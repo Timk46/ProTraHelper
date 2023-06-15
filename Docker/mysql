@@ -1,0 +1,5 @@
+FROM mysql:8.0
+
+#ADD /Docker/hefl_ki.sql /docker-entrypoint-initdb.d hier kann eine initiale sql Datei abgelegt werden, die beim Starten des Datenbankservers importiert wird.
+
+EXPOSE 3306
