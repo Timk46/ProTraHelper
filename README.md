@@ -4,7 +4,7 @@ Willkommen in unserem Gitlab Repository für Code und Projektmanagement :)
 ### Wichtige Links:
 1. [Starter-Guide](https://ddi-projektgruppe.de/) - Hatte ich für meine Projektgruppe erstellt. Passwort: projektgruppe2023
 
-2. [Angular-Guide](https://www.udemy.com/course/the-complete-guide-to-angular-2/) - Angular Kurs bei Udemy, welchen Marc und ich uns zugelegt
+2. [Angular-Guide](https://www.udemy.com/course/the-complete-guide-to-angular-2/) - Angular Kurs bei Udemy, welchen Marc und ich uns zugelegt haben
 
 3. [Weiterführend](https://thefullstack.engineer/tag/full-stack-development-series/) - Als Monorepo mit NX inkl. CICD etc. pp.
 
