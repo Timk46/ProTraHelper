@@ -6,16 +6,197 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-model Book { //kleines Beispiel aus dem Tutorial
-  id          Int      @id @default(autoincrement())
-  title       String   @unique
-  subtitle    String
-  isbn        Int?
-  published   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model User {
+  id                   Int           @id @default(autoincrement())
+  email                String        @unique
+  firstname            String
+  lastname             String
+  password             String
+  createdAt            DateTime      @default(now())
+  roles                Role[]
+  modules              Modul[]
+  currentConcept       ConceptNode   @relation(fields: [currentconceptNodeId], references: [id]) // last concept the user has visited
+  currentconceptNodeId Int
+  conceptUser          ConceptUser[]
+  question             Question[]
+  discussion           Discussion[]
+  message              Message[]
+}
+
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+}
+
+model Modul {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String
+  subjects    Subject[]
+  users       User[]
+}
+
+// n to n relation between subject and module is implicit
+model Subject {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String
+  modules     Modul[]
+}
+
+// a node in the concept graph, for example "while loop" or "programming basics"
+model ConceptNode {
+  id           Int             @id @default(autoincrement())
+  name         String          @unique
+  description  String
+  families     ConceptFamily[]
+  edges        ConceptEdge[]
+  requirements Requirement[]
+  trainings    Training[]
+  users        User[]
+  conceptUsers ConceptUser[]
+}
+
+// nesting relationships between concept nodes
+model ConceptFamily {
+  id       Int         @id @default(autoincrement())
+  child    ConceptNode @relation("childConcept", fields: [childId], references: [id])
+  childId  Int
+  parent   ConceptNode @relation("parentConcept", fields: [parentId], references: [id])
+  parentId Int
+}
+
+// prerequisite relationships between concept nodes
+model ConceptEdge {
+  id             Int         @id @default(autoincrement())
+  prerequisite   ConceptNode @relation("prerequisiteConcept", fields: [prerequisiteId], references: [id])
+  prerequisiteId Int
+  successor      ConceptNode @relation("successorConcept", fields: [successorId], references: [id])
+  successorId    Int
+}
+
+// a node that references a piece of content, like a task or an instruction
+model ContentNode {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  description  String
+  edges        ContentEdge[]
+  questions    Question[]
+  requirements Requirement[]
+  trainings    Training[]
+  Discussion   Discussion[]
+}
+
+// prerequisite relationships between content nodes
+model ContentEdge {
+  id             Int         @id @default(autoincrement())
+  prerequisite   ContentNode @relation("prerequisiteContent", fields: [prerequisiteId], references: [id])
+  prerequisiteId Int
+  successor      ContentNode @relation("successorContent", fields: [successorId], references: [id])
+  successorId    Int
+}
+
+// the concepts that should be known to understand or solve a content node
+model Requirement {
+  id            Int         @id @default(autoincrement())
+  contentNode   ContentNode @relation(fields: [contentNodeId], references: [id])
+  contentNodeId Int
+  conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id])
+  conceptNodeId Int
+}
+
+// a piece of content trains one (or more) concepts
+// for example a task trains the concept of "while loop" and "functions"
+// it can also award a competence level for that concept
+model Training {
+  id            Int         @id @default(autoincrement())
+  contentNode   ContentNode @relation(fields: [contentNodeId], references: [id])
+  contentNodeId Int
+  conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id])
+  conceptNodeId Int
+  awards        Boolean
+}
+
+// a user can have a competence level for a concept
+// for example a user can have a level 3 for the concept "while loop"
+// "expanded" saves the state of the concept graph between sessions
+model ConceptUser {
+  id            Int         @id @default(autoincrement())
+  user          User        @relation(fields: [userId], references: [id])
+  userId        Int
+  concept       ConceptNode @relation(fields: [conceptNodeId], references: [id])
+  conceptNodeId Int
+  level         Int
+  expanded      Boolean
+}
+
+// Feedback which the users will get after answering a question
+model Feedback {
+  id         Int      @id @default(autoincrement())
+  name       String
+  text       String
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id])
+}
+
+model Question {
+  id              Int               @id @default(autoincrement())
+  name            String
+  version         Int?
+  description     String
+  type            String
+  author          User              @relation(fields: [authorId], references: [id])
+  authorId        Int
+  contentNode     ContentNode       @relation(fields: [contentNodeId], references: [id])
+  contentNodeId   Int
+  feedbacks       Feedback[]
+  //toDo: Marc change for MC-Quiz
+  //toDo: connect to different mediatypes Evelyn
+  codingQuestions CodingQuestion[]
+}
+
+model Answers {
+  id         Int      @id @default(autoincrement())
+  name       String
+  type       String
+  text       String
+  score      Int
+  is_correct Boolean
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id])
+}
+
+model CodingQuestion {
+  id              Int      @id @default(autoincrement())
+  count_InputArgs Int
+  question        Question @relation(fields: [questionId], references: [id])
+  questionId      Int
+}
+
+model Discussion {
+  id            Int         @id @default(autoincrement())
+  title         String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  contentNode   ContentNode @relation(fields: [contentNodeId], references: [id])
+  contentNodeId Int
+  author        User        @relation(fields: [authorId], references: [id])
+  authorId      Int
+  messages      Message[]
+}
+
+model Message {
+  id           Int         @id @default(autoincrement())
+  text         String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  author       User        @relation(fields: [authorId], references: [id])
+  authorId     Int
+  Discussion   Discussion? @relation(fields: [discussionId], references: [id])
+  discussionId Int?
 }
