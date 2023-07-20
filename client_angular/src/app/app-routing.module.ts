@@ -11,8 +11,8 @@ import { McQuizComponent } from './Pages/content/mcQuiz/mcQuiz.component';
 import { GraphComponent } from './Pages/graph/graph.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: 'home', component: AppComponent },
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  { path: 'app', component: AppComponent },
   { path: 'content', component: ContentComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'contentOverview', component: ContentOverviewComponent },
