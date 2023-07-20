@@ -51,6 +51,15 @@ model Subject {
   modules     Modul[]
 }
 
+// a concept graph defines the lowest level of nodes
+model ConceptGraph {
+  id         Int         @id @default(autoincrement())
+  name       String
+  ancestor   ConceptNode @relation(fields: [ancestorId], references: [id])
+  ancestorId Int         @unique // points to parent node that contains all other nodes
+}
+
+// A Concept node is a node in the concept graph
 model ConceptNode {
   id             Int             @id @default(autoincrement())
   name           String          @unique
@@ -59,12 +68,16 @@ model ConceptNode {
   parentFamilies ConceptFamily[] @relation("parentConcept")
   prerequisites  ConceptEdge[]   @relation("prerequisiteConcept")
   successors     ConceptEdge[]   @relation("successorConcept")
+  childEdges     ConceptEdge[]  @relation("conceptEdgeParent") // makes it easier to construct the graph
   requirements   Requirement[]
   trainings      Training[]
   users          User[]
   conceptUsers   ConceptUser[]
+  conceptGraph   ConceptGraph?
+  conceptGraphId Int? // is only set for the ancestor node
 }
 
+// defines one parent-child relationship in the concept graph
 model ConceptFamily {
   id       Int         @id @default(autoincrement())
   child    ConceptNode @relation("childConcept", fields: [childId], references: [id]) // we have to name the relation because we have two relations between the same models
@@ -73,12 +86,15 @@ model ConceptFamily {
   parentId Int
 }
 
+// defines one prerequisite relationship in the concept graph
 model ConceptEdge {
   id             Int         @id @default(autoincrement())
   prerequisite   ConceptNode @relation("prerequisiteConcept", fields: [prerequisiteId], references: [id])
   prerequisiteId Int
   successor      ConceptNode @relation("successorConcept", fields: [successorId], references: [id])
   successorId    Int
+  parent ConceptNode @relation("conceptEdgeParent", fields: [parentId], references: [id])
+  parentId Int 
 }
 
 model ContentNode {
@@ -87,9 +103,9 @@ model ContentNode {
   description   String
   prerequisites ContentEdge[] @relation("prerequisiteContent")
   successors    ContentEdge[] @relation("successorContent")
-  questions     Question[]
   requirements  Requirement[]
   trainings     Training[]
+  questions     Question[]
   discussions   Discussion[]
 }
 
@@ -195,6 +211,7 @@ model MCAnswer {
   question   MCQuestion @relation(fields: [questionId], references: [id])
   questionId Int
 }
+
 //********************************************************************************************* End MC-Question
 
 //********************************************************************************************* Begin Coding Questions
@@ -296,4 +313,5 @@ model Message {
   Discussion   Discussion? @relation(fields: [discussionId], references: [id])
   discussionId Int?
 }
+
 //********************************************************************************************* End Discussion
