@@ -5,7 +5,7 @@ import { VNode } from 'snabbdom';
 import { IView, RectangularNodeView, RenderingContext, SButton, SLabel, 
     SLabelView, SNode, SPort, ShapeView, findParentByFeature, isExpandable, setAttr
  } from 'sprotty';
-import { ConceptNode } from './models';
+import { ConceptNode } from '../../../Interfaces/conceptNode.interface';
 
 @injectable()
 export class ConceptNodeView extends RectangularNodeView {

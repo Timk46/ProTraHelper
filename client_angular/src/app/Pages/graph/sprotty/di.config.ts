@@ -4,7 +4,6 @@ import { configureModelElement, configureViewerOptions, loadDefaultModules, Loca
     SNode, TYPES, RectangularNode, expandFeature, nameFeature, SButton, ExpandButtonView, 
     configureButtonHandler, SRoutingHandle, SRoutingHandleView, SModelElement, SPort } from 'sprotty';
 import { ConceptNodeView, CustomCollapseExpandView, HeaderLabelView, PortViewWithExternalLabel, TextLabelView} from './views';
-import { ConceptNode } from './models';
 import { ConceptGraphModelSource } from './model-source';
 import ElkConstructor, { LayoutOptions } from 'elkjs';
 import {
@@ -13,6 +12,7 @@ import {
 import { SGraph as SGraphP, SModelIndex, SNode as SNodeP, Point} from 'sprotty-protocol';
 import { CustomMouseListener } from './mouse-interactions';
 
+import { ConceptNode } from '@Interfaces/index';
 
 
 
@@ -89,6 +89,7 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
             'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
             //'org.eclipse.elk.spacing.nodeNode': '500', //doesn't work
             'org.eclipse.elk.spacing.labelLabel': '5',
+            'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '50',
         };
     }
 

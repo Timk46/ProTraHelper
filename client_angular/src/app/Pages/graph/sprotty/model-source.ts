@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { ActionHandlerRegistry, Expandable, LocalModelSource, TYPES, VBoxLayouter } from 'sprotty';
-import { ConceptNode } from '../sprotty/models';
+import { ConceptNode } from '@Interfaces/index';
 //import { SModelIndex } from 'sprotty-protocol/lib/utils/model-utils';
 import {
     Action, CollapseExpandAction, CollapseExpandAllAction, SCompartment, SEdge, SGraph, SLabel,
@@ -100,6 +100,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
           name: name,
           expanded: expanded,
           level: level,
+          //layout: 'hbox'
         };
         node.children = [
           <SLabel>{

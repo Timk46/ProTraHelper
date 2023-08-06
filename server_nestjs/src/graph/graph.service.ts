@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
+import { ConceptNode, ConceptEdge, ConceptGraph } from '@Interfaces/index';
+
 @Injectable()
 export class GraphService {
 
