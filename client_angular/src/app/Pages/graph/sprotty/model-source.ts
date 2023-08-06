@@ -6,10 +6,13 @@ import {
     Action, CollapseExpandAction, CollapseExpandAllAction, SCompartment, SEdge, SGraph, SLabel,
     SModelElement, SModelIndex, SModelRoot, SNode, SelectAction, CenterAction, Point, SPort
 } from 'sprotty-protocol';
+import { ChangeActiveNodeService } from 'src/app/Services/changeActiveNode.service';
 
 
 @injectable()
 export class ConceptGraphModelSource extends LocalModelSource {
+
+  private changeActiveNodeService: ChangeActiveNodeService = ChangeActiveNodeService.getInstance();
 
     constructor() {
         super();
@@ -26,6 +29,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
         switch (action.kind) {
             case SelectAction.KIND:
                 console.log("this is the select action: ", action);
+                this.changeActiveNodeService.changeActiveNode(action); // TODO: type - communicate node info to contentOverview (so get full node info from db first?)
                 break;
             case CollapseExpandAction.KIND:
                 //this.handleCollapseExpandAction(action as CollapseExpandAction);
@@ -111,7 +115,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
         ];
         return node;
       }
-    
+
       createEdge(id: string, sourceId: string, targetId: string): SEdge {
         const edge: SEdge = {
             type: 'edge',
