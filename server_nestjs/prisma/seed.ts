@@ -45,6 +45,7 @@ async function main() {
     data: Array.from({ length: 10 }, (_, i) => ({
       prerequisiteId: i + 1,
       successorId: i + 2 > 10 ? 1 : i + 2, // Assuming there's a loop in the concept hierarchy
+      parentId: i + 1,
     })),
   });
 

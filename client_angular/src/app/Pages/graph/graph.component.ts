@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { LocalModelSource, TYPES } from 'sprotty';
+import  createContainer  from './sprotty/di.config';
 
 @Component({
   selector: 'app-graph',
@@ -7,9 +9,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class GraphComponent implements OnInit {
 
+    container = createContainer('concept-graph');
+    modelSource = this.container.get<LocalModelSource>(TYPES.ModelSource);
+
   constructor() { }
 
   ngOnInit() {
+    this.modelSource.updateModel();
   }
 
 }
