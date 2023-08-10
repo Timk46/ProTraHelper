@@ -10,6 +10,129 @@ export class GraphService {
     constructor(private prisma: PrismaService) { }
 
     /**
+     * returns the concept graph
+     * if userId is provided, the graph will be returned with the user's 
+     * level and other relevant information
+     * @param userId
+     * @returns the concept graph
+     */
+    async getConceptGraph(userId?: number): Promise<ConceptGraph> {
+        // get graph (only one graph exists for now)
+        const graph = await this.prisma.graph.findFirst({});
+        // if no graph exists, create a new one with a root node
+        if (!graph) {
+            await this.initGraph();
+        }
+
+        // conditionally include UserConcept if userId is provided
+        const includeCondition = userId !== undefined ? {
+            UserConcept: {
+                where: {
+                    userId: userId
+                }
+            }
+        } : {};
+
+        // all nodes, potentially joined with UserConcept table
+        const nodes = await this.prisma.conceptNode.findMany({
+            include: {
+                ...includeCondition,
+                myParents: true,
+                myChildren: true,
+                myPrerequisites: true,
+                mySuccessors: true,
+                childEdges: true,
+            }
+        });
+
+        // create nodeMap
+        const nodeMap: Record<string, ConceptNode> = {};
+        nodes.forEach(node => {
+            nodeMap[node.id] = {
+                id: 'node_' + node.id,
+                type: 'node:concept',
+                name: node.name,
+
+                // if no user concept exists, set expanded to false
+                expanded: node.userConcepts[0].expanded || false,
+
+                // graph helper fields
+                parentIds: node.myParents.map(parent => 'node_' + parent.parentId),
+                childIds: node.myChildren.map(child => 'node_' + child.childId),
+                prerequisiteEdgeIds: node.myPrerequisites.map(prerequisite => 'edge_' + prerequisite.id),
+                successorEdgeIds: node.mySuccessors.map(successor => 'edge_' + successor.id),
+                edgeChildIds: node.childEdges.map(edge => 'node_' + edge.childId),
+            };
+            // add level field if userId is provided
+            if (userId !== undefined) {
+                // if no user concept exists, set level to 0
+                nodeMap[node.id].level = node.userConcepts[0].level || 0;
+            }
+        });
+
+        // all edges
+        const edges = await this.prisma.conceptEdge.findMany({});
+
+        // create edgeMap
+        const edgeMap: Record<string, ConceptEdge> = {};
+        edges.forEach(edge => {
+            edgeMap[edge.id] = {
+                id: 'edge_' + edge.id,
+                type: 'edge',
+                sourceId: 'node_' + edge.prerequisiteId,
+                targetId: 'node_' + edge.successorId,
+                parentId: 'node_' + edge.parentId
+            };
+        });
+
+        // get current concept id
+
+
+        // construct concept graph
+        const conceptGraph: ConceptGraph = {
+            id: graph.id,
+            name: graph.name,
+            trueRootId: 'node_' + graph.trueRootId,
+            nodeMap: nodeMap,
+            edgeMap: edgeMap,
+        };
+        // if user id is provided, add currentConceptId to conceptGraph
+        if (userId !== undefined) {
+            const currentConcept = await this.prisma.user.findUnique({
+                where: { id: userId },
+                select: { currentConceptId: true }
+            });
+            conceptGraph.currentConceptId = 'node_' + currentConcept.currentConceptId || null;
+        }
+
+        return conceptGraph;
+    }
+
+    async initGraph() {
+        // create root node
+        const root = await this.prisma.conceptNode.create({
+            data: {
+                name: 'root',
+                description: '',
+                myParents: [],
+                myChildren: [],
+                myPrerequisites: [],
+                mySuccessors: [],
+                childEdges: [],
+            }
+        });
+
+        // create graph
+        const graph = await this.prisma.conceptGraph.create({
+            data: {
+                name: 'graph',
+                trueRootId: root.id
+            }
+        });
+
+    }
+
+    /**
      * creates a new concept node and returns it
      * @param parentId 
      * @param conceptName 

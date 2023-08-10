@@ -45,7 +45,7 @@ export default (containerId: string) => {
         });
         configureModelElement(context, 'edge', SEdge, PolylineEdgeView);
         configureModelElement(context, 'label:heading', SLabel, SLabelView)
-        configureModelElement(context, 'label:text', SLabel, TextLabelView)
+        configureModelElement(context, 'label:text', SLabel, SLabelView)
         //configureModelElement(context, 'comp:comp', SCompartment, SCompartmentView)
         
         //collapse expand button
@@ -78,7 +78,8 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
 
     protected override graphOptions(sgraph: SGraphP, index: SModelIndex): LayoutOptions | undefined {
         return {
-            'org.eclipse.elk.algorithm': 'org.eclipse.elk.layered'
+            'org.eclipse.elk.algorithm': 'org.eclipse.elk.layered',
+            'org.eclipse.elk.spacing.nodeNode': '500', //doesn't work
         };
     }
 
@@ -87,7 +88,6 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
             'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS MINIMUM_SIZE',
             //'org.eclipse.elk.nodeSize.minimum': '(40, 40)', // doesn't work
             'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
-            //'org.eclipse.elk.spacing.nodeNode': '500', //doesn't work
             'org.eclipse.elk.spacing.labelLabel': '5',
             'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '50',
         };

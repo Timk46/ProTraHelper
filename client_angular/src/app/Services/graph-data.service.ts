@@ -1,17 +1,12 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
-export class GraphService {
+export class GraphDataService {
 
-  constructor() { }
-
-  /**
-   * Fetches the full graph from the server
-   */
-  fetchFullGraph() {
-  }
+  constructor(private http: HttpClient) { }
 
   /**
    * Fetches the graph for a specific user
@@ -29,7 +24,7 @@ export class GraphService {
    * @param conceptName The name of the new concept
    * @returns The new concept node
    */
-  createConcept(parentId: number, conceptName: string) {
+  createConcept(parentId: string, conceptName: string) {
   }
 
   /**
@@ -39,7 +34,7 @@ export class GraphService {
    * @param successor The id of the successor concept
    * @returns The new edge
    */
-  createEdge(parentId: number, prerequisite: number, successor: number) {
+  createEdge(parentId: string, prerequisiteId: string, successorId: string) {
   
   }
   

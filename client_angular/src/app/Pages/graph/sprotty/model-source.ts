@@ -106,6 +106,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
           <SLabel>{
             id: 'header_' + id,
             type: 'label:heading',
+            
             text: name,
           },
           <SLabel>{

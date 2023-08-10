@@ -71,8 +71,8 @@ model ConceptNode {
   childEdges      ConceptEdge[]   @relation("conceptEdgeParent") // makes it easier to construct the graph
   requiredBy      Requirement[]
   trainedBy       Training[]
-  users           User[]
-  conceptUsers    UserConcept[]
+  currentConceptFor  User[]
+  userConcepts    UserConcept[]
   conceptGraph    ConceptGraph?
   conceptGraphId  Int? // is only set for the ancestor node
 }

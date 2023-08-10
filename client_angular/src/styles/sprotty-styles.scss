@@ -16,14 +16,14 @@
     stroke-width: 2;
 }
 
-text {
-    stroke-width: 0;
-    stroke: #000;
-    fill: #000;
-    font-family: sans-serif;
-    font-size: 12pt;
-    text-anchor: middle;
-}
+// text {
+//     stroke-width: 0;
+//     stroke: #000;
+//     fill: #000;
+//     font-family: sans-serif;
+//     font-size: 12pt;
+//     text-anchor: middle;
+// }
 
 .sprotty-node {
     stroke-width: 0;
@@ -77,3 +77,8 @@ text {
 .sprotty-popup-body > p {
     margin-bottom: 2px;
 }
+
+.flower {
+    fill: #173c5c;
+    stroke: #000;
+  }
