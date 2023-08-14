@@ -12,11 +12,13 @@ export class ContentOverviewComponent implements OnInit, OnDestroy {
   private changeActiveNodeService: ChangeActiveNodeService = ChangeActiveNodeService.getInstance();
 
   private activeNodeSubscription: Subscription;
+  activeNodeTestDisplay: String = '';
   activeNode: any; // TODO: type
 
   constructor() {
     this.activeNodeSubscription = this.changeActiveNodeService.currentActiveNode.subscribe((ActiveNode) => {
-      this.activeNode = JSON.stringify(ActiveNode); // TODO: type
+      this.activeNode = ActiveNode; // TODO: type
+      this.activeNodeTestDisplay = JSON.stringify(this.activeNode);
     });
   }
 

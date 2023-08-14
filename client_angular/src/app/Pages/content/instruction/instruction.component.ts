@@ -30,6 +30,8 @@ export class InstructionComponent implements OnInit {
     this.instructionId = this.route.snapshot.params['id'];
     console.log("instructionId: " + this.instructionId );
 
+    this.pdfSrc = "assets/pdf_testing_needsToBeAccesedByNestjs/" + this.instructionId%5 + ".pdf";
+
     }
 
   ngOnInit() {

@@ -6,6 +6,7 @@
 
 .mat-elevation-z8 {
   background: #eceff4;
+  color: black;
 }
 
 .content {
@@ -19,6 +20,5 @@
   scrollbar-width: thin;
 
   font-size: 14px;
-  color: lightgrey;
   border-radius: 10px;
 }

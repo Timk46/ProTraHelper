@@ -1,6 +1,6 @@
 <h1>App-Instruction</h1>
 
-    Node in App-Instruction (example Child-Paren): {{ activeNode }}
+    Example for passing Node Information to Child-Component (also updating it): {{ activeNode.selectedElementsIDs }}
 
     <div class="grid-container">
       <mat-card *ngFor="let card of cards" (click)="onCardClick(card.id)">

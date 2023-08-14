@@ -3,13 +3,13 @@
 }
 
 .content {
-  height: 20h;
+  height: 40vh;
   margin: 16px;
   margin-left: 32px;
   padding:16px;
 
   contain: content;
-  overflow-y: scroll;
+  overflow-y: hide; /* Hide vertical scrollbar because we can already move content by clicking on whitespace */
   scrollbar-width: thin;
 
   font-size: 14px;

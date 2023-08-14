@@ -8,8 +8,8 @@ import { Router } from '@angular/router';
 })
 export class ContentComponent implements OnInit {
 
-  @Input() activeNode: any;
-  cards = Array.from({ length: 10 }, (_, i) => ({ id: i + 1 }));
+  @Input() activeNode: any; // ToDo: This should be the node with all needed information (placeholder since we dont have testdata yet)
+  cards = Array.from({ length: 15 }, (_, i) => ({ id: i + 1 }));
 
   constructor(private router: Router) { }
 
@@ -19,7 +19,6 @@ export class ContentComponent implements OnInit {
   onCardClick(id: number) {
     console.log(`Card with ID ${id} clicked.`);
     this.router.navigate(['/instruction', id]);
-
   }
 
 }
