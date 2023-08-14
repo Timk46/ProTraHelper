@@ -1,0 +1,11 @@
+.grid-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+mat-card {
+  width: 400px;
+  height: 300px;
+  margin: 8px;
+}

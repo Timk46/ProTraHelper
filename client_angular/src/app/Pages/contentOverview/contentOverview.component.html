@@ -1,4 +1,25 @@
-active Node: <br>
-<h1>{{activeNode}}</h1> <br>
-Basierend auf der aktiven Node werden die Inhalte angezeigt. <br>
-Inhalte werden entweder direkt übergeben oder hier erst von DB geholt
+<div class="content mat-elevation-z8">
+<h1>Content-Overview</h1>
+
+active Node: {{activeNode}}
+
+<mat-tab-group animationDuration="0ms">
+  <mat-tab label="Content">
+    <app-content [activeNode]="activeNode"></app-content>
+  </mat-tab>
+
+  <mat-tab label="Aufgaben">
+    Content 2
+  </mat-tab>
+
+  <mat-tab label="Kompetenzen">
+    Content 3
+  </mat-tab>
+
+  <mat-tab label="Diskussion">
+    Content 3
+  </mat-tab>
+</mat-tab-group>
+
+</div>
+

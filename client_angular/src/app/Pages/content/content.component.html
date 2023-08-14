@@ -1,3 +1,11 @@
-<p>
-  content works!
-</p>
+<h1>App-Instruction</h1>
+
+    Node in App-Instruction (example Child-Paren): {{ activeNode }}
+
+    <div class="grid-container">
+      <mat-card *ngFor="let card of cards" (click)="onCardClick(card.id)">
+        <mat-card-content>
+          Content ID: {{ card.id }}
+        </mat-card-content>
+      </mat-card>
+    </div>

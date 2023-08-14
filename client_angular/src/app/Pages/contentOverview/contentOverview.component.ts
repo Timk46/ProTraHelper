@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ChangeActiveNodeService } from 'src/app/Services/changeActiveNode.service';
+import {MatTabsModule} from '@angular/material/tabs';
 
 @Component({
   selector: 'app-contentOverview',

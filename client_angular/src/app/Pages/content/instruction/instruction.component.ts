@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { NgxExtendedPdfViewerService, pdfDefaultOptions } from 'ngx-extended-pdf-viewer';
 
 @Component({
@@ -9,13 +10,15 @@ import { NgxExtendedPdfViewerService, pdfDefaultOptions } from 'ngx-extended-pdf
 })
 export class InstructionComponent implements OnInit {
 
+  instructionId: number;
+
   pdfSrc = "https://vadimdez.github.io/ng2-pdf-viewer/assets/pdf-test.pdf";
 
   /** In most cases, you don't need the NgxExtendedPdfViewerService. It allows you
    *  to use the "find" api, to extract text and images from a PDF file,
    *  to print programmatically, and to show or hide layers by a method call.
   */
-  constructor(private pdfService: NgxExtendedPdfViewerService) {
+  constructor(private pdfService: NgxExtendedPdfViewerService, private route: ActivatedRoute) {
     /* More likely than not you don't need to tweak the pdfDefaultOptions.
        They are a collecton of less frequently used options.
        To illustrate how they're used, here are two example settings: */
@@ -24,8 +27,9 @@ export class InstructionComponent implements OnInit {
     // but most devices support much higher resolutions.
     // Increasing this setting allows your users to use higher zoom factors,
     // trading image quality for performance.
+    this.instructionId = this.route.snapshot.params['id'];
+    console.log("instructionId: " + this.instructionId );
 
-    
     }
 
   ngOnInit() {

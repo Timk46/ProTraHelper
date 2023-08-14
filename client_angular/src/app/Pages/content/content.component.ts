@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-content',
@@ -7,9 +8,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ContentComponent implements OnInit {
 
-  constructor() { }
+  @Input() activeNode: any;
+  cards = Array.from({ length: 10 }, (_, i) => ({ id: i + 1 }));
+
+  constructor(private router: Router) { }
 
   ngOnInit() {
+  }
+
+  onCardClick(id: number) {
+    console.log(`Card with ID ${id} clicked.`);
+    this.router.navigate(['/instruction', id]);
+
   }
 
 }
