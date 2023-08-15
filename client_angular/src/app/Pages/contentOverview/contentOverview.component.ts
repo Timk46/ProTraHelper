@@ -12,7 +12,9 @@ export class ContentOverviewComponent implements OnInit, OnDestroy {
   private changeActiveNodeService: ChangeActiveNodeService = ChangeActiveNodeService.getInstance();
 
   private activeNodeSubscription: Subscription;
-  activeNodeTestDisplay: String = '';
+
+  activeNodeTestDisplay: String = ''; // for testing only
+
   activeNode: any; // TODO: type
 
   constructor() {
