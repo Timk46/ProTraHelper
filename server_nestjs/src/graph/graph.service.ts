@@ -49,19 +49,18 @@ export class GraphService {
         const nodeMap: Record<string, ConceptNode> = {};
         nodes.forEach(node => {
             nodeMap[node.id] = {
-                id: 'node_' + node.id,
-                type: 'node:concept',
+                databaseId: node.id,
                 name: node.name,
 
                 // if no user concept exists, set expanded to false
                 expanded: node.userConcepts[0].expanded || false,
 
                 // graph helper fields
-                parentIds: node.myParents.map(parent => 'node_' + parent.parentId),
-                childIds: node.myChildren.map(child => 'node_' + child.childId),
-                prerequisiteEdgeIds: node.myPrerequisites.map(prerequisite => 'edge_' + prerequisite.id),
-                successorEdgeIds: node.mySuccessors.map(successor => 'edge_' + successor.id),
-                edgeChildIds: node.childEdges.map(edge => 'node_' + edge.childId),
+                parentIds: node.myParents.map(parent => parent.parentId),
+                childIds: node.myChildren.map(child => child.childId),
+                prerequisiteEdgeIds: node.myPrerequisites.map(prerequisite => prerequisite.id),
+                successorEdgeIds: node.mySuccessors.map(successor => successor.id),
+                edgeChildIds: node.childEdges.map(edge => edge.childId),
             };
             // add level field if userId is provided
             if (userId !== undefined) {
@@ -77,11 +76,10 @@ export class GraphService {
         const edgeMap: Record<string, ConceptEdge> = {};
         edges.forEach(edge => {
             edgeMap[edge.id] = {
-                id: 'edge_' + edge.id,
-                type: 'edge',
-                sourceId: 'node_' + edge.prerequisiteId,
-                targetId: 'node_' + edge.successorId,
-                parentId: 'node_' + edge.parentId
+                databaseId: edge.id,
+                sourceId: edge.prerequisiteId,
+                targetId: edge.successorId,
+                parentId: edge.parentId
             };
         });
 
@@ -137,7 +135,7 @@ export class GraphService {
      * @param parentId 
      * @param conceptName 
      */
-    async createConcept(parentId: number, conceptName: string) {
+    async createConceptNode(parentId: number, conceptName: string) {
         const newConcept = await this.prisma.concept.create({
             data: {
                 name: conceptName,
@@ -155,6 +153,7 @@ export class GraphService {
                 }
             }
         });
+        return newConcept;
     }
 
     /**

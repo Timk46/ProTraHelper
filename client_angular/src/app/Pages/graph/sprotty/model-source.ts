@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { ActionHandlerRegistry, Expandable, LocalModelSource, TYPES, VBoxLayouter } from 'sprotty';
-import { ConceptNode } from '@Interfaces/index';
+import { SprottyConceptNode } from '@Interfaces/index';
 //import { SModelIndex } from 'sprotty-protocol/lib/utils/model-utils';
 import {
     Action, CollapseExpandAction, CollapseExpandAllAction, SCompartment, SEdge, SGraph, SLabel,
@@ -55,7 +55,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
           };
 
         // Programmiergrundlagen
-        const node1: ConceptNode = this.createConceptNode('1', 'Programmiergrundlagen', true, 2);
+        const node1: SprottyConceptNode = this.createConceptNode('1', 'Programmiergrundlagen', true, 2);
 
         const node2 = this.createConceptNode('2', 'Variablen', true, 4);
         node1.children!.push(node2);
@@ -93,13 +93,15 @@ export class ConceptGraphModelSource extends LocalModelSource {
     }
 
     // creates new concept node (locally)
-    createConceptNode(id: string, name: string, expanded: boolean, level: number): ConceptNode {
-        const node: SNode & ConceptNode & Expandable = {
+    createConceptNode(id: string, name: string, expanded: boolean, level: number): SprottyConceptNode {
+        const node: SNode & SprottyConceptNode & Expandable = {
           type: 'node:concept',
           id: id,
+          databaseId: 0,
           name: name,
           expanded: expanded,
           level: level,
+          levelGoal: 3,
           //layout: 'hbox'
         };
         node.children = [

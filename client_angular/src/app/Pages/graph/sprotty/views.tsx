@@ -6,19 +6,44 @@ import {
     IView, RectangularNodeView, RenderingContext, SButton, SLabel,
     SLabelView, SNode, SPort, ShapeView, findParentByFeature, isExpandable, setAttr
 } from 'sprotty';
-import { ConceptNode } from '../../../Interfaces/conceptNode.interface';
+import { SprottyConceptNode } from '@Interfaces/index';
 
 @injectable()
 export class ConceptNodeView extends RectangularNodeView {
-    override render(node: Readonly<SNode & ConceptNode>, context: RenderingContext): VNode {
+    override render(node: Readonly<SNode & SprottyConceptNode>, context: RenderingContext): VNode {
+
+        let petals = [];
+        const level = node.level || 0;
+
+        if (level > 0) {
+            // Generate normal petals based on node.level
+            const levelPetals = Array.from({ length: level }).map((_, index) =>
+                <path
+                    className="petal"
+                    transform={`translate(${10 + (index * 10)},30) rotate(270)`}
+                    d="m1,2 c0,-8 19,-7 32,-4 c13,3 12,4 1,7 c-11,3 -33,4 -33,-4z"
+                />
+            );
+            petals.push(...levelPetals);
+        }
+
+        if (typeof node.levelGoal !== "undefined" && node.levelGoal > level) {
+            // Generate greyed out petals based on the difference between node.levelGoal and node.level
+            const levelGoalPetals = Array.from({ length: node.levelGoal - level }).map((_, index) =>
+                <path
+                    class={{ "grey-petal": true }}  // Assuming you've styled greyed-out petals in CSS
+                    transform={`translate(${10 + ((level + index) * 10)},33) rotate(270)`}
+                    d="m1,2 c0,-8 19,-7 32,-4 c13,3 12,4 1,7 c-11,3 -33,4 -33,-4z"
+                />
+            );
+            petals.push(...levelGoalPetals);
+        }
+
         return <g>
             <g class-flower="true">
-                <path className="petal" transform="translate(20,20) rotate(180)" d="m1,2 c0,-8 19,-7 32,-4 c13,3 12,4 1,7 c-11,3 -33,4 -33,-4z" />
-                <path className="petal" transform="translate(20,20) rotate(270)" d="m1,2 c0,-8 19,-7 32,-4 c13,3 12,4 1,7 c-11,3 -33,4 -33,-4z" />
-                <path className="petal" transform="translate(20,20) rotate(240)" d="m1,2 c0,-8 19,-7 32,-4 c13,3 12,4 1,7 c-11,3 -33,4 -33,-4z" />
-                <path className="petal" transform="translate(20,20) rotate(210)" d="m1,2 c0,-8 19,-7 32,-4 c13,3 12,4 1,7 c-11,3 -33,4 -33,-4z" />
+                {petals}  {/* Render the petals here */}
             </g>
-            
+
             <rect class-sprotty-node={true} class-concept={true}
                 width={node.size.width}
                 height={node.size.height}

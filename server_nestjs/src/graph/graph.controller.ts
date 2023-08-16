@@ -1,5 +1,5 @@
 import { ConceptGraph } from '@Interfaces/index';
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { GraphService } from './graph.service';
 
 @Controller('graph')
@@ -7,17 +7,40 @@ export class GraphController {
 
     constructor(private graphService: GraphService) {}
 
+    /**
+     * This function returns a concept graph without data about a course or a user
+     * @returns the concept graph
+     */
     @Get()
     async getConceptGraph(): Promise<ConceptGraph>{
         const graph: ConceptGraph = await this.graphService.getConceptGraph();
         return graph;
     }
 
+    /**
+     * This function returns a concept graph with data about a user (the level)
+     * @param userId the user id
+     * @returns the concept graph
+     */
     @Get(':userId')
     async getUserConceptGraph(@Param('userId', ParseIntPipe) userId: number): Promise<ConceptGraph>{
         const graph: ConceptGraph = await this.graphService.getConceptGraph(userId);
         return graph;
     }
+
+    /**
+     * This function creates a new concept node
+     * @param parentId the parent id
+     * @param name the name of the concept
+     * @returns the new concept
+     */
+    @Post('concept/:parentId/:name')
+    async createConcept(@Param('parentId', ParseIntPipe) parentId:number, @Param('name') name: string): Promise<void> {
+        const newConcept = await this.graphService.createConceptNode(parentId, name);
+        return newConcept;
+    }
+
+
 
 
 }

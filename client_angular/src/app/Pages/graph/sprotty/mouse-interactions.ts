@@ -2,7 +2,7 @@ import { IButtonHandler, MouseListener, SButton, findParentByFeature, isExpandab
 import { Action, CollapseExpandAction, SModelElement, Point } from 'sprotty-protocol';
 import { injectable, inject } from 'inversify';
 import { expand } from "rxjs";
-import { ConceptNode } from "@Interfaces/index";
+import { SprottyConceptNode } from "@Interfaces/index";
 //import { NodeCreator } from "./di.config";
 
 export const NodeCreator = Symbol('NodeCreator');
@@ -13,7 +13,7 @@ export class CustomMouseListener extends MouseListener {
         console.log('double clicked ' + target.id, target)
         
         if(target.type === 'node:concept') {
-            const conceptNode = target as ConceptNode;
+            const conceptNode = target as SprottyConceptNode;
             const action = CollapseExpandAction.create({
                 expandIds:   conceptNode.expanded ? [] : [ conceptNode.id ],
                 collapseIds:  conceptNode.expanded ? [ conceptNode.id ] : []

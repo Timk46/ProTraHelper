@@ -12,8 +12,6 @@ import {
 import { SGraph as SGraphP, SModelIndex, SNode as SNodeP, Point} from 'sprotty-protocol';
 import { CustomMouseListener } from './mouse-interactions';
 
-import { ConceptNode } from '@Interfaces/index';
-
 
 
 

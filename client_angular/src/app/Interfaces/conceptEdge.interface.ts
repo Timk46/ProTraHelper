@@ -1,14 +1,8 @@
-import { SEdge } from "sprotty-protocol"
+// interface for a concept edge
 
-// interface for concept edges
-// needed for sprotty
-export interface ConceptEdge extends SEdge {
-    //inherited mandatory fields from SEdge:
-    //id: string; // edge_ + string der Datenbank-id
-    //type: string; // z.B. 'edge:concept'
-    //sourceId: string;
-    //targetId: string;
-
-    //
-    parentId: string;
+export interface ConceptEdge {
+    databaseId: number;
+    sourceId: number;
+    targetId: number;
+    parentId: number;
 }
