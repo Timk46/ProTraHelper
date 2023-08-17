@@ -11,11 +11,11 @@ export class GraphService {
 
     /**
      * creates a new concept node and returns it
-     * @param parentId 
-     * @param conceptName 
+     * @param parentId
+     * @param conceptName
      */
     async createConcept(parentId: number, conceptName: string) {
-        const newConcept = await this.prisma.concept.create({
+        const newConcept = await this.prisma.conceptNode.create({
             data: {
                 name: conceptName,
                 description: '',
@@ -43,7 +43,7 @@ export class GraphService {
      */
     async createConceptEdge(parentId: number, prerequisiteId: number, successorId: number) {
         // check if edge already exists
-        const edge = await this.prisma.conceptEdge.findUnique({
+        const edge = await this.prisma.conceptEdge.findFirst({
             where: {
                 parentId: parentId,
                 prerequisiteId: prerequisiteId,
@@ -79,8 +79,8 @@ export class GraphService {
 
     /**
      * deletes a childless concept
-     * @param conceptNodeId 
-     * @returns 
+     * @param conceptNodeId
+     * @returns
      */
     async deleteConceptNode(conceptNodeId: number): Promise<any> {
         // can only delete concept nodes that have no children
@@ -91,8 +91,8 @@ export class GraphService {
 
     /**
      * deletes a concept edge
-     * @param conceptEdgeId 
-     * @returns 
+     * @param conceptEdgeId
+     * @returns
      */
     async deleteConceptEdge(conceptEdgeId: number): Promise<any> {
         return await this.prisma.conceptEdge.delete({
