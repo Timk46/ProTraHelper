@@ -3,6 +3,7 @@ import { LocalModelSource, TYPES } from 'sprotty';
 import  createContainer  from './sprotty/di.config';
 
 import { GraphDataService } from 'src/app/Services/graph-data.service';
+import { ConceptGraphModelSource } from './sprotty/model-source';
 
 @Component({
   selector: 'app-graph',
@@ -12,11 +13,15 @@ import { GraphDataService } from 'src/app/Services/graph-data.service';
 export class GraphComponent implements OnInit {
 
     container = createContainer('concept-graph');
-    modelSource = this.container.get<LocalModelSource>(TYPES.ModelSource);
+    modelSource = this.container.get<ConceptGraphModelSource>(TYPES.ModelSource);
 
   constructor(private graphData: GraphDataService) { }
 
   ngOnInit() {
+    this.graphData.fetchUserGraph(1).subscribe((graph) => {
+      this.modelSource.initGraph(graph);
+      console.log(graph);
+    });
     this.modelSource.updateModel();
   }
 

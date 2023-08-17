@@ -26,12 +26,12 @@ export class GraphService {
 
         // conditionally include UserConcept if userId is provided
         const includeCondition = userId !== undefined ? {
-            UserConcept: {
+            userConcepts: {
                 where: {
                     userId: userId
                 }
             }
-        } : {};
+        } : {userConcepts: false};
 
         // all nodes, potentially joined with UserConcept table
         const nodes = await this.prisma.conceptNode.findMany({
@@ -60,7 +60,7 @@ export class GraphService {
                 childIds: node.myChildren.map(child => child.childId),
                 prerequisiteEdgeIds: node.myPrerequisites.map(prerequisite => prerequisite.id),
                 successorEdgeIds: node.mySuccessors.map(successor => successor.id),
-                edgeChildIds: node.childEdges.map(edge => edge.childId),
+                edgeChildIds: node.childEdges.map(edge => edge.id),
             };
             // add level field if userId is provided
             if (userId !== undefined) {
@@ -90,7 +90,7 @@ export class GraphService {
         const conceptGraph: ConceptGraph = {
             id: graph.id,
             name: graph.name,
-            trueRootId: 'node_' + graph.trueRootId,
+            trueRootId: graph.ancestorId,
             nodeMap: nodeMap,
             edgeMap: edgeMap,
         };
@@ -98,9 +98,9 @@ export class GraphService {
         if (userId !== undefined) {
             const currentConcept = await this.prisma.user.findUnique({
                 where: { id: userId },
-                select: { currentConceptId: true }
+                select: { currentConcept: true }
             });
-            conceptGraph.currentConceptId = 'node_' + currentConcept.currentConceptId || null;
+            conceptGraph.currentConceptId = 'node_' + currentConcept.currentConcept || null;
         }
 
         return conceptGraph;
@@ -112,11 +112,6 @@ export class GraphService {
             data: {
                 name: 'root',
                 description: '',
-                myParents: [],
-                myChildren: [],
-                myPrerequisites: [],
-                mySuccessors: [],
-                childEdges: [],
             }
         });
 
@@ -124,7 +119,7 @@ export class GraphService {
         const graph = await this.prisma.conceptGraph.create({
             data: {
                 name: 'graph',
-                trueRootId: root.id
+                ancestorId: root.id
             }
         });
 
@@ -137,7 +132,7 @@ export class GraphService {
      * @param parentId
      * @param conceptName
      */
-    async createConcept(parentId: number, conceptName: string) {
+    async createConceptNode(parentId: number, conceptName: string) {
         const newConcept = await this.prisma.conceptNode.create({
             data: {
                 name: conceptName,

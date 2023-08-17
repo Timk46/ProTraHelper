@@ -8,7 +8,7 @@ async function main() {
     const userRole = await prisma.role.create({ data: { name: "User" } });
 
     // Modul
-    const module1 = await prisma.modul.create({
+    const module1 = await prisma.module.create({
         data: {
             name: "Module 1",
             description: "Description for Module 1"

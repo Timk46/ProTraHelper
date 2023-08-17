@@ -1,4 +1,4 @@
-import { ConceptGraph } from '@Interfaces/index';
+import { ConceptGraph, ConceptNode } from '@Interfaces/index';
 import { Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { GraphService } from './graph.service';
 
@@ -35,7 +35,7 @@ export class GraphController {
      * @returns the new concept
      */
     @Post('concept/:parentId/:name')
-    async createConcept(@Param('parentId', ParseIntPipe) parentId:number, @Param('name') name: string): Promise<void> {
+    async createConceptNode(@Param('parentId', ParseIntPipe) parentId:number, @Param('name') name: string): Promise<any> { // todo: there must be a better way than any
         const newConcept = await this.graphService.createConceptNode(parentId, name);
         return newConcept;
     }

@@ -9,16 +9,17 @@ import {
 import { ChangeActiveNodeService } from 'src/app/Services/changeActiveNode.service';
 import { GraphDataService } from 'src/app/Services/graph-data.service';
 import { ThisReceiver } from '@angular/compiler';
+import { Inject } from '@angular/core';
 
 
 @injectable()
 export class ConceptGraphModelSource extends LocalModelSource {
 
   private changeActiveNodeService: ChangeActiveNodeService = ChangeActiveNodeService.getInstance();
-  private flatGraph: ConceptGraph = {id: 0, name: "", nodeMap: {}, edgeMap: {}, trueRootId: ''}
+  private flatGraph: ConceptGraph = {id: 0, name: "", nodeMap: {}, edgeMap: {}, trueRootId: 0}
   
 
-    constructor(private graphData: GraphDataService) {
+    constructor() {
         super();
         this.initTestGraph();
     }
@@ -43,13 +44,12 @@ export class ConceptGraphModelSource extends LocalModelSource {
         }
     }
 
-    initGraph(flatGraph: ConceptGraph) {
-      this.graphData.fetchUserGraph(1).subscribe((graph) => {
-        this.flatGraph = graph;
-      });
+    public initGraph(flatGraph: ConceptGraph) {
+        this.flatGraph = flatGraph;
     }
 
     initTestGraph() {
+      console.log("initTestGraph() called");
         const graph: SGraph = {
             type: 'graph',
             id: 'root',

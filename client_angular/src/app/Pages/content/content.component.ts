@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 })
 export class ContentComponent implements OnInit {
 
-  @Input() activeNode: any; // ToDo: This should be the node with all needed information (placeholder since we dont have testdata yet)
+  @Input() activeNode: any = {}; // ToDo: This should be the node with all needed information (placeholder since we dont have testdata yet)
   cards = Array.from({ length: 15 }, (_, i) => ({ id: i + 1 }));
 
   constructor(private router: Router) { }
