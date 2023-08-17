@@ -1,3 +1,11 @@
-<p>
-  content works!
-</p>
+<h1>App-Instruction</h1>
+
+    Example for passing Node Information to Child-Component (also updating it): {{ activeNode.selectedElementsIDs }}
+
+    <div class="grid-container">
+      <mat-card *ngFor="let card of cards" (click)="onCardClick(card.id)">
+        <mat-card-content>
+          Content ID: {{ card.id }}
+        </mat-card-content>
+      </mat-card>
+    </div>

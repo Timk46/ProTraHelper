@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ChangeActiveNodeService } from 'src/app/Services/changeActiveNode.service';
+import {MatTabsModule} from '@angular/material/tabs';
 
 @Component({
   selector: 'app-contentOverview',
@@ -11,11 +12,15 @@ export class ContentOverviewComponent implements OnInit, OnDestroy {
   private changeActiveNodeService: ChangeActiveNodeService = ChangeActiveNodeService.getInstance();
 
   private activeNodeSubscription: Subscription;
+
+  activeNodeTestDisplay: String = ''; // for testing only
+
   activeNode: any; // TODO: type
 
   constructor() {
     this.activeNodeSubscription = this.changeActiveNodeService.currentActiveNode.subscribe((ActiveNode) => {
-      this.activeNode = JSON.stringify(ActiveNode); // TODO: type
+      this.activeNode = ActiveNode; // TODO: type
+      this.activeNodeTestDisplay = JSON.stringify(this.activeNode);
     });
   }
 

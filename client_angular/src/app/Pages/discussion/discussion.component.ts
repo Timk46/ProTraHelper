@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-discussion',
@@ -6,6 +6,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./discussion.component.css']
 })
 export class DiscussionComponent implements OnInit {
+
+  @Input() activeNode: any; // ToDo: This should be the node with all needed information (placeholder since we dont have testdata yet)
 
   constructor() { }
 

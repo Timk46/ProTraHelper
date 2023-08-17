@@ -1,0 +1,24 @@
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.mat-elevation-z8 {
+  background: #eceff4;
+  color: black;
+}
+
+.content {
+  height: 20h;
+  margin: 16px;
+  margin-left: 32px;
+  padding:16px;
+
+  contain: content;
+  overflow-y: scroll;
+  scrollbar-width: thin;
+
+  font-size: 14px;
+  border-radius: 10px;
+}
