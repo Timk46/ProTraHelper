@@ -18,7 +18,7 @@ model User {
   password                 String
   createdAt                DateTime                   @default(now())
   roles                    Role[]
-  modules                  Modul[]
+  modules                  Module[]
   currentConcept           ConceptNode                @relation(fields: [currentconceptNodeId], references: [id]) // last concept the user has visited
   currentconceptNodeId     Int
   conceptUser              UserConcept[]
@@ -35,12 +35,23 @@ model Role {
   users User[]
 }
 
-model Modul {
+model Module {
   id          Int       @id @default(autoincrement())
   name        String    @unique
   description String
   subjects    Subject[]
   users       User[]
+  goals       ModuleConceptGoal[]
+}
+
+// the level goal for a concept in a module
+model ModuleConceptGoal {
+  id            Int         @id @default(autoincrement())
+  module        Module      @relation(fields: [moduleId], references: [id])
+  moduleId      Int
+  conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id])
+  conceptNodeId Int
+  level         Int
 }
 
 // n to n relation between subject and module is implicit
@@ -48,7 +59,7 @@ model Subject {
   id          Int     @id @default(autoincrement())
   name        String  @unique
   description String
-  modules     Modul[]
+  modules     Module[]
 }
 
 // a concept graph defines the lowest level of nodes
@@ -73,6 +84,7 @@ model ConceptNode {
   trainedBy       Training[]
   currentConceptFor  User[]
   userConcepts    UserConcept[]
+  moduleGoals     ModuleConceptGoal[]
   conceptGraph    ConceptGraph?
   conceptGraphId  Int? // is only set for the ancestor node
 }

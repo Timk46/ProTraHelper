@@ -1,20 +1,24 @@
 import { injectable } from 'inversify';
 import { ActionHandlerRegistry, Expandable, LocalModelSource, TYPES, VBoxLayouter } from 'sprotty';
-import { SprottyConceptNode } from '@Interfaces/index';
+import { ConceptGraph, SprottyConceptNode } from '@Interfaces/index';
 //import { SModelIndex } from 'sprotty-protocol/lib/utils/model-utils';
 import {
     Action, CollapseExpandAction, CollapseExpandAllAction, SCompartment, SEdge, SGraph, SLabel,
     SModelElement, SModelIndex, SModelRoot, SNode, SelectAction, CenterAction, Point, SPort
 } from 'sprotty-protocol';
 import { ChangeActiveNodeService } from 'src/app/Services/changeActiveNode.service';
+import { GraphDataService } from 'src/app/Services/graph-data.service';
+import { ThisReceiver } from '@angular/compiler';
 
 
 @injectable()
 export class ConceptGraphModelSource extends LocalModelSource {
 
   private changeActiveNodeService: ChangeActiveNodeService = ChangeActiveNodeService.getInstance();
+  private flatGraph: ConceptGraph = {id: 0, name: "", nodeMap: {}, edgeMap: {}, trueRootId: ''}
+  
 
-    constructor() {
+    constructor(private graphData: GraphDataService) {
         super();
         this.initTestGraph();
     }
@@ -37,6 +41,12 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
             default: super.handle(action);
         }
+    }
+
+    initGraph(flatGraph: ConceptGraph) {
+      this.graphData.fetchUserGraph(1).subscribe((graph) => {
+        this.flatGraph = graph;
+      });
     }
 
     initTestGraph() {

@@ -1,6 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
+import { ConceptGraph } from '@Interfaces/index';
+import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -14,9 +18,11 @@ export class GraphDataService {
    * @param userId The id of the user
    * @returns The graph for the user
    */
-  fetchUserGraph(userId: number) {
-  
+  fetchUserGraph(userId: number): Observable<ConceptGraph> {
+    return this.http.get<ConceptGraph>(environment.server + `/graph/${userId}`)
   }
+
+
 
   /**
    * Creates a new concept node and returns it
@@ -35,7 +41,7 @@ export class GraphDataService {
    * @returns The new edge
    */
   createEdge(parentId: string, prerequisiteId: string, successorId: string) {
-  
+
   }
-  
+
 }

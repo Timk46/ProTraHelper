@@ -16,6 +16,7 @@ export interface SprottyConceptNode extends SNode, Expandable {
     expanded: boolean;
     level?: number;
     levelGoal?: number;
+    //levelGoal?: Record<number, number>; // <courseId, levelGoal>
     
     // helper fields
     databaseId: number;

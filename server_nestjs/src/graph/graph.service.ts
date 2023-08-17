@@ -18,10 +18,10 @@ export class GraphService {
      */
     async getConceptGraph(userId?: number): Promise<ConceptGraph> {
         // get graph (only one graph exists for now)
-        const graph = await this.prisma.graph.findFirst({});
+        let graph = await this.prisma.graph.findFirst({});
         // if no graph exists, create a new one with a root node
         if (!graph) {
-            await this.initGraph();
+            graph = await this.initGraph();
         }
 
         // conditionally include UserConcept if userId is provided
@@ -127,6 +127,8 @@ export class GraphService {
                 trueRootId: root.id
             }
         });
+
+        return graph;
 
     }
 
