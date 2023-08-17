@@ -25,7 +25,9 @@
       "dom"
     ],
     "paths": {
-      "@Interfaces/*": ["src/app/Interfaces/*"]
+      "@Interfaces/*": ["src/app/Interfaces/*"],
+      "@DTOs/*": ["../shared/dtos/*"],
+
     }
   },
   "angularCompilerOptions": {

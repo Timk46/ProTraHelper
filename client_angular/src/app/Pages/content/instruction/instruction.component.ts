@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NgxExtendedPdfViewerService, pdfDefaultOptions } from 'ngx-extended-pdf-viewer';
+import { FilesService } from '../../../Services/files/files.service';
 
 @Component({
   selector: 'app-instruction',
@@ -18,7 +19,7 @@ export class InstructionComponent implements OnInit {
    *  to use the "find" api, to extract text and images from a PDF file,
    *  to print programmatically, and to show or hide layers by a method call.
   */
-  constructor(private pdfService: NgxExtendedPdfViewerService, private route: ActivatedRoute) {
+  constructor(private pdfService: NgxExtendedPdfViewerService, private route: ActivatedRoute, private filesService: FilesService) {
     /* More likely than not you don't need to tweak the pdfDefaultOptions.
        They are a collecton of less frequently used options.
        To illustrate how they're used, here are two example settings: */
@@ -33,6 +34,19 @@ export class InstructionComponent implements OnInit {
     this.pdfSrc = "assets/pdf_testing_needsToBeAccesedByNestjs/" + this.instructionId%5 + ".pdf";
 
     }
+
+    // The following is just a demonstration of the files api and how to use it with the files service in angular.
+
+    downloadFile(fileId: string): void {
+      this.filesService.getFileByName(fileId).subscribe((data: Blob) => {
+        const downloadURL = window.URL.createObjectURL(data);
+        const link = document.createElement('a');
+        link.href = downloadURL;
+        link.download = fileId;
+        link.click();
+      });
+    }
+
 
   ngOnInit() {
   }

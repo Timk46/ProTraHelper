@@ -4,6 +4,7 @@
   "sourceRoot": "src",
   "entryFile": "server_nestjs/src/main",
   "compilerOptions": {
+    "assets": ["./storage/**/*"],
     "deleteOutDir": true
   }
 }

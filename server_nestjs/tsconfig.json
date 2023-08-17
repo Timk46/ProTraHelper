@@ -19,7 +19,10 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@/*": ["src/*"],
-      "@Interfaces/*": ["../client_angular/src/app/Interfaces/*"]
+      "@storage/*": ["./storage*"],
+      "@Interfaces/*": ["../client_angular/src/app/Interfaces/*"],
+      "@DTOs/*": ["../shared/dtos/*"]
+
     }
   }
 }

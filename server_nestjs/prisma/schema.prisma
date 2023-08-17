@@ -167,6 +167,7 @@ model File {
   id         Int      @id @default(autoincrement())
   name       String
   path       String
+  type       String
   question   Question? @relation(fields: [questionId], references: [id])
   questionId Int?
   MCAnswer   MCAnswer? @relation(fields: [mCAnswerId], references: [id])
