@@ -19,8 +19,8 @@ model User {
   createdAt                DateTime                   @default(now())
   roles                    Role[]
   modules                  Module[]
-  currentConcept           ConceptNode                @relation(fields: [currentconceptNodeId], references: [id]) // last concept the user has visited
-  currentconceptNodeId     Int
+  currentConcept           ConceptNode?                @relation(fields: [currentconceptNodeId], references: [id], onDelete: SetNull) // last concept the user has visited
+  currentconceptNodeId     Int?
   conceptUser              UserConcept[]
   question                 Question[]
   discussion               Discussion[]
@@ -66,7 +66,7 @@ model Subject {
 model ConceptGraph {
   id         Int         @id @default(autoincrement())
   name       String
-  ancestor   ConceptNode @relation(fields: [ancestorId], references: [id])
+  root   ConceptNode @relation(fields: [ancestorId], references: [id], onDelete: Cascade)
   ancestorId Int         @unique // points to parent node that contains all other nodes
 }
 
@@ -94,7 +94,7 @@ model ConceptFamily {
   id       Int         @id @default(autoincrement())
   child    ConceptNode @relation("childConcept", fields: [childId], references: [id], onDelete: Cascade) // we have to name the relation because we have two relations between the same models
   childId  Int
-  parent   ConceptNode @relation("parentConcept", fields: [parentId], references: [id], onDelete: Restrict) // cannot delete a node with children
+  parent   ConceptNode @relation("parentConcept", fields: [parentId], references: [id], onDelete: Cascade) // cannot delete a node with children
   parentId Int
 }
 
@@ -123,9 +123,9 @@ model ContentNode {
 
 model ContentEdge {
   id             Int         @id @default(autoincrement())
-  prerequisite   ContentNode @relation("prerequisiteContent", fields: [prerequisiteId], references: [id])
+  prerequisite   ContentNode @relation("prerequisiteContent", fields: [prerequisiteId], references: [id], onDelete: Cascade)
   prerequisiteId Int
-  successor      ContentNode @relation("successorContent", fields: [successorId], references: [id])
+  successor      ContentNode @relation("successorContent", fields: [successorId], references: [id], onDelete: Cascade)
   successorId    Int
 }
 
