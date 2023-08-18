@@ -5,10 +5,10 @@ export interface ConceptNode {
     level?: number;
     expanded?: boolean;
 
-    parentIds?: number[];
-    childIds?: number[];
-    prerequisiteEdgeIds?: number[];
-    successorEdgeIds?: number[];
-    edgeChildIds?: number[];
+    parentIds: number[];
+    childIds: number[];
+    prerequisiteEdgeIds: number[];
+    successorEdgeIds: number[];
+    edgeChildIds: number[];
 }
 

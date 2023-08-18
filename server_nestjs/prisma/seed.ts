@@ -114,7 +114,7 @@ async function main() {
         { id: 3, prerequisiteId: 6, successorId: 15, parentId: 4 },
         { id: 4, prerequisiteId: 7, successorId: 18, parentId: 4 },
         { id: 5, prerequisiteId: 8, successorId: 17, parentId: 4 },
-        { id: 6, prerequisiteId: 5, successorId: 11, parentId: 5 },
+        { id: 6, prerequisiteId: 5, successorId: 11, parentId: 2 },
     ];
 
 
@@ -243,7 +243,7 @@ async function main() {
                 userId: userId,
                 conceptNodeId: concept.id,
                 level: level,
-                expanded: false
+                expanded: true
             };
         }).filter(Boolean);  // filter out any null entries
     };

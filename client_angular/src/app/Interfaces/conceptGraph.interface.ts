@@ -9,5 +9,5 @@ export interface ConceptGraph {
                         // so we need to store the id of the true root node here
     nodeMap: Record<number, ConceptNode>;
     edgeMap: Record<number, ConceptEdge>;  
-    currentConceptId?: string; // id of the last concept that was clicked on
+    currentConceptId?: number; // id of the last concept that was clicked on
 }

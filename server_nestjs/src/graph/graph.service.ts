@@ -31,7 +31,7 @@ export class GraphService {
                     userId: userId
                 }
             }
-        } : {userConcepts: false};
+        } : { userConcepts: false };
 
         // all nodes, potentially joined with UserConcept table
         const nodes = await this.prisma.conceptNode.findMany({
@@ -53,7 +53,7 @@ export class GraphService {
                 name: node.name,
 
                 // if no user concept exists, set expanded to false
-                expanded: node.userConcepts[0].expanded || false,
+                expanded: false,
 
                 // graph helper fields
                 parentIds: node.myParents.map(parent => parent.parentId),
@@ -65,7 +65,14 @@ export class GraphService {
             // add level field if userId is provided
             if (userId !== undefined) {
                 // if no user concept exists, set level to 0
-                nodeMap[node.id].level = node.userConcepts[0].level || 0;
+                if (node.userConcepts.length === 0) {
+                    nodeMap[node.id].expanded = false;
+                    nodeMap[node.id].level = 0;
+                }
+                else {
+                    nodeMap[node.id].expanded = node.userConcepts[0].expanded || false;
+                    nodeMap[node.id].level = node.userConcepts[0].level || 0;
+                }
             }
         });
 
@@ -100,7 +107,12 @@ export class GraphService {
                 where: { id: userId },
                 select: { currentConcept: true }
             });
-            conceptGraph.currentConceptId = 'node_' + currentConcept.currentConcept || null;
+            if (currentConcept !== null){
+                conceptGraph.currentConceptId = currentConcept.currentConcept.id || null;
+            }
+            else {
+                conceptGraph.currentConceptId = 2;
+            }
         }
 
         return conceptGraph;

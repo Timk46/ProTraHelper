@@ -10,6 +10,7 @@ import { ChangeActiveNodeService } from 'src/app/Services/changeActiveNode.servi
 import { GraphDataService } from 'src/app/Services/graph-data.service';
 import { ThisReceiver } from '@angular/compiler';
 import { Inject } from '@angular/core';
+import { NoDataRowOutlet } from '@angular/cdk/table';
 
 
 @injectable()
@@ -46,6 +47,78 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
     public initGraph(flatGraph: ConceptGraph) {
         this.flatGraph = flatGraph;
+
+        const graph: SGraph = {
+          type: 'graph',
+          id: 'root',
+          children: [],
+          layoutOptions: {
+            hGap: 5,
+            hAlign: 'left',
+            paddingLeft: 7,
+            paddingRight: 7,
+            paddingTop: 7,
+            paddingBottom: 7
+          }
+        };
+
+        // add first layer of nodes
+        this.flatGraph.nodeMap[this.flatGraph.trueRootId].childIds.forEach(childId => {
+          const flatChild = this.flatGraph.nodeMap[childId];
+          if (flatChild) {
+            const expanded = flatChild.expanded ? flatChild.expanded : true;
+            const level = flatChild.level ? flatChild.level : 0;
+            const newChild = this.createConceptNode("node_"+ flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId);
+            graph.children!.push(newChild);
+            if(expanded) {
+              this.addChildren(newChild);
+            }
+          }
+        });
+
+        // add first layer of edges
+        this.flatGraph.nodeMap[this.flatGraph.trueRootId].edgeChildIds.forEach(edgeChildId => {
+          const flatChild = this.flatGraph.edgeMap[edgeChildId];
+          if (flatChild) {
+            const edgeChild = this.createEdge("edge_"+ flatChild.databaseId, "node_" + flatChild.sourceId, "node_" + flatChild.targetId);
+            graph.children!.push(edgeChild);
+          }
+        });
+
+        this.currentRoot = graph;
+        this.updateModel(this.currentRoot);
+        console.log("graph: ", graph);
+    }
+
+    private addChildren(parentNode: SprottyConceptNode) {
+        const flatParentNode = this.flatGraph.nodeMap[parentNode.databaseId];
+        // add children
+        if (flatParentNode.childIds.length > 0) {
+            flatParentNode.childIds.forEach(childId => {
+                const flatChild = this.flatGraph.nodeMap[childId];
+                if (flatChild) {
+                    const expanded = flatChild.expanded ? flatChild.expanded : true;
+                    const level = flatChild.level ? flatChild.level : 0;
+                    const newChild = this.createConceptNode("node_"+ flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId);
+                    parentNode.children!.push(newChild);
+
+                    if(expanded) {
+                      this.addChildren(newChild);
+                    }
+                }
+            });
+        }
+
+        // add edge children
+        if (flatParentNode.edgeChildIds.length > 0) {
+            flatParentNode.edgeChildIds.forEach(edgeChildId => {
+                const flatChild = this.flatGraph.edgeMap[edgeChildId];
+                if (flatChild) {
+                    const edgeChild = this.createEdge("edge_"+ flatChild.databaseId, "node_" + flatChild.sourceId, "node_" + flatChild.targetId);
+                    parentNode.children!.push(edgeChild);
+                }
+            });
+        }
     }
 
     initTestGraph() {
@@ -65,34 +138,34 @@ export class ConceptGraphModelSource extends LocalModelSource {
           };
 
         // Programmiergrundlagen
-        const node1: SprottyConceptNode = this.createConceptNode('1', 'Programmiergrundlagen', true, 2);
+        const node1: SprottyConceptNode = this.createConceptNode('1', 'Programmiergrundlagen', true, 2, 1);
 
-        const node2 = this.createConceptNode('2', 'Variablen', true, 4);
+        const node2 = this.createConceptNode('2', 'Variablen', true, 4, 1);
         node1.children!.push(node2);
 
-        const node3 = this.createConceptNode('3', 'Datentypen', true, 3);
-        const node4 = this.createConceptNode('4', 'boolean', true, 3);
-        const node5 = this.createConceptNode('5', 'strings', true, 3);
-        const node6 = this.createConceptNode('6', 'numbers', true, 3);
+        const node3 = this.createConceptNode('3', 'Datentypen', true, 3, 1);
+        const node4 = this.createConceptNode('4', 'boolean', true, 3, 1);
+        const node5 = this.createConceptNode('5', 'strings', true, 3, 1);
+        const node6 = this.createConceptNode('6', 'numbers', true, 3, 1);
         node3.children!.push(node4, node5, node6);
         node1.children!.push(node3);
         const edge_2_3 = this.createEdge('edge_2_3', '2', '3');
         node1.children!.push(edge_2_3);
 
-        const node7 = this.createConceptNode('7', 'Kontrollelemente', true, 2);
-        const node8 = this.createConceptNode('8', 'if/else', true, 2);
-        const node9 = this.createConceptNode('9', 'and/or', true, 2);
+        const node7 = this.createConceptNode('7', 'Kontrollelemente', true, 2, 1);
+        const node8 = this.createConceptNode('8', 'if/else', true, 2, 1);
+        const node9 = this.createConceptNode('9', 'and/or', true, 2, 1);
         node7.children!.push(node8, node9);
         node1.children!.push(node7);
         const edge_3_7 = this.createEdge('edge_3_7', '3', '7');
         node1.children!.push(edge_3_7);
 
-        const node10 = this.createConceptNode('10', 'while', true, 1);
+        const node10 = this.createConceptNode('10', 'while', true, 1, 1);
         node1.children!.push(node10);
         const edge_7_10 = this.createEdge('edge_7_10', '7', '10');
         node1.children!.push(edge_7_10);
 
-        const node11 = this.createConceptNode('11', 'for', true, 0);
+        const node11 = this.createConceptNode('11', 'for', true, 0, 1);
         node1.children!.push(node11);
         const edge_7_11 = this.createEdge('edge_7_11', '7', '11');
         node1.children!.push(edge_7_11);
@@ -103,11 +176,11 @@ export class ConceptGraphModelSource extends LocalModelSource {
     }
 
     // creates new concept node (locally)
-    createConceptNode(id: string, name: string, expanded: boolean, level: number): SprottyConceptNode {
+    createConceptNode(id: string, name: string, expanded: boolean, level: number, databaseId: number): SprottyConceptNode {
         const node: SNode & SprottyConceptNode & Expandable = {
           type: 'node:concept',
           id: id,
-          databaseId: 0,
+          databaseId: databaseId,
           name: name,
           expanded: expanded,
           level: level,
