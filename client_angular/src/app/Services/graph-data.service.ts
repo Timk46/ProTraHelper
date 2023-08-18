@@ -44,4 +44,15 @@ export class GraphDataService {
 
   }
 
+  updateUserConceptData(userId: number, conceptId: number, expanded?: boolean, level?: number) {
+    const data: any = {};
+    if (expanded !== undefined) {
+        data.expanded = expanded;
+    }
+    if (level !== undefined) {
+        data.level = level;
+    }
+    //return this.http.put(environment.server + `/graph/userConcept/${userId}/${conceptId}`, data)
+  }
+
 }

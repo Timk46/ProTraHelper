@@ -210,7 +210,7 @@ async function main() {
             password: "admin123",
             roles: { connect: { id: adminRole.id } },
             currentConcept: { connect: { id: conceptNode.id } },
-            modules: { connect: { id: module1.id } }
+            modules: { connect: [{ id: module1.id }, { id: module2.id }]  }
         }
     });
 
@@ -221,11 +221,12 @@ async function main() {
     for (let i = 0; i < numberOfUsers; i++) {
         const user = await prisma.user.create({
             data: {
+                id: i + 2,
                 email: faker.internet.email(),
                 firstname: faker.person.firstName(),
                 lastname: faker.person.lastName(),
                 password: faker.internet.password(),
-                modules: { connect: [{ id: 1 }, { id: 2 }] },
+                modules: { connect: [{ id: module1.id }, { id: module2.id }] },
                 currentconceptNodeId: Math.floor(Math.random() * (conceptNodeData.length)) + 2
             }
         });
