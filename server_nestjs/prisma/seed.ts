@@ -115,6 +115,7 @@ async function main() {
         { id: 4, prerequisiteId: 7, successorId: 18, parentId: 4 },
         { id: 5, prerequisiteId: 8, successorId: 17, parentId: 4 },
         { id: 6, prerequisiteId: 5, successorId: 11, parentId: 2 },
+        { id: 7, prerequisiteId: 4, successorId: 16, parentId: 2 },
     ];
 
 

@@ -9,7 +9,7 @@ import {
 import { ChangeActiveNodeService } from 'src/app/Services/changeActiveNode.service';
 import { GraphDataService } from 'src/app/Services/graph-data.service';
 import { ThisReceiver } from '@angular/compiler';
-import { Inject } from '@angular/core';
+import { inject as injectAngular } from '@angular/core';
 import { NoDataRowOutlet } from '@angular/cdk/table';
 
 
@@ -18,11 +18,17 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   private changeActiveNodeService: ChangeActiveNodeService = ChangeActiveNodeService.getInstance();
   private flatGraph: ConceptGraph = { id: 0, name: "", nodeMap: {}, edgeMap: {}, trueRootId: 0 }
+  graphData: GraphDataService|undefined;
+  userId = 2;
 
 
   constructor() {
     super();
-    this.initTestGraph();
+    this.graphData = injectAngular(GraphDataService)
+    //this.initTestGraph();
+    this.graphData.fetchUserGraph(this.userId).subscribe((graph) => {
+      this.initGraph(graph);
+    });
   }
 
   override initialize(registry: ActionHandlerRegistry): void {
@@ -66,7 +72,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.flatGraph.nodeMap[this.flatGraph.trueRootId].childIds.forEach(childId => {
       const flatChild = this.flatGraph.nodeMap[childId];
       if (flatChild) {
-        const expanded = flatChild.expanded ? flatChild.expanded : true;
+        const expanded = flatChild.expanded !== undefined ? flatChild.expanded : true;
         const level = flatChild.level ? flatChild.level : 0;
         const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId);
         graph.children!.push(newChild);
@@ -87,7 +93,6 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
     this.currentRoot = graph;
     this.updateModel();
-    console.log("graph: ", graph);
   }
 
   private addChildren(parentNode: SprottyConceptNode) {
@@ -97,7 +102,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       flatParentNode.childIds.forEach(childId => {
         const flatChild = this.flatGraph.nodeMap[childId];
         if (flatChild) {
-          const expanded = flatChild.expanded ? flatChild.expanded : true;
+          const expanded = flatChild.expanded !== undefined ? flatChild.expanded : true;
           const level = flatChild.level ? flatChild.level : 0;
           const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId);
           parentNode.children!.push(newChild);
@@ -155,7 +160,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   private updateExpandedState(node: SprottyConceptNode, expanded: boolean) {
     this.flatGraph.nodeMap[node.databaseId].expanded = expanded;
-    //todo: update in db
+    this.graphData!.updateUserConceptData(this.userId, node.databaseId, { expanded: expanded }).subscribe();
   }
 
   initTestGraph() {

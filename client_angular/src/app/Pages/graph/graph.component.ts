@@ -18,11 +18,7 @@ export class GraphComponent implements OnInit {
   constructor(private graphData: GraphDataService) { }
 
   ngOnInit() {
-    this.graphData.fetchUserGraph(1).subscribe((graph) => {
-      this.modelSource.initGraph(graph);
-      console.log(graph);
-    });
-    this.modelSource.updateModel();
+    
   }
 
 }

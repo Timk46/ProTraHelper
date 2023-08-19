@@ -70,8 +70,8 @@ export class GraphService {
                     nodeMap[node.id].level = 0;
                 }
                 else {
-                    nodeMap[node.id].expanded = node.userConcepts[0].expanded || false;
-                    nodeMap[node.id].level = node.userConcepts[0].level || 0;
+                    nodeMap[node.id].expanded = node.userConcepts[0].expanded;
+                    nodeMap[node.id].level = node.userConcepts[0].level;
                 }
             }
         });
@@ -97,7 +97,7 @@ export class GraphService {
         const conceptGraph: ConceptGraph = {
             id: graph.id,
             name: graph.name,
-            trueRootId: graph.ancestorId,
+            trueRootId: graph.rootId,
             nodeMap: nodeMap,
             edgeMap: edgeMap,
         };
@@ -131,7 +131,7 @@ export class GraphService {
         const graph = await this.prisma.conceptGraph.create({
             data: {
                 name: 'graph',
-                ancestorId: root.id
+                rootId: root.id
             }
         });
 
@@ -228,6 +228,46 @@ export class GraphService {
     async deleteConceptEdge(conceptEdgeId: number): Promise<any> {
         return await this.prisma.conceptEdge.delete({
             where: { id: conceptEdgeId },
+        });
+    }
+
+    async updateUserConceptData(userId: number, conceptNodeId: number, data: any): Promise<any> {
+        const userConcept = await this.prisma.userConcept.findFirst({
+            where: { conceptNodeId: conceptNodeId,
+                     userId: userId }
+        });
+
+        const expanded = data.expanded !== undefined ? {expanded: data.expanded} : {expanded: false};
+        const level = data.level !== undefined ? {level: data.level} : {};
+
+
+        // if the userConcept does not exist, create it
+        if (userConcept === null) {
+            return await this.prisma.userConcept.create({
+                data: {
+                    concept: {
+                        connect: {
+                            id: conceptNodeId
+                        }
+                    },
+                    user: {
+                        connect: {
+                            id: userId
+                        }
+                    },
+                    ...expanded,
+                    ...level
+                }
+            });
+        }
+
+        // if the userConcept exists, update it
+        return await this.prisma.userConcept.update({
+            where: { id: userConcept.id, },
+            data: {
+                ...expanded,
+                ...level
+            }
         });
     }
 

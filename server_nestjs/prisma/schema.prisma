@@ -19,7 +19,7 @@ model User {
   createdAt                DateTime                   @default(now())
   roles                    Role[]
   modules                  Module[]
-  currentConcept           ConceptNode?                @relation(fields: [currentconceptNodeId], references: [id], onDelete: SetNull) // last concept the user has visited
+  currentConcept           ConceptNode?               @relation(fields: [currentconceptNodeId], references: [id], onDelete: SetNull) // last concept the user has visited
   currentconceptNodeId     Int?
   conceptUser              UserConcept[]
   question                 Question[]
@@ -36,8 +36,8 @@ model Role {
 }
 
 model Module {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique
+  id          Int                 @id @default(autoincrement())
+  name        String              @unique
   description String
   subjects    Subject[]
   users       User[]
@@ -56,37 +56,37 @@ model ModuleConceptGoal {
 
 // n to n relation between subject and module is implicit
 model Subject {
-  id          Int     @id @default(autoincrement())
-  name        String  @unique
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
   description String
   modules     Module[]
 }
 
 // a concept graph defines the lowest level of nodes
 model ConceptGraph {
-  id         Int         @id @default(autoincrement())
-  name       String
-  root   ConceptNode @relation(fields: [ancestorId], references: [id], onDelete: Cascade)
-  ancestorId Int         @unique // points to parent node that contains all other nodes
+  id     Int         @id @default(autoincrement())
+  name   String
+  root   ConceptNode? @relation(fields: [rootId], references: [id], onDelete: Cascade)
+  rootId Int?         @unique // points to parent node that contains all other nodes
 }
 
 // A Concept node is a node in the concept graph
 model ConceptNode {
-  id              Int             @id @default(autoincrement())
-  name            String          @unique
-  description     String
-  myParents       ConceptFamily[] @relation("childConcept") // we have to name the relation because we have two relations between the same models
-  myChildren      ConceptFamily[] @relation("parentConcept")
-  mySuccessors    ConceptEdge[]   @relation("prerequisiteConcept")
-  myPrerequisites ConceptEdge[]   @relation("successorConcept")
-  childEdges      ConceptEdge[]   @relation("conceptEdgeParent") // makes it easier to construct the graph
-  requiredBy      Requirement[]
-  trainedBy       Training[]
-  currentConceptFor  User[]
-  userConcepts    UserConcept[]
-  moduleGoals     ModuleConceptGoal[]
-  conceptGraph    ConceptGraph?
-  conceptGraphId  Int? // is only set for the ancestor node
+  id                Int                 @id @default(autoincrement())
+  name              String              @unique
+  description       String
+  myParents         ConceptFamily[]     @relation("childConcept") // we have to name the relation because we have two relations between the same models
+  myChildren        ConceptFamily[]     @relation("parentConcept")
+  mySuccessors      ConceptEdge[]       @relation("prerequisiteConcept")
+  myPrerequisites   ConceptEdge[]       @relation("successorConcept")
+  childEdges        ConceptEdge[]       @relation("conceptEdgeParent") // makes it easier to construct the graph
+  requiredBy        Requirement[]
+  trainedBy         Training[]
+  currentConceptFor User[]
+  userConcepts      UserConcept[]
+  moduleGoals       ModuleConceptGoal[]
+  conceptGraph      ConceptGraph?
+  conceptGraphId    Int? // is only set for the ancestor node
 }
 
 // defines one parent-child relationship in the concept graph
@@ -159,12 +159,12 @@ model UserConcept {
   userId        Int
   concept       ConceptNode @relation(fields: [conceptNodeId], references: [id])
   conceptNodeId Int
-  level         Int
+  level         Int?
   expanded      Boolean // remembers if the concept was expanded in the concept graph
 }
 
 model File {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   name       String
   path       String
   type       String
