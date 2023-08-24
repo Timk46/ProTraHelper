@@ -1,5 +1,5 @@
 // generic interface for a node in the concept graph
-export interface ConceptNode {
+export interface ConceptNodeDTO {
     databaseId: number;
     name: string;
     level?: number;

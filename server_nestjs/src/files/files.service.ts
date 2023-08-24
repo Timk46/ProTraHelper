@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { FileDto } from '@DTOs/files.dto';
+import { FileDto } from '@DTOs/index';
 
 /**
  * A service that provides functionalities related to file operations.

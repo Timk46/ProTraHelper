@@ -1,4 +1,4 @@
-import { ConceptGraphDTO } from '@DTOs/conceptGraph.interface';
+import { ConceptGraphDTO } from '@DTOs/index';
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { GraphService } from './graph.service';
 

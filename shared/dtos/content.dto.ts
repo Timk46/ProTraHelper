@@ -1,11 +1,11 @@
 import { contentElementType } from "./contentElementType.enum";
-import { QuestionDTO } from "./question.interface";
+import { QuestionDTO } from "./question.dto";
 
-export interface Content {
+export interface ContentDTO {
     contentNodeId: number;
     name: string;
     description: string;
-    contentElements: ContentElement[];
+    contentElements: ContentElementDTO[];
 
     contentPrerequisiteIds?: number[];
     contentSuccessorIds?: number[];
@@ -16,7 +16,7 @@ export interface Content {
     //discussion: Discussion // TODO: implement
 }
 
-export interface ContentElement {
+export interface ContentElementDTO {
     id: number;
     type: contentElementType;
     position: number;

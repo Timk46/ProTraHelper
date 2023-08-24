@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
-import { ConceptNode, ConceptEdge, ConceptGraphDTO } from '@Interfaces/index';
+import { ConceptNodeDTO, ConceptEdgeDTO, ConceptGraphDTO } from '@Interfaces/index';
 
 @Injectable()
 export class GraphService {
@@ -46,7 +46,7 @@ export class GraphService {
         });
 
         // create nodeMap
-        const nodeMap: Record<string, ConceptNode> = {};
+        const nodeMap: Record<string, ConceptNodeDTO> = {};
         nodes.forEach(node => {
             nodeMap[node.id] = {
                 databaseId: node.id,
@@ -80,7 +80,7 @@ export class GraphService {
         const edges = await this.prisma.conceptEdge.findMany({});
 
         // create edgeMap
-        const edgeMap: Record<string, ConceptEdge> = {};
+        const edgeMap: Record<string, ConceptEdgeDTO> = {};
         edges.forEach(edge => {
             edgeMap[edge.id] = {
                 databaseId: edge.id,

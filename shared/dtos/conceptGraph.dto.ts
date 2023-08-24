@@ -1,5 +1,5 @@
-import { ConceptEdge } from "./conceptEdge.interface";
-import { ConceptNode } from "./conceptNode.interface";
+import { ConceptEdgeDTO } from "./conceptEdge.dto";
+import { ConceptNodeDTO } from "./conceptNode.dto";
 // interfaces relating to the concept graph
 
 export interface ConceptGraphDTO {
@@ -7,7 +7,7 @@ export interface ConceptGraphDTO {
     name: string;
     trueRootId: number; // in the graph the id of the root node has to be 'root'.
                         // so we need to store the id of the true root node here
-    nodeMap: Record<number, ConceptNode>;
-    edgeMap: Record<number, ConceptEdge>;  
+    nodeMap: Record<number, ConceptNodeDTO>;
+    edgeMap: Record<number, ConceptEdgeDTO>;  
     currentConceptId?: number; // id of the last concept that was clicked on
 }

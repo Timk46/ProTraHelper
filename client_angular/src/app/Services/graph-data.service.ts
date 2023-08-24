@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { ConceptGraphDTO } from '@DTOs/conceptGraph.interface';
+import { ConceptGraphDTO } from '@DTOs/index';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 

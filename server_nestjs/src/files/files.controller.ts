@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Res } from '@nestjs/common';
 import { FilesService } from './files.service';
-import { FileDto } from '@DTOs/files.dto';
+import { FileDto } from '@DTOs/index';
 
 import { Response } from 'express';
 import { join } from 'path';
