@@ -2,7 +2,7 @@ import { IButtonHandler, MouseListener, SButton, findParentByFeature, isExpandab
 import { Action, CollapseExpandAction, SModelElement, Point } from 'sprotty-protocol';
 import { injectable, inject } from 'inversify';
 import { expand } from "rxjs";
-import { SprottyConceptNode } from "@Interfaces/index";
+import { SprottyConceptNode } from "./sprottyModels.interface";
 //import { NodeCreator } from "./di.config";
 
 export const NodeCreator = Symbol('NodeCreator');

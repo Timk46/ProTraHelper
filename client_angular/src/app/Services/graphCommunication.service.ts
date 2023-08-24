@@ -1,7 +1,7 @@
 import { BehaviorSubject } from 'rxjs';
 
-export class ChangeActiveNodeService {
-    private static instance: ChangeActiveNodeService;
+export class GraphCommunicationService {
+    private static instance: GraphCommunicationService;
 
     private ActiveNode = new BehaviorSubject<any>(null);
     currentActiveNode = this.ActiveNode.asObservable();
@@ -9,11 +9,11 @@ export class ChangeActiveNodeService {
     private constructor() {}
 
     // Singleton pattern
-    public static getInstance(): ChangeActiveNodeService {
-        if (!ChangeActiveNodeService.instance) {
-            ChangeActiveNodeService.instance = new ChangeActiveNodeService();
+    public static getInstance(): GraphCommunicationService {
+        if (!GraphCommunicationService.instance) {
+            GraphCommunicationService.instance = new GraphCommunicationService();
         }
-        return ChangeActiveNodeService.instance;
+        return GraphCommunicationService.instance;
     }
 
     // communication between graph and contentOverview

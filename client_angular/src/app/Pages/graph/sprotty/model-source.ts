@@ -7,7 +7,7 @@ import {
   Action, CollapseExpandAction, CollapseExpandAllAction, SCompartment, SEdge, SGraph, SLabel,
   SModelElement, SModelIndex, SModelRoot, SNode, SelectAction, CenterAction, Point, SPort
 } from 'sprotty-protocol';
-import { ChangeActiveNodeService } from 'src/app/Services/changeActiveNode.service';
+import { GraphCommunicationService } from 'src/app/Services/graphCommunication.service';
 import { GraphDataService } from 'src/app/Services/graph-data.service';
 import { ThisReceiver } from '@angular/compiler';
 import { inject as injectAngular } from '@angular/core';
@@ -17,7 +17,7 @@ import { NoDataRowOutlet } from '@angular/cdk/table';
 @injectable()
 export class ConceptGraphModelSource extends LocalModelSource {
 
-  private changeActiveNodeService: ChangeActiveNodeService = ChangeActiveNodeService.getInstance();
+  private GraphCommunicationService: GraphCommunicationService = GraphCommunicationService.getInstance();
   private flatGraph: ConceptGraphDTO = { id: 0, name: "", nodeMap: {}, edgeMap: {}, trueRootId: 0 }
   graphData: GraphDataService|undefined;
   userId = 2;
@@ -42,7 +42,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     switch (action.kind) {
       case SelectAction.KIND:
         console.log("this is the select action: ", action);
-        this.changeActiveNodeService.changeActiveNode(action); // TODO: type - communicate node info to contentOverview (so get full node info from db first?)
+        this.GraphCommunicationService.changeActiveNode(action); // TODO: type - communicate node info to contentOverview (so get full node info from db first?)
         break;
       case CollapseExpandAction.KIND:
         this.handleCollapseExpandAction(action as CollapseExpandAction);

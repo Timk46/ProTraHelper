@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ChangeActiveNodeService } from 'src/app/Services/changeActiveNode.service';
+import { GraphCommunicationService } from 'src/app/Services/graphCommunication.service';
 import { MatTabsModule } from '@angular/material/tabs';
 
 @Component({
@@ -9,7 +9,7 @@ import { MatTabsModule } from '@angular/material/tabs';
   styleUrls: ['./contentOverview.component.css'],
 })
 export class ContentOverviewComponent implements OnInit, OnDestroy {
-  private changeActiveNodeService: ChangeActiveNodeService = ChangeActiveNodeService.getInstance();
+  private graphCommunicationService: GraphCommunicationService = GraphCommunicationService.getInstance();
 
   private activeNodeSubscription: Subscription;
 
@@ -18,7 +18,7 @@ export class ContentOverviewComponent implements OnInit, OnDestroy {
   activeNode: any = {}; // TODO: type
 
   constructor() {
-    this.activeNodeSubscription = this.changeActiveNodeService.currentActiveNode.subscribe((ActiveNode) => {
+    this.activeNodeSubscription = this.graphCommunicationService.currentActiveNode.subscribe((ActiveNode) => {
       if (ActiveNode != null) {
         this.activeNode = ActiveNode; // TODO: type
         this.activeNodeTestDisplay = JSON.stringify(this.activeNode);

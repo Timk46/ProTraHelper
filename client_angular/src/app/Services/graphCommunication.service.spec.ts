@@ -1,16 +1,16 @@
 /* tslint:disable:no-unused-variable */
 
 import { TestBed, async, inject } from '@angular/core/testing';
-import { ChangeActiveNodeService } from './changeActiveNode.service';
+import { GraphCommunicationService } from './graphCommunication.service';
 
 describe('Service: ChangeActiveNode', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ChangeActiveNodeService]
+      providers: [GraphCommunicationService]
     });
   });
 
-  it('should ...', inject([ChangeActiveNodeService], (service: ChangeActiveNodeService) => {
+  it('should ...', inject([GraphCommunicationService], (service: GraphCommunicationService) => {
     expect(service).toBeTruthy();
   }));
 });

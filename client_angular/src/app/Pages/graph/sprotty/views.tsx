@@ -6,7 +6,7 @@ import {
     IView, RectangularNodeView, RenderingContext, SButton, SLabel,
     SLabelView, SNode, SPort, ShapeView, findParentByFeature, isExpandable, setAttr
 } from 'sprotty';
-import { SprottyConceptNode } from '@Interfaces/index';
+import { SprottyConceptNode } from "./sprottyModels.interface";
 
 @injectable()
 export class ConceptNodeView extends RectangularNodeView {
