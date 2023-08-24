@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { ConceptGraph } from '@Interfaces/index';
+import { ConceptGraphDTO } from '@DTOs/conceptGraph.interface';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -18,8 +18,8 @@ export class GraphDataService {
    * @param userId The id of the user
    * @returns The graph for the user
    */
-  fetchUserGraph(userId: number): Observable<ConceptGraph> {
-    return this.http.get<ConceptGraph>(environment.server + `/graph/${userId}`)
+  fetchUserGraph(userId: number): Observable<ConceptGraphDTO> {
+    return this.http.get<ConceptGraphDTO>(environment.server + `/graph/${userId}`)
   }
 
 

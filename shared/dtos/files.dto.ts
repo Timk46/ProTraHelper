@@ -1,4 +1,4 @@
-export class FileDto {
+export interface FileDto {
     id?: number;
     name: string;
     path: string;

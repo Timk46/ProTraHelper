@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
-import { ConceptNode, ConceptEdge, ConceptGraph } from '@Interfaces/index';
+import { ConceptNode, ConceptEdge, ConceptGraphDTO } from '@Interfaces/index';
 
 @Injectable()
 export class GraphService {
@@ -16,7 +16,7 @@ export class GraphService {
      * @param userId
      * @returns the concept graph
      */
-    async getConceptGraph(userId?: number): Promise<ConceptGraph> {
+    async getConceptGraph(userId?: number): Promise<ConceptGraphDTO> {
         // get graph (only one graph exists for now)
         let graph = await this.prisma.conceptGraph.findFirst({});
         // if no graph exists, create a new one with a root node
@@ -94,7 +94,7 @@ export class GraphService {
 
 
         // construct concept graph
-        const conceptGraph: ConceptGraph = {
+        const conceptGraph: ConceptGraphDTO = {
             id: graph.id,
             name: graph.name,
             trueRootId: graph.rootId,

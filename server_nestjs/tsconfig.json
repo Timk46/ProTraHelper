@@ -20,7 +20,7 @@
     "paths": {
       "@/*": ["src/*"],
       "@storage/*": ["./storage*"],
-      "@Interfaces/*": ["../client_angular/src/app/Interfaces/*"],
+      "@Interfaces/*": ["../shared/dtos/*"],
       "@DTOs/*": ["../shared/dtos/*"]
 
     }

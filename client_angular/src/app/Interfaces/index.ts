@@ -1,5 +1,2 @@
 
-export * from "./conceptNode.interface";
-export * from "./conceptGraph.interface";
-export * from "./conceptEdge.interface";
-export * from "./sprottyModels.interface";
+export * from "../Pages/graph/sprotty/sprottyModels.interface";

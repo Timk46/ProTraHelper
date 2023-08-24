@@ -1,4 +1,4 @@
-import { ConceptGraph, ConceptNode } from '@Interfaces/index';
+import { ConceptGraphDTO } from '@DTOs/conceptGraph.interface';
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { GraphService } from './graph.service';
 
@@ -12,8 +12,8 @@ export class GraphController {
      * @returns the concept graph
      */
     @Get()
-    async getConceptGraph(): Promise<ConceptGraph>{
-        const graph: ConceptGraph = await this.graphService.getConceptGraph();
+    async getConceptGraph(): Promise<ConceptGraphDTO>{
+        const graph: ConceptGraphDTO = await this.graphService.getConceptGraph();
         return graph;
     }
 
@@ -23,8 +23,8 @@ export class GraphController {
      * @returns the concept graph
      */
     @Get(':userId')
-    async getUserConceptGraph(@Param('userId', ParseIntPipe) userId: number): Promise<ConceptGraph>{
-        const graph: ConceptGraph = await this.graphService.getConceptGraph(userId);
+    async getUserConceptGraph(@Param('userId', ParseIntPipe) userId: number): Promise<ConceptGraphDTO>{
+        const graph: ConceptGraphDTO = await this.graphService.getConceptGraph(userId);
         return graph;
     }
 

@@ -1,6 +1,7 @@
 import { injectable } from 'inversify';
 import { ActionHandlerRegistry, Expandable, LocalModelSource, TYPES, VBoxLayouter } from 'sprotty';
-import { ConceptGraph, SprottyConceptNode } from '@Interfaces/index';
+import { ConceptGraphDTO } from '@DTOs/index';
+import { SprottyConceptNode } from './sprottyModels.interface'
 //import { SModelIndex } from 'sprotty-protocol/lib/utils/model-utils';
 import {
   Action, CollapseExpandAction, CollapseExpandAllAction, SCompartment, SEdge, SGraph, SLabel,
@@ -17,7 +18,7 @@ import { NoDataRowOutlet } from '@angular/cdk/table';
 export class ConceptGraphModelSource extends LocalModelSource {
 
   private changeActiveNodeService: ChangeActiveNodeService = ChangeActiveNodeService.getInstance();
-  private flatGraph: ConceptGraph = { id: 0, name: "", nodeMap: {}, edgeMap: {}, trueRootId: 0 }
+  private flatGraph: ConceptGraphDTO = { id: 0, name: "", nodeMap: {}, edgeMap: {}, trueRootId: 0 }
   graphData: GraphDataService|undefined;
   userId = 2;
 
@@ -51,7 +52,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     }
   }
 
-  public initGraph(flatGraph: ConceptGraph) {
+  public initGraph(flatGraph: ConceptGraphDTO) {
     this.flatGraph = flatGraph;
 
     const graph: SGraph = {

@@ -10,6 +10,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum GlobalRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum contentElementType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+  CODE
+  PDF
+}
+
 model User {
   id                       Int                        @id @default(autoincrement())
   email                    String                     @unique
@@ -17,7 +32,7 @@ model User {
   lastname                 String
   password                 String
   createdAt                DateTime                   @default(now())
-  roles                    Role[]
+  globalRole               GlobalRole
   modules                  Module[]
   currentConcept           ConceptNode?               @relation(fields: [currentconceptNodeId], references: [id], onDelete: SetNull) // last concept the user has visited
   currentconceptNodeId     Int?
@@ -27,12 +42,6 @@ model User {
   message                  Message[]
   submissionCode           SubmissionCode[]
   SubmissionSingleCodeFile SubmissionSingleCodeFile[]
-}
-
-model Role {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-  users User[]
 }
 
 model Module {
@@ -64,7 +73,7 @@ model Subject {
 
 // a concept graph defines the lowest level of nodes
 model ConceptGraph {
-  id     Int         @id @default(autoincrement())
+  id     Int          @id @default(autoincrement())
   name   String
   root   ConceptNode? @relation(fields: [rootId], references: [id], onDelete: Cascade)
   rootId Int?         @unique // points to parent node that contains all other nodes
@@ -110,15 +119,15 @@ model ConceptEdge {
 }
 
 model ContentNode {
-  id            Int           @id @default(autoincrement())
-  name          String        @unique
-  description   String
-  prerequisites ContentEdge[] @relation("prerequisiteContent")
-  successors    ContentEdge[] @relation("successorContent")
-  requires      Requirement[]
-  trains        Training[]
-  questions     Question[]
-  discussions   Discussion[]
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  description     String
+  prerequisites   ContentEdge[]    @relation("prerequisiteContent")
+  successors      ContentEdge[]    @relation("successorContent")
+  requires        Requirement[]
+  trains          Training[]
+  discussions     Discussion[]
+  contentElements ContentElement[]
 }
 
 model ContentEdge {
@@ -163,15 +172,32 @@ model UserConcept {
   expanded      Boolean // remembers if the concept was expanded in the concept graph
 }
 
+// for example a MC question or a video or a piece of text
+model ContentElement {
+  id            Int                @id @default(autoincrement())
+  type          contentElementType
+  position      Int // position in the content node
+  title         String?
+  text          String?
+  contentNode   ContentNode        @relation(fields: [contentNodeId], references: [id])
+  contentNodeId Int                @unique
+  file          File?              @relation(fields: [fileId], references: [id])
+  fileId        Int?               @unique
+  question      Question?          @relation(fields: [questionId], references: [id])
+  questionId    Int?               @unique
+}
+
 model File {
-  id         Int       @id @default(autoincrement())
-  name       String
-  path       String
-  type       String
-  question   Question? @relation(fields: [questionId], references: [id])
-  questionId Int?
-  MCAnswer   MCAnswer? @relation(fields: [mCAnswerId], references: [id])
-  mCAnswerId Int?
+  id               Int             @id @default(autoincrement())
+  name             String
+  path             String
+  type             String
+  question         Question?       @relation(fields: [questionId], references: [id])
+  questionId       Int?
+  MCAnswer         MCAnswer?       @relation(fields: [mCAnswerId], references: [id])
+  mCAnswerId       Int?
+  contentElement   ContentElement?
+  contentElementId Int?
 }
 
 // Feedback which the users will get after answering a question
@@ -184,24 +210,24 @@ model Feedback {
 }
 
 model Question {
-  id              Int             @id @default(autoincrement())
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  name            String
-  version         Int?
-  description     String
-  score           Int
-  type            String
-  author          User            @relation(fields: [authorId], references: [id])
-  authorId        Int
-  contentNode     ContentNode     @relation(fields: [contentNodeId], references: [id])
-  contentNodeId   Int
-  feedbacks       Feedback[]
-  files           File[]
+  id               Int             @id @default(autoincrement())
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  name             String
+  version          Int?
+  description      String
+  score            Int
+  type             String
+  author           User            @relation(fields: [authorId], references: [id])
+  authorId         Int
+  feedbacks        Feedback[]
+  files            File[]
   //toDo: Marc change for MC-Quiz
   //toDo: connect to different mediatypes Evelyn
-  codingQuestions CodingQuestion?
-  mcQuestions     MCQuestion?
+  codingQuestions  CodingQuestion?
+  mcQuestions      MCQuestion?
+  contentElement   ContentElement?
+  contentElementId Int?
 }
 
 //********************************************************************************************* Begin MC-Question
