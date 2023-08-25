@@ -1,3 +1,4 @@
+import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
 import { BehaviorSubject } from 'rxjs';
 
 export class GraphCommunicationService {
@@ -17,7 +18,7 @@ export class GraphCommunicationService {
     }
 
     // communication between graph and contentOverview
-    changeActiveNode(ActiveNode: any) {
+    changeActiveNode(ActiveNode: ConceptNodeDTO) {
         this.ActiveNode.next(ActiveNode);
     }
 }

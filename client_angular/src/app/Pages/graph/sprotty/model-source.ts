@@ -19,7 +19,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   private GraphCommunicationService: GraphCommunicationService = GraphCommunicationService.getInstance();
   private flatGraph: ConceptGraphDTO = { id: 0, name: "", nodeMap: {}, edgeMap: {}, trueRootId: 0 }
-  graphData: GraphDataService|undefined;
+  graphData: GraphDataService | undefined;
   userId = 2;
 
 
@@ -42,7 +42,13 @@ export class ConceptGraphModelSource extends LocalModelSource {
     switch (action.kind) {
       case SelectAction.KIND:
         console.log("this is the select action: ", action);
-        this.GraphCommunicationService.changeActiveNode(action); // TODO: type - communicate node info to contentOverview (so get full node info from db first?)
+        const index = new SModelIndex();
+        index.add(this.currentRoot);
+        let firstSelectedNode = index.getById((action as SelectAction).selectedElementsIDs[0]);
+        if (firstSelectedNode !== undefined && firstSelectedNode?.type.startsWith('node')) {
+          const currentActiveNode = this.flatGraph.nodeMap[(firstSelectedNode as SprottyConceptNode).databaseId];
+          this.GraphCommunicationService.changeActiveNode(currentActiveNode); // TODO: type - communicate node info to contentOverview (so get full node info from db first?)
+        }
         break;
       case CollapseExpandAction.KIND:
         this.handleCollapseExpandAction(action as CollapseExpandAction);
@@ -152,7 +158,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
         // remove children
         element.children = element.children?.filter(child => !child.type.startsWith('node'));
         element.children = element.children?.filter(child => !child.type.startsWith('edge'));
-        
+
         this.updateModel();
         this.updateExpandedState(node, false);
       }
