@@ -32,7 +32,7 @@ model User {
   lastname                 String
   password                 String
   createdAt                DateTime                   @default(now())
-  globalRole               GlobalRole
+  globalRole               GlobalRole                 @default(STUDENT)
   modules                  Module[]
   currentConcept           ConceptNode?               @relation(fields: [currentconceptNodeId], references: [id], onDelete: SetNull) // last concept the user has visited
   currentconceptNodeId     Int?
