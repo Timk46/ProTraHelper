@@ -35,14 +35,8 @@ async function main() {
     await prisma.conceptNode.deleteMany();
     await prisma.conceptGraph.deleteMany();
     await prisma.user.deleteMany();
-    await prisma.role.deleteMany();
 
     console.log("Creating everything...");
-
-
-    // Role
-    const adminRole = await prisma.role.create({ data: { name: "Admin" } });
-    const userRole = await prisma.role.create({ data: { name: "User" } });
 
     // Modules
     const module1 = await prisma.module.create({
@@ -168,12 +162,21 @@ async function main() {
 
     console.log("Concepts created.")
 
-
     // ContentNode
     const contentNode = await prisma.contentNode.create({
         data: {
             name: "Content Node 1",
             description: "Description for Content Node 1"
+        }
+    });
+
+    // ContentElements
+    const contentElement1 = await prisma.contentElement.create({
+        data: {
+            type: "TEXT",
+            position: 1,
+            text: "This is a text element.",
+            contentNode: { connect: { id: contentNode.id } }
         }
     });
 
@@ -209,7 +212,7 @@ async function main() {
             firstname: "Admin",
             lastname: "User",
             password: "admin123",
-            roles: { connect: { id: adminRole.id } },
+            globalRole: "ADMIN",
             currentConcept: { connect: { id: conceptNode.id } },
             modules: { connect: [{ id: module1.id }, { id: module2.id }]  }
         }
@@ -227,6 +230,7 @@ async function main() {
                 firstname: faker.person.firstName(),
                 lastname: faker.person.lastName(),
                 password: faker.internet.password(),
+                globalRole: "STUDENT",
                 modules: { connect: [{ id: module1.id }, { id: module2.id }] },
                 currentconceptNodeId: Math.floor(Math.random() * (conceptNodeData.length)) + 2
             }
@@ -275,7 +279,6 @@ async function main() {
             score: 10,
             type: "MC",
             author: { connect: { id: adminUser.id } },
-            contentNode: { connect: { id: contentNode.id } }
         }
     });
 
