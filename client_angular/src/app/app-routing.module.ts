@@ -10,6 +10,9 @@ import { InstructionComponent } from './Pages/content/instruction/instruction.co
 import { McQuizComponent } from './Pages/content/mcQuiz/mcQuiz.component';
 import { GraphComponent } from './Pages/graph/graph.component';
 
+// just for testing
+import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
+
 const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: 'app', component: AppComponent },
@@ -20,7 +23,10 @@ const routes: Routes = [
   { path: 'codeTask', component: CodeTaskComponent },
   { path: 'instruction/:id', component: InstructionComponent },
   { path: 'mcQuiz', component: McQuizComponent },
-  { path: 'graph', component: GraphComponent }
+  { path: 'graph', component: GraphComponent },
+
+  // just for testing
+  { path: 'file-upload', component: FileUploadComponent },
 
 ];
 

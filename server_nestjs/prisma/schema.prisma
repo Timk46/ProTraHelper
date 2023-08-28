@@ -188,10 +188,13 @@ model ContentElement {
 }
 
 model File {
-  id               Int             @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
+  uniqueIdentifier String   @unique
   name             String
   path             String
   type             String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
   question         Question?       @relation(fields: [questionId], references: [id])
   questionId       Int?
   MCAnswer         MCAnswer?       @relation(fields: [mCAnswerId], references: [id])

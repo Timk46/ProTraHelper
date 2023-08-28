@@ -286,8 +286,9 @@ async function main() {
     // Due to the length of the schema and to avoid redundancy, I will create only one entity per model here:
     await prisma.file.create({
         data: {
-            name: "Organisation & Übungsbetrieb",
-            path: "0.pdf", //just a test pdf (0.pdf) in the storage folder
+            name: "Organisation & Übungsbetrieb.pdf",
+            uniqueIdentifier: "randomString1",
+            path: "randomString1.pdf", //just a test pdf (0.pdf) in the storage folder
             type: "pdf",
             question: { connect: { id: question.id } }
         }
@@ -295,8 +296,9 @@ async function main() {
 
     await prisma.file.create({
         data: {
-            name: "Testvideo",
-            path: "11.mp4", //just a test pdf (0.pdf) in the storage folder
+            name: "Testvideo.mp4",
+            uniqueIdentifier: "randomString2",
+            path: "randomString2.mp4", //just a test pdf (0.pdf) in the storage folder
             type: "mp4",
         }
     });

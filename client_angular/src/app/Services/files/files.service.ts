@@ -1,26 +1,49 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-export class FilesService {
+export class FileService {
+  private readonly apiUrl = environment.server + '/files';
 
-  /** Base URL of the API */
-  private readonly BASE_URL: string = environment.server + '/files';
-
-  constructor(private http: HttpClient) { }
+  constructor(private httpClient: HttpClient) {}
 
   /**
-   * Retrieves a file by its name.
+   * Uploads a given file to the server.
    *
-   * @param fileId The name of the file to retrieve.
-   * @returns An observable containing the file data.
+   * @param file The file to be uploaded.
+   * @returns An Observable containing the server response.
    */
-  getFileByName(fileId: string): Observable<Blob> {
-    return this.http.get(`${this.BASE_URL}/${fileId}`, { responseType: 'blob' });
+  uploadFile(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+
+    return this.httpClient.post(`${this.apiUrl}/upload`, formData);
+  }
+
+  /**
+   * Downloads a file based on a given unique identifier.
+   *
+   * @param uniqueIdentifier The unique identifier for the file to be downloaded.
+   * @returns An Observable containing the server response, which includes the file as a Blob.
+   */
+  downloadFile(uniqueIdentifier: string): Observable<HttpResponse<Blob>> {
+    return this.httpClient.get(`${this.apiUrl}/download/${uniqueIdentifier}`, {
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
+
+  /**
+   * Retrieves the metadata for a file based on its unique identifier.
+   *
+   * @param uniqueIdentifier The unique identifier for the file.
+   * @returns An Observable containing the file metadata.
+   */
+  getFile(uniqueIdentifier: string): Observable<any> {
+    return this.httpClient.get(`${this.apiUrl}/${uniqueIdentifier}`);
   }
 }

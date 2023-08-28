@@ -2,6 +2,7 @@ import "reflect-metadata"
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { MaterialModule } from './Modules/material.module';
+import { FormsModule } from '@angular/forms';
 // Components
 import { GraphComponent } from './Pages/graph/graph.component';
 import { ContentComponent } from './Pages/content/content.component';
@@ -17,6 +18,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { HttpClient, HttpClientModule } from "@angular/common/http";
+import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 
 
 
@@ -30,10 +32,12 @@ import { HttpClient, HttpClientModule } from "@angular/common/http";
     CodeTaskComponent,
     InstructionComponent,
     McQuizComponent,
-    GraphComponent
+    GraphComponent,
+    FileUploadComponent
   ],
   imports: [
     BrowserModule,
+    FormsModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     MaterialModule,

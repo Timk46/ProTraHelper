@@ -1,0 +1,11 @@
+<div>
+  <h2>File Upload</h2>
+  <input type="file" (change)="onFileSelected($event)" />
+  <button (click)="uploadFile()">Upload</button>
+</div>
+
+<div>
+  <h2>Download File</h2>
+  <input type="text" [(ngModel)]="uniqueIdentifier" placeholder="Enter Unique Identifier" />
+  <button (click)="downloadFile()">Download</button>
+</div>

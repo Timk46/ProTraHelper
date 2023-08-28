@@ -1,57 +1,87 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { v4 as uuidv4 } from 'uuid';
 import { FileDto } from '@DTOs/index';
+import * as fs from 'fs';
 
-/**
- * A service that provides functionalities related to file operations.
- */
 @Injectable()
 export class FilesService {
-
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Stores a new file record in the database using data from the provided DTO.
+   * Upload a new file.
    *
-   * @param {FileDto} filedto - Data transfer object containing file details.
+   * @param {Buffer} fileBuffer - The file data as a Buffer
+   * @param {string} fileType - The file type (e.g., 'pdf', 'mp4', 'png', 'jpg', 'gif')
+   * @returns {Promise<FileDto>} The metadata of the uploaded file
    */
-  async saveFilePath(filedto: FileDto) {
-    return this.prisma.file.create({
+  async uploadFile(
+    fileBuffer: Buffer,
+    fileName: string,
+    fileType: string,
+  ): Promise<FileDto> {
+    const uniqueIdentifier = uuidv4();
+    const filePath = `${uniqueIdentifier}.${fileType}`;
+
+    await fs.promises.writeFile(process.env.FILE_PATH + filePath, fileBuffer);
+
+    const file = await this.prisma.file.create({
       data: {
-        name: filedto.name,
-        path: filedto.path,
-        type: filedto.type,
+        uniqueIdentifier,
+        name: fileName,
+        path: filePath,
+        type: fileType,
       },
     });
+
+    return {
+      id: file.id,
+      uniqueIdentifier: file.uniqueIdentifier,
+      name: file.name,
+      path: file.path,
+      type: file.type,
+    };
   }
 
   /**
-   * Fetches the details of a file by its ID.
+   * Download a file by its unique identifier.
    *
-   * @param {number} fileId - The unique identifier of the file.
-   * @returns {Promise<FileDto>} A promise that resolves with the file details or null if not found.
+   * @param {string} uniqueIdentifier - The unique identifier of the file
+   * @returns {StreamableFile} The StreamableFile for downloading
    */
-  async getFilePathById(fileId: number): Promise<FileDto> {
-    const file = await this.prisma.file.findUnique({
-      where: {
-        id: Number(fileId),
-      },
-    });
-    return { name: file.name, path: file.path, type: file.type };
+  async downloadFile(uniqueIdentifier: string): Promise<StreamableFile> {
+    const file: FileDto = await this.getFile(uniqueIdentifier);
+    const filePath = process.env.FILE_PATH + file.path;
+
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundException('File does not exist');
+    }
+
+    const fileStream = fs.createReadStream(filePath);
+    return new StreamableFile(fileStream);
   }
 
-    /**
-   * Fetches the details of a file by its ID.
+  /**
+   * Retrieve information about an existing file.
    *
-   * @param {number} fileId - The unique identifier of the file.
-   * @returns {Promise<FileDto>} A promise that resolves with the file details or null if not found.
+   * @param {string} uniqueIdentifier - The unique identifier of the file
+   * @returns {Promise<FileDto>} The metadata of the retrieved file
    */
-    async getFilePathByName(fileId: number): Promise<FileDto> {
-      const file = await this.prisma.file.findUnique({
-        where: {
-          id: Number(fileId),
-        },
-      });
-      return { name: file.name, path: file.path, type: file.type };
+  async getFile(uniqueIdentifier: string): Promise<FileDto> {
+    const file = await this.prisma.file.findUnique({
+      where: { uniqueIdentifier },
+    });
+
+    if (!file) {
+      throw new NotFoundException('File not found');
     }
+
+    return {
+      id: file.id,
+      uniqueIdentifier: file.uniqueIdentifier,
+      name: file.name,
+      path: file.path,
+      type: file.type,
+    };
+  }
 }

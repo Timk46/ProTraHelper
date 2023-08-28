@@ -1,35 +1,74 @@
-import { Controller, Get, Param, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Res,
+  StreamableFile,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
-import { FileDto } from '@DTOs/index';
-
 import { Response } from 'express';
-import { join } from 'path';
-
 
 @Controller('files')
 export class FilesController {
-
-  constructor(private filesService: FilesService) {}
+  constructor(private readonly filesService: FilesService) {}
 
   /**
-   * Endpoint to retrieve a file by its ID. The file path is fetched from the service,
-   * and if it exists, the file is sent in the response.
+   * Upload a new file.
    *
-   * @route GET /files/:id
+   * POST /files/upload
    *
-   * @param {number} id - The unique identifier of the file.
-   * @param {Response} res - Express response object.
-   * @returns {Response} - A response containing the file or a 404 status if the file is not found.
+   * @param {Express.Multer.File} file - The file to upload
+   * @returns {Promise<FileDto>} The metadata of the uploaded file
    */
-  @Get(':id')
-  async getFile(@Param('id') id: number, @Res() res: Response) {
-    const file: FileDto = await this.filesService.getFilePathById(id);
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    const { buffer, mimetype } = file;
+    const fileName = file.originalname;
+    const fileType = mimetype.split('/')[1];
 
-    if (!file.path) {
-      return res.status(404).send('File not found');
-    }
+    return await this.filesService.uploadFile(buffer, fileName, fileType);
+  }
 
-    const storagePath = join('dist/storage');
-    return res.sendFile(file.path, { root: storagePath });
+  /**
+   * Download an existing file by its unique identifier.
+   *
+   * GET /files/download/:uniqueIdentifier
+   *
+   * @param {string} uniqueIdentifier - The unique identifier of the file
+   * @param {Response} response - The Express response object
+   * @returns {StreamableFile} The StreamableFile for downloading
+   */
+  @Get('download/:uniqueIdentifier')
+  async downloadFile(
+    @Param('uniqueIdentifier') uniqueIdentifier: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<StreamableFile> {
+    const file = await this.filesService.getFile(uniqueIdentifier);
+
+    response.set({
+      'Content-Type': file.type,
+      'Content-Disposition': `attachment; filename=${file.name}`,
+      'X-Filename': file.name, // additional header with filename because Angular's HttpClient cant access the filename from the response while using responseType: 'blob'
+    });
+
+    return this.filesService.downloadFile(uniqueIdentifier);
+  }
+
+  /**
+   * Retrieve an existing file by its unique identifier.
+   *
+   * GET /files/:uniqueIdentifier
+   *
+   * @param {string} uniqueIdentifier - The unique identifier of the file
+   * @returns {Promise<FileDto>} The metadata of the retrieved file
+   */
+  @Get(':uniqueIdentifier')
+  async getFile(@Param('uniqueIdentifier') uniqueIdentifier: string) {
+    return await this.filesService.getFile(uniqueIdentifier);
   }
 }
