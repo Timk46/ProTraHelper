@@ -1,4 +1,4 @@
-import { IButtonHandler, MouseListener, SButton, findParentByFeature, isExpandable } from "sprotty";
+import { IButtonHandler, MouseListener, findParentByFeature, isExpandable } from "sprotty";
 import { Action, CollapseExpandAction, SModelElement, Point } from 'sprotty-protocol';
 import { injectable, inject } from 'inversify';
 import { expand } from "rxjs";

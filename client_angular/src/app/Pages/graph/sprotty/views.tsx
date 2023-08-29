@@ -3,14 +3,15 @@ import { svg } from 'sprotty/lib/lib/jsx';
 import { injectable } from 'inversify';
 import { VNode } from 'snabbdom';
 import {
-    IView, RectangularNodeView, RenderingContext, SButton, SLabel,
-    SLabelView, SNode, SPort, ShapeView, findParentByFeature, isExpandable, setAttr
+    IView, RectangularNodeView, RenderingContext, SButtonImpl, SLabel,
+    SLabelImpl,
+    SLabelView, SNodeImpl, SPortImpl, ShapeView, findParentByFeature, isExpandable, setAttr
 } from 'sprotty';
 import { SprottyConceptNode } from "./sprottyModels.interface";
 
 @injectable()
 export class ConceptNodeView extends RectangularNodeView {
-    override render(node: Readonly<SNode & SprottyConceptNode>, context: RenderingContext): VNode {
+    override render(node: Readonly<SNodeImpl & SprottyConceptNode>, context: RenderingContext): VNode {
 
         let petals = [];
         const level = node.level || 0;
@@ -65,7 +66,7 @@ export class ConceptNodeView extends RectangularNodeView {
 
 @injectable()
 export class HeaderLabelView extends SLabelView {
-    override render(label: Readonly<SLabel>, context: RenderingContext): VNode {
+    override render(label: Readonly<SLabelImpl>, context: RenderingContext): VNode {
         const vnode = <text x={10} y={30}>{label.text}</text>
         return vnode;
     }
@@ -73,7 +74,7 @@ export class HeaderLabelView extends SLabelView {
 
 @injectable()
 export class TextLabelView extends SLabelView {
-    override render(label: Readonly<SLabel>, context: RenderingContext): VNode {
+    override render(label: Readonly<SLabelImpl>, context: RenderingContext): VNode {
         const vnode = <text x={0} y={0} height={30}>{label.text}</text>
         return vnode;
     }
@@ -81,7 +82,7 @@ export class TextLabelView extends SLabelView {
 
 @injectable()
 export class CustomCollapseExpandView implements IView {
-    render(button: SButton, context: RenderingContext): VNode {
+    render(button: SButtonImpl, context: RenderingContext): VNode {
         const expandable = findParentByFeature(button, isExpandable);
         const buttonText = (expandable !== undefined && expandable.expanded)
             ? 'Collapse Node'
@@ -100,7 +101,7 @@ export class CustomCollapseExpandView implements IView {
 
 @injectable()
 export class PortViewWithExternalLabel extends ShapeView {
-    render(node: Readonly<SPort>, context: RenderingContext): VNode | undefined {
+    render(node: Readonly<SPortImpl>, context: RenderingContext): VNode | undefined {
         if (!this.isVisible(node, context)) {
             return undefined;
         }
