@@ -5,9 +5,9 @@ import { AppComponent } from './app.component';
 import { DashboardComponent } from './Pages/dashboard/dashboard.component';
 import { ConceptOverviewComponent } from './Pages/conceptOverview/conceptOverview.component';
 import { DiscussionComponent } from './Pages/discussion/discussion.component';
-import { CodeTaskComponent } from './Pages/contentBoard/codeTask/codeTask.component';
-import { PdfViewerComponent } from './Pages/contentBoard/pdfViewer/pdfViewer.component';
-import { McQuizComponent } from './Pages/contentBoard/mcQuiz/mcQuiz.component';
+import { CodeTaskComponent } from './Pages/contentView/contentElement/codeTask/codeTask.component';
+import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer/pdfViewer.component';
+import { McQuizComponent } from './Pages/contentView/contentElement/mcQuiz/mcQuiz.component';
 import { GraphComponent } from './Pages/graph/graph.component';
 
 // just for testing

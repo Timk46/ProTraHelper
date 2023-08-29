@@ -9,9 +9,9 @@ import { ContentBoardComponent } from './Pages/contentBoard/contentBoard.compone
 import { DashboardComponent } from './Pages/dashboard/dashboard.component';
 import { ConceptOverviewComponent } from './Pages/conceptOverview/conceptOverview.component';
 import { DiscussionComponent } from './Pages/discussion/discussion.component';
-import { CodeTaskComponent } from './Pages/contentBoard/codeTask/codeTask.component';
-import { PdfViewerComponent } from './Pages/contentBoard/pdfViewer/pdfViewer.component';
-import { McQuizComponent } from './Pages/contentBoard/mcQuiz/mcQuiz.component';
+import { CodeTaskComponent } from './Pages/contentView/contentElement/codeTask/codeTask.component';
+import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer/pdfViewer.component';
+import { McQuizComponent } from './Pages/contentView/contentElement/mcQuiz/mcQuiz.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -19,6 +19,7 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { HttpClient, HttpClientModule } from "@angular/common/http";
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
+import { ContentViewComponent } from './Pages/contentView/contentView.component';
 
 
 
@@ -33,7 +34,8 @@ import { FileUploadComponent } from './Pages/test/file-upload/file-upload.compon
     PdfViewerComponent,
     McQuizComponent,
     GraphComponent,
-    FileUploadComponent
+    FileUploadComponent,
+    ContentViewComponent
   ],
   imports: [
     BrowserModule,

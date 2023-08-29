@@ -4,7 +4,20 @@ import { BehaviorSubject } from 'rxjs';
 export class GraphCommunicationService {
     private static instance: GraphCommunicationService;
 
-    private ActiveNode = new BehaviorSubject<any>(null);
+    // init with dummy node
+    dummyNode: ConceptNodeDTO = {
+        databaseId: 0,
+        name: 'dummy',
+        level: 0,
+        expanded: false,
+        parentIds: [],
+        childIds: [],
+        prerequisiteEdgeIds: [],
+        successorEdgeIds: [],
+        edgeChildIds: [],
+    };
+
+    private ActiveNode = new BehaviorSubject<ConceptNodeDTO>(this.dummyNode);
     currentActiveNode = this.ActiveNode.asObservable();
 
     private constructor() {}

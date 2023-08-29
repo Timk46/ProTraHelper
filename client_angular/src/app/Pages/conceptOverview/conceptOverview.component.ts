@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { GraphCommunicationService } from 'src/app/Services/graphCommunication.service';
 import { MatTabsModule } from '@angular/material/tabs';
+import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
 
 @Component({
   selector: 'app-conceptOverview',
@@ -15,7 +16,18 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
 
   activeNodeTestDisplay: String = ''; // for testing only
 
-  activeNode: any = {}; // TODO: type
+  // init with dummy node
+  activeNode: ConceptNodeDTO = {
+    databaseId: 0,
+    name: 'dummy',
+    level: 0,
+    expanded: false,
+    parentIds: [],
+    childIds: [],
+    prerequisiteEdgeIds: [],
+    successorEdgeIds: [],
+    edgeChildIds: [],
+  };
 
   constructor() {
     this.activeNodeSubscription = this.graphCommunicationService.currentActiveNode.subscribe((ActiveNode) => {
