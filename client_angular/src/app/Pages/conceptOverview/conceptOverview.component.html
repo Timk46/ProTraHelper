@@ -1,12 +1,12 @@
 
 <div *ngIf="activeNode !== null" class =" content mat-elevation-z8">
-<h1>Content-Overview</h1>
+<h1>Concept Overview</h1>
 
 active Node: {{activeNodeTestDisplay}}
 
 <mat-tab-group animationDuration="0ms">
   <mat-tab label="Content">
-    <app-content [activeNode]="activeNode"></app-content> <!--Communication to Child-Component-->
+    <app-contentBoard [activeNode]="activeNode"></app-contentBoard> <!--Communication to Child-Component-->
   </mat-tab>
 
   <mat-tab label="Aufgaben">

@@ -5,12 +5,12 @@ import { NgxExtendedPdfViewerService, pdfDefaultOptions } from 'ngx-extended-pdf
 import { FileService } from 'src/app/Services/files/files.service';
 
 @Component({
-  selector: 'app-instruction',
-  templateUrl: './instruction.component.html',
-  styleUrls: ['./instruction.component.css'],
+  selector: 'app-pdfViewer',
+  templateUrl: './pdfViewer.component.html',
+  styleUrls: ['./pdfViewer.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InstructionComponent implements OnInit {
+export class PdfViewerComponent implements OnInit {
 
   uniqueIdentifier: String;
 

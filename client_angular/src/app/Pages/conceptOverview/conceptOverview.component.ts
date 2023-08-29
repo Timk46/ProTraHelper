@@ -4,11 +4,11 @@ import { GraphCommunicationService } from 'src/app/Services/graphCommunication.s
 import { MatTabsModule } from '@angular/material/tabs';
 
 @Component({
-  selector: 'app-contentOverview',
-  templateUrl: './contentOverview.component.html',
-  styleUrls: ['./contentOverview.component.css'],
+  selector: 'app-conceptOverview',
+  templateUrl: './conceptOverview.component.html',
+  styleUrls: ['./conceptOverview.component.css'],
 })
-export class ContentOverviewComponent implements OnInit, OnDestroy {
+export class ConceptOverviewComponent implements OnInit, OnDestroy {
   private graphCommunicationService: GraphCommunicationService = GraphCommunicationService.getInstance();
 
   private activeNodeSubscription: Subscription;
