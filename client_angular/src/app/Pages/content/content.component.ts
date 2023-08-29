@@ -18,7 +18,7 @@ export class ContentComponent implements OnInit {
 
   onCardClick(id: number) {
     console.log(`Card with ID ${id} clicked.`);
-    this.router.navigate(['/instruction', id]);
+    this.router.navigate(['/instruction', 'randomString1']); // this is just a static placeholder -> from here we need to navigate to the content view
   }
 
 }

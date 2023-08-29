@@ -30,7 +30,7 @@ export class FileService {
    * @param uniqueIdentifier The unique identifier for the file to be downloaded.
    * @returns An Observable containing the server response, which includes the file as a Blob.
    */
-  downloadFile(uniqueIdentifier: string): Observable<HttpResponse<Blob>> {
+  downloadFile(uniqueIdentifier: String): Observable<HttpResponse<Blob>> {
     return this.httpClient.get(`${this.apiUrl}/download/${uniqueIdentifier}`, {
       responseType: 'blob',
       observe: 'response',

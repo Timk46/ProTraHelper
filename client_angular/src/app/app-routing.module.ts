@@ -21,7 +21,7 @@ const routes: Routes = [
   { path: 'contentOverview', component: ContentOverviewComponent },
   { path: 'discussion', component: DiscussionComponent },
   { path: 'codeTask', component: CodeTaskComponent },
-  { path: 'instruction/:id', component: InstructionComponent },
+  { path: 'instruction/:uniqueIdentifier', component: InstructionComponent },
   { path: 'mcQuiz', component: McQuizComponent },
   { path: 'graph', component: GraphComponent },
 

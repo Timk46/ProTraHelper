@@ -2,6 +2,8 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NgxExtendedPdfViewerService, pdfDefaultOptions } from 'ngx-extended-pdf-viewer';
 
+import { FileService } from 'src/app/Services/files/files.service';
+
 @Component({
   selector: 'app-instruction',
   templateUrl: './instruction.component.html',
@@ -10,7 +12,7 @@ import { NgxExtendedPdfViewerService, pdfDefaultOptions } from 'ngx-extended-pdf
 })
 export class InstructionComponent implements OnInit {
 
-  instructionId: number;
+  uniqueIdentifier: String;
 
   pdfSrc = "https://vadimdez.github.io/ng2-pdf-viewer/assets/pdf-test.pdf";
 
@@ -18,7 +20,7 @@ export class InstructionComponent implements OnInit {
    *  to use the "find" api, to extract text and images from a PDF file,
    *  to print programmatically, and to show or hide layers by a method call.
   */
-  constructor(private pdfService: NgxExtendedPdfViewerService, private route: ActivatedRoute) {
+  constructor(private pdfService: NgxExtendedPdfViewerService, private route: ActivatedRoute, private fileService: FileService) {
     /* More likely than not you don't need to tweak the pdfDefaultOptions.
        They are a collecton of less frequently used options.
        To illustrate how they're used, here are two example settings: */
@@ -27,14 +29,28 @@ export class InstructionComponent implements OnInit {
     // but most devices support much higher resolutions.
     // Increasing this setting allows your users to use higher zoom factors,
     // trading image quality for performance.
-    this.instructionId = this.route.snapshot.params['id'];
-    console.log("instructionId: " + this.instructionId );
 
-    this.pdfSrc = "assets/pdf_testing_needsToBeAccesedByNestjs/" + this.instructionId%5 + ".pdf";
-
+    this.uniqueIdentifier = this.route.snapshot.params['uniqueIdentifier'];
+    if (this.uniqueIdentifier != null) {
+      console.log('uniqueIdentifier: ' + this.uniqueIdentifier);
+      this.pdfFromUniqueIdentifier(this.uniqueIdentifier);
     }
+  }
 
   ngOnInit() {
   }
 
+  // just a demo how to connect pdf to the file service: http://localhost:4200/instruction/randomString1 (loads pdf from server_nestjs\src\storage\randomString1.pdf)
+  pdfFromUniqueIdentifier(uniqueIdentifier: String){
+    this.fileService.downloadFile(uniqueIdentifier).subscribe(response => {
+      const blob = response.body;
+
+      if (blob !== null) {
+        const url = URL.createObjectURL(blob);
+        this.pdfSrc = url;
+      } else {
+        console.error("no file found");
+      }
+    });
+  }
 }
