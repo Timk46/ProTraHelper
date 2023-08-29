@@ -20,9 +20,11 @@ export class ConceptNodeView extends RectangularNodeView {
             // Generate normal petals based on node.level
             const levelPetals = Array.from({ length: level }).map((_, index) =>
                 <path
-                    className="petal"
-                    transform={`translate(${10 + (index * 10)},30) rotate(270)`}
-                    d="m1,2 c0,-8 19,-7 32,-4 c13,3 12,4 1,7 c-11,3 -33,4 -33,-4z"
+                    className="sprotty-star"
+                    // transform={`translate(${10 + (index * 10)},30) rotate(270)`}
+                    // d="m1,2 c0,-8 19,-7 32,-4 c13,3 12,4 1,7 c-11,3 -33,4 -33,-4z"
+                    transform={`translate(${2 + (index * 12)},-11) scale(0.07)`}
+                    d="m83.66,5.71l12.23,37.64c1.11,3.4,4.28,5.71,7.86,5.71h39.58c8,0,11.33,10.24,4.86,14.95l-32.02,23.26c-2.9,2.1-4.11,5.83-3,9.24l12.23,37.64c2.47,7.61-6.24,13.94-12.72,9.24l-32.02-23.26c-2.9-2.1-6.82-2.1-9.71,0l-32.02,23.26c-6.48,4.71-15.19-1.63-12.72-9.24l12.23-37.64c1.11-3.4-.11-7.13-3-9.24L3.42,64.01c-6.48-4.71-3.15-14.95,4.86-14.95h39.58c3.58,0,6.75-2.31,7.86-5.71l12.23-37.64c2.47-7.61,13.24-7.61,15.72,0Z"
                 />
             );
             petals.push(...levelPetals);
@@ -32,16 +34,19 @@ export class ConceptNodeView extends RectangularNodeView {
             // Generate greyed out petals based on the difference between node.levelGoal and node.level
             const levelGoalPetals = Array.from({ length: node.levelGoal - level }).map((_, index) =>
                 <path
-                    class={{ "grey-petal": true }}  // Assuming you've styled greyed-out petals in CSS
-                    transform={`translate(${10 + ((level + index) * 10)},33) rotate(270)`}
-                    d="m1,2 c0,-8 19,-7 32,-4 c13,3 12,4 1,7 c-11,3 -33,4 -33,-4z"
+                    class={{ "sprotty-grey-star": true }}  // Assuming you've styled greyed-out petals in CSS
+                    // transform={`translate(${10 + ((level + index) * 10)},33) rotate(270)`}
+                    // d="m1,2 c0,-8 19,-7 32,-4 c13,3 12,4 1,7 c-11,3 -33,4 -33,-4z"
+                    transform={`translate(${2 + ((level+ index) * 12)},-11) scale(0.07)`}
+                    d="m83.66,5.71l12.23,37.64c1.11,3.4,4.28,5.71,7.86,5.71h39.58c8,0,11.33,10.24,4.86,14.95l-32.02,23.26c-2.9,2.1-4.11,5.83-3,9.24l12.23,37.64c2.47,7.61-6.24,13.94-12.72,9.24l-32.02-23.26c-2.9-2.1-6.82-2.1-9.71,0l-32.02,23.26c-6.48,4.71-15.19-1.63-12.72-9.24l12.23-37.64c1.11-3.4-.11-7.13-3-9.24L3.42,64.01c-6.48-4.71-3.15-14.95,4.86-14.95h39.58c3.58,0,6.75-2.31,7.86-5.71l12.23-37.64c2.47-7.61,13.24-7.61,15.72,0Z"
+                
                 />
             );
             petals.push(...levelGoalPetals);
         }
 
         return <g>
-            <g class-flower="true">
+            <g class-sprotty-star="true">
                 {petals}  {/* Render the petals here */}
             </g>
 

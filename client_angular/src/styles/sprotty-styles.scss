@@ -1,7 +1,7 @@
 // sprotty styles
 .sprotty-graph {
     width: 100%;
-    height: 700px;
+    height: 380px;
     font-size: 15pt;
 }
 .sprotty-edge {
@@ -78,12 +78,52 @@
     margin-bottom: 2px;
 }
 
-.flower {
-    fill: #0f3c64;
+.sprotty-star {
+    fill: #f1cd00;
     stroke: #000;
+    stroke-width: 11;
   }
 
-.grey-petal {
+.sprotty-grey-star {
     fill: #0f3c6462;
     stroke: #00000000;
   }
+
+
+.class-context-menu {
+    background-color: #dee2e6;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    border: 1px solid #adb5bd;
+    border-radius: 3px;
+    padding: 1px;
+    color:#000
+}
+
+.class-context-menu-item {
+    background-color: #dee2e6;
+    padding: 2px;
+    padding-left: 15px;
+    padding-right: 15px;
+    min-width: 100px;
+    font-family: sans-serif;
+    cursor: default;
+}
+
+.class-context-menu-item.disabled-action {
+    color: darkgray;
+}
+
+.class-context-menu-item:empty {
+    padding: 0px;
+    border-bottom: 1.5px solid #adb5bd;
+    margin-left: 15px;
+    margin-right: 15px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.class-context-menu-item:hover:not(.disabled-action) {
+    color: green;
+}
