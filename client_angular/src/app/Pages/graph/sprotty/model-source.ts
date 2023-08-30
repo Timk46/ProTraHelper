@@ -39,6 +39,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   override handle(action: Action) {
+    console.log("action: ", action)
     switch (action.kind) {
       case SelectAction.KIND:
         console.log("this is the select action: ", action);

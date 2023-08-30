@@ -1,8 +1,9 @@
 import { Container, ContainerModule } from 'inversify';
 import { configureModelElement, configureViewerOptions, loadDefaultModules, LocalModelSource, 
-    PolylineEdgeView, SCompartmentView, SCompartment, SEdge, SGraph, SGraphView, SLabel, SLabelView, 
-    SNode, TYPES, RectangularNode, expandFeature, nameFeature, SButton, ExpandButtonView, 
-    configureButtonHandler, SRoutingHandle, SRoutingHandleView, SModelElement, SPort } from 'sprotty';
+    PolylineEdgeView, SCompartmentView, SCompartmentImpl, SEdgeImpl, SGraphImpl, SGraphView, SLabelImpl, SLabelView, 
+    SNodeImpl, TYPES, RectangularNode, expandFeature, nameFeature, SButtonImpl, ExpandButtonView, 
+    configureButtonHandler, SRoutingHandleImpl, SRoutingHandleView, SModelElementImpl, SPortImpl, ConsoleLogger, 
+    LogLevel, IContextMenuServiceProvider, contextMenuModule, ContextMenuProviderRegistry } from 'sprotty';
 import { ConceptNodeView, CustomCollapseExpandView, HeaderLabelView, PortViewWithExternalLabel, TextLabelView} from './views';
 import { ConceptGraphModelSource } from './model-source';
 import ElkConstructor, { LayoutOptions } from 'elkjs';
@@ -11,6 +12,8 @@ import {
 } from 'sprotty-elk/lib/inversify';
 import { SGraph as SGraphP, SModelIndex, SNode as SNodeP, Point} from 'sprotty-protocol';
 import { CustomMouseListener } from './mouse-interactions';
+import { PopupModelProvider } from './popup';
+import { ClassContextMenuItemProvider, ClassContextMenuService } from './context-menu';
 
 
 
@@ -23,13 +26,23 @@ export default (containerId: string) => {
     
     const myModule = new ContainerModule((bind, unbind, isBound, rebind) => {
         bind(TYPES.ModelSource).to(ConceptGraphModelSource).inSingletonScope();
+        rebind(TYPES.ILogger).to(ConsoleLogger).inSingletonScope();
+        rebind(TYPES.LogLevel).toConstantValue(LogLevel.log);
         bind(TYPES.IModelLayoutEngine).toService(ElkLayoutEngine);
         bind(ElkFactory).toConstantValue(elkFactory);
         rebind(ILayoutConfigurator).to(RandomGraphLayoutConfigurator);
 
+        //popup
+        //bind(TYPES.IPopupModelProvider).to(PopupModelProvider);
+
+        // context menu
+        bind(TYPES.IContextMenuService).to(ClassContextMenuService);
+        bind(TYPES.IContextMenuItemProvider).to(ClassContextMenuItemProvider);
+
         //double click
         bind(CustomMouseListener).toSelf().inSingletonScope();
         bind(TYPES.MouseListener).toService(CustomMouseListener);
+
 
         //drag and drop
         //bind(NodeCreator).toConstantValue(nodeCreator);
@@ -37,13 +50,13 @@ export default (containerId: string) => {
         // bind(TYPES.MouseListener).toService(DroppableMouseListener);
 
         const context = { bind, unbind, isBound, rebind };
-        configureModelElement(context, 'graph', SGraph, SGraphView);
+        configureModelElement(context, 'graph', SGraphImpl, SGraphView);
         configureModelElement(context, 'node:concept', RectangularNode, ConceptNodeView,{
             enable: [expandFeature]
         });
-        configureModelElement(context, 'edge', SEdge, PolylineEdgeView);
-        configureModelElement(context, 'label:heading', SLabel, SLabelView)
-        configureModelElement(context, 'label:text', SLabel, SLabelView)
+        configureModelElement(context, 'edge', SEdgeImpl, PolylineEdgeView);
+        configureModelElement(context, 'label:heading', SLabelImpl, SLabelView)
+        configureModelElement(context, 'label:text', SLabelImpl, SLabelView)
         //configureModelElement(context, 'comp:comp', SCompartment, SCompartmentView)
         
         //collapse expand button
