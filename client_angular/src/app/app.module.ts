@@ -15,11 +15,11 @@ import { McQuizComponent } from './Pages/contentView/contentElement/mcQuiz/mcQui
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { HttpClient, HttpClientModule } from "@angular/common/http";
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 import { ContentViewComponent } from './Pages/contentView/contentView.component';
+import { VideoViewerComponent } from './Pages/contentView/contentElement/videoViewer/videoViewer.component';
 
 
 
@@ -35,7 +35,8 @@ import { ContentViewComponent } from './Pages/contentView/contentView.component'
     McQuizComponent,
     GraphComponent,
     FileUploadComponent,
-    ContentViewComponent
+    ContentViewComponent,
+    VideoViewerComponent
   ],
   imports: [
     BrowserModule,
@@ -43,7 +44,6 @@ import { ContentViewComponent } from './Pages/contentView/contentView.component'
     AppRoutingModule,
     BrowserAnimationsModule,
     MaterialModule,
-    PdfViewerModule,
     NgxExtendedPdfViewerModule,
     HttpClientModule
   ],

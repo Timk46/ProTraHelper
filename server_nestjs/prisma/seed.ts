@@ -280,6 +280,7 @@ async function main() {
     data: {
       type: 'TEXT',
       position: 7,
+      title: 'Titel für contentElement 1',
       text: 'This is a text element.',
       contentNode: { connect: { id: contentNode.id } },
     },
@@ -288,6 +289,7 @@ async function main() {
   const contentElement2 = await prisma.contentElement.create({
     data: {
       type: 'PDF',
+      title: 'Titel für contentElement 2',
       position: 2,
       contentNode: { connect: { id: contentNode.id } },
     },
@@ -296,6 +298,7 @@ async function main() {
   const contentElement3 = await prisma.contentElement.create({
     data: {
       type: 'PDF',
+      title: 'Titel für contentElement 3',
       position: 1,
       contentNode: { connect: { id: contentNode.id } },
     },
@@ -304,6 +307,7 @@ async function main() {
   const contentElement4 = await prisma.contentElement.create({
     data: {
       type: 'VIDEO',
+      title: 'Titel für contentElement 4',
       position: 12,
       contentNode: { connect: { id: contentNode.id } },
     },
