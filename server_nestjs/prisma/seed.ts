@@ -237,15 +237,41 @@ async function main() {
   // ContentNode
   const contentNode = await prisma.contentNode.create({
     data: {
-      name: 'ContentNode für Arrays',
-      description: 'Arrays blabla',
+      id: 1,
+      name: '1 ContentNode für Arrays',
+      description: 'Description for Content Node 1',
     },
   });
 
   const contentNode2 = await prisma.contentNode.create({
     data: {
-      name: 'Content Node 2',
+      id: 2,
+      name: '2 ContentNode für Arrays',
       description: 'Description for Content Node 2',
+    },
+  });
+
+  const contentNode3 = await prisma.contentNode.create({
+    data: {
+      id: 3,
+      name: '3 ContentNode für Arrays',
+      description: 'Description for Content Node 3',
+    },
+  });
+
+  const contentNode4 = await prisma.contentNode.create({
+    data: {
+      id: 4,
+      name: '4 ContentNode für Arrays',
+      description: 'Description for Content Node 4',
+    },
+  });
+
+  const contentNode5 = await prisma.contentNode.create({
+    data: {
+      id: 5,
+      name: '5 ContentNode für Arrays',
+      description: 'Description for Content Node 5',
     },
   });
 
@@ -253,9 +279,9 @@ async function main() {
   const contentElement1 = await prisma.contentElement.create({
     data: {
       type: 'TEXT',
-      position: 1,
+      position: 7,
       text: 'This is a text element.',
-      contentNode: { connect: { id: contentNode2.id } },
+      contentNode: { connect: { id: contentNode.id } },
     },
   });
 
@@ -263,6 +289,22 @@ async function main() {
     data: {
       type: 'PDF',
       position: 2,
+      contentNode: { connect: { id: contentNode.id } },
+    },
+  });
+
+  const contentElement3 = await prisma.contentElement.create({
+    data: {
+      type: 'PDF',
+      position: 1,
+      contentNode: { connect: { id: contentNode.id } },
+    },
+  });
+
+  const contentElement4 = await prisma.contentElement.create({
+    data: {
+      type: 'VIDEO',
+      position: 12,
       contentNode: { connect: { id: contentNode.id } },
     },
   });
@@ -279,7 +321,40 @@ async function main() {
   await prisma.requirement.create({
     data: {
       contentNode: { connect: { id: contentNode.id } },
-      conceptNode: { connect: { id: 14 } }, // arrays
+      conceptNode: { connect: { id: 14 } }, // concept for arrays - concept node ids are static currently in seed.ts
+    },
+  });
+  await prisma.training.create({
+    data: {
+      contentNode: { connect: { id: contentNode.id } },
+      conceptNode: { connect: { id: 14 } }, // concept for arrays - concept node ids are static currently in seed.ts
+    },
+  });
+  await prisma.training.create({
+    data: {
+      contentNode: { connect: { id: contentNode2.id } },
+      conceptNode: { connect: { id: 14 } }, // concept for arrays - concept node ids are static currently in seed.ts
+    },
+  });
+
+  await prisma.training.create({
+    data: {
+      contentNode: { connect: { id: contentNode3.id } },
+      conceptNode: { connect: { id: 14 } }, // concept for arrays - concept node ids are static currently in seed.ts
+    },
+  });
+
+  await prisma.training.create({
+    data: {
+      contentNode: { connect: { id: contentNode4.id } },
+      conceptNode: { connect: { id: 14 } }, // concept for arrays - concept node ids are static currently in seed.ts
+    },
+  });
+
+  await prisma.training.create({
+    data: {
+      contentNode: { connect: { id: contentNode5.id } },
+      conceptNode: { connect: { id: 14 } }, // concept for arrays - concept node ids are static currently in seed.ts
     },
   });
 
@@ -386,9 +461,9 @@ async function main() {
     data: {
       name: 'Organisation & Übungsbetrieb.pdf',
       uniqueIdentifier: 'randomString1',
-      path: 'randomString1.pdf', //just a test pdf (0.pdf) in the storage folder
+      path: 'randomString1.pdf', //just a test pdf in the storage folder
       type: 'pdf',
-      contentElement: { connect: { id: contentElement1.id } },
+      contentElement: { connect: { id: contentElement2.id } },
     },
   });
 
@@ -396,9 +471,19 @@ async function main() {
     data: {
       name: 'Java_Datenstrukturen_Array.pdf',
       uniqueIdentifier: 'randomString3',
-      path: 'randomString3.pdf', //just a test pdf (0.pdf) in the storage folder
+      path: 'randomString3.pdf', //just a test pdf in the storage folder
       type: 'pdf',
-      contentElement: { connect: { id: contentElement2.id } },
+      contentElement: { connect: { id: contentElement3.id } },
+    },
+  });
+
+  await prisma.file.create({
+    data: {
+      name: 'Python_Kontrollstrukturen_for.mp4',
+      uniqueIdentifier: 'randomString4',
+      path: 'randomString4.mp4', //just a test mp4 in the storage folder
+      type: 'mp4',
+      contentElement: { connect: { id: contentElement4.id } },
     },
   });
 

@@ -1,5 +1,8 @@
+import { ContentDTO, ContentsForConceptDTO } from '@DTOs/content.dto';
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { ContentViewComponent } from '../contentView/contentView.component';
 
 @Component({
   selector: 'app-contentBoard',
@@ -8,17 +11,27 @@ import { Router } from '@angular/router';
 })
 export class ContentBoardComponent implements OnInit {
 
-  @Input() activeNode: any = {}; // ToDo: This should be the node with all needed information (placeholder since we dont have testdata yet)
-  cards = Array.from({ length: 15 }, (_, i) => ({ id: i + 1 }));
+  @Input() contentsForActiveConceptNode: ContentsForConceptDTO = {
+    trainedBy: [],
+    requiredBy: [],
+  };
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, public dialog: MatDialog) { }
 
   ngOnInit() {
   }
 
-  onCardClick(id: number) {
-    console.log(`Card with ID ${id} clicked.`);
-    this.router.navigate(['/pdfViewer', 'randomString1']); // this is just a static placeholder -> from here we need to navigate to the content view
+  onContentClick(content: ContentDTO) {
+    // Dialog-Konfiguration erstellen
+    const dialogConfig = new MatDialogConfig();
+
+    // Übergeben der Daten an den Dialog
+    dialogConfig.data = {
+      contentViewData: content
+    };
+
+    // Dialog öffnen
+    this.dialog.open(ContentViewComponent, dialogConfig);
   }
 
 }

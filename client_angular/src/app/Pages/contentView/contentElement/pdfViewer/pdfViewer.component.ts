@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NgxExtendedPdfViewerService, pdfDefaultOptions } from 'ngx-extended-pdf-viewer';
+import { ContentsForConceptDTO } from '@DTOs/content.dto';
 
 import { FileService } from 'src/app/Services/files/files.service';
 

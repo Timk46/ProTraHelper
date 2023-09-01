@@ -10,8 +10,8 @@ export interface ContentDTO {
     contentPrerequisiteIds?: number[];
     contentSuccessorIds?: number[];
 
-    requiresConcepts: number[];
-    trainsConcepts: number[];
+    requiresConceptIds: number[];
+    trainsConceptIds: number[];
 
     //discussion: Discussion // TODO: implement
 }
@@ -24,4 +24,9 @@ export interface ContentElementDTO {
     text?: string;
     file?: File;
     question?: QuestionDTO;
+}
+
+export interface ContentsForConceptDTO {
+    trainedBy: ContentDTO[];
+    requiredBy: ContentDTO[];
 }

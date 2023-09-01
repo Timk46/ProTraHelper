@@ -1,3 +1,9 @@
-<p>
-  contentView works!
-</p>
+<h1>Content View for ContentNode: Id: {{ contentViewData.contentNodeId}}</h1>
+
+Just the stringyfied ContentElementDTOs fow now. We import our components for pdf/mp4 etc. depending on file type later.
+<h2>Content Elements:</h2>
+<ul>
+<li *ngFor="let contentElem of contentViewData.contentElements">
+  {{tempForTest(contentElem)}}
+</li>
+</ul>

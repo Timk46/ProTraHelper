@@ -179,8 +179,8 @@ model ContentElement {
   position      Int // position in the content node
   title         String?
   text          String?
-  contentNode   ContentNode        @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
-  contentNodeId Int                @unique
+  contentNode   ContentNode  @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
+  contentNodeId Int
   file          File?              @relation(fields: [fileId], references: [id])
   fileId        Int?               @unique
   question      Question?          @relation(fields: [questionId], references: [id])

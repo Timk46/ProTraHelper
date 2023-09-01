@@ -1,3 +1,4 @@
+import { ContentModule } from './content/content.module';
 import { FilesModule } from './files/files.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -6,7 +7,7 @@ import { GraphModule } from './graph/graph.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
-  imports: [FilesModule, GraphModule, PrismaModule],
+  imports: [FilesModule, GraphModule, PrismaModule, ContentModule],
   controllers: [AppController],
   providers: [AppService],
 })
