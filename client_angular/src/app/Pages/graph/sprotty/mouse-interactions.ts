@@ -1,4 +1,4 @@
-import { ContextMenuMouseListener, IActionDispatcher, IButtonHandler, IContextMenuService, IContextMenuServiceProvider, 
+import { ContextMenuMouseListener, ContextMenuProviderRegistry, IActionDispatcher, IButtonHandler, IContextMenuService, IContextMenuServiceProvider, 
     MouseListener, SModelElementImpl, TYPES, findParentByFeature, isExpandable, isSelectable, 
     isSelected } from "sprotty";
 import { Action, CollapseExpandAction, SModelElement, Point, SelectAction } from 'sprotty-protocol';
@@ -12,12 +12,15 @@ import { PermissionService } from "./permissionService";
 export const NodeCreator = Symbol('NodeCreator');
 
 export class CustomMouseListener extends MouseListener {
-    // @inject(TYPES.IActionDispatcher) protected actionDispatcher!: IActionDispatcher;
+    @inject(TYPES.IActionDispatcher) protected actionDispatcher!: IActionDispatcher;
     
-    // constructor(@inject(TYPES.IContextMenuServiceProvider) protected readonly contextMenuService: IContextMenuServiceProvider,
-    // private permissionService: PermissionService){
-    //     super();
-    // }
+    constructor(
+        @inject(TYPES.IContextMenuServiceProvider) protected readonly contextMenuService: IContextMenuServiceProvider,
+    @inject(TYPES.IContextMenuProviderRegistry) protected readonly menuProvider: ContextMenuProviderRegistry,
+    //private permissionService: PermissionService
+    ){
+        super();
+    }
 
     override doubleClick(target: SModelElement, event: MouseEvent): (Action | Promise<Action>)[] {
         console.log('double clicked ' + target.id, target)
@@ -35,54 +38,20 @@ export class CustomMouseListener extends MouseListener {
         }
     }
 
-    // override contextMenu(target: SModelElementImpl, event: MouseEvent): (Action | Promise<Action>)[] {
-    //     console.log('context menu ' + target.id, target)
-    //     super.contextMenu(target, event);
-    //     //this.showContextMenu(target, event);
-    //     return [];
-    // }
+    override contextMenu(target: SModelElementImpl, event: MouseEvent): (Action | Promise<Action>)[] {
+        // this function is called when the user right-clicks on an element
+        // it selects the right-clicked element and deselects all other elements
+        // the context menu is opened by the standard sprotty context menu service
+        console.log('context menu ' + target.id, target)
 
-    // protected async showContextMenu(target: SModelElementImpl, event: MouseEvent): Promise<void> {
-    //     let menuService: IContextMenuService;
-    //     try {
-    //         menuService = await this.contextMenuService();
-    //     } catch (rejected) {
-    //         // IContextMenuService is not bound => do nothing
-    //         return;
-    //     }
 
-    //     let isTargetSelected = false;
-    //     const selectableTarget = findParentByFeature(target, isSelectable);
-    //     if (selectableTarget) {
-    //         isTargetSelected = selectableTarget.selected;
-    //         selectableTarget.selected = true;
-    //     }
+        const root = target.root;
+        const options = { selectedElementsIDs: [target.id], deselectedElementsIDs: Array.from(root.index.all().filter(isSelected), 
+            (val) => { return val.id; }) };
+        this.actionDispatcher.dispatch(SelectAction.create(options));
+        return [];
+    }
 
-    //     const root = target.root;
-    //     const mousePosition = { x: event.x, y: event.y };
-    //     if (target.id === root.id || isSelected(selectableTarget)) {
-    //         const menuItems = await this.menuProvider.getItems(root, mousePosition);
-    //         const restoreSelection = () => { if (selectableTarget) selectableTarget.selected = isTargetSelected; };
-    //         menuService.show(menuItems, mousePosition, restoreSelection);
-    //     } else {
-    //         if (isSelectable(target)) {
-    //             const options = { selectedElementsIDs: [target.id], deselectedElementsIDs: Array.from(root.index.all().filter(isSelected), (val) => { return val.id; }) };
-    //             await this.actionDispatcher.dispatch(SelectAction.create(options));
-    //         }
-    //         const items = await this.menuProvider.getItems(root, mousePosition);
-    //         menuService.show(items, mousePosition);
-    //     }
-    // }
-
-    // protected getMenuItems(target: SprottyConceptNode, mousePosition: Point): LabeledAction[] {
-    //     const items: LabeledAction[] = [];
-    //     if (this.permissionService.canEdit(target)) {
-    //         items.push(new LabeledAction('Add Child', [this.nodeCreator]));
-    //     }
-    //     return items;
-    
-
-    //}
 }
 
 // @injectable()

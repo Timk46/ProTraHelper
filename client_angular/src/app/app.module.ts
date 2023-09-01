@@ -20,6 +20,7 @@ import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { HttpClient, HttpClientModule } from "@angular/common/http";
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 import { ContentViewComponent } from './Pages/contentView/contentView.component';
+import { CreateConceptDialogComponent } from './Pages/graph/graph-dialogs/create-concept-dialog/create-concept-dialog.component';
 
 
 
@@ -35,7 +36,8 @@ import { ContentViewComponent } from './Pages/contentView/contentView.component'
     McQuizComponent,
     GraphComponent,
     FileUploadComponent,
-    ContentViewComponent
+    ContentViewComponent,
+    CreateConceptDialogComponent
   ],
   imports: [
     BrowserModule,

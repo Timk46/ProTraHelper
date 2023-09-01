@@ -27,13 +27,13 @@ export default (containerId: string) => {
     const myModule = new ContainerModule((bind, unbind, isBound, rebind) => {
         bind(TYPES.ModelSource).to(ConceptGraphModelSource).inSingletonScope();
         rebind(TYPES.ILogger).to(ConsoleLogger).inSingletonScope();
-        rebind(TYPES.LogLevel).toConstantValue(LogLevel.log);
+        rebind(TYPES.LogLevel).toConstantValue(LogLevel.warn);
         bind(TYPES.IModelLayoutEngine).toService(ElkLayoutEngine);
         bind(ElkFactory).toConstantValue(elkFactory);
         rebind(ILayoutConfigurator).to(RandomGraphLayoutConfigurator);
 
         //popup
-        //bind(TYPES.IPopupModelProvider).to(PopupModelProvider);
+        bind(TYPES.IPopupModelProvider).to(PopupModelProvider);
 
         // context menu
         bind(TYPES.IContextMenuService).to(ClassContextMenuService);

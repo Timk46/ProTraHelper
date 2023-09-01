@@ -36,6 +36,7 @@ export class GraphController {
      */
     @Post('concept/:parentId/:name')
     async createConceptNode(@Param('parentId', ParseIntPipe) parentId:number, @Param('name') name: string): Promise<any> { // todo: there must be a better way than any
+        console.log("in createConceptNode controller: ", parentId, name)
         const newConcept = await this.graphService.createConceptNode(parentId, name);
         return newConcept;
     }

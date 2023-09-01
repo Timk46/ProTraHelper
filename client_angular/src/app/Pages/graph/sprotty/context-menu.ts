@@ -18,10 +18,12 @@ import { inject, injectable } from 'inversify';
 import {
     Anchor, EMPTY_ROOT, GetSelectionAction, IActionDispatcher,
     IContextMenuItemProvider, IContextMenuService, LabeledAction, MenuItem,
-    RequestExportSvgAction, SModelRootImpl, TYPES, ViewerOptions
+    RequestExportSvgAction, SModelRootImpl, SNodeImpl, TYPES, ViewerOptions
 } from 'sprotty';
-import { CenterAction, DeleteElementAction, FitToScreenAction, Point, SetPopupModelAction, SelectionResult } from 'sprotty-protocol';
+import { CenterAction, DeleteElementAction, FitToScreenAction, Point, SetPopupModelAction, SelectionResult, CreateElementAction } from 'sprotty-protocol';
 
+import { SprottyConceptNode } from './sprottyModels.interface'
+import { CreateConceptAction } from './actions';
 @injectable()
 export class ClassContextMenuService implements IContextMenuService {
 
@@ -39,8 +41,9 @@ export class ClassContextMenuService implements IContextMenuService {
             }
         }
         menuNode = this.createMenu(items, hideMenu);
-        menuNode.style.top = (anchor.y-50 ) + 'px'
-        menuNode.style.left = (anchor.x-50 ) + 'px'
+        menuNode.style.top = (anchor.y-100 ) + 'px'
+        menuNode.style.left = (anchor.x-100 ) + 'px'
+        menuNode.autofocus = true;
         console.log(anchor)
 
 
@@ -76,6 +79,7 @@ export class ClassContextMenuService implements IContextMenuService {
 export class ClassContextMenuItemProvider implements IContextMenuItemProvider {
 
     @inject(TYPES.IActionDispatcher) readonly actionDispatcher!: IActionDispatcher;
+    
 
     async getItems(root: Readonly<SModelRootImpl>, lastMousePosition?: Point | undefined): Promise<LabeledAction[]> {
         const selectionResult = await this.actionDispatcher.request<SelectionResult>(GetSelectionAction.create())
@@ -90,7 +94,11 @@ export class ClassContextMenuItemProvider implements IContextMenuItemProvider {
                 isEnabled: () => {
                     return selectionResult.selectedElementsIDs.length > 0
                 }
-            } as MenuItem
+            } as MenuItem,
+
+            // custom options
+            new LabeledAction('', []),
+            new LabeledAction('Add Concept here', [CreateConceptAction.create({parentId: selectionResult.selectedElementsIDs[0]})]),
         ];
     }
 

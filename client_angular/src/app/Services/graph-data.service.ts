@@ -30,7 +30,9 @@ export class GraphDataService {
    * @param conceptName The name of the new concept
    * @returns The new concept node
    */
-  createConcept(parentId: string, conceptName: string) {
+  createConcept(parentId: string, conceptName: string, description?: string) {
+    console.log("in graph-data.service. Trying to create concept: ", parentId, conceptName)
+    return this.http.post(environment.server + `/graph/concept/${parentId}/${conceptName}`, {description: description})
   }
 
   /**

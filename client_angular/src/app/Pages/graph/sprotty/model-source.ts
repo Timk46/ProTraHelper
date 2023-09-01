@@ -5,13 +5,17 @@ import { SprottyConceptNode } from './sprottyModels.interface'
 //import { SModelIndex } from 'sprotty-protocol/lib/utils/model-utils';
 import {
   Action, CollapseExpandAction, CollapseExpandAllAction, SCompartment, SEdge, SGraph, SLabel,
-  SModelElement, SModelIndex, SModelRoot, SNode, SelectAction, CenterAction, Point, SPort
+  SModelElement, SModelIndex, SModelRoot, SNode, SelectAction, CenterAction, Point, SPort, CreateElementAction
 } from 'sprotty-protocol';
 import { GraphCommunicationService } from 'src/app/Services/graphCommunication.service';
 import { GraphDataService } from 'src/app/Services/graph-data.service';
 import { ThisReceiver } from '@angular/compiler';
 import { inject as injectAngular } from '@angular/core';
 import { NoDataRowOutlet } from '@angular/cdk/table';
+import { CreateConceptAction } from './actions';
+import { MatDialog } from '@angular/material/dialog';
+import { CreateConceptDialogComponent } from '../graph-dialogs/create-concept-dialog/create-concept-dialog.component';
+
 
 
 @injectable()
@@ -20,11 +24,13 @@ export class ConceptGraphModelSource extends LocalModelSource {
   private GraphCommunicationService: GraphCommunicationService = GraphCommunicationService.getInstance();
   private flatGraph: ConceptGraphDTO = { id: 0, name: "", nodeMap: {}, edgeMap: {}, trueRootId: 0 }
   graphData: GraphDataService | undefined;
+  private dialog: MatDialog | undefined;
   userId = 2;
 
 
   constructor() {
     super();
+    this.dialog = injectAngular(MatDialog);
     this.graphData = injectAngular(GraphDataService)
     //this.initTestGraph();
     this.graphData.fetchUserGraph(this.userId).subscribe((graph) => {
@@ -36,6 +42,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     super.initialize(registry);
     registry.register(SelectAction.KIND, this)
     registry.register(CollapseExpandAction.KIND, this)
+    registry.register(CreateConceptAction.KIND, this)
   }
 
   override handle(action: Action) {
@@ -53,6 +60,10 @@ export class ConceptGraphModelSource extends LocalModelSource {
         break;
       case CollapseExpandAction.KIND:
         this.handleCollapseExpandAction(action as CollapseExpandAction);
+        break;
+
+      case CreateConceptAction.KIND:
+        this.handleCreateConceptAction(action as CreateConceptAction);
         break;
 
       default: super.handle(action);
@@ -130,6 +141,20 @@ export class ConceptGraphModelSource extends LocalModelSource {
           const edgeChild = this.createEdge("edge_" + flatChild.databaseId, "node_" + flatChild.sourceId, "node_" + flatChild.targetId);
           parentNode.children!.push(edgeChild);
         }
+      });
+    }
+  }
+
+  handleCreateConceptAction(action: CreateConceptAction): void {
+    const index = new SModelIndex();
+    index.add(this.currentRoot);
+    const sprottyParentNode = index.getById(action.parentId) as SprottyConceptNode;
+
+    if (sprottyParentNode !== undefined) {
+
+    console.log("handleCreateConceptAction: ", action, sprottyParentNode);
+      const dialogRef = this.dialog?.open(CreateConceptDialogComponent, {
+        data: { parentId: sprottyParentNode.databaseId },
       });
     }
   }
