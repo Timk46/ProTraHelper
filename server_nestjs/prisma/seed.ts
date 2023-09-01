@@ -279,9 +279,9 @@ async function main() {
   const contentElement1 = await prisma.contentElement.create({
     data: {
       type: 'TEXT',
-      position: 1,
+      position: 7,
       text: 'This is a text element.',
-      contentNode: { connect: { id: contentNode2.id } },
+      contentNode: { connect: { id: contentNode.id } },
     },
   });
 
@@ -289,6 +289,22 @@ async function main() {
     data: {
       type: 'PDF',
       position: 2,
+      contentNode: { connect: { id: contentNode.id } },
+    },
+  });
+
+  const contentElement3 = await prisma.contentElement.create({
+    data: {
+      type: 'PDF',
+      position: 1,
+      contentNode: { connect: { id: contentNode.id } },
+    },
+  });
+
+  const contentElement4 = await prisma.contentElement.create({
+    data: {
+      type: 'VIDEO',
+      position: 12,
       contentNode: { connect: { id: contentNode.id } },
     },
   });
@@ -445,9 +461,9 @@ async function main() {
     data: {
       name: 'Organisation & Übungsbetrieb.pdf',
       uniqueIdentifier: 'randomString1',
-      path: 'randomString1.pdf', //just a test pdf (0.pdf) in the storage folder
+      path: 'randomString1.pdf', //just a test pdf in the storage folder
       type: 'pdf',
-      contentElement: { connect: { id: contentElement1.id } },
+      contentElement: { connect: { id: contentElement2.id } },
     },
   });
 
@@ -455,9 +471,19 @@ async function main() {
     data: {
       name: 'Java_Datenstrukturen_Array.pdf',
       uniqueIdentifier: 'randomString3',
-      path: 'randomString3.pdf', //just a test pdf (0.pdf) in the storage folder
+      path: 'randomString3.pdf', //just a test pdf in the storage folder
       type: 'pdf',
-      contentElement: { connect: { id: contentElement2.id } },
+      contentElement: { connect: { id: contentElement3.id } },
+    },
+  });
+
+  await prisma.file.create({
+    data: {
+      name: 'Python_Kontrollstrukturen_for.mp4',
+      uniqueIdentifier: 'randomString4',
+      path: 'randomString4.mp4', //just a test mp4 in the storage folder
+      type: 'mp4',
+      contentElement: { connect: { id: contentElement4.id } },
     },
   });
 

@@ -31,7 +31,11 @@ export class ContentService {
                 successors: true,
                 requires: true,
                 trains: true,
-                contentElements: true,
+                contentElements: {
+                  include: {
+                    file: true,
+                  },
+                },
               },
             },
           },
@@ -44,7 +48,11 @@ export class ContentService {
                 successors: true,
                 requires: true,
                 trains: true,
-                contentElements: true,
+                contentElements: {
+                  include: {
+                    file: true,
+                  },
+                },
               },
             },
           },
