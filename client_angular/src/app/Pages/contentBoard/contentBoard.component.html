@@ -1,11 +1,11 @@
-<h1>Content Board</h1>
-
-    Example for passing Node Information to Child-Component (also updating it): {{ activeNode.selectedElementsIDs }}
+<h1>Content Board</h1> Click on Cards to open ContentViews with all Contentelements in the predefined order.
 
     <div class="grid-container">
-      <mat-card *ngFor="let card of cards" (click)="onCardClick(card.id)">
+      <mat-card *ngFor="let content of contentsForActiveConceptNode.trainedBy" (click)="onContentClick(content)">
         <mat-card-content>
-          Content ID: {{ card.id }}
+          ContentNode Id: {{ content.contentNodeId }} <br>
+          ContentNode Name: {{ content.name }} <br>
+          ContentNode Description: {{ content.description }}
         </mat-card-content>
       </mat-card>
     </div>

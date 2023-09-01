@@ -1,12 +1,14 @@
 
-<div *ngIf="activeNode !== null" class =" content mat-elevation-z8">
+<div class =" content mat-elevation-z8">
 <h1>Concept Overview</h1>
 
-active Node: {{activeNodeTestDisplay}}
+active Concept Node Id: {{activeConceptNode.databaseId}} <br>
+active Concept Node Name: {{activeConceptNode.name}} <br>
+
 
 <mat-tab-group animationDuration="0ms">
   <mat-tab label="Content">
-    <app-contentBoard [activeNode]="activeNode"></app-contentBoard> <!--Communication to Child-Component-->
+    <app-contentBoard [contentsForActiveConceptNode]="contentsForActiveConceptNode"></app-contentBoard> <!--Communication to Child-Component-->
   </mat-tab>
 
   <mat-tab label="Aufgaben">
@@ -18,7 +20,7 @@ active Node: {{activeNodeTestDisplay}}
   </mat-tab>
 
   <mat-tab label="Diskussion">
-    <app-discussion [activeNode]="activeNode"></app-discussion>
+    <app-discussion [contentsForActiveConceptNode]="contentsForActiveConceptNode"></app-discussion>
   </mat-tab>
 </mat-tab-group>
 

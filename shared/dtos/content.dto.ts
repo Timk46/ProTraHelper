@@ -26,7 +26,7 @@ export interface ContentElementDTO {
     question?: QuestionDTO;
 }
 
-export interface ContentsForConcept {
+export interface ContentsForConceptDTO {
     trainedBy: ContentDTO[];
     requiredBy: ContentDTO[];
 }

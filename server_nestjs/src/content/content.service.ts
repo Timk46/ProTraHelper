@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
-import { ContentsForConcept, ContentElementDTO } from '@Interfaces/index';
+import { ContentsForConceptDTO, ContentElementDTO } from '@Interfaces/index';
 
 @Injectable()
 export class ContentService {
@@ -14,12 +14,12 @@ export class ContentService {
    *
    * @param {number} conceptNodeId The ID of the concept node
    *
-   * @returns {Promise<ContentsForConcept>} A promise that resolves to ContentsForConcept - an object with two arrays of ContentDTO objects. One for the requiredBy and one for trainedBy relations.
+   * @returns {Promise<ContentsForConceptDTO>} A promise that resolves to ContentsForConceptDTO - an object with two arrays of ContentDTO objects. One for the requiredBy and one for trainedBy relations.
    *
    * @throws Will throw an error if the concept node is not found.
    *
    */
-  async getContentsByConceptNode(conceptNodeId: number): Promise<ContentsForConcept> {
+  async getContentsByConceptNode(conceptNodeId: number): Promise<ContentsForConceptDTO> {
     const conceptNode = await this.prisma.conceptNode.findUnique({
       where: { id: Number(conceptNodeId) },
       include: {
