@@ -282,6 +282,30 @@ async function main() {
       conceptNode: { connect: { id: 14 } }, // arrays
     },
   });
+  await prisma.requirement.create({
+    data: {
+      contentNode: { connect: { id: contentNode.id } },
+      conceptNode: { connect: { id: 14 } }, // arrays
+    },
+  });
+  await prisma.requirement.create({
+    data: {
+      contentNode: { connect: { id: contentNode.id } },
+      conceptNode: { connect: { id: 14 } }, // arrays
+    },
+  });
+  await prisma.training.create({
+    data: {
+      contentNode: { connect: { id: contentNode.id } },
+      conceptNode: { connect: { id: 14 } }, // arrays
+    },
+  });
+  await prisma.training.create({
+    data: {
+      contentNode: { connect: { id: contentNode.id } },
+      conceptNode: { connect: { id: 14 } }, // arrays
+    },
+  });
 
   const testRequierement = await prisma.requirement.create({
     data: {
