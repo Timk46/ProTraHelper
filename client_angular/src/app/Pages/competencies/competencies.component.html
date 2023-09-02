@@ -1,0 +1,63 @@
+<h1>Compentcies which are required or trained by Content connected to the chosen ConceptNode</h1>
+
+<!-- Main container using Flexbox to align tables horizontally -->
+<div style="display: flex; justify-content: space-between;">
+
+  <!-- Trained By Table -->
+  <div style="flex: 1; margin-right: 20px;"> <!-- Added margin-right here -->
+
+    <mat-table [dataSource]="contentsForActiveConceptNode.trainedBy">
+
+      <!-- Define columns -->
+      <ng-container matColumnDef="trainedBy">
+        <mat-header-cell *matHeaderCellDef> Trained by </mat-header-cell>
+         <!-- One Cell for each ContentsForConceptDTO.trainedBy[] ContentDTO-->
+        <mat-cell *matCellDef="let content">
+          <span matTooltip="Content Node Name: {{content.name}} Content Node Description: {{content.description}}">
+            <b>Content Node {{content.contentNodeId}}</b>, which also trains:</span>
+          <!-- Using an unordered list for bullet points for each Id in ContentDTO.trainsConceptIds[] -->
+          <ul>
+            <li *ngFor="let id of content.trainsConceptIds">
+              Concept Node {{id}}
+            </li>
+          </ul>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Header row definition -->
+      <mat-header-row *matHeaderRowDef="['trainedBy']"></mat-header-row>
+
+      <!-- Data row definition -->
+      <mat-row *matRowDef="let row; columns: ['trainedBy'];"></mat-row>
+    </mat-table>
+  </div>
+
+  <!-- Required By Table -->
+  <div style="flex: 1;">
+    <mat-table [dataSource]="contentsForActiveConceptNode.requiredBy">
+
+      <!-- Define columns -->
+      <ng-container matColumnDef="requiredBy">
+        <mat-header-cell *matHeaderCellDef> Required By </mat-header-cell>
+        <!-- One Cell for each ContentsForConceptDTO.requiredBy[] ContentDTO-->
+        <mat-cell *matCellDef="let content">
+          <span matTooltip="Content Node Name: {{content.name}} Content Node Description: {{content.description}}">
+            <b>Content Node {{content.contentNodeId}}</b>, which also requieres:</span>
+          <!-- Using an unordered list for bullet points for each Id in ContentDTO.requiresConceptIds[]-->
+          <ul>
+            <li *ngFor="let id of content.requiresConceptIds">
+              Concept Node {{id}}
+            </li>
+          </ul>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Header row definition -->
+      <mat-header-row *matHeaderRowDef="['requiredBy']"></mat-header-row>
+
+      <!-- Data row definition -->
+      <mat-row *matRowDef="let row; columns: ['requiredBy'];"></mat-row>
+    </mat-table>
+  </div>
+
+</div>

@@ -280,6 +280,7 @@ async function main() {
     data: {
       type: 'TEXT',
       position: 7,
+      title: 'Titel für contentElement 1',
       text: 'This is a text element.',
       contentNode: { connect: { id: contentNode.id } },
     },
@@ -288,6 +289,7 @@ async function main() {
   const contentElement2 = await prisma.contentElement.create({
     data: {
       type: 'PDF',
+      title: 'Titel für contentElement 2',
       position: 2,
       contentNode: { connect: { id: contentNode.id } },
     },
@@ -296,6 +298,7 @@ async function main() {
   const contentElement3 = await prisma.contentElement.create({
     data: {
       type: 'PDF',
+      title: 'Titel für contentElement 3',
       position: 1,
       contentNode: { connect: { id: contentNode.id } },
     },
@@ -304,6 +307,7 @@ async function main() {
   const contentElement4 = await prisma.contentElement.create({
     data: {
       type: 'VIDEO',
+      title: 'Titel für contentElement 4',
       position: 12,
       contentNode: { connect: { id: contentNode.id } },
     },
@@ -317,10 +321,34 @@ async function main() {
     },
   });
 
-  // Requirement and Training
+  // Requirement and Training Test fpr Id 14 (Arrays)
   await prisma.requirement.create({
     data: {
       contentNode: { connect: { id: contentNode.id } },
+      conceptNode: { connect: { id: 14 } }, // concept for arrays - concept node ids are static currently in seed.ts
+    },
+  });
+  await prisma.requirement.create({
+    data: {
+      contentNode: { connect: { id: contentNode.id } },
+      conceptNode: { connect: { id: 4 } }, // concept for arrays - concept node ids are static currently in seed.ts
+    },
+  });
+  await prisma.requirement.create({
+    data: {
+      contentNode: { connect: { id: contentNode.id } },
+      conceptNode: { connect: { id: 5 } }, // concept for arrays - concept node ids are static currently in seed.ts
+    },
+  });
+  await prisma.requirement.create({
+    data: {
+      contentNode: { connect: { id: contentNode2.id } },
+      conceptNode: { connect: { id: 14 } }, // concept for arrays - concept node ids are static currently in seed.ts
+    },
+  });
+  await prisma.requirement.create({
+    data: {
+      contentNode: { connect: { id: contentNode3.id } },
       conceptNode: { connect: { id: 14 } }, // concept for arrays - concept node ids are static currently in seed.ts
     },
   });

@@ -15,12 +15,13 @@ import { McQuizComponent } from './Pages/contentView/contentElement/mcQuiz/mcQui
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { HttpClient, HttpClientModule } from "@angular/common/http";
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 import { ContentViewComponent } from './Pages/contentView/contentView.component';
 import { CreateConceptDialogComponent } from './Pages/graph/graph-dialogs/create-concept-dialog/create-concept-dialog.component';
+import { VideoViewerComponent } from './Pages/contentView/contentElement/videoViewer/videoViewer.component';
+import { CompetenciesComponent } from './Pages/competencies/competencies.component';
 
 
 
@@ -37,7 +38,9 @@ import { CreateConceptDialogComponent } from './Pages/graph/graph-dialogs/create
     GraphComponent,
     FileUploadComponent,
     ContentViewComponent,
-    CreateConceptDialogComponent
+    CreateConceptDialogComponent,
+    VideoViewerComponent,
+    CompetenciesComponent
   ],
   imports: [
     BrowserModule,
@@ -45,7 +48,6 @@ import { CreateConceptDialogComponent } from './Pages/graph/graph-dialogs/create
     AppRoutingModule,
     BrowserAnimationsModule,
     MaterialModule,
-    PdfViewerModule,
     NgxExtendedPdfViewerModule,
     HttpClientModule
   ],

@@ -1,5 +1,6 @@
 import { contentElementType } from "./contentElementType.enum";
 import { QuestionDTO } from "./question.dto";
+import { FileDto } from "./file.dto";
 
 export interface ContentDTO {
     contentNodeId: number;
@@ -22,7 +23,7 @@ export interface ContentElementDTO {
     position: number;
     title?: string;
     text?: string;
-    file?: File;
+    file?: FileDto;
     question?: QuestionDTO;
 }
 

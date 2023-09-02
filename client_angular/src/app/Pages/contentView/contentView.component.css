@@ -1,0 +1,23 @@
+.contentView-Container{
+  height: 95vh;
+  overflow: scroll;
+  text-align: center;
+}
+
+.contetView-card{
+  display: inline-block;
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 0 5px #ccc;
+    width: 90%;
+    overflow: hidden;
+    max-height: 70vh;
+}
+
+.contentElement-Container {
+  max-height: 60vh;
+  overflow: auto;
+}

@@ -1,9 +1,47 @@
-<h1>Content View for ContentNode: Id: {{ contentViewData.contentNodeId}}</h1>
+<div class = "contentView-Container">
+  <h1>Content View for ContentNode: Id: {{ contentViewData.contentNodeId}}</h1>
 
-Just the stringyfied ContentElementDTOs fow now. We import our components for pdf/mp4 etc. depending on file type later.
-<h2>Content Elements:</h2>
-<ul>
-<li *ngFor="let contentElem of contentViewData.contentElements">
-  {{tempForTest(contentElem)}}
-</li>
-</ul>
+  <!-- Create a Card for each Content Element and display PDF, Video etc. depending on type-->
+  <mat-card *ngFor="let contentElem of contentViewData.contentElements" class="contetView-card">
+
+    <!--Show Content Title, if it has any-->
+    <mat-card-header *ngIf="contentElem.title">
+      <mat-card-title-group>
+        <mat-card-title>{{contentElem.title}}</mat-card-title>
+            <!-- We could add an subtitle or icon to the header aswell
+            <mat-card-subtitle>Extra large</mat-card-subtitle>
+            <img mat-card-xl-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" >
+            -->
+      </mat-card-title-group>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!--********** BEGIN: Show Content depending on type **********-->
+
+      <!--PDF-->
+      <div *ngIf="contentElem.type == 'PDF' && contentElem.file " class = "contentElement-Container">
+        Our current PDF Component cant be initialized multiple times... using an iframe instead for now
+        <iframe id="embedded" [src]="getPdfUrl(contentElem.file.uniqueIdentifier)" style="height: 100%; min-height: 500px; width: 100%"></iframe>
+      </div>
+
+      <!--VIDEO-->
+      <div *ngIf="contentElem.type == 'VIDEO' && contentElem.file " class = "contentElement-Container">
+        <app-videoViewer  [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-videoViewer>
+      </div>
+
+      <!--Show additional Content Text, if it has any-->
+      <div *ngIf="contentElem.text" class="contentElement-Container">
+        {{contentElem.text}}
+      </div>
+
+      <!--********** END: Show Content depending on type **********-->
+    </mat-card-content>
+  </mat-card>
+
+  <h2>For Debugging the stringyfied ContentElements:</h2>
+  <ul>
+  <li *ngFor="let contentElem of contentViewData.contentElements">
+    {{tempForTest(contentElem)}}
+  </li>
+  </ul>
+</div>
