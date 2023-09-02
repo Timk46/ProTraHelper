@@ -321,10 +321,34 @@ async function main() {
     },
   });
 
-  // Requirement and Training
+  // Requirement and Training Test fpr Id 14 (Arrays)
   await prisma.requirement.create({
     data: {
       contentNode: { connect: { id: contentNode.id } },
+      conceptNode: { connect: { id: 14 } }, // concept for arrays - concept node ids are static currently in seed.ts
+    },
+  });
+  await prisma.requirement.create({
+    data: {
+      contentNode: { connect: { id: contentNode.id } },
+      conceptNode: { connect: { id: 4 } }, // concept for arrays - concept node ids are static currently in seed.ts
+    },
+  });
+  await prisma.requirement.create({
+    data: {
+      contentNode: { connect: { id: contentNode.id } },
+      conceptNode: { connect: { id: 5 } }, // concept for arrays - concept node ids are static currently in seed.ts
+    },
+  });
+  await prisma.requirement.create({
+    data: {
+      contentNode: { connect: { id: contentNode2.id } },
+      conceptNode: { connect: { id: 14 } }, // concept for arrays - concept node ids are static currently in seed.ts
+    },
+  });
+  await prisma.requirement.create({
+    data: {
+      contentNode: { connect: { id: contentNode3.id } },
       conceptNode: { connect: { id: 14 } }, // concept for arrays - concept node ids are static currently in seed.ts
     },
   });

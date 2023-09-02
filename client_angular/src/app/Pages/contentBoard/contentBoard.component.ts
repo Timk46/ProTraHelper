@@ -22,15 +22,16 @@ export class ContentBoardComponent implements OnInit {
   }
 
   onContentClick(content: ContentDTO) {
-    // Dialog-Konfiguration erstellen
+
+    // Create Dialog Config https://material.angular.io/components/dialog/api#MatDialogConfig
     const dialogConfig = new MatDialogConfig();
 
-    // Übergeben der Daten an den Dialog
+    // Communicate ContentDTO with all ContentElements of that ContentView to the Dialog/ContentViewComponent
     dialogConfig.data = {
       contentViewData: content
     };
 
-    // Dialog öffnen
+    // Open the Dialog with ContentViewComponent. We could navigate to the component instead aswell.
     this.dialog.open(ContentViewComponent, dialogConfig);
   }
 

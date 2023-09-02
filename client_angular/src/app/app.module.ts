@@ -20,6 +20,7 @@ import { HttpClient, HttpClientModule } from "@angular/common/http";
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 import { ContentViewComponent } from './Pages/contentView/contentView.component';
 import { VideoViewerComponent } from './Pages/contentView/contentElement/videoViewer/videoViewer.component';
+import { CompetenciesComponent } from './Pages/competencies/competencies.component';
 
 
 
@@ -36,7 +37,8 @@ import { VideoViewerComponent } from './Pages/contentView/contentElement/videoVi
     GraphComponent,
     FileUploadComponent,
     ContentViewComponent,
-    VideoViewerComponent
+    VideoViewerComponent,
+    CompetenciesComponent
   ],
   imports: [
     BrowserModule,
