@@ -15,3 +15,19 @@ export namespace CreateConceptAction {
         };
     }
 }
+
+
+export interface DeleteConceptAction extends Action {
+    kind: typeof DeleteConceptAction.KIND;
+    conceptId: string;
+}
+export namespace DeleteConceptAction {
+    export const KIND = 'deleteConcept';
+    
+    export function create(options: { conceptId: string }): DeleteConceptAction {
+        return {
+            kind: KIND,
+            conceptId: options.conceptId
+        };
+    }
+}

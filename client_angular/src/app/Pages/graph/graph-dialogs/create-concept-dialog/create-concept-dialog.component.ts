@@ -10,12 +10,17 @@ import { GraphDataService } from 'src/app/Services/graph-data.service';
 export class CreateConceptDialogComponent {
   name: string = "";
   description: string = "";
+  currentModuleId: number = 1;
+  levels: number[] = [1,2,3,4,5,6];
+  moduleGoal: number = 0;
   
     constructor(
       public dialogRef: MatDialogRef<CreateConceptDialogComponent>,
       @Inject(MAT_DIALOG_DATA) public data: any,
       private graphService: GraphDataService
-      ) {}
+      ) {
+
+      }
   
 
     onDialogOpen(): void {
@@ -27,7 +32,7 @@ export class CreateConceptDialogComponent {
 
     createConcept(): void {
       console.log("trying to create concept: ", this.name, this.description)
-      this.graphService.createConcept(this.data.parentId, this.name, this.description);
+      this.graphService.createConcept(this.data.parentId, this.name, this.description, [{ moduleId: this.currentModuleId, goal: this.moduleGoal }]);
       this.dialogRef.close({name: this.name, description: this.description});
     }
 

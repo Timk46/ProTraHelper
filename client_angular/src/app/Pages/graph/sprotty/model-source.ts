@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { ActionHandlerRegistry, Expandable, LocalModelSource, TYPES, VBoxLayouter } from 'sprotty';
-import { ConceptGraphDTO } from '@DTOs/index';
+import { ConceptGraphDTO, ConceptNodeDTO } from '@DTOs/index';
 import { SprottyConceptNode } from './sprottyModels.interface'
 //import { SModelIndex } from 'sprotty-protocol/lib/utils/model-utils';
 import {
@@ -12,7 +12,7 @@ import { GraphDataService } from 'src/app/Services/graph-data.service';
 import { ThisReceiver } from '@angular/compiler';
 import { inject as injectAngular } from '@angular/core';
 import { NoDataRowOutlet } from '@angular/cdk/table';
-import { CreateConceptAction } from './actions';
+import { CreateConceptAction, DeleteConceptAction } from './actions';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateConceptDialogComponent } from '../graph-dialogs/create-concept-dialog/create-concept-dialog.component';
 
@@ -33,9 +33,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.dialog = injectAngular(MatDialog);
     this.graphData = injectAngular(GraphDataService)
     //this.initTestGraph();
-    this.graphData.fetchUserGraph(this.userId).subscribe((graph) => {
-      this.initGraph(graph);
-    });
+    this.getUserGraph();
   }
 
   override initialize(registry: ActionHandlerRegistry): void {
@@ -43,6 +41,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     registry.register(SelectAction.KIND, this)
     registry.register(CollapseExpandAction.KIND, this)
     registry.register(CreateConceptAction.KIND, this)
+    registry.register(DeleteConceptAction.KIND, this)
   }
 
   override handle(action: Action) {
@@ -66,8 +65,18 @@ export class ConceptGraphModelSource extends LocalModelSource {
         this.handleCreateConceptAction(action as CreateConceptAction);
         break;
 
+      case DeleteConceptAction.KIND:
+        this.handleDeleteConceptAction(action as DeleteConceptAction);
+        break;
+
       default: super.handle(action);
     }
+  }
+
+  private getUserGraph() {
+    this.graphData!.fetchUserGraph(this.userId).subscribe((graph) => {
+      this.initGraph(graph);
+    });
   }
 
   public initGraph(flatGraph: ConceptGraphDTO) {
@@ -155,6 +164,27 @@ export class ConceptGraphModelSource extends LocalModelSource {
     console.log("handleCreateConceptAction: ", action, sprottyParentNode);
       const dialogRef = this.dialog?.open(CreateConceptDialogComponent, {
         data: { parentId: sprottyParentNode.databaseId },
+      });
+    }
+  }
+
+  /**
+   * Deletes the current concept if it has no children
+   * @param action 
+   */
+  handleDeleteConceptAction(action: DeleteConceptAction): void {
+    console.log("handleDeleteConceptAction: ", action);
+    const index = new SModelIndex();
+    index.add(this.currentRoot);
+    const sprottyNode = index.getById(action.conceptId) as SprottyConceptNode;
+
+
+    if (sprottyNode !== undefined) {
+      const flatNode: ConceptNodeDTO = this.flatGraph.nodeMap[sprottyNode.databaseId];
+      //todo: check if node is deletable and if it has multiple parents?
+      this.graphData!.deleteConcept(sprottyNode.databaseId).subscribe((res) => {
+        console.log("deleted concept: ", res);
+        this.getUserGraph();
       });
     }
   }

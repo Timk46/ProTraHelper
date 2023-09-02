@@ -14,6 +14,16 @@
 
     </p>
     <p>
+        Level for current module:
+        <mat-form-field>
+            <mat-select [(ngModel)]="moduleGoal">
+                <mat-option *ngFor="let level of levels" [value]="level">
+                    {{level}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </p>
+    <p>
         <button mat-raised-button (click)="createConcept()">Create</button>
         <button mat-raised-button (click)="cancelCreateConcept()">Cancel</button>
     </p>

@@ -1,5 +1,5 @@
 import { ConceptGraphDTO } from '@DTOs/index';
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { GraphService } from './graph.service';
 
 @Controller('graph')
@@ -34,11 +34,19 @@ export class GraphController {
      * @param name the name of the concept
      * @returns the new concept
      */
+    // todo: add body for description and moduleGoals
     @Post('concept/:parentId/:name')
     async createConceptNode(@Param('parentId', ParseIntPipe) parentId:number, @Param('name') name: string): Promise<any> { // todo: there must be a better way than any
         console.log("in createConceptNode controller: ", parentId, name)
         const newConcept = await this.graphService.createConceptNode(parentId, name);
         return newConcept;
+    }
+
+    @Delete('concept/:conceptId')
+    async deleteConceptNode(@Param('conceptId', ParseIntPipe) conceptId:number): Promise<any> {
+        console.log("in deleteConceptNode controller: ", conceptId)
+        const deletedConcept = await this.graphService.deleteConceptNode(conceptId);
+        return deletedConcept;
     }
 
     @Put('userConcept/:userId/:conceptId')

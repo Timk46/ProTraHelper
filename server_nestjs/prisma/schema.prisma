@@ -141,9 +141,9 @@ model ContentEdge {
 // the concepts that should be known to understand or solve a content node
 model Requirement {
   id            Int         @id @default(autoincrement())
-  contentNode   ContentNode @relation(fields: [contentNodeId], references: [id])
+  contentNode   ContentNode @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
   contentNodeId Int
-  conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id])
+  conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id], onDelete: Cascade)
   conceptNodeId Int
 }
 
@@ -152,9 +152,9 @@ model Requirement {
 // it can also award a competence level for that concept
 model Training {
   id            Int         @id @default(autoincrement())
-  contentNode   ContentNode @relation(fields: [contentNodeId], references: [id])
+  contentNode   ContentNode @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
   contentNodeId Int
-  conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id])
+  conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id], onDelete: Cascade)
   conceptNodeId Int
   awards        Int?
 }
@@ -164,9 +164,9 @@ model Training {
 // "expanded" saves the state of the concept graph between sessions
 model UserConcept {
   id            Int         @id @default(autoincrement())
-  user          User        @relation(fields: [userId], references: [id])
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        Int
-  concept       ConceptNode @relation(fields: [conceptNodeId], references: [id])
+  concept       ConceptNode @relation(fields: [conceptNodeId], references: [id], onDelete: Cascade)
   conceptNodeId Int
   level         Int?
   expanded      Boolean // remembers if the concept was expanded in the concept graph

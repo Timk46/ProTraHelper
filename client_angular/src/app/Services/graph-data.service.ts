@@ -30,9 +30,22 @@ export class GraphDataService {
    * @param conceptName The name of the new concept
    * @returns The new concept node
    */
-  createConcept(parentId: string, conceptName: string, description?: string) {
+  createConcept(parentId: string, conceptName: string, description?: string, moduleGoals?: { moduleId: number, goal: number }[]) {
     console.log("in graph-data.service. Trying to create concept: ", parentId, conceptName)
-    return this.http.post(environment.server + `/graph/concept/${parentId}/${conceptName}`, {description: description})
+    const x = this.http.post(environment.server + `/graph/concept/${parentId}/${conceptName}`, { description: description, moduleGoals: moduleGoals }).subscribe()
+    console.log("x: ", x)
+    return x
+  }
+
+  /**
+   * Deletes a concept node if it has no children
+   * @param conceptId The id of the concept node
+   * @returns The deleted concept node
+   * @throws Will throw an error if the concept node has children
+   */
+  deleteConcept(conceptId: number) {
+    console.log("trying to delete node with id: ", conceptId)
+    return this.http.delete(environment.server + `/graph/concept/${conceptId}`)
   }
 
   /**
@@ -45,6 +58,8 @@ export class GraphDataService {
   createEdge(parentId: string, prerequisiteId: string, successorId: string) {
 
   }
+
+
 
   updateUserConceptData(userId: number, conceptId: number, data?: any) {
     console.log("in updateUserConceptData: ", data)

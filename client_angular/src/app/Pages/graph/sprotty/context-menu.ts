@@ -23,7 +23,7 @@ import {
 import { CenterAction, DeleteElementAction, FitToScreenAction, Point, SetPopupModelAction, SelectionResult, CreateElementAction } from 'sprotty-protocol';
 
 import { SprottyConceptNode } from './sprottyModels.interface'
-import { CreateConceptAction } from './actions';
+import { CreateConceptAction, DeleteConceptAction } from './actions';
 @injectable()
 export class ClassContextMenuService implements IContextMenuService {
 
@@ -83,22 +83,24 @@ export class ClassContextMenuItemProvider implements IContextMenuItemProvider {
 
     async getItems(root: Readonly<SModelRootImpl>, lastMousePosition?: Point | undefined): Promise<LabeledAction[]> {
         const selectionResult = await this.actionDispatcher.request<SelectionResult>(GetSelectionAction.create())
+        const selectedElement = selectionResult.selectedElementsIDs[0]
         return [
             new LabeledAction('Fit Diagram to Screen', [FitToScreenAction.create(root.children.map(child => child.id))]),
             new LabeledAction('Center Selection', [CenterAction.create(selectionResult.selectedElementsIDs)]),
             new LabeledAction('', []),
             new LabeledAction('Export SVG', [RequestExportSvgAction.create()]),
             new LabeledAction('', []),
-            {
-                ...new LabeledAction('Delete Selected', [DeleteElementAction.create(selectionResult.selectedElementsIDs)]),
-                isEnabled: () => {
-                    return selectionResult.selectedElementsIDs.length > 0
-                }
-            } as MenuItem,
+            // {
+            //     ...new LabeledAction('Delete Selected', [DeleteElementAction.create(selectionResult.selectedElementsIDs)]),
+            //     isEnabled: () => {
+            //         return selectionResult.selectedElementsIDs.length > 0
+            //     }
+            // } as MenuItem,
 
             // custom options
             new LabeledAction('', []),
-            new LabeledAction('Add Concept here', [CreateConceptAction.create({parentId: selectionResult.selectedElementsIDs[0]})]),
+            new LabeledAction('Add Concept here', [CreateConceptAction.create({parentId: selectedElement})]),
+            new LabeledAction('Delete this Concept', [DeleteConceptAction.create({conceptId: selectedElement})]),
         ];
     }
 
