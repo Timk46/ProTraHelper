@@ -22,6 +22,9 @@ import { ContentViewComponent } from './Pages/contentView/contentView.component'
 import { CreateConceptDialogComponent } from './Pages/graph/graph-dialogs/create-concept-dialog/create-concept-dialog.component';
 import { VideoViewerComponent } from './Pages/contentView/contentElement/videoViewer/videoViewer.component';
 import { CompetenciesComponent } from './Pages/competencies/competencies.component';
+import { QuestionFilterComponent } from './Pages/discussion/question-filter/question-filter.component';
+import { QuestionOverviewComponent } from './Pages/discussion/question-overview/question-overview.component';
+import { QuestionComponent } from './Pages/discussion/question-overview/question/question.component';
 
 
 
@@ -40,7 +43,10 @@ import { CompetenciesComponent } from './Pages/competencies/competencies.compone
     ContentViewComponent,
     CreateConceptDialogComponent,
     VideoViewerComponent,
-    CompetenciesComponent
+    CompetenciesComponent,
+    QuestionFilterComponent,
+    QuestionOverviewComponent,
+    QuestionComponent
   ],
   imports: [
     BrowserModule,
