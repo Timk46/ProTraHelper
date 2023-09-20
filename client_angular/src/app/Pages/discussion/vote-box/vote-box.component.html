@@ -1,0 +1,23 @@
+<div class="vertical-container">
+  <div>
+    <button *ngIf="userVoteStatus != 1" mat-button (click)="onUpvote()" class="small-button">
+      <mat-icon class="small-icon">arrow_upward</mat-icon>
+    </button>
+    <button *ngIf="userVoteStatus == 1" mat-stroked-button (click)="onUpvote()" class="small-button" style="width: 25px;">
+      <mat-icon class="small-icon">arrow_upward</mat-icon>
+    </button>
+
+    <div class="count-box">{{ votes + userVoteStatus}}</div>
+
+    <button *ngIf="userVoteStatus != -1" mat-button (click)="onDownvote()" class="small-button">
+      <mat-icon class="small-icon">arrow_downward</mat-icon>
+    </button>
+    <button *ngIf="userVoteStatus == -1" mat-stroked-button (click)="onDownvote()" class="small-button">
+      <mat-icon class="small-icon">arrow_downward</mat-icon>
+    </button>
+  </div>
+
+  <mat-icon *ngIf="isSolution" class="small-icon" style="padding-left: 3px;" title="Diese Frage wurde beantwortet.">check</mat-icon>
+
+</div>
+

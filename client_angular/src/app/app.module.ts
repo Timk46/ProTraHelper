@@ -25,6 +25,7 @@ import { CompetenciesComponent } from './Pages/competencies/competencies.compone
 import { QuestionFilterComponent } from './Pages/discussion/question-filter/question-filter.component';
 import { QuestionOverviewComponent } from './Pages/discussion/question-overview/question-overview.component';
 import { QuestionComponent } from './Pages/discussion/question-overview/question/question.component';
+import { VoteBoxComponent } from './Pages/discussion/vote-box/vote-box.component';
 
 
 
@@ -46,7 +47,8 @@ import { QuestionComponent } from './Pages/discussion/question-overview/question
     CompetenciesComponent,
     QuestionFilterComponent,
     QuestionOverviewComponent,
-    QuestionComponent
+    QuestionComponent,
+    VoteBoxComponent
   ],
   imports: [
     BrowserModule,

@@ -1,3 +1,26 @@
-<div class="question-box mat-elevation-z8" onfocus="">
-  <p>{{ title }}</p>
+<div class="question-box">
+  <div class="question-row">
+    <div style="padding-left: 10px; padding-top: 14px">
+      <app-vote-box [votes]="questionData.votes" [isSolution]="questionData.solved"></app-vote-box>
+    </div>
+
+    <div class="vertical-line"></div>
+
+    <div class="vertical-container">
+      <div>
+        <div class="question-row">
+          <mat-icon>account_circle</mat-icon>
+          <p>Beitrag von {{questionData.username}}</p>
+          <p>•</p>
+          <p>{{questionData.date}}</p>
+          <p>•</p>
+          <p>{{questionData.contentNodeName}}</p>
+          <p>•</p>
+          <p>Stichworte: {{questionData.tags}}</p>
+        </div>
+        <h1>{{ questionData.title }}</h1>
+      </div>
+      <p>{{questionData.commentCount}} Kommentare</p>
+    </div>
+  </div>
 </div>

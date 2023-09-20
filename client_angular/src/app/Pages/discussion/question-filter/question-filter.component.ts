@@ -7,7 +7,7 @@ import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
 @Component({
   selector: 'app-question-filter',
   templateUrl: './question-filter.component.html',
-  styleUrls: ['./question-filter.component.scss', '../discussion.component.css']
+  styleUrls: ['./question-filter.component.scss']
 })
 export class QuestionFilterComponent {
   allSelected : Boolean = true;

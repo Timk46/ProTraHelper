@@ -1,0 +1,38 @@
+.vote-row {
+  display: flex;
+  gap: 10px;
+}
+
+.small-button {
+  width: 30px;
+  height: 30px;
+  min-width: unset;
+  min-height: unset;
+  font-size: unset;
+  margin-right: unset;
+}
+
+.small-icon {
+  font-size: auto;
+  margin: unset;
+  overflow: unset;
+}
+
+.count-box {
+  width: 30px;
+  height: 30px;
+  line-height: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center; /* vertical */
+  align-content: center; /* horizontal */
+}
+
+.vertical-container {
+  width: 30px;
+  display: flex;
+  flex-direction: column; /* Anordnung der Elemente vertikal */
+  align-items: flex-start; /* Zentriert die Elemente horizontal */
+  gap: 10px;
+}

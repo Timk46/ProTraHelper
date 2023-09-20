@@ -19,3 +19,35 @@
   opacity: 1;
   max-height: 1500px;
 }
+
+.mat-elevation-z8 {
+  background: #eceff4;
+  color: black;
+}
+
+.content {
+  height: 20h;
+  margin: 16px;
+  margin-left: 32px;
+  padding:16px;
+
+  contain: content;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+
+  font-size: 14px;
+  border-radius: 10px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+h2 {
+  line-height: 0;
+  margin: 0 0 0px;
+}
