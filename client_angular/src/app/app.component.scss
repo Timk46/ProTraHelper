@@ -3,9 +3,8 @@
 }
 
 .app-container {
-  height: 90%;
+  height:calc(100vh - 64px); /* our toolbar hight: 64px */
   margin: 0;
-
 }
 .app-sidenav {
   width: 230px;
