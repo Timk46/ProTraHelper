@@ -1,0 +1,9 @@
+<div class="content mat-elevation-z8">
+  <!-- <h1>Discussion Page</h1> -->
+  <app-discussion-page-question [questionData]="questionData"></app-discussion-page-question>
+</div>
+<div class="content mat-elevation-z8">
+  <h1>Antworten</h1>
+  <app-discussion-page-comment *ngFor="let comment of commentData" [commentData]="comment"></app-discussion-page-comment>
+</div>
+

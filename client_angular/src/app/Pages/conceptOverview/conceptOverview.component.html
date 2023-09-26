@@ -18,7 +18,10 @@ active Concept Node Id: {{activeConceptNode.databaseId}} <br>
   </mat-tab>
 
   <mat-tab label="Diskussion">
-    <app-discussion [contentsForActiveConceptNode]="contentsForActiveConceptNode"></app-discussion>
+    <app-discussion
+    [contentsForActiveConceptNode]="contentsForActiveConceptNode"
+    [activeConceptNode]="activeConceptNode"
+    ></app-discussion>
   </mat-tab>
 </mat-tab-group>
 

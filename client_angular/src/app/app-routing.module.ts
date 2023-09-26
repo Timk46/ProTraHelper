@@ -12,6 +12,7 @@ import { GraphComponent } from './Pages/graph/graph.component';
 
 // just for testing
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
+import { DiscussionPageComponent } from './Pages/discussion/discussion-page/discussion-page.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -27,6 +28,7 @@ const routes: Routes = [
 
   // just for testing
   { path: 'file-upload', component: FileUploadComponent },
+  { path: 'discussion-page', component: DiscussionPageComponent },
 
 ];
 

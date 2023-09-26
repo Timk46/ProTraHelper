@@ -2,7 +2,7 @@ import "reflect-metadata"
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { MaterialModule } from './Modules/material.module';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 // Components
 import { GraphComponent } from './Pages/graph/graph.component';
 import { ContentBoardComponent } from './Pages/contentBoard/contentBoard.component';
@@ -26,6 +26,11 @@ import { QuestionFilterComponent } from './Pages/discussion/question-filter/ques
 import { QuestionOverviewComponent } from './Pages/discussion/question-overview/question-overview.component';
 import { QuestionComponent } from './Pages/discussion/question-overview/question/question.component';
 import { VoteBoxComponent } from './Pages/discussion/vote-box/vote-box.component';
+import { FilterMenuComponent } from './Pages/discussion/question-filter/filter-menu/filter-menu.component';
+import { DiscussionPageComponent } from './Pages/discussion/discussion-page/discussion-page.component';
+import { QuestionCreationComponent } from './Pages/discussion/question-creation/question-creation.component';
+import { DiscussionPageQuestionComponent } from './Pages/discussion/discussion-page/discussion-page-question/discussion-page-question.component';
+import { DiscussionPageCommentComponent } from './Pages/discussion/discussion-page/discussion-page-comment/discussion-page-comment.component';
 
 
 
@@ -48,11 +53,17 @@ import { VoteBoxComponent } from './Pages/discussion/vote-box/vote-box.component
     QuestionFilterComponent,
     QuestionOverviewComponent,
     QuestionComponent,
-    VoteBoxComponent
+    VoteBoxComponent,
+    FilterMenuComponent,
+    DiscussionPageComponent,
+    QuestionCreationComponent,
+    DiscussionPageQuestionComponent,
+    DiscussionPageCommentComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
+    ReactiveFormsModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     MaterialModule,

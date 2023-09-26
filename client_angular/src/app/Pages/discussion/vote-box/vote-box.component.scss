@@ -35,4 +35,9 @@
   flex-direction: column; /* Anordnung der Elemente vertikal */
   align-items: flex-start; /* Zentriert die Elemente horizontal */
   gap: 10px;
+  margin-bottom: 15px;
+}
+
+mat-icon {
+  margin-right: 0px !important;
 }

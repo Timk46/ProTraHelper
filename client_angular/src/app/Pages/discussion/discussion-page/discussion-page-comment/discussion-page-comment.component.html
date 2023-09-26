@@ -1,0 +1,21 @@
+<div class="question-box">
+  <div class="question-row">
+    <div style="padding-left: 10px; padding-top: 14px;">
+      <app-vote-box [votes]="0" [isSolution]="false"></app-vote-box> <!-- solution hard coded for now -->
+    </div>
+
+    <div class="vertical-line"></div>
+
+    <div class="vertical-container">
+      <div>
+        <div class="question-row">
+          <mat-icon>account_circle</mat-icon>
+          <p>{{commentData.username}}</p>
+          <p>•</p>
+          <p>{{commentData.date}}</p>
+        </div>
+        <p>{{ commentData.text }}</p>
+      </div>
+    </div>
+  </div>
+</div>

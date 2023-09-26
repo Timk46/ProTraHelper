@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-question-overview',
@@ -7,6 +7,7 @@ import { Component } from '@angular/core';
 })
 export class QuestionOverviewComponent {
 
+  /* test content, removed when database communication is established */
   dummyQuestions = [
     {
       id: 0,

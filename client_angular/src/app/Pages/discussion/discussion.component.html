@@ -1,2 +1,6 @@
-<app-question-filter></app-question-filter>
+<p>passed active concept node: {{activeConceptNode.databaseId}} : {{activeConceptNode.name}}</p>
+<app-question-filter
+  [activeConceptNode]="activeConceptNode"
+  [contentNodes]="contentsForActiveConceptNode.trainedBy"
+></app-question-filter>
 <app-question-overview></app-question-overview>

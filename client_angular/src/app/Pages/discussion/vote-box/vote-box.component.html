@@ -17,7 +17,14 @@
     </button>
   </div>
 
-  <mat-icon *ngIf="isSolution" class="small-icon" style="padding-left: 3px;" title="Diese Frage wurde beantwortet.">check</mat-icon>
+  <div>
+    <!-- <mat-icon *ngIf="isSolution" class="small-icon" style="padding-left: 3px;" title="Diese Frage wurde beantwortet.">check</mat-icon> -->
+
+    <span matTooltip="Diese Frage wurde als 'geklärt' gekennzeichnet.">
+      <mat-icon *ngIf="isSolution" class="small-icon" style="padding-left: 3px;">check</mat-icon>
+    </span>
+  </div>
+
 
 </div>
 

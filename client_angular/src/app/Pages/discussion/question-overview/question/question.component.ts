@@ -8,6 +8,7 @@ import { Component, Input } from '@angular/core';
 export class QuestionComponent {
   @Input() title : String = 'Ist ein dictionary in Python mutable?';
 
+  /* dummy content, TODO: create DTO*/
   @Input() questionData =
     {
       id: -1,

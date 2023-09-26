@@ -17,13 +17,7 @@
   <!-- the filter seclection box -->
   <div [ngClass]="{'fade-in-out': true, 'active': filterSelection}">
     <hr>
-    <app-graph></app-graph>
-    <hr>
-    <div style="margin-bottom: 9px; margin-left: 5px;"> <!-- fix gesucht, momentan ein Workaround, da sonst Schatten abgeschnitten -->
-      <!-- only clickable, if content node chosen -->
-      <button *ngIf="activeConceptNode.databaseId > 0" (click)="onFilterSelected()" mat-raised-button>Wählen</button> <!-- Hier nochmal schauen, ob es nicht doch eine Node mit id 0 gibt -->
-      <button *ngIf="activeConceptNode.databaseId <= 0" [disabled]="true"  mat-stroked-button>Wählen</button> <!-- genauso hier -->
-    </div>
+    <app-filter-menu [contentNodes]="contentNodes"></app-filter-menu>
   </div>
 
 </div>
