@@ -18,6 +18,8 @@ async function main() {
   await prisma.file.deleteMany();
   await prisma.message.deleteMany();
   await prisma.discussion.deleteMany();
+  await prisma.vote.deleteMany();
+  await prisma.anonymousUser.deleteMany();
   await prisma.submissionCode.deleteMany();
   await prisma.codingQuestion.deleteMany();
   await prisma.mCQuestion.deleteMany();
@@ -613,21 +615,46 @@ async function main() {
   });
 
   // Discussion, Message
-  const discussion = await prisma.discussion.create({
+  const anonymousAdmin = await prisma.anonymousUser.create({
+      data: {
+        user: { connect: { id: adminUser.id } },
+        anonymousName: 'Anonymous 4dm1n',
+      },
+    });
+
+  const exampleDiscussion = await prisma.discussion.create({
     data: {
-      title: 'Discussion Topic',
+      title: 'Ist ein dictionary in Python mutable?',
       contentNode: { connect: { id: contentNode.id } },
-      author: { connect: { id: adminUser.id } },
+      author: { connect: { id: anonymousAdmin.id } },
     },
   });
 
-  await prisma.message.create({
+  const exampleQuestion = await prisma.message.create({ // the question
     data: {
-      text: 'Message Text',
-      author: { connect: { id: adminUser.id } },
-      Discussion: { connect: { id: discussion.id } },
+      text: 'Als ich kürzlich an meinem Python-Projekt gearbeitet habe, stieß ich auf eine interessante Herausforderung. Ich verwendete ein Dictionary, um Daten zu speichern, und bemerkte, dass sich die Werte nach der Zuweisung scheinbar veränderten. Das brachte mich ins Grübeln - ist ein Dictionary in Python wirklich veränderbar? Könnte das der Grund für mein Problem sein? Könntet ihr mir bitte erklären, wie die Mutabilität von Dictionaries in Python funktioniert und ob es eine Möglichkeit gibt, sie vor ungewollten Änderungen zu schützen?',
+      author: { connect: { id: anonymousAdmin.id } },
+      isInitiator: true,
+      discussion: { connect: { id: exampleDiscussion.id } },
     },
   });
+
+  await prisma.message.create({ // an answer
+    data: {
+      text: 'Nagut, ich antworte einfach mal auf mich selbst: Ja, ein dictionary ist mutable. Aber ich würde mir empfehlen, nochmal in der Dokumentation nachzulesen, da steht alles drin.',
+      author: { connect: { id: anonymousAdmin.id } },
+      discussion: { connect: { id: exampleDiscussion.id } },
+    },
+  });
+
+  await prisma.vote.create({
+    data: { // upvote per default
+      author: { connect: { id: anonymousAdmin.id } },
+      message: { connect: { id: exampleQuestion.id } },
+    },
+  });
+
+  console.log('Test Discussion created.');
 }
 
 main()
