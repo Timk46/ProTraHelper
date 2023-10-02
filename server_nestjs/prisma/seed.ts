@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { ConsoleLogger } from '@nestjs/common';
 import { Console } from 'console';
+import * as XLSX from 'xlsx';
+import * as fs from 'fs';
 
 const prisma = new PrismaClient();
 
@@ -16,9 +18,9 @@ async function main() {
   await prisma.mCAnswer.deleteMany();
   await prisma.feedback.deleteMany();
   await prisma.file.deleteMany();
+  await prisma.vote.deleteMany();
   await prisma.message.deleteMany();
   await prisma.discussion.deleteMany();
-  await prisma.vote.deleteMany();
   await prisma.anonymousUser.deleteMany();
   await prisma.submissionCode.deleteMany();
   await prisma.codingQuestion.deleteMany();
@@ -39,6 +41,59 @@ async function main() {
   await prisma.user.deleteMany();
 
   console.log('Creating everything...');
+
+  const filePath = process.env.FILE_PATH + 'Kompetenzraster.xlsx';
+  if (fs.existsSync(filePath)) {
+    const workbook = XLSX.readFile(filePath);
+    const worksheet = workbook.Sheets['OFP_Import'];
+    const excelData = XLSX.utils.sheet_to_json(worksheet, {
+      header: 1,
+    });
+
+    // Extract column names from the first row (header)
+    const columnNames = excelData[0];
+    // Divide columns and save their indexes
+    // TODO: get the ids by column names
+    const columnConceptId = 0;
+    const columnContentId = 1;
+    const columnRequiresId = 2;
+    const columnTrainsId = 3;
+    const columnTopicId = [4, 5, 6];
+    const columnLevelId = 7;
+    const columnDescriptionId = 8;
+    const columnElementId = [9, 10, 11, 12, 13];
+    const columnTaskId = [14, 15];
+
+    // Iterate through the excelData and insert records into your Prisma database
+    let lastTopic = 'No topic found!';
+    for (const row of excelData) {
+      //import contentNodes from excelData
+      if (row[columnContentId] && !isNaN(+row[columnContentId])) {
+        // We need to iterate over the topic columns because they are divided into subtopics
+        for (const topicId in columnTopicId) {
+          if (row[columnTopicId[topicId]]) {
+            lastTopic = row[columnTopicId[topicId]];
+            break;
+          }
+        }
+        await prisma.contentNode.create({
+          data: {
+            id: +row[columnContentId],
+            name: 'ContentNode' + +row[columnContentId] + ' für ' + lastTopic,
+            description: row[columnDescriptionId]
+              ? row[columnDescriptionId].toString()
+              : 'Keine Beschreibung für ContentNode ' + +row[columnContentId],
+          },
+        });
+      }
+    }
+
+    console.log('ContentNodes created.');
+  } else {
+    console.log(
+      'To import ContentNodes please save "Kompetenzraster.xlsx" in the storage folder!',
+    );
+  }
 
   // Modules
   const module1 = await prisma.module.create({
@@ -239,7 +294,7 @@ async function main() {
   // ContentNode
   const contentNode = await prisma.contentNode.create({
     data: {
-      id: 1,
+      id: 1001,
       name: '1 ContentNode für Arrays',
       description: 'Description for Content Node 1',
     },
@@ -247,7 +302,7 @@ async function main() {
 
   const contentNode2 = await prisma.contentNode.create({
     data: {
-      id: 2,
+      id: 1002,
       name: '2 ContentNode für Arrays',
       description: 'Description for Content Node 2',
     },
@@ -255,7 +310,7 @@ async function main() {
 
   const contentNode3 = await prisma.contentNode.create({
     data: {
-      id: 3,
+      id: 1003,
       name: '3 ContentNode für Arrays',
       description: 'Description for Content Node 3',
     },
@@ -263,7 +318,7 @@ async function main() {
 
   const contentNode4 = await prisma.contentNode.create({
     data: {
-      id: 4,
+      id: 1004,
       name: '4 ContentNode für Arrays',
       description: 'Description for Content Node 4',
     },
@@ -271,7 +326,7 @@ async function main() {
 
   const contentNode5 = await prisma.contentNode.create({
     data: {
-      id: 5,
+      id: 1005,
       name: '5 ContentNode für Arrays',
       description: 'Description for Content Node 5',
     },
@@ -616,11 +671,11 @@ async function main() {
 
   // Discussion, Message
   const anonymousAdmin = await prisma.anonymousUser.create({
-      data: {
-        user: { connect: { id: adminUser.id } },
-        anonymousName: 'Anonymous 4dm1n',
-      },
-    });
+    data: {
+      user: { connect: { id: adminUser.id } },
+      anonymousName: 'Anonymous 4dm1n',
+    },
+  });
 
   const exampleDiscussion = await prisma.discussion.create({
     data: {
@@ -630,7 +685,8 @@ async function main() {
     },
   });
 
-  const exampleQuestion = await prisma.message.create({ // the question
+  const exampleQuestion = await prisma.message.create({
+    // the question
     data: {
       text: 'Als ich kürzlich an meinem Python-Projekt gearbeitet habe, stieß ich auf eine interessante Herausforderung. Ich verwendete ein Dictionary, um Daten zu speichern, und bemerkte, dass sich die Werte nach der Zuweisung scheinbar veränderten. Das brachte mich ins Grübeln - ist ein Dictionary in Python wirklich veränderbar? Könnte das der Grund für mein Problem sein? Könntet ihr mir bitte erklären, wie die Mutabilität von Dictionaries in Python funktioniert und ob es eine Möglichkeit gibt, sie vor ungewollten Änderungen zu schützen?',
       author: { connect: { id: anonymousAdmin.id } },
@@ -639,7 +695,8 @@ async function main() {
     },
   });
 
-  await prisma.message.create({ // an answer
+  await prisma.message.create({
+    // an answer
     data: {
       text: 'Nagut, ich antworte einfach mal auf mich selbst: Ja, ein dictionary ist mutable. Aber ich würde mir empfehlen, nochmal in der Dokumentation nachzulesen, da steht alles drin.',
       author: { connect: { id: anonymousAdmin.id } },
@@ -648,7 +705,8 @@ async function main() {
   });
 
   await prisma.vote.create({
-    data: { // upvote per default
+    data: {
+      // upvote per default
       author: { connect: { id: anonymousAdmin.id } },
       message: { connect: { id: exampleQuestion.id } },
     },
