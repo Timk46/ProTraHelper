@@ -124,3 +124,6 @@ dist
 
 # MacFiles
 .DS_Store
+
+# Storage of Lecture files for local testing
+server_nestjs/src/storage
