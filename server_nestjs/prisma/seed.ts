@@ -18,7 +18,7 @@ async function main() {
   await prisma.mCAnswer.deleteMany();
   await prisma.feedback.deleteMany();
   await prisma.file.deleteMany();
-  await prisma.vote.deleteMany();
+  await prisma.Task.deleteMany();
   await prisma.message.deleteMany();
   await prisma.discussion.deleteMany();
   await prisma.anonymousUser.deleteMany();
@@ -64,11 +64,15 @@ async function main() {
     const columnElementId = [9, 10, 11, 12, 13];
     const columnTaskId = [14, 15];
 
-    // Iterate through the excelData and insert records into your Prisma database
     let lastTopic = 'No topic found!';
+    let lastConceptId = 0;
+    // Iterate through the excelData and insert records into your Prisma database
     for (const row of excelData) {
-      //import contentNodes from excelData
+      if (row[columnConceptId] && !isNaN(+row[columnConceptId])) {
+        lastConceptId = +row[columnConceptId];
+      }
       if (row[columnContentId] && !isNaN(+row[columnContentId])) {
+        //import contentNodes from excelData
         // We need to iterate over the topic columns because they are divided into subtopics
         for (const topicId in columnTopicId) {
           if (row[columnTopicId[topicId]]) {
@@ -85,6 +89,40 @@ async function main() {
               : 'Keine Beschreibung für ContentNode ' + +row[columnContentId],
           },
         });
+        //import contentElements from excelData
+        for (const elementId in columnElementId) {
+          if (
+            row[columnElementId[elementId]] &&
+            row[columnElementId[elementId]].length > 0
+          ) {
+            const TempContentElement = await prisma.contentElement.create({
+              data: {
+                type: row[columnElementId[elementId]],
+                //TODO: get the title from the excel file
+                title:
+                  'Titel für contentElement ' +
+                  +row[columnContentId] +
+                  '.' +
+                  elementId,
+                position: +elementId + 1,
+                contentNode: {
+                  connect: { id: +row[columnContentId] },
+                },
+              },
+            });
+            await prisma.file.create({
+              data: {
+                name: 'Filename ' + +row[columnContentId] + '.' + elementId, //TODO: get the filename from the excel file
+                uniqueIdentifier:
+                  'randomString1' + +row[columnContentId] + '.' + elementId, //TODO: generate a unique identifier
+                path: 'randomString1.pdf', //TODO: get the path from the excel file
+                type: row[columnElementId[elementId]],
+                contentElement: { connect: { id: TempContentElement.id } },
+              },
+            });
+            break;
+          }
+        }
       }
     }
 
@@ -704,9 +742,9 @@ async function main() {
     },
   });
 
-  await prisma.vote.create({
+  await prisma.Task.create({
     data: {
-      // upvote per default
+      // upTask per default
       author: { connect: { id: anonymousAdmin.id } },
       message: { connect: { id: exampleQuestion.id } },
     },
