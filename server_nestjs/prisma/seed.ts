@@ -718,8 +718,9 @@ async function main() {
   const exampleDiscussion = await prisma.discussion.create({
     data: {
       title: 'Ist ein dictionary in Python mutable?',
-      contentNode: { connect: { id: contentNode.id } },
+      conceptNode: { connect: { id: 14 } },
       author: { connect: { id: anonymousAdmin.id } },
+      isSolved: true,
     },
   });
 
@@ -739,6 +740,7 @@ async function main() {
       text: 'Nagut, ich antworte einfach mal auf mich selbst: Ja, ein dictionary ist mutable. Aber ich würde mir empfehlen, nochmal in der Dokumentation nachzulesen, da steht alles drin.',
       author: { connect: { id: anonymousAdmin.id } },
       discussion: { connect: { id: exampleDiscussion.id } },
+      isSolution: true,
     },
   });
 

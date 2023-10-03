@@ -5,10 +5,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphModule } from './graph/graph.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { DiscussionController } from './discussion/discussion.controller';
+import { DiscussionService } from './discussion/discussion.service';
 
 @Module({
   imports: [FilesModule, GraphModule, PrismaModule, ContentModule],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, DiscussionController],
+  providers: [AppService, DiscussionService],
 })
 export class AppModule {}

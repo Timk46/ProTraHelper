@@ -95,6 +95,7 @@ model ConceptNode {
   moduleGoals       ModuleConceptGoal[]
   conceptGraph      ConceptGraph?
   conceptGraphId    Int? // is only set for the ancestor node
+  Discussion        Discussion[]
 }
 
 // defines one parent-child relationship in the concept graph
@@ -333,11 +334,11 @@ model KIFeedback {
 //********************************************************************************************* End Coding Questions
 
 //********************************************************************************************* Begin Discussion
-model anonymousUser { // each user is an anonymous user for each discussion
-  id            Int          @id @default(autoincrement())
-  user          User         @relation(fields: [userId], references: [id])
-  userId        Int          
-  anonymousName String       @default("Anonymchen")
+model anonymousUser {
+  id            Int         @id @default(autoincrement()) @unique
+  user          User       @relation(fields: [userId], references: [id])
+  userId        Int
+  anonymousName String      @default("Anonymchen")
   Discussion    Discussion?
   Message       Message[]
   Vote          Vote[]
@@ -348,10 +349,13 @@ model Discussion {
   title         String
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  contentNode   ContentNode   @relation(fields: [contentNodeId], references: [id])
-  contentNodeId Int
+  contentNode   ContentNode?  @relation(fields: [contentNodeId], references: [id])
+  contentNodeId Int?
+  conceptNode   ConceptNode   @relation(fields: [conceptNodeId], references: [id])
+  conceptNodeId Int
   author        anonymousUser @relation(fields: [authorId], references: [id])
-  authorId      Int          @unique
+  authorId      Int           @unique
+  isSolved      Boolean       @default(false)
   messages      Message[]
 }
 
@@ -362,19 +366,20 @@ model Message {
   updatedAt    DateTime      @updatedAt
   author       anonymousUser @relation(fields: [authorId], references: [id])
   authorId     Int
-  isInitiator  Boolean       @default(false) // true if this is the autors discussion question
+  isInitiator  Boolean       @default(false) // true if this is the authors discussion question
+  isSolution   Boolean       @default(false)
   discussion   Discussion    @relation(fields: [discussionId], references: [id])
   discussionId Int
-  vote         Vote?
+  votes        Vote[]
 }
 
 model Vote {
   id        Int           @id @default(autoincrement())
   isUpvote  Boolean       @default(true) // true if upvote, false if downvote
   author    anonymousUser @relation(fields: [authorId], references: [id])
-  authorId  Int           
+  authorId  Int
   message   Message       @relation(fields: [messageId], references: [id])
-  messageId Int           @unique
+  messageId Int
 }
 
 //********************************************************************************************* End Discussion

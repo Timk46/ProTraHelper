@@ -4,5 +4,6 @@ export interface discussionMessageDTO {
     voteId: number;
     createdAt: Date;
     messageText: string;
+    isSolution: boolean;
 }
 

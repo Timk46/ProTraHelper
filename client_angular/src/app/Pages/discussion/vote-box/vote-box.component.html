@@ -7,7 +7,7 @@
       <mat-icon class="small-icon">arrow_upward</mat-icon>
     </button>
 
-    <div class="count-box">{{ votes + userVoteStatus}}</div>
+    <div class="count-box">{{ voteData.votes + userVoteStatus}}</div>
 
     <button *ngIf="userVoteStatus != -1" mat-button (click)="onDownvote()" class="small-button">
       <mat-icon class="small-icon">arrow_downward</mat-icon>
