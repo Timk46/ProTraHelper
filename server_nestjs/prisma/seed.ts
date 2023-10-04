@@ -4,8 +4,14 @@ import { ConsoleLogger } from '@nestjs/common';
 import { Console } from 'console';
 import * as XLSX from 'xlsx';
 import * as fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
+
+function getFilenameByLink(hyperlink: string): string {
+  const filename = hyperlink.split('/').pop();
+  return filename;
+}
 
 async function main() {
   // delete everything
@@ -64,10 +70,14 @@ async function main() {
     const columnElementId = [9, 10, 11, 12, 13];
     const columnTaskId = [14, 15];
 
+    //in case the topic column for the Content is empty we need to save the last topic
     let lastTopic = 'No topic found!';
     let lastConceptId = 0;
     // Iterate through the excelData and insert records into your Prisma database
-    for (const row of excelData) {
+    for (const { rowIndex, row } of excelData.map((row, rowIndex) => ({
+      rowIndex,
+      row,
+    }))) {
       if (row[columnConceptId] && !isNaN(+row[columnConceptId])) {
         lastConceptId = +row[columnConceptId];
       }
@@ -80,6 +90,7 @@ async function main() {
             break;
           }
         }
+        //contentNodes from excelData
         await prisma.contentNode.create({
           data: {
             id: +row[columnContentId],
@@ -89,16 +100,27 @@ async function main() {
               : 'Keine Beschreibung für ContentNode ' + +row[columnContentId],
           },
         });
-        //import contentElements from excelData
+        //loop through all contentElement columns
         for (const elementId in columnElementId) {
           if (
             row[columnElementId[elementId]] &&
             row[columnElementId[elementId]].length > 0
           ) {
+            const cellAddress = XLSX.utils.encode_cell({
+              r: rowIndex,
+              c: columnElementId[elementId],
+            });
+            const hyperlink =
+              worksheet[cellAddress] &&
+              worksheet[cellAddress].l &&
+              worksheet[cellAddress].l.Target;
+            const filename = hyperlink
+              ? getFilenameByLink(hyperlink)
+              : 'Kein Dateiname gefunden!';
+            //contentElements from excelData
             const TempContentElement = await prisma.contentElement.create({
               data: {
                 type: row[columnElementId[elementId]],
-                //TODO: get the title from the excel file
                 title:
                   'Titel für contentElement ' +
                   +row[columnContentId] +
@@ -110,12 +132,12 @@ async function main() {
                 },
               },
             });
+            //files from excelData
             await prisma.file.create({
               data: {
-                name: 'Filename ' + +row[columnContentId] + '.' + elementId, //TODO: get the filename from the excel file
-                uniqueIdentifier:
-                  'randomString1' + +row[columnContentId] + '.' + elementId, //TODO: generate a unique identifier
-                path: 'randomString1.pdf', //TODO: get the path from the excel file
+                name: row[columnElementId[elementId]] + ' zu ' + filename,
+                uniqueIdentifier: uuidv4(),
+                path: filename, //TODO: replace with the actual path when running on the server
                 type: row[columnElementId[elementId]],
                 contentElement: { connect: { id: TempContentElement.id } },
               },
@@ -127,6 +149,8 @@ async function main() {
     }
 
     console.log('ContentNodes created.');
+    console.log('ContentElements created.');
+    console.log('Files created.');
   } else {
     console.log(
       'To import ContentNodes please save "Kompetenzraster.xlsx" in the storage folder!',
@@ -715,42 +739,42 @@ async function main() {
     },
   });
 
-  const exampleDiscussion = await prisma.discussion.create({
-    data: {
-      title: 'Ist ein dictionary in Python mutable?',
-      conceptNode: { connect: { id: 14 } },
-      author: { connect: { id: anonymousAdmin.id } },
-      isSolved: true,
-    },
-  });
+  // const exampleDiscussion = await prisma.discussion.create({
+  //   data: {
+  //     title: 'Ist ein dictionary in Python mutable?',
+  //     conceptNode: { connect: { id: 14 } },
+  //     author: { connect: { id: anonymousAdmin.id } },
+  //     isSolved: true,
+  //   },
+  // });
 
-  // the question
-  const exampleQuestion = await prisma.message.create({
-    data: {
-      text: 'Als ich kürzlich an meinem Python-Projekt gearbeitet habe, stieß ich auf eine interessante Herausforderung. Ich verwendete ein Dictionary, um Daten zu speichern, und bemerkte, dass sich die Werte nach der Zuweisung scheinbar veränderten. Das brachte mich ins Grübeln - ist ein Dictionary in Python wirklich veränderbar? Könnte das der Grund für mein Problem sein? Könntet ihr mir bitte erklären, wie die Mutabilität von Dictionaries in Python funktioniert und ob es eine Möglichkeit gibt, sie vor ungewollten Änderungen zu schützen?',
-      author: { connect: { id: anonymousAdmin.id } },
-      isInitiator: true,
-      discussion: { connect: { id: exampleDiscussion.id } },
-    },
-  });
+  // // the question
+  // const exampleQuestion = await prisma.message.create({
+  //   data: {
+  //     text: 'Als ich kürzlich an meinem Python-Projekt gearbeitet habe, stieß ich auf eine interessante Herausforderung. Ich verwendete ein Dictionary, um Daten zu speichern, und bemerkte, dass sich die Werte nach der Zuweisung scheinbar veränderten. Das brachte mich ins Grübeln - ist ein Dictionary in Python wirklich veränderbar? Könnte das der Grund für mein Problem sein? Könntet ihr mir bitte erklären, wie die Mutabilität von Dictionaries in Python funktioniert und ob es eine Möglichkeit gibt, sie vor ungewollten Änderungen zu schützen?',
+  //     author: { connect: { id: anonymousAdmin.id } },
+  //     isInitiator: true,
+  //     discussion: { connect: { id: exampleDiscussion.id } },
+  //   },
+  // });
 
-  // an answer
-  await prisma.message.create({
-    data: {
-      text: 'Nagut, ich antworte einfach mal auf mich selbst: Ja, ein dictionary ist mutable. Aber ich würde mir empfehlen, nochmal in der Dokumentation nachzulesen, da steht alles drin.',
-      author: { connect: { id: anonymousAdmin.id } },
-      discussion: { connect: { id: exampleDiscussion.id } },
-      isSolution: true,
-    },
-  });
+  // // an answer
+  // await prisma.message.create({
+  //   data: {
+  //     text: 'Nagut, ich antworte einfach mal auf mich selbst: Ja, ein dictionary ist mutable. Aber ich würde mir empfehlen, nochmal in der Dokumentation nachzulesen, da steht alles drin.',
+  //     author: { connect: { id: anonymousAdmin.id } },
+  //     discussion: { connect: { id: exampleDiscussion.id } },
+  //     isSolution: true,
+  //   },
+  // });
 
   // an upvote
-  await prisma.vote.create({
-    data: {
-      author: { connect: { id: anonymousAdmin.id } },
-      message: { connect: { id: exampleQuestion.id } },
-    },
-  });
+  // await prisma.vote.create({
+  //   data: {
+  //     author: { connect: { id: anonymousAdmin.id } },
+  //     message: { connect: { id: exampleQuestion.id } },
+  //   },
+  // });
 
   console.log('Test Discussion created.');
 }
