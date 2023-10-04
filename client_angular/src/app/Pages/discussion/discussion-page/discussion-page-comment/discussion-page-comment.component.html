@@ -1,7 +1,7 @@
 <div class="question-box">
   <div class="question-row">
     <div style="padding-left: 10px; padding-top: 14px;">
-      <app-vote-box [messageId]="1" [isSolution]="false"></app-vote-box> <!-- solution hard coded for now -->
+      <app-vote-box [messageId]="messageData.messageId" [isSolution]="messageData.isSolution"></app-vote-box> <!-- solution hard coded for now -->
     </div>
 
     <div class="vertical-line"></div>
@@ -10,11 +10,11 @@
       <div>
         <div class="question-row">
           <mat-icon>account_circle</mat-icon>
-          <p>{{commentData.username}}</p>
+          <p>{{messageData.authorName}}</p>
           <p>•</p>
-          <p>{{commentData.date}}</p>
+          <p>{{messageData.createdAt}}</p>
         </div>
-        <p>{{ commentData.text }}</p>
+        <p>{{ messageData.messageText }}</p>
       </div>
     </div>
   </div>

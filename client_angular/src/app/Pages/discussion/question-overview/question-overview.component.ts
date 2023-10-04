@@ -18,7 +18,7 @@ export class QuestionOverviewComponent implements OnChanges {
   constructor(private discussionDataService: DiscussionDataService) { }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['activeConceptNodeId']) {
+    if (changes['activeConceptNodeId'] && this['activeConceptNodeId'] != -1) {
       this.discussionDataService.getDiscussions(this['activeConceptNodeId'], -1, false, -1, JSON.stringify( {"content" : "" } )).subscribe(discussions => this.visibleDiscussions = discussions);
     }
   }

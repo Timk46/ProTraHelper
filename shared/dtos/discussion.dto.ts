@@ -12,3 +12,7 @@ export interface discussionDTO {
 export interface discussionsDTO {
     discussions: discussionDTO[];
 }
+
+export interface nodeNameDTO {
+    name: string;
+}

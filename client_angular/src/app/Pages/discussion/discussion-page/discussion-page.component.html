@@ -1,9 +1,14 @@
 <div class="content mat-elevation-z8">
   <!-- <h1>Discussion Page</h1> -->
-  <app-discussion-page-question [questionData]="questionData"></app-discussion-page-question>
+  <app-discussion-page-question
+    [messageData]="initiatorMessage"
+    [conceptNodeName]="conceptNodeName"
+    [discussionData]="discussionData"
+    ></app-discussion-page-question>
 </div>
 <div class="content mat-elevation-z8">
   <h1>Antworten</h1>
-  <app-discussion-page-comment *ngFor="let comment of commentData" [commentData]="comment"></app-discussion-page-comment>
+  <app-discussion-page-comment
+    *ngFor="let message of messagesData.messages"></app-discussion-page-comment>
 </div>
 

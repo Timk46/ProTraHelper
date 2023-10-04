@@ -1,3 +1,4 @@
+import { discussionMessageDTO } from '@DTOs/discussionMessage.dto';
 import { Component, Input } from '@angular/core';
 
 @Component({
@@ -7,11 +8,13 @@ import { Component, Input } from '@angular/core';
 })
 export class DiscussionPageCommentComponent {
 
-  @Input() commentData = {
-    date: '01.01.2020',
-    username: 'maxmuster253',
-    voteId: 1,
-    text: 'dummytext',
-  }
-
+  @Input() messageData : discussionMessageDTO = {
+    messageId: -1,
+    authorId: -1,
+    authorName: 'dummy',
+    createdAt: new Date(),
+    messageText: 'dummy',
+    isSolution: false,
+    isInitiator: false
+  };
 }

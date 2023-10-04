@@ -335,8 +335,8 @@ model KIFeedback {
 
 //********************************************************************************************* Begin Discussion
 model anonymousUser {
-  id            Int         @id @default(autoincrement()) @unique
-  user          User       @relation(fields: [userId], references: [id])
+  id            Int         @id @default(autoincrement())
+  user          User        @relation(fields: [userId], references: [id])
   userId        Int
   anonymousName String      @default("Anonymchen")
   Discussion    Discussion?

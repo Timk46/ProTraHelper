@@ -1,3 +1,5 @@
+import { discussionDTO } from '@DTOs/discussion.dto';
+import { discussionMessageDTO } from '@DTOs/discussionMessage.dto';
 import { Component, Input } from '@angular/core';
 
 @Component({
@@ -7,21 +9,27 @@ import { Component, Input } from '@angular/core';
 })
 export class DiscussionPageQuestionComponent {
 
-  @Input() questionData =
-  {
-    id: -1,
-    title: 'dummy question',
-    date: '01.01.2020',
-    userId: -1,
-    username: 'maxmuster253',
-    contentNode: -1,
-    contentNodeName: 'dummy',
-    votes: 0, /* Lieber mit voteId tauschen */
-    solved: false,
-    tags: ['dummy1', 'dummy2'],
-    commentCount: 0,
-    text: 'dummytext',
-  }
+  @Input() conceptNodeName: string = 'dummy concept';
 
+  @Input() messageData : discussionMessageDTO = {
+    messageId: -1,
+    authorId: -1,
+    authorName: 'dummy',
+    createdAt: new Date(),
+    messageText: 'dummy',
+    isSolution: false,
+    isInitiator: false
+  };
+
+  @Input() discussionData : discussionDTO = {
+    id: -1,
+    initMessageId: -1,
+    title: "dummy title",
+    authorName: "dummy author",
+    createdAt: new Date(),
+    contentNodeName: "dummy content node",
+    commentCount: 0,
+    isSolved: false,
+  };
 
 }

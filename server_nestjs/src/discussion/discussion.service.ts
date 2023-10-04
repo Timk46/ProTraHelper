@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { discussionDTO, discussionsDTO, discussionMessageVoteDTO } from '@DTOs/index';
+import { discussionDTO, discussionsDTO, discussionMessageVoteDTO, discussionMessageDTO, discussionMessagesDTO, nodeNameDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { get } from 'http';
 
@@ -64,9 +64,6 @@ export class DiscussionService {
 
     console.log('paras:' + conceptNodeId + ',' + contentNodeId + ',' + onlySolved + ',' + authorId + ',' + searchString);
 
-    console.log('discussions found:');
-    console.log(discussions);
-
     if (contentNodeId != -1) {
       console.log('filtering for contentNodeId');
       discussions = discussions.filter(discussion => discussion.contentNodeId == contentNodeId);
@@ -95,7 +92,7 @@ export class DiscussionService {
         title: discussion.title,
         authorName: await this.getAuthorName(discussion.authorId),
         createdAt: discussion.createdAt,
-        contentNodeName: contentNodeId == -1 ? 'keiner' : await this.getContentNodeName(discussion.contentNodeId),
+        contentNodeName: contentNodeId == -1 ? 'allgemein' : (await this.getContentNodeName(discussion.contentNodeId)).name,
         commentCount: await this.getDiscussionCommentCount(discussion.id),
         isSolved: discussion.isSolved
       });
@@ -112,13 +109,16 @@ export class DiscussionService {
    * @returns the id of the init message
    */
   async getInitMessageId(discussionId: number) : Promise<number | null> {
-    const message = await this.prisma.message.findUnique({
-      where: { id: Number(discussionId), isInitiator: true },
+    const message = await this.prisma.message.findFirst({
+      where: {
+          discussionId: Number(discussionId),
+          isInitiator: true
+      },
       select: { id: true }
     });
 
     if (!message) {
-      throw new Error('Init message not found');
+      throw new Error('Init message not found. Discussion id: ' + discussionId);
     }
 
     return message ? message.id : null;
@@ -149,19 +149,59 @@ export class DiscussionService {
    * @param contentNodeId
    * @returns the name of the content node
    */
-  async getContentNodeName(contentNodeId: number) : Promise<string | null> {
-    const contentNodeName = await this.prisma.contentNode.findUnique({
+  async getContentNodeName(contentNodeId: number) : Promise<nodeNameDTO> {
+    const contentNodeData = await this.prisma.contentNode.findUnique({
       where: { id: Number(contentNodeId) },
       select: { name: true }
     });
 
-    if (!contentNodeName) {
-      throw new Error('Content node not found');
+    if (!contentNodeData) {
+      throw new Error('Content node not found. Content node id: ' + contentNodeId);
     }
 
-    return contentNodeName ? contentNodeName.name : null;
+    const contentNodeName = {
+      name: contentNodeData ? contentNodeData.name : ""
+    };
+
+    return contentNodeName;
   }
 
+  /** This function returns the name of the concept node for a given concept node id
+   * 
+   * @param conceptNodeId 
+   * @returns the stringyfied JSON name of the concept node
+   */
+  async getConceptNodeName(discussionId: number) : Promise<nodeNameDTO> {
+    console.log('getConceptNodeName. discussionId: ' + discussionId);
+    const conceptNodeData = await this.prisma.discussion.findUnique({
+      where: { id: Number(discussionId) },
+      include: {
+        conceptNode: {
+          select: { name: true }
+        }
+      }
+    });
+
+    if (!conceptNodeData) {
+      throw new Error('Concept node name not found');
+    }
+    
+
+    const conceptNodeName = {
+      name: conceptNodeData ? conceptNodeData.conceptNode.name : ""
+    };
+
+    return conceptNodeName;
+  }
+    
+
+  /**
+   * This function returns the number of comments for a given discussion
+   * (excluding the init message)
+   *
+   * @param discussionId
+   * @returns the number of comments
+   */
   async getDiscussionCommentCount(discussionId: number) : Promise<number> {
     const commentCount = await this.prisma.message.count({
       where: { discussionId: Number(discussionId) }
@@ -169,6 +209,67 @@ export class DiscussionService {
 
     return commentCount - 1; // -1 because the init message is not a comment
   }
+
+  /**
+   * This function returns all messages for a given discussion.
+   * (including the init message)
+   *
+   * @param discussionId
+   * @returns the messages
+   */
+  async getDiscussionMessages(discussionId: number) : Promise<discussionMessagesDTO> {
+    const messages = await this.prisma.message.findMany({
+      where: { discussionId: Number(discussionId) }
+    });
+
+    if (!messages) {
+      throw new Error('Messages not found');
+    }
+
+    let messageData: discussionMessagesDTO = {
+      messages: []
+    };
+    for (let message of messages) {
+      messageData.messages.push({
+        messageId: message.id,
+        authorId: message.authorId,
+        authorName: await this.getAuthorName(message.authorId),
+        createdAt: message.createdAt,
+        messageText: message.text,
+        isSolution: message.isSolution,
+        isInitiator: message.isInitiator
+      });
+    }
+    return messageData;
+  }
+
+  /**
+   * This function returns a discussion for a given discussion id
+   * 
+   * @param discussionId 
+   * @returns the discussion
+   */
+  async getDiscussion(discussionId: number) : Promise<discussionDTO> {
+    const discussion = await this.prisma.discussion.findUnique({
+      where: { id: Number(discussionId) }
+    });
+
+    if (!discussion) {
+      throw new Error('Discussion not found');
+    }
+
+    return {
+      id: discussionId,
+      initMessageId: await this.getInitMessageId(discussionId),
+      title: discussion.title,
+      authorName: await this.getAuthorName(discussion.authorId),
+      createdAt: discussion.createdAt,
+      contentNodeName: discussion.contentNodeId == null ? 'allgemein' : (await this.getContentNodeName(discussion.contentNodeId)).name,
+      commentCount: await this.getDiscussionCommentCount(discussionId),
+      isSolved: discussion.isSolved,
+    };
+  }
+
 
 
 }
