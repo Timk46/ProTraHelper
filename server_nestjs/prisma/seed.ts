@@ -731,7 +731,7 @@ async function main() {
     },
   });
 
-  // Discussion, Message
+  // Discussion, Message --------------------------------------------------------------
   const anonymousAdmin = await prisma.anonymousUser.create({
     data: {
       user: { connect: { id: adminUser.id } },
@@ -739,42 +739,42 @@ async function main() {
     },
   });
 
-  // const exampleDiscussion = await prisma.discussion.create({
-  //   data: {
-  //     title: 'Ist ein dictionary in Python mutable?',
-  //     conceptNode: { connect: { id: 14 } },
-  //     author: { connect: { id: anonymousAdmin.id } },
-  //     isSolved: true,
-  //   },
-  // });
+ const exampleDiscussion = await prisma.discussion.create({
+   data: {
+     title: 'Ist ein dictionary in Python mutable?',
+     conceptNode: { connect: { id: 14 } },
+     author: { connect: { id: anonymousAdmin.id } },
+     isSolved: true,
+   },
+ });
 
-  // // the question
-  // const exampleQuestion = await prisma.message.create({
-  //   data: {
-  //     text: 'Als ich kürzlich an meinem Python-Projekt gearbeitet habe, stieß ich auf eine interessante Herausforderung. Ich verwendete ein Dictionary, um Daten zu speichern, und bemerkte, dass sich die Werte nach der Zuweisung scheinbar veränderten. Das brachte mich ins Grübeln - ist ein Dictionary in Python wirklich veränderbar? Könnte das der Grund für mein Problem sein? Könntet ihr mir bitte erklären, wie die Mutabilität von Dictionaries in Python funktioniert und ob es eine Möglichkeit gibt, sie vor ungewollten Änderungen zu schützen?',
-  //     author: { connect: { id: anonymousAdmin.id } },
-  //     isInitiator: true,
-  //     discussion: { connect: { id: exampleDiscussion.id } },
-  //   },
-  // });
+ // the question
+ const exampleQuestion = await prisma.message.create({
+   data: {
+     text: 'Als ich kürzlich an meinem Python-Projekt gearbeitet habe, stieß ich auf eine interessante Herausforderung. Ich verwendete ein Dictionary, um Daten zu speichern, und bemerkte, dass sich die Werte nach der Zuweisung scheinbar veränderten. Das brachte mich ins Grübeln - ist ein Dictionary in Python wirklich veränderbar? Könnte das der Grund für mein Problem sein? Könntet ihr mir bitte erklären, wie die Mutabilität von Dictionaries in Python funktioniert und ob es eine Möglichkeit gibt, sie vor ungewollten Änderungen zu schützen?',
+     author: { connect: { id: anonymousAdmin.id } },
+     isInitiator: true,
+     discussion: { connect: { id: exampleDiscussion.id } },
+   },
+ });
 
-  // // an answer
-  // await prisma.message.create({
-  //   data: {
-  //     text: 'Nagut, ich antworte einfach mal auf mich selbst: Ja, ein dictionary ist mutable. Aber ich würde mir empfehlen, nochmal in der Dokumentation nachzulesen, da steht alles drin.',
-  //     author: { connect: { id: anonymousAdmin.id } },
-  //     discussion: { connect: { id: exampleDiscussion.id } },
-  //     isSolution: true,
-  //   },
-  // });
+ // an answer
+ await prisma.message.create({
+   data: {
+     text: 'Nagut, ich antworte einfach mal auf mich selbst: Ja, ein dictionary ist mutable. Aber ich würde mir empfehlen, nochmal in der Dokumentation nachzulesen, da steht alles drin.',
+     author: { connect: { id: anonymousAdmin.id } },
+     discussion: { connect: { id: exampleDiscussion.id } },
+     isSolution: true,
+   },
+ });
 
-  // an upvote
-  // await prisma.vote.create({
-  //   data: {
-  //     author: { connect: { id: anonymousAdmin.id } },
-  //     message: { connect: { id: exampleQuestion.id } },
-  //   },
-  // });
+ // an upvote
+ await prisma.vote.create({
+   data: {
+     author: { connect: { id: anonymousAdmin.id } },
+     message: { connect: { id: exampleQuestion.id } },
+   },
+ });
 
   console.log('Test Discussion created.');
 }
