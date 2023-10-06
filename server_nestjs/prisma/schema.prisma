@@ -41,6 +41,7 @@ model User {
   submissionCode           SubmissionCode[]
   SubmissionSingleCodeFile SubmissionSingleCodeFile[]
   anonymousUser            anonymousUser[]
+  userMCAnswer             UserMCAnswer[]
 }
 
 model Module {
@@ -197,7 +198,7 @@ model File {
   updatedAt        DateTime        @updatedAt
   question         Question?       @relation(fields: [questionId], references: [id])
   questionId       Int?
-  MCAnswer         MCAnswer?       @relation(fields: [mCAnswerId], references: [id])
+  MCAnswer         MCOption?       @relation(fields: [mCAnswerId], references: [id])
   mCAnswerId       Int?
   contentElement   ContentElement?
   contentElementId Int?
@@ -223,36 +224,60 @@ model Question {
   type             String
   author           User            @relation(fields: [authorId], references: [id])
   authorId         Int
+  text             String
   feedbacks        Feedback[]
   files            File[]
-  //toDo: Marc change for MC-Quiz
   //toDo: connect to different mediatypes Evelyn
   codingQuestions  CodingQuestion?
-  mcQuestions      MCQuestion?
+  mcQuestion       MCQuestion?
   contentElement   ContentElement?
   contentElementId Int?
 }
 
 //********************************************************************************************* Begin MC-Question
 model MCQuestion {
-  id         Int        @id @default(autoincrement())
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  question   Question   @relation(fields: [questionId], references: [id])
-  questionId Int        @unique
-  mcAnswers  MCAnswer[]
-  isSC       Boolean
+  id              Int        @id @default(autoincrement())
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  question        Question   @relation(fields: [questionId], references: [id])
+  questionId      Int        @unique
+  shuffleoptions  Boolean    @default(true)
+  mcOptions       MCOption[]
+  isSC            Boolean
+  userMCAnswers   UserMCAnswer[]
 }
 
-model MCAnswer {
-  id         Int        @id @default(autoincrement())
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  text       String
-  files      File[]
-  is_correct Boolean
-  question   MCQuestion @relation(fields: [questionId], references: [id])
-  questionId Int
+model MCOption {
+  id                    Int        @id @default(autoincrement())
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  text                  String
+  files                 File[]
+  is_correct            Boolean
+  question              MCQuestion @relation(fields: [questionId], references: [id])
+  questionId            Int
+  userMCAnswerSelected  UserMCAnswerSelected[]
+}
+
+model UserMCAnswer {
+  id                      Int         @id @default(autoincrement())
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+  user                    User        @relation(fields: [userId], references: [id])
+  userId                  Int
+  question                MCQuestion  @relation(fields: [questionId], references: [id])
+  questionId              Int
+  userMCAnswerSelected    UserMCAnswerSelected[]
+}
+
+model UserMCAnswerSelected {
+  id                    Int           @id @default(autoincrement())
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  userMCAnswer          UserMCAnswer  @relation(fields: [userMCAnswerId], references: [id])
+  userMCAnswerId        Int
+  answer                MCOption      @relation(fields: [answerId], references: [id])
+  answerId              Int
 }
 
 //********************************************************************************************* End MC-Question
