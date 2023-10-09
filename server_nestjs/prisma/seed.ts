@@ -3,10 +3,29 @@ import { faker } from '@faker-js/faker';
 import { ConsoleLogger } from '@nestjs/common';
 import { Console } from 'console';
 import * as XLSX from 'xlsx';
+import { WorkSheet, utils } from 'xlsx';
 import * as fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
+
+interface excel_Aufgabe {
+  Id: number;
+  Week: number;
+  Titel: string;
+  Task: string;
+  Test: string;
+  Task_html: string;
+  codeName: string;
+  countInputArgs: number;
+}
+
+interface excel_Codegeruest {
+  id: number;
+  taskId: number;
+  fileName: string;
+  code: string;
+}
 
 function getFilenameByLink(hyperlink: string): string {
   const filename = hyperlink.split('/').pop();
@@ -17,18 +36,18 @@ async function main() {
   // delete everything
   console.log('Deleting everything...');
   await prisma.kIFeedback.deleteMany();
-  await prisma.submissionSingleCodeFile.deleteMany();
+  await prisma.codeSubmissionFile.deleteMany();
   await prisma.testcase.deleteMany();
   await prisma.automatedTest.deleteMany();
   await prisma.codeGeruest.deleteMany();
-  await prisma.mCAnswer.deleteMany();
+  await prisma.userMCAnswer.deleteMany();
   await prisma.feedback.deleteMany();
   await prisma.file.deleteMany();
   await prisma.vote.deleteMany();
   await prisma.message.deleteMany();
   await prisma.discussion.deleteMany();
   await prisma.anonymousUser.deleteMany();
-  await prisma.submissionCode.deleteMany();
+  await prisma.codeSubmission.deleteMany();
   await prisma.codingQuestion.deleteMany();
   await prisma.mCQuestion.deleteMany();
   await prisma.question.deleteMany();
@@ -46,7 +65,7 @@ async function main() {
   await prisma.conceptGraph.deleteMany();
   await prisma.user.deleteMany();
 
-  console.log('Creating everything...');
+  console.log('Creating Content Node from Excel...');
 
   const filePath = process.env.FILE_PATH + 'Kompetenzraster.xlsx';
   if (fs.existsSync(filePath)) {
@@ -156,6 +175,8 @@ async function main() {
       'To import ContentNodes please save "Kompetenzraster.xlsx" in the storage folder!',
     );
   }
+
+  console.log('Creating rest from Seed.ts...');
 
   // Modules
   const module1 = await prisma.module.create({
@@ -659,78 +680,6 @@ async function main() {
     },
   });
 
-  await prisma.mCAnswer.create({
-    data: {
-      text: 'Answer1',
-      is_correct: true,
-      question: { connect: { id: mcQuestion.id } },
-    },
-  });
-
-  const codingQuestion = await prisma.codingQuestion.create({
-    data: {
-      count_InputArgs: 2,
-      question: { connect: { id: question.id } },
-    },
-  });
-
-  await prisma.codeGeruest.create({
-    data: {
-      text: 'Code Geruest',
-      codingQuestion: { connect: { id: codingQuestion.id } },
-      codeFileName: 'codeFile1.txt',
-      code: 'Sample code',
-      language: 'JavaScript',
-    },
-  });
-
-  const automatedTest = await prisma.automatedTest.create({
-    data: {
-      code: 'Test Code',
-      testFileName: 'testFile1.txt',
-      language: 'JavaScript',
-      codingQuestion: { connect: { id: codingQuestion.id } },
-    },
-  });
-
-  await prisma.testcase.create({
-    data: {
-      input: 'Test Input',
-      expectedOutput: 'Expected Output',
-      automatedTest: { connect: { id: automatedTest.id } },
-    },
-  });
-
-  // SubmissionCode, SubmissionSingleCodeFile, KIFeedback
-  const submissionCode = await prisma.submissionCode.create({
-    data: {
-      code: 'User Submission Code',
-      compilerOutput: 'Output',
-      compilerError: 'No errors',
-      compilerResponse: 'Success',
-      user: { connect: { id: adminUser.id } },
-    },
-  });
-
-  await prisma.submissionSingleCodeFile.create({
-    data: {
-      code: 'Single Code File',
-      language: 'JavaScript',
-      codeFileName: 'singleCodeFile1.txt',
-      user: { connect: { id: adminUser.id } },
-      SubmissionCode: { connect: { id: submissionCode.id } },
-    },
-  });
-
-  await prisma.kIFeedback.create({
-    data: {
-      model: 'KI Model',
-      text: 'KI Feedback',
-      ratedByStudent: 5,
-      submission: { connect: { id: submissionCode.id } },
-    },
-  });
-
   // Discussion, Message --------------------------------------------------------------
   const anonymousAdmin = await prisma.anonymousUser.create({
     data: {
@@ -776,7 +725,59 @@ async function main() {
    },
  });
 
-  console.log('Test Discussion created.');
+   // Import Tasks for Excel
+   console.log('Importing Tasks from Excel...');
+   const filePathTasks = process.env.FILE_PATH + 'ofp_aufgaben.xlsx';
+   const workbook = XLSX.readFile(filePathTasks);
+
+   const taskSheet: WorkSheet = workbook.Sheets[workbook.SheetNames[0]]
+   const tasks: excel_Aufgabe[] = utils.sheet_to_json(taskSheet)
+   const codeSheet: WorkSheet = workbook.Sheets[workbook.SheetNames[1]]
+   const codes: excel_Codegeruest[] = utils.sheet_to_json(codeSheet)
+
+   for (let task of tasks) {
+     let newTask = await prisma.question.create({
+       data: {
+         name: task.Titel,
+         // week: task.Week,
+         description: "automated JACK import from Excel - tasks from SoSe 2023",
+         score: 100, // this is the max score for all tasks currently (=100%)
+         type: "CodingQuestion_JACK",
+         author: { connect: { id: adminUser.id } }, // connect to admin user
+         codingQuestions: {
+           create: {
+             text: task.Task,
+             textHTML: task.Task_html,
+             mainFileName: task.codeName,
+             count_InputArgs: task.countInputArgs,
+             automatedTests: {
+               create: [
+                 {
+                   code: task.Test,
+                   //testcase: { Not using this model for testcases yet. All in one code currently
+                   //  create: {
+                   //    input: task.Test,
+                   //    output: "1",
+                   //  },
+                   //},
+                 },
+               ],
+             },
+             codeGerueste: { // add all codegerueste with matching taskId
+               create: codes
+                 .filter((code) => code.taskId === task.Id)
+                 .map((filteredCode) => ({
+                   codeFileName: filteredCode.fileName,
+                   code: filteredCode.code
+                 })),
+             },
+           },
+         },
+       },
+     });
+   }
+
+   console.log('Importing Done!');
 }
 
 main()
