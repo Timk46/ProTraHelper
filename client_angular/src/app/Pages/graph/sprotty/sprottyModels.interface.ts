@@ -10,6 +10,7 @@ export interface SprottyConceptNode extends SNode, Expandable {
     // inherited mandatory fields from SNode:
     // id: string; // node_ + string der Datenbank-id, außer für die root node (id: 'root')
     // type: string; // z.B. 'node:concept'
+    // children: element[]
 
     // neu:
     name: string ;

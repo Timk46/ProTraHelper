@@ -4,7 +4,7 @@ import { configureModelElement, configureViewerOptions, loadDefaultModules, Loca
     SNodeImpl, TYPES, RectangularNode, expandFeature, nameFeature, SButtonImpl, ExpandButtonView, 
     configureButtonHandler, SRoutingHandleImpl, SRoutingHandleView, SModelElementImpl, SPortImpl, ConsoleLogger, 
     LogLevel, IContextMenuServiceProvider, contextMenuModule, ContextMenuProviderRegistry } from 'sprotty';
-import { ConceptNodeView, CustomCollapseExpandView, HeaderLabelView, PortViewWithExternalLabel, TextLabelView} from './views';
+import { ConceptNodeView, CustomCollapseExpandView, HeaderLabelView, MiniConceptView, PortViewWithExternalLabel, TextLabelView} from './views';
 import { ConceptGraphModelSource } from './model-source';
 import ElkConstructor, { LayoutOptions } from 'elkjs';
 import {
@@ -54,6 +54,7 @@ export default (containerId: string) => {
         configureModelElement(context, 'node:concept', RectangularNode, ConceptNodeView,{
             enable: [expandFeature]
         });
+        configureModelElement(context, 'node:mini-concept', RectangularNode, MiniConceptView);
         configureModelElement(context, 'edge', SEdgeImpl, PolylineEdgeView);
         configureModelElement(context, 'label:heading', SLabelImpl, SLabelView)
         configureModelElement(context, 'label:text', SLabelImpl, SLabelView)

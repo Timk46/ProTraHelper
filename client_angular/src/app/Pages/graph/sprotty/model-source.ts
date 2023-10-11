@@ -102,11 +102,13 @@ export class ConceptGraphModelSource extends LocalModelSource {
       if (flatChild) {
         const expanded = flatChild.expanded !== undefined ? flatChild.expanded : true;
         const level = flatChild.level ? flatChild.level : 0;
-        const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId);
+        const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId, 'concept');
         graph.children!.push(newChild);
         if (expanded) {
-          this.addChildren(newChild);
+          this.addChildren(newChild, 'concept');
         }
+        else
+          this.addChildren(newChild, 'mini-concept');
       }
     });
 
@@ -123,7 +125,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.updateModel();
   }
 
-  private addChildren(parentNode: SprottyConceptNode) {
+  private addChildren(parentNode: SprottyConceptNode, type: string) {
     const flatParentNode = this.flatGraph.nodeMap[parentNode.databaseId];
     // add children
     if (flatParentNode.childIds.length > 0) {
@@ -132,12 +134,14 @@ export class ConceptGraphModelSource extends LocalModelSource {
         if (flatChild) {
           const expanded = flatChild.expanded !== undefined ? flatChild.expanded : true;
           const level = flatChild.level ? flatChild.level : 0;
-          const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId);
+          const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId, type);
           parentNode.children!.push(newChild);
 
-          if (expanded) {
-            this.addChildren(newChild);
+          if (expanded && type === 'concept') {
+            this.addChildren(newChild, 'concept');
           }
+          else
+            this.addChildren(newChild, 'mini-concept');
         }
       });
     }
@@ -161,7 +165,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
     if (sprottyParentNode !== undefined) {
 
-    console.log("handleCreateConceptAction: ", action, sprottyParentNode);
+      console.log("handleCreateConceptAction: ", action, sprottyParentNode);
       const dialogRef = this.dialog?.open(CreateConceptDialogComponent, {
         data: { parentId: sprottyParentNode.databaseId },
       });
@@ -199,7 +203,9 @@ export class ConceptGraphModelSource extends LocalModelSource {
       if (element !== undefined && element!.type.startsWith('node')) {
         const node = element as SprottyConceptNode;
         node.expanded = true;
-        this.addChildren(node);
+        element.children = element.children?.filter(child => !child.type.startsWith('node'));
+        element.children = element.children?.filter(child => !child.type.startsWith('edge'));
+        this.addChildren(node, 'concept');
         this.updateModel();
         this.updateExpandedState(node, true);
       }
@@ -214,6 +220,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
         // remove children
         element.children = element.children?.filter(child => !child.type.startsWith('node'));
         element.children = element.children?.filter(child => !child.type.startsWith('edge'));
+        this.addChildren(node, 'mini-concept');
 
         this.updateModel();
         this.updateExpandedState(node, false);
@@ -226,87 +233,101 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.graphData!.updateUserConceptData(this.userId, node.databaseId, { expanded: expanded }).subscribe();
   }
 
-  initTestGraph() {
-    console.log("initTestGraph() called");
-    const graph: SGraph = {
-      type: 'graph',
-      id: 'root',
-      children: [],
-      layoutOptions: {
-        hGap: 5,
-        hAlign: 'left',
-        paddingLeft: 7,
-        paddingRight: 7,
-        paddingTop: 7,
-        paddingBottom: 7
-      }
-    };
+  // initTestGraph() {
+  //   console.log("initTestGraph() called");
+  //   const graph: SGraph = {
+  //     type: 'graph',
+  //     id: 'root',
+  //     children: [],
+  //     layoutOptions: {
+  //       hGap: 5,
+  //       hAlign: 'left',
+  //       paddingLeft: 7,
+  //       paddingRight: 7,
+  //       paddingTop: 7,
+  //       paddingBottom: 7
+  //     }
+  //   };
 
-    // Programmiergrundlagen
-    const node1: SprottyConceptNode = this.createConceptNode('1', 'Programmiergrundlagen', true, 2, 1);
+  //   // Programmiergrundlagen
+  //   const node1: SprottyConceptNode = this.createConceptNode('1', 'Programmiergrundlagen', true, 2, 1);
 
-    const node2 = this.createConceptNode('2', 'Variablen', true, 4, 1);
-    node1.children!.push(node2);
+  //   const node2 = this.createConceptNode('2', 'Variablen', true, 4, 1);
+  //   node1.children!.push(node2);
 
-    const node3 = this.createConceptNode('3', 'Datentypen', true, 3, 1);
-    const node4 = this.createConceptNode('4', 'boolean', true, 3, 1);
-    const node5 = this.createConceptNode('5', 'strings', true, 3, 1);
-    const node6 = this.createConceptNode('6', 'numbers', true, 3, 1);
-    node3.children!.push(node4, node5, node6);
-    node1.children!.push(node3);
-    const edge_2_3 = this.createEdge('edge_2_3', '2', '3');
-    node1.children!.push(edge_2_3);
+  //   const node3 = this.createConceptNode('3', 'Datentypen', true, 3, 1);
+  //   const node4 = this.createConceptNode('4', 'boolean', true, 3, 1);
+  //   const node5 = this.createConceptNode('5', 'strings', true, 3, 1);
+  //   const node6 = this.createConceptNode('6', 'numbers', true, 3, 1);
+  //   node3.children!.push(node4, node5, node6);
+  //   node1.children!.push(node3);
+  //   const edge_2_3 = this.createEdge('edge_2_3', '2', '3');
+  //   node1.children!.push(edge_2_3);
 
-    const node7 = this.createConceptNode('7', 'Kontrollelemente', true, 2, 1);
-    const node8 = this.createConceptNode('8', 'if/else', true, 2, 1);
-    const node9 = this.createConceptNode('9', 'and/or', true, 2, 1);
-    node7.children!.push(node8, node9);
-    node1.children!.push(node7);
-    const edge_3_7 = this.createEdge('edge_3_7', '3', '7');
-    node1.children!.push(edge_3_7);
+  //   const node7 = this.createConceptNode('7', 'Kontrollelemente', true, 2, 1);
+  //   const node8 = this.createConceptNode('8', 'if/else', true, 2, 1);
+  //   const node9 = this.createConceptNode('9', 'and/or', true, 2, 1);
+  //   node7.children!.push(node8, node9);
+  //   node1.children!.push(node7);
+  //   const edge_3_7 = this.createEdge('edge_3_7', '3', '7');
+  //   node1.children!.push(edge_3_7);
 
-    const node10 = this.createConceptNode('10', 'while', true, 1, 1);
-    node1.children!.push(node10);
-    const edge_7_10 = this.createEdge('edge_7_10', '7', '10');
-    node1.children!.push(edge_7_10);
+  //   const node10 = this.createConceptNode('10', 'while', true, 1, 1);
+  //   node1.children!.push(node10);
+  //   const edge_7_10 = this.createEdge('edge_7_10', '7', '10');
+  //   node1.children!.push(edge_7_10);
 
-    const node11 = this.createConceptNode('11', 'for', true, 0, 1);
-    node1.children!.push(node11);
-    const edge_7_11 = this.createEdge('edge_7_11', '7', '11');
-    node1.children!.push(edge_7_11);
+  //   const node11 = this.createConceptNode('11', 'for', true, 0, 1);
+  //   node1.children!.push(node11);
+  //   const edge_7_11 = this.createEdge('edge_7_11', '7', '11');
+  //   node1.children!.push(edge_7_11);
 
-    graph.children!.push(node1);
+  //   graph.children!.push(node1);
 
-    this.currentRoot = graph;
-  }
+  //   this.currentRoot = graph;
+  // }
 
   // creates new concept node (locally)
-  createConceptNode(id: string, name: string, expanded: boolean, level: number, databaseId: number): SprottyConceptNode {
+  /**
+   * 
+   * @param id sprotty graph id , usually 'node_' + databaseId
+   * @param name title of the node
+   * @param expanded true or false, if the node is expanded or not
+   * @param level integer from 0 to 6, the level of the node for the current user
+   * @param databaseId id of this node in the database
+   * @param type either "concept" or "mini-concept", mini-concepts are used for collapsed nodes to show a preview of the children
+   * @returns a ConceptNode
+   */
+  createConceptNode(id: string, name: string, expanded: boolean, level: number, databaseId: number, type: string): SprottyConceptNode {
     const node: SNode & SprottyConceptNode & Expandable = {
-      type: 'node:concept',
+      type: "node:" + type,
       id: id,
       databaseId: databaseId,
       name: name,
       expanded: expanded,
       level: level,
       levelGoal: 3,
+      children: [],
       //layout: 'hbox'
     };
-    node.children = [
-      <SLabel>{
-        id: 'header_' + id,
-        type: 'label:heading',
+    if (type === 'concept') {
+      node.children = [
+        <SLabel>{
+          id: 'header_' + id,
+          type: 'label:heading',
 
-        text: name,
-      },
-      <SLabel>{
-        id: 'level_' + id,
-        type: 'label:text',
-        text: 'Level: ' + level.toString(),
-      },
-    ];
+          text: name,
+        },
+        <SLabel>{
+          id: 'level_' + id,
+          type: 'label:text',
+          text: 'Level: ' + level.toString(),
+        },
+      ];
+    }
     return node;
   }
+
 
   createEdge(id: string, sourceId: string, targetId: string): SEdge {
     const edge: SEdge = {
