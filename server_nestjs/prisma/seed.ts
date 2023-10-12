@@ -65,6 +65,42 @@ async function main() {
   await prisma.conceptGraph.deleteMany();
   await prisma.user.deleteMany();
 
+  console.log('Creating everything...');
+
+  const moduleInformatik = await prisma.module.create({
+    data: {
+      id: 3,
+      name: 'Bachelor Informatik',
+      description: 'Beschreibung für den Studiengang Informatik.',
+    },
+  });
+
+  const subjectOFP = await prisma.subject.create({
+    data: {
+      id: 2,
+      name: 'Objektorientierte und funktionale Programmierung',
+      description: 'Beschreibung für die Veranstaltung OPF.',
+      modules: { connect: { id: moduleInformatik.id } },
+    },
+  });
+
+  // root node
+  const conceptNode = await prisma.conceptNode.create({
+    data: {
+      id: 1,
+      name: 'root',
+      description: 'root description',
+    },
+  });
+
+  // ConceptGraph
+  const conceptGraph = await prisma.conceptGraph.create({
+    data: {
+      name: 'Concept Graph 1',
+      root: { connect: { id: conceptNode.id } },
+    },
+  });
+
   console.log('Creating Content Node from Excel...');
 
   const filePath = process.env.FILE_PATH + 'Kompetenzraster.xlsx';
@@ -89,9 +125,14 @@ async function main() {
     const columnElementId = [9, 10, 11, 12, 13];
     const columnTaskId = [14, 15];
 
+    //conceptIds that start represent the beginning of a new rootConcept
+    const rootConceptId = [1, 42];
+
     //in case the topic column for the Content is empty we need to save the last topic
     let lastTopic = 'No topic found!';
     let lastConceptId = 0;
+
+    const ParentId = Array<number>(columnTopicId.length + 1);
     // Iterate through the excelData and insert records into your Prisma database
     for (const { rowIndex, row } of excelData.map((row, rowIndex) => ({
       rowIndex,
@@ -155,21 +196,99 @@ async function main() {
             await prisma.file.create({
               data: {
                 name: row[columnElementId[elementId]] + ' zu ' + filename,
-                uniqueIdentifier: uuidv4(),
-                path: filename, //TODO: replace with the actual path when running on the server
-                type: row[columnElementId[elementId]],
+                // uniqueIdentifier: uuidv4(),
+                uniqueIdentifier: row[columnContentId] + '.' + elementId,
+                path: 'OFP/' + filename, //TODO: replace with the actual path when running on the server
+                type:
+                  row[columnElementId[elementId]].toString() === 'VIDEO'
+                    ? 'mp4'
+                    : row[columnElementId[elementId]],
                 contentElement: { connect: { id: TempContentElement.id } },
+              },
+            });
+          }
+        }
+      }
+      //ConceptNodes
+      if (row[columnConceptId] && !isNaN(+row[columnConceptId])) {
+        // Save the last topic of each topic column
+        // First element reserved for root ConceptNodes
+        for (const topicId in columnTopicId) {
+          if (row[columnTopicId[topicId]]) {
+            if (rootConceptId.includes(+row[columnConceptId])) {
+              ParentId[0] = row[columnConceptId];
+              await prisma.conceptNode.create({
+                data: {
+                  id: +row[columnConceptId] + 18,
+                  name:
+                    row[columnConceptId] + ' ' + row[columnTopicId[topicId]], //TODO: Remove id later, just for testing to keep unique
+                  description: row[columnDescriptionId]
+                    ? row[columnDescriptionId].toString()
+                    : 'Keine Beschreibung für ConceptNode ' +
+                      +row[columnConceptId],
+                },
+              });
+              await prisma.conceptFamily.create({
+                data: {
+                  childId: +row[columnConceptId] + 18,
+                  parentId: conceptNode.id,
+                },
+              });
+            } else {
+              ParentId[+topicId + 1] = row[columnConceptId];
+              await prisma.conceptNode.create({
+                data: {
+                  id: +row[columnConceptId] + 18,
+                  name:
+                    row[columnConceptId] + ' ' + row[columnTopicId[topicId]], //TODO: Remove id later, just for testing to keep unique
+                  description: row[columnDescriptionId]
+                    ? row[columnDescriptionId].toString()
+                    : 'Keine Beschreibung für ConceptNode ' +
+                      +row[columnConceptId],
+                },
+              });
+              await prisma.moduleConceptGoal.create({
+                data: {
+                  moduleId: moduleInformatik.id,
+                  conceptNodeId: +row[columnConceptId] + 18,
+                  level: +row[columnLevelId] ? +row[columnLevelId] : 1,
+                },
+              });
+              await prisma.conceptFamily.create({
+                data: {
+                  childId: +row[columnConceptId] + 18,
+                  parentId: +ParentId[+topicId] + 18,
               },
             });
             break;
           }
         }
       }
+        if (
+          row[columnTrainsId] &&
+          row[columnContentId] &&
+          !isNaN(+row[columnContentId])
+        ) {
+          // console.log('row[columnTrainsId]: ' + row[columnTrainsId]);
+          const trains = row[columnTrainsId].split(',');
+          for (const train in trains) {
+            await prisma.training.create({
+              data: {
+                contentNode: {
+                  connect: { id: +row[columnContentId] },
+                },
+                conceptNode: {
+                  connect: { id: +trains[train] + 18 },
+                },
+                awards: 1,
+              },
+            });
+          }
+        }
+      }
     }
 
-    console.log('ContentNodes created.');
-    console.log('ContentElements created.');
-    console.log('Files created.');
+    console.log('Importing Concepts Done!');
   } else {
     console.log(
       'To import ContentNodes please save "Kompetenzraster.xlsx" in the storage folder!',
@@ -202,23 +321,6 @@ async function main() {
       name: 'Subject 1',
       description: 'Description for Subject 1',
       modules: { connect: { id: module1.id } },
-    },
-  });
-
-  // root node
-  const conceptNode = await prisma.conceptNode.create({
-    data: {
-      id: 1,
-      name: 'root',
-      description: 'root description',
-    },
-  });
-
-  // ConceptGraph
-  const conceptGraph = await prisma.conceptGraph.create({
-    data: {
-      name: 'Concept Graph 1',
-      root: { connect: { id: conceptNode.id } },
     },
   });
 
@@ -567,7 +669,13 @@ async function main() {
         lastname: faker.person.lastName(),
         password: faker.internet.password(),
         globalRole: 'STUDENT',
-        modules: { connect: [{ id: module1.id }, { id: module2.id }] },
+        modules: {
+          connect: [
+            { id: module1.id },
+            { id: module2.id },
+            { id: moduleInformatik.id },
+          ],
+        },
         currentconceptNodeId:
           Math.floor(Math.random() * conceptNodeData.length) + 2,
       },
@@ -608,6 +716,22 @@ async function main() {
       user: { connect: { id: adminUser.id } },
       concept: { connect: { id: conceptNode.id } },
       level: 1,
+      expanded: true,
+    },
+  });
+  await prisma.userConcept.create({
+    data: {
+      user: { connect: { id: adminUser.id } },
+      concept: { connect: { id: conceptNode.id } },
+      level: 19,
+      expanded: true,
+    },
+  });
+  await prisma.userConcept.create({
+    data: {
+      user: { connect: { id: adminUser.id } },
+      concept: { connect: { id: conceptNode.id } },
+      level: 60,
       expanded: true,
     },
   });
