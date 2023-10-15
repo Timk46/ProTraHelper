@@ -28,7 +28,7 @@ const routes: Routes = [
 
   // just for testing
   { path: 'file-upload', component: FileUploadComponent },
-  { path: 'discussion-page', component: DiscussionPageComponent },
+  { path: 'discussion-page/:discussionId', component: DiscussionPageComponent },
 
 ];
 

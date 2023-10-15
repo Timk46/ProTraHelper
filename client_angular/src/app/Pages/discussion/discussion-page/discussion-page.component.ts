@@ -1,14 +1,16 @@
 import { discussionMessageDTO, discussionMessagesDTO } from '@DTOs/discussionMessage.dto';
 import { discussionDTO } from '@DTOs/discussion.dto';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Inject, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { DiscussionDataService } from 'src/app/Services/discussion/discussion-data.service';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-discussion-page',
   templateUrl: './discussion-page.component.html',
   styleUrls: ['./discussion-page.component.scss', '../discussion.component.css']
 })
-export class DiscussionPageComponent implements OnChanges{
+export class DiscussionPageComponent{
 
   @Input() discussionId: number = -1;
 
@@ -40,24 +42,49 @@ export class DiscussionPageComponent implements OnChanges{
     isInitiator: true
   }
 
-  constructor(private discussionDataService: DiscussionDataService) { }
+  constructor(private route: ActivatedRoute, private discussionDataService: DiscussionDataService) { }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  /* constructor(@Inject(MAT_DIALOG_DATA) public data: any, private discussionDataService: DiscussionDataService) {
+    this.discussionData = data.discussionData as discussionDTO;
+  } */
+
+  ngOnInit(): void {
+    this.route.params.subscribe(params => {
+      this.discussionId = params['discussionId'];
+      console.log(this.discussionId);
+      console.log(params['discussionId'])
+      if (this.discussionId != -1) {
+        this.discussionDataService.getConceptNodeName(this.discussionId).subscribe(conceptNodeName => this.conceptNodeName = conceptNodeName.name);
+        this.discussionDataService.getDiscussion(this.discussionId).subscribe(discussion => {
+          this.discussionData = discussion;
+          this.discussionDataService.getMessages(this.discussionId).subscribe(messages => {
+            console.log(messages.messages);
+            this.messagesData = messages;
+            console.log(this.messagesData);
+            this.initiatorMessage = this.getAndSeparateMessage(this.discussionData.initMessageId);
+            console.log(this.messagesData.messages);
+          });
+        });
+      }
+    });
+  }
+
+  /* ngOnChanges(changes: SimpleChanges): void {
     console.log("change happened...")
     if (changes['discussionId'] && this['discussionId'] != -1) {
       this.discussionDataService.getConceptNodeName(this.discussionId).subscribe(conceptNodeName => this.conceptNodeName = conceptNodeName.name);
       this.discussionDataService.getDiscussion(this.discussionId).subscribe(discussion => {
         this.discussionData = discussion;
         this.discussionDataService.getMessages(this.discussionId).subscribe(messages => {
-          console.log(messages);
+          console.log(messages.messages);
           this.messagesData = messages;
           console.log(this.messagesData);
           this.initiatorMessage = this.getAndSeparateMessage(this.discussionData.initMessageId);
-          console.log(this.messagesData);
+          console.log(this.messagesData.messages);
         });
       });
     }
-  }
+  } */
 
   /**
    * Looks for a message by its id and deletes it from the messages.

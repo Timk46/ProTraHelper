@@ -8,7 +8,7 @@ export class DiscussionService {
 
   constructor(private prisma: PrismaService) {}
 
-  /**
+  /** This function returns the vote data for a given message
    * @param messageId
    * @returns the vote data
    */
@@ -167,8 +167,8 @@ export class DiscussionService {
   }
 
   /** This function returns the name of the concept node for a given concept node id
-   * 
-   * @param conceptNodeId 
+   *
+   * @param conceptNodeId
    * @returns the stringyfied JSON name of the concept node
    */
   async getConceptNodeName(discussionId: number) : Promise<nodeNameDTO> {
@@ -185,7 +185,7 @@ export class DiscussionService {
     if (!conceptNodeData) {
       throw new Error('Concept node name not found');
     }
-    
+
 
     const conceptNodeName = {
       name: conceptNodeData ? conceptNodeData.conceptNode.name : ""
@@ -193,7 +193,7 @@ export class DiscussionService {
 
     return conceptNodeName;
   }
-    
+
 
   /**
    * This function returns the number of comments for a given discussion
@@ -245,8 +245,8 @@ export class DiscussionService {
 
   /**
    * This function returns a discussion for a given discussion id
-   * 
-   * @param discussionId 
+   *
+   * @param discussionId
    * @returns the discussion
    */
   async getDiscussion(discussionId: number) : Promise<discussionDTO> {

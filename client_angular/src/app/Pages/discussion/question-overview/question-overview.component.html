@@ -2,7 +2,9 @@
   <h1>Beiträge</h1>
   <div class="container">
     <div *ngIf="visibleDiscussions && visibleDiscussions.discussions && visibleDiscussions.discussions.length > 0">
-      <app-question *ngFor="let question of visibleDiscussions.discussions" [questionData]="question"></app-question>
+      <app-question *ngFor="let question of visibleDiscussions.discussions"
+        [questionData]="question"
+        (click)="onQuestionClick(question.id)"></app-question>
     </div>
   </div>
 </div>

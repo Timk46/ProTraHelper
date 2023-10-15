@@ -9,6 +9,6 @@
 <div class="content mat-elevation-z8">
   <h1>Antworten</h1>
   <app-discussion-page-comment
-    *ngFor="let message of messagesData.messages"></app-discussion-page-comment>
+    *ngFor="let message of messagesData.messages" [messageData]="message"></app-discussion-page-comment>
 </div>
 
