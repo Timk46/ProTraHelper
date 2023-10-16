@@ -10,6 +10,7 @@ export class DiscussionPageCommentComponent {
 
   @Input() messageData : discussionMessageDTO = {
     messageId: -1,
+    discussionId: -1,
     authorId: -1,
     authorName: 'dummy',
     createdAt: new Date(),

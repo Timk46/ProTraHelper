@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { discussionDTO, discussionsDTO, discussionMessageVoteDTO, discussionMessageDTO, discussionMessagesDTO, nodeNameDTO } from '@DTOs/index';
+import { discussionDTO, discussionsDTO, discussionMessageVoteDTO, discussionMessageDTO, discussionMessagesDTO, nodeNameDTO, AnonymousUserDTO, creationResponseDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { get } from 'http';
 
@@ -172,7 +172,6 @@ export class DiscussionService {
    * @returns the stringyfied JSON name of the concept node
    */
   async getConceptNodeName(discussionId: number) : Promise<nodeNameDTO> {
-    console.log('getConceptNodeName. discussionId: ' + discussionId);
     const conceptNodeData = await this.prisma.discussion.findUnique({
       where: { id: Number(discussionId) },
       include: {
@@ -232,6 +231,7 @@ export class DiscussionService {
     for (let message of messages) {
       messageData.messages.push({
         messageId: message.id,
+        discussionId: discussionId,
         authorId: message.authorId,
         authorName: await this.getAuthorName(message.authorId),
         createdAt: message.createdAt,
@@ -257,9 +257,8 @@ export class DiscussionService {
     if (!discussion) {
       throw new Error('Discussion not found');
     }
-
     return {
-      id: discussionId,
+      id: discussion.id,
       initMessageId: await this.getInitMessageId(discussionId),
       title: discussion.title,
       authorName: await this.getAuthorName(discussion.authorId),
@@ -267,6 +266,75 @@ export class DiscussionService {
       contentNodeName: discussion.contentNodeId == null ? 'allgemein' : (await this.getContentNodeName(discussion.contentNodeId)).name,
       commentCount: await this.getDiscussionCommentCount(discussionId),
       isSolved: discussion.isSolved,
+    };
+  }
+
+  /** Returns the anonymous user data for a given user id and discussion id
+   * If no anonymous user is found, a dummy is returned
+   *
+   * @param userId
+   * @param discussionId
+   * @returns the anonymous user data or a dummy
+   */
+  async getAnonymousUser(userId: number, discussionId: number) : Promise<AnonymousUserDTO> {
+    const anonymousUser = await this.prisma.anonymousUser.findFirst({
+      where: {
+        userId: Number(userId),
+        Message: {
+          some: {
+            discussionId: Number(discussionId),
+          }
+        }
+      },
+      select: {
+        id: true,
+        userId: true,
+        anonymousName: true
+      }
+    });
+
+    if (!anonymousUser) {
+      console.log('DiscussionServie: No anonymous user found! Returning dummy.');
+      return {
+        id: -1,
+        anonymousName: 'missingNo',
+        userId: -1
+      }
+    }
+
+    return {
+      id: anonymousUser.id,
+      anonymousName: anonymousUser.anonymousName,
+      userId: anonymousUser.userId
+    };
+  }
+
+  /** Creates a new discussion message in the database and returns
+   *
+   * @param discussionData
+   * @returns a creation status if successful
+   */
+  async createDiscussionMessage(messageData: discussionMessageDTO) : Promise<creationResponseDTO> {
+    console.log('DiscussionService: createDiscussionMessage, messageData:');
+    console.log(messageData);
+    const message = await this.prisma.message.create({
+      data: {
+        text: messageData.messageText,
+        authorId: messageData.authorId,
+        discussionId: messageData.discussionId,
+        isInitiator: messageData.isInitiator,
+        isSolution: messageData.isSolution
+      }
+    });
+
+    if (!message) {
+      throw new Error('Message not created');
+    }
+
+    return {
+      ok: true,
+      returnNumber: message.id,
+      returnText: 'Message created'
     };
   }
 

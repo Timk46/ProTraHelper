@@ -13,6 +13,7 @@ export class DiscussionPageQuestionComponent {
 
   @Input() messageData : discussionMessageDTO = {
     messageId: -1,
+    discussionId: -1,
     authorId: -1,
     authorName: 'dummy',
     createdAt: new Date(),

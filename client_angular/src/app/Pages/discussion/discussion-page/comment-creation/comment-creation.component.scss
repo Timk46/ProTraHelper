@@ -1,0 +1,30 @@
+.fade-in-out {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out;
+}
+
+.fade-in-out.active {
+  opacity: 1;
+  max-height: 1500px;
+}
+
+.arrow-down::before {
+  content: "\25BC";
+  margin-left: 5px;
+}
+
+.arrow-up::before {
+  content: "\25B2";
+  margin-left: 5px;
+}
+
+.vbox {
+  min-height: 100px;
+  padding-right: 10px;
+  display: flex;
+  flex-direction: column; /* Anordnung der Elemente vertikal */
+  justify-content: space-between;
+  padding-top: 14px;
+}

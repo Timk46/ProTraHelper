@@ -7,7 +7,7 @@
 
    border: 1px solid #c9c9c9;
    background-color: #ffffff;
-   box-shadow: 0 0 5px #ccc;
+   /* box-shadow: 0 0 5px #ccc; */
 
    display: flex;
    flex-direction: column;
@@ -36,4 +36,13 @@
    flex-direction: column; /* Anordnung der Elemente vertikal */
    justify-content: space-between;
    padding-top: 14px;
+ }
+
+ .main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    align-content: center;
+    flex-wrap: wrap;
  }

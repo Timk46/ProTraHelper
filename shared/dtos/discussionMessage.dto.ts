@@ -1,5 +1,6 @@
 export interface discussionMessageDTO {
     messageId: number;
+    discussionId: number;
     authorId: number;
     authorName: string;
     createdAt: Date;

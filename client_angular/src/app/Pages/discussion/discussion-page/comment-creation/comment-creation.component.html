@@ -1,0 +1,22 @@
+<!-- expand button -->
+<button  *ngIf="expanded" (click)="onExpandAnswerBox()" mat-stroked-button >
+  {{ expanderTitle }}
+  <span class="{{expanded ? 'arrow-up' : 'arrow-down'}}"></span>
+</button>
+<button  *ngIf="!expanded" (click)="onExpandAnswerBox()" mat-raised-button>
+  {{ expanderTitle }}
+  <span class="{{expanded ? 'arrow-up' : 'arrow-down'}}"></span>
+</button>
+<!-- text box -->
+<div [ngClass]="{'fade-in-out': true, 'active': expanded}">
+  <div class="vbox">
+    <hr>
+    <mat-form-field class="example-full-width">
+      <mat-label>Antwort verfassen</mat-label>
+      <textarea #inputText matInput placeholder="Schön, dass du helfen möchtest..."></textarea>
+    </mat-form-field>
+    <!-- button not available if not logged in -->
+    <button *ngIf="userId != -1" mat-raised-button style="width: fit-content; margin-bottom: 8px" (click)="onSubmit(inputText.value)">Senden</button>
+    <p *ngIf="userId == -1">Bitte einloggen!</p>
+  </div>
+</div>

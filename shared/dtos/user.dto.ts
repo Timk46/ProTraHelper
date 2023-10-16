@@ -7,3 +7,9 @@ export interface UserDTO {
     lastname: string;
     globalRole: globalRole;
 }
+
+export interface AnonymousUserDTO {
+    id: number;
+    userId: number;
+    anonymousName: string;
+}

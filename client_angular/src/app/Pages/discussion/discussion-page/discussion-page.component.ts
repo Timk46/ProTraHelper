@@ -34,6 +34,7 @@ export class DiscussionPageComponent{
 
   initiatorMessage: discussionMessageDTO = {
     messageId: -1,
+    discussionId: -1,
     authorId: -1,
     authorName: 'dummy',
     createdAt: new Date(),
@@ -50,13 +51,16 @@ export class DiscussionPageComponent{
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-      this.discussionId = params['discussionId'];
+      this.discussionId = parseInt(params['discussionId']);
+      console.log("ngOnInit called");
       console.log(this.discussionId);
+      console.log(typeof this.discussionId)
       console.log(params['discussionId'])
       if (this.discussionId != -1) {
         this.discussionDataService.getConceptNodeName(this.discussionId).subscribe(conceptNodeName => this.conceptNodeName = conceptNodeName.name);
         this.discussionDataService.getDiscussion(this.discussionId).subscribe(discussion => {
           this.discussionData = discussion;
+          console.log(this.discussionData);
           this.discussionDataService.getMessages(this.discussionId).subscribe(messages => {
             console.log(messages.messages);
             this.messagesData = messages;
