@@ -6,6 +6,7 @@
         [questionData]="question"
         (click)="onQuestionClick(question.id)"></app-question>
     </div>
+    <p *ngIf="visibleDiscussions.discussions.length == 0">Zu diesem Thema/Filter wurden keine Beiträge gefunden. Erstelle den Ersten oder ändere das Thema bzw. den Filter!</p>
   </div>
 </div>
 
