@@ -1,6 +1,6 @@
 import { discussionMessageDTO } from '@DTOs/discussionMessage.dto';
 import { AnonymousUserDTO } from '@DTOs/user.dto';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CreationService } from 'src/app/Services/discussion/creation.service';
 
 @Component({
@@ -15,6 +15,9 @@ export class CommentCreationComponent {
 
   @Input() userId: number = -1;
   @Input() discussionId: number = -1;
+
+  @Output() refreshMessages = new EventEmitter<void>();
+
   anonymousUser: AnonymousUserDTO = {
     id: -1,
     userId: -1,
@@ -65,7 +68,8 @@ export class CommentCreationComponent {
           this.creationService.createDiscussionMessage(message).subscribe(creationResult => {
             console.log(creationResult);
             this.expanded = false;
-            window.location.reload();
+            // refresh the messages by telling the parent 'discussion-page' component to do so
+            this.refreshMessages.emit();
           });
 
         });
@@ -74,6 +78,8 @@ export class CommentCreationComponent {
       }
     }
   }
+
+
 
 
 

@@ -11,7 +11,10 @@
     <div class="content mat-elevation-z8">
       <!-- TODO: LOGIN SYSTEM. -->
       <!-- For now, the message creator is always the admin user with id=1 -->
-      <app-comment-creation [userId]="1" [discussionId]="discussionData.id"></app-comment-creation>
+      <app-comment-creation
+        [userId]="1"
+        [discussionId]="discussionData.id"
+        (refreshMessages)="refreshMessages()"></app-comment-creation>
     </div>
     <div class="content mat-elevation-z8">
       <h1>Antworten</h1>
