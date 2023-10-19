@@ -11,3 +11,4 @@ export * from "./discussion.dto";
 export * from "./discussionMessage.dto";
 export * from "./discussionMessageVote.dto";
 export * from "./discussionCreation.dto"
+export * from "./discussionFilter.dto"

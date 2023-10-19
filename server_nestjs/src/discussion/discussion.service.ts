@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { discussionDTO, discussionsDTO, discussionMessageVoteDTO, discussionMessageDTO, discussionMessagesDTO, nodeNameDTO, AnonymousUserDTO, creationResponseDTO } from '@DTOs/index';
+import { discussionDTO, discussionsDTO, discussionMessageVoteDTO, discussionMessageDTO, discussionMessagesDTO, nodeNameDTO, AnonymousUserDTO, creationResponseDTO, discussionFilterDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { get } from 'http';
 
@@ -37,24 +37,15 @@ export class DiscussionService {
 
   /**
    * This function returns all discussions for a given concept node and optional content node, author, solved status and search string
+   * provided in the discussionFilterDTO
    *
-   * @param conceptNodeId
-   * @param contentNodeId
-   * @param onlySolved
-   * @param authorId
-   * @param searchString
+   * @param filterData : discussionFilterDTO
    * @returns  the discussions
    */
-  async getDiscussions(
-    conceptNodeId: number,
-    contentNodeId: number,
-    onlySolved: boolean,
-    authorId: number,
-    searchString: string,
-  ) : Promise<discussionsDTO> {
+  async getDiscussions(filterData: discussionFilterDTO) : Promise<discussionsDTO> {
     let discussions = await this.prisma.discussion.findMany({
       where: {
-        conceptNodeId: Number(conceptNodeId)
+        conceptNodeId: Number(filterData.conceptNodeId)
         }
     });
 
@@ -62,24 +53,24 @@ export class DiscussionService {
       throw new Error('Discussions not found');
     }
 
-    console.log('paras:' + conceptNodeId + ',' + contentNodeId + ',' + onlySolved + ',' + authorId + ',' + searchString);
+    console.log('paras:' + filterData.conceptNodeId + ',' + filterData.contentNodeId + ',' + filterData.onlySolved + ',' + filterData.authorId + ',' + filterData.searchString);
 
-    if (contentNodeId != -1) {
+    if (filterData.contentNodeId != -1) {
       console.log('filtering for contentNodeId');
-      discussions = discussions.filter(discussion => discussion.contentNodeId == contentNodeId);
+      discussions = discussions.filter(discussion => discussion.contentNodeId == filterData.contentNodeId);
     }
-    if (onlySolved == true) {
+    if (filterData.onlySolved == true) {
       console.log('filtering for onlySolved');
       discussions = discussions.filter(discussion => discussion.isSolved);
     }
-    if (authorId != -1) {
+    if (filterData.authorId != -1) {
       console.log('filtering for authorId');
-      discussions = discussions.filter(discussion => discussion.authorId == authorId);
+      discussions = discussions.filter(discussion => discussion.authorId == filterData.authorId);
     }
 
-    if (searchString != "") {
+    if (filterData.searchString != "") {
       console.log('filtering for searchString');
-      discussions = discussions.filter(discussion => discussion.title.includes(searchString));
+      discussions = discussions.filter(discussion => discussion.title.includes(filterData.searchString));
     }
 
     let discussionData: discussionsDTO = {
@@ -92,13 +83,11 @@ export class DiscussionService {
         title: discussion.title,
         authorName: await this.getAuthorName(discussion.authorId),
         createdAt: discussion.createdAt,
-        contentNodeName: contentNodeId == -1 ? 'allgemein' : (await this.getContentNodeName(discussion.contentNodeId)).name,
+        contentNodeName: filterData.contentNodeId == -1 ? 'allgemein' : (await this.getContentNodeName(discussion.contentNodeId)).name,
         commentCount: await this.getDiscussionCommentCount(discussion.id),
         isSolved: discussion.isSolved
       });
     }
-    console.log('returned discussionData:');
-    console.log(discussionData);
     return discussionData;
   }
 

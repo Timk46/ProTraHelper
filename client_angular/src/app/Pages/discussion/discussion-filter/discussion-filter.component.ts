@@ -1,31 +1,21 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ContentService } from 'src/app/Services/content/content.service';
-import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
 import { ContentDTO } from '@DTOs/content.dto';
+import { discussionFilterDTO } from '@DTOs/discussionFilter.dto';
 
 @Component({
-  selector: 'app-question-filter',
-  templateUrl: './question-filter.component.html',
-  styleUrls: ['./question-filter.component.scss']
+  selector: 'app-discussion-filter',
+  templateUrl: './discussion-filter.component.html',
+  styleUrls: ['./discussion-filter.component.scss']
 })
-export class QuestionFilterComponent {
+export class DiscussionFilterComponent {
   allSelected : Boolean = true;
   filterSelection : Boolean = false;
   filterTitle : String = 'Filter auswählen';
   filterSelected : String = 'Python';
 
   // init with dummy node, but this is too much information
-  @Input() activeConceptNode: ConceptNodeDTO = {
-    databaseId: -1,
-    name: 'dummy',
-    level: 0,
-    expanded: false,
-    parentIds: [],
-    childIds: [],
-    prerequisiteEdgeIds: [],
-    successorEdgeIds: [],
-    edgeChildIds: [],
-  };
+  @Input() activeConceptNodeId: number = -1
 
   // should contain all the content 'cards', but also with too much information
   @Input() contentNodes: ContentDTO[] = [{
@@ -40,10 +30,10 @@ export class QuestionFilterComponent {
     }
   ];
 
+  @Output() changeFilter = new EventEmitter<discussionFilterDTO>();
 
-  constructor(private contentService: ContentService) {
 
-  }
+  constructor(private contentService: ContentService) {  }
 
   /* if the "Alle" button is clicked */
   onAllQuestions() {
@@ -59,25 +49,19 @@ export class QuestionFilterComponent {
     this.filterSelection = !this.filterSelection;
   }
 
-  /* deprecated, at least not in use. TODO: reaction if 'filter' package is emitted */
-  onFilterSelected(){
+  /**
+   * if a filter is selected, the filter title is changed and the filter data is emitted
+   * @param filterData 
+   */
+  onFilterSelected(filterData: discussionFilterDTO){
     this.filterSelection = false;
     this.allSelected = false;
-    this.filterTitle = 'Filter: ' + this.activeConceptNode.name;
+    this.filterTitle = 'Filter eingestellt';
+    this.changeFilter.emit(filterData);
   }
 
-  // reset activeConceptNode to dummy node
+  // reset activeConceptNodeId
   resetActiveConceptNode() {
-    this.activeConceptNode = {
-      databaseId: -1,
-      name: 'dummy',
-      level: 0,
-      expanded: false,
-      parentIds: [],
-      childIds: [],
-      prerequisiteEdgeIds: [],
-      successorEdgeIds: [],
-      edgeChildIds: [],
-    }
+    this.activeConceptNodeId = -1;
   }
 }

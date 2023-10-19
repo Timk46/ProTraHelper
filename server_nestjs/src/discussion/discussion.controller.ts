@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { DiscussionService } from './discussion.service';
-import { discussionMessageDTO, discussionMessageVoteDTO } from '@DTOs/index';
+import { discussionFilterDTO, discussionMessageDTO, discussionMessageVoteDTO } from '@DTOs/index';
 
 @Controller('discussion')
 export class DiscussionController {
@@ -39,22 +39,10 @@ export class DiscussionController {
   * @param searchString the search string, handled as JSON string with a 'content' field
   * @returns the discussions
   */
-  @Get('list/:conceptNodeId/:contentNodeId/:onlySolved/:authorId/:searchString')
-  async getDiscussions(
-    @Param('conceptNodeId') conceptNodeId: number,
-    @Param('contentNodeId') contentNodeId: number,
-    @Param('onlySolved') onlySolved: boolean,
-    @Param('authorId') authorId: number,
-    @Param('searchString') searchString: string,
-  ) {
+  @Get('list/:filterData')
+  async getDiscussions(@Param('filterData') filterData: any) {
     console.log('DiscussionController: getDiscussions');
-    return this.discussionService.getDiscussions(
-      conceptNodeId,
-      contentNodeId,
-      onlySolved,
-      authorId,
-      JSON.parse(searchString)['content'],
-    );
+    return this.discussionService.getDiscussions(JSON.parse(filterData));
   }
 
   /**

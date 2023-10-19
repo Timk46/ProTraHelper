@@ -71,7 +71,6 @@ export class CommentCreationComponent {
             // refresh the messages by telling the parent 'discussion-page' component to do so
             this.refreshMessages.emit();
           });
-
         });
       } else {
         console.log('Error. Not logged in!');

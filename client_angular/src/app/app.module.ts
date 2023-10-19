@@ -22,13 +22,13 @@ import { ContentViewComponent } from './Pages/contentView/contentView.component'
 import { CreateConceptDialogComponent } from './Pages/graph/graph-dialogs/create-concept-dialog/create-concept-dialog.component';
 import { VideoViewerComponent } from './Pages/contentView/contentElement/videoViewer/videoViewer.component';
 import { CompetenciesComponent } from './Pages/competencies/competencies.component';
-import { QuestionFilterComponent } from './Pages/discussion/question-filter/question-filter.component';
-import { QuestionOverviewComponent } from './Pages/discussion/question-overview/question-overview.component';
-import { QuestionComponent } from './Pages/discussion/question-overview/question/question.component';
+import { DiscussionFilterComponent } from './Pages/discussion/discussion-filter/discussion-filter.component';
+import { DiscussionListComponent } from './Pages/discussion/discussion-list/discussion-list.component';
+import { QuestionComponent } from './Pages/discussion/discussion-list/question/question.component';
 import { VoteBoxComponent } from './Pages/discussion/vote-box/vote-box.component';
-import { FilterMenuComponent } from './Pages/discussion/question-filter/filter-menu/filter-menu.component';
+import { FilterMenuComponent } from './Pages/discussion/discussion-filter/filter-menu/filter-menu.component';
 import { DiscussionPageComponent } from './Pages/discussion/discussion-page/discussion-page.component';
-import { QuestionCreationComponent } from './Pages/discussion/question-creation/question-creation.component';
+import { QuestionCreationComponent } from './Pages/discussion/discussion-creation/question-creation.component';
 import { DiscussionPageQuestionComponent } from './Pages/discussion/discussion-page/discussion-page-question/discussion-page-question.component';
 import { DiscussionPageCommentComponent } from './Pages/discussion/discussion-page/discussion-page-comment/discussion-page-comment.component';
 import { CommentCreationComponent } from './Pages/discussion/discussion-page/comment-creation/comment-creation.component';
@@ -51,8 +51,8 @@ import { CommentCreationComponent } from './Pages/discussion/discussion-page/com
     CreateConceptDialogComponent,
     VideoViewerComponent,
     CompetenciesComponent,
-    QuestionFilterComponent,
-    QuestionOverviewComponent,
+    DiscussionFilterComponent,
+    DiscussionListComponent,
     QuestionComponent,
     VoteBoxComponent,
     FilterMenuComponent,

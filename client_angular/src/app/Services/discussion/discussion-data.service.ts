@@ -7,6 +7,7 @@ import { discussionDTO, discussionsDTO, nodeNameDTO } from '@DTOs/discussion.dto
 import { discussionMessagesDTO } from '@DTOs/discussionMessage.dto';
 
 import { Observable } from 'rxjs';
+import { discussionFilterDTO } from '@DTOs/discussionFilter.dto';
 
 
 
@@ -35,8 +36,8 @@ export class DiscussionDataService {
    * @param searchString 
    * @returns the discussions
    */
-  getDiscussions(conceptNodeId: number, contentNodeId: number, onlySolved: boolean, authorId: number, searchString: string) : Observable<discussionsDTO> {
-    return this.http.get<discussionsDTO>(environment.server + `/discussion/list/${conceptNodeId}/${contentNodeId}/${onlySolved}/${authorId}/${searchString}`)
+  getDiscussions(filterData: discussionFilterDTO) : Observable<discussionsDTO> {
+    return this.http.get<discussionsDTO>(environment.server + `/discussion/list/${JSON.stringify(filterData)}`)
   }
 
   /**

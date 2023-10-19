@@ -1,7 +1,8 @@
-<p>passed active concept node: {{activeConceptNode.databaseId}} : {{activeConceptNode.name}}</p>
-<app-question-filter
-  [activeConceptNode]="activeConceptNode"
+<p>passed active concept node: {{activeConceptNodeId}}</p>
+<app-discussion-filter
+  [activeConceptNodeId]="activeConceptNodeId"
   [contentNodes]="contentsForActiveConceptNode.trainedBy"
-></app-question-filter>
-<app-question-overview [activeConceptNodeId]="activeConceptNode.databaseId"></app-question-overview>
+  (changeFilter)="changeFilter($event)"
+></app-discussion-filter>
+<app-discussion-list></app-discussion-list>
 <!-- <app-discussion-page [discussionId]="1"></app-discussion-page> -->
