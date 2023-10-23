@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { DiscussionService } from './discussion.service';
-import { discussionFilterDTO, discussionMessageDTO, discussionMessageVoteDTO } from '@DTOs/index';
+import { AnonymousUserDTO, creationResponseDTO, discussionCreationDTO, discussionFilterDTO, discussionMessageCreationDTO, discussionMessageDTO, discussionMessageVoteDTO, discussionMessagesDTO, discussionNodeNamesDTO, discussionsDTO, nodeNameDTO } from '@DTOs/index';
 
 @Controller('discussion')
 export class DiscussionController {
@@ -40,7 +40,7 @@ export class DiscussionController {
   * @returns the discussions
   */
   @Get('list/:filterData')
-  async getDiscussions(@Param('filterData') filterData: any) {
+  async getDiscussions(@Param('filterData') filterData: any): Promise<discussionsDTO> {
     console.log('DiscussionController: getDiscussions');
     return this.discussionService.getDiscussions(JSON.parse(filterData));
   }
@@ -51,7 +51,7 @@ export class DiscussionController {
    * @returns the messages
    */
   @Get('messages/:discussionId')
-  async getMessages(@Param('discussionId') discussionId: number) {
+  async getMessages(@Param('discussionId') discussionId: number): Promise<discussionMessagesDTO> {
     console.log('DiscussionController: getMessages')
     return this.discussionService.getDiscussionMessages(discussionId);
   }
@@ -62,7 +62,7 @@ export class DiscussionController {
    * @returns the name of the concept node
    */
   @Get('conceptNodeName/:discussionId')
-  async getConceptNodeName(@Param('discussionId') discussionId: number) {
+  async getConceptNodeName(@Param('discussionId') discussionId: number): Promise<nodeNameDTO> {
     console.log('DiscussionController: getConceptNodeName')
     return this.discussionService.getConceptNodeName(discussionId);
   }
@@ -73,9 +73,20 @@ export class DiscussionController {
    * @returns the name of the content node
    */
   @Get('anonymousUser/:userId/:discussionId')
-  async getAnonymousUser(@Param('userId') userId: number, @Param('discussionId') discussionId: number) {
+  async getAnonymousUser(@Param('userId') userId: number, @Param('discussionId') discussionId: number): Promise<AnonymousUserDTO> {
     console.log('DiscussionController: getAnonymousUser')
     return this.discussionService.getAnonymousUser(userId, discussionId);
+  }
+
+  /**
+   * Creates a new anonymous user in the database and returns it
+   * @param data
+   * @returns
+   */
+  @Post('anonymousUser/create')
+  async createAnonymousUser(@Body() data: { userId: number, name: string }): Promise<AnonymousUserDTO> {
+    console.log('DiscussionController: createAnonymousUser')
+    return this.discussionService.createAnonymousUser(data.userId, data.name);
   }
 
   /** Creates a new message in the database and returns
@@ -84,9 +95,38 @@ export class DiscussionController {
    * @returns a creation status if successful
    */
   @Post('messages/create')
-  async createDiscussionMessage(@Body() messageData: discussionMessageDTO) {
+  async createDiscussionMessage(@Body() messageData: discussionMessageCreationDTO): Promise<discussionMessageCreationDTO> {
     console.log('DiscussionController: createMessage')
     return this.discussionService.createDiscussionMessage(messageData);
+  }
+
+
+  /**
+   * Returns the node names for the given ids
+   * @param conceptNodeId
+   * @param contentNodeId
+   * @param contentElementId
+   * @returns the node names
+   */
+  @Get('nodeNames/:conceptNodeId/:contentNodeId/:contentElementId')
+  async getDiscussionNodeNames(
+    @Param('conceptNodeId') conceptNodeId: number,
+    @Param('contentNodeId') contentNodeId: number,
+    @Param('contentElementId') contentElementId: number): Promise<discussionNodeNamesDTO> {
+    console.log('DiscussionController: getDiscussionNodeNames');
+    console.log(conceptNodeId, contentNodeId, contentElementId);
+    return this.discussionService.getDiscussionNodeNames(conceptNodeId, contentNodeId, contentElementId);
+  }
+
+  /**
+   * Creates a new discussion in the database and returns it
+   * @param discussionData
+   * @returns the discussion
+   */
+  @Post('create')
+  async createDiscussion(@Body() discussionData: discussionCreationDTO): Promise<discussionCreationDTO> {
+    console.log('DiscussionController: createDiscussion');
+    return this.discussionService.createDiscussion(discussionData);
   }
 
 

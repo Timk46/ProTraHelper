@@ -28,7 +28,7 @@ import { QuestionComponent } from './Pages/discussion/discussion-list/question/q
 import { VoteBoxComponent } from './Pages/discussion/vote-box/vote-box.component';
 import { FilterMenuComponent } from './Pages/discussion/discussion-filter/filter-menu/filter-menu.component';
 import { DiscussionPageComponent } from './Pages/discussion/discussion-page/discussion-page.component';
-import { QuestionCreationComponent } from './Pages/discussion/discussion-creation/question-creation.component';
+import { DiscussionCreationComponent } from './Pages/discussion/discussion-creation/discussion-creation.component';
 import { DiscussionPageQuestionComponent } from './Pages/discussion/discussion-page/discussion-page-question/discussion-page-question.component';
 import { DiscussionPageCommentComponent } from './Pages/discussion/discussion-page/discussion-page-comment/discussion-page-comment.component';
 import { CommentCreationComponent } from './Pages/discussion/discussion-page/comment-creation/comment-creation.component';
@@ -57,7 +57,7 @@ import { CommentCreationComponent } from './Pages/discussion/discussion-page/com
     VoteBoxComponent,
     FilterMenuComponent,
     DiscussionPageComponent,
-    QuestionCreationComponent,
+    DiscussionCreationComponent,
     DiscussionPageQuestionComponent,
     DiscussionPageCommentComponent,
     CommentCreationComponent

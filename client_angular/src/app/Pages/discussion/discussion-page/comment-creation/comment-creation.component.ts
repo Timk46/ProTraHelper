@@ -1,4 +1,4 @@
-import { discussionMessageDTO } from '@DTOs/discussionMessage.dto';
+import { discussionMessageCreationDTO } from '@DTOs/discussionCreation.dto';
 import { AnonymousUserDTO } from '@DTOs/user.dto';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CreationService } from 'src/app/Services/discussion/creation.service';
@@ -55,15 +55,13 @@ export class CommentCreationComponent {
             //TODO create anonymous user
           }
           // wrap the comment in a messageDTO and send it to the backend
-          const message: discussionMessageDTO = {
-            messageId: -1,
-            discussionId: this.discussionId,
+          const message: discussionMessageCreationDTO = {
+            id: -1,
+            text: text,
             authorId: this.anonymousUser.id,
-            authorName: this.anonymousUser.anonymousName,
-            createdAt: new Date(),
-            messageText: text,
-            isSolution: false,
-            isInitiator: false
+            discussionId: this.discussionId,
+            isInitiator: false,
+            isSolution: false
           }
           this.creationService.createDiscussionMessage(message).subscribe(creationResult => {
             console.log(creationResult);

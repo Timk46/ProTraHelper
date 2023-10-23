@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { discussionDTO, discussionsDTO, discussionMessageVoteDTO, discussionMessageDTO, discussionMessagesDTO, nodeNameDTO, AnonymousUserDTO, creationResponseDTO, discussionFilterDTO } from '@DTOs/index';
+import { discussionDTO, discussionsDTO, discussionMessageVoteDTO, discussionMessageDTO, discussionMessagesDTO, nodeNameDTO, AnonymousUserDTO, creationResponseDTO, discussionFilterDTO, discussionNodeNamesDTO, discussionCreationDTO, discussionMessageCreationDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { get } from 'http';
 
@@ -298,17 +298,32 @@ export class DiscussionService {
     };
   }
 
+  /**
+   * Creates a new anonymous user in the database and returns it
+   * @param userId
+   * @param name
+   * @returns the anonymous user
+   */
+  createAnonymousUser(userId: number, name: string) : Promise<AnonymousUserDTO> {
+    return this.prisma.anonymousUser.create({
+      data: {
+        userId: userId,
+        anonymousName: name
+      }
+    });
+  }
+
   /** Creates a new discussion message in the database and returns
    *
    * @param discussionData
    * @returns a creation status if successful
    */
-  async createDiscussionMessage(messageData: discussionMessageDTO) : Promise<creationResponseDTO> {
+  async createDiscussionMessage(messageData: discussionMessageCreationDTO) : Promise<discussionMessageCreationDTO> {
     console.log('DiscussionService: createDiscussionMessage, messageData:');
     console.log(messageData);
     const message = await this.prisma.message.create({
       data: {
-        text: messageData.messageText,
+        text: messageData.text,
         authorId: messageData.authorId,
         discussionId: messageData.discussionId,
         isInitiator: messageData.isInitiator,
@@ -320,10 +335,67 @@ export class DiscussionService {
       throw new Error('Message not created');
     }
 
+    return message;
+  }
+
+  /**
+   * Returns the name of the concept Node, the content Node and the content Element for the given ids
+   * @param conceptNodeId
+   * @param contentNodeId
+   * @param contentElementId
+   * @returns the names of the nodes and the element name
+   */
+  async getDiscussionNodeNames(conceptNodeId: number, contentNodeId: number, contentElementId: number) : Promise<discussionNodeNamesDTO> {
+    console.log('conceptNodeId: ' + conceptNodeId + ', contentNodeId: ' + contentNodeId + ', contentElementId: ' + contentElementId);
+    const conceptNodeName = await this.prisma.conceptNode.findUnique({
+      where: { id: Number(conceptNodeId) },
+      select: { name: true }
+    });
+    const contentNodeName = await this.prisma.contentNode.findUnique({
+      where: { id: Number(contentNodeId) },
+      select: { name: true }
+    });
+    const elementNodeName = await this.prisma.contentElement.findUnique({
+      where: { id: Number(contentElementId) },
+      select: { title: true }
+    });
+
     return {
-      ok: true,
-      returnNumber: message.id,
-      returnText: 'Message created'
+      conceptNodeName: conceptNodeName?.name || "no concept node found",
+      contentNodeName: contentNodeName?.name || "Allgemein",
+      contentElementName: elementNodeName?.title || "Allgemein"
+    };
+  }
+
+  /**
+   * Creates a new discussion in the database and returns it
+   * @param discussionData
+   * @returns the discussion
+   */
+  async createDiscussion(discussionData: discussionCreationDTO) : Promise<discussionCreationDTO> {
+    const discussion = await this.prisma.discussion.create({
+      data: {
+        title: discussionData.title,
+        conceptNodeId: discussionData.conceptNodeId,
+        contentNodeId: discussionData.contentNodeId != -1 ? discussionData.contentNodeId : null,
+        contentElementId: discussionData.contentElementId != -1 ? discussionData.contentElementId : null,
+        authorId: discussionData.authorId,
+        isSolved: discussionData.isSolved
+      }
+    });
+
+    if (!discussion) {
+      throw new Error('Discussion not created');
+    }
+
+    return {
+      id: discussion.id,
+      title: discussion.title,
+      conceptNodeId: discussion.conceptNodeId,
+      contentNodeId: discussion.contentNodeId,
+      contentElementId: discussion.contentElementId,
+      authorId: discussion.authorId,
+      isSolved: discussion.isSolved
     };
   }
 

@@ -8,6 +8,7 @@ import { discussionMessagesDTO } from '@DTOs/discussionMessage.dto';
 
 import { Observable } from 'rxjs';
 import { discussionFilterDTO } from '@DTOs/discussionFilter.dto';
+import { discussionNodeNamesDTO } from '@DTOs/discussionCreation.dto';
 
 
 
@@ -20,7 +21,7 @@ export class DiscussionDataService {
 
   /**
    * This function returns the vote data for a given message
-   * @param messageId 
+   * @param messageId
    * @returns the vote data
    */
   getVoteData(messageId: number) : Observable<discussionMessageVoteDTO> {
@@ -28,12 +29,12 @@ export class DiscussionDataService {
   }
 
   /** Returns all discussions for a given concept node and optional content node, author, solved status and search string
-   * 
-   * @param conceptNodeId 
-   * @param contentNodeId 
-   * @param onlySolved 
-   * @param authorId 
-   * @param searchString 
+   *
+   * @param conceptNodeId
+   * @param contentNodeId
+   * @param onlySolved
+   * @param authorId
+   * @param searchString
    * @returns the discussions
    */
   getDiscussions(filterData: discussionFilterDTO) : Observable<discussionsDTO> {
@@ -42,7 +43,7 @@ export class DiscussionDataService {
 
   /**
    * This function returns a discussion for a given id
-   * @param discussionId 
+   * @param discussionId
    * @returns the discussion
    */
   getDiscussion(discussionId: number) : Observable<discussionDTO> {
@@ -51,7 +52,7 @@ export class DiscussionDataService {
 
   /**
    * This function returns all messages for a given discussion
-   * @param discussionId 
+   * @param discussionId
    * @returns the messages
    */
   getMessages(discussionId: number) : Observable<discussionMessagesDTO> {
@@ -59,12 +60,23 @@ export class DiscussionDataService {
   }
 
   /** Returns the name of the concept node for a given discussion
-   * 
-   * @param discussionId 
+   *
+   * @param discussionId
    * @returns the name of the concept node
    */
   getConceptNodeName(discussionId: number) : Observable<nodeNameDTO> {
     return this.http.get<nodeNameDTO>(environment.server + `/discussion/conceptNodeName/${discussionId}`)
+  }
+
+  /**
+   * Returns the names of the concept node, content node and content element for the related ids
+   * @param conceptNodeId
+   * @param contentNodeId
+   * @param contentElementId
+   * @returns
+   */
+  getNodeNames(conceptNodeId: number, contentNodeId: number, contentElementId: number) : Observable<discussionNodeNamesDTO> {
+    return this.http.get<discussionNodeNamesDTO>(environment.server + `/discussion/nodeNames/${conceptNodeId}/${contentNodeId}/${contentElementId}`)
   }
 
 }

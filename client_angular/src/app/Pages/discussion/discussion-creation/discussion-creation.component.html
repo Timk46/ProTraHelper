@@ -1,0 +1,34 @@
+<div class="main-container">
+  <div class="content mat-elevation-z8">
+    <h1>Neuen Beitrag erstellen</h1>
+    <!-- begin white card -->
+    <div class="vbox">
+      <h2>Dieser Beitrag wird erstellt unter {{discussionNodeNames.conceptNodeName}}
+        <span *ngIf="discussionData.contentNodeId != -1">: {{discussionNodeNames.contentNodeName}}</span>
+        <span *ngIf="discussionData.contentElementId != -1">: {{discussionNodeNames.contentElementName}}</span>
+      </h2>
+      <!-- Title -->
+      <h3>Titel</h3>
+      <mat-form-field class="example-full-width">
+        <mat-label>Titel des Beitrags</mat-label>
+        <input matInput #title maxlength="64" placeholder="Titel...">
+        <mat-hint align="end">{{title.value.length}} / 64</mat-hint>
+      </mat-form-field>
+      <!-- Text -->
+      <h3>Beschreibung</h3>
+      <mat-form-field>
+        <mat-label>Beitrag verfassen</mat-label>
+        <textarea #inputText matInput placeholder="Beschreibe dein Anliegen..."></textarea>
+      </mat-form-field>
+
+    </div>
+    <!-- button not available if not logged in -->
+    <div class="hbox" style="margin-top: 16px;">
+      <button *ngIf="userId != -1" mat-raised-button style="width: fit-content; margin-bottom: 8px" (click)="onSubmit(title.value, inputText.value)">Erstellen</button>
+      <p *ngIf="userId == -1">Zum Absenden bitte einloggen!</p>
+    </div>
+
+  </div>
+</div>
+
+

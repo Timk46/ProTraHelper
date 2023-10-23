@@ -9,10 +9,12 @@ import { CodeTaskComponent } from './Pages/contentView/contentElement/codeTask/c
 import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer/pdfViewer.component';
 import { McQuizComponent } from './Pages/contentView/contentElement/mcQuiz/mcQuiz.component';
 import { GraphComponent } from './Pages/graph/graph.component';
+import { DiscussionPageComponent } from './Pages/discussion/discussion-page/discussion-page.component';
+import { DiscussionCreationComponent } from './Pages/discussion/discussion-creation/discussion-creation.component';
 
 // just for testing
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
-import { DiscussionPageComponent } from './Pages/discussion/discussion-page/discussion-page.component';
+
 
 const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -25,10 +27,11 @@ const routes: Routes = [
   { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent },
   { path: 'mcQuiz', component: McQuizComponent },
   { path: 'graph', component: GraphComponent },
+  { path: 'discussion-page/:discussionId', component: DiscussionPageComponent },
+  { path: 'discussion-creation/:conceptNodeId/:contentNodeId/:contentElementId', component: DiscussionCreationComponent },
 
   // just for testing
   { path: 'file-upload', component: FileUploadComponent },
-  { path: 'discussion-page/:discussionId', component: DiscussionPageComponent },
 
 ];
 
