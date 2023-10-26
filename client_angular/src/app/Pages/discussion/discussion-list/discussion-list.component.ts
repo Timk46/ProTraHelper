@@ -1,9 +1,10 @@
 import { discussionsDTO, discussionDTO } from '@DTOs/discussion.dto';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DiscussionDataService } from 'src/app/Services/discussion/discussion-data.service';
 import { DiscussionPageComponent } from '../discussion-page/discussion-page.component';
 import { discussionFilterDTO } from '@DTOs/discussionFilter.dto';
+import { DiscussionCreationComponent } from '../discussion-creation/discussion-creation.component';
 
 
 @Component({
@@ -12,6 +13,8 @@ import { discussionFilterDTO } from '@DTOs/discussionFilter.dto';
   styleUrls: ['./discussion-list.component.scss', '../discussion.component.css']
 })
 export class DiscussionListComponent {
+
+  @Output() createDiscussion = new EventEmitter();
 
   visibleDiscussions: discussionsDTO = {
     discussions: [] as discussionDTO[],
@@ -47,6 +50,12 @@ export class DiscussionListComponent {
   onQuestionClick(discussionId: number) {
     const url = '/discussion-page/' + discussionId;
     window.open(url, "_blank");
+  }
+
+  onNewDiscussion(){
+    /* const url = '/discussion-creation/14/1/1';
+    window.open(url, "_blank"); */
+    this.createDiscussion.emit();
   }
 
   /**

@@ -1,7 +1,13 @@
 import { Component, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
-import { ContentsForConceptDTO } from '@DTOs/content.dto';
+import { ContentDTO, ContentsForConceptDTO } from '@DTOs/content.dto';
 import { discussionFilterDTO } from '@DTOs/discussionFilter.dto';
 import { DiscussionListComponent } from './discussion-list/discussion-list.component';
+import { DialogConfig } from '@angular/cdk/dialog';
+
+import { MatDialog } from '@angular/material/dialog';
+import { CreationDialogComponent } from './creation-dialog/creation-dialog.component';
+
+
 @Component({
   selector: 'app-discussion',
   templateUrl: './discussion.component.html',
@@ -29,7 +35,7 @@ export class DiscussionComponent implements OnInit, OnChanges {
     searchString: ""
   }
 
-  constructor() { }
+  constructor(public dialog: MatDialog) {}
 
   ngOnInit() {
   }
@@ -43,9 +49,30 @@ export class DiscussionComponent implements OnInit, OnChanges {
     }
   }
 
+  /**
+   * Tells the discussion list child to list the discussions with the given filter data
+   * @param filterData 
+   */
   changeFilter(filterData: discussionFilterDTO) {
     //this.filterData = filterData;
     this.discussionList.listDiscussions(filterData);
+  }
+
+  
+  onCreateDiscussion() {
+    const dialogRef = this.dialog.open(CreationDialogComponent, {
+      width: '50%',
+      data: this.contentsForActiveConceptNode.trainedBy
+    });
+
+    dialogRef.afterClosed().subscribe((result: ContentDTO) => {
+      if (result) {
+        // do something with the selected content node
+        console.log("selected content node: " + result.contentNodeId);
+        const url = `/discussion-creation/${this.activeConceptNodeId}/${result.contentNodeId}/-1`;
+        window.open(url, "_blank");
+      }
+    });
   }
 
 }

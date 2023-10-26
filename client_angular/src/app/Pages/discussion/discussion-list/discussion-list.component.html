@@ -1,5 +1,9 @@
 <div class="content mat-elevation-z8">
-  <h1>Beiträge</h1>
+  <div style="display: flex; flex-direction: row; justify-content: space-between;">
+    <h1>Beiträge</h1>
+    <button mat-raised-button (click)="onNewDiscussion()">Neuen Beitrag erstellen</button>
+  </div>
+  
   <p>FilterData: unset</p>
   <div class="container">
     <div *ngIf="visibleDiscussions && visibleDiscussions.discussions && visibleDiscussions.discussions.length > 0">

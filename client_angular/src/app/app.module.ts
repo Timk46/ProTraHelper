@@ -32,6 +32,7 @@ import { DiscussionCreationComponent } from './Pages/discussion/discussion-creat
 import { DiscussionPageQuestionComponent } from './Pages/discussion/discussion-page/discussion-page-question/discussion-page-question.component';
 import { DiscussionPageCommentComponent } from './Pages/discussion/discussion-page/discussion-page-comment/discussion-page-comment.component';
 import { CommentCreationComponent } from './Pages/discussion/discussion-page/comment-creation/comment-creation.component';
+import { CreationDialogComponent } from './Pages/discussion/creation-dialog/creation-dialog.component';
 
 
 
@@ -60,7 +61,8 @@ import { CommentCreationComponent } from './Pages/discussion/discussion-page/com
     DiscussionCreationComponent,
     DiscussionPageQuestionComponent,
     DiscussionPageCommentComponent,
-    CommentCreationComponent
+    CommentCreationComponent,
+    CreationDialogComponent
   ],
   imports: [
     BrowserModule,
