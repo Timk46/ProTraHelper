@@ -36,11 +36,17 @@ export class DiscussionFilterComponent {
   constructor(private contentService: ContentService) {  }
 
   /* if the "Alle" button is clicked */
-  onAllQuestions() {
+  onAllDiscussions() {
     this.allSelected = true;
     this.filterSelection = false;
     this.filterTitle = 'Filter auswählen';
-    this.resetActiveConceptNode();
+    this.changeFilter.emit({
+      conceptNodeId: this.activeConceptNodeId,
+      contentNodeId: -1,
+      authorId: -1,
+      onlySolved: false,
+      searchString: ""
+    });
   }
 
   /* if the button for the filter selection is clicked */
@@ -60,8 +66,4 @@ export class DiscussionFilterComponent {
     this.changeFilter.emit(filterData);
   }
 
-  // reset activeConceptNodeId
-  resetActiveConceptNode() {
-    this.activeConceptNodeId = -1;
-  }
 }

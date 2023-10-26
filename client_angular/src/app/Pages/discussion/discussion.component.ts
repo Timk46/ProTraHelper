@@ -35,7 +35,9 @@ export class DiscussionComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges() {
-    if (this.activeConceptNodeId != -1) {
+    console.log("discussion component: " + this.activeConceptNodeId);
+    if (this.activeConceptNodeId != -1 && this.filterData.conceptNodeId != this.activeConceptNodeId) {
+      console.log("changing filter data");
       this.filterData.conceptNodeId = this.activeConceptNodeId;
       this.discussionList.listDiscussions(this.filterData);
     }

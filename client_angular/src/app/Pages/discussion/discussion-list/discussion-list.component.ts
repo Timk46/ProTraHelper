@@ -32,9 +32,10 @@ export class DiscussionListComponent {
    * @param filterData 
    */
   listDiscussions(filterData: discussionFilterDTO) {
-    if (filterData.conceptNodeId != -1 && filterData != this.filterData) {
+    console.log("do i want to list? Different?: " + this.isDifferent(filterData) + " conceptNodeId: " + filterData.conceptNodeId)
+    if (filterData.conceptNodeId != -1 && this.isDifferent(filterData)) {
       console.log('discussion-list: listDiscussions');
-      this.filterData = filterData;
+      this.filterData = {...filterData}; //prevents mutation
       this.discussionDataService.getDiscussions(filterData).subscribe(discussions => this.visibleDiscussions = discussions);
     }
   }
@@ -46,5 +47,19 @@ export class DiscussionListComponent {
   onQuestionClick(discussionId: number) {
     const url = '/discussion-page/' + discussionId;
     window.open(url, "_blank");
+  }
+
+  /**
+   * Checks if the given filter data is different from the current filter data
+   * @param filterData 
+   * @returns true if the given filter data is different from the current filter data
+   */
+  isDifferent(filterData: discussionFilterDTO): boolean {
+    console.log("checking differences...");
+    return filterData.conceptNodeId != this.filterData.conceptNodeId || 
+    filterData.contentNodeId != this.filterData.contentNodeId || 
+    filterData.authorId != this.filterData.authorId || 
+    filterData.onlySolved != this.filterData.onlySolved || 
+    filterData.searchString != this.filterData.searchString;
   }
 }

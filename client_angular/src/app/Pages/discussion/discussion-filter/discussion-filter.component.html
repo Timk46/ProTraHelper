@@ -3,7 +3,7 @@
     <h2>Filter:</h2>
     <!-- select all button -->
     <button *ngIf="allSelected" mat-raised-button>Alle</button>
-    <button *ngIf="!allSelected" (click)="onAllQuestions()" mat-stroked-button>Alle</button>
+    <button *ngIf="!allSelected" (click)="onAllDiscussions()" mat-stroked-button>Alle</button>
     <!-- filter button -->
     <button  *ngIf="allSelected" (click)="onSelectFilter()" mat-stroked-button >
       {{ filterTitle }}
