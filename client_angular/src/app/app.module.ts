@@ -33,6 +33,8 @@ import { DiscussionPageQuestionComponent } from './Pages/discussion/discussion-p
 import { DiscussionPageCommentComponent } from './Pages/discussion/discussion-page/discussion-page-comment/discussion-page-comment.component';
 import { CommentCreationComponent } from './Pages/discussion/discussion-page/comment-creation/comment-creation.component';
 import { CreationDialogComponent } from './Pages/discussion/creation-dialog/creation-dialog.component';
+import { TinymceComponent } from './Pages/tinymce/tinymce.component';
+import { EditorModule, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
 
 
 
@@ -62,7 +64,8 @@ import { CreationDialogComponent } from './Pages/discussion/creation-dialog/crea
     DiscussionPageQuestionComponent,
     DiscussionPageCommentComponent,
     CommentCreationComponent,
-    CreationDialogComponent
+    CreationDialogComponent,
+    TinymceComponent
   ],
   imports: [
     BrowserModule,
@@ -72,9 +75,12 @@ import { CreationDialogComponent } from './Pages/discussion/creation-dialog/crea
     BrowserAnimationsModule,
     MaterialModule,
     NgxExtendedPdfViewerModule,
-    HttpClientModule
+    HttpClientModule,
+    EditorModule
   ],
-  providers: [],
+  providers: [
+    { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,6 +1,7 @@
 import { discussionMessageCreationDTO } from '@DTOs/discussionCreation.dto';
 import { AnonymousUserDTO } from '@DTOs/user.dto';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { TinymceComponent } from 'src/app/Pages/tinymce/tinymce.component';
 import { CreationService } from 'src/app/Services/discussion/creation.service';
 
 @Component({
@@ -77,7 +78,8 @@ export class CommentCreationComponent {
   }
 
 
-
-
+  onLog(data: string) {
+    console.log("log from comment-creation:" + data);
+  }
 
 }

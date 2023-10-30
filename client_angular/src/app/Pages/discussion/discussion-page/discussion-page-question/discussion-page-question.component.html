@@ -19,7 +19,8 @@
           <p>•</p>
           <p>{{discussionData.contentNodeName}}</p>
         </div>
-        <p>{{messageData.messageText}}</p>
+        <!-- <p>{{messageData.messageText}}</p> -->
+        <div [innerHTML]="sanitizeContent(messageData.messageText)"></div>
       </div>
       <p>{{discussionData.commentCount}} Kommentare</p>
     </div>

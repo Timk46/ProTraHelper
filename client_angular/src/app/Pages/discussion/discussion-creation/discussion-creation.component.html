@@ -16,15 +16,16 @@
       </mat-form-field>
       <!-- Text -->
       <h3>Beschreibung</h3>
-      <mat-form-field>
+      <app-tinymce #editor></app-tinymce>
+      <!-- <mat-form-field>
         <mat-label>Beitrag verfassen</mat-label>
         <textarea #inputText matInput placeholder="Beschreibe dein Anliegen..."></textarea>
-      </mat-form-field>
+      </mat-form-field> -->
 
     </div>
     <!-- button not available if not logged in -->
     <div class="hbox" style="margin-top: 16px;">
-      <button *ngIf="userId != -1" mat-raised-button style="width: fit-content; margin-bottom: 8px" (click)="onSubmit(title.value, inputText.value)">Erstellen</button>
+      <button *ngIf="userId != -1" mat-raised-button style="width: fit-content; margin-bottom: 8px" (click)="onSubmit(title.value, editor.getContent()); editor.destroy()">Erstellen</button>
       <p *ngIf="userId == -1">Zum Absenden bitte einloggen!</p>
     </div>
 
