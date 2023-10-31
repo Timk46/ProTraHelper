@@ -3,13 +3,14 @@
     <h1>Neuen Beitrag erstellen</h1>
     <!-- begin white card -->
     <div class="vbox">
-      <h2>Dieser Beitrag wird erstellt unter {{discussionNodeNames.conceptNodeName}}
+      <h2 style="margin-bottom: 0px;">Dieser Beitrag wird erstellt unter:</h2>
+      <h2>{{discussionNodeNames.conceptNodeName}}
         <span *ngIf="discussionData.contentNodeId != -1">: {{discussionNodeNames.contentNodeName}}</span>
         <span *ngIf="discussionData.contentElementId != -1">: {{discussionNodeNames.contentElementName}}</span>
       </h2>
       <!-- Title -->
       <h3>Titel</h3>
-      <mat-form-field class="example-full-width">
+      <mat-form-field appearance="outline">
         <mat-label>Titel des Beitrags</mat-label>
         <input matInput #title maxlength="64" placeholder="Titel...">
         <mat-hint align="end">{{title.value.length}} / 64</mat-hint>
