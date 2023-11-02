@@ -42,6 +42,7 @@ model User {
   codeSubmissionFile   CodeSubmissionFile[]
   anonymousUser        anonymousUser[]
   userMCAnswer         UserMCAnswer[]
+  Vote                 Vote[]
 }
 
 model Module {
@@ -384,7 +385,6 @@ model anonymousUser {
   anonymousName String      @default("Anonymchen")
   Discussion    Discussion?
   Message       Message[]
-  Vote          Vote[]
 }
 
 model Discussion {
@@ -419,12 +419,14 @@ model Message {
 }
 
 model Vote {
-  id        Int           @id @default(autoincrement())
-  isUpvote  Boolean       @default(true) // true if upvote, false if downvote
-  author    anonymousUser @relation(fields: [authorId], references: [id])
-  authorId  Int
-  message   Message       @relation(fields: [messageId], references: [id])
+  id        Int     @id @default(autoincrement())
+  isUpvote  Boolean @default(true) // true if upvote, false if downvote
+  user    User    @relation(fields: [userId], references: [id])
+  userId  Int
+  message   Message @relation(fields: [messageId], references: [id])
   messageId Int
+
+  @@unique([userId, messageId], name: "unique_vote")
 }
 
 //********************************************************************************************* End Discussion

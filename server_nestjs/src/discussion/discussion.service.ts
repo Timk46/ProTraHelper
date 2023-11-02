@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { discussionDTO, discussionsDTO, discussionMessageVoteDTO, discussionMessageDTO, discussionMessagesDTO, nodeNameDTO, AnonymousUserDTO, creationResponseDTO, discussionFilterDTO, discussionNodeNamesDTO, discussionCreationDTO, discussionMessageCreationDTO } from '@DTOs/index';
+import { discussionDTO, discussionsDTO, discussionMessageVoteDTO, discussionMessageDTO, discussionMessagesDTO, nodeNameDTO, AnonymousUserDTO, creationResponseDTO, discussionFilterDTO, discussionNodeNamesDTO, discussionCreationDTO, discussionMessageCreationDTO, discussionMessageVoteCreationDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { get } from 'http';
 
@@ -12,14 +12,24 @@ export class DiscussionService {
    * @param messageId
    * @returns the vote data
    */
-  async getVoteData(messageId: number) : Promise<discussionMessageVoteDTO> {
+  async getVoteData(messageId: number, userId: number) : Promise<discussionMessageVoteDTO> {
     const votesForMessage = await this.prisma.vote.findMany({
       where: {
-        messageId: Number(messageId)
+        messageId: messageId,
+        userId: {
+          not: userId
+        }
       }
     });
 
-    if (!votesForMessage) {
+    const userVote = await this.prisma.vote.findFirst({
+      where: {
+        messageId: messageId,
+        userId: userId
+      }
+    });
+
+    if (!votesForMessage && !userVote) {
       throw new Error('Message votes not found');
     }
 
@@ -29,10 +39,65 @@ export class DiscussionService {
 
     const voteData: discussionMessageVoteDTO = {
       messageId: messageId,
-      votes: totalVotes
+      votes: totalVotes,
+      userVoteStatus: userVote ? (userVote.isUpvote ? 1 : -1) : 0
     }
-
     return voteData;
+  }
+
+  /** This function creates or modifies a vote for a given message
+   * if the vote status is 0, the vote is deleted, otherwise it is created or modified
+   * @param voteCreationData
+   * @returns a creation status if successful
+   */
+  async createOrModifyVote(voteCreationData: discussionMessageVoteCreationDTO) : Promise<discussionMessageVoteCreationDTO> {
+    //console.log('DiscussionService: createOrModifyVote, voteCreationData:');
+    const vote = await this.prisma.vote.findFirst({
+      where: {
+        messageId: voteCreationData.messageId,
+        userId: voteCreationData.userId
+      }
+    });
+
+    if (!vote) {
+      if (voteCreationData.voteStatus != 0) {
+        //console.log('DiscussionService: createOrModifyVote, no vote found, creating new vote');
+        const newVote = await this.prisma.vote.create({
+          data: {
+            messageId: voteCreationData.messageId,
+            userId: voteCreationData.userId,
+            isUpvote: voteCreationData.voteStatus == 1 ? true : false
+          }
+        });
+
+        if (!newVote) {
+          throw new Error('Vote not created');
+        }
+      } else {
+        //console.log('DiscussionService: createOrModifyVote, no vote found, vote status 0, doing nothing');
+      }
+    } else {
+      //console.log('DiscussionService: createOrModifyVote, vote found, modifying vote');
+      if (voteCreationData.voteStatus == 0) {
+        //console.log('DiscussionService: createOrModifyVote, vote status 0, deleting vote');
+        await this.prisma.vote.delete({
+          where: {
+            id: vote.id
+          }
+        });
+      } else {
+        //console.log('DiscussionService: createOrModifyVote, vote status != 0, modifying vote');
+        await this.prisma.vote.update({
+          where: {
+            id: vote.id
+          },
+          data: {
+            isUpvote: voteCreationData.voteStatus == 1 ? true : false
+          }
+        });
+      }
+    }
+    return voteCreationData;
   }
 
   /**
@@ -295,6 +360,48 @@ export class DiscussionService {
       id: anonymousUser.id,
       anonymousName: anonymousUser.anonymousName,
       userId: anonymousUser.userId
+    };
+  }
+
+  /** Returns the anonymous user data for a given user id and message id
+   * If no anonymous user is found, a dummy is returned
+   *
+   * @param userId
+   * @param messageId
+   * @returns the anonymous user data or a dummy
+   */
+  async getAnonymousUserByMessageId(userId: number, messageId: number) : Promise<AnonymousUserDTO> {
+    const anonymousUser = await this.prisma.message.findFirst({
+      where: {
+        id: Number(messageId),
+        author: {
+          userId: Number(userId)
+        }
+      },
+      select: {
+        author: {
+          select: {
+            id: true,
+            userId: true,
+            anonymousName: true
+          }
+        }
+      }
+    });
+
+    if (!anonymousUser) {
+      console.log('DiscussionServie: No anonymous user found! Returning dummy.');
+      return {
+        id: -1,
+        anonymousName: 'missingNo',
+        userId: -1
+      }
+    }
+    console.log(anonymousUser.author.id + ' ' + anonymousUser.author.anonymousName + ' ' + anonymousUser.author.userId);
+    return {
+      id: anonymousUser.author.id,
+      anonymousName: anonymousUser.author.anonymousName,
+      userId: anonymousUser.author.userId
     };
   }
 

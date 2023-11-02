@@ -844,7 +844,7 @@ async function main() {
  // an upvote
  await prisma.vote.create({
    data: {
-     author: { connect: { id: anonymousAdmin.id } },
+     user: { connect: { id: adminUser.id } },
      message: { connect: { id: exampleQuestion.id } },
    },
  });

@@ -24,8 +24,8 @@ export class DiscussionDataService {
    * @param messageId
    * @returns the vote data
    */
-  getVoteData(messageId: number) : Observable<discussionMessageVoteDTO> {
-    return this.http.get<discussionMessageVoteDTO>(environment.server + `/discussion/votes/${messageId}`)
+  getVoteData(messageId: number, userId: number) : Observable<discussionMessageVoteDTO> {
+    return this.http.get<discussionMessageVoteDTO>(environment.server + `/discussion/votes/${messageId}/${userId}`)
   }
 
   /** Returns all discussions for a given concept node and optional content node, author, solved status and search string
