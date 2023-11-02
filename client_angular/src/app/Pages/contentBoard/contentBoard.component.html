@@ -3,6 +3,7 @@
     <div class="grid-container">
       <mat-card *ngFor="let content of contentsForActiveConceptNode.trainedBy" (click)="onContentClick(content)">
         <mat-card-content>
+          <p style="font-weight: bold;">{{ content.name }}</p>
           ContentNode Id: {{ content.contentNodeId }} <br>
           ContentNode Name: {{ content.name }} <br>
           ContentNode Description: {{ content.description }}
