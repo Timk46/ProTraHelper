@@ -82,7 +82,7 @@ model ConceptGraph {
 // A Concept node is a node in the concept graph
 model ConceptNode {
   id                Int                 @id @default(autoincrement())
-  name              String              @unique
+  name              String
   description       String
   myParents         ConceptFamily[]     @relation("childConcept") // we have to name the relation because we have two relations between the same models
   myChildren        ConceptFamily[]     @relation("parentConcept")
@@ -121,7 +121,7 @@ model ConceptEdge {
 
 model ContentNode {
   id              Int              @id @default(autoincrement())
-  name            String           @unique
+  name            String
   description     String
   prerequisites   ContentEdge[]    @relation("prerequisiteContent")
   successors      ContentEdge[]    @relation("successorContent")
