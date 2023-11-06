@@ -106,41 +106,63 @@ export class DiscussionService {
    *
    * @param filterData : discussionFilterDTO
    * @returns  the discussions
+   *
+   * How it works:
+   * 1. Get all discussions for the given concept node:
+   *   - find all discussions and look inside their connected concept nodes
+   *   - find all trains that are connected to the content nodes of the concept node
+   *   - from this trains, filter the ones that are only connected to the given filterData concept node
+   * 2. Filter the discussions according to the given filter data
+   * 3. Build the discussionsDTO and return it
+   *
    */
   async getDiscussions(filterData: discussionFilterDTO) : Promise<discussionsDTO> {
     let discussions = await this.prisma.discussion.findMany({
       where: {
-        conceptNodeId: Number(filterData.conceptNodeId)
+        conceptNode: {
+          trainedBy: {
+            some: {
+              contentNode: {
+                trains: {
+                  some: {
+                    conceptNode: {
+                      id: Number(filterData.conceptNodeId)
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
+      }
     });
 
     if (!discussions) {
       throw new Error('Discussions not found');
     }
 
-    console.log('paras:' + filterData.conceptNodeId + ',' + filterData.contentNodeId + ',' + filterData.onlySolved + ',' + filterData.authorId + ',' + filterData.searchString);
-
     if (filterData.contentNodeId != -1) {
-      console.log('filtering for contentNodeId');
-      discussions = discussions.filter(discussion => discussion.contentNodeId == filterData.contentNodeId);
+      //console.log('filtering for contentNodeId');
+      discussions = discussions.filter(discussion => discussion.contentNodeId === filterData.contentNodeId || discussion.contentNodeId === null);
     }
     if (filterData.onlySolved == true) {
-      console.log('filtering for onlySolved');
+      //console.log('filtering for onlySolved');
       discussions = discussions.filter(discussion => discussion.isSolved);
     }
     if (filterData.authorId != -1) {
-      console.log('filtering for authorId');
+      //console.log('filtering for authorId');
       discussions = discussions.filter(discussion => discussion.authorId == filterData.authorId);
     }
 
     if (filterData.searchString != "") {
-      console.log('filtering for searchString');
+      //console.log('filtering for searchString');
       discussions = discussions.filter(discussion => discussion.title.includes(filterData.searchString));
     }
 
     let discussionData: discussionsDTO = {
       discussions: []
     };
+
     for (let discussion of discussions) {
       discussionData.discussions.push({
         id: discussion.id,
@@ -148,7 +170,7 @@ export class DiscussionService {
         title: discussion.title,
         authorName: await this.getAuthorName(discussion.authorId),
         createdAt: discussion.createdAt,
-        contentNodeName: filterData.contentNodeId == -1 ? 'allgemein' : (await this.getContentNodeName(discussion.contentNodeId)).name,
+        contentNodeName: discussion.contentNodeId == null ? 'allgemein' : (await this.getContentNodeName(discussion.contentNodeId)).name,
         commentCount: await this.getDiscussionCommentCount(discussion.id),
         isSolved: discussion.isSolved
       });

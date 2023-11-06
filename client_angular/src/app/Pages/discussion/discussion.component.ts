@@ -13,10 +13,10 @@ import { CreationDialogComponent } from './creation-dialog/creation-dialog.compo
   templateUrl: './discussion.component.html',
   styleUrls: ['./discussion.component.css']
 })
-export class DiscussionComponent implements OnInit, OnChanges {
+export class DiscussionComponent implements OnChanges {
 
   //used to pass the filter data to the discussion list, ! is used to tell typescript that the variable is initialized in the html
-  @ViewChild(DiscussionListComponent) discussionList!: DiscussionListComponent
+  @ViewChild(DiscussionListComponent) discussionList!: DiscussionListComponent;
 
   //used to pass available content 'cards' to the filter, but only 'trainedBy' is passed through
   @Input() contentsForActiveConceptNode: ContentsForConceptDTO = {
@@ -37,11 +37,10 @@ export class DiscussionComponent implements OnInit, OnChanges {
 
   constructor(public dialog: MatDialog) {}
 
-  ngOnInit() {
-  }
-
+  /**
+   * Lists the discussions for the active concept node if the active concept node has changed and the filter data is not set to the active concept node
+   */
   ngOnChanges() {
-    console.log("discussion component: " + this.activeConceptNodeId);
     if (this.activeConceptNodeId != -1 && this.filterData.conceptNodeId != this.activeConceptNodeId) {
       console.log("changing filter data");
       this.filterData.conceptNodeId = this.activeConceptNodeId;
@@ -51,14 +50,16 @@ export class DiscussionComponent implements OnInit, OnChanges {
 
   /**
    * Tells the discussion list child to list the discussions with the given filter data
-   * @param filterData 
+   * @param filterData
    */
   changeFilter(filterData: discussionFilterDTO) {
     //this.filterData = filterData;
     this.discussionList.listDiscussions(filterData);
   }
 
-  
+  /**
+   * Opens a new tab asking the user to select a content node to create a discussion for
+   */
   onCreateDiscussion() {
     const dialogRef = this.dialog.open(CreationDialogComponent, {
       width: '50%',

@@ -13,6 +13,9 @@ export class TinymceComponent implements AfterViewInit {
 
   constructor(){}
 
+  /**
+   * Initialize tinymce editor
+   */
   ngAfterViewInit(): void {
     tinymce.init({
       readonly: false,
@@ -29,6 +32,9 @@ export class TinymceComponent implements AfterViewInit {
     });
   }
 
+  /**
+   * Change the view of the editor
+   */
   changeView(){
     if (this.isReadonly) {
       tinymce.get("editor").mode.set("readonly");
@@ -37,11 +43,18 @@ export class TinymceComponent implements AfterViewInit {
     }
   }
 
+  /**
+   * Get the content of the editor
+   * @returns the content of the editor
+   */
   getContent(): string {
     console.log("TinymceComponent: getContent");
     return tinymce.get("editor").getContent();
   }
 
+  /**
+   * Destroys the editor
+   */
   destroy(): void {
     tinymce.get("editor").destroy();
   }

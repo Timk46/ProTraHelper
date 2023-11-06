@@ -371,9 +371,10 @@ CREATE TABLE `Message` (
 CREATE TABLE `Vote` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `isUpvote` BOOLEAN NOT NULL DEFAULT true,
-    `authorId` INTEGER NOT NULL,
+    `userId` INTEGER NOT NULL,
     `messageId` INTEGER NOT NULL,
 
+    UNIQUE INDEX `Vote_userId_messageId_key`(`userId`, `messageId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -534,7 +535,7 @@ ALTER TABLE `Message` ADD CONSTRAINT `Message_authorId_fkey` FOREIGN KEY (`autho
 ALTER TABLE `Message` ADD CONSTRAINT `Message_discussionId_fkey` FOREIGN KEY (`discussionId`) REFERENCES `Discussion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Vote` ADD CONSTRAINT `Vote_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `anonymousUser`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Vote` ADD CONSTRAINT `Vote_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Vote` ADD CONSTRAINT `Vote_messageId_fkey` FOREIGN KEY (`messageId`) REFERENCES `Message`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

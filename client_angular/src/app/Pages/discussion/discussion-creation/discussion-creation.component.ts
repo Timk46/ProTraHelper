@@ -44,6 +44,20 @@ export class DiscussionCreationComponent {
     });
   }
 
+  /**
+   * Submits the discussion creation form by creating an anonymous user, a discussion and a message
+   * @param title
+   * @param text
+   *
+   * This function does:
+   * 1. Checks if the title and text are not empty
+   * 2. Creates a random name for the anonymous user
+   * 3. Creates an anonymous user with the given id and name
+   * 4. Creates a discussion with the given title and the id of the anonymous user
+   * 5. Creates a message with the given text and the id of the discussion
+   * 6. Navigates to the discussion page
+   *
+   */
   onSubmit(title: string, text: string) {
     console.log("Submit: " + title + text);
     if (title != "" && text != "" && this.userId != -1 && this.discussionData.id == -1) {

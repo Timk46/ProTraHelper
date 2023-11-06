@@ -4,5 +4,5 @@
   [contentNodes]="contentsForActiveConceptNode.trainedBy"
   (changeFilter)="changeFilter($event)"
 ></app-discussion-filter>
-<app-discussion-list (createDiscussion)="onCreateDiscussion()"></app-discussion-list>
+<app-discussion-list #discussionList (createDiscussion)="onCreateDiscussion()"></app-discussion-list>
 <!-- <app-discussion-page [discussionId]="1"></app-discussion-page> -->

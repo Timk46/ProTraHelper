@@ -34,7 +34,10 @@ export class FilterMenuComponent {
   @Output() changeFilter = new EventEmitter<discussionFilterDTO>();
 
   /**
-   * if a filter is selected, the filter title is changed and the filter data is emitted
+   * Emits the filter data based on the selected content node, the search input and the solved checkbox
+   * @param contentId
+   * @param searchInput
+   * @param solvedChecked
    */
   onFilterSelected(contentId: number, searchInput: string, solvedChecked: boolean) {
     const newFilterData: discussionFilterDTO = {

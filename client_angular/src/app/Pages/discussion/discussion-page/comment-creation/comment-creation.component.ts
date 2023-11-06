@@ -27,7 +27,9 @@ export class CommentCreationComponent {
 
   constructor(private creationService: CreationService) { }
 
-  // haldles the expansion of the answer box
+  /**
+   * Handles the expansion of the answer box
+   */
   onExpandAnswerBox() {
     this.expanded = !this.expanded;
   }
@@ -75,11 +77,6 @@ export class CommentCreationComponent {
         console.log('Error. Not logged in!');
       }
     }
-  }
-
-
-  onLog(data: string) {
-    console.log("log from comment-creation:" + data);
   }
 
 }

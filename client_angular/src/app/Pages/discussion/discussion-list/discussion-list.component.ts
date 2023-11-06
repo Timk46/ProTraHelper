@@ -32,7 +32,7 @@ export class DiscussionListComponent {
 
   /**
    * Renews the list of discussions with the given filter data
-   * @param filterData 
+   * @param filterData
    */
   listDiscussions(filterData: discussionFilterDTO) {
     console.log("do i want to list? Different?: " + this.isDifferent(filterData) + " conceptNodeId: " + filterData.conceptNodeId)
@@ -43,32 +43,33 @@ export class DiscussionListComponent {
     }
   }
 
-  /** 
+  /**
    * Opens a new tab with the discussion page for the given discussion id
-   * @param discussionId 
+   * @param discussionId
    */
   onQuestionClick(discussionId: number) {
     const url = '/discussion-page/' + discussionId;
     window.open(url, "_blank");
   }
 
+  /**
+   * Emits the createDiscussion event
+   */
   onNewDiscussion(){
-    /* const url = '/discussion-creation/14/1/1';
-    window.open(url, "_blank"); */
     this.createDiscussion.emit();
   }
 
   /**
    * Checks if the given filter data is different from the current filter data
-   * @param filterData 
+   * @param filterData
    * @returns true if the given filter data is different from the current filter data
    */
   isDifferent(filterData: discussionFilterDTO): boolean {
     console.log("checking differences...");
-    return filterData.conceptNodeId != this.filterData.conceptNodeId || 
-    filterData.contentNodeId != this.filterData.contentNodeId || 
-    filterData.authorId != this.filterData.authorId || 
-    filterData.onlySolved != this.filterData.onlySolved || 
+    return filterData.conceptNodeId != this.filterData.conceptNodeId ||
+    filterData.contentNodeId != this.filterData.contentNodeId ||
+    filterData.authorId != this.filterData.authorId ||
+    filterData.onlySolved != this.filterData.onlySolved ||
     filterData.searchString != this.filterData.searchString;
   }
 }

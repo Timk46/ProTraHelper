@@ -15,10 +15,17 @@ export class CreationDialogComponent {
     this.contentNodes = data;
   }
 
+  /**
+   * Closes the dialog and passes the selected content node to the parent component
+   * @param contentNode
+   */
   onSelect(contentNode: ContentDTO) {
     this.dialogRef.close(contentNode);
   }
 
+  /**
+   * Closes the dialog and passes a common content node to the parent component
+   */
   onAllSelect(){
     this.dialogRef.close({
       contentNodeId: -1,
@@ -28,6 +35,9 @@ export class CreationDialogComponent {
     });
   }
 
+  /**
+   * Closes the dialog without passing any data to the parent component
+   */
   onCancel() {
     this.dialogRef.close();
   }

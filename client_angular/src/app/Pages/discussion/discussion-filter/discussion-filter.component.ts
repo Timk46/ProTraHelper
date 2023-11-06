@@ -35,7 +35,9 @@ export class DiscussionFilterComponent {
 
   constructor(private contentService: ContentService) {  }
 
-  /* if the "Alle" button is clicked */
+  /**
+   * Emits the filter data for all discussions
+   */
   onAllDiscussions() {
     this.allSelected = true;
     this.filterSelection = false;
@@ -49,7 +51,9 @@ export class DiscussionFilterComponent {
     });
   }
 
-  /* if the button for the filter selection is clicked */
+  /**
+   * Switches the filter selection on and off
+   */
   onSelectFilter() {
     this.allSelected = false;
     this.filterSelection = !this.filterSelection;
@@ -57,7 +61,7 @@ export class DiscussionFilterComponent {
 
   /**
    * if a filter is selected, the filter title is changed and the filter data is emitted
-   * @param filterData 
+   * @param filterData
    */
   onFilterSelected(filterData: discussionFilterDTO){
     this.filterSelection = false;

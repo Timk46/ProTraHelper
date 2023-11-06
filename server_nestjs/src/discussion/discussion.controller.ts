@@ -1,10 +1,17 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { DiscussionService } from './discussion.service';
 import { AnonymousUserDTO, creationResponseDTO, discussionCreationDTO, discussionFilterDTO, discussionMessageCreationDTO, discussionMessageDTO, discussionMessageVoteCreationDTO, discussionMessageVoteDTO, discussionMessagesDTO, discussionNodeNamesDTO, discussionsDTO, nodeNameDTO } from '@DTOs/index';
+import { debounce } from 'rxjs';
 
+const debug: boolean = true; // set this to false to disable console logs
 @Controller('discussion')
 export class DiscussionController {
+
+
+
   constructor(private discussionService: DiscussionService) {}
+
+
 
   /**
    * This function returns the vote data for a given message
@@ -13,7 +20,7 @@ export class DiscussionController {
    */
   @Get('votes/:messageId/:userId')
   async getVoteData(@Param('messageId') messageId : number, @Param('userId') userId : number): Promise<discussionMessageVoteDTO> {
-    console.log('DiscussionController: getVoteData')
+    debug && console.log('DiscussionController: getVoteData');
     if (isNaN(messageId) || isNaN(userId)) {
       throw new Error('Invalid message id or user id');
     }
@@ -22,7 +29,7 @@ export class DiscussionController {
 
   @Post('votes/create')
   async createOrModifyVote(@Body() voteCreationData: discussionMessageVoteCreationDTO): Promise<discussionMessageVoteCreationDTO> {
-    console.log('DiscussionController: createOrModifyVote')
+    debug && console.log('DiscussionController: createOrModifyVote')
     return this.discussionService.createOrModifyVote(voteCreationData);
   }
 
@@ -33,7 +40,7 @@ export class DiscussionController {
    */
   @Get(':discussionId')
   async getDiscussion(@Param('discussionId') discussionId: number) {
-    console.log('DiscussionController: getDiscussion')
+    debug && console.log('DiscussionController: getDiscussion')
     if (isNaN(discussionId)) {
       throw new Error('Invalid discussion id');
     }
@@ -53,7 +60,7 @@ export class DiscussionController {
   */
   @Get('list/:filterData')
   async getDiscussions(@Param('filterData') filterData: any): Promise<discussionsDTO> {
-    console.log('DiscussionController: getDiscussions');
+    debug && console.log('DiscussionController: getDiscussions');
     return this.discussionService.getDiscussions(JSON.parse(filterData));
   }
 
@@ -64,7 +71,7 @@ export class DiscussionController {
    */
   @Get('messages/:discussionId')
   async getMessages(@Param('discussionId') discussionId: number): Promise<discussionMessagesDTO> {
-    console.log('DiscussionController: getMessages')
+    debug && console.log('DiscussionController: getMessages')
     if (isNaN(discussionId)) {
       throw new Error('Invalid discussion id');
     }
@@ -78,7 +85,7 @@ export class DiscussionController {
    */
   @Get('conceptNodeName/:discussionId')
   async getConceptNodeName(@Param('discussionId') discussionId: number): Promise<nodeNameDTO> {
-    console.log('DiscussionController: getConceptNodeName')
+    debug && console.log('DiscussionController: getConceptNodeName')
     if (isNaN(discussionId)) {
       throw new Error('Invalid discussion id');
     }
@@ -92,16 +99,22 @@ export class DiscussionController {
    */
   @Get('anonymousUser/:userId/:discussionId')
   async getAnonymousUser(@Param('userId') userId: number, @Param('discussionId') discussionId: number): Promise<AnonymousUserDTO> {
-    console.log('DiscussionController: getAnonymousUser')
+    debug && console.log('DiscussionController: getAnonymousUser')
     if (isNaN(userId) || isNaN(discussionId)) {
       throw new Error('Invalid user id or discussion id');
     }
     return this.discussionService.getAnonymousUser(Number(userId), Number(discussionId));
   }
 
+  /**
+   * Returns the anonymous user for a given message
+   * @param userId
+   * @param messageId
+   * @returns the anonymous user
+   */
   @Get('anonymousUserByMessageId/:userId/:messageId')
   async getAnonymousUserByMessageId(@Param('userId') userId: number, @Param('messageId') messageId: number): Promise<AnonymousUserDTO> {
-    console.log('DiscussionController: getAnonymousUserByMessageId')
+    debug && console.log('DiscussionController: getAnonymousUserByMessageId')
     if (isNaN(userId) || isNaN(messageId)) {
       throw new Error('Invalid user id or message id');
     }
@@ -115,7 +128,7 @@ export class DiscussionController {
    */
   @Post('anonymousUser/create')
   async createAnonymousUser(@Body() data: { userId: number, name: string }): Promise<AnonymousUserDTO> {
-    console.log('DiscussionController: createAnonymousUser')
+    debug && console.log('DiscussionController: createAnonymousUser')
     if (isNaN(data.userId)) {
       throw new Error('Invalid user id');
     }
@@ -129,7 +142,7 @@ export class DiscussionController {
    */
   @Post('messages/create')
   async createDiscussionMessage(@Body() messageData: discussionMessageCreationDTO): Promise<discussionMessageCreationDTO> {
-    console.log('DiscussionController: createMessage')
+    debug && console.log('DiscussionController: createMessage')
     return this.discussionService.createDiscussionMessage(messageData);
   }
 
@@ -146,8 +159,8 @@ export class DiscussionController {
     @Param('conceptNodeId') conceptNodeId: number,
     @Param('contentNodeId') contentNodeId: number,
     @Param('contentElementId') contentElementId: number): Promise<discussionNodeNamesDTO> {
-    console.log('DiscussionController: getDiscussionNodeNames');
-    console.log(conceptNodeId, contentNodeId, contentElementId);
+    debug && console.log('DiscussionController: getDiscussionNodeNames');
+    debug && console.log(conceptNodeId, contentNodeId, contentElementId);
     if (isNaN(conceptNodeId) || isNaN(contentNodeId) || isNaN(contentElementId)) {
       throw new Error('Invalid node ids');
     }
@@ -161,7 +174,7 @@ export class DiscussionController {
    */
   @Post('create')
   async createDiscussion(@Body() discussionData: discussionCreationDTO): Promise<discussionCreationDTO> {
-    console.log('DiscussionController: createDiscussion');
+    debug && console.log('DiscussionController: createDiscussion');
     return this.discussionService.createDiscussion(discussionData);
   }
 

@@ -25,12 +25,17 @@ export class VoteBoxComponent {
 
   constructor(private discussionDataService: DiscussionDataService, private creationService: CreationService) { }
 
-  /* find the anonymous user by userId and get the vote data for the message */
+  /**
+   * Gets the vote data for the message
+   */
   ngOnInit(): void {
     this.discussionDataService.getVoteData(this.messageId, this.userId).subscribe(voteData => this.voteData = voteData);
   }
 
-  /* if the upvote button is clicked*/
+  /**
+   * Changes the vote status of the user to upvote or removes the upvote
+   * To prevent too many requests to the server, the vote status is only set after a timeout of 1 second
+   */
   onUpvote() {
     if (this.voteData.userVoteStatus != 1) {
       this.voteData.userVoteStatus = 1;
@@ -40,7 +45,10 @@ export class VoteBoxComponent {
     this.resetTimerSetStatus();
   }
 
-  /* if the downvote button is clicked */
+  /**
+   * Changes the vote status of the user to downvote or removes the downvote
+   * To prevent too many requests to the server, the vote status is only set after a timeout of 1 second
+   */
   onDownvote() {
     if (this.voteData.userVoteStatus != -1) {
       this.voteData.userVoteStatus = -1;
