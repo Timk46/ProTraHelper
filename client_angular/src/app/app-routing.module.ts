@@ -9,6 +9,7 @@ import { CodeTaskComponent } from './Pages/contentView/contentElement/codeTask/c
 import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer/pdfViewer.component';
 import { McQuizComponent } from './Pages/contentView/contentElement/mcQuiz/mcQuiz.component';
 import { GraphComponent } from './Pages/graph/graph.component';
+import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
 
 // just for testing
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
@@ -25,6 +26,7 @@ const routes: Routes = [
   { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent },
   { path: 'mcQuiz', component: McQuizComponent },
   { path: 'graph', component: GraphComponent },
+  { path: 'chatbot', component: ChatBotComponent },
 
   // just for testing
   { path: 'file-upload', component: FileUploadComponent },

@@ -7,9 +7,10 @@ import { GraphModule } from './graph/graph.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { DiscussionController } from './discussion/discussion.controller';
 import { DiscussionService } from './discussion/discussion.service';
+import { ChatBotModule } from './ai/chat-bot/chat-bot.module';
 
 @Module({
-  imports: [FilesModule, GraphModule, PrismaModule, ContentModule],
+  imports: [FilesModule, GraphModule, PrismaModule, ContentModule, ChatBotModule],
   controllers: [AppController, DiscussionController],
   providers: [AppService, DiscussionService],
 })

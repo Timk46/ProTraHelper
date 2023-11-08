@@ -1,0 +1,9 @@
+<div class="chat-container">
+  <div *ngFor="let message of messages" class="chat-message" [class.user]="message.sender === 'user'" [class.bot]="message.sender === 'bot'">
+    {{ message.text }}
+  </div>
+  <div class="chat-input">
+    <input [(ngModel)]="question" placeholder="Ask a question">
+    <button (click)="askQuestion()">Ask</button>
+  </div>
+</div>

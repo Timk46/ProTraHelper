@@ -60,7 +60,6 @@ CREATE TABLE `ConceptNode` (
     `description` VARCHAR(191) NOT NULL,
     `conceptGraphId` INTEGER NULL,
 
-    UNIQUE INDEX `ConceptNode_name_key`(`name`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -89,7 +88,6 @@ CREATE TABLE `ContentNode` (
     `name` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NOT NULL,
 
-    UNIQUE INDEX `ContentNode_name_key`(`name`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -186,6 +184,7 @@ CREATE TABLE `Question` (
     `score` INTEGER NOT NULL,
     `type` VARCHAR(191) NOT NULL,
     `authorId` INTEGER NOT NULL,
+    `text` VARCHAR(191) NULL,
     `contentElementId` INTEGER NULL,
 
     PRIMARY KEY (`id`)
@@ -197,6 +196,7 @@ CREATE TABLE `MCQuestion` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `questionId` INTEGER NOT NULL,
+    `shuffleoptions` BOOLEAN NOT NULL DEFAULT true,
     `isSC` BOOLEAN NOT NULL,
 
     UNIQUE INDEX `MCQuestion_questionId_key`(`questionId`),
@@ -204,7 +204,7 @@ CREATE TABLE `MCQuestion` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `MCAnswer` (
+CREATE TABLE `MCOption` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -216,9 +216,34 @@ CREATE TABLE `MCAnswer` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `UserMCAnswer` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `userId` INTEGER NOT NULL,
+    `questionId` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `UserMCAnswerSelected` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `userMCAnswerId` INTEGER NOT NULL,
+    `answerId` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `CodingQuestion` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `count_InputArgs` INTEGER NOT NULL,
+    `text` TEXT NOT NULL,
+    `textHTML` TEXT NOT NULL,
+    `mainFileName` VARCHAR(191) NOT NULL,
     `questionId` INTEGER NOT NULL,
 
     UNIQUE INDEX `CodingQuestion_questionId_key`(`questionId`),
@@ -228,11 +253,10 @@ CREATE TABLE `CodingQuestion` (
 -- CreateTable
 CREATE TABLE `CodeGeruest` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `text` VARCHAR(191) NOT NULL,
     `codingQuestionId` INTEGER NOT NULL,
     `codeFileName` VARCHAR(191) NOT NULL,
-    `code` VARCHAR(191) NOT NULL,
-    `language` VARCHAR(191) NOT NULL,
+    `code` TEXT NOT NULL,
+    `language` VARCHAR(191) NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -240,9 +264,9 @@ CREATE TABLE `CodeGeruest` (
 -- CreateTable
 CREATE TABLE `AutomatedTest` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `code` VARCHAR(191) NOT NULL,
-    `testFileName` VARCHAR(191) NOT NULL,
-    `language` VARCHAR(191) NOT NULL,
+    `code` TEXT NOT NULL,
+    `testFileName` VARCHAR(191) NULL,
+    `language` VARCHAR(191) NULL,
     `questionId` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -259,29 +283,31 @@ CREATE TABLE `Testcase` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `SubmissionCode` (
+CREATE TABLE `CodeSubmission` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `code` VARCHAR(191) NOT NULL,
+    `code` TEXT NOT NULL,
     `updatedAt` DATETIME(3) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `compilerOutput` VARCHAR(191) NOT NULL,
-    `compilerError` VARCHAR(191) NOT NULL,
-    `compilerResponse` VARCHAR(191) NOT NULL,
+    `compilerOutput` TEXT NULL,
+    `compilerError` TEXT NULL,
+    `compilerResponse` TEXT NULL,
     `userId` INTEGER NOT NULL,
+    `codingQuestionId` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `SubmissionSingleCodeFile` (
+CREATE TABLE `CodeSubmissionFile` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `updatedAt` DATETIME(3) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `code` VARCHAR(191) NULL,
+    `version` INTEGER NOT NULL,
+    `code` TEXT NULL,
     `language` VARCHAR(191) NULL,
     `codeFileName` VARCHAR(191) NULL,
     `userId` INTEGER NOT NULL,
-    `submissionCodeId` INTEGER NOT NULL,
+    `CodeSubmissionId` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -289,10 +315,22 @@ CREATE TABLE `SubmissionSingleCodeFile` (
 -- CreateTable
 CREATE TABLE `KIFeedback` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `updatedAt` DATETIME(3) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `model` VARCHAR(191) NOT NULL,
-    `text` VARCHAR(191) NOT NULL,
-    `ratedByStudent` INTEGER NOT NULL,
+    `text` TEXT NOT NULL,
+    `ratingByStudent` INTEGER NULL,
+    `feedbackByStudent` TEXT NULL,
     `submissionId` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `anonymousUser` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `userId` INTEGER NOT NULL,
+    `anonymousName` VARCHAR(191) NOT NULL DEFAULT 'Anonymchen',
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -303,20 +341,46 @@ CREATE TABLE `Discussion` (
     `title` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-    `contentNodeId` INTEGER NOT NULL,
+    `contentNodeId` INTEGER NULL,
+    `conceptNodeId` INTEGER NOT NULL,
     `authorId` INTEGER NOT NULL,
+    `isSolved` BOOLEAN NOT NULL DEFAULT false,
 
+    UNIQUE INDEX `Discussion_authorId_key`(`authorId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Message` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `text` VARCHAR(191) NOT NULL,
+    `text` VARCHAR(2000) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `authorId` INTEGER NOT NULL,
-    `discussionId` INTEGER NULL,
+    `isInitiator` BOOLEAN NOT NULL DEFAULT false,
+    `isSolution` BOOLEAN NOT NULL DEFAULT false,
+    `discussionId` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Vote` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `isUpvote` BOOLEAN NOT NULL DEFAULT true,
+    `authorId` INTEGER NOT NULL,
+    `messageId` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ChatBotMessage` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `question` VARCHAR(191) NOT NULL,
+    `answer` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `userId` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -373,22 +437,22 @@ ALTER TABLE `ContentEdge` ADD CONSTRAINT `ContentEdge_prerequisiteId_fkey` FOREI
 ALTER TABLE `ContentEdge` ADD CONSTRAINT `ContentEdge_successorId_fkey` FOREIGN KEY (`successorId`) REFERENCES `ContentNode`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Requirement` ADD CONSTRAINT `Requirement_contentNodeId_fkey` FOREIGN KEY (`contentNodeId`) REFERENCES `ContentNode`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Requirement` ADD CONSTRAINT `Requirement_contentNodeId_fkey` FOREIGN KEY (`contentNodeId`) REFERENCES `ContentNode`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Requirement` ADD CONSTRAINT `Requirement_conceptNodeId_fkey` FOREIGN KEY (`conceptNodeId`) REFERENCES `ConceptNode`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Requirement` ADD CONSTRAINT `Requirement_conceptNodeId_fkey` FOREIGN KEY (`conceptNodeId`) REFERENCES `ConceptNode`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Training` ADD CONSTRAINT `Training_contentNodeId_fkey` FOREIGN KEY (`contentNodeId`) REFERENCES `ContentNode`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Training` ADD CONSTRAINT `Training_contentNodeId_fkey` FOREIGN KEY (`contentNodeId`) REFERENCES `ContentNode`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Training` ADD CONSTRAINT `Training_conceptNodeId_fkey` FOREIGN KEY (`conceptNodeId`) REFERENCES `ConceptNode`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Training` ADD CONSTRAINT `Training_conceptNodeId_fkey` FOREIGN KEY (`conceptNodeId`) REFERENCES `ConceptNode`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `UserConcept` ADD CONSTRAINT `UserConcept_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `UserConcept` ADD CONSTRAINT `UserConcept_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `UserConcept` ADD CONSTRAINT `UserConcept_conceptNodeId_fkey` FOREIGN KEY (`conceptNodeId`) REFERENCES `ConceptNode`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `UserConcept` ADD CONSTRAINT `UserConcept_conceptNodeId_fkey` FOREIGN KEY (`conceptNodeId`) REFERENCES `ConceptNode`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ContentElement` ADD CONSTRAINT `ContentElement_contentNodeId_fkey` FOREIGN KEY (`contentNodeId`) REFERENCES `ContentNode`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -403,7 +467,7 @@ ALTER TABLE `ContentElement` ADD CONSTRAINT `ContentElement_questionId_fkey` FOR
 ALTER TABLE `File` ADD CONSTRAINT `File_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `File` ADD CONSTRAINT `File_mCAnswerId_fkey` FOREIGN KEY (`mCAnswerId`) REFERENCES `MCAnswer`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `File` ADD CONSTRAINT `File_mCAnswerId_fkey` FOREIGN KEY (`mCAnswerId`) REFERENCES `MCOption`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Feedback` ADD CONSTRAINT `Feedback_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -415,43 +479,73 @@ ALTER TABLE `Question` ADD CONSTRAINT `Question_authorId_fkey` FOREIGN KEY (`aut
 ALTER TABLE `MCQuestion` ADD CONSTRAINT `MCQuestion_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `MCAnswer` ADD CONSTRAINT `MCAnswer_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `MCQuestion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `MCOption` ADD CONSTRAINT `MCOption_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `MCQuestion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `CodingQuestion` ADD CONSTRAINT `CodingQuestion_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `UserMCAnswer` ADD CONSTRAINT `UserMCAnswer_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `CodeGeruest` ADD CONSTRAINT `CodeGeruest_codingQuestionId_fkey` FOREIGN KEY (`codingQuestionId`) REFERENCES `CodingQuestion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `UserMCAnswer` ADD CONSTRAINT `UserMCAnswer_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `MCQuestion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `AutomatedTest` ADD CONSTRAINT `AutomatedTest_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `CodingQuestion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `UserMCAnswerSelected` ADD CONSTRAINT `UserMCAnswerSelected_userMCAnswerId_fkey` FOREIGN KEY (`userMCAnswerId`) REFERENCES `UserMCAnswer`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Testcase` ADD CONSTRAINT `Testcase_automatedTestId_fkey` FOREIGN KEY (`automatedTestId`) REFERENCES `AutomatedTest`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `UserMCAnswerSelected` ADD CONSTRAINT `UserMCAnswerSelected_answerId_fkey` FOREIGN KEY (`answerId`) REFERENCES `MCOption`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `SubmissionCode` ADD CONSTRAINT `SubmissionCode_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `CodingQuestion` ADD CONSTRAINT `CodingQuestion_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `SubmissionSingleCodeFile` ADD CONSTRAINT `SubmissionSingleCodeFile_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `CodeGeruest` ADD CONSTRAINT `CodeGeruest_codingQuestionId_fkey` FOREIGN KEY (`codingQuestionId`) REFERENCES `CodingQuestion`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `SubmissionSingleCodeFile` ADD CONSTRAINT `SubmissionSingleCodeFile_submissionCodeId_fkey` FOREIGN KEY (`submissionCodeId`) REFERENCES `SubmissionCode`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `AutomatedTest` ADD CONSTRAINT `AutomatedTest_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `CodingQuestion`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `KIFeedback` ADD CONSTRAINT `KIFeedback_submissionId_fkey` FOREIGN KEY (`submissionId`) REFERENCES `SubmissionCode`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Testcase` ADD CONSTRAINT `Testcase_automatedTestId_fkey` FOREIGN KEY (`automatedTestId`) REFERENCES `AutomatedTest`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Discussion` ADD CONSTRAINT `Discussion_contentNodeId_fkey` FOREIGN KEY (`contentNodeId`) REFERENCES `ContentNode`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `CodeSubmission` ADD CONSTRAINT `CodeSubmission_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Discussion` ADD CONSTRAINT `Discussion_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `CodeSubmission` ADD CONSTRAINT `CodeSubmission_codingQuestionId_fkey` FOREIGN KEY (`codingQuestionId`) REFERENCES `CodingQuestion`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Message` ADD CONSTRAINT `Message_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `CodeSubmissionFile` ADD CONSTRAINT `CodeSubmissionFile_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Message` ADD CONSTRAINT `Message_discussionId_fkey` FOREIGN KEY (`discussionId`) REFERENCES `Discussion`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `CodeSubmissionFile` ADD CONSTRAINT `CodeSubmissionFile_CodeSubmissionId_fkey` FOREIGN KEY (`CodeSubmissionId`) REFERENCES `CodeSubmission`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `KIFeedback` ADD CONSTRAINT `KIFeedback_submissionId_fkey` FOREIGN KEY (`submissionId`) REFERENCES `CodeSubmission`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `anonymousUser` ADD CONSTRAINT `anonymousUser_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Discussion` ADD CONSTRAINT `Discussion_contentNodeId_fkey` FOREIGN KEY (`contentNodeId`) REFERENCES `ContentNode`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Discussion` ADD CONSTRAINT `Discussion_conceptNodeId_fkey` FOREIGN KEY (`conceptNodeId`) REFERENCES `ConceptNode`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Discussion` ADD CONSTRAINT `Discussion_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `anonymousUser`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Message` ADD CONSTRAINT `Message_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `anonymousUser`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Message` ADD CONSTRAINT `Message_discussionId_fkey` FOREIGN KEY (`discussionId`) REFERENCES `Discussion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Vote` ADD CONSTRAINT `Vote_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `anonymousUser`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Vote` ADD CONSTRAINT `Vote_messageId_fkey` FOREIGN KEY (`messageId`) REFERENCES `Message`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ChatBotMessage` ADD CONSTRAINT `ChatBotMessage_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `_ModuleToSubject` ADD CONSTRAINT `_ModuleToSubject_A_fkey` FOREIGN KEY (`A`) REFERENCES `Module`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
