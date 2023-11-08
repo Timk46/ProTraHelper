@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { MaterialModule } from './Modules/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MarkdownModule } from 'ngx-markdown';
 // Components
 import { GraphComponent } from './Pages/graph/graph.component';
 import { ContentBoardComponent } from './Pages/contentBoard/contentBoard.component';
@@ -71,7 +72,8 @@ import { ChatBotDialogComponent } from './Pages/chat-bot/chat-bot-dialog/chat-bo
     BrowserAnimationsModule,
     MaterialModule,
     NgxExtendedPdfViewerModule,
-    HttpClientModule
+    HttpClientModule,
+    MarkdownModule.forRoot(),
   ],
   providers: [],
   bootstrap: [AppComponent]
