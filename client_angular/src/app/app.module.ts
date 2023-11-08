@@ -32,6 +32,7 @@ import { QuestionCreationComponent } from './Pages/discussion/question-creation/
 import { DiscussionPageQuestionComponent } from './Pages/discussion/discussion-page/discussion-page-question/discussion-page-question.component';
 import { DiscussionPageCommentComponent } from './Pages/discussion/discussion-page/discussion-page-comment/discussion-page-comment.component';
 import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
+import { ChatBotDialogComponent } from './Pages/chat-bot/chat-bot-dialog/chat-bot-dialog.component';
 
 
 
@@ -60,7 +61,7 @@ import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
     QuestionCreationComponent,
     DiscussionPageQuestionComponent,
     DiscussionPageCommentComponent,
-    ChatBotComponent
+    ChatBotComponent, ChatBotDialogComponent
   ],
   imports: [
     BrowserModule,

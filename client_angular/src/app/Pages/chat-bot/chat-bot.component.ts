@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
 import { ChatBotService } from '../../Services/ai/chat-bot.service';
+import { ChatBotMessageDTO } from '@DTOs/chatBot.dto';
 
-interface Message {
-  text: string;
-  sender: 'user' | 'bot';
-}
+import { MatDialog } from '@angular/material/dialog';
+import { ChatBotDialogComponent } from './chat-bot-dialog/chat-bot-dialog.component';
 
 @Component({
   selector: 'app-chat-bot',
@@ -13,19 +12,19 @@ interface Message {
 })
 
 export class ChatBotComponent {
-  messages: Message[] = [];
-  question: string = '';
+  chatOpen: boolean = false;
 
-  constructor(private chatBotService: ChatBotService) { }
+  constructor(public dialog: MatDialog) { }
 
-  askQuestion(): void {
-    this.messages.push({ text: this.question, sender: 'user' });
-    this.chatBotService.askQuestion(this.question).subscribe(response => {
-      this.messages.push({ text: response.answer, sender: 'bot' });
-      console.log("Frage:" + this.question+ "\n");
-      console.log("Antowrt:\n" + response.answer + "\n\n");
-      console.log("Used Chunks:\n" + response.usedChunks + "\n\n");
+  openDialog(): void {
+    this.chatOpen = true;
+    const dialogRef = this.dialog.open(ChatBotDialogComponent, {
+      width: '80%',
+      height: 'auto',
     });
-    this.question = '';
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.chatOpen = false;
+    });
   }
 }

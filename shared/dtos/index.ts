@@ -10,3 +10,4 @@ export * from "./user.dto";
 export * from "./discussion.dto";
 export * from "./discussionMessage.dto";
 export * from "./discussionMessageVote.dto";
+export * from "./chatBot.dto";

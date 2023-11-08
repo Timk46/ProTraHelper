@@ -1,6 +1,6 @@
 import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { ChatBotService } from './chat-bot.service';
-import { ChatBotMessage } from '@prisma/client';
+import { ChatBotMessageDTO } from '@DTOs/chatBot.dto';
 
 @Controller('chat-bot')
 export class ChatBotController {
@@ -8,7 +8,7 @@ export class ChatBotController {
 
   @Post('ask')
   @HttpCode(200)
-  askQuestion(@Body('question') question: string): Promise<ChatBotMessage> {
+  askQuestion(@Body('question') question: string): Promise<ChatBotMessageDTO> {
     return this.ChatBotService.askQuestion(question);
   }
 }
