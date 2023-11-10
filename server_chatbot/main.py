@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import os
+from typing import List, Dict
 
 from fastapi import FastAPI, Body
 from fastapi.responses import JSONResponse
@@ -75,20 +76,23 @@ async def root(prompt: Prompt = Body(...)):
     )
     answer = qa_chain({"question": question})
 
-    responses = answer #qa_stuff_with_sources({"query": query})
+    responses = answer
 
     source_documents = responses["source_documents"]
     source_content = [doc.page_content for doc in source_documents]
     source_metadata = [doc.metadata for doc in source_documents]
-    
+
     result = responses['answer']
-    usedChunks = ""
+    used_chunks = []
 
     for i in range(len(source_content)):
-        usedChunks += "\n\n" +  source_metadata[i]['source']
-        usedChunks += "\n" + source_content[i]
+        used_chunks.append({
+            "metadata": source_metadata[i]['source'],
+            "content": source_content[i]
+        })
+    print(used_chunks)
 
     return JSONResponse(content={
         "result": result,
-        "usedChunks": usedChunks
+        "usedChunks": used_chunks
     })

@@ -1,4 +1,4 @@
-<mat-dialog-content style = " background-color: #4C566A;">
+<mat-dialog-content style = " background-color: #4C566A; scrollbar-width: thin">
   <div class="chat-container">
     <div>
     <div *ngFor="let message of messages" class="chat-message" [class.user]="!message.isBot" [class.bot]="message.isBot">
@@ -6,7 +6,7 @@
     </div>
   </div>
     <div class="chat-input">
-      <mat-form-field class="input-field" appearance="fill">
+      <mat-form-field class="input-field" appearance="fill" (keydown.enter)="askQuestion()">
         <mat-label>Befrage das Skript</mat-label>
         <input matInput [(ngModel)]="question">
       </mat-form-field>

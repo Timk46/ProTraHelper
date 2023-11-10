@@ -43,6 +43,7 @@ export class ChatBotDialogComponent {
         isBot: true,
         usedChunks: response.usedChunks
       };
+      console.log(botMessage.usedChunks);
       this.messages.push(botMessage);
     });
     this.question = '';
