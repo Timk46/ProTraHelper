@@ -2,7 +2,7 @@
   <div class="chat-container">
     <div>
     <div *ngFor="let message of messages" class="chat-message" [class.user]="!message.isBot" [class.bot]="message.isBot">
-      <markdown [data]="message.question"></markdown>
+      <div [innerHTML]="message.question"></div>
     </div>
   </div>
     <div class="chat-input">
