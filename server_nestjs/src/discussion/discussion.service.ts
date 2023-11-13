@@ -2,6 +2,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { discussionDTO, discussionsDTO, discussionMessageVoteDTO, discussionMessageDTO, discussionMessagesDTO, nodeNameDTO, AnonymousUserDTO, creationResponseDTO, discussionFilterDTO, discussionNodeNamesDTO, discussionCreationDTO, discussionMessageCreationDTO, discussionMessageVoteCreationDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { get } from 'http';
+import { filter } from 'rxjs';
 
 @Injectable()
 export class DiscussionService {
@@ -112,6 +113,7 @@ export class DiscussionService {
    *   - find all discussions and look inside their connected concept nodes
    *   - find all trains that are connected to the content nodes of the concept node
    *   - from this trains, filter the ones that are only connected to the given filterData concept node
+   *   - keep only the discussions that do not have a content node or that have a content node that is trained by the filter concept node
    * 2. Filter the discussions according to the given filter data
    * 3. Build the discussionsDTO and return it
    *
@@ -137,9 +139,22 @@ export class DiscussionService {
       }
     });
 
+    //we have to get a list of all content nodes that are trained by the filter concept node
+    const trainedByContentNodes = await this.prisma.training.findMany({
+      where: {
+        conceptNodeId: Number(filterData.conceptNodeId)
+      },
+      select: {
+        contentNodeId: true
+      }
+    });
+
     if (!discussions) {
       throw new Error('Discussions not found');
     }
+
+    //filter only discussions that do not have a content node or that have a content node that is trained by the filter concept node
+    discussions = discussions.filter(discussion => discussion.contentNodeId == null || trainedByContentNodes.some(trainedByContentNode => trainedByContentNode.contentNodeId == discussion.contentNodeId));
 
     if (filterData.contentNodeId != -1) {
       //console.log('filtering for contentNodeId');

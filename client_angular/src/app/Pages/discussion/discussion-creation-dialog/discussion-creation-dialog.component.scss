@@ -1,0 +1,45 @@
+.main-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  align-content: center;
+  flex-wrap: wrap;
+}
+
+.content {
+  padding:16px;
+
+  contain: content;
+  scrollbar-width: thin;
+
+  font-size: 14px;
+  background: #eceff4;
+  color: black;
+
+  transition: all 0.5s ease-in-out;
+}
+
+.vbox {
+  min-height: 100px;
+  padding: 16px;
+
+  display: flex;
+  flex-direction: column; /* Anordnung der Elemente vertikal */
+  justify-content: space-between;
+
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.hbox {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 16px;
+
+}
+
+
+

@@ -1,11 +1,10 @@
 import { Component, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
-import { ContentDTO, ContentsForConceptDTO } from '@DTOs/content.dto';
-import { discussionFilterDTO } from '@DTOs/discussionFilter.dto';
+import { ContentDTO, ContentsForConceptDTO, discussionCreationDTO, discussionFilterDTO } from '@DTOs/index';
 import { DiscussionListComponent } from './discussion-list/discussion-list.component';
-import { DialogConfig } from '@angular/cdk/dialog';
-
 import { MatDialog } from '@angular/material/dialog';
 import { CreationDialogComponent } from './creation-dialog/creation-dialog.component';
+import { DiscussionCreationDialogComponent } from './discussion-creation-dialog/discussion-creation-dialog.component';
+import { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
 
 
 @Component({
@@ -14,6 +13,8 @@ import { CreationDialogComponent } from './creation-dialog/creation-dialog.compo
   styleUrls: ['./discussion.component.css']
 })
 export class DiscussionComponent implements OnChanges {
+
+  userId: number = 1; //dummy user id, will be replaced by auth service
 
   //used to pass the filter data to the discussion list, ! is used to tell typescript that the variable is initialized in the html
   @ViewChild(DiscussionListComponent) discussionList!: DiscussionListComponent;
@@ -35,13 +36,13 @@ export class DiscussionComponent implements OnChanges {
     searchString: ""
   }
 
-  constructor(public dialog: MatDialog) {}
+  constructor(public dialog: MatDialog, private discussionDialog: DiscussionDialogService) {}
 
   /**
    * Lists the discussions for the active concept node if the active concept node has changed and the filter data is not set to the active concept node
    */
   ngOnChanges() {
-    if (this.activeConceptNodeId != -1 && this.filterData.conceptNodeId != this.activeConceptNodeId) {
+    if (this.activeConceptNodeId && this.activeConceptNodeId != -1 && this.filterData.conceptNodeId != this.activeConceptNodeId) {
       console.log("changing filter data");
       this.filterData.conceptNodeId = this.activeConceptNodeId;
       this.discussionList.listDiscussions(this.filterData);
@@ -58,22 +59,10 @@ export class DiscussionComponent implements OnChanges {
   }
 
   /**
-   * Opens a new tab asking the user to select a content node to create a discussion for
+   * Opens a new dialog asking the user to select a content node to create a discussion for
    */
   onCreateDiscussion() {
-    const dialogRef = this.dialog.open(CreationDialogComponent, {
-      width: '50%',
-      data: this.contentsForActiveConceptNode.trainedBy
-    });
-
-    dialogRef.afterClosed().subscribe((result: ContentDTO) => {
-      if (result) {
-        // do something with the selected content node
-        console.log("selected content node: " + result.contentNodeId);
-        const url = `/discussion-creation/${this.activeConceptNodeId}/${result.contentNodeId}/-1`;
-        window.open(url, "_blank");
-      }
-    });
+    this.discussionDialog.openContentSelection(this.activeConceptNodeId, this.contentsForActiveConceptNode.trainedBy, this.userId);
   }
 
 }

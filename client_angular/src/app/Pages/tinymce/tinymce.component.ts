@@ -59,4 +59,8 @@ export class TinymceComponent implements AfterViewInit {
     tinymce.get("editor").destroy();
   }
 
+  ngOnDestroy(): void {
+    tinymce.get("editor").destroy();
+  }
+
 }

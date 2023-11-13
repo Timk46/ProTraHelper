@@ -11,6 +11,8 @@ import { ContentViewComponent } from '../contentView/contentView.component';
 })
 export class ContentBoardComponent implements OnInit {
 
+  @Input() activeConceptNodeId: number = -1; //needed for the discussion creation dialog
+
   @Input() contentsForActiveConceptNode: ContentsForConceptDTO = {
     trainedBy: [],
     requiredBy: [],
@@ -28,7 +30,8 @@ export class ContentBoardComponent implements OnInit {
 
     // Communicate ContentDTO with all ContentElements of that ContentView to the Dialog/ContentViewComponent
     dialogConfig.data = {
-      contentViewData: content
+      contentViewData: content,
+      conceptNodeId: this.activeConceptNodeId
     };
 
     // Open the Dialog with ContentViewComponent. We could navigate to the component instead aswell.

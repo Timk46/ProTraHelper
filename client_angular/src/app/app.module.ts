@@ -35,6 +35,7 @@ import { CommentCreationComponent } from './Pages/discussion/discussion-page/com
 import { CreationDialogComponent } from './Pages/discussion/creation-dialog/creation-dialog.component';
 import { TinymceComponent } from './Pages/tinymce/tinymce.component';
 import { EditorModule, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
+import { DiscussionCreationDialogComponent } from './Pages/discussion/discussion-creation-dialog/discussion-creation-dialog.component';
 
 
 
@@ -65,7 +66,8 @@ import { EditorModule, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
     DiscussionPageCommentComponent,
     CommentCreationComponent,
     CreationDialogComponent,
-    TinymceComponent
+    TinymceComponent,
+    DiscussionCreationDialogComponent
   ],
   imports: [
     BrowserModule,
