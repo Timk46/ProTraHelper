@@ -17,7 +17,16 @@ export interface DialogData {
 })
 export class ChatBotDialogComponent {
 
-  messages: ChatBotMessageDTO[] = [];
+  markdownTestString: string = "## Heading level 2\n Italicized text is the *cat's meow*. \n1. First item \n2. Second item \n3. Third item \n4. Fourth item \n"
+  + "```javascript\nvar add2 = function(number) {\n   return number + 2; \n }\n```";
+  message: ChatBotMessageDTO = {
+    id: 12,
+    question: this.markdownService.parse(this.markdownTestString),
+    createdAt: new Date(),
+    isBot: false
+  };
+
+  messages: ChatBotMessageDTO[] = [this.message];
   question: string = '';
 
   constructor(

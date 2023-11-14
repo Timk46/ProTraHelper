@@ -1,8 +1,9 @@
-// src/app/markdown-parser.service.ts
-
 import { Injectable } from '@angular/core';
 import * as MarkdownIt from 'markdown-it';
 import markdownItFootnote from 'markdown-it-footnote';
+import markdownItHighlight from 'markdown-it-highlightjs';
+import highlightjs from 'highlight.js';
+
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +14,7 @@ export class MarkdownService {
   constructor() {
     this.md = new MarkdownIt();
     this.md.use(markdownItFootnote);
+    this.md.use(markdownItHighlight, { highlightjs }, { inline: true });
 
     // Customize output -> https://www.npmjs.com/package/markdown-it-footnote
 
