@@ -56,7 +56,9 @@ async def root(prompt: Prompt = Body(...)):
     question = prompt.promptstr
 
     template = """Du bist ein hilfreicher Tutor. Gegeben sind die folgenden extrahierten Teile eines Vorlesungstranskripts und eine Frage, erstelle eine finale Antwort mit Verweisen ("QUELLEN"). Wenn du die Antwort nicht weißt, sage einfach, dass du es nicht weißt. Versuche nicht, eine Antwort zu erfinden. GIB immer eine Antwort mit Fußnoten zu dem "QUELLEN"-Teil in deiner Antwort zurück. Nutze Metadaten. Schließe immer Quellen am Ende deiner Antwort ein. Eine Fußnote funktioniert so: Text zum Zitieren [^1] und dann am Ende der Antwort: [^1]: Quellentext.
-
+    Der Quellentext MUSS in diesem Format angegeben werden (ersetze .srt durch .mp4): [FILENAME.mp4 bei Stelle](/video?fileName=FILENAME.mp4&timeStamp=Stelle)!
+    Hier ist ein Besispiel: [^1]: [Einfuehrung_Motivation.mp4 bei 00:05:02,000](/video?fileName=Python_Einfuehrung_Motivation.mp4&timeStamp=00:05:02,000)
+    
         Frage: {question}
         =========
         {summaries}

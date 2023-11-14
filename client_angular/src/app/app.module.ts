@@ -34,6 +34,7 @@ import { DiscussionPageQuestionComponent } from './Pages/discussion/discussion-p
 import { DiscussionPageCommentComponent } from './Pages/discussion/discussion-page/discussion-page-comment/discussion-page-comment.component';
 import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
 import { ChatBotDialogComponent } from './Pages/chat-bot/chat-bot-dialog/chat-bot-dialog.component';
+import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
 
 
 
@@ -62,7 +63,7 @@ import { ChatBotDialogComponent } from './Pages/chat-bot/chat-bot-dialog/chat-bo
     QuestionCreationComponent,
     DiscussionPageQuestionComponent,
     DiscussionPageCommentComponent,
-    ChatBotComponent, ChatBotDialogComponent
+    ChatBotComponent, ChatBotDialogComponent, VideoTimeStampComponent
   ],
   imports: [
     BrowserModule,

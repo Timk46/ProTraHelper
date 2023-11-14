@@ -256,7 +256,8 @@ async function main() {
             //files from excelData
             await prisma.file.create({
               data: {
-                name: row[columnElementId[elementId]] + ' zu ' + filename,
+                //name: row[columnElementId[elementId]] + ' zu ' + filename, changed. need the get raw filename
+                name: filename,
                 uniqueIdentifier: uuidv4(),
                 path: 'OFP/' + filename, //TODO: replace with the actual path when running on the server
                 type: row[columnElementId[elementId]],
@@ -379,7 +380,7 @@ async function main() {
       }
       /*
       //End of Concepts
-      
+
       //Training
       */
       if (

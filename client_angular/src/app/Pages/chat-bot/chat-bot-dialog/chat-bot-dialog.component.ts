@@ -26,7 +26,7 @@ export class ChatBotDialogComponent {
     isBot: false
   };
 
-  messages: ChatBotMessageDTO[] = [this.message];
+  messages: ChatBotMessageDTO[] = [];
   question: string = '';
 
   constructor(

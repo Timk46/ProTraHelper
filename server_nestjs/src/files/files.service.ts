@@ -49,8 +49,8 @@ export class FilesService {
    * @param {string} uniqueIdentifier - The unique identifier of the file
    * @returns {StreamableFile} The StreamableFile for downloading
    */
-  async downloadFile(uniqueIdentifier: string, byName: boolean = false): Promise<StreamableFile> {
-    const file: FileDto = await this.getFileByName(uniqueIdentifier);
+  async downloadFile(uniqueIdentifier: string): Promise<StreamableFile> {
+    const file: FileDto = await this.getFile(uniqueIdentifier);
     const filePath = process.env.FILE_PATH + file.path;
 
     if (!fs.existsSync(filePath)) {
@@ -86,6 +86,28 @@ export class FilesService {
   }
 
   /**
+   * Download a file by its name (returns first file with the given name)
+   *
+   * @param {string} uniqueIdentifier - The unique identifier of the file
+   * @returns {StreamableFile} The StreamableFile for downloading
+   */
+  async downloadFileByName(uniqueIdentifier: string): Promise<StreamableFile> {
+    const file: FileDto = await this.getFileByName(uniqueIdentifier);
+    console.log("downloadFileByName A");
+    console.log(JSON.stringify(file));
+    const filePath = process.env.FILE_PATH + file.path;
+
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundException('File does not exist');
+    }
+
+    const fileStream = fs.createReadStream(filePath);
+    console.log("downloadFileByName B");
+    console.log(JSON.stringify(filePath));
+    return new StreamableFile(fileStream);
+  }
+
+  /**
    * Retrieve information about the first existing file with the given name.
    *
    * @param {string} name - The name of the file
@@ -100,7 +122,7 @@ export class FilesService {
     if (!file) {
       throw new NotFoundException('File not found');
     }
-    console.log(JSON.stringify(file));
+
     return {
       id: file.id,
       uniqueIdentifier: file.uniqueIdentifier,
