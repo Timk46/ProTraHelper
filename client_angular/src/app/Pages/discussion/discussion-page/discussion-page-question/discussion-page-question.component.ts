@@ -1,6 +1,6 @@
 import { discussionDTO } from '@DTOs/discussion.dto';
 import { discussionMessageDTO } from '@DTOs/discussionMessage.dto';
-import { Component, Input } from '@angular/core';
+import { Component, Input, SimpleChanges } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
@@ -9,6 +9,8 @@ import { DomSanitizer } from '@angular/platform-browser';
   styleUrls: ['./discussion-page-question.component.scss', '../discussion-page.component.scss']
 })
 export class DiscussionPageQuestionComponent {
+
+  readableDate: string = 'dummy date';
 
   @Input() conceptNodeName: string = 'dummy concept';
 
@@ -43,6 +45,23 @@ export class DiscussionPageQuestionComponent {
    */
   sanitizeContent(content: string) {
     return this.sanitizer.bypassSecurityTrustHtml(content);
+  }
+
+  /**
+   * Returns the date in a human readable format, e.g. "heute" or "1. 1. 2021"
+   * @param date 
+   * @returns 
+   */
+  getDateDisplay(date: Date): string {
+    console.log("getDateDisplay called");
+    const today = new Date();
+    const newDate = new Date(date);
+    today.setHours(0, 0, 0, 0); // set time to 00:00:00.000
+    if (newDate.setHours(0, 0, 0, 0) === today.getTime()) {
+      return 'heute';
+    } else {
+      return `${newDate.getDate()}. ${newDate.getMonth() + 1}. ${newDate.getFullYear()}`;
+    }
   }
 
 }
