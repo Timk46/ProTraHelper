@@ -199,7 +199,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     }
   }
 
-  handleCollapseExpandAction(action: CollapseExpandAction): void {
+  async handleCollapseExpandAction(action: CollapseExpandAction): Promise<void> {
     const index = new SModelIndex();
     index.add(this.currentRoot);
 
@@ -212,8 +212,9 @@ export class ConceptGraphModelSource extends LocalModelSource {
         element.children = element.children?.filter(child => !child.type.startsWith('node'));
         element.children = element.children?.filter(child => !child.type.startsWith('edge'));
         this.addChildren(node, 'concept');
-        this.updateModel();
+        await this.updateModel();
         this.updateExpandedState(node, true);
+        this.actionDispatcher.dispatch(CenterAction.create([id], {animate: true}))
       }
     }
 
