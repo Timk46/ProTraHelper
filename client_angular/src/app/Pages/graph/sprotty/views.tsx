@@ -3,7 +3,7 @@ import { svg } from 'sprotty/lib/lib/jsx';
 import { injectable } from 'inversify';
 import { VNode } from 'snabbdom';
 import {
-    IView, RectangularNodeView, RenderingContext, SButtonImpl, SLabel,
+    IView, RectangularNodeView, RenderingContext, SButtonImpl,
     SLabelImpl,
     SLabelView, SNodeImpl, SPortImpl, ShapeView, findParentByFeature, isExpandable, setAttr
 } from 'sprotty';

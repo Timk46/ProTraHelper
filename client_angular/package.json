@@ -38,8 +38,8 @@
     "prismjs": "^1.29.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~7.8.0",
-    "sprotty": "^0.14.0",
-    "sprotty-elk": "^0.14.0",
+    "sprotty": "^1.0.0",
+    "sprotty-elk": "^1.0.0",
     "tslib": "^2.3.0",
     "web-worker": "^1.2.0",
     "zone.js": "~0.12.0"
