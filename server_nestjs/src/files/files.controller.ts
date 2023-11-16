@@ -60,6 +60,31 @@ export class FilesController {
   }
 
   /**
+   * Download an existing file by its name
+   *
+   * GET /files/download/:name
+   *
+   * @param {string} name - The unique identifier of the file
+   * @param {Response} response - The Express response object
+   * @returns {StreamableFile} The StreamableFile for downloading
+   */
+  @Get('download/byName/:name')
+  async downloadFileByName(
+    @Param('name') name: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<StreamableFile> {
+    const file = await this.filesService.getFileByName(name);
+
+    response.set({
+      'Content-Type': file.type,
+      'Content-Disposition': `attachment; filename=${file.name}`,
+      'X-Filename': file.name, // additional header with filename because Angular's HttpClient cant access the filename from the response while using responseType: 'blob'
+    });
+
+    return this.filesService.downloadFileByName(name);
+  }
+
+  /**
    * Retrieve an existing file by its unique identifier.
    *
    * GET /files/:uniqueIdentifier

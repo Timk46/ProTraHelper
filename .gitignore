@@ -127,3 +127,4 @@ dist
 
 # Storage of Lecture files for local testing
 server_nestjs/src/storage/OFP
+server_nestjs/src/storage/RNI

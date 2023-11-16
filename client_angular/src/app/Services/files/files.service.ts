@@ -37,6 +37,19 @@ export class FileService {
     });
   }
 
+   /**
+   * Downloads a file based on a name (first file with that name <- not unique)
+   *
+   * @param name The unique identifier for the file to be downloaded.
+   * @returns An Observable containing the server response, which includes the file as a Blob.
+   */
+   downloadFileByName(name: String): Observable<HttpResponse<Blob>> {
+    return this.httpClient.get(`${this.apiUrl}/download/byName/${name}`, {
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
+
   /**
    * Retrieves the metadata for a file based on its unique identifier.
    *

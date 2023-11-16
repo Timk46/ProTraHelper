@@ -1,6 +1,4 @@
 import { Component } from '@angular/core';
-import { ChatBotService } from '../../Services/ai/chat-bot.service';
-import { ChatBotMessageDTO } from '@DTOs/chatBot.dto';
 
 import { MatDialog } from '@angular/material/dialog';
 import { ChatBotDialogComponent } from './chat-bot-dialog/chat-bot-dialog.component';

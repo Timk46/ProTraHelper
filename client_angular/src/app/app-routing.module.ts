@@ -10,7 +10,7 @@ import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer
 import { McQuizComponent } from './Pages/contentView/contentElement/mcQuiz/mcQuiz.component';
 import { GraphComponent } from './Pages/graph/graph.component';
 import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
-
+import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
 // just for testing
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 import { DiscussionPageComponent } from './Pages/discussion/discussion-page/discussion-page.component';
@@ -27,6 +27,7 @@ const routes: Routes = [
   { path: 'mcQuiz', component: McQuizComponent },
   { path: 'graph', component: GraphComponent },
   { path: 'chatbot', component: ChatBotComponent },
+  { path: 'video', component: VideoTimeStampComponent },
 
   // just for testing
   { path: 'file-upload', component: FileUploadComponent },

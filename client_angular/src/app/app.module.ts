@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { MaterialModule } from './Modules/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MarkdownModule } from 'ngx-markdown';
+
 // Components
 import { GraphComponent } from './Pages/graph/graph.component';
 import { ContentBoardComponent } from './Pages/contentBoard/contentBoard.component';
@@ -34,6 +34,7 @@ import { DiscussionPageQuestionComponent } from './Pages/discussion/discussion-p
 import { DiscussionPageCommentComponent } from './Pages/discussion/discussion-page/discussion-page-comment/discussion-page-comment.component';
 import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
 import { ChatBotDialogComponent } from './Pages/chat-bot/chat-bot-dialog/chat-bot-dialog.component';
+import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
 
 
 
@@ -62,7 +63,7 @@ import { ChatBotDialogComponent } from './Pages/chat-bot/chat-bot-dialog/chat-bo
     QuestionCreationComponent,
     DiscussionPageQuestionComponent,
     DiscussionPageCommentComponent,
-    ChatBotComponent, ChatBotDialogComponent
+    ChatBotComponent, ChatBotDialogComponent, VideoTimeStampComponent
   ],
   imports: [
     BrowserModule,
@@ -73,7 +74,6 @@ import { ChatBotDialogComponent } from './Pages/chat-bot/chat-bot-dialog/chat-bo
     MaterialModule,
     NgxExtendedPdfViewerModule,
     HttpClientModule,
-    MarkdownModule.forRoot(),
   ],
   providers: [],
   bootstrap: [AppComponent]

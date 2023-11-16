@@ -23,7 +23,7 @@ export class ChatBotService {
         question,
         answer,
         isBot: true,
-        usedChunks,
+        usedChunks: JSON.stringify(usedChunks), // Store usedChunks as a JSON string
       },
     });
 

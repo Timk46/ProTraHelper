@@ -20,6 +20,10 @@
             "outputPath": "dist/client_angular",
             "index": "src/index.html",
             "main": "src/main.ts",
+            "allowedCommonJsDependencies": [
+              "sprotty",
+              "markdown-it-footnote"
+           ],
             "polyfills": [
               "zone.js"
             ],
@@ -38,17 +42,10 @@
               "@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.scss",
               "src/styles/sprotty-styles.scss",
-              "src/assets/prism-ghcolors.css"
+              "src/styles/highlightThemes/nord.css"
             ],
             "scripts": [
-              "node_modules/marked/marked.min.js",
-              "node_modules/prismjs/prism.js",
-              "node_modules/prismjs/components/prism-csharp.min.js",
-              "node_modules/prismjs/components/prism-css.min.js",
-              "node_modules/prismjs/components/prism-java.min.js",
-              "node_modules/prismjs/components/prism-python.min.js",
-              "node_modules/prismjs/components/prism-javascript.min.js",
-              "node_modules/prismjs/components/prism-typescript.min.js"
+              "node_modules/markdown-it-footnote/dist/markdown-it-footnote.min.js"
             ]
           },
           "configurations": {
