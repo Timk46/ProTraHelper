@@ -9,8 +9,9 @@
 
 .content {
   padding:16px;
-
-  contain: content;
+  height: calc(100% - 32px);
+  display: flex;
+  flex-direction: column;
   scrollbar-width: thin;
 
   font-size: 14px;

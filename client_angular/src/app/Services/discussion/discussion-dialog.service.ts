@@ -41,6 +41,8 @@ export class DiscussionDialogService {
     }
     const dialogRef = this.dialog.open(DiscussionCreationDialogComponent, {
       width: '50%',
+      panelClass: 'discussionDialog',
+      //height: '95%',
       data: {
         id: -1,
         title: "",
