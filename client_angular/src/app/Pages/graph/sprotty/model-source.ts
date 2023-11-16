@@ -102,7 +102,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       if (flatChild) {
         const expanded = flatChild.expanded !== undefined ? flatChild.expanded : true;
         const level = flatChild.level ? flatChild.level : 0;
-        const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId, 'concept');
+        const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId);
         graph.children!.push(newChild);
         if (expanded) {
           this.addChildren(newChild, 'concept');
@@ -134,13 +134,19 @@ export class ConceptGraphModelSource extends LocalModelSource {
         if (flatChild) {
           const expanded = flatChild.expanded !== undefined ? flatChild.expanded : true;
           const level = flatChild.level ? flatChild.level : 0;
-          const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId, type);
+          let newChild;
+          if (type === 'mini-concept') {
+            newChild = this.createMiniConceptNode("node_" + flatChild.databaseId, flatChild.name, level, flatChild.databaseId);
+          }
+          else {
+            newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId);
+          }
           parentNode.children!.push(newChild);
 
           if (expanded && type === 'concept') {
             this.addChildren(newChild, 'concept');
           }
-          else
+          else if (type === 'concept')
             this.addChildren(newChild, 'mini-concept');
         }
       });
@@ -295,12 +301,11 @@ export class ConceptGraphModelSource extends LocalModelSource {
    * @param expanded true or false, if the node is expanded or not
    * @param level integer from 0 to 6, the level of the node for the current user
    * @param databaseId id of this node in the database
-   * @param type either "concept" or "mini-concept", mini-concepts are used for collapsed nodes to show a preview of the children
    * @returns a ConceptNode
    */
-  createConceptNode(id: string, name: string, expanded: boolean, level: number, databaseId: number, type: string): SprottyConceptNode {
+  createConceptNode(id: string, name: string, expanded: boolean, level: number, databaseId: number): SprottyConceptNode {
     const node: SNode & SprottyConceptNode & Expandable = {
-      type: "node:" + type,
+      type: "node:concept" ,
       id: id,
       databaseId: databaseId,
       name: name,
@@ -310,21 +315,46 @@ export class ConceptGraphModelSource extends LocalModelSource {
       children: [],
       //layout: 'hbox'
     };
-    if (type === 'concept') {
-      node.children = [
-        <SLabel>{
-          id: 'header_' + id,
-          type: 'label:heading',
+    node.children = [
+      <SLabel>{
+        id: 'header_' + id,
+        type: 'label:heading',
 
-          text: name,
-        },
-        <SLabel>{
-          id: 'level_' + id,
-          type: 'label:text',
-          text: 'Level: ' + level.toString(),
-        },
-      ];
-    }
+        text: name,
+      },
+      <SLabel>{
+        id: 'level_' + id,
+        type: 'label:text',
+        text: 'Level: ' + level.toString(),
+      },
+    ];
+
+    return node;
+  }
+
+  // creates new mini concept node (locally)
+  /**
+   * 
+   * @param id sprotty graph id , usually 'node_' + databaseId
+   * @param name title of the node
+   * @param expanded true or false, if the node is expanded or not
+   * @param level integer from 0 to 6, the level of the node for the current user
+   * @param databaseId id of this node in the database
+   * @returns a ConceptNode
+   */
+  createMiniConceptNode(id: string, name: string, level: number, databaseId: number): SprottyConceptNode {
+    const node: SNode & SprottyConceptNode & Expandable = {
+      type: "node:mini-concept",
+      id: id,
+      databaseId: databaseId,
+      name: name,
+      expanded: false,
+      level: level,
+      levelGoal: 3,
+      children: [],
+      //layout: 'hbox'
+    };
+
     return node;
   }
 

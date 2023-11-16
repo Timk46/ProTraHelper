@@ -53,7 +53,7 @@ export class ConceptNodeView extends RectangularNodeView {
             <rect class-sprotty-node={true} class-concept={true}
                 width={node.size.width}
                 height={node.size.height}
-                //class-mouseover={node.hoverFeedback} class-selected={node.selected}
+                class-mouseover={node.hoverFeedback} class-selected={node.selected}
                 rx={5}
             >
             </rect>
@@ -75,7 +75,7 @@ export class MiniConceptView extends RectangularNodeView {
             <rect class-sprotty-node={true}p class-mini-concept={true}
             class-mouseover={node.hoverFeedback} class-selected={node.selected}
                 width={20}
-                height={10}
+                height={25}
                 rx={2}
             >
             </rect>
