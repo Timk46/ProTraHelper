@@ -86,7 +86,7 @@ export class AuthInterceptor implements HttpInterceptor {
    * @param message - The message to display
    * @param icon - The icon to display
    */
-  openSnackBar(message: string, icon: string): void {
+  private openSnackBar(message: string, icon: string): void {
     this.snackBar.open(message, '', {
       duration: 3000, // Time duration in milliseconds to display the snackbar
       panelClass: ['snackbar'],

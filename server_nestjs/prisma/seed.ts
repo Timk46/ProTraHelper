@@ -88,11 +88,51 @@ async function main() {
   const adminUser = await prisma.user.create({
     data: {
       id: 1,
-      email: 'admin@examplei.com',
+      email: 'admin@admin.de',
       firstname: 'Admin',
       lastname: 'User',
-      password: 'admin123',
+      password: '$2b$10$Bn9kqoUAJXE2SAXyqK5LbOk2t2QqDuJ4WKBA.aLjlxuJepwRxRf5C', // plain = admin
       globalRole: 'ADMIN',
+      modules: { connect: [{ id: moduleInformatik.id }] },
+    },
+  });
+
+
+   // Teacher
+   const teacherUser = await prisma.user.create({
+    data: {
+      id: 2,
+      email: 'lehrer@lehrer.de',
+      firstname: 'Lehrer',
+      lastname: 'User',
+      password: '$2b$10$NnM.nnNJ0T0XD1BkqVbGCedYwEQgWQHiz0ao0H6AkSYFX9Kqq9UrO', // plain = lehrer
+      globalRole: 'TEACHER',
+      modules: { connect: [{ id: moduleInformatik.id }] },
+    },
+  });
+
+   // Student
+   const studentUser = await prisma.user.create({
+    data: {
+      id: 3,
+      email: 'student@student.de',
+      firstname: 'Student',
+      lastname: 'User',
+      password: '$2b$10$VPheWSunU2/ntaC/s5wBkO5ZjYN8ogxqtdAJis5n3Bvgmm99Fkxxm', // plain = student
+      globalRole: 'STUDENT',
+      modules: { connect: [{ id: moduleInformatik.id }] },
+    },
+  });
+
+  // Sven
+  const svenUser = await prisma.user.create({
+    data: {
+      id: 4,
+      email: 'sven@student.de',
+      firstname: 'Sven',
+      lastname: 'Jacobs',
+      password: '$2b$10$VPheWSunU2/ntaC/s5wBkO5ZjYN8ogxqtdAJis5n3Bvgmm99Fkxxm', // plain = student
+      globalRole: 'STUDENT',
       modules: { connect: [{ id: moduleInformatik.id }] },
     },
   });
@@ -104,11 +144,11 @@ async function main() {
   for (let i = 0; i < numberOfUsers; i++) {
     const user = await prisma.user.create({
       data: {
-        id: i + 2,
+        id: i + 500,
         email: faker.internet.email(),
         firstname: faker.person.firstName(),
         lastname: faker.person.lastName(),
-        password: faker.internet.password(),
+        password: faker.internet.password(), //passwords wont work because they are not hashed like they should. To Login with Users use hardcoded ones (see above)
         globalRole: 'STUDENT',
         modules: {
           connect: [{ id: moduleInformatik.id }],

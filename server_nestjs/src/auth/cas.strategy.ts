@@ -19,6 +19,7 @@ export class CasStrategy extends PassportStrategy(Strategy, 'cas') {
   }
 
   async validate(profile: any): Promise<User> {
+    // profile only contains the university id number
     const user: User = {
       id: profile,
       email: undefined,

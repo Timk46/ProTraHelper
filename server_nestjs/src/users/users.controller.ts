@@ -12,7 +12,7 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
  // currently all login logic is done in the auth.controller.ts and auth.service.ts with CAS
 
- /*
+
  @Public()
  @Post()
  createUser(
@@ -23,6 +23,5 @@ export class UsersController {
  ) {
    return this.usersService.createUser(email, firstName, lastName, password);
  }
- */
 }
 

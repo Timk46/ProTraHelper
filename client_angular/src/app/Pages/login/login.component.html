@@ -11,7 +11,7 @@
             <div class="col-auto">
               <mat-form-field>
                 <mat-label>E-Mail</mat-label>
-                <input matInput type="email" formControlName="username" placeholder="Email address">
+                <input matInput type="email" formControlName="username" placeholder="Email address" (keydown.enter)="loginWithPassword()">
                 <mat-error
                   *ngIf="loginForm.controls['username'].invalid && loginForm.controls['username'].touched">
                   <ng-container *ngIf="loginForm.controls['username'].errors?.['required']">
@@ -29,7 +29,7 @@
             <div class="col-auto">
               <mat-form-field>
                 <mat-label>Passwort</mat-label>
-                <input matInput type="password" formControlName="password" placeholder="Password">
+                <input matInput type="password" formControlName="password" placeholder="Password" (keydown.enter)="loginWithPassword()">
                 <mat-error
                   *ngIf="loginForm.controls['password'].invalid && loginForm.controls['password'].touched">
                   Password is required
@@ -40,10 +40,10 @@
 
           <div class="row">
             <div class="col-auto">
-              <button (click)="loginWithPassword()" mat-raised-button disabled>Login</button>
+              <button (click)="loginWithPassword()" mat-raised-button primary>Login</button>
             </div>
             <div class="col-auto" style = "margin-top: 20px;">
-              <button mat-raised-button color="primary" (click)="login()">Login über Uni Siegen</button>
+              <button mat-raised-button color="primary" (click)="loginWithCAS()">Login über Uni Siegen</button>
             </div>
           </div>
 

@@ -2,6 +2,10 @@ import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import jwt_decode from 'jwt-decode';
 import { globalRole } from '@DTOs/roles.enum';
+import { environment } from 'src/environments/environment';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -9,9 +13,44 @@ import { globalRole } from '@DTOs/roles.enum';
 export class UserService {
   isAuthenticated$: Observable<boolean>;
 
-  constructor() {
+  constructor
+  (
+    private router: Router,
+    private snackBar: MatSnackBar,
+    private http: HttpClient
+  )
+  {
     this.isAuthenticated$ = new BehaviorSubject<boolean>(false);
   }
+
+    /**
+   * This method is used to handle the login
+   * @param username the username (email)
+   * @param password the password
+   * @returns { Promise<boolean> } a promise containing a boolean indicating whether the login was successful
+   */
+    login(username: string, password: string): Promise<boolean> {
+      return new Promise((resolve, reject) => {
+        const credentials = { username: username, password: password };
+        this.http.post(environment.server + '/auth/login', credentials).subscribe(
+          {
+            next: (response: any) => {
+              // Handle successful login
+              const accessToken = response.accessToken;
+              localStorage.setItem('accessToken', accessToken);
+              this.openSnackBar("Hallo " + username);
+              this.router.navigate(['/dashboard']);
+              resolve(true);
+            },
+            error: (error: any) => {
+              // Handle login error
+              console.error(error);
+              this.openSnackBar("Der Login ist fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.");
+              resolve(false);
+            }
+          });
+      });
+    }
 
   /**
    * Checks if the user is logged in by verifying the existence of authentication tokens.
@@ -114,5 +153,19 @@ export class UserService {
   getTokenID(): string {
     const decodedToken = this.decodeAccessToken();
     return decodedToken.id;
+  }
+   /**
+   * Open a MatSnackBar with the provided message and icon.
+   *
+   * @param message - The message to display
+   * @param icon - The icon to display
+   */
+   private openSnackBar(message: string): void {
+    this.snackBar.open(message, '', {
+      duration: 3000, // Time duration in milliseconds to display the snackbar
+      panelClass: ['snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+    });
   }
 }

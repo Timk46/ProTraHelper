@@ -66,14 +66,14 @@ export class AuthService {
    /**
      * Generates the access and refresh tokens for a user
      * @param { User } user the user to generate the tokens for
-     * @returns { Promise<{ accessToken: string; refreshToken: string }> } the access and refresh tokens
+     * @returns { Promise<{ accessToken: string }> } the access and refresh tokens
      */
-   async generateTokens(user: User): Promise<{ accessToken: string; refreshToken: string }> {
+   async generateTokens(user: User): Promise<{ accessToken: string; }> {
     const payload = {
         email: user.email, firstName: user.firstname,
         lastName: user.lastname, id: user.id, role: await this.usersService.getGlobalRole(user.id)
     };
-    const [accessToken, refreshToken] = await Promise.all([
+    const [accessToken] = await Promise.all([
         this.jwtService.signAsync(
             {
                 ...payload,
@@ -94,8 +94,7 @@ export class AuthService {
         ),
     ]);
     return {
-        accessToken,
-        refreshToken,
+        accessToken
     };
 }
 }

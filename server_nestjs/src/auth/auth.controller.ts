@@ -24,7 +24,7 @@ export class AuthController {
 
     // Redirect to the website with tokens as URL parameters - not super secure, but cant send in body because its not a request by the client
     res.redirect(
-      `${process.env.WEBSITE_URL}/login?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
+      `${process.env.WEBSITE_URL}/login?accessToken=${tokens.accessToken}`,
     );
   }
 
@@ -33,6 +33,7 @@ export class AuthController {
    * @param req the request object
    * @returns the access and refresh tokens
    */
+  @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req: { user: User }) {

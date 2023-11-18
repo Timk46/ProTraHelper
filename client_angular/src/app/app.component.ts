@@ -21,8 +21,11 @@ export class AppComponent {
       // Subscribe to the authentication observable
       this.userService.isAuthenticated$.subscribe((isAuthenticated) => {
         this.userIsLoggedIn = isAuthenticated;
-        this.userMail= userService.getEmail();
-        this.userRole = userService.getRole();
+        if (isAuthenticated)
+        {
+          this.userMail= userService.getEmail();
+          this.userRole = userService.getRole();
+        }
       });
     }
 

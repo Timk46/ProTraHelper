@@ -48,12 +48,21 @@ export class LoginComponent implements OnInit {
   /**
    * The login method navigates to the authentication server to authenticate the user.
    */
-  login(): void {
+  loginWithCAS(): void {
     console.log('login');
     window.location.href = `${environment.server}/auth/cas/`;
   }
 
   loginWithPassword(){
-    // TODO: implement login with password
+    if (this.loginForm.invalid) {
+      Object.values(this.loginForm.controls).forEach(control => {
+        control.markAsTouched();
+      });
+      console.error("Form is invalid");
+      return;
+    }
+
+    const { username, password } = this.loginForm.value;
+    this.userService.login(username, password);
   }
 }
