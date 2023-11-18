@@ -1,0 +1,54 @@
+<div class="outer-container">
+  <div class="login-container">
+    <div class="main-div d-flex align-items-center justify-content-center">
+      <div class="logo-container">
+        <img src="assets/img/logo_hefl2.png" alt="Website Logo">
+      </div>
+      <ng-container>
+        <div (keyup.enter)="loginWithPassword()" class="container-fluid" [formGroup]="loginForm">
+          <div class="row">
+            <h1>Login</h1>
+            <div class="col-auto">
+              <mat-form-field>
+                <mat-label>E-Mail</mat-label>
+                <input matInput type="email" formControlName="username" placeholder="Email address">
+                <mat-error
+                  *ngIf="loginForm.controls['username'].invalid && loginForm.controls['username'].touched">
+                  <ng-container *ngIf="loginForm.controls['username'].errors?.['required']">
+                    Email is required
+                  </ng-container>
+                  <ng-container *ngIf="loginForm.controls['username'].errors?.['email']">
+                    Invalid email format
+                  </ng-container>
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-auto">
+              <mat-form-field>
+                <mat-label>Passwort</mat-label>
+                <input matInput type="password" formControlName="password" placeholder="Password">
+                <mat-error
+                  *ngIf="loginForm.controls['password'].invalid && loginForm.controls['password'].touched">
+                  Password is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-auto">
+              <button (click)="loginWithPassword()" mat-raised-button disabled>Login</button>
+            </div>
+            <div class="col-auto" style = "margin-top: 20px;">
+              <button mat-raised-button color="primary" (click)="login()">Login über Uni Siegen</button>
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

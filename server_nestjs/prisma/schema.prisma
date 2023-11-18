@@ -31,6 +31,7 @@ model User {
   firstname            String
   lastname             String
   password             String
+  refreshToken         String?
   createdAt            DateTime             @default(now())
   globalRole           GlobalRole           @default(STUDENT)
   modules              Module[]

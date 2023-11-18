@@ -17,7 +17,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
-import { HttpClient, HttpClientModule } from "@angular/common/http";
+import { HTTP_INTERCEPTORS, HttpClient, HttpClientModule } from "@angular/common/http";
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 import { ContentViewComponent } from './Pages/contentView/contentView.component';
 import { CreateConceptDialogComponent } from './Pages/graph/graph-dialogs/create-concept-dialog/create-concept-dialog.component';
@@ -35,6 +35,8 @@ import { DiscussionPageCommentComponent } from './Pages/discussion/discussion-pa
 import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
 import { ChatBotDialogComponent } from './Pages/chat-bot/chat-bot-dialog/chat-bot-dialog.component';
 import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
+import { LoginComponent } from './Pages/login/login.component';
+import { AuthInterceptor } from "./Services/auth/auth-interceptor.service";
 
 
 
@@ -63,7 +65,7 @@ import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video
     QuestionCreationComponent,
     DiscussionPageQuestionComponent,
     DiscussionPageCommentComponent,
-    ChatBotComponent, ChatBotDialogComponent, VideoTimeStampComponent
+    ChatBotComponent, ChatBotDialogComponent, VideoTimeStampComponent, LoginComponent
   ],
   imports: [
     BrowserModule,
@@ -75,7 +77,7 @@ import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video
     NgxExtendedPdfViewerModule,
     HttpClientModule,
   ],
-  providers: [],
+  providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true } ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

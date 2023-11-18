@@ -14,10 +14,12 @@ import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video
 // just for testing
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 import { DiscussionPageComponent } from './Pages/discussion/discussion-page/discussion-page.component';
+import { LoginComponent } from './Pages/login/login.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-  { path: 'app', component: AppComponent },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'app', component: AppComponent,},
   { path: 'contentBoard', component: ContentBoardComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'conceptOverview', component: ConceptOverviewComponent },
