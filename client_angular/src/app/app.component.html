@@ -5,8 +5,8 @@
   </button>
   <span>HEFL</span>
   <span class="toolbar-item-spacer"></span>
-  {{userMail}}
-  <button mat-icon-button matTooltip="Mein Account">
+  <p *ngIf="userIsLoggedIn">Rolle: {{userRole}} | Mail: {{userMail}}</p>
+  <button *ngIf="userIsLoggedIn" mat-icon-button matTooltip="Mein Account">
       <mat-icon>account_circle</mat-icon>
   </button>
 </mat-toolbar>

@@ -1,6 +1,7 @@
 import { UserService } from './Services/auth/user.service';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { globalRole } from '@DTOs/roles.enum';
 
 @Component({
   selector: 'app-root',
@@ -9,6 +10,7 @@ import { Router } from '@angular/router';
 })
 export class AppComponent {
   userMail: string = "";
+  userRole: string = "";
   userIsLoggedIn: boolean = false;
   constructor
     (
@@ -20,6 +22,7 @@ export class AppComponent {
       this.userService.isAuthenticated$.subscribe((isAuthenticated) => {
         this.userIsLoggedIn = isAuthenticated;
         this.userMail= userService.getEmail();
+        this.userRole = userService.getRole();
       });
     }
 
