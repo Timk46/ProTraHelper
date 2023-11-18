@@ -1,0 +1,47 @@
+.outer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.logo-container img {
+  max-width: 350px; /* oder die gewünschte maximale Breite */
+  max-height: 350px; /* oder die gewünschte maximale Höhe */
+  //border-radius: 15px;
+  //box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  width: fit-content;
+  padding: 20px;
+  background-color: #E5E9F0;
+}
+
+.main-div {
+  display: flex;
+  align-items: center;
+}
+
+
+.logo-container {
+  margin-right: 1rem;
+}
+
+.video-container {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+video {
+  border-radius: 10px; // Fügt abgerundete Ecken hinzu
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); // Fügt einen Boxschatten hinzu
+  margin-top: 1rem; // Fügt einen oberen Rand hinzu
+}
+

@@ -9,9 +9,32 @@ import { DiscussionController } from './discussion/discussion.controller';
 import { DiscussionService } from './discussion/discussion.service';
 import { ChatBotModule } from './ai/chat-bot/chat-bot.module';
 
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+
 @Module({
-  imports: [FilesModule, GraphModule, PrismaModule, ContentModule, ChatBotModule],
-  controllers: [AppController, DiscussionController],
-  providers: [AppService, DiscussionService],
+  imports: [
+    FilesModule,
+    GraphModule,
+    PrismaModule,
+    AuthModule,
+    UsersModule,
+    ContentModule,
+    ChatBotModule],
+  controllers: [
+    AppController,
+    DiscussionController
+  ],
+  providers: [
+    AppService,
+    DiscussionService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // All Routes are protected by JWTGuard. Users only get Tokens by using CAS of the university
+    },
+
+  ],
 })
 export class AppModule {}

@@ -5,7 +5,8 @@
   </button>
   <span>HEFL</span>
   <span class="toolbar-item-spacer"></span>
-  <button mat-icon-button matTooltip="Mein Account">
+  <p *ngIf="userIsLoggedIn">Rolle: {{userRole}} | Mail: {{userMail}}</p>
+  <button *ngIf="userIsLoggedIn" mat-icon-button matTooltip="Mein Account">
       <mat-icon>account_circle</mat-icon>
   </button>
 </mat-toolbar>
@@ -20,6 +21,7 @@
       <a mat-list-item routerLink="/file-upload" routerLinkActive="active-link">file-upload</a>
       <a mat-list-item routerLink="/discussion-page" routerLinkActive="active-link">discussion-page</a>
       <a mat-list-item routerLink="/chatbot" routerLinkActive="active-link">Chat Bot</a>
+      <a mat-list-item *ngIf="userIsLoggedIn" (click)="logOut()">Logout</a>
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>

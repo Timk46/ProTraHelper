@@ -14,27 +14,29 @@ import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video
 // just for testing
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 import { DiscussionPageComponent } from './Pages/discussion/discussion-page/discussion-page.component';
+import { LoginComponent } from './Pages/login/login.component';
+import { LoggedInGuard } from './Guards/is-logged-in.guard';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-  { path: 'app', component: AppComponent },
-  { path: 'contentBoard', component: ContentBoardComponent },
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'conceptOverview', component: ConceptOverviewComponent },
-  { path: 'discussion', component: DiscussionComponent },
-  { path: 'codeTask', component: CodeTaskComponent },
-  { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent },
-  { path: 'mcQuiz', component: McQuizComponent },
-  { path: 'graph', component: GraphComponent },
-  { path: 'chatbot', component: ChatBotComponent },
-  { path: 'video', component: VideoTimeStampComponent },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'app', component: AppComponent,},
+  { path: 'contentBoard', component: ContentBoardComponent, canActivate: [LoggedInGuard] },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [LoggedInGuard] },
+  { path: 'conceptOverview', component: ConceptOverviewComponent, canActivate: [LoggedInGuard] },
+  { path: 'discussion', component: DiscussionComponent, canActivate: [LoggedInGuard] },
+  { path: 'codeTask', component: CodeTaskComponent, canActivate: [LoggedInGuard] },
+  { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent, canActivate: [LoggedInGuard] },
+  { path: 'mcQuiz', component: McQuizComponent, canActivate: [LoggedInGuard] },
+  { path: 'graph', component: GraphComponent, canActivate: [LoggedInGuard] },
+  { path: 'chatbot', component: ChatBotComponent, canActivate: [LoggedInGuard] },
+  { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard] },
+  { path: 'discussion-page', component: DiscussionPageComponent, canActivate: [LoggedInGuard] },
 
   // just for testing
-  { path: 'file-upload', component: FileUploadComponent },
-  { path: 'discussion-page', component: DiscussionPageComponent },
+  { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
 
 ];
-
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]

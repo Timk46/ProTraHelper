@@ -17,6 +17,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 @NgModule({
     imports: [
@@ -37,6 +38,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         MatCheckboxModule,
         MatDialogModule,
         MatTooltipModule,
+        MatSnackBarModule
       ],
       exports: [
         BrowserAnimationsModule,
@@ -56,6 +58,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         MatCheckboxModule,
         MatDialogModule,
         MatTooltipModule,
+        MatSnackBarModule
       ],
 })
 export class MaterialModule { }
