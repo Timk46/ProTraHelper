@@ -1,8 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, SetMetadata } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Reflector } from '@nestjs/core';
 import { User } from '@prisma/client';
 import { globalRole } from '@Interfaces/roles.enum';
+
+export const roles = (...roles: string[]) => SetMetadata('roles', roles);
 
 /**
  * This class is used to define the roles guard
@@ -10,11 +12,7 @@ import { globalRole } from '@Interfaces/roles.enum';
  */
 @Injectable()
 export class RolesGuard implements CanActivate {
-  /**
-   * Constructor of RolesGuard
-   * @param { Reflector } reflector the reflector
-   * @param { UserGlobalRoleService } userGlobalRoleService the user global role service
-   */
+
   constructor(private reflector: Reflector, private prisma: PrismaService) {}
 
   /**
@@ -28,9 +26,9 @@ export class RolesGuard implements CanActivate {
     // if role is given as 'none', everyone can access the route
     // if role is given as 'any' all logged in members can access the route
     const requiredRoles = this.reflector.getAllAndOverride<string[]>(
-      'globalRoles',
+      'roles',
       [context.getHandler(), context.getClass()],
-    );
+  );
     if (!requiredRoles) {
       console.log(
         'No allowed global roles are set for this route. It is forbidden by default.',
@@ -52,10 +50,10 @@ export class RolesGuard implements CanActivate {
 
     console.log('Role required: ' + requiredRoles.toString());
 
-    const userGlobalRole = await this.getGlobalRole(user.id);
-    console.log('User role: ' + userGlobalRole);
+    const globalRole = await this.getGlobalRole(user.id);
+    console.log('User role: ' + globalRole);
 
-    if (requiredRoles.includes(userGlobalRole)) {
+    if (requiredRoles.includes(globalRole)) {
       return true;
     }
     // else
