@@ -1,5 +1,6 @@
 import { UserService } from './Services/auth/user.service';
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -7,15 +8,28 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  userMail: string;
-  constructor(
-    UserService: UserService)
+  userMail: string = "";
+  userIsLoggedIn: boolean = false;
+  constructor
+    (
+      private userService: UserService,
+      private router: Router
+    )
     {
-      this.userMail= UserService.getEmail();
+      // Subscribe to the authentication observable
+      this.userService.isAuthenticated$.subscribe((isAuthenticated) => {
+        this.userIsLoggedIn = isAuthenticated;
+        this.userMail= userService.getEmail();
+      });
     }
 
   ngOnInit() {
 
+  }
+
+  logOut() {
+    this.userService.removeTokens();
+    this.router.navigate(['/login']);
   }
 
 }

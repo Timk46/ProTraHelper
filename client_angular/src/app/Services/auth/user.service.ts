@@ -38,6 +38,7 @@ export class UserService {
   setTokens(accessToken: string, refreshToken: string): void {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
+    (this.isAuthenticated$ as BehaviorSubject<boolean>).next(true);// Update authentication status
   }
 
   /**
@@ -51,6 +52,7 @@ export class UserService {
     if (localStorage.getItem(accessToken)) {
       localStorage.removeItem(accessToken);
       localStorage.removeItem(refreshToken);
+      (this.isAuthenticated$ as BehaviorSubject<boolean>).next(false);// Update authentication status
     }
   }
   /**

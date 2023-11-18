@@ -37,6 +37,7 @@ import { ChatBotDialogComponent } from './Pages/chat-bot/chat-bot-dialog/chat-bo
 import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
 import { LoginComponent } from './Pages/login/login.component';
 import { AuthInterceptor } from "./Services/auth/auth-interceptor.service";
+import { LoggedInGuard } from "./Guards/is-logged-in.guard";
 
 
 
@@ -77,7 +78,7 @@ import { AuthInterceptor } from "./Services/auth/auth-interceptor.service";
     NgxExtendedPdfViewerModule,
     HttpClientModule,
   ],
-  providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true } ],
+  providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }, LoggedInGuard ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

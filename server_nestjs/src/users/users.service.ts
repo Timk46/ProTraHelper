@@ -10,14 +10,14 @@ export class UsersService {
   // The Cas User will be created or updated after each login
   createCASuser(username: string) {
     return this.prisma.user.upsert({
-      where: { email: username + '@CAS.de' },
+      where: { email: username + '@CAS-uni-siegen.de' },
       update: {},
       create: {
-        firstname: 'casUSER', // geändert von firstName zu firstname
-        lastname: 'UniSiegen', // geändert von lastName zu lastname
-        email: username + '@CAS-uni-siegen.de', // we append @CAS so we know they registered via CAS
+        firstname: 'casUSER', // we only get university id number but no name or mail
+        lastname: 'UniSiegen',
+        email: username + '@CAS-uni-siegen.de',
         password: bcrypt.hashSync(
-          process.env.CAS_PW_SECRET_KEY, // password is a hash of the secret key since there is no way to login via password
+          process.env.CAS_PW_SECRET_KEY, // all cas users have the same password, but its only stored as hash and in clear text in .env -> ToDo: Prohibit login with passwort for cas-accounts
           bcrypt.genSaltSync(10),
         ),
         // GlobalRole entfernt, da es nicht im User-Modell definiert ist und der Standardwert STUDENT automatisch zugewiesen wird
