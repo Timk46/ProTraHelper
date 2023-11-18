@@ -75,17 +75,6 @@ export class UsersService {
     });
   }
 
-  updateUserRefreshToken(email: string, refreshToken: string) {
-    return this.prisma.user.update({
-      where: {
-        email: email,
-      },
-      data: {
-        refreshToken: refreshToken,
-      },
-    });
-  }
-
   /**
    * This method returns the global role of a user
    * @param userId --> User we want the data for

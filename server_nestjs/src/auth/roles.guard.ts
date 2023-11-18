@@ -36,11 +36,11 @@ export class RolesGuard implements CanActivate {
       return false;
     }
 
-    if (requiredRoles.includes('none')) {
+    if (requiredRoles.includes('NONE')) {
       console.log('No required roles');
       return true;
     }
-    if (requiredRoles.includes('any')) {
+    if (requiredRoles.includes('ANY')) {
       return true; // logged in members are controlled by the JwtAuthGuard
     }
 

@@ -4,7 +4,6 @@ import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
-import { JwtRefreshStrategy } from './jwt-refresh.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './auth.controller';
@@ -22,7 +21,6 @@ import { CasStrategy } from './cas.strategy';
     AuthService,
     LocalStrategy,
     JwtStrategy,
-    JwtRefreshStrategy,
     CasStrategy,
   ],
   exports: [AuthService],

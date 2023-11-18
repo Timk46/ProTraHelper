@@ -29,7 +29,6 @@ export class AuthService {
     const user = await this.usersService.createCASuser(username);
     const tokens = await this.generateTokens(user);
     console.log('User logged in: ' + username + " Role: " + user.globalRole + " Refreshtoken " + tokens.accessToken);
-    await this.updateRefreshToken(user.email, tokens.refreshToken);
     return {
       ...tokens,
     };
@@ -59,29 +58,9 @@ export class AuthService {
    */
   async login(user: User) {
     const tokens = await this.generateTokens(user);
-    await this.updateRefreshToken(user.email, tokens.refreshToken);
     return {
       ...tokens,
     };
-  }
-
-  /**
-   * Logs out a user by setting the refresh token to null
-   * @param { User } user the user to log out
-   * @returns the status of the operation as a message
-   */
-  async logout(user: User) {
-    return this.usersService.updateUserRefreshToken(user.email, null);
-  }
-
-  /**
-   * Updates the refresh token of a user
-   * @param { string } email the email of the user
-   * @param { string } refreshToken the new refresh token
-   */
-  async updateRefreshToken(email: string, refreshToken: string) {
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-    await this.usersService.updateUserRefreshToken(email, hashedRefreshToken);
   }
 
    /**
@@ -119,24 +98,4 @@ export class AuthService {
         refreshToken,
     };
 }
-
-  /**
-   * Refreshes the access and refresh tokens of a user
-   * @param { string } email the email of the user
-   * @param { string } refreshToken the refresh token of the user
-   * @returns the access and refresh tokens
-   */
-  async refreshTokens(email: string, refreshToken: string) {
-    const user = await this.usersService.findOne(email);
-    if (!user || !user.refreshToken)
-      throw new ForbiddenException('Access Denied');
-    const refreshTokenMatches = await bcrypt.compare(
-      refreshToken,
-      user.refreshToken,
-    );
-    if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
-    const tokens = await this.generateTokens(user);
-    await this.updateRefreshToken(user.email, tokens.refreshToken);
-    return tokens;
-  }
 }

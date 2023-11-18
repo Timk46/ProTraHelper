@@ -16,42 +16,36 @@ export class UserService {
   /**
    * Checks if the user is logged in by verifying the existence of authentication tokens.
    * - `accessToken`: Gets from local storage
-   * - `refreshToken`: Gets from local storage
    *
    * @returns A boolean value representing whether the user is logged in
    */
   isUserLoggedIn(): boolean {
     const isAuthenticated = Boolean(
-      localStorage.getItem('accessToken') &&
-        localStorage.getItem('refreshToken')
+      localStorage.getItem('accessToken')
     );
     (this.isAuthenticated$ as BehaviorSubject<boolean>).next(isAuthenticated);
     return isAuthenticated;
   }
 
   /**
-   * Sets the authentication accessToken and refreshToken in local storage.
+   * Sets the authentication accessToken in local storage.
    *
    * @param accessToken - The user accessToken to be saved in local storage
-   * @param refreshToken - The refreshToken  to be saved in local storage
    */
-  setTokens(accessToken: string, refreshToken: string): void {
+  setTokens(accessToken: string): void {
     localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
     (this.isAuthenticated$ as BehaviorSubject<boolean>).next(true);// Update authentication status
   }
 
   /**
-   * Removes both accessToken and refreshToken from local storage,
+   * Removes both accessToken from local storage,
    * if either of them exists.
    */
   removeTokens(): void {
     const accessToken = 'accessToken';
-    const refreshToken = 'refreshToken';
 
     if (localStorage.getItem(accessToken)) {
       localStorage.removeItem(accessToken);
-      localStorage.removeItem(refreshToken);
       (this.isAuthenticated$ as BehaviorSubject<boolean>).next(false);// Update authentication status
     }
   }

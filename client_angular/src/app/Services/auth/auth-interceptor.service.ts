@@ -65,7 +65,14 @@ export class AuthInterceptor implements HttpInterceptor {
         'Too many requests in a short time. Please try again in a minute.',
         'Warning'
       );
-    } else {
+    }
+    else if (error.status === 403) {
+      this.openSnackBar(
+        'Authorization failed.',
+        'Warning'
+      );
+    }
+    else {
       this.openSnackBar(
         `An error occurred. Please check the console.\n${error.statusText}`,
         'Warning'

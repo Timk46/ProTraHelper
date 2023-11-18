@@ -13,7 +13,7 @@ export class GraphController {
      * This function returns a concept graph without data about a course or a user
      * @returns the concept graph
      */
-    @roles("any")
+    @roles("ANY")
     @Get()
     async getConceptGraph(): Promise<ConceptGraphDTO>{
         const graph: ConceptGraphDTO = await this.graphService.getConceptGraph();
@@ -25,7 +25,7 @@ export class GraphController {
      * @param userId the user id
      * @returns the concept graph
      */
-    @roles("any")
+    @roles("ANY")
     @Get(':userId')
     async getUserConceptGraph(@Param('userId', ParseIntPipe) userId: number): Promise<ConceptGraphDTO>{
         const graph: ConceptGraphDTO = await this.graphService.getConceptGraph(userId);
@@ -39,7 +39,7 @@ export class GraphController {
      * @returns the new concept
      */
     // todo: add body for description and moduleGoals
-    @roles("any")
+    @roles("ANY")
     @Post('concept/:parentId/:name')
     async createConceptNode(@Param('parentId', ParseIntPipe) parentId:number, @Param('name') name: string): Promise<any> { // todo: there must be a better way than any
         console.log("in createConceptNode controller: ", parentId, name)
@@ -47,7 +47,7 @@ export class GraphController {
         return newConcept;
     }
 
-    @roles("any")
+    @roles("ANY")
     @Delete('concept/:conceptId')
     async deleteConceptNode(@Param('conceptId', ParseIntPipe) conceptId:number): Promise<any> {
         console.log("in deleteConceptNode controller: ", conceptId)
@@ -55,7 +55,7 @@ export class GraphController {
         return deletedConcept;
     }
 
-    @roles("any")
+    @roles("ANY")
     @Put('userConcept/:userId/:conceptId')
     async updateUserConceptData(
         @Param('userId', ParseIntPipe) userId: number,

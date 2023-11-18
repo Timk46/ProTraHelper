@@ -28,7 +28,6 @@ export class CasStrategy extends PassportStrategy(Strategy, 'cas') {
       createdAt: undefined,
       globalRole: undefined,
       currentconceptNodeId: undefined,
-      refreshToken: undefined,
     };
     return user;
   }
