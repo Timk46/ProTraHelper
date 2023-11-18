@@ -143,7 +143,7 @@ export class UserService {
    */
   getRole(): globalRole  {
     const decodedToken = this.decodeAccessToken();
-    return decodedToken.role;
+    return decodedToken.globalRole;
   }
 
   /**

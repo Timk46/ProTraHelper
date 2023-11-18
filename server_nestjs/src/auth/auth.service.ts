@@ -45,7 +45,7 @@ export class AuthService {
     if (user && bcrypt.compareSync(pass, user.password)) {
       return {
         ...user,
-        password: undefined,
+        password: undefined, // we dont want to return the passwordhash
       };
     }
     return null;
@@ -71,7 +71,9 @@ export class AuthService {
    async generateTokens(user: User): Promise<{ accessToken: string; }> {
     const payload = {
         email: user.email, firstName: user.firstname,
-        lastName: user.lastname, id: user.id, role: await this.usersService.getGlobalRole(user.id)
+        lastName: user.lastname,
+        id: user.id,
+        globalRole: await this.usersService.getGlobalRole(user.id)
     };
     const [accessToken] = await Promise.all([
         this.jwtService.signAsync(
