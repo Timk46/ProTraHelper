@@ -1,5 +1,4 @@
-
-<mat-toolbar color="primary">
+<mat-toolbar color="primary" *ngIf="(toolbarService.visible|async)">
   <button mat-icon-button (click)="sidenav.toggle()" matTooltip="Menu">
       <mat-icon>menu</mat-icon>
   </button>
@@ -25,7 +24,7 @@
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
-       <app-chat-bot></app-chat-bot>
+       <app-chat-bot *ngIf="(toolbarService.visible|async)"></app-chat-bot>
       <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>

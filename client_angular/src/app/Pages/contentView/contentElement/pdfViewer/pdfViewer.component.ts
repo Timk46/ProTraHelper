@@ -4,6 +4,7 @@ import { NgxExtendedPdfViewerService, pdfDefaultOptions } from 'ngx-extended-pdf
 import { ContentsForConceptDTO } from '@DTOs/content.dto';
 
 import { FileService } from 'src/app/Services/files/files.service';
+import { ToolbarService } from 'src/app/Services/toolbar/toolbar.service';
 
 @Component({
   selector: 'app-pdfViewer',
@@ -21,7 +22,7 @@ export class PdfViewerComponent implements OnInit {
    *  to use the "find" api, to extract text and images from a PDF file,
    *  to print programmatically, and to show or hide layers by a method call.
   */
-  constructor(private pdfService: NgxExtendedPdfViewerService, private route: ActivatedRoute, private fileService: FileService) {
+  constructor(private pdfService: NgxExtendedPdfViewerService, private route: ActivatedRoute, private fileService: FileService, public toolbarService: ToolbarService) {
     /* More likely than not you don't need to tweak the pdfDefaultOptions.
        They are a collecton of less frequently used options.
        To illustrate how they're used, here are two example settings: */
@@ -36,6 +37,7 @@ export class PdfViewerComponent implements OnInit {
       console.log('uniqueIdentifier: ' + this.uniqueIdentifier);
       this.pdfFromUniqueIdentifier(this.uniqueIdentifier);
     }
+    toolbarService.hide();
   }
 
   ngOnInit() {

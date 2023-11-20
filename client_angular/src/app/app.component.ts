@@ -1,4 +1,5 @@
 import { UserService } from './Services/auth/user.service';
+import { ToolbarService } from './Services/toolbar/toolbar.service';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { globalRole } from '@DTOs/roles.enum';
@@ -15,7 +16,8 @@ export class AppComponent {
   constructor
     (
       private userService: UserService,
-      private router: Router
+      private router: Router,
+      public toolbarService: ToolbarService
     )
     {
       // Subscribe to the authentication observable
@@ -30,7 +32,7 @@ export class AppComponent {
     }
 
   ngOnInit() {
-
+    this.toolbarService.show();
   }
 
   logOut() {
