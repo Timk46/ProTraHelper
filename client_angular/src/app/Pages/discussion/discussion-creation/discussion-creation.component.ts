@@ -1,7 +1,7 @@
 import { discussionCreationDTO, discussionNodeNamesDTO } from '@DTOs/discussionCreation.dto';
 import { Component, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CreationService } from 'src/app/Services/discussion/creation.service';
+import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
 import { DiscussionDataService } from 'src/app/Services/discussion/discussion-data.service';
 
 @Component({
@@ -31,7 +31,7 @@ export class DiscussionCreationComponent {
 
   funnyWords: string[] = ["Narwal", "Quokka", "Axolotl", "Blobfisch", "Pangolin", "Wombat", "Kakapo", "Fuchskusu", "Gibbon", "Tapir", "Schnabeltier", "Alpaka", "Koala", "Lemming", "Marmelade", "Muffin", "Pudding", "Schokolade", "Zimtstern", "Donut", "Einhorn", "Flamingo", "Giraffe", "Hummel", "Igel", "Jaguar", "Kolibri", "Lama", "Maulwurf", "Nashorn", "Otter", "Pinguin", "Qualle", "Raubkatze", "Seestern", "Tukan", "Uhu", "Vogelspinne", "Yak", "Zebra"]
 
-  constructor(route: ActivatedRoute, private discussionDataService: DiscussionDataService, private creationService: CreationService, private router: Router) {
+  constructor(route: ActivatedRoute, private discussionDataService: DiscussionDataService, private creationService: DiscussionCreationService, private router: Router) {
     route.params.subscribe(params => {
       console.log('got params');
       this.discussionData.conceptNodeId = Number(params['conceptNodeId']) || -1;

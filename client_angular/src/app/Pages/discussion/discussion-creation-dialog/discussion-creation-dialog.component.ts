@@ -1,7 +1,7 @@
 import { discussionCreationDTO, discussionNodeNamesDTO } from '@DTOs/index';
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { CreationService } from 'src/app/Services/discussion/creation.service';
+import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
 import { DiscussionDataService } from 'src/app/Services/discussion/discussion-data.service';
 
 @Component({
@@ -32,7 +32,7 @@ export class DiscussionCreationDialogComponent {
     public dialogRef: MatDialogRef<DiscussionCreationDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public reqDiscussionData: discussionCreationDTO,
     private discussionDataService: DiscussionDataService,
-    private creationService: CreationService,
+    private creationService: DiscussionCreationService,
     ) {
       this.discussionData = reqDiscussionData;
       this.discussionDataService.getNodeNames(reqDiscussionData.conceptNodeId, reqDiscussionData.contentNodeId, reqDiscussionData.contentElementId).subscribe(data => {

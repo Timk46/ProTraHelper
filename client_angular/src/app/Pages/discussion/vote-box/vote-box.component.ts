@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { discussionMessageVoteCreationDTO, discussionMessageVoteDTO } from '@DTOs/index';
-import { CreationService } from 'src/app/Services/discussion/creation.service';
+import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
 import { DiscussionDataService } from 'src/app/Services/discussion/discussion-data.service';
 
 @Component({
@@ -23,7 +23,7 @@ export class VoteBoxComponent {
     userVoteStatus: 0
   }
 
-  constructor(private discussionDataService: DiscussionDataService, private creationService: CreationService) { }
+  constructor(private discussionDataService: DiscussionDataService, private creationService: DiscussionCreationService) { }
 
   /**
    * Gets the vote data for the message

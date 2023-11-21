@@ -2,7 +2,7 @@ import { discussionMessageCreationDTO } from '@DTOs/discussionCreation.dto';
 import { AnonymousUserDTO } from '@DTOs/user.dto';
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { TinymceComponent } from 'src/app/Pages/tinymce/tinymce.component';
-import { CreationService } from 'src/app/Services/discussion/creation.service';
+import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
 
 @Component({
   selector: 'app-comment-creation',
@@ -25,7 +25,7 @@ export class CommentCreationComponent {
     anonymousName: 'dummy'
   }
 
-  constructor(private creationService: CreationService) { }
+  constructor(private creationService: DiscussionCreationService) { }
 
   /**
    * Handles the expansion of the answer box
