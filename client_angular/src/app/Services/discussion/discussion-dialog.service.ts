@@ -1,15 +1,16 @@
-import { ContentDTO, discussionCreationDTO } from '@DTOs/index';
+import { ContentDTO, discussionCreationDTO, discussionFilterContentNodeDTO } from '@DTOs/index';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { CreationDialogComponent } from 'src/app/Pages/discussion/creation-dialog/creation-dialog.component';
-import { DiscussionCreationDialogComponent } from 'src/app/Pages/discussion/discussion-creation-dialog/discussion-creation-dialog.component';
+import { DiscussionCreationComponent } from 'src/app/Pages/Discussion/discussion-creation/discussion-creation.component';
+import { DiscussionPrecreationComponent } from 'src/app/Pages/Discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
+import { DiscussionListService } from './discussion-list.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DiscussionDialogService {
 
-  constructor(private dialog: MatDialog) { }
+  constructor(private dialog: MatDialog, private listService: DiscussionListService) { }
 
   /**
    * Opens the discussion creation dialog. The dialog is used to choose a content node for the discussion.
@@ -18,16 +19,18 @@ export class DiscussionDialogService {
    * @param contentNodes
    * @param userId
    */
-  openContentSelection(conceptNode: number, contentNodes: ContentDTO[], userId: number){
-    const dialogRef = this.dialog.open(CreationDialogComponent, {
-      width: '40%',
-      data: contentNodes
-    });
+  openContentSelection(conceptNode: number, userId: number = 1){ //TODO: replace userId with auth
+    this.listService.getFilterContentNodes(conceptNode).subscribe(contentNodes => {
+      const dialogRef = this.dialog.open(DiscussionPrecreationComponent, {
+        width: '40%',
+        data: contentNodes
+      });
 
-    dialogRef.afterClosed().subscribe((result: ContentDTO) => {
-      if (result) {
-        this.openDiscussionCreation(conceptNode, result.contentNodeId, -1, userId);
-      }
+      dialogRef.afterClosed().subscribe((result: discussionFilterContentNodeDTO) => {
+        if (result) {
+          this.openDiscussionCreation(conceptNode, result.id, -1);
+        }
+      });
     });
   }
 
@@ -35,11 +38,8 @@ export class DiscussionDialogService {
    * Opens the discussion creation dialog. Here the user can create a discussion for the given concept and content node
    * @param discussionData
    */
-  openDiscussionCreation(conceptNodeId: number, contentNodeId: number, contentElementId: number, userId: number = -1){
-    if (userId == -1) {
-      throw new Error("DiscussionDialogService: userId is not set. Please rewrite this function when auth is implemented");
-    }
-    const dialogRef = this.dialog.open(DiscussionCreationDialogComponent, {
+  openDiscussionCreation(conceptNodeId: number, contentNodeId: number, contentElementId: number, userId: number = 1){ //TODO: replace userId with auth
+    const dialogRef = this.dialog.open(DiscussionCreationComponent, {
       width: '50%',
       panelClass: 'discussionDialog',
       //height: '95%',
@@ -58,7 +58,7 @@ export class DiscussionDialogService {
       if (result && result != -1) {
         // do something with the selected content node
         console.log("created discussion id: " + result);
-        const url = `/discussion-page/${result}`;
+        const url = `/discussion-view/${result}`;
         window.open(url, "_blank");
       } else {
         console.log("no discussion created");

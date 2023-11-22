@@ -4,7 +4,7 @@ import { AnonymousUserDTO, creationResponseDTO, discussionCreationDTO, discussio
 import { debounce } from 'rxjs';
 
 const debug: boolean = true; // set this to false to disable console logs
-@Controller('discussion')
+@Controller('discussionOLD')
 export class DiscussionController {
 
 

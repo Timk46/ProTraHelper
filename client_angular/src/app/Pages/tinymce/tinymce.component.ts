@@ -54,6 +54,14 @@ export class TinymceComponent implements AfterViewInit {
   }
 
   /**
+   * Set the content of the editor
+   * @param content the content to set
+   */
+  setContent(content: string): void {
+    tinymce.get("editor").setContent(content);
+  }
+
+  /**
    * Destroys the editor
    */
   destroy(): void {

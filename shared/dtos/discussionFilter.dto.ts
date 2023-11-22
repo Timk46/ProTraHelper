@@ -5,3 +5,9 @@ export interface discussionFilterDTO {
     onlySolved: boolean,
     searchString: string
 }
+
+export interface discussionFilterContentNodeDTO {
+    id: number,
+    name: string,
+    description: string,
+}

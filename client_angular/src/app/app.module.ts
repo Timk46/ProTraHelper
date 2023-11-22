@@ -8,7 +8,6 @@ import { GraphComponent } from './Pages/graph/graph.component';
 import { ContentBoardComponent } from './Pages/contentBoard/contentBoard.component';
 import { DashboardComponent } from './Pages/dashboard/dashboard.component';
 import { ConceptOverviewComponent } from './Pages/conceptOverview/conceptOverview.component';
-import { DiscussionComponent } from './Pages/discussion/discussion.component';
 import { CodeTaskComponent } from './Pages/contentView/contentElement/codeTask/codeTask.component';
 import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer/pdfViewer.component';
 import { McQuizComponent } from './Pages/contentView/contentElement/mcQuiz/mcQuiz.component';
@@ -22,20 +21,18 @@ import { ContentViewComponent } from './Pages/contentView/contentView.component'
 import { CreateConceptDialogComponent } from './Pages/graph/graph-dialogs/create-concept-dialog/create-concept-dialog.component';
 import { VideoViewerComponent } from './Pages/contentView/contentElement/videoViewer/videoViewer.component';
 import { CompetenciesComponent } from './Pages/competencies/competencies.component';
-import { DiscussionFilterComponent } from './Pages/discussion/discussion-filter/discussion-filter.component';
-import { DiscussionListComponent } from './Pages/discussion/discussion-list/discussion-list.component';
-import { QuestionComponent } from './Pages/discussion/discussion-list/question/question.component';
-import { VoteBoxComponent } from './Pages/discussion/vote-box/vote-box.component';
-import { FilterMenuComponent } from './Pages/discussion/discussion-filter/filter-menu/filter-menu.component';
-import { DiscussionPageComponent } from './Pages/discussion/discussion-page/discussion-page.component';
-import { DiscussionCreationComponent } from './Pages/discussion/discussion-creation/discussion-creation.component';
-import { DiscussionPageQuestionComponent } from './Pages/discussion/discussion-page/discussion-page-question/discussion-page-question.component';
-import { DiscussionPageCommentComponent } from './Pages/discussion/discussion-page/discussion-page-comment/discussion-page-comment.component';
-import { CommentCreationComponent } from './Pages/discussion/discussion-page/comment-creation/comment-creation.component';
-import { CreationDialogComponent } from './Pages/discussion/creation-dialog/creation-dialog.component';
 import { TinymceComponent } from './Pages/tinymce/tinymce.component';
 import { EditorModule, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
-import { DiscussionCreationDialogComponent } from './Pages/discussion/discussion-creation-dialog/discussion-creation-dialog.component';
+import { DiscussionListComponent } from './Pages/Discussion/discussion-list/discussion-list.component';
+import { DiscussionViewComponent } from './Pages/Discussion/discussion-view/discussion-view.component';
+import { DiscussionFilterComponent } from './Pages/Discussion/discussion-list/discussion-filter/discussion-filter.component';
+import { DiscussionListItemComponent } from './Pages/Discussion/discussion-list/discussion-list-item/discussion-list-item.component';
+import { DiscussionVoteboxComponent } from './Pages/Discussion/discussion-votebox/discussion-votebox.component';
+import { DiscussionViewQuestionComponent } from './Pages/Discussion/discussion-view/discussion-view-question/discussion-view-question.component';
+import { DiscussionViewMessageComponent } from './Pages/Discussion/discussion-view/discussion-view-message/discussion-view-message.component';
+import { DiscussionViewCreateComponent } from './Pages/Discussion/discussion-view/discussion-view-create/discussion-view-create.component';
+import { DiscussionCreationComponent } from './Pages/Discussion/discussion-creation/discussion-creation.component';
+import { DiscussionPrecreationComponent } from './Pages/Discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
 
 
 
@@ -45,7 +42,6 @@ import { DiscussionCreationDialogComponent } from './Pages/discussion/discussion
     ContentBoardComponent,
     DashboardComponent,
     ConceptOverviewComponent,
-    DiscussionComponent,
     CodeTaskComponent,
     PdfViewerComponent,
     McQuizComponent,
@@ -55,19 +51,17 @@ import { DiscussionCreationDialogComponent } from './Pages/discussion/discussion
     CreateConceptDialogComponent,
     VideoViewerComponent,
     CompetenciesComponent,
-    DiscussionFilterComponent,
-    DiscussionListComponent,
-    QuestionComponent,
-    VoteBoxComponent,
-    FilterMenuComponent,
-    DiscussionPageComponent,
-    DiscussionCreationComponent,
-    DiscussionPageQuestionComponent,
-    DiscussionPageCommentComponent,
-    CommentCreationComponent,
-    CreationDialogComponent,
     TinymceComponent,
-    DiscussionCreationDialogComponent
+    DiscussionListComponent,
+    DiscussionViewComponent,
+    DiscussionFilterComponent,
+    DiscussionListItemComponent,
+    DiscussionVoteboxComponent,
+    DiscussionViewQuestionComponent,
+    DiscussionViewMessageComponent,
+    DiscussionViewCreateComponent,
+    DiscussionCreationComponent,
+    DiscussionPrecreationComponent,
   ],
   imports: [
     BrowserModule,

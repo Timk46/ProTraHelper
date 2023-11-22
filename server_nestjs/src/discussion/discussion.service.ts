@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { discussionDTO, discussionsDTO, discussionMessageVoteDTO, discussionMessageDTO, discussionMessagesDTO, nodeNameDTO, AnonymousUserDTO, creationResponseDTO, discussionFilterDTO, discussionNodeNamesDTO, discussionCreationDTO, discussionMessageCreationDTO, discussionMessageVoteCreationDTO } from '@DTOs/index';
+import { discussionDTO, discussionsDTO, discussionMessageVoteDTO, discussionMessageDTO, discussionMessagesDTO, nodeNameDTO, AnonymousUserDTO, creationResponseDTO, discussionFilterDTO, discussionNodeNamesDTO, discussionCreationDTO, discussionMessageCreationDTO, discussionMessageVoteCreationDTO, discussionFilterContentNodeDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { get } from 'http';
 import { filter } from 'rxjs';
@@ -44,6 +44,40 @@ export class DiscussionService {
       userVoteStatus: userVote ? (userVote.isUpvote ? 1 : -1) : 0
     }
     return voteData;
+  }
+
+  /**
+   * Returns the content nodes that are trained by the given concept node - used for the discussion filter
+   * @param conceptNodeId
+   * @returns discussionFilterContentNodeDTO[]
+   */
+  async getFilterContentNodes(conceptNodeId: number) : Promise<discussionFilterContentNodeDTO[]> {
+    const contentNodes = await this.prisma.training.findMany({
+      where: {
+        conceptNodeId: conceptNodeId
+      },
+      select: {
+        contentNode: {
+          select: {
+            id: true,
+            name: true,
+            description: true
+          }
+        }
+      }
+    });
+
+    if (!contentNodes) {
+      throw new Error('Content nodes not found');
+    }
+
+    return contentNodes.map(contentNode => {
+      return {
+        id: contentNode.contentNode.id,
+        name: contentNode.contentNode.name,
+        description: contentNode.contentNode.description
+      }
+    });
   }
 
   /** This function creates or modifies a vote for a given message

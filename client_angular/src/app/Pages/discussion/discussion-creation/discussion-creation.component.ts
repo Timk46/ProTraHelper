@@ -1,8 +1,7 @@
 import { discussionCreationDTO, discussionNodeNamesDTO } from '@DTOs/discussionCreation.dto';
-import { Component, Input } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, Inject, Input } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
-import { DiscussionDataService } from 'src/app/Services/discussion/discussion-data.service';
 
 @Component({
   selector: 'app-discussion-creation',
@@ -29,20 +28,16 @@ export class DiscussionCreationComponent {
     isSolved: false
   };
 
-  funnyWords: string[] = ["Narwal", "Quokka", "Axolotl", "Blobfisch", "Pangolin", "Wombat", "Kakapo", "Fuchskusu", "Gibbon", "Tapir", "Schnabeltier", "Alpaka", "Koala", "Lemming", "Marmelade", "Muffin", "Pudding", "Schokolade", "Zimtstern", "Donut", "Einhorn", "Flamingo", "Giraffe", "Hummel", "Igel", "Jaguar", "Kolibri", "Lama", "Maulwurf", "Nashorn", "Otter", "Pinguin", "Qualle", "Raubkatze", "Seestern", "Tukan", "Uhu", "Vogelspinne", "Yak", "Zebra"]
-
-  constructor(route: ActivatedRoute, private discussionDataService: DiscussionDataService, private creationService: DiscussionCreationService, private router: Router) {
-    route.params.subscribe(params => {
-      console.log('got params');
-      this.discussionData.conceptNodeId = Number(params['conceptNodeId']) || -1;
-      this.discussionData.contentNodeId = Number(params['contentNodeId']) || -1;
-      this.discussionData.contentElementId = Number(params['contentElementId']) || -1;
-      console.log(this.discussionData);
-      discussionDataService.getNodeNames(this.discussionData.conceptNodeId, this.discussionData.contentNodeId, this.discussionData.contentElementId).subscribe(data => {
+  constructor(
+    public dialogRef: MatDialogRef<DiscussionCreationComponent>,
+    @Inject(MAT_DIALOG_DATA) public reqDiscussionData: discussionCreationDTO,
+    private creationService: DiscussionCreationService,
+    ) {
+      this.discussionData = reqDiscussionData;
+      this.creationService.getNodeNames(reqDiscussionData.conceptNodeId, reqDiscussionData.contentNodeId, reqDiscussionData.contentElementId).subscribe(data => {
         this.discussionNodeNames = data;
       });
-    });
-  }
+    }
 
   /**
    * Submits the discussion creation form by creating an anonymous user, a discussion and a message
@@ -60,12 +55,11 @@ export class DiscussionCreationComponent {
    */
   onSubmit(title: string, text: string) {
     console.log("Submit: " + title + text);
-    if (title != "" && text != "" && this.userId != -1 && this.discussionData.id == -1) {
+    if (title != "" && text != "" && this.discussionData.authorId != -1) {
       this.discussionData.title = title;
-      const randomSurname = this.funnyWords[Math.floor(Math.random() * this.funnyWords.length)];
-      const randomName = this.funnyWords[Math.floor(Math.random() * this.funnyWords.length)];
-      this.creationService.createAnonymousUser(this.userId, (randomSurname + "s " + randomName)).subscribe(data => {
-        this.discussionData.authorId = data.id;
+
+      this.creationService.createAnonymousUser(this.discussionData.authorId).subscribe(data => {
+        this.discussionData.authorId = data.id; //rewrite needed when auth is implemented
 
         this.creationService.createDiscussion(this.discussionData).subscribe(discussionData => {
          this.discussionData = discussionData;
@@ -77,14 +71,13 @@ export class DiscussionCreationComponent {
               discussionId: discussionData.id,
               isInitiator: true,
               isSolution: false
-            }).subscribe(messageData => {
-              this.router.navigate(['/discussion-page/' + discussionData.id]);
+            }).subscribe( () => {
+              this.dialogRef.close(this.discussionData.id);
             });
           }
-
         });
+
       });
     }
   }
-
 }

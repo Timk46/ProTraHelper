@@ -4,16 +4,15 @@ import { ContentBoardComponent } from './Pages/contentBoard/contentBoard.compone
 import { AppComponent } from './app.component';
 import { DashboardComponent } from './Pages/dashboard/dashboard.component';
 import { ConceptOverviewComponent } from './Pages/conceptOverview/conceptOverview.component';
-import { DiscussionComponent } from './Pages/discussion/discussion.component';
 import { CodeTaskComponent } from './Pages/contentView/contentElement/codeTask/codeTask.component';
 import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer/pdfViewer.component';
 import { McQuizComponent } from './Pages/contentView/contentElement/mcQuiz/mcQuiz.component';
 import { GraphComponent } from './Pages/graph/graph.component';
-import { DiscussionPageComponent } from './Pages/discussion/discussion-page/discussion-page.component';
-import { DiscussionCreationComponent } from './Pages/discussion/discussion-creation/discussion-creation.component';
+import { DiscussionViewComponent } from './Pages/Discussion/discussion-view/discussion-view.component';
 
 // just for testing
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
+
 
 
 const routes: Routes = [
@@ -22,13 +21,11 @@ const routes: Routes = [
   { path: 'contentBoard', component: ContentBoardComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'conceptOverview', component: ConceptOverviewComponent },
-  { path: 'discussion', component: DiscussionComponent },
   { path: 'codeTask', component: CodeTaskComponent },
   { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent },
   { path: 'mcQuiz', component: McQuizComponent },
   { path: 'graph', component: GraphComponent },
-  { path: 'discussion-page/:discussionId', component: DiscussionPageComponent },
-  { path: 'discussion-creation/:conceptNodeId/:contentNodeId/:contentElementId', component: DiscussionCreationComponent },
+  { path: 'discussion-view/:discussionId', component: DiscussionViewComponent },
 
   // just for testing
   { path: 'file-upload', component: FileUploadComponent },

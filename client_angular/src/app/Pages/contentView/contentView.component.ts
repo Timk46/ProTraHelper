@@ -38,7 +38,7 @@ export class ContentViewComponent implements OnInit {
   }
 
   onCreateDiscussion(contentElementId: number) {
-    this.discussionDialogService.openDiscussionCreation(this.activeConceptNodeId, this.contentViewData.contentNodeId, contentElementId, 1); //TODO: rewrite when auth is implemented
+    this.discussionDialogService.openDiscussionCreation(this.activeConceptNodeId, this.contentViewData.contentNodeId, contentElementId);
     this.dialogRef.close();
   }
 

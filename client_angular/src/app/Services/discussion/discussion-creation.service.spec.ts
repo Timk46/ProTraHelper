@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { DiscussionCreationService } from './discussion-creation.service';
 
-describe('CreationServiceService', () => {
+describe('DiscussionCreationService', () => {
   let service: DiscussionCreationService;
 
   beforeEach(() => {

@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DiscussionCreationComponent as DiscussionCreationComponent } from './discussion-creation.component';
+import { DiscussionCreationComponent } from './discussion-creation.component';
 
-describe('QuestionCreationComponent', () => {
+describe('DiscussionCreationComponent', () => {
   let component: DiscussionCreationComponent;
   let fixture: ComponentFixture<DiscussionCreationComponent>;
 
