@@ -10,8 +10,8 @@ import { McQuizComponent } from './Pages/contentView/contentElement/mcQuiz/mcQui
 import { GraphComponent } from './Pages/graph/graph.component';
 import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
 import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
-import { DiscussionViewComponent } from './Pages/Discussion/discussion-view/discussion-view.component';
-import { DiscussionListComponent } from './Pages/Discussion/discussion-list/discussion-list.component';
+import { DiscussionViewComponent } from './Pages/discussion/discussion-view/discussion-view.component';
+import { DiscussionListComponent } from './Pages/discussion/discussion-list/discussion-list.component';
 // just for testing
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 import { LoginComponent } from './Pages/login/login.component';

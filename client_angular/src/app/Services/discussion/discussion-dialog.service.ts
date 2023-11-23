@@ -1,8 +1,8 @@
 import { ContentDTO, discussionCreationDTO, discussionFilterContentNodeDTO } from '@DTOs/index';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { DiscussionCreationComponent } from 'src/app/Pages/Discussion/discussion-creation/discussion-creation.component';
-import { DiscussionPrecreationComponent } from 'src/app/Pages/Discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
+import { DiscussionCreationComponent } from 'src/app/Pages/discussion/discussion-creation/discussion-creation.component';
+import { DiscussionPrecreationComponent } from 'src/app/Pages/discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
 import { DiscussionListService } from './discussion-list.service';
 
 @Injectable({

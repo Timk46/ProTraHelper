@@ -1,0 +1,41 @@
+.question-box {
+  height: 150px;
+  max-height: 70vh;
+ /*  padding-left:14px; /* please adjust when changing font size
+  padding-top: 14px; /* please adjust when changing font size
+ */
+  font-size: 14px;
+  border-radius: 10px;
+
+  border: 1px solid #c9c9c9;
+  background-color: #ffffff;
+  box-shadow: 0 0 5px #ccc;
+}
+
+.question-box:hover {
+  box-shadow: 0 0 5px #aaa;
+  border: 1px solid #868686;
+  cursor: pointer;
+}
+
+.question-row {
+  display: flex;
+  gap: 10px;
+}
+
+.padding-box {
+  padding-left: 14px;
+  padding-top: 14px;
+}
+
+.vertical-line {
+  border-left: 1px solid #acacac;
+  height: 150px; /* equals the max hight of question-box */
+}
+
+.vertical-container {
+  display: flex;
+  flex-direction: column; /* Anordnung der Elemente vertikal */
+  justify-content: space-between;
+  padding-top: 14px;
+}

@@ -1,0 +1,26 @@
+<!-- <h1>{{ discussionData.title }}</h1> -->
+<div class="question-box">
+  <div class="question-row">
+    <div style="padding-left: 10px; padding-top: 14px">
+      <app-discussion-votebox [messageId]="messageData.messageId" [isSolution]="messageData.isSolution"></app-discussion-votebox>
+    </div>
+
+    <div class="vertical-line"></div>
+
+    <div class="vertical-container">
+      <div>
+        <div class="question-row">
+          <mat-icon>account_circle</mat-icon>
+          <div>
+            <p style="margin: 0px;">Beitrag von {{discussionData.authorName}} • {{readableDate}}</p>
+            <p style="margin: 0 0 10px;">Verbundener Inhalt: {{conceptNodeName}} • {{discussionData.contentNodeName}}</p>
+          </div>
+        </div>
+        <!-- <p>{{messageData.messageText}}</p> -->
+        <div [innerHTML]="sanitizeContent(messageData.messageText)"></div>
+      </div>
+      <br>
+      <p>{{discussionData.commentCount}} {{discussionData.commentCount == 1 ? 'Kommentar' : 'Kommentare'}}</p>
+    </div>
+  </div>
+</div>

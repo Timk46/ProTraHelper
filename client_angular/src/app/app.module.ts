@@ -30,16 +30,16 @@ import { AuthInterceptor } from "./Services/auth/auth-interceptor.service";
 import { LoggedInGuard } from "./Guards/is-logged-in.guard";
 import { TinymceComponent } from './Pages/tinymce/tinymce.component';
 import { EditorModule, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
-import { DiscussionListComponent } from './Pages/Discussion/discussion-list/discussion-list.component';
-import { DiscussionViewComponent } from './Pages/Discussion/discussion-view/discussion-view.component';
-import { DiscussionFilterComponent } from './Pages/Discussion/discussion-list/discussion-filter/discussion-filter.component';
-import { DiscussionListItemComponent } from './Pages/Discussion/discussion-list/discussion-list-item/discussion-list-item.component';
-import { DiscussionVoteboxComponent } from './Pages/Discussion/discussion-votebox/discussion-votebox.component';
-import { DiscussionViewQuestionComponent } from './Pages/Discussion/discussion-view/discussion-view-question/discussion-view-question.component';
-import { DiscussionViewMessageComponent } from './Pages/Discussion/discussion-view/discussion-view-message/discussion-view-message.component';
-import { DiscussionViewCreateComponent } from './Pages/Discussion/discussion-view/discussion-view-create/discussion-view-create.component';
-import { DiscussionCreationComponent } from './Pages/Discussion/discussion-creation/discussion-creation.component';
-import { DiscussionPrecreationComponent } from './Pages/Discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
+import { DiscussionListComponent } from './Pages/discussion/discussion-list/discussion-list.component';
+import { DiscussionViewComponent } from './Pages/discussion/discussion-view/discussion-view.component';
+import { DiscussionFilterComponent } from './Pages/discussion/discussion-list/discussion-filter/discussion-filter.component';
+import { DiscussionListItemComponent } from './Pages/discussion/discussion-list/discussion-list-item/discussion-list-item.component';
+import { DiscussionVoteboxComponent } from './Pages/discussion/discussion-votebox/discussion-votebox.component';
+import { DiscussionViewQuestionComponent } from './Pages/discussion/discussion-view/discussion-view-question/discussion-view-question.component';
+import { DiscussionViewMessageComponent } from './Pages/discussion/discussion-view/discussion-view-message/discussion-view-message.component';
+import { DiscussionViewCreateComponent } from './Pages/discussion/discussion-view/discussion-view-create/discussion-view-create.component';
+import { DiscussionCreationComponent } from './Pages/discussion/discussion-creation/discussion-creation.component';
+import { DiscussionPrecreationComponent } from './Pages/discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
 
 
 
