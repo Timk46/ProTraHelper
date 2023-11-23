@@ -1,11 +1,11 @@
 import { injectable } from 'inversify';
-import { ActionHandlerRegistry, Expandable, LocalModelSource, TYPES, VBoxLayouter } from 'sprotty';
+import { ActionHandlerRegistry, Expandable, LocalModelSource, SShapeElementImpl, TYPES, VBoxLayouter } from 'sprotty';
 import { ConceptGraphDTO, ConceptNodeDTO } from '@DTOs/index';
 import { SprottyConceptNode } from './sprottyModels.interface'
 //import { SModelIndex } from 'sprotty-protocol/lib/utils/model-utils';
 import {
   Action, CollapseExpandAction, CollapseExpandAllAction, SCompartment, SEdge, SGraph, SLabel,
-  SModelElement, SModelIndex, SModelRoot, SNode, SelectAction, CenterAction, Point, SPort, CreateElementAction
+  SModelIndex, SModelRoot, SNode, SelectAction, CenterAction, SShapeElement
 } from 'sprotty-protocol';
 import { GraphCommunicationService } from 'src/app/Services/graphCommunication.service';
 import { GraphDataService } from 'src/app/Services/graph-data.service';
@@ -15,6 +15,7 @@ import { NoDataRowOutlet } from '@angular/cdk/table';
 import { CreateConceptAction, DeleteConceptAction } from './actions';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateConceptDialogComponent } from '../graph-dialogs/create-concept-dialog/create-concept-dialog.component';
+import { has } from 'markdown-it/lib/common/utils';
 
 
 
@@ -98,11 +99,12 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
     // add first layer of nodes
     this.flatGraph.nodeMap[this.flatGraph.trueRootId].childIds.forEach(childId => {
-      const flatChild = this.flatGraph.nodeMap[childId];
+      const flatChild: ConceptNodeDTO = this.flatGraph.nodeMap[childId];
       if (flatChild) {
         const expanded = flatChild.expanded !== undefined ? flatChild.expanded : true;
         const level = flatChild.level ? flatChild.level : 0;
-        const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId);
+        const hasChildren = flatChild.childIds.length > 0;
+        const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId, hasChildren);
         graph.children!.push(newChild);
         if (expanded) {
           this.addChildren(newChild, 'concept');
@@ -139,7 +141,8 @@ export class ConceptGraphModelSource extends LocalModelSource {
             newChild = this.createMiniConceptNode("node_" + flatChild.databaseId, flatChild.name, level, flatChild.databaseId);
           }
           else {
-            newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId);
+            const hasChildren = flatChild.childIds.length > 0;
+            newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId, hasChildren);
           }
           parentNode.children!.push(newChild);
 
@@ -214,7 +217,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
         this.addChildren(node, 'concept');
         await this.updateModel();
         this.updateExpandedState(node, true);
-        this.actionDispatcher.dispatch(CenterAction.create([id], {animate: true}))
+        this.actionDispatcher.dispatch(CenterAction.create([id], { animate: true }))
       }
     }
 
@@ -304,9 +307,9 @@ export class ConceptGraphModelSource extends LocalModelSource {
    * @param databaseId id of this node in the database
    * @returns a ConceptNode
    */
-  createConceptNode(id: string, name: string, expanded: boolean, level: number, databaseId: number): SprottyConceptNode {
+  createConceptNode(id: string, name: string, expanded: boolean, level: number, databaseId: number, hasChildren: boolean): SprottyConceptNode {
     const node: SNode & SprottyConceptNode & Expandable = {
-      type: "node:concept" ,
+      type: "node:concept",
       id: id,
       databaseId: databaseId,
       name: name,
@@ -316,19 +319,34 @@ export class ConceptGraphModelSource extends LocalModelSource {
       children: [],
       //layout: 'hbox'
     };
-    node.children = [
+    node.children = [];
+
+    //expand/collapse button
+    if (hasChildren) {
+      node.children.push(<SShapeElement>{
+        id: 'button_' + id,
+        type: 'button:expand',
+        position: { x: 5, y: 10 },
+      })
+    }
+
+    //header
+    node.children.push(
       <SLabel>{
         id: 'header_' + id,
         type: 'label:heading',
 
         text: name,
-      },
+      });
+
+    //level
+    node.children.push(
       <SLabel>{
         id: 'level_' + id,
         type: 'label:text',
         text: 'Level: ' + level.toString(),
       },
-    ];
+    );
 
     return node;
   }

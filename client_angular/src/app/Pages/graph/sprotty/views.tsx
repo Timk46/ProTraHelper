@@ -84,6 +84,20 @@ export class MiniConceptView extends RectangularNodeView {
 }
 
 @injectable()
+export class CustomExpandButtonView implements IView {
+    render(button: SButtonImpl, context: RenderingContext): VNode {
+        const expandable = findParentByFeature(button, isExpandable);
+        const path = expandable !== undefined && expandable.expanded
+            ? 'M 1,5 L 8,12 L 15,5 Z'
+            : 'M 1,1 L 8,8 L 1,15 Z';
+        return <g class-sprotty-button="{true}" class-enabled="{button.enabled}">
+            <rect x={0} y={0} width={16} height={16} opacity={0}></rect>
+            <path d={path}></path>
+        </g>;
+    }
+}
+
+@injectable()
 export class HeaderLabelView extends SLabelView {
     override render(label: Readonly<SLabelImpl>, context: RenderingContext): VNode {
         const vnode = <text x={10} y={30}>{label.text}</text>

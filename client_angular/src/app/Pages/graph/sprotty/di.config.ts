@@ -3,8 +3,8 @@ import { configureModelElement, configureViewerOptions, loadDefaultModules, Loca
     PolylineEdgeView, SCompartmentView, SCompartmentImpl, SEdgeImpl, SGraphImpl, SGraphView, SLabelImpl, SLabelView, 
     SNodeImpl, TYPES, RectangularNode, expandFeature, nameFeature, SButtonImpl, ExpandButtonView, 
     configureButtonHandler, SRoutingHandleImpl, SRoutingHandleView, SModelElementImpl, SPortImpl, ConsoleLogger, 
-    LogLevel, IContextMenuServiceProvider, contextMenuModule, ContextMenuProviderRegistry } from 'sprotty';
-import { ConceptNodeView, CustomCollapseExpandView, HeaderLabelView, MiniConceptView, PortViewWithExternalLabel, TextLabelView} from './views';
+    LogLevel, IContextMenuServiceProvider, contextMenuModule, ContextMenuProviderRegistry, moveFeature } from 'sprotty';
+import { ConceptNodeView, CustomCollapseExpandView, CustomExpandButtonView, HeaderLabelView, MiniConceptView, PortViewWithExternalLabel, TextLabelView} from './views';
 import { ConceptGraphModelSource } from './model-source';
 import ElkConstructor, { LayoutOptions } from 'elkjs';
 import {
@@ -52,16 +52,18 @@ export default (containerId: string) => {
         const context = { bind, unbind, isBound, rebind };
         configureModelElement(context, 'graph', SGraphImpl, SGraphView);
         configureModelElement(context, 'node:concept', RectangularNode, ConceptNodeView,{
-            enable: [expandFeature]
+            enable: [expandFeature], disable: [moveFeature]
         });
-        configureModelElement(context, 'node:mini-concept', RectangularNode, MiniConceptView);
+        configureModelElement(context, 'node:mini-concept', RectangularNode, MiniConceptView, {
+            disable: [moveFeature]
+        });
         configureModelElement(context, 'edge', SEdgeImpl, PolylineEdgeView);
         configureModelElement(context, 'label:heading', SLabelImpl, SLabelView)
         configureModelElement(context, 'label:text', SLabelImpl, SLabelView)
         //configureModelElement(context, 'comp:comp', SCompartment, SCompartmentView)
         
         //collapse expand button
-        // configureModelElement(context, 'label:button:expand', SButton, CustomCollapseExpandView); //not used
+        configureModelElement(context, 'button:expand', SButtonImpl, CustomExpandButtonView); //not used
         // configureButtonHandler({bind, isBound}, 'label:button:expand', CustomButtonHandler); //not used
 
         // if(0){
@@ -91,7 +93,10 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
     protected override graphOptions(sgraph: SGraphP, index: SModelIndex): LayoutOptions | undefined {
         return {
             'org.eclipse.elk.algorithm': 'org.eclipse.elk.layered',
-            'org.eclipse.elk.spacing.nodeNode': '500', //doesn't work
+            //'org.eclipse.elk.spacing.nodeNode': '500', //doesn't work
+            //'org.eclipse.elk.edgeRouting': 'POLYLINE',
+            //'org.eclipse.elk.hierarchyHandling': 'INCLUDE_CHILDREN',
+            //'org.eclipse.elk.layered.considerModelOrder.strategy': 'PREFER_NODES',
         };
     }
 
@@ -100,6 +105,7 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
             'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS MINIMUM_SIZE',
             //'org.eclipse.elk.nodeSize.minimum': '(40, 40)', // doesn't work
             'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
+            'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=20, right=20]',
             'org.eclipse.elk.spacing.labelLabel': '5',
             'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '50',
         };
