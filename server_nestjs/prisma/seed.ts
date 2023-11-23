@@ -999,13 +999,13 @@ await prisma.file.create({
     },
   });
 
-  // an upvote
-  await prisma.vote.create({
-    data: {
-      author: { connect: { id: anonymousAdmin.id } },
-      message: { connect: { id: exampleQuestion.id } },
-    },
-  });
+ // an upvote
+ await prisma.vote.create({
+   data: {
+     user: { connect: { id: adminUser.id } },
+     message: { connect: { id: exampleQuestion.id } },
+   },
+ });
 
   // Import Tasks for Excel
   console.log('Importing Tasks from Excel...');

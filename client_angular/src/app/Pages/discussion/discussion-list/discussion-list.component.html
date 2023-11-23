@@ -1,0 +1,24 @@
+<p>passed active concept node: {{activeConceptNodeId}}</p>
+<app-discussion-filter
+  [activeConceptNodeId]="activeConceptNodeId"
+  (changeFilter)="listDiscussions($event)"
+></app-discussion-filter>
+
+<div class="list-container mat-elevation-z8">
+  <div style="display: flex; flex-direction: row; justify-content: space-between;">
+    <h1>Beiträge</h1>
+    <button mat-raised-button (click)="onNewDiscussion()">Neuen Beitrag erstellen</button>
+  </div>
+
+  <p>FilterData: unset</p>
+  <div class="list-container">
+    <div *ngIf="visibleDiscussions && visibleDiscussions.length > 0">
+      <app-discussion-list-item *ngFor="let question of visibleDiscussions"
+        [questionData]="question"
+        (click)="onQuestionClick(question.id)"></app-discussion-list-item>
+    </div>
+    <p *ngIf="visibleDiscussions.length == 0">Zu diesem Thema/Filter wurden keine Beiträge gefunden. Erstelle den Ersten oder ändere das Thema bzw. den Filter!</p>
+  </div>
+</div>
+
+<!-- TODO: Wechsel zwischen alle und meine Beitraege -->

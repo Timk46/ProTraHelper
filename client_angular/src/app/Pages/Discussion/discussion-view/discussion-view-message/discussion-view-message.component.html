@@ -1,0 +1,22 @@
+<div class="question-box">
+  <div class="question-row">
+    <div style="padding-left: 10px; padding-top: 14px;">
+      <app-discussion-votebox [messageId]="messageData.messageId" [isSolution]="messageData.isSolution"></app-discussion-votebox>
+    </div>
+
+    <div class="vertical-line"></div>
+
+    <div class="vertical-container" style="width: 100%;">
+      <div>
+        <div class="question-row">
+          <mat-icon>account_circle</mat-icon>
+          <p>{{messageData.authorName}}</p>
+          <p>•</p>
+          <p>{{readableDate}}</p>
+        </div>
+        <!-- <p>{{ messageData.messageText }}</p> -->
+        <div [innerHTML]="sanitizeContent(messageData.messageText)"></div>
+      </div>
+    </div>
+  </div>
+</div>

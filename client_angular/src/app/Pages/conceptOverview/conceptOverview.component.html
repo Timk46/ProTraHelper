@@ -7,7 +7,7 @@ active Concept Node Name: {{activeConceptNode.name}} <br>
 
 <mat-tab-group animationDuration="0ms">
   <mat-tab label="Content">
-    <app-contentBoard [contentsForActiveConceptNode]="contentsForActiveConceptNode"></app-contentBoard> <!--Communication to Child-Component-->
+    <app-contentBoard [contentsForActiveConceptNode]="contentsForActiveConceptNode" [activeConceptNodeId]="activeConceptNode.databaseId"></app-contentBoard> <!--Communication to Child-Component-->
   </mat-tab>
 
   <mat-tab label="Aufgaben">
@@ -19,10 +19,7 @@ active Concept Node Name: {{activeConceptNode.name}} <br>
   </mat-tab>
 
   <mat-tab label="Diskussion">
-    <app-discussion
-    [contentsForActiveConceptNode]="contentsForActiveConceptNode"
-    [activeConceptNode]="activeConceptNode"
-    ></app-discussion>
+    <app-discussion-list [activeConceptNodeId]="activeConceptNode.databaseId" ></app-discussion-list>
   </mat-tab>
 </mat-tab-group>
 

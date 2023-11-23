@@ -5,9 +5,16 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphModule } from './graph/graph.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { DiscussionController } from './discussion/discussion.controller';
-import { DiscussionService } from './discussion/discussion.service';
 import { ChatBotModule } from './ai/chat-bot/chat-bot.module';
+import { DiscussionListController } from './discussion/discussion-list/discussion-list.controller';
+import { DiscussionListService } from './discussion/discussion-list/discussion-list.service';
+import { DiscussionDataService } from './discussion/discussion-data/discussion-data.service';
+import { DiscussionVoteService } from './discussion/discussion-vote/discussion-vote.service';
+import { DiscussionVoteController } from './discussion/discussion-vote/discussion-vote.controller';
+import { DiscussionViewController } from './discussion/discussion-view/discussion-view.controller';
+import { DiscussionViewService } from './discussion/discussion-view/discussion-view.service';
+import { DiscussionCreationService } from './discussion/discussion-creation/discussion-creation.service';
+import { DiscussionCreationController } from './discussion/discussion-creation/discussion-creation.controller';
 
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -25,11 +32,11 @@ import { UsersModule } from './users/users.module';
     ChatBotModule],
   controllers: [
     AppController,
-    DiscussionController
+    DiscussionListController, DiscussionVoteController, DiscussionViewController, DiscussionCreationController
   ],
   providers: [
     AppService,
-    DiscussionService,
+    DiscussionListService, DiscussionDataService, DiscussionVoteService, DiscussionViewService, DiscussionCreationService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard, // All Routes are protected by JWTGuard. Users only get Tokens by using CAS of the university
@@ -37,4 +44,5 @@ import { UsersModule } from './users/users.module';
 
   ],
 })
+
 export class AppModule {}

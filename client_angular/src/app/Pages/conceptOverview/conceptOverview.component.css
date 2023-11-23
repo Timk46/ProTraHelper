@@ -16,7 +16,7 @@
   padding:16px;
 
   contain: content;
-  overflow-y: scroll;
+  overflow-y: hidden;
   scrollbar-width: thin;
 
   font-size: 14px;
