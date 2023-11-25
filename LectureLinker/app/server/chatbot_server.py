@@ -86,7 +86,7 @@ async def getAnswer(lecture: str, prompt: Prompt = Body(...)):
     qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
         llm=llm,
         chain_type="stuff",
-        retriever=store.as_retriever(metadata_field_info=metadata_field_info),
+        retriever=store.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": .5, "k": 10}, metadata_field_info=metadata_field_info), # https://python.langchain.com/docs/modules/data_connection/retrievers/vectorstore
         chain_type_kwargs=chain_type_kwargs,
         return_source_documents=True,
         verbose=True
