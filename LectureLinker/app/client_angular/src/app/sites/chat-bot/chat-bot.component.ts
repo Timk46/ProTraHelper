@@ -13,8 +13,7 @@ import { VideoTimeStampComponent } from './video-time-stamp/video-time-stamp.com
 
 export class ChatBotComponent {
   markdownTestString: string =
-    "## Heading level 2\n Italicized text is the *cat's meow*. \n1. First item \n2. Second item \n3. Third item \n4. Fourth item \n" +
-    '```javascript\nvar add2 = function(number) {\n   return number + 2; \n }\n```';
+    "**Test**: Here is an inline note.^[Inlines notes are easier to write, since you don't have to pick an identifier and move down to type the note.]";
   message: ChatBotMessageDTO = {
     id: 12,
     question: this.markdownService.parse(this.markdownTestString),
@@ -32,6 +31,10 @@ export class ChatBotComponent {
     private el: ElementRef,
     private dialog: MatDialog
   ) {}
+
+  ngOnInit(): void {
+    //this.messages.push(this.message);
+  }
 
 
   @HostListener('click', ['$event'])
