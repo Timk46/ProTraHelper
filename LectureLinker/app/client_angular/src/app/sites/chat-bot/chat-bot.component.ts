@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener } from '@angular/core';
 import { ChatBotMessageDTO } from '../../interfaces/chatBot.dto';
 import { ChatBotService } from '../../services/ai/chat-bot.service';
 import { MarkdownService } from '../../services/markdown/markdown.service';
+import { MatDialog } from '@angular/material/dialog';
+import { VideoTimeStampComponent } from './video-time-stamp/video-time-stamp.component';
 
 @Component({
   selector: 'app-chat-bot',
@@ -27,8 +29,24 @@ export class ChatBotComponent {
   constructor(
     private chatBotService: ChatBotService,
     private markdownService: MarkdownService,
+    private el: ElementRef,
+    private dialog: MatDialog
   ) {}
 
+
+  @HostListener('click', ['$event'])
+  public onClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (target.tagName === 'A' && target.getAttribute('href')) {
+      event.preventDefault();
+      this.openModal(target.getAttribute('href'));
+    }
+  }
+
+  private openModal(href: string | null) {
+    // Logik, um das Modal zu öffnen und die richtige Komponente anzuzeigen
+    this.dialog.open(VideoTimeStampComponent, { data: { href } });
+  }
 
   /**
    * Sends the user's question to the chatbot service and adds the response to the messages array.

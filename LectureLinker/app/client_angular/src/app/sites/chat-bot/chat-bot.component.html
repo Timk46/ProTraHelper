@@ -2,10 +2,10 @@
 
   <div class="chat-input">
     <mat-form-field class="input-field" appearance="fill" (keydown.enter)="askQuestion()">
-      <mat-label>Befrage das Skript</mat-label>
+      <mat-label>Stelle eine Frage...</mat-label>
       <input matInput [(ngModel)]="question">
     </mat-form-field>
-    <button mat-raised-button style="font-size:24px; height:52px; width: 150px" color="primary" (click)="askQuestion()">Ask</button>
+    <button mat-raised-button style="font-size:24px; height:52px; width: 150px" color="primary" (click)="askQuestion()">Los</button>
   </div>
   <p style = "margin-top: -25px;" class="prose max-w-none text-center prose-gray prose-sm">Überprüfen Sie immer den Wahrheitsgehalt mit den verlinkten Vorlesungsvideos! Die Nachrichten werden von einem Large Language Model basierend auf dem Vorlesungstranskript erzeugt.</p>
   <mat-divider></mat-divider>

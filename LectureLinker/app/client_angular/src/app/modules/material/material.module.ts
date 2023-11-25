@@ -23,7 +23,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 
-
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 
 @NgModule({
@@ -49,6 +49,7 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
         MatDialogModule,
         MatCheckboxModule,
         MatExpansionModule,
+        DragDropModule
 
       ],
       exports: [
@@ -73,7 +74,8 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
         MatDialogModule,
         MatCheckboxModule,
         MatExpansionModule,
-        MatTable
+        MatTable,
+        DragDropModule
       ],
 })
 export class MaterialModule { }
