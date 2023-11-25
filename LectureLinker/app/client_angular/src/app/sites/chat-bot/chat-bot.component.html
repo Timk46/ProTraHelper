@@ -1,0 +1,22 @@
+<div class="chat-container">
+
+  <div class="chat-input">
+    <mat-form-field class="input-field" appearance="fill" (keydown.enter)="askQuestion()">
+      <mat-label>Befrage das Skript</mat-label>
+      <input matInput [(ngModel)]="question">
+    </mat-form-field>
+    <button mat-raised-button style="font-size:24px; height:52px; width: 150px" color="primary" (click)="askQuestion()">Ask</button>
+  </div>
+  <p style = "margin-top: -25px;" class="prose max-w-none text-center prose-gray prose-sm">Überprüfen Sie immer den Wahrheitsgehalt mit den verlinkten Vorlesungsvideos! Die Nachrichten werden von einem Large Language Model basierend auf dem Vorlesungstranskript erzeugt.</p>
+  <mat-divider></mat-divider>
+
+  <div class="messages-container">
+    <div *ngFor="let message of messages" class="chat-message" [class.user]="!message.isBot" [class.bot]="message.isBot">
+      <div *ngIf="message.isBot" class="prose max-w-none prose-stone prose-lg" [innerHTML]="message.question"></div>
+      <div *ngIf="!message.isBot" class="text-white prose max-w-none prose-stone prose-lg" [innerHTML]="message.question"></div>
+    </div>
+    <mat-spinner *ngIf="isloading" style="margin-left: 50%; margin-top: 20px;"></mat-spinner>
+
+  </div>
+</div>
+

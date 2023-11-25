@@ -1,0 +1,108 @@
+
+// nord colors: https://www.nordtheme.com/docs/colors-and-palettes
+$snowstorm_1: #eceff4;
+$snowstorm_2: #e5e9f0;
+$snowstorm_3: #d8dee9;
+
+mat-toolbar{
+  background: $snowstorm_3;
+  color:black;
+  height: fit-content;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toolbar-content {
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-logo {
+  max-height: 50px;
+}
+
+mat-sidenav {
+  margin: 16px;
+  width: 220px;
+  border-right:none;
+  background: $snowstorm_1;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+
+}
+
+.content {
+  height: calc(100vh - 98px);
+  margin: 16px;
+  margin-left: 32px;
+  padding:16px;
+  //display: flex;
+  //justify-content: center;
+  //align-items: center;
+
+  contain: content;
+  overflow-y: scroll;
+  scrollbar-width: thin;
+
+  font-size: 14px;
+  color: lightgrey;
+  border-radius: 10px;
+
+}
+
+mat-sidenav-container {
+  height: calc(100vh - 65px);
+  background: $snowstorm_3;
+}
+
+.mat-elevation-z8 {
+  background: $snowstorm_1;
+}
+
+.menu-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 16px;
+
+  mat-icon {
+      margin-right: 8px;
+  }
+}
+
+.mat-divider {
+  margin-top:16px;
+  margin-bottom: 16px;
+  background-color: lightgrey;
+}
+
+
+.footer {
+  height: 20px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size:x-small;
+  color: #434c5e
+}
+
+.footer-content {
+  display: flex;
+  align-items: center;
+  gap: 5px; /* Abstand zwischen den Elementen */
+}
+
+.divider {
+  height: 10px; /* Höhe des Trenners */
+  margin: 0 5px; /* horizontaler Abstand zum Rest des Inhalts */
+}
+
+.menu-button-active {
+  background-color: $snowstorm_3; /* Wählen Sie hier Ihre bevorzugte Farbe */
+}
