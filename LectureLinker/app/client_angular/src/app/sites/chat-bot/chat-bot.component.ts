@@ -24,6 +24,7 @@ export class ChatBotComponent {
   messages: ChatBotMessageDTO[] = [];
   question: string = '';
   isloading: boolean = false;
+  currentLoadingAnswer: string = '';
 
   constructor(
     private chatService: ChatService,
@@ -64,20 +65,29 @@ export class ChatBotComponent {
     };
     this.messages.push(message);
     this.isloading = true;
-
-    const chatSubscription = this.chatService.getChatStream(this.question)
+    this.messages.push({
+      id: this.messages.length + 1,
+      question: '',
+      createdAt: new Date(),
+      isBot: true,
+    });
+    const chatSubscription = this.chatService.getChatStream("RN1", this.question)
     .subscribe({
       next: (data: string) => {
-        console.log(data);
-        //this.messages.push(data);
+        this.isloading = false;
+        this.currentLoadingAnswer += data;
+        this.messages[this.messages.length - 1].question = this.markdownService.parse(this.currentLoadingAnswer);
       },
       error: (error) => {
-        // Handle the error
         console.log(error);
+        this.isloading = false;
+        this.currentLoadingAnswer = '';
         chatSubscription.unsubscribe();
       },
       complete: () => {
         this.isloading = false;
+        this.currentLoadingAnswer = '';
+        console.log(JSON.stringify(this.messages[this.messages.length - 1]));
         chatSubscription.unsubscribe();
       }
     });

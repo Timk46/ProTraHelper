@@ -10,12 +10,11 @@ export class ChatService {
 
   constructor() {}
 
-  getChatStream(query: string): Observable<string> {
+  getChatStream(lecture: string, query: string): Observable<string> {
     return new Observable((subscriber: Subscriber<string>) => {
-      const websocket = new WebSocket(`${this.apiUrl}/chat/${query}`);
+      const websocket = new WebSocket(`${this.apiUrl}/chat/${lecture}/${query}`);
 
       websocket.onmessage = event => {
-        console.log(event.data);
         subscriber.next(event.data);
       };
 

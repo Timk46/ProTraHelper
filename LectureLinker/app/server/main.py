@@ -40,7 +40,6 @@ class AsyncCallbackHandler(AsyncIteratorCallbackHandler):
 
     async def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         if token is not None and token != "":
-            print(token)
             await self.websocket.send_text(token)
             self.queue.put_nowait(token)
             
@@ -51,7 +50,7 @@ class AsyncCallbackHandler(AsyncIteratorCallbackHandler):
         self.done.set()
          
 
-async def run_call(query: str, stream_it: AsyncCallbackHandler):
+async def run_call(query: str, lecture: str, stream_it: AsyncCallbackHandler):
     llm = ChatOpenAI(
     openai_api_key=os.getenv("OPENAI_API_KEY"),
     temperature=0.0,
@@ -69,9 +68,17 @@ async def run_call(query: str, stream_it: AsyncCallbackHandler):
         password=os.environ.get("PGVECTOR_PASSWORD", "qzx5vQG9WQ2b35eZUWujPUhVb8xRr"),
     )
 
-    documents = []
     CONNECTION_STRING = connection_string
     COLLECTION_NAME = "RN1_chunksize1500overlap225"  ## OFP = ChunkSize1500overlap225 ; RNI = RN1chunksize1500overlap225
+    match lecture:
+        case "RN1":
+            COLLECTION_NAME = "RN1_chunksize1500overlap225"
+        case "OFP":
+            COLLECTION_NAME = "OFP_ChunkSize1500overlap225"
+        case _:
+            # Default. Falls die Lecture nicht existiert, wird ein entsprechender Fehler zurückgegeben
+            raise HTTPException(status_code=404, detail="Lecture does not exist")
+
     embeddings = OpenAIEmbeddings()
 
     store = PGVector(
@@ -116,7 +123,7 @@ async def run_call(query: str, stream_it: AsyncCallbackHandler):
     qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
         llm=llm2,
         chain_type="stuff",
-        retriever=store.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": .7, "k": 1}, metadata_field_info=metadata_field_info), # https://python.langchain.com/docs/modules/data_connection/retrievers/vectorstore
+        retriever=store.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": .7, "k": 15}, metadata_field_info=metadata_field_info), # https://python.langchain.com/docs/modules/data_connection/retrievers/vectorstore
         chain_type_kwargs=chain_type_kwargs,
         return_source_documents=True,
         verbose=True
@@ -135,11 +142,12 @@ async def create_gen(query: str, stream_it: AsyncCallbackHandler):
         yield token
     await task
 
-@app.websocket("/chat/{query}")
-async def websocket_endpoint(websocket: WebSocket, query: str):
+@app.websocket("/chat/{lecture}/{query}")
+async def websocket_endpoint(websocket: WebSocket,lecture: str, query: str):
+  
     await websocket.accept()
     stream_it = AsyncCallbackHandler(websocket)
-    task = asyncio.create_task(run_call(query, stream_it))
+    task = asyncio.create_task(run_call(query,lecture, stream_it))
 
     await task  # Warten, bis der Task beendet ist
     await websocket.close()

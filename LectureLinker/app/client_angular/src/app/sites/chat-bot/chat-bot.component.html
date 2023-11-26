@@ -12,8 +12,8 @@
 
   <div class="messages-container">
     <div *ngFor="let message of messages" class="chat-message" [class.user]="!message.isBot" [class.bot]="message.isBot">
-      <div *ngIf="message.isBot" class="prose max-w-none prose-stone prose-lg" [innerHTML]="message.question"></div>
-      <div *ngIf="!message.isBot" class="text-white prose max-w-none prose-stone prose-lg" [innerHTML]="message.question"></div>
+      <div *ngIf="message.isBot && message.question.length>2" class="prose max-w-none prose-stone prose-lg" [innerHTML]="message.question"></div>
+      <div *ngIf="!message.isBot && message.question.length>2" class="text-white prose max-w-none prose-stone prose-lg" [innerHTML]="message.question"></div>
     </div>
     <mat-spinner *ngIf="isloading" style="margin-left: 50%; margin-top: 20px;"></mat-spinner>
 
