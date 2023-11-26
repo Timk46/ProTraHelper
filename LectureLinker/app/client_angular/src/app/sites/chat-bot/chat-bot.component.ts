@@ -1,6 +1,6 @@
 import { Component, ElementRef, HostListener } from '@angular/core';
 import { ChatBotMessageDTO } from '../../interfaces/chatBot.dto';
-import { ChatBotService } from '../../services/ai/chat-bot.service';
+import { ChatService } from '../../services/ai/chat..service';
 import { MarkdownService } from '../../services/markdown/markdown.service';
 import { MatDialog } from '@angular/material/dialog';
 import { VideoTimeStampComponent } from './video-time-stamp/video-time-stamp.component';
@@ -26,7 +26,7 @@ export class ChatBotComponent {
   isloading: boolean = false;
 
   constructor(
-    private chatBotService: ChatBotService,
+    private chatService: ChatService,
     private markdownService: MarkdownService,
     private el: ElementRef,
     private dialog: MatDialog
@@ -64,25 +64,22 @@ export class ChatBotComponent {
     };
     this.messages.push(message);
     this.isloading = true;
-    this.chatBotService.askQuestion(this.question, "RN1")
+
+    const chatSubscription = this.chatService.getChatStream(this.question)
     .subscribe({
-      next: (response) => {
-      console.log(JSON.stringify(response));
-      const botMessage: ChatBotMessageDTO = {
-        id: this.messages.length + 1,
-        question: this.markdownService.parse(response.result), // parse markdown to html here
-        createdAt: new Date(),
-        isBot: true,
-        usedChunks: response.usedChunks,
-      };
-      console.log(botMessage.usedChunks);
-      this.isloading = false;
-      this.messages.push(botMessage);
-    },
-      error: (error) => {
-        console.log(error);
-        this.isloading = false;
+      next: (data: string) => {
+        console.log(data);
+        //this.messages.push(data);
       },
+      error: (error) => {
+        // Handle the error
+        console.log(error);
+        chatSubscription.unsubscribe();
+      },
+      complete: () => {
+        this.isloading = false;
+        chatSubscription.unsubscribe();
+      }
     });
     this.question = '';
   }

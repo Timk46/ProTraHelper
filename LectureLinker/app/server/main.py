@@ -1,3 +1,4 @@
+# Start with uvicorn main:app --reload
 import os
 import asyncio
 from typing import Any
@@ -5,9 +6,10 @@ import uvicorn
 
 from pydantic import BaseModel
 
-from fastapi import FastAPI, Body, HTTPException
+from fastapi import FastAPI, Body, HTTPException, WebSocket
 from fastapi.responses import StreamingResponse
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from langchain.chat_models import ChatOpenAI
 from langchain.callbacks.streaming_aiter import AsyncIteratorCallbackHandler
@@ -26,15 +28,20 @@ app = FastAPI()
 os.environ["OPENAI_API_KEY"]="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"
 
 class AsyncCallbackHandler(AsyncIteratorCallbackHandler):
+
+        
+    def __init__(self, websocket: WebSocket) -> None:
+        self.websocket = websocket
+        super().__init__()
+        
     content: str = ""
     final_answer: bool = False
     
-    def __init__(self) -> None:
-        super().__init__()
 
     async def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
         if token is not None and token != "":
             print(token)
+            await self.websocket.send_text(token)
             self.queue.put_nowait(token)
             
     async def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
@@ -113,6 +120,7 @@ async def run_call(query: str, stream_it: AsyncCallbackHandler):
         chain_type_kwargs=chain_type_kwargs,
         return_source_documents=True,
         verbose=True
+        
     )
 
     await qa_chain.acall(inputs={"question": query})
@@ -127,13 +135,14 @@ async def create_gen(query: str, stream_it: AsyncCallbackHandler):
         yield token
     await task
 
-@app.get("/chat")
-async def chat(
-    query: Query = Body(...),
-):
-    stream_it = AsyncCallbackHandler()
-    gen = create_gen(query.text, stream_it)
-    return StreamingResponse(gen, media_type="text/event-stream")
+@app.websocket("/chat/{query}")
+async def websocket_endpoint(websocket: WebSocket, query: str):
+    await websocket.accept()
+    stream_it = AsyncCallbackHandler(websocket)
+    task = asyncio.create_task(run_call(query, stream_it))
+
+    await task  # Warten, bis der Task beendet ist
+    await websocket.close()
 
 @app.get("/health")
 async def health():
