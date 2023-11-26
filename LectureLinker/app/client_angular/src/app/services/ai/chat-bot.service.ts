@@ -12,6 +12,6 @@ export class ChatBotService {
   constructor(private http: HttpClient) { }
 
   askQuestion(question: string, lecture: String): Observable<any> {
-    return this.http.post(`${this.apiUrl}/ask/${lecture}`, { promptstr: question });
+    return this.http.post(`${this.apiUrl}/ask`, { lecture: lecture, prompt: question });
   }
 }

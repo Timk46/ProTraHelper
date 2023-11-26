@@ -6,6 +6,10 @@ from typing import List, Dict
 
 from fastapi import FastAPI, Body,  HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
+from langchain.agents import AgentType, initialize_agent, load_tools
+from langchain.callbacks.streaming_stdout_final_only import (
+    FinalStreamingStdOutCallbackHandler,
+)
 
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores.pgvector import PGVector
@@ -19,14 +23,10 @@ langchain.debug = True  # Super praktisch: Finales Prompt wird ausgegeben!
 
 app = FastAPI()
 
-class Prompt(BaseModel):
-    promptstr: str
-class Response(BaseModel):
-    responsestr: str
-
 os.environ["OPENAI_API_KEY"]="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"
 
 llm = ChatOpenAI(
+    callbacks=[FinalStreamingStdOutCallbackHandler()],
     temperature = 0.0, 
     model = 'gpt-4-1106-preview',
     verbose=True
@@ -52,8 +52,24 @@ store = PGVector(
     embedding_function=embeddings,
 )
 
-@app.post("/ask/{lecture}", response_class=JSONResponse)
-async def getAnswer(lecture: str, prompt: Prompt = Body(...)):
+class QuestionInput(BaseModel):
+    prompt: str
+    lecture: str
+    
+@app.post("/ask", response_class=JSONResponse)
+async def getQa(questionInput: QuestionInput):
+    lecture = questionInput.lecture
+    prompt = questionInput.prompt
+
+    # Verwenden Sie 'await' nur, wenn die Funktion tatsächlich eine Coroutine zurückgibt
+    response = await getAnswer(lecture, prompt)
+    return JSONResponse(content={
+            "result": response,
+        })
+
+
+
+async def getAnswer(lecture: str, prompt: str):
     match lecture:
         case "RN1":
             store.collection_name = "RN1_chunksize1500overlap225"
@@ -71,7 +87,7 @@ async def getAnswer(lecture: str, prompt: Prompt = Body(...)):
         )
     ]
 
-    question = prompt.promptstr
+    question = prompt
     print (question)
 
     template = """Du bist ein hilfreicher Tutor und kannst sehr gut erklären. Gegeben sind die folgenden extrahierten Teile eines Vorlesungstranskripts und eine Frage, erstelle eine finale Antwort mit Verweisen ("QUELLEN"). Wenn du die Antwort nicht weißt, sage einfach, dass du es nicht weißt. Versuche nicht, eine Antwort zu erfinden. Du erhälst dazu merhfach Informationen aus Vorlesungstranskripten in folgendem Format:
@@ -110,23 +126,8 @@ async def getAnswer(lecture: str, prompt: Prompt = Body(...)):
 
     responses = answer
 
-    source_documents = responses["source_documents"]
-    source_content = [doc.page_content for doc in source_documents]
-    source_metadata = [doc.metadata for doc in source_documents]
+    return responses['answer']
 
-    result = responses['answer']
-    used_chunks = []
-
-    for i in range(len(source_content)):
-        used_chunks.append({
-            "metadata": source_metadata[i],
-            "content": source_content[i]
-        })
-
-    return JSONResponse(content={
-        "result": result,
-        "usedChunks": used_chunks
-    })
 
 
 # Funktion zum Streamen von Videodateien
