@@ -6,7 +6,7 @@ import uvicorn
 
 from pydantic import BaseModel
 
-from fastapi import FastAPI, Body, HTTPException, WebSocket
+from fastapi import FastAPI, Body, HTTPException, Request, WebSocket
 from fastapi.responses import StreamingResponse
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -160,16 +160,15 @@ async def health():
 
 ##################################################################################### Videos
 # Funktion zum Streamen von Videodateien
-def video_streamer(video_path: str):
+
+def video_streamer(video_path: str, start: int, end: int):
     with open(video_path, "rb") as video_file:
-        # Lesen der Videodatei in Chunks
-        while chunk := video_file.read(1024 * 1024):  # liest 1 MB pro Chunk
-            # Senden des Chunks an den Client
+        video_file.seek(start)
+        while (chunk := video_file.read(end - start + 1)):
             yield chunk
 
-# FastAPI-Endpunkt zum Streamen von Videodateien
 @app.get("/video/{lecture}/{video_name}")
-async def stream_video( lecture: str, video_name: str):
+async def stream_video(request: Request, lecture: str, video_name: str):
     VIDEO_FOLDER =""
     # Überprüfen, ob die Videodatei im angegebenen Ordner existiert
     video_path = os.path.join(VIDEO_FOLDER, f"{video_name}")
@@ -187,13 +186,35 @@ async def stream_video( lecture: str, video_name: str):
         # Falls die Datei nicht existiert, wird ein entsprechender Fehler zurückgegeben
         raise HTTPException(status_code=404, detail="Video not found")
 
-    # Erstellen einer StreamingResponse, die das Video streamt
-    return StreamingResponse(
-        video_streamer(video_path),
-        media_type="video/mp4",
-        headers={"Content-Disposition": f"attachment;filename={video_name}.mp4"},
-    )
 
+    range_header = request.headers.get("range")
+    if range_header:
+        range_start, range_end = range_header.strip().split("=")[1].split("-")
+        range_start, range_end = int(range_start), int(range_end) if range_end else None
+    else:
+        range_start, range_end = None, None
+
+    file_size = os.path.getsize(video_path)
+
+    if range_start is not None:
+        content_range = f"bytes {range_start}-{range_end or file_size - 1}/{file_size}"
+        headers = {
+            "Content-Range": content_range,
+            "Content-Disposition": f"attachment;filename={video_name}.mp4",
+            "Accept-Ranges": "bytes",
+        }
+        return StreamingResponse(
+            video_streamer(video_path, range_start, range_end or file_size - 1),
+            media_type="video/mp4",
+            headers=headers,
+            status_code=206,
+        )
+    else:
+        return StreamingResponse(
+            video_streamer(video_path, 0, file_size - 1),
+            media_type="video/mp4",
+            headers={"Content-Disposition": f"attachment;filename={video_name}.mp4"},
+        )
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
