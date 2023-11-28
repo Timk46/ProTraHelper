@@ -9,6 +9,7 @@ import { environment } from 'src/environments/environment';
 })
 export class VideoTimeStampComponent implements OnInit {
   videoUrl: string = '';
+  videoLoading: boolean = false;
   startTime: number = 0;
   titel: string = '';
   private readonly apiUrl = environment.server;
@@ -47,6 +48,7 @@ export class VideoTimeStampComponent implements OnInit {
   }
 
   videoFromName(name: string): void {
+    this.videoLoading = true;
     this.videoUrl = `${this.apiUrl}/video/RN1/${name}`;
   }
 }

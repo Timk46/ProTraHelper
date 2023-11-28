@@ -2,6 +2,13 @@
   <mat-icon class="drag-icon">open_with</mat-icon>
   <h1 class="prose max-w-none text-slate-50 prose-lg" style = "margin-top: 5px; cursor: move;">{{ titel }}</h1>
   <div class="video-container align-items-center justify-content-center">
-    <video *ngIf="videoUrl" [src]="videoUrl" [currentTime]="startTime" controls width="auto" height="480"></video>
+    <video *ngIf="videoUrl"
+       [src]="videoUrl"
+       [currentTime]="startTime"
+       controls
+       width="auto"
+       height="480"
+       (loadedmetadata)="videoLoading = false">
+</video>
   </div>
 </div>

@@ -142,12 +142,13 @@ async def create_gen(query: str, stream_it: AsyncCallbackHandler):
         yield token
     await task
 
-@app.websocket("/chat/{lecture}/{query}")
-async def websocket_endpoint(websocket: WebSocket,lecture: str, query: str):
-  
+@app.websocket("/chat/{lecture}")
+async def websocket_endpoint(websocket: WebSocket, lecture: str):
     await websocket.accept()
+    query = await websocket.receive_text()  # Erste Nachricht vom Client erhalten
+
     stream_it = AsyncCallbackHandler(websocket)
-    task = asyncio.create_task(run_call(query,lecture, stream_it))
+    task = asyncio.create_task(run_call(query, lecture, stream_it))
 
     await task  # Warten, bis der Task beendet ist
     await websocket.close()

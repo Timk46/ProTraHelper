@@ -12,7 +12,11 @@ export class ChatService {
 
   getChatStream(lecture: string, query: string): Observable<string> {
     return new Observable((subscriber: Subscriber<string>) => {
-      const websocket = new WebSocket(`${this.apiUrl}/chat/${lecture}/${query}`);
+      const websocket = new WebSocket(`${this.apiUrl}/chat/${lecture}`);
+
+      websocket.onopen = () => {
+        websocket.send(query);
+      };
 
       websocket.onmessage = event => {
         subscriber.next(event.data);
@@ -32,4 +36,5 @@ export class ChatService {
       };
     });
   }
+
 }
