@@ -46,10 +46,6 @@ export class DiscussionViewComponent {
         this.discussionViewService.getDiscussion(this.discussionId).subscribe(discussion => {
           this.discussionData = discussion;
           this.refreshMessages();
-          /* this.discussionDataService.getMessages(this.discussionId).subscribe(messages => {
-            this.messagesData = messages;
-            this.initiatorMessage = this.getAndSeparateMessage(this.discussionData.initMessageId);
-          }); */
         });
       }
     });

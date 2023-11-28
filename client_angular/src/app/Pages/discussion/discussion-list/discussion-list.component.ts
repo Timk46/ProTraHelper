@@ -46,9 +46,9 @@ export class DiscussionListComponent implements OnChanges {
    * Renews the list of discussions with the given filter data
    * @param filterData
    */
-  listDiscussions(filterData: discussionFilterDTO) {
+  listDiscussions(filterData: discussionFilterDTO, force: boolean = false) {
     //console.log("do i want to list? Different?: " + this.isDifferent(filterData) + " conceptNodeId: " + filterData.conceptNodeId)
-    if (filterData.conceptNodeId >0 && this.isDifferent(filterData)) {
+    if ( (filterData.conceptNodeId >0 && this.isDifferent(filterData)) || force) {
       this.filterData = {...filterData}; //prevents mutation
       this.discussionListService.getDiscussions(filterData).subscribe(discussions => {
         this.visibleDiscussions = discussions;
@@ -69,7 +69,12 @@ export class DiscussionListComponent implements OnChanges {
    * Emits the createDiscussion event
    */
   onNewDiscussion(){
-    this.discussionDialogService.openContentSelection(this.activeConceptNodeId);
+    this.discussionDialogService.openContentSelection(this.activeConceptNodeId).then((result: number) => {
+      console.log("Want to refresh? result: " + result);
+      if (!isNaN(result)) {
+        this.listDiscussions(this.filterData, true);
+      }
+    });
   }
 
   /**

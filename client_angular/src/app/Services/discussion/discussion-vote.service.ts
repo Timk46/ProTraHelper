@@ -16,8 +16,8 @@ export class DiscussionVoteService {
    * @param messageId
    * @returns the vote data
    */
-  getVoteData(messageId: number, userId: number) : Observable<discussionMessageVoteDTO> {
-    return this.http.get<discussionMessageVoteDTO>(environment.server + `/discussion/vote/${messageId}/${userId}`)
+  getVoteData(messageId: number) : Observable<discussionMessageVoteDTO> {
+    return this.http.get<discussionMessageVoteDTO>(environment.server + `/discussion/vote/${messageId}`)
   }
 
   /**

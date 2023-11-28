@@ -28,7 +28,7 @@
     <!-- button not available if not logged in -->
 
     <div class="hbox" style="margin-top: 16px;">
-      <button *ngIf="discussionData.authorId != -1" mat-raised-button style="width: fit-content; margin-bottom: 8px" (click)="onSubmit(title.value, editor.getContent())">Erstellen</button>
+      <button mat-raised-button style="width: fit-content; margin-bottom: 8px" (click)="onSubmit(title.value, editor.getContent())">Erstellen</button>
     </div>
 
   </div>

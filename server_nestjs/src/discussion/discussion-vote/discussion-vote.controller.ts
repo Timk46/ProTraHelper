@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { DiscussionVoteService } from './discussion-vote.service';
 import { discussionMessageVoteCreationDTO, discussionMessageVoteDTO } from '@DTOs/index';
+import { RolesGuard, roles } from '@/auth/roles.guard';
 
 const debug: boolean = true;
-
+@UseGuards(RolesGuard)
 @Controller('discussion/vote')
 export class DiscussionVoteController {
 
@@ -14,13 +15,14 @@ export class DiscussionVoteController {
    * @param messageId
    * @returns the vote data
    */
-  @Get(':messageId/:userId')
-  async getVoteData(@Param('messageId') messageId : number, @Param('userId') userId : number): Promise<discussionMessageVoteDTO> {
+  @roles('ANY')
+  @Get(':messageId/')
+  async getVoteData(@Param('messageId') messageId : number, @Req() req): Promise<discussionMessageVoteDTO> {
     debug && console.log('DiscussionVoteController: getVoteData');
-    if (isNaN(messageId) || isNaN(userId)) {
+    if (isNaN(messageId) || isNaN(req.user.id)) {
       throw new Error('Invalid message id or user id');
     }
-    return this.voteService.getVoteData(Number(messageId),Number(userId));
+    return this.voteService.getVoteData(Number(messageId),Number(req.user.id));
   }
 
   /**
@@ -28,10 +30,11 @@ export class DiscussionVoteController {
    * @param voteCreationData
    * @returns discussionMessageVoteCreationDTO
    */
+  @roles('ANY')
   @Post('create')
-  async createOrModifyVote(@Body() voteCreationData: discussionMessageVoteCreationDTO): Promise<discussionMessageVoteCreationDTO> {
+  async createOrModifyVote(@Body() voteCreationData: discussionMessageVoteCreationDTO, @Req() req): Promise<discussionMessageVoteCreationDTO> {
     debug && console.log('DiscussionVoteController: createOrModifyVote')
-    return this.voteService.createOrModifyVote(voteCreationData);
+    return this.voteService.createOrModifyVote(voteCreationData, req.user.id);
   }
 
 }

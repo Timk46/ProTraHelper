@@ -49,12 +49,12 @@ export class DiscussionVoteService {
    * @param voteCreationData
    * @returns a creation status if successful
    */
-  async createOrModifyVote(voteCreationData: discussionMessageVoteCreationDTO) : Promise<discussionMessageVoteCreationDTO> {
+  async createOrModifyVote(voteCreationData: discussionMessageVoteCreationDTO, userId: number) : Promise<discussionMessageVoteCreationDTO> {
     //console.log('DiscussionService: createOrModifyVote, voteCreationData:');
     const vote = await this.prisma.vote.findFirst({
       where: {
         messageId: voteCreationData.messageId,
-        userId: voteCreationData.userId
+        userId: userId
       }
     });
 
@@ -64,7 +64,7 @@ export class DiscussionVoteService {
         const newVote = await this.prisma.vote.create({
           data: {
             messageId: voteCreationData.messageId,
-            userId: voteCreationData.userId,
+            userId: userId,
             isUpvote: voteCreationData.voteStatus == 1 ? true : false
           }
         });

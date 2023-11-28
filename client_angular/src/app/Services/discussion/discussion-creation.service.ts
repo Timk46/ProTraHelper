@@ -17,19 +17,19 @@ export class DiscussionCreationService {
    * @param discussionId
    * @returns Observable<AnonymousUserDTO>
    */
-  getAnonymousUser(userId: number, discussionId: number) : Observable<AnonymousUserDTO>{
-    return this.http.get<AnonymousUserDTO>(environment.server + `/discussion/creation/anonymousUser/${userId}/${discussionId}`);
+  getAnonymousUser(discussionId: number) : Observable<AnonymousUserDTO>{
+    return this.http.get<AnonymousUserDTO>(environment.server + `/discussion/creation/anonymousUser/${discussionId}`);
   }
 
   /**
-   * Returns the anonymous user for a given user id and message id
+   * Returns the anonymous user for a given user id and message id -- deprecated
    * @param userId
    * @param messageId
    * @returns Observable<AnonymousUserDTO>
    */
-  getAnonymousUserByMessageId(userId: number, messageId: number) : Observable<AnonymousUserDTO>{
+  /* getAnonymousUserByMessageId(userId: number, messageId: number) : Observable<AnonymousUserDTO>{
     return this.http.get<AnonymousUserDTO>(environment.server + `/discussion/creation/anonymousUserByMessageId/${userId}/${messageId}`);
-  }
+  } */
 
   /**
    * Creates a new anonymous user in the database and returns it
@@ -37,13 +37,13 @@ export class DiscussionCreationService {
    * @param name
    * @returns Observable<AnonymousUserDTO>
    */
-  createAnonymousUser(userId: number, name: string = ''): Observable<AnonymousUserDTO>{
+  createAnonymousUser(name: string = ''): Observable<AnonymousUserDTO>{
     const funnyWords: string[] = ["Narwal", "Quokka", "Axolotl", "Blobfisch", "Pangolin", "Wombat", "Kakapo", "Fuchskusu", "Gibbon", "Tapir", "Schnabeltier", "Alpaka", "Koala", "Lemming", "Marmelade", "Muffin", "Pudding", "Schokolade", "Zimtstern", "Donut", "Einhorn", "Flamingo", "Giraffe", "Hummel", "Igel", "Jaguar", "Kolibri", "Lama", "Maulwurf", "Nashorn", "Otter", "Pinguin", "Qualle", "Raubkatze", "Seestern", "Tukan", "Uhu", "Vogelspinne", "Yak", "Zebra"];
     let nameString: string = name;
     if (name === '') {
       nameString = funnyWords[Math.floor(Math.random() * funnyWords.length)] + 's ' + funnyWords[Math.floor(Math.random() * funnyWords.length)];
     }
-    return this.http.post<AnonymousUserDTO>(environment.server + '/discussion/creation/anonymousUser/create', {userId: userId, name: name? name : nameString});
+    return this.http.post<AnonymousUserDTO>(environment.server + '/discussion/creation/anonymousUser/create', {name: name? name : nameString});
   }
 
   /**

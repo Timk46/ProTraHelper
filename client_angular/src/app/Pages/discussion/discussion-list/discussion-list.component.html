@@ -10,7 +10,6 @@
     <button mat-raised-button (click)="onNewDiscussion()">Neuen Beitrag erstellen</button>
   </div>
 
-  <p>FilterData: unset</p>
   <div class="list-container">
     <div *ngIf="visibleDiscussions && visibleDiscussions.length > 0">
       <app-discussion-list-item *ngFor="let question of visibleDiscussions"

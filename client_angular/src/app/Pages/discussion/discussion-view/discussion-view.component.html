@@ -5,10 +5,7 @@
       <app-discussion-view-question [messageData]="initiatorMessage" [conceptNodeName]="conceptNodeName" [discussionData]="discussionData"></app-discussion-view-question>
     </div>
     <div class="content mat-elevation-z8">
-      <!-- TODO: LOGIN SYSTEM. -->
-      <!-- For now, the message creator is always the admin user with id=1 -->
       <app-discussion-view-create
-        [userId]="1"
         [discussionId]="discussionData.id"
         (refreshMessages)="refreshMessages()">
       </app-discussion-view-create>

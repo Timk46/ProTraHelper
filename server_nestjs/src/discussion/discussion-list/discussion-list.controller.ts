@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { DiscussionListService } from './discussion-list.service';
 import { discussionDTO, discussionFilterContentNodeDTO, discussionFilterDTO } from '@DTOs/index';
+import { RolesGuard, roles } from '@/auth/roles.guard';
 
 const debug: boolean = true; // set this to false to disable console logs
-
+@UseGuards(RolesGuard)
 @Controller('discussion/list')
 export class DiscussionListController {
 
@@ -20,12 +21,14 @@ export class DiscussionListController {
   * @param searchString the search string, handled as JSON string with a 'content' field
   * @returns the discussions
   */
+  @roles('ANY')
   @Post()
   async getDiscussions(@Body() filterData: discussionFilterDTO): Promise<discussionDTO[]> {
     debug && console.log('DiscussionListController: getDiscussions');
     return this.listService.getDiscussions(filterData);
   }
 
+  @roles('ANY')
   @Get('filterContentNodes/:conceptNodeId')
   async getFilterContentNodes(@Param('conceptNodeId') conceptNodeId: number): Promise<discussionFilterContentNodeDTO[]> {
     debug && console.log('DiscussionListController: getFilterContentNodes');

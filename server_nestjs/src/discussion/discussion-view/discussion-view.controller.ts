@@ -1,9 +1,10 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { DiscussionViewService } from './discussion-view.service';
 import { discussionMessageDTO, nodeNameDTO } from '@DTOs/index';
+import { RolesGuard, roles } from '@/auth/roles.guard';
 
 const debug: boolean = true; // set this to false to disable console logs
-
+@UseGuards(RolesGuard)
 @Controller('discussion/view')
 export class DiscussionViewController {
 
@@ -14,6 +15,7 @@ export class DiscussionViewController {
    * @param discussionId
    * @returns the name of the concept node
    */
+  @roles('ANY')
   @Get('conceptNodeName/:discussionId')
   async getConceptNodeName(@Param('discussionId') discussionId: number): Promise<nodeNameDTO> {
     debug && console.log('DiscussionViewController: getConceptNodeName')
@@ -28,6 +30,7 @@ export class DiscussionViewController {
    * @param discussionId
    * @returns the discussion
    */
+  @roles('ANY')
   @Get(':discussionId')
   async getDiscussion(@Param('discussionId') discussionId: number) {
     debug && console.log('DiscussionViewController: getDiscussion')
@@ -42,6 +45,7 @@ export class DiscussionViewController {
    * @param discussionId
    * @returns the messages
    */
+  @roles('ANY')
   @Get('messages/:discussionId')
   async getMessages(@Param('discussionId') discussionId: number): Promise<discussionMessageDTO[]> {
     debug && console.log('DiscussionViewController: getMessages')

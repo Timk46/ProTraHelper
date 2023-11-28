@@ -10,7 +10,7 @@ import { DiscussionVoteService } from 'src/app/Services/discussion/discussion-vo
 export class DiscussionVoteboxComponent {
   @Input() messageId: number = -1; // to be changed on init
   @Input() isSolution : boolean = false;
-  @Input() userId: number = 1; //HAS TO BE CHANGED
+  //@Input() userId: number = 1; //HAS TO BE CHANGED
 
   userVoteStatus : number = 0; /* 0 = nicht gevotet, 1 = upvote, -1 = downvote */
 
@@ -28,7 +28,7 @@ export class DiscussionVoteboxComponent {
    * Gets the vote data for the message
    */
   ngOnInit(): void {
-    this.discussionVoteService.getVoteData(this.messageId, this.userId).subscribe(voteData => this.voteData = voteData);
+    this.discussionVoteService.getVoteData(this.messageId).subscribe(voteData => this.voteData = voteData);
   }
 
   /**
@@ -71,7 +71,7 @@ export class DiscussionVoteboxComponent {
     this.timeoutID = setTimeout(() => {
       const voteCreationData: discussionMessageVoteCreationDTO = {
         messageId: this.messageId,
-        userId: this.userId,
+        userId: -1,
         voteStatus: this.voteData.userVoteStatus
       }
       this.discussionVoteService.createOrModifyVote(voteCreationData).subscribe();

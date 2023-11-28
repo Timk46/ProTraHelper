@@ -10,7 +10,7 @@ import { DiscussionCreationService } from 'src/app/Services/discussion/discussio
 })
 export class DiscussionCreationComponent {
 
-  @Input() userId: number = 1;
+  //@Input() userId: number = 1;
 
   discussionNodeNames: discussionNodeNamesDTO = {
     conceptNodeName: "dummy",
@@ -55,15 +55,14 @@ export class DiscussionCreationComponent {
    */
   onSubmit(title: string, text: string) {
     console.log("Submit: " + title + text);
-    if (title != "" && text != "" && this.discussionData.authorId != -1) {
+    if (title != "" && text != "") {
       this.discussionData.title = title;
 
-      this.creationService.createAnonymousUser(this.discussionData.authorId).subscribe(data => {
-        this.discussionData.authorId = data.id; //rewrite needed when auth is implemented
-
-        this.creationService.createDiscussion(this.discussionData).subscribe(discussionData => {
-         this.discussionData = discussionData;
-         if (data.id != -1) {
+      this.creationService.createAnonymousUser().subscribe(data => {
+        if (data.id != -1) {
+          this.discussionData.authorId = data.id; //rewrite needed when auth is implemented
+          this.creationService.createDiscussion(this.discussionData).subscribe(discussionData => {
+            this.discussionData = discussionData;
             this.creationService.createDiscussionMessage({
               id: -1,
               text: text,
@@ -74,9 +73,8 @@ export class DiscussionCreationComponent {
             }).subscribe( () => {
               this.dialogRef.close(this.discussionData.id);
             });
-          }
-        });
-
+          });
+        }
       });
     }
   }
