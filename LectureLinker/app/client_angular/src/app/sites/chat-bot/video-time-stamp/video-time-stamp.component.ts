@@ -7,14 +7,42 @@ import { environment } from 'src/environments/environment';
   templateUrl: './video-time-stamp.component.html',
   styleUrls: ['./video-time-stamp.component.scss'],
 })
+/**
+ * VideoTimeStampComponent is a class that handles the display of a video with a specific timestamp.
+ * It uses the MAT_DIALOG_DATA injection token to receive data from the parent component.
+ *
+ * @example
+ * <app-video-time-stamp></app-video-time-stamp>
+ *
+ * @class VideoTimeStampComponent
+ */
 export class VideoTimeStampComponent implements OnInit {
+  /**
+   * The URL of the video to be displayed.
+   */
   videoUrl: string = '';
+
+  /**
+   * A boolean indicating if the video is currently loading.
+   */
   videoLoading: boolean = false;
+
+  /**
+   * The start time of the video in seconds.
+   */
   startTime: number = 0;
+
+  /**
+   * The title of the video.
+   */
   titel: string = '';
+
+  /**
+   * The base URL of the API.
+   */
   private readonly apiUrl = environment.server;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { href: string }) {}
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { href: string, lecture: string }) {}
 
   ngOnInit(): void {
     const params = this.parseHref(this.data.href);
@@ -23,7 +51,7 @@ export class VideoTimeStampComponent implements OnInit {
     this.titel = 'Video: ' + fileName + '   -   Beginn: ' + timeStamp;
 
     if (fileName) {
-      this.videoFromName(fileName);
+      this.videoFromName(fileName, this.data.lecture);
     }
 
     if (timeStamp) {
@@ -31,6 +59,12 @@ export class VideoTimeStampComponent implements OnInit {
     }
   }
 
+  /**
+   * Parses the href attribute of a link and returns an object with the query parameters (filename & timestamp)
+   *
+   * @param href - The href attribute of a link.
+   * @returns An object with the query parameters.
+   */
   parseHref(href: string): Record<string, string> {
     const query = href.split('?')[1];
     return query.split('&').reduce((params, param) => {
@@ -40,6 +74,12 @@ export class VideoTimeStampComponent implements OnInit {
     }, {} as Record<string, string>);
   }
 
+  /**
+   * Parses a timestamp string and returns the time in seconds.
+   *
+   * @param timeStamp - A timestamp string in the format 'hh:mm:ss'.
+   * @returns The time in seconds.
+   */
   parseTimeStamp(timeStamp: string): number {
     const timeParts = timeStamp.split(',');
     const [hours, minutes, seconds] = timeParts[0].split(':').map(Number);
@@ -47,8 +87,14 @@ export class VideoTimeStampComponent implements OnInit {
     return hours * 3600 + minutes * 60 + seconds;
   }
 
-  videoFromName(name: string): void {
+  /**
+   * Sets the URL of the video to be displayed based on the file name and lecture.
+   *
+   * @param name - The name of the video file.
+   * @param lecture - The lecture the video is associated with.
+   */
+  videoFromName(name: string, lecture: string): void {
     this.videoLoading = true;
-    this.videoUrl = `${this.apiUrl}/video/RN1/${name}`;
+    this.videoUrl = `${this.apiUrl}/video/${lecture}/${name}.mp4`;
   }
 }

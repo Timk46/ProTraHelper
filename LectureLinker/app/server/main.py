@@ -51,6 +51,7 @@ class AsyncCallbackHandler(AsyncIteratorCallbackHandler):
          
 
 async def run_call(query: str, lecture: str, stream_it: AsyncCallbackHandler):
+    print(lecture)
     llm = ChatOpenAI(
     openai_api_key=os.getenv("OPENAI_API_KEY"),
     temperature=0.0,
@@ -69,10 +70,10 @@ async def run_call(query: str, lecture: str, stream_it: AsyncCallbackHandler):
     )
 
     CONNECTION_STRING = connection_string
-    COLLECTION_NAME = "RN1_chunksize1500overlap225"  ## OFP = ChunkSize1500overlap225 ; RNI = RN1chunksize1500overlap225
+    COLLECTION_NAME = "RN1_chunksize1500overlap225"  ## OFP = OFP_ChunkSize1500overlap225 ; RNI = RN1_ChunkSize1500overlap225
     match lecture:
         case "RN1":
-            COLLECTION_NAME = "RN1_chunksize1500overlap225"
+            COLLECTION_NAME = "RN1_ChunkSize1500overlap225"
         case "OFP":
             COLLECTION_NAME = "OFP_ChunkSize1500overlap225"
         case _:
@@ -97,12 +98,13 @@ async def run_call(query: str, lecture: str, stream_it: AsyncCallbackHandler):
 
     template = """Du bist ein hilfreicher Tutor und kannst sehr gut erklären. Gegeben sind die folgenden extrahierten Teile eines Vorlesungstranskripts und eine Frage, erstelle eine finale Antwort mit Verweisen ("QUELLEN"). Wenn du die Antwort nicht weißt, sage einfach, dass du es nicht weißt. Versuche nicht, eine Antwort zu erfinden. Du erhälst dazu merhfach Informationen aus Vorlesungstranskripten in folgendem Format:
     Content: Ausschnitt aus dem Vorlesungstranskript, welchen du referenzieren kannst. Zu einem Content gehört immer der Source, welches auf ihn folgt.
-    Source: filename: Der Dateiname timestamp: Der timestamp aus den Metadaten. 
+    Source: filename: Der Dateiname 
+    timestamp: Der timestamp aus den Metadaten. 
 
-    Für alles, was du den contents benutzt, musst du den passenden filename und timestamp aus dem Source wie folgt hinzufügen: ^[[FILENAME.mp4 bei Stelle](/video?fileName=FILENAME.mp4&timeStamp=TIMESTAMP)]
+    Für alles, was du den contents benutzt, musst du den passenden filename und timestamp aus dem Source wie folgt hinzufügen: ^[[FILENAME bei Stelle](/video?fileName=FILENAME&timeStamp=TIMESTAMP)]
 
     Ein Beispiel:
-    Content: unterschiedlichen Fragenformate auch mal zu zeigen. Der Hauptteil der Klausur ist aber nach wie vor Freitext. Das heißt, es gibt auch ganz viele Freitextaufgaben, allerdings normalerweise wirklich nur mit ein paar Zeilen Text, also ein paar Sätzen, die Sie angeben müssen. Beispielsweise hier beschreiben Sie kurz die grundsätzliche Vorgehensweise bei der 4b5b-Codierung und ich gebe Ihnen häufig dann noch in Klammern Erklärungen an, was ich jetzt genau von Ihnen wissen will. Die bitte genau lesen. Source: filename: 11-1-Probeklausur.srt timestamp: 00:26:15,000
+    Content: unterschiedlichen Fragenformate auch mal zu zeigen. Der Hauptteil der Klausur ist aber nach wie vor Freitext. Das heißt, es gibt auch ganz viele Freitextaufgaben, allerdings normalerweise wirklich nur mit ein paar Zeilen Text, also ein paar Sätzen, die Sie angeben müssen. Beispielsweise hier beschreiben Sie kurz die grundsätzliche Vorgehensweise bei der 4b5b-Codierung und ich gebe Ihnen häufig dann noch in Klammern Erklärungen an, was ich jetzt genau von Ihnen wissen will. Die bitte genau lesen. Source: filename: 11-1-Probeklausur.mp4 timestamp: 00:26:15,000
     Beispiel-Antwort: In der Klausur werden hauptsächlich Freitextaufgaben gestellt, bei denen Sie in der Regel nur ein paar Sätze schreiben müssen. Zum Beispiel könnten Sie aufgefordert werden, die grundsätzliche Vorgehensweise bei der 4b5b-Codierung zu beschreiben, wobei in Klammern zusätzliche Erklärungen angegeben sein können, die genau lesen sollten  ^[[11-1-Probeklausur.mp4 an Stelle: 00:26:15,000](/video?fileName=11-1-Probeklausur.mp4&timeStamp=00:26:15,000)].
 
     Verfahre für folgende Frage nach dem gleichen Schema:

@@ -22,7 +22,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-
+import {MatRadioModule} from '@angular/material/radio';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 
 
@@ -49,7 +49,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
         MatDialogModule,
         MatCheckboxModule,
         MatExpansionModule,
-        DragDropModule
+        DragDropModule,
+        MatRadioModule
 
       ],
       exports: [
@@ -75,7 +76,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
         MatCheckboxModule,
         MatExpansionModule,
         MatTable,
-        DragDropModule
+        DragDropModule,
+        MatRadioModule
       ],
 })
 export class MaterialModule { }

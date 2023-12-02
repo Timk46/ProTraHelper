@@ -5,9 +5,17 @@
       <mat-label>Stelle eine Frage...</mat-label>
       <input matInput [(ngModel)]="question">
     </mat-form-field>
-    <button mat-raised-button style="font-size:24px; height:52px; width: 150px" color="primary" (click)="askQuestion()">Los</button>
+    <mat-radio-group
+  aria-labelledby="example-radio-group-label"
+  class="example-radio-group"
+  [(ngModel)]="lecture">
+    <mat-radio-button  class="example-radio-button" *ngFor="let lecture of lectureOptions" [value]="lecture">{{lecture}}</mat-radio-button>
+
+</mat-radio-group>
+
+    <button mat-raised-button style="font-size:24px; height:52px; width: 100px; margin-left: 20px" color="primary" (click)="askQuestion()">Los</button>
   </div>
-  <p style = "margin-top: -25px;" class="prose max-w-none text-center prose-gray prose-sm">Überprüfen Sie immer den Wahrheitsgehalt mit den verlinkten Vorlesungsvideos! Die Nachrichten werden von einem Large Language Model basierend auf dem Vorlesungstranskript erzeugt.</p>
+  <p style = "margin-top: -25px;" class="prose max-w-none text-center prose-gray prose-sm">Die Antworten werden mit generativer KI erzeugt! Überprüfen Sie immer die Vollständigkeit und den Wahrheitsgehalt mit den verlinkten Vorlesungsvideos!</p>
   <mat-divider></mat-divider>
 
   <div class="messages-container">
