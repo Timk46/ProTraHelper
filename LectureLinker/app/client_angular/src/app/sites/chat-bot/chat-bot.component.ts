@@ -31,7 +31,7 @@ export class ChatBotComponent {
   /**
    * The current lecture.
    */
-  lecture: string = 'OFP';
+  lecture: string = 'RN1';
 
   /**
    * The available lecture options.
@@ -49,9 +49,14 @@ export class ChatBotComponent {
   question: string = '';
 
   /**
-   * A boolean indicating if the chatbot is currently loading a response.
+   * A boolean indicating if the chatbot is currently waiting for the stream to start
    */
-  isloading: boolean = false;
+  isLoading: boolean = false;
+
+  /**
+   * A boolean indicating if the chatbot is currently streaming.
+   */
+  isStreaming: boolean = false;
 
   /**
    * The current loading answer from the chatbot.
@@ -104,7 +109,7 @@ export class ChatBotComponent {
       isBot: false,
     };
     this.messages.push(message);
-    this.isloading = true;
+    this.isLoading = true;
     this.messages.push({
       id: this.messages.length + 1,
       question: '',
@@ -114,18 +119,21 @@ export class ChatBotComponent {
     const chatSubscription = this.chatService.getChatStream(this.lecture, this.question)
     .subscribe({
       next: (data: string) => {
-        this.isloading = false;
+        this.isLoading = false;
+        this.isStreaming = true;
         this.currentLoadingAnswer += data;
         this.messages[this.messages.length - 1].question = this.markdownService.parse(this.currentLoadingAnswer);
       },
       error: (error) => {
         console.log(error);
-        this.isloading = false;
+        this.isLoading = false;
+        this.isStreaming = false;
         this.currentLoadingAnswer = '';
         chatSubscription.unsubscribe();
       },
       complete: () => {
-        this.isloading = false;
+        this.isLoading = false;
+        this.isStreaming = false;
         this.currentLoadingAnswer = '';
         console.log(JSON.stringify(this.messages[this.messages.length - 1]));
         chatSubscription.unsubscribe();

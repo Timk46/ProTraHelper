@@ -13,17 +13,18 @@
 
 </mat-radio-group>
 
-    <button mat-raised-button style="font-size:24px; height:52px; width: 100px; margin-left: 20px" color="primary" (click)="askQuestion()">Los</button>
+    <button *ngIf="!isStreaming" mat-raised-button style="font-size:24px; height:52px; width: 100px; margin-left: 20px" color="primary" (click)="askQuestion()">Los</button>
+    <button *ngIf="isStreaming" mat-raised-button disabled style="font-size:24px; height:52px; width: 100px; margin-left: 20px" color="primary" (click)="askQuestion()">Los</button>
   </div>
   <p style = "margin-top: -25px;" class="prose max-w-none text-center prose-gray prose-sm">Die Antworten werden mit generativer KI erzeugt! Überprüfen Sie immer die Vollständigkeit und den Wahrheitsgehalt mit den verlinkten Vorlesungsvideos!</p>
   <mat-divider></mat-divider>
 
   <div class="messages-container">
     <div *ngFor="let message of messages" class="chat-message" [class.user]="!message.isBot" [class.bot]="message.isBot">
-      <div *ngIf="message.isBot && message.question.length>2" class="prose max-w-none prose-stone prose-lg" [innerHTML]="message.question"></div>
-      <div *ngIf="!message.isBot && message.question.length>2" class="text-white prose max-w-none prose-stone prose-lg" [innerHTML]="message.question"></div>
+      <div *ngIf="message.isBot && message.question.length>2" class="prose max-w-none prose-stone prose-base" [innerHTML]="message.question"></div>
+      <div *ngIf="!message.isBot && message.question.length>2" class="text-white prose max-w-none prose-stone prose-base" [innerHTML]="message.question"></div>
     </div>
-    <mat-spinner *ngIf="isloading" style="margin-left: 50%; margin-top: 20px;"></mat-spinner>
+    <mat-spinner *ngIf="isLoading" style="margin-left: 50%; margin-top: 20px;"></mat-spinner>
 
   </div>
 </div>

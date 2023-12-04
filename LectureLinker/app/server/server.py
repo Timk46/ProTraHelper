@@ -20,10 +20,18 @@ from langchain.vectorstores.pgvector import PGVector
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.prompts import PromptTemplate
 from langchain.chains.query_constructor.base import AttributeInfo
-#import langchain 
-#langchain.debug = True  # Super praktisch: Finales Prompt wird ausgegeben!
+import langchain 
+langchain.debug = True  # Super praktisch: Finales Prompt wird ausgegeben!
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 os.environ["OPENAI_API_KEY"]="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"
 
@@ -96,16 +104,16 @@ async def run_call(query: str, lecture: str, stream_it: AsyncCallbackHandler):
             )
         ]
 
-    template = """Du bist ein hilfreicher Tutor und kannst sehr gut erklären. Gegeben sind die folgenden extrahierten Teile eines Vorlesungstranskripts und eine Frage, erstelle eine finale Antwort mit Verweisen ("QUELLEN"). Wenn du die Antwort nicht weißt, sage einfach, dass du es nicht weißt. Versuche nicht, eine Antwort zu erfinden. Du erhälst dazu merhfach Informationen aus Vorlesungstranskripten in folgendem Format:
+    template = """Du bist ein hilfreicher Tutor und du kannst sehr gut erklären. Gegeben sind die folgenden extrahierten Teile eines Vorlesungstranskripts und eine Frage. Erstelle eine finale Antwort mit Verweisen. Wenn du die Antwort nicht weißt, sage einfach, dass du es nicht weißt. Versuche nicht, eine Antwort zu erfinden. Du erhälst dazu merhfach Informationen aus Vorlesungstranskripten in folgendem Format:
     Content: Ausschnitt aus dem Vorlesungstranskript, welchen du referenzieren kannst. Zu einem Content gehört immer der Source, welches auf ihn folgt.
     Source: filename: Der Dateiname 
     timestamp: Der timestamp aus den Metadaten. 
 
-    Für alles, was du den contents benutzt, musst du den passenden filename und timestamp aus dem Source wie folgt hinzufügen: ^[[FILENAME bei Stelle](/video?fileName=FILENAME&timeStamp=TIMESTAMP)]
+    Für alles, was du den contents benutzt, musst du den passenden filename und timestamp aus dem Source wie genau nach folgendem Schema hinzufügen: ^[[FILENAME bei Stelle](/video?fileName=FILENAME&timeStamp=TIMESTAMP)]
 
     Ein Beispiel:
-    Content: unterschiedlichen Fragenformate auch mal zu zeigen. Der Hauptteil der Klausur ist aber nach wie vor Freitext. Das heißt, es gibt auch ganz viele Freitextaufgaben, allerdings normalerweise wirklich nur mit ein paar Zeilen Text, also ein paar Sätzen, die Sie angeben müssen. Beispielsweise hier beschreiben Sie kurz die grundsätzliche Vorgehensweise bei der 4b5b-Codierung und ich gebe Ihnen häufig dann noch in Klammern Erklärungen an, was ich jetzt genau von Ihnen wissen will. Die bitte genau lesen. Source: filename: 11-1-Probeklausur.mp4 timestamp: 00:26:15,000
-    Beispiel-Antwort: In der Klausur werden hauptsächlich Freitextaufgaben gestellt, bei denen Sie in der Regel nur ein paar Sätze schreiben müssen. Zum Beispiel könnten Sie aufgefordert werden, die grundsätzliche Vorgehensweise bei der 4b5b-Codierung zu beschreiben, wobei in Klammern zusätzliche Erklärungen angegeben sein können, die genau lesen sollten  ^[[11-1-Probeklausur.mp4 an Stelle: 00:26:15,000](/video?fileName=11-1-Probeklausur.mp4&timeStamp=00:26:15,000)].
+    Content: Der Hauptteil der Klausur ist aber nach wie vor Freitext. Das heißt, es gibt auch ganz viele Freitextaufgaben, allerdings normalerweise wirklich nur mit ein paar Zeilen Text, also ein paar Sätzen, die Sie angeben müssen. Source: filename: 11-1-Probeklausur timestamp: 00:26:15,000
+    Beispiel-Antwort: In der Klausur werden hauptsächlich Freitextaufgaben gestellt, bei denen Sie in der Regel nur ein paar Sätze schreiben müssen. ^[[11-1-Probeklausur an Stelle: 00:26:15,000](/video?fileName=11-1-Probeklausur&timeStamp=00:26:15,000)].
 
     Verfahre für folgende Frage nach dem gleichen Schema:
 
@@ -218,10 +226,3 @@ async def stream_video(request: Request, lecture: str, video_name: str):
             media_type="video/mp4",
             headers={"Content-Disposition": f"attachment;filename={video_name}.mp4"},
         )
-if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        host="localhost",
-        port=8000,
-        reload=True
-    )
