@@ -157,5 +157,83 @@ export class DiscussionViewService {
     return messageData;
   }
 
+  /**
+   * Toggles the solution status of a message and returns and sets the solution status of the discussion
+   * @param messageId
+   * @returns the new solution status as boolean
+   */
+  async toggleSolution(messageId: number, userId: number) : Promise<boolean> {
+    //get message solution status
+    const message = await this.prisma.message.findUnique({
+      where: {
+        id: messageId,
+      },
+      select: {
+        isSolution: true,
+        discussion: {
+          select: {
+            id: true,
+            author: {
+              select: {
+                userId: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!message) {
+      throw new Error('Message not found');
+    }
+
+    console.log(message.discussion.author.userId, userId);
+    //check if user is author of message
+    if (message.discussion.author.userId != userId) {
+      throw new Error('User is not author of message');
+    }
+
+    //set all messages in discussion to not solution except toggle message and init message
+    await this.prisma.message.updateMany({
+      where: {
+        discussionId: message.discussion.id,
+        NOT: {
+          id: messageId,
+          isInitiator: true
+        }
+      },
+      data: {
+        isSolution: false
+      }
+    });
+
+    //toggle message solution status and init message solution status
+    await this.prisma.message.updateMany({
+      where: {
+        discussionId: message.discussion.id,
+        OR: [
+          { id: messageId },
+          { isInitiator: true }
+        ]
+      },
+      data: {
+        isSolution: !message.isSolution
+      }
+    });
+    console.log(message.isSolution);
+
+    //set discussion solution status
+    await this.prisma.discussion.update({
+      where: {
+        id: message.discussion.id
+      },
+      data: {
+        isSolved: !message.isSolution
+      }
+    });
+
+    return !message.isSolution;
+  }
+
 
 }

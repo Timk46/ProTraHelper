@@ -1,7 +1,7 @@
 <div class="question-box">
   <div class="question-row">
     <div style="padding-left: 10px; padding-top: 14px;">
-      <app-discussion-votebox [messageId]="messageData.messageId" [isSolution]="messageData.isSolution"></app-discussion-votebox>
+      <app-discussion-votebox [messageId]="messageData.messageId" [isSolution]="messageData.isSolution" [canMarkAsSolution]="userIsAuthor"></app-discussion-votebox>
     </div>
 
     <div class="vertical-line"></div>

@@ -12,7 +12,7 @@
     </div>
     <div class="content mat-elevation-z8">
       <h1>Antworten</h1>
-      <app-discussion-view-message *ngFor="let message of messagesData" [messageData]="message"></app-discussion-view-message>
+      <app-discussion-view-message *ngFor="let message of messagesData" [messageData]="message" [userIsAuthor]="userId == initiatorMessage.authorId"></app-discussion-view-message>
     </div>
   </div>
 </div>

@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { discussionMessageVoteCreationDTO, discussionMessageVoteDTO } from '@DTOs/index';
+import { DiscussionViewService } from 'src/app/Services/discussion/discussion-view.service';
 import { DiscussionVoteService } from 'src/app/Services/discussion/discussion-vote.service';
 
 @Component({
@@ -10,6 +11,7 @@ import { DiscussionVoteService } from 'src/app/Services/discussion/discussion-vo
 export class DiscussionVoteboxComponent {
   @Input() messageId: number = -1; // to be changed on init
   @Input() isSolution : boolean = false;
+  @Input() canMarkAsSolution : boolean = false;
   //@Input() userId: number = 1; //HAS TO BE CHANGED
 
   userVoteStatus : number = 0; /* 0 = nicht gevotet, 1 = upvote, -1 = downvote */
@@ -22,7 +24,7 @@ export class DiscussionVoteboxComponent {
     userVoteStatus: 0
   }
 
-  constructor(private discussionVoteService: DiscussionVoteService) { }
+  constructor(private discussionVoteService: DiscussionVoteService, private discussionViewService: DiscussionViewService) { }
 
   /**
    * Gets the vote data for the message
@@ -57,6 +59,11 @@ export class DiscussionVoteboxComponent {
       this.voteData.userVoteStatus = 0;
     }
     this.resetTimerSetStatus();
+  }
+
+  onMarkAsSolution(event: Event) {
+    event.stopPropagation();
+    this.discussionViewService.toggleSolution(this.messageId).subscribe(isSolution => this.isSolution = isSolution);
   }
 
   /**

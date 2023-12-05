@@ -1,6 +1,7 @@
 import { discussionDTO, discussionMessageDTO, nodeNameDTO } from '@DTOs/index';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Subject, tap } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
 import { environment } from 'src/environments/environment';
 
@@ -8,6 +9,8 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class DiscussionViewService {
+
+  public toggleStatus: Subject<{messageId: number, isSolution: boolean}> = new Subject<{messageId: number, isSolution: boolean}>();
 
   constructor(private http: HttpClient) { }
 
@@ -37,4 +40,21 @@ export class DiscussionViewService {
   getMessages(discussionId: number) : Observable<discussionMessageDTO[]> {
     return this.http.get<discussionMessageDTO[]>(environment.server + `/discussion/view/messages/${discussionId}`)
   }
+
+  /**
+   * Toggles the solution status of a message and returns and sets the solution status of the discussion
+   * @param messageId
+   * @returns the new solution status as boolean
+   */
+  toggleSolution(messageId: number) : Observable<boolean> {
+    console.log('DiscussionViewService: toggleSolution')
+    return this.http.get<boolean>(environment.server + `/discussion/view/messages/toggleSolution/${messageId}`)
+      .pipe(
+        tap((toggleStatus: boolean) => {
+          this.toggleStatus.next({messageId: messageId, isSolution: toggleStatus});
+        })
+      );
+  }
+
+
 }

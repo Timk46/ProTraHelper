@@ -12,7 +12,7 @@ export class DiscussionCreationService {
   constructor(private http:HttpClient) { }
 
   /**
-   * Returns the anonymous user for a given user id and discussion id
+   * Returns the anonymous user for the logged in user by discussion id
    * @param userId
    * @param discussionId
    * @returns Observable<AnonymousUserDTO>
@@ -20,16 +20,6 @@ export class DiscussionCreationService {
   getAnonymousUser(discussionId: number) : Observable<AnonymousUserDTO>{
     return this.http.get<AnonymousUserDTO>(environment.server + `/discussion/creation/anonymousUser/${discussionId}`);
   }
-
-  /**
-   * Returns the anonymous user for a given user id and message id -- deprecated
-   * @param userId
-   * @param messageId
-   * @returns Observable<AnonymousUserDTO>
-   */
-  /* getAnonymousUserByMessageId(userId: number, messageId: number) : Observable<AnonymousUserDTO>{
-    return this.http.get<AnonymousUserDTO>(environment.server + `/discussion/creation/anonymousUserByMessageId/${userId}/${messageId}`);
-  } */
 
   /**
    * Creates a new anonymous user in the database and returns it

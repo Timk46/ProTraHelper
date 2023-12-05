@@ -20,9 +20,20 @@
   <div>
     <!-- <mat-icon *ngIf="isSolution" class="small-icon" style="padding-left: 3px;" title="Diese Frage wurde beantwortet.">check</mat-icon> -->
 
-    <span matTooltip="Diese Frage wurde als 'geklärt' gekennzeichnet.">
-      <mat-icon *ngIf="isSolution" class="small-icon" style="padding-left: 3px;">check</mat-icon>
+    <span matTooltip="Diese Frage ist beantwortet." *ngIf="isSolution && !canMarkAsSolution">
+      <mat-icon class="small-icon" style="padding-left: 3px;">check</mat-icon>
     </span>
+    <button mat-stroked-button *ngIf="isSolution && canMarkAsSolution" class="small-button" (click)="onMarkAsSolution($event)">
+      <span matTooltip="Diese Antwort nicht mehr als Lösung kennzeichnen.">
+        <mat-icon class="small-icon">check</mat-icon>
+      </span>
+    </button>
+    <button mat-button *ngIf="!isSolution && canMarkAsSolution" class="small-button" (click)="onMarkAsSolution($event)">
+      <span matTooltip="Diese Antowort als Lösung kennzeichnen.">
+        <mat-icon class="small-icon">done_outline</mat-icon>
+      </span>
+    </button>
+
   </div>
 
 

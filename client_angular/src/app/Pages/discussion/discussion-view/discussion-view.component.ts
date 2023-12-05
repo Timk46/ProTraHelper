@@ -3,6 +3,9 @@ import { discussionDTO } from '@DTOs/discussion.dto';
 import { Component, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DiscussionViewService } from 'src/app/Services/discussion/discussion-view.service';
+import { Subscription } from 'rxjs';
+import { UserService } from 'src/app/Services/auth/user.service';
+import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
 
 @Component({
   selector: 'app-discussion-view',
@@ -13,6 +16,8 @@ export class DiscussionViewComponent {
 
   conceptNodeName: string = 'dummy concept';
   messagesData: discussionMessageDTO[] = [];
+  subscriptions: Subscription[] = [];
+  userId: number;
 
   discussionData: discussionDTO = {
     id: -1,
@@ -37,19 +42,44 @@ export class DiscussionViewComponent {
 
   @Input() discussionId: number = -1;
 
-  constructor(private route: ActivatedRoute, private discussionViewService: DiscussionViewService) {
-    this.route.params.subscribe(params => {
+  constructor(private route: ActivatedRoute, private discussionViewService: DiscussionViewService, private discussionCreationService: DiscussionCreationService, private userService: UserService) {
+    this.userId = parseInt(this.userService.getTokenID());
+    const pSub = this.route.params.subscribe(params => {
       this.discussionId = parseInt(params['discussionId']);
-      console.log(this.discussionId);
+      // get anonymous user id
+      const auSub = this.discussionCreationService.getAnonymousUser(this.discussionId).subscribe(anonymousUser => {
+        if (anonymousUser) {
+          this.userId = anonymousUser.id;
+        }
+      });
+      this.subscriptions.push(auSub);
+      // get discussion data
       if (this.discussionId != -1) {
-        this.discussionViewService.getConceptNodeName(this.discussionId).subscribe(conceptNodeName => this.conceptNodeName = conceptNodeName.name);
-        this.discussionViewService.getDiscussion(this.discussionId).subscribe(discussion => {
+        const cnnSub = this.discussionViewService.getConceptNodeName(this.discussionId).subscribe(conceptNodeName => this.conceptNodeName = conceptNodeName.name);
+        const dSub = this.discussionViewService.getDiscussion(this.discussionId).subscribe(discussion => {
           this.discussionData = discussion;
           this.refreshMessages();
         });
+        this.subscriptions.push(cnnSub);
+        this.subscriptions.push(dSub);
       }
     });
+    this.subscriptions.push(pSub);
+    // get messages
+    const tsSub = this.discussionViewService.toggleStatus.subscribe(toggleStatus => {
+      console.log("got some toggle", toggleStatus);
+      this.messagesData.forEach(message => {
+        if (message.messageId != toggleStatus.messageId) {
+          message.isSolution = false;
+        } else {
+          message.isSolution = toggleStatus.isSolution;
+        }
+      });
+      this.initiatorMessage.isSolution = toggleStatus.isSolution;
+      this.discussionData.isSolved = toggleStatus.isSolution;
 
+    });
+    this.subscriptions.push(tsSub);
   }
 
   /**
@@ -66,11 +96,16 @@ export class DiscussionViewComponent {
    * @param messageId the id of the message to be separated from the messages (usually the initiating question message)
    */
   refreshMessages(discussionId: number = this.discussionId, messageId: number = this.discussionData.initMessageId) {
-    this.discussionViewService.getMessages(discussionId).subscribe(messages => {
+    const gmSub = this.discussionViewService.getMessages(discussionId).subscribe(messages => {
       this.messagesData = messages;
       this.initiatorMessage = this.getAndSeparateMessage(messageId);
       this.discussionData.commentCount = this.messagesData.length;
     });
+    this.subscriptions.push(gmSub);
+  }
+
+  ngOnDestory() {
+    this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
 
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
 import { DiscussionViewService } from './discussion-view.service';
 import { discussionMessageDTO, nodeNameDTO } from '@DTOs/index';
 import { RolesGuard, roles } from '@/auth/roles.guard';
@@ -53,6 +53,21 @@ export class DiscussionViewController {
       throw new Error('Invalid discussion id');
     }
     return this.viewService.getDiscussionMessages(Number(discussionId));
+  }
+
+  /**
+   * Toggles the solution status of a message and returns and sets the solution status of the discussion
+   * @param messageId
+   * @returns the new solution status as boolean
+   */
+  @roles('ANY')
+  @Get('messages/toggleSolution/:messageId')
+  async toggleSolution(@Param('messageId') messageId: number, @Req() req): Promise<boolean> {
+    debug && console.log('DiscussionViewController: toggleSolution')
+    if (isNaN(messageId)) {
+      throw new Error('Invalid discussion id');
+    }
+    return this.viewService.toggleSolution(Number(messageId), req.user.id);
   }
 
 

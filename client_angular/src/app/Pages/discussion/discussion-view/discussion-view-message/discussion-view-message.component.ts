@@ -1,6 +1,7 @@
 import { discussionMessageDTO } from '@DTOs/index';
 import { Component, Input, OnChanges } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
+import { UserService } from 'src/app/Services/auth/user.service';
 
 @Component({
   selector: 'app-discussion-view-message',
@@ -10,6 +11,8 @@ import { DomSanitizer } from '@angular/platform-browser';
 export class DiscussionViewMessageComponent implements OnChanges {
 
   readableDate: string = 'dummy date';
+
+  @Input() userIsAuthor: boolean = false;
 
   @Input() messageData : discussionMessageDTO = {
     messageId: -1,
