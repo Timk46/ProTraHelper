@@ -3,7 +3,6 @@
 }
 
 .content {
-  height: 80vh;
   margin: 16px;
   margin-left: 32px;
   padding:16px;
@@ -15,4 +14,13 @@
   font-size: 14px;
   color: lightgrey;
   border-radius: 10px;
+}
+
+.graph {
+  height: 30vh;
+  transition: height 0.5s;
+}
+
+.graph:hover {
+  height: 80vh;
 }
