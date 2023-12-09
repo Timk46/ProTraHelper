@@ -48,7 +48,7 @@ export class VideoTimeStampComponent implements OnInit {
     const params = this.parseHref(this.data.href);
     const fileName = params['fileName'];
     const timeStamp = params['timeStamp'];
-    this.titel = 'Video: ' + fileName + '   -   Beginn: ' + timeStamp;
+    this.titel = 'Video: ' + fileName + '   -   Beginn: ' + timeStamp.substring(0, 8);
 
     if (fileName) {
       this.videoFromName(fileName, this.data.lecture);

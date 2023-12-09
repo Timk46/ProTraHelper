@@ -1,49 +1,19 @@
 <!--Toolbar -> upper horizontal bar -->
 <mat-toolbar>
   <div class="toolbar-content">
-    <button mat-icon-button (click)="sidenav.toggle()">
-      <mat-icon *ngIf="!sidenav.opened">more_horiz</mat-icon>
-      <mat-icon *ngIf="sidenav.opened">more_vert</mat-icon>
-    </button>
-    <span>Tutor Kai: Lecture Linker</span>
+    <span style = "margin-left: 15px;">Tutor Kai: Lecture Linker</span>
   </div>
-  <img src="../../../assets/fak4.png" alt="Logo" class="toolbar-logo">
+  <img style = "margin-top: -2px; margin-bottom: 4px" src="../../../assets/fak4.png" alt="Logo" class="toolbar-logo">
 </mat-toolbar>
 
- <!--Sidenav -> left bar -->
- <mat-sidenav-container class="example-container">
-     <mat-sidenav #sidenav="matSidenav" class="mat-elevation-z8">
-         Tutor Kai: Lecture Linker
-         <mat-divider></mat-divider>
-           <button mat-button class="menu-button" routerLink="/chat" routerLinkActive="menu-button-active">
-             <mat-icon>chat</mat-icon>
-             <span class = "font-extrabold">Chat</span>
-           </button>
 
-          <a mat-button class="menu-button" href="https://www.bs.informatik.uni-siegen.de/lehre/rn1" target="_blank">
-            <mat-icon>insert_link</mat-icon>
-            <span>RN I: Script</span>
-          </a>
-          <a mat-button class="menu-button" href="https://moodle.uni-siegen.de/course/view.php?id=21984" target="_blank">
-            <mat-icon>insert_link</mat-icon>
-            <span>RN I: Moodle</span>
-          </a>
 
-          <mat-divider></mat-divider>
+<div class="content mat-elevation-z8">
 
-     </mat-sidenav>
+  <router-outlet></router-outlet>
 
-     <!--Content Area-->
-     <mat-sidenav-content>
+</div>
 
-         <div class="content mat-elevation-z8">
-
-          <router-outlet></router-outlet>
-
-         </div>
-
-     </mat-sidenav-content>
- </mat-sidenav-container>
 
 <!--Toolbar-> footer/bottom bar -->
  <mat-toolbar class="footer">

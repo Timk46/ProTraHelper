@@ -81,9 +81,11 @@ async def run_call(query: str, lecture: str, stream_it: AsyncCallbackHandler):
     COLLECTION_NAME = "RN1_chunksize1500overlap225"  ## OFP = OFP_ChunkSize1500overlap225 ; RNI = RN1_ChunkSize1500overlap225
     match lecture:
         case "RN1":
-            COLLECTION_NAME = "RN1_ChunkSize1500overlap225"
+            COLLECTION_NAME = "RN1_512_64"
+        case "RN2":
+            COLLECTION_NAME = "RN2_512_64"
         case "OFP":
-            COLLECTION_NAME = "OFP_ChunkSize1500overlap225"
+            COLLECTION_NAME = "OFP_512_64"
         case _:
             # Default. Falls die Lecture nicht existiert, wird ein entsprechender Fehler zurückgegeben
             raise HTTPException(status_code=404, detail="Lecture does not exist")
@@ -98,25 +100,16 @@ async def run_call(query: str, lecture: str, stream_it: AsyncCallbackHandler):
 
     metadata_field_info = [
             AttributeInfo(
-                name="source",
-                description="Der Dateiname, aus welchem der Content extrahiert wurde.",
+                name="Quelle",
+                description="STARTSOURCE Der Link zur Quelle im Markdown-Fußnotenformat zwischen ENDSOURCE",
                 type="string",
             )
         ]
 
     template = """Du bist ein hilfreicher Tutor und du kannst sehr gut erklären. Gegeben sind die folgenden extrahierten Teile eines Vorlesungstranskripts und eine Frage. Erstelle eine finale Antwort mit Verweisen. Wenn du die Antwort nicht weißt, sage einfach, dass du es nicht weißt. Versuche nicht, eine Antwort zu erfinden. Du erhälst dazu merhfach Informationen aus Vorlesungstranskripten in folgendem Format:
     Content: Ausschnitt aus dem Vorlesungstranskript, welchen du referenzieren kannst. Zu einem Content gehört immer der Source, welches auf ihn folgt.
-    Source: filename: Der Dateiname 
-    timestamp: Der timestamp aus den Metadaten. 
-
-    Für alles, was du den contents benutzt, musst du den passenden filename und timestamp aus dem Source wie genau nach folgendem Schema hinzufügen: ^[[FILENAME bei Stelle](/video?fileName=FILENAME&timeStamp=TIMESTAMP)]
-
-    Ein Beispiel:
-    Content: Der Hauptteil der Klausur ist aber nach wie vor Freitext. Das heißt, es gibt auch ganz viele Freitextaufgaben, allerdings normalerweise wirklich nur mit ein paar Zeilen Text, also ein paar Sätzen, die Sie angeben müssen. Source: filename: 11-1-Probeklausur timestamp: 00:26:15,000
-    Beispiel-Antwort: In der Klausur werden hauptsächlich Freitextaufgaben gestellt, bei denen Sie in der Regel nur ein paar Sätze schreiben müssen. ^[[11-1-Probeklausur an Stelle: 00:26:15,000](/video?fileName=11-1-Probeklausur&timeStamp=00:26:15,000)].
-
-    Verfahre für folgende Frage nach dem gleichen Schema:
-
+    Source: Die Quelle für den vorherigen Content. ALLES zwischen STARTSOURCE und ENDSOURCE inklusive ^ muss exakt übernommen werden, wenn der Content referenziert wird.
+    Hinter JEDE EINZELNE Aussage muss direkt die zugehörige passende Quelle wie beschrieben gesetzt werden.
         Frage: {question}
         =========
         {summaries}
@@ -133,7 +126,7 @@ async def run_call(query: str, lecture: str, stream_it: AsyncCallbackHandler):
     qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
         llm=llm2,
         chain_type="stuff",
-        retriever=store.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": .7, "k": 15}, metadata_field_info=metadata_field_info), # https://python.langchain.com/docs/modules/data_connection/retrievers/vectorstore
+        retriever=store.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": .7, "k": 10}, metadata_field_info=metadata_field_info), # https://python.langchain.com/docs/modules/data_connection/retrievers/vectorstore
         chain_type_kwargs=chain_type_kwargs,
         return_source_documents=True,
         verbose=True
@@ -186,6 +179,8 @@ async def stream_video(request: Request, lecture: str, video_name: str):
     match lecture:
         case "RN1":
             VIDEO_FOLDER = './storage/lectureVideos/RN1/'
+        case "RN2":
+            VIDEO_FOLDER = './storage/lectureVideos/RN2/'
         case "OFP":
             VIDEO_FOLDER = './storage/lectureVideos/OFP/' 
         case _:

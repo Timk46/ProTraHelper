@@ -19,7 +19,7 @@ mat-toolbar{
 }
 
 .toolbar-logo {
-  max-height: 50px;
+  max-height: 40px;
 }
 
 mat-sidenav {
@@ -36,14 +36,13 @@ mat-sidenav {
 .content {
   height: calc(100vh - 98px);
   margin: 16px;
-  margin-left: 32px;
   padding:16px;
   //display: flex;
   //justify-content: center;
   //align-items: center;
 
   contain: content;
-  overflow-y: scroll;
+
   scrollbar-width: thin;
 
   font-size: 14px;
@@ -58,6 +57,7 @@ mat-sidenav-container {
 }
 
 .mat-elevation-z8 {
+  margin-top: -2px;
   background: $snowstorm_1;
 }
 

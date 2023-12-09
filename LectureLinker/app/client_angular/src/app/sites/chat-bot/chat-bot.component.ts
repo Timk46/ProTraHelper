@@ -36,7 +36,7 @@ export class ChatBotComponent {
   /**
    * The available lecture options.
    */
-  lectureOptions: string[] = ['OFP', 'RN1'];
+  lectureOptions: string[] = ['OFP', 'RN1', 'RN2'];
 
   /**
    * An array of messages exchanged in the chat.

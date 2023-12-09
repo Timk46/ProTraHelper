@@ -1,4 +1,4 @@
 # all recordings only local hosted on our servers.
-app/server/storage/lectureVideos/OFP/*
-app/server/storage/lectureVideos/RN1/*
+app/server/storage/lectureVideos/*
 transcripts/*
+__pycache__
