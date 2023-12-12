@@ -937,28 +937,86 @@ await prisma.file.create({
   });
 
   // Question
+  // Question
   const question = await prisma.question.create({
     data: {
-      name: 'Question 1',
-      description: 'Description for Question 1',
-      score: 10,
-      type: 'MC',
+      name: 'Primitiver Datentyp',
+      description: 'The first MC-Question in HeFL',
+      score: 1  ,
+      type: 'SC',
       author: { connect: { id: adminUser.id } },
+      text: 'Welcher der folgenden Datentypen in Java ist primitiv?',
+      conceptNode: { connect: { id: conceptNode.id } },
     },
   });
 
-  await prisma.feedback.create({
+  const questionVersion = await prisma.questionVersion.create({
     data: {
-      name: 'Feedback1',
-      text: 'This is a feedback.',
-      question: { connect: { id: question.id } },
+        question: { connect: { id: question.id } },
+        version: 1
     },
   });
 
   const mcQuestion = await prisma.mCQuestion.create({
     data: {
       isSC: false,
-      question: { connect: { id: question.id } },
+      questionVersion: { connect: { id: questionVersion.id } },
+    },
+  });
+
+  const mcOption1 = await prisma.mCOption.create({
+    data: {
+      text: 'String',
+      is_correct: false,
+    },
+  });
+
+  const mcOption2 = await prisma.mCOption.create({
+    data: {
+      text: 'int',
+      is_correct: true,
+    },
+  });
+
+  const mcOption3 = await prisma.mCOption.create({
+    data: {
+      text: 'double',
+      is_correct: false,
+    },
+  });
+
+  const mcOption4 = await prisma.mCOption.create({
+    data: {
+      text: 'ArrayList',
+      is_correct: false,
+    },
+  });
+
+  const mcQuestionOption1 = await prisma.mCQuestionOption.create({
+    data: {
+      question: { connect: { id: mcQuestion.id } },
+      option: { connect: { id: mcOption1.id } },
+    },
+  });
+
+  const mcQuestionOption2 = await prisma.mCQuestionOption.create({
+    data: {
+      question: { connect: { id: mcQuestion.id } },
+      option: { connect: { id: mcOption2.id } },
+    },
+  });
+
+  const mcQuestionOption3 = await prisma.mCQuestionOption.create({
+    data: {
+      question: { connect: { id: mcQuestion.id } },
+      option: { connect: { id: mcOption3.id } },
+    },
+  });
+
+  const mcQuestionOption4 = await prisma.mCQuestionOption.create({
+    data: {
+      question: { connect: { id: mcQuestion.id } },
+      option: { connect: { id: mcOption4.id } },
     },
   });
 
