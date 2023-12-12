@@ -1,27 +1,38 @@
-
-<div class =" content mat-elevation-z8">
-<h1>Concept Overview</h1>
-<h3>Testdata currently only for Arrays (in Graph) -> then Card for Content Node 1</h3>
+<div class=" content mat-elevation-z8">
+  <h1>Concept Overview</h1>
+  <p style="width: fit-content"
+    matTooltip="Testdata currently only for Arrays (in Graph) -> then Card for Content Node 1; active Concept Node Id: {{activeConceptNode.databaseId}}; active Concept Node Name: {{activeConceptNode.name}}">
+    dev info</p>
+  <!-- <h3>Testdata currently only for Arrays (in Graph) -> then Card for Content Node 1</h3>
 active Concept Node Id: {{activeConceptNode.databaseId}} <br>
-active Concept Node Name: {{activeConceptNode.name}} <br>
+active Concept Node Name: {{activeConceptNode.name}} <br> -->
 
-<mat-tab-group animationDuration="0ms">
-  <mat-tab label="Content">
-    <app-contentBoard [contentsForActiveConceptNode]="contentsForActiveConceptNode" [activeConceptNodeId]="activeConceptNode.databaseId"></app-contentBoard> <!--Communication to Child-Component-->
-  </mat-tab>
+  <mat-tab-group animationDuration="0ms">
+    <mat-tab label="Content">
+      <div class="tab-content-container">
+        <app-contentBoard class="tab-content" [contentsForActiveConceptNode]="contentsForActiveConceptNode"
+          [activeConceptNodeId]="activeConceptNode.databaseId"></app-contentBoard>
+        <!--Communication to Child-Component-->
+      </div>
+    </mat-tab>
 
-  <mat-tab label="Aufgaben">
-    Here we will show Cards for each connected Task, which will open them (for example Coding Task in Tutor-Kai)
-  </mat-tab>
+    <mat-tab label="Aufgaben">
+      <div class="tab-content-container">
+        Here we will show Cards for each connected Task, which will open them (for example Coding Task in Tutor-Kai)
+      </div>
+    </mat-tab>
 
-  <mat-tab label="Kompetenzen">
-    <app-competencies [contentsForActiveConceptNode]="contentsForActiveConceptNode"></app-competencies>
-  </mat-tab>
+    <mat-tab label="Kompetenzen">
+      <div class="tab-content-container">
+        <app-competencies [contentsForActiveConceptNode]="contentsForActiveConceptNode"></app-competencies>
+      </div>
+    </mat-tab>
 
-  <mat-tab label="Diskussion">
-    <app-discussion-list [activeConceptNodeId]="activeConceptNode.databaseId" ></app-discussion-list>
-  </mat-tab>
-</mat-tab-group>
+    <mat-tab label="Diskussion">
+      <div class="tab-content-container">
+        <app-discussion-list [activeConceptNodeId]="activeConceptNode.databaseId"></app-discussion-list>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
 
 </div>
-

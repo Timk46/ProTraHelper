@@ -18,9 +18,9 @@
 
 .graph {
   height: 30vh;
-  transition: height 0.5s;
+  transition: height 0.2s;
 }
 
 .graph:hover {
-  height: 80vh;
+  height: 60vh;
 }

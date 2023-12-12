@@ -22,3 +22,11 @@
   font-size: 14px;
   border-radius: 10px;
 }
+
+.tab-content-container {
+  margin: 5px;
+  padding: 10px;
+  border-radius: 10px;
+/*   background-color: #C0E0FC; */
+  background-color: #eceff4;
+}
