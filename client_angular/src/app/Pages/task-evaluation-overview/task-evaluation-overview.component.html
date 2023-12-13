@@ -1,0 +1,52 @@
+<mat-form-field>
+    <input matInput placeholder="Filter Studierende" [(ngModel)]="searchTerm" (input)="filterPanels()">
+</mat-form-field>
+
+<mat-accordion>
+    <!--example student-->
+    <mat-expansion-panel *ngFor="let panel of filteredPanels">
+        <mat-expansion-panel-header>
+            <mat-panel-title>Task Evaluation Overview for {{ panel.title }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-card class="task-progress-card">
+            <mat-card-content>
+                <h2>Fortschritt für Strings</h2>
+                <section>
+                    <mat-progress-bar mode="determinate" value="40" color="warn"></mat-progress-bar>
+                </section>   
+            </mat-card-content>
+        </mat-card>
+        <mat-card class="task-progress-card">
+            <mat-card-content>
+                <h2>Fortschritt für Kontrollstrukturen</h2>
+                <section>
+                    <mat-progress-bar mode="determinate" value="60" color="warn"></mat-progress-bar>
+                </section>   
+            </mat-card-content>
+        </mat-card>
+        <mat-card class="task-progress-card">
+            <mat-card-content>
+                <h2>Fortschritt für Datentypen</h2>
+                <section>
+                    <mat-progress-bar mode="determinate" value="30" color="warn"></mat-progress-bar>
+                </section>   
+            </mat-card-content>
+        </mat-card>
+        <mat-card class="task-progress-card">
+            <mat-card-content>
+                <h2>Fortschritt für Exceptions</h2>
+                <section>
+                    <mat-progress-bar mode="determinate" value="80" color=""></mat-progress-bar>
+                </section>   
+            </mat-card-content>
+        </mat-card>
+        <mat-card class="task-progress-card">
+            <mat-card-content>
+                <h2>Fortschritt für Schleifen</h2>
+                <section>
+                    <mat-progress-bar mode="determinate" value="90" color=""></mat-progress-bar>
+                </section>   
+            </mat-card-content>
+        </mat-card>
+    </mat-expansion-panel>
+</mat-accordion>

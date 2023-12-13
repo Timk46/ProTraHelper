@@ -16,6 +16,7 @@ import { DiscussionListComponent } from './Pages/discussion/discussion-list/disc
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 import { LoginComponent } from './Pages/login/login.component';
 import { LoggedInGuard } from './Guards/is-logged-in.guard';
+import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overview/task-evaluation-overview.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -32,6 +33,7 @@ const routes: Routes = [
   { path: 'chatbot', component: ChatBotComponent, canActivate: [LoggedInGuard] },
   { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard] },
   { path: 'discussion-view/:discussionId', component: DiscussionViewComponent, canActivate: [LoggedInGuard] },
+  { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent },
 
   // just for testing
   { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },

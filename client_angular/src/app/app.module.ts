@@ -43,6 +43,7 @@ import { DiscussionPrecreationComponent } from './Pages/discussion/discussion-cr
 import { TaskOverviewComponent } from './Pages/task-overview/task-overview.component';
 import { MatBadgeModule } from '@angular/material/badge';
 import {ProgressBarMode, MatProgressBarModule, MatProgressBar} from '@angular/material/progress-bar';
+import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overview/task-evaluation-overview.component';
 
 
 
@@ -74,6 +75,7 @@ import {ProgressBarMode, MatProgressBarModule, MatProgressBar} from '@angular/ma
     DiscussionCreationComponent,
     DiscussionPrecreationComponent,
     TaskOverviewComponent,
+    TaskEvaluationOverviewComponent,
   ],
   imports: [
     BrowserModule,
