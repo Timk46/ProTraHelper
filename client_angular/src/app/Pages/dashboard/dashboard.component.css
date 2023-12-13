@@ -17,10 +17,10 @@
 }
 
 .graph {
-  height: 30vh;
-  transition: height 0.2s;
+  height: 20vh;
+  transition: height 0.3s;
 }
 
 .graph:hover {
-  height: 60vh;
+  height: 70vh;
 }
