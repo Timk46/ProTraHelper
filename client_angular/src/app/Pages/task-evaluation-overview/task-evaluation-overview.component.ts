@@ -20,6 +20,7 @@ export class TaskEvaluationOverviewComponent {
 
   filteredPanels: any[] = [];
   searchTerm: string = '';
+  isSelected : boolean = false;
 
   constructor() {
     this.filteredPanels = this.panels;
@@ -29,5 +30,9 @@ export class TaskEvaluationOverviewComponent {
     this.filteredPanels = this.panels.filter(panel =>
       panel.title.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
+  }
+
+  toggleSelection() {
+    this.isSelected = !this.isSelected;
   }
 }
