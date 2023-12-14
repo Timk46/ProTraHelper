@@ -1020,6 +1020,27 @@ await prisma.file.create({
     },
   });
 
+  // Free Text Question
+  const questionFreeText = await prisma.question.create({
+    data: {
+      name: 'Primitiver Datentyp - Freitext',
+      description: 'Beschreibe in eigenen Worten, was ein primitiver Datentyp ist.',
+      score: 1  ,
+      type: 'FreeText',
+      author: { connect: { id: adminUser.id } },
+      text: 'Primitive Datentypen',
+      conceptNode: { connect: { id: conceptNode.id } },
+    },
+  });
+
+  const questionFreeTextVersion = await prisma.questionVersion.create({
+    data: {
+        question: { connect: { id: questionFreeText.id } },
+        version: 1,
+        isApproved : true
+    },
+  });
+
   // Discussion, Message --------------------------------------------------------------
   const anonymousAdmin = await prisma.anonymousUser.create({
     data: {

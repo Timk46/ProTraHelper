@@ -44,6 +44,7 @@ import { TaskOverviewComponent } from './Pages/task-overview/task-overview.compo
 import { MatBadgeModule } from '@angular/material/badge';
 import {ProgressBarMode, MatProgressBarModule, MatProgressBar} from '@angular/material/progress-bar';
 import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overview/task-evaluation-overview.component';
+import { FreeTextTaskComponent } from './Pages/contentView/contentElement/free-text-task/free-text-task.component';
 
 
 
@@ -76,6 +77,7 @@ import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overvie
     DiscussionPrecreationComponent,
     TaskOverviewComponent,
     TaskEvaluationOverviewComponent,
+    FreeTextTaskComponent,
   ],
   imports: [
     BrowserModule,
