@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ChatBotMessageDTO } from '@DTOs/chatBot.dto';
-import { ChatBotService } from 'src/app/Services/ai/chat-bot.service';
+import { LlmService } from 'src/app/Services/ai/llm.service';
 import { MarkdownService } from 'src/app/Services/markdown/markdown.service';
 
 export interface DialogData {
@@ -27,9 +27,10 @@ export class ChatBotDialogComponent {
 
   messages: ChatBotMessageDTO[] = [];
   question: string = '';
+  tempMessage: string = "";
 
   constructor(
-    private chatBotService: ChatBotService,
+    private llmService: LlmService,
     private markdownService: MarkdownService,
     public dialogRef: MatDialogRef<ChatBotDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData
@@ -48,23 +49,44 @@ export class ChatBotDialogComponent {
    */
   askQuestion(): void {
     const message: ChatBotMessageDTO = {
-      id: this.messages.length + 1,
+      id: this.messages.length,
       question: this.question,
       createdAt: new Date(),
       isBot: false,
     };
     this.messages.push(message);
-    this.chatBotService.askQuestion(this.question).subscribe((response) => {
-      const botMessage: ChatBotMessageDTO = {
-        id: this.messages.length + 1,
-        question: this.markdownService.parse(response.answer), // parse markdown to html here
-        createdAt: new Date(),
-        isBot: true,
-        usedChunks: response.usedChunks,
-      };
-      console.log(botMessage.usedChunks);
-      this.messages.push(botMessage);
+    const answerId = this.messages.length;
+    let isFirstResponse: boolean = true;
+
+    const botMessage: ChatBotMessageDTO = {
+      id: answerId,
+      question: '', // acutally answer not question
+      createdAt: new Date(),
+      isBot: true,
+    };
+    this.messages.push(botMessage);
+
+    // getLlmAnswer only used for demonstration purposes here!
+    const test = this.llmService.getLlmAnswer(this.question).subscribe((response) => {
+      console.log("Basic GPT-4 QA Test Answer: " + response);
     });
-    this.question = '';
+
+
+    this.llmService.getLlmAnswerStream(this.question).subscribe({
+      next: (response) => {
+        if (isFirstResponse) {
+          isFirstResponse = false;
+        }
+        this.tempMessage += response;
+        this.messages[this.messages.length -1].question = this.markdownService.parse(this.tempMessage);
+      },
+      error: (error) => {
+        console.log(error);
+      },
+      complete: () => {
+        console.log("AI Answer for Querstion: '" + this.question + "' completed.");
+      },
+    });
   }
 }
+

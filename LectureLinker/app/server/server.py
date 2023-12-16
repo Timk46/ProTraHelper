@@ -1,4 +1,4 @@
-# Start with uvicorn main:app --reload
+# Start with uvicorn server:app --reload
 import os
 import asyncio
 from typing import Any

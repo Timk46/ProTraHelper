@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ChatBotService } from './chat-bot.service';
 import { ChatBotController } from './chat-bot.controller';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { HttpModule } from '@nestjs/axios';
+import { LlmBasicPromptService } from '../services/llmBasicPrompt.service';
+import { RagService } from '../services/rag.service';
 
 @Module({
-  providers: [ChatBotService,],
+  providers: [LlmBasicPromptService, RagService],
   imports: [PrismaModule, HttpModule],
   controllers: [ChatBotController]
 })
