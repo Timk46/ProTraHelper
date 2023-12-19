@@ -26,15 +26,15 @@ enum contentElementType {
 }
 
 model User {
-  id                   Int                  @id @default(autoincrement())
-  email                String               @unique
+  id                   Int                   @id @default(autoincrement())
+  email                String                @unique
   firstname            String
   lastname             String
   password             String
-  createdAt            DateTime             @default(now())
-  globalRole           GlobalRole           @default(STUDENT)
+  createdAt            DateTime              @default(now())
+  globalRole           GlobalRole            @default(STUDENT)
   modules              Module[]
-  currentConcept       ConceptNode?         @relation(fields: [currentconceptNodeId], references: [id], onDelete: SetNull) // last concept the user has visited
+  currentConcept       ConceptNode?          @relation(fields: [currentconceptNodeId], references: [id], onDelete: SetNull) // last concept the user has visited
   currentconceptNodeId Int?
   conceptUser          UserConcept[]
   question             Question[]
@@ -44,6 +44,7 @@ model User {
   userMCAnswer         UserMCAnswer[]
   chatBotMessage       ChatBotMessage[]
   Vote                 Vote[]
+  UserContentProgress  UserContentProgress[]
 }
 
 model Module {
@@ -122,15 +123,16 @@ model ConceptEdge {
 }
 
 model ContentNode {
-  id              Int              @id @default(autoincrement())
-  name            String
-  description     String
-  prerequisites   ContentEdge[]    @relation("prerequisiteContent")
-  successors      ContentEdge[]    @relation("successorContent")
-  requires        Requirement[]
-  trains          Training[]
-  discussions     Discussion[]
-  contentElements ContentElement[]
+  id                  Int                   @id @default(autoincrement())
+  name                String
+  description         String
+  prerequisites       ContentEdge[]         @relation("prerequisiteContent")
+  successors          ContentEdge[]         @relation("successorContent")
+  requires            Requirement[]
+  trains              Training[]
+  discussions         Discussion[]
+  contentElements     ContentElement[]
+  UserContentProgress UserContentProgress[]
 }
 
 model ContentEdge {
@@ -422,8 +424,8 @@ model Message {
 model Vote {
   id        Int     @id @default(autoincrement())
   isUpvote  Boolean @default(true) // true if upvote, false if downvote
-  user    User    @relation(fields: [userId], references: [id])
-  userId  Int
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
   message   Message @relation(fields: [messageId], references: [id])
   messageId Int
 
@@ -433,12 +435,26 @@ model Vote {
 //********************************************************************************************* End Discussion
 
 model ChatBotMessage {
-  id        Int      @id @default(autoincrement())
-  question  String
-  answer    String?  @db.Text
-  createdAt DateTime @default(now())
-  isBot     Boolean  @default(false)
-  usedChunks String? @db.Text
-  user             User?           @relation(fields: [userId], references: [id])
-  userId           Int?
+  id         Int      @id @default(autoincrement())
+  question   String
+  answer     String?  @db.Text
+  createdAt  DateTime @default(now())
+  isBot      Boolean  @default(false)
+  usedChunks String?  @db.Text
+  user       User?    @relation(fields: [userId], references: [id])
+  userId     Int?
 }
+
+//********************************************************************************************* Begin ContentView Progress
+
+model UserContentProgress {
+  id            Int         @id @default(autoincrement())
+  user          User        @relation(fields: [userId], references: [id])
+  userId        Int
+  contentNode   ContentNode @relation(fields: [contentNodeId], references: [id])
+  contentNodeId Int
+  markedAsDone  Boolean     @default(false)
+  updatedAt     DateTime    @updatedAt
+}
+
+//********************************************************************************************* End ContentView Progress
