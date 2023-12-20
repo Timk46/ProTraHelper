@@ -1,16 +1,20 @@
-<mat-form-field>
+<p style="margin: 4px;">grün = Prüfungsvorleistung erfüllt</p>
+<p style="margin: 4px;">gelb = Prüfungsvorleistung teilweise erfüllt</p>
+<p style="margin: 4px;">rot = Prüfungsvorleistung nicht erfüllt</p>
+<mat-form-field style="display: flex; justify-content: center; align-items: center; margin: 4px;">
     <input matInput placeholder="Filter Studierende" [(ngModel)]="searchTerm" (input)="filterPanels()">
 </mat-form-field>
 
+
 <mat-accordion>
     <!--example student-->
-    <mat-expansion-panel *ngFor="let panel of filteredPanels" (click)="toggleSelection()">
-        <mat-expansion-panel-header>
+    <mat-expansion-panel *ngFor="let panel of filteredPanels" class="show-details">
+        <mat-expansion-panel-header class="{{panel.status}}">
             <mat-panel-title>{{ panel.title }}</mat-panel-title>
         </mat-expansion-panel-header>
         <mat-card class="task-progress-card">
-            <mat-card-content class="failed">
-                <h3>Strings</h3>
+            <mat-card-content class="{{panel.status}}">
+                <h3>Gesamtübersicht (gemittelt)</h3>
                 <section>
                     Faktenwissen (60%)
                     <mat-progress-bar mode="determinate" value="60" color="warn"></mat-progress-bar>
@@ -21,44 +25,62 @@
                 </section>  
             </mat-card-content>
         </mat-card>
-        <mat-card class="task-progress-card">
-            <mat-card-content class="failed">
-                <h3>Kontrollstrukturen</h3>
-                <section>
-                    Faktenwissen (50%)
-                    <mat-progress-bar mode="determinate" value="50" color="warn"></mat-progress-bar>
-                </section>
-                <section>
-                    Programmieraufgaben (39%)
-                    <mat-progress-bar mode="determinate" value="30" color="warn"></mat-progress-bar>
-                </section>      
-            </mat-card-content>
-        </mat-card>
-        <mat-card class="task-progress-card">
-            <mat-card-content class="floating">
-                <h3>Datentypen</h3>
-                <section>
-                    Faktenwissen (60%)
-                    <mat-progress-bar mode="determinate" value="60" color="warn"></mat-progress-bar>
-                </section>
-                <section>
-                    Programmieraufgaben (80%)
-                    <mat-progress-bar mode="determinate" value="80" color=""></mat-progress-bar>
-                </section>     
-            </mat-card-content>
-        </mat-card>
-        <mat-card class="task-progress-card">
-            <mat-card-content class="passed">
-                <h3>Exceptions</h3>
-                <section>
-                    Faktenwissen (90%)
-                    <mat-progress-bar mode="determinate" value="90" color=""></mat-progress-bar>
-                </section>
-                <section>
-                    Programmieraufgaben (100%)
-                    <mat-progress-bar mode="determinate" value="100" color=""></mat-progress-bar>
-                </section>  
-            </mat-card-content>
-        </mat-card>
+        <mat-expansion-panel class="show-details">
+            <mat-expansion-panel-header>
+                <mat-panel-title>Detailansicht</mat-panel-title>
+            </mat-expansion-panel-header>
+            <mat-card class="task-progress-card">
+                <mat-card-content class="failed">
+                    <h3>Strings</h3>
+                    <section>
+                        Faktenwissen (60%)
+                        <mat-progress-bar mode="determinate" value="60" color="warn"></mat-progress-bar>
+                    </section>
+                    <section>
+                        Programmieraufgaben (40%)
+                        <mat-progress-bar mode="determinate" value="40" color="warn"></mat-progress-bar>
+                    </section>  
+                </mat-card-content>
+            </mat-card>
+            <mat-card class="task-progress-card">
+                <mat-card-content class="failed">
+                    <h3>Kontrollstrukturen</h3>
+                    <section>
+                        Faktenwissen (50%)
+                        <mat-progress-bar mode="determinate" value="50" color="warn"></mat-progress-bar>
+                    </section>
+                    <section>
+                        Programmieraufgaben (39%)
+                        <mat-progress-bar mode="determinate" value="30" color="warn"></mat-progress-bar>
+                    </section>      
+                </mat-card-content>
+            </mat-card>
+            <mat-card class="task-progress-card">
+                <mat-card-content class="floating">
+                    <h3>Datentypen</h3>
+                    <section>
+                        Faktenwissen (60%)
+                        <mat-progress-bar mode="determinate" value="60" color="warn"></mat-progress-bar>
+                    </section>
+                    <section>
+                        Programmieraufgaben (80%)
+                        <mat-progress-bar mode="determinate" value="80" color=""></mat-progress-bar>
+                    </section>     
+                </mat-card-content>
+            </mat-card>
+            <mat-card class="task-progress-card">
+                <mat-card-content class="passed">
+                    <h3>Exceptions</h3>
+                    <section>
+                        Faktenwissen (90%)
+                        <mat-progress-bar mode="determinate" value="90" color=""></mat-progress-bar>
+                    </section>
+                    <section>
+                        Programmieraufgaben (100%)
+                        <mat-progress-bar mode="determinate" value="100" color=""></mat-progress-bar>
+                    </section>  
+                </mat-card-content>
+            </mat-card>
+        </mat-expansion-panel>
     </mat-expansion-panel>
 </mat-accordion>

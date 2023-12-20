@@ -1,11 +1,20 @@
 <p>Task-Overview for ConceptNodeID: {{activeConceptNodeId}}</p>
-<p>Taks-IDs for Concept: {{questionsForConcept}}</p>
+<p>Taks-IDs for Concept: {{questionsIDsForConcept}}</p>
 
 <div class="taskProgress-Container">
-    <mat-card class="task-progress-card">
+    <mat-card class="task-progress-card" class="failed">
+        <mat-card-header>
+            <mat-card-title-group> 
+                <mat-card-title>Fortschritt für {{activeConceptNodeId}}</mat-card-title>
+            </mat-card-title-group>
+        </mat-card-header>
         <mat-card-content>
-            <h2>Fortschritt für {{activeConceptNodeId}}</h2>
             <section>
+                Faktenwissen (60%)
+                <mat-progress-bar mode="determinate" value="60" color="warn"></mat-progress-bar>
+            </section>
+            <section>
+                Programmieraufgaben (40%)
                 <mat-progress-bar mode="determinate" value="40" color="warn"></mat-progress-bar>
             </section>
         </mat-card-content>
@@ -13,19 +22,18 @@
 </div>
 
 <div class="taskOverview-container">
-   
-    <mat-card *ngFor="let question of questionsForConcept" class="task-overview-card" (click)="onTaskClick(question)">
+    <mat-card *ngFor="let question of studentQuestionStutus" class="task-overview-card" (click)="onTaskClick(question)" [ngClass]="{'passed' : question.passed}">
         <mat-card-header>
-            <mat-card-title-group>
+            <mat-card-title-group> 
                 <mat-card-title>Aufgabe</mat-card-title>
             </mat-card-title-group>
         </mat-card-header>  
         <mat-card-content>
-            Versuche: 2
+            {{question.type}}<br>
+            Versuche: {{question.attempts}}
         </mat-card-content>
         <mat-card-footer>
-            <mat-progress-bar mode="determinate" value="33" color="warn"></mat-progress-bar>
+            <mat-progress-bar mode="determinate" value="{{question.progress}}" color="{{question.color}}"></mat-progress-bar>
         </mat-card-footer>
     </mat-card>
-    
 </div>

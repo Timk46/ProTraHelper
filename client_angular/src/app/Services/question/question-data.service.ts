@@ -37,11 +37,11 @@ export class QuestionDataService {
   }
 
   createUserMCAnswer(userId: number, mcQuestionId: number) : Observable<UserMCAnswerDTO> {
+    console.log('create user mc answer for question ' + mcQuestionId + ' and user ' + userId);
     return this.http.post<UserMCAnswerDTO>(environment.server + `/question-data/userMCAnswer/create`, {userId, mcQuestionId});
   }
   
   createUserMCOptionSelected(userMCAnswerId: number, mcOptionId: number) : Observable<UserMCOptionSelectedDTO> {
-    console.log('userMCOptionSelected created');
     return this.http.post<UserMCOptionSelectedDTO>(environment.server + `/question-data/userMCOptionSelected/create`, {userMCAnswerId, mcOptionId});
   }
 

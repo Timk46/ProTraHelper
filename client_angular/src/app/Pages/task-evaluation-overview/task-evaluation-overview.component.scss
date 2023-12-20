@@ -3,10 +3,6 @@
     display: flex;
 }
 
-.selected {
-    background-color: grey;
-}
-
 .passed {
     background-color: rgb(0, 255, 0, 0.3);
 }
@@ -17,4 +13,8 @@
 
 .failed {
     background-color: rgb(255, 0, 0, 0.3);
+}
+
+.show-details {
+    margin: 4px;
 }
