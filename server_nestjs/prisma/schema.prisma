@@ -454,6 +454,7 @@ model UserContentProgress {
   contentNode   ContentNode @relation(fields: [contentNodeId], references: [id])
   contentNodeId Int
   markedAsDone  Boolean     @default(false)
+  markedAsQuestion  Boolean     @default(false)
   updatedAt     DateTime    @updatedAt
 }
 
