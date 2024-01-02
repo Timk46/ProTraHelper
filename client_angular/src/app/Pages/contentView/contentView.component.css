@@ -21,3 +21,14 @@
   max-height: 60vh;
   overflow: auto;
 }
+
+.btn-default {
+  color: gray;
+  background-color: white;
+
+}
+
+.btn-completed {
+  color: white;
+  background-color: green;
+}

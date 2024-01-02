@@ -4,7 +4,8 @@
   <!-- Create a Card for each Content Element and display PDF, Video etc. depending on type-->
   <mat-card *ngFor="let contentElem of contentViewData.contentElements" class="contetView-card">
     <button (click)="onCreateDiscussion(contentElem.id)" mat-stroked-button color="primary">Frage stellen</button>    
-    <button mat-stroked-button class="small-button" >
+    <!-- Create Button for each Content Element to mark the Element as 'Completed'  -->
+    <button (click)="onToggleCheckmark(contentElem.id)" mat-stroked-button [ngClass]="[bntCompletedStyle]" >
       <span matTooltip="Als 'Bearbeitet' markieren.">
         <mat-icon class="small-icon">check</mat-icon>
       </span>

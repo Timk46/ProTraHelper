@@ -13,3 +13,4 @@ export * from "./discussionMessageVote.dto";
 export * from "./chatBot.dto";
 export * from "./discussionCreation.dto"
 export * from "./discussionFilter.dto"
+export * from "./contentElementStatus.dto"

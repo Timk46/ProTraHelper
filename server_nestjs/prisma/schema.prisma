@@ -132,7 +132,6 @@ model ContentNode {
   trains              Training[]
   discussions         Discussion[]
   contentElements     ContentElement[]
-  UserContentProgress UserContentProgress[]
 }
 
 model ContentEdge {
@@ -179,18 +178,19 @@ model UserConcept {
 
 // for example a MC question or a video or a piece of text
 model ContentElement {
-  id            Int                @id @default(autoincrement())
-  type          contentElementType
-  position      Int // position in the content node
-  title         String?
-  text          String?
-  contentNode   ContentNode        @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
-  contentNodeId Int
-  file          File?              @relation(fields: [fileId], references: [id])
-  fileId        Int?               @unique
-  question      Question?          @relation(fields: [questionId], references: [id])
-  questionId    Int?               @unique
-  Discussion    Discussion[]
+  id                  Int                   @id @default(autoincrement())
+  type                contentElementType
+  position            Int // position in the content node
+  title               String?
+  text                String?
+  contentNode         ContentNode           @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
+  contentNodeId       Int
+  file                File?                 @relation(fields: [fileId], references: [id])
+  fileId              Int?                  @unique
+  question            Question?             @relation(fields: [questionId], references: [id])
+  questionId          Int?                  @unique
+  Discussion          Discussion[]
+  UserContentProgress UserContentProgress[]
 }
 
 model File {
@@ -448,14 +448,14 @@ model ChatBotMessage {
 //********************************************************************************************* Begin ContentView Progress
 
 model UserContentProgress {
-  id            Int         @id @default(autoincrement())
-  user          User        @relation(fields: [userId], references: [id])
-  userId        Int
-  contentNode   ContentNode @relation(fields: [contentNodeId], references: [id])
-  contentNodeId Int
-  markedAsDone  Boolean     @default(false)
-  markedAsQuestion  Boolean     @default(false)
-  updatedAt     DateTime    @updatedAt
+  id               Int            @id @default(autoincrement())
+  user             User           @relation(fields: [userId], references: [id])
+  userId           Int
+  contentElement   ContentElement @relation(fields: [contentElementId], references: [id])
+  contentElementId Int
+  markedAsDone     Boolean        @default(false)
+  markedAsQuestion Boolean        @default(false)
+  updatedAt        DateTime       @updatedAt
 }
 
 //********************************************************************************************* End ContentView Progress

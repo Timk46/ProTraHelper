@@ -54,6 +54,7 @@ async function main() {
   await prisma.training.deleteMany();
   await prisma.requirement.deleteMany();
   await prisma.contentEdge.deleteMany();
+  await prisma.userContentProgress.deleteMany();
   await prisma.contentNode.deleteMany();
   await prisma.conceptEdge.deleteMany();
   await prisma.conceptFamily.deleteMany();
@@ -290,6 +291,14 @@ async function main() {
                 contentNode: {
                   connect: { id: +row[columnContentId] },
                 },
+              },
+            });
+            await prisma.userContentProgress.create({
+              data: {
+                user: { connect: { id: studentUser.id } },
+                contentElement: { connect: { id: TempContentElement.id } },
+                markedAsDone: true,
+                updatedAt: new Date(),
               },
             });
             //files from excelData
