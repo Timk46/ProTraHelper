@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { GraphCommunicationService } from 'src/app/Services/graphCommunication.service';
+import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
 import { ContentsForConceptDTO } from '@DTOs/content.dto';
