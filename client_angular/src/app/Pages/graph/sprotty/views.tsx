@@ -50,19 +50,21 @@ export class ConceptNodeView extends RectangularNodeView {
                 {petals}  {/* Render the petals here */}
             </g>
 
+            {/* Render the node here */}
             <rect class-sprotty-node={true} class-concept={true}
                 width={node.size.width}
                 height={node.size.height}
                 class-mouseover={node.hoverFeedback} class-selected={node.selected}
-                rx={5}
+                // rx={5}
             >
             </rect>
+            {/* hacky solution to get the blue background in the concept header */}
             <rect width={node.size.width - 2}
                 height={30}
-                fill="#29669b"
+                class-sprotty-concept-header={true}
                 x={1}
                 y={1}
-                rx={5}
+                // rx={5}
             ></rect>
             {context.renderChildren(node)}
         </g>;

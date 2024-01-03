@@ -11,17 +11,21 @@
 }
 
 .sprotty-node.concept {
-    fill: #c0e0fc;
+    fill: #c9c9c9; // #c0e0fc
     stroke: #000;
     stroke-width: 2;
+    filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 1));
 }
 
 .sprotty-node.mini-concept {
-    fill: #29669b;
+    fill: #2b2b2b; // #29669b
     stroke: #000;
     stroke-width: 1;
 }
 
+.sprotty-concept-header {
+    fill: #2b2b2b;
+}
 
 // text {
 //     stroke-width: 0;
@@ -37,6 +41,12 @@
     font-weight: bold;
 }
 
+.sprotty-button {
+    fill: #fff;
+    stroke-width: 1;
+    cursor: pointer;
+}
+
 .sprotty-node.selected {
     stroke-width: 5;
 }
@@ -47,7 +57,7 @@
 
 .sprotty-label {
     stroke-width: 0;
-    fill: #000;
+    fill: #000000;
     font-weight: inherit;
     text-align: inherit;
     font-size: 100%;
@@ -55,6 +65,7 @@
 
 .sprotty-label.heading {
     font-weight: bold;
+    fill: #88dddd;
     //display: inline-block;
     //width: 100%;
 }

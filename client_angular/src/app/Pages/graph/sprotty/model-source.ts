@@ -88,12 +88,12 @@ export class ConceptGraphModelSource extends LocalModelSource {
       id: 'root',
       children: [],
       layoutOptions: {
-        hGap: 5,
+        //hGap: 5,
         hAlign: 'left',
-        paddingLeft: 7,
-        paddingRight: 7,
-        paddingTop: 7,
-        paddingBottom: 7
+        // paddingLeft: 7,
+        // paddingRight: 7,
+        // paddingTop: 7,
+        // paddingBottom: 7
       }
     };
 
@@ -352,13 +352,13 @@ export class ConceptGraphModelSource extends LocalModelSource {
       });
 
     //level
-    node.children.push(
-      <SLabel>{
-        id: 'level_' + id,
-        type: 'label:text',
-        text: 'Level: ' + level.toString(),
-      },
-    );
+    // node.children.push(
+    //   <SLabel>{
+    //     id: 'level_' + id,
+    //     type: 'label:text',
+    //     text: 'Level: ' + level.toString(),
+    //   },
+    // );
 
     return node;
   }
