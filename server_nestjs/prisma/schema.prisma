@@ -41,9 +41,11 @@ model User {
   codeSubmission       CodeSubmission[]
   codeSubmissionFile   CodeSubmissionFile[]
   anonymousUser        anonymousUser[]
-  userMCAnswer         UserMCAnswer[]
+  userAnswer           UserAnswer[]
   chatBotMessage       ChatBotMessage[]
   Vote                 Vote[]
+  //to be deleted
+  userMCAnswer         UserMCAnswer[]
 }
 
 model Module {
@@ -215,6 +217,7 @@ model Feedback {
   text       String
   questionId Int
   question   Question @relation(fields: [questionId], references: [id])
+  userAnswer UserAnswer[]
 }
 
 model Question {
@@ -236,6 +239,7 @@ model Question {
   contentElementId           Int?
   conceptNode                ConceptNode?       @relation(fields: [conceptNodeId], references: [id])
   conceptNodeId              Int?
+  userAnswer                 UserAnswer[]
   QuestionVersionAsQuestion  QuestionVersion[] @relation("QuestionToQuestionVersion")
   QuestionVersionAsSuccessor QuestionVersion[] @relation("QuestionToSuccessorQuestionVersion")
 }
@@ -294,19 +298,36 @@ model UserMCAnswer {
   user                 User                   @relation(fields: [userId], references: [id])
   userId               Int
   question             MCQuestion             @relation(fields: [mcQuestionId], references: [id])
-  isCorrectAnswer      Boolean?
   mcQuestionId         Int
-  UserMCOptionSelected UserMCOptionSelected[]
+  isCorrectAnswer      Boolean?
+  userMCOptionSelected UserMCOptionSelected[]
+}
+
+model UserAnswer {
+  id                   Int                    @id @default(autoincrement())
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  user                 User                   @relation(fields: [userId], references: [id])
+  userId               Int
+  question             Question               @relation(fields: [questionId], references: [id])
+  questionId           Int
+  feedback             Feedback               @relation(fields: [feedbackId], references: [id])
+  feedbackId           Int
+  userMCOptionSelected UserMCOptionSelected[]
+  userFreetextAnswer   String?
 }
 
 model UserMCOptionSelected {
   id             Int          @id @default(autoincrement())
   createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  userMCAnswer   UserMCAnswer @relation(fields: [userMCAnswerId], references: [id])
-  userMCAnswerId Int
+  updatedAt      DateTime     @updatedAt  
+  userAnswer     UserAnswer @relation(fields: [userAnswerId], references: [id])
+  userAnswerId   Int
   mcOption       MCOption     @relation(fields: [mcOptionId], references: [id])
   mcOptionId     Int
+  //to be deleted
+  userMCAnswer   UserMCAnswer @relation(fields: [userMCAnswerId], references: [id])
+  userMCAnswerId Int
 }
 
 //********************************************************************************************* End MC-Question
