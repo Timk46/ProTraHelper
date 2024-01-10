@@ -78,4 +78,13 @@ export class ContentViewComponent implements OnInit {
     return styles;
   }
 
+  getCompletedTooltip(contentElementId: number) {
+    const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
+    if (this.applyCompletedStyle[position]) {
+      return 'Als nicht abgeschlossen markieren';
+    } else {
+      return 'Als abgeschlossen markieren';
+    }
+  }
+
 }
