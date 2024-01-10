@@ -1,40 +1,23 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { QuestionDTO } from '@DTOs/question.dto';
+import { taskOverviewElementDTO } from '@DTOs/taskOverview.dto';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class TaskOverviewService {
     constructor(private prisma : PrismaService) {}
 
-    async getTaskIdsForConceptNode(conceptNode_id: number) : Promise<number[]> {
-        //the array for the question id 
-        let question_ids : number[] = [];
-        let questions = await this.prisma.question.findMany({
-            where: {
-                conceptNodeId : Number(conceptNode_id)
-            }
-        });
-
-        if(!questions) {
-            throw new Error('No questions found');
-        }
-        else {
-            for (let question of questions) {
-                question_ids.push(question.id);
-            }   
-        }
-        
-        return question_ids;
-    }
-
-    async getTaskIdentityDataForConceptNode(conceptNode_id: number) : Promise<{id: number, type: string}[]> {
+    async getTaskOverviewDataForConceptNode(conceptNode_id: number) : Promise<taskOverviewElementDTO[]> {
         const questions = await this.prisma.question.findMany({
             where: {
-                conceptNodeId : conceptNode_id
+                conceptNodeId : conceptNode_id,
+                originId: null
             },
             select: {
                 id: true,
-                type: true
+                type: true,
+                description: true,
+                name: true,
             }
         });
         
@@ -45,5 +28,4 @@ export class TaskOverviewService {
         return questions;
     }
 
-    
 }

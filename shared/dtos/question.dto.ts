@@ -9,6 +9,8 @@ export interface QuestionDTO {
     author?: number;
     text: string;
     conceptNode?: number;
+    isApproved: boolean;
+    originId: number | null;
 }
 
 export interface QuestionVersionDTO {
@@ -53,8 +55,16 @@ export interface UserMCAnswerDTO {
     mcQuestionId: number;
 }
 
+export interface UserAnswerDTO {
+    id: number;
+    userId: number;
+    questionId: number;
+    feedbackId: number | null;
+    userFreetextAnswer: string | null;
+}
+
 export interface UserMCOptionSelectedDTO {
     id: number,
-    userMCAnswerId: number,
+    userAnswerId: number,
     mcOptionId: number
 }

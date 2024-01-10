@@ -21,10 +21,15 @@ export class FreeTextTaskComponent {
   }
 
   answerText: string = '';
-  questionData: QuestionDTO = {
-    id: -1,
-    type: '',
-    text: '',
+  questionData : QuestionDTO = {
+    id : -1,
+    name : '',
+    description : '',
+    score : -1,
+    type : '',
+    text : '',
+    isApproved: false,
+    originId: -1,
   }
 
   constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: {question_id: number}, private quesitonService: QuestionDataService) {

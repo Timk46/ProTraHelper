@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { McQuestionDTO, McQuestionOptionDTO, QuestionDTO, QuestionVersionDTO, UserMCAnswerDTO, UserMCOptionSelectedDTO, MCOptionDTO } from '@DTOs/question.dto';
+import { McQuestionDTO, McQuestionOptionDTO, QuestionDTO, QuestionVersionDTO, UserAnswerDTO, UserMCOptionSelectedDTO, MCOptionDTO } from '@DTOs/question.dto';
 import { Injectable } from '@nestjs/common';
 import {  } from '@prisma/client';
 
@@ -30,6 +30,8 @@ export class QuestionDataService {
             score: question.score,
             type: question.type,
             text: question.text,
+            isApproved: question.isApproved,
+            originId: question.originId,
         };
     
         return questionData;
@@ -37,55 +39,32 @@ export class QuestionDataService {
 
     /**
      * 
-     * @param questionId 
-     * @returns the question version data
-     */
-    async getQuestionVersion(question_id: number): Promise<QuestionVersionDTO> {
-        let questionVersion = await this.prisma.questionVersion.findFirst({
-            where: {
-                questionId: Number(question_id),
-                successorId: null
-            }
-        });
-
-        if(!questionVersion) {
-            throw new Error('Question Version not found');
-        }
-
-        let questionVersionData: QuestionVersionDTO = {
-            id: questionVersion.id,
-            questionId: questionVersion.questionId,
-            version: questionVersion.version,
-            isApproved: questionVersion.isApproved,
-            successor: questionVersion.successorId    
-        };
-
-        return questionVersionData;
-    }
-
-    /**
-     * 
      * @param question_id 
      * @returns the question data of the newest version of the question
      */
-    async getNewestQuestionVersion(question_id: number): Promise<QuestionVersionDTO> {
-        let questionVersion = await this.prisma.questionVersion.findFirst({
+    async getNewestQuestionVersion(question_id: number): Promise<QuestionDTO> {
+        let questionVersion = await this.prisma.question.findFirst({
             where: {
-                questionId: Number(question_id),
-                successor: null,
-                isApproved: true
+                originId: question_id,
+                isApproved: true,
+            },
+            orderBy: {
+                version: 'desc',
             }
         })
 
-        let questionVersionData: QuestionVersionDTO = {
+        let newestQuestionVersion: QuestionDTO = {
             id: questionVersion.id,
-            questionId: questionVersion.questionId,
-            version: questionVersion.version,
+            name: questionVersion.name,
+            description: questionVersion.description,
+            score: questionVersion.score,
+            type: questionVersion.type,
+            text: questionVersion.text,
             isApproved: questionVersion.isApproved,
-            successor: questionVersion.successorId    
+            originId: questionVersion.originId,    
         };
         
-        return questionVersionData;
+        return newestQuestionVersion;
     }
 
     /**
@@ -93,10 +72,10 @@ export class QuestionDataService {
      * @param questionVersion_id 
      * @returns mc question data
      */
-    async getMCQuestion(questionVersion_id: number): Promise<McQuestionDTO> {
+    async getMCQuestion(question_id: number): Promise<McQuestionDTO> {
         let mcQuestion = await this.prisma.mCQuestion.findFirst({
             where: {
-                questionVersionId: Number(questionVersion_id)
+                questionId: Number(question_id)
             }
         })
 
@@ -148,19 +127,21 @@ export class QuestionDataService {
      * @param mcQuestion_id 
      * @returns the new user mc answer
      */
-    async createUserMCAnswer(user_id: number, mcQuestion_id: number) : Promise<UserMCAnswerDTO> {
-        return await this.prisma.userMCAnswer.create({
+    async createUserAnswer(user_id: number, question_id: number) : Promise<UserAnswerDTO> {
+        return await this.prisma.userAnswer.create({
             data: {
                 userId: user_id,
-                mcQuestionId: mcQuestion_id
+                questionId: question_id,
+                userFreetextAnswer: null,
+                feedbackId: null,
             }
         })
     }
 
-    async createUserMCOptionSelected(userMCAnswer_id: number, mcOption_id: number) : Promise<UserMCOptionSelectedDTO> {
+    async createUserMCOptionSelected(userAnswer_id: number, mcOption_id: number) : Promise<UserMCOptionSelectedDTO> {
         return await this.prisma.userMCOptionSelected.create({
             data: {
-                userMCAnswerId: userMCAnswer_id,
+                userAnswerId: userAnswer_id,
                 mcOptionId: mcOption_id
             }
         })

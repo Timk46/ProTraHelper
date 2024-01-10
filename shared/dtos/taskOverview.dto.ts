@@ -1,8 +1,10 @@
 export interface taskOverviewElementDTO {
-    questionId: number;
-    title?: string;
+    id: number;
+    name?: string;
     description?: string;
     type: string;
-    attemps: number;
-    progress: number;
+}
+
+export interface userTaskStatusDTO {
+    
 }

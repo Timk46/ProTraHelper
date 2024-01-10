@@ -942,25 +942,29 @@ await prisma.file.create({
     data: {
       name: 'Primitiver Datentyp',
       description: 'The first MC-Question in HeFL',
-      score: 1  ,
-      type: 'SC',
+      score: 2,
+      type: 'MC',
       author: { connect: { id: adminUser.id } },
       text: 'Welcher der folgenden Datentypen in Java ist primitiv?',
       conceptNode: { connect: { id: conceptNode.id } },
+      isApproved: true,
+      version: 1,
     },
   });
 
+  /*  
   const questionVersion = await prisma.questionVersion.create({
     data: {
         question: { connect: { id: question.id } },
         version: 1
     },
   });
+  */
 
   const mcQuestion = await prisma.mCQuestion.create({
     data: {
       isSC: false,
-      questionVersion: { connect: { id: questionVersion.id } },
+      question: { connect: { id: question.id } },
     },
   });
 
@@ -981,7 +985,7 @@ await prisma.file.create({
   const mcOption3 = await prisma.mCOption.create({
     data: {
       text: 'double',
-      is_correct: false,
+      is_correct: true,
     },
   });
 

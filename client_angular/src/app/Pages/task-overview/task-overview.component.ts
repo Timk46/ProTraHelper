@@ -6,6 +6,7 @@ import { TaskOverviewService } from 'src/app/Services/taskOverview/task-overview
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
+import { taskOverviewElementDTO } from '@DTOs/taskOverview.dto';
 
 @Component({
   selector: 'app-task-overview',
@@ -15,9 +16,7 @@ import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-t
 export class TaskOverviewComponent implements OnInit, OnChanges {
 
   @Input() activeConceptNodeId: any; 
-
-  questionsForConcept : Number[] = [];
-  questionIdentityData : {id: number, type: string}[] = [];
+  taskOverviewData : taskOverviewElementDTO[] = [];
 
   //activeTask : Number = -1;
   showTask : Boolean = false;
@@ -32,10 +31,10 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
       this.questionsForConcept = data;
     }); */
 
-    this.taskOverviewService.getTaskIdentityDataForConceptNode(this.activeConceptNodeId).subscribe(identityData => {
+    this.taskOverviewService.getTaskOverviewDataForConceptNode(this.activeConceptNodeId).subscribe(taskOverviewData => {
       console.log(this.activeConceptNodeId);
-      this.questionIdentityData = identityData;
-      console.log(this.questionIdentityData);
+      this.taskOverviewData = taskOverviewData;
+      console.log(this.taskOverviewData);
     });
   }
 
@@ -62,7 +61,7 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
     dialogConfig.data = {
       question_id: question_data.id,
     }  
-    if (question_data.type == 'SC') { // why SC and not MC?
+    if (question_data.type == 'MC') { // why SC and not MC?
       this.dialog.open(McTaskComponent, dialogConfig);
     }
     if (question_data.type == 'FreeText') {

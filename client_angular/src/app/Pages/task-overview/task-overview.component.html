@@ -1,5 +1,5 @@
 <p>Task-Overview for ConceptNodeID: {{activeConceptNodeId}}</p>
-<p>Taks-IDs for Concept: {{questionsIDsForConcept}}</p>
+<p>Tasks for Concept: {{taskOverviewData}}</p>
 
 <div class="taskProgress-Container">
     <mat-card class="task-progress-card" class="failed">
@@ -22,33 +22,20 @@
 </div>
 
 <div class="taskOverview-container">
-   
-    <!-- <mat-card *ngFor="let question of questionsForConcept" class="task-overview-card" (click)="onTaskClick(question)">
-        <mat-card-header>
-            <mat-card-title-group>
-                <mat-card-title>Aufgabe</mat-card-title>
-            </mat-card-title-group>
-        </mat-card-header>  
-        <mat-card-content>
-            Versuche: 2
-        </mat-card-content>
-        <mat-card-footer>
-            <mat-progress-bar mode="determinate" value="33" color="warn"></mat-progress-bar>
-        </mat-card-footer>
-    </mat-card> -->
 
-    <mat-card *ngFor="let question of questionIdentityData" class="task-overview-card" (click)="onTaskIdentityClick(question)">
+    <mat-card *ngFor="let question of taskOverviewData" class="task-overview-card" (click)="onTaskIdentityClick(question)">
         <mat-card-header>
             <mat-card-title-group> 
-                <mat-card-title>Aufgabe</mat-card-title>
+                <mat-card-title>{{question.name}}</mat-card-title>
             </mat-card-title-group>
         </mat-card-header>  
         <mat-card-content>
-            {{question.type}}<br>
-            Versuche: {{question.attempts}}
+            Typ: {{question.type}}<br>
+            <!--Versuche: {{question.attempts}}-->
+            Versuche: 3
         </mat-card-content>
         <mat-card-footer>
-            <mat-progress-bar mode="determinate" value="{{question.progress}}" color="{{question.color}}"></mat-progress-bar>
+            <mat-progress-bar mode="determinate" value="50" color="warn"></mat-progress-bar>
         </mat-card-footer>
     </mat-card>
 </div>

@@ -14,11 +14,6 @@ export class QuestionDataController {
     async getQuestion(@Param('questionId') questionId: number) {
         return this.questionDataService.getQuestion(questionId);
     }
-
-    @Get('/questionVersion/:questionId')
-    async getQuestionVersion(@Param('questionId') questionId: number) {
-        return this.questionDataService.getQuestionVersion(questionId);
-    }
     
     @Get('/newestQuestionVersion/:questionId')
     async getNewestQuestionVersion(@Param('questionId') questionId: number) {
@@ -35,10 +30,10 @@ export class QuestionDataController {
         return this.questionDataService.getMCOptions(mcQuestionId);
     }
     
-    @Post('userMCAnswer/create')
-    async createUserMCAnswer(@Body() data: {userId: number, mcQuestionId: number}) {
+    @Post('userAnswer/create')
+    async createUserMCAnswer(@Body() data: {userId: number, questionId: number}) {
         console.log(data.userId);
-        return this.questionDataService.createUserMCAnswer(data.userId, data.mcQuestionId);  
+        return this.questionDataService.createUserAnswer(data.userId, data.questionId);  
     }
 
     @Post('userMCOptionSelected/create')

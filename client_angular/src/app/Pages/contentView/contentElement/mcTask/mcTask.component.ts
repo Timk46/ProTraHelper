@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Inject } from '@angular/core';
 import { MatList, MatSelectionListChange } from '@angular/material/list';
 import { MatListOption } from '@angular/material/list';
-import { MCOptionDTO, McQuestionDTO, OptionDTO, QuestionDTO, QuestionVersionDTO, UserMCAnswerDTO } from '@DTOs/question.dto';
+import { MCOptionDTO, McQuestionDTO, OptionDTO, QuestionDTO, QuestionVersionDTO, UserAnswerDTO } from '@DTOs/question.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';  
 
@@ -13,14 +13,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 export class McTaskComponent implements OnInit {
 
-  //init question version data
-  questionVersion : QuestionVersionDTO = {
-    id : -1,
-    questionId : -1,
-    version : -1,
-    isApproved : false,
-    successor : null
-  }
   //init question data
   questionData : QuestionDTO = {
     id : -1,
@@ -28,7 +20,9 @@ export class McTaskComponent implements OnInit {
     description : '',
     score : -1,
     type : '',
-    text : ''
+    text : '',
+    isApproved: false,
+    originId: -1,
   }
 
   //the mc question data
@@ -38,11 +32,13 @@ export class McTaskComponent implements OnInit {
     shuffleOptions : false
   }
 
-  //the userMCAnswer data
-  userMCAnswer : UserMCAnswerDTO = {
+  //the userAnswer data
+  userAnswer : UserAnswerDTO = {
     id: -1,
     userId: -1,
-    mcQuestionId: -1
+    questionId: -1,
+    feedbackId: null,
+    userFreetextAnswer: null,
   }
 
   //the requested question
@@ -75,14 +71,14 @@ export class McTaskComponent implements OnInit {
 
   onSubmit() :void {
     //Create new submit
-    this.questionDataService.createUserMCAnswer(this.userId, this.mcQuestion.id).subscribe(data => {
-      this.userMCAnswer = data;
+    this.questionDataService.createUserAnswer(this.userId, this.mcQuestion.id).subscribe(data => {
+      this.userAnswer = data;
   
       //add the selected options to the submit
       for(let optionSelected of this.selectedOptions) {
         console.log(optionSelected);
-        console.log(this.userMCAnswer.id);
-        this.questionDataService.createUserMCOptionSelected(this.userMCAnswer.id, optionSelected).subscribe();
+        console.log(this.userAnswer.id);
+        this.questionDataService.createUserMCOptionSelected(this.userAnswer.id, optionSelected).subscribe();
       }
     
     });
@@ -103,19 +99,12 @@ export class McTaskComponent implements OnInit {
   ngOnInit() {
     //Get the newest Version of the requested question
     this.questionDataService.getNewestQuestionVersion(this.questionId).subscribe(data => {
-      this.questionVersion = data;
+      this.questionData = data;
       //console.log(data);
       //console.log(this.questionVersion);
-    
-      //Get the question data of the newest question version
-      this.questionDataService.getQuestionData(this.questionVersion.questionId).subscribe(data => {
-        this.questionData = data;
-        //console.log(data);
-        //console.log(this.questionData);
-      });
 
       //Get the mc question data of the newest question version
-      this.questionDataService.getMCQuestion(this.questionVersion.id).subscribe(data => {
+      this.questionDataService.getMCQuestion(this.questionData.id).subscribe(data => {
         this.mcQuestion = data;
         //console.log(data);
         //console.log(this.mcQuestion);
