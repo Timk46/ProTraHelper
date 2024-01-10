@@ -14,4 +14,14 @@ export class TaskOverviewService {
     console.log('given conceptNodeID for task-overview-service: ' + conceptNodeId);
     return this.http.get<Number[]>(environment.server + `/task-overview/${conceptNodeId}`);
   }
+
+  /**
+   * Returns the marginal task identity data for a given concept node id to be able to open the right task dialog
+   * @param conceptNodeId 
+   * @returns {id: number, type: string}
+   */
+  getTaskIdentityDataForConceptNode(conceptNodeId: Number) : Observable<{id: number, type: string}[]>{
+    console.log('given conceptNodeID for task-overview-service: ' + conceptNodeId);
+    return this.http.get<{id: number, type: string}[]>(environment.server + `/task-overview/taskIdentitys/${conceptNodeId}`);
+  }
 }

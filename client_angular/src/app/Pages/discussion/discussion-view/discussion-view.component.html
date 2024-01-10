@@ -1,5 +1,5 @@
 <div *ngIf="discussionData.id != -1 && initiatorMessage.messageId != -1" class="main-container">
-  <div style="max-width: 1000px;">
+  <div style="width: 1000px;">
     <div class="content mat-elevation-z8">
       <h1>{{discussionData.title}}</h1>
       <app-discussion-view-question [messageData]="initiatorMessage" [conceptNodeName]="conceptNodeName" [discussionData]="discussionData"></app-discussion-view-question>

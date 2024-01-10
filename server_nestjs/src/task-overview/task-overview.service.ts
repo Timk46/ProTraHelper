@@ -26,4 +26,24 @@ export class TaskOverviewService {
         
         return question_ids;
     }
+
+    async getTaskIdentityDataForConceptNode(conceptNode_id: number) : Promise<{id: number, type: string}[]> {
+        const questions = await this.prisma.question.findMany({
+            where: {
+                conceptNodeId : conceptNode_id
+            },
+            select: {
+                id: true,
+                type: true
+            }
+        });
+        
+        if(!questions) {
+            throw new Error('No questions found');
+        }
+        
+        return questions;
+    }
+
+    
 }
