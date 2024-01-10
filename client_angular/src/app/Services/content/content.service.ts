@@ -4,7 +4,6 @@ import { ContentsForConceptDTO, ContentElementStatusDTO } from '@DTOs/index';
 import { catchError, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
-const debug = true;
 @Injectable({
   providedIn: 'root',
 })
@@ -32,7 +31,6 @@ export class ContentService {
   getContentElementCompletionStatus(
     contentElementId: number
   ): Observable<ContentElementStatusDTO> {
-    debug && console.log('ContentService: getContentElementCompletionStatus');
     return this.http.get<ContentElementStatusDTO>(
       environment.server + `/content/status/${contentElementId}`
     );

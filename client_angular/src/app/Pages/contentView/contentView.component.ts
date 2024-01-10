@@ -16,7 +16,7 @@ export class ContentViewComponent implements OnInit {
 
   contentViewData: ContentDTO;
   activeConceptNodeId: number;
-  bntCompletedStyle: string;
+  applyCompletedStyle: boolean[] = [];
 
   // Get Data from Dialog
   constructor(public dialogRef: MatDialogRef<ContentViewComponent>, @Inject(MAT_DIALOG_DATA) public data: any, private sanitizer: DomSanitizer, private discussionDialogService: DiscussionDialogService, private contentService: ContentService) {
@@ -25,7 +25,9 @@ export class ContentViewComponent implements OnInit {
     // sort contentElements by position
     this.contentViewData.contentElements = this.contentViewData.contentElements.sort((a, b) => a.position - b.position);
     // set default button style
-    this.bntCompletedStyle = 'btn-default';
+    for(let i = 0; i < this.contentViewData.contentElements.length; i++) {
+      this.applyCompletedStyle[i] = false;
+    }
   }
 
   // for testing -> print ContentElems as String
@@ -35,14 +37,12 @@ export class ContentViewComponent implements OnInit {
 
   ngOnInit() {
     for (let i = 0; i < this.contentViewData.contentElements.length; i++) {
-      console.log('ContentElement: ', this.contentViewData.contentElements[i]);
       this.contentService.getContentElementCompletionStatus(this.contentViewData.contentElements[i].id).subscribe(status => {
         if (status.userStatusCompleted) {
-          this.bntCompletedStyle = 'btn-completed';
+          this.applyCompletedStyle[i] = true;
         } else {
-          this.bntCompletedStyle = 'btn-default';
+          this.applyCompletedStyle[i] = false;
         }
-        console.log(status.contentElementId + ' ' + status.userStatusCompleted);
       });
     }
   }
@@ -58,11 +58,24 @@ export class ContentViewComponent implements OnInit {
   }
 
   onToggleCheckmark(contentElementId: number) {
-    if (this.bntCompletedStyle == 'btn-default') {
-      this.bntCompletedStyle = 'btn-completed';
+    const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
+    if (this.applyCompletedStyle[position]) {
+      this.applyCompletedStyle[position] = false;
     } else {
-      this.bntCompletedStyle = 'btn-default';
+      this.applyCompletedStyle[position] = true;
     }
+  }
+
+  applyStyles(contentElementId: number) {
+    const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
+
+    let styles = {'color' : 'red', 'background-color' : 'white'};
+    if (this.applyCompletedStyle[position]) {
+      styles = {'color' : 'white', 'background-color': 'green'};
+    } else {
+      styles = {'color' : 'gray', 'background-color': 'white'};
+    }
+    return styles;
   }
 
 }

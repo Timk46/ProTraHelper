@@ -4,7 +4,6 @@ import { ContentDTO, ContentsForConceptDTO } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
 import { RolesGuard, roles } from '@/auth/roles.guard';
 
-const debug = true;
 @UseGuards(RolesGuard)
 @Controller('content')
 export class ContentController {
@@ -44,7 +43,6 @@ export class ContentController {
     @Param('contentElementId') contentElementId: number,
     @Req() req,
   ): Promise<ContentElementStatusDTO> {
-    debug && console.log('ContentController: getContentElementStatus');
     if (isNaN(contentElementId) || isNaN(req.user.id)) {
       throw new Error('Invalid contentElement id or user id');
     }

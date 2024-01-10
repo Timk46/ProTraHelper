@@ -293,14 +293,16 @@ async function main() {
                 },
               },
             });
-            await prisma.userContentProgress.create({
-              data: {
-                user: { connect: { id: studentUser.id } },
-                contentElement: { connect: { id: TempContentElement.id } },
-                markedAsDone: true,
-                updatedAt: new Date(),
-              },
-            });
+            if (+elementId == 0) {
+              await prisma.userContentProgress.create({
+                data: {
+                  user: { connect: { id: studentUser.id } },
+                  contentElement: { connect: { id: TempContentElement.id } },
+                  markedAsDone: true,
+                  updatedAt: new Date(),
+                },
+              });
+            }
             //files from excelData
             await prisma.file.create({
               data: {

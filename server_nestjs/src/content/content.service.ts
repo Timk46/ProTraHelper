@@ -125,7 +125,6 @@ export class ContentService {
     contentElementId: number,
     userId: number,
   ): Promise<ContentElementStatusDTO> {
-    console.log('Test');
     const contentElementStatus =
       await this.prisma.userContentProgress.findFirst({
         where: {
