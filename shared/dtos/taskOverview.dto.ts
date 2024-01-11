@@ -3,8 +3,6 @@ export interface taskOverviewElementDTO {
     name?: string;
     description?: string;
     type: string;
-}
-
-export interface userTaskStatusDTO {
-    
+    attemps: number;
+    progress: number;
 }

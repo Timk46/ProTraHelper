@@ -20,10 +20,6 @@ export class QuestionDataService {
     return this.http.get<QuestionDTO>(environment.server + `/question-data/${questionId}`);
   }
   
-  getQuestionVersionData(questionId: number) : Observable<QuestionVersionDTO> {
-    return this.http.get<QuestionVersionDTO>(environment.server + `/question-data/questionVersion/${questionId}`);
-  }
-  
   getNewestQuestionVersion(questionId: number) : Observable<QuestionDTO> {
     return this.http.get<QuestionDTO>(environment.server + `/question-data/newestQuestionVersion/${questionId}`);
   }
@@ -37,7 +33,6 @@ export class QuestionDataService {
   }
 
   createUserAnswer(userId: number, questionId: number) : Observable<UserAnswerDTO> {
-    console.log('create user mc answer for question ' + questionId + ' and user ' + userId);
     return this.http.post<UserAnswerDTO>(environment.server + `/question-data/userAnswer/create`, {userId, questionId});
   }
   

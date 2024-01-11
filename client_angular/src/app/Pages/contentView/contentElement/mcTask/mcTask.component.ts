@@ -71,7 +71,7 @@ export class McTaskComponent implements OnInit {
 
   onSubmit() :void {
     //Create new submit
-    this.questionDataService.createUserAnswer(this.userId, this.mcQuestion.id).subscribe(data => {
+    this.questionDataService.createUserAnswer(this.userId, this.questionData.id).subscribe(data => {
       this.userAnswer = data;
   
       //add the selected options to the submit
@@ -100,24 +100,23 @@ export class McTaskComponent implements OnInit {
     //Get the newest Version of the requested question
     this.questionDataService.getNewestQuestionVersion(this.questionId).subscribe(data => {
       this.questionData = data;
-      //console.log(data);
-      //console.log(this.questionVersion);
+      //console.log("The data of the newest question version: " + data.id);
+      //console.log("The data of the newest question version (check): " + this.questionData.id);
 
       //Get the mc question data of the newest question version
       this.questionDataService.getMCQuestion(this.questionData.id).subscribe(data => {
         this.mcQuestion = data;
-        //console.log(data);
-        //console.log(this.mcQuestion);
+        //console.log("The mc question data: " + data);
+        //console.log("The mc question data (check): " + this.mcQuestion);
       
         //Get the MC-Options of the question
         this.questionDataService.getMCOptions(this.mcQuestion.id).subscribe(data => {
-          //console.log(this.mcQuestion.id);
+          console.log(this.mcQuestion.id);
           this.options = data;
-          //console.log(data);
-          //console.log(this.options);
+          console.log("The mc question options: " + data);
+          console.log("The mc question options (check)" + this.options);
         });
       })
-  
     });  
   }
 

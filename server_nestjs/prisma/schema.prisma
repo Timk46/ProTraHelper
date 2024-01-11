@@ -213,8 +213,8 @@ model File {
 // Feedback which the users will get after answering a question
 model Feedback {
   id         Int      @id @default(autoincrement())
-  name       String
   text       String
+  score      Int
   questionId Int
   question   Question @relation(fields: [questionId], references: [id])
   userAnswer UserAnswer[]
@@ -318,8 +318,8 @@ model UserAnswer {
   userId               Int
   question             Question               @relation(fields: [questionId], references: [id])
   questionId           Int
-  feedback             Feedback               @relation(fields: [feedbackId], references: [id])
-  feedbackId           Int
+  feedback             Feedback?               @relation(fields: [feedbackId], references: [id])
+  feedbackId           Int?
   userMCOptionSelected UserMCOptionSelected[]
   userFreetextAnswer   String?
 }

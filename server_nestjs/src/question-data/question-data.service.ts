@@ -45,7 +45,7 @@ export class QuestionDataService {
     async getNewestQuestionVersion(question_id: number): Promise<QuestionDTO> {
         let questionVersion = await this.prisma.question.findFirst({
             where: {
-                originId: question_id,
+                originId: Number(question_id),
                 isApproved: true,
             },
             orderBy: {
@@ -146,5 +146,4 @@ export class QuestionDataService {
             }
         })
     }
-
 }

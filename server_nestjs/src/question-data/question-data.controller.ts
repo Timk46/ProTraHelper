@@ -31,13 +31,12 @@ export class QuestionDataController {
     }
     
     @Post('userAnswer/create')
-    async createUserMCAnswer(@Body() data: {userId: number, questionId: number}) {
-        console.log(data.userId);
+    async createUserAnswer(@Body() data: {userId: number, questionId: number}) {
         return this.questionDataService.createUserAnswer(data.userId, data.questionId);  
     }
 
     @Post('userMCOptionSelected/create')
-    async createUserMCOptionSelected(@Body() data: {userMCAnswerId: number, mcOptionId: number}) {
-        return this.questionDataService.createUserMCOptionSelected(data.userMCAnswerId, data.mcOptionId);
+    async createUserMCOptionSelected(@Body() data: {userAnswerId: number, mcOptionId: number}) {
+        return this.questionDataService.createUserMCOptionSelected(data.userAnswerId, data.mcOptionId);
     }
 }
