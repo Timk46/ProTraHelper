@@ -1,6 +1,9 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req, UseGuards } from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
+import { UserAnswerDataDTO } from '@Interfaces/question.dto';
+import { RolesGuard, roles } from '@/auth/roles.guard';
 
+//@UseGuards(RolesGuard)
 @Controller('question-data')
 export class QuestionDataController {
     constructor(private questionDataService: QuestionDataService) {}
@@ -30,9 +33,16 @@ export class QuestionDataController {
         return this.questionDataService.getMCOptions(mcQuestionId);
     }
     
-    @Post('userAnswer/create')
-    async createUserAnswer(@Body() data: {userId: number, questionId: number}) {
+    /* @Post('userAnswer/create')
+    async createUserMCAnswer(@Body() data: {userId: number, questionId: number}) {
+        console.log(data.userId);
         return this.questionDataService.createUserAnswer(data.userId, data.questionId);  
+    } */
+    //@roles('ANY')
+    @Post('userAnswer/create')
+    async createUserMCAnswer(@Body() data: UserAnswerDataDTO, @Req() req: any) {
+        console.log(data.userId);
+        return this.questionDataService.createUserAnswer(req.user.id, data);  
     }
 
     @Post('userMCOptionSelected/create')

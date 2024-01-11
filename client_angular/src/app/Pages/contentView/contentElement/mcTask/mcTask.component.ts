@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Inject } from '@angular/core';
 import { MatList, MatSelectionListChange } from '@angular/material/list';
 import { MatListOption } from '@angular/material/list';
-import { MCOptionDTO, McQuestionDTO, OptionDTO, QuestionDTO, QuestionVersionDTO, UserAnswerDTO } from '@DTOs/question.dto';
+import { MCOptionDTO, McQuestionDTO, OptionDTO, QuestionDTO, QuestionVersionDTO, UserAnswerDTO, UserAnswerDataDTO } from '@DTOs/question.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';  
 
@@ -33,12 +33,17 @@ export class McTaskComponent implements OnInit {
   }
 
   //the userAnswer data
-  userAnswer : UserAnswerDTO = {
+  /* userAnswer : UserAnswerDTO = {
     id: -1,
     userId: -1,
     questionId: -1,
     feedbackId: null,
     userFreetextAnswer: null,
+  } */
+  userAnswer : UserAnswerDataDTO = {
+    id: -1,
+    userId: -1,
+    questionId: -1,
   }
 
   //the requested question
@@ -71,7 +76,7 @@ export class McTaskComponent implements OnInit {
 
   onSubmit() :void {
     //Create new submit
-    this.questionDataService.createUserAnswer(this.userId, this.questionData.id).subscribe(data => {
+    /* this.questionDataService.createUserAnswer(this.userId, this.mcQuestion.id).subscribe(data => {
       this.userAnswer = data;
   
       //add the selected options to the submit
@@ -80,6 +85,23 @@ export class McTaskComponent implements OnInit {
         console.log(this.userAnswer.id);
         this.questionDataService.createUserMCOptionSelected(this.userAnswer.id, optionSelected).subscribe();
       }
+    
+    }); */
+    const userAnswerData: UserAnswerDataDTO = {
+      id: -1,
+      userId: -1,
+      questionId: this.mcQuestion.id,
+      userMCAnswer: this.selectedOptions,
+    }
+    this.questionDataService.createUserAnswer(userAnswerData).subscribe(data => {
+      this.userAnswer = data;
+  
+      //add the selected options to the submit
+      /* for(let optionSelected of this.selectedOptions) {
+        console.log(optionSelected);
+        console.log(this.userAnswer.id);
+        this.questionDataService.createUserMCOptionSelected(this.userAnswer.id, optionSelected).subscribe();
+      } */
     
     });
     
@@ -98,7 +120,7 @@ export class McTaskComponent implements OnInit {
 
   ngOnInit() {
     //Get the newest Version of the requested question
-    this.questionDataService.getNewestQuestionVersion(this.questionId).subscribe(data => {
+    this.questionDataService.getQuestionData(this.questionId).subscribe(data => {
       this.questionData = data;
       //console.log("The data of the newest question version: " + data.id);
       //console.log("The data of the newest question version (check): " + this.questionData.id);

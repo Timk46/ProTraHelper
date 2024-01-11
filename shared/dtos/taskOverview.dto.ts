@@ -3,6 +3,6 @@ export interface taskOverviewElementDTO {
     name?: string;
     description?: string;
     type: string;
-    attemps: number;
+    attempts: number;
     progress: number;
 }

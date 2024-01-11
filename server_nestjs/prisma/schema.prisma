@@ -214,10 +214,8 @@ model File {
 model Feedback {
   id         Int      @id @default(autoincrement())
   text       String
-  score      Int
-  questionId Int
-  question   Question @relation(fields: [questionId], references: [id])
-  userAnswer UserAnswer[]
+  userAnswer UserAnswer @relation(fields: [userAnswerId], references: [id])
+  userAnswerId Int
 }
 
 model Question {
@@ -233,11 +231,11 @@ model Question {
   text                       String?
   isApproved                 Boolean            @default(false)
   version                    Int                @default(1)
-  feedbacks                  Feedback[]
   files                      File[]
-  originId                   Int?               @unique
+  originId                   Int?               
   origin                     Question?          @relation("VersionControl", fields: [originId], references: [id])
-  successor                  Question?          @relation("VersionControl")
+  question                   Question[]          @relation("VersionControl")
+  //successor                  Question?          @relation("VersionControl")
   //toDo: connect to different mediatypes Evelyn
   codingQuestions            CodingQuestion?
   contentElement             ContentElement?
@@ -318,10 +316,9 @@ model UserAnswer {
   userId               Int
   question             Question               @relation(fields: [questionId], references: [id])
   questionId           Int
-  feedback             Feedback?               @relation(fields: [feedbackId], references: [id])
-  feedbackId           Int?
   userMCOptionSelected UserMCOptionSelected[]
   userFreetextAnswer   String?
+  feedback             Feedback[]
 }
 
 model UserMCOptionSelected {

@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { McQuestionDTO, McQuestionOptionDTO, QuestionDTO, QuestionVersionDTO, UserAnswerDTO, UserMCOptionSelectedDTO, MCOptionDTO } from '@DTOs/question.dto';
+import { McQuestionDTO, McQuestionOptionDTO, QuestionDTO, QuestionVersionDTO, UserAnswerDTO, UserMCOptionSelectedDTO, MCOptionDTO, UserAnswerDataDTO } from '@DTOs/question.dto';
 import { Injectable } from '@nestjs/common';
 import {  } from '@prisma/client';
 
@@ -127,7 +127,7 @@ export class QuestionDataService {
      * @param mcQuestion_id 
      * @returns the new user mc answer
      */
-    async createUserAnswer(user_id: number, question_id: number) : Promise<UserAnswerDTO> {
+    /* async createUserAnswer(user_id: number, question_id: number) : Promise<UserAnswerDTO> {
         return await this.prisma.userAnswer.create({
             data: {
                 userId: user_id,
@@ -136,7 +136,40 @@ export class QuestionDataService {
                 feedbackId: null,
             }
         })
+    } */
+
+
+    async createUserAnswer(userId: number, answerData: UserAnswerDataDTO) : Promise<UserAnswerDataDTO> {
+        const createdData = await this.prisma.userAnswer.create({
+            data: {
+                userId: userId,
+                questionId: answerData.questionId,
+                //if answerData has a userFreetextAnswer, use it, else use null
+                userFreetextAnswer: answerData.userFreetextAnswer ?? null,
+                //connect all mc options
+                //userMCOptionSelected: {}
+
+            }
+        });
+
+        if (!createdData) throw new Error('Could not create userAnswer');
+        
+        if (answerData.userMCAnswer) {
+            for (const mcOptionId of answerData.userMCAnswer) {
+                await this.createUserMCOptionSelected(createdData.id, mcOptionId);
+            }
+        }
+
+        return {
+            id: createdData.id,
+            userId: createdData.userId,
+            questionId: createdData.questionId,
+            userFreetextAnswer: createdData.userFreetextAnswer,
+            userMCAnswer: answerData.userMCAnswer, //maybe also return from createdData...
+        }
+
     }
+
 
     async createUserMCOptionSelected(userAnswer_id: number, mcOption_id: number) : Promise<UserMCOptionSelectedDTO> {
         return await this.prisma.userMCOptionSelected.create({

@@ -951,6 +951,11 @@ await prisma.file.create({
       version: 1,
     },
   });
+  // connect it to itself
+  await prisma.question.update({
+    where: { id: question.id },
+    data: { origin: { connect: { id: question.id } } },
+  });
 
   /*  
   const questionVersion = await prisma.questionVersion.create({
@@ -1035,6 +1040,12 @@ await prisma.file.create({
       text: 'Primitive Datentypen',
       conceptNode: { connect: { id: conceptNode.id } },
     },
+  });
+
+  // connect it to itself
+  await prisma.question.update({
+    where: { id: questionFreeText.id },
+    data: { origin: { connect: { id: questionFreeText.id } } },
   });
 
   const questionFreeTextVersion = await prisma.questionVersion.create({

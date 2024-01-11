@@ -1,4 +1,4 @@
-import { QuestionDTO } from '@DTOs/index';
+import { QuestionDTO, UserAnswerDataDTO } from '@DTOs/index';
 import { DialogRef } from '@angular/cdk/dialog';
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -40,6 +40,15 @@ export class FreeTextTaskComponent {
 
   onSubmit() {
     console.log(this.answerText);
+    const userAnswerData: UserAnswerDataDTO = {
+      id: -1,
+      questionId: this.questionData.id,
+      userId: -1,
+      userFreetextAnswer: this.answerText,
+    }
+    this.quesitonService.createUserAnswer(userAnswerData).subscribe(data => {
+      console.log(data);
+    });
   }
 
 
