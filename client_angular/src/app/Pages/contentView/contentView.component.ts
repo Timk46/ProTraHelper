@@ -17,6 +17,7 @@ export class ContentViewComponent implements OnInit {
   contentViewData: ContentDTO;
   activeConceptNodeId: number;
   applyCompletedStyle: boolean[] = [];
+  applyQuestionStyle: boolean[] = [];
 
   // Get Data from Dialog
   constructor(public dialogRef: MatDialogRef<ContentViewComponent>, @Inject(MAT_DIALOG_DATA) public data: any, private sanitizer: DomSanitizer, private discussionDialogService: DiscussionDialogService, private contentService: ContentService) {
@@ -27,6 +28,7 @@ export class ContentViewComponent implements OnInit {
     // set default button style
     for(let i = 0; i < this.contentViewData.contentElements.length; i++) {
       this.applyCompletedStyle[i] = false;
+      this.applyQuestionStyle[i] = false;
     }
   }
 
@@ -37,11 +39,18 @@ export class ContentViewComponent implements OnInit {
 
   ngOnInit() {
     for (let i = 0; i < this.contentViewData.contentElements.length; i++) {
-      this.contentService.getContentElementCompletionStatus(this.contentViewData.contentElements[i].id).subscribe(status => {
+      this.contentService.getContentElementStatus(this.contentViewData.contentElements[i].id).subscribe(status => {
         if (status.userStatusCompleted) {
           this.applyCompletedStyle[i] = true;
         } else {
           this.applyCompletedStyle[i] = false;
+        }
+      });
+      this.contentService.getContentElementStatus(this.contentViewData.contentElements[i].id).subscribe(status => {
+        if (status.userStatusQuestion) {
+          this.applyQuestionStyle[i] = true;
+        } else {
+          this.applyQuestionStyle[i] = false;
         }
       });
     }
@@ -59,16 +68,32 @@ export class ContentViewComponent implements OnInit {
 
   onToggleCheckmark(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
-    // this.applyCompletedStyle[position] = !this.applyCompletedStyle[position];
     this.contentService.toggleContentElementCompletionStatus(contentElementId).subscribe(status => this.applyCompletedStyle[position] = status);
   }
 
-  applyStyles(contentElementId: number) {
+  onToggleQuestionmark(contentElementId: number) {
+    const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
+    this.contentService.toggleContentElementQuestionStatus(contentElementId).subscribe(status => this.applyQuestionStyle[position] = status);
+  }
+
+  applyCheckmarkStyles(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
 
     let styles = {'color' : 'red', 'background-color' : 'white'};
     if (this.applyCompletedStyle[position]) {
       styles = {'color' : 'white', 'background-color': 'green'};
+    } else {
+      styles = {'color' : 'gray', 'background-color': 'white'};
+    }
+    return styles;
+  }
+
+  applyQuestionmarkStyles(contentElementId: number) {
+    const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
+
+    let styles = {'color' : 'white', 'background-color' : 'red'};
+    if (this.applyQuestionStyle[position]) {
+      styles = {'color' : 'white', 'background-color': 'purple'};
     } else {
       styles = {'color' : 'gray', 'background-color': 'white'};
     }
@@ -81,6 +106,15 @@ export class ContentViewComponent implements OnInit {
       return 'Als nicht abgeschlossen markieren';
     } else {
       return 'Als abgeschlossen markieren';
+    }
+  }
+
+  getQuestionTooltip(contentElementId: number) {
+    const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
+    if (this.applyQuestionStyle[position]) {
+      return 'Markierung entfernen';
+    } else {
+      return "Als 'Offene Frage(n)' markieren";
     }
   }
 

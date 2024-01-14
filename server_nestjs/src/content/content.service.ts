@@ -187,7 +187,6 @@ export class ContentService {
           userId: userId,
         },
       });
-      return true;
     }
 
     //toggle checkmark status
@@ -200,7 +199,55 @@ export class ContentService {
       },
     });
 
-    console.log(checkmarkStatus.markedAsDone);
     return !checkmarkStatus.markedAsDone;
+  }
+
+  /**
+   * Toggle Content Element Status
+   *
+   * Toggles the completion status of a content element for a specific user.
+   * @param {number} contentElementId The ID of the content element
+   * @returns {Promise<boolean>} A promise that resolves to a boolean.
+   *
+   */
+  async toggleQuestionmark(
+    contentElementId: number,
+    userId: number,
+  ): Promise<boolean> {
+    //get checkmark status
+    let questionmarkStatus = await this.prisma.userContentProgress.findFirst({
+      where: {
+        contentElementId: contentElementId,
+        userId: userId,
+      },
+      select: {
+        id: true,
+        markedAsQuestion: true,
+      },
+    });
+
+    if (!questionmarkStatus) {
+      //create new entry in userContentProgress if not exists
+      questionmarkStatus = await this.prisma.userContentProgress.create({
+        data: {
+          markedAsDone: false,
+          markedAsQuestion: true,
+          contentElementId: contentElementId,
+          userId: userId,
+        },
+      });
+    }
+
+    //toggle checkmark status
+    await this.prisma.userContentProgress.update({
+      where: {
+        id: questionmarkStatus.id,
+      },
+      data: {
+        markedAsQuestion: !questionmarkStatus.markedAsQuestion,
+      },
+    });
+
+    return !questionmarkStatus.markedAsQuestion;
   }
 }

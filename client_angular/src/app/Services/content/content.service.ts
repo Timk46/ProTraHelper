@@ -10,6 +10,7 @@ import { environment } from 'src/environments/environment';
 export class ContentService {
 
   public toggleCheckmarkStatus: Subject<{contentElementId: number, isCompleted: boolean}> = new Subject<{contentElementId: number, isCompleted: boolean}>();
+  public toggleQuestionmarkStatus: Subject<{contentElementId: number, hasQuestion: boolean}> = new Subject<{contentElementId: number, hasQuestion: boolean}>();
 
   constructor(private http: HttpClient) {}
 
@@ -31,7 +32,7 @@ export class ContentService {
    * @param contentElementId The id of a content element.
    * @returns ContentElementStatusDTO - the status of the content element.
    */
-  getContentElementCompletionStatus(
+  getContentElementStatus(
     contentElementId: number
   ): Observable<ContentElementStatusDTO> {
     return this.http.get<ContentElementStatusDTO>(
@@ -54,6 +55,25 @@ export class ContentService {
       .pipe(
         tap((status: boolean) => {
           this.toggleCheckmarkStatus.next({contentElementId: contentElementId, isCompleted: status});
+        })
+      );
+  }
+
+  /**
+   * Toggles the completion status of a content element for a specific user.
+   * @param contentElementId The id of a content element.
+   * @returns ContentElementStatusDTO - the status of the content element.
+   */
+  toggleContentElementQuestionStatus(
+    contentElementId: number
+  ): Observable<boolean> {
+    return this.http
+      .get<boolean>(
+        environment.server + `/content/toggleQuestionmark/${contentElementId}`
+      )
+      .pipe(
+        tap((status: boolean) => {
+          this.toggleQuestionmarkStatus.next({contentElementId: contentElementId, hasQuestion: status});
         })
       );
   }
