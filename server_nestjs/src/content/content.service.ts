@@ -139,7 +139,11 @@ export class ContentService {
       });
 
     if (!contentElementStatus) {
-      throw new Error('Discussion not found');
+      return {
+        contentElementId: contentElementId,
+        userStatusCompleted: false,
+        userStatusQuestion: false,
+      };
     }
 
     return {
@@ -147,5 +151,56 @@ export class ContentService {
       userStatusCompleted: contentElementStatus.markedAsDone,
       userStatusQuestion: contentElementStatus.markedAsQuestion,
     };
+  }
+
+  /**
+   * Toggle Content Element Status
+   *
+   * Toggles the completion status of a content element for a specific user.
+   * @param {number} contentElementId The ID of the content element
+   * @returns {Promise<boolean>} A promise that resolves to a boolean.
+   *
+   */
+  async toggleCheckmark(
+    contentElementId: number,
+    userId: number,
+  ): Promise<boolean> {
+    //get checkmark status
+    let checkmarkStatus = await this.prisma.userContentProgress.findFirst({
+      where: {
+        contentElementId: contentElementId,
+        userId: userId,
+      },
+      select: {
+        id: true,
+        markedAsDone: true,
+      },
+    });
+
+    if (!checkmarkStatus) {
+      //create new entry in userContentProgress if not exists
+      checkmarkStatus = await this.prisma.userContentProgress.create({
+        data: {
+          markedAsDone: true,
+          markedAsQuestion: false,
+          contentElementId: contentElementId,
+          userId: userId,
+        },
+      });
+      return true;
+    }
+
+    //toggle checkmark status
+    await this.prisma.userContentProgress.update({
+      where: {
+        id: checkmarkStatus.id,
+      },
+      data: {
+        markedAsDone: !checkmarkStatus.markedAsDone,
+      },
+    });
+
+    console.log(checkmarkStatus.markedAsDone);
+    return !checkmarkStatus.markedAsDone;
   }
 }

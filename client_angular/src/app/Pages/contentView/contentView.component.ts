@@ -59,11 +59,8 @@ export class ContentViewComponent implements OnInit {
 
   onToggleCheckmark(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
-    if (this.applyCompletedStyle[position]) {
-      this.applyCompletedStyle[position] = false;
-    } else {
-      this.applyCompletedStyle[position] = true;
-    }
+    // this.applyCompletedStyle[position] = !this.applyCompletedStyle[position];
+    this.contentService.toggleContentElementCompletionStatus(contentElementId).subscribe(status => this.applyCompletedStyle[position] = status);
   }
 
   applyStyles(contentElementId: number) {

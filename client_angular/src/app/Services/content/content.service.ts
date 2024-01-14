@@ -1,13 +1,16 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ContentsForConceptDTO, ContentElementStatusDTO } from '@DTOs/index';
-import { catchError, Observable } from 'rxjs';
+import { catchError, Observable, tap, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ContentService {
+
+  public toggleCheckmarkStatus: Subject<{contentElementId: number, isCompleted: boolean}> = new Subject<{contentElementId: number, isCompleted: boolean}>();
+
   constructor(private http: HttpClient) {}
 
   /**
@@ -34,5 +37,24 @@ export class ContentService {
     return this.http.get<ContentElementStatusDTO>(
       environment.server + `/content/status/${contentElementId}`
     );
+  }
+
+  /**
+   * Toggles the completion status of a content element for a specific user.
+   * @param contentElementId The id of a content element.
+   * @returns ContentElementStatusDTO - the status of the content element.
+   */
+  toggleContentElementCompletionStatus(
+    contentElementId: number
+  ): Observable<boolean> {
+    return this.http
+      .get<boolean>(
+        environment.server + `/content/toggleCheckmark/${contentElementId}`
+      )
+      .pipe(
+        tap((status: boolean) => {
+          this.toggleCheckmarkStatus.next({contentElementId: contentElementId, isCompleted: status});
+        })
+      );
   }
 }

@@ -51,4 +51,29 @@ export class ContentController {
       Number(req.user.id),
     );
   }
+
+  /**
+   * Toggle Content Element Status by Content Element ID
+   * @route GET /content/toggleCheckmark/:contentElementId
+   *
+   * @param {number} contentElementId - The ID of the content element passed as a URL parameter.
+   *
+   * @returns {Promise<boolean>} - A promise that resolves to a boolean.
+   *
+   * @example http://localhost:3000/content/toggleCheckmark/14
+   */
+  @roles('ANY')
+  @Get('/toggleCheckmark/:contentElementId')
+  async toggleContentElementStatus(
+    @Param('contentElementId') contentElementId: number,
+    @Req() req,
+  ): Promise<boolean> {
+    if (isNaN(contentElementId)) {
+      throw new Error('Invalid contentElement id');
+    }
+    return this.contentService.toggleCheckmark(
+      Number(contentElementId),
+      req.user.id,
+    );
+  }
 }
