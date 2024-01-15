@@ -939,26 +939,119 @@ await prisma.file.create({
   // Question
   const question = await prisma.question.create({
     data: {
-      name: 'Question 1',
-      description: 'Description for Question 1',
-      score: 10,
+      name: 'Primitiver Datentyp',
+      description: 'The first MC-Question in HeFL',
+      score: 2,
       type: 'MC',
       author: { connect: { id: adminUser.id } },
+      text: 'Welcher der folgenden Datentypen in Java ist primitiv?',
+      conceptNode: { connect: { id: conceptNode.id } },
+      isApproved: true,
+      version: 1,
     },
+  });
+  // connect it to itself
+  await prisma.question.update({
+    where: { id: question.id },
+    data: { origin: { connect: { id: question.id } } },
   });
 
-  await prisma.feedback.create({
+  /*  
+  const questionVersion = await prisma.questionVersion.create({
     data: {
-      name: 'Feedback1',
-      text: 'This is a feedback.',
-      question: { connect: { id: question.id } },
+        question: { connect: { id: question.id } },
+        version: 1
     },
   });
+  */
 
   const mcQuestion = await prisma.mCQuestion.create({
     data: {
       isSC: false,
       question: { connect: { id: question.id } },
+    },
+  });
+
+  const mcOption1 = await prisma.mCOption.create({
+    data: {
+      text: 'String',
+      is_correct: false,
+    },
+  });
+
+  const mcOption2 = await prisma.mCOption.create({
+    data: {
+      text: 'int',
+      is_correct: true,
+    },
+  });
+
+  const mcOption3 = await prisma.mCOption.create({
+    data: {
+      text: 'double',
+      is_correct: true,
+    },
+  });
+
+  const mcOption4 = await prisma.mCOption.create({
+    data: {
+      text: 'ArrayList',
+      is_correct: false,
+    },
+  });
+
+  const mcQuestionOption1 = await prisma.mCQuestionOption.create({
+    data: {
+      question: { connect: { id: mcQuestion.id } },
+      option: { connect: { id: mcOption1.id } },
+    },
+  });
+
+  const mcQuestionOption2 = await prisma.mCQuestionOption.create({
+    data: {
+      question: { connect: { id: mcQuestion.id } },
+      option: { connect: { id: mcOption2.id } },
+    },
+  });
+
+  const mcQuestionOption3 = await prisma.mCQuestionOption.create({
+    data: {
+      question: { connect: { id: mcQuestion.id } },
+      option: { connect: { id: mcOption3.id } },
+    },
+  });
+
+  const mcQuestionOption4 = await prisma.mCQuestionOption.create({
+    data: {
+      question: { connect: { id: mcQuestion.id } },
+      option: { connect: { id: mcOption4.id } },
+    },
+  });
+
+  // Free Text Question
+  const questionFreeText = await prisma.question.create({
+    data: {
+      name: 'Primitiver Datentyp - Freitext',
+      description: 'Beschreibe in eigenen Worten, was ein primitiver Datentyp ist.',
+      score: 1  ,
+      type: 'FreeText',
+      author: { connect: { id: adminUser.id } },
+      text: 'Primitive Datentypen',
+      conceptNode: { connect: { id: conceptNode.id } },
+    },
+  });
+
+  // connect it to itself
+  await prisma.question.update({
+    where: { id: questionFreeText.id },
+    data: { origin: { connect: { id: questionFreeText.id } } },
+  });
+
+  const questionFreeTextVersion = await prisma.questionVersion.create({
+    data: {
+        question: { connect: { id: questionFreeText.id } },
+        version: 1,
+        isApproved : true
     },
   });
 

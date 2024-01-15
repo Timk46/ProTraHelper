@@ -1,0 +1,60 @@
+.question-text {
+    /*display: flex;*/
+    place-content: center;
+    margin-top: 1%;
+    margin-left: 1%
+}
+
+.list-container {
+    display: inline-block;
+    height: auto;
+    width: auto;
+  }
+
+.selected {
+    background-color: #ffb700; /* Hintergrundfarbe für ausgewählte Elemente */
+    font-weight: bold; /* Fettdruck für ausgewählte Elemente */
+  }
+
+.selectedCorrect {
+  /* border: solid 3px green; */
+  background: green;
+  font-weight: bold;
+}
+
+.selectedIncorrect {
+  border: solid 3px red;
+  /*background-color: red;*/
+  font-weight: bold;
+}
+
+.correctNotSelected {
+  border: solid 3px red;
+}
+
+.incorrectNotSelected {
+  border: solid 3px green;
+}
+
+.mat-elevation-z8 {
+    background: #eceff4;
+    color: black;
+  }
+  
+  .content {
+    height: 20h;
+    margin: 16px;
+    padding: 16px;
+  
+    contain: content;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+  
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .submit {
+    display: flex;
+    flex-direction: column;
+  }

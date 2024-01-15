@@ -1,0 +1,36 @@
+.taskOverview-container {
+    display: flex;
+    flex-wrap: wrap;
+    //justify-content: space-around;
+}
+
+.task-overview-card {
+    max-width: 200px;
+    max-height: 200px;
+    margin-right: 4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.task-progress-card {
+    margin-bottom: 4px;
+}
+
+.passed {
+    background-color: rgb(0, 255, 0, 0.3);
+}
+
+.floating {
+    background-color: rgb(255, 255, 0, 0.3);
+}
+
+.failed {
+    background-color: rgb(255, 0, 0, 0.3);
+}
+
+.task-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}

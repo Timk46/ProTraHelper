@@ -15,6 +15,8 @@ import { DiscussionViewController } from './discussion/discussion-view/discussio
 import { DiscussionViewService } from './discussion/discussion-view/discussion-view.service';
 import { DiscussionCreationService } from './discussion/discussion-creation/discussion-creation.service';
 import { DiscussionCreationController } from './discussion/discussion-creation/discussion-creation.controller';
+import { QuestionDataModule } from './question-data/question-data.module';
+import { TaskOverviewModule } from './task-overview/task-overview.module';
 
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -29,7 +31,9 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     UsersModule,
     ContentModule,
-    ChatBotModule],
+    ChatBotModule,
+    QuestionDataModule, 
+    TaskOverviewModule],
   controllers: [
     AppController,
     DiscussionListController, DiscussionVoteController, DiscussionViewController, DiscussionCreationController
