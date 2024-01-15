@@ -937,7 +937,6 @@ await prisma.file.create({
   });
 
   // Question
-  // Question
   const question = await prisma.question.create({
     data: {
       name: 'Primitiver Datentyp',

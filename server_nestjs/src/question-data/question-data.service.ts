@@ -39,7 +39,7 @@ export class QuestionDataService {
 
     /**
      * 
-     * @param questionVersion_id 
+     * @param question_id 
      * @returns the mc question data
      */
     async getMCQuestion(question_id: number): Promise<McQuestionDTO> {
