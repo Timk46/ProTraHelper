@@ -33,13 +33,6 @@ export class McTaskComponent implements OnInit {
   }
 
   //the userAnswer data
-  /* userAnswer : UserAnswerDTO = {
-    id: -1,
-    userId: -1,
-    questionId: -1,
-    feedbackId: null,
-    userFreetextAnswer: null,
-  } */
   userAnswer : UserAnswerDataDTO = {
     id: -1,
     userId: -1,
@@ -49,9 +42,6 @@ export class McTaskComponent implements OnInit {
   //the requested question
   questionId: number;
   
-  //the current unser
-  @Input() userId : number = 2;
-
   //isSelfAssessment
   @Input() isSelfAssessment: boolean = true;
   
@@ -76,33 +66,15 @@ export class McTaskComponent implements OnInit {
 
   onSubmit() :void {
     //Create new submit
-    /* this.questionDataService.createUserAnswer(this.userId, this.mcQuestion.id).subscribe(data => {
-      this.userAnswer = data;
-  
-      //add the selected options to the submit
-      for(let optionSelected of this.selectedOptions) {
-        console.log(optionSelected);
-        console.log(this.userAnswer.id);
-        this.questionDataService.createUserMCOptionSelected(this.userAnswer.id, optionSelected).subscribe();
-      }
-    
-    }); */
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
       userId: -1,
       questionId: this.mcQuestion.id,
       userMCAnswer: this.selectedOptions,
     }
+    
     this.questionDataService.createUserAnswer(userAnswerData).subscribe(data => {
       this.userAnswer = data;
-  
-      //add the selected options to the submit
-      /* for(let optionSelected of this.selectedOptions) {
-        console.log(optionSelected);
-        console.log(this.userAnswer.id);
-        this.questionDataService.createUserMCOptionSelected(this.userAnswer.id, optionSelected).subscribe();
-      } */
-    
     });
     
     this.submitDisabled = true;
@@ -119,7 +91,7 @@ export class McTaskComponent implements OnInit {
   }
 
   ngOnInit() {
-    //Get the newest Version of the requested question
+    //Show the newest Version of the questions
     this.questionDataService.getQuestionData(this.questionId).subscribe(data => {
       this.questionData = data;
       //console.log("The data of the newest question version: " + data.id);

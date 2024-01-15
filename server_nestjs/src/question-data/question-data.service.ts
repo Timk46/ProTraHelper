@@ -39,38 +39,8 @@ export class QuestionDataService {
 
     /**
      * 
-     * @param question_id 
-     * @returns the question data of the newest version of the question
-     */
-    async getNewestQuestionVersion(question_id: number): Promise<QuestionDTO> {
-        let questionVersion = await this.prisma.question.findFirst({
-            where: {
-                originId: Number(question_id),
-                isApproved: true,
-            },
-            orderBy: {
-                version: 'desc',
-            }
-        })
-
-        let newestQuestionVersion: QuestionDTO = {
-            id: questionVersion.id,
-            name: questionVersion.name,
-            description: questionVersion.description,
-            score: questionVersion.score,
-            type: questionVersion.type,
-            text: questionVersion.text,
-            isApproved: questionVersion.isApproved,
-            originId: questionVersion.originId,    
-        };
-        
-        return newestQuestionVersion;
-    }
-
-    /**
-     * 
      * @param questionVersion_id 
-     * @returns mc question data
+     * @returns the mc question data
      */
     async getMCQuestion(question_id: number): Promise<McQuestionDTO> {
         let mcQuestion = await this.prisma.mCQuestion.findFirst({
@@ -121,24 +91,13 @@ export class QuestionDataService {
         return mcOptions;
     }
 
+
     /**
      * 
-     * @param user_id 
-     * @param mcQuestion_id 
-     * @returns the new user mc answer
+     * @param userId 
+     * @param answerData 
+     * @returns the new user answer
      */
-    /* async createUserAnswer(user_id: number, question_id: number) : Promise<UserAnswerDTO> {
-        return await this.prisma.userAnswer.create({
-            data: {
-                userId: user_id,
-                questionId: question_id,
-                userFreetextAnswer: null,
-                feedbackId: null,
-            }
-        })
-    } */
-
-
     async createUserAnswer(userId: number, answerData: UserAnswerDataDTO) : Promise<UserAnswerDataDTO> {
         const createdData = await this.prisma.userAnswer.create({
             data: {
@@ -146,14 +105,12 @@ export class QuestionDataService {
                 questionId: answerData.questionId,
                 //if answerData has a userFreetextAnswer, use it, else use null
                 userFreetextAnswer: answerData.userFreetextAnswer ?? null,
-                //connect all mc options
-                //userMCOptionSelected: {}
-
             }
         });
 
         if (!createdData) throw new Error('Could not create userAnswer');
         
+        //connect all mc options
         if (answerData.userMCAnswer) {
             for (const mcOptionId of answerData.userMCAnswer) {
                 await this.createUserMCOptionSelected(createdData.id, mcOptionId);
@@ -170,7 +127,12 @@ export class QuestionDataService {
 
     }
 
-
+    /**
+     * 
+     * @param userAnswer_id 
+     * @param mcOption_id 
+     * @returns the selected options
+     */
     async createUserMCOptionSelected(userAnswer_id: number, mcOption_id: number) : Promise<UserMCOptionSelectedDTO> {
         return await this.prisma.userMCOptionSelected.create({
             data: {

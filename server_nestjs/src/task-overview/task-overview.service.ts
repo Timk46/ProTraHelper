@@ -28,7 +28,6 @@ export class TaskOverviewService {
             distinct: ['originId'],
         });
 
-
         if(!questions) {
             throw new Error('No questions found');
         }

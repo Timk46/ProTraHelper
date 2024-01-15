@@ -26,10 +26,6 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
   ngOnInit() { }
 
   ngOnChanges() { 
-    /* this.taskOverviewService.getTaskIdsForConceptNode(this.activeConceptNodeId).subscribe(data => {
-      console.log(this.activeConceptNodeId);
-      this.questionsForConcept = data;
-    }); */
 
     this.taskOverviewService.getTaskOverviewDataForConceptNode(this.activeConceptNodeId).subscribe(taskOverviewData => {
       console.log(this.activeConceptNodeId);
@@ -47,8 +43,6 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
 
     this.dialog.open(McTaskComponent, dialogConfig);
 
-    //this.showTask = true;
-    //this.activeTask = question_id;
   }
 
   /**

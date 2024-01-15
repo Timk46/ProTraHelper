@@ -18,29 +18,35 @@ export class QuestionDataController {
         return this.questionDataService.getQuestion(questionId);
     }
     
-    @Get('/newestQuestionVersion/:questionId')
-    async getNewestQuestionVersion(@Param('questionId') questionId: number) {
-        return this.questionDataService.getNewestQuestionVersion(questionId);
-    }
-
+    /**
+     * 
+     * @param questionVersionId 
+     * @returns the mc question
+     */
     @Get('/mcQuestion/:questionVersionId')
     async getMCQuestion(@Param('questionVersionId') questionVersionId: number) {
         return this.questionDataService.getMCQuestion(questionVersionId);
     }
 
+    /**
+     * 
+     * @param mcQuestionId 
+     * @returns the mc options for the mc question
+     */
     @Get('/mcOptions/:mcQuestionId')
     async getMCOptions(@Param('mcQuestionId') mcQuestionId: number) {
         return this.questionDataService.getMCOptions(mcQuestionId);
     }
     
-    /* @Post('userAnswer/create')
-    async createUserMCAnswer(@Body() data: {userId: number, questionId: number}) {
-        console.log(data.userId);
-        return this.questionDataService.createUserAnswer(data.userId, data.questionId);  
-    } */
+    /**
+     * 
+     * @param data 
+     * @param req 
+     * @returns the the new user answer
+     */
     //@roles('ANY')
     @Post('userAnswer/create')
-    async createUserMCAnswer(@Body() data: UserAnswerDataDTO, @Req() req: any) {
+    async createUserAnswer(@Body() data: UserAnswerDataDTO, @Req() req: any) {
         console.log(data.userId);
         return this.questionDataService.createUserAnswer(req.user.id, data);  
     }
