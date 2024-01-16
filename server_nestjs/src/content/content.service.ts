@@ -181,7 +181,7 @@ export class ContentService {
       //create new entry in userContentProgress if not exists
       checkmarkStatus = await this.prisma.userContentProgress.create({
         data: {
-          markedAsDone: true,
+          markedAsDone: false,
           markedAsQuestion: false,
           contentElementId: contentElementId,
           userId: userId,
@@ -231,7 +231,7 @@ export class ContentService {
       questionmarkStatus = await this.prisma.userContentProgress.create({
         data: {
           markedAsDone: false,
-          markedAsQuestion: true,
+          markedAsQuestion: false,
           contentElementId: contentElementId,
           userId: userId,
         },
