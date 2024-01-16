@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { LocalModelSource, TYPES } from 'sprotty';
 import  createContainer  from './sprotty/di.config';
 
-import { GraphDataService } from 'src/app/Services/graph-data.service';
+import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { ConceptGraphModelSource } from './sprotty/model-source';
 
 @Component({

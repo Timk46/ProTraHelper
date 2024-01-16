@@ -93,6 +93,7 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
     protected override graphOptions(sgraph: SGraphP, index: SModelIndex): LayoutOptions | undefined {
         return {
             'org.eclipse.elk.algorithm': 'org.eclipse.elk.layered',
+            'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]', // important for button-label spacing
             //'org.eclipse.elk.spacing.nodeNode': '500', //doesn't work
             //'org.eclipse.elk.edgeRouting': 'POLYLINE',
             //'org.eclipse.elk.hierarchyHandling': 'INCLUDE_CHILDREN',
@@ -105,9 +106,9 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
             'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS MINIMUM_SIZE',
             //'org.eclipse.elk.nodeSize.minimum': '(40, 40)', // doesn't work
             'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
-            'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=20, right=20]',
+            'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]',
             'org.eclipse.elk.spacing.labelLabel': '5',
-            'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '50',
+            'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '60',
         };
     }
 

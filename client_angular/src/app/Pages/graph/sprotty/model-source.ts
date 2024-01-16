@@ -7,8 +7,8 @@ import {
   Action, CollapseExpandAction, CollapseExpandAllAction, SCompartment, SEdge, SGraph, SLabel,
   SModelIndex, SModelRoot, SNode, SelectAction, CenterAction, SShapeElement
 } from 'sprotty-protocol';
-import { GraphCommunicationService } from 'src/app/Services/graphCommunication.service';
-import { GraphDataService } from 'src/app/Services/graph-data.service';
+import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
+import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { ThisReceiver } from '@angular/compiler';
 import { inject as injectAngular } from '@angular/core';
 import { NoDataRowOutlet } from '@angular/cdk/table';
@@ -34,7 +34,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.dialog = injectAngular(MatDialog);
     this.graphData = injectAngular(GraphDataService)
     //this.initTestGraph();
-    this.getUserGraph();
+    this.updateUserGraph();
   }
 
   override initialize(registry: ActionHandlerRegistry): void {
@@ -74,7 +74,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     }
   }
 
-  private getUserGraph() {
+  public updateUserGraph() {
     this.graphData!.fetchUserGraph(this.userId).subscribe((graph) => {
       this.initGraph(graph);
     });
@@ -88,12 +88,12 @@ export class ConceptGraphModelSource extends LocalModelSource {
       id: 'root',
       children: [],
       layoutOptions: {
-        hGap: 5,
+        //hGap: 5,
         hAlign: 'left',
-        paddingLeft: 7,
-        paddingRight: 7,
-        paddingTop: 7,
-        paddingBottom: 7
+        // paddingLeft: 7,
+        // paddingRight: 7,
+        // paddingTop: 7,
+        // paddingBottom: 7
       }
     };
 
@@ -171,14 +171,26 @@ export class ConceptGraphModelSource extends LocalModelSource {
     const index = new SModelIndex();
     index.add(this.currentRoot);
     const sprottyParentNode = index.getById(action.parentId) as SprottyConceptNode;
+    let parentDatabaseId;
+    console.log("sprottyParentNode: ", index)
 
-    if (sprottyParentNode !== undefined) {
+    if (sprottyParentNode == undefined) {
+      parentDatabaseId = this.flatGraph.trueRootId;
+    }
+    else {
+      parentDatabaseId = sprottyParentNode.databaseId;
+    }
 
       console.log("handleCreateConceptAction: ", action, sprottyParentNode);
       const dialogRef = this.dialog?.open(CreateConceptDialogComponent, {
-        data: { parentId: sprottyParentNode.databaseId },
+        data: { parentId: parentDatabaseId},
       });
-    }
+      dialogRef?.afterClosed().subscribe((result) => {
+        if (result === 'success') {
+          this.updateUserGraph();
+        }
+      });
+    
   }
 
   /**
@@ -197,7 +209,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       //todo: check if node is deletable and if it has multiple parents?
       this.graphData!.deleteConcept(sprottyNode.databaseId).subscribe((res) => {
         console.log("deleted concept: ", res);
-        this.getUserGraph();
+        this.updateUserGraph();
       });
     }
   }
@@ -340,13 +352,13 @@ export class ConceptGraphModelSource extends LocalModelSource {
       });
 
     //level
-    node.children.push(
-      <SLabel>{
-        id: 'level_' + id,
-        type: 'label:text',
-        text: 'Level: ' + level.toString(),
-      },
-    );
+    // node.children.push(
+    //   <SLabel>{
+    //     id: 'level_' + id,
+    //     type: 'label:text',
+    //     text: 'Level: ' + level.toString(),
+    //   },
+    // );
 
     return node;
   }

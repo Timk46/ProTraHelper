@@ -11,6 +11,14 @@ import { DiscussionCreationService } from 'src/app/Services/discussion/discussio
 export class DiscussionCreationComponent {
 
   //@Input() userId: number = 1;
+  editorConfig = {
+    readonly: false,
+    plugins: 'autoresize lists table link image code codesample',
+    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | link image | code codesample',
+    min_height: 300,
+    max_height: 500,
+    resize: false,
+  }
 
   discussionNodeNames: discussionNodeNamesDTO = {
     conceptNodeName: "dummy",

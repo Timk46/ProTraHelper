@@ -17,9 +17,7 @@ active Concept Node Name: {{activeConceptNode.name}} <br> -->
     </mat-tab>
 
     <mat-tab label="Aufgaben">
-      <div class="tab-content-container">
-        Here we will show Cards for each connected Task, which will open them (for example Coding Task in Tutor-Kai)
-      </div>
+      <app-task-overview [activeConceptNodeId]="activeConceptNode.databaseId"></app-task-overview>
     </mat-tab>
 
     <mat-tab label="Kompetenzen">

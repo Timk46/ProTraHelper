@@ -6,7 +6,7 @@ import { DashboardComponent } from './Pages/dashboard/dashboard.component';
 import { ConceptOverviewComponent } from './Pages/conceptOverview/conceptOverview.component';
 import { CodeTaskComponent } from './Pages/contentView/contentElement/codeTask/codeTask.component';
 import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer/pdfViewer.component';
-import { McQuizComponent } from './Pages/contentView/contentElement/mcQuiz/mcQuiz.component';
+import { McTaskComponent } from './Pages/contentView/contentElement/mcTask/mcTask.component';
 import { GraphComponent } from './Pages/graph/graph.component';
 import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
 import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
@@ -16,6 +16,7 @@ import { DiscussionListComponent } from './Pages/discussion/discussion-list/disc
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 import { LoginComponent } from './Pages/login/login.component';
 import { LoggedInGuard } from './Guards/is-logged-in.guard';
+import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overview/task-evaluation-overview.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -27,11 +28,12 @@ const routes: Routes = [
   { path: 'discussion', component: DiscussionListComponent, canActivate: [LoggedInGuard] },
   { path: 'codeTask', component: CodeTaskComponent, canActivate: [LoggedInGuard] },
   { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent, canActivate: [LoggedInGuard] },
-  { path: 'mcQuiz', component: McQuizComponent, canActivate: [LoggedInGuard] },
+  //{ path: 'mcTask', component: McTaskComponent, canActivate: [LoggedInGuard] },
   { path: 'graph', component: GraphComponent, canActivate: [LoggedInGuard] },
   { path: 'chatbot', component: ChatBotComponent, canActivate: [LoggedInGuard] },
   { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard] },
   { path: 'discussion-view/:discussionId', component: DiscussionViewComponent, canActivate: [LoggedInGuard] },
+  { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent },
 
   // just for testing
   { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },

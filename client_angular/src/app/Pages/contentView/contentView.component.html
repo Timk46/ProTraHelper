@@ -42,6 +42,12 @@
         <app-videoViewer  [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-videoViewer>
       </div>
 
+      <!--MC Question
+      <div *ngIf="contentElem.type == 'MCQ' " class = "contentElement-Container">
+        <app-mcTask>  [uniqueIdentifier]=""></app-mcTask>
+      </div>
+      -->
+      
       <!--Show additional Content Text, if it has any-->
       <div *ngIf="contentElem.text" class="contentElement-Container">
         {{contentElem.text}}

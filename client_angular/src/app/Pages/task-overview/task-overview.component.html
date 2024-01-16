@@ -1,0 +1,41 @@
+<p>Task-Overview for ConceptNodeID: {{activeConceptNodeId}}</p>
+<p>Tasks for Concept: {{taskOverviewData}}</p>
+
+<div class="taskProgress-Container">
+    <mat-card class="task-progress-card" class="failed">
+        <mat-card-header>
+            <mat-card-title-group> 
+                <mat-card-title>Fortschritt für {{activeConceptNodeId}}</mat-card-title>
+            </mat-card-title-group>
+        </mat-card-header>
+        <mat-card-content>
+            <section>
+                Faktenwissen (60%)
+                <mat-progress-bar mode="determinate" value="60" color="warn"></mat-progress-bar>
+            </section>
+            <section>
+                Programmieraufgaben (40%)
+                <mat-progress-bar mode="determinate" value="40" color="warn"></mat-progress-bar>
+            </section>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="taskOverview-container">
+
+    <mat-card *ngFor="let question of taskOverviewData" class="task-overview-card" (click)="onTaskIdentityClick(question)">
+        <mat-card-header>
+            <mat-card-title-group> 
+                <mat-card-title>{{question.name}}</mat-card-title>
+            </mat-card-title-group>
+        </mat-card-header>  
+        <mat-card-content>
+            Typ: {{question.type}}<br>
+            <!--Versuche: {{question.attempts}}-->
+            Versuche: 3
+        </mat-card-content>
+        <mat-card-footer>
+            <mat-progress-bar class="task-progress-bar" mode="determinate" value="50" color="warn"></mat-progress-bar>
+        </mat-card-footer>
+    </mat-card>
+</div>

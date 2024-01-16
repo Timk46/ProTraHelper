@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, SimpleChanges } from '@angular/core';
 
 declare var tinymce: any;
 
@@ -7,16 +7,46 @@ declare var tinymce: any;
   templateUrl: './tinymce.component.html',
   styleUrls: ['./tinymce.component.scss']
 })
-export class TinymceComponent implements AfterViewInit {
+export class TinymceComponent {
 
   isReadonly: boolean = false;
+  @Input() content: string = '';
+  @Input() config: any = {};
+  
 
   constructor(){}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['content'] && changes['config']) {
+      const content = this.content;
+
+      const defaultConfig = {
+        selector: '#editor',
+        base_url: '/tinymce',
+        suffix: '.min',
+        menubar: false,
+        statusbar: false,
+        resize: false,
+        branding: false,
+      };
+
+      this.config = Object.assign(defaultConfig, this.config);
+      tinymce.init({
+        ...this.config,
+        setup: function (editor: any) {
+          editor.on('init', () => {
+            editor.setContent(content == undefined ? '' : content);
+          });
+        }
+      })
+    }
+  }
+
 
   /**
    * Initialize tinymce editor
    */
-  ngAfterViewInit(): void {
+  /* ngAfterViewInit(): void {
     tinymce.init({
       readonly: false,
       selector: '#editor',
@@ -31,7 +61,7 @@ export class TinymceComponent implements AfterViewInit {
       resize: false,
       branding: false,
     });
-  }
+  } */
 
   /**
    * Change the view of the editor

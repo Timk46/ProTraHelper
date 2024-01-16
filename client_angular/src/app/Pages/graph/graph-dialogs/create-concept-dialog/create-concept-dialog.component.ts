@@ -1,6 +1,8 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject} from '@angular/core';
+import { inject } from 'inversify';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { GraphDataService } from 'src/app/Services/graph-data.service';
+import { IActionDispatcher, TYPES } from 'sprotty';
+import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 
 @Component({
   selector: 'app-create-concept-dialog',
@@ -8,6 +10,7 @@ import { GraphDataService } from 'src/app/Services/graph-data.service';
   styleUrls: ['./create-concept-dialog.component.scss']
 })
 export class CreateConceptDialogComponent {
+
   name: string = "";
   description: string = "";
   currentModuleId: number = 1;
@@ -27,17 +30,17 @@ export class CreateConceptDialogComponent {
       console.log("in onDialogOpen")
     }
     onNoClick(): void {
-      this.dialogRef.close();
+      this.dialogRef.close('cancel');
     }
 
     createConcept(): void {
       console.log("trying to create concept: ", this.name, this.description)
       this.graphService.createConcept(this.data.parentId, this.name, this.description, [{ moduleId: this.currentModuleId, goal: this.moduleGoal }]);
-      this.dialogRef.close({name: this.name, description: this.description});
+      this.dialogRef.close('success');
     }
 
     cancelCreateConcept(): void {
-      this.dialogRef.close();
+      this.dialogRef.close('cancel');
     }
 
 }
