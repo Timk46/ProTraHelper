@@ -10,7 +10,7 @@ import {
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { inject as injectAngular } from '@angular/core';
-import { CreateConceptAction, DeleteConceptAction } from './actions';
+import { AwardLevelAction, CreateConceptAction, DeleteConceptAction } from './actions';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateConceptDialogComponent } from '../graph-dialogs/create-concept-dialog/create-concept-dialog.component';
 
@@ -40,6 +40,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     registry.register(CollapseExpandAction.KIND, this)
     registry.register(CreateConceptAction.KIND, this)
     registry.register(DeleteConceptAction.KIND, this)
+    registry.register(AwardLevelAction.KIND, this)
   }
 
   override handle(action: Action) {
@@ -65,6 +66,10 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
       case DeleteConceptAction.KIND:
         this.handleDeleteConceptAction(action as DeleteConceptAction);
+        break;
+
+      case AwardLevelAction.KIND:
+        this.handleAwardLevelAction(action as AwardLevelAction);
         break;
 
       default: super.handle(action);
@@ -253,59 +258,21 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.graphData!.updateUserConceptData(node.databaseId, { expanded: expanded }).subscribe();
   }
 
-  // initTestGraph() {
-  //   console.log("initTestGraph() called");
-  //   const graph: SGraph = {
-  //     type: 'graph',
-  //     id: 'root',
-  //     children: [],
-  //     layoutOptions: {
-  //       hGap: 5,
-  //       hAlign: 'left',
-  //       paddingLeft: 7,
-  //       paddingRight: 7,
-  //       paddingTop: 7,
-  //       paddingBottom: 7
-  //     }
-  //   };
+  handleAwardLevelAction(action: AwardLevelAction): void {
+    console.log("handleAwardLevelAction: ", action);
+    const index = new SModelIndex();
+    index.add(this.currentRoot);
+    const sprottyNode = index.getById(action.conceptId) as SprottyConceptNode;
+    const currentLevel = sprottyNode.level? sprottyNode.level : 0;
+    const newLevel = currentLevel + 1;
+    this.graphData!.updateUserConceptData(sprottyNode.databaseId, { level: newLevel }).subscribe(
+      (res) => {
+        console.log("updated concept: ", res);
+        this.getUserGraph();
+      }
+    );
 
-  //   // Programmiergrundlagen
-  //   const node1: SprottyConceptNode = this.createConceptNode('1', 'Programmiergrundlagen', true, 2, 1);
-
-  //   const node2 = this.createConceptNode('2', 'Variablen', true, 4, 1);
-  //   node1.children!.push(node2);
-
-  //   const node3 = this.createConceptNode('3', 'Datentypen', true, 3, 1);
-  //   const node4 = this.createConceptNode('4', 'boolean', true, 3, 1);
-  //   const node5 = this.createConceptNode('5', 'strings', true, 3, 1);
-  //   const node6 = this.createConceptNode('6', 'numbers', true, 3, 1);
-  //   node3.children!.push(node4, node5, node6);
-  //   node1.children!.push(node3);
-  //   const edge_2_3 = this.createEdge('edge_2_3', '2', '3');
-  //   node1.children!.push(edge_2_3);
-
-  //   const node7 = this.createConceptNode('7', 'Kontrollelemente', true, 2, 1);
-  //   const node8 = this.createConceptNode('8', 'if/else', true, 2, 1);
-  //   const node9 = this.createConceptNode('9', 'and/or', true, 2, 1);
-  //   node7.children!.push(node8, node9);
-  //   node1.children!.push(node7);
-  //   const edge_3_7 = this.createEdge('edge_3_7', '3', '7');
-  //   node1.children!.push(edge_3_7);
-
-  //   const node10 = this.createConceptNode('10', 'while', true, 1, 1);
-  //   node1.children!.push(node10);
-  //   const edge_7_10 = this.createEdge('edge_7_10', '7', '10');
-  //   node1.children!.push(edge_7_10);
-
-  //   const node11 = this.createConceptNode('11', 'for', true, 0, 1);
-  //   node1.children!.push(node11);
-  //   const edge_7_11 = this.createEdge('edge_7_11', '7', '11');
-  //   node1.children!.push(edge_7_11);
-
-  //   graph.children!.push(node1);
-
-  //   this.currentRoot = graph;
-  // }
+  }
 
   // creates new concept node (locally)
   /**

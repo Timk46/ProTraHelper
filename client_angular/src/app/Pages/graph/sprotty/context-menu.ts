@@ -23,7 +23,7 @@ import {
 import { CenterAction, GetSelectionAction, DeleteElementAction, FitToScreenAction, Point, SetPopupModelAction, SelectionResult, CreateElementAction } from 'sprotty-protocol';
 
 import { SprottyConceptNode } from './sprottyModels.interface'
-import { CreateConceptAction, DeleteConceptAction } from './actions';
+import { AwardLevelAction, CreateConceptAction, DeleteConceptAction } from './actions';
 @injectable()
 export class ClassContextMenuService implements IContextMenuService {
 
@@ -101,6 +101,7 @@ export class ClassContextMenuItemProvider implements IContextMenuItemProvider {
             new LabeledAction('', []),
             new LabeledAction('Add Concept here', [CreateConceptAction.create({parentId: selectedElement})]),
             new LabeledAction('Delete this Concept', [DeleteConceptAction.create({conceptId: selectedElement})]),
+            new LabeledAction('debug: Award 1 Level', [AwardLevelAction.create({conceptId: selectedElement})]),
         ];
     }
 
