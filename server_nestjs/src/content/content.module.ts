@@ -4,8 +4,8 @@ import { ContentService } from './content.service';
 import { ContentController } from './content.controller';
 
 @Module({
-    imports: [PrismaModule],
-    controllers: [ContentController],
-    providers: [ContentService],
+  imports: [PrismaModule],
+  controllers: [ContentController],
+  providers: [ContentService],
 })
 export class ContentModule {}

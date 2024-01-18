@@ -22,7 +22,7 @@
 
       <!-- Text -->
       <!-- <h3>Beschreibung</h3> -->
-      <app-tinymce #editor></app-tinymce>
+      <app-tinymce #editor [config]="editorConfig" [content]="''"></app-tinymce>
 
     </div>
     <!-- button not available if not logged in -->

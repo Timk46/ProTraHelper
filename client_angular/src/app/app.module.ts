@@ -11,7 +11,7 @@ import { DashboardComponent } from './Pages/dashboard/dashboard.component';
 import { ConceptOverviewComponent } from './Pages/conceptOverview/conceptOverview.component';
 import { CodeTaskComponent } from './Pages/contentView/contentElement/codeTask/codeTask.component';
 import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer/pdfViewer.component';
-import { McQuizComponent } from './Pages/contentView/contentElement/mcQuiz/mcQuiz.component';
+import { McTaskComponent } from './Pages/contentView/contentElement/mcTask/mcTask.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -40,6 +40,11 @@ import { DiscussionViewMessageComponent } from './Pages/discussion/discussion-vi
 import { DiscussionViewCreateComponent } from './Pages/discussion/discussion-view/discussion-view-create/discussion-view-create.component';
 import { DiscussionCreationComponent } from './Pages/discussion/discussion-creation/discussion-creation.component';
 import { DiscussionPrecreationComponent } from './Pages/discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
+import { TaskOverviewComponent } from './Pages/task-overview/task-overview.component';
+import { MatBadgeModule } from '@angular/material/badge';
+import {ProgressBarMode, MatProgressBarModule, MatProgressBar} from '@angular/material/progress-bar';
+import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overview/task-evaluation-overview.component';
+import { FreeTextTaskComponent } from './Pages/contentView/contentElement/free-text-task/free-text-task.component';
 
 
 
@@ -51,7 +56,7 @@ import { DiscussionPrecreationComponent } from './Pages/discussion/discussion-cr
     ConceptOverviewComponent,
     CodeTaskComponent,
     PdfViewerComponent,
-    McQuizComponent,
+    McTaskComponent,
     GraphComponent,
     FileUploadComponent,
     ContentViewComponent,
@@ -70,6 +75,9 @@ import { DiscussionPrecreationComponent } from './Pages/discussion/discussion-cr
     DiscussionViewCreateComponent,
     DiscussionCreationComponent,
     DiscussionPrecreationComponent,
+    TaskOverviewComponent,
+    TaskEvaluationOverviewComponent,
+    FreeTextTaskComponent,
   ],
   imports: [
     BrowserModule,
@@ -80,6 +88,8 @@ import { DiscussionPrecreationComponent } from './Pages/discussion/discussion-cr
     MaterialModule,
     NgxExtendedPdfViewerModule,
     HttpClientModule,
+    MatProgressBarModule,
+    MatBadgeModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

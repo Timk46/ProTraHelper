@@ -14,3 +14,5 @@ export * from "./chatBot.dto";
 export * from "./discussionCreation.dto"
 export * from "./discussionFilter.dto"
 export * from "./module.dto"
+export * from "./contentElementStatus.dto"
+export * from "./taskOverview.dto";

@@ -26,24 +26,27 @@ enum contentElementType {
 }
 
 model User {
-  id                   Int                  @id @default(autoincrement())
-  email                String               @unique
+  id                   Int                   @id @default(autoincrement())
+  email                String                @unique
   firstname            String
   lastname             String
   password             String
-  createdAt            DateTime             @default(now())
-  globalRole           GlobalRole           @default(STUDENT)
+  createdAt            DateTime              @default(now())
+  globalRole           GlobalRole            @default(STUDENT)
   modules              Module[]
-  currentConcept       ConceptNode?         @relation(fields: [currentconceptNodeId], references: [id], onDelete: SetNull) // last concept the user has visited
+  currentConcept       ConceptNode?          @relation(fields: [currentconceptNodeId], references: [id], onDelete: SetNull) // last concept the user has visited
   currentconceptNodeId Int?
   conceptUser          UserConcept[]
   question             Question[]
   codeSubmission       CodeSubmission[]
   codeSubmissionFile   CodeSubmissionFile[]
   anonymousUser        anonymousUser[]
-  userMCAnswer         UserMCAnswer[]
+  userAnswer           UserAnswer[]
   chatBotMessage       ChatBotMessage[]
   Vote                 Vote[]
+  UserContentProgress  UserContentProgress[]
+  //to be deleted
+  userMCAnswer         UserMCAnswer[]
 }
 
 model Module {
@@ -99,6 +102,7 @@ model ConceptNode {
   conceptGraph      ConceptGraph?
   conceptGraphId    Int? // is only set for the ancestor node
   Discussion        Discussion[]
+  question          Question[]
 }
 
 // defines one parent-child relationship in the concept graph
@@ -122,15 +126,15 @@ model ConceptEdge {
 }
 
 model ContentNode {
-  id              Int              @id @default(autoincrement())
-  name            String
-  description     String
-  prerequisites   ContentEdge[]    @relation("prerequisiteContent")
-  successors      ContentEdge[]    @relation("successorContent")
-  requires        Requirement[]
-  trains          Training[]
-  discussions     Discussion[]
-  contentElements ContentElement[]
+  id                  Int                   @id @default(autoincrement())
+  name                String
+  description         String
+  prerequisites       ContentEdge[]         @relation("prerequisiteContent")
+  successors          ContentEdge[]         @relation("successorContent")
+  requires            Requirement[]
+  trains              Training[]
+  discussions         Discussion[]
+  contentElements     ContentElement[]
 }
 
 model ContentEdge {
@@ -177,18 +181,19 @@ model UserConcept {
 
 // for example a MC question or a video or a piece of text
 model ContentElement {
-  id            Int                @id @default(autoincrement())
-  type          contentElementType
-  position      Int // position in the content node
-  title         String?
-  text          String?
-  contentNode   ContentNode        @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
-  contentNodeId Int
-  file          File?              @relation(fields: [fileId], references: [id])
-  fileId        Int?               @unique
-  question      Question?          @relation(fields: [questionId], references: [id])
-  questionId    Int?               @unique
-  Discussion    Discussion[]
+  id                  Int                   @id @default(autoincrement())
+  type                contentElementType
+  position            Int // position in the content node
+  title               String?
+  text                String?
+  contentNode         ContentNode           @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
+  contentNodeId       Int
+  file                File?                 @relation(fields: [fileId], references: [id])
+  fileId              Int?                  @unique
+  question            Question?             @relation(fields: [questionId], references: [id])
+  questionId          Int?                  @unique
+  Discussion          Discussion[]
+  UserContentProgress UserContentProgress[]
 }
 
 model File {
@@ -210,44 +215,67 @@ model File {
 // Feedback which the users will get after answering a question
 model Feedback {
   id         Int      @id @default(autoincrement())
-  name       String
   text       String
-  questionId Int
-  question   Question @relation(fields: [questionId], references: [id])
+  userAnswer UserAnswer @relation(fields: [userAnswerId], references: [id])
+  userAnswerId Int
 }
 
 model Question {
-  id               Int             @id @default(autoincrement())
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  name             String
-  version          Int?
-  description      String
-  score            Int
-  type             String
-  author           User            @relation(fields: [authorId], references: [id])
-  authorId         Int
-  text             String?
-  feedbacks        Feedback[]
-  files            File[]
+  id                         Int                @id @default(autoincrement())
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+  name                       String?
+  description                String?
+  score                      Int?
+  type                       String
+  author                     User               @relation(fields: [authorId], references: [id])
+  authorId                   Int
+  text                       String?
+  isApproved                 Boolean            @default(false)
+  version                    Int                @default(1)
+  files                      File[]
+  originId                   Int?               
+  origin                     Question?          @relation("VersionControl", fields: [originId], references: [id])
+  question                   Question[]          @relation("VersionControl")
+  //successor                  Question?          @relation("VersionControl")
   //toDo: connect to different mediatypes Evelyn
-  codingQuestions  CodingQuestion?
-  mcQuestion       MCQuestion?
-  contentElement   ContentElement?
-  contentElementId Int?
+  codingQuestions            CodingQuestion?
+  contentElement             ContentElement?
+  contentElementId           Int?
+  conceptNode                ConceptNode?         @relation(fields: [conceptNodeId], references: [id])
+  conceptNodeId              Int?
+  userAnswer                 UserAnswer[]
+  mcQuestion                 MCQuestion[]
+  QuestionVersionAsQuestion  QuestionVersion[]  @relation("QuestionToQuestionVersion")
+  QuestionVersionAsSuccessor QuestionVersion[]  @relation("QuestionToSuccessorQuestionVersion")
+}
+
+model QuestionVersion {
+  id          Int          @id @default(autoincrement())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  question    Question?    @relation("QuestionToQuestionVersion", fields: [questionId], references: [id])
+  questionId  Int
+  successor   Question?    @relation("QuestionToSuccessorQuestionVersion", fields: [successorId], references: [id])
+  successorId Int?
+  version     Int
+  isApproved  Boolean      @default(false)
+  MCQuestion  MCQuestion[]
 }
 
 //********************************************************************************************* Begin MC-Question
 model MCQuestion {
-  id             Int            @id @default(autoincrement())
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  question       Question       @relation(fields: [questionId], references: [id])
-  questionId     Int            @unique
-  shuffleoptions Boolean        @default(true)
-  mcOptions      MCOption[]
-  isSC           Boolean
-  userMCAnswers  UserMCAnswer[]
+  id                Int                @id @default(autoincrement())
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  questionVersion   QuestionVersion?   @relation(fields: [questionVersionId], references: [id])
+  questionVersionId Int?               
+  question          Question           @relation(fields: [questionId], references: [id])
+  questionId        Int
+  shuffleoptions    Boolean            @default(true)
+  isSC              Boolean
+  userMCAnswers     UserMCAnswer[]
+  MCQuestionOption  MCQuestionOption[]
 }
 
 model MCOption {
@@ -257,9 +285,18 @@ model MCOption {
   text                 String
   files                File[]
   is_correct           Boolean
-  question             MCQuestion             @relation(fields: [questionId], references: [id])
-  questionId           Int
-  userMCAnswerSelected UserMCAnswerSelected[]
+  UserMCOptionSelected UserMCOptionSelected[]
+  MCQuestionOption     MCQuestionOption[]
+}
+
+model MCQuestionOption {
+  id           Int        @id @default(autoincrement())
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  question     MCQuestion @relation(fields: [mcQuestionId], references: [id])
+  mcQuestionId Int
+  option       MCOption   @relation(fields: [mcOptionId], references: [id])
+  mcOptionId   Int
 }
 
 model UserMCAnswer {
@@ -268,19 +305,32 @@ model UserMCAnswer {
   updatedAt            DateTime               @updatedAt
   user                 User                   @relation(fields: [userId], references: [id])
   userId               Int
-  question             MCQuestion             @relation(fields: [questionId], references: [id])
-  questionId           Int
-  userMCAnswerSelected UserMCAnswerSelected[]
+  question             MCQuestion             @relation(fields: [mcQuestionId], references: [id])
+  mcQuestionId         Int
+  isCorrectAnswer      Boolean?
 }
 
-model UserMCAnswerSelected {
+model UserAnswer {
+  id                   Int                    @id @default(autoincrement())
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  user                 User                   @relation(fields: [userId], references: [id])
+  userId               Int
+  question             Question               @relation(fields: [questionId], references: [id])
+  questionId           Int
+  userMCOptionSelected UserMCOptionSelected[]
+  userFreetextAnswer   String?
+  feedback             Feedback[]
+}
+
+model UserMCOptionSelected {
   id             Int          @id @default(autoincrement())
   createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  userMCAnswer   UserMCAnswer @relation(fields: [userMCAnswerId], references: [id])
-  userMCAnswerId Int
-  answer         MCOption     @relation(fields: [answerId], references: [id])
-  answerId       Int
+  updatedAt      DateTime     @updatedAt  
+  userAnswer     UserAnswer   @relation(fields: [userAnswerId], references: [id])
+  userAnswerId   Int
+  mcOption       MCOption     @relation(fields: [mcOptionId], references: [id])
+  mcOptionId     Int
 }
 
 //********************************************************************************************* End MC-Question
@@ -422,8 +472,8 @@ model Message {
 model Vote {
   id        Int     @id @default(autoincrement())
   isUpvote  Boolean @default(true) // true if upvote, false if downvote
-  user    User    @relation(fields: [userId], references: [id])
-  userId  Int
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
   message   Message @relation(fields: [messageId], references: [id])
   messageId Int
 
@@ -433,12 +483,27 @@ model Vote {
 //********************************************************************************************* End Discussion
 
 model ChatBotMessage {
-  id        Int      @id @default(autoincrement())
-  question  String
-  answer    String?  @db.Text
-  createdAt DateTime @default(now())
-  isBot     Boolean  @default(false)
-  usedChunks String? @db.Text
-  user             User?           @relation(fields: [userId], references: [id])
-  userId           Int?
+  id         Int      @id @default(autoincrement())
+  question   String
+  answer     String?  @db.Text
+  createdAt  DateTime @default(now())
+  isBot      Boolean  @default(false)
+  usedChunks String?  @db.Text
+  user       User?    @relation(fields: [userId], references: [id])
+  userId     Int?
 }
+
+//********************************************************************************************* Begin ContentView Progress
+
+model UserContentProgress {
+  id               Int            @id @default(autoincrement())
+  user             User           @relation(fields: [userId], references: [id])
+  userId           Int
+  contentElement   ContentElement @relation(fields: [contentElementId], references: [id])
+  contentElementId Int
+  markedAsDone     Boolean        @default(false)
+  markedAsQuestion Boolean        @default(false)
+  updatedAt        DateTime       @updatedAt
+}
+
+//********************************************************************************************* End ContentView Progress
