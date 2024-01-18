@@ -5,7 +5,7 @@
 }
 
 .content {
-  height: 80vh;
+  height: 30vh;
   margin: 16px;
   margin-left: 32px;
   padding:16px;
@@ -17,4 +17,9 @@
   font-size: 14px;
   color: lightgrey;
   border-radius: 10px;
+}
+
+.graph-container {
+  height: 20vh;
+  transition: height 0.3s;
 }

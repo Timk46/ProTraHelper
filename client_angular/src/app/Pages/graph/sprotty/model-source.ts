@@ -5,7 +5,7 @@ import { SprottyConceptNode } from './sprottyModels.interface'
 //import { SModelIndex } from 'sprotty-protocol/lib/utils/model-utils';
 import {
   Action, CollapseExpandAction, CollapseExpandAllAction, SCompartment, SEdge, SGraph, SLabel,
-  SModelIndex, SNode, SelectAction, CenterAction, SShapeElement
+  SModelIndex, SNode, SelectAction, CenterAction, FitToScreenAction, SShapeElement
 } from 'sprotty-protocol';
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
@@ -226,7 +226,8 @@ export class ConceptGraphModelSource extends LocalModelSource {
         this.addChildren(node, 'concept');
         await this.updateModel();
         this.updateExpandedState(node, true);
-        this.actionDispatcher.dispatch(CenterAction.create([id], { animate: true }))
+        this.actionDispatcher.dispatch(CenterAction.create([id], { animate: true, retainZoom: true }))
+        this.actionDispatcher.dispatch(FitToScreenAction.create([id], { animate: true, maxZoom: 1 }))
       }
     }
 
