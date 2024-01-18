@@ -58,3 +58,7 @@
     display: flex;
     flex-direction: column;
   }
+
+  .feedback {
+    background-color: #ffb700;
+  }

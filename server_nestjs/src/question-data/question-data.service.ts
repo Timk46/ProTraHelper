@@ -1,5 +1,6 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { McQuestionDTO, McQuestionOptionDTO, QuestionDTO, QuestionVersionDTO, UserAnswerDTO, UserMCOptionSelectedDTO, MCOptionDTO, UserAnswerDataDTO } from '@DTOs/question.dto';
+import { McQuestionDTO, MCOptionDTO, QuestionDTO } from '@DTOs/question.dto';
+import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto'; 
 import { Injectable } from '@nestjs/common';
 import {  } from '@prisma/client';
 
@@ -98,7 +99,7 @@ export class QuestionDataService {
      * @param answerData 
      * @returns the new user answer
      */
-    async createUserAnswer(userId: number, answerData: UserAnswerDataDTO) : Promise<UserAnswerDataDTO> {
+    async createUserAnswer(userId: number, answerData: UserAnswerDataDTO) : Promise<userAnswerFeedbackDTO> {
         const createdData = await this.prisma.userAnswer.create({
             data: {
                 userId: userId,
@@ -117,6 +118,50 @@ export class QuestionDataService {
             }
         }
 
+        //generate feedback for user answer
+        if (answerData.userMCAnswer) {
+            console.log('generate feedback for user answer');
+            const question = await this.getQuestion(answerData.questionId);
+            const mcOptions = await this.getMCOptions(answerData.questionId);
+            let userScore = 0;
+            const scorePerOption = question.score / mcOptions.length;
+
+            //generate user score
+            for(let mcOption of mcOptions) {
+                if (mcOption.isCorrect && answerData.userMCAnswer.includes(mcOption.id)) {
+                    userScore += scorePerOption;
+                }
+                else if (!mcOption.isCorrect && !answerData.userMCAnswer.includes(mcOption.id)) {
+                    userScore += scorePerOption;
+                }
+            }
+
+            const feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
+
+            console.log(feedbackText);
+
+            //create feedback for user answer
+            const feedback = await this.prisma.feedback.create({
+                data: {
+                    userAnswerId: createdData.id,
+                    text: feedbackText,
+                    score: userScore
+                }
+            });
+
+            if (!feedback) throw new Error('Could not create Feedback'); 
+
+            return {
+                id: feedback.id,
+                userAnswerId: feedback.userAnswerId,
+                score: feedback.score,
+                feedbackText: feedback.text
+            }
+        }     
+        
+        /**
+         * the old returning UserAnswerDataDTO
+         * 
         return {
             id: createdData.id,
             userId: createdData.userId,
@@ -124,6 +169,7 @@ export class QuestionDataService {
             userFreetextAnswer: createdData.userFreetextAnswer,
             userMCAnswer: answerData.userMCAnswer, //maybe also return from createdData...
         }
+        */
 
     }
 

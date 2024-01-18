@@ -212,10 +212,11 @@ model File {
 
 // Feedback which the users will get after answering a question
 model Feedback {
-  id         Int      @id @default(autoincrement())
-  text       String
-  userAnswer UserAnswer @relation(fields: [userAnswerId], references: [id])
-  userAnswerId Int
+  id            Int      @id @default(autoincrement())
+  text          String
+  userAnswer    UserAnswer @relation(fields: [userAnswerId], references: [id])
+  userAnswerId  Int
+  score         Int
 }
 
 model Question {

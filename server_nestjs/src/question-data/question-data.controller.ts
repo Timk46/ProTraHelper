@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Param, Body, Req, UseGuards } from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
-import { UserAnswerDataDTO } from '@Interfaces/question.dto';
+import { UserAnswerDataDTO } from '@DTOs/userAnswer.dto';
 import { RolesGuard, roles } from '@/auth/roles.guard';
 
 //@UseGuards(RolesGuard)
