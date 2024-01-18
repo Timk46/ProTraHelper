@@ -15,11 +15,11 @@ export class GraphDataService {
   /**
    * Fetches the graph for a specific user
    * with the user's progress
-   * @param userId The id of the user
+   * @param moduleId The id of the module (for the concept goals)
    * @returns The graph for the user
    */
-  fetchUserGraph(userId: number): Observable<ConceptGraphDTO> {
-    return this.http.get<ConceptGraphDTO>(environment.server + `/graph/${userId}`)
+  fetchUserGraph(moduleId: number): Observable<ConceptGraphDTO> {
+    return this.http.get<ConceptGraphDTO>(environment.server + `/graph/${moduleId}`)
   }
 
 
@@ -61,9 +61,9 @@ export class GraphDataService {
 
 
 
-  updateUserConceptData(userId: number, conceptId: number, data?: any) {
+  updateUserConceptData(conceptId: number, data?: any) {
     console.log("in updateUserConceptData: ", data)
-    return this.http.put(environment.server + `/graph/userConcept/${userId}/${conceptId}`, data)
+    return this.http.put(environment.server + `/graph/userConcept/${conceptId}`, data)
   }
 
 }

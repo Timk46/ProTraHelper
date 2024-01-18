@@ -1,4 +1,20 @@
 <!-- <div class="content mat-elevation-z8"> -->
+  <div>
+    <mat-toolbar>
+      <mat-toolbar-row>
+        <mat-select placeholder="Select a module (eine Vorlesung)">
+          <mat-option *ngFor="let module of modules" [value]="module">
+            {{ module.name }}
+          </mat-option>
+        </mat-select>
+        <mat-checkbox>flat graph</mat-checkbox> 
+        <mat-checkbox>show connected content nodes</mat-checkbox> 
+        <mat-checkbox>editing mode</mat-checkbox> 
+        <mat-checkbox>show abstract nodes</mat-checkbox> 
+        
+      </mat-toolbar-row>
+    </mat-toolbar>
+  </div>
 
   <div id="concept-graph"></div>
 

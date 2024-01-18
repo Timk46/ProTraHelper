@@ -13,10 +13,12 @@ export class GraphService {
      * returns the concept graph
      * if userId is provided, the graph will be returned with the user's 
      * level and other relevant information
+     * 
      * @param userId
+     * @param moduleId if the moduleId is provided, the graph will be returned with modules goal
      * @returns the concept graph
      */
-    async getConceptGraph(userId?: number): Promise<ConceptGraphDTO> {
+    async getConceptGraph(userId?: number, moduleId?: number): Promise<ConceptGraphDTO> {
         // get graph (only one graph exists for now)
         let graph = await this.prisma.conceptGraph.findFirst({});
         // if no graph exists, create a new one with a root node
@@ -25,7 +27,7 @@ export class GraphService {
         }
 
         // conditionally include UserConcept if userId is provided
-        const includeCondition = userId !== undefined ? {
+        const includeConditionUser = userId !== undefined ? {
             userConcepts: {
                 where: {
                     userId: userId
@@ -33,10 +35,19 @@ export class GraphService {
             }
         } : { userConcepts: false };
 
+        const includeConditionModule = moduleId !== undefined ? {
+            moduleGoals: {
+                where: {
+                    moduleId: moduleId
+                }
+            }
+        } : { moduleGoals: false };
+
         // all nodes, potentially joined with UserConcept table
         const nodes = await this.prisma.conceptNode.findMany({
             include: {
-                ...includeCondition,
+                ...includeConditionUser,
+                ...includeConditionModule,
                 myParents: true,
                 myChildren: true,
                 myPrerequisites: true,
@@ -72,6 +83,16 @@ export class GraphService {
                 else {
                     nodeMap[node.id].expanded = node.userConcepts[0].expanded;
                     nodeMap[node.id].level = node.userConcepts[0].level;
+                }
+            }
+            // add goal field if moduleId is provided
+            if (moduleId !== undefined) {
+                // if no module goal exists, set goal to 0
+                if (node.moduleGoals.length === 0) {
+                    nodeMap[node.id].goal = 0;
+                }
+                else {
+                    nodeMap[node.id].goal = node.moduleGoals[0].level;
                 }
             }
         });

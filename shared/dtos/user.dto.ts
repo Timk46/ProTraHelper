@@ -1,4 +1,5 @@
 import { globalRole } from "./roles.enum";
+import { ModuleDTO } from "./module.dto";
 
 export interface UserDTO {
     id: number;

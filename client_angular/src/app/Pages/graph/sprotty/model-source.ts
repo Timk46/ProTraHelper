@@ -1,21 +1,18 @@
 import { injectable } from 'inversify';
-import { ActionHandlerRegistry, Expandable, LocalModelSource, SShapeElementImpl, TYPES, VBoxLayouter } from 'sprotty';
+import { ActionHandlerRegistry, Expandable, LocalModelSource,TYPES } from 'sprotty';
 import { ConceptGraphDTO, ConceptNodeDTO } from '@DTOs/index';
 import { SprottyConceptNode } from './sprottyModels.interface'
 //import { SModelIndex } from 'sprotty-protocol/lib/utils/model-utils';
 import {
   Action, CollapseExpandAction, CollapseExpandAllAction, SCompartment, SEdge, SGraph, SLabel,
-  SModelIndex, SModelRoot, SNode, SelectAction, CenterAction, SShapeElement
+  SModelIndex, SNode, SelectAction, CenterAction, SShapeElement
 } from 'sprotty-protocol';
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
-import { ThisReceiver } from '@angular/compiler';
 import { inject as injectAngular } from '@angular/core';
-import { NoDataRowOutlet } from '@angular/cdk/table';
 import { CreateConceptAction, DeleteConceptAction } from './actions';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateConceptDialogComponent } from '../graph-dialogs/create-concept-dialog/create-concept-dialog.component';
-import { has } from 'markdown-it/lib/common/utils';
 
 
 
@@ -26,7 +23,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
   private flatGraph: ConceptGraphDTO = { id: 0, name: "", nodeMap: {}, edgeMap: {}, trueRootId: 0 }
   graphData: GraphDataService | undefined;
   private dialog: MatDialog | undefined;
-  userId = 2;
+  currentModule = 1;
 
 
   constructor() {
@@ -34,7 +31,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.dialog = injectAngular(MatDialog);
     this.graphData = injectAngular(GraphDataService)
     //this.initTestGraph();
-    this.updateUserGraph();
+    this.getUserGraph();
   }
 
   override initialize(registry: ActionHandlerRegistry): void {
@@ -74,8 +71,8 @@ export class ConceptGraphModelSource extends LocalModelSource {
     }
   }
 
-  public updateUserGraph() {
-    this.graphData!.fetchUserGraph(this.userId).subscribe((graph) => {
+  private getUserGraph() {
+    this.graphData!.fetchUserGraph(this.currentModule).subscribe((graph) => {
       this.initGraph(graph);
     });
   }
@@ -187,7 +184,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       });
       dialogRef?.afterClosed().subscribe((result) => {
         if (result === 'success') {
-          this.updateUserGraph();
+          this.getUserGraph();
         }
       });
     
@@ -209,7 +206,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       //todo: check if node is deletable and if it has multiple parents?
       this.graphData!.deleteConcept(sprottyNode.databaseId).subscribe((res) => {
         console.log("deleted concept: ", res);
-        this.updateUserGraph();
+        this.getUserGraph();
       });
     }
   }
@@ -252,7 +249,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   private updateExpandedState(node: SprottyConceptNode, expanded: boolean) {
     this.flatGraph.nodeMap[node.databaseId].expanded = expanded;
-    this.graphData!.updateUserConceptData(this.userId, node.databaseId, { expanded: expanded }).subscribe();
+    this.graphData!.updateUserConceptData(node.databaseId, { expanded: expanded }).subscribe();
   }
 
   // initTestGraph() {

@@ -1,5 +1,5 @@
 import { ConceptGraphDTO } from '@DTOs/index';
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { GraphService } from './graph.service';
 import { roles, RolesGuard } from './../auth/roles.guard';
 
@@ -26,9 +26,28 @@ export class GraphController {
      * @returns the concept graph
      */
     @roles("ANY")
-    @Get(':userId')
-    async getUserConceptGraph(@Param('userId', ParseIntPipe) userId: number): Promise<ConceptGraphDTO>{
-        const graph: ConceptGraphDTO = await this.graphService.getConceptGraph(userId);
+    @Get('module/:moduleId')
+    async getUserConceptGraph(@Req() req,
+    @Param('moduleId', ParseIntPipe) moduleId: number
+    ): Promise<ConceptGraphDTO>{
+        const userId = req.user.id;
+        const graph: ConceptGraphDTO = await this.graphService.getConceptGraph(userId, moduleId);
+        return graph;
+    }
+
+    /**
+     * This function returns a concept graph of a module with data about a user (the level)
+     * @param userId the user id
+     * @param moduleId the module id
+     * @returns the concept graph
+     */
+    @roles("ANY")
+    @Get(':moduleId')
+    async getModuleUserConceptGraph( @Req() req,
+    @Param('moduleId', ParseIntPipe) moduleId: number): 
+    Promise<ConceptGraphDTO>{
+        const userId = req.user.id;
+        const graph: ConceptGraphDTO = await this.graphService.getConceptGraph(userId, moduleId);
         return graph;
     }
 
@@ -56,12 +75,12 @@ export class GraphController {
     }
 
     @roles("ANY")
-    @Put('userConcept/:userId/:conceptId')
-    async updateUserConceptData(
-        @Param('userId', ParseIntPipe) userId: number,
+    @Put('userConcept/:conceptId')
+    async updateUserConceptData(@Req() req,
         @Param('conceptId', ParseIntPipe) conceptId: number,
         @Body() data: any): Promise<any> {
         // todo: sanitize data
+        const userId = req.user.id;
         const updatedUserConcept = await this.graphService.updateUserConceptData(userId, conceptId, data);
         console.log("updated user concept to: " , updatedUserConcept);
         return updatedUserConcept;
