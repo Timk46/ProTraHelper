@@ -11,20 +11,20 @@
 }
 
 .sprotty-node.concept {
-    fill: #c9c9c9; // #c0e0fc
-    stroke: #000;
+    fill: #d8d9e2;//#c9c9c9; 
+    stroke: #2b356e;
     stroke-width: 2;
     filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 1));
 }
 
 .sprotty-node.mini-concept {
-    fill: #2b2b2b; // #29669b
-    stroke: #000;
-    stroke-width: 1;
+    fill: #2b356e; // #29669b
+    stroke: #2b356e;
+    stroke-width: 2;
 }
 
 .sprotty-concept-header {
-    fill: #2b2b2b;
+    fill: #2b356e//#2b2b2b;
 }
 
 // text {
@@ -48,11 +48,14 @@
 }
 
 .sprotty-node.selected {
-    stroke-width: 5;
+    stroke-width: 4;
+    stroke: #485ac2;
+    filter: drop-shadow(0px 0px 8px #2b356e);
 }
 
 .sprotty-node.mouseover:not(.selected) {
     stroke-width: 3;
+    
 }
 
 .sprotty-label {
@@ -65,7 +68,7 @@
 
 .sprotty-label.heading {
     font-weight: bold;
-    fill: #88dddd;
+    fill: #ffffff //#88dddd;
     //display: inline-block;
     //width: 100%;
 }

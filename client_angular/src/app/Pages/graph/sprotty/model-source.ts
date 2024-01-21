@@ -183,13 +183,13 @@ export class ConceptGraphModelSource extends LocalModelSource {
         parentNode.numberDescendants = descendantData.descendants;
         parentNode.descendantLevels = descendantData.descendantLevels;
         parentNode.descendantLevelGoals = descendantData.descendantLevelGoals;
-        parentNode.children!.push(
-          <SLabel>{
-            id: 'desc_' + parentNode.id,
-            type: 'label:text',
-            text: 'descendants: ' + parentNode.numberDescendants + ' desLevels' + parentNode.descendantLevels + ' desGoals' + parentNode.descendantLevelGoals,
-            position: { x: 5, y: 30 },
-          });
+        // parentNode.children!.push(
+        //   <SLabel>{
+        //     id: 'desc_' + parentNode.id,
+        //     type: 'label:text',
+        //     text: 'descendants: ' + parentNode.numberDescendants + ' desLevels' + parentNode.descendantLevels + ' desGoals' + parentNode.descendantLevelGoals,
+        //     position: { x: 5, y: 30 },
+        //   });
       }
 
     }
@@ -372,12 +372,12 @@ export class ConceptGraphModelSource extends LocalModelSource {
         text: name,
       });
 
-    //level
+    level
     node.children.push(
       <SLabel>{
         id: 'level_' + id,
         type: 'label:text',
-        text: 'level: ' + level + ' goal: ' + levelGoal,
+        text: '.',
         position: { x: 5, y: 30 },
       });
 

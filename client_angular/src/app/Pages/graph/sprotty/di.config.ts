@@ -94,7 +94,6 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
         return {
             'org.eclipse.elk.algorithm': 'org.eclipse.elk.layered',
             'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]', // important for button-label spacing
-            
             //'org.eclipse.elk.edgeRouting': 'POLYLINE',
         };
     }
@@ -102,10 +101,11 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
     protected override nodeOptions(snode: SNodeP, index: SModelIndex): LayoutOptions | undefined {
         return {
             'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS MINIMUM_SIZE',
-            //'org.eclipse.elk.nodeSize.minimum': '(40, 40)', // doesn't work
+            //'org.eclipse.elk.nodeSize.minimum': '(40, 40)', 
             'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
             'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]',
             'org.eclipse.elk.spacing.labelLabel': '5',
+            //'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '500', // space between two connected nodes
         };
     }
 
