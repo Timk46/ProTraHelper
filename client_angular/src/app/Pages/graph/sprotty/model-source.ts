@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { ActionHandlerRegistry, Expandable, LocalModelSource,TYPES } from 'sprotty';
+import { ActionHandlerRegistry, Expandable, LocalModelSource, TYPES } from 'sprotty';
 import { ConceptGraphDTO, ConceptNodeDTO } from '@DTOs/index';
 import { SprottyConceptNode } from './sprottyModels.interface'
 //import { SModelIndex } from 'sprotty-protocol/lib/utils/model-utils';
@@ -106,13 +106,15 @@ export class ConceptGraphModelSource extends LocalModelSource {
         const expanded = flatChild.expanded !== undefined ? flatChild.expanded : true;
         const level = flatChild.level ? flatChild.level : 0;
         const hasChildren = flatChild.childIds.length > 0;
-        const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId, hasChildren);
+        const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level,
+          flatChild.goal ? flatChild.goal : 0, flatChild.databaseId, hasChildren);
         graph.children!.push(newChild);
         if (expanded) {
           this.addChildren(newChild, 'concept');
         }
-        else
+        else {
           this.addChildren(newChild, 'mini-concept');
+        }
       }
     });
 
@@ -129,8 +131,11 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.updateModel();
   }
 
-  private addChildren(parentNode: SprottyConceptNode, type: string) {
+
+  private addChildren(parentNode: SprottyConceptNode, type: string): { descendants: number, descendantLevels: number[], descendantLevelGoals: number[] } {
     const flatParentNode = this.flatGraph.nodeMap[parentNode.databaseId];
+    let descendantData = { descendants: 0, descendantLevels: [0, 0, 0, 0, 0, 0], descendantLevelGoals: [0, 0, 0, 0, 0, 0] };
+    let childDescData = { descendants: 0, descendantLevels: [0, 0, 0, 0, 0, 0], descendantLevelGoals: [0, 0, 0, 0, 0, 0] };
     // add children
     if (flatParentNode.childIds.length > 0) {
       flatParentNode.childIds.forEach(childId => {
@@ -140,22 +145,69 @@ export class ConceptGraphModelSource extends LocalModelSource {
           const level = flatChild.level ? flatChild.level : 0;
           let newChild;
           if (type === 'mini-concept') {
-            newChild = this.createMiniConceptNode("node_" + flatChild.databaseId, flatChild.name, level, flatChild.databaseId);
+            newChild = this.createMiniConceptNode("node_" + flatChild.databaseId, flatChild.name, level, flatChild.goal ? flatChild.goal : 0, flatChild.databaseId);
+            parentNode.children!.push(newChild);
           }
-          else {
+          else if (type === 'concept') {
             const hasChildren = flatChild.childIds.length > 0;
-            newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.databaseId, hasChildren);
+            newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.goal ? flatChild.goal : 0, flatChild.databaseId, hasChildren);
+            parentNode.children!.push(newChild);
           }
-          parentNode.children!.push(newChild);
+          else { // type === 'not-visible'
+            newChild = this.createMiniConceptNode("node_" + flatChild.databaseId, flatChild.name, level, flatChild.goal ? flatChild.goal : 0, flatChild.databaseId);
+            // dummy node, is not added to the graph
+          }
+
 
           if (expanded && type === 'concept') {
-            this.addChildren(newChild, 'concept');
+            childDescData = this.addChildren(newChild, 'concept');
           }
-          else if (type === 'concept')
-            this.addChildren(newChild, 'mini-concept');
+          else if (type === 'concept') {
+            childDescData = this.addChildren(newChild, 'mini-concept');
+          }
+          else if (parentNode.numberDescendants===undefined && type === 'mini-concept' || type === 'not-visible') {
+            // keep the recursion going for counting descendants, but don't add children to the graph
+            childDescData = this.addChildren(newChild, 'not-visible');
+          }
+
+          // update descendant data
+          descendantData.descendants += childDescData.descendants;
+          for (let i = 0; i < 6; i++) {
+            descendantData.descendantLevels[i] += childDescData.descendantLevels[i];
+            descendantData.descendantLevelGoals[i] += childDescData.descendantLevelGoals[i];
+          }
         }
       });
+      // update descendant data of parentNode if it is not set yet
+      if (parentNode.numberDescendants === undefined) {
+        parentNode.numberDescendants = descendantData.descendants;
+        parentNode.descendantLevels = descendantData.descendantLevels;
+        parentNode.descendantLevelGoals = descendantData.descendantLevelGoals;
+        parentNode.children!.push(
+          <SLabel>{
+            id: 'desc_' + parentNode.id,
+            type: 'label:text',
+            text: 'descendants: ' + parentNode.numberDescendants + ' desLevels' + parentNode.descendantLevels + ' desGoals' + parentNode.descendantLevelGoals,
+            position: { x: 5, y: 30 },
+          });
+      }
+
     }
+    else {
+      // no children, end of recursion
+      descendantData.descendants += 1;
+      for (let i = 0; i < 6; i++) {
+        if (flatParentNode.level != undefined && flatParentNode.level > i) {
+          descendantData.descendantLevels[i] += 1;
+        }
+        if (flatParentNode.goal != undefined && flatParentNode.goal > i) {
+          descendantData.descendantLevelGoals[i] += 1;
+        }
+      }
+    }
+
+
+
 
     // add edge children
     if (flatParentNode.edgeChildIds.length > 0) {
@@ -167,6 +219,9 @@ export class ConceptGraphModelSource extends LocalModelSource {
         }
       });
     }
+    // add own level and goal to descendant data
+
+    return descendantData;
   }
 
   handleCreateConceptAction(action: CreateConceptAction): void {
@@ -183,16 +238,16 @@ export class ConceptGraphModelSource extends LocalModelSource {
       parentDatabaseId = sprottyParentNode.databaseId;
     }
 
-      console.log("handleCreateConceptAction: ", action, sprottyParentNode);
-      const dialogRef = this.dialog?.open(CreateConceptDialogComponent, {
-        data: { parentId: parentDatabaseId},
-      });
-      dialogRef?.afterClosed().subscribe((result) => {
-        if (result === 'success') {
-          this.getUserGraph();
-        }
-      });
-    
+    console.log("handleCreateConceptAction: ", action, sprottyParentNode);
+    const dialogRef = this.dialog?.open(CreateConceptDialogComponent, {
+      data: { parentId: parentDatabaseId },
+    });
+    dialogRef?.afterClosed().subscribe((result) => {
+      if (result === 'success') {
+        this.getUserGraph();
+      }
+    });
+
   }
 
   /**
@@ -263,7 +318,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     const index = new SModelIndex();
     index.add(this.currentRoot);
     const sprottyNode = index.getById(action.conceptId) as SprottyConceptNode;
-    const currentLevel = sprottyNode.level? sprottyNode.level : 0;
+    const currentLevel = sprottyNode.level ? sprottyNode.level : 0;
     const newLevel = currentLevel + 1;
     this.graphData!.updateUserConceptData(sprottyNode.databaseId, { level: newLevel }).subscribe(
       (res) => {
@@ -284,7 +339,8 @@ export class ConceptGraphModelSource extends LocalModelSource {
    * @param databaseId id of this node in the database
    * @returns a ConceptNode
    */
-  createConceptNode(id: string, name: string, expanded: boolean, level: number, databaseId: number, hasChildren: boolean): SprottyConceptNode {
+  createConceptNode(id: string, name: string, expanded: boolean, level: number, levelGoal: number, databaseId: number,
+    hasChildren: boolean): SprottyConceptNode {
     const node: SNode & SprottyConceptNode & Expandable = {
       type: "node:concept",
       id: id,
@@ -292,7 +348,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       name: name,
       expanded: expanded,
       level: level,
-      levelGoal: 3,
+      levelGoal: levelGoal,
       children: [],
       //layout: 'hbox'
     };
@@ -317,13 +373,13 @@ export class ConceptGraphModelSource extends LocalModelSource {
       });
 
     //level
-    // node.children.push(
-    //   <SLabel>{
-    //     id: 'level_' + id,
-    //     type: 'label:text',
-    //     text: 'Level: ' + level.toString(),
-    //   },
-    // );
+    node.children.push(
+      <SLabel>{
+        id: 'level_' + id,
+        type: 'label:text',
+        text: 'level: ' + level + ' goal: ' + levelGoal,
+        position: { x: 5, y: 30 },
+      });
 
     return node;
   }
@@ -338,7 +394,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
    * @param databaseId id of this node in the database
    * @returns a ConceptNode
    */
-  createMiniConceptNode(id: string, name: string, level: number, databaseId: number): SprottyConceptNode {
+  createMiniConceptNode(id: string, name: string, level: number, levelGoal: number, databaseId: number): SprottyConceptNode {
     const node: SNode & SprottyConceptNode & Expandable = {
       type: "node:mini-concept",
       id: id,
@@ -346,7 +402,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       name: name,
       expanded: false,
       level: level,
-      levelGoal: 3,
+      levelGoal: levelGoal,
       children: [],
       //layout: 'hbox'
     };

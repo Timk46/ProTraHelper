@@ -145,3 +145,17 @@
 .class-context-menu-item:hover:not(.disabled-action) {
     color: green;
 }
+
+
+// styles for the progress bar
+.sprotty-progress-bar-segment {
+    fill: grey; /* Default color */
+}
+
+.sprotty-progress-bar-segment.achieved {
+    fill: green; /* Color for achieved segments */
+}
+
+.sprotty-progress-bar-segment.goal {
+    fill: red; /* Color for goal segments */
+}

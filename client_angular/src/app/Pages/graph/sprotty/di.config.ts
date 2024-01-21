@@ -1,7 +1,7 @@
 import { Container, ContainerModule } from 'inversify';
 import { configureModelElement, configureViewerOptions, loadDefaultModules, LocalModelSource, 
     PolylineEdgeView, SCompartmentView, SCompartmentImpl, SEdgeImpl, SGraphImpl, SGraphView, SLabelImpl, SLabelView, 
-    SNodeImpl, TYPES, RectangularNode, expandFeature, nameFeature, SButtonImpl, ExpandButtonView, 
+    SNodeImpl, TYPES, RectangularNode, expandFeature, nameFeature, SButtonImpl, ExpandButtonView,
     configureButtonHandler, SRoutingHandleImpl, SRoutingHandleView, SModelElementImpl, SPortImpl, ConsoleLogger, 
     LogLevel, IContextMenuServiceProvider, contextMenuModule, ContextMenuProviderRegistry, moveFeature } from 'sprotty';
 import { ConceptNodeView, CustomCollapseExpandView, CustomExpandButtonView, HeaderLabelView, MiniConceptView, PortViewWithExternalLabel, TextLabelView} from './views';
@@ -60,7 +60,7 @@ export default (containerId: string) => {
         configureModelElement(context, 'edge', SEdgeImpl, PolylineEdgeView);
         configureModelElement(context, 'label:heading', SLabelImpl, SLabelView)
         configureModelElement(context, 'label:text', SLabelImpl, SLabelView)
-        //configureModelElement(context, 'comp:comp', SCompartment, SCompartmentView)
+        configureModelElement(context, 'comp', SCompartmentImpl, SCompartmentView)
         
         //collapse expand button
         configureModelElement(context, 'button:expand', SButtonImpl, CustomExpandButtonView); //not used
@@ -94,10 +94,8 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
         return {
             'org.eclipse.elk.algorithm': 'org.eclipse.elk.layered',
             'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]', // important for button-label spacing
-            //'org.eclipse.elk.spacing.nodeNode': '500', //doesn't work
+            
             //'org.eclipse.elk.edgeRouting': 'POLYLINE',
-            //'org.eclipse.elk.hierarchyHandling': 'INCLUDE_CHILDREN',
-            //'org.eclipse.elk.layered.considerModelOrder.strategy': 'PREFER_NODES',
         };
     }
 
@@ -108,7 +106,6 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
             'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
             'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]',
             'org.eclipse.elk.spacing.labelLabel': '5',
-            'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '60',
         };
     }
 

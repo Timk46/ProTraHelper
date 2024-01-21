@@ -45,17 +45,81 @@ export class ConceptNodeView extends RectangularNodeView {
             petals.push(...levelGoalPetals);
         }
 
+        // progress bar
+        const renderProgressBarSegment = (total: number, goal: number, achieved: number, segmentNumber: number) => {
+            const segments = [];
+            const gap = 3;
+            const segmentWidth = node.size.width/ 6 - 2*gap ;
+            const segmentOffset = node.size.width/ 6;
+            const segmentHeight = 15;
+            console.log('nodeI:' + node.name+ ' total: ' + total + ' goal: ' + goal + ' achieved: ' + achieved + ' segmentNumber: ' + segmentNumber);
+            for (let i = 0; i < total; i++) {
+                let className = 'sprotty-progress-bar-segment';
+                if (i < achieved) className += '.achieved';
+                else if (i < goal) className += '.goal';
+                segments.push(<rect 
+                    width={segmentWidth/total} 
+                    y={-segmentHeight} 
+                    x={i*(segmentWidth/total)+ segmentNumber*segmentOffset + gap} 
+                    height = {segmentHeight} 
+                    className={className}
+                    fill = {i < achieved ? "green" : i < goal ? "yellow" : "grey"}
+                    ></rect>);
+            }
+            // Add border
+            segments.push(
+                <rect 
+                    key="border"
+                    width={segmentWidth} 
+                    y={-segmentHeight} 
+                    x={segmentNumber * segmentOffset + gap} 
+                    height={segmentHeight} 
+                    fill="none" // No fill, only border
+                    stroke="black" // Border color
+                    strokeWidth="2" // Border width
+                />
+            );
+            return <g className="sprotty-progress-bar">{segments}</g>;
+        };
+
+        const renderAllSegments = () => {
+            const totalSegments = 6; // Assuming a fixed number of segments
+            const allSegments = [];
+            let totalSubSegments = 0;
+            let achieved = 0;
+            let goal = 0;
+
+            for (let i = 0; i < totalSegments; i++) {
+                if (node.numberDescendants !== undefined) {
+                    totalSubSegments = node.numberDescendants; // Assuming each segment is divided into a fixed number of sub-segments
+                    achieved = node.descendantLevels ? node.descendantLevels[i] : 0;
+                    goal = node.descendantLevelGoals ? node.descendantLevelGoals[i] : 0;
+                }
+                else {
+                    totalSubSegments = 1;
+                    achieved = node.level === undefined ? 0 : node.level > i ?  1 : 0;
+                    goal = node.levelGoal === undefined ? 0 : node.levelGoal > i ? 1 : 0;
+                }
+                allSegments.push(renderProgressBarSegment(totalSubSegments, goal, achieved, i));
+            }
+
+            return <g className="sprotty-all-segments">{allSegments}</g>;
+        };
+
+
+        // actual rendering of everything
         return <g>
             <g class-sprotty-star="true">
                 {petals}  {/* Render the petals here */}
             </g>
+            {renderAllSegments()}
 
             {/* Render the node here */}
             <rect class-sprotty-node={true} class-concept={true}
                 width={node.size.width}
                 height={node.size.height}
                 class-mouseover={node.hoverFeedback} class-selected={node.selected}
-                // rx={5}
+            // rx={5}
             >
             </rect>
             {/* hacky solution to get the blue background in the concept header */}
@@ -64,19 +128,21 @@ export class ConceptNodeView extends RectangularNodeView {
                 class-sprotty-concept-header={true}
                 x={1}
                 y={1}
-                // rx={5}
+            // rx={5}
             ></rect>
             {context.renderChildren(node)}
         </g>;
     }
+
+
 }
 
 export class MiniConceptView extends RectangularNodeView {
     override render(node: Readonly<SNodeImpl & SprottyConceptNode>, context: RenderingContext): VNode {
         return <g>
-            <rect class-sprotty-node={true}p class-mini-concept={true}
-            class-mouseover={node.hoverFeedback} class-selected={node.selected}
-                width={20}
+            <rect class-sprotty-node={true} p class-mini-concept={true}
+                class-mouseover={node.hoverFeedback} class-selected={node.selected}
+                width={25}
                 height={25}
                 rx={2}
             >
@@ -84,6 +150,8 @@ export class MiniConceptView extends RectangularNodeView {
         </g>;
     }
 }
+
+
 
 @injectable()
 export class CustomExpandButtonView implements IView {
