@@ -1,6 +1,6 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { McQuestionDTO, MCOptionDTO, QuestionDTO } from '@DTOs/question.dto';
-import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto'; 
+import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { Injectable } from '@nestjs/common';
 import {  } from '@prisma/client';
 
@@ -9,8 +9,8 @@ export class QuestionDataService {
     constructor(private prisma: PrismaService) {}
 
     /**
-     * 
-     * @param questionId 
+     *
+     * @param questionId
      * @returns the question data
      */
     async getQuestion(questionId: number): Promise<QuestionDTO> {
@@ -34,13 +34,13 @@ export class QuestionDataService {
             isApproved: question.isApproved,
             originId: question.originId,
         };
-    
+
         return questionData;
     }
 
     /**
-     * 
-     * @param question_id 
+     *
+     * @param question_id
      * @returns the mc question data
      */
     async getMCQuestion(question_id: number): Promise<McQuestionDTO> {
@@ -58,15 +58,15 @@ export class QuestionDataService {
 
         return mcQuestionData;
     }
-    
+
     /**
-     * 
-     * @param mcQuestion_id 
+     *
+     * @param mcQuestion_id
      * @returns the options of the mc question
      */
     async getMCOptions(mcQuestion_id: number): Promise<MCOptionDTO[]> {
         let mcOptions : MCOptionDTO[] = [];
-        
+
         let mcQuestionOptions = await this.prisma.mCQuestionOption.findMany({
             where: {
                 mcQuestionId: Number(mcQuestion_id)
@@ -88,15 +88,15 @@ export class QuestionDataService {
 
             mcOptions.push(mcOptionData);
         }
-       
+
         return mcOptions;
     }
 
 
     /**
-     * 
-     * @param userId 
-     * @param answerData 
+     *
+     * @param userId
+     * @param answerData
      * @returns the new user answer
      */
     async createUserAnswer(userId: number, answerData: UserAnswerDataDTO) : Promise<userAnswerFeedbackDTO> {
@@ -110,7 +110,7 @@ export class QuestionDataService {
         });
 
         if (!createdData) throw new Error('Could not create userAnswer');
-        
+
         //connect all mc options
         if (answerData.userMCAnswer) {
             for (const mcOptionId of answerData.userMCAnswer) {
@@ -149,7 +149,7 @@ export class QuestionDataService {
                 }
             });
 
-            if (!feedback) throw new Error('Could not create Feedback'); 
+            if (!feedback) throw new Error('Could not create Feedback');
 
             return {
                 id: feedback.id,
@@ -157,11 +157,42 @@ export class QuestionDataService {
                 score: feedback.score,
                 feedbackText: feedback.text
             }
-        }     
-        
+        }
+
+        //generate feedback for user freetext answer
+        if (answerData.userFreetextAnswer) {
+            console.log('generate feedback for user answer');
+            const question = await this.getQuestion(answerData.questionId);
+
+            //TODO: generate a feedback text based on the user answer
+
+            const userScore = 0;
+            const feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
+
+            console.log(feedbackText);
+
+            //create feedback for user answer
+            const feedback = await this.prisma.feedback.create({
+                data: {
+                    userAnswerId: createdData.id,
+                    text: feedbackText,
+                    score: userScore
+                }
+            });
+
+            if (!feedback) throw new Error('Could not create Feedback');
+
+            return {
+                id: feedback.id,
+                userAnswerId: feedback.userAnswerId,
+                score: feedback.score,
+                feedbackText: feedback.text
+            }
+        }
+
         /**
          * the old returning UserAnswerDataDTO
-         * 
+         *
         return {
             id: createdData.id,
             userId: createdData.userId,
@@ -174,9 +205,9 @@ export class QuestionDataService {
     }
 
     /**
-     * 
-     * @param userAnswer_id 
-     * @param mcOption_id 
+     *
+     * @param userAnswer_id
+     * @param mcOption_id
      * @returns the selected options
      */
     async createUserMCOptionSelected(userAnswer_id: number, mcOption_id: number) : Promise<UserMCOptionSelectedDTO> {

@@ -38,7 +38,8 @@ export class FreeTextTaskComponent {
     });
   }
 
-  onSubmit() {
+  onSubmit(text: string) {
+    this.answerText = text;
     console.log(this.answerText);
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,

@@ -4,7 +4,7 @@ import { MatListOption } from '@angular/material/list';
 import { MCOptionDTO, McQuestionDTO, QuestionDTO, QuestionVersionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';  
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-mcTask',
@@ -45,17 +45,17 @@ export class McTaskComponent implements OnInit {
     userAnswerId: -1,
     score: -1,
     feedbackText: '',
-  }   
+  }
 
   //the requested question
   questionId: number;
-  
+
   //isSelfAssessment
   @Input() isSelfAssessment: boolean = false;
-  
+
   //the mc options
   options : MCOptionDTO[] = [];
-  
+
   //the selected option(s)
   selectedOptions : number[] = [];
 
@@ -80,16 +80,16 @@ export class McTaskComponent implements OnInit {
       questionId: this.mcQuestion.id,
       userMCAnswer: this.selectedOptions,
     }
-    
+
     this.questionDataService.createUserAnswer(userAnswerData).subscribe(data => {
       this.feedback = data;
     });
-    
+
     setTimeout(() => {
       //timeout for showing the feedback
       this.submitDisabled = true;
     }, 500);
-    
+
 
   }
 
@@ -97,7 +97,7 @@ export class McTaskComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<McTaskComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private questionDataService: QuestionDataService) { 
+    private questionDataService: QuestionDataService) {
 
     this.questionId = data.question_id as number;
   }
@@ -110,14 +110,14 @@ export class McTaskComponent implements OnInit {
       //Get the mc question data of the newest question version
       this.questionDataService.getMCQuestion(this.questionData.id).subscribe(data => {
         this.mcQuestion = data;
-      
+
         //Get the MC-Options of the question
         this.questionDataService.getMCOptions(this.mcQuestion.id).subscribe(data => {
           console.log(this.mcQuestion.id);
           this.options = data;
-          
+
         });
       })
-    });  
+    });
   }
 }
