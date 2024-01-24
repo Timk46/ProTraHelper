@@ -212,10 +212,10 @@ model File {
 
 // Feedback which the users will get after answering a question
 model Feedback {
-  id            Int      @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   text          String
-  userAnswer    UserAnswer @relation(fields: [userAnswerId], references: [id])
-  userAnswerId  Int
+  userAnswer    UserAnswer  @relation(fields: [userAnswerId], references: [id])
+  userAnswerId  Int  
   score         Int
 }
 
@@ -318,8 +318,8 @@ model UserAnswer {
   question             Question               @relation(fields: [questionId], references: [id])
   questionId           Int
   userMCOptionSelected UserMCOptionSelected[]
-  userFreetextAnswer   String?
-  feedback             Feedback[]
+  userFreetextAnswer   String?                   
+  feedbacks            Feedback[]     
 }
 
 model UserMCOptionSelected {
@@ -469,12 +469,12 @@ model Message {
 }
 
 model Vote {
-  id        Int     @id @default(autoincrement())
-  isUpvote  Boolean @default(true) // true if upvote, false if downvote
-  user    User    @relation(fields: [userId], references: [id])
-  userId  Int
-  message   Message @relation(fields: [messageId], references: [id])
-  messageId Int
+  id          Int     @id @default(autoincrement())
+  isUpvote    Boolean @default(true) // true if upvote, false if downvote
+  user        User    @relation(fields: [userId], references: [id])
+  userId      Int
+  message     Message @relation(fields: [messageId], references: [id])
+  messageId   Int
 
   @@unique([userId, messageId], name: "unique_vote")
 }
