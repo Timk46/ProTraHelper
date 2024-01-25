@@ -17,6 +17,13 @@
     filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 1));
 }
 
+.sprotty-node.leaf-concept {
+    fill: #2b356e;//#c9c9c9; 
+    stroke: #2b356e;
+    stroke-width: 2;
+    filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 1));
+}
+
 .sprotty-node.mini-concept {
     fill: #2b356e; // #29669b
     stroke: #2b356e;
@@ -160,5 +167,13 @@
 }
 
 .sprotty-progress-bar-segment.goal {
-    fill: red; /* Color for goal segments */
+    fill: orange; /* Color for goal segments */
+}
+
+.sprotty-progress-bar-segment.achieved-mute {
+    fill: #51a751; /* Color for achieved segments */
+}
+
+.sprotty-progress-bar-segment.goal-mute {
+    fill: #ffd88f; /* Color for goal segments */
 }

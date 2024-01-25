@@ -13,6 +13,7 @@ import { inject as injectAngular } from '@angular/core';
 import { AwardLevelAction, CreateConceptAction, DeleteConceptAction } from './actions';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateConceptDialogComponent } from '../graph-dialogs/create-concept-dialog/create-concept-dialog.component';
+import { has } from 'markdown-it/lib/common/utils';
 
 
 
@@ -341,8 +342,13 @@ export class ConceptGraphModelSource extends LocalModelSource {
    */
   createConceptNode(id: string, name: string, expanded: boolean, level: number, levelGoal: number, databaseId: number,
     hasChildren: boolean): SprottyConceptNode {
+    // determine render type
+    let nodeType = 'node:concept';
+    if(!hasChildren){
+      nodeType = 'node:leaf-concept';
+    }
     const node: SNode & SprottyConceptNode & Expandable = {
-      type: "node:concept",
+      type: nodeType,
       id: id,
       databaseId: databaseId,
       name: name,
@@ -350,7 +356,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       level: level,
       levelGoal: levelGoal,
       children: [],
-      //layout: 'hbox'
+      layout: 'vbox'
     };
     node.children = [];
 
@@ -372,14 +378,14 @@ export class ConceptGraphModelSource extends LocalModelSource {
         text: name,
       });
 
-    level
-    node.children.push(
-      <SLabel>{
-        id: 'level_' + id,
-        type: 'label:text',
-        text: '.',
-        position: { x: 5, y: 30 },
-      });
+    // level
+    // node.children.push(
+    //   <SLabel>{
+    //     id: 'level_' + id,
+    //     type: 'label:text',
+    //     text: '.',
+    //     position: { x: 5, y: 30 },
+    //   });
 
     return node;
   }

@@ -4,7 +4,7 @@ import { configureModelElement, configureViewerOptions, loadDefaultModules, Loca
     SNodeImpl, TYPES, RectangularNode, expandFeature, nameFeature, SButtonImpl, ExpandButtonView,
     configureButtonHandler, SRoutingHandleImpl, SRoutingHandleView, SModelElementImpl, SPortImpl, ConsoleLogger, 
     LogLevel, IContextMenuServiceProvider, contextMenuModule, ContextMenuProviderRegistry, moveFeature } from 'sprotty';
-import { ConceptNodeView, CustomCollapseExpandView, CustomExpandButtonView, HeaderLabelView, MiniConceptView, PortViewWithExternalLabel, TextLabelView} from './views';
+import { ConceptNodeView, CustomCollapseExpandView, CustomExpandButtonView, HeaderLabelView, LeafConceptView, MiniConceptView, PortViewWithExternalLabel, TextLabelView} from './views';
 import { ConceptGraphModelSource } from './model-source';
 import ElkConstructor, { LayoutOptions } from 'elkjs';
 import {
@@ -57,6 +57,9 @@ export default (containerId: string) => {
         configureModelElement(context, 'node:mini-concept', RectangularNode, MiniConceptView, {
             disable: [moveFeature]
         });
+        configureModelElement(context, 'node:leaf-concept', RectangularNode, LeafConceptView, {
+            disable: [moveFeature]
+        });
         configureModelElement(context, 'edge', SEdgeImpl, PolylineEdgeView);
         configureModelElement(context, 'label:heading', SLabelImpl, SLabelView)
         configureModelElement(context, 'label:text', SLabelImpl, SLabelView)
@@ -99,6 +102,26 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
     }
 
     protected override nodeOptions(snode: SNodeP, index: SModelIndex): LayoutOptions | undefined {
+        if(snode.type === 'node:concept'){
+            return {
+                'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS MINIMUM_SIZE',
+                //'org.eclipse.elk.nodeSize.minimum': '(40, 40)', 
+                'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
+                'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]',
+                'org.eclipse.elk.padding': '[top=30, bottom=20, left=20, right=20]',
+                'org.eclipse.elk.spacing.labelLabel': '5',
+                //'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '500', // space between two connected nodes
+            };
+        }
+        if(snode.type === 'node:leaf-concept'){
+            return {
+                'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS MINIMUM_SIZE',
+                'org.eclipse.elk.nodeSize.minimum': '(130, 30)', 
+                'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
+                'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]',
+                'org.eclipse.elk.spacing.labelLabel': '5',
+            };
+        }
         return {
             'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS MINIMUM_SIZE',
             //'org.eclipse.elk.nodeSize.minimum': '(40, 40)', 
