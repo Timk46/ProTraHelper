@@ -1,0 +1,49 @@
+Was ich auch noch kurz zeigen wollte, das haben wir schon für den Konstruktoren gesehen,
+aber dieses Überladen von Methoden ist ziemlich sinnvoll, aber die Grenzen sind auch relativ
+deutlich.
+Unser Compiler muss immer eindeutig wissen, um welche Methode es geht.
+Und unser Compiler kann das nur, wenn man weiß, was für Parameter man weitergegeben
+hat.
+Also müssen die Parameter stimmen, kurz gesagt.
+Das heißt, die Typen der Parameter und diesen Namen von Parameter, vor allem die Typen,
+müssen stimmen.
+Das heißt, hier hat man zwei Methoden, die den gleichen Namen haben, deshalb nennt man
+das das Überladen von Methoden.
+Also man hat zwei Methoden, die sich beide Drücken nennen.
+Drücke hier hat aber ein Integer, Drücke hier hat aber ein String.
+Und die können deshalb unterschiedliche Sachen machen.
+Wenn der Benutzer später ein Objekt von der Klasse Drücker kreiert, hier zum Beispiel,
+und dann oder zum Beispiel als Methode, weil es ist eine Static-Methode, deshalb kann man
+es auch für die Klasse selbst ausrufen, Drücke ausruft mit Wert 10, dann ist dieses 10 ein
+Integer und da weiß der Compiler dann auch sofort, welche von diesen beiden möglichen
+Methoden da ausgewählt werden muss.
+Da es ein Integer ist, wird sofort das hier genannt.
+Würde man hier ein Double oder ein Long oder so etwas erwähnen, dann hätte man nachher
+große Probleme und dann würde man wahrscheinlich da einen Fehler bekommen.
+Deshalb muss man hier die Parameter und die Typen vor allem von den Parametern, muss man
+beachten und das muss stimmen.
+Sobald das stimmt, kann man jede Methode beliebig mehrmals definieren, aber dann stets für
+andere Parameter und nicht nur andere einzelne Parameter, wie hier man nur einen Parameter
+hat, man kann das auch gleich für die Zahl der Parameter machen.
+Wenn man dann zum Beispiel eine dritte Funktion mit zwei Integers hat, dann wird hier zum
+Beispiel diese Methode ausgeführt.
+Wenn man hier eine Drücke 10,10 hat hier zum Beispiel, dann würde diese dritte Methode
+ausgeführt, die als Parameterliste zwei Integers als Parameter hat.
+Okay, das ist eigentlich ziemlich trivial, aber es ist auch wichtig zu erwähnen.
+Was man zum Beispiel nicht machen kann oder was man nicht erwarten kann, ist, dass unser
+Compiler auch zum Beispiel diese Wert, die zurückkommt, dass man das dann zum Beispiel
+versucht abzufangen.
+Das könnte man machen, also man hat hier zwei, oder man hat hier wieder ein anderes
+Beispiel, man hat hier zwei Methoden.
+Okay, ich habe es hier noch nicht geändert, eigentlich sollte das beide Suchen sein.
+Also hier hat man eine Methode Suche, hier hat man eine Methode Suche.
+Die sind eigentlich genau gleich in den Parameter, also beide haben String Stichwort als Parameter,
+aber da kehrt etwas anderes zurück.
+Da kann unser Compiler überhaupt nicht wissen, welche von den beiden ausgeführt werden muss
+und deshalb wird das sicherlich zu einem Fehler geben.
+Sicherlich, wenn das hier noch immer den Namenssucher hätte.
+Also das ist unzulässig oder wird zu Problemen führen oder wird zu einem Fehler führen.
+Deshalb, als Überladen-Roll-Methode muss man einfach gucken, dass die Zahl und Typ
+in der Parameter stimmt.
+Und so und auch nur so kann unser Compiler wissen, welche von den Methoden ausgewählt
+wird, obwohl die Methode alle den gleichen Namen hat.

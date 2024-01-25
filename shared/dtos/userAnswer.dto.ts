@@ -3,6 +3,7 @@ export interface UserAnswerDataDTO {
     userId: number;
     questionId: number;
     userFreetextAnswer?: string;
+    userFreetextAnswerRaw?: string;
     userMCAnswer?: number[];
     //space for more types of answers
 }

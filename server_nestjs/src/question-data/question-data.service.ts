@@ -1,12 +1,13 @@
+import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { McQuestionDTO, MCOptionDTO, QuestionDTO } from '@DTOs/question.dto';
+import { McQuestionDTO, MCOptionDTO, QuestionDTO, questionType } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { Injectable } from '@nestjs/common';
 import {  } from '@prisma/client';
 
 @Injectable()
 export class QuestionDataService {
-    constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService, private feedbackGenerationService: FeedbackGenerationService) {}
 
     /**
      *
@@ -33,6 +34,7 @@ export class QuestionDataService {
             text: question.text,
             isApproved: question.isApproved,
             originId: question.originId,
+            conceptNode: question.conceptNodeId || undefined
         };
 
         return questionData;
@@ -118,10 +120,13 @@ export class QuestionDataService {
             }
         }
 
+        const question = await this.getQuestion(answerData.questionId);
+        if (!question) throw new Error('Could not get question');
+
         //generate feedback for user answer
-        if (answerData.userMCAnswer) {
+        if (question.type === questionType.MULTIPLECHOICE) { //  && answerData.userMCAnswer
             console.log('generate feedback for user answer');
-            const question = await this.getQuestion(answerData.questionId);
+            //const question = await this.getQuestion(answerData.questionId);
             const mcOptions = await this.getMCOptions(answerData.questionId);
             let userScore = 0;
             const scorePerOption = question.score / mcOptions.length;
@@ -160,16 +165,18 @@ export class QuestionDataService {
         }
 
         //generate feedback for user freetext answer
-        if (answerData.userFreetextAnswer) {
+        if (question.type === questionType.FREETEXT && question.description) {
             console.log('generate feedback for user answer');
-            const question = await this.getQuestion(answerData.questionId);
 
             //TODO: generate a feedback text based on the user answer
-
+            let feedbackText: string = 'Du hast keine Antwort eingeben.';
+            if (answerData.userFreetextAnswerRaw && answerData.userFreetextAnswerRaw != '') {
+                feedbackText = await this.feedbackGenerationService.generateFreetextFeedback({question: question.description, answer: answerData.userFreetextAnswerRaw, conceptNodeId: (question.conceptNode || -1)});
+            }
             const userScore = 0;
-            const feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
+            //const feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
 
-            console.log(feedbackText);
+            console.log('generated Text:', feedbackText);
 
             //create feedback for user answer
             const feedback = await this.prisma.feedback.create({
@@ -188,6 +195,12 @@ export class QuestionDataService {
                 score: feedback.score,
                 feedbackText: feedback.text
             }
+            /* return {
+                id: 0,
+                userAnswerId: 0,
+                score: 0,
+                feedbackText: answerData.userFreetextAnswer
+            } */
         }
 
         /**

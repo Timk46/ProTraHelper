@@ -64,3 +64,8 @@ export interface UserMCAnswerDTO {
     userId: number;
     mcQuestionId: number;
 }
+
+export enum questionType {
+    MULTIPLECHOICE = "MC",
+    FREETEXT = "FreeText",
+}

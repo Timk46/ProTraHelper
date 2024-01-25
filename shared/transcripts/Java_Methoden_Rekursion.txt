@@ -1,0 +1,62 @@
+Dann, habe ich es schon in Python-Rekursion gesehen, hoffentlich mal, ja, also das kann
+man natürlich in Java genauso machen und wird ähnlich oder fast ähnlich ausgeführt.
+Das heißt, man hat für eine Methode noch immer die Möglichkeit, dass innerhalb dieser
+Methode, diese Methode selbst auch wieder ausgeführt wird.
+Und grundsätzlich ist das nichts Neues.
+Wie wir jetzt Methode gesehen haben und was passiert, wenn eine Methode ausgeführt wird
+oder aufgerufen wird, man hat im Speicher irgendwie einen Bereich für diese Methode
+und da werden die Anweisungen, die in dieser Methode stehen, in diesem Fall alles, das
+hier steht, wird das erst nach dem anderen ausgeführt.
+Bis da zum Beispiel wieder diese Methode steht und dann wird das auch wieder irgendwo anders
+im Speicher belegt erst und dann ausgeführt.
+Und auch da habe ich dann, also Sie haben das bestimmt schon mal gesehen, aber das hat
+noch mal ganz kurz eine beliebte Funktion oder Methode, die Fakultät.
+Das heißt, die Fakultät kann man mathematisch so definieren, wenn n gleich 0 ist, dann gibt
+man 1 und wenn n großer als 0 ist, dann hat man n mal n minus 1 Fakultät.
+Und da das hier eigentlich Teil der Definition ist von Fakultät, muss man dann wieder das
+Rekursiv ausüben.
+Das heißt, 5 Fakultät ist gleich 5 mal 4 Fakultät.
+4 Fakultät ist 4 mal 3 Fakultät.
+Dann mal 2 mal 1, dann kommt man hier bei 1 an und dann hat man berechnet, was 5 Fakultät
+ist, nämlich 5 mal 4 mal 3 mal 2 mal 1.
+Genau.
+Und also in Java hat man das dann genau so definiert.
+Also wenn n 0 ist, dann, wir machen das hier mal für long integers, dann kommt 1 zurück.
+Wenn nichts, also wenn n großer ist als 0, dann berechnen wir erst, weil das kommt zuerst
+hier, das hat Priorität, n mal und dann muss man erst berechnen, was Fakultät von n minus
+1 ist.
+Also führen das genau auch wieder aus.
+Jede Aktivierung von einer Methode hat deshalb seinen eigenen Speicherbereich.
+Und um das, weil auch das wieder genau so wichtig ist, wird auch das wieder so darstellt.
+Genauso wie wir es vorher gemacht haben, also eine Funktion wird aufgerufen, auch genau
+das hier wird gemacht.
+Wir haben unsere Funktion definiert hier und etwas später fragen wir, was ist die Fakultät
+von 6.
+In diesem Fall wird auf dem Stapel oder auf dem Stack ein Speicherplatz reserviert, wo
+n gleich 3 habe, ich weiß nicht, wo ich hier 6 hier kenne, das Ergebnis ist 6.
+Aber das hier soll 3 sein.
+Wir möchten erst mal Fakultät von 3 wissen, das heißt Fakultät von 3, n 3 und das Ergebnis
+wird dann hier gespeichert oder ist erst mal ganz offen hier.
+Dann kommen wir hier bei Fakultät n minus 1, das heißt n ist 3, werden wir erst mal
+Fakultät von 2, das heißt diesem Speicherelement wird neu dazukommen.
+Und auch da kommen wir hier am Ende Fakultät von 1, das heißt, werden wir das hier reservieren
+auf dem Stapel oder auf dem Stack mit n ist 1.
+Und erst dann, wenn wir hier wieder das Ganze durchlaufen, hier Fakultät von 0 haben, führe
+das nochmal aus für 0, also n ist 0 und auch dann, erst dann kommen wir hier in dieser
+Return 1.
+Dann wird 1 zurückgegeben, das kommt hier hin, dann kommen wir wieder, das wird dann
+hier entfernt, so sieht es dann aus und wird das Ergebnis weitergeführt.
+Das heißt, wir haben unsere n mal, was das vorherige Ergebnis war, n ist 1, das vorherige
+Ergebnis war 1, hier ist das Ergebnis 2, vorherige Ergebnis war 1, deshalb ist das Ergebnis 2
+und so weiter.
+Und so kommt man zum Ergebnis 6.
+Das heißt, auch das muss ich später mal kurz korrigieren, hier kommt ein 3, also n
+ist 3 in diesem Fall.
+Aber so, also wenn man zurückrudert, machen wir diesen Stack höher und höher im Speicher
+und im Speicher wird dann jedes Mal, wenn man diese Funktion aufruft, ein neues n konstruiert.
+Das heißt, dieses n ist ganz anders als dieses n, als dieses n und so weiter.
+Sobald man diese Funktion verlässt, am Ende, solange diese Funktion wirklich mit dem Return
+Statement, mit der Return Anweisung verlassen wird, dann wird das entfernt, gelöscht im
+Speicher.
+Und so geht man zurück, bis man wieder auf diese originelle Fakultät von 3 kommt und
+das Ergebnis dann 6 ergibt, weil Fakultät 3 ist 3 mal 2 mal 1.

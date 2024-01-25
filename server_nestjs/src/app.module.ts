@@ -22,6 +22,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
 
 @Module({
   imports: [
@@ -33,7 +34,7 @@ import { UsersModule } from './users/users.module';
     ContentModule,
     ChatBotModule,
     QuestionDataModule, 
-    TaskOverviewModule],
+    TaskOverviewModule, FeedbackGenerationModule],
   controllers: [
     AppController,
     DiscussionListController, DiscussionVoteController, DiscussionViewController, DiscussionCreationController

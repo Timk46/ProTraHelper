@@ -1,0 +1,190 @@
+Wenn wir eine absagte Klasse haben mit nur absagten Operationen, heißt das ein Interface
+und eine Schnittstelle.
+Und eine Schnittstelle ist so etwas wie das Summum in objektorientiertes Programmieren,
+wo wir etwas komplett abkapseln möchten.
+Weil, wenn wir das machen, dann schreiben wir irgendwo eine Datei, eine .java-Datei,
+wo wir dann schreiben, guck, wir haben hier eine Klasse mit bestimmten Attributen und
+bestimmten Methoden.
+Aber es ist eine absagte Klasse, das heißt, wir werden nie ein Objekt von dieser Klasse
+erzeugen.
+Und wir haben nur absagte Methoden, deshalb müssen die Methoden von anderen Unterklassen
+auch noch definiert werden.
+Aber das als Interface oder als Schnittstelle erzeugt natürlich einen gewissen Druck auf
+alle anderen Entwickler, die genau diese Unterklasse dann definieren und programmieren sollten.
+Also wenn man sagt, das ist meine Basisklasse, von der alle anderen Klasse generalisieren
+sollten, dann sollen alle Unterklassen, die müssen dann diese Methoden erzeugen und die
+müssen dann diese Attributen benutzen, wie in dieser Oberklasse, dieser abstrakten Oberklasse
+mit abstrakten Methoden definiert ist.
+Deshalb ist das etwas, das sehr häufig benutzt wird, wenn man zwischen mehreren Personen
+etwas als Absprache benutzt.
+Das heißt, ich implementiere diesen Teil, diese Person implementiert einen anderen Teil
+und wie wir dann ein anderes Quellcode benutzen oder ein anderes Klassen benutzen, wird dann
+definiert anhand von dieser Schnittstelle.
+Und diese Schnittstelle ist eine abstrakte Klasse mit abstrakten Methoden.
+Genau.
+Also in OML können Schnittstelle relativ vieles haben.
+Das heißt, also Attribute hier in diesem Falle machen meistens wenig Sinn, aber es
+könnten Attribute geben in OML, die man dann auch hervorragend definieren kann.
+In Java werden als Attribute eigentlich nur Public Static Final Attributen genannt.
+Also das heißt, die müssen sowohl konstant sein, die dürfen sich nie ändern, die sind
+static, das heißt, über alle Klassen von dieser Klasse weg bleibt die gleiche Variable
+und die muss öffentlich sein, die muss zu aller Verfügung gestellt werden.
+Und das ist ziemlich eng, aber das macht auch Sinn.
+Alles andere muss dann implementiert werden in Unterklassen.
+Und das kann man in Java auch entfallen lassen, weil wenn man ein Interface definiert in Java,
+wird das dann so gemacht, man schreibt nicht Class oder Abstract Class und alle Methoden
+werden dann abstrakt angezeigt, aber man hat dann wirklich tatsächlich ein Interface statt
+diese Class und das ist dann das Interface für alle Klassen, die wir dann benutzen werden
+in unserem Projekt.
+Das heißt, das ist das Gleiche wie Abstract Class mit Methoden, die alle auch abstrakt sind.
+Genau und wie gesagt, also dieses Public kann man auch entfallen lassen, das steht hier,
+sodass auch dieses Public nicht da sein sollte und wenn man dann zum Beispiel ein Attribut
+hier haben möchte, dann muss es sowohl Public als auch Static als auch Final sein, aber
+es wird auch implizit angenommen von Java.
+Das heißt, man muss das auch nicht alles erwähnen.
+Man kann in Java einfach sagen, ich habe hier ein Integer, das nennt sich mPy zum Beispiel
+und das stelle ich als 3 vor.
+Das ist dann die Methode, wo wir dann zum Beispiel Konstante, die sich nie ändern und
+die wir alle unseren Unterklassen zur Verfügung stellen möchten, die definieren wir so.
+Zum Beispiel wir müssen oder wir haben vier Gegner in unserem Spiel, das können wir dann
+so in unserem Interface darstellen, sodass wir das hier als 4 darstellen.
+Okay.
+Und wie schon gesagt, diese Schnittstellen und diese Interfaces, die definieren, was andere
+programmieren sollten.
+Das heißt, jeder hat die Aufgabe, Klassen zu implementieren.
+Das ist sowieso was ständig passiert in Java.
+Man macht nichts anderes als eine Klasse zu implementieren, indem man die Attribute und
+die Methoden so erstmal definiert und dann implementiert für die Methoden.
+Wenn man dann als Generalisierungseffekt dieses Interface und diese Schnittstelle hat, dann
+erzeugt man einen gewissen Druck.
+Das heißt, alle Entwickler müssen nach diesem Schema arbeiten.
+Das heißt, sie müssen diese Methoden mit diesen Parametern und dieser Rückgabe arbeiten.
+Also muss das genau eigentlich vorgelegt werden.
+Deshalb sind diese Schnittstellen so beliebt, als erstmal zu definieren, wer was macht und
+welche Schnittstelle man dann definiert, um dann diese Interaktion sicherzustellen.
+Ich benutze eine Klasse und diese Klasse hat folgende Methode und deshalb nimmt man dafür
+ein Interface, eine Schnittstelle, um diese Methode erstmal abzusichern.
+Und jede andere Person oder die andere Person könne dann genau diese Klassen so implementieren,
+sodass man eigentlich von dieser Klasse Unterklasse generiert, sodass diese Unterklasse sofort
+diese Methode implementieren müssen.
+Genau und ja, also wie gesagt, auch Schnittstelle und Interface können nicht instanziert werden.
+Das macht auch Sinn.
+Würde man ein Objekt von einer Interface, also von einer abstrakten Klasse mit abstrakten
+Methoden kreieren können, dann würde man nicht wissen, wie die Methoden auszufügen wären.
+Zum Beispiel.
+Also das macht auch keinen Sinn.
+Deshalb wird auch Java da sofort einen Fehler zurückgeben, wenn man das machen möchte.
+Wenn man zum Beispiel erstmal ein New, ein Objekt generiert von dieser abstrakten Klasse.
+Deshalb wird das nicht gemacht.
+Genau und was man normalerweise oder wie man normalerweise diese Interface und diese Schnittstelle
+benutzt, ist, dass man erbt.
+Das heißt, man vererbt oder man hat Unterklassen, die man definiert von dieser Oberklasse, von
+dieser Interfaces und da hat man sofort eine Liste von Operationen, die man implementieren
+muss.
+Und die Operationen müssen genau gleich sein, wie in diesem Schnittstelle definiert wurde.
+Und können dann auch noch konstante Werte zum Beispiel auch noch vererben, wie dieses
+MPI zum Beispiel vor zwei Folien.
+Okay.
+Ja, also wie gesagt, also wie wir das in Java machen, diese Vererbung, ist mit Implements
+oder kann mit Implements gemacht werden, wenn es dann ein Interface ist.
+Das heißt, wenn man eine spezielle Klasse hat, die wir als Interface darstellen, dann
+machen wir mit Implements die Implementierung dieser Schnittstelle, dieses Interfaces.
+Das heißt, wenn man dann eine Klasse definiert, kann man diese Klasse dann mit Implements,
+mit diesem Keyword, kann man Java dann klarstellen, dass das von dieser Klasse erbt.
+Das heißt, man hat dann zum Beispiel die Klassename und dann Implements und dann den
+Namen von unserem Interface, von unserer Schnittstelle.
+Das heißt zum Beispiel, man könnte Personen, da haben wir Attributen gehabt, aber zum Beispiel
+man könnte Personen auch als nur eine abgestackte Klasse mit nur einer abstackten Methode, nämlich
+diese drücke Adresse geben oder darstellen, sodass alle Personen, die dann von dieser
+Person eine Klasse machen müssen, nur diese Methode implementieren müssen.
+In diesem Fall würde man zum Beispiel dann sagen, Klass, Angestellte, Implements, Person.
+Und dann Person war in diesem Fall ein Interface.
+Also das würde dann definiert mit Interface, Person und dann zwischengeschweifte Klammer
+dann unsere Methode, unsere abstackte Methode, die wir dann haben.
+Okay, hier ein Beispiel.
+Also wir haben unser Interface, das wird in UML so dargestellt mit diesem eckigen Klammer Interface
+oder zwei eckigen Klammer Interface.
+Das heißt, wir haben hier ein Interface mit zwei Operationen und wir wissen schon, dass die Operationen
+im Interface selbst nicht definiert werden.
+Deshalb, wir haben hier ein Interface, und wir haben zwei Operationen, ein op, das ein Integer nimmt,
+das Parameter und dann ein Doppel zurückgibt, ein Methode op2, das ein String nimmt und dann nichts zurückgibt.
+Beide sind automatisch public, public hätte man auch weglassen können, wie wir schon vor drei Folien gesehen haben.
+Aber das ist dann zum Beispiel die Implementierung von genau diesem Teil hier.
+Wenn man dann erbt von einer abstackten Klasse, von einem Interface, dann macht man das auch so,
+mit einem dotted line hier.
+Das heißt, hier abstackt class ist eine abstackte Klasse und erbt von diesem Interface in diesem Fall.
+Man hätte ja auch eine normale Klasse nehmen können, aber wir nehmen jetzt mal eine abstackte Klasse,
+das heißt, wir nehmen hier abstackt class, abstackt class und wie wir dann vererben von einem Interface,
+kommt dann später, aber das ist nicht mit extends, aber mit implements.
+Das heißt, implement ist eigentlich nur für Interfaces, das heißt, unser Interface mal Interface wird hier definiert von unserer abstackten Klasse.
+Und was wir in dieser abstackten Klasse machen können, ist, wir können da ein Attribut dazu nehmen,
+aber wir wissen, weil das eine Implementierung ist von dieser Schnittstelle mal Interface,
+dass wir dann op1 und op2 genau so implementieren müssen.
+Deshalb müssen wir hier, das ist dann zwischen dieser geschweiften Klammern,
+ziemlich viele Anweisungen schreiben wahrscheinlich, um genau diese Operation 1 und diese Methode zu implementieren.
+Die muss aber h genau gleich sein wie op1 hier, das gleiche für op2.
+Aber diese op2 müssen wir eigentlich neu implementieren.
+Da das aber eine abstackte Klasse ist, muss das nicht.
+Das sind eigentlich zwei Beispiele in einem.
+Genau, wir haben hier eine neue dritte Operation dazugefügt und beide Operationen oder beide Methoden sind public.
+Das heißt, auch hier kann man das so sehen, unsere abstackte Klasse erbt von mein Interface,
+das ist ein Interface oder eine Schnittstelle Klasse und implementiert op1 und hat dann dazu nochmal ein op3 als Methode implementiert.
+Also das kommt neu dazu und unser Attribut kommt auch neu dazu.
+Und wenn wir jetzt eine normale Klasse, myClass haben und diese Klasse erbt von abstackt Class,
+dann wissen wir, dass wir noch op2 neu definieren müssen.
+Das heißt, op2, weil es dieses Interface gibt, muss genauso implementiert werden wie hier angegeben.
+Es muss als einzige Parameter ein String s geben und es soll nichts zurückgeben, also Void.
+Deshalb ist auch diese Signatur von op2 genau hier gleich an dieser Signatur.
+Das sind mehrere Sachen gleichzeitig dargestellt, aber wie gesagt, wir haben ein Interface,
+das dann gleich für zwei Klassen definiert, wie die Implementierung kommt.
+Und op1 und op2 werden dann letztendlich definiert in die Klasse, die man dann endgültig benutzt als Objekt.
+Oder auch da nochmal, am Ende, wenn man das Ganze hier definiert hat in Java,
+wird das einzige Objekt, das hier zustande kommt und das hier kreiert wird,
+so wird erwartet, dass von myClass sein, nicht von allen Klassen vorher.
+Das heißt, wir haben myClass als Klasse, diese Klasse hat ein Attribut hier aus unserer abstackten Klasse,
+hat eine Methode op1 aus unserem Interface, ein op2 aus unserem Interface, die so implementiert sind.
+Also op1 wurde in unserer abstackten Klasse implementiert, op2 wurde in myClass implementiert
+und von abstackter Klasse hat man auch noch eine Operation, eine Methode, die auch implementiert wurde dort.
+Deshalb hat all das kann man auch hier von myClass aus verwalten oder kann man auch benutzen.
+Aber grundsätzlich ein Objekt von Typ myClass wird dann hier zustande kommen am Ende.
+Oder das erwartet unsere Java Compiler.
+Alles andere, abstackte Klasse und eine abstackte Klasse mit nur abstackten Methoden, was ein Interface ist,
+da wird nie ein, oder da werde von der Klasse, werde wir nie ein Objekt kreieren.
+Das Einzige, wo, also zum Beispiel viele von Ihnen kannten C++, schon erinnere ich mich noch,
+in C++ kann man tatsächlich von mehr Klassen etwas vererben.
+In Java geht so etwas normalerweise nicht.
+Man kann nicht sagen, ich definiere eine Klasse myClass und das vererbt ein paar Attribute
+und oder auch ein paar Operationen von Klasse X und auch nur ein paar Attribute und Operationen von Klasse Y.
+In Java geht so etwas nie.
+Man kann nur von einer Klasse etwas vererben, es sei, diese Klasse ist ein Interface oder eine Schnittstelle.
+Das heißt, man kann, wenn man eine Klasse hat, von zwei Schnittstellen gleichzeitig etwas vererben.
+Zum Beispiel hier hat man eine Klasse myClass, von einem Interface bekommt man sofort gesagt,
+dass man diese bestimmte Methode implementieren muss und von einer anderen Schnittstelle bekommt man sofort gesagt,
+dass es auch eine andere Methode geben muss, die man sofort implementieren muss.
+Das heißt, und dann können es noch mehr geben, nicht nur zwei, können auch drei, vier oder fünf sein oder noch mehr.
+Grundsätzlich werden die ganzen alle gesammelt und am Ende in unserer endgültigen Klasse myClass
+oder die Objekte, die hier kreiert werden, werden diese Operationen benutzen können.
+Deshalb muss unsere Klasse diese Operationen auch implementieren.
+Deshalb müssen wir auch hier zwischen links, rechts und kleinem diese Blöcke ausfüllen.
+Das heißt, hier müssen wir definieren, was diese Methode OP1 macht und was diese OP2 macht.
+Mit genau der gleichen Signatur wie hier oben.
+Das heißt, OP1 hat ein Integer, gibt nichts zurück.
+OP2 hat ein String, gibt nichts zurück.
+Genauso wie hier.
+Und das ist auch die einzige in Java Methode, um von mehrerer Klasse etwas zu erden oder etwas zu können.
+In einem. Das heißt, man definiert unsere Klasse myClass und sagt, das implementiert alles,
+also alle Methoden aus myInterface1 und myInterface2.
+Und da kann man mit Kommas noch mehr dazu pflügen.
+Und wenn man das so hat, dann weiß man sofort, was man zu implementieren hat.
+Und auch das kann man hier machen.
+Deshalb könnte man auch Schnittstellen von anderen Schnittstellen erben lassen.
+Und dann wird es natürlich relativ komplex, weil man natürlich auch so von mehreren Schnittstellen Sachen aggregieren kann.
+Und Vererbung wird dann genauso dargestellt in UML.
+Nur hat man dann zum Beispiel zwei Interfaces.
+Das heißt, das eine Interface, myInterface2 hier, erbt alles von myInterface1.
+Das heißt, myInterface2 sammelt eigentlich OP1, OP2, OP3 als Methoden und die Signaturen von diesen Methoden.
+Aber bis hier ist nichts implementiert.
+Das stellt man da als klassische Vererbung.
+myClass in diesem Fall als Implementierung, das heißt Vererbung von einem Schnittsteller,
+sagt dann genau, wie diese drei Methoden dann definiert werden.
+Oder hier habe ich dann das wirklich zu implementieren.

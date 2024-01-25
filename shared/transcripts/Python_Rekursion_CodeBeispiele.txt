@@ -1,0 +1,462 @@
+Jetzt machen wir das Ganze einmal rekursiv.
+Ich habe gesehen, das löst einen Teil, einen großen Schritt Ihrer Übungsaufgabe.
+Aber wir machen das hier trotzdem einmal über alle Zahlen zusammen.
+Und Sie müssen das dann halt ein bisschen komplizierter machen.
+Wer hat denn mal einen Vorschlag für Summe über Zahlen bis N von N?
+Rekursiv.
+Und sei es nur ein Anfang davon.
+Was ist denn unsere Abbruchbedingung?
+Das war vielleicht auch ein Grund, warum ich das als erstes hingeschrieben habe.
+Wir sollten immer darauf achten, dass irgendwann unser Programm abbricht.
+Wann sollte ich kein weiteres Mal Summe über alle Zahlen bis N aufrufen?
+Wann weiß ich, was daraus kommt?
+Ja.
+Sie denken, seit S1 sind wir auf S1.
+Genau.
+Also, wenn N gleich 1 ist, wissen wir, dass die Summe über alle Zahlen bis 1 wohl 1 ist.
+Spannend ist, was ist, wenn N noch größer als 1 ist.
+Wie realisiere ich jetzt, wie breche ich das Problem, über alle Zahlen zu summieren, runter in das nächst kleinere?
+Ja.
+Genau.
+Sehr gut.
+Genau. Also, ich weiß, wenn ich alle Zahlen bis N aufsummieren möchte,
+dann ist das das Gleiche wie die Zahl N hinzu radieren zur Summe aller Zahlen bis N-1.
+Ja, und nochmal, die Summe über alle Zahlen bis N ist das Gleiche wie N plus die Summe aller Zahlen bis N-1.
+Und umgekehrt, wenn ich weiß, dass N nur noch gleich 1 ist, dann weiß ich, was daraus kommt.
+Dann ist 1 das Ergebnis.
+Und das ist so ein bisschen die Denkweise von Problemlösungen mit Rekursion,
+dass ich sage, ich versuche, ein großes Problem runterzubrechen, in immer kleiner werdende Instanzen,
+und irgendwann ist meine Instanz so klein, dass ich weiß, wie es geht.
+Ja, also meine Summe über alle Zahlen ist N plus die Summe über alle Zahlen mit einer Zahl weniger.
+Und wenn ich wenig genug Zahlen habe, dann kann ich das Ergebnis hinschreiben.
+Und tatsächlich ist das jetzt schon alles, was ich brauche.
+Also jetzt kann ich Summe über Zahlen bis 8 drucken, und ich kriege 36.
+Stimmt das?
+Wie geht das nochmal? 8 mal 7 durch 2?
+9 mal 8 durch 2?
+Ja, 9 mal 8 durch 2 ist es.
+Genau.
+Also, wenn ich hier mal N, eine spannende Zahl, nehme,
+und N plus 1.
+Ah.
+Sehr gut. Dankeschön.
+Genau.
+Okay, wieso die Formel hier unten steht, das überlassen wir der Mathematik zu erklären,
+warum das hier stimmt, aber das hier soll jetzt illustrieren, wie Rekursion funktioniert.
+Also ich summiere über weniger Zahlen und weiß, wie ich es mache, wenn nur noch eine Zahl übrig ist.
+Sehr gut.
+Sehr gut.
+Lass ich mal für die Folien. Es gibt sogar eine kompakte Version, so etwas zu schreiben.
+Man kann so IF-ELSE-Abfragen auch in eine Zeile schreiben.
+Und ich habe es hier ein bisschen anders gemacht, dass ich bis N gleich 0 gegangen bin,
+aber das hängt jetzt davon ab, ob Sie davon ausgehen, dass jemand auch mal N gleich 0 in ihre Summenfunktion füttert.
+Gut.
+Dann gehen wir mal ein paar Beispiele durch.
+N-Fakultät mit einer Vorschleife und Rekursivmacht.
+Wer hilft mir mal, damit zu sagen, was N-Fakultät ist? Fangen wir mal so an.
+Vielleicht noch mal andere Beteiligungen.
+Was ist N-Fakultät? Das wissen eigentlich alle, oder? Ja.
+Das ist das Produkt von N-Fakultät.
+Genau.
+Dann machen wir das Ganze erstmal mit einer Vorschleife.
+Wie rechne ich denn das Produkt über alle Zahlen aus bis N?
+Ja.
+Ja, das ist schon mal eine gute Frage.
+Wollen wir...
+Genau.
+Also, wenn wir mit 0 multiplizieren, dann weiß ich schon, was rauskommt.
+Dann ist 0 die Antwort.
+Und 0-Fakultät ist sogar 1.
+Also deshalb wollen wir hier gerne bei 1 anfangen und die Zahl N mit einschließen.
+I mal I.
+Da brauchen wir noch ein bisschen was anderes.
+Da müssen wir uns vielleicht jetzt wirklich eine Variable merken, die wir im Rahmen der Vorschleife ändern.
+Ja.
+Genau. Ich würde es an dieser Stelle, auch wenn ich die Ähnlichkeit zu schätzen weiß, nenne ich mal Produkt.
+Genau.
+Genau.
+Also ich multipliziere immer mit I.
+Sehr gut. Und dann...
+Fehlt noch was?
+Ja.
+Genau.
+So, das ist Fakultät mit einer Vorschleife.
+Fakultät Rekursiv.
+Und da schlage ich vor, ich bin schreibfaul und Sie sagen mir...
+Sie können mir auch sagen, wie es geht, aber Sie können mir auch sagen, was ich tun soll.
+Ja.
+Ja.
+Ja.
+Ja.
+Rekursiv. Genau.
+Sehr gut.
+Genau.
+Also hier n mal Fakultät Rekursiv n-1 ist wirklich quasi 1 zu 1 das, was hier steht, nur dass ich dieses Plus durch ein Malzeichen ersetzt habe.
+Gut. Und wenn wir jetzt noch sicherer sein wollen, dass jemand vielleicht auch mal 0 Fakultät aufruft, dann können wir hier auch bei 0 sagen.
+Gut. Das war mal ein erstes Beispiel.
+Habe ich hier nachgezogen.
+Ist...
+Durch. Dann machen wir mal das nächste Beispiel. Ein bisschen anspruchsvoller.
+Herausfinden, ob eine Zahl eine Primzahl ist mit Vorschleife, Weilschleife und Rekursiv.
+Wir fangen mal mit einer Weilschleife an.
+Und fangen wir damit an, dass jemand nochmal kurz sagt, was eine Primzahl ist.
+Ja.
+Genau.
+Also nochmal laut. Eine Zahl, die nur durch 0, äh, zwischen 1 und sich selbst teilbar ist.
+Und man hat mal festgelegt, die 1 soll nicht dazu gehören.
+Gut.
+Wie bestimme ich das?
+Also, def ist Primzahl, while und ich gebe ein n rein.
+Wie mache ich das denn?
+Wie mache ich das denn?
+Wie mache ich das denn?
+Wer ist dafür, dass 6 eine Primzahl ist? Arme hoch.
+Wer ist dafür, dass 7 eine Primzahl ist? Arme hoch.
+Sehr gut. Wer ist dafür, dass eine gerade Zahl niemals eine Primzahl ist?
+Sehr gut. Wie finden Sie das raus, ob eine Zahl gerade ist?
+Ja.
+Genau. Also, was sicherlich auch richtig ist, völlig richtig, mit Modulung,
+wenn ich das n durch den Teiler, den ich jetzt mal auf 2 gesetzt habe, teilen kann und der Rest ist 0.
+Also, wenn das gilt, dann müsste ich return false machen, vielleicht noch mit einer kleinen Abfrage vorher,
+dass die Zahl n selber nicht 2 ist.
+Okay. Das ist richtig. Also, wenn die Zahl ohne Rest durch 2 teilbar ist, sollten wir sicher false zurückgeben.
+Wenn wir jetzt mal erstmal auf eine große Zahl denken. Ja.
+Außer die Zahl 2 selber. Sehr gut. Genau.
+Was machen Sie denn, wenn Sie in Ihrer Freizeit gefragt werden, ob irgendwas eine Primzahl ist?
+Außer sagen, beantworte ich nicht. Aber was würden Sie als nächstes versuchen, wenn Sie 2 ausprobiert haben?
+Ja. Genau. Also, man geht einfach alle Zahlen mal durch und probiert, kann ich das dadurch teilen.
+Ja, dann gibt es vielleicht noch Rechenschlauere Rechenansätze, so was wie die 4 dann nicht auszuprobieren,
+weil ich weiß, wenn es durch 4 teilbar wäre, dann wäre es auch durch 2 teilbar.
+Aber wir machen mal ein bisschen brute force. Also, irgendwie will ich danach den Teiler erhöhen.
+Völlig richtig. Also, wenn das nicht so ist, wenn das nicht restlos durch den Teiler teilbar ist,
+dann würde ich Teiler mal um einen erhöhen. Und jetzt will ich das...
+Ja. Ja.
+Sehr gut.
+Sehr gut.
+Genau. Also, sehr gut. Die Antwort war, ich will hier eine Schleife machen mit einer geeigneten Abbruchbedingung
+und sicher muss ich nicht weitergehen, als der Teiler ist kleiner als n. Und dann ein sehr guter Gedanke.
+Ich muss tatsächlich nur bis Wurzeln gehen. Hintergrund ist, wenn ich eine Zahl finde, durch die ich n teilen kann,
+die größer ist als Wurzeln, dann muss es auch eine Zahl geben, die kleiner ist als Wurzeln,
+durch die ich n auch glatt teilen kann. Denn wenn beide Zahlen größer als Wurzeln wären,
+dann ist sicher ihr Produkt, also der Rest, quasi n durch die Zahl mal die Zahl,
+müsste dann ja größer sein als n. Und das macht nun mal keinen Sinn.
+Ja, das heißt, es reicht zu testen, ist Teiler-Quadrat noch kleiner als n.
+Und da müssten wir dann aber fairerweise sagen, da muss ich auch kleiner gleich noch zulassen.
+Denn es könnte ja sein, dass Teiler genau die Zahl ist, die quadriert.
+n ergibt, also wenn mein n ist 49, 49, die einzige Faktorisierung von 49, die Primzahlzerlegung, ist 7 mal 7.
+Und das heißt, ich muss genau bis zu 7 bis zur Wurzel aus 49 abgehen.
+Genau, prima.
+Was fehlt uns noch in unserem Programm?
+Also, vielleicht zwei Dinge. Das erste ist, was ist denn, wenn die Wildschleife durchläuft
+und es kein Return-Falls gegeben hat? Was möchte ich denn dann zurückgeben? Ja?
+Sehr gut, genau. Also, wenn ich diese Wildschleife komplett durchlaufe, ohne dass es einen Teiler gegeben hat,
+dann kann ich true zurückgeben und wenn wir jetzt genau sind und bei,
+jetzt muss man kurz auf Sonderfälle achten, na gut, machen wir so.
+Wir gehen davon aus, dass n immer größer als 1 ist.
+Aber wenn jetzt gerade jemand 1 eingibt als n, dann würde Teiler bei 2 starten,
+dann würde Teiler-Quadrat kleiner gleich n sofort nicht mehr gelten.
+Dann würde das hier also die Wildschleife gar nicht ausgeführt und er würde true zurückgeben.
+Das ist für 1 schlecht, denn da soll die Antwort false lauten, weil per Definition 1 keine Primzahl ist.
+Dann müssen wir die anderen Fälle vielleicht auch noch eben gedanklich durchgehen.
+Wenn n gleich 2 ist, geht er auch nicht in die Wildschleife, gibt true zurück, aber das ist auch okay, weil 2 eine Primzahl ist.
+Wenn n gleich 3 ist und Teiler gleich 2, dann geht er auch nicht in die Wildschleife,
+weil Teiler-Quadrat schon kleiner gleich n ist, schon größer als n ist und er gibt true zurück,
+ist aber auch okay, weil 3 auch eine Primzahl ist.
+Und n gleich 4 ist dann der erste Punkt, wo er in die Wildschleife reingeht und er dann hier zu Recht false ausgibt.
+Also so passt es.
+Sehr gut, okay.
+Dann wissen wir jetzt, wie das mit ner Wildschleife geht.
+Dann machen wir es jetzt auch noch einmal mit ner Vorschleife.
+Okay, wir machen es direkt mit ner Rekursion.
+Ich brauch sie aktiver, damit wir, die Vorschleife ist nichts Neues für sie, aber dann müssen sie mir das auch direkt diktieren.
+Also das einzig spannende vielleicht in der Vorschleifenlösung ist, wenn man explizit angeben möchte,
+bis wohin es geht, dann kann man eben sowas wie Teiler-Quadrat kleiner gleich n nicht schreiben,
+sondern uns die Wurzel aus n wirklich ausrechnen und dann muss man das einmal aufrunden, damit man bis da drüber geht.
+Also da wird sowas wie Mass.SquareRoot von n vorkommen.
+In der Frage, wie weit laufe ich mit meinem Teil an.
+Okay, nicht zu entscheiden, wir haben es schon mit ner Wildschleife geschafft.
+Dann lassen sie uns Rekursion machen.
+Wie könnte das funktionieren?
+Jetzt würde ich vorschlagen, um ihnen mal einen Anhaltspunkt zu geben,
+dass das Eingabeargument zu dieser Rekursiven Funktion eben nicht mehr nur noch n ist,
+sondern ich nen Teiler mit übergebe.
+Dann haben sie schon vielleicht mal n Eindruck davon, wieso das irgendwas überhaupt mit Rekursion zu tun hat.
+Würden sie irgendwie sonst daran sehen, dass wir hier irgendwie Teiler wie ein Augenball immer weiter erhöhen?
+So, ich schlage mal vor, wenn jemand nichts angibt, dann starten wir mit dem Teiler bei 2.
+Das hat ja schließlich in der Wildschleife auch ganz gut geklappt.
+Also das bedeutet, dieses Teiler gleich 2.
+Wir erinnern uns, wenn jemand IstPrimZahl Rekursion mit nur n aufruft und den Teiler nicht angibt,
+dann startet er bei Teiler gleich 2.
+Was ist eine geeignete Abbruchbedingung für diese Rekursion?
+Das ist?
+Ja, das könnten wir machen.
+Also wenn Teiler gleich n ist, dann
+Genau, das ist also auf jeden Fall eine Abbruchbedingung.
+Wir überlegen uns noch, was wir da hinschreiben können.
+Denken wir mal, dadurch, dass wir ja die Wildschleife oben schon besprochen haben,
+an etwas können wir vielleicht schon früher sprechen.
+Nicht erst, wenn Teiler bei n angekommen ist.
+Damit wir die Analogie zu der Implementierung oben stärker sehen.
+Ja.
+Ja.
+Genau.
+Also wenn Teiler Quadrat und das gleiche ist, dann ein bisschen gefährlich.
+Denn das wissen wir nicht, ob das passiert.
+Also wenn wir da hingekommen sind, dass das Teiler Quadrat größer n ist,
+na gut, dann müssen wir ein bisschen antizipieren,
+dass nicht vorher schon jemand was anderes zurückgegeben hat.
+Also ich behaupte, an dieser Stelle würden wir mal True ausgeben.
+So ein bisschen in der Logik, dass wenn hier nichts passiert,
+dann gibt diese Funktion auch True zurück.
+Und sonst?
+Ja.
+So.
+Wir testen das mal.
+Und hier noch mal, hier habe ich ganz viele Prints drin, die ich nicht möchte.
+Ja.
+Also das ist noch ein bisschen gefährlich.
+Das ist quasi n Tick zu schnell.
+Also ich schlage hier was mit If-Else noch mal vor.
+Wir haben jetzt eine, achso, ja dann gebe ich, ja.
+Genau, also if n Modulo Teiler gleich gleich Null,
+dann return false, sonst rufe die Funktion noch mal auf.
+So, jetzt geben wir das Ganze einmal, gleich gleich gleich Null.
+So, jetzt geben wir das Ganze sehr gut gemacht und korrigiert.
+Jetzt geben wir das Ganze also einmal logisch durch.
+Wir rufen diese Funktion auf mit irgendeinem n und irgendeinem Teiler.
+Wir gehen mal davon aus, dass der Teiler noch nicht so,
+Entschuldigung, und es startet mit Teiler gleich zwei.
+Der Teiler ist erstmal noch kleiner als Wurzel n,
+das heißt wir kommen hier nicht hin.
+Und dann gibt es jetzt zwei Möglichkeiten.
+Entweder an dieser Stelle hört die Rekursion auf
+und es wird falsch zurückgegeben.
+Oder die Rekursion hört noch nicht auf
+und es wird ist Primzahl mit einem Teiler einen Schritt höher zurückgegeben.
+Und das bedeutet er läuft jetzt irgendwann entweder dahin,
+wo diese Bedingung hier erfüllt ist und gibt true zurück
+und dann kollabiert dieser Stack an Funktionsaufrufen
+und jede gibt immer wieder true true true bis zum Ende wieder weiter zurück.
+Oder er geht hier hin, dann das gleiche mit false
+und dadurch sollte jetzt auch jeweils genau das Richtige passieren.
+Also in beiden Fällen kommt jetzt jeweils true zurück.
+Macht das Sinn?
+Das hier ist jetzt so etwas wie mein aktueller Teiler.
+Wenn mein aktueller Teiler n teilt, dann ist n offensichtlich keine Primzahl.
+Wenn mein aktueller Teiler n nicht teilt,
+dann versuche ich es mit dem nächsten Teiler.
+Wenn mein Teiler schon so groß ist, dass ich bislang nichts mehr gefunden habe
+und jetzt auch nicht mehr erwarten kann, was zu finden, dann war es eine Primzahl.
+Macht das Sinn?
+Alle soweit damit zufrieden?
+Ja?
+Bei der Y-Scheife in der Theorie,
+also nicht der Schnellen, sondern bei der breit abhängigen kleinen Steiler,
+also wenn es mal durch zwei oder drei kleine Teiler geht, dann ist es keine Primzahl.
+Und das gibt jetzt hier die Gewalt, dass man so ein bisschen nach drüben und weiter geht,
+weil man hört ja eigentlich immer weiter auf.
+Das heißt, ich könnte noch weiter, wenn ich die Scheibe spannen will,
+einfach schreibe m modulo 2, m modulo 3
+und dann bin ich fertig.
+Das ist ja auch normal, weil man weiterlässt und dann ist es eine Primzahl.
+Das reicht ja nicht.
+Die Zahl 7 ist weder durch 2 noch durch 3 teilbar, aber trotzdem eine Primzahl.
+Ja.
+Die Zahl...
+Okay, eine Zahl, die Zahl 25 ist weder durch 3 noch durch 2 teilbar,
+aber trotzdem keine Primzahl.
+Stimmt. Genau.
+Also tatsächlich ist dieses Schauen, ob etwas eine Primzahl ist,
+eine ziemlich schwierige Aufgabe.
+Sprich, okay, wir müssen nicht alle Teile ausprobieren,
+so wie wir das jetzt gerade machen,
+aber wir müssen alle Primzahlen als Teile ausprobieren.
+Und das bedeutet für...
+Es gibt tatsächlich so Challenges von Leuten mit großen Computern,
+die sich freuen, wenn sie die größte bekannte Primzahl der Menschheit gefunden haben.
+Ich glaube, da gibt es auch Geld für.
+Also es ist wirklich eine Rechenaufgabe
+und kann nicht einfach auf ein paar Tests sozusagen untergebrochen werden.
+Gut.
+Dazu noch Fragen zur rekursiven Primzahlbestimmung?
+Genau.
+Ich habe es hier nochmal aufgeschrieben auf den Folien,
+aber wir haben uns jetzt, glaube ich, ausführlich besprochen,
+wie es funktioniert.
+Okay, und jetzt könnten wir dazu gehen,
+auch in unseren Move-Spiel die Rekursion einzuführen,
+aber es ist natürlich noch vielleicht sehr neu mit der Rekursion.
+Sollen wir nochmal ein anderes Rekursionsbeispiel machen?
+Ja?
+Jetzt habe ich nichts mehr vorbereitet.
+Sagen Sie mir mal, was wir mal...
+Was machen wir in einer Vorschleife?
+Und dann versuchen wir das in irgendeiner Rekursion umzuschreiben.
+Hat irgendjemand einen Vorschleifenwunsch?
+Das könnten wir tun.
+Ja.
+Was haben wir denn an Vorschleifen?
+Das ist langsam gemacht.
+Ja?
+Wenn wir jetzt von eurer großen Zahl, der aus der mehreren Mengen der Primzahl erkennt,
+haben wir überhaupt eine Primfaktorzerlegung?
+Eine Primfaktorzerlegung.
+Wenn ich jetzt einfach bei zwei Anfragen quasi,
+zum Beispiel zwei in der Primzahl reite, das nicht mehr geht,
+und dann die Primzahl weitergebe,
+dann habe ich dann auch ein Möglichkeitsystem.
+Ja?
+Ja, das ist eine gute Idee.
+Okay, sehr gut. Dann versuchen wir das mal.
+Das ist auch ein bisschen aufwendiger.
+Sollen wir das auch erst mit Vor- oder While-Schleife schreiben?
+Also wir brauchen dann ...
+Oder wollen Sie Ist-Prim-Zahl dann einfach verwenden?
+Machen wir das? Ich habe ein bisschen Angst, dass das Programm zu groß oder zu lang wird.
+Was ist die Primfaktorzerlegung?
+Denken wir mal laut, was müssen wir machen?
+Wir kriegen hier irgendeine Zahl rein, testen, ob die durch zwei teilbar ist.
+Wenn nein, gehen wir zur nächsten Zahl.
+Wenn ja, dann merken wir uns die Zahl 2 als einer der Primfaktoren.
+Und rufen es auf der dividierten Zahl nochmal auf.
+Das können wir auf jeden Fall machen.
+Primfaktorzerlegung von einem N.
+Dann helfen Sie mir mal weiter.
+Wie machen wir das?
+Und vielleicht spendieren wir uns hier auch einen Teiler.
+Vielleicht fangen wir auch bei zwei an.
+Oder wir machen es erst einmal so, wie wir es kennen.
+Und übersetzen es dann.
+Wenn wir es so machen, hat jemand einen Vorschlag.
+Für die eine oder andere Funktion einen Vorschlag.
+Ja?
+Ja?
+Ja?
+Ja?
+Wie viele Primfaktoren ist es dann?
+Und beide nach Hause in den Plan N 0, 5, 3, 5, 3?
+Genau.
+Fangen wir mit einer währenden Liste an.
+Guter Punkt.
+Und Primfaktorzerlegung von, was rufe ich da dann auf?
+Wer hat einen Vorschlag?
+Ja?
+Okay.
+Sie hatten es schon gesagt.
+Also, wenn ich einen Teiler gefunden habe, einen echten,
+dann hänge ich den an meine Liste an Primfaktoren
+und rufe auf die Primfaktorzerlegung mit,
+okay, die sind Teiler jetzt rausdividiert,
+aber ich muss den gleichen Teiler nochmal versuchen.
+Es könnte ja so etwas sein wie eine 4,
+aber eine 4 ist 2², da kommt 2, also 2 mal als Primfaktor vor.
+Also ich muss hier wirklich weitergehen,
+bis ich den Teiler nicht mehr finde.
+Wenn ich den Teiler nicht mehr finde, dann, was mache ich dann?
+Ja?
+Okay.
+Also dann lasse ich n gleich, aber erhöhe den Teiler auch mal.
+Das ist wahr, ja.
+Sonst komme ich nicht auf einen.
+Sonst komme ich auf...
+...auf...
+Können wir jetzt noch eine Rekursion einbauen?
+Wenn ich jetzt auf alle...
+Ne, wir müssen...
+Okay, hier brauche ich jetzt irgendwie so etwas wie nächste Primzahl von Teiler.
+So, ja, und jetzt müssen wir noch einen Fall abwarten.
+Also so, wie es jetzt geschrieben ist, haben wir jetzt F, L und den beiden
+kommt eine Primfaktorzerlegung wieder neu als Aufruf vor.
+Das sollte im Zweifelsfall ein Warnsignal sein, denn dann kann ich ja nur Primfaktorzerlegung
+wieder aufrufen und sehe mich in der Gefahr einer Endlosstreife, ja?
+Genau.
+Vielleicht machen wir so.
+Ne, da müssen wir wirklich IstPrimZahl machen.
+Achso, wir haben ja schon eine IstPrimZahl. Aha.
+IstPrimZahlRekursiv.
+Von N.
+Und dann...
+Von N.
+Und was mache ich dann?
+Also, wenn ich festgestellt habe, mein aktuelles N ist eine Primzahl, was gebe ich dann zurück?
+Was mache ich und gebe zurück?
+Ja?
+Genau. Also das wäre der Plan. Was brauchen wir jetzt dafür?
+Wir brauchen eine Funktion, die...
+Wir brauchen eine Funktion, die...
+...testet, ob irgendwas eine Primzahl ist. Die haben wir schon.
+Denn die brauche ich hier.
+Ähm...
+Und wir brauchen sowas wie Nächster. Nächster. Primzahl.
+Von Teiler.
+Ja.
+Okay, was machen wir da? Mir fällt gerade noch was Primitives ein.
+Wer hat mal einen Vorschlag, den wir einfach hochzählen, bis wir eine neue Primzahl finden?
+Ja?
+Ja.
+Ja.
+Genau.
+Genau.
+Genau.
+Genau.
+Genau.
+Genau.
+Genau.
+Also vielleicht sowas.
+Solange... Wir setzen den Teiler um einen hoch.
+Solange der Teiler noch keine Primzahl ist, setze ich ihn noch um einen hoch und danach gebe ich den Teiler zurück.
+Ja?
+Entfernen.
+Also, das von 8 gibt ein Fals.
+Und Teile ist nicht richtig.
+Nein.
+Teile ist nicht richtig.
+Nein.
+Nein.
+Ich glaube nicht, aber wir testen das.
+Nein.
+Okay, und jetzt bin ich gespannt.
+Primfaktorzerlegung von 16 ist non. Das ist nicht so gut.
+Testen. Überlegen wir mal, was hier schief geht.
+Wir testen erst mal, ob das hier funktioniert.
+Nächster Teiler von 3 ist 5. Nächster Teiler von 5 ist 7. Nächster Teiler von 7 ist 11. Und nächster Teiler von 11 ist 13.
+Das sieht alles recht gut aus. Nächste Primzahl scheint zu funktionieren.
+Dann die Regulierung. Wenn es eine Primzahl ist, dann hänge ich das an die Primfaktoren an und gebe es zurück.
+Wenn es gleich ohne Rest teilbar ist, hänge ich es an, teile es und lasse es wieder laufen.
+Und da sehe ich eine gewisse Gefahr.
+Ich bin mal gespannt. Wir printen mal einmal n.
+Wir prüfen mal.
+Wir haben ja jetzt 13 Primfaktoren. Das ist das erste, was wir machen.
+Wollen wir das jetzt weg prüfen?
+Ja.
+Deshalb ist die einfach leer.
+Also da returnt er.
+Achso, hier fehlt uns.
+Achso, ja. Wir kriegen da kein Return Befehl. Genau.
+Also wir müssen returnen.
+Dann würden wir, glaube ich, am besten...
+Wir sollten...
+Wir sollten...
+...überall etwas returnen und wieder überschreiben.
+Ja.
+Machen wir gerade eine Übungsaufgabe?
+Achso. Sie haben das gerade live nachgemacht.
+Ja, jetzt.
+Wenn wir da was...
+Ja, okay. Genau.
+Hier printen wir jetzt die Primfaktoren und die sehen gut aus.
+Ich will sie jetzt gerne noch als Return Wert dieser Funktion hinkriegen.
+Aber ist das richtig?
+Also wir müssen die Primfaktoren returnen.
+Das reicht schon. Genau. Sehr gut.
+Freisiegen wir.
+Nochmal ein Test.
+Ja, das glaube ich auch.
+Also das ist absolut keine gute Implementierung, aber mir ging es jetzt um eine Implementierung.
+Genau. Okay. Aber wir haben es geschafft, das rekursiv zu machen.
+Also...
+Das hier ist die einzige Stelle, wo er nicht einen Funktionsaufruf returnt.
+Und alle Funktionsaufrufe, die müssen dann etwas, was von späteren Funktionsaufrufen kommt,
+nämlich irgendwann mal diese Primfaktoren, mit zurückgeben.
+Das heißt, damit reicht man quasi durch und kriegt es jetzt hoffentlich auch, um etwas hin, das mitzugeben.
+Gut.

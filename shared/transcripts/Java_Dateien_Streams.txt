@@ -1,0 +1,358 @@
+Wenn man wirklich mit Dateien agieren möchte oder mit auch alle anderen Arten von Speichermechanismen,
+die nicht dann sofort im Hauptspeicher der Rechner stecken, dann muss man mit Streams arbeiten.
+Sicherlich für Dateien auch.
+Also diese Strömen, sie sind eine konzeptionelle Darstellung, wo wir eigentlich Sachen hinschicken,
+die sequenziell erstmal dargestellt werden und sequenziell auch abgearbeitet werden an der anderen Seite.
+Das heißt, man hat meistens eine Quelle, oft ist das zum Beispiel unser Programm,
+das dann eine Struktur hat oder Objekte hat, die dann gespeichert werden müssen,
+ein nach dem anderen und die werden dann sequenziell erstmal in einen Strom positioniert
+und dann nach einem First-in-First-out-Prinzip, das heißt, das geht hier von links nach rechts,
+sobald hier dieser Strom dann durchkommt und dann ankommt er an der Senke,
+werden dann die Objekte hier gespeichert in genau diese Sequenz.
+Das ist, was ein Stream grundsätzlich ist.
+Und ein Stream habe ich schon mehrmals benutzt, weil zum Beispiel die Strings, mit denen wir arbeiten,
+sind selbst auch Streams.
+Das heißt, wenn man sagt ein String, das heißt etwas an Text, das wir dann erstellen
+und man macht dann Plus und dann zum Beispiel eine Zahl, Plus nochmal ein bisschen Text,
+das ist eigentlich ein Strom, ein Stream.
+Genau, und dafür habe ich jetzt mehrere Klassen in Java, die dann zur Verfügung stehen im Paket java.io.
+Und es gibt dann mehr Output-Streams und mehr Input-Streams.
+Das heißt, Output-Streams ist da, wo wir die Streams erzeugen, die Daten einen nach dem anderen erzeugen
+und für die Input-Streams ist es, wo wir die Daten einlesen können.
+Das heißt, wenn wir eine Datei schreiben, dann müssen wir bei Output-Stream File-Output-Stream benutzen.
+Wenn wir eine Datei einlesen, dann sind wir die Senker und lesen wir vom File-Input-Stream die Daten ein.
+Und das kann man auch generell machen, nicht nur als etwas, das zu einer Datei gehört,
+aber zum Beispiel auch als ein Objekt.
+Wie gesagt, auch dieses Objekt ist wieder das Hauptobjekt, die Hauptklasse in Java.
+Und das kann man dann filtern, sodass man es zum Beispiel auch ausgeben kann auf eine Konsole,
+wie wir das jetzt gemacht haben, mit System zum Beispiel,
+oder man kann auch lesen, wie wir das eben gemacht haben, mit Scanner.
+Genau, das sind so die Möglichkeiten, die man dann zur Verfügung hat,
+um bestimmte Dateien irgendwie von A nach B zu schicken oder hin und her zu schicken.
+Das heißt, wir haben abstrakte Basisklassen, das heißt, das sind quasi Interfaces, Input-Stream und Output-Stream.
+Das sind allgemeine Ströme, wo dann Ströme abstrakt dargestellt werden.
+Und dann, wenn man eine Datei haben möchte, dann wird es abgeleitet,
+oder dann hat man Unterklassen von Input-Stream und Output-Stream,
+und die nennen sich dann File-Input-Stream oder Object-Input-Stream oder Filter-Input-Stream.
+Und dann für Input kann man auch Output haben,
+deshalb File-Output-Stream, Objekt-Output-Stream und Filter-Output-Stream.
+Gab es eine Frage? Ne? Okay.
+Was man auch machen kann, ist dann sofort eine bidirektionale Dateiströme haben.
+Das heißt, eine Ströme, also eigentlich sind das zwei, wie man das implementiert,
+wo man sofort auch etwas hinschicken kann, aber auch etwas zurück erwarten kann.
+Und das heißt dann Random Access File, wo dann diese Dateizeiger, oder Dateizahlen,
+dann auch gemanagt werden.
+Genau, das ist eigentlich die Beschreibung von diesem Diagramm hier.
+Genau, und die Schnittstellen, also Interfaces, Data Input und Data Output,
+die beschreiben dann die Operationen, die wir dann nutzen können,
+um diese Datentypen zu managen.
+Also die Datentypen sind einfach einfache Datentypen,
+also Integer, Double, Boolean, Car und so weiter, und Things.
+Also die können gestreamt werden. Das ist automatisch da.
+Alle anderen Objekte typischerweise noch nicht, es sei, man zeigt das explizit an.
+Genau, Objekt Input, Objekt Output sind auch Schnittstellen und definieren Operationen,
+um Objekte ein- oder auszugeben. Auch das ist relativ leicht.
+Und dann können wir Textausgaben von da mit PrintStream sehen.
+Genau, und das kennen wir alles schon.
+Also wir benutzen schon ständig System.out.println, hallo.
+Genau das ist es, weil System.out ist ein Objekt von Typ PrintStream.
+Das ist genau das.
+Und PrintStream ist von der Klasse, die wir soeben gesehen haben.
+Und ähnlich wie wir System.out haben, das ist eigentlich alles,
+was auf unserer Konsole ausgedruckt wird.
+Also in diesem Fenster hier können wir auch alle Fehler irgendwie sammeln.
+Die werden normalerweise irgendwo in einer Datei oder die kann man auch in der Konsole erfassen.
+Die heißt aber System.error, von Errors.
+Also da werden alle Fehlermeldungen hingeschickt und das ist auch ein Stream.
+Genau hat man auch diese Input Stream, also wenn man etwas in der Tastatur eintippt,
+hat man dann System.in.
+Das ist meistens was man dann zum Beispiel in den Scanner gibt,
+so dass man mit der Scanner-Klasse automatisch die Objekte als Integer oder als ein Stream implementieren kann.
+Gleich würde man sehen, wenn man das dann nicht macht,
+wenn man das dann Charakter per Charakter macht, dass es etwas umständlicher ist.
+Genau, deshalb hat man relativ viele Ströme sowieso schon als Konzept,
+wenn man mit Java arbeitet.
+Das heißt, wenn man einfach eine normale Konsole hat, also keine grafische Oberfläche,
+aber nur eine Tastatur und eine Konsole, das habe ich am häufigsten benutzt bislang,
+dann hat man dann unseren Standard-Output-Ausgabe-Strom,
+Eingabe-Strom und dann auch diesen Error- oder Fehler-Strom,
+die wir dann irgendwie lesen können oder wo wir etwas hinschicken können an beide Seiten.
+Und die Dateien sind genauso.
+Das sind einfach nur Ströme, in denen man etwas schicken kann oder von denen man etwas erwarten kann
+via unserem Java-Programm.
+Und das ist eigentlich alles.
+Unabhängig von welcher Datei man hat, kann man verschiedene Arten von Klassen nehmen,
+um diese Ströme zu interpretieren.
+Ich werde jetzt in der nächsten Folge nur die wichtigsten Methoden zeigen.
+Es gibt viele mehr, aber ich glaube, das kann man erst mal suchen
+und wahrscheinlich kommt man mit diesen Methoden schon am weitesten.
+Also Input-Stream muss natürlich etwas lesen können,
+deshalb hat man verschiedene Arten von Read-Methoden.
+Es hat erst mal eine abstrakte Read-Methode
+und wir sehen auch hier, die können IEO-Exceptions thrown.
+Das heißt, jetzt wissen wir, wieso oder was das hier heißt.
+Also diese Methode wird definiert als eine Methode,
+die dann auch selbst eine Fehlermeldung, ein Exception werfen kann.
+Und diese Read-Methode ohne Parameter liest einfach ein Byte.
+Das war's.
+Blockiert, wenn da nichts vorhanden ist.
+Das heißt, das ganze Programm wartet einfach darauf,
+bis da ein Byte erzeugt wird.
+Zum Beispiel aus der Tastatur, wenn man etwas eintippt.
+Und am Ende, wenn zum Beispiel der Teil zu Ende ist
+oder wenn der Strom ein bestimmter Endbyte bekommt,
+dann wird ein Minus 1 zurückgegeben auf diese Read.
+Das heißt, wenn hier ein Minus 1 kommt,
+dann wissen wir, jetzt ist dieser Strom fertig
+und kommen keine Charaktere mehr oder keine Bytes mehr, genauer gesagt.
+Und das kann man auch machen als Buffer.
+In dieser Buffer kann man wirklich mehrere Bytes
+und diesmal benutzen wir ein Byte.
+Hier hat man ein Integer zurückgegeben,
+aber das Integer wird nur benutzt für ein Byte.
+Das heißt, nur 8 Bits von diesen insgesamt,
+also ein Integer ist 4 Bytes,
+deshalb 32 Bits werden benutzt,
+aber nur 8 davon werden wirklich benutzt,
+um eine Ausgabe zu geben bei dieser Methode.
+Hier wird auch ein Integer zurückgegeben,
+genau das Gleiche, aber Bytes,
+also ein Buffer von Bytes wird hier benutzt.
+Das heißt, mehrere Bytes werden gleich ausgelesen.
+Und man kann auch diesen Stream,
+diesen Strom automatisch selbst schließen
+und gibt dann auch die Ressourcen, die dazu gehören, frei.
+Und genauso wie wir das für Input haben,
+haben wir das auch für Output.
+Das heißt, man kann einzelne Bytes schreiben,
+man kann mehrere Bytes, also ein Buffer von Bytes,
+kann man schreiben gleichzeitig, von N Bytes.
+Wenn man diesen Buffer benutzt,
+muss man auch Flush benutzen können,
+also wenn man sicherstellt,
+dass es auch tatsächlich weitergeschrieben wird,
+hat man dann auch Flush als Methode
+und auch hier hat man wieder Close als Methode.
+Auch hier, all diese Methoden haben IO Exceptions,
+diese werfen können und die dann auch selbst als Benutzer,
+wenn man diese Methode braucht,
+muss man normalerweise mit Try und Catch
+oder danach irgendwann diese Exceptions auch auffangen können.
+Okay, hier ist ein Beispiel, das genau das zeigt.
+Also wir haben jetzt System.in und System.out
+als Objekte, die wir hier zur Verfügung haben
+und wir lesen, was aus der Tastatur kommt
+und wir schreiben dann später, wie viele Bytes,
+also wie viele Zeichen wir jetzt hier eingetippt haben.
+Und wir machen das bis Stromende,
+das heißt, sobald man STRG D tippt,
+dann zeigt man, jetzt ist der Strom fertig
+oder man muss es zweimal tippen,
+wir werden es gleich mal sehen,
+aber grundsätzlich ist es das.
+Das heißt, wir importieren erstmal alle Methoden
+aus Java.io, des Pakets,
+benutzen eigentlich nur System.in, System.out
+und was wir da in unserer Main-Methode auch schreiben,
+weil und diese Read und Write Methoden das benutzen,
+wir throwen die IO Exception weiter,
+die dann hier rauskommt.
+Das ist dann eine Möglichkeit.
+Die andere Möglichkeit ist,
+dass man dann mit Try und Catch das selbst auch fängt.
+Aber das ist genauso gut.
+Und dann lassen wir einfach das Programm crashen,
+sobald es hier ein Fehler gibt.
+Also das Crashlicht, das hört dann automatisch auf,
+weil die Virtual Machine das zu Ende führt.
+Genau, diese Weilschleife hört einfach auf,
+sobald wir dann dieses Minus 1 haben.
+Also diese End of Stream ist dann erreicht
+und solange das nicht ist,
+dann zählen wir einfach weiter.
+Wir fangen an bei 0 und zählen einfach weiter.
+Und sobald es dann endet, kommen wir hier an,
+wir schreiben unsere Message
+und diese Message wird dann hier erweitert.
+Diese Stream Message, genau,
+da wird hier geschrieben,
+wie viele Bytes wir da hatten.
+Genau.
+Wenn wir das dann machen,
+ich will das mal hier schließen, genau,
+dann haben wir das ungefähr.
+Ich glaube, das ist genau das gleiche Programm.
+Steuerung und Set funktioniert bei mir in diesem Fall
+nicht in diesem Terminal,
+aber grundsätzlich funktioniert alles so,
+wie es hier steht.
+Also ich habe hier die Klasse Count und Java genannt,
+aber sonst ist das genau das gleiche.
+Das heißt, wenn man hier das Ganze erstmal kompiliert
+und dann ausführt,
+dann kann man, dann wird geblockiert,
+das heißt, hier ist jetzt Strom aufgemacht
+und man wartet, bis ich hier Taste eindrücke
+oder bestimmte Charaktere ausführe,
+bis ich STRG D, STRG D nehme.
+Und erst dann ist das Ganze fertig.
+Das heißt, dann ist dieses Strom beendet
+mit STRG D, STRG D
+und dann ist dieses Strom beendet
+und kann nicht zählen, wie viele Bytes das jetzt war.
+Kann ich natürlich ändern,
+also dieses "-r1", kann auch was komplett anderes sein.
+Also wenn ich Q drücke zum Beispiel,
+kann man auch ändern.
+Z.B. wenn man das kompiliert, ausführt,
+ich kann alles eintippen,
+aber wenn ich Q drücke und dann Enter,
+dann muss ich natürlich erstmal Enter drücken,
+sobald das dann interpretiert wird,
+auch dann wird dann dieser Strom geschlossen.
+Nicht bei "-1", aber bei Q und dann explizit.
+Das ist eine Alternative, die man da hätte.
+Okay, also das mal als Beispiel,
+also was wir eintippen und was wir dann sehen
+in unserer Konsole eigentlich
+als zwei Ströme dargestellt sind.
+Das eine ist dann System.in,
+das andere System.out.
+Genau, und das gleiche gilt für Dateiströme.
+Also auch da hat man dann
+einen File-Input-Stream und einen File-Output-Stream.
+Die nehmen einen String für Part,
+also wo die Datei kommt,
+und die können dann ein File-Not-Found-Exception werfen.
+Aber das war es eigentlich.
+Das sind die zwei Dateiströme,
+die man dann zur Verfügung hat.
+Ich komme sofort mal zu einem Beispiel,
+so dass Sie dann sehen können,
+wie Dateien gelesen werden
+und wie Dateien geschrieben werden.
+Und in diesem Fall ist es etwas ganz Kurzes,
+dass man als Teil einer Klasse
+zum Beispiel implementieren kann.
+Wir haben hier eine Methode CopyFile,
+wo man einfach sagt,
+von welcher Datei zu welcher Datei kopiert man was.
+Und wenn diese Datei noch nicht besteht,
+dann kreieren wir die auch.
+Das ist eigentlich Teil oder ein Feature
+von File-Output-Stream.
+Hier nehmen wir ein Objekt von File-Input-Stream,
+ein Objekt von File-Output-Stream,
+wir kreieren die,
+indem wir sagen, wie diese Dateien heißen,
+und welche Pfad sie haben,
+und dann kopieren wir die byteweise.
+Etwas Spezielles hier ist,
+wie wir das hier machen,
+das ist auch nicht so elegant,
+man hätte es auch anders machen können,
+aber das ist sicherlich das Kürze gewesen.
+Das heißt, wir haben Integer b,
+und dann sagen wir hier,
+b ist gleich, was hier gelesen wird,
+und solange das hier,
+weil ein Assignment,
+also diese Operation hier,
+gibt auch wieder diesen Wert wieder.
+Das heißt, wir können diesen Wert auch wieder verwenden,
+und sagen, wenn das Ganze,
+das jetzt b ist,
+nicht gleich 1 ist,
+dann gehen wir weiter.
+Solange das der Fall ist,
+schreibe b auch in unser Output-File,
+in unsere zweite Datei.
+Und so wird dann byte für byte
+diese byte gelesen erst mal,
+mit inRead,
+und dann geschrieben mit outWrite.
+Und welcher byte das ist,
+was hier auskommt,
+aus dieser Methode kommt,
+wird hier reingesteckt.
+Das ist relativ leicht.
+Und dann am Ende muss man beide schließen.
+Auch um das nochmal darzustellen,
+habe ich genau das gleiche wieder gemacht.
+Wir haben als Klasse Copy gemacht.
+Okay, Moment, ich habe hier noch eine,
+also auch hier wird das Ganze implementiert,
+aus der Main-Methode,
+aber das kann ich auch genau hier zeigen.
+Das haben wir hier soeben besprochen.
+Das ist diese Schleife,
+die ein Byte liest,
+dann schreibt von einer Datei
+zu einer anderen Datei.
+Und die Dateien, die werden hier
+als Strings wiedergegeben bei Copy-File.
+Und in unserer Main-Methode hier
+kontrollieren, also nehmen diese
+zwei Dateien Namen als Argumente auch wieder.
+Genauso wie wir es für unser
+Verteilungsbeispiel soeben gesehen haben.
+Das heißt, wir nehmen hier,
+wir nehmen an, dass unser Benutzer
+oder beim Ausführen dieses Programmes,
+dass man auch als zwei Argumente
+eine Input-Datei und eine Output-Datei
+nochmal spezifiziert.
+Und wenn diese Länge von den Argumenten
+nicht zwei ist, also wenn man nicht
+zwei Dateien hier ausgegeben hat,
+dann kommt da noch auf ein Arrow,
+oder als Arrow kommt dann auch noch
+dieser String oder diese Rückmeldung.
+Und dann kehren wir auch wieder zurück.
+Wenn das nicht ist, dann gehen wir weiter
+und dann führen wir einfach nur Copy-File aus.
+Mit diesem ersten String als erste Datei,
+zweites String als zweite Datei.
+Auch da, es wird eigentlich nicht kontrolliert,
+ob diese Dateien bestehen.
+Wenn das nicht so ist,
+dann wird diese Copy-File einfach
+in IOI-Exception gethrown
+und wird das hier in Main gecatcht.
+Diesmal aber, wir können das auch hier
+hinter Main stellen, aber hier wird das dann
+explizit mit dem Try-Catch
+nochmal verarbeitet,
+so dass man hier auch unsere String
+zum Beispiel nochmal spezifizieren kann.
+Also, dass wir sagen können,
+Fehler beim Kopieren und dann kommt der Rest,
+dieses String, das von IOI-Exception kommt.
+Okay, also das ist dann,
+wie wir das machen können.
+Auch das können wir kurz dann überprüfen.
+Das heißt, wir können das erstmal
+in IOI-Exception kompilieren
+und dann ausführen.
+Also, das ist dann die Klasse-Datei.
+Aber da brauchen wir eine Datei
+und dann können wir zum Beispiel
+genau diese gleiche Datei nehmen.
+Das ist eine Textdatei,
+die besteht aus Bytes
+und können wir das dann auch etwas anders nehmen.
+Zum Beispiel Copy2.txt
+oder .txt, genau.
+Das heißt, wenn wir das dann ausführen,
+dann steht da Copy2.txt
+und da haben wir genau diese Eingabe.
+Und auch das ist eine Textdatei,
+aber da ist nicht mit .ja verendet,
+habe ich auch nicht die Farben hier in meinem Editor.
+Das ist nur eine Textdatei,
+die aus vielen Bytes besteht.
+Genau, also das nur,
+um dieses Beispiel nochmal etwas deutlicher zu machen.
+Das heißt, so kann man Dateien öffnen,
+lesen oder auch schreiben
+und dann schließen.

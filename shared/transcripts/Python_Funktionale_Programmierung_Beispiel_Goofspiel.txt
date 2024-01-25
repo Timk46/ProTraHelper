@@ -1,0 +1,685 @@
+Die Grundidee ist, dass wir unsere Programme so weit wie möglich durch sogenannte Pure Functions aufbauen sollten.
+Durch reine Funktionen, die also nur von ihren Eingabeargumenten abhängen, von nichts anderem und keine Nebeneffekte haben.
+Ihr einziger Effekt ist die Rückgabe von Wern.
+Also für gleiche Eingabeparameter kommt auch die gleiche Rückgabe und diese Rückgabe ist das einzige, was diese Funktion tun soll.
+Also wir haben als erstes mal dieses Rufspiel, das wir zusammen hier in der Vorlesung programmiert haben, hingeschrieben und mal markiert,
+was sind denn eigentlich Variablen, die sich ändern über das Programm, wann lösen wir Nebeneffekte aus.
+In unserem Fall sind die einzigen Nebeneffekte Printbefehle, aber es ist trotzdem etwas, was eben einen Effekt hat, jenseits von Rückgabe eines Wertes.
+Und wo ändern wir Variablen, globale Variablen etc.
+Dahingehend hatten wir unser Programm analysiert und dann angefangen, uns mal Schritt für Schritt vorzuwagen, das Ganze funktionaler umzuschreiben.
+Wer erinnert sich denn noch, wie wir mit so einer Verschachtelung von Logik des Programms und Nebeneffekten umgegangen sind?
+Wie können wir sowas, das war jetzt das Ende unseres Spiels, wer gewinnt das Spiel,
+wie können wir sowas umschreiben in eine Pure Function und eine einzige Zeile Nebeneffekt?
+Um erstmal wieder reinzukommen.
+So, ja?
+Wie ist das mit der Prüfung, die du hier geschrieben hast?
+Veränderst du das mit der Prüfung, je nachdem was da in der Zeile auf die Prüfung draufgegeben wird?
+Ganz genau. Also ich schreibe im Prinzip alles, was hier steht, in eine Funktion.
+Und wenn ich auch innerhalb der Funktion noch vielleicht vermeiden möchte, dass ich einen String initialisiert habe, den ich dann verändere,
+dann könnte ich auch relativ stumpf alles, was hier Print heißt, durch Return ersetzen.
+Ja, also das ist auch tatsächlich das, was wir gemacht haben.
+Sieht jetzt erstmal nach mehr Code aus, aber das liegt nur an dieser einen Zeile Definition der Funktion.
+Wir haben jetzt Schlussnachricht genannt.
+Und es ist einfach genau die gleiche Funktion hier, nur überall, wo hier oben Print steht, steht hier Return.
+Und dann haben wir im Hauptprogramm eine Print-Nachricht.
+Ist natürlich irgendwie ein kleiner Unterschied, aber das bedeutet, Schlussnachricht ist jetzt eine Pure-Funktion.
+Ist eine Funktion, die kriegt eben die beiden Punkte und die beiden Spielannahmen rein und gibt einen String zurück.
+Und genau, dementsprechend nutzen wir, können wir jetzt in einem sehr einfachen Beispiel die Vorteile von funktionaler Programmierung nutzen.
+Nämlich, Pure-Functions sind sehr modular einsetzbar.
+Sie hängen nicht von irgendwelchen Zuständen ab, in denen sich das Hauptprogramm befindet.
+Sie sind sehr einfach zu testen.
+Ich kann sie also mit irgendwelchen Eingabeargumenten aufrufen, ohne dass ich irgendwie einen Zustand des Hauptprogramms mir erst ausspeichern muss.
+So was ist bei komplexen Programmen dann manchmal gar nicht so leicht, dass man so einen Snapshot des Gesamtprogramms braucht,
+um zu testen, ob eine Funktion auch das tut, was sie tun soll.
+Hier, ich kann sie einfach testen. Sie sollte immer das Gleiche geben.
+Ich kann sie modular einsetzen. Das sollte hier an so einer Stelle funktionieren.
+Natürlich kommen wir, wir werden auch ganz zum Schluss, wenn wir mit dieser Vorlesung durch sind, noch nicht ganz ohne Nebeneffekte auskommen.
+Denn wir wollen ja irgendwie ein Programm schreiben, was einen Print-Befehl hat.
+Und da werden wir auch letztendlich nicht drum rum kommen.
+Also ein Programm, was wirklich nur Funktionsaufrufe und Return-Werte hat, das tut nichts.
+Es kann ja nichts tun, denn alles, was es tun könnte, wäre ein Nebeneffekt.
+Ein Print oder in eine Datenbank schreiben oder so was.
+Und dementsprechend eine Schnittstelle brauchen wir, aber wir versuchen diese Schnittstelle so klein und kompakt und zentral wie möglich zu halten.
+Gut, dann haben wir uns schon beim letzten Mal ein bisschen weiter angeschaut, was wir noch für Funktionen geschrieben haben.
+Also wir hatten Strategien der Spieler ausgelagert.
+Das eine war das Spielen einer zufälligen Karte.
+Hat hereinbekommen den Wert der Preiskarte und die verbleibenden Karten.
+Das einfach in der Idee, dass alle Strategien vielleicht von mindestens diesen beiden Sachen abhängen sollten.
+Und was hier passiert ist, die gespielte Karte wird mit Random Choice aus den verbleibenden Karten gezogen.
+Also das zieht einfach eine zufällige Karte.
+Und dann hatten wir auf den verbleibenden Karten einen Punkt Remove aufgerufen, was also das entsprechende Element aus der Liste verbleibender Karten entfernt.
+Obwohl verbleibende Karten hier nicht zurückgegeben wird, ist diese Liste verbleibender Karten eine veränderbare, eine Mutable Variable.
+Die kann ich innerhalb des Programms mit so einem Remove verändern und, Entschuldigung, innerhalb der Funktion mit einem Remove verändern.
+Und es hat einen Effekt auf das, was diese Variable auch außerhalb von meiner Funktion an Werten hält.
+Das war dieses Thema von veränderbaren Variablen.
+Listen sind veränderbar.
+Auf denen kann ich sowas wie Remove oder Pop oder Index I gleich irgendwas aufrufen innerhalb von einer Funktion und es ändert sich dann eben global.
+Der Teil ist auch klar, dass das jetzt das Ändern einer globalen Variable innerhalb einer lokalen Funktion ist.
+Sonst illustrieren wir das, wenn das jetzt mit dem Gufspiel, ich springe natürlich immer so ein bisschen in der Vorlesung zwischen einfachen Beispielen von einer Liste von Zahlen und dem Gufspiel, was jetzt ein bisschen anwendungsnäher oder komplexer ist.
+Aber wenn jetzt jemand sagt, können Sie das nochmal einer Liste von Zahlen zeigen, dann mache ich das gerne.
+Gut, dann gehe ich davon aus, dass das klar ist.
+Also was wir dann gemacht haben, ist zu sagen, diese globalen Änderungen, die sollten mindestens nicht innerhalb der Funktion geschehen.
+Also schreiben wir lieber Funktionen, wo diese beiden Zeilen jeweils nicht drinstehen.
+Und, ok, weil wir noch keine bessere Idee hatten, lagern wir die erstmal aus.
+Mit dem kleinen Problem, dass ich hier Kartenspieler 2 und Remove-Werte Kartenspieler 2 hätte schreiben wollen, natürlich nicht zweimal das Gleiche.
+Gut, dadurch sehen diese Funktionen schöner aus, in dem Sinne, dass sie keine globale Variable mehr benötigen und auch nicht eine globale Variable als Wert ändern.
+Womit wir uns beim letzten Mal auch schon beschäftigt haben, waren die vielen unterschiedlichen Variablen.
+Hier markiert man die, die sich im Laufe des Spiels ändern.
+Und das ist jetzt eine Kleinigkeit an Änderungen, aber macht das Ganze auch wieder ein bisschen kompakter oder vielleicht übersichtlicher,
+dass wir gesagt haben, alles was sich als Zustand des Spiels, alles was als Zustand des Spiels eine Rolle spielt,
+also was für Karten gibt es noch, was für Karten haben die Spieler, was für Punkte haben die Spieler, die Strategien der Spieler, welche Karten wurden zuletzt gespielt,
+diese Sachen, die wollen wir nachher einfach mal sammeln in einer Variable, die wir State oder Zustand genannt haben.
+Und das mache ich jetzt einfach, indem ich alles was hier drin steht in ein sogenanntes Dictionary schreibe, in ein Lexikon.
+Also die Definition von State oder von jedem Dictionary beginnt mit geschwungenen Klammern.
+Oder das ist eine Schreibweise jedenfalls mit geschwungenen Klammern.
+Dann haben, bestehen so Dictionaries immer aus Tupeln.
+Ein Tupel, also eine Paarung von zwei Dingen, nämlich einen Key und einen Value, einen Schlüssel und einen Wert.
+Die Schlüssel, das sind bei uns jeweils Strings, müssten keine Strings sein, aber sind bei uns jeweils Strings, die beschreiben was der zugehörige Wert sein soll.
+Also der Wert des Schlüssels, Preiskarten im Dictionary State ist an dieser Stelle dieses 1 bis 13.
+Und weil ich zum Ende der Vorlesung dazu eine Frage gekriegt habe, auch zum Thema Vorschleifen mit Dictionaries,
+dachte ich, sprechen wir das noch einmal kurz auch im Code durch.
+Also, ich kann ein Dictionary, ganz egal wie ich das nenne, deklarieren mit geschreiften Klammern.
+Und jetzt kann ich hier immer Key und Value verteilen.
+Also zum Beispiel Begrüßung und dann mache ich einen Doppelpunkt und den Wert, der an dieser Stelle stehen soll.
+Hallo. Aber ich müsste als Key auch nicht unbedingt einen String nehmen.
+Ich könnte auch irgendwas anderes nehmen, wie 1 und 1 oder eine Liste, die ich mir hier merke,
+die 1, 2, 3 heißt oder ein Tuple, was ich mir merke, was 1, 2, 3, 4 heißt.
+Ja, also das hier ist jetzt ein Dictionary. Wir versuchen uns mal diesen Sachen ein bisschen zu nähern, was man damit so machen kann.
+Also ich kann erst mal PrintDict schreiben, dann kriege ich im Prinzip das raus, was ich hier auch vorher schon definiert habe.
+Wir können uns auch mal Type von Dict ausgeben lassen. Dann sagt er auch, das ist ein Class Dict, also ein Dictionary.
+Und jetzt kann man sich ja fragen, wie komme ich an Werte? Was ist denn, wenn ich Hallo ausgeben möchte? Was schreibe ich denn dann hier rein?
+Erinnern Sie sich noch an dieses Konzept von Key und Value?
+Also ich möchte aus dem, gut das kann ich mir schon mal vorgeben, hier wird auf jeden Fall dieses Dictionary ausgeben.
+Erinnern Sie sich noch an dieses Konzept von Key und Value?
+Also ich möchte aus dem, gut das kann ich mir schon mal vorgeben, hier wird auf jeden Fall Dict stehen, denn daraus möchte ich ja irgendwas ausgeben.
+Aber wie mache ich hier weiter? Wenn ich nur das schreibe, kriege ich das raus, was oben auch schon steht. Das haben wir ja schon ausprobiert.
+Aber wie komme ich jetzt an diesen Eintrag, den Wert für den Key Begrüßung?
+Ja, genau. Also einfach in eckigen Klammern, W grü, Zunk hier hinschreiben und dann kriege ich hier als Ausgabe tatsächlich ein Hallo raus. Völlig richtig.
+Ja. Genau. Das können wir uns auch gut mal anschauen. Begrüßung 123.
+Okay. Ich hätte auch gedacht es schmeißt einen Fehler. Es schmeißt hier keinen Fehler. Bedeutet man muss bei der Definition von Dictionaries gut aufpassen, was zumindest die IDI macht.
+Ist mir das hier anmarkierend. Also Dictionary Key Begrüßung repeated with different values. Und wenn ich jetzt nur das Dictionary drücke, das ist vielleicht auch mal ganz interessant, dann fehlt eben hier das Element Begrüßung Hallo, weil ich es einfach an dieser Stelle schon wieder überschrieben habe.
+Ja, das wäre das Gleiche, wie als hätte ich hier Begrüßung gleich 123 geschrieben.
+Also das Begrüßung hier ein zweites Mal zu verwenden ist das Gleiche wie ein Dictionary im Nachhinein für diesen Key zu ändern, den Wert zu ändern. Sprich, da muss man auffassen.
+Ja. Value. Also Entschuldigung, die Frage war, wie hießen nochmal diese beiden Sachen, die ein Dictionary hat. Das erste nennt man Key, das zweite nennt man Value. Key als Schlüssel, also was muss ich eingeben, um den Wert des Dictionaries an dieser Stelle zu bekommen.
+Genau.
+So, um das vielleicht nochmal ein bisschen weiter. Achso, und jetzt kann ich natürlich auch Dick von 1 machen. Was kriege ich hier jetzt raus, wenn ich das ausführe? Was kriege ich auf die Konsole?
+Genau, hier vorne habe ich es schon gehört. Genau, und als Wort oder als Zahl? Sehr gut, wir kriegen 1 als Wort raus, war die Antwort. Und das ist natürlich völlig richtig, weil an dieser Stelle hier dem Key 1 das Wort 1 als Wort hinterlegt ist. Also genau das kriegen wir raus.
+Was natürlich dann dazu führt, dass wir so etwas wie eine reinweise Indizierung hier nicht machen können. Also so etwas wie Dick von 0 in der Hoffnung, dass das das gleiche ist wie Begrüßung Hallo, gibt es nicht. Also da sagt er mir dann Key Error, also den Key 0 gibt es nicht.
+Und genauso kann ich hier jetzt halt alle anderen Sachen reinschreiben, zum Beispiel Liste und ich kriege die hier hinterlegte Liste als Wert raus.
+So, dann die Frage, die ich am Ende der letzten Vorlesung bekommen habe und die deshalb ganz spannend auch im Zusammenhang mit Dictionaries nochmal zu besprechen ist, sind Vorschleifen in dieser Python Art.
+Also wir hatten ja schon mal so etwas wie Liste 5, 3, 1 und dann haben wir so etwas geschrieben wie for Element in Liste print Element und kriegen dann 5, 3 und 1.
+Also ich muss hier nicht ein for i in range Längs Liste und sowas schreiben. Das ist ja das, womit sich wahrscheinlich alle erstmal am wohlsten führen, was sie jetzt alle gut kennen. Ich kann natürlich die Länge meiner Liste nehmen und dann die Liste an der Stelle i ausgeben.
+Dann kriege ich 5, 3, 1. Aber ich kann auch diese kompaktere, etwas Python-artigere Schreibweise nehmen. Also for Element in Liste.
+Und was wir dann, glaube ich, letztes Mal mal gemacht haben, war eine Vorschleife, wo hier nicht ein Element stand, sondern zwei. Ja, wir haben sowas gemacht wie i, Element. Weiß zufällig noch jemand, welches Wort ich dann hier um die Liste rumschreiben muss, wenn ich das machen möchte?
+Ja, genau. Also enumerate, zähle die Liste auf und was ich dann bekomme, wenn ich die Liste aufzähle, ist eben ein Laufindex i und das Element.
+Also jetzt könnte ich hier sowas schreiben wie am Index i steht das Element. Und ich kriege am Index 0 steht das Element 5, am Index 1 steht das Element 3 und am Index 2 steht das Element 1.
+Das liegt jetzt daran, dass nach dem Aufrufen von enumerate auf der Liste da Tupel drin stehen. Ne, ok, das kann man sich nicht schön anschauen.
+Das liegt daran, dass hier Tupel drin stehen, was jetzt konzeptionell ein bisschen ähnlich ist zu dem Dictionary, wo es auch Tupel gibt aus Key und Value.
+Und es deshalb vielleicht interessant ist, sich auch hier nochmal zu überlegen, wie kann ich eine Vorschleife über ein Dictionary schreiben. Also wenn ich einfach mal for i in print i schreibe, dann kriege ich, jetzt wird es hier ein bisschen verwirrend, ich muss glaube ich mal diese Print-Verfehle hier alle rausnehmen.
+Dann kriege ich hier Begrüßung 1 Liste Tupel. Begrüßung 1 Liste Tupel. Also der, ja.
+Sehr gut. Genau. Also das, Sie haben jetzt schon völlig richtig implizit gesagt, was wir hier rauskriegen aus dieser Vorschleife sind offensichtlich die Keys. Denn Begrüßung 1 Liste Tupel hatten wir als Keys verwendet.
+Und Sie haben auch schon den Vorschlag gemacht, wie ich jetzt an die Werte komme. Also ich könnte hier schreiben, der Key e hat den Wert dick, eckige Klammern e. Das haben Sie gerade schon vorgeschlagen, dass wir das so machen sollten.
+Und dann kriege ich tatsächlich genau das raus. Also der Key Begrüßung hat den Wert Hallo. Der Key 1 hat den Wert 1. Der Key Liste hat den Wert 1, 2, 3. Der Key Tupel hat den Wert 1, 2, 3, 4.
+Ganz genau. Also das ist eine Möglichkeit, um so eine Vorschleife über ein Dictionary zu schreiben. Hilft vielleicht auch nochmal beim Verständnis des Dictionaries.
+Jetzt gibt es aber auch die Möglichkeit, statt dieser Indizierung direkt über Key und Value in dem Dictionary zu iterieren. Und dafür brauche ich eben ein, was ich hier hinschreibe ist egal, aber dann greifen wir nochmal die Werte auf.
+Ich kann hier zwei Sachen hinschreiben. Key und Value und schreibe hier Dick.Items, schlägt er mir hier schon vor, hin. Und aus Dick.Items kommen jetzt wieder Tupel raus.
+Also eine Art Rückgabe des Iterators über Dick.Items sind Paare, nämlich Key und Value. Und dadurch, dass ich hier zwei Sachen angebe, kann er die einzelnen rausschreiben.
+Vielleicht mache ich erst nochmal den Test, hier einfach nur wieder E hinzuschreiben, das hier auszukommentieren und Print E zu machen. Dann sehe ich nämlich, ich muss das auch mal wieder rausnehmen.
+Dann sehe ich nämlich aus for E in Dick.Items bekomme ich jetzt nicht mehr nur den Key, das was wir vorher hatten, sondern bekomme ich jetzt Paare. Was hier ausgedruckt worden ist, sind zwei Tupel, bestehend aus dem Key als erstes und dem Value als zweites.
+Und wann immer ich das habe, dass ich sowas wie Zweiertupel oder auch längere habe, dann kann ich das in Python auch dadurch auf unterschiedliche Variablen verteilen, indem ich die hier mit Komma hinschreibe.
+Also jetzt schreibe ich hier Key, Value statt eine einzige Variable E und kann hier schreiben, der Key, Key hat den Wert Value. Und kriege wieder, der Key, Begrüßung hat den Wert Hallo. Der Key, Eins hat den Wert Eins und so weiter.
+Ja, also aus Dick.Items und aus Enumerate kriege ich Tupel aus, in dem letzten Fall, Index und Wert oder hier aus Schlüssel und Wert und kann diese Schlüssel und Wert eben dadurch, dass ich zwei Variablen angebe, einzeln in unterschiedlichen Variablen bekommen. Ja.
+Ist das, was Sie jetzt angemacht haben, dasselbe, was mit den Enumerate-Listen passiert ist?
+Genau. Sehr guter Hinweis. Also, das machen wir mal wieder raus und das machen wir hier hin und dann schreiben wir hier E und kommentieren das aus und printen E. Und dann sehen wir, dass da tatsächlich, völlig richtig gesagt, genau das Gleiche passiert.
+Ich habe irgendwie die Liste aus, ja okay, die existiert ja noch. Also ich habe jetzt das, was wir vorher hatten, nämlich E und Element rausgenommen und hier einfach mal einen E hingesetzt und dann kriege ich aus for E in Enumerate-Liste auch Tupel raus.
+Also völlig richtig die Analogie zum Dick-Stream. Ich kriege zwei Tupel hier raus, wobei das erste einfach nur der Laufindex ist, 0, 1, 2 und so weiter und das hintere der Wert.
+Ich gebe Ihnen noch mal eine Sekunde, gibt es Fragen dazu? Soll ich nochmal Beispiele dazu oder?
+Nein.
+Machen wir vielleicht mal einen, noch eine kleine Beispielaufgabe dazu. Angenommen, ich habe eine Liste, die heißt 7, 4, 6, 5, weil ich das gerade drucken konnte.
+Und jetzt addiere, ist meine Aufgabe, addiere zu jedem Listeneintrag seinen Index hinzu.
+Also die 7 soll ersetzt werden durch 7 plus 0. Die 4 soll ersetzt werden durch 4 plus 1. Die 6 soll ersetzt werden durch 6 plus 2. Wie mache ich das mit einer Vorschleife?
+Und Enumerate, weil wir das natürlich jetzt einmal üben wollen.
+Ja.
+Sehr gut, das ist ein guter Vorschlag mit einer Kleinigkeit, die man vielleicht anders machen muss. Ich lasse es mal laufen.
+14, 8, 12, 10. Ja.
+Genau, also ich hätte es auch einfach die Aufgabenstellung umformulieren können. Wichtig war mir, dass hier irgendeine Formel steht, wo, jetzt kommt nur i vor, da hätten wir das Element nicht gebraucht.
+Genau, also, gut, wenn wir sowieso schon Liste i adressieren, dann ist das hier jetzt vielleicht nicht zwingend nötig, aber so löst es die Aufgabe.
+Wichtig war mir, dass Sie sehen, dass es da jetzt irgendwie mal eine Formel zum Beispiel mit dem Index und Element gibt.
+Gut, damit soweit alle zufrieden?
+Dictionaries, Key, Value, Tuple, man kann mit eckigen Klammern und Key den Wert an der Stelle adressieren. Bei Vorschleifen kann man zwei Elemente angeben, wenn ich einen Punkt Items verwende und dann über beides iterieren.
+Sie hatten noch eine Anmerkung? Ja.
+Genau, das Enumerate war die Frage. Noch einmal sagen, was Enumerate macht. Das macht aus den Einträgen der Liste Paare von Index und Wert an der Stelle.
+Also, ich schreibe mal vielleicht zwei Vorschleifen. Das eine ist einfach nur for i in Liste, Print i und das andere ist for i in Enumerate Liste, Print i.
+Einfach damit wir genau das gleiche gemacht haben, einmal mit und einmal ohne Enumerate, damit man die gut miteinander vergleichen kann.
+Und wenn ich das jetzt laufen lasse, dann kriege ich, wenn ich nur über die Liste iteriere, eben die Einzelwerte, die in der Liste stehen, 7, 4, 6, 5.
+Und wenn ich das mit Enumerate mache, kriege ich Paare, Tuple, an erster Eintrag Index, zweiter Eintrag Wert an der Stelle.
+Also an der Stelle 0 steht der Wert 7, an der Stelle 1 steht der Wert 4, an der Stelle 2 steht der Wert 6, an der Stelle 3 steht der Wert 5.
+Ja?
+Ich glaube, es ist ein eigener Typ.
+Genau, es ist tatsächlich ein Enumerate-Objekt.
+Ich glaube, jetzt könnte man damit anfangen.
+Ich könnte aus dem Enumerate-Objekt wissen, dass es iterierbar ist, einen Iterator definieren, das war übrigens das, was mir beim letzten Mal bei Range noch gefehlt hat, um einen Next drauf aufzurufen.
+Also Range ist ein iterierbares Objekt, aber um da wirklich so etwas wie Next drauf aufrufen zu können, brauche ich einen Iterator, den generiere ich mit Iter und kann jetzt so etwas wie d.__next__ aufrufen.
+Und sollte hier mal das mit dem Print wieder sein lassen, weil man sonst nichts sieht.
+Also wenn ich das einmal ausführe, das Next, dann kriege ich halt das Element 0,7 und wenn ich es nochmal ausführe, dann kriege ich 1,4 und wenn ich es nochmal ausführe, dann kriege ich 2,6.
+Also so habe ich einen Iterator über das Enumerate-Objekt erstellt.
+Aber das ist jetzt schon ein bisschen mehr im Detail.
+Okay. So weit, so gut.
+Dann kehren wir jetzt einmal wieder hierhin zurück.
+Dann kehren wir jetzt einmal wieder hierhin zurück.
+Also wir haben uns entschieden, unsere alten Variablen im Gupfspiel, die wir hier hatten, zu bündeln in einem einzigen Dictionary, was wir Zustand oder State nennen könnten,
+wobei wir jetzt als Keys versucht haben, die Sachen zu verwenden, die irgendwie sinnvoll helfen dabei, die Einträge zu verstehen, denen einen sinnvollen Namen zu geben und als Values, naja, mehr oder weniger das hier oben kopiert haben.
+Das Einzige, was wir hier auch schon beim letzten Mal gemacht haben, ist schon mal uns selber ein bisschen davor schützen, dass wir auf Dingen wie Preiskarten oder Kartenspieler 1 oder Kartenspieler 2 etwas wie Remove oder Pop aufrufen,
+indem wir diese ursprünglich Listen hier mit eckigen Klammern zu Tuplen gemacht haben, mit runden Klammern, weil Tuplen quasi unveränderbare Listen sind.
+Also wenn wir hier einen Remove drauf aufrufen, kriegen wir einen Fehler.
+Schützt uns selber davor, so etwas noch heimlich zu tun.
+Gut. Das war, glaube ich, so ziemlich unser Stand und so ein bisschen der Punkt, wo wir, glaube ich, heute jetzt frisch noch mal weitermachen können.
+Was wir dann angefangen haben zu sehen, war jetzt irgendwie auch an so einer Stelle, wo die Auswertung der Runde gezeigt ist, machen wir unterschiedliche Sachen.
+Also haben wir die Logik des Programms mit if Punkt, if irgendwas gilt, dann Punkte vom Spieler erhöhen und den Print Befehl, einen Nebeneffekt irgendwie vermischt und hatten überlegt, die Art, wie wir das jetzt lösen wollten,
+wenn wir hier schon so Zustände, States definiert haben, ist zu versuchen, eine Funktion zu schreiben, die wir zum Beispiel Nexter State nennen wollten, die sagt, wir versuchen jetzt mal alle Logik des Programms in diese Funktion Nexter State zu packen.
+Die kriegt einen State als Eingabe, macht irgendwas, was das Spiel uns sagt und gibt wieder einen State zurück.
+Wenn wir glauben, dass diese Sachen hier, die hier jetzt unter State stehen, vielleicht auch noch mehr Sachen, die wichtigen Schlüsseldinger unseres Spiels sind, dann sollten wir vielleicht dafür sorgen, dass wir über jede Runde, die unser Spiel geht, genau diese Schlüsseldinger, diese Zustände, States uns merken.
+Und das bedeutet, der wichtige Schritt, der Hauptschritt, die Hauptlogik von unserem Spiel ist irgendeine Funktion, die einen Zustand des Spiels nimmt und einen neuen Zustand nach der nächsten Runde generiert.
+Deshalb eine Funktion Nexter State, die hängt nur von State ab und gibt einen State zurück und hat keinen Nebeneffekt. Die soll auch nicht dokumentieren oder printen oder sowas, die soll einfach nur die Logik unseres Spiels abbilden. Ohne irgendeine Ausgabe. Ja?
+Eine andere Frage ist, was für Karten wollen die Spieler benutzen?
+Genau das ist eine sehr gute Frage. Es ist so eine Mischung, sowas wie welche Karten wollen die Spieler benutzen, das steht hier in Strategie und ist dementsprechend Teil unseres Zustandes.
+Was basierend auf den Strategien in der nächsten Runde passiert, das ist genau das, was die Funktion Nächster State abbilden soll.
+Was basierend auf diesem Zustand, also basierend auf den aktuellen Preiskarten, Karten, Punkten, den Strategien als nächstes passiert, das ist das, was diese Funktion Return von State als Nächster State von State tun soll.
+Vielleicht klingt das zu abstrakt. Wir gehen vielleicht einmal in den Code und schauen uns an, wo wir standen und gehen dann nochmal zu der Logik, warum man das so machen könnte, zurück.
+Also ich gehe mal kurz zurück in unsere Implementierung vom Rufspiel. Die ist halt gerade relativ kaputt, weil wir noch dabei sind, das zu schreiben.
+Aber einfach, um erstmal wieder reinzufinden, vielleicht haben Sie es sich ja auch länger nicht angeschaut, wir hatten hier die Spielannahmen irgendwie, eine Initialisierung, harte Kopien, ja das könnten wir vielleicht auch noch uns drum kümmern, dass wir das hier Kartenspiel nennen.
+Dieses Tupel nennen wir Kartenspiel. Und jetzt kriegen halt sowohl die Preiskarten als auch jeder Spieler kriegt einfach ein Kartenspiel. Jetzt als Initialisierung, dann können wir das mit den harten Kopien rausnehmen. Wunderbar, also das ist unser Zustand.
+Und jetzt wollen wir, wollten wir sowas schreiben wie, wiederhole bis keine Karten übrig sind, einfach nur State gleich Nächster State von State. Das hier ist nichts anderes als das Ausführen einer Runde der Logik in unserem Spiel.
+Wir haben hier unseren Zustand, was die Spieler machen und was für Karten es noch gibt, wie viele Punkte wir noch haben und jetzt soll das hier durch eine Funktion Nächster State aktualisiert werden.
+Und zwar so lange, bis keine Karten mehr übrig sind und keine Karten sind mehr übrig, wenn die Länge des im Dictionary State unter den Key-Preiskarten gespeicherten Variable, die Länge 0 hat, also keine Karte mehr übrig ist.
+Dann wollen wir aufhören. Das hatten wir auch vorher schon bei der Wildschleife drin.
+Und wir waren jetzt dabei und alles was hier kommt, da kümmern wir uns nachher drum, das löschen wir bzw. wandeln wir um in irgendwas, was dann basierend auf den States dokumentiert.
+Also das hier erstmal noch völlig ignorieren, das wird jetzt noch ganz umgebaut. Wir überlegen, wir konzentrieren uns erstmal darauf, wenn wir einen State haben, was ist unser Nächster State?
+Von einem Zustand auf den nächsten, wie funktioniert eine Runde von unserem Spiel? Wir müssen versuchen, die Spielregeln irgendwie besonders gut abzubilden.
+Okay, und das hier, ich klappe mal alles ein, was wir vielleicht jetzt gerade nicht unbedingt brauchen.
+So, jetzt haben wir nur noch das offen, was uns interessiert, nämlich diese Funktion, die den nächsten State berechnet.
+Also einen Schritt im Grundspiel, Sachen die wir da schon letztes Mal reinkopiert haben, ist, was geschieht in unserem Spiel?
+Naja, wir brauchen den Wert der Preiskarte, der bestimmt wird durch zufälliges Ziehen aus dem Dictionary am Key Wert Preiskarten.
+Aus der Liste, die in unserem Zustand unter dem Namen Preiskarten gespeichert ist, ziehen wir eine zufällige Karte.
+Das ist die Logik von einem gemischten Kartenstapel und da ziehe ich eine raus.
+Ja? Sonst müssen Sie Nein schreien jetzt. Schreien Sie jetzt Nein.
+Dann versuchen wir diesen Teil mal auszubauen und irgendwie in einer kleinen Demo unabhängig vom Spiel zu machen.
+Möchte das gerne jemand? Ja? Sehr gut, danke, dass Sie sich trauen das zu sagen. Sonst machen wir in Zukunft sowas wie Summen.
+Alle Summen, die das gerne mal in einem abstrakten, in einem kleineren Beispiel sehen wollen, jetzt?
+Zumindest Sie dürfen jetzt summen. Nein.
+Es gibt so Kinovorstellungen, die das machen, wo man möchte, dass man anonymen Feedback geben möchte im Saal, weil man das relativ schlecht lokalisieren kann.
+Insbesondere ich vorne sehe nicht, wenn sie machen, wer gesummt hat. Aber gut, ist offensichtlich kein erfolgreicheres Konzept, um hier eine Meinung zu bekommen.
+Trauen Sie sich was zu sagen. Also wir haben jetzt sowas gemacht wie ein Lexikon definiert. Da steht was drin.
+Sowas wie ein Kartenspiel und das hat von mir aus den Wert, wir haben jetzt ein kleineres Kartenspiel, haben fünf Werte.
+Wir hatten importiert ein Modul mit dem Namen Random und dank Random gab es sowas wie Random.choice.
+Das bedeutet, ich ziehe eine zufällige Karte aus dem Dictionary. Also ich könnte jetzt zum Beispiel vor E in Range 3 sowas schreiben wie Print Random Choice von Dictionary an der Stelle Kartenspiel.
+Und hier könnte jetzt noch sowas stehen wie Anderes Zeug und Mehr Anderes Zeug.
+So und das kann ich jetzt machen und ausführen und das ist in einem ganz kleinen das, was auch in unserem nächsten State passiert.
+In genau dieser Zeile, über die wir gerade diskutiert haben. Wir haben irgendwie ein Dictionary, das heißt in dem anderen Programm State, ich habe es jetzt mal explizit Dictionary genannt.
+Das hat irgendwelche Keys und Values und alles was für uns in dieser Zeile wichtig ist, ist, dass es einen Key hat, das nennt sich Kartenspiel und hinter Kartenspiel ist ein Tupel von Werten, die jetzt unser Kartenspiel abstrahiert.
+Also 1, 2, 3, 4, 5 steht jetzt vielleicht für, na eins gibt es gar nicht, sowas wie Ass 2, 3, 4, 5 oder wie auch immer ihre Logik von Wertigkeit in einem Kartenspiel zu zahlen ist.
+Das ist natürlich dann, könnte auch Maus, Katze, Hund, Zebra, Elefant sein.
+Gut und hier sage ich jetzt dreimal, drucke aus, ziehe eine zufällige Karte aus oder Entschuldigung, ziehe einen zufälligen Wert, einen Eintrag aus dem Tupel, der als Wert zu dem Key, zu dem Schlüssel Kartenspiel in meinem Dictionary hinterlegt ist.
+Und wie oft ich das mache, das ist natürlich völlig frei, weil dieses Random Choice macht was anderes als das Pop oder Remove oder sowas, das zieht da keine Werte raus, die nachher nicht mehr da sind, sondern das ist wie ziehen mit zurücklegen.
+Die Logik ist, ich ziehe eine Karte aus dem Kartenspiel, printe einmal den Wert, stecke es wieder rein und mische.
+Das ist Random Choice, also ich kann das auch 30 mal machen und dann habe ich hier halt 30 Werte zwischen 1 und 5 zugänglich.
+Ja, macht das mehr Sinn?
+Genau, also trauen Sie sich, dafür ist das hier da, dass Sie das verstehen.
+Trauen Sie sich gerne was zu sagen.
+Also, genau, das ist diese Zeile von unserer nächsten State-Funktion.
+Wir ziehen zufällig aus den noch übrigen Preiskarten in State eine Karte und die speichern wir gerade unter Wert der Preiskarte.
+So, die nächste Zeile ist im Prinzip nicht schwieriger, aber ein bisschen abstrakter, weil wir hier mit dem Konzept arbeiten, dass wir Funktionen als Variable speichern können.
+Ja, denn in unserem Dictionary unter dem Key Strategie 1 hatten wir gespeichert eine Funktion, nämlich, wenn ich ins Hauptspiel einmal zurückgehe, steht da aktuell, Helper spielen einer zufälligen Karte.
+Es ist eine Funktion in unserem Dictionary als Wert zu dem Key Strategie 1 gespeichert und die rufe ich an dieser Stelle auf.
+Ich rufe die an State Strategie 1 gespeicherte Funktion auf mit den Eingabeargumenten Wert der Preiskarte und dem aktuellen Stand des Kartenspiels, was dieser Spieler noch hat.
+Gegeben durch State von Karten 1.
+Machen wir vielleicht auch das, weil das noch quasi einen Schritt weiter ist als die Zeile davor, mache ich das auch einmal in einem kleinen Beispiel.
+Also, ich modifiziere hier jetzt mal eben mein Dictionary, indem ich noch eine Funktion hinzufüge.
+Wie wäre es mit.
+Schreibe.
+Zwei.
+Zufällig.
+Zufällig.
+Geschrieben.
+Werte von einem.
+Und was diese Funktion macht.
+Ist.
+Auf dem Tupel ein Räumen aufrufen und drucken und das Ganze zweimal.
+Ja, also erstmal die die Funktion ist hoffentlich klar.
+Die kriegt ein Tupel als Eingabeargument, zieht zweimal zufällig daraus und drückt das.
+Das erste zufällige Element ist.
+Das zweite.
+Zufällige Element ist, soll jetzt einfach irgendeine Funktion sein, die irgendwas mit dem Tupel macht.
+So, jetzt könnte ich in meinem Dictionary.
+Eine.
+Ein Key, der vielleicht irgendwie sinnvoll belegt ist, wenn ich ihn meine Funktion nenne.
+Hinterlegen.
+Und als Wert hat er.
+Diese Funktion.
+Schreibe zufällig gezogene Werte.
+Ja, das ist nichts anderes als das Konzept, was sie schon kennen.
+Ich kann gleich schreibe zwei zufällig gezogene Werte schreiben und dann an irgendeiner Stelle A vom Tupel aufrufen.
+Und dann wird halt damit die Funktion evaluiert.
+Das haben wir im Rahmen von Funktionen können in Variablen gespeichert werden schon diskutiert.
+So, und das hier ist jetzt nichts anderes, außer dass diese Funktion.
+Schreibe zwei zufällig gezogene Werte jetzt als Wert in einem Dictionary vorkommt.
+Sie können was immer sie wollen als Wert in einem Dictionary schreiben.
+Alles was einer Variable zugeordnet werden kann, kann auch einem Value in einem Dictionary zugeordnet werden.
+Das heißt, ich kann jetzt hier in meinem Dictionary.
+Das heißt, ich kann in Dictionary eine meine Funktion unter dem Key meine Funktion oder was auch immer ich möchte so etwas speichern.
+Und dann kann ich also sowas oder wer kann mir sagen, wie rufe ich jetzt die im Dictionary unter dem Key meine Funktion gespeicherte Funktion auf.
+Das auf dem Tupel, was unter dem Key Kartenspiel im Dictionary gespeichert ist, auf.
+Also ich möchte, schreibe zwei zufällig gezogene Werte, aufrufen auf dem Tupel 1, 2, 3, 4, 5.
+Aber nicht indem ich eins davon explizit benenne, sondern indem ich jeweils auf das Dictionary verweise.
+Ja.
+Perfekt. Inklusive Erklärung. Also genau das.
+An der Stelle meine Funktion im Dictionary steht die Funktion schreibe zwei zufällig gezogene Werte.
+Die kann ich aufrufen, indem ich hier runde Klammern schreibe und in den runden Klammern das schreibe, worauf das angewendet werden soll.
+Entschuldigung, vor.
+Was das Eingabeargument davon sein soll und das Eingabeargument soll eben der Wert sein, der an der Stelle Kartenspiel gespeichert ist.
+Das heißt, ich kann das hier aufrufen und dann passiert tatsächlich, naja, das, was man so erwarten kann.
+Es kommen zwei zufällig gezogene Elemente aus der Liste von 1 bis 5, Entschuldigung, aus dem Tupel von 1 bis 5.
+Also in der Logik von dem, was wir bislang machen, um dieses Next-A-State zu machen, umzusetzen, ist es eigentlich nur so, dass ich irgendeinen Funktions, irgendeinen Code habe.
+Und dann alles, was irgendwie da drin vorkommt, einfach in ein Dictionary schreibe und das Ganze mit den entsprechenden Befehlen äh, ändere.
+Wir machen das vielleicht mal so.
+Wer diktiert mir mal, wie ich diesen Code umschreibe, wenn ich eine neue State-Variable definieren möchte, die hat
+die hat irgendwie A, B und Liste als vielleicht meine Liste.
+Und B fängt vielleicht mal mit 0 an.
+Wie kann ich das hier so umschreiben, dass kein A, B oder Liste mehr drin vorkommt, sondern nur noch die Einträge aus meinem State-Dictionary?
+Das ist ja so ein bisschen das, was wir machen.
+Wir hatten vorher explizite, unterschiedliche Variablen-Namen und jetzt wollen wir das Ganze einfach in einen State gießen und
+alle Variablen-Namen ersetzen durch eine Referenz auf diesen Zustand.
+Ja?
+Wie sagt man, wie man die A, B und Liste in einem Liste-System verweist?
+Genau, also das ist schon mein erster sehr guter Hinweis, wo ich selber gerade noch nicht wusste, was wir damit tun.
+Wir machen mal, wir schreiben mal einfach 1, 2, 3 und A gleich 1 hier so rein.
+Dann haben wir quasi diesen Teil und diesen Teil schon abgearbeitet.
+B habe ich jetzt mal absichtlich anders gemacht, habe ich mal auf 0 gesetzt.
+Wie könnte man dann weitermachen?
+Ja, könnte.
+Genau, sehr gut, ok, machen wir sogar das.
+Ne, an der...
+Ja, das ist jetzt nur...
+Der Code, der hier in diesen Temp-Funktionen ist, ist nie besonders schön, das ist halt so mal schnell was gezeigt.
+Das stimmt, wir wollen das jetzt nicht duplizieren, ich will einfach nur sagen, ich kann, wir machen hier mal ein bisschen was spannenderes.
+A gleich A Quadrat und Liste.append 2.
+So, ja, jetzt ist es ein bisschen spannender geworden.
+Und was ich jetzt sagen möchte, ich kann hier im Prinzip einen Copy und Paste machen, aber jetzt, was muss ich jetzt machen?
+Was muss ich jetzt machen?
+Wenn ich jetzt nicht mehr A, B und Liste explizit haben möchte, sondern auf States in diesem Dictionary verweisen.
+Ja.
+Ja.
+Genau, also einfach überall wo hier was vorkommt an A, B und Liste, ersetzen durch State, eckige Klammern, das was man auch immer haben möchte.
+Also ich könnte hier wirklich ein Find and Replace machen, wenn die Variable nicht A heißen würde und man dann Gefahr liefen würde, so was wie Append auch zu ersetzen.
+Aber im Prinzip kann ich A ersetzen durch State von A.
+So, und dann markiere ich mir das Copy und wenn dann A vorkommt Paste, und wenn hier ein A vorkommt Paste.
+Und wenn ein B vorkommt, schreibe ich hier einen State B hin.
+Und wenn hier eine Liste vorkommt, dann schreibe ich hier einen State meine Liste hin.
+Also ich habe jetzt nichts gemacht als stumpf jedes A durch State von A zu ersetzen und stumpf jedes B durch State von B und stumpf jede Liste durch State von meine Liste zu ersetzen.
+Denn das sind ja die Werte, die in diesem Ding Jury gespeichert sind.
+Und dann muss ich das hier
+So, das hier ist die Logik, aber durch State Dictionary zu ersetzen.
+So, und dann funktioniert das genau so.
+A war 1, ich habe es quadriert.
+Ne, was wird hier denn ausgegeben? 1², 2², nur 1, 2, 3 und das angelegte 2.
+Warum das hier ausgegeben wird.
+Also es ist wirklich ein stumpfes Ersetzen von den alten Variablen Namen durch State von in Anführungsstrichen der Name, der wir die Variable gegeben haben.
+Ist das noch verbindend?
+Sonst, wie gesagt, jetzt wieder die Möglichkeit zu sagen, können wir das nochmal in einem anderen Beispiel machen.
+Oder einen bestimmten Schritt hier drin habe ich nicht verstanden.
+Dann gehe ich davon aus, dass das soweit klar ist.
+So, das bedeutet, wir können jetzt akzeptieren, dass hier vorher sowas stand.
+Vielleicht schreibe ich das noch einmal drüber, damit wir es noch einmal klar haben.
+Vorher stand hier, das war die Variable, die ich eben gesagt habe, die Variable, die ich eben gesagt habe, die Variable, die ich eben gesagt habe, die Variable.
+Das bedeutet, wir können jetzt akzeptieren, dass hier vorher sowas stand.
+Vielleicht schreibe ich das noch einmal drüber, damit wir es noch einmal klar haben.
+Vorher stand hier sowas wie Wert der Karte Spieler 1 gleich Strategie 1 von Wert der Preiskarte und Karten 1 oder Karten Spieler 1.
+Ich weiß nicht mehr, wie wir es genannt hatten.
+Das stand hier vorher und jetzt habe ich einfach nur Strategie 1 ersetzt durch State Strategie 1 und Karten 1 ersetzt durch State Karten 1.
+Einfach nur ein Ersetzen der Variable, weil jetzt alles in State gespeichert ist.
+Gut, wenn Sie das akzeptiert haben, dann ist die nächste Zeile absolut identisch, nur dass da Strategie 2 und Karten 2 steht.
+Und jetzt hatten wir uns ja schon überlegt, wollen wir nachher irgendwas zurückgeben, was so aussieht wie unser State.
+Deshalb stehen hier schon eckige Klammern und die Schlüsselworte und ein Doppelpunkt.
+Aber natürlich stimmen diese Werte jetzt nicht.
+Wir können hier jetzt nicht wieder ein volles Kartenspiel zurückgeben, sondern wir wollen natürlich die Karte, die der Spieler gespielt hat oder die die Preiskarte war, aus dem Ganzen rausziehen.
+Das heißt, wir müssen so etwas wie Remove irgendwie selber implementieren.
+Remove wird auf dem Tuple nicht funktionieren, denn selbst wenn ich hier, was ich natürlich erstmal versuchen könnte, Karten Spieler 1 als State zu schreiben,
+dann wird aber ein Punkt Remove darauf nicht funktionieren, weil wir jetzt als Karten 1 ein Tuple verwendet haben und ein Tuple ist unveränderbar und damit wird kein Remove funktionieren.
+Was ich hier jetzt mache und das ist auch ganz ganz üblich für die funktionale Programmierung, ist eine neue Variable zu erschaffen.
+Eine Art Kopie vom Kartenspiel und zwar von allen Karten bis auf eine.
+Das ist vielleicht auch das, was wir nachher mal als Kritik an die funktionale Programmierung äußern werden, dass das natürlich für große Sachen speicheraufwendig sein kann,
+dass es nicht ganz im Hintergrund sehr spezielle Verfahren gibt, die genau sowas, ich habe eine super lange Liste und möchte jetzt ein Element daraus ändern oder rausnehmen.
+Wenn ich das naiv mache, dann speichert er die super lange Liste einfach komplett so nochmal.
+Und das wäre sehr sehr teuer und dann gibt es in diesen funktionalen Sprachen oft irgendwie Strategien, die im Speichermanagement was Besseres machen als 1 zu 1 eine Kopie anlegen, wenn nur ein Mann repärt.
+Für uns jetzt erstmal kümmern wir uns gar nicht um den Speicherbedarf, sondern wir sagen, wir erzeugen hier etwas, am besten im Sinne einer Pure Function, was eine Karte aus den aktuellen Preiskarten entfernt.
+Also vielleicht sowas wie, entferne Karte von Kartenspiel und Karte. Das ist das, was ich gerne abstrakt schreiben möchte.
+Und hier returne ich nachher ein Kartenspiel in Form eines Tuppels.
+Vielleicht sollte ich explizit sagen, ein neues Kartenspiel in Form eines Tuppels.
+Und dann rufe ich hier entferne Karte.
+Na ja, auf was sollte ich das jetzt aufrufen, wenn ich das hier als neuen State an die Stelle Preiskarten schreiben möchte?
+Angenommen, diese Funktion wäre schon geschrieben.
+Wenn ich es geschafft habe, eine Funktion zu schreiben, die ein Tuppel reinbekommt, sowie eine Zahl, die Teil des Tuppels ist und dann ein neues Tuppel zurückgibt, was einfach das gleiche Tuppel ohne diese Zahl drin ist.
+Das soll entferne Karte machen.
+Dann würde ich das hier für das Update der Preiskarten gerne worauf aufrufen.
+Sind das jemand?
+Mir geht es quasi um das Ersetzen von dieser Zeile.
+Nur, dass diese Zeile gerade, Entschuldigung, diese Zeile macht gerade nichts.
+Sondern wenn, dann müsste das natürlich State von Preiskarten.
+Oh.
+Das ist ja ein bisschen schwierig.
+Das ist ja ein bisschen schwierig.
+Das ist ja ein bisschen schwierig.
+Dann müsste das natürlich State von Preiskarten.
+Oh.
+Das war sowieso falsch gedruckt.
+Das war irgendwie mal Wert der Preiskarte.
+So, aber das wollen wir jetzt anders machen, nämlich durch die entferne Karte.
+Was möchte ich denn? Rein logisch, mal völlig ohne Code.
+Was möchte ich denn? Wie möchte ich denn meine Preiskarten updaten?
+Was ist die Logik des Spiels?
+Ja.
+Genau.
+Also ich möchte alle Preiskarten, die ich habe, nehmen und die, die ich gezogen habe, entfernen.
+Alle Preiskarten des Spiels sind in unserer aktuellen Benamung, wer kann das sehen?
+Wer kann das sehen?
+Ja.
+Ganz genau, alle Preiskarten, die ich noch habe, ist State Preiskarten.
+Und wenn wir schon akzeptiert haben, dass das hier so bleiben kann, wie es ist, was ist dann die Karte, die ich entfernen möchte?
+Ja, Sie können weitermachen.
+Ja. Wert der Preiskarte. Prima.
+Dann machen wir hier das Gleiche. Was sollte dann hier stehen?
+Entferne Karte von ...
+Ja. Achso. Entschuldigung.
+Jetzt halte ich sie auf. Jetzt nehme ich jemanden dran.
+Ja.
+State Karten 1 ist das erste Argument und das zweite Argument ...
+... wieder angenommen, dass das da oben ist, so wie es ... ja.
+Genau.
+So, und wenn wir das akzeptiert haben, dann denke ich, können wir das hier einfach mit 2 und 2 machen.
+Wenn wir das hier implementiert haben, dann haben wir also das hier schon umgesetzt. Prima.
+Das kann ich schon löschen. Das kann ich löschen. Sieht das alles friedlicher aus?
+So, jetzt müssen wir also nur noch entferne Karte aus dem Kartenspiel irgendwie selber hinkriegen.
+Und, okay, was ich da brauche, ist irgendwas, was mir den Index von der Karte in meinem Kartenspiel gibt.
+So was wie die Position. Das wäre eine Möglichkeit, das zu implementieren.
+Und ich weiß gerade selber nicht, wie der Befehl dazu heißt, aber wir schauen mal, wenn ich Kartenspiel gleich 1, 2, 3, 4, 5 habe,
+ob so etwas wie Kartenspiel.index von 4 existiert und das ist 3, weil Kartenspiel von 3 ist 4.
+Entschuldigung.
+Achso, eine Vorschleife durchgehen und ein neues Tuplip füllen. Genau, das könnte man auch.
+Ja, also, völlig richtiger Hinweis. Ein Vorschlag war, eine Vorschleife zu schreiben,
+jeweils durch alle Elemente im Kartenspiel zu gehen und wenn ich auf das Element treffe, was gleich Karte ist,
+dann nehme ich es nicht mit, alles andere schreibe ich in ein neues Tuplip.
+Völlig richtig, ist eine legitime Möglichkeit. Jetzt machen wir es mal noch ein bisschen kompakter mit dem, was man Slicing nennt,
+also dieser Indizierung von Reißen, haben wir lange nicht mehr verwendet.
+Wir haben gerade festgestellt, dass wir mit Kartenspiel.index, dann ist das vielleicht nicht so schön,
+Karte bekommen, an welcher Stelle die Karte in dem Kartenspiel ist
+und dann könnte ich zurückgeben, so etwas wie das Kartenspiel von 0 an bis zum Index, bis das Kartenspiel vom Index plus 1 bis zum Ende.
+Ja, das hier vielleicht noch einmal getrennt.
+Ich habe behauptet, so etwas geht.
+Kartenspiel, jetzt fange ich mal bei 0 an, damit das mit den Indizes übereinstimmt.
+Mal einmal ein Test, also ich habe hier jetzt zum Test erstellt, ein Kartenspiel, das sind die Zahlen von 0 bis 5 als Tuplip.
+Ich habe einen Index benannt, nämlich Nummer 3, das ist jetzt der, der rausgenommen werden soll
+und dann genau das geschrieben, was ich gerade schon behauptet habe, ich nehme das ganze Kartenspiel bis zum Index 3,
+aber der ist ja nach Python-Schreibweise nicht mit dabei, wenn ich hier Doppelpunkt bis in schreibe
+und dieses Plus auf Tuplen ist nichts anderes als Anhängen, so wie das auf Strings oder so auch schon war
+und ich hänge an das gesamte Kartenspiel, aber jetzt von Index plus 1 an bis zum Ende.
+Und wenn ich das hier aufrufe, dann kriege ich tatsächlich 0, 1, 2, die 3 fehlt, 4, 5.
+Ich habe ein neues Tuplen erzeugt, wo die Karte an dem Index fehlt und das ist genau das, was wir hier sowieso machen wollen.
+Das heißt, ich bin mit entferne Karte fertig. Ja?
+Sehr gut, sehr gute Bedenken. Also das hier sieht jetzt so aus, als sollte dieser Index genau mit dem Wert drüber einstimmen
+und das wäre natürlich gefährlich. Wir machen es lieber so, wie es auch in der entfernen Karte implementiert ist.
+Also wenn ich die Karte 3 entfernen möchte und es fehlt hier zum Beispiel eine, dann rufe ich auf dem Kartenspiel Index auf
+und das gibt mir eben den Index, an dem die 3 steht. Das heißt, was erwarten Sie hier bei jetzt Index 3?
+Index 3? Ja?
+Falsche Richtung? Gut gedacht, aber falsche Richtung?
+Oder? Noch? Ja? 2 haben wir gesagt, richtig. Ja, ich bin auch für 2.
+Also ich habe hier jetzt Index 0, Index 1, Index 2, das heißt die 3 steht an Stelle 2.
+Und dann ist es auch wirklich so, dass das aus der Liste entfernte Element das ist, welches am Index 2 steht, obwohl es den Wert 3 hat.
+Ja, also man muss tatsächlich, man darf sich nicht darauf verlassen, dass Werte und Indizes übereinstimmen.
+Vor allem könnte ja jemand auch auf die Idee gekommen sein, die Karten vorher mal zu mischen, also durch zu permutieren
+und dann haben Indizes und Werte nichts miteinander zu tun. Aber sehr guter Einwand. Ist das klarer?
+Sehr gut. Das heißt, das hier tut jetzt schon das Richtige. Wir haben entferne Karten.
+Wir haben hier ein Komma zu viel, deshalb beschwert er sich. So, und jetzt müssen wir eigentlich nur noch hier eine Funktion schreiben, die Punkte verteilt.
+Das ist das Letzte, was wir noch vor der Pause machen. Also vielleicht sowas wie Update Punkte.
+Was brauche ich? Ich brauche die aktuellen Punkte. Ich brauche die Karte von Spieler 1.
+Ich brauche die Karte von Spieler 2 und ich brauche den Wert der Preiskarte.
+Das wäre das, was ich logischerweise für das Verteilen von Punkten als Logik bräuchte.
+Alle dafür? Und dann will ich nachher was zurückgeben, nämlich ein neues Tuple mit den neuen Punkten.
+Okay, und jetzt kann ich im Prinzip aus unserer Logik der Hauptschleife kopieren.
+Ich kopiere mal einfach alles, was wir da vorher mal stehen hatten, was die Punktevergabe angeht,
+aber lösche sofort mal alle Printbefehle. Das sind Nebeneffekte, die wollen wir hier auf keinen Fall.
+Okay, jetzt muss ich das ein bisschen umbenennen, weil hier alles ein bisschen anders heißt.
+Das war kein gutes Umbenennen. Also, wenn Karte 1 größer ist als Karte 2,
+dann will ich irgendwie die Punkte von Spieler 1 erhöhen.
+Wenn Karte 2 größer ist als Karte 1, dann möchte ich die Punkte von Spieler 2 erhöhen.
+Und das else, das kann ich jetzt schon sagen, dann kann ich die Punkte einfach unverändert,
+so wie sie jetzt schon sind, zurückgeben.
+Gut, und das Einzige, was wir jetzt hier noch ändern müssen, ist Punkte Spieler 1, das gibt es jetzt nicht mehr,
+sondern ich würde hier gerne einen Return schreiben.
+Ich möchte hier die Punkte an der Stelle 0 und die Punkte an der Stelle 1 zurückgeben,
+aber auf einen noch irgendwas addieren. Und hier auch.
+Gut, und was addiere ich jetzt, an welcher Stelle noch? Das hier muss nachher raus.
+Und das hier muss nachher raus. Wo will ich jetzt noch irgendwas addieren?
+Ja.
+Genau.
+Sehr gut. Und wir haben wieder eine Pure Function geschaffen, also sowohl entferne Karte als auch entferne Karte.
+Und auch Update Punkte.
+Genau.
+Sehr gut. Und wir haben wieder eine Pure Function geschaffen, also sowohl entferne Karte,
+hängt jetzt nur noch von Kartenspieler und Karte ab, eingeklappt, Pure Function,
+und auch Update Punkte, gibt mir einfach ein neues Tupel an Punkten, basierend auf den Eingaben zurück.
+Und kann eingeklappt werden. Entschuldigung, es sei denn, es gibt Fragen zu der Funktion. Ja.
+Ja, sehr guter Hinweis. Also ich wiederhole es nochmal, damit es alle hören.
+Warum ist ein Printbefehl eigentlich ein Nebeneffekt?
+Das dient ja eigentlich nur der Dokumentation und hat keine weitere Auswirkung auf unser Spiel.
+Das ist völlig richtig. Ein Stück weit, muss ich zugeben, dient das einfach nur der Illustration von etwas,
+was hier das Schreiben in eine Datenbank bedeuten könnte.
+Also ich könnte ja statt dem Printbefehl sagen, ich möchte jeden Spielverlauf dokumentieren,
+indem ich es mir in eine Datei schreibe. Dann ist es ein bisschen offensichtlicher, dass es ein Nebeneffekt ist,
+denn jemand anderes könnte aus der Datei wieder auslesen, sage ich mal ein Auswertungsprogramm oder sowas,
+macht die Datei auf, liest den Spielverlauf aus, generiert einen Plot und speichert den Plot wieder in die Datei.
+Dann wäre das tatsächlich ein aktiver Nebeneffekt, weil es die Datei öffnet und sie verändert
+und jemand anderes könnte auf die Datei zugreifen, sie auch öffnen und verändern.
+Und dann hätte ich wieder den Konflikt, den ich habe und die Vorteile von funktionaler Programmierung angehend.
+Parallelisierung kann ich nicht machen, wenn zwei Programme gleichzeitig versuchen, die gleiche Datei zu öffnen
+und eine bessere Kontrolle darüber, wann denn was passiert.
+Wenn jetzt mein Code 100.000 Zeichen lang ist und potenziell kann an jeder Stelle in so eine Datenbank geschrieben werden,
+dann wird es einfach nachher extrem schwer zu liefern.
+Also, völlig richtig, Print auf die Konsole, nicht so gefährlich,
+aber für uns jetzt ein bisschen stellvertretend für spannendere Nebeneffekte.
+Wenn man es ganz konsequent macht, das hängt jetzt immer davon ab, wie konsequent man funktional programmieren möchte,
+wie gesagt, ganz ohne Nebeneffekte kann man nicht auskommen, ein paar muss man erlauben,
+idealerweise an nur einer Schnittstelle, Print auf die Konsole, ja, klar, kann man machen, ist eine Perspektive für größere Projekte.
+Gibt es noch Fragen zu Update-Punkte?
+Also, Pure Function, Sachen rein, neues Tupel an Punkten raus, kann ich einklappen
+und kann jetzt auch das hier noch ersetzen durch Update-Punkte von, was schreibe ich da jetzt hin?
+Also, da muss so etwas sein wie das, aber das, was ich hier jetzt reinkopiere, ist nicht das, was hier in dem Spiel existiert,
+aber ich würde mir wünschen, dass ich viele Arme sehe, denn das ist so ein bisschen das,
+was wir jetzt schon lange diskutieren, wie wir das ersetzen.
+Genau, also State-Punkte hatten wir es, glaube ich, genannt, sehr gut.
+State-Punkte, das ist jetzt ein Punkt, das wir jetzt ersetzen können.
+Also, das ist jetzt ein Punkt, das wir jetzt ersetzen können.
+Und das ist jetzt ein Punkt, das wir jetzt ersetzen können.
+Genau, also State-Punkte hatten wir es, glaube ich, genannt, sehr gut.
+State-Karten 1, völlig richtig.
+Also, überall, wo hier was steht, was wir in unserem Zustand haben,
+State von das, was wir hier haben wollen und hier steht Wert.
+Okay, das ist jetzt vielleicht unschön von mir, dass Wert der Preiskarte und Wert der Preiskarte immer mal wieder unterschiedlich vorkommt.
+Genau, und hier ist noch, achso, hier ist Helfer nicht definiert.
+Hier würde ich natürlich das zurückgeben, was ich vorher auch schon hatte.
+Also, da würde ich einfach State-Strategie 1, denn wir wollen ja wahrscheinlich nicht,
+oder erstmal nicht, dass die Spieler in der ersten Phase,
+oder erstmal nicht, dass die Spieler innerhalb ihres Spiels die Strategie wechseln.
+Gut, und dann haben wir State gleich nächster State von State fertig.
+Können das speichern und dann wird das hier funktionieren.
+Wir müssen hier keine Punkt-Updates machen.
+Entschuldigung, ja.
+Jetzt übernehmen Sie ja die Ego-Karten ein.
+Der Punkt-Update muss natürlich mehr erwarten, der Einzelne.
+Sehr gut, sehr gut aufgepasst.
+Ja, wir wollen natürlich nicht das ganze Kartenspielen nehmen, sondern die hier gespielten Karten.
+Sehr gut aufgepasst, vielen Dank.
+Genau.
+So, und das Einzige, was wir hier jetzt noch haben, als To-Do, ist dokumentiere den Rundenverlauf mittels Print.
+Und dann kann das hier alles weg.
+Alles weg, und unser Programm hat sich hier drauf reduziert, nur dass hier noch ein Helperpunkt rein muss.
+Und hier fehlt auch, ok, und hier müssen wir nochmal Heimatstates wieder einführen.
+Das Einzige, was wir jetzt noch offen haben, ist einmal das Dokumentieren vom Rundenverlauf mittels Print-Befehl.
+Und die Schlussnachricht, da zeigt er mir hier an, dass es noch einen Fehler gibt.
+Vielleicht machen wir einmal die Schlussnachricht zuerst.
+Dokumentieren vom Rundenverlauf stelle ich vielleicht nochmal hinten an, damit ich für das Hauptthema,
+was ich heute an neuem Konzept besprechen möchte, genug Zeit habe.
+Denn das Dokumentieren basierend auf dem State können Sie sich jetzt vielleicht schon vorstellen.
+Dann liest man halt aus dem State die aktuellen Punkte aus und schreibt hin, was passiert ist.
+Oder gegebenenfalls schreiben wir hier noch States letzte gespielte Karte mit rein,
+damit wir das im Rundenverlauf sehen und damit dokumentieren können.
+Gut, machen wir erst einmal das hier.
+Was schreibe ich statt Punktespieler 1 und Punktespieler 2?
+Diese Schlussnachricht hatten wir vorher schon geschrieben.
+Das heißt, diese Schlussnachricht, da habe ich zwei Möglichkeiten.
+Entweder ich schreibe Schlussnachricht um, sodass es State entgegennimmt.
+Oder ich schreibe für Punktespieler 1, Spieler 2 und so weiter was rein.
+Konzeptioneller wäre hier vielleicht, wenn ich es wirklich so umschreibe,
+dass meine Schlussnachricht den State bekommt und ich hier schaue,
+weil wenn hier State steht, was muss ich dann hier schreiben?
+Ja.
+Wie dann auch das erste hier.
+Nullte in der Schlussnachricht.
+Sehr gut, prima Antwort. Genau richtig.
+Das ist vielleicht erst einmal auch eine Sekunde lang irritierend,
+dass es hier so zwei eckige Klammern geben kann.
+Aber State von Punkte gibt ein Tupe mit zwei Elementen wieder.
+Dadurch, dass das ein Tupe mit zwei Elementen ist,
+kann ich auf die nullte oder erste Stelle getrennt zugreifen,
+indem ich eckige Klammern 0 oder 1 dahinter schreibe.
+Also völlig richtig. State Punkte von 0 sind die Punkte von Spieler 0.
+Und das hier die von Spieler 1.
+Und das hier die von Spieler 2.
+Und das hier die von Spieler 1.
+Und hier habe ich noch einen Spieler.
+Das heißt, ich brauche hier noch irgendwie einen State Spieler 1
+und muss gleich mal gucken, ob es den gibt überhaupt.
+State Spieler 2.
+Das heißt, so habe ich die Funktion umgeschrieben.
+Und erweiter jetzt halt, wenn ich sowas brauche,
+einfach meinen State Spieler 1, heißt jetzt Spieler 1 oder Max direkt.
+Hier haben wir jetzt ja sowieso keine Namenseingabe oder sowas mehr.
+Gut.
+So, damit haben wir das so weit hingekriegt,
+dass es jetzt eigentlich nur noch sowas wie einen Print Dokument,
+ok, Helper wird das nachher reinkommen,
+Helper, Dokumentiere, Rundenverlauf oder sowas gibt von State.
+Und damit werden wir erstmal durch auf einen Haufen schöner Funktionen,
+die wir hier drin haben.
+Das sind alles schöne Funktionen.
+Und unsere Schnittstelle mit der Außenwelt ist jetzt hier in dem Hauptprogramm,
+also State ist noch eine Variable, die in jeder Iteration geändert wird.
+Und dann gibt es die beiden Print Befehle, die das Ganze nach und nach dokumentieren.
+Wenn wir die beiden Print Befehle jetzt zusammenlegen möchten
+und uns Speicher wirklich egal ist,
+dann könnten wir das Ganze noch ein bisschen erweitern,
+indem wir sagen, wir haben nicht mehr einen State, sondern viele States
+und ich einfach eine Liste an States mache.
+Also ich mache das hier einfach mal frech.
+Ich mache mal ein Tupel an lauter States.
+Am Anfang gibt es nur einen Eintrag in meinen Tupel an States,
+also das ist jetzt eine Liste von Dictionary, ein Tupel mit Dictionary Einträgen.
+Und dann würde ich einfach an die aktuellen States einen anhängen.
+Also ich würde nächster State auf den letzten, State minus eins ist der letzte Eintrag in States,
+was dann der letzte State ist, den ich habe, nehmen.
+Da einen neuen generieren und den einfach an States anhängen.
+Und dann, also neue States sind alte States, an die ein nächster State angehängt wird.
+Ja, und dann meckert der hier, jetzt brauchen wir States an der letzten Stelle
+und States an der letzten Stelle und States an der letzten Stelle.
+Also Ecke, Klammern, minus eins an der letzten Stelle.
+Hört man mich hinten eigentlich auch so?
+Hört man mich hinten eigentlich auch so?
+Oder ist Mikro besser?
+So? So besser. Sehr gut.
+So, wir können mal testen, was wir alles falsch gemacht haben.
+So, State Spieler zwei existiert nicht.
+Schlussnachricht. Achso.
+Wo haben wir Sachen? In meinem nächsten State gibt es jetzt noch keinen Spieler.
+Den muss ich natürlich jetzt auch durch das ganze Spiel durchkopieren,
+mit durchziehen, wenn ich die im State haben möchte.
+Ob Spieler ein Zustand des Spiels sind, ist dann vielleicht nochmal eine neue,
+nahe philosophische Frage.
+Okay, jetzt läuft zumindest das ganze Spiel noch durch.
+Schlussnachricht ist irgendwie gerade nicht besonders spannend,
+weil wir den Rundenverlauf noch nicht dokumentieren.
+Aber wie gesagt, das stelle ich mal ein bisschen hinten an.
+Das bedeutet zumindest, wir haben keinen Fehler gemacht,
+der das Programm nicht durchlaufen lässt.
+Das heißt noch nicht, dass das Programm auch das tut, was es soll.
+Das müssten wir natürlich jetzt nochmal testen.
+Aber lassen Sie mich jetzt mal zurückkehren zu dem, was ich Ihnen zeigen wollte,
+was uns helfen wird, auch diese letzte Wildschleife mit stetigen Überschreibungen
+von States oder Anhängen von States anders zu machen.
+Gut. Vielleicht mal kurz auf den Folien nachziehen, worüber wir gesprochen haben.
+Hier auf den Folien stehen jetzt so ein Haufen Code drauf,
+der ein bisschen das dokumentiert, was wir hier jetzt auch gemacht haben.
+Also Logik des Programms und Änderungen von Variablen und Nebeneffekten sind vermischt.
+Neu wollen wir irgendwas schreiben, was basierend auf einem State den nächsten State rausgibt,
+wo hier so etwas wie entferne Karte steht, neue Punkte und solche Sachen.
+Die wir jetzt auch alle gemacht haben.
+Das ist Punkte-Updates, mussten wir dazu in den neuen State schreiben.
+Und das erlaubte es dann letztendlich, unser Programm zu reduzieren auf State gleich nächster State von State
+und irgendwie einen Print-Dokumentiere-Rundenverlauf.
+Das ist jetzt in unserem Fall noch zu schreiben, aber das können Sie sich vielleicht schon denken.
+Dann im Zweifelsfall so etwas wie eine Vorschleife, wo die States drinsteht oder nachher auch etwas anderes,
+um das zu dokumentieren.
+Wer hat was gespielt?
+Das ist die Dokumentation, die machen wir eben nachher mal.
+Was ich jetzt schon behauptet habe, ist, man kann die beiden Print-Befehle noch zusammenführen,
+indem wir uns alle States merken und dazu generieren wir Tuple mit allen States.
+Das ist also genau das, was ich gerade auch gemacht habe.
+Einfach runde Klammern nochmal zusätzlich um den State schreiben und das dann in States umbenennen.
+Weil runde Klammern aber, wenn da sonst nichts zusteht, einfach nur als Klammerung ignoriert werden,
+braucht man hier ein Komma, wenn man ein Tuple mit nur einem Element erzeugen möchte.
+Deshalb dieses Komma-Klammer.
+Genau, und dann steht hier halt so etwas wie States gleich States plus nächster State von States an der Stelle minus 1.
+Das ist genau das, was wir jetzt auch in unserem Hauptprogramm stehen haben.
+Gut, und danach wird irgendwie so etwas kommen wie Dokumentiere den Spielverlauf von allen States.
+So, dass ich weiß, wie ich den Rundenverlauf dokumentiere und wie ich eine Schlussnachricht schreibe.
+Und dann hätten wir es geschafft, dass wir die Schnittstelle ziemlich aufgewandt haben.
+Also dann haben wir es geschafft, wir haben nur noch States als sich im Spiel verändernde Werte.
+Wobei der Punkt, wo wir States ändern, eben in keiner der Funktionen ist, die wir in unserem Helper stehen haben.
+Sondern ausschließlich in dieser einen Zeile, dadurch, dass wir immer neue States generieren und die anhängen.
+Sonst wird States oder irgendwas in States nirgendwo verändert.
+Und dann haben wir den Nebeneffekt ganz zum Schluss, nämlich, dass wir irgendwann mal basierend auf den States einfach dokumentieren, was da passiert.
+Also dieses Dokumentiere Spielverlauf soll nachher so etwas sein wie eine Vorschleife über die States.
+An jedem State, der nicht der letzte ist, Dokumentiere Rundenverlauf aufrufen und auf dem letzten State Schlussnachricht aufrufen.
+Gut.
+Das bedeutet, so haben wir zumindest alles schon mal schön und sauber aufgeräumt.
+Und jetzt soll es noch eine Änderung oder eine Möglichkeit geben, um auch diese Wildschleife mit Veränderungen über die States noch loszuwerden.
+Das ist auch recht typisch für funktionale Programmierung oder ein weiteres generelles Element für die Programmierung, was man kennenlernen kann, um eben explizite Schleifen zu vermeiden.
+Und das ist die Rekursion, die wir als nächstes besprechen werden.
+Jetzt musste ich hier leider noch eine Folie, das hätte ich jetzt eigentlich einfach so runtergejubelt, aber jetzt ist es schon einmal im Video.
+Eine Sache habe ich Ihnen untergejubelt in den Funktionen.
+Wir schauen mal hier rein.
+Hier rein.
+Und ich frage mal einmal, stehen in dieser Datei wirklich nur Pure Functions drin?
+Ja?
+Sehr gut.
+Sehr gut.
+Genau, also völlig richtig, hier ist Randomness drin, das heißt in Wirklichkeit basiert unser Programm an dieser Stelle auf irgendwas, haben Sie völlig recht, es gibt unterschiedliche Möglichkeiten.
+Und dieses irgendwas ist aber kein Eingabeargument explizit.
+Kann man auch daran sehr einfach sehen, wenn ich die Funktion zweimal aufrufe, mit den gleichen Eingabeargumenten kommt nicht zweimal das gleiche unbedingt raus.
+Und das ist ja genau das Charakteristikum von Pure Functions, wenn ich die gleichen Eingabeargumente nehme, muss das gleiche rauskommen, weil es eben eine Funktion im mathematischen Sinne ist, die von nichts anderem abhängt als von ihren Eingabeargumenten.
+Und das tut sie an dieser Stelle nicht.
+Also sowohl hier gibt es Random als auch in einer der, achso das hier ist schon eine Strategie, hier ist auch ein Random beim Ziehen der Preiskarten.
+Wären wir also jetzt sehr präzise, würden wir einen Zufallsgenerator erzeugen am Anfang unseres Spiels und den Zufallsgenerator als Eingabeargument von diesen jeweiligen Funktionen, also so ein Pseudo-Zufallsgenerator, wie es die halt im Computer gibt, mit einem fixen Seat.
+Und die als Eingabeargument zu dieser Funktion übergeben, damit wir hier dann nicht mehr Random Choice, sondern Zufallsgenerator Punkt Choice machen können und die Funktion wieder deterministisch von ihren Eingabeargumenten erbringt.
+Das wäre dann der ganz strikte Fall, um auch diese Funktion pure zu machen.
+Das ist aber jetzt, können wir irgendwann nächste Vorlesung nochmal machen, wenn das von Interesse ist, aber hat für mich jetzt eine niedrige Priorität.
+Das geht so ein bisschen auch in ihren Kommentaren, sind Print Befehle wirklich so schlimm?
+Ne, würde ich auch sagen, sind nicht so schlimm.
+Hier Random Choice zu verwenden ist vielleicht auch nicht so schlimm, obwohl es streng genommen natürlich keine pure Function ist.
+Gut, das eben als Ausräumung, warum ich hier auf den Folien vorbereitet hatte, zu sagen, das ist ein kleiner Betrug.
+Ich habe hier auch mal mit drauf geschrieben, wie man einen eigenen Zufallsgenerator erzeugt.
+So gibt es halt in diesem Modul Random auch den Befehl, die Klasse Random, die von dem Seed abhängt und dann kann man dieses Mein Zufall immer als Argument hiermit übergeben.
+Gut, was aber schon schön daran ist, ist, dass man explizit sieht, welche Funktionen dann vom Zufall abhängen, nämlich die, die so einen Zufallsgenerator als Eingabe bekommen.
+Und ich dann auch für Testen der Funktionen wirklich einen Zufallsgenerator mit einem fixen eigenen internen State und Seed übergeben kann,
+immer dasselbe Ergebnis erwarten kann und deshalb reproduzierbare Tests machen.
+Also wenn ich Tests automatisieren möchte, dann würde ich auch am liebsten sagen, wenn ich das so ausführe, dann kommt genau das raus.
+Wenn wir es so lassen, können wir nicht sagen, dann kommt genau das raus, denn jedes Mal, wenn wir es laufen lassen, kommt ein anderer Spielverlauf raus.
+Und dafür ist es natürlich schon interessant, auch diesen Seed fix zu nehmen.

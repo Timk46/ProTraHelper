@@ -1,0 +1,173 @@
+kommen wir zum nächsten Punkt oder zum nächsten Kapitel, Ausnahmebehandlung.
+Also bislang, wenn ein Programm nicht funktioniert,
+gab es einen Fehler und deshalb hat Java oder die Java Compiler sofort gesagt,
+da auf diese Zeile, diese Spalte gibt es ein Problem und kann man dann erforschen, was das Problem war.
+Als nächste Stufe, das ist auch etwas schwieriger meistens, hat man etwas das kompiliert,
+aber wenn man es ausführt, kommt dann plötzlich irgendwann ein Fehler.
+Und diese Fehler ist etwas schwieriger zu erbeheben.
+Das ist meistens ein Fehler, den man selbst rein programmiert hat,
+aber das muss man erstmal finden, wo das dann steckt.
+Und so etwas ist etwas schwieriger, weil man dann auch ein Programm haben muss,
+das methodisch so ständig das gleiche macht.
+Und das machen die meisten Softwarepakete nicht.
+Also wenn man selbst Software erstellt, vor allem wenn dann auch Benutzer etwas eingeben sollten,
+können da so viele Probleme entstehen, das kann man als Programmierer eigentlich nicht vorhersehen.
+Deshalb wird das immer früher oder später stattfinden, dass man da einen Fehler hat oder eine Ausnahme hat.
+Und letzte Woche sind wir hier stehen geblieben.
+Wir haben hier eine Klasse Accept Test, um das mal darzustellen.
+Wir geben hier zwei a, b, das sind zwei Random-Zahler, diesmal mit unserer Math-Klasse.
+Also Random ist eine Methode, eine Klasse-Methode, deshalb gehört es zu der Math-Klasse.
+Wir können das einfach so, ohne ein Objekt von der Klasse Math zu haben, ausführen.
+Und a und b sind deshalb hier einfach nur mal zwischen 0 und 10.
+Originell sind das Doubles, aber die habe ich jetzt konvertiert auf Integers.
+Also hier wird einfach 0, 1, 2, 3 bis 10 aufkommen für a und b.
+Und dann schreiben wir hier a geteilt durch b gleich und dann schreiben wir hier das Ergebnis.
+Das kann Println, wieso, das habe ich auch das letzte Mal gesehen.
+Weil Println als Funktion ein Objekt nimmt, also ein Objekt von Klasse Objekt und deshalb benutzen wir hier Polymorphismus.
+Genau, aber nochmal, also hier habe a geteilt durch b.
+Was wir schon gesehen haben, was passieren kann, ist, dass b hier auf eine Wahrscheinlichkeit von 1 auf 10 hier 0 wird.
+Und wenn b 0 ist, dann teilt man durch 0, darf man nichts, also bekommt man eine Ausnahme hier, eine Exception.
+Das heißt, wenn das mal passiert, dann bekommt man diese Fehlermeldung, während man mit Java Virtual Machine diese Klasse Datei ausführt.
+Das ist, was dann im Hintergrund passiert.
+Und diese Java Virtual Machine ist schon ziemlich vernünftig, weil zum Beispiel wird da schon verwiesen auf, welche Zeile in der Quellkode zum Beispiel es ein Fehler geben könnte.
+Das heißt, also diese Fehlermeldung hat eigentlich schon relativ viele relevante Informationen.
+Alles, was relevant sein könnte in der Kontext von dieser Ausnahme, wird irgendwie normalerweise weitergegeben von Java.
+Aber es ist nervig, weil als Entwickler kann so etwas immer passieren und trotzdem, was dann hier wiedergegeben wird, möchte man nicht immer am Benutzer weitergeben.
+Deshalb ist das so etwas, das man auch selbst regulieren möchte als Entwickler.
+Und wie man das macht, das sehen wir dann in diesem Kapitel oder in den nächsten Folien.
+Genau.
+Das Schöne ist, und das ist, was wir dann jetzt gleich sehen werden, ist, dass mit diesen neuen Try-Catch-Anweisungen man etwas definieren kann, wenn eine Ausnahme kommt.
+Dann können wir dann erstmal in einem Block von Anweisungen, das sind meistens hier mehrere Anweisungen, kann man mal vieles machen.
+Und wenn in einem von diesen Zeilen etwas schief geht oder eine Ausnahme kommt, dann kann man die später auffangen in diese Catch-Statements und kann man da hier das Ganze beheben.
+Oder kann man da zum Beispiel etwas selbst definieren, was dann passieren muss.
+Und meistens, auch in Textbüchern, steht dann, dass man dann selbst zum Beispiel diesen String ändern kann, sodass der Benutzer zum Beispiel nicht sofort zu sehen bekommt, dass in, was war es, Zeile 5 von eigenem Java-Programm ein Problem gibt.
+Das kann man verdecken zum Beispiel, aber man kann auch vieles anderes machen.
+Also das sehen wir auch gleich noch. Grundsätzlich aber ist das das Neue, das wir jetzt gesehen haben oder das wir jetzt sehen werden.
+Man hat diese zwei Blöcke, die man dazu nehmen kann. Eins, das vorangenommen wird von Try, das andere von Catch.
+Das heißt, man probiert erstmal ziemlich viele Anweisungen meistens, die aus einem Block definiert werden.
+Und wenn eine von diesen Anweisungen schief geht, dann wird Catch ausgeführt.
+Also dann wird die Catch Anweisung ausgeführt mit dem richtigen Typ von Fehler.
+Das kommt auch gleich noch. Und so kann man zum Beispiel etwas komplett anderes hier wiedergeben.
+Und das andere ist, also grundsätzlich könnte man implizit, also kann im Implizit Java etwas schief gehen.
+Deshalb können dann diese Ausnahmen auftreten. Man kann also den Entwickler auch selbst diese Ausnahme selbst kreieren.
+Und das ist das Schöne. Man kann selbst sagen, ich möchte jetzt eine Ausnahme werfen, das heißt eigentlich, ich möchte das jetzt irgendwie beiseite stellen.
+Und nachdem hier das Ganze, dieser ganze Code fertig ist, erst dann werde ich mich kümmern, um wie diese Fehlerbehebung stattfindet.
+Die Alternative wäre, dass man eine ganz lange Liste hätte von If-Tests, If-Else-Tests eigentlich.
+Also wenn das funktioniert, If, dann macht man etwas, Else macht man was anderes.
+Und so kann man das auch beheben, aber so wird die Quellcode meistens sehr schnell zu Spaghetti-Code, wo man eigentlich nichts mehr lesen kann.
+Deshalb ist ein Block mit Try und mehrere dann die dann folgen mit Catch viel eleganter.
+Also Exceptions sind Ausnahmesituationen, das heißt, es ist etwas, das man normalerweise nicht geplant hat und hoffentlich dann auch nur selten auftritt oder meistens nicht.
+Das wäre schön. Und deshalb wird man als Programmierer dann dazu bewogen, erst mal als Try in diesem Try-Block die eigene Quellcode, die Anweisungen zu schreiben.
+Und erst dann am Ende kann man sagen, wenn da etwas schief gehen würde, dann würde ich auf diese Ausnahme so reagieren, auf diese Ausnahme so und so weiter.
+Und so wird diese Quellcode etwas kompakter, etwas übersichtlicher und meistens etwas schöner und eleganter.
+Okay, das Interessante, wie das im Java gelöst wird, weil in den meisten Programmiersprachen sind diese Ausnahmen eigentlich nur Strings.
+Das heißt, man hat eine Meldung, die dann kommt, oft sind die dann auch mit Nummer oder haben die auch eine Nummer, aber das war es dann.
+In Java werden diese Ausnahmen als Objekte dargestellt.
+Das heißt, in der Java Virtual Machine kreiert ein Objekt von einem bestimmten Typ und dieses Typ ist eine Klasse.
+Und diese Klasse hat auch eine riesige Hierarchie von verschiedenen Ausnahmen, die passieren können.
+Und jeder Objekt hat deshalb auch unterschiedliche Attribute, die dazu gehören.
+Manche Ausnahmen, die erfordern ganz viele Attributen, die dann beschreiben, wie etwas schief gegangen ist, andere vielleicht weniger.
+Und das können dann auch Ganzzahle sein oder Gleichkommazahlen oder Booleans, das kann alles sein oder andere Objekte.
+Deshalb habe ich genau das hier als Bau.
+Wie gesagt, alles stammt vom Objekt, unserer Hauptklasse.
+Eine dieser Klasse, die sofort vererbt vom Objekt, ist throwable, also etwas, das man werfen kann, in diesem Fall ein Fehler oder eine Ausnahme.
+Und was wir meistens hier sehen werden, ist diese Runtime Exceptions.
+Das heißt, diese Ausnahme, die auftreten, während Java Virtual Machine unser Code ausführt.
+Es gibt noch andere Exceptions, es gibt auch Errors und es gibt noch mehr sogar.
+Also die können alle in Java Virtual Machine oder in Java Code vorkommen.
+Also hier sollte man natürlich nichts machen, das ist eigentlich etwas innerhalb Java oder unserer Java Virtual Machine, das passiert.
+Hier sollte man Exceptions, es sind meistens zum Beispiel die eigenen Exceptions, die dann auftreten können.
+Und wenn man Runtime Exceptions hat, dann können die auch gefangen werden, müssen aber nicht.
+Das hört sich erstmal komisch an.
+Also wenn man Runtime Exceptions hat, dann ist das eine Unterklasse von Exception, ist eine Unterklasse von throwable, ist eine Unterklasse von Objekt.
+Und diese Runtime Exceptions müssen nicht behandelt werden, weil wenn man selbst Code geschrieben hat und man hat nicht dieses try-catch-statement zum Beispiel
+und plötzlich hat man durch 0 geteilt, wie in der ersten Folie dieses Kapitels, dann hat man sowieso das Problem,
+dann hat Java Virtual Machine sowieso das Problem behoben, indem man diesen Code nicht weiter ausführt.
+Sobald er durch 0 geteilt wird, wird alles gestoppt und sagt unsere Java Virtual Machine, hier wurde durch 0 geteilt, es gab einen Fehler.
+In den meisten Fällen reicht das auch. Normalerweise würde das eigentlich reichen.
+Normalerweise hat man dann schon fertig und hat dann der Benutzer Pech gehabt.
+Deshalb muss das nicht behandelt werden.
+Eigentlich ist das schon eine sehr elegante Lösung, um mit solchen Problemen umzugehen.
+Eine nicht elegante Lösung wäre, wenn das Ganze crasht und man weiß nicht, wieso.
+Das passiert in Java in diesem Fall nichts, weil es Runtime Exceptions sind.
+Und so gibt es ganz viele. Auf der PDF können Sie da mal verfolgen, wie viele.
+Aber ich glaube, wir sind schon bei hunderten.
+Und wie gesagt, für jede Art von Fehler gibt es eine bestimmte Klasse, von der dann unsere Java Virtual Machine ein Objekt kreiert, wenn dieser Fehler auftritt.
+Das heißt, wenn wir durch 0 teilen zum Beispiel, dann kommt ein Arithmetic Exception.
+Dann wird ein Objekt kreiert von dieser Klasse.
+Wenn wir ein Array haben und wir versuchen, das minuserste Element von diesem Array darauf zuzugreifen, auch dann kommt ein Fehler, ein Index Out of Bounds Exception.
+Oder wenn der Array zum Beispiel nur 10 lang ist und wir möchten das 11. Element haben, dann kommt auch genau das.
+Und das ist relevant, weil auch hier meistens eine Variable steht und diese Variable zum Beispiel abhängig ist, was für Daten vom Benutzer kommen oder von anderen Programmen.
+Deshalb kann man als Java Compiler nie vorhersehen, dass das zum Beispiel auftreten würde.
+Deshalb ist es eine Runtime Exception.
+Das Gleiche für das hier zum Beispiel, wenn man ein neues Objekt kreiert oder ein neues Array und diese Länge dieses Arrays ist dann negativ, dann kommt auch das wieder zurück.
+Genau das ist etwas, das bei Polymorphismus gehört.
+Also man hat eine Oberklasse zum Beispiel, nee, das ist nicht Polymorphismus.
+Man hat eine Klasse, aber die hat man noch nicht instanziert.
+Das heißt, man hat mein Hund als Referenzvariable, aber man hat das Objekt, das dazugehört, noch nicht kreiert im Speicher.
+Das heißt, man macht das normalerweise schön so, indem man den Nullzeiger vergibt.
+Das heißt, der Java Virtual Machine weiß, dass mein Hund noch nicht besteht.
+Wenn man dann versucht, dieses nicht bestehende Objekt zu adressieren, zum Beispiel mit einer Methode, wie Print in diesem Fall, die nicht besteht, dann kommt ein Nullpointer Exception.
+Weil mein Hund ein Nullpointer ist.
+Das heißt, als Referenzvariable wurde es noch nicht instanziert oder würde der Speicher dazu noch nichts reserviert und kreiert.
+Genau, und hier Class Cast Exception, das ist eigentlich, was ich vorher meinte mit Polymorphismus.
+Das heißt, man hat eine Oberklasse Tier, man definiert das hier als Hund, aber wenn man das dann hier zum Beispiel als Katze definieren möchte oder konvertieren möchte,
+mit Type Conversion, Explicit Type Conversion, dann geht so etwas nichts.
+Das habe ich gesehen das letzte Mal, weil T in diesem Fall ein Hund ist, keine Katze.
+Man kann nichts, zwei Unterklasse, die gleiche Klasse, nacheinander konvertieren.
+Das Schöne, wie ich gesagt habe, ist, dass man eigene Fehler definieren kann.
+Und das erscheint auf den ersten Blick etwas umständlich.
+Das heißt, man muss erst mal eine eigene Klasse erstellen und diese Klasse muss man irgendwie alles vererben lassen von einer Oberklasse, die es schon gibt.
+Zum Beispiel von Exception, gleich von Exception oder Runtime Exception oder ein von den anderen.
+Und dann, was dann typischerweise, nee, was passieren muss, ist, dass jede Art von Exception zwei Konstruktoren hat.
+Der erste ist ein Default-Konstruktor, hier werden wir einfach nichts machen, also MyExcepts als Default-Konstruktor, weil es hat hier keine Parameter, macht auch nichts als Anweisungen,
+hat eine leere Sammlung von Anweisungen, deshalb passiert hier nichts, ist aber gültig.
+Und dann hat man noch einen zweiten Konstruktor, MyExcepts mit String als Parameter.
+Und hier gibt man einfach dieses String weiter an der Oberklasse und unsere Oberklasse hat dann einen String, der dann aussagt, es gibt einen Fehler und diese Art von Fehler ist das hier zum Beispiel.
+Plus noch verschiedene andere Informationen, die sofort in dieses String gesteckt werden.
+Na, jetzt für unsere eigene Exception, MyExcepts, werden noch ein dritter Konstruktor definieren, in dem man nicht nur dieses String definiert als Parameter, aber auch ein Element Nummer.
+Und dieses Element Nummer ist einfach ein Integer. Wieso, das werden wir gleich sehen.
+Das heißt, wir können hier ein Objekt kreieren, dieses Objekt ist eigentlich eine Ausnahme, ein Exception, und diese Exception wird kreiert mit einem bestimmten String, die wir selbst definieren können.
+Und ein Integer, die wir auch selbst definieren können.
+Und wenn das passiert, wenn dieser Konstruktor ausgeführt wird, führen wir erst unseren Konstruktor von der Oberklasse aus.
+Super muss immer an erster Stelle stehen, ich weiß nicht, ob ich das vorher schon gesagt habe heute.
+Letzte Woche habe ich das sicherlich gesagt, aber Super muss immer erst kommen, dann der Rest.
+Und dann wird dieser Attribut L Nummer auf diese Nummer hier gestellt.
+Und auch das habe ich die letzte Woche schon gesehen, das kann man mit der Dis Zeiger oder Dis Referenzvariable machen.
+Dis zeigt einfach auf unserem heutigen Objekt, unserem jetzigen Objekt.
+Deshalb ist das hier diese Nummer und das hier ist diese Nummer hier.
+Das sind zwei unterschiedliche Integers im Speicher.
+Okay, das sind unsere Konstruktoren.
+Dann haben wir ein Getter, das heißt eine Methode, die einen der Werte von unserem Attribute einfach wiedergibt.
+Das ist GetElementNumber, nennen wir das.
+Und dann haben wir hier ToString, wie schon gesagt, ToString ist eine Methode, die zu Objekten gehört.
+Ein Objekt ist dann diese Ganzklasse, von dem alle andere Klassen vererben.
+Deshalb redefinieren wir hier ToString neu, oder nee, reimplementieren wir ToString neu,
+indem man hier einfach diese ganze String neu definiert, die dann ausgegeben wird.
+Das heißt, wir haben diese String, wir fügen dazu unsere ElementNummer,
+wir fügen dazu das hier und dann kommt GetMessage.
+GetMessage ist das Neue hier.
+GetMessage hier ist einfach eine Methode, die von Exception vererbt wird.
+Und da kommen dann nochmal neue Informationen als String ausgeführt.
+Okay, also das ist unsere eigene Implementierung von MyExcept.
+Und dann haben wir ein eigene Klasse Vektor.
+Und dann in diesem Vektor möchten wir jetzt ein Array von Vektoren definieren.
+Das heißt, unser Vektor definieren wir als eigentlich ein Array von Doubles.
+Das heißt, wir haben Vektorkomponente und die Vektorkomponente sind jeweils eine Gleichkommazahl.
+Und dann haben wir als Methode für unser Vektor zum Beispiel Invert.
+Und Invert möchte jeder, jedes Element von unserem Vektor oder jede Komponente von unserem Vektor invertieren.
+Was dann natürlich passieren könnte, ist, dass eine von diesen Komponenten von unserem Vektor null ist.
+Und das Problem da ist, dass wir dann einen Fehler haben.
+Wenn wir das nicht selbst versuchen zu korrigieren, dann wird Java Virtual Machine das für uns machen.
+Und diese Virtual Machine wird dann einfach diese Ausgabe geben, die wir vorher schon gesehen haben.
+Jetzt könnte das aber etwas konkretisieren, indem wir dann sagen, wir kreieren jetzt ein neues Objekt von unserer Klasse mit new.
+Das heißt, wir kreieren ein Objekt von Klasse MyException.
+Und wir rufen dann unsere Konstruktion mit zwei Parameter auf.
+Einmal mit einem String, divide by zero, das ist unsere Fehlermeldung.
+Und dann i. Und i ist einfach das Element von unserem Vektor, wo etwas schiefgegangen ist in diesem Fall.
+Das heißt, mit diesem Beispiel kann man dann ganz genau zeigen, wir haben hier das Problem divide by zero gehabt.
+Aber auch kann man noch spezifizieren, dass dieses Element von unserem Vektor das Problem hatte.
+Und dann später kann man zum Beispiel, wenn diese Methode dann benutzt wird, in unserer Main-Methode zum Beispiel,
+kann man das dann so ausführen und sieht man, dass wenn dann tatsächlich ein der Elemente null ist,
+dass man dann die eigene Fehlermeldung hier bekommt.
+Nicht eine andere vordefinierte Fehlermeldung von Java.

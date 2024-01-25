@@ -15,3 +15,4 @@ export * from "./discussionCreation.dto";
 export * from "./discussionFilter.dto";
 export * from "./taskOverview.dto";
 export * from "./userAnswer.dto";
+export * from "./feedbackGeneration.dto";
