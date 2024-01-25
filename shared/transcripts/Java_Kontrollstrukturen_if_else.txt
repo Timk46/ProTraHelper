@@ -1,0 +1,70 @@
+Okay, dann kommen wir zum ersten Anweisungen, also interessanter Anweisungen, nämlich if.
+Also, if sagt einfach, ist eine Bedingung und alles, was anzwischen Klammern kommt,
+wird dann ausgewertet als falsch oder wahr, als nebulische Variable.
+Das heißt, normalerweise hat man if, immer Hunde Klammern,
+und wenn diese Bedingung wahr ist, dann wird die Anweisung, die danach folgt, ausgeführt.
+Wenn das nur eine Anweisung ist, dann wird nur diese eine Anweisung ausgeführt,
+bis diesem Strichpunkt, und dann wird dann weitergegangen.
+Wenn diese Bedingung nicht wahr ist, dann wird einfach weitergegangen nach diesem Strichpunkt.
+So, eben habe ich gesagt, Blöcke, das sind einfach diese geschweifte Klammern,
+das sind auch Anweisungen.
+Das heißt, man kann diese Anweisung hier mit dem Strichpunkt ersetzen durch einen Block.
+Das heißt, man kann sagen, if Bedingung und dann geschweifte Klammern
+und dann mehrere Anweisungen dann folgen lassen.
+In diesem Falle hat man, wenn diese Bedingung wahr ist,
+dann führt man all diese Bedingungen aus, die in diesem Block vorkommen.
+Dann hat man auch eine Alternativauswahl mit else, das heißt,
+wenn diese Bedingung wahr ist, wird Anweisung 1 hier ausgeführt,
+und das kann auch ein Block sein,
+oder wenn diese Bedingung nicht wahr ist, dann wird Anweisung 2 hier ausgeführt,
+also alles, was nach else kommt.
+Und auch das kann ein Block sein, auch das kann mit geschweiften Klammern
+dann zusammengruppiert sein.
+Also hier ein Beispiel, um herauszufinden, ob eine Zahl einen Plus oder Minus hat als Signum.
+Das heißt, wenn die Zahl 0 ist, dann sagen wir, dann geben wir 0 aus,
+wenn das nicht so ist, dann können wir nochmal eine if-Anweisung geben,
+sagen wir, if die Zahl größer als 0 ist, dann setzen wir diese Variable auf Plus 1,
+und wenn diese Zahl nicht größer ist als 0, und auch nicht gleich an 0 in diesem Fall,
+dann setzen wir diesen Signum als Minus 1.
+Das heißt, nach dieser Anweisung hier, und das ist eigentlich eine Anweisung
+mit einer Alternativeanweisung, dann wird Signum Minus 1, Plus 1 oder 0 sein, immer.
+Und 0, wenn die Zahl 0 ist, und dann Plus 1, wenn die Zahl positiv ist,
+Minus 1, wenn diese Zahl negativ ist.
+Man kann das auch sofort mit unserem Ausfalloperator machen,
+also das heißt, wenn die Zahl, obwohl hier hätte man besser Klammern haben können,
+also runde Klammern, wäre hier schöner gewesen,
+wenn diese Zahl 0 ist, dann geben wir 0 aus,
+sonst, wenn die Zahl, auch hier Klammern wäre besser gewesen,
+wenn die Zahl größer ist als 0, dann geben wir Plus 1 wieder, sonst Minus 1.
+Und das Ganze wird dann in Signum gesteckt, also in unsere Variable Signum.
+Das ist ab und zu ein bisschen gefährlich, weil diese else hier gehört zu der letzten if.
+Das heißt, obwohl wir das hier so unterordnen, ist es eigentlich nicht genau das Gleiche wie hier,
+wie man hier denken würde.
+Das heißt, wenn diese else gehört zu dieser if, nicht zu dieser if.
+Das heißt, das Ganze ist eigentlich korrekter, weil in diesem Fall,
+wenn Bedingung 1 wahr ist, ausgeführt wird, folgt mit dieser Geschweige Klammern,
+und die Alternative, wenn Bedingung 1 nicht wahr ist, dann wird Anweisung 2 ausgeführt.
+Hier ist das nicht so.
+Hier führen wir erstmal, wenn Bedingung 1 wahr ist, führen wir diese if-Anweisung aus.
+Wenn dann Bedingung 2 wahr ist, dann führen wir Anweisung 1 aus.
+Aber wenn Bedingung 2 nicht wahr ist, dann gehen wir einfach weiter.
+Und also wenn Bedingung 2 falsch ist, wird dann Anweisung 2 ausgeführt.
+Wenn Bedingung 1 falsch ist, dann wird nichts ausgeführt von dem.
+Also nicht Anweisung 1, nicht Anweisung 2.
+Und das ist wichtig.
+Also das ist so dargestellt, und das kann man, weil grundsätzlich, wenn man programmiert,
+erstellt man nur diese Textdatei.
+Diese Identierung wird dann meistens nicht aktiv kontrolliert von den Umgebungen,
+deshalb kann man das dann erstellen, aber das sieht, als ob es so funktionieren würde,
+aber es funktioniert nicht so.
+Das heißt, diese zwei sind sehr unterschiedlich, weil diese else zu den letzten if gehört.
+Und deshalb kann man dann, also dass man if aus Anweisungen verschachteln kann, ist gut.
+Man kann deshalb zum Beispiel sagen, wenn ich das habe, oder wenn ich das habe,
+oder wenn ich das habe, oder wenn ich das habe.
+Man kann das als Sequenz nennen, dann muss man das nur als eine Verschachtelung von else ifs machen.
+Das heißt, wenn ich zum Beispiel eine Anwendung habe, wo ich ein Menüitem habe,
+und das ist eine Zahl von 1 bis 10 zum Beispiel, und ich möchte einfach testen, was dieser Wert ist,
+dann kann ich sagen, if Menüitem ist gleich 1, dann führe ich das hier aus.
+Else if, wenn ich dieses Menüitem gleich habe an 2, dann führe ich das hier aus, und so weiter.
+Oder hier zum Beispiel, wenn mein Menüitem gleich 3, oder wenn mein Menüitem gleich 4 ist,
+dann führe ich das hier aus, etc. etc.

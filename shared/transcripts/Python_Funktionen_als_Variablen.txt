@@ -1,0 +1,397 @@
+Wir können in Python ja alle möglichen Sachen als Variablen speichern.
+Zahlen, Strings, Listen, Booleans, None.
+Haben wir alles schon kennengelernt, können wir als Variablen speichern.
+Interessanterweise können wir auch Funktionen als Variablen speichern.
+Vielleicht springe ich einmal direkt wieder in den Code,
+behalte das als Beispiel, damit ich das später noch hochladen kann.
+Ich speichere das mal eben.
+Und beginne was Neues.
+Also, ich kann eine Funktion definieren, die heißt sagHallo und die gibt aus.
+Dann könnte ich eine Variable nehmen, meine Variable,
+und ich kann in der speichern die Funktion sagHallo.
+Und ich mache mal zwei Beispiele und Sie müssen mir versuchen zu erklären, was hier passiert.
+Also, es gibt die Möglichkeit, eine Funktion als Variable zu speichern.
+Wieso ist hier jetzt ein Hallo noch?
+Achso, das ist die, ja, genau.
+Jetzt war ich beinahe durch meine eigene Aufgabe verwirrt.
+Hat so etwas jemand schon mal gesehen?
+Können Sie sich vielleicht vorstellen, was hier geschieht?
+Ich mache mal hier drinnen, hier sieht es schöner aus.
+Ich mache das hier nochmal ein bisschen neu.
+Also, dieser Code schreibt Hallo, dann Function sagt Hallo, Add, und dann None.
+Ich modifiziere mal den Code und sobald Sie eine Idee haben, können Sie mir aufzeigen, was hier passieren könnte.
+Ich schreibe mal hier einen Return 1,0.
+Hallo, Function sagt Hallo, Add, None, 1,0.
+Sehr gut, ganz genau.
+Also, diese zweite Variante, die Kantenwischung, die haben wir jetzt schon ganz häufig verwendet.
+Also, wenn ich jetzt einfach mal den Teil hier weglasse und den Teil hier weglasse.
+Ich habe eine Funktion geschrieben, die drückt halt Hallo aus und gibt den Wert 1,0 zurück.
+Und wenn ich jetzt meine Variable gleich sagt Hallo aufrufe, dann hält meine Variable 2 halt den Rückgabewert der Funktion, nämlich 1,0.
+Und der wird hier ausgedruckt.
+Und weil ich hier ja die Funktion sagt Hallo aufgerufen habe, wird hier auch Hallo ausgegeben.
+Also jetzt steht hier nur Hallo und 1,0.
+Das ist das, was Sie aus Teil 1 der Vorlesung inzwischen kennen sollen.
+Macht das Sinn?
+So, dann Schritt 2.
+Wenn es eine Funktion ist, die keinen Rückgabewert hat, also die gar keinen Return-Befehl hat, dann ist es ganz interessant zu sehen,
+in Python kommt dann kein Fehler, wenn ich meine Variable 2 gleich sagt Hallo aufrufe, sondern es gibt einen Rückgabewert, Implizit.
+Und der heißt None.
+Das war dieser spezielle Datentyp auch.
+Und das haben wir auch vielleicht schon einmal kurz gesehen, wenn ich hier versuche einen Dockstring zu erzeugen mit einer Funktion, die keinen Return-Wert hat.
+Dann steht hier schon Returns None.
+Und das soll hier wirklich heißen, nicht, dass sie nichts zurückgibt, sondern dass sie None zurückgibt.
+Was ein spezieller Datentyp in Python ist.
+Also tatsächlich spezifiziere ich keinen Return-Wert einer Funktion in Python, ist ihr Return-Wert implizit None.
+Das haben wir jetzt hier gesehen und deshalb ist das hier einfach nur der Aufruf von Hallo.
+Deshalb wird Hallo gedruckt und in meiner Variable steht jetzt None und wenn ich die drucke, dann steht hier halt None.
+Sehr gut.
+Jetzt der schwierigere Teil.
+Hier steht das Gleiche, nur nicht Klammer auf, Klammer zu.
+Klammer auf, Klammer zu heißt, ich rufe diese Funktion auf.
+Hier rufe ich diese Funktion nicht auf, sondern, wie gerade völlig richtig erklärt, ich speichere mir, sag Hallo, als Funktion in meine Variable 1.
+Ich kann an dieser Stelle nicht nur meine Variable 1, ich kommentiere das andere mal aus, was wir jetzt kennen, nicht nur meine Variable 1 printen.
+Ich könnte auch meine Variable 1 Klammer auf, Klammer zu schreiben, weil meine Variable 1 hält an dieser Stelle die Funktion sag Hallo.
+Also ich kann an dieser Stelle meine Variable 1 und sag Hallo auf gleiche Art und Weise benutzen.
+Das heißt, meine Variable 1 Klammer auf, Klammer zu führt die Funktion sag Hallo aus, weil sie eben diesen Wert der Funktion sag Hallo beinhaltet.
+Also wenn ich das jetzt ausführe, dann kriege ich hier für meine Variable 1, dass das eine Funktion ist.
+Und wie gerade richtig gesagt, das was ich jetzt so elegant als irre beschrieben habe, ist nichts anderes als eine hexadexamale Speicheradresse in dieser Funktion.
+Also das besagt, in meiner Variable, meine Variable 1 steht die Funktion namens sag Hallo an dieser Speicheradresse.
+Rufe ich jetzt meine Variable Klammer auf, Klammer zu auf, dann wird diese Funktion aufgerufen.
+Deshalb wird Hallo gedruckt und weil ich jetzt ehrlich gesagt versehentlich noch einen Printbefehl da drum stehen hatte,
+muss der Rückgabewert von dieser Funktion gedruckt werden, aber diese Funktion hat kein explizites Return, deshalb wird Non gedruckt.
+Also tatsächlich vielleicht etwas sinnvoller ohne diesen Printbefehl.
+Wenn ich jetzt das Ganze ausführe, dann kriege ich aus dem ersten die Ansage, meine Variable 1 ist die Funktion sag Hallo an dieser Speicheradresse
+und das zweite, wenn ich meine Variable 1 jetzt ausführe, indem ich da runde Klammern drum schreibe, dann kriege ich das Hallo gedruckt.
+Ja? Machen wir vielleicht noch unser Beispiel, erweitern wir das Beispiel ein bisschen.
+Ich könnte ja auch sag Hallo Name schreiben und gebe mir hier Hallo Name rein.
+Der klassische Ansatz, wie wir das bislang schon verwendet haben, ist einfach sag Hallo zusammen aufzurufen
+und wenn ich das dann aufrufe, da ist ein automatisches Wertzeichen bei, steht hier Hallo zusammen.
+Wunderbar. So kennen wir Funktionen, die haben ein Eingabeargument, sie tun irgendwas, dieses Eingabeargument wird hier verwendet.
+Ich kann aber auch diese Funktion, sag Hallo, obwohl sie ein Argument hat, hier völlig ohne runde Klammern und Argument in der Variable meine Variable speichern.
+Drucke ich jetzt Print meine Variable 1, dann kriege ich wieder quasi die identische Ausgabe hierzu.
+Führe ich das aus, kriege ich wieder Function, sag Hallo, Add, irgendwas.
+Ich kann jetzt wieder meine Variable 1 ausführen mit einem falsch geschriebenen Michael und kriege dann eben Hallo, falsch geschriebenes Michael.
+Also ich konnte die Funktion, sag Hallo, in dieser Variable speichern.
+So.
+Wofür könnte sowas gut sein? Verlockt.
+Wir machen erst nochmal ein Beispiel, was in die Richtung einer Motivation geht und dann gucken wir uns für unser Gufspiel an, warum das interessant ist,
+dass wir eine Funktion in einer Variable speichern können.
+Wie wäre es denn, wenn eine Funktion als Eingabeargument eine Funktion bekommt?
+Das scheint ja zu gehen, weil ich in einer Variable eine Funktion speichern kann.
+Vielleicht kann mir jemand sagen, wie ich aus einer Funktion bauen kann, die eine Variable entgegennimmt, die eine Funktion ist
+und deren Sinn dieser Funktion ist, dann diese entgegnendende Funktion auszuführen.
+Jetzt habe ich es geschafft, alle zu unterbinden.
+Eine Funktion, meine verrückte Funktion, die hat als Eingabeargument Variable, in der eine Funktion gespeichert ist
+und die hat den Sinn, diese Funktion auszuführen. Ja?
+Sehr gut. Genau. Also wenn ich das hier mal wieder reduziere darauf auf nur noch Hallo,
+dann könnte ich jetzt in meine Variable Sag Hallo speichern und dann könnte ich meine verrückte Funktion von meine Variable 1 aufrufen und ausführen
+und es funktioniert und ich kriege ein Hallo.
+Jetzt müssen wahrscheinlich alle mal ein Stück sacken lassen, weil das ist das erste Mal A verwirrend und B vielleicht völlig unsinnig erscheint
+und jetzt erarbeiten wir uns langsam, wieso das doch sinnvoll sein kann.
+Also ich kann eine Funktion definieren, die heißt hier Sag Hallo.
+Ich kann mir diese Funktion in einer Variable speichern und dann kann ich mir eine andere Funktion definieren,
+die eben eine Variable, in der eine Funktion gespeichert ist, entgegennimmt und das Ganze ausführt.
+Ja, erstmal die Konzeption ist verbindend, aber klar.
+So, wie wäre es, jetzt fangen wir an ein bisschen sinnvoller darüber nachzudenken.
+Wie wäre es, wenn wir sowas schreiben wie Taschenrechner auf der Kommandozeile?
+Was würden wir machen? Wir würden wahrscheinlich erstmal sagen müssen, wähle eine Operation aus,
+kommen wir aus den Standard-Operationen, sowas wie plus, minus mal geteilt und dann welche Zahlen involviert sind.
+Könnten wir sagen jedenfalls. So könnten wir das Ganze konstruieren.
+Also wie wäre es, wenn ich eine Funktion definiere, die heißt addiere, mal kurz, von x und y und die returnt x plus y.
+Und ich habe auch eine Funktion multipliziere von x und y und die returnt x mal y.
+Und jetzt nähern wir uns vielleicht einem Szenario, wo es sinnvoll sein könnte.
+Jetzt könnte ich sagen, Benutzer ausgewählte Funktion und der hat halt durch irgendeine Input-Eingabe irgendwas ausgewählt, was jetzt geschehen soll.
+Zum Beispiel addiere, wohlgemerkt nicht von x und y, sondern einfach nur als Funktionalität addiere.
+Und dann soll es eben eine Funktion anwenden der Operation von x und y und Operation.
+Ist jemandem klar, wie hier die Logik des Programms aussehen könnte?
+Also ich möchte den Benutzer erst auswählen lassen, was für eine Operation möchtest du hier auf den beiden Zahlen ausführen und mir ausaddieren oder multiplizieren.
+Und dann möchte ich eine Funktion schreiben, die einfach nur sagt, egal was für eine Operation du gerade ausgewählt hast, wende die auf die aktuellen beiden Zahlen gerade an.
+Wenn ich das machen möchte, dann soll anwenden der Operation also zwei Zahlen kriegen, x und y und dieses Ding hier Operation, was jetzt genau eine Variable, in der eine Funktion gespeichert ist, sein soll.
+Ja?
+Ja, das ist einfach eine Operation, die aber auch die Ausführung schreibt.
+Sehr gut, genau, das ist Operation von x, y.
+Gut, und wenn ich das jetzt irgendwie zurückgeben oder printen möchte, ich printe es mal hier, ist das meine Ausgabe.
+Also könnte ich jetzt sagen, Benutzer ausgewählte Operation ist gleich Addiere und dann anwenden der Operation Benutzer ausgewählte Funktion auf,
+also das wäre jetzt sowas wie in unserem Hauptprogramm werden dann irgendwo mal x und y festgelegt und dann rufe ich anwenden der Operation aus.
+Und dann kriege ich tatsächlich meine mit Rechenfedern behaftete angewendete Operation Benutzer ausgewählte Funktion auf x, y und ich hätte hier an dieser Stelle, hätte der Benutzer auch multipliziere auswählen können und dann hätte es auch eben ein Ergebnis gegeben.
+Ja, also das Prinzip soll sein, ich addiere oder multipliziere abstrakt als Funktion und kann jetzt eine in einer Variablen gespeicherte Funktion an eine andere Funktion übergeben und sagen, wende die doch jetzt mal ab.
+Das nennt man auch Higher-Order Functions, Funktionen höherer Ordnung. Eine Funktion, die von einer Funktion abhängt. Hängt verwandt mit der Idee in der Mathematik, Funktionen zu verschachteln.
+Man kann ja auch in der Mathematik eine Funktion von einer Funktion von einer Funktion wählen. Und das ergibt zusammen eine Funktion. Sinus von Cosinus von x.
+Wenn man das als Funktion betrachtet, könnte der Sinus als Eingabe noch zusätzlichen Cosinus bekommen und dann baut man zusammen daraus den Sinus von Cosinus von x. Eine Verschachtelung der Funktion.
+Und hier jetzt eben in der Anwendung, in einer möglichen Anwendung von sowas wie einem Taschenrechner oder sowas, könnte ich erst fragen, was für eine Operation möchtest du machen und am Ende meines Programms sagen und jetzt fülle die Rechnung aus.
+Wird das langsam klarer, wofür das da ist? Dann versuchen wir jetzt erstmal, bevor ich überhaupt auf die Folien zurückgehe und irgendwas programmiere, einmal zu überlegen in unserem Buchspiel.
+Wofür könnte das, so eine Funktionalität denn vielleicht sinnvoll sein?
+Sofort eine Meldung. Ja.
+Perfekt, ganz genau. Das war auch das Erste, was mir dazu eingefallen ist. Genau das, worauf ich hinaus wollte. Also wir haben ja schon, wo haben wir unser Buchspiel?
+Wenn ich das nochmal ein bisschen größer mache. Wir haben schon diese beiden Zeilen, die eigentlich ziemlich schön sind.
+Zu sagen, Wert der Karte Spieler 1 ist Strategie Spieler 1 angewandt auf Wert der Preiskarte und Kartenspieler 1.
+Und Wert der Karte Spieler 2 ist Strategie Spieler 2 angewandt auf Wert der Preiskarte und Kartenspieler 2.
+Momentan ist die Logik von unserem Programm noch so, dass oben Strategie Spieler 1 hart gecodet wurde.
+Da steht jetzt drin, Spieler 1 nimmt immer die letzte Karte von seinen Deckard-Karten.
+Und da steht hart drin, Strategie Spieler 2 ist Spiele wie Wert der Preiskarte.
+Es sind also hart kodierte KIs, die hinter dem Wort Strategie Spieler 1 bzw. Strategie Spieler 2 stecken.
+Und jetzt vielleicht nochmal jemand anderes als der Kommilitone, der den Vorschlag schon gemacht hat.
+Wie kann jetzt das Konzept von Funktionen in variablen Speichern helfen, um das schöner zu machen?
+Um das allgemeiner nutzbar zu machen?
+Vielleicht mit der Idee, wenn man so ein Spiel startet, fragt jemand den Schwierigkeitsgrad ab.
+Ganz üblich für irgendwie ein automatisches Schachspiel oder sowas.
+Da fragt jemand, wie schwierig möchten Sie spielen, leicht, mittel oder hart?
+Und was man sich schon denken kann, was im Hintergrund passieren muss, ist irgendwie, ist die KI eine andere?
+Also wie kann das Konzept von Funktionen in variablen Speichern jetzt helfen, um sowas vielleicht abzubilden?
+So eine Abfrage, wie schwierig soll das Spiel denn jetzt sein?
+Sehr gut. Ganz genau.
+Also was, ich versuch es nochmal so ein bisschen hier zu illustrieren.
+Was die Idee ist zu sagen, dass das was wir hier geschrieben haben, wieso hardcoden wir hier, dass die Strategie von Spieler 1, Spielen der letzten Karte ist?
+Oder wir hardcoden, dass die Strategie von Spieler 2 ist, den Wert der Preiskarte zu spielen.
+Das ist auch von der Benahmung der Funktionen her allein schon überhaupt nicht sinnvoll zu sagen, Strategie Spieler 1 und dahinter steht dann irgendwas ganz Spezielles, was hier jetzt die letzte Karte spielen ist.
+Also eigentlich sollte das hier doch vielleicht besser heißen, Spielen der letzten Karte.
+Das ist eine mögliche Strategie und die heißt Spielen der letzten Karte.
+Und eigentlich ist der viel sinnvollere Ausdruck statt zu sagen, das hier ist Strategie Spieler 2, Spielen der Preiskarte.
+Viel sinnvoller.
+Ja, denn das hat mit Spieler 1 und Spieler 2 rein logisch nichts zu tun.
+Das war jetzt unsere Entscheidung, dass Spieler 1 die erste Strategie der letzte Karte spielt und Spieler 2 spielt den Wert der Preiskarte.
+Aber es hat jetzt erstmal eigentlich gar nicht so viel damit zu tun.
+Ja, sind da alle bei mir?
+Das ist eine abstrakte Strategie.
+Unabhängig davon ist, ob es Spieler 1 oder Spieler 2, abstrakte Strategie, spiele die letzte Karte.
+Ja.
+Sehr gut, genau.
+Völlig richtig.
+Also hier müssen wir noch einiges umbauen, um das schöner zu machen.
+Sehr gut aufgepasst.
+Das ist jetzt super gefährlich, was ich jetzt vorhabe.
+Weil hier Karten Spieler 1 steht und hier wird Karten Spieler 1 irgendwie geändert.
+Aber in Wirklichkeit soll das nicht mehr Karten Spieler 1 heißen, sondern es sollte eine abstrakte Strategie sein.
+Abstrakte Strategie, dann sollte hier nur Karte stehen.
+Oder Karten, Entschuldigung.
+Und dann sollen wir hier auch nur die Karten modifizieren und dann, gut.
+Geht das tatsächlich schon nachher so, wenn wir die mit auf den Weg geben.
+Und hier sollten wir, ach hier haben wir das schon besser.
+Hier haben wir es besser angedeutet und falsch gemacht.
+Was ist falsch an dieser Funktion?
+Auch schon so wie sie ist jetzt?
+Ja.
+Genau.
+Also das ist jetzt eine Funktion, die hat zwar ein Eingabeargument verbleibende Karten.
+Aber wir haben hier immer noch hart gekodet, also verbleibende Karten wird hier in der Funktion gar nicht verwendet.
+Sondern hart gekodet Karten Spieler 2.
+Wunderbares Beispiel.
+Merken Sie sich diese Stelle gut.
+Vielleicht schneide ich sie nochmal aus dem Video raus.
+Das ist eine perfekte Motivation für das, was wir eigentlich jetzt so in den nächsten 2-3 Vorlesungen machen möchten.
+Funktionale Programmierung, darum soll es ja eigentlich gehen.
+Die Idee ist genau Code zu schreiben, wo sowas nicht aus Versehen durchlaufen kann.
+So aussieht als wäre es richtiger Code, aber es ist eigentlich falscher Code und kann jetzt irgendwas Blödes verursachen.
+Also es sieht so aus, als würde ich verbleibende Karten übernehmen und ändern.
+Aber hier ist in Wirklichkeit Karten Spieler 2 hart reingekodet und weil die Karten Spieler 2 hier oben schon definiert sind, funktioniert das auch, schmeißt keinen Fehler.
+Aber es tut nicht das Richtige.
+Merken Sie sich das mal für später.
+Also gut, das hier haben wir jetzt erstmal behoben.
+Es hängt jetzt abstrakt von, wir würden das hier auch verbleibende Karten nennen, ab.
+So.
+Jetzt sind es zwei abstrakte Strategien.
+Die eine Strategie ist, spiele die letzte Karte.
+Die andere ist, spiele den Wert der Preiskarte.
+Und jetzt könnten wir noch drei Strategien schreiben.
+Vielleicht haben einige von Ihnen auch als Übung eine bessere Strategie geschrieben als zufällig und Wert der Preiskarte.
+Wir hatten ja schon mal besprochen, zufällig ist eine relativ schwache KI-Strategie.
+Wert der Preiskarte spielen ist eine, wo Sie zweimal gegen verlieren, dann verstanden haben, was der Computer tut und dann immer gegen den Computer gewinnen.
+Also ist wahrscheinlich eine sinnvolle KI, irgendwas mit ein bisschen Zufall, aber nicht ganz so viel Zufall wie mach irgendwas.
+Und da könnten Sie jetzt einfach meine Lieblingsstrategie von Wert der Preiskarte und verbleibende Karten definieren.
+Vielleicht auch irgendwann mal mit dem Zusatz verbleibende Karten des Gegners, haben wir ja auch besprochen.
+So und jetzt aber der entscheidende Schritt, jetzt kommt hier irgendwie vielleicht mal irgendeine Auswahl, wie schwierig soll das Spiel sein.
+Und dann soll hier sowas abgebildet werden, wie wenn einfach Strategie letzte Karte spielen,
+wenn schwierig Wert der Preiskarte spielen.
+Ich sage nicht, dass das besonders sinnvoll ist, die KI-Spiele immer den Wert der Preiskarte als schwierige Spielstrategie zu nennen.
+Das ist vielleicht mal was völlig anderes.
+Aber wie könnte ich das jetzt abbilden?
+Ich habe einen Pool an KIs, ich habe eine Auswahl für was auch immer der Benutzer jetzt für ein Spiel spielen möchte.
+Und wie kann ich jetzt das Konzept von Funktionen als variablen Speichern nutzen, um das umzusetzen?
+Und zwar ohne hier dran irgendwas zu ändern.
+Unser Hauptprogramm bleibt genauso, wie es ist.
+Muss ich nicht anfassen.
+Also momentan, wenn ich es ausführe, schmeiße ich es in Fehler.
+Das ist hier auch schon direkt in der Code-Analyse genannt.
+Strategie-Spieler 1 habe ich bislang gar nicht definiert.
+Aber jetzt einfach, um das zum Laufen zu kriegen, was bislang auch schon gelaufen ist.
+Lassen wir mal die Auswahl weg.
+Wie kriege ich das Spiel wieder zum Laufen?
+Völlig ohne irgendwas hier in dieser Wire-Schleife zu ändern.
+Ja?
+Perfekt, ganz genau.
+Also ich würde hier sagen, Strategie-Spieler 1 und dann kommt es einem vielleicht auch gar nicht mehr so abstrus vor,
+Funktionen in Variablen zu speichern.
+Das ist vielleicht auch logisch, genau das, was man machen würde.
+Strategie-Spieler 1 lautet jetzt, spielen der letzten Karte.
+Strategie-Spieler 2 lautet jetzt, spielen der Preiskarte.
+Ja? Macht das Sinn?
+Und das wird, wenn wir uns nicht irgendwo vertieft haben, haben wir nicht, immer noch funktionieren.
+Wir haben nichts in der Wire-Schleife der Funktionen geändert.
+Wir haben einfach nur gesagt, wir definieren uns abstrakte Strategien.
+Ich nehme mal hier diesen Docstring raus, der mir nicht gerade was zu lang wird.
+Wir definieren abstrakte Strategien, so was wie spielen der letzten Karte, spielen der Preiskarte,
+spielen einer zufälligen Karte, was auch immer Sie sich ausdenken.
+Und dann definieren wir einfach, bevor wir das Spiel starten, was die Strategien der Spieler sind.
+Oder von mir aus, was eine Strategie von einem Spieler ist, wenn man das jetzt als Mensch gegen einen Computer umsetzt.
+Und dann könnte die Frage, welchen Wert die Variable Strategie-Spieler 1 bekommt,
+davon abhängen, dass man den Benutzer gefragt hat, möchten Sie einfach mittel oder schwierig spielen.
+Ich weiß, es ist schon weit fortgeschritten, aber jetzt wäre es trotzdem wichtig, wenn mal jemand sagt, ich habe keine Ahnung, wo kann sie hin.
+Was völlig in Ordnung ist. Ja, wollen Sie noch was sagen?
+Genau, also das wäre schon das Umsetzen. Sehr gut.
+Also das könnte man jetzt hier mit einem If und einem Input und sowas lösen, wenn man das wirklich variabel machen möchte.
+Aber mir geht es jetzt erstmal nur um dieses Prinzip, dass Strategie-Spieler 1 jetzt 2 gegen welche Funktionen sind.
+Ja.
+Ja, da ist der Vorteil, wenn man die Funktionsvariante der Spieler 1 definiert und dann seine Datenveranstaltung abfragen,
+soll jetzt vielleicht ein weniger schweres Spiel werden, je nach Echographie von der Eingabe.
+Genau, das wäre, das ist dann ein bisschen die Stilfrage, findet man das schöner, dann müsste man das für Spieler 1 und Spieler 2 machen
+und müsste innerhalb von Spieler 1 und Spieler 2 dann sowas wie Spielen der letzten Karte und Spielen der Preiskarte jeweils drin haben.
+Also dann wäre das, wir hätten dann eine variable Spielstrategie 1 oder sowas und dann müsste Strategie-Spieler 1 eine Funktion sein,
+die diese Spielstrategie als Eingehabe-Argument bekommt und da drin steht dann,
+IF Spielstrategie gleich einfach, dann Führerhaus Spielen der letzten Karte.
+ELS-IF Strategie gleich mittel, dann Führerhaus Spielen der Preiskarte.
+Es ist auch möglich, das so umzusetzen, bedeutet aber, ich muss halt jede, in jeder Iteration meiner Wildstrife einmal durch diese IF-Abfrage
+und habe da drin eben meine Strategien gespeichert.
+Bedeutet auch, wenn ich eine neue Strategie hinzufüge, muss das als zusätzliches IF in meine Strategie-Spieler 1 und auch in die Strategie-Spieler 2 mit rein.
+Ist nicht nur ein bisschen eine Stilfrage, ist auch eine legitime Umsetzung.
+Ich halte es so für etwas eleganter gelöstes Anlass.
+Die Sachen werden da zugewiesen, wo sie auch festgelegt werden und müssen nicht in jeder Runde des Spiels wieder neu abgefragt werden.
+Aber sehr guter Hinweis ist auch möglich.
+Aber als erstes Mal ist mir ganz wichtig, dass wir hier drüber sprechen.
+Also an dieser Stelle, ich print das vielleicht mal.
+Preisfrage, was kriege ich hier raus durch den Printbefehl? Was gibt der raus?
+Ja, genau.
+Also hier kommt das, was wir schon häufiger mal gesehen haben.
+Das steht jetzt dann Funktion spielende letzte Karte at irgendeine hexadezimale Speicheradresse.
+Also damit würde ich das nicht ausführen, sondern mir nur sagen, was das ist.
+Mal gucken, was da rauskommt.
+Das steht jetzt ganz am Anfang.
+Also das ist die Funktion spielende letzte Karte an dieser Speicheradresse.
+Was passiert, wenn ich runde Klammern da drumsetze?
+Das könnte man fast als Trickfrage bezeichnen.
+Funktioniert es dann noch?
+Ja.
+Ja.
+Sehr gut, genau. Also führe ich das jetzt aus, kriege ich direkt einen Fehler.
+Und das ist einer, den wir inzwischen schon ziemlich gut lesen können.
+Missing two required positional arguments.
+Sie erinnern sich, es gibt positional arguments und keyword arguments.
+Keyword waren die, wo ich der Variable einen vordefinierten Wert gebe und die dann mit ihrem Namen ansprechen kann.
+Positional arguments einfach nur die, die bestimmt werden dadurch, an welcher Stelle das Ganze steht.
+Hier haben die Variablen keinen vordefinierten Wert. Das sind positional arguments.
+Und hier sagt er mir jetzt, da fehlen zwei.
+Ich kann diese Funktion, okay, ich kann die Funktion spielende letzte Karte, die ja jetzt gespeichert ist,
+in der Variablen Strategie Spieler 1 nicht ohne Argumente aufrufen.
+Ich brauche zwei Argumente.
+Was ich jetzt machen könnte, ist natürlich, ich kann hier was vorgeben.
+Eins und eins, zwei, drei.
+Kann ich das ausführen?
+Sehr gut, genau. Also es läuft durch und gibt die drei aus.
+Mal testen, es läuft durch.
+Und hier oben steht irgendwo die drei.
+Der Grund ist, das hier ist nichts anderes als diese abstrakte Funktion.
+Wenn ich diese abstrakte Funktion aufrufe mit Wert der Preiskarte gleich eins und verbleibende Karten gleich eins, zwei, drei,
+dann steht hier, es wird zurückgegeben die gespielte Karte und die gespielte Karte ist nichts anderes als die verbleibenden Karten an Punkt Pop.
+Also das letzte Element von der Liste, die ich hier eingebe.
+Also wird die drei ausgegeben.
+Das gehört hier natürlich für die Logik des Spiels nicht hin.
+Es soll nur nochmal zeigen, Strategie Spieler 1 ist einfach nur eine Variable, in der diese Funktion gespeichert ist.
+Sehr gut.
+Dann vielleicht noch einen weiteren Schritt.
+Nämlich wieder mit dem Argument, je größer das Programm wird, desto nerviger wird es hier,
+also ein Pfeil mit tausenden Zeilen Code zu haben.
+Für die Organisation von dem Code wäre es ja irgendwie schön, jetzt alle Funktionen, die irgendeine Form von Strategie implementieren, in eine Datei zu packen.
+Dann müsste jemand, der eine neue Strategie implementiert, sich nur mit dieser Datei beschäftigen.
+Dann ist das wirklich auch noch vom Ort her ein bisschen abgekapselt.
+Ist natürlich hier bei diesem Programm vielleicht nicht so nötig, aber Sie können sich vorstellen,
+dass moderne Spiele eine etwas komplexere Strategie implementieren müssen als das hier.
+Also will ich noch einmal besprechen, wie wir das machen.
+Wie wäre es denn, wenn ich hier einfach STRG-C drücke, auf Löschen, eine neue Datei aufmache und das hier reinkopiere
+und dann das irgendwie speicher als hier in dem gleichen Ordner, wo auch unser Groovspiel liegt
+und das nenne ich jetzt, Hilfs, nee, vielleicht einen besseren Namen, Strategien.
+Also das hier ist jetzt eine Datei, Strategien.y.
+Ich möchte in meinem Groovspiel trotzdem noch so etwas hier machen.
+Und das bedeutet, ich muss jetzt diesem Programm irgendwie sagen, dass es die Dateien Strategien.y verwenden soll.
+Sie haben schon die Idee. Ja.
+Sehr gut. Ganz genau.
+Wir haben den Importbefehl schon einmal kennengelernt, als wir etwas aus dem Modul Random verwenden wollten.
+Ach, hier steht er ja auch noch.
+Genau. Also hier steht noch ein Import Random, da wollten wir also die Funktion Shuffle verwenden.
+Und die Art, wie das hier funktioniert, ist nichts anderes, als dass Random in Wirklichkeit irgendein Python-Feil ist,
+was im Verhand vom Python-Interpreter liegt.
+Also man muss hier nicht die absolute Adresse geben, damit er das findet.
+Aber sonst ist dieses Random eigentlich nichts anderes als ein Python-Feil,
+sodass wir das genauso auch mit selbstgeschriebenen Python-Files verwenden können.
+Also ich kann hier Import Strategien machen.
+Strategien bezieht sich jetzt auf diese Datei, die wir selber erstellt haben.
+Und die wird gefunden, weil wir das Ganze von einem Ordner und in einem Ordner ausführen.
+Deshalb weiß er sofort, wo Strategien liegen.
+Und genauso, wie wir für importierte Module automatisch einen Namensraum bekommen, einen Namespace,
+nämlich die Funktion Shuffle, konnten wir nicht direkt aufrufen, sondern wir mussten Random Punkt Shuffle verwenden,
+weil dieses Import hier automatisch einen Namensraum, einen Namespace des importierten Moduls generiert.
+Muss ich dann an dieser Stelle auch Strategien Punkt Funktion verwenden.
+Und wenn ich es jetzt ausführe, funktioniert es wieder.
+Also ich kann Teile meines Codes, insbesondere Funktionen, auslagern in eine andere Datei.
+Diese Datei kann ich mir verfügbar machen mit dem Begriff Import.
+Importiere ich etwas, dann haben die Funktionen da drin automatisch den Namensraum von der importierten Datei.
+Wenn ich möchte, kann ich diesen Namensraum verändern.
+Dazu gibt es den Begriff As.
+Da kann ich mir dann was Neues ausdenken.
+Wenn mir Strategien zu lang ist, schreibe ich halt Import As Strat und schreibe hier Strat hin.
+Und dann funktioniert es immer noch.
+Ich könnte auch diese Funktionen hier ganz direkt importieren, dass sie nicht mehr in einem unteren Namensraum liegen.
+Dann würde ich From, Strategien, Import und dann die Funktionsnamen.
+Okay, und damit sind wir jetzt in der Lage, eigentlich ziemlich schön das Ganze zu organisieren.
+Wir haben hier eine völlig getrennte Datei, wo wir ganz abstrakt Strategien implementieren.
+Die hängen immer noch vom Wert der Preiskarte und der verbleibenden Karte ab.
+Die können wir hier beliebig erweitern.
+Man könnte hier jetzt auf die gleiche Art und Weise auch einen menschlichen Spieler implementieren.
+Ich wüsste nicht, was dagegen spricht.
+Dann steht hier halt noch ein Input in dieser Funktion.
+Und im Rufspiel würde man davon quasi nichts mitkriegen, weil es einfach nur die Frage ist,
+wie werden am Anfang des Spiels die Strategien festgelegt.
+Und das ist vielleicht der Grund, warum ich diese Art der Implementierung auch vorziehen würde über eine große Lieferanfrage.
+Es ist einfach, bildet die Logik vielleicht auch eines Menschen, der sich das überlegt hat, am besten ab.
+Man legt die Strategien der Spieler fest und gespeichert hier sind eben Funktionen als Variante.
+Gut, das ist also so ein bisschen zur weiteren Strukturierung vom Rufspiel.
+Sollen wir noch ein paar Beispiele für Funktionen als Variable machen?
+Gibt es bestimmte Sachen, die Sie noch mal sehen möchten?
+Wie stecke ich eine Funktion in eine andere Funktion?
+Oder sagen Sie an dieser Stelle einfach, Sie müssen das ein bisschen verinnerlichen,
+bevor Sie überhaupt eine Frage hier stellen wollen.
+Also ein bisschen nochmal der Aufruf, auch wenn es dann etwas größere Veranstaltungen gibt,
+aber ich würde sagen, das ist ein bisschen das, was wir hier im Spiel machen.
+Also ein bisschen nochmal der Aufruf, auch wenn es dann etwas größere Veranstaltungen ist
+und vielleicht ein bisschen unangenehm zu sprechen vor den ganzen Kommilitonen.
+Nur wenn Sie mir Feedback geben, kann ich auf Fragen, Probleme etc. eingehen.
+Sonst muss ich an dieser Stelle nicht mehr so viel reden.
+Sonst muss ich an dieser Stelle nicht mehr so viel reden.
+Es ist soweit alles klar, Sie müssen das natürlich üben, aber Sie haben das alles verstanden
+und ich kann in dem Sinne ein paar weitere Sachen darum herum erklären.
+Wenn Sie mir jetzt was sagen, dann kann ich natürlich speziell auf irgendwelche Fragen oder Unklarheiten eingehen.
+Wenn Sie mir jetzt was sagen, dann kann ich natürlich speziell auf irgendwelche Fragen oder Unklarheiten eingehen.
+Gut, ich zeige Ihnen einmal, wie das, was ich jetzt alles so ein bisschen im Code gezeigt habe,
+hier auf den Folien abgebildet ist, denn lernen tun Sie nachher vielleicht ein Stück weit auch mit den Folien
+oder irgendwie mit den Videos mit doppelter Wiedergabegeschwindigkeit oder sowas.
+Also, wir haben kennengelernt, dass wir hier in der ersten Phase,
+also wir haben kennengelernt, man kann Funktionen als Variablen schreiben.
+Drucke ich dann diese Variable, sagt er mir, es ist eine Funktion, sagt mir wie die heißt
+und an welcher hexadezimalen Speicheradresse die steht, rufe ich dann die Variable mit einem Argument auf,
+verhält es sich, wie als hätte ich die ursprüngliche Funktion mit diesem Argument aufgerufen.
+Also, meine Funktion kann jetzt genauso genutzt werden wie Say Hello.
+Das hier haben wir auch kurz besprochen, wenn ich einen Print Befehl jetzt aus Versehen quasi noch um diese Funktion schreibe,
+die gar keinen Rückgabewert hat, kriege ich None zurück, was dann der sozusagen implizite Rückgabenwert ist.
+Wir haben besprochen, dass das ermöglicht, Funktionen höherer Ordnung zu konstruieren,
+also Funktionen, die eine Funktion als Eingabeargument nehmen.
+Wir können also zwei Funktionen schreiben zum Addieren und Multiplizieren von Zahlen
+und eine Funktion anwenden, die dann auch eine gegebene Funktion,
+die, Entschuldigung, eine gegebene Funktion auf zwei Zahlen anwendet.
+Das ist jetzt mal genau das Beispiel, was wir hier auch gemacht haben.
+Und dann kann sich eben diese Variable, in der die Operation gespeichert ist,
+die wir anwenden wollen, im Laufe des Programms ändern.
+Und wir haben das dann übertragen auf unser Gruppenspiel,
+in dem wir gesagt haben, ja, eigentlich ist genau das auch das,
+was wir hier mit Strategie Spiele 1 und Spiele 2 haben wollen.
+Wir wollen einen Pool an Strategie und am Anfang unseres Spiels soll einmal festgelegt werden,
+was ist denn die Strategie von Spiele 1 und was ist denn die Strategie von Spiele 2.
+Und deshalb weisen wir den Variablen Strategie von Spiele 1 oder Spiele 2 eine Funktion zu.
+Aus dem Pool der vorher definierten Strategie.

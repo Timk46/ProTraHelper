@@ -1,0 +1,157 @@
+Geltungsbereich und Lebensdauer von Variablen in Python. Wann kann ich eine Variable in einer
+Funktion verwenden, die außerhalb definiert wurde? Generell erstmal, wenn die Variable vor
+der Definition meiner Funktion mit einem Wert belegt wurde, wenn die da vorher existiert,
+dann kann ich die verwenden. Also ich kann sowas schreiben wie a gleich 4, meine Funktion von x
+return x plus a. Wenn ich jetzt meine Funktion von 2 aufrufe, dann ist eben a gleich 4. Hier
+steht eine 2, kriege ich zurück eine 6. Ja, a kann hier eingesehen werden, ist in dem Sinne eine
+globale Variable und sowas funktioniert. Wenn wir eine mutable Variable haben, dann können wir die
+innerhalb der Funktion manipulieren und diese Manipulationen sind außen sichtbar. Also das,
+was hier jetzt als Beispiel steht, ist sowas wie der Extremfall von dem, was wir jetzt schon zweimal,
+einmal für das Kartenspiel und einmal für unsere angebenden Elementfunktionen besprochen haben,
+das hier ist jetzt eine Funktion, die hat keine Eingabe, die hat keine Rückgabe, aber sie tut
+trotzdem was, nämlich sie setzt das erste, also die 0. Element von Liste auf den Wert 5 und wenn
+ich die jetzt aufrufe und dann Liste drücke, dann steht da tatsächlich 5, 2, 3. Ja, also Liste, globale
+Variable und mutable, ich kann die in einer Funktion einfach ändern und die Änderung hat
+nach Aufruf der Funktion dann Effekt. Wir nennen diese überall bekannten Variablen sowas wie a und
+Liste in den vorherigen Beispielen globale Variablen. Das geschieht in Abgrenzung zu
+sogenannten lokalen Variablen, die nur innerhalb einer Funktion bekannt sind. Also sowas wie,
+wenn ich innerhalb der Funktion schreibe b gleich 4, a habe ich vorher definiert auf 1 und dann
+return ich a plus b, rufe die Funktion auf und versuche dann aber b zu auszugeben, dann sagt
+er mir, name b is not defined, b gibt es nicht, weil ich b nur innerhalb der Funktion definiert
+habe und Sachen, die ich innerhalb einer Funktion neu definiert habe, sind außen nicht sichtbar,
+auch nicht nach dem Aufruf der Funktion. Das ist eine lokale Variable, b existiert nur innerhalb
+von meiner Funktion, nicht außerhalb von meiner Funktion. Ja? Ja. Genau, also ich könnte hier
+auch eine Liste reinschreiben, vielleicht müssen wir gleich sowieso mal. Also, def meine Funktion
+von gar nichts und liste gleich 1, 2, 3 und return natürlich auch nichts und wenn ich jetzt das hier
+aufrufe und dann versuche printListe zu schreiben. Ja, auch nett. Was ist jetzt passiert?
+Also es funktioniert anscheinend doch. Ich konnte printListe schreiben und als Antwort habe ich
+bekommen die Quadratzahlen von 0 bis 9. Kann jemand erklären, woran das lag? Ja?
+Sehr guter Ansatz, ich wiederhole es einmal, damit es alle hören können. Also die Idee war, er kann das
+hier nicht ausführen, aber in diesem Tab hier irgendwo ist Liste noch definiert und um trotzdem
+was richtiges ausführen zu können, nimmt er dann die Liste von da, was schon fast genau die richtige
+Antwort ist. Eine Kleinigkeit müssen wir noch korrigieren, es hängt nicht an den Tabs, sondern, ja?
+Quellordner ist auch eine gute Idee, aber ist auch noch nicht ganz die Lösung. Ja?
+Genau, sehr gut. Also alles, was ich jemals hier drin ausgeführt habe, alle Variablen in
+allen Programmen, die ich je ausgeführt habe, die sind immer noch in diesem interaktiven
+Python-Programm vorhanden. Ich kann hier auf Variable Explorer gehen und dann sehe ich tatsächlich
+mal, dass ich schon eine ganze Menge erzeugt habe. Einfach dadurch, dass es irgendwann mal diese
+Variable Liste gab und die den Wert dieser Quadratzahlen hatte. Danach habe ich sie umgenannt,
+aber ich hatte das Programm ja schon einmal ausgeführt und sobald ich es ausgeführt habe,
+merkt er sich das. Also, sobald ich hier mal welche asdf gleich 3 schreibe, dann fügt er hier asdf
+dazu und wenn ich jetzt aus Versehen hier mal in dem Programm print asdf schreibe und dieses Programm
+ausführe, dann kann er das aktuell ausführen und das ausdrucken, weil es die Variable asdf ja gibt.
+Und dafür ist es tatsächlich sinnvoll, um einmal, wenn man so interaktiv das Ganze macht,
+wie wir das jetzt gerade machen, immer mal was Coden ausführen, mit dem gleichen Kern,
+sagt man, ausführen, ist es sinnvoll, ab und zu mal hier drauf zu gehen und zu sagen,
+restart kernel. Sind Sie sicher, dass Sie das wollen? Ja, und jetzt sollte der Variable in
+Explorer wieder leer sein und wenn ich sie jetzt ausführe, sagt er das, was wir erhofft hatten,
+nämlich, Liste ist nicht definiert. Ja. Nee, jetzt gibt er immer noch einen Fehler. Was müsste ich
+machen? Aber das ist ein sehr guter Ansatz. Also, wieso gibt es immer noch einen Fehler,
+wenn ich Return Liste schreibe? Was müsste ich machen, damit der String Liste hier funktioniert?
+Ja. Genau. Also, das, was hier zurückgegeben wird, das werde ich nur dann verwenden, wenn ich das hier
+auch in der Variable speichere. Also, wenn ich hier Liste gleich schreibe, dann funktioniert das.
+Ich könnte ja auch natürlich einen anderen Namen verwenden. Also, ich könnte hier auch L schreiben,
+dann würde Liste nicht funktionieren, aber wenn ich L verwende, dann geht es. Ja, also Return Werte,
+die kann ich nur dann verwenden, wenn ich links davon mit einem Gleichheitszeichen diese Return
+Werte auch irgendwo speichere. Ja. Genau. Entschuldigung, das, ja, das gehört der
+Vollständigkeit halber dazu. Also, völlig richtiger Kommentar, wenn ich Print meine Funktion schreibe,
+dann gibt er das auch aus, obwohl ich jetzt den Return Wert nicht explizit irgendwo gespeichert
+habe. Ich hätte präziser sein sollen und sagen, das muss man dann unmittelbar verwenden. Wenn ich
+nur meine Funktion aufrufe und dann nicht noch eine Funktion rumschreibe oder es nicht speichere,
+dann ist dieser Return Wert einfach weg. Aber völlig richtig, wenn ich das in eine andere
+Funktion einwette, dann wird dieser Return Wert genutzt. Sehr gut, genau. Okay, schauen wir uns
+das ganze Chaos mit lokalen und globalen Variablen mal an. Kann ich meine Funktion aufrufen und was
+gibt es aus? Wir testen jetzt mal so ein paar Fälle durch. Ja. Das ist jetzt, ja, wollen Sie selber
+korrigieren? Genau, also, aber super, dass Sie das so gesagt haben, denn das gibt jetzt zwei Sachen
+zu besprechen. Ich habe das Konzept von veränderbar und unveränderbar eingeführt, aber das hat
+mit global und lokal zu tun. Und es ist tatsächlich so, dass jede Variable, sofort, jede Variable,
+egal ob Mutable oder Immutable, wenn sie im Hauptprogramm definiert wurde, danach von Funktionen
+verwendet werden kann. Also, ich kann a plus 1 rechnen, wenn ich a vorher definiert habe,
+obwohl a ein Integer ist und als Integer im Mutable. Unveränderbar. Wollten Sie noch was sagen oder
+wollen Sie das erklären? Entschuldigung, dann habe ich Ihnen das weggenommen. Genau, also es
+funktioniert. a ist globale Variable, b ist lokal und wird auch lokal mittels Print gedruckt. Nächstes
+Beispiel. Funktioniert, funktioniert es nicht. Was kommt aus dem Printbefehl raus?
+Hier, ja.
+Ich könnte mal a mit 1, weil man mit 1 ist a in der Funktion.
+Sehr gut, also völlig richtig. Die Funktion funktioniert, man kann sie ausführen, oder den Code. Und es gibt 1 zurück.
+Also es gibt eine globale Variable, die hat den Wert 1. Es gibt eine lokale Variable, die genauso
+heißt wie die globale, die hat den Wert 5, aber lokale Variablen sind nach Aufruf der Funktion nicht mehr sichtbar.
+Das heißt, Print a bezieht sich auf das a, was wir hier am Anfang hatten. Gibt also in diesem Fall wirklich 1 aus.
+Ja, also funktioniert, gibt 1 aus. a ist sowohl global als auch lokal, aber lokal mit einem anderen Wert.
+Und innerhalb der Funktion, meine Funktion hat a den Wert 5, außerhalb hat und behält a den Wert 1.
+Fast genau der gleiche Code, jetzt mit eckigen Klammern rum und das ist fast eine Trickfrage.
+Jetzt habe ich fast Angst, jemanden in der Falle laufen zu lassen, aber wenn sie das tun, ist es nicht schlimm.
+Das sollte man meinen, aber tut sie tatsächlich nicht. Also, das funktioniert und gibt weiterhin 1 aus.
+Denn das Verwirrende ist jetzt, obwohl das hier eine Liste ist, eine Liste ist mutable, aber ich gehe hier nicht auf ein Element der Liste,
+sondern sobald ich a gleich schreibe, definiere ich den Wert der Variablen a komplett neu.
+Also hier spielt jetzt gar keine Rolle, ob das 5 in eckigen Klammern ist oder hier irgendwas anderes steht, ein ganz anderer Datentyp.
+Dadurch, dass ich a gleich irgendwas schreibe, überschreibe ich den Wert, der möglicherweise in a definiert war.
+Und dadurch entsteht hier jetzt wieder das gleiche Konzept, wie das, was wir vorher auch hatten.
+Es gibt eine globale Variable, das ist a Liste mit einem Element, welches 1 ist.
+Es gibt eine lokale Variable, die ist a auch eine Liste mit einem Element, welches 5 ist.
+Und außerhalb dieser Funktion hat a weiterhin den Wert 1.
+Und jetzt, dürfen Sie vielleicht nochmal das sagen, was Sie gesagt haben.
+Genau, also jetzt habe ich quasi diesen Fallstrick, den ich böswilligerweise oben eingebaut habe, ausgebaut.
+Also so ist die Antwort a ist anschließend 5, ist eine Liste mit einem Element, welches den Wert 5 hat, wieder völlig richtig.
+Weil a ist eine globale Variable, eine Liste mit einem Element, das den Wert 1 hat.
+Mit a eckigen Klammern 0 wird das 0. Element dieser Liste adressiert und auf 5 gesetzt.
+a ist mutable, global, Effekt ist nachher sichtbar.
+Das heißt, wenn ich hier print a ausgebe, kriege ich die Liste mit dem einen Element 5.
+Also funktioniert und gibt 5 auf der Kommandozeile aus.
+a ist eine globale und veränderbare Variable, deshalb gibt es keinen Fehler.
+Und die Veränderungen von a sind innerhalb von Funktionen möglich und dementsprechend auch außerhalb sichtbar.
+Okay.
+Machen wir nochmal weiter.
+a gleich 1, meine Funktion setzt a auf a plus 1.
+Können Sie fast nicht wissen, was da passiert.
+Aber vielleicht hat trotzdem jemand einen Vorschlag.
+Ja?
+Also a bleibt weiterhin 1.
+Und wenn ich meine Funktion darauf anpasse, dann passiert nichts.
+Das ist ja gar nicht passiert.
+Das ist schon mal super beobachtet.
+Ich habe keinen Print gemacht, deshalb passiert sowieso, selbst wenn es funktionieren würde, nichts.
+In diesem Fall, was ich Ihnen aber sagen wollte, ist,
+Python weiß in gewisser Weise nicht mehr, was hier lokal und global sein soll.
+Also es gibt eine globale Variable, die ist immutable.
+Und jetzt wird hier irgendwie, soll das natürlich sowas heißen, wie auf der rechten Seite ist das hier gemeint und auf der linken Seite definiere ich das neu.
+Das kann er aber nicht.
+Da gibt er jetzt tatsächlich einen Fehler aus, dass die Variable a noch nicht initialisiert ist.
+Also an der Stelle, wo ich a gleich schreibe, denkt er, das hier ist eine lokale Variable.
+Aber wenn das eine lokale Variable ist, dann hat sie noch keinen Wert und ich darf sie nicht auf der rechten Seite verwenden.
+Das heißt, das hier führt zu einem Fehler im Code.
+Gut.
+Das hier, ich muss mich jetzt selber immer kurz konzentrieren, was überhaupt die Änderung in dem Code ist.
+Funktioniert, funktioniert nicht.
+Was gibt es aus?
+Funktioniert, funktioniert nicht.
+Was gibt es aus?
+Ja.
+Sehr gut, genau.
+Also das funktioniert und gibt eins aus.
+Wir übergeben ja jetzt explizit diese Variable a.
+Das hier ist trotzdem, a ist in diesem Fall trotzdem eine lokale Variable innerhalb der Funktion, die innerhalb der Funktion auch geändert wird, nämlich mit dieser Zeile hier auf zwei gesetzt wird.
+Aber weil dieses a eben nur ein lokales a ist, bleiben diese Änderungen außerhalb dieser Funktion nicht bestehen und der Printbefehl gibt eins aus.
+Haben Sie völlig richtig erklärt. Ganz genau.
+Also das funktioniert und gibt eins aus.
+Und jetzt gibt es noch einen Trick, um auch dieses Verhalten noch anders aussehen zu lassen.
+Nämlich, wenn ich in meine Funktion, die jetzt kein Eingabeargument hat, als Befehl global a, global a schreibe, dann kann ich anschließend das a verwenden,
+weil das in gewisser Weise den Geltungsbereich der Variablen von der Funktion auf alles erweitert.
+Also mit dem global sage ich, wenn ich jetzt hier in der nächsten Zeile a gleich irgendwas schreibe, dann meine ich damit aber die Variable, die ich außerhalb von meinem Geltungsbereich, also außerhalb der Funktion hier definiert habe und nimm bitte die.
+Und wenn ich jetzt meine Funktion aufrufe und a ausgebe, dann habe ich also der globalen Variablen a durch Überschreiben einen neuen Wert zugeordnet und es gibt zwei aus.
+Ja, das macht in gewisser Weise die Verwirrung jetzt komplett.
+Also es gibt da tatsächlich relativ viele Fälle, die man beachten muss und schon mit diesen ganz kleinen Funktionen muss man sich ein bisschen konzentrieren.
+Was ist denn jetzt global, was ist lokal, welche Änderungen wirken sich global aus, welche wirken sich lokal aus.
+Genau. Und das funktioniert eben auch, wenn die Variable a vorher gar nicht definiert war.
+Also dieses DefMind-Funktion global a, a gleich zwei, bringt a nach Aufruf der Funktion, funktioniert auch, ergibt es danach.
+Ich habe den Geltungsbereich der Variablen a, die innerhalb der Funktion definiert wurde, erweitert, auch in diesem Fall um das ganze Programm.
+Achso, Entschuldigung. Ja.
+Muss man das mit Grenzsteigern oder kann man das mit globalen Variablen freisteigern?
+Ich bin mir relativ sicher, dass das nicht geht, aber wir probieren es aus.
+Sicherheitshalber. Das spricht schon für Invalid-Syntax, dass das nicht geht.
+Genau. Aber global a, a gleich zwei, geht nicht.
+Ach, ich habe die Funktion nicht aufgerufen. Sehr gut. Genau.
+Ach, ich habe die Funktion nicht aufgerufen. Sehr gut. Genau.
+Das macht natürlich, also so, sehr gut, dass ich das aus didaktischen Gründen so hingeschrieben habe.
+Also hier habe ich einfach vergessen, die Funktion aufzurufen und wenn ich das nicht mache, dann wurde dieser Code, der hier drin steht, natürlich nie ausgeführt.
+Und deshalb ging das gerade nicht und so geht es.

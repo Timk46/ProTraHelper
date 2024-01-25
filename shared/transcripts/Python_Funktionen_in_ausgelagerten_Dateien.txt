@@ -1,0 +1,63 @@
+Um das besser strukturieren zu können, haben wir gerade gesprochen, können wir den Befehl
+Import verwenden.
+Gesehen haben wir das für Import Random.
+Dazu gehört dann immer der Namespace des importierten Moduls.
+Also man kann das auch mit selbstgeschriebenen Dateien machen.
+Jetzt vielleicht doch, weil es hier auftaucht, ich könnte sagen, in meinem Buchspiel mich
+nervt es, dass ich hier Strattfunkt schreiben muss.
+Das sind doch nur zwei Strategien.
+Ich möchte, dass diese Strategien in meinem Namensraum direkt liegen.
+Halte ich hier nicht für sinnvoll, weil das eine schöne Aufteilung ist, dass alle Strategien
+halt mit Strattfunkt angesprochen werden.
+Aber wenn ich das hier vermeiden wollte und das ohne schreiben wollte, dann müsste ich
+nicht Importstrategien.stratt schreiben, sondern dann könnte ich sagen, aus Strategien
+importiere Spielen der letzten Karte und was brauchen wir noch, Spielen der Preiskarte.
+Das macht jetzt die beiden Funktionen, Spielen der letzten Karte und Spielen der Preiskarte
+aus den Modulstrategien oder der Dateistrategien verfügbar ohne Namespace in dem gesamten Programm.
+Also das hier kann ich immer noch ausführen und es funktioniert.
+From Modul Import Funktionsname macht ohne Namensraum, ohne Namespace die entsprechenden
+Funktionen verfügbar.
+Hier lasse ich es aber lieber um Stil her auf dieser Version.
+Also das soll in diesen Vorlesungsfolien heißen, From Name des Moduls Import Name der Funktion.
+Und was wir gerade schon gesehen haben, Import Name des Moduls as Name des gewünschten Namespaces,
+also Import Strategien as Stratt, erlaubt uns dann die Funktion mit Strattpunkt irgendwas
+anzustreiten.
+Und das ist genau das, was wir vorhin auch nachgebaut haben.
+Achso, das Einzige, was hier noch neu dazu kommt, ich habe auch mal eine Spiele zufällige
+Karte geschrieben, weil es jetzt unschön ist, dass dieses Spiele letzte Karte nur dann
+eine zufällige Karte gibt, wenn die vorher gemischt wurden.
+So, ja?
+Jetzt hat es von der Begründung Modulaufbau, kann man sagen, es ist einfach eine Sammlung
+von Funktionen?
+Genau.
+Das ist jetzt einfach eine Sammlung von Funktionen oder für uns jetzt auch gleichbedeutend mit
+Datei.
+In dem Sinne, wo diese Funktionen dann reingestehen wurden.
+Vielleicht auch mal interessant, wenn Sie das Ganze ein bisschen sortieren wollen und
+zum Beispiel, wo haben wir sie, unsere Strategien gar nicht mehr im gleichen Ordner halten wollen
+wie Gufspielvorlesung, das ist das, worin wir gerade immer arbeiten, sondern sagen,
+ich möchte einen neuen Ordner erzeugen, der heißt Helper und ich möchte meine Dateistrategien
+in den Unterordner Helper schieben, dann wird er mir sagen, dass ich das schließen...
+Nee.
+...das da rein speichern möchte, so und jetzt funktioniert das hier natürlich nicht mehr,
+weil er nicht mehr Strategien findet.
+Achso.
+Trickreich.
+Weiß jemand, wieso das jetzt trotzdem noch funktioniert?
+Hat was mit dem Erinnerungsvermögen der Eigentümer zu tun?
+Also ich könnte hier zum Beispiel an sowas sehen.
+Ich habe diese, ja.
+...und dann kann man auch in den Ordner eine Meldestätigung machen.
+Das ist zwar auch schon, aber...
+Genau, ich glaube einfach, dass er sich gemerkt hat, was diese Funktion
+statt Spielen der letzten Karte ist.
+Und mit Restart Kernel sollte er dann tatsächlich diesen Speicher freigeben.
+Und jetzt bin ich gespannt. So, jetzt wird auch das erzeugt, was ich gehofft und gedacht hatte.
+Also irgendwie hatte sich der, diese Konsole quasi, dieser Kern, auf dem das ausgeführt ist,
+wird noch gemerkt, was in Strategien drin steht und jetzt habe ich es auch geschafft,
+den gewünschten Fehler zu erzeugen.
+Und dann kann ich hier in einen Unterordner gehen, in dem ich den da vorschreibe
+und einen Punkt adressiere. Also wenn ich jetzt Helper.Strategien schreibe,
+weil Helper ein Unterordner ist, sodass von meinem aktuellen Ordner, wo ich das Ding ausführe,
+im Unterordner Helper die Datei Strategien.py liegt, dann kann ich das so adressieren.
+Eine weitere Möglichkeit, hier im Code besser zu strukturieren.

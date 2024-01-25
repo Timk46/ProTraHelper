@@ -1,0 +1,29 @@
+Das wissen wir eigentlich schon, also wenn wir eine Klasse definieren, dann definieren
+ein Objekt, ein physisches Objekt oder ein Konzept, das kann beides sein.
+Und die Klasse selbst ist komplett unterschiedlich vom Objekt.
+Das heißt, das Objekt hat Attributwerte, also Werte, die dann die Variable, die Attribute
+sind, haben.
+Eine Klasse aber sagt auch, dass es diese Attribute gibt.
+Die könnten zum Beispiel einen Initialwert haben, wenn wir unsere Klasse definieren,
+aber das heißt nicht, dass es immer diesen Wert haben muss.
+Das Objekt ist eine Instanz, das lebt irgendwo in unserem Speicher.
+Eine Klasse ist irgendwie so eine Blaupause, also eine Struktur für die Objekte von dieser
+Art von Klasse.
+Das ist dann, was eine Klasse ausmacht.
+Und diese Klasse hat dann meistens auch die Operationen oder die Methoden, das haben wir
+eigentlich als Methode jetzt bislang gesehen, die dann auch wichtig sind.
+Weil die Methoden, die können dann zum Beispiel die Struktur oder die Attribute ändern oder
+die Werte zurückgeben und so weiter.
+Und dann hat man dann die Assertion, wie wir es schon gesehen haben mit den Linien.
+Und die Assertion kann man dann unterschiedlich darstellen.
+Und das kommt dann jetzt gleich.
+Also zum Beispiel habe jetzt gesehen schon, dass das allgemeine Schema für eine Klasse
+ein Klassenname ist und das wird dann groß geschrieben.
+Dann die Attribute, dann die Operationen und die Operationen haben meistens diese oder
+haben immer diese Klammer.
+Und so können wir dann auch, wenn wir das Ganze abkürzen möchten, zum Beispiel eine
+Klasse hat überhaupt keine Attribute, können wir diese Klasse zum Beispiel darstellen
+als eine Klasse mit nur Operationen oder nur Methoden und keine Attribute.
+Und das Umgekehrte ist auch, also kann man auch machen, wenn eine Klasse zum Beispiel
+keine Operationen hätte, dann kann man auch die Klasse mit nur Attributen darstellen
+und kann man die Operationen weglassen, weil es keine gibt zum Beispiel.

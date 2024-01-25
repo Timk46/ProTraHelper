@@ -1,0 +1,142 @@
+Und man kann in Python und fast jeder anderen Kombiniersprache eine Funktion schreiben,
+die sich selber aufruft.
+Eine Funktion, die sich selber aufruft.
+Also sowas.
+Ich könnte definieren, sag mehr als Hallo von N, wobei N die Anzahl sein soll, wie oft
+ich Hallo sage.
+Wenn N gleich 0 ist, schreibe ich hier fertig.
+Wenn N nicht gleich 0 ist, dann rufe ich, sag mehrmals Hallo von N-1 auf und drücke
+Hallo.
+Ja, was wird das tun?
+Wenn ich jetzt sag mehrmals Hallo von 4 aufrufe, dann ruft er das auf, schaut, N ist nicht
+0, das ist ja 4, also gehe ich hier rein, also rufe ich auf, sag mehrmals Hallo von
+3 und muss danach noch was tun.
+Also an dieser Stelle gibt es einen sogenannten Stack an Funktionen, also Sachen, die sich
+der Computer merken muss, die er noch ausführen muss und er weiß, ich muss hier noch was
+drum drucken, aber jetzt führe ich erst mal, sag mehrmals Hallo von 3 auf.
+Was passiert?
+Er geht hier in die Funktion, N ist 3, N ist also nicht 0, also gehe ich hier hin,
+also komme ich an die Stelle, wo hier steht, ich muss sag mehrmals Hallo von 2 ausführen
+und danach noch was tun.
+Wieder hier, ich muss mehrmals Hallo von 1 ausführen und danach noch was machen.
+Einmal durch, oh, jetzt ist N gleich 0, dann bin ich fertig und dann habe ich jetzt eben
+diesen Stack von Sachen, die passieren sollen und dann kann er nach und nach in allen Funktionen
+weiter im Text gehen sozusagen, also kommt hier an das Hallo, drückt das aus und nochmal
+und nochmal und nochmal und zum Schluss drückt er fertig.
+Okay, eine Funktion, die sich selbst aufruft.
+Besonders wichtig, ganz generell, wenn man sowas überhaupt schreibt, ist natürlich,
+dass man eine Abbruchbedingung braucht.
+Hätte ich dieses Wenn N gleich 0 da nicht reingeschrieben, dann, naja, dann probieren
+wir mal aus, was passiert, aber wahrscheinlich sagt er mir dann vor der Ausführung, dass
+das nicht geht.
+Oder er stürzt ab.
+Mal gucken.
+Ja, stürzt ab.
+Also, er hat den Kern gestartet, er hat jetzt gemerkt, irgendwas läuft schief, nämlich
+ich hänge irgendwie fest.
+Glücklicherweise gibt es heutzutage da immer einen Schutz gegen, typischerweise, und wir
+müssen nicht den Computer neu starten, aber genau, ich brauche hier also irgendwie eine
+Abbruchbedingung und dann funktioniert es so.
+Das Einzige, was mich gerade gewundert hat, muss ich mal einmal umdrehen.
+Genau, okay.
+Das ist auch das, was ich dachte.
+Mich haben meine eigenen Folien gewundert.
+Das hier ist nicht die Ausgabe von diesem Programm.
+Was ich gemerkt habe, als ich nach und nach erzählt habe, dass das immer wieder aufgerufen
+wird, denn ich habe ja gesagt, es ruft bei Sag Hallo 4, Sag Hallo 3 auf, dann 2, dann
+1, dann 0 und wenn es 0 aufgerufen hat, kommt es hier an die Stelle, wo Print fertig steht.
+Das heißt, er müsste zuerst Print fertig schreiben, also zuerst fertig schreiben und
+dann mit den anderen Funktionen weitermachen.
+Also dann die Hallos drucken.
+Also dieser Code sollte eigentlich fertig Hallo, Hallo, Hallo, Hallo generieren.
+Das ist ja auch das, was ich hier jetzt nachgebaut habe.
+Hier steht auch Stopp, Hallo, Hallo, Hallo, Hallo.
+Was daran liegt, dass hier halt erst das Sag Hallo aufgerufen wird und dann das Hallo gedruckt
+wird, also die Reihenfolge, wenn ich das andersrum machen möchte, wäre so Hallo, Hallo, Hallo,
+Hallo, Stopp.
+Ja.
+Achso, hier, ja, also man kann es, klar, man kann die gleiche Funktion mit einer Vorschreibe
+lösen, das können wir auf jeden Fall schon mal machen.
+Sag Hallo vor.
+Das Umdrehen, dafür sind die, ja, sind die IF-Abfragen zu günstig, um das, dass das
+eine Rolle spielt, aber ja, man könnte auch das so machen, klar, if n echt größer als
+0, mach das, sonst, das meinst du, richtig?
+Genau, das kann man auch, aber ob das irgendeinen Laufzeitunterschied hat, das weiß ich nicht
+genau.
+Aber klar, man geht häufiger in diesem Fall wahrscheinlich.
+Dann die zweite Frage, kann man das mit einer Vorschreibe lösen?
+Auch, auf jeden Fall.
+Klar, ich kann die ja auch schreiben vor, wie in range n, print, Hallo, neue Zeile.
+Und, sag Hallo von, achso, wenn ich damit fertig bin, print, stop.
+Und print Hallo vor.
+So, also, das funktioniert natürlich auf genau gleiche Art und Weise und sind einfach
+zwei unterschiedliche Herangehensweisen für eine ähnliche Problemlösung und da komme
+ich gleich zu, was für Vorteile hat die Rekussion, was für Nachteile hat die Rekussion.
+Also, völlig klar, das ist nicht so, dass das die einzige Lösung dafür ist, sondern
+dass es eine alternative Möglichkeit ist und genau das habe ich auch in dem Buchstiel
+vor.
+Wir werden die While-Schleife, eine funktionierende, existierende Implementierung, ersetzen durch
+eine Rekussion.
+Gut.
+Ach ja, das machen wir als nächstes vielleicht mal.
+Aber im Prinzip, wir das direkt, ich kann es auch hier machen.
+Was ich als nächstes gemacht habe, ist zu Sag mehrmals Hallo eine Einrückung hinzugefügt.
+Das Sag mehrmals Hallo hängt jetzt von der Anzahl der Hallo-Sagenden ab, sowie von einem
+Level der Verschachtelung der Funktion, damit man das einfach ein bisschen besser visualisieren
+kann.
+Also, dieses Level ist hier jetzt nur zum Visualisieren, Backslash T ist ein Takt, eine
+Einrückung und jetzt sage ich, wenn N gleich 0 ist, dann rücke Level oft ein und printe
+dahinter fertig und sonst rücke Level oft ein und schreibe, rufe die Funktion, sag
+mehrmals Hallo N-1 mal auf und tue das dann, aber erhöhe das Level.
+Schmeiße mir das Level gedanklich raus und die Funktion ist identisch zu dem, was auf
+der vorherigen Folie geschehen ist.
+Alles, was jetzt hinzugekommen ist, ist jeder Print-Befehl ist um Level viele Takts eingerückt
+und immer wenn ich sag mehrmals Hallo aufrufe, mache ich nicht nur eine Reduktion von N,
+sondern auch ein Erhöhen vom Level, weil das die Anzahl der Verschachtelungen ist.
+Ja, und dann nachdem das ausgeführt wurde, printen wir hier mit dem entsprechenden Level
+das Hallo und jetzt sieht das Ganze so aus.
+Also, wir rufen, sag mehrmals Hallo von 4 auf.
+Er geht in die Funktion rein, 4 ist nicht 0, also geht er hier hin, er druckt 0 Einrückungen
+und sagt, ich rufe jetzt die Funktion, sag mehrmals Hallo von 4-1, also mit dem Eingabeargument
+3 auf.
+Dann tut er das mit einem höheren Level und nachdem er damit fertig ist, wird er nachher
+noch mit 0 vielen Einrückungen Hallo schreiben.
+Die Funktion, sag mehrmals Hallo, wird jetzt aufgerufen mit Eingabeargument 3 und 1.
+Er geht hier rein, schaut, 3 ist nicht 0, also gehe ich hier hin, jetzt hat er eine Einrückung
+und sagt, ich rufe die Funktion, sag mehrmals Hallo von 2 auf.
+Tut das, aber mit einem Level von 2 und druckt nachher mit einer Einrückung das Wort Hallo.
+Ja?
+Also, jetzt haben wir wirklich Printbefehle vor und nach diesem Rekursiven aufgerufen
+und das fertig eben als den einzigen Printbefehl, wenn n gleich 0 wird.
+Und jetzt sieht man ein bisschen die Reihenfolge, in dem das Ganze geschieht.
+Es geschehen halt erst alle Aufrufe.
+Es ist nachher also ein Stack von 1, 2, 3, 4, in dem Sinne 5 Aufrufen.
+Und diese 5 Aufrufe, wenn die hier durch sind, gehen alle auf ihr individuelles Printkommando.
+Also kommt zuerst hier in gewisser Weise das Print von dem fertig und dann alle Prints,
+die hinter den Rekursiven Funktionsaufrufen stehen.
+Also deshalb geht es hier so pyramidenförmig wieder rückwärts mit den Hallos.
+Ja, das ist die Idee von diesem Set, wenn ich diese Funktion F nenne.
+Und ja, ich könnte das auch aufschreiben.
+Das ist ein Sag mir mal Hallo von, Sag mir mal Hallo von, Sag mir mal Hallo von
+und da drin spezifiziert, dass jede Funktion einmal Hallo sagt.
+Sozusagen ist es eine Art Verschachtelung.
+Ja.
+Okay, warum tun wir das Ganze?
+Also Rekursionen haben wir gerade schon gesehen, mit dem sehr guten Hinweis,
+hätten wir das nicht mit einer Vorschlage machen können.
+Ja, Rekursion hat einige Vorteile.
+Programme können zum Teil mit Rekursion einfacher, eleganter oder mit weniger Code gelöst werden.
+Weniger Code oder verständlichere Code ist immer besser, ist einfacher zu pflegen,
+weniger fehleranfällig, das ist ein Gewinn.
+Und Rekursion kann, und das ist der Teil, für den wir es verwenden werden,
+die Mutation von Variablen verhindern und ist deshalb insbesondere für funktionale Programmierung sehr interessant.
+Bei einer Vorschleife speichere ich mir ja immer irgendwie mein Ergebnis zwischen wieder.
+Bei der Rekursion verschachtel ich einfach die Funktion sehr oft
+und speichere dieses Zwischenergebnis jedes Funktionsaufrufs gar nicht mehr explizit in der Variable.
+Da kommen wir gleich nochmal drauf zu.
+Also das sind Vorteile, warum Rekursion vielleicht interessant sein könnte.
+Und was wir vielleicht mal machen, ist die Schleife Summe über alle n schreiben,
+die nichts anderes macht, als alle Zahlen von 0 bis n aufzusummieren.
+Und ich glaube mit einer Vorschleife ist das kein so großes Hindernis,
+das ist ziemlich genau das, was wir quasi in der ersten, vielleicht zweiten Vorlesung gemacht haben.
+Einfache Vorschleifen plus gleiche Operationen.

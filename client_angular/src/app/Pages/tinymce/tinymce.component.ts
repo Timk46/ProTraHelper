@@ -83,6 +83,11 @@ export class TinymceComponent {
     return tinymce.get("editor").getContent();
   }
 
+  getRawContent(): string {
+    console.log("TinymceComponent: getRawContent");
+    return tinymce.get("editor").getContent({format: 'text'});
+  }
+
   /**
    * Set the content of the editor
    * @param content the content to set

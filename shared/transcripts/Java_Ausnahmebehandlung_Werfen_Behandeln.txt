@@ -1,0 +1,148 @@
+Genau, also so kann man selbst die eigenen Fälle schreiben.
+Und das passiert mit diesem speziellen Keyword throw,
+wo throw eigentlich normalerweise kombiniert wird mit new,
+weil man kreiert ein neues Objekt.
+Und was dann folgt, ist meistens eine Klasse,
+die man entweder selbst definiert hat,
+oder eine Klasse, die auch schon besteht, in Java.
+Also zum Beispiel eine der Runtime Exceptions, typischerweise.
+Und auch da kann man dann nochmal spezifizieren,
+welche Parameter dann aufgerufen werden.
+Genau, und so kann man dann selbst definieren,
+was schief gehen kann, oder was passiert, wenn etwas schief geht,
+indem man selbst diese Ausnahme Klassen definiert,
+um dann die Objekte zu kreieren mit throw.
+Genau.
+Man kann auch throw in einen Catchblock verwenden,
+das heißt, throw kann man auch noch benutzen,
+wenn man nicht die eigenen Fälle hat,
+aber die Fälle, die schon aufgefangen wurden in einen Catchblock.
+Das heißt, sobald man hier in diesen Block kommt,
+weiß man, dass diese Ausnahme hier aufgetreten hat.
+Hier steht zum Beispiel ein divide by zero Exception.
+Oder Arithmetic Exception, heißt es eher.
+Aber wenn das dann passiert ist, dann kommt man hier in diesen Block.
+Sobald man in diesen Block kommt, hat man diese E als Fehler,
+das ist unsere Instanz für diese Fehler.
+Und wenn man das zum Beispiel nicht mehr beheben kann,
+oder wenn man das einfach zurückgeben möchte am Betriebssystem,
+oder weitergehen möchte,
+dann kann man das mit throw auch wieder weiterwerfen.
+Deshalb kann man das, oder das macht man auch oft,
+nachdem man ein Catchstatement hat,
+und es gibt unter bestimmten Umständen etwas,
+das man nicht machen könnte, oder etwas noch später machen möchte,
+dann macht man mit throw und gibt man das weiter.
+Genau.
+Also wenn man eine Ausnahme hat,
+dann ist der einfachste Fall, dass man das nicht behandelt.
+Und wenn das passiert, dann bricht unsere Methode sofort ab.
+Alle anderen Anweisungen, die danach kämen würden,
+passieren halt nichts.
+Es geht einfach weiter zurück bis zum Main-Methode.
+Und wenn da nichts mehr aufgefangen wird mit catch,
+dann wird das Programm abgebrochen.
+Dann wird einfach diese Methode abgebrochen, die Methode der Methode,
+bis man auf die Main-Methode kommt.
+Und wenn da nichts aufgefangen wird,
+dann hat unsere Virtual Machine die Information,
+dass nichts aufgefangen wurde,
+und deshalb muss das Programm abgebrochen werden.
+Das ist eigentlich, was passiert.
+Wenn eine Methode bestimmte Exceptions werfen kann,
+muss das definiert werden.
+Und das haben wir bislang noch nicht gesehen,
+deshalb ist das auch noch wichtig zu sagen.
+Wenn eine Methode definiert wird,
+zum Beispiel anmelden ist eine Methode eine Klasse,
+geben Sie nichts zurück, hat bestimmte Parameter,
+wenn innerhalb der Anweisungen von dieser Methode
+eine Ausnahme passieren kann,
+dann muss man das auch definieren.
+Das heißt, auch da kommen wir dann mit throws,
+das heißt, wir geben hier die Information,
+dass anmelden als Methode eine bestimmte Ausnahme werfen kann.
+In diesem Fall Anmeldungsexception,
+was wir selbst wahrscheinlich kreiert haben.
+Und das können auch mehrere sein,
+oder es sind häufig mehrere,
+deshalb muss man das dann zum Beispiel
+dann auch explizit darstellen.
+Also wenn man zum Beispiel darstellen möchte,
+dass die Main-Methode bestimmte Ausnahmen werfen kann,
+dann kann man das auch so definieren.
+Oder so an unseren Compiler
+und an unsere Java Virtual Machine weitergeben.
+Genau.
+Das haben wir eigentlich schon gesehen.
+Wir haben meistens dann halt,
+wenn man das selbst auffangen möchte,
+unser Block von Anweisungen,
+wo ein Fehler passieren könnte.
+Das beschreibe ich einfach mit diesem try-Block.
+Sobald dann in diesem Block etwas passiert,
+können wir das auffangen.
+Und dann das Auffangen passiert,
+indem man die Parameter so definiert,
+also wo man die Objekte E der Klasse so definiert,
+dass die Klasse dazu gehört.
+Das heißt, wenn dadurch nur geteilt wird hier,
+wenn Z ein Null ist,
+dann kommt nicht ein Index out-of-bound-exception,
+also kommen wir hier nie in dieser Block,
+aber eher in diesem Block.
+Und werden dann Schreiben, Fehler und dann GetMessage zum Beispiel.
+Das heißt, Catch wird ausgeführt beim ersten Catch,
+der zutrifft.
+Wenn man dann zum Beispiel eine generellere Nachhier hat,
+deshalb wird man hier normalerweise auch Show-Statements finden.
+Wenn hier zum Beispiel dann noch mal getestet wird
+und man möchte dann zum Beispiel nicht diese bestimmten Fehler
+noch mal anzeigen, aber etwas später,
+dann kann man mit Show dann noch mal das Ganze weitergeben
+an andere Catch-Statements.
+Oder an andere Methoden, die diese Methode aufgerufen haben.
+Auch das ist eine Möglichkeit.
+Okay, und dann...
+Genau, also was passiert, wenn in einem Tri-Block,
+das ist eigentlich ziemlich wichtig,
+wenn in einem Tri-Block ein Fehler passiert?
+Also ein von dutzenden Anweisungen da hat Teil durch Null
+und es wird Teil durch Null,
+dann wird da die Ausnahme vorkommen.
+Das Problem ist, also dann alle anderen Anweisungen
+werden erstmal nicht berücksichtigt
+und man wird in dem Programm springen.
+Deshalb heißt es auch Show, man wird einfach aus dem Tri-Block gehen
+und wird dann den passenden Catch-Block,
+der danach kommt, aussuchen.
+Also der passende Catch-Block wird gefunden,
+indem man die Klasse, zu der dieser Fehler gehört,
+findet und dann ausführt, was nach dieser Catch-Methode steht.
+Genau, und das wird dann ausgeführt.
+Wenn das dann ausgeführt ist, dann wurde das behoben.
+Das heißt, dann wird es rückgekehrt
+und werden alle anderen Anweisungen in diesem Tri-Block weiter ausgeführt.
+Wenn das aber nicht passiert, wenn da nichts aufgefangen wird,
+dann wird diese Methode abgebrochen
+und geht man weiter zu den Exceptions von allen anderen Methoden,
+die dann danach kommen, zu denen diese Methode gehört.
+Das ist dann, was hier hierarchisch weitergegeben wird nach oben.
+Genau, und wie gesagt, also der passende Catch-Block,
+das ist keine Magie, das ist einfach nur der Typ,
+also unsere Klassedefinition, die dann erfasst,
+ob man dann in dieser Catch-Block geht oder auch nicht.
+Und dann hat man, nicht oft, aber kann man haben, eine Finally-Block.
+Diese Finally-Block kommt danach.
+Das heißt, nach dem, also Finally wird immer ausgeführt.
+Das heißt, wenn alles gut gegangen ist nach Tri,
+wird Finally dann trotzdem noch ausgeführt.
+Wenn es etwas schief gegangen ist und man geht von Tri auf Catch
+und man hat da etwas gefunden und geht zurück in Tri,
+auch dann wird Finally ausgeführt und in allen anderen Fällen auch.
+Das heißt, Finally ist ein Block, das genau wie Tri und Catch
+einfach nur ist Finally in einem Geschwafte-Klammer
+und dann folgen Anweisungen, die immer zum Aufräumarbeiten gehören.
+Das heißt, wenn man dann in einer bestimmten Methode
+Objekte kreiert hat, die dazu gehören,
+dann kann man sie in Finally aufräumen.

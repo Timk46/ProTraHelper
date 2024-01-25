@@ -23,6 +23,7 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ModulesModule } from './modules/modules.module';
+import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
 
 @Module({
   imports: [
@@ -35,7 +36,7 @@ import { ModulesModule } from './modules/modules.module';
     ChatBotModule,
     ModulesModule,
     QuestionDataModule, 
-    TaskOverviewModule],
+    TaskOverviewModule, FeedbackGenerationModule],
   controllers: [
     AppController,
     DiscussionListController, DiscussionVoteController, DiscussionViewController, DiscussionCreationController

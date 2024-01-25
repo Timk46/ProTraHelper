@@ -5,11 +5,15 @@
 }
 
 .task-overview-card {
-    max-width: 200px;
-    max-height: 200px;
+    width: 200px;
+    height: 120px;
     margin-right: 4px;
     margin-top: 4px;
     margin-bottom: 4px;
+}
+
+.button {
+    margin: 4px;
 }
 
 .task-progress-card {
@@ -33,4 +37,8 @@
     bottom: 0;
     left: 0;
     width: 100%;
+}
+
+.card-title {
+    font-size: medium;
 }

@@ -1,0 +1,348 @@
+Okay, jetzt haben wir noch ein bisschen Zeit, um etwas Interessantes zu machen, weil leider
+auch die nächste Woche eine typische Vorlesung so aussehen wird.
+Wir machen ständig das hier, wir sehen dann Klassen, wir sehen dann Methoden, das wird
+dann komplexer werden, aber grundsätzlich wird unsere Quellcode immer so aussehen und
+unser Programm, qua Charakter, sieht immer dann so aus.
+Man führt die aus und man sieht dann in der Konsole ein paar Werten ändern.
+Das ist nicht immer so, also als Erfolgserlebnis ist das nach einer bestimmten Zeit etwas langweilig.
+Deshalb schlage ich vor, dass ich ab und zu auch ein anderes Beispiel einbaue, nämlich
+wo wir dann sofort in AWT und Swing agieren, weil ich glaube, das ist ein der Vorteile
+von Java.
+Grundsätzlich, weil Java Plattform unabhängig ist und weil Swing und AWT auch Standardbibliothek
+oder Standardpakete sind, kann man fast überall Swing und AWT benutzen.
+Das heißt, man kann ein Fenster in eine grafische Umgebung, wie hier, sofort erstellen und das
+funktioniert sowohl auf Mac oder Linux oder Windows Computer.
+Dafür braucht man etwas mehr magische Sprüche, aber wie wir so eben gesehen haben.
+Aber grundsätzlich, glaube ich, können wir da ein relativ gutes Beispiel nehmen.
+Dann werde ich das einfach so aufbauen, sodass wir dann das zum Beispiel für vielleicht
+eine Schleife mal nennen können.
+Ich werde mal ein Game.
+Erwarte nicht zu viel, aber ich nenne es mal Game.
+Und ich sage, Game ist eine Klasse.
+Auch da wieder genau das gleiche.
+Wir machen immer das weiter.
+Game.
+Ich erzähle später was für Game.
+Auch da, ich bin der Autor, ich habe die Verantwortung und es ist heute programmiert.
+So.
+Dann habe ich meine Klasse auch schon mal direkt definiert, weil ich möchte eine Klasse Game haben.
+Das erste Spezielle ist, sobald ich, also was wir bis jetzt haben, ist einfach eine normale Klasse.
+Und dann hat diese Klasse eine Methode Main.
+Und das ist dann, was ausgeführt wird.
+Was in dem Block von Main steht oder in dieser Funktion steht, das wird dann ausgeführt.
+Hier werden wir aber diese Klasse etwas ausbauen, sodass wir dann das Grafische auch irgendwie bewirken können.
+Und dafür braucht man sofort etwas, das wir erst in vielen Wochen erstmal sehen, nämlich Extents.
+Was das heißt, auch das kommt dann später.
+Ich kann aber sagen, was dieser JPanel ist, ist eigentlich schon etwas, das besteht.
+Das muss man aber importieren aus dem Paket, das standardf.java zur Verfügung steht.
+Also sobald Sie dann JDK installiert haben zum Beispiel, kann man dann sagen in der Quellcode import java.avt.
+Alles da.
+Und dann haben Sie alle Funktionen aus avt.
+Jetzt, das kommt dann auch später in Kapitel 10 oder so was, steht avt für Abstract Window Toolkit,
+womit wir abstrakte Fenster bauen können.
+Und das machen wir jetzt. Wir machen gleich nicht etwas in die Konsole, aber etwas aus Fenster.
+So die Idee.
+Genau, also wenn wir das machen, dann haben wir jetzt eine Klasse, die etwas mehr Funktionen hat.
+Das ist eigentlich, was dieses Extents.jPanel bewirkt.
+Das heißt, unsere Game-Klasse ist eine spezielle Klasse.
+Mehr dazu später.
+Auch hier habe, wie vorher, eine Public.
+Static.Methode.Main.
+Hier brauche, ich weiß es nicht, aber wir machen es mal so.
+Eine String Array.
+Nehme ich mal A.
+Genau, und hier haben wir dann unsere Quellcode, die wir jetzt ausführen werden.
+In diese Quellcode werden wir jetzt unsere Klasse hier, genau wie ich das vorher auch gemacht habe,
+beim Beispiel in der ersten Woche, würde ich auch hier genau das wieder machen.
+Das heißt, ich erstelle ein Objekt von Klasse Game.
+Ich nenne das mal Game hier in diesem Fall.
+Ich glaube, ich muss das sogar nicht machen, aber egal.
+Auch das ist magisch momentan.
+Wir wissen nicht, was ich da gemacht habe.
+Ich habe ein Objekt von Typ Game erstellt und dieses Objekt nennt sich Game.
+Das ist genauso wie bei System.out.print.
+Das ist einfach zur Verfügung.
+Auch das hier ist einfach etwas, das besteht.
+Und was auch wichtig ist, ist, dass ich Game.setFocusable machen muss.
+Das heißt, was ich hier erstelle, ist letztendlich ein neues Fenster, ein grafisches Fenster,
+Windows-Fenster in diesem Fall oder Mac-Fenster hier.
+Und ich brauche ein paar Anweisungen, um das Ganze erstmal vorzubereiten.
+Genau. Und setFocus ist etwas, das wir benutzen werden.
+Ich glaube, das sollte funktionieren.
+So, das ist das Erste, was wir machen müssen.
+Und dann machen wir ein JFrame.
+Das ist, was in unserem Fenster steht und das ist die grafische Oberfläche.
+Das werden wir gleich zeigen.
+Das nennen wir mal Frame.
+Und auch da werden wir genau das Gleiche machen wie vorher, hier in Zeile 12.
+Aber hier mussten wir das als JFrame.
+Und da können wir in dieser Funktion einen Namen geben.
+Und das hier ist ein String, das angezeigt wird, sobald man das Fenster öffnet.
+So etwas zum Beispiel.
+Okay. Was jetzt kommt, ist eine Zeit...
+Noch einmal ein paar, aber nicht viele.
+Das Erste, was man sicherlich haben möchte, ist, dass das Ganze sichtbar wird.
+Das heißt, sobald man dann unser Programm ausführt, macht man ein neues Fenster.
+Das Fenster nennt man Game.
+Und wir sagen, wir können das fokussieren.
+Und in diesem Fenster setzen wir dann Frame, wo wir dann Sachen zeichnen können.
+Und das wird auch visuell sichtbar sein.
+Heißt, Set Visible setzen wir dann auf True auch.
+Das ist schon mal ein erstes Programm.
+Das hier sollte dazu führen, dass ich jetzt gleich ein Fenster erzeuge.
+Und auch da genau das gleiche Prozedere.
+Ich habe mein Game.java, also Textdatei.
+Ich kompiliere das. Ups, ich bekomme einen Fehler.
+Ah, okay. Ich habe eins vergessen.
+Ich brauche auch Swing tatsächlich.
+Und Swing muss man so importieren.
+Statt an Java.avt hat man javaswing.alles.
+Swing Toolkits.
+Das ist für, ich kann das auch direkt sagen, 4G Panel.
+Ne, das war das Falsche.
+Da habe ich...
+Ach komm.
+So, da.
+Bin diese Tastatur auch nicht gewöhnt.
+Okay, nochmal.
+Schon wieder nichts.
+GameSetFocus.
+Vielleicht.
+Ah, Focusable.
+Naja, muss man halt wissen.
+Aber wenn das dann passiert, dann kann man einfach gucken auf der Webseite von Swing.
+Das ist ein Teil von AVT.
+Und da steht genau, was man machen müsste.
+Dieser Link, den ich vorher in der Voreihe gezeigt habe, zeigt zum Beispiel genau das.
+Gut, und dann werde ich das jetzt mal ausführen und gucken, ob jetzt etwas entsteht.
+Hier.
+Okay, nicht so behäuschend.
+Ich kann es aber etwas größer machen.
+Tatsächlich haben wir jetzt ein Fenster mit GameOn als Titel und eine bestimmte Größe.
+Diese Größe ist aber sehr klein und fängt hier an.
+Das ist ja auch nicht so schlimm.
+Aber die Größe muss man noch anpassen.
+Und das machen wir hier bei JFrame.
+Also bei JFrame kann man sagen, SetSize, und kann man die Größe in Pixel angeben.
+Zum Beispiel sagen wir jetzt 800x400 zum Beispiel.
+Das heißt, 800 Pixel breit, 400 Pixel hoch.
+Eine andere Sache ist, dass unser Programm noch immer da ist.
+Guck, ich habe es geschlossen, visuell ist es geschlossen, aber das Programm läuft noch immer.
+Auch das ist ein Fehler.
+Wenn das passiert, und das wird bei Ihnen bestimmt ab und zu mal passieren,
+zum Beispiel wenn eine Weilschleife hat und diese Bedingung ist immer wahr,
+dann hat man eine Endlosschleife und wird dieses Programm immer ausgeführt werden.
+Wenn so etwas passiert und man macht das zum Beispiel in der Konsole,
+dann kann man Steuerung C drücken und dann hat man wieder die Kontrolle.
+Man hat das Programm gelöscht, also wird nicht mehr ausgeführt.
+Aber das möchten wir jetzt eigentlich nicht mehr haben, deshalb werden wir auch das jetzt mit
+– da muss ich nochmal kurz gucken, was das ist –
+Default Close Operation.
+Das heißt, wenn ich das Fenster beende, dann ist das mein Default Close Operation,
+wenn ich dieses ganze Programm beende.
+Das heißt, das werde ich erst setten, also set Default Close Operation
+und dann auch das muss man dann wissen, oder auch das bekommt man dann,
+Exit underscore Close.
+Gut, ich glaube, wir haben es fast.
+Das heißt, das nächste Mal sollte mein Fenster 800 mal 400 Pixel groß sein
+und wenn ich es beende, dann wird auch das ganze Programm beendet.
+Wir kompilieren und führen es aus.
+Jetzt habe ich tatsächlich ein Fenster, da passiert noch nichts,
+aber jetzt kann ich programmieren, was passiert, wenn wir hier etwas machen.
+Ab jetzt gibt es hoffentlich weniger Zaubersprüche oder etwas,
+das man aus einer Webseite holen muss und kann man das dann tatsächlich selbst programmieren.
+Das Erste ist, wir müssen etwas zeichnen und das Zeichnen passiert mit der zweiten Methode.
+Das heißt, Main ist die Methode, die ausgeführt wird, sobald man das Ganze ausführt.
+Wir machen hier jetzt ein neues Fenster auf und wir können auf dieses Fenster etwas bewirken,
+wir haben dann eine Größe, aber jetzt, sobald das Fenster dann da steht,
+müssen wir etwas malen können und das wird dann mit einer speziellen Funktion passieren.
+Und diese Funktion kommt, kann ich schon sagen, aus J-Panel.
+Das ist diese Funktion, anders als wie bei zum Beispiel dieser Prop-Funktion,
+die wir vorher hatten in der ersten Vorlesungswoche, ist das eine Funktion, die schon besteht,
+aber die eigentlich jetzt neu definiert wird. Und wie das funktioniert, kommt auch später.
+Also wir sagen, Public Void Paint Component, so, und diese Funktion wird jedes Mal ausgeführt,
+wenn uns das Fenster sich irgendwie ändert.
+Dann wird das hier ausgeführt und es hat als Parameter ein Graphics,
+also nicht Int, nicht Float, aber Graphics als Objekt. Das nennen wir mal G.
+Und das ist eigentlich, womit wir Sachen zeichnen können.
+Da können wir zum Beispiel einen Kreis zeichnen oder eine Linie oder ein Stück Text oder was dann auch.
+Und das geht dann ungefähr so. Wir können erstmal Super machen.
+Was das heißt, auch das ist so etwas, was dann später in drei Wochen deutlich wird.
+Das heißt, wir machen alles, was üblicherweise passiert, vor unserem Fenster.
+Ja, Component, danke schön, super. Herzlichen Dank, schön, dass man mit dem und guckt.
+Ja, perfekt. Also, und jetzt wollen wir was zeichnen.
+Vielleicht erstmal eine Farbe auswählen. Auch das ist möglich und das passiert dann so.
+Muss man auch wissen, muss man auch aus dem Tutorial sofort kopieren.
+Grundsätzlich ist das auch nicht so viel Hokus Pokus. Das kann man noch mal lernen, aber das kann man auch mal sehen.
+Und dann ein Rechteck, das man füllt mit einer bestimmten Farbe, ist ein Fill Rect zum Beispiel.
+So, und da muss man erst die Position, also XY Position, also wir werden das irgendwo in der Mitte setzen,
+zum Beispiel 300 oder sagen wir 200, 200, das klappt schon.
+Und dann die Größe, also wie breit es ist und wie hoch es ist.
+Da würde ich mal 20, 20 Pixel nehmen. Das ist, glaube ich, okay.
+Position XY, dass das später noch alles ist.
+Und dann mit Height, dass keiner dann später noch mal diese Funktion, diese Methode aufrufen muss oder nachdenken muss, was wird hier gemacht.
+Also wir werden hier draw a rectangle.
+So.
+Also das sollte schon funktionieren. Das heißt, sobald ich hier das Ganze aufrufe, wird das von JVM, also Java Virtual Machine, interpretiert.
+Ein Fenster wird gemacht. In diesem Fenster kann ich zeichnen und jedes Mal, wenn gezeichnet werden muss, wird diese Funktion ausgeführt.
+Und in diese Funktion setze ich die Farbe auf Rot und mache ich diese Rechteck auf diese Position mit dieser Breite und Höhe.
+Okay.
+Ah, das stimmt.
+Okay. Ich dachte, es wird schon aufgerufen, sobald wir hier das haben und zum Beispiel resizen, aber tatsächlich ist es anscheinend nicht der Fall.
+Deshalb müssen wir das Ganze explizit wahrscheinlich auch erst mal aufrufen oder müssen wir erst mal diese Paint Component auslösen.
+Das können wir auch machen, aber dafür muss ich noch eine Sache machen.
+Ja.
+Ah, ja, genau, super. Man denkt mit und man weiß auch tatsächlich, worum es geht. Super.
+Das machen wir jetzt hier. Tatsächlich müssen wir bei Frame hier etwas dazu fügen.
+Nämlich, ja, man muss hier jetzt dann das Content Paint, Paint oder Panel, Paint glaube ich, und dann Add.
+Und dann müssen wir, was wir haben, ist dann unser J-Panel, das ist Game, Game dazunehmen.
+Ja, ich weiß es nicht. Ich probiere mal aus. Sollte man nie machen. Man sollte hier natürlich einfach das Tutorial folgen und verstehen, worum es geht.
+Aber andererseits, jedes Mal, wenn ich hier mal ausprobiere, lerne ich dazu. Ich hoffe, dass Sie das auch gesehen haben. Also grundsätzlich habe ich wieder was gelernt.
+Nein, das macht jetzt noch immer nichts. Wenn ich resize, ah, okay. Wenn ich resize, wird dann tatsächlich dieses Paint herausgeführt.
+Tatsächlich ist das schon mal ein guter Anfang. Okay. Noch was, das ich machen konnte?
+Also ich glaube, das ist schon mal, also grundsätzlich wissen wir jetzt, dass jedes Mal, wenn ich etwas mit dem Fenster mache, dass dann diese Paint Components Funktion ausgeführt wird.
+Das ist, glaube ich, das Allerwichtigste. Jetzt zum letzten Punkt, werde wir jetzt nicht nur vom J-Panel hier etwas einholen, man werde aber auch etwas implementieren,
+was auch uns befähigt, hier mit der Tastatur bestimmte Tasten auszulesen. Das heißt, ich möchte jetzt endlich mal das rote Kästchen bewegen, zum Beispiel hoch, runter, links oder rechts.
+Das ist eigentlich das Ziel hier. Und dafür brauche ich erstmal, man sollte nie aufhören und dann irgendwo anders etwas tippen, aber das mache ich jetzt mal, eine andere spezielle Bibliothek von Java, von AWT, der Events ausliest.
+Also das hier, KeyListenerEvents, werden hier ausgelesen. Und das kann man machen, sobald man hier KeyCloudListener hat als Klasse, als Standardklasse, das man hier nimmt.
+Okay, das kann man nur machen, wenn man hier das ganze auch dazu fügt. Das heißt, hier beim Fenster selbst muss man ermöglichen, dass jedes Mal, wenn ich auf die Tastatur eine Taste drücke, dass man das dann als Ereignis reinbekommt, in diese KeyListener.
+Das ist, was ich hier dazu füge. Und da muss ich jetzt einfach KeyListener gehen. Das heißt, unsere Klasse funktioniert auch als KeyListener. Jedes Mal, wenn ich eine Taste drücke, erzeuge ich ein Event oder ein Ereignis und das wird dann hier in eine bestimmte Funktion wieder aufgeladen.
+Genauso wie diese Paint-Component entsteht dann eine neue Funktion. Eigentlich soll ich da drei Funktionen eintippen, die dann diese Taste dann sofort mitbekommt.
+Okay, was wir da machen, ist auch wieder, das ist ein public void keyPressed und diese Funktion wird aufgerufen, jedes Mal, wenn ich eine Taste drücke. Das ist eigentlich, was da passiert.
+Und da hat man ein KeyEvent, nennen wir mal e, und diese e ist eigentlich etwas, das wir dann auslesen können. Und abhängig von welcher Taste ich drücke, bekomme ich da was anderes.
+Okay, das ist eigentlich, wo wir dann unsere Funktionalität von unserem Programm irgendwie dann steuern können. Und ich weiß, das ist schon etwas komplizierter als vorher dieses System.out.printl, aber grundsätzlich ist es nichts anderes.
+Wir haben einfach statt nur eine Funktion oder eine Methode main, aber dann mehrere, die wir dann einfach zur Verfügung haben und wo wir dann unsere Quellcoder programmieren können.
+Gut, was wir auch noch müssen, jedes Mal, wenn wir das machen, brauchen wir nicht nur diese Funktion, aber zwei andere Funktionen. Diese Funktionen können wir einfach oder müssen wir nicht benutzen.
+Das heißt, wir haben eine Funktion, wo die Taste dann eingedrückt wird und eine Funktion, wo wir die Taste dann wieder loslassen.
+Und auch das sind dann Public-Void-Funktionen. Sie sehen, da gibt es schon ein paar Muster. Die Methoden sind immer Public-Void irgendwie.
+KeyReleased ist, wenn man dann die Taste wieder loslässt. Auch das hat KEYEvent als Parameter. Und dann genau das Gleiche für KeyPressed.
+So. Das heißt, diese zwei sind leer. Da gibt es keine Anweisungen, was ich da implementieren möchte. Das sind einfach leere Funktionen.
+Hier möchte ich aber einiges machen. Das heißt, hier möchte ich, sobald ich eine bestimmte Taste drücke, möchte ich dieses Rechteck irgendwie bewegen.
+Und ich hoffe, dass es dann tatsächlich möglich wird, wenn ich hoch, runter, links oder rechts drücke, dass das Rechteck dann tatsächlich auch hoch, runter, links oder rechts sich bewegt.
+Soweit mein Plan. Wie mache ich das?
+Ja.
+Warum haben wir selber die gleiche Funktion?
+Ah, Moment. KeyTyped ist das letzte hier tatsächlich.
+Man könnte es auch anders machen tatsächlich. Man könnte auch einen von den anderen nehmen. Zum Beispiel KeyReleased. Aber hier nehme ich mal, jedes Mal, wenn man drückt, dann wird das ausgeführt.
+Und wenn man das eingedrückt lässt, dann kann man auch weitergehen.
+Ja.
+Ich glaube, als nächstes muss man dann E-Punkt, ich glaube, das ist kein Schadwort, sondern das ist ein Async-Tool.
+Genau. Super.
+Aber muss ich nicht meinen Grade-Render, also das müsste ich noch, und nicht GameAuth Set 1, sondern muss ich gleich aus dem Grade-Set, weil das nicht recht versteht.
+Das heißt, erst das hier machen und dann der Rest.
+Nein, das war voll gut. Aber oben müsste es sich dann noch ergänzen.
+Dann kann ich auch noch auf den Punkt Set Size, auf den großen Respekt.
+Wenn ich mir extra laute, dann...
+Wir gucken mal. Also ich glaube, es sollte schon funktionieren. Es kann tatsächlich sein, dass ich das trotzdem früher machen muss.
+Und dann erst visible am Ende zum Beispiel. Das könnte helfen.
+Um dann zum Beispiel, sobald ich das dann öffne, dass dann diese Paint-Component aufgerufen wird.
+Weil da gehen Sie in den Haushalt. Ich glaube, das ist tatsächlich schon richtig.
+Wir gucken mal und sehen mal, wie weit wir kommen.
+Aber auch da, das ist einfach nur die Verwendung dieser Pakete.
+Wie genau das Ganze funktioniert, ist einfach etwas, das man per Google herausfinden kann, natürlich.
+Aber auch da finde ich, dass viel zu viel einfach nur kopiert wird, ohne zu wissen, wofür es dient.
+Deshalb ist es schon wichtig, das Ganze hier immer so auszuprobieren.
+Genau, also wir haben tatsächlich, wie Sie es eben schon vordefiniert haben, auf diesen E eine GetKeyCode-Funktion.
+Und diese E, E GetKeyCode, ist tatsächlich etwas, wo wir dann etwas testen können.
+Wir können zum Beispiel mit einem If-Test sagen, if diese GetKeyCode ist gleich an etwas,
+also zum Beispiel die Pfeile nach links oder die Pfeile nach rechts, dann können wir genau das so ausführen.
+Dann sagen wir, okay, führe das hier aus.
+Else, if, und dann muss man wieder E GetKeyCode und dann so wieder.
+Das ist relativ lang, da haben wir jetzt dieses neue Konstrukt gesehen, nämlich Switch.
+Also, da haben wir gesehen, Switch muss man einfach nur auf GetKeyCode aufführen.
+Diese runden Klammern sind notwendig.
+Und dann müssen wir mit diesen Cases und Breaks, die gehören immer zusammen,
+kann man dann mehrere Fälle abarbeiten.
+Also, wenn diese Key oder diese Taste, die ich jetzt eingedrückt habe,
+ob das ein linker Pfeil ist, rechter Pfeil, nach oben oder nach unten zum Beispiel.
+Und auch da muss man wissen, was diese ASCII-Zahl bewirkt.
+Und auch da gibt es natürlich Shortcuts oder einfach nur einen vordefinierten Wert,
+den man dann einfach nehmen kann.
+Und das kann man dann machen mit KeyEvent, das ist die Klasse.
+Auch das kommt dann später.
+Und dann gibt es VK, das ist eine Arrow-Key-Bezeichnung, Left zum Beispiel.
+Und das Gleiche, ich mach mal so.
+Ich glaube, das ist das am sinnvollste.
+Das Gleiche kann man machen für Right, Up and Down.
+Das heißt, wenn ich das mache, viermal, dann habe ich es eigentlich schon.
+Das heißt, für Left ist, wenn ich auf den linken Pfeil drücke,
+Right, rechter, Down, nach unten und Up nach oben.
+Gut, jetzt brauche ich aber bestimmte Variablen, um das Ganze zu bewirken.
+Ich muss irgendwie unsere Rechteck oder die Position unseres Rechtecks irgendwie beibehalten.
+Und das sind Variablen.
+Jetzt würde die Variable einfach hier definieren.
+Und das werde ich mal als Integer.
+Ich glaube, Integer würde passen.
+Und ich wäre die als x und y zum Beispiel.
+Oder xpos, ypos für die Position von unserer...
+So, endlich.
+Gut.
+Hm.
+Jetzt könnte es sein... Mal gucken.
+Jetzt muss ich natürlich auch Eingabewerte geben.
+Okay, das mache ich jetzt mal via Constructor, auch was das bedeutet, kommt dann später.
+Weil im Constructor, also das ist die Funktion, die eigentlich ausgeführt wird,
+sobald ein Objekt der Klasse Game angemacht wird oder erstellt wird.
+Aber das muss public sein.
+Das habe ich schon mal vergessen.
+Ich glaube, ich kann es einfach so machen.
+Das heißt, xposition gleich yposition und wir machen das mal 200, wie vorher gehabt.
+Das heißt, sobald ich dann die Klasse angemacht habe, werden diese zwei Integers angemacht.
+Die habe ich jetzt zur Verfügung.
+Das sind Integers, aber die Werte sind irgendwie noch nicht definiert.
+Aber sobald dann diese Game-Klasse als Objekt erstellt wird, werden diese den Wert 200 gegeben.
+Am Anfang. Das ist, was das bedeutet.
+Und ab jetzt können wir überall xpos und ypos benennen oder auch benutzen.
+Deshalb kann ich auch jetzt beim Paint-Component hier statt 200, 200, kann ich dann xpos und ypos einstellen,
+sodass das eigentlich am Anfang 200, 200 wird.
+Das haben wir in den Vorhinein als erste Art von Variablen, in der Vorbemerkung unter Variablen gesehen,
+dass das eine Möglichkeit ist.
+Gut, okay. Aber das ist alles noch immer etwas, das dann vordefiniert ist.
+Jetzt möchten wir in dieser Methode unser eigener QL-Code ein bisschen weiterführen
+und alles andere kommt dann eigentlich damit.
+Das heißt, ich würde einfach demonstrieren, wie gut diese Switch-Anweisung funktioniert.
+Das heißt, wir haben aus dieser Methode, diese E, wir bekommen dann diese QL-Code, die wir da haben
+und ab dann werden wir dann Sachen da rausholen.
+Das heißt, wenn ich jetzt die linke Taste drücke, dann kann ich unsere Position anpassen.
+Und wie das geht, das wissen wir.
+Man muss einfach die x-Position in diesem Falle, oder war es die y-Position, die x-Position ändern.
+Wenn das vorher 200 war beim Start, muss ich jetzt dann das ein bisschen weniger machen, wenn ich nach links gehe.
+Das heißt, zum Beispiel 200 minus 20.
+Das heißt, dass ich eine Breite zurückgehe.
+Das ist eigentlich, was passiert.
+Und das war unsere originelle Position.
+Eigentlich habe ich es damit.
+Das heißt, unsere x-Position war 200 und unsere neue x-Position wird dann 180.
+Und wir haben schon gesehen, dass das noch kürzer dargestellt werden kann, nämlich hiermit.
+Oder man könnte auch sagen, wir können das einfach so schreiben.
+Gut, also das machen wir, wenn wir die linke Pfeiltaste ausgerichtet haben.
+Die rechte Pfeiltaste, genau das gleiche.
+Nur müssen wir hier die Position nicht minus 20, aber plus 20.
+Wenn wir dann hochgehen, haben wir genau das gleiche.
+Aber hier müssen wir nicht die x-Position ändern, aber die y-Position.
+Auch da, die x-Position müssen wir bei runter eins dazuzählen, weil wir fangen an bei 0,0 links oben.
+Das heißt, je größer die y-Position wird, je mehr wir nach unten gehen.
+Das heißt, hier können wir genau das gleiche machen.
+x-Position ist x-Position, y-Position ist y-Position plus 20.
+Oder auch da wissen wir, das ist genau das gleiche wie das hier.
+Und dann als letztes, wenn wir hochgehen möchten, dann müssen wir genau das gleiche, aber mit minus machen.
+Okay, von dem ganzen Programm brauchst du eigentlich nur dieses switch-Statement zu begreifen.
+Das haben wir schon gesehen.
+Alles andere ist irgendwie ein Setup, um dann wirklich etwas grafisch machen zu können.
+Und dann am nächsten Wochen werden wir hier weiter basteln und bauen.
+Aber grundsätzlich in dieser Funktion, die es schon gibt, in dieser Blöcke, die es schon gibt.
+Erstmal gucken, ob es funktioniert.
+So, wir haben unseren Block, wird sofort angezeigt.
+Und wenn ich links oder rechts, da wird nichts passieren.
+Ja, Experte, was habe ich vergessen?
+Ich glaube, dass du noch einen noch oben hast.
+Ja, genau.
+Also grundsätzlich habe ich hier jetzt die Keycode aufgefangen.
+Ich habe aber noch immer nichts gesagt, was ich hier painten muss.
+Das muss ich noch als Update haben.
+Und das ist eigentlich eine Funktion, die ich dann als repaint darstellen muss.
+Also jedes Mal, wenn man repaint, dann sagen wir, wir führen Paint-Componen nochmal aus.
+Oder im Englischen, execute Paint-Componen.
+So, und damit habe ich es hoffentlich.
+So, hoch, runter, links und rechts.
+Gut.

@@ -1,0 +1,19 @@
+Genau, und Zuweisungen sind eine Anweisung, wie schon gesagt, wo man einem Variable einen Wert zuweist.
+Deshalb nennt man es Zuweisung.
+Hier ist ein Beispiel, wir haben hier vier verschiedene Integers, also Summa, x, y und Rest.
+Und hier weist man den Wert zu an y.
+Das Ganze wird auf 7 und 7, dieser Wert, wird auch an x gegeben oder weitergegeben.
+Und das Gleiche wird hier mit seiner arithmetischen Operation oder Sequenz von Operationen gemacht, für Summa.
+Hier das Gleiche für x.
+Und das hier ist eine Zuweisung, wo man zugleich sagt, also das ist das Gleiche wie x, gleich x plus minus 5.
+Das heißt, man wertet hier erst minus 5 aus, das ist eine Konstante, mit minus 5 als Wert.
+Und das zählt man zu x.
+Und das bekommt dann, also dieser Wert bekommt x dann erneut.
+Das ist eine sehr kurze Erfassung, also das ist das Lange.
+Kurz erfasst wird das dann so notiert.
+Das heißt x gleich x plus minus 5.
+Und das Gleiche kann man dann für Modulo, für Teildurch, multiplizieren und für alle anderen arithmetischen Operatoren auch machen.
+Das heißt, es gibt immer diese drei Schritte.
+Man bestimmt, was für Variablen man hat, ob das ein Integer ist oder ein Float oder ein Double zum Beispiel.
+Dann berechnet man diesen Wert und was man dann bekommt, wird dann weitergegeben.
+Und dann wird dann zugewiesen.

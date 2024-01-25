@@ -1,0 +1,106 @@
+Grundsätzlich alles, was wir jetzt genommen haben als Objekte oder als Klasse, wird immer irgendwie in eine große Hierarchie heruntergebracht, obwohl wir das nicht wissen.
+Bislang haben wir immer zum Beispiel Random genommen. Random gehört in eine Hierarchie als Klasse und hat auch eine Oberklasse und so weiter.
+Das Gleiche gilt für alle Arten von Klasse, die wir haben. Wenn wir selbst eine Klasse definieren und nicht explizit eine Oberklasse definieren, wird unsere Klasse so direkt eine Unterklasse sein von einer absagten Objektklasse.
+Das heißt, Objekt besteht schon als Klasse immer in Java und das ist halt die Hauptklasse. Und alle Klassen, die wir dann importieren können aus Bibliotheken, werden eigentlich Teil sein von dieser, oder werden Unterklasse sein von dieser Klasse Objekts.
+Das heißt, man hat wirklich eine Klasse Hierarchie, wo man eine Unterklasse hat von einer Unterklasse von einer Unterklasse von Objekt zum Beispiel und wo Objekt bestimmte Attribute und Methode, vor allem Methode hat, die jede Klasse in Java hat.
+Deshalb ist es nochmal wichtig, das nochmal zu zeigen, dass jede Klasse, die man in Java hat, eigentlich eine Unterklasse ist von dieser Klasse Objekt.
+Das heißt, wenn wir nicht explizit eine Oberklasse haben, das heißt, wenn man nicht explizit eine Klasse definiert als Class, dann unseren Namen und dann Extents und dann den Namen von unserer Oberklasse,
+also wenn dieses Extents nichts passiert, dann wird automatisch diese Klasse definiert als Unterklasse von Objekt. Und Objekt in diesem Fall ist dann unsere Hauptklasse, die an der Spitze von dieser Hierarchie steht.
+Diese Objektklasse hat verschiedene Methoden, 9 insgesamt, das sind die Methoden. Es ist nicht wichtig, all diese Methoden zu kennen, aber grundsätzlich haben sie schon ihren Zweck.
+Deshalb, sobald Sie eine Klasse definieren, selbst, wie wir heute zum Beispiel Snail oder Game oder Verteilung hatten als Klasse, diese Klassen haben eigentlich schon eine Unterklasse.
+Also unsere Game-Klasse hat eine Unterklasse JPanel zum Beispiel. JPanel hat auch noch eine Oberklasse und dann etwas später kommt dann Objekt als Klasse.
+Unsere Snail-Klasse hat als Oberklasse Objekt sofort. Das wissen wir ab dieser Woche.
+Also das sind alle Methoden, die jede Klasse sofort hat. Und da sind einige von den Methoden sehr interessant. Zum Beispiel ToString.
+Also jede Klasse, die Sie jetzt in Java kreieren, hat automatisch ToString schon als Methode.
+Und was automatisch zurückkommt oder wie das definiert wird in Objekt, ist, dass man automatisch das String kreiert wird. Also was zurückkommt aus dieser Methode ist ein String.
+Das kann von allen ausgeführt werden und man hat dann die Klassenahme als Adresse, sodass man sehen kann, wo unsere Klasse gespeichert wird in unserem Speicher.
+Also ist ab und zu mal interessant. Das Gute ist natürlich, dass man das auch modifizieren kann. Oder ToString kann man selbst auch nehmen.
+Das heißt, statt Print hätte ich soeben in unserem Verteilungsbeispiel auch ToString nehmen können und ich würde hier einfach unsere Methode von Klasse Objekt überschrieben haben.
+Das ist das Schöne. Also man bleibt so in diesem Gerüst und in diesem Framework von Java.
+Das Gleiche mit Equals. Equals haben wir schon gesehen bei String. String, wissen wir jetzt, ist auch ein Objekt. Es ist eine Klasse, das zu einem Objekt gehört.
+Also Unterklasse ist ein Objekt. Equals ist eine Methode, die ein anderes Objekt, also jedes Objekt, nehmen kann.
+Und dann kommt dann zurück, ob das das Gleiche ist wie das Objekt selbst.
+Und da das die Oberklasse ist, können wir das jetzt, ab jetzt, für jede Klasse, die wir selbst erstellen, auch benutzen.
+Das heißt, wir machen unsere eigene Klasse, hat MyClass. Hier mache ich das nochmal klein, aber ich hoffe, Sie können das sehen deutlich.
+Das heißt, in unserer Main-Funktion, die ich hier als statische Klasse bei MyClass habe, werde ich einfach zwei Instanzen von MyClass nehmen, me und you.
+Und hier kann ich dann tatsächlich sofort überprüfen, ob me und you gleich sind.
+Und das wird dann in diese Boolean gesteckt hier.
+Das ist möglich, weil beide von diesen Instanzen und diese Objekte Klasse MyClass haben.
+MyClass wird nicht explizit, vererbt nichts von anderen Klassen und deshalb, implizit, ist MyClass eine Unterklasse von Objekts.
+Und Objekt hat automatisch dieses Equals.
+Und das können wir dann zum Beispiel ausgeben.
+Und das gleiche, also bei ToString kann man das auch machen.
+Ich würde empfehlen, das mal kurz zu Hause auszuprobieren.
+Dann sehen Sie, dass da tatsächlich ein Adresse bei rauskommt.
+Dann können wir dann sehen, dass dieses Objekt eine bestimmte Speicheradresse hat.
+Okay, Clone ist noch ein Adress, dass jedes Objekt, also jedes Objekt ist eine Referenzvariante.
+Das wissen wir schon.
+Das heißt, wenn wir dann zum Beispiel sagen, Objekt 2 ist gleich Objekt 1,
+dann referiere beide Objekte zum gleichen Objekt, aber das wird nicht kopiert.
+Das heißt, die Attribute werden nicht kopiert.
+Mit Clone kann man das machen.
+Man kann automatisch ein Objekt 1 zu 1 kopieren mit einer Methode.
+Das heißt, man kann sagen, ich möchte mein Objekt, das ich jetzt habe, zum Beispiel mi, möchte ich clonen.
+Und dann gleiche Stelle an you, dann werde ich hier zwei Objekte in meinem Speicher haben.
+Das ist, was dann Clone ermöglicht.
+Und dann schließlich Finalize.
+Finalize ist irgendwie, also wer schon C++ gewöhnt ist,
+der kennt auch den Destructor.
+Genauso wie man einen Constructor hat, hat man auch meistens einen Destructor,
+was eine Methode ist, die ausgeführt wird, sobald ein Objekt vernichtet wird oder gelöscht wird.
+Hier ist es eigentlich Finalize.
+Das heißt, diese Methode Finalize wird aufgerufen, sobald ein Objekt gelöscht wird.
+Und in Java steht das nur zur Verdeutlichung.
+Ich könnte dann diese mi und you Objekte zum Beispiel explizit auf 0 stellen.
+Und ich möchte dann unserem System sagen, schmeiß den Garbage Collector mal an.
+Das heißt, ab dann wird unser Garbage Collector in Java aktiv gestellt.
+Und wird Java dann alle Objekte, die es gibt und die gelöscht werden können, wird sie löschen.
+Und ab dann wird dann automatisch für mi und you diese Finalize Methode aufgerufen.
+Und manchmal ist es auch sinnvoll, zu wissen, wann ein bestimmtes Objekt gelöscht wird,
+so dass man dann noch extra Sachen da machen könnte, zum Beispiel.
+Etwas nach kurz auf eine Datei schreiben oder was anderes.
+Genau.
+Perfekt.
+Und dann als Letztes, diese Funktion habe ich schon mehrmals ausgeführt,
+vor allem in den Beispielen.
+Printline, was eigentlich eine Methode ist von aus, was zu System gehört.
+Also diese Printline Methode kann beliebige Objekte ausdrücken.
+Das habe ich schon gesehen.
+Wir haben dann zum Beispiel in Beispielen ein Integer gegeben an Printline
+und dann schreibt es in unserer Konsole eigentlich ein String von diesem Integer.
+Wenn dieser Integer 122 ist, dann schreibt es eine 1, eine 2, eine 2.
+Also nicht 122 als Symbol zum Beispiel.
+Und das gilt für alles.
+Also für alle Objekte, die wir in der Klasse haben, kann man die in Printline setzen.
+Sobald man dann zum Beispiel toString hat als Methode in diese Objekte.
+Zum Beispiel, wenn wir das in unserem Beispiel mit Hund, Katze und Tier machen
+und für jede Klasse dann toString hat statt Print und wenn man dann das Gleiche dann ausführt,
+wenn man dann Printline Valdi hat, Valdi ist hier ein Hund, ein Objekt, das wir soeben kreiert haben.
+Das ist irgendwo in unserem Speicher mit dem Namen Valdi mit Rasse Dackel und es vererbt alles vom Tier.
+Wenn man dann Printline auf Valdi ausführt, das heißt wir führen diese Methode Printline aus,
+dann weiß Printline irgendwie, dass es diese Funktion ausführen muss.
+Auch das ist ziemlich magisch,
+weil grundsätzlich habe ich das hier nicht explizit irgendwie dargestellt.
+Wir haben das einfach so gemacht, indem wir toString definiert haben in unserer Klasse Hund
+und dass Printline weiß, dass wenn wir etwas an Printline geben sollten,
+dass das ein Objekt ist von einer Klasse, das ist eine Unterklasse von Objekt sowieso
+und deshalb hat toString und da wir jetzt hier definiert haben, was toString machen soll,
+wird dann hier etwas Vernünftiges ausgegeben als String.
+Deshalb, was hier innerhalb, also Printline wurde so programmiert,
+das Objekt, das wir haben, ist ein abstraktes Objekt, aber eine Unterklasse davon.
+Wir kreieren ein String, das dann toString ausführt und genau das ist Polymorphie.
+toString hier gehört zu unserem Objekt und wir gehen dann zu der richtigen Unterklasse,
+zu dem toString gehört.
+Das ist das Magische hier.
+Und dann, wenn wir das dann wirklich in unserer Konsole ausdrücken,
+wird dieses String einfach so gedrückt.
+Das heißt, hier weiß Println sofort, dass Baldi ein Hund ist
+und deshalb wird die richtige toString-Methode ausgeführt
+und wird dann hier, ich bin Baldi, der Dackel aus der Konsole kommen.
+Und wenn wir da ein Double zurückführen, dann weiß Println, dass das ein Boolean ist,
+dann weiß es, dass es ein Boolean ist, sodass es dann false oder true ausgeben muss.
+Oder wenn wir ein Double, wenn Baldi ein Double wäre,
+dass das ein String ist mit einem Punkt irgendwo in der Mitte.
+Das ist das Magische, was wir jetzt eigentlich schon sowieso angenommen haben,
+aber Println als Methode benutzt Polymorphie zusammen mit dieser toString-Methode,
+die zu Objekt gehört, was diese Hauptklasse ist.

@@ -1,0 +1,94 @@
+Also was die einfachste Art von vererben oder von generalisieren ist,
+sind abstrakte Klassen und Operationen.
+Man kann sowohl Klassen als abstrakt definieren, als auch Operationen.
+Und wie gesagt, das ist das Einfachste, weil man sagt einfach,
+dass die Klasse nichts hat, dass es eine abstrakte Klasse hat,
+ohne jegliche Implementierung.
+Das heißt, es ist irgendwie eine Klasse, die erstmal abstrahiert wird
+und wo andere Klassen dann Attribute und Methoden vererben können.
+Genau.
+Und was wir im letzten Beispiel, dieses Beispiel gemacht haben,
+ist eigentlich schon, also Person ist eine abstrakte Klasse,
+weil Person hat eigentlich keine eigene Sache, die dann hier benutzt werden.
+Angestellte und Studenten haben das.
+Das heißt, deshalb wäre Person so eine abstrakte Klasse,
+wir benutzen nur diese Hilfskräfte, Studenten und, was war das, Angestellte?
+Ja, genau, Angestellte.
+Aber Person als solches benutzen wir in unserer Quellcode eigentlich nichts.
+Es ist einfach aber nützlich, diese Person zu haben als abstrakte Klasse,
+weil so unsere eigentlichen drei Klassen, mit denen wir arbeiten,
+nicht ständig Name, Adresse und Geburtsdatum und auch nur diese extra Methoden
+noch definiert haben müssen.
+So sparen wir.
+Also, Platz in unsere Diagramme, aber später auch in unsere Code und Platz sparen
+oder nichts, alles duplizieren zu müssen, heißt meistens,
+dass man etwas geschaffen hat, das besser erweiterbar ist.
+Das ist eigentlich hier Sinn der Sache.
+Das heißt, man kann diese Person als abstrakte Klasse darstellen
+und das kann man in UML als, genau wie wir vorher eine Klasse dargestellt hatten,
+also etwas.
+Das heißt, man kann das mit einem Kurs geschrieben, zum Beispiel Person,
+großes P, das heißt, wir wissen schon, dass das eine Klasse ist.
+Wenn das kursiv geschrieben wird oder wenn man das handschriftlich mal kurz skizziert,
+ist das schwierig darzustellen, deshalb kann man es einfach normal darstellen,
+aber nochmal mit geschweifte Klammer abstrakt dazwischen oder da hinten
+kann man dann darstellen, dass hier als Klasse ist eine abstrakte Klasse.
+In UML wird das dann so dargestellt.
+Und da unten kommen dann die Attribute.
+Und da unten kommen dann die Methoden, wie wir schon aus UML kennen.
+In Java fügt man einfach abstrakt dazu.
+Das heißt, man hat abstrakt class Person und da hat man dann eine Menge von Attributen
+und eine Menge von Operationen.
+Genau.
+Und wie gesagt, abstrakt ist hier abstrakt, weil wir hier nie ein Objekt kreieren werden
+von klasse Person.
+Das heißt, wir könnten, aber wir werden das nie machen.
+Und um das sicherzustellen,
+sagen wir hier Java oder hier UML,
+wir werden hier nie ein Objekt von Klasse Person erzeugen.
+Und deshalb wird das hier definiert als abstrakte Klasse.
+Ist aber trotzdem noch sinnvoll, um Platz zu sparen und nicht zu duplizieren
+zwischen die drei Klassen, die wir vorher hatten.
+Genau.
+Also wie gesagt, wir deklarieren eine abstrakte Operation.
+Also wir,
+definieren die Klasse, wie wir vorher auch immer eine Klasse definiert haben in Java.
+Wir müssen das aber nie implementieren.
+Also wir sagen nur, wie diese Klasse, was die Klasse als Signatur haben.
+Und das war's eigentlich.
+Also grundsätzlich habe dann, oder das gilt jetzt als Operation.
+Das heißt, eine Operation kann auch abstrakt sein, explizit.
+Also hier zum Beispiel drücke Adresse wird auch explizit implementiert.
+Und das hier, die Implementierung wird dann weitergeleitet an Angestellte
+oder an als Student oder an via Student Hilfskraft.
+Das heißt, hier werden wir in unserer abstrakten Klasse eine Methode implementieren.
+Das müssen wir aber nicht.
+Wir können auch eine Operation selbst auch als abstrakt darstellen.
+Und das wird dann direkt vor oder direkt vor dann unserer
+Methode oder direkt nach unserer Public, Private oder Protected eingestellt.
+Also darstellen wir abstrakt.
+Wenn das so ist, dann sagen wir hier, dass wir versprechen, dass jede Person, also ein Angestellter, ein Student oder ein Hilfskraft diese Funktion, diese Methode selbst definieren muss.
+Am Ende.
+Das heißt, wir implementieren das nicht in unserer abstrakten Klasse.
+Unsere abstrakte Klasse.
+Hat dann hier diese Methode als abstrakte Methode ohne Implementierung.
+Genau.
+Und das kann man auch genauso wie vorher.
+Also hier habe ich das ist kursiv geschrieben.
+Es geht auch.
+Aber ich hätte hier auch noch abstrakt dazu schreiben können.
+Aber bei Druck Adresse kann mich genau das Gleiche machen.
+Also wenn das Ganze kursiv geschrieben wird, dann ist das eine abstrakte Operation oder abstrakte Methode.
+Also Operation in UML Methode.
+In.
+In.
+In.
+In Java benutze ich meistens.
+Oder man kann auch explizit zwischen geschweifte Klammer abstrakt dazu schreiben.
+Und so weiß man, dass diese Methode hier innerhalb unserer Klasse Person nicht implementiert ist.
+Wenn man dann von dieser Person Person einer Unterklasse hat, dann muss diese Unterklasse das dann definieren.
+Sprich implementieren.
+Das Implementieren erfolgt durch beschreiben.
+Diese Operation.
+Das heißt, wenn dann ein Angestellter als Unterklasse von Person definiert wird, dann muss diese Angestellte in der Signatur, also in diese Klasse Definition auch diese genau diese Methode implementieren.
+Auch da zwischen geschweifte Klammer muss dann die Anweisung kommen, die dann diese Methode Druck Adresse ausmacht.
