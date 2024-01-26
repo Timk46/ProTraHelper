@@ -17,13 +17,14 @@ export class FeedbackGenerationService {
 
         let lecture_data: string = "";
         lecture_data = await this.getTranscripts(requestData.conceptNodeId);
+        if (lecture_data === "") {
+            lecture_data = await this.getSimilarities(requestData.question);
+        }
 
-        //const llmResponse = await this.llmService.generateLlmAnswer( feedbackGenerationPrompts.freeText(requestData.question, lecture_data), requestData.answer );
+        const llmResponse = await this.llmService.generateLlmAnswer( feedbackGenerationPrompts.freeText(requestData.question, lecture_data), requestData.answer );
 
-
-
-        return "This is a dummy freetext feedback.";
-        //return llmResponse;
+        //return "This is a dummy freetext feedback.";
+        return llmResponse;
     }
 
     async getSimilarities(question: string): Promise<string> {
@@ -48,9 +49,8 @@ export class FeedbackGenerationService {
             return "";
         }
 
-        //const transcriptsPath = "./././shared/transcripts/";
-        const transcriptsPath = path.join(__dirname, '..', '..', 'shared', 'transcripts');
-        // gehe alle transcripts durch und suche nach solchen, in dessen Namen der conceptNode.name vorkommt
+        const transcriptsPath = path.join(__dirname, '..', '..', '..', '..', '..', '..', 'shared', 'transcripts');
+        // get all transcripts from the transcripts folder
         let transcripts = [];
         try {
             transcripts = fileSystem.readdirSync(transcriptsPath);
@@ -58,15 +58,19 @@ export class FeedbackGenerationService {
             console.log(error);
             return "";
         }
-
-        //filtere alle transcripts, die nicht den Namen des conceptNodes enthalten
+        //filter transcripts for the concept node name
         const filteredTranscripts = transcripts.filter((transcript) => {
             return this.prepareCompareString(transcript).includes(this.prepareCompareString(conceptNode.name));
         });
 
-        console.log(filteredTranscripts);
-        return "";
-        
+        //combine all transcripts into one string
+        let transcriptString = "";
+        filteredTranscripts.forEach((transcript) => {
+            transcriptString += '...' + fileSystem.readFileSync(path.join(transcriptsPath, transcript), 'utf8') + '...;\n';
+        });
+
+        return transcriptString;
+
     }
 
     private prepareCompareString(text: string): string {
@@ -83,7 +87,6 @@ export class FeedbackGenerationService {
         text = text.replace(/ö/g, "oe");
         text = text.replace(/ü/g, "ue");
         text = text.replace(/ß/g, "ss");
-        console.log(text);
 
         return text;
     }
