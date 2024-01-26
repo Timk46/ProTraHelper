@@ -21,10 +21,11 @@ export class FeedbackGenerationService {
         const llmResponse = await this.llmService.generateLlmAnswer( feedbackGenerationPrompts.freeText(requestData.question, ragResponseString), requestData.answer );
 
         //console.log(ragResponseString);
-        console.log(llmResponse);
+        //console.log(llmResponse);
 
 
-        return "This is a dummy freetext feedback.";
+        //return "This is a dummy freetext feedback.";
+        return llmResponse;
     }
 
 }

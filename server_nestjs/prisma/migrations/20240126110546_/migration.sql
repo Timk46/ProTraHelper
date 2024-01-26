@@ -166,9 +166,9 @@ CREATE TABLE `File` (
 -- CreateTable
 CREATE TABLE `Feedback` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(191) NOT NULL,
-    `text` VARCHAR(191) NOT NULL,
-    `questionId` INTEGER NOT NULL,
+    `text` MEDIUMTEXT NOT NULL,
+    `userAnswerId` INTEGER NOT NULL,
+    `score` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -178,14 +178,30 @@ CREATE TABLE `Question` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-    `name` VARCHAR(191) NOT NULL,
-    `version` INTEGER NULL,
-    `description` VARCHAR(191) NOT NULL,
-    `score` INTEGER NOT NULL,
+    `name` VARCHAR(191) NULL,
+    `description` VARCHAR(191) NULL,
+    `score` INTEGER NULL,
     `type` VARCHAR(191) NOT NULL,
     `authorId` INTEGER NOT NULL,
     `text` VARCHAR(191) NULL,
+    `isApproved` BOOLEAN NOT NULL DEFAULT false,
+    `version` INTEGER NOT NULL DEFAULT 1,
+    `originId` INTEGER NULL,
     `contentElementId` INTEGER NULL,
+    `conceptNodeId` INTEGER NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `QuestionVersion` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `questionId` INTEGER NOT NULL,
+    `successorId` INTEGER NULL,
+    `version` INTEGER NOT NULL,
+    `isApproved` BOOLEAN NOT NULL DEFAULT false,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -195,11 +211,11 @@ CREATE TABLE `MCQuestion` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
+    `questionVersionId` INTEGER NULL,
     `questionId` INTEGER NOT NULL,
     `shuffleoptions` BOOLEAN NOT NULL DEFAULT true,
     `isSC` BOOLEAN NOT NULL,
 
-    UNIQUE INDEX `MCQuestion_questionId_key`(`questionId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -210,7 +226,17 @@ CREATE TABLE `MCOption` (
     `updatedAt` DATETIME(3) NOT NULL,
     `text` VARCHAR(191) NOT NULL,
     `is_correct` BOOLEAN NOT NULL,
-    `questionId` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `MCQuestionOption` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `mcQuestionId` INTEGER NOT NULL,
+    `mcOptionId` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -221,18 +247,31 @@ CREATE TABLE `UserMCAnswer` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `userId` INTEGER NOT NULL,
-    `questionId` INTEGER NOT NULL,
+    `mcQuestionId` INTEGER NOT NULL,
+    `isCorrectAnswer` BOOLEAN NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `UserMCAnswerSelected` (
+CREATE TABLE `UserAnswer` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-    `userMCAnswerId` INTEGER NOT NULL,
-    `answerId` INTEGER NOT NULL,
+    `userId` INTEGER NOT NULL,
+    `questionId` INTEGER NOT NULL,
+    `userFreetextAnswer` MEDIUMTEXT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `UserMCOptionSelected` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `userAnswerId` INTEGER NOT NULL,
+    `mcOptionId` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -390,6 +429,18 @@ CREATE TABLE `ChatBotMessage` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `UserContentProgress` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `userId` INTEGER NOT NULL,
+    `contentElementId` INTEGER NOT NULL,
+    `markedAsDone` BOOLEAN NOT NULL DEFAULT false,
+    `markedAsQuestion` BOOLEAN NOT NULL DEFAULT false,
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `_ModuleToSubject` (
     `A` INTEGER NOT NULL,
     `B` INTEGER NOT NULL,
@@ -474,28 +525,52 @@ ALTER TABLE `File` ADD CONSTRAINT `File_questionId_fkey` FOREIGN KEY (`questionI
 ALTER TABLE `File` ADD CONSTRAINT `File_mCAnswerId_fkey` FOREIGN KEY (`mCAnswerId`) REFERENCES `MCOption`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Feedback` ADD CONSTRAINT `Feedback_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Feedback` ADD CONSTRAINT `Feedback_userAnswerId_fkey` FOREIGN KEY (`userAnswerId`) REFERENCES `UserAnswer`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Question` ADD CONSTRAINT `Question_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Question` ADD CONSTRAINT `Question_originId_fkey` FOREIGN KEY (`originId`) REFERENCES `Question`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Question` ADD CONSTRAINT `Question_conceptNodeId_fkey` FOREIGN KEY (`conceptNodeId`) REFERENCES `ConceptNode`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `QuestionVersion` ADD CONSTRAINT `QuestionVersion_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `QuestionVersion` ADD CONSTRAINT `QuestionVersion_successorId_fkey` FOREIGN KEY (`successorId`) REFERENCES `Question`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `MCQuestion` ADD CONSTRAINT `MCQuestion_questionVersionId_fkey` FOREIGN KEY (`questionVersionId`) REFERENCES `QuestionVersion`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `MCQuestion` ADD CONSTRAINT `MCQuestion_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `MCOption` ADD CONSTRAINT `MCOption_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `MCQuestion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `MCQuestionOption` ADD CONSTRAINT `MCQuestionOption_mcQuestionId_fkey` FOREIGN KEY (`mcQuestionId`) REFERENCES `MCQuestion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `MCQuestionOption` ADD CONSTRAINT `MCQuestionOption_mcOptionId_fkey` FOREIGN KEY (`mcOptionId`) REFERENCES `MCOption`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `UserMCAnswer` ADD CONSTRAINT `UserMCAnswer_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `UserMCAnswer` ADD CONSTRAINT `UserMCAnswer_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `MCQuestion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `UserMCAnswer` ADD CONSTRAINT `UserMCAnswer_mcQuestionId_fkey` FOREIGN KEY (`mcQuestionId`) REFERENCES `MCQuestion`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `UserMCAnswerSelected` ADD CONSTRAINT `UserMCAnswerSelected_userMCAnswerId_fkey` FOREIGN KEY (`userMCAnswerId`) REFERENCES `UserMCAnswer`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `UserAnswer` ADD CONSTRAINT `UserAnswer_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `UserMCAnswerSelected` ADD CONSTRAINT `UserMCAnswerSelected_answerId_fkey` FOREIGN KEY (`answerId`) REFERENCES `MCOption`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `UserAnswer` ADD CONSTRAINT `UserAnswer_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `UserMCOptionSelected` ADD CONSTRAINT `UserMCOptionSelected_userAnswerId_fkey` FOREIGN KEY (`userAnswerId`) REFERENCES `UserAnswer`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `UserMCOptionSelected` ADD CONSTRAINT `UserMCOptionSelected_mcOptionId_fkey` FOREIGN KEY (`mcOptionId`) REFERENCES `MCOption`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `CodingQuestion` ADD CONSTRAINT `CodingQuestion_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `Question`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -553,6 +628,12 @@ ALTER TABLE `Vote` ADD CONSTRAINT `Vote_messageId_fkey` FOREIGN KEY (`messageId`
 
 -- AddForeignKey
 ALTER TABLE `ChatBotMessage` ADD CONSTRAINT `ChatBotMessage_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `UserContentProgress` ADD CONSTRAINT `UserContentProgress_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `UserContentProgress` ADD CONSTRAINT `UserContentProgress_contentElementId_fkey` FOREIGN KEY (`contentElementId`) REFERENCES `ContentElement`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `_ModuleToSubject` ADD CONSTRAINT `_ModuleToSubject_A_fkey` FOREIGN KEY (`A`) REFERENCES `Module`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
