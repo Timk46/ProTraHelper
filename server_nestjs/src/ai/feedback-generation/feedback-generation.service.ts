@@ -3,29 +3,89 @@ import { Injectable } from '@nestjs/common';
 import { RagService } from '../services/rag.service';
 import { LlmBasicPromptService } from '../services/llmBasicPrompt.service';
 import { feedbackGenerationPrompts } from './feedback-generation.prompts';
+import { PrismaClient } from '@prisma/client';
+import * as path from 'path';
+import * as fileSystem from 'fs';
 
 @Injectable()
 export class FeedbackGenerationService {
-    constructor(private ragService: RagService, private llmService: LlmBasicPromptService) { } // Retrieval Augmented Generation
+    constructor(private ragService: RagService, private llmService: LlmBasicPromptService, private prisma: PrismaClient) { } // Retrieval Augmented Generation
 
     async generateFreetextFeedback(requestData: freetextFeedbackRequestDTO): Promise<string> {
         console.log("FeedbackGenerationService.generateFreetextQuestion");
         console.log(requestData);
 
-        const ragResponse = await this.ragService.lectureSimilaritySearch(requestData.question, 3);
+        let lecture_data: string = "";
+        lecture_data = await this.getTranscripts(requestData.conceptNodeId);
+
+        //const llmResponse = await this.llmService.generateLlmAnswer( feedbackGenerationPrompts.freeText(requestData.question, lecture_data), requestData.answer );
+
+
+
+        return "This is a dummy freetext feedback.";
+        //return llmResponse;
+    }
+
+    async getSimilarities(question: string): Promise<string> {
+        const ragResponse = await this.ragService.lectureSimilaritySearch(question, 3);
         let ragResponseString = "";
         ragResponse.forEach((element) => {
             ragResponseString += "..." + element.pageContent + "...;\n";
         });
 
-        const llmResponse = await this.llmService.generateLlmAnswer( feedbackGenerationPrompts.freeText(requestData.question, ragResponseString), requestData.answer );
+        return ragResponseString;
+    }
 
-        //console.log(ragResponseString);
-        //console.log(llmResponse);
+    async getTranscripts(conceptNodeId: number): Promise<string> {
+        // get the concept node from db
+        const conceptNode = await this.prisma.conceptNode.findUnique({
+            where: {
+                id: conceptNodeId
+            }
+        });
+        if (!conceptNode) {
+            // we don't want this to be an error, because we have other ways to get the transcript information
+            return "";
+        }
 
+        //const transcriptsPath = "./././shared/transcripts/";
+        const transcriptsPath = path.join(__dirname, '..', '..', 'shared', 'transcripts');
+        // gehe alle transcripts durch und suche nach solchen, in dessen Namen der conceptNode.name vorkommt
+        let transcripts = [];
+        try {
+            transcripts = fileSystem.readdirSync(transcriptsPath);
+        } catch (error) {
+            console.log(error);
+            return "";
+        }
 
-        //return "This is a dummy freetext feedback.";
-        return llmResponse;
+        //filtere alle transcripts, die nicht den Namen des conceptNodes enthalten
+        const filteredTranscripts = transcripts.filter((transcript) => {
+            return this.prepareCompareString(transcript).includes(this.prepareCompareString(conceptNode.name));
+        });
+
+        console.log(filteredTranscripts);
+        return "";
+        
+    }
+
+    private prepareCompareString(text: string): string {
+        // remove all line breaks
+        text = text.replace(/(\r\n|\n|\r)/gm, "");
+        // remove all whitespaces
+        text = text.replace(/\s/g, "");
+        // remove all special characters
+        text = text.replace(/[^\w\s]/gi, '');
+        // make everything lowercase
+        text = text.toLowerCase();
+        //replace all umlauts
+        text = text.replace(/ä/g, "ae");
+        text = text.replace(/ö/g, "oe");
+        text = text.replace(/ü/g, "ue");
+        text = text.replace(/ß/g, "ss");
+        console.log(text);
+
+        return text;
     }
 
 }
