@@ -1,4 +1,20 @@
 // sprotty styles
+//nord colors
+$concept-header-color: #3b4252;
+$concept-background-color: #d8dee9;
+
+$mini-concept-background: #3b4252;
+
+$leaf-concept-color: darken(#5e81ac,10%);
+$leaf-concept-border: #3b4252;
+
+$title-text-color: #eceff4;
+
+$edge-color: #2e3440;
+
+$progress-goal: #ebcb8b;
+$progress-achieved: #86bd55;
+
 .sprotty-graph {
     width: 100%;
     height: 70vh;
@@ -6,32 +22,32 @@
 }
 .sprotty-edge {
     fill: none;
-    stroke: black;
+    stroke: $edge-color;
     stroke-width: 3px;
 }
 
 .sprotty-node.concept {
-    fill: #d8d9e2;//#c9c9c9; 
-    stroke: #2b356e;
+    fill: $concept-background-color;//#d8d9e2;
+    stroke: $concept-header-color;//#2b356e;
     stroke-width: 2;
     filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 1));
 }
 
 .sprotty-node.leaf-concept {
-    fill: #2b356e;//#c9c9c9; 
-    stroke: #2b356e;
+    fill: $leaf-concept-color;//#2b356e;
+    stroke: $leaf-concept-border;//#2b356e;
     stroke-width: 2;
     filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 1));
 }
 
 .sprotty-node.mini-concept {
-    fill: #2b356e; // #29669b
-    stroke: #2b356e;
+    fill: $mini-concept-background;//#2b356e; 
+    stroke: #3b4252;//#2b356e;
     stroke-width: 2;
 }
 
 .sprotty-concept-header {
-    fill: #2b356e//#2b2b2b;
+    fill: #3b4252//#2b356e
 }
 
 // text {
@@ -56,7 +72,7 @@
 
 .sprotty-node.selected {
     stroke-width: 4;
-    stroke: #485ac2;
+    stroke: #8fbcbb;
     filter: drop-shadow(0px 0px 8px #2b356e);
 }
 
@@ -75,7 +91,7 @@
 
 .sprotty-label.heading {
     font-weight: bold;
-    fill: #ffffff //#88dddd;
+    fill: #eceff4;
     //display: inline-block;
     //width: 100%;
 }
@@ -157,23 +173,28 @@
 }
 
 
-// styles for the progress bar
-.sprotty-progress-bar-segment {
-    fill: grey; /* Default color */
+.sprotty-progress-bar-segment{
+    stroke: none;
 }
 
 .sprotty-progress-bar-segment.achieved {
-    fill: green; /* Color for achieved segments */
+    fill: $progress-achieved; /* Color for achieved segments */
+    
 }
 
 .sprotty-progress-bar-segment.goal {
-    fill: orange; /* Color for goal segments */
+    fill: $progress-goal; /* Color for goal segments */
 }
 
-.sprotty-progress-bar-segment.achieved-mute {
-    fill: #51a751; /* Color for achieved segments */
+.sprotty-progress-bar-segment.leaf {
+    stroke-width: 2; // Border width
+    stroke: $leaf-concept-border;
 }
 
-.sprotty-progress-bar-segment.goal-mute {
-    fill: #ffd88f; /* Color for goal segments */
+.sprotty-progress-bar-border {
+    stroke-width: 1; // Border width
+    stroke: $concept-header-color;
+    stroke-width: 2;
+    fill: none;
 }
+

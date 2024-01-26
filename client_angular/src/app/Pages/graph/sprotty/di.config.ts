@@ -118,7 +118,7 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
                 'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS MINIMUM_SIZE',
                 'org.eclipse.elk.nodeSize.minimum': '(130, 30)', 
                 'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
-                'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]',
+                'org.eclipse.elk.nodeLabels.padding': '[top=10, bottom=0, left=25, right=25]',
                 'org.eclipse.elk.spacing.labelLabel': '5',
             };
         }
@@ -126,7 +126,7 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
             'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS MINIMUM_SIZE',
             //'org.eclipse.elk.nodeSize.minimum': '(40, 40)', 
             'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
-            'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]',
+            'org.eclipse.elk.nodeLabels.padding': '[top=0, bottom=0, left=25, right=25]',
             'org.eclipse.elk.spacing.labelLabel': '5',
             //'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '500', // space between two connected nodes
         };
