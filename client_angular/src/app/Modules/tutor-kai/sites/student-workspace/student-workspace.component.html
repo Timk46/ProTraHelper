@@ -1,0 +1,174 @@
+<div class="container mx-auto px-4">
+  <div class="max-w-screen-xl mx-auto my-4">
+
+    <!-- Main Grid mit 12 Spalten (jede Hälfte 6 Spalten) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-2">
+
+      <!-- Linkes Grid: Dropdown + Aufgabenstellung-->
+      <div class="col-span-1 lg:col-span-6">
+            <div class="col-span-1 lg:col-span-6 grid lg:grid-cols-2 gap-3">
+              <mat-form-field
+                appearance="fill"
+                class="mat-body w-full mb-1 light-theme"
+              >
+                <mat-select placeholder="Wähle die Übung"  [(value)]="defaultWeek" (selectionChange)="changeWeek($event.value)">
+                  <mat-option *ngFor="let week of getWeeks()" [value]="week">{{ week }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field
+                *ngIf="tasksOfSelectedWeek.length > 0"
+                appearance="fill"
+                class="mat-body w-full mb-1 light-theme"
+              >
+                <mat-select placeholder="Wähle eine Aufgabe" (selectionChange)="changeTask($event.value)">
+                  <mat-option *ngFor="let task of tasksOfSelectedWeek" [value]="task.codingQuestion.id">{{ task.name }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            <!--
+              <mat-form-field
+                appearance="fill"
+                class="mat-body w-full mb-1 light-theme"
+              >
+                  <mat-select [(value)]="selectedLanguage" [(value)]="selectedLanguage" (selectionChange)="this.codeEditorComponent?.changeLanguage($event.value)">
+                    <mat-option *ngFor="let lang of supportedLanguages" [value]="lang.value">{{ lang.name }}</mat-option>
+                  </mat-select>
+              </mat-form-field>
+              -->
+            </div>
+              <mat-card>
+                <mat-card-content class = "polarNight_4_text"  [innerHTML]="taskDescription"></mat-card-content>
+              </mat-card>
+      </div>
+
+      <!-- Rechtes Grid: Code-Editor -->
+      <div class="col-span-1 lg:col-span-6">
+        <mat-tab-group dynamicHeight animationDuration="0ms">
+          <mat-tab *ngFor="let codeStructure of currentTask?.codingQuestion?.codeGerueste; let isLast = last">
+            <ng-template mat-tab-label>
+              <div class="tab-label">
+                <span>{{codeStructure.codeFileName.split('.')[0]}}</span> <!--Filename without .java etc.-->
+              </div>
+            </ng-template>
+              <div class = "code-editor-parent">
+                <app-code-editor #codeEditorMonaco [selectedLanguage] = "currentTask?.codingQuestion?.programmingLanguage" [(code)] = "codeStructure.code"></app-code-editor>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+
+
+
+      <!-- Breites Grid: Ausführen + Feedback + Console -->
+      <div class="col-span-full lg:col-span-12 flex justify-between">
+        <div class="flex-1"></div> <!-- Platzhalter auf der linken Seite -->
+
+        <!-- Run Code Button mit verschiedenen States -->
+        <div class="flex justify-center">
+
+          <button
+            *ngIf="currentState != 0 && currentState != 3 && inputArgsForm.valid"
+            mat-raised-button color="primary" (click)="submitCode()"
+            class="md:w-auto mb-2 px-4 noOverFlow">Ausführen
+          </button>
+          <button
+            *ngIf="currentState != 0 && currentState != 3 && currentState != 4 && !inputArgsForm.valid"
+            mat-raised-button color="primary" [disabled]="true"
+            class="md:w-auto mb-2 px-4 noOverFlow">String[] args fehlt ->
+          </button>
+          <button *ngIf="currentState != 0 && currentState == 3" mat-raised-button color="primary" [disabled]="true" class="md:w-auto mb-2 px-4 noOverFlow">Warten auf das Feedback</button>
+          <!--<button *ngIf="currentState != 0 && currentState == 4" mat-raised-button color="primary" [disabled]="true" class="md:w-auto mb-2 px-4 noOverFlow">Bewerte zunächst das Feedback</button> -->
+        </div>
+
+        <!-- Input Args (java) -->
+        <div class="flex justify-end flex-1">
+          <form [formGroup]="inputArgsForm"  *ngIf="argsArray.controls.length>0">
+            <div formArrayName = "argsArray" class="flex flex-wrap items-center" style="margin-top: -1px; margin-right: 8px;">
+              <div class="flex items-center space-x-2"  matTooltip="Werte des Arrays (String[] args) anstelle über die Befehlszeile (z.B. java MeinProgramm arg1 arg2)" *ngFor="let arg of argsArray.controls; let i = index">
+                <label for="arg{{i}}" class = "polarNight_4_text">args[{{i}}]:</label>
+                <input id="arg{{i}}" class="border border-gray-300 p-2 polarNight_4_text" type="text" [formControlName]="i" style="width: 50px; margin-right: 6px;" />
+              </div>
+          </div>
+          </form>
+          <button *ngIf="currentState != 0" mat-raised-button color="primary" (click)="downloadFiles()" class="downloadButton"><mat-icon>save</mat-icon></button>
+        </div>
+      </div>
+
+       <!-- Breites Grid: Progress Spinner -->
+      <div class="col-span-full lg:col-span-12 flex justify-center">
+        <div *ngIf="isLoading" class="flex justify-center items-center min-h-32">
+          <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+        </div>
+      </div>
+
+       <!-- Linkes Grid: KI-Feedback -->
+      <div *ngIf="!isLoading && compilerOutput" class="col-span-1 lg:col-span-6">
+        <mat-card class="KI-card">
+          <mat-card-header>
+            <mat-card-subtitle class="polarNight_4_text">Kai</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="prose prose-stone prose-base"  [innerHTML]="feedbackMessage"></div>
+            <mat-divider></mat-divider>
+          </mat-card-content>
+          <mat-card-actions *ngIf="currentState == 4" class="actions-container">
+            <div class="rating"> <!-- Bewerten des Feedbacks mit Sternen -->
+              <button mat-icon-button *ngFor="let star of [1, 2, 3, 4, 5, 6, 7]"
+                      (click)="onStar(star)"
+                      (mouseenter)="onMouseEnter(star)"
+                      (mouseleave)="onMouseLeave()"
+                      class="star-button">
+                <mat-icon [ngClass]="{'gold': (star <= hoverState || star <= rating), 'grey': !(star <= hoverState || star <= rating)}">
+                  {{star <= hoverState || star <= rating ? 'star' : 'star_border'}}
+                </mat-icon>
+              </button>
+            </div>
+            <div *ngIf="rating > 0" class="feedback-form">  <!-- Optionales Text-Feedback -->
+              <button mat-raised-button color="primary" (click)="sendStudentFeedback()">
+                <mat-icon>send</mat-icon>
+                Senden
+              </button>
+              <mat-form-field class="mt-3 example-full-width">
+                <mat-label>Optional</mat-label>
+                <textarea matInput [(ngModel)]="feedback" placeholder="Ihre Meinung zum Feedback..."></textarea>
+              </mat-form-field>
+            </div>
+            <pre class = "text-center polarNight_4_text break-words whitespace-pre-wrap text-xs">Hat dir das Feedback geholfen? Dein ehrliche Meinung macht Kai noch besser.</pre>
+          </mat-card-actions>
+          <mat-card-actions *ngIf="currentState == 2" class="actions-container">
+            <mat-radio-group
+            aria-labelledby="example-radio-group-label"
+            class="example-radio-group"
+            [(ngModel)]="flavor">
+              <mat-radio-button  class="example-radio-button" *ngFor="let flavor of flavorOptions" [value]="flavor">{{flavor}}</mat-radio-button>
+          </mat-radio-group>
+            <div class="feedback-form">
+              <button mat-raised-button color="primary" (click)="getKIFeedback()">
+                <mat-icon>assistant</mat-icon>
+                Feedback erzeugen
+              </button>
+            </div>
+          </mat-card-actions>
+          <mat-card-footer>
+            <mat-progress-bar *ngIf="currentState == 3" mode="indeterminate"></mat-progress-bar>
+          </mat-card-footer>
+        </mat-card>
+      </div>
+
+       <!-- Rechtes Grid: Console Output -->
+      <div *ngIf="!isLoading && compilerOutput" class="col-span-1 lg:col-span-6">
+        <mat-card class="CompilerCard-card">
+          <mat-card-header>
+            <mat-card-subtitle class = "polarNight_4_text" >Ausgabe</mat-card-subtitle>
+
+          </mat-card-header>
+          <mat-card-content>
+            <pre class="polarNight_4_text break-words whitespace-pre-wrap text-xs md:text-base">{{ compilerOutput }}</pre>
+            <mat-divider></mat-divider>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+    </div>
+  </div>
+</div>

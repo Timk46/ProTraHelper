@@ -13,6 +13,18 @@ export interface QuestionDTO {
     originId: number | null;
 }
 
+export interface QuestionDto { // This is the Tutor-Kai Question DTO. ToDo: NEEDS MERGE
+    id: number;
+    name: string;
+    week: number;
+    description: string;
+    score: number;
+    type: string;
+    text: string;
+    codingQuestion: CodingQuestionDto;
+  }
+
+  
 export interface QuestionVersionDTO {
     id: number;
     questionId: number;
@@ -77,3 +89,45 @@ export interface UserMCOptionSelectedDTO {
     userAnswerId: number,
     mcOptionId: number
 }
+
+
+// TutorKai CodingQuestion DTOs
+
+export interface CodingQuestionDto {
+    id: number;
+    countInputArgs: number;
+    programmingLanguage: string;
+    mainFileName: string;
+    text: string;
+    textHTML: string;
+    codeGerueste: CodeGeruestDto[];
+  }
+  
+  export interface CodingQuestionInternal extends CodingQuestionDto { // for backend only
+    automatedTests: AutomatedTestDto[];
+  }
+  
+  export interface CodeGeruestDto {
+    id: number;
+    codingQuestionId: number;
+    codeFileName: string;
+    code: string;
+    language: string;
+  }
+  
+  export interface AutomatedTestDto {
+    id: number;
+    code: string;
+    testFileName: string;
+    language: string;
+    questionId: number;
+    testCases: TestcaseDto[];
+  }
+  
+  export interface TestcaseDto {
+    id: number;
+    input: string;
+    expectedOutput: string;
+    automatedTestId: number;
+  }
+  
