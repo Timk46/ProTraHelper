@@ -3,6 +3,7 @@ export interface ConceptNodeDTO {
     databaseId: number;
     name: string;
     level?: number;
+    goal?: number;
     expanded?: boolean;
 
     parentIds: number[];

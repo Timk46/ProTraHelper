@@ -12,60 +12,139 @@ import { SprottyConceptNode } from "./sprottyModels.interface";
 @injectable()
 export class ConceptNodeView extends RectangularNodeView {
     override render(node: Readonly<SNodeImpl & SprottyConceptNode>, context: RenderingContext): VNode {
+        const renderAsOneProgressBar = () => {
 
-        let petals = [];
-        const level = node.level || 0;
+            // sum up all the goals and achieved levels
 
-        if (level > 0) {
-            // Generate normal petals based on node.level
-            const levelPetals = Array.from({ length: level }).map((_, index) =>
-                <path
-                    className="sprotty-star"
-                    // transform={`translate(${10 + (index * 10)},30) rotate(270)`}
-                    // d="m1,2 c0,-8 19,-7 32,-4 c13,3 12,4 1,7 c-11,3 -33,4 -33,-4z"
-                    transform={`translate(${2 + (index * 12)},-11) scale(0.07)`}
-                    d="m83.66,5.71l12.23,37.64c1.11,3.4,4.28,5.71,7.86,5.71h39.58c8,0,11.33,10.24,4.86,14.95l-32.02,23.26c-2.9,2.1-4.11,5.83-3,9.24l12.23,37.64c2.47,7.61-6.24,13.94-12.72,9.24l-32.02-23.26c-2.9-2.1-6.82-2.1-9.71,0l-32.02,23.26c-6.48,4.71-15.19-1.63-12.72-9.24l12.23-37.64c1.11-3.4-.11-7.13-3-9.24L3.42,64.01c-6.48-4.71-3.15-14.95,4.86-14.95h39.58c3.58,0,6.75-2.31,7.86-5.71l12.23-37.64c2.47-7.61,13.24-7.61,15.72,0Z"
+            let goal = 0;
+            let achieved = 0;
+            let total = goal > achieved ? goal : achieved;
+            const max = node.descendantLevels ? node.descendantLevels.length : node.descendantLevelGoals ? node.descendantLevelGoals.length : 0;
+            for (let i = 0; i < max; i++) {
+                goal =node.descendantLevelGoals? goal + node.descendantLevelGoals[i]:0;
+                achieved = node.descendantLevels ? achieved + node.descendantLevels[i] : 0;
+                total = goal > achieved ? goal : achieved;
+            }
+            
+
+            const segments = [];
+            const gap = 0;
+            const segmentWidth = node.size.width - 2 * gap;
+            const segmentHeight = 10;
+            //console.log('nodeI:' + node.name + ' total: ' + total + ' goal: ' + goal + ' achieved: ' + achieved);
+            for (let i = 0; i < total; i++) {
+                segments.push(<rect
+                    width={segmentWidth / total}
+                    y={-segmentHeight}
+                    x={i * (segmentWidth / total) + gap}
+                    height={segmentHeight}
+
+                    //fill={i < achieved ? '#a3be8c' : i < goal ? "#ebcb8b" : "white"}
+                    class-sprotty-progress-bar-segment={true}
+                    class-achieved={i < achieved ? true : false}
+                    class-goal={i < goal && i >= achieved ? true : false}
+                ></rect>);
+            }
+            // Add border
+            segments.push(
+                <rect
+                    key="border"
+                    width={segmentWidth}
+                    y={-segmentHeight}
+                    x={gap}
+                    height={segmentHeight}
+                    class-sprotty-progress-bar-border={true}
                 />
             );
-            petals.push(...levelPetals);
-        }
+            return <g className="sprotty-progress-bar">{segments}</g>;
+        };
 
-        if (typeof node.levelGoal !== "undefined" && node.levelGoal > level) {
-            // Generate greyed out petals based on the difference between node.levelGoal and node.level
-            const levelGoalPetals = Array.from({ length: node.levelGoal - level }).map((_, index) =>
-                <path
-                    class={{ "sprotty-grey-star": true }}  // Assuming you've styled greyed-out petals in CSS
-                    // transform={`translate(${10 + ((level + index) * 10)},33) rotate(270)`}
-                    // d="m1,2 c0,-8 19,-7 32,-4 c13,3 12,4 1,7 c-11,3 -33,4 -33,-4z"
-                    transform={`translate(${2 + ((level + index) * 12)},-11) scale(0.07)`}
-                    d="m83.66,5.71l12.23,37.64c1.11,3.4,4.28,5.71,7.86,5.71h39.58c8,0,11.33,10.24,4.86,14.95l-32.02,23.26c-2.9,2.1-4.11,5.83-3,9.24l12.23,37.64c2.47,7.61-6.24,13.94-12.72,9.24l-32.02-23.26c-2.9-2.1-6.82-2.1-9.71,0l-32.02,23.26c-6.48,4.71-15.19-1.63-12.72-9.24l12.23-37.64c1.11-3.4-.11-7.13-3-9.24L3.42,64.01c-6.48-4.71-3.15-14.95,4.86-14.95h39.58c3.58,0,6.75-2.31,7.86-5.71l12.23-37.64c2.47-7.61,13.24-7.61,15.72,0Z"
 
-                />
-            );
-            petals.push(...levelGoalPetals);
-        }
-
+        // actual rendering of everything
         return <g>
-            <g class-sprotty-star="true">
-                {petals}  {/* Render the petals here */}
-            </g>
+            {/* <g class-sprotty-star="true">
+                {petals}  
+            </g> */}
+
 
             {/* Render the node here */}
             <rect class-sprotty-node={true} class-concept={true}
                 width={node.size.width}
                 height={node.size.height}
                 class-mouseover={node.hoverFeedback} class-selected={node.selected}
-                // rx={5}
+            // rx={5}
             >
             </rect>
             {/* hacky solution to get the blue background in the concept header */}
-            <rect width={node.size.width - 2}
+            <rect width={node.size.width}
                 height={30}
                 class-sprotty-concept-header={true}
-                x={1}
-                y={1}
-                // rx={5}
+                x={0}
+                y={0}
+            // rx={5}
             ></rect>
+
+            {!node.expanded && renderAsOneProgressBar()}
+            {context.renderChildren(node)}
+        </g>;
+    }
+}
+
+export class LeafConceptView extends RectangularNodeView {
+    override render(node: Readonly<SNodeImpl & SprottyConceptNode>, context: RenderingContext): VNode {
+        // progress bar
+        const renderProgressBarSegment = (goal: number, achieved: number, segmentNumber: number) => {
+            const segments = [];
+            const gap = 2;
+            const cornerGap = 5;
+            const segmentWidth = (node.size.width - cornerGap * 2) / 6 - 2 * gap;
+            const segmentOffset = (node.size.width - cornerGap * 2) / 6;
+            const segmentHeight = 10;
+            //console.log('nodeI:' + node.name + ' total: ' + total + ' goal: ' + goal + ' achieved: ' + achieved + ' segmentNumber: ' + segmentNumber);
+
+            segments.push(<rect
+                width={segmentWidth}
+                y={-10}
+                x={segmentNumber * segmentOffset + gap + cornerGap}
+                height={segmentHeight}
+                class-sprotty-progress-bar-segment={true}
+                class-achieved={0 < achieved ? true : false}
+                class-goal={0 < goal && goal > achieved ? true : false}
+                class-leaf={true}
+            ></rect>);
+            return <g >{segments}</g>;
+        };
+
+        const renderAllSegments = () => {
+            const totalSegments = 6; // six levels
+            const allSegments = [];
+            let totalSubSegments = 0;
+            let achieved = 0;
+            let goal = 0;
+
+            if (node.levelGoal !== undefined) {
+                for (let i = 0; i < Math.max(node.levelGoal, node.level ? node.level : 0); i++) {
+                    achieved = node.level === undefined ? 0 : node.level > i ? 1 : 0;
+                    goal = node.levelGoal === undefined ? 0 : node.levelGoal > i ? 1 : 0;
+
+                    allSegments.push(renderProgressBarSegment(goal, achieved, i));
+                }
+            }
+
+            return <g className="sprotty-all-segments">{allSegments}</g>;
+        };
+        return <g>
+
+            {/* Render the node here */}
+            <rect class-sprotty-node={true} class-leaf-concept={true}
+                width={node.size.width}
+                height={node.size.height - 20}
+                class-mouseover={node.hoverFeedback} class-selected={node.selected}
+                y={0}
+                rx={5}
+            >
+            </rect>
+            {renderAllSegments()}
             {context.renderChildren(node)}
         </g>;
     }
@@ -74,16 +153,18 @@ export class ConceptNodeView extends RectangularNodeView {
 export class MiniConceptView extends RectangularNodeView {
     override render(node: Readonly<SNodeImpl & SprottyConceptNode>, context: RenderingContext): VNode {
         return <g>
-            <rect class-sprotty-node={true}p class-mini-concept={true}
-            class-mouseover={node.hoverFeedback} class-selected={node.selected}
-                width={20}
-                height={25}
+            <rect class-sprotty-node={true} p class-mini-concept={true}
+                class-mouseover={node.hoverFeedback} class-selected={node.selected}
+                width={node.size.width}
+                height={node.size.height}
                 rx={2}
             >
             </rect>
         </g>;
     }
 }
+
+
 
 @injectable()
 export class CustomExpandButtonView implements IView {
@@ -92,8 +173,8 @@ export class CustomExpandButtonView implements IView {
         const path = expandable !== undefined && expandable.expanded
             ? 'M 1,5 L 8,12 L 15,5 Z'
             : 'M 1,1 L 8,8 L 1,15 Z';
-        return <g class-sprotty-button="{true}" class-enabled="{button.enabled}">
-            <rect x={0} y={0} width={16} height={16} opacity={0}></rect>
+        return <g
+            class-sprotty-button="{true}" class-enabled="{button.enabled}">
             <path d={path}></path>
         </g>;
     }

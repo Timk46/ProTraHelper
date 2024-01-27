@@ -15,9 +15,12 @@ export interface SprottyConceptNode extends SNode, Expandable {
     // neu:
     name: string ;
     expanded: boolean;
-    level?: number;
-    levelGoal?: number;
-    //levelGoal?: Record<number, number>; // <courseId, levelGoal>
+
+    level?: number; //user level, currently only important for leaf nodes
+    levelGoal: number; //module goal for this level, currently only important for leaf nodes
+    numberDescendants?: number; // number of leaf node descendants
+    descendantLevels?: number[];  // array of six numbers, each number represents the number of descendants that have reached the corresponding level
+    descendantLevelGoals?: number[];  // array of six numbers, each number represents the number of descendants that have this level as goal
     
     // helper fields
     databaseId: number;

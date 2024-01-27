@@ -22,6 +22,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { ModulesModule } from './modules/modules.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     ContentModule,
     ChatBotModule,
+    ModulesModule,
     QuestionDataModule, 
     TaskOverviewModule],
   controllers: [

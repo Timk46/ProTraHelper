@@ -36,3 +36,20 @@ export namespace DeleteConceptAction {
         };
     }
 }
+
+// increases concept level of user by 1
+export interface AwardLevelAction extends Action {
+    kind: typeof AwardLevelAction.KIND;
+    conceptId: string;
+}
+
+export namespace AwardLevelAction {
+    export const KIND = 'awardLevel';
+    
+    export function create(options: { conceptId: string }): AwardLevelAction {
+        return {
+            kind: KIND,
+            conceptId: options.conceptId
+        };
+    }
+}
