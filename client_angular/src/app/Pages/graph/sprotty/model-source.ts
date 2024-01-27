@@ -135,8 +135,10 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   private addChildren(parentNode: SprottyConceptNode, type: string): { descendants: number, descendantLevels: number[], descendantLevelGoals: number[] } {
     const flatParentNode = this.flatGraph.nodeMap[parentNode.databaseId];
+    // variables for counting descendants
     let descendantData = { descendants: 0, descendantLevels: [0, 0, 0, 0, 0, 0], descendantLevelGoals: [0, 0, 0, 0, 0, 0] };
     let childDescData = { descendants: 0, descendantLevels: [0, 0, 0, 0, 0, 0], descendantLevelGoals: [0, 0, 0, 0, 0, 0] };
+
     // add children
     if (flatParentNode.childIds.length > 0) {
       flatParentNode.childIds.forEach(childId => {
@@ -155,8 +157,8 @@ export class ConceptGraphModelSource extends LocalModelSource {
             parentNode.children!.push(newChild);
           }
           else { // type === 'not-visible'
+            // dummy node, is not added to the graph. we need to keep the recursion going for counting descendants
             newChild = this.createMiniConceptNode("node_" + flatChild.databaseId, flatChild.name, level, flatChild.goal ? flatChild.goal : 0, flatChild.databaseId);
-            // dummy node, is not added to the graph
           }
 
 
@@ -166,7 +168,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
           else if (type === 'concept') {
             childDescData = this.addChildren(newChild, 'mini-concept');
           }
-          else if (parentNode.numberDescendants===undefined && type === 'mini-concept' || type === 'not-visible') {
+          else if (parentNode.numberDescendants === undefined && type === 'mini-concept' || type === 'not-visible') {
             // keep the recursion going for counting descendants, but don't add children to the graph
             childDescData = this.addChildren(newChild, 'not-visible');
           }
@@ -197,7 +199,8 @@ export class ConceptGraphModelSource extends LocalModelSource {
     else {
       // no children, end of recursion
       descendantData.descendants += 1;
-      for (let i = 0; i < 6; i++) {
+      const maxLevels = flatParentNode.goal ? flatParentNode.goal : 6; // never count mor than goal levels for progress bar
+      for (let i = 0; i < maxLevels; i++) {
         if (flatParentNode.level != undefined && flatParentNode.level > i) {
           descendantData.descendantLevels[i] += 1;
         }
@@ -344,7 +347,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     hasChildren: boolean): SprottyConceptNode {
     // determine render type
     let nodeType = 'node:concept';
-    if(!hasChildren){
+    if (!hasChildren) {
       nodeType = 'node:leaf-concept';
     }
     const node: SNode & SprottyConceptNode & Expandable = {

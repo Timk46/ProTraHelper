@@ -14,17 +14,24 @@ export class ConceptNodeView extends RectangularNodeView {
     override render(node: Readonly<SNodeImpl & SprottyConceptNode>, context: RenderingContext): VNode {
         const renderAsOneProgressBar = () => {
 
-            // sum up all the goals and achieved
+            // sum up all the goals and achieved levels
 
-            const goal = node.descendantLevelGoals ? node.descendantLevelGoals.reduce((acc, current) => { return acc + current; }) : 0;
-            const achieved = node.descendantLevels ? node.descendantLevels.reduce((acc, current) => { return acc + current; }) : 0;
-            const total = goal//node.numberDescendants ? node.numberDescendants*6 : 0;
+            let goal = 0;
+            let achieved = 0;
+            let total = goal > achieved ? goal : achieved;
+            const max = node.descendantLevels ? node.descendantLevels.length : node.descendantLevelGoals ? node.descendantLevelGoals.length : 0;
+            for (let i = 0; i < max; i++) {
+                goal =node.descendantLevelGoals? goal + node.descendantLevelGoals[i]:0;
+                achieved = node.descendantLevels ? achieved + node.descendantLevels[i] : 0;
+                total = goal > achieved ? goal : achieved;
+            }
+            
 
             const segments = [];
             const gap = 0;
             const segmentWidth = node.size.width - 2 * gap;
             const segmentHeight = 10;
-            console.log('nodeI:' + node.name + ' total: ' + total + ' goal: ' + goal + ' achieved: ' + achieved);
+            //console.log('nodeI:' + node.name + ' total: ' + total + ' goal: ' + goal + ' achieved: ' + achieved);
             for (let i = 0; i < total; i++) {
                 segments.push(<rect
                     width={segmentWidth / total}
