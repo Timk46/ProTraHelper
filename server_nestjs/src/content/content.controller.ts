@@ -101,4 +101,30 @@ export class ContentController {
       req.user.id,
     );
   }
+
+  /**
+   * Update Last Opened Date
+   * @route GET /content/updateLastOpenedDate/:contentNodeId
+   *
+   * @param {number} contentNodeId - The ID of the content node passed as a URL parameter.
+   *
+   * @returns {Promise<Date>} - A promise that resolves to a Date.
+   *
+   * @example http://localhost:3000/content/updateLastOpenedDate/14
+   */
+  @roles('ANY')
+  @Get('/lastOpenedDate/:contentNodeId')
+  async updateLastOpenedDate(
+    @Param('contentNodeId') contentNodeId: number,
+    @Req() req,
+  ): Promise<Date> {
+    console.log('ContentController: updateLastOpenedDate');
+    if (isNaN(contentNodeId)) {
+      throw new Error('Invalid contentNode id');
+    }
+    return this.contentService.updateLastOpenedDate(
+      Number(contentNodeId),
+      req.user.id,
+    );
+  }
 }

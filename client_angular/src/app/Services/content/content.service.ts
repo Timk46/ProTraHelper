@@ -11,6 +11,7 @@ export class ContentService {
 
   public toggleCheckmarkStatus: Subject<{contentElementId: number, isCompleted: boolean}> = new Subject<{contentElementId: number, isCompleted: boolean}>();
   public toggleQuestionmarkStatus: Subject<{contentElementId: number, hasQuestion: boolean}> = new Subject<{contentElementId: number, hasQuestion: boolean}>();
+  // public lastOpenedDate: Subject<Date> = new Subject<Date>();
 
   constructor(private http: HttpClient) {}
 
@@ -76,5 +77,17 @@ export class ContentService {
           this.toggleQuestionmarkStatus.next({contentElementId: contentElementId, hasQuestion: status});
         })
       );
+  }
+
+  /**
+   * Fetches the last opened date of a content node for a specific user.
+   * @param contentNodeId The id of a content node.
+   * @returns Date - the last opened date of the content node.
+   */
+  updateLastOpenedDate(contentNodeId: number): Observable<Date> {
+    console.log('ContentService: updateLastOpenedDate');
+    return this.http.get<Date>(
+      environment.server + `/content/lastOpenedDate/${contentNodeId}`
+    );
   }
 }

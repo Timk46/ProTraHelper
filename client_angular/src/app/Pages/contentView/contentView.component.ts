@@ -6,6 +6,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DomSanitizer } from '@angular/platform-browser';
 import { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
 import { ContentService } from 'src/app/Services/content/content.service';
+import { last } from 'rxjs';
 
 @Component({
   selector: 'app-contentView',
@@ -18,6 +19,11 @@ export class ContentViewComponent implements OnInit {
   activeConceptNodeId: number;
   applyCompletedStyle: boolean[] = [];
   applyQuestionStyle: boolean[] = [];
+  lastOpenedDate: Date = new Date();
+  
+  hours : string = "";
+  minutes : string = "";
+  seconds : string = "";
 
   // Get Data from Dialog
   constructor(public dialogRef: MatDialogRef<ContentViewComponent>, @Inject(MAT_DIALOG_DATA) public data: any, private sanitizer: DomSanitizer, private discussionDialogService: DiscussionDialogService, private contentService: ContentService) {
@@ -38,6 +44,7 @@ export class ContentViewComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.getLastOpenedDate();
     for (let i = 0; i < this.contentViewData.contentElements.length; i++) {
       this.contentService.getContentElementStatus(this.contentViewData.contentElements[i].id).subscribe(status => {
         if (status.userStatusCompleted) {
@@ -116,6 +123,11 @@ export class ContentViewComponent implements OnInit {
     } else {
       return "Als 'Offene Frage(n)' markieren";
     }
+  }
+
+  getLastOpenedDate(){
+    console.log('ContentViewComponent: getLastOpenedDate');
+    this.contentService.updateLastOpenedDate(this.contentViewData.contentNodeId).subscribe(status => {this.lastOpenedDate = status;});
   }
 
 }

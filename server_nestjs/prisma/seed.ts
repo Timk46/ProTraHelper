@@ -54,7 +54,8 @@ async function main() {
   await prisma.training.deleteMany();
   await prisma.requirement.deleteMany();
   await prisma.contentEdge.deleteMany();
-  await prisma.userContentProgress.deleteMany();
+  await prisma.userContentElementProgress.deleteMany();
+  await prisma.userContentView.deleteMany();
   await prisma.contentNode.deleteMany();
   await prisma.conceptEdge.deleteMany();
   await prisma.conceptFamily.deleteMany();
@@ -294,7 +295,7 @@ async function main() {
               },
             });
             if (+elementId == 0) {
-              await prisma.userContentProgress.create({
+              await prisma.userContentElementProgress.create({
                 data: {
                   user: { connect: { id: studentUser.id } },
                   contentElement: { connect: { id: TempContentElement.id } },

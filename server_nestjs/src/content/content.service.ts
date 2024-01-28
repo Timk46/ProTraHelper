@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 import { ContentsForConceptDTO, ContentElementDTO } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
+import { last } from 'rxjs';
 
 @Injectable()
 export class ContentService {
@@ -126,7 +127,7 @@ export class ContentService {
     userId: number,
   ): Promise<ContentElementStatusDTO> {
     const contentElementStatus =
-      await this.prisma.userContentProgress.findFirst({
+      await this.prisma.userContentElementProgress.findFirst({
         where: {
           contentElementId: contentElementId,
           userId: userId,
@@ -166,20 +167,21 @@ export class ContentService {
     userId: number,
   ): Promise<boolean> {
     //get checkmark status
-    let checkmarkStatus = await this.prisma.userContentProgress.findFirst({
-      where: {
-        contentElementId: contentElementId,
-        userId: userId,
-      },
-      select: {
-        id: true,
-        markedAsDone: true,
-      },
-    });
+    let checkmarkStatus =
+      await this.prisma.userContentElementProgress.findFirst({
+        where: {
+          contentElementId: contentElementId,
+          userId: userId,
+        },
+        select: {
+          id: true,
+          markedAsDone: true,
+        },
+      });
 
     if (!checkmarkStatus) {
       //create new entry in userContentProgress if not exists
-      checkmarkStatus = await this.prisma.userContentProgress.create({
+      checkmarkStatus = await this.prisma.userContentElementProgress.create({
         data: {
           markedAsDone: false,
           markedAsQuestion: false,
@@ -190,7 +192,7 @@ export class ContentService {
     }
 
     //toggle checkmark status
-    await this.prisma.userContentProgress.update({
+    await this.prisma.userContentElementProgress.update({
       where: {
         id: checkmarkStatus.id,
       },
@@ -215,20 +217,21 @@ export class ContentService {
     userId: number,
   ): Promise<boolean> {
     //get checkmark status
-    let questionmarkStatus = await this.prisma.userContentProgress.findFirst({
-      where: {
-        contentElementId: contentElementId,
-        userId: userId,
-      },
-      select: {
-        id: true,
-        markedAsQuestion: true,
-      },
-    });
+    let questionmarkStatus =
+      await this.prisma.userContentElementProgress.findFirst({
+        where: {
+          contentElementId: contentElementId,
+          userId: userId,
+        },
+        select: {
+          id: true,
+          markedAsQuestion: true,
+        },
+      });
 
     if (!questionmarkStatus) {
       //create new entry in userContentProgress if not exists
-      questionmarkStatus = await this.prisma.userContentProgress.create({
+      questionmarkStatus = await this.prisma.userContentElementProgress.create({
         data: {
           markedAsDone: false,
           markedAsQuestion: false,
@@ -239,7 +242,7 @@ export class ContentService {
     }
 
     //toggle checkmark status
-    await this.prisma.userContentProgress.update({
+    await this.prisma.userContentElementProgress.update({
       where: {
         id: questionmarkStatus.id,
       },
@@ -249,5 +252,50 @@ export class ContentService {
     });
 
     return !questionmarkStatus.markedAsQuestion;
+  }
+
+  /**
+   * Update Last Opened Data
+   *
+   * Updates the lastOpened field of a content element for a specific user.
+   * @param {number} contentElementId The ID of the content element
+   * @returns {Promise<Date>} A promise that resolves to void.
+   *
+   */
+  async updateLastOpenedDate(
+    contentNodeId: number,
+    userId: number,
+  ): Promise<Date> {
+    let lastOpenedDate = await this.prisma.userContentView.findFirst({
+      where: {
+        contentNodeId: contentNodeId,
+        userId: userId,
+      },
+      select: {
+        id: true,
+        lastOpened: true,
+      },
+    });
+
+    if (!lastOpenedDate) {
+      lastOpenedDate = await this.prisma.userContentView.create({
+        data: {
+          userId: userId,
+          contentNodeId: contentNodeId,
+          lastOpened: new Date(),
+        },
+      });
+    }
+
+    await this.prisma.userContentView.update({
+      where: {
+        id: lastOpenedDate.id,
+      },
+      data: {
+        lastOpened: new Date(),
+      },
+    });
+
+    return lastOpenedDate.lastOpened;
   }
 }
