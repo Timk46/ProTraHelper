@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { QuestionDto } from '@DTOs/index';
+import { QuestionDTO } from '@DTOs/index';
 import { environment } from 'src/environments/environment';
 
 /**
@@ -20,8 +20,12 @@ export class TaskDataService {
    *
    * @returns All available questions with their codeGeruest wrapped in an observable.
    */
-  getTasks(): Observable<QuestionDto[]> {
+  getTasks(): Observable<QuestionDTO[]> {
 
-    return this.http.get<QuestionDto[]>(`${this.apiURL}`);
+    return this.http.get<QuestionDTO[]>(`${this.apiURL}`);
+  }
+  getTask(id: number): Observable<QuestionDTO> {
+
+    return this.http.get<QuestionDTO>(`${this.apiURL}/${id}`);
   }
 }

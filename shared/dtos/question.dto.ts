@@ -11,9 +11,10 @@ export interface QuestionDTO {
     conceptNode?: number;
     isApproved: boolean;
     originId: number | null;
+    codingQuestion?: CodingQuestionDto
 }
 
-export interface QuestionDto { // This is the Tutor-Kai Question DTO. ToDo: NEEDS MERGE
+/*export interface QuestionDto { // This is the Tutor-Kai Question DTO. ToDo: NEEDS MERGE
     id: number;
     name: string;
     week: number;
@@ -23,7 +24,7 @@ export interface QuestionDto { // This is the Tutor-Kai Question DTO. ToDo: NEED
     text: string;
     codingQuestion: CodingQuestionDto;
   }
-
+*/
   
 export interface QuestionVersionDTO {
     id: number;

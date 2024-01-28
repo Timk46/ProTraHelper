@@ -30,6 +30,7 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              { "glob": "**/*", "input": "node_modules/monaco-editor", "output": "/assets/monaco/" },
               "src/favicon.ico",
               "src/assets",
               {
@@ -47,7 +48,8 @@
               "@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.scss",
               "src/styles/sprotty-styles.scss",
-              "src/styles/highlightThemes/nord.css"
+              "src/styles/highlightThemes/nord.css",
+              "node_modules/ngx-toastr/toastr.css"
             ],
             "scripts": [
               "node_modules/markdown-it-footnote/dist/markdown-it-footnote.min.js",

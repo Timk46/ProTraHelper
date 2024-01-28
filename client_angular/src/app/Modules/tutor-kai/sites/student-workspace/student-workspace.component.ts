@@ -2,7 +2,7 @@ import { Component, HostListener, OnInit, QueryList, ViewChild, ViewChildren } f
 import { RunCodeService } from "../../services/runCode.service";
 import { TaskDataService } from "../../services/task-data.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { CodeSubmissionResultDto, Judge0Dto, QuestionDto } from "@DTOs/index";
+import { CodeSubmissionResultDto, Judge0Dto, QuestionDTO } from "@DTOs/index";
 import { FormArray, FormBuilder, Validators } from "@angular/forms";
 import { saveAs } from "file-saver";
 import * as JSZip from "jszip";
@@ -34,10 +34,10 @@ export class StudentWorkspaceComponent implements OnInit {
 
   currentState: States = States.startState;
   selectedLanguage: string = "python";
-  currentTask: QuestionDto | undefined;
+  currentTask: QuestionDTO | undefined;
   currentTaskId: number = 0;
-  tasks: QuestionDto[] = [];
-  tasksOfSelectedWeek: QuestionDto[] = [];
+  tasks: QuestionDTO[] = [];
+  tasksOfSelectedWeek: QuestionDTO[] = [];
   flavor: string = 'Schnelles Feedback';
   flavorOptions: string[] = ['Schnelles Feedback', 'Feedback mit Vorlesungsinformationen'];
 
@@ -77,13 +77,13 @@ export class StudentWorkspaceComponent implements OnInit {
    * The default week is set to the highest week number.
    */
   ngOnInit(): void {
-    this.taskDataService.getTasks().subscribe(
-      (tasks) => (
-        (this.tasks = tasks),
-        (this.defaultWeek = this.getHighestWeek()),
-        this.changeWeek(this.defaultWeek)
-      )
-    );
+    this.currentTaskId = 3;
+    this.taskDataService.getTask(3).subscribe((task) => {
+      this.currentTask = task;
+      console.log(this.currentTask);
+      this.taskDescription = this.currentTask?.codingQuestion!.textHTML;
+      this.currentState = States.editingCode;
+    });
   }
 
   @HostListener('click', ['$event'])
@@ -127,7 +127,7 @@ export class StudentWorkspaceComponent implements OnInit {
       "Lass mich einen Augenblick über die Aufgabe nachdenken...";
     let submitCode = "";
     if (this.currentTask) {
-      for (const file of this.currentTask.codingQuestion.codeGerueste) {
+      for (const file of this.currentTask.codingQuestion!.codeGerueste) {
         submitCode +=
           "Beginn " +
           file.codeFileName +
@@ -173,13 +173,13 @@ export class StudentWorkspaceComponent implements OnInit {
     const inputArgs = this.argsArray.value;
     const additionalFiles: { [fileName: string]: string } = {};
     if (this.currentTask) {
-      for (const file of this.currentTask.codingQuestion.codeGerueste) {
+      for (const file of this.currentTask.codingQuestion!.codeGerueste) {
         additionalFiles[file.codeFileName] = file.code;
       }
     }
 
     // Handling java tasks
-    if (this.currentTask?.codingQuestion.programmingLanguage ==  "java") {
+    if (this.currentTask?.codingQuestion!.programmingLanguage ==  "java") {
       // if Java run multiple file endpoint
       this.runCodeService
         .executeMultipleFiles(
@@ -200,7 +200,7 @@ export class StudentWorkspaceComponent implements OnInit {
         });
     }
     // Handling python tasks
-    if (this.currentTask?.codingQuestion.programmingLanguage ==  "python") {
+    if (this.currentTask?.codingQuestion!.programmingLanguage ==  "python") {
       // else run single file endpoint for python tasks, async ng_bind use in html. remove {{code}}
       const firstCodeStructure =
         this.currentTask?.codingQuestion.codeGerueste[0].code ||
@@ -209,7 +209,7 @@ export class StudentWorkspaceComponent implements OnInit {
         .executeCode(
           firstCodeStructure,
           this.selectedLanguage,
-          this.currentTaskId
+          this.currentTask.codingQuestion!.id
         )
         .subscribe({
           next: (result) => {
@@ -253,15 +253,15 @@ export class StudentWorkspaceComponent implements OnInit {
       return;
     }
 
-    if (this.currentTask.codingQuestion.codeGerueste.length === 1) {
-      const codeGerueste = this.currentTask.codingQuestion.codeGerueste[0];
+    if (this.currentTask.codingQuestion!.codeGerueste.length === 1) {
+      const codeGerueste = this.currentTask.codingQuestion!.codeGerueste[0];
       const blob = new Blob([codeGerueste.code], {
         type: "text/plain;charset=utf-8",
       });
       saveAs(blob, codeGerueste.codeFileName);
-    } else if (this.currentTask.codingQuestion.codeGerueste.length > 1) {
+    } else if (this.currentTask.codingQuestion!.codeGerueste.length > 1) {
       const zip = new JSZip();
-      for (const codeGerueste of this.currentTask.codingQuestion.codeGerueste) {
+      for (const codeGerueste of this.currentTask.codingQuestion!.codeGerueste) {
         zip.file(codeGerueste.codeFileName, codeGerueste.code);
       }
       zip.generateAsync({ type: "blob" }).then((blob) => {
@@ -311,46 +311,21 @@ export class StudentWorkspaceComponent implements OnInit {
     this.currentTask = this.findQuestionById(index); //changing current task automatically changes the code inside the editor - check html
     //this.codeEditorComponent?.changeLanguage(this.selectedLanguage);
     if (this.currentTask) {
-      this.selectedLanguage = this.currentTask.codingQuestion.programmingLanguage;
-      this.taskDescription = this.currentTask?.codingQuestion.textHTML;
+      this.selectedLanguage = this.currentTask.codingQuestion!.programmingLanguage;
+      this.taskDescription = this.currentTask?.codingQuestion!.textHTML;
     }
 
     // Add Input Args if there are any
-    if (this.currentTask && this.currentTask.codingQuestion.countInputArgs !== undefined) {
-      this.createInputArgs(this.currentTask.codingQuestion.countInputArgs);
+    if (this.currentTask && this.currentTask.codingQuestion!.countInputArgs !== undefined) {
+      this.createInputArgs(this.currentTask.codingQuestion!.countInputArgs);
     }
   }
 
-    findQuestionById(id: number): QuestionDto | undefined {
+    findQuestionById(id: number): QuestionDTO | undefined {
     return this.tasks.find(question => question.id === id);
   }
 
-  /**
-   * Change the selected week.
-   * @param index - The index of the week to change to.
-   */
-  changeWeek(index: number): void {
-    this.selectedWeek = index;
-    this.tasksOfSelectedWeek = this.tasks.filter((task) => task.week === index);
-  }
 
-  /**
-   * Get the list of unique week numbers from tasks.
-   */
-  getWeeks(): number[] {
-    const weeks = this.tasks.map((task) => task.week);
-    const uniqueWeeks = [...new Set(weeks)];
-    return uniqueWeeks.reverse();
-  }
-
-  /**
-   * Get the highest week number from the tasks.
-   */
-  getHighestWeek(): number {
-    const weeks = this.tasks.map((task) => task.week);
-    const uniqueWeeks = [...new Set(weeks)];
-    return Math.max(...uniqueWeeks);
-  }
 
   /**
    * Show errors in console and as Snackback.

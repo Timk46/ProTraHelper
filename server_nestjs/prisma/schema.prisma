@@ -234,7 +234,7 @@ model Question {
   isApproved                 Boolean            @default(false)
   version                    Int                @default(1)
   files                      File[]
-  originId                   Int?               
+  originId                   Int?
   origin                     Question?          @relation("VersionControl", fields: [originId], references: [id])
   question                   Question[]          @relation("VersionControl")
   //successor                  Question?          @relation("VersionControl")
@@ -269,7 +269,7 @@ model MCQuestion {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   questionVersion   QuestionVersion?   @relation(fields: [questionVersionId], references: [id])
-  questionVersionId Int?               
+  questionVersionId Int?
   question          Question           @relation(fields: [questionId], references: [id])
   questionId        Int
   shuffleoptions    Boolean            @default(true)
@@ -326,7 +326,7 @@ model UserAnswer {
 model UserMCOptionSelected {
   id             Int          @id @default(autoincrement())
   createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt  
+  updatedAt      DateTime     @updatedAt
   userAnswer     UserAnswer   @relation(fields: [userAnswerId], references: [id])
   userAnswerId   Int
   mcOption       MCOption     @relation(fields: [mcOptionId], references: [id])
@@ -343,6 +343,7 @@ model CodingQuestion {
   text            String           @db.Text
   textHTML        String           @db.Text
   mainFileName    String
+  programmingLanguage String
   question        Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId      Int              @unique
   codeGerueste    CodeGeruest[]
@@ -418,6 +419,7 @@ model KIFeedback {
   feedbackByStudent String?        @db.Text
   submission        CodeSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   submissionId      Int
+  flavor            String       @default("normal")
 }
 
 //********************************************************************************************* End Coding Questions

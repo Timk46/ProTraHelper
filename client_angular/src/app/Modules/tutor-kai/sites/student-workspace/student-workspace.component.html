@@ -7,14 +7,6 @@
       <!-- Linkes Grid: Dropdown + Aufgabenstellung-->
       <div class="col-span-1 lg:col-span-6">
             <div class="col-span-1 lg:col-span-6 grid lg:grid-cols-2 gap-3">
-              <mat-form-field
-                appearance="fill"
-                class="mat-body w-full mb-1 light-theme"
-              >
-                <mat-select placeholder="Wähle die Übung"  [(value)]="defaultWeek" (selectionChange)="changeWeek($event.value)">
-                  <mat-option *ngFor="let week of getWeeks()" [value]="week">{{ week }}</mat-option>
-                </mat-select>
-              </mat-form-field>
 
               <mat-form-field
                 *ngIf="tasksOfSelectedWeek.length > 0"
@@ -22,7 +14,7 @@
                 class="mat-body w-full mb-1 light-theme"
               >
                 <mat-select placeholder="Wähle eine Aufgabe" (selectionChange)="changeTask($event.value)">
-                  <mat-option *ngFor="let task of tasksOfSelectedWeek" [value]="task.codingQuestion.id">{{ task.name }}</mat-option>
+                  <mat-option *ngFor="let task of tasksOfSelectedWeek" [value]="task.codingQuestion!.id">{{ task.name }}</mat-option>
                 </mat-select>
               </mat-form-field>
             <!--

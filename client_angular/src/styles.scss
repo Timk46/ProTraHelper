@@ -1,6 +1,10 @@
 /* self hostet fonts and icons*/
 @import 'styles/roboto.scss';
 @import 'styles/material-icons.scss';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

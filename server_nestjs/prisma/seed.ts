@@ -11,9 +11,9 @@ const prisma = new PrismaClient();
 
 interface excel_Aufgabe {
   Id: number;
-  Week: number;
   Titel: string;
   Task: string;
+  Programming_Language: string;
   Test: string;
   Task_html: string;
   codeName: string;
@@ -964,7 +964,7 @@ async function main() {
     data: { origin: { connect: { id: question.id } } },
   });
 
-  /*  
+  /*
   const questionVersion = await prisma.questionVersion.create({
     data: {
         question: { connect: { id: question.id } },
@@ -1110,7 +1110,7 @@ async function main() {
 
   // Import Tasks for Excel
   console.log('Importing Tasks from Excel...');
-  const filePathTasks = process.env.FILE_PATH + 'ofp_aufgaben.xlsx';
+  const filePathTasks = process.env.FILE_PATH + 'wise2324_OFP_workshop_aufgaben.xlsx';
   const workbook = XLSX.readFile(filePathTasks);
 
   const taskSheet: WorkSheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -1118,26 +1118,27 @@ async function main() {
   const codeSheet: WorkSheet = workbook.Sheets[workbook.SheetNames[1]];
   const codes: excel_Codegeruest[] = utils.sheet_to_json(codeSheet);
 
-  for (const task of tasks) {
-    const newTask = await prisma.question.create({
+  for (let task of tasks) {
+    let newTask = await prisma.question.create({
       data: {
         name: task.Titel,
-        // week: task.Week,
-        description: 'automated JACK import from Excel - tasks from SoSe 2023',
+        description: "automated Import from Excel - JACK Tasks from SoSe 2023 and LiveCodingTasks for Exampreperation WiSe2324",
         score: 100, // this is the max score for all tasks currently (=100%)
-        type: 'CodingQuestion_JACK',
-        author: { connect: { id: adminUser.id } }, // connect to admin user
+        type: "CodingQuestion",
+        author: { connect: { id: adminUser.id } },
         codingQuestions: {
           create: {
             text: task.Task,
             textHTML: task.Task_html,
             mainFileName: task.codeName,
+            programmingLanguage: task.Programming_Language,
             count_InputArgs: task.countInputArgs,
             automatedTests: {
               create: [
                 {
                   code: task.Test,
-                  //testcase: { Not using this model for testcases yet. All in one code currently
+                  // Not using this model for testcases yet. All in one code currently
+                  //testcase: {
                   //  create: {
                   //    input: task.Test,
                   //    output: "1",
@@ -1146,13 +1147,12 @@ async function main() {
                 },
               ],
             },
-            codeGerueste: {
-              // add all codegerueste with matching taskId
+            codeGerueste: { // add all codegerueste with matching taskId
               create: codes
                 .filter((code) => code.taskId === task.Id)
                 .map((filteredCode) => ({
                   codeFileName: filteredCode.fileName,
-                  code: filteredCode.code,
+                  code: filteredCode.code
                 })),
             },
           },

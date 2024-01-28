@@ -34,16 +34,17 @@
     "faker": "^5.5.3",
     "fix": "^0.0.6",
     "fs": "^0.0.1-security",
+    "jszip": "^3.10.1",
+    "langchain": "^0.0.203",
     "passport": "^0.6.0",
     "passport-cas": "^0.1.1",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "uuid": "^9.0.1",
-    "xlsx": "^0.18.5",
-    "langchain": "^0.0.203",
-    "pg": "^8.11.3"
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@compodoc/compodoc": "^1.1.19",
