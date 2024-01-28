@@ -55,6 +55,7 @@
     "@angular-devkit/build-angular": "^15.2.4",
     "@angular/cli": "~15.2.4",
     "@angular/compiler-cli": "^15.2.0",
+    "@tailwindcss/typography": "^0.5.10",
     "@types/file-saver": "^2.0.5",
     "@types/jasmine": "~4.3.0",
     "autoprefixer": "^10.4.17",

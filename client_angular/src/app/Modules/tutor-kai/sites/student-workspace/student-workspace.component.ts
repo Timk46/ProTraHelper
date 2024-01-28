@@ -10,6 +10,7 @@ import { CodeEditorComponent } from "../code-editor/code-editor.component";
 import { MarkdownService } from "../../services/markdown/markdown.service";
 import { VideoTimeStampComponent } from '../video-time-stamp/video-time-stamp.component';
 import { MatDialog } from "@angular/material/dialog";
+import { ActivatedRoute } from '@angular/router';
 /**
  * The different states representing the current status of the student workspace.
  */
@@ -69,7 +70,8 @@ export class StudentWorkspaceComponent implements OnInit {
     private snackBar: MatSnackBar,
     private formBuilder: FormBuilder,
     private markdownService: MarkdownService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private route: ActivatedRoute,
   ) { }
 
   /**
@@ -77,12 +79,20 @@ export class StudentWorkspaceComponent implements OnInit {
    * The default week is set to the highest week number.
    */
   ngOnInit(): void {
-    this.currentTaskId = 3;
-    this.taskDataService.getTask(3).subscribe((task) => {
-      this.currentTask = task;
-      console.log(this.currentTask);
-      this.taskDescription = this.currentTask?.codingQuestion!.textHTML;
-      this.currentState = States.editingCode;
+    this.getCurrentTaskFromRoute();
+  }
+
+  getCurrentTaskFromRoute(): void {
+    this.route.params.subscribe((params) => {
+      const taskId = params['taskId'];
+      if (taskId) {
+        this.currentTaskId = +taskId;
+        this.taskDataService.getTask(this.currentTaskId).subscribe((task) => {
+          this.currentTask = task;
+          this.taskDescription = this.currentTask?.codingQuestion!.textHTML;
+          this.currentState = States.editingCode;
+        });
+      }
     });
   }
 
