@@ -222,7 +222,7 @@ export class RunCodeService {
 
      const user = await this.prisma.user.findUnique({
        where: {
-         email: req.user.id,
+         email: req.user.email,
        },
      });
 

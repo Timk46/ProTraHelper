@@ -1,8 +1,8 @@
-<div class=" content mat-elevation-z8">
-  <h1>Concept Overview</h1>
-  <p style="width: fit-content"
+<div *ngIf="activeConceptNode.databaseId != -1" class=" content mat-elevation-z8">
+  <h1>{{activeConceptNode.name}} (Concept Overview)</h1>
+  <p style="width: fit-content; color: blue"
     matTooltip="Testdata currently only for Arrays (in Graph) -> then Card for Content Node 1; active Concept Node Id: {{activeConceptNode.databaseId}}; active Concept Node Name: {{activeConceptNode.name}}">
-    dev info</p>
+    dev info (hover me!)</p>
   <!-- <h3>Testdata currently only for Arrays (in Graph) -> then Card for Content Node 1</h3>
 active Concept Node Id: {{activeConceptNode.databaseId}} <br>
 active Concept Node Name: {{activeConceptNode.name}} <br> -->
