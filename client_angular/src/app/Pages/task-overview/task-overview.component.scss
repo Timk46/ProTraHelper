@@ -34,3 +34,13 @@
     left: 0;
     width: 100%;
 }
+
+
+
+.grid-container {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 400px);
+  justify-content: space-evenly;
+  grid-gap: 5px;
+}
