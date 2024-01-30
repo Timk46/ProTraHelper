@@ -86,22 +86,6 @@ export interface UserAnswerDTO {
     userFreetextAnswer: string | null;
 }
 
-export interface UserAnswerDataDTO {
-    id: number;
-    userId: number;
-    questionId: number;
-    userFreetextAnswer?: string;
-    userMCAnswer?: number[];
-    //space for more types of answers
-}
-
-export interface UserMCOptionSelectedDTO {
-    id: number,
-    userAnswerId: number,
-    mcOptionId: number
-}
-
-
 // TutorKai CodingQuestion DTOs
 
 export interface CodingQuestionDto {
@@ -142,3 +126,7 @@ export interface CodingQuestionDto {
     automatedTestId: number;
   }
   
+  export enum questionType {
+    MULTIPLECHOICE = "MC",
+    FREETEXT = "FreeText",
+  }
