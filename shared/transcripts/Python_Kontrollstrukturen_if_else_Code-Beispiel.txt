@@ -1,0 +1,642 @@
+Also, für genau das, was wir hier hinten in Worten geschrieben haben, wir wollen vergleichen.
+Also, es gibt ja die beiden, oder es gibt vielleicht drei Möglichkeiten, aber wir wollen
+wissen, hat Spieler 1 mehr Punkte als Spieler 2, dann muss ich irgendwie sagen, Spieler
+1 hat gewonnen.
+Hat Spieler 2 mehr Punkte als Spieler 1, dann muss ich sagen, Spieler 2 hat gewonnen.
+Hat Spieler 1 genauso viele Punkte wie der Spieler 2, dann muss ich sagen, es ist unentschieden.
+Diese Logik müssen wir natürlich erstmal umsetzen.
+Und da haben wir gerade völlig richtig gehört, das geht in Programmiersprachen mit einem sogenannten
+If-and-else-statement.
+Und das heißt, was ich jetzt Ihnen irgendwie noch zeigen muss, ist, naja, wie die Syntax
+davon ist in Peisen.
+Also, tatsächlich heißt das Ganze auch erstmal If und dahinter kommt jetzt eine Bedingung,
+die evaluiert werden muss zu einem Bool'schen Ausdruck.
+Also, es muss dahinter irgendwas kommen, was als Resultat entweder True oder False liefert.
+Wenn das, was dahinter kommt, True ist, dann wird der Codeblock, der hinter dem If kommt,
+ausgeführt.
+Wenn das, was hinter dem If steht, False ist, wird dieser Codeblock nicht ausgeführt.
+Das ist die Idee vom If-Statement.
+Was wäre denn die Bedingung, die wir hier überprüfen wollen?
+Ja, hier?
+Ja?
+Der Punkt, der einflößt, ist der Punkt, der falsch ist.
+Sehr gut.
+Also, wir brauchen hier natürlich einen Vergleich der Punkte.
+Wir haben vorhin auf den Folien, nee, wir haben das noch nicht gelernt.
+Okay, genau.
+Es gibt also einen Vergleichsoperator, der einfach das Größerzeichen ist, wo eben hier
+True rauskommt, wenn das hier tatsächlich wahr ist, also wenn die Punkte in Spieler
+1, die da gespeichert sind, größer sind als die in Punkte Spieler 2 gespeicherte Zahl
+und die Notation, wie es dann weitergeht in Python, ist ein Doppelpunkt und ab hier, dann
+lernen wir was Neues kennen, ist es wichtig, dass Sie mit einer Einrückung weitermachen.
+Das hat hier jetzt mein Editor automatisch schon gemacht.
+Also, ich fange hier nicht ganz vorne in der Zeile ein, sondern mit einer Einrückung und
+diese Einrückung ist tatsächlich Teil Ihres Codes.
+Also, wenn Sie nicht einrücken, okay, wenn Sie gar nichts einrücken, ist es ein Fehler,
+den der Code schmeißen wird, aber ich mache gleich auch mal ein Beispiel, wo Sie sehen,
+was da schief und richtig laufen kann.
+Aber erstmal völlig richtig, also das ist ein If-Statement, danach kommt ein Vulscher
+Ausdruck, nämlich ist das größer als das.
+Und was machen wir dann?
+Ja?
+Sehr gut.
+Also könnte ich hier schreiben, Spieler Platzhalter hat gewonnen.
+Was schreibe ich da jetzt?
+Noch mal Erinnerung von vor 30 Minuten.
+Ja?
+Genau.
+Also das würde jetzt ausgeben, Spieler 1 hat gewonnen.
+Ich führe einfach mal dieses Programm einmal aus.
+Name des ersten Spielers Test 1, Name des zweiten Spielers Test 2.
+Und jetzt passiert nichts.
+Ist das auch gut so?
+Ja?
+Ja, das ist richtig, weil ich den Null da vorne, also kann ich den Null auch auf den
+Null befinden, vorne auf den Null.
+Genau.
+Also wir haben ja die Punkte als Null initialisiert, dementsprechend ist der Vergleich Null größer
+Null und die Antwort ist fort.
+Nur, das ist jetzt nicht richtig für unser Spiel, aber nur um einmal zu zeigen, was passiert,
+kann ich hier mal ein größer Gleich dahinter schreiben.
+Das würde jetzt also, naja, das was auch mathematisch mit größer gleich gemeint ist,
+bedeuten, also ist diese Punktzahl größer oder gleich?
+Und wenn ich das Ganze jetzt ausführe und Test 1 und Test 2 eingebe, dann hat Spieler
+Test 1 gewonnen, weil eben dieser Ausdruck hier auf Tchu evaluiert worden ist.
+Und er dementsprechend diese Zeile hier ausgeführt hat.
+Jetzt gehen wir mal weiter.
+Ich lösche mal hier das Zeichen.
+Und ich veranschauliche mal, was es mit der Eindruckung auf sich hat.
+Also ich muss ja jetzt irgendwie nochmal das gleiche Statement vielleicht umgekehrt machen,
+also ob der Spieler 2 mehr Punkte hat und dann gebe ich Spieler 2 hier aus.
+So, und jetzt ist das Prinzip von dem If eben, dass alles, was gleich eingerückt ist,
+auch ausgeführt wird und zwar nur dann, wenn die If-Abfrage sich zu Tchu evaluiert.
+Und jetzt behaupte ich, haben wir hier ein Problem.
+Jetzt habe ich was falsch gemacht.
+Ja, sehr gut.
+Das bedeutet, wenn ich jetzt mal dem Spieler 2 einen Punkt Vorsprung gebe,
+was für eine Ausgabe erwarten wir, wenn wir das Programm laufen lassen?
+Ja, noch mal.
+Ganz genau.
+Während dieses mit dem Input völlig richtig ist, wird mir das beim Ausführen zu nervig.
+Deshalb mache ich mal hier Spieler 1 und Spieler 2 raus, damit ich das nicht immer eingeben muss.
+Also wenn ich dieses Programm jetzt laufen lasse, dann kriege ich keine Ausgabe.
+Und das obwohl Punktespieler 2 natürlich tatsächlich größer ist als Punktespieler 1.
+Und der Grund ist, dass sich diese Abfrage hier zu False evaluiert
+und damit wird jetzt alles, was eingerückt ist, also insbesondere das hier, nicht aufgerufen.
+Und wenn dieses hier nicht aufgerufen wird, dann wird logischerweise auch das hier nicht aufgerufen.
+Und damit kommt es niemals zu dieser Abfrage.
+Das bedeutet, an dieser Stelle müssen wir aufpassen auf die Einrückung in unserem Heißen Programm.
+Also wenn ich diese Einrückung rückgängig mache und das Programm jetzt laufen lasse,
+dann kommt tatsächlich Spieler 2,
+vielleicht macht es 1 oder 2 mehr Sinn, hat gewonnen, weil jetzt wir in diese IF-Abfrage laufen.
+Damit gibt es jetzt noch eine Möglichkeit, die offen bleibt.
+Was ist die letzte Möglichkeit, die offen bleibt?
+Gleichstand.
+Genau.
+Und das könnten wir jetzt nochmal mit einem IF machen.
+Dann hätten wir drei IF-Statements und das letzte IF hätte dann so ein Gleich-Gleich.
+Und es würde natürlich logisch gesehen alle Fälle abdecken, die wir haben können.
+Nämlich das eine ist größer, das andere ist größer und das ist alles gleich.
+Ist aber trotzdem nicht ganz so schön im Stil wie eine etwas andere Lösung, die oft genommen wird.
+Weil wir hier...
+Achso, weiß schon jemand warum?
+Ja, wissen schon. Hier mal.
+Genau.
+Schon eine Idee, warum das schöner ist mit dem ELS zu lösen?
+Ja?
+Es steckt halt alle Möglichkeiten ab, die wir hier erarbeiten,
+der im Fahrverfahren ist.
+Unsere Fahrer haben keine Möglichkeiten,
+weil die Fahrer im Vergleich zu anderen Autos sind.
+Aber bei anderen Autos, die wir hier lösen,
+verstehen das vorher eher als Fahrer.
+Aber das war es nicht.
+Dann wäre es eine gute Lösung.
+Ich finde das wäre auch schöner,
+wenn wir das ELS-Stil, die wir hier lösen,
+dann hätten wir eine bessere Planung.
+Sehr gut, ganz genau.
+Prima Antwort.
+Also tatsächlich drei IF-Statements nacheinander.
+Dann sind wir selber als Programmierer dafür verantwortlich,
+sehr gut zu schauen,
+dass nur einer dieser Blöcke aufgerufen wird.
+Haben wir irgendeinen blöden Fehler im Code gemacht,
+kann es theoretisch passieren,
+dass zwei von diesen Aussagen ausgegeben werden.
+Spieler 1 und Spieler 2 haben gewonnen.
+Was ja erstmal keinen Sinn macht.
+Aber das wird halt von unserem Code jetzt
+erstmal erlaubt
+und nur von der Logik im Code ausgeschlossen.
+Wollten Sie noch direkt was dazu sagen?
+Sehr gut.
+Ja,
+das ist wieder eine sehr gute Beobachtung.
+Aber vielleicht
+trotzdem von der Logik her
+würde ich es für gefährlich erhalten,
+diesen Fall wegzulassen.
+Angenommen,
+ich führe ein neues Kartenspiel ein,
+wo es Zahlen doppelt gibt,
+wo ich mehr oder weniger Karten habe.
+Dann möchte ich als Programmierer
+am liebsten nur den Teil,
+den wir jetzt noch nicht geschrieben haben,
+dieses hier,
+drei Variablen für Preiskarten
+Kartenspieler 1 und Kartenspieler 2
+modifizieren.
+Ich möchte einfach sagen,
+jetzt gibt es noch andere Preiskarten
+oder alle Preiskarten sind gleich viel wert
+Würde ich jetzt den Fall unentschieden
+nicht in meinem Code berücksichtigen,
+müsste ich das selber auf dem Schirm haben.
+Müsste ich wissen,
+wenn ich mein Setting
+von meinen Variablen
+oben, meinen Preiskarten oder Spielkarten
+ändere,
+dann muss ich jetzt auch
+einen neuen möglichen Spielstand
+unentschieden berücksichtigen.
+Und aus diesem Grund würde ich, wenn es geht,
+in solchen Entscheidungen
+immer
+in gewisser Weise
+wasserdicht machen.
+Und dazu gehört,
+ich setze jetzt erst mal das um,
+was hier vorne
+gesagt wurde,
+dazu würde gehören
+jede Möglichkeit
+abzufangen
+und das macht man in Python
+mit zwei weiteren Code Wörtern.
+Nämlich einmal gibt es zu
+if, auch ein else
+else fängt
+alles ab, was vorher nicht
+aus if Statements
+zu war evaluiert wurde.
+Also wenn es nur if else gibt,
+dann heißt das
+entweder es wird
+das hier evaluiert
+Entschuldigung, entweder das hier ist true
+dann wird das ausgeführt und das was unter
+else steht nicht
+oder alle
+vorherigen if
+und etwas was wir gleich noch lernen werden
+nämlich else if
+Statements sind falsch
+also haben danach
+den Bolschenwert false
+dann wird das ausgeführt
+was unter else kommt.
+Also tatsächlich würde ich jetzt am liebsten
+hier elif schreiben
+das bedeutet
+entweder ist es das
+und wenn das wahr ist, dann muss ich mir
+das was unter elif und else
+steht gar nicht mehr anschauen.
+Sollte das hier
+nicht wahr sein, dann schaue ich mir an
+was steht unter else if
+oder elif
+ist das hier wahr
+dann führe ich das aus
+aber nicht mehr das was unter else steht
+sind alle
+if und else
+if Bolschen Statements
+false, dann führe ich
+das aus was hinter else steht.
+Und in diesem
+Fall wäre
+unentschieden
+sicher
+was sinnvolles was man ausgeben sollte.
+Ja?
+Sehr gut. Genau.
+Das ist also auch
+etwas was wir jetzt schon
+anfangen können zu berücksichtigen
+Laufzeit und Effizienz des Codes
+wenn ich if und if und if schreibe
+Computerlogischerweise
+selbst wenn das erste if Statement
+true war, die anderen noch evaluieren
+denn der kann ja nicht wissen
+dass wir das so gebaut haben
+dass sie sich gegenseitig ausschließen
+und mit diesem elif völlig richtig
+ist wenn das hier wahr wird
+schaut er sich das was hierhinter kommt gar nicht mehr an.
+Ist also in dem Sinne
+auch effizienter.
+Natürlich für diese Miniprogramme jetzt
+völlig egal aber
+auf lange Sicht sicher
+wenn hier aufwändige Rechenoperationen oder vor allem
+wenn hier was aufwändiges geschieht
+dann möchte man das nicht so schön schreiben.
+Sehr gut.
+Genau.
+Fragen oder Anmerkungen
+noch dazu?
+Dann
+behaupte ich das was wir gerade gelernt haben
+if und else
+können wir noch
+an einer anderen Stelle verwenden
+um Code umzusetzen
+den wir uns hier schon gewünscht haben
+der jetzt noch im Poser Text da steht
+wo werden wir sowas noch verwenden?
+Ja, einmal ganz oben.
+Genau.
+Wer gewinnt diese Runde?
+Wie verwenden wir da einen if Statement?
+Ja, machen wir ruhig weiter.
+Spieler 1, Spieler 1
+Sehr gut.
+Also ich tue mal so als gäbe es hier
+eine Variable
+Wert der Karte
+Spieler 1
+machen wir es sehr lang
+Was müsste ich dann hier schreiben?
+Sehr gut.
+Und
+ja
+und jetzt?
+Jetzt war meine
+IT wieder schlau und hat einen Doppelpunkt selber gemacht
+also vergessen wir keinen Doppelpunkt
+Print
+sehr gut
+Ja
+Ja
+mhm
+Sehr gut
+Sehr gut
+Sehr gut
+Sehr gut
+Also
+ich übernehme das mal
+wie gesagt, also der Vorschlag war
+das einfach
+hier das 1 jeweils
+durch einen 2
+zu ersetzen
+und hier ist es dann Spieler 2
+der gewinnt mit Wert der Karte
+Spieler 2
+Sehr gut
+und dann war doch der Vorschlag noch
+einen 11 zu verwenden
+und was kommt dahin?
+Ich habe es glaube ich schon gehört
+Was kann ich hier?
+Sehr gut
+Sehr gut. Ist damit die Logik
+von Werden gewinnt die Runde
+schon vollständig?
+Vergleiche mir mal mit dem
+rosa Text der da noch im Kommentar
+da drunter steht
+oder fehlt uns noch was?
+Ja hier einmal
+mit Mütze
+jetzt ist es schwierig
+Sehr gut
+Genau. Wie mache ich das?
+Genau. Sehr gut.
+Das müssen wir nachschauen.
+Punktespieler 1
+Sehr gut
+Also die Logik verlangte ja
+Wert der Preiskarte
+addieren zu
+Punktespieler 1
+Karte
+So. Sehr gut.
+Und hier logischerweise
+machen wir das gleiche
+mit Spieler 2
+Und bei dem Els müssen wir nichts machen
+denn keiner bekommt Punkte.
+Sehr gut. Damit haben wir ja diese Logik
+mal kurz überprüfen
+Kartespieler 1 größer oder kleiner als Kartespieler 2
+Print des Rundenergebnisses
+und Wert der Preiskarte
+addieren zu
+Punktespieler 1
+und Spieler 2
+Gut
+Haben wir das schon drin stehen
+was wir jetzt hier
+automatisch vielleicht
+mitmachen können
+was ich tatsächlich noch nicht auf den Folien habe
+aber was trotzdem ein wichtiger und guter Stil ist
+nämlich
+die Logik die wir uns vorher überlegt haben
+vielleicht zum Teil als Kommentare
+im Programm zu lassen
+damit wir nachher auch noch nachvollziehen können
+was das Ganze tut.
+Ja. Hier war glaube ich zuerst die Meldung.
+Ja.
+Sehr gut.
+Genau.
+Also das ist tatsächlich
+der viel schönere Stil
+wir sollten niemals etwas
+hartcoden
+was wir in Wirklichkeit in variabler Form
+vorliegen haben
+der Kommentar ist völlig richtig
+also hier habe ich einfach Spieler 1 geschrieben
+aber wir haben ja gesagt
+dass wir ein bisschen persönlicher in diesem Spiel sind
+und
+hier tatsächlich
+den Namen des Spielers
+also Spieler 1
+hat man es glaube ich genannt
+und genau hier
+können wir auch
+Spieler 2
+dahin schreiben. Sehr gut.
+Noch irgendwas?
+Dann sind wir doch hier schon mal ein
+ganzes Stück weiter
+das haben wir schon umgesetzt
+Wer gewinnt das Spiel als Kommentar?
+Wer gewinnt diese Runde?
+Okay. Was wir noch wissen oder können
+ist vielleicht das hier.
+Wie können wir das machen? Jawohl.
+Genau. Also die
+nicht schöne
+aber sichere Version
+ist vielleicht
+zu sagen wir haben Preiskarten
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 und 13
+Sie können
+das wäre jetzt der erste Punkt wo Sie
+wahrscheinlich auf die Idee kommen würden
+auch wenn wir das Spiel mit 100 Karten
+auszielen wollten, dass es dann nicht
+das effizienteste ist 100 Zahlen
+nacheinander dahin zu schreiben, sondern
+dass es wahrscheinlich in Python eine
+eingebaute Funktion gibt
+die eine ganze zusammenhängende
+Reihe an Zahlen erzeugt
+also
+eine andere Lösungsmöglichkeit wäre
+das jetzt zu suchen und zu finden
+es gibt range zum Beispiel
+als möglicher Befehl
+ich lasse es jetzt einfach mal einmal
+hart gecodet erst hier drin stehen
+und Kartenspieler 1
+und Kartenspieler 2
+Bin ich schon bereit für mögliche
+Kritik?
+Oder wir belassen es erst mal dabei
+ähm
+Aber ein Stück weit ist das
+unschön, das sage ich jetzt schon mal
+äh, das was ich jetzt
+hier geschrieben habe
+wenn es geht
+nicht hart gecodet
+mehrere Sachen die gleich
+sein sollen wiederholen
+also
+ein Tippfehler
+weil ich hier
+zu viel gedrückt habe
+und auf einmal ist das Spiel unfair
+weil Spieler 2 eine Karte der Wertigkeit 100
+das andere
+wenn ich das kopieren würde
+wäre es zwar immer noch ein Bug im Code
+aber zumindest wäre es weiterhin
+ein faires Spiel wo halt eine Karte
+auf einmal die Wertigkeit 100 hat. Ja?
+Sehr gut. Genau.
+Das geht jetzt schon ein bisschen
+Richtung dem
+was wir vielleicht am
+Ende dieser Vorlesung
+oder Anfang nächster Vorlesung machen
+dass wir mal über alles drüber schauen
+und überlegen
+wie wir das Ganze schöner machen
+und da bin ich vollkommen weit
+in, also wir können schon mal
+anfangen hier zu sagen
+dieser Teil ist irgendwie
+eine Initialisierung
+unseres Programms
+und was wir vorschlagen ist schon
+eine sehr gute Idee zu sagen
+dass wenn man irgendwie abkapseln
+vielleicht in etwas
+was eine Initialisierungspunktion sein könnte
+und
+dann eben vielleicht
+so etwas einführen wie das Standarddeck
+und das Dreimalkopieren
+um dieses hart kopieren zu vermeiden.
+Sehr gut. Dann
+sind wir da schon
+ein ganzes Stück weiter.
+Ah! Und aus diesem
+Grund sollte man da aufpassen.
+Genau.
+Das korrigiere ich jetzt erstmal.
+Harte
+Kopien
+noch unschön.
+Ist vielleicht auch manchmal
+gar nicht schlecht wenn man selber
+das schon merkt, aber so ein Ding erst mal
+zum Laufen kriegen möchte, dass man sich
+selber To-Dos in die Kommentare schreibt, was man noch schöner machen möchte.
+Gut.
+Dann
+müssen wir
+noch so ein bisschen
+an
+diesen Sachen arbeiten.
+Da gibt es schon
+eine Meldung und noch eine Meldung und noch eine Meldung.
+Machen wir mal darum.
+Frage. Ja.
+Wo bin ich das bei den
+Verbrauchern?
+Genau. Sehr gut aufgepasst.
+Das ist wenn ich in dem Code rumhacke
+um irgendwelche Effekte zu zeigen
+dann wird es falsch. Sehr gut. Genau.
+Ja.
+Ja.
+Guter Hinweis. Genau.
+Das
+ist jetzt dem geschuldet, dass ich
+die 1 und 2 genannt habe, aber
+wir könnten auch sagen
+von Max gewinnt
+und hier würde ich dann auch sagen
+die beiden Personen haben gewonnen.
+Genau. Sehr gut.
+Ja.
+Ja. Sehr gut.
+So. Das heißt
+ich würde sagen strukturell haben wir noch
+mindestens
+drei Probleme. Wir müssen
+mischen implementieren, wir müssen
+irgendwie verstehen, was wiederhole bedeutet
+und wir müssen irgendwie
+mit den Karten umgehen können.
+Da gibt es jetzt einige Leute, die
+glaube ich schon viel Programmiererfahrung haben.
+Aber
+warum nicht? Machen sie das. Ja.
+Also perfekt
+das ist natürlich was, was sie nur wissen können
+wenn sie damit
+schon mal gearbeitet haben.
+Nee.
+Genau.
+Also. Damit lernen wir
+jetzt was neues kennen. Es gibt
+Module
+das ist das, was ich eingehend schon mal
+erwähnt habe, dass es
+in Python
+relativ viele schöne und nützliche
+Module gibt, die man sich einfach importieren kann
+die dann die Funktionalität
+der Grundsprache
+erweitern und wir müssen
+uns jetzt nicht selber
+überlegen, wie wir irgendwie Zufallszahlen
+erzeugen oder aus
+erzeugten Zufallszahlen
+eine Liste zufällig durchpermutieren
+sondern da gibt
+es dann eben etwas Vorimplementiertes
+tatsächlich unter
+dem Begriff Random
+hier und dann
+kann ich
+die Funktionen, die in Random
+zur Verfügung stehen, ansprechen
+über Random
+Punkt und dann
+Funktionsname, der in Random zur Verfügung
+steht. Ja.
+Ja, ganz oben.
+Entschuldigung?
+Was?
+Achso, ja, ich
+zeige nochmal eben, was hier passiert und bringe
+das eben zu Ende. Also
+weil dieses
+Ding hier Random heißt, müssen wir es
+als Random Punkt Funktionsname
+ansprechen. Wir stecken da die Liste rein
+und die Liste selber
+wird jetzt eben durchgetauscht, das heißt
+nachher, ich printe das
+vielleicht einmal vorher und nachher, um zu sehen
+ähm
+hat sich jetzt die Reihenfolge
+zufällig geändert. Also wenn ich das jetzt
+ausführe, dann sehe ich, dass es
+das hier natürlich noch nicht gibt
+ähm
+weil ich das hier
+noch gar nicht initialisiert
+habe, aber
+wir können ja
+mal einfach
+sowas machen und feststellen
+dass ich immer noch
+irgendwas falsch gemacht habe
+Also, ich rücke hier lauter Sachen ein
+in einer gewissen Voraussicht
+was kommen wird
+aber noch gibt es hier ja gar keine Eindruckung
+und was
+wir auch noch nicht haben ist
+Punktespieler1
+Ach, Wert der Preiskarte haben wir noch nicht
+Ich hätte jetzt auch
+einen Blogkommentar setzen können, das wäre vielleicht auch
+sinnvoll gewesen, aber
+ok, wir ignorieren einfach mal
+dass das Programm alles so runden ausgibt
+Das Spannende hier
+ist, dass wir kommen von den beiden Printbefehlen
+der Preiskarten
+und das erste ist das, was wir erwartet haben
+das steht auch quasi wörtlich so oben drüber
+eine Liste
+mit 13 Elementen von 1 bis 13
+und darunter
+haben wir eben das Shuffle einmal aufgerufen
+auf die Preiskarten und danach
+hat Preiskarten jetzt eben
+eine andere und zufällige
+Reihenfolge
+Sogar so, dass wenn ich das jetzt nochmal ausführe
+eine neue
+zufällige Reihenfolge da reingekommen ist.
+Also das ist genau das
+was wir
+möchten
+tut genau das was wir möchten
+und basiert eben darauf
+dass wir nachgeschaut haben, dass es ein neues Modul
+gibt, random, was mit
+import geladen wird und dann
+random Punkt Funktionsname
+angesprochen werden kann
+Wir könnten dem hier auch noch
+einen anderen Namen geben, wenn wir das schöner
+finden
+Also hier könnte ich auch meinen
+Name für
+random hinschreiben
+wenn ich es mag
+viel längere Namen zu schreiben
+und
+dann funktioniert es immer noch
+Ich habe die Print-Papier herausgenommen
+Das ist die Bedeutung von
+As, nur um das auch schon einmal
+vorweg genommen zu haben
+aber wir belassen das mal
+erstmal auf
+einfach so wie es ist
+Dann haben wir es schon geschafft
+Preiskarten zu mischen
+Zufällige Reihenfolge ist ein Kommentar
+den ich am besten vielleicht mal hier zu dem
+random Shuffle stehen lasse
+Sehr gut

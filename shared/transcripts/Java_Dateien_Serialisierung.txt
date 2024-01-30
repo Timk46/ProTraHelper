@@ -1,0 +1,413 @@
+Also Serialisierung ist eigentlich alle Objekte, die wir in einem Programm kreieren,
+die haben eine bestimmte Struktur.
+Und typischerweise für große Programme sieht es so aus, dass man ein Objekt hat von einer Klasse oder mehrere Objekte.
+Innerhalb dieser Objekte stecken dann zum Beispiel mehrere, typischerweise mehrere Attribute
+und die Attribute sind selbst dann auch Objekte von anderen Klassen.
+Und so hat man dann eigentlich Verweise auf andere Objekte, die dann wieder auf andere Objekte gehen.
+Das heißt, eigentlich hat man ein ziemlich komplexes System im Speicher von aller Art von Objekten,
+Variablen, Integers, Double, Strings und Arrays, die man dann so hat,
+in verschiedene Klasse Objekte, die da zur Verfügung kommen.
+Und wenn dann so ein Programm endet, dann verschwindet das alles, weil es ist alles Teil des Speichers.
+Und wir haben gesehen, gerade wenn man dann endet, Java macht dann diese Cleanup-Routine,
+also hat man dann dieses Garbage Collection, das eher in Kraft tritt
+und alles wird dann ein nach dem anderen explizit gelöscht aus dem Speicher.
+Das möchte man meistens nicht haben.
+Meistens möchte man alle Variablen, alle Daten, alle Objekte, mit denen man arbeitet, schon speichern.
+Und das ist nicht so leicht. Das kann man nicht mit einem Stream, so wie wir es soeben gemacht haben, machen,
+weil das sind alles unterschiedliche Objekte, die auch Objekte beinhalten können
+oder Zeige auf andere Objekte haben können, die auch irgendwie gespeichert werden müssen.
+Und das ist etwas Komplexes.
+Und wenn man so etwas machen möchte, dann benutzt man Serialisierung.
+Heißt auch Lightweight Persistence oft.
+Also das heißt, bevor man dann das Programm schließt, möchte man alles gespeichert haben
+oder möchte man alles an einen Server geschickt haben.
+Oder wenn das ein Executable oder ein Programm ist, das in einem Browser agiert,
+dann möchte man das auch irgendwie im Cache speichern.
+Das sind alles genau die gleichen Konzepte.
+Und das heißt Serialisierung.
+Das heißt, man möchte einfach Persistenz vorbereiten für alle Objekte, die man in einem Programm-Code hat.
+Und Objekte, das beinhaltet alle Variablen eigentlich, mit denen man arbeitet.
+Und was Serialisierung macht, ist, dass man das Ganze umändert in einen Byte-Strom.
+Das heißt, man serialisiert alles, alle Objekte, die man hat,
+und am Ende kommt da eigentlich eine lange, lange Sequenz von Byte bei raus.
+Und diese Sequenz macht Sinn und ist nicht leicht darzustellen.
+Das ist grundsätzlich, was das beinhaltet.
+Wenn man das selbst programmieren möchte, das wäre eine riesige Aufgabe,
+aber zum Glück hat man in Java die Serialisierung eigentlich auch vorhanden als Klasse
+und als System, als Konzept.
+Was geschieht bei der Serialisierung eines Objekts oder Arrays oder alles,
+was man eigentlich im Speicher haben könnte,
+ist, dass erstmal eine Seriennummer vergeben wird.
+Also es ist eigentlich ein Algorithmus, der das Ganze macht.
+Und das Ganze wird eigentlich auch reklusiv gemacht.
+Das heißt, bei jedes Objekt bekommt es ein eindeutiges Seriennummer,
+also ein Nummer nur für dieses Objekt,
+und das Objekt wird dann in den Strom geschrieben, Byte für Byte für Byte.
+Wenn dieses Objekt zum Beispiel zwei Integers, ein Double und ein String beinhaltet,
+plus auch eine Methode, die dann auch als Signatur weitergegeben werden,
+werden all diese Sachen Byte für Byte nacheinander in diesen Strom geschickt.
+Also erstmal, welche Arten von Attributen es gibt zum Beispiel.
+Und dann, nachdem diese Attributen Namen und Typen gespeichert wurden,
+weil auch das braucht man als Information,
+dann werden alle Werten geschrieben.
+Das heißt, ja, also das wird erst das eine nach dem anderen gemacht.
+Das kann sein, das ist die Ausnahme hier,
+dass bestimmte Objekte als Attribut ein anderes Objekt haben.
+Und das ist dann eine Referenz.
+Wenn das eine Referenz ist, dann hat man auch wieder etwas,
+also ein Zeige auf ein anderes Speicherplatz, und muss man dann dieser Zeige folgen.
+Und muss man auch dann dieser andere Speicherplatz,
+das ist auch wieder ein Objekt,
+muss man auch dieses Objekt wieder speichern in den Strom.
+Und so kann es sein, dass zum Beispiel ein Objekt,
+zum Beispiel fünf andere Objekte als Attribut hat,
+und die alle auch irgendwie Zeige auf fünf andere Objekte,
+dann müssen all diese fünf andere Objekte auch wieder verfolgt werden,
+um das Ganze serialisieren zu können.
+Und auch diese anderen Objekte können wieder zeigen auf andere Objekte.
+Und so kommt man dann auf einen Graph, also nicht wirklich einen Baum,
+aber einen Graph, wo man Verweisen haben kann von Objekten nach anderen Objekten.
+Und da haben wir das dann zum Beispiel bei Kapitel drei, glaube ich, oder vier,
+wo wir dann das Löschen von Objekten gesehen haben,
+dass das auch nicht immer so leicht ist,
+dass da auch die Objekte markiert werden erst,
+sodass dann später unser Garbage Collector dann sehen kann,
+was entfernt werden muss oder was nicht,
+oder was gelöscht werden kann oder nichts.
+Genau so ist ein Programm meistens eine Sammlung von Objekten,
+die Referenzen haben aufeinander.
+Und die müssen dann serialisiert werden.
+Genau, und das wird dann rekursiv gemacht.
+Das heißt, wenn man so ein Beispiel hat,
+man hat hier zum Beispiel im Speicher irgendwo ein Objekt Staff,
+und das hat dann wieder drei, oder ein Array zum Beispiel von drei anderen,
+das ist ein Array von Persons, von Staff zum Beispiel,
+und der eine ist ein Employee, die anderen zwei sind Managers,
+und die haben bestimmte Felder.
+Und das muss alles jetzt serialisiert werden.
+Was dann gemacht wird, man macht einen Strom auf,
+und man versucht einfach, diese Zeige zu folgen.
+Man fängt einfach beim ersten Objekt an,
+und dann folgt man Objekt für Objekt.
+Und wenn dann zum Beispiel ein Objekt,
+zum Beispiel diese zweite Array Element,
+was ein Manager ist, was den Namen Karl Kräcker hat,
+und dann auch eine Referenz hat auf dem ersten Employee,
+auch das wird hier dann zum Beispiel gezeigt oder gespeichert.
+Und so wird hier in diesem Fall erst mal das gemacht,
+dann das, und dann das,
+und diese Zeiger, die stehen schon da.
+Das ist aber eine günstige Situation,
+meistens tritt das nicht ein.
+Das heißt, sobald wir hier Secretary speichern möchten in unseren Strom,
+habe ich schon das hier gespeichert.
+Und wissen wir, worauf wir verweisen müssen?
+Das heißt, hier müssen wir auf Objekt 1 verweisen,
+und hier auch nochmal auf Objekt 1 verweisen.
+Das ist meistens nicht so, meistens kommt so etwas zustande.
+Das heißt, man hat erst mal ein Objekt,
+und da gibt es dann plötzlich einen Verweis auf etwas,
+das noch nicht besteht.
+Das heißt, hier hat man, wenn man das Ganze serialisiert,
+erst unser Manager, unser Manager wird jetzt serialisiert,
+also sobald man bei Secretary kommt,
+hat man einen Verweis auf eine andere Person,
+oder an das Staff Item sozusagen.
+Und was dann passiert ist, man geht auch in diese,
+also man folgt diese Zeiger und serialisiert erst das mal,
+und wenn man dann hier kommt,
+macht man eigentlich nur diese seriale Nummer und das war es.
+Und so geht man weiter.
+Und so kommt man auch, also in diesem Algorithmus
+hat man dann die Sicherheit, dass man wirklich alles hat.
+Das ist eine Art von Depth-first-Search sozusagen,
+man geht in die Tiefe und man verfolgt jede Zeiger
+und serialisiert alles in die Tiefe erst.
+Und dann kommt man, wenn man dann am Ende bekommt,
+hat man wirklich alles erfasst, seriell.
+Und dieser Serialstrom ist meistens ziemlich lang und binär,
+wie gesagt.
+Genau.
+Und das Schöne ist, dass man das machen kann
+an der Hand von einer Interface-Klasse
+oder einer Schnittstelle-Klasse
+mit einem extra Kommando oder einem Wort dazu,
+das Implements heißt,
+oder Implements Serializable macht.
+Also es wird implementiert, indem man dieses Interface benutzt,
+also implementiert.
+Und das Interessante ist,
+dass Serializable eigentlich nichts beinhaltet.
+Es hat keine Methode, die man implementieren muss,
+es hat keine Konstante, die man dann zur Verfügung hat.
+Wenn man etwas von Serializable ableitet oder vererbt,
+wird das eigentlich nur eine Markierung.
+Und kann man so sagen, okay,
+in diesem Fall ist eine Klasse, die Serializierbar ist.
+Und das ist dann das Interessante davon.
+Und das Zweite, also das, was man machen muss,
+ist aber, alle Attribute,
+die Attributen werden dann auch gespeichert,
+die Attribute, die man dann innerhalb von diesen Objekten
+und dieser Klasse hat,
+diese Attribute, die müssen auch Serializable sein.
+Und was wir wissen, ist,
+dass alle typischen Variablen,
+wie Int, Double, Boolean, Car und so weiter,
+die sind Serializierbar, String auch.
+Das heißt,
+dieser Name ist schon Serializierbar,
+Adresse aber nicht,
+weil das ist von einer anderen Klasse.
+Das heißt, wir müssen uns noch davon gewissen,
+dass diese Klasse Adress
+auch Serializable ist.
+Auch das muss deshalb
+vererben von unserer Interface,
+unserer Schnittstelle Serializable.
+Und wenn das gemacht wird
+und Serializable ist dann
+ja, muss auch noch importiert werden,
+dann hat man die Möglichkeit,
+die Objekte, die man so erstellt,
+Serializierbar zu machen.
+Das heißt,
+das ist eigentlich relativ wenig Aufwand,
+weil die Basisvariablen sind schon da.
+String auch
+und alles andere
+macht man selbst normalerweise.
+Und das kann man dann so Serialisieren.
+Und dann hat man
+genauso auch wieder
+unser Object Output Stream,
+den man benutzen kann.
+Also man kann dann Objekt für Objekt
+Sachen da hinschreiben
+und sobald man Write Objekt für ein Objekt hat
+und auch hier als Parameter
+hat man Oberklasse Objekte,
+aber das kann deshalb jeder
+Klasse sein, die wir benutzen können,
+kann man dieses Objekt
+in den Strom serialisieren.
+Und wenn dieses Objekt
+andere Objekte als Attributen hat,
+die dann auch wieder andere Objekte als Attribute haben,
+die nacheinander verweisen,
+das andere wird das eine nach dem anderen
+serialisiert in diesem Strom.
+Das ganze kann man
+auch Resetten,
+das heißt, diese Information,
+was es eigentlich schon
+gegeben hat, wird jedes Mal
+wenn man zwischen Write Objekt und noch mal
+ein weiteres Write Objekt macht,
+wird das nochmal gespeichert,
+was alles schon vorhanden ist.
+Wenn man das aber löschen möchte,
+dann kann man das ganze löschen
+sodass man dann beim nächsten Write Objekt
+komplett wieder von neu anfängt.
+Das ist dann das,
+was dann noch zukommt.
+Und dann hat man noch alle andere Methoden
+von Data Output, die man dann noch zu hat.
+Ich glaube,
+hier kommt nochmal das Gleiche,
+wie wir es eigentlich beim Beispiel gesehen haben.
+Das heißt, sobald ein Objekt
+gefunden wird,
+also ein Attribut eines Objektes
+zum Beispiel, dann wird auch
+dieses serialisiert.
+Und auch da gucken wir einfach,
+welche Objekte es da gibt, die noch nicht
+serialisiert sind
+und auch die werden dann
+serialisiert. Das heißt,
+dieses Objekt ist ein Wurzelobjekt
+von mehreren anderen Objekten,
+die einem nach dem anderen in die Tiefe erst
+serialisiert werden.
+Genau, das ist
+eigentlich, was da im Hintergrund passiert.
+Und das kann man dann auch lesen
+mit Object Input Stream,
+das ist eigentlich die umgekehrte Version,
+so dass man eigentlich Objekte dann wieder
+aus diesem Strom
+rausholen kann.
+Genau, das ist eigentlich
+wie die
+wichtigste Sache. Man kann via Data Output
+und Data Input auch
+explizit Integers oder Doubles
+dahin schreiben oder lesen
+und so gibt es genauso auch für Booleans
+oder Characters etwas.
+Aber das ist eigentlich
+nicht wesentlich. Also das Wesentliche
+ist, was im letzten Beispiel stand.
+Dann,
+um Zeit zu sparen, werde ich
+dieses Beispiel
+dann einfach hochladen.
+Grundsätzlich hat man hier
+genau das gleiche Programm.
+Wir haben hier erstmal
+eine Klasse Name. Wir sagen
+einfach, weil wir das später dann auch
+serialisieren möchten,
+das heißt, wir möchten das
+beidweise
+speichern, was hier alles
+an Objekten
+kreiert wird,
+werden wir die Objekte von Klasse Name
+deshalb implementieren oder
+werden die Klasse Name implementieren als
+ein Serializable. Das heißt, es gibt ein Interface
+Serializable und wir vererben davon.
+Und dann haben wir unsere Attribute,
+beide sind Strings,
+die sind Serializable, deshalb ist das
+kein Problem und wir haben in unserem
+Konstruktor etwas
+typischerweise hier
+das Name gleich N
+und Vorname gleich VN ist.
+Das ist dann unsere Klasse Name.
+Das ist dann eine Klasse.
+Dann haben wir unsere zweite Klasse, Student
+oder Student.
+Auch das implementiert
+Serializable, auch das kann man
+dann später serialisieren.
+Deshalb müssen alle
+Attribute, die es hier gibt,
+serialisierbar sein
+und Name ist serialisierbar,
+das haben wir soeben eigentlich gelöst.
+End, Double
+sind Basistypen,
+auch die kann man serialisieren,
+deshalb kann man hier alles serialisieren.
+Auch hier haben wir dann unseren Konstruktor
+für unseren Student, wo wir dann sofort
+Name, Vorname und Matrikennummer
+unseres Studentes dann hier
+eingeben und
+das war es dann. Also diese zwei
+Datentypen oder diese zwei
+Klassen haben wir jetzt zur Verfügung
+und die Objekte, die wir von diesen beiden Klassen
+machen, sind serialisierbar.
+Und das können wir dann
+in einer anderen Klasse zum Beispiel
+auch so implementieren. Das heißt,
+wir können dann ein
+Object-Output-Stream definieren,
+das ist unser
+Strom, den wir dann serialisieren werden
+und dann werden wir dann
+in den Try-Block, weil auch da
+kann etwas schief gehen,
+vor allem weil es
+in der Datei geht, hier
+können wir sagen, wir machen hier ein Student,
+ein neues Student S,
+das ist ein neues Objekt, mit diesen
+Namen, Vornamen, diesen Matrikennummer,
+wir kreieren ein neues Output-Stream
+dafür und das ist
+hier eine binäre
+Sequenz. Das heißt, hier
+ist einfach als Datei
+eine binäre Datei, eine Sammlung von
+Bytes, in dem wir dann
+dieses Objekt dann sofort
+speichern werden.
+Und das können wir dann schreiben,
+wir können auch die Note
+von Student S ändern,
+wir können dann das ganze
+nochmal resetten, das heißt,
+unser Strom
+Objekt-Output-Stream erinnert sich
+nicht mehr, dass das ganze gespeichert wurde
+und können das dann nochmal
+speichern,
+sodass dann das zweimal nacheinander
+geschrieben wird
+und dann kann man mit Catch and Finally
+auch, was hier in Try schief gehen
+könnte, auffangen. Aber grundsätzlich
+hat man so die Möglichkeit,
+alles, was man so als
+Objekte hat, und das sind meistens
+binäre Objekte, Arrays von Objekten
+und Zusammenhänge zwischen
+Objekten, kann man so speichern
+in einer Datei.
+Und das Reset würde man dann
+in Wert 3,7
+überschreiben?
+Genau, diese 3,7
+würde man
+also
+genau, um sicherzustellen,
+dass hier keine weitere
+Referenz geschrieben wird,
+machen wir hier diese
+Reset.
+Das kann man sogar mal ausprobieren
+mit dem Programm, aber grundsätzlich, was
+passiert bei Reset ist, dass
+wenn man das ganze
+hier beendet hat, wird nur diese
+eine Objekt geschrieben
+mit Note 3,7
+und keine Null.
+Also innerhalb der Null sind
+die Objekte.
+Genau, genau. Wenn diese
+Objekt schon geschrieben ist, dann wird hier nichts
+passieren und wird eigentlich eine Null erzeugt
+oder eine Null geschrieben werden.
+Das könnte man
+tatsächlich auch mal als Übung haben,
+weil es gibt ja, also man kann diese Datei
+dann angucken, also man kann so einen Hexdumpf
+generieren, wo man zum Beispiel
+byte für byte das interpretieren
+kann und dann sieht man, dass in
+dieser Datei zum Beispiel
+diese Attributnamen
+wie Vorname oder Name
+oder Matrikelnummer auch
+auftauchen und dann auch später
+diese Werte auftauchen. Das heißt,
+das ist eigentlich eine binäre Datei,
+da kann man aber bestimmte Werte schon lesen,
+weil das Strings sind und
+die Strings byte für byte gespeichert werden
+und diese Strings dann auch zum Beispiel
+die Attributnamen sind oder die Klassennamen
+sind. Deshalb
+wäre das schon interessant, glaube ich,
+das mal einfach mal auszuprobieren.
+Genau.
+Aber so kann man
+einen Programmstand
+speichern und dann später,
+obwohl das Programm eigentlich beendet wurde,
+komplett von diesem Stand wieder
+weiterführen.
+Das ist dann mit Serialisierung
+möglich.
+Genauso wie man speichert, kann man es natürlich
+auch wieder lesen.
+Das Lesen ist das leichtere.
+Vielleicht.

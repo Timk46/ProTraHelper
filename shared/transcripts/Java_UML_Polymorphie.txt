@@ -1,0 +1,1592 @@
+Polymorphie ist etwas, das man meistens für jedes Anfangsmodul in der Programmierung am Ende sieht,
+weil das eigentlich für die meiste Programmiersprache das ist, das mehr advanced ist.
+Deshalb ist es wirklich wichtig zu wissen, was Polymorphie ist und auch wie man das benutzen kann.
+Also Polymorphie kommt aus dem Griechischen und heißt, dass es mehrere Formen gibt,
+also Poly, mehr, morphie, Form, also viel Gestaltigkeit könnte man das auch interpretieren.
+Und es ist eigentlich eine Eigenschaft, dass zum Beispiel Methoden mehrere Formen haben
+und mehrmals definiert werden können und auch implementiert werden können.
+Und das haben wir schon gesehen beim Überladen von Methoden.
+Was wir auch später sehen werden, ist, dass man das Gleiche machen kann mit Operatoren.
+Genauso wie bei einer Methode.
+Wenn man eine Methode für eine Klasse definieren kann, zum Beispiel soeben M1 ist eine Methode für eine bestimmte Klasse,
+kann man auch Plus als Bezeichnung nehmen und sagen, das ist als Operator auch irgendwie eine Methode.
+Das wird dann anders interpretiert, aber genau das Gleiche eigentlich.
+Also das ist dann ein Operator.
+Und diese Methode können als Parameter nehmen, Integers oder Doubles.
+Zum Beispiel, wenn man einen Operator nimmt oder eine Methode, M1 zum Beispiel,
+dann kann man sagen, wir definieren einmal M1 mit als Parameter ein Integer
+und man kann auch M1 mit als Parameter ein Double nehmen.
+Und wenn man später für dieses Objekt die Methode M1 und man nimmt dann ein Integer,
+dann weiß Java automatisch, dass diese bestimmte Methode mit als Parameter ein Integer ausgeführt werden soll.
+Und deshalb kann diese Methode auch komplett etwas anderes zurückgeben.
+Zum Beispiel Integer.
+Und diese Methode M1, die mit einem Parameter Double zum Beispiel ausgeführt wird, kann einen Double zurückgeben.
+Beide Methode heißen gleich, beide Methode heißen M1, aber die Signatur sonst kann sich ändern.
+Das heißt, auch da kann man zum Beispiel andere Parameter haben oder andere Typarameter,
+oder andere Typen, was dann zurückkommt.
+Und jetzt, wo wir jetzt dann auch Vererbung gesehen haben,
+aber kann man genau das auch für Klassen machen.
+Also jedes Objekt einer Klasse ist eigentlich eine Referenzvariable.
+Das heißt, es zeigt auf ein Objekt, wie wir soeben gesehen haben,
+und das Spannende, was wir jetzt gleich sehen werden, ist, dass diese Variable einfach interpretierbar wird.
+Man kann das sehen als ein Objekt von der Oberklasse,
+aber man kann das auch interpretieren als ein Objekt einer Unterklasse.
+Okay.
+Und da kommt hoffentlich jetzt, glaube ich, ja, ein Beispiel.
+Das heißt, wir haben hier zum Beispiel eine abstracte Klasse, das heißt eine Klasse, die wir nie instanzieren werden.
+Wir werden nie ein Objekt haben von Typ Tier.
+Und diese abstracte Klasse habe ein Objekt, ein Attribut, nämlich ein String, den wir Gattung nennen.
+Und wir haben unsere Konstruktor.
+Die einfach, was wir hier als einziger Parameter an den Konstruktor geben, an Gattung zurückgeben.
+Also das heißt, dieser String hier bekommt den Wert oder den String,
+oder hat den gleichen Inhalt wie der String, den wir jetzt an diesen Konstruktor geben.
+Und es hat auch eine Methode, nämlich print,
+und dieser gibt einfach aus Tier der Gattung plus welche Gattung plus ein Punkt.
+Genau.
+Und jetzt werden wir von Tier,
+dieser Klasse, von dem wir jetzt erben werden, zwei Unterklassen haben.
+Ein Tier nennen wir Hund, das heißt hier haben wir Hund, externe Tier.
+Hund hat noch extra Attributen, das heißt Hund hat automatisch auch Gattung für sich.
+Das können wir auch hier ändern.
+Aber auch Name und Rasse, auch beide sind Stings.
+In den Konstruktor von Hund nehmen wir dann zwei Parameter, einmal für den Namen, einmal für Rasse.
+Und wir führen dann erstmal den Konstruktor von der Oberklasse aus,
+das heißt diesen Konstruktor hier, und sagen, diese Gattung nennen wir hier Hund.
+Wir hätten das auch anders machen können, wir hatten das auch explizit,
+wir hätten Gattung gleich Hund nehmen können, aber grundsätzlich ist das hier genau das Gleiche.
+Wir führen halt den Konstruktor von der Oberklasse aus mit als einziger Parameter Sting Hund.
+Und so wird dann dieser Konstruktor ausgewählt.
+Genau, und dann führen wir einfach die beiden anderen Strings,
+die Attribute, die es hier gibt für Hund, Name und Rasse.
+Und wenn wir jetzt ein Objekt von Klasse Hund nehmen, und wir nehmen dann auch da Print als Methode,
+genauso wie in der Oberklasse, das heißt diese Methode wird jetzt überschrieben hier,
+und diese Methode, statt das hier auszuführen, führt das hier aus.
+Also statt zu schreiben, Tier das hier aus, führt das hier aus.
+Also statt zu schreiben, Tier das hier aus, führt das hier aus.
+Also statt zu schreiben, Tier das hier aus, führt das hier aus.
+Gattung wird hier ausgeführt, ich bin, und dann schreibt man den Namen des Hundes,
+plus welche Rasse dieser Hund hat.
+Und wenn man einen Hund hat, dann muss man auch eine Katze haben, auch da, Katze ist eine Unterklasse von Klasse Tier,
+hat auch einen Namen, keine Rasse aber, und hat auch einen Konstruktor.
+Die Konstruktor macht genau das Gleiche, das heißt Gattung wird als Katze angenommen,
+und dann kommt hier, und wir nehmen diesen Namen neu.
+Genau, das ist ungefähr das Gleiche, was beim Hund passiert, aber auch da überschreiben wir diese Methode Print,
+genau die gleiche Signatur, das heißt, wenn man ein Katze-Objekt hat,
+und man sagt, das Objekt .print, dann wird das hier ausgeführt,
+und das schreibt man komplett etwas anderes, zum Beispiel, ich bin und dann diesen Namen.
+Und danach führt man auch dieses Print aus, von der Oberklasse, dann sagt man, der Hund ist das, das ich bin, und dann dieses Name.
+führt man auch dieses Print aus von der Oberklasse.
+So wie wir soeben gesehen haben, das geht. Wir nehmen einfach dieses
+super Punkt Print, sodass man nicht diese Methode ausführt,
+aber die Methode Print der Oberklasse.
+Genau, um das jetzt zu zeigen, nehmen wir dann eine vierte Klasse.
+Das ist unsere Public Klasse, mit der wir einfach unsere
+Main-Methode definieren. Diese Main-Methode, um das
+nochmal deutlich zu stellen, also in dieser Main-Methode nehmen wir jetzt
+drei Tiere oder kreieren wir drei Tiere hier.
+Also ein Array von drei Tieren.
+0, 1 und 2, das sind die Indisches. Und wir
+kreieren hier neue Objekte gleich. Aber was
+hier neu kreiert wird, ist kein Tier der Oberklasse.
+Sonst hätte man ein Problem hier, weil das ist eine absagte Klasse.
+Das heißt, überall, wo man
+ein Tier und etwas kreiert, hat man ein Problem.
+Hat man hier aber nichts. Hier ist also ein Array
+von diesen Objekten, aber die wurden noch nicht kreiert hier.
+Das heißt, man könnte auch hier ein Tier machen, aber das wäre ungültig,
+weil das eine absagte Klasse ist. Also hier nehmen wir
+einen Hund mit diesem Namen und dieser
+Rasse war es, glaube ich. Und für Tier 1
+kann man das Gleiche machen.
+Für Tier 2 kann man das Gleiche machen. Das heißt hier, obwohl das ein Array von
+Tieren ist, weil Katze und Hunde Unterklasse sind von Tieren, kann man das hier machen.
+Kann man die spezifizieren auf den Unterklasse.
+Und das ist ziemlich interessant, weil das hier eigentlich
+at runtime passiert.
+Also während dieses Programm ausgeführt wird, wird man mit new neue Instanze kreieren.
+Das wird nicht gemacht,
+beim Kompilieren des Programms. Und das ist schon ein Unterschied.
+Das heißt, wenn man einfach das zum Beispiel randomisiert und sagt, wir
+wir printen einfach nur für diese bestimmten Tieren oder bestimmte.
+Also wir wählen hier einfach ein beliebiges Tier aus und führen dann diese Methode print aus,
+dann ist dann Tier hier ein Tier.
+Das ist noch nicht spezifiziert, ob das ein Hund ist oder,
+eine Katze. Das heißt Tier T hier ist ein Tier.
+Wir sagen einfach, dass das das Gleiche, das ist eine Referenzvariable,
+ist wie ein von den Tieren in dieses Array.
+Und wir führen für dieses Tier print aus.
+Das magische, das hier passiert, und das ist eigentlich Polymorphismus,
+ist, dass diese print Methode die richtige Methode sofort ausführt.
+Wenn dieses Tier ein Hund ist, dann wird die Methode print vom Hund,
+genommen. Wenn dieses Tier eine Katze ist, dann wird diese Methode aus der Katze-Klasse genommen.
+Automatisch. Obwohl hier in diesem Bereich überhaupt nicht,
+ja, offensichtlich ist, ob dieses Tier T eine Katze ist oder ein Hund.
+Und das ist Polymorphismus. T kann mehrere Formen haben.
+Kann ein Hund sein oder eine Katze.
+Und wenn wir das ausführen würden hier, dann kommt so was raus.
+Das heißt, wir nehmen einfach ein Tier und drücken für dieses beliebige Tier,
+ob das ein Hund ist oder eine Katze, dann, wir führen dann diese Methode print aus.
+Und manchmal ist das eine Katze, wie im ersten Fall.
+Und wenn das print von einer Katze ist, dann drückt das aus den Namen der Katze,
+plus dann welche Gattung. Manchmal ist das ein Hund.
+Wenn das ein Hund ist, dann drückt man einfach, oder dann hat man einfach nur Name plus Rasse.
+Name plus Rasse.
+Hier gibt es eine Katze, also hat man diese beiden, und dann wieder ein Hund.
+Also Name plus Rasse.
+Also nochmal zur Wiederholung, weil das ganz wichtig ist.
+Das Tier hier ist entweder ein Hund oder eine Katze.
+Und print hier als Methode ist es eigentlich egal, ob das ein Hund oder eine Katze ist.
+Das muss hier nicht definiert werden.
+Und das ist Polymorphismus.
+Und das hat dann viele Vorteile, weil grundsätzlich, während das Print,
+wenn das Programm hier irgendwo ist, oder ausgeführt wird, diese Anweisungen,
+haben wir jetzt hier T als Objekt von Klasse Tier,
+und wir führen print hier aus für die passende Unterklasse, nicht für die Oberklasse.
+Okay.
+Noch Fragen dazu?
+Kommt bestimmt in ein paar Wochen nochmal.
+Genau.
+Und das hat zu tun mit dem Binde von Bezeichnungen.
+Wie zum Beispiel, wie weiß Java, unsere Java Virtual Machine, wo diese Print herkommt.
+Ob das jetzt eine Methode ist von Katze, oder eine Methode von Tier, oder von Hund.
+Genau.
+Und diese Bindung von Bezeichnungen wird entweder zur Übersetzungszeit,
+also wenn unser Java Compiler unsere Textdateien nimmt,
+und übersetzt in Instructions, die unsere Java Virtual Machine interpretieren kann.
+Das nennt man statische Bindung.
+Das haben wir bislang irgendwie immer interpretiert so.
+Oder auch zur Laufzeit, dynamische Bindung.
+Und das ist dann, was Polymorphie benutzt.
+Genau.
+Und wenn man dann zum Beispiel Methode hat,
+die Methoden, wie Print soeben, werden dynamisch gebunden.
+Das heißt, wenn man eine Methode hat in einer Klasse,
+dann ist diese Methode, also wie diese Methode implementiert ist,
+nicht sofort implementiert wie das Objekt selbst.
+Man hat da eine Zeige, die irgendwo anders hin zeigt,
+und man kann das auch noch ändern.
+Das ist das Schöne.
+Genau.
+Klasse-Methoden aber sind speziell.
+Also jede Klasse hat diese Klasse-Methode,
+und die gehört dann nicht zu diesem Objekt.
+Und deshalb sind Klasse-Methoden und auch Attribute statisch gebunden.
+Auch da, das heißt, wenn man ein Objekt hat,
+dann sind die Attribute in dem Objekt schon gebunden.
+Man kann da nicht automatisch dann zum Beispiel
+an der Polymorphie die Objekte überschreiben.
+Das geht leider nicht.
+Und das Gleiche für Klasse-Methoden.
+Aber Methode schon.
+Und das heißt, Methode werden dann dynamisch gebunden,
+Klasse-Methode, Attribute werden statisch gebunden.
+Also Attribute und Klasse-Methode werden während dem Compilen
+irgendwie sofort arrangiert, also wird sofort vorgeplant,
+was hier ausgeführt werden soll.
+Aber für jede Methode einer Klasse kann man dann,
+während das Programm ausgeführt wird,
+das noch dynamisch ändern.
+Deshalb dynamische Bindung oder späte Bindung.
+Genau.
+Okay, ich nehme mal kurz jetzt,
+werde jetzt auf ein anderes Beispiel gehen.
+Ich mache es hier in BlueJ wieder.
+Genau.
+Ich lade mal wieder die Klassen, die wir vorher hatten,
+für unser Beispiel.
+Hier glaube ich waren wir.
+Genau, für unser Schneckenspiel.
+Das heißt, wir haben,
+vielleicht können wir das erstmal wiederholen,
+weil mit OML wissen wir ganz genau,
+wie das hier bezeichnet wird.
+Und auch wissen wir endlich,
+wofür all diese Zeichner, die wir jetzt soeben gesehen haben,
+oder die wir in diesem Beispiel gesehen haben,
+wofür die dienen.
+Das heißt, wir haben, also wenn ich das kompiliere, genau, egal.
+Also wir haben zwei Klassen.
+Diese Klasse haben wir selbst kreiert,
+in den letzten Wochen.
+Ich hoffe, Sie erinnern sich noch.
+Das heißt, in dieser Klasse Snail haben wir einfach alle Daten,
+die zu einer Schnecke gehören in unserem Spiel.
+Und in diese andere Klasse haben wir eigentlich alles andere gesteckt.
+Und jetzt wissen wir endlich mal,
+was dieses Jpanel und was diese Keylessener ist.
+Wir haben jetzt eine Klasse Game,
+das haben wir selbst definiert.
+Aber wir wissen, dass es jetzt eine Oberklasse gibt,
+Jpanel.
+Dieses Jpanel kommt aus,
+also hat jemand anders programmiert,
+ist halt eine normale Oberklasse,
+die wir jetzt als Unterklasse,
+also als Unterklasse,
+wovon wir vererben.
+Das heißt, Jpanel gibt es schon,
+irgendwo anders.
+Und wir vererben von Jpanel bestimmte Methoden,
+bestimmte Attribute.
+Keylessener, davon implementieren wir.
+Und wie wir es schon wissen,
+in Java kann man eigentlich nur von einer Klasse vererben.
+Das heißt, wir können nur von Jpanel jetzt vererben.
+Und Game ist jetzt eine Kindklasse oder eine Unterklasse von Jpanel.
+Aber wenn man dann,
+ein Interface hat,
+man kann von mehr Interfaces vererben.
+Oder auch ein Interface zusätzlich zu einer Oberklasse.
+Das heißt, Keylessener ist ein Interface,
+wie wir soeben gesehen haben.
+Das heißt, wir haben Implements, nicht Extents.
+Und auch bei Keylessener hat man dann bestimmte Methoden,
+die man ausführen muss.
+Und auch da können wir jetzt mal gucken,
+was für Methoden das waren.
+Also für Keylessener habe ich drei Methoden gesehen.
+Keypressed,
+Keyreleased
+und Keytyped.
+Die mussten wir implementieren,
+sonst hätten wir hier einen Fehler bekommen.
+Deshalb mussten wir auch diese beiden hier implementieren
+und haben einfach die implementiert.
+Also die machen eigentlich nichts.
+Also die haben keine Anweisungen,
+wenn die ausgeführt werden.
+Für Keyreleased und Keytyped.
+Für Keypressed habe ich jetzt eine Methode implementiert,
+die dann sofort hier ausgeführt wird.
+Und das ist eigentlich alles,
+was unser Interface Keylessener macht.
+Von Jpanel habe ich andere Methoden.
+Als Methode habe ich da zum Beispiel PaintComponent gesehen.
+Diese Methode überschreiben wir und,
+um dann sicher zu gehen,
+dass wir dann unsere andere Methode,
+die dann in Jpanel zur Verfügung steht, ausführen.
+Als erstes nehmen wir damit Super, genau das hier.
+Und dann haben wir hier die Möglichkeit,
+die wir hier ausführen.
+Und dann haben wir hier die Möglichkeit,
+die wir hier ausführen.
+Also das haben wir eigentlich letzte Woche erst gesehen,
+aber das haben wir vor drei Wochen, glaube ich,
+das erste Mal implementiert.
+Aber jetzt sollte endlich mal deutlich sein,
+wieso wir diese Funktionen so implementiert haben.
+Und dann in unserer Main-Methode haben wir,
+also unsere Main-Methode ist public,
+das heißt, sie steht zur Verfügung für alle,
+andere Klassen, die unsere Klasse aufrufen.
+Static, das heißt, wir haben hier,
+das heißt, wir müssen sogar kein Game instanzieren
+und Void gibt nichts zurück.
+Auch das wissen wir jetzt.
+Genau, und alles, was wir hier machen,
+ist einfach ein Fenster öffnen,
+das dann, was wird wieder gemacht,
+ich glaube, wenn wir das ausführen,
+dann sehen wir genau ein Fenster
+und in diesem Fenster haben wir unsere Spiele als Schnecke.
+Und wenn man dann einen Taster drückt,
+dann wird via diese Funktion,
+die via unser Interface definiert wurde,
+kommt dann zusammen,
+was unsere Schnecke macht selbst.
+Also das heißt, ich drücke jetzt links,
+also geht unser Spiel nach links oder nach oben, etc.
+Und wir haben auch gesehen,
+dass die Gegner-Schnecken dann auch was anderes machen.
+Und sobald dann ein Überlapp kommt,
+dass wir dann das auch detektieren können.
+Genau, also das ist,
+also das ist implementiert teilweise unsere Schnecke-Klasse,
+aber alles andere wurde jetzt implementiert,
+in unserer Game-Klasse.
+Das heißt, unsere Game-Klasse,
+da habe eigentlich schon,
+das ist eine Unterklasse,
+da habe ich schon vererbt,
+obwohl wir damals nicht wussten,
+dass das Vererbung war.
+Und da habe ich auch ein Interface benutzt,
+obwohl damals es nicht deutlich war,
+dass das ein Interface ist.
+Genau.
+Jetzt würde ich noch eine Sache machen,
+bevor wir in die Pause gehen.
+Und das ist,
+jetzt habe ich jedes Mal,
+wenn wir das Spiel ausführen,
+ein bestimmtes Fenster von einer bestimmten Größe.
+Und wenn wir für diese Größe haben,
+auch diese Blöckchen,
+die wir eigentlich vorgeben,
+auch die sind eigentlich von einer bestimmten Größe.
+Das ist eigentlich,
+was wir später nicht mehr haben möchten.
+Das heißt, wenn wir hier eine bestimmte Größe haben möchten,
+von unserem Fenster,
+zum Beispiel, man kann auch hier detektieren,
+wie groß das Fenster ist.
+Man möchte sofort das Spiel auf Fullscreen starten,
+dann muss man hier nicht 800, 400,
+aber was anderes nehmen.
+Das heißt, hier habe ich jetzt Konstante,
+diese Konstante möchte ich irgendwie anders definieren.
+Jetzt ist das Problem,
+wenn ich das mache hier,
+dann muss das auch irgendwie in unsere Snail-Klasse definiert werden.
+Weil wir benutzen implizit auch diese 800, 400.
+Zum Beispiel,
+also zum Beispiel in diese Units,
+das heißt, wenn wir einen Block große haben,
+einen Block große habe,
+jetzt 20 auf 20 Pixel,
+das ist, was ein Teil dieser Schnecke ist,
+aber auch diese 340 und diese 760 ist,
+um sicher zu sein,
+dass wenn man nicht weiter geht,
+als zum Beispiel die rechte Seite des Fensters.
+Jetzt, wie können wir sowohl in diese Klasse Snail,
+als auch in unserer Klasse Game,
+das hier als Konstante irgendwie bewahren
+oder übergeben?
+Man kann das zweimal machen,
+man kann zum Beispiel in Game sagen,
+in Game kann ich das erstmal definieren,
+also wir sagen, das Fenster ist 800, 400
+oder 1600 groß zum Beispiel
+und dann jedes Mal, wenn man eine Schnecke kreiert,
+dann hat man als Parameter 1500.
+Das wäre aber etwas doof,
+weil grundsätzlich für jede Schnecke
+und jeder Gegner, also Snail, die wir haben,
+muss man das erst kreieren,
+das heißt, dann kämen wir hier auch wieder auf
+nochmal ganz viele extra Parameter,
+die wir jedes Mal da auch weitergeben müssten.
+Das wäre valide,
+aber auch das wäre eigentlich doppelte Arbeit.
+Gibt es da eine Idee,
+wie wir das weitergeben könnten?
+Also wie man das in einem Projekt machen könnte,
+ist natürlich auch,
+man macht irgendwo eine Datei
+und das ist dann eine Konfigurationsdatei
+und das kann man laden, z.B.
+und auch das hätte man dann zum Beispiel als eine Klasse.
+Das Problem ist,
+unsere Klasse Game ist jetzt schon eine Unterklasse von Jpaddle,
+das heißt, wir können hier nicht wirklich
+von einer anderen Klasse vererben.
+Java erlaubt das nicht.
+Wie könnten wir dann zum Beispiel
+Konstante für unsere Größe des Fensters
+trotzdem sowohl für unsere Snail-Klasse
+als auch für unsere Game-Klasse nehmen?
+Ja, dann würde ich sagen,
+das wäre, also das geht in die richtige Richtung.
+Also, was ich da schon gesagt habe,
+zum Beispiel hier hat man dann
+Protected X und Protected Y zum Beispiel
+als Static-Variable,
+das heißt, in diesem Fall ist es egal,
+weil wir haben einfach nur eine Instanz
+oder ein Objekt von unserem Game.
+Trotzdem ist es noch immer das Problem,
+dass für unsere Schnecke dann irgendwie
+diese Zahlen dann weitergegeben werden.
+Die Frage ist, wie?
+Wie können wir das machen, sobald,
+also man müsste das fünfmal machen dann.
+Für unsere Spiele müsste man das machen
+und für die vier Gegner
+müssten diese vier Objekte
+dann eigentlich diese Werte auch noch bekommen.
+Nein, das ist nicht so eindeutig.
+Deshalb die Frage, wie könnte man es zum Beispiel machen
+mit einem Trick oder,
+nein, nicht einem Trick,
+eine Methode, die wir schon gesehen haben.
+Also nicht das Klasse-Method,
+aber eine Methode des Programmierens.
+Also ich gebe gleich mal die Antwort,
+also es ist tatsächlich nicht so einfach,
+aber eine Methode wäre oder eine Möglichkeit wäre,
+man macht hier einfach ein neues Interface auf.
+Man kann mehr Interfaces vererben.
+Das heißt, man nimmt einfach ein neues Interface
+und in dieses Interface kann man Konstanten stecken.
+Das haben wir am Anfang,
+also von der ersten Zeit,
+also von einer Stunde und halb gesehen.
+Das heißt, hier kann man zum Beispiel
+dieses Interface Screen nennen.
+Man sagt einfach explizit,
+dass es ein Interface ist.
+Und sowohl Game als auch Snail
+können wir jetzt von Screen vererben lassen.
+Das heißt, in Screen geben wir jetzt,
+dass wir die gleich dann interpretieren,
+aber können wir dann zum Beispiel sagen,
+wir haben jetzt ein Integer,
+wir nehmen mal x-length zum Beispiel
+und wir geben das die Länge des Fans,
+die Breite des Fensters,
+zum Beispiel 1000.
+Das muss man, weil wir haben gesehen,
+in einem Interface sind die Attributen konstant,
+also Finals sind auch abstrakt oder static,
+nicht abstrakt, static und public.
+Aber das ist egal, das lasse ich hier mal kurz weg.
+Und das Gleiche können wir dann machen für unsere y-Werte
+und vielleicht für auch andere Sachen,
+die hier mit zu tun haben.
+Also hier ist jetzt mein Fenster größer
+und das sind Konstanten,
+die ich sowohl für unsere Snail-Klasse
+auch als für unsere Game-Klasse nehmen kann.
+Das heißt, wir haben jetzt ein Interface definiert.
+Für unsere Snail-Klasse kann ich jetzt sagen,
+Implement Screen
+und ab dann habe ich plötzlich
+x-length und y-length zur Verfügung.
+Das sollte möglich sein,
+it's not abstract.
+Okay, das kann ich gleich,
+also wir müssen dann,
+Sample Methods, was ist das?
+Ah, das ist das hier.
+Das können wir, das müssen wir sogar erstmal entfernen.
+Dann haben wir keinen Fehler hier.
+Genau, und das können wir für sowohl Snail machen
+als auch Game, wobei wir das bei Game
+mit einem Komma machen müssen.
+Das heißt, Game hat jetzt zwei Interfaces,
+die jetzt vererbt werden,
+von Key Listener und von Screen.
+Das war die Idee.
+Das war die Antwort.
+Ich weiß, es ist ein bisschen weitgesorgt,
+aber es ist tatsächlich eine relativ elegante Methode,
+um das dann so zu haben.
+Das Problem ist natürlich noch immer,
+dass das Konstante sind.
+Deshalb habe ich vielleicht auch nicht sofort daran gedacht.
+Das hier kann man nicht mehr ändern, natürlich.
+Aber grundsätzlich wäre das eine Möglichkeit,
+um gleichzeitig unserer Snail-Klasse
+als auch unserer Game-Klasse
+die gleiche Variable zur Verfügung zu stellen.
+Ohne dass man das irgendwie mit extra Klassen
+oder extra Parametern in Konstruktoren machen müsste.
+Genau.
+Und da habe auch dann genau das, was hier gestellt wird,
+wir haben Interface und unsere Game-Klasse hat das Interface
+und unsere Snail-Klasse hat auch das Interface.
+Vor der Pause habe ich gesehen, dass bei unserem Spiel
+wir eigentlich jetzt mit dem Interface,
+sowohl die Snail-Klasse als auch die Game-Klasse,
+die gleichen Parameter geben können.
+Obwohl es keine echten Parameter sind,
+es sind Konstanten, weil es ein Interface ist.
+Und Attribute in dem Interface sind feiner,
+deshalb kann man die nicht mehr ändern.
+Trotzdem hat das einen Vorteil.
+Also wir möchten jetzt mit dieser Konstellation
+sowohl unsere Gegner als auch unsere Spieler hier ändern.
+Also dass man das Fenster irgendwie größer machen kann.
+Ab jetzt, also wenn wir zum Beispiel nach unten gehen,
+können wir nicht mehr nach unten hier,
+also unsere Schnecke wird komprimiert
+und grundsätzlich können wir nicht aus dem Bereich gehen.
+Und das ist etwas, das gut ist,
+also wir können uns nicht mehr verstecken, weg vom Schirm,
+aber dieses Fenster ist eine bestimmte Größe,
+das möchten wir jetzt ändern.
+Gleichzeitig können wir vielleicht auch die Blöcke,
+die wir hier haben, also habe ich ständig 20x20 Pixel genommen,
+können wir auch das ändern, auf 10 oder 40 oder was auch immer.
+Deshalb, also wenn wir das machen möchten,
+können wir dann via dieses eine Interface
+diese Nummer irgendwie festbehalten
+und sofort an beide Klassen übergeben.
+Das ist auch eine Möglichkeit von Interfaces,
+normalerweise werden die benutzt, um vorzuschreiben,
+welche Methode die beiden Klassen haben sollten.
+Hier machen wir das aber via den Attributen,
+die dann eigentlich konstant sind,
+die für beide direkt verfügbar sind.
+Das heißt, xlen, also die Breite des Fensters,
+ylen, also die y-Achse, die Höhe des Fensters
+und units, also die Blöckegröße, sind jetzt ab jetzt verfügbar
+für sowohl unsere Snail-Klasse als auch unsere Game-Klasse
+und das können wir jetzt implementieren.
+Das heißt, überall wo 20 steht, können wir einfach units schreiben,
+das können wir auch wahrscheinlich etwas schneller machen,
+indem man einfach das so,
+macht und dann können wir für jeder 20,
+genau, das als unit ändern,
+das ist schon mal das.
+Das sieht gut aus.
+Und dann können wir da zum Beispiel auch das hier machen,
+also das ist die Breite des Fensters,
+also xlen minus,
+okay, da steht minus 60,
+habe ich da irgendwas gemacht, oder minus 40,
+können wir ungefähr das gleiche machen, zum Beispiel,
+minus units mal 2, zum Beispiel.
+Das wird ungefähr hinkommen.
+Und dann haben wir überhaupt oder fast keine Konstante mehr,
+was immer gut ist.
+Das gleiche für das hier, xlen minus units mal 2.
+Also meine Hoffnung ist, dass das dann irgendwie funktioniert,
+dass sobald wir dann an der rechten Seite oder Unterseite unseres Fensters kommen,
+dass das jetzt passt,
+unabhängig von welcher Breite des Fensters,
+diese Glieder haben für unsere Schnecke.
+Also diese Teilchen unserer Schnecke.
+Genau.
+Und das ist alles für unsere Snail-Klasse.
+Das gleiche machen wir jetzt für unsere Game-Klasse.
+Das heißt, auch hier müssen wir gucken,
+wo wir 20 haben,
+also hier zum Beispiel wird das units,
+hier, hier, hier.
+Das heißt, jedes Mal, wenn wir unser Spieler links, rechts, nach oben oder nach unten,
+bewegen, ist das jetzt nicht 20,
+aber zum Beispiel 10 oder 40.
+Ich weiß nicht, was ich hier genommen habe.
+20, können wir sagen mal 10 nehmen.
+So dass dann die Schnecke ganz klein wird, oder?
+Relativ klein wird.
+Dann hier, genau das gleiche.
+Also bewegen wir die Gegner auch um ein Unit oder minus ein Unit,
+links oder rechts oder hoch oder runter.
+Das gleiche hierfür.
+Das heißt, hier zeichnen wir unseren Spieler.
+Hier zeichnen wir unseren Gegner jedes Mal.
+Hier, das ist, wo das Auge kommt.
+Okay.
+Dann können wir hier mal units, units,
+Teil durch 4.
+Da muss man später gucken, dass unser Unit auch irgendwie,
+dass das Sinn macht.
+Und auch hier zum Beispiel unit Teil durch 2.
+So dass das Auge auch irgendwie in die Mitte kommt.
+Das ist, was wir hier hoffentlich dann bald haben.
+Und hier, okay, dieses Häuschen,
+genau das gleiche würde ich sagen.
+Also auch da nehmen wir etwas breiter.
+Und hier nehmen wir die Hälfte.
+Also units plus unit.
+So.
+So dass dann irgendwie unsere Schnecke skaliert wird.
+Abhängig von dieser unit size.
+Hier nehmen wir einfach x lang und y lang.
+Und das ist es, glaube ich schon.
+Das heißt, ich habe irgendwas.
+Ich habe es vergessen.
+Jetzt werde ich hier diese Gegner Schnecke auch.
+Okay, lass uns da hier auf.
+Das ist x lang minus unit mal 2 zum Beispiel.
+Das ist die ganz Rechtsanfanger.
+Und hier ganz unten.
+Das heißt hier y lang minus units mal 2.
+Das würde ungefähr auf das gleiche kommen,
+wenn wir wieder 800 mal 400 Fenster hatten.
+Da.
+Ich bin mal gespannt, ob das jetzt komponiert.
+Sieht gut aus.
+Und das auszuführen.
+Genau.
+Jetzt habe ich ein riesiges, oder riesig,
+ein großes Fenster und unsere Spiele sind deutlich kleiner geworden.
+Und jetzt können abhängig von was wir da machen,
+grundsätzlich auch mehr Gegner oder andere Sachen dazu machen später.
+Und das ist dann, was wir hier gewonnen haben.
+Oder wir können auch hier,
+dass wir hier gewonnen haben.
+Oder wir können das Fenster zum Beispiel auch komplett so groß machen,
+wie unser Display.
+Genau.
+Und das war alles eigentlich auch schon für heute,
+für das Spiel.
+Das nächste, was ich machen möchte, ist Polymorphie.
+Aber bevor ich mit Polymorphie anfange,
+würde ich dann nächste Woche auch das nochmal wiederholen.
+Da brauche ich auch wieder ein Beispiel für.
+Deshalb würde ich das jetzt sehen.
+Und das Beispiel ist das Wiedergeben von bestimmten Datenverteilungen.
+Das nennen wir mal Verteilung.
+.java.
+Fangen wir komplett wieder was Neues an.
+Also der Hintergrund hier von diesem Beispiel ist,
+man hat sehr oft,
+und das werden Sie auch später sehen,
+wenn Sie Probleme haben,
+oder wenn Sie ein Problem haben,
+was Sie lösen müssen mit Implementierung von zum Beispiel Java etwas,
+dann haben Sie Daten.
+Und die Daten,
+es ist immer gut zu wissen,
+was für Verteilungen die Daten haben.
+Manchmal ist die Verteilung zum Beispiel uniform.
+Das heißt, wenn Sie eine beliebige Zahl zwischen 0 und 10 fragen,
+das habe ich schon gesehen in Java,
+dann ist das meistens uniform.
+Die Wahrscheinlichkeit, dass das zwischen 0 und 1 ist,
+ist ungefähr das gleiche wie die Wahrscheinlichkeit,
+dass das zwischen 5 und 6 ist,
+oder zwischen 9 und 10.
+Das ist uniform.
+Andererseits gibt es ganz viele Arten von Daten,
+die nicht uniform sind.
+Ich weiß nicht, ob ich das schon gesehen habe in Stochastik oder in Statistik.
+Auch da gibt es dann zum Beispiel andere Verteilungen,
+die in der Natur sehr oft vorkommen,
+die nennen sich Chaos-Verteilungen oder Normalverteilungen.
+Also wenn Sie zum Beispiel mehr Becher haben
+und Sie versuchen,
+eine Becher zu kaufen,
+dann haben Sie eine Becher,
+die sich nicht uniform aussehen.
+Und wenn Sie eine Becher haben
+und Sie versuchen,
+da ein Bällchen in diese Becher zu kriegen,
+Beer Pong überhaupt,
+dann wird die Wahrscheinlichkeit,
+dass man irgendwo in der Mitte trifft,
+meistens höher sein als irgendwo am Rande.
+Und da ist diese Verteilung ganz anders.
+Es ist nicht so,
+dass jedes Becher irgendwie gleich wahrscheinlich wird als Ziel,
+aber eher, dass die in der Mitte
+mehr Bällchen bekommen als die am Rande.
+Und das ist dann eine Chaos-Verteilung.
+Das werden wir jetzt diese Woche
+und nächste Woche sehen
+als Beispiel für Vererbung
+und auch später Polymorphie.
+Das heißt,
+wir möchten diese Verteilung irgendwie visualisieren
+in einer Dimension.
+Und das möchte ich mit,
+also wie man Verteilung visualisiert,
+wenn man echte Daten hat,
+ist einfach mit dem Histogramm.
+Und das Histogramm habe hoffentlich
+alle schon gesehen in der Schule.
+Das heißt,
+wir werden es auch machen mit den Funktionen,
+die es in Java schon gibt.
+Das heißt,
+wir werden einfach mit den Random Class anfangen.
+Und wir können diese Random Class nicht nur fragen,
+gib mir eine beliebige Zahl zwischen 0 und 10
+und die ist dann meistens uniform.
+Man kann auch sagen,
+ich möchte jetzt eine gaussische Wahrscheinlichkeit.
+Deshalb müssen wir früher oder später,
+also später mache ich hier mal unsere Beschreibung,
+was hier kommt.
+Ähm,
+ähm,
+das nehme ich nochmal für später,
+dass ich hier weiß,
+wann es entstanden ist.
+So.
+Verteilungen machen wir da mal raus.
+Okay, also unser Random Paket,
+also unsere Random Klasse müssen wir importieren.
+Und alles,
+was wir importieren mussten,
+kommt aus Java.
+Ich hoffe,
+das haben Sie schon gesehen.
+Und dann statt lang oder so,
+haben wir auch Util für Utilities.
+Und dann können wir explizit diese Random Klasse importieren.
+Und ab jetzt haben wir Random als Klasse,
+die wir dann benutzen können in unserer eigenen Klasse.
+Dann werden unsere Klasseverteilung darstellen als eine Oberklasse.
+Und dann werden wir später die Kindklasse
+oder die Unterklasse als spezifische Arten von Verteilung,
+sehen.
+Das heißt,
+unsere Verteilung können wir auch als abstrakte Klasse später implementieren.
+Das können wir später machen.
+Aber grundsätzlich ist die Verteilung etwas,
+das bestimmte Daten enthält und die auch wiedergibt.
+Im Mittelsein ist es ein Histogramm.
+Ich könnte es auch Histogramm nennen eigentlich,
+aber jetzt ist es schon zu spät.
+Ich habe die Datei eigentlich auch schon benennt.
+Genau, also wenn wir unsere Verteilung haben,
+dann müssen wir ein paar Daten haben.
+Diese Daten werden jetzt gespeichert in ein Array.
+Und dieses Array können wir uns später ausgeben auf der Konsole.
+Und dieses Array zeigt dann die Verteilung für unsere Werte.
+Zum Beispiel können wir sagen,
+also wir werden das später vererben.
+Das heißt, wir müssen das,
+oder wenn man das ordentlich macht,
+nichts verändern.
+Nichts public, aber auch nicht private,
+aber protected haben.
+Und dann müssen wir die Y-Länge erstmal,
+also die Höhe des Histogramms,
+ich meine das mal gleich wie vorher,
+in der Konsole wird 24 ungefähr, glaube ich, reichen.
+Das Gleiche machen wir jetzt für unsere Breite des Konsoles.
+Protected.
+Und da ist es meistens 80, glaube ich.
+Das wird dann uns schon reichen.
+Und da, also diese zwei werde ich jetzt in Array,
+oder benutzen als Maximum Länge in ein zweidimensionales Array.
+Das heißt, wir werden Arrays,
+ja, ein Array als Attribute haben,
+zweidimensional,
+Integers würde ich mal sagen.
+Und, oder wir können auch Booleans nehmen.
+Und dann später zum Beispiel, wenn es wahr ist,
+ausgebe als ein X.
+Wenn es falsch ist oder nicht,
+falsch ist oder nicht wahr ist,
+als ein Leerzeichen.
+Das heißt, wir haben ein zweidimensionales,
+also das ist viel komprimierter natürlich,
+als ein Integer, deshalb wäre das nichts Schlechtes.
+Und das nennen wir mal Display.
+Das heißt, wir haben jetzt hier ein zweidimensionales Array,
+die wir dann später einfach ausgeben aus der Konsole,
+mit einem If-Test.
+Also wenn der Inhalt von diesem Display
+gleich ist als True,
+dann schreibe ich ein X.
+Wenn nicht, dann schreibe ich ein Leerzeichen.
+Und so haben wir eigentlich ein Bitmap,
+ein einfacher Bitmap,
+wo wir dann zum Beispiel für jede Zeile dann sagen,
+wie viele von diesen Zahlen vorgekommen sind,
+in welchem Bin im Histogramm.
+Das heißt, die erste Zeile ist zum Beispiel
+alle Nummern zwischen 0 und 1,
+die zweite Zeile ist alle Nummern zwischen 1 und 2,
+und so weiter bis 10.
+Und dann die Länge, also wie viele X man da hat pro Zeile,
+zeigt dann, wie viele Randomzahlen man gefunden hat
+für diese Zeile, also für diesen Bin im Histogramm.
+Und dann werden wir sehen später,
+dass Uniform in anderer Form hat als eine gaussische Verteilung.
+Das ist dann die Idee.
+Okay, und auch das ist protected.
+Auch das werden wir dann später irgendwie mal brauchen
+als Attribut, auch in unserer Kindklasse,
+also die Klasse, die wir da vererben.
+Jetzt werden wir alles oder fast alles machen
+mit unseren Konstruktoren.
+Das heißt, wir werden gar nicht so viele Methoden schreiben.
+Ich versuche eigentlich, alles in einen Konstruktor zu nehmen.
+Konstruktor ist meistens public, wie wir schon gesehen haben,
+und habe die gleichen Methoden.
+Ich habe hier gleiche Namen wie unsere Klasse,
+Verteilung halt.
+Hier werde ich unseren Konstruktor auch sofort mitgeben,
+was für Länge und vielleicht noch was anderes auch.
+Das heißt, wir können unser,
+wir können H für height,
+und wir können W für width nehmen.
+Oder einfach das beschreiben so.
+Width.
+Und dann kann unser Benutzer sofort,
+wenn er Verteilung definiert,
+eine bestimmte, ein Display geben.
+Okay.
+Eine andere Sache, die wir brauchen bei unserer Oberklasse schon,
+ist unsere Random-Klasse.
+Also auch das können wir als Attribut hier gleich dazu nehmen.
+Das heißt, wir haben ein Objekt von Typ random,
+das nennen wir mal R zum Beispiel,
+und in unserer Verteilung,
+also in unserem Konstruktor,
+können wir das dann später initialisieren,
+als eine bestimmte Art von Random-Variablen.
+Also das können wir hier erstmal als,
+voila, random,
+als Objekt, also ab jetzt können wir R nehmen,
+R ist ein Attribut, R wird auch protected,
+auch das kann man dann von den Unterklassen nehmen,
+und R kann man hier dann später als etwas,
+das dann eine uniforme Random-Variable zurückgibt,
+oder eine gaussische Random-Variable.
+Und dann gucken wir uns an,
+was die Verteilung bringt am Ende.
+Genau.
+Also das ist was, was wir da schon haben.
+Wir können dann unser Y lenkt,
+wird dann, das ist unser Klasse-Attribut,
+ist unser Höhe des Displays,
+X lenkt ist dann unser Breite des Displays,
+und dann werden wir mehrmals samplen,
+das heißt, abhängig von unserer Randomisierungsmethode,
+ob das jetzt uniform oder gaussisch oder was anderes ist,
+es gibt auch viele andere,
+werden wir jetzt das mehrmals machen müssen.
+Wenn wir das nur einmal machen,
+dann haben wir nur einen Wert,
+und dann wäre wenig,
+dazu zeigen.
+Wir machen das mehrmals,
+ich würde sagen,
+auch das ist dann eigentlich eine Variable,
+die hier kommen sollte.
+Wir nennen das mal runs.
+Wir können das 80-mal machen,
+das heißt, wenn man Pech hat,
+und das alles im gleichen Histogramm-Kästchen kommt,
+dann wird man schon über diese 80 gehen später,
+also wenn wir etwas Großes nehmen.
+Aber wir werden sehen,
+bei dieser Menge kann man auch ein bisschen höher gehen.
+Also 120 werden.
+Also wir werden 120 random Zahlen fragen,
+und dann gucken, wo die hinkommen.
+Zwischen 0 und 1,
+zwischen 1 und 2,
+zwischen 2 und 3,
+und so weiter.
+Und das ist der Punkt hier.
+Und auch das können wir eigentlich als Parameter geben.
+Das heißt, wir nehmen in runs,
+und hier haben wir dann zweimal die gleiche Variable,
+also einmal als Attribut,
+einmal als Parameter für unsere Funktion,
+oder Methode.
+Da haben wir gesehen,
+wenn man this.runs hat,
+dann haben wir diese.
+Das heißt, this zeigt auf das Objekt,
+das dann später aus unserer Klasse kommt.
+Also das hier ist unser Attribut,
+und runs ist unsere Parameter hier.
+Das sind zwei verschiedene Sachen,
+das heißt, der Wert von runs wird jetzt in diese runs gesteckt.
+Das ist das Schöne an this.
+Prima, jetzt haben wir alle Attribute gefüllt,
+oder wir hatten schon Standardattribute,
+jetzt habe ich nochmal gefüllt,
+und können das dann später anpassen.
+Also eigentlich hätten wir das alles weglassen können,
+aber egal.
+Und dann müssen wir auch unser Display auch noch initialisieren.
+Das heißt, wir müssen unser Display zum Beispiel alle auf false initialisieren.
+Wir haben dann halt zwei for loops,
+das heißt, ein for loop für die Funktion,
+ein for loop für die Zeile,
+ein for loop für die Spalte zum Beispiel.
+Zum Beispiel x nehmen wir dann für die Breite.
+Das heißt, x wird dann kleiner als,
+Breite ist x, oder?
+Ja, als x lang, voilà.
+x++.
+Ich habe hier keine geschweigte Klammer,
+weil eigentlich wissen wir schon,
+was wir hier machen möchten.
+Ich möchte display x,
+und dann kommt dann gleich y,
+möchte wir gleichstellen an false.
+False.
+So.
+Sodass dann, sobald wir hier sind,
+eigentlich alle Variablen in unserer zweidimensionalen Array auf false stehen.
+Dass das schon mal deutlich ist.
+In Java würde das eigentlich schon passieren.
+Normalerweise.
+Normalerweise wird, wenn man ein Array initialisiert,
+das auf 0 gesetzt, wenn das zum Beispiel eine Zahl wäre,
+oder auf false, wenn das ein Boolean wäre.
+Hier mache ich das nochmal explizit,
+sodass wir sicherstellen, dass das da auch tatsächlich passiert,
+unabhängig von unserer Java-Variante.
+Vielleicht, dass es sich später nochmal ändert.
+Deshalb ist es dann gut, dass wir das nochmal explizit machen.
+Oder später, wenn jemand dann unsere Implementierung liest,
+dann weiß er ganz genau, ich muss mich nicht befürchten,
+dass das dann nicht passiert, zum Beispiel.
+Gut.
+Also das ist hier alles, was Initialisierung angeht.
+Und ab jetzt habe ich einfach hier alles initialisiert,
+was wir haben möchten.
+Jetzt brauchen wir eine Methode,
+um dann auszugeben, was unsere Verteilung am Ende hat.
+Und was wir dann später noch brauchen, ist eine Methode,
+die dann eine bestimmte Zahl,
+also diese 120 oder runs,
+mal eine random Zahl nimmt
+und diese random Zahl irgendwie in ein Display verwaltet.
+Und das ist dann unsere nächste Aufgabe.
+Aber erstmal müssen wir das später ausgeben.
+Das heißt, wir müssen eine public method haben,
+wir nehmen das mal als void,
+und das nennen wir mal print.
+Das haben wir heute ein paarmal gehabt.
+Deshalb, wir möchten jetzt ausgeben in unsere Konsole,
+wie diese Verteilung aussieht.
+Und auch da nehmen wir einfach ein for-loop.
+Wir können genau das nehmen hier.
+Also wir gehen über unsere,
+okay, da müssen wir wahrscheinlich schon mal mit Schleifen arbeiten.
+So, das heißt für jede,
+okay, ich möchte es eigentlich umgekehrt machen.
+Das heißt für jede Zeile werde ich das hier machen.
+Und dann für jede Zeile habe ich eine bestimmte Länge.
+Deshalb halte ich das konsistent und nehme ich hier x.
+So, jetzt werde ich anfangen,
+jede Zeile auszugeben.
+Und ich könnte dann zum Beispiel
+print,
+print,
+print,
+so,
+einfach mit einer Linie,
+an der linken Seite zum Beispiel.
+Und an der rechten Seite machen wir genau das Gleiche.
+Das heißt, wir haben da eine Linie
+und an der rechten Seite haben wir eine Linie.
+Und jetzt wäre für jede Zeile da,
+sobald wir unser Display ein true haben,
+wäre da ein true,
+wenn wir dann x zum Beispiel schreiben,
+oder ein Blöckchen,
+wenn da false steht,
+dann werden wir nichts schreiben.
+Das ist relativ leicht.
+Das heißt,
+if display x, y
+gleich ist als false,
+und das muss zwischen Klammern stehen,
+so,
+und ich sage mal jetzt true,
+das heißt, da würde eine Zahl gezählt,
+dann,
+da brauche ich auch nur eine Anmerkung.
+Ich mache das mal hier.
+Und print.
+Dann werde ich einfach hier ein x schreiben.
+Und sonst genau das.
+Ups.
+Aber ohne die x.
+Also ein Leerzeichen.
+Das heißt, normalerweise würde man da ein Blöckchen bekommen.
+Hoffentlich.
+Mal gucken.
+Genau.
+Und das ist es schon.
+Also das ist eigentlich alles,
+was unsere Verteilungsklasse braucht.
+Eine Methode, um alles zu initialisieren
+und eine Methode, um alles in der Konsole wiederzugeben.
+Und jetzt werden wir alles andere in unsere Unterklassen,
+unsere Unterklassen,
+unsere Unterklassen nehmen,
+aber dann spezifisch für eine Art von Verteilung.
+Das heißt, wir haben diese Verteilung hier,
+und dann nehmen wir einfach zwei Klassen.
+Eine Klasse, wo wir dann zum Beispiel die uniforme Verteilung,
+also uni,
+wir können das einfach uni nehmen,
+oder uniform,
+und eine Klasse gauss,
+für gaussische Verteilung.
+Und in dieser Klasse werden wir sagen,
+das sind Kindklasse von unserer Verteilungsklasse.
+Auch hier.
+Voila.
+Also die haben alles,
+was wir schon implementiert haben,
+und nehmen etwas extra Spezifisches dazu.
+Genau.
+Was unsere Uniformklasse hat,
+also die haben eigentlich keine Attribute diesmal,
+diese zwei Unterklassen,
+die haben nur Methode.
+Und diese einzelnen Methode,
+die wir dann,
+die wir dann sicherlich implementieren müssen,
+ist ein Konstruktor.
+Das heißt für uniform nehmen wir ein,
+problem uniform.
+Voila.
+Und auch da können wir die Länge,
+oder die Größe auch als Variable nehmen.
+Ich weiß nicht mehr,
+wie wir das hier oben gemacht haben.
+Das können wir jetzt mal kopieren.
+Und dann können wir hier,
+also wir machen das genau das Gleiche eigentlich.
+Das heißt,
+wir bestimmen die Höhe unseres Histogramms,
+die Breite unseres Histogramms,
+und wie oft wir neue Daten nehmen.
+Und das ist eigentlich alles,
+was wir brauchen.
+Wir können da das Gleiche wieder machen,
+wie in dem Beispiel soeben.
+Wir möchten dann sofort explizit
+unser Konstruktor von Verteilung,
+also das ist jetzt hier,
+Konstruktor von Verteilung aufrufen.
+Wenn wir hier das nicht machen würden,
+dann würde unser Default-Konstruktor aufgerufen.
+Das Problem ist aber,
+wir haben kein Default-Konstruktor da oben,
+weil wir haben nur ein bestimmter Konstruktor
+mit drei Parametern definiert.
+Deshalb müssen wir eigentlich hier
+unser Super initiieren.
+Also müssen wir unser Superklasse-Konstruktor
+so aufrufen,
+indem wir dann,
+also das heißt,
+width und runs dann auch wieder
+erstmal initialisieren in Verteilung,
+um dann weiterarbeiten zu können
+in unserer uniformen Verteilung.
+Und jetzt werden wir eine Vorschleife haben,
+weil wir müssen mehrmals
+eine neue Zahl nehmen.
+Also da oben in Verteilung,
+jetzt werde ich mal kurz
+noch ein bisschen mehr Platz,
+das wir hier brauchen.
+Also hier oben in Verteilung habe er,
+diese Rundung habe ich schon initialisiert hier,
+also können wir jetzt benutzen,
+um zum Beispiel eine uniforme Verteilung herzustellen.
+Und das habe ich eigentlich schon mehrmals gemacht.
+Wenn wir zum Beispiel unsere Gegner
+bei unserem Schneckenspiel hatten,
+also um die bewegen zu können ab und zu
+Richtung unsere Spieler,
+habe ich dann einfach diese nextInt genommen.
+In unserem Wordle-Spiel habe ich genau das gleiche gemacht,
+um ein beliebiges Wort aus einem Array von Things zu nehmen,
+habe auch da eine uniforme random Zahl genommen.
+Und das habe ich gesehen ist nextInt,
+das ist die Methode, die wir bei R haben.
+Das heißt, sobald wir diese Methode aufrufen,
+mit hier einer bestimmten Zahl,
+dann wissen wir, okay, jetzt haben wir
+eine bestimmte Zahl.
+Und wenn wir zum Beispiel sowieso unsere Höhe,
+unsere Displays haben,
+dann können wir auch hier sofort das Ganze quantisieren.
+Das heißt, unser Height, unser Display nehmen wir gleich
+als unsere maximale Zahl.
+Das heißt, wenn das 24 ist zum Beispiel,
+unser Display 24 hoch ist,
+dann werden diese randomisierte Zahlen hier automatisch
+in der richtigen Zeile.
+Und dann können wir das Ganze auch in der richtigen Zeile
+umwandeln.
+Und das ist, was dann hier passiert,
+spät, sobald wir das in der Schleife fertig haben.
+Das heißt, wir müssen hier,
+ich nehme mal für i hier,
+das heißt, i ist gleich,
+es startet bei 0, ist kleiner als runs,
+weil wir werden das dann n-mal machen,
+also runs mal machen.
+Und für jede von diesen,
+ich glaube, wir brauchen da etwas mehr,
+deshalb würde ich einfach das schon mal nehmen,
+werden wir dann eine Zahl daraus holen.
+Genau.
+Und diese Zahl müssen wir irgendwo in unserem Display stecken.
+Das ist dann, was wir als nächstes machen.
+Also wir können das erst mal als eine Zahl aufgreifen.
+Ich glaube,
+hier kriegt man sofort ein Integer,
+aber wir können das nochmal explizit machen.
+Nein, das brauchen wir gar nicht.
+Das ist immer ein Integer.
+Also jetzt hat c eigentlich unsere randomisierte Zahl.
+Also c ist eigentlich ein Sample.
+Und jetzt müssen wir für c dann das ganze Display,
+also unser Display Array,
+die wir haben aus Verteilung, füllen.
+Das heißt, hier müssen wir für jede Zeile,
+genau, müssen wir irgendwo ein neues false ausdrücken.
+Das heißt, wir müssen hier mit dem while-Schleife
+anfangen.
+Wir können sagen, sobald,
+weil c ist eigentlich unsere Zeile, in der wir gehen.
+Unsere Zeile kommt auf den zweiten Platz, also hier.
+Und müssen wir dann für ein j zum Beispiel,
+das anfangen bei 0, das ganze korrigieren.
+Das heißt, wir werden anfangen bei j ist 0,
+und solange unser Display 1 ist,
+werden wir dann das j incrementieren.
+Das heißt, sobald das,
+wir können das einfach so lassen,
+das heißt, wenn das hier true ist,
+gehen wir auf den nächsten,
+und dann auch mal auf den nächsten,
+und nochmal auf den nächsten.
+Ich hoffe, das ist, also auf dieser Position stehen die Spalten,
+auf dieser Position stehen die,
+ist das richtig?
+Ja, das ist richtig, die Zeilen, genau.
+Das heißt, wir werden einfach hier im Display speichern,
+wie oft eine Zahl zwischen 0 und 1 aufgetreten ist.
+Oder in diesem Fall, wenn es eine uniforme,
+random Zahl zwischen 0 und 10 ist,
+wie oft wir 0 gefunden haben,
+wie oft wir 1 gefunden haben, und so weiter.
+Genau das Gleiche können wir später auch
+für unsere gaussische Methode nehmen,
+wo wir dann zum Beispiel eine random Zahl
+oder random Double zum Beispiel,
+eine Kommazahl zwischen 0 und 1 haben.
+Das ist dann, wieso ich hier diese extra Methode
+oder extra Arbeit mache.
+Genau.
+Und sobald wir das dann haben,
+also das eigentlich sucht für die vorherige,
+wo es schon ein true gibt,
+sobald wir dann eines gefunden haben, wo es false ist,
+muss sie das auf true setzen.
+Das heißt auch hier, also i,
+wir sind jetzt am Ende gekommen von dieser Zeile,
+und das letzte Element, das noch nicht auf true gesetzt wurde,
+muss jetzt auf true setzen.
+Und dann folgen normalerweise auch mehr,
+die mit false anfangen.
+Das heißt, hier müssen wir das auf true setzen.
+Auf true setzen.
+Genau.
+Und am Anfang wird diese while-Schleife
+überhaupt nicht durchgeführt.
+Setzen wir einfach das erste auf true.
+Das nächste Mal, wenn genau die gleiche Zeile gewählt wird,
+ist das erste zu.
+Also gehen wir einmal durch diese Schleife
+und setzen wir dann das nächste auf true, und so weiter.
+Das kann man später noch mal visualisieren,
+wenn man das haben möchte,
+aber grundsätzlich ist das relativ
+eine leichte Implementierung mit Array von Booleans,
+mit zweidimensionales Array von Booleans.
+Genau.
+Und das machen wir jetzt für eine große Zahl von random samples.
+Also grundsätzlich würde das eigentlich uns schon eine Verteilung geben.
+Genau.
+So.
+Dann können wir das gleiche für gauss machen.
+Also grundsätzlich ist das alles,
+was wir brauchen,
+obwohl das können wir erstmal testen.
+Deshalb würde ich das erstmal auskommentieren.
+Mit einer eigenen main-Funktion in unserer uniformen Verteilung.
+Das heißt hier machen wir wie immer ein static,
+das heißt also unsere main-Funktion muss immer static
+oder public erst.
+static void, das geht nicht zurück.
+Und als,
+als Argument könnte man da auch ein paar Strings,
+zum Beispiel, ist egal was für Namen das hat.
+Und in dieser main-Funktion würde einfach nur ein Objekt
+von unserer uniformen Verteilung kreieren.
+Das heißt, wir geben unser uniform U zum Beispiel,
+das instanzieren wir auch sofort.
+Das ist ein uniform.
+Und dann können wir sagen, was für Länge,
+was für Breite und wie viele Runs wir das machen.
+Zum Beispiel machen wir das,
+umso höher ist zum Beispiel 24,
+so eben auch als default angegeben,
+umso breiter ist 80.
+Obwohl wir können nur 120 nehmen oder 100.
+So.
+Und Runs können wir auch eine ziemlich große Zahl nehmen,
+würde ich mal denken.
+Ohne da wirklich Probleme zu haben.
+Also 240 zum Beispiel.
+Das heißt, wir werden 240 Randomzahler zwischen 1 und 24 fragen.
+Und wir werden die einfach kategorisieren auf die Zeile,
+wo sie hin zu gehören.
+Die erste Zahl ist die 0 haben,
+die zweite Zahl ist die 1 haben, 2 habe und so weiter.
+Das ist, was wir hier dann sofort haben.
+Und dann rufen wir die Methode,
+die wir bei U haben,
+nämlich Uprint auf.
+Und hier ist das Schöne,
+dass Uprint eigentlich aus Verteilung kommt,
+nicht aus unserer Unterklasse.
+Aber trotzdem benutzt werden kann man diese Print.
+Drückt einfach aus, was hier im Display gezeigt wurde.
+Und jetzt hoffe ich, dass das schon funktioniert.
+Die Frage ist, ob.
+Das heißt, wir müssen erstmal kompilieren.
+Verteilung.
+Da habe ich schon ein Problem.
+Booleans.
+Das ist leider nicht möglich,
+ist dieses Boolean.
+Gibt es noch was?
+Nein? Okay.
+Mal gucken, ob es noch was gibt.
+Ja, diesmal, das ging relativ erstaunlich schnell.
+Also erstaunlich schnell, weil ich fast nichts,
+also fast viel geschrieben habe,
+und nicht kompiliert habe.
+Woops, da gibt es ein Problem.
+Ich habe etwas vergessen in main, glaube ich.
+Define the main method as.
+Das habe ich doch gemacht.
+Ah, okay, Verteilung muss ich haben.
+Ja, okay.
+Das ist, weil ich alles in einer Datei habe.
+Das können wir aber so machen, glaube ich.
+Das heißt können.
+Sonst muss ich den main in Verteilung gießen.
+So.
+Also die erste Klasse, die man hat, wird ausgeführt.
+Nein, das geht auch nicht.
+Okay.
+Gut, dann machen wir das umgekehrt.
+Ich dachte, ich mache es erst in unserer Kindsklasse.
+Geht nicht.
+Ist aber nicht schlimm.
+Dann werde ich es einfach in Verteilung machen.
+Und statt dass wir dann unsere main Funktion,
+hier haben, werde ich es einfach hier, Verteilung, nochmal dazu schreiben.
+Das heißt, Verteilung hat jetzt unsere main Funktion
+und kreiert dann unsere uniforme Kindklasse.
+Ups.
+Wo war das?
+Da.
+Da.
+Auf Linie 20.
+Kann ich das nicht, weil display ist null.
+Weil ich es nicht kreiert habe.
+Komisch.
+Ah ja, klar, natürlich.
+Ich habe diesen Display noch nicht kreiert.
+Das heißt, das ist eigentlich, was passiert ist.
+Das ist eine Referenzvariable, wie wir gesehen haben.
+Ich muss display auch explizit kreieren,
+als Array.
+Das heißt, display ist new.
+Und dann hier muss ich sagen, was?
+Nämlich ein Boolean.
+Und dann hier die Größe.
+Nämlich, was habe ich?
+x-Lang, dann y-Lang.
+So.
+Gibt es noch was?
+Nein.
+Doch.
+Index 80, arrow, bounds.
+Okay, hier habe ich 80 genommen, aber,
+ah ja, genau.
+Ich nehme x.
+Ich habe glaube ich x und y irgendwie vermischt, oder?
+Also hier nehme ich x.
+Und dann x.
+Auf derasant Let decentralized��니다.
+Das heißt, ich muss nun fit AC auf der
+Let disparate x FAR
+Nein, nein, nein, also x, also Moment, ich weiß es auch nicht, ich sage nicht, dass es falsch ist,
+aber x wird hier als Breite gestellt, das heißt, x kommt als Erste und ist die Breite,
+y ist die Höhe, auch hier zum Beispiel, x ist hier, sag, 80,
+ah, nein, nein, genau, jetzt verstehe ich es.
+Also das eigentlich mache ich, ich benutze hier schon x-Längen und y-Längen,
+obwohl es eigentlich nicht initialisiert wurde, das ist der Punkt.
+Ja, grundsätzlich brauche ich das hier hinzuschleppen.
+Weil grundsätzlich möchte, also ich habe das hier schon,
+also ich hätte eigentlich das auch hier initialisieren können als Height and Width natürlich,
+das wäre das Gleiche gewesen.
+Aber das Gleiche, also auch das ist verwirrend.
+Ich glaube, mein Fehler war, dass ich es x-Längen und y-Längen genannt habe.
+Das ist sowieso irgendwie keine gute Wahl gewesen.
+Ah, das passiert, oder das klappt.
+Was ich noch vergesse.
+Was ich noch vergessen habe, ist dann hier zum Beispiel ein Entliner.
+Das heißt, hier muss ich dann auf die neue Zeile gehen.
+Aber wenn wir das machen, ich mache mal clear hier,
+sodass uns die Konsole völlig benutzt wird,
+und wenn wir das dann nochmal machen,
+nochmal erst kompilieren und dann nochmal ausführen,
+dann habe ich eine uniforme Verteilung.
+Also das heißt für die Höhe, also für alle unsere,
+für die Höhe, die wir hier haben,
+das sind 24 Zeile, also 25, nee, 24,
+von 0 bis, was habe ich genommen, 24, glaube ich.
+Das heißt, von 0 bis 23 habe ich jetzt das 9-mal 0 bekommen,
+oder 2-mal hier etwas in der Mitte, so 11 oder so vielleicht,
+und 6-mal habe ich 23 bekommen.
+Das ist ungefähr unsere Verteilung von unserer beliebigen Zahl.
+Und das ist jetzt für uniforme Verteilung.
+Jetzt, wenn wir das das Gleiche machen für unsere gaussische Verteilung,
+ist es genau das Gleiche.
+Das heißt, wir können das hier kopieren.
+Das werde ich dann zeitweise auch mal machen.
+Das heißt, hier statt uniform nehme ich dann unsere zweite Klasse Gauss.
+Und das ist unsere gaussische Verteilung,
+und muss ich deshalb auch an der Klasse, an der Konstruktor,
+das Einzige, was sich ändert, ist, wie wir unsere neue beliebige Zahl kreieren.
+Bei Gauss-Verteilung wird das etwas anders gemacht,
+nämlich man sagt,
+bum bum bum,
+wie mache ich das jetzt, das muss ich tatsächlich,
+also Integer, weil das, da kommt, glaube ich, ein Double zurück,
+wenn ich mir nicht ganz,
+ganz irre.
+Und es ist also Normalverteilung, deshalb wird es bei 0 anfangen,
+und hat man dann auch Minus, also Minus 1,2 zum Beispiel,
+oder Plus 2,7, das heißt, ich muss etwas verrutschen.
+Das heißt, ich muss hier mit unserer Zeile, okay, das können wir später,
+also ich werde bestimmt einen Fingernummer nehmen, aber ich werde das jetzt mal machen.
+Ich werde das jetzt mal machen.
+Vielleicht müssen wir natürlich auch einen bestimmten Fehler machen,
+aber, wir müssen die Hälfte, also ich würde sagen,
+nehmen die Hälfte von unserer Höhe von unserem Display
+und fügen dazu dass diese Nummer, die dann zurückkommt
+und da wird Teil durch, also kommt zuerst
+und dann erst addieren wir, ist das okay.
+Und dann die Funktion, die wir nehmen müssen,
+heißt Next Gauss.
+Das heißt, das wird eine gaussische Normalverteilung zurückheben,
+wo man normalerweise immer einen Wert hat, der nahe an 0 ist,
+aber manchmal auch 1 oder 2, sehr selten 3 oder 4 und noch seltener 5 oder 6 und so weiter.
+Und das eigentlich auch bis unendlich.
+Und das Gleiche auch an der anderen Seite im Minusbereich.
+Deshalb könnten wir auch, wenn wir das nicht ganz geschickt machen,
+auch hier außerhalb unseres Bereiches unser Display nehmen.
+Das ist dann das Spannende bei Gaussiens.
+Man müsste eigentlich hier testen, ob man da rüberkommt oder nicht,
+bei jedes Mal, wenn man einen neuen gaussischen Wert hat.
+Das ist aber so unwahrscheinlich, dass das hoffentlich jetzt nicht passiert.
+Es ist mal Gaussien, glaube ich, nicht Gaussien.
+Alles andere ist gleich.
+Das heißt, wenn ich dann oben in unserer Main-Funktion statt Uniform jetzt,
+ich kann das mal hier lassen, sodass wir dann später nochmal beide nehmen können zum Beispiel,
+unsere gaussische Verteilung mit ungefähr die gleiche, also mit nicht ungefähr,
+genau die gleiche Werte hat,
+dann gucken wir erstmal, ob das passt, ob das kompiliert.
+Ah, sieht gut aus.
+Genau.
+Also das ist tatsächlich eine typische gaussische Verteilung.
+Das heißt, auch hier haben wir komplett, also mit einer anderen Methode einen randomen Wert genommen,
+aber als gaussischen Wert,
+und sehen wir genau das, was wir erwartet haben.
+Das ist ähnlich wie, also wie gesagt, mit unserem Bierpong,
+man hofft, dass alle Bällchen irgendwo in der Mitte belanden,
+und dann, je weiter man von der Mitte entfernt ist, je unwahrscheinlicher ist, dass es da,
+dass diese Zahl, die wir hier haben,
+diese Zahl da anbelangt.
+Genau das haben wir hier als Histogramm dargestellt.
+Okay?
+Das werden wir jetzt nächste Woche nochmal nehmen,
+um dann mit Polymorphie und ein paar anderen Methoden das dann erweitern zu können.
+Okay, das ist, was ich da noch machen wollte.
+Also diese Verteilung nehmen wir jetzt mit zur nächsten Woche.
+Genau.
+Jetzt nochmal kurz, um nochmal Polymorphie selbst nochmal zu üben.
+Das ist eine andere Methode mit Polymorphie, als wir es schon vorher gesehen haben.
+Also dieses eine Beispiel mit Hund und Katze ist etwas künstlich,
+aber da haben wir gesehen, dass wir ein Tier kreiert haben,
+und dann in unserem Programm Dynamisch haben wir dann das Tier,
+die Methode, Print glaube ich, unseres Tieres genommen,
+und dann abhängig, ob das eine Katze war oder ein Hund, hat das die richtige Methode ausgeführt.
+Ja, das ist das Spannende an Polymorphie.
+Hier genau das Gleiche, nur ganz kryptographisch auch dargestellt.
+Wir haben eine Oberklasse, eine Unterklasse.
+Die Oberklasse vererbt vom Interface, das heißt folgt diese Methode.
+Diese Methode wird hier nicht implementiert, es ist ja ein Interface,
+und wird von oben hier erst implementiert und wird dann vererbt von unten und auch da neu definiert.
+Das ist dann, was man alles haben kann in Java.
+Und das ist nochmal, um es ganz, ja, ganz kryptisch darzustellen,
+das wäre natürlich eine gute Frage für eine Klausur.
+Wir haben das hier, was kommt bei Z hier zum Beispiel jedes Mal oder bei raus,
+oder erst mal hier zum Beispiel, was, wenn ich ein Interface hätte,
+also hier auch wieder ein Array, wir kreieren kein,
+das können wir machen, weil wir kreieren keine Objekte von diesem Interface,
+darf man auch nicht, weil Interface ist eigentlich eine abstrakte Klasse,
+habe ich gesehen, aber diese Teilobjekte von unserem Interface sind ein Oberklasseobjekt,
+ein Unterklasseobjekt.
+Also wenn wir dann das erste, das Oberklasseobjekt nehmen,
+wird hier automatisch diese Operation, also was kommt hier zurück?
+Hat jemand schon gesehen?
+Eine gute Übung.
+Wer das hier versteht,
+wird wahrscheinlich diese Art von Übungen auf einer Klausur auch sehr gut ausüben können.
+Ich sage einfach eine Zahl und das sollte dann...
+Also I0 ist ein Objekt von...
+Also das sind die Klasseober.
+Und hier haben wir gesehen, bei Polymorphismen,
+sobald wir hier eine Methode nehmen,
+weiß Java oder Java Virtual Machine automatisch, um welches Objekt es geht,
+welches Typ Objekt.
+Also das heißt, wir sind hier bei Klasseober
+und Klasseober hat genau diese Methode hier.
+Also was gibt das zurück?
+Null.
+Null.
+Nein.
+Zwei.
+Weil, also diese Funktion wird ausgeführt.
+Das heißt, I ist 1, das ist der Parameter, den wir zurückgeben.
+1 plus 1, also geben wir 2 zurück.
+Ja?
+Gut.
+Also nochmal wiederholen, wenn das nicht ganz klar war.
+Dann für das zweite Element, diese Unterklasse, machen wir genau das Gleiche.
+Und hier tritt Polymorphism in Action.
+Also auch hier haben wir ein Objekt von unserer Unterklasse.
+Wir führen OP genauso aus.
+Das ist aber eine andere Methode.
+Deshalb werden wir hier etwas anderes bekommen, nämlich...
+Welche Zahl kommt hier raus?
+Ja, danke.
+Perfekt.
+Weil wir folgen dieser Methode hier.
+Also I ist 1, 1 plus 2 ist 3.
+Also lassen Sie uns das mal zurückgeben.
+Also vielleicht ist es verwirrend, weil ich habe hier kein Z-Signal.
+Also ich habe hier kein Z-Signal.
+Vielleicht ist es verwirrend, weil ich habe hier kein Z-Gleich oder so genannt.
+Aber grundsätzlich ist das eine Anweisung und Ausdruck sogar etwas,
+das einen Wert zurückliefert.
+Nur wird hier nichts mit diesem Wert gemacht.
+Das ist das...
+Alle Basics, was wir bei Java gesehen haben.
+Genau.
+Und so können wir, das würde ich jetzt, weil wir relativ...
+Also weil ich noch ein paar andere Sachen sehen möchte,
+können wir genauso mit allen anderen Sachen machen.
+Deshalb würde ich versuchen, oder würde ich
+empfehlen, das auch zu Hause mal zu machen.
+Was passiert, wenn wir das hier haben, das hier haben, das hier haben und so weiter.
+In den Folien, also ich habe es jetzt hier interaktiv,
+wird dann tatsächlich dann auch angezeigt, was es ist.
+Aber wir versuchen, das erst mal zu verdecken und zu verstehen.
+Zum Beispiel hier, also diese dritte Zeile hier in diesem Block.
+Also wenn man hier 5,1 wiedergibt, bei unserer Oberklasse ist das Problem,
+dass es hier keine Methode gibt, die ein Double hat in der Signatur als Parameter.
+Deshalb wird hier ein Fehler zurückkommen.
+Es gibt keine Operation, keine Methode OP mit Double als Parameter.
+Deshalb kommt hier ein Fehler.
+Für die Unterklasse gibt es das.
+Also für U gibt es eine Methode OP mit Double, diese nämlich.
+Und deshalb wird hier return 7, also 7 zurückgegeben.
+Ja.
+Aber das sind so Sachen,
+die da tatsächlich auch in der Prüfung wahrscheinlich kommen werden.
+Man muss einfach nur rückverfolgen müssen, was passiert.
+Ich glaube, das ist als Übung, glaube ich, gar nicht so schlecht.
+Genau.
+Und das nochmal bei Polymorphie sicherzustellen.
+Genau.
+So.
+Also das noch mal darauf zu deuten.
+Wir haben zum Beispiel in unserem letzten Beispiel,
+das erste Polymorphie Beispiel, zwei Arten von Objekten gehabt.
+Wir haben das Obere Objekt.
+Wir können das auch definieren.
+Tier zum Beispiel.
+Wir können das als ein Tier definieren.
+Und jetzt habe ein Objekt von Klasse Tier.
+Genauso können wir das auch für Hund machen, obwohl Hund eine Unterklasse ist
+von Klasse Tier.
+Das heißt Fido, auch das ist jetzt ein Objekt von Klasse Hund.
+Und deshalb auch eine Unterklasse von Klasse Tier.
+Und Fido können wir auch da hier kreieren.
+Mit new haben wir jetzt eine Instanz von diesem Klasse Hund.
+Also wir geben das einen Namen und eine Rasse, glaube ich, war es.
+Das heißt ein Tier und Fido sind ganz
+unterschiedliche Sachen.
+Es ist, als ob man ein Integer hat und ein Boolean.
+Also beide sind verschiedene Typen.
+Das einzige ist, dass wir wissen, aber ist, dass das eine eine Unterklasse ist von
+einem anderen und das wird tatsächlich in Java gespeichert oder Java
+oder unsere Java Virtual Machine
+hat das auch noch als Verbindung.
+Und das ist das, was Polymorphie in diesem Fall möglich macht.
+Das heißt, man kann
+später ein Tier gleich Fido stellen.
+Das heißt ein Tier, also alle Objekte, alle Objekte sind Referenzvariablen.
+Das heißt, ein Tier kann auch verweisen auf, was wir hier so eben kreiert haben.
+Und dann ein Tier und Fido sind beide Referenzvariablen, die auf das gleiche
+Objekt referieren. Das ist da, was da passiert.
+Und das darf man machen, weil grundsätzlich ist das eine im Prinzip
+eine implizite Typ Konversion.
+Man kann auch bei Fido vorher dann sagen Hund oder Tier zum Beispiel, so dass ein Tier,
+was ein Tier ist, gleichgestellt wird an das Tier, das Fido, das Objekt Fido ist.
+Das muss man nicht.
+Das kann implizit gemacht werden hier.
+Genau.
+Also explizit sieht das so aus.
+Das heißt, das habe ich soeben gesagt, also ein Tier kann man sagen,
+also als ein Tier gleich Tier Fido.
+Das heißt, Fido besteht schon in unserem Speicher als Objekt.
+Und diese Referenzvariable ein Tier stellen wir dann gleich.
+Das heißt, wir können auch noch explizit sagen Fido ist ein Tier.
+Aber Java weiß das schon.
+Also Java JVM weiß das schon.
+Umgekehrt kann man das auch machen, aber später.
+Das heißt, später können wir sagen Fido oder ein anderer Hund als Objekt
+Name, die wir dann instanziert haben, können gleichstellen an ein Hund,
+was ein Tier ist, was okay ist, weil wir haben schon soeben gesagt,
+ein Tier ist eine Referenzvariable und referiert auf Fido.
+Deshalb geht auch das.
+Und auch das kann man dann explizit konvertieren.
+Das heißt, man kann hochgehen von Unterklasse nach Oberklasse, aber man kann auch wieder runtergehen.
+Von Oberklasse nach Unterklasse.
+Dann das Problem ist, wenn man eine komplett andere Klasse hat wie Klasse Student.
+Das habe auch mal klar gesehen, glaube ich.
+Und man möchte diese Klasse, dieses Objekt S von Klasse Student,
+also diese Referenzvariable referieren auf ein Tier.
+Dann wird sicherlich ein Fehler kommen beim Kompilieren, weil Student als Klasse hat
+nichts zu tun mit Tier oder Hund oder was auch immer.
+Deshalb wird hier sofort ein Kompilierfehler erzeugt.
+Und dann das Gleiche bei diesem Beispiel.
+Obwohl Puki ein Objekt ist von Typ Katze.
+Und das geht.
+Das geht. Wir haben hier einfach ein Objekt Puki.
+Das ist von Typ Katze.
+Das kann man, man kann dann sagen, dass diese Referenzvariable werden wir jetzt referieren auf ein Tier.
+Und ein Tier werde jetzt korrigiert als Katze.
+Das geht nicht, weil vorher habe schon ein Tier hier als Hund instanziert.
+Also diese Referenzvariable ein Tier zeigt auf einen Hund, nicht auf eine Katze.
+Auch diese Verbindung besteht nicht zwischen Katze und Hund.
+Nur zwischen Katze und Tier oder Hund und Tier.
+Deshalb ist auch das ganz wichtig zu verstehen, dass diese
+Typ Konversion schon stattfinden, explizit sowie auch implizit wie eine Folie.
+Und dass dann sowohl abwärts als auch aufwärts geht.
+Aufwärts nur implizit wie in der letzten Folie und dann das andere abwärts und aufwärts via explizite Konversion.
+Genau.
+Und das letzte auch nicht ganz unwichtig.
+Man kann immer kontrollieren, ob man, wenn man eine Instanz hat, also
+also wir haben hier einen Hund,
+wir haben ein Objekt kreiert von einer bestimmten Klasse,
+zum Beispiel Tier oder Hund.
+Und dann später möchte man sich davon gewissen, was für Klasse dieses Objekt, diese Referenzvariable hat.
+Wie wir schon gesehen haben, ein Tier kann sowohl ein Tier sein als auch ein Hund oder auch eine Katze.
+Abhängig von wie man das macht.
+Deshalb kann man das dann testen oder überprüfen.
+Das heißt, man kann mit InstanceOf,
+das ist eine neue Notation jetzt,
+herausfinden, ob ein Tier eine Katze ist oder nichts.
+Und dann zum Beispiel nur wenn ein Tier eine Katze als Katze instanziert wurde,
+das heißt ein Tier ist InstanceOfKatze, auch erst dann kann man sagen, Puki,
+diese letzte Zeile hier kann man sagen, dass dann Puki verweist auf ein Objekt von Typ Katze.
+Okay.
+Und das ist eigentlich alles, was
+da noch sehr wichtig wäre.

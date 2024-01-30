@@ -1,0 +1,160 @@
+oder kann man die entfernen?
+Da habe ich, glaube ich, kein Beispiel für.
+Genau, und jetzt zum letzten Mal haben wir dann nochmal WURTLE.
+Also WURTLE, vorher haben wir gesehen, dass WURTLE eigentlich nur Methoden benutzt,
+die Methoden mittlerweile sehr einfach gehalten sind.
+Wir haben das erste Mal WURTLE implementiert als eine lange Main-Methode,
+dann haben wir das Ganze aufgeteilt in Methoden, die irgendwie mehr Sinn machen,
+als Teil einer WURTLE-Klasse.
+Das Einzige, was da noch fehlt, ist, dass WURTLE einfach nur eine bestimmte Menge von Wörtern hatte.
+Man hatte diese Wörter hier und diese Wörter sind, naja, nach ein paar Mal hat man durch,
+welche Wörter da auftreten können und kann man relativ leicht gewinnen.
+Das möchten wir jetzt verheben und deshalb habe ich dann in den vorigen Satz genau diese Blocke gesetzt.
+Wenn man das einfügt in unseren Konstruktor, dann können wir WURTLE jetzt abhängen lassen von einer Textdatei.
+Und diese Textdatei ist dann eigentlich eine Textdatei mit Dutzenden oder Hunderten oder Tausenden Wörtern,
+typischerweise.
+Das heißt, wir können einfach statt einer statischen Array oder einer konstanten Array hier,
+hier das Ganze eigentlich weglassen.
+Und in unserer Klasse WURTLE ist WURTLE einfach jetzt eine Referenzvariable auf eine Array von Strings.
+Aber wir werden später definieren, wo dieses Strings herkommt, nämlich in unserem Konstruktor hier.
+Und in unserem Konstruktor können wir jetzt versuchen, eine Datei zu laden mit Wörtern.
+Und das kann zum Beispiel so passieren.
+Jetzt habe ich das Ganze nur für das Laden von der Datei und das Auffangen von den Fehler dargestellt.
+Da müssen wir noch ein paar andere Sachen machen.
+Zum Beispiel habe ich da WURTSMAX gesetzt.
+Das ist typischerweise, wenn das passiert. Das ist eine gute Übung für Finals.
+Also zum Beispiel wäre WURTSMAX, ich würde es eher als Private nennen,
+Final Integer, würde ich mal sagen.
+Und dann WURTSMAX wird meistens als Großbuchstabe geschrieben.
+Das heißt, das ändert man nicht mehr.
+Das ist nur eine Variable und da sagen wir, unser Wörterbuch hat maximal 20.000 Wörter zum Beispiel.
+Und ab dann kann WURTSMAX immer benutzt werden.
+Sonst sehe ich noch LEN hier, das habe auch noch nichts.
+Auch das würde ich sagen ist ein Privates in LEN.
+Und was das ist, wir können das erstmal initialisieren auf 0.
+Und später wird dann LEN wahrscheinlich, oder hier ist es schon 0, wird das dann durchgezählt.
+Das heißt, wenn wir diese Datei WURTS.txt laden erstmal und dann mit dieser Methode,
+das ist eine Methode von Klassen, die man einfach importiert.
+Das muss man noch machen, importieren.
+Das werden wir gleich sehen nach der Pause.
+Das wird mit Java.io gemacht.
+Import.
+Scanner und File vor allem.
+Das ist das, was wir hier definieren als Klasse.
+Wenn wir hier jede Zeile von dieser WURT-Datei lesen und diese Zeile definieren dann vor als Wörter.
+Das heißt, wir füllen diese Datei mit ganz vielen Wörtern und wir können das Ganze dann so schreiben.
+Wenn da ein Fehler kommt, und das ist eigentlich ein super Beispiel dafür,
+muss man nicht immer den Benutzern nerven mit einer Fehlermeldung.
+In diesem Fall hat man zum Beispiel den Fall, wir können diese Datei nicht laden.
+Das heißt, diese Datei ist wahrscheinlich nicht vorhanden oder etwas ist schief gegangen in dieser Datei.
+Wenn das passiert, können wir trotzdem noch zugreifen auf eine statische Array von Wörtern.
+Das müssen nicht drei sein, das können auch ein paar hundert sein.
+Aber können wir zum Beispiel einen default Wörterarray hier laden,
+so dass sobald unsere Wörterdatei nicht geladen werden kann,
+können wir auch immer in unserer Quellcode eine Fallback-Option haben.
+In diesem Fall wird unser Benutzer nie wahrnehmen, dass es hier einen Fehler gab.
+Wenn es einen Fehler gab, dann werden wir hier zum Beispiel unser Array von Wörtern nochmal neu definieren und so weitergehen.
+Deshalb ist das keine schlechte Option.
+Genau. Und damit habe ich es schon, glaube ich.
+Ich glaube nicht, dass ich noch etwas mehr brauche hier.
+Alles andere haben wir schon gesehen.
+Wir haben dann unseren Dialog, wir haben unsere Check-Methode, unsere Run-Methode
+und am Ende das Einzige, was wir dann machen, wenn wir diese Software, unsere Klasse eigentlich ausführen in main,
+ist wir kreieren eine Instanz von Wörter und wir führen das aus nochmal explizit.
+Gut, also wenn wir das Ganze dann kompilieren und dann ausführen,
+dann können wir erstmal gucken, oder ich mache es erstmal so, ich briche ab.
+Ich glaube nicht, dass es hier eine Textdatei gibt.
+Ne, deshalb sind wir eigentlich schon in unsere Catch-State gegangen.
+Das heißt, hier habe ich kein Dictionary.
+Das heißt, wenn wir hier das Ganze ausführen, dann werden wir einen von den drei Fällen hier haben,
+dass unser Wort worth oder words ist.
+Deshalb können wir einfach mal testen.
+Words, ne, aber wir sind fast da.
+Worth, ja, okay.
+Oh, ich sehe hier, das ist falsch.
+One tries, weil es waren zwei.
+Und das ist, ah genau, weil tries bei sechs anfängt.
+Genau, prima, deshalb müssen wir bei sieben gehen.
+Hatte das letzte Mal noch nicht gesehen.
+Gut, okay.
+Das heißt, jetzt habe ich keine Textdatei, jetzt hat das nicht funktioniert.
+Wenn wir aber eine Textdatei erstellen, ich würde mal machen mit,
+oder wir können, ich mache mal erstmal nano words text.
+Dann können wir hier ein paar Wörter einfach schreiben.
+Weary, count, tuner, doors, table, dies, hello and tries.
+Und das können wir ergänzen mit tausenden anderen Wörtern.
+So, jetzt habe ich diese Datei.
+Wenn wir jetzt das Ganze wieder ausführen und jetzt at runtime, ich muss das nicht mehr neu kompilieren,
+wird hoffentlich ein von den anderen Wörtern.
+Also, hello vielleicht, whoops, okay, da habe ich jetzt einen Fehler.
+Nee, also grundsätzlich der Fehler war, ich muss mal zurück, hier, genau.
+Also der Fehler war relativ leicht, oder natürlich ist alles leicht, wenn man es später weiß.
+Grundsätzlich habe ich hier ein Referenzvariable für ein Array von Strings.
+Dieser Referenzvariable wird hier initialisiert.
+Also ab hier, ab den Zeilen 21, bereiten wir jetzt hier in unserem Speicher ein Array vor von Wordmax,
+das sind 20.000 mal 5 Charakteren hier, oder 20.000 Strings.
+Und das sind am Anfang alle Nullpointer.
+Das ist das Erste.
+Wenn wir dann diese Words.txt Datei lesen, eine Zeile nach dem anderen,
+dann werden wir diese Länge ändern, hier, diese len, von 0 auf 1, auf 2, auf 3 und so weiter,
+bis wir alle Wörter gelesen haben.
+Und wenn wir diese Wörter gelesen haben, wird alles funktioniert, kommen wir nicht in diese catch hier,
+also kommen wir hier.
+Und jetzt geht es los, wir haben hier jetzt eine Randomzahl, die wir hier fragen, zwischen 0 und Words.length.
+Words ist ein Array, deshalb ist length automatisch ein Attribut, ein Pseudoattribut, das dazu gehört.
+Was ist die Länge von unserem Array? 20.000.
+Deshalb wird hier eine Randomzahl zwischen 0 und 20.000 gewählt.
+Unsere Textdatei ist aber nur, wie viel?
+Der Text ist nur ein paar Wörter lang, also 8 Wörter lang.
+Das heißt, die Wahrscheinlichkeit, dass eine Zahl höher als 8 gewählt wird, ist ziemlich hoch.
+Was dann gewählt wird, ist ein Element aus diesem Array Words,
+von 9 bis 20.000 oder 19.999, wo natürlich das ein Nullpointer ist.
+Deshalb war diese Nullpointer-Exemption eigentlich ein ziemlich guter Tipp von Java als Ausnahmenahme.
+Deshalb war das das Problem natürlich.
+Also grundsätzlich müssen wir hier ein Handelwort zwischen 0 und 8 und 8 ist in diesem Fall ein Len.
+Vorher ging das, weil unser Words-Array ein konstanter Array war, von 0 bis 8.
+Deshalb ging das damals. Jetzt aber, wo wir das dann dynamisch laden, funktioniert das nicht mehr so gut.
+Okay, deshalb müssen wir wieder neu kompilieren.
+Und wenn wir es dann wieder ausführen, dann werden wir wahrscheinlich ein Level-Wort bekommen.
+Das heißt, wir können einfach hier gucken, was ein E hat.
+Table vielleicht? Nee.
+Hello? Nein.
+Okay.
+Tries auch nichts.
+Dives. Ja. Okay. Gewonnen.
+Gut. Um das jetzt nochmal abzuschließen, was wir machen können sofort,
+ist, wir können diese Word-Datei einfach natürlich füllen mit etwas, das etwas vernünftiger ist, also mehr Wörter.
+Deshalb, also wir können einfach suchen, Google, das ist unser Freund da,
+also im Goethe-Propositorium, es gibt da Dutzende, kann man einfach das kopieren.
+Das kann ich einfach so mal machen, einfach zu der letzten Zeile von dieser Textdatei gehen,
+weil genau diese Datei ist genau das, was wir brauchen.
+Oh.
+So. Kopieren ist etwas groß, aber es sollte möglich sein.
+Ups, nee.
+Okay, wir haben jetzt.
+Ich mach es mal so.
+Kopieren das meiste, dann sind das Tausende von Wörtern, die wir dann in unser Wörterbuch finden.
+Kommt noch mehr aus Roomba? Nee.
+Kopie.
+Da. Okay. Hat etwas gedauert, aber wir haben jetzt 5700 und ein bisschen Wörter,
+wir können das speichern und da sollte dann genau das gleiche bei rauskommen.
+Wir müssen nicht neu kompilieren, können einfach nur wieder laden, können wir hier ein neues Wort versuchen.
+Wir haben Glück hier mit dem E und dem R.
+Nee, nichts mit das.
+Hello ist es auch nichts.
+Hello ist es auch nichts.
+Beers. Kommt Beers. Ja. Noch eine Chance.
+Noch eine Chance.
+Beers. Okay. Keine Ahnung, ob das war oder nicht. Wahrscheinlich nichts,
+aber sonst kam unsere Gewinnermeldung.
+Also man könnte auch danach mal schreiben, welches Wort es war. Egal, aber ich kam nah dran.
+Also so wird es natürlich etwas spannender.
+Wenn man dann die Möglichkeit hat, Wörter aus einer Datei zu holen, wird es natürlich viel spannender.
+Und der Mechanismus dieses Spiels bleibt gleich. Das ist das Interessante.
+Noch mal Fazit. Was wir heute neu gemacht haben, ist einfach die Wörter aus einer Datei zu holen.
+Wir haben dann mit Try and Catch die Fehler, die vielleicht aus einer Datei kommen,
+weil vielleicht ist diese Datei nicht da, vielleicht sind die Inhalte dieser Datei nicht genau das, was man haben möchte.
+Deshalb können es da Ausnahmen geben. Wenn die Ausnahmen gibt, dann gibt es eine Art Fallback-Plan,
+wo wir einfach nur diese drei Wörter nehmen und gut ist.
+Und der Benutzer wird dann hoffentlich nichts merken.
+Das ist der Vorteil von Try and Catch.

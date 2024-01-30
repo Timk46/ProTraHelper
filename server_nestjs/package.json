@@ -32,7 +32,7 @@
     "@prisma/client": "^5.7.0",
     "bcrypt": "^5.1.0",
     "faker": "^5.5.3",
-    "fix": "^0.0.6",
+    "fix": "^0.0.3",
     "fs": "^0.0.1-security",
     "jszip": "^3.10.1",
     "langchain": "^0.0.203",

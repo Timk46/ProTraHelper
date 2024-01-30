@@ -1,0 +1,54 @@
+Jedes Mal, wenn man eine Variable deklariert, heißt das, wir definieren eine bestimmte Variable mit Name und Typ.
+Wir können auch da Final dazustellen.
+Also wenn man das Ganze als Final bewertet, heißt das, wir benennen diese Variable mit einem bestimmten Namen, zum Beispiel Pi.
+Wir sagen, dass das ein Double ist.
+Aber wir sagen auch aus, dass es jetzt nicht mehr geändert wird, nachdem es diesen Wert bekommt.
+Und ab dann kann, also wenn wir dann in unserem Programm zum Beispiel diesen Wert später besuchen, zu ändern,
+dann wird es ein Fehler kommen, weil wir das eigentlich so definiert haben in der Deklaration dieser Variable Pi,
+dass es ein Final ist, dass es ein Konstant ist.
+Dann, also alle Variablen haben einen Gültigkeitsbereich.
+Und die verschiedenen Gültigkeitsbereiche werden jede Woche, glaube ich, kommen einige dazu.
+Wenn wir zum Beispiel...
+Methoden haben eine Funktion, ist das ein Gültigkeitsbereich.
+Im Grunde genommen ist jeder Block, jede mehrere Zeile von Quellcode, die dann mit geschweiften Klammern umgeben sind,
+das ist ein Gültigkeitsbereich.
+Und jedes Mal, wenn man dann eine Variable definiert oder deklariert, wie A und B hier zum Beispiel,
+dann sind A und B aktiv nur in diesem Block hier.
+Und das Gleiche für C.
+Also C ist nur gültig nach dieser If-Schleife, was das ist hier immer gleich,
+aber auch da, diese geschweiften Klammern bilden einen Bereich ab, in dem C aktiv ist.
+C wird nur aktiv ab dieser Zeile, also vorher nicht, nachher schon.
+Aber sobald man aus diesem Block geht, ist C nicht mehr gültig.
+Okay, deshalb ist in diesem Beispiel...
+In diesem Beispiel wird dann gesagt...
+Es wird dann gezeigt, dass diese C eigentlich nur hier aktiv ist, in dieser Zeile und in dieser Zeile hier.
+Genau.
+Auch darf man nicht die gleiche Variablen-Name benutzen.
+Zum Beispiel hier ist es okay, wenn wir hier Variable C nehmen, zum Beispiel in diesem Block hier.
+Das ist okay.
+Auch hier, das ist auch okay.
+Aber hier zum Beispiel hatten wir schon A deklariert als Integer-Variable.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Okay.
+Vielen Dank.

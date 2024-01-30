@@ -1,0 +1,156 @@
+Eine Sache, die man sinnvoll machen kann, wenn man über Weilschleifen gesprochen hat,
+wäre eine andere Art das zu tun, nämlich Vorschleifen, das kennen Sie in den meisten
+Programmiersprachen, wenn Sie schon mal eine gesehen haben, in mehr oder weniger ähnlicher
+Notation, nämlich zu sagen, wir laufen durch eine Reihe von Zahlen, in Python funktioniert
+das am einfachsten vielleicht so, dass man sagt for, dann gibt man den Variablen Namen,
+der pro Durchlauf einer Schleife immer erhöht oder zum nächsten Element springen soll und
+dann schreibt man in und dann die Elemente, die durchlaufen werden sollen und ich hatte
+schon vorhin einmal erwähnt, man muss die Liste mit allen Zahlen von 0 bis n nicht explizit
+hinschreiben, dafür gibt es auch einen Begriff, der heißt Range, ist tatsächlich hier sein
+eigener Typ, also das hier ist eine Range von 0 bis 4, Python bleibt sich da treu, dass
+die Zahl, die Sie hier reinschreiben, quasi nicht Teil der Indizes, wenn Sie so wollen ist,
+also die Range hier, wenn Sie Range 5 schreiben, durchläuft die Schleife alle Zahlen von 0 bis 4.
+Range kann man noch in anderer Art und Weise verwenden, nämlich mit dem Startindex,
+dem Stopindex und einem Stepindex, also um wie viel möchte ich mein etablierte Variable i hier
+in jedem Schritt erhöhen, also wenn ich zum Beispiel Range von 1 bis 10 mit Dreierschritten
+schreibe, dann komme ich auf die Zahlen 1, 4, 7, 10 wäre die nächste, ist aber nicht dabei,
+wieder nach dem Prinzip, diese Zahl hier, also mein i muss echt kleiner sein als die Endzahl,
+die ich hier einschreibe. Dieses Prinzip mit 4 Variable in irgendwas ist tatsächlich ein
+ziemlich wichtiges und vielverwendetes in Python, weil es eben nicht nur über Zahlen funktioniert,
+also nicht nur, dass ich sage, ich möchte 13 mal den folgenden Code ausführen, weil ich schon weiß,
+ich habe 13 Karten in meinem Kartenspiel und schreibe deshalb for i in Range, ok,
+erste Idee for i in Range 13, kein schöner Stil, denn wenn ich das Spiel ausführe mit 14 Karten,
+verpasse ich eine Karte. Ja?
+Genau. Achso, das hätte man auch, schöne Idee, könnte man auch implementieren,
+muss man wahrscheinlich darauf aufpassen, dass das Spiel dann trotzdem endet,
+denn man könnte dann natürlich die Situation generieren, dass beide Spieler die gleiche
+Karte übrig haben und es ist nur noch eine Karte übrig und dann durchlaufen wir diese Schleife
+ewig. Aber ja, das wieder reinmischen wäre eine Erweiterung vom Spiel, was man auch sinnvoll
+machen könnte. Genau, for i in Range 13 ist also unschön, einmal weil es verhindert,
+solche Erweiterungen zu implementieren, auch weil es hardcoded, dass wir 13 Karten haben,
+wenn, dann würde ich for i in Range längst Anzahl der Wert, längst Preiskarten oder wie
+wir es genannt haben, schreiben, dann ist es zumindest diesbezüglich variabel. Was in Python
+aber auch relativ schön ist, ist, dass man über andere Sachen als Zahlen eine Vorschleife schreiben
+kann. Vorschleifen funktionieren tatsächlich für beliebige sogenannte iterierbare Objekte und unter
+den iterierbaren Objekten, die wir kennengelernt haben, sind zum Beispiel Listen. Also ich könnte
+schreiben, meine Liste 152 und darf dann tatsächlich iterieren über for Element in
+meine Liste und kann hier jetzt Element printen und habe einen Doppelpunkt vergessen. Aber wenn
+ich den nicht vergesse, ist es tatsächlich eine Vorschleife, die über alle Einträge in meine
+Liste geht, wo also das Element, was ich hier auch i schreiben könnte oder was immer, jeden Wert
+der Einträge in meine Liste einzeln einmal annimmt. Das ist also eine Art, wie man über
+alle möglichen iterierbaren Objekte, wir werden noch mehr kennenlernen, Vorschleifen schreiben
+kann. Insbesondere könnte man hier bei unserem Spiel, wenn man möchte und davon ausgeht, dass
+eben natürlich die Preiskarten alle hintereinander abgearbeitet werden, hier auch einfach for Wert
+der Preiskarte in Preiskarten schreiben. Dann würde ich auch eine Schleife über alle Preiskarten
+generieren. Genau, also das ist vielleicht eine Besonderheit der Listen. Also hier nochmal
+dargestellt mit einer verrückten Liste. Das funktioniert halt wirklich für alles Mögliche,
+was in der Liste steht. Hier einen String, einen Int und eine Liste und man kann über die Elemente
+gehen. Was auch noch ganz interessant ist, weil man in einigen Anwendungen vielleicht beides
+braucht, sowohl die Elemente aus einer Liste als auch die Indizes der Elemente einer Liste,
+kann man um die Liste noch ein Enumerate davor schreiben. Das bildet dann so Paare an Index und
+Listen Einträgen und dann eine Vorschleife mit Index, Element schreiben und dann kriegt man in
+Index nach und nach alle Zahlen von 0 bis Anzahl der Elemente in der Liste, minus 1 und in den
+Elementen halt das, was an dem jeweiligen Index steht. Also hier nochmal an Index 0 steht,
+hallo, an Index 1 steht, hier an Index 2 steht, die Liste 1, 2, 3. Ansonsten gehen wir einfach
+nochmal so ein kleines Programmierbeispiel durch zu dem, was wir gemacht haben. Also ich gehe mal
+davon aus, in den Übungen haben wir jetzt alle geschafft, Python zu installieren und haben
+entweder einen Editor oder sogar eine Entwicklungsumgebung, die funktioniert. Und jetzt
+vielleicht mal ein Beispiel zu den letzten Inhalten. Das war ja hauptsächlich die Kontrollstrukturen
+über if und while. While haben wir schon länger gemacht, über, Entschuldigung, while for,
+sowie if und else. Und weil wir for in der Vorlesung noch fast nicht verwendet haben,
+machen wir dazu vielleicht mal ein Beispiel. Nämlich wie wäre es, wenn wir eine Mannschaftsliste
+haben. Das ist eine Liste von Strings und von mir aus heißt das Mannschaft 1 oder wenn sie
+Fußball mögen, können wir auch sowas machen oder was auch immer. Und jetzt möchte ich irgendwas
+ausgeben, printen, das seht ihr hoffentlich, wo jede Mannschaft aus Mannschaftsliste gegen
+jede andere Mannschaft spielt. Also jede Mannschaft soll einmal gegen jede andere Mannschaft spielen.
+Also hier möchte ich sowas ausgeben wie
+Mannschaft 1 spielt gegen
+Mannschaft 2. Aber das jetzt für alle Mannschaften wechselseitig gegeneinander
+und natürlich können wir die Mannschaftsliste jetzt noch erweitern. Wer hat eine Idee, wie wir sowas machen?
+Ich hoffe, es ist erstmal klar, was ich vorhabe. Also in diesem Fall soll ausgegeben werden,
+sowas wie Mannschaft 1 spielt gegen BVB, Mannschaft 1 spielt gegen Bayern, BVB spielt gegen Mannschaft 1,
+Bayern spielt gegen BVB. Wenn wir sowas machen wollen, sozusagen mit Hin- und Rückspiel, wer vorne steht, ist die Heimat.
+Vorschläge dazu?
+Alle sortieren sich nach Ostern noch ein bisschen. Hat was zu tun mit der Beispielaufgabe, die einige
+gemacht haben, Richtung Matrix-Film? Da oben haben wir einen Vorschlag. Ja, genau. Haben Sie einen Vorschlag, wie wir das machen?
+Genau. Also erstmal, wenn wir eine Vorschleife in Weißen schreiben, ist die Notation ja, wenn wir hier einfach Zahlen haben wollen,
+dann 4E in Range und jetzt müssen wir uns erstmal was überlegen. Was schreiben wir in die Range? Ja.
+Sehr gut. Genau. Und dann sollte hier ja jetzt sowas wie Mannschaftsliste von E kommen,
+wenn ich Sie richtig verstanden habe. So, noch, wenn ich das jetzt, mal den Speicher irgendwo,
+und ausführe, dann kriege ich noch irgendwie ein Problem. Ich finde, funktioniert so noch nicht. Ja, machen Sie mal direkt weiter.
+Genau. Und wie machen wir hier den zweiten Eintrag? Wie können wir den generieren?
+Das ist vielleicht erstmal wirklich dieser Prozess von gar nicht so sehr nach Befehlen suchen, sondern was bedeutet es, wenn jede Mannschaft gegen jede spielen muss?
+Wie viele machen erstmal, wenn eine Mannschaft auch gegen sich selbst spielen kann? Wie viele gibt es? Wie viele Möglichkeiten? Warum?
+Und wie, also 6 ist richtig für nicht jede gegen jede, Entschuldigung, ja, für jede gegen jede, aber nicht eine Mannschaft gegen sich selbst, also das ist völlig richtig.
+Wie sind Sie darauf gekommen? Vielleicht mal so. Mal mathematisch überlegen. Mannschaftsliste hat, und dann mathematisch sagt man ja gerne sowas wie N viele Einträge. In diesem Fall N gleich 3.
+Ja. Das, genau das, da gibt es jetzt unterschiedliche Modelle. Fakultät ist eins davon. Fakultät ist ziehen ohne zurücklegen. Also dann hat man beim ersten Mal drei Mannschaften zur Auswahl, beim zweiten Mal ziehen nur zwei.
+Und der letzte ist dann festgelegt, dadurch kommt Fakultät. Aber hier in diesem Fall ist es tatsächlich noch anders. Das ist zweimal, wenn Sie das Richtung stochastische Modelle sehen, ist das zweimal ziehen mit zurücklegen.
+Weil ich jetzt erst mal gesagt habe, eine Mannschaft kann auch gegen sich selber spielen. Ja. Sehr gut, genau. Das ist jetzt schon die ganze Lösung von nicht gegen sich selber spielen. Machen wir einmal, wenn eine Mannschaft auch gegen sich selber spielen kann, dann?
+Genau. Also N Quadrat. Wir haben N viele Mannschaften zur Auswahl und jede Mannschaft kann gegen jede spielen. Jetzt wird vielleicht auch ein bisschen klar, warum ich vorhin gesagt habe, das hat was zu tun mit der Übungsaufgabe, die einige gemacht haben, eine Matrix mit Einträgen zu füllen.
+Man könnte sagen, ich schreibe alle Teams in eine Spalte und dann schreibe ich nochmal alle Teams in eine Zeile und dann sind die Einträge in dieser Tabelle, die dann entsteht, die Spielbegegnung. Und wenn ich N Zeilen und N Spalten habe, dann habe ich eben N mal N gleich N Quadrat, wie gesagt, viele Einträge. Wunderbar.
+Völlig richtig. Und jetzt haben Sie auch schon gesagt, was ist, wenn ich, achso, ja nun. Sehr gut, genau. Also einmal noch darauf eingehen, Sie haben auch schon völlig richtig gesagt, wenn ein Team jetzt nicht gegen sich selbst spielen soll, dann würde in dieser grafischen Vorstellung einer Tabelle die Diagonale rausgenommen werden. Denn auf der Diagonale würde dann immer ein Team auf sich selbst treffen.
+Ist das hinreichend klar oder soll ich eine Tabelle malen? Gut, also die Diagonale raus und wenn es entweder Zeilen und Spalten gibt, hat die Diagonale entweder Einträge. Es sind also N Quadrat minus N und das hat Ihr Kommilitone gerade schon ausgerechnet oder ausfaktorisiert. Dann könnte ich N Quadrat minus N natürlich auch schreiben als N mal N minus 1.
+Oder eine andere Anschauung wäre, ich kann mir eine Mannschaft aussuchen, davon gibt es N viele und dann kann ich mir irgendeine andere Mannschaft aussuchen, davon gibt es nur noch N minus 1 viele. Deshalb N mal N minus 1. Und dann haben wir gerade auch schon gehört, wunderbar, der Vorschlag war eine weitere Vorschlage zu machen.
+Also jetzt nenne ich den Laufindex mal J und worüber geht die? Ja, genau, also hier kann ich das einfach komplett kopieren, denn wir wollen ja eine N mal N Tabelle füllen. Könnte man sich grafisch vorstellen. Also brauchen wir zwei Laufindizes, die jeweils bis N gehen.
+Sehr gut und was würden wir hier jetzt als Begegnung erstmal hinschreiben, wenn wir auch erlauben wollen, dass eine Mannschaft gegen sich selber spielt. Machen wir das erstmal.
+Ja. Genau, das probieren wir mal einmal aus und gucken, was dann rauskommt.
+Ja, sehr gut. Also was mir jetzt passiert ist, ist der Printbefehl war noch genauso eingerückt wie die erste Vorschleife, weil wir erst nur eine Vorschleife geschrieben haben. Und da, das ist auch ganz interessant zu sehen, beschwert er sich.
+Also man muss hier mindestens nach der zweiten Vorschleife mindestens ein Befehl haben, der irgendwie eingerückt ist. Sonst stellt er fest, dass das irgendwie ein Eindrückungsfehler gewesen sein muss, denn sonst hätte ich diese Vorschleife gar nicht gebraucht. Also tatsächlich wollen wir hier noch eine Eindrückung haben.
+Und jetzt passiert vielleicht das, was wir uns vorgestellt haben. Ich printe mal immer i und j vorher noch. Also erster Durchlauf dieser Schleife. i beginnt mit dem Index 0. Dann geht er in diese Schleife.
+j beginnt mit dem Index 0. Mit diesem Printbefehl ausgegeben wird logischerweise 0,0. Dann kommt hier, es spielt Mannschaftsliste an der Stelle 0 gegen Mannschaftsliste an der Stelle 0. Deshalb steht hier Mannschaft 1 spielt gegen Mannschaft 1.
+Dann endet hier die Sequenz an Befehlen in der inneren Vorschleife. Er springt also zurück auf diese Vorschleife, schaut, gibt es in range, links Mannschaftsliste, noch einen Index? Die Antwort ist ja. j gleich 1 ist auch erlaubt.
+Deshalb gibt er jetzt als nächstes aus 0,1 und schreibt dementsprechend Mannschaft 1 spielt gegen jetzt Eintrag 1 aus der Mannschaftsliste BVB. Wieder die innere Vorschleife ist beendet. Er springt zurück am Anfang. Einen Eintrag gibt es noch, denn die Länge der Mannschaftsliste ist 3.
+Das bedeutet, range gibt hier die Indizes von 0 bis 2. Also geht er hier nochmal auf Print 0,2 und Mannschaft 1 spielt gegen Bayern. Dann passiert das erste Mal etwas Spannendes. Dann ist dieser Block zu Ende. Er geht hier wieder zurück an die Schleife, stellt fest, die ist aber ganz durch.
+Hier gibt es nicht noch einen Index in range, links, n. Damit ist alles auf dieser Ebene bereits abgearbeitet. Und er springt zurück an den Anfang der allerersten Schleife. Fragt also jetzt, gibt es noch einen Index i in range, links Mannschaftsliste?
+Und weil i bislang 0 war, lautet hier die Antwort ja. Hier gibt es noch einen, zum Beispiel als nächstes i gleich 1. Für i gleich 1 wird dann dieser Code hier, der innerhalb der ersten Schleife steht, wieder neu ausgeführt.
+Das bedeutet, jetzt trifft er wieder auf eine neue Vorschleife, die jetzt von neuem losgeht. Also jetzt geht es wieder los mit j gleich 0. Und dementsprechend wird hier jetzt durchgezählt 01010102, Sprung 1011112, Sprung 202122. Und daraus ziehen wir dann jeweils die Paarungen der Mannschaft.
+Also das nochmal als komplexere Aufgabe zu Vorschleifen, nämlich jetzt zwei sogenannte verschachtelte Vorschleifen, die ineinander stehen. Gibt es zu Vorschleifen noch Fragen? Dann wäre jetzt ein sehr guter Zeitpunkt.
+Oder ist das noch nicht klar, was hier geschieht? Dann schreibe ich auch gerne nochmal was dazu auf.
+Und es muss völlig klar sein, sie kommen alle von unterschiedlichen Hintergründen. Manche haben schon in der Schule angefangen zu programmieren und für manche ist das jetzt vielleicht das allererste Mal, dass sie mit sowas konfrontiert sind.
+Dann ist es überhaupt keine Schande und ganz normal, dass das schwieriger ist. Und deshalb können sie sich ruhig trauen, an dieser Stelle zu sagen, bitte erklären sie das nochmal. Oder wieso steht die eine Vorschleife in der anderen und nicht daneben oder sowas.
+Gut, dann gehe ich davon aus, dass dieser Teil klar ist. Dann, was wir jetzt noch machen wollen, ist verhindern, dass hier Mannschaft 1 spielt gegen Mannschaft 1 und BVB spielt gegen BVB und Bayern spielt gegen Bayern ausgegeben wird.
+Wie könnte ich das machen?
+Vielleicht kann man hier schon auf der Konsole ausgegebenen Dingen sehen, für welche Indizes immer eine Mannschaft gegen sich selber spielt. Ich warte nochmal kurz.
+Ja.
+Sehr gut. Genau. Also hier könnte ich sagen, oder erstmal feststellen, die gleiche Mannschaft spielt immer gegen sich selber, wenn meine Indizes I und J identisch sind. Also wenn hier 0 und 0 steht, 1 und 1 und 2 und 2.
+Das passt auch zu dem, was ich am Anfang mal anschaulich gesagt hatte mit der Tabelle. Wenn ich mir die Teams einmal in die Spalten und einmal in die Zeilen schreibe und dann überlege, wann trifft ein Team auf das gleiche Team, dann ist es eben genau die Diagonale. Die Diagonale ist das, wo die Indizes gleich sind.
+Und dann wurde hier vollkommen richtig vorgeschlagen, wie wir das verhindern können, dass diese gleichen Teams auftauchen, wäre zu schreiben, wenn I nicht gleich J, weiß noch jemand, wie man das schreibt?
+Ja. Genau. Also wenn I nicht gleich J, dann gebe das hier aus. Und wenn ich es jetzt ausführe, dann passt es. Also wir kriegen hier nur 0, das erste wird quasi übersprungen. 0 und 0 gibt es nicht, dann gibt es 0, 1, 0, 2.
+Dann gibt es 1, 0, aber nicht 1, 1, sondern erst wieder 1, 2 und so weiter. Sehr gut. Das ist also ein einfaches If-Statement. Ist das auch klar? Oder gibt es dazu noch eine Frage, wieso das Sinn macht, das so zu lösen?
+Dann machen wir eine kleine Abwandlung davon. Was ist denn, wenn ich nicht möchte, dass die Match-Ups doppelt sind? Also was ich ja hier feststelle ist, es gibt Mannschaft 1 gegen BVB und es gibt BVB gegen Mannschaft 1.
+Also das folgt jetzt ein bisschen der Logik von Hin- und Rückspiel. Wer vorne steht, hat von mir aus das Heimspiel. Aber was ist, wenn ich hier ein Turnier darstelle und sage, es gibt erstmal immer nur ein Spiel von jeder Mannschaft gegen die andere Mannschaft?
+Wie könnte ich das ausschließen? Vielleicht ist es da auch hilfreich, sich nochmal die Visualisierung vorzustellen. Eine Tabelle, Mannschaften in den Zeilen, Mannschaften in den Spalten. Gerade haben wir die Diagonale rausgenommen, damit eine Mannschaft nicht gegen sich selber spielt.
+Jetzt würden wir ja irgendwie sagen, sowas wie der Eintrag an der Stelle 2-1 ist der gleiche wie der Eintrag an der Stelle 1-2. Denn es spielt keine Rolle, ob die eine Mannschaft oder die andere vorne steht.
+Ja? Sehr gut. Genau. Warum? Sehr gut, genau. Ist das klar, was die Logik davon wäre?
+Ich habe quasi eine Tabelle, aber möchte jetzt nur die Einträge haben, die zum Beispiel oberhalb der Diagonalen sind. Denn alle unterhalb der Diagonalen sind wieder das Gleiche. Da tauchen die gleichen Paarungen auf.
+Und dann wurde hier vorgeschlagen, einfach zu sagen, wir fangen mit J nicht bei 1 an, sondern bei I. Und dann gibt es tatsächlich nur die 3 Paarungen, die Sie hier sehen.
+Und natürlich könnte ich jetzt auch das If-Statement hier wegmachen. Wenn ich es so laufen lasse, dann haben wir wieder die Match-Ups einer Mannschaft gegen sich selbst drin.
+Aber ich könnte jetzt natürlich auch direkt sagen, ich fange noch einen später an. Und dann haben wir If-Statements ganz vermieden und haben wir auch nur diese Match-Ups.
+Soll ich das mit einer Tabelle nochmal erklären, was gerade geschehen ist? Sehr gut. Genau. Das mache ich gerne. Ich mache es mal einfach so.
+Einfüge eine Tabelle. Machen wir eine 4x4-Tabelle.
+Also anschaulich hatten wir hier Mannschaft 1, BVB, Bayern und Mannschaft 1, BVB und Bayern.
+Und jetzt können wir hier vielleicht mal die Indizes reinschreiben, die zu unseren Tabellen gehören. Wir nehmen ja immer Mannschaft an der Stelle I, also den Iten-Eintrag aus der Mannschaftsliste und den Jocken-Eintrag aus der Mannschaftsliste.
+Das bedeutet, ich kann mir das hier vorstellen als Indizes 0 und 0 in meiner Tabelle. Das hier kann ich mir vorstellen als Indizes, und jetzt hängt es ja immer davon ab, wie man das jetzt nummeriert und laufen lassen möchte.
+Aber ich mache es mal so. Indizes 0 und 2. Indizes 1 und 0. Indizes 1 und 1. Indizes 1 und 2.
+Und hier unten steht dann halt eine 2. 2 und 2. Also das soll heißen, wenn I gleich 0 ist und J gleich 0 ist, dann kommt hier vor Mannschaft 1 gegen Mannschaft 1.
+Und wenn der erste Index 0 ist und der zweite 1, dann steht hier Mannschaft 1 gegen BVB. Und wenn der erste Index 0 ist und der zweite 2, dann steht hier Mannschaft 1 gegen Bayern.
+Und jetzt kann man sich vorstellen, wie es hier weitergeht. Also hier steht jetzt BVB und hier steht BVB gegen BVB. Eine zweite mache ich noch und dann höre ich auf.
+Okay, und was man jetzt hier glaube ich schon sehen kann, ist zum einen noch mal bestätigt, auf der Diagonalen stehen die Match-Ups jeder Mannschaft gegen sich selbst. Deshalb haben wir in Schritt 1 gesagt, wir wollen nur die Paarung ausgeben, wo Index I ungleich Index J ist.
+Denn sobald I gleich J ist, befinden wir uns hier auf der Diagonalen und haben hier die gleichen Match-Ups. Und jetzt in dem Schritt 2, in der Erweiterung dieser Aufgabe, habe ich gesagt, was ist, wenn das ein Turnier ist und ich Mannschaft 1 gegen BVB genauso betrachten möchte wie BVB gegen Mannschaft 1.
+Also wo es keine Rolle spielt, ob jemand vorne oder hinten spielt. Es gibt nicht irgendwie Hin- und Rückspiel, Halbspiel und Auswärtsspiel, sondern es gibt nur ein Turnier, wo die Mannschaften gegeneinander spielen. Und dann stelle ich, vielleicht auch schon durch Überlegen, wie viele Paarungen es überhaupt noch gibt, fest, es gibt nur noch 3.
+Nämlich, naja, Mannschaft 1 gegen BVB, Mannschaft 1 gegen Bayern und BVB gegen Bayern. Und alles, was jetzt auf der oberen Hälfte dieser Matrix steht, ist das gleiche wie das, was gespiegelt hier auf der unteren steht.
+Also zwar steht hier BVB gegen Mannschaft 1, aber das ist ja für mich jetzt das gleiche wie Mannschaft 1 gegen BVB. Ich möchte nicht beide Einträge haben, ich möchte nur einen davon haben. Und deshalb sage ich jetzt, ich möchte das nicht haben, ich möchte das nicht haben, ich möchte das nicht haben.
+Das war die Diagonale, die hatten wir von Anfang an. Und jetzt war die Idee, ich möchte diese unteren Einträge auch alle nicht haben. Den nicht, den nicht und den nicht, weil eben in diesen 3 Einträgen das gleiche steht wie in diesen oberen 3 Einträgen.
+Und jetzt sieht man vielleicht auch schon durch die farbliche Markierung, das ist die komplette untere Hälfte dieser Matrix oder, und das haben wir gerade schön dann abstrahiert oder mathematisch gesehen, das sind alle die Einträge, wo der zweite Index echt größer ist als der erste.
+Also 1 ist echt größer als 0, 2 ist echt größer als 0, 2 ist echt größer als 1 und alle rot markierten hier sind tatsächlich die Beispiele, wo der erste Index nicht strikt kleiner ist als der zweite.
+Oder wo der zweite nicht strikt größer ist als der erste. Also wir hätten vielleicht sogar als erstes, ich drücke mal ganz oft rückgängig. So, wir waren schon hier, das waren alle Paarungen außer jede Mannschaft gegen sich selbst.
+Eine weniger effiziente, aber auch einfache Möglichkeit wäre gewesen an dieser Impfstelle ein kleiner zu schreiben. Das ist genau die Logik von der gerade rot markierten Tabelle. Nur wenn der erste Index echt kleiner ist als der zweite. Erinnerung, nur wenn der erste Index echt kleiner ist als der zweite, wollen wir die Paarung ausgeben.
+Und wenn ich das laufen lasse, dann passiert jetzt hier das gleiche wie in unserer anderen Lösung und das hatte Herr Comelitone halt direkt gesehen, dass es so vielleicht nicht das effizienteste ist, weil ich immer noch über n Quadrat viele Schleifendurchgänge gehen muss.
+Also ich lasse ja i und j trotzdem immer noch von 0 bis Länge Mannschaftsliste laufen. Also ich kriege immer noch Anzahl der Elemente in Mannschaftsliste Quadrat viele Schleifendurchläufe und sage dann erst anschließend, na gut, aber über die Hälfte davon brauche ich gar nicht.
+Und deshalb wurde hier direkt gesehen, statt das hier zu machen, kann ich auch einfach die Range einschränken, nämlich zu sagen, ich fange hier bei i plus eins, was der kleinste Index, der größer ist als i, ist an und spar mir dafür, dass ich das Statement von einer Reihe von Schleifendurchgängen.
+Ja.
+Vielleicht mal nebeneinander.
+Man kann es rechts nicht mehr lesen, aber man kann es vielleicht noch visualisieren.
+Also wir wollten hier wirklich nur über die Indizes j gehen, die bei i plus eins anfangen. Hier ist i null, i plus eins ist eins.
+Und dann gibt es bis Range, links Mannschaftsliste, noch einen weiteren Index, nämlich zwei.
+Das ist quasi mein erster Durchlauf der Schleife und das hier ist mein zweiter Durchlauf der Schleife. Der geht dann nur noch von i plus eins, das ist zwei bis Länge der Mannschaft резte.

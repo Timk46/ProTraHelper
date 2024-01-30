@@ -24,3 +24,5 @@ export * from "./tutorKaiDtos/submission.dto";
 // export * from "./question.dto"; // Merged with HEFL and deleted. Maybe needs fix?
 export * from "./user.dto"; // ToDo: Merge with hefl
 export * from "./file.dto"; // ToDo: Merge with hefl
+//export * from "./userAnswer.dto";
+export * from "./feedbackGeneration.dto";

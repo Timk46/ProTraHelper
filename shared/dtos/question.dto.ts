@@ -42,7 +42,23 @@ export interface McQuestionDTO {
     shuffleOptions: boolean;
 }
 
+/**
+ * This DTO is for showing the mc options in the mc task component
+ */
 export interface MCOptionDTO {
+    id: number;
+    text: string;
+    files?: FileDto[];
+    //isCorrect needs to be deleted from the MCOptionDTO that is given to the mc task component, because is shows the correct anwers!
+    isCorrect: boolean;
+    //selected is only used in the mc task component and so it should also be transfered to the MCOptionCheckDTO
+    selected?: boolean;
+}
+
+/**
+ * This DTO is for checking the mc answers of the user
+ */
+export interface MCOptionCheckDTO {
     id: number;
     text: string;
     files?: FileDto[];
@@ -54,12 +70,6 @@ export interface McQuestionOptionDTO {
     id: number;
     mcQuestion?: McQuestionDTO;
     mcOption: MCOptionDTO;
-}
-
-export interface OptionDTO {
-    id : number;
-    text: string;
-    selected: boolean;
 }
 
 export interface UserMCAnswerDTO {

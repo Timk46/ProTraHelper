@@ -7,6 +7,14 @@ import { QuestionDataService } from 'src/app/Services/question/question-data.ser
 import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
 import { taskOverviewElementDTO } from '@DTOs/taskOverview.dto';
+import { MatTableDataSource } from '@angular/material/table';
+
+export interface PeriodicElement {
+  name: string;
+  position: number;
+  weight: number;
+  symbol: string;
+}
 
 @Component({
   selector: 'app-task-overview',
@@ -18,8 +26,8 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
   @Input() activeConceptNodeId: any;
   taskOverviewData : taskOverviewElementDTO[] = [];
 
-  //activeTask : Number = -1;
-  showTask : Boolean = false;
+  //the data for the table
+  displayedColumns: string[] = ['id', 'name', 'type', 'attempts', 'progress', 'actions'];
 
   titles = [
     "Python Kapitalwert",
@@ -66,7 +74,9 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
     return `/tutor-kai/code/${index + 3}`;
   }
 
-  constructor (private taskOverviewService : TaskOverviewService, private questionDataService : QuestionDataService, private dialog : MatDialog) { }
+  constructor (private taskOverviewService : TaskOverviewService, private questionDataService : QuestionDataService, private dialog : MatDialog) {
+    
+  }
 
   ngOnInit() { }
 

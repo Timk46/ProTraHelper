@@ -1,0 +1,89 @@
+Dann kommen wir glaube ich zu UML. Genau. Das ist eigentlich eine Art von
+Sidetrack jetzt, aber deshalb wollte ich erst auch zeigen, dass meistens ab jetzt
+werden wir mehr Klassen definieren und programmieren. Genauso wie beim Spiel,
+wir jetzt zwei Klassen haben. Wir haben eine Snail-Klasse, die wir in
+einer anderen Datei haben, nehmen wir unsere snail.java-Datei und wir haben unsere Game-Klasse.
+Diese Klasse ist definiert in Game.java. Ab jetzt werde ich auch ab und zu mit BlueJ
+arbeiten, wo man genau das auch relativ gut, ähnlich wie in echten UML-Diagrammen sehen kann.
+Aber es ist trotzdem leicht genug, so dass ich es dann in Präsentationen zeigen kann,
+weil so etwas in NetBeans oder Eclipse wäre dann etwas zu viel. Deshalb also grundsätzlich,
+werden wir ab jetzt bei Beispielen ganz viele Klassen kreieren, die irgendwie Zusammenhang
+haben. Und um da noch einen Überblick zu schaffen, ist es immer gut solche UML-Diagramme zu erstellen.
+Und in BlueJ wird beide gleichzeitig benutzt. Man kann gleich eine Klasse erstellen mit UML
+und man kann auch gleich diese Klasse ersteller programmieren oder ergänzen in Java-Dateien.
+Und da wir jetzt das schon haben, werde ich einfach nur diese Klassen von Datei nehmen müssen. Das
+heißt, ich gehe einfach in die richtige Datei und da sollte ich dann zum Beispiel unsere
+Snail-Klasse haben. Genau, das ist unsere Snail-Klasse. Und das gleiche auch für unsere
+Game-Klasse. Genau, und was Sie sehen, ist, dass unsere Game-Klasse eine Abhängigkeit hat von
+Snail. Das ist mit diesem Pfeil hier dargestellt. Und dann später kommen da noch viele andere
+Sachen, die da dazukommen, dazu. Aber grundsätzlich kann man hier relativ schnell für eine Projekt
+Sammlung von Klasse relativ schnell später den Überblick durchschauen. Man weiß, dass man ein
+Spiel hat und dass dieses Spiel eine andere Klasse benutzt und diese Klasse ist Snail. Und dann kann
+man mit Doppelklicken sofort auch diese Quellcodes, die dahinter hängt, also das haben wir so eben
+programmiert, hier alles, kann man dann auch anschaulich mit schöner Farbe alles nochmal
+weiter programmieren zum Beispiel. Ich weiß nicht, ob Sie das schon gesehen haben oder schon
+gemacht haben, das ist eigentlich Kinderspiel. BlueJay wurde auch gemacht, um das relativ schnell
+in Schüle zum Beispiel auch übersichtlich zu machen. So, dass man zum Beispiel für ein Spiel,
+wenn man dann rechts klickt, das erstmal kompilieren kann. Sobald es dann kompiliert ist,
+hat man hier zum Beispiel unsere Main-Funktion, die da für jede Klasse anwesend ist, also auch
+ohne Objekte, die wir dann sofort auch ausüben können. Die Main-Funktion hat dann ein Array von
+Strings, die lassen wir erstmal leer und wenn wir dann ausführen, dann wird unser Spiel ausgeführt
+und können wir weiterspielen. Auch das ist natürlich als Umgebung viel leichter oder
+viel schöner jetzt, weil wir müssen einfach nur doppelklicken und dann können wir wechseln zwischen
+diese zwei Implementierungen, unsere Implementierung von Snail und unsere Implementierung von unserem
+Spiel. Das ist viel leichter und was es dann vor allem viel leichter macht, ist, wenn wir hier
+dutzend Klassen haben, weil auch dann wird es sehr unübersichtlich, um zu gucken, wo, also was möchte
+ich jetzt programmieren, wie sondere ich das ab und so weiter. Also deshalb würde ich wirklich
+empfehlen, das mal mit BlueJay zu machen, weil das ist erstens sehr leicht, wenn wir es vergleichen mit
+NinneBins oder Eclipse, was die typischen IDEs sind, aber für unsere Zwecke hier in diesem Übung ist
+so etwas sehr schnell vor allem. Kommt man sofort zu dem Punkt und man kann sofort auch sehen, was alles
+möglich ist. Deshalb werden wir jetzt, weil wir wissen jetzt, was Klassen sind und wir wissen jetzt, was Objekte sind,
+werden wir jetzt diese UML-Diagramme etwas deutlicher definieren. Das ist meistens, was man auch benutzt
+in großen Projekten, wo man in der Analyse und wo man im Design auch UML benutzen kann oder soll,
+um erst mal zu skizzieren, was ein Projekt ausmacht, welcher Klasse dann alle implementiert
+werden sollten, sodass man zum Beispiel, wenn man mehrere Programmierer hat, das aufteilen kann. Eine
+Person programmiert Game, der andere Programmierer oder Person programmiert Snail zum Beispiel. Und dann
+muss man abklären, wie die Zusammenhänge sind, nämlich dass in Game zum Beispiel es zwei Instanzen
+gibt von Snail, nämlich Player und Enemy. Das ist dann hier der Zusammenhang hier. Okay, deshalb werden wir
+jetzt erst mal so eine Grundlagereinführung von UML sehen und UML ist ziemlich vielfältig. Wir werden einfach nur
+die wichtigsten Sachen sehen, sodass Sie damit später in Übungen und später auch mit großen Projekten
+überwegen können. Alles andere kann man auch sehen oder lesen in Büchern. Genau, grundsätzlich hat man da
+relativ viele Arten von Diagrammtypen und man hat die Unterstützung von UML in zwei Phasen oder man
+unterscheidet meistens in diesen zwei Phasen erst mal die objektorientierte Analysephase, wird mit OOA
+abgekürzt oder dann später kommt danach, sobald man die Analyse durchgeführt hat, die objektorientierte
+Designphase. Das wird dann meistens mit OOD abgekürzt. Und der Hintergrund ist, dass man meistens schneller
+mal kurz etwas auf eine Serviette skizzieren kann, als dass man sofort in den Editor programmieren kann.
+Das Programmieren war bislang das aller-allerwichtigste. Das habe ich dann auch deshalb immer in dieser
+Umgebung gemacht. Man sieht eigentlich nichts anderes als das, was ich jetzt auch code oder
+programmiere und alles andere ist eigentlich nicht so wichtig. Aber langsam, wenn wir mit Klassen
+arbeiten, werden diese Zusammenhänge wichtiger und wichtiger. Deshalb ist es wichtig, dass man
+das erst mal in UML später für große Projekte skizzieren kann. Und auch in den Übungen werden wir dann
+pseudo-große Projekte sehen, wo unbedingt dann mehr Klasse zum Beispiel implementiert werden müssen,
+mit bestimmten Zusammenhängen. Genau, und in der Analyse hat man meistens, das ist jetzt ein ganz
+einfaches Trivialbeispiel, aber grundsätzlich haben sie dann das Coder von Java, von Java-Programmierung
+zum Beispiel dann immer ein Problem oder ein Kunde mit einem Problem und in der Analyse kommt irgendwie
+nach vorne, was für Daten das Allerwichtigste sind oder welche Konzepte. Deshalb hat man dann zum
+Beispiel da auch bestimmte Fragenbögen, die man dann abarbeiten kann. Das werden wir jetzt in
+dieser Veranstaltung nicht sehen, wir werden hier vor allem auf das Programmieren setzen. Aber
+grundsätzlich kommt hier aus dieser Analyse meistens ein Design in UML oder ein verläufiges
+Design in UML nach vorne. Zum Beispiel, dass man sagt, für ein bestimmtes Problem möchte man den
+Kunden zentral stellen, also als Datenobjekt, nicht als echter Kunde. Und man hat zum Beispiel
+herausgefunden, dass diese Kunde, das Wesentliche von dieser Kunde ein Name ist, ein Alter und ein
+Gewicht. Und das sind dann die Attribute, die dazu gehören und werden dann halt so dargestellt. Das
+heißt, man hat eine Klasse, wir nennen die Person, weil das kommt aus dieser Anwendungsgeschichte
+raus und diese Person wird bestimmt an der Hand von dieser Art Attribute oder Konzepte. Und dazu
+gehört auch noch, was passieren soll mit dieser Person. Und zum Beispiel das Allerwichtigste
+scheint hier so zu sein, dass man diese Informationen, die dann in dieser Person Daten sind,
+dass man die erstmal ausgeben muss. Zum Beispiel in so grafischer Umgebung oder in so Web App,
+als HTML-Seite oder was auch immer. Das ist dann, was in dieser Methode, Drucke Info,
+sitzt. Das heißt, man hat meistens in dieser UML-Darstellung, wenn man eine Klasse darstellen
+möchte, Klassennamen ganz oben, würde später auch sehen oder gleich groß geschrieben, dann
+alle Attribute und dann alle Methoden. Und die Methode, weil die dann die Klammen haben, kann
+man so eindeutig sehen, das ist eine Methode, das sind die Attributen. Und bei den Attributen kann
+man auch nur die Typen oder auch sogar noch Default-Werte, also Anfang-Initialwerte, da eingeben.
+Das heißt, diese Zusammenhänge zwischen UML-Diagramm und die Implementierung in Ja
+können sehr eindeutig gleich gehalten werden. Und so konnte ich auch zum Beispiel so eben in BlueJ
+einfach eine Klasse laden und so konnte dann auch BlueJ dann sehen, dass es einen Zusammenhang
+zwischen dieser beiden Klasse gibt. Und das ist nicht immer so leicht, aber dass das gibt. Es gibt
+1 zu 1. Also es stimmt zwischen diesen beiden Darstellungsformen. Das erste hier als Klassendiagramm,
+das zweite als eine Implementierung in der Programmiersprache.

@@ -1,0 +1,35 @@
+Weiter. Zahlen. Zahlen in Python. Also jenseits von Strings haben wir gerade schon ein paar
+Zahlen als Variablen definiert und auch schon deren Typen kurz gesehen. Es gibt nur drei Arten
+von Zahlen in Python. Das ist deutlich weniger als in anderen Sprachen, wo die Länge oder ob
+sie ein Vorzeichen haben oder sowas jeweils noch unterschiedliche Typen hervorruft. In Python gibt
+es nur Integer, Floats und komplexe Zahlen. Wenn ich einfach nur eine ganze Zahl ohne einen Punkt
+irgendwas schreibe, dann führt diese dynamische Typisierung, von der wir schon gesprochen haben,
+dazu, dass es zu einer Class Int wird. Ganze Zahlen, die können auch negatives Vorzeichen
+haben. Dann, wenn ich einen Punkt 0 dahinter hänge oder natürlich Punkt irgendwas, ist es
+eine Gleitkommazahl, wird also als Typ Float hier bezeichnet. Die Art, wie Gleitkommazahlen
+gespeichert werden im Computer folgt einem bestimmten Standard. Falls Sie Lust haben,
+das mal nachzuschauen und ein bisschen zu verstehen, wie sowas gespeichert wird. Das ist der IEEE 754
+Double Precision Binary Floating Point Number Format Standard. Was für uns vielleicht nur
+wichtig ist, es ist eben keine exakte Repräsentation, was manchmal zu etwas unvorhergesehenen Ergebnissen
+führt. Also zum Beispiel Print von 3,0 mal 0,1. Führt zu etwas, was wir vielleicht nicht so
+erwartet hätten, nämlich 0,3... 0,4. Und natürlich ist diese letzte 4 mathematisch Unsinn, ist aber eben ein
+Artefakt von Rundungsfehlern, die beim Rechnen mit nicht exakt repräsentierten Gleitkommazahlen
+auftreten können. Jetzt erstmal würde ich Sie einfach bitten, bedenken Sie das in Ihrem Code.
+Also was zum Beispiel eine schlechte Zeile Code wäre, wäre ein solcher Vergleich. Ist 3 mal 0,1
+gleichgleich, haben wir gerade mal kennengelernt als Vergleichsoperator, ist das wirklich gleich
+0,3 und mein Code geht hier jetzt aus Falls. Tja, das ist natürlich eigentlich von Python
+Falsch, dieses Ergebnis, aber ist etwas, womit man umgehen muss. Also bei Vergleichen, ob bei
+einer Rechnung das Richtige rauskommt, sollte man eher schauen, ob der Absolutbetrag, der Differenz
+der Rechnung mit dem, was man herauskriegen möchte, klein ist. Und klein heißt jetzt in der
+Größenordnung von, ein bisschen problemabhängig, 10 hoch, minus, was auch immer, 7 oder sowas,
+für Floats ist wahrscheinlich noch ziemlich sicher. Genau, es gibt auch Pakete, die diese
+Problematik speziell adressieren und das genauer machen, dazu aber nachher vielleicht nochmal ein Wort.
+Gut, die dritte Zahl, die dritte Klasse von Zahlen sind komplexe Zahlen, da weiß ich gar nicht,
+ob alle von Ihnen das schon mal gesehen haben. Wir werden auch in der Vorlesung quasi nicht mehr
+damit arbeiten. Es gibt so eine imaginäre Zahl, wird oft mit I bezeichnet, die das Problem lösen
+soll, dass man aus negativen Zahlen keine Wurzel ziehen kann und deshalb definiert man sich das
+einfach. Die imaginäre Zahl I ist die Wurzel aus minus 1, also I² ist minus 1, so ein mathematisches Konstrukt,
+aber diese dann so entstehenden Zahlen, die eben noch immer einen Imaginäranteil haben, die werden
+in Python gesondert als Datentyp behandelt und das, was ich jetzt I genannt habe, heißt in Python J.
+Also, wenn Sie mal so eine Zahl sehen, die irgendeine Zahl plus irgendwas J hat, dann können Sie mal testen,
+sollte das eine komplexe Gleichkommazahl sein, einfach als weiteren Zahlendatentyp, um hier vollständig zu sein.

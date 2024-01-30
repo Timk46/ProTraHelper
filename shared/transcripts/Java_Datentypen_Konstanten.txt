@@ -1,0 +1,6 @@
+Also wir haben gesehen, dass in unserem Beispiel, dass Variable immer einen Typ haben und dass
+dieser Ball, dieser Typ, sehr wichtig ist und dass wir gleichzeitig auch jede Konstante,
+die wir irgendwie benennen und benutzen in unserem Programm, auch das irgendwie eine
+Auswirkung hat.
+Und wenn man da irgendwie einen Fehler macht, dass dann sofort da Fehlermeldungen kommen
+können oder ungewünschtes Verhalten der Anwendung.

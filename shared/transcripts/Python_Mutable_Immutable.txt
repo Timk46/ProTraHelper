@@ -1,0 +1,450 @@
+Und als kleines Beispiel einer Wiederholung von sowas habe ich mir mal überlegt, dass
+wir am Anfang versuchen eine abstrakte Funktion namens auf jedes Element zu schreiben.
+Diese Funktion soll eine Funktion als Eingabeargument bekommen, ist also eine Funktion höherer
+Ordnung, zusammen mit einer Liste.
+Und was passieren soll, ist, dass die in Funktion gespeicherte Funktion auf jedes Element der
+Liste angewendet werden soll.
+Das Schöne an so einer abstrakten Funktion wie auf jedes Element ist, dass sie sehr leicht
+in ganz unterschiedlichen Kontexten wiederverwendet werden kann, weil es tatsächlich ziemlich
+häufig darum geht, Vorschleifen über irgendwelche Listen oder andere iterierbare Strukturen
+zu schreiben.
+Und deshalb testen wir das nachher mal an zwei Beispielen, nämlich quadrieren Sie alle
+Zahlen von 0 bis 9 und fügen Sie an eine Liste von Strings einen Absatz zu jedem String
+hinzu.
+Und wie wir sehen werden, können wir das eben beide sehr unterschiedlichen Aufgaben
+mit unserer dann geschriebenen Funktion auf jedes Element lösen.
+Gehen wir dazu also einmal zum Programmierteil.
+Wer kann mir denn helfen, wie ich eine Funktion auf jedes Element schreiben kann?
+Fangen wir erstmal mit den Basics an.
+Wie definiere ich überhaupt eine Funktion in Python?
+Ja.
+Genau, def.
+Sehr gut, genau.
+Dann nehme ich mal auf jedes Element, weil das ein Vorschlag war.
+Genau.
+Und da habe ich versprochen, also wir benennen unsere Eingabevariablen und versprochen habe
+ich, dass wir entgegennehmen wollen eine Funktion und eine Liste.
+Und jetzt war es das Ziel, auf jedes Element der Liste die Funktion anzuwenden.
+Wie machen wir das?
+Genau, also für jedes Element müssen wir die Funktion aufrufen.
+Das habe ich Sie richtig verstanden?
+Genau, also völlig richtig.
+Schönere Lösungen mit anderen.
+Es gibt natürlich vorher implementierte Funktionen für das, was wir hier versuchen.
+Aber völlig richtig geht hier erstmal darum, das als Beispiel, als Basis mal zu implementieren.
+Und ja, wir müssen diese Funktion dann für jedes Element der Liste wieder neu aufrufen.
+Das war der Kommentar hier vorne und das ist völlig richtig.
+Und wie setzen wir das technisch um im Code?
+Ja.
+Sehr gut, mit einer Vorschleife, völlig richtig.
+Können Sie mir das sogar diktieren?
+Ja, da sind wir, also völlig richtig, aber in Python würden wir das typischerweise mit
+diesem.
+Sehr gut, genau.
+Also das andere stimmt auch.
+Aber in Python machen wir es zum Beispiel so.
+Genau.
+Längs oder, längs heißt es, genau.
+Sehr gut.
+Und was können wir jetzt machen?
+Wie geht es weiter?
+Ja?
+Genau.
+Ja.
+Also, das ist eine sehr gute Frage.
+Ich glaube, wir haben jetzt schon ein paar Fragen gestellt.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Genau.
+Und wenn wir das hier vielleicht wieder an der gleichen Stelle speichern wollen, also
+das hängt jetzt nicht mehr davon ab, wie die Funktion gestrickt ist, aber wir gehen jetzt
+mal davon aus, dass die auch ein Rückgabeargument liefert.
+Ja?
+Sehr gut.
+Genau.
+Also wir können Liste i gleich Funktion Liste i setzen.
+Gut.
+Sind wir fertig?
+Probieren wir mal aus, ob wir fertig sind.
+Ja?
+Oder noch ein Kommentar?
+Ja, das ist genau so gewesen.
+Genau.
+Das ist jetzt ein spannender Punkt.
+Aber ja, ich nehme an, das wäre hier eine gute Idee.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Ja.
+Genau.
+Also, wunderbar.
+Ja.
+Das…
+Genau.
+Das ist, was wir jetzt…
+Genau, ja.
+Ja.
+Genau.
+Genau.
+Ja.
+Genau.
+Ja.
+Ja.
+Genau.
+Das ist was ganz Gutes, was man auf jeden Fall im Kopf haben muss.
+Also, der Kommentar war, wo startet Range bei 1?
+Wenn dann müssen wir…
+Wenn das bei 1 startet, müssen wir nochmal überdenken, ob die Vorschleife so richtig
+ist.
+Ich schreibe mal einmal Print Range 10 als Beispiel.
+Das würde ich…
+Okay.
+4E in Range 10 Print E.
+Und so würde ich das dann immer mal überprüfen, wenn ich mir nicht mehr ganz sicher bin.
+Man kann natürlich auch einfach die Doku nachgucken, aber für sowas wie Range würde
+ich es vielleicht einfach ausgeben lassen.
+Und dann sehen wir hier, wir haben in gewisser Weise Glück gehabt.
+Also, es fängt wirklich bei 0 an und geht bis zu der Zahl, die immer noch kleiner ist
+als das, was wir hier reingeschrieben haben.
+Also, kleiner als Längsliste.
+Und jetzt können wir das vielleicht auch nochmal einmal ausprobieren, was ist, wenn
+wir hier eine Liste 1, 2, 3, 4 haben und Längsliste aufrufen.
+Dann kriegen wir als Output 4.
+Ist das gut als Grenze für unsere Vorschleife?
+Ja.
+Die A3 wäre jetzt bei 0 angepackt oder ist das dann die…
+Ganz genau.
+Also, die Antwort war ja, das ist gut und das ist völlig richtig.
+Die Länge der Liste ist 4, aber es geht jetzt bis zu der Zahl vor 4, also bis 3 inklusive.
+Und das ist auch richtig, denn 3 ist der letzte Index, weil wir bei 0 anfangen zu zählen.
+Ja, macht Sinn?
+Sehr gut.
+Also, ist gut so etwas zu überprüfen, aber das ist tatsächlich hier die Vorschleife
+über die gesamte Liste.
+So, jetzt einmal auf die Folien zurück.
+Als erstes Testbeispiel war die Idee zu sagen, quadrieren Sie alle Zahlen von 0 bis 9.
+Wer kann mir da weiterhelfen, wie ich jetzt diese Funktion auf jedes Element verwenden
+kann, um eine Liste der Zahlen von 0 bis 9 zu quadrieren?
+Ja.
+Es gibt so etwas wie, dass man die Liste anfängt, um die Fachstelle zu verändern,
+was die Lücken einfach quadrieren kann.
+Ja, können Sie also immer mit einem Faktor i quadrieren, aber können Sie das nochmal
+formalisieren?
+Also, wenn jetzt auf der Liste ein Faktor i abgerufen wird, sollte man einfach abrufen
+über mehreren Namen, die sich an die Zahlen anerkennen werden?
+Genau.
+Vielleicht, ich gebe noch ein bisschen mehr Struktur des Problems vor.
+Nachher möchte ich gerne aufrufen, meine Liste quadrierter Zahlen gleich auf jedes
+Element von Funktion und Liste.
+Und ich suche jetzt so ein bisschen, meine Frage ist eigentlich, wie definieren wir Funktion
+und wie definieren wir Liste, wenn das Ziel ist, eben die Quadratzahlen aller Zahlen
+von 0 bis 9 hier zu berechnen?
+Ja.
+Sehr gut.
+Also, kurz anhalten, wir dürfen gleich weitermachen, nur damit das alle sehen.
+Wir definieren jetzt eine Funktion.
+Ich nenne die mal Quadriere.
+Quadriere, also Sie haben natürlich völlig recht, nachher soll die hier an dieser Stelle
+für Funktionen übergeben werden, aber damit wir eine sinnvolle Benahmung der Funktion
+haben, nenne ich die mal Quadriere x in der üblichen Definition einer Funktion und die
+macht nichts anderes als das Element x, was sie bekommt, quadrieren mit dieser Stern-Stern-Operation.
+Prima?
+Ja?
+Genau.
+Genau.
+Und das mache ich vielleicht mal eben, also Sie kennen ja schon das Range 10, haben wir
+uns schon davon überzeugt, dass das die Zahlen von 0 bis 9 sind, aber Range ist ein eigener
+Datentyp in Python und wenn wir jetzt eine Liste wollen wirklich, dann schreiben wir
+da einmal List drum, das ist eben der Begriff, der hieraus wirklich eine Liste macht.
+Wir können auch mal eben PrintType von Liste aufrufen, um sicher zu gehen und dann sollte
+dieser Aufruf hier klappen und deshalb printe ich auch mal eben meine Liste quadrierter
+Zahlen danach.
+So, wir haben tatsächlich hier für den ersten Print-Befehl Glas-List bekommen und danach
+eine Liste mit das, was tatsächlich sehr gut aussieht, nach den Quadratzahlen von 0
+bis 9.
+Ja, macht das Sinn?
+Also jetzt, ich hätte es auch noch hier mal extra machen können, es gibt, man könnte
+eine Variable definieren, die heißt meine Funktion, die heißt quadriere, über sowas
+haben wir letzte Vorlesung viel gesprochen und dann rufe ich auf jedes Element mit meiner
+Funktion und Liste auf.
+Ja, ist das Gleiche.
+Also ich hätte jetzt auch direkt, das war eigentlich schöner hier, wie es diktiert
+wurde, quadriere hier hinzuschreiben, das ist nur nochmal, um explizit zu sagen, das
+hält eine Funktion.
+Sehr gut.
+Dann machen wir auch noch eben, oder erstmal Fragen dazu.
+Dann machen wir noch einmal Beispiel 2.
+Fügen Sie an eine Liste von Strings einen Absatz zu jedem String hinzu.
+Also, ich mache mal jetzt eine Liste an Strings.
+Hallo, hi, guten Tag.
+Und jetzt, wie kann ich denn jetzt nachher wieder diese Funktion an jedem Element auf
+Liste an Strings anwenden, damit nachher irgendwie eine Liste an Strings mit Absätzen herauskommt.
+Was müssen wir definieren und was setze ich da ein in meine Higher Order Function auf
+jedes Element.
+Ich warte nochmal kurz.
+Ja, nochmal.
+Sehr gut.
+Sehr gut.
+Sehr gut, genau.
+Ist das klar?
+Also, das Plus auf einem String führt einfach zum Anhängen der Zeichenkette, die dann als
+zweites kommt, an den existierenden String x und backslash n kodiert einen Absatz.
+Das heißt, ich füge an ein Element, was jetzt hier reinkommt, x, einen Absatz hinzu.
+Ich kann das auch mal einmal auskommentieren, laufen lassen.
+Dann habe ich jetzt hier diese Funktion Absatz anfügen.
+Das heißt, wir können mal eben ausprobieren, was passiert, wenn ich sgleich Absatz anfügen
+nur von einem String, jHallo, ausführe und dann den String drucke.
+Das ist das jHallo mit einer Leerzeile hier.
+Ja, also damit haben wir jetzt herausgefunden, dass Absatz anfügen offensichtlich funktioniert.
+Und was schreibe ich jetzt hier?
+Wenn ich diese Funktion jetzt benutzen möchte.
+Ja.
+Genau.
+So, und dann kann ich mal einmal print, was man an dieser Variante macht.
+Und, okay.
+Und das ist natürlich jetzt hier die Listenschreibweise.
+Das heißt, wir sehen das Ganze noch mit backslash n.
+Wenn ich jetzt jeden String in dieser Liste anschließend vielleicht mal drucken möchte.
+Wie würde ich das machen?
+Damit wir schöner sehen, dass dazwischen Absätze stehen.
+Ja.
+Genau, wir machen mal ein anderes Format der Vorschleife.
+Wenn man nicht über Zahlen gehen möchte, sagen Sie erstmal Entschuldigung.
+Also 4e in range.
+Genau, also das ist dann 4s in Liste an Strings mit Absätzen.
+Genau.
+Genau, also gar keine eckigen Klammer, sondern das hier sind dann einfach die einzelnen Elemente der Liste.
+Das wäre das gleiche, wie als wenn ich hier i in range.lengths.liste brauche und hier dann Liste an der Stelle i machen würde.
+Das wollten wir erst sagen. Funktioniert natürlich auch völlig richtig.
+Das hier ist ein bisschen die üblichere Schreibweise, sage ich mal.
+Weil es eben diese Möglichkeit gibt, direkt über die Elemente der Liste eine Vorschleife zu schreiben.
+Und dann, wenn ich das jetzt ausfüge, kriege ich Hallo, neue Zeile, Hi, neue Zeile, Guten Tag, neue Zeile.
+Jeder Printbefehl ist sowieso eine neue Zeile und dadurch, dass ich jetzt noch Absätze drin habe, ist dazwischen halt immer ein Element Platz.
+Sehr gut. Wir haben also eine abstrakte Funktion höherer Ordnung auf jedes Element geschrieben, die wir relativ vielseitig einsetzen können.
+Nämlich immer dann, wenn ich über eine Vorschleife gehen möchte, Entschuldigung, über eine Liste gehen möchte und auf jedes Element der Liste irgendwas anwenden möchte.
+Jetzt schauen wir uns ganz zum Schluss, nee, wir schauen uns noch zwei Sachen an.
+Ich lösche mal einfach hier das, ich lasse es mal drin für das, was wir noch, damit ich das hochladen kann, kommentiere es einfach noch einmal aus.
+Damit ich es jetzt nicht dauernd hier drauf kriege.
+Bleiben wir mal bei unserem Beispiel von Quadrieren.
+Da gibt es noch zwei Sachen, die ich Ihnen zeigen möchte oder mit Ihnen besprechen.
+Zum einen haben wir jetzt ziemlich kurze Funktionen, sowas wie Quadriere oder Absatzanfügen, immer als eigenes Depp schreiben müssen.
+Und um da zu lange Definitionen zu vermeiden, damit man nicht jede Funktion, die man da möglicherweise mal in einer Zeile schreiben muss, extra wieder mit einem neuen Depp versehen muss,
+gibt es in Python eine Alternative, nämlich die Definition sogenannter Anonyma-Funktionen, die es einem möglich macht, eine Funktion in nur eine Zeile zu schreiben.
+Dafür gibt es ein Code-Wort, das heißt, oder ein Befehl, der heißt Lambda.
+Immer wenn ich Lambda schreibe, bedeutet das, hiermit definiere ich jetzt innerhalb von einer Zeile eine Funktion.
+Nach dem Lambda kann ich Eingabe-Parameter nehmen, sowas wie x, dann schreibe ich einen Doppelpunkt und dann schreibe ich das, was die Funktion als Return-Wert zurückgeben soll.
+Also in diesem Fall zum Beispiel x-Stern, Stern 2. Ich definiere eine Funktion, die als Eingabe x hat und als Rückgabe x².
+Ja, macht die Notation Sinn? Lambda heißt, hier beginnt jetzt eine Funktion, dann kommt eine Eingabe, Doppelpunkt, Rückgabe-Wert.
+Also wir können das jetzt sogar mal testen, wenn ich nur test gleich Lambda x Doppelpunkt x² schreibe, dann test alleine sagt mir, das ist irgendwie eine Funktion, die ist abstrakt, deshalb gibt es dieses, Entschuldigung, Anonym, dieses Lambda und die hängt von einem Eingabe-Moment x hat.
+Und ich kann jetzt test von 3 schreiben und Enter drücken und dann kriege ich 9 raus, weil 3² gleich 9 ist.
+Und genauso kann ich mir das halt, wenn das eben diese Funktion Quadrat jetzt schon definiert, kann ich mir das auch direkt hier in meine Funktion auf jedes Element schreiben und dann kann ich mir die Definition von Quadriere sogar spannen.
+Dann bin ich noch schneller in meiner Programmierung, ich muss nicht jede Funktion, die ich in meine Highorder-Funktion einsetzen möchte, extra neu mit dem Depth schreiben, sondern kann die einfach direkt in meiner Highorder-Funktion selber verwenden.
+Versuchen wir das mal zu übertragen auf das, was hier unten geschehen ist.
+Wenn ich die Funktion Absatz anfügen ersetzen möchte an dieser Stelle mit dieser Lambda-Notation, hat jemand eine Idee, wie das funktionieren würde?
+Ja?
+Sehr gut, genau, also es ist gesagt worden, ich schreibe Lambda, das definiert eine Funktion, x ist der Eingabe-Parameter, ich mache einen Doppelpunkt und zurückgegeben werden soll das, was hier eben schon steht.
+x plus backslash n und jetzt funktioniert es immer noch.
+Also das ist die Funktionsweise von Lambda und das erlaubt jetzt auch noch Funktionen mit mehreren Eingabe-Argumenten, also wenn ich mal test Lambda, ich könnte auch sagen x1 und x2 und es gibt zurück x1 plus x2, so was funktioniert eben auch.
+Dann kann ich anschließend test von 1 und 2 aufrufen und kriege 3 als 1 plus 2 gleich 3 raus. Ja?
+Ja, aber ich glaube, das ist auch ein Vorteil, wenn man das am Montag noch mal ausprobiert.
+Ne, im Prinzip ist das für einzeilige Funktionen gedacht, es gibt noch so kompakte Versionen, Vorschleifen zu schreiben und klar, im Prinzip alles, was man in eine Zeile schreiben kann, kann man auch hinter das Doppelpunkt schreiben,
+aber das wäre dann nicht mehr, glaube ich, der Sinn von dem Lambda, dann, wenn es so komplex ist, dass eine Vorschleife braucht, würde ich es auch stilistisch lieber in einer eigenen Funktion anlegen.
+Prinzipiell alles, was eben als ein Ausdruck beschrieben werden kann, geht in Lambda, aber in dem Fall vielleicht lieber nicht.
+Weitere Fragen?
+Gut, also das ist der eine Teil, den ich besprechen wollte, dass man mit Lambda solche kleinen Funktionen noch schneller erzeugen kann.
+Das andere, was ich mit Ihnen besprechen möchte, ist, dass wir jetzt schon an dem Punkt sind, dass wir hier vielleicht unerwartetes Verhalten erzeugt haben.
+Was passiert wohl, wenn ich jetzt hier Print Liste am Ende schreibe?
+Was könnte passieren? Wir hätten zwei mögliche Vorschläge, was Liste sein könnte.
+Ja?
+Genau, das ist auf jeden Fall ein sinnvoller Vorschlag, dass eine Zeichenkette von 0 bis 9 dabei rauskommt. Ich fülle das Ganze mal aus.
+Hm.
+Verwirrend, ja.
+Genau, also es gibt Liste als Return zurück, wobei wir den Return-Wert hier als meine Liste quadrierter Zahlen geschrieben haben.
+Aber das ist jetzt vielleicht trotzdem die überraschende Erkenntnis.
+Offensichtlich hat dieser Aufruf hier, dieses Für jedes Element in der Liste, wende die Funktion auf Liste an,
+nicht nur einen Einfluss auf das, was ich hier zurückgebe, also auf meine Liste quadrierter Zahlen, sondern auch auf die Eingabeliste.
+Also wir haben mit der Funktion auf jedes Element, Funktion und Liste, das Eingabeargument dieser Funktion geändert.
+Ja?
+Ja?
+Also das passiert jetzt mal in der Funktion Liste return, wo wir das Eingabeargument der Funktion zurückgeben.
+Ja?
+Ähm, nee. Achso, genau. Das ist aber eine sehr sinnvolle Anmerkung. Also woran liegt es quasi?
+Und das können wir jetzt mal nach und nach testen.
+Was ist denn, wenn ich keinen Return-Wert mehr habe und deshalb einfach nur noch auf jedes Element aufrufe?
+Wenn ich das laufen lasse, funktioniert es immer noch und ich kriege immer noch alle quadrierten Zahlen.
+Und nächster Schritt, jetzt haben wir hier natürlich eine Namensgleichheit von der Variable in dieser Funktion und das, was hier steht.
+Also, ich schreibe hier mal meine Liste und rufe das Ganze mit meine Liste auf und printe meine Liste und es passiert immer noch das Gleiche.
+Ja?
+Ja?
+Genau, also sehr gut. Hier ist es tatsächlich sowas wie eine Referenz auf die Werte und ich kann diese Werte tatsächlich umschreiben mit meiner Funktion.
+Also, ich darf Werte in Liste innerhalb meiner Funktion ändern. Ich muss gar keinen Return-Wert haben, sondern ich kann die hier drin ändern.
+Und dann muss ich halt wissen, dass wenn ich auf jedes Element aufrufe, auf meine Liste, selbst ohne Return-Wert, dann hat sich dadurch meine Liste geändert.
+Und das ist der erste Schritt von dem, was wir heute am Anfang besprechen möchten, nämlich wo existiert überhaupt welche Variablen, wann kann ich welche Variable in einer Funktion ändern?
+Und vielleicht ein Stück weit als Motivierung für das, was in Teil 2 kommt, nämlich funktionale Programmierung, das ist ein Stück weit verwirrend.
+Also, es ist verwirrend, weil Sie am Anfang schon als ersten Tipp gegeben haben, in Liste stehen immer noch die Zahlen von 0 bis 9.
+Hat jetzt keiner direkt mit gerechnet, dass da die quadratischen Zahlen stehen.
+Und dass selbst ohne Return-Wert und ohne die Namensgleichheit von Liste und meine Liste immer noch hier einfach die quadratischen Zahlen stehen.
+Da muss man also in dem Sinne ganz schön aufpassen, was man hier programmiert, insbesondere wenn man hier eigentlich etwas kopieren wollte, das aber in dem Sinne gar nicht tut.
+Vielleicht das wäre auch noch ein Test. Testliste und jetzt schreibe ich Liste gleich Testliste.
+In der Hoffnung, das zu kopieren und es passiert immer noch das Gleiche.
+Also diese Listen werden offensichtlich immer als eine Art Referenz übergeben.
+Also hier zeigt eben jetzt, wenn ich das aufrufe, teste auf die gleichen Werte wie meine Liste, danach zeigt Liste auf die gleichen Werte wie Testliste, was das Gleiche ist wie meine Liste.
+Und weil ich jetzt hier die Werte ändere, sind nachher auch die Werte von meine Liste geändert.
+Ja, also ich kann nicht durch hier so Gleichheitszeichen, dann muss ich schon aktiv irgendwas nehmen, was hier eine Kopie erzeugt.
+Das gibt es natürlich auch, aber wenn ich es nur so schreibe, dann wird keine echte Kopie erzeugt der Werte dahinter und man ändert immer noch das, was hier ursprünglich drin stand.
+Ist das schon mal soweit klar? Fragen dazu?
+Gehören wir mal einmal hier zurück. Ich habe Ihnen den Lambda-Befehl noch kurz aufgeschrieben.
+Aber gedanklich ist das eigentlich total verwandt zu einer Funktion, die wir schon geschrieben haben.
+Wenn Sie sich erinnern an vor einer Woche, als wir ein paar Funktionen eingeführt haben, die wir schon geschrieben haben.
+Wenn Sie sich erinnern an vor einer Woche, als wir ein paar Funktionen eingeführt haben für unser Hufspiel.
+Da haben wir die Funktion Spiele den Wert der Preiskarte geschrieben.
+Das hat Karten und Wert der Preiskarte als Eingabeargument bekommen.
+Das hat Wertkarte. Haben wir so etwas Verwirrtes geschrieben? Das sieht irgendwie komisch aus.
+Ja, ich nehme an, das ist...
+Na gut.
+Das ist ein bisschen seltsam. Mich wundert das gerade.
+Ich muss jetzt selber im Code nachschauen. Haben wir das so geschrieben?
+Aktueller Stand Hufspiel.
+Nein, haben wir nicht. Wir gucken mal, was wir in den Strategien hatten.
+Ja, aber hier finden wir das trotzdem. Schauen wir stattdessen mal.
+Doch, da haben wir so etwas.
+Ach, das war... Entschuldigung, jetzt verstehe ich meinen eigenen Code auch wieder.
+So, jetzt macht es Sinn.
+Das war eine der Strategien. Ich war gerade gedanklich dabei, dass das Spiel das Ziehen der Preiskarte selber ist.
+Wir hatten eine Strategie geschrieben für das Spiel. Die hieß Spiele den Wert der Preiskarte.
+Und diese Strategie kriegte den Wert der Preiskarte und die Karten und sagte, den Wert der Karten, die dieser Spieler spielt,
+der ist gleich dem Wert der Preiskarte und danach entferne ich diesen Wert der Karte aus den Karten und gebe den Wert der Karte zurück.
+Ist aber gedanklich nichts anderes vom Effekt her als das, was wir gerade gesehen haben.
+Wir übergeben ein Argument Karten an die Funktion und anschließend ist das Eingabeargument zu dieser Funktion, in diesem Fall Karten, geändert worden.
+Dadurch, dass ich auf Karten Remove aufgerufen habe.
+Also innerhalb der Funktion Spiele den Wert der Preiskarte wird Karten geändert.
+Nämlich, ich lösche das Element Wert der Preiskarte aus der Liste Karten.
+Ich hatte eine Liste, habe ein Element gelöscht, habe diese Liste nicht wieder als Rückgabeargument gehabt,
+aber trotzdem hat im Spiel den Effekt gehabt, dass eben die Liste der Karten entsprechend reduziert wurde.
+Sieht das jeder, dass das konzeptionell das gleiche ist wie das, was wir gerade ausprobiert haben.
+Eine Funktion, die hat eine Liste als Eingabe bekommen und wir konnten diese Liste innerhalb der Funktion ändern
+und es hatte Auswirkungen auf die Liste, die wir ursprünglich definiert haben.
+Und genau das passiert hier auch.
+Ich habe eine Liste Karten, innerhalb der Funktion wird die geändert, indem ich einen Remove drauf aufrufe.
+Ich gebe diese Liste nicht zurück, aber trotzdem ist außerhalb der Funktion dann dieser Wert von Karten geändert worden.
+Ein Element fehlt.
+Ja, haben Sie?
+Ganz genau, also sehr guter Hinweis.
+Das kann je nach Programmiersprache ein bisschen anders aussehen.
+Dann muss man halt gucken, ob man den Wert übergibt oder eine Referenz zu dem Wert bei sowas wie C++.
+Aber genau, dadurch, dass es hier so aussieht, als würden wir den Wert übergeben, würde man dann nicht erwarten,
+dass man das hier tatsächlich ändern kann, aber das ist eben bei einigen Datentypen in Python so,
+dass man hier tatsächlich Einfluss auf diese Variable innerhalb der Funktion nehmen kann
+und deshalb außerhalb der Funktion bleibt diese Änderung bestehen.
+Genau, dass das überhaupt möglich ist,
+liegt jetzt daran, dass unsere Karten oder meine Liste in dem, was wir vorhin geschrieben haben,
+eine veränderbare, auf Englisch Mutable Variable ist.
+Ähnliche Konstruktionen mit einem anderen Datentyp, der unveränderbar ist, also im Mutable, funktionieren nicht.
+Zum Beispiel, wenn wir das jetzt mal mit Zahlen versuchen,
+also ich definiere eine Funktion, teste Änderungen von a, b
+und versuche jetzt innerhalb dessen a gleich 5 und return a plus b zu schreiben
+und rufe das mit x gleich 1 und y gleich 1 auf,
+dann ist es in diesem Fall nicht so, dass ich das mit Zahlen verändern kann.
+Also, wenn ich das mit x gleich 1 und y gleich 1 aufrufe,
+dann ist es in diesem Fall nicht so, dass jetzt hier x übergeben wird.
+x steht sozusagen für a, aber hier rufe ich a gleich 5 auf.
+Das führt nicht dazu, dass x anschließend, wenn ich das hier ausgebe, 5 ist.
+Ja, also an dieser Stelle kommt wirklich immer noch x gleich 1 raus.
+So, das ist also wirklich ein lokales Überschreiben, was draußen keine Auswirkungen hat.
+Sowas hat draußen Auswirkungen.
+Und umgekehrt, sowas können wir nicht mit allen Arten von Variablen machen.
+Das haben wir schon in einer der ersten beiden Vorlesungen mal gesehen oder versucht,
+dass einige eben unveränderbar sind und wir nicht irgendwie an der Stelle so und so irgendwas umschreiben konnten.
+Also, Strings, dafür haben wir das versucht.
+Ich hatte Ihnen gezeigt, wie man indiziert Strings, also so was, dass man String, eckige Klammern, 5 schreiben kann
+und das ist dann das fünfte Zeichen im String, das zurückgegeben wird.
+Aber wenn ich versuche, String an der Stelle 5 gleich einen anderen Zeichen zu schreiben, dann meckert er.
+Dann sagt er, das geht nicht.
+String ist unveränderbar, immutable.
+Und tatsächlich sowas wie int, float, bool, string, Unicode, ja, tuple.
+Tuple ist tatsächlich quasi das gleiche wie Liste, nur als unveränderbare Variable,
+wo es dann auch solche Funktionen wie remove nicht gibt.
+Also man kann so eine Variable, wenn sie einmal erstellt wurde, nicht ändern.
+Man kann natürlich eine neue Variable erzeugen, die den gleichen Namen hat und dementsprechend überschreiben,
+aber ich kann nicht an irgendeiner Stelle einen Tuple an der Stelle 5 oder einen String an der Stelle 5 einen neuen Wert zuweisen.
+Das geht nicht.
+Könnt ihr auch mal kurz ausprobieren, vielleicht einfach.
+Also, wenn ich s gleich Hallo schreibe und versuche, s an der Stelle 2 gleich i zu setzen,
+dann kriege ich str. object does not support item assignment.
+Also das darf ich nicht.
+Wenn ich ein Tuple, das schreibt man genauso wie eine Liste, nur mit runden Klammern, erzeuge und tu an der Stelle 1 gleich 3 schreibe,
+dann kriege ich tuple object does not support item assignment.
+Also das liegt hier an den runden Klammern und der Tatsache, dass Tuple unveränderbare Variablen sind.
+Immutable. Und wenn ich hier eckige Klammern drum schreibe und das ausführe, dann kriege ich keinen Fehler.
+Dann funktioniert das und ich habe tatsächlich anschließend hier print tuple gleich 1, 2, 3, 4.
+Ja.
+Ja, man nennt es nicht so. Sie haben auch C++ gemacht.
+Genau. Also listen sind veränderbare Variablen, mutable und tuple sind unveränderbare Variablen.
+Genau. Man könnte sich das so ein bisschen so vorstellen, als wenn es Referenzen darauf gibt.
+Aber es gibt jetzt nicht so ein und-Zeichen und Stern-Zeichen und dieser Wechsel, wie es das in C++ gibt.
+Ja.
+Und dann gibt es natürlich ein paar Funktionen, auf dem einen, die es auf dem anderen nicht gibt,
+weil eben sowas wie remove oder sowas nicht vorgesehen ist, wenn die Variable immutable ist.
+Ja, aber dann noch eine Review.
+Genau. Also die meisten Sachen, die auf einer Liste funktionieren, also sowas wie for t in tuple.
+Print t.
+Das funktioniert auch genauso.
+Schützt einen in gewisser Weise davor, dass man aus Versehen sowas tut, wie wir hier gemacht haben.
+Also es soll eine aktive Entscheidung sein, möchte man diese Eingabevariante überschreiben oder nicht.

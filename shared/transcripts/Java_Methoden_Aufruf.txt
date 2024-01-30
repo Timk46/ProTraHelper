@@ -1,0 +1,52 @@
+Jeder Programmeschwerer hat Funktionen oder Methoden oder es gibt auch Operationen, wie man es nennt.
+Grundsätzlich sind das Blöcke mit Anweisungen, die dann ausgeführt werden.
+Und in diesem Fall hat man meistens Parameter oder sehr oft Parameter, die man dann dazu fügen kann.
+Wie man das jetzt gesehen hat, zwischen den runden Klammern gibt es Parameter
+und die Parameter hat man dann zur Verfügung in diese Methode.
+Wichtig zu erwähnen ist, dass diese Parameter Call-by-Value-Parameter sind.
+Das heißt, eigentlich was im Grunde passiert, wenn wir diese Methode ausführen,
+wie wir so vorher gesehen haben, wir geben diesen Head-and-Ear-Wert zum Beispiel,
+dann können wir da Werte von einem Variabler erwähnen, die werden kopiert,
+nur die Werten werden kopiert, nicht die Variable selbst.
+Und das heißt Call-by-Value.
+Um das nochmal sehr deutlich darzustellen, in diesem Beispiel, wo wir einfach zwei Methoden haben,
+eine Methode M1 und eine Methode F.
+Diese Methoden sind ziemlich verwirrend konstruiert, aber das soll auch so sein.
+Methode M1 hier gibt nichts zurück, nimmt einfach nur zwei Integers, die initialisiert sind als 10 und als 12
+und berechnet da was raus mit F.
+Und das kann man dann das Ganze darstellen, sobald so etwas passiert, mit einem Stapel
+oder ich nenne das meistens Stack, weil das ist eigentlich ein Datentyp, den man hier benutzt.
+Und so werden die Funktionen ein nach dem anderen ausgeführt.
+Das heißt, wir müssen hier die Funktion F ausführen und wir haben jetzt zwei Parameter A und plus plus X.
+Plus plus X wissen wir hoffentlich noch, dass das eigentlich erst X inkrementiert,
+das heißt der Wert von X10 wird erstmal erhöht auf 11 und dann wird das Ganze weitergegeben an diese Funktion.
+Und das wird als diese zweite Parameter in F weitergegeben, nämlich als A hier.
+Das heißt, was hier steht, also diese 11, wird hier platziert.
+Was hier steht, also diese A, wird hier hin kopiert.
+Und das Kopieren ist sehr wichtig, nur die Werte werden kopiert, die eigentliche Variable X und A, die bleiben, wie sie vorher waren.
+Und das ist ein wesentliches Unterschied und das kann zu Problemen führen später, wenn man das nicht so ganz versteht.
+Deshalb dieses Beispiel ist sehr wichtig.
+Das heißt, wir haben in unserer M1, in unserem Speicher, irgendwo eine Variable X, ist ein Integer, hat Wert 10.
+Wir haben Integer A, hat Wert 12 und das gehört zu unserer Funktion M1.
+Und jetzt wird A hier einen neuen Wert bekommen, Schritt nach Schritt.
+Aber in diesem ersten Schritt, wo wir an der linken Seite diese Funktion F ausführen möchten,
+wird dann A als erster Parameter in B gestellt hier und X erstmal inkrementiert und dann dieser Wert wird in A hier gestellt.
+Das heißt, was stattfindet ist das hier.
+Das heißt, wir haben hier als Wert B, sobald wir hier in unsere Funktion F ankommen, zwei Variablen.
+Eine Variable B ist ein Integer, hat Wert 12 und eine Variable A ist auch ein Integer, hat Wert 11.
+Das ist schon mal sehr verwirrend oder sollte verwirrend sein, aber wichtig ist, dass diese Werte hier kopiert werden
+und dass diese Variablen komplett unabhängig sind von dieser Variable hier.
+Wie wir letzte Woche schon oder das letzte Mal schon gesehen haben, sobald eine Funktion beendet wird,
+sobald man bei return dann aus dieser Funktion geht, wird das alles im Speicher hier gelöscht.
+Und besteht diese Variable B und diese Variable A nicht mehr.
+Das heißt, sobald man diese Funktion aufruft und hier sagt, diese erste Variable soll 12 enthalten,
+diese zweite Variable soll 11 enthalten, dann werden die zwei Werte kopiert, hier auf den Stapel gesetzt und man kann dann so weitergehen.
+Das heißt, auch was hier als Ergebnis zurückkommt, was hier zum Beispiel passiert ist, dass A dann einen neuen Wert bekommt.
+2 mal B, B war 12, also 2 mal 12, das ist 24, plus A ist 11, also 11 mal 11, 121.
+Und dann hat man da einen Wert, also A bekommt dann diesen neuen Wert und sobald man dann diese Return Anweisung kriegt,
+wird dann A plus 1 zurückgegeben. Das heißt, das Ergebnis aus dieser Funktion ist 145 plus 1 ist 146.
+Und das wird dann weitergegeben an die Funktion M1. Und so wird dann weitergearbeitet.
+Aber wenn wir dann das Ganze verlassen, dann wird den blauen Teil gelöscht und sind wir wieder in diesem roten Teil.
+Und ganz wichtig, X und A haben sich nicht geändert. Die Werten wurden nur kopiert in den Parameter von F,
+aber die echten Variablen bleiben, wie sie sind. Das heißt, es sind zwei unterschiedliche Speicherplatzen, die irgendwie reserviert wurden.
+Und das ist wichtig.

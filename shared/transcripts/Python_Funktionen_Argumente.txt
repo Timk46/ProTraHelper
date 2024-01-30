@@ -1,0 +1,155 @@
+Wir haben bislang Funktionen kennengelernt, die auch mehrere Eingabeargumente haben können,
+wo dann logischerweise die Reihenfolge eine Rolle spielt.
+Also wenn ich hier def meine Funktion von x und y habe und ich gebe zurück x hoch y,
+dann gibt natürlich meine Funktion von 2, 4 was anderes aus als meine Funktion von
+das ist ein ganz schlechtes Beispiel vielleicht, meine Funktion, das ist ein unglaublich schlechtes Beispiel,
+als meine Funktion von, also 2, 5 und 5, 2, jetzt habe ich ausgerechnet die Zahlen genommen,
+für die das Ganze symmetrisch ist. Das spielt eine Rolle, denn die erste Zahl, die ich hier reinfüttere,
+ist die Zahl, die für x genommen wird und die zweite Zahl, die ich hier reinfüttere, ist die, die für y genommen wird.
+Jetzt gibt es in Python aber auch die Möglichkeit von sogenannten, Entschuldigung,
+und dieses, wo die Reihenfolge bestimmt, was x und y sind, sind sogenannte Positional Arguments.
+Es gibt auch sogenannte Keyword Arguments, bevor ich das jetzt hier mache.
+Ich könnte irgendwie zum Beispiel sogar Werte vordefinieren, x gleich 0 und y gleich 0
+und könnte hier jetzt im Funktionsaufruf meine x und y spezifizieren und an der Stelle,
+wo ich x und y spezifiziere, ist es egal, in welcher Reihenfolge ich das tue,
+weil jetzt x dem Wert 2 zugeordnet wird und dann ist es egal, ob es an dieser Stelle geschieht oder an der zweiten Stelle.
+Sprich, wenn ich das jetzt ausführe, dann kriege ich 2 mal 32, obwohl hier erst x gleich 2 steht
+und dann y gleich 5 und hier erst y gleich 5 und dann x gleich 2 steht.
+Und dank dieser Art Funktionen zu definieren, ist es auch möglich, nur Teile der Werte festzulegen.
+Also ich könnte zum Beispiel nur y gleich 5 sagen und kriege dann 0 aus, weil er dann den Defaultwert x gleich 0 nimmt
+und 0 hoch 5 ist immer noch 0 und ich könnte auch das y noch löschen und kriege dann die 1 raus
+nach dieser mathematischen Konvention, dass irgendwas hoch 0 gleich 1 ist, selbst 0 hoch 0 ist 1.
+Genau, und genauso könnte ich hier auch nur das x angeben, irgendwas Spannendes und kriege auch 1 raus, weil auch 5 hoch 0 gleich 1 ist.
+Gut, das sind sogenannte Keyword Arguments, also hier mal in einer anderen Art von Funktionen dargestellt
+mit Grußwort und Name und man kann jetzt eben mit Print Grußwort Name unterschiedliche Sachen zusammenstellen.
+Grußwort ist mit Hallo vordefiniert, Name mit gar nichts und wenn ich nur meine Funktion aufrufe, dann steht da Hallo.
+Wenn Name zusammen ist, dann ist es Hallo zusammen und so weiter.
+Das gibt also, das haben wir schon an anderen Stellen gesehen, dass es möglich ist, in Python an allen möglichen Stellen
+der Variable direkt einen Wert zuzuordnen und das geht eben auch in Funktionen.
+Was auch möglich ist, auch wenn das jetzt ein Schritt komplizierter ist, ist mit einem Stern,
+beziehungsweise einem Sternstern eine beliebige Anzahl an Eingabeargumenten zu erlauben.
+Oft sehen Sie das irgendwie als Sternargs oder Sternstern kwargs für Keyword Arguments,
+die dann eben beliebig viele sein können, aber das kwargs ist nicht vorgeben, das können Sie so nennen, wie Sie wollen.
+Wir könnten also irgendwie meine Funktion als Sternargs definieren und sowas wie
+for Argument in args.print.argument machen und dann aufrufen
+meine Funktion von 1 und ich kriege eine 1 raus, meine Funktion von 1 und Hallo und 123,
+4, 124 und das wären einfach alle Argumente, die ich hier beliebig eingebe über diese Vorschleife,
+das ist jetzt diese besondere Art der Vorschleife, die eben ein iterierbares Objekt, dieses Args hier,
+das Args ist eine, vielleicht sollte ich das mal zeigen, das Args ist eine Liste und das durchiteriert,
+ah, Entschuldigung, das ist eine Menge, haben wir noch nicht gehabt, ok, sowas ähnliches wie eine Liste ist das, Args.
+Genau und damit iteriert man halt dadurch und gibt hier jedes einzelne Argument aus und wenn ich das mit Stern, Stern mache,
+dann kann ich das mit bestimmten Variablen machen, Grußwort gleich Hallo, Liste, Liste, Liste gleich so und so
+und ich habe einen Fehler erzeugt. Achso, es war jetzt nicht vorgesehen, dass hier ein Argument auch steht,
+was positional ist, also vielleicht auch ganz interessant mal die Fehlerquellen zu sehen,
+also meine Funktion takes zero positional arguments, positional arguments waren die Dinger,
+die nur von der Position abhängen und keinen speziellen Namen haben und ich habe hier vorne einfach nur eins stehen lassen,
+aber hier steht mit dem Stern, Stern sind nur Keyword-Arguments gemeint und deshalb ist hier kein positional-Argument vorgesehen,
+das heißt ich muss dem Ganzen einen Namen geben und dann kriege ich das Ganze raus in einer, ok, Struktur,
+die nochmal wieder ein bisschen anders ist als das, was wir kennengelernt haben, ein Dictionary,
+hier wird jetzt dem Code-Wort x der Wert 1 zugeordnet, dem Code-Wort Grußwort, dem Wert Hallo, dem Code-Wort Liste,
+dem Wert 1, 1, 24, will ich gar nicht so im Detail darauf eingehen, Mengen und Dictionary, Dictionaries, Wörterbücher,
+ob man das in Python so nennt, bin ich mir gerade selber nicht sicher, vielleicht nennen wir es auch auf Deutsch Dictionaries,
+werden wir vielleicht nochmal besprechen, soll jetzt nicht unser Hauptfokus sein,
+falls Sie so Sachen in Funktion mit einem Stern und einem Stern, Stern mal sehen, kommen gar nicht so selten vor,
+dann können Sie sich merken, das hier kann mit beliebig vielen Positional-Arguments umgehen, Stern, Stern mit beliebig vielen Keyword-Arguments.
+Also, dieses Print haben wir gerade einmal gesehen, na gut, hier habe ich doch das ein bisschen detaillierter gemacht,
+also tatsächlich für diese Dictionaries gibt es immer einen Schlüssel, einen Key und einen Wert, einen Value
+und man kann hier unter einem Namen Key den Wert Value iterieren, indem man über dieses Dictionary-Kompt Items iteriert.
+Das ist aber vielleicht alles, was wir zu Dictionaries brauchen.
+In erster Linie ging es mir darum zu zeigen, man kann die Anzahl der Argumente festlegen, muss es aber nicht, man kann es auch variabel lassen
+und muss dann natürlich ein bisschen komplizierter in seiner Funktion das, was hier vom Benutzer reinkommt, irgendwie sortieren.
+Vielleicht machen wir doch mal ein Beispiel davon, warum nicht.
+So, ich möchte eine Funktion schreiben, was sie tun soll, ist, gibt die Summe aller Argumente, die ich hier sollte,
+die Summe aller Argumente zurück.
+Return Summe.
+Vorschläge, wie machen wir das?
+Also ich möchte jetzt nachher in der Lage sein, Print meine Funktion,
+sowohl von 1, von 2, 3, 4 aufzurufen, als auch von meiner Funktion 1, 2, 3, 4, 5, 6, 7
+und es soll beides funktionieren.
+Wer hat Vorschläge?
+Also Stern, Ax kann damit umgehen, dass ich die Funktion aufrufe mit mehreren Argumenten, das haben wir gerade besprochen.
+Stern, Ax, gibt sowas wieder so ähnlich wie eine Liste.
+Können Sie so behandeln wie eine Liste.
+Wie könnte ich alle Einträge einer Liste aufsummieren?
+Machen wir das erstmal.
+Hier haben wir schon eine Meldung.
+Sonst, vielleicht, ich habe es zur Kenntnis genommen, wir machen trotzdem noch erst einmal etwas anderes.
+Liste gleich 1, 2, 3, 4, 5.
+Summiere alle Elemente in dieser Liste.
+Wie mache ich das?
+Das können hoffentlich eigentlich alle.
+Vielleicht wieder eine Wiederholung von Vorschlägen.
+Ja, hier.
+Genau.
+Sehr gut, wie mache ich das?
+Mit dem Code.
+Also die Idee ist gut, ich will hier irgendwie hochzählen.
+Liste von I vielleicht.
+Und hier müssen wir irgendwie über I gehen.
+Und vielleicht noch so, was mache ich mit diesen Einträgen in der Liste immer?
+Haben Sie, glaube ich, gesagt.
+Sehr gut.
+Was mache ich am Anfang mit der Variable?
+Ja.
+Sehr gut.
+Okay, wir setzen meine Variable Summe gleich 0 und rechnen hier Plus gleich Liste.
+Und was muss ich hier noch tun?
+Wenn ich das so machen möchte?
+Ja.
+Genau.
+Sehr gut.
+Also das, hier beschwert er sich noch über irgendwas.
+Machst du einen Doppelpunkt?
+Das funktioniert schon mal, wunderbar.
+15.
+Jetzt gab es noch eine Möglichkeit, das vielleicht noch Python-artiger zu machen,
+als sich die Länge der Liste auszugeben.
+Wie kann man direkt über so Sachen iterieren?
+Ja.
+Genau.
+Also.
+Ich nenne es jetzt mal einfach Element oder so was.
+Dann ist es in Abgrenzung.
+Da kommen auch 15 raus.
+Also für alle Elemente in der Liste summiere ich Element auf und drücke die Summe.
+Sehr gut.
+So, nachdem wir das verstanden haben, wie können wir das hier machen?
+Mit der Aussage, dass ihr das jetzt ganz ähnlich behandeln könnt.
+Wie habt ihr das?
+Elementen in Paragrafen.
+Sehr gut.
+Also genau so.
+Und hier könnte jetzt wirklich irgendwas stehen.
+Das hier ist einfach nur der Name von dem, was da nachher, wie das nachher heißen soll.
+Und 2 plus 3 plus 4 sind 9 und die Zahlen von 1 bis 7 aufsummiert sind 28.
+Und tatsächlich, das funktioniert so und ist ein Beispiel für eine Funktion,
+die beliebig viele Eingabeargumente nehmen kann.
+Macht das Sinn?
+Vielleicht.
+Mit etwas Zeit zum Verdauen.
+Also eigentlich das, was ich Ihnen mit auf den Weg geben möchte, ist,
+dass das hier, was glaube ich jetzt nach Vorlesung 1 eigentlich alle schon mal gesehen haben,
+genau so funktioniert wie das hier.
+Nur, dass es jetzt eine Funktion ist, die dank dieses Sterns nicht eine einzige Liste bekommt,
+sondern das in diesen Funktionsaufgaben,
+sondern das in diesem Funktionsaufruf diese Argumente hier umgewandelt werden können in eine Liste.
+Vielleicht können wir sogar noch mal ein Beispiel dazwischen machen.
+Wie könnte ich ohne einen Stern eine Funktion schreiben,
+die so etwas Ähnliches tut, wenn ich meine Eingabeargumente ein bisschen anders schreibe.
+Wenn ich die in eckige Klammern setzen würde.
+Vielleicht mache ich das einfach einmal.
+Zwischen dem und dem gäbe es noch eine Möglichkeit das auch zu realisieren.
+Wenn ich sage, ich lösche diesen Stern, dann wie viele Eingabeargumente kann meine Funktion dann nehmen?
+Ja?
+Ein.
+Sehr gut, genau.
+Und jetzt müsste ich diese Sachen zu einem einzigen Eingabeargument machen.
+Wie könnte ich eine, ja?
+Genau, also das hier würde jetzt das gleiche tun.
+Also ich könnte sie vorher händisch zu einer Liste machen und dann an die Funktion übergeben.
+Und Sie können sich jetzt dieses Sternchen so ein bisschen so vorstellen wie einen Shortcut dazu.
+Sonst müsste ich erst immer alle meine Argumente sammeln und dann in eine Liste machen und dann einfügen.
+So.
+Mit dem Stern ist es ein bisschen kürzer oder einfacher.
+Plus ein Unterschied zwischen Listen und diesem Sternargument.
+Was wir aber uns mal für später aufheben.

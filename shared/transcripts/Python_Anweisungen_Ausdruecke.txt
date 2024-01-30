@@ -1,0 +1,25 @@
+Variablen, die wir jetzt gerade einmal kennengelernt haben, sind also die Dinge, die die Daten halten,
+die unser Programm verarbeiten soll. Was mit den Daten geschehen soll, geben wir in Anweisungen
+oder auf Englisch Statements an. Also eine Anweisung ist einfach eine Instruktion, die
+vom sogenannten Python Interpreter ausgeführt werden kann. Also Sie können sich vorstellen,
+alles was wir jetzt mit dem Keyboard schreiben, muss natürlich noch irgendwie so interpretiert
+werden, dass es nachher Binärcode ist, der tatsächlich auf dem Computer ausgeführt
+werden kann. Das heißt in Python eben Interpreter und quasi alle Anweisungen,
+die irgendwie ausgeführt werden können, zum Beispiel der Aufruf einer Funktion oder der
+Zuweisung eines Werts zu einer Variable, sind Anweisungen oder Statements. Ein Ausdruck oder
+eine Expression ist eine spezielle Anweisung, nämlich eine, die einen Wert zurückliefert,
+zum Beispiel ein arithmetischer Ausdruck, wie eine Rechnung 2 plus 5. Was wir kennengelernt
+haben, ist schon der Operator gleich als Zuweisungsoperator, der den Rückgabewert eines
+rechts stehenden Ausdrucks einer links stehenden Variable zuordnet und während Programmierung
+ziemlich mathematisch ist, ist das ein Punkt, wo sich Mathematik und Programmierung unterscheidet.
+Zum Beispiel, wenn ich sowas wie 6 gleich x schreibe, dann ist das mathematisch natürlich
+das gleiche wie x gleich 6, aber wenn ich das im Programm schreibe und ausführe,
+dann kriege ich eben einen Fehler, cannot assign to literal, weil er versucht, der Zahl 6,
+was keine Variable ist, einen Wert zuzuordnen, was dann verboten ist und in dem Sinne unterscheidet
+sich hier wirklich das Gleichheitszeichen als Zuweisungsoperator vom mathematischen Gleich.
+Und was natürlich im Programmiercode auch möglich ist, ist sowas wie x gleich 1, x gleich x plus 1,
+print x und wir kriegen 2 raus, weil wir eben den Wert an der Stelle x hier auf der rechten Seite
+um einen erhöhen und das Resultat wieder in x speichern. Wir kriegen dadurch eben eine 2 raus
+und hier könnte man jetzt mathematisch sagen, ich subtrahiere x auf beiden Seiten und kriege 0
+gleich 1 raus, was eben eine nicht erfüllbare Gleichung wäre. Auch in diesem Fall ist eben
+das Gleichheitszeichen nicht mathematisch, sondern ein Zuweisungsoperator.
