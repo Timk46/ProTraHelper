@@ -41,11 +41,8 @@ import { DiscussionViewCreateComponent } from './Pages/discussion/discussion-vie
 import { DiscussionCreationComponent } from './Pages/discussion/discussion-creation/discussion-creation.component';
 import { DiscussionPrecreationComponent } from './Pages/discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
 import { TaskOverviewComponent } from './Pages/task-overview/task-overview.component';
-import { MatBadgeModule } from '@angular/material/badge';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overview/task-evaluation-overview.component';
 import { FreeTextTaskComponent } from './Pages/contentView/contentElement/free-text-task/free-text-task.component';
-import { MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 
 
@@ -90,9 +87,6 @@ import { MatTableModule } from '@angular/material/table';
     MaterialModule,
     NgxExtendedPdfViewerModule,
     HttpClientModule,
-    MatProgressBarModule,
-    MatBadgeModule,
-    MatProgressSpinnerModule,
     MatTableModule,
   ],
   providers: [

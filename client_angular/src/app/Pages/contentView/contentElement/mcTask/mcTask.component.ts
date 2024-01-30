@@ -14,6 +14,13 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 export class McTaskComponent implements OnInit {
 
+  editorConfig = { //tinyMCE
+    readonly: true,
+    min_height: 300,
+    max_height: 500,
+    resize: false,
+  }
+
   //init question data
   questionData : QuestionDTO = {
     id : -1,

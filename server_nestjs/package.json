@@ -35,7 +35,7 @@
     "fix": "^0.0.3",
     "fs": "^0.0.1-security",
     "passport": "^0.6.0",
-    "passport-cas": "^0.0.3",
+    "passport-cas": "^0.1.1",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",

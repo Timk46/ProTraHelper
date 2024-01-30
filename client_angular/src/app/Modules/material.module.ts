@@ -17,7 +17,10 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @NgModule({
     imports: [
@@ -38,7 +41,10 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
         MatCheckboxModule,
         MatDialogModule,
         MatTooltipModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        MatProgressBarModule,
+        MatBadgeModule,
+        MatProgressSpinnerModule,
       ],
       exports: [
         BrowserAnimationsModule,
@@ -58,7 +64,10 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
         MatCheckboxModule,
         MatDialogModule,
         MatTooltipModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        MatProgressBarModule,
+        MatBadgeModule,
+        MatProgressSpinnerModule,
       ],
 })
 export class MaterialModule { }

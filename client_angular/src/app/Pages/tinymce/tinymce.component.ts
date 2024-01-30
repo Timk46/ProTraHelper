@@ -18,6 +18,7 @@ export class TinymceComponent {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['content'] && changes['config']) {
+      console.log("TinymceComponent: ngOnChanges  " + this.content);
       const content = this.content;
 
       const defaultConfig = {

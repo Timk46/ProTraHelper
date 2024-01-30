@@ -195,25 +195,8 @@ export class QuestionDataService {
                 score: feedback.score,
                 feedbackText: feedback.text
             }
-            /* return {
-                id: 0,
-                userAnswerId: 0,
-                score: 0,
-                feedbackText: answerData.userFreetextAnswer
-            } */
+     
         }
-
-        /**
-         * the old returning UserAnswerDataDTO
-         *
-        return {
-            id: createdData.id,
-            userId: createdData.userId,
-            questionId: createdData.questionId,
-            userFreetextAnswer: createdData.userFreetextAnswer,
-            userMCAnswer: answerData.userMCAnswer, //maybe also return from createdData...
-        }
-        */
 
     }
 
@@ -231,4 +214,5 @@ export class QuestionDataService {
             }
         })
     }
+
 }
