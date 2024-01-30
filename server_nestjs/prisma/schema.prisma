@@ -218,7 +218,7 @@ model Feedback {
   text          String
   userAnswer    UserAnswer  @relation(fields: [userAnswerId], references: [id])
   userAnswerId  Int  
-  score         Int
+  score         Float
 }
 
 model Question {
@@ -227,7 +227,7 @@ model Question {
   updatedAt                  DateTime           @updatedAt
   name                       String?
   description                String?
-  score                      Int?
+  score                      Float?
   type                       String
   author                     User               @relation(fields: [authorId], references: [id])
   authorId                   Int

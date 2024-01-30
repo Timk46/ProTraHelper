@@ -37,9 +37,9 @@
 </div>
 
 <!-- Formative Assessment-Mode -> Do not show correct answers after submit -->
-<div *ngIf="!isSelfAssessment" class="content mat-elevation-z8">
-  <!-- <app-tinymce [config]="editorConfig" [content]="questionData.text"></app-tinymce> -->
-  <h2 class="question-text">{{questionData.text}}</h2>
+<div *ngIf="!isSelfAssessment && dataLoaded" class="content mat-elevation-z8">
+  <app-tinymce [config]="editorConfig" [content]="questionData.text"></app-tinymce>
+  <!--<h2 class="question-text">{{questionData.text}}</h2>-->
   <h3>Maximale Punktzahl: {{questionData.score}}</h3>
   <div *ngIf="mcQuestion.isSC">
     <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="false" (selectionChange)="onSelectionChange()">
@@ -68,7 +68,7 @@
   <p>{{feedback.feedbackText}}</p>
 </div>
 
-<!-- Show the feedback of the latest attemp -->
+<!-- Show the feedback of the latest attempt 
 <div class="content mat-elevation-z8">
   <h2>Feedback des letzten Versuchs</h2>
   <div>
@@ -76,3 +76,4 @@
     <p>Das ist ein Dummy-Feedback für den letzten Versuch.</p>
   </div>
 </div>
+-->

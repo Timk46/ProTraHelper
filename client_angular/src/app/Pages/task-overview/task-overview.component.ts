@@ -8,6 +8,7 @@ import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.com
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
 import { taskOverviewElementDTO } from '@DTOs/taskOverview.dto';
 import { MatTableDataSource } from '@angular/material/table';
+import { Router } from '@angular/router';
 
 export interface PeriodicElement {
   name: string;
@@ -71,10 +72,14 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
   ];
 
   getRouterLink(index: number): string {
+    return `/tutor-kai/code/${index}`;
+  }
+
+  getRouterLinkOLD(index: number): string {
     return `/tutor-kai/code/${index + 3}`;
   }
 
-  constructor (private taskOverviewService : TaskOverviewService, private questionDataService : QuestionDataService, private dialog : MatDialog) {
+  constructor (private taskOverviewService : TaskOverviewService, private questionDataService : QuestionDataService, private dialog : MatDialog, private router: Router) {
     
   }
 
@@ -89,22 +94,11 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
     });
   }
 
-  onTaskClick(question : any) {
-    console.log('active task id: ' + question.q_id);
-    const dialogConfig = new MatDialogConfig();
-    dialogConfig.data = {
-      question_id: question.q_id
-    }
-
-    this.dialog.open(McTaskComponent, dialogConfig);
-
-  }
-
   /**
    * Opens the task dialog for the given task id and type
    * @param question_data
    */
-  onTaskIdentityClick(question_data: {id: number, type: string}) {
+  onTaskClick(question_data: {id: number, type: string}) {
     console.log('active task id: ' + question_data.id);
     const dialogConfig = new MatDialogConfig();
     dialogConfig.data = {
@@ -115,6 +109,9 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
     }
     if (question_data.type == 'FreeText') {
       this.dialog.open(FreeTextTaskComponent, dialogConfig);
+    }
+    if (question_data.type == 'CodingQuestion') {
+      this.router.navigate([this.getRouterLink(question_data.id)]);
     }
   }
 

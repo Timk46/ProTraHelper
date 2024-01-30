@@ -16,7 +16,9 @@ export class McTaskComponent implements OnInit {
 
   editorConfig = { //tinyMCE
     readonly: true,
-    min_height: 300,
+    plugins: 'lists table link image code codesample',
+    //toolbar: false,
+    min_height: 100,
     max_height: 500,
     resize: false,
   }
@@ -32,6 +34,8 @@ export class McTaskComponent implements OnInit {
     isApproved: false,
     originId: -1,
   }
+
+  dataLoaded : boolean = false;
 
   //the mc question data
   mcQuestion : McQuestionDTO = {
@@ -113,6 +117,7 @@ export class McTaskComponent implements OnInit {
     //Show the newest Version of the questions
     this.questionDataService.getQuestionData(this.questionId).subscribe(data => {
       this.questionData = data;
+      this.dataLoaded = true;
 
       //Get the mc question data of the newest question version
       this.questionDataService.getMCQuestion(this.questionData.id).subscribe(data => {

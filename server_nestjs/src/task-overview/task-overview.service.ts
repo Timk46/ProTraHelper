@@ -47,7 +47,7 @@ export class TaskOverviewService {
             //get the best user score for each question
             let userAnswers = await this.prisma.userAnswer.findMany({
                 where: {
-                    questionId: question.id
+                    questionId: question.id,
                 },
                 select: {
                     id: true,

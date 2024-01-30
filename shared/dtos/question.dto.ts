@@ -129,4 +129,5 @@ export interface CodingQuestionDto {
   export enum questionType {
     MULTIPLECHOICE = "MC",
     FREETEXT = "FreeText",
+    CODE = "CodingQuestion",
   }
