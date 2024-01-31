@@ -28,7 +28,7 @@ const routes: Routes = [
   { path: 'discussion', component: DiscussionListComponent, canActivate: [LoggedInGuard] },
   { path: 'codeTask', component: CodeTaskComponent, canActivate: [LoggedInGuard] },
   { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent, canActivate: [LoggedInGuard] },
-  //{ path: 'mcTask', component: McTaskComponent, canActivate: [LoggedInGuard] },
+  { path: 'mcTask', component: McTaskComponent, canActivate: [LoggedInGuard] },
   { path: 'graph', component: GraphComponent, canActivate: [LoggedInGuard] },
   { path: 'chatbot', component: ChatBotComponent, canActivate: [LoggedInGuard] },
   { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard] },
@@ -37,6 +37,9 @@ const routes: Routes = [
 
   // just for testing
   { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
+
+  // Turor-Kai as lazy loaded module (https://medium.com/@jaydeepvpatil225/feature-module-with-lazy-loading-in-angular-15-53bb8e15d193) Maybe we can use the same for UML Tasks?
+  { path: 'tutor-kai', loadChildren: () => import('./Modules/tutor-kai/tutor-kai.module').then(m => m.TutorKaiModule) },
 
 ];
 @NgModule({

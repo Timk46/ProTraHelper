@@ -1,0 +1,82 @@
+$snowstorm_1: #eceff4;
+$snowstorm_2: #e5e9f0;
+$snowstorm_3: #d8dee9;
+
+$polarNight_4: #2e3440;
+
+.polarNight_4_text {
+  color: $polarNight_4;
+}
+
+.snowstorm_1 {
+  background-color: $snowstorm_1;
+}
+
+.snowstorm_2 {
+  background-color: $snowstorm_2;
+}
+
+.snowstorm_3 {
+  background-color: $snowstorm_3;
+}
+
+.snackbar {
+  background-color:$snowstorm_3;
+  color:$polarNight_4;
+}
+
+resize {
+  resize: vertical;
+  overflow: auto;
+}
+
+::ng-deep ngx-monaco-editor {
+  height: 100% !important;
+}
+
+.actions-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rating {
+  margin-bottom: 1rem;
+}
+
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.feedback-form mat-form-field {
+  width: 80%;
+}
+
+.star-button .mat-icon.gold {
+  color: gold;
+}
+
+.star-button .mat-icon.grey {
+  color: grey;
+}
+
+.example-full-width {
+  width: 100%;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.noOverFlow
+{
+  min-width: 150px;
+  overflow: hidden;
+}
+.code-editor-parent
+{
+  height: 400px;
+}

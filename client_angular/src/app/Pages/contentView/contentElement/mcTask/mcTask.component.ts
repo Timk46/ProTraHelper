@@ -1,9 +1,10 @@
 import { Component, OnInit, Input, Inject } from '@angular/core';
 import { MatList, MatSelectionListChange } from '@angular/material/list';
 import { MatListOption } from '@angular/material/list';
-import { MCOptionDTO, McQuestionDTO, OptionDTO, QuestionDTO, QuestionVersionDTO, UserAnswerDTO, UserAnswerDataDTO } from '@DTOs/question.dto';
+import { MCOptionDTO, McQuestionDTO, QuestionDTO, QuestionVersionDTO } from '@DTOs/question.dto';
+import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';  
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-mcTask',
@@ -12,6 +13,15 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 })
 
 export class McTaskComponent implements OnInit {
+
+  editorConfig = { //tinyMCE
+    readonly: true,
+    plugins: 'lists table link image code codesample',
+    //toolbar: false,
+    min_height: 100,
+    max_height: 500,
+    resize: false,
+  }
 
   //init question data
   questionData : QuestionDTO = {
@@ -24,6 +34,8 @@ export class McTaskComponent implements OnInit {
     isApproved: false,
     originId: -1,
   }
+
+  dataLoaded : boolean = false;
 
   //the mc question data
   mcQuestion : McQuestionDTO = {
@@ -39,15 +51,22 @@ export class McTaskComponent implements OnInit {
     questionId: -1,
   }
 
+  feedback : userAnswerFeedbackDTO = {
+    id: -1,
+    userAnswerId: -1,
+    score: -1,
+    feedbackText: '',
+  }
+
   //the requested question
   questionId: number;
-  
+
   //isSelfAssessment
-  @Input() isSelfAssessment: boolean = true;
-  
+  @Input() isSelfAssessment: boolean = false;
+
   //the mc options
   options : MCOptionDTO[] = [];
-  
+
   //the selected option(s)
   selectedOptions : number[] = [];
 
@@ -72,12 +91,16 @@ export class McTaskComponent implements OnInit {
       questionId: this.mcQuestion.id,
       userMCAnswer: this.selectedOptions,
     }
-    
+
     this.questionDataService.createUserAnswer(userAnswerData).subscribe(data => {
-      this.userAnswer = data;
+      this.feedback = data;
     });
-    
-    this.submitDisabled = true;
+
+    setTimeout(() => {
+      //timeout for showing the feedback
+      this.submitDisabled = true;
+    }, 500);
+
 
   }
 
@@ -85,7 +108,7 @@ export class McTaskComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<McTaskComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private questionDataService: QuestionDataService) { 
+    private questionDataService: QuestionDataService) {
 
     this.questionId = data.question_id as number;
   }
@@ -94,24 +117,19 @@ export class McTaskComponent implements OnInit {
     //Show the newest Version of the questions
     this.questionDataService.getQuestionData(this.questionId).subscribe(data => {
       this.questionData = data;
-      //console.log("The data of the newest question version: " + data.id);
-      //console.log("The data of the newest question version (check): " + this.questionData.id);
+      this.dataLoaded = true;
 
       //Get the mc question data of the newest question version
       this.questionDataService.getMCQuestion(this.questionData.id).subscribe(data => {
         this.mcQuestion = data;
-        //console.log("The mc question data: " + data);
-        //console.log("The mc question data (check): " + this.mcQuestion);
-      
+
         //Get the MC-Options of the question
         this.questionDataService.getMCOptions(this.mcQuestion.id).subscribe(data => {
           console.log(this.mcQuestion.id);
           this.options = data;
-          console.log("The mc question options: " + data);
-          console.log("The mc question options (check)" + this.options);
+
         });
       })
-    });  
+    });
   }
-
 }

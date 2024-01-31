@@ -1,0 +1,40 @@
+Das allerletzte, was ich noch mitgeben möchte, ist formatierte Texte in einer Ausgabe,
+weil Java Ström bislang, das ist alles byte-orientiert, nicht zeichenorientiert.
+Zeichen, Characters, sind zwei Bytes. Ein Car ist zwei Bytes.
+Deshalb haben wir nochmal eine andere Möglichkeit, um Text auszugeben.
+Das ist eine komplett andere Möglichkeit, um es strukturiert zu machen.
+Sagt, wir haben eine relativ leichte Datenbank mit Studenten- und Matrikelnummer und Note zum Beispiel,
+wie soeben, dann würde es auch Sinn machen, das Ganze in eine Textdatei zu speichern.
+Und das kann man zum Beispiel mit Reader und Writer machen.
+Also Reader und Writer sind die oberen Klassen.
+Und dann kann man sagen, für eine Datei, für einen Input-Stream, also etwas,
+das man zum Beispiel zwischen zwei Rechner als Strom hat,
+oder Buffered Reader, das ist eigentlich, was man meistens benutzt,
+so dass man einen Puffer hat, so dass man dann diesen Puffer auch interpretieren kann,
+und Print Writer. Aber auch das haben wir eigentlich soeben gesehen mit System.out.
+Genau, und hier habe ich dann nochmal ein Beispiel, auch das würde ich dann zur Verfügung stellen auf der Webseite.
+Eigentlich genau das Gleiche, auch hier haben wir eine Klasse mit Student, mit Namen, Vorname,
+Matrikelnummer, Note, was wir hier machen, aber wenn wir dann, okay, das ist hier,
+hier wird er dann tatsächlich Fields lest und interpretieren.
+Und was hier als Neues dazu kommt, ist, dass für jeden Basistyp, das man hat, wie Int,
+hat man auch eine Klasse, Integer. Und das beinhaltet dann einfach nur diese Int plus ein paar Methoden,
+um dieses Integer zu konvertieren oder konvertieren zu können.
+Zu einem String zum Beispiel. Und jedes Mal, wenn wir dann zum Beispiel ein Integer
+konkateniert haben an ein String, das heißt, man hat ein String plus I,
+genau, er hat zum Beispiel dieses I als Integer umgeändert.
+Aber das ist nur eine Nebensache, was hier gemacht wird, ist, dass wir hier beim Konstruktor schon
+lesen außen der Datei und was hier, lesen wir einfach die Inhalte für diesen Student.
+Das ist eigentlich, was hier passiert. Oder hier beim Schreiben, sagen wir, es gibt einen neuen Student,
+genauso wie beim Stream soeben, und wir schreiben zu dieser Datei hier,
+oder hier zu System.out oder zu die Out-Datei, diese Datei.
+Und da kann man auch die Fehler behandeln, aber grundsätzlich ist das Schreiben dann so gehandhabt.
+Und dann hat man Fields, die dann zu einer Datei gehören.
+Genau, und das ist dann als Textdatei sofort wahrnehmbar.
+Da wird alles als String wiedergegeben und, also wie Sie wahrscheinlich schon wissen,
+wenn alles Charakterien wären, dann benutzt alles viel mehr Platz.
+Wenn man sagt, man hat eine Gleitkummerzahl 3,141592 zum Beispiel,
+dann sind das gleich so ungefähr 8 Bytes, die man da benutzt hat.
+Wenn das eine Gleitzahl, okay, das ist genau das Gleiche.
+Aber man kann da zum Beispiel eine sehr lange Zahl kurz als Strom, als Bytes Strom darstellen,
+oder textuell als Textdatei. Das ist eigentlich der Unterschied.
+Und die Textdateien sind meistens viel länger.

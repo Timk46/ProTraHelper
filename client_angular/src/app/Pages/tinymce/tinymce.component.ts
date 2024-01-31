@@ -18,6 +18,7 @@ export class TinymceComponent {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['content'] && changes['config']) {
+      console.log("TinymceComponent: ngOnChanges  " + this.content);
       const content = this.content;
 
       const defaultConfig = {
@@ -81,6 +82,11 @@ export class TinymceComponent {
   getContent(): string {
     console.log("TinymceComponent: getContent");
     return tinymce.get("editor").getContent();
+  }
+
+  getRawContent(): string {
+    console.log("TinymceComponent: getRawContent");
+    return tinymce.get("editor").getContent({format: 'text'});
   }
 
   /**

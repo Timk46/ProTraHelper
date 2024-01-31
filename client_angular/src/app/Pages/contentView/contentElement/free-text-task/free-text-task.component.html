@@ -15,7 +15,7 @@
             </div>
         </mat-card-content>
         <mat-card-actions align="end">
-            <button mat-flat-button color="accent" (click)="onSubmit()">Antworten</button>
+            <button mat-flat-button color="accent" (click)="onSubmit(textEdit.getContent(), textEdit.getRawContent())">Antworten</button>
         </mat-card-actions>
     </mat-card>
 </div>

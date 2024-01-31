@@ -38,13 +38,15 @@ export class FreeTextTaskComponent {
     });
   }
 
-  onSubmit() {
+  onSubmit(text: string, rawText: string) {
+    this.answerText = text;
     console.log(this.answerText);
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
       questionId: this.questionData.id,
       userId: -1,
-      userFreetextAnswer: this.answerText,
+      userFreetextAnswer: text,
+      userFreetextAnswerRaw: rawText,
     }
     this.quesitonService.createUserAnswer(userAnswerData).subscribe(data => {
       console.log(data);

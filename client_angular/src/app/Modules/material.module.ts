@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -17,48 +16,61 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatRadioModule } from '@angular/material/radio';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @NgModule({
-    imports: [
-        BrowserAnimationsModule,
-        MatButtonModule,
-        MatCardModule,
-        MatDividerModule,
-        MatFormFieldModule,
-        MatIconModule,
-        MatInputModule,
-        MatListModule,
-        MatSelectModule,
-        MatSidenavModule,
-        MatTableModule,
-        MatToolbarModule,
-        MatTabsModule,
-        MatExpansionModule,
-        MatCheckboxModule,
-        MatDialogModule,
-        MatTooltipModule,
-        MatSnackBarModule
-      ],
-      exports: [
-        BrowserAnimationsModule,
-        MatButtonModule,
-        MatCardModule,
-        MatDividerModule,
-        MatFormFieldModule,
-        MatIconModule,
-        MatInputModule,
-        MatListModule,
-        MatSelectModule,
-        MatSidenavModule,
-        MatTableModule,
-        MatToolbarModule,
-        MatTabsModule,
-        MatExpansionModule,
-        MatCheckboxModule,
-        MatDialogModule,
-        MatTooltipModule,
-        MatSnackBarModule
-      ],
+  imports: [
+    MatButtonModule,
+    MatCardModule,
+    MatDividerModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatListModule,
+    MatSelectModule,
+    MatSidenavModule,
+    MatTableModule,
+    MatToolbarModule,
+    MatTabsModule,
+    MatExpansionModule,
+    MatCheckboxModule,
+    MatDialogModule,
+    MatTooltipModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatSlideToggleModule,
+    MatRadioModule,
+    DragDropModule,
+    MatProgressBarModule
+  ],
+  exports: [
+    MatButtonModule,
+    MatCardModule,
+    MatDividerModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatListModule,
+    MatSelectModule,
+    MatSidenavModule,
+    MatTableModule,
+    MatToolbarModule,
+    MatTabsModule,
+    MatExpansionModule,
+    MatCheckboxModule,
+    MatDialogModule,
+    MatTooltipModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatSlideToggleModule,
+    MatRadioModule,
+    DragDropModule,
+    MatProgressBarModule
+  ],
 })
-export class MaterialModule { }
+export class MaterialModule {}

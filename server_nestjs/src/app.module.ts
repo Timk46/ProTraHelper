@@ -18,11 +18,18 @@ import { DiscussionCreationController } from './discussion/discussion-creation/d
 import { QuestionDataModule } from './question-data/question-data.module';
 import { TaskOverviewModule } from './task-overview/task-overview.module';
 
+// BEGIN Tutor-Kai Imports
+import { CryptoService } from './tutor-kai/crypto/crypto.service';
+import { QuestionModule } from './tutor-kai/question/question.module';
+import { RunCodeModule } from './tutor-kai/run-code/run-code.module';
+// END Tutor-Kai Imports
+
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ModulesModule } from './modules/modules.module';
+import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
 
 @Module({
   imports: [
@@ -34,15 +41,23 @@ import { ModulesModule } from './modules/modules.module';
     ContentModule,
     ChatBotModule,
     ModulesModule,
-    QuestionDataModule, 
-    TaskOverviewModule],
+    QuestionDataModule,
+    TaskOverviewModule,
+    RunCodeModule,
+    QuestionModule,
+    FeedbackGenerationModule],
   controllers: [
     AppController,
     DiscussionListController, DiscussionVoteController, DiscussionViewController, DiscussionCreationController
   ],
   providers: [
     AppService,
-    DiscussionListService, DiscussionDataService, DiscussionVoteService, DiscussionViewService, DiscussionCreationService,
+    DiscussionListService,
+    DiscussionDataService,
+    DiscussionVoteService,
+    DiscussionViewService,
+    DiscussionCreationService,
+    CryptoService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard, // All Routes are protected by JWTGuard. Users only get Tokens by using CAS of the university

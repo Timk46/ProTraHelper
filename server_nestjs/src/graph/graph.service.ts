@@ -128,7 +128,7 @@ export class GraphService {
                 where: { id: userId },
                 select: { currentConcept: true }
             });
-            if (currentConcept !== null){
+            if (currentConcept.currentConcept !== null){
                 conceptGraph.currentConceptId = currentConcept.currentConcept.id || null;
             }
             else {

@@ -11,8 +11,21 @@ export interface QuestionDTO {
     conceptNode?: number;
     isApproved: boolean;
     originId: number | null;
+    codingQuestion?: CodingQuestionDto
 }
 
+/*export interface QuestionDto { // This is the Tutor-Kai Question DTO. ToDo: NEEDS MERGE
+    id: number;
+    name: string;
+    week: number;
+    description: string;
+    score: number;
+    type: string;
+    text: string;
+    codingQuestion: CodingQuestionDto;
+  }
+*/
+  
 export interface QuestionVersionDTO {
     id: number;
     questionId: number;
@@ -29,7 +42,23 @@ export interface McQuestionDTO {
     shuffleOptions: boolean;
 }
 
+/**
+ * This DTO is for showing the mc options in the mc task component
+ */
 export interface MCOptionDTO {
+    id: number;
+    text: string;
+    files?: FileDto[];
+    //isCorrect needs to be deleted from the MCOptionDTO that is given to the mc task component, because is shows the correct anwers!
+    isCorrect: boolean;
+    //selected is only used in the mc task component and so it should also be transfered to the MCOptionCheckDTO
+    selected?: boolean;
+}
+
+/**
+ * This DTO is for checking the mc answers of the user
+ */
+export interface MCOptionCheckDTO {
     id: number;
     text: string;
     files?: FileDto[];
@@ -41,12 +70,6 @@ export interface McQuestionOptionDTO {
     id: number;
     mcQuestion?: McQuestionDTO;
     mcOption: MCOptionDTO;
-}
-
-export interface OptionDTO {
-    id : number;
-    text: string;
-    selected: boolean;
 }
 
 export interface UserMCAnswerDTO {
@@ -63,17 +86,48 @@ export interface UserAnswerDTO {
     userFreetextAnswer: string | null;
 }
 
-export interface UserAnswerDataDTO {
-    id: number;
-    userId: number;
-    questionId: number;
-    userFreetextAnswer?: string;
-    userMCAnswer?: number[];
-    //space for more types of answers
-}
+// TutorKai CodingQuestion DTOs
 
-export interface UserMCOptionSelectedDTO {
-    id: number,
-    userAnswerId: number,
-    mcOptionId: number
-}
+export interface CodingQuestionDto {
+    id: number;
+    countInputArgs: number;
+    programmingLanguage: string;
+    mainFileName: string;
+    text: string;
+    textHTML: string;
+    codeGerueste: CodeGeruestDto[];
+  }
+  
+  export interface CodingQuestionInternal extends CodingQuestionDto { // for backend only
+    automatedTests: AutomatedTestDto[];
+  }
+  
+  export interface CodeGeruestDto {
+    id: number;
+    codingQuestionId: number;
+    codeFileName: string;
+    code: string;
+    language: string;
+  }
+  
+  export interface AutomatedTestDto {
+    id: number;
+    code: string;
+    testFileName: string;
+    language: string;
+    questionId: number;
+    testCases: TestcaseDto[];
+  }
+  
+  export interface TestcaseDto {
+    id: number;
+    input: string;
+    expectedOutput: string;
+    automatedTestId: number;
+  }
+  
+  export enum questionType {
+    MULTIPLECHOICE = "MC",
+    FREETEXT = "FreeText",
+    CODE = "CodingQuestion",
+  }

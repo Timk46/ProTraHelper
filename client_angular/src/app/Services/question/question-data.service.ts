@@ -1,4 +1,5 @@
-import { McQuestionDTO, QuestionDTO, QuestionVersionDTO, MCOptionDTO, UserAnswerDTO, UserMCOptionSelectedDTO, UserAnswerDataDTO } from '@DTOs/question.dto';
+import { McQuestionDTO, QuestionDTO, QuestionVersionDTO, MCOptionDTO } from '@DTOs/question.dto';
+import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
@@ -36,12 +37,11 @@ export class QuestionDataService {
     console.log('create user mc answer for question ' + questionId + ' and user ' + userId);
     return this.http.post<UserAnswerDTO>(environment.server + `/question-data/userAnswer/create`, {userId, questionId});
   } */
-  createUserAnswer(data: UserAnswerDataDTO) : Observable<UserAnswerDataDTO> {
+  createUserAnswer(data: UserAnswerDataDTO) : Observable<userAnswerFeedbackDTO> {
     console.log('create user mc answer for question ' + data.questionId + ' and user ' + data.userId);
-    return this.http.post<UserAnswerDataDTO>(environment.server + `/question-data/userAnswer/create`, data);
+    return this.http.post<userAnswerFeedbackDTO>(environment.server + `/question-data/userAnswer/create`, data);
   }
 
-  
   createUserMCOptionSelected(userAnswerId: number, mcOptionId: number) : Observable<UserMCOptionSelectedDTO> {
     return this.http.post<UserMCOptionSelectedDTO>(environment.server + `/question-data/userMCOptionSelected/create`, {userAnswerId, mcOptionId});
   }

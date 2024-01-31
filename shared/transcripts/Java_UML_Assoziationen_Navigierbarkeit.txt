@@ -1,0 +1,255 @@
+Und auch da kann man diese Assoziation und Navigierbarkeit, nennt man das, modellieren
+mit Pfeilen.
+Das ist eigentlich grundsätzlich, wo es geht.
+Das heißt, wenn es eine Assoziation gibt zwischen zwei Klassen, A und B zum Beispiel,
+und es gibt diese Assoziation nur von A nach B, aber nicht umgekehrt, dann kann man das
+auch darstellen, Grafis darstellen mit Pfeilen.
+Oder wenn das dann wechselseitig passiert, wenn man von A nach B gehen kann, aber von
+B nach A auch, dann wird das auch hier so wechselseitig dargestellt.
+Und wenn man dann zum Beispiel hier von K Klasse 6 nicht nach Klasse 5 gehen kann oder
+auf Objekte zugreifen kann, dann wird auch genau das so dargestellt.
+Hier nochmal ein Beispiel.
+Wir haben hier jetzt Übungsgruppen.
+Also eine Übung ist hier eine Komposition aus Übungsgruppen.
+Das heißt, wir haben bestimmte Übungen, also Datenblatt 2 oder Übungsblatt 2 zum
+Beispiel.
+Das hat von 1 bis 10 Übungsgruppen.
+Jede Übungsgruppe hat eine Übung.
+Jede Übungsgruppe hat beliebig viele Studierende.
+Jeder Student gehört entweder zu keiner Übungsgruppe oder zu einer, genau einer Übungsgruppe.
+Und diese Übungsgruppe hat genau einen Raum.
+Raum kann beliebig viele Übungsgruppen haben.
+Das ist ungefähr, wie wir das Ganze hier lesen können.
+Und das ist dann, wie man das Ganze implementieren müsste.
+Also das heißt, ich glaube, das machen wir auch hier genau oder grob, wie die Implementierung
+dann aussieht.
+In Java ist es so, wir nehmen einfach nur diese Darstellung.
+Wir haben hier zwei Klassen, eine Klasse Übungsgruppe, also das Klassendiagramm.
+Und für die Klasse Übungsgruppe habe ich jetzt beliebig viele Studierende.
+Das heißt, das stellen wir als ein Array vor.
+Das heißt, jede Übungsgruppe hat Teilnehmer, Studierende vom Typ Student.
+Und das ist ein Array.
+Das wird dann halt so dargestellt.
+Also diese Sternchen hier zum Beispiel.
+Oder jedes Student hat genau eine Übungsgruppe oder auch keine.
+Das ist eins.
+Das wird hier so dargestellt.
+Also erstmal wird die Klasse Student so definiert.
+Es hat ein Attribut, nämlich Gruppe von Klasse Übungsgruppe.
+Sobald wir dann ein Objekt von Klasse Student kreieren, das wird hier gemacht, wir kreieren
+das auch mit new.
+Dann müssen wir auch testen, ob diese Gruppe null ist oder nicht.
+Und dann dieser if-else-Test testet genau, ob das null ist oder nicht.
+Das ist etwas, was hier stattfindet.
+Um dann sicherzustellen, dass eine bestimmte Student, nämlich Student hier, eine Gruppe
+hat oder nicht.
+Das heißt, alles, was wir hier an Assoziationen annotieren, muss man irgendwo in der Quellcode
+auch implementieren oder sicherstellen.
+Und da gibt es viele verschiedene Möglichkeiten.
+Es ist nicht immer ganz eindeutig.
+Aber die Implementierung ist gleich.
+Sowohl für UML als Klassendiagramm hier links, als auch für Java hier rechts.
+Okay, dann, ja genau, also was wichtig ist hier, ist, dass jedes Mal, wenn man navigieren
+kann oder diese Navigierbarkeit zwischen Klassen, dass man eigentlich das Navigieren sieht als
+Attributen, die eine bestimmte Referenzvariable haben.
+Das ist ganz, ganz wichtig.
+Das heißt, sobald man einfach nur sagt, das sind eigentlich im Schluss alles Attributen,
+wie hier ein Attribut in die Übungsgruppe von Klasse Student oder ein Array davon oder
+hier ein Attribut in Klasse Student von Typ Übergruppe, das ist eigentlich, wie wir diese
+Assoziationen und diese Navigierbarkeit darstellen.
+Das heißt, sobald man hier in die Klasse Student ist, sobald man eine Methode hier
+programmiert oder wo man die Anweisungen hier für irgendwo eine Methode zusammenstellt,
+dann weiß man, dass man eine bestimmte Gruppe hat, zur Verfügung hat.
+Man kann auf diesem Attribut zugreifen.
+Und das ist genau diese Navigierbarkeit.
+Das kann man so sehen auch, also auch da wieder, das ist hier das Objektdiagramm.
+Hier habe ich zwei Objekte, Objekt 1 von Klasse 1 und Objekt 2 von Klasse 2, also
+zwei verschiedene Klassen.
+Klasse 1 hat zwei Attributen, A1 ist Nummer, A2 ist ein String und Klasse 2 hat ein Attribut,
+A1.
+Und die werden für diese zwei Objekte sofort auch ausgefüllt.
+Das heißt, A1 hat 45, A2 hat high für O1 und A1 hat diesen bestimmten Wert für O2.
+Und wir wissen auch, dass es diese Assoziationen gibt.
+Man kann navigieren von O1 nach O2.
+Wie wir das machen, ist, man kann in Klasse 1 genau das, wie wir vorher schon gesehen
+haben, Klasse 1 hat zwei Attributen, A1 und A2, und die werden so implementiert.
+Macht Sinn.
+Man hätte hier in OML auch noch explizit dazu schreiben können, dass A1 ein Integer
+ist und A2 ein String.
+Aber das war es dann auch.
+Für Klasse 2 oder für O2, von Typ Klasse 2 oder Klasse 2, habe dann diese Assoziierbarkeit
+zwischen Klasse 2 und Klasse 1.
+Das heißt, als Attribut von Klasse 2 verlinken wir diese Assoziation jetzt so.
+Wir haben einfach in den...
+Moment, was habe ich hier gemacht?
+Ich habe hier komplett was vergessen, glaube ich.
+Oder?
+Genau.
+Also, was ich hier vergessen habe in Klasse 1, ist tatsächlich ein Attribut, das von
+Typ Klasse 2 ist, hier noch dazu zu fügen.
+Das werde ich gleich...
+Moment, ich mache mal ein komplett anderes Beispiel hier.
+Und um das schnell zu machen...
+Genau.
+Ich mache das auch als zwei Dateien.
+Also, wir haben Klasse 1 oder MyClass 1.
+Das ist ein Class.
+So.
+Und da habe ich zum Beispiel nur ein Attribut, Int A1.
+Man kann die auch sofort einen Wert geben für eine bestimmte Klasse, das wir uns später
+mal ausprobieren können.
+Und dann werden wir hier auch sagen, MyClass 1 hat als Attribut eine bestimmte, ein Objekt
+von Typ MyClass 2.
+Das heißt, es gibt diesen Link zwischen beiden.
+Das heißt, später werden wir hier MyClass 2 haben.
+Und das würde dann mal so oder C2 zum Beispiel haben.
+Genau.
+Das heißt, dieses Objekt, am Ende, das wir hier später von dieser Klasse kreieren werden,
+wird ein Integer haben und wird einen Verweis haben auf Klasse 2.
+Dann können wir später auch noch das hier ändern.
+Ich kann das gleich machen.
+Also, grundsätzlich, das werden wir gleich sehen, oder habe auch schon mal gesehen, sind
+Attributen immer privat oder sollten immer privat sein.
+Da haben wir es am Anfang dieses Kapitels gesehen, dass wir normalerweise diese Get-und-Set-Methoden
+haben, um auf solche Attributen zu verweisen.
+Das heißt, normalerweise, wenn wir das dann richtig objektorientiert machen, nehmen wir
+immer diese Attribute als privat.
+Das heißt, wenn wir diese Attribute später irgendwo anders, von einer komplett anderen
+Klasse ändern möchten, dann geht das nichts.
+Dann braucht man eine Methode wie Get-und-Set-Methoden.
+Und sagt, wir können einfach nur die Methoden darstellen.
+Also, ich würde sagen, wir ändern die Methoden mit dem Set.
+Dann können wir sagen, Set C2 zum Beispiel.
+Und diese Methode, Set 2, füllt dieses Objekt aus.
+Das kreieren wir irgendwo anders, dieses Objekt.
+Und dieser Zeiger oder dieser Verweis wird dann hier in diese Klasse verlinkt.
+Das heißt, wir haben hier etwas vom Typ MyClass2.
+Das können wir auch C2 nennen.
+Und wie wir das letzte Mal gesehen haben, können wir Dis C2 gleich D2 genau das so
+kreieren.
+Das heißt, wir kreieren hier kein neues Objekt.
+Wir sagen einfach, dass C2, das eine Variable ist, die irgendwo anders hinweist, dass das
+jetzt da aufverweisen sollte.
+Okay?
+Das ist dann für Klasse 1.
+Dann machen wir das gleiche für Klasse 2.
+Das heißt, auch hier haben wir eine Klasse.
+Wir haben hier, machen wir mal was anderes, Double A1, können wir es auch A1 nennen.
+So, das ist ein Double zum Beispiel.
+Auch hier könnte man, das können wir gleich machen.
+Könnte man was anderes machen, aber grundsätzlich ist das eine Klasse mit einem anderen Attribut.
+Das reicht eigentlich schon.
+Okay, jetzt werde ich das eigentlich hier machen, in BlueJ, weil ich wollte das sowieso
+nochmal machen.
+Das heißt, wir fügen beide hier mit rein.
+Das heißt, man hat Klasse 1.
+Ich hoffe, dass das irgendwie zu sehen ist.
+Ich kann das nicht einsummen leider.
+Aus geht's.
+Und dann mal Klasse 2.
+Das sind unsere zwei Klassen.
+Wir können die implementieren nochmal, darzeigen.
+Klasse 2 ist sehr einfach, hat einfach nur ein Attribut, das A1 nennt.
+Klasse 2, das können wir auch nochmal privat nennen, also private nehmen.
+Ab jetzt mache ich das immer, würde ich mal vorschlagen.
+Und Klasse 1 hat einen Verweis auf ein Objekt von dieser zweiten Klasse.
+Das heißt, sobald man hier das Ganze kompiliert, für beide Seiten, können wir hier ein Objekt
+kreieren.
+Das heißt, man kann einfach ein neues Objekt kreieren.
+Das nennen wir dann MyClass2 zum Beispiel, mit einem kleinen m.
+Also das hier habe ich jetzt kreiert.
+Das heißt, wenn wir das dann inspektieren, haben wir hier nur ein Attribut und dieses
+Attribut hat nur A1,1.
+Das gleiche können wir für MyClass1 machen.
+Das nennen wir MyClass1.
+Auch das ist etwa ein Objekt, das wir jetzt haben.
+Jetzt sehen wir, dass dieses zweite Attribut C2 jetzt auf 0 gestellt ist.
+Das haben wir nicht definiert.
+Das wurde initialisiert in einem Konstruktor, der defaultmäßig sofort aufgerufen wurde
+und alles wurde auf 0 gesetzt, es sei denn, wir haben schon einen Wert definiert.
+Das heißt, diese Zeige steht auf 0.
+Was wir jetzt machen könnten, ist, wir könnten hier das hier als MyClass2 nehmen.
+Das heißt, wir können hier, wir haben jetzt C2 als eine Methode von MyClass1.
+Jetzt frage ich mich, wieso das hier nicht dargestellt ist.
+Warum kommt hier nicht ein Grundset C2 auf?
+Ja, genau, das ist meine Frage.
+Wieso kommt hier dieses Set C2 nicht vor?
+Also ich kann ein neues Objekt kreieren, aber normalerweise sollte ich hier tatsächlich,
+ich sollte auch die Zusammenhänge zwischen den beiden Clustern sehen.
+Vielleicht weil die Definition von dem Klasseausbau schon auf 0 ist.
+Also kann ich jetzt...
+Ah, genau, das würde Sinn machen.
+Das heißt, wenn wir hier ein Objekt machen von Klasse 1, wir fangen mal so an.
+Genau, jetzt können wir hier diese...
+Natürlich.
+Ich dachte, man kann es in einem machen, aber jetzt habe ich es wieder.
+Ich mache mal jedes Objekt 1.
+Das heißt, wie ich es vorher hatte, ich mache ein Objekt für Klasse 1 und ein Objekt für Klasse 2.
+Klasse 2 ist das einfache Objekt, das wir jetzt verkuppeln möchten in Klasse 1.
+Das heißt, hier möchte ich Set C2 verknüpfen mit MyClass2.
+Und wenn ich das dann mache, dann habe ich hier tatsächlich jetzt nicht mehr 0,
+aber ich kann das verfolgen und jetzt habe ich tatsächlich den Verweis,
+also ich kann auf MyClass1, auf MyClass2 gehen.
+Okay?
+Und man könnte das umgekehrt natürlich auch machen.
+Man könnte auch von Klasse 2, das werde ich nochmal kurz machen, um das zu zeigen,
+oder mal auszuprobieren.
+Das heißt, man kann genau hier das Gleiche machen.
+Das heißt, wenn ich das neu kompiliere, sollte ich das auch...
+Ups, C2 ist natürlich kein Teil davon.
+Stimmt auch.
+Und das ist von Typ Klasse 1.
+Und dann...
+Das sollte auch von Klasse 1 sein.
+So, jetzt habe ich es.
+Wenn ich das dann wieder kompiliere, genau, dann kann ich hier eine neue Klasse, Klasse 1,
+hier eine neue Klasse, Klasse 2, kreieren.
+Das sind beide Objekte.
+Und dann kann ich das eine in dem anderen setzen.
+Das heißt, ich setze hier MyClass2 in MyClass1.
+Und auch hier kann ich MyClass1, ups, nicht My, aber MyClass1 in MyClass2 setzen.
+Wenn ich das mache, dann verweise beide aufeinander.
+Das heißt, wenn ich hier von MyClass2 auf MyClass1 gehe, komme ich auf MyClass1.
+Und von hier kann ich wieder, kommt da wieder, auf MyClass2 gehen.
+Das heißt, man hat hier einen Verweis aufeinander.
+Das heißt, ich kann von Klasse 1 auf Klasse 2 gehen, und ich kann auch von Klasse 2 auf Klasse 1 gehen.
+Okay?
+Prima.
+Das dazu.
+Das heißt, hier müsste man normalerweise auch noch eine Klasse haben.
+Das werde ich dann später in den Folien nochmal nachbessern.
+Weil grundsätzlich hat man dann das hier zum Beispiel im Speichermodell.
+Also irgendwie im Speicher, das sind die Speicheradressen hier, die einfach so weitergehen,
+hat man für diese Klasse 1 hier, für die Attribute A1 und A2 eine bestimmte Vorstellung.
+A1 ist ein Integer. Wir wissen, dass ein Integer 4 Bytes ist.
+Das heißt, 4 von diesen Kästchen beinhalten den Wert 45.
+Das heißt, jedes Kästchen hier ist ein Byte.
+Und die grünen werden dann interpretiert, also das sind dann 32 Bits, die interpretiert werden als eine Ganzzahl, als ein Integer.
+Oder unser String hier ist etwas größer.
+Die werden dann auch in der Serie von Bytes dargestellt, direkt danach.
+Und da haben wir dann als Inhalt den String high.
+Und genauso haben wir dann normalerweise hier,
+ich mache das mal kurz hier, damit Sie das nicht später machen,
+genau hier haben wir dann normalerweise Klasse 2.
+Und wie wir das heißen, können wir es einfach zu Klasse 2 nehmen.
+Und das ist dann ein Attribut, das dann später einen bestimmten Wert bekommt.
+Das kann man zum Beispiel in der Konstrukte machen oder irgendwie anders.
+Das heißt, unsere Klasse 1 hat das im Speicher.
+Und diese 2080 hier ist ein beliebiger Adresse im Speicher.
+Aber da wird dann das Objekt von Klasse 2 stattfinden.
+Das heißt, sobald man O1 hier kreiert, wird das hier als Speicherplatz kreiert.
+Das heißt, 45 und high sind sofort Attributen von unserem Objekt O1.
+Aber O1 hat auch ein Attribut von Typ Klasse 2, diese KL2.
+Das hier ist ein Verweis auf irgendwo anders.
+Am Anfang ist das 0, aber das können wir zum Beispiel im Konstruktor von O2 hier definieren als was anderes.
+Oder das muss man noch später machen.
+Aber grundsätzlich kann man genauso wie ich soeben diese MyClass1 und MyClass2 verknüpft habe,
+kann man genau das mit diese beiden Klassen.
+Das heißt, man setzt diese Wert auf ein Objekt, das man schon kreiert hat,
+nämlich ein Objekt von Klasse 2.
+Also das hier ist O2, das hier ist O1.
+O1 hat als ein der Attribute einen Verweis auf O2.
+Sodass O1 hier die Information hat, 45 high,
+und via dem Verweis auch unsere Klasse 2 ansprechen kann,
+oder das Objekt von Klasse 2 O2,
+das als einziger Attribut A1 diese Wert hat.
