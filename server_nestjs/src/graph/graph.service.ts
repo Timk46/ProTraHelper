@@ -194,6 +194,7 @@ export class GraphService {
      * @returns the new concept edge
      */
     async createConceptEdge(parentId: number, prerequisiteId: number, successorId: number) {
+        // for the future: find appropriate parent here instead in frontend (first common ancestor)
         // check if edge already exists
         const edge = await this.prisma.conceptEdge.findFirst({
             where: {

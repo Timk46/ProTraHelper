@@ -53,3 +53,21 @@ export namespace AwardLevelAction {
         };
     }
 }
+
+export interface CreateEdgeAction extends Action {
+    kind: typeof CreateEdgeAction.KIND;
+    conceptId: string;
+    connectionType: string;
+}
+
+export namespace CreateEdgeAction {
+    export const KIND = 'createEdge';
+    
+    export function create(options: { conceptId: string, connectionType: string }): CreateEdgeAction {
+        return {
+            kind: KIND,
+            conceptId: options.conceptId,
+            connectionType: options.connectionType
+        };
+    }
+}
