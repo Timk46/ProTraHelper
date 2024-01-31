@@ -86,4 +86,21 @@ export class GraphController {
         return updatedUserConcept;
     }
 
+    @roles("ANY")
+    @Post('edge')
+    async createEdge(@Body() data: any): Promise<any> {
+        //todo: check roles
+        const parentId = data.parentId;
+        const prerequisiteId = data.prerequisiteId;
+        const successorId = data.successorId;
+        const newEdge = await this.graphService.createConceptEdge(parentId, prerequisiteId, successorId);
+    }
+
+    @roles("ANY")
+    @Delete('edge/:edgeId')
+    async deleteEdge(@Param('edgeId', ParseIntPipe) edgeId: number): Promise<any> {
+        console.log("in deleteEdge controller: ", edgeId)
+        await this.graphService.deleteConceptEdge(edgeId);
+    }
+
 }

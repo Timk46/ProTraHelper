@@ -55,8 +55,14 @@ export class GraphDataService {
    * @param successor The id of the successor concept
    * @returns The new edge
    */
-  createEdge(parentId: string, prerequisiteId: string, successorId: string) {
+  createEdge(parentId: number, prerequisiteId: number, successorId: number) {
+    console.log("in createEdge: ", parentId, prerequisiteId, successorId)
+    return this.http.post(environment.server + `/graph/edge`, {parentId: parentId, prerequisiteId: prerequisiteId, successorId: successorId})
+  }
 
+  deleteEdge(edgeId: number) {
+    console.log("in deleteEdge: ", edgeId)
+    return this.http.delete(environment.server + `/graph/edge/${edgeId}`)
   }
 
 
