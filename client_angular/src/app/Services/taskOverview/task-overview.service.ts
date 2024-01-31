@@ -17,7 +17,6 @@ export class TaskOverviewService {
    * @returns {id: number, type: string}
    */
   getTaskOverviewDataForConceptNode(conceptNodeId: Number) : Observable<taskOverviewElementDTO[]>{
-    console.log('given conceptNodeID for task-overview-service: ' + conceptNodeId);
     return this.http.get<taskOverviewElementDTO[]>(environment.server + `/task-overview/${conceptNodeId}`);
   }
 }
