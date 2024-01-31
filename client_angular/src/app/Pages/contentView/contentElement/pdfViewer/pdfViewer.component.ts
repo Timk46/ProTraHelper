@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NgxExtendedPdfViewerService, pdfDefaultOptions } from 'ngx-extended-pdf-viewer';
 import { ContentsForConceptDTO } from '@DTOs/content.dto';
@@ -14,7 +14,7 @@ import { ToolbarService } from 'src/app/Services/toolbar/toolbar.service';
 })
 export class PdfViewerComponent implements OnInit {
 
-  uniqueIdentifier: String;
+  @Input() uniqueIdentifier: String  = "";
 
   pdfSrc = "https://vadimdez.github.io/ng2-pdf-viewer/assets/pdf-test.pdf";
 
@@ -41,6 +41,7 @@ export class PdfViewerComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.pdfFromUniqueIdentifier(this.uniqueIdentifier);
   }
 
   // just a demo how to connect pdf to the file service: http://localhost:4200/instruction/randomString1 (loads pdf from server_nestjs\src\storage\randomString1.pdf)

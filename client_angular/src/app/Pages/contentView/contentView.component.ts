@@ -20,6 +20,7 @@ export class ContentViewComponent implements OnInit {
   applyCompletedStyle: boolean[] = [];
   applyQuestionStyle: boolean[] = [];
   lastOpenedDate: Date = new Date();
+  pdfCount: number = 0;
   
   hours : string = "";
   minutes : string = "";
@@ -36,6 +37,7 @@ export class ContentViewComponent implements OnInit {
       this.applyCompletedStyle[i] = false;
       this.applyQuestionStyle[i] = false;
     }
+    this.pdfCount = this.getPdfCount();
   }
 
   // for testing -> print ContentElems as String
@@ -66,6 +68,10 @@ export class ContentViewComponent implements OnInit {
   // needed for pdf iframe (we need iframe for multiple pdfs in a row: https://pdfviewer.net/extended-pdf-viewer/side-by-side)
   getPdfUrl(uniqueIdentifier: string) {
     return this.sanitizer.bypassSecurityTrustResourceUrl(`/pdfViewer/${uniqueIdentifier}`);
+  }
+
+  getPdfCount() {
+    return this.contentViewData.contentElements.filter(x => x.type === 'PDF').length;
   }
 
   onCreateDiscussion(contentElementId: number) {

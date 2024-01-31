@@ -2,6 +2,7 @@
   <h1>Content View for ContentNode: Id: {{ contentViewData.contentNodeId}}</h1>
   <h3>Content Node zuletzt geöffnet: {{ lastOpenedDate }} </h3>
 
+
   <!-- Create a Card for each Content Element and display PDF, Video etc. depending on type-->
   <mat-card *ngFor="let contentElem of contentViewData.contentElements" class="contetView-card">
     <button (click)="onCreateDiscussion(contentElem.id)" mat-stroked-button color="primary">Frage stellen</button>    
@@ -35,7 +36,8 @@
       <!--PDF-->
       <div *ngIf="contentElem.type == 'PDF' && contentElem.file " class = "contentElement-Container">
         Our current PDF Component cant be initialized multiple times... using an iframe instead for now
-        <iframe id="embedded" [src]="getPdfUrl(contentElem.file.uniqueIdentifier)" style="height: 100%; min-height: 500px; width: 100%"></iframe>
+        <iframe *ngIf="pdfCount > 1" id="embedded" [src]="getPdfUrl(contentElem.file.uniqueIdentifier)" style="height: 100%; min-height: 500px; width: 100%"></iframe>
+        <app-pdfViewer *ngIf="pdfCount == 1" [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-pdfViewer>
       </div>
 
       <!--VIDEO-->
