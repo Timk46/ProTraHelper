@@ -37,7 +37,8 @@ export class PdfViewerComponent implements OnInit {
       console.log('uniqueIdentifier: ' + this.uniqueIdentifier);
       this.pdfFromUniqueIdentifier(this.uniqueIdentifier);
     }
-    toolbarService.hide();
+    //Only needed if pdf is opened using iframe to hide toolbar
+    // toolbarService.hide();
   }
 
   ngOnInit() {
