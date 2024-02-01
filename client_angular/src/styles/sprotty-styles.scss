@@ -145,3 +145,7 @@
 .class-context-menu-item:hover:not(.disabled-action) {
     color: green;
 }
+
+.sprotty-hidden {
+  position: fixed;
+}

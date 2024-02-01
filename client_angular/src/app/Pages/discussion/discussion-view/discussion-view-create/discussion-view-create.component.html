@@ -15,7 +15,7 @@
       <mat-label>Antwort verfassen</mat-label>
       <textarea #inputText matInput placeholder="Schön, dass du helfen möchtest..."></textarea>
     </mat-form-field> -->
-    <app-tinymce #editor></app-tinymce>
+    <app-tinymce [content]="'lol hallo'" #editor></app-tinymce>
     <!-- button not available if not logged in -->
     <button mat-raised-button style="width: fit-content; margin-bottom: 8px; margin-top: 16px;" (click)="onSubmit(editor)">Senden</button>
   </div>

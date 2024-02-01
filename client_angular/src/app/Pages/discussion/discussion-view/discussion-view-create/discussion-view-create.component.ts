@@ -13,6 +13,11 @@ export class DiscussionViewCreateComponent {
   expanded: Boolean = false
   expanderTitle: String = 'Dem Beitrag antworten'
 
+  editorConfig = { // for later
+    plugins: 'autoresize lists table link image code codesample',
+    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | link image | code codesample',
+  }
+
   anonymousUser: AnonymousUserDTO = {
     id: -1,
     userId: -1,
