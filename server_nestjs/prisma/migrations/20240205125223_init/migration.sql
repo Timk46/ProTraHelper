@@ -427,7 +427,7 @@ CREATE TABLE "ChatBotMessage" (
 );
 
 -- CreateTable
-CREATE TABLE "UserContentProgress" (
+CREATE TABLE "UserContentElementProgress" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
     "contentElementId" INTEGER NOT NULL,
@@ -435,19 +435,19 @@ CREATE TABLE "UserContentProgress" (
     "markedAsQuestion" BOOLEAN NOT NULL DEFAULT false,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "UserContentProgress_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "UserContentElementProgress_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "UserContentView" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
-    "contentElementId" INTEGER NOT NULL,
+    "contentNodeId" INTEGER NOT NULL,
     "lastOpened" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "UserContentView_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "UserContentView_userId_contentElementId_key" UNIQUE ("userId", "contentElementId"),
-    CONSTRAINT "UserContentView_contentElementId_fkey" FOREIGN KEY ("contentElementId") REFERENCES "ContentElement"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "UserContentView_userId_contentElementId_key" UNIQUE ("userId", "contentNodeId"),
+    CONSTRAINT "UserContentView_contentNodeId_fkey" FOREIGN KEY ("contentNodeId") REFERENCES "ContentNode"("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "UserContentView_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -677,10 +677,10 @@ ALTER TABLE "Vote" ADD CONSTRAINT "Vote_messageId_fkey" FOREIGN KEY ("messageId"
 ALTER TABLE "ChatBotMessage" ADD CONSTRAINT "ChatBotMessage_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserContentProgress" ADD CONSTRAINT "UserContentProgress_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserContentElementProgress" ADD CONSTRAINT "UserContentElementProgress_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserContentProgress" ADD CONSTRAINT "UserContentProgress_contentElementId_fkey" FOREIGN KEY ("contentElementId") REFERENCES "ContentElement"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserContentElementProgress" ADD CONSTRAINT "UserContentElementProgress_contentElementId_fkey" FOREIGN KEY ("contentElementId") REFERENCES "ContentElement"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ModuleToSubject" ADD CONSTRAINT "_ModuleToSubject_A_fkey" FOREIGN KEY ("A") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;
