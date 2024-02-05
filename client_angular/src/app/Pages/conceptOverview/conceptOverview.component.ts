@@ -21,6 +21,7 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
     databaseId: -1,
     name: 'dummy',
     level: 0,
+    description: 'dummy',
     expanded: false,
     parentIds: [],
     childIds: [],

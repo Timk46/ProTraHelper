@@ -11,9 +11,9 @@ export class GraphService {
 
     /**
      * returns the concept graph
-     * if userId is provided, the graph will be returned with the user's 
+     * if userId is provided, the graph will be returned with the user's
      * level and other relevant information
-     * 
+     *
      * @param userId
      * @param moduleId if the moduleId is provided, the graph will be returned with modules goal
      * @returns the concept graph
@@ -62,6 +62,7 @@ export class GraphService {
             nodeMap[node.id] = {
                 databaseId: node.id,
                 name: node.name,
+                description: node.description,
 
                 // if no user concept exists, set expanded to false
                 expanded: false,

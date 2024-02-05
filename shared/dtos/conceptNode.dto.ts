@@ -5,7 +5,7 @@ export interface ConceptNodeDTO {
     level?: number;
     goal?: number;
     expanded?: boolean;
-
+    description?: string;
     parentIds: number[];
     childIds: number[];
     prerequisiteEdgeIds: number[];

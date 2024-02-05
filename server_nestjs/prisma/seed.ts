@@ -259,7 +259,7 @@ async function main() {
         await prisma.contentNode.create({
           data: {
             id: +row[columnContentId],
-            name: 'ContentNode' + +row[columnContentId] + ' für ' + lastTopic,
+            name: lastTopic,
             description: row[columnVideoDescriptionId]
               ? row[columnVideoDescriptionId].toString()
               : 'Keine Beschreibung für ContentNode ' + +row[columnContentId],
