@@ -96,7 +96,6 @@ async function main() {
   // Admin
   const adminUser = await prisma.user.create({
     data: {
-      id: 1,
       email: 'admin@admin.de',
       firstname: 'Admin',
       lastname: 'User',
@@ -109,7 +108,6 @@ async function main() {
   // Teacher
   const teacherUser = await prisma.user.create({
     data: {
-      id: 2,
       email: 'lehrer@lehrer.de',
       firstname: 'Lehrer',
       lastname: 'User',
@@ -122,7 +120,6 @@ async function main() {
   // Student
   const studentUser = await prisma.user.create({
     data: {
-      id: 3,
       email: 'student@student.de',
       firstname: 'Student',
       lastname: 'User',
@@ -135,7 +132,6 @@ async function main() {
   // Sven
   const svenUser = await prisma.user.create({
     data: {
-      id: 4,
       email: 'sven@student.de',
       firstname: 'Sven',
       lastname: 'Jacobs',
@@ -152,7 +148,6 @@ async function main() {
   for (let i = 0; i < numberOfUsers; i++) {
     const user = await prisma.user.create({
       data: {
-        id: i + 500,
         email: faker.internet.email(),
         firstname: faker.person.firstName(),
         lastname: faker.person.lastName(),

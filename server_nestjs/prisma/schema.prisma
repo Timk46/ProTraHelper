@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -217,8 +217,8 @@ model File {
 // Feedback which the users will get after answering a question
 model Feedback {
   id           Int        @id @default(autoincrement())
-  text         String
-  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
+  text         String     @db.Text
+  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id])
   userAnswerId Int
   score        Float
 }
@@ -231,7 +231,7 @@ model Question {
   description                String?           @db.Text
   score                      Float?
   type                       String
-  author                     User              @relation(fields: [authorId], references: [id])
+  author                     User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId                   Int
   text                       String            @db.Text
   isApproved                 Boolean           @default(false)
@@ -322,7 +322,7 @@ model UserAnswer {
   question             Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId           Int
   userMCOptionSelected UserMCOptionSelected[]
-  userFreetextAnswer   String?                @db.MediumText
+  userFreetextAnswer   String?                @db.Text
   feedbacks            Feedback[]
 }
 
@@ -462,7 +462,7 @@ model Discussion {
 
 model Message {
   id           Int           @id @default(autoincrement())
-  text         String        @db.VarChar(2000)
+  text         String        @db.Text
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   author       anonymousUser @relation(fields: [authorId], references: [id])

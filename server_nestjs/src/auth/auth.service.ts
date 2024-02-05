@@ -26,9 +26,15 @@ export class AuthService {
    * @returns the user, access and refresh tokens if the user exists
    */
   async loginCAS(username: string) {
-    const user = await this.usersService.createCASuser(username);
+    let user = await this.usersService.findOne(username);
+    if (user) {
+      console.log('User logged in: ' + user.email+ " Role: " + user.globalRole)
+    }
+    else { // If the user doesn't exist, create a new one
+      user = await this.usersService.createCASuser(username);
+      console.log('User created: ' + username + " Role: " + user.globalRole)
+    }
     const tokens = await this.generateTokens(user);
-    console.log('User logged in: ' + username + " Role: " + user.globalRole + " Refreshtoken " + tokens.accessToken);
     return {
       ...tokens,
     };
