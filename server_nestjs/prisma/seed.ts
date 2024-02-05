@@ -18,6 +18,7 @@ interface excel_Aufgabe {
   Task_html: string;
   codeName: string;
   countInputArgs: number;
+  ConceptNodeID: number;
 }
 
 interface excel_Codegeruest {
@@ -33,6 +34,8 @@ function getFilenameByLink(hyperlink: string): string {
 }
 
 async function main() {
+  // npx prisma migrate reset ist jetzt in seed integriert. Deshalb müssen wir das hier nicht mehr manuell machen.
+  /*
   // delete everything
   console.log('Deleting everything...');
   await prisma.kIFeedback.deleteMany();
@@ -49,6 +52,9 @@ async function main() {
   await prisma.anonymousUser.deleteMany();
   await prisma.codeSubmission.deleteMany();
   await prisma.codingQuestion.deleteMany();
+  await prisma.mCQuestionOption.deleteMany();
+  await prisma.mCQuestion.deleteMany();
+  await prisma.questionVersion.deleteMany();
   await prisma.question.deleteMany();
   await prisma.mCQuestion.deleteMany();
   await prisma.training.deleteMany();
@@ -66,6 +72,7 @@ async function main() {
   await prisma.conceptNode.deleteMany();
   await prisma.conceptGraph.deleteMany();
   await prisma.user.deleteMany();
+  */
 
   console.log('Creating everything...');
 
@@ -946,6 +953,10 @@ async function main() {
   });
 
   // Question
+  const conceptNodeForMCQ = await prisma.conceptNode.findUnique({
+    where: { id: 8 },
+  });
+
   const question = await prisma.question.create({
     data: {
       name: 'Primitiver Datentyp',
@@ -954,7 +965,7 @@ async function main() {
       type: 'MC',
       author: { connect: { id: adminUser.id } },
       text: 'Welcher der folgenden Datentypen in Java ist primitiv?',
-      conceptNode: { connect: { id: conceptNode.id } },
+      conceptNode: { connect: { id: conceptNodeForMCQ.id } },
       isApproved: true,
       version: 1,
     },
@@ -1047,7 +1058,8 @@ async function main() {
       type: 'FreeText',
       author: { connect: { id: adminUser.id } },
       text: 'Primitive Datentypen',
-      conceptNode: { connect: { id: conceptNode.id } },
+      conceptNode: { connect: { id: conceptNodeForMCQ.id } },
+      isApproved: true,
     },
   });
 
@@ -1121,8 +1133,14 @@ async function main() {
   const codeSheet: WorkSheet = workbook.Sheets[workbook.SheetNames[1]];
   const codes: excel_Codegeruest[] = utils.sheet_to_json(codeSheet);
 
-  for (let task of tasks) {
-    let newTask = await prisma.question.create({
+  for (const task of tasks) {
+    const conceptNode = await prisma.conceptNode.findFirst({
+      where: {
+        id: task.ConceptNodeID,
+      },
+    });
+
+    const newTask = await prisma.question.create({
       data: {
         name: task.Titel,
         description:
@@ -1130,6 +1148,9 @@ async function main() {
         score: 100, // this is the max score for all tasks currently (=100%)
         type: 'CodingQuestion',
         author: { connect: { id: adminUser.id } },
+        text: task.Task,
+        conceptNode: { connect: { id: conceptNode.id } },
+        isApproved: true,
         codingQuestions: {
           create: {
             text: task.Task,
@@ -1163,6 +1184,12 @@ async function main() {
           },
         },
       },
+    });
+
+    // connect it to itself
+    await prisma.question.update({
+      where: { id: newTask.id },
+      data: { origin: { connect: { id: newTask.id } } },
     });
   }
 

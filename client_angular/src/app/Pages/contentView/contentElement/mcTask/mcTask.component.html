@@ -6,50 +6,49 @@
 <div *ngIf="isSelfAssessment" class="content mat-elevation-z8">
   <h2 class="question-text">{{questionData.text}}</h2>
   <div *ngIf="mcQuestion.isSC">
-  <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="false" (selectionChange)="onSelectionChange()">
-    <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected, 'selectedCorrect' : option.selected && submitDisabled && option.isCorrect}" [selected]="option.selected">{{option.text}}</mat-list-option>
-  </mat-selection-list>
-</div>   
-
-<div *ngIf="!mcQuestion.isSC">
-  <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="true" (selectionChange)="onSelectionChange()">
-    <mat-list-option *ngFor="let option of options" 
-      [disabled]="submitDisabled" 
-      [value]="option.id" 
-      [ngClass]="{
-        'selected' : option.selected, 
-        'selectedCorrect' : option.selected && submitDisabled && option.isCorrect,
-        'selectedIncorrect' : option.selected && submitDisabled && !option.isCorrect,
-        'correctNotSelected' : !option.selected && submitDisabled && option.isCorrect,
-      }" 
-      [selected]="option.selected">{{option.text}}
-    </mat-list-option>
-  </mat-selection-list>
-</div>
-
-<div class="submit">
-  <button mat-flat-button color="accent" (click)="onSubmit()" [disabled]="submitDisabled">
-    <mat-icon>submit</mat-icon>
-    Antworten
-  </button>
-</div>
-
-</div>
-
-<!-- Formative Assessment-Mode -> Do not show correct answers after submit -->
-<div *ngIf="!isSelfAssessment && dataLoaded" class="content mat-elevation-z8">
-  <app-tinymce [config]="editorConfig" [content]="questionData.text"></app-tinymce>
-  <!--<h2 class="question-text">{{questionData.text}}</h2>-->
-  <h3>Maximale Punktzahl: {{questionData.score}}</h3>
-  <div *ngIf="mcQuestion.isSC">
     <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="false" (selectionChange)="onSelectionChange()">
-      <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected}" [selected]="option.selected">{{option.text}}</mat-list-option>
+      <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected, 'selectedCorrect' : option.selected && submitDisabled && option.isCorrect}" [selected]="option.selected">{{option.text}}</mat-list-option>
     </mat-selection-list>
   </div>   
 
   <div *ngIf="!mcQuestion.isSC">
     <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="true" (selectionChange)="onSelectionChange()">
-      <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected}" [selected]="option.selected">{{option.text}}</mat-list-option>
+      <mat-list-option *ngFor="let option of options" 
+        [disabled]="submitDisabled" 
+        [value]="option.id" 
+        [ngClass]="{
+          'selected' : option.selected, 
+          'selectedCorrect' : option.selected && submitDisabled && option.isCorrect,
+          'selectedIncorrect' : option.selected && submitDisabled && !option.isCorrect,
+          'correctNotSelected' : !option.selected && submitDisabled && option.isCorrect,
+        }" 
+        [selected]="option.selected">{{option.text}}
+      </mat-list-option>
+    </mat-selection-list>
+  </div>
+
+  <div class="submit">
+    <button mat-flat-button color="accent" (click)="onSubmit()" [disabled]="submitDisabled">
+      <mat-icon>submit</mat-icon>
+      Antworten
+    </button>
+  </div>
+</div>
+
+<!-- Formative Assessment-Mode -> Do not show correct answers after submit -->
+<div *ngIf="!isSelfAssessment && dataLoaded" class="test content mat-elevation-z8">
+  <!--<app-tinymce [config]="editorConfig" [content]="questionData.text"></app-tinymce>-->
+  <h2 class="question-text"><div [innerHTML]="questionData.text"></div></h2>
+  <h3>Maximale Punktzahl: {{questionData.score}}</h3>
+  <div *ngIf="mcQuestion.isSC">
+    <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="false" (selectionChange)="onSelectionChange()">
+      <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected}" [selected]="option.selected"><span [innerHTML]="option.text"></span></mat-list-option>
+    </mat-selection-list>
+  </div>   
+
+  <div *ngIf="!mcQuestion.isSC">
+    <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="true" (selectionChange)="onSelectionChange()">
+      <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected}" [selected]="option.selected"><span [innerHTML]="option.text"></span></mat-list-option>
     </mat-selection-list>
   </div>
 

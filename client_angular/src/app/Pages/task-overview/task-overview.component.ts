@@ -28,7 +28,7 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
   taskOverviewData : taskOverviewElementDTO[] = [];
 
   //the data for the table
-  displayedColumns: string[] = ['id', 'name', 'type', 'attempts', 'progress', 'actions'];
+  displayedColumns: string[] = ['id', 'name', 'type', 'attempts', 'progress', 'mode', 'actions'];
 
   titles = [
     "Python Kapitalwert",

@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "seed": "npx prisma generate && ts-node prisma/seed.ts",
+    "seed": "npx prisma generate && npx prisma migrate reset && ts-node prisma/seed.ts",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -37,7 +37,7 @@
     "jszip": "^3.10.1",
     "langchain": "^0.0.203",
     "passport": "^0.6.0",
-    "passport-cas": "^0.0.3",
+    "passport-cas": "^0.1.1",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "pg": "^8.11.3",

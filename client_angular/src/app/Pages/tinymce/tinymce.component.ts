@@ -9,69 +9,70 @@ declare var tinymce: any;
 })
 export class TinymceComponent {
 
-  isReadonly: boolean = false;
-  @Input() content: string = '';
-  @Input() config: any = {};
-  
-
-  constructor(){}
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['content'] && changes['config']) {
-      console.log("TinymceComponent: ngOnChanges  " + this.content);
-      const content = this.content;
-
-      const defaultConfig = {
-        selector: '#editor',
+  readonly DEFAULT_CONFIG: any = {
+    selector: '#editor',
         base_url: '/tinymce',
         suffix: '.min',
         menubar: false,
         statusbar: false,
         resize: false,
         branding: false,
-      };
+  };
 
-      this.config = Object.assign(defaultConfig, this.config);
-      tinymce.init({
-        ...this.config,
-        setup: function (editor: any) {
-          editor.on('init', () => {
-            editor.setContent(content == undefined ? '' : content);
-          });
-        }
-      })
+  @Input() content: string = '';
+  @Input() config: any = {};
+
+  isReadonly: boolean = false;
+  editorInstance: any;
+
+  constructor(){}
+
+  ngOnInit(): void {
+    this.initEditor();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['content']) {
+      this.content = changes['content'].currentValue;
+      if (this.content != undefined) {
+        this.setContent(this.content);
+      }
     }
+    if (changes['config']) {
+      this.initEditor();
+    }
+  }
+
+  /**
+   * Initializes the editor.
+   */
+  private initEditor(): void {
+    if (this.editorInstance) {
+      this.editorInstance.destroy();
+    }
+    this.config = Object.assign(this.DEFAULT_CONFIG, this.config);
+    tinymce.init({
+      ...this.config,
+      setup: (editor: any) =>	{
+        this.editorInstance = editor;
+        editor.on('init', () => {
+          editor.setContent(this.content == undefined ? '' : this.content);
+        });
+      }
+    });
   }
 
 
   /**
-   * Initialize tinymce editor
-   */
-  /* ngAfterViewInit(): void {
-    tinymce.init({
-      readonly: false,
-      selector: '#editor',
-      base_url: '/tinymce',
-      suffix: '.min',
-      plugins: 'autoresize lists table link image code codesample',
-      toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | link image | code codesample',
-      min_height: 300,
-      max_height: 500,
-      menubar: false,
-      statusbar: false,
-      resize: false,
-      branding: false,
-    });
-  } */
-
-  /**
    * Change the view of the editor
    */
-  changeView(){
-    if (this.isReadonly) {
-      tinymce.get("editor").mode.set("readonly");
-    } else {
-      tinymce.get("editor").mode.set("design");
+  changeView() {
+    if (this.editorInstance){
+      if (this.isReadonly) {
+        this.editorInstance.mode.set("readonly");
+      } else {
+        this.editorInstance.mode.set("design");
+      }
     }
   }
 
@@ -81,12 +82,23 @@ export class TinymceComponent {
    */
   getContent(): string {
     console.log("TinymceComponent: getContent");
-    return tinymce.get("editor").getContent();
+    if (this.editorInstance) {
+      console.log('editor instance', this.editorInstance);
+      return this.editorInstance.getContent();
+    }
+    return '';
   }
 
+  /**
+   * Retrieves the raw content from the TinyMCE editor.
+   * @returns The raw content as a string.
+   */
   getRawContent(): string {
     console.log("TinymceComponent: getRawContent");
-    return tinymce.get("editor").getContent({format: 'text'});
+    if (this.editorInstance) {
+      return this.editorInstance.getContent({format: 'text'});
+    }
+    return '';
   }
 
   /**
@@ -94,18 +106,25 @@ export class TinymceComponent {
    * @param content the content to set
    */
   setContent(content: string): void {
-    tinymce.get("editor").setContent(content);
+    console.log('set content', content);
+    if (this.editorInstance) {
+      this.editorInstance.setContent(content);
+    }
   }
 
   /**
    * Destroys the editor
    */
   destroy(): void {
-    tinymce.get("editor").destroy();
+    if (this.editorInstance) {
+      this.editorInstance.destroy();
+    }
   }
 
   ngOnDestroy(): void {
-    tinymce.get("editor").destroy();
+    if (this.editorInstance) {
+      this.editorInstance.destroy();
+    }
   }
 
 }

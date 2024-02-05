@@ -20,6 +20,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   overflow: auto;
 }
 
-.sprotty-hidden {
-  position: fixed;
+// workaround preventing a angular-tailwind bug that summons a blue vertical line on activated mat-form-field elements with appearance="outline"
+.mdc-notched-outline__notch {
+  border-right: none !important;
 }

@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import { ActionHandlerRegistry, Expandable, LocalModelSource, TYPES } from 'sprotty';
 import { ConceptGraphDTO, ConceptNodeDTO } from '@DTOs/index';
-import { SprottyConceptNode } from './sprottyModels.interface'
+import { SprottyConceptEdge, SprottyConceptNode } from './sprottyModels.interface'
 //import { SModelIndex } from 'sprotty-protocol/lib/utils/model-utils';
 import {
   Action, CollapseExpandAction, CollapseExpandAllAction, SCompartment, SEdge, SGraph, SLabel,
@@ -10,10 +10,11 @@ import {
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { inject as injectAngular } from '@angular/core';
-import { AwardLevelAction, CreateConceptAction, DeleteConceptAction } from './actions';
+import { AwardLevelAction, CreateConceptAction, CreateEdgeAction, DeleteConceptAction } from './actions';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateConceptDialogComponent } from '../graph-dialogs/create-concept-dialog/create-concept-dialog.component';
 import { has } from 'markdown-it/lib/common/utils';
+import { first } from 'rxjs';
 
 
 
@@ -25,6 +26,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
   graphData: GraphDataService | undefined;
   private dialog: MatDialog | undefined;
   currentModule = 1;
+  private EdgeCreator: { concept: string, type: string } | undefined;
 
 
   constructor() {
@@ -42,20 +44,14 @@ export class ConceptGraphModelSource extends LocalModelSource {
     registry.register(CreateConceptAction.KIND, this)
     registry.register(DeleteConceptAction.KIND, this)
     registry.register(AwardLevelAction.KIND, this)
+    registry.register(CreateEdgeAction.KIND, this)
   }
 
   override handle(action: Action) {
     console.log("action: ", action)
     switch (action.kind) {
       case SelectAction.KIND:
-        console.log("this is the select action: ", action);
-        const index = new SModelIndex();
-        index.add(this.currentRoot);
-        let firstSelectedNode = index.getById((action as SelectAction).selectedElementsIDs[0]);
-        if (firstSelectedNode !== undefined && firstSelectedNode?.type.startsWith('node')) {
-          const currentActiveNode = this.flatGraph.nodeMap[(firstSelectedNode as SprottyConceptNode).databaseId];
-          this.GraphCommunicationService.changeActiveNode(currentActiveNode); // TODO: type - communicate node info to contentOverview (so get full node info from db first?)
-        }
+        this.handleSelectAction(action as SelectAction);
         break;
       case CollapseExpandAction.KIND:
         this.handleCollapseExpandAction(action as CollapseExpandAction);
@@ -71,6 +67,10 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
       case AwardLevelAction.KIND:
         this.handleAwardLevelAction(action as AwardLevelAction);
+        break;
+
+      case CreateEdgeAction.KIND:
+        this.handleCreateEdgeAction(action as CreateEdgeAction);
         break;
 
       default: super.handle(action);
@@ -107,7 +107,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
         const expanded = flatChild.expanded !== undefined ? flatChild.expanded : true;
         const level = flatChild.level ? flatChild.level : 0;
         const hasChildren = flatChild.childIds.length > 0;
-        const newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level,
+        const newChild = this.createConceptNode("root", "node_" + flatChild.databaseId, flatChild.name, expanded, level,
           flatChild.goal ? flatChild.goal : 0, flatChild.databaseId, hasChildren);
         graph.children!.push(newChild);
         if (expanded) {
@@ -123,7 +123,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.flatGraph.nodeMap[this.flatGraph.trueRootId].edgeChildIds.forEach(edgeChildId => {
       const flatChild = this.flatGraph.edgeMap[edgeChildId];
       if (flatChild) {
-        const edgeChild = this.createEdge("edge_" + flatChild.databaseId, "node_" + flatChild.sourceId, "node_" + flatChild.targetId);
+        const edgeChild = this.createEdge("edge_" + flatChild.databaseId, "node_" + flatChild.sourceId, "node_" + flatChild.targetId, "root", flatChild.databaseId);
         graph.children!.push(edgeChild);
       }
     });
@@ -148,17 +148,17 @@ export class ConceptGraphModelSource extends LocalModelSource {
           const level = flatChild.level ? flatChild.level : 0;
           let newChild;
           if (type === 'mini-concept') {
-            newChild = this.createMiniConceptNode("node_" + flatChild.databaseId, flatChild.name, level, flatChild.goal ? flatChild.goal : 0, flatChild.databaseId);
+            newChild = this.createMiniConceptNode(parentNode.id, "node_" + flatChild.databaseId, flatChild.name, level, flatChild.goal ? flatChild.goal : 0, flatChild.databaseId);
             parentNode.children!.push(newChild);
           }
           else if (type === 'concept') {
             const hasChildren = flatChild.childIds.length > 0;
-            newChild = this.createConceptNode("node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.goal ? flatChild.goal : 0, flatChild.databaseId, hasChildren);
+            newChild = this.createConceptNode(parentNode.id, "node_" + flatChild.databaseId, flatChild.name, expanded, level, flatChild.goal ? flatChild.goal : 0, flatChild.databaseId, hasChildren);
             parentNode.children!.push(newChild);
           }
           else { // type === 'not-visible'
             // dummy node, is not added to the graph. we need to keep the recursion going for counting descendants
-            newChild = this.createMiniConceptNode("node_" + flatChild.databaseId, flatChild.name, level, flatChild.goal ? flatChild.goal : 0, flatChild.databaseId);
+            newChild = this.createMiniConceptNode(parentNode.id, "node_" + flatChild.databaseId, flatChild.name, level, flatChild.goal ? flatChild.goal : 0, flatChild.databaseId);
           }
 
 
@@ -218,7 +218,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       flatParentNode.edgeChildIds.forEach(edgeChildId => {
         const flatChild = this.flatGraph.edgeMap[edgeChildId];
         if (flatChild) {
-          const edgeChild = this.createEdge("edge_" + flatChild.databaseId, "node_" + flatChild.sourceId, "node_" + flatChild.targetId);
+          const edgeChild = this.createEdge("edge_" + flatChild.databaseId, "node_" + flatChild.sourceId, "node_" + flatChild.targetId, parentNode.id, flatChild.databaseId);
           parentNode.children!.push(edgeChild);
         }
       });
@@ -226,6 +226,58 @@ export class ConceptGraphModelSource extends LocalModelSource {
     // add own level and goal to descendant data
 
     return descendantData;
+  }
+
+  handleSelectAction(action: SelectAction): void {
+    // send data to contentOverview
+    console.log("this is the select action: ", action);
+    const index = new SModelIndex();
+    index.add(this.currentRoot);
+    let firstSelectedNode = index.getById((action as SelectAction).selectedElementsIDs[0]) as SprottyConceptNode;
+    if (firstSelectedNode !== undefined && firstSelectedNode?.type.startsWith('node')) {
+      const currentActiveNode = this.flatGraph.nodeMap[(firstSelectedNode as SprottyConceptNode).databaseId];
+      this.GraphCommunicationService.changeActiveNode(currentActiveNode); // TODO: type - communicate node info to contentOverview (so get full node info from db first?)
+    }
+
+    // create edge if EdgeCreator is set
+    // very hacky, no sanity checks anywhere
+    if (this.EdgeCreator !== undefined) {
+      const sprottyNode = index.getById(this.EdgeCreator.concept) as SprottyConceptNode;
+      const parentNodeId = sprottyNode.parentIds![0];
+      if (parentNodeId !== firstSelectedNode?.parentIds![0]) {
+        // nodes have different parents, do nothing
+        this.EdgeCreator = undefined;
+        return;
+      }
+
+      // get databaseId of parentNode
+      let parentNodeDatabaseId = 0;
+      if (parentNodeId === "root") {
+        parentNodeDatabaseId = this.flatGraph.trueRootId;
+      }
+      else {
+        parentNodeDatabaseId = (index.getById(parentNodeId)! as SprottyConceptNode).databaseId;
+      }
+
+      if (this.EdgeCreator.type === 'prerequisite') {
+        // newly selected node is prerequisite of sprottyNode
+        this.graphData!.createEdge(parentNodeDatabaseId, firstSelectedNode.databaseId, sprottyNode.databaseId).subscribe((res) => {
+          console.log("created edge: ", res);
+          this.getUserGraph();
+          this.updateModel();
+        });
+      }
+      else if (this.EdgeCreator.type === 'successor') {
+        // newly selected node is successor of sprottyNode
+        this.graphData!.createEdge(parentNodeDatabaseId, sprottyNode.databaseId, firstSelectedNode.databaseId).subscribe((res) => {
+          console.log("created edge: ", res);
+          this.getUserGraph();
+          this.updateModel();
+        });
+      }
+
+      this.EdgeCreator = undefined;
+    }
   }
 
   handleCreateConceptAction(action: CreateConceptAction): void {
@@ -262,16 +314,29 @@ export class ConceptGraphModelSource extends LocalModelSource {
     console.log("handleDeleteConceptAction: ", action);
     const index = new SModelIndex();
     index.add(this.currentRoot);
-    const sprottyNode = index.getById(action.conceptId) as SprottyConceptNode;
+
+    // if action.conceptId starts with "node", delete concept
+    if (action.conceptId.startsWith("node")) {
+
+      const sprottyNode = index.getById(action.conceptId) as SprottyConceptNode;
 
 
-    if (sprottyNode !== undefined) {
-      const flatNode: ConceptNodeDTO = this.flatGraph.nodeMap[sprottyNode.databaseId];
-      //todo: check if node is deletable and if it has multiple parents?
-      this.graphData!.deleteConcept(sprottyNode.databaseId).subscribe((res) => {
-        console.log("deleted concept: ", res);
-        this.getUserGraph();
-      });
+      if (sprottyNode !== undefined) {
+        //todo: check if node is deletable and if it has multiple parents?
+        this.graphData!.deleteConcept(sprottyNode.databaseId).subscribe((res) => {
+          console.log("deleted concept: ", res);
+          this.getUserGraph();
+        });
+      }
+    }
+    else if(action.conceptId.startsWith("edge")){
+      const sprottyEdge = index.getById(action.conceptId) as SprottyConceptEdge;
+      if (sprottyEdge !== undefined) {
+        this.graphData!.deleteEdge(sprottyEdge.databaseId).subscribe((res) => {
+          console.log("deleted edge: ", res);
+          this.getUserGraph();
+        });
+      }
     }
   }
 
@@ -333,6 +398,15 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   }
 
+  handleCreateEdgeAction(action: CreateEdgeAction): void {
+    // set private variable that will be checked when a new node is selected
+    console.log("handleCreateEdgeAction: ", action);
+    const index = new SModelIndex();
+    index.add(this.currentRoot);
+
+    this.EdgeCreator = { concept: action.conceptId, type: action.connectionType };
+  }
+
   // creates new concept node (locally)
   /**
    * 
@@ -343,7 +417,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
    * @param databaseId id of this node in the database
    * @returns a ConceptNode
    */
-  createConceptNode(id: string, name: string, expanded: boolean, level: number, levelGoal: number, databaseId: number,
+  createConceptNode(parentId: string, id: string, name: string, expanded: boolean, level: number, levelGoal: number, databaseId: number,
     hasChildren: boolean): SprottyConceptNode {
     // determine render type
     let nodeType = 'node:concept';
@@ -358,6 +432,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       expanded: expanded,
       level: level,
       levelGoal: levelGoal,
+      parentIds: [parentId],
       children: [],
       layout: 'vbox'
     };
@@ -377,7 +452,6 @@ export class ConceptGraphModelSource extends LocalModelSource {
       <SLabel>{
         id: 'header_' + id,
         type: 'label:heading',
-
         text: name,
       });
 
@@ -403,7 +477,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
    * @param databaseId id of this node in the database
    * @returns a ConceptNode
    */
-  createMiniConceptNode(id: string, name: string, level: number, levelGoal: number, databaseId: number): SprottyConceptNode {
+  createMiniConceptNode(parentId: string, id: string, name: string, level: number, levelGoal: number, databaseId: number): SprottyConceptNode {
     const node: SNode & SprottyConceptNode & Expandable = {
       type: "node:mini-concept",
       id: id,
@@ -412,6 +486,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       expanded: false,
       level: level,
       levelGoal: levelGoal,
+      parentIds: [parentId],
       children: [],
       //layout: 'hbox'
     };
@@ -420,12 +495,14 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
 
-  createEdge(id: string, sourceId: string, targetId: string): SEdge {
-    const edge: SEdge = {
+  createEdge(id: string, sourceId: string, targetId: string, parentId: string, databaseId: number): SEdge {
+    const edge: SprottyConceptEdge = {
       type: 'edge',
       id: id,
       sourceId: sourceId,
-      targetId: targetId
+      targetId: targetId,
+      databaseId: databaseId,
+      parentId: parentId
     };
     return edge;
   }

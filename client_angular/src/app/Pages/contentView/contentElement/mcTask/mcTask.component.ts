@@ -17,7 +17,7 @@ export class McTaskComponent implements OnInit {
   editorConfig = { //tinyMCE
     readonly: true,
     plugins: 'lists table link image code codesample',
-    //toolbar: false,
+    toolbar: false,
     min_height: 100,
     max_height: 500,
     resize: false,

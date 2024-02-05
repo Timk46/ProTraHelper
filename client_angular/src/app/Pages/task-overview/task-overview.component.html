@@ -1,7 +1,5 @@
-<p>Task-Overview for ConceptNodeID: {{activeConceptNodeId}}</p>
-<p>Tasks for Concept: {{taskOverviewData}}</p>
+<!--
 
-<div class="taskProgress-Container">
     <mat-card class="task-progress-card" class="failed">
         <mat-card-header>
             <mat-card-title-group>
@@ -20,50 +18,58 @@
         </mat-card-content>
     </mat-card>
 </div>
-
-<table mat-table [dataSource]="taskOverviewData" class="mat-elevation-z8">
-  
-    <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef> ID </th>
-      <td mat-cell *matCellDef="let element"> {{element.id}} </td>
-    </ng-container>
-  
-    <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef> Name </th>
-      <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-    </ng-container>
-  
-    <ng-container matColumnDef="type">
-      <th mat-header-cell *matHeaderCellDef> Aufgabentyp </th>
-      <td mat-cell *matCellDef="let element"> {{element.type}} </td>
-    </ng-container>
-  
-    <ng-container matColumnDef="attempts">
-        <th mat-header-cell *matHeaderCellDef> Versuche </th>
-        <td mat-cell *matCellDef="let element"> {{element.attempts}} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="progress">
-      <th mat-header-cell *matHeaderCellDef> Fortschritt </th>
-      <td mat-cell *matCellDef="let row">
-        <mat-progress-spinner [value]="row.progress" [mode]="'determinate'" [diameter]="30"></mat-progress-spinner>
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef> Aktionen </th>
-      <td mat-cell *matCellDef="let row">
-        <button mat-raised-button color="primary" (click)="onTaskClick(row)" class="button">Lösen</button>
-        <button mat-raised-button color="primary" class="button">Feedback Historie</button>
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+-->
+<div class="task-container">
+  <table mat-table [dataSource]="taskOverviewData" class="mat-elevation-z8">
     
-</table>
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef> ID </th>
+        <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+      </ng-container>
+    
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> Name </th>
+        <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+      </ng-container>
+    
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef> Aufgabentyp </th>
+        <td mat-cell *matCellDef="let element"> {{element.type}} </td>
+      </ng-container>
+    
+      <ng-container matColumnDef="attempts">
+          <th mat-header-cell *matHeaderCellDef> Versuche </th>
+          <td mat-cell *matCellDef="let element"> {{element.attempts}} </td>
+      </ng-container>
 
-<!-- NOTIZ AN MARC: Hier nur statisch zum testen, da du das im anderen Branch schon mit Tabelle machst. Bei der Tabell einfach alle CodingQuestions per QuestionId an die Tutor-Kai Route (siehe hier)-->
+      <ng-container matColumnDef="progress">
+        <th mat-header-cell *matHeaderCellDef> Fortschritt </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-progress-spinner [value]="row.progress" [mode]="'determinate'" [diameter]="30"></mat-progress-spinner>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="mode">
+        <th mat-header-cell *matHeaderCellDef> Modus </th>
+        <!-- <td mat-cell *matCellDef="let element"> {{element.mode}} </td> -->
+        <td mat-cell *matCellDef="let element">Üben</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Aktionen </th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-raised-button color="primary" (click)="onTaskClick(row)" class="button">Lösen</button>
+          <button mat-raised-button color="primary" class="button">Feedback Historie</button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      
+  </table>
+</div>
+
+<!-- NOTIZ AN MARC: Hier nur statisch zum testen, da du das im anderen Branch schon mit Tabelle machst. Bei der Tabell einfach alle CodingQuestions per QuestionId an die Tutor-Kai Route (siehe hier)
 <div class="grid-container">
       <mat-card style="margin:10px; padding:2px" *ngFor="let title of titles; let i = index">
         <mat-card-title>{{ title }}</mat-card-title>
@@ -72,3 +78,4 @@
         </mat-card-actions>
       </mat-card>
 </div>
+-->

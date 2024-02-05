@@ -233,9 +233,9 @@ model Question {
   type                       String
   author                     User              @relation(fields: [authorId], references: [id])
   authorId                   Int
-  text                       String?
-  isApproved                 Boolean           @default(false)
-  version                    Int               @default(1)
+  text                       String             @db.Text
+  isApproved                 Boolean            @default(false)
+  version                    Int                @default(1)
   files                      File[]
   originId                   Int?
   origin                     Question?          @relation("VersionControl", fields: [originId], references: [id], onDelete: Cascade)
@@ -322,7 +322,7 @@ model UserAnswer {
   question             Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId           Int
   userMCOptionSelected UserMCOptionSelected[]
-  userFreetextAnswer   String?                   
+  userFreetextAnswer   String?                @db.MediumText   
   feedbacks            Feedback[]     
 }
 

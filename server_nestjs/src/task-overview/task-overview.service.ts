@@ -7,7 +7,7 @@ import { Injectable } from '@nestjs/common';
 export class TaskOverviewService {
     constructor(private prisma : PrismaService) {}
 
-    async getTaskOverviewDataForConceptNode(conceptNode_id: number) : Promise<taskOverviewElementDTO[]> {
+    async getTaskOverviewDataForConceptNode(conceptNode_id: number, user_id: number) : Promise<taskOverviewElementDTO[]> {
         
         //schaue in die question tabelle und hole alle fragen mit angegebener conceptNodeId. Dabei soll jede originId nur einmal vorkommen und die neuste version der Frage sein
         const questions = await this.prisma.question.findMany({
@@ -40,7 +40,8 @@ export class TaskOverviewService {
         for(let question of questions) {
             let attemptCount = await this.prisma.userAnswer.count({
                 where: {
-                    questionId: question.id
+                    questionId: question.id,
+                    userId: user_id,
                 },
             });
 
@@ -48,30 +49,31 @@ export class TaskOverviewService {
             let userAnswers = await this.prisma.userAnswer.findMany({
                 where: {
                     questionId: question.id,
+                    userId: user_id,
                 },
                 select: {
                     id: true,
                 }
             });
 
-            /*
             let bestScore = 0;
-            for(let userAnswer of userAnswers) {
-                let feedback = await this.prisma.feedback.findUnique({
-                    where: {
-                        id: userAnswer.id,
-                    },
-                    select: {
-                        score: true,
+            if(userAnswers) {
+                for(let userAnswer of userAnswers) {
+                    let feedback = await this.prisma.feedback.findUnique({
+                        where: {
+                            id: userAnswer.id,
+                        },
+                        select: {
+                            score: true,
+                        }
+                    });
+                    if(feedback.score > bestScore) {
+                        bestScore = feedback.score;
                     }
-                });
-                if(feedback.score > bestScore) {
-                    bestScore = feedback.score;
                 }
             }
-
-            let progress = bestScore / question.score;
-            */
+            
+            let progress = (bestScore / question.score)*100;
 
             taskOverviewData.push({
                 id: question.id,
@@ -79,7 +81,7 @@ export class TaskOverviewService {
                 description: question.description,
                 name: question.name,
                 attempts: attemptCount,
-                progress: 30,
+                progress: progress,
             });
         }
 

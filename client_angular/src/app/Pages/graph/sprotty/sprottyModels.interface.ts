@@ -24,7 +24,7 @@ export interface SprottyConceptNode extends SNode, Expandable {
     
     // helper fields
     databaseId: number;
-    parentIds?: string[];
+    parentIds: string[];
     childIds?: string[];
     prerequisiteEdgeIds?: string[];
     successorEdgeIds?: string[];
@@ -43,4 +43,5 @@ export interface SprottyConceptEdge extends SEdge {
 
     //
     parentId: string;
+    databaseId: number;
 }
