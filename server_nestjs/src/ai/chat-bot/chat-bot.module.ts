@@ -4,9 +4,10 @@ import { PrismaModule } from '@/prisma/prisma.module';
 import { HttpModule } from '@nestjs/axios';
 import { LlmBasicPromptService } from '../services/llmBasicPrompt.service';
 import { RagService } from '../services/rag.service';
+import {ChatBotRAGService} from './chatbot_rag.service';
 
 @Module({
-  providers: [LlmBasicPromptService, RagService],
+  providers: [LlmBasicPromptService, RagService, ChatBotRAGService],
   imports: [PrismaModule, HttpModule],
   controllers: [ChatBotController]
 })

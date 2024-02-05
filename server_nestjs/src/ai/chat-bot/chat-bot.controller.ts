@@ -1,12 +1,14 @@
 import { Controller, Post, Body, HttpCode, Res } from '@nestjs/common';
 import { LlmBasicPromptService } from '../services/llmBasicPrompt.service';
 import { Response } from 'express';
+import { ChatBotRAGService } from './chatbot_rag.service';
 
 @Controller('chat-bot')
 export class ChatBotController {
   constructor(
 
     private readonly llmBasicPromptService: LlmBasicPromptService,
+    private readonly chatBotRAGService: ChatBotRAGService
     ) {}
 
   @Post('ask/basic')
@@ -23,7 +25,6 @@ export class ChatBotController {
     res.set('Content-Type', 'text/plain');
     res.setHeader('Transfer-Encoding', 'chunked');
 
-    const systemMessage: string = "Du bist ein hilfreicher Assistent." //Systemmessage can be modified depending on the task
-    const result = await this.llmBasicPromptService.streamLlmAnswer(systemMessage, question, res)
+    const result = await this.chatBotRAGService.chatBotRagAnswer( question, res)
   }
 }

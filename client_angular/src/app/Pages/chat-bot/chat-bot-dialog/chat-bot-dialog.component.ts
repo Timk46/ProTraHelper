@@ -1,8 +1,10 @@
-import { Component, Inject } from '@angular/core';
+import { Component, ElementRef, HostListener, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ChatBotMessageDTO } from '@DTOs/chatBot.dto';
 import { LlmService } from 'src/app/Services/ai/llm.service';
 import { MarkdownService } from 'src/app/Services/markdown/markdown.service';
+import { MatDialog } from '@angular/material/dialog';
+import { VideoTimeStampComponent } from '../../../Modules/tutor-kai/sites/video-time-stamp/video-time-stamp.component';
 
 export interface DialogData {
   question: string;
@@ -16,8 +18,8 @@ export interface DialogData {
 })
 export class ChatBotDialogComponent {
   markdownTestString: string =
-    "## Heading level 2\n Italicized text is the *cat's meow*. \n1. First item \n2. Second item \n3. Third item \n4. Fourth item \n" +
-    '```javascript\nvar add2 = function(number) {\n   return number + 2; \n }\n```';
+    "**Test**: Here is an inline note.^[Inlines notes are easier to write, since you don't have to pick an identifier and move down to type the note.]";
+
   message: ChatBotMessageDTO = {
     id: 12,
     question: this.markdownService.parse(this.markdownTestString),
@@ -25,68 +27,109 @@ export class ChatBotDialogComponent {
     isBot: false,
   };
 
+  /**
+   * The current lecture.
+   */
+  lecture: string = 'OFP';
+
+  /**
+   * The available lecture options.
+   */
+  lectureOptions: string[] = ['OFP', 'RN1', 'RN2'];
+
+  /**
+   * An array of messages exchanged in the chat.
+   */
   messages: ChatBotMessageDTO[] = [];
+
+  /**
+   * The user's question.
+   */
   question: string = '';
-  tempMessage: string = "";
+
+  /**
+   * A boolean indicating if the chatbot is currently waiting for the stream to start
+   */
+  isLoading: boolean = false;
+
+  /**
+   * A boolean indicating if the chatbot is currently streaming.
+   */
+  isStreaming: boolean = false;
+
 
   constructor(
     private llmService: LlmService,
     private markdownService: MarkdownService,
-    public dialogRef: MatDialogRef<ChatBotDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData
+    private el: ElementRef,
+    private dialog: MatDialog
   ) {}
 
+  ngOnInit(): void {}
+
   /**
-   * Closes the dialog.
+   * Handles click events on the component.
+   * If the clicked element is a link, it prevents the default action and opens a modal with the lecture-video instead.
    */
-  onNoClick(): void {
-    this.dialogRef.close();
+  @HostListener('click', ['$event'])
+  public onClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (target.tagName === 'A' && target.getAttribute('href')) {
+      event.preventDefault();
+      this.openModal(
+        target.getAttribute('href'),
+        this.lecture
+        );
+    }
+  }
+
+  /**
+   * Opens a modal with the VideoTimeStampComponent and passes data to it.
+   *
+   * @param href - The href attribute of the clicked link.
+   * @param lecture - The current lecture.
+   */
+  private openModal(href: string | null, lecture: string) {
+    this.dialog.open(VideoTimeStampComponent, { data: { href, lecture } });
   }
 
   /**
    * Sends the user's question to the chatbot service and adds the response to the messages array.
-   * The message array is displayed in the html.
    */
   askQuestion(): void {
     const message: ChatBotMessageDTO = {
-      id: this.messages.length,
+      id: this.messages.length + 1,
       question: this.question,
       createdAt: new Date(),
       isBot: false,
     };
     this.messages.push(message);
-    const answerId = this.messages.length;
-    let isFirstResponse: boolean = true;
-
-    const botMessage: ChatBotMessageDTO = {
-      id: answerId,
-      question: '', // acutally answer not question
+    this.isLoading = true;
+    this.messages.push({
+      id: this.messages.length + 1,
+      question: '',
       createdAt: new Date(),
       isBot: true,
-    };
-    this.messages.push(botMessage);
-
-    // getLlmAnswer only used for demonstration purposes here!
-    const test = this.llmService.getLlmAnswer(this.question).subscribe((response) => {
-      console.log("Basic GPT-4 QA Test Answer: " + response);
     });
-
-
-    this.llmService.getLlmAnswerStream(this.question).subscribe({
-      next: (response) => {
-        if (isFirstResponse) {
-          isFirstResponse = false;
-        }
-        this.tempMessage += response;
-        this.messages[this.messages.length -1].question = this.markdownService.parse(this.tempMessage);
+    const chatSubscription = this.llmService.getLlmAnswerStream(this.question)
+    .subscribe({
+      next: (data: string) => {
+        this.isLoading = false;
+        this.isStreaming = true;
+        this.messages[this.messages.length - 1].question = this.markdownService.parse(data);
       },
       error: (error) => {
         console.log(error);
+        this.isLoading = false;
+        this.isStreaming = false;
+        chatSubscription.unsubscribe();
       },
       complete: () => {
-        console.log("AI Answer for Querstion: '" + this.question + "' completed.");
-      },
+        this.isLoading = false;
+        this.isStreaming = false;
+        chatSubscription.unsubscribe();
+      }
     });
+    this.question = '';
   }
 }
-

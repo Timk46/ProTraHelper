@@ -1,13 +1,14 @@
-<mat-dialog-content style = " background-color: #4C566A; scrollbar-width: thin">
+<mat-dialog-content style = " background-color: #4c566a; scrollbar-width: thin">
   <div class="chat-container">
     <div>
+      <p style="color: whitesmoke;">Hier kannst du Fragen zu den Vorlesungsinhalten stellen.</p>
     <div *ngFor="let message of messages" class="chat-message" [class.user]="!message.isBot" [class.bot]="message.isBot">
-      <div [innerHTML]="message.question"></div>
+      <div class="prose max-w-none prose-stone prose-base" [innerHTML]="message.question"></div>
     </div>
   </div>
     <div class="chat-input">
       <mat-form-field class="input-field" appearance="fill" (keydown.enter)="askQuestion()">
-        <mat-label>Befrage das Skript</mat-label>
+        <mat-label>KI fragen</mat-label>
         <input matInput [(ngModel)]="question">
       </mat-form-field>
       <button mat-raised-button style="font-size:24px; height:52px" color="primary" (click)="askQuestion()">Ask</button>
