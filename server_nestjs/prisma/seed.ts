@@ -49,8 +49,8 @@ async function main() {
   await prisma.anonymousUser.deleteMany();
   await prisma.codeSubmission.deleteMany();
   await prisma.codingQuestion.deleteMany();
-  await prisma.mCQuestion.deleteMany();
   await prisma.question.deleteMany();
+  await prisma.mCQuestion.deleteMany();
   await prisma.training.deleteMany();
   await prisma.requirement.deleteMany();
   await prisma.contentEdge.deleteMany();
@@ -1041,8 +1041,9 @@ async function main() {
   const questionFreeText = await prisma.question.create({
     data: {
       name: 'Primitiver Datentyp - Freitext',
-      description: 'Beschreibe in eigenen Worten, was ein primitiver Datentyp ist.',
-      score: 1  ,
+      description:
+        'Beschreibe in eigenen Worten, was ein primitiver Datentyp ist.',
+      score: 1,
       type: 'FreeText',
       author: { connect: { id: adminUser.id } },
       text: 'Primitive Datentypen',
@@ -1058,9 +1059,9 @@ async function main() {
 
   const questionFreeTextVersion = await prisma.questionVersion.create({
     data: {
-        question: { connect: { id: questionFreeText.id } },
-        version: 1,
-        isApproved : true
+      question: { connect: { id: questionFreeText.id } },
+      version: 1,
+      isApproved: true,
     },
   });
 
@@ -1111,7 +1112,8 @@ async function main() {
 
   // Import Tasks for Excel
   console.log('Importing Tasks from Excel...');
-  const filePathTasks = process.env.FILE_PATH + 'wise2324_OFP_workshop_aufgaben.xlsx';
+  const filePathTasks =
+    process.env.FILE_PATH + 'wise2324_OFP_workshop_aufgaben.xlsx';
   const workbook = XLSX.readFile(filePathTasks);
 
   const taskSheet: WorkSheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -1123,9 +1125,10 @@ async function main() {
     let newTask = await prisma.question.create({
       data: {
         name: task.Titel,
-        description: "automated Import from Excel - JACK Tasks from SoSe 2023 and LiveCodingTasks for Exampreperation WiSe2324",
+        description:
+          'automated Import from Excel - JACK Tasks from SoSe 2023 and LiveCodingTasks for Exampreperation WiSe2324',
         score: 100, // this is the max score for all tasks currently (=100%)
-        type: "CodingQuestion",
+        type: 'CodingQuestion',
         author: { connect: { id: adminUser.id } },
         codingQuestions: {
           create: {
@@ -1148,12 +1151,13 @@ async function main() {
                 },
               ],
             },
-            codeGerueste: { // add all codegerueste with matching taskId
+            codeGerueste: {
+              // add all codegerueste with matching taskId
               create: codes
                 .filter((code) => code.taskId === task.Id)
                 .map((filteredCode) => ({
                   codeFileName: filteredCode.fileName,
-                  code: filteredCode.code
+                  code: filteredCode.code,
                 })),
             },
           },

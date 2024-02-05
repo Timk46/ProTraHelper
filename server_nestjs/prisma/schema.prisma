@@ -62,9 +62,9 @@ model Module {
 // the level goal for a concept in a module
 model ModuleConceptGoal {
   id            Int         @id @default(autoincrement())
-  module        Module      @relation(fields: [moduleId], references: [id])
+  module        Module      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   moduleId      Int
-  conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id])
+  conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id], onDelete: Cascade)
   conceptNodeId Int
   level         Int
 }
@@ -100,7 +100,7 @@ model ConceptNode {
   currentConceptFor User[]
   userConcepts      UserConcept[]
   moduleGoals       ModuleConceptGoal[]
-  conceptGraph      ConceptGraph?
+  conceptGraph      ConceptGraph?       
   conceptGraphId    Int? // is only set for the ancestor node
   Discussion        Discussion[]
   question          Question[]
@@ -190,9 +190,9 @@ model ContentElement {
   text                String?
   contentNode         ContentNode           @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
   contentNodeId       Int
-  file                File?                 @relation(fields: [fileId], references: [id])
+  file                File?                 @relation(fields: [fileId], references: [id], onDelete: SetNull)
   fileId              Int?                  @unique
-  question            Question?             @relation(fields: [questionId], references: [id])
+  question            Question?             @relation(fields: [questionId], references: [id], onDelete: SetNull)
   questionId          Int?                  @unique
   Discussion          Discussion[]
   UserContentProgress UserContentElementProgress[]
@@ -206,9 +206,9 @@ model File {
   type             String
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
-  question         Question?       @relation(fields: [questionId], references: [id])
+  question         Question?       @relation(fields: [questionId], references: [id], onDelete: SetNull)
   questionId       Int?
-  MCAnswer         MCOption?       @relation(fields: [mCAnswerId], references: [id])
+  MCAnswer         MCOption?       @relation(fields: [mCAnswerId], references: [id], onDelete: SetNull)
   mCAnswerId       Int?
   contentElement   ContentElement?
   contentElementId Int?
@@ -218,7 +218,7 @@ model File {
 model Feedback {
   id            Int         @id @default(autoincrement())
   text          String
-  userAnswer    UserAnswer  @relation(fields: [userAnswerId], references: [id])
+  userAnswer    UserAnswer  @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
   userAnswerId  Int  
   score         Float
 }
@@ -238,14 +238,14 @@ model Question {
   version                    Int               @default(1)
   files                      File[]
   originId                   Int?
-  origin                     Question?          @relation("VersionControl", fields: [originId], references: [id])
+  origin                     Question?          @relation("VersionControl", fields: [originId], references: [id], onDelete: Cascade)
   question                   Question[]          @relation("VersionControl")
   //successor                  Question?          @relation("VersionControl")
   //toDo: connect to different mediatypes Evelyn
   codingQuestions            CodingQuestion?
-  contentElement             ContentElement?
+  contentElement             ContentElement?   
   contentElementId           Int?
-  conceptNode                ConceptNode?      @relation(fields: [conceptNodeId], references: [id])
+  conceptNode                ConceptNode?      @relation(fields: [conceptNodeId], references: [id], onDelete: SetNull)
   conceptNodeId              Int?
   userAnswer                 UserAnswer[]
   mcQuestion                 MCQuestion[]
@@ -257,9 +257,9 @@ model QuestionVersion {
   id          Int          @id @default(autoincrement())
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  question    Question?    @relation("QuestionToQuestionVersion", fields: [questionId], references: [id])
+  question    Question    @relation("QuestionToQuestionVersion", fields: [questionId], references: [id], onDelete: Cascade)
   questionId  Int
-  successor   Question?    @relation("QuestionToSuccessorQuestionVersion", fields: [successorId], references: [id])
+  successor   Question?    @relation("QuestionToSuccessorQuestionVersion", fields: [successorId], references: [id], onDelete: SetNull)
   successorId Int?
   version     Int
   isApproved  Boolean      @default(false)
@@ -271,9 +271,9 @@ model MCQuestion {
   id                Int                @id @default(autoincrement())
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  questionVersion   QuestionVersion?   @relation(fields: [questionVersionId], references: [id])
+  questionVersion   QuestionVersion?   @relation(fields: [questionVersionId], references: [id], onDelete: SetNull)
   questionVersionId Int?
-  question          Question           @relation(fields: [questionId], references: [id])
+  question          Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId        Int
   shuffleoptions    Boolean            @default(true)
   isSC              Boolean
@@ -296,9 +296,9 @@ model MCQuestionOption {
   id           Int        @id @default(autoincrement())
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  question     MCQuestion @relation(fields: [mcQuestionId], references: [id])
+  question     MCQuestion @relation(fields: [mcQuestionId], references: [id], onDelete: Cascade)
   mcQuestionId Int
-  option       MCOption   @relation(fields: [mcOptionId], references: [id])
+  option       MCOption   @relation(fields: [mcOptionId], references: [id], onDelete: Cascade)
   mcOptionId   Int
 }
 
@@ -317,9 +317,9 @@ model UserAnswer {
   id                   Int                    @id @default(autoincrement())
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
-  user                 User                   @relation(fields: [userId], references: [id])
+  user                 User                  @relation(fields: [userId], references: [id])
   userId               Int
-  question             Question               @relation(fields: [questionId], references: [id])
+  question             Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId           Int
   userMCOptionSelected UserMCOptionSelected[]
   userFreetextAnswer   String?                   
@@ -330,9 +330,9 @@ model UserMCOptionSelected {
   id             Int          @id @default(autoincrement())
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  userAnswer     UserAnswer   @relation(fields: [userAnswerId], references: [id])
+  userAnswer     UserAnswer   @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
   userAnswerId   Int
-  mcOption       MCOption     @relation(fields: [mcOptionId], references: [id])
+  mcOption       MCOption     @relation(fields: [mcOptionId], references: [id], onDelete: Cascade)
   mcOptionId     Int
 }
 
@@ -436,7 +436,7 @@ model KIFeedback {
 //the 'authorId' field in both the discussion and message table.
 model anonymousUser {
   id            Int         @id @default(autoincrement())
-  user          User        @relation(fields: [userId], references: [id])
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        Int
   anonymousName String      @default("Anonymchen")
   Discussion    Discussion?
@@ -452,7 +452,7 @@ model Discussion {
   contentNodeId    Int?
   conceptNode      ConceptNode     @relation(fields: [conceptNodeId], references: [id])
   conceptNodeId    Int
-  contentElement   ContentElement? @relation(fields: [contentElementId], references: [id])
+  contentElement   ContentElement? @relation(fields: [contentElementId], references: [id], onDelete: SetNull)
   contentElementId Int?
   author           anonymousUser   @relation(fields: [authorId], references: [id])
   authorId         Int             @unique
@@ -469,7 +469,7 @@ model Message {
   authorId     Int
   isInitiator  Boolean       @default(false) // true if this is the authors discussion question
   isSolution   Boolean       @default(false)
-  discussion   Discussion    @relation(fields: [discussionId], references: [id])
+  discussion   Discussion    @relation(fields: [discussionId], references: [id], onDelete: Cascade)
   discussionId Int
   votes        Vote[]
 }
@@ -477,9 +477,9 @@ model Message {
 model Vote {
   id        Int     @id @default(autoincrement())
   isUpvote  Boolean @default(true) // true if upvote, false if downvote
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  message   Message @relation(fields: [messageId], references: [id])
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
   messageId Int
 
   @@unique([userId, messageId], name: "unique_vote")
@@ -502,9 +502,9 @@ model ChatBotMessage {
 
 model UserContentElementProgress {
   id               Int            @id @default(autoincrement())
-  user             User           @relation(fields: [userId], references: [id])
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId           Int
-  contentElement   ContentElement @relation(fields: [contentElementId], references: [id])
+  contentElement   ContentElement @relation(fields: [contentElementId], references: [id], onDelete: Cascade)
   contentElementId Int
   markedAsDone     Boolean        @default(false)
   markedAsQuestion Boolean        @default(false)
@@ -513,9 +513,9 @@ model UserContentElementProgress {
 
 model UserContentView {
   id            Int         @id @default(autoincrement())
-  user          User        @relation(fields: [userId], references: [id])
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        Int
-  contentNode   ContentNode @relation(fields: [contentNodeId], references: [id])
+  contentNode   ContentNode @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
   contentNodeId Int
   lastOpened    DateTime    
 }
