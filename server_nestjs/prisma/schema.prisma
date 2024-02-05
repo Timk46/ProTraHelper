@@ -231,7 +231,7 @@ model Question {
   type                       String
   author                     User               @relation(fields: [authorId], references: [id])
   authorId                   Int
-  text                       String?
+  text                       String             @db.Text
   isApproved                 Boolean            @default(false)
   version                    Int                @default(1)
   files                      File[]

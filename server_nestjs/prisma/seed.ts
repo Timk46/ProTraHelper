@@ -18,6 +18,7 @@ interface excel_Aufgabe {
   Task_html: string;
   codeName: string;
   countInputArgs: number;
+  ConceptNodeID: number;
 }
 
 interface excel_Codegeruest {
@@ -945,6 +946,10 @@ async function main() {
   });
 
   // Question
+  let conceptNodeForMCQ = await prisma.conceptNode.findUnique({
+    where: { id: 8 },
+  });
+
   const question = await prisma.question.create({
     data: {
       name: 'Primitiver Datentyp',
@@ -953,7 +958,7 @@ async function main() {
       type: 'MC',
       author: { connect: { id: adminUser.id } },
       text: 'Welcher der folgenden Datentypen in Java ist primitiv?',
-      conceptNode: { connect: { id: conceptNode.id } },
+      conceptNode: { connect: { id: conceptNodeForMCQ.id } },
       isApproved: true,
       version: 1,
     },
@@ -1045,7 +1050,8 @@ async function main() {
       type: 'FreeText',
       author: { connect: { id: adminUser.id } },
       text: 'Primitive Datentypen',
-      conceptNode: { connect: { id: conceptNode.id } },
+      conceptNode: { connect: { id: conceptNodeForMCQ.id } },
+      isApproved: true,
     },
   });
 
@@ -1119,6 +1125,13 @@ async function main() {
   const codes: excel_Codegeruest[] = utils.sheet_to_json(codeSheet);
 
   for (let task of tasks) {
+    
+    let conceptNode = await prisma.conceptNode.findFirst({
+      where: {
+        id: task.ConceptNodeID,
+      },
+    });
+
     let newTask = await prisma.question.create({
       data: {
         name: task.Titel,
@@ -1126,6 +1139,9 @@ async function main() {
         score: 100, // this is the max score for all tasks currently (=100%)
         type: "CodingQuestion",
         author: { connect: { id: adminUser.id } },
+        text: task.Task,
+        conceptNode: { connect: { id: conceptNode.id } },
+        isApproved: true,
         codingQuestions: {
           create: {
             text: task.Task,
@@ -1158,6 +1174,12 @@ async function main() {
           },
         },
       },
+    });
+
+    // connect it to itself
+    await prisma.question.update({
+      where: { id: newTask.id },
+      data: { origin: { connect: { id: newTask.id } } },
     });
   }
 
