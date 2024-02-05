@@ -439,6 +439,19 @@ CREATE TABLE "UserContentProgress" (
 );
 
 -- CreateTable
+CREATE TABLE "UserContentView" (
+    "id" SERIAL NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "contentElementId" INTEGER NOT NULL,
+    "lastOpened" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "UserContentView_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "UserContentView_userId_contentElementId_key" UNIQUE ("userId", "contentElementId"),
+    CONSTRAINT "UserContentView_contentElementId_fkey" FOREIGN KEY ("contentElementId") REFERENCES "ContentElement"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "UserContentView_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateTable
 CREATE TABLE "_ModuleToSubject" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
