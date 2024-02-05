@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -215,9 +215,9 @@ model File {
 // Feedback which the users will get after answering a question
 model Feedback {
   id            Int         @id @default(autoincrement())
-  text          String      @db.MediumText
+  text          String      @db.Text
   userAnswer    UserAnswer  @relation(fields: [userAnswerId], references: [id])
-  userAnswerId  Int  
+  userAnswerId  Int
   score         Float
 }
 
@@ -229,7 +229,7 @@ model Question {
   description                String?
   score                      Float?
   type                       String
-  author                     User               @relation(fields: [authorId], references: [id])
+  author                     User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId                   Int
   text                       String             @db.Text
   isApproved                 Boolean            @default(false)
@@ -294,9 +294,9 @@ model MCQuestionOption {
   id           Int        @id @default(autoincrement())
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  question     MCQuestion @relation(fields: [mcQuestionId], references: [id])
+  question     MCQuestion @relation(fields: [mcQuestionId], references: [id], onDelete: Cascade)
   mcQuestionId Int
-  option       MCOption   @relation(fields: [mcOptionId], references: [id])
+  option       MCOption   @relation(fields: [mcOptionId], references: [id], onDelete: Cascade)
   mcOptionId   Int
 }
 
@@ -320,8 +320,8 @@ model UserAnswer {
   question             Question               @relation(fields: [questionId], references: [id])
   questionId           Int
   userMCOptionSelected UserMCOptionSelected[]
-  userFreetextAnswer   String?                @db.MediumText   
-  feedbacks            Feedback[]     
+  userFreetextAnswer   String?                @db.Text
+  feedbacks            Feedback[]
 }
 
 model UserMCOptionSelected {
@@ -460,7 +460,7 @@ model Discussion {
 
 model Message {
   id           Int           @id @default(autoincrement())
-  text         String        @db.VarChar(2000)
+  text         String        @db.Text
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   author       anonymousUser @relation(fields: [authorId], references: [id])
