@@ -237,6 +237,7 @@ async function main() {
     const columnDescriptionId = 9;
     const columnElementId = [10, 11, 12, 13, 14];
     const columnTaskId = [15, 16];
+    const columnVideoDescriptionId = 17;
 
     //conceptIds that start represent the beginning of a new rootConcept
     const rootConceptId = [1, 42];
@@ -264,8 +265,8 @@ async function main() {
           data: {
             id: +row[columnContentId],
             name: 'ContentNode' + +row[columnContentId] + ' für ' + lastTopic,
-            description: row[columnDescriptionId]
-              ? row[columnDescriptionId].toString()
+            description: row[columnVideoDescriptionId]
+              ? row[columnVideoDescriptionId].toString()
               : 'Keine Beschreibung für ContentNode ' + +row[columnContentId],
           },
         });
@@ -301,16 +302,6 @@ async function main() {
                 },
               },
             });
-            if (+elementId == 0) {
-              await prisma.userContentElementProgress.create({
-                data: {
-                  user: { connect: { id: studentUser.id } },
-                  contentElement: { connect: { id: TempContentElement.id } },
-                  markedAsDone: true,
-                  updatedAt: new Date(),
-                },
-              });
-            }
             //files from excelData
             await prisma.file.create({
               data: {

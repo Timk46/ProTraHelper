@@ -17,7 +17,7 @@ CREATE TABLE `User` (
 CREATE TABLE `Module` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
-    `description` VARCHAR(191) NOT NULL,
+    `description` TEXT NOT NULL,
 
     UNIQUE INDEX `Module_name_key`(`name`),
     PRIMARY KEY (`id`)
@@ -37,7 +37,7 @@ CREATE TABLE `ModuleConceptGoal` (
 CREATE TABLE `Subject` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
-    `description` VARCHAR(191) NOT NULL,
+    `description` TEXT NOT NULL,
 
     UNIQUE INDEX `Subject_name_key`(`name`),
     PRIMARY KEY (`id`)
@@ -57,7 +57,7 @@ CREATE TABLE `ConceptGraph` (
 CREATE TABLE `ConceptNode` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
-    `description` VARCHAR(191) NOT NULL,
+    `description` TEXT NOT NULL,
     `conceptGraphId` INTEGER NULL,
 
     PRIMARY KEY (`id`)
@@ -86,7 +86,7 @@ CREATE TABLE `ConceptEdge` (
 CREATE TABLE `ContentNode` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
-    `description` VARCHAR(191) NOT NULL,
+    `description` TEXT NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -179,7 +179,7 @@ CREATE TABLE `Question` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `name` VARCHAR(191) NULL,
-    `description` VARCHAR(191) NULL,
+    `description` TEXT NULL,
     `score` DOUBLE NULL,
     `type` VARCHAR(191) NOT NULL,
     `authorId` INTEGER NOT NULL,
@@ -431,7 +431,7 @@ CREATE TABLE `ChatBotMessage` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `UserContentProgress` (
+CREATE TABLE `UserContentElementProgress` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `userId` INTEGER NOT NULL,
     `contentElementId` INTEGER NOT NULL,
@@ -632,10 +632,10 @@ ALTER TABLE `Vote` ADD CONSTRAINT `Vote_messageId_fkey` FOREIGN KEY (`messageId`
 ALTER TABLE `ChatBotMessage` ADD CONSTRAINT `ChatBotMessage_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `UserContentProgress` ADD CONSTRAINT `UserContentProgress_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `UserContentElementProgress` ADD CONSTRAINT `UserContentElementProgress_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `UserContentProgress` ADD CONSTRAINT `UserContentProgress_contentElementId_fkey` FOREIGN KEY (`contentElementId`) REFERENCES `ContentElement`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `UserContentElementProgress` ADD CONSTRAINT `UserContentElementProgress_contentElementId_fkey` FOREIGN KEY (`contentElementId`) REFERENCES `ContentElement`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `_ModuleToSubject` ADD CONSTRAINT `_ModuleToSubject_A_fkey` FOREIGN KEY (`A`) REFERENCES `Module`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

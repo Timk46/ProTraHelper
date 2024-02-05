@@ -26,15 +26,15 @@ enum contentElementType {
 }
 
 model User {
-  id                   Int                   @id @default(autoincrement())
-  email                String                @unique
+  id                   Int                          @id @default(autoincrement())
+  email                String                       @unique
   firstname            String
   lastname             String
   password             String
-  createdAt            DateTime              @default(now())
-  globalRole           GlobalRole            @default(STUDENT)
+  createdAt            DateTime                     @default(now())
+  globalRole           GlobalRole                   @default(STUDENT)
   modules              Module[]
-  currentConcept       ConceptNode?          @relation(fields: [currentconceptNodeId], references: [id], onDelete: SetNull) // last concept the user has visited
+  currentConcept       ConceptNode?                 @relation(fields: [currentconceptNodeId], references: [id], onDelete: SetNull) // last concept the user has visited
   currentconceptNodeId Int?
   conceptUser          UserConcept[]
   question             Question[]
@@ -53,7 +53,7 @@ model User {
 model Module {
   id          Int                 @id @default(autoincrement())
   name        String              @unique
-  description String
+  description String              @db.Text
   subjects    Subject[]
   users       User[]
   goals       ModuleConceptGoal[]
@@ -73,7 +73,7 @@ model ModuleConceptGoal {
 model Subject {
   id          Int      @id @default(autoincrement())
   name        String   @unique
-  description String
+  description String   @db.Text
   modules     Module[]
 }
 
@@ -89,7 +89,7 @@ model ConceptGraph {
 model ConceptNode {
   id                Int                 @id @default(autoincrement())
   name              String
-  description       String
+  description       String              @db.Text
   myParents         ConceptFamily[]     @relation("childConcept") // we have to name the relation because we have two relations between the same models
   myChildren        ConceptFamily[]     @relation("parentConcept")
   mySuccessors      ConceptEdge[]       @relation("prerequisiteConcept")
@@ -100,7 +100,7 @@ model ConceptNode {
   currentConceptFor User[]
   userConcepts      UserConcept[]
   moduleGoals       ModuleConceptGoal[]
-  conceptGraph      ConceptGraph?       
+  conceptGraph      ConceptGraph?
   conceptGraphId    Int? // is only set for the ancestor node
   Discussion        Discussion[]
   question          Question[]
@@ -129,7 +129,7 @@ model ConceptEdge {
 model ContentNode {
   id              Int               @id @default(autoincrement())
   name            String
-  description     String
+  description     String            @db.Text
   prerequisites   ContentEdge[]     @relation("prerequisiteContent")
   successors      ContentEdge[]     @relation("successorContent")
   requires        Requirement[]
@@ -183,17 +183,17 @@ model UserConcept {
 
 // for example a MC question or a video or a piece of text
 model ContentElement {
-  id                  Int                   @id @default(autoincrement())
+  id                  Int                          @id @default(autoincrement())
   type                contentElementType
   position            Int // position in the content node
   title               String?
   text                String?
-  contentNode         ContentNode           @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
+  contentNode         ContentNode                  @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
   contentNodeId       Int
-  file                File?                 @relation(fields: [fileId], references: [id], onDelete: SetNull)
-  fileId              Int?                  @unique
-  question            Question?             @relation(fields: [questionId], references: [id], onDelete: SetNull)
-  questionId          Int?                  @unique
+  file                File?                        @relation(fields: [fileId], references: [id], onDelete: SetNull)
+  fileId              Int?                         @unique
+  question            Question?                    @relation(fields: [questionId], references: [id], onDelete: SetNull)
+  questionId          Int?                         @unique
   Discussion          Discussion[]
   UserContentProgress UserContentElementProgress[]
 }
@@ -216,11 +216,11 @@ model File {
 
 // Feedback which the users will get after answering a question
 model Feedback {
-  id            Int         @id @default(autoincrement())
-  text          String
-  userAnswer    UserAnswer  @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
-  userAnswerId  Int  
-  score         Float
+  id           Int        @id @default(autoincrement())
+  text         String
+  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
+  userAnswerId Int
+  score        Float
 }
 
 model Question {
@@ -228,22 +228,22 @@ model Question {
   createdAt                  DateTime          @default(now())
   updatedAt                  DateTime          @updatedAt
   name                       String?
-  description                String?
+  description                String?           @db.Text
   score                      Float?
   type                       String
   author                     User              @relation(fields: [authorId], references: [id])
   authorId                   Int
-  text                       String             @db.Text
-  isApproved                 Boolean            @default(false)
-  version                    Int                @default(1)
+  text                       String            @db.Text
+  isApproved                 Boolean           @default(false)
+  version                    Int               @default(1)
   files                      File[]
   originId                   Int?
-  origin                     Question?          @relation("VersionControl", fields: [originId], references: [id], onDelete: Cascade)
-  question                   Question[]          @relation("VersionControl")
+  origin                     Question?         @relation("VersionControl", fields: [originId], references: [id], onDelete: Cascade)
+  question                   Question[]        @relation("VersionControl")
   //successor                  Question?          @relation("VersionControl")
   //toDo: connect to different mediatypes Evelyn
   codingQuestions            CodingQuestion?
-  contentElement             ContentElement?   
+  contentElement             ContentElement?
   contentElementId           Int?
   conceptNode                ConceptNode?      @relation(fields: [conceptNodeId], references: [id], onDelete: SetNull)
   conceptNodeId              Int?
@@ -257,7 +257,7 @@ model QuestionVersion {
   id          Int          @id @default(autoincrement())
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  question    Question    @relation("QuestionToQuestionVersion", fields: [questionId], references: [id], onDelete: Cascade)
+  question    Question     @relation("QuestionToQuestionVersion", fields: [questionId], references: [id], onDelete: Cascade)
   questionId  Int
   successor   Question?    @relation("QuestionToSuccessorQuestionVersion", fields: [successorId], references: [id], onDelete: SetNull)
   successorId Int?
@@ -317,23 +317,23 @@ model UserAnswer {
   id                   Int                    @id @default(autoincrement())
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
-  user                 User                  @relation(fields: [userId], references: [id])
+  user                 User                   @relation(fields: [userId], references: [id])
   userId               Int
   question             Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId           Int
   userMCOptionSelected UserMCOptionSelected[]
-  userFreetextAnswer   String?                @db.MediumText   
-  feedbacks            Feedback[]     
+  userFreetextAnswer   String?                @db.MediumText
+  feedbacks            Feedback[]
 }
 
 model UserMCOptionSelected {
-  id             Int          @id @default(autoincrement())
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  userAnswer     UserAnswer   @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
-  userAnswerId   Int
-  mcOption       MCOption     @relation(fields: [mcOptionId], references: [id], onDelete: Cascade)
-  mcOptionId     Int
+  id           Int        @id @default(autoincrement())
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
+  userAnswerId Int
+  mcOption     MCOption   @relation(fields: [mcOptionId], references: [id], onDelete: Cascade)
+  mcOptionId   Int
 }
 
 //********************************************************************************************* End MC-Question
@@ -341,17 +341,17 @@ model UserMCOptionSelected {
 //********************************************************************************************* Begin Coding Questions
 
 model CodingQuestion {
-  id              Int              @id @default(autoincrement())
-  count_InputArgs Int
-  text            String           @db.Text
-  textHTML        String           @db.Text
-  mainFileName    String
+  id                  Int              @id @default(autoincrement())
+  count_InputArgs     Int
+  text                String           @db.Text
+  textHTML            String           @db.Text
+  mainFileName        String
   programmingLanguage String
-  question        Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  questionId      Int              @unique
-  codeGerueste    CodeGeruest[]
-  automatedTests  AutomatedTest[]
-  codeSubmissions CodeSubmission[]
+  question            Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId          Int              @unique
+  codeGerueste        CodeGeruest[]
+  automatedTests      AutomatedTest[]
+  codeSubmissions     CodeSubmission[]
 }
 
 model CodeGeruest {
@@ -422,7 +422,7 @@ model KIFeedback {
   feedbackByStudent String?        @db.Text
   submission        CodeSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   submissionId      Int
-  flavor            String       @default("normal")
+  flavor            String         @default("normal")
 }
 
 //********************************************************************************************* End Coding Questions
@@ -517,7 +517,7 @@ model UserContentView {
   userId        Int
   contentNode   ContentNode @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
   contentNodeId Int
-  lastOpened    DateTime    
+  lastOpened    DateTime
 }
 
 //********************************************************************************************* End ContentView Progress
