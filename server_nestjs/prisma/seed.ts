@@ -34,6 +34,10 @@ function getFilenameByLink(hyperlink: string): string {
 }
 
 async function main() {
+
+
+  // npx prisma migrate reset ist jetzt in seed integriert. Deshalb müssen wir das hier nicht mehr manuell machen.
+  /*
   // delete everything
   console.log('Deleting everything...');
   await prisma.kIFeedback.deleteMany();
@@ -50,7 +54,9 @@ async function main() {
   await prisma.anonymousUser.deleteMany();
   await prisma.codeSubmission.deleteMany();
   await prisma.codingQuestion.deleteMany();
+  await prisma.mCQuestionOption.deleteMany();
   await prisma.mCQuestion.deleteMany();
+  await prisma.questionVersion.deleteMany();
   await prisma.question.deleteMany();
   await prisma.training.deleteMany();
   await prisma.requirement.deleteMany();
@@ -66,6 +72,7 @@ async function main() {
   await prisma.conceptNode.deleteMany();
   await prisma.conceptGraph.deleteMany();
   await prisma.user.deleteMany();
+  */
 
   console.log('Creating everything...');
 
