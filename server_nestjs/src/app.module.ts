@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { ContentModule } from './content/content.module';
 import { FilesModule } from './files/files.module';
 import { Module } from '@nestjs/common';
@@ -30,6 +31,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ModulesModule } from './modules/modules.module';
 import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
+import { McqCreationModule } from './mcqcreation/mcqcreation.module';
 
 @Module({
   imports: [
@@ -45,7 +47,8 @@ import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-gene
     TaskOverviewModule,
     RunCodeModule,
     QuestionModule,
-    FeedbackGenerationModule],
+    FeedbackGenerationModule,
+    McqCreationModule],
   controllers: [
     AppController,
     DiscussionListController, DiscussionVoteController, DiscussionViewController, DiscussionCreationController

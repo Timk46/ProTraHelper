@@ -44,6 +44,9 @@ import { TaskOverviewComponent } from './Pages/task-overview/task-overview.compo
 import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overview/task-evaluation-overview.component';
 import { FreeTextTaskComponent } from './Pages/contentView/contentElement/free-text-task/free-text-task.component';
 import { MatTableModule } from '@angular/material/table';
+import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
+import { ScoreComponent } from './Pages/contentView/contentElement/mc-task-creation/score/score.component';
+import { DescriptionDialogComponent } from './Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component';
 
 
 
@@ -77,6 +80,9 @@ import { MatTableModule } from '@angular/material/table';
     TaskOverviewComponent,
     TaskEvaluationOverviewComponent,
     FreeTextTaskComponent,
+    McTaskCreationComponent,
+    ScoreComponent,
+    DescriptionDialogComponent,
   ],
   imports: [
     BrowserModule,

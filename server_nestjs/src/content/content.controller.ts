@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
 import { ContentService } from './content.service';
 import { ContentDTO, ContentsForConceptDTO } from '@Interfaces/index';
@@ -126,5 +127,17 @@ export class ContentController {
       Number(contentNodeId),
       req.user.id,
     );
+  }
+
+  @roles('ANY')
+  @Get('/concepts')
+  async fetchAllConcepts(): Promise<string[]> {
+    const concepts = await this.contentService.fetchAllConcepts();
+    const formattedConcepts = concepts.map(concept => {
+      const formattedConcept = concept.replace(/^\d+\s/, '');
+      return formattedConcept.charAt(0).toUpperCase() + formattedConcept.slice(1);
+    });
+    console.log("Set of concepts: ",  formattedConcepts)
+    return formattedConcepts
   }
 }

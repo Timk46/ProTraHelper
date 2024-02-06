@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { PrismaService } from '@/prisma/prisma.service';
 import { ModuleDTO } from '@Interfaces/module.dto';
 import { Injectable } from '@nestjs/common';
@@ -21,6 +22,6 @@ export class ModulesService {
             };
         });
 
-        return modules; 
+        return modules;
     }
 }

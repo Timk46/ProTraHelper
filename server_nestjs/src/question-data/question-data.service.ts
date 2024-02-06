@@ -1,6 +1,7 @@
+/* eslint-disable prettier/prettier */
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { McQuestionDTO, MCOptionDTO, QuestionDTO, questionType } from '@DTOs/question.dto';
+import { McQuestionDTO, MCOptionDTO, QuestionDTO, questionType, McQuestionOptionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { Injectable } from '@nestjs/common';
 import {  } from '@prisma/client';
@@ -54,6 +55,7 @@ export class QuestionDataService {
 
         let mcQuestionData: McQuestionDTO = {
             id: mcQuestion.id,
+            questionId: mcQuestion.questionId,
             isSC: mcQuestion.isSC,
             shuffleOptions: mcQuestion.shuffleoptions
         }
@@ -94,6 +96,123 @@ export class QuestionDataService {
         return mcOptions;
     }
 
+    /**
+     *
+     * @param question
+     * @returns question Data
+     */
+    async createQuestion(question: QuestionDTO): Promise<QuestionDTO> {
+        if(question.author === undefined) {
+          throw new Error('Author not defined');
+        }
+        let newQuestion = await this.prisma.question.create({
+            data: {
+                author:  {connect: {id: question.author}},
+                description: question.description,
+                score: question.score,
+                type: question.type,
+                text: question.text,
+                isApproved: question.isApproved,
+                origin: {connect: {id: 1}},
+            }
+        });
+
+        if(!newQuestion) {
+            throw new Error('Question not created');
+        }
+
+        return newQuestion;
+    }
+
+    /**
+     *
+     * @param mcOptions
+     * @returns Options
+     */
+    async createOptions(mcOptions: MCOptionDTO[]): Promise<MCOptionDTO[]> {
+        let newOptions : MCOptionDTO[] = [];
+
+         const optionPromises = mcOptions.map(async (mcOption) => {
+             let newOption =  await this.prisma.mCOption.create({
+                data: {
+                    id: mcOption.id,
+                    text: mcOption.text,
+                    is_correct: mcOption.isCorrect
+                }
+            });
+            if(!newOption) {
+                throw new Error('Option not created');
+            }
+            return {...newOption, isCorrect: newOption.is_correct};
+        });
+        newOptions = await Promise.all(optionPromises);
+        return newOptions;
+
+    }
+
+    /**
+     *
+     * @param mcQuestion
+     * @returns McQuestion Object
+     */
+    async createMcQuestion(mcQuestion: McQuestionDTO): Promise<McQuestionDTO> {
+
+        let newMcQuestion = await this.prisma.mCQuestion.create({
+            data: {
+                question: {connect: {id: mcQuestion.questionId}},
+                isSC: mcQuestion.isSC,
+                shuffleoptions: mcQuestion.shuffleOptions
+            },
+        });
+
+        if(!newMcQuestion) {
+            throw new Error('McQuestion not created');
+        }
+
+        return {...newMcQuestion,
+                shuffleOptions: newMcQuestion.shuffleoptions};
+    }
+
+        /**
+     *
+     * @param mcQuestionOption
+     * @returns McQuestionOption Object
+     */
+    async createMcQuestionOption(mcQuestionOption: McQuestionOptionDTO): Promise<McQuestionOptionDTO> {
+      if(mcQuestionOption.mcQuestion === undefined) {
+        throw new Error('McQuestion not defined');
+      }
+      if(!mcQuestionOption.mcQuestion.id) {
+        throw new Error('McQuestion ID not defined');
+      }
+      if(!mcQuestionOption.mcOption.id){
+        throw new Error('McOption ID not defined');
+      }
+        let newMcQuestionOption = await this.prisma.mCQuestionOption.create({
+            data: {
+
+              question: {connect: {id: mcQuestionOption.mcQuestion.id}},
+              option: {connect: {id: mcQuestionOption.mcOption.id}},
+
+            },
+            include: {
+              question: {include: {questionVersion: true}},
+              option: true,
+
+            }
+        });
+
+        if(!newMcQuestionOption) {
+            throw new Error('McQuestionOption not created');
+        }
+
+        return {...newMcQuestionOption,
+                mcOption: {...newMcQuestionOption.option,
+                          isCorrect: newMcQuestionOption.option.is_correct},
+                mcQuestion: {...newMcQuestionOption.question,
+                            shuffleOptions: newMcQuestionOption.question.shuffleoptions,
+                          }};
+    }
 
     /**
      *
@@ -195,10 +314,11 @@ export class QuestionDataService {
                 score: feedback.score,
                 feedbackText: feedback.text
             }
-     
+
         }
 
     }
+
 
     /**
      *

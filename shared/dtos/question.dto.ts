@@ -37,7 +37,7 @@ export interface QuestionVersionDTO {
 //MC-Question
 export interface McQuestionDTO {
     id: number;
-    questionVersion?: QuestionVersionDTO ;
+    questionId: number;
     isSC: boolean;
     shuffleOptions: boolean;
 }

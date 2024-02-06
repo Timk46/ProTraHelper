@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { RolesGuard, roles } from '@/auth/roles.guard';
 import { ModuleDTO } from '@Interfaces/module.dto';
 import { Controller, Get, Param, ParseIntPipe, Req, UseGuards } from '@nestjs/common';
@@ -16,7 +17,7 @@ export class ModulesController {
      */
     @roles("ANY")
     @Get()
-    async getUserModules(@Req() req): 
+    async getUserModules(@Req() req):
     Promise<ModuleDTO[]>{
         const userId = req.user.id;
         const modules: ModuleDTO[] = await this.modulesService.getUserModules(userId);

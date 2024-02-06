@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // content.service.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -297,5 +298,17 @@ export class ContentService {
     });
 
     return lastOpenedDate.lastOpened;
+  }
+
+    async fetchAllConcepts(): Promise<string[]> {
+    const concepts = await this.prisma.conceptNode.findMany({
+      select: {
+        name: true,
+      },
+    });
+    const allConcepts = concepts.map((concept) => concept.name as string);
+    Array.from(new Set(allConcepts)).find((concept) => concept === "root") ? allConcepts.splice(allConcepts.indexOf("root"), 1) : null;
+    console.log("all concepts here: ", allConcepts)
+    return Array.from(new Set(allConcepts));
   }
 }

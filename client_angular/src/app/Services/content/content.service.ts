@@ -29,6 +29,14 @@ export class ContentService {
   }
 
   /**
+   *
+   * @returns All concepts in the database.
+   */
+  fetchAllConcepts(): Observable<string[]> {
+    return this.http.get<string[]>(environment.server + `/content/concepts`)
+  }
+
+  /**
    * Fetches the completion status of a content element for a specific user.
    * @param contentElementId The id of a content element.
    * @returns ContentElementStatusDTO - the status of the content element.

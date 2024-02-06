@@ -1,0 +1,12 @@
+<h1 mat-dialog-title>Set Score</h1>
+<div mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Score</mat-label>
+    <input matInput [(ngModel)]="data.score" type="number">
+  </mat-form-field>
+</div>
+<div mat-dialog-actions class="size-buttons">
+  <button mat-raised-button color="primary" type="button" [mat-dialog-close]="data.score"
+    cdkFocusInitial>Accept</button>
+  <button mat-raised-button color="warn" type="button" (click)="onNoClick()">Delete</button>
+</div>

@@ -40,6 +40,7 @@ export class McTaskComponent implements OnInit {
   //the mc question data
   mcQuestion : McQuestionDTO = {
     id : -1,
+    questionId : -1,
     isSC : false,
     shuffleOptions : false
   }
