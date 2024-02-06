@@ -79,7 +79,7 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
     return `/tutor-kai/code/${index + 3}`;
   }
 
-  constructor (private taskOverviewService : TaskOverviewService, private questionDataService : QuestionDataService, private dialog : MatDialog, private router: Router) {
+  constructor (private taskOverviewService : TaskOverviewService, private dialog : MatDialog, private router: Router) {
     
   }
 
@@ -104,14 +104,22 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
     dialogConfig.data = {
       question_id: question_data.id,
     }
+    let dialogRef;
     if (question_data.type == 'MC') { // why SC and not MC?
-      this.dialog.open(McTaskComponent, dialogConfig);
+      dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
     }
     if (question_data.type == 'FreeText') {
-      this.dialog.open(FreeTextTaskComponent, dialogConfig);
+      dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
     }
     if (question_data.type == 'CodingQuestion') {
       this.router.navigate([this.getRouterLink(question_data.id)]);
+    }
+    
+    if(dialogRef) {
+      dialogRef.afterClosed().subscribe(result => {
+        // Aktualisieren Sie hier die Seite
+        this.ngOnChanges();
+      });
     }
   }
 
