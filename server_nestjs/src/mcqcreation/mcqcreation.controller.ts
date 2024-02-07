@@ -66,7 +66,8 @@ export class McqcreationController {
     }
 
     @Get('questionTitle')
-    async getQuestionTitle(@Query('concept') concept: string): Promise<string> {
+    async getQuestionTitle(@Query('concept') concept: string): Promise<{question?: string}> {
+
       return await this.mcqcreationService.getQuestionTitle(concept);
     }
 

@@ -20,7 +20,10 @@ interface Answer{
   answer?: string;
   correct?: boolean;
 }
+interface Title {
+  question?: string;
 
+}
 const client = new Client({
   apiUrl: "https://api.smith.langchain.com",
   apiKey: "ls__f3c8aba313dd43aeb5f85c89487a7652"
@@ -342,8 +345,10 @@ export class McqCreationService {
     }
   }
 
-  async getQuestionTitle(concept: string): Promise<string> {
-    const parser = StructuredOutputParser.fromZodSchema(z.string().describe("Question to the user"));
+  async getQuestionTitle(concept: string): Promise<Title> {
+    const parser = StructuredOutputParser.fromZodSchema(z.object({
+      question: z.string().describe("Question to the user without answering options"),
+    }));
     const context = await (await this.pgVectorStore).similaritySearch(concept, 10);
     const completeContext = formatDocumentsAsString(context);
     const conceptContext = await this.getFileFromFolder(this.folderPath,concept);
@@ -360,9 +365,12 @@ export class McqCreationService {
       this.llm,
       parser,
       ]).invoke({callbacks: [tracer]})
-      if(!this.askedQuestions.includes(response)){
-        this.askedQuestions.push(response)
+
+      if(!this.askedQuestions.includes(response.question)){
+        this.askedQuestions.push(response.question)
       }
+      console.log(this.askedQuestions)
+
       return response;
     } else {
       const response2 = await RunnableSequence.from([
@@ -376,12 +384,13 @@ export class McqCreationService {
         this.llm,
         parser,
       ]).invoke({callbacks: [tracer]})
-      if(!this.askedQuestions.includes(response2)){
-        this.askedQuestions.push(response2)
+
+      if(!this.askedQuestions.includes(response2.question)){
+        this.askedQuestions.push(response2.question)
       }
+      console.log(this.askedQuestions)
       return response2;
     }
-    return ""
   }
 
   /**
@@ -419,7 +428,6 @@ export class McqCreationService {
 
 
       console.log("option: ", option)
-      console.log("response for single answer is: ", response)
       if(!this.chosenOptions.includes(response.answer)){
         this.chosenOptions.push(response.answer)
       }
@@ -456,7 +464,6 @@ export class McqCreationService {
   async getAnswers(options: number, question: string, concept: string) :Promise<Answer[]> {
 
     console.log("question: ", question)
-    console.log("options: ", options)
 
     const parser = StructuredOutputParser.fromZodSchema(z.array(z.object({
       answer: z.string().describe("Answer to the user's question. Dont enumerate"),

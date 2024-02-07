@@ -230,13 +230,13 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
       console.log("title fired again: ")
       this.fetchingTitle = true;
       this.mcqService.getQuestionTitle(this.taskForm.get('conceptName')?.value).subscribe(
-        (question: string) => {
-          this.taskForm.get('title')?.setValue(question);
+        (questionTitle: {question?: string}) => {
+          console.log("generated question from llm for the title: ",  questionTitle.question)
+          this.taskForm.get('title')?.setValue(questionTitle.question);
           this.fetchingTitle = false;
-          console.log("Lol")
         }
       )
-      console.log("lol")
+
     }
   }
 

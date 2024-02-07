@@ -99,9 +99,9 @@ export class McqcreationService {
    * @param question
    * @returns
    */
-  getQuestionTitle(concept: string) :Observable<string> {
+  getQuestionTitle(concept: string) :Observable<{question?: string}> {
     const body = new HttpParams()
       .set('concept', concept);
-    return this.http.get<string>(environment.server + `/mcqcreation/questionTitle`, {params: body})
+    return this.http.get<{question?: string}>(environment.server + `/mcqcreation/questionTitle`, {params: body})
   }
 }
