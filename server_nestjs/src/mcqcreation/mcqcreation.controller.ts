@@ -27,7 +27,7 @@ export class McqcreationController {
      * @returns the question
      */
     @Get('answers')
-    async getAnswers(@Query('question') question:string, @Query('options') options: number, @Query('concept') concept: string ): Promise<Answer[]> {
+    async getAnswers(@Query('question') question:string, @Query('options') options: number, @Query('concept') concept: string ): Promise<{answers: Answer[], description: string, score: number}> {
       return await this.mcqcreationService.getAnswers(options,question, concept);
     }
 

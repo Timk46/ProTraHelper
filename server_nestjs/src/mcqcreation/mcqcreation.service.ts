@@ -376,7 +376,7 @@ export class McqCreationService {
       const response2 = await RunnableSequence.from([
         {
           concept: () => concept,
-          completeContext: () => completeContext,
+          conceptText: () => completeContext,
           questions: () => this.askedQuestions,
           format_instructions: () => parser.getFormatInstructions(),
         },
@@ -461,14 +461,36 @@ export class McqCreationService {
    * @param question
    * @returns all answers to the user's question
    */
-  async getAnswers(options: number, question: string, concept: string) :Promise<Answer[]> {
+  async getAnswers(options: number, question: string, concept: string) :Promise<{answers: Answer[], description: string, score: number}> {
 
     console.log("question: ", question)
 
-    const parser = StructuredOutputParser.fromZodSchema(z.array(z.object({
-      answer: z.string().describe("Answer to the user's question. Dont enumerate"),
-      correct: z.boolean().describe("Indicates if the answer is correct (true/false)"),
-    })));
+    const parser = StructuredOutputParser.fromZodSchema(
+      z.array(
+        z.object(
+          {
+          answer: z.string().describe("Answer to the user's question. Dont enumerate"),
+          correct: z.boolean().describe("Indicates if the answer is correct (true/false)"),
+        }
+        ),
+        z.object({
+          description: z.string().describe("Brief Description of the Question with regards to the Topic/Concept"),
+          score: z.number().describe("Score for answering the Question right ranging from 0 for an easy Question to 5 for a hard question. Choose according to the difficulty of the question."),
+        })
+      )
+    );
+    const parse = StructuredOutputParser.fromZodSchema(
+      z.object({
+        answers: z.array(
+          z.object({
+            answer: z.string().describe("Answer to the user's question. Dont enumerate"),
+            correct: z.boolean().describe("Indicates if the answer is correct (true/false)"),
+          })
+        ),
+        description: z.string().describe("Brief Description of the Question with regards to the Topic/Concept"),
+        score: z.number().describe("Score for answering the Question right ranging from 0 for an easy Question to 5 for a hard question. Choose according to the difficulty of the question."),
+      })
+    )
 
     const context = await (await this.pgVectorStore).similaritySearch(question, 10);
     const completeContext = formatDocumentsAsString(context);
@@ -483,18 +505,26 @@ export class McqCreationService {
         question: () => question,
         completeContext:  () => completeContext,
         conceptText:  () => conceptContext,
-        format_instructions: () => parser.getFormatInstructions(),
+        format_instructions: () => parse.getFormatInstructions(),
       },
       PromptTemplate.fromTemplate(systemMsg),
       this.llm,
-      parser,
+      parse,
     ]).invoke({callbacks: [tracer]});
-    contextResult.forEach(result => {
+
+    contextResult.answers.forEach(result => {
         if(!this.chosenOptions.includes(result.answer)){
           this.chosenOptions.push(result.answer)
         }
       });
-    return contextResult;
+    console.log("this.contextresult: ", contextResult);
+    const myObject: { answers: Answer[]; description: string; score: number; } = {
+      answers: contextResult.answers,
+      description: contextResult.description,
+      score: contextResult.score    };
+
+    console.log("myObject: ", myObject)
+    return myObject;
     } else
     {
       console.log("result without concept context is fired")
@@ -503,20 +533,20 @@ export class McqCreationService {
           options: () => options.toString(),
           question: () => question,
           completeContext: () => completeContext,
-          format_instructions: () => parser.getFormatInstructions(),
+          format_instructions: () => parse.getFormatInstructions(),
         },
         PromptTemplate.fromTemplate(systemMsg2),
         this.llm,
-        parser,
+        parse,
       ]).invoke({callbacks: [tracer]});
 
-      contextResult2.forEach(result => {
+      contextResult2.answers.forEach(result => {
         if(!this.chosenOptions.includes(result.answer)){
           this.chosenOptions.push(result.answer)
         }
       });
       console.log("this.chosenOptions: ", this.chosenOptions)
-      return contextResult2;
+      return contextResult2 as {answers: Answer[], description: string, score: number};
     }
 
 
@@ -528,8 +558,6 @@ export class McqCreationService {
    * @returns question and answers to the user's question
    */
   async getQuestionAndAnswers(concept: string, options: number) :Promise<{question: string, answer: Answer[], description: string, score: number}> {
-    const Path = path.join(__dirname, '../../../shared/transkripte');
-    console.log(`Folder path: ${Path}`);
     console.log("concept: ", concept)
     console.log("otherOptions: ", options)
     // parser for formatting the output in the desired way
