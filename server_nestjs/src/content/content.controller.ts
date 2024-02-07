@@ -131,13 +131,12 @@ export class ContentController {
 
   @roles('ANY')
   @Get('/concepts')
-  async fetchAllConcepts(): Promise<string[]> {
-    const concepts = await this.contentService.fetchAllConcepts();
+  async fetchAllConceptNames(): Promise<string[]> {
+    const concepts = await this.contentService.fetchAllConceptNames();
     const formattedConcepts = concepts.map(concept => {
       const formattedConcept = concept.replace(/^\d+\s/, '');
       return formattedConcept.charAt(0).toUpperCase() + formattedConcept.slice(1);
     });
-    console.log("Set of concepts: ",  formattedConcepts)
     return formattedConcepts
   }
 }

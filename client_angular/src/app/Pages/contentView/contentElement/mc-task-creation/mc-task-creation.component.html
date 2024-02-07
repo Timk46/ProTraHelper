@@ -1,11 +1,16 @@
-<div class="content mat-elevation-z8 container wrapper">
+<div class="content mat-elevation-z8 container wrapper"  style="margin: 0 auto; max-width: 90%;">
   <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="task-form">
     <section class="section">
       <mat-form-field class="full-width-input">
         <textarea matInput cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
           formControlName="text" [placeholder]="fetchingTitle ? 'Fetching...' : 'Title...'" formControlName="title">
         </textarea>
-        <button *ngIf="taskForm.get('title')?.value" matSuffix mat-icon-button aria-label="Clear" (click)="clearTitle()"
+        <button type="button" *ngIf="!taskForm.get('title')?.value" matSuffix mat-icon-button aria-label="Clear" (click)="generateTitle()">
+        <mat-icon>
+          sync
+        </mat-icon>
+      </button>
+        <button type="button" *ngIf="taskForm.get('title')?.value" matSuffix mat-icon-button aria-label="Clear" (click)="clearTitle()"
           type="button">
           <mat-icon>close</mat-icon>
         </button>
@@ -21,7 +26,7 @@
         </mat-error>
       </mat-form-field>
       <mat-form-field class="corner">
-        <input type="text" placeholder="Concepts" matInput [formControl]="conceptControl" [matAutocomplete]="auto">
+        <input type="text" placeholder="Concepts" matInput formControlName="conceptName" [matAutocomplete]="auto">
         <mat-autocomplete #auto="matAutocomplete">
           <mat-option *ngFor="let concept of filteredConcepts | async" [value]="concept">
             {{concept}}
@@ -103,3 +108,6 @@
     </div>
   </form>
 </div>
+<mat-divider></mat-divider>
+
+

@@ -65,7 +65,8 @@ export class QuestionDataController {
      */
     @roles('ANY')
     @Post('/createQuestion')
-    async createQuestion(@Body()question: QuestionDTO) {
+    async createQuestion(@Body() question: QuestionDTO) {
+      console.log('createQuestion question author', question.author);
         return this.questionDataService.createQuestion(question);
     }
 
@@ -80,15 +81,6 @@ export class QuestionDataController {
         return await this.questionDataService.createOptions(mcOptions);
     }
 
-    // /**
-    //  *
-    //  * @param questionVersion
-    //  * @returns the created QuestionVersion
-    //  */
-    // @Post('/createQuestionVersion')
-    // async createQuestionVersion(@Body() questionVersion: QuestionVersionDTO) {
-    //     return await this.questionDataService.createQuestionVersion(questionVersion);
-    // }
 
     /**
      *

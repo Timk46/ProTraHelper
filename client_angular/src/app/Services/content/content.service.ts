@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ContentsForConceptDTO, ContentElementStatusDTO } from '@DTOs/index';
+import { ContentsForConceptDTO, ContentElementStatusDTO, ConceptNodeDTO } from '@DTOs/index';
 import { catchError, Observable, tap, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -30,9 +30,9 @@ export class ContentService {
 
   /**
    *
-   * @returns All concepts in the database.
+   * @returns All conceptNames in the database.
    */
-  fetchAllConcepts(): Observable<string[]> {
+  fetchAllConceptNames(): Observable<string[]> {
     return this.http.get<string[]>(environment.server + `/content/concepts`)
   }
 

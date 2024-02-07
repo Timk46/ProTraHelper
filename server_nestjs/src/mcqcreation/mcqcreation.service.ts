@@ -15,6 +15,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Client } from "langsmith";
 import { LangChainTracer } from "langchain/callbacks";
+import { el } from '@faker-js/faker';
 interface Answer{
   answer?: string;
   correct?: boolean;
@@ -63,6 +64,34 @@ const pg_config_lectureTranscripts = {
     metadataColumnName: 'cmetadata',
   },
 };
+
+const questionTitlePrompt = `Du bist ein Programmierexperte und hilfst mir nur dabei eine Fragestellung für eine Multiple Choice Aufgabe zu erstellen. Nutze dabei folgendes Konzept:
+--------------
+Konzept: {concept}. Dieses Konzept ist das Thema zu dem die Fragestellung vorgeschlagen werden sollen. Hier ist der spezielle Kontext des übergeordneten Themas:
+--------------
+Oberthema: {conceptText}. Und zusätzlich der Gesamte Kontext zu dem Thema:
+--------------
+Gesamtkontext: {completeContext}. Bitte lies dir alles an Kontexten genau durch, um eine passende Fragestellung zu generieren. Achte darauf, dass folgende Fragestellungen bereits vorgeschlagen wurden und du diese nicht widerholen sollst:
+--------------
+Bereits vorgeschlagene Fragen: {questions}.
+--------------
+Achte zusätzlich darauf, dass du keine Antwortmöglichkeiten mit in deine Antwort reinbringst, es soll nur die Fragestellung sein.
+--------------
+format instructions: {format_instructions}
+`
+
+const questionTitlePrompt2 = `Du bist ein Programmierexperte und hilfst mir nur dabei eine Fragestellung für eine Multiple Choice Aufgabe zu erstellen. Nutze dabei folgendes Konzept:
+--------------
+Konzept: {concept}. Dieses Konzept ist das Thema zu dem die Fragestellung vorgeschlagen werden sollen. Hier ist der spezielle Kontext des übergeordneten Themas:
+--------------
+Oberthema: {conceptText}. Bitte lies dir alles an Kontexten genau durch, um eine passende Fragestellung zu generieren. Achte darauf, dass folgende Fragestellungen bereits vorgeschlagen wurden und du diese nicht widerholen sollst:
+--------------
+Bereits vorgeschlagene Fragen: {questions}.
+--------------
+Achte zusätzlich darauf, dass du keine Antwortmöglichkeiten mit in deine Antwort reinbringst, es soll nur die Fragestellung sein.
+--------------
+format instructions: {format_instructions}
+`
 
 // needs to be altered because llm needs to know what kind of expert he needs to be etc. (example: suggests network related stuff when asking about interfaces in programming languages if not specified in question field in the frontend
 const systemMsg = `Du bist ein Programmierexperte und hilfst dabei sich unterscheidende Antwortmöglichkeiten für eine Multiple Choice Aufgabe zu erstellen.
@@ -140,7 +169,7 @@ const questionAndAnswerPrompt = `Du bist ein Programmierexperte und hilfst mir d
 --------------
 Konzept: {concept}. Dieses Konzept ist das Thema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen werden sollen. Hier ist der spezielle Kontext des Konzepts, also des Oberthemas: {conceptText}
 --------------
-Beachte dabei folgenden Kontext: {completeContext}
+Beachte dabei folgenden Gesamtkontext: {completeContext}
 --------------
 und liefere mir basierend auf diesem Kontext eine konkrete Fragestellung für die Multiple Choice Aufgabe. Überelege dir zusätzlich bis zu {options} verschiedene Antwortmöglichkeiten auf diese Frage.
 --------------
@@ -313,6 +342,48 @@ export class McqCreationService {
     }
   }
 
+  async getQuestionTitle(concept: string): Promise<string> {
+    const parser = StructuredOutputParser.fromZodSchema(z.string().describe("Question to the user"));
+    const context = await (await this.pgVectorStore).similaritySearch(concept, 10);
+    const completeContext = formatDocumentsAsString(context);
+    const conceptContext = await this.getFileFromFolder(this.folderPath,concept);
+    if(!(conceptContext === null)) {
+      const response = await RunnableSequence.from([
+      {
+        concept: () => concept,
+        completeContext: () => completeContext,
+        questions: () => this.askedQuestions,
+        conceptText:  () =>  conceptContext,
+        format_instructions: () => parser.getFormatInstructions(),
+      },
+      PromptTemplate.fromTemplate(questionTitlePrompt),
+      this.llm,
+      parser,
+      ]).invoke({callbacks: [tracer]})
+      if(!this.askedQuestions.includes(response)){
+        this.askedQuestions.push(response)
+      }
+      return response;
+    } else {
+      const response2 = await RunnableSequence.from([
+        {
+          concept: () => concept,
+          completeContext: () => completeContext,
+          questions: () => this.askedQuestions,
+          format_instructions: () => parser.getFormatInstructions(),
+        },
+        PromptTemplate.fromTemplate(questionTitlePrompt2),
+        this.llm,
+        parser,
+      ]).invoke({callbacks: [tracer]})
+      if(!this.askedQuestions.includes(response2)){
+        this.askedQuestions.push(response2)
+      }
+      return response2;
+    }
+    return ""
+  }
+
   /**
    * @param question
    * @param option
@@ -411,13 +482,11 @@ export class McqCreationService {
       this.llm,
       parser,
     ]).invoke({callbacks: [tracer]});
-
     contextResult.forEach(result => {
-      if(!this.chosenOptions.includes(result.answer)){
-        this.chosenOptions.push(result.answer)
-      }
-    });
-    console.log("this.chosenOptions: ", this.chosenOptions)
+        if(!this.chosenOptions.includes(result.answer)){
+          this.chosenOptions.push(result.answer)
+        }
+      });
     return contextResult;
     } else
     {

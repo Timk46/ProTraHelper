@@ -102,9 +102,15 @@ export class QuestionDataService {
      * @returns question Data
      */
     async createQuestion(question: QuestionDTO): Promise<QuestionDTO> {
-        if(question.author === undefined) {
-          throw new Error('Author not defined');
-        }
+         if(question.author === undefined) {
+           throw new Error('Author not defined');
+         }
+        const concept = await this.prisma.conceptNode.findFirst({
+            where: {
+                name: question.conceptNodeName
+            }
+        });
+        console.log("question origin Id", question.originId);
         let newQuestion = await this.prisma.question.create({
             data: {
                 author:  {connect: {id: question.author}},
@@ -113,8 +119,17 @@ export class QuestionDataService {
                 type: question.type,
                 text: question.text,
                 isApproved: question.isApproved,
-                origin: {connect: {id: 1}},
+                conceptNode: {connect: {id: concept.id}}
             }
+        });
+
+        newQuestion = await this.prisma.question.update({
+          where: {
+            id: newQuestion.id
+          },
+          data: {
+            originId: newQuestion.id
+          }
         });
 
         if(!newQuestion) {
@@ -157,6 +172,7 @@ export class QuestionDataService {
      */
     async createMcQuestion(mcQuestion: McQuestionDTO): Promise<McQuestionDTO> {
 
+      //console.log("concepts in createMcQuestion", concept);
         let newMcQuestion = await this.prisma.mCQuestion.create({
             data: {
                 question: {connect: {id: mcQuestion.questionId}},

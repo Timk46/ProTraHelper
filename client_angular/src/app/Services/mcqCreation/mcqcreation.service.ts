@@ -93,4 +93,15 @@ export class McqcreationService {
       .set('answers', answers);
     return this.http.get<{question: string, answer: Answer[], reasoning: string}>(environment.server + `/mcqcreation/evaluateOptions`, {params: body})
   }
+
+  /**
+   *
+   * @param question
+   * @returns
+   */
+  getQuestionTitle(concept: string) :Observable<string> {
+    const body = new HttpParams()
+      .set('concept', concept);
+    return this.http.get<string>(environment.server + `/mcqcreation/questionTitle`, {params: body})
+  }
 }

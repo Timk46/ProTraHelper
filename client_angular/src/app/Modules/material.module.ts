@@ -23,6 +23,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatGridListModule} from '@angular/material/grid-list';
 @NgModule({
   imports: [
     MatButtonModule,
@@ -47,7 +48,8 @@ import {MatAutocompleteModule} from '@angular/material/autocomplete';
     MatRadioModule,
     DragDropModule,
     MatProgressBarModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatGridListModule,
   ],
   exports: [
     MatButtonModule,
@@ -72,7 +74,8 @@ import {MatAutocompleteModule} from '@angular/material/autocomplete';
     MatRadioModule,
     DragDropModule,
     MatProgressBarModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatGridListModule
   ],
 })
 export class MaterialModule {}

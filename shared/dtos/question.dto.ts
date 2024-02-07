@@ -9,8 +9,9 @@ export interface QuestionDTO {
     author?: number;
     text: string;
     conceptNode?: number;
+    conceptNodeName?: string;
     isApproved: boolean;
-    originId: number | null;
+    originId?: number;
     codingQuestion?: CodingQuestionDto
 }
 

@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Query } from '@nestjs/common';
 import { McqCreationService } from './mcqcreation.service';
+import { roles } from '@/auth/roles.guard';
 interface Answer {
   answer?: string;
   correct?: boolean;
@@ -62,6 +63,11 @@ export class McqcreationController {
     @Get('evaluateOptions')
     async getEvaluation(@Query('question') question: string, @Query('concept') concept: string, @Query('asnwers') answers: {answer: string, correct: boolean}[]): Promise<{answer: Answer[], reasoning: string}> {
       return await this.mcqcreationService.getEvaluation(question, concept, answers);
+    }
+
+    @Get('questionTitle')
+    async getQuestionTitle(@Query('concept') concept: string): Promise<string> {
+      return await this.mcqcreationService.getQuestionTitle(concept);
     }
 
 }
