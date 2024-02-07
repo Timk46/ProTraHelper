@@ -35,7 +35,7 @@ const routes: Routes = [
   { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard] },
   { path: 'discussion-view/:discussionId', component: DiscussionViewComponent, canActivate: [LoggedInGuard] },
   { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent },
-  { path: 'mcqcreation', component: McTaskCreationComponent, canActivate: [LoggedInGuard] },
+  { path: 'mcqcreation', component: McTaskCreationComponent, canActivate: [LoggedInGuard]},
   // just for testing
   { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
 

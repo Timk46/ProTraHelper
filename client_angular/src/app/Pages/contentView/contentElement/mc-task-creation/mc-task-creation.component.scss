@@ -24,10 +24,10 @@
     justify-content: flex-start;
     // flex-direction: row;
     align-items: center;
-    gap: 185px;
+    gap: 170px;
 
     .full-width-input {
-      width: 51%; // Full width for the title input
+      width: 55%; // Full width for the title input
     }
 
     .half-width-input {
@@ -79,5 +79,8 @@ mat-divider {
 }
 
 .corner {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 40px ;
   width: 25%;
 }

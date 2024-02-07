@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable prettier/prettier */
-
 import { Injectable } from '@nestjs/common';
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { ChatOpenAI } from "langchain/chat_models/openai";
@@ -15,15 +14,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Client } from "langsmith";
 import { LangChainTracer } from "langchain/callbacks";
-import { el } from '@faker-js/faker';
+import { McqGenerationDTO } from '@Interfaces/question.dto';
+import { env } from 'process';
 interface Answer{
   answer?: string;
-  correct?: boolean;
+  isCorrect?: boolean;
 }
-interface Title {
-  question?: string;
 
-}
 const client = new Client({
   apiUrl: "https://api.smith.langchain.com",
   apiKey: "ls__f3c8aba313dd43aeb5f85c89487a7652"
@@ -38,13 +35,14 @@ const tracer = new LangChainTracer({
 // change to accessing sensitive data from .env(?)
 const llmConfig = {
   modelName: 'gpt-4-1106-preview', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
-  openAIApiKey: "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",
+  openAIApiKey: env.OPEN_API_KEY,
   temperature: 0, // Low Temperature favours the words with higher probability = less creative
   streaming: true
 };
+
 const regenerateLLmconfig = {
   modelName: 'gpt-4-1106-preview', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
-  openAIApiKey: "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",
+  openAIApiKey: env.OPEN_API_KEY,
   temperature: 0.33, // higher Temperature favours the words with lower probability = more creative
   streaming: true
 }
@@ -74,11 +72,13 @@ Konzept: {concept}. Dieses Konzept ist das Thema zu dem die Fragestellung vorges
 --------------
 Oberthema: {conceptText}. Und zusätzlich der Gesamte Kontext zu dem Thema:
 --------------
-Gesamtkontext: {completeContext}. Bitte lies dir alles an Kontexten genau durch, um eine passende Fragestellung zu generieren. Achte darauf, dass folgende Fragestellungen bereits vorgeschlagen wurden und du diese nicht widerholen sollst:
+Gesamtkontext: {completeContext}.
+--------------
+Bitte lies dir den gesamten Kontext genau durch, um eine passende Fragestellung zu generieren. Achte darauf, dass folgende Fragestellungen bereits vorgeschlagen wurden und du diese nicht widerholen sollst:
 --------------
 Bereits vorgeschlagene Fragen: {questions}.
 --------------
-Achte zusätzlich darauf, dass du keine Antwortmöglichkeiten mit in deine Antwort reinbringst, es soll nur die Fragestellung sein.
+Achte zusätzlich darauf, dass du keine Antwortmöglichkeiten mit in deine Antwort reinbringst, es soll nur die Fragestellung sein. Antworte auf jeden Fall auf deutsch.
 --------------
 format instructions: {format_instructions}
 `
@@ -87,129 +87,153 @@ const questionTitlePrompt2 = `Du bist ein Programmierexperte und hilfst mir nur 
 --------------
 Konzept: {concept}. Dieses Konzept ist das Thema zu dem die Fragestellung vorgeschlagen werden sollen. Hier ist der spezielle Kontext des übergeordneten Themas:
 --------------
-Oberthema: {conceptText}. Bitte lies dir alles an Kontexten genau durch, um eine passende Fragestellung zu generieren. Achte darauf, dass folgende Fragestellungen bereits vorgeschlagen wurden und du diese nicht widerholen sollst:
+Oberthema: {conceptText}
 --------------
-Bereits vorgeschlagene Fragen: {questions}.
+Bitte lies dir den gesamten Kontext genau durch, um eine passende Fragestellung zu generieren. Achte darauf, dass folgende Fragestellungen bereits vorgeschlagen wurden und du diese nicht widerholen sollst:
 --------------
-Achte zusätzlich darauf, dass du keine Antwortmöglichkeiten mit in deine Antwort reinbringst, es soll nur die Fragestellung sein.
+Bereits vorgeschlagene Fragen: {questions}
+--------------
+Achte zusätzlich darauf, dass du keine Antwortmöglichkeiten mit in deine Antwort reinbringst, es soll nur die Fragestellung sein. Antworte auf jeden Fall auf deutsch.
 --------------
 format instructions: {format_instructions}
 `
 
 // needs to be altered because llm needs to know what kind of expert he needs to be etc. (example: suggests network related stuff when asking about interfaces in programming languages if not specified in question field in the frontend
-const systemMsg = `Du bist ein Programmierexperte und hilfst dabei sich unterscheidende Antwortmöglichkeiten für eine Multiple Choice Aufgabe zu erstellen.
-Liefere mir bitte genau eine Anzahl von: {options} sich unterscheidenden Antwortmöglichkeiten. Hier ist der spezielle Kontext des Konzepts, also des Oberthemas: {conceptText}
-Beachte dabei folenden Gesamtkontext.
+const systemMsg = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und dazugehörige Antwortmöglichkeiten, eine Beschreibung und eine Punktzahl für eine Multiple Choice Aufgabe zu erstellen. Die Punktzahl soll dabei von 0 für besonders einfach bis 5 für besonders schwer reichen. Nutze dabei folgendes Konzept:
+----------------
+Konzept: {concept}
+---------------
+Liefere mir bitte genau eine Anzahl von: {options} sich unterscheidenden Antwortmöglichkeiten. Hier ist der spezielle Kontext des Konzepts, also des Oberthemas:
+----------------
+Oberthema: {conceptText}
+----------------
+Beachte dabei bitte folgenden Gesamtkontext des Oberthemas:
 ----------------
 Gesamtkontext: {completeContext}
 ----------------
-und schreibe jeweils dazu,  ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist.
-Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang. Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten.
+Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
+Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte schreibe die Antwortmöglichkeit auf jeden Fall auf deutsch. Dies ist die Frage zu der du die Antwortmöglichkeiten vorschlagen sollst:
 ----------------
 Frage: {question}
 ----------------
 format instructions: {format_instructions}
 `
 
-const systemMsg2 = `Du bist ein Programmierexperte und hilfst dabei sich unterscheidende Antwortmöglichkeiten für eine Multiple Choice Aufgabe zu erstellen.
-Liefere mir bitte genau eine Anzahl von: {options} sich unterscheidenden Antwortmöglichkeiten.
-Beachte dabei folenden Gesamtkontext: {completeContext}
+const systemMsg2 = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und dazugehörige Antwortmöglichkeiten, eine Beschreibung und eine Punktzahl für eine Multiple Choice Aufgabe zu erstellen. Die Punktzahl soll dabei von 0 für besonders einfach bis 5 für besonders schwer reichen. Nutze dabei folgendes Konzept:
 ----------------
-und schreibe jeweils dazu,  ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist.
-Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang. Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten.
+Konzept: {concept}
+---------------
+Liefere mir bitte genau eine Anzahl von: {options} sich unterscheidenden Antwortmöglichkeiten. Beachte dabei bitte folgenden Gesamtkontext des Oberthemas:
+----------------
+Gesamtkontext: {completeContext}
+----------------
+Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
+Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte schreibe die Antwortmöglichkeit auf jeden Fall auf deutsch. Dies ist die Frage zu der du die Antwortmöglichkeiten vorschlagen sollst:
 ----------------
 Frage: {question}
 ----------------
 format instructions: {format_instructions}
 `
-
 // needs to be altered because llm needs to know what kind of expert he needs to be etc. (example: suggests network related stuff when asking about interfaces in programming languages if not specified in question field in the frontend
-const regeneratePrompt = `Du bist ein Programmierexperte und hilfst dabei Antwortmöglichkeiten für eine Multiple Choice Aufgabe zu erstellen.
+const regeneratePrompt = `Du bist ein Programmierexperte und hilfst mir dabei eine neue Antwortmöglichkeit für eine bestehende Multiple Choice Aufgabenstellung zu erstellen. Nutze dabei folgendes Konzept:
+----------------
+Konzept: {concept}
+----------------
 Beachte dabei den speziellen Kontext des Konzepts, also des Oberthemas: {conceptText}
 ----------------
 und diesen Gesamtkontext: {completeContext}
---------------
-und liefere mir bitte eine andere Antwortmöglichkeit für folgende
---------------
-Antwortmöglichkeit: {option}.
---------------
+----------------
+und liefere mir bitte eine andere Antwortmöglichkeit für folgende bereits von dir vorgeschlagene Antwortmöglichkeit:
+----------------
+bereits vorgeschlagene Antwortmöglichkeit: {option}.
+----------------
 Achte darauf, dass folgende Antwortmöglichkeiten schon bestehen und du diese nicht erneut vorschlagen darfst. Lies diese bereits verwendeten Antwortmöglichkeiten genau durch, um keine leicht umformulierten Antwortmöglichkeiten zu generieren:
---------------
+----------------
 Bereits vorgeschlagene Antwortmöglichkeiten: {options}.
---------------
-Keine der zuvor beschriebenen Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden.
-Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist.
-Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
-Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten.
---------------
+----------------
+Keine der zuvor beschriebenen Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden. Die Antwortmöglichkeit soll eine Antwort auf die Frage sein, die du bereits vorgeschlagen hast:
+----------------
 Frage: {question}
---------------
+----------------
+Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
+Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte schreibe die Antwortmöglichkeit auf jeden Fall auf deutsch.
+----------------
 format instructions: {format_instructions}
 `
 
-const regeneratePrompt2 = `Du bist ein Programmierexperte und hilfst dabei Antwortmöglichkeiten für eine Multiple Choice Aufgabe zu erstellen.
-Beachte dabei  diesen Gesamtkontext: {completeContext}
---------------
-und liefere mir bitte eine andere Antwortmöglichkeit für folgende
---------------
-Antwortmöglichkeit: {option}.
---------------
+const regeneratePrompt2 = `Du bist ein Programmierexperte und hilfst mir dabei eine neue Antwortmöglichkeit für eine bestehende Multiple Choice Aufgabenstellung zu erstellen. Nutze dabei folgendes Konzept:
+----------------
+Konzept: {concept}
+----------------
+Beachte dabei folgenden Gesamtkontext: {completeContext}
+----------------
+und liefere mir bitte eine andere Antwortmöglichkeit für folgende bereits von dir vorgeschlagene Antwortmöglichkeit:
+----------------
+bereits vorgeschlagene Antwortmöglichkeit: {option}.
+----------------
 Achte darauf, dass folgende Antwortmöglichkeiten schon bestehen und du diese nicht erneut vorschlagen darfst. Lies diese bereits verwendeten Antwortmöglichkeiten genau durch, um keine leicht umformulierten Antwortmöglichkeiten zu generieren:
---------------
+----------------
 Bereits vorgeschlagene Antwortmöglichkeiten: {options}.
---------------
-Keine der zuvor beschriebenen Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden.
-Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist.
-Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
-Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten.
---------------
+----------------
+Die Antwortmöglichkeit soll eine Antwort auf die Frage sein, die du bereits vorgeschlagen hast:
+----------------
 Frage: {question}
---------------
+----------------
+Keine der zuvor beschriebenen Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden.
+Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
+Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte schreibe die Antwortmöglichkeit auf jeden Fall auf deutsch.
+----------------
 format instructions: {format_instructions}
 `
 
 const questionAndAnswerPrompt = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und dazugehörige Antwortmöglichkeiten, eine Beschreibung und eine Punktzahl für eine Multiple Choice Aufgabe zu erstellen. Die Punktzahl soll dabei von 0 für besonders einfach bis 5 für besonders schwer reichen. Nutze dabei folgendes Konzept:
 --------------
-Konzept: {concept}. Dieses Konzept ist das Thema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen werden sollen. Hier ist der spezielle Kontext des Konzepts, also des Oberthemas: {conceptText}
+Konzept: {concept}
 --------------
-Beachte dabei folgenden Gesamtkontext: {completeContext}
+Dieses Konzept ist das Thema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen werden sollen. Hier ist der spezielle Kontext des Konzepts, also des Oberthemas:
+--------------
+Oberthema: {conceptText}
+--------------
+Beachte dabei folgenden Gesamtkontext:
+--------------
+Gesamtkontext: {completeContext}
 --------------
 und liefere mir basierend auf diesem Kontext eine konkrete Fragestellung für die Multiple Choice Aufgabe. Überelege dir zusätzlich bis zu {options} verschiedene Antwortmöglichkeiten auf diese Frage.
 --------------
 Achte darauf, dass folgende Fragen und Antwortmöglichkeiten schon bestehen und du diese nicht erneut vorschlagen darfst. Lies diese bereits verwendeten Fragen und Antwortmöglichkeiten genau durch, um keine leicht umformulierten Fragen oder Antwortmöglichkeiten zu generieren:
 --------------
 Bereits vorgeschlagene Fragen: {questions}.
-und bereits vorgeschlagene Antwortmöglichkeiten: {otherOptions}.
 --------------
-Keine der zuvor beschriebenen Fragen oder Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden.
-Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist.
-Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
-Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten.
+Bereits vorgeschlagene Antwortmöglichkeiten: {otherOptions}.
+--------------
+Keine der zuvor beschriebenen Fragen oder Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden. Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
+Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte antworte auf jeden Fall auf deutsch.
 --------------
 format instructions: {format_instructions}
 `
 
-const questionAndAnswerPrompt2 = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und dazugehörige Antwortmöglichkeiten für eine Multiple Choice Aufgabe zu folgendem Konzept erstellen.
+const questionAndAnswerPrompt2 = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und dazugehörige Antwortmöglichkeiten, eine Beschreibung und eine Punktzahl für eine Multiple Choice Aufgabe zu erstellen. Die Punktzahl soll dabei von 0 für besonders einfach bis 5 für besonders schwer reichen. Nutze dabei folgendes Konzept:
 --------------
-Konzept: {concept}. Dieses Konzept ist das Thema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen werden sollen.
+Konzept: {concept}
 --------------
-Beachte dabei folgenden Kontext: {completeContext}
+Dieses Konzept ist das Thema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen werden sollen. Beachte dabei folgenden Gesamtkontext:
+--------------
+Gesamtkontext: {completeContext}
 --------------
 und liefere mir basierend auf diesem Kontext eine konkrete Fragestellung für die Multiple Choice Aufgabe. Überelege dir zusätzlich bis zu {options} verschiedene Antwortmöglichkeiten auf diese Frage.
 --------------
-Achte darauf, dass folgende Fragen und Antwortmöglichkeiten schon bestehen und du diese nicht erneut vorschlagen darfst.Lies diese bereits verwendeten Fragen und Antwortmöglichkeiten genau durch, um keine leicht umformulierten Fragen oder Antwortmöglichkeiten zu generieren:
+Achte darauf, dass folgende Fragen und Antwortmöglichkeiten schon bestehen und du diese nicht erneut vorschlagen darfst. Lies diese bereits verwendeten Fragen und Antwortmöglichkeiten genau durch, um keine leicht umformulierten Fragen oder Antwortmöglichkeiten zu generieren:
 --------------
 Bereits vorgeschlagene Fragen: {questions}.
-und bereits vorgeschlagene Antwortmöglichkeiten: {otherOptions}.
 --------------
-Keine der zuvor beschriebenen Fragen oder Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden.
-Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist.
-Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
-Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten.
+Bereits vorgeschlagene Antwortmöglichkeiten: {otherOptions}.
+--------------
+Keine der zuvor beschriebenen Fragen oder Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden. Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
+Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte antworte auf jeden Fall auf deutsch.
 --------------
 format instructions: {format_instructions}
 `
-// not yet used
+// not used yet
 const reevaluationPrompt = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und dazugehörige Antwortmöglichkeiten für eine Multiple Choice Aufgabe zu bewerten und zu verbessern.
 --------------
 Folgendes Konzept ist das Thema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen wurden: {concept}. Hier ist der spezielle Kontext des Konzepts, also des Oberthemas: {conceptText}
@@ -229,7 +253,7 @@ Gib zusätzlich eine Begründung dafür an, weshalb du die Frage und/oder Antwor
 --------------
 format instructions: {format_instructions}
 `
-// not yet used
+// not used yet
 const evaluationPrompt = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und die dazugehörigen Antwortmöglichkeiten für eine Multiple Choice Aufgabe zu bewerten. Du bekommst eine Frage und die dazugehörigen Antwortmöglichkeiten samt der Information, ob diese Antwortmöglichkeiten für die Frage als "wahr" oder "falsch" oder markiert wurden.
 Du sollst nun bewerten, ob die Angabe "wahr" oder "falsch" für die jeweilige Antwortmöglichkeit korrekt ist.
 --------------
@@ -255,14 +279,13 @@ export class McqCreationService {
   private chosenOptions : string[] = []
   private askedQuestions : string[] = []
   constructor() {
-    this.pgVectorStore = this.intitPgVectorStore();
+    this.pgVectorStore = this.initPgVectorStore();
     this.folderPath = path.join(__dirname, '..', '..', '..', '..', '..', 'shared', 'transcripts');
-    console.log(`Folder path: ${this.folderPath}`);
   }
 
-  private intitPgVectorStore() {
+  private initPgVectorStore() {
     return PGVectorStore.initialize(
-      new OpenAIEmbeddings({openAIApiKey: process.env.OPEN_API_KEY}),
+      new OpenAIEmbeddings({openAIApiKey: env.OPEN_API_KEY}),
       pg_config_lectureTranscripts,
     );
   }
@@ -318,7 +341,6 @@ export class McqCreationService {
     }
 
     console.log("Search words: ", searchWords)
-    console.log("Folder path: ", folderPath)
 
     try {
       const files = fs.readdirSync(folderPath);
@@ -345,7 +367,7 @@ export class McqCreationService {
     }
   }
 
-  async getQuestionTitle(concept: string): Promise<Title> {
+  async getQuestionTitle(concept: string): Promise<McqGenerationDTO> {
     const parser = StructuredOutputParser.fromZodSchema(z.object({
       question: z.string().describe("Question to the user without answering options"),
     }));
@@ -376,7 +398,7 @@ export class McqCreationService {
       const response2 = await RunnableSequence.from([
         {
           concept: () => concept,
-          completeContext: () => completeContext,
+          conceptText: () => completeContext,
           questions: () => this.askedQuestions,
           format_instructions: () => parser.getFormatInstructions(),
         },
@@ -399,14 +421,17 @@ export class McqCreationService {
    * @param otherOptions
    * @returns Answer to the user's question
    */
-  async getAnswer(question: string, option: string, otherOptions: string, concept: string) :Promise<Answer> {
-    console.log("otherOptions: ", otherOptions)
-    console.log("this.chosenOptions: ", this.chosenOptions)
+  async getAnswer(question: string, option: string, otherOptions: string[], concept: string) :Promise<Answer> {
+
+    if(otherOptions){
+      this.chosenOptions.concat(otherOptions)
+    }
+    console.log("chosenOptions: ", this.chosenOptions)
     const parser = StructuredOutputParser.fromZodSchema(
       z.object(
                 {
                   answer: z.string().describe("Answer to the user's question. Dont enumerate"),
-                  correct: z.boolean().describe("Indicates if the answer is correct (true/false)"),
+                  isCorrect: z.boolean().describe("Indicates if the answer is correct (true/false)"),
                 }));
     const context = await (await this.pgVectorStore).similaritySearch(question, 10);
     const completeContext = formatDocumentsAsString(context);
@@ -415,6 +440,7 @@ export class McqCreationService {
       const response = await RunnableSequence.from([
       {
         option: () => option,
+        concept: () => concept,
         options: () => this.chosenOptions,
         question: () => question,
         completeContext: () => completeContext,
@@ -427,7 +453,6 @@ export class McqCreationService {
       ]).invoke({callbacks: [tracer]})
 
 
-      console.log("option: ", option)
       if(!this.chosenOptions.includes(response.answer)){
         this.chosenOptions.push(response.answer)
       }
@@ -437,6 +462,7 @@ export class McqCreationService {
       const response2 = await RunnableSequence.from([
       {
         option: () => option,
+        concept: () => concept,
         options: () => this.chosenOptions,
         question: () => question,
         completeContext: async () => completeContext,
@@ -446,7 +472,6 @@ export class McqCreationService {
       this.regenLlm,
       parser,
       ]).invoke({callbacks: [tracer]})
-      console.log("option: ", option)
       console.log("response for single answer is: ", response2)
       if(!this.chosenOptions.includes(response2.answer)){
         this.chosenOptions.push(response2.answer)
@@ -461,14 +486,20 @@ export class McqCreationService {
    * @param question
    * @returns all answers to the user's question
    */
-  async getAnswers(options: number, question: string, concept: string) :Promise<Answer[]> {
+  async getAnswers(options: number, question: string, concept: string) :Promise<McqGenerationDTO> {
 
-    console.log("question: ", question)
-
-    const parser = StructuredOutputParser.fromZodSchema(z.array(z.object({
-      answer: z.string().describe("Answer to the user's question. Dont enumerate"),
-      correct: z.boolean().describe("Indicates if the answer is correct (true/false)"),
-    })));
+    const parser = StructuredOutputParser.fromZodSchema(
+      z.object({
+        answers: z.array(
+          z.object({
+            answer: z.string().describe("Answer to the user's question. Dont enumerate"),
+            isCorrect: z.boolean().describe("Indicates if the answer is correct (true/false)"),
+          })
+        ),
+        description: z.string().describe("Brief Description of the Question with regards to the Topic/Concept"),
+        score: z.number().describe("Score for answering the Question right ranging from 0 for an easy Question to 5 for a hard question. Choose according to the difficulty of the question."),
+      })
+    )
 
     const context = await (await this.pgVectorStore).similaritySearch(question, 10);
     const completeContext = formatDocumentsAsString(context);
@@ -480,6 +511,7 @@ export class McqCreationService {
       const contextResult = await RunnableSequence.from([
       {
         options: () => options.toString(),
+        concept: () => concept,
         question: () => question,
         completeContext:  () => completeContext,
         conceptText:  () => conceptContext,
@@ -489,18 +521,22 @@ export class McqCreationService {
       this.llm,
       parser,
     ]).invoke({callbacks: [tracer]});
-    contextResult.forEach(result => {
+
+    contextResult.answers.forEach(result => {
         if(!this.chosenOptions.includes(result.answer)){
           this.chosenOptions.push(result.answer)
         }
       });
+
     return contextResult;
+
     } else
     {
       console.log("result without concept context is fired")
       const contextResult2 = await RunnableSequence.from([
         {
           options: () => options.toString(),
+          concept: () => concept,
           question: () => question,
           completeContext: () => completeContext,
           format_instructions: () => parser.getFormatInstructions(),
@@ -510,13 +546,13 @@ export class McqCreationService {
         parser,
       ]).invoke({callbacks: [tracer]});
 
-      contextResult2.forEach(result => {
+      contextResult2.answers.forEach(result => {
         if(!this.chosenOptions.includes(result.answer)){
           this.chosenOptions.push(result.answer)
         }
       });
       console.log("this.chosenOptions: ", this.chosenOptions)
-      return contextResult2;
+      return contextResult2
     }
 
 
@@ -527,9 +563,7 @@ export class McqCreationService {
    * @param options
    * @returns question and answers to the user's question
    */
-  async getQuestionAndAnswers(concept: string, options: number) :Promise<{question: string, answer: Answer[], description: string, score: number}> {
-    const Path = path.join(__dirname, '../../../shared/transkripte');
-    console.log(`Folder path: ${Path}`);
+  async getQuestionAndAnswers(concept: string, options: number) :Promise<McqGenerationDTO> {
     console.log("concept: ", concept)
     console.log("otherOptions: ", options)
     // parser for formatting the output in the desired way
@@ -549,16 +583,11 @@ export class McqCreationService {
     )
     // context retrieval for the question
     const context = await (await this.pgVectorStore).similaritySearch(concept, 10);
-    console.log("context: ", context)
-
     const completeContext = formatDocumentsAsString(context);
-    console.log("completeContext: ", completeContext)
-
     const conceptText = await this.getFileFromFolder(this.folderPath,concept);
-    console.log("conceptText: ", conceptText)
+
 
     if(!(conceptText === null)) {
-      console.log("conceptlength:", conceptText.length)
       console.log("result with concept context is fired")
 
       const result = await RunnableSequence.from([
@@ -575,7 +604,6 @@ export class McqCreationService {
         this.llm,
         parser,
       ]).invoke({callbacks: [tracer]});
-
       console.log("result with concept: ", result)
 
 
@@ -590,14 +618,9 @@ export class McqCreationService {
       console.log("this.chosenOptions: ", this.chosenOptions)
       console.log("this.askedQuestions: ", this.askedQuestions)
 
-      return {
-        question: result.question,
-        answer: result.answers,
-        description: result.description,
-        score: result.score,
-      };
+      return result;
     } else {
-      console.log("result without concept is fired");
+      console.log("result without concept:");
         const result2 = await RunnableSequence.from([
           {
             concept: () => concept,
@@ -622,20 +645,15 @@ export class McqCreationService {
         });
         console.log("this.chosenOptions: ", this.chosenOptions)
         console.log("this.askedQuestions: ", this.askedQuestions)
-        return {
-          question: result2.question,
-          answer: result2.answers,
-          description: result2.description,
-          score: result2.score,
-        };
+        return result2;
     }
 
 
 
   }
 
-  //ToDo: creating a chain, which reevaluates the given question and its options and maybe returns changes afterwards
-  async getReevaluatedQuestionAndAnswers(question: string, options: string, concept: string) :Promise<{question: string, answer: Answer[], reasoning: string}> {
+  //NOT IMPLEMENTED YET: ToDo: creating a chain, which reevaluates the given question and its options and maybe returns changes afterwards
+  async getReevaluatedQuestionAndAnswers(question: string, options: string, concept: string) :Promise<McqGenerationDTO> {
     console.log("reevaluation fired")
     const parser = StructuredOutputParser.fromZodSchema(
       z.object({
@@ -678,15 +696,11 @@ export class McqCreationService {
     });
     console.log("this.chosenOptions: ", this.chosenOptions)
     console.log("this.askedQuestions: ", this.askedQuestions)
-    return {
-      question: result.question,
-      answer: result.answers,
-      reasoning: result.reasoning,
-    } ;
+    return result;
   }
 
-  //ToDo: creating a chain, which evaluates the given question and its options and returns reasoning
-  async getEvaluation(question: string, concept: string, answers: {answer: string, correct: boolean}[]) : Promise<{answer: Answer[], reasoning:string}> {
+  //NOT IMPLEMENTED YET: ToDo: creating a chain, which evaluates the given question and its options and returns reasoning
+  async getEvaluation(question: string, concept: string, answers: {answer: string, isCorrect: boolean}[]) : Promise<{evaluations?: {answer?: string, isCorrect?: boolean}[], reasoning?: string}> {
     console.log("evaluation fired")
     console.log("question: ", question)
     console.log("concept: ", concept)
@@ -696,7 +710,7 @@ export class McqCreationService {
         evaluations: z.array(
           z.object({
             answer: z.string().describe("Evaluation of the Answer with regards to the original question."),
-            correctness: z.boolean().describe("Evaluates if the answer really is correct for that question"),
+            isCorrect: z.boolean().describe("Evaluates if the answer really is correct for that question"),
           })
         ).optional().default([]),
         reasoning: z.string().describe("Reasoning for the evaluations of the answers"),
@@ -720,10 +734,7 @@ export class McqCreationService {
     ]).invoke({callbacks: [tracer]});
 
     console.log("Evaluation result: ", result)
-    return {
-      answer: result.evaluations,
-      reasoning: result.reasoning,
-    } ;
+    return result;
 
   }
 }

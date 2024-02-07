@@ -119,7 +119,7 @@ export class QuestionDataService {
                 type: question.type,
                 text: question.text,
                 isApproved: question.isApproved,
-                conceptNode: {connect: {id: concept.id}}
+                conceptNode: {connect: {id: concept.id}},
             }
         });
 
@@ -148,7 +148,7 @@ export class QuestionDataService {
         let newOptions : MCOptionDTO[] = [];
 
          const optionPromises = mcOptions.map(async (mcOption) => {
-             let newOption =  await this.prisma.mCOption.create({
+             const newOption =  await this.prisma.mCOption.create({
                 data: {
                     id: mcOption.id,
                     text: mcOption.text,
@@ -173,7 +173,7 @@ export class QuestionDataService {
     async createMcQuestion(mcQuestion: McQuestionDTO): Promise<McQuestionDTO> {
 
       //console.log("concepts in createMcQuestion", concept);
-        let newMcQuestion = await this.prisma.mCQuestion.create({
+        const newMcQuestion = await this.prisma.mCQuestion.create({
             data: {
                 question: {connect: {id: mcQuestion.questionId}},
                 isSC: mcQuestion.isSC,
@@ -204,7 +204,7 @@ export class QuestionDataService {
       if(!mcQuestionOption.mcOption.id){
         throw new Error('McOption ID not defined');
       }
-        let newMcQuestionOption = await this.prisma.mCQuestionOption.create({
+        const newMcQuestionOption = await this.prisma.mCQuestionOption.create({
             data: {
 
               question: {connect: {id: mcQuestionOption.mcQuestion.id}},
@@ -267,7 +267,7 @@ export class QuestionDataService {
             const scorePerOption = question.score / mcOptions.length;
 
             //generate user score
-            for(let mcOption of mcOptions) {
+            for(const mcOption of mcOptions) {
                 if (mcOption.isCorrect && answerData.userMCAnswer.includes(mcOption.id)) {
                     userScore += scorePerOption;
                 }

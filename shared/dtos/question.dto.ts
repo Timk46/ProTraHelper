@@ -132,3 +132,11 @@ export interface CodingQuestionDto {
     FREETEXT = "FreeText",
     CODE = "CodingQuestion",
   }
+
+  export interface McqGenerationDTO {
+    question?: string;
+    answers?: {answer?: string; isCorrect?: boolean}[];
+    description?: string;
+    score?: number;
+
+  }
