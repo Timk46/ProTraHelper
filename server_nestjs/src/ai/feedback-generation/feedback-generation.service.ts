@@ -9,86 +9,103 @@ import * as fileSystem from 'fs';
 
 @Injectable()
 export class FeedbackGenerationService {
-    constructor(private ragService: RagService, private llmService: LlmBasicPromptService, private prisma: PrismaClient) { } // Retrieval Augmented Generation
+  constructor(private ragService: RagService, private llmService: LlmBasicPromptService, private prisma: PrismaClient) { } // Retrieval Augmented Generation
 
-    async generateFreetextFeedback(requestData: freetextFeedbackRequestDTO): Promise<string> {
-        console.log("FeedbackGenerationService.generateFreetextQuestion");
-        console.log(requestData);
+  async generateFreetextFeedback(requestData: freetextFeedbackRequestDTO): Promise<string> {
+    console.log("FeedbackGenerationService.generateFreetextQuestion");
+    console.log(requestData);
 
-        let lecture_data: string = "";
-        lecture_data = await this.getTranscripts(requestData.conceptNodeId);
-        if (lecture_data === "") {
-            lecture_data = await this.getSimilarities(requestData.question);
-        }
-
-        const llmResponse = await this.llmService.generateLlmAnswer( feedbackGenerationPrompts.freeText(requestData.question, lecture_data), requestData.answer );
-
-        //return "This is a dummy freetext feedback.";
-        return llmResponse;
+    let lecture_data: string = "";
+    lecture_data = await this.getTranscripts(requestData.conceptNodeId);
+    if (lecture_data === "") {
+      lecture_data = await this.getSimilarities(requestData.question);
     }
 
-    async getSimilarities(question: string): Promise<string> {
-        const ragResponse = await this.ragService.lectureSimilaritySearch(question, 3);
-        let ragResponseString = "";
-        ragResponse.forEach((element) => {
-            ragResponseString += "..." + element.pageContent + "...;\n";
-        });
+    const llmResponse = await this.llmService.generateLlmAnswer( feedbackGenerationPrompts.freeTextTranscriptSearch(requestData.question, lecture_data), requestData.answer );
 
-        return ragResponseString;
+    //return "This is a dummy freetext feedback.";
+    return llmResponse;
+  }
+
+
+
+  async generateFreetextTranscriptFeedback(requestData: freetextFeedbackRequestDTO): Promise<string> {
+    console.log("FeedbackGenerationService.generateFreetextQuestion");
+    console.log(requestData);
+
+    let lecture_data: string = "";
+    lecture_data = await this.getTranscripts(requestData.conceptNodeId);
+    if (lecture_data === "") {
+      lecture_data = await this.getSimilarities(requestData.question);
     }
 
-    async getTranscripts(conceptNodeId: number): Promise<string> {
-        // get the concept node from db
-        const conceptNode = await this.prisma.conceptNode.findUnique({
-            where: {
-                id: conceptNodeId
-            }
-        });
-        if (!conceptNode) {
-            // we don't want this to be an error, because we have other ways to get the transcript information
-            return "";
-        }
+    const llmResponse = await this.llmService.generateLlmAnswer( feedbackGenerationPrompts.freeTextTranscriptSearch(requestData.question, lecture_data), requestData.answer );
 
-        const transcriptsPath = path.join(__dirname, '..', '..', '..', '..', '..', '..', 'shared', 'transcripts');
-        // get all transcripts from the transcripts folder
-        let transcripts = [];
-        try {
-            transcripts = fileSystem.readdirSync(transcriptsPath);
-        } catch (error) {
-            console.log(error);
-            return "";
-        }
-        //filter transcripts for the concept node name
-        const filteredTranscripts = transcripts.filter((transcript) => {
-            return this.prepareCompareString(transcript).includes(this.prepareCompareString(conceptNode.name));
-        });
+    //return "This is a dummy freetext feedback.";
+    return llmResponse;
+  }
 
-        //combine all transcripts into one string
-        let transcriptString = "";
-        filteredTranscripts.forEach((transcript) => {
-            transcriptString += '...' + fileSystem.readFileSync(path.join(transcriptsPath, transcript), 'utf8') + '...;\n';
-        });
+  async getSimilarities(question: string): Promise<string> {
+    const ragResponse = await this.ragService.lectureSimilaritySearch(question, 3);
+    let ragResponseString = "";
+    ragResponse.forEach((element) => {
+      ragResponseString += "..." + element.pageContent + "...;\n";
+    });
 
-        return transcriptString;
+    return ragResponseString;
+  }
 
+  async getTranscripts(conceptNodeId: number): Promise<string> {
+    // get the concept node from db
+    const conceptNode = await this.prisma.conceptNode.findUnique({
+      where: {
+        id: conceptNodeId
+      }
+    });
+    if (!conceptNode) {
+      // we don't want this to be an error, because we have other ways to get the transcript information
+      return "";
     }
 
-    private prepareCompareString(text: string): string {
-        // remove all line breaks
-        text = text.replace(/(\r\n|\n|\r)/gm, "");
-        // remove all whitespaces
-        text = text.replace(/\s/g, "");
-        // remove all special characters
-        text = text.replace(/[^\w\s]/gi, '');
-        // make everything lowercase
-        text = text.toLowerCase();
-        //replace all umlauts
-        text = text.replace(/ä/g, "ae");
-        text = text.replace(/ö/g, "oe");
-        text = text.replace(/ü/g, "ue");
-        text = text.replace(/ß/g, "ss");
-
-        return text;
+    const transcriptsPath = path.join(__dirname, '..', '..', '..', '..', '..', '..', 'shared', 'transcripts');
+    // get all transcripts from the transcripts folder
+    let transcripts = [];
+    try {
+      transcripts = fileSystem.readdirSync(transcriptsPath);
+    } catch (error) {
+      console.log(error);
+      return "";
     }
+    //filter transcripts for the concept node name
+    const filteredTranscripts = transcripts.filter((transcript) => {
+      return this.prepareCompareString(transcript).includes(this.prepareCompareString(conceptNode.name));
+    });
+
+    //combine all transcripts into one string
+    let transcriptString = "";
+    filteredTranscripts.forEach((transcript) => {
+      transcriptString += '...' + fileSystem.readFileSync(path.join(transcriptsPath, transcript), 'utf8') + '...;\n';
+    });
+
+    return transcriptString;
+  }
+
+  private prepareCompareString(text: string): string {
+    // remove all line breaks
+    text = text.replace(/(\r\n|\n|\r)/gm, "");
+    // remove all whitespaces
+    text = text.replace(/\s/g, "");
+    // remove all special characters
+    text = text.replace(/[^\w\s]/gi, '');
+    // make everything lowercase
+    text = text.toLowerCase();
+    //replace all umlauts
+    text = text.replace(/ä/g, "ae");
+    text = text.replace(/ö/g, "oe");
+    text = text.replace(/ü/g, "ue");
+    text = text.replace(/ß/g, "ss");
+
+    return text;
+  }
 
 }
