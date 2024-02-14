@@ -1,0 +1,816 @@
+{
+  "questions": [
+    {
+      "question": "Wie wird in einem Stream von Daten, der gemäß einer reinen ASCII-Kodierung übertragen wird, ein spezifischer Datentyp gekennzeichnet?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Datentyp bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer binären Kennzeichnung, die vor jedem Wert eingefügt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Verwendung von XML-Tags, die den Datentyp umschließen.",
+          "correct": false
+        },
+        {
+          "answer": "Es wird keine spezifische Kennzeichnung verwendet, der Datentyp muss aus dem Kontext erschlossen werden.",
+          "correct": false
+        },
+        {
+          "answer": "Mit einem speziellen Header, der zu Beginn des Streams gesendet wird und alle Datentypen definiert.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine Index-Tabelle am Ende des Streams, die die Positionen und Typen der Daten beschreibt.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein Datensatz, der aus einer Kombination von einfachen Datentypen wie Integer, Boolean und Char besteht, typischerweise kodiert?",
+      "options": [
+        {
+          "answer": "Durch eine Sequenz von Zeichen, die jeweils den Typ und den Wert der einzelnen einfachen Datentypen repräsentieren.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer einzigen Zahl, die alle Werte der einfachen Datentypen in einer festgelegten Reihenfolge enthält.",
+          "correct": false
+        },
+        {
+          "answer": "Durch ein spezielles Trennzeichen, das zwischen den Werten der verschiedenen Datentypen eingefügt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Indem alle Werte der einfachen Datentypen zu einem langen String zusammengefügt und ohne Typinformationen übertragen werden.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Verwendung von XML-Tags, die jeden einfachen Datentyp umschließen und so die Struktur des komplexen Datentyps abbilden.",
+          "correct": false
+        },
+        {
+          "answer": "Es wird ein einziges Zeichen verwendet, das den komplexen Datentyp repräsentiert, gefolgt von den konkatenierten Werten der einfachen Datentypen.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream von Daten, der gemäß einer simplen ASCII-Kodierung übertragen wird, typischerweise ein Datentyp gekennzeichnet, um eine korrekte Interpretation des folgenden Wertes zu gewährleisten?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Datentyp definiert, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer binären Kodierung, die in den ersten Bits des Wertes den Datentyp verschlüsselt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine XML-Struktur, die den Datentyp als Tag um den Wert herum definiert.",
+          "correct": false
+        },
+        {
+          "answer": "Es wird keine Kennzeichnung verwendet; der Datentyp muss aus dem Kontext erschlossen werden.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine JSON-Struktur, bei der der Datentyp als Schlüssel vor dem Wert steht.",
+          "correct": false
+        },
+        {
+          "answer": "Mit einem speziellen Header-Byte am Anfang des Streams, das für alle folgenden Werte den Datentyp festlegt.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein Datentyp typischerweise gekennzeichnet, um eine korrekte Interpretation der Daten zu gewährleisten?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Datentyp bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer XML-Struktur, die den Datentyp innerhalb eines Tags definiert.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine feste Byte-Reihenfolge, bei der das erste Byte immer den Datentyp angibt.",
+          "correct": false
+        },
+        {
+          "answer": "Über eine JSON-Notation, in der der Datentyp als Schlüsselwert-Paar angegeben wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine implizite Vereinbarung, bei der der Datentyp aus dem Kontext erschlossen wird.",
+          "correct": false
+        },
+        {
+          "answer": "Mit Hilfe von ASN.1, das eine formale Beschreibung des Datentyps liefert.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream von Datensätzen, der eine reine ASCII-Kodierung verwendet, ein spezifischer Datentyp gekennzeichnet?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Datentyp bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mithilfe einer binären Kodierung, die vor dem eigentlichen Wert steht.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine XML-Struktur, die den Datentyp als Tag um den Wert herum definiert.",
+          "correct": false
+        },
+        {
+          "answer": "Mit einer JSON-Notation, bei der der Datentyp als Schlüssel und der Wert als zugehöriger Wert aufgeführt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine spezielle Sequenz von Escape-Zeichen, die vor dem Wert eingefügt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Es gibt keine spezielle Kennzeichnung; der Datentyp muss aus dem Kontext erschlossen werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream von Datensätzen, der eine reine ASCII-Kodierung verwendet, ein spezifischer Datentyp gekennzeichnet?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Datentyp bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mithilfe einer binären Kodierung, die vor jedem Wert steht und den Datentyp angibt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine XML-Struktur, in der Tags den Datentyp umschließen.",
+          "correct": false
+        },
+        {
+          "answer": "Es gibt keine spezielle Kennzeichnung; der Datentyp muss aus dem Kontext erschlossen werden.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine JSON-Struktur, bei der Schlüssel-Wert-Paare den Datentyp und den Wert definieren.",
+          "correct": false
+        },
+        {
+          "answer": "Mit einem speziellen Header am Anfang des Streams, der alle Datentypen definiert.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream von Datensätzen, der eine ASCII-Kodierung verwendet, ein spezifischer Datentyp gemäß dem beschriebenen Format gekennzeichnet?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Datentyp bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer binären Kodierung, die vor jedem Wert angegeben wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine eindeutige Farbkodierung, die jedem Datentyp zugeordnet ist.",
+          "correct": false
+        },
+        {
+          "answer": "Mit einer XML-Struktur, die den Datentyp als Tag um den Wert herum definiert.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine JSON-Struktur, in der der Datentyp als Schlüssel vor dem Wert steht.",
+          "correct": false
+        },
+        {
+          "answer": "Es wird kein spezifisches Kennzeichen verwendet, der Datentyp wird aus dem Kontext interpretiert.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein komplexer Datentyp, der aus mehreren einfachen Datentypen besteht, typischerweise serialisiert?",
+      "options": [
+        {
+          "answer": "Durch Verwendung eines Delimiters zwischen den Datentypen.",
+          "correct": true
+        },
+        {
+          "answer": "Indem jeder Datentyp in einer neuen Zeile beginnt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Anhängen eines speziellen End-of-File Zeichens am Ende jedes Datentyps.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Einbetten der Datentypen in XML-Tags.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Verschlüsseln jedes Datentyps mit einem einzigartigen Schlüssel.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Konvertieren aller Datentypen in einen einzigen String.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein komplexer Datentyp, der aus mehreren einfachen Datentypen besteht, typischerweise serialisiert?",
+      "options": [
+        {
+          "answer": "Durch eine sequenzielle Aneinanderreihung der einzelnen Datentypen mit vorangestellten Typkennzeichnungen.",
+          "correct": true
+        },
+        {
+          "answer": "Komplexe Datentypen werden in Stream-orientierten Protokollen nicht serialisiert, sondern nur als Ganzes übertragen.",
+          "correct": false
+        },
+        {
+          "answer": "Jeder einfache Datentyp wird in einem separaten Stream übertragen, um die Serialisierung zu vereinfachen.",
+          "correct": false
+        },
+        {
+          "answer": "Die Serialisierung erfolgt durch das Einbetten der Datentypen in XML-Strukturen, die dann gestreamt werden.",
+          "correct": false
+        },
+        {
+          "answer": "Es wird eine feste Byte-Reihenfolge verwendet, ohne Typkennzeichnungen, um die Serialisierung zu optimieren.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Verwendung von JSON-Objekten, die die Datentypen und ihre Werte als Schlüssel-Wert-Paare enthalten.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream von Datensätzen, der eine reine ASCII-Kodierung verwendet, ein spezifischer Datentyp gekennzeichnet?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Typ bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer XML-Struktur, die den Datentyp als Attribut des Wertes definiert.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine binäre Kodierung, die vor dem eigentlichen Wert steht und den Datentyp definiert.",
+          "correct": false
+        },
+        {
+          "answer": "Es wird kein spezifischer Datentyp gekennzeichnet, da alle Werte als String interpretiert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Mit einem speziellen Header am Anfang des Streams, der alle Datentypen für die folgenden Werte definiert.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Verwendung von JSON-Objekten, bei denen der Schlüssel den Datentyp und der Wert den eigentlichen Datenwert repräsentiert.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream von Datensätzen, der eine ASCII-Kodierung verwendet, ein spezifischer Datentyp gekennzeichnet?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Typ bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer binären Kennzeichnung, die vor dem eigentlichen Wert steht.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine XML-Struktur, in der Tags den Datentyp umschließen.",
+          "correct": false
+        },
+        {
+          "answer": "Mit einer JSON-Struktur, bei der der Schlüssel den Datentyp und der Wert den eigentlichen Wert darstellt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine spezielle Sequenz von Escape-Zeichen, die vor dem Wert eingefügt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Es wird keine Kennzeichnung verwendet; der Datentyp muss aus dem Kontext erschlossen werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream von Daten, der gemäß einer einfachen ASCII-Kodierung übertragen wird, ein spezifischer Datentyp gekennzeichnet?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Datentyp bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer binären Kodierung, die vor jedem Wert eingefügt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Verwendung von XML-Tags, die den Datentyp umschließen.",
+          "correct": false
+        },
+        {
+          "answer": "Mit einem speziellen Header, der zu Beginn jedes Datenpakets gesendet wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Länge des Wertes, die den Datentyp impliziert.",
+          "correct": false
+        },
+        {
+          "answer": "Es gibt keine Kennzeichnung; der Datentyp muss aus dem Kontext erschlossen werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream von Daten, der gemäß der ASCII-Kodierung nur druckbare 7-Bit-Zeichen enthält, ein Datentyp gemäß dem beschriebenen Format gekennzeichnet?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Datentyp bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mit einer XML-Struktur, die den Datentyp in einem Tag umschließt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine JSON-Struktur, bei der der Datentyp als Schlüssel und der Wert als zugehöriger Wert aufgeführt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Mittels einer Binärkodierung, die den Datentyp in den ersten 8 Bits codiert.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine explizite Typangabe in Klammern vor dem eigentlichen Wert.",
+          "correct": false
+        },
+        {
+          "answer": "Indem der Wert direkt ohne Typangabe gesendet wird und der Datentyp aus dem Kontext erschlossen werden muss.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream von Daten, der gemäß einer einfachen ASCII-Kodierung übertragen wird, ein spezifischer Datentyp gekennzeichnet?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Datentyp bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer binären Kodierung, die in den Datenstrom eingebettet ist.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine XML-Struktur, die den Datentyp als Tag enthält.",
+          "correct": false
+        },
+        {
+          "answer": "Mit einer JSON-Notation, bei der der Datentyp als Schlüssel verwendet wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine spezielle Sequenz von Escape-Zeichen, die vor dem Wert stehen.",
+          "correct": false
+        },
+        {
+          "answer": "Es gibt keine Kennzeichnung; der Datentyp muss aus dem Kontext erschlossen werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream von Datensätzen, der eine reine ASCII-Kodierung verwendet, ein spezifischer Datentyp gekennzeichnet?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Typ bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer XML-Struktur, die den Datentyp als Attribut des Wertes definiert.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine JSON-Notation, bei der der Wert in einem Schlüssel-Wert-Paar den Datentyp angibt.",
+          "correct": false
+        },
+        {
+          "answer": "Mit einem speziellen Header am Anfang des Streams, der alle Datentypen und ihre Reihenfolge auflistet.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine binäre Kennzeichnung, die vor jedem Wert im Stream eingefügt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Es gibt keine spezielle Kennzeichnung; der Datentyp muss aus dem Kontext erschlossen werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein komplexer Datentyp, der aus mehreren einfachen Datentypen besteht, typischerweise serialisiert?",
+      "options": [
+        {
+          "answer": "Durch eine Abfolge von Zeichen, die jeweils den Typ und den Wert der einzelnen einfachen Datentypen repräsentieren.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer einzigen Zahl, die alle Werte der einfachen Datentypen in einer festgelegten Reihenfolge enthält.",
+          "correct": false
+        },
+        {
+          "answer": "Durch ein spezielles Trennzeichen, das zwischen den Werten der verschiedenen Datentypen eingefügt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Indem alle Werte der einfachen Datentypen zu einem langen String zusammengefügt und ohne Typinformationen übertragen werden.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Verwendung von XML-Tags, die jeden einfachen Datentyp umschließen und so die Struktur des komplexen Datentyps abbilden.",
+          "correct": false
+        },
+        {
+          "answer": "Mittels einer verschlüsselten Binärsequenz, die nur vom Sender und Empfänger entschlüsselt werden kann.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream von Datensätzen, der eine reine ASCII-Kodierung verwendet, ein spezifischer Datentyp gekennzeichnet?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Datentyp bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer binären Kodierung, die vor jedem Wert eingefügt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine XML-Struktur, die den Datentyp als Tag um den Wert herum definiert.",
+          "correct": false
+        },
+        {
+          "answer": "Mit einer JSON-Notation, bei der der Datentyp als Schlüssel und der Wert als zugehöriger Wert aufgeführt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine spezielle Header-Datei, die alle Datentypen und ihre Positionen im Stream beschreibt.",
+          "correct": false
+        },
+        {
+          "answer": "Es gibt keine spezielle Kennzeichnung; der Datentyp muss aus dem Kontext erschlossen werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream von Daten, der gemäß einer einfachen ASCII-Kodierung übertragen wird, ein spezifischer Datentyp gemäß dem vorliegenden Format gekennzeichnet?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Datentyp bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer binären Kodierung, die vor jedem Wert angegeben wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine XML-Struktur, in der Tags den Datentyp umschließen.",
+          "correct": false
+        },
+        {
+          "answer": "Mit einer JSON-Notation, bei der Schlüssel-Wert-Paare den Datentyp und den Wert definieren.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine spezielle Header-Datei, die vor dem Datenstrom gesendet wird.",
+          "correct": false
+        },
+        {
+          "answer": "Es wird keine Kennzeichnung verwendet; der Datentyp muss aus dem Kontext erschlossen werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein komplexer Datentyp, der aus mehreren einfachen Datentypen besteht, typischerweise kodiert, um die Eindeutigkeit der Datentypgrenzen zu gewährleisten?",
+      "options": [
+        {
+          "answer": "Durch die Verwendung von speziellen Trennzeichen zwischen den Datentypen.",
+          "correct": true
+        },
+        {
+          "answer": "Indem alle Datentypen in einen einzigen Binärwert konvertiert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Zuweisung einer festen Byte-Anzahl für jeden Datentyp.",
+          "correct": false
+        },
+        {
+          "answer": "Mittels einer vorangestellten Längenangabe für jeden Datentyp.",
+          "correct": true
+        },
+        {
+          "answer": "Durch die Implementierung einer komplexen Verschlüsselungsroutine.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die Datentypen in einer festgelegten Reihenfolge ohne Trennung gesendet werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream von Datensätzen, der eine ASCII-Kodierung verwendet, ein spezifischer Datentyp wie 'Integer' typischerweise gekennzeichnet?",
+      "options": [
+        {
+          "answer": "Durch ein vorangestelltes Zeichen, das den Datentyp bestimmt, gefolgt von einem Gleichheitszeichen und dem Wert.",
+          "correct": true
+        },
+        {
+          "answer": "Durch die Verwendung von XML-Tags, die den Datentyp umschließen.",
+          "correct": false
+        },
+        {
+          "answer": "Mit einer expliziten Längenangabe vor dem Wert.",
+          "correct": false
+        },
+        {
+          "answer": "Durch ein spezielles Trennzeichen, das nach dem Wert steht.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Position des Wertes im Stream, die den Datentyp impliziert.",
+          "correct": false
+        },
+        {
+          "answer": "Durch eine binäre Kennzeichnung, die dem Wert vorangestellt wird.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein einfacher Datentyp wie 'Char' typischerweise kodiert?",
+      "options": [
+        {
+          "answer": "Ein 'Char' wird durch ein vorangestelltes 'C', gefolgt von einem Gleichheitszeichen und dem Zeichen selbst kodiert.",
+          "correct": true
+        },
+        {
+          "answer": "Charaktere werden als Ganzzahlen kodiert, wobei jeder Buchstabe einem numerischen Wert entspricht.",
+          "correct": false
+        },
+        {
+          "answer": "Ein 'Char' wird nicht kodiert, sondern direkt als Binärwert im Stream übertragen.",
+          "correct": false
+        },
+        {
+          "answer": "Charaktere werden durch eine feste Byte-Reihenfolge kodiert, die durch die Definition des Datentyps vorgegeben ist.",
+          "correct": false
+        },
+        {
+          "answer": "Ein 'Char' wird durch eine feste Anzahl von Leerzeichen vom nächsten Wert im Stream getrennt.",
+          "correct": false
+        },
+        {
+          "answer": "Der Wert eines 'Char' wird als ASCII-Zeichenfolge übertragen, ohne den Datentyp zu kennzeichnen.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein Datensatz, der aus einer Kombination von einfachen Datentypen wie Integer, Boolean und Char besteht, typischerweise kodiert?",
+      "options": [
+        {
+          "answer": "Durch eine Sequenz von Zeichen, die jeweils den Typ und den Wert der einzelnen einfachen Datentypen repräsentieren.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer einzigen Zahl, die alle Werte der einfachen Datentypen in einer festgelegten Reihenfolge enthält.",
+          "correct": false
+        },
+        {
+          "answer": "Durch ein spezielles Trennzeichen, das zwischen den Werten der verschiedenen Datentypen eingefügt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Indem alle Werte der einfachen Datentypen zu einem langen String zusammengefügt und ohne Typinformationen übertragen werden.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Verwendung von XML-Tags, die jeden einfachen Datentyp umschließen und so die Struktur des komplexen Datentyps abbilden.",
+          "correct": false
+        },
+        {
+          "answer": "Indem der Datentyp in einem separaten Header außerhalb des Datenstroms übermittelt wird.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein komplexer Datentyp, der aus einer Kombination von einfachen Datentypen wie Integer, Boolean und Char besteht, typischerweise serialisiert?",
+      "options": [
+        {
+          "answer": "Die Serialisierung erfolgt durch Aneinanderreihung der einzelnen Werte, wobei jeder Wert durch ein spezielles Trennzeichen vom nächsten getrennt wird.",
+          "correct": true
+        },
+        {
+          "answer": "Komplexe Datentypen werden als JSON-Objekte serialisiert, wobei jeder einfache Datentyp als Schlüssel-Wert-Paar dargestellt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Die Werte werden in einer festen Byte-Reihenfolge übertragen, die durch die Definition des komplexen Datentyps vorgegeben ist.",
+          "correct": true
+        },
+        {
+          "answer": "Jeder Wert des komplexen Datentyps wird in eine Binärsequenz umgewandelt und die Sequenzen werden ohne Trennzeichen hintereinander übertragen.",
+          "correct": false
+        },
+        {
+          "answer": "Die Serialisierung erfolgt durch Einbettung der Werte in XML-Tags, die den jeweiligen Datentyp repräsentieren.",
+          "correct": false
+        },
+        {
+          "answer": "Es wird ein einziges Zeichen verwendet, das den komplexen Datentyp repräsentiert, gefolgt von den konkatenierten Werten der einfachen Datentypen.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein einfacher Datentyp wie 'Boolean' typischerweise kodiert?",
+      "options": [
+        {
+          "answer": "Ein 'Boolean' wird durch ein vorangestelltes 'B', gefolgt von einem Gleichheitszeichen und dem Wert 'true' oder 'false' kodiert.",
+          "correct": true
+        },
+        {
+          "answer": "Booleans werden als ganze Zahlen kodiert, wobei '0' für 'false' und '1' für 'true' steht.",
+          "correct": false
+        },
+        {
+          "answer": "Ein 'Boolean' wird nicht kodiert, sondern als Klartext 'true' oder 'false' ohne vorangestellte Typkennzeichnung übertragen.",
+          "correct": false
+        },
+        {
+          "answer": "Booleans werden durch ein spezielles Symbol am Ende des Streams gekennzeichnet, zum Beispiel ein Ausrufezeichen für 'true' und ein Fragezeichen für 'false'.",
+          "correct": false
+        },
+        {
+          "answer": "Ein 'Boolean' wird durch eine feste Byte-Reihenfolge kodiert, bei der das erste Byte den Typ und das zweite Byte den Wert angibt.",
+          "correct": false
+        },
+        {
+          "answer": "Booleans werden als '1' oder '0' kodiert, gefolgt von einem speziellen Trennzeichen, um sie von anderen Datentypen zu unterscheiden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein Datensatz, der aus einer Kombination von einfachen Datentypen wie Integer, Boolean und Char besteht, typischerweise kodiert?",
+      "options": [
+        {
+          "answer": "Durch eine Sequenz von Zeichen, wobei jedes Zeichen den Typ und den Wert der einzelnen Datentypen repräsentiert.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer einzigen Zahl, die alle Werte der einfachen Datentypen in einer festgelegten Reihenfolge enthält.",
+          "correct": false
+        },
+        {
+          "answer": "Durch ein spezielles Trennzeichen, das zwischen den Werten der verschiedenen Datentypen eingefügt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Indem alle Werte der einfachen Datentypen zu einem langen String zusammengefügt und ohne Typinformationen übertragen werden.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Verwendung von XML-Tags, die jeden einfachen Datentyp umschließen und so die Struktur des komplexen Datentyps abbilden.",
+          "correct": false
+        },
+        {
+          "answer": "Es wird ein einziges Zeichen verwendet, das den komplexen Datentyp repräsentiert, gefolgt von den konkatenierten Werten der einfachen Datentypen.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein Datensatz, der aus einer Kombination von einfachen Datentypen wie Integer, Boolean und Char besteht, typischerweise kodiert?",
+      "options": [
+        {
+          "answer": "Durch eine Sequenz von Zeichen, die jeweils den Typ und den Wert der einzelnen einfachen Datentypen repräsentieren.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer einzigen Zahl, die alle Werte der einfachen Datentypen in einer festgelegten Reihenfolge enthält.",
+          "correct": false
+        },
+        {
+          "answer": "Durch ein spezielles Trennzeichen, das zwischen den Werten der verschiedenen Datentypen eingefügt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Indem alle Werte der einfachen Datentypen zu einem langen String zusammengefügt und ohne Typinformationen übertragen werden.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Verwendung von XML-Tags, die jeden einfachen Datentyp umschließen und so die Struktur des komplexen Datentyps abbilden.",
+          "correct": false
+        },
+        {
+          "answer": "Es wird ein einziges Zeichen verwendet, das den komplexen Datentyp repräsentiert, gefolgt von den konkatenierten Werten der einfachen Datentypen.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein komplexer Datentyp, der aus mehreren einfachen Datentypen besteht, typischerweise serialisiert?",
+      "options": [
+        {
+          "answer": "Durch eine Abfolge von Zeichen, die jeweils den Typ und den Wert der einzelnen einfachen Datentypen repräsentieren.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer einzigen Zahl, die alle Werte der einfachen Datentypen in einer festgelegten Reihenfolge enthält.",
+          "correct": false
+        },
+        {
+          "answer": "Durch ein spezielles Trennzeichen, das zwischen den Werten der verschiedenen Datentypen eingefügt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Indem alle Werte der einfachen Datentypen zu einem langen String zusammengefügt und ohne Typinformationen übertragen werden.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Verwendung von XML-Tags, die jeden einfachen Datentyp umschließen und so die Struktur des komplexen Datentyps abbilden.",
+          "correct": false
+        },
+        {
+          "answer": "Indem der Datentyp in einem separaten Header außerhalb des Datenstroms übermittelt wird.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in einem Stream-orientierten Protokoll ein Datensatz, der aus einer Kombination von einfachen Datentypen wie Integer, Boolean und Char besteht, typischerweise kodiert?",
+      "options": [
+        {
+          "answer": "Durch eine Sequenz von Zeichen, die jeweils den Typ und den Wert der einzelnen einfachen Datentypen repraesentieren.",
+          "correct": true
+        },
+        {
+          "answer": "Mittels einer einzigen Zahl, die alle Werte der einfachen Datentypen in einer festgelegten Reihenfolge enthaelt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch ein spezielles Trennzeichen, das zwischen den Werten der verschiedenen Datentypen eingefuegt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Indem alle Werte der einfachen Datentypen zu einem langen String zusammengefuegt und ohne Typinformationen uebertragen werden.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Verwendung von XML-Tags, die jeden einfachen Datentyp umschliessen und so die Struktur des komplexen Datentyps abbilden.",
+          "correct": false
+        },
+        {
+          "answer": "Es wird ein einziges Zeichen verwendet, das den komplexen Datentyp repraesentiert, gefolgt von den konkatenierten Werten der einfachen Datentypen.",
+          "correct": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,497 @@
+{
+  "questions": [
+    {
+      "question": "Wie kann der Zustand einer externen Variable in einer Pure Function in funktionalen Programmiersprachen berücksichtigt werden, ohne die Pure Function Eigenschaft zu verletzen?",
+      "options": [
+        {
+          "answer": "Durch direktes Modifizieren der externen Variable innerhalb der Pure Function.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die externe Variable als Referenz übergeben und innerhalb der Pure Function verändert wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Übergeben der externen Variable als Argument an die Pure Function, wobei die Funktion eine Kopie der Variable verwendet.",
+          "correct": true
+        },
+        {
+          "answer": "Die Pure Function kann den Zustand einer externen Variable ignorieren, da sie keine Seiteneffekte haben darf.",
+          "correct": true
+        },
+        {
+          "answer": "Durch das Erstellen einer Closure, die die externe Variable einschließt und als Pure Function behandelt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die externe Variable in einem globalen Zustandsobjekt gespeichert und von der Pure Function gelesen wird.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann eine Pure Function in einer funktionalen Programmiersprache so definiert werden, dass sie auf eine externe Variable zugreift, ohne ihre Reinheit zu verlieren?",
+      "options": [
+        {
+          "answer": "Durch Verwendung einer Closure, die die externe Variable im Funktionskontext einschließt.",
+          "correct": true
+        },
+        {
+          "answer": "Indem die externe Variable als globaler Zustand innerhalb der Pure Function deklariert wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch Übergabe der externen Variable als Argument bei jedem Funktionsaufruf.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die Funktion als Methode eines Objekts definiert wird, das die externe Variable als Eigenschaft hat.",
+          "correct": false
+        },
+        {
+          "answer": "Durch direkten Zugriff auf die externe Variable innerhalb des Funktionskörpers ohne spezielle Vorkehrungen.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Kopieren der externen Variable in eine lokale Variable innerhalb der Pure Function.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in funktionalen Programmiersprachen eine Strategie als Variable gespeichert werden, um die Vorteile von Pure Functions zu nutzen, ohne dass die Strategie ein Argument der Funktion ist?",
+      "options": [
+        {
+          "answer": "Durch die Verwendung einer Closure, die es erlaubt, den Zustand der Strategie zu speichern und auf ihn zuzugreifen, ohne dass er als Argument übergeben wird.",
+          "correct": true
+        },
+        {
+          "answer": "Indem die Strategie als statische Variable innerhalb einer Klasse definiert wird, was jedoch die Prinzipien reiner Funktionen verletzt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Setzen einer globalen Variable, die von allen Funktionen im Programm gelesen und verändert werden kann.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die Strategie direkt im Code der Funktion hartkodiert wird, was die Wiederverwendbarkeit und Testbarkeit der Funktion einschränkt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Übergabe der Strategie als Parameter an die Funktion, was jedoch die Fragestellung nicht erfüllt.",
+          "correct": false
+        },
+        {
+          "answer": "Indem ein Objekt mit Methoden, die die Strategien repräsentieren, erstellt und dieses Objekt der Funktion übergeben wird.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in funktionalen Programmiersprachen eine Strategie als Variable gespeichert werden, um die Vorteile von Pure Functions zu nutzen, ohne dass die Strategie ein Argument der Funktion ist?",
+      "options": [
+        {
+          "answer": "Durch die Verwendung einer Closure, die es erlaubt, den Zustand der Strategie zu speichern und auf ihn zuzugreifen, ohne dass er als Argument übergeben wird.",
+          "correct": true
+        },
+        {
+          "answer": "Indem die Strategie als statische Variable innerhalb einer Klasse definiert wird, was jedoch die Prinzipien reiner Funktionen verletzt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Setzen einer globalen Variable, die von allen Funktionen im Programm gelesen und verändert werden kann.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die Strategie direkt im Code der Funktion hartkodiert wird, was die Wiederverwendbarkeit und Testbarkeit der Funktion einschränkt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Übergabe der Strategie als Parameter an die Funktion.",
+          "correct": false
+        },
+        {
+          "answer": "Indem ein Objekt mit Methoden, die die Strategien repräsentieren, erstellt und dieses Objekt der Funktion übergeben wird.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in funktionalen Programmiersprachen eine Strategie als Variable gespeichert werden, ohne dass sie ein Argument der umgebenden Funktion ist?",
+      "options": [
+        {
+          "answer": "Durch die Verwendung einer Closure, die es erlaubt, den Zustand der Strategie zu speichern und auf ihn zuzugreifen.",
+          "correct": true
+        },
+        {
+          "answer": "Indem die Strategie als statische Variable innerhalb einer Klasse definiert wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Setzen einer globalen Variable, die von allen Funktionen im Programm gelesen und verändert werden kann.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die Strategie direkt im Code der Funktion hartkodiert wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Übergabe der Strategie als Parameter an die Funktion.",
+          "correct": false
+        },
+        {
+          "answer": "Indem ein Objekt mit Methoden, die die Strategien repräsentieren, erstellt und dieses Objekt der Funktion übergeben wird.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in funktionalen Programmiersprachen eine Strategie als Variable gespeichert werden, um die Vorteile von Pure Functions zu nutzen, ohne dass die Strategie ein Argument der Funktion ist?",
+      "options": [
+        {
+          "answer": "Durch die Verwendung einer Closure, die es erlaubt, den Zustand der Strategie zu speichern und auf ihn zuzugreifen.",
+          "correct": true
+        },
+        {
+          "answer": "Indem die Strategie als statische Variable innerhalb einer Klasse definiert wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Setzen einer globalen Variable, die von allen Funktionen im Programm gelesen und verändert werden kann.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die Strategie direkt im Code der Funktion hartkodiert wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Übergabe der Strategie als Parameter an die Funktion.",
+          "correct": false
+        },
+        {
+          "answer": "Indem ein Objekt mit Methoden, die die Strategien repräsentieren, erstellt und dieses Objekt der Funktion übergeben wird.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in funktionalen Programmiersprachen eine Funktion innerhalb einer anderen Funktion gespeichert werden, um die Vorteile von Pure Functions zu nutzen?",
+      "options": [
+        {
+          "answer": "Durch die Zuweisung der inneren Funktion zu einer Variablen in der äußeren Funktion.",
+          "correct": true
+        },
+        {
+          "answer": "Indem die innere Funktion als globale Variable definiert wird, die von der äußeren Funktion aufgerufen wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Verwendung von Klassen und Objekten, um die innere Funktion zu kapseln.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die innere Funktion als String gespeichert und zur Laufzeit evaluiert wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das direkte Einbetten der inneren Funktion im Code der äußeren Funktion ohne Verwendung einer Variablen.",
+          "correct": false
+        },
+        {
+          "answer": "Indem ein Funktionszeiger auf die innere Funktion erstellt und in der äußeren Funktion verwendet wird.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in funktionalen Programmiersprachen eine Strategie als Variable gespeichert werden, ohne dass sie ein Argument der umgebenden Funktion ist, um die Vorteile von Pure Functions zu nutzen?",
+      "options": [
+        {
+          "answer": "Durch die Zuweisung einer anonymen Funktion zu einer Variablen, die dann im Spielverlauf aufgerufen wird.",
+          "correct": true
+        },
+        {
+          "answer": "Indem die Strategie als String gespeichert und zur Laufzeit evaluiert wird, um die entsprechende Funktion auszuführen.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Erstellung einer neuen Klasse, die die Strategie als Methode implementiert und deren Instanz der Variablen zugewiesen wird.",
+          "correct": false
+        },
+        {
+          "answer": "Indem ein Funktionszeiger auf die Funktion 'Spielen der letzten Karte' erstellt und der Variablen zugewiesen wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Definition einer globalen Variable, die den Zustand der Strategie speichert und von der Funktion genutzt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die Strategie als Teil eines Objekts gespeichert wird, das verschiedene Spielstrategien als Methoden enthält.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in funktionalen Programmiersprachen eine Strategie als Variable gespeichert werden, um die Vorteile von Pure Functions zu nutzen, ohne dass die Strategie ein Argument der Funktion ist?",
+      "options": [
+        {
+          "answer": "Durch die Zuweisung einer anonymen Funktion zu einer Variablen, die dann im Spielverlauf aufgerufen wird.",
+          "correct": true
+        },
+        {
+          "answer": "Indem die Strategie als statische Variable innerhalb einer Klasse definiert wird, was jedoch die Prinzipien reiner Funktionen verletzt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Setzen einer globalen Variable, die von allen Funktionen im Programm gelesen und verändert werden kann.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die Strategie direkt im Code der Funktion hartkodiert wird, was die Wiederverwendbarkeit und Testbarkeit der Funktion einschränkt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Übergabe der Strategie als Parameter an die Funktion.",
+          "correct": false
+        },
+        {
+          "answer": "Indem ein Objekt mit Methoden, die die Strategien repräsentieren, erstellt und dieses Objekt der Funktion übergeben wird.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in funktionalen Programmiersprachen eine Strategie als Variable gespeichert werden, um die Vorteile von Pure Functions zu nutzen, ohne dass die Strategie ein Argument der Funktion ist?",
+      "options": [
+        {
+          "answer": "Durch die Verwendung einer Closure, die es erlaubt, den Zustand der Strategie zu speichern und auf ihn zuzugreifen, ohne dass er als Argument übergeben wird.",
+          "correct": true
+        },
+        {
+          "answer": "Indem die Strategie als statische Variable innerhalb einer Klasse definiert wird, was jedoch die Prinzipien reiner Funktionen verletzt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Setzen einer globalen Variable, die von allen Funktionen im Programm gelesen und verändert werden kann.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die Strategie direkt im Code der Funktion hartkodiert wird, was die Wiederverwendbarkeit und Testbarkeit der Funktion einschränkt.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Übergabe der Strategie als Parameter an die Funktion, was jedoch die Fragestellung nicht erfüllt.",
+          "correct": false
+        },
+        {
+          "answer": "Indem ein Objekt mit Methoden, die die Strategien repräsentieren, erstellt und dieses Objekt der Funktion übergeben wird.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in funktionalen Programmiersprachen die Strategie 'Spielen der letzten Karte' in einer Variablen gespeichert werden, um die Vorteile von Pure Functions zu nutzen?",
+      "options": [
+        {
+          "answer": "Durch die Zuweisung einer anonymen Funktion zu einer Variablen, die die Strategie implementiert.",
+          "correct": true
+        },
+        {
+          "answer": "Indem die Strategie als String gespeichert und zur Laufzeit evaluiert wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Definition einer Klasse mit einer Methode, die die Strategie implementiert, und die Zuweisung einer Instanz dieser Klasse zu einer Variablen.",
+          "correct": false
+        },
+        {
+          "answer": "Indem ein Funktionszeiger auf die Funktion 'Spielen der letzten Karte' erstellt und der Variablen zugewiesen wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Erstellung eines Interface, das die Strategie definiert, und die Implementierung dieses Interface in einer Klasse, deren Objekt dann der Variablen zugewiesen wird.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die Strategie als Teil eines Objekts gespeichert wird, das verschiedene Spielstrategien als Methoden enthält und dieses Objekt der Variablen zugewiesen wird.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in funktionalen Programmiersprachen die Strategie 'Spielen der letzten Karte' in einer Variablen gespeichert werden, um die Vorteile von Pure Functions zu nutzen?",
+      "options": [
+        {
+          "answer": "Durch die Zuweisung einer anonymen Funktion, die die Strategie implementiert, zu einer Variablen.",
+          "correct": true
+        },
+        {
+          "answer": "Indem die Strategie als String gespeichert und zur Laufzeit evaluiert wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Definition einer Klasse mit einer Methode, die die Strategie implementiert, und die Zuweisung einer Instanz dieser Klasse zu einer Variablen.",
+          "correct": false
+        },
+        {
+          "answer": "Indem ein Funktionszeiger auf die Funktion 'Spielen der letzten Karte' erstellt und der Variablen zugewiesen wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Erstellung eines Interface, das die Strategie definiert, und die Implementierung dieses Interface in einer Klasse, deren Objekt dann der Variablen zugewiesen wird.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die Strategie als Teil eines Objekts gespeichert wird, das verschiedene Spielstrategien als Methoden enthält und dieses Objekt der Variablen zugewiesen wird.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann die Dokumentation einer Funktion in funktionalen Programmiersprachen dazu beitragen, dass die Funktion auch Monate später noch verständlich und wartbar ist?",
+      "options": [
+        {
+          "answer": "Durch die Verwendung von Docstrings, die eine ausführliche Beschreibung der Funktion, ihrer Argumente und des Rückgabewerts enthalten.",
+          "correct": true
+        },
+        {
+          "answer": "Indem der Funktionsname so gewählt wird, dass er die Funktionalität der Funktion genau beschreibt.",
+          "correct": true
+        },
+        {
+          "answer": "Durch das Einfügen von Kommentaren im Code außerhalb der Funktion, die auf die Funktion verweisen.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Verwendung globaler Variablen innerhalb der Funktion, um den Kontext zu verdeutlichen.",
+          "correct": false
+        },
+        {
+          "answer": "Indem man die Funktion regelmäßig neu schreibt, um sie aktuell zu halten.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Vermeiden jeglicher Dokumentation, um die Lesbarkeit des Codes zu erhöhen.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann die Closure-Eigenschaft in funktionalen Programmiersprachen genutzt werden, um eine Strategie zu definieren, die auf eine nicht lokale Variable zugreift, ohne die Reinheit der Funktion zu beeinträchtigen?",
+      "options": [
+        {
+          "answer": "Durch die Verwendung einer anonymen Funktion, die die externe Variable einfängt und als Rückgabewert dient.",
+          "correct": true
+        },
+        {
+          "answer": "Indem die externe Variable als global deklariert und direkt in der Pure Function verwendet wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Kopieren der externen Variable in eine lokale Variable innerhalb der Pure Function.",
+          "correct": false
+        },
+        {
+          "answer": "Indem die externe Variable als Referenz übergeben und innerhalb der Pure Function modifiziert wird.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Erstellung einer neuen Funktion, die die externe Variable als Parameter akzeptiert und diese innerhalb der Funktion verwendet.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Implementierung eines Objekts, das die externe Variable kapselt und Methoden zur Manipulation anbietet.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann die Unveränderlichkeit von Datenstrukturen in funktionalen Programmiersprachen dazu beitragen, dass Funktionen als Variablen sicher und effektiv genutzt werden?",
+      "options": [
+        {
+          "answer": "Unveränderliche Datenstrukturen verhindern Seiteneffekte, wodurch Funktionen als Variablen in verschiedenen Kontexten wiederverwendet werden können, ohne unerwartetes Verhalten zu riskieren.",
+          "correct": true
+        },
+        {
+          "answer": "Durch die Unveränderlichkeit von Datenstrukturen wird der Speicherverbrauch erhöht, was die Nutzung von Funktionen als Variablen ineffizient macht.",
+          "correct": false
+        },
+        {
+          "answer": "Unveränderliche Datenstrukturen ermöglichen es, dass Funktionen als Variablen ihren Zustand beibehalten und somit Zustandsänderungen in anderen Teilen des Programms nachvollziehen können.",
+          "correct": false
+        },
+        {
+          "answer": "Die Unveränderlichkeit von Datenstrukturen hat keinen Einfluss auf die Nutzung von Funktionen als Variablen, da Funktionen und Datenstrukturen unabhängige Konzepte sind.",
+          "correct": false
+        },
+        {
+          "answer": "Unveränderliche Datenstrukturen erleichtern das Debugging, da die Funktionen als Variablen keine versteckten Zustandsänderungen verursachen können.",
+          "correct": true
+        },
+        {
+          "answer": "Die Unveränderlichkeit von Datenstrukturen führt dazu, dass Funktionen als Variablen nicht in Schleifen verwendet werden können, da sie keine Zustandsänderungen zulassen.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie kann die Implementierung von Pure Functions in einem funktionalen Programm dazu beitragen, dass Seiteneffekte vermieden werden, wenn Funktionen als Variablen verwendet werden?",
+      "options": [
+        {
+          "answer": "Indem Pure Functions keine Seiteneffekte erzeugen, können sie als Werte in Variablen gespeichert werden, ohne das Verhalten anderer Teile des Programms unerwartet zu beeinflussen.",
+          "correct": true
+        },
+        {
+          "answer": "Pure Functions erfordern die Verwendung globaler Variablen, um Seiteneffekte zu vermeiden, wenn sie als Variablen gespeichert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Die Implementierung von Pure Functions hat keinen Einfluss auf das Vermeiden von Seiteneffekten, da Funktionen immer Zustände anderer Variablen ändern.",
+          "correct": false
+        },
+        {
+          "answer": "Pure Functions können Seiteneffekte vermeiden, indem sie Kopien von Objekten erstellen, anstatt die Originalobjekte zu verändern.",
+          "correct": true
+        },
+        {
+          "answer": "Das Speichern von Pure Functions in Variablen führt zu Seiteneffekten, da die Funktionen externe Zustände verändern müssen.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Unveränderlichkeit der Eingabeparameter von Pure Functions werden keine Seiteneffekte erzeugt, selbst wenn diese Funktionen als Variablen gespeichert werden.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "question": "Wie kann die Idee der funktionalen Programmierung genutzt werden, um eine Funktion zu definieren, die eine Strategie anwendet, ohne dabei auf globale Variablen oder Zustände direkt zuzugreifen?",
+      "options": [
+        {
+          "answer": "Durch die Verwendung einer Higher-Order Function, die eine Strategiefunktion als Parameter annimmt und anwendet.",
+          "correct": true
+        },
+        {
+          "answer": "Indem man eine globale Variable innerhalb der Funktion definiert und diese als Strategie verwendet.",
+          "correct": false
+        },
+        {
+          "answer": "Durch das Erstellen einer anonymen Funktion, die bei jedem Aufruf eine neue Strategie generiert.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Implementierung einer Klasse mit einer Methode, die als Strategie fungiert.",
+          "correct": false
+        },
+        {
+          "answer": "Indem man die Strategie als statische Variable in der Funktion speichert.",
+          "correct": false
+        },
+        {
+          "answer": "Durch die Nutzung einer Closure, die eine Strategie kapselt und als Argument für andere Funktionen dient.",
+          "correct": true
+        }
+      ]
+    }
+  ]
+}

@@ -135,7 +135,7 @@ export interface CodingQuestionDto {
 
   export interface McqGenerationDTO {
     question?: string;
-    answers?: {answer?: string; isCorrect?: boolean}[];
+    options?: {answer?: string; isCorrect?: boolean}[];
     description?: string;
     score?: number;
 

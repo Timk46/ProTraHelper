@@ -1,0 +1,533 @@
+{
+  "questions": [
+    {
+      "question": "Welche Klasse ist in Java die Wurzel der Exception-Hierarchie und muss daher von einer benutzerdefinierten Exception-Klasse erweitert werden?",
+      "options": [
+        {
+          "answer": "Die Klasse Object ist die Wurzel aller Exceptions und muss erweitert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse RuntimeException ist die Basis aller Exceptions und muss für benutzerdefinierte Exceptions erweitert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse Throwable ist die Wurzel der Exception-Hierarchie und muss von benutzerdefinierten Exceptions erweitert werden.",
+          "correct": true
+        },
+        {
+          "answer": "Die Klasse Error bildet die Basis der Exception-Hierarchie und muss für eigene Exceptions verwendet werden.",
+          "correct": false
+        },
+        {
+          "answer": "Benutzerdefinierte Exceptions müssen die Klasse String erweitern, da Exceptions in Java als Strings repräsentiert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse Exception ist die Wurzel der Exception-Hierarchie und muss von benutzerdefinierten Exceptions erweitert werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf die Vererbungshierarchie von Exceptions in Java zu, insbesondere im Kontext von Throwable und seinen Subklassen?",
+      "options": [
+        {
+          "answer": "Die Klasse Throwable ist die oberste Klasse in der Hierarchie und wird von den Klassen Exception und Error erweitert.",
+          "correct": true
+        },
+        {
+          "answer": "Die Klasse Exception ist die oberste Klasse in der Hierarchie und wird direkt von der Klasse Object abgeleitet.",
+          "correct": false
+        },
+        {
+          "answer": "Runtime Exceptions sind eine direkte Unterklasse von Throwable und stehen neben der Klasse Exception.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse Error ist eine Unterklasse von Exception und wird für die Behandlung von Ausnahmen verwendet.",
+          "correct": false
+        },
+        {
+          "answer": "Throwable ist eine Schnittstelle, die von den Klassen Exception und Error implementiert wird.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse RuntimeException ist eine Unterklasse von Error und repräsentiert Laufzeitfehler.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in Java eine Ausnahme behandelt, die innerhalb eines Try-Blocks auftritt und für die kein passender Catch-Block existiert?",
+      "options": [
+        {
+          "answer": "Die Ausnahme wird an den nächsthöheren Call-Stack weitergeleitet, bis sie von einem passenden Catch-Block abgefangen oder das Programm beendet wird.",
+          "correct": true
+        },
+        {
+          "answer": "Die Ausnahme wird automatisch von der Java Virtual Machine behoben, und das Programm setzt seine Ausführung ohne Unterbrechung fort.",
+          "correct": false
+        },
+        {
+          "answer": "Die Ausnahme wird als Warnung in der Konsole ausgegeben, aber das Programm fährt mit der nächsten Anweisung nach dem Try-Block fort.",
+          "correct": false
+        },
+        {
+          "answer": "Die Ausnahme wird ignoriert, und der Try-Block wird erneut ausgeführt in der Hoffnung, dass der Fehler nicht wieder auftritt.",
+          "correct": false
+        },
+        {
+          "answer": "Ein Default-Catch-Block wird von der Java Virtual Machine bereitgestellt, der alle nicht abgefangenen Ausnahmen behandelt.",
+          "correct": false
+        },
+        {
+          "answer": "Das Programm wird sofort beendet, und ein Fehlerbericht wird generiert, um das Problem zu analysieren.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Klasse wird in Java verwendet, um eine Ausnahme zu definieren, die während der Laufzeit auftritt und nicht zwingend abgefangen werden muss, aber dennoch von Throwable abgeleitet ist?",
+      "options": [
+        {
+          "answer": "Die Klasse RuntimeException wird verwendet, um eine solche Ausnahme zu definieren.",
+          "correct": true
+        },
+        {
+          "answer": "Die Klasse Exception muss verwendet werden, um alle Laufzeitausnahmen zu definieren.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse Error wird für Laufzeitausnahmen verwendet, die nicht abgefangen werden müssen.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse Throwable ist direkt zu verwenden, um Laufzeitausnahmen zu definieren.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf das Verhalten von Java zu, wenn eine selbst definierte Ausnahme innerhalb eines try-Blocks geworfen wird und ein entsprechender catch-Block vorhanden ist?",
+      "options": [
+        {
+          "answer": "Das Programm fängt die Ausnahme im catch-Block ab und führt den darin definierten Code aus.",
+          "correct": true
+        },
+        {
+          "answer": "Die Ausnahme wird bis zum nächsten übergeordneten try-catch-Block weitergeleitet, auch wenn ein passender catch-Block im aktuellen Scope vorhanden ist.",
+          "correct": false
+        },
+        {
+          "answer": "Das Programm wird sofort beendet, da selbst definierte Ausnahmen nicht abgefangen werden können.",
+          "correct": false
+        },
+        {
+          "answer": "Die Ausnahme wird ignoriert und das Programm setzt seine Ausführung nach dem try-catch-Block fort.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf das Verhalten von Java zu, wenn eine selbst definierte Ausnahme (CustomException) auftritt und diese nicht in einem try-catch-Block abgefangen wird?",
+      "options": [
+        {
+          "answer": "Das Programm wird beendet und der Stacktrace der CustomException wird auf der Standardausgabe ausgegeben.",
+          "correct": true
+        },
+        {
+          "answer": "Die CustomException wird ignoriert und das Programm setzt seine Ausführung fort, als ob kein Fehler aufgetreten wäre.",
+          "correct": false
+        },
+        {
+          "answer": "Die Java Virtual Machine versucht, die CustomException selbst zu beheben, indem sie alternative Codepfade sucht.",
+          "correct": false
+        },
+        {
+          "answer": "Die CustomException wird in eine andere Ausnahme umgewandelt und das Programm fährt mit der Ausführung fort.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Was ist die korrekte Vorgehensweise, um in Java eine benutzerdefinierte Ausnahme zu definieren, die von der Klasse Exception abgeleitet ist?",
+      "options": [
+        {
+          "answer": "Man erstellt eine neue Klasse, die direkt von der Klasse Throwable erbt.",
+          "correct": false
+        },
+        {
+          "answer": "Eine neue Klasse wird erstellt, die von der Klasse Exception erbt und mindestens einen Konstruktor definiert.",
+          "correct": true
+        },
+        {
+          "answer": "Die benutzerdefinierte Ausnahme wird durch das Implementieren des Interfaces Runnable erstellt.",
+          "correct": false
+        },
+        {
+          "answer": "Man verwendet das Schlüsselwort 'throws', um eine neue Ausnahmeklasse zu deklarieren.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf das Verhalten von Java zu, wenn innerhalb eines try-Blocks eine ArithmeticException auftritt und kein passender catch-Block vorhanden ist?",
+      "options": [
+        {
+          "answer": "Das Programm wird beendet und der Stacktrace der ArithmeticException wird auf der Standardausgabe ausgegeben.",
+          "correct": true
+        },
+        {
+          "answer": "Die ArithmeticException wird ignoriert und das Programm setzt seine Ausführung nach dem try-Block fort.",
+          "correct": false
+        },
+        {
+          "answer": "Die ArithmeticException wird in eine andere Exception umgewandelt und das Programm fährt mit der Ausführung fort.",
+          "correct": false
+        },
+        {
+          "answer": "Die Java Virtual Machine versucht, die ArithmeticException selbst zu beheben, indem sie alternative Codepfade sucht.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Klasse wird in Java verwendet, um eine Ausnahme zu definieren, die während der Laufzeit auftritt und von der Klasse Throwable abgeleitet ist, aber nicht zwingend abgefangen werden muss?",
+      "options": [
+        {
+          "answer": "Die Klasse RuntimeException wird verwendet, um eine solche Ausnahme zu definieren.",
+          "correct": true
+        },
+        {
+          "answer": "Die Klasse Exception muss verwendet werden, um alle Laufzeitausnahmen zu definieren.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse Error wird für Laufzeitausnahmen verwendet, die nicht abgefangen werden müssen.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse Throwable ist direkt zu verwenden, um Laufzeitausnahmen zu definieren.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Klasse wird in Java verwendet, um eine Ausnahme zu definieren, die während der Laufzeit auftritt und von der Klasse Throwable abgeleitet ist, aber nicht zwingend abgefangen werden muss?",
+      "options": [
+        {
+          "answer": "Die Klasse RuntimeException wird verwendet, um eine solche Ausnahme zu definieren.",
+          "correct": true
+        },
+        {
+          "answer": "Die Klasse Exception muss verwendet werden, um alle Laufzeitausnahmen zu definieren.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse Error wird für Laufzeitausnahmen verwendet, die nicht abgefangen werden müssen.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse Throwable ist direkt zu verwenden, um Laufzeitausnahmen zu definieren.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf die Hierarchie und das Verhalten von Exceptions in Java zu?",
+      "options": [
+        {
+          "answer": "Die Klasse Throwable ist die oberste Klasse in der Hierarchie der Exceptions und Errors in Java.",
+          "correct": true
+        },
+        {
+          "answer": "Runtime Exceptions in Java sind eine Unterklasse von Exception und müssen immer in einem try-catch-Block abgefangen werden.",
+          "correct": false
+        },
+        {
+          "answer": "In Java werden alle Ausnahmen als Strings repräsentiert und nicht als Objekte einer Klasse.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse Error ist eine Unterklasse von Exception und wird für programmierbare Fehlerbedingungen verwendet.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Klasse wird in Java verwendet, um eine Ausnahme zu definieren, die während der Laufzeit auftritt und von der Klasse Throwable abgeleitet ist, aber nicht zwingend abgefangen werden muss?",
+      "options": [
+        {
+          "answer": "Die Klasse RuntimeException wird verwendet, um eine solche Ausnahme zu definieren.",
+          "correct": true
+        },
+        {
+          "answer": "Die Klasse Exception muss verwendet werden, um alle Laufzeitausnahmen zu definieren.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse Error wird für Laufzeitausnahmen verwendet, die nicht abgefangen werden müssen.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse Throwable ist direkt zu verwenden, um Laufzeitausnahmen zu definieren.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Was beschreibt das Verhalten einer Java-Methode, die mit dem Schlüsselwort 'throws' eine Ausnahme deklariert, wenn diese Ausnahme während der Ausführung der Methode auftritt?",
+      "options": [
+        {
+          "answer": "Die Methode gibt die Kontrolle an die aufrufende Methode zurück, und die Ausnahme wird im Call-Stack nach oben weitergereicht.",
+          "correct": true
+        },
+        {
+          "answer": "Die Methode versucht, die Ausnahme selbst zu beheben, bevor sie an die aufrufende Methode zurückgibt.",
+          "correct": false
+        },
+        {
+          "answer": "Die Methode wird sofort beendet, und das Programm fährt mit der nächsten Anweisung nach dem Methodenaufruf fort.",
+          "correct": false
+        },
+        {
+          "answer": "Die Methode ignoriert die Ausnahme, und die Ausführung wird mit der nächsten Anweisung innerhalb der Methode fortgesetzt.",
+          "correct": false
+        },
+        {
+          "answer": "Die Methode löst eine andere Art von Exception aus, um die ursprüngliche Ausnahme zu maskieren.",
+          "correct": false
+        },
+        {
+          "answer": "Die Methode protokolliert die Ausnahme und setzt die Ausführung fort, als ob nichts passiert wäre.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf das Verhalten von Java zu, wenn eine selbst definierte Ausnahme innerhalb eines try-Blocks geworfen wird und kein entsprechender catch-Block vorhanden ist?",
+      "options": [
+        {
+          "answer": "Das Programm wird beendet und der Stacktrace der Ausnahme wird auf der Standardausgabe ausgegeben.",
+          "correct": true
+        },
+        {
+          "answer": "Die Ausnahme wird bis zum nächsten übergeordneten try-catch-Block weitergeleitet, wenn dieser existiert.",
+          "correct": true
+        },
+        {
+          "answer": "Die Ausnahme wird ignoriert und das Programm setzt seine Ausführung nach dem try-Block fort.",
+          "correct": false
+        },
+        {
+          "answer": "Die Java Virtual Machine versucht, die Ausnahme selbst zu beheben, indem sie alternative Codepfade sucht.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in Java eine Ausnahme signalisiert, wenn innerhalb eines Catch-Blocks keine Behebung des Fehlers möglich ist?",
+      "options": [
+        {
+          "answer": "Die Ausnahme wird mit 'System.exit()' beendet und das Programm wird abgeschaltet.",
+          "correct": false
+        },
+        {
+          "answer": "Innerhalb des Catch-Blocks wird die Ausnahme mit 'throw' erneut geworfen.",
+          "correct": true
+        },
+        {
+          "answer": "Die Ausnahme wird automatisch an den übergeordneten Catch-Block weitergeleitet.",
+          "correct": false
+        },
+        {
+          "answer": "Die Ausnahme wird mit 'return' zurückgegeben und die Methode beendet.",
+          "correct": false
+        },
+        {
+          "answer": "Die Ausnahme wird mit 'continue' ignoriert und das Programm setzt seine Ausführung fort.",
+          "correct": false
+        },
+        {
+          "answer": "Die Ausnahme wird mit 'finally' blockiert und das Programm fährt ohne Unterbrechung fort.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage beschreibt die Verwendung des Schlüsselworts 'throws' in einer Methodendeklaration in Java?",
+      "options": [
+        {
+          "answer": "Das Schlüsselwort 'throws' gibt an, dass eine Methode möglicherweise eine oder mehrere Ausnahmen auslösen kann.",
+          "correct": true
+        },
+        {
+          "answer": "'throws' wird verwendet, um eine Ausnahme innerhalb eines Try-Blocks zu werfen.",
+          "correct": false
+        },
+        {
+          "answer": "Mit 'throws' werden alle Ausnahmen innerhalb der Methode automatisch abgefangen.",
+          "correct": false
+        },
+        {
+          "answer": "Das Schlüsselwort 'throws' ist erforderlich, um benutzerdefinierte Ausnahmen in einer Methode zu verwenden.",
+          "correct": false
+        },
+        {
+          "answer": "'throws' wird benutzt, um anzuzeigen, dass die Methode keine Ausnahmen auslöst, sondern diese behandelt.",
+          "correct": false
+        },
+        {
+          "answer": "Eine Methode mit 'throws' im Methodenkopf muss alle aufgeführten Ausnahmen innerhalb der Methode mit einem Try-Catch-Block abfangen.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Was ist die korrekte Vorgehensweise, um eine benutzerdefinierte Exception in Java zu werfen?",
+      "options": [
+        {
+          "answer": "Man erstellt ein neues Exception-Objekt mit dem Schlüsselwort 'new' und wirft es mit 'throw'.",
+          "correct": true
+        },
+        {
+          "answer": "Man ruft die Methode 'throwException()' auf der Exception-Klasse auf.",
+          "correct": false
+        },
+        {
+          "answer": "Man verwendet das Schlüsselwort 'throws' direkt vor dem Exception-Objekt.",
+          "correct": false
+        },
+        {
+          "answer": "Man definiert eine neue Methode, die die Exception automatisch wirft, wenn sie aufgerufen wird.",
+          "correct": false
+        },
+        {
+          "answer": "Man übergibt die Exception als Argument an die Methode 'System.exit()', um sie zu werfen.",
+          "correct": false
+        },
+        {
+          "answer": "Man implementiert das Interface 'Throwable' in der eigenen Klasse und ruft dann 'throw this'.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Wie verhält sich die Java Virtual Machine (JVM), wenn eine 'Error'-Klasse Instanz innerhalb eines Programms instanziiert wird?",
+      "options": [
+        {
+          "answer": "Die JVM versucht, den Error zu beheben und das Programm normal weiterlaufen zu lassen.",
+          "correct": false
+        },
+        {
+          "answer": "Errors sind schwerwiegende Probleme, die die JVM nicht erwartet, und führen meist zum Abbruch des Programms.",
+          "correct": true
+        },
+        {
+          "answer": "Die JVM behandelt Instanzen der 'Error'-Klasse genauso wie Exceptions und sucht nach einem entsprechenden Catch-Block.",
+          "correct": false
+        },
+        {
+          "answer": "Errors werden ignoriert, da sie nicht im Code, sondern aufgrund von Problemen in der JVM-Umgebung auftreten.",
+          "correct": false
+        },
+        {
+          "answer": "Die Instanzierung einer 'Error'-Klasse löst automatisch einen Neustart der JVM aus.",
+          "correct": false
+        },
+        {
+          "answer": "Ein Error kann durch einen Try-Catch-Block abgefangen werden, obwohl dies nicht die übliche Vorgehensweise ist.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in Java eine Ausnahme behandelt, die in einem Try-Block auftritt und für die ein passender Catch-Block definiert ist?",
+      "options": [
+        {
+          "answer": "Die Ausnahme wird vom entsprechenden Catch-Block abgefangen und die dort definierten Anweisungen werden ausgeführt.",
+          "correct": true
+        },
+        {
+          "answer": "Das Programm wird sofort beendet, ohne dass der Catch-Block ausgeführt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Die Ausnahme wird an die aufrufende Methode weitergeleitet, ohne dass der Catch-Block berücksichtigt wird.",
+          "correct": false
+        },
+        {
+          "answer": "Die Ausnahme wird ignoriert und die Ausführung des Programms wird mit der nächsten Anweisung nach dem Try-Catch-Block fortgesetzt.",
+          "correct": false
+        },
+        {
+          "answer": "Die JVM löst eine neue Ausnahme aus, um auf das Problem aufmerksam zu machen.",
+          "correct": false
+        },
+        {
+          "answer": "Der Catch-Block wird nur ausgeführt, wenn es sich um eine Checked Exception handelt, bei Unchecked Exceptions wird er ignoriert.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf die Hierarchie und das Verhalten von Exceptions in Java zu?",
+      "options": [
+        {
+          "answer": "Die Klasse Throwable ist die oberste Klasse in der Hierarchie der Exceptions und Errors in Java.",
+          "correct": true
+        },
+        {
+          "answer": "Exceptions in Java sind immer Instanzen von String, da sie als solche repräsentiert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Runtime Exceptions sind eine Unterklasse von Exception und repräsentieren Fehler, die zur Laufzeit auftreten.",
+          "correct": true
+        },
+        {
+          "answer": "Die Klasse Error ist eine Unterklasse von Exception und wird für weniger schwerwiegende Fehler verwendet.",
+          "correct": false
+        },
+        {
+          "answer": "Eine benutzerdefinierte Exception muss nicht notwendigerweise von der Klasse Exception abgeleitet sein.",
+          "correct": false
+        },
+        {
+          "answer": "Die Klasse RuntimeException muss von allen benutzerdefinierten Exceptions erweitert werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Was beschreibt das Konzept des 'finally'-Blocks in der Fehlerbehandlung in Java?",
+      "options": [
+        {
+          "answer": "Der 'finally'-Block wird ausgeführt, unabhängig davon, ob eine Ausnahme im Try-Block aufgetreten ist oder nicht.",
+          "correct": true
+        },
+        {
+          "answer": "Ein 'finally'-Block ist optional und wird nur ausgeführt, wenn keine Ausnahme aufgetreten ist.",
+          "correct": false
+        },
+        {
+          "answer": "Der 'finally'-Block ersetzt alle Catch-Blöcke und wird zur allgemeinen Fehlerbehandlung verwendet.",
+          "correct": false
+        },
+        {
+          "answer": "Wenn ein 'finally'-Block vorhanden ist, werden Catch-Blöcke ignoriert und nicht ausgeführt.",
+          "correct": false
+        },
+        {
+          "answer": "Der 'finally'-Block wird nur ausgeführt, wenn eine Ausnahme im entsprechenden Try-Block erfolgreich abgefangen wurde.",
+          "correct": false
+        },
+        {
+          "answer": "Ein 'finally'-Block kann verwendet werden, um Ressourcen freizugeben, die im Try-Block allokiert wurden, unabhängig vom Auftreten einer Ausnahme.",
+          "correct": true
+        }
+      ]
+    }
+  ]
+}
