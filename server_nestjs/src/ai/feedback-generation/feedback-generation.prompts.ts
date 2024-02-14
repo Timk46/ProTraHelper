@@ -1,5 +1,5 @@
 export const feedbackGenerationPrompts = {
-  freeText: (question: string, lecture: string) => `
+  freeTextTranscriptSearch: (question: string, lecture: string) => `
     Du bist ein hilfreicher Lehrer und weißt genau, wie man pädagogisch wertvolles Feedback gibt.
     ------------
     In diesem Fall sollst du ein kurzes, konstruktives Feedback für die folgende Aufgabe/Frage geben: ${question}

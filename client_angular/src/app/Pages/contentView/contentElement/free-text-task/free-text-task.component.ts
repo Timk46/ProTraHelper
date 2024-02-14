@@ -32,6 +32,9 @@ export class FreeTextTaskComponent {
     originId: -1,
   }
 
+  feedbackText: string = '';
+  isSending: boolean = false;
+
   constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: {question_id: number}, private quesitonService: QuestionDataService) {
     this.quesitonService.getQuestionData(this.data.question_id).subscribe(data => {
       this.questionData = data;
@@ -39,7 +42,9 @@ export class FreeTextTaskComponent {
   }
 
   onSubmit(text: string, rawText: string) {
+    this.isSending = true;
     this.answerText = text;
+    this.feedbackText = '';
     console.log(this.answerText);
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
@@ -50,7 +55,14 @@ export class FreeTextTaskComponent {
     }
     this.quesitonService.createUserAnswer(userAnswerData).subscribe(data => {
       console.log(data);
+      this.feedbackText = data.feedbackText.replace(/\n/g, '<br>');
+      this.isSending = false;
     });
+  }
+
+  private replaceNewLines(text: string){
+    //replace all "\n" with "<br>"
+
   }
 
 

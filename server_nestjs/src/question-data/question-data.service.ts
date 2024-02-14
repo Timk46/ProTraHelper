@@ -306,7 +306,7 @@ export class QuestionDataService {
             //TODO: generate a feedback text based on the user answer
             let feedbackText: string = 'Du hast keine Antwort eingeben.';
             if (answerData.userFreetextAnswerRaw && answerData.userFreetextAnswerRaw != '') {
-                feedbackText = await this.feedbackGenerationService.generateFreetextFeedback({question: question.description, answer: answerData.userFreetextAnswerRaw, conceptNodeId: (question.conceptNode || -1)});
+                feedbackText = await this.feedbackGenerationService.generateFreetextFeedback({question: question.description, instructions: "", answer: answerData.userFreetextAnswerRaw, conceptNodeId: (question.conceptNode || -1)});
             }
             const userScore = 0;
             //const feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
