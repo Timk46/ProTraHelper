@@ -65,6 +65,11 @@ export class GraphDataService {
     return this.http.delete(environment.server + `/graph/edge/${edgeId}`)
   }
 
+  moveConceptNode(conceptId: number, parentId: number) {
+    console.log("in moveConcept: ", conceptId, parentId)
+    return this.http.put(environment.server + `/graph/concept/${conceptId}/newParent/${parentId}`, {})
+  }
+
 
 
   updateUserConceptData(conceptId: number, data?: any) {

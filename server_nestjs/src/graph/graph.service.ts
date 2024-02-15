@@ -294,4 +294,27 @@ export class GraphService {
         });
     }
 
+    /**
+     * moves a concept node to a new parent
+     * @param conceptNodeId
+     * @param newParentId
+     * @returns
+     */
+    async moveConceptNode(conceptNodeId: number, newParentId: number) {
+        const family = await this.prisma.conceptFamily.findFirst({
+            where: {
+                childId: conceptNodeId
+            }
+        });
+        
+        if (family !== null) {
+            return await this.prisma.conceptFamily.update({
+                where: { id: family.id },
+                data: {
+                    parentId: newParentId
+                }
+            });
+        }
+    }
+
 }

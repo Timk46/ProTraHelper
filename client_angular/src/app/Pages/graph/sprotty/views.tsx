@@ -138,7 +138,7 @@ export class LeafConceptView extends RectangularNodeView {
             {/* Render the node here */}
             <rect class-sprotty-node={true} class-leaf-concept={true}
                 width={node.size.width}
-                height={node.size.height - 20}
+                height={node.size.height - 10}
                 class-mouseover={node.hoverFeedback} class-selected={node.selected}
                 y={0}
                 rx={5}

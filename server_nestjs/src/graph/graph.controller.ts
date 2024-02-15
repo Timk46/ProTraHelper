@@ -103,4 +103,11 @@ export class GraphController {
         await this.graphService.deleteConceptEdge(edgeId);
     }
 
+    @roles("ANY")
+    @Put('concept/:conceptId/newParent/:parentId')
+    async moveConcept(@Param('conceptId', ParseIntPipe) conceptId: number, @Param('parentId', ParseIntPipe) parentId: number): Promise<any> {
+        console.log("in moveConcept controller: ", conceptId, parentId)
+        await this.graphService.moveConceptNode(conceptId, parentId);
+    }
+
 }
