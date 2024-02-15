@@ -276,8 +276,8 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
 
             for (let i = 0; i < this.getOptions().length; i++) {
               const option = (this.getOptions().at(i) as FormGroup);
-              option.get('text')?.setValue(answers.answers?.[i].answer);
-              option.get('isCorrect')?.setValue(answers.answers?.[i].isCorrect);
+              option.get('text')?.setValue(answers.options?.[i].answer);
+              option.get('isCorrect')?.setValue(answers.options?.[i].isCorrect);
 
               this.fetchingStates[i] = false;
             }
@@ -315,8 +315,8 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
             for (let i = 0; i < this.getOptions().length; i++) {
               const option = (this.getOptions().at(i) as FormGroup);
               if(!option.get('text')?.value) {
-                option.get('text')?.setValue(answers.answers?.[answerIndex].answer);
-                option.get('isCorrect')?.setValue(answers.answers?.[answerIndex].isCorrect);
+                option.get('text')?.setValue(answers.options?.[answerIndex].answer);
+                option.get('isCorrect')?.setValue(answers.options?.[answerIndex].isCorrect);
                 answerIndex++;
               }
               this.fetchingStates[i] = false;
@@ -407,8 +407,8 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
             for (let i = 0; i < this.getOptions().length; i++) {
               const option = (this.getOptions().at(i) as FormGroup);
               if(!option.get('text')?.value) {
-                option.get('text')?.setValue(answers[answerIndex].mcq.answers?.[i].answer);
-                option.get('isCorrect')?.setValue(answers[answerIndex].mcq.answers?.[i].isCorrect);
+                option.get('text')?.setValue(answers[answerIndex].mcq.options?.[i].answer);
+                option.get('isCorrect')?.setValue(answers[answerIndex].mcq.options?.[i].isCorrect);
                 answerIndex++;
               }
               this.fetchingStates[i] = false;
@@ -572,7 +572,7 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
             console.log("evaluation answers: ",answers)
             for (let i = 0; i < this.getOptions().length; i++) {
               const option = (this.getOptions().at(i) as FormGroup);
-              option.get('isCorrect')?.setValue(answers.mcq.answers?.[i].isCorrect as boolean);
+              option.get('isCorrect')?.setValue(answers.mcq.options?.[i].isCorrect as boolean);
             }
           })
         }
