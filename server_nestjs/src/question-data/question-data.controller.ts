@@ -43,6 +43,16 @@ export class QuestionDataController {
 
     /**
      *
+     * @param questionVersionId
+     * @returns the free text question
+     */
+    @Get('/freeTextQuestion/:questionVersionId')
+    async getFreeTextQuestion(@Param('questionVersionId') questionVersionId: number) {
+        return this.questionDataService.getFreeTextQuestion(questionVersionId);
+    }
+
+    /**
+     *
      * @param data
      * @param req
      * @returns the the new user answer
@@ -106,5 +116,5 @@ export class QuestionDataController {
         return await this.questionDataService.createMcQuestionOption(mcQuestionOption);
     }
 
-    
+
 }

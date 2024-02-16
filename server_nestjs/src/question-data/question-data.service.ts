@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { McQuestionDTO, MCOptionDTO, QuestionDTO, questionType, McQuestionOptionDTO } from '@DTOs/question.dto';
+import { McQuestionDTO, MCOptionDTO, QuestionDTO, questionType, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { Injectable } from '@nestjs/common';
 import {  } from '@prisma/client';
@@ -94,6 +94,34 @@ export class QuestionDataService {
         }
 
         return mcOptions;
+    }
+
+    /**
+     * get the free text question, including the solution and expectations if requested
+     * @param questionVersionId
+     * @param fullData if true, the solution and expectations are returned
+     * @returns the free text question
+     */
+    async getFreeTextQuestion(questionId: number, fullData: boolean = false): Promise<freeTextQuestionDTO> {
+      let freeTextQuestion = await this.prisma.freeTextQuestion.findFirst({
+          where: {
+              questionId: Number(questionId)
+          }
+      });
+      if (!freeTextQuestion) {
+          throw new Error('FreeTextQuestion not found');
+      }
+      return {
+        questionId: freeTextQuestion.questionId,
+        title: freeTextQuestion.title,
+        text: freeTextQuestion.text,
+        textHTML: freeTextQuestion.textHTML || undefined,
+        expectations: fullData? freeTextQuestion.expectations: "",
+        expectationsHTML: fullData? (freeTextQuestion.expectationsHTML || undefined) : undefined,
+        exampleSolution: fullData? (freeTextQuestion.exampleSolution || undefined) : undefined,
+        exampleSolutionHTML: fullData? (freeTextQuestion.exampleSolutionHTML || undefined) : undefined,
+        maxPoints: freeTextQuestion.maxPoints
+      };
     }
 
     /**
@@ -305,11 +333,15 @@ export class QuestionDataService {
 
             //TODO: generate a feedback text based on the user answer
             let feedbackText: string = 'Du hast keine Antwort eingeben.';
+            let userScore = 0;
             if (answerData.userFreetextAnswerRaw && answerData.userFreetextAnswerRaw != '') {
-                feedbackText = await this.feedbackGenerationService.generateFreetextFeedback({question: question.description, instructions: "", answer: answerData.userFreetextAnswerRaw, conceptNodeId: (question.conceptNode || -1)});
+              await this.getFreeTextQuestion(answerData.questionId, true).then(async (questionData) => {
+                await this.feedbackGenerationService.generateFreetextFeedback(questionData, answerData.userFreetextAnswerRaw).then((feedback) => {
+                  feedbackText = feedback.feedbackText;
+                  userScore = feedback.reachedPoints;
+                });
+              });
             }
-            const userScore = 0;
-            //const feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
 
             console.log('generated Text:', feedbackText);
 

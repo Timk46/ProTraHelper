@@ -224,33 +224,34 @@ model Feedback {
 }
 
 model Question {
-  id                         Int               @id @default(autoincrement())
-  createdAt                  DateTime          @default(now())
-  updatedAt                  DateTime          @updatedAt
+  id                         Int                @id @default(autoincrement())
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
   name                       String?
-  description                String?           @db.Text
+  description                String?            @db.Text
   score                      Float?
   type                       String
-  author                     User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author                     User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId                   Int
-  text                       String            @db.Text
-  isApproved                 Boolean           @default(false)
-  version                    Int               @default(1)
+  text                       String             @db.Text
+  isApproved                 Boolean            @default(false)
+  version                    Int                @default(1)
   files                      File[]
   originId                   Int?
-  origin                     Question?         @relation("VersionControl", fields: [originId], references: [id], onDelete: Cascade)
-  question                   Question[]        @relation("VersionControl")
+  origin                     Question?          @relation("VersionControl", fields: [originId], references: [id], onDelete: Cascade)
+  question                   Question[]         @relation("VersionControl")
   //successor                  Question?          @relation("VersionControl")
   //toDo: connect to different mediatypes Evelyn
   codingQuestions            CodingQuestion?
   contentElement             ContentElement?
   contentElementId           Int?
-  conceptNode                ConceptNode?      @relation(fields: [conceptNodeId], references: [id], onDelete: SetNull)
+  conceptNode                ConceptNode?       @relation(fields: [conceptNodeId], references: [id], onDelete: SetNull)
   conceptNodeId              Int?
   userAnswer                 UserAnswer[]
   mcQuestion                 MCQuestion[]
-  QuestionVersionAsQuestion  QuestionVersion[] @relation("QuestionToQuestionVersion")
-  QuestionVersionAsSuccessor QuestionVersion[] @relation("QuestionToSuccessorQuestionVersion")
+  QuestionVersionAsQuestion  QuestionVersion[]  @relation("QuestionToQuestionVersion")
+  QuestionVersionAsSuccessor QuestionVersion[]  @relation("QuestionToSuccessorQuestionVersion")
+  FreeTextQuestion           FreeTextQuestion[]
 }
 
 model QuestionVersion {
@@ -324,6 +325,8 @@ model UserAnswer {
   userMCOptionSelected UserMCOptionSelected[]
   userFreetextAnswer   String?                @db.Text
   feedbacks            Feedback[]
+  FreeTextQuestion     FreeTextQuestion?      @relation(fields: [freeTextQuestionId], references: [id])
+  freeTextQuestionId   Int?
 }
 
 model UserMCOptionSelected {
@@ -337,6 +340,27 @@ model UserMCOptionSelected {
 }
 
 //********************************************************************************************* End MC-Question
+
+//********************************************************************************************* Begin FreeText-Question
+
+model FreeTextQuestion {
+  id                  Int          @id @default(autoincrement())
+  title               String
+  text                String       @db.Text
+  textHTML            String?      @db.Text
+  expectations        String       @db.Text
+  expectationsHTML    String?      @db.Text
+  exampleSolution     String?      @db.Text
+  exampleSolutionHTML String?      @db.Text
+  maxPoints           Int
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  question            Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId          Int
+  userAnswers         UserAnswer[]
+}
+
+//********************************************************************************************* End FreeText-Question
 
 //********************************************************************************************* Begin Coding Questions
 

@@ -1,4 +1,4 @@
-import { QuestionDTO, UserAnswerDataDTO } from '@DTOs/index';
+import { QuestionDTO, UserAnswerDataDTO, freeTextQuestionDTO } from '@DTOs/index';
 import { DialogRef } from '@angular/cdk/dialog';
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -21,7 +21,7 @@ export class FreeTextTaskComponent {
   }
 
   answerText: string = '';
-  questionData : QuestionDTO = {
+  /* questionData : QuestionDTO = {
     id : -1,
     name : '',
     description : '',
@@ -30,14 +30,27 @@ export class FreeTextTaskComponent {
     text : '',
     isApproved: false,
     originId: -1,
+  } */
+
+  freeTextQuestion: freeTextQuestionDTO = {
+    questionId: -1,
+    title: "",
+    text: "",
+    expectations: "",
+    maxPoints: 0,
   }
+
+
 
   feedbackText: string = '';
   isSending: boolean = false;
 
   constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: {question_id: number}, private quesitonService: QuestionDataService) {
-    this.quesitonService.getQuestionData(this.data.question_id).subscribe(data => {
+    /* this.quesitonService.getQuestionData(this.data.question_id).subscribe(data => {
       this.questionData = data;
+    }); */
+    this.quesitonService.getFreeTextQuestion(this.data.question_id).subscribe(data => {
+      this.freeTextQuestion = data;
     });
   }
 
@@ -48,7 +61,7 @@ export class FreeTextTaskComponent {
     console.log(this.answerText);
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
-      questionId: this.questionData.id,
+      questionId: this.freeTextQuestion.questionId,
       userId: -1,
       userFreetextAnswer: text,
       userFreetextAnswerRaw: rawText,

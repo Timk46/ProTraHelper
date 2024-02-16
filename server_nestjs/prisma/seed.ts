@@ -1039,13 +1039,43 @@ async function main() {
     data: {
       name: 'Primitiver Datentyp - Freitext',
       description:
-        'Beschreibe in eigenen Worten, was ein primitiver Datentyp ist.',
+        'Beschreibung primitiver Datentyp',
       score: 1,
       type: 'FreeText',
       author: { connect: { id: adminUser.id } },
       text: 'Primitive Datentypen',
       conceptNode: { connect: { id: conceptNodeForMCQ.id } },
       isApproved: true,
+    },
+  });
+
+  await prisma.freeTextQuestion.create({
+    data: {
+      title: 'Primitive Datentypen in Python',
+      text: 'Beschreibe in eigenen Worten, was ein primitiver Datentyp ist. Beschreibe dabei zu den folgenden Aspekten: Definition, Eigenschaften, Beispiele, Speicherung und Unterscheidung zu nicht-primitiven Datentypen.',
+      expectations: `
+        Folgende Punkte sollten beachtet werden, dabei wird für jeden korrekten Aspekt ein Punkt vergeben:
+        1. Definition: Eine klare und präzise Erklärung, was ein primitiver Datentyp ist.
+        2. Eigenschaften: Die grundlegenden Eigenschaften primitiver Datentypen, wie Unveränderlichkeit und Einfachheit.
+        3. Beispiele: Nennung einiger Beispiele für primitive Datentypen. Es reicht ein Beispiel, um den Punkt zu erhalten.
+        4. Speicherung: Wie primitiver Datentypen im Speicher abgelegt werden.
+        5. Unterscheidung: Der Unterschied zwischen primitiven und nicht-primitiven Datentypen.
+        `,
+      exampleSolution: `
+        Ein primitiver Datentyp ist ein grundlegender Datentyp, der in einer Programmiersprache zur Darstellung einfacher Werte verwendet wird.
+        Diese Datentypen sind in der Regel direkt in die Sprache integriert und bieten eine grundlegende Möglichkeit, Daten zu speichern und zu manipulieren,
+        ohne dass komplexe Strukturen oder Operationen erforderlich sind.
+        Primitive Datentypen sind in der Regel unveränderlich, was bedeutet, dass ihre Werte nach der Erstellung nicht mehr geändert werden können.
+        Sie repräsentieren einfache Werte und haben in der Regel keine eingebauten Methoden oder Funktionen zur Manipulation.
+        Beispiele für primitive Datentypen: Integer (int), Float (float), Complex (complex), String (str), Boolean (bool)
+        Primitive Datentypen werden in der Regel direkt im Speicher abgelegt und benötigen eine feste Menge an Speicherplatz, der je nach Typ variieren kann.
+        Zum Beispiel benötigt ein Integer normalerweise 4 oder 8 Bytes, abhängig von der Plattform.
+        Primitive Datentypen repräsentieren einfache Werte und haben keine eingebauten Methoden oder Funktionen zur Manipulation.
+        Nicht-primitive Datentypen (auch als zusammengesetzte oder zusammengesetzte Datentypen bezeichnet) können komplexe Strukturen wie Listen, Tupel,
+        Mengen und Wörterbücher darstellen und bieten eingebaute Methoden und Funktionen zur Manipulation dieser Datenstrukturen.
+      `,
+      maxPoints: 5,
+      question: { connect: { id: questionFreeText.id } },
     },
   });
 
