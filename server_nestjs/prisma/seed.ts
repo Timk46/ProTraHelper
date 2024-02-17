@@ -234,7 +234,7 @@ async function main() {
     const columnDescriptionId = 9;
     const columnElementId = [10, 11, 12, 13, 14];
     const columnTaskId = [15, 16];
-    const columnVideoDescriptionId = 17;
+    const columnContentDescriptionId = 17;
 
     //in case the topic column for the Content is empty we need to save the last topic
     let lastTopic = 'No topic found!';
@@ -244,7 +244,6 @@ async function main() {
       rowIndex,
       row,
     }))) {
-      console.log('Importing row ' + rowIndex + '...');
       let ParentId = 1;
       if (row[columnParentId] && !isNaN(+row[columnParentId])) {
         ParentId = row[columnParentId];
@@ -262,8 +261,8 @@ async function main() {
           data: {
             id: +row[columnContentId],
             name: lastTopic,
-            description: row[columnVideoDescriptionId]
-              ? row[columnVideoDescriptionId].toString()
+            description: row[columnContentDescriptionId]
+              ? row[columnContentDescriptionId].toString()
               : 'Keine Beschreibung für ContentNode ' + +row[columnContentId],
           },
         });
@@ -349,50 +348,9 @@ async function main() {
             data: {
               moduleId: moduleInformatik.id,
               conceptNodeId: +row[columnConceptId],
-              level: Math.floor(Math.random() * 7), // random number between 0 and 6
+              level: +row[columnModuleGoalId], // random number between 0 and 6
             },
           });
-          if (row[columnTopicId[0]]) {
-            //create userConcepts for each conceptNode
-            await prisma.userConcept.create({
-              data: {
-                user: { connect: { id: adminUser.id } },
-                concept: { connect: { id: +row[columnConceptId] } },
-                level: Math.floor(Math.random() * 7), // random number between 0 and 6
-                expanded: true,
-              },
-            });
-            for (const user in createdUsers) {
-              await prisma.userConcept.create({
-                data: {
-                  user: { connect: { id: createdUsers[user].id } },
-                  concept: { connect: { id: +row[columnConceptId] } },
-                  level: Math.floor(Math.random() * 7), // random number between 0 and 6
-                  expanded: true,
-                },
-              });
-            }
-          } else {
-            //create userConcepts for each conceptNode
-            await prisma.userConcept.create({
-              data: {
-                user: { connect: { id: adminUser.id } },
-                concept: { connect: { id: +row[columnConceptId] } },
-                level: Math.floor(Math.random() * 7), // random number between 0 and 6
-                expanded: false,
-              },
-            });
-            for (const user in createdUsers) {
-              await prisma.userConcept.create({
-                data: {
-                  user: { connect: { id: createdUsers[user].id } },
-                  concept: { connect: { id: +row[columnConceptId] } },
-                  level: Math.floor(Math.random() * 7), // random number between 0 and 6
-                  expanded: false,
-                },
-              });
-            }
-          }
         }
       }
       //End of Concepts
@@ -415,7 +373,7 @@ async function main() {
                 conceptNode: {
                   connect: { id: +trains[train] },
                 },
-                awards: 1,
+                awards: +row[columnLevelId],
               },
             });
           }
@@ -430,7 +388,7 @@ async function main() {
               conceptNode: {
                 connect: { id: +trains },
               },
-              awards: 1,
+              awards: +row[columnLevelId],
             },
           });
         }
