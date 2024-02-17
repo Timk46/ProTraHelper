@@ -233,8 +233,7 @@ async function main() {
     const columnLevelId = 8;
     const columnDescriptionId = 9;
     const columnElementId = [10, 11, 12, 13, 14];
-    const columnTaskId = [15, 16];
-    const columnContentDescriptionId = 17;
+    const columnContentDescriptionId = 15;
 
     //in case the topic column for the Content is empty we need to save the last topic
     let lastTopic = 'No topic found!';
