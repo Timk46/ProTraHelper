@@ -227,34 +227,36 @@ async function main() {
     const columnContentId = 2;
     const columnRequiresId = 3;
     const columnTrainsId = 4;
-    const columnTopicId = [5, 6, 7];
+    const columnTopicId = 5;
+    const columnParentId = 6;
+    const columnModuleGoalId = 7;
     const columnLevelId = 8;
     const columnDescriptionId = 9;
     const columnElementId = [10, 11, 12, 13, 14];
     const columnTaskId = [15, 16];
     const columnVideoDescriptionId = 17;
 
-    //conceptIds that start represent the beginning of a new rootConcept
-    const rootConceptId = [1, 42];
-
     //in case the topic column for the Content is empty we need to save the last topic
     let lastTopic = 'No topic found!';
 
-    const ParentId = Array<number>(columnTopicId.length + 1);
     // Iterate through the excelData and insert records into your Prisma database
     for (const { rowIndex, row } of excelData.map((row, rowIndex) => ({
       rowIndex,
       row,
     }))) {
+      console.log('Importing row ' + rowIndex + '...');
+      let ParentId = 1;
+      if (row[columnParentId] && !isNaN(+row[columnParentId])) {
+        ParentId = row[columnParentId];
+      }
       if (row[columnContentId] && !isNaN(+row[columnContentId])) {
         //import contentNodes from excelData
-        // We need to iterate over the topic columns because they are divided into subtopics
-        for (const topicId in columnTopicId) {
-          if (row[columnTopicId[topicId]]) {
-            lastTopic = row[columnTopicId[topicId]];
-            break;
-          }
+
+        // Save the last topic in case there are multiple contentNodes for the same topic
+        if (row[columnTopicId]) {
+          lastTopic = row[columnTopicId];
         }
+
         //contentNodes from excelData
         await prisma.contentNode.create({
           data: {
@@ -315,118 +317,87 @@ async function main() {
       if (row[columnConceptId] && !isNaN(+row[columnConceptId])) {
         // Save the last topic of each topic column
         // First element reserved for root ConceptNodes
-        for (const topicId in columnTopicId) {
-          if (row[columnTopicId[topicId]]) {
-            //root concepts (like 'Funktionale Programmierung in Python') have a common parent node
-            if (rootConceptId.includes(+row[columnConceptId])) {
-              ParentId[0] = row[columnConceptId] + 1;
-              //ConceptNode
-              await prisma.conceptNode.create({
-                data: {
-                  id: +row[columnConceptId] + 1,
-                  name: row[columnTopicId[topicId]],
-                  description: row[columnDescriptionId]
-                    ? row[columnDescriptionId].toString()
-                    : 'Keine Beschreibung für ConceptNode ' +
-                      +row[columnConceptId] +
-                      1,
-                },
-              });
-              //ConceptFamily
-              await prisma.conceptFamily.create({
-                data: {
-                  childId: +row[columnConceptId] + 1,
-                  parentId: conceptNode.id,
-                },
-              });
-            } else {
-              ParentId[+topicId + 1] = row[columnConceptId] + 1;
-              //ConceptNode
-              await prisma.conceptNode.create({
-                data: {
-                  id: +row[columnConceptId] + 1,
-                  name: row[columnTopicId[topicId]],
-                  description: row[columnDescriptionId]
-                    ? row[columnDescriptionId].toString()
-                    : 'Keine Beschreibung für ConceptNode ' +
-                      +row[columnConceptId] +
-                      1,
-                },
-              });
-              await prisma.conceptFamily.create({
-                data: {
-                  childId: +row[columnConceptId] + 1,
-                  parentId: +ParentId[+topicId],
-                },
-              });
-              if (row[columnConceptEdge] && !isNaN(+row[columnConceptEdge])) {
-                await prisma.conceptEdge.create({
-                  data: {
-                    prerequisiteId: +row[columnConceptEdge] + 1,
-                    successorId: +row[columnConceptId] + 1,
-                    parentId: +ParentId[+topicId],
-                  },
-                });
-              }
-            }
-            //create moduleConceptGoals for each conceptNode
-            await prisma.moduleConceptGoal.create({
+
+        if (row[columnTopicId]) {
+          //ConceptNode
+          await prisma.conceptNode.create({
+            data: {
+              id: +row[columnConceptId],
+              name: row[columnTopicId],
+              description: row[columnDescriptionId]
+                ? row[columnDescriptionId].toString()
+                : 'Keine Beschreibung für ConceptNode ' + +row[columnConceptId],
+            },
+          });
+          await prisma.conceptFamily.create({
+            data: {
+              childId: +row[columnConceptId],
+              parentId: +ParentId,
+            },
+          });
+          if (row[columnConceptEdge] && !isNaN(+row[columnConceptEdge])) {
+            await prisma.conceptEdge.create({
               data: {
-                moduleId: moduleInformatik.id,
-                conceptNodeId: +row[columnConceptId] + 1,
-                level: Math.floor(Math.random() * 7), // random number between 0 and 6
+                prerequisiteId: +row[columnConceptEdge],
+                successorId: +row[columnConceptId],
+                parentId: +ParentId,
               },
             });
-            if (row[columnTopicId[0]]) {
-              //create userConcepts for each conceptNode
+          }
+          //create moduleConceptGoals for each conceptNode
+          await prisma.moduleConceptGoal.create({
+            data: {
+              moduleId: moduleInformatik.id,
+              conceptNodeId: +row[columnConceptId],
+              level: Math.floor(Math.random() * 7), // random number between 0 and 6
+            },
+          });
+          if (row[columnTopicId[0]]) {
+            //create userConcepts for each conceptNode
+            await prisma.userConcept.create({
+              data: {
+                user: { connect: { id: adminUser.id } },
+                concept: { connect: { id: +row[columnConceptId] } },
+                level: Math.floor(Math.random() * 7), // random number between 0 and 6
+                expanded: true,
+              },
+            });
+            for (const user in createdUsers) {
               await prisma.userConcept.create({
                 data: {
-                  user: { connect: { id: adminUser.id } },
-                  concept: { connect: { id: +row[columnConceptId] + 1 } },
+                  user: { connect: { id: createdUsers[user].id } },
+                  concept: { connect: { id: +row[columnConceptId] } },
                   level: Math.floor(Math.random() * 7), // random number between 0 and 6
                   expanded: true,
                 },
               });
-              for (const user in createdUsers) {
-                await prisma.userConcept.create({
-                  data: {
-                    user: { connect: { id: createdUsers[user].id } },
-                    concept: { connect: { id: +row[columnConceptId] + 1 } },
-                    level: Math.floor(Math.random() * 7), // random number between 0 and 6
-                    expanded: true,
-                  },
-                });
-              }
-            } else {
-              //create userConcepts for each conceptNode
+            }
+          } else {
+            //create userConcepts for each conceptNode
+            await prisma.userConcept.create({
+              data: {
+                user: { connect: { id: adminUser.id } },
+                concept: { connect: { id: +row[columnConceptId] } },
+                level: Math.floor(Math.random() * 7), // random number between 0 and 6
+                expanded: false,
+              },
+            });
+            for (const user in createdUsers) {
               await prisma.userConcept.create({
                 data: {
-                  user: { connect: { id: adminUser.id } },
-                  concept: { connect: { id: +row[columnConceptId] + 1 } },
+                  user: { connect: { id: createdUsers[user].id } },
+                  concept: { connect: { id: +row[columnConceptId] } },
                   level: Math.floor(Math.random() * 7), // random number between 0 and 6
                   expanded: false,
                 },
               });
-              for (const user in createdUsers) {
-                await prisma.userConcept.create({
-                  data: {
-                    user: { connect: { id: createdUsers[user].id } },
-                    concept: { connect: { id: +row[columnConceptId] + 1 } },
-                    level: Math.floor(Math.random() * 7), // random number between 0 and 6
-                    expanded: false,
-                  },
-                });
-              }
             }
-            break;
           }
         }
       }
-      /*
       //End of Concepts
 
-      //Training
-      */
+      // //Training
       if (
         row[columnTrainsId] &&
         row[columnContentId] &&
@@ -963,13 +934,13 @@ async function main() {
   });
 
   /*
-  const questionVersion = await prisma.questionVersion.create({
-    data: {
-        question: { connect: { id: question.id } },
-        version: 1
-    },
-  });
-  */
+    const questionVersion = await prisma.questionVersion.create({
+      data: {
+          question: { connect: { id: question.id } },
+          version: 1
+      },
+    });
+    */
 
   const mcQuestion = await prisma.mCQuestion.create({
     data: {
@@ -1038,8 +1009,7 @@ async function main() {
   const questionFreeText = await prisma.question.create({
     data: {
       name: 'Primitiver Datentyp - Freitext',
-      description:
-        'Beschreibung primitiver Datentyp',
+      description: 'Beschreibung primitiver Datentyp',
       score: 1,
       type: 'FreeText',
       author: { connect: { id: adminUser.id } },
@@ -1054,26 +1024,26 @@ async function main() {
       title: 'Primitive Datentypen in Python',
       text: 'Beschreibe in eigenen Worten, was ein primitiver Datentyp ist. Beschreibe dabei zu den folgenden Aspekten: Definition, Eigenschaften, Beispiele, Speicherung und Unterscheidung zu nicht-primitiven Datentypen.',
       expectations: `
-        Folgende Punkte sollten beachtet werden, dabei wird für jeden korrekten Aspekt ein Punkt vergeben:
-        1. Definition: Eine klare und präzise Erklärung, was ein primitiver Datentyp ist.
-        2. Eigenschaften: Die grundlegenden Eigenschaften primitiver Datentypen, wie Unveränderlichkeit und Einfachheit.
-        3. Beispiele: Nennung einiger Beispiele für primitive Datentypen. Es reicht ein Beispiel, um den Punkt zu erhalten.
-        4. Speicherung: Wie primitiver Datentypen im Speicher abgelegt werden.
-        5. Unterscheidung: Der Unterschied zwischen primitiven und nicht-primitiven Datentypen.
-        `,
+          Folgende Punkte sollten beachtet werden, dabei wird für jeden korrekten Aspekt ein Punkt vergeben:
+          1. Definition: Eine klare und präzise Erklärung, was ein primitiver Datentyp ist.
+          2. Eigenschaften: Die grundlegenden Eigenschaften primitiver Datentypen, wie Unveränderlichkeit und Einfachheit.
+          3. Beispiele: Nennung einiger Beispiele für primitive Datentypen. Es reicht ein Beispiel, um den Punkt zu erhalten.
+          4. Speicherung: Wie primitiver Datentypen im Speicher abgelegt werden.
+          5. Unterscheidung: Der Unterschied zwischen primitiven und nicht-primitiven Datentypen.
+          `,
       exampleSolution: `
-        Ein primitiver Datentyp ist ein grundlegender Datentyp, der in einer Programmiersprache zur Darstellung einfacher Werte verwendet wird.
-        Diese Datentypen sind in der Regel direkt in die Sprache integriert und bieten eine grundlegende Möglichkeit, Daten zu speichern und zu manipulieren,
-        ohne dass komplexe Strukturen oder Operationen erforderlich sind.
-        Primitive Datentypen sind in der Regel unveränderlich, was bedeutet, dass ihre Werte nach der Erstellung nicht mehr geändert werden können.
-        Sie repräsentieren einfache Werte und haben in der Regel keine eingebauten Methoden oder Funktionen zur Manipulation.
-        Beispiele für primitive Datentypen: Integer (int), Float (float), Complex (complex), String (str), Boolean (bool)
-        Primitive Datentypen werden in der Regel direkt im Speicher abgelegt und benötigen eine feste Menge an Speicherplatz, der je nach Typ variieren kann.
-        Zum Beispiel benötigt ein Integer normalerweise 4 oder 8 Bytes, abhängig von der Plattform.
-        Primitive Datentypen repräsentieren einfache Werte und haben keine eingebauten Methoden oder Funktionen zur Manipulation.
-        Nicht-primitive Datentypen (auch als zusammengesetzte oder zusammengesetzte Datentypen bezeichnet) können komplexe Strukturen wie Listen, Tupel,
-        Mengen und Wörterbücher darstellen und bieten eingebaute Methoden und Funktionen zur Manipulation dieser Datenstrukturen.
-      `,
+          Ein primitiver Datentyp ist ein grundlegender Datentyp, der in einer Programmiersprache zur Darstellung einfacher Werte verwendet wird.
+          Diese Datentypen sind in der Regel direkt in die Sprache integriert und bieten eine grundlegende Möglichkeit, Daten zu speichern und zu manipulieren,
+          ohne dass komplexe Strukturen oder Operationen erforderlich sind.
+          Primitive Datentypen sind in der Regel unveränderlich, was bedeutet, dass ihre Werte nach der Erstellung nicht mehr geändert werden können.
+          Sie repräsentieren einfache Werte und haben in der Regel keine eingebauten Methoden oder Funktionen zur Manipulation.
+          Beispiele für primitive Datentypen: Integer (int), Float (float), Complex (complex), String (str), Boolean (bool)
+          Primitive Datentypen werden in der Regel direkt im Speicher abgelegt und benötigen eine feste Menge an Speicherplatz, der je nach Typ variieren kann.
+          Zum Beispiel benötigt ein Integer normalerweise 4 oder 8 Bytes, abhängig von der Plattform.
+          Primitive Datentypen repräsentieren einfache Werte und haben keine eingebauten Methoden oder Funktionen zur Manipulation.
+          Nicht-primitive Datentypen (auch als zusammengesetzte oder zusammengesetzte Datentypen bezeichnet) können komplexe Strukturen wie Listen, Tupel,
+          Mengen und Wörterbücher darstellen und bieten eingebaute Methoden und Funktionen zur Manipulation dieser Datenstrukturen.
+        `,
       maxPoints: 5,
       question: { connect: { id: questionFreeText.id } },
     },
