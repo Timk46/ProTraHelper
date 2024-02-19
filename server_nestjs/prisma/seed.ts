@@ -287,9 +287,7 @@ async function main() {
               data: {
                 type: row[columnElementId[elementId]],
                 title:
-                  row[columnElementId[elementId]] +
-                  ' zu ' +
-                  +row[columnTopicId],
+                  row[columnElementId[elementId]] + ' zu ' + row[columnTopicId],
                 position: +elementId + 1,
                 contentNode: {
                   connect: { id: +row[columnContentId] },
