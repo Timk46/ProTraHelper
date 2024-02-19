@@ -287,10 +287,9 @@ async function main() {
               data: {
                 type: row[columnElementId[elementId]],
                 title:
-                  'Titel für contentElement ' +
-                  +row[columnContentId] +
-                  '.' +
-                  elementId,
+                  row[columnElementId[elementId]] +
+                  ' zu ' +
+                  +row[columnTopicId],
                 position: +elementId + 1,
                 contentNode: {
                   connect: { id: +row[columnContentId] },
@@ -333,14 +332,29 @@ async function main() {
               parentId: +ParentId,
             },
           });
-          if (row[columnConceptEdge] && !isNaN(+row[columnConceptEdge])) {
-            await prisma.conceptEdge.create({
-              data: {
-                prerequisiteId: +row[columnConceptEdge],
-                successorId: +row[columnConceptId],
-                parentId: +ParentId,
-              },
-            });
+          if (row[columnConceptEdge]) {
+            //split the string in case of multiple entrees in the same cell
+            if (row[columnConceptEdge].toString().includes(',')) {
+              const edges = row[columnConceptEdge].split(',');
+              for (const edge in edges) {
+                await prisma.conceptEdge.create({
+                  data: {
+                    prerequisiteId: +edges[edge],
+                    successorId: +row[columnConceptId],
+                    parentId: +ParentId,
+                  },
+                });
+              }
+              //if there is only one entry in the cell make sure it is a number
+            } else if (typeof row[columnConceptEdge] === 'number') {
+              await prisma.conceptEdge.create({
+                data: {
+                  prerequisiteId: +row[columnConceptEdge],
+                  successorId: +row[columnConceptId],
+                  parentId: +ParentId,
+                },
+              });
+            }
           }
           //create moduleConceptGoals for each conceptNode
           await prisma.moduleConceptGoal.create({
