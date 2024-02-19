@@ -20,11 +20,8 @@ export class ContentViewComponent implements OnInit {
   applyCompletedStyle: boolean[] = [];
   applyQuestionStyle: boolean[] = [];
   lastOpenedDate: Date = new Date();
+  readableDate: string = 'dummy date';
   pdfCount: number = 0;
-  
-  hours : string = "";
-  minutes : string = "";
-  seconds : string = "";
 
   // Get Data from Dialog
   constructor(public dialogRef: MatDialogRef<ContentViewComponent>, @Inject(MAT_DIALOG_DATA) public data: any, private sanitizer: DomSanitizer, private discussionDialogService: DiscussionDialogService, private contentService: ContentService) {
@@ -133,7 +130,24 @@ export class ContentViewComponent implements OnInit {
 
   getLastOpenedDate(){
     console.log('ContentViewComponent: getLastOpenedDate');
-    this.contentService.updateLastOpenedDate(this.contentViewData.contentNodeId).subscribe(status => {this.lastOpenedDate = status;});
+    this.contentService.updateLastOpenedDate(this.contentViewData.contentNodeId).subscribe(status => {this.lastOpenedDate = new Date(status); this.readableDate = this.getDateDisplay(this.lastOpenedDate);});
   }
+    /**
+   * Returns the date in a human readable format
+   * @param date
+   * @returns
+   */
+    getDateDisplay(date: Date): string {
+      console.log("getDateDisplay called");
+      const today = new Date();
+      const newDate = new Date(date);
+      const dbDate = new Date(date);
+      today.setHours(0, 0, 0, 0); // set time to 00:00:00.000
+      if (newDate.setHours(0, 0, 0, 0) === today.getTime()) {
+        return `Heute ${dbDate.getHours()}:${dbDate.getMinutes()< 10 ? '0' : ''}${dbDate.getMinutes()} Uhr`;
+      } else {
+        return `${newDate.getDate()}.${newDate.getMonth() + 1}.${newDate.getFullYear()}`;
+      }
+    }
 
 }
