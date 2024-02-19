@@ -4,9 +4,23 @@
 
 
   <!-- Create a Card for each Content Element and display PDF, Video etc. depending on type-->
-  <mat-card *ngFor="let contentElem of contentViewData.contentElements" class="contetView-card">
-    <button (click)="onCreateDiscussion(contentElem.id)" mat-stroked-button color="primary">Frage stellen</button>    
+  <mat-card *ngFor="let contentElem of contentViewData.contentElements" class="contentView-card">
+
+    <!--Show Content Title, if it has any-->
+    <mat-card-header *ngIf="contentElem.title">
+      <mat-card-title-group>
+        <mat-card-title>
+          {{contentElem.title}}</mat-card-title>
+            <!-- We could add an subtitle or icon to the header aswell
+            <mat-card-subtitle>Extra large</mat-card-subtitle>
+            <img mat-card-xl-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" >
+            -->
+
+    <!-- Create Button for each Content Element to create a new Discussion -->
+    <button (click)="onCreateDiscussion(contentElem.id)" mat-stroked-button color="primary" style="text-align: center;">Frage stellen</button>
+    
     <!-- Create Button for each Content Element to mark the Element as 'Completed'  -->
+    <div class="progress-button">
       <button (click)="onToggleCheckmark(contentElem.id)" mat-stroked-button [ngStyle]="applyCheckmarkStyles(contentElem.id)" >
         <span [matTooltip]=getCompletedTooltip(contentElem.id)>
           <mat-icon class="small-icon">check</mat-icon>
@@ -18,31 +32,30 @@
           <mat-icon class="small-icon">?</mat-icon>
         </span>
       </button>
+    </div>
 
-    <!--Show Content Title, if it has any-->
-    <mat-card-header *ngIf="contentElem.title">
-      <mat-card-title-group>
-        <mat-card-title>{{contentElem.title}}</mat-card-title>
-            <!-- We could add an subtitle or icon to the header aswell
-            <mat-card-subtitle>Extra large</mat-card-subtitle>
-            <img mat-card-xl-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" >
-            -->
-      </mat-card-title-group>
+      </mat-card-title-group>    
     </mat-card-header>
+
 
     <mat-card-content>
       <!--********** BEGIN: Show Content depending on type **********-->
 
       <!--PDF-->
       <div *ngIf="contentElem.type == 'PDF' && contentElem.file " class = "contentElement-Container">
-        Our current PDF Component cant be initialized multiple times... using an iframe instead for now
-        <iframe *ngIf="pdfCount > 1" id="embedded" [src]="getPdfUrl(contentElem.file.uniqueIdentifier)" style="height: 100%; min-height: 500px; width: 100%"></iframe>
+        <!-- Our current PDF Component cant be initialized multiple times... using an iframe instead for now -->
+        <iframe *ngIf="pdfCount > 1" id="embedded" [src]="getPdfUrl(contentElem.file.uniqueIdentifier)" style="height: 60vh; width: 100pv"></iframe>
         <app-pdfViewer *ngIf="pdfCount == 1" [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-pdfViewer>
       </div>
 
       <!--VIDEO-->
       <div *ngIf="contentElem.type == 'VIDEO' && contentElem.file " class = "contentElement-Container">
         <app-videoViewer  [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-videoViewer>
+      </div>
+
+      <!--CODE-->
+      <div *ngIf="contentElem.type == 'CODE' " class = "contentElement-Container">
+        Code kann noch nicht dargestellt werden
       </div>
 
       <!--MC Question

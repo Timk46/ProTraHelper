@@ -89,11 +89,11 @@ export class ContentViewComponent implements OnInit {
   applyCheckmarkStyles(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
 
-    let styles = {'color' : 'red', 'background-color' : 'white'};
+    let styles = {'color' : 'red', 'background-color' : 'white', 'border-radius': '70%'};
     if (this.applyCompletedStyle[position]) {
-      styles = {'color' : 'white', 'background-color': 'green'};
+      styles = {'color' : 'white', 'background-color': 'green', 'border-radius': '70%'};
     } else {
-      styles = {'color' : 'gray', 'background-color': 'white'};
+      styles = {'color' : 'gray', 'background-color': 'white', 'border-radius': '70%'};
     }
     return styles;
   }
@@ -101,11 +101,11 @@ export class ContentViewComponent implements OnInit {
   applyQuestionmarkStyles(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
 
-    let styles = {'color' : 'white', 'background-color' : 'red'};
+    let styles = {'color' : 'white', 'background-color' : 'red', 'border-radius': '70%'};
     if (this.applyQuestionStyle[position]) {
-      styles = {'color' : 'white', 'background-color': 'purple'};
+      styles = {'color' : 'white', 'background-color': 'purple', 'border-radius': '70%'};
     } else {
-      styles = {'color' : 'gray', 'background-color': 'white'};
+      styles = {'color' : 'gray', 'background-color': 'white', 'border-radius': '70%'};
     }
     return styles;
   }
