@@ -23,7 +23,7 @@ export class FeedbackGenerationService {
     const llmResponse = await this.llmService.generateLlmAnswer( feedbackGenerationPrompts.byExpectations(freeTextData.text, freeTextData.maxPoints, freeTextData.expectations, freeTextData.exampleSolution || undefined), userAnswer );
     let reachedPoints = 0;
 
-    //find the reached points and convert the it to a float number
+    //find the reached points and convert it to a float number
     const match = llmResponse.match(/Erreichte Punktzahl: (\d+([.,]\d+)?)/);
     if (match) {
       reachedPoints = parseFloat(match[1].replace(/,/g, '.'));
