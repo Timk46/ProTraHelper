@@ -103,7 +103,8 @@ export class QuestionDataService {
      * @returns the free text question
      */
     async getFreeTextQuestion(questionId: number, fullData: boolean = false): Promise<freeTextQuestionDTO> {
-      let freeTextQuestion = await this.prisma.freeTextQuestion.findFirst({
+      const question = await this.getQuestion(questionId);
+      const freeTextQuestion = await this.prisma.freeTextQuestion.findFirst({
           where: {
               questionId: Number(questionId)
           }
@@ -113,14 +114,14 @@ export class QuestionDataService {
       }
       return {
         questionId: freeTextQuestion.questionId,
-        title: freeTextQuestion.title,
-        text: freeTextQuestion.text,
+        title: question.name,
+        text: question.text,
         textHTML: freeTextQuestion.textHTML || undefined,
         expectations: fullData? freeTextQuestion.expectations: "",
         expectationsHTML: fullData? (freeTextQuestion.expectationsHTML || undefined) : undefined,
         exampleSolution: fullData? (freeTextQuestion.exampleSolution || undefined) : undefined,
         exampleSolutionHTML: fullData? (freeTextQuestion.exampleSolutionHTML || undefined) : undefined,
-        maxPoints: freeTextQuestion.maxPoints
+        maxPoints: question.score,
       };
     }
 

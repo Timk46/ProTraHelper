@@ -345,14 +345,11 @@ model UserMCOptionSelected {
 
 model FreeTextQuestion {
   id                  Int          @id @default(autoincrement())
-  title               String
-  text                String       @db.Text
   textHTML            String?      @db.Text
   expectations        String       @db.Text
   expectationsHTML    String?      @db.Text
   exampleSolution     String?      @db.Text
   exampleSolutionHTML String?      @db.Text
-  maxPoints           Int
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
   question            Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)

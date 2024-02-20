@@ -977,12 +977,12 @@ async function main() {
   // Free Text Question
   const questionFreeText = await prisma.question.create({
     data: {
-      name: 'Primitiver Datentyp - Freitext',
+      name: 'Primitive Datentypen in Python',
       description: 'Beschreibung primitiver Datentyp',
-      score: 1,
+      score: 5,
       type: 'FreeText',
       author: { connect: { id: adminUser.id } },
-      text: 'Primitive Datentypen',
+      text: 'Beschreibe in eigenen Worten, was ein primitiver Datentyp ist. Beschreibe dabei zu den folgenden Aspekten: Definition, Eigenschaften, Beispiele, Speicherung und Unterscheidung zu nicht-primitiven Datentypen.',
       conceptNode: { connect: { id: conceptNodeForMCQ.id } },
       isApproved: true,
     },
@@ -990,15 +990,15 @@ async function main() {
 
   await prisma.freeTextQuestion.create({
     data: {
-      title: 'Primitive Datentypen in Python',
-      text: 'Beschreibe in eigenen Worten, was ein primitiver Datentyp ist. Beschreibe dabei zu den folgenden Aspekten: Definition, Eigenschaften, Beispiele, Speicherung und Unterscheidung zu nicht-primitiven Datentypen.',
       expectations: `
           Folgende Punkte sollten beachtet werden, dabei wird für jeden korrekten Aspekt ein Punkt vergeben:
-          1. Definition: Eine klare und präzise Erklärung, was ein primitiver Datentyp ist.
-          2. Eigenschaften: Die grundlegenden Eigenschaften primitiver Datentypen, wie Unveränderlichkeit und Einfachheit.
+          1. Definition: Eine Erklärung, was ein primitiver Datentyp ist.
+          2. Eigenschaften: Die grundlegenden Eigenschaften primitiver Datentypen, wie zum Beispiel Unveränderlichkeit und Einfachheit.
           3. Beispiele: Nennung einiger Beispiele für primitive Datentypen. Es reicht ein Beispiel, um den Punkt zu erhalten.
-          4. Speicherung: Wie primitiver Datentypen im Speicher abgelegt werden.
-          5. Unterscheidung: Der Unterschied zwischen primitiven und nicht-primitiven Datentypen.
+          4. Speicherung: Eine grobe Erklärung, wie primitive Datentypen im Speicher abgelegt werden. Es reicht ein oberflächlicher Einblick.
+          5. Unterscheidung: Der grobe Unterschied zwischen primitiven und nicht-primitiven Datentypen. Es reicht eine implizite Erklärung.
+          Es soll freundlich bewertet werden, da lediglich ein knappes Anreißen der Aspekte erwartet wird und keine detaillierte Analyse.
+          Sollten Details in der Antwort fehlen, kann ein Punkt immernoch als richtig bewertet werden, wenn ein Teil richtig ist.
           `,
       exampleSolution: `
           Ein primitiver Datentyp ist ein grundlegender Datentyp, der in einer Programmiersprache zur Darstellung einfacher Werte verwendet wird.
@@ -1013,7 +1013,6 @@ async function main() {
           Nicht-primitive Datentypen (auch als zusammengesetzte oder zusammengesetzte Datentypen bezeichnet) können komplexe Strukturen wie Listen, Tupel,
           Mengen und Wörterbücher darstellen und bieten eingebaute Methoden und Funktionen zur Manipulation dieser Datenstrukturen.
         `,
-      maxPoints: 5,
       question: { connect: { id: questionFreeText.id } },
     },
   });
