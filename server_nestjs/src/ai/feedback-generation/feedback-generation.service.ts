@@ -19,19 +19,19 @@ export class FeedbackGenerationService {
    */
   async generateFreetextFeedback(freeTextData: freeTextQuestionDTO, userAnswer: string): Promise<{feedbackText: string, reachedPoints: number}> {
     console.log("FeedbackGenerationService.generateFreetextQuestion");
-    //console.log(requestData);
 
     const llmResponse = await this.llmService.generateLlmAnswer( feedbackGenerationPrompts.byExpectations(freeTextData.text, freeTextData.maxPoints, freeTextData.expectations, freeTextData.exampleSolution || undefined), userAnswer );
     let reachedPoints = 0;
 
-    const match = llmResponse.match(/Erreichte Punktzahl: (\d+)/);
+    //find the reached points and convert the it to a float number
+    const match = llmResponse.match(/Erreichte Punktzahl: (\d+([.,]\d+)?)/);
     if (match) {
-      reachedPoints = parseInt(match[1]);
+      reachedPoints = parseFloat(match[1].replace(/,/g, '.'));
+      console.log(">> Reached points: " + reachedPoints);
     } else {
       console.error("Could not find reached points in LLM response.");
     }
 
-    //return "This is a dummy freetext feedback.";
     return {feedbackText: llmResponse, reachedPoints: reachedPoints};
   }
 
