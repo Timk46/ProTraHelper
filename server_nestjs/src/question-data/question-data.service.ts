@@ -345,7 +345,7 @@ export class QuestionDataService {
             }
 
             console.log('generated Text:', feedbackText);
-
+            console.log('userScore: ' + userScore);
             //create feedback for user answer
             const feedback = await this.prisma.feedback.create({
                 data: {

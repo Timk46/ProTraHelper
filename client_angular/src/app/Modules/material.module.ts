@@ -9,7 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatTable, MatTableModule } from '@angular/material/table';
+import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -22,8 +22,10 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatRadioModule } from '@angular/material/radio';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
-import {MatGridListModule} from '@angular/material/grid-list';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+
 @NgModule({
   imports: [
     MatButtonModule,
@@ -50,6 +52,8 @@ import {MatGridListModule} from '@angular/material/grid-list';
     MatProgressBarModule,
     MatAutocompleteModule,
     MatGridListModule,
+    MatTableModule,
+    MatSortModule,
   ],
   exports: [
     MatButtonModule,
@@ -75,7 +79,9 @@ import {MatGridListModule} from '@angular/material/grid-list';
     DragDropModule,
     MatProgressBarModule,
     MatAutocompleteModule,
-    MatGridListModule
+    MatGridListModule,
+    MatTableModule,
+    MatSortModule,
   ],
 })
 export class MaterialModule {}

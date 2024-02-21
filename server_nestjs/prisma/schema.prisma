@@ -231,6 +231,8 @@ model Question {
   description                String?            @db.Text
   score                      Float?
   type                       String
+  level                      Int                @default(1)
+  mode                       String             @default("practise")
   author                     User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId                   Int
   text                       String             @db.Text

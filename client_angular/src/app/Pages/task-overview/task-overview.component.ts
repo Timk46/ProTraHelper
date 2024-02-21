@@ -1,6 +1,6 @@
 import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
 import { QuestionVersionDTO } from '@DTOs/question.dto';
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { TaskOverviewService } from 'src/app/Services/taskOverview/task-overview.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
@@ -8,6 +8,7 @@ import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.com
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
 import { taskOverviewElementDTO } from '@DTOs/taskOverview.dto';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
 import { Router } from '@angular/router';
 
 export interface PeriodicElement {
@@ -22,13 +23,15 @@ export interface PeriodicElement {
   templateUrl: './task-overview.component.html',
   styleUrls: ['./task-overview.component.scss'],
 })
-export class TaskOverviewComponent implements OnInit, OnChanges {
+export class TaskOverviewComponent implements OnInit, OnChanges, AfterViewInit {
 
   @Input() activeConceptNodeId: any;
-  taskOverviewData : taskOverviewElementDTO[] = [];
+  taskOverviewData : MatTableDataSource<taskOverviewElementDTO>;
+
+  @ViewChild(MatSort) sort: MatSort;
 
   //the data for the table
-  displayedColumns: string[] = ['id', 'name', 'type', 'attempts', 'progress', 'mode', 'actions'];
+  displayedColumns: string[] = ['id', 'name', 'type', 'attempts', 'progress', 'mode', 'level', 'actions'];
 
   titles = [
     "Python Kapitalwert",
@@ -80,7 +83,8 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
   }
 
   constructor (private taskOverviewService : TaskOverviewService, private dialog : MatDialog, private router: Router) {
-    
+    this.taskOverviewData = new MatTableDataSource();
+    this.sort = new MatSort();
   }
 
   ngOnInit() { }
@@ -89,9 +93,14 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
 
     this.taskOverviewService.getTaskOverviewDataForConceptNode(this.activeConceptNodeId).subscribe(taskOverviewData => {
       console.log(this.activeConceptNodeId);
-      this.taskOverviewData = taskOverviewData;
+      this.taskOverviewData = new MatTableDataSource(taskOverviewData);
+      this.taskOverviewData.sort = this.sort;
       console.log(this.taskOverviewData);
     });
+  }
+
+  ngAfterViewInit() {
+    this.taskOverviewData.sort = this.sort;
   }
 
   /**
@@ -106,6 +115,9 @@ export class TaskOverviewComponent implements OnInit, OnChanges {
     }
     let dialogRef;
     if (question_data.type == 'MC') { // why SC and not MC?
+      dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
+    }
+    if (question_data.type == 'SC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
     }
     if (question_data.type == 'FreeText') {

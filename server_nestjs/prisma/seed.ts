@@ -985,7 +985,13 @@ async function main() {
       text: 'Beschreibe in eigenen Worten, was ein primitiver Datentyp ist. Beschreibe dabei zu den folgenden Aspekten: Definition, Eigenschaften, Beispiele, Speicherung und Unterscheidung zu nicht-primitiven Datentypen.',
       conceptNode: { connect: { id: conceptNodeForMCQ.id } },
       isApproved: true,
+      version: 1,
     },
+  });
+  // connect it to itself
+  await prisma.question.update({
+    where: { id: questionFreeText.id },
+    data: { origin: { connect: { id: questionFreeText.id } } },
   });
 
   await prisma.freeTextQuestion.create({
@@ -1021,14 +1027,6 @@ async function main() {
   await prisma.question.update({
     where: { id: questionFreeText.id },
     data: { origin: { connect: { id: questionFreeText.id } } },
-  });
-
-  const questionFreeTextVersion = await prisma.questionVersion.create({
-    data: {
-      question: { connect: { id: questionFreeText.id } },
-      version: 1,
-      isApproved: true,
-    },
   });
 
   // Discussion, Message --------------------------------------------------------------
