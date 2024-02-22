@@ -1,12 +1,24 @@
 import { QuestionService } from './../question/question.service';
-import { HttpException, HttpStatus, Inject, Injectable, Req, Scope } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Req,
+  Scope,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CodeSubmission, CodingQuestion } from '@prisma/client';
 import { CryptoService } from '../crypto/crypto.service';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import * as JSZip from 'jszip';
-import { CodeSubmissionResultDto, CodingQuestionDto, Judge0Dto, CodingQuestionInternal } from '@DTOs/index';
+import {
+  CodeSubmissionResultDto,
+  CodingQuestionDto,
+  Judge0Dto,
+  CodingQuestionInternal,
+} from '@DTOs/index';
 import { ProgrammingLanguageDto } from '@DTOs/index';
 
 /**
@@ -38,15 +50,21 @@ export class RunCodeService {
    * @param {number} taskId - The identifier of the task associated with the code.
    * @return {Promise<CodeSubmissionResultDto>} Returns a promise that resolves to CodeSubmissionResultDto.
    */
-  async executeCode(req, code: string, language: string, taskId: number,): Promise<CodeSubmissionResultDto > {
-    const codingQuestion: CodingQuestionInternal = await this.questionService.findCodingQuestionById(taskId);
+  async executeCode(
+    req,
+    code: string,
+    language: string,
+    taskId: number,
+  ): Promise<CodeSubmissionResultDto> {
+    const codingQuestion: CodingQuestionInternal =
+      await this.questionService.findCodingQuestionById(taskId);
     const requestBody = {
       source_code: code + '\n' + codingQuestion.automatedTests[0].code, // currently only one test per task (each containing multiple test cases)
       language_id: this.getLanguageIdByName(language),
       stdin: '',
       expected_output: '',
     };
-    const submissionResponse = await fetch(this.apiUrl+ '/?base64_encoded', {
+    const submissionResponse = await fetch(this.apiUrl + '/?base64_encoded', {
       method: 'POST',
       body: JSON.stringify(requestBody),
       headers: { 'Content-Type': 'application/json' },
@@ -61,16 +79,19 @@ export class RunCodeService {
 
     const submission = await submissionResponse.json();
     const submissionId = submission.token;
-    let resultjudge0Response ;
+    let resultjudge0Response;
     let result: Judge0Dto;
 
     do {
       await new Promise((resolve) => setTimeout(resolve, 300)); // Polling delay to get result from the Judge0 Database
 
-      resultjudge0Response = await fetch(`${this.apiUrl}/${submissionId}?base64_encoded=true`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
+      resultjudge0Response = await fetch(
+        `${this.apiUrl}/${submissionId}?base64_encoded=true`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
 
       if (!resultjudge0Response.ok) {
         throw new HttpException(
@@ -80,19 +101,19 @@ export class RunCodeService {
       }
 
       result = await resultjudge0Response.json();
-       if (result.stdout) {
-         // decode from base64
-         result.stdout = Buffer.from(result.stdout, 'base64').toString();
-       }
-       if (result.stderr) {
-         result.stderr = Buffer.from(result.stderr, 'base64').toString();
-       }
-       if (result.compile_output) {
-         result.compile_output = Buffer.from(
-           result.compile_output,
-           'base64',
-         ).toString();
-       }
+      if (result.stdout) {
+        // decode from base64
+        result.stdout = Buffer.from(result.stdout, 'base64').toString();
+      }
+      if (result.stderr) {
+        result.stderr = Buffer.from(result.stderr, 'base64').toString();
+      }
+      if (result.compile_output) {
+        result.compile_output = Buffer.from(
+          result.compile_output,
+          'base64',
+        ).toString();
+      }
     } while (result.status.id <= 2); // Polling the result until the code is processed
 
     // get user id who made the request by email
@@ -102,34 +123,64 @@ export class RunCodeService {
       },
     });
 
-
     // save submission result to database -> this row gets updated with the feedback from the AI (if the user requests it)
-    const prismaResult: CodeSubmission = await this.prisma.codeSubmission.create({
-      data: {
-        code: code,
-        compilerOutput: result.stdout,
-        compilerError: result.stderr,
-        compilerResponse: result.compile_output,
-        user: {
-          connect: {
-            id: user.id,
+    const prismaResult: CodeSubmission =
+      await this.prisma.codeSubmission.create({
+        data: {
+          code: code,
+          compilerOutput: result.stdout,
+          compilerError: result.stderr,
+          compilerResponse: result.compile_output,
+          user: {
+            connect: {
+              id: user.id,
+            },
+          },
+          codingQuestion: {
+            connect: {
+              id: taskId,
+            },
           },
         },
-        codingQuestion: {
-          connect: {
-            id: taskId,
-          },
+      });
+
+    const tempCodingQuestion = await this.prisma.codingQuestion.findUnique({
+      where: {
+        id: taskId,
+      },
+      select: {
+        questionId: true, // Hier nehmen wir an, dass es eine Verbindung zwischen CodingQuestion und Question gibt
+      },
+    });
+
+    const score = this.extractScore(
+      result.stdout + result.compile_output + result.stderr,
+    );
+
+    await this.prisma.userAnswer.create({
+      data: {
+        userId: user.id,
+        questionId: tempCodingQuestion.questionId,
+        feedbacks: {
+          create: [
+            {
+              text: 'Feedback for Coding Task got its own table',
+              score: score ? score : 0,
+            },
+          ],
         },
       },
     });
 
     return {
       resultjudge0: result,
-      encryptedSubmissionId: this.cryptoService.encrypt(prismaResult.id.toString()),
+      encryptedSubmissionId: this.cryptoService.encrypt(
+        prismaResult.id.toString(),
+      ),
     };
   }
 
-    /**
+  /**
    * Run code consisting of multiple files
    * @param {string} code - The code to be executed.
    * @param {string} language - The programming language of the code.
@@ -138,132 +189,168 @@ export class RunCodeService {
    * @param additionalFiles - An object where each key-value pair represents a file name and its content (code).
    * @return {Promise<CodeSubmissionResultDto>} Returns a promise that resolves to CodeSubmissionResultDto.
    */
-   async runMultipleFiles(
-     req,
-     code: string,
-     language: string,
-     taskId: number,
-     inputArgs: string[],
-     additionalFiles: { [fileName: string]: string },
-   ): Promise<CodeSubmissionResultDto> {
-     const codingQuestion: CodingQuestionInternal = await this.questionService.findCodingQuestionById(taskId);
-     additionalFiles['Dynamisch.java'] = codingQuestion.automatedTests[0].code; // currently only one test per task (each containing multiple test cases)
-     const inputStringArray = this.createInputArgsString(inputArgs); // some tasks need user input
-     const className = codingQuestion.mainFileName.split('.')[0]; // Classname of the student java class with main method (xy.java -> xy)
-     additionalFiles[ // Main.java that runs the tests for each test method defined in Dynamisch.java
-       'Main.java'
-     ] = `import java.lang.reflect.Method; public class Main { public static void main(String[] args) throws Exception {\n boolean correctSynatx = true; int punkte = 0;try {\n ${className}.main(${inputStringArray});\n }catch (Exception e) {\n System.out.println("Fehler beim Ausführen des Studentencodes.");\n correctSynatx = false; return; }if (correctSynatx) { try { Dynamisch testObj = new Dynamisch(); Method[] methods = Dynamisch.class.getMethods(); System.out.println("******** Begin Tests ********"); for (Method method : methods) { if (method.isAnnotationPresent(Test.class)) { try { method.invoke(testObj); } catch (Exception e) { System.out.println("Fehler beim Ausführen des Tests " + method.getName()); } } } punkte = testObj.getResult(); } catch (Exception e) { System.out.println("Fehler im Programmcode."); } } System.out.println("Die erreichte Punktzahl ist: " + punkte); } }`;
+  async runMultipleFiles(
+    req,
+    code: string,
+    language: string,
+    taskId: number,
+    inputArgs: string[],
+    additionalFiles: { [fileName: string]: string },
+  ): Promise<CodeSubmissionResultDto> {
+    const codingQuestion: CodingQuestionInternal =
+      await this.questionService.findCodingQuestionById(taskId);
+    additionalFiles['Dynamisch.java'] = codingQuestion.automatedTests[0].code; // currently only one test per task (each containing multiple test cases)
+    const inputStringArray = this.createInputArgsString(inputArgs); // some tasks need user input
+    const className = codingQuestion.mainFileName.split('.')[0]; // Classname of the student java class with main method (xy.java -> xy)
+    additionalFiles[ // Main.java that runs the tests for each test method defined in Dynamisch.java
+      'Main.java'
+    ] = `import java.lang.reflect.Method; public class Main { public static void main(String[] args) throws Exception {\n boolean correctSynatx = true; int punkte = 0;try {\n ${className}.main(${inputStringArray});\n }catch (Exception e) {\n System.out.println("Fehler beim Ausführen des Studentencodes.");\n correctSynatx = false; return; }if (correctSynatx) { try { Dynamisch testObj = new Dynamisch(); Method[] methods = Dynamisch.class.getMethods(); System.out.println("******** Begin Tests ********"); for (Method method : methods) { if (method.isAnnotationPresent(Test.class)) { try { method.invoke(testObj); } catch (Exception e) { System.out.println("Fehler beim Ausführen des Tests " + method.getName()); } } } punkte = testObj.getResult(); } catch (Exception e) { System.out.println("Fehler im Programmcode."); } } System.out.println("Die erreichte Punktzahl ist: " + punkte); } }`;
 
-     if (className === 'Summenwert' || className === 'VektorWork' || className === 'Leser' || className === 'Auto') {
-       // Tasks that doesn't have a main method. ToDo: Make this dynamic and load from DB.
-       additionalFiles[
-         'Main.java'
-       ] = `import java.lang.reflect.Method; public class Main { public static void main(String[] args) throws Exception {\n boolean correctSynatx = true; int punkte = 0; if (correctSynatx) { try {\n Dynamisch testObj = new Dynamisch();\n Method[] methods = Dynamisch.class.getMethods();\n System.out.println("******** Begin Tests ********");\n for (Method method : methods) { if (method.isAnnotationPresent(Test.class)) { try { method.invoke(testObj); } catch (Exception e) { System.out.println("Fehler beim Ausführen des Tests " + method.getName()); e.printStackTrace();} } } punkte = testObj.getResult(); } catch (Exception e) { System.out.println("Fehler im Programmcode."); } } System.out.println("Die erreichte Punktzahl ist: " + punkte); } }`;
-     }
+    if (
+      className === 'Summenwert' ||
+      className === 'VektorWork' ||
+      className === 'Leser' ||
+      className === 'Auto'
+    ) {
+      // Tasks that doesn't have a main method. ToDo: Make this dynamic and load from DB.
+      additionalFiles[
+        'Main.java'
+      ] = `import java.lang.reflect.Method; public class Main { public static void main(String[] args) throws Exception {\n boolean correctSynatx = true; int punkte = 0; if (correctSynatx) { try {\n Dynamisch testObj = new Dynamisch();\n Method[] methods = Dynamisch.class.getMethods();\n System.out.println("******** Begin Tests ********");\n for (Method method : methods) { if (method.isAnnotationPresent(Test.class)) { try { method.invoke(testObj); } catch (Exception e) { System.out.println("Fehler beim Ausführen des Tests " + method.getName()); e.printStackTrace();} } } punkte = testObj.getResult(); } catch (Exception e) { System.out.println("Fehler im Programmcode."); } } System.out.println("Die erreichte Punktzahl ist: " + punkte); } }`;
+    }
 
-     additionalFiles['Test.java'] = // define test annotation
-       'import java.lang.annotation.ElementType; import java.lang.annotation.Retention; import java.lang.annotation.RetentionPolicy; import java.lang.annotation.Target; @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.METHOD) public @interface Test { String name() default "";}';
-     additionalFiles['compile'] = // For the Judge0 to know how to compile and execute your multi-file program you need to provide two special files that should be available in the root of the .zip archive that you are sending with additional_files attribute. These files should be named compile and run, and are expected to be Bash scripts that know how to compile and execute your multi-file program.
-       '#!/bin/bash\n/usr/local/openjdk13/bin/javac Main.java';
-     additionalFiles['run'] = '#!/bin/bash\n/usr/local/openjdk13/bin/java Main'; // adding sqlite-jdbc is possible: /usr/local/openjdk13/bin/java -classpath ".:sqlite-jdbc-3.27.2.1.jar" Main
+    additionalFiles['Test.java'] = // define test annotation
+      'import java.lang.annotation.ElementType; import java.lang.annotation.Retention; import java.lang.annotation.RetentionPolicy; import java.lang.annotation.Target; @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.METHOD) public @interface Test { String name() default "";}';
+    additionalFiles['compile'] = // For the Judge0 to know how to compile and execute your multi-file program you need to provide two special files that should be available in the root of the .zip archive that you are sending with additional_files attribute. These files should be named compile and run, and are expected to be Bash scripts that know how to compile and execute your multi-file program.
+      '#!/bin/bash\n/usr/local/openjdk13/bin/javac Main.java';
+    additionalFiles['run'] = '#!/bin/bash\n/usr/local/openjdk13/bin/java Main'; // adding sqlite-jdbc is possible: /usr/local/openjdk13/bin/java -classpath ".:sqlite-jdbc-3.27.2.1.jar" Main
 
-     const requestBody = await this.generateRequestBody(additionalFiles);
-     const submissionResponse = await fetch(this.apiUrl + '/?base64_encoded', {
-       method: 'POST',
-       body: requestBody,
-       headers: { 'Content-Type': 'application/json' },
-     });
+    const requestBody = await this.generateRequestBody(additionalFiles);
+    const submissionResponse = await fetch(this.apiUrl + '/?base64_encoded', {
+      method: 'POST',
+      body: requestBody,
+      headers: { 'Content-Type': 'application/json' },
+    });
 
-     if (!submissionResponse.ok) {
-       throw new HttpException(
-         'Failed to submit the code to Judge0',
-         HttpStatus.BAD_GATEWAY,
-       );
-     }
+    if (!submissionResponse.ok) {
+      throw new HttpException(
+        'Failed to submit the code to Judge0',
+        HttpStatus.BAD_GATEWAY,
+      );
+    }
 
-     const submission = await submissionResponse.json();
-     const submissionId = submission.token;
-     let resultjudge0Response;
-     let result: Judge0Dto;
+    const submission = await submissionResponse.json();
+    const submissionId = submission.token;
+    let resultjudge0Response;
+    let result: Judge0Dto;
 
-     do {
-       await new Promise((resolve) => setTimeout(resolve, 300)); // Polling delay
-       resultjudge0Response = await fetch(
-         `${this.apiUrl}/${submissionId}?base64_encoded=true`,
-         {
-           method: 'GET',
-           headers: { 'Content-Type': 'application/json' },
-         },
-       );
+    do {
+      await new Promise((resolve) => setTimeout(resolve, 300)); // Polling delay
+      resultjudge0Response = await fetch(
+        `${this.apiUrl}/${submissionId}?base64_encoded=true`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
 
-       if (!resultjudge0Response.ok) {
-         console.log('Failed to get the code execution result from Judge0');
-         throw new HttpException(
-           'Failed to get the code execution result from Judge0',
-           HttpStatus.BAD_GATEWAY,
-         );
-       }
+      if (!resultjudge0Response.ok) {
+        console.log('Failed to get the code execution result from Judge0');
+        throw new HttpException(
+          'Failed to get the code execution result from Judge0',
+          HttpStatus.BAD_GATEWAY,
+        );
+      }
 
-       result = await resultjudge0Response.json();
-       if (result.stdout) {
-         // decode from base64
-         result.stdout = Buffer.from(result.stdout, 'base64').toString();
-       }
-       if (result.stderr) {
-         result.stderr = Buffer.from(result.stderr, 'base64').toString();
-       }
-       if (result.compile_output) {
-         result.compile_output = Buffer.from(
-           result.compile_output,
-           'base64',
-         ).toString();
-       }
-     } while (result.status.id <= 2); // Polling the result until the code is processed
+      result = await resultjudge0Response.json();
+      if (result.stdout) {
+        // decode from base64
+        result.stdout = Buffer.from(result.stdout, 'base64').toString();
+      }
+      if (result.stderr) {
+        result.stderr = Buffer.from(result.stderr, 'base64').toString();
+      }
+      if (result.compile_output) {
+        result.compile_output = Buffer.from(
+          result.compile_output,
+          'base64',
+        ).toString();
+      }
+    } while (result.status.id <= 2); // Polling the result until the code is processed
 
-     const user = await this.prisma.user.findUnique({
-       where: {
-         email: req.user.email,
-       },
-     });
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: req.user.email,
+      },
+    });
 
-     let submitCode = '';
-     for (const fileName in additionalFiles) {
-       submitCode +=
-         'Beginn ' +
-         fileName +
-         '\n' +
-         additionalFiles[fileName] +
-         '\n Ende ' +
-         fileName +
-         '\n\n';
-     }
+    let submitCode = '';
+    for (const fileName in additionalFiles) {
+      submitCode +=
+        'Beginn ' +
+        fileName +
+        '\n' +
+        additionalFiles[fileName] +
+        '\n Ende ' +
+        fileName +
+        '\n\n';
+    }
 
-     const prismaResult: CodeSubmission = await this.prisma.codeSubmission.create({
-       data: {
-         code: code,
-         compilerOutput: result.stdout,
-         compilerError: result.stderr,
-         compilerResponse: result.compile_output,
-         user: {
-           connect: {
-             id: user.id,
-           },
-         },
-         codingQuestion: {
-           connect: {
-             id: taskId,
-           },
-         },
-       },
-     });
+    const prismaResult: CodeSubmission =
+      await this.prisma.codeSubmission.create({
+        data: {
+          code: code,
+          compilerOutput: result.stdout,
+          compilerError: result.stderr,
+          compilerResponse: result.compile_output,
+          user: {
+            connect: {
+              id: user.id,
+            },
+          },
+          codingQuestion: {
+            connect: {
+              id: taskId,
+            },
+          },
+        },
+      });
 
-     // result.compile_output = result.compile_output?.split('Dynamisch.java')[0]; // remove everything from Dynamisch.java so students can't see test cases
+    const tempCodingQuestion = await this.prisma.codingQuestion.findUnique({
+      where: {
+        id: taskId,
+      },
+      select: {
+        questionId: true, // Hier nehmen wir an, dass es eine Verbindung zwischen CodingQuestion und Question gibt
+      },
+    });
 
-     return {
-       resultjudge0: result,
-       encryptedSubmissionId: this.cryptoService.encrypt(prismaResult.id.toString()),
-     };
-   }
+    const score = this.extractScore(
+      result.stdout + result.compile_output + result.stderr,
+    );
+    await this.prisma.userAnswer.create({
+      data: {
+        userId: user.id,
+        questionId: tempCodingQuestion.questionId,
+        feedbacks: {
+          create: [
+            {
+              text: 'Feedback for Coding Task got its own table',
+              score: score ? score : 0,
+            },
+          ],
+        },
+      },
+    });
+
+    // result.compile_output = result.compile_output?.split('Dynamisch.java')[0]; // remove everything from Dynamisch.java so students can't see test cases
+
+    return {
+      resultjudge0: result,
+      encryptedSubmissionId: this.cryptoService.encrypt(
+        prismaResult.id.toString(),
+      ),
+    };
+  }
 
   /**
    * This belongs to the runMultipleFiles function.
@@ -271,7 +358,9 @@ export class RunCodeService {
    * @param additionalFiles - An object where each key-value pair represents a file name and its content (code).
    * @return {Promise<string>} Returns a promise that resolves to a JSON-formatted string containing base64-encoded additional_files data.
    */
-  async generateRequestBody(additionalFiles: {[fileName: string]: string;}): Promise<string> {
+  async generateRequestBody(additionalFiles: {
+    [fileName: string]: string;
+  }): Promise<string> {
     const zip = new JSZip();
     for (const fileName in additionalFiles) {
       const fileContent = additionalFiles[fileName].replace(/\r\n/g, '\n');
@@ -324,4 +413,19 @@ export class RunCodeService {
     );
     return language ? language.id : undefined;
   }
+
+  extractScore(inputString: string): number | null {
+
+    // Only last 40 chars to prevent student printing the score
+    const searchInString = inputString.slice(-40);
+
+    const regex =
+      /(Die erreichte Punktzahl ist: |Total score: |Endpunktzahl: )([0-9.]+)/;
+    const match = searchInString.match(regex);
+    if (match && match[2]) {
+      return parseFloat(match[2]);
+    }
+    return null;
+  }
+
 }
