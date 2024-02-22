@@ -27,6 +27,12 @@
   text-align: center;
 }
 
-.progress-button {
+div.progress-button {
   float: right;
+}
+
+button.progress-button {
+  margin: 2px;
+  padding: 2px;
+  border-radius: 50%;
 }
