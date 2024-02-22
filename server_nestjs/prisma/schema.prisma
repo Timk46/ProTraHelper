@@ -327,8 +327,6 @@ model UserAnswer {
   userMCOptionSelected UserMCOptionSelected[]
   userFreetextAnswer   String?                @db.Text
   feedbacks            Feedback[]
-  FreeTextQuestion     FreeTextQuestion?      @relation(fields: [freeTextQuestionId], references: [id])
-  freeTextQuestionId   Int?
 }
 
 model UserMCOptionSelected {
@@ -346,17 +344,16 @@ model UserMCOptionSelected {
 //********************************************************************************************* Begin FreeText-Question
 
 model FreeTextQuestion {
-  id                  Int          @id @default(autoincrement())
-  textHTML            String?      @db.Text
-  expectations        String       @db.Text
-  expectationsHTML    String?      @db.Text
-  exampleSolution     String?      @db.Text
-  exampleSolutionHTML String?      @db.Text
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
-  question            Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  id                  Int      @id @default(autoincrement())
+  textHTML            String?  @db.Text
+  expectations        String   @db.Text
+  expectationsHTML    String?  @db.Text
+  exampleSolution     String?  @db.Text
+  exampleSolutionHTML String?  @db.Text
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  question            Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId          Int
-  userAnswers         UserAnswer[]
 }
 
 //********************************************************************************************* End FreeText-Question

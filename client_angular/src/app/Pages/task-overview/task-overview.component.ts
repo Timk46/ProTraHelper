@@ -112,7 +112,8 @@ export class TaskOverviewComponent implements OnInit, OnChanges, AfterViewInit {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.data = {
       question_id: question_data.id,
-    }
+    };
+    dialogConfig.maxHeight = "80vh";
     let dialogRef;
     if (question_data.type == 'MC') { // why SC and not MC?
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
