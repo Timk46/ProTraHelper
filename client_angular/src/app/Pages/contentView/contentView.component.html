@@ -21,13 +21,13 @@
     
     <!-- Create Button for each Content Element to mark the Element as 'Completed'  -->
     <div class="progress-button">
-      <button (click)="onToggleCheckmark(contentElem.id)" mat-stroked-button [ngStyle]="applyCheckmarkStyles(contentElem.id)" >
+      <button class="progress-button" (click)="onToggleCheckmark(contentElem.id)" mat-stroked-button [ngStyle]="applyCheckmarkStyles(contentElem.id)" >
         <span [matTooltip]=getCompletedTooltip(contentElem.id)>
           <mat-icon class="small-icon">check</mat-icon>
         </span>
       </button>
       <!-- Create Button for each Content Element to mark the Element as 'Open Question'  -->
-      <button (click)="onToggleQuestionmark(contentElem.id)" mat-stroked-button [ngStyle]="applyQuestionmarkStyles(contentElem.id)" >
+      <button class="progress-button" (click)="onToggleQuestionmark(contentElem.id)" mat-stroked-button [ngStyle]="applyQuestionmarkStyles(contentElem.id)" >
         <span [matTooltip]=getQuestionTooltip(contentElem.id)>
           <mat-icon class="small-icon">?</mat-icon>
         </span>

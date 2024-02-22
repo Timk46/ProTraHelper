@@ -1,5 +1,5 @@
 .contentView-Container{
-  height: 95vh;
+  height: 100vh;
   overflow: scroll;
   text-align: center;
 }
@@ -19,14 +19,21 @@
 }
 
 .contentElement-Container {
-  margin: 2px;
+  margin: auto;
   margin-top: 10px;
   padding: 2px;
   height: 60vh;
+  max-width: 80%;
   overflow: auto;
   text-align: center;
 }
 
-.progress-button {
+div.progress-button {
   float: right;
+}
+
+button.progress-button {
+  margin: 2px;
+  padding: 2px;
+  border-radius: 50%;
 }

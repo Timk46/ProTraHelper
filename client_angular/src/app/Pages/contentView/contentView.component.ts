@@ -89,11 +89,11 @@ export class ContentViewComponent implements OnInit {
   applyCheckmarkStyles(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
 
-    let styles = {'color' : 'red', 'background-color' : 'white', 'border-radius': '70%'};
+    let styles = {'color' : 'red', 'background-color' : 'white'};
     if (this.applyCompletedStyle[position]) {
-      styles = {'color' : 'white', 'background-color': 'green', 'border-radius': '70%'};
+      styles = {'color' : 'white', 'background-color': '#a3be8c'};
     } else {
-      styles = {'color' : 'gray', 'background-color': 'white', 'border-radius': '70%'};
+      styles = {'color' : 'gray', 'background-color': 'white'};
     }
     return styles;
   }
@@ -101,11 +101,11 @@ export class ContentViewComponent implements OnInit {
   applyQuestionmarkStyles(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
 
-    let styles = {'color' : 'white', 'background-color' : 'red', 'border-radius': '70%'};
+    let styles = {'color' : 'white', 'background-color' : 'red'};
     if (this.applyQuestionStyle[position]) {
-      styles = {'color' : 'white', 'background-color': 'purple', 'border-radius': '70%'};
+      styles = {'color' : 'white', 'background-color': '#b48ead'};
     } else {
-      styles = {'color' : 'gray', 'background-color': 'white', 'border-radius': '70%'};
+      styles = {'color' : 'gray', 'background-color': 'white'};
     }
     return styles;
   }
@@ -113,18 +113,18 @@ export class ContentViewComponent implements OnInit {
   getCompletedTooltip(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
     if (this.applyCompletedStyle[position]) {
-      return 'Als nicht abgeschlossen markieren';
+      return 'Markierung entfernen.';
     } else {
-      return 'Als abgeschlossen markieren';
+      return 'Als abgeschlossen markieren.';
     }
   }
 
   getQuestionTooltip(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
     if (this.applyQuestionStyle[position]) {
-      return 'Markierung entfernen';
+      return 'Markierung entfernen.';
     } else {
-      return "Als 'Offene Frage(n)' markieren";
+      return "Als 'Offene Frage(n)' markieren.";
     }
   }
 
