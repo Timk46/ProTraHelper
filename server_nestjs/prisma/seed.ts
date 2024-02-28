@@ -233,7 +233,8 @@ async function main() {
     const columnLevelId = 8;
     const columnDescriptionId = 9;
     const columnElementId = [10, 11, 12, 13, 14];
-    const columnContentDescriptionId = 15;
+    const columnContentNodeTitle = 15;
+    const columnContentDescription = 16;
 
     //in case the topic column for the Content is empty we need to save the last topic
     let lastTopic = 'No topic found!';
@@ -259,10 +260,12 @@ async function main() {
         await prisma.contentNode.create({
           data: {
             id: +row[columnContentId],
-            name: lastTopic,
-            description: row[columnContentDescriptionId]
-              ? row[columnContentDescriptionId].toString()
-              : 'Keine Beschreibung für ContentNode ' + +row[columnContentId],
+            name: row[columnContentNodeTitle]
+              ? row[columnContentNodeTitle].toString()
+              : lastTopic,
+            description: row[columnContentDescription]
+              ? row[columnContentDescription].toString()
+              : null,
           },
         });
         //loop through all contentElement columns
@@ -321,7 +324,7 @@ async function main() {
               name: row[columnTopicId],
               description: row[columnDescriptionId]
                 ? row[columnDescriptionId].toString()
-                : 'Keine Beschreibung für ConceptNode ' + +row[columnConceptId],
+                : null,
             },
           });
           await prisma.conceptFamily.create({

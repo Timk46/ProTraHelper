@@ -4,6 +4,36 @@
   text-align: center;
 }
 
+.contentView-Title{
+  display: inline-block;
+  clear: both;
+  width: 90%;
+}
+
+h1{
+  font-weight: bold;
+  float: left;
+}
+
+h3{
+  float: right;
+}
+
+h1, h3{
+  margin: 20px;
+  padding: 10px;
+}
+
+.contentView-Description{
+  width: 90%;
+  padding: 10px;
+  margin: auto;
+}
+
+p{
+  text-align: justify;
+}
+
 .contentView-card{
   display: inline-block;
     margin: 10px;

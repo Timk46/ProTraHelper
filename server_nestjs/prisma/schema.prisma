@@ -89,7 +89,7 @@ model ConceptGraph {
 model ConceptNode {
   id                Int                 @id @default(autoincrement())
   name              String
-  description       String              @db.Text
+  description       String?              @db.Text
   myParents         ConceptFamily[]     @relation("childConcept") // we have to name the relation because we have two relations between the same models
   myChildren        ConceptFamily[]     @relation("parentConcept")
   mySuccessors      ConceptEdge[]       @relation("prerequisiteConcept")
@@ -129,7 +129,7 @@ model ConceptEdge {
 model ContentNode {
   id              Int               @id @default(autoincrement())
   name            String
-  description     String            @db.Text
+  description     String?           @db.Text
   prerequisites   ContentEdge[]     @relation("prerequisiteContent")
   successors      ContentEdge[]     @relation("successorContent")
   requires        Requirement[]
