@@ -7,7 +7,12 @@
 .contentView-Title{
   display: inline-block;
   clear: both;
+  margin-top: 10px;
   width: 90%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: primary;
+  box-shadow: 0 0 5px #ccc;
 }
 
 h1{
