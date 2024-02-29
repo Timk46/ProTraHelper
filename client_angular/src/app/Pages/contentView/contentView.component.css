@@ -80,5 +80,6 @@ button.progress-button {
 
 p.message-code {
   text-align: center;
-  margin-top: 20px;
+  margin-top: auto;
+  margin-bottom: 0;
 }
