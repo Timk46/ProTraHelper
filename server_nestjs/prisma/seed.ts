@@ -1159,9 +1159,9 @@ async function createFilesOFP() {
   });
   await prisma.file.create({
     data: {
-      name: 'Pyphon_Geltungsbereich_Lebensdauer_Variablen.pdf',
+      name: 'Python_Geltungsbereich_Lebensdauer_Variablen.pdf',
       uniqueIdentifier: '7185bc4d-a06f-4326-9d37-932f2920ae4f',
-      path: 'OFP/Pyphon_Geltungsbereich_Lebensdauer_Variablen.pdf',
+      path: 'OFP/Python_Geltungsbereich_Lebensdauer_Variablen.pdf',
       type: 'PDF',
     },
   });
@@ -1175,9 +1175,9 @@ async function createFilesOFP() {
   });
   await prisma.file.create({
     data: {
-      name: 'Pyphon_Mutable_Immutable.pdf',
+      name: 'Python_Mutable_Immutable.pdf',
       uniqueIdentifier: '38bcbb98-a103-488d-b627-e5808a8e6780',
-      path: 'OFP/Pyphon_Mutable_Immutable.pdf',
+      path: 'OFP/Python_Mutable_Immutable.pdf',
       type: 'PDF',
     },
   });
@@ -1231,9 +1231,9 @@ async function createFilesOFP() {
   });
   await prisma.file.create({
     data: {
-      name: 'Pyphon_Rekursion_CodeBeispiele.py',
+      name: 'Python_Rekursion_CodeBeispiele.py',
       uniqueIdentifier: 'd6f6f2a2-a096-4300-bd50-7a6d928537e7',
-      path: 'OFP/Pyphon_Rekursion_CodeBeispiele.py',
+      path: 'OFP/Python_Rekursion_CodeBeispiele.py',
       type: 'CODE',
     },
   });
@@ -1255,9 +1255,9 @@ async function createFilesOFP() {
   });
   await prisma.file.create({
     data: {
-      name: 'Pyphon_FunktionaleProgrammierung_pureFunctions.pdf',
+      name: 'Python_FunktionaleProgrammierung_pureFunctions.pdf',
       uniqueIdentifier: '658c43ba-f341-44ec-acf7-ef3da6b292bf',
-      path: 'OFP/Pyphon_FunktionaleProgrammierung_pureFunctions.pdf',
+      path: 'OFP/Python_FunktionaleProgrammierung_pureFunctions.pdf',
       type: 'PDF',
     },
   });
