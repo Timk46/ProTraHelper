@@ -11,7 +11,7 @@
         <textarea matInput placeholder="Antwort" [(ngModel)]="answerText"></textarea>
       </mat-form-field> -->
       <div style="padding: 10px">
-        <app-tinymce #textEdit [config]="editorConfig" [content]="''"></app-tinymce>
+        <app-tinymce #textEdit [config]="editorConfig" [content]="answerText"></app-tinymce>
       </div>
     </mat-card-content>
     <mat-card-actions align="end">

@@ -126,6 +126,44 @@ export class QuestionDataService {
     }
 
     /**
+     * Retrieves the newest user answer for a specific question and user.
+     * 
+     * @param questionId - The ID of the question.
+     * @param userId - The ID of the user.
+     * @returns A promise that resolves to a UserAnswerDataDTO object representing the newest user answer.
+     */
+    async getNewestUserAnswer(questionId: number, userId: number): Promise<UserAnswerDataDTO> {
+      const userAnswer = await this.prisma.userAnswer.findFirst({
+        where: {
+          questionId: questionId,
+          userId: userId
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+      if (!userAnswer) {
+        return {
+          id: -1,
+          questionId: questionId,
+          userId: userId
+        };
+      }
+      return {
+        id: userAnswer.id,
+        questionId: userAnswer.questionId,
+        userId: userAnswer.userId,
+        userFreetextAnswer: userAnswer.userFreetextAnswer || undefined,
+        userFreetextAnswerRaw: undefined,
+        userMCAnswer: (await this.prisma.userMCOptionSelected.findMany({
+          where: {
+            userAnswerId: userAnswer.id
+          }
+        })).map((option) => option.mcOptionId)
+      };
+    }
+
+    /**
      *
      * @param question
      * @returns question Data

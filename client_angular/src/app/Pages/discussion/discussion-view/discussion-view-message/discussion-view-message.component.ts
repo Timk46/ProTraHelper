@@ -48,7 +48,6 @@ export class DiscussionViewMessageComponent implements OnChanges {
    * @returns
    */
   getDateDisplay(date: Date): string {
-    console.log("getDateDisplay called");
     const today = new Date();
     const newDate = new Date(date);
     today.setHours(0, 0, 0, 0); // set time to 00:00:00.000

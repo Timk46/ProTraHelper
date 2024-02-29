@@ -25,6 +25,10 @@ export class QuestionDataService {
     return this.http.get<QuestionDTO>(environment.server + `/question-data/newestQuestionVersion/${questionId}`);
   }
 
+  getNewestUserAnswer(questionId: number, userId: number = -1) : Observable<UserAnswerDataDTO> {
+    return this.http.get<UserAnswerDataDTO>(environment.server + `/question-data/newestUserAnswer/${questionId}/${userId}`);
+  }
+
   getMCQuestion(questionVersionId: number) : Observable<McQuestionDTO> {
     return this.http.get<McQuestionDTO>(environment.server + `/question-data/mcQuestion/${questionVersionId}`);
   }

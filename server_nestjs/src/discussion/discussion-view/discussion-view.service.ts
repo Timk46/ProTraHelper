@@ -141,8 +141,18 @@ export class DiscussionViewService {
       throw new Error('Messages not found');
     }
 
+    
+
+
     let messageData: discussionMessageDTO[] = [];
     for (let message of messages) {
+      const totalVotes = (await this.prisma.vote.findMany({
+        where: {
+          messageId: message.id,
+        }
+      })).reduce((sum, vote) => sum + (vote.isUpvote ? 1 : -1), 0);
+      console.log(totalVotes);
+
       messageData.push({
         messageId: message.id,
         discussionId: discussionId,
@@ -151,7 +161,8 @@ export class DiscussionViewService {
         createdAt: message.createdAt,
         messageText: message.text,
         isSolution: message.isSolution,
-        isInitiator: message.isInitiator
+        isInitiator: message.isInitiator,
+        voteCount: totalVotes || 0
       });
     }
     return messageData;

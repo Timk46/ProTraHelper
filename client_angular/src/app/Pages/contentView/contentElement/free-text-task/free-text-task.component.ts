@@ -21,6 +21,9 @@ export class FreeTextTaskComponent {
   }
 
   answerText: string = '';
+  feedbackText: string = '';
+  isSending: boolean = false;
+
   /* questionData : QuestionDTO = {
     id : -1,
     name : '',
@@ -41,16 +44,15 @@ export class FreeTextTaskComponent {
   }
 
 
-
-  feedbackText: string = '';
-  isSending: boolean = false;
-
   constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: {question_id: number}, private quesitonService: QuestionDataService) {
     /* this.quesitonService.getQuestionData(this.data.question_id).subscribe(data => {
       this.questionData = data;
     }); */
     this.quesitonService.getFreeTextQuestion(this.data.question_id).subscribe(data => {
       this.freeTextQuestion = data;
+    });
+    this.quesitonService.getNewestUserAnswer(this.data.question_id).subscribe(data => {
+      this.answerText = data.userFreetextAnswer || '';
     });
   }
 
