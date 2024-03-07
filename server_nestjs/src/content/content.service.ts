@@ -36,9 +36,9 @@ export class ContentService {
                 successors: true,
                 requires: true,
                 trains: true,
-                contentElements: {
+                ContentView: {
                   include: {
-                    file: true,
+                    contentElement: true,
                   },
                 },
               },
@@ -53,9 +53,9 @@ export class ContentService {
                 successors: true,
                 requires: true,
                 trains: true,
-                contentElements: {
+                ContentView: {
                   include: {
-                    file: true,
+                    contentElement: true,
                   },
                 },
               },
@@ -75,7 +75,9 @@ export class ContentService {
       name: requiredBy.contentNode.name,
       description: requiredBy.contentNode.description,
       contentElements: requiredBy.contentNode
-        .contentElements as unknown as ContentElementDTO[], //enum problem
+        .ContentView.map(
+          (p) => p.contentElementId,
+        ) as unknown as ContentElementDTO[], //enum problem
       contentPrerequisiteIds: requiredBy.contentNode.prerequisites.map(
         (p) => p.prerequisiteId,
       ),
@@ -96,7 +98,9 @@ export class ContentService {
       name: trainedBy.contentNode.name,
       description: trainedBy.contentNode.description,
       contentElements: trainedBy.contentNode
-        .contentElements as unknown as ContentElementDTO[], //enum problem
+        .ContentView.map(
+          (p) => p.contentElementId,
+        ) as unknown as ContentElementDTO[], //enum problem
       contentPrerequisiteIds: trainedBy.contentNode.prerequisites.map(
         (p) => p.prerequisiteId,
       ),
@@ -300,14 +304,16 @@ export class ContentService {
     return lastOpenedDate.lastOpened;
   }
 
-    async fetchAllConceptNames(): Promise<string[]> {
+  async fetchAllConceptNames(): Promise<string[]> {
     const concepts = await this.prisma.conceptNode.findMany({
       select: {
         name: true,
       },
     });
     const allConcepts = concepts.map((concept) => concept.name as string);
-    Array.from(new Set(allConcepts)).find((concept) => concept === "root") ? allConcepts.splice(allConcepts.indexOf("root"), 1) : null;
+    Array.from(new Set(allConcepts)).find((concept) => concept === 'root')
+      ? allConcepts.splice(allConcepts.indexOf('root'), 1)
+      : null;
     return Array.from(new Set(allConcepts));
   }
 }

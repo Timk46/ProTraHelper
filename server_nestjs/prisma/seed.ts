@@ -289,10 +289,6 @@ async function main() {
                 data: {
                   type: contentElementType[file.type],
                   title: file.name,
-                  position: +elementId + 1,
-                  contentNode: {
-                    connect: { id: +row[columnContentId] },
-                  },
                 },
               });
               //connect file to contentElement
@@ -300,6 +296,18 @@ async function main() {
                 where: { uniqueIdentifier: row[columnElementId[elementId]] },
                 data: {
                   contentElement: { connect: { id: TempContentElement.id } },
+                },
+              });
+              //connect contentView
+              await prisma.contentView.create({
+                data: {
+                  contentNode: {
+                    connect: { id: +row[columnContentId] },
+                  },
+                  contentElement: {
+                    connect: { id: TempContentElement.id },
+                  },
+                  position: +elementId + 1,
                 },
               });
             } else {

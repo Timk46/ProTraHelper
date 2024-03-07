@@ -89,7 +89,7 @@ model ConceptGraph {
 model ConceptNode {
   id                Int                 @id @default(autoincrement())
   name              String
-  description       String?              @db.Text
+  description       String?             @db.Text
   myParents         ConceptFamily[]     @relation("childConcept") // we have to name the relation because we have two relations between the same models
   myChildren        ConceptFamily[]     @relation("parentConcept")
   mySuccessors      ConceptEdge[]       @relation("prerequisiteConcept")
@@ -135,8 +135,8 @@ model ContentNode {
   requires        Requirement[]
   trains          Training[]
   discussions     Discussion[]
-  contentElements ContentElement[]
   UserContentView UserContentView[]
+  ContentView     ContentView[]
 }
 
 model ContentEdge {
@@ -185,17 +185,15 @@ model UserConcept {
 model ContentElement {
   id                  Int                          @id @default(autoincrement())
   type                contentElementType
-  position            Int // position in the content node
   title               String?
   text                String?
-  contentNode         ContentNode                  @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
-  contentNodeId       Int
   file                File?                        @relation(fields: [fileId], references: [id], onDelete: SetNull)
   fileId              Int?                         @unique
   question            Question?                    @relation(fields: [questionId], references: [id], onDelete: SetNull)
   questionId          Int?                         @unique
   Discussion          Discussion[]
   UserContentProgress UserContentElementProgress[]
+  ContentView         ContentView[]
 }
 
 model File {
@@ -212,6 +210,15 @@ model File {
   mCAnswerId       Int?
   contentElement   ContentElement?
   contentElementId Int?
+}
+
+model ContentView {
+  id               Int            @id @default(autoincrement())
+  contentNode      ContentNode    @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
+  contentNodeId    Int
+  contentElement   ContentElement @relation(fields: [contentElementId], references: [id], onDelete: Cascade)
+  contentElementId Int
+  position         Int
 }
 
 // Feedback which the users will get after answering a question
