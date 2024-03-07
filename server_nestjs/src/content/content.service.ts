@@ -3,23 +3,20 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
-import { ContentsForConceptDTO, ContentElementDTO } from '@Interfaces/index';
+import { ContentsForConceptDTO, ContentElementDTO, ContentViewDTO, ContentDTO } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
 import { last } from 'rxjs';
 
 @Injectable()
 export class ContentService {
   constructor(private prisma: PrismaService) {}
-  /**
-   * Get Contents by Concept Node ID
-   *
+
+    /**
    * Retrieves all contents associated with a particular concept node by trainedBy and requiredBy relations.
    *
    * @param {number} conceptNodeId The ID of the concept node
    *
    * @returns {Promise<ContentsForConceptDTO>} A promise that resolves to ContentsForConceptDTO - an object with two arrays of ContentDTO objects. One for the requiredBy and one for trainedBy relations.
-   *
-   * @throws Will throw an error if the concept node is not found.
    *
    */
   async getContentsByConceptNode(
@@ -36,9 +33,14 @@ export class ContentService {
                 successors: true,
                 requires: true,
                 trains: true,
-                contentElements: {
+                ContentView: {
                   include: {
-                    file: true,
+                    contentElement: {
+                      include: {
+                        file: true,
+                        question: true,
+                      },
+                    }
                   },
                 },
               },
@@ -53,9 +55,14 @@ export class ContentService {
                 successors: true,
                 requires: true,
                 trains: true,
-                contentElements: {
+                ContentView: {
                   include: {
-                    file: true,
+                    contentElement: {
+                      include: {
+                        file: true,
+                        question: true,
+                      },
+                    }
                   },
                 },
               },
@@ -69,52 +76,37 @@ export class ContentService {
       throw new Error('ConceptNode not found');
     }
 
-    // Transform the 'requiredBy' relations into ContentDTO[] format.
-    const requiredBy = conceptNode.requiredBy.map((requiredBy) => ({
-      contentNodeId: requiredBy.contentNode.id,
-      name: requiredBy.contentNode.name,
-      description: requiredBy.contentNode.description,
-      contentElements: requiredBy.contentNode
-        .contentElements as unknown as ContentElementDTO[], //enum problem
-      contentPrerequisiteIds: requiredBy.contentNode.prerequisites.map(
+    const transformContentNode = (contentNode) => ({
+      contentNodeId: contentNode.id,
+      name: contentNode.name,
+      description: contentNode.description,
+      contentElements: contentNode.ContentView.map((contentView: ContentViewDTO) => ({
+        id: contentView.contentElement.id,
+        type: contentView.contentElement.type,
+        positionInSpecificContentView: contentView.position, // position in the specific content view
+        title: contentView.contentElement.title,
+        text: contentView.contentElement.text,
+        file: contentView.contentElement.file,
+        question: contentView.contentElement.question,
+      })),
+      contentPrerequisiteIds: contentNode.prerequisites.map(
         (p) => p.prerequisiteId,
       ),
-      contentSuccessorIds: requiredBy.contentNode.successors.map(
+      contentSuccessorIds: contentNode.successors.map(
         (s) => s.successorId,
       ),
-      requiresConceptIds: requiredBy.contentNode.requires.map(
+      requiresConceptIds: contentNode.requires.map(
         (r) => r.conceptNodeId,
       ),
-      trainsConceptIds: requiredBy.contentNode.trains.map(
+      trainsConceptIds: contentNode.trains.map(
         (t) => t.conceptNodeId,
       ),
-    }));
+    });
 
-    // Transform the 'trainedBy' relations into ContentDTO[] format.
-    const trainedBy = conceptNode.trainedBy.map((trainedBy) => ({
-      contentNodeId: trainedBy.contentNode.id,
-      name: trainedBy.contentNode.name,
-      description: trainedBy.contentNode.description,
-      contentElements: trainedBy.contentNode
-        .contentElements as unknown as ContentElementDTO[], //enum problem
-      contentPrerequisiteIds: trainedBy.contentNode.prerequisites.map(
-        (p) => p.prerequisiteId,
-      ),
-      contentSuccessorIds: trainedBy.contentNode.successors.map(
-        (s) => s.successorId,
-      ),
-      requiresConceptIds: trainedBy.contentNode.requires.map(
-        (r) => r.conceptNodeId,
-      ),
-      trainsConceptIds: trainedBy.contentNode.trains.map(
-        (t) => t.conceptNodeId,
-      ),
-    }));
-
-    // Return the transformed content.
+    const requiredBy: ContentDTO[] = conceptNode.requiredBy.map((requiredBy) => transformContentNode(requiredBy.contentNode));
+    const trainedBy: ContentDTO[] = conceptNode.trainedBy.map((trainedBy) => transformContentNode(trainedBy.contentNode));
     return { trainedBy: trainedBy, requiredBy: requiredBy };
   }
-
   /**
    * Get Content Element Status
    *
@@ -300,14 +292,16 @@ export class ContentService {
     return lastOpenedDate.lastOpened;
   }
 
-    async fetchAllConceptNames(): Promise<string[]> {
+  async fetchAllConceptNames(): Promise<string[]> {
     const concepts = await this.prisma.conceptNode.findMany({
       select: {
         name: true,
       },
     });
     const allConcepts = concepts.map((concept) => concept.name as string);
-    Array.from(new Set(allConcepts)).find((concept) => concept === "root") ? allConcepts.splice(allConcepts.indexOf("root"), 1) : null;
+    Array.from(new Set(allConcepts)).find((concept) => concept === 'root')
+      ? allConcepts.splice(allConcepts.indexOf('root'), 1)
+      : null;
     return Array.from(new Set(allConcepts));
   }
 }
