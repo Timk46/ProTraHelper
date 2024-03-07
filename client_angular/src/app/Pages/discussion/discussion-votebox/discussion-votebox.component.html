@@ -4,9 +4,9 @@
       matTooltip="Als hilfreich markieren">
       <mat-icon class="small-icon">expand_less</mat-icon>
     </button>
-    <button *ngIf="voteData.userVoteStatus == 1" mat-stroked-button (click)="onUpvote($event)" class="small-button" style="width: 25px;"
+    <button *ngIf="voteData.userVoteStatus == 1" mat-stroked-button (click)="onUpvote($event)" class="small-button" style="background-color: #eceff4;"
       matTooltip='"Hilfreich" aufheben'>
-      <mat-icon class="small-icon">keyboard_double_arrow_up</mat-icon>
+      <mat-icon class="small-icon">expand_less</mat-icon>
     </button>
 
     <div class="count-box">{{ voteData.votes + voteData.userVoteStatus}}</div>
@@ -15,9 +15,9 @@
       matTooltip="Als nicht hilfreich markieren">
       <mat-icon class="small-icon">expand_more</mat-icon>
     </button>
-    <button *ngIf="voteData.userVoteStatus == -1" mat-stroked-button (click)="onDownvote($event)" class="small-button"
+    <button *ngIf="voteData.userVoteStatus == -1" mat-stroked-button (click)="onDownvote($event)" class="small-button" style="background-color: #eceff4;"
       matTooltip='"Nicht hilfreich" aufheben'>
-      <mat-icon class="small-icon">keyboard_double_arrow_down</mat-icon>
+      <mat-icon class="small-icon">expand_more</mat-icon>
     </button>
   </div>
 
@@ -27,14 +27,14 @@
     <span matTooltip="Diese Frage ist beantwortet." *ngIf="isSolution && !canMarkAsSolution">
       <mat-icon class="small-icon" style="padding-left: 3px; color: green;">check</mat-icon>
     </span>
-    <button mat-stroked-button *ngIf="isSolution && canMarkAsSolution" class="small-button" (click)="onMarkAsSolution($event)">
+    <button mat-stroked-button *ngIf="isSolution && canMarkAsSolution" class="small-button" style="background-color: green;" (click)="onMarkAsSolution($event)">
       <span matTooltip="Diese Antwort nicht mehr als Lösung kennzeichnen.">
-        <mat-icon class="small-icon" style="color:green">check</mat-icon>
+        <mat-icon class="small-icon" style="color:white">check</mat-icon>
       </span>
     </button>
     <button mat-button *ngIf="!isSolution && canMarkAsSolution" class="small-button" (click)="onMarkAsSolution($event)">
       <span matTooltip="Diese Antowort als Lösung kennzeichnen.">
-        <mat-icon class="small-icon" style="color: grey;">done_outline</mat-icon>
+        <mat-icon class="small-icon" style="color: grey;">check</mat-icon>
       </span>
     </button>
 
