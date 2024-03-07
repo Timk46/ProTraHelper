@@ -7,6 +7,7 @@ export interface discussionMessageDTO {
     messageText: string;
     isSolution: boolean;
     isInitiator: boolean;
+    voteCount?: number;
 }
 
 export interface discussionMessagesDTO {

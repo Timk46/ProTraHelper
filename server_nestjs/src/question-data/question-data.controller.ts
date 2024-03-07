@@ -5,6 +5,7 @@ import { UserAnswerDataDTO } from '@DTOs/userAnswer.dto';
 import { RolesGuard, roles } from '@/auth/roles.guard';
 import { MCOptionDTO, McQuestionDTO, McQuestionOptionDTO, QuestionDTO } from '@Interfaces/question.dto';
 import { uptime } from 'process';
+import { th } from '@faker-js/faker';
 
 //@UseGuards(RolesGuard)
 @Controller('question-data')
@@ -39,6 +40,28 @@ export class QuestionDataController {
     @Get('/mcOptions/:mcQuestionId')
     async getMCOptions(@Param('mcQuestionId') mcQuestionId: number) {
         return this.questionDataService.getMCOptions(mcQuestionId);
+    }
+
+    /**
+     *
+     * @param questionVersionId
+     * @returns the free text question
+     */
+    @Get('/freeTextQuestion/:questionVersionId')
+    async getFreeTextQuestion(@Param('questionVersionId') questionVersionId: number) {
+        return this.questionDataService.getFreeTextQuestion(questionVersionId);
+    }
+
+    @Get('/newestUserAnswer/:questionId/:userId')
+    async getNewestUserAnswer(@Param('questionId') questionId: number, @Param('userId') userId: number, @Req() req: any) {
+        if (isNaN(questionId) || isNaN(userId)) {
+            throw new Error('Invalid questionId or userId');
+        }
+        if (req.user.role == 'ADMIN' || req.user.role == 'TEACHER'){
+            return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(userId));
+        } else {
+            return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
+        } 
     }
 
     /**
@@ -106,5 +129,5 @@ export class QuestionDataController {
         return await this.questionDataService.createMcQuestionOption(mcQuestionOption);
     }
 
-    
+
 }

@@ -12,8 +12,11 @@ $title-text-color: #eceff4;
 
 $edge-color: #2e3440;
 
-$progress-goal: #ebcb8b;
-$progress-achieved: #86bd55;
+$progress-goal: #e9dbc0;
+$progress-achieved: #88bb21;
+
+$highlight-color: #8fbcbb;
+$dark-highlight-color: #5e81ac;
 
 .sprotty-graph {
     width: 100%;
@@ -23,14 +26,14 @@ $progress-achieved: #86bd55;
 .sprotty-edge {
     fill: none;
     stroke: $edge-color;
-    stroke-width: 3px;
+    stroke-width: 4px;
 }
 
 .sprotty-node.concept {
     fill: $concept-background-color;//#d8d9e2;
     stroke: $concept-header-color;//#2b356e;
-    stroke-width: 2;
-    filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 1));
+    stroke-width: 3;
+    filter: drop-shadow(0px 0px 10px rgba(0, 0, 0, 1));
 }
 
 .sprotty-node.leaf-concept {
@@ -72,12 +75,12 @@ $progress-achieved: #86bd55;
 
 .sprotty-node.selected {
     stroke-width: 4;
-    stroke: #8fbcbb;
-    filter: drop-shadow(0px 0px 8px #2b356e);
+    stroke: $highlight-color;
+    //filter: drop-shadow(0px 0px 8px #2b356e);
 }
 
 .sprotty-node.mouseover:not(.selected) {
-    stroke-width: 3;
+    stroke-width: 4;
     
 }
 
@@ -97,7 +100,7 @@ $progress-achieved: #86bd55;
 }
 
 .sprotty-edge.selected {
-    stroke: #844;
+    stroke: $highlight-color;
     stroke-width: 4px;
 }
 
@@ -121,18 +124,6 @@ $progress-achieved: #86bd55;
 .sprotty-popup-body > p {
     margin-bottom: 2px;
 }
-
-.sprotty-star {
-    fill: #f1cd00;
-    stroke: #000;
-    stroke-width: 11;
-  }
-
-.sprotty-grey-star {
-    fill: #0f3c6462;
-    stroke: #00000000;
-  }
-
 
 .class-context-menu {
     background-color: #dee2e6;
@@ -169,7 +160,7 @@ $progress-achieved: #86bd55;
 }
 
 .class-context-menu-item:hover:not(.disabled-action) {
-    color: green;
+    color: $dark-highlight-color;
 }
 
 

@@ -18,6 +18,9 @@ export class DiscussionViewComponent {
   messagesData: discussionMessageDTO[] = [];
   subscriptions: Subscription[] = [];
   userId: number;
+  displayedColumns: string[] = ['message'];
+  sortingText: 'Hilfreich' | 'Datum' = 'Hilfreich';
+  sortingDirection: 'asc' | 'desc' | '' = '';
 
   discussionData: discussionDTO = {
     id: -1,
@@ -30,14 +33,14 @@ export class DiscussionViewComponent {
     isSolved: false,
   }
   initiatorMessage: discussionMessageDTO = {
-      messageId: -1,
-      discussionId: -1,
-      authorId: -1,
-      authorName: 'dummy',
-      createdAt: new Date(),
-      messageText: 'dummy',
-      isSolution: false,
-      isInitiator: true
+    messageId: -1,
+    discussionId: -1,
+    authorId: -1,
+    authorName: 'dummy',
+    createdAt: new Date(),
+    messageText: 'dummy',
+    isSolution: false,
+    isInitiator: true
   };
 
   @Input() discussionId: number = -1;
@@ -86,7 +89,7 @@ export class DiscussionViewComponent {
    * Looks for a message by its id and deletes it from the messages.
    * @returns the message
    */
-  getAndSeparateMessage(messageId: number) : discussionMessageDTO {
+  getAndSeparateMessage(messageId: number): discussionMessageDTO {
     return this.messagesData.splice(this.messagesData.findIndex(message => message.messageId == messageId), 1)[0];
   }
 
@@ -100,8 +103,47 @@ export class DiscussionViewComponent {
       this.messagesData = messages;
       this.initiatorMessage = this.getAndSeparateMessage(messageId);
       this.discussionData.commentCount = this.messagesData.length;
+      this.onSort(this.sortingDirection);
     });
     this.subscriptions.push(gmSub);
+  }
+
+  /**
+   * Sorts the messagesData array based on the provided sort direction.
+   * @param event - The sort event object containing the sort direction.
+   */
+  onSort(event: any) {
+    switch (event.direction) {
+      case 'asc':
+        this.sortingDirection = 'asc';
+        this.sortingText = 'Datum';
+        this.messagesData = [...this.messagesData.sort((a, b) => {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        })];
+        break;
+      case 'desc':
+        this.sortingDirection = 'desc';
+        this.sortingText = 'Datum';
+        this.messagesData = [...this.messagesData.sort((a, b) => {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        })];
+        break;
+      default:
+        this.sortingDirection = '';
+        this.sortingText = 'Hilfreich';
+        this.messagesData = [...this.messagesData.sort((a, b) => {
+          if (a.isSolution && !b.isSolution) {
+            return -1;
+          } else if (!a.isSolution && b.isSolution) {
+            return 1;
+          } else if ((a.voteCount !== undefined && b.voteCount !== undefined) && a.voteCount !== b.voteCount) {
+            return b.voteCount - a.voteCount;
+          } else {
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          }
+        })];
+        break;
+    }
   }
 
   ngOnDestory() {

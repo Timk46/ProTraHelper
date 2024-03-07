@@ -10,7 +10,7 @@ import {
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { inject as injectAngular } from '@angular/core';
-import { AwardLevelAction, CreateConceptAction, CreateEdgeAction, DeleteConceptAction } from './actions';
+import { AwardLevelAction, CreateConceptAction, CreateEdgeAction, DeleteConceptAction, MoveNodeAction } from './actions';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateConceptDialogComponent } from '../graph-dialogs/create-concept-dialog/create-concept-dialog.component';
 import { has } from 'markdown-it/lib/common/utils';
@@ -26,7 +26,11 @@ export class ConceptGraphModelSource extends LocalModelSource {
   graphData: GraphDataService | undefined;
   private dialog: MatDialog | undefined;
   currentModule = 1;
+
+  // private variables for editing the graph
+  // undefined if no change is in progress
   private EdgeCreator: { concept: string, type: string } | undefined;
+  private NodeMover: { concept: string} | undefined;
 
 
   constructor() {
@@ -45,6 +49,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     registry.register(DeleteConceptAction.KIND, this)
     registry.register(AwardLevelAction.KIND, this)
     registry.register(CreateEdgeAction.KIND, this)
+    registry.register(MoveNodeAction.KIND, this)
   }
 
   override handle(action: Action) {
@@ -71,6 +76,10 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
       case CreateEdgeAction.KIND:
         this.handleCreateEdgeAction(action as CreateEdgeAction);
+        break;
+      
+      case MoveNodeAction.KIND:
+        this.handleMoveNodeAction(action as MoveNodeAction);
         break;
 
       default: super.handle(action);
@@ -242,41 +251,12 @@ export class ConceptGraphModelSource extends LocalModelSource {
     // create edge if EdgeCreator is set
     // very hacky, no sanity checks anywhere
     if (this.EdgeCreator !== undefined) {
-      const sprottyNode = index.getById(this.EdgeCreator.concept) as SprottyConceptNode;
-      const parentNodeId = sprottyNode.parentIds![0];
-      if (parentNodeId !== firstSelectedNode?.parentIds![0]) {
-        // nodes have different parents, do nothing
-        this.EdgeCreator = undefined;
-        return;
-      }
+      this.CreateEdge(index, firstSelectedNode);
+    }
 
-      // get databaseId of parentNode
-      let parentNodeDatabaseId = 0;
-      if (parentNodeId === "root") {
-        parentNodeDatabaseId = this.flatGraph.trueRootId;
-      }
-      else {
-        parentNodeDatabaseId = (index.getById(parentNodeId)! as SprottyConceptNode).databaseId;
-      }
-
-      if (this.EdgeCreator.type === 'prerequisite') {
-        // newly selected node is prerequisite of sprottyNode
-        this.graphData!.createEdge(parentNodeDatabaseId, firstSelectedNode.databaseId, sprottyNode.databaseId).subscribe((res) => {
-          console.log("created edge: ", res);
-          this.getUserGraph();
-          this.updateModel();
-        });
-      }
-      else if (this.EdgeCreator.type === 'successor') {
-        // newly selected node is successor of sprottyNode
-        this.graphData!.createEdge(parentNodeDatabaseId, sprottyNode.databaseId, firstSelectedNode.databaseId).subscribe((res) => {
-          console.log("created edge: ", res);
-          this.getUserGraph();
-          this.updateModel();
-        });
-      }
-
-      this.EdgeCreator = undefined;
+    // move node if NodeMover is set
+    if (this.NodeMover !== undefined) {
+      this.MoveNode(index, firstSelectedNode);
     }
   }
 
@@ -371,7 +351,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
         element.children = element.children?.filter(child => !child.type.startsWith('edge'));
         this.addChildren(node, 'mini-concept');
 
-        this.updateModel();
+        await this.updateModel();
         this.updateExpandedState(node, false);
       }
     }
@@ -405,9 +385,77 @@ export class ConceptGraphModelSource extends LocalModelSource {
     index.add(this.currentRoot);
 
     this.EdgeCreator = { concept: action.conceptId, type: action.connectionType };
+    this.NodeMover = undefined;
   }
 
-  // creates new concept node (locally)
+  /**
+   * Sends a request to the server to create an edge between the currently selected node and the node that
+   * was selected when the CreateEdgeAction was dispatched
+   * @param index index of the current graph
+   * @param firstSelectedNode the first of the currently selected nodes
+   * @returns 
+   */
+  private CreateEdge(index: SModelIndex, firstSelectedNode: SprottyConceptNode) {
+    const sprottyNode = index.getById(this.EdgeCreator!.concept) as SprottyConceptNode;
+      const parentNodeId = sprottyNode.parentIds![0];
+      if (parentNodeId !== firstSelectedNode?.parentIds![0]) {
+        // nodes have different parents, do nothing
+        this.EdgeCreator = undefined;
+        return;
+      }
+
+      // get databaseId of parentNode
+      let parentNodeDatabaseId = 0;
+      if (parentNodeId === "root") {
+        parentNodeDatabaseId = this.flatGraph.trueRootId;
+      }
+      else {
+        parentNodeDatabaseId = (index.getById(parentNodeId)! as SprottyConceptNode).databaseId;
+      }
+
+      if (this.EdgeCreator!.type === 'prerequisite') {
+        // newly selected node is prerequisite of sprottyNode
+        this.graphData!.createEdge(parentNodeDatabaseId, firstSelectedNode.databaseId, sprottyNode.databaseId).subscribe((res) => {
+          console.log("created edge: ", res);
+          this.getUserGraph();
+          this.updateModel();
+        });
+      }
+      else if (this.EdgeCreator!.type === 'successor') {
+        // newly selected node is successor of sprottyNode
+        this.graphData!.createEdge(parentNodeDatabaseId, sprottyNode.databaseId, firstSelectedNode.databaseId).subscribe((res) => {
+          console.log("created edge: ", res);
+          this.getUserGraph();
+          this.updateModel();
+        });
+      }
+
+      this.EdgeCreator = undefined;
+  }
+
+  handleMoveNodeAction(action: MoveNodeAction): void {
+    console.log("handleMoveNodeAction: ", action);
+    const index = new SModelIndex();
+    index.add(this.currentRoot);
+    this.NodeMover = { concept: action.conceptId };
+    this.EdgeCreator = undefined;
+  }
+
+  private MoveNode(index: SModelIndex, firstSelectedNode: SprottyConceptNode) {
+    const sprottyNode = index.getById(this.NodeMover!.concept) as SprottyConceptNode;
+    const newParentNodeId = firstSelectedNode.databaseId;
+    
+
+    this.graphData!.moveConceptNode(sprottyNode.databaseId, newParentNodeId).subscribe((res) => {
+      console.log("moved node: ", res);
+      this.getUserGraph();
+      this.updateModel();
+    });
+
+    this.NodeMover = undefined;
+  }
+
+  // creates new sprotty concept node (locally)
   /**
    * 
    * @param id sprotty graph id , usually 'node_' + databaseId
@@ -494,7 +542,15 @@ export class ConceptGraphModelSource extends LocalModelSource {
     return node;
   }
 
-
+  /**
+   * Creates a sprotty edge for the graph
+   * @param id string, 'edge_' + databaseId
+   * @param sourceId string, 'node_' + databaseId
+   * @param targetId string, 'node_' + databaseId
+   * @param parentId string, 'node_' + databaseId (except if it is the root, then it is 'root')
+   * @param databaseId id of this edge in the database
+   * @returns SpottyConceptEdge
+   */
   createEdge(id: string, sourceId: string, targetId: string, parentId: string, databaseId: number): SEdge {
     const edge: SprottyConceptEdge = {
       type: 'edge',

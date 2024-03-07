@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { McQuestionDTO, MCOptionDTO, QuestionDTO, questionType, McQuestionOptionDTO } from '@DTOs/question.dto';
+import { McQuestionDTO, MCOptionDTO, QuestionDTO, questionType, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { Injectable } from '@nestjs/common';
 import {  } from '@prisma/client';
@@ -94,6 +94,73 @@ export class QuestionDataService {
         }
 
         return mcOptions;
+    }
+
+    /**
+     * get the free text question, including the solution and expectations if requested
+     * @param questionVersionId
+     * @param fullData if true, the solution and expectations are returned
+     * @returns the free text question
+     */
+    async getFreeTextQuestion(questionId: number, fullData: boolean = false): Promise<freeTextQuestionDTO> {
+      const question = await this.getQuestion(questionId);
+      const freeTextQuestion = await this.prisma.freeTextQuestion.findFirst({
+          where: {
+              questionId: Number(questionId)
+          }
+      });
+      if (!freeTextQuestion) {
+          throw new Error('FreeTextQuestion not found');
+      }
+      return {
+        questionId: freeTextQuestion.questionId,
+        title: question.name,
+        text: question.text,
+        textHTML: freeTextQuestion.textHTML || undefined,
+        expectations: fullData? freeTextQuestion.expectations: "",
+        expectationsHTML: fullData? (freeTextQuestion.expectationsHTML || undefined) : undefined,
+        exampleSolution: fullData? (freeTextQuestion.exampleSolution || undefined) : undefined,
+        exampleSolutionHTML: fullData? (freeTextQuestion.exampleSolutionHTML || undefined) : undefined,
+        maxPoints: question.score,
+      };
+    }
+
+    /**
+     * Retrieves the newest user answer for a specific question and user.
+     * 
+     * @param questionId - The ID of the question.
+     * @param userId - The ID of the user.
+     * @returns A promise that resolves to a UserAnswerDataDTO object representing the newest user answer.
+     */
+    async getNewestUserAnswer(questionId: number, userId: number): Promise<UserAnswerDataDTO> {
+      const userAnswer = await this.prisma.userAnswer.findFirst({
+        where: {
+          questionId: questionId,
+          userId: userId
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+      if (!userAnswer) {
+        return {
+          id: -1,
+          questionId: questionId,
+          userId: userId
+        };
+      }
+      return {
+        id: userAnswer.id,
+        questionId: userAnswer.questionId,
+        userId: userAnswer.userId,
+        userFreetextAnswer: userAnswer.userFreetextAnswer || undefined,
+        userFreetextAnswerRaw: undefined,
+        userMCAnswer: (await this.prisma.userMCOptionSelected.findMany({
+          where: {
+            userAnswerId: userAnswer.id
+          }
+        })).map((option) => option.mcOptionId)
+      };
     }
 
     /**
@@ -305,14 +372,18 @@ export class QuestionDataService {
 
             //TODO: generate a feedback text based on the user answer
             let feedbackText: string = 'Du hast keine Antwort eingeben.';
+            let userScore = 0;
             if (answerData.userFreetextAnswerRaw && answerData.userFreetextAnswerRaw != '') {
-                feedbackText = await this.feedbackGenerationService.generateFreetextFeedback({question: question.description, instructions: "", answer: answerData.userFreetextAnswerRaw, conceptNodeId: (question.conceptNode || -1)});
+              await this.getFreeTextQuestion(answerData.questionId, true).then(async (questionData) => {
+                await this.feedbackGenerationService.generateFreetextFeedback(questionData, answerData.userFreetextAnswerRaw).then((feedback) => {
+                  feedbackText = feedback.feedbackText;
+                  userScore = feedback.reachedPoints;
+                });
+              });
             }
-            const userScore = 0;
-            //const feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
 
             console.log('generated Text:', feedbackText);
-
+            console.log('userScore: ' + userScore);
             //create feedback for user answer
             const feedback = await this.prisma.feedback.create({
                 data: {

@@ -20,11 +20,8 @@ export class ContentViewComponent implements OnInit {
   applyCompletedStyle: boolean[] = [];
   applyQuestionStyle: boolean[] = [];
   lastOpenedDate: Date = new Date();
+  readableDate: string = 'dummy date';
   pdfCount: number = 0;
-  
-  hours : string = "";
-  minutes : string = "";
-  seconds : string = "";
 
   // Get Data from Dialog
   constructor(public dialogRef: MatDialogRef<ContentViewComponent>, @Inject(MAT_DIALOG_DATA) public data: any, private sanitizer: DomSanitizer, private discussionDialogService: DiscussionDialogService, private contentService: ContentService) {
@@ -94,7 +91,7 @@ export class ContentViewComponent implements OnInit {
 
     let styles = {'color' : 'red', 'background-color' : 'white'};
     if (this.applyCompletedStyle[position]) {
-      styles = {'color' : 'white', 'background-color': 'green'};
+      styles = {'color' : 'white', 'background-color': '#a3be8c'};
     } else {
       styles = {'color' : 'gray', 'background-color': 'white'};
     }
@@ -106,7 +103,7 @@ export class ContentViewComponent implements OnInit {
 
     let styles = {'color' : 'white', 'background-color' : 'red'};
     if (this.applyQuestionStyle[position]) {
-      styles = {'color' : 'white', 'background-color': 'purple'};
+      styles = {'color' : 'white', 'background-color': '#b48ead'};
     } else {
       styles = {'color' : 'gray', 'background-color': 'white'};
     }
@@ -116,24 +113,41 @@ export class ContentViewComponent implements OnInit {
   getCompletedTooltip(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
     if (this.applyCompletedStyle[position]) {
-      return 'Als nicht abgeschlossen markieren';
+      return 'Markierung entfernen.';
     } else {
-      return 'Als abgeschlossen markieren';
+      return 'Als abgeschlossen markieren.';
     }
   }
 
   getQuestionTooltip(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
     if (this.applyQuestionStyle[position]) {
-      return 'Markierung entfernen';
+      return 'Markierung entfernen.';
     } else {
-      return "Als 'Offene Frage(n)' markieren";
+      return "Als 'Offene Frage(n)' markieren.";
     }
   }
 
   getLastOpenedDate(){
     console.log('ContentViewComponent: getLastOpenedDate');
-    this.contentService.updateLastOpenedDate(this.contentViewData.contentNodeId).subscribe(status => {this.lastOpenedDate = status;});
+    this.contentService.updateLastOpenedDate(this.contentViewData.contentNodeId).subscribe(status => {this.lastOpenedDate = new Date(status); this.readableDate = this.getDateDisplay(this.lastOpenedDate);});
   }
+    /**
+   * Returns the date in a human readable format
+   * @param date
+   * @returns
+   */
+    getDateDisplay(date: Date): string {
+      console.log("getDateDisplay called");
+      const today = new Date();
+      const newDate = new Date(date);
+      const dbDate = new Date(date);
+      today.setHours(0, 0, 0, 0); // set time to 00:00:00.000
+      if (newDate.setHours(0, 0, 0, 0) === today.getTime()) {
+        return `Heute ${dbDate.getHours()}:${dbDate.getMinutes()< 10 ? '0' : ''}${dbDate.getMinutes()} Uhr`;
+      } else {
+        return `${newDate.getDate()}.${newDate.getMonth() + 1}.${newDate.getFullYear()}`;
+      }
+    }
 
 }

@@ -138,5 +138,16 @@ export interface CodingQuestionDto {
     answers?: {answer?: string; correct?: boolean}[];
     description?: string;
     score?: number;
+  }
 
+  export interface freeTextQuestionDTO {
+    questionId: number;
+    title: string;
+    text: string;
+    textHTML?: string;
+    expectations: string;
+    expectationsHTML?: string;
+    exampleSolution?: string;
+    exampleSolutionHTML?: string;
+    maxPoints: number;
   }

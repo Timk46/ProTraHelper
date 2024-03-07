@@ -71,3 +71,20 @@ export namespace CreateEdgeAction {
         };
     }
 }
+
+
+export interface MoveNodeAction extends Action {
+    kind: typeof MoveNodeAction.KIND;
+    conceptId: string;
+}
+
+export namespace MoveNodeAction {
+    export const KIND = 'moveNode';
+    
+    export function create(options: { conceptId: string}): MoveNodeAction {
+        return {
+            kind: KIND,
+            conceptId: options.conceptId,
+        };
+    }
+}

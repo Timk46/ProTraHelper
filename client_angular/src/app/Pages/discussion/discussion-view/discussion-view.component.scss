@@ -73,3 +73,22 @@
   display: flex;
   gap: 10px;
 }
+
+.sortColumn {
+  background-color: white;
+  color: black;
+  border: 1px solid #c9c9c9;
+  border-radius: 10px;
+  padding: 5px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  font-weight: normal;
+  cursor: pointer;
+  user-select: none;
+}
+
+tr {
+  height: 40px !important;
+}

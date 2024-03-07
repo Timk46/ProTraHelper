@@ -1,10 +1,10 @@
 import { Container, ContainerModule } from 'inversify';
 import { configureModelElement, configureViewerOptions, loadDefaultModules, LocalModelSource, 
     PolylineEdgeView, SCompartmentView, SCompartmentImpl, SEdgeImpl, SGraphImpl, SGraphView, SLabelImpl, SLabelView, 
-    SNodeImpl, TYPES, RectangularNode, expandFeature, nameFeature, SButtonImpl, ExpandButtonView,
+    SNodeImpl, TYPES, RectangularNode, expandFeature, nameFeature, SButtonImpl,
     configureButtonHandler, SRoutingHandleImpl, SRoutingHandleView, SModelElementImpl, SPortImpl, ConsoleLogger, 
-    LogLevel, IContextMenuServiceProvider, contextMenuModule, ContextMenuProviderRegistry, moveFeature } from 'sprotty';
-import { ConceptNodeView, CustomCollapseExpandView, CustomExpandButtonView, HeaderLabelView, LeafConceptView, MiniConceptView, PortViewWithExternalLabel, TextLabelView} from './views';
+    LogLevel, moveFeature } from 'sprotty';
+import { ConceptNodeView, CustomExpandButtonView, LeafConceptView, MiniConceptView,} from './views';
 import { ConceptGraphModelSource } from './model-source';
 import ElkConstructor, { LayoutOptions } from 'elkjs';
 import {
@@ -66,7 +66,7 @@ export default (containerId: string) => {
         configureModelElement(context, 'comp', SCompartmentImpl, SCompartmentView)
         
         //collapse expand button
-        configureModelElement(context, 'button:expand', SButtonImpl, CustomExpandButtonView); //not used
+        configureModelElement(context, 'button:expand', SButtonImpl, CustomExpandButtonView); 
         // configureButtonHandler({bind, isBound}, 'label:button:expand', CustomButtonHandler); //not used
 
         // if(0){
@@ -116,9 +116,9 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
         if(snode.type === 'node:leaf-concept'){
             return {
                 'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS MINIMUM_SIZE',
-                'org.eclipse.elk.nodeSize.minimum': '(130, 30)', 
-                'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
-                'org.eclipse.elk.nodeLabels.padding': '[top=10, bottom=0, left=25, right=25]',
+                'org.eclipse.elk.nodeSize.minimum': '(130, 40)', 
+                'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_CENTER', // very important
+                'org.eclipse.elk.nodeLabels.padding': '[top=10, bottom=10, left=25, right=25]',
                 'org.eclipse.elk.spacing.labelLabel': '5',
             };
         }

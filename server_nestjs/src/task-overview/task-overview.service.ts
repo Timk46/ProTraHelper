@@ -21,6 +21,8 @@ export class TaskOverviewService {
                 description: true,
                 name: true,
                 score: true,
+                level: true,
+                mode: true,
             },
             orderBy: [
                 { originId: 'asc' },
@@ -82,6 +84,8 @@ export class TaskOverviewService {
                 name: question.name,
                 attempts: attemptCount,
                 progress: progress,
+                mode: question.mode,
+                level: question.level,
             });
         }
 
