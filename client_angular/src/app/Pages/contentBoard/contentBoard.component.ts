@@ -5,6 +5,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ContentViewComponent } from '../contentView/contentView.component';
 import { MatTab } from '@angular/material/tabs';
 import { MatTableDataSource } from '@angular/material/table';
+import { ContentService } from 'src/app/Services/content/content.service';
 
 interface ContentViewData {
   id: number;
@@ -36,7 +37,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
   ];
   dataSource : MatTableDataSource<ContentViewData> = new MatTableDataSource<ContentViewData>();
 
-  constructor(private router: Router, public dialog: MatDialog) {}
+  constructor(private router: Router, public dialog: MatDialog, private contentService: ContentService) {}
   
 
   ngOnInit() {
@@ -45,12 +46,13 @@ export class ContentBoardComponent implements OnInit, OnChanges {
   ngOnChanges() {
     this.dataSource.data = [];
     for (let content of this.contentsForActiveConceptNode.trainedBy) {
-      // console.log('Test: ', content);
+      let userProgress = 30;
+      let userQuestion = false;
       const input: ContentViewData = {
         id: content.contentNodeId,
         name: content.name.toString(),
-        progress: content.contentElements.length,
-        question: null,
+        progress: userProgress,
+        question: userQuestion,
         action: content,
       };
       this.dataSource.data.push(input);
