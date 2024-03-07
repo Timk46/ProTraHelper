@@ -1,0 +1,234 @@
+{
+  "questions": [
+    {
+      "question": "Welche Eigenschaft muss eine Funktion in Java besitzen, um als Lambda-Ausdruck betrachtet zu werden und wie wird dies in Python umgesetzt?",
+      "options": [
+        {
+          "answer": "In Java muss eine Funktion als Interface mit nur einer abstrakten Methode definiert sein, in Python wird dies durch die 'lambda' Syntax ermöglicht."
+        },
+        {
+          "answer": "In Java müssen Lambda-Ausdrücke immer innerhalb von Klassen definiert werden, während in Python Lambda-Ausdrücke unabhängig von Klassen existieren können."
+        },
+        {
+          "answer": "Lambda-Ausdrücke in Java können nur statische Methoden sein, während in Python Lambda-Ausdrücke immer anonym sind."
+        },
+        {
+          "answer": "In Java gibt es keine Lambda-Ausdrücke, diese sind ein exklusives Feature von Python."
+        },
+        {
+          "answer": "In Java ist ein Lambda-Ausdruck eine Instanz einer Klasse, die das Serializable Interface implementiert, in Python ist ein Lambda-Ausdruck eine Funktion ohne Namen."
+        },
+        {
+          "answer": "In Java und Python müssen Lambda-Ausdrücke immer eine Rückgabe haben, auch wenn sie keinen Wert zurückgeben."
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in Java eine anonyme Funktion definiert und wie entspricht dies dem Konzept der Lambda-Funktionen in Python?",
+      "options": [
+        {
+          "answer": "In Java wird eine anonyme Funktion mit dem Schlüsselwort 'lambda' definiert, ähnlich wie in Python."
+        },
+        {
+          "answer": "Anonyme Funktionen in Java werden als Lambda-Ausdrücke definiert, die eine kurze Syntax für die Implementierung von Interfaces mit nur einer Methode bieten."
+        },
+        {
+          "answer": "In Java werden anonyme Funktionen immer als innere Klassen implementiert, während in Python Lambda-Funktionen verwendet werden."
+        },
+        {
+          "answer": "Java verwendet das Schlüsselwort 'def' für anonyme Funktionen, was direkt dem 'lambda' in Python entspricht."
+        },
+        {
+          "answer": "Anonyme Funktionen in Java können nicht erstellt werden, da Java keine funktionalen Konzepte unterstützt."
+        },
+        {
+          "answer": "In Python werden anonyme Funktionen als Lambda-Funktionen definiert, die eine kompakte Form von Funktionen ohne Namen darstellen, und in Java wird ein ähnliches Konzept mit Lambda-Ausdrücken verwendet."
+        }
+      ]
+    },
+    {
+      "question": "Welche Rolle spielt das Konzept der 'First-Class Citizens' in der funktionalen Programmierung, insbesondere im Kontext von Funktionen in Python?",
+      "options": [
+        {
+          "answer": "In Python können Funktionen als 'First-Class Citizens' behandelt werden, was bedeutet, dass sie wie jede andere Variable zugewiesen, übergeben oder als Rückgabewert verwendet werden können."
+        },
+        {
+          "answer": "Das Konzept der 'First-Class Citizens' bezieht sich ausschließlich auf Objekte in objektorientierten Programmiersprachen wie Java und hat keine Bedeutung in der funktionalen Programmierung mit Python."
+        },
+        {
+          "answer": "Funktionen als 'First-Class Citizens' zu behandeln, schließt in Python die Möglichkeit aus, sie als Argumente an andere Funktionen zu übergeben."
+        },
+        {
+          "answer": "Das Konzept der 'First-Class Citizens' in Python erlaubt es, Funktionen zu modifizieren, indem ihr Code zur Laufzeit verändert wird."
+        },
+        {
+          "answer": "In Python bedeutet die Behandlung von Funktionen als 'First-Class Citizens', dass Funktionen keine anderen Funktionen als Argumente erhalten können."
+        },
+        {
+          "answer": "Das Konzept der 'First-Class Citizens' ermöglicht es in Python, dass Funktionen anonym bleiben und nicht zwingend einem Namen zugewiesen werden müssen."
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in Java eine Methode definiert werden, die ein funktionalen Interface implementiert und in Python als höherwertige Funktion verwendet wird?",
+      "options": [
+        {
+          "answer": "In Java wird ein funktionalen Interface durch eine anonyme Klasse implementiert, die eine einzige abstrakte Methode definiert, während in Python eine Funktion direkt als Argument übergeben wird."
+        },
+        {
+          "answer": "Java verwendet das Schlüsselwort 'func' zur Definition einer Methode, die ein funktionalen Interface implementiert, ähnlich wie 'def' in Python."
+        },
+        {
+          "answer": "In Java und Python werden Methoden, die funktionale Interfaces implementieren, immer mit dem Schlüsselwort 'lambda' definiert."
+        },
+        {
+          "answer": "Java erlaubt die Verwendung von Lambda-Ausdrücken zur Implementierung funktionaler Interfaces, während Python Klassen benötigt, um höherwertige Funktionen zu definieren."
+        },
+        {
+          "answer": "In Java kann eine Methode eines funktionalen Interfaces nicht in einer Variablen gespeichert werden, während in Python Funktionen als First-Class Citizens behandelt werden."
+        },
+        {
+          "answer": "Java nutzt das Konzept der funktionalen Interfaces, um Lambda-Ausdrücke zu ermöglichen, die ähnlich wie in Python als höherwertige Funktionen verwendet werden können."
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in Java das Konzept der Unveränderlichkeit (Immutability) umgesetzt werden, um funktionale Programmierprinzipien zu unterstützen, und wie wird dies in Python erreicht?",
+      "options": [
+        {
+          "answer": "In Java kann Unveränderlichkeit durch die Verwendung des 'final' Schlüsselwortes bei Variablen und die Erstellung von Klassen ohne Setter-Methoden erreicht werden, während in Python oft Tuples und frozensets verwendet werden."
+        },
+        {
+          "answer": "Java verwendet ausschließlich das Schlüsselwort 'immutable' und Python das Schlüsselwort 'const', um Unveränderlichkeit zu gewährleisten."
+        },
+        {
+          "answer": "Unveränderlichkeit wird in Java und Python nicht unterstützt, da beide Sprachen das Konzept der funktionalen Programmierung nicht umfassend integrieren."
+        },
+        {
+          "answer": "In Java wird Unveränderlichkeit durch die Verwendung von Interfaces erreicht, während Python spezielle Module wie 'immutable.py' verwendet."
+        },
+        {
+          "answer": "Java erreicht Unveränderlichkeit durch die Verwendung von Enums, während Python auf magische Methoden wie '__immutable__' setzt."
+        },
+        {
+          "answer": "In Java wird Unveränderlichkeit durch die Verwendung von unveränderlichen Sammlungen aus der 'Collections' Bibliothek erreicht, und in Python durch das Einfrieren von Objekten mit 'freeze'."
+        }
+      ]
+    },
+    {
+      "question": "In welcher Weise ermöglicht das Konzept der First-Class-Funktionen in Python die Erstellung von Decorators und wie unterscheidet sich dies von Java?",
+      "options": [
+        {
+          "answer": "In Python können Funktionen als Argumente übergeben, von anderen Funktionen zurückgegeben und Variablen zugewiesen werden, was die Erstellung von Decorators ermöglicht; in Java ist dies durch die Verwendung von Interfaces möglich, aber weniger direkt."
+        },
+        {
+          "answer": "Decorators in Python sind spezielle Methoden, die nur in Klassen verwendet werden können, während in Java Decorators als Annotationen implementiert sind."
+        },
+        {
+          "answer": "Python unterstützt Decorators nativ durch die Syntax '@', während in Java Decorators durch abstrakte Klassen realisiert werden müssen."
+        },
+        {
+          "answer": "In Java werden Decorators durch das Überladen von Methoden erreicht, was in Python nicht möglich ist."
+        },
+        {
+          "answer": "Python erlaubt die Verwendung von Decorators durch die dynamische Natur der Sprache, während Java keine direkte Entsprechung bietet, da es eine statisch typisierte Sprache ist."
+        },
+        {
+          "answer": "Decorators in Python können nur in funktionalen Programmierstilen verwendet werden, während Java Decorators in jedem Programmierstil unterstützt."
+        }
+      ]
+    },
+    {
+      "question": "Wie unterscheidet sich die Übergabe von Funktionen als Argumente in Java im Vergleich zu Python?",
+      "options": [
+        {
+          "answer": "In Java werden Funktionen als Argumente mithilfe von funktionalen Interfaces wie z.B. 'Function<T,R>' übergeben, während in Python Funktionen direkt als Argumente übergeben werden können."
+        },
+        {
+          "answer": "In Java können Funktionen nicht als Argumente übergeben werden, da es keine funktionalen Konzepte unterstützt."
+        },
+        {
+          "answer": "In Python müssen Funktionen immer in Objekte gekapselt werden, bevor sie als Argumente übergeben werden können."
+        },
+        {
+          "answer": "Java und Python verwenden exakt die gleiche Syntax und Semantik für die Übergabe von Funktionen als Argumente."
+        },
+        {
+          "answer": "In Java werden Funktionen als Argumente durch anonyme Klassen übergeben, während Python Lambda-Ausdrücke verwendet."
+        },
+        {
+          "answer": "Python erlaubt die Übergabe von Funktionen als Argumente nur innerhalb von Modulen, während Java dies auch über Modulgrenzen hinweg ermöglicht."
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in Java eine Methode innerhalb einer Klasse definiert werden, die ein funktionalen Interface repräsentiert, und wie wird ein äquivalentes Konzept in Python umgesetzt?",
+      "options": [
+        {
+          "answer": "In Java wird eine Methode definiert, die das Interface implementiert, und in Python wird eine entsprechende Funktion innerhalb einer Klasse definiert."
+        },
+        {
+          "answer": "Java verwendet anonyme Klassen, um funktionale Interfaces zu implementieren, während Python Klassenmethoden mit dem 'staticmethod' Dekorator nutzt."
+        },
+        {
+          "answer": "Java nutzt Lambda-Ausdrücke für funktionale Interfaces, während Python Closures verwendet, um ähnliche Funktionalität zu erreichen."
+        },
+        {
+          "answer": "In Java kann keine Methode ein funktionales Interface repräsentieren, dies ist nur in Python möglich."
+        },
+        {
+          "answer": "Java und Python nutzen beide das Schlüsselwort 'lambda', um funktionale Interfaces bzw. anonyme Funktionen zu definieren."
+        },
+        {
+          "answer": "In Python wird das Konzept durch die Verwendung von 'lambda'-Ausdrücken umgesetzt, während Java abstrakte Klassen verwendet."
+        }
+      ]
+    },
+    {
+      "question": "Wie kann in Java ein funktionaler Ansatz genutzt werden, um Operationen auf Elementen einer Liste durchzuführen, und wie wird ein ähnliches Konzept in Python umgesetzt?",
+      "options": [
+        {
+          "answer": "In Java kann die Stream-API verwendet werden, um Operationen auf Listen durchzuführen, während in Python List Comprehensions für ähnliche Zwecke genutzt werden."
+        },
+        {
+          "answer": "Java verwendet ausschließlich Schleifenstrukturen für Operationen auf Listen, während Python dafür rekursive Funktionen nutzt."
+        },
+        {
+          "answer": "In Java werden funktionale Interfaces wie Predicate oder Function für Listenoperationen verwendet, die in Python durch Funktionen höherer Ordnung repräsentiert werden."
+        },
+        {
+          "answer": "Java und Python nutzen beide ausschließlich imperativen Code, um Operationen auf Listen durchzuführen, und bieten keine funktionalen Ansätze."
+        },
+        {
+          "answer": "In Python werden für die Listenmanipulation Lambda-Funktionen verwendet, während Java für diesen Zweck keine Lambda-Ausdrücke unterstützt."
+        },
+        {
+          "answer": "Python setzt auf das Konzept der Generatoren, um mit Listen zu arbeiten, was in Java durch die Verwendung von Iteratoren erreicht wird."
+        }
+      ]
+    },
+    {
+      "question": "Welche Konzepte ermöglichen es in Python, eine Funktion zu definieren, die sich selbst während der Ausführung modifiziert, und wie wird dies im Vergleich zu Java gehandhabt?",
+      "options": [
+        {
+          "answer": "In Python kann das Konzept der Metaprogrammierung genutzt werden, um Funktionen zur Laufzeit zu modifizieren, was in Java durch die Verwendung von Reflection-APIs erreicht wird."
+        },
+        {
+          "answer": "Python verwendet ausschließlich das Konzept der Klassenvererbung, um Funktionen dynamisch zu modifizieren, während Java auf Interfaces setzt."
+        },
+        {
+          "answer": "Die Modifikation von Funktionen zur Laufzeit ist in Python durch das Konzept der Decorators möglich, Java bietet dafür keine direkte Entsprechung."
+        },
+        {
+          "answer": "In Python können Funktionen durch direkte Manipulation des Bytecodes zur Laufzeit verändert werden, was in Java durch die Java Virtual Machine verhindert wird."
+        },
+        {
+          "answer": "Python ermöglicht die Modifikation von Funktionen durch das Konzept der First-Class-Funktionen, während Java dies durch Lambda-Ausdrücke erreicht."
+        },
+        {
+          "answer": "In Python kann das Konzept der funktionalen Programmierung genutzt werden, um Funktionen zur Laufzeit zu ändern, was in Java durch das Konzept der anonymen Klassen erreicht wird."
+        }
+      ]
+    }
+  ]
+}

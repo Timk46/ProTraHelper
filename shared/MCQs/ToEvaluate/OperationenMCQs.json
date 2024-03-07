@@ -1,0 +1,234 @@
+{
+  "questions": [
+    {
+      "question": "Wie wird in Java eine anonyme Klasse definiert, die eine Schnittstelle mit einer Methode implementiert?",
+      "options": [
+        {
+          "answer": "Eine anonyme Klasse wird mit dem Schlüsselwort 'anonymous' und der Implementierung der Methode innerhalb eines Codeblocks definiert."
+        },
+        {
+          "answer": "Eine anonyme Klasse wird durch das Schlüsselwort 'class' ohne Namen und direkter Implementierung der Methode in einem Codeblock erstellt."
+        },
+        {
+          "answer": "Eine anonyme Klasse wird durch die Verwendung von geschweiften Klammern direkt nach der Instanziierung eines Interface-Typs definiert."
+        },
+        {
+          "answer": "Anonyme Klassen werden in Java nicht unterstützt und können daher nicht definiert werden."
+        },
+        {
+          "answer": "Eine anonyme Klasse wird durch das Schlüsselwort 'new', gefolgt vom Interface-Namen und einem Codeblock mit der Methode, erstellt."
+        },
+        {
+          "answer": "Anonyme Klassen werden durch das Schlüsselwort 'implements' gefolgt von einem Codeblock zur Implementierung der Methode definiert."
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in Java eine Methode definiert, die eine Operation als Parameter entgegennimmt und diese auf zwei übergebene Integer anwendet?",
+      "options": [
+        {
+          "answer": "public int ausfuehren(Operation op, int x, int y) { return op.anwenden(x, y); }"
+        },
+        {
+          "answer": "public Operation ausfuehren(int x, int y) { return new Operation(x, y); }"
+        },
+        {
+          "answer": "private void ausfuehren(Operation op, int x, int y) { op.anwenden(x, y); }"
+        },
+        {
+          "answer": "public void ausfuehren(int x, Operation op, int y) { op.anwenden(x, y); }"
+        },
+        {
+          "answer": "public int ausfuehren(int x, int y, Operation op) { return x op y; }"
+        },
+        {
+          "answer": "protected Operation ausfuehren(Operation op, int x, int y) { return op; }"
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in Java eine Methode definiert, die einen generischen Typ zurückgibt und einen Parameter desselben generischen Typs entgegennimmt?",
+      "options": [
+        {
+          "answer": "public <T> T meineMethode(T param) { /* Implementierung */ }"
+        },
+        {
+          "answer": "public T <T> meineMethode(T param) { /* Implementierung */ }"
+        },
+        {
+          "answer": "public T meineMethode<T>(T param) { /* Implementierung */ }"
+        },
+        {
+          "answer": "public T meineMethode(T param) { /* Implementierung */ }"
+        },
+        {
+          "answer": "public <T> meineMethode(T param) { /* Implementierung */ }"
+        },
+        {
+          "answer": "public meineMethode<T>(T param) { /* Implementierung */ }"
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in Java eine Methode definiert, die eine Variable vom Typ Interface entgegennimmt, welche eine Operation repräsentiert, und diese Operation mit zwei gegebenen Integer-Werten ausführt?",
+      "options": [
+        {
+          "answer": "Durch eine Methode, die ein Interface als Parameter hat und zwei Integer-Werte an die Methode des Interfaces übergibt."
+        },
+        {
+          "answer": "Mit einer Methode, die eine Klasse statt eines Interfaces als Parameter verwendet, um die Operation auszuführen."
+        },
+        {
+          "answer": "Durch eine Methode, die drei Integer-Parameter annimmt und die dritte Zahl als Ergebnis der Operation zurückgibt."
+        },
+        {
+          "answer": "Mithilfe einer statischen Methode, die direkt ohne Interface-Parameter die Operation auf die Integer anwendet."
+        },
+        {
+          "answer": "Durch eine Methode, die ein Interface als Parameter hat und dieses Interface zur Laufzeit mit einer Lambda-Expression implementiert."
+        },
+        {
+          "answer": "Mit einer Methode, die ein Interface als Parameter hat und die Methode des Interfaces ohne Argumente aufruft."
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in Java eine Methode definiert, die eine Liste von Operationen als Parameter entgegennimmt und für jede Operation in der Liste eine bestimmte Aktion ausführt?",
+      "options": [
+        {
+          "answer": "Man definiert eine Methode, die eine Liste von Interfaces entgegennimmt, wobei jedes Interface eine Operation repräsentiert."
+        },
+        {
+          "answer": "Eine Methode wird mit einem einzelnen Parameter definiert, der eine unbestimmte Anzahl von Operationen als Argumente akzeptiert."
+        },
+        {
+          "answer": "Man verwendet das Schlüsselwort 'implements' in der Methodendefinition, um eine Liste von Operationen zu übergeben."
+        },
+        {
+          "answer": "Die Methode wird ohne Parameter definiert und ruft stattdessen Operationen aus einer globalen Variablen auf."
+        },
+        {
+          "answer": "Man definiert eine Methode, die eine Liste von abstrakten Klassen entgegennimmt, die jeweils eine Operation kapseln."
+        },
+        {
+          "answer": "Eine Methode wird mit einem Array von Funktionszeigern definiert, die auf die zu ausführenden Operationen verweisen."
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in Java eine Methode definiert, die als Parameter eine Lambda-Expression entgegennimmt, welche eine Operation mit zwei Integer-Werten ausführt und das Ergebnis zurückgibt?",
+      "options": [
+        {
+          "answer": "public int ausfuehren(BiFunction<Integer, Integer, Integer> operation, int a, int b) { return operation.apply(a, b); }"
+        },
+        {
+          "answer": "public void ausfuehren(BiFunction<Integer, Integer, Integer> operation, int a, int b) { operation.apply(a, b); }"
+        },
+        {
+          "answer": "public int ausfuehren(Function<Integer, Integer> operation, int a, int b) { return operation.apply(a); }"
+        },
+        {
+          "answer": "public int ausfuehren(BiConsumer<Integer, Integer> operation, int a, int b) { return operation.accept(a, b); }"
+        },
+        {
+          "answer": "public int ausfuehren(Supplier<Integer> operation) { return operation.get(); }"
+        },
+        {
+          "answer": "public int ausfuehren(Consumer<Integer> operation, int a, int b) { operation.accept(a); return b; }"
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in Java eine Methode definiert, die eine beliebige Anzahl von Integer-Argumenten entgegennimmt und deren Summe zurückgibt?",
+      "options": [
+        {
+          "answer": "Durch Verwendung des Schlüsselworts 'varargs' in der Parameterliste."
+        },
+        {
+          "answer": "Mit einem Parameter vom Typ 'int[]', um ein Array von Integern zu übergeben."
+        },
+        {
+          "answer": "Durch Verwendung des Varargs-Syntax 'int...' vor dem Parameter."
+        },
+        {
+          "answer": "Mithilfe einer Liste als Parameter, um eine variable Anzahl von Integern zu übergeben."
+        },
+        {
+          "answer": "Indem man für jeden möglichen Parameter eine eigene Methode definiert."
+        },
+        {
+          "answer": "Durch Überladung der Methode für jede Anzahl von Parametern."
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in Java eine Methode definiert, die eine Operation als Parameter entgegennimmt, diese auf zwei übergebene Objekte anwendet und das Ergebnis der Operation zurückgibt?",
+      "options": [
+        {
+          "answer": "Durch eine Methode, die zwei Objekte und ein Interface, das eine Methode zur Operation definiert, als Parameter hat und das Ergebnis der Interface-Methode zurückgibt."
+        },
+        {
+          "answer": "Mit einer Methode, die nur zwei Objekte als Parameter entgegennimmt und eine interne Operation ohne Interface-Parameter ausführt."
+        },
+        {
+          "answer": "Durch eine Methode, die eine Klasse als Parameter verwendet, welche die Operation als statische Methode implementiert."
+        },
+        {
+          "answer": "Mit einer Methode, die eine generische Liste von Operationen entgegennimmt und auf die Objekte anwendet."
+        },
+        {
+          "answer": "Durch eine Methode, die eine Lambda-Expression als Parameter entgegennimmt und diese auf die Objekte anwendet."
+        },
+        {
+          "answer": "Mit einer Methode, die eine Variable vom Typ String entgegennimmt, die den Namen der auszuführenden Operation enthält."
+        }
+      ]
+    },
+    {
+      "question": "In Java, wie wird eine Methode definiert, die eine Operation als Parameter entgegennimmt, diese auf ein Objekt anwendet und das Ergebnis in einer bestimmten Weise verarbeitet?",
+      "options": [
+        {
+          "answer": "Man definiert eine Methode mit einem Parameter vom Typ eines funktionalen Interfaces, das eine Methode mit einem Objekt als Parameter und einem Rückgabetyp definiert."
+        },
+        {
+          "answer": "Eine Methode wird mit einem Parameter vom Typ String definiert, der den Namen der Operation als Text enthält."
+        },
+        {
+          "answer": "Man definiert eine Methode ohne Parameter und ruft die Operation direkt innerhalb der Methode auf."
+        },
+        {
+          "answer": "Eine Methode wird mit einem Parameter definiert, der ein Array von Objekten enthält, auf die die Operation angewendet werden soll."
+        },
+        {
+          "answer": "Man definiert eine Methode mit einem Parameter vom Typ Runnable, um die Operation auf das Objekt anzuwenden."
+        },
+        {
+          "answer": "Eine Methode wird mit einem generischen Parameter definiert, der zur Laufzeit auf den Typ der Operation festgelegt wird."
+        }
+      ]
+    },
+    {
+      "question": "Wie wird in Java eine Methode definiert, die eine Operation als Parameter entgegennimmt, diese auf ein Array von Objekten anwendet und ein Array der Ergebnisse zurückgibt?",
+      "options": [
+        {
+          "answer": "public <T, R> R[] applyOperation(T[] objects, Function<T, R> operation) { return Arrays.stream(objects).map(operation).toArray(); }"
+        },
+        {
+          "answer": "public <T, R> R[] applyOperation(T[] objects, Function<T, R> operation) { return Arrays.stream(objects).map(operation).toArray(size -> (R[]) new Object[size]); }"
+        },
+        {
+          "answer": "public <T, R> List<R> applyOperation(T[] objects, Function<T, R> operation) { return Arrays.asList(objects).stream().map(operation).collect(Collectors.toList()); }"
+        },
+        {
+          "answer": "public <T, R> Stream<R> applyOperation(T[] objects, Function<T, R> operation) { return Arrays.stream(objects).map(operation); }"
+        },
+        {
+          "answer": "public <T, R> R applyOperation(T[] objects, Function<T, R> operation) { return operation.apply(objects); }"
+        },
+        {
+          "answer": "public <T, R> void applyOperation(T[] objects, Function<T, R> operation) { for(T object : objects) { operation.apply(object); } }"
+        }
+      ]
+    }
+  ]
+}

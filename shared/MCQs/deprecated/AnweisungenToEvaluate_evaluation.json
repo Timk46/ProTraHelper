@@ -1,0 +1,292 @@
+[
+  {
+    "question": "Wie wird in Java eine anonyme Klasse erstellt und wie wird in Python eine anonyme Funktion definiert?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird eine anonyme Klasse tatsächlich durch die Verwendung von 'new' gefolgt von einem Interface oder einer Klassendefinition erstellt. In Python wird eine anonyme Funktion mit dem 'lambda'-Schlüsselwort definiert. Diese Antwort ist korrekt.",
+        "correct": true
+      },
+      {
+        "reasoning": "Anonyme Klassen und Funktionen sind sowohl in Java als auch in Python möglich. Diese Antwort ist falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java werden anonyme Klassen nicht mit dem 'lambda'-Schlüsselwort erstellt, sondern wie in der ersten Antwort beschrieben. In Python wird 'new' nicht verwendet, um anonyme Funktionen zu erstellen, sondern das 'lambda'-Schlüsselwort. Diese Antwort ist falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird eine anonyme Klasse nicht mit dem 'class'-Schlüsselwort ohne Namen erstellt, sondern durch die Verwendung von 'new' gefolgt von einem Interface oder einer Klassendefinition. In Python wird eine anonyme Funktion nicht als reguläre Funktion ohne Namen definiert, sondern mit dem 'lambda'-Schlüsselwort. Diese Antwort ist falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird eine anonyme Klasse nicht durch das Überschreiben einer Methode in einer bestehenden Klasse erstellt, sondern durch die Verwendung von 'new' gefolgt von einem Interface oder einer Klassendefinition. In Python wird eine anonyme Funktion nicht durch das Definieren einer Funktion innerhalb einer anderen Funktion erstellt, sondern mit dem 'lambda'-Schlüsselwort. Diese Antwort ist falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java und Python gibt es kein 'anonymous'-Schlüsselwort zur Erstellung anonymer Klassen oder Funktionen. Die korrekten Methoden sind in der ersten Antwort beschrieben. Diese Antwort ist falsch.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die eine Ausnahme wirft, und wie wird in Python eine Funktion definiert, die einen Generator darstellt?",
+    "evaluations": [
+      {
+        "reasoning": "In Java verwendet man tatsächlich das Schlüsselwort 'throws' in der Methodensignatur, um anzugeben, dass eine Methode eine Ausnahme werfen kann. In Python wird das Schlüsselwort 'yield' innerhalb der Funktion verwendet, um einen Generator zu definieren. Diese Antwort ist korrekt.",
+        "correct": true
+      },
+      {
+        "reasoning": "In Java verwendet man das Schlüsselwort 'throws' in der Methodensignatur und nicht 'throw', um anzugeben, dass eine Methode eine Ausnahme werfen kann. Das Schlüsselwort 'throw' wird verwendet, um eine Ausnahme tatsächlich zu werfen. In Python ist 'yield' korrekt für die Definition eines Generators. Diese Antwort ist also teilweise falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird das Schlüsselwort 'throws' in der Methodensignatur verwendet, nicht 'exception', um anzugeben, dass eine Methode eine Ausnahme werfen kann. In Python gibt es kein Schlüsselwort 'generator'; stattdessen wird 'yield' verwendet, um einen Generator zu definieren. Diese Antwort ist falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'throw' wird in Java verwendet, um eine Ausnahme tatsächlich zu werfen, nicht um eine Methode zu definieren, die eine Ausnahme wirft. In Python wird 'yield' verwendet, um einen Generator zu definieren, nicht 'throw'. Diese Antwort ist falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird das Schlüsselwort 'throws' in der Methodendeklaration verwendet, um anzugeben, dass eine Methode eine Ausnahme werfen kann. In Python wird das Schlüsselwort 'def' verwendet, um eine Funktion zu definieren, aber 'def' allein gibt nicht an, dass es sich um einen Generator handelt; dafür ist 'yield' erforderlich. Diese Antwort ist daher teilweise falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird sehr wohl eine spezielle Syntax verwendet, um eine Methode zu definieren, die eine Ausnahme wirft, nämlich das Schlüsselwort 'throws'. In Python wird 'def' verwendet, um eine Funktion zu definieren, aber das Sternchen (*) wird nicht verwendet, um einen Generator zu definieren; dafür wird 'yield' verwendet. Diese Antwort ist falsch.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie unterscheidet sich die Verwendung von 'switch'-Anweisungen in Java im Vergleich zu Python, wenn es um die Handhabung verschiedener Fälle geht?",
+    "evaluations": [
+      {
+        "reasoning": "In Java verwendet 'switch' Fälle, die durch 'case' Schlüsselwörter definiert sind. Python unterstützt 'switch' nicht nativ und verwendet stattdessen 'if-elif-else' Strukturen oder ab Python 3.10 das 'match'-Statement.",
+        "correct": true
+      },
+      {
+        "reasoning": "Python unterstützt keine 'switch' Anweisungen wie Java. Es gibt kein 'case' oder 'default' Schlüsselwort in Python bis zur Version 3.9. Ab Python 3.10 gibt es das 'match'-Statement, das eine ähnliche Funktionalität bietet, aber es ist nicht identisch mit dem 'switch' in Java.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java kann 'switch' tatsächlich mit Strings verwendet werden, seit Java 7. Python hat keine native 'switch'-Anweisung, aber ab Python 3.10 gibt es das 'match'-Statement, das mit verschiedenen Datentypen, einschließlich Strings, funktioniert.",
+        "correct": false
+      },
+      {
+        "reasoning": "Python hat ab Version 3.10 das 'match'-Statement eingeführt, das eine ähnliche Funktionalität wie 'switch' in anderen Sprachen bietet. Java hat kein 'match'-Statement, sondern verwendet 'switch'.",
+        "correct": true
+      },
+      {
+        "reasoning": "Python verwendet kein 'switch'-Statement, daher ist die Aussage, dass in Python die 'case'-Labels Konstanten sein müssen, nicht zutreffend. In Java müssen die 'case'-Labels Konstanten sein.",
+        "correct": false
+      },
+      {
+        "reasoning": "Da Python keine 'switch'-Anweisung hat, ist die Aussage über das Beenden von 'case' Anweisungen in Python nicht korrekt. In Java ist es üblich, jeden 'case' mit einem 'break' zu beenden, um den 'switch' zu verlassen, es sei denn, man möchte absichtlich das Durchfallen ('fallthrough') zu einem nachfolgenden 'case' erlauben.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "In welcher Weise beeinflusst das 'continue'-Statement den Ablauf einer Schleife in Java und Python?",
+    "evaluations": [
+      {
+        "reasoning": "Das 'continue'-Statement beendet tatsächlich die Ausführung der aktuellen Schleifeniteration und beginnt sofort mit der nächsten Iteration. Dies ist das korrekte Verhalten in sowohl Java als auch Python.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das 'continue'-Statement beendet nicht die gesamte Schleife, sondern nur die aktuelle Iteration. Die Schleife wird danach mit der nächsten Iteration fortgesetzt, nicht beendet.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das 'continue'-Statement beendet die aktuelle Iteration und fährt mit der nächsten fort, ohne den nachfolgenden Code in der aktuellen Iteration zu beachten. Es startet die Schleife jedoch nicht von vorne.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das 'continue'-Statement hat sehr wohl einen Einfluss auf die Ausführung der Schleife, indem es die aktuelle Iteration beendet und mit der nächsten fortfährt. Es wird nicht als Kommentar verwendet.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java und Python hat das 'continue'-Statement die gleiche Funktion: Es beendet die aktuelle Iteration und setzt die Schleife mit der nächsten Iteration fort. Es gibt keinen Unterschied im Verhalten zwischen den beiden Sprachen in Bezug auf das 'continue'-Statement.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das 'continue'-Statement führt nicht dazu, dass der Schleifendurchlauf pausiert wird. Es beendet die aktuelle Iteration und fährt sofort mit der nächsten fort.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Instanzmethode korrekt aufgerufen und wie wird in Python eine Funktion mit einem Lambda-Ausdruck definiert?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird eine Instanzmethode mit der Syntax objekt.methodenName() aufgerufen, was korrekt ist. In Python wird eine Funktion mit einem Lambda-Ausdruck als lambda x: x * 2 definiert, was ebenfalls korrekt ist.",
+        "correct": true
+      },
+      {
+        "reasoning": "In Java wird eine Instanzmethode nicht mit der Syntax methodenName(objekt) aufgerufen, sondern mit objekt.methodenName(). In Python wird eine Funktion mit einem Lambda-Ausdruck nicht als def x: x * 2 definiert, sondern als lambda x: x * 2.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird eine Instanzmethode nicht mit der Syntax objekt->methodenName() aufgerufen, sondern mit objekt.methodenName(). Die Syntax function(x) => x * 2 ist nicht korrekt für Python; die korrekte Syntax für einen Lambda-Ausdruck in Python ist lambda x: x * 2.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird eine Instanzmethode mit der Syntax objekt.methodenName() aufgerufen, nicht mit objekt::methodenName. Die Syntax lambda x: x * 2 ist zwar korrekt für Python, aber die Aussage ist irreführend, da sie suggeriert, dass diese Syntax in Python nicht korrekt sei.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java und Python werden Instanzmethoden bzw. Funktionen nicht mit der gleichen Syntax aufgerufen. In Java verwendet man objekt.methodenName(), während in Python eine Funktion direkt mit ihrem Namen und Klammern aufgerufen wird, z.B. funktionName().",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird eine Instanzmethode mit objekt.methodenName() aufgerufen, nicht deklariert. In Python wird ein Lambda-Ausdruck mit lambda x: x * 2 definiert und kann dann ausgeführt werden, nicht nur direkt ausgeführt.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie kann in Java eine Methode definiert werden, die je nach übergebenem Argument unterschiedliche Datentypen zurückgibt, und wie wird in Python eine Funktion definiert, die mehrere Werte gleichzeitig zurückgeben kann?",
+    "evaluations": [
+      {
+        "reasoning": "In Java können Generics verwendet werden, um Methoden zu definieren, die unterschiedliche Datentypen zurückgeben können. In Python kann man das Tuple-Packing nutzen, um mehrere Werte gleichzeitig zurückzugeben, indem man sie in einem Tuple zusammenfasst.",
+        "correct": true
+      },
+      {
+        "reasoning": "Java unterstützt Methoden mit Generics, die unterschiedliche Datentypen zurückgeben können. Python unterstützt ebenfalls Funktionen, die mehrere Rückgabewerte haben, indem sie ein Tuple zurückgeben.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'var' in Java wird nicht für Methoden mit variablen Rückgabetypen verwendet, sondern für lokale Variablen mit Typinferenz. In Python steht das Schlüsselwort 'pass' nicht für multiple Rückgabewerte, sondern wird als Platzhalter in Blöcken verwendet, die keinen Code enthalten.",
+        "correct": false
+      },
+      {
+        "reasoning": "Java verwendet nicht das Schlüsselwort 'dynamic' für Methoden mit variablen Rückgabetypen, da Java eine statisch typisierte Sprache ist. In Python wird 'yield' verwendet, um einen Generator zu erstellen, der eine Sequenz von Werten erzeugt, nicht um mehrere Werte gleichzeitig zurückzugeben.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird das Überladen von Methoden (Method Overloading) verwendet, um Methoden mit demselben Namen, aber unterschiedlichen Parametertypen oder -anzahl zu definieren, nicht für unterschiedliche Rückgabetypen. In Python kann 'return' nicht mehrfach in einer Funktion aufgerufen werden, um mehrere Werte zurückzugeben; stattdessen wird ein Tuple zurückgegeben.",
+        "correct": false
+      },
+      {
+        "reasoning": "Java verwendet nicht das Schlüsselwort 'multiple' für Methoden mit variablen Rückgabetypen, und es gibt keine Funktion 'multi_return' in Python. In Python werden mehrere Werte als Tuple zurückgegeben.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine 'switch'-Anweisung korrekt beendet, um Fall-Durchläufe zu verhindern, und wie wird in Python ein äquivalentes Konstrukt in einer 'match'-Anweisung erreicht?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird tatsächlich das 'break'-Statement verwendet, um einen Fall in einer 'switch'-Anweisung zu beenden. In Python gibt es jedoch keine 'match'-Anweisung, die ein 'return'-Statement erfordert, um einen Fall zu beenden. Stattdessen gibt es das 'match'-Statement (eingeführt in Python 3.10), das ohne 'break' oder 'return' automatisch nach dem ersten passenden Fall beendet wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird das 'break'-Statement verwendet, um einen Fall in einer 'switch'-Anweisung zu beenden. In Python wird das 'match'-Statement (eingeführt in Python 3.10) verwendet, das automatisch nach dem ersten passenden Fall beendet wird, ohne dass ein explizites 'break' erforderlich ist.",
+        "correct": true
+      },
+      {
+        "reasoning": "In Java wird nicht das 'continue'-Statement, sondern das 'break'-Statement verwendet, um einen Fall in einer 'switch'-Anweisung zu beenden. In Python gibt es kein 'pass'-Statement in einer 'match'-Anweisung, da das 'match'-Statement automatisch nach dem ersten passenden Fall beendet wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird nicht das 'return'-Statement, sondern das 'break'-Statement verwendet, um einen Fall in einer 'switch'-Anweisung zu beenden. In Python wird kein 'break'-Statement in einer 'match'-Anweisung genutzt, da das 'match'-Statement automatisch nach dem ersten passenden Fall beendet wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das 'exit'-Statement ist in diesem Kontext weder in Java noch in Python korrekt. In Java wird das 'break'-Statement verwendet, und in Python wird das 'match'-Statement automatisch beendet, ohne dass ein 'exit'-Statement erforderlich ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird tatsächlich ein 'break'-Statement benötigt, um eine 'switch'-Anweisung zu beenden und Fall-Durchläufe zu verhindern. In Python wird kein 'break'-Statement in einer 'match'-Anweisung genutzt, da das 'match'-Statement automatisch nach dem ersten passenden Fall beendet wird.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine try-catch-Anweisung korrekt verwendet, um Ausnahmen zu behandeln, und wie wird in Python ein Fehler mit einem try-except-Block abgefangen?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird tatsächlich die try-catch-Anweisung verwendet, um den Code, der eine Ausnahme auslösen könnte, zu umschließen. In Python wird der try-except-Block für denselben Zweck verwendet.",
+        "correct": true
+      },
+      {
+        "reasoning": "In Java wird nicht der try-except-Block verwendet, sondern die try-catch-Anweisung. In Python wird nicht die try-catch-Anweisung, sondern der try-except-Block verwendet.",
+        "correct": false
+      },
+      {
+        "reasoning": "Java verwendet nicht ausschließlich das throw-Statement für die Fehlerbehandlung, sondern auch try-catch-Anweisungen. Python verwendet assert-Anweisungen, aber auch try-except-Blöcke für die Fehlerbehandlung.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird sehr wohl Fehlerbehandlung durchgeführt, typischerweise mit try-catch-Anweisungen. Python verwendet try-except-Blöcke, um Fehler zu behandeln, und optional kann ein finally-Block angefügt werden, aber nicht ausschließlich try-finally.",
+        "correct": false
+      },
+      {
+        "reasoning": "Weder Java noch Python verwenden eine try-throw-Anweisung, um Ausnahmen zu behandeln. Java verwendet try-catch und Python verwendet try-except.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird die try-catch-Anweisung nicht verwendet, um Compiler-Fehler zu behandeln, sondern Laufzeit-Ausnahmen. In Python wird der try-except-Block nicht verwendet, um Syntaxfehler zu korrigieren, sondern um Laufzeit-Ausnahmen zu behandeln.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java das Schlüsselwort 'synchronized' verwendet, um auf ein Objekt bezogene Anweisungen thread-sicher zu machen, und wie wird in Python ein ähnlicher Mechanismus mit 'with' und Locks erreicht?",
+    "evaluations": [
+      {
+        "reasoning": "In Java kann das 'synchronized' Schlüsselwort tatsächlich vor Methodendefinitionen gestellt werden, um sicherzustellen, dass nur ein Thread gleichzeitig auf die Methode zugreifen kann. In Python wird der 'with'-Block zusammen mit einem Lock-Objekt verwendet, um sicherzustellen, dass nur ein Thread gleichzeitig den kritischen Abschnitt ausführt.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das 'synchronized' Schlüsselwort in Java wird nicht verwendet, um Variablen zu deklarieren, sondern um Methoden oder Blöcke zu synchronisieren. In Python werden 'with' und Locks nicht zur Deklaration von Klassen verwendet, sondern um sicherzustellen, dass nur ein Thread gleichzeitig einen bestimmten Abschnitt von Code ausführt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Weder in Java noch in Python wird 'synchronized' bzw. 'with' verwendet, um Schleifen zu synchronisieren. In Java wird 'synchronized' verwendet, um Methoden oder Blöcke zu synchronisieren, und in Python wird 'with' zusammen mit Locks verwendet, um kritische Abschnitte zu schützen.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java kann das 'synchronized' Schlüsselwort zusammen mit 'static' verwendet werden, um Klassenmethoden zu synchronisieren. In Python können 'with' und Locks auch für statische Methoden verwendet werden, wenn diese einen kritischen Abschnitt enthalten, der synchronisiert werden muss.",
+        "correct": false
+      },
+      {
+        "reasoning": "'volatile' in Java wird für eine andere Art der Synchronisation verwendet, nämlich um zu gewährleisten, dass der Wert einer Variablen immer aus dem Hauptspeicher gelesen wird. 'synchronized' wird jedoch in Java für die Synchronisation von Methoden und Blöcken verwendet. In Python sind 'with' und Locks eine von mehreren Möglichkeiten zur Synchronisation.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird 'synchronized' nicht auf Variablen angewendet, sondern auf Methoden und Blöcke, um den Zugriff zu synchronisieren. In Python werden 'with' und Locks nicht speziell für den Zugriff auf Dateien verwendet, sondern allgemein, um kritische Abschnitte zu schützen, was auch den Zugriff auf Dateien einschließen kann.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine statische Methode definiert und wie unterscheidet sich ihr Aufruf von dem einer Instanzmethode?",
+    "evaluations": [
+      {
+        "reasoning": "Eine statische Methode wird in Java tatsächlich mit dem Schlüsselwort 'static' definiert und kann ohne eine Instanz der Klasse aufgerufen werden, indem man den Klassennamen verwendet.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'instance' existiert in Java nicht in diesem Kontext. Statische Methoden werden mit 'static' gekennzeichnet und benötigen kein Objekt für den Aufruf.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine statische Methode in Java muss mit dem Schlüsselwort 'static' definiert werden, um sie ohne eine Instanz der Klasse aufrufen zu können.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'public' ist ein Zugriffsmodifikator und hat nichts mit der statischen Definition einer Methode zu tun. Eine statische Methode wird mit 'static' definiert und unterscheidet sich im Aufruf von einer Instanzmethode.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine statische Methode wird mit dem Schlüsselwort 'static' definiert, nicht durch Voranstellen des Klassennamens. Sie kann auch außerhalb der Klasse aufgerufen werden, sofern sie öffentlich (public) ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'void' gibt den Rückgabetyp einer Methode an und hat nichts mit der statischen Definition zu tun. Statische Methoden werden mit 'static' definiert und können ohne Klasseninstanz aufgerufen werden.",
+        "correct": false
+      }
+    ]
+  }
+]

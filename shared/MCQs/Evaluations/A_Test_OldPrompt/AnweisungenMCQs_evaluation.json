@@ -1,0 +1,292 @@
+[
+  {
+    "question": "Wie wird in einem Programm eine Anweisung definiert, die eine Gruppe von Anweisungen wiederholt ausführt, solange eine bestimmte Bedingung erfüllt ist, ohne eine for- oder while-Schleife zu verwenden?",
+    "evaluations": [
+      {
+        "reasoning": "Eine rekursive Funktion ist eine Funktion, die sich selbst aufruft. Sie kann verwendet werden, um eine Gruppe von Anweisungen wiederholt auszuführen, solange eine bestimmte Bedingung erfüllt ist. Dies ist eine gängige Technik in der Programmierung, um Schleifen ohne for- oder while-Konstrukte zu implementieren.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine switch-Anweisung wird verwendet, um verschiedene Aktionen basierend auf unterschiedlichen Fällen auszuführen. Sie ist nicht dafür gedacht, Anweisungen wiederholt auszuführen, und hat keine eingebaute Möglichkeit, eine Bedingung kontinuierlich zu überprüfen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das wiederholte Kopieren eines Anweisungsblocks im Code führt nicht zu einer wiederholten Ausführung zur Laufzeit. Es erzeugt lediglich redundanten Code und ist keine dynamische Methode, um Anweisungen basierend auf einer Bedingung zu wiederholen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine goto-Anweisung kann verwendet werden, um den Programmfluss zu einem bestimmten Punkt im Code zu springen. In Kombination mit einer Bedingungsprüfung kann dies dazu führen, dass ein Codeblock wiederholt ausgeführt wird, solange eine Bedingung erfüllt ist. Obwohl die Verwendung von goto oft als schlechte Praxis angesehen wird, ist es technisch möglich, damit eine Schleifenstruktur zu implementieren.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Einbinden einer externen Bibliothek kann spezielle Funktionen für Schleifenstrukturen bereitstellen, aber die Frage bezieht sich auf die Definition einer Anweisung im eigenen Programmcode, ohne for- oder while-Schleifen zu verwenden. Eine externe Bibliothek würde in der Regel auch for- oder while-Schleifen oder andere interne Mechanismen verwenden, um Wiederholungen zu implementieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine Pipeline-Funktion leitet Daten durch eine Reihe von Verarbeitungsschritten. Sie ist nicht dafür gedacht, eine Gruppe von Anweisungen wiederholt auszuführen, solange eine bestimmte Bedingung erfüllt ist, und entspricht nicht der Beschreibung einer Schleifenstruktur.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in einem Programm eine Anweisung definiert, die mehrere andere Anweisungen nur dann ausführt, wenn eine bestimmte Bedingung erfüllt ist?",
+    "evaluations": [
+      {
+        "reasoning": "Eine if-Anweisung ist dazu da, um einen Block von Anweisungen auszuführen, wenn eine bestimmte Bedingung wahr ist. Die Anweisungen innerhalb der geschweiften Klammern werden nur ausgeführt, wenn die Bedingung der if-Anweisung erfüllt ist.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine for-Schleife ist für das wiederholte Ausführen eines Anweisungsblocks konzipiert, wobei die Anzahl der Wiederholungen normalerweise durch eine Zählvariable bestimmt wird, nicht durch eine einzelne Bedingung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine while-Schleife führt Anweisungen wiederholt aus, solange eine Bedingung wahr ist. Sie ist nicht speziell dafür gedacht, Anweisungen nur einmal auszuführen, wenn eine Bedingung erfüllt ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein switch-Statement prüft einen Ausdruck auf Übereinstimmung mit verschiedenen Fällen und führt den entsprechenden Code-Block aus. Es ist nicht speziell dafür gedacht, Anweisungen nur dann auszuführen, wenn eine bestimmte Bedingung erfüllt ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine Zuweisungsanweisung weist einer Variablen einen Wert zu und ist nicht dafür gedacht, mehrere Anweisungen aufgrund einer Bedingung auszuführen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das 'break'-Statement wird verwendet, um die Ausführung einer Schleife oder eines switch-Statements zu beenden, nicht um einen Block von Anweisungen auszuführen, wenn eine Bedingung erfüllt ist.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Anweisung in einem Programm sorgt dafür, dass ein Codeblock nur dann ausgeführt wird, wenn eine vorherige Bedingung nicht erfüllt ist?",
+    "evaluations": [
+      {
+        "reasoning": "Die else-Anweisung wird in Verbindung mit einer if-Anweisung verwendet. Sie sorgt dafür, dass der Codeblock innerhalb der else-Anweisung ausgeführt wird, wenn die Bedingung in der if-Anweisung nicht erfüllt ist.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die for-Anweisung wird für Schleifen verwendet, um einen Codeblock mehrmals zu wiederholen. Sie ist nicht dafür vorgesehen, auf eine nicht erfüllte Bedingung zu reagieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die while-Anweisung wird verwendet, um einen Codeblock zu wiederholen, solange eine Bedingung wahr ist. Sie steuert nicht die Ausführung eines Codeblocks basierend darauf, dass eine vorherige Bedingung nicht erfüllt ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die switch-Anweisung wird verwendet, um zwischen mehreren Codeblöcken zu wählen, basierend auf dem Wert einer Variablen. Sie ist nicht spezifisch dafür ausgelegt, auf eine nicht erfüllte Bedingung zu reagieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die continue-Anweisung wird innerhalb von Schleifen verwendet, um den aktuellen Durchlauf zu überspringen und mit dem nächsten fortzufahren. Sie führt keinen Codeblock aus, basierend darauf, dass eine Bedingung nicht erfüllt ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die return-Anweisung wird verwendet, um eine Funktion zu beenden und optional einen Wert zurückzugeben. Sie kontrolliert nicht die Ausführung eines Codeblocks, wenn eine vorherige Bedingung nicht erfüllt ist.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Anweisung in einem Programm sorgt dafür, dass eine Reihe von Anweisungen wiederholt ausgeführt wird, bis eine bestimmte Bedingung zu einem späteren Zeitpunkt während der Ausführung erfüllt wird?",
+    "evaluations": [
+      {
+        "reasoning": "Eine for-Schleife kann zwar auf eine Bedingung basieren, aber sie ist in der Regel für eine vorab festgelegte Anzahl von Durchläufen konzipiert, nicht für eine Bedingung, die erst während der Ausführung erfüllt wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine if-Anweisung führt Anweisungen nur einmal aus, wenn die Bedingung wahr ist, und ist nicht dafür gedacht, Anweisungen zu wiederholen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine do-while-Schleife führt Anweisungen mindestens einmal aus und wiederholt sie dann, bis eine bestimmte Bedingung während der Ausführung erfüllt wird. Dies entspricht der Beschreibung in der Frage.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das break-Statement beendet eine Schleife sofort und ist nicht dafür gedacht, Anweisungen zu wiederholen, bis eine Bedingung erfüllt wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine while-Schleife prüft die Bedingung vor jedem Durchlauf der Anweisungen, kann aber auch während der Ausführung auf eine Bedingung reagieren, wenn diese innerhalb der Schleife geändert wird. Daher ist diese Antwort teilweise wahr, aber sie beschreibt nicht genau das Verhalten, das in der Frage gefragt wird, da die while-Schleife nicht speziell darauf ausgelegt ist, die Bedingung während der Ausführung zu prüfen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das continue-Statement überspringt den aktuellen Durchlauf in einer Schleife und fährt mit dem nächsten fort. Es ist nicht dafür gedacht, Anweisungen zu wiederholen, bis eine Bedingung später während der Ausführung erfüllt wird.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Anweisung in einem Programm sorgt dafür, dass eine Gruppe von Anweisungen ausgeführt wird, wenn eine bestimmte Bedingung zu Beginn wahr ist, und die Ausführung beendet wird, sobald diese Bedingung falsch wird?",
+    "evaluations": [
+      {
+        "reasoning": "Eine if-Anweisung führt eine Gruppe von Anweisungen nur einmal aus, wenn die Bedingung wahr ist. Sie beendet nicht die Ausführung, sobald die Bedingung falsch wird, sondern prüft die Bedingung nur einmal.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine do-while-Schleife führt Anweisungen mindestens einmal aus und prüft die Bedingung nach der Ausführung der Anweisungen. Sie ist nicht darauf ausgelegt, die Ausführung zu beginnen, wenn die Bedingung zu Beginn wahr ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine for-Schleife führt eine Gruppe von Anweisungen aus, solange die Bedingung wahr ist, und beendet die Ausführung, wenn sie falsch wird. Sie ist jedoch spezifisch für Situationen, in denen die Anzahl der Durchläufe bekannt ist oder gesteuert wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine while-Schleife ist die korrekte Antwort, da sie eine Gruppe von Anweisungen ausführt, wenn die Bedingung zu Beginn wahr ist, und die Ausführung beendet, sobald die Bedingung falsch wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein switch-Statement führt Anweisungen basierend auf dem Wert eines Ausdrucks aus und ist nicht dafür gedacht, eine Gruppe von Anweisungen wiederholt auszuführen, basierend auf einer sich ändernden Bedingung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein goto-Statement springt zu einem benannten Punkt im Code und ist nicht dafür gedacht, eine Gruppe von Anweisungen basierend auf einer Bedingung zu wiederholen.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Anweisung in einem Programm sorgt dafür, dass eine Gruppe von Anweisungen wiederholt ausgeführt wird, solange eine bestimmte Bedingung am Ende der Schleife wahr ist?",
+    "evaluations": [
+      {
+        "reasoning": "Eine for-Schleife verwendet eine Initialisierung, eine Bedingung und eine Inkrementierung/Update-Anweisung, die typischerweise am Anfang der Schleife definiert werden, nicht am Ende.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine do-while-Schleife ist eine Schleifenkonstruktion, die die Anweisungen mindestens einmal ausführt und die Bedingung am Ende der Schleife prüft. Wenn die Bedingung wahr ist, wird die Schleife wiederholt.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine if-Anweisung führt Anweisungen nur einmal aus, wenn die Bedingung wahr ist. Sie wiederholt keine Anweisungen, solange eine Bedingung wahr ist, und stellt keine Schleife dar.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine switch-Anweisung wählt für die Ausführung einen Fall aus mehreren Fällen basierend auf dem Wert eines Ausdrucks. Sie wiederholt keine Anweisungen basierend auf einer Bedingung am Ende der Schleife.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine while-Schleife prüft die Bedingung vor der Ausführung der Anweisungen und wiederholt diese, solange sie wahr ist. Die Bedingung wird am Anfang der Schleife geprüft, nicht am Ende.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das continue-Statement wird innerhalb von Schleifenkonstruktionen verwendet, um die aktuelle Iteration zu überspringen und mit der nächsten Iteration fortzufahren. Es sorgt nicht dafür, dass Anweisungen wiederholt werden, solange eine Bedingung am Ende der Schleife wahr ist.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Anweisung in einem Programm sorgt dafür, dass eine Gruppe von Anweisungen wiederholt ausgeführt wird, solange eine bestimmte Bedingung zu Beginn jeder Iteration wahr ist, und zusätzlich eine Zählvariable bei jeder Iteration verändert wird?",
+    "evaluations": [
+      {
+        "reasoning": "Eine for-Schleife ist speziell dafür ausgelegt, eine Gruppe von Anweisungen wiederholt auszuführen, eine Bedingung zu Beginn jeder Iteration zu prüfen und eine Zählvariable bei jeder Iteration zu verändern.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine if-Anweisung führt eine Gruppe von Anweisungen nur einmal aus, wenn die Bedingung wahr ist. Sie ist nicht dafür ausgelegt, Anweisungen wiederholt auszuführen oder eine Zählvariable zu verändern.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine do-while-Schleife prüft die Bedingung nach der Ausführung der Anweisungen und ist nicht dafür ausgelegt, eine Zählvariable automatisch zu verändern.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine while-Schleife führt Anweisungen wiederholt aus, solange die Bedingung wahr ist. Allerdings verändert sie nicht automatisch eine Zählvariable; dies muss innerhalb des Schleifenkörpers manuell implementiert werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein switch-Statement führt Anweisungen basierend auf dem Wert einer Variable aus. Es ist nicht dafür vorgesehen, Anweisungen wiederholt auszuführen oder eine Zählvariable zu verändern.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine goto-Anweisung ermöglicht es, zu einem bestimmten Punkt im Code zu springen. Sie führt keine Anweisungen wiederholt aus und verändert auch keine Zählvariable.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Anweisung in einem Programm sorgt dafür, dass eine Gruppe von Anweisungen ausgeführt wird, und zwar in Abhängigkeit vom Wahrheitswert einer Bedingung, ohne die Verwendung von 'if', 'while' oder 'for'?",
+    "evaluations": [
+      {
+        "reasoning": "Die 'switch'-Anweisung ermöglicht es, abhängig vom Wert eines Ausdrucks unterschiedliche Codeblöcke auszuführen. Sie ist eine Kontrollstruktur, die eine Auswahl zwischen mehreren Möglichkeiten erlaubt, basierend auf dem Wert einer Variablen oder eines Ausdrucks.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die 'do-while'-Schleife führt Anweisungen mindestens einmal aus und prüft dann die Bedingung am Ende der Schleife. Sie ist eine Schleifenkontrollstruktur und keine bedingte Ausführungsstruktur ohne Schleife.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die 'goto'-Anweisung springt zu einem vordefinierten Label im Code. Obwohl sie bedingte Ausführung ermöglichen kann, wird sie in der modernen Programmierung aufgrund ihrer Unübersichtlichkeit und der Schwierigkeit, den Code zu verstehen und zu warten, meist vermieden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die 'return'-Anweisung beendet eine Funktion und gibt optional einen Wert zurück. Sie steuert nicht die bedingte Ausführung von Codeblöcken, sondern beendet die Ausführung der aktuellen Funktion.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die 'throw'-Anweisung löst eine Ausnahme aus. Bedingte Ausführung von Code kann über Fehlerbehandlungsroutinen erfolgen, aber 'throw' selbst steuert nicht direkt die bedingte Ausführung von Codeblöcken.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die 'continue'-Anweisung überspringt den aktuellen Durchlauf einer Schleife und fährt mit der nächsten Iteration fort. Sie prüft keine Bedingungen und ist spezifisch für Schleifenkontrollstrukturen.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Anweisung in einem Programm sorgt dafür, dass eine Gruppe von Anweisungen ausgeführt wird, wenn eine bestimmte Bedingung zu jedem Zeitpunkt während der Ausführung wahr ist, ohne die Verwendung von 'if', 'while', 'for' oder 'switch'?",
+    "evaluations": [
+      {
+        "reasoning": "Die 'do-while' Anweisung führt Anweisungen mindestens einmal aus und überprüft die Bedingung am Ende der Schleife. Sie ist jedoch in der Frage ausgeschlossen, da sie eine Variante der 'while'-Schleife ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die 'repeat-until' Anweisung ist ähnlich wie 'do-while', aber sie ist in einigen Programmiersprachen wie Pascal vorhanden. Sie führt Anweisungen aus, bis die Bedingung wahr wird, was bedeutet, dass die Bedingung am Ende der Schleife überprüft wird. Diese Anweisung ist jedoch in der Frage ausgeschlossen, da sie eine Schleifenstruktur darstellt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die 'goto' Anweisung kann tatsächlich verwendet werden, um zu einem bestimmten Punkt im Code zu springen und Anweisungen auszuführen, basierend auf einer Bedingung, die im Code überprüft wird. Sie ist nicht direkt eine Schleifenstruktur und wird nicht in der Frage ausgeschlossen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die 'continue' Anweisung wird innerhalb von Schleifen verwendet, um die aktuelle Iteration zu überspringen und mit der nächsten fortzufahren. Sie ist jedoch nicht dafür gedacht, eine Gruppe von Anweisungen auszuführen, wenn eine Bedingung wahr ist, sondern um die Ausführung zu steuern, und ist in der Frage ausgeschlossen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die 'assert' Anweisung wird verwendet, um eine Bedingung zu überprüfen und eine Ausnahme zu werfen, wenn die Bedingung falsch ist. Sie führt keine Gruppe von Anweisungen aus, wenn die Bedingung wahr ist, sondern dient der Überprüfung von Annahmen im Code.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die 'try-catch' Anweisung wird verwendet, um Ausnahmen zu behandeln, die während der Ausführung eines Programms auftreten können. Sie führt keine Anweisungen aus, weil eine Bedingung wahr ist, sondern reagiert auf das Auftreten von Ausnahmen.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Anweisung in einem Programm sorgt dafür, dass eine Gruppe von Anweisungen wiederholt ausgeführt wird, basierend auf dem Zustand eines Iterators, ohne die Verwendung von 'while' oder 'for'?",
+    "evaluations": [
+      {
+        "reasoning": "Die 'do-while'-Schleife ist eine Kontrollstruktur, die eine Gruppe von Anweisungen mindestens einmal ausführt und danach basierend auf einer Bedingung (dem Zustand eines Iterators) wiederholt. Sie ist jedoch eine Variante der 'while'-Schleife und somit nicht korrekt im Kontext der Frage.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die 'foreach'-Schleife wird verwendet, um über die Elemente einer Sammlung oder eines Arrays zu iterieren. Sie ist korrekt im Kontext der Frage, da sie keine 'while'- oder 'for'-Schleife ist und auf dem Zustand eines Iterators basiert.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die 'repeat-until'-Schleife ist eine Kontrollstruktur, die Anweisungen wiederholt, bis eine Bedingung erfüllt ist. Die Bedingung wird nach der Ausführung der Anweisungen geprüft. Diese Schleife ist ähnlich zur 'do-while'-Schleife und ist korrekt im Kontext der Frage, da sie keine 'while'- oder 'for'-Schleife ist.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die 'goto'-Anweisung ermöglicht es, zu einem bestimmten Punkt im Code zu springen. Obwohl sie theoretisch zum Wiederholen von Anweisungen verwendet werden kann, wird sie nicht als Standard-Kontrollstruktur für Iterationen angesehen und ist in moderner Programmierung aufgrund schlechter Lesbarkeit und Wartbarkeit meist verpönt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die 'switch'-Anweisung wird verwendet, um verschiedene Anweisungen basierend auf dem Wert eines Ausdrucks auszuführen. Sie ist nicht dafür gedacht, Anweisungen zu wiederholen, und ist daher nicht korrekt im Kontext der Frage.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die 'if'-Anweisung führt Anweisungen aus, wenn eine Bedingung wahr ist. Sie ist nicht für wiederholte Ausführungen konzipiert und ist daher nicht korrekt im Kontext der Frage.",
+        "correct": false
+      }
+    ]
+  }
+]

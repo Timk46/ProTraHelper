@@ -1,0 +1,302 @@
+[
+  {
+    "question": "Welche Maßnahme sorgt in einer Datenstruktur für die korrekte Ausrichtung (Alignment) von Datentypen unterschiedlicher Bytegrößen?",
+    "evaluations": [
+      {
+        "reasoning": "Padding-Bytes werden tatsächlich verwendet, um die korrekte Ausrichtung von Datentypen in einer Datenstruktur zu gewährleisten, indem sie den Speicherplatz auffüllen, um die Datentypen an den erforderlichen Speichergrenzen auszurichten.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Verwendung von Pointern ermöglicht zwar den Zugriff auf Speicheradressen und kann zur dynamischen Speicherverwaltung genutzt werden, aber sie sorgt nicht direkt für die Ausrichtung von Datentypen in einer Datenstruktur.",
+        "correct": false
+      },
+      {
+        "reasoning": "Inline-Funktionen sind Optimierungen des Compilers, um Funktionsaufrufe zu vermeiden, haben aber keinen Einfluss auf die Ausrichtung von Datentypen in einer Datenstruktur.",
+        "correct": false
+      },
+      {
+        "reasoning": "Es gibt keine speziellen 'Alignment-Datentypen'. Die korrekte Ausrichtung wird durch die Strukturierung der Daten und ggf. das Einfügen von Padding-Bytes erreicht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Dynamische Datentypen beziehen sich auf Typen, deren Größe zur Laufzeit verändert werden kann, wie z.B. dynamische Arrays, aber sie sorgen nicht automatisch für die korrekte Ausrichtung von Datentypen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Definition von Datentypen in einer bestimmten Reihenfolge kann zwar die Lesbarkeit verbessern, aber sie sorgt nicht automatisch für die korrekte Ausrichtung von Datentypen in einer Datenstruktur.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung in objektorientierte und funktionale Programmierung angemessen. Die Antwortoptionen enthalten eine korrekte Lösung und plausible Distraktoren, die verschiedene Missverständnisse und falsche Annahmen abdecken. Die MCQ erfüllt die Anforderungen an eine gute Formulierung und die Eigenschaften einer gut konstruierten MCQ, da sie Verständnis und Anwendung von Konzepten fordert und keine sprachlichen Verzerrungen oder erkennbare Muster aufweist, die zur Antwortfindung durch Eliminierung führen könnten."
+  },
+  {
+    "question": "Wie wird in einer Datenstruktur, die für die Übertragung über ein Stream-orientiertes Protokoll vorbereitet ist, ein komplexer Datentyp, der aus einer Kombination von einfachen Datentypen und Objekten besteht, für die Serialisierung vorbereitet?",
+    "evaluations": [
+      {
+        "reasoning": "Diese Antwort ist korrekt, da komplexe Datentypen oft durch Tags und Längenangaben serialisiert werden, um ihre Struktur und ihren Inhalt zu definieren, was besonders bei Protokollen wie ASN.1 oder ähnlichen verwendet wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da komplexe Datentypen in der Regel nicht als unveränderte Binärdaten übertragen werden, da dies keine Informationen über die Struktur oder den Typ der Daten enthält, was für die Deserialisierung notwendig ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da zwar eine feste Byte-Reihenfolge (Endianess) oft verwendet wird, dies allein jedoch nicht ausreicht, um komplexe Datentypen für die Serialisierung vorzubereiten. Strukturinformationen sind ebenfalls erforderlich.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da nicht alle Datentypen effizient in Strings konvertiert werden können und dies nicht die übliche Methode zur Serialisierung komplexer Datentypen ist, insbesondere wenn es um Stream-orientierte Protokolle geht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist teilweise wahr, da in manchen Programmiersprachen wie Java Objekte durch die Implementierung von Schnittstellen wie Serializable serialisierbar gemacht werden können. Jedoch ist dies nicht die einzige Methode und nicht immer automatisch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist korrekt, da XML und JSON häufig verwendete Austauschformate für die Serialisierung sind, die es ermöglichen, komplexe Datentypen in einer für Menschen lesbaren Form zu übertragen.",
+        "correct": true
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung. Die Antwortoptionen sind relevant und decken verschiedene Aspekte der Serialisierung ab. Die Distraktoren sind plausibel und könnten Unkundige herausfordern, ohne jedoch verwirrend zu sein. Die Frage testet das Verständnis und die Anwendung von Konzepten, die über reines Faktenwissen hinausgehen, und erfüllt somit die Anforderungen an eine gute MCQ."
+  },
+  {
+    "question": "Welche Konsequenz ergibt sich aus der Verwendung von Alignment in Datenstrukturen, die einfache Datentypen wie Bytes und 32-Bit-Integer kombinieren?",
+    "evaluations": [
+      {
+        "reasoning": "Alignment kann tatsächlich zu einer effizienteren Verarbeitung durch die CPU führen, da Daten an speicheradressengerechten Grenzen ausgerichtet sind, was die Zugriffszeiten verbessern kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch, da Alignment sehr wohl einen Einfluss auf die Verarbeitungsgeschwindigkeit haben kann, indem es die Speicherzugriffe optimiert.",
+        "correct": false
+      },
+      {
+        "reasoning": "Durch Alignment kann der Speicherbedarf tatsächlich steigen, da Padding-Bytes eingefügt werden müssen, um die Daten an speicheradressengerechten Grenzen auszurichten.",
+        "correct": false
+      },
+      {
+        "reasoning": "Alignment sorgt nicht dafür, dass alle Datentypen die gleiche Bytegröße haben, sondern richtet sie lediglich an Speichergrenzen aus.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Aussage ist wahr, da Padding-Bytes tatsächlich eingefügt werden, um Datentypen an speicheradressengerechten Grenzen auszurichten, was zu einem erhöhten Speicherbedarf führen kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Alignment verändert nicht die Reihenfolge der Datentypen in der Datenstruktur, sondern fügt lediglich Padding-Bytes ein, um die Ausrichtung zu gewährleisten.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung in objektorientierte und funktionale Programmierung angemessen. Die Antwortoptionen decken ein Spektrum an möglichen Missverständnissen ab und sind plausibel für Unkundige. Es gibt keine erkennbaren Muster, die zur Antwortfindung durch Eliminierung führen könnten, und die Distraktoren sind herausfordernd, aber nicht verwirrend. Die MCQ erfüllt die Anforderungen an eine gute Fragestellung und bietet plausible Distraktoren, die verschiedene Missverständnisse abdecken. Sie testet das Verständnis und die Anwendung von Konzepten und nicht nur Faktenwissen."
+  },
+  {
+    "question": "Wie wird in einer Datenstruktur, die gemäß der Session Description Protocol (SDP) Spezifikation kodiert ist, der Ursprung eines Streams (Origin) repräsentiert?",
+    "evaluations": [
+      {
+        "reasoning": "Die SDP-Spezifikation verwendet das 'o=' (Origin Field) zur Darstellung des Ursprungs eines Streams. Diese Antwortoption ist jedoch falsch formuliert, da sie ein 'O'-Zeichen gefolgt von einem Gleichheitszeichen beschreibt, was nicht der korrekten Syntax entspricht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwortoption ist falsch, da in der SDP-Spezifikation das 'o=' (Origin Field) und nicht ein 'U'-Zeichen zur Darstellung des Ursprungs verwendet wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "SDP ist kein XML-basiertes Protokoll, daher ist diese Antwortoption falsch. SDP verwendet eine textbasierte Darstellung für die Beschreibung von Mediensessions.",
+        "correct": false
+      },
+      {
+        "reasoning": "SDP ist kein JSON-basiertes Protokoll, daher ist diese Antwortoption falsch. SDP verwendet eine textbasierte Darstellung für die Beschreibung von Mediensessions.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwortoption ist falsch, da sie nicht der Syntax der SDP-Spezifikation entspricht. Der Ursprung wird mit 'o=' und nicht nur mit einem 'O'-Zeichen am Anfang der Datenstruktur repräsentiert.",
+        "correct": false
+      },
+      {
+        "reasoning": "SDP verwendet eine textbasierte Darstellung und keine binäre Kodierung zur Beschreibung von Mediensessions. Diese Antwortoption ist daher falsch.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung zu objektorientierter und funktionaler Programmierung, da das Verständnis von Protokollen und Datenstrukturen relevant ist. Allerdings ist die Frage nicht korrekt, da keine der Antwortoptionen richtig ist. Die korrekte Darstellung des Ursprungs in SDP ist 'o=' gefolgt von den entsprechenden Werten, aber keine der Optionen gibt dies korrekt wieder. Die Distraktoren sind plausibel, aber es fehlt eine korrekte Antwort, was gegen die Eigenschaften einer gut konstruierten MCQ verstößt. Um die MCQ zu verbessern, sollte eine korrekte Antwortoption hinzugefügt werden, die die SDP-Syntax 'o=' korrekt wiedergibt."
+  },
+  {
+    "question": "Wie wird in einer Datenstruktur, die gemäß der Internet Engineering Task Force (IETF) Standards kodiert ist, ein komplexer Datentyp, der aus einer Kombination von einfachen Datentypen und 'Things' besteht, für die Serialisierung vorbereitet?",
+    "evaluations": [
+      {
+        "reasoning": "Die Verwendung von Tags zur Markierung von komplexen Datentypen ist eine gängige Methode in verschiedenen Serialisierungsstandards, jedoch nicht spezifisch genug, um auf IETF-Standards zu verweisen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine feste Byte-Reihenfolge ist ein Merkmal von binären Serialisierungsformaten, aber dies ist keine spezifische Methode, die nur für komplexe Datentypen oder 'Things' verwendet wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Implementieren einer 'Serialize'-Methode könnte eine gültige Technik sein, aber es ist nicht spezifisch für IETF-Standards oder eine allgemeine Vorgehensweise für die Serialisierung komplexer Datentypen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Umwandeln jedes 'Thing'-Datentyps in einen String vor der Serialisierung ist eine mögliche Methode, aber sie ist nicht spezifisch für IETF-Standards und könnte zu Datenverlust führen, wenn nicht korrekt implementiert.",
+        "correct": false
+      },
+      {
+        "reasoning": "Automatische Indexierung jedes Datentyps durch einen Archivierungs-Algorithmus ist keine bekannte Methode im Kontext der IETF-Standards für die Serialisierung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Verwendung einer Typbeschreibung gemäß der Abstract Syntax Notation One (ASN.1) ist eine Methode, die in IETF-Standards verwendet wird, um komplexe Datentypen für die Serialisierung zu beschreiben.",
+        "correct": true
+      }
+    ],
+    "commentOnQuality": "Die Frage ist spezifisch und relevant für das Thema der objektorientierten und funktionalen Programmierung, insbesondere im Kontext von Datenstrukturen und Serialisierung. Die Formulierung ist klar und präzise, jedoch könnte die Frage für eine Einführungsveranstaltung zu spezialisiert sein, da sie Wissen über IETF-Standards und ASN.1 voraussetzt, was nicht unbedingt Teil eines Einführungskurses ist. Die Antwortoptionen enthalten plausible Distraktoren, aber sie könnten für Studierende ohne Vorkenntnisse in IETF-Standards verwirrend sein. Die MCQ erfüllt die Anforderungen an eine gute MCQ, da sie eine eindeutige Fragestellung und plausible Distraktoren bietet, die verschiedene Missverständnisse abdecken. Sie vermeidet sprachliche Verzerrungen und testet höhere Denkprozesse, indem sie Verständnis und Anwendung von Konzepten fordert."
+  },
+  {
+    "question": "Wie wird in einer Datenstruktur, die gemäß ASN1 kodiert ist, ein Array-Datentyp repräsentiert, um die Länge und den Inhalt korrekt zu interpretieren?",
+    "evaluations": [
+      {
+        "reasoning": "In ASN.1 wird die Länge eines Arrays durch ein Längenfeld definiert, das vor den eigentlichen Array-Elementen steht. Es gibt kein spezielles Array-Tag.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Hash-Symbol (#) wird in ASN.1 nicht verwendet, um die Anzahl der Elemente in einem Array anzugeben.",
+        "correct": false
+      },
+      {
+        "reasoning": "Klammern {} werden in ASN.1 nicht verwendet, um den Anfang und das Ende eines Arrays zu markieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "In ASN.1 gibt es kein spezielles Schlüsselwort 'ARRAY', das vor den Elementen steht, die durch Kommas getrennt sind.",
+        "correct": false
+      },
+      {
+        "reasoning": "ASN.1 verwendet kein End-Tag, ähnlich wie in XML, um das Ende eines Arrays zu signalisieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "In ASN.1 wird die Länge eines Arrays tatsächlich aus dem Kontext erschlossen, es gibt kein spezielles Kennzeichen für den Anfang oder das Ende eines Arrays.",
+        "correct": true
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung in objektorientierte und funktionale Programmierung angemessen, da ASN.1 ein grundlegendes Konzept für Datenstrukturen ist. Die Antwortoptionen sind jedoch nicht optimal gewählt, da sie nicht alle plausibel sind und somit nicht die Anforderungen an gute Distraktoren erfüllen. Die korrekte Antwort ist zwar enthalten, aber die Distraktoren könnten verbessert werden, um häufige Missverständnisse oder alternative Kodierungsstandards widerzuspiegeln, die in einer Einführungsveranstaltung behandelt werden könnten. Die MCQ erfüllt nicht vollständig die Anforderungen an höhere kognitive Fähigkeiten, da sie eher auf Faktenwissen als auf Verständnis oder Anwendung abzielt."
+  },
+  {
+    "question": "Wie wird in einer Datenstruktur, die gemäß der SMI (Structure of Management Information) Spezifikation kodiert ist, ein komplexer Datentyp repräsentiert, um die Hierarchie und die Beziehungen zwischen den einzelnen Datentypen zu definieren?",
+    "evaluations": [
+      {
+        "reasoning": "Die SMI-Spezifikation verwendet Sequenzen und Sequenzen von Sequenzen, um komplexe Datenstrukturen und deren Hierarchien und Beziehungen zu definieren. Dies ist eine korrekte Darstellung der Struktur in SMI.",
+        "correct": true
+      },
+      {
+        "reasoning": "Reguläre Ausdrücke werden nicht verwendet, um die Struktur und Beziehungen von Datentypen in SMI zu beschreiben. Sie dienen eher der Mustererkennung in Texten.",
+        "correct": false
+      },
+      {
+        "reasoning": "Vererbungshierarchien sind ein Konzept der objektorientierten Programmierung und nicht Teil der SMI-Definitionen für Datenstrukturen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein flaches Array würde keine Hierarchie oder Beziehungen zwischen Datentypen darstellen, was im Widerspruch zur Fragestellung steht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Zuweisung von eindeutigen Identifikatoren definiert keine Hierarchie oder Beziehungen, was für SMI-Datenstrukturen erforderlich ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein spezielles Tagging-System, ähnlich wie XML-Tags, ist nicht die Methode, die in SMI verwendet wird, um komplexe Datenstrukturen zu definieren.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung, da sie grundlegende Konzepte der Datenstrukturierung berührt. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren, die verschiedene Missverständnisse und falsche Konzepte abdecken. Die Frage und die Distraktoren erfüllen die Anforderungen an gute MCQs, indem sie eindeutig sind, keine sprachlichen Verzerrungen aufweisen und höhere Denkprozesse prüfen, ohne dass die Antwort erraten werden kann. Die MCQ entspricht den Vorgaben."
+  },
+  {
+    "question": "Wie wird in einer Datenstruktur, die für die Netzwerkübertragung optimiert ist, ein komplexer Datentyp, der aus einer Kombination von einfachen Datentypen und einer variablen Anzahl von 'Things' besteht, effizient serialisiert?",
+    "evaluations": [
+      {
+        "reasoning": "Die Verwendung eines Delimiters und einer Längenangabe ist eine gängige Methode, um komplexe Datenstrukturen für die Netzwerkübertragung zu serialisieren, da sie es ermöglicht, die Struktur beim Deserialisieren wiederherzustellen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Konvertieren aller Datentypen in einen einzigen langen String ohne Trennzeichen würde die Deserialisierung erschweren, da die Strukturinformationen verloren gehen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine feste Reihenfolge ohne zusätzliche Kennzeichnung oder Längenangaben würde die Deserialisierung erschweren, insbesondere wenn die Anzahl der 'Things' variabel ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "XML ist ein Format, das Struktur und Datentypinformationen erhalten kann, aber es ist nicht unbedingt für die Netzwerkübertragung optimiert, da es tendenziell mehr Overhead als andere Serialisierungsformate hat.",
+        "correct": false
+      },
+      {
+        "reasoning": "ASN.1 ist ein Standard zur Beschreibung von Datenstrukturen, der Typbeschreibung und Längenangabe für eine selbstbeschreibende Serialisierung verwendet. Dies ist eine effiziente Methode für die Netzwerkübertragung.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein spezieller Kompressionsalgorithmus, der nur für 'Things' optimiert ist, könnte zwar die Größe der übertragenen Daten reduzieren, aber er adressiert nicht direkt die Serialisierung der Datenstruktur als Ganzes.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung. Die Antwortoptionen decken verschiedene plausible Serialisierungsmethoden ab und beinhalten sowohl korrekte als auch falsche Ansätze, was die kognitiven Fähigkeiten der Studierenden herausfordert. Die Distraktoren sind plausibel und decken häufige Missverständnisse ab, ohne erkennbare Muster aufzuweisen, die zur Antwortfindung durch Eliminierung führen könnten. Die MCQ entspricht den Vorgaben und erfordert kein weiteres Feedback zur Verbesserung."
+  },
+  {
+    "question": "Wie wird in einer Datenstruktur, die gemäß der SMI-Spezifikation kodiert ist, ein komplexer Datentyp dargestellt, um die Beziehungen zwischen verschiedenen 'Things' und einfachen Datentypen zu verwalten?",
+    "evaluations": [
+      {
+        "reasoning": "Die SMI (Structure of Management Information) verwendet eine hierarchische Baumstruktur, um MIB-Objekte und ihre Beziehungen darzustellen, was auch auf komplexe Datentypen zutrifft.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine flache Liste würde keine hierarchischen Beziehungen darstellen können, was im Widerspruch zur SMI-Spezifikation steht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Array mit spezifischen Indizes für Datentypen würde keine hierarchischen Beziehungen oder komplexe Datentypen effektiv darstellen können.",
+        "correct": false
+      },
+      {
+        "reasoning": "Schlüssel-Wert-Paare ohne Strukturinformationen würden nicht die notwendige Hierarchie und Beziehungen zwischen den Datentypen gemäß SMI-Spezifikation abbilden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein einziger String, der alle Datentypen und ihre Werte kommagetrennt enthält, würde keine hierarchische Struktur oder Beziehungen zwischen den Datentypen darstellen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine verschachtelte Struktur aus mehreren Arrays könnte zwar Beziehungen darstellen, entspricht aber nicht der spezifischen hierarchischen Baumstruktur, die in der SMI-Spezifikation verwendet wird.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung in objektorientierte und funktionale Programmierung angemessen, da sie grundlegendes Verständnis von Datenstrukturen erfordert. Die Antwortoptionen sind plausibel und decken verschiedene Missverständnisse ab. Es gibt keine erkennbaren Muster, die zur Antwortfindung durch Eliminierung führen könnten, und die Distraktoren sind thematisch passend und nicht irreführend. Die Frage und die Antwortoptionen erfüllen die Anforderungen an eine gut konstruierte MCQ."
+  },
+  {
+    "question": "Welche Rolle spielt das Konzept des 'Object Input' und 'Object Output' im Kontext der Serialisierung von Objekten in Java?",
+    "evaluations": [
+      {
+        "reasoning": "ObjectInputStream und ObjectOutputStream sind tatsächlich Java-Streams, die für die Serialisierung und Deserialisierung von Objekten verwendet werden. Diese Antwort ist korrekt und spiegelt die Verwendung dieser Streams in Java wider.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwortoption ist falsch, da Object Input und Object Output keine speziellen Variablen in Java sind, die den Zustand eines Objekts speichern. Sie sind Streams, die für die Serialisierung und Deserialisierung verwendet werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Object Input und Object Output sind keine Protokolle auf Anwendungsebene. Sie sind Java-Streams, die für die Serialisierung und Deserialisierung von Objekten verwendet werden. Diese Antwort ist daher falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Object Input und Object Output definieren keine Methoden zur Manipulation von Dateiinhalten ohne Serialisierung. Sie sind speziell für die Serialisierung und Deserialisierung von Objekten gedacht. Diese Antwort ist falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da Object Input und Object Output keine Schnittstellen sind, die Operationen zum Lesen und Schreiben von primitiven Datentypen definieren. Sie sind spezifische Streams für die Objektserialisierung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Object Input und Object Output sind keine Methoden, sondern Streams. Sie konvertieren Objekte in Byte-Arrays für die Serialisierung, nicht speziell für Netzwerkübertragungen. Diese Antwort ist daher irreführend und falsch.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung zur objektorientierten und funktionalen Programmierung angemessen. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren, die verschiedene Missverständnisse abdecken. Die MCQ erfüllt die Anforderungen an eine gute Formulierung und testet das Verständnis der Serialisierung in Java, was eine höhere kognitive Fähigkeit darstellt. Es gibt keine erkennbaren Muster, die zur Antwortfindung durch Eliminierung führen könnten, und die Distraktoren sind thematisch passend und nicht irreführend. Die MCQ entspricht den Vorgaben."
+  }
+]

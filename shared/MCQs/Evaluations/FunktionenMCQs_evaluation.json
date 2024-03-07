@@ -1,0 +1,302 @@
+[
+  {
+    "question": "Welche Technik ermöglicht es in funktionalen Programmiersprachen, eine Funktion zu definieren, die auf den Zustand einer externen Variable zugreift, ohne dabei ihre Eigenschaft als Pure Function zu verlieren?",
+    "evaluations": [
+      {
+        "reasoning": "Globale Variablen innerhalb einer Funktion zu verwenden, widerspricht dem Konzept reiner Funktionen, da dies zu Seiteneffekten führen kann.",
+        "correct": false
+      },
+      {
+        "reasoning": "Seiteneffekte verändern den Zustand außerhalb der Funktion und machen die Funktion somit nicht rein.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine Closure ist eine Funktion, die Zugriff auf den Zustand einer externen Variable hat, die zum Zeitpunkt der Definition der Closure existiert, ohne dass die Funktion ihre Reinheit verliert.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Übergeben einer externen Variable als Referenz und deren Modifikation innerhalb der Funktion führt zu Seiteneffekten und macht die Funktion nicht rein.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Kopieren des externen Zustands in lokale Variablen bei jedem Funktionsaufruf verhindert Seiteneffekte, aber es ist keine spezifische Technik, die das Konzept reiner Funktionen unterstützt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Reine Funktionen nutzen oder verändern keine externen Variablen, aber die Frage zielt auf eine Technik ab, die den Zugriff auf externe Variablen ermöglicht, ohne die Reinheit zu verlieren.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Sehr Gut. Die Frage ist klar und präzise formuliert und passt zum Thema funktionale Programmierung. Die Antwortoptionen enthalten eine korrekte Lösung und plausible Distraktoren, die verschiedene Missverständnisse abdecken. Die Frage testet das Verständnis von Konzepten der funktionalen Programmierung und vermeidet sprachliche Verzerrungen."
+  },
+  {
+    "question": "Wie kann die Technik der höheren Ordnungsfunktionen in funktionalen Programmiersprachen dazu verwendet werden, um Strategien wie 'Spielen der letzten Karte' oder 'Spielen der Preiskarte' als abstrakte Aktionen zu behandeln?",
+    "evaluations": [
+      {
+        "reasoning": "Höhere Ordnungsfunktionen können tatsächlich andere Funktionen als Argumente akzeptieren, was es ermöglicht, Strategien als übergebene Funktionen zu behandeln.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch, da höhere Ordnungsfunktionen gerade dafür bekannt sind, andere Funktionen als Argumente akzeptieren zu können.",
+        "correct": false
+      },
+      {
+        "reasoning": "Strategien als globale Variablen zu definieren, widerspricht den Prinzipien funktionaler Programmierung, die auf Unveränderlichkeit und Funktionen ohne Seiteneffekte abzielt. Höhere Ordnungsfunktionen manipulieren keine globalen Variablen direkt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Anonyme Funktionen können zur Laufzeit erstellt werden und sind ein Werkzeug, um Strategien dynamisch zu definieren. Dies ist eine korrekte Anwendung höherer Ordnungsfunktionen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch, da höhere Ordnungsfunktionen nicht auf primitive Datentypen beschränkt sind und sehr wohl mit Funktionen als Argumenten arbeiten können.",
+        "correct": false
+      },
+      {
+        "reasoning": "Reine Funktionen sind ein zentrales Konzept in der funktionalen Programmierung und können als Argumente an höhere Ordnungsfunktionen übergeben werden, um abstrakte Aktionen wie Spielstrategien zu behandeln.",
+        "correct": true
+      }
+    ],
+    "commentOnQuality": "Sehr Gut. Die Frage ist klar und präzise formuliert und passt zum Thema der funktionalen Programmierung mit Python. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren, die verschiedene Missverständnisse abdecken. Die MCQ prüft das Verständnis von höheren Ordnungsfunktionen und deren Anwendung in funktionalen Programmiersprachen, was höhere kognitive Fähigkeiten erfordert."
+  },
+  {
+    "question": "Wie kann die Technik der funktionalen Programmierung genutzt werden, um eine Funktion zu definieren, die eine Strategie anwendet und dabei Zustandsunabhängigkeit gewährleistet?",
+    "evaluations": [
+      {
+        "reasoning": "Globale Variablen führen zu Zustandsabhängigkeiten und sind nicht im Sinne der funktionalen Programmierung, die Zustandsunabhängigkeit anstrebt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Closures können zwar Zustände kapseln, aber die Frage zielt auf Zustandsunabhängigkeit ab, was durch Closures nicht garantiert wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Direkter Zugriff auf externe Zustände widerspricht dem Prinzip der Zustandsunabhängigkeit in der funktionalen Programmierung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Reine Funktionen sind ein zentrales Konzept der funktionalen Programmierung und gewährleisten Zustandsunabhängigkeit, da sie keine Seiteneffekte haben und nur von ihren Eingabeparametern abhängen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Vererbung ist ein Konzept der objektorientierten Programmierung und nicht der funktionalen Programmierung. Zudem führt es zu Zustandsabhängigkeiten.",
+        "correct": false
+      },
+      {
+        "reasoning": "Höhere Ordnungsfunktionen sind ein Konzept der funktionalen Programmierung, aber sie garantieren nicht per se Zustandsunabhängigkeit.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Gut. Die Frage ist klar und präzise formuliert und passt zum Thema der funktionalen Programmierung. Die Antwortoptionen sind thematisch relevant und decken verschiedene Konzepte ab. Allerdings könnten die Distraktoren besser auf häufige Missverständnisse in der funktionalen Programmierung abzielen, um die Qualität der MCQ zu verbessern."
+  },
+  {
+    "question": "Wie kann in funktionalen Programmiersprachen die Referenztransparenz einer Funktion gewahrt bleiben, wenn diese Funktionen als Variablen speichert und wiederverwendet?",
+    "evaluations": [
+      {
+        "reasoning": "Globale Variablen verletzen die Referenztransparenz, da sie den Funktionsausgang von ihrem Kontext abhängig machen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Übergeben von Funktionen als Argumente ohne sie zu verändern, erhält die Referenztransparenz, da keine externen Zustände modifiziert werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das direkte Modifizieren von Objekten, die als Parameter übergeben werden, verletzt die Referenztransparenz, da es Seiteneffekte erzeugt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Speichern von Funktionen in einer Datenstruktur, die ihren Zustand ändert, verletzt die Referenztransparenz, da die Funktionen von externen Zuständen abhängig werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Erstellung von Funktionen ohne Seiteneffekte, die keine externen Variablen verändern, erhält die Referenztransparenz.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Speichern von Funktionen in einer unveränderlichen Datenstruktur, die bei jeder Operation eine neue Version von sich selbst erzeugt, erhält die Referenztransparenz, da keine Zustände verändert werden.",
+        "correct": true
+      }
+    ],
+    "commentOnQuality": "Sehr Gut. Die Frage ist klar und präzise formuliert und passt zum Thema der funktionalen Programmierung. Die Antwortoptionen decken ein Spektrum an Konzepten ab, die in einer Einführungsveranstaltung behandelt werden könnten. Die korrekten Antworten sind thematisch relevant und die Distraktoren sind plausibel und decken häufige Missverständnisse ab."
+  },
+  {
+    "question": "Wie kann in funktionalen Programmiersprachen die Strategie 'Spielen der Preiskarte' in einer Variablen gespeichert werden, sodass die Strategie wiederverwendbar und unabhängig vom Zustand des Hauptprogramms ist?",
+    "evaluations": [
+      {
+        "reasoning": "In funktionalen Programmiersprachen können Funktionen als Werte behandelt und somit einer Variablen zugewiesen werden. Diese Variable kann dann in andere Funktionen als Argument übergeben werden, was die Wiederverwendbarkeit und Unabhängigkeit gewährleistet.",
+        "correct": true
+      },
+      {
+        "reasoning": "Globale Zustände widersprechen den Prinzipien funktionaler Programmierung, da sie zu Seiteneffekten führen können und die Unabhängigkeit von Funktionen beeinträchtigen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Anonyme Funktionen sind zwar in funktionalen Programmiersprachen üblich, aber die Fragestellung zielt auf die Speicherung und Wiederverwendbarkeit ab, was durch eine bei jeder Verwendung neu definierte anonyme Funktion nicht erreicht wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Closures sind ein Mechanismus in funktionalen Programmiersprachen, um Zustände zu kapseln, ohne globale Variablen zu verwenden. Sie ermöglichen es, eine Strategie zu speichern und wiederverwendbar zu machen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das direkte Einbetten der Strategie in jede Funktion ist ineffizient und widerspricht dem Prinzip der Wiederverwendbarkeit in funktionalen Programmiersprachen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Reine Funktionen sind ein zentrales Konzept in funktionalen Programmiersprachen und hängen nur von ihren Eingabeparametern ab. Sie haben keine Seiteneffekte, was sie ideal für die Speicherung von Strategien macht.",
+        "correct": true
+      }
+    ],
+    "commentOnQuality": "Sehr Gut. Die Frage ist klar und präzise formuliert und passt zum Thema der funktionalen Programmierung. Die Antwortoptionen sind thematisch relevant und decken verschiedene Konzepte und Missverständnisse ab. Die korrekten Antworten sind wahr und gut begründet, während die falschen Antworten plausible Distraktoren darstellen."
+  },
+  {
+    "question": "Wie kann eine Funktion in einer funktionalen Programmiersprache so implementiert werden, dass sie eine übergebene Strategie ausführt, ohne dabei auf den Zustand außerhalb ihres eigenen Scopes zu wirken?",
+    "evaluations": [
+      {
+        "reasoning": "Die Übergabe einer Strategie als Parameter, die selbst eine Pure Function ist, ist eine korrekte Methode in der funktionalen Programmierung, um Seiteneffekte zu vermeiden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Modifizieren einer globalen Variable würde zu Seiteneffekten führen und ist nicht im Sinne der funktionalen Programmierung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Verwendung einer anonymen Funktion, um eine Strategie zu kapseln, ist eine gültige Technik in der funktionalen Programmierung, um Seiteneffekte zu vermeiden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Callback-Funktionen sind ein gängiges Konzept in der funktionalen Programmierung, um Funktionen als Argumente zu übergeben und innerhalb anderer Funktionen aufzurufen, ohne Seiteneffekte zu erzeugen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Direkter Zugriff auf externe Variablen ist nicht im Sinne der funktionalen Programmierung, da dies zu Seiteneffekten führen kann.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Verändern von Referenzen auf Objekte oder Arrays außerhalb des eigenen Scopes führt zu Seiteneffekten und widerspricht den Prinzipien der funktionalen Programmierung.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Sehr Gut. Die Frage ist klar und präzise formuliert und passt zum Thema der funktionalen Programmierung. Die Antwortoptionen enthalten eine korrekte Lösung und plausible Distraktoren, die verschiedene Missverständnisse abdecken. Die Frage testet das Verständnis und die Anwendung von Konzepten der funktionalen Programmierung."
+  },
+  {
+    "question": "Welche Eigenschaft muss eine Funktion in einer funktionalen Programmiersprache erfüllen, um als 'Pure Function' zu gelten und somit als Variable ohne Seiteneffekte gespeichert werden zu können?",
+    "evaluations": [
+      {
+        "reasoning": "Eine reine Funktion muss bei gleichen Eingabewerten immer dasselbe Ergebnis liefern, was eine wichtige Eigenschaft von Idempotenz ist. Dies ist korrekt im Kontext von funktionaler Programmierung.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Verändern des eigenen Codes zur Laufzeit ist nicht charakteristisch für reine Funktionen und steht nicht im Zusammenhang mit der Definition einer 'Pure Function'.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Fähigkeit, verschiedene Datentypen zu akzeptieren, ist nicht relevant für die Definition einer 'Pure Function'.",
+        "correct": false
+      },
+      {
+        "reasoning": "Reine Funktionen dürfen keine Seiteneffekte haben und müssen unabhängig vom Zustand des Programms sein. Dies ist eine korrekte Aussage.",
+        "correct": true
+      },
+      {
+        "reasoning": "Asynchrone Ausführung ist kein Kriterium für eine 'Pure Function'. Reine Funktionen können synchron oder asynchron ausgeführt werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Halten einer Referenz auf externe Variablen würde Seiteneffekte verursachen, was im Widerspruch zur Definition einer 'Pure Function' steht.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Gut. Die Frage ist klar und präzise formuliert und passt zum Thema der funktionalen Programmierung. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren. Allerdings könnten die Distraktoren besser auf häufige Missverständnisse eingehen, um das Verständnis gründlicher zu testen. Die Frage könnte auch höhere kognitive Fähigkeiten fordern, indem sie beispielsweise die Anwendung von 'Pure Functions' in einem bestimmten Kontext abfragt."
+  },
+  {
+    "question": "Wie kann in funktionalen Programmiersprachen die Strategie 'Spielen der Preiskarte' als reine Funktion implementiert werden, sodass sie in verschiedenen Kontexten wiederverwendet werden kann?",
+    "evaluations": [
+      {
+        "reasoning": "Eine reine Funktion hat keine Seiteneffekte und hängt nur von ihren Eingabeparametern ab, was der Definition einer Pure Function in funktionalen Programmiersprachen entspricht.",
+        "correct": true
+      },
+      {
+        "reasoning": "In funktionalen Programmiersprachen sollten Funktionen keine globalen Variablen manipulieren, da dies Seiteneffekte erzeugen würde und somit nicht als reine Funktion gilt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Verwendung einer anonymen Funktion ist in funktionalen Programmiersprachen üblich, aber die Fragestellung impliziert, dass die Strategie wiederverwendbar sein soll, was nicht zwingend durch die Erzeugung einer neuen Instanz bei jedem Aufruf erreicht wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Speichern des eigenen Zustands in einer statischen Variablen würde Seiteneffekte erzeugen und ist nicht charakteristisch für reine Funktionen in funktionalen Programmiersprachen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Funktionen höherer Ordnung, die andere Funktionen als Argumente annehmen und ausführen, sind ein zentrales Konzept funktionaler Programmierung und ermöglichen die Wiederverwendung von Strategien.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Definieren einer Funktion als Methode eines Objekts, das Zustand kapselt, ist ein objektorientierter Ansatz und entspricht nicht den Prinzipien der funktionalen Programmierung.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Gut. Die Frage ist klar und präzise formuliert und passt zum Thema 'Funktionale Programmierung mit Python'. Die Antwortoptionen enthalten eine korrekte Lösung und plausible Distraktoren. Allerdings könnten die Distraktoren besser auf häufige Missverständnisse in der funktionalen Programmierung abzielen, um das Verständnis gründlicher zu testen."
+  },
+  {
+    "question": "Wie kann die Technik der funktionalen Programmierung dazu genutzt werden, um eine Funktion zu definieren, die eine Strategie kapselt, ohne dabei auf den Zustand außerhalb ihres eigenen Scopes zu wirken?",
+    "evaluations": [
+      {
+        "reasoning": "Globale Variablen sind nicht Teil der funktionalen Programmierung, da sie Zustände außerhalb des Funktionsscopes beeinflussen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Closures sind ein zentrales Konzept der funktionalen Programmierung, das es ermöglicht, Zustände in einem lokalen Scope zu kapseln.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Einbetten der Strategie im Funktionskörper ist eine gültige Technik, allerdings ist die Frage auf die Kapselung einer Strategie ausgerichtet, was durch einfaches Einbetten nicht erreicht wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Objektorientierung ist nicht Teil der funktionalen Programmierung, sondern ein separates Paradigma.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Übergabe der Strategie als Argument ist eine Technik der funktionalen Programmierung, die keine externen Zustände beeinflusst.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Definieren der Strategie als unveränderliche Konstante und deren Übergabe an die Funktion ist eine Technik der funktionalen Programmierung, die keine externen Zustände beeinflusst.",
+        "correct": true
+      }
+    ],
+    "commentOnQuality": "Gut. Die Frage ist klar und präzise formuliert. Die Antwortoptionen sind thematisch passend und decken verschiedene Konzepte der funktionalen Programmierung ab. Allerdings könnte die Fragestellung noch spezifischer sein, um höhere kognitive Fähigkeiten zu testen, und einige Distraktoren könnten besser auf häufige Missverständnisse abzielen."
+  },
+  {
+    "question": "Wie kann in funktionalen Programmiersprachen eine Funktion als Variable gespeichert werden, um die Wiederverwendbarkeit und Testbarkeit zu erhöhen, ohne dabei auf den Zustand des Hauptprogramms zu wirken?",
+    "evaluations": [
+      {
+        "reasoning": "Globale Variablen sind nicht spezifisch für funktionale Programmierung und können Seiteneffekte verursachen, was dem Prinzip der funktionalen Programmierung widerspricht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Übergeben von Funktionen als Argumente ist ein zentrales Konzept der funktionalen Programmierung und erhöht die Wiederverwendbarkeit und Testbarkeit von Code, ohne Seiteneffekte zu verursachen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das direkte Einbetten von Funktionen in den Code fördert nicht die Wiederverwendbarkeit und Testbarkeit und ist keine spezifische Technik der funktionalen Programmierung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Objektorientierung ist ein separates Paradigma und nicht spezifisch für funktionale Programmierung. Methoden in Klassen zu definieren, ist nicht das gleiche wie Funktionen als Variablen zu speichern.",
+        "correct": false
+      },
+      {
+        "reasoning": "Anonyme Funktionen sind ein Konzept der funktionalen Programmierung und können als Variablen gespeichert werden, um Wiederverwendbarkeit und Testbarkeit zu erhöhen, ohne den Zustand des Hauptprogramms zu beeinflussen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Speichern von Funktionen in einer Datenbank ist keine übliche Praxis in der funktionalen Programmierung und hat nichts mit der Speicherung von Funktionen als Variablen zu tun.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Gut. Die Frage ist klar und präzise formuliert und passt zum Thema der funktionalen Programmierung. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren. Einige Distraktoren könnten jedoch als irreführend angesehen werden, da sie Konzepte aus anderen Programmierparadigmen beinhalten, was zu Verwirrung führen könnte. Um die Qualität zu verbessern, sollten die Distraktoren stärker auf häufige Missverständnisse innerhalb der funktionalen Programmierung abzielen und weniger auf andere Paradigmen."
+  }
+]

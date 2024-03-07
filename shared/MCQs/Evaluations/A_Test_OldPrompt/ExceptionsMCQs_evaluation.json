@@ -1,0 +1,292 @@
+[
+  {
+    "question": "Wie verhält sich Java, wenn eine RuntimeException in einem try-Block geworfen wird und ein catch-Block für Exception vorhanden ist?",
+    "evaluations": [
+      {
+        "reasoning": "RuntimeException ist eine Unterklasse von Exception. In Java können catch-Blöcke für Oberklassen Exceptions von ihren Unterklassen abfangen. Daher wird eine RuntimeException von einem catch-Block für Exception abgefangen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch, da RuntimeException tatsächlich eine Unterklasse von Exception ist und somit von einem catch-Block für Exception abgefangen werden kann.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Programm wird nicht sofort beendet, wenn eine RuntimeException auftritt und ein catch-Block für Exception vorhanden ist. Die RuntimeException wird von diesem catch-Block abgefangen, da RuntimeException eine Unterklasse von Exception ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Der catch-Block für Exception wird nicht ignoriert. Er wird verwendet, um die RuntimeException abzufangen, da RuntimeException eine Unterklasse von Exception ist. Es ist nicht notwendig, nach einem spezifischeren catch-Block zu suchen, wenn bereits ein passender catch-Block vorhanden ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "RuntimeExceptions müssen nicht zwingend mit einem eigenen catch-Block behandelt werden. Sie können auch von einem catch-Block für Exception abgefangen werden, da RuntimeException eine Unterklasse von Exception ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die RuntimeException wird abgefangen, auch wenn sie nicht explizit im catch-Block aufgeführt wird. Ein catch-Block für die Oberklasse Exception ist ausreichend, um alle Exceptions dieser Klasse und ihrer Unterklassen abzufangen, einschließlich RuntimeException.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie verhält sich Java, wenn eine benutzerdefinierte Exception, die das Schlüsselwort 'throws' in der Methodensignatur verwendet, zur Laufzeit geworfen wird, aber nicht in einem try-catch-Block abgefangen wird?",
+    "evaluations": [
+      {
+        "reasoning": "Java wird nicht normal weiterlaufen, wenn eine Exception geworfen wird. Stattdessen wird die Exception entlang des Aufrufstapels nach oben propagiert, bis sie entweder abgefangen oder das Programm beendet wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn eine Exception in Java geworfen wird und nicht in einem try-catch-Block abgefangen wird, wird sie an die aufrufende Methode weitergeleitet. Dies setzt sich fort, bis sie entweder von einem try-catch-Block abgefangen wird oder das Programm beendet wird, indem die Exception den Aufrufstapel bis zur main-Methode durchläuft und nicht abgefangen wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die JVM ignoriert keine Exceptions, unabhängig davon, ob sie benutzerdefiniert sind oder nicht. Alle Exceptions müssen entweder abgefangen oder behandelt werden, sonst führt dies zum Abbruch des Programms.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine benutzerdefinierte Exception wird nicht automatisch in eine RuntimeException umgewandelt. Sie behält ihren Typ bei, bis sie abgefangen wird oder das Programm beendet wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn eine Exception nicht abgefangen wird, wird das Programm beendet und der Stacktrace der Exception wird ausgegeben. Dies dient zur Diagnose des Problems, das die Exception verursacht hat.",
+        "correct": true
+      },
+      {
+        "reasoning": "Exceptions in Java werden nicht von der Garbage Collection gelöscht. Sie müssen entweder abgefangen oder behandelt werden. Unbehandelte Exceptions führen zum Abbruch des Programms.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie verhält sich Java, wenn eine benutzerdefinierte Exception, die von der Klasse Exception abgeleitet ist, in einem try-Block geworfen wird und ein catch-Block für eine allgemeinere Exception vorhanden ist?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird der spezifischste catch-Block ausgeführt, der die geworfene Exception behandeln kann. Wenn es keinen spezifischen catch-Block für die benutzerdefinierte Exception gibt, wird der allgemeinere catch-Block ausgeführt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn eine benutzerdefinierte Exception geworfen wird und ein catch-Block für die allgemeine Klasse Exception vorhanden ist, wird dieser catch-Block ausgeführt, da er in der Lage ist, alle Exceptions abzufangen, die von der Klasse Exception abgeleitet sind.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Programm wird nicht sofort beendet, wenn eine benutzerdefinierte Exception geworfen wird. Stattdessen wird der entsprechende catch-Block ausgeführt, der diese Exception behandeln kann, auch wenn es sich um einen allgemeineren catch-Block handelt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine ClassNotFoundException wird nur dann geworfen, wenn eine Klasse zur Laufzeit nicht gefunden werden kann. Dies hat nichts mit dem Werfen einer benutzerdefinierten Exception zu tun.",
+        "correct": false
+      },
+      {
+        "reasoning": "Der finally-Block wird nach den catch-Blöcken ausgeführt, unabhängig davon, ob eine Exception aufgetreten ist oder nicht. Er wird jedoch nicht anstelle eines catch-Blocks ausgeführt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Nicht alle Exceptions in Java sind von RuntimeException abgeleitet. Es gibt zwei Arten von Exceptions: checked Exceptions (direkt von Exception abgeleitet) und unchecked Exceptions (von RuntimeException abgeleitet). Eine benutzerdefinierte Exception, die von Exception abgeleitet ist, ist eine checked Exception und führt nicht automatisch zu einer RuntimeException.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie verhält sich Java, wenn eine benutzerdefinierte Exception, die von RuntimeException abgeleitet ist, in einem try-Block geworfen wird und ein catch-Block für eine spezifischere Exception vorhanden ist?",
+    "evaluations": [
+      {
+        "reasoning": "Wenn eine benutzerdefinierte RuntimeException geworfen wird, sucht die JVM nach einem catch-Block, der diese Exception oder eine ihrer Oberklassen abfängt. Wenn eine spezifischere Exception im catch-Block vorhanden ist, die von der geworfenen RuntimeException abgeleitet ist, wird diese abgefangen.",
+        "correct": true
+      },
+      {
+        "reasoning": "In Java werden Exceptions abgefangen, wenn ein catch-Block für die geworfene Exception oder eine ihrer Oberklassen vorhanden ist. Eine benutzerdefinierte RuntimeException wird also abgefangen, wenn sie nicht spezifischer als die im catch-Block gefangene Exception ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "RuntimeExceptions sind in Java nicht als Errors klassifiziert. Sie führen nicht automatisch zum Abbruch des Programms, sondern können abgefangen und behandelt werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine benutzerdefinierte RuntimeException wird nicht ignoriert. Wenn sie nicht abgefangen wird, führt sie zu einem Abbruch des Programms, aber sie wird nicht einfach übergangen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn die spezifischere Exception im catch-Block die geworfene RuntimeException nicht abfängt, sucht die JVM nach einem weiteren catch-Block, der RuntimeExceptions oder deren Oberklassen abfängt.",
+        "correct": true
+      },
+      {
+        "reasoning": "Wenn keine passende Exception abgefangen wird, wird die RuntimeException an den Aufrufer der Methode weitergeleitet und kann dort behandelt werden. Wenn sie nirgendwo behandelt wird, führt dies zum Abbruch des Programms.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie verhält sich Java, wenn eine benutzerdefinierte Exception, die von keiner der Standard-Exception-Klassen abgeleitet ist, geworfen wird und ein catch-Block für Throwable vorhanden ist?",
+    "evaluations": [
+      {
+        "reasoning": "In Java ist Throwable die Superklasse für alle Fehler und Ausnahmen. Wenn eine benutzerdefinierte Exception geworfen wird, wird sie von einem catch-Block, der Throwable fängt, abgefangen, unabhängig davon, ob sie von einer Standard-Exception-Klasse abgeleitet ist oder nicht.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch, da in Java alle Exceptions, auch benutzerdefinierte, eine Instanz von Throwable sind. Daher wird eine benutzerdefinierte Exception von einem catch-Block für Throwable abgefangen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch. In Java können benutzerdefinierte Exceptions erstellt werden, die nicht unbedingt von einer Standard-Exception-Klasse abgeleitet sein müssen. Sie müssen lediglich von Throwable oder einer seiner Unterklassen abgeleitet sein.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch, da eine benutzerdefinierte Exception, die geworfen wird, entweder von einem entsprechenden catch-Block abgefangen wird oder, wenn kein solcher Block vorhanden ist, zu einem Laufzeitfehler führt. Wenn ein catch-Block für Throwable vorhanden ist, wird die Exception abgefangen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch, da eine nicht abgefangene Exception in Java nicht ignoriert wird. Das Programm wird entweder die Exception abfangen, wenn ein entsprechender catch-Block vorhanden ist, oder es wird beendet, wenn die Exception nicht behandelt wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch, da ein catch-Block für Throwable alle Exceptions und Errors abfängt, unabhängig davon, ob sie explizit aufgeführt sind oder nicht.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie verhält sich Java, wenn eine benutzerdefinierte Exception, die von Exception abgeleitet ist, in einer Methode geworfen wird, die diese Exception nicht in ihrer 'throws'-Klausel deklariert?",
+    "evaluations": [
+      {
+        "reasoning": "In Java müssen checked Exceptions, zu denen benutzerdefinierte Exceptions gehören, die von Exception abgeleitet sind, entweder in der 'throws'-Klausel der Methode deklariert oder innerhalb der Methode abgefangen werden. Andernfalls gibt der Compiler einen Fehler aus.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn eine Methode eine Exception wirft, die nicht in ihrer 'throws'-Klausel deklariert ist und diese Exception eine checked Exception ist, gibt der Java-Compiler einen Fehler aus. Benutzerdefinierte Exceptions, die von Exception abgeleitet sind, sind in der Regel checked Exceptions.",
+        "correct": true
+      },
+      {
+        "reasoning": "In Java werden Exceptions nicht ignoriert, wenn sie geworfen werden. Sie müssen entweder abgefangen oder deklariert werden. Wenn eine benutzerdefinierte Exception geworfen wird, die nicht in der 'throws'-Klausel aufgeführt ist, wird sie nicht ignoriert, sondern führt zu einem Compilerfehler.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn eine benutzerdefinierte Exception, die von Exception abgeleitet ist, geworfen wird und nicht in der 'throws'-Klausel deklariert ist, wird die Methode zur Laufzeit beendet, aber das Programm sucht nicht automatisch nach einem globalen Exception-Handler. Stattdessen wird ein Compilerfehler erzeugt, da es sich um eine checked Exception handelt.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java werden benutzerdefinierte Exceptions, die von Exception abgeleitet sind, nicht automatisch in RuntimeExceptions umgewandelt. Sie müssen explizit als RuntimeExceptions deklariert oder in solche umgewandelt werden, wenn sie unchecked sein sollen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn eine benutzerdefinierte Exception, die von Exception abgeleitet ist, geworfen wird und nicht in der 'throws'-Klausel deklariert ist, wird die JVM diese nicht einfach abfangen und den Stack Trace ausgeben, ohne das Programm zu beenden. Stattdessen wird ein Compilerfehler erzeugt, da es sich um eine checked Exception handelt.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie verhält sich Java, wenn eine benutzerdefinierte Exception, die von RuntimeException abgeleitet ist, in einem try-Block geworfen wird und ein catch-Block für Throwable vorhanden ist?",
+    "evaluations": [
+      {
+        "reasoning": "Throwable ist die Superklasse von Exception und Error, und somit auch die Superklasse von RuntimeException. Daher wird jede Exception, die von RuntimeException abgeleitet ist, von einem catch-Block für Throwable abgefangen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch, da Throwable tatsächlich die Superklasse aller Exception-Typen in Java ist, einschließlich benutzerdefinierter Exceptions, die von RuntimeException abgeleitet sind.",
+        "correct": false
+      },
+      {
+        "reasoning": "RuntimeExceptions und ihre Subklassen können abgefangen werden, wenn ein entsprechender catch-Block vorhanden ist. Das Vorhandensein eines catch-Blocks für Throwable sorgt dafür, dass die Exception abgefangen wird und das Programm nicht sofort beendet wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "RuntimeExceptions können von jedem catch-Block abgefangen werden, der RuntimeException selbst, eine ihrer Superklassen (wie Exception oder Throwable), oder eine ihrer Subklassen angibt. Sie müssen nicht explizit durch die genaue Exception-Klasse angegeben werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine Exception, die von RuntimeException abgeleitet ist, wird nicht als Error behandelt. Errors sind eine separate Kategorie von Throwable, die für schwerwiegende Probleme wie Hardwarefehler oder interne JVM-Fehler verwendet werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn ein catch-Block für Throwable vorhanden ist, wird die Exception dort abgefangen und nicht an den übergeordneten Methodenaufruf weitergeleitet. Throwable ist spezifisch genug, um alle Exceptions und Errors abzufangen.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie verhält sich Java, wenn eine benutzerdefinierte Exception, die das Interface AutoCloseable implementiert, in einem try-with-resources Block auftritt?",
+    "evaluations": [
+      {
+        "reasoning": "Java ignoriert keine Exceptions aufgrund der automatischen Schließung von Ressourcen im try-with-resources Block. Alle Exceptions werden behandelt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn eine Exception in einem try-with-resources Block auftritt, wird sie an den Aufrufer der Methode weitergeleitet, auch ohne einen catch-Block. Allerdings müssen Ressourcen, die AutoCloseable implementieren, korrekt geschlossen werden, bevor die Exception weitergeleitet wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das ist korrekt. Ressourcen, die AutoCloseable implementieren, werden vor dem Werfen der Exception geschlossen. Danach wird die Exception wie üblich behandelt.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das try-with-resources Konstrukt ist mit benutzerdefinierten Exceptions, die AutoCloseable implementieren, kompatibel. Es wurde speziell dafür entworfen, um sicherzustellen, dass Ressourcen geschlossen werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine benutzerdefinierte Exception wird nicht unterdrückt und durch eine IOException ersetzt. Die ursprüngliche Exception wird weitergeleitet, nachdem die Ressourcen geschlossen wurden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Ressourcen im try-with-resources Block werden immer geschlossen, auch wenn eine Exception auftritt. Das ist der Hauptzweck des try-with-resources Konstrukts.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie verhält sich Java, wenn eine benutzerdefinierte Exception, die von keiner Standard-Exception-Klasse abgeleitet ist, in einem try-Block geworfen wird und ein catch-Block für eine spezifische, aber nicht zutreffende Exception vorhanden ist?",
+    "evaluations": [
+      {
+        "reasoning": "Java wird nicht normal weiterlaufen, wenn eine benutzerdefinierte Exception geworfen wird und kein passender catch-Block vorhanden ist. Stattdessen wird die Exception an den nächsthöheren Aufrufer weitergeleitet, bis sie entweder abgefangen oder das Programm beendet wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn keine passende catch-Anweisung für die benutzerdefinierte Exception vorhanden ist, wird die Exception nicht abgefangen und das Programm wird nicht normal weiterlaufen. Stattdessen wird die Exception an den nächsthöheren Aufrufer weitergeleitet.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine benutzerdefinierte Exception wird nicht ignoriert, nur weil sie von keiner Standard-Exception-Klasse abgeleitet ist. Sie wird wie jede andere Throwable behandelt und muss abgefangen oder weitergeleitet werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird jede Exception, die von der Klasse Throwable abgeleitet ist, als Throwable behandelt. Wenn also kein spezifischer catch-Block für die benutzerdefinierte Exception vorhanden ist, könnte sie von einem catch-Block abgefangen werden, der Throwable oder eine seiner Superklassen fängt, sofern ein solcher existiert.",
+        "correct": true
+      },
+      {
+        "reasoning": "Wenn eine benutzerdefinierte Exception geworfen wird und kein passender catch-Block vorhanden ist, wird die Exception an den nächsthöheren Aufrufer weitergeleitet, bis sie entweder abgefangen oder das Programm beendet wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "In Java werden benutzerdefinierte Exceptions nicht automatisch in RuntimeExceptions umgewandelt. Sie behalten ihren Typ, es sei denn, sie werden explizit im Code umgewandelt oder erweitern RuntimeException.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie verhält sich Java, wenn eine benutzerdefinierte Exception, die von RuntimeException abgeleitet ist, geworfen wird und keine entsprechende catch-Anweisung vorhanden ist?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird das Programm nicht normal fortgesetzt, wenn eine Exception auftritt. Stattdessen wird die Ausführung des aktuellen Blocks beendet und nach einem passenden Exception-Handler gesucht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn keine catch-Anweisung für eine RuntimeException vorhanden ist, wird die Exception nicht zur nächsten umgebenden try-catch-Struktur weitergeleitet, sondern der Thread, in dem die Exception auftritt, wird beendet, es sei denn, es gibt einen Handler weiter oben im Call-Stack.",
+        "correct": false
+      },
+      {
+        "reasoning": "RuntimeExceptions müssen nicht zwingend abgefangen werden (unchecked exceptions), aber sie werden nicht ignoriert. Wenn sie nicht behandelt werden, führt dies zum Abbruch des Programms.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn eine RuntimeException auftritt und nicht abgefangen wird, wird das Programm beendet und der Stacktrace der Exception wird ausgegeben. Dies ist das Standardverhalten für nicht behandelte Exceptions.",
+        "correct": true
+      },
+      {
+        "reasoning": "Exceptions werden in Java nicht automatisch behoben. Die JVM gibt Informationen über die Exception aus und beendet den Thread, wenn keine Behandlung durch den Programmierer erfolgt.",
+        "correct": false
+      },
+      {
+        "reasoning": "RuntimeExceptions werden nicht als Warnungen geloggt und das Programm läuft nicht weiter, wenn sie nicht abgefangen werden. Stattdessen wird das Programm beendet und der Stacktrace wird ausgegeben.",
+        "correct": false
+      }
+    ]
+  }
+]
