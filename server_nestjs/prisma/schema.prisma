@@ -212,7 +212,7 @@ model File {
   contentElementId Int?
 }
 
-model ContentView {
+model ContentView { // n to n between content elements and conntent node. This way each content element can be used for multiple conctent nodes with different positions.
   id               Int            @id @default(autoincrement())
   contentNode      ContentNode    @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
   contentNodeId    Int

@@ -28,7 +28,7 @@ export class ContentViewComponent implements OnInit {
     this.contentViewData = data.contentViewData as ContentDTO;
     this.activeConceptNodeId = data.conceptNodeId as number;
     // sort contentElements by position
-    this.contentViewData.contentElements = this.contentViewData.contentElements.sort((a, b) => a.position - b.position);
+    this.contentViewData.contentElements = this.contentViewData.contentElements.sort((a, b) => a.positionInSpecificContentView - b.positionInSpecificContentView);
     // set default button style
     for(let i = 0; i < this.contentViewData.contentElements.length; i++) {
       this.applyCompletedStyle[i] = false;

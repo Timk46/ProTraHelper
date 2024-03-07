@@ -17,10 +17,16 @@ export interface ContentDTO {
     //discussion: Discussion // TODO: implement
 }
 
+export interface ContentViewDTO {
+    contentNode: ContentDTO;
+    contentElement: ContentElementDTO;
+    position: number;
+}
+
 export interface ContentElementDTO {
     id: number;
     type: contentElementType;
-    position: number;
+    positionInSpecificContentView: number;
     title?: string;
     text?: string;
     file?: FileDto;
