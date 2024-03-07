@@ -1,0 +1,292 @@
+[
+  {
+    "question": "Welche Methode wird in Java verwendet, um einen Datei-Stream zu schließen und sicherzustellen, dass alle gepufferten Daten korrekt geschrieben wurden?",
+    "evaluations": [
+      {
+        "reasoning": "Die Methode close() der FileOutputStream-Klasse wird verwendet, um den Stream zu schließen. Sie sorgt auch dafür, dass alle gepufferten Daten geschrieben werden, bevor der Stream geschlossen wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Methode flush() wird verwendet, um alle gepufferten Daten zu schreiben, aber sie schließt den Stream nicht. Nach dem Aufruf von flush() sollte immer noch close() aufgerufen werden, um den Stream zu schließen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Methode write() wird zum Schreiben von Daten in einen Stream verwendet, aber sie schließt den Stream nicht automatisch. Nach dem Schreiben der Daten muss close() aufgerufen werden, um den Stream zu schließen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Der Garbage Collector in Java kümmert sich um die Speicherbereinigung von Objekten, die nicht mehr referenziert werden, aber er schließt keine Streams. Es ist die Verantwortung des Programmierers, Streams mit close() zu schließen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Methode finalize() kann überschrieben werden, um Aufräumarbeiten vor der Objektzerstörung durchzuführen, aber es ist keine zuverlässige Methode, um Streams zu schließen. Es ist besser, close() explizit aufzurufen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Es gibt keine Methode open() mit einem Parameter 'close' in Java, um Streams zu schließen. Die korrekte Methode zum Schließen eines Streams ist close().",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Java-Methode wird typischerweise verwendet, um eine Datei zu öffnen und zu prüfen, ob sie existiert, bevor man Lese- oder Schreiboperationen durchführt?",
+    "evaluations": [
+      {
+        "reasoning": "Die Methode 'exists()' der Klasse 'File' ist die korrekte Methode, um zu prüfen, ob eine Datei existiert.",
+        "correct": true
+      },
+      {
+        "reasoning": "Es gibt keine Methode 'checkFile()' in der Klasse 'FileInputStream'. Die Existenz einer Datei wird nicht durch 'FileInputStream' geprüft, sondern durch die Klasse 'File'.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Methode 'openFile()' existiert nicht in der Klasse 'FileOutputStream'. 'FileOutputStream' wird verwendet, um eine Datei zum Schreiben zu öffnen, aber sie prüft nicht die Existenz der Datei.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Methode 'isFile()' der Klasse 'File' prüft, ob der angegebene Pfad eine Datei ist und nicht ein Verzeichnis, aber sie öffnet die Datei nicht für Lese- oder Schreiboperationen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Es gibt keine Methode 'validate()' in der Klasse 'FileWriter'. 'FileWriter' wird verwendet, um Zeichen in eine Datei zu schreiben, aber es prüft nicht die Existenz der Datei vor dem Schreiben.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Methode 'canRead()' der Klasse 'File' prüft, ob die Anwendung Lesezugriff auf die Datei hat. Wenn die Methode 'true' zurückgibt, bedeutet das, dass die Datei existiert und lesbar ist. Es ist eine indirekte Methode, um die Existenz einer Datei zu prüfen.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Welche Java-Klasse wird verwendet, um einen Datei-Stream zu erzeugen, der es erlaubt, eine Datei zeilenweise zu lesen?",
+    "evaluations": [
+      {
+        "reasoning": "Die Klasse FileReader liest tatsächlich Textdateien, aber sie tut dies zeichenweise und nicht zeilenweise.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse BufferedReader erweitert einen Reader um Pufferung, was das zeilenweise Lesen von Text durch die Methode readLine() ermöglicht.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Klasse FileOutputStream ist zum Schreiben von Dateien gedacht, nicht zum Lesen, und insbesondere nicht zum zeilenweisen Lesen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse ObjectOutputStream dient der Serialisierung von Objekten und hat keine Methoden zum zeilenweisen Lesen von Text.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse FileInputStream liest Rohbyte-Daten aus einer Datei und ist nicht für das zeilenweise Lesen von Textdateien ausgelegt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse FileWriter wird zum Schreiben in Dateien verwendet, nicht zum Lesen, daher ist sie für das zeilenweise Lesen nicht geeignet.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Java-Klasse wird verwendet, um eine Datei zu öffnen und den Inhalt Byte für Byte zu schreiben?",
+    "evaluations": [
+      {
+        "reasoning": "Die Klasse FileOutputStream ist in Java dazu vorgesehen, um binäre Daten Byte für Byte in eine Datei zu schreiben.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Klasse FileInputStream ist dazu da, um Daten Byte für Byte aus einer Datei zu lesen, nicht um sie zu schreiben.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse FileWriter wird verwendet, um Zeichen in eine Datei zu schreiben. Sie ist nicht für das Schreiben von binären Daten Byte für Byte vorgesehen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse BufferedWriter wird in Verbindung mit einem Writer, wie z.B. FileWriter, verwendet, um Zeichen effizient in eine Datei zu schreiben. Sie ist nicht für das Schreiben von binären Daten Byte für Byte vorgesehen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse DataOutputStream kann zwar zum Schreiben von binären Daten verwendet werden, aber sie bietet zusätzliche Methoden für primitive Datentypen. Die Klasse FileOutputStream wäre die direktere Wahl für das Schreiben von Bytes.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse PrintWriter wird verwendet, um formatierte Repräsentationen von Objekten in eine Textausgabe zu schreiben. Sie ist nicht für das Schreiben von binären Daten Byte für Byte vorgesehen.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Java-Klasse wird verwendet, um eine Datei zu öffnen, die sowohl Lese- als auch Schreiboperationen in einem einzigen Stream ermöglicht?",
+    "evaluations": [
+      {
+        "reasoning": "Die Klasse RandomAccessFile in Java ermöglicht es, an jede Stelle einer Datei zu springen (sowohl für Lese- als auch für Schreiboperationen), was sie ideal für den Zugriff auf Dateien macht, bei denen man sowohl lesen als auch schreiben möchte.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Klasse FileInputStream ist ausschließlich zum Lesen von Daten aus Dateien gedacht und unterstützt keine Schreiboperationen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse FileWriter ist ausschließlich zum Schreiben von Daten in Dateien gedacht und unterstützt keine Leseoperationen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse BufferedInputStream ist eine gepufferte Eingabestream-Klasse, die nur Leseoperationen unterstützt und keine Schreiboperationen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse FileOutputStream ist ausschließlich zum Schreiben von Daten in Dateien gedacht und unterstützt keine Leseoperationen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse FileChannel kann für Lese- und Schreiboperationen verwendet werden, arbeitet jedoch mit Kanälen (Channels) und nicht mit Streams im herkömmlichen Sinne. Sie ermöglicht dennoch das Lesen von und Schreiben in eine Datei, aber nicht über einen 'Stream'.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Java-Methode wird verwendet, um die Metadaten einer Datei zu lesen, ohne den Inhalt der Datei zu öffnen?",
+    "evaluations": [
+      {
+        "reasoning": "Die Methode 'readAttributes()' der Klasse 'Files' ist tatsächlich die Methode, die in Java verwendet wird, um die Metadaten einer Datei zu lesen, ohne den Inhalt zu öffnen. Sie ermöglicht es, verschiedene Dateiattribute in einer einzigen Operation zu lesen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Methode 'getAttribute()' existiert in der Klasse 'File', aber sie ist nicht dazu gedacht, Metadaten in der Art und Weise zu lesen, wie 'readAttributes()' es tut. 'getAttribute()' kann verwendet werden, um bestimmte Dateiattribute zu lesen, aber es ist nicht die Standardmethode, um alle Metadaten zu lesen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse 'FileInputStream' hat keine Methode namens 'metadata()'. 'FileInputStream' wird verwendet, um den Inhalt einer Datei zu lesen, nicht ihre Metadaten.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Methode 'openFileDescriptor()' existiert nicht in Java. Selbst wenn sie existieren würde, deutet der Name darauf hin, dass sie einen Dateideskriptor öffnen würde, nicht Metadaten lesen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Methode 'readLine()' der Klasse 'BufferedReader' wird verwendet, um Text aus einer Eingabedatenquelle Zeile für Zeile zu lesen, nicht um Metadaten zu lesen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse 'FileChannel' hat eine Methode namens 'getFileAttributeView()', die verwendet werden kann, um eine Ansicht der Dateiattribute zu erhalten. Es gibt jedoch keine Methode 'getFileAttributes()', und 'getFileAttributeView()' wird normalerweise nicht verwendet, um Metadaten direkt zu lesen, sondern um eine Ansicht zu erhalten, mit der man dann Attribute lesen kann.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Java-Klasse wird verwendet, um eine Datei zu öffnen und den Inhalt als Stream von Zeichen zu lesen, wobei die Kodierung der Zeichen berücksichtigt wird?",
+    "evaluations": [
+      {
+        "reasoning": "Die Klasse FileReader kann verwendet werden, um Dateiinhalte als Stream von Zeichen zu lesen. Sie berücksichtigt jedoch die Standardkodierung des Systems und erlaubt nicht die explizite Angabe einer Kodierung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse FileOutputStream ist eine Ausgabestream-Klasse für das Schreiben von Daten in Dateien und nicht für das Lesen von Zeichenströmen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse DataInputStream ermöglicht es, primitive Datentypen aus einem Eingabestream in einer maschinenunabhängigen Weise zu lesen. Sie ist nicht speziell für das Lesen von Zeichenströmen unter Berücksichtigung der Kodierung gedacht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse BufferedWriter ist eine Ausgabestream-Klasse, die zum Schreiben von Text in einen Stream verwendet wird, und nicht zum Lesen von Dateiinhalten.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse FileInputStream liest rohe Byte-Daten aus einer Datei und ist nicht speziell für das Lesen von Zeichenströmen unter Berücksichtigung der Kodierung gedacht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse InputStreamReader ist eine Brücke von Byte-Streams zu Zeichen-Streams. Sie liest Bytes und decodiert sie in Zeichen unter Verwendung einer angegebenen Charset-Kodierung, was sie zur korrekten Wahl für das Lesen von Dateiinhalten als Stream von Zeichen unter Berücksichtigung der Kodierung macht.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Welche Aussage trifft auf die Verwendung von Datei-Streams in Java zu, wenn man sequenzielle Schreib- oder Leseoperationen durchführen möchte?",
+    "evaluations": [
+      {
+        "reasoning": "FileInputStream und FileOutputStream sind tatsächlich spezialisierte Streams in Java, die für das Lesen aus bzw. Schreiben in Dateien verwendet werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Datei-Streams in Java, wie FileInputStream und FileOutputStream, ermöglichen sequenzielle Schreib- und Leseoperationen und nicht den direkten Zugriff auf Dateiinhalte.",
+        "correct": false
+      },
+      {
+        "reasoning": "Scanner und PrintWriter sind höherwertige Klassen, die auf Streams aufbauen und für das Lesen und Schreiben von Dateien verwendet werden können.",
+        "correct": true
+      },
+      {
+        "reasoning": "Datei-Streams in Java können sowohl für Text- als auch für Binärdateien verwendet werden. FileInputStream und FileOutputStream sind Beispiele für Streams, die Binärdateien verarbeiten können.",
+        "correct": false
+      },
+      {
+        "reasoning": "FileOutputStream verwendet intern einen Puffer, aber die Aussage, dass automatisch ein Dateipuffer eingerichtet wird, ist irreführend, da dies impliziert, dass es sich um einen speziellen Dateipuffer handelt, während es tatsächlich ein allgemeiner Ausgabestrompuffer ist.",
+        "correct": true
+      },
+      {
+        "reasoning": "Um eine Datei im Append-Modus zu öffnen, verwendet man nicht die Klasse FileDescriptor, sondern gibt einen entsprechenden Konstruktorparameter (einen boolean-Wert) an den FileOutputStream an, der angibt, dass im Append-Modus geschrieben werden soll.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Java-Klasse wird verwendet, um einen Datei-Stream zu erzeugen, der es ermöglicht, eine Datei mit einem spezifischen Zeichensatz zu schreiben?",
+    "evaluations": [
+      {
+        "reasoning": "FileWriter erlaubt das Schreiben von Text in Dateien, verwendet jedoch den Standardzeichensatz des Systems und nicht einen spezifischen Zeichensatz.",
+        "correct": false
+      },
+      {
+        "reasoning": "OutputStreamWriter ist eine Klasse, die einen OutputStream in einen Writer umwandelt und dabei einen spezifischen Zeichensatz verwenden kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "FileInputStream ist eine Klasse zum Lesen von Dateien, nicht zum Schreiben, und sie befasst sich nicht mit Zeichensätzen, da sie byte-orientiert ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "PrintWriter kann tatsächlich mit einem OutputStreamWriter kombiniert werden, um Text mit einem spezifischen Zeichensatz zu schreiben.",
+        "correct": true
+      },
+      {
+        "reasoning": "ByteBuffer ist eine Klasse aus dem NIO-Paket, die für die Pufferung von Daten beim Schreiben oder Lesen verwendet wird, aber sie ist nicht speziell für das Schreiben von Dateien mit einem spezifischen Zeichensatz konzipiert.",
+        "correct": false
+      },
+      {
+        "reasoning": "RandomAccessFile ermöglicht das Schreiben und Lesen von Dateien, aber es gibt keine Möglichkeit, einen spezifischen Zeichensatz für das Schreiben anzugeben.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Java-Klasse wird verwendet, um eine Datei zu öffnen und einen Datenstrom zu erzeugen, der es ermöglicht, Objekte zu serialisieren und in die Datei zu schreiben?",
+    "evaluations": [
+      {
+        "reasoning": "Die Klasse ObjectOutputStream ist in Java speziell dafür vorgesehen, Objekte zu serialisieren und in einen OutputStream zu schreiben, der dann mit einer Datei verbunden sein kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Klasse ObjectInputStream ist für das Lesen (Deserialisieren) von Objekten aus einem InputStream konzipiert, nicht für das Schreiben.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse FileWriter ist dazu gedacht, einfache Textdaten und nicht serialisierte Objekte in eine Datei zu schreiben.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse FileOutputStream ist ein OutputStream, der für das Schreiben von Bytes in eine Datei verwendet wird, aber sie serialisiert keine Objekte. Für die Objektserialisierung muss sie mit ObjectOutputStream kombiniert werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse FileInputStream ist ein InputStream, der für das Lesen von Bytes aus einer Datei verwendet wird, und hat keine Funktionalität zum Serialisieren von Objekten.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Klasse PrintWriter wird verwendet, um Text in eine Datei zu schreiben. Sie bietet keine Funktionalität zum Serialisieren von Objekten.",
+        "correct": false
+      }
+    ]
+  }
+]

@@ -1,0 +1,292 @@
+[
+  {
+    "question": "Wie wird in Java eine Instanzmethode deklariert, die einen Wert zurückgibt, und wie wird in Python eine äquivalente Funktion als Lambda-Ausdruck dargestellt?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird eine Methode, die einen Wert zurückgibt, mit einem Rückgabetyp vor dem Methodennamen deklariert, z.B. 'int'. Die Methode 'public int meineMethode()' ist korrekt deklariert, aber der Python Lambda-Ausdruck 'lambda x: x * 2' gibt das Doppelte des Eingabewertes zurück, was nicht notwendigerweise der Funktionalität der Java-Methode entspricht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Java-Methode 'public void meineMethode()' gibt keinen Wert zurück, da 'void' als Rückgabetyp angegeben ist. Der Python Lambda-Ausdruck 'lambda: None' gibt ebenfalls keinen Wert zurück. Diese Antwortmöglichkeit ist inkorrekt, da die Frage nach Methoden fragt, die einen Wert zurückgeben.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Java-Methode 'public int meineMethode()' ist korrekt deklariert, um einen int-Wert zurückzugeben. Der Python Lambda-Ausdruck 'lambda x: x' gibt den Eingabewert zurück, was der Funktionalität der Java-Methode entsprechen könnte. Diese Antwortmöglichkeit ist korrekt, wenn die Java-Methode tatsächlich den Eingabewert zurückgeben würde.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Java-Methode 'private int meineMethode()' ist korrekt deklariert, um einen int-Wert zurückzugeben, aber der Zugriffsmodifikator 'private' beschränkt die Sichtbarkeit auf die Klasse selbst. Der Python Lambda-Ausdruck 'lambda x: x + 1' gibt den inkrementierten Eingabewert zurück. Diese Antwortmöglichkeit ist inkorrekt, da die Frage nicht spezifiziert, dass die Sichtbarkeit der Methode eingeschränkt sein soll.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Java-Methode 'int meineMethode()' ist korrekt deklariert, um einen int-Wert zurückzugeben, auch ohne expliziten Zugriffsmodifikator, was 'package-private' Sichtbarkeit impliziert. Der Python Lambda-Ausdruck 'lambda x: x / 2' gibt den halbierten Eingabewert zurück. Diese Antwortmöglichkeit ist inkorrekt, da sie nicht der Funktionalität einer typischen Instanzmethode entspricht, die einen Wert zurückgibt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Java-Methode 'public int meineMethode(int x)' ist korrekt deklariert, um einen int-Wert zurückzugeben und nimmt einen Parameter 'x' entgegen. Der Python Lambda-Ausdruck 'lambda x: x' gibt den Eingabewert unverändert zurück, was der Funktionalität der Java-Methode entsprechen könnte. Diese Antwortmöglichkeit ist korrekt, wenn die Java-Methode tatsächlich den Eingabewert unverändert zurückgeben würde.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "In welcher Weise beeinflusst das Schlüsselwort 'static' in Java die Art und Weise, wie Operationen aufgerufen werden, und wie würde man eine äquivalente Operation in Python definieren?",
+    "evaluations": [
+      {
+        "reasoning": "In Java ermöglicht das Schlüsselwort 'static', dass eine Methode auf Klassenebene aufgerufen werden kann, ohne dass eine Instanz der Klasse erstellt werden muss. In Python würde man eine Methode mit dem Dekorator @classmethod versehen, um ein ähnliches Verhalten zu erreichen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'static' in Java beeinflusst definitiv die Art und Weise, wie Methoden aufgerufen werden, da es ermöglicht, Methoden auf Klassenebene aufzurufen. In Python gibt es keine direkte Entsprechung zu 'static', aber man würde keine spezielle Syntax verwenden, um das gleiche Verhalten wie eine nicht-statische Methode zu erreichen.",
+        "correct": false
+      },
+      {
+        "reasoning": "'static' in Java bedeutet nicht, dass die Methode nur innerhalb der Klasse aufgerufen werden kann. Es bedeutet, dass die Methode ohne eine Instanz der Klasse aufgerufen werden kann. In Python würde man eine private Methode mit einem Unterstrich als Präfix definieren, aber das kontrolliert nur die Sichtbarkeit, nicht die statische Natur der Methode.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine 'static' Methode in Java kann öffentlich oder privat sein, die Zugänglichkeit wird durch die Zugriffsmodifikatoren bestimmt, nicht durch das 'static' Schlüsselwort. In Python würde man keine globale Funktion definieren, um das Verhalten einer statischen Methode zu replizieren, sondern eine Methode mit @staticmethod oder @classmethod.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'static' in Java bewirkt, dass die Methode oder Variable auf Klassenebene und nicht auf Instanzebene existiert, was bedeutet, dass sie für alle Instanzen der Klasse gleich ist. In Python würde man eine Instanzmethode ohne Dekoratoren verwenden, um eine Methode zu definieren, die für jede Instanz unterschiedlich ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java ermöglicht 'static', dass eine Methode oder Variable Zustandsinformationen zwischen verschiedenen Instanzen der Klasse teilt, da sie auf Klassenebene definiert ist. In Python würde man eine statische Variable auf Modulebene definieren, um ein ähnliches Verhalten zu erreichen, nicht eine Methode.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie kann in Java eine Methode definiert werden, die eine generische Liste von Elementen eines Typs T sortiert, und was ist das Ergebnis einer solchen Methode in Python, wenn sie als Lambda-Funktion implementiert wird?",
+    "evaluations": [
+      {
+        "reasoning": "In Java erfordert das Sortieren von Objekten, dass diese vergleichbar sind, daher muss T das Comparable-Interface implementieren. Die korrekte Syntax in Java ist 'public static <T extends Comparable<T>> void sort(List<T> list)'. In Python gibt die 'sorted' Funktion eine neue sortierte Liste zurück und kann als Lambda-Funktion mit 'lambda list: sorted(list)' ausgedrückt werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, weil in Java, wenn man eine Liste von Elementen eines generischen Typs T sortieren möchte, T das Comparable-Interface implementieren muss, damit die Elemente verglichen werden können. Die Python-Lambda-Funktion 'lambda list: list.sort()' sortiert die Liste in-place und gibt None zurück, was nicht dem Ergebnis der 'sorted' Funktion entspricht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da sie zwei Fehler enthält: Erstens muss in Java T das Comparable-Interface implementieren, um sortiert werden zu können. Zweitens gibt es in Python keine Methode 'list.sorted()', die korrekte Methode ist 'sorted(list)'.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, weil sie nicht angibt, dass T in Java das Comparable-Interface implementieren muss. Außerdem ist die Python-Lambda-Funktion 'lambda list: list.sort()' inkorrekt, da 'list.sort()' die Liste in-place sortiert und None zurückgibt, was nicht dem Verhalten der 'sorted' Funktion entspricht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da 'T extends Object' in Java redundant ist, weil alle Klassen von Object erben. Die Python-Lambda-Funktion 'lambda list: list.sort(reverse=False)' ist ebenfalls falsch, da 'list.sort()' die Liste in-place sortiert und None zurückgibt, nicht eine neue sortierte Liste.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, weil sie in Java eine Methode definiert, die eine Liste zurückgibt, was nicht der Fragestellung entspricht, die nach einer void-Methode fragt. In Python ist die Lambda-Funktion 'lambda list: sorted(list, key=lambda x: x)' korrekt, aber sie ist redundant, da 'sorted(list)' ausreicht.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die ein Objekt eines generischen Typs T akzeptiert und dieses Objekt als Ergebnis einer Operation zurückgibt, und wie wird in Python eine äquivalente Funktion mit Typ-Hinweisen definiert?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird die generische Methode korrekt mit dem generischen Typsymbol <T> vor dem Rückgabetyp definiert, um anzugeben, dass es sich um einen generischen Typ handelt. In Python wird die Funktion mit Typ-Hinweisen korrekt definiert, indem der Typ des Parameters und der Rückgabetyp mit 'T' angegeben wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "In Java muss das generische Typsymbol <T> vor dem Rückgabetyp verwendet werden, um eine generische Methode zu definieren. In Python können Typ-Hinweise verwendet werden, um die Typen von Parametern und Rückgabewerten anzugeben.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java muss das generische Typsymbol <T> vor dem Rückgabetyp verwendet werden, um eine generische Methode zu definieren. In Python muss der Typ-Hinweis nach dem Parameter mit einem Doppelpunkt und nicht mit einem Pfeil angegeben werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java ist die Syntax für die Definition einer generischen Methode 'public <T> T operation(T input)', nicht 'public T<T> operation(T input)'. In Python ist die Syntax für Typ-Hinweise 'def operation(input: T) -> T', nicht 'def operation(input: T) -> T:'.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java muss das generische Typsymbol <T> vor dem Rückgabetyp verwendet werden, um eine generische Methode zu definieren. In Python würde die Verwendung eines Lambda-Ausdrucks ohne Typ-Hinweise nicht die Typinformationen bereitstellen, die in der Frage gefordert sind.",
+        "correct": false
+      },
+      {
+        "reasoning": "Generische Typen werden sowohl in Java als auch in Python unterstützt. In Java werden sie mit dem generischen Typsymbol <T> definiert, und in Python können Typ-Hinweise mit der Syntax 'input: T' für Parameter und '-> T' für Rückgabetypen verwendet werden.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java das Konzept der Kapselung umgesetzt, um den direkten Zugriff auf die Attribute eines Objekts zu verhindern, und wie wird in Python ein Attribut als privat gekennzeichnet?",
+    "evaluations": [
+      {
+        "reasoning": "In Java werden Attribute tatsächlich mit dem Schlüsselwort 'private' deklariert, um sie zu kapseln. In Python wird ein einzelner Unterstrich vor dem Attributnamen als Konvention verwendet, um anzuzeigen, dass ein Attribut nicht öffentlich sein soll, obwohl es technisch nicht privat ist. Ein doppelter Unterstrich führt zu einer Namensmangelung, die das Attribut schwerer zugänglich macht, aber nicht im strengen Sinne privat.",
+        "correct": true
+      },
+      {
+        "reasoning": "Java verwendet nicht das Schlüsselwort 'hidden', sondern 'private', um Attribute zu kapseln. In Python werden zwei Unterstriche verwendet, um ein Attribut als privat zu kennzeichnen, was zu einer Namensmangelung führt, die das Attribut schwerer zugänglich macht.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird der Zugriff auf Attribute durch die Verwendung des Schlüsselworts 'private' geregelt, nicht durch das Paket 'java.security'. In Python können Attribute durch Voranstellen von zwei Unterstrichen als privat gekennzeichnet werden, auch wenn dies nicht echte Privatheit im Sinne von Zugriffskontrolle bietet.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'private' wird in Java verwendet, um Attribute zu verbergen, aber in Python gibt es kein Schlüsselwort 'private'. Stattdessen wird die Konvention eines vorangestellten Unterstrichs verwendet, oder zwei Unterstriche für Namensmangelung.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java werden tatsächlich Methoden (Getter und Setter) verwendet, um den Zugriff auf Attribute zu steuern, wenn diese als 'private' deklariert sind. In Python wird jedoch nicht das Schlüsselwort 'private' verwendet, sondern die Konvention eines vorangestellten Unterstrichs oder zwei Unterstriche für Namensmangelung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'protected' in Java bietet eingeschränkten Zugriff, ist aber nicht gleichbedeutend mit 'private'. In Python wird durch das Voranstellen von zwei Unterstrichen ein Attribut schwerer zugänglich gemacht, was der Konvention für private Attribute entspricht.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die eine beliebige Anzahl von Argumenten desselben Typs akzeptiert, und wie wird in Python eine äquivalente Funktion mit variablen Argumenten definiert?",
+    "evaluations": [
+      {
+        "reasoning": "In Java verwendet man das Schlüsselwort 'varargs', indem man drei Punkte '...' vor dem Parametertyp angibt. In Python verwendet man das Unpacking-Prinzip mit einem Sternchen '*', um eine beliebige Anzahl von Argumenten zu akzeptieren.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'unpack' existiert in Java nicht in diesem Kontext, und 'varargs' ist kein Schlüsselwort in Python. Die korrekte Syntax in Java ist '...', und in Python wird '*' vor dem Parameter verwendet.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird nicht explizit ein Array als Parameter definiert, sondern die Syntax '...' verwendet, um varargs zu definieren. In Python wird nicht eine Liste verwendet, sondern das Sternchen '*', um variable Argumente zu definieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'args' wird in dieser Form in keiner der beiden Sprachen verwendet, um Methoden mit variablen Argumenten zu definieren. In Java verwendet man '...', und in Python das Sternchen '*'.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird tatsächlich ein einzelner Parameter mit drei Punkten '...' definiert, um varargs zu ermöglichen. In Python wird jedoch nicht das gleiche Symbol verwendet, sondern das Sternchen '*' vor dem Parameter.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'params' wird in Java nicht verwendet. In Python bezieht sich 'kwargs' auf ein Dictionary von Schlüsselwort-Argumenten, das mit zwei Sternchen '**' definiert wird, und nicht auf eine beliebige Anzahl von Argumenten desselben Typs.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java das Überladen von Methoden realisiert, und was ist das äquivalente Konzept in Python, um Funktionen mit der gleichen Bezeichnung aber unterschiedlichen Parametern zu definieren?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird das Überladen von Methoden tatsächlich durch das Definieren mehrerer Methoden mit demselben Namen aber unterschiedlichen Parameterlisten erreicht. In Python wird das Überladen nicht direkt unterstützt, aber man kann Funktionen mit optionalen oder Schlüsselwort-Parametern definieren, um ähnliche Funktionalitäten zu erreichen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Weder Java noch Python verwenden das Schlüsselwort 'overload'. In Java wird das Überladen durch unterschiedliche Parameterlisten erreicht, und Python hat kein direktes Äquivalent für das Überladen von Funktionen.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird das Überladen von Methoden nicht durch unterschiedliche Rückgabetypen erreicht, sondern durch unterschiedliche Parameterlisten. In Python wird das Überladen nicht durch Dekoratoren ermöglicht, sondern kann durch Funktionen mit optionalen oder Schlüsselwort-Parametern simuliert werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'override' wird in Java verwendet, um zu kennzeichnen, dass eine Methode in einer Unterklasse eine Methode der Oberklasse überschreibt, nicht für das Überladen von Methoden. Python verwendet das Schlüsselwort 'override' nicht.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird das Überladen von Methoden nicht durch unterschiedliche Methodennamen erreicht, sondern durch Methoden mit demselben Namen und unterschiedlichen Parameterlisten. Python verwendet keine spezielle Syntax für das Überladen von Funktionen, da es nicht direkt unterstützt wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'def' wird in beiden Sprachen verwendet, um Methoden bzw. Funktionen zu definieren, aber nicht speziell für das Überladen. Überladen in Java wird durch unterschiedliche Parameterlisten erreicht, und Python unterstützt das Überladen nicht direkt.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java das Konzept der Vererbung genutzt, um eine Methode einer Oberklasse in einer Unterklasse zu überschreiben, und wie wird in Python eine Methode überschrieben, um das Verhalten einer Methode einer Basisklasse zu ändern?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird tatsächlich die '@Override' Annotation verwendet, um dem Compiler mitzuteilen, dass die Methode eine Überschreibung einer Methode der Oberklasse ist. In Python wird das Überschreiben einer Methode erreicht, indem man in der abgeleiteten Klasse eine Methode mit dem gleichen Namen definiert.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'super' in Java wird verwendet, um auf Methoden und Eigenschaften der Oberklasse zuzugreifen, nicht um sie zu überschreiben. In Python wird eine Methode überschrieben, indem sie in der abgeleiteten Klasse neu definiert wird, ohne ein spezielles Schlüsselwort zu verwenden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'extends' in Java wird verwendet, um eine Klasse als Unterklasse einer anderen zu deklarieren, nicht um Methoden zu überschreiben. In Python gibt es kein Schlüsselwort 'override'.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'implements' in Java wird verwendet, um eine Schnittstelle zu implementieren, nicht um Methoden zu überschreiben. In Python wird das Schlüsselwort 'pass' verwendet, um in einer Methode keinen Code auszuführen, es hat nichts mit dem Überschreiben von Methoden zu tun.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'override' existiert in Python nicht. In Java wird '@Override' als Annotation verwendet, nicht als Schlüsselwort.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird keine spezielle Syntax benötigt, um eine Methode zu überschreiben, aber es wird empfohlen, die '@Override' Annotation zu verwenden. In Python wird eine Methode nicht mit einem Unterstrich vorangestellt überschrieben, sondern einfach durch Neudefinition mit dem gleichen Namen in der abgeleiteten Klasse.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java das Konzept der Polymorphie genutzt, um unterschiedliche Implementierungen einer Methode in verschiedenen Klassen zu ermöglichen, und wie wird in Python eine ähnliche Funktionalität durch Duck Typing erreicht?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird Polymorphie tatsächlich durch das Überschreiben von Methoden in abgeleiteten Klassen erreicht. In Python ermöglicht Duck Typing, dass ein Objekt in einem Kontext verwendet werden kann, wenn es alle erforderlichen Methoden und Eigenschaften bereitstellt, ohne dass eine spezifische Klasse oder ein spezifisches Interface erforderlich ist.",
+        "correct": true
+      },
+      {
+        "reasoning": "Java verwendet nicht das Schlüsselwort 'polymorph', und Python verwendet nicht das Schlüsselwort 'duck' für Duck Typing. Diese Schlüsselwörter existieren in den genannten Sprachen nicht in diesem Kontext.",
+        "correct": false
+      },
+      {
+        "reasoning": "Polymorphie in Java erfordert nicht zwingend die Verwendung von Interfaces, sie kann auch durch Vererbung erreicht werden. Python benötigt keine speziellen Dekoratoren für Duck Typing, da es auf dem Prinzip 'If it walks like a duck and it quacks like a duck, then it must be a duck' basiert.",
+        "correct": false
+      },
+      {
+        "reasoning": "Polymorphie in Java wird nicht ausschließlich durch abstrakte Klassen realisiert, sondern kann auch durch Interfaces oder konkrete Klassen mit überschriebenen Methoden erreicht werden. Python erreicht Duck Typing nicht durch Vererbung von einer Basisklasse, sondern durch das Prinzip, dass Objekte mit den erforderlichen Methoden in einem bestimmten Kontext verwendet werden können.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'override' wird in Java verwendet, um anzuzeigen, dass eine Methode einer Superklasse überschrieben wird, aber Python verwendet dieses Schlüsselwort nicht für Duck Typing.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist teilweise korrekt. Polymorphie in Java wird durch das Implementieren von Interfaces und das Überschreiben von Methoden erreicht. In Python sind Objekte mit gleichen Methoden austauschbar, aber das ist eine Vereinfachung des Duck Typing Prinzips, das nicht nur gleiche Methodennamen, sondern auch passende Signatur und Verhalten erwartet.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die eine variable Anzahl von Argumenten unterschiedlichen Typs akzeptiert, und wie wird in Python eine äquivalente Funktion mit Keyword-Argumenten definiert?",
+    "evaluations": [
+      {
+        "reasoning": "In Java verwendet man das Varargs-Feature mit der Syntax 'Typ... name', um eine variable Anzahl von Argumenten desselben Typs zu akzeptieren. In Python verwendet man '**kwargs', um eine Funktion zu definieren, die eine beliebige Anzahl von Keyword-Argumenten akzeptiert.",
+        "correct": true
+      },
+      {
+        "reasoning": "Java unterstützt Methoden mit variablen Argumenten durch das Varargs-Feature, das mit der Syntax 'Typ... name' verwendet wird, nicht 'params'. In Python verwendet man '*args', um eine Funktion zu definieren, die eine beliebige Anzahl von Positional-Argumenten akzeptiert, nicht Keyword-Argumente.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java kann man Methoden überladen, um verschiedene Typen von Argumenten zu akzeptieren, aber das ist nicht dasselbe wie eine Methode zu definieren, die eine variable Anzahl von Argumenten unterschiedlichen Typs akzeptiert. In Python verwendet man 'def func(*args, **kwargs)', um sowohl Positional- als auch Keyword-Argumente in beliebiger Anzahl zu akzeptieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Java verwendet nicht das Schlüsselwort 'params', sondern 'Typ... name' für Varargs. In Python definiert man eine Funktion mit 'def func(*args)' für variable Positional-Argumente, nicht Keyword-Argumente.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java kann man 'Object...' verwenden, um eine Methode zu definieren, die eine variable Anzahl von Argumenten akzeptiert, die alle vom Typ Object oder einem Subtyp davon sein müssen. In Python verwendet man 'def func(**kwargs)' für Keyword-Argumente.",
+        "correct": true
+      },
+      {
+        "reasoning": "Java und Python verwenden nicht dasselbe Schlüsselwort für Methoden mit variablen Argumenten. Java verwendet 'Typ... name', während Python '*args' für Positional-Argumente und '**kwargs' für Keyword-Argumente verwendet.",
+        "correct": false
+      }
+    ]
+  }
+]

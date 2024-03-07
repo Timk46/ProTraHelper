@@ -1,0 +1,302 @@
+[
+  {
+    "question": "Welche Rolle spielt das Konzept des Methoden-Signaturvergleichs bei der Entscheidung, welche Implementierung einer überladenen Methode zur Laufzeit aufgerufen wird?",
+    "evaluations": [
+      {
+        "reasoning": "Die Methoden-Signatur, bestehend aus dem Methodennamen und den Parametertypen, ist entscheidend, um die korrekte Implementierung einer überladenen Methode zur Laufzeit zu identifizieren.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Rückgabetypen sind nicht Teil der Methodensignatur und daher nicht ausschlaggebend für die Auswahl der Methode zur Laufzeit. Die Signatur bezieht sich auf den Methodennamen und die Parametertypen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Der Methodenname allein ist nicht ausreichend, um die korrekte Methode zu identifizieren, da überladene Methoden denselben Namen haben können, sich aber in den Parametertypen unterscheiden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Sichtbarkeit einer Methode beeinflusst nicht die Auswahl der Methode zur Laufzeit im Kontext von Überladung, sondern bestimmt, ob die Methode von außerhalb der Klasse oder des Pakets sichtbar ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Reihenfolge der Methodendefinitionen in einer Klasse hat keinen Einfluss darauf, welche Implementierung einer überladenen Methode zur Laufzeit aufgerufen wird. Es kommt auf die Übereinstimmung der Signatur mit den übergebenen Argumenten an.",
+        "correct": false
+      },
+      {
+        "reasoning": "Statische und nicht-statische Methoden können überladen werden. Die Entscheidung, welche Methode aufgerufen wird, hängt von der Übereinstimmung der Methodensignatur mit den übergebenen Argumenten ab, nicht davon, ob die Methode statisch ist oder nicht.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung in objektorientierte und funktionale Programmierung angemessen. Sie testet das Verständnis des Konzepts der Methodenüberladung und des Signaturvergleichs, was eine höhere kognitive Fähigkeit darstellt. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren, die verschiedene Missverständnisse abdecken. Es gibt keine erkennbaren Muster, die zur Antwortfindung durch Eliminierung führen könnten, und die Distraktoren sind thematisch passend und nicht irreführend. Die MCQ entspricht den Vorgaben der Anweisungen A, B, C und D."
+  },
+  {
+    "question": "Wie wird in Java eine Methode innerhalb einer Klasse definiert, die eine Implementierung einer abstrakten Methode aus einer Schnittstelle darstellt?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird eine Methode, die eine abstrakte Methode aus einer Schnittstelle implementiert, nicht mit 'abstract' gekennzeichnet, da sie implementiert werden muss und nicht abstrakt bleiben kann.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine Methode, die eine Schnittstellenmethode implementiert, wird als normaler Klasseninhalt definiert, ohne zusätzliche Schlüsselwörter wie 'abstract', 'static' oder 'interface'.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'implements' wird in Java auf Klassenebene verwendet, um anzugeben, dass eine Klasse eine Schnittstelle implementiert, nicht auf Methodenebene.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'interface' wird verwendet, um eine Schnittstelle in Java zu definieren, nicht um eine Methode zu kennzeichnen, die eine Schnittstellenmethode implementiert.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine Methode, die eine Schnittstellenmethode implementiert, muss den gleichen Namen und die gleiche Signatur wie in der Schnittstelle haben und muss implementiert werden. Dies ist eine korrekte Aussage.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'static' wird in Java verwendet, um Klassenmethoden zu definieren, die nicht zu Instanzen gehören. Es wird nicht verwendet, um eine Methode zu kennzeichnen, die eine Schnittstellenmethode implementiert.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren, die verschiedene Missverständnisse abdecken. Die MCQ erfüllt die Anforderungen an eine gute MCQ, da sie Verständnis und Anwendung des Konzepts der Implementierung von Schnittstellenmethoden in Java testet und keine sprachlichen Verzerrungen oder erkennbare Muster aufweist, die das Erraten der Antwort erleichtern würden."
+  },
+  {
+    "question": "Welche Aussage trifft auf die Verwendung von Methodenparametern unterschiedlichen Typs beim Überladen von Methoden zu?",
+    "evaluations": [
+      {
+        "reasoning": "Diese Aussage ist falsch. Methoden können sehr wohl überladen werden, indem sie sich nur im Typ ihrer Parameter unterscheiden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch. Beim Überladen von Methoden ist es nicht erforderlich, dass jede Methode eine unterschiedliche Anzahl von Parametern hat; sie können sich auch nur im Typ unterscheiden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch. Überladene Methoden müssen nicht unterschiedliche Rückgabetypen aufweisen. Es ist möglich, dass überladene Methoden den gleichen Rückgabetyp haben, solange sie sich in der Anzahl oder den Typen der Parameter unterscheiden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Aussage ist wahr. Methodenüberladung ermöglicht es, Methoden mit demselben Namen zu definieren, die sich in der Anzahl oder dem Typ der Parameter unterscheiden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Aussage ist wahr. Der Compiler verwendet den Typ und die Anzahl der übergebenen Argumente, um zu bestimmen, welche überladene Methode aufgerufen wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch. Eine Methode kann überladen werden, unabhängig davon, ob sie statisch ist oder nicht, und sie muss nicht in einer Schnittstelle definiert sein, um überladen werden zu können.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren, die verschiedene Missverständnisse abdecken. Die MCQ erfüllt die Anforderungen an eine gute MCQ, da sie höhere kognitive Fähigkeiten testet, indem sie das Verständnis von Methodenüberladung prüft und nicht nur Faktenwissen abfragt. Es gibt keine sprachlichen Verzerrungen, und die Distraktoren sind plausibel und relevant, ohne erkennbare Muster, die zur Antwortfindung durch Eliminierung führen könnten."
+  },
+  {
+    "question": "Welche Aussage trifft auf die Rolle von Methodensignaturen in der objektorientierten Programmierung zu, wenn es um die Unterscheidung zwischen Methoden-Überladung und Methoden-Implementierung geht?",
+    "evaluations": [
+      {
+        "reasoning": "Diese Antwort ist falsch, da Methodensignaturen sehr wohl relevant sind, wenn es um Methoden-Überladung geht. Die Methodensignatur, die aus dem Methodennamen und der Parameterliste besteht, muss unterschiedlich sein, um Methoden zu überladen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da eine Methodensignatur nicht nur aus dem Methodennamen besteht, sondern auch die Parameterliste beinhaltet. Sie ist entscheidend für die Unterscheidung zwischen Überladung und Implementierung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist wahr, da Methoden-Überladung unterschiedliche Methodensignaturen erfordert, während bei der Implementierung die Signatur der abstrakten Methode exakt übereinstimmen muss, um die Methode korrekt zu implementieren.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da die Implementierung einer Methode die Methodensignatur nicht ignorieren kann. Der Methodenname und die Parameterliste müssen mit der zu implementierenden Methode übereinstimmen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da Methodensignaturen sowohl bei der Überschreibung (Overriding) als auch beim Überladen (Overloading) und Implementieren von Methoden relevant sind.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist wahr, da beim Überladen von Methoden die Rückgabetypen variieren können, solange die Parameterliste unterschiedlich ist. Bei der Implementierung muss jedoch der Rückgabetyp der Oberklasse beibehalten werden, wenn es sich um eine konkrete Implementierung einer abstrakten Methode handelt.",
+        "correct": true
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung zur objektorientierten und funktionalen Programmierung angemessen. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren, die verschiedene Missverständnisse abdecken. Die MCQ erfüllt die Anforderungen an eine gute MCQ, da sie höhere kognitive Fähigkeiten testet, indem sie das Verständnis von Konzepten wie Methoden-Überladung und -Implementierung fordert. Es gibt keine sprachlichen Verzerrungen, und die Distraktoren sind plausibel und relevant, ohne erkennbare Muster, die zur Antwortfindung durch Eliminierung führen könnten."
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die je nach Typ des übergebenen Parameters unterschiedliche Implementierungen ausführt?",
+    "evaluations": [
+      {
+        "reasoning": "In Java ist es nicht möglich, Methoden allein aufgrund unterschiedlicher Rückgabetypen zu überladen. Die Parameter müssen sich unterscheiden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Dies ist eine korrekte Beschreibung von Methodenüberladung (Overloading) in Java, bei der Methoden den gleichen Namen haben können, aber unterschiedliche Parametertypen aufweisen müssen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Obwohl es möglich ist, eine Methode mit if-else-Anweisungen zu schreiben, die verschiedene Typen überprüft, ist dies nicht die übliche Art, in Java unterschiedliche Implementierungen je nach Parametertyp auszuführen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'dynamic' existiert in Java in diesem Kontext nicht. Methodenüberladung wird nicht durch ein Schlüsselwort, sondern durch unterschiedliche Parameterlisten erreicht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Implementieren einer Methode in einer Schnittstelle und das Überschreiben in jeder Klasse ist eine Form der Polymorphie, aber es ist nicht das, was gefragt ist. Die Frage zielt auf Methodenüberladung ab, nicht auf Polymorphie durch Schnittstellen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Deklarieren einer Methode als 'final' verhindert, dass sie in einer Unterklasse überschrieben wird. Es hat nichts mit der Überladung von Methoden für verschiedene Parametertypen zu tun.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung in objektorientierte und funktionale Programmierung angemessen. Die Antwortoptionen enthalten eine korrekte Lösung und plausible Distraktoren, die verschiedene Missverständnisse und falsche Konzepte abdecken. Die MCQ erfüllt die Anforderungen an eine gute Fragestellung, da sie Verständnis und Anwendung des Konzepts der Methodenüberladung testet und keine sprachlichen Verzerrungen oder erkennbare Muster aufweist, die das Erraten der richtigen Antwort erleichtern würden."
+  },
+  {
+    "question": "Angenommen, Sie haben eine abstrakte Klasse 'Gerät' mit einer abstrakten Methode 'einschalten'. Wie würden Sie in einer Unterklasse 'Lampe', die von 'Gerät' erbt, die Methode 'einschalten' korrekt implementieren?",
+    "evaluations": [
+      {
+        "reasoning": "Das Schlüsselwort 'abstract' wird verwendet, um eine abstrakte Methode in einer abstrakten Klasse zu deklarieren. In einer konkreten Unterklasse muss die Methode konkret implementiert werden, nicht als abstrakt gekennzeichnet.",
+        "correct": false
+      },
+      {
+        "reasoning": "Dies ist die korrekte Vorgehensweise, um eine abstrakte Methode in einer Unterklasse zu implementieren. Die Methode muss mit dem gleichen Methodenkopf definiert und mit spezifischen Anweisungen für das Verhalten der Unterklasse implementiert werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Methode 'einschalten' als 'static' zu deklarieren würde bedeuten, dass sie zur Klasse gehört und nicht zu einem Objekt. Dies widerspricht dem Konzept der Vererbung und Instanzmethoden in der objektorientierten Programmierung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Da 'Gerät' eine abstrakte Klasse ist und 'einschalten' eine abstrakte Methode, muss sie in der Unterklasse 'Lampe' implementiert werden, um ein konkretes Verhalten zu definieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Implementierung einer Methode als 'private' in einer Unterklasse, die eine abstrakte Methode überschreibt, würde die Sichtbarkeit einschränken und ist nicht zulässig. Die Methode muss mindestens so zugänglich sein wie in der Oberklasse.",
+        "correct": false
+      },
+      {
+        "reasoning": "Der Rückgabetyp einer überschriebenen Methode in einer Unterklasse muss mit dem Rückgabetyp in der Oberklasse übereinstimmen. Eine Änderung des Rückgabetyps würde nicht als korrekte Überschreibung gelten.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung. Die Antwortoptionen enthalten eine korrekte Lösung und plausible Distraktoren, die verschiedene Missverständnisse und falsche Annahmen abdecken. Es gibt kein erkennbares Muster, das zur Antwortfindung durch Eliminierung führen könnte, und die Distraktoren sind herausfordernd, aber nicht verwirrend. Die MCQ erfüllt die Anforderungen an eine gut konstruierte Frage, da sie höhere kognitive Fähigkeiten testet, indem sie das Verständnis der Vererbung und Methodenimplementierung in der objektorientierten Programmierung prüft."
+  },
+  {
+    "question": "Welche Aussage trifft auf die Definition und Verwendung von statischen und nicht-statischen überladenen Methoden in einer Klasse zu?",
+    "evaluations": [
+      {
+        "reasoning": "Statische Methoden können überladen werden, solange sie unterschiedliche Parameterlisten haben. Die Bindung an die Klasse statt an Instanzen verhindert nicht das Überladen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Nicht-statische Methoden können überladen werden und sind innerhalb von Objektinstanzen verfügbar. Sie müssen nicht ausschließlich innerhalb von Objektinstanzen überladen werden und sind auch klassenweit zugänglich, wenn sie public oder protected sind.",
+        "correct": false
+      },
+      {
+        "reasoning": "Überladene statische Methoden können gleiche Rückgabetypen haben, solange ihre Parameterlisten sich unterscheiden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Aussage ist korrekt. Sowohl statische als auch nicht-statische Methoden können überladen werden, wenn sie unterschiedliche Parameterlisten haben.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine überladene Methode kann auch die gleiche Anzahl von Parametern haben, solange die Typen der Parameter unterschiedlich sind.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Überladen von Methoden ist innerhalb derselben Klasse möglich und nicht auf verschiedene Klassen beschränkt.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren, die verschiedene Missverständnisse abdecken. Die Distraktoren sind thematisch passend und vermeiden erkennbare Muster, die zur Antwortfindung durch Eliminierung führen könnten. Die MCQ erfüllt die Anforderungen an eine gute MCQ, da sie höhere kognitive Fähigkeiten testet, indem sie das Verständnis von Konzepten über Faktenwissen hinaus fordert und die Antwort nicht einfach erraten werden kann."
+  },
+  {
+    "question": "Wie wird in Java eine Methode innerhalb einer Klasse definiert, die eine konkrete Implementierung einer abstrakten Methode aus einer Oberklasse darstellt, ohne dabei die Signatur zu verändern?",
+    "evaluations": [
+      {
+        "reasoning": "Das Schlüsselwort 'abstract' wird verwendet, um eine abstrakte Methode zu deklarieren, nicht um sie zu implementieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'static' wird verwendet, um eine statische Methode zu deklarieren, die nicht zu einer Instanz der Klasse gehört. Dies ist nicht die Art und Weise, wie eine abstrakte Methode implementiert wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'final' wird verwendet, um zu verhindern, dass eine Methode in einer Unterklasse überschrieben wird. Es wird nicht verwendet, um eine abstrakte Methode zu implementieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine konkrete Implementierung einer abstrakten Methode erfolgt durch Definieren der Methode mit der gleichen Signatur und einem Methodenkörper, der die spezifische Implementierung enthält, ohne zusätzliche Schlüsselwörter.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'implements' wird verwendet, um ein Interface zu implementieren, nicht um eine Methode zu definieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java gibt es kein Schlüsselwort 'override'. Stattdessen wird die Annotation '@Override' verwendet, um dem Compiler mitzuteilen, dass die Methode eine Oberklassenmethode überschreibt. Dies ist jedoch nicht erforderlich, um eine Methode zu definieren.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung. Die Antwortoptionen enthalten plausible Distraktoren, die verschiedene Missverständnisse abdecken, wie das Verwenden von 'abstract', 'static', 'final', 'implements' und 'override' in falschem Kontext. Die korrekte Antwort ist eindeutig und die Distraktoren sind relevant und herausfordernd, ohne verwirrend zu sein. Die MCQ erfüllt die Anforderungen an eine gute Formulierung und testet das Verständnis der Konzepte, die über reines Faktenwissen hinausgehen. Es gibt keine erkennbaren Muster, die zur Antwortfindung durch Eliminierung führen könnten, und die Frage prüft höhere Denkprozesse, da sie das Verständnis der Implementierung von Methoden in Java erfordert."
+  },
+  {
+    "question": "Welche Aussage trifft auf die Unterscheidung zwischen statischen und Instanzmethoden zu, wenn es um das Überladen von Methoden in einer Klasse geht?",
+    "evaluations": [
+      {
+        "reasoning": "Statische Methoden können überladen werden, indem man Methoden mit demselben Namen aber unterschiedlichen Parameterlisten definiert. Diese Aussage ist also falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Instanzmethoden können mit unterschiedlichen Parameterlisten überladen werden, unabhängig vom Rückgabetyp. Statische Methoden können ebenfalls überladen werden, auch mit gleichen Rückgabetypen, solange die Parameterlisten unterschiedlich sind. Diese Aussage ist also falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Beim Überladen von Methoden sind die Parameterlisten entscheidend, nicht ob die Methode statisch oder eine Instanzmethode ist. Diese Aussage ist wahr.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine statische Methode und eine Instanzmethode können den gleichen Namen haben, solange ihre Parameterlisten unterschiedlich sind. Diese Aussage ist also falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Statische Methoden können auch in abgeleiteten Klassen überladen werden, nicht nur innerhalb ihrer eigenen Klasse. Instanzmethoden können ebenfalls in abgeleiteten Klassen überladen werden. Diese Aussage ist also falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Sowohl statische als auch Instanzmethoden können überladen werden. Das Verstecken von Methoden bezieht sich auf das Verhalten von statischen Methoden in Vererbungshierarchien, nicht auf das Überladen. Diese Aussage ist also falsch.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren, die verschiedene Missverständnisse abdecken. Die MCQ erfüllt die Anforderungen an eine gute Formulierung und testet das Verständnis der Konzepte des Überladens von Methoden und der Unterscheidung zwischen statischen und Instanzmethoden. Die Distraktoren sind thematisch passend und vermeiden erkennbare Muster, die zur Antwortfindung durch Eliminierung führen könnten. Die MCQ entspricht den Vorgaben und erfordert keine Verbesserung."
+  },
+  {
+    "question": "Wie wird in Java eine Methode in einer Unterklasse definiert, die eine von einer Oberklasse geerbte Methode überschreibt, um eine spezifische Funktionalität zu implementieren?",
+    "evaluations": [
+      {
+        "reasoning": "Das Schlüsselwort 'super' wird verwendet, um den Konstruktor oder eine Methode der Oberklasse aufzurufen, nicht um eine Methode zu überschreiben.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird das '@Override' Annotation oberhalb der Methodendeklaration verwendet, um anzugeben, dass eine Methode eine geerbte Methode überschreibt. Obwohl 'override' in den Kommentaren nicht technisch erforderlich ist, ist es eine gute Praxis, um die Absicht zu zeigen. Die Antwort ist daher teilweise richtig, aber irreführend, da sie impliziert, dass ein Kommentar ausreicht, was nicht der Fall ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Um eine Methode in Java zu überschreiben, muss die Methode in der Unterklasse denselben Namen und dieselbe Parameterliste wie die Methode in der Oberklasse haben.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine überschreibende Methode muss denselben Namen wie die Methode in der Oberklasse haben, um als Überschreibung zu gelten.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine überschreibende Methode muss dieselbe Parameterliste wie die geerbte Methode haben, Parameter wegzulassen ist nicht erlaubt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die überschreibende Methode kann einen anderen Rückgabetyp haben, aber nur, wenn es sich um einen kovarianten Rückgabetyp handelt. Das bedeutet, der Rückgabetyp der überschreibenden Methode muss ein Untertyp des Rückgabetyps der Methode in der Oberklasse sein.",
+        "correct": true
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren. Die Distraktoren decken häufige Missverständnisse ab, wie die Verwendung des Schlüsselworts 'super' oder die Annahme, dass der Name der Methode geändert werden kann. Es gibt jedoch eine Antwortoption, die irreführend sein könnte, da sie die Verwendung von 'override' in Kommentaren erwähnt, was nicht ausreichend ist, um eine Methode in Java zu überschreiben. Die MCQ erfüllt die Anforderungen an eine gute MCQ, da sie klar ist, plausible Distraktoren bietet und höhere Denkprozesse prüft. Die Antwortoptionen könnten jedoch verbessert werden, indem die irreführende Option über die Kommentare entfernt oder klarer formuliert wird, dass die '@Override' Annotation verwendet werden sollte."
+  }
+]

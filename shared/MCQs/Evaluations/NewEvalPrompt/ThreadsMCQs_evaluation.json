@@ -1,0 +1,302 @@
+[
+  {
+    "question": "Wie beeinflusst die Verwendung eines hierarchischen Thread-Modells die Skalierbarkeit und Ressourcennutzung in einer verteilten Anwendung mit mehreren Schichten?",
+    "evaluations": [
+      {
+        "reasoning": "Die Lastverteilung auf mehrere Schichten kann die Skalierbarkeit verbessern, da sie eine effizientere Nutzung der Ressourcen ermöglicht und Engpässe vermeiden kann. Diese Antwort ist plausibel und könnte in bestimmten Kontexten korrekt sein.",
+        "correct": true
+      },
+      {
+        "reasoning": "Obwohl separate Threads für jede Schicht verwaltet werden müssen, bedeutet dies nicht zwangsläufig eine erhöhte Ressourcennutzung, da Threads auch effizient verwaltet werden können. Diese Antwort ist daher irreführend.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Komplexität der Thread-Verwaltung steigt mit jeder zusätzlichen Schicht, aber nicht notwendigerweise exponentiell. Diese Aussage ist übertrieben und nicht präzise genug.",
+        "correct": false
+      },
+      {
+        "reasoning": "Thread-Wiederverwendung kann die Ressourcennutzung verringern, aber dies ist nicht spezifisch für hierarchische Thread-Modelle. Die Antwort ist daher nicht eindeutig korrekt oder falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Anzahl der Threads kann durchaus von der Schichtenanzahl beeinflusst werden, besonders in einem hierarchischen Modell. Diese Antwortoption ist daher falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Ressourcennutzung in einem hierarchischen Thread-Modell kann sich ändern, abhängig von der Anzahl der Benutzeranfragen und der Effizienz der Thread-Verwaltung. Diese Antwort ist daher nicht korrekt.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung. Die Antwortoptionen sind jedoch nicht alle plausibel und könnten klarer formuliert sein, um Missverständnisse zu vermeiden. Einige Antworten sind irreführend oder zu absolut formuliert, was gegen die Eigenschaften guter Distraktoren verstößt. Die MCQ könnte verbessert werden, indem man die Antwortoptionen präzisiert und sicherstellt, dass sie alle auf der gleichen Ebene der Plausibilität sind und verschiedene häufige Missverständnisse abdecken."
+  },
+  {
+    "question": "Welche Auswirkungen hat die Implementierung eines Thread-per-Request-Modells auf die Leistung eines Servers bei einer plötzlichen Spitzenlast im Vergleich zu einem Server mit einem festen Thread-Pool?",
+    "evaluations": [
+      {
+        "reasoning": "Diese Antwort ist wahr, da das Thread-per-Request-Modell tatsächlich für jede Anfrage sofort einen neuen Thread erstellt, was zu einer schnelleren Reaktionszeit führen kann, solange die Ressourcen des Systems dies zulassen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist wahr, da ein fester Thread-Pool eine begrenzte Anzahl von Threads hat, was bei einer Spitzenlast zu Verzögerungen führen kann, wenn alle Threads beschäftigt sind und neue Anfragen warten müssen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da das Thread-per-Request-Modell nicht notwendigerweise zu einem geringeren Ressourcenverbrauch führt. Es kann sogar zu einem höheren Ressourcenverbrauch kommen, da das Erstellen und Zerstören von Threads Overhead verursacht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist wahr, da ein fester Thread-Pool bei Spitzenlasten zu einer Überlastung führen kann, wenn die Anzahl der Anfragen die Anzahl der verfügbaren Threads übersteigt und neue Anfragen warten müssen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da ein fester Thread-Pool nicht notwendigerweise besser bei Spitzenlasten skaliert. Die Skalierbarkeit hängt von der Optimierung und der Anpassungsfähigkeit des Thread-Pools an die Last ab, was nicht immer gegeben ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist wahr, da ein Thread-per-Request-Modell bei hohen Spitzenlasten zu einem erhöhten Overhead führen kann, da das System möglicherweise nicht in der Lage ist, die große Anzahl gleichzeitig laufender Threads effizient zu verwalten.",
+        "correct": true
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung zur objektorientierten und funktionalen Programmierung angemessen, da sie grundlegende Konzepte der Serverleistung und Thread-Verwaltung behandelt. Die Antwortoptionen sind relevant und decken ein Spektrum an möglichen Auswirkungen ab, was die kognitiven Fähigkeiten der Studierenden herausfordert. Die Distraktoren sind plausibel und decken häufige Missverständnisse ab. Es gibt kein erkennbares Muster, das zur Antwortfindung durch Eliminierung führen könnte, und die Distraktoren sind nicht verwirrend oder irreführend. Die MCQ entspricht den Vorgaben und erfordert ein Verständnis der Konzepte, anstatt nur Faktenwissen abzufragen."
+  },
+  {
+    "question": "Wie beeinflusst die Verwendung eines Thread-Pools mit einer begrenzten Anzahl von Threads die Fähigkeit eines Servers, mit einer plötzlichen Spitzenlast umzugehen, im Vergleich zu einem unbegrenzten Thread-per-Request-Modell?",
+    "evaluations": [
+      {
+        "reasoning": "Diese Antwort ist korrekt, da ein Thread-Pool mit einer begrenzten Anzahl von Threads dazu führen kann, dass Anfragen warten müssen, bis ein Thread verfügbar wird, was die Bearbeitung verlangsamt.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da ein Thread-Pool nicht notwendigerweise die Erzeugung neuer Threads beschleunigt. Die Idee eines Thread-Pools ist es, die Anzahl der Threads zu begrenzen und wiederverwendbare Threads zu nutzen, um Overhead zu vermeiden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da ein Thread-Pool nicht automatisch zu einem Serverabsturz bei Spitzenlast führt. Ein Thread-per-Request-Modell kann ebenfalls abstürzen, wenn zu viele Threads erzeugt werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist korrekt, da ein Thread-Pool die Anzahl der gleichzeitig ausgeführten Threads begrenzt, was den Speicherverbrauch reduziert und den Overhead durch Thread-Erzeugung vermeidet.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist korrekt, da ein unbegrenztes Thread-per-Request-Modell bei Spitzenlast zu einem erhöhten Ressourcenverbrauch führen kann, was möglicherweise zu einem Systemausfall führt.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da die Anzahl der Threads sehr wohl die Leistung beeinflusst, insbesondere wie der Server mit Spitzenlasten umgeht.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung in objektorientierte und funktionale Programmierung angemessen, da sie grundlegende Konzepte der Nebenläufigkeit und Ressourcenverwaltung berührt. Die Antwortoptionen sind überwiegend plausibel und decken ein Spektrum an möglichen Missverständnissen ab. Die Frage und die Distraktoren erfüllen die Anforderungen an gute MCQs, da sie Verständnis und Analyse fordern und keine sprachlichen Verzerrungen aufweisen. Die MCQ entspricht den Vorgaben und erfordert keine Verbesserung."
+  },
+  {
+    "question": "Welche Auswirkungen hat die Entscheidung für ein Thread-per-Request-Modell auf die Reaktionsfähigkeit eines Servers bei einer hohen Anzahl von Anfragen mit unterschiedlichen Ausführungszeiten?",
+    "evaluations": [
+      {
+        "reasoning": "Diese Antwort ist wahr, da das Thread-per-Request-Modell bedeutet, dass für jede eingehende Anfrage sofort ein neuer Thread erstellt wird, was die sofortige Bearbeitung ermöglicht.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist ebenfalls wahr, da die Erzeugung eines neuen Threads für jede Anfrage Overhead verursacht, was bei einer hohen Anzahl von Anfragen die Reaktionsfähigkeit des Servers beeinträchtigen kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da die Reaktionsfähigkeit des Servers nicht nur von der Ausführungszeit der Anfragen abhängt, sondern auch von der Art und Weise, wie Anfragen gehandhabt werden, einschließlich der Thread-Erzeugung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist wahr, da die Anzahl der Prozessorkerne eine Grenze für die gleichzeitige Ausführung von Threads darstellt. Wird diese Grenze überschritten, kann es zu einem Leistungsabfall kommen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist wahr, da die Effizienz des Garbage Collectors bei vielen kurzlebigen Threads eine Rolle spielt und die Reaktionsfähigkeit des Servers beeinflussen kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da das Betriebssystem zwar die Thread-Erzeugung optimieren kann, dies aber nicht bedeutet, dass die Reaktionsfähigkeit des Servers bei einem Thread-per-Request-Modell nicht beeinflusst wird.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung, da sie grundlegende Kenntnisse über Server-Modelle und Multithreading erfordert. Die Antwortoptionen sind plausibel und decken verschiedene Aspekte und mögliche Missverständnisse ab, die mit dem Thread-per-Request-Modell verbunden sind. Die MCQ erfüllt die Anforderungen an eine gute MCQ, da sie höhere kognitive Fähigkeiten testet, indem sie das Verständnis für die Auswirkungen von Designentscheidungen auf die Serverleistung prüft. Es gibt keine erkennbaren Muster, die zur Antwortfindung durch Eliminierung führen könnten, und die Distraktoren sind herausfordernd, aber nicht verwirrend. Die MCQ entspricht den Vorgaben."
+  },
+  {
+    "question": "Welche Strategie zur Thread-Verwaltung in einem Server ist am effizientesten, wenn die Anforderungen an Sicherheit und Schutz hoch sind und gleichzeitig eine hohe Nebenläufigkeit gewährleistet sein muss?",
+    "evaluations": [
+      {
+        "reasoning": "Das Thread-per-Request-Modell kann zwar hohe Nebenläufigkeit ermöglichen, ist aber nicht unbedingt effizient in Bezug auf Ressourcennutzung und kann bei hoher Last zu Performance-Problemen führen. Es ist nicht spezifisch auf hohe Sicherheitsanforderungen ausgerichtet.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Thread-Pool mit einer festen Anzahl von Threads kann die Ressourcennutzung optimieren und Nebenläufigkeit bieten. Es ist jedoch nicht spezifisch auf hohe Sicherheitsanforderungen ausgerichtet, aber es ist eine gängige Praxis in Server-Implementierungen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Select-basierter Server ist ressourcenschonend, da er mit nur einem Thread auskommt. Allerdings ist er nicht für hohe Nebenläufigkeit ausgelegt und kann bei hoher Last zu Engpässen führen. Sicherheitsaspekte werden nicht direkt angesprochen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Thread-per-Session-Modell kann Anfragen von verschiedenen Clients gleichzeitig bearbeiten, was Nebenläufigkeit ermöglicht. Es ist jedoch nicht speziell auf hohe Sicherheitsanforderungen ausgerichtet und kann bei vielen gleichzeitigen Sessions zu Ressourcenproblemen führen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Prozess-basierter Ansatz bietet durch die stärkere Isolation der Prozesse eine höhere Sicherheit, kann aber im Vergleich zu Thread-basierten Ansätzen weniger effizient in Bezug auf Ressourcennutzung und Nebenläufigkeit sein.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein Single-Threaded-Modell vermeidet die Komplexität der Synchronisation und kann Sicherheit durch Einfachheit bieten, ist aber nicht für hohe Nebenläufigkeit geeignet und kann bei hoher Last zu Engpässen führen.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung. Die Antwortoptionen sind plausibel und decken verschiedene gängige Ansätze zur Thread-Verwaltung ab. Allerdings könnte die Fragestellung noch spezifischer auf die Sicherheitsaspekte eingehen, um die Anforderung, höhere kognitive Fähigkeiten zu testen, besser zu erfüllen. Die Distraktoren sind herausfordernd und vermeiden erkennbare Muster, könnten aber noch stärker auf häufige Missverständnisse eingehen, um das Verständnis gründlicher zu testen. Insgesamt entspricht die MCQ den Vorgaben, da sie eine klare Fragestellung, plausible Distraktoren und die Fähigkeit bietet, höhere Denkprozesse zu prüfen."
+  },
+  {
+    "question": "Wie beeinflusst die Implementierung eines Thread-Pools mit dynamischer Größenanpassung die Leistungsfähigkeit eines Servers bei variabler Last im Vergleich zu einem Server mit einem statischen Thread-Pool?",
+    "evaluations": [
+      {
+        "reasoning": "Diese Antwort ist korrekt, da ein dynamischer Thread-Pool tatsächlich die Fähigkeit hat, sich an die Last anzupassen, indem er Threads hinzufügt oder entfernt, was zu einer effizienteren Ressourcennutzung führen kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist teilweise wahr, aber irreführend. Ein statischer Thread-Pool kann in bestimmten Szenarien zu einer besseren Leistung führen, da kein Overhead für das Erstellen und Zerstören von Threads anfällt. Allerdings ist dies nicht immer der Fall, insbesondere bei variabler Last, wo ein dynamischer Thread-Pool vorteilhafter sein kann.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch. Die Leistungsfähigkeit eines Servers kann sehr wohl durch die Implementierung eines Thread-Pools beeinflusst werden, da die Art und Weise, wie Threads verwaltet werden, die Effizienz der Lastverarbeitung beeinflusst.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch. Ein dynamischer Thread-Pool, der gut implementiert ist, wird Threads nicht unnötig im Speicher halten, sondern bei geringer Last entsprechend reduzieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch. Ein Server mit einem statischen Thread-Pool kann bei plötzlichen Lastspitzen nicht unbedingt schneller reagieren, da die Anzahl der Threads begrenzt ist und nicht dynamisch erhöht werden kann, um mit der zusätzlichen Last umzugehen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist korrekt. Ein dynamischer Thread-Pool kann die Reaktionszeit des Servers verbessern, indem er bei Bedarf schnell zusätzliche Threads bereitstellt, um mit erhöhter Last umzugehen.",
+        "correct": true
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung zur objektorientierten und funktionalen Programmierung angemessen, da sie grundlegende Konzepte der Serverleistung und Thread-Verwaltung behandelt. Die Antwortoptionen sind thematisch relevant und decken ein Spektrum an möglichen Missverständnissen ab. Die Distraktoren sind plausibel und fordern das Verständnis der Studierenden heraus, ohne irreführend zu sein. Die Frage und die Antwortoptionen erfüllen die Anforderungen an eine gut konstruierte MCQ, da sie höhere kognitive Fähigkeiten testen und plausible Distraktoren enthalten, die das Verständnis prüfen."
+  },
+  {
+    "question": "Welche Auswirkungen hat die Verwendung eines Thread-Pools mit einer maximalen Größe im Vergleich zu einem unbegrenzten Thread-per-Request-Modell auf die Stabilität eines Servers unter hoher Last?",
+    "evaluations": [
+      {
+        "reasoning": "Diese Antwort ist korrekt, da ein Thread-Pool mit einer maximalen Größe die Anzahl der gleichzeitig laufenden Threads begrenzt, was die Ressourcen des Systems schont und somit zur Stabilität beiträgt.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da ein unbegrenztes Thread-per-Request-Modell unter hoher Last zu einer Überlastung des Systems führen kann, da für jede Anfrage ein neuer Thread erstellt wird, was die Ressourcen stark beanspruchen kann.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da die Verwendung eines Thread-Pools mit maximaler Größe sehr wohl einen Einfluss auf die Stabilität eines Servers haben kann, indem sie die Anzahl der gleichzeitig laufenden Threads und somit die Ressourcennutzung begrenzt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist korrekt, da ein unbegrenztes Thread-per-Request-Modell tatsächlich zu einer Überlastung des Servers führen kann, wenn zu viele Threads gleichzeitig laufen und Ressourcenkonflikte verursachen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist korrekt, da ein Thread-Pool mit maximaler Größe zu längeren Wartezeiten führen kann, wenn die Anzahl der Anfragen die Kapazität des Pools übersteigt. Dies kann die Stabilität beeinträchtigen, wenn das System nicht richtig dimensioniert ist.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da die Anzahl der Threads sehr wohl mit der Stabilität eines Servers zusammenhängt, insbesondere wenn es um die Verwaltung von Ressourcen und die Vermeidung von Überlastung geht.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung zur objektorientierten und funktionalen Programmierung angemessen komplex. Sie fordert das Verständnis und die Analyse von Konzepten der Thread-Verwaltung und deren Auswirkungen auf die Stabilität von Servern. Die Antwortoptionen sind plausibel und decken verschiedene Szenarien und Missverständnisse ab, die in der Praxis auftreten können. Es gibt keine sprachlichen Verzerrungen und die Distraktoren sind herausfordernd, aber nicht irreführend. Die MCQ entspricht den Vorgaben der Definition und den Eigenschaften einer gut konstruierten MCQ."
+  },
+  {
+    "question": "Wie beeinflusst die Verwendung eines Thread-Pools mit einer festen Größe die Fähigkeit eines Servers, auf eine variable Anzahl von Anfragen zu reagieren, im Vergleich zu einem Modell, das für jede Anfrage einen neuen Thread startet?",
+    "evaluations": [
+      {
+        "reasoning": "Diese Antwort ist wahr, da ein Thread-Pool mit fester Größe eine begrenzte Anzahl von Threads zur Verfügung stellt. Wenn alle Threads beschäftigt sind, müssen zusätzliche Anfragen warten, bis ein Thread frei wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da ein Thread-Pool mit fester Größe nicht unbegrenzt skaliert. Neue Threads werden nicht dynamisch hinzugefügt, wenn die Last steigt, sondern die Anzahl der Threads bleibt konstant.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist wahr, da das Starten eines neuen Threads für jede Anfrage bei geringer Last keine unnötigen Ressourcen bindet und somit effizient sein kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist wahr, da das Starten eines neuen Threads für jede Anfrage unter hoher Last zu einem Ressourcenengpass führen kann, weil das System mit der Erstellung und Verwaltung einer großen Anzahl von Threads überfordert sein könnte.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da ein Thread-Pool mit fester Größe Nebenläufigkeit ermöglicht und nicht zu einer sequenziellen Abarbeitung der Anfragen führt. Die Threads im Pool arbeiten parallel an den Anfragen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da das Starten eines neuen Threads für jede Anfrage nicht notwendigerweise eine bessere Antwortzeit garantiert, besonders wenn das System unter hoher Last steht und die Ressourcen begrenzt sind.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung zur objektorientierten und funktionalen Programmierung angemessen, da sie grundlegende Konzepte der Nebenläufigkeit und Ressourcenverwaltung behandelt. Die Antwortoptionen sind größtenteils plausibel und decken verschiedene Szenarien und Missverständnisse ab. Die MCQ erfüllt die Anforderungen an eine gute Fragestellung, da sie Verständnis und Analyse fordert und keine sprachlichen Verzerrungen aufweist. Die Distraktoren sind herausfordernd, aber nicht irreführend, und es gibt kein erkennbares Muster, das zur Antwortfindung durch Eliminierung führen könnte. Insgesamt entspricht die MCQ den Vorgaben."
+  },
+  {
+    "question": "Welche Auswirkungen hat die Entscheidung für ein Thread-per-Request-Modell auf die Wartezeit und den Durchsatz eines Servers bei einer hohen Anzahl von Anfragen mit unterschiedlichen Ausführungszeiten?",
+    "evaluations": [
+      {
+        "reasoning": "Die Wartezeit kann sich erhöhen, wenn alle Threads beschäftigt sind und neue Anfragen auf die Freigabe eines Threads warten müssen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Der Durchsatz steigt nicht notwendigerweise, da die sofortige Bearbeitung durch neue Threads durch den Overhead des Thread-Managements begrenzt sein kann.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Thread-per-Request-Modell erzeugt nicht eine unbegrenzte Anzahl von Threads, da die Anzahl der Threads durch Systemressourcen begrenzt ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Der Durchsatz kann sinken, da das Erzeugen und Verwalten vieler Threads zusätzlichen Overhead verursacht, der Ressourcen verbraucht.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Wartezeit und der Durchsatz bleiben nicht unverändert, da das Thread-per-Request-Modell bei hoher Last zu Overhead und Wartezeiten führen kann.",
+        "correct": false
+      },
+      {
+        "reasoning": "Der Durchsatz wird beeinflusst, da das Thread-per-Request-Modell sowohl die Ausführungszeit der Anfragen als auch den Overhead für Thread-Management berücksichtigen muss.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung zur objektorientierten und funktionalen Programmierung angemessen, da sie grundlegende Kenntnisse über Server-Modelle und Multithreading erfordert. Die Antwortoptionen sind plausibel und decken verschiedene Szenarien und Missverständnisse ab, die im Kontext der Frage auftreten können. Die MCQ erfüllt die Anforderungen an eine gute Fragestellung, da sie Verständnis und Analyse fordert und keine sprachlichen Verzerrungen enthält. Die Distraktoren sind herausfordernd und vermeiden erkennbare Muster, die zur Antwortfindung durch Eliminierung führen könnten. Die Frage prüft höhere Denkprozesse, indem sie die Auswirkungen eines Programmiermodells auf die Leistung eines Servers untersucht, was über reines Faktenwissen hinausgeht."
+  },
+  {
+    "question": "Wie beeinflusst die Implementierung eines Thread-Pools mit Priorisierung von Aufgaben die Verarbeitung von Client-Anfragen in einem hochlastigen Serverumfeld?",
+    "evaluations": [
+      {
+        "reasoning": "Diese Antwort ist wahr, da ein Thread-Pool mit Priorisierung dazu beitragen kann, kritische Anfragen schneller zu bearbeiten, indem diesen Anfragen Vorrang eingeräumt wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da die Priorisierung von Aufgaben in einem Thread-Pool genau dazu dient, bestimmte Anfragen zu bevorzugen und nicht alle gleich zu behandeln.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort kann in bestimmten Fällen wahr sein, wenn der Verwaltungsaufwand für die Priorisierung tatsächlich zu hoch ist und die Systemressourcen übermäßig beansprucht. Allerdings ist dies nicht generell der Fall und hängt von der Implementierung ab.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da es nicht immer effizienter ist, einen Thread-Pool ohne Priorisierung zu implementieren. Die Effizienz hängt von der Art der Anfragen und der Lastsituation ab.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist wahr, da ein priorisierender Thread-Pool so konzipiert sein kann, dass er weniger dringende Aufgaben zurückstellt, um Ressourcen für dringendere Anfragen bereitzustellen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da Thread-Pools mit Priorisierung gerade in hochlastigen Umgebungen sinnvoll sind, um kritische Anfragen effizient zu bearbeiten. Bei geringer Anzahl von Anfragen ist die Priorisierung weniger kritisch.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung, da sie Konzepte der Nebenläufigkeit und Ressourcenverwaltung berührt. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren, die verschiedene Missverständnisse und Szenarien abdecken. Die MCQ erfüllt die Anforderungen an eine gute Fragestellung, da sie höhere kognitive Fähigkeiten testet, indem sie das Verständnis für die Auswirkungen von Priorisierung in Thread-Pools fordert. Die Distraktoren sind thematisch passend und vermeiden erkennbare Muster, die zur Antwortfindung durch Eliminierung führen könnten. Die MCQ entspricht den Vorgaben und erfordert kein weiteres Feedback."
+  }
+]

@@ -1,0 +1,292 @@
+[
+  {
+    "question": "Wie kann in Python eine benutzerdefinierte Exception erstellt werden, die zusätzliche Kontextinformationen beim Werfen der Exception bereitstellt?",
+    "evaluations": [
+      {
+        "reasoning": "In Python kann eine benutzerdefinierte Exception durch Erweiterung der BaseException-Klasse oder einer ihrer Unterklassen (wie Exception) erstellt werden. Ein Konstruktor kann definiert werden, um zusätzliche Parameter zu akzeptieren und diese als Attribute der Klasse zu speichern.",
+        "correct": true
+      },
+      {
+        "reasoning": "In Python ist es sehr wohl möglich, benutzerdefinierte Exceptions zu erstellen. Die Standardbibliothek bietet eine Vielzahl von eingebauten Exceptions, die erweitert werden können, um benutzerdefinierte Fehler zu definieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Werfen eines Strings als Exception ist zwar technisch möglich, gilt aber als schlechte Praxis und wird nicht empfohlen. Es bietet auch keine gute Möglichkeit, zusätzliche Kontextinformationen strukturiert bereitzustellen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine neue Klasse, die von keiner anderen Klasse erbt, wäre keine Exception-Klasse. Exception-Klassen in Python sollten immer von BaseException oder einer ihrer Unterklassen erben.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das ist eine korrekte Methode, um eine benutzerdefinierte Exception in Python zu erstellen. Durch Erweiterung der Exception-Klasse und Überschreiben der __init__-Methode können zusätzliche Attribute hinzugefügt werden, die beim Werfen der Exception nützliche Kontextinformationen liefern.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das 'raise'-Schlüsselwort wird verwendet, um eine Exception auszulösen, aber es wird nicht gefolgt von einem Dictionary, um eine benutzerdefinierte Exception zu definieren. Stattdessen sollte 'raise' gefolgt von einer Instanz einer Exception-Klasse verwendet werden.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie kann in Python eine benutzerdefinierte Exception korrekt ausgelöst werden, um einen spezifischen Fehlerzustand in einem Programm anzuzeigen?",
+    "evaluations": [
+      {
+        "reasoning": "In Python kann eine benutzerdefinierte Exception erstellt werden, indem eine neue Klasse definiert wird, die von der Klasse BaseException oder einer ihrer Unterklassen (z.B. Exception) erbt. Die Methode __init__ kann überschrieben werden, um Fehlerdetails zu speichern und zu initialisieren.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Instanziieren der vordefinierten Exception-Klasse mit einer Fehlermeldung als Argument und das Auslösen mit 'raise' ist eine korrekte Methode, um eine Exception in Python zu werfen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Verwenden des Schlüsselworts 'pass' in einem leeren try-Block erzeugt keine Exception. 'pass' ist lediglich ein Platzhalter, der verwendet wird, wenn ein Statement erforderlich ist syntaktisch, aber keine Aktion ausgeführt werden soll.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Funktion print() wird verwendet, um Nachrichten auf der Konsole auszugeben, aber sie löst keine Exceptions aus. Exceptions müssen mit 'raise' ausgelöst werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine Funktion, die 'raise' zusammen mit einem String aufruft, ist nicht korrekt, da 'raise' ein Exception-Objekt erwartet, nicht einen einfachen String.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Erstellen einer neuen Klasse, die von der Klasse Exception erbt und die Methode __str__ überschreibt, ist eine gültige Methode, um eine benutzerdefinierte Fehlermeldung für eine Exception zu definieren. Dies ändert jedoch nicht die Art und Weise, wie die Exception ausgelöst wird, was mit 'raise' erfolgen muss.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie unterscheidet sich das Exception-Handling in Java von dem in Python, insbesondere im Hinblick auf die Syntax und Struktur der try-catch-Blöcke?",
+    "evaluations": [
+      {
+        "reasoning": "In Java verwendet man tatsächlich 'try' und 'catch', während in Python 'try' und 'except' verwendet werden. Dies ist ein grundlegender Unterschied in der Syntax zwischen den beiden Sprachen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Python verwendet 'try' und 'except' für das Exception-Handling. Die Aussage ist falsch, da Python sehr wohl 'except'-Blöcke verwendet, um Exceptions zu behandeln. 'finally' wird in Python auch verwendet, aber zusätzlich zu 'except', nicht anstelle davon.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java kann man seit Java 7 mit dem Multi-Catch-Feature mehrere Exceptions in einem einzigen 'catch'-Block behandeln, indem man die Exception-Typen mit einem vertikalen Balken (|) trennt. In Python kann man mehrere Exceptions als Tupel in einem 'except'-Block behandeln. Die Aussage ist also falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java müssen checked Exceptions entweder abgefangen oder in der Methodensignatur mit 'throws' deklariert werden. Python unterscheidet nicht zwischen checked und unchecked Exceptions und hat keine solche Anforderung. Diese Aussage ist wahr.",
+        "correct": true
+      },
+      {
+        "reasoning": "Python unterstützt 'finally'-Blöcke genauso wie Java. Ein 'finally'-Block wird in beiden Sprachen verwendet, um Code auszuführen, der nach einem try-catch-Block ausgeführt werden soll, unabhängig davon, ob eine Exception aufgetreten ist oder nicht. Die Aussage ist also falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Syntax für das Exception-Handling in Java und Python ist nicht identisch. Wie bereits erwähnt, verwendet Java 'try' und 'catch', während Python 'try' und 'except' verwendet. Außerdem gibt es Unterschiede im Umgang mit checked und unchecked Exceptions. Diese Aussage ist falsch.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie kann in Java sichergestellt werden, dass eine Ressource, wie eine Datei oder Netzwerkverbindung, korrekt geschlossen wird, auch wenn während der Nutzung eine Exception auftritt?",
+    "evaluations": [
+      {
+        "reasoning": "Ein finally-Block wird immer ausgeführt, egal ob eine Exception auftritt oder nicht. Daher ist es ein gängiges Muster, Ressourcen im finally-Block zu schließen, um sicherzustellen, dass sie in jedem Fall freigegeben werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schließen einer Ressource im catch-Block ist nicht zuverlässig, da weitere Exceptions auftreten können, bevor der catch-Block erreicht wird oder während der Ausführung des catch-Blocks.",
+        "correct": false
+      },
+      {
+        "reasoning": "Java hat keinen Destruktor wie in C++ und Ressourcen werden nicht automatisch beim Werfen einer Exception geschlossen. Die Garbage Collection in Java kümmert sich nicht um das Schließen von Ressourcen wie Dateien oder Netzwerkverbindungen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das try-with-resources Statement ist eine Funktion in Java, die das automatische Schließen von Ressourcen, die das AutoCloseable-Interface implementieren, sicherstellt, sobald der try-Block verlassen wird - unabhängig davon, ob eine Exception aufgetreten ist oder nicht.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Ignorieren von Exceptions ist keine gute Praxis, und die JVM kümmert sich nicht um das Schließen von Ressourcen wie Dateien oder Netzwerkverbindungen. Ressourcen müssen explizit geschlossen werden, um Ressourcenlecks zu vermeiden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schließen von Ressourcen in einem separaten Thread ist keine zuverlässige Methode, da es zu Race Conditions und anderen Synchronisationsproblemen führen kann. Es ist auch nicht die standardmäßige oder empfohlene Methode, um Ressourcen in Java zu schließen.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie kann in Java eine benutzerdefinierte Exception korrekt deklariert werden, um zusätzliche Informationen über den Fehlerzustand zu kapseln, ohne dabei die Stack-Trace-Informationen zu verlieren?",
+    "evaluations": [
+      {
+        "reasoning": "Das Überschreiben der getMessage-Methode ist eine gängige Praxis, um zusätzliche Informationen zu einer Exception hinzuzufügen, ohne die Stack-Trace-Informationen zu beeinträchtigen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Überschreiben der toString-Methode könnte zwar zusätzliche Informationen bereitstellen, ist aber nicht die übliche Methode, um Fehlerinformationen in einer Exception zu kapseln.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das direkte Hinzufügen von Attributen zur Exception-Klasse ist eine gültige Methode, um zusätzliche Informationen zu speichern, ohne die Stack-Trace-Informationen zu verlieren.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Verwendung des Konstruktors der Oberklasse, der eine Nachricht und eine Throwable-Instanz akzeptiert, ist eine korrekte Methode, um eine benutzerdefinierte Exception zu deklarieren und dabei die Stack-Trace-Informationen zu erhalten.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Überschreiben der printStackTrace-Methode ist nicht die übliche Methode, um zusätzliche Informationen zu einer Exception hinzuzufügen, und könnte die Ausgabe des Stack-Traces beeinträchtigen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Werfen einer neuen Exception innerhalb des Konstruktors einer benutzerdefinierten Exception ist nicht sinnvoll und würde nicht dazu beitragen, zusätzliche Informationen zu kapseln, ohne die Stack-Trace-Informationen zu verlieren.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie kann in Java eine benutzerdefinierte Exception korrekt implementiert werden, um eine spezifische Überprüfung der Argumente eines Konstruktors zu erzwingen?",
+    "evaluations": [
+      {
+        "reasoning": "Das Überschreiben der toString-Methode einer Exception-Klasse hat nichts mit der Überprüfung von Argumenten zu tun. Die toString-Methode dient dazu, eine lesbare Nachricht der Exception zurückzugeben, nicht zur Argumentüberprüfung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das ist eine korrekte Methode, um eine benutzerdefinierte Exception in Java zu implementieren. Eine neue Klasse, die von Exception erbt, kann im Konstruktor eine Überprüfung der Argumente vornehmen und bei Bedarf die Exception auslösen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Throwable ist die Superklasse von Error und Exception. Es ist zwar möglich, Throwable direkt zu werfen, aber es ist keine gute Praxis für benutzerdefinierte Exceptions, die spezifisch für Argumentüberprüfungen sind. Es ist besser, eine spezifischere Exception-Klasse zu verwenden oder zu erstellen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die assert-Anweisung wird in Java für Testzwecke verwendet und ist nicht dazu gedacht, in Produktionscode benutzerdefinierte Exceptions zu implementieren. Asserts können in der JVM deaktiviert werden und sind daher keine zuverlässige Methode zur Argumentüberprüfung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Verwendung der IllegalArgumentException ist eine gültige Methode, um auf ungültige Argumente hinzuweisen. Es ist jedoch keine benutzerdefinierte Exception, sondern eine bereits in Java vorhandene Standard-Exception.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Implementieren eines Interface zur Argumentüberprüfung ist eine Möglichkeit, Überprüfungen durchzuführen, aber es erstellt keine benutzerdefinierte Exception. Die Frage bezieht sich auf die Implementierung einer Exception, nicht auf die Überprüfungsmethode an sich.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine benutzerdefinierte Exception als 'unchecked' deklariert?",
+    "evaluations": [
+      {
+        "reasoning": "In Java werden 'unchecked' Exceptions durch Ableitung von der Klasse RuntimeException erstellt. Dies ist korrekt, da 'unchecked' Exceptions zur Laufzeit auftreten und nicht vom Compiler auf ihre Handhabung hin überprüft werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Es gibt kein Interface namens CheckedException in Java, und das Implementieren eines Interfaces würde eine Exception nicht automatisch zu einer 'unchecked' Exception machen. 'Checked' und 'unchecked' Exceptions werden durch ihre Hierarchie im Exception-Klassenbaum bestimmt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das direkte Ableiten von Throwable macht eine Exception nicht automatisch zu einer 'unchecked' Exception. 'Checked' Exceptions können auch direkt von Throwable abgeleitet werden. Der entscheidende Faktor ist, ob sie von RuntimeException oder Error abgeleitet sind.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Ableiten von der Klasse Error würde eine schwere Ausnahme definieren, die normalerweise für Fehler in der Java-Laufzeitumgebung verwendet wird, nicht für benutzerdefinierte 'unchecked' Exceptions.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Ableiten von der Klasse Exception und die Verwendung des Schlüsselwortes 'unchecked' ist keine gültige Methode in Java, um eine 'unchecked' Exception zu deklarieren. Das Schlüsselwort 'unchecked' existiert nicht in diesem Kontext in Java.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java müssen alle Exceptions von Throwable oder einer seiner Unterklassen abgeleitet werden. Eine Exception, die von keiner anderen Klasse abgeleitet wird, ist nicht möglich.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine benutzerdefinierte Exception als Teil einer Methode deklariert, die eine spezifische Bedingung überprüft und diese Exception nur unter bestimmten Umständen auslöst?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird eine benutzerdefinierte Exception innerhalb einer Methode mit dem Schlüsselwort 'throw' ausgelöst, indem eine neue Instanz der Exception-Klasse erzeugt wird, wenn eine bestimmte Bedingung erfüllt ist.",
+        "correct": true
+      },
+      {
+        "reasoning": "Benutzerdefinierte Exceptions werden nicht automatisch von der JVM ausgelöst. Sie müssen explizit im Code mit 'throw' ausgelöst werden, wenn die entsprechende Bedingung erfüllt ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Exceptions werden nicht als Parameter an Methoden übergeben, um sie auszulösen. Sie werden innerhalb der Methode mit 'throw' ausgelöst, wenn die Bedingung erfüllt ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'throws' in der Methodensignatur gibt an, dass eine Methode eine Exception auslösen kann, aber die tatsächliche Auslösung erfolgt innerhalb der Methode mit 'throw new'.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Überschreiben der 'toString'-Methode der Exception-Klasse ist eine Möglichkeit, die Ausgabe der Exception zu personalisieren, aber es ist nicht die Methode, um eine Exception zu deklarieren oder auszulösen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Benutzerdefinierte Exceptions werden nicht durch das Implementieren eines Interfaces deklariert. Sie werden als Klassen definiert, die von der Klasse 'Exception' oder einer ihrer Unterklassen erben.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine benutzerdefinierte Exception als Teil einer Methode deklariert, die eine spezifische Bedingung überprüft und diese Exception nur unter bestimmten Umständen auslöst?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird eine benutzerdefinierte Exception innerhalb einer Methode mit dem Schlüsselwort 'throw' ausgelöst, gefolgt von einer neuen Instanz der Exception-Klasse, wenn eine bestimmte Bedingung erfüllt ist.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Java Virtual Machine löst keine benutzerdefinierten Exceptions automatisch aus. Der Entwickler muss die Exception explizit im Code mit 'throw' auslösen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Exceptions werden in Java nicht als Rückgabewerte von Methoden verwendet. Sie werden mit 'throw' ausgelöst und durch die Methodensignatur mit 'throws' deklariert, falls sie nach außen weitergegeben werden sollen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'throws' in der Methodensignatur gibt an, dass eine Methode eine Exception auslösen kann, aber es löst die Exception nicht selbst aus. Die Exception muss innerhalb der Methode mit 'throw' ausgelöst werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine benutzerdefinierte Exception kann bedingt ausgelöst werden, abhängig von der Logik, die der Entwickler implementiert. Sie muss nicht zwangsläufig am Anfang der Methode ausgelöst werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Definieren einer Subklasse von RuntimeException ist ein gültiger Weg, um eine benutzerdefinierte Exception zu erstellen. Diese wird dann mit 'throw new' gefolgt vom Klassennamen ausgelöst, wenn die entsprechende Bedingung erfüllt ist.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie kann in Java eine benutzerdefinierte Exception korrekt weitergeleitet werden, nachdem sie in einem catch-Block abgefangen wurde?",
+    "evaluations": [
+      {
+        "reasoning": "In Java kann eine Exception, die in einem catch-Block abgefangen wurde, mit dem Schlüsselwort 'throw' erneut geworfen werden, um sie weiterzuleiten.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'continue' wird in Schleifen verwendet, um zur nächsten Iteration zu springen, nicht um Exceptions weiterzuleiten.",
+        "correct": false
+      },
+      {
+        "reasoning": "System.exit beendet das Programm und leitet keine Exception weiter. Es ist nicht der korrekte Weg, um eine Exception zu behandeln.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Erzeugen einer neuen Exception mit 'throw new' ist nicht dasselbe wie das Weiterleiten einer bereits gefangenen Exception. Es würde eine neue Exception-Instanz erzeugen und werfen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Methode 'printStackTrace()' dient dazu, den Stack Trace der Exception auszugeben, aber sie leitet die Exception nicht weiter.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'finally' wird verwendet, um Code auszuführen, der nach einem try-catch-Block ausgeführt werden soll, unabhängig davon, ob eine Exception aufgetreten ist oder nicht. Es wird nicht verwendet, um Exceptions weiterzuleiten.",
+        "correct": false
+      }
+    ]
+  }
+]

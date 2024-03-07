@@ -1,0 +1,292 @@
+[
+  {
+    "question": "Wie beeinflusst die Verwendung eines hierarchischen Thread-Modells die Skalierbarkeit und Ressourcennutzung in einer verteilten Anwendung mit mehreren Schichten?",
+    "evaluations": [
+      {
+        "reasoning": "Ein hierarchisches Thread-Modell kann die Skalierbarkeit verbessern, indem es die Last auf mehrere Schichten verteilt und dadurch die Verarbeitung parallelisiert. Allerdings hängt dies stark von der Implementierung und dem Kontext ab und ist nicht grundsätzlich der Fall.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Ressourcennutzung kann durch ein hierarchisches Thread-Modell erhöht werden, da tatsächlich für jede Schicht separate Threads verwaltet werden müssen. Dies kann zu einem höheren Overhead führen, insbesondere wenn viele Threads erzeugt und verwaltet werden müssen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Komplexität der Thread-Verwaltung in einem hierarchischen Modell steigt nicht notwendigerweise exponentiell mit jeder zusätzlichen Schicht. Die Zunahme der Komplexität hängt von der spezifischen Implementierung ab und kann durch effiziente Designmuster abgemildert werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein hierarchisches Thread-Modell kann die Ressourcennutzung verringern, wenn Threads effizient wiederverwendet werden, zum Beispiel durch einen Thread-Pool. Dies reduziert den Overhead, der durch das ständige Erzeugen und Zerstören von Threads entsteht.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein hierarchisches Thread-Modell kann sehr wohl einen Einfluss auf die Skalierbarkeit haben, da es die Art und Weise beeinflusst, wie Aufgaben aufgeteilt und verarbeitet werden. Die Anzahl der Threads kann durch die Schichtenanzahl beeinflusst werden, insbesondere wenn für jede Schicht separate Threads vorgesehen sind.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Ressourcennutzung in einem hierarchischen Thread-Modell bleibt nicht konstant, unabhängig von der Anzahl der gleichzeitigen Benutzeranfragen. Bei steigender Anzahl von Anfragen kann es zu einer erhöhten Ressourcennutzung kommen, da mehr Threads aktiv sein können und mehr Rechenzeit benötigen.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Auswirkungen hat die Implementierung eines Thread-per-Request-Modells auf die Leistung eines Servers bei einer plötzlichen Spitzenlast im Vergleich zu einem Server mit einem festen Thread-Pool?",
+    "evaluations": [
+      {
+        "reasoning": "Obwohl ein Thread-per-Request-Modell theoretisch eine sofortige Reaktion auf jede Anfrage ermöglicht, kann die Erstellung eines neuen Threads für jede Anfrage bei hoher Last zu erheblichem Overhead führen und die Antwortzeiten verlangsamen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Server mit einem festen Thread-Pool kann tatsächlich zu Verzögerungen führen, wenn die Anzahl der Anfragen die Anzahl der verfügbaren Threads übersteigt, da Anfragen warten müssen, bis ein Thread frei wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein Thread-per-Request-Modell kann im Vergleich zu einem festen Thread-Pool zu einem höheren Ressourcenverbrauch führen, da das ständige Erstellen und Beenden von Threads Overhead verursacht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein fester Thread-Pool kann bei Spitzenlasten zu einer Überlastung führen, wenn die festgelegte Anzahl von Threads nicht ausreicht, um die Last zu bewältigen, und neue Anfragen müssen warten, bis Threads verfügbar werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein Server mit einem festen Thread-Pool kann besser bei Spitzenlasten skalieren, wenn die Anzahl der Threads sorgfältig basierend auf den verfügbaren Ressourcen und der erwarteten Last optimiert wird. Eine feste Grenze verhindert, dass das System durch zu viele gleichzeitig laufende Threads überlastet wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein Thread-per-Request-Modell kann bei hohen Spitzenlasten tatsächlich zu einem erhöhten Overhead führen, da das System möglicherweise nicht effizient mit einer großen Anzahl gleichzeitig laufender Threads umgehen kann, was zu Leistungseinbußen führen kann.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie beeinflusst die Verwendung eines Thread-Pools mit einer begrenzten Anzahl von Threads die Fähigkeit eines Servers, mit einer plötzlichen Spitzenlast umzugehen, im Vergleich zu einem unbegrenzten Thread-per-Request-Modell?",
+    "evaluations": [
+      {
+        "reasoning": "Ein Thread-Pool mit begrenzter Anzahl von Threads kann tatsächlich zu einer Verlangsamung führen, wenn alle Threads beschäftigt sind und neue Anfragen in die Warteschlange eingereiht werden müssen, bis Threads verfügbar werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein Server mit einem Thread-Pool erzeugt nicht schneller neue Threads als ein Thread-per-Request-Modell, da die Anzahl der Threads im Pool begrenzt ist und nicht dynamisch auf Spitzenlast reagiert.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Verwendung eines Thread-Pools führt nicht zwangsläufig zum Absturz des Servers bei Spitzenlast. Ein Thread-per-Request-Modell kann bei unbegrenzter Thread-Erzeugung eher zu einem Absturz führen, da die Systemressourcen überlastet werden können.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Thread-Pool begrenzt die Anzahl der gleichzeitig ausgeführten Threads, was den Speicherverbrauch und den Overhead durch Thread-Erzeugung reduziert, da nicht für jede Anfrage ein neuer Thread gestartet werden muss.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein unbegrenztes Thread-per-Request-Modell kann tatsächlich zu einem erhöhten Ressourcenverbrauch führen, da für jede eingehende Anfrage ein neuer Thread erzeugt wird, was bei Spitzenlasten zu einem Systemausfall führen kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Verwendung eines Thread-Pools beeinflusst sehr wohl die Bearbeitung von Spitzenlasten, da die begrenzte Anzahl von Threads die Anzahl der gleichzeitig bearbeitbaren Anfragen limitiert und somit die Leistung bei hohem Anfrageaufkommen beeinflusst.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Auswirkungen hat die Entscheidung für ein Thread-per-Request-Modell auf die Reaktionsfähigkeit eines Servers bei einer hohen Anzahl von Anfragen mit unterschiedlichen Ausführungszeiten?",
+    "evaluations": [
+      {
+        "reasoning": "Obwohl das Thread-per-Request-Modell sicherstellt, dass Anfragen sofort bearbeitet werden können, führt es bei einer hohen Anzahl von Anfragen zu einem hohen Overhead durch das Erzeugen und Verwalten vieler Threads, was die Reaktionsfähigkeit des Servers beeinträchtigen kann.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Erzeugung von Threads für jede Anfrage kann bei einer hohen Anzahl von Anfragen zu einem signifikanten Overhead führen, der die Reaktionsfähigkeit des Servers verschlechtert, da Ressourcen für das Thread-Management statt für die eigentliche Anfragebearbeitung verwendet werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Reaktionsfähigkeit eines Servers wird durch verschiedene Faktoren beeinflusst, einschließlich der Ausführungszeit der Anfragen. Jedoch kann das Thread-per-Request-Modell bei einer hohen Anzahl von Anfragen zu einem Overhead führen, der die Reaktionsfähigkeit beeinträchtigt, daher bleibt sie nicht unverändert.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn die Anzahl der gleichzeitig laufenden Threads die Anzahl der verfügbaren Prozessorkerne überschreitet, kann es zu einem Kontextwechsel-Overhead kommen, der die Reaktionsfähigkeit des Servers verschlechtert, da die CPU-Ressourcen zwischen zu vielen Threads aufgeteilt werden müssen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Effizienz des Garbage Collectors kann die Reaktionsfähigkeit eines Servers beeinflussen, insbesondere wenn viele kurzlebige Threads erzeugt werden, da dies zu häufigeren Garbage Collection-Zyklen führen kann, die die Serverleistung beeinträchtigen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Obwohl das Betriebssystem die Thread-Erzeugung und -Verwaltung optimieren kann, wird die Reaktionsfähigkeit des Servers dennoch durch das Thread-per-Request-Modell beeinflusst, insbesondere bei einer hohen Anzahl von Anfragen, da das Betriebssystem den Overhead nicht vollständig eliminieren kann.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Strategie zur Thread-Verwaltung in einem Server ist am effizientesten, wenn die Anforderungen an Sicherheit und Schutz hoch sind und gleichzeitig eine hohe Nebenläufigkeit gewährleistet sein muss?",
+    "evaluations": [
+      {
+        "reasoning": "Das Thread-per-Request-Modell kann zwar hohe Nebenläufigkeit ermöglichen, ist aber nicht unbedingt effizient in Bezug auf Ressourcennutzung, da es bei vielen gleichzeitigen Anfragen zu einem hohen Ressourcenverbrauch kommen kann. Zudem kann es bei hoher Last zu Performance-Problemen führen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Thread-Pool mit einer festen Anzahl von Threads kann effizient sein, da er die Ressourcennutzung optimiert, indem er die Erstellung und Zerstörung von Threads minimiert. Gleichzeitig kann er Nebenläufigkeit bieten, jedoch kann die feste Anzahl von Threads ein Limit darstellen, wenn die Last sehr hoch ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Select-basierter Server, der mit nur einem Thread arbeitet, spart zwar Ressourcen, kann aber bei hoher Last und Anforderungen an hohe Nebenläufigkeit zu Engpässen führen und ist daher nicht die effizienteste Lösung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Thread-per-Session-Modell kann für die gleichzeitige Bearbeitung von Anfragen verschiedener Clients nützlich sein, aber es ist nicht unbedingt effizient in Bezug auf Ressourcennutzung und kann bei vielen gleichzeitigen Sessions zu einem hohen Ressourcenverbrauch führen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Prozess-basierter Ansatz bietet eine stärkere Isolation zwischen den Anfragen, was zu einer höheren Sicherheit führen kann. Allerdings ist die Prozesserstellung und -verwaltung in der Regel ressourcenintensiver als die Thread-Verwaltung, was ihn weniger effizient machen kann, insbesondere wenn hohe Nebenläufigkeit erforderlich ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Single-Threaded-Modell vermeidet zwar die Komplexität der Synchronisation, ist aber nicht geeignet, wenn hohe Nebenläufigkeit erforderlich ist, da es nur eine Anfrage zur gleichen Zeit bearbeiten kann. Daher ist es nicht die effizienteste Lösung für die gegebene Anforderung.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie beeinflusst die Implementierung eines Thread-Pools mit dynamischer Größenanpassung die Leistungsfähigkeit eines Servers bei variabler Last im Vergleich zu einem Server mit einem statischen Thread-Pool?",
+    "evaluations": [
+      {
+        "reasoning": "Ein dynamischer Thread-Pool kann sich an die aktuelle Last anpassen, indem er Threads hinzufügt oder entfernt. Dies kann zu einer effizienteren Ressourcennutzung führen, da bei geringer Last weniger Threads aktiv sind und bei hoher Last mehr Threads zur Verarbeitung beitragen können.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein statischer Thread-Pool kann in bestimmten Szenarien zu einer besseren Leistung führen, insbesondere wenn die Last relativ konstant ist und die Overhead-Kosten für das Erstellen und Zerstören von Threads tatsächlich vermieden werden können. Allerdings ist diese Aussage im Kontext der Frage zu allgemein und berücksichtigt nicht die Vorteile eines dynamischen Thread-Pools bei variabler Last.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Leistungsfähigkeit eines Servers wird sehr wohl durch die Implementierung eines Thread-Pools beeinflusst, da die Art und Weise, wie Threads verwaltet werden, direkten Einfluss auf die Fähigkeit des Servers hat, auf Laständerungen zu reagieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein dynamischer Thread-Pool kann bei geringer Last nicht zu einer Verschwendung von Ressourcen führen, da er gerade dafür ausgelegt ist, die Anzahl der Threads bei geringer Last zu reduzieren und somit Ressourcen zu sparen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Server mit einem statischen Thread-Pool kann bei plötzlichen Lastspitzen nicht unbedingt schneller reagieren, da die Anzahl der verfügbaren Threads begrenzt ist und nicht dynamisch erhöht werden kann, um mit der erhöhten Last umzugehen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein dynamischer Thread-Pool kann die Reaktionszeit des Servers verbessern, indem er bei Bedarf schnell zusätzliche Threads bereitstellt, um mit einem Anstieg der Last umzugehen. Dies ermöglicht eine flexiblere Anpassung an die aktuelle Lastsituation.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Welche Auswirkungen hat die Verwendung eines Thread-Pools mit einer maximalen Größe im Vergleich zu einem unbegrenzten Thread-per-Request-Modell auf die Stabilität eines Servers unter hoher Last?",
+    "evaluations": [
+      {
+        "reasoning": "Ein Thread-Pool mit maximaler Größe kann die Anzahl der gleichzeitig laufenden Threads begrenzen, was die Ressourcennutzung kontrolliert und somit die Stabilität des Systems unter hoher Last verbessern kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein unbegrenztes Thread-per-Request-Modell kann unter hoher Last zu einer Überlastung des Systems führen, da für jede Anfrage ein neuer Thread erstellt wird, was die Ressourcen des Servers übermäßig beanspruchen kann.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Verwendung eines Thread-Pools mit maximaler Größe hat sehr wohl einen Einfluss auf die Stabilität eines Servers, da sie hilft, die Anzahl der gleichzeitig laufenden Threads zu kontrollieren und Ressourcenüberlastung zu vermeiden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein unbegrenztes Thread-per-Request-Modell kann tatsächlich zu einer Überlastung des Servers führen, da eine unkontrollierte Anzahl von Threads zu Ressourcenkonflikten und möglicherweise zum Zusammenbruch des Systems führen kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Obwohl ein Thread-Pool mit maximaler Größe zu längeren Wartezeiten führen kann, wenn die Anzahl der Anfragen die Kapazität des Pools übersteigt, trägt dies zur Stabilität des Servers bei, indem es verhindert, dass zu viele Threads gleichzeitig ausgeführt werden und die Ressourcen überlasten.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Anzahl der Threads hat sehr wohl einen Einfluss auf die Stabilität eines Servers, da eine zu hohe Anzahl an Threads zu Ressourcenüberlastung und Instabilität führen kann.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie beeinflusst die Verwendung eines Thread-Pools mit einer festen Größe die Fähigkeit eines Servers, auf eine variable Anzahl von Anfragen zu reagieren, im Vergleich zu einem Modell, das für jede Anfrage einen neuen Thread startet?",
+    "evaluations": [
+      {
+        "reasoning": "Ein Thread-Pool mit fester Größe kann tatsächlich zu Wartezeiten führen, wenn alle Threads beschäftigt sind und neue Anfragen eintreffen, da diese Anfragen warten müssen, bis ein Thread verfügbar wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein Thread-Pool mit fester Größe skaliert nicht unbegrenzt. Neue Threads werden nicht dynamisch hinzugefügt, wenn die Last steigt, da die Größe des Pools fest ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Starten eines neuen Threads für jede Anfrage kann bei geringer Last effizient sein, weil keine Ressourcen für ungenutzte Threads reserviert werden müssen. Allerdings kann dies bei höherer Last ineffizient werden, da das Erstellen und Zerstören von Threads Ressourcen verbraucht.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein Modell, das für jede Anfrage einen neuen Thread startet, kann tatsächlich zu einem Ressourcenengpass führen, wenn zu viele Threads gleichzeitig gestartet werden, was das System überlasten kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein Thread-Pool mit fester Größe verhindert nicht jegliche Form von Nebenläufigkeit. Er ermöglicht die gleichzeitige Bearbeitung von Anfragen bis zur Grenze der Poolgröße.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Starten eines neuen Threads für jede Anfrage garantiert nicht notwendigerweise eine bessere Antwortzeit pro Anfrage, besonders nicht unter hoher Last, wo das Erstellen von Threads selbst zu Verzögerungen führen kann.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Auswirkungen hat die Entscheidung für ein Thread-per-Request-Modell auf die Wartezeit und den Durchsatz eines Servers bei einer hohen Anzahl von Anfragen mit unterschiedlichen Ausführungszeiten?",
+    "evaluations": [
+      {
+        "reasoning": "Wenn die Anzahl der Anfragen die Anzahl der verfügbaren Threads übersteigt, müssen neue Anfragen warten, bis ein Thread frei wird. Dies kann die Wartezeit erhöhen, insbesondere wenn die Anfragen unterschiedliche Ausführungszeiten haben und einige Threads länger blockiert sind.",
+        "correct": true
+      },
+      {
+        "reasoning": "Der Durchsatz steigt nicht notwendigerweise, da die sofortige Bearbeitung durch neue Threads durch den Overhead des Thread-Managements und mögliche Ressourcenengpässe begrenzt wird. Bei einer hohen Anzahl von Anfragen kann dies zu einem verringerten Durchsatz führen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Thread-per-Request-Modell erzeugt nicht zwangsläufig eine unbegrenzte Anzahl von Threads, da die Anzahl der Threads normalerweise durch Systemressourcen und die Thread-Pool-Konfiguration begrenzt ist. Eine unbegrenzte Erzeugung von Threads wäre zudem ineffizient und könnte zu einem Systemzusammenbruch führen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Erzeugen und Verwalten einer großen Anzahl von Threads kann erheblichen Overhead verursachen, was den Durchsatz des Servers reduzieren kann, insbesondere wenn die Anzahl der Anfragen sehr hoch ist.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Wartezeit und der Durchsatz bleiben nicht unverändert, da das Thread-per-Request-Modell bei einer hohen Anzahl von Anfragen zu Overhead und Ressourcenengpässen führen kann, was die Effizienz beeinträchtigt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Obwohl die Ausführungszeit der Anfragen eine wichtige Rolle spielt, wird der Durchsatz auch durch die Anzahl der gleichzeitig bearbeiteten Anfragen und den Overhead des Thread-Managements beeinflusst. Das Thread-per-Request-Modell kann den Durchsatz beeinflussen, insbesondere wenn die Anzahl der Anfragen die Kapazität des Servers übersteigt.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie beeinflusst die Implementierung eines Thread-Pools mit Priorisierung von Aufgaben die Verarbeitung von Client-Anfragen in einem hochlastigen Serverumfeld?",
+    "evaluations": [
+      {
+        "reasoning": "Ein Thread-Pool mit Priorisierung ermöglicht es, wichtige Anfragen vorrangig zu behandeln, was die Antwortzeiten für diese Anfragen verbessern kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Priorisierung von Aufgaben in einem Thread-Pool bedeutet, dass Anfragen basierend auf ihrer Priorität behandelt werden und nicht alle gleich.",
+        "correct": false
+      },
+      {
+        "reasoning": "Obwohl Priorisierung zusätzlichen Verwaltungsaufwand bedeutet, ist es nicht zwangsläufig so, dass dies zu einer Verschlechterung der Gesamtleistung führt. In vielen Fällen kann die Priorisierung die Effizienz verbessern, indem kritische Aufgaben schneller bearbeitet werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Effizienz eines Thread-Pools hängt von der spezifischen Lastsituation und den Anforderungen ab. Ein Thread-Pool mit Priorisierung kann in bestimmten Szenarien effizienter sein als einer ohne.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein priorisierender Thread-Pool kann tatsächlich dazu führen, dass weniger dringende Aufgaben verzögert werden, um Ressourcen für dringendere Anfragen bereitzustellen. Dies ist ein beabsichtigter Effekt der Priorisierung.",
+        "correct": true
+      },
+      {
+        "reasoning": "Thread-Pools mit Priorisierung sind auch bei einer hohen Anzahl von Client-Anfragen sinnvoll, da sie dazu beitragen können, die Verarbeitung basierend auf der Wichtigkeit der Anfragen zu optimieren.",
+        "correct": false
+      }
+    ]
+  }
+]

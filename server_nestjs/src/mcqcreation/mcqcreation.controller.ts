@@ -7,6 +7,14 @@ interface Answer {
   answer?: string;
   isCorrect?: boolean;
 }
+
+interface McqEvaluation {
+  correct?: boolean;
+  reasoning?: string;
+}
+interface McqEvaluations {
+  evaluations?: McqEvaluation[];
+}
 @Controller('mcqcreation')
 export class McqcreationController {
 
@@ -72,8 +80,10 @@ export class McqcreationController {
      * @returns evaluated answers in text form
      */
     @Get('evaluateOptions')
-    async getEvaluation(@Query('question') question: string, @Query('concept') concept: string, @Query('answers') answers: {answer: string, isCorrect: boolean}[]): Promise<{evaluations?: {answer?: string, isCorrect?: boolean}[], reasoning?: string}> {
-      return await this.mcqCreationService.getEvaluation(question, concept, answers);
+    async getEvaluation(@Query('question') question: string, @Query('answers') answers: string[]): Promise<McqEvaluations> {
+      console.log("question in controller",question);
+      console.log("answers in controller",answers);
+      return await this.mcqCreationService.getEvaluation(question, answers);
     }
 
 

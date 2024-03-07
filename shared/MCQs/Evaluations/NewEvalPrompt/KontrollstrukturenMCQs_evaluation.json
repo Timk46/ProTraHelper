@@ -1,0 +1,302 @@
+[
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Netzwerkschicht (Layer 3) realisiert, um eine effiziente Routenwahl bei variabler Netzwerkauslastung zu gewährleisten?",
+    "evaluations": [
+      {
+        "reasoning": "Routing-Protokolle wie OSPF und BGP sind dynamische Routing-Protokolle, die auf Veränderungen in der Netzwerktopologie und Auslastung reagieren können, um effiziente Routen zu wählen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Statisches Routing verwendet feste Routen, die nicht auf Veränderungen in der Netzwerkauslastung reagieren, und ist daher nicht für die Überlastkontrolle geeignet.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine zentrale Instanz, die alle Datenpakete sammelt und verteilt, ist kein Mechanismus, der typischerweise auf der Netzwerkschicht für die Überlastkontrolle verwendet wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Quality of Service (QoS) ist ein Mechanismus zur Priorisierung von Datenpaketen, aber nicht spezifisch für die Überlastkontrolle auf der Netzwerkschicht konzipiert.",
+        "correct": false
+      },
+      {
+        "reasoning": "Load Balancing verteilt den Datenverkehr, um Überlastung zu vermeiden, aber es ist nicht spezifisch ein Mechanismus der Netzwerkschicht und wird oft auf anderen Ebenen implementiert.",
+        "correct": false
+      },
+      {
+        "reasoning": "TCP Congestion Control ist ein Mechanismus der Transportschicht (Layer 4), nicht der Netzwerkschicht (Layer 3).",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und für eine Einführungsveranstaltung in objektorientierte und funktionale Programmierung zu spezifisch und nicht relevant, da sie sich auf Netzwerkprotokolle und nicht auf Programmierparadigmen bezieht. Die Antwortoptionen sind thematisch nicht konsistent mit dem Inhalt der Veranstaltung und testen eher Wissen über Netzwerktechnologien als über Programmierkonzepte. Die Frage und die Antwortoptionen erfüllen nicht die Anforderung, höhere kognitive Fähigkeiten zu testen, da sie sich auf spezifisches Faktenwissen konzentrieren. Die Distraktoren sind zwar plausibel, aber sie decken nicht verschiedene häufige Missverständnisse in Bezug auf objektorientierte und funktionale Programmierung ab. Daher entspricht diese MCQ nicht den Vorgaben."
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Datensicherungsschicht (Layer 2) durchgeführt, um Jitter zu minimieren und maximale Verzögerungen zu garantieren?",
+    "evaluations": [
+      {
+        "reasoning": "Token-Ring-Protokolle regeln den Zugriff auf das Medium und können Überlastung verhindern, indem sie eine geregelte Übertragung sicherstellen. Dies ist eine plausible Methode, um Jitter zu minimieren und maximale Verzögerungen zu garantieren.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine zufällige Backoff-Strategie wird typischerweise in Protokollen wie Ethernet verwendet, um nach Kollisionen die Wartezeit zu bestimmen. Dies trägt nicht direkt zur Überlastkontrolle bei und garantiert keine minimalen Jitter oder maximale Verzögerungen.",
+        "correct": false
+      },
+      {
+        "reasoning": "CSMA/CD ist ein Protokoll, das Kollisionen erkennt und die Übertragung nach einer Kollision wiederholt. Es ist nicht darauf ausgelegt, Jitter zu minimieren oder maximale Verzögerungen zu garantieren, sondern um Kollisionen auf einem geteilten Medium zu handhaben.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Master-Slave-Verfahren kann die Kommunikation effektiv regeln und Überlast vermeiden, indem ein zentraler Controller die Übertragungen steuert. Dies kann zur Minimierung von Jitter und Garantie von maximalen Verzögerungen beitragen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Quality of Service (QoS) Mechanismen sind tatsächlich anwendbar auf Layer 2, um Ressourcen zu priorisieren und zu garantieren. Diese Antwort ist falsch, da sie eine unzutreffende Aussage macht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Round-Robin-Verfahren teilt jedem Gerät ein Zeitfenster für die Datenübertragung zu und kann effektiv zur Überlastkontrolle beitragen, indem es die Bandbreite gerecht verteilt und somit Jitter minimiert und maximale Verzögerungen garantieren kann.",
+        "correct": true
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung, obwohl sie sich mehr auf Netzwerkprotokolle konzentriert. Die Antwortoptionen sind relevant und plausibel, decken verschiedene Konzepte ab und vermeiden erkennbare Muster, die zur Antwortfindung durch Eliminierung führen könnten. Die MCQ erfüllt die Anforderungen an eine gute MCQ, da sie Verständnis und Anwendung von Konzepten fordert und nicht nur Faktenwissen abfragt. Die Distraktoren sind herausfordernd und decken verschiedene häufige Missverständnisse ab."
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Anwendungsschicht (Layer 7) realisiert, um die Dienstgüte (Quality of Service, QoS) bei der Übertragung von Echtzeitdaten zu gewährleisten, ohne dabei auf die Mechanismen der Transportschicht zurückzugreifen?",
+    "evaluations": [
+      {
+        "reasoning": "Die Implementierung eines Token-Bucket-Algorithmus in der Anwendungslogik ist eine gültige Methode, um die Datenrate zu begrenzen und somit die Dienstgüte auf der Anwendungsschicht zu gewährleisten.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Priorisierung von Datenpaketen basierend auf der IP-Adresse des Senders ist keine Methode der Anwendungsschicht, sondern wird üblicherweise auf der Netzwerkschicht durchgeführt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein einfacher FIFO-Queue bietet keine Mechanismen zur Überlastkontrolle oder QoS und ist daher keine geeignete Methode für die gestellte Frage.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Anpassung der Fenstergröße in der TCP-Flusskontrolle ist ein Mechanismus der Transportschicht und nicht der Anwendungsschicht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Reservierung von Bandbreite für bestimmte Anwendungen auf dem Router ist eine Methode der Netzwerkschicht und nicht der Anwendungsschicht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Anwendungsspezifische Protokolle, die eine adaptive Datenübertragung ermöglichen, können auf der Anwendungsschicht implementiert werden, um QoS zu gewährleisten, ohne auf die Transportschicht zurückzugreifen.",
+        "correct": true
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer universitären Einführungsveranstaltung zu objektorientierter und funktionaler Programmierung, da sie Grundkenntnisse über Netzwerkschichten und deren Funktionen erfordert. Die Antwortoptionen enthalten eine korrekte Antwort und plausible Distraktoren. Die Distraktoren decken verschiedene Missverständnisse ab und sind thematisch passend, ohne erkennbare Muster, die zur Antwortfindung durch Eliminierung führen könnten. Die Frage testet das Verständnis und die Anwendung von Konzepten, was höhere kognitive Fähigkeiten erfordert. Insgesamt entspricht die MCQ den Vorgaben."
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Anwendungsschicht (Layer 7) realisiert, um die Dienstgüte (Quality of Service, QoS) bei der Übertragung von Echtzeitdaten zu gewährleisten?",
+    "evaluations": [
+      {
+        "reasoning": "Der Token-Bucket-Algorithmus ist eine Methode zur Überlastkontrolle, die die Datenrate begrenzt und Burst-Übertragungen ermöglicht, was zur Aufrechterhaltung der Dienstgüte beitragen kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine feste Round-Trip-Time (RTT) für alle Datenpakete ist technisch nicht umsetzbar und würde nicht notwendigerweise Überlastung verhindern, da die Netzwerkbedingungen variieren können.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein einfacher FIFO-Queue ohne Priorisierung würde nicht effektiv zur Überlastkontrolle beitragen, da er keine Unterscheidung zwischen verschiedenen Arten von Datenverkehr macht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Weighted Fair Queuing (WFQ) ist eine Technik zur Überlastkontrolle, die verschiedene Datenströme basierend auf ihrer Priorität behandelt, was zur Dienstgüte beiträgt.",
+        "correct": true
+      },
+      {
+        "reasoning": "Explicit Congestion Notification (ECN) ist ein Mechanismus zur Signalisierung von Netzwerküberlastung, der zur Überlastkontrolle beitragen kann, ohne Datenpakete zu verwerfen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Statische IP-Routing-Tabellen legen den Weg von Datenpaketen fest, aber sie tragen nicht direkt zur Überlastkontrolle bei, da sie nicht dynamisch auf Netzwerkbedingungen reagieren.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung zu objektorientierter und funktionaler Programmierung, da sie Grundkenntnisse über Netzwerkkonzepte und Überlastkontrolle erfordert. Die Antwortoptionen sind relevant und decken verschiedene Techniken zur Überlastkontrolle ab. Sie enthalten plausible Distraktoren und testen das Verständnis der Konzepte. Die Frage und die Antwortoptionen erfüllen die Anforderungen an eine gut konstruierte MCQ, da sie höhere kognitive Fähigkeiten prüfen und verschiedene häufige Missverständnisse abdecken."
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der physikalischen Schicht (Layer 1) realisiert, um Kollisionen und Interferenzen zu vermeiden?",
+    "evaluations": [
+      {
+        "reasoning": "CSMA/CD ist ein Kollisionsvermeidungsprotokoll, das jedoch auf der Datenverbindungsschicht (Layer 2) und nicht auf der physikalischen Schicht (Layer 1) eingesetzt wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Frequenzspreizung ist eine Technik, die auf der physikalischen Schicht verwendet werden kann, um die Wahrscheinlichkeit von Interferenzen zu minimieren, indem das Signal über ein breiteres Frequenzband verteilt wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Verwendung von Lichtwellenleitern anstelle von Kupferkabeln kann elektromagnetische Interferenzen reduzieren, ist aber keine Methode der Überlastkontrolle.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwortoption ist irreführend, da sie suggeriert, dass Überlastkontrolle auf Layer 1 nicht existiert, was nicht korrekt ist. Überlastkontrolle kann auch auf Layer 1 durch verschiedene Techniken, wie Frequenzspreizung, realisiert werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Quality of Service (QoS) Mechanismen sind nicht auf der physikalischen Schicht angesiedelt, sondern werden auf höheren Schichten implementiert, um den Datenverkehr zu priorisieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Automatische Verstärkungsregelung (AGC) ist eine Technik, die in Empfängern verwendet wird, um das Signal-Rausch-Verhältnis zu optimieren, aber sie ist keine Methode zur Überlastkontrolle auf Layer 1.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung, obwohl sie eher zu einem Kurs über Netzwerkprotokolle und -technologien passen würde. Die Antwortoptionen sind jedoch nicht alle plausibel und einige sind irreführend, was gegen die Anweisungen verstößt. Die Frage testet das Verständnis der physikalischen Schicht und der damit verbundenen Konzepte, was eine höhere kognitive Fähigkeit darstellt. Allerdings könnte die Frage durch klarere und thematisch passendere Distraktoren verbessert werden, um Missverständnisse effektiver zu prüfen und die Qualität der MCQ zu erhöhen."
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle durchgeführt, um dynamische Lastverteilung zu ermöglichen, ohne dass die Endpunkte der Kommunikation die Kontrolle übernehmen?",
+    "evaluations": [
+      {
+        "reasoning": "Load Balancing auf Routern ist eine gängige Methode, um den Datenverkehr entsprechend der Netzwerkauslastung zu verteilen und somit eine dynamische Lastverteilung zu ermöglichen. Diese Antwort ist korrekt und relevant für die Frage.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine zentrale Steuerungseinheit, die alle Datenpakete sammelt und sequenziell weiterleitet, ist keine Methode der Überlastkontrolle, die eine dynamische Lastverteilung ermöglicht. Diese Antwort ist daher falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine statische Zuweisung von Bandbreitenkapazitäten ist das Gegenteil einer dynamischen Lastverteilung und würde nicht zur Überlastkontrolle beitragen, wenn sich die Netzwerklast ändert. Diese Antwort ist falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Peer-to-Peer-Kommunikation ist ein Kommunikationsmodell und keine Methode zur Überlastkontrolle in Netzwerken. Diese Antwort ist daher nicht korrekt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Quality of Service (QoS) Mechanismen arbeiten auf der Anwendungsschicht, um Netzwerkressourcen zu garantieren, aber sie sind nicht spezifisch für die Überlastkontrolle zur dynamischen Lastverteilung ohne Kontrolle durch Endpunkte. Diese Antwort ist daher falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Token Ring Protokolle regeln den Zugriff auf das Medium, sind aber nicht für die Überlastkontrolle in einem Kommunikationsnetzwerk zur dynamischen Lastverteilung gedacht. Diese Antwort ist falsch.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung, da sie Grundkenntnisse in Netzwerkkonzepten erfordert. Die Antwortoptionen sind plausibel und decken verschiedene Konzepte ab, die mit der Frage in Verbindung stehen könnten. Es gibt eine korrekte Antwort und plausible Distraktoren, die verschiedene Missverständnisse und falsche Annahmen abdecken. Die Frage und die Antwortoptionen erfüllen die Anforderungen an eine gut konstruierte MCQ, da sie höhere kognitive Fähigkeiten testen, indem sie das Verständnis von Konzepten der Netzwerküberlastkontrolle und Lastverteilung fordern, ohne dass die Antwort erraten werden kann."
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Vermittlungsschicht (Layer 3) durchgeführt, um eine adaptive Lastverteilung zu erreichen, ohne dass die Endpunkte der Kommunikation die Kontrolle übernehmen?",
+    "evaluations": [
+      {
+        "reasoning": "Routing-Algorithmen auf Layer 3 sind dafür verantwortlich, Pfade durch das Netzwerk zu bestimmen und können dynamisch auf Netzwerkauslastung reagieren, um Routen anzupassen. Dies ist eine korrekte Methode zur Überlastkontrolle auf dieser Schicht.",
+        "correct": true
+      },
+      {
+        "reasoning": "Quality of Service (QoS) Parameter werden auf der Anwendungsschicht (Layer 7) festgelegt und sind nicht direkt für die Überlastkontrolle auf der Vermittlungsschicht (Layer 3) verantwortlich.",
+        "correct": false
+      },
+      {
+        "reasoning": "TCP Congestion Control ist ein Mechanismus der Transportschicht (Layer 4) und nicht der Vermittlungsschicht (Layer 3).",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine zentrale Zuteilung von Bandbreiten durch den Netzwerkadministrator ist keine adaptive Methode der Lastverteilung und findet nicht automatisch auf Layer 3 statt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Backpressure-Mechanismen sind ein Konzept, das in verschiedenen Schichten angewendet werden kann, aber sie sind nicht spezifisch für die Überlastkontrolle auf Layer 3 und werden normalerweise nicht zur adaptiven Lastverteilung verwendet.",
+        "correct": false
+      },
+      {
+        "reasoning": "Frame Relay ist eine Technologie der Datensicherungsschicht (Layer 2) und nicht der Vermittlungsschicht (Layer 3).",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und bezieht sich auf ein relevantes Thema der objektorientierten und funktionalen Programmierung im Kontext von Netzwerken. Die Antwortoptionen sind thematisch passend und decken verschiedene Schichten des OSI-Modells ab, was die Konzentration auf die geprüften Konzepte lenkt. Es gibt keine erkennbaren Muster, die zur Antwortfindung durch Eliminierung führen könnten, und die Distraktoren sind plausibel für Unkundige. Die Frage und die Antwortoptionen erfüllen die Anforderungen an eine gut konstruierte MCQ, da sie höhere kognitive Fähigkeiten testen und verschiedene häufige Missverständnisse abdecken."
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Vermittlungsschicht (Layer 3) durchgeführt, um Engpässe zu vermeiden, die durch eine ungleichmäßige Verteilung von Datenpaketen entstehen können?",
+    "evaluations": [
+      {
+        "reasoning": "Load-Balancing-Methoden sind tatsächlich eine Technik, um den Datenverkehr auf mehrere Pfade zu verteilen und somit Engpässe zu vermeiden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Quality of Service (QoS) ist eine Technik zur Priorisierung von Datenpaketen, die zwar zur Verwaltung der Netzwerkressourcen beiträgt, aber nicht direkt zur Überlastkontrolle auf Layer 3 dient.",
+        "correct": false
+      },
+      {
+        "reasoning": "Statische Routen sind nicht dynamisch und können daher nicht auf Veränderungen im Datenverkehr reagieren, um Engpässe zu vermeiden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Congestion Avoidance Protokolle sind speziell dafür ausgelegt, Datenstaus zu erkennen und zu vermeiden, was sie zu einer korrekten Antwort macht.",
+        "correct": true
+      },
+      {
+        "reasoning": "Flow Control ist eine Technik, die hauptsächlich auf der Transportschicht (Layer 4) eingesetzt wird, nicht auf der Vermittlungsschicht (Layer 3).",
+        "correct": false
+      },
+      {
+        "reasoning": "Automatische Bandbreitenanpassung ist eine mögliche Technik zur Überlastkontrolle, aber sie ist nicht spezifisch für Layer 3 und wird in der Praxis nicht ausschließlich dort eingesetzt.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung, obwohl sie sich mehr auf Netzwerktechnik konzentriert. Die Antwortoptionen sind plausibel und decken verschiedene Konzepte ab, die in einem Einführungskurs behandelt werden könnten. Die Distraktoren sind herausfordernd und nicht irreführend, was die Qualität der MCQ unterstützt. Die Frage und die Antwortoptionen erfüllen die Anforderungen an eine gut konstruierte MCQ, da sie höhere kognitive Fähigkeiten testen und plausible Distraktoren enthalten, die verschiedene häufige Missverständnisse abdecken."
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Transportschicht (Layer 4) durchgeführt, um die Reihenfolge der Paketzustellung zu gewährleisten und gleichzeitig Datenverlust zu vermeiden?",
+    "evaluations": [
+      {
+        "reasoning": "Priorisierungswarteschlangen werden verwendet, um die Verarbeitung von Paketen nach ihrer Wichtigkeit zu ordnen, aber sie gewährleisten nicht direkt die Reihenfolge der Paketzustellung oder verhindern Datenverlust auf der Transportschicht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Sequenznummern in den Paketköpfen werden verwendet, um die Reihenfolge der Pakete sicherzustellen, was ein wesentlicher Bestandteil der Überlastkontrolle auf der Transportschicht ist.",
+        "correct": true
+      },
+      {
+        "reasoning": "Token Ring Protokolle regeln den Zugriff auf das Medium und sind hauptsächlich auf der Data Link Schicht (Layer 2) relevant, nicht auf der Transportschicht (Layer 4).",
+        "correct": false
+      },
+      {
+        "reasoning": "Flutsteuerung ist ein Mechanismus zur Überlastkontrolle, der verhindert, dass zu viele Daten gleichzeitig gesendet werden, was Datenverlust vermeiden kann, aber nicht direkt die Reihenfolge der Paketzustellung gewährleistet.",
+        "correct": false
+      },
+      {
+        "reasoning": "Lastverteilungsalgorithmen verteilen den Datenverkehr auf mehrere Pfade, was zur Skalierbarkeit und Ausfallsicherheit beiträgt, aber nicht spezifisch die Reihenfolge der Paketzustellung auf der Transportschicht gewährleistet.",
+        "correct": false
+      },
+      {
+        "reasoning": "Automatische Wiederholungsanfragen (ARQ) werden verwendet, um verlorene oder beschädigte Pakete erneut zu senden, was Datenverlust verhindert, aber nicht direkt die Reihenfolge der Paketzustellung sichert.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung in objektorientierte und funktionale Programmierung, obwohl sie sich mehr auf Netzwerkprotokolle konzentriert. Die Antwortoptionen sind plausibel und decken verschiedene Aspekte der Netzwerkkommunikation ab. Allerdings könnte die Fragestellung für eine Einführungsveranstaltung zu spezifisch sein, da sie sich auf die Transportschicht eines Kommunikationsnetzwerks bezieht, was eher ein Thema für eine Veranstaltung zu Netzwerkprotokollen oder -technologien wäre. Die MCQ erfüllt die Anforderungen an eine gute MCQ, da sie eine klare Fragestellung hat, plausible Distraktoren bietet und höhere kognitive Fähigkeiten testet, indem sie das Verständnis von Überlastkontrollmechanismen auf der Transportschicht fordert."
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Datensicherungsschicht (Layer 2) realisiert, um die Priorisierung von Echtzeitdatenverkehr zu unterstützen?",
+    "evaluations": [
+      {
+        "reasoning": "Quality of Service (QoS) Mechanismen werden tatsächlich implementiert, um Datenpakete basierend auf ihrer Priorität zu behandeln und somit Echtzeitdatenverkehr zu unterstützen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein Round-Robin-Verfahren behandelt alle Datenpakete gleich und unterstützt keine Priorisierung von Echtzeitdatenverkehr.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Token-Bucket-Algorithmus wird verwendet, um die Datenrate zu begrenzen, aber nicht speziell zur Priorisierung von Echtzeitdatenverkehr auf Layer 2.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine feste Bandbreitenzuweisung würde keine Priorisierung von Echtzeitdatenverkehr unterstützen, da sie für jeden Datenstrom gleich ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Lastausgleich verteilt Datenverkehr gleichmäßig über alle Pfade und unterstützt keine spezifische Priorisierung von Echtzeitdatenverkehr.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine zentrale Zuteilung durch einen Master-Knoten ist nicht spezifisch für die Priorisierung von Echtzeitdatenverkehr auf Layer 2.",
+        "correct": false
+      }
+    ],
+    "commentOnQuality": "Die Frage ist klar und präzise formuliert und passt thematisch zu einer Einführungsveranstaltung über objektorientierte und funktionale Programmierung, da sie Grundkenntnisse über Netzwerkkonzepte abfragt. Die Antwortoptionen sind plausibel und decken verschiedene Konzepte der Netzwerküberlastkontrolle ab. Es gibt eine korrekte Antwort und plausible Distraktoren, die keine erkennbaren Muster aufweisen und verschiedene häufige Missverständnisse abdecken. Die MCQ erfüllt die Anforderungen an eine gut konstruierte MCQ, da sie höhere kognitive Fähigkeiten testet und das Verständnis der Konzepte über reines Faktenwissen hinaus fordert."
+  }
+]

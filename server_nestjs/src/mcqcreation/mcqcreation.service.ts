@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable prettier/prettier */
 
 
@@ -18,9 +19,18 @@ import { LangChainTracer } from "langchain/callbacks";
 import { McqGenerationDTO } from '@Interfaces/question.dto';
 import { env } from 'process';
 import { JsonLoaderService } from './jsonloader.service';
+
 interface Answer{
   answer?: string;
   isCorrect?: boolean;
+}
+interface McqEvaluation {
+  correct?: boolean;
+  reasoning?: string;
+}
+interface McqEvaluations {
+  question?: string;
+  evaluations?: McqEvaluation[];
 }
 
 const client = new Client({
@@ -188,46 +198,86 @@ Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte sc
 format instructions: {format_instructions}
 `
 
-const questionAndAnswerPrompt = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und dazugehörige Antwortmöglichkeiten, eine Beschreibung und eine Punktzahl für eine Multiple Choice Aufgabe zu erstellen. Die Punktzahl soll dabei von 0 für besonders einfach bis 5 für besonders schwer reichen. Nutze dabei folgendes Konzept:
---------------
-Konzept: {concept}
---------------
-Dieses Konzept ist das Thema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen werden sollen. Beachte dabei folgenden Gesamtkontext:
---------------
-Gesamtkontext: {completeContext}
---------------
-und liefere mir basierend auf diesem Kontext eine konkrete Fragestellung für die Multiple Choice Aufgabe. Überelege dir zusätzlich bis zu {options} verschiedene Antwortmöglichkeiten auf diese Frage.
---------------
-Achte darauf, dass folgende Fragen und Antwortmöglichkeiten schon bestehen und du diese nicht erneut vorschlagen darfst. Nimm dir nun erstmal etwas Zeit und lies diese bereits verwendeten Fragen und Antwortmöglichkeiten genau durch. Anschließend denke genau nach, du darfst auf keinen Fall nur leicht umformulierten Fragen oder Antwortmöglichkeiten zu generieren. Wenn die Frage einen ähnlichen Kern wie eine bereits vorgeschlagene Frage hat, dann denke dir eine neue aus und wenn die Fragen bisher zu einfach waren, dann generiere schwerere:
---------------
-Bereits vorgeschlagene Fragen: {questions}.
---------------
-Keine der zuvor beschriebenen Fragen oder Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden, also denke hier erneut kurz nach und generiere zur not neue. Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
-Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte antworte auf jeden Fall auf deutsch. Beachte dass die Beschreibung, die du generierst nichts über die Lösung der Fragestellung verraten soll, sondern viel mejr das Thema der Fragestellung beschreiben und in einen Kontext setzen soll.
---------------
+const questionAndAnswerPrompt = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
+Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein müssen innerhalb der triple quotes ("""):
+"""Beschreibung der wesentlichen 3 Eigenschaften einer MCQ:
+1. MCQs bestehen aus einem klaren Fragestamm und mehreren Antwortoptionen, darunter eine richtige Antwort und plausible Distraktoren, um effektives Lernen zu unterstützen.
+2. Effektive MCQs testen höhere kognitive Fähigkeiten, indem sie Verständnis, Anwendung und Analyse von Konzepten über Faktenwissen hinaus fordern.
+3. Gute MCQs zeichnen sich durch eindeutige Fragen, plausible Distraktoren, die Vermeidung von sprachlichen Verzerrungen und die Fähigkeit aus, höhere Denkprozesse zu prüfen, ohne dass die Antwort erraten werden kann.
+
+Zu den Merkmalen einer gut konstruierten MCQ gehören eindeutige und relevante Fragestellungen, plausible und gleichmäßig überzeugende Distraktoren. Beachte hierbei die folgenden 5 Eigenschaften von Distraktoren:
+1. Distraktoren müssen plausibel und herausfordernd für Unkundige sein, um effektiv das Verständnis statt Erkennungsfähigkeit zu prüfen.
+2. Sie sollten thematisch zum Fragestamm passen und die Konzentration auf die geprüften Konzepte lenken.
+3. Jedes erkennbare Muster, das zur Antwortfindung durch Eliminierung führen könnte, ist zu vermeiden.
+4. Distraktoren sollen herausfordernd, aber nicht verwirrend oder irreführend sein, um Klarheit zu bewahren.
+5. Sie sollten verschiedene häufige Missverständnisse abdecken, um das Verständnis gründlich zu testen."""
+---
+Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Objektorientierte und Funktionale Programmierung". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen thematisch dazu passen.
+Der thematische Teil der objektorientierten Programmierung wird hier anhand der Programmiersprache Java gelehrt. Der thematische Teil der funktionalen Programmierung hingegen eher anhand der Programmiersprache Python.
+Beziehe dich immer auf das konkrete Konzept, welches als übergeordnetes Thema dienen soll zu welchem die Fragestellung und die dazugehörigen Antwortmöglichkeiten erstellt werden sollen.
+Es ist verboten, bereits existierenden Multiple Choice Questions erneut vorzuschlagen. Benutze in den Antwortmöglichkeiten keine Aufzählungen verschiedener Optionen und nutze maximal 2 Sätze. Benutze unbedingt immer die deutsche Sprache.
+---
+Das dazugehörige Transkript: {transcript}
+---
+thematisch verwandter Kontext: {context}
+---
+Anzahl an Antwortmöglichkeiten: {options}
+---
+Konzept, welches als übergeordnetes Thema dienen soll: {concept}
+---
+Bereits existierende Fragen: {questions}.
+---
 format instructions: {format_instructions}
 `
-
+// To Add: Bigger context if no transcript is found
 const questionAndAnswerPrompt2 = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und dazugehörige Antwortmöglichkeiten, eine Beschreibung und eine Punktzahl für eine Multiple Choice Aufgabe zu erstellen. Die Punktzahl soll dabei von 0 für besonders einfach bis 5 für besonders schwer reichen. Nutze dabei folgendes Konzept:
 --------------
 Konzept: {concept}
 --------------
-Dieses Konzept ist das Thema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen werden sollen. Beachte dabei folgenden Gesamtkontext:
+Dieses Konzept ist das OberThema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen werden sollen. Denke lange und gut drüber nach, um mit den generierten Fragen den Umfang des Oberthemas gut abzudecken.
+Überelege dir zusätzlich bis zu {options} verschiedene Antwortmöglichkeiten auf diese Frage.
 --------------
-Gesamtkontext: {completeContext}
---------------
-und liefere mir basierend auf diesem Kontext eine konkrete Fragestellung für die Multiple Choice Aufgabe. Überelege dir zusätzlich bis zu {options} verschiedene Antwortmöglichkeiten auf diese Frage.
---------------
-Achte darauf, dass folgende Fragen und Antwortmöglichkeiten schon bestehen und du diese nicht erneut vorschlagen darfst. Nimm dir nun erstmal etwas Zeit und lies diese bereits verwendeten Fragen und Antwortmöglichkeiten genau durch. Anschließend denke genau nach, du darfst auf keinen Fall nur leicht umformulierten Fragen oder Antwortmöglichkeiten zu generieren. Wenn die Frage einen ähnlichen Kern wie eine bereits vorgeschlagene Frage hat, dann denke dir eine neue aus und wenn die Fragen bisher zu einfach waren, dann generiere schwerere:
+Achte darauf, dass folgende Fragen schon bestehen und du diese nicht erneut vorschlagen darfst. Nimm dir nun erstmal etwas Zeit und lies diese bereits verwendeten Fragen genau durch. Anschließend denke genau nach, du darfst auf keinen Fall nur leicht umformulierte Fragen generieren. Wenn die Frage einen ähnlichen Kern wie eine bereits vorgeschlagene Frage hat, dann denke dir eine neue aus. Wenn die Fragen bisher zu leicht waren, dann denke dir schwerere aus:
 --------------
 Bereits vorgeschlagene Fragen: {questions}.
 --------------
-Keine der zuvor beschriebenen Fragen oder Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden, also denke hier erneut kurz nach und generiere zur not neue. Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
-Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte antworte auf jeden Fall auf deutsch. Beachte dass die Beschreibung, die du generierst nichts über die Lösung der Fragestellung verraten soll, sondern viel mejr das Thema der Fragestellung beschreiben und in einen Kontext setzen soll.
+Keine der zuvor beschriebenen Fragen sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden, also denke hier erneut kurz nach und generiere zur not neue. Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
+Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte antworte auf jeden Fall auf deutsch. Beachte dass die Beschreibung, die du generierst nichts über die Lösung der Fragestellung verraten soll, sondern viel mehr das Thema der Fragestellung beschreibend in einen Kontext setzen soll.
 --------------
 format instructions: {format_instructions}
 `
-// not used yet
+
+const evaluationPrompt = `Du bist ein Programmierexperte und bewertest Multiple Choice Questions (MCQs). Bewerte die MCQs anhand folgender Anweisungen:
+Anweisungen zur Bewertung innerhalb der triple quotes ("""):
+"""
+A. Für jede Frage bewertest du, ob die Formulierung gut ist. Eine gute Formulierung ist klar, präzise, nicht zu lang und sofort verständlich.
+B. Für jede Antwortoption musst du bewerten, ob diese wahr oder falsch im Kontext der gestellten Frage ist. Solltest du eine als "wahr" gekennzeichnete Antwort für "falsch" halten, begründe deine Entscheidung ausführlich. Gleiches gilt, wenn du eine als "falsch" markierte Antwortoption für "wahr" hältst.
+C. Die MCQs müssen thematisch zur universitären Einführungsverstanstaltung "Objektorientierte Programmierung mit Java" und "Funktionale Programmierung mit Python" passen. Die Fragen und Antworten müssen sich auf die spezifischen Konzepte beziehen, die in den Vorlesungen behandelt werden und Fragen zu anderen Programmiersprachen sind nicht zulässig.
+D. Die Eigenschaften der MCQ müssen den Vorgaben der Definition entsprechen:
+Beschreibung der wesentlichen 3 Eigenschaften einer MCQ:
+  1. MCQs bestehen aus einem klaren Fragestamm und mehreren Antwortoptionen, darunter eine richtige Antwort und plausible Distraktoren, um effektives Lernen zu unterstützen.
+  2. Effektive MCQs testen höhere kognitive Fähigkeiten, indem sie Verständnis, Anwendung und Analyse von Konzepten über Faktenwissen hinaus fordern.
+  3. Gute MCQs zeichnen sich durch eindeutige Fragen, plausible Distraktoren, die Vermeidung von sprachlichen Verzerrungen und die Fähigkeit aus, höhere Denkprozesse zu prüfen, ohne dass die Antwort erraten werden kann.
+
+Zu den Merkmalen einer gut konstruierten MCQ gehören eindeutige und relevante Fragestellungen, plausible und gleichmäßig überzeugende Distraktoren. Beachte hierbei die folgenden 5 Eigenschaften von Distraktoren:
+  1. Distraktoren müssen plausibel und herausfordernd für Unkundige sein, um effektiv das Verständnis statt Erkennungsfähigkeit zu prüfen.
+  2. Sie sollten thematisch zum Fragestamm passen und die Konzentration auf die geprüften Konzepte lenken.
+  3. Jedes erkennbare Muster, das zur Antwortfindung durch Eliminierung führen könnte, ist zu vermeiden.
+  4. Distraktoren sollen herausfordernd, aber nicht verwirrend oder irreführend sein, um Klarheit zu bewahren.
+  5. Sie sollten verschiedene häufige Missverständnisse abdecken, um das Verständnis gründlich zu testen.
+"""
+Bewerte weiterhin die gesamte MCQ. Wenn die MCQ nicht den Vorgaben enstpricht, erläutere kurz warum und beziehe dich dabei auf die Anweisungen "A, B, C und D". Danach gib mir Verbesserungsvorschläge.
+Ansonsten antworte ausschließlich mit "Gut", "Sehr Gut" oder "Exzellent".
+
+---
+MCQ: {question}
+---
+Antwortoptionen der MCQ: {answers}
+---
+format instructions: {format_instructions}
+`
+
+// not used
 const reevaluationPrompt = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und dazugehörige Antwortmöglichkeiten für eine Multiple Choice Aufgabe zu bewerten und zu verbessern.
 --------------
 Folgendes Konzept ist das Thema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen wurden: {concept}. Hier ist der spezielle Kontext des Konzepts, also des Oberthemas: {conceptText}
@@ -247,23 +297,6 @@ Gib zusätzlich eine Begründung dafür an, weshalb du die Frage und/oder Antwor
 --------------
 format instructions: {format_instructions}
 `
-// not used yet
-const evaluationPrompt = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und die dazugehörigen Antwortmöglichkeiten für eine Multiple Choice Aufgabe zu bewerten. Du bekommst eine Frage und die dazugehörigen Antwortmöglichkeiten samt der Information, ob diese Antwortmöglichkeiten für die Frage als "wahr" oder "falsch" oder markiert wurden.
-Du sollst nun bewerten, ob die Angabe "wahr" oder "falsch" für die jeweilige Antwortmöglichkeit korrekt ist.
---------------
-Folgendes Konzept ist dabei das Oberthema:{concept}. Hier ist der spezielle Kontext des Konzepts, also des Oberthemas: {conceptText}
---------------
-Der Kontext zu dieser Frage ergibt sich aus der Fragestellung und lautet: {completeContext}
---------------
-Bewerte für folgende
-Frage: {question}
-die bestehenden Antwortmöglichkeiten: {answers}
---------------
-Bewerte bitte die Antwortmöglichkeiten und begründe deine Bewertung.
-Wenn eine als "wahr" markierte Antwortmöglichkeit deiner Meinung nach "falsch" ist, dann erkläre warum.
-Wenn eine als "falsch" markierte Antwortmöglichkeit deiner Meinung nach "wahr" ist, dann erkläre ebenfalls warum.
-format instructions: {format_instructions}
-`
 @Injectable()
 export class McqCreationService {
   private pgVectorStore: Promise<PGVectorStore>;
@@ -272,6 +305,7 @@ export class McqCreationService {
   private regenLlm = new ChatOpenAI(regenerateLLmconfig);
   private otherOptions : { [question: string]: string[] } = {};
   private askedQuestions: { [concept: string]: McqGenerationDTO[] } = {};
+  private mcqToEvaluate: { [question: string]: string[] } = {};
   constructor(private jsonLoaderService : JsonLoaderService) {
     this.pgVectorStore = this.initPgVectorStore();
     this.folderPath = path.join(__dirname, '..', '..', '..', '..', '..', 'shared', 'transcripts');
@@ -287,7 +321,7 @@ export class McqCreationService {
 
     if (!questionExists) {
       const mcqOptions = options.map(option => ({ answer: option, isCorrect: false }));
-      this.askedQuestions[concept].push({ question: question, options: mcqOptions });
+      this.askedQuestions[concept].push({ question: question, answers: mcqOptions });
     }
 
   }
@@ -300,7 +334,7 @@ export class McqCreationService {
   const questionExists = this.askedQuestions[concept].some(mcq => mcq.question === question);
 
   if (!questionExists) {
-    this.askedQuestions[concept].push({ question: question, options: [] });
+    this.askedQuestions[concept].push({ question: question, answers: [] });
   }
   }
 
@@ -308,7 +342,7 @@ export class McqCreationService {
   if (concept in this.askedQuestions) {
     this.askedQuestions[concept].forEach((mcq: McqGenerationDTO) => {
       if (mcq.question === question) {
-        mcq.options = mcq.options.map(option => option.answer === oldOption ? { ...option, answer: newOption } : option);
+        mcq.answers = mcq.answers.map(option => option.answer === oldOption ? { ...option, answer: newOption } : option);
       }
     });
   }
@@ -320,7 +354,7 @@ export class McqCreationService {
 
     if (mcq) {
       const mcqOptions = options.map(option => ({ answer: option, isCorrect: false }));
-      mcq.options.push(...mcqOptions);
+      mcq.answers.push(...mcqOptions);
     }
   }
 }
@@ -338,7 +372,7 @@ export class McqCreationService {
    * @returns if concept has Umlauts
    */
   private hasUmlauts(concept: string): boolean {
-    return /[äöüÄÖÜß]/.test(concept);
+    return /[äöüÄÖÜß]/i.test(concept);
   }
 
   /**
@@ -355,47 +389,34 @@ export class McqCreationService {
    * @param concept
    * @returns document of the concept if it matches
    */
-  private async getFileFromFolder(folderPath: string, searchStr: string): Promise<string[] | null> {
-
-    if(this.hasUmlauts(searchStr)) {
+  public async getFileFromFolder(searchStr: string) {
+    if (this.hasUmlauts(searchStr)) {
       searchStr = this.replaceUmlauts(searchStr);
     }
 
-    let searchWords: string[];
-    const mainWords = ['python', 'java']; // Hauptwörter für die Suche
     const searchStrLower = searchStr.toLowerCase();
-
-    // Überprüfen, ob der Suchstring 'Python' oder 'Java' enthält
-    if (mainWords.some(word => searchStrLower.includes(word))) {
-      const terms = searchStr.split(/[\s/]+/)
-                          .map(word => word.trim().toLowerCase())
-                          .filter(word => word !== 'mit');
-
-      // Erzeugen von Suchbegriffen, die das Hauptwort und die anderen Begriffe kombinieren
-      searchWords = terms.flatMap(term =>
-        mainWords.includes(term) ? [] : mainWords.map(mainWord => mainWord + '_' + term)
-      );
-    } else {
-      // Aufteilen des Suchstrings in einzelne Wörter
-      searchWords = searchStr.split(/[\s/]+/)
-                              .map(word => word.trim().toLowerCase())
-                              .filter(word => word !== '');
-    }
-
-    console.log("Search words: ", searchWords)
+    const prefixes = ['python_', 'java_'];
+    const selectedPrefix = prefixes[Math.floor(Math.random() * prefixes.length)]; // Zufällige Auswahl zwischen 'python_' und 'java_'
 
     try {
-      const files = fs.readdirSync(folderPath);
-      const matchingFiles = files.filter(file => {
-        const lowerCaseFileName = path.basename(file, '.txt').toLowerCase();
-        // Prüfen, ob der Dateiname einen der Suchbegriffe enthält
-        return searchWords.some(word => lowerCaseFileName.includes(word));
+      const files = fs.readdirSync(this.folderPath);
+      let matchingFiles = files.filter(file => {
+        const lowerCaseFileName = file.toLowerCase();
+        // Prüfen, ob der Dateiname den Suchstring enthält und mit dem ausgewählten Präfix beginnt
+        return lowerCaseFileName.includes(searchStrLower) && lowerCaseFileName.startsWith(selectedPrefix);
       });
 
-      console.log("Matching files: ", matchingFiles)
+      console.log("Matching files before random selection: ", matchingFiles);
+
+      // Zufällige Auswahl von bis zu 3 Dateien, wenn mehr als 3 übereinstimmen
+      if (matchingFiles.length > 3) {
+        matchingFiles = matchingFiles.sort(() => 0.5 - Math.random()).slice(0, 3);
+      }
+
+      console.log("Matching files after random selection: ", matchingFiles);
 
       if (matchingFiles.length > 0) {
-        // Inhalt aller übereinstimmenden Dateien zurückgeben
+        // Inhalt aller ausgewählten Dateien zurückgeben
         return matchingFiles.map(file => {
           const filePath = path.join(this.folderPath, file);
           return fs.readFileSync(filePath, 'utf8');
@@ -404,7 +425,7 @@ export class McqCreationService {
         return null;
       }
     } catch (err) {
-      console.log("Error stack: ", err.stack);
+      console.error("An error occurred: ", err);
       return null;
     }
   }
@@ -418,7 +439,7 @@ export class McqCreationService {
       question: z.string().describe("Question to the user without answering options"),
     }));
     const completeContext = formatDocumentsAsString(await (await this.pgVectorStore).similaritySearch(concept, 10));
-    const conceptContext = await this.getFileFromFolder(this.folderPath,concept);
+    const conceptContext = await this.getFileFromFolder(concept);
     if(!(conceptContext === null)) {
       const response = await RunnableSequence.from([
       {
@@ -469,7 +490,7 @@ export class McqCreationService {
   async getAnswer(question: string, option: string, otherOptions: string[], concept: string) :Promise<Answer> {
   if (!this.askedQuestions[concept].some(questionDto => questionDto.question === question)) {
     const optionsForQuestion = otherOptions.map(option => ({ answer: option}));
-    this.askedQuestions[concept].push({ question: question, options: optionsForQuestion });
+    this.askedQuestions[concept].push({ question: question, answers: optionsForQuestion });
   }
 
     const parser = StructuredOutputParser.fromZodSchema(
@@ -479,7 +500,7 @@ export class McqCreationService {
                   isCorrect: z.boolean().describe("Indicates if the answer is correct (true/false)"),
                 }));
     const completeContext = formatDocumentsAsString(await (await this.pgVectorStore).similaritySearch(question, 10));
-    const conceptContext = await this.getFileFromFolder(this.folderPath,concept);
+    const conceptContext = await this.getFileFromFolder(concept);
     if(!(conceptContext === null)) {
       const response = await RunnableSequence.from([
       {
@@ -487,7 +508,7 @@ export class McqCreationService {
         concept: () => concept,
         options: () => {
           const questionDto = this.askedQuestions[concept].find(dto => dto.question === question);
-          return questionDto ? questionDto.options : [];
+          return questionDto ? questionDto.answers : [];
         },
         question: () => question,
         completeContext: () => completeContext,
@@ -509,7 +530,7 @@ export class McqCreationService {
         concept: () => concept,
         options: () => {
           const questionDto = this.askedQuestions[concept].find(dto => dto.question === question);
-          return questionDto ? questionDto.options : [];
+          return questionDto ? questionDto.answers : [];
         },
         question: () => question,
         completeContext: async () => completeContext,
@@ -547,7 +568,7 @@ export class McqCreationService {
       })
     )
     const completeContext = formatDocumentsAsString(await (await this.pgVectorStore).similaritySearch(question, 10));
-    const conceptContext = await this.getFileFromFolder(this.folderPath, concept);
+    const conceptContext = await this.getFileFromFolder(concept);
 
     if(!(conceptContext === null))
     {
@@ -610,9 +631,9 @@ export class McqCreationService {
 
   this.jsonLoaderService.loadJson(concept).subscribe((mcqs: { questions: McqGenerationDTO[] }) => {
     mcqs.questions.forEach((mcq: McqGenerationDTO) => {
-      if(mcq.options)
+      if(mcq.answers)
       {
-        this.addQuestionAndOptions(concept, mcq.question, mcq.options.map(answer => answer.answer));
+        this.addQuestionAndOptions(concept, mcq.question, mcq.answers.map(answer => answer.answer));
       }
     });
   });
@@ -621,35 +642,35 @@ export class McqCreationService {
     // parser for formatting the output in the desired way
     const parser = StructuredOutputParser.fromZodSchema(
       z.object({
-        question: z.string().describe("Question to the user"),
+        question: z.string().describe("Frage an den Nutzer"),
         answers: z.array(
           z.object({
-            answer: z.string().describe("Answer to the user's question. Dont enumerate"),
-            correct: z.boolean().describe("Indicates if the answer is correct (true/false)"),
+            answer: z.string().describe("Antworrtmöglichkeit des Nutzers. Keine Aufzählungen"),
+            correct: z.boolean().describe("Markiert die Korrektheit der Antwortmöglichkeit (wahr/falsch)"),
           })
         ).optional().default([]),
-        description: z.string().describe("Brief Description of the Question with regards to the Topic/Concept"),
-        score: z.number().describe("Score for answering the Question right ranging from 0 for an easy Question to 5 for a hard question. Choose according to the difficulty of the question."),
+        description: z.string().describe("Kurze Beschreibung des Themas/Konzepts"),
+        score: z.number().describe("Punktzahl für das richtige beantworten der Frage, wo 1 für sehr einfach und 5 für sher schwierig steht. Wähle anhand des Schwierigekeitsgrades."),
 
       })
     )
     // context retrieval for the question
     const completeContext = formatDocumentsAsString(await (await this.pgVectorStore).similaritySearch(concept, 10));
-    const conceptText = await this.getFileFromFolder(this.folderPath,concept);
+    const transcript = await this.getFileFromFolder(concept);
 
     questions = this.askedQuestions[concept].map(mcq => mcq.question);
     console.log("loaded questions:", questions);
-    if(!(conceptText === null)) {
+    if(!(transcript === null)) {
       console.log("result with concept context is fired")
 
       const result = await RunnableSequence.from([
         {
           concept: () => concept,
-          options: () => options ?? 6,
+          options: () => options,
+          context: () => completeContext,
           completeContext: () => completeContext,
-          //conceptText: () => conceptText,
+          transcript: () => transcript,
           questions: () => questions,
-          //otherOptions: () => this.chosenOptions[concept],
           format_instructions: () => parser.getFormatInstructions(),
         },
         PromptTemplate.fromTemplate(questionAndAnswerPrompt),
@@ -666,7 +687,7 @@ export class McqCreationService {
           {
             concept: () => concept,
             options: () => options,
-            completeContext: () => completeContext,
+            //completeContext: () => completeContext,
             questions: () => questions,
             //otherOptions: () => this.chosenOptions[concept],
             format_instructions: () => parser.getFormatInstructions(),
@@ -681,6 +702,57 @@ export class McqCreationService {
 
         return result2;
     }
+  }
+
+   /**
+  * returns evaluation of given answer options and the reasoning behind its evaluation
+  * @param question
+  * @param answers
+  * @returns
+  */
+  async getEvaluation(question: string, answers: string[]) : Promise<McqEvaluations> {
+    console.log("answers", answers)
+
+    this.mcqToEvaluate[question] = answers
+    console.log("mcqtoevaluateanswers: ", this.mcqToEvaluate.answers)
+    console.log("mcqtoevaluateanswers: ", this.mcqToEvaluate[question])
+    console.log("type of mcqtoevaluateanswers: ", typeof this.mcqToEvaluate.answers)
+    console.log("evaluation fired")
+    console.log("mcq question: ", question, "and: ", answers)
+    console.log("types: ", typeof question, "and: ", typeof answers)
+    const parser = StructuredOutputParser.fromZodSchema(
+      z.object({
+        question: z.string().describe("Die Frage an den User"),
+        evaluations: z.array(
+          z.object({
+            reasoning: z.string().describe("Eine ausführliche Erklärung dazu, warum diese Antwortmöglichkeit Mit Bezug zur Frage wahr oder falsch ist."),
+            correct: z.boolean().describe("Evaluiert, ob die gegebene Antwortmöglichkeit auf die jeweilige Frage korrekt ist (wahr/falsch)"),
+
+          })
+        ).optional().default([]),
+        commentOnQuality: z.string().describe("Die Bewertung der Gesamtfrage und der Antwortmöglichkeiten als Gut, Sehr Gut oder Exzellent. kurze Begründung für die Bewertung anhand der Anweisungen."),
+      })
+    )
+    const options: string[] = []
+    console.log("options: ", options)
+    console.log("typeof options: ", typeof options)
+    console.log("answers: ", answers)
+    console.log("typeof answers: ", typeof answers)
+    const result = await RunnableSequence.from([
+      {
+        question: () => question,
+        answers: () => this.mcqToEvaluate[question],
+        format_instructions: () => parser.getFormatInstructions(),
+      },
+      PromptTemplate.fromTemplate(evaluationPrompt),
+      this.llm,
+      parser,
+    ]).invoke({callbacks: [tracer]});
+
+    console.log("Evaluation result: ", result)
+
+    return result;
+
   }
 
   //NOT IMPLEMENTED YET: ToDo: creating a chain, which reevaluates the given question and its options and maybe returns changes afterwards
@@ -701,7 +773,7 @@ export class McqCreationService {
 
     const context = await (await this.pgVectorStore).similaritySearch(question, 10);
     const completeContext = formatDocumentsAsString(context);
-    const contextText = await this.getFileFromFolder(this.folderPath,concept);
+    const contextText = await this.getFileFromFolder(concept);
     console.log("context: ", context)
     const result = await RunnableSequence.from([
       {
@@ -724,42 +796,4 @@ export class McqCreationService {
     return result;
   }
 
-  //NOT IMPLEMENTED YET: ToDo: creating a chain, which evaluates the given question and its options and returns reasoning
-  async getEvaluation(question: string, concept: string, answers: {answer: string, isCorrect: boolean}[]) : Promise<{evaluations?: {answer?: string, isCorrect?: boolean}[], reasoning?: string}> {
-    console.log("evaluation fired")
-    console.log("question: ", question)
-    console.log("concept: ", concept)
-    console.log("answers: ", answers)
-    const parser = StructuredOutputParser.fromZodSchema(
-      z.object({
-        evaluations: z.array(
-          z.object({
-            answer: z.string().describe("Evaluation of the Answer with regards to the original question."),
-            isCorrect: z.boolean().describe("Evaluates if the answer really is correct for that question"),
-          })
-        ).optional().default([]),
-        reasoning: z.string().describe("Reasoning for the evaluations of the answers"),
-      })
-    )
-    const context = await (await this.pgVectorStore).similaritySearch(question, 10);
-    const completeContext = formatDocumentsAsString(context);
-    const contextText = await this.getFileFromFolder(this.folderPath,concept);
-    const result = await RunnableSequence.from([
-      {
-        concept: () => concept,
-        completeContext: () => completeContext,
-        conceptText: () => contextText,
-        question: () => question,
-        answers: () => answers,
-        format_instructions: () => parser.getFormatInstructions(),
-      },
-      PromptTemplate.fromTemplate(evaluationPrompt),
-      this.llm,
-      parser,
-    ]).invoke({callbacks: [tracer]});
-
-    console.log("Evaluation result: ", result)
-    return result;
-
-  }
 }

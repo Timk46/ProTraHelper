@@ -1,0 +1,292 @@
+[
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Netzwerkschicht (Layer 3) realisiert, um eine effiziente Routenwahl bei variabler Netzwerkauslastung zu gewährleisten?",
+    "evaluations": [
+      {
+        "reasoning": "Routing-Protokolle wie OSPF und BGP sind dynamische Routing-Protokolle, die in der Lage sind, ihre Routenwahl auf Basis der aktuellen Netzwerkauslastung anzupassen. Sie können somit zur Überlastkontrolle beitragen, indem sie überlastete Routen vermeiden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Statisches Routing verwendet feste Routen, die nicht auf Veränderungen in der Netzwerkauslastung reagieren. Daher ist es nicht geeignet, um Überlastkontrolle auf der Netzwerkschicht zu realisieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine zentrale Instanz, die alle Datenpakete sammelt und verteilt, ist nicht typisch für die Netzwerkschicht, sondern eher für höhere Schichten oder spezielle Netzwerkarchitekturen. Die Netzwerkschicht arbeitet in der Regel dezentral.",
+        "correct": false
+      },
+      {
+        "reasoning": "Quality of Service (QoS) ist ein Mechanismus, der verwendet wird, um Netzwerkressourcen zuzuweisen und Datenpaketen Prioritäten zu geben, aber es ist nicht spezifisch für die Überlastkontrolle auf der Netzwerkschicht, sondern dient eher der Qualitätsverbesserung für bestimmte Dienste oder Datenströme.",
+        "correct": false
+      },
+      {
+        "reasoning": "Load Balancing verteilt den Datenverkehr auf alle verfügbaren Routen, um eine gleichmäßige Auslastung zu erreichen. Es ist eine Methode zur Überlastkontrolle, die auf der Netzwerkschicht eingesetzt werden kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "TCP Congestion Control ist ein Mechanismus der Transportschicht (Layer 4) und nicht der Netzwerkschicht (Layer 3). Es ist daher nicht korrekt, TCP Congestion Control als Methode der Überlastkontrolle auf der Netzwerkschicht zu bezeichnen.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Datensicherungsschicht (Layer 2) durchgeführt, um Jitter zu minimieren und maximale Verzögerungen zu garantieren?",
+    "evaluations": [
+      {
+        "reasoning": "Das Token-Ring-Protokoll ist ein Netzwerkprotokoll, das den Zugriff auf das Medium regelt und eine geregelte Übertragung sicherstellt, indem es ein Token im Ring zirkulieren lässt. Dies kann dazu beitragen, Jitter zu minimieren und maximale Verzögerungen zu garantieren, da jedes Gerät im Netzwerk seine Chance bekommt, Daten zu senden, und Kollisionen vermieden werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine zufällige Backoff-Strategie wird typischerweise in Protokollen wie CSMA/CA verwendet, um nach Kollisionen die Wartezeit bis zum nächsten Senden zu bestimmen. Dies kann zwar helfen, Kollisionen zu reduzieren, garantiert aber keine minimalen Jitter oder maximale Verzögerungen, da die Wartezeit zufällig ist und Kollisionen immer noch auftreten können.",
+        "correct": false
+      },
+      {
+        "reasoning": "CSMA/CD (Carrier Sense Multiple Access with Collision Detection) ist ein Protokoll, das Kollisionen erkennt und die Übertragung nach einer Kollision stoppt, um sie nach einer zufälligen Zeit wieder zu versuchen. Dieses Protokoll kann nicht garantieren, dass Jitter minimiert wird oder maximale Verzögerungen eingehalten werden, da es keine Kontrolle über die Zugriffszeiten auf das Medium gibt und Kollisionen zu unvorhersehbaren Verzögerungen führen können.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Master-Slave-Verfahren, bei dem ein zentraler Controller (Master) die Kommunikation steuert, kann effektiv dazu beitragen, Jitter zu minimieren und maximale Verzögerungen zu garantieren, da der Master die Übertragungszeiten für alle Slaves koordiniert und somit eine vorhersehbare Netzwerkleistung ermöglicht.",
+        "correct": true
+      },
+      {
+        "reasoning": "Quality of Service (QoS) Mechanismen sind dazu da, Netzwerkverkehr zu priorisieren und können auf verschiedenen Schichten, einschließlich Layer 2, implementiert werden. Sie sind anwendbar und können dazu beitragen, Jitter zu minimieren und maximale Verzögerungen zu garantieren, indem sie sicherstellen, dass kritischer Verkehr bevorzugt behandelt wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Round-Robin-Verfahren teilt jedem Gerät der Reihe nach ein Zeitfenster für die Datenübertragung zu. Dies kann dazu beitragen, Jitter zu minimieren und maximale Verzögerungen zu garantieren, da jedes Gerät weiß, wann es an der Reihe ist, und somit die Zugriffszeiten auf das Medium vorhersehbar sind.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Anwendungsschicht (Layer 7) realisiert, um die Dienstgüte (Quality of Service, QoS) bei der Übertragung von Echtzeitdaten zu gewährleisten, ohne dabei auf die Mechanismen der Transportschicht zurückzugreifen?",
+    "evaluations": [
+      {
+        "reasoning": "Der Token-Bucket-Algorithmus ist ein Mechanismus zur Verkehrssteuerung und kann auf der Anwendungsschicht implementiert werden, um die Datenrate zu begrenzen und somit die Dienstgüte zu gewährleisten.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Priorisierung von Datenpaketen basierend auf der IP-Adresse des Senders ist eine Funktion, die typischerweise auf der Netzwerkschicht (Layer 3) durchgeführt wird, nicht auf der Anwendungsschicht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein einfacher FIFO-Queue bietet keine Mechanismen zur Überlastkontrolle oder zur Gewährleistung der Dienstgüte für Echtzeitdaten, da alle Pakete gleich behandelt werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Anpassung der Fenstergröße in der TCP-Flusskontrolle ist ein Mechanismus der Transportschicht (Layer 4), nicht der Anwendungsschicht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Reservierung von Bandbreite für bestimmte Anwendungen auf dem Router ist eine Maßnahme, die auf der Netzwerkschicht (Layer 3) stattfindet und nicht direkt auf der Anwendungsschicht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Anwendungsspezifische Protokolle, die eine adaptive Datenübertragung ermöglichen, können auf der Anwendungsschicht implementiert werden, um die Dienstgüte ohne Rückgriff auf die Transportschicht zu gewährleisten.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Anwendungsschicht (Layer 7) realisiert, um die Dienstgüte (Quality of Service, QoS) bei der Übertragung von Echtzeitdaten zu gewährleisten?",
+    "evaluations": [
+      {
+        "reasoning": "Der Token-Bucket-Algorithmus ist ein Mechanismus zur Überlastkontrolle, der die Datenrate begrenzt und gleichzeitig Burst-Übertragungen zulässt. Er wird oft verwendet, um QoS-Anforderungen zu erfüllen, indem er sicherstellt, dass die Datenrate nicht die Netzwerkkapazität überschreitet.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine feste Round-Trip-Time (RTT) für alle Datenpakete ist technisch nicht umsetzbar, da die RTT von vielen variablen Faktoren wie Netzwerkauslastung, physischer Distanz und Zwischensystemen abhängt. Eine feste RTT kann daher nicht garantiert werden, um Überlastung zu verhindern.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein einfacher FIFO-Queue behandelt alle Pakete gleich und bietet keine Mechanismen zur Priorisierung oder Überlastkontrolle. Dies würde nicht dazu beitragen, QoS für Echtzeitdaten zu gewährleisten, da kritische Daten nicht bevorzugt behandelt werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Weighted Fair Queuing (WFQ) ist eine Technik zur Überlastkontrolle, die verschiedene Datenströme basierend auf ihrer Priorität behandelt. Dies hilft, QoS zu gewährleisten, indem sicherstellt wird, dass wichtige Datenströme bevorzugt behandelt werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Explicit Congestion Notification (ECN) ist ein Mechanismus zur Überlastkontrolle, der es Endpunkten ermöglicht, auf Netzwerküberlastung zu reagieren, ohne Pakete zu verwerfen. Dies kann dazu beitragen, die Dienstgüte zu verbessern, indem es die Reaktion auf Überlastung erleichtert.",
+        "correct": true
+      },
+      {
+        "reasoning": "Statische IP-Routing-Tabellen legen den Weg von Datenpaketen im Netzwerk fest, bieten aber keine direkte Überlastkontrolle oder QoS-Mechanismen. Sie sind nicht dynamisch genug, um auf wechselnde Netzwerkbedingungen oder Überlastung zu reagieren.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der physikalischen Schicht (Layer 1) realisiert, um Kollisionen und Interferenzen zu vermeiden?",
+    "evaluations": [
+      {
+        "reasoning": "CSMA/CD ist ein Kollisionsvermeidungsprotokoll, das auf der Datenverbindungsschicht (Layer 2) des OSI-Modells arbeitet, nicht auf der physikalischen Schicht (Layer 1).",
+        "correct": false
+      },
+      {
+        "reasoning": "Frequenzspreizung ist eine Technik, die auf der physikalischen Schicht verwendet werden kann, um die Wahrscheinlichkeit von Interferenzen zu minimieren, indem das Signal über ein breiteres Frequenzband verteilt wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Verwendung von Lichtwellenleitern anstelle von Kupferkabeln kann elektromagnetische Interferenzen reduzieren, was eine Maßnahme auf der physikalischen Schicht ist, um die Signalqualität zu verbessern.",
+        "correct": true
+      },
+      {
+        "reasoning": "Überlastkontrolle auf Layer 1 bezieht sich tatsächlich auf die physische Medienzugangskontrolle, aber auch auf die Vermeidung von Kollisionen und Interferenzen, da diese Aspekte auf der physikalischen Schicht relevant sind.",
+        "correct": false
+      },
+      {
+        "reasoning": "Quality of Service (QoS) Mechanismen sind in der Regel auf höheren Schichten des OSI-Modells angesiedelt und nicht auf der physikalischen Schicht (Layer 1).",
+        "correct": false
+      },
+      {
+        "reasoning": "Automatische Verstärkungsregelung (AGC) ist eine Technik, die in Empfängern verwendet wird, um das Signal-Rausch-Verhältnis zu optimieren und kann somit auf der physikalischen Schicht zur Verbesserung der Signalqualität beitragen.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle durchgeführt, um dynamische Lastverteilung zu ermöglichen, ohne dass die Endpunkte der Kommunikation die Kontrolle übernehmen?",
+    "evaluations": [
+      {
+        "reasoning": "Load Balancing auf Routern ist eine gängige Methode, um den Datenverkehr dynamisch zu verteilen und Überlast zu vermeiden. Die Router entscheiden anhand der aktuellen Netzwerkauslastung, wie der Verkehr am besten verteilt wird, ohne dass die Endpunkte der Kommunikation eingreifen müssen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine zentrale Steuerungseinheit, die alle Datenpakete sammelt und sequenziell weiterleitet, würde einen Flaschenhals erzeugen und ist keine übliche Methode zur Überlastkontrolle in modernen Netzwerken.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine statische Zuweisung von Bandbreitenkapazitäten für jeden Sender im Netzwerk ist nicht dynamisch und kann nicht auf wechselnde Lastsituationen reagieren, was für eine effektive Überlastkontrolle erforderlich ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Peer-to-Peer-Kommunikation bedeutet, dass jeder Knoten direkt mit jedem anderen kommunizieren kann, aber dies ist keine Methode zur Überlastkontrolle und bietet keine dynamische Lastverteilung auf Netzwerkebene.",
+        "correct": false
+      },
+      {
+        "reasoning": "Quality of Service (QoS) Mechanismen arbeiten zwar auf der Anwendungsschicht, um Ressourcen zu priorisieren und zu garantieren, aber sie sind nicht speziell für die dynamische Lastverteilung konzipiert, um Netzwerküberlast zu verhindern.",
+        "correct": false
+      },
+      {
+        "reasoning": "Token Ring Protokolle regeln den Zugriff auf das Medium, aber sie sind nicht für dynamische Lastverteilung in einem Kommunikationsnetzwerk gedacht und werden in modernen Netzwerken kaum noch verwendet.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Vermittlungsschicht (Layer 3) durchgeführt, um eine adaptive Lastverteilung zu erreichen, ohne dass die Endpunkte der Kommunikation die Kontrolle übernehmen?",
+    "evaluations": [
+      {
+        "reasoning": "Routing-Algorithmen auf Layer 3 sind dafür verantwortlich, Pfade durch das Netzwerk zu bestimmen. Sie können dynamisch auf Netzwerkauslastung reagieren und Routen anpassen, um Überlast zu vermeiden und eine adaptive Lastverteilung zu erreichen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Quality of Service (QoS) Parameter werden zwar zur Verkehrssteuerung verwendet, aber sie sind auf der Anwendungsschicht (Layer 7) angesiedelt und nicht auf der Vermittlungsschicht (Layer 3).",
+        "correct": false
+      },
+      {
+        "reasoning": "TCP Congestion Control ist ein Mechanismus der Transportschicht (Layer 4), der die Übertragungsrate von TCP-Verbindungen steuert, um Überlast zu vermeiden. Dies ist nicht Teil der Vermittlungsschicht (Layer 3).",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine zentrale Zuteilung von Bandbreiten durch den Netzwerkadministrator ist keine adaptive Methode der Lastverteilung auf Layer 3, sondern eine administrative Kontrollmaßnahme.",
+        "correct": false
+      },
+      {
+        "reasoning": "Backpressure-Mechanismen sind Techniken, die in verschiedenen Netzwerkschichten eingesetzt werden können, um den Datenfluss bei Überlastung zu drosseln. Sie sind jedoch nicht spezifisch für Layer 3 und werden in der Regel auf niedrigeren Schichten wie Layer 2 angewendet.",
+        "correct": false
+      },
+      {
+        "reasoning": "Frame Relay ist eine Technologie der Datensicherungsschicht (Layer 2), die zur Verbindung von Netzwerken verwendet wird. Es ist nicht für die Überlastkontrolle auf der Vermittlungsschicht (Layer 3) zuständig.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Vermittlungsschicht (Layer 3) durchgeführt, um Engpässe zu vermeiden, die durch eine ungleichmäßige Verteilung von Datenpaketen entstehen können?",
+    "evaluations": [
+      {
+        "reasoning": "Load-Balancing-Methoden sind dafür konzipiert, den Datenverkehr gleichmäßig über mehrere Pfade zu verteilen, um Engpässe zu vermeiden. Dies ist eine gängige Technik auf Layer 3, um Überlastkontrolle zu gewährleisten.",
+        "correct": true
+      },
+      {
+        "reasoning": "Quality of Service (QoS) ist ein Mechanismus, der die Priorisierung von Datenpaketen ermöglicht, um sicherzustellen, dass kritische oder bevorzugte Datenpakete bevorzugt behandelt werden. Dies trägt zur Überlastkontrolle bei, indem es sicherstellt, dass wichtige Datenpakete auch bei Netzwerkengpässen übertragen werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Statische Routen sind festgelegte Wege durch das Netzwerk, die nicht dynamisch auf Netzwerklast oder Engpässe reagieren. Sie sind nicht speziell für die Überlastkontrolle konzipiert, können aber in einem gut geplanten Netzwerk zur Lastverteilung beitragen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Congestion Avoidance Protokolle, wie TCPs Congestion Control, sind dafür ausgelegt, Datenstaus zu erkennen und zu vermeiden, indem sie die Übertragungsrate an die wahrgenommene Netzwerkauslastung anpassen. Diese Protokolle sind ein wesentlicher Bestandteil der Überlastkontrolle auf Layer 3.",
+        "correct": true
+      },
+      {
+        "reasoning": "Flow Control ist ein Mechanismus, der auf Layer 2 (Data Link Layer) und Layer 4 (Transport Layer) eingesetzt wird, um den Datenfluss zwischen zwei direkt verbundenen Geräten zu steuern. Es ist nicht spezifisch für Layer 3 konzipiert und wird dort nicht für die Überlastkontrolle verwendet.",
+        "correct": false
+      },
+      {
+        "reasoning": "Automatische Bandbreitenanpassung ist ein Konzept, das in verschiedenen Formen existieren kann, einschließlich einiger QoS-Mechanismen. Es ist jedoch zu allgemein formuliert und nicht spezifisch genug, um als korrekte Antwort auf die Frage nach Überlastkontrolle auf Layer 3 zu gelten.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Transportschicht (Layer 4) durchgeführt, um die Reihenfolge der Paketzustellung zu gewährleisten und gleichzeitig Datenverlust zu vermeiden?",
+    "evaluations": [
+      {
+        "reasoning": "Priorisierungswarteschlangen werden verwendet, um die Verarbeitung von Paketen nach ihrer Wichtigkeit zu steuern, aber sie garantieren nicht die Reihenfolge der Paketzustellung oder verhindern Datenverlust auf der Transportschicht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Sequenznummern in den Paketköpfen sind ein Mechanismus, der die Reihenfolge der Pakete sicherstellt, indem jedes Paket eine eindeutige Nummer erhält, die es dem Empfänger ermöglicht, die Pakete in der richtigen Reihenfolge wieder zusammenzusetzen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Token Ring Protokolle regeln den Zugriff auf das Medium auf der Data Link Schicht (Layer 2) und nicht auf der Transportschicht (Layer 4).",
+        "correct": false
+      },
+      {
+        "reasoning": "Flutsteuerung (Flow Control) ist ein Mechanismus auf der Transportschicht, der verhindert, dass zu viele Daten gleichzeitig gesendet werden, um Überlastung zu vermeiden, aber sie gewährleistet nicht direkt die Reihenfolge der Paketzustellung.",
+        "correct": true
+      },
+      {
+        "reasoning": "Lastverteilungsalgorithmen verteilen den Datenverkehr auf mehrere Pfade, um die Netzwerkauslastung zu optimieren, aber sie sind nicht spezifisch für die Überlastkontrolle auf der Transportschicht oder die Sicherstellung der Paketreihenfolge.",
+        "correct": false
+      },
+      {
+        "reasoning": "Automatische Wiederholungsanfragen (Automatic Repeat reQuest, ARQ) sind ein Fehlerkorrekturverfahren, das dazu dient, verlorene oder beschädigte Pakete erneut zu senden, was Datenverlust verhindert, aber nicht direkt die Reihenfolge der Paketzustellung gewährleistet.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in einem Kommunikationsnetzwerk die Überlastkontrolle auf der Datensicherungsschicht (Layer 2) realisiert, um die Priorisierung von Echtzeitdatenverkehr zu unterstützen?",
+    "evaluations": [
+      {
+        "reasoning": "Quality of Service (QoS) Mechanismen werden verwendet, um Datenpakete basierend auf ihrer Priorität zu behandeln und sind ein gängiges Mittel zur Unterstützung von Echtzeitdatenverkehr.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein Round-Robin-Verfahren behandelt alle Datenpakete gleich und berücksichtigt keine Prioritäten, was im Widerspruch zur Fragestellung steht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Token-Bucket-Algorithmus wird verwendet, um die Datenrate zu begrenzen, was zur Überlastkontrolle beitragen kann, aber nicht spezifisch die Priorisierung von Echtzeitdatenverkehr unterstützt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine feste Bandbreitenzuweisung, die für jeden Datenstrom gleich ist, unterstützt keine Priorisierung von Echtzeitdatenverkehr, da alle Datenströme gleich behandelt werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Lastausgleich verteilt den Datenverkehr gleichmäßig über alle Pfade, was nicht speziell die Priorisierung von Echtzeitdatenverkehr unterstützt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine zentrale Zuteilung durch einen Master-Knoten könnte die Übertragungsrechte basierend auf Prioritäten vergeben, aber dies ist nicht spezifisch für Layer 2 oder eine allgemeine Methode zur Überlastkontrolle.",
+        "correct": false
+      }
+    ]
+  }
+]

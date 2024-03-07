@@ -1,0 +1,292 @@
+[
+  {
+    "question": "Wie wird in Java eine Methode definiert, die einen Rückgabewert liefert, und wie wird dieser in Python als Lambda-Ausdruck dargestellt?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird eine Methode tatsächlich mit einem Rückgabetyp vor dem Methodennamen definiert. In Python wird ein Lambda-Ausdruck mit dem 'lambda' Schlüsselwort eingeleitet und der Ausdruck nach dem Doppelpunkt liefert den Rückgabewert.",
+        "correct": true
+      },
+      {
+        "reasoning": "In Java wird eine Methode immer mit einem Rückgabetyp definiert, auch wenn dieser 'void' ist, was bedeutet, dass die Methode keinen Wert zurückgibt. In Python wird eine normale Funktion mit dem 'def' Schlüsselwort definiert, aber das hat nichts mit der Rückgabe von Werten zu tun.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java und Python wird das Schlüsselwort 'return' verwendet, um einen Wert aus einer Methode oder Funktion zurückzugeben. Die Syntax für die Definition einer Methode oder Funktion unterscheidet sich jedoch zwischen den beiden Sprachen.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java bedeutet das Schlüsselwort 'void' vor dem Methodennamen, dass die Methode keinen Rückgabewert liefert. In Python kann ein Lambda-Ausdruck verwendet werden, um eine Funktion mit einem Rückgabewert in einer einzigen Zeile zu definieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java gibt es keinen Rückgabetyp 'lambda'. Das Schlüsselwort 'return' wird in beiden Sprachen verwendet, um einen Wert aus einer Methode oder Funktion zurückzugeben, aber nicht als Rückgabetyp in der Methodendefinition.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird der Rückgabetyp vor dem Methodennamen definiert, nicht danach. In Python wird ein Lambda-Ausdruck immer mit dem 'lambda' Schlüsselwort eingeleitet.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die eine Ausnahme wirft, und wie wird dies in Python behandelt?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird das Schlüsselwort 'throws' in der Methodensignatur verwendet, um anzuzeigen, dass eine Methode eine Ausnahme werfen kann. In Python wird eine Ausnahme mit 'raise' geworfen, ohne dass dies in der Methodensignatur deklariert wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'throw' wird in Java verwendet, um eine Ausnahme zu werfen, nicht in der Methodensignatur. In Python wird 'except' nicht zum Werfen, sondern zum Abfangen von Ausnahmen verwendet.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird das Schlüsselwort 'throw' verwendet, um eine Ausnahme zu werfen, nicht 'throws'. In Python wird ebenfalls 'raise' und nicht 'throw' verwendet, um eine Ausnahme zu werfen.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java werden 'try' und 'catch' verwendet, um Ausnahmen abzufangen, nicht um sie zu werfen. In Python wird 'try' und 'except' ebenfalls zum Abfangen, nicht zum Werfen von Ausnahmen verwendet.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird eine Ausnahme mit 'throw new ExceptionType()' geworfen. In Python wird eine Ausnahme mit 'raise ExceptionType()' oder 'raise ExceptionType' geworfen, je nachdem, ob Argumente übergeben werden oder nicht.",
+        "correct": true
+      },
+      {
+        "reasoning": "In Python wird das Schlüsselwort 'raise' verwendet, um eine Ausnahme zu werfen, nicht 'throws'. In Java wird 'throws' in der Methodensignatur verwendet, um zu deklarieren, dass eine Methode eine Ausnahme werfen könnte, und 'throw', um eine Ausnahme tatsächlich zu werfen.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die generische Typen verwendet, und wie wird ein äquivalentes Konzept in Python umgesetzt?",
+    "evaluations": [
+      {
+        "reasoning": "In Java werden generische Methoden tatsächlich mit Typ-Parametern innerhalb von spitzen Klammern definiert, z.B. <T>. In Python werden Typ-Hinweise mit dem 'typing'-Modul und nicht mit spitzen Klammern verwendet, z.B. List[T].",
+        "correct": true
+      },
+      {
+        "reasoning": "Generische Typen in Java werden nicht mit eckigen Klammern definiert, sondern mit spitzen Klammern. In Python werden generische Typen nicht mit runden Klammern, sondern mit dem 'typing'-Modul und Typ-Hinweisen definiert.",
+        "correct": false
+      },
+      {
+        "reasoning": "Java verwendet nicht das Schlüsselwort 'generic' zur Definition generischer Methoden, sondern Typ-Parameter in spitzen Klammern. Python unterstützt generische Typen durch das 'typing'-Modul, auch wenn die Sprache dynamisch typisiert ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java und Python werden generische Typen nicht identisch definiert. Java verwendet spitze Klammern für generische Typen, während Python das 'typing'-Modul verwendet.",
+        "correct": false
+      },
+      {
+        "reasoning": "Java nutzt nicht das Schlüsselwort 'var' für generische Methoden, sondern Typ-Parameter in spitzen Klammern. Python verwendet 'def' für die Definition von Funktionen und Methoden, aber Typ-Hinweise werden mit dem 'typing'-Modul angegeben, nicht mit 'var'.",
+        "correct": false
+      },
+      {
+        "reasoning": "Java verwendet nicht das Schlüsselwort 'template' für generische Methoden, sondern Typ-Parameter in spitzen Klammern. Python hat eine dynamische Typisierung, unterstützt aber auch generische Typen durch das 'typing'-Modul.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die synchronisiert ist, um Thread-Sicherheit zu gewährleisten, und wie wird ein ähnliches Konzept in Python erreicht?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird das Schlüsselwort 'synchronized' verwendet, um eine Methode zu synchronisieren. Dies ist korrekt. In Python wird das 'threading.Lock' Objekt genutzt, um kritische Abschnitte zu schützen, was ebenfalls korrekt ist.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'volatile' in Java wird verwendet, um zu signalisieren, dass eine Variable von verschiedenen Threads gelesen und geschrieben werden kann und dass jede Lese- oder Schreiboperation auf dieser Variablen direkt auf den Hauptspeicher zugreift. Es hat nichts mit Methodensynchronisation zu tun. Das 'global' Schlüsselwort in Python wird verwendet, um auf globale Variablen zuzugreifen, nicht für Synchronisation.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'synchronized' existiert in Python nicht, es ist spezifisch für Java. Daher ist diese Antwortmöglichkeit falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java sind nicht alle Methoden standardmäßig thread-sicher. Entwickler müssen das 'synchronized' Schlüsselwort verwenden, um Methoden thread-sicher zu machen. In Python wird das 'with' Statement oft in Verbindung mit Locks verwendet, um kritische Abschnitte zu schützen, aber das allein macht nicht alle Methoden thread-sicher.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java kann ein 'synchronized' Block innerhalb einer Methode verwendet werden, um einen bestimmten Abschnitt der Methode zu synchronisieren. Python verwendet jedoch keine Decorators wie '@synchronized'. Stattdessen werden Locks oder andere Synchronisationsmechanismen verwendet.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Implementieren des 'Runnable' Interfaces in Java ist eine Art, Threads zu erstellen, aber es hat nichts mit der Synchronisation von Methoden zu tun. Das 'multiprocessing' Modul in Python wird für Prozess-basiertes paralleles Ausführen verwendet, nicht speziell für Methodensynchronisation.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie kann in Java eine Methode definiert werden, die eine variable Anzahl von Argumenten akzeptiert?",
+    "evaluations": [
+      {
+        "reasoning": "In Java wird das 'varargs'-Feature verwendet, um eine Methode zu definieren, die eine variable Anzahl von Argumenten akzeptieren kann. Dies geschieht durch das Voranstellen von drei Punkten (...) vor dem Typ des letzten Parameters.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Überladen von Methoden für jeden möglichen Argumenttyp ist nicht praktikabel für eine variable Anzahl von Argumenten, da dies eine unendliche Anzahl von Methoden erfordern würde.",
+        "correct": false
+      },
+      {
+        "reasoning": "Obwohl es möglich ist, ein Array als Parameter zu verwenden, um eine feste Anzahl von Argumenten zu übergeben, ist dies nicht die Methode, die in Java verwendet wird, um eine variable Anzahl von Argumenten zu akzeptieren ('varargs' wird dafür verwendet).",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java ist es sehr wohl möglich, Methoden für eine variable Anzahl von Argumenten zu definieren, und zwar mit dem 'varargs'-Feature.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine Liste als Parameter zu verwenden, würde zwar funktionieren, um eine Sammlung von Argumenten zu übergeben, aber es ist nicht die standardmäßige Methode, um eine variable Anzahl von Argumenten in Java zu definieren ('varargs' wird bevorzugt).",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'dynamic' existiert nicht in Java im Kontext der Definition von Methoden, die eine variable Anzahl von Argumenten akzeptieren.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Bedeutung hat das Schlüsselwort 'this' in einer Instanzmethode in Java und wie wird ein ähnliches Konzept in Python verwendet?",
+    "evaluations": [
+      {
+        "reasoning": "In Java bezieht sich 'this' auf die aktuelle Instanz der Klasse, in der die Methode definiert ist. In Python wird das äquivalente Konzept durch die Variable 'self' repräsentiert, die als erster Parameter in Methodendefinitionen übergeben wird. Diese Antwort ist korrekt und beschreibt die Verwendung von 'this' in Java und 'self' in Python korrekt.",
+        "correct": true
+      },
+      {
+        "reasoning": "'this' ist in Java keine statische Referenz und zeigt nicht auf die Klasse selbst, sondern auf die aktuelle Instanz der Klasse. In Python gibt es mit 'self' ein äquivalentes Konzept, das als erster Parameter in Methodendefinitionen übergeben wird. Diese Antwort ist falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird 'this' verwendet, um auf Instanzvariablen und -methoden zuzugreifen, nicht nur auf Klassenvariablen. In Python ist 'self' notwendig, um auf Instanzvariablen zuzugreifen, da es den Kontext der aktuellen Instanz bereitstellt. Diese Antwort ist falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'this' existiert in Java, aber nicht in Python. In Python wird das Konzept der Selbstreferenz durch 'self' repräsentiert, welches als erster Parameter in Methodendefinitionen übergeben wird. Diese Antwort ist falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java und Python wird 'this' bzw. 'self' nicht verwendet, um neue Instanzen zu erstellen. Neue Instanzen werden in Java mit dem Schlüsselwort 'new' und in Python durch Aufrufen des Klassennamens erstellt. Diese Antwort ist falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "'this' in Java ist kein optionaler Parameter, sondern eine implizite Referenz auf die aktuelle Instanz. In Python ist 'self' ein expliziter Parameter in Methodendefinitionen und nicht optional. Diese Antwort ist falsch.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Rolle spielt das Schlüsselwort 'final' bei der Definition von Methoden in Java und wie wird ein ähnliches Verhalten in Python erreicht?",
+    "evaluations": [
+      {
+        "reasoning": "In Java verhindert das Schlüsselwort 'final' bei einer Methode, dass diese in einer Unterklasse überschrieben werden kann. In Python gibt es kein direktes Äquivalent zu 'final', aber Methodenüberschreibungen können durch Programmierkonventionen oder durch explizite Überprüfungen innerhalb der Methode verhindert werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'final' in Java hat nichts mit der Überladung von Methoden zu tun. Überladen bedeutet, dass Methoden denselben Namen, aber unterschiedliche Parameter haben. Das '@overload' Dekorator in Python ist auch nicht direkt vergleichbar mit 'final' in Java, da es für Typ-Hinweise bei der Überladung von Methoden verwendet wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das 'final' Schlüsselwort in Java macht eine Methode nicht statisch. Eine statische Methode gehört zur Klasse und nicht zu einer Instanz der Klasse. In Java wird dies mit dem Schlüsselwort 'static' erreicht, in Python mit der '@staticmethod' Dekoration.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java kennzeichnet 'final' eine Methode nicht als privat. Private Methoden werden in Java mit dem Schlüsselwort 'private' gekennzeichnet. In Python wird eine Methode als nicht öffentlich betrachtet, wenn ihr Name mit einem Unterstrich beginnt, aber dies ist nur eine Konvention und verhindert nicht den Zugriff wie das 'private' Schlüsselwort in Java.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'final' in Java zeigt nicht an, dass eine Methode abstrakt ist. Abstrakte Methoden in Java werden mit dem Schlüsselwort 'abstract' gekennzeichnet. In Python wird eine abstrakte Methode in der Regel durch das Werfen einer 'NotImplementedError' Ausnahme oder durch die Verwendung des 'abc' Moduls erreicht.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java wird 'final' nicht verwendet, um eine Methode als synchronisiert zu kennzeichnen. Synchronisierte Methoden in Java werden mit dem Schlüsselwort 'synchronized' gekennzeichnet. In Python kann Synchronisation durch verschiedene Mechanismen wie 'threading.Lock' erreicht werden.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java das Schlüsselwort 'super' verwendet, um auf Methoden der Elternklasse zuzugreifen, und wie wird ein ähnliches Verhalten in Python erreicht?",
+    "evaluations": [
+      {
+        "reasoning": "In Java kann 'super' tatsächlich verwendet werden, um Konstruktoren der Elternklasse aufzurufen, aber es ist falsch, dass es keine Entsprechung in Python gibt. In Python wird 'super()' verwendet, um auf die Elternklasse zu verweisen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das ist korrekt. In Java wird 'super' verwendet, um auf Methoden und Variablen der Elternklasse zuzugreifen. In Python erreicht man ein ähnliches Verhalten mit 'super()', um auf die Elternklasse zu verweisen.",
+        "correct": true
+      },
+      {
+        "reasoning": "In Java wird 'super' nicht nur verwendet, um auf versteckte Variablen zuzugreifen, sondern auch für Methoden. In Python wird nicht der Name der Elternklasse direkt verwendet, sondern 'super()', um auf die Elternklasse zuzugreifen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'super' existiert sowohl in Java als auch in Python und wird in beiden Sprachen verwendet, um auf die Elternklasse zuzugreifen, allerdings mit unterschiedlicher Syntax und Verwendung.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java und Python wird 'super' nicht identisch verwendet. In Python wird 'super()' als Funktion aufgerufen, während in Java 'super' als Schlüsselwort verwendet wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Python wird 'super' immer mit Klammern verwendet, um auf die Elternklasse zuzugreifen, und in Java wird 'super' ohne Klammern verwendet, wenn man auf Variablen der Elternklasse zugreifen möchte, und mit Klammern, wenn man den Konstruktor der Elternklasse aufrufen möchte.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Welche Eigenschaft muss eine Methode in Java erfüllen, um als rekursiv bezeichnet zu werden, und wie wird ein ähnliches Verhalten in Python erreicht?",
+    "evaluations": [
+      {
+        "reasoning": "Eine rekursive Methode muss sich selbst aufrufen können. Dies ist sowohl in Java als auch in Python der Fall. Die Anzahl der Parameter oder die Verwendung von globalen Variablen ist nicht relevant für die Definition von Rekursion.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Anzahl der Parameter einer Methode hat keinen Einfluss darauf, ob sie als rekursiv bezeichnet werden kann. Rekursion in Python hängt nicht von der Verwendung globaler Variablen ab, sondern davon, ob sich eine Funktion selbst aufrufen kann.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine rekursive Methode in Java muss nicht statisch sein. Rekursion in Python wird nicht durch Dekoratoren erreicht, sondern durch die Fähigkeit einer Funktion, sich selbst aufzurufen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Vorhandensein einer Schleife in einer Methode ist nicht das, was sie rekursiv macht. Rekursion bedeutet, dass sich eine Methode oder Funktion selbst aufruft, nicht dass sie eine Schleife enthält. In Python wird Rekursion auch nicht durch Iteration erreicht, sondern durch Selbstaufruf.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java gibt es kein Schlüsselwort 'recursive', und in Python wird das Schlüsselwort 'def' nur einmal vor der Funktionsdefinition verwendet. Rekursion wird durch den Selbstaufruf der Methode oder Funktion definiert, nicht durch spezielle Schlüsselwörter.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine rekursive Methode oder Funktion muss eine Endbedingung haben, um eine unendliche Rekursion zu verhindern. Dies ist ein wichtiger Teil des Designs einer rekursiven Methode in jeder Programmiersprache, einschließlich Java und Python.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Welche Konzepte ermöglichen in Java die Definition einer Methode, die erst zur Laufzeit aufgrund des Objekttyps ihre spezifische Implementierung bestimmt, und wie wird dieses Verhalten in Python erreicht?",
+    "evaluations": [
+      {
+        "reasoning": "Polymorphie ist das Konzept in Java, das es ermöglicht, dass eine Methode zur Laufzeit basierend auf dem Objekttyp ihre spezifische Implementierung bestimmt. Duck-Typing in Python ermöglicht ein ähnliches Verhalten, indem Methodenaufrufe und Eigenschaften von Objekten zur Laufzeit geprüft werden, ohne auf den spezifischen Typ zu achten.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'static' in Java wird für Klassenmethoden verwendet, die nicht auf Instanzebene, sondern auf Klassenebene operieren. Dekorative Annotationen in Python sind Dekoratoren, die zusätzliche Funktionalität zu Funktionen oder Methoden hinzufügen können, aber nicht direkt mit der Laufzeit-Methodenauswahl verbunden sind.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'final' in Java wird verwendet, um zu verhindern, dass eine Methode überschrieben oder eine Klasse erweitert wird. Unveränderlichkeit ('immutability') in Python bedeutet, dass der Wert eines Objekts nicht geändert werden kann, nachdem es erstellt wurde. Beide Konzepte sind nicht direkt mit der Methodenauswahl zur Laufzeit verbunden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Interfaces in Java ermöglichen Polymorphie, aber sie sind nicht das einzige Konzept, das dies ermöglicht. Mehrfachvererbung in Python kann auch zur Polymorphie beitragen, aber sie ist nicht das direkte Äquivalent zu Java-Interfaces.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Überschreiben von Methoden in abgeleiteten Klassen ist ein Mechanismus in Java, um Polymorphie zu erreichen. Die Methode '__call__' in Python ermöglicht es, dass Instanzen von Klassen wie Funktionen aufgerufen werden können, aber sie ist nicht das primäre Mittel zur Implementierung von Polymorphie.",
+        "correct": false
+      },
+      {
+        "reasoning": "Anonyme Klassen in Java sind eine Möglichkeit, um schnell eine Implementierung einer Schnittstelle oder abstrakten Klasse zu erstellen, ohne eine benannte Klasse zu definieren. Lambda-Funktionen in Python sind anonyme Funktionen, die für kurze Ausdrücke verwendet werden. Beide Konzepte sind nicht direkt mit der Methodenauswahl zur Laufzeit verbunden.",
+        "correct": false
+      }
+    ]
+  }
+]

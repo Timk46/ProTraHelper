@@ -1,4 +1,5 @@
 Wenn wir eine absagte Klasse haben mit nur absagten Operationen, heißt das ein Interface
+
 und eine Schnittstelle.
 Und eine Schnittstelle ist so etwas wie das Summum in objektorientiertes Programmieren,
 wo wir etwas komplett abkapseln möchten.

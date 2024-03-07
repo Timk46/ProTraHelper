@@ -1,0 +1,292 @@
+[
+  {
+    "question": "Wie kann die Deadlock-Prävention in einem Multithreading-Umfeld erreicht werden, wenn Threads auf gemeinsame Ressourcen zugreifen?",
+    "evaluations": [
+      {
+        "reasoning": "Die Implementierung einer strikten Reihenfolge, in der Threads Ressourcen anfordern dürfen, kann Deadlocks verhindern, indem zyklische Warteabhängigkeiten vermieden werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Erlauben von Threads, Ressourcen in beliebiger Reihenfolge anzufordern, erhöht das Risiko von Deadlocks, da zyklische Warteabhängigkeiten entstehen können.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Verwendung eines einzigen globalen Locks für alle Ressourcen kann Deadlocks verhindern, führt jedoch zu erheblichen Leistungseinbußen, da Threads auf die Freigabe des Locks warten müssen, selbst wenn sie auf unterschiedliche Ressourcen zugreifen möchten.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Zuteilung aller benötigten Ressourcen an den Thread vor dessen Ausführung verhindert Deadlocks, da keine Warteabhängigkeiten zwischen den Threads entstehen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Vermeidung jeglicher Synchronisationsmechanismen würde zu einem unsicheren Zugriff auf gemeinsame Ressourcen führen und könnte Race Conditions verursachen, was nicht zur Deadlock-Prävention beiträgt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Verwendung von nicht-blockierenden Algorithmen und Datenstrukturen kann Deadlocks verhindern, da Threads nicht in einem wartenden Zustand blockiert werden, aber dies allein garantiert nicht die Vermeidung von Deadlocks in allen Szenarien.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie kann die Priorisierung von Threads die Reaktionszeit eines interaktiven Systems beeinflussen?",
+    "evaluations": [
+      {
+        "reasoning": "Eine höhere Priorisierung interaktionskritischer Threads ermöglicht es dem Betriebssystem, diese Threads vorrangig zu behandeln, was zu einer schnelleren Reaktion auf Benutzereingaben führen kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Priorisierung von Threads ist ein wesentliches Merkmal moderner Betriebssysteme, um die Reaktionszeit zu beeinflussen, indem bestimmte Threads bevorzugt behandelt werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine niedrigere Priorisierung von Hintergrundprozessen kann dazu führen, dass interaktionskritische Prozesse mehr CPU-Zeit erhalten, was die Reaktionszeit verbessert.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Priorisierung von Threads ist auch in Mehrthreadsystemen von Bedeutung, da sie bestimmt, welcher Thread wie viel Prozessorzeit erhält.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine falsche Priorisierung kann dazu führen, dass Threads mit niedriger Priorität nicht ausreichend CPU-Zeit erhalten, was zu Problemen wie 'Starvation' führen kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Priorisierung von Threads zielt darauf ab, die CPU-Zeit basierend auf der Wichtigkeit der Aufgaben zu verteilen, nicht unbedingt auf eine gerechtere Verteilung.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie kann die Verwendung von Thread-Local Speicherbereichen die Leistung eines Multithreaded-Programms beeinflussen?",
+    "evaluations": [
+      {
+        "reasoning": "Thread-Local Speicherbereiche reduzieren den Bedarf an Synchronisation, da jeder Thread seinen eigenen Speicherbereich hat und somit keine Konflikte bei gleichzeitigem Zugriff entstehen. Dies kann die Leistung verbessern.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Verwendung von Thread-Local Speicherbereichen kann den Garbage Collector beeinflussen, aber sie führt nicht generell zu einer schlechteren Leistung. Die Auswirkung hängt von der Implementierung und dem Einsatz ab.",
+        "correct": false
+      },
+      {
+        "reasoning": "Thread-Local Speicherbereiche können sehr wohl einen Einfluss auf die Leistung haben, da sie die Art und Weise, wie Speicher genutzt und Synchronisation gehandhabt wird, verändern.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn Thread-Local Speicherbereiche nicht ordnungsgemäß aufgeräumt werden, können sie zu Speicherlecks führen. Solche Lecks können die verfügbaren Ressourcen reduzieren und somit indirekt die Leistung beeinträchtigen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Der Zugriff auf Thread-Local Variablen kann schneller sein als auf gemeinsam genutzte Variablen, da keine Synchronisationsmechanismen benötigt werden. Dies kann die Leistung verbessern.",
+        "correct": true
+      },
+      {
+        "reasoning": "Thread-Local Speicherbereiche beeinflussen die Kontextwechsel zwischen Threads nicht direkt. Kontextwechsel werden durch den Thread-Scheduler des Betriebssystems gehandhabt und sind unabhängig von der Verwendung von Thread-Local Speicher.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie kann die Verwendung von Thread-Affinität die Leistung eines Multicore-Systems beeinflussen?",
+    "evaluations": [
+      {
+        "reasoning": "Thread-Affinität kann tatsächlich die Cache-Nutzung optimieren, da durch die Bindung von Threads an bestimmte CPU-Kerne die Lokalität von Daten erhöht wird und somit Cache-Misses reduziert werden können.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Leistung kann in manchen Fällen verschlechtert werden, wenn die Thread-Affinität die Entscheidungen des Betriebssystem-Schedulers überschreibt und dadurch die CPU-Ressourcen nicht optimal genutzt werden. Allerdings ist dies nicht immer der Fall, da Thread-Affinität auch zu einer besseren Leistung führen kann, wenn sie richtig eingesetzt wird.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch, da Thread-Affinität sehr wohl einen Einfluss auf Multicore-Systeme hat und Threads nicht immer auf demselben Kern ausgeführt werden müssen. Das Betriebssystem kann Threads auf verschiedene Kerne verteilen, um die Last zu balancieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine ungleichmäßige Lastverteilung kann tatsächlich ein Ergebnis von Thread-Affinität sein, wenn bestimmte Kerne überlastet und andere unterausgelastet sind, was zu einer ineffizienten Nutzung der verfügbaren Ressourcen führt.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Aussage ist falsch, da Thread-Affinität sehr wohl für Multicore-Systeme relevant ist und dazu verwendet werden kann, die Leistung durch optimierte Nutzung der CPU-Kerne zu verbessern.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Reduzierung von Kontextwechseln zwischen den Kernen durch Thread-Affinität kann die Leistung verbessern, da weniger Overhead durch das Speichern und Laden von Kontextinformationen entsteht.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie beeinflusst die Implementierung von feingranularer Sperren im Vergleich zu grobgranularer Sperren die Leistung und Konkurrenz in einem Multithreading-Umfeld?",
+    "evaluations": [
+      {
+        "reasoning": "Feingranulare Sperren erlauben mehreren Threads, unterschiedliche Teile einer Ressource gleichzeitig zu bearbeiten, was die Wartezeiten reduzieren und die Leistung verbessern kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Grobgranulare Sperren sind nicht immer vorzuziehen, da sie zwar einfacher zu implementieren sein können, aber in einem hochkonkurrenten Umfeld zu Leistungseinbußen führen können, weil sie den gleichzeitigen Zugriff auf getrennte Teile einer Ressource verhindern.",
+        "correct": false
+      },
+      {
+        "reasoning": "Feingranulare Sperren können das Risiko von Deadlocks erhöhen, wenn sie nicht sorgfältig implementiert werden, da mehr Sperren und damit mehr Abhängigkeiten zwischen diesen bestehen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Verwendung von grobgranularen Sperren kann zu einer geringeren Prozessorkernauslastung führen, da sie potenziell weniger Kontextwechsel erfordern, weil weniger Sperren vorhanden sind und somit weniger Threads um den Zugriff konkurrieren.",
+        "correct": true
+      },
+      {
+        "reasoning": "Feingranulare Sperren können die Konkurrenz zwischen Threads erhöhen, indem sie mehreren Threads den gleichzeitigen Zugriff auf unterschiedliche Teile einer Ressource ermöglichen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Grobgranulare Sperren bieten nicht notwendigerweise eine bessere Skalierbarkeit in Systemen mit einer hohen Anzahl von Threads, da sie die Konkurrenz und Parallelität einschränken können, was in einer schlechteren Leistung resultieren kann.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie beeinflusst die Implementierung von Thread-Spezifischen Speicherkontexten (Thread-Local Storage) die Fehleranfälligkeit und Wartbarkeit eines Multithreaded-Programms?",
+    "evaluations": [
+      {
+        "reasoning": "Thread-Local Storage kann die Fehleranfälligkeit tatsächlich reduzieren, indem es den Bedarf an Synchronisationsmechanismen verringert, da Daten nicht zwischen Threads geteilt werden müssen. Dies vermindert die Möglichkeit von Synchronisationsfehlern wie Race Conditions.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Verwendung von Thread-Local Storage kann die Wartbarkeit erschweren, da es schwieriger sein kann, den Überblick über die Daten zu behalten, die in verschiedenen Threads unterschiedlich sein können. Dies kann den Code komplexer machen und die Nachverfolgung von Datenflüssen erschweren.",
+        "correct": true
+      },
+      {
+        "reasoning": "Thread-Local Storage verringert zwar die Notwendigkeit von Synchronisationsmechanismen, eliminiert sie aber nicht vollständig. Es gibt Szenarien, in denen Threads weiterhin auf gemeinsame Ressourcen zugreifen müssen, was Synchronisation erfordert.",
+        "correct": true
+      },
+      {
+        "reasoning": "Weniger Synchronisationscode kann die Wartbarkeit verbessern, da der Code einfacher zu verstehen und zu warten sein kann. Allerdings hängt dies stark vom spezifischen Anwendungsfall und der Implementierung ab.",
+        "correct": true
+      },
+      {
+        "reasoning": "Thread-Local Storage beeinflusst die Fehleranfälligkeit, da es die Art und Weise beeinflusst, wie Daten gespeichert und zwischen Threads gehandhabt werden. Es kann die Fehleranfälligkeit durch Reduzierung der Notwendigkeit von Synchronisation verringern.",
+        "correct": false
+      },
+      {
+        "reasoning": "Thread-Local Storage kann die Wahrscheinlichkeit von Fehlern durch Race Conditions reduzieren, aber es kann sie nicht komplett ausschließen, da es immer noch andere Arten von Fehlern gibt, die auftreten können, wie Logikfehler oder Fehler im Umgang mit externen Ressourcen.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie beeinflusst die Implementierung von Thread-Prioritäten in einem Betriebssystem die CPU-Zeitzuteilung und die Reihenfolge der Thread-Ausführung?",
+    "evaluations": [
+      {
+        "reasoning": "Thread-Prioritäten ermöglichen es dem Betriebssystem, höher priorisierten Threads bevorzugt CPU-Zeit zuzuweisen. Dies beeinflusst die Ausführungsreihenfolge, da Threads mit höherer Priorität in der Regel vor Threads mit niedrigerer Priorität ausgeführt werden.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Implementierung von Thread-Prioritäten beeinflusst sehr wohl die CPU-Zeitzuteilung, da das Betriebssystem versucht, Threads basierend auf ihrer Priorität CPU-Zeit zuzuweisen. Threads werden nicht alle gleich behandelt, wenn Prioritäten gesetzt sind.",
+        "correct": false
+      },
+      {
+        "reasoning": "Obwohl höher priorisierte Threads bevorzugt behandelt werden, bedeutet dies nicht, dass niedriger priorisierte Threads immer blockiert werden. Sie erhalten CPU-Zeit, wenn höher priorisierte Threads nicht aktiv sind oder wenn das Betriebssystem entscheidet, dass sie ausgeführt werden sollen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die CPU-Zeitzuteilung basiert nicht ausschließlich auf der Reihenfolge der Thread-Erstellung. Thread-Prioritäten und andere Faktoren wie Scheduling-Algorithmen spielen ebenfalls eine Rolle bei der Bestimmung, welcher Thread CPU-Zeit erhält.",
+        "correct": false
+      },
+      {
+        "reasoning": "Thread-Prioritäten sind sowohl in Single-Core- als auch in Multi-Core-Systemen relevant. In Multi-Core-Systemen können Prioritäten immer noch bestimmen, welche Threads auf den einzelnen Kernen bevorzugt ausgeführt werden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Verwendung von Thread-Prioritäten kann tatsächlich zu einem Starvation-Problem führen, wenn niedriger priorisierte Threads aufgrund der ständigen Bevorzugung höher priorisierter Threads selten oder nie CPU-Zeit erhalten.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie beeinflusst die Implementierung von Thread-Safe Singleton-Designmustern die Erzeugung und Verwaltung von Instanzen in einem Multithreading-Umfeld?",
+    "evaluations": [
+      {
+        "reasoning": "Thread-Safe Singleton-Muster stellen sicher, dass nur eine Instanz erstellt wird, auch wenn mehrere Threads gleichzeitig darauf zugreifen. Dies wird durch Synchronisationsmechanismen wie das 'synchronized' Schlüsselwort in Java oder ähnliche Konstrukte in anderen Sprachen erreicht.",
+        "correct": true
+      },
+      {
+        "reasoning": "Singleton-Designmuster können in einer Multithread-Umgebung ohne entsprechende Synchronisationsmechanismen zu Problemen führen, da mehrere Threads gleichzeitig eine Instanz erstellen könnten. Thread-Safe Singleton-Muster sind speziell darauf ausgelegt, dies zu verhindern.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Verwendung von Thread-Safe Singleton-Mustern kann tatsächlich zu Leistungseinbußen führen, da der Zugriff auf die Instanz synchronisiert werden muss, was Overhead verursacht und die Ausführung verlangsamen kann, insbesondere wenn viele Threads auf die Instanz zugreifen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Thread-Safe Singleton-Muster verwenden keine speziellen Thread-Pools zur Verwaltung der Instanzerstellung. Sie verwenden Synchronisationsmechanismen, um sicherzustellen, dass nur eine Instanz erstellt wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Implementierung eines Thread-Safe Singleton-Musters ist in der Regel komplexer als die eines nicht Thread-Safe Musters, da zusätzliche Überlegungen und Synchronisationsmechanismen erforderlich sind, um die Thread-Sicherheit zu gewährleisten.",
+        "correct": false
+      },
+      {
+        "reasoning": "Wenn ein Thread-Safe Singleton-Muster nicht korrekt implementiert wird, kann es zu Deadlocks kommen, wenn mehrere Threads versuchen, auf die Instanz zuzugreifen und dabei in einen Wartezustand geraten, aus dem sie nicht mehr herauskommen.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie beeinflusst die Wahl des Scheduling-Algorithmus für Threads die Fairness und die Antwortzeit in einem Betriebssystem?",
+    "evaluations": [
+      {
+        "reasoning": "Ein Round-Robin-Scheduler teilt die CPU-Zeit in feste Zeitscheiben auf und weist diese den Threads in der Reihenfolge ihrer Ankunft zu. Dies führt zu einer gleichmäßigen Verteilung der CPU-Zeit und erhöht somit die Fairness.",
+        "correct": true
+      },
+      {
+        "reasoning": "First-Come-First-Served (FCFS) ist ein einfacher Scheduling-Algorithmus, der die Threads in der Reihenfolge ihres Eintreffens abarbeitet. Bei hoher Last kann dies dazu führen, dass Threads, die später kommen, lange warten müssen, während die früher angekommenen Threads abgearbeitet werden, was zu längeren Antwortzeiten führt.",
+        "correct": true
+      },
+      {
+        "reasoning": "Priority-Scheduling ordnet jedem Thread eine Priorität zu und lässt Threads mit höherer Priorität zuerst laufen. Dies kann die Antwortzeit für hochpriorisierte Threads verbessern, aber wenn niedrigpriorisierte Threads ständig von höherpriorisierten verdrängt werden, kann dies zu einer geringeren Fairness führen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Least-Recently-Used (LRU) ist ein Algorithmus, der für die Seitenersetzung in der Speicherverwaltung verwendet wird, nicht für CPU-Scheduling. Daher hat LRU keinen direkten Einfluss auf die Antwortzeit oder Fairness im Kontext von Scheduling.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Wahl des Scheduling-Algorithmus hat sehr wohl einen Einfluss auf die Systemleistung, da unterschiedliche Algorithmen die Threads in unterschiedlicher Weise behandeln und somit die Antwortzeiten und die Fairness beeinflussen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Shortest-Job-First (SJF) ist ein Scheduling-Algorithmus, der den Thread mit der kürzesten geschätzten Laufzeit zuerst ausführt. Dies kann die durchschnittliche Antwortzeit verbessern, aber wenn es viele kurze Jobs gibt, können längere Jobs möglicherweise sehr lange warten oder sogar verhungern (Starvation), was bedeutet, dass sie möglicherweise nie zur Ausführung kommen.",
+        "correct": true
+      }
+    ]
+  },
+  {
+    "question": "Wie beeinflusst die Verwendung von nicht-blockierenden Synchronisationsmechanismen wie Lock-Free und Wait-Free Algorithmen die Leistung und Skalierbarkeit eines Multithreaded-Systems?",
+    "evaluations": [
+      {
+        "reasoning": "Lock-Free und Wait-Free Algorithmen verbessern die Leistung, indem sie das Warten auf das Freigeben von Sperren vermeiden, was zu einer effizienteren Nutzung der CPU-Zeit führt und Wartezeiten reduziert.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Verwendung von Lock-Free und Wait-Free Algorithmen kann tatsächlich zu einer besseren Leistung führen, da sie weniger CPU-Zyklen für das Warten auf Sperren benötigen. Die Aussage ist daher inkorrekt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Lock-Free und Wait-Free Algorithmen sind darauf ausgelegt, die Skalierbarkeit zu verbessern, indem sie die Anzahl der gleichzeitig ausführbaren Threads nicht begrenzen. Diese Aussage ist also falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Obwohl diese Algorithmen die Fehlerbehebung komplexer machen können, ist die Aussage, dass Race Conditions häufiger auftreten, nicht korrekt, da Lock-Free und Wait-Free Algorithmen gerade darauf abzielen, solche Bedingungen sicher zu handhaben.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Skalierbarkeit wird durch Lock-Free und Wait-Free Algorithmen beeinflusst, da sie in der Regel die Skalierbarkeit verbessern, indem sie die Abhängigkeit von der Anzahl der Threads reduzieren. Die Aussage ist also inkorrekt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Lock-Free und Wait-Free Algorithmen können Deadlocks verhindern, da sie keine Sperren verwenden, die zu Deadlocks führen könnten. Diese Aussage ist korrekt.",
+        "correct": true
+      }
+    ]
+  }
+]

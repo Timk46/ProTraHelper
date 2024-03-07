@@ -1,0 +1,292 @@
+[
+  {
+    "question": "Wie wird in Java eine anonyme Klasse definiert, die eine Schnittstelle mit einer Methode implementiert?",
+    "evaluations": [
+      {
+        "reasoning": "In Java gibt es kein Schlüsselwort 'anonymous' zur Definition anonymer Klassen. Anonyme Klassen werden anders erstellt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Obwohl das Schlüsselwort 'class' in Java verwendet wird, ist die Syntax für anonyme Klassen anders und beinhaltet nicht das Schlüsselwort 'class' ohne Namen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Beschreibung ist fast korrekt, aber sie lässt das Schlüsselwort 'new' aus, das notwendig ist, um eine Instanz der anonymen Klasse zu erstellen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Anonyme Klassen werden in Java unterstützt und können definiert werden, daher ist diese Aussage falsch.",
+        "correct": false
+      },
+      {
+        "reasoning": "Dies ist die korrekte Beschreibung, wie eine anonyme Klasse in Java definiert wird: durch das Schlüsselwort 'new', gefolgt vom Interface-Namen und einem Codeblock, der die Methode implementiert.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'implements' wird in der Definition einer anonymen Klasse nicht in dieser Weise verwendet. Anonyme Klassen werden durch das Schlüsselwort 'new' gefolgt von einem Interface-Namen und einem Codeblock erstellt.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die eine Operation als Parameter entgegennimmt und diese auf zwei übergebene Integer anwendet?",
+    "evaluations": [
+      {
+        "reasoning": "Diese Methode nimmt ein Operation-Objekt und zwei Integer als Parameter und wendet die Methode 'anwenden' des Operation-Objekts auf die beiden Integer an. Das entspricht der Beschreibung der Aufgabenstellung.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Methode gibt ein neues Operation-Objekt zurück und nimmt keine Operation als Parameter entgegen. Sie entspricht nicht der Beschreibung der Aufgabenstellung.",
+        "correct": false
+      },
+      {
+        "reasoning": "Obwohl diese Methode ein Operation-Objekt und zwei Integer als Parameter nimmt, gibt sie keinen Wert zurück und ist daher nicht korrekt, da die Aufgabenstellung eine Rückgabe des Ergebnisses der Operation verlangt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Methode nimmt zwar ein Operation-Objekt und zwei Integer als Parameter, gibt aber keinen Wert zurück und die Reihenfolge der Parameter entspricht nicht der in der Fragestellung vorgegebenen Reihenfolge.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Methode versucht, eine Operation direkt auf die beiden Integer anzuwenden, was in Java nicht möglich ist, da 'op' als Parameter ein Objekt und kein Operator ist. Zudem gibt es in Java keine Möglichkeit, Operatoren als Parameter zu übergeben.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Methode gibt ein Operation-Objekt zurück und nimmt zwar ein Operation-Objekt als Parameter, führt aber keine Operation auf den beiden Integer aus. Sie entspricht nicht der Beschreibung der Aufgabenstellung.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die einen generischen Typ zurückgibt und einen Parameter desselben generischen Typs entgegennimmt?",
+    "evaluations": [
+      {
+        "reasoning": "Die Syntax <T> vor der Rückgabetypangabe T signalisiert, dass es sich um eine generische Methode handelt. Der Parameter T param entspricht dem generischen Typ. Diese Syntax ist korrekt für eine generische Methode in Java.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Syntax T <T> ist nicht korrekt für die Definition einer generischen Methode in Java. Die generische Typangabe <T> muss vor dem Rückgabetyp stehen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Syntax public T meineMethode<T>(T param) ist nicht korrekt, da die generische Typangabe <T> vor dem Rückgabetyp und nicht nach dem Methodennamen stehen muss.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ohne die generische Typangabe <T> vor der Methode wird der Typ T nicht als generischer Typ erkannt und führt zu einem Kompilierungsfehler, wenn T nicht als Klasse oder Interface im Scope definiert ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Syntax public <T> meineMethode(T param) fehlt den Rückgabetyp T, was zu einem Kompilierungsfehler führt, da der Rückgabetyp einer Methode in Java immer angegeben werden muss.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Syntax public meineMethode<T>(T param) ist nicht korrekt, da die generische Typangabe <T> vor dem Rückgabetyp und nicht nach dem Methodennamen stehen muss. Außerdem fehlt der Rückgabetyp vor dem Methodennamen.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die eine Variable vom Typ Interface entgegennimmt, welche eine Operation repräsentiert, und diese Operation mit zwei gegebenen Integer-Werten ausführt?",
+    "evaluations": [
+      {
+        "reasoning": "Diese Antwort ist korrekt, da in Java Interfaces dazu verwendet werden können, um eine Methode zu definieren, die ein bestimmtes Verhalten erwartet. Ein Interface als Parameter zu haben und zwei Integer-Werte an eine Methode dieses Interfaces zu übergeben, ist eine gängige Praxis, um Operationen auszuführen, die durch das Interface definiert sind.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da die Frage explizit nach einer Methode fragt, die ein Interface als Parameter verwendet. Die Verwendung einer Klasse statt eines Interfaces würde nicht der Anforderung entsprechen, eine Operation zu repräsentieren, die durch ein Interface definiert ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da die Frage nach einer Methode fragt, die ein Interface als Parameter nimmt. Eine Methode, die drei Integer-Parameter annimmt, entspricht nicht der Anforderung, da sie kein Interface als Parameter verwendet und somit keine Operation repräsentiert, die durch ein Interface definiert ist.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da sie nicht der Anforderung entspricht, ein Interface als Parameter zu verwenden. Eine statische Methode, die direkt die Operation anwendet, würde das Konzept der Verwendung eines Interfaces umgehen, welches dazu dient, die Operation zu abstrahieren und flexibel zu halten.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwort ist korrekt, da in Java Lambda-Expressionen oft verwendet werden, um ein Interface zur Laufzeit zu implementieren. Eine Methode, die ein Interface als Parameter hat und zur Laufzeit mit einer Lambda-Expression implementiert wird, ist eine gültige und moderne Art, Operationen in Java auszuführen.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwort ist falsch, da die Frage darauf hinweist, dass die Operation mit zwei Integer-Werten ausgeführt werden soll. Eine Methode des Interfaces ohne Argumente aufzurufen, würde nicht die Anforderung erfüllen, die Operation mit zwei gegebenen Integer-Werten auszuführen.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die eine Liste von Operationen als Parameter entgegennimmt und für jede Operation in der Liste eine bestimmte Aktion ausführt?",
+    "evaluations": [
+      {
+        "reasoning": "In Java kann man eine Methode definieren, die eine Liste von Interfaces entgegennimmt. Jedes Interface kann eine Operation repräsentieren, die dann implementiert und ausgeführt werden kann.",
+        "correct": true
+      },
+      {
+        "reasoning": "Java erlaubt es nicht, einen einzelnen Parameter zu definieren, der eine unbestimmte Anzahl von Operationen als Argumente akzeptiert. Stattdessen würde man eine Liste oder ein Array von Objekten verwenden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Schlüsselwort 'implements' wird in Java verwendet, um ein Interface in einer Klasse zu implementieren, nicht in einer Methodendefinition, um Parameter zu übergeben.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine Methode, die ohne Parameter definiert wird und stattdessen auf globale Variablen zugreift, ist nicht die korrekte Art, eine Liste von Operationen als Parameter zu übergeben und widerspricht dem Prinzip der Methodenparameter in Java.",
+        "correct": false
+      },
+      {
+        "reasoning": "In Java ist es möglich, eine Methode zu definieren, die eine Liste von abstrakten Klassen entgegennimmt, wobei jede abstrakte Klasse eine Operation kapseln kann. Dies ist eine gültige Methode, um Operationen als Parameter zu übergeben.",
+        "correct": true
+      },
+      {
+        "reasoning": "Java verwendet keine Funktionszeiger wie in C oder C++. Stattdessen verwendet man in Java Objekte, die ein Interface implementieren, um ähnliche Funktionalität zu erreichen.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die als Parameter eine Lambda-Expression entgegennimmt, welche eine Operation mit zwei Integer-Werten ausführt und das Ergebnis zurückgibt?",
+    "evaluations": [
+      {
+        "reasoning": "Die Methode nimmt eine BiFunction als Parameter, die zwei Integer-Werte annimmt und einen Integer zurückgibt. Die apply-Methode wird korrekt aufgerufen, um das Ergebnis der Operation zu erhalten.",
+        "correct": true
+      },
+      {
+        "reasoning": "Obwohl eine BiFunction als Parameter übergeben wird, gibt die Methode keinen Wert zurück, was nicht der Fragestellung entspricht, da das Ergebnis der Operation zurückgegeben werden soll.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Methode nimmt eine Function statt einer BiFunction als Parameter, was nicht korrekt ist, da eine Operation mit zwei Integer-Werten ausgeführt werden soll, nicht nur mit einem.",
+        "correct": false
+      },
+      {
+        "reasoning": "BiConsumer akzeptiert zwar zwei Integer-Werte, hat aber keinen Rückgabewert (void). Die Methode versucht, einen Wert zurückzugeben, was zu einem Kompilierungsfehler führen würde, da accept keinen Wert zurückgibt.",
+        "correct": false
+      },
+      {
+        "reasoning": "Supplier nimmt keine Parameter entgegen und liefert einen Wert zurück. In der Fragestellung wird jedoch eine Operation mit zwei Integer-Werten verlangt, was hier nicht zutrifft.",
+        "correct": false
+      },
+      {
+        "reasoning": "Consumer akzeptiert einen Wert und gibt keinen zurück. Die Methode gibt zwar 'b' zurück, aber das entspricht nicht dem Ergebnis der Operation mit zwei Integer-Werten, wie in der Frage gefordert.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die eine beliebige Anzahl von Integer-Argumenten entgegennimmt und deren Summe zurückgibt?",
+    "evaluations": [
+      {
+        "reasoning": "Das Schlüsselwort 'varargs' ist eine korrekte Bezeichnung für die Funktionalität in Java, die es ermöglicht, eine beliebige Anzahl von Argumenten desselben Typs zu einer Methode zu übergeben.",
+        "correct": true
+      },
+      {
+        "reasoning": "Ein Parameter vom Typ 'int[]' kann verwendet werden, um ein Array von Integern zu übergeben, was ebenfalls eine Möglichkeit darstellt, eine variable Anzahl von Integer-Argumenten zu übergeben.",
+        "correct": true
+      },
+      {
+        "reasoning": "Die Varargs-Syntax 'int...' ist die korrekte Syntax in Java, um eine Methode zu definieren, die eine beliebige Anzahl von Integer-Argumenten entgegennimmt.",
+        "correct": true
+      },
+      {
+        "reasoning": "Obwohl eine Liste verwendet werden kann, um eine variable Anzahl von Argumenten zu übergeben, ist dies nicht die Standardmethode in Java, um eine Methode zu definieren, die eine beliebige Anzahl von Integer-Argumenten entgegennimmt. Die bevorzugte Methode ist die Verwendung von Varargs.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Definieren einer eigenen Methode für jeden möglichen Parameter ist nicht praktikabel und widerspricht dem Konzept von Varargs, das genau dafür entwickelt wurde, um solche Situationen zu vermeiden.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Überladung der Methode für jede Anzahl von Parametern ist nicht praktikabel und widerspricht ebenfalls dem Konzept von Varargs, das eine Methode erlaubt, die eine beliebige Anzahl von Argumenten desselben Typs akzeptieren kann.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die eine Operation als Parameter entgegennimmt, diese auf zwei übergebene Objekte anwendet und das Ergebnis der Operation zurückgibt?",
+    "evaluations": [
+      {
+        "reasoning": "In Java kann ein Interface verwendet werden, um eine Methode zu definieren, die eine Operation repräsentiert. Eine Methode kann dann dieses Interface als Parameter entgegennehmen und die definierte Operation auf zwei Objekte anwenden. Das Ergebnis der Operation wird dann zurückgegeben. Dies ist ein gängiges Muster in Java, insbesondere mit funktionalen Interfaces, die mit Lambda-Ausdrücken verwendet werden können.",
+        "correct": true
+      },
+      {
+        "reasoning": "Eine Methode, die nur zwei Objekte als Parameter entgegennimmt und eine interne Operation ausführt, nimmt keine Operation als Parameter entgegen. Die Operation ist in diesem Fall fest in der Methode verdrahtet und nicht flexibel durch den Aufrufer bestimmbar.",
+        "correct": false
+      },
+      {
+        "reasoning": "Die Verwendung einer Klasse mit einer statischen Methode als Parameter ist in Java nicht die übliche Art, Operationen als Parameter zu übergeben. Stattdessen werden Interfaces oder Lambda-Ausdrücke verwendet, um dieses Verhalten zu erreichen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine Methode, die eine generische Liste von Operationen entgegennimmt, ist nicht spezifisch genug, um nur eine Operation auf zwei Objekte anzuwenden. Zudem ist die Frage auf die Anwendung einer einzelnen Operation ausgerichtet, nicht auf eine Liste von Operationen.",
+        "correct": false
+      },
+      {
+        "reasoning": "Lambda-Ausdrücke in Java ermöglichen es, eine Operation als Parameter zu übergeben. Eine Methode kann eine Lambda-Expression entgegennehmen und diese auf zwei Objekte anwenden. Dies ist eine korrekte und gängige Methode in Java, um Verhalten zu parametrisieren.",
+        "correct": true
+      },
+      {
+        "reasoning": "Das Entgegennehmen eines Strings, der den Namen einer Operation enthält, ist keine direkte Methode, um eine Operation als Parameter zu übergeben. In Java würde dies zusätzliche Logik erfordern, um den String in eine tatsächliche Operation umzusetzen, was nicht der üblichen Vorgehensweise entspricht und auch nicht sicher ist.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "In Java, wie wird eine Methode definiert, die eine Operation als Parameter entgegennimmt, diese auf ein Objekt anwendet und das Ergebnis in einer bestimmten Weise verarbeitet?",
+    "evaluations": [
+      {
+        "reasoning": "In Java können funktionale Interfaces verwendet werden, um Methoden als Parameter zu übergeben. Ein funktionales Interface hat genau eine abstrakte Methode, die dann mit einer Lambda-Expression oder Methodenreferenz implementiert werden kann. Dies ermöglicht es, eine Operation als Parameter zu übergeben und auf ein Objekt anzuwenden.",
+        "correct": true
+      },
+      {
+        "reasoning": "In Java ist es nicht üblich, den Namen einer Operation als String zu übergeben, um sie auszuführen. Dies würde nicht die tatsächliche Operation als Parameter übergeben, sondern lediglich ihren Namen, was nicht der Fragestellung entspricht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Eine Methode ohne Parameter kann keine Operation als Parameter entgegennehmen. Die Operation müsste innerhalb der Methode bereits bekannt sein, was der Anforderung widerspricht, dass die Operation als Parameter übergeben werden soll.",
+        "correct": false
+      },
+      {
+        "reasoning": "Ein Array von Objekten als Parameter zu übergeben, ist nicht dasselbe wie eine Operation als Parameter zu übergeben. Die Frage bezieht sich auf eine einzelne Operation, die auf ein Objekt angewendet wird, nicht auf eine Sammlung von Objekten.",
+        "correct": false
+      },
+      {
+        "reasoning": "Das Runnable-Interface ist ein funktionales Interface in Java, das für die Ausführung von Code in einem eigenen Thread verwendet wird. Es hat eine run-Methode ohne Parameter und Rückgabetyp, was es ungeeignet macht, um eine Operation mit einem Objekt als Parameter und einem Rückgabetyp zu definieren.",
+        "correct": false
+      },
+      {
+        "reasoning": "Generische Parameter in Java werden verwendet, um Typsicherheit für Klassen und Methoden zu bieten, die mit verschiedenen Datentypen arbeiten können. Sie sind jedoch nicht dazu gedacht, Operationen als Parameter zu übergeben. Die Frage bezieht sich auf eine spezifische Operation, nicht auf einen variablen Datentyp.",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "question": "Wie wird in Java eine Methode definiert, die eine Operation als Parameter entgegennimmt, diese auf ein Array von Objekten anwendet und ein Array der Ergebnisse zurückgibt?",
+    "evaluations": [
+      {
+        "reasoning": "Diese Antwortmöglichkeit ist fast korrekt, aber sie gibt keinen Array-Typ zurück, da die toArray()-Methode ohne Argumente nicht weiß, welchen Typ das Array haben soll und daher ein Object[] zurückgibt, was zu einem ClassCastException führen würde.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwortmöglichkeit ist korrekt. Sie verwendet die toArray()-Methode mit einem Generator-Argument, um ein Array des richtigen Typs zu erstellen und zurückzugeben.",
+        "correct": true
+      },
+      {
+        "reasoning": "Diese Antwortmöglichkeit ist falsch, da sie eine Liste und kein Array zurückgibt, was nicht der Anforderung der Frage entspricht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwortmöglichkeit ist falsch, da sie einen Stream und kein Array zurückgibt, was nicht der Anforderung der Frage entspricht.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwortmöglichkeit ist falsch, da sie ein einzelnes Ergebnis und kein Array von Ergebnissen zurückgibt. Außerdem wird die apply-Methode falsch verwendet, da sie auf das gesamte Array und nicht auf einzelne Elemente angewendet wird.",
+        "correct": false
+      },
+      {
+        "reasoning": "Diese Antwortmöglichkeit ist falsch, da sie keinen Wert zurückgibt (void), was nicht der Anforderung der Frage entspricht, die ein Array von Ergebnissen verlangt.",
+        "correct": false
+      }
+    ]
+  }
+]

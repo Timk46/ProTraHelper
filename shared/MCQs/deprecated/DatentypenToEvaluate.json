@@ -1,0 +1,198 @@
+{
+  "questions": [
+    {
+      "question": "Welche Besonderheit weisen primitive Datentypen in Java auf, die sie von den Datentypen in Python unterscheidet?",
+      "options": [
+        {
+          "answer": "In Java sind primitive Datentypen immer Objekte, während in Python alles ein Objekt ist."
+        },
+        {
+          "answer": "Primitive Datentypen in Java haben eine feste Größe und sind nicht Objekte, während in Python Datentypen dynamisch sind und alles als Objekt behandelt wird."
+        },
+        {
+          "answer": "Java unterstützt keine primitiven Datentypen, nur Objekte, während Python sowohl primitive Datentypen als auch Objekte unterstützt."
+        },
+        {
+          "answer": "In Java und Python sind primitive Datentypen identisch, da beide Sprachen dynamische Typisierung verwenden."
+        },
+        {
+          "answer": "Primitive Datentypen in Java können nur als globale Variablen deklariert werden, während in Python lokale und globale Variablen unterstützt werden."
+        },
+        {
+          "answer": "In Java sind primitive Datentypen auf numerische Werte beschränkt, während Python auch Text als primitiven Datentyp behandelt."
+        }
+      ]
+    },
+    {
+      "question": "Welche Besonderheit gilt für die Typinferenz in Java im Vergleich zur dynamischen Typisierung in Python?",
+      "options": [
+        {
+          "answer": "In Java muss der Datentyp einer Variablen bei der Deklaration explizit angegeben werden, während Python zur Laufzeit den Typ bestimmt."
+        },
+        {
+          "answer": "Java unterstützt keine Typinferenz, alle Typen müssen immer manuell angegeben werden."
+        },
+        {
+          "answer": "Python erfordert Typangaben bei der Variablendeklaration, um die Typsicherheit zu gewährleisten."
+        },
+        {
+          "answer": "In Java wird der Datentyp einer Variablen zur Kompilierzeit festgelegt, in Python kann sich der Typ einer Variablen zur Laufzeit ändern."
+        },
+        {
+          "answer": "Typinferenz in Java bedeutet, dass der Compiler den Datentyp einer Variable aus ihrem initialen Wert ableiten kann."
+        },
+        {
+          "answer": "Python verwendet statische Typisierung, wodurch Variablen während der gesamten Laufzeit denselben Typ beibehalten."
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Aussagen beschreibt korrekt die Behandlung von Datentypen in der objektorientierten Programmierung mit Java und der funktionalen Programmierung mit Python?",
+      "options": [
+        {
+          "answer": "In Java sind Datentypen statisch, das heißt, sie müssen bei der Deklaration einer Variablen angegeben werden und können nicht geändert werden."
+        },
+        {
+          "answer": "Python erlaubt es, den Datentyp einer Variablen zur Laufzeit zu ändern, da es eine dynamische Typisierung verwendet."
+        },
+        {
+          "answer": "Java unterstützt keine primitiven Datentypen, während Python ausschließlich dynamische Datentypen verwendet."
+        },
+        {
+          "answer": "In Python müssen Variablen vor ihrer Verwendung explizit mit einem Datentyp deklariert werden."
+        },
+        {
+          "answer": "Java und Python verwenden beide ausschließlich statische Typisierung, wobei der Datentyp einer Variablen nicht geändert werden kann."
+        },
+        {
+          "answer": "Python verwendet Typinferenz, um den Datentyp einer Variablen automatisch zu bestimmen, ohne dass der Entwickler ihn explizit angeben muss."
+        }
+      ]
+    },
+    {
+      "question": "Welche Anweisung in Java definiert korrekt eine Variable des primitiven Datentyps 'int' und weist ihr den Wert 10 zu?",
+      "options": [
+        { "answer": "int number = 10;" },
+        { "answer": "integer number = 10;" },
+        { "answer": "int number == 10;" },
+        { "answer": "number = 10;" },
+        { "answer": "var number = 10;" },
+        { "answer": "Int number = new Int(10);" }
+      ]
+    },
+    {
+      "question": "Welche Anweisung in Python erstellt eine Liste, die verschiedene Datentypen wie Integer, String und Float enthalten kann, und weist ihr die Werte [1, 'Zwei', 3.0] zu?",
+      "options": [
+        { "answer": "list_var = [1, 'Zwei', 3.0]" },
+        { "answer": "list_var = (1, 'Zwei', 3.0)" },
+        { "answer": "list_var = {1, 'Zwei', 3.0}" },
+        { "answer": "list_var = {'eins': 1, 'zwei': 'Zwei', 'drei': 3.0}" },
+        { "answer": "list_var = 1, 'Zwei', 3.0" },
+        { "answer": "list_var = array(1, 'Zwei', 3.0)" }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf die Unterscheidung zwischen primitiven Datentypen in Java und dynamischen Datentypen in Python zu?",
+      "options": [
+        {
+          "answer": "In Java sind primitive Datentypen wie int oder double nicht Objekte, während in Python alle Datentypen als Objekte behandelt werden."
+        },
+        {
+          "answer": "Python verwendet keine dynamischen Datentypen, sondern ausschließlich statische Typisierung wie Java."
+        },
+        {
+          "answer": "Java und Python behandeln primitive Datentypen auf die gleiche Weise, beide sind streng typisiert."
+        },
+        {
+          "answer": "In Python können Variablen ihren Typ zur Laufzeit ändern, während in Java die Typen der Variablen zur Kompilierzeit festgelegt werden."
+        },
+        {
+          "answer": "Java unterstützt dynamische Datentypen durch die Verwendung von Reflection, ähnlich wie Python."
+        },
+        {
+          "answer": "Python's dynamische Typisierung bedeutet, dass Variablen vor ihrer Verwendung nicht deklariert werden müssen, im Gegensatz zu Java."
+        }
+      ]
+    },
+    {
+      "question": "In welcher Weise beeinflusst die Wahl des Datentyps in Java die Speichereffizienz und die Präzision der Daten?",
+      "options": [
+        {
+          "answer": "Die Verwendung von primitiven Datentypen in Java kann die Speichereffizienz erhöhen, da sie weniger Speicherplatz als Objekte benötigen."
+        },
+        {
+          "answer": "In Java hat die Wahl des Datentyps keinen Einfluss auf die Speichereffizienz, da alle Datentypen gleich viel Speicherplatz benötigen."
+        },
+        {
+          "answer": "Die Präzision der Daten in Java ist unabhängig vom gewählten Datentyp, da Java automatisch die beste Präzision wählt."
+        },
+        {
+          "answer": "Die Verwendung von größeren Datentypen wie 'double' statt 'float' kann in Java zu einer höheren Präzision führen, benötigt aber auch mehr Speicherplatz."
+        },
+        {
+          "answer": "In Python werden alle Daten als Objekte behandelt, was zu einer einheitlichen Speichereffizienz führt, unabhängig vom Datentyp."
+        },
+        {
+          "answer": "Die Speichereffizienz in Python wird durch die dynamische Typisierung verbessert, da der Interpreter den optimalen Datentyp zur Laufzeit wählt."
+        }
+      ]
+    },
+    {
+      "question": "Welche Anweisung in Java erzeugt eine Instanz eines generischen Datentyps und weist ihr eine Liste von Integer-Werten zu?",
+      "options": [
+        { "answer": "List<Integer> meineListe = new ArrayList<>();" },
+        { "answer": "int[] meineListe = new int[]{1, 2, 3};" },
+        { "answer": "ArrayList<Integer> meineListe = new List<>();" },
+        { "answer": "List<int> meineListe = new ArrayList<Integer>();" },
+        { "answer": "var meineListe = new ArrayList<Integer>();" },
+        { "answer": "List<Integer> meineListe = new LinkedList<Integer>();" }
+      ]
+    },
+    {
+      "question": "Welche Konvertierungsmethode wird in Java verwendet, um einen String in einen primitiven Datentyp wie 'int' umzuwandeln, und was ist das Ergebnis, wenn der String nicht in das Format des primitiven Datentyps passt?",
+      "options": [
+        {
+          "answer": "Die Methode Integer.parseInt() wird verwendet und löst eine NumberFormatException aus, wenn der String nicht konvertiert werden kann."
+        },
+        {
+          "answer": "Die Methode Integer.toString() wird verwendet und gibt 'null' zurück, wenn der String nicht konvertiert werden kann."
+        },
+        {
+          "answer": "Die Methode String.toInt() wird verwendet und gibt 0 zurück, wenn der String nicht konvertiert werden kann."
+        },
+        {
+          "answer": "Die Methode Integer.valueOf() wird verwendet und gibt einen Standardwert zurück, wenn der String nicht konvertiert werden kann."
+        },
+        {
+          "answer": "Die Methode Integer.parseString() wird verwendet und das Programm wird beendet, wenn der String nicht konvertiert werden kann."
+        },
+        {
+          "answer": "Die Methode Integer.parseInt() wird verwendet und gibt den Wert -1 zurück, wenn der String nicht konvertiert werden kann."
+        }
+      ]
+    },
+    {
+      "question": "Welche Eigenschaft von Datentypen in Java und Python ermöglicht es, dass eine Variable zur Laufzeit ihren Typ ändern kann, und wie wird dies in beiden Sprachen bezeichnet?",
+      "options": [
+        {
+          "answer": "In Java ist dies durch die Verwendung von Objektreferenzen und in Python durch die dynamische Typisierung möglich."
+        },
+        {
+          "answer": "Java unterstützt keine Typänderungen zur Laufzeit, da es statisch typisiert ist, während Python dies durch Duck-Typing ermöglicht."
+        },
+        {
+          "answer": "In Java wird dies als 'Autoboxing' bezeichnet und in Python als 'Typinferenz'."
+        },
+        {
+          "answer": "Java verwendet 'Type Casting', um Typänderungen zur Laufzeit zu ermöglichen, während Python 'Dynamic Typing' verwendet."
+        },
+        {
+          "answer": "Beide Sprachen verwenden den Mechanismus der 'Generics', um Typänderungen zur Laufzeit zu erlauben."
+        },
+        {
+          "answer": "Java erlaubt keine Typänderungen zur Laufzeit, Python hingegen nutzt 'Dynamic Typing', um Variablen dynamisch Typen zuzuweisen."
+        }
+      ]
+    }
+  ]
+}
