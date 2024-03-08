@@ -1,10 +1,12 @@
 import { PrismaClient, contentElementType } from '@prisma/client';
-import { faker, hy } from '@faker-js/faker';
+import { el, faker, hy } from '@faker-js/faker';
 import { ConsoleLogger } from '@nestjs/common';
 import { Console } from 'console';
 import * as XLSX from 'xlsx';
 import { WorkSheet, utils } from 'xlsx';
 import * as fs from 'fs';
+import { last, of } from 'rxjs';
+import e from 'express';
 
 const prisma = new PrismaClient();
 
@@ -18,6 +20,26 @@ interface excel_Aufgabe {
   codeName: string;
   countInputArgs: number;
   ConceptNodeID: number;
+}
+
+interface excel_OFP {
+  conceptId: number | null;
+  conceptEdge: number[] | null;
+  contentId: number | null;
+  requiresId: number[] | null;
+  trainsId: number[] | null;
+  topic: string | null;
+  parentId: number | null;
+  moduleGoalId: number | null;
+  level: number | null;
+  conceptDescription: string | null;
+  elementId1: string | null;
+  elementId2: string | null;
+  elementId3: string | null;
+  elementId4: string | null;
+  elementId5: string | null;
+  contentNodeTitle: string | null;
+  description: string | null;
 }
 
 interface excel_Codegeruest {
@@ -214,6 +236,8 @@ async function main() {
   // TODO: Put this in a separate function
   console.log('Importing Concepts from Excel...');
 
+  const ofpData: excel_OFP[] = [];
+
   const filePath = process.env.FILE_PATH + 'Kompetenzraster.xlsx';
   if (fs.existsSync(filePath)) {
     const workbook = XLSX.readFile(filePath);
@@ -235,10 +259,9 @@ async function main() {
     const columnParentId = 6;
     const columnModuleGoalId = 7;
     const columnLevelId = 8;
-    const columnDescriptionId = 9;
-    const columnElementId = [10, 11, 12, 13, 14];
-    const columnContentNodeTitle = 15;
-    const columnContentDescription = 16;
+    const columnElementId = [9, 10, 11, 12, 13];
+    const columnContentNodeTitle = 14;
+    const columnDescription = 15;
 
     //in case the topic column for the Content is empty we need to save the last topic
     let lastTopic = 'No topic found!';
@@ -248,212 +271,178 @@ async function main() {
       rowIndex,
       row,
     }))) {
-      let ParentId = 1;
-      if (row[columnParentId] && !isNaN(+row[columnParentId])) {
-        ParentId = row[columnParentId];
+      // Save the last topic in case there are multiple contentNodes for the same topic
+      if (row[columnTopicId]) {
+        lastTopic = row[columnTopicId];
       }
-      if (row[columnContentId] && !isNaN(+row[columnContentId])) {
-        //import contentNodes from excelData
 
-        // Save the last topic in case there are multiple contentNodes for the same topic
-        if (row[columnTopicId]) {
-          lastTopic = row[columnTopicId];
-        }
-
-        //contentNodes from excelData
-        await prisma.contentNode.create({
-          data: {
-            id: +row[columnContentId],
-            name: row[columnContentNodeTitle]
-              ? row[columnContentNodeTitle].toString()
-              : lastTopic,
-            description: row[columnContentDescription]
-              ? row[columnContentDescription].toString()
-              : null,
-          },
+      if (rowIndex > 0) {
+        ofpData.push({
+          conceptId: row[columnConceptId],
+          conceptEdge: row[columnConceptEdge]
+            ? row[columnConceptEdge].toString().split(',').map(Number)
+            : null,
+          contentId: row[columnContentId],
+          requiresId: row[columnRequiresId]
+            ? row[columnRequiresId].toString().split(',').map(Number)
+            : null,
+          trainsId: row[columnTrainsId]
+            ? row[columnTrainsId].toString().split(',').map(Number)
+            : null,
+          topic: lastTopic,
+          parentId: row[columnParentId] ? row[columnParentId] : 1,
+          moduleGoalId: row[columnModuleGoalId],
+          level: row[columnLevelId],
+          conceptDescription: row[columnDescription],
+          elementId1: row[columnElementId[0]],
+          elementId2: row[columnElementId[1]],
+          elementId3: row[columnElementId[2]],
+          elementId4: row[columnElementId[3]],
+          elementId5: row[columnElementId[4]],
+          contentNodeTitle: row[columnContentNodeTitle]
+            ? row[columnContentNodeTitle]
+            : lastTopic,
+          description: row[columnDescription],
         });
-        //loop through all contentElement columns
-        for (const elementId in columnElementId) {
-          if (
-            row[columnElementId[elementId]] &&
-            row[columnElementId[elementId]].replace(/\s/g, '').length > 0
-          ) {
-            //find corresponding file
-            const file = await prisma.file.findUnique({
-              where: { uniqueIdentifier: row[columnElementId[elementId]] },
+      }
+    } //end of for loop for excelData
+
+    //------------------------------------------
+    //Start of creating from ofpData
+    //ConceptNode
+    await prisma.conceptNode.createMany({
+      data: ofpData
+        .filter((data) => data.conceptId)
+        .map((data) => ({
+          id: data.conceptId,
+          name: data.topic,
+          description: data.conceptDescription,
+        })),
+    });
+    //ConceptFamily
+    await prisma.conceptFamily.createMany({
+      data: ofpData
+        .filter((data) => data.conceptId)
+        .map((data) => ({
+          childId: data.conceptId,
+          parentId: data.parentId ? data.parentId : 1,
+        })),
+    });
+    //ConceptEdge
+    for (const data of ofpData) {
+      if (data.conceptEdge) {
+        for (const edge of data.conceptEdge) {
+          await prisma.conceptEdge.create({
+            data: {
+              prerequisiteId: edge,
+              successorId: data.conceptId,
+              parentId: data.parentId ? data.parentId : 1,
+            },
+          });
+        }
+      }
+    }
+    //ModuleConceptGoal
+    await prisma.moduleConceptGoal.createMany({
+      data: ofpData
+        .filter((data) => data.conceptId && data.moduleGoalId)
+        .map((data) => ({
+          moduleId: moduleInformatik.id,
+          conceptNodeId: data.conceptId,
+          level: data.moduleGoalId,
+        })),
+    });
+    //ContentNode
+    await prisma.contentNode.createMany({
+      data: ofpData
+        .filter((data) => data.contentId)
+        .map((data) => ({
+          id: data.contentId,
+          name: data.contentNodeTitle,
+          description: data.description,
+        })),
+    });
+    //ContentElement
+    for (const data of ofpData) {
+      const elementList = [
+        data.elementId1,
+        data.elementId2,
+        data.elementId3,
+        data.elementId4,
+        data.elementId5,
+      ];
+      for (const elemId in elementList) {
+        // console.log('data', elemId.valueOf);
+        if (elementList[+elemId] && data.contentId) {
+          const file = await prisma.file.findUnique({
+            where: { uniqueIdentifier: elementList[+elemId] },
+          });
+          if (file) {
+            const TempContentElement = await prisma.contentElement.create({
+              data: {
+                type: contentElementType[file.type],
+                title: file.name,
+              },
             });
-
-            //create ContentElements
-            if (file) {
-              const TempContentElement = await prisma.contentElement.create({
-                data: {
-                  type: contentElementType[file.type],
-                  title: file.name,
-                },
-              });
-              //connect file to contentElement
-              await prisma.file.update({
-                where: { uniqueIdentifier: row[columnElementId[elementId]] },
-                data: {
-                  contentElement: { connect: { id: TempContentElement.id } },
-                },
-              });
-              //connect contentView
-              await prisma.contentView.create({
-                data: {
-                  contentNode: {
-                    connect: { id: +row[columnContentId] },
-                  },
-                  contentElement: {
-                    connect: { id: TempContentElement.id },
-                  },
-                  position: +elementId + 1,
-                },
-              });
-            } else {
-              console.log(
-                'File with uniqueIdentifier ' +
-                  row[columnElementId[elementId]] +
-                  ' not found!',
-              );
-            }
-          }
-        }
-      }
-      //Concept
-      if (row[columnConceptId] && !isNaN(+row[columnConceptId])) {
-        // Save the last topic of each topic column
-        // First element reserved for root ConceptNodes
-
-        if (row[columnTopicId]) {
-          //ConceptNode
-          await prisma.conceptNode.create({
-            data: {
-              id: +row[columnConceptId],
-              name: row[columnTopicId],
-              description: row[columnDescriptionId]
-                ? row[columnDescriptionId].toString()
-                : null,
-            },
-          });
-          await prisma.conceptFamily.create({
-            data: {
-              childId: +row[columnConceptId],
-              parentId: +ParentId,
-            },
-          });
-          if (row[columnConceptEdge]) {
-            //split the string in case of multiple entrees in the same cell
-            if (row[columnConceptEdge].toString().includes(',')) {
-              const edges = row[columnConceptEdge].split(',');
-              for (const edge in edges) {
-                await prisma.conceptEdge.create({
-                  data: {
-                    prerequisiteId: +edges[edge],
-                    successorId: +row[columnConceptId],
-                    parentId: +ParentId,
-                  },
-                });
-              }
-              //if there is only one entry in the cell make sure it is a number
-            } else if (typeof row[columnConceptEdge] === 'number') {
-              await prisma.conceptEdge.create({
-                data: {
-                  prerequisiteId: +row[columnConceptEdge],
-                  successorId: +row[columnConceptId],
-                  parentId: +ParentId,
-                },
-              });
-            }
-          }
-          //create moduleConceptGoals for each conceptNode
-          await prisma.moduleConceptGoal.create({
-            data: {
-              moduleId: moduleInformatik.id,
-              conceptNodeId: +row[columnConceptId],
-              level: +row[columnModuleGoalId], // random number between 0 and 6
-            },
-          });
-        }
-      }
-      //End of Concepts
-
-      // //Training
-      if (
-        row[columnTrainsId] &&
-        row[columnContentId] &&
-        !isNaN(+row[columnContentId])
-      ) {
-        //split the string in case of multiple entrees in the same cell
-        if (row[columnTrainsId].toString().includes(',')) {
-          const trains = row[columnTrainsId].split(',');
-          for (const train in trains) {
-            await prisma.training.create({
+            await prisma.file.update({
+              where: { uniqueIdentifier: file.uniqueIdentifier },
+              data: {
+                contentElement: { connect: { id: TempContentElement.id } },
+              },
+            });
+            await prisma.contentView.create({
               data: {
                 contentNode: {
-                  connect: { id: +row[columnContentId] },
+                  connect: { id: data.contentId },
                 },
-                conceptNode: {
-                  connect: { id: +trains[train] },
+                contentElement: {
+                  connect: { id: TempContentElement.id },
                 },
-                awards: +row[columnLevelId],
+                position: +elemId,
               },
             });
           }
-          //if there is only one entry in the cell make sure it is a number
-        } else if (typeof row[columnTrainsId] === 'number') {
-          const trains = row[columnTrainsId];
+        }
+      }
+    }
+    //Training
+    for (const data of ofpData) {
+      if (data.trainsId && data.contentId) {
+        for (const train of data.trainsId) {
           await prisma.training.create({
             data: {
               contentNode: {
-                connect: { id: +row[columnContentId] },
+                connect: { id: data.contentId },
               },
               conceptNode: {
-                connect: { id: +trains },
+                connect: { id: +train },
               },
-              awards: +row[columnLevelId],
+              awards: data.level,
             },
           });
         }
       }
-      //Requirement
-      if (
-        row[columnRequiresId] &&
-        row[columnContentId] &&
-        !isNaN(+row[columnContentId])
-      ) {
-        //split the string in case of multiple entrees in the same cell
-        if (row[columnRequiresId].toString().includes(',')) {
-          const requirement = row[columnRequiresId].split(',');
-          for (const requires in requirement) {
-            console.log(row[columnRequiresId]);
-            await prisma.requirement.create({
-              data: {
-                contentNode: {
-                  connect: { id: +row[columnContentId] },
-                },
-                conceptNode: {
-                  connect: { id: +requirement[requires] },
-                },
-              },
-            });
-          }
-          //if there is only one entry in the cell make sure it is a number
-        } else if (typeof row[columnRequiresId] === 'number') {
-          const requirement = row[columnRequiresId];
+    }
+    //Requirement
+    for (const data of ofpData) {
+      if (data.requiresId && data.contentId) {
+        for (const requires of data.requiresId) {
           await prisma.requirement.create({
             data: {
               contentNode: {
-                connect: { id: +row[columnContentId] },
+                connect: { id: data.contentId },
               },
               conceptNode: {
-                connect: { id: +requirement },
+                connect: { id: +requires },
               },
             },
           });
         }
       }
     }
+
+    //End of creating from ofpData
+    //------------------------------------------
 
     console.log('Importing Concepts Done!');
   } else {
