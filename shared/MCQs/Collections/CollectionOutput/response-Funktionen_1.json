@@ -1,0 +1,31 @@
+{
+  "question": "Welche Funktionseigenschaft ermöglicht es in funktionalen Programmiersprachen, Funktionen ohne Seiteneffekte zu komponieren?",
+  "answers": [
+    {
+      "answer": "Referenzielle Transparenz gewährleistet, dass Ausdrücke durch ihre Werte ersetzt werden können, ohne das Verhalten des Programms zu ändern.",
+      "correct": true
+    },
+    {
+      "answer": "Die Eigenschaft der Polymorphie erlaubt es, Funktionen mit verschiedenen Typen zu komponieren.",
+      "correct": false
+    },
+    {
+      "answer": "Durch die Verwendung von High-Order Functions können Funktionen wie Variablen behandelt und zusammengesetzt werden.",
+      "correct": false
+    },
+    {
+      "answer": "Die Unveränderlichkeit von Datenstrukturen ist notwendig, um Funktionen ohne Seiteneffekte zu komponieren.",
+      "correct": false
+    },
+    {
+      "answer": "Kapselung ist die Eigenschaft, die es ermöglicht, Funktionen zu komponieren, indem sie Details der Implementierung verbergen.",
+      "correct": false
+    },
+    {
+      "answer": "Die Eigenschaft der Modularität ermöglicht es, unabhängige Funktionen zu größeren Einheiten zusammenzufassen.",
+      "correct": false
+    }
+  ],
+  "description": "In der funktionalen Programmierung ist es wichtig, Funktionen zu schreiben, die keine Seiteneffekte haben und somit vorhersehbares Verhalten aufweisen. Dies ermöglicht es, Funktionen zu größeren Einheiten zu komponieren, ohne das Gesamtverhalten des Programms zu beeinträchtigen.",
+  "score": 4
+}

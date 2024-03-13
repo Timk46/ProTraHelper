@@ -1,0 +1,31 @@
+{
+  "question": "Welche Aussage trifft auf die Typisierung von Variablen in Java und Python zu?",
+  "answers": [
+    {
+      "answer": "In Java muss der Typ einer Variablen bei der Deklaration festgelegt werden, während Python dynamisch typisiert ist.",
+      "correct": true
+    },
+    {
+      "answer": "Sowohl Java als auch Python erfordern eine explizite Typangabe bei der Deklaration von Variablen.",
+      "correct": false
+    },
+    {
+      "answer": "Python benötigt eine Typangabe bei der Deklaration, während Java Variablen dynamisch typisiert.",
+      "correct": false
+    },
+    {
+      "answer": "In Java und Python werden Variablen ohne Typangabe deklariert und der Typ wird zur Laufzeit bestimmt.",
+      "correct": false
+    },
+    {
+      "answer": "Java ist dynamisch typisiert und Python statisch, daher muss der Typ in Python vorher bekannt sein.",
+      "correct": false
+    },
+    {
+      "answer": "Der Typ einer Variablen in Java kann nach der Deklaration geändert werden, in Python ist dies nicht möglich.",
+      "correct": false
+    }
+  ],
+  "description": "Die Typisierung von Variablen unterscheidet sich in Java und Python. Java ist statisch typisiert, was bedeutet, dass der Typ einer Variablen bei der Deklaration festgelegt werden muss. Python hingegen ist dynamisch typisiert, und der Typ einer Variablen wird zur Laufzeit bestimmt.",
+  "score": 3
+}

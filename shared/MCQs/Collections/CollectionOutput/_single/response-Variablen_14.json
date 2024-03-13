@@ -1,0 +1,31 @@
+{
+  "question": "Welche Aussage trifft auf die Veränderlichkeit von Variablen in Python und Java zu?",
+  "answers": [
+    {
+      "answer": "In Python können Variablen ihren Typ zur Laufzeit ändern, während in Java der Typ einer Variablen nach der Deklaration feststeht.",
+      "correct": true
+    },
+    {
+      "answer": "Sowohl in Python als auch in Java können Variablen ihren Typ nach der Deklaration nicht ändern.",
+      "correct": false
+    },
+    {
+      "answer": "In Java können Variablen ihren Typ zur Laufzeit ändern, während in Python der Typ einer Variablen nach der Deklaration feststeht.",
+      "correct": false
+    },
+    {
+      "answer": "Der Typ einer Variablen in Python wird erst bei der Kompilierung festgelegt, ähnlich wie in Java.",
+      "correct": false
+    },
+    {
+      "answer": "Python erlaubt keine Typänderungen für Variablen, während Java dynamische Typisierung unterstützt.",
+      "correct": false
+    },
+    {
+      "answer": "In Python wird der Typ einer Variablen durch die Zuweisung bestimmt und kann sich ändern, in Java muss der Typ vorab definiert werden und bleibt konstant.",
+      "correct": true
+    }
+  ],
+  "description": "Die Veränderlichkeit von Variablen bezieht sich auf die Möglichkeit, den Typ einer Variablen nach ihrer Deklaration zu ändern. Python ist dynamisch typisiert, was bedeutet, dass der Typ einer Variablen zur Laufzeit geändert werden kann. Java hingegen ist statisch typisiert, und der Typ einer Variablen ist nach der Deklaration unveränderlich.",
+  "score": 3
+}

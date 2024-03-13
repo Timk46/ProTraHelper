@@ -1,9 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { Observable, of } from 'rxjs';
-import { AxiosResponse } from 'axios';
-import { map } from 'rxjs/operators';
-import { HttpService } from '@nestjs/axios';
 import * as path from 'path';
 import { McqGenerationDTO } from '@Interfaces/question.dto';
 import { readFileSync } from 'fs';
@@ -18,11 +15,22 @@ export class JsonLoaderService {
 
   }
 
-  loadJson(conceptFilename: string): Observable<{ questions: McqGenerationDTO[] }> {
+  async loadJson(conceptFilename: string): Promise<{ questions: McqGenerationDTO[] }> {
     const filePath = path.join(`${this.folderPath}/${conceptFilename}MCQs.json`);
-    const data = readFileSync(filePath, 'utf8');
-    const json: { questions: McqGenerationDTO[] } = JSON.parse(data);
+    try {
+      const data = readFileSync(filePath, 'utf8');
+      const json: { questions: McqGenerationDTO[] } = JSON.parse(data);
+      console.log('json data: ', json)
+      return json
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        console.error(`Datei nicht gefunden: ${filePath}`);
+      } else {
+        throw error;
+      }
+    }
 
-    return of(json);
+
+
   }
 }

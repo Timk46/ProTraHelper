@@ -1,0 +1,31 @@
+{
+  "question": "Welche der folgenden Anweisungen beschreibt korrekt das Konzept einer Anweisung in der Programmierung?",
+  "answers": [
+    {
+      "answer": "Eine Anweisung ist eine Instruktion, die vom Interpreter oder Compiler in Binärcode umgewandelt und ausgeführt wird.",
+      "correct": true
+    },
+    {
+      "answer": "Eine Anweisung ist eine Sammlung von Daten, die von einem Programm verarbeitet werden.",
+      "correct": false
+    },
+    {
+      "answer": "Eine Anweisung ist ein Fehler im Code, der während der Kompilierung auftritt.",
+      "correct": false
+    },
+    {
+      "answer": "Eine Anweisung ist eine Variable, die zur Speicherung von Daten verwendet wird.",
+      "correct": false
+    },
+    {
+      "answer": "Eine Anweisung ist ein Kommentar im Code, der zur Dokumentation dient.",
+      "correct": false
+    },
+    {
+      "answer": "Eine Anweisung ist eine Bedingung, die in einer if-Struktur verwendet wird, um den Kontrollfluss zu steuern.",
+      "correct": false
+    }
+  ],
+  "description": "Anweisungen sind die grundlegenden Bausteine eines Programms, die definieren, welche Operationen ausgeführt werden sollen.",
+  "score": 2
+}

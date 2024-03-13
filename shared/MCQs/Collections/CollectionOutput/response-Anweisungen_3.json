@@ -1,0 +1,16 @@
+{
+  "question": "Welche der folgenden Anweisungen in Java definiert korrekt einen Block, der mehrere Anweisungen enthält?",
+  "answers": [
+    { "answer": "if (bedingung) { anweisung1; anweisung2; }", "correct": true },
+    { "answer": "if bedingung: anweisung1; anweisung2;", "correct": false },
+    { "answer": "if (bedingung) anweisung1; anweisung2;", "correct": false },
+    { "answer": "{ anweisung1; anweisung2; }", "correct": true },
+    {
+      "answer": "if (bedingung) anweisung1; else anweisung2;",
+      "correct": false
+    },
+    { "answer": "if [bedingung] { anweisung1; anweisung2; }", "correct": false }
+  ],
+  "description": "In Java werden Blöcke von Anweisungen durch geschweifte Klammern definiert und können mehrere Anweisungen enthalten, die nacheinander ausgeführt werden.",
+  "score": 2
+}

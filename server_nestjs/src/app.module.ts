@@ -32,6 +32,7 @@ import { UsersModule } from './users/users.module';
 import { ModulesModule } from './modules/modules.module';
 import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
 import { McqCreationModule } from './mcqcreation/mcqcreation.module';
+import { McqevaluationModule } from './mcqevaluation/mcqevaluation.module';
 
 @Module({
   imports: [
@@ -48,7 +49,8 @@ import { McqCreationModule } from './mcqcreation/mcqcreation.module';
     RunCodeModule,
     QuestionModule,
     FeedbackGenerationModule,
-    McqCreationModule],
+    McqCreationModule,
+    McqevaluationModule],
   controllers: [
     AppController,
     DiscussionListController, DiscussionVoteController, DiscussionViewController, DiscussionCreationController

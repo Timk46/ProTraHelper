@@ -1,0 +1,13 @@
+{
+  "question": "Welche der folgenden Anweisungen in Python führt zu einer Zuweisung des Wertes einer arithmetischen Berechnung an eine Variable?",
+  "answers": [
+    { "answer": "ergebnis = 3 * 7", "correct": true },
+    { "answer": "3 * 7 = ergebnis", "correct": false },
+    { "answer": "ergebnis == 3 * 7", "correct": false },
+    { "answer": "3 * 7 == ergebnis", "correct": false },
+    { "answer": "ergebnis := 3 * 7", "correct": false },
+    { "answer": "setze ergebnis auf 3 mal 7", "correct": false }
+  ],
+  "description": "In Python wird der Zuweisungsoperator '=' verwendet, um den Wert eines Ausdrucks einer Variablen zuzuweisen. Die korrekte Syntax dafür ist 'variable = ausdruck'.",
+  "score": 2
+}

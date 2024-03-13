@@ -1,0 +1,31 @@
+{
+  "question": "Welche Aussage über die Verwendung von Variablen in Python trifft zu?",
+  "answers": [
+    {
+      "answer": "In Python müssen Variablen vor ihrer Verwendung explizit deklariert werden.",
+      "correct": false
+    },
+    {
+      "answer": "Variablen in Python können dynamisch während der Laufzeit ihren Typ ändern.",
+      "correct": true
+    },
+    {
+      "answer": "Der Typ einer Variablen in Python ist statisch und kann nach der Initialisierung nicht geändert werden.",
+      "correct": false
+    },
+    {
+      "answer": "In Python ist es nicht möglich, Funktionen als Werte von Variablen zu speichern.",
+      "correct": false
+    },
+    {
+      "answer": "Globale Variablen in Python können innerhalb von Funktionen ohne Einschränkungen geändert werden.",
+      "correct": false
+    },
+    {
+      "answer": "Lokale Variablen in Python-Funktionen sind auch außerhalb dieser Funktionen sichtbar.",
+      "correct": false
+    }
+  ],
+  "description": "Variablen in Python sind dynamisch typisiert, was bedeutet, dass der Typ einer Variablen zur Laufzeit geändert werden kann und nicht im Voraus deklariert werden muss. Funktionen können ebenfalls als Werte von Variablen gespeichert werden, was ein mächtiges Konzept der funktionalen Programmierung in Python ist. Globale Variablen können unter bestimmten Bedingungen innerhalb von Funktionen geändert werden, während lokale Variablen nur innerhalb ihrer Funktionen sichtbar sind.",
+  "score": 3
+}

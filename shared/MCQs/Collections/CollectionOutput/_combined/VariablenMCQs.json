@@ -1,0 +1,606 @@
+{
+  "questions": [
+    {
+      "question": "Was beschreibt den Gültigkeitsbereich (Scope) einer Variablen in Java am besten?",
+      "options": [
+        {
+          "answer": "Der Gültigkeitsbereich ist global und die Variable ist überall im Programm verfügbar.",
+          "correct": false
+        },
+        {
+          "answer": "Eine Variable ist nur innerhalb der Methode verfügbar, in der sie deklariert wurde.",
+          "correct": false
+        },
+        {
+          "answer": "Eine Variable ist nur innerhalb des Blocks verfügbar, in dem sie deklariert wurde.",
+          "correct": true
+        },
+        {
+          "answer": "Der Gültigkeitsbereich einer Variablen kann nachträglich erweitert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Variablen in Java haben keinen spezifischen Gültigkeitsbereich.",
+          "correct": false
+        },
+        {
+          "answer": "Eine Variable ist nur in der Klasse verfügbar, in der sie deklariert wurde.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welchen Typ hat eine Variable in Python, die mit dem Wert True initialisiert wird?",
+      "options": [
+        { "answer": "Integer (int)", "correct": false },
+        { "answer": "Gleitkommazahl (float)", "correct": false },
+        { "answer": "Zeichenkette (str)", "correct": false },
+        { "answer": "Wahrheitswert (bool)", "correct": true },
+        { "answer": "Liste (list)", "correct": false },
+        { "answer": "Dictionary (dict)", "correct": false }
+      ]
+    },
+    {
+      "question": "Welche Aussage über die Deklaration und Initialisierung von Variablen in Java ist korrekt?",
+      "options": [
+        {
+          "answer": "Eine Variable in Java muss bei der Deklaration nicht sofort initialisiert werden.",
+          "correct": true
+        },
+        {
+          "answer": "In Java können Variablen ohne Angabe eines Typs deklariert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Das Schlüsselwort 'final' erlaubt es, den Wert einer Variable nachträglich zu ändern.",
+          "correct": false
+        },
+        {
+          "answer": "Eine Variable vom Typ 'int' kann in Java mit einem String initialisiert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Variablen in Java können nur innerhalb von Methoden deklariert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Das Schlüsselwort 'final' in Java deklariert eine Variable als Konstante, die nicht verändert werden kann.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage über die Initialisierung von Variablen in Java ist korrekt?",
+      "options": [
+        {
+          "answer": "Eine Variable muss in Java bei der Deklaration initialisiert werden.",
+          "correct": false
+        },
+        {
+          "answer": "In Java kann eine Variable bei der Deklaration initialisiert werden, es ist aber nicht zwingend erforderlich.",
+          "correct": true
+        },
+        {
+          "answer": "Variablen in Java werden immer automatisch mit dem Wert null initialisiert.",
+          "correct": false
+        },
+        {
+          "answer": "Statische Variablen in Java werden, falls nicht explizit initialisiert, mit Standardwerten belegt.",
+          "correct": true
+        },
+        {
+          "answer": "Lokale Variablen in Java haben einen Standardwert und müssen nicht initialisiert werden.",
+          "correct": false
+        },
+        {
+          "answer": "In Java müssen Variablen vom Typ 'final' bei der Deklaration initialisiert werden.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf die Lebensdauer einer lokalen Variablen in Java zu?",
+      "options": [
+        {
+          "answer": "Eine lokale Variable ist während der gesamten Laufzeit des Programms verfügbar.",
+          "correct": false
+        },
+        {
+          "answer": "Eine lokale Variable ist nur innerhalb der Methode verfügbar, in der sie deklariert wurde.",
+          "correct": true
+        },
+        {
+          "answer": "Eine lokale Variable kann außerhalb ihres Blocks durch den Klassennamen referenziert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Eine lokale Variable wird automatisch als 'final' deklariert.",
+          "correct": false
+        },
+        {
+          "answer": "Eine lokale Variable behält ihren Wert, auch wenn die Methode beendet wird.",
+          "correct": false
+        },
+        {
+          "answer": "Eine lokale Variable kann ohne Initialisierung verwendet werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf die Sichtbarkeit und den Gültigkeitsbereich von Variablen in Java zu?",
+      "options": [
+        {
+          "answer": "Eine Variable, die innerhalb einer Methode deklariert wird, ist nur innerhalb dieser Methode sichtbar.",
+          "correct": true
+        },
+        {
+          "answer": "Eine Variable, die außerhalb von Methoden deklariert wird, ist global und in jeder Methode sichtbar.",
+          "correct": false
+        },
+        {
+          "answer": "Variablen, die in einem Block mit geschweiften Klammern deklariert werden, sind außerhalb dieses Blocks sichtbar.",
+          "correct": false
+        },
+        {
+          "answer": "Eine als 'final' deklarierte Variable in Java kann nach ihrer Initialisierung ihren Wert ändern.",
+          "correct": false
+        },
+        {
+          "answer": "Eine Variable, die in einer Schleife deklariert wird, bleibt nach Beendigung der Schleife erhalten.",
+          "correct": false
+        },
+        {
+          "answer": "Eine statische Variable in Java ist an die Klasse gebunden und nicht an eine Instanz der Klasse.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Aussagen beschreibt korrekt das Konzept einer Variablen in der Programmierung?",
+      "options": [
+        {
+          "answer": "Eine Variable ist ein Container im Speicher, der Daten speichert und über einen Namen angesprochen werden kann.",
+          "correct": true
+        },
+        {
+          "answer": "Eine Variable ist eine Funktion, die bestimmte Operationen in einem Programm ausführt.",
+          "correct": false
+        },
+        {
+          "answer": "Variablen sind unveränderliche Konstanten, die einmal gesetzt, ihren Wert nicht ändern können.",
+          "correct": false
+        },
+        {
+          "answer": "Eine Variable in Python muss bei ihrer Erstellung mit einem spezifischen Datentyp deklariert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Der Wert einer Variablen kann sich im Laufe eines Programms ändern, wenn neue Daten zugewiesen werden.",
+          "correct": true
+        },
+        {
+          "answer": "In Python sind Variablen immer global und können überall im Programm ohne Einschränkungen verwendet werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf die Typisierung von Variablen in Java und Python zu?",
+      "options": [
+        {
+          "answer": "In Java muss der Typ einer Variablen bei der Deklaration festgelegt werden, während Python dynamisch typisiert ist.",
+          "correct": true
+        },
+        {
+          "answer": "Sowohl Java als auch Python erfordern eine explizite Typangabe bei der Deklaration von Variablen.",
+          "correct": false
+        },
+        {
+          "answer": "Python benötigt eine Typangabe bei der Deklaration, während Java Variablen dynamisch typisiert.",
+          "correct": false
+        },
+        {
+          "answer": "In Java und Python werden Variablen ohne Typangabe deklariert und der Typ wird zur Laufzeit bestimmt.",
+          "correct": false
+        },
+        {
+          "answer": "Java ist dynamisch typisiert und Python statisch, daher muss der Typ in Python vorher bekannt sein.",
+          "correct": false
+        },
+        {
+          "answer": "Der Typ einer Variablen in Java kann nach der Deklaration geändert werden, in Python ist dies nicht möglich.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage über Variablen in Python ist korrekt?",
+      "options": [
+        {
+          "answer": "Eine Variable in Python ist ein Name für einen Speicherort, der Daten eines bestimmten Typs enthält.",
+          "correct": true
+        },
+        {
+          "answer": "Variablen in Python müssen vor ihrer Verwendung immer mit einem Datentyp deklariert werden.",
+          "correct": false
+        },
+        {
+          "answer": "In Python können Variablen ihren Typ während der Laufzeit des Programms nicht ändern.",
+          "correct": false
+        },
+        {
+          "answer": "Der Wert einer Variablen in Python kann im Laufe eines Programms nicht verändert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Globale Variablen in Python können nicht innerhalb von Funktionen verändert werden.",
+          "correct": false
+        },
+        {
+          "answer": "In Python können Variablen ohne Initialisierung verwendet werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welchen Datentyp hat eine Variable in Python, die mit einer Ganzzahl initialisiert wird?",
+      "options": [
+        { "answer": "int", "correct": true },
+        { "answer": "float", "correct": false },
+        { "answer": "str", "correct": false },
+        { "answer": "bool", "correct": false },
+        { "answer": "list", "correct": false },
+        { "answer": "dict", "correct": false }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf die Verwendung des Schlüsselworts 'final' in Java zu?",
+      "options": [
+        {
+          "answer": "Eine mit 'final' deklarierte Variable kann nach ihrer Initialisierung nicht mehr verändert werden.",
+          "correct": true
+        },
+        {
+          "answer": "Das Schlüsselwort 'final' in Java erlaubt es, den Wert einer Variable zur Laufzeit zu ändern.",
+          "correct": false
+        },
+        {
+          "answer": "'final' wird verwendet, um eine Variable als global zu deklarieren.",
+          "correct": false
+        },
+        {
+          "answer": "Eine 'final' Variable in Java kann mehrere Werte gleichzeitig annehmen.",
+          "correct": false
+        },
+        {
+          "answer": "Das Schlüsselwort 'final' macht eine Variable zu einer Funktion.",
+          "correct": false
+        },
+        {
+          "answer": "'final' in Java bedeutet, dass die Variable nur innerhalb einer Methode gültig ist.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welchen Wert hat die Variable 'a' nach Ausführung des folgenden Python-Codes: a = 5; a = 'Hallo'; a = 3.14?",
+      "options": [
+        {
+          "answer": "Der Wert ist 5.",
+          "correct": false
+        },
+        {
+          "answer": "Der Wert ist 'Hallo'.",
+          "correct": false
+        },
+        {
+          "answer": "Der Wert ist 3.14.",
+          "correct": true
+        },
+        {
+          "answer": "Der Wert ist '3.14'.",
+          "correct": false
+        },
+        {
+          "answer": "Der Wert ist None.",
+          "correct": false
+        },
+        {
+          "answer": "Es gibt einen Fehler im Code.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Was passiert, wenn in Java eine Variable als 'final' deklariert wird?",
+      "options": [
+        {
+          "answer": "Der Wert der Variable kann nach der Initialisierung nicht mehr geändert werden.",
+          "correct": true
+        },
+        {
+          "answer": "Die Variable kann beliebig oft neu zugewiesen werden.",
+          "correct": false
+        },
+        {
+          "answer": "Die Variable wird automatisch als global betrachtet.",
+          "correct": false
+        },
+        {
+          "answer": "Die Variable kann ohne Typdeklaration verwendet werden.",
+          "correct": false
+        },
+        {
+          "answer": "Die Variable wird zu einer Funktion.",
+          "correct": false
+        },
+        {
+          "answer": "Die Variable kann nur innerhalb von Schleifen verwendet werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage über die Verwendung von Variablen in Python ist korrekt?",
+      "options": [
+        {
+          "answer": "In Python müssen Variablen vor ihrer Verwendung immer explizit deklariert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Variablen in Python können Funktionen speichern und diese können dann über die Variable aufgerufen werden.",
+          "correct": true
+        },
+        {
+          "answer": "Der Typ einer Variablen in Python ist statisch und kann nach der Initialisierung nicht geändert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Globale Variablen in Python können nicht innerhalb von Funktionen verändert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Lokale Variablen innerhalb einer Funktion sind auch außerhalb dieser Funktion sichtbar.",
+          "correct": false
+        },
+        {
+          "answer": "Das Schlüsselwort 'global' erlaubt es, innerhalb einer Funktion auf eine globale Variable zu verweisen und diese zu modifizieren.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf die Sichtbarkeit einer lokalen Variablen in Java zu?",
+      "options": [
+        {
+          "answer": "Eine lokale Variable ist innerhalb der gesamten Klasse sichtbar, in der sie deklariert wurde.",
+          "correct": false
+        },
+        {
+          "answer": "Eine lokale Variable ist nur innerhalb der Methode sichtbar, in der sie deklariert wurde.",
+          "correct": true
+        },
+        {
+          "answer": "Eine lokale Variable in Java kann ohne vorherige Deklaration verwendet werden.",
+          "correct": false
+        },
+        {
+          "answer": "Lokale Variablen in Java sind standardmäßig mit dem Wert 'null' initialisiert.",
+          "correct": false
+        },
+        {
+          "answer": "Eine lokale Variable ist überall im Programm sichtbar, sobald sie einmal deklariert wurde.",
+          "correct": false
+        },
+        {
+          "answer": "Der Gültigkeitsbereich einer lokalen Variablen kann durch geschweifte Klammern erweitert werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage über die Verwendung von Variablen in Python trifft zu?",
+      "options": [
+        {
+          "answer": "In Python müssen Variablen vor ihrer Verwendung explizit deklariert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Variablen in Python können dynamisch während der Laufzeit ihren Typ ändern.",
+          "correct": true
+        },
+        {
+          "answer": "Der Typ einer Variablen in Python ist statisch und kann nach der Initialisierung nicht geändert werden.",
+          "correct": false
+        },
+        {
+          "answer": "In Python ist es nicht möglich, Funktionen als Werte von Variablen zu speichern.",
+          "correct": false
+        },
+        {
+          "answer": "Globale Variablen in Python können innerhalb von Funktionen ohne Einschränkungen geändert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Lokale Variablen in Python-Funktionen sind auch außerhalb dieser Funktionen sichtbar.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage über den Gültigkeitsbereich (Scope) einer Variablen in Java ist korrekt?",
+      "options": [
+        {
+          "answer": "Eine lokale Variable in Java ist im gesamten Klassenkörper gültig.",
+          "correct": false
+        },
+        {
+          "answer": "Eine lokale Variable in Java ist nur innerhalb der Methode gültig, in der sie deklariert wurde.",
+          "correct": true
+        },
+        {
+          "answer": "Der Gültigkeitsbereich einer lokalen Variable in Java kann durch das Schlüsselwort 'global' erweitert werden.",
+          "correct": false
+        },
+        {
+          "answer": "In Java ist eine Variable, die innerhalb einer Schleife deklariert wird, außerhalb dieser Schleife gültig.",
+          "correct": false
+        },
+        {
+          "answer": "Eine statische Variable in Java ist nur innerhalb der Klasse gültig, in der sie deklariert wurde.",
+          "correct": false
+        },
+        {
+          "answer": "Eine Instanzvariable in Java ist für alle Instanzen der Klasse global gültig.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf die Veränderlichkeit von Variablen in Python und Java zu?",
+      "options": [
+        {
+          "answer": "In Python können Variablen ihren Typ zur Laufzeit ändern, während in Java der Typ einer Variablen nach der Deklaration feststeht.",
+          "correct": true
+        },
+        {
+          "answer": "Sowohl in Python als auch in Java können Variablen ihren Typ nach der Deklaration nicht ändern.",
+          "correct": false
+        },
+        {
+          "answer": "In Java können Variablen ihren Typ zur Laufzeit ändern, während in Python der Typ einer Variablen nach der Deklaration feststeht.",
+          "correct": false
+        },
+        {
+          "answer": "Der Typ einer Variablen in Python wird erst bei der Kompilierung festgelegt, ähnlich wie in Java.",
+          "correct": false
+        },
+        {
+          "answer": "Python erlaubt keine Typänderungen für Variablen, während Java dynamische Typisierung unterstützt.",
+          "correct": false
+        },
+        {
+          "answer": "In Python wird der Typ einer Variablen durch die Zuweisung bestimmt und kann sich ändern, in Java muss der Typ vorab definiert werden und bleibt konstant.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage über die Lebensdauer und den Geltungsbereich einer in Python definierten Variablen ist korrekt?",
+      "options": [
+        {
+          "answer": "Eine in einer Funktion definierte Variable ist global sichtbar und kann außerhalb der Funktion verwendet werden.",
+          "correct": false
+        },
+        {
+          "answer": "Eine außerhalb einer Funktion definierte Variable kann nicht innerhalb der Funktion verwendet werden.",
+          "correct": false
+        },
+        {
+          "answer": "Eine globale Variable, die außerhalb einer Funktion definiert wurde, kann innerhalb der Funktion verwendet werden.",
+          "correct": true
+        },
+        {
+          "answer": "Eine lokale Variable, die innerhalb einer Funktion definiert wurde, ist auch außerhalb dieser Funktion sichtbar.",
+          "correct": false
+        },
+        {
+          "answer": "Eine lokale Variable kann ihren Wert nach dem Funktionsaufruf beibehalten und außerhalb der Funktion weiterverwendet werden.",
+          "correct": false
+        },
+        {
+          "answer": "Eine globale Variable kann innerhalb einer Funktion ohne das Schlüsselwort 'global' verändert werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage über die Gültigkeit von Variablen in Java trifft zu?",
+      "options": [
+        {
+          "answer": "Eine Variable ist im gesamten Programm gültig, sobald sie deklariert wurde.",
+          "correct": false
+        },
+        {
+          "answer": "Eine Variable ist nur innerhalb des Blocks gültig, in dem sie deklariert wurde.",
+          "correct": true
+        },
+        {
+          "answer": "Eine Variable, die innerhalb einer Schleife deklariert wurde, kann außerhalb dieser Schleife verwendet werden.",
+          "correct": false
+        },
+        {
+          "answer": "Eine Variable, die außerhalb von Blöcken deklariert wird, ist lokal und nur in Funktionen gültig.",
+          "correct": false
+        },
+        {
+          "answer": "Eine Variable, die als 'final' deklariert wird, kann in anderen Blöcken re-deklariert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Eine Variable, die in einer Methode deklariert wird, ist nur in dieser Methode gültig.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage trifft auf die Deklaration einer Variablen in Java zu?",
+      "options": [
+        {
+          "answer": "Eine Variable in Java kann ohne Angabe eines Typs deklariert werden.",
+          "correct": false
+        },
+        {
+          "answer": "Bei der Deklaration einer Variablen in Java muss der Typ explizit angegeben werden.",
+          "correct": true
+        },
+        {
+          "answer": "Eine Variable in Java kann nach ihrer Deklaration ihren Typ ändern.",
+          "correct": false
+        },
+        {
+          "answer": "Eine Variable in Java wird immer als 'final' deklariert.",
+          "correct": false
+        },
+        {
+          "answer": "In Java ist es erlaubt, eine Variable mehrmals im gleichen Scope zu deklarieren.",
+          "correct": false
+        },
+        {
+          "answer": "Eine deklarierte Variable in Java kann ohne Initialisierung verwendet werden.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche Aussage über den Gültigkeitsbereich (Scope) einer Variablen in Java ist korrekt?",
+      "options": [
+        {
+          "answer": "Eine lokale Variable in Java ist nur innerhalb der Methode gültig, in der sie deklariert wurde.",
+          "correct": true
+        },
+        {
+          "answer": "Eine lokale Variable in Java ist im gesamten Programm gültig, sobald sie deklariert wurde.",
+          "correct": false
+        },
+        {
+          "answer": "In Java ist der Gültigkeitsbereich einer Variablen unabhängig von Blöcken und Methoden.",
+          "correct": false
+        },
+        {
+          "answer": "Eine lokale Variable in Java kann außerhalb ihres Blocks durch das Schlüsselwort 'global' zugänglich gemacht werden.",
+          "correct": false
+        },
+        {
+          "answer": "Der Gültigkeitsbereich einer Klassenvariablen in Java erstreckt sich auf alle Instanzen der Klasse.",
+          "correct": true
+        },
+        {
+          "answer": "Eine lokale Variable in Java, die innerhalb einer Schleife deklariert wird, ist auch außerhalb der Schleife gültig.",
+          "correct": false
+        }
+      ]
+    }
+  ]
+}

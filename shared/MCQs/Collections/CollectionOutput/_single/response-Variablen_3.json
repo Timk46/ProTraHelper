@@ -1,0 +1,31 @@
+{
+  "question": "Welche Aussage trifft auf die Lebensdauer einer lokalen Variablen in Java zu?",
+  "answers": [
+    {
+      "answer": "Eine lokale Variable ist während der gesamten Laufzeit des Programms verfügbar.",
+      "correct": false
+    },
+    {
+      "answer": "Eine lokale Variable ist nur innerhalb der Methode verfügbar, in der sie deklariert wurde.",
+      "correct": true
+    },
+    {
+      "answer": "Eine lokale Variable kann außerhalb ihres Blocks durch den Klassennamen referenziert werden.",
+      "correct": false
+    },
+    {
+      "answer": "Eine lokale Variable wird automatisch als 'final' deklariert.",
+      "correct": false
+    },
+    {
+      "answer": "Eine lokale Variable behält ihren Wert, auch wenn die Methode beendet wird.",
+      "correct": false
+    },
+    {
+      "answer": "Eine lokale Variable kann ohne Initialisierung verwendet werden.",
+      "correct": false
+    }
+  ],
+  "description": "Lokale Variablen in Java sind nur innerhalb des Blocks sichtbar, in dem sie deklariert wurden, und werden nicht außerhalb dieses Gültigkeitsbereichs (Scope) gespeichert.",
+  "score": 3
+}

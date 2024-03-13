@@ -43,7 +43,6 @@ const tracer = new LangChainTracer({
   client
 });
 
-
 // change to accessing sensitive data from .env(?)
 const llmConfig = {
   modelName: 'gpt-4-1106-preview', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
@@ -212,7 +211,13 @@ Zu den Merkmalen einer gut konstruierten MCQ gehören eindeutige und relevante F
 4. Distraktoren sollen herausfordernd, aber nicht verwirrend oder irreführend sein, um Klarheit zu bewahren.
 5. Sie sollten verschiedene häufige Missverständnisse abdecken, um das Verständnis gründlich zu testen."""
 ---
-Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Objektorientierte und Funktionale Programmierung". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen thematisch dazu passen.
+Hier eine Liste bereits existierender Multiple Choice Questions, welche nicht widerholt werden dürfen.
+Es ist verboten, die bereits existierenden Fragen nur etwas umformuliert erneut vorzuschlagen.
+---
+Bereits existierende Fragen: {questions}.
+---
+Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Objektorientierte und Funktionale Programmierung". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions mit dem Wissen daraus beantwortet werden können sollen.
+Die MCQs müssen aber nicht ausschließlich aus dem Transkript generiert werden, sie dürfen auch aus dem allgemeinen Wissen zu den Themen generiert werden.
 Der thematische Teil der objektorientierten Programmierung wird hier anhand der Programmiersprache Java gelehrt. Der thematische Teil der funktionalen Programmierung hingegen eher anhand der Programmiersprache Python.
 Beziehe dich immer auf das konkrete Konzept, welches als übergeordnetes Thema dienen soll zu welchem die Fragestellung und die dazugehörigen Antwortmöglichkeiten erstellt werden sollen.
 Es ist verboten, bereits existierenden Multiple Choice Questions erneut vorzuschlagen. Benutze in den Antwortmöglichkeiten keine Aufzählungen verschiedener Optionen und nutze maximal 2 Sätze. Benutze unbedingt immer die deutsche Sprache.
@@ -224,8 +229,7 @@ thematisch verwandter Kontext: {context}
 Anzahl an Antwortmöglichkeiten: {options}
 ---
 Konzept, welches als übergeordnetes Thema dienen soll: {concept}
----
-Bereits existierende Fragen: {questions}.
+
 ---
 format instructions: {format_instructions}
 `
@@ -306,13 +310,20 @@ export class McqCreationService {
   private otherOptions : { [question: string]: string[] } = {};
   private askedQuestions: { [concept: string]: McqGenerationDTO[] } = {};
   private mcqToEvaluate: { [question: string]: string[] } = {};
+  private mcqs: { questions: McqGenerationDTO[] } = { questions: [] };
   constructor(private jsonLoaderService : JsonLoaderService) {
     this.pgVectorStore = this.initPgVectorStore();
     this.folderPath = path.join(__dirname, '..', '..', '..', '..', '..', 'shared', 'transcripts');
 
   }
 
-  private addQuestionAndOptions(concept: string, question: string, options: string[]) {
+  /** adds a question and options to the askedQuestions object
+   *
+   * @param concept
+   * @param question
+   * @param options
+   */
+  private addQuestionAndOptions(concept: string, question: string, options: Answer[]) {
     if (!(concept in this.askedQuestions)) {
       this.askedQuestions[concept] = [];
     }
@@ -320,24 +331,36 @@ export class McqCreationService {
     const questionExists = this.askedQuestions[concept].some(mcq => mcq.question === question);
 
     if (!questionExists) {
-      const mcqOptions = options.map(option => ({ answer: option, isCorrect: false }));
+      const mcqOptions = options ? options.map(option => ({ answer: option.answer, isCorrect: option.isCorrect })) : [];
       this.askedQuestions[concept].push({ question: question, answers: mcqOptions });
     }
 
   }
 
+  /** adds a question to the askedQuestions object to prevent regenerating duplicates
+   *
+   * @param concept
+   * @param question
+   */
   private addQuestion(concept: string, question: string) {
-  if (!(concept in this.askedQuestions)) {
-    this.askedQuestions[concept] = [];
+    if (!(concept in this.askedQuestions)) {
+      this.askedQuestions[concept] = [];
+    }
+
+    const questionExists = this.askedQuestions[concept].some(mcq => mcq.question === question);
+
+    if (!questionExists) {
+      this.askedQuestions[concept].push({ question: question, answers: [] });
+    }
   }
 
-  const questionExists = this.askedQuestions[concept].some(mcq => mcq.question === question);
-
-  if (!questionExists) {
-    this.askedQuestions[concept].push({ question: question, answers: [] });
-  }
-  }
-
+  /** replaces an option in the askedQuestions object to prevent regenerating duplicates
+   *
+   * @param concept
+   * @param question
+   * @param oldOption
+   * @param newOption
+   */
   private replaceOption(concept: string, question: string, oldOption: string, newOption: string) {
   if (concept in this.askedQuestions) {
     this.askedQuestions[concept].forEach((mcq: McqGenerationDTO) => {
@@ -348,6 +371,12 @@ export class McqCreationService {
   }
   }
 
+  /** adds options to the question in the askedQuestions object to prevent regenerating duplicates
+   *
+   * @param concept
+   * @param question
+   * @param options
+   */
   private addOptionsToQuestion(concept: string, question: string, options: string[]) {
   if (concept in this.askedQuestions) {
     const mcq = this.askedQuestions[concept].find(mcq => mcq.question === question);
@@ -384,8 +413,8 @@ export class McqCreationService {
     return concept.replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss');
   }
 
-  /**
-   * this function manages to get all necessary text files as complete context for answering the question
+  /** this function gets all necessary text files (transcripts)
+   *
    * @param concept
    * @returns document of the concept if it matches
    */
@@ -620,6 +649,7 @@ export class McqCreationService {
 
   }
 
+
   /** Called when only  concept and number of options is entered into the frontend
    * @param concept
    * @param options
@@ -628,16 +658,16 @@ export class McqCreationService {
   async getQuestionAndAnswers(concept: string, options: number) :Promise<McqGenerationDTO> {
     console.log("concept: ", concept)
     console.log("otherOptions: ", options)
+    console.log("askedquestions = undefined?: ", this.askedQuestions[concept] === undefined)
 
-  this.jsonLoaderService.loadJson(concept).subscribe((mcqs: { questions: McqGenerationDTO[] }) => {
-    mcqs.questions.forEach((mcq: McqGenerationDTO) => {
-      if(mcq.answers)
-      {
-        this.addQuestionAndOptions(concept, mcq.question, mcq.answers.map(answer => answer.answer));
-      }
-    });
-  });
-    let questions = this.askedQuestions[concept].map(mcq => mcq.question);
+
+    this.mcqs = await this.jsonLoaderService.loadJson(concept);
+
+    this.mcqs.questions.forEach(mcq => {
+      this.addQuestionAndOptions(concept, mcq.question, mcq.answers);
+    })
+
+
 
     // parser for formatting the output in the desired way
     const parser = StructuredOutputParser.fromZodSchema(
@@ -658,8 +688,7 @@ export class McqCreationService {
     const completeContext = formatDocumentsAsString(await (await this.pgVectorStore).similaritySearch(concept, 10));
     const transcript = await this.getFileFromFolder(concept);
 
-    questions = this.askedQuestions[concept].map(mcq => mcq.question);
-    console.log("loaded questions:", questions);
+    console.log("loaded questions:", this.askedQuestions[concept].map(mcq => mcq.question));
     if(!(transcript === null)) {
       console.log("result with concept context is fired")
 
@@ -670,7 +699,7 @@ export class McqCreationService {
           context: () => completeContext,
           completeContext: () => completeContext,
           transcript: () => transcript,
-          questions: () => questions,
+          questions: () => this.askedQuestions[concept].map(mcq => mcq.question),
           format_instructions: () => parser.getFormatInstructions(),
         },
         PromptTemplate.fromTemplate(questionAndAnswerPrompt),
@@ -678,17 +707,18 @@ export class McqCreationService {
         parser,
       ]).invoke({callbacks: [tracer]});
 
-      this.addQuestionAndOptions(concept, result.question, result.answers.map(answer => answer.answer));
+      this.addQuestionAndOptions(concept, result.question, result.answers);
 
       return result;
     } else {
+      const completeContext2 = formatDocumentsAsString(await (await this.pgVectorStore).similaritySearch(concept, 20));
       console.log("result without concept fired:");
         const result2 = await RunnableSequence.from([
           {
             concept: () => concept,
             options: () => options,
-            //completeContext: () => completeContext,
-            questions: () => questions,
+            completeContext: () => completeContext2,
+            questions: () => this.askedQuestions[concept].map(mcq => mcq.question),
             //otherOptions: () => this.chosenOptions[concept],
             format_instructions: () => parser.getFormatInstructions(),
           },
@@ -697,7 +727,7 @@ export class McqCreationService {
           parser,
         ]).invoke({callbacks: [tracer]});
 
-        this.addQuestionAndOptions(concept, result2.question, result2.answers.map(answer => answer.answer));
+        this.addQuestionAndOptions(concept, result2.question, result2.answers);
 
 
         return result2;
@@ -790,7 +820,7 @@ export class McqCreationService {
     ]).invoke({callbacks: [tracer]});
     console.log("result: ", result)
 
-    this.addQuestionAndOptions(concept, result.question, result.answers.map(answer => answer.answer));
+    this.addQuestionAndOptions(concept, result.question, result.answers);
 
 
     return result;

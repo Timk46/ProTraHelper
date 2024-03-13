@@ -1,0 +1,13 @@
+{
+  "question": "Welche der folgenden Anweisungen in Java definiert und initialisiert eine Variable innerhalb eines Blocks und weist ihr einen Wert zu?",
+  "answers": [
+    { "answer": "int zahl = 5;", "correct": true },
+    { "answer": "int zahl == 5;", "correct": false },
+    { "answer": "int zahl = 5", "correct": false },
+    { "answer": "zahl = 5;", "correct": false },
+    { "answer": "int zahl = '5';", "correct": false },
+    { "answer": "int number = 5;", "correct": false }
+  ],
+  "description": "In Java werden Variablen innerhalb eines Blocks mit dem Typ, gefolgt von einem Variablennamen und einem Zuweisungsoperator, definiert und initialisiert. Der Wert wird nach dem Zuweisungsoperator angegeben und die Anweisung mit einem Semikolon abgeschlossen.",
+  "score": 2
+}

@@ -1,0 +1,31 @@
+{
+  "question": "Welche Aussage über die Deklaration und Initialisierung von Variablen in Java ist korrekt?",
+  "answers": [
+    {
+      "answer": "Eine Variable in Java muss bei der Deklaration nicht sofort initialisiert werden.",
+      "correct": true
+    },
+    {
+      "answer": "In Java können Variablen ohne Angabe eines Typs deklariert werden.",
+      "correct": false
+    },
+    {
+      "answer": "Das Schlüsselwort 'final' erlaubt es, den Wert einer Variable nachträglich zu ändern.",
+      "correct": false
+    },
+    {
+      "answer": "Eine Variable vom Typ 'int' kann in Java mit einem String initialisiert werden.",
+      "correct": false
+    },
+    {
+      "answer": "Variablen in Java können nur innerhalb von Methoden deklariert werden.",
+      "correct": false
+    },
+    {
+      "answer": "Das Schlüsselwort 'final' in Java deklariert eine Variable als Konstante, die nicht verändert werden kann.",
+      "correct": true
+    }
+  ],
+  "description": "Die Deklaration und Initialisierung von Variablen in Java folgt strengen Regeln, einschließlich der Typisierung und der optionalen Verwendung des Schlüsselworts 'final' für Konstanten.",
+  "score": 3
+}

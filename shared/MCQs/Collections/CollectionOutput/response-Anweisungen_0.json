@@ -1,0 +1,13 @@
+{
+  "question": "Welche der folgenden Anweisungen in Java führt zu einer Kompilierungsfehler?",
+  "answers": [
+    { "answer": "int x = 5; x = x + 1;", "correct": false },
+    { "answer": "int x = 5; x += 1;", "correct": false },
+    { "answer": "int x = 5; x++;", "correct": false },
+    { "answer": "int x = 5; ++x;", "correct": false },
+    { "answer": "int x = 5; x =+ 1;", "correct": true },
+    { "answer": "int x = 5; x = x - 1;", "correct": false }
+  ],
+  "description": "In Java müssen Anweisungen korrekt formatiert sein und der Syntax der Sprache folgen. Ein häufiger Fehler ist die Verwechslung von Zuweisungs- und arithmetischen Operatoren.",
+  "score": 2
+}

@@ -1,0 +1,45 @@
+{
+  "info": {
+    "_postman_id": "eeb7ef24-91b4-4ff7-9254-6ada1fb25dd7",
+    "name": "Funktionen",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "29455336"
+  },
+  "item": [
+    {
+      "name": "Funktionen",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImcwMzA1MTkiLCJmaXJzdE5hbWUiOiJjYXNVU0VSIiwibGFzdE5hbWUiOiJVbmlTaWVnZW4iLCJpZCI6MTUsImdsb2JhbFJvbGUiOiJTVFVERU5UIiwiaWF0IjoxNzA5NzI2OTAzLCJleHAiOjE3MTAzMzE3MDN9.LSe6t9i6x3oJl2xvs0H1OsIzD8bIIxzmUEjXkxjgajU",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/mcqcreation/questionAndAnswers?concept=Funktionen&options=6",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["mcqcreation", "questionAndAnswers"],
+          "query": [
+            {
+              "key": "concept",
+              "value": "Funktionen"
+            },
+            {
+              "key": "options",
+              "value": "6"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

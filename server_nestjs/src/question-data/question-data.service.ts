@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable prettier/prettier */
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -127,7 +128,7 @@ export class QuestionDataService {
 
     /**
      * Retrieves the newest user answer for a specific question and user.
-     * 
+     *
      * @param questionId - The ID of the question.
      * @param userId - The ID of the user.
      * @returns A promise that resolves to a UserAnswerDataDTO object representing the newest user answer.

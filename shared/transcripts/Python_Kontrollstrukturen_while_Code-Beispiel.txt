@@ -1,5 +1,5 @@
 wollten Sie ganz oben weitermachen, schon mit dem nächsten Schritt in unserem Programm.
-Sehr gut. Was ist denn eine Wildschleife? Ja, können Sie direkt weitermachen.
+Sehr gut. Was ist denn eine While-schleife? Ja, können Sie direkt weitermachen.
 Genau, also die Notation vielleicht einmal ist zu sagen, while, deutsch sowas wie,
 solange wie, solange wie und dann kommt hier irgendwas, was ein bulscher Ausdruck sein muss,
 also der entweder true oder false ist und solange dieser bulsche Ausdruck auf true steht,
@@ -42,13 +42,13 @@ Aber wir müssen natürlich hier irgendwie davon ausgehen, dass die Spielerkarte
 viele sind wie die Preiskarten, sonst funktioniert das Spiel nicht. Ja. Sehr gut, genau. Also das
 muss sich immer noch als wahr evaluieren, wenn noch eine Karte übrig ist, sonst spielen wir die
 letzte nicht mehr. Sehr gut. Genau. Und dann, okay, ich gehe mal eben in meinen Temp, nur damit wir
-diese Wild Schleife ein bisschen besser verstehen. Was können wir hier mal machen? Als Beispiel A
+diese while Schleife ein bisschen besser verstehen. Was können wir hier mal machen? Als Beispiel A
 gleich 0 und A kleiner 4 und Print A und A gleich A plus 1 oder plus gleich 1. Einfach damit wir einmal
-sehen, wie diese Wild Schleife systematisch funktioniert. Ich habe eine Variable A, die
+sehen, wie diese while Schleife systematisch funktioniert. Ich habe eine Variable A, die
 sitzt auf 0. Ich überprüfe, solange die kleiner als 4 ist, drucke ich das aus und erhöhe die um
 einen und zähle damit halt von 0 bis 3 hoch. Würde ich kleiner gleich schreiben, zähle ich bis 4 hoch.
 Ja, macht Sinn. Also das bedeutet einfach nur, wiederhole, was hier steht, solange wie diese
-Bedingung wahr ist. Aufpassen bei Wild Schleifen, dass man hier eine Bedingung hinschreibt, die sich
+Bedingung wahr ist. Aufpassen bei while Schleifen, dass man hier eine Bedingung hinschreibt, die sich
 auch irgendwie ändert, damit das nicht für immer weiterläuft und damit sich aufhängt so ein Programm.
 Aber ansonsten ist das genau die Art, wie das funktioniert. Ja.
 Hier direkt? Das kann man noch kürzer schreiben.
@@ -69,7 +69,7 @@ das Schöne ist, ich kann jetzt hier tatsächlich schreiben, wie wollten wir es 
 Preiskarte gleich Preiskarten.pop, was zwei Effekte hat. Die Preiskarten, dann lösche ich das letzte
 Element, aber ich kriege den Wert dieses letzten Elements unter Wert der Preiskarte geschrieben.
 Vielleicht gehe ich mal kurz in mein Tem und zeige einmal, wie das aussieht. Also das hier
-kann ich jetzt eigentlich direkt mal so zeigen. Also, was mache ich hier? Ich habe die Wildschleife
+kann ich jetzt eigentlich direkt mal so zeigen. Also, was mache ich hier? Ich habe die While-schleife
 so gelassen, wie wir sie hatten, nämlich solange wie die Länge der Preiskarten noch größer
 gleich 1 ist, mache ich dieses Preiskartenpop, was eben zwei Effekte hat. Löschen des letzten
 Elementes der Liste und Rückgabe des Wertes des letzten Elements der Liste. Und die beiden, dann

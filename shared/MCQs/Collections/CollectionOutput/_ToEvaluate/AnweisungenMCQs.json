@@ -1,0 +1,671 @@
+{
+  "questions": [
+    {
+      "question": "Welche der folgenden Anweisungen in Java führt zu einer Kompilierungsfehler?",
+      "options": [
+        {
+          "answer": "int x = 5; x = x + 1;"
+        },
+        {
+          "answer": "int x = 5; x += 1;"
+        },
+        {
+          "answer": "int x = 5; x++;"
+        },
+        {
+          "answer": "int x = 5; ++x;"
+        },
+        {
+          "answer": "int x = 5; x =+ 1;"
+        },
+        {
+          "answer": "int x = 5; x = x - 1;"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Python führt zu einer Syntaxfehlermeldung?",
+      "options": [
+        {
+          "answer": "x = x + 1"
+        },
+        {
+          "answer": "if x > 5: print(x)"
+        },
+        {
+          "answer": "while True: break"
+        },
+        {
+          "answer": "6 = x"
+        },
+        {
+          "answer": "for i in range(10): continue"
+        },
+        {
+          "answer": "print('Hello World')"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Python führt zu einer Zuweisung des Wertes einer arithmetischen Berechnung an eine Variable?",
+      "options": [
+        {
+          "answer": "ergebnis = 3 * 7"
+        },
+        {
+          "answer": "3 * 7 = ergebnis"
+        },
+        {
+          "answer": "ergebnis == 3 * 7"
+        },
+        {
+          "answer": "3 * 7 == ergebnis"
+        },
+        {
+          "answer": "ergebnis := 3 * 7"
+        },
+        {
+          "answer": "setze ergebnis auf 3 mal 7"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Java definiert korrekt einen Block, der mehrere Anweisungen enthält?",
+      "options": [
+        {
+          "answer": "if (bedingung) { anweisung1; anweisung2; }"
+        },
+        {
+          "answer": "if bedingung: anweisung1; anweisung2;"
+        },
+        {
+          "answer": "if (bedingung) anweisung1; anweisung2;"
+        },
+        {
+          "answer": "{ anweisung1; anweisung2; }"
+        },
+        {
+          "answer": "if (bedingung) anweisung1; else anweisung2;"
+        },
+        {
+          "answer": "if [bedingung] { anweisung1; anweisung2; }"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Java definiert eine Variable und weist ihr direkt einen berechneten Wert zu?",
+      "options": [
+        {
+          "answer": "int ergebnis = 3 * (10 / 2);"
+        },
+        {
+          "answer": "int ergebnis == 3 * (10 / 2);"
+        },
+        {
+          "answer": "int ergebnis; ergebnis = 3 * (10 / 2);"
+        },
+        {
+          "answer": "int ergebnis = 3 * 10 / 2;"
+        },
+        {
+          "answer": "ergebnis = 3 * (10 / 2);"
+        },
+        {
+          "answer": "int 3 * (10 / 2) = ergebnis;"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Python führt zu einer Zuweisung des Wertes einer arithmetischen Berechnung an eine Variable und ist syntaktisch korrekt?",
+      "options": [
+        {
+          "answer": "x = 5 + 7"
+        },
+        {
+          "answer": "5 + 7 = x"
+        },
+        {
+          "answer": "x plus 5 gleich 7"
+        },
+        {
+          "answer": "x == 5 + 7"
+        },
+        {
+          "answer": "x = 5 plus 7"
+        },
+        {
+          "answer": "x = '5 + 7'"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen beschreibt korrekt das Konzept einer Anweisung in der Programmierung?",
+      "options": [
+        {
+          "answer": "Eine Anweisung ist ein Teil eines Programms, der eine spezifische Operation ausführt und mit einem Strichpunkt endet."
+        },
+        {
+          "answer": "Anweisungen sind Kommentare im Code, die dem Entwickler helfen, den Code zu verstehen."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Fragestellung, die das Programm dem Benutzer stellt."
+        },
+        {
+          "answer": "Anweisungen sind Variablendeklarationen, die den Typ und den Namen einer Variablen festlegen."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Sammlung von Klassen und Methoden, die zusammen ein Programm bilden."
+        },
+        {
+          "answer": "Anweisungen sind die Bausteine eines Programms, die aus Ausdrücken und Zuweisungen bestehen können und durch Strichpunkte getrennt sind."
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Aussagen beschreibt korrekt das Konzept einer Anweisung in der Programmierung?",
+      "options": [
+        {
+          "answer": "Eine Anweisung ist eine Instruktion, die vom Interpreter oder Compiler in Binärcode umgesetzt und ausgeführt wird."
+        },
+        {
+          "answer": "Anweisungen sind Kommentare im Code, die dem Entwickler helfen, den Code zu verstehen."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Variable, die dazu dient, Daten während der Programmausführung zu speichern."
+        },
+        {
+          "answer": "Anweisungen sind die Namen von Funktionen, die in einem Programm aufgerufen werden können."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Bedingung, die immer zu einem Wahrheitswert evaluiert wird."
+        },
+        {
+          "answer": "Anweisungen sind die Dokumentationsteile eines Programms, die außerhalb des Quellcodes existieren."
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Aussagen beschreibt korrekt das Konzept einer Anweisung in der Programmierung?",
+      "options": [
+        {
+          "answer": "Eine Anweisung ist eine Instruktion, die vom Interpreter oder Compiler ausgeführt wird und zwischen Strichpunkten notiert ist."
+        },
+        {
+          "answer": "Anweisungen sind Kommentare im Code, die dem Entwickler helfen, den Code zu verstehen."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Sammlung von Variablen, die zur Speicherung von Daten verwendet werden."
+        },
+        {
+          "answer": "Anweisungen sind die Namen von Funktionen, die in einem Programm aufgerufen werden."
+        },
+        {
+          "answer": "Eine Anweisung ist ein Ausdruck, der keinen Wert berechnet und nicht vom Interpreter ausgeführt wird."
+        },
+        {
+          "answer": "Anweisungen sind spezielle Schlüsselwörter in einer Programmiersprache, die keine Aktionen auslösen."
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Python führt zu einer Zuweisung eines berechneten Wertes an eine Variable?",
+      "options": [
+        {
+          "answer": "x = 42"
+        },
+        {
+          "answer": "if x == 42: pass"
+        },
+        {
+          "answer": "print('Der Wert ist', x)"
+        },
+        {
+          "answer": "x == 42"
+        },
+        {
+          "answer": "while x < 42: x += 1"
+        },
+        {
+          "answer": "x, y = 42, 23"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Java führt zu einer Kompilierungsfehler?",
+      "options": [
+        {
+          "answer": "int x = 5; x = x + 1;"
+        },
+        {
+          "answer": "int x = 5; x += 1;"
+        },
+        {
+          "answer": "int x = 5; x++;"
+        },
+        {
+          "answer": "int x = 5; ++x;"
+        },
+        {
+          "answer": "int x = 5; x =+ 1;"
+        },
+        {
+          "answer": "int x = 5; x = x - 1;"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Python führt zu einer Syntaxfehlermeldung?",
+      "options": [
+        {
+          "answer": "x = x + 1"
+        },
+        {
+          "answer": "if x > 5: print(x)"
+        },
+        {
+          "answer": "while True: break"
+        },
+        {
+          "answer": "6 = x"
+        },
+        {
+          "answer": "for i in range(10): continue"
+        },
+        {
+          "answer": "print('Hello World')"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Aussagen beschreibt korrekt das Konzept einer Anweisung in der Programmierung?",
+      "options": [
+        {
+          "answer": "Eine Anweisung ist eine Instruktion, die vom Interpreter oder Compiler in Binärcode umgesetzt und ausgeführt wird."
+        },
+        {
+          "answer": "Anweisungen sind Kommentare im Code, die dem Entwickler helfen, den Code zu verstehen."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Variable, die dazu dient, Daten während der Programmausführung zu speichern."
+        },
+        {
+          "answer": "Anweisungen sind ausschließlich arithmetische Operationen, die in einem Programm ausgeführt werden."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Sammlung von Funktionen, die zusammen ein Programm bilden."
+        },
+        {
+          "answer": "Anweisungen sind die physischen Komponenten eines Computers, die zur Ausführung von Programmen benötigt werden."
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Aussagen beschreibt korrekt das Konzept einer Anweisung in der Programmierung?",
+      "options": [
+        {
+          "answer": "Eine Anweisung ist eine Instruktion, die vom Interpreter oder Compiler ausgeführt wird und keinen Wert zurückliefert."
+        },
+        {
+          "answer": "Eine Anweisung ist ein Ausdruck, der immer einen Wert berechnet und diesen Wert einer Variablen zuweist."
+        },
+        {
+          "answer": "Eine Anweisung ist ein Teil des Codes, der eine spezifische Operation ausführt und durch einen Strichpunkt abgeschlossen wird."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Sammlung von Blöcken, die in geschweiften Klammern eingeschlossen sind und mehrere Anweisungen enthalten können."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Bedingung in einer if-Struktur, die entscheidet, ob ein Block von Code ausgeführt wird oder nicht."
+        },
+        {
+          "answer": "Eine Anweisung ist ein Kommentar im Code, der dazu dient, den Code für den Entwickler verständlicher zu machen."
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Python führt zu einem Syntaxfehler?",
+      "options": [
+        {
+          "answer": "x = 10"
+        },
+        {
+          "answer": "print(x)"
+        },
+        {
+          "answer": "if x > 10:"
+        },
+        {
+          "answer": "6 = x"
+        },
+        {
+          "answer": "x == x + 1"
+        },
+        {
+          "answer": "x += 1"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen beschreibt korrekt das Konzept einer Anweisung in der Programmierung?",
+      "options": [
+        {
+          "answer": "Eine Anweisung ist ein Teil des Codes, der eine spezifische Operation ausführt und mit einem Strichpunkt endet."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Fragestellung, die der Compiler beantwortet, um den Code auszuführen."
+        },
+        {
+          "answer": "Anweisungen sind Kommentare im Code, die dem Entwickler helfen, den Code zu verstehen."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Sammlung von Variablen, die zur Speicherung von Daten verwendet werden."
+        },
+        {
+          "answer": "Anweisungen sind die grafischen Elemente einer Benutzeroberfläche, die mit dem Code interagieren."
+        },
+        {
+          "answer": "Eine Anweisung ist ein Ausdruck, der einen Wert berechnet, aber keine Seiteffekte hat."
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Java definiert korrekt eine lokale Variable innerhalb einer Methode und weist ihr einen Wert zu?",
+      "options": [
+        {
+          "answer": "int zahl = 5;"
+        },
+        {
+          "answer": "zahl := 5;"
+        },
+        {
+          "answer": "int 5 = zahl;"
+        },
+        {
+          "answer": "5 = int zahl;"
+        },
+        {
+          "answer": "integer zahl = 5;"
+        },
+        {
+          "answer": "set zahl to 5;"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Java definiert und initialisiert eine Variable innerhalb eines Blocks und weist ihr einen Wert zu?",
+      "options": [
+        {
+          "answer": "int zahl = 5;"
+        },
+        {
+          "answer": "int zahl == 5;"
+        },
+        {
+          "answer": "int zahl = 5"
+        },
+        {
+          "answer": "zahl = 5;"
+        },
+        {
+          "answer": "int zahl = '5';"
+        },
+        {
+          "answer": "int number = 5;"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Java definiert und initialisiert eine Variable innerhalb eines Blocks und weist ihr einen Wert zu?",
+      "options": [
+        {
+          "answer": "int zahl = 5;"
+        },
+        {
+          "answer": "int zahl == 5;"
+        },
+        {
+          "answer": "int zahl = 5"
+        },
+        {
+          "answer": "zahl = 5;"
+        },
+        {
+          "answer": "int zahl; zahl = 5;"
+        },
+        {
+          "answer": "int nummer = 5.0;"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen beschreibt korrekt das Konzept einer Anweisung in der Programmierung?",
+      "options": [
+        {
+          "answer": "Eine Anweisung ist eine Instruktion, die vom Interpreter oder Compiler in Binärcode umgewandelt und ausgeführt wird."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Sammlung von Daten, die von einem Programm verarbeitet werden."
+        },
+        {
+          "answer": "Eine Anweisung ist ein Fehler im Code, der während der Kompilierung auftritt."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Variable, die zur Speicherung von Daten verwendet wird."
+        },
+        {
+          "answer": "Eine Anweisung ist ein Kommentar im Code, der zur Dokumentation dient."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Bedingung, die in einer if-Struktur verwendet wird, um den Kontrollfluss zu steuern."
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Python ist korrekt, um einer Variablen 'a' den Wert 10 zuzuweisen und anschließend den Wert zu erhöhen?",
+      "options": [
+        {
+          "answer": "a = 10; a = a + 1"
+        },
+        {
+          "answer": "a == 10; a++"
+        },
+        {
+          "answer": "a := 10; a += 1"
+        },
+        {
+          "answer": "10 = a; a += 1"
+        },
+        {
+          "answer": "a <- 10; increment(a)"
+        },
+        {
+          "answer": "set(a, 10); a = a + 1"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Python führt zu einer Zuweisung des Wertes einer arithmetischen Berechnung an eine Variable?",
+      "options": [
+        {
+          "answer": "ergebnis = 3 * 7"
+        },
+        {
+          "answer": "3 * 7 = ergebnis"
+        },
+        {
+          "answer": "ergebnis == 3 * 7"
+        },
+        {
+          "answer": "3 * 7 == ergebnis"
+        },
+        {
+          "answer": "ergebnis := 3 * 7"
+        },
+        {
+          "answer": "setze ergebnis auf 3 mal 7"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Java definiert korrekt einen Block, der mehrere Anweisungen enthält?",
+      "options": [
+        {
+          "answer": "if (bedingung) { anweisung1; anweisung2; }"
+        },
+        {
+          "answer": "if bedingung: anweisung1; anweisung2;"
+        },
+        {
+          "answer": "if (bedingung) anweisung1; anweisung2;"
+        },
+        {
+          "answer": "{ anweisung1; anweisung2; }"
+        },
+        {
+          "answer": "if (bedingung) anweisung1; else anweisung2;"
+        },
+        {
+          "answer": "if [bedingung] { anweisung1; anweisung2; }"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Java definiert eine Variable und weist ihr direkt einen berechneten Wert zu?",
+      "options": [
+        {
+          "answer": "int ergebnis = 3 * (10 / 2);"
+        },
+        {
+          "answer": "int ergebnis == 3 * (10 / 2);"
+        },
+        {
+          "answer": "int ergebnis; ergebnis = 3 * (10 / 2);"
+        },
+        {
+          "answer": "int ergebnis = 3 * 10 / 2;"
+        },
+        {
+          "answer": "ergebnis = 3 * (10 / 2);"
+        },
+        {
+          "answer": "int 3 * (10 / 2) = ergebnis;"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Python führt zu einer Zuweisung des Wertes einer arithmetischen Berechnung an eine Variable und ist syntaktisch korrekt?",
+      "options": [
+        {
+          "answer": "x = 5 + 7"
+        },
+        {
+          "answer": "5 + 7 = x"
+        },
+        {
+          "answer": "x plus 5 gleich 7"
+        },
+        {
+          "answer": "x == 5 + 7"
+        },
+        {
+          "answer": "x = 5 plus 7"
+        },
+        {
+          "answer": "x = '5 + 7'"
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen beschreibt korrekt das Konzept einer Anweisung in der Programmierung?",
+      "options": [
+        {
+          "answer": "Eine Anweisung ist ein Teil eines Programms, der eine spezifische Operation ausführt und mit einem Strichpunkt endet."
+        },
+        {
+          "answer": "Anweisungen sind Kommentare im Code, die dem Entwickler helfen, den Code zu verstehen."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Fragestellung, die das Programm dem Benutzer stellt."
+        },
+        {
+          "answer": "Anweisungen sind Variablendeklarationen, die den Typ und den Namen einer Variablen festlegen."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Sammlung von Klassen und Methoden, die zusammen ein Programm bilden."
+        },
+        {
+          "answer": "Anweisungen sind die Bausteine eines Programms, die aus Ausdrücken und Zuweisungen bestehen können und durch Strichpunkte getrennt sind."
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Aussagen beschreibt korrekt das Konzept einer Anweisung in der Programmierung?",
+      "options": [
+        {
+          "answer": "Eine Anweisung ist eine Instruktion, die vom Interpreter oder Compiler in Binärcode umgesetzt und ausgeführt wird."
+        },
+        {
+          "answer": "Anweisungen sind Kommentare im Code, die dem Entwickler helfen, den Code zu verstehen."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Variable, die dazu dient, Daten während der Programmausführung zu speichern."
+        },
+        {
+          "answer": "Anweisungen sind die Namen von Funktionen, die in einem Programm aufgerufen werden können."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Bedingung, die immer zu einem Wahrheitswert evaluiert wird."
+        },
+        {
+          "answer": "Anweisungen sind die Dokumentationsteile eines Programms, die außerhalb des Quellcodes existieren."
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Aussagen beschreibt korrekt das Konzept einer Anweisung in der Programmierung?",
+      "options": [
+        {
+          "answer": "Eine Anweisung ist eine Instruktion, die vom Interpreter oder Compiler ausgeführt wird und zwischen Strichpunkten notiert ist."
+        },
+        {
+          "answer": "Anweisungen sind Kommentare im Code, die dem Entwickler helfen, den Code zu verstehen."
+        },
+        {
+          "answer": "Eine Anweisung ist eine Sammlung von Variablen, die zur Speicherung von Daten verwendet werden."
+        },
+        {
+          "answer": "Anweisungen sind die Namen von Funktionen, die in einem Programm aufgerufen werden."
+        },
+        {
+          "answer": "Eine Anweisung ist ein Ausdruck, der keinen Wert berechnet und nicht vom Interpreter ausgeführt wird."
+        },
+        {
+          "answer": "Anweisungen sind spezielle Schlüsselwörter in einer Programmiersprache, die keine Aktionen auslösen."
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen in Python führt zu einer Zuweisung eines berechneten Wertes an eine Variable?",
+      "options": [
+        {
+          "answer": "x = 42"
+        },
+        {
+          "answer": "if x == 42: pass"
+        },
+        {
+          "answer": "print('Der Wert ist', x)"
+        },
+        {
+          "answer": "x == 42"
+        },
+        {
+          "answer": "while x < 42: x += 1"
+        },
+        {
+          "answer": "x, y = 42, 23"
+        }
+      ]
+    }
+  ]
+}

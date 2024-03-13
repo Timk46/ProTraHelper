@@ -1,0 +1,31 @@
+{
+  "question": "Welche der folgenden Aussagen beschreibt korrekt das Konzept einer Anweisung in der Programmierung?",
+  "answers": [
+    {
+      "answer": "Eine Anweisung ist eine Instruktion, die vom Interpreter oder Compiler ausgeführt wird und keinen Wert zurückliefert.",
+      "correct": false
+    },
+    {
+      "answer": "Eine Anweisung ist ein Ausdruck, der immer einen Wert berechnet und diesen Wert einer Variablen zuweist.",
+      "correct": false
+    },
+    {
+      "answer": "Eine Anweisung ist ein Teil des Codes, der eine spezifische Operation ausführt und durch einen Strichpunkt abgeschlossen wird.",
+      "correct": true
+    },
+    {
+      "answer": "Eine Anweisung ist eine Sammlung von Blöcken, die in geschweiften Klammern eingeschlossen sind und mehrere Anweisungen enthalten können.",
+      "correct": false
+    },
+    {
+      "answer": "Eine Anweisung ist eine Bedingung in einer if-Struktur, die entscheidet, ob ein Block von Code ausgeführt wird oder nicht.",
+      "correct": false
+    },
+    {
+      "answer": "Eine Anweisung ist ein Kommentar im Code, der dazu dient, den Code für den Entwickler verständlicher zu machen.",
+      "correct": false
+    }
+  ],
+  "description": "Anweisungen sind die Grundbausteine eines Programms, die definieren, welche Operationen vom Computer ausgeführt werden sollen. Sie enden typischerweise mit einem Strichpunkt und können Ausdrücke, Zuweisungen oder Kontrollstrukturen beinhalten.",
+  "score": 2
+}

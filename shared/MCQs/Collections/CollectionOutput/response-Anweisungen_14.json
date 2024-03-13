@@ -1,0 +1,13 @@
+{
+  "question": "Welche der folgenden Anweisungen in Java definiert korrekt eine lokale Variable innerhalb einer Methode und weist ihr einen Wert zu?",
+  "answers": [
+    { "answer": "int zahl = 5;", "correct": true },
+    { "answer": "zahl := 5;", "correct": false },
+    { "answer": "int 5 = zahl;", "correct": false },
+    { "answer": "5 = int zahl;", "correct": false },
+    { "answer": "integer zahl = 5;", "correct": false },
+    { "answer": "set zahl to 5;", "correct": false }
+  ],
+  "description": "In Java werden lokale Variablen innerhalb von Methoden definiert, indem zuerst der Datentyp und dann der Variablenname gefolgt von einem Gleichheitszeichen und dem Wert angegeben wird.",
+  "score": 2
+}

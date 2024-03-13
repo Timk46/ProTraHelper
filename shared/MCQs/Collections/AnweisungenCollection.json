@@ -1,0 +1,45 @@
+{
+  "info": {
+    "_postman_id": "f1e3531c-3904-486c-93e6-11fa898fb2e4",
+    "name": "Anweisungen",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "29455336"
+  },
+  "item": [
+    {
+      "name": "Anweisungen",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImcwMzA1MTkiLCJmaXJzdE5hbWUiOiJjYXNVU0VSIiwibGFzdE5hbWUiOiJVbmlTaWVnZW4iLCJpZCI6MTUsImdsb2JhbFJvbGUiOiJTVFVERU5UIiwiaWF0IjoxNzA5NzI2OTAzLCJleHAiOjE3MTAzMzE3MDN9.LSe6t9i6x3oJl2xvs0H1OsIzD8bIIxzmUEjXkxjgajU",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/mcqcreation/questionAndAnswers?concept=Anweisungen&options=6",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["mcqcreation", "questionAndAnswers"],
+          "query": [
+            {
+              "key": "concept",
+              "value": "Anweisungen"
+            },
+            {
+              "key": "options",
+              "value": "6"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

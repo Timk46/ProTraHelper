@@ -4,7 +4,7 @@ import { McqCreationService } from './mcqcreation.service';
 import * as fs from 'fs';
 import * as util from 'util';
 import * as path from 'path';
-import { appendFile } from 'fs';
+
 
 interface McqEvaluation {
   correct?: boolean;

@@ -1,6 +1,325 @@
 {
   "questions": [
     {
+      "question": "Was passiert mit den Variablen, die innerhalb eines Anweisungsblocks in einer Programmiersprache definiert wurden, nachdem der Block ausgeführt wurde?",
+      "options": [
+        {
+          "answer": "Die Variablen bleiben im gesamten Programm verfügbar und können außerhalb des Blocks verwendet werden.",
+          "correct": false
+        },
+        {
+          "answer": "Die Variablen werden gelöscht und der Speicher, den sie belegt haben, wird freigegeben.",
+          "correct": true
+        },
+        {
+          "answer": "Die Variablen werden automatisch zu globalen Variablen und sind im gesamten Programm sichtbar.",
+          "correct": false
+        },
+        {
+          "answer": "Die Variablen werden in den nächst umschließenden Block übertragen und dort weiterhin verwendet.",
+          "correct": false
+        },
+        {
+          "answer": "Die Variablen werden nur gelöscht, wenn der Garbage Collector der Sprache aktiviert ist.",
+          "correct": false
+        },
+        {
+          "answer": "Die Variablen bleiben bestehen, aber ihr Wert wird auf den Standardwert des entsprechenden Datentyps zurückgesetzt.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Codezeilen zeigt die korrekte Verwendung des ternären Operators in Java?",
+      "options": [
+        {
+          "answer": "int result = (a > b) ? a : b;",
+          "correct": true
+        },
+        {
+          "answer": "int result = if (a > b) a; else b;",
+          "correct": false
+        },
+        {
+          "answer": "int result = a > b ? a : b;",
+          "correct": true
+        },
+        {
+          "answer": "int result = a > b ? a;",
+          "correct": false
+        },
+        {
+          "answer": "int result = a > b : a ? b;",
+          "correct": false
+        },
+        {
+          "answer": "int result = (a > b) a : b;",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Aussagen beschreibt korrekt die Verwendung des Modulo-Operators in der Programmierung?",
+      "options": [
+        {
+          "answer": "Der Modulo-Operator gibt das Produkt zweier Zahlen zurück.",
+          "correct": false
+        },
+        {
+          "answer": "Der Modulo-Operator wird mit einem Prozentzeichen dargestellt und liefert den Rest einer Division.",
+          "correct": true
+        },
+        {
+          "answer": "Der Modulo-Operator kann nur auf ganze Zahlen angewendet werden und nicht auf Fließkommazahlen.",
+          "correct": true
+        },
+        {
+          "answer": "Der Modulo-Operator erhöht den Wert einer Variablen um eins.",
+          "correct": false
+        },
+        {
+          "answer": "Der Modulo-Operator teilt eine Zahl durch eine andere und gibt das Ergebnis der Division zurück.",
+          "correct": false
+        },
+        {
+          "answer": "Der Modulo-Operator wird verwendet, um zu überprüfen, ob eine Zahl gerade oder ungerade ist.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Aussagen beschreibt korrekt die Verwendung des Inkrement-Operators in der Programmierung?",
+      "options": [
+        {
+          "answer": "Der Inkrement-Operator ++ erhöht den Wert einer Variablen um eins und kann sowohl in präfix- als auch in postfix-Form verwendet werden.",
+          "correct": true
+        },
+        {
+          "answer": "Der Inkrement-Operator -- wird verwendet, um den Wert einer Variablen um eins zu erhöhen.",
+          "correct": false
+        },
+        {
+          "answer": "Die Verwendung des Inkrement-Operators in der Form x++ gibt den inkrementierten Wert von x zurück, bevor x erhöht wird.",
+          "correct": false
+        },
+        {
+          "answer": "Wenn der Inkrement-Operator als Präfix verwendet wird, wie in ++x, wird x nach der Verwendung des Operators erhöht.",
+          "correct": false
+        },
+        {
+          "answer": "Der Inkrement-Operator kann nur auf Variablen vom Typ Integer angewendet werden.",
+          "correct": true
+        },
+        {
+          "answer": "Die Verwendung des Inkrement-Operators in der Form ++x gibt den Wert von x zurück, nachdem er um eins erhöht wurde.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen beschreibt korrekt die Verwendung des Zuweisungsoperators in Verbindung mit einem arithmetischen Operator?",
+      "options": [
+        {
+          "answer": "Der Ausdruck 'x *= 2' ist eine Kurzform von 'x = x * 2' und verdoppelt den Wert von x.",
+          "correct": true
+        },
+        {
+          "answer": "Die Anweisung 'x =+ 1' erhöht den Wert von x um eins.",
+          "correct": false
+        },
+        {
+          "answer": "Der Ausdruck 'x %= 3' setzt den Wert von x auf den Rest der Division von x durch 3.",
+          "correct": true
+        },
+        {
+          "answer": "Die Anweisung 'x -= y' subtrahiert den Wert von y von x und speichert das Ergebnis in x.",
+          "correct": true
+        },
+        {
+          "answer": "Der Ausdruck 'x /= y' teilt x durch y und weist das Ergebnis einer neuen Variablen x zu.",
+          "correct": true
+        },
+        {
+          "answer": "Die Anweisung 'x ++' ist äquivalent zu 'x = x + 1' und erhöht x um eins.",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Anweisungen beschreibt korrekt die Verwendung des ternären Operators in der Programmierung?",
+      "options": [
+        {
+          "answer": "Der ternäre Operator wird mit einem Fragezeichen und einem Doppelpunkt verwendet, um eine verkürzte if-else-Struktur darzustellen.",
+          "correct": true
+        },
+        {
+          "answer": "Ein ternärer Operator benötigt vier Operanden, um eine Bedingung zu evaluieren und einen Wert zurückzugeben.",
+          "correct": false
+        },
+        {
+          "answer": "Der ternäre Operator kann nur in Schleifenkonstrukten verwendet werden, um bedingte Anweisungen zu vereinfachen.",
+          "correct": false
+        },
+        {
+          "answer": "In der Anweisung 'x = (a > b) ? a : b;', wird 'a' zugewiesen, wenn die Bedingung 'a > b' wahr ist, andernfalls wird 'b' zugewiesen.",
+          "correct": true
+        },
+        {
+          "answer": "Der ternäre Operator ist eine Erweiterung des binären Operators und benötigt daher drei Variablen auf der rechten Seite des Zuweisungsoperators.",
+          "correct": false
+        },
+        {
+          "answer": "Ternäre Operatoren werden in der Programmierung verwendet, um Schleifen zu erstellen und zu steuern.",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Codezeilen stellt eine korrekte Anweisung in einer Programmiersprache dar?",
+      "options": [
+        {
+          "answer": "x = x + 1;",
+          "correct": true
+        },
+        {
+          "answer": "x + 1;",
+          "correct": true
+        },
+        {
+          "answer": "if (x > 0) x = x - 1;",
+          "correct": true
+        },
+        {
+          "answer": "while x > 0: x -= 1",
+          "correct": true
+        },
+        {
+          "answer": "return x * 2;",
+          "correct": true
+        },
+        {
+          "answer": "print 'Der Wert von x ist: ' + x;",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Codezeilen stellt eine gültige Anweisung dar, die eine Variable x inkrementiert und den neuen Wert zuweist?",
+      "options": [
+        {
+          "answer": "x = x + 1;",
+          "correct": true
+        },
+        {
+          "answer": "x++;",
+          "correct": true
+        },
+        {
+          "answer": "++x;",
+          "correct": true
+        },
+        {
+          "answer": "x += 1;",
+          "correct": true
+        },
+        {
+          "answer": "x =+ 1;",
+          "correct": false
+        },
+        {
+          "answer": "x - 1;",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Codezeilen stellt eine gültige Anweisung dar, die eine Variable 'a' deklariert und ihr den Wert einer arithmetischen Berechnung zuweist?",
+      "options": [
+        {
+          "answer": "int a = 7 + 3;",
+          "correct": true
+        },
+        {
+          "answer": "a := 5 * (2 + 3);",
+          "correct": false
+        },
+        {
+          "answer": "declare a as integer set to 4 minus 2;",
+          "correct": false
+        },
+        {
+          "answer": "a <- 8 / 2;",
+          "correct": false
+        },
+        {
+          "answer": "set a to 9 % 4;",
+          "correct": false
+        },
+        {
+          "answer": "int a; a = 6 + 2;",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Codezeilen stellt eine gültige Anweisung dar, die eine Variable 'num' deklariert und ihr den Wert einer arithmetischen Berechnung zuweist?",
+      "options": [
+        {
+          "answer": "int num = 5 * (3 + 2);",
+          "correct": true
+        },
+        {
+          "answer": "num = 5 * (3 + 2);",
+          "correct": true
+        },
+        {
+          "answer": "int num; num = 5 * (3 + 2);",
+          "correct": true
+        },
+        {
+          "answer": "num := 5 * (3 + 2);",
+          "correct": false
+        },
+        {
+          "answer": "5 * (3 + 2) = int num;",
+          "correct": false
+        },
+        {
+          "answer": "declare num as integer set to 5 times (3 plus 2);",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "question": "Welche der folgenden Codezeilen stellt eine korrekte Anweisung dar, die eine Variable 'counter' deklariert und ihr den Wert einer arithmetischen Berechnung zuweist?",
+      "options": [
+        {
+          "answer": "int counter = 10 * (2 + 3);",
+          "correct": true
+        },
+        {
+          "answer": "counter == 10 * (2 + 3);",
+          "correct": false
+        },
+        {
+          "answer": "counter = 10 * 2 + 3;",
+          "correct": true
+        },
+        {
+          "answer": "int counter; counter == 10 * (2 + 3);",
+          "correct": false
+        },
+        {
+          "answer": "declare counter as integer set to 10 times (2 plus 3);",
+          "correct": false
+        },
+        {
+          "answer": "counter := 10 * (2 + 3);",
+          "correct": false
+        }
+      ]
+    },
+    {
       "question": "Welche der folgenden Aussagen beschreibt korrekt das Verhalten einer if-Anweisung in einem Programm?",
       "options": [
         {

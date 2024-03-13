@@ -1,3 +1,5 @@
+/* eslint-disable prefer-const */
+/* eslint-disable prettier/prettier */
 import { PrismaService } from '@/prisma/prisma.service';
 import { QuestionDTO } from '@DTOs/question.dto';
 import { taskOverviewElementDTO } from '@DTOs/taskOverview.dto';
@@ -8,7 +10,7 @@ export class TaskOverviewService {
     constructor(private prisma : PrismaService) {}
 
     async getTaskOverviewDataForConceptNode(conceptNode_id: number, user_id: number) : Promise<taskOverviewElementDTO[]> {
-        
+
         //schaue in die question tabelle und hole alle fragen mit angegebener conceptNodeId. Dabei soll jede originId nur einmal vorkommen und die neuste version der Frage sein
         const questions = await this.prisma.question.findMany({
             where: {
@@ -37,7 +39,7 @@ export class TaskOverviewService {
 
         //get the attemt count and the progress for each question id by looking at the user_answer table
         let taskOverviewData : taskOverviewElementDTO[] = [];
-        
+
         //get the attempt count for each question
         for(let question of questions) {
             let attemptCount = await this.prisma.userAnswer.count({
@@ -74,7 +76,7 @@ export class TaskOverviewService {
                     }
                 }
             }
-            
+
             let progress = (bestScore / question.score)*100;
 
             taskOverviewData.push({

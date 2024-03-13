@@ -1,0 +1,31 @@
+{
+  "question": "Welche Aussage trifft auf die Sichtbarkeit einer lokalen Variablen in Java zu?",
+  "answers": [
+    {
+      "answer": "Eine lokale Variable ist innerhalb der gesamten Klasse sichtbar, in der sie deklariert wurde.",
+      "correct": false
+    },
+    {
+      "answer": "Eine lokale Variable ist nur innerhalb der Methode sichtbar, in der sie deklariert wurde.",
+      "correct": true
+    },
+    {
+      "answer": "Eine lokale Variable in Java kann ohne vorherige Deklaration verwendet werden.",
+      "correct": false
+    },
+    {
+      "answer": "Lokale Variablen in Java sind standardmäßig mit dem Wert 'null' initialisiert.",
+      "correct": false
+    },
+    {
+      "answer": "Eine lokale Variable ist überall im Programm sichtbar, sobald sie einmal deklariert wurde.",
+      "correct": false
+    },
+    {
+      "answer": "Der Gültigkeitsbereich einer lokalen Variablen kann durch geschweifte Klammern erweitert werden.",
+      "correct": false
+    }
+  ],
+  "description": "Lokale Variablen in Java sind nur im Block sichtbar, in dem sie deklariert wurden, und nicht außerhalb davon.",
+  "score": 2
+}

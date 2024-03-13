@@ -28,27 +28,3 @@ Zum Beispiel hier ist es okay, wenn wir hier Variable C nehmen, zum Beispiel in 
 Das ist okay.
 Auch hier, das ist auch okay.
 Aber hier zum Beispiel hatten wir schon A deklariert als Integer-Variable.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Okay.
-Vielen Dank.
