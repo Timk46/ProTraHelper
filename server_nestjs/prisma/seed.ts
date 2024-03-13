@@ -7,6 +7,7 @@ import { WorkSheet, utils } from 'xlsx';
 import * as fs from 'fs';
 import { last, of } from 'rxjs';
 import e from 'express';
+import { seedMCQ } from './seedMCQ';
 
 const prisma = new PrismaClient();
 
@@ -2641,7 +2642,12 @@ async function createFilesRNI() {
       type: 'VIDEO',
     },
   });
+
+
+  seedMCQ();
 }
+
+
 
 main()
   .catch((e) => {
