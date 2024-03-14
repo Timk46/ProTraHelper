@@ -2644,7 +2644,7 @@ async function createFilesRNI() {
   });
 
 
-  seedMCQ();
+  //seedMCQ();
 }
 
 
