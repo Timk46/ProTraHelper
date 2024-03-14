@@ -88,7 +88,7 @@ export class QuestionDataService {
             let mcOptionData : MCOptionDTO = {
                 id: mcOption.id,
                 text: mcOption.text,
-                isCorrect: mcOption.is_correct
+                correct: mcOption.is_correct
             }
 
             mcOptions.push(mcOptionData);
@@ -220,13 +220,13 @@ export class QuestionDataService {
                 data: {
                     id: mcOption.id,
                     text: mcOption.text,
-                    is_correct: mcOption.isCorrect
+                    is_correct: mcOption.correct
                 }
             });
             if(!newOption) {
                 throw new Error('Option not created');
             }
-            return {...newOption, isCorrect: newOption.is_correct};
+            return {...newOption, correct: newOption.is_correct};
         });
         newOptions = await Promise.all(optionPromises);
         return newOptions;
@@ -292,7 +292,7 @@ export class QuestionDataService {
 
         return {...newMcQuestionOption,
                 mcOption: {...newMcQuestionOption.option,
-                          isCorrect: newMcQuestionOption.option.is_correct},
+                          correct: newMcQuestionOption.option.is_correct},
                 mcQuestion: {...newMcQuestionOption.question,
                             shuffleOptions: newMcQuestionOption.question.shuffleoptions,
                           }};
@@ -336,10 +336,10 @@ export class QuestionDataService {
 
             //generate user score
             for(const mcOption of mcOptions) {
-                if (mcOption.isCorrect && answerData.userMCAnswer.includes(mcOption.id)) {
+                if (mcOption.correct && answerData.userMCAnswer.includes(mcOption.id)) {
                     userScore += scorePerOption;
                 }
-                else if (!mcOption.isCorrect && !answerData.userMCAnswer.includes(mcOption.id)) {
+                else if (!mcOption.correct && !answerData.userMCAnswer.includes(mcOption.id)) {
                     userScore += scorePerOption;
                 }
             }

@@ -131,7 +131,6 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
 
 
   //Method to be called when values will change
-
   onChanges(): void {
     this.Questiontitle = this.taskForm.get('title')?.value;
     this.taskForm.get('text')?.valueChanges.subscribe(val => {
@@ -157,14 +156,14 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
     if(this.taskForm.get('numberOfOptions')?.value < 0) {
       this.taskForm.get('numberOfOptions')?.setValue(0);
     }
-   const options = this.taskForm.get('options') as FormArray;
+    const options = this.taskForm.get('options') as FormArray;
     const numberOfOptions = this.taskForm.get('numberOfOptions')?.value;
 
     if(numberOfOptions < 0 || numOfOptions === null){
       this.taskForm.get('numberOfOptions')?.setValue(0);
       return;
     }
-  // Überprüfen, ob numberOfOptions größer als 6 ist
+    // Überprüfen, ob numberOfOptions größer als 6 ist
     if (numberOfOptions > 6) {
       // Setzen Sie numberOfOptions auf 6, wenn es größer als 6 ist
       this.taskForm.get('numberOfOptions')?.setValue(6);
@@ -177,15 +176,13 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
       if (options.length < numberOfOptions) {
         options.push(new FormGroup({
           text: new FormControl('', Validators.required),
-          isCorrect: new FormControl(false, Validators.required)
+          correct: new FormControl(false, Validators.required)
         }));
       } else {
         options.removeAt(options.length - 1);
       }
 
-  }
-
-
+    }
   }
 
   getOptions(): FormArray {
@@ -194,7 +191,10 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
 
   clearTitle() {
     this.taskForm.get('title')?.setValue('');
+  }
 
+  titleAndNumberOfOptionsFilled(): boolean {
+    return this.taskForm.get('title')?.value != null && this.taskForm.get('numberOfOptions')?.value != null;
   }
 
   generateTitle() {
@@ -230,13 +230,13 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
   }
 
   updateIsSC() {
-    if(this.getOptions().controls.filter(control => control.get('isCorrect')?.value === true).length > 1) {
+    if(this.getOptions().controls.filter(control => control.get('correct')?.value === true).length > 1) {
       this.mcDisabled = true;
       this.taskForm.get("type")?.setValue("MC");
-    } else if (this.getOptions().controls.filter(control => control.get('isCorrect')?.value === true).length === 1) {
+    } else if (this.getOptions().controls.filter(control => control.get('correct')?.value === true).length === 1) {
       this.mcDisabled = false;
       this.taskForm.get("type")?.setValue("SC");
-    } else if (this.getOptions().controls.filter(control => control.get('isCorrect')?.value === true).length === 0) {
+    } else if (this.getOptions().controls.filter(control => control.get('correct')?.value === true).length === 0) {
       this.mcDisabled = false;
       this.taskForm.get("type")?.setValue("");
     }
@@ -278,7 +278,7 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
             for (let i = 0; i < this.getOptions().length; i++) {
               const option = (this.getOptions().at(i) as FormGroup);
               option.get('text')?.setValue(answers.answers?.[i].answer);
-              option.get('isCorrect')?.setValue(answers.answers?.[i].correct);
+              option.get('correct')?.setValue(answers.answers?.[i].correct);
 
               this.fetchingStates[i] = false;
             }
@@ -318,8 +318,8 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
               const option = (this.getOptions().at(i) as FormGroup);
               console.log("answeroption: ",answers.answers?.[i].answer)
               option.get('text')?.setValue(answers.answers?.[i].answer);
-              console.log("isCorrect: ",answers.answers?.[i].correct)
-              option.get('isCorrect')?.setValue(answers.answers?.[i].correct);
+              console.log("correct: ",answers.answers?.[i].correct)
+              option.get('correct')?.setValue(answers.answers?.[i].correct);
               this.fetchingStates[i] = false;
 
             }
@@ -333,7 +333,7 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
 
   generateOption(index: number) {
     const option = (this.getOptions().at(index) as FormGroup).get('text')!;
-    const isCorrect = (this.getOptions().at(index) as FormGroup).get('isCorrect')!;
+    const correct = (this.getOptions().at(index) as FormGroup).get('correct')!;
     const opt = option!.value;
     const title = this.taskForm.get('title')?.value
     const concept = this.taskForm.get('conceptName')?.value
@@ -354,9 +354,9 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
         (answer: Answer) => {
           console.log("answer: ",answer)
           console.log("answer: ",answer.answer)
-          console.log("isCorrect", answer.correct)
+          console.log("correct", answer.correct)
           option.setValue(answer.answer);
-          isCorrect.setValue(answer.correct);
+          correct.setValue(answer.correct);
           this.fetchingStates[index] = false;
         }
       )
@@ -374,12 +374,14 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
   }
 
   clearAllFields() {
+
     this.taskForm.get('title')?.setValue('');
     this.taskForm.get('description')?.setValue('');
     this.taskForm.get('score')?.setValue('');
     this.taskForm.get('type')?.setValue('');
     this.taskForm.get('options')?.reset();
     this.taskForm.get('conceptName')?.setValue('');
+
   }
 
 
@@ -413,7 +415,7 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
               const option = (this.getOptions().at(i) as FormGroup);
               if(!option.get('text')?.value) {
                 option.get('text')?.setValue(answers[answerIndex].mcq.answers?.[i].answer);
-                option.get('isCorrect')?.setValue(answers[answerIndex].mcq.answers?.[i].correct);
+                option.get('correct')?.setValue(answers[answerIndex].mcq.answers?.[i].correct);
                 answerIndex++;
               }
               this.fetchingStates[i] = false;
@@ -461,13 +463,13 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
   }
 
   getCorrectOptionsCount() {
-    return this.getOptions().value.map((option: { isCorrect: boolean; }) => option.isCorrect).filter((v: number) => v).length;
+    return this.getOptions().value.map((option: { correct: boolean; }) => option.correct).filter((v: number) => v).length;
   }
 
   countCorrectOptions() {
     let correctOptions = 0;
     for (let option of this.mcOptions) {
-      if (option.isCorrect) {
+      if (option.correct) {
         correctOptions++;
       }
     }
@@ -478,11 +480,8 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
   }
 
   onSubmit(): void {
-
+    console.log("taskForm is valid = ",this.taskForm.valid);
     if(this.taskForm.valid) {
-
-
-
       const formQuestionData: QuestionDTO = {
         author: 1, // need to set the author on some kind of user service
         description: this.taskForm.get('description')?.value,
@@ -577,7 +576,7 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
             console.log("evaluation answers: ",answers)
             for (let i = 0; i < this.getOptions().length; i++) {
               const option = (this.getOptions().at(i) as FormGroup);
-              option.get('isCorrect')?.setValue(answers.mcq.answers?.[i].correct as boolean);
+              option.get('correct')?.setValue(answers.mcq.answers?.[i].correct as boolean);
             }
           })
         }

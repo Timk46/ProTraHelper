@@ -51,7 +51,7 @@ export interface MCOptionDTO {
     text: string;
     files?: FileDto[];
     //isCorrect needs to be deleted from the MCOptionDTO that is given to the mc task component, because is shows the correct anwers!
-    isCorrect: boolean;
+    correct: boolean;
     //selected is only used in the mc task component and so it should also be transfered to the MCOptionCheckDTO
     selected?: boolean;
 }
