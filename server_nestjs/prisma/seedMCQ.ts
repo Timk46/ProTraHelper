@@ -36,7 +36,7 @@ export const seedMCQ = async () => {
         //console.log(mcQuestions);
         for (const mcq of question_data) {
             //console.log(mcq);
-            let approved = false;
+            let approved = true; //for testing only!
             if(mcq['approved'] == '1') {
                 approved = true;
             }
@@ -58,7 +58,7 @@ export const seedMCQ = async () => {
                 version: 1,
             }
             mcQuestions.push(question);
-            //console.log(question);
+            console.log(question);
         } 
 
         //Create all mc questions
@@ -70,9 +70,9 @@ export const seedMCQ = async () => {
                 data: {
                     score: data.score,
                     type: data.type,
-                    authorId: data.author,
+                    author: { connect: { id: data.author } },
                     text: data.text,
-                    conceptNodeId: data.concept,
+                    conceptNode: { connect: { id: data.concept } },
                     isApproved: data.isApproved,
                     version: data.version,
                 },
@@ -82,7 +82,7 @@ export const seedMCQ = async () => {
             await prisma.question.update({
                 where: { id: createdQuestion.id },
                 data: { 
-                    originId: createdQuestion.id,
+                    origin: { connect: { id: createdQuestion.id } }, 
                     name: 'Multiple-Choice Frage ' + createdQuestion.id, 
                 },
             });
@@ -95,22 +95,26 @@ export const seedMCQ = async () => {
             const mcQuestion = await prisma.mCQuestion.create({
                 data: {
                     isSC: isSC,
-                    questionId: createdQuestion.id,
+                    question: { connect: { id: createdQuestion.id } },
                 },
             });
 
             //create the options
             for (const option of data.options) {
+                let isCorrect = false;
+                if(option.correct) {
+                    isCorrect = true;
+                }
                 const mcOption = await prisma.mCOption.create({
                     data: {
                         text: option.text,
-                        is_correct: option.correct,
+                        is_correct: isCorrect,
                     },
                 });
                 await prisma.mCQuestionOption.create({
                     data: {
-                        mcQuestionId: mcQuestion.id,
-                        mcOptionId: mcOption.id,
+                        question: { connect: { id: mcQuestion.id } },
+                        option: { connect: { id: mcOption.id } },
                     },
                 });
             }

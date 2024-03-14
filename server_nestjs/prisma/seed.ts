@@ -102,6 +102,7 @@ async function main() {
   createFilesOFP();
   createFilesRNI();
 
+
   const moduleInformatik = await prisma.module.create({
     data: {
       id: 1,
@@ -657,10 +658,16 @@ async function main() {
     },
   });
 
-  // Import Tasks for Excel
   console.log('Importing Tasks from Excel...');
-  const filePathTasks =
-    process.env.FILE_PATH + 'wise2324_OFP_workshop_aufgaben.xlsx';
+  await importProgrammingTasksFromExcel('programmieraufgaben_JACK_SOSE23_WORKSHOP_WISE2324.xlsx', 'Automatisch Import aus Excel: JACK Aufgaben aus SoSe 23 + Workshopsaufgaben aus WiSe 23/24', adminUser.id);
+  await importProgrammingTasksFromExcel('programmieraufgaben_bechtel.xlsx', 'Automatisch Import aus Excel: Aufgaben aus dem TutorKai-Einsatz in Schulen von Herrn Bechtel WiSe 23/24', adminUser.id);
+  await importProgrammingTasksFromExcel('programmieraufgaben_linden.xlsx', 'Automatisch Import aus Excel: ufgaben aus dem TutorKai-Einsatz in Schulen von Frau Linden WiSe 23/244', adminUser.id);
+
+  console.log('Importing Done!');
+}
+
+async function importProgrammingTasksFromExcel(filename: string, description: string, adminUserId: number = 1) {
+  const filePathTasks = process.env.FILE_PATH + filename;
   const workbook = XLSX.readFile(filePathTasks);
 
   const taskSheet: WorkSheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -678,11 +685,10 @@ async function main() {
     const newTask = await prisma.question.create({
       data: {
         name: task.Titel,
-        description:
-          'automated Import from Excel - JACK Tasks from SoSe 2023 and LiveCodingTasks for Exampreperation WiSe2324',
+        description: description,
         score: 100, // this is the max score for all tasks currently (=100%)
         type: 'CodingQuestion',
-        author: { connect: { id: adminUser.id } },
+        author: { connect: { id: adminUserId } },
         text: task.Task,
         conceptNode: { connect: { id: conceptNode.id } },
         isApproved: true,
@@ -727,6 +733,8 @@ async function main() {
       data: { origin: { connect: { id: newTask.id } } },
     });
   }
+
+  await seedMCQ();
 
   console.log('Importing Done!');
 }
@@ -2643,11 +2651,7 @@ async function createFilesRNI() {
     },
   });
 
-
-  //seedMCQ();
 }
-
-
 
 main()
   .catch((e) => {
