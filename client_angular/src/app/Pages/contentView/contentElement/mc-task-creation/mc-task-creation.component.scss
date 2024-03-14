@@ -31,8 +31,8 @@
     }
 
     .half-width-input {
-      margin-left: 45px;
-      width: 48%; // Smaller width for the number of options input
+
+      width: 30%; // Smaller width for the number of options input
       //max-width: 200px; // Restricting the maximum width
     }
   }
@@ -83,4 +83,64 @@ mat-divider {
   justify-content: flex-end;
   margin-right: 40px ;
   width: 25%;
+}
+
+mat-vertical-stepper {
+  width: 80%; /* Adjust as necessary */
+  margin: 0 auto; /* Center the stepper */
+}
+
+.mat-form-field {
+  width: 100%;
+}
+
+.half-width-input {
+      width: 30%; // Smaller width for the number of options input
+      //max-width: 200px; // Restricting the maximum width
+}
+
+.step-content {
+  margin-left: 20px;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.row {
+  gap: 20px;
+  display: flex;
+  flex-direction: row;
+
+  justify-content: space-between;
+}
+
+.row.buttons {
+  justify-content: flex-end;
+}
+
+
+.columns {
+  display: flex;
+  justify-content: space-between;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+}
+/* Button styles */
+button.mat-button {
+  margin: 8px;
+}
+
+.option-group {
+  display: flex;
+  justify-content: space-between;
+}
+
+.option-input {
+  width: 100%;
+  margin-bottom: 16px;
 }
