@@ -25,7 +25,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatStepperModule } from '@angular/material/stepper';
 
 @NgModule({
   imports: [
@@ -55,7 +54,6 @@ import { MatStepperModule } from '@angular/material/stepper';
     MatGridListModule,
     MatTableModule,
     MatSortModule,
-    MatStepperModule,
   ],
   exports: [
     MatButtonModule,
@@ -84,7 +82,6 @@ import { MatStepperModule } from '@angular/material/stepper';
     MatGridListModule,
     MatTableModule,
     MatSortModule,
-    MatStepperModule,
   ],
 })
 export class MaterialModule {}

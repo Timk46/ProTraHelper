@@ -86,7 +86,7 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
   fetchingTitle: boolean = false;
   fetchingStates: boolean[] = [false, false, false, false, false, false];
   Questiontitle: string = "";
-  immediateGeneration: boolean = false;
+
   constructor(
     private questionService : QuestionDataService,
     private dialog: MatDialog,
@@ -379,7 +379,6 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
     this.taskForm.get('score')?.setValue('');
     this.taskForm.get('type')?.setValue('');
     this.taskForm.get('options')?.reset();
-    this.taskForm.get('conceptName')?.setValue('');
   }
 
 

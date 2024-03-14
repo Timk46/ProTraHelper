@@ -24,7 +24,6 @@ interface FlatData {
   answer: string;
   correct: boolean;
   match: number;
-  reasoning: string;
   description: string;
   score: number;
 }
@@ -34,9 +33,6 @@ interface AggregatedData {
     answers: string[];
     corrects: boolean[];
     matches: number[];
-    reasonings: string[];
-    descriptions?: string[];
-    scores?: number[];
   };
 }
 
@@ -54,9 +50,9 @@ export class McqevaluationService {
    *
    * @param filePath
    */
-  async evaluateFromJsonFile(conceptname: string): Promise<void> {
-    const filepath = path.join(this.collectionOutputPath, '_ToEvaluate');
-    const data = await fs.readFile(filepath+'/'+conceptname+'MCQs.json', 'utf-8');
+  async evaluateFromJsonFile(filePath: string): Promise<void> {
+
+    const data = await fs.readFile(filePath, 'utf-8');
     const jsonData = JSON.parse(data);
     const evaluations: McqEvaluations[] = [];
 
@@ -67,13 +63,13 @@ export class McqevaluationService {
       evaluations.push(evaluation);
     }
 
-    const outputPath = path.join(filepath,`${path.basename(filepath, '.json')}_evaluation.json` )
-    await fs.writeFile(outputPath, JSON.stringify(evaluations, null, 2));
+    const evalPath = path.join(__dirname, '..', '..', '..', '..', '..', 'shared', 'MCQs', 'Evaluations',`${path.basename(filePath, '.json')}_evaluation.json` )
+    await fs.writeFile(evalPath, JSON.stringify(evaluations, null, 2));
   }
 
   /** evaluates a collection of MCQs from a directory
    *
-   * @param conceptName
+   * @param directoryPath
    */
   async evaluateFromDirectory(conceptName:string): Promise<void> {
 
@@ -111,11 +107,12 @@ export class McqevaluationService {
 
   /** runs a collection of requests in postman and saves the responses to a folder
    *
-   * @param conceptName
+   * @param folder
+   * @param collectionName
    * @param iterations
    */
-  async runCollection(conceptName: string, iterations: number): Promise<void> {
-    console.log("the collection name: ", conceptName);
+  async runCollection(collectionName: string, iterations: number): Promise<void> {
+    console.log("the collection name: ", collectionName);
     const collections = await fs.readdir(this.collectionsPath);
     console.log("the collections: ", collections);
     const collectionFiles = collections.filter(fileName => path.extname(fileName) === '.json');
@@ -124,12 +121,12 @@ export class McqevaluationService {
 
     const existingFiles = await fs.readdir(this.collectionOutputPath);
     // Filter the list to only include files that match the response file pattern
-    const responseFiles = existingFiles.filter(fileName => fileName.startsWith(`response-${conceptName}`) && fileName.endsWith('.json'));
+    const responseFiles = existingFiles.filter(fileName => fileName.startsWith(`response-${collectionName}`) && fileName.endsWith('.json'));
     // Set the count to the number of existing response files
     this.count = responseFiles.length;
     await new Promise((resolve, reject) => {
       newman.run({
-        collection: require(path.join(this.collectionsPath, `${conceptName}Collection.json`)),
+        collection: require(path.join(this.collectionsPath, `${collectionName}Collection.json`)),
         reporters: ['cli', 'json'],
         iterationCount: 9,
         reporter: {
@@ -209,7 +206,7 @@ export class McqevaluationService {
   }
 
   /** removes the correct field from the options in the combined JSON files (preparation for automatic evaluation)
-   * @param conceptName
+   *
    */
   async removeCorrectFieldFromOptions(conceptName:string): Promise<void> {
 
@@ -220,6 +217,7 @@ export class McqevaluationService {
     if (!f.existsSync(outputFolder)) {
       f.mkdirSync(outputFolder, { recursive: true });
     }
+
 
     // iterate through all files in the folder
     const files = f.readdirSync(folderPath);
@@ -253,16 +251,18 @@ export class McqevaluationService {
   // TODO: REEASONING MIT INS WORKBOOK?
   /** creates the complete excel workbook from the combined responses (with evaluations in it)
    *
-   * @param conceptname
+   * @param directoryPath
+   * @param evaluationDirectoryPath
+   * @param finalFilePath
    */
-  async createAndTransformWorkbook(conceptname: string): Promise<void> {
+  async createAndTransformWorkbook(collectionName: string): Promise<void> {
     const allData: FlatData[] = [];
 
-    // read data
+    // Einlesen der Daten
     const files = await fs.readdir(path.join(this.collectionOutputPath, `_combined`));
     for (const filename of files) {
       console.log("the filename: ", filename);
-      if (filename.startsWith(`${conceptname}MCQs`)) {
+      if (filename.startsWith(`${collectionName}MCQs`)) {
         const dataPath = path.join(path.join(this.collectionOutputPath, `_combined`), filename);
         const data = JSON.parse(await fs.readFile(dataPath, 'utf-8'));
         console.log("the data: ", data);
@@ -271,6 +271,7 @@ export class McqevaluationService {
         const evaluationData = JSON.parse(await fs.readFile(evaluationDataPath, 'utf-8'));
         console.log("the evaluation data: ", evaluationData);
         const concept = filename.split('MCQ')[0];
+
 
         data['questions'].forEach((question: any, i: number) => {
           // maybe change to question['answers'] due to autogenerated format
@@ -283,7 +284,6 @@ export class McqevaluationService {
               answer: answer['answer'],
               correct: answer['correct'],
               match,
-              reasoning: evaluationData[i]['evaluations'][j]['reasoning'],
               description: question['description'] || '',
               score: question['score'] || 0,
             });
@@ -292,34 +292,32 @@ export class McqevaluationService {
       }
     }
 
-    // aggregate and transform the data for the workbook
+    // aggregate and transform the data for the worksheet
     const aggregatedData: AggregatedData = {};
+
     allData.forEach(item => {
       const key = `${item.concept}-${item.question}`;
       if (!aggregatedData[key]) {
-        aggregatedData[key] = { answers: [], corrects: [], matches: [], reasonings: [], descriptions: [], scores: []};
+        aggregatedData[key] = { answers: [], corrects: [], matches: [] };
       }
       aggregatedData[key].answers.push(item.answer);
       aggregatedData[key].corrects.push(item.correct);
       aggregatedData[key].matches.push(item.match);
-      aggregatedData[key].reasonings.push(item.reasoning);
-      //aggregatedData[key].descriptions.push(item.description);
-      //aggregatedData[key].scores.push(item.score);
     });
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Evaluation');
 
     worksheet.columns = [
-      { header: 'Konzept', key: 'concept', width: 5, font: { bold: true } },
-      { header: 'Frage', key: 'question', width: 20, font: { bold: true } },
-      ...Array.from({ length: 6 }, (_, i) => ({ header: `Antwort ${String.fromCharCode(65 + i)}`, key: `answer${i}` , font: { bold: true }})),
-      ...Array.from({ length: 6 }, (_, i) => ({ header: `Korrekt markiert ${String.fromCharCode(65 + i)}`, key: `correctMarked${i}`, width: 5, font: { bold: true } })),
-      ...Array.from({ length: 6 }, (_, i) => ({ header: `Übereinstimmung ${String.fromCharCode(65 + i)}`, key: `match${i}`, width: 5, font: { bold: true } })),
-      ...Array.from({ length: 6 }, (_, i) => ({ header: `Begründung ${String.fromCharCode(65 + i)}`, key: `reasoning${i}`, width: 5, font: { bold: true } })),
-      { header: 'Gesamtübereinstimmung', key: 'totalMatch', width: 5,font: { bold: true } },
+      { header: 'Konzept', key: 'concept', width: 20 },
+      { header: 'Frage', key: 'question', width: 80},
+      ...Array.from({ length: 6 }, (_, i) => ({ header: `Antwort ${String.fromCharCode(65 + i)}`, key: `answer${i}` })),
+      ...Array.from({ length: 6 }, (_, i) => ({ header: `Korrekt markiert ${String.fromCharCode(65 + i)}`, key: `correctMarked${i}`, width: 5 })),
+      ...Array.from({ length: 6 }, (_, i) => ({ header: `Übereinstimmung ${String.fromCharCode(65 + i)}`, key: `match${i}`, width: 5 })),
+      { header: 'Gesamtübereinstimmung', key: 'totalMatch', width: 5 },
     ];
-    // Add the data to the worksheet rowwise
+
+
     Object.entries(aggregatedData).forEach(([key, value]) => {
     const [concept, ...questionParts] = key.split('-');
     const question = questionParts.join('-');
@@ -327,12 +325,12 @@ export class McqevaluationService {
         concept,
         question,
     };
-    // Add the answers, corrects, reaosonings and matches to the row for all 6 options
+
+
     for (let i = 0; i < 6; i++) {
         row[`answer${i}`] = value.answers[i] || null;
         row[`correctMarked${i}`] = value.corrects[i] ? 1 : 0;
         row[`match${i}`] = value.matches[i] ? 1 : 0;
-        row[`reasoning${i}`] = value.reasonings[i] || null;
     }
 
     // Calculate the total match
@@ -342,7 +340,7 @@ export class McqevaluationService {
     worksheet.addRow(row);
   });
 
-    workbook.xlsx.writeFile(path.join(__dirname, '..', '..', '..', '..', '..', 'shared', 'MCQs', 'Workbooks', `${conceptname}Evaluation.xlsx`));
+    workbook.xlsx.writeFile(path.join(__dirname, '..', '..', '..', '..', '..', 'shared', 'MCQs', 'Workbooks', `${collectionName}Evaluation.xlsx`));
     console.log('Die Daten wurden erfolgreich umgeformt und gespeichert.');
 
   }
