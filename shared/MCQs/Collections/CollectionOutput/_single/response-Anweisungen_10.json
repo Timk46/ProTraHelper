@@ -1,0 +1,31 @@
+{
+  "question": "Welche der folgenden Aussagen beschreibt korrekt das Konzept einer Anweisung in der Programmierung?",
+  "answers": [
+    {
+      "answer": "Eine Anweisung ist eine Instruktion, die vom Interpreter oder Compiler in Binärcode umgesetzt und ausgeführt wird.",
+      "correct": true
+    },
+    {
+      "answer": "Anweisungen sind Kommentare im Code, die dem Entwickler helfen, den Code zu verstehen.",
+      "correct": false
+    },
+    {
+      "answer": "Eine Anweisung ist eine Variable, die dazu dient, Daten während der Programmausführung zu speichern.",
+      "correct": false
+    },
+    {
+      "answer": "Anweisungen sind ausschließlich arithmetische Operationen, die in einem Programm ausgeführt werden.",
+      "correct": false
+    },
+    {
+      "answer": "Eine Anweisung ist eine Sammlung von Funktionen, die zusammen ein Programm bilden.",
+      "correct": false
+    },
+    {
+      "answer": "Anweisungen sind die physischen Komponenten eines Computers, die zur Ausführung von Programmen benötigt werden.",
+      "correct": false
+    }
+  ],
+  "description": "Anweisungen sind die grundlegenden Bausteine eines Programms, die definieren, welche Operationen vom Computer ausgeführt werden sollen.",
+  "score": 2
+}
