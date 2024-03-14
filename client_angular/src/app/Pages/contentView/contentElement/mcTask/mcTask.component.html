@@ -36,7 +36,7 @@
 </div>
 
 <!-- Formative Assessment-Mode -> Do not show correct answers after submit -->
-<div *ngIf="!isSelfAssessment && dataLoaded" class="test content mat-elevation-z8">
+<div *ngIf="!isSelfAssessment && dataLoaded" class="content mat-elevation-z8">
   <!--<app-tinymce [config]="editorConfig" [content]="questionData.text"></app-tinymce>-->
   <h2 class="question-text"><div [innerHTML]="questionData.text"></div></h2>
   <h3>Maximale Punktzahl: {{questionData.score}}</h3>

@@ -102,6 +102,7 @@ async function main() {
   createFilesOFP();
   createFilesRNI();
 
+
   const moduleInformatik = await prisma.module.create({
     data: {
       id: 1,
@@ -727,6 +728,8 @@ async function main() {
       data: { origin: { connect: { id: newTask.id } } },
     });
   }
+
+  await seedMCQ();
 
   console.log('Importing Done!');
 }
@@ -2643,11 +2646,7 @@ async function createFilesRNI() {
     },
   });
 
-
-  //seedMCQ();
 }
-
-
 
 main()
   .catch((e) => {

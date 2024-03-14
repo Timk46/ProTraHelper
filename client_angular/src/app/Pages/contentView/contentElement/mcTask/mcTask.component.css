@@ -43,7 +43,7 @@
   
   .content {
     height: 20h;
-    width: 70vh;
+    width: auto;
     margin: 16px;
     padding: 16px;
   
