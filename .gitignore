@@ -131,3 +131,4 @@ server_nestjs/src/storage/RNI
 
 # Environment variables
 .env
+server_nestjs/.env
