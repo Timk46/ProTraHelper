@@ -7,7 +7,7 @@
   <h2 class="question-text">{{questionData.text}}</h2>
   <div *ngIf="mcQuestion.isSC">
     <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="false" (selectionChange)="onSelectionChange()">
-      <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected, 'selectedCorrect' : option.selected && submitDisabled && option.isCorrect}" [selected]="option.selected">{{option.text}}</mat-list-option>
+      <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected, 'selectedCorrect' : option.selected && submitDisabled && option.correct}" [selected]="option.selected">{{option.text}}</mat-list-option>
     </mat-selection-list>
   </div>   
 
@@ -18,9 +18,9 @@
         [value]="option.id" 
         [ngClass]="{
           'selected' : option.selected, 
-          'selectedCorrect' : option.selected && submitDisabled && option.isCorrect,
-          'selectedIncorrect' : option.selected && submitDisabled && !option.isCorrect,
-          'correctNotSelected' : !option.selected && submitDisabled && option.isCorrect,
+          'selectedCorrect' : option.selected && submitDisabled && option.correct,
+          'selectedIncorrect' : option.selected && submitDisabled && !option.correct,
+          'correctNotSelected' : !option.selected && submitDisabled && option.correct,
         }" 
         [selected]="option.selected">{{option.text}}
       </mat-list-option>
