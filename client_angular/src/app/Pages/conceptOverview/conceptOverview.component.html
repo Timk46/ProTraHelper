@@ -12,7 +12,9 @@
     </mat-tab>
 
     <mat-tab label="Aufgaben">
-      <app-task-overview [activeConceptNodeId]="activeConceptNode.databaseId"></app-task-overview>
+      <div class="tab-content-container">
+        <app-task-overview [activeConceptNodeId]="activeConceptNode.databaseId"></app-task-overview>
+      </div>
     </mat-tab>
 
     <mat-tab label="Kompetenzen">
