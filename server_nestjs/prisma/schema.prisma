@@ -23,6 +23,7 @@ enum contentElementType {
   AUDIO
   CODE
   PDF
+  QUESTION
 }
 
 model User {
@@ -212,13 +213,13 @@ model File {
   contentElementId Int?
 }
 
-model ContentView { // n to n between content elements and conntent node. This way each content element can be used for multiple conctent nodes with different positions.
+model ContentView { // n to n between content elements and content node. This way each content element can be used for multiple conctent nodes with different positions.
   id               Int            @id @default(autoincrement())
   contentNode      ContentNode    @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
   contentNodeId    Int
   contentElement   ContentElement @relation(fields: [contentElementId], references: [id], onDelete: Cascade)
   contentElementId Int
-  position         Int
+  position         Int?
 }
 
 // Feedback which the users will get after answering a question
@@ -252,8 +253,7 @@ model Question {
   //successor                  Question?          @relation("VersionControl")
   //toDo: connect to different mediatypes Evelyn
   codingQuestions            CodingQuestion?
-  contentElement             ContentElement?
-  contentElementId           Int?
+  contentElement             ContentElement?   
   conceptNode                ConceptNode?       @relation(fields: [conceptNodeId], references: [id], onDelete: SetNull)
   conceptNodeId              Int?
   userAnswer                 UserAnswer[]

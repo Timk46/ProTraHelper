@@ -24,9 +24,9 @@ interface MCQuestion {
     
 }
 
-const mcQuestions : MCQuestion[] = [];
-
 export const seedMCQ = async () => {
+    const mcQuestions : MCQuestion[] = [];
+
     console.log('reading mc questions from Excel...');    
     const filePath = process.env.FILE_PATH + 'MCQuestions.xlsx';
     if(fs.existsSync(filePath)) {
@@ -40,6 +40,28 @@ export const seedMCQ = async () => {
             if(mcq['approved'] == '1') {
                 approved = true;
             }
+
+            
+            const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+            const options = letters
+                .filter(letter => mcq[`Antwort ${letter}`] !== undefined)
+                .map(letter => ({
+                    text: mcq[`Antwort ${letter}`],
+                    correct: mcq[`Korrekt markiert ${letter}`]
+                }));
+
+            const question: MCQuestion = {
+                score: mcq['score'],
+                type: 'MC',
+                author: 1,
+                text: mcq['text'],
+                concept: mcq['concept'],
+                isApproved: approved,
+                options: options,
+                version: 1,
+            };
+            
+            /*
             const question: MCQuestion = {
                 score: mcq['score'],
                 type: 'MC',
@@ -57,15 +79,16 @@ export const seedMCQ = async () => {
                 ],
                 version: 1,
             }
+            */
             mcQuestions.push(question);
-            console.log(question);
+            //console.log(question);
         } 
 
         //Create all mc questions
         console.log('creating mc questions...');
         for (const data of mcQuestions) {
             //create the question
-            console.log('create mc question...');
+            //console.log('create mc question...');
             const createdQuestion = await prisma.question.create({
                 data: {
                     score: data.score,
@@ -86,6 +109,30 @@ export const seedMCQ = async () => {
                     name: 'Multiple-Choice Frage ' + createdQuestion.id, 
                 },
             });
+
+            /*
+            - connect question as a new content element
+            - connect content element to the content node with the right award level by creating a content view
+            - 
+            */
+
+            //create content element and connect it to the question
+            const contentElement = await prisma.contentElement.create({
+                data: {
+                    type: contentElementType.QUESTION,
+                    question: { connect: { id: createdQuestion.id } },
+                },
+            });
+
+            //connect the content element to the the concept node by setting the training
+            const training = await prisma.training.findFirst({
+                where: { conceptNodeId: data.concept }
+            });
+            if(training) {
+                if(training.awards == 1) {
+
+                }
+            }
 
             //create the mc question
             let isSC = true;
@@ -118,6 +165,7 @@ export const seedMCQ = async () => {
                     },
                 });
             }
+
         }
 
     } 

@@ -2,7 +2,7 @@
 - dunkelgrün -> ausgewählt+richtig
 - rot -> ausgewählt+falsch
 - hellgrünnicht -> ausgewählt+richtig
--->
+
 <div *ngIf="isSelfAssessment" class="content mat-elevation-z8">
   <h2 class="question-text">{{questionData.text}}</h2>
   <div *ngIf="mcQuestion.isSC">
@@ -34,6 +34,7 @@
     </button>
   </div>
 </div>
+-->
 
 <!-- Formative Assessment-Mode -> Do not show correct answers after submit -->
 <div *ngIf="!isSelfAssessment && dataLoaded" class="content mat-elevation-z8">
