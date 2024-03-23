@@ -23,9 +23,10 @@ export class ContentController {
   @roles('ANY')
   @Get('/byConceptNode/:conceptNodeId')
   async getContentByConceptNode(
-    @Param('conceptNodeId') conceptNodeId: number,
+    @Param('conceptNodeId') conceptNodeId: number, 
+    @Req() req,
   ): Promise<ContentsForConceptDTO> {
-    return this.contentService.getContentsByConceptNode(conceptNodeId);
+    return this.contentService.getContentsByConceptNode(conceptNodeId, req.user.id);
   }
 
   /**

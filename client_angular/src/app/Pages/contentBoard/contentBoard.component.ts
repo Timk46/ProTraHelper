@@ -46,8 +46,8 @@ export class ContentBoardComponent implements OnInit, OnChanges {
   ngOnChanges() {
     this.dataSource.data = [];
     for (let content of this.contentsForActiveConceptNode.trainedBy) {
-      let userProgress = 30;
-      let userQuestion = false;
+      let userProgress = content.progress;
+      let userQuestion = content.questionMarked;
       const input: ContentViewData = {
         id: content.contentNodeId,
         name: content.name.toString(),

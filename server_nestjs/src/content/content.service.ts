@@ -3,15 +3,21 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
-import { ContentsForConceptDTO, ContentElementDTO, ContentViewDTO, ContentDTO } from '@Interfaces/index';
+import {
+  ContentsForConceptDTO,
+  ContentElementDTO,
+  ContentViewDTO,
+  ContentDTO,
+} from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
 import { last } from 'rxjs';
+import { tr } from '@faker-js/faker';
 
 @Injectable()
 export class ContentService {
   constructor(private prisma: PrismaService) {}
 
-    /**
+  /**
    * Retrieves all contents associated with a particular concept node by trainedBy and requiredBy relations.
    *
    * @param {number} conceptNodeId The ID of the concept node
@@ -21,6 +27,7 @@ export class ContentService {
    */
   async getContentsByConceptNode(
     conceptNodeId: number,
+    userId: number,
   ): Promise<ContentsForConceptDTO> {
     const conceptNode = await this.prisma.conceptNode.findUnique({
       where: { id: Number(conceptNodeId) },
@@ -40,7 +47,7 @@ export class ContentService {
                         file: true,
                         question: true,
                       },
-                    }
+                    },
                   },
                 },
               },
@@ -62,7 +69,7 @@ export class ContentService {
                         file: true,
                         question: true,
                       },
-                    }
+                    },
                   },
                 },
               },
@@ -76,35 +83,77 @@ export class ContentService {
       throw new Error('ConceptNode not found');
     }
 
+    const userStatus = await this.prisma.userContentElementProgress.findMany({
+      where: {
+        userId: userId,
+      },
+      select: {
+        contentElementId: true,
+        markedAsDone: true,
+        markedAsQuestion: true,
+      },
+    });
+
+    const getProgress = (contentNode) => {
+      //Count the number of content elements marked as done
+      let number = 0;
+
+      const total = contentNode.ContentView.length;
+      if (total === 0) {
+        return 0;
+      } else {
+        for (const contentView of contentNode.ContentView) {
+          //TODO: if contentElement is of type task add progress of tasks
+          for (const status of userStatus) {
+            if (status.contentElementId === contentView.contentElement.id) {
+              if (status.markedAsDone) {
+                number++;
+              }
+            }
+          }
+        }
+        return (number / total) * 100;
+      }
+    };
+
     const transformContentNode = (contentNode) => ({
       contentNodeId: contentNode.id,
       name: contentNode.name,
       description: contentNode.description,
-      contentElements: contentNode.ContentView.map((contentView: ContentViewDTO) => ({
-        id: contentView.contentElement.id,
-        type: contentView.contentElement.type,
-        positionInSpecificContentView: contentView.position, // position in the specific content view
-        title: contentView.contentElement.title,
-        text: contentView.contentElement.text,
-        file: contentView.contentElement.file,
-        question: contentView.contentElement.question,
-      })),
+      contentElements: contentNode.ContentView.map(
+        (contentView: ContentViewDTO) => ({
+          id: contentView.contentElement.id,
+          type: contentView.contentElement.type,
+          positionInSpecificContentView: contentView.position, // position in the specific content view
+          title: contentView.contentElement.title,
+          text: contentView.contentElement.text,
+          file: contentView.contentElement.file,
+          question: contentView.contentElement.question,
+        }),
+      ),
       contentPrerequisiteIds: contentNode.prerequisites.map(
         (p) => p.prerequisiteId,
       ),
-      contentSuccessorIds: contentNode.successors.map(
-        (s) => s.successorId,
-      ),
-      requiresConceptIds: contentNode.requires.map(
-        (r) => r.conceptNodeId,
-      ),
-      trainsConceptIds: contentNode.trains.map(
-        (t) => t.conceptNodeId,
+      contentSuccessorIds: contentNode.successors.map((s) => s.successorId),
+      requiresConceptIds: contentNode.requires.map((r) => r.conceptNodeId),
+      trainsConceptIds: contentNode.trains.map((t) => t.conceptNodeId),
+      progress: getProgress(contentNode),
+      questionMarked: contentNode.ContentView.some(
+        (contentView: ContentViewDTO) =>
+          userStatus.some(
+            (status) =>
+              status.contentElementId === contentView.contentElement.id &&
+              status.markedAsQuestion,
+          ),
       ),
     });
 
-    const requiredBy: ContentDTO[] = conceptNode.requiredBy.map((requiredBy) => transformContentNode(requiredBy.contentNode));
-    const trainedBy: ContentDTO[] = conceptNode.trainedBy.map((trainedBy) => transformContentNode(trainedBy.contentNode));
+    const requiredBy: ContentDTO[] = conceptNode.requiredBy.map((requiredBy) =>
+      transformContentNode(requiredBy.contentNode),
+    );
+    const trainedBy: ContentDTO[] = conceptNode.trainedBy.map((trainedBy) =>
+      transformContentNode(trainedBy.contentNode),
+    );
     return { trainedBy: trainedBy, requiredBy: requiredBy };
   }
   /**
