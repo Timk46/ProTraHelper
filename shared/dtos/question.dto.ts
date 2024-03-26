@@ -12,7 +12,8 @@ export interface QuestionDTO {
     conceptNodeName?: string;
     isApproved: boolean;
     originId?: number;
-    codingQuestion?: CodingQuestionDto
+    codingQuestion?: CodingQuestionDto,
+    level: number;
 }
 
 /*export interface QuestionDto { // This is the Tutor-Kai Question DTO. ToDo: NEEDS MERGE

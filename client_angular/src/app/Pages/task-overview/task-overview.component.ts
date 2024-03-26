@@ -38,7 +38,7 @@ export class TaskOverviewComponent implements OnInit, OnChanges, AfterViewInit {
   @ViewChild(MatSort) sort: MatSort;
 
   //the data for the table
-  displayedColumns: string[] = ['id', 'name', 'type', 'attempts', 'progress', 'mode', 'level', 'actions'];
+  displayedColumns: string[] = ['id', 'name', 'type', 'attempts', 'progress', 'level', 'actions'];
 
   titles = [
     "Python Kapitalwert",
@@ -99,20 +99,31 @@ export class TaskOverviewComponent implements OnInit, OnChanges, AfterViewInit {
   ngOnChanges() {
 
     //loading tasks by contents for concept node --> method prio 1
-    this.taskOverviewData.data = [];
-    for (let content of this.contentsForActiveConceptNode.trainedBy) {
-      //toDo: geht the data: progress, tries (and newest version!?)
-    }    
+    const taskOverviewData: taskOverviewElementDTO[] = [];
+    for (let contentNode of this.contentsForActiveConceptNode.trainedBy) {
+      contentNode.contentElements.forEach(contentElement => {
+        if (contentElement.question) {
+          this.taskOverviewService.getTaskOverviewData(contentElement.question.id).subscribe(taskOverviewElement => {
+            taskOverviewData.push(taskOverviewElement);
+            this.taskOverviewData.sort = this.sort;
+          });
+        }  
+      });
+    }
+    this.taskOverviewData = new MatTableDataSource(taskOverviewData);
+  }
+    
 
     //loading tasks by concept node id --> method to be deleted
+    /*
     this.taskOverviewService.getTaskOverviewDataForConceptNode(this.activeConceptNodeId).subscribe(taskOverviewData => {
       console.log(this.activeConceptNodeId);
       this.taskOverviewData = new MatTableDataSource(taskOverviewData);
       this.taskOverviewData.sort = this.sort;
       console.log(this.taskOverviewData);
     });
-  }
-
+    */
+  
   ngAfterViewInit() {
     this.taskOverviewData.sort = this.sort;
   }

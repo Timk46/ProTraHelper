@@ -6,12 +6,12 @@ import { taskOverviewElementDTO } from '@DTOs/taskOverview.dto';
 export class TaskOverviewController {
     constructor(private taskOverviewService : TaskOverviewService) {}
 
-    @Get(':conceptNodeId')
-    async getTaskIdentityDataForConceptNode(@Param('conceptNodeId') conceptNodeId : number, @Req() req: any): Promise<taskOverviewElementDTO[]> {
-        console.log('task-overview-controller: getTaskIdentityDataForConceptNode: conceptNodeId: ' + conceptNodeId);
-        if (isNaN(conceptNodeId)) {
-            throw new Error('conceptNodeId is not a number');
+    @Get(':questionId')
+    async getTaskOverviewData(@Param('questionId') questionId : number, @Req() req: any): Promise<taskOverviewElementDTO> {
+        console.log('task-overview-controller: getTaskOverviewData: questionId: ' + questionId);
+        if (isNaN(questionId)) {
+            throw new Error('questionId is not a number');
         }
-        return this.taskOverviewService.getTaskOverviewDataForConceptNode(Number(conceptNodeId), req.user.id);
+        return this.taskOverviewService.getTaskOverviewData(Number(questionId), req.user.id);
     }
 }

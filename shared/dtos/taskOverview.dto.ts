@@ -5,8 +5,8 @@ export interface taskOverviewElementDTO {
     name?: string;
     description?: string;
     type: string;
-    mode: string;
-    level: number;
+    mode?: string;
+    level?: number;
     attempts: number;
     progress: number;
     feedback?: userAnswerFeedbackDTO[];

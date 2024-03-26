@@ -46,7 +46,7 @@ export class QuestionDataService {
     return this.http.post<UserAnswerDTO>(environment.server + `/question-data/userAnswer/create`, {userId, questionId});
   } */
   createUserAnswer(data: UserAnswerDataDTO) : Observable<userAnswerFeedbackDTO> {
-    console.log('create user mc answer for question ' + data.questionId + ' and user ' + data.userId);
+    console.log('create user answer for question ' + data.questionId + ' and user ' + data.userId);
     return this.http.post<userAnswerFeedbackDTO>(environment.server + `/question-data/userAnswer/create`, data);
   }
 

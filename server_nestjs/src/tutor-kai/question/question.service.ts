@@ -208,6 +208,7 @@ export class QuestionService {
       originId: question.originId,
       text: question.text,
       codingQuestion: this.mapCodingQuestionToDto(question.codingQuestions),
+      level: question.level,
     };
     return questionDto;
   }

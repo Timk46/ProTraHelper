@@ -33,6 +33,7 @@ export class McTaskComponent implements OnInit {
     text : '',
     isApproved: false,
     originId: -1,
+    level: -1,
   }
 
   dataLoaded : boolean = false;
@@ -89,7 +90,7 @@ export class McTaskComponent implements OnInit {
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
       userId: -1,
-      questionId: this.mcQuestion.id,
+      questionId: this.questionData.id,
       userMCAnswer: this.selectedOptions,
     }
 

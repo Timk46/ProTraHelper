@@ -110,12 +110,6 @@ export const seedMCQ = async () => {
                 },
             });
 
-            /*
-            - connect question as a new content element
-            - connect content element to the content node with the right award level by creating a content view
-            - 
-            */
-
             //create content element and connect it to the question
             const contentElement = await prisma.contentElement.create({
                 data: {

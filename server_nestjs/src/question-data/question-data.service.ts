@@ -36,7 +36,8 @@ export class QuestionDataService {
             text: question.text,
             isApproved: question.isApproved,
             originId: question.originId,
-            conceptNode: question.conceptNodeId || undefined
+            conceptNode: question.conceptNodeId || undefined,
+            level: question.level,
         };
 
         return questionData;
@@ -327,10 +328,10 @@ export class QuestionDataService {
         if (!question) throw new Error('Could not get question');
 
         //generate feedback for user answer
-        if (question.type === questionType.MULTIPLECHOICE) { //  && answerData.userMCAnswer
+        if (question.type === questionType.MULTIPLECHOICE) {
             console.log('generate feedback for user answer');
             //const question = await this.getQuestion(answerData.questionId);
-            const mcOptions = await this.getMCOptions(answerData.questionId);
+            const mcOptions = await this.getMCOptions((await this.getMCQuestion(answerData.questionId)).id);
             let userScore = 0;
             const scorePerOption = question.score / mcOptions.length;
 

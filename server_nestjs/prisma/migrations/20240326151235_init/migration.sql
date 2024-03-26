@@ -2,7 +2,7 @@
 CREATE TYPE "GlobalRole" AS ENUM ('STUDENT', 'TEACHER', 'ADMIN');
 
 -- CreateEnum
-CREATE TYPE "contentElementType" AS ENUM ('TEXT', 'IMAGE', 'VIDEO', 'AUDIO', 'CODE', 'PDF');
+CREATE TYPE "contentElementType" AS ENUM ('TEXT', 'IMAGE', 'VIDEO', 'AUDIO', 'CODE', 'PDF', 'QUESTION');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -165,7 +165,7 @@ CREATE TABLE "ContentView" (
     "id" SERIAL NOT NULL,
     "contentNodeId" INTEGER NOT NULL,
     "contentElementId" INTEGER NOT NULL,
-    "position" INTEGER NOT NULL,
+    "position" INTEGER,
 
     CONSTRAINT "ContentView_pkey" PRIMARY KEY ("id")
 );
@@ -196,7 +196,6 @@ CREATE TABLE "Question" (
     "isApproved" BOOLEAN NOT NULL DEFAULT false,
     "version" INTEGER NOT NULL DEFAULT 1,
     "originId" INTEGER,
-    "contentElementId" INTEGER,
     "conceptNodeId" INTEGER,
 
     CONSTRAINT "Question_pkey" PRIMARY KEY ("id")
