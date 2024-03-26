@@ -10,6 +10,7 @@ import { taskOverviewElementDTO } from '@DTOs/taskOverview.dto';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { Router } from '@angular/router';
+import { ContentsForConceptDTO } from '@DTOs/content.dto';
 
 export interface PeriodicElement {
   name: string;
@@ -27,6 +28,12 @@ export class TaskOverviewComponent implements OnInit, OnChanges, AfterViewInit {
 
   @Input() activeConceptNodeId: any;
   taskOverviewData : MatTableDataSource<taskOverviewElementDTO>;
+
+  // init empty
+  @Input() contentsForActiveConceptNode: ContentsForConceptDTO = {
+    trainedBy: [],
+    requiredBy: [],
+  };
 
   @ViewChild(MatSort) sort: MatSort;
 
@@ -91,6 +98,13 @@ export class TaskOverviewComponent implements OnInit, OnChanges, AfterViewInit {
 
   ngOnChanges() {
 
+    //loading tasks by contents for concept node --> method prio 1
+    this.taskOverviewData.data = [];
+    for (let content of this.contentsForActiveConceptNode.trainedBy) {
+      //toDo: geht the data: progress, tries (and newest version!?)
+    }    
+
+    //loading tasks by concept node id --> method to be deleted
     this.taskOverviewService.getTaskOverviewDataForConceptNode(this.activeConceptNodeId).subscribe(taskOverviewData => {
       console.log(this.activeConceptNodeId);
       this.taskOverviewData = new MatTableDataSource(taskOverviewData);

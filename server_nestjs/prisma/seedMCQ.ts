@@ -121,17 +121,60 @@ export const seedMCQ = async () => {
                 data: {
                     type: contentElementType.QUESTION,
                     question: { connect: { id: createdQuestion.id } },
+                    title: createdQuestion.name,
                 },
             });
 
             //connect the content element to the the concept node by setting the training
             const training = await prisma.training.findFirst({
-                where: { conceptNodeId: data.concept }
+                where: { 
+                    conceptNodeId: createdQuestion.conceptNodeId,
+                    awards: createdQuestion.level,
+                 }
             });
             if(training) {
-                if(training.awards == 1) {
-
+                const contentNode = await prisma.contentNode.findFirst({
+                    where: { id: training.contentNodeId }
+                });
+                //ermittle die höchste Position in der content view und setze die Position des neuen content elements auf +1
+                const contentViews = await prisma.contentView.findMany({
+                    where: { contentNodeId: contentNode.id }
+                });
+                let maxPosition = 0;
+                for (const contentView of contentViews) {
+                    if(contentView.position > maxPosition) {
+                        maxPosition = contentView.position;
+                    }
                 }
+                await prisma.contentView.create({
+                    data: {
+                        contentNode: { connect: { id: contentNode.id } },
+                        contentElement: { connect: { id: contentElement.id } },
+                        position: maxPosition + 1,
+                    },
+                });
+            }
+            else {
+                //erzeuge eine neue content node mit dem award level und verbinde sie mit dem content element
+                const contentNode = await prisma.contentNode.create({
+                    data: {
+                        name: 'Training ' + createdQuestion.level,
+                    },
+                });
+                await prisma.training.create({
+                    data: {
+                        conceptNode: { connect: { id: createdQuestion.conceptNodeId } },
+                        contentNode: { connect: { id: contentNode.id } },
+                        awards: createdQuestion.level,
+                    },
+                });
+                await prisma.contentView.create({
+                    data: {
+                        contentNode: { connect: { id: contentNode.id } },
+                        contentElement: { connect: { id: contentElement.id } },
+                        position: 1,
+                    },
+                });
             }
 
             //create the mc question

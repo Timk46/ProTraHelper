@@ -5,4 +5,5 @@ export enum contentElementType {
     AUDIO = "AUDIO",
     CODE = "CODE",
     PDF = "PDF",
+    QUESTION = "QUESTION",
 }
