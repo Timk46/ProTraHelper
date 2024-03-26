@@ -333,6 +333,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
         element.children = element.children?.filter(child => !child.type.startsWith('node'));
         element.children = element.children?.filter(child => !child.type.startsWith('edge'));
         this.addChildren(node, 'concept');
+        this.deleteEdgeBends(this.currentRoot);
         await this.updateModel();
         this.updateExpandedState(node, true);
         this.actionDispatcher.dispatch(CenterAction.create([id], { animate: true, retainZoom: true }))
@@ -351,6 +352,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
         element.children = element.children?.filter(child => !child.type.startsWith('edge'));
         this.addChildren(node, 'mini-concept');
 
+        this.deleteEdgeBends(this.currentRoot);
         await this.updateModel();
         this.updateExpandedState(node, false);
       }
@@ -563,5 +565,23 @@ export class ConceptGraphModelSource extends LocalModelSource {
     return edge;
   }
 
+  /**
+   * Deletes all edge bends. This is a temporary solution to a bug in elk. 
+   * When the issue is fixed (and integrated into sprotty), this function should be removed.
+   * Link to issue: https://github.com/eclipse/elk/issues/1001
+   * The function recursively goes through the graph and deletes all edge bends.
+   */
+  deleteEdgeBends(node: SGraph | SNode) {
+    
+    for (const child of node.children!) {
+      if(child.type === 'edge'){
+        const edge = child as SEdge;
+        edge.routingPoints = [];
+      }
+      else if (child.type.startsWith('node')) {
+        this.deleteEdgeBends(child)
+      }
+    }
+  }
 
 }
