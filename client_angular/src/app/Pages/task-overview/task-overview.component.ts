@@ -98,7 +98,10 @@ export class TaskOverviewComponent implements OnInit, OnChanges, AfterViewInit {
 
   ngOnChanges() {
 
-    //loading tasks by contents for concept node --> method prio 1
+    /*
+    * This is the new way of loading tasks by concept node id
+    * There shoud be an optimasiation in the backend to load all tasks at once!
+    */
     const taskOverviewData: taskOverviewElementDTO[] = [];
     for (let contentNode of this.contentsForActiveConceptNode.trainedBy) {
       contentNode.contentElements.forEach(contentElement => {

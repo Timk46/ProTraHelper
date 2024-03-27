@@ -8,21 +8,9 @@ import * as fs from 'fs';
 import { last, of } from 'rxjs';
 import e from 'express';
 import { seedMCQ } from './seedMCQ';
+import { seedCodeQuestions } from './seedCodeQuestions';
 
 const prisma = new PrismaClient();
-
-interface excel_Aufgabe {
-  Id: number;
-  Titel: string;
-  Task: string;
-  Programming_Language: string;
-  Test: string;
-  Task_html: string;
-  codeName: string;
-  countInputArgs: number;
-  ConceptNodeID: number;
-}
-
 interface excel_OFP {
   conceptId: number | null;
   conceptEdge: number[] | null;
@@ -41,13 +29,6 @@ interface excel_OFP {
   elementId5: string | null;
   contentNodeTitle: string | null;
   description: string | null;
-}
-
-interface excel_Codegeruest {
-  id: number;
-  taskId: number;
-  fileName: string;
-  code: string;
 }
 
 function getFilenameByLink(hyperlink: string): string {
@@ -467,97 +448,6 @@ async function main() {
     where: { id: 8 },
   });
 
-  const question = await prisma.question.create({
-    data: {
-      name: 'Primitiver Datentyp',
-      description: 'The first MC-Question in HeFL',
-      score: 2,
-      type: 'MC',
-      author: { connect: { id: adminUser.id } },
-      text: 'Welcher der folgenden Datentypen in Java ist primitiv?',
-      conceptNode: { connect: { id: conceptNodeForMCQ.id } },
-      isApproved: true,
-      version: 1,
-    },
-  });
-  // connect it to itself
-  await prisma.question.update({
-    where: { id: question.id },
-    data: { origin: { connect: { id: question.id } } },
-  });
-
-  /*
-    const questionVersion = await prisma.questionVersion.create({
-      data: {
-          question: { connect: { id: question.id } },
-          version: 1
-      },
-    });
-    */
-
-  const mcQuestion = await prisma.mCQuestion.create({
-    data: {
-      isSC: false,
-      question: { connect: { id: question.id } },
-    },
-  });
-
-  const mcOption1 = await prisma.mCOption.create({
-    data: {
-      text: 'String',
-      is_correct: false,
-    },
-  });
-
-  const mcOption2 = await prisma.mCOption.create({
-    data: {
-      text: 'int',
-      is_correct: true,
-    },
-  });
-
-  const mcOption3 = await prisma.mCOption.create({
-    data: {
-      text: 'double',
-      is_correct: true,
-    },
-  });
-
-  const mcOption4 = await prisma.mCOption.create({
-    data: {
-      text: 'ArrayList',
-      is_correct: false,
-    },
-  });
-
-  const mcQuestionOption1 = await prisma.mCQuestionOption.create({
-    data: {
-      question: { connect: { id: mcQuestion.id } },
-      option: { connect: { id: mcOption1.id } },
-    },
-  });
-
-  const mcQuestionOption2 = await prisma.mCQuestionOption.create({
-    data: {
-      question: { connect: { id: mcQuestion.id } },
-      option: { connect: { id: mcOption2.id } },
-    },
-  });
-
-  const mcQuestionOption3 = await prisma.mCQuestionOption.create({
-    data: {
-      question: { connect: { id: mcQuestion.id } },
-      option: { connect: { id: mcOption3.id } },
-    },
-  });
-
-  const mcQuestionOption4 = await prisma.mCQuestionOption.create({
-    data: {
-      question: { connect: { id: mcQuestion.id } },
-      option: { connect: { id: mcOption4.id } },
-    },
-  });
-
   // Free Text Question
   const questionFreeText = await prisma.question.create({
     data: {
@@ -659,83 +549,8 @@ async function main() {
   });
 
   console.log('Importing Tasks from Excel...');
-  await importProgrammingTasksFromExcel('programmieraufgaben_JACK_SOSE23_WORKSHOP_WISE2324.xlsx', 'Automatisch Import aus Excel: JACK Aufgaben aus SoSe 23 + Workshopsaufgaben aus WiSe 23/24', adminUser.id);
-  await importProgrammingTasksFromExcel('programmieraufgaben_bechtel.xlsx', 'Automatisch Import aus Excel: Aufgaben aus dem TutorKai-Einsatz in Schulen von Herrn Bechtel WiSe 23/24', adminUser.id);
-  await importProgrammingTasksFromExcel('programmieraufgaben_linden.xlsx', 'Automatisch Import aus Excel: ufgaben aus dem TutorKai-Einsatz in Schulen von Frau Linden WiSe 23/244', adminUser.id);
+  await seedCodeQuestions(adminUser.id);
   await seedMCQ();
-  console.log('Importing Done!');
-}
-
-async function importProgrammingTasksFromExcel(filename: string, description: string, adminUserId: number = 1) {
-  const filePathTasks = process.env.FILE_PATH + filename;
-  const workbook = XLSX.readFile(filePathTasks);
-
-  const taskSheet: WorkSheet = workbook.Sheets[workbook.SheetNames[0]];
-  const tasks: excel_Aufgabe[] = utils.sheet_to_json(taskSheet);
-  const codeSheet: WorkSheet = workbook.Sheets[workbook.SheetNames[1]];
-  const codes: excel_Codegeruest[] = utils.sheet_to_json(codeSheet);
-
-  for (const task of tasks) {
-    const conceptNode = await prisma.conceptNode.findFirst({
-      where: {
-        id: task.ConceptNodeID,
-      },
-    });
-
-    const newTask = await prisma.question.create({
-      data: {
-        name: task.Titel,
-        description: description,
-        score: 100, // this is the max score for all tasks currently (=100%)
-        type: 'CodingQuestion',
-        author: { connect: { id: adminUserId } },
-        text: task.Task,
-        conceptNode: { connect: { id: conceptNode.id } },
-        isApproved: true,
-        codingQuestions: {
-          create: {
-            text: task.Task,
-            textHTML: task.Task_html,
-            mainFileName: task.codeName,
-            programmingLanguage: task.Programming_Language,
-            count_InputArgs: task.countInputArgs,
-            automatedTests: {
-              create: [
-                {
-                  code: task.Test,
-                  // Not using this model for testcases yet. All in one code currently
-                  //testcase: {
-                  //  create: {
-                  //    input: task.Test,
-                  //    output: "1",
-                  //  },
-                  //},
-                },
-              ],
-            },
-            codeGerueste: {
-              // add all codegerueste with matching taskId
-              create: codes
-                .filter((code) => code.taskId === task.Id)
-                .map((filteredCode) => ({
-                  codeFileName: filteredCode.fileName,
-                  code: filteredCode.code,
-                })),
-            },
-          },
-        },
-      },
-    });
-
-    // connect it to itself
-    await prisma.question.update({
-      where: { id: newTask.id },
-      data: { origin: { connect: { id: newTask.id } } },
-    });
-  }
-
-  
-
   console.log('Importing Done!');
 }
 
