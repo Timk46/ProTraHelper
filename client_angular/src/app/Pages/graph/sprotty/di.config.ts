@@ -97,6 +97,7 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
         return {
             'org.eclipse.elk.algorithm': 'org.eclipse.elk.layered',
             'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]', // important for button-label spacing
+            'org.eclipse.elk.spacing.edgeNode': '20', // space between node and edge
             //'org.eclipse.elk.edgeRouting': 'POLYLINE',
         };
     }
@@ -110,6 +111,7 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
                 'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]',
                 'org.eclipse.elk.padding': '[top=30, bottom=20, left=20, right=20]',
                 'org.eclipse.elk.spacing.labelLabel': '5',
+                'org.eclipse.elk.spacing.edgeNode': '20', // space between node and edge
                 //'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '500', // space between two connected nodes
             };
         }
@@ -119,6 +121,7 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
                 'org.eclipse.elk.nodeSize.minimum': '(130, 40)', 
                 'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_CENTER', // very important
                 'org.eclipse.elk.nodeLabels.padding': '[top=10, bottom=10, left=25, right=25]',
+                'org.eclipse.elk.spacing.edgeNode': '20', // space between node and edge
                 'org.eclipse.elk.spacing.labelLabel': '5',
             };
         }
@@ -128,6 +131,7 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
             'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
             'org.eclipse.elk.nodeLabels.padding': '[top=0, bottom=0, left=25, right=25]',
             'org.eclipse.elk.spacing.labelLabel': '5',
+            'org.eclipse.elk.spacing.edgeNode': '20', // space between node and edge
             //'org.eclipse.elk.layered.spacing.nodeNodeBetweenLayers': '500', // space between two connected nodes
         };
     }
