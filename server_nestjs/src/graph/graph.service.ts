@@ -4,6 +4,11 @@ import { PrismaService } from '../prisma/prisma.service';
 
 import { ConceptNodeDTO, ConceptEdgeDTO, ConceptGraphDTO } from '@Interfaces/index';
 
+
+/**
+ * This service handles the concept graph
+ * (nodes, edges, and the graph itself)
+ */
 @Injectable()
 export class GraphService {
 
@@ -129,7 +134,7 @@ export class GraphService {
                 where: { id: userId },
                 select: { currentConcept: true }
             });
-            if (currentConcept.currentConcept !== null){
+            if (currentConcept.currentConcept !== null) {
                 conceptGraph.currentConceptId = currentConcept.currentConcept.id || null;
             }
             else {
@@ -254,45 +259,8 @@ export class GraphService {
         });
     }
 
-    async updateUserConceptData(userId: number, conceptNodeId: number, data: any): Promise<any> {
-        const userConcept = await this.prisma.userConcept.findFirst({
-            where: { conceptNodeId: conceptNodeId,
-                     userId: userId }
-        });
+    
 
-        const expanded = data.expanded !== undefined ? {expanded: data.expanded} : {expanded: false};
-        const level = data.level !== undefined ? {level: data.level} : {};
-
-
-        // if the userConcept does not exist, create it
-        if (userConcept === null) {
-            return await this.prisma.userConcept.create({
-                data: {
-                    concept: {
-                        connect: {
-                            id: conceptNodeId
-                        }
-                    },
-                    user: {
-                        connect: {
-                            id: userId
-                        }
-                    },
-                    ...expanded,
-                    ...level
-                }
-            });
-        }
-
-        // if the userConcept exists, update it
-        return await this.prisma.userConcept.update({
-            where: { id: userConcept.id, },
-            data: {
-                ...expanded,
-                ...level
-            }
-        });
-    }
 
     /**
      * moves a concept node to a new parent
@@ -306,7 +274,7 @@ export class GraphService {
                 childId: conceptNodeId
             }
         });
-        
+
         if (family !== null) {
             return await this.prisma.conceptFamily.update({
                 where: { id: family.id },

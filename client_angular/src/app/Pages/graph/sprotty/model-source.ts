@@ -245,7 +245,12 @@ export class ConceptGraphModelSource extends LocalModelSource {
     let firstSelectedNode = index.getById((action as SelectAction).selectedElementsIDs[0]) as SprottyConceptNode;
     if (firstSelectedNode !== undefined && firstSelectedNode?.type.startsWith('node')) {
       const currentActiveNode = this.flatGraph.nodeMap[(firstSelectedNode as SprottyConceptNode).databaseId];
-      this.GraphCommunicationService.changeActiveNode(currentActiveNode); // TODO: type - communicate node info to contentOverview (so get full node info from db first?)
+      this.GraphCommunicationService.changeActiveNode(currentActiveNode); // TODO: communicate more data like all selected concepts and maybe leaf nodes
+
+      // update selected concept in database
+      this.graphData!.updateSelectedConcept(currentActiveNode.databaseId).subscribe((res) => {
+        console.log("updated selected concept: ", res);
+      });
     }
 
     // create edge if EdgeCreator is set
@@ -361,7 +366,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   private updateExpandedState(node: SprottyConceptNode, expanded: boolean) {
     this.flatGraph.nodeMap[node.databaseId].expanded = expanded;
-    this.graphData!.updateUserConceptData(node.databaseId, { expanded: expanded }).subscribe();
+    this.graphData!.updateConceptExpansionState(node.databaseId, expanded).subscribe();
   }
 
   handleAwardLevelAction(action: AwardLevelAction): void {
@@ -371,7 +376,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     const sprottyNode = index.getById(action.conceptId) as SprottyConceptNode;
     const currentLevel = sprottyNode.level ? sprottyNode.level : 0;
     const newLevel = currentLevel + 1;
-    this.graphData!.updateUserConceptData(sprottyNode.databaseId, { level: newLevel }).subscribe(
+    this.graphData!.updateUserLevel(sprottyNode.databaseId, newLevel ).subscribe(
       (res) => {
         console.log("updated concept: ", res);
         this.getUserGraph();
@@ -567,8 +572,10 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   /**
    * Deletes all edge bends. This is a temporary solution to a bug in elk. 
-   * When the issue is fixed (and integrated into sprotty), this function should be removed.
-   * Link to issue: https://github.com/eclipse/elk/issues/1001
+   * When the issue is fixed (and integrated into sprotty), this function should be removed
+   * to reduce unnecessary lag.
+   * Link to issue in elk: https://github.com/eclipse/elk/issues/1001
+   * Link to (closed) issue in sprotty: https://github.com/eclipse-sprotty/sprotty/issues/427
    * The function recursively goes through the graph and deletes all edge bends.
    */
   deleteEdgeBends(node: SGraph | SNode) {

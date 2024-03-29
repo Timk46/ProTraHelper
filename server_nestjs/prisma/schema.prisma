@@ -180,6 +180,25 @@ model UserConcept {
   conceptNodeId Int
   level         Int?
   expanded      Boolean // remembers if the concept was expanded in the concept graph
+  events        UserConceptEvent[]
+}
+
+enum userConceptEventType {
+  LEVEL_CHANGE
+  EXPANDED
+  COLLAPSED
+  SELECTED
+}
+
+// events that change the userConcept (level, expand state, selected nodes)
+model UserConceptEvent {
+  id            Int         @id @default(autoincrement())
+  userConcept   UserConcept @relation(fields: [userConceptId], references: [id], onDelete: Cascade)
+  userConceptId Int
+  eventType     userConceptEventType
+  level         Int
+  createdAt     DateTime    @default(now())
+
 }
 
 // for example a MC question or a video or a piece of text

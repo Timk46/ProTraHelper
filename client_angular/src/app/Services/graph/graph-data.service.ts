@@ -72,9 +72,17 @@ export class GraphDataService {
 
 
 
-  updateUserConceptData(conceptId: number, data?: any) {
-    console.log("in updateUserConceptData: ", data)
-    return this.http.put(environment.server + `/graph/userConcept/${conceptId}`, data)
+  updateUserLevel(conceptId: number, level: number) {
+    console.log("in updateUserLevel: ", level)
+    return this.http.put(environment.server + `/user-concept/${conceptId}/level/${level}`, {})
+  }
+
+  updateSelectedConcept(conceptId: number) {
+    return this.http.put(environment.server + `/user-concept/concept/${conceptId}/selected`, {})
+  }
+
+  updateConceptExpansionState(conceptId: number, expanded: boolean) {
+    return this.http.put(environment.server + `/user-concept/${conceptId}/expanded/${expanded}`, {})
   }
 
 }

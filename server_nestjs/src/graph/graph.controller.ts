@@ -75,18 +75,6 @@ export class GraphController {
     }
 
     @roles("ANY")
-    @Put('userConcept/:conceptId')
-    async updateUserConceptData(@Req() req,
-        @Param('conceptId', ParseIntPipe) conceptId: number,
-        @Body() data: any): Promise<any> {
-        // todo: sanitize data
-        const userId = req.user.id;
-        const updatedUserConcept = await this.graphService.updateUserConceptData(userId, conceptId, data);
-        console.log("updated user concept to: " , updatedUserConcept);
-        return updatedUserConcept;
-    }
-
-    @roles("ANY")
     @Post('edge')
     async createEdge(@Body() data: any): Promise<any> {
         //todo: check roles
