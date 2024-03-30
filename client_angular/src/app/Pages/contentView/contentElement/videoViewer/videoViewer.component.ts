@@ -1,4 +1,12 @@
-import { Component, Input, OnInit, Sanitizer, SecurityContext } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  Input,
+  OnInit,
+  Sanitizer,
+  SecurityContext,
+  ViewChild,
+} from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { FileService } from 'src/app/Services/files/files.service';
 import { environment } from '../../../../../environments/environment';
@@ -6,26 +14,33 @@ import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-videoViewer',
   templateUrl: './videoViewer.component.html',
-  styleUrls: ['./videoViewer.component.scss']
+  styleUrls: ['./videoViewer.component.scss'],
 })
 export class VideoViewerComponent implements OnInit {
-    /**
+  /**
    * A unique identifier (from FileDTO) for the video file to be displayed.
    * This is an input property and should be passed from the parent component.
    */
-  @Input() uniqueIdentifier: String  = "";
-
+  @Input() uniqueIdentifier: String = '';
+  @ViewChild('videoPlayer') videoPlayer!: ElementRef;
   /**
    * Holds the sanitized URL of the video file.
    * This property is used for securely binding the video URL in the component's template.
    */
   videoUrl: SafeUrl = '';
 
-  constructor(private sanitizer: DomSanitizer, private fileService: FileService) { }
+  constructor(
+    private sanitizer: DomSanitizer,
+    private fileService: FileService
+  ) {}
 
   ngOnInit(): void {
-    this.videoFromUniqueIdentifier(this.uniqueIdentifier)
+    this.videoFromUniqueIdentifier(this.uniqueIdentifier);
+  }
 
+  // preventing Premature close conncetion error by closing the modal while video is loading
+  ngOnDestroy() {
+    this.stopAndResetVideo();
   }
 
   /**
@@ -33,12 +48,16 @@ export class VideoViewerComponent implements OnInit {
    *
    * @param uniqueIdentifier A unique string identifier for fetching the video.
    */
-  videoFromUniqueIdentifier(uniqueIdentifier: String){
-    console.log("Fetching video URL for: " + uniqueIdentifier);
-    // Hier verwenden wir eine fiktive URL-Struktur, die du entsprechend deiner API anpassen musst.
+  videoFromUniqueIdentifier(uniqueIdentifier: String) {
     const videoUrl = `${environment.server}/files/download/Video/${uniqueIdentifier}`;
-    // Verwende DomSanitizer, um die URL sicher im Template zu binden
     this.videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(videoUrl);
   }
 
+  private stopAndResetVideo() {
+    if (this.videoPlayer && this.videoPlayer.nativeElement) {
+      this.videoPlayer.nativeElement.pause();
+      this.videoPlayer.nativeElement.src = '';
+      this.videoPlayer.nativeElement.load();
+    }
+  }
 }
