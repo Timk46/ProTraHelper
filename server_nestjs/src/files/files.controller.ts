@@ -7,10 +7,13 @@ import {
   StreamableFile,
   UploadedFile,
   UseInterceptors,
+  Headers
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
 import { Response } from 'express';
+import * as fs from 'fs';
+import { Public } from '../public.decorator';
 
 @Controller('files')
 export class FilesController {
@@ -95,5 +98,44 @@ export class FilesController {
   @Get(':uniqueIdentifier')
   async getFile(@Param('uniqueIdentifier') uniqueIdentifier: string) {
     return await this.filesService.getFile(uniqueIdentifier);
+  }
+
+  @Public()
+  @Get('download/Video/:uniqueIdentifier')
+  async downloadVideo(
+    @Param('uniqueIdentifier') uniqueIdentifier: string,
+    @Res({ passthrough: true }) response: Response,
+    @Headers('range') range: string, // Empfange den Range Header vom Client
+  ): Promise<StreamableFile> {
+    const file = await this.filesService.getFile(uniqueIdentifier);
+    const fileSize = fs.statSync(process.env.FILE_PATH + file.path).size;
+
+    if (range) {
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+      response.set({
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': end - start + 1,
+        'Content-Type': 'video/mp4', // Stelle sicher, dass du den korrekten MIME-Typ setzt
+      });
+
+      response.status(206); // Partial Content
+
+      const fileStream = fs.createReadStream(
+        process.env.FILE_PATH + file.path,
+        { start, end },
+      );
+      return new StreamableFile(fileStream);
+    } else {
+      response.set({
+        'Content-Length': fileSize,
+        'Content-Type': 'video/mp4', // Stelle sicher, dass du den korrekten MIME-Typ setzt
+      });
+      const fileStream = fs.createReadStream(process.env.FILE_PATH + file.path);
+      return new StreamableFile(fileStream);
+    }
   }
 }

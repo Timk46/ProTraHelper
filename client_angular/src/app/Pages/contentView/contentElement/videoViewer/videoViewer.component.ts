@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, Sanitizer, SecurityContext } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { FileService } from 'src/app/Services/files/files.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-videoViewer',
@@ -33,17 +34,11 @@ export class VideoViewerComponent implements OnInit {
    * @param uniqueIdentifier A unique string identifier for fetching the video.
    */
   videoFromUniqueIdentifier(uniqueIdentifier: String){
-    console.log("videoFromUniqueIdentifier: " + uniqueIdentifier);
-    this.fileService.downloadFile(uniqueIdentifier).subscribe(response => {
-      const blob = response.body;
-
-      // Check if the video blob is null or not.
-      if (blob !== null) {
-        const url = URL.createObjectURL(blob);
-        this.videoUrl = url;
-      } else {
-        console.error("no video found");
-      }
-    });
+    console.log("Fetching video URL for: " + uniqueIdentifier);
+    // Hier verwenden wir eine fiktive URL-Struktur, die du entsprechend deiner API anpassen musst.
+    const videoUrl = `${environment.server}/files/download/Video/${uniqueIdentifier}`;
+    // Verwende DomSanitizer, um die URL sicher im Template zu binden
+    this.videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(videoUrl);
   }
+
 }
