@@ -3,10 +3,11 @@ FROM node:18 as build
 WORKDIR /usr/local/app
 
 COPY ../client_angular /usr/local/app/
+COPY ../shared /usr/local/app/
 
 RUN npm ci && npm cache clean --force
 RUN npm install -g @angular/cli@15.2.8
-RUN ng build --configuration production --base-href ./
+RUN ng build --configuration production --base-href /
 
 FROM nginx:1.23.4
 

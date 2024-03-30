@@ -2,72 +2,34 @@ version: '3.1'
 
 services: 
 
+# Postgres Database running in different compose
+
 #ANGULAR
   hefl_client:
+    container_name: goals_client
     build: 
       context: .
       dockerfile: ./Docker/angular
     ports: 
       - 4200:80
     networks:
-      - hefl_net
+      - nginx-network
     restart: always
 
-#MYSQL
-  hefl_mysql:
-    build: 
-      context: .
-      dockerfile: ./Docker/mysql
-    command: mysqld --default-authentication-plugin=mysql_native_password
-    environment:
-      MYSQL_DATABASE: hefl
-      MYSQL_ROOT_PASSWORD: needsToBeChanged # also change in server_nestjs/.env - in development nutzer wir xampp oder ne andere lokale db
-    ports:
-     - '3306:3306'
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3306"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    networks:
-      - hefl_net
-    restart: always
-
-#PHPMYADMIN
-  hefl_phpmyadmin:
-    depends_on:
-      - hefl_mysql
-    image: phpmyadmin/phpmyadmin
-    container_name: hefl_phpmyadmin
-    restart: always
-    ports:
-     - '8080:80'
-    environment:
-      PMA_HOST: hefl_mysql
-    networks:
-    - hefl_net
-
-    
 #NestJS
   hefl_server:
-    depends_on:
-      - hefl_mysql 
-    links: 
-      - hefl_mysql 
+    container_name: goals_server
     build: 
       context: .
       dockerfile: ./Docker/nest
     ports: 
       - 3000:3000
-    volumes:
-      - hefl-datavolume:/var/lib/mysql
     networks:
-      - hefl_net
+      - nginx-network
     restart: always
+    volumes:
+    - ./files:/usr/src/files
 
-volumes:
-  hefl-datavolume:
-  
 networks:
-  hefl_net:
-    driver: bridge
+  nginx-network:
+    external: true
