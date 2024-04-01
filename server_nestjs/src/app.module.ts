@@ -18,6 +18,7 @@ import { DiscussionCreationService } from './discussion/discussion-creation/disc
 import { DiscussionCreationController } from './discussion/discussion-creation/discussion-creation.controller';
 import { QuestionDataModule } from './question-data/question-data.module';
 import { TaskOverviewModule } from './task-overview/task-overview.module';
+import { LoggerModule } from 'nestjs-pino';
 
 // BEGIN Tutor-Kai Imports
 import { CryptoService } from './tutor-kai/crypto/crypto.service';
@@ -33,9 +34,26 @@ import { ModulesModule } from './modules/modules.module';
 import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
 import { McqCreationModule } from './mcqcreation/mcqcreation.module';
 import { McqevaluationModule } from './mcqevaluation/mcqevaluation.module';
+import { EventLogModule } from './EventLog/event-log.module';
 
 @Module({
   imports: [
+    LoggerModule.forRoot({
+      pinoHttp: {
+        customProps: (req, res) => ({
+          context: 'HTTP',
+        }),
+        transport: {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            levelFirst: true,
+            translateTime: 'SYS:dd.mm.yyyy hh:MM:ss TT Z',
+            singleLine: true,
+          },
+      },
+    },
+    }),
     FilesModule,
     GraphModule,
     PrismaModule,
@@ -50,7 +68,9 @@ import { McqevaluationModule } from './mcqevaluation/mcqevaluation.module';
     QuestionModule,
     FeedbackGenerationModule,
     McqCreationModule,
-    McqevaluationModule],
+    McqevaluationModule,
+    EventLogModule,
+  ],
   controllers: [
     AppController,
     DiscussionListController, DiscussionVoteController, DiscussionViewController, DiscussionCreationController

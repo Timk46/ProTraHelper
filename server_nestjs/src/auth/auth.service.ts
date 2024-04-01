@@ -3,6 +3,7 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
+import { EventLogService } from '@/EventLog/event-log.service';
 
 /**
  * Provides authentication services
@@ -18,6 +19,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private eventLogService: EventLogService
   ) {}
 
   /**
@@ -28,11 +30,12 @@ export class AuthService {
   async loginCAS(username: string) {
     let user = await this.usersService.findOne(username);
     if (user) {
-      console.log('User logged in: ' + user.email+ " Role: " + user.globalRole)
+      this.eventLogService.log('info', 'login', user.id, 'User logged in', {email: user.email, role: user.globalRole});
+
     }
     else { // If the user doesn't exist, create a new one
       user = await this.usersService.createCASuser(username);
-      console.log('User created: ' + username + " Role: " + user.globalRole)
+      this.eventLogService.log('info', 'login', user.id, 'User created', {email: user.email, role: user.globalRole});
     }
     const tokens = await this.generateTokens(user);
     return {
@@ -49,11 +52,13 @@ export class AuthService {
   async validateUser(email: string, pass: string): Promise<User> {
     const user = await this.usersService.findOne(email);
     if (user && bcrypt.compareSync(pass, user.password)) {
+      this.eventLogService.log('info', 'login', user.id, 'User ' + email + ' validated', {email: user.email, role: user.globalRole});
       return {
         ...user,
         password: undefined, // we dont want to return the passwordhash
       };
     }
+    this.eventLogService.log('warn', 'login', user.id, 'User ' + email + ' NOT validated', {email: email});
     return null;
   }
 
@@ -101,6 +106,7 @@ export class AuthService {
             },
         ),
     ]);
+    this.eventLogService.log('info', 'login', user.id, 'Tokens generated', {email: user.email, role: user.globalRole, accessToken: accessToken});
     return {
         accessToken
     };

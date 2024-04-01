@@ -39,6 +39,7 @@ model User {
   currentconceptNodeId Int?
   conceptUser          UserConcept[]
   question             Question[]
+  EventLogs            EventLog[]
   codeSubmission       CodeSubmission[]
   codeSubmissionFile   CodeSubmissionFile[]
   anonymousUser        anonymousUser[]
@@ -272,7 +273,7 @@ model Question {
   //successor                  Question?          @relation("VersionControl")
   //toDo: connect to different mediatypes Evelyn
   codingQuestions            CodingQuestion?
-  contentElement             ContentElement?   
+  contentElement             ContentElement?
   conceptNode                ConceptNode?       @relation(fields: [conceptNodeId], references: [id], onDelete: SetNull)
   conceptNodeId              Int?
   userAnswer                 UserAnswer[]
@@ -567,3 +568,14 @@ model UserContentView {
 }
 
 //********************************************************************************************* End ContentView Progress
+
+model EventLog {
+  id        Int      @id @default(autoincrement())
+  timestamp DateTime @default(now())
+  type      String
+  level     String
+  message   String
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  data      Json?
+}
