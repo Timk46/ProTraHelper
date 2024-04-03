@@ -1,8 +1,9 @@
+import { last } from 'rxjs';
 import { Component, HostListener, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { RunCodeService } from "../../services/runCode.service";
 import { TaskDataService } from "../../services/task-data.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { CodeSubmissionResultDto, Judge0Dto, QuestionDTO } from "@DTOs/index";
+import { CodeSubmissionResultDto, QuestionDTO } from "@DTOs/index";
 import { FormArray, FormBuilder, Validators } from "@angular/forms";
 import { saveAs } from "file-saver";
 import * as JSZip from "jszip";
@@ -86,7 +87,7 @@ export class StudentWorkspaceComponent implements OnInit {
     this.route.params.subscribe((params) => {
       const taskId = params['taskId'];
       if (taskId) {
-        this.currentTaskId = +taskId;
+        this.currentTaskId = taskId;
         this.taskDataService.getTask(this.currentTaskId).subscribe((task) => {
           this.currentTask = task;
           this.taskDescription = this.currentTask?.codingQuestion!.textHTML;
@@ -151,10 +152,11 @@ export class StudentWorkspaceComponent implements OnInit {
     let isFirstResponse = true;
     this.currentLoadingFeedbackMessage = "";
     this.runCodeService
-      .getKiFeedback(submitCode, this.taskDescription, this.selectedLanguage, this.flavor, {
-        resultjudge0: this.lastResult,
-        encryptedSubmissionId: this.lastSubmissionId,
-      })
+      .getKiFeedback(submitCode, this.taskDescription, this.selectedLanguage, this.flavor,
+        //testResults: this.lastResult,
+        this.lastResult
+        //encryptedSubmissionId: this.lastSubmissionId,
+      )
       .subscribe({
         next: (response) => {
           if (isFirstResponse) {
@@ -187,14 +189,8 @@ export class StudentWorkspaceComponent implements OnInit {
         additionalFiles[file.codeFileName] = file.code;
       }
     }
-
-    // Handling java tasks
-    if (this.currentTask?.codingQuestion!.programmingLanguage ==  "java") {
-      // if Java run multiple file endpoint
       this.runCodeService
-        .executeMultipleFiles(
-          "", // async ng_bind in solution templates "{{}}" can trigger for data races, remove
-          this.selectedLanguage,
+        .executeStudentCode(
           this.currentTaskId,
           inputArgs,
           additionalFiles
@@ -208,29 +204,6 @@ export class StudentWorkspaceComponent implements OnInit {
             this.isLoading = false;
           },
         });
-    }
-    // Handling python tasks
-    if (this.currentTask?.codingQuestion!.programmingLanguage ==  "python") {
-      // else run single file endpoint for python tasks, async ng_bind use in html. remove {{code}}
-      const firstCodeStructure =
-        this.currentTask?.codingQuestion.codeGerueste[0].code ||
-        "error: no code found";
-      this.runCodeService
-        .executeCode(
-          firstCodeStructure,
-          this.selectedLanguage,
-          this.currentTask.codingQuestion!.id
-        )
-        .subscribe({
-          next: (result) => {
-            this.handleCodeSubmissionResponse(result);
-          },
-          error: (error) => {
-            this.checkError(error);
-            this.isLoading = false;
-          },
-        });
-    }
   }
 
   /**
@@ -239,16 +212,24 @@ export class StudentWorkspaceComponent implements OnInit {
    * @param result - The API response data.
    */
   handleCodeSubmissionResponse(result: CodeSubmissionResultDto): void {
-    const response: Judge0Dto = result.resultjudge0;
-    this.lastSubmissionId = result.encryptedSubmissionId;
-    this.lastResult = response;
-    this.compilerOutput = response.stdout;
+    console.log(result);
+    //this.lastSubmissionId = result.encryptedSubmissionId;
+    this.lastResult = result;
+    this.compilerOutput = "";
+    for (const testResult of result.CodeSubmissionResult.testResults) {
+      this.compilerOutput += testResult.test+ "\n";
+      this.compilerOutput += testResult.status+ "\n";
+      this.compilerOutput += testResult.exception+ "\n";
+    }
+    this.compilerOutput += "\n" + "SCORE: " + result.CodeSubmissionResult.score;
+    /*
     if (response.compile_output) {
       this.compilerOutput += "\n" + response.compile_output;
     }
     if (response.stderr) {
       this.compilerOutput += "\n" + response.stderr;
     }
+    */
     this.isLoading = false;
     this.feedbackMessage =
       'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben. Klicke hierzu auf den Button "Feedback erzeugen".';

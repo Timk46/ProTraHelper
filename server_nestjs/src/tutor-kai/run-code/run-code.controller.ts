@@ -2,7 +2,7 @@ import { Controller, Post, Body, Res, Req } from '@nestjs/common';
 import { RunCodeService } from './run-code.service';
 import { FeedbackNormalService } from './feedback_normal.service';
 import { FeedbackRAGService } from './feedback_rag.service';
-import { CodeSubmissionResultDto, Judge0Dto } from '@DTOs/index';
+import { CodeSubmissionResultDto } from '@DTOs/index';
 import { StudentRatingService } from './student-rating.service';
 import { Response } from 'express';
 
@@ -15,51 +15,17 @@ export class RunCodeController {
     private readonly studentRatingService: StudentRatingService,
   ) { }
 
-  /**
-   * executeCode - executes the given code and returns the result.
-   *
-   * @param {string} code - the code to execute
-   * @param {string} language - the programming language of the code
-   * @param {number} taskId - the associated task ID
-   * @result returns a CodeSubmissionResultDto
-   */
-  @Post('execute-code')
-  async executeCode(
-    @Body('code') code: string,
-    @Body('language') language: string,
-    @Body('taskId') taskId: number,
+  @Post('execute')
+  async execute(
     @Req() req,
-  ): Promise<CodeSubmissionResultDto> {
-    return await this.runCodeService.executeCode(req, code, language, taskId);
-  }
-
-  /**
-   * executeMultipleFiles - executes code with multiple files and returns the result.
-   *
-   * @param {string} code - the main file code to execute
-   * @param {string} language - the programming language of the code
-   * @param {number} taskId - the associated task ID
-   * @param {string[]} inputArgs - user input arguments
-   * @param {{ [fileName: string]: string }} additionalFiles - a dictionary containing additional files in which the key is the file name and the value is the file content
-   * @result returns a CodeSubmissionResultDto
-   */
-  @Post('execute-multiple-files')
-  async executeMultipleFiles(
-    @Req() req,
-    @Body('code') code: string,
-    @Body('language') language: string,
-    @Body('taskId') taskId: number,
+    @Body('taskId') taskId: string,
     @Body('inputArgs') inputArgs: string[],
-    @Body('additionalFiles') additionalFiles: { [fileName: string]: string },
+    @Body('CodeFiles') files: { [fileName: string]: string },
   ): Promise<CodeSubmissionResultDto> {
-    return await this.runCodeService.runMultipleFiles(
-      req,
-      code,
-      language,
-      taskId,
-      inputArgs,
-      additionalFiles,
-    );
+
+    const results = await this.runCodeService.executeCode(files, parseInt(taskId), req.user.id);
+    console.log(JSON.stringify(results));
+    return results;
   }
 
   /**
@@ -106,10 +72,6 @@ export class RunCodeController {
     }
   }
 
-  @Post('test')
-  async test(): Promise<void> {
-    //const test = await this.FeedbackRAGService.getKiFeedback();
-  }
   /**
    * postFeedback - submits user feedback to the backend.
    *

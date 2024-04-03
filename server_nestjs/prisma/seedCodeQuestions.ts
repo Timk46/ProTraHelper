@@ -31,7 +31,7 @@ export const seedCodeQuestions = async (user_id: number) => {
 }
 
 async function importProgrammingTasksFromExcel(filename: string, description: string, adminUserId: number = 1) {
-    const filePathTasks = process.env.FILE_PATH + filename;
+    const filePathTasks = process.env.FILE_PATH + 'programming-tasks/' + filename;
     const workbook = XLSX.readFile(filePathTasks);
 
     const taskSheet: WorkSheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -67,13 +67,7 @@ async function importProgrammingTasksFromExcel(filename: string, description: st
                             create: [
                                 {
                                     code: task.Test,
-                                    // Not using this model for testcases yet. All in one code currently
-                                    //testcase: {
-                                    //  create: {
-                                    //    input: task.Test,
-                                    //    output: "1",
-                                    //  },
-                                    //},
+                                    language: task.Programming_Language
                                 },
                             ],
                         },

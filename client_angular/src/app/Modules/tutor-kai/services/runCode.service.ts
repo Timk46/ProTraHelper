@@ -16,51 +16,24 @@ export class RunCodeService {
   constructor(private http: HttpClient) { }
 
   /**
-   * Executes single files of user-submitted code on the server.
-   *
-   * @param code - The source code to be executed.
-   * @param language - The programming language of the submitted code.
-   * @param taskId - The ID of the task the code is associated with.
-   * @returns An Observable with the server's response.
-   */
-  executeCode(
-    code: string,
-    language: string,
-    taskId: number
-  ): Observable<CodeSubmissionResultDto> {
-    const body = {
-      code: code,
-      language: language,
-      taskId: taskId,
-    };
-    return this.http.post<CodeSubmissionResultDto>(`${this.apiUrl}/execute-code`, body);
-  }
-
-  /**
    * Executes multiple files of user-submitted code on the server.
    *
-   * @param code - The main source code to be executed.
-   * @param language - The programming language of the submitted code (always 'multipleFiles').
    * @param taskId - The ID of the task the code is associated with.
    * @param inputArgs - Arguments provided for execution.
    * @param additionalFiles - A dictionary of filename (key) and source code (value) pairs for additional files.
    * @returns An Observable with the server's response.
    */
-  executeMultipleFiles(
-    code: string,
-    language: string,
+  executeStudentCode(
     taskId: number,
     inputArgs: string[],
     additionalFiles: { [fileName: string]: string }
   ): Observable<CodeSubmissionResultDto> {
     const body = {
-      code: code,
-      language: 'multipleFiles',
       taskId: taskId,
       inputArgs: inputArgs,
-      additionalFiles: additionalFiles,
+      CodeFiles: additionalFiles,
     };
-    return this.http.post<CodeSubmissionResultDto>(`${this.apiUrl}/execute-multiple-files`, body);
+    return this.http.post<CodeSubmissionResultDto>(`${this.apiUrl}/execute`, body);
   }
 
   /**

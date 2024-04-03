@@ -118,16 +118,8 @@ export interface CodingQuestionDto {
     testFileName: string;
     language: string;
     questionId: number;
-    testCases: TestcaseDto[];
   }
-  
-  export interface TestcaseDto {
-    id: number;
-    input: string;
-    expectedOutput: string;
-    automatedTestId: number;
-  }
-  
+
   export enum questionType {
     MULTIPLECHOICE = "MC",
     FREETEXT = "FreeText",
