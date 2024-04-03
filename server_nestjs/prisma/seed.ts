@@ -503,6 +503,67 @@ async function main() {
     data: { origin: { connect: { id: questionFreeText.id } } },
   });
 
+  //create content element and connect it to the question
+  const contentElement = await prisma.contentElement.create({
+    data: {
+        type: contentElementType.QUESTION,
+        question: { connect: { id: questionFreeText.id } },
+        title: questionFreeText.name,
+    },
+});
+
+//connect the content element to the the concept node by setting the training
+const training = await prisma.training.findFirst({
+    where: { 
+        conceptNodeId: questionFreeText.conceptNodeId,
+        awards: questionFreeText.level,
+     }
+});
+if(training) {
+    const contentNode = await prisma.contentNode.findFirst({
+        where: { id: training.contentNodeId }
+    });
+    //ermittle die höchste Position in der content view und setze die Position des neuen content elements auf +1
+    const contentViews = await prisma.contentView.findMany({
+        where: { contentNodeId: contentNode.id }
+    });
+    let maxPosition = 0;
+    for (const contentView of contentViews) {
+        if(contentView.position > maxPosition) {
+            maxPosition = contentView.position;
+        }
+    }
+    await prisma.contentView.create({
+        data: {
+            contentNode: { connect: { id: contentNode.id } },
+            contentElement: { connect: { id: contentElement.id } },
+            position: maxPosition + 1,
+        },
+    });
+}
+else {
+    //erzeuge eine neue content node mit dem award level und verbinde sie mit dem content element
+    const contentNode = await prisma.contentNode.create({
+        data: {
+            name: 'Training ' + questionFreeText.level,
+        },
+    });
+    await prisma.training.create({
+        data: {
+            conceptNode: { connect: { id: questionFreeText.conceptNodeId } },
+            contentNode: { connect: { id: contentNode.id } },
+            awards: questionFreeText.level,
+        },
+    });
+    await prisma.contentView.create({
+        data: {
+            contentNode: { connect: { id: contentNode.id } },
+            contentElement: { connect: { id: contentElement.id } },
+            position: 1,
+        },
+    });
+}
+
   // Discussion, Message --------------------------------------------------------------
   const anonymousAdmin = await prisma.anonymousUser.create({
     data: {

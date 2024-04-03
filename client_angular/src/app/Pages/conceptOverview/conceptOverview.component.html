@@ -11,18 +11,6 @@
       </div>
     </mat-tab>
 
-    <mat-tab label="Aufgaben">
-      <div class="tab-content-container">
-        <app-task-overview [activeConceptNodeId]="activeConceptNode.databaseId" [contentsForActiveConceptNode]="contentsForActiveConceptNode"></app-task-overview>
-      </div>
-    </mat-tab>
-
-    <mat-tab label="Kompetenzen">
-      <div class="tab-content-container">
-        <app-competencies [contentsForActiveConceptNode]="contentsForActiveConceptNode"></app-competencies>
-      </div>
-    </mat-tab>
-
     <mat-tab label="Diskussion">
       <div class="tab-content-container">
         <app-discussion-list [activeConceptNodeId]="activeConceptNode.databaseId"></app-discussion-list>

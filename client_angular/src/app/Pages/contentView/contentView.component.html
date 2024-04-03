@@ -1,6 +1,6 @@
 <div class = "contentView-Container">
   <div class = "contentView-Title">
-    <h1> {{ contentViewData.name}} </h1>
+    <h1> {{ contentViewData.name }} </h1>
     <h3>Zuletzt geöffnet: {{ readableDate }} </h3>
   </div>
   <div class = "contentView-Description">
@@ -63,11 +63,11 @@
         <p class="message-code">Code kann noch nicht dargestellt werden.</p>
       </div>
 
-      <!--MC Question
-      <div *ngIf="contentElem.type == 'MCQ' " class = "contentElement-Container">
-        <app-mcTask>  [uniqueIdentifier]=""></app-mcTask>
+      <!-- QUESTION -->
+      <div *ngIf="contentElem.type == 'QUESTION' " class = "contentElement-Container">
+        <p class="message-code">Hier werden die Aufgaben angezeigt.</p>
+        <!-- <app-mcTask>  [uniqueIdentifier]=""></app-mcTask> -->
       </div>
-      -->
       
       <!--Show additional Content Text, if it has any-->
       <div *ngIf="contentElem.text" class="contentElement-Container">

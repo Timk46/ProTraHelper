@@ -17,7 +17,6 @@ import { DiscussionViewService } from './discussion/discussion-view/discussion-v
 import { DiscussionCreationService } from './discussion/discussion-creation/discussion-creation.service';
 import { DiscussionCreationController } from './discussion/discussion-creation/discussion-creation.controller';
 import { QuestionDataModule } from './question-data/question-data.module';
-import { TaskOverviewModule } from './task-overview/task-overview.module';
 import { LoggerModule } from 'nestjs-pino';
 
 // BEGIN Tutor-Kai Imports
@@ -63,7 +62,6 @@ import { EventLogModule } from './EventLog/event-log.module';
     ChatBotModule,
     ModulesModule,
     QuestionDataModule,
-    TaskOverviewModule,
     RunCodeModule,
     QuestionModule,
     FeedbackGenerationModule,

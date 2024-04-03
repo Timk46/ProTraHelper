@@ -1,12 +1,14 @@
 import { contentElementType } from "./contentElementType.enum";
 import { QuestionDTO } from "./question.dto";
 import { FileDto } from "./file.dto";
+import { userAnswerFeedbackDTO } from "./userAnswer.dto";
 
 export interface ContentDTO {
     contentNodeId: number;
     name: string;
     description: string;
     contentElements: ContentElementDTO[];
+    level?: number;
 
     contentPrerequisiteIds?: number[];
     contentSuccessorIds?: number[];
@@ -33,10 +35,20 @@ export interface ContentElementDTO {
     title?: string;
     text?: string;
     file?: FileDto;
-    question?: QuestionDTO;
+    question?: taskViewDTO;
 }
 
 export interface ContentsForConceptDTO {
     trainedBy: ContentDTO[];
     requiredBy: ContentDTO[];
+}
+
+export interface taskViewDTO {
+    id: number;
+    name?: string;
+    description?: string;
+    type: string;
+    level: number;
+    progress: number;
+    feedback?: userAnswerFeedbackDTO[];
 }

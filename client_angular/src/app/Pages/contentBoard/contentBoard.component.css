@@ -1,4 +1,28 @@
 .content-container {
-  display: flex;
+  display: block;
   margin-top: 8px;
+}
+
+.node-progress {
+  width: 50%;
+  margin: auto;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.node-question {
+  margin-right: 10px;
+} 
+
+.content-view {
+  width: fit-content;
+}
+
+.description {
+  width: fit-content;
+  margin: 4px;
+}
+
+.panel-title {
+  width: fit-content;
 }

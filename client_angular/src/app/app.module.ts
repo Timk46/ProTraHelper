@@ -40,7 +40,6 @@ import { DiscussionViewMessageComponent } from './Pages/discussion/discussion-vi
 import { DiscussionViewCreateComponent } from './Pages/discussion/discussion-view/discussion-view-create/discussion-view-create.component';
 import { DiscussionCreationComponent } from './Pages/discussion/discussion-creation/discussion-creation.component';
 import { DiscussionPrecreationComponent } from './Pages/discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
-import { TaskOverviewComponent } from './Pages/task-overview/task-overview.component';
 import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overview/task-evaluation-overview.component';
 import { FreeTextTaskComponent } from './Pages/contentView/contentElement/free-text-task/free-text-task.component';
 import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
@@ -76,7 +75,6 @@ import { DescriptionDialogComponent } from './Pages/contentView/contentElement/m
     DiscussionViewCreateComponent,
     DiscussionCreationComponent,
     DiscussionPrecreationComponent,
-    TaskOverviewComponent,
     TaskEvaluationOverviewComponent,
     FreeTextTaskComponent,
     McTaskCreationComponent,

@@ -1,57 +1,79 @@
-<!-- <div class="grid-container">
-  <mat-card class="card-container" *ngFor="let content of contentsForActiveConceptNode.trainedBy" (click)="onContentClick(content)">
-    <mat-card-header>
-      <mat-card-title>{{ content.name }}</mat-card-title>
-      <mat-card-subtitle>ContentNode Id: {{ content.contentNodeId }}</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      Beschreibung: {{ content.description }}
-    </mat-card-content>
-  </mat-card>
-</div> -->
-
 <div class="content-container" class="mat-elevation-z8">
-<table [dataSource]="dataSource" mat-table>
-  <!-- Position Column -->
-  <ng-container matColumnDef="id">
-    <th mat-header-cell *matHeaderCellDef> ID </th>
-    <td mat-cell *matCellDef="let element"> {{element.id}} </td>
-  </ng-container>
-
-  <!-- Name Column -->
-  <ng-container matColumnDef="name">
-    <th mat-header-cell *matHeaderCellDef> Name </th>
-    <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-  </ng-container>
-
-  <!-- Weight Column -->
-  <ng-container matColumnDef="progress">
-    <th mat-header-cell *matHeaderCellDef> Fortschritt </th>
-    <td mat-cell *matCellDef="let row">
-      <mat-progress-spinner [value]="row.progress" [mode]="'determinate'" [diameter]="30"></mat-progress-spinner>
-    </td>
-  </ng-container>
-
-  <!-- Symbol Column -->
-  <ng-container matColumnDef="question">
-    <th mat-header-cell *matHeaderCellDef> Fragen </th>
-    <td mat-cell *matCellDef="let element">
-      <div *ngIf="element.question">
-        <mat-icon class="small-icon">?</mat-icon>
+  <mat-accordion>
+    <mat-expansion-panel *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index">
+      <mat-expansion-panel-header>
+        <mat-panel-title class="panel-title">{{ content.name }} (Level: {{content.level}})</mat-panel-title>
+        <!-- when element.question true, then show the icon -->
+        <div class="node-question" *ngIf="content.questionMarked">
+          <mat-icon matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
+        </div>
+        <p matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet.">Fortschritt: </p><mat-progress-bar matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." class="node-progress" mode="determinate" [value]="content.progress"></mat-progress-bar>
+        <button matTooltip="Zeigt alle Inhalte (PDF / Video / Fragen.) Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." class="content-view" mat-raised-button color="primary" (click)="onContentClick(content)" class="button">Gesamt-Ansicht öffnen</button>  
+      </mat-expansion-panel-header>
+      <mat-panel-description>
+        <p class="description">{{ content.description }}</p>
+      </mat-panel-description>
+      
+      <!-- table with the content node details and elements -->
+      <div class="content-container">
+        <h3>Fragenübersicht</h3>
+        <div>
+          <table mat-table [dataSource]="getFilteredData(content.contentNodeId)" mat-sort>
+            <!-- Position Column -->
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef> ID </th>
+              <td mat-cell *matCellDef="let element"> {{ element.id }} </td>
+            </ng-container>
+          
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef> Name </th>
+              <td mat-cell *matCellDef="let element" matTooltip="{{element.description}}"> {{ element.name }} </td>
+            </ng-container>
+  
+            <!-- Type Column -->
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef> Fragentyp </th>
+              <td mat-cell *matCellDef="let element"> {{ element.type }} </td>
+            </ng-container>
+  
+            <!-- Attempts Column -> not used anymore
+            <ng-container matColumnDef="attempts">
+              <th mat-header-cell *matHeaderCellDef> Versuche </th>
+              <td mat-cell *matCellDef="let element"> {{ element.attempts }} </td>
+            </ng-container>
+            -->
+  
+            <!-- Level Column -> not used anymore, because the level shown in the content node title
+            <ng-container matColumnDef="level">
+              <th mat-header-cell *matHeaderCellDef> Level </th>
+              <td mat-cell *matCellDef="let element"> {{ element.level }} </td>
+            </ng-container>
+            -->
+          
+            <!-- Progress Column -->
+            <ng-container matColumnDef="progress">
+              <th mat-header-cell *matHeaderCellDef> Fortschritt </th>
+              <td mat-cell *matCellDef="let row">
+                <mat-progress-spinner [value]="row.progress" [mode]="'determinate'" [diameter]="30"></mat-progress-spinner>
+              </td>
+            </ng-container>
+          
+            <!-- Symbol Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef> Aktion </th>
+              <td mat-cell *matCellDef="let element"> 
+                <button mat-raised-button color="primary" (click)="onTaskClick(element.id, element.type)" class="button">Öffnen</button>
+              </td>
+            </ng-container>
+            
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          
+          </table>
+        </div>
       </div>
-    </td>
-  </ng-container>
-
-  <!-- Symbol Column -->
-  <ng-container matColumnDef="actions">
-    <th mat-header-cell *matHeaderCellDef> Aktion </th>
-    <td mat-cell *matCellDef="let element"> 
-      <button mat-raised-button color="primary" (click)="onContentClick(element.action)" class="button">Öffnen</button>
-    </td>
-  </ng-container>
-
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-</table>
+    </mat-expansion-panel>
+  </mat-accordion>
 </div>
+

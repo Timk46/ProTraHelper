@@ -1,11 +1,15 @@
 import { ContentDTO, ContentsForConceptDTO } from '@DTOs/content.dto';
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ContentViewComponent } from '../contentView/contentView.component';
 import { MatTab } from '@angular/material/tabs';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
 import { ContentService } from 'src/app/Services/content/content.service';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
+import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
 
 interface ContentViewData {
   id: number;
@@ -15,49 +19,120 @@ interface ContentViewData {
   action: ContentDTO;
 }
 
+interface TaskViewData {
+  contentNodeId: number;
+  id: number;
+  name: string;
+  type: string;
+  progress: number;
+  description?: string;
+}
+
 @Component({
   selector: 'app-contentBoard',
   templateUrl: './contentBoard.component.html',
   styleUrls: ['./contentBoard.component.css'],
 })
 export class ContentBoardComponent implements OnInit, OnChanges {
-  @Input() activeConceptNodeId: number = -1; //needed for the discussion creation dialog
+  @Input() activeConceptNodeId: any; //needed for the discussion creation dialog
 
   @Input() contentsForActiveConceptNode: ContentsForConceptDTO = {
     trainedBy: [],
     requiredBy: [],
   };
 
-  displayedColumns: string[] = [
-    'id',
-    'name',
-    'progress',
-    'question',
-    'actions',
-  ];
-  dataSource : MatTableDataSource<ContentViewData> = new MatTableDataSource<ContentViewData>();
+  @ViewChild(MatSort) sort: MatSort;
 
-  constructor(private router: Router, public dialog: MatDialog, private contentService: ContentService) {}
+  //the data for the table of questions
+  displayedColumns: string[] = [
+    'id', 
+    'name', 
+    'type',  
+    'progress', 
+    //'level', 
+    'actions'
+  ];
+
+  getRouterLink(index: number): string {
+    return `/tutor-kai/code/${index}`;
+  }
+
+  titles = [
+    "Python Kapitalwert",
+    "Python Buchhandlung",
+    "Python Quersumme",
+    "Python_Fibonacci Index",
+    "Buchstabenfrequenz",
+    "Rekursive Summe",
+    "Euklidischer Algorithmus",
+    "Sieb des Erathostenes",
+    "Java Alter",
+    "Java Bruchsumme",
+    "Java Discount",
+    "Java Maximalwert",
+    "Java Arrays und Schleifen",
+    "Java Königsschach",
+    "Java Switch",
+    "Java Bibliothek",
+    "Java GGT",
+    "Java Uni",
+    "Java VektorWork",
+    "Java_KFZ",
+    "Java_Punkt",
+    "Java_Bank",
+    "Java_Radio",
+    "UMLtoJava",
+    "Java_Airline",
+    "Java_Koerper",
+    "Java_Threads",
+    "Python Matrix",
+    "Python Funktionen",
+    "Python Potenz",
+    "Python Drehe String",
+    "Python Steuer",
+    "Python Filter Liste",
+    "Python Reduziere Liste",
+    "Python Fibonacci",
+    "Java Wettrennen",
+    "Java BubbleSort",
+    "Java UML to Java"
+  ];
+
+  dataSource: MatTableDataSource<TaskViewData>;
+
+  constructor(private router: Router, public dialog: MatDialog, private contentService: ContentService) {
+    this.dataSource = new MatTableDataSource<TaskViewData>();
+    this.sort = new MatSort();
+  }
   
 
   ngOnInit() {
   }
 
   ngOnChanges() {
-    this.dataSource.data = [];
+    const data: TaskViewData[] = [];
     for (let content of this.contentsForActiveConceptNode.trainedBy) {
-      let userProgress = content.progress;
-      let userQuestion = content.questionMarked;
-      const input: ContentViewData = {
-        id: content.contentNodeId,
-        name: content.name.toString(),
-        progress: userProgress,
-        question: userQuestion,
-        action: content,
-      };
-      this.dataSource.data.push(input);
+      for (let contentElement of content.contentElements) {
+        if (contentElement.question == null) {
+          continue;
+        }
+        const input: TaskViewData = {
+          contentNodeId: content.contentNodeId,
+          id: contentElement.question.id,
+          name: contentElement.question.name ? contentElement.question.name : content.name,
+          type: contentElement.question.type,
+          progress: 50,
+          description: contentElement.question.description,
+        };
+        data.push(input);
+      }
+      
     }
-    this.dataSource.data = this.dataSource.data;
+    this.dataSource = new MatTableDataSource(data);
+  }
+
+  ngAfterViewInit() { 
+    this.dataSource.sort = this.sort;
   }
 
   onContentClick(content: ContentDTO) {
@@ -74,4 +149,33 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     // Open the Dialog with ContentViewComponent. We could navigate to the component instead aswell.
     this.dialog.open(ContentViewComponent, dialogConfig);
   }
+
+  
+
+  onTaskClick(id: number, type: string) {
+    console.log('active task id: ' + id);
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.data = {
+      question_id: id,
+    };
+    dialogConfig.maxHeight = "80vh";
+    let dialogRef;
+    if (type == 'MC') { // why SC and not MC?
+      dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
+    }
+    if (type == 'SC') {
+      dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
+    }
+    if (type == 'FreeText') {
+      dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
+    }
+    if (type == 'CodingQuestion') {
+      this.router.navigate([this.getRouterLink(id)]);
+    }
+  }
+
+  getFilteredData(contentNodeId: number) {
+    return this.dataSource.data.filter(element => element.contentNodeId === contentNodeId);
+  }
+
 }

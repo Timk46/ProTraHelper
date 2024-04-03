@@ -116,6 +116,15 @@ export class ContentService {
       }
     };
 
+    const getAttemptsForQuestion = async (question_id) => {
+      return await this.prisma.userAnswer.count({
+        where: {
+            questionId: question_id,
+            userId: userId,
+        },
+      });
+    }
+
     const transformContentNode = (contentNode) => ({
       contentNodeId: contentNode.id,
       name: contentNode.name,
@@ -128,7 +137,14 @@ export class ContentService {
           title: contentView.contentElement.title,
           text: contentView.contentElement.text,
           file: contentView.contentElement.file,
-          question: contentView.contentElement.question,
+          question: contentView.contentElement.question ? {
+            id: contentView.contentElement.question.id,
+            name: contentView.contentElement.question.name,
+            description: contentView.contentElement.question.description,
+            type: contentView.contentElement.question.type,
+            level: contentView.contentElement.question.level,
+            progress: 50,
+          } : null,
         }),
       ),
       contentPrerequisiteIds: contentNode.prerequisites.map(
@@ -353,4 +369,46 @@ export class ContentService {
       : null;
     return Array.from(new Set(allConcepts));
   }
+
 }
+
+/*
+  //get the attemt count and the progress for each question id by looking at the user_answer table
+        //get the attempt count for the question
+        let attemptCount = await this.prisma.userAnswer.count({
+          where: {
+              questionId: question.id,
+              userId: user_id,
+          },
+      });
+
+      //get the best user score for each question
+      let userAnswers = await this.prisma.userAnswer.findMany({
+          where: {
+              questionId: question.id,
+              userId: user_id,
+          },
+          select: {
+              id: true,
+          }
+      });
+
+      let bestScore = 0;
+      if(userAnswers) {
+          for(let userAnswer of userAnswers) {
+              let feedback = await this.prisma.feedback.findUnique({
+                  where: {
+                      id: userAnswer.id,
+                  },
+                  select: {
+                      score: true,
+                  }
+              });
+              if(feedback.score > bestScore) {
+                  bestScore = feedback.score;
+              }
+          }
+      }
+
+      let progress = (bestScore / question.score)*100;
+*/
