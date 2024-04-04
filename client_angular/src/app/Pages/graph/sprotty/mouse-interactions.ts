@@ -6,7 +6,6 @@ import { injectable, inject } from 'inversify';
 import { expand } from "rxjs";
 import { SprottyConceptNode } from "./sprottyModels.interface";
 import ElkConstructor from "elkjs";
-import { PermissionService } from "./permissionService";
 //import { NodeCreator } from "./di.config";
 
 export const NodeCreator = Symbol('NodeCreator');
@@ -17,11 +16,11 @@ export class CustomMouseListener extends MouseListener {
     constructor(
         @inject(TYPES.IContextMenuServiceProvider) protected readonly contextMenuService: IContextMenuServiceProvider,
     @inject(TYPES.IContextMenuProviderRegistry) protected readonly menuProvider: ContextMenuProviderRegistry,
-    //private permissionService: PermissionService
     ){
         super();
     }
 
+    // sends a collapse/expand action to the action dispatcher when a node is double-clicked
     override doubleClick(target: SModelElement, event: MouseEvent): (Action | Promise<Action>)[] {
         console.log('double clicked ' + target.id, target)
         
@@ -31,7 +30,6 @@ export class CustomMouseListener extends MouseListener {
                 expandIds:   conceptNode.expanded ? [] : [ conceptNode.id ],
                 collapseIds:  conceptNode.expanded ? [ conceptNode.id ] : []
             })
-            //target.actionDispatcher.dispatch(action)
             return [action ];
         } else {
             return [];
@@ -54,6 +52,7 @@ export class CustomMouseListener extends MouseListener {
 
 }
 
+// can be used for drag-and-drop functionality, probably broken right now
 // @injectable()
 // export class DroppableMouseListener extends MouseListener {
 

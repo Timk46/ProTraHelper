@@ -16,8 +16,6 @@ import { PopupModelProvider } from './popup';
 import { ClassContextMenuItemProvider, ClassContextMenuService } from './context-menu';
 
 
-
-
 // This file creates an inversify container for the sprotty diagram.
 export default (containerId: string) => {
     const elkFactory: ElkFactory = () => new ElkConstructor({
@@ -27,17 +25,17 @@ export default (containerId: string) => {
     const myModule = new ContainerModule((bind, unbind, isBound, rebind) => {
         bind(TYPES.ModelSource).to(ConceptGraphModelSource).inSingletonScope();
         rebind(TYPES.ILogger).to(ConsoleLogger).inSingletonScope();
-        rebind(TYPES.LogLevel).toConstantValue(LogLevel.warn);
+        rebind(TYPES.LogLevel).toConstantValue(LogLevel.error);
         bind(TYPES.IModelLayoutEngine).toService(ElkLayoutEngine);
         bind(ElkFactory).toConstantValue(elkFactory);
         rebind(ILayoutConfigurator).to(RandomGraphLayoutConfigurator);
 
-        //popup
-        bind(TYPES.IPopupModelProvider).to(PopupModelProvider);
+        //popup (doesn't work)
+        //bind(TYPES.IPopupModelProvider).to(PopupModelProvider);
 
-        // context menu
-        bind(TYPES.IContextMenuService).to(ClassContextMenuService);
-        bind(TYPES.IContextMenuItemProvider).to(ClassContextMenuItemProvider);
+        // context menu 
+        //bind(TYPES.IContextMenuService).to(ClassContextMenuService);
+        //bind(TYPES.IContextMenuItemProvider).to(ClassContextMenuItemProvider);
 
         //double click
         bind(CustomMouseListener).toSelf().inSingletonScope();
@@ -67,12 +65,6 @@ export default (containerId: string) => {
         
         //collapse expand button
         configureModelElement(context, 'button:expand', SButtonImpl, CustomExpandButtonView); 
-        // configureButtonHandler({bind, isBound}, 'label:button:expand', CustomButtonHandler); //not used
-
-        // if(0){
-        // configureModelElement(context, 'routing-point', SRoutingHandle, SRoutingHandleView);
-        // configureModelElement(context, 'volatile-routing-point', SRoutingHandle, SRoutingHandleView);
-        // }
 
 
         configureViewerOptions(context, {
@@ -98,7 +90,6 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
             'org.eclipse.elk.algorithm': 'org.eclipse.elk.layered',
             'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]', // important for button-label spacing
             'org.eclipse.elk.spacing.edgeNode': '20', // space between node and edge
-            //'org.eclipse.elk.edgeRouting': 'POLYLINE',
         };
     }
 
@@ -106,7 +97,6 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
         if(snode.type === 'node:concept'){
             return {
                 'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS MINIMUM_SIZE',
-                //'org.eclipse.elk.nodeSize.minimum': '(40, 40)', 
                 'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
                 'org.eclipse.elk.nodeLabels.padding': '[top=5, bottom=0, left=25, right=25]',
                 'org.eclipse.elk.padding': '[top=30, bottom=20, left=20, right=20]',
@@ -127,7 +117,6 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
         }
         return {
             'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS MINIMUM_SIZE',
-            //'org.eclipse.elk.nodeSize.minimum': '(40, 40)', 
             'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_TOP', // very important
             'org.eclipse.elk.nodeLabels.padding': '[top=0, bottom=0, left=25, right=25]',
             'org.eclipse.elk.spacing.labelLabel': '5',

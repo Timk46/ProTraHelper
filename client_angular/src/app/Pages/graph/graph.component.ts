@@ -14,7 +14,9 @@ import { ModuleDTO } from '@DTOs/index';
 })
 export class GraphComponent implements OnInit {
 
+  // create inversify container in di.config
   container = createContainer('concept-graph');
+  
   modelSource = this.container.get<ConceptGraphModelSource>(TYPES.ModelSource);
   modules: ModuleDTO[] = [];
 
