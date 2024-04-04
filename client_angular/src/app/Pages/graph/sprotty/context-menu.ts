@@ -90,14 +90,9 @@ export class ClassContextMenuItemProvider implements IContextMenuItemProvider {
             new LabeledAction('', []),
             new LabeledAction('Export SVG', [RequestExportSvgAction.create()]),
             new LabeledAction('', []),
-            // {
-            //     ...new LabeledAction('Delete Selected', [DeleteElementAction.create(selectionResult.selectedElementsIDs)]),
-            //     isEnabled: () => {
-            //         return selectionResult.selectedElementsIDs.length > 0
-            //     }
-            // } as MenuItem,
 
-            // custom options
+
+            // custom options for admins
             new LabeledAction('', []),
             new LabeledAction('Add Concept here', [CreateConceptAction.create({parentId: selectedElement})]),
             new LabeledAction('Delete this Concept or Edge', [DeleteConceptAction.create({conceptId: selectedElement})]),

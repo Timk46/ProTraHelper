@@ -1,4 +1,4 @@
-import { CodeSubmissionResultDto, Judge0Dto } from '@DTOs/index';
+import { CodeSubmissionResultDto} from '@DTOs/index';
 import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { CryptoService } from '../crypto/crypto.service';
@@ -176,14 +176,14 @@ export class FeedbackRAGService {
       task: task,
       language: language,
       code: code,
-      output:
-        relatedCodeSubmissionResult.resultjudge0.stdout +
+      output: ""
+       /* relatedCodeSubmissionResult.resultjudge0.stdout +
         (relatedCodeSubmissionResult.resultjudge0.compile_output
           ? relatedCodeSubmissionResult.resultjudge0.compile_output
           : ''),
       error: relatedCodeSubmissionResult.resultjudge0.stderr
         ? 'Error message: ' + relatedCodeSubmissionResult.resultjudge0.stderr
-        : '',
+        : '',*/
     });
     // Ask initial question that requires multiple tool calls
     const res = await chat.invoke(conceptsFormattedPrompt, { callbacks: [tracer] });
@@ -238,14 +238,14 @@ export class FeedbackRAGService {
       task: task,
       language: language,
       code: code,
-      output:
+      output:"",/*
         relatedCodeSubmissionResult.resultjudge0.stdout +
         (relatedCodeSubmissionResult.resultjudge0.compile_output
           ? relatedCodeSubmissionResult.resultjudge0.compile_output
           : ''),
       error: relatedCodeSubmissionResult.resultjudge0.stderr
         ? 'Error message: ' + relatedCodeSubmissionResult.resultjudge0.stderr
-        : '',
+        : '',*/
         lectureSnippet: conceptString,
     });
     const openAiResponse = await chatStream.generatePrompt([ragFormattedPrompt], undefined, [
@@ -279,10 +279,10 @@ export class FeedbackRAGService {
     openAiResponse,
     flavor: string,
   ) {
-    const sumbissionId = Number(
-      this.cryptoService.decrypt(
-        relatedCodeSubmissionResult.encryptedSubmissionId,
-      ),
+    const sumbissionId = Number("12"
+      //this.cryptoService.decrypt(
+       // relatedCodeSubmissionResult.encryptedSubmissionId,
+      //),
     );
     await this.prisma.kIFeedback.create({
       data: {

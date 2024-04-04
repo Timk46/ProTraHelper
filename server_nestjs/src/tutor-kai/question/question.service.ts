@@ -5,7 +5,6 @@ import {
   CodingQuestionDto,
   CodeGeruestDto,
   AutomatedTestDto,
-  TestcaseDto,
   CodingQuestionInternal,
 } from '@DTOs/index';
 
@@ -27,11 +26,7 @@ export class QuestionService {
       where: { id },
       include: {
         codeGerueste: true,
-        automatedTests: {
-          include: {
-            testcases: true,
-          },
-        },
+        automatedTests: true
       },
     });
     if (!codingQuestion) {
@@ -67,11 +62,7 @@ export class QuestionService {
         codingQuestions: {
           include: {
             codeGerueste: true,
-            automatedTests: {
-              include: {
-                testcases: true,
-              },
-            },
+            automatedTests: true
           },
         },
       },
@@ -92,11 +83,7 @@ export class QuestionService {
         codingQuestions: {
           include: {
             codeGerueste: true,
-            automatedTests: {
-              include: {
-                testcases: true,
-              },
-            },
+            automatedTests: true
           },
         },
       },
@@ -174,15 +161,7 @@ export class QuestionService {
           testFileName: automatedTest.testFileName,
           language: automatedTest.language,
           questionId: automatedTest.questionId,
-          testCases: automatedTest.testcases.map((testcase) => {
-            const testcaseDto: TestcaseDto = {
-              id: testcase.id,
-              input: testcase.input,
-              expectedOutput: testcase.expectedOutput,
-              automatedTestId: testcase.automatedTestId,
-            };
-            return testcaseDto;
-          }),
+
         };
         return automatedTestDto;
       }),

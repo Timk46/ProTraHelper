@@ -17,7 +17,6 @@ export * from "./module.dto"
 export * from "./contentElementStatus.dto"
 
 //TutorKai DTOs
-export * from "./tutorKaiDtos/judge0.dto";
 export * from "./tutorKaiDtos/kiFeedback.dto";
 export * from "./tutorKaiDtos/submission.dto";
 export * from "./user.dto"; // ToDo: Merge with hefl

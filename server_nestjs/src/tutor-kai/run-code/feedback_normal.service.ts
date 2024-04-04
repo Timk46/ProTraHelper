@@ -1,4 +1,4 @@
-import { CodeSubmissionResultDto, Judge0Dto } from '@DTOs/index';
+import { CodeSubmissionResultDto } from '@DTOs/index';
 import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { CryptoService } from '../crypto/crypto.service';
@@ -71,8 +71,8 @@ export class FeedbackNormalService {
       task: task,
       language: language,
       code: code,
-      output: relatedCodeSubmissionResult.resultjudge0.stdout + (relatedCodeSubmissionResult.resultjudge0.compile_output ? relatedCodeSubmissionResult.resultjudge0.compile_output : ''),
-      error: relatedCodeSubmissionResult.resultjudge0.stderr ? 'Error message: ' + relatedCodeSubmissionResult.resultjudge0.stderr : '',
+      output: "",// relatedCodeSubmissionResult.resultjudge0.stdout + (relatedCodeSubmissionResult.resultjudge0.compile_output ? relatedCodeSubmissionResult.resultjudge0.compile_output : ''),
+      error: "", //relatedCodeSubmissionResult.resultjudge0.stderr ? 'Error message: ' + relatedCodeSubmissionResult.resultjudge0.stderr : '',
     });
 
     const openAiResponse = await chat.generatePrompt([formattedPrompt], undefined, [
@@ -86,7 +86,8 @@ export class FeedbackNormalService {
     ],
     );
 
-    const sumbissionId = Number(this.cryptoService.decrypt(relatedCodeSubmissionResult.encryptedSubmissionId));
+    const sumbissionId = 12
+    //const sumbissionId = Number(this.cryptoService.decrypt(relatedCodeSubmissionResult.encryptedSubmissionId));
     await this.prisma.kIFeedback.create({
       data: {
         submission: {

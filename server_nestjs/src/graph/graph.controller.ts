@@ -58,7 +58,7 @@ export class GraphController {
      * @returns the new concept
      */
     // todo: add body for description and moduleGoals
-    @roles("ANY")
+    @roles("ADMIN")
     @Post('concept/:parentId/:name')
     async createConceptNode(@Param('parentId', ParseIntPipe) parentId:number, @Param('name') name: string): Promise<any> { // todo: there must be a better way than any
         console.log("in createConceptNode controller: ", parentId, name)
@@ -66,7 +66,7 @@ export class GraphController {
         return newConcept;
     }
 
-    @roles("ANY")
+    @roles("ADMIN")
     @Delete('concept/:conceptId')
     async deleteConceptNode(@Param('conceptId', ParseIntPipe) conceptId:number): Promise<any> {
         console.log("in deleteConceptNode controller: ", conceptId)
@@ -74,7 +74,7 @@ export class GraphController {
         return deletedConcept;
     }
 
-    @roles("ANY")
+    @roles("ADMIN")
     @Post('edge')
     async createEdge(@Body() data: any): Promise<any> {
         //todo: check roles
@@ -84,14 +84,14 @@ export class GraphController {
         const newEdge = await this.graphService.createConceptEdge(parentId, prerequisiteId, successorId);
     }
 
-    @roles("ANY")
+    @roles("ADMIN")
     @Delete('edge/:edgeId')
     async deleteEdge(@Param('edgeId', ParseIntPipe) edgeId: number): Promise<any> {
         console.log("in deleteEdge controller: ", edgeId)
         await this.graphService.deleteConceptEdge(edgeId);
     }
 
-    @roles("ANY")
+    @roles("ADMIN")
     @Put('concept/:conceptId/newParent/:parentId')
     async moveConcept(@Param('conceptId', ParseIntPipe) conceptId: number, @Param('parentId', ParseIntPipe) parentId: number): Promise<any> {
         console.log("in moveConcept controller: ", conceptId, parentId)

@@ -1,4 +1,3 @@
-import { Judge0Dto } from './judge0.dto';
 import { KIFeedbackDto } from './kiFeedback.dto';
 export interface CodeSubmissionDto {
   id: number;
@@ -25,7 +24,21 @@ export interface CodeSubmissionFileDto {
   codeSubmissionId: number;
 }
 
+export interface CodeSubmissionResult{
+  testResults: TestResult[];
+  testsPassed: boolean;
+  score: number;
+}
+
 export interface CodeSubmissionResultDto {
-  resultjudge0: Judge0Dto;
-  encryptedSubmissionId: string;
+  CodeSubmissionResult: CodeSubmissionResult;
+  encryptedCodeSubissionId: string;
+
+}
+
+
+interface TestResult {
+  test: string;
+  status: 'PASSED' | 'FAILED'; // Angenommen, dass dies die möglichen Werte sind.
+  exception: string;
 }

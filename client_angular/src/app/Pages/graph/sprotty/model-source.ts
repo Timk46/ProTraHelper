@@ -43,6 +43,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   override initialize(registry: ActionHandlerRegistry): void {
     super.initialize(registry);
+    // register all actions handled by this model source
     registry.register(SelectAction.KIND, this)
     registry.register(CollapseExpandAction.KIND, this)
     registry.register(CreateConceptAction.KIND, this)
@@ -53,7 +54,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   override handle(action: Action) {
-    console.log("action: ", action)
+    //console.log("action: ", action)
     switch (action.kind) {
       case SelectAction.KIND:
         this.handleSelectAction(action as SelectAction);
@@ -86,12 +87,21 @@ export class ConceptGraphModelSource extends LocalModelSource {
     }
   }
 
+  /**
+   * Fetches the user graph from the server and initializes the graph
+   */
   private getUserGraph() {
     this.graphData!.fetchUserGraph(this.currentModule).subscribe((graph) => {
       this.initGraph(graph);
     });
   }
 
+  /**
+   * Initializes the graph with the given flatGraph by creating the 
+   * root node and adding the first layer of nodes and edges
+   * the recursive function addChildren is called for each node to add its children
+   * @param flatGraph the graph to be initialized
+   */
   public initGraph(flatGraph: ConceptGraphDTO) {
     this.flatGraph = flatGraph;
 
@@ -142,6 +152,12 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
 
+  /**
+   * This recursive function adds children to a node in the graph. It also calculates the level and goal summaries for parent nodes.
+   * @param parentNode 
+   * @param type of the children being added, is 'concept' for parent and leaf nodes, 'mini-concept' for mini concepts and 'not-visible' for dummy nodes
+   * @returns levels and goals of leaf nodes
+   */
   private addChildren(parentNode: SprottyConceptNode, type: string): { descendants: number, descendantLevels: number[], descendantLevelGoals: number[] } {
     const flatParentNode = this.flatGraph.nodeMap[parentNode.databaseId];
     // variables for counting descendants
@@ -237,9 +253,14 @@ export class ConceptGraphModelSource extends LocalModelSource {
     return descendantData;
   }
 
+  /**
+   * Is called every time a node is selected. Updates the active node in the graphCommunication service,
+   * updates the selected concept in the database and handles edge creating and node moving if the respective
+   * private variables are set
+   * @param action 
+   */
   handleSelectAction(action: SelectAction): void {
     // send data to contentOverview
-    console.log("this is the select action: ", action);
     const index = new SModelIndex();
     index.add(this.currentRoot);
     let firstSelectedNode = index.getById((action as SelectAction).selectedElementsIDs[0]) as SprottyConceptNode;
@@ -249,7 +270,6 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
       // update selected concept in database
       this.graphData!.updateSelectedConcept(currentActiveNode.databaseId).subscribe((res) => {
-        console.log("updated selected concept: ", res);
       });
     }
 
@@ -265,12 +285,15 @@ export class ConceptGraphModelSource extends LocalModelSource {
     }
   }
 
+  /**
+   * Opens the dialog for creating a new concept
+   * @param action 
+   */
   handleCreateConceptAction(action: CreateConceptAction): void {
     const index = new SModelIndex();
     index.add(this.currentRoot);
     const sprottyParentNode = index.getById(action.parentId) as SprottyConceptNode;
     let parentDatabaseId;
-    console.log("sprottyParentNode: ", index)
 
     if (sprottyParentNode == undefined) {
       parentDatabaseId = this.flatGraph.trueRootId;
@@ -279,7 +302,6 @@ export class ConceptGraphModelSource extends LocalModelSource {
       parentDatabaseId = sprottyParentNode.databaseId;
     }
 
-    console.log("handleCreateConceptAction: ", action, sprottyParentNode);
     const dialogRef = this.dialog?.open(CreateConceptDialogComponent, {
       data: { parentId: parentDatabaseId },
     });
@@ -292,11 +314,10 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * Deletes the current concept if it has no children
+   * Deletes the current concept
    * @param action 
    */
   handleDeleteConceptAction(action: DeleteConceptAction): void {
-    console.log("handleDeleteConceptAction: ", action);
     const index = new SModelIndex();
     index.add(this.currentRoot);
 
@@ -325,6 +346,10 @@ export class ConceptGraphModelSource extends LocalModelSource {
     }
   }
 
+  /**
+   * Expands and collapses nodes in the graph
+   * @param action 
+   */
   async handleCollapseExpandAction(action: CollapseExpandAction): Promise<void> {
     const index = new SModelIndex();
     index.add(this.currentRoot);
@@ -369,8 +394,11 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.graphData!.updateConceptExpansionState(node.databaseId, expanded).subscribe();
   }
 
+  /**
+   * called through the context menu, increases level of the node by one
+   * @param action 
+   */
   handleAwardLevelAction(action: AwardLevelAction): void {
-    console.log("handleAwardLevelAction: ", action);
     const index = new SModelIndex();
     index.add(this.currentRoot);
     const sprottyNode = index.getById(action.conceptId) as SprottyConceptNode;
@@ -385,9 +413,12 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   }
 
+  /**
+   * called through the context menu, sets the EdgeCreator variable to the selected node
+   * @param action 
+   */
   handleCreateEdgeAction(action: CreateEdgeAction): void {
     // set private variable that will be checked when a new node is selected
-    console.log("handleCreateEdgeAction: ", action);
     const index = new SModelIndex();
     index.add(this.currentRoot);
 
@@ -440,14 +471,22 @@ export class ConceptGraphModelSource extends LocalModelSource {
       this.EdgeCreator = undefined;
   }
 
+  /**
+   * called through the context menu, sets the NodeMover variable to the selected node
+   * @param action 
+   */
   handleMoveNodeAction(action: MoveNodeAction): void {
-    console.log("handleMoveNodeAction: ", action);
     const index = new SModelIndex();
     index.add(this.currentRoot);
     this.NodeMover = { concept: action.conceptId };
     this.EdgeCreator = undefined;
   }
 
+  /**
+   * moves the node that was selected when the MoveNodeAction was dispatched to the currently selected node
+   * @param index 
+   * @param firstSelectedNode 
+   */
   private MoveNode(index: SModelIndex, firstSelectedNode: SprottyConceptNode) {
     const sprottyNode = index.getById(this.NodeMover!.concept) as SprottyConceptNode;
     const newParentNodeId = firstSelectedNode.databaseId;
@@ -462,13 +501,15 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.NodeMover = undefined;
   }
 
-  // creates new sprotty concept node (locally)
+  
   /**
-   * 
-   * @param id sprotty graph id , usually 'node_' + databaseId
+   * creates new sprotty concept node
+   * @param parentId the sprotty id of the parent
+   * @param id sprotty id of the node being created, is 'node_' + databaseId
    * @param name title of the node
    * @param expanded true or false, if the node is expanded or not
    * @param level integer from 0 to 6, the level of the node for the current user
+   * @param levelGoal integer from 0 to 6, the goal level of the node for the current module
    * @param databaseId id of this node in the database
    * @returns a ConceptNode
    */
@@ -510,25 +551,17 @@ export class ConceptGraphModelSource extends LocalModelSource {
         text: name,
       });
 
-    // level
-    // node.children.push(
-    //   <SLabel>{
-    //     id: 'level_' + id,
-    //     type: 'label:text',
-    //     text: '.',
-    //     position: { x: 5, y: 30 },
-    //   });
-
     return node;
   }
 
-  // creates new mini concept node (locally)
+
   /**
-   * 
+   * creates new mini concept node 
+   * @param parentId the sprotty id of the parent
    * @param id sprotty graph id , usually 'node_' + databaseId
    * @param name title of the node
-   * @param expanded true or false, if the node is expanded or not
    * @param level integer from 0 to 6, the level of the node for the current user
+   * @param levelGoal integer from 0 to 6, the goal level of the node for the current module
    * @param databaseId id of this node in the database
    * @returns a ConceptNode
    */
