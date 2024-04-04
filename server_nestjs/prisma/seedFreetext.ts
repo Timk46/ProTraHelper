@@ -1,4 +1,3 @@
-
 import { PrismaClient, contentElementType } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import { WorkSheet, utils } from 'xlsx';
@@ -6,88 +5,55 @@ import * as fs from 'fs';
     
 const prisma = new PrismaClient();
 
-interface Option {
-    text: string;
-    correct: boolean;
-}
+interface FreetextQuestion {
     
-interface MCQuestion {
-    
-    score: number; 
-    type: string; //MC
+    score: number;
+    type: string; //Freetext
     author: number; //init = 1
     text: string;
-    options: Option[];
     concept: number;
     isApproved: boolean;
     version: number; //init = 1
+    expectations: string;
+    exampleSolution: string;
+    level: number;
+    name: string;
     
 }
 
-export const seedMCQ = async (user_id: number) => {
-    const mcQuestions : MCQuestion[] = [];
+export const seedFreetext = async (user_id: number) => {
 
-    console.log('reading mc questions from Excel...');    
-    const filePath = process.env.FILE_PATH + 'MCQuestions.xlsx';
+    const freetextQuestions : FreetextQuestion[] = [];
+
+    console.log('reading freetext questions from Excel...');    
+    const filePath = process.env.FILE_PATH + 'freetext_questions.xlsx';
     if(fs.existsSync(filePath)) {
         const workbook = XLSX.readFile(filePath);
         const worksheet: WorkSheet = workbook.Sheets[workbook.SheetNames[0]];
         const question_data = utils.sheet_to_json(worksheet);
-        //console.log(mcQuestions);
-        for (const mcq of question_data) {
-            //console.log(mcq);
-            let approved = true; //for testing only!
-            if(mcq['approved'] == '1') {
-                approved = true;
-            }
-
-            const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
-            const options = letters
-                .filter(letter => mcq[`Antwort ${letter}`] !== undefined)
-                .map(letter => ({
-                    text: mcq[`Antwort ${letter}`],
-                    correct: mcq[`Korrekt markiert ${letter}`]
-                }));
-
-            const question: MCQuestion = {
-                score: mcq['score'],
-                type: 'MC',
+        for (const freeTextQuestion of question_data) {
+            
+            const question: FreetextQuestion = {
+                score: freeTextQuestion['Punkte'],
+                type: 'FreeText',
                 author: user_id,
-                text: mcq['text'],
-                concept: mcq['concept'],
-                isApproved: approved,
-                options: options,
+                text: freeTextQuestion['Aufgabentext'],
+                concept: freeTextQuestion['conceptNode'],
+                isApproved: true,
                 version: 1,
+                expectations: freeTextQuestion['expectations'],
+                exampleSolution: freeTextQuestion['exampleSolution'],
+                level: freeTextQuestion['Level'],
+                name: freeTextQuestion['Name'],
+
             };
             
-            /*
-            const question: MCQuestion = {
-                score: mcq['score'],
-                type: 'MC',
-                author: 1,
-                text: mcq['text'],
-                concept: mcq['concept'],
-                isApproved: approved,
-                options: [
-                    {text: mcq['Antwort A'], correct: mcq['Korrekt markiert A']},
-                    {text: mcq['Antwort B'], correct: mcq['Korrekt markiert B']},
-                    {text: mcq['Antwort C'], correct: mcq['Korrekt markiert C']},
-                    {text: mcq['Antwort D'], correct: mcq['Korrekt markiert D']},
-                    {text: mcq['Antwort E'], correct: mcq['Korrekt markiert E']},
-                    {text: mcq['Antwort F'], correct: mcq['Korrekt markiert F']},
-                ],
-                version: 1,
-            }
-            */
-            mcQuestions.push(question);
-            //console.log(question);
+            freetextQuestions.push(question);
         } 
 
         //Create all mc questions
-        console.log('creating mc questions...');
-        for (const data of mcQuestions) {
-            //create the question
-            //console.log('create mc question...');
+        console.log('creating freetext questions...');
+        for (const data of freetextQuestions) {
             const createdQuestion = await prisma.question.create({
                 data: {
                     score: data.score,
@@ -105,7 +71,7 @@ export const seedMCQ = async (user_id: number) => {
                 where: { id: createdQuestion.id },
                 data: { 
                     origin: { connect: { id: createdQuestion.id } }, 
-                    name: 'Multiple-Choice Frage ' + createdQuestion.id, 
+                    name: data.name,
                 },
             });
 
@@ -172,37 +138,14 @@ export const seedMCQ = async (user_id: number) => {
             }
             */
 
-            //create the mc question
-            let isSC = true;
-            if(data.type == 'MC') {
-                isSC = false;
-            }
-            const mcQuestion = await prisma.mCQuestion.create({
+            //create the freetext question
+            const mcQuestion = await prisma.freeTextQuestion.create({
                 data: {
-                    isSC: isSC,
+                    expectations: data.expectations,
                     question: { connect: { id: createdQuestion.id } },
+                    exampleSolution: data.exampleSolution,
                 },
             });
-
-            //create the options
-            for (const option of data.options) {
-                let isCorrect = false;
-                if(option.correct) {
-                    isCorrect = true;
-                }
-                const mcOption = await prisma.mCOption.create({
-                    data: {
-                        text: option.text,
-                        is_correct: isCorrect,
-                    },
-                });
-                await prisma.mCQuestionOption.create({
-                    data: {
-                        question: { connect: { id: mcQuestion.id } },
-                        option: { connect: { id: mcOption.id } },
-                    },
-                });
-            }
 
         }
 
@@ -222,4 +165,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-    

@@ -9,6 +9,7 @@ import { last, of } from 'rxjs';
 import e from 'express';
 import { seedMCQ } from './seedMCQ';
 import { seedCodeQuestions } from './seedCodeQuestions';
+import { seedFreetext } from './seedFreetext';
 
 const prisma = new PrismaClient();
 interface excel_OFP {
@@ -611,7 +612,8 @@ else {
 
   console.log('Importing Tasks from Excel...');
   await seedCodeQuestions(adminUser.id);
-  await seedMCQ();
+  await seedMCQ(adminUser.id);
+  await seedFreetext(adminUser.id);
   console.log('Importing Done!');
 }
 

@@ -25,9 +25,9 @@ interface excel_Codegeruest {
 }
 
 export const seedCodeQuestions = async (user_id: number) => {
-    await importProgrammingTasksFromExcel('programmieraufgaben_JACK_SOSE23_WORKSHOP_WISE2324.xlsx', 'Automatisch Import aus Excel: JACK Aufgaben aus SoSe 23 + Workshopsaufgaben aus WiSe 23/24', user_id);
-    await importProgrammingTasksFromExcel('programmieraufgaben_bechtel.xlsx', 'Automatisch Import aus Excel: Aufgaben aus dem TutorKai-Einsatz in Schulen von Herrn Bechtel WiSe 23/24', user_id);
-    await importProgrammingTasksFromExcel('programmieraufgaben_linden.xlsx', 'Automatisch Import aus Excel: ufgaben aus dem TutorKai-Einsatz in Schulen von Frau Linden WiSe 23/244', user_id);
+    await importProgrammingTasksFromExcel('programming-tasks/programmieraufgaben_JACK_SOSE23_WORKSHOP_WISE2324.xlsx', 'Automatisch Import aus Excel: JACK Aufgaben aus SoSe 23 + Workshopsaufgaben aus WiSe 23/24', user_id);
+    await importProgrammingTasksFromExcel('programming-tasks/programmieraufgaben_bechtel.xlsx', 'Automatisch Import aus Excel: Aufgaben aus dem TutorKai-Einsatz in Schulen von Herrn Bechtel WiSe 23/24', user_id);
+    await importProgrammingTasksFromExcel('programming-tasks/programmieraufgaben_linden.xlsx', 'Automatisch Import aus Excel: ufgaben aus dem TutorKai-Einsatz in Schulen von Frau Linden WiSe 23/244', user_id);
 }
 
 async function importProgrammingTasksFromExcel(filename: string, description: string, adminUserId: number = 1) {
@@ -135,7 +135,7 @@ async function importProgrammingTasksFromExcel(filename: string, description: st
                 },
             });
         }
-        /*
+        /* /* Not working yet, because of constraint violation
         else {
             //erzeuge eine neue content node mit dem award level und verbinde sie mit dem content element
             const contentNode = await prisma.contentNode.create({
