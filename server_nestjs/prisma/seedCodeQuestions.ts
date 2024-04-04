@@ -31,7 +31,7 @@ export const seedCodeQuestions = async (user_id: number) => {
 }
 
 async function importProgrammingTasksFromExcel(filename: string, description: string, adminUserId: number = 1) {
-    const filePathTasks = process.env.FILE_PATH + 'programming-tasks/' + filename;
+    const filePathTasks = process.env.FILE_PATH + filename;
     const workbook = XLSX.readFile(filePathTasks);
 
     const taskSheet: WorkSheet = workbook.Sheets[workbook.SheetNames[0]];
