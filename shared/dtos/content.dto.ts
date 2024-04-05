@@ -8,7 +8,7 @@ export interface ContentDTO {
     name: string;
     description: string;
     contentElements: ContentElementDTO[];
-    level?: number;
+    level: number;
 
     contentPrerequisiteIds?: number[];
     contentSuccessorIds?: number[];

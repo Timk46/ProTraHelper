@@ -175,8 +175,15 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     }
   }
 
+  hasContentElementType(content : ContentDTO, type: string) {
+    return content.contentElements.some(element => element.type === type);
+  }
   getFilteredData(contentNodeId: number) {
     return this.dataSource.data.filter(element => element.contentNodeId === contentNodeId);
+  }
+
+  getLevels(num: number) {
+    return new Array(num);
   }
 
 }

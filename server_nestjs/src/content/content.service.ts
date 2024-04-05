@@ -10,12 +10,12 @@ import {
   ContentDTO,
 } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
-import { last } from 'rxjs';
+import { async, last } from 'rxjs';
 import { tr } from '@faker-js/faker';
 
 @Injectable()
 export class ContentService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   /**
    * Retrieves all contents associated with a particular concept node by trainedBy and requiredBy relations.
@@ -119,16 +119,50 @@ export class ContentService {
     const getAttemptsForQuestion = async (question_id) => {
       return await this.prisma.userAnswer.count({
         where: {
-            questionId: question_id,
-            userId: userId,
+          questionId: question_id,
+          userId: userId,
         },
       });
+    }
+
+    const getQuestionProgress = async (question) => {
+      //get the best user score for each question
+      let userAnswers = await this.prisma.userAnswer.findMany({
+        where: {
+          questionId: question.id,
+          userId: userId,
+        },
+        select: {
+          id: true,
+        }
+      });
+
+      let bestScore = 0;
+
+      if (userAnswers) {
+        for (let userAnswer of userAnswers) {
+          let feedback = await this.prisma.feedback.findUnique({
+            where: {
+              id: userAnswer.id,
+            },
+            select: {
+              score: true,
+            }
+          });
+          if (feedback.score > bestScore) {
+            bestScore = feedback.score;
+          }
+        }
+      }
+
+      return (bestScore / question.score) * 100;
     }
 
     const transformContentNode = (contentNode) => ({
       contentNodeId: contentNode.id,
       name: contentNode.name,
       description: contentNode.description,
+      level: 1,
       contentElements: contentNode.ContentView.map(
         (contentView: ContentViewDTO) => ({
           id: contentView.contentElement.id,
@@ -143,7 +177,7 @@ export class ContentService {
             description: contentView.contentElement.question.description,
             type: contentView.contentElement.question.type,
             level: contentView.contentElement.question.level,
-            progress: 50,
+            progress: getQuestionProgress(contentView.contentElement.question),
           } : null,
         }),
       ),
@@ -372,43 +406,9 @@ export class ContentService {
 
 }
 
+
+  
+
 /*
-  //get the attemt count and the progress for each question id by looking at the user_answer table
-        //get the attempt count for the question
-        let attemptCount = await this.prisma.userAnswer.count({
-          where: {
-              questionId: question.id,
-              userId: user_id,
-          },
-      });
-
-      //get the best user score for each question
-      let userAnswers = await this.prisma.userAnswer.findMany({
-          where: {
-              questionId: question.id,
-              userId: user_id,
-          },
-          select: {
-              id: true,
-          }
-      });
-
-      let bestScore = 0;
-      if(userAnswers) {
-          for(let userAnswer of userAnswers) {
-              let feedback = await this.prisma.feedback.findUnique({
-                  where: {
-                      id: userAnswer.id,
-                  },
-                  select: {
-                      score: true,
-                  }
-              });
-              if(feedback.score > bestScore) {
-                  bestScore = feedback.score;
-              }
-          }
-      }
-
-      let progress = (bestScore / question.score)*100;
+  
 */
