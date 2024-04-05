@@ -110,24 +110,6 @@ export class ContentViewComponent implements OnInit {
     return styles;
   }
 
-  getCompletedTooltip(contentElementId: number) {
-    const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
-    if (this.applyCompletedStyle[position]) {
-      return 'Markierung entfernen.';
-    } else {
-      return 'Als abgeschlossen markieren.';
-    }
-  }
-
-  getQuestionTooltip(contentElementId: number) {
-    const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
-    if (this.applyQuestionStyle[position]) {
-      return 'Markierung entfernen.';
-    } else {
-      return "Als 'Offene Frage(n)' markieren.";
-    }
-  }
-
   getLastOpenedDate(){
     console.log('ContentViewComponent: getLastOpenedDate');
     this.contentService.updateLastOpenedDate(this.contentViewData.contentNodeId).subscribe(status => {this.lastOpenedDate = new Date(status); this.readableDate = this.getDateDisplay(this.lastOpenedDate);});

@@ -50,7 +50,7 @@ p{
     box-shadow: 0 0 5px #ccc;
     width: 90%;
     overflow: hidden;
-    max-height: 70vh;
+    max-height: 85vh;
     text-align: center;
 }
 
@@ -58,7 +58,7 @@ p{
   margin: auto;
   margin-top: 10px;
   padding: 2px;
-  height: 60vh;
+  height: 55vh;
   max-width: 80%;
   overflow: auto;
   text-align: center;
@@ -68,17 +68,47 @@ p{
   max-height: 40px;
 }
 
+.contentButton-Container {
+  display: inline-block;
+  margin: auto;
+  padding-top: 10px;
+  text-align: center;
+}
+
 div.progress-button {
   float: right;
 }
 
 button.progress-button {
-  margin: 2px;
+  display: inline-block;
+  margin: 10px;
   padding: 2px;
+  width: 25vw;
+  text-align: center;
 }
 
 p.message-code {
   text-align: center;
   margin-top: auto;
   margin-bottom: 0;
+}
+
+.progressButton-Container {
+  display: inline-block;
+  margin: auto;
+  padding-top: 10px;
+  text-align: center;
+}
+
+.small-icon {
+  margin: auto;
+  margin-left: 10px;
+  float: left;
+  vertical-align: middle;
+}
+
+.button-text {
+  margin: auto;
+  text-align: center;
+  vertical-align: middle;
 }
