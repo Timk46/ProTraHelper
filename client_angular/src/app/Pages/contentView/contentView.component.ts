@@ -17,6 +17,7 @@ export class ContentViewComponent implements OnInit {
 
   contentViewData: ContentDTO;
   activeConceptNodeId: number;
+  contentTypes: string[];
   applyCompletedStyle: boolean[] = [];
   applyQuestionStyle: boolean[] = [];
   lastOpenedDate: Date = new Date();
@@ -27,6 +28,9 @@ export class ContentViewComponent implements OnInit {
   constructor(public dialogRef: MatDialogRef<ContentViewComponent>, @Inject(MAT_DIALOG_DATA) public data: any, private sanitizer: DomSanitizer, private discussionDialogService: DiscussionDialogService, private contentService: ContentService) {
     this.contentViewData = data.contentViewData as ContentDTO;
     this.activeConceptNodeId = data.conceptNodeId as number;
+    this.contentTypes = data.contentTypes;
+    // filter contentElements by type
+    this.contentViewData.contentElements = this.contentViewData.contentElements.filter(x => this.contentTypes.includes(x.type));
     // sort contentElements by position
     this.contentViewData.contentElements = this.contentViewData.contentElements.sort((a, b) => a.positionInSpecificContentView - b.positionInSpecificContentView);
     // set default button style

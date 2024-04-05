@@ -135,7 +135,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     this.dataSource.sort = this.sort;
   }
 
-  onContentClick(content: ContentDTO) {
+  onContentClick(content: ContentDTO, type: string[]) {
 
     // Create Dialog Config https://material.angular.io/components/dialog/api#MatDialogConfig
     const dialogConfig = new MatDialogConfig();
@@ -144,6 +144,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     dialogConfig.data = {
       contentViewData: content,
       conceptNodeId: this.activeConceptNodeId,
+      contentTypes: type,
     };
 
     // Open the Dialog with ContentViewComponent. We could navigate to the component instead aswell.

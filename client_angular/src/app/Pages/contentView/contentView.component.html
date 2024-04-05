@@ -9,7 +9,7 @@
 
 
   <!-- Create a Card for each Content Element and display PDF, Video etc. depending on type-->
-  <mat-card *ngFor="let contentElem of contentViewData.contentElements" class="contentView-card">
+  <mat-card *ngFor="let contentElem of contentViewData.contentElements " class="contentView-card">
 
     <!--Show Content Title, if it has any-->
     <mat-card-header *ngIf="contentElem.title">
@@ -29,8 +29,9 @@
     </mat-card-header>
 
 
-    <mat-card-content>
+    <mat-card-content *ngIf="contentTypes.includes(contentElem.type)">
       <!--********** BEGIN: Show Content depending on type **********-->
+      <p> Content-Type: {{contentElem.type}} </p>
 
       <!--PDF-->
       <div *ngIf="contentElem.type == 'PDF' && contentElem.file " class = "contentElement-Container">
