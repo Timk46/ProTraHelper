@@ -51,8 +51,6 @@ export class ContentViewComponent implements OnInit {
         } else {
           this.applyCompletedStyle[i] = false;
         }
-      });
-      this.contentService.getContentElementStatus(this.contentViewData.contentElements[i].id).subscribe(status => {
         if (status.userStatusQuestion) {
           this.applyQuestionStyle[i] = true;
         } else {
