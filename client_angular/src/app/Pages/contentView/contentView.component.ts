@@ -18,6 +18,7 @@ export class ContentViewComponent implements OnInit {
   contentViewData: ContentDTO;
   activeConceptNodeId: number;
   contentTypes: string[];
+  viewableElements: ContentElementDTO[] = [];
   applyCompletedStyle: boolean[] = [];
   applyQuestionStyle: boolean[] = [];
   lastOpenedDate: Date = new Date();
@@ -32,9 +33,9 @@ export class ContentViewComponent implements OnInit {
     this.contentTypes = data.contentTypes;
     this.elementCount = this.contentViewData.contentElements.length;
     // filter contentElements by type
-    this.contentViewData.contentElements = this.contentViewData.contentElements.filter(x => this.contentTypes.includes(x.type));
+    this.viewableElements = this.contentViewData.contentElements.filter(x => this.contentTypes.includes(x.type));
     // sort contentElements by position
-    this.contentViewData.contentElements = this.contentViewData.contentElements.sort((a, b) => a.positionInSpecificContentView - b.positionInSpecificContentView);
+    this.viewableElements = this.viewableElements.sort((a, b) => a.positionInSpecificContentView - b.positionInSpecificContentView);
     // set default button style
     for(let i = 0; i < this.contentViewData.contentElements.length; i++) {
       this.applyCompletedStyle[i] = false;
