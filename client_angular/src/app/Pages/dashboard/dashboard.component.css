@@ -6,18 +6,13 @@
   display: flex; /* Ermöglicht die Verwendung von Flexbox */
   align-items: center; /* Zentriert den Inhalt vertikal */
   justify-content: center; /* Zentriert den Inhalt horizontal */
-  width: 50px; /* Setzt die Breite des Handles */
-  height: 40px; /* Erhöht die Höhe, um mehr Platz für ein größeres Icon zu schaffen */
+  width: 100px; /* Setzt die Breite des Handles */
+  height: 50px; /* Erhöht die Höhe, um mehr Platz für ein größeres Icon zu schaffen */
   cursor: ns-resize; /* Ändert den Mauszeiger, um die Ziehbarkeit anzuzeigen */
   position: absolute;
-  bottom: -7px;
+  bottom: -8px;
   left: 50%; /* Positioniert den Handle in der Mitte des Elternelements */
   transform: translateX(-50%); /* Zentriert den Handle genau, indem es um die Hälfte seiner Breite nach links verschoben wird */
-}
-
-.black-icon {
-  color: black;
-  transform: scale(2);
 }
 
 .content {
