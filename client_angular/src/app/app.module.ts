@@ -45,6 +45,7 @@ import { FreeTextTaskComponent } from './Pages/contentView/contentElement/free-t
 import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
 import { ScoreComponent } from './Pages/contentView/contentElement/mc-task-creation/score/score.component';
 import { DescriptionDialogComponent } from './Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component';
+import { DraggableHeightDirective } from "./Directives/draggable-height.directive";
 
 
 
@@ -80,6 +81,7 @@ import { DescriptionDialogComponent } from './Pages/contentView/contentElement/m
     McTaskCreationComponent,
     ScoreComponent,
     DescriptionDialogComponent,
+    DraggableHeightDirective
   ],
   imports: [
     BrowserModule,

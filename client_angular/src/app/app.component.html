@@ -1,13 +1,15 @@
-<mat-toolbar color="primary" *ngIf="(toolbarService.visible|async)">
-  <button mat-icon-button (click)="sidenav.toggle()" matTooltip="Menu">
+<mat-toolbar style="min-height: 30px !important; height: 30px !important;" color="primary" *ngIf="(toolbarService.visible|async)">
+  <!--<button mat-icon-button (click)="sidenav.toggle()" matTooltip="Menu">
       <mat-icon>menu</mat-icon>
-  </button>
-  <span>GOALS</span>
+  </button>-->
+  <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link">
+    <span style="font-size:15px;">GOALS</span>
+  </a>
   <span class="toolbar-item-spacer"></span>
-  <p *ngIf="userIsLoggedIn">Rolle: {{userRole}} | Mail: {{userMail}}</p>
-  <button *ngIf="userIsLoggedIn" mat-icon-button matTooltip="Mein Account">
-      <mat-icon>account_circle</mat-icon>
-  </button>
+  <span style="font-size:15px;" *ngIf="userIsLoggedIn">User: {{userMail}}</span>
+  <!--<button *ngIf="userIsLoggedIn" mat-icon-button matTooltip="Mein Account">
+      <mat-icon>account_circle</mat-icon
+  </button>-->
 </mat-toolbar>
 
 <mat-sidenav-container class="app-container">
@@ -26,7 +28,7 @@
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
-       <app-chat-bot *ngIf="(toolbarService.visible|async)"></app-chat-bot>
+       <!--<app-chat-bot *ngIf="(toolbarService.visible|async)"></app-chat-bot>!-->
       <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>

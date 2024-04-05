@@ -20,9 +20,10 @@ $dark-highlight-color: #5e81ac;
 
 .sprotty-graph {
     width: 100%;
-    height: 66vh;
+    height: 47vh;
     font-size: 15pt;
 }
+
 .sprotty-edge {
     fill: none;
     stroke: $edge-color;
@@ -44,7 +45,7 @@ $dark-highlight-color: #5e81ac;
 }
 
 .sprotty-node.mini-concept {
-    fill: $mini-concept-background;//#2b356e; 
+    fill: $mini-concept-background;//#2b356e;
     stroke: #3b4252;//#2b356e;
     stroke-width: 2;
 }
@@ -81,7 +82,7 @@ $dark-highlight-color: #5e81ac;
 
 .sprotty-node.mouseover:not(.selected) {
     stroke-width: 4;
-    
+
 }
 
 .sprotty-label {
@@ -170,7 +171,7 @@ $dark-highlight-color: #5e81ac;
 
 .sprotty-progress-bar-segment.achieved {
     fill: $progress-achieved; /* Color for achieved segments */
-    
+
 }
 
 .sprotty-progress-bar-segment.goal {

@@ -15,6 +15,7 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
   private graphCommunicationService: GraphCommunicationService = GraphCommunicationService.getInstance();
 
   private activeConceptNodeSubscription: Subscription;
+  activeTab: string = 'content';
 
   // init with dummy node
   activeConceptNode: ConceptNodeDTO = {

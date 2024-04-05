@@ -1,21 +1,19 @@
-<div *ngIf="activeConceptNode.databaseId != -1" class=" content mat-elevation-z8">
-  <h1 matTooltip="Id: {{activeConceptNode.databaseId}}">{{activeConceptNode.name}}</h1>
+<div *ngIf="activeConceptNode.databaseId != -1" class="content mat-elevation-z8">
+  <div class="header">
+    <h1 matTooltip="Id: {{activeConceptNode.databaseId}}">{{activeConceptNode.name}}</h1>
+    <div class="button-group">
+      <button mat-button [ngClass]="{'active': activeTab === 'content'}" (click)="activeTab = 'content'">Bearbeiten</button>
+      <button mat-button [ngClass]="{'active': activeTab === 'discussion'}" (click)="activeTab = 'discussion'">Diskutieren</button>
+    </div>
+  </div>
   <p>{{activeConceptNode.description}}</p>
 
-  <mat-tab-group animationDuration="0ms">
-    <mat-tab label="Content">
-      <div class="tab-content-container">
-        <app-contentBoard class="tab-content" [contentsForActiveConceptNode]="contentsForActiveConceptNode"
-          [activeConceptNodeId]="activeConceptNode.databaseId"></app-contentBoard>
-        <!--Communication to Child-Component-->
-      </div>
-    </mat-tab>
+  <div [ngStyle]="{'display': activeTab === 'content' ? 'block' : 'none'}" class="tab-content-container">
+    <app-contentBoard class="tab-content" [contentsForActiveConceptNode]="contentsForActiveConceptNode"
+      [activeConceptNodeId]="activeConceptNode.databaseId"></app-contentBoard>
+  </div>
 
-    <mat-tab label="Diskussion">
-      <div class="tab-content-container">
-        <app-discussion-list [activeConceptNodeId]="activeConceptNode.databaseId"></app-discussion-list>
-      </div>
-    </mat-tab>
-  </mat-tab-group>
-
+  <div [ngStyle]="{'display': activeTab === 'discussion' ? 'block' : 'none'}" class="tab-content-container">
+    <app-discussion-list [activeConceptNodeId]="activeConceptNode.databaseId"></app-discussion-list>
+  </div>
 </div>

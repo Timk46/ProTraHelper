@@ -4,6 +4,27 @@
   gap: 16px;
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.button-group {
+  /* Optional: zusätzliche Stildefinitionen für die Button-Gruppe */
+}
+
+.button-group button.active {
+  background-color: #3b4252;
+  color: white;
+}
+.button-group button {
+  border-color: #3b4252; /* Blau */
+  border: 2px solid #3b4252 !important;
+  color: #3b4252;
+  margin-left: 5px;
+}
+
 .mat-elevation-z8 {
   background: #eceff4;
   color: black;
