@@ -22,6 +22,7 @@ export class ContentViewComponent implements OnInit {
   applyQuestionStyle: boolean[] = [];
   lastOpenedDate: Date = new Date();
   readableDate: string = 'dummy date';
+  elementCount: number = 0;
   pdfCount: number = 0;
 
   // Get Data from Dialog
@@ -29,6 +30,7 @@ export class ContentViewComponent implements OnInit {
     this.contentViewData = data.contentViewData as ContentDTO;
     this.activeConceptNodeId = data.conceptNodeId as number;
     this.contentTypes = data.contentTypes;
+    this.elementCount = this.contentViewData.contentElements.length;
     // filter contentElements by type
     this.contentViewData.contentElements = this.contentViewData.contentElements.filter(x => this.contentTypes.includes(x.type));
     // sort contentElements by position
@@ -81,11 +83,27 @@ export class ContentViewComponent implements OnInit {
   onToggleCheckmark(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
     this.contentService.toggleContentElementCompletionStatus(contentElementId).subscribe(status => this.applyCompletedStyle[position] = status);
+    if(typeof this.contentViewData.progress === 'number'){
+      const sign = this.applyCompletedStyle[position] ? -1 : 1;
+      console.log('sign: ' + sign);
+      this.contentViewData.progress = this.contentViewData.progress + (sign/this.elementCount * 100);
+    }
   }
 
   onToggleQuestionmark(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
     this.contentService.toggleContentElementQuestionStatus(contentElementId).subscribe(status => this.applyQuestionStyle[position] = status);
+    if(!this.applyQuestionStyle[position]){
+      this.contentViewData.questionMarked = true;
+    } else {
+      for(let i = 0; i < this.applyQuestionStyle.length; i++){
+        if(this.applyQuestionStyle[i] && i !== position){
+          this.contentViewData.questionMarked = true;
+          return;
+        }
+        this.contentViewData.questionMarked = false;
+      }
+    }
   }
 
   applyCheckmarkStyles(contentElementId: number) {
