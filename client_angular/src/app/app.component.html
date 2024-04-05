@@ -2,11 +2,13 @@
   <!--<button mat-icon-button (click)="sidenav.toggle()" matTooltip="Menu">
       <mat-icon>menu</mat-icon>
   </button>-->
-  <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link">
-    <span style="font-size:15px;">GOALS</span>
+  <a mat-list-item routerLink="/dashboard" style="cursor: pointer;" routerLinkActive="active-link">
+    <span style="font-size:15px;">Dashboard</span>
   </a>
   <span class="toolbar-item-spacer"></span>
-  <span style="font-size:15px;" *ngIf="userIsLoggedIn">User: {{userMail}}</span>
+  <span style="font-size:15px;" *ngIf="userIsLoggedIn">User: {{userMail}} | </span>
+
+  <span style="font-size:15px; margin-left: 5px; cursor: pointer;" *ngIf="userIsLoggedIn">Logout</span>
   <!--<button *ngIf="userIsLoggedIn" mat-icon-button matTooltip="Mein Account">
       <mat-icon>account_circle</mat-icon
   </button>-->
