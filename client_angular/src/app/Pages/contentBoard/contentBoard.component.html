@@ -1,6 +1,6 @@
 <div class="content-container" class="mat-elevation-z8">
   <mat-accordion>
-    <mat-expansion-panel *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index">
+    <mat-expansion-panel matTooltip="Beschreibung: {{content.description}}" [disabled]="!hasContentElementType(content, 'QUESTION')" [hideToggle]="!hasContentElementType(content, 'QUESTION')" *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index">
       <mat-expansion-panel-header>
         <mat-panel-title class="panel-title">
           {{ content.name }}
