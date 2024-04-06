@@ -11,6 +11,7 @@ import { MarkdownService } from "../../services/markdown/markdown.service";
 import { VideoTimeStampComponent } from '../video-time-stamp/video-time-stamp.component';
 import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from '@angular/router';
+import { ConfettiService } from "src/app/Services/animations/confetti.service";
 /**
  * The different states representing the current status of the student workspace.
  */
@@ -72,7 +73,8 @@ export class StudentWorkspaceComponent implements OnInit {
     private formBuilder: FormBuilder,
     private markdownService: MarkdownService,
     private dialog: MatDialog,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private confettiService: ConfettiService
   ) {}
 
   /**
@@ -219,6 +221,9 @@ export class StudentWorkspaceComponent implements OnInit {
     this.feedbackMessage =
       'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben. Klicke hierzu auf den Button "Feedback erzeugen".';
     this.currentState = States.submittedCode;
+    if (result.CodeSubmissionResult.score === 100) {
+      this.confettiService.celebrate(6,800); // small confetti animation :)
+    }
   }
 
   /**

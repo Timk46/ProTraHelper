@@ -82,7 +82,7 @@
           <div class="test-results">
             <div class="points-display">
               <p style="margin: 0;">Punkte: {{lastResult?.CodeSubmissionResult?.score ? lastResult.CodeSubmissionResult.score : 0}} / 100</p>
-              <mat-progress-bar style="height: 15px;" mode="determinate" value="lastResult?.CodeSubmissionResult.score ? lastResult.CodeSubmissionResult.score : 0" bufferValue="100"></mat-progress-bar>
+              <mat-progress-bar mode="determinate" value="{{lastResult?.CodeSubmissionResult?.score ? lastResult.CodeSubmissionResult.score : 0}}"></mat-progress-bar>
             </div>
           </div>
 

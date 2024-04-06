@@ -46,6 +46,7 @@ import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-t
 import { ScoreComponent } from './Pages/contentView/contentElement/mc-task-creation/score/score.component';
 import { DescriptionDialogComponent } from './Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component';
 import { DraggableHeightDirective } from "./Directives/draggable-height.directive";
+import { ConfettiService } from "./Services/animations/confetti.service";
 
 
 
@@ -97,7 +98,8 @@ import { DraggableHeightDirective } from "./Directives/draggable-height.directiv
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
     LoggedInGuard,
-    EditorModule
+    EditorModule,
+    ConfettiService
   ],
   bootstrap: [AppComponent]
 })
