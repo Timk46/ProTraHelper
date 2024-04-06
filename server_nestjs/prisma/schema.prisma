@@ -428,8 +428,7 @@ model CodeSubmission {
   updatedAt           DateTime             @updatedAt
   createdAt           DateTime             @default(now())
   compilerOutput      String?              @db.Text
-  compilerError       String?              @db.Text
-  compilerResponse    String?              @db.Text
+  unitTestResults     String?              @db.Text
   user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId              Int
   codingQuestion      CodingQuestion       @relation(fields: [codingQuestionId], references: [id], onDelete: Cascade)

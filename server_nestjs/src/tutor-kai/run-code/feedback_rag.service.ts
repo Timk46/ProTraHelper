@@ -15,6 +15,7 @@ import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PGVectorStore } from 'langchain/vectorstores/pgvector';
 import { PoolConfig } from 'pg';
 import { IpgVectorContent } from './pgVectorResult.DTO';
+import { EventLogService } from '@/EventLog/event-log.service';
 
 const pg_config = {
   postgresConnectionOptions: {
@@ -99,7 +100,7 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
     'Die Studenten lösen Programmieraufgaben und du gibst Ihnen kurzes hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
     'Sind 100 Punkte erreicht sollst du lediglich zur korrekten Lösung gratulieren. '+
     'DU VERRÄST DU NIEMALS DIE LÖSUNG. ES IST DIR VERBOTEN, PROGRAMMCODE ZU FORMULIEREN! ' +
-    'Dein kurzes hilfreichses Feedback ist maximal sechs Sätze auf drei Absätze lang oder kürzer. ',
+    'Dein kurzes hilfreichses Feedback ist maximal sechs Sätze auf drei Absätze lang oder kürzer.  Es ist verboten, die Unit-Tests zu erwähnen!',
 
     // Erläuterungen zu dem Aufbau der Informationen aus RAG
     'Bei deinem Feedback beziehst du dich IMMER auf Erklärungen aus den Vorlesungsausschnitten und nennst die korrekte Quelle. Diese liegen im folgenden JSON-Format vor:' +
@@ -111,14 +112,17 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
   ),
   HumanMessagePromptTemplate.fromTemplate(
     '# Aufgabe die vom Studenten gelöst werden soll:\n{task}\n' +
-    '# Die Programmiersprache ist \n{language}\n' +
+    '# Die Programmiersprache ist: {language}\n' +
     '# Lösung des Studenten:\n{code}\n' +
     '# Output des Compiler und Unit-Tests:\n {output}\n' +
-    '{error}\n' +
+    '# Unit Tests und deren Ergebnisse:\n ' +
+      'Die Unit Tests und deren Ergebnisse liegen als JSON vor. Sie dienen nur zur internen Verwendung.\n ' +
+      '## Unit TestCases \n {unitTests}\n' +
+      '## Ergebnis der Unit-Tests \n {unitTestsResults}\n' +
     '# Ausschnitt aus der Vorlesung:\n' +
-    '{lectureSnippet}\n' +
+      '{lectureSnippet}\n' +
     '# Wichtige Anweisung\n' +
-    'Verweise immer auf die Erklärungen auf den Vorlesungsausschnitten exakt so wie beschrieben! Die Zeichen ^ und [] dürfen dabei NIEMALS vergessen werden!'
+      'Verweise immer auf die Erklärungen auf den Vorlesungsausschnitten exakt so wie beschrieben! Die Zeichen ^ und [] dürfen dabei NIEMALS vergessen werden!'
   ),
 ]);
 
@@ -130,12 +134,15 @@ const getConceptsPrompt = ChatPromptTemplate.fromPromptMessages([
   ),
   HumanMessagePromptTemplate.fromTemplate(
     'BEGINCONTEXT' +
-      'Aufgabe die vom Schüler gelöst werden soll: {task} ' +
-      'Die Programmiersprache ist {language} ' +
-      'Lösung des Schüler: {code} ' +
-      'Output des Compiler: {output} ' +
-      '{error}' +
-      'ENDCONTEXT',
+      '# Aufgabe die vom Studenten gelöst werden soll:\n{task}\n' +
+      '# Die Programmiersprache ist: {language}\n' +
+      '# Lösung des Studenten:\n{code}\n' +
+      '# Output des Compiler und Unit-Tests:\n {output}\n' +
+      '# Unit Tests und deren Ergebnisse:\n ' +
+        'Die Unit Tests und deren Ergebnisse liegen als JSON vor. Sie dienen nur zur internen Verwendung.\n ' +
+        '## Unit TestCases \n {unitTests}\n' +
+        '## Ergebnis der Unit-Tests \n {unitTestsResults}\n' +
+    'ENDCONTEXT',
   ),
 ]);
 
@@ -145,6 +152,7 @@ export class FeedbackRAGService {
     @Inject(REQUEST) private readonly request: Request,
     private prisma: PrismaService,
     private readonly cryptoService: CryptoService,
+    private eventLogService: EventLogService,
   ) {}
 
   // Mocked out function, could be a database/API call in production
@@ -153,42 +161,64 @@ export class FeedbackRAGService {
       new OpenAIEmbeddings(),
       pg_config,
     );
-    //console.log('BEGIN similaritySearch');
-    //console.log('Question: ' + data.question);
     const similaritySearchResult = await pgvectorStore.similaritySearch(
       data.question,
       4,
     );
-    //console.log(JSON.stringify(similaritySearchResult));
-    //console.log('ENDE similaritySearch');
     return JSON.stringify({ data, explanation: similaritySearchResult });
   }
 
   async getKiFeedback(
-    code: string,
-    task: string,
-    language: string,
+    questionId: number,
     flavor: string,
     relatedCodeSubmissionResult: CodeSubmissionResultDto,
     resStream: Response,
+    userId: number,
   ): Promise<void> {
+    const sumbissionId = Number(this.cryptoService.decrypt(relatedCodeSubmissionResult.encryptedCodeSubissionId));
+    const question = await this.prisma.question.findUnique({
+      where: { id: questionId },
+      include: {
+        codingQuestions: {
+          include: {
+            codeGerueste: true,
+            automatedTests: true,
+          },
+        },
+      },
+    });
+
+    const relatedCodeSubmission = await this.prisma.codeSubmission.findUnique({
+      where: { id: sumbissionId },
+      include: {
+        codingQuestion: {
+          include: {
+            codeGerueste: true,
+            automatedTests: true,
+          },
+        },
+      },
+    });
+
     const conceptsFormattedPrompt = await getConceptsPrompt.formatPromptValue({
-      task: task,
-      language: language,
-      code: code,
-      output: ""
-       /* relatedCodeSubmissionResult.resultjudge0.stdout +
-        (relatedCodeSubmissionResult.resultjudge0.compile_output
-          ? relatedCodeSubmissionResult.resultjudge0.compile_output
-          : ''),
-      error: relatedCodeSubmissionResult.resultjudge0.stderr
-        ? 'Error message: ' + relatedCodeSubmissionResult.resultjudge0.stderr
-        : '',*/
+      task: question.codingQuestions.text,
+      language: question.codingQuestions.programmingLanguage,
+      code: relatedCodeSubmission.code,
+      output: relatedCodeSubmissionResult.CodeSubmissionResult.output ? relatedCodeSubmissionResult.CodeSubmissionResult.output : "Es liegt kein Output vor.",
+      unitTests: relatedCodeSubmission.codingQuestion.automatedTests[0].code ? relatedCodeSubmission.codingQuestion.automatedTests[0].code : "Es liegen keine Unit-Tests vor.",
+      unitTestsResults: relatedCodeSubmission.unitTestResults? relatedCodeSubmission.unitTestResults : "Es liegen keine Testergebnisse vor.",
     });
     // Ask initial question that requires multiple tool calls
     const res = await chat.invoke(conceptsFormattedPrompt, { callbacks: [tracer] });
 
     console.log(res.additional_kwargs.tool_calls);
+    this.eventLogService.log(
+      "info",
+      "FeedbackRAGService/usedTool",
+      userId,
+      "Neue Anfrage an Vektordatenbank fuer Aufgabe " + questionId,
+      res.additional_kwargs.tool_calls,
+    );
 
     const toolMessages = await Promise.all(
       res.additional_kwargs.tool_calls?.map(async (toolCall) => {
@@ -224,30 +254,25 @@ export class FeedbackRAGService {
       }
     }
     let conceptString: string  = JSON.stringify({ Vorlesungsausschnitte: concepts });
-    console.log(conceptString);
+    this.eventLogService.log(
+      "info",
+      "FeedbackRAGService/usedTool",
+      userId,
+      "Neue Antwort von Vektordatenbank fuer Aufgabe " + questionId,
+      conceptString,
+    );
 
-
-    /* hier neuen Prompt fürs Feedback als Stream generieren!!!
-    const finalResponse = await chat.invoke([
-      ['human', 'Wie funktioniert Rekursion?'],
-      res,
-      ...(toolMessages ?? []),
-    ]); */
 
     const ragFormattedPrompt = await finalRAGPrompt.formatPromptValue({
-      task: task,
-      language: language,
-      code: code,
-      output:"",/*
-        relatedCodeSubmissionResult.resultjudge0.stdout +
-        (relatedCodeSubmissionResult.resultjudge0.compile_output
-          ? relatedCodeSubmissionResult.resultjudge0.compile_output
-          : ''),
-      error: relatedCodeSubmissionResult.resultjudge0.stderr
-        ? 'Error message: ' + relatedCodeSubmissionResult.resultjudge0.stderr
-        : '',*/
-        lectureSnippet: conceptString,
+      task: question.codingQuestions.text,
+      language: question.codingQuestions.programmingLanguage,
+      code: relatedCodeSubmission.code,
+      output: relatedCodeSubmissionResult.CodeSubmissionResult.output ? relatedCodeSubmissionResult.CodeSubmissionResult.output : "Es liegt kein Output vor.",
+      unitTests: relatedCodeSubmission.codingQuestion.automatedTests[0].code ? relatedCodeSubmission.codingQuestion.automatedTests[0].code : "Es liegen keine Unit-Tests vor.",
+      unitTestsResults: relatedCodeSubmission.unitTestResults? relatedCodeSubmission.unitTestResults : "Es liegen keine Testergebnisse vor.",
+      lectureSnippet: conceptString,
     });
+
     const openAiResponse = await chatStream.generatePrompt([ragFormattedPrompt], undefined, [
       {
         ignoreAgent: true,
@@ -259,10 +284,17 @@ export class FeedbackRAGService {
       tracer
     ],
     );
-    console.log(openAiResponse);
     this.saveFeedbackInDB(relatedCodeSubmissionResult, openAiResponse, flavor);
+    this.eventLogService.log(
+      "info",
+      "FeedbackRAGService/usedTool",
+      userId,
+      "Neues RAG-Feedback fuer Aufgabe " + questionId + " zugehörige CodeSubmission " + this.cryptoService.decrypt(relatedCodeSubmissionResult.encryptedCodeSubissionId),
+      {Prompt: ragFormattedPrompt, OpenAIAntwort: openAiResponse.generations[0][0].text},
+    );
     resStream.end();
   }
+
 
   /*
   getExplanationStrings(content: IpgVectorContent): string {
@@ -279,10 +311,8 @@ export class FeedbackRAGService {
     openAiResponse,
     flavor: string,
   ) {
-    const sumbissionId = Number("12"
-      //this.cryptoService.decrypt(
-       // relatedCodeSubmissionResult.encryptedSubmissionId,
-      //),
+    const sumbissionId = Number(
+      this.cryptoService.decrypt(relatedCodeSubmissionResult.encryptedCodeSubissionId),
     );
     await this.prisma.kIFeedback.create({
       data: {

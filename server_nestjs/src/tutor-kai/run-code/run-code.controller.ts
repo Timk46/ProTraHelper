@@ -38,34 +38,32 @@ export class RunCodeController {
    */
   @Post('evaluate-code')
   async evaluateCode(
-    @Body('code') code: string,
-    @Body('task') task: string,
-    @Body('language') language: string,
+    @Body('questionId') questionId: number,
     @Body('flavor') flavor: string,
     @Body('relatedCodeSubmissionResult') relatedCodeSubmissionResult: CodeSubmissionResultDto,
-    @Res() res: Response
+    @Res() res: Response,
+    @Req() req
   ): Promise<void> {
     res.set('Content-Type', 'text/plain');
     res.setHeader('Transfer-Encoding', 'chunked');
 
     if (flavor == 'Schnelles Feedback') {
       const result = await this.feedbackNormalService.getKiFeedback(
-        code,
-        task,
-        language,
+        Number(questionId),
         flavor,
         relatedCodeSubmissionResult,
-        res
+        res,
+        req.user.id
       );
     }
+
       if (flavor == 'Feedback mit Vorlesungsinformationen') {
       const result = await this.feedbackRAGService.getKiFeedback(
-        code,
-        task,
-        language,
+        Number(questionId),
         flavor,
         relatedCodeSubmissionResult,
-        res
+        res,
+        req.user.id
       );
     }
   }

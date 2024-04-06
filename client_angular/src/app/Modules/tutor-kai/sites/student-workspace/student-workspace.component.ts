@@ -153,13 +153,9 @@ export class StudentWorkspaceComponent implements OnInit {
     this.currentLoadingFeedbackMessage = '';
     this.runCodeService
       .getKiFeedback(
-        submitCode,
-        this.taskDescription,
-        this.selectedLanguage,
+        this.currentTaskId,
         this.flavor,
-        //testResults: this.lastResult,
         this.lastResult
-        //encryptedSubmissionId: this.lastSubmissionId,
       )
       .subscribe({
         next: (response) => {

@@ -46,17 +46,13 @@ export class RunCodeService {
    * @returns An Observable with the LLM generated Feedback string.
    */
   getKiFeedback(
-    code: string,
-    task: string,
-    language: string,
+    questionId: number,
     flavor: string,
     relatedCodeSubmissionResult: CodeSubmissionResultDto
   ): Observable<string> {
 
     const body = {
-      code: code,
-      task: task,
-      language: language,
+      questionId: questionId,
       flavor: flavor,
       relatedCodeSubmissionResult: relatedCodeSubmissionResult
     };

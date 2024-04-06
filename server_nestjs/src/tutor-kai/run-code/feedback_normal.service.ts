@@ -4,7 +4,7 @@ import { REQUEST } from '@nestjs/core';
 import { CryptoService } from '../crypto/crypto.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Response } from 'express';
-
+import { EventLogService } from '@/EventLog/event-log.service';
 import { ChatOpenAI } from "langchain/chat_models/openai";
 
 const {
@@ -30,14 +30,17 @@ const chatPrompt = ChatPromptTemplate.fromPromptMessages([
     'Die Studenten lösen Programmieraufgaben und du gibst Ihnen kurzes hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken. ' + // entfernt: und passende Quellen aus der Vorlesung verlinken.
     'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren. '+
     'DU VERRÄST DU NIEMALS DIE LÖSUNG. ES IST DIR VERBOTEN, PROGRAMMCODE ZU FORMULIEREN! ' +
-    'Dein kurzes hilfreichses Feedback ist maximal sechs Sätze auf drei Absätze lang oder kürzer. ',
+    'Dein kurzes hilfreichses Feedback ist maximal sechs Sätze auf drei Absätze lang oder kürzer. Es ist verboten, die Unit-Tests zu erwähnen!',
   ),
   HumanMessagePromptTemplate.fromTemplate(
     '# Aufgabe die vom Studenten gelöst werden soll:\n{task}\n' +
-    '# Die Programmiersprache ist \n{language}\n' +
+    '# Die Programmiersprache ist: {language}\n' +
     '# Lösung des Studenten:\n{code}\n' +
     '# Output des Compiler und Unit-Tests:\n {output}\n' +
-    '{error}',
+    '# Unit Tests und deren Ergebnisse:\n ' +
+      'Die Unit Tests und deren Ergebnisse liegen als JSON vor. Sie dienen nur zur internen Verwendung.\n ' +
+      '## Unit TestCases \n {unitTests}\n' +
+      '## Ergebnis der Unit-Tests \n {unitTestsResults}\n'
   ),
 ]);
 @Injectable()
@@ -46,33 +49,59 @@ export class FeedbackNormalService {
     @Inject(REQUEST) private readonly request: Request,
     private prisma: PrismaService,
     private readonly cryptoService: CryptoService,
+    private eventLogService: EventLogService
   ) { }
 
   /**
-   * Get KI feedback based on the student's submitted code, task, language, compiler output, and submission ID.
+   * Gets feedback from the AI.
    *
-   * @param {string} task - The task description given to the student.
-   * @param {string} code - The code submitted by the student.
-   * @param {string} language - The programming language used by the student.
-   * @param {CodeSubmissionResultDto} relatedCodeSubmissionResult - The result of the code execution and the ID of the last code submission (which is the submission associated with the feedback)
-   * @param {Response} res - The response object to write the KI feedback to.
-   * @returns {Promise<void>} - A promise that resolves when the KI feedback has been written to the response object.
+   * @param {string} questionId- the task description to evaluate code on
+   * @param {string} flavor - the flavor of feedback to get
+   * @param {CodeSubmissionResultDto} relatedCodeSubmissionResult - CodeSubmissionResultDto: the result of the executed code (containing stdout, stderr, compile_output) and the previous submission ID (for updating the matching tuple in the database)
+   * @param {Response} res - the response object to write the KI feedback to
+   * @returns {Promise<void>} - a promise that resolves when the KI feedback has been written to the response object
    */
   async getKiFeedback(
-    code: string,
-    task: string,
-    language: string,
+    questionId: number,
     flavor: string,
     relatedCodeSubmissionResult: CodeSubmissionResultDto,
-    res: Response
+    res: Response,
+    userId: number,
   ): Promise<void> {
 
+    const sumbissionId = Number(this.cryptoService.decrypt(relatedCodeSubmissionResult.encryptedCodeSubissionId));
+    console.log("Question ID: " + questionId);
+    const question = await this.prisma.question.findUnique({
+      where: { id: questionId },
+      include: {
+        codingQuestions: {
+          include: {
+            codeGerueste: true,
+            automatedTests: true,
+          },
+        },
+      },
+    });
+
+    const relatedCodeSubmission = await this.prisma.codeSubmission.findUnique({
+      where: { id: sumbissionId },
+      include: {
+        codingQuestion: {
+          include: {
+            codeGerueste: true,
+            automatedTests: true,
+          },
+        },
+      },
+    });
+
     const formattedPrompt = await chatPrompt.formatPromptValue({
-      task: task,
-      language: language,
-      code: code,
-      output: "",// relatedCodeSubmissionResult.resultjudge0.stdout + (relatedCodeSubmissionResult.resultjudge0.compile_output ? relatedCodeSubmissionResult.resultjudge0.compile_output : ''),
-      error: "", //relatedCodeSubmissionResult.resultjudge0.stderr ? 'Error message: ' + relatedCodeSubmissionResult.resultjudge0.stderr : '',
+      task: question.codingQuestions.text,
+      language: question.codingQuestions.programmingLanguage,
+      code: relatedCodeSubmission.code,
+      output: relatedCodeSubmissionResult.CodeSubmissionResult.output ? relatedCodeSubmissionResult.CodeSubmissionResult.output : "Es liegt kein Output vor.",
+      unitTests: relatedCodeSubmission.codingQuestion.automatedTests[0].code ? relatedCodeSubmission.codingQuestion.automatedTests[0].code : "Es liegen keine Unit-Tests vor.",
+      unitTestsResults: relatedCodeSubmission.unitTestResults? relatedCodeSubmission.unitTestResults : "Es liegen keine Testergebnisse vor.",
     });
 
     const openAiResponse = await chat.generatePrompt([formattedPrompt], undefined, [
@@ -85,9 +114,14 @@ export class FeedbackNormalService {
       },
     ],
     );
+    this.eventLogService.log(
+      "info",
+      "FeedbackRAGService/usedTool",
+      userId,
+      "Neues RAG-Feedback fuer Aufgabe " + questionId + " zugehörige CodeSubmission " + this.cryptoService.decrypt(relatedCodeSubmissionResult.encryptedCodeSubissionId),
+      {Prompt: formattedPrompt, OpenAIAntwort: openAiResponse.generations[0][0].text},
+    );
 
-    const sumbissionId = 12
-    //const sumbissionId = Number(this.cryptoService.decrypt(relatedCodeSubmissionResult.encryptedSubmissionId));
     await this.prisma.kIFeedback.create({
       data: {
         submission: {
@@ -103,4 +137,5 @@ export class FeedbackNormalService {
 
     res.end();
   }
+
 }

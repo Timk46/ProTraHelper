@@ -128,9 +128,8 @@ export class RunCodeService {
     const codeSubmission: CodeSubmission = await this.prisma.codeSubmission.create({
       data: {
         code: JSON.stringify(studentCode),
-        compilerOutput: JSON.stringify(response.testResults),
-        compilerError: "", // TODO: Extract and store compiler error messages.
-        compilerResponse: "", // TODO: Extract and store the full compiler response.
+        compilerOutput: response.output? JSON.stringify(response.output) : "",
+        unitTestResults: response.testResults? JSON.stringify(response.testResults) : "", // TODO: Extract and store compiler error messages.
         score: response.score? response.score : 0,
         user: { connect: { id: userId } },
         codingQuestion: { connect: { id: codingQuestion.id } },
