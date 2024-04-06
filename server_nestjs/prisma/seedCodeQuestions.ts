@@ -10,11 +10,14 @@ interface excel_Aufgabe {
     Titel: string;
     Task: string;
     Programming_Language: string;
+    ConceptNodeID: number;
     Test: string;
     Task_html: string;
     codeName: string;
     countInputArgs: number;
-    ConceptNodeID: number;
+    testClassName?: string;
+    runMethod?: string;
+    input?: string;
 }
 
 interface excel_Codegeruest {
@@ -67,7 +70,10 @@ async function importProgrammingTasksFromExcel(filename: string, description: st
                             create: [
                                 {
                                     code: task.Test,
-                                    language: task.Programming_Language
+                                    language: task.Programming_Language,
+                                    testClassName: task.testClassName,
+                                    runMethod: task.runMethod,
+                                    inputArguments: "" + task.input,
                                 },
                             ],
                         },

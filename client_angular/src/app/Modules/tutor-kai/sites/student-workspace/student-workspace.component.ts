@@ -1,4 +1,3 @@
-import { last } from 'rxjs';
 import { Component, HostListener, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { RunCodeService } from "../../services/runCode.service";
 import { TaskDataService } from "../../services/task-data.service";
@@ -26,44 +25,45 @@ enum States {
 }
 
 @Component({
-  selector: "app-student-workspace",
-  templateUrl: "./student-workspace.component.html",
-  styleUrls: ["./student-workspace.component.scss"],
+  selector: 'app-student-workspace',
+  templateUrl: './student-workspace.component.html',
+  styleUrls: ['./student-workspace.component.scss'],
 })
-
 export class StudentWorkspaceComponent implements OnInit {
   @ViewChild('codeEditorMonaco') codeEditorComponent?: CodeEditorComponent; // we get access to the codeEditorComponent and can call its methods
 
   currentState: States = States.startState;
-  selectedLanguage: string = "python";
+  selectedLanguage: string = 'python';
   currentTask: QuestionDTO | undefined;
   currentTaskId: number = 0;
   tasks: QuestionDTO[] = [];
   tasksOfSelectedWeek: QuestionDTO[] = [];
   flavor: string = 'Schnelles Feedback';
-  flavorOptions: string[] = ['Schnelles Feedback', 'Feedback mit Vorlesungsinformationen'];
+  flavorOptions: string[] = [
+    'Schnelles Feedback',
+    'Feedback mit Vorlesungsinformationen',
+  ];
 
   selectedWeek = 0;
   rating: number = 0;
   hoverState: number = 0;
-  feedback: string = "";
-  lastSubmissionId: string = ""; // encrypted - only server can decrypt
+  feedback: string = '';
+  lastSubmissionId: string = ''; // encrypted - only server can decrypt
   defaultWeek: number = 0;
   taskDescription: string =
-    "Hi :)\n ich bin Kai. Ich bin hier, um dir Feedback zu deinen Lösungen zu geben.\n Wähle hierzu zunächst oben im Dropdown eine Aufgabe aus. Im rechten Fenster kannst du deinen Programmcode eingeben.";
+    'Hi :)\n ich bin Kai. Ich bin hier, um dir Feedback zu deinen Lösungen zu geben.\n Wähle hierzu zunächst oben im Dropdown eine Aufgabe aus. Im rechten Fenster kannst du deinen Programmcode eingeben.';
   isLoading: boolean = false;
-  compilerOutput: string | null = "";
+  compilerOutput: string | null = '';
   feedbackMessage: string =
     'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben. Klicke hierzu auf den Button "Feedback erzeugen".';
-  currentLoadingFeedbackMessage: string = "";
+  currentLoadingFeedbackMessage: string = '';
   lastResult: any;
 
   supportedLanguages = [
-    { name: "Python", value: "python" },
-    { name: "Java", value: "java" },
-    { name: "TypeScript", value: "typescript" },
+    { name: 'Python', value: 'python' },
+    { name: 'Java', value: 'java' },
+    { name: 'TypeScript', value: 'typescript' },
   ];
-
 
   constructor(
     private runCodeService: RunCodeService,
@@ -72,8 +72,8 @@ export class StudentWorkspaceComponent implements OnInit {
     private formBuilder: FormBuilder,
     private markdownService: MarkdownService,
     private dialog: MatDialog,
-    private route: ActivatedRoute,
-  ) { }
+    private route: ActivatedRoute
+  ) {}
 
   /**
    * Initialize the component by getting question data from the API.
@@ -102,9 +102,7 @@ export class StudentWorkspaceComponent implements OnInit {
     const target = event.target as HTMLElement;
     if (target.tagName === 'A' && target.getAttribute('href')) {
       event.preventDefault();
-      this.openModal(
-        target.getAttribute('href')
-        );
+      this.openModal(target.getAttribute('href'));
     }
   }
   private openModal(href: string | null) {
@@ -120,7 +118,7 @@ export class StudentWorkspaceComponent implements OnInit {
       .postFeedback(this.rating, this.feedback, this.lastSubmissionId)
       .subscribe({
         next: (response) => {
-          this.openSnackBar("Vielen Dank für Ihr Feedback!", "done");
+          this.openSnackBar('Vielen Dank für Ihr Feedback!', 'done');
         },
         error: (error) => {
           this.checkError(error);
@@ -135,24 +133,28 @@ export class StudentWorkspaceComponent implements OnInit {
     this.rating = 0;
     this.currentState = States.startGeneratingKIFeedback;
     this.feedbackMessage =
-      "Lass mich einen Augenblick über die Aufgabe nachdenken...";
-    let submitCode = "";
+      'Lass mich einen Augenblick über die Aufgabe nachdenken...';
+    let submitCode = '';
     if (this.currentTask) {
       for (const file of this.currentTask.codingQuestion!.codeGerueste) {
         submitCode +=
-          "Beginn " +
+          'Beginn ' +
           file.codeFileName +
           file.code +
-          " Ende " +
+          ' Ende ' +
           file.codeFileName +
-          "`";
+          '`';
       }
     }
 
     let isFirstResponse = true;
-    this.currentLoadingFeedbackMessage = "";
+    this.currentLoadingFeedbackMessage = '';
     this.runCodeService
-      .getKiFeedback(submitCode, this.taskDescription, this.selectedLanguage, this.flavor,
+      .getKiFeedback(
+        submitCode,
+        this.taskDescription,
+        this.selectedLanguage,
+        this.flavor,
         //testResults: this.lastResult,
         this.lastResult
         //encryptedSubmissionId: this.lastSubmissionId,
@@ -173,7 +175,7 @@ export class StudentWorkspaceComponent implements OnInit {
         complete: () => {
           console.log(this.currentLoadingFeedbackMessage);
           this.currentState = States.finishedGeneratingKIFeedback;
-        }
+        },
       });
   }
 
@@ -189,21 +191,17 @@ export class StudentWorkspaceComponent implements OnInit {
         additionalFiles[file.codeFileName] = file.code;
       }
     }
-      this.runCodeService
-        .executeStudentCode(
-          this.currentTaskId,
-          inputArgs,
-          additionalFiles
-        )
-        .subscribe({
-          next: (result) => {
-            this.handleCodeSubmissionResponse(result);
-          },
-          error: (error) => {
-            this.checkError(error);
-            this.isLoading = false;
-          },
-        });
+    this.runCodeService
+      .executeStudentCode(this.currentTaskId, inputArgs, additionalFiles)
+      .subscribe({
+        next: (result) => {
+          this.handleCodeSubmissionResponse(result);
+        },
+        error: (error) => {
+          this.checkError(error);
+          this.isLoading = false;
+        },
+      });
   }
 
   /**
@@ -213,23 +211,10 @@ export class StudentWorkspaceComponent implements OnInit {
    */
   handleCodeSubmissionResponse(result: CodeSubmissionResultDto): void {
     console.log(result);
-    //this.lastSubmissionId = result.encryptedSubmissionId;
     this.lastResult = result;
-    this.compilerOutput = "";
-    for (const testResult of result.CodeSubmissionResult.testResults) {
-      this.compilerOutput += testResult.test+ "\n";
-      this.compilerOutput += testResult.status+ "\n";
-      this.compilerOutput += testResult.exception+ "\n";
-    }
-    this.compilerOutput += "\n" + "SCORE: " + result.CodeSubmissionResult.score;
-    /*
-    if (response.compile_output) {
-      this.compilerOutput += "\n" + response.compile_output;
-    }
-    if (response.stderr) {
-      this.compilerOutput += "\n" + response.stderr;
-    }
-    */
+    this.compilerOutput = result.CodeSubmissionResult.output;
+    this.compilerOutput +=
+      result.CodeSubmissionResult.output.length === 0 ? 'Keine Ausgabe' : '';
     this.isLoading = false;
     this.feedbackMessage =
       'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben. Klicke hierzu auf den Button "Feedback erzeugen".';
@@ -247,15 +232,16 @@ export class StudentWorkspaceComponent implements OnInit {
     if (this.currentTask.codingQuestion!.codeGerueste.length === 1) {
       const codeGerueste = this.currentTask.codingQuestion!.codeGerueste[0];
       const blob = new Blob([codeGerueste.code], {
-        type: "text/plain;charset=utf-8",
+        type: 'text/plain;charset=utf-8',
       });
       saveAs(blob, codeGerueste.codeFileName);
     } else if (this.currentTask.codingQuestion!.codeGerueste.length > 1) {
       const zip = new JSZip();
-      for (const codeGerueste of this.currentTask.codingQuestion!.codeGerueste) {
+      for (const codeGerueste of this.currentTask.codingQuestion!
+        .codeGerueste) {
         zip.file(codeGerueste.codeFileName, codeGerueste.code);
       }
-      zip.generateAsync({ type: "blob" }).then((blob) => {
+      zip.generateAsync({ type: 'blob' }).then((blob) => {
         saveAs(blob, `${this.currentTask?.name}.zip`);
       });
     }
@@ -288,7 +274,7 @@ export class StudentWorkspaceComponent implements OnInit {
     argsArray: this.formBuilder.array([]),
   });
   get argsArray(): FormArray {
-    return this.inputArgsForm.get("argsArray") as FormArray;
+    return this.inputArgsForm.get('argsArray') as FormArray;
   }
 
   /**
@@ -302,21 +288,32 @@ export class StudentWorkspaceComponent implements OnInit {
     this.currentTask = this.findQuestionById(index); //changing current task automatically changes the code inside the editor - check html
     //this.codeEditorComponent?.changeLanguage(this.selectedLanguage);
     if (this.currentTask) {
-      this.selectedLanguage = this.currentTask.codingQuestion!.programmingLanguage;
+      this.selectedLanguage =
+        this.currentTask.codingQuestion!.programmingLanguage;
       this.taskDescription = this.currentTask?.codingQuestion!.textHTML;
     }
 
     // Add Input Args if there are any
-    if (this.currentTask && this.currentTask.codingQuestion!.countInputArgs !== undefined) {
+    if (
+      this.currentTask &&
+      this.currentTask.codingQuestion!.countInputArgs !== undefined
+    ) {
       this.createInputArgs(this.currentTask.codingQuestion!.countInputArgs);
     }
   }
 
-    findQuestionById(id: number): QuestionDTO | undefined {
-    return this.tasks.find(question => question.id === id);
+  findQuestionById(id: number): QuestionDTO | undefined {
+    return this.tasks.find((question) => question.id === id);
   }
 
-
+  getTooltipText(
+    test: string,
+    status: string,
+    exception: string
+  ): string {
+    return `Testname: ${test}\n
+    Passed: ${status}`
+  }
 
   /**
    * Show errors in console and as Snackback.
@@ -324,16 +321,16 @@ export class StudentWorkspaceComponent implements OnInit {
   checkError(error: any): void {
     console.error(error);
     this.openSnackBar(
-      "Ein Fehler ist aufgetreten. Bitte Konsole überprüfen.",
-      "Warning"
+      'Ein Fehler ist aufgetreten. Bitte Konsole überprüfen.',
+      'Warning'
     );
   }
   openSnackBar(message: string, icon: string): void {
-    this.snackBar.open(message, "", {
+    this.snackBar.open(message, '', {
       duration: 2500,
-      panelClass: ["snackbar"],
-      horizontalPosition: "center",
-      verticalPosition: "bottom",
+      panelClass: ['snackbar'],
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
     });
   }
 }

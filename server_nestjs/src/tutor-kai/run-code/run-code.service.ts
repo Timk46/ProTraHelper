@@ -44,46 +44,75 @@ export class RunCodeService {
     if (!question) {
       throw new HttpException('Diese Question existiert nicht.', HttpStatus.NOT_FOUND);
     }
-
+    console.log("CODE REQUEST Stundent-Code: ");
+    console.log(JSON.stringify(studentCode));
     // Generate Base64-encoded strings of student code and test files for submission (needed for Jury1)
     const filesBase64 = await this.generateBase64(studentCode);
-    const testfileName = question.codingQuestions.automatedTests[0].language === "python"
-      ? "test_main.py"
-      : `${question.codingQuestions.mainFileName.split(".java")[0]}Test.java`; // TODO: This is a hacky solution. Refactor this.
-
-    const testFilesBase64 = await this.generateBase64({ [testfileName]: question.codingQuestions.automatedTests[0].code });
+    const testFilesBase64 = await this.generateBase64({ [question.codingQuestions.automatedTests[0].testClassName]: question.codingQuestions.automatedTests[0].code });
 
     // Submit encoded files for execution and process the response.
-    const response = await this.submitCodeForExecution(filesBase64, testFilesBase64, question.codingQuestions.automatedTests[0].language);
-    const result = this.processExecutionResponse(response, question.codingQuestions, question, userId, studentCode);
+    let response: CodeSubmissionResult;
+    if (question.codingQuestions.automatedTests[0].language === "java") {
+      response = await this.submitCodeForExecutionJava(filesBase64, testFilesBase64, question.codingQuestions.mainFileName);
+    } else {
+      response = await this.submitCodeForExecutionPython(filesBase64, testFilesBase64, question.codingQuestions.automatedTests[0].runMethod, question.codingQuestions.automatedTests[0].inputArguments);
+    }
+    const result = await this.processExecutionResponse(response, question.codingQuestions, question, userId, studentCode);
     return result;
   }
-
   /**
-   * Submits encoded student code and test files for execution with Jury1.
+   * Submits encoded student java code and test files for execution with Jury1.
    * @param files Base64-encoded student code files.
    * @param testFiles Base64-encoded test files.
-   * @param language The programming language of the submission.
+   * @param mainClassName Name of the Main Class which needs to be run to get console output (System.out.println)
    * @returns The execution result from the external API.
    */
-  private async submitCodeForExecution(files: { [fileName: string]: string }, testFiles: { [fileName: string]: string }, language: string): Promise<any> {
-    const response = await fetch(`${this.apiUrl}${language}-assignment`, {
+  private async submitCodeForExecutionJava(files: { [fileName: string]: string }, testFiles: { [fileName: string]: string }, mainClassName: string): Promise<CodeSubmissionResult> {
+    console.log("Anfrage an Jury1 gesendet.");
+    const tempClassName = mainClassName.split(".java")[0];
+    console.log(JSON.stringify({mainClassName: tempClassName, files, testFiles }));
+    const response = await fetch(`${this.apiUrl}java-assignment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ files, testFiles }),
+      body: JSON.stringify({mainClassName: tempClassName, files, testFiles }),
     });
 
     if (!response.ok) {
       throw new HttpException(`Failed to execute code. Status: ${response.status}`, HttpStatus.BAD_GATEWAY);
     }
-    return response.json();
+
+    const result: CodeSubmissionResult = await response.json();
+    return await result;
+  }
+
+  /**
+   * Submits encoded student python code and test files for execution with Jury1.
+   * @param mainFile Base64-encoded student code files.
+   * @param testFiles Base64-encoded test files.
+   * @returns The execution result from the external API.
+   */
+  private async submitCodeForExecutionPython(mainFile: { [fileName: string]: string }, testFiles: { [fileName: string]: string }, runMethod: string, inputArguments: string): Promise<any> {
+    console.log("CODE REQUEST Python BODY: ");
+    console.log(JSON.stringify({input: inputArguments, runMethod: runMethod, mainFile, testFiles }));
+    const response = await fetch(`${this.apiUrl}python-assignment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({runMethod: runMethod, input: inputArguments, mainFile, testFiles }),
+    });
+
+    if (!response.ok) {
+      throw new HttpException(`Failed to execute code. Status: ${response.status}`, HttpStatus.BAD_GATEWAY);
+    }
+    const result = await response.json();
+    console.log("RUN PYTHON CODE RESULTS: ");
+    console.log(result);
+    return result;
   }
 
   /**
    * Processes the response from the code execution API, logs the response, and saves the results to the database.
    */
   private async processExecutionResponse(response: CodeSubmissionResult, codingQuestion: CodingQuestion, question: Question, userId: number, studentCode: { [fileName: string]: string }): Promise<CodeSubmissionResultDto> {
-    console.log(response);
     const codeSubmission = await this.saveToDatabase(response, codingQuestion, question, userId, studentCode);
     return {
       CodeSubmissionResult: response,
@@ -102,7 +131,7 @@ export class RunCodeService {
         compilerOutput: JSON.stringify(response.testResults),
         compilerError: "", // TODO: Extract and store compiler error messages.
         compilerResponse: "", // TODO: Extract and store the full compiler response.
-        score: response.score,
+        score: response.score? response.score : 0,
         user: { connect: { id: userId } },
         codingQuestion: { connect: { id: codingQuestion.id } },
       },
@@ -114,7 +143,7 @@ export class RunCodeService {
         userId: userId,
         questionId: question.id,
         feedbacks: {
-          create: [{ text: 'Feedback for Coding Task got its own table', score: response.score }],
+          create: [{ text: 'Feedback for Coding Task got its own table', score: response.score? response.score : 0}],
         },
       },
     });

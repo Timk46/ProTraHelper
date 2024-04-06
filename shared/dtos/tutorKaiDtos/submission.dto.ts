@@ -25,6 +25,7 @@ export interface CodeSubmissionFileDto {
 }
 
 export interface CodeSubmissionResult{
+  output: string;
   testResults: TestResult[];
   testsPassed: boolean;
   score: number;
@@ -39,6 +40,6 @@ export interface CodeSubmissionResultDto {
 
 interface TestResult {
   test: string;
-  status: 'PASSED' | 'FAILED'; // Angenommen, dass dies die möglichen Werte sind.
+  status: 'PASSED' | 'FAILED';
   exception: string;
 }

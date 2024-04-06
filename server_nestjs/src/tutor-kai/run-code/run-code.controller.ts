@@ -22,9 +22,7 @@ export class RunCodeController {
     @Body('inputArgs') inputArgs: string[],
     @Body('CodeFiles') files: { [fileName: string]: string },
   ): Promise<CodeSubmissionResultDto> {
-
     const results = await this.runCodeService.executeCode(files, parseInt(taskId), req.user.id);
-    console.log(JSON.stringify(results));
     return results;
   }
 

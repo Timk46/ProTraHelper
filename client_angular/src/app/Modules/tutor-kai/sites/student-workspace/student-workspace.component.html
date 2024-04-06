@@ -1,11 +1,12 @@
 <div class="container mx-auto px-4">
+
   <div class="max-w-screen-xl mx-auto my-4">
 
     <!-- Main Grid mit 12 Spalten (jede Hälfte 6 Spalten) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-2">
 
       <!-- Linkes Grid: Dropdown + Aufgabenstellung-->
-      <div class="col-span-1 lg:col-span-6">
+      <div class="col-span-1 lg:col-span-6" style ="top: 30px">
             <div class="col-span-1 lg:col-span-6 grid lg:grid-cols-2 gap-3">
 
               <mat-form-field
@@ -35,7 +36,7 @@
 
       <!-- Rechtes Grid: Code-Editor -->
       <div class="col-span-1 lg:col-span-6">
-        <mat-tab-group dynamicHeight animationDuration="0ms">
+        <mat-tab-group dynamicHeight animationDuration="0ms" [backgroundColor]="'primary'" [color]="'primary'">
           <mat-tab *ngFor="let codeStructure of currentTask?.codingQuestion?.codeGerueste; let isLast = last">
             <ng-template mat-tab-label>
               <div class="tab-label">
@@ -55,8 +56,9 @@
       <div class="col-span-full lg:col-span-12 flex justify-between">
         <div class="flex-1"></div> <!-- Platzhalter auf der linken Seite -->
 
+        <div class="flex-1"></div>
         <!-- Run Code Button mit verschiedenen States -->
-        <div class="flex justify-center">
+        <div class="flex justify-center" [ngClass]="{'with-tests': !isLoading && lastResult}">
 
           <button
             *ngIf="currentState != 0 && currentState != 3 && inputArgsForm.valid"
@@ -72,6 +74,29 @@
           <!--<button *ngIf="currentState != 0 && currentState == 4" mat-raised-button color="primary" [disabled]="true" class="md:w-auto mb-2 px-4 noOverFlow">Bewerte zunächst das Feedback</button> -->
         </div>
 
+        <!-- Anzeige der erreichten Punktzahl -->
+
+        <!-- Anzeige der Ergebnisse der Unit-Tests -->
+        <div class="flex justify-end flex-1">
+          <!-- Anzeige der Ergebnisse der Unit-Tests mit benutzerdefinierten Kreisen -->
+          <div class="test-results">
+            <div class="points-display">
+              <p style="margin: 0;">Punkte: {{lastResult?.CodeSubmissionResult?.score ? lastResult.CodeSubmissionResult.score : 0}} / 100</p>
+              <mat-progress-bar style="height: 15px;" mode="determinate" value="lastResult?.CodeSubmissionResult.score ? lastResult.CodeSubmissionResult.score : 0" bufferValue="100"></mat-progress-bar>
+            </div>
+          </div>
+
+          <div class="test-results" *ngIf="!isLoading && lastResult" style="margin-left: 10px;">
+            <div class="test-circles">
+              <svg *ngFor="let test of lastResult.CodeSubmissionResult.testResults" width="24" height="24" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"
+                        [attr.fill]="test.status === 'SUCCESSFUL' ? '#4caf50' : '#f44336'"></circle>
+              </svg>
+            </div>
+          </div>
+
+      </div>
+
         <!-- Input Args (java) -->
         <div class="flex justify-end flex-1">
           <form [formGroup]="inputArgsForm"  *ngIf="argsArray.controls.length>0">
@@ -84,7 +109,11 @@
           </form>
           <button *ngIf="currentState != 0" mat-raised-button color="primary" (click)="downloadFiles()" class="downloadButton"><mat-icon>save</mat-icon></button>
         </div>
+
+
       </div>
+
+
 
        <!-- Breites Grid: Progress Spinner -->
       <div class="col-span-full lg:col-span-12 flex justify-center">

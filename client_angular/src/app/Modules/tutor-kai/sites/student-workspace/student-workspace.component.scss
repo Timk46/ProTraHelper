@@ -80,3 +80,21 @@ resize {
 {
   height: 400px;
 }
+
+.test-results {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Abstand zwischen den Elementen */
+}
+
+.test-circles {
+  display: flex;
+  align-items: center;
+  gap: 4px; /* Abstand zwischen den Kreisen */
+}
+
+.points-progress-bar {
+  width: 100%; /* Setzt die Breite der Fortschrittsleiste */
+  margin-top: 20px; /* Fügt einen Abstand nach oben hinzu */
+}
+

@@ -415,6 +415,9 @@ model AutomatedTest {
   code           String         @db.Text
   testFileName   String?
   language       String?
+  testClassName  String? // only for Java Tasks to isolated run a function to check for syntaxerrors
+  runMethod      String? // only for Python Tasks to isolated run a function to check for syntaxerrors
+  inputArguments String? // only for Python Tasks to isolated run a function to check for syntaxerrors
   questionId     Int
   codingQuestion CodingQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
