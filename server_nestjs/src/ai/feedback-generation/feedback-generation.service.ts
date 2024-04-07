@@ -66,7 +66,7 @@ export class FeedbackGenerationService {
     const ragResponse = await this.ragService.lectureSimilaritySearch(question, 3);
     let ragResponseString = "";
     ragResponse.forEach((element) => {
-      ragResponseString += "..." + element.pageContent + "...;\n";
+      ragResponseString += "..." + element.TranscriptChunkContent + "...;\n"; //@Jappaha I updated you code here. Please Check.
     });
 
     return ragResponseString;

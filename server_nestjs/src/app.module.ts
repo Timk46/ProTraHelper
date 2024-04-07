@@ -6,7 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphModule } from './graph/graph.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { ChatBotModule } from './ai/chat-bot/chat-bot.module';
+//import { ChatBotModule } from './ai/chat-bot/chat-bot.module'; PERMANENT DISABLED
 import { DiscussionListController } from './discussion/discussion-list/discussion-list.controller';
 import { DiscussionListService } from './discussion/discussion-list/discussion-list.service';
 import { DiscussionDataService } from './discussion/discussion-data/discussion-data.service';
@@ -31,8 +31,8 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ModulesModule } from './modules/modules.module';
 import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
-import { McqCreationModule } from './mcqcreation/mcqcreation.module';
-import { McqevaluationModule } from './mcqevaluation/mcqevaluation.module';
+// import { McqCreationModule } from './mcqcreation/mcqcreation.module'; CURRENTLY DISABLED
+// import { McqevaluationModule } from './mcqevaluation/mcqevaluation.module'; CURRENTLY DISABLED
 import { EventLogModule } from './EventLog/event-log.module';
 
 @Module({
@@ -59,14 +59,14 @@ import { EventLogModule } from './EventLog/event-log.module';
     AuthModule,
     UsersModule,
     ContentModule,
-    ChatBotModule,
+    //ChatBotModule, PERMANANT DISABLED
     ModulesModule,
     QuestionDataModule,
     RunCodeModule,
     QuestionModule,
     FeedbackGenerationModule,
-    McqCreationModule,
-    McqevaluationModule,
+    // McqCreationModule, CURRENTLY DISABLED
+    // McqevaluationModule, CURRENTLY DISABLED
     EventLogModule,
   ],
   controllers: [

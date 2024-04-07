@@ -1,32 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { Response } from 'express';
 import { LangChainTracer } from 'langchain/callbacks';
 import { Client } from 'langsmith';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { PGVectorStore } from 'langchain/vectorstores/pgvector';
-import { PoolConfig } from 'pg';
+import { RagService } from '../services/rag.service';
+import { TranscriptChunk } from '@Interfaces/index';
 
-const pg_config = {
-  postgresConnectionOptions: {
-    type: 'postgres',
-    host: 'vectordb.bshefl0.bs.informatik.uni-siegen.de',
-    port: 3306,
-    user: 'root',
-    password: 'qzx5vQG9WQ2b35eZUWujPUhVb8xRr',
-    database: 'vectordb',
-  } as PoolConfig,
-  tableName: 'langchain_pg_embedding',
-  columns: {
-    idColumnName: 'uuid',
-    vectorColumnName: 'embedding',
-    contentColumnName: 'document',
-    metadataColumnName: 'cmetadata',
-  },
-};
-
+// IMPORTANT: THIS IS OUTDATED !!!
+// THIS API ENDPOINT IS DISABLED AND THIS CODE NEEDS TO BE UPDATED WITH CURRENT LECTURE LINKER CODE !!!
 const {
   ChatPromptTemplate,
   HumanMessagePromptTemplate,
@@ -74,18 +56,14 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
 export class ChatBotRAGService {
   constructor(
     @Inject(REQUEST) private readonly request: Request,
-    private prisma: PrismaService,
+    private ragService: RagService,
   ) {}
 
   async chatBotRagAnswer(question: string, resStream: Response): Promise<void> {
-    const pgvectorStore = await PGVectorStore.initialize(
-      new OpenAIEmbeddings(),
-      pg_config,
-    );
 
-    const tempsimilaritySearchResult = await pgvectorStore.similaritySearch(
+    const tempsimilaritySearchResult = await this.ragService.lectureSimilaritySearch(
       question,
-      8,
+      6,
     );
 
     const similaritySearchResult = this.transformSearchResult(
@@ -93,7 +71,6 @@ export class ChatBotRAGService {
     );
     console.log(JSON.stringify(similaritySearchResult));
 
-    console.log(JSON.stringify(similaritySearchResult));
     const ragFormattedPrompt = await finalRAGPrompt.formatPromptValue({
       question: question,
       lectureSnippet:  JSON.stringify(similaritySearchResult),
@@ -116,11 +93,11 @@ export class ChatBotRAGService {
 
     resStream.end();
   }
-  // Funktion zur Transformation des JSON-Arrays
-  transformSearchResult(jsonArray: any[]): any[] {
+
+  transformSearchResult(jsonArray: TranscriptChunk[]): any[] {
     return jsonArray.map(item => ({
-      Erklärung: item.pageContent,
-      Quelle: item.metadata.source.replace('STARTSOURCE ', '').replace(' ENDSOURCE', '')
+      Erklärung: item.TranscriptChunkContent,
+      Quelle: item.metadata.markdownLink
     }));
   }
 }

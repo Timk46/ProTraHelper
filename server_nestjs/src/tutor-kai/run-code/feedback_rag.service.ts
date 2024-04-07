@@ -4,96 +4,21 @@ import { REQUEST } from '@nestjs/core';
 import { CryptoService } from '../crypto/crypto.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Response } from 'express';
-
 import { LangChainTracer } from "langchain/callbacks";
 import { Client } from "langsmith";
-
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { ToolMessage } from 'langchain/schema';
-
+import { Prisma, PrismaClient, TranscriptEmbedding } from '@prisma/client';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { PGVectorStore } from 'langchain/vectorstores/pgvector';
-import { PoolConfig } from 'pg';
+import { PrismaVectorStore } from '@langchain/community/vectorstores/prisma';
 import { IpgVectorContent } from './pgVectorResult.DTO';
 import { EventLogService } from '@/EventLog/event-log.service';
+import { TranscriptChunk } from '@DTOs/index';
 
-const pg_config = {
-  postgresConnectionOptions: {
-    type: 'postgres',
-    host: 'vectordb.bshefl0.bs.informatik.uni-siegen.de',
-    port: 3306,
-    user: 'root',
-    password: 'qzx5vQG9WQ2b35eZUWujPUhVb8xRr',
-    database: 'vectordb',
-  } as PoolConfig,
-  tableName: 'langchain_pg_embedding',
-  columns: {
-    idColumnName: 'uuid',
-    vectorColumnName: 'embedding',
-    contentColumnName: 'document',
-    metadataColumnName: 'cmetadata',
-  },
-};
+const {ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate} = require('langchain/prompts');
 
-const {
-  ChatPromptTemplate,
-  HumanMessagePromptTemplate,
-  SystemMessagePromptTemplate,
-} = require('langchain/prompts');
-
-//const KImodel = 'gpt-4-0314';
-//const KImodel = 'gpt-3.5-turbo';
 const KImodel = 'gpt-4-1106-preview';
 
-const chatStream = new ChatOpenAI({
-  modelName: KImodel,
-  openAIApiKey: process.env.OPENAI_API_KEY,
-  temperature: 0, // Low Temperature favours the words with higher probability = less creative
-  streaming: true
-});
-
-const client = new Client({
-  apiUrl: "https://api.smith.langchain.com",
-  apiKey: process.env.LANGCHAIN_API_KEY
-});
-const tracer = new LangChainTracer({
-  projectName: "Tutor-Kai",
-  client
-});
-
-const chat = new ChatOpenAI({
-  modelName: KImodel,
-  openAIApiKey: process.env.OPENAI_API_KEY,
-  temperature: 0, // Low Temperature favours the words with higher probability = less creative
-  streaming: true,
-}).bind({
-  tools: [
-    {
-      type: 'function',
-      function: {
-        name: 'getProgrammingConcepts',
-        description:
-          'Ruft Informationen aus dem Vorlesungstranskript zu einem Programmierkonzept ab.',
-        parameters: {
-          type: 'object',
-          properties: {
-            concept: {
-              type: 'string',
-              description: 'Das Programmierkonzept wie z.B. Rekursion',
-            },
-            question: {
-              type: 'string',
-              description:
-                'Die einzelne sehr einfache Frage auf deutsch, welche basierend auf dem Vorlesungstranskript beantwortet werden soll. Zum Beispiel: Wie funktioniert Rekursion? Oder: Was ist Rekursion?',
-            },
-          },
-          required: ['concept'],
-        },
-      },
-    },
-  ],
-  tool_choice: 'auto',
-});
 const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
     'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
@@ -146,6 +71,70 @@ const getConceptsPrompt = ChatPromptTemplate.fromPromptMessages([
   ),
 ]);
 
+const db = new PrismaClient();
+const vectorStore = PrismaVectorStore.withModel<TranscriptEmbedding>(db).create(
+  new OpenAIEmbeddings(),
+  {
+    prisma: Prisma,
+    tableName: 'TranscriptEmbedding',
+    vectorColumnName: 'vector',
+    columns: {
+      id: PrismaVectorStore.IdColumn,
+      content: PrismaVectorStore.ContentColumn,
+    },
+  },
+);
+
+const chatStream = new ChatOpenAI({
+  modelName: KImodel,
+  openAIApiKey: process.env.OPENAI_API_KEY,
+  temperature: 0, // Low Temperature favours the words with higher probability = less creative
+  streaming: true
+});
+
+const client = new Client({
+  apiUrl: "https://api.smith.langchain.com",
+  apiKey: process.env.LANGCHAIN_API_KEY
+});
+const tracer = new LangChainTracer({
+  projectName: "Tutor-Kai",
+  client
+});
+
+const chat = new ChatOpenAI({
+  modelName: KImodel,
+  openAIApiKey: process.env.OPENAI_API_KEY,
+  temperature: 0, // Low Temperature favours the words with higher probability = less creative
+  streaming: true,
+}).bind({
+  tools: [
+    {
+      type: 'function',
+      function: {
+        name: 'getProgrammingConcepts',
+        description:
+          'Ruft Informationen aus dem Vorlesungstranskript zu einem Programmierkonzept ab.',
+        parameters: {
+          type: 'object',
+          properties: {
+            concept: {
+              type: 'string',
+              description: 'Das Programmierkonzept wie z.B. Rekursion',
+            },
+            question: {
+              type: 'string',
+              description:
+                'Die einzelne sehr einfache Frage auf deutsch, welche basierend auf dem Vorlesungstranskript beantwortet werden soll. Zum Beispiel: Wie funktioniert Rekursion? Oder: Was ist Rekursion?',
+            },
+          },
+          required: ['concept'],
+        },
+      },
+    },
+  ],
+  tool_choice: 'auto',
+});
+
 @Injectable()
 export class FeedbackRAGService {
   constructor(
@@ -157,14 +146,11 @@ export class FeedbackRAGService {
 
   // Mocked out function, could be a database/API call in production
   async getProgrammingConcepts(data: any): Promise<string> {
-    const pgvectorStore = await PGVectorStore.initialize(
-      new OpenAIEmbeddings(),
-      pg_config,
-    );
-    const similaritySearchResult = await pgvectorStore.similaritySearch(
+    const tempsimilaritySearchResult = await vectorStore.similaritySearch(
       data.question,
       4,
     );
+    const similaritySearchResult= this.transformToTranscriptChunks(JSON.stringify(tempsimilaritySearchResult));
     return JSON.stringify({ data, explanation: similaritySearchResult });
   }
 
@@ -211,7 +197,7 @@ export class FeedbackRAGService {
     // Ask initial question that requires multiple tool calls
     const res = await chat.invoke(conceptsFormattedPrompt, { callbacks: [tracer] });
 
-    console.log(res.additional_kwargs.tool_calls);
+    //console.log(res.additional_kwargs.tool_calls);
     this.eventLogService.log(
       "info",
       "FeedbackRAGService/usedTool",
@@ -240,10 +226,9 @@ export class FeedbackRAGService {
         let content: IpgVectorContent = JSON.parse(toolMessage.content);// Angenommen, content enthält das JSON-Format
         let explanations = [];
         for (var explanation of content.explanation) {
-          const source = explanation.metadata.source.replace("STARTSOURCE ", "").replace(" ENDSOURCE", "")
           explanations.push({
-            Erklärung: explanation.pageContent,
-            Quelle: source
+            Erklärung: explanation.TranscriptChunkContent,
+            Quelle: explanation.metadata.markdownLink // we have access to all metadata
           });
         }
         concepts.push({
@@ -295,17 +280,6 @@ export class FeedbackRAGService {
     resStream.end();
   }
 
-
-  /*
-  getExplanationStrings(content: IpgVectorContent): string {
-    var result: string  = "";
-    for (var explanation of content.explanation) {
-      result += ' BEGINEXPLANATION: ' + explanation.pageContent + explanation.metadata.source + ' ENDEXPLANATION ';
-    }
-    return result;
-  }
-  */
-
   private async saveFeedbackInDB(
     relatedCodeSubmissionResult: CodeSubmissionResultDto,
     openAiResponse,
@@ -327,4 +301,50 @@ export class FeedbackRAGService {
       },
     });
   }
+
+    // Da der Prisma Vectorstore für pgVector keine Metadaten abfragen kann, sind diese alle als JSON-String als Text im Content und werden hier wieder zurückgeparsed.
+    transformToTranscriptChunks(jsonString: string): TranscriptChunk[] {
+      try {
+        // Zunächst den String in ein JSON-Objekt umwandeln
+        const parsedData = JSON.parse(jsonString);
+
+        // Überprüfen, ob das geparste Objekt ein Array ist
+        if (!Array.isArray(parsedData)) {
+          throw new Error("Parsed data is not an array");
+        }
+
+        // Das Array von Objekten in das gewünschte Format mappen
+        const transcriptChunks: TranscriptChunk[] = parsedData.map(item => {
+          // Sicherstellen, dass pageContent existiert und ein JSON-String ist
+          if (typeof item.pageContent !== 'string') {
+            throw new Error("pageContent is missing or not a string");
+          }
+
+          // pageContent von String zu JSON umwandeln
+          const pageContent = JSON.parse(item.pageContent);
+
+          // Die Struktur validieren und anpassen
+          if (typeof pageContent !== 'object' || typeof pageContent.TranscriptChunkContent !== 'string' || typeof pageContent.metadata !== 'object') {
+            throw new Error("Invalid pageContent structure");
+          }
+
+          // Rückgabe des neu strukturierten Objekts
+          return {
+            TranscriptChunkContent: pageContent.TranscriptChunkContent,
+            metadata: {
+              filename: pageContent.metadata.filename,
+              timestamp: pageContent.metadata.timestamp,
+              markdownLink: pageContent.metadata.markdownLink,
+              uuid: pageContent.metadata.uuid,
+              lectureName: pageContent.metadata.lectureName,
+            }
+          };
+        });
+
+        return transcriptChunks;
+      } catch (error) {
+        console.error("Error mapping to TranscriptChunk array:", error);
+        return [];
+      }
+    }
 }

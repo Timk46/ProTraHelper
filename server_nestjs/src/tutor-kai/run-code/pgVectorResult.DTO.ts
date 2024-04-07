@@ -1,14 +1,4 @@
-export interface IpgVectorExplanationMetadata {
-    source: string;
-    filename: string;
-    timestamp: string;
-    uuid: string;
-  }
-
-  export interface IpgVectorExplanation {
-    pageContent: string;
-    metadata: IpgVectorExplanationMetadata;
-  }
+import { TranscriptChunk } from '@DTOs/index';
 
   export interface IpgVectorData {
     concept: string;
@@ -17,5 +7,5 @@ export interface IpgVectorExplanationMetadata {
 
   export interface IpgVectorContent {
     data: IpgVectorData;
-    explanation: IpgVectorExplanation[];
+    explanation: TranscriptChunk[];
   }

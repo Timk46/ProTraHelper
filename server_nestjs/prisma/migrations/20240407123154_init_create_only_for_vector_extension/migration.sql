@@ -1,8 +1,13 @@
+CREATE EXTENSION IF NOT EXISTS vector; -- https://js.langchain.com/docs/integrations/vectorstores/prisma
+
 -- CreateEnum
 CREATE TYPE "GlobalRole" AS ENUM ('STUDENT', 'TEACHER', 'ADMIN');
 
 -- CreateEnum
 CREATE TYPE "contentElementType" AS ENUM ('TEXT', 'IMAGE', 'VIDEO', 'AUDIO', 'CODE', 'PDF', 'QUESTION');
+
+-- CreateEnum
+CREATE TYPE "userConceptEventType" AS ENUM ('LEVEL_CHANGE', 'EXPANDED', 'COLLAPSED', 'SELECTED');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -130,6 +135,17 @@ CREATE TABLE "UserConcept" (
     "expanded" BOOLEAN NOT NULL,
 
     CONSTRAINT "UserConcept_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UserConceptEvent" (
+    "id" SERIAL NOT NULL,
+    "userConceptId" INTEGER NOT NULL,
+    "eventType" "userConceptEventType" NOT NULL,
+    "level" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "UserConceptEvent_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -329,19 +345,12 @@ CREATE TABLE "AutomatedTest" (
     "code" TEXT NOT NULL,
     "testFileName" TEXT,
     "language" TEXT,
+    "testClassName" TEXT,
+    "runMethod" TEXT,
+    "inputArguments" TEXT,
     "questionId" INTEGER NOT NULL,
 
     CONSTRAINT "AutomatedTest_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Testcase" (
-    "id" SERIAL NOT NULL,
-    "input" TEXT NOT NULL,
-    "expectedOutput" TEXT NOT NULL,
-    "automatedTestId" INTEGER NOT NULL,
-
-    CONSTRAINT "Testcase_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -351,10 +360,10 @@ CREATE TABLE "CodeSubmission" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "compilerOutput" TEXT,
-    "compilerError" TEXT,
-    "compilerResponse" TEXT,
+    "unitTestResults" TEXT,
     "userId" INTEGER NOT NULL,
     "codingQuestionId" INTEGER NOT NULL,
+    "score" INTEGER,
 
     CONSTRAINT "CodeSubmission_pkey" PRIMARY KEY ("id")
 );
@@ -473,6 +482,28 @@ CREATE TABLE "UserContentView" (
 );
 
 -- CreateTable
+CREATE TABLE "EventLog" (
+    "id" SERIAL NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "type" TEXT NOT NULL,
+    "level" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "userId" INTEGER,
+    "data" JSONB,
+
+    CONSTRAINT "EventLog_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Transcript" (
+    "id" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "vector" vector,
+
+    CONSTRAINT "Transcript_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_ModuleToSubject" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
@@ -578,6 +609,9 @@ ALTER TABLE "UserConcept" ADD CONSTRAINT "UserConcept_userId_fkey" FOREIGN KEY (
 ALTER TABLE "UserConcept" ADD CONSTRAINT "UserConcept_conceptNodeId_fkey" FOREIGN KEY ("conceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "UserConceptEvent" ADD CONSTRAINT "UserConceptEvent_userConceptId_fkey" FOREIGN KEY ("userConceptId") REFERENCES "UserConcept"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "ContentElement" ADD CONSTRAINT "ContentElement_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "File"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -656,9 +690,6 @@ ALTER TABLE "CodeGeruest" ADD CONSTRAINT "CodeGeruest_codingQuestionId_fkey" FOR
 ALTER TABLE "AutomatedTest" ADD CONSTRAINT "AutomatedTest_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "CodingQuestion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Testcase" ADD CONSTRAINT "Testcase_automatedTestId_fkey" FOREIGN KEY ("automatedTestId") REFERENCES "AutomatedTest"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "CodeSubmission" ADD CONSTRAINT "CodeSubmission_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -714,6 +745,9 @@ ALTER TABLE "UserContentView" ADD CONSTRAINT "UserContentView_userId_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "UserContentView" ADD CONSTRAINT "UserContentView_contentNodeId_fkey" FOREIGN KEY ("contentNodeId") REFERENCES "ContentNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "EventLog" ADD CONSTRAINT "EventLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ModuleToSubject" ADD CONSTRAINT "_ModuleToSubject_A_fkey" FOREIGN KEY ("A") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;

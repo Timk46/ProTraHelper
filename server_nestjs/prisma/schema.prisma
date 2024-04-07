@@ -231,6 +231,7 @@ model File {
   mCAnswerId       Int?
   contentElement   ContentElement?
   contentElementId Int?
+  TranscriptEmbeddings    TranscriptEmbedding[]
 }
 
 model ContentView { // n to n between content elements and content node. This way each content element can be used for multiple conctent nodes with different positions.
@@ -572,4 +573,12 @@ model EventLog {
   User      User?    @relation(fields: [userId], references: [id])
   userId    Int?
   data      Json?
+}
+
+model TranscriptEmbedding {
+  id      String                 @id @default(cuid())
+  content String                 @db.Text // contains all metadata in a stringified JSON because vectorstore for prisma doesnt supper metadata fields yet. Because of that we can not filter by concept etc. yet (we could with rawqueries)
+  vector  Unsupported("vector")? // https://js.langchain.com/docs/integrations/vectorstores/prisma
+  file   File? @relation(fields: [fileId], references: [id])
+  fileId Int?
 }
