@@ -114,7 +114,6 @@ export class FilesService {
    * @returns {Promise<FileDto>} The metadata of the retrieved file
    */
   async getFileByName(name: string): Promise<FileDto> {
-    console.log(name);
     const file = await this.prisma.file.findFirst({
       where: { name },
     });

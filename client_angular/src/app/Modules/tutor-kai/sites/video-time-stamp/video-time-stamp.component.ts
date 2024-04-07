@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { environment } from 'src/environments/environment';
 
@@ -16,6 +16,7 @@ export class VideoTimeStampComponent implements OnInit {
   private lastLoggedTime: number = 0;
   private logIntervalSeconds: number = 5;
   private readonly apiUrl = `${environment.server}/event-log`;
+  @ViewChild('videoPlayer') videoPlayer!: ElementRef;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: { href: string }, private httpClient: HttpClient) {}
 
@@ -63,8 +64,7 @@ export class VideoTimeStampComponent implements OnInit {
    */
   private videoFromName(name: string): void {
     this.videoLoading = true;
-    // ToDo: REMOVE LECTURE LINKER API AND USE GOALS API WITH UUIDs instead of Videon Names (need to add those to vector db metadata first)
-    this.videoUrl = `https://api-lecturelinker.bshefl0.bs.informatik.uni-siegen.de/video/OFP/${name}.mp4`;
+    this.videoUrl = `${environment.server}/files/download/VideoByName/${name}.mp4`;
   }
 
   /**
@@ -106,4 +106,18 @@ export class VideoTimeStampComponent implements OnInit {
       this.lastLoggedTime = currentTime;
     }
   }
+
+    // preventing Premature close conncetion error by closing the modal while video is loading
+    ngOnDestroy() {
+      this.stopAndResetVideo();
+    }
+
+    private stopAndResetVideo() {
+      if (this.videoPlayer && this.videoPlayer.nativeElement) {
+        this.videoPlayer.nativeElement.pause();
+        this.videoPlayer.nativeElement.src = '';
+        this.videoPlayer.nativeElement.load();
+      }
+      this.videoUrl = "";
+    }
 }

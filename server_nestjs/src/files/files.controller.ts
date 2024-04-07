@@ -22,11 +22,12 @@ export class FilesController {
   /**
    * Upload a new file.
    *
-   * POST /files/upload
+   * POST /files/upload   DISABLED FOR NOW
    *
    * @param {Express.Multer.File} file - The file to upload
    * @returns {Promise<FileDto>} The metadata of the uploaded file
    */
+  /*
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
@@ -35,7 +36,7 @@ export class FilesController {
     const fileType = mimetype.split('/')[1];
 
     return await this.filesService.uploadFile(buffer, fileName, fileType);
-  }
+  }*/
 
   /**
    * Download an existing file by its unique identifier.
@@ -156,5 +157,61 @@ async downloadVideo(
     return new StreamableFile(fileStream);
   }
 }
+
+
+  /**
+   * Downloads a video file by its name. CAREFUL: If there is a double, it will take the first one.
+   *
+   * @param name - The name of the video file to download.
+   * @param response - The HTTP response object, used to set headers and status.
+   * @param range - The 'Range' header from the request, used for partial file downloads.
+   * @returns A StreamableFile object containing the video stream.
+   */
+  @Public()
+  @Get('download/VideoByName/:name')
+  async downloadVideoByName(
+    @Param('name') name: string, // Extracts the video's unique identifier from the URL.
+    @Res({ passthrough: true }) response: Response, // Injects the response object for direct manipulation.
+    @Headers('range') range: string, // Extracts the 'Range' header from the request.
+  ): Promise<StreamableFile> {
+    // Retrieves the file based on the unique identifier.
+    const file = await this.filesService.getFileByName(name);
+    // Determines the file size for setting appropriate headers.
+    const fileSize = fs.statSync(process.env.FILE_PATH + file.path).size;
+
+    // Checks if a range request was made. This is needed for "streaming" the video.
+    if (range) {
+      // Parses the range header to determine the requested segment of the file.
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+      // Sets headers specific to range requests.
+      response.set({
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': end - start + 1,
+        'Content-Type': 'video/mp4',
+      });
+
+      response.status(206); // Indicates partial content.
+
+      // Creates a readable stream for the requested segment.
+      const fileStream = fs.createReadStream(
+        process.env.FILE_PATH + file.path,
+        { start, end },
+      );
+      return new StreamableFile(fileStream);
+    } else {
+      // Sets headers for a full file response.
+      response.set({
+        'Content-Length': fileSize,
+        'Content-Type': 'video/mp4',
+      });
+      // Creates a readable stream for the entire file.
+      const fileStream = fs.createReadStream(process.env.FILE_PATH + file.path);
+      return new StreamableFile(fileStream);
+    }
+  }
 
 }
