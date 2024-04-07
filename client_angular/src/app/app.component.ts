@@ -32,7 +32,7 @@ export class AppComponent {
     }
 
   ngOnInit() {
-    this.toolbarService.show();
+    //this.toolbarService.show();
   }
 
   logOut() {
