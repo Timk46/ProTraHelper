@@ -6,6 +6,7 @@ import { DiscussionViewService } from 'src/app/Services/discussion/discussion-vi
 import { Subscription } from 'rxjs';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-discussion-view',
@@ -45,7 +46,7 @@ export class DiscussionViewComponent {
 
   @Input() discussionId: number = -1;
 
-  constructor(private route: ActivatedRoute, private discussionViewService: DiscussionViewService, private discussionCreationService: DiscussionCreationService, private userService: UserService) {
+  constructor(private route: ActivatedRoute, private discussionViewService: DiscussionViewService, private discussionCreationService: DiscussionCreationService, private userService: UserService, private title: Title) {
     this.userId = parseInt(this.userService.getTokenID());
     const pSub = this.route.params.subscribe(params => {
       this.discussionId = parseInt(params['discussionId']);
@@ -144,6 +145,9 @@ export class DiscussionViewComponent {
         })];
         break;
     }
+  }
+  ngOnInit(): void {
+    this.title.setTitle('GOALS: Diskutieren');
   }
 
   ngOnDestory() {

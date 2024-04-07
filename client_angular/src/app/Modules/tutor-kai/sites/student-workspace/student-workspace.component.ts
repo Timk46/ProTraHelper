@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
+import { Component, HostListener, OnInit, ViewChild } from "@angular/core";
 import { RunCodeService } from "../../services/runCode.service";
 import { TaskDataService } from "../../services/task-data.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -12,6 +12,7 @@ import { VideoTimeStampComponent } from '../video-time-stamp/video-time-stamp.co
 import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from '@angular/router';
 import { ConfettiService } from "src/app/Services/animations/confetti.service";
+import { Title } from '@angular/platform-browser';
 /**
  * The different states representing the current status of the student workspace.
  */
@@ -74,7 +75,8 @@ export class StudentWorkspaceComponent implements OnInit {
     private markdownService: MarkdownService,
     private dialog: MatDialog,
     private route: ActivatedRoute,
-    private confettiService: ConfettiService
+    private confettiService: ConfettiService,
+    private title: Title
   ) {}
 
   /**
@@ -83,6 +85,7 @@ export class StudentWorkspaceComponent implements OnInit {
    */
   ngOnInit(): void {
     this.getCurrentTaskFromRoute();
+    this.title.setTitle('GOALS: Tutor Kai');
   }
 
   getCurrentTaskFromRoute(): void {

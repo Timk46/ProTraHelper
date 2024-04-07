@@ -3,6 +3,7 @@ import { environment } from 'src/environments/environment';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../Services/auth/user.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Title } from '@angular/platform-browser';
 
 /**
  * The LoginComponent handles the login process.
@@ -18,7 +19,8 @@ export class LoginComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private userService: UserService,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private title: Title
   ) {
     this.loginForm = this.formBuilder.group({
       username: ['', [Validators.required, Validators.email]],
@@ -43,13 +45,13 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/dashboard']);
       }
     });
+    this.title.setTitle('GOALS: Login');
   }
 
   /**
    * The login method navigates to the authentication server to authenticate the user.
    */
   loginWithCAS(): void {
-    console.log('login');
     window.location.href = `${environment.server}/auth/cas/`;
   }
 

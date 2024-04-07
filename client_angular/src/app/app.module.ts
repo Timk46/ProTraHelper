@@ -1,6 +1,6 @@
 import "reflect-metadata"
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, Title } from '@angular/platform-browser';
 import { MaterialModule } from './Modules/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
@@ -99,7 +99,8 @@ import { ConfettiService } from "./Services/animations/confetti.service";
     { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
     LoggedInGuard,
     EditorModule,
-    ConfettiService
+    ConfettiService,
+    Title
   ],
   bootstrap: [AppComponent]
 })

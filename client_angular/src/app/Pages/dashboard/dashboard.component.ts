@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
+import { Title } from '@angular/platform-browser';
 import { ToolbarService } from 'src/app/Services/toolbar/toolbar.service';
 
 @Component({
@@ -8,8 +8,9 @@ import { ToolbarService } from 'src/app/Services/toolbar/toolbar.service';
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
-  constructor(public toolbarService: ToolbarService) {
+  constructor(public toolbarService: ToolbarService, private title:Title) {
     toolbarService.show();
+    title.setTitle('GOALS: Dashboard');
   }
 
   ngOnInit() {}
