@@ -125,37 +125,23 @@ export class ContentService {
       });
     }
 
+
     const getQuestionProgress = async (question) => {
-      //get the best user score for each question
-      let userAnswers = await this.prisma.userAnswer.findMany({
-        where: {
-          questionId: question.id,
-          userId: userId,
+      const maxScoreResult = await this.prisma.feedback.aggregate({
+        _max: {
+          score: true,
         },
-        select: {
-          id: true,
-        }
+        where: {
+          userAnswer: {
+            questionId: question.id,
+            userId: userId,
+          },
+        },
       });
 
-      let bestScore = 0;
-
-      if (userAnswers) {
-        for (let userAnswer of userAnswers) {
-          let feedback = await this.prisma.feedback.findUnique({
-            where: {
-              id: userAnswer.id,
-            },
-            select: {
-              score: true,
-            }
-          });
-          if (feedback.score > bestScore) {
-            bestScore = feedback.score;
-          }
-        }
-      }
-
-      return (bestScore / question.score) * 100;
+      const bestScore = maxScoreResult._max.score || 0;
+      const questionScore = question.score;
+      return (bestScore / questionScore) * 100;
     }
 
     const transformContentNode = (contentNode) => ({
@@ -407,8 +393,8 @@ export class ContentService {
 }
 
 
-  
+
 
 /*
-  
+
 */
