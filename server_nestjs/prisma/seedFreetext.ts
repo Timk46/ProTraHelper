@@ -63,6 +63,7 @@ export const seedFreetext = async (user_id: number) => {
                     conceptNode: { connect: { id: data.concept } },
                     isApproved: data.isApproved,
                     version: data.version,
+                    level: data.level,
                 },
             });
             

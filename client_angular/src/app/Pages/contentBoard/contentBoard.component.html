@@ -1,10 +1,11 @@
 <div class="content-container" class="mat-elevation-z8">
   <mat-accordion>
-    <mat-expansion-panel matTooltip="Beschreibung: {{content.description}}" [disabled]="!hasContentElementType(content, 'QUESTION')" [hideToggle]="!hasContentElementType(content, 'QUESTION')" *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index">
+    <mat-expansion-panel [hideToggle]="!hasContentElementType(content, 'QUESTION')" *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index">
+    <!-- <mat-expansion-panel [disabled]="!hasContentElementType(content, 'QUESTION')" [hideToggle]="!hasContentElementType(content, 'QUESTION')" *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index"></mat-expansion-panel> -->
       <mat-expansion-panel-header>
         <mat-panel-title class="panel-title">
           {{ content.name }}
-          <mat-icon class="level-icon" *ngFor="let level of getLevels(2)">star</mat-icon>
+          <mat-icon class="level-icon" *ngFor="let level of getLevels(content.level)">star</mat-icon>
           <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
         </mat-panel-title>
         <p matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." style="margin-top: 10px;">Level-Fortschritt: </p><mat-progress-bar matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." class="node-progress" mode="determinate" [value]="content.progress"></mat-progress-bar>
@@ -29,7 +30,7 @@
             <!-- Name Column -->
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef> Name </th>
-              <td mat-cell *matCellDef="let element" matTooltip="{{element.description}}"> {{ element.name }} </td>
+              <td mat-cell *matCellDef="let element"> {{ element.name }} </td>
             </ng-container>
   
             <!-- Type Column -->

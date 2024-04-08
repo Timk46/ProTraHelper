@@ -1,4 +1,4 @@
-CREATE EXTENSION IF NOT EXISTS vector; -- https://js.langchain.com/docs/integrations/vectorstores/prisma
+CREATE EXTENSION IF NOT EXISTS vector;
 
 -- CreateEnum
 CREATE TYPE "GlobalRole" AS ENUM ('STUDENT', 'TEACHER', 'ADMIN');
@@ -495,12 +495,13 @@ CREATE TABLE "EventLog" (
 );
 
 -- CreateTable
-CREATE TABLE "Transcript" (
+CREATE TABLE "TranscriptEmbedding" (
     "id" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "vector" vector,
+    "fileId" INTEGER,
 
-    CONSTRAINT "Transcript_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "TranscriptEmbedding_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -748,6 +749,9 @@ ALTER TABLE "UserContentView" ADD CONSTRAINT "UserContentView_contentNodeId_fkey
 
 -- AddForeignKey
 ALTER TABLE "EventLog" ADD CONSTRAINT "EventLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TranscriptEmbedding" ADD CONSTRAINT "TranscriptEmbedding_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "File"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ModuleToSubject" ADD CONSTRAINT "_ModuleToSubject_A_fkey" FOREIGN KEY ("A") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;

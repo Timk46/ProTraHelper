@@ -121,7 +121,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
           id: contentElement.question.id,
           name: contentElement.question.name ? contentElement.question.name : content.name,
           type: contentElement.question.type,
-          progress: 50,
+          progress: contentElement.question.progress,
           description: contentElement.question.description,
         };
         data.push(input);
@@ -151,8 +151,6 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     this.dialog.open(ContentViewComponent, dialogConfig);
   }
 
-  
-
   onTaskClick(id: number, type: string) {
     console.log('active task id: ' + id);
     const dialogConfig = new MatDialogConfig();
@@ -163,7 +161,22 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     let dialogRef;
     if (type == 'MC') { // why SC and not MC?
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
+      /*
+      dialogRef.afterClosed().subscribe(result => {
+        const new_progress = result['reached_score'] / result['question_score'];
+        // Find the specific question in the data source and update its progress
+        for (const element of this.dataSource.data) {
+          if (new_progress > element.progress) {
+            element.progress = new_progress;
+            break;
+          }
+        }
+      // Update the data source
+      this.dataSource = new MatTableDataSource(this.dataSource.data);
+      });
+      */
     }
+
     if (type == 'SC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
     }
@@ -178,6 +191,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
   hasContentElementType(content : ContentDTO, type: string) {
     return content.contentElements.some(element => element.type === type);
   }
+  
   getFilteredData(contentNodeId: number) {
     return this.dataSource.data.filter(element => element.contentNodeId === contentNodeId);
   }

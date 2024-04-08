@@ -144,11 +144,23 @@ export class ContentService {
       return (bestScore / questionScore) * 100;
     }
 
+    const questionProgressMap = new Map();
+    //durchlaufe alle trainedBy contentNodes und speichere die FrageId und den Fortschritt in einem Map
+    for (const contentNode of conceptNode.trainedBy) {
+      for (const contentView of contentNode.contentNode.ContentView) {
+        if (contentView.contentElement.question) {
+          const questionId = contentView.contentElement.question.id;
+          const progress = await getQuestionProgress(contentView.contentElement.question);
+          questionProgressMap.set(questionId, progress);
+        }
+      }
+    }
+
     const transformContentNode = (contentNode) => ({
       contentNodeId: contentNode.id,
       name: contentNode.name,
       description: contentNode.description,
-      level: 1,
+      level: contentNode.trains[0].awards,
       contentElements: contentNode.ContentView.map(
         (contentView: ContentViewDTO) => ({
           id: contentView.contentElement.id,
@@ -163,7 +175,7 @@ export class ContentService {
             description: contentView.contentElement.question.description,
             type: contentView.contentElement.question.type,
             level: contentView.contentElement.question.level,
-            progress: getQuestionProgress(contentView.contentElement.question),
+            progress: Number(questionProgressMap.get(contentView.contentElement.question.id)),
           } : null,
         }),
       ),

@@ -102,8 +102,7 @@ export class McTaskComponent implements OnInit {
       //timeout for showing the feedback
       this.submitDisabled = true;
     }, 500);
-
-
+  
   }
 
   //Get data from dialog
@@ -134,4 +133,12 @@ export class McTaskComponent implements OnInit {
       })
     });
   }
+
+  //Close the dialog
+  onClose(): void {
+    const result = {reached_score: this.feedback.score, question_score: this.questionData.score};
+    //mit dem close() soll die Punktzahl an die parent component übergeben werden
+    this.dialogRef.close(result);
+  }
+
 }

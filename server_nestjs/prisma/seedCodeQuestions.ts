@@ -59,6 +59,7 @@ async function importProgrammingTasksFromExcel(filename: string, description: st
                 text: task.Task,
                 conceptNode: { connect: { id: conceptNode.id } },
                 isApproved: true,
+                level: 3, // this is the default level for all tasks currently
                 codingQuestions: {
                     create: {
                         text: task.Task,
