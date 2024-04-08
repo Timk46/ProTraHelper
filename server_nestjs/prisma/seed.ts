@@ -266,14 +266,14 @@ async function main() {
         ofpData.push({
           conceptId: row[columnConceptId],
           conceptEdge: row[columnConceptEdge]
-            ? row[columnConceptEdge].toString().split(',').map(Number)
+            ? row[columnConceptEdge].toString().split(/[,.]/).map(Number)
             : null,
           contentId: row[columnContentId],
           requiresId: row[columnRequiresId]
-            ? row[columnRequiresId].toString().split(',').map(Number)
+            ? row[columnRequiresId].toString().split(/[,.]/).map(Number)
             : null,
           trainsId: row[columnTrainsId]
-            ? row[columnTrainsId].toString().split(',').map(Number)
+            ? row[columnTrainsId].toString().split(/[,.]/).map(Number)
             : null,
           topic: lastTopic,
           parentId: row[columnParentId] ? row[columnParentId] : 1,
