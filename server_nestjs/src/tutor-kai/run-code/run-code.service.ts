@@ -44,8 +44,6 @@ export class RunCodeService {
     if (!question) {
       throw new HttpException('Diese Question existiert nicht.', HttpStatus.NOT_FOUND);
     }
-    console.log("CODE REQUEST Stundent-Code: ");
-    console.log(JSON.stringify(studentCode));
     // Generate Base64-encoded strings of student code and test files for submission (needed for Jury1)
     const filesBase64 = await this.generateBase64(studentCode);
     const testFilesBase64 = await this.generateBase64({ [question.codingQuestions.automatedTests[0].testClassName]: question.codingQuestions.automatedTests[0].code });
@@ -68,9 +66,10 @@ export class RunCodeService {
    * @returns The execution result from the external API.
    */
   private async submitCodeForExecutionJava(files: { [fileName: string]: string }, testFiles: { [fileName: string]: string }, mainClassName: string): Promise<CodeSubmissionResult> {
-    console.log("Anfrage an Jury1 gesendet.");
-    const tempClassName = mainClassName.split(".java")[0];
-    console.log(JSON.stringify({mainClassName: tempClassName, files, testFiles }));
+
+    const tempClassName = "de.goals.testing." + mainClassName.split(".java")[0];
+    //console.log("Jury1: Run Assignment Java:");
+    //console.log(JSON.stringify({mainClassName: tempClassName, files, testFiles }));
     const response = await fetch(`${this.apiUrl}java-assignment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -82,7 +81,9 @@ export class RunCodeService {
     }
 
     const result: CodeSubmissionResult = await response.json();
-    return await result;
+    //console.log("Jury1: Run Assignment Java RESULTS: ");
+    //console.log(result);
+    return result;
   }
 
   /**
@@ -92,8 +93,8 @@ export class RunCodeService {
    * @returns The execution result from the external API.
    */
   private async submitCodeForExecutionPython(mainFile: { [fileName: string]: string }, testFiles: { [fileName: string]: string }, runMethod: string, inputArguments: string): Promise<any> {
-    console.log("CODE REQUEST Python BODY: ");
-    console.log(JSON.stringify({input: inputArguments, runMethod: runMethod, mainFile, testFiles }));
+    //console.log("Jury1: Run Assignment Python:");
+    //console.log(JSON.stringify({input: inputArguments, runMethod: runMethod, mainFile, testFiles }));
     const response = await fetch(`${this.apiUrl}python-assignment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -104,8 +105,8 @@ export class RunCodeService {
       throw new HttpException(`Failed to execute code. Status: ${response.status}`, HttpStatus.BAD_GATEWAY);
     }
     const result = await response.json();
-    console.log("RUN PYTHON CODE RESULTS: ");
-    console.log(result);
+    //console.log("Jury1: Run Assignment Python RESULTS: ");
+    //console.log(result);
     return result;
   }
 
