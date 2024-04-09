@@ -1,12 +1,7 @@
 import { PrismaClient, contentElementType } from '@prisma/client';
-import { el, faker, hy } from '@faker-js/faker';
-import { ConsoleLogger } from '@nestjs/common';
-import { Console } from 'console';
+import { faker } from '@faker-js/faker';
 import * as XLSX from 'xlsx';
-import { WorkSheet, utils } from 'xlsx';
 import * as fs from 'fs';
-import { last, of } from 'rxjs';
-import e from 'express';
 import { seedMCQ } from './seedMCQ';
 import { seedCodeQuestions } from './seedCodeQuestions';
 import { seedFreetext } from './seedFreetext';
