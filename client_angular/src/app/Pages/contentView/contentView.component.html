@@ -1,91 +1,81 @@
-<div class = "contentView-Container">
-  <div class = "contentView-Title">
-    <h1> {{ contentViewData.name }} </h1>
-    <h3>Zuletzt geöffnet: {{ readableDate }} </h3>
-  </div>
-  <div class = "contentView-Description">
-    <p> {{ contentViewData.description }} </p>
-  </div>
+<!-- Create a Card for each Content Element and display PDF, Video etc. depending on type-->
+<mat-card *ngFor="let contentElem of viewableElements " class="contentView-card">
+
+  <!--Show Content Title, if it has any-->
+  <mat-card-header *ngIf="contentElem.title">
+    <mat-card-title-group>
+      <mat-card-title>
+        {{contentViewData.name}} - Zuletzt geöffnet: {{ readableDate }}</mat-card-title>
+          <!-- We could add an subtitle or icon to the header aswell
+          <mat-card-subtitle>Extra large</mat-card-subtitle>
+          <img mat-card-xl-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" >
+          -->
+
+  <!-- Create Button for each Content Element to create a new Discussion -->
+  <button (click)="onCreateDiscussion(contentElem.id)" mat-stroked-button color="primary" style="text-align: center;">Frage stellen</button>
 
 
-  <!-- Create a Card for each Content Element and display PDF, Video etc. depending on type-->
-  <mat-card *ngFor="let contentElem of viewableElements " class="contentView-card">
-
-    <!--Show Content Title, if it has any-->
-    <mat-card-header *ngIf="contentElem.title">
-      <mat-card-title-group>
-        <mat-card-title>
-          {{contentElem.title}}</mat-card-title>
-            <!-- We could add an subtitle or icon to the header aswell
-            <mat-card-subtitle>Extra large</mat-card-subtitle>
-            <img mat-card-xl-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" >
-            -->
-
-    <!-- Create Button for each Content Element to create a new Discussion -->
-    <button (click)="onCreateDiscussion(contentElem.id)" mat-stroked-button color="primary" style="text-align: center;">Frage stellen</button>
-    
-
-      </mat-card-title-group>    
-    </mat-card-header>
+    </mat-card-title-group>
+  </mat-card-header>
 
 
-    <mat-card-content *ngIf="contentTypes.includes(contentElem.type)">
-      <!--********** BEGIN: Show Content depending on type **********-->
+  <mat-card-content *ngIf="contentTypes.includes(contentElem.type)">
+    <!--********** BEGIN: Show Content depending on type **********-->
 
-      <!--PDF-->
-      <div *ngIf="contentElem.type == 'PDF' && contentElem.file " class = "contentElement-Container">
-        <!-- Our current PDF Component cant be initialized multiple times... using an iframe instead for now -->
-        <iframe *ngIf="pdfCount > 1" id="embedded" [src]="getPdfUrl(contentElem.file.uniqueIdentifier)" style="height: 60vh; width: 100pv"></iframe>
-        <app-pdfViewer *ngIf="pdfCount == 1" [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-pdfViewer>
-      </div>
-
-      <!--VIDEO-->
-      <div *ngIf="contentElem.type == 'VIDEO' && contentElem.file " class = "contentElement-Container">
-        <app-videoViewer  [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-videoViewer>
-      </div>
-
-      <!--CODE-->
-      <div *ngIf="contentElem.type == 'CODE' " class = "contentElement-Container contentElement-Code">
-        <p class="message-code">Code kann noch nicht dargestellt werden.</p>
-      </div>
-
-      <!-- QUESTION -->
-      <div *ngIf="contentElem.type == 'QUESTION' " class = "contentElement-Container">
-        <p class="message-code">Hier werden die Aufgaben angezeigt.</p>
-        <!-- <app-mcTask>  [uniqueIdentifier]=""></app-mcTask> -->
-      </div>
-      
-      <!--Show additional Content Text, if it has any-->
-      <div *ngIf="contentElem.text" class="contentElement-Container">
-        {{contentElem.text}}
-      </div>
-
-    <!-- Create Button for each Content Element to mark the Element as 'Completed'  -->
-    <div class="progressButton-Container" >
-      <div class="progress-button">
-        <button class="progress-button" (click)="onToggleCheckmark(contentElem.id)" mat-stroked-button [ngStyle]="applyCheckmarkStyles(contentElem.id)" >
-          <mat-icon class="small-icon">check</mat-icon>
-          <p class="button-text"> Ich habe diesen Inhalt verstanden.</p>
-        </button>
-        <!-- Create Button for each Content Element to mark the Element as 'Open Question'  -->
-        <button class="progress-button" (click)="onToggleQuestionmark(contentElem.id)" mat-stroked-button [ngStyle]="applyQuestionmarkStyles(contentElem.id)" >
-          <mat-icon class="small-icon">?</mat-icon>
-          <p class="button-text"> Zu diesem Inhalt habe ich noch Fragen.</p>
-        </button>
-      </div>
+    <!--PDF-->
+    <div *ngIf="contentElem.type == 'PDF' && contentElem.file " class = "contentElement-Container">
+      <!-- Our current PDF Component cant be initialized multiple times... using an iframe instead for now -->
+      <iframe *ngIf="pdfCount > 1" id="embedded" [src]="getPdfUrl(contentElem.file.uniqueIdentifier)" style="height: 60vh; width: 100pv"></iframe>
+      <app-pdfViewer *ngIf="pdfCount == 1" [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-pdfViewer>
     </div>
 
-      <!--********** END: Show Content depending on type **********-->
-    </mat-card-content>
+    <!--VIDEO-->
+    <div *ngIf="contentElem.type == 'VIDEO' && contentElem.file " class = "contentElement-Container">
+      <app-videoViewer  [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-videoViewer>
+    </div>
+
+    <!--CODE-->
+    <div *ngIf="contentElem.type == 'CODE' " class = "contentElement-Container contentElement-Code">
+      <p class="message-code">Code kann noch nicht dargestellt werden.</p>
+    </div>
+
+    <!-- QUESTION -->
+    <div *ngIf="contentElem.type == 'QUESTION' " class = "contentElement-Container">
+      <p class="message-code">Hier werden die Aufgaben angezeigt.</p>
+      <!-- <app-mcTask>  [uniqueIdentifier]=""></app-mcTask> -->
+    </div>
+
+    <!--Show additional Content Text, if it has any-->
+    <div *ngIf="contentElem.text" class="contentElement-Container">
+      {{contentElem.text}}
+    </div>
+
+  <!-- Create Button for each Content Element to mark the Element as 'Completed'  -->
+  <div class="progressButton-Container" >
+    <div class="progress-button">
+      <button class="progress-button" (click)="onToggleCheckmark(contentElem.id)" mat-stroked-button [ngStyle]="applyCheckmarkStyles(contentElem.id)" >
+        <mat-icon class="small-icon">check</mat-icon>
+        <p class="button-text"> Ich habe diesen Inhalt verstanden.</p>
+      </button>
+      <!-- Create Button for each Content Element to mark the Element as 'Open Question'  -->
+      <button class="progress-button" (click)="onToggleQuestionmark(contentElem.id)" mat-stroked-button [ngStyle]="applyQuestionmarkStyles(contentElem.id)" >
+        <mat-icon class="small-icon">?</mat-icon>
+        <p class="button-text"> Ich habe noch Fragen.</p>
+      </button>
+    </div>
+  </div>
+
+    <!--********** END: Show Content depending on type **********-->
+  </mat-card-content>
 
 
 
-  </mat-card>
-
+</mat-card>
+<!--
   <h2>For Debugging the stringyfied ContentElements:</h2>
   <ul>
   <li *ngFor="let contentElem of contentViewData.contentElements">
     {{tempForTest(contentElem)}}
   </li>
   </ul>
-</div>
+-->

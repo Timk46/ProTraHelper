@@ -45,11 +45,11 @@ export class ContentBoardComponent implements OnInit, OnChanges {
 
   //the data for the table of questions
   displayedColumns: string[] = [
-    'id', 
-    'name', 
-    'type',  
-    'progress', 
-    //'level', 
+    'id',
+    'name',
+    'type',
+    'progress',
+    //'level',
     'actions'
   ];
 
@@ -104,7 +104,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     this.dataSource = new MatTableDataSource<TaskViewData>();
     this.sort = new MatSort();
   }
-  
+
 
   ngOnInit() {
   }
@@ -126,12 +126,12 @@ export class ContentBoardComponent implements OnInit, OnChanges {
         };
         data.push(input);
       }
-      
+
     }
     this.dataSource = new MatTableDataSource(data);
   }
 
-  ngAfterViewInit() { 
+  ngAfterViewInit() {
     this.dataSource.sort = this.sort;
   }
 
@@ -157,7 +157,8 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     dialogConfig.data = {
       question_id: id,
     };
-    dialogConfig.maxHeight = "80vh";
+    //dialogConfig.maxHeight = "80vh";
+    dialogConfig.width = "auto";
     let dialogRef;
     if (type == 'MC') { // why SC and not MC?
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
@@ -191,7 +192,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
   hasContentElementType(content : ContentDTO, type: string) {
     return content.contentElements.some(element => element.type === type);
   }
-  
+
   getFilteredData(contentNodeId: number) {
     return this.dataSource.data.filter(element => element.contentNodeId === contentNodeId);
   }

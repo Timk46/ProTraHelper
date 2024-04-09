@@ -12,7 +12,7 @@
 
 .node-question {
   margin-right: 10px;
-} 
+}
 
 .content-view {
   width: fit-content;
@@ -37,3 +37,4 @@
 ::ng-deep .mat-expansion-panel-header[aria-disabled=true] {
   color: rgba(0,0,0,.87);
 }
+
