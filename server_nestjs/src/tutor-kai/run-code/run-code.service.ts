@@ -68,8 +68,8 @@ export class RunCodeService {
   private async submitCodeForExecutionJava(files: { [fileName: string]: string }, testFiles: { [fileName: string]: string }, mainClassName: string): Promise<CodeSubmissionResult> {
 
     const tempClassName = "de.goals.testing." + mainClassName.split(".java")[0];
-    //console.log("Jury1: Run Assignment Java:");
-    //console.log(JSON.stringify({mainClassName: tempClassName, files, testFiles }));
+    console.log("Jury1: Run Assignment Java:");
+    console.log(JSON.stringify({mainClassName: tempClassName, files, testFiles }));
     const response = await fetch(`${this.apiUrl}java-assignment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -81,8 +81,8 @@ export class RunCodeService {
     }
 
     const result: CodeSubmissionResult = await response.json();
-    //console.log("Jury1: Run Assignment Java RESULTS: ");
-    //console.log(result);
+    console.log("Jury1: Run Assignment Java RESULTS: ");
+    console.log(result);
     return result;
   }
 
@@ -93,8 +93,8 @@ export class RunCodeService {
    * @returns The execution result from the external API.
    */
   private async submitCodeForExecutionPython(mainFile: { [fileName: string]: string }, testFiles: { [fileName: string]: string }, runMethod: string, inputArguments: string): Promise<any> {
-    //console.log("Jury1: Run Assignment Python:");
-    //console.log(JSON.stringify({input: inputArguments, runMethod: runMethod, mainFile, testFiles }));
+    console.log("Jury1: Run Assignment Python:");
+    console.log(JSON.stringify({input: inputArguments, runMethod: runMethod, mainFile, testFiles }));
     const response = await fetch(`${this.apiUrl}python-assignment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -105,8 +105,8 @@ export class RunCodeService {
       throw new HttpException(`Failed to execute code. Status: ${response.status}`, HttpStatus.BAD_GATEWAY);
     }
     const result = await response.json();
-    //console.log("Jury1: Run Assignment Python RESULTS: ");
-    //console.log(result);
+    console.log("Jury1: Run Assignment Python RESULTS: ");
+    console.log(result);
     return result;
   }
 
