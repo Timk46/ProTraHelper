@@ -17,7 +17,7 @@ import { TranscriptChunk } from '@DTOs/index';
 
 const {ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate} = require('langchain/prompts');
 
-const KImodel = 'gpt-4-1106-preview';
+const KImodel = 'gpt-4-turbo-2024-04-09';
 
 const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
