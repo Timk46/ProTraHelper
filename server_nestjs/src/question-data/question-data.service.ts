@@ -2,7 +2,7 @@
 /* eslint-disable prettier/prettier */
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { McQuestionDTO, MCOptionDTO, QuestionDTO, questionType, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
+import { McQuestionDTO, MCOptionDTO, MCOptionViewDTO, QuestionDTO, questionType, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { Injectable } from '@nestjs/common';
 import {  } from '@prisma/client';
@@ -70,7 +70,39 @@ export class QuestionDataService {
      * @param mcQuestion_id
      * @returns the options of the mc question
      */
-    async getMCOptions(mcQuestion_id: number): Promise<MCOptionDTO[]> {
+    async getMCOptions(mcQuestion_id: number): Promise<MCOptionViewDTO[]> {
+        let mcOptions : MCOptionViewDTO[] = [];
+
+        let mcQuestionOptions = await this.prisma.mCQuestionOption.findMany({
+            where: {
+                mcQuestionId: Number(mcQuestion_id)
+            }
+        });
+
+        for(let mcQuestionOption of mcQuestionOptions) {
+            let mcOption = await this.prisma.mCOption.findUnique({
+                where: {
+                    id: Number(mcQuestionOption.mcOptionId)
+                }
+            })
+
+            let mcOptionData : MCOptionViewDTO = {
+                id: mcOption.id,
+                text: mcOption.text,
+            }
+
+            mcOptions.push(mcOptionData);
+        }
+
+        return mcOptions;
+    }
+    
+    /**
+     *
+     * @param mcQuestion_id
+     * @returns the options of the mc question
+     */
+    async getMCCheckOptions(mcQuestion_id: number): Promise<MCOptionDTO[]> {
         let mcOptions : MCOptionDTO[] = [];
 
         let mcQuestionOptions = await this.prisma.mCQuestionOption.findMany({
@@ -89,15 +121,15 @@ export class QuestionDataService {
             let mcOptionData : MCOptionDTO = {
                 id: mcOption.id,
                 text: mcOption.text,
-                correct: mcOption.is_correct
+                correct: mcOption.is_correct,
             }
 
             mcOptions.push(mcOptionData);
         }
 
         return mcOptions;
-    }
-
+    }    
+    
     /**
      * get the free text question, including the solution and expectations if requested
      * @param questionVersionId
@@ -331,7 +363,7 @@ export class QuestionDataService {
         if (question.type === questionType.MULTIPLECHOICE) {
             console.log('generate feedback for user answer');
             //const question = await this.getQuestion(answerData.questionId);
-            const mcOptions = await this.getMCOptions((await this.getMCQuestion(answerData.questionId)).id);
+            const mcOptions = await this.getMCCheckOptions((await this.getMCQuestion(answerData.questionId)).id);
             let userScore = 0;
             const scorePerOption = question.score / mcOptions.length;
 

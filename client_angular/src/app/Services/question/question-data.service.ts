@@ -1,4 +1,4 @@
-import { McQuestionDTO, QuestionDTO, QuestionVersionDTO, MCOptionDTO, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
+import { McQuestionDTO, QuestionDTO, QuestionVersionDTO, MCOptionDTO, MCOptionViewDTO, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -33,8 +33,8 @@ export class QuestionDataService {
     return this.http.get<McQuestionDTO>(environment.server + `/question-data/mcQuestion/${questionVersionId}`);
   }
 
-  getMCOptions(questionId: number) : Observable<MCOptionDTO[]> {
-    return this.http.get<MCOptionDTO[]>(environment.server + `/question-data/mcOptions/${questionId}`);
+  getMCOptions(questionId: number) : Observable<MCOptionViewDTO[]> {
+    return this.http.get<MCOptionViewDTO[]>(environment.server + `/question-data/mcOptions/${questionId}`);
   }
 
   getFreeTextQuestion(questionVersionId: number) : Observable<freeTextQuestionDTO> {

@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Inject } from '@angular/core';
 import { MatList, MatSelectionListChange } from '@angular/material/list';
 import { MatListOption } from '@angular/material/list';
-import { MCOptionDTO, McQuestionDTO, QuestionDTO, QuestionVersionDTO } from '@DTOs/question.dto';
+import { MCOptionViewDTO, McQuestionDTO, QuestionDTO, QuestionVersionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -67,7 +67,7 @@ export class McTaskComponent implements OnInit {
   @Input() isSelfAssessment: boolean = false;
 
   //the mc options
-  options : MCOptionDTO[] = [];
+  options : MCOptionViewDTO[] = [];
 
   //the selected option(s)
   selectedOptions : number[] = [];
