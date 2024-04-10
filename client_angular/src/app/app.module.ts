@@ -5,6 +5,7 @@ import { MaterialModule } from './Modules/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // Components
+import {ContactComponent, ImpressumComponent, DatenschutzComponent} from './app.component'
 import { GraphComponent } from './Pages/graph/graph.component';
 import { ContentBoardComponent } from './Pages/contentBoard/contentBoard.component';
 import { DashboardComponent } from './Pages/dashboard/dashboard.component';
@@ -82,7 +83,10 @@ import { ConfettiService } from "./Services/animations/confetti.service";
     McTaskCreationComponent,
     ScoreComponent,
     DescriptionDialogComponent,
-    DraggableHeightDirective
+    DraggableHeightDirective,
+    ContactComponent,
+    ImpressumComponent,
+    DatenschutzComponent
   ],
   imports: [
     BrowserModule,
