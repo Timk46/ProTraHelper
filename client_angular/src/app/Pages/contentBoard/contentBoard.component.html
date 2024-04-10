@@ -5,7 +5,12 @@
       <mat-expansion-panel-header>
         <mat-panel-title class="panel-title">
           {{ content.name }}
-          <mat-icon class="level-icon" *ngFor="let level of getLevels(content.level)">star_border</mat-icon>
+          <div *ngIf="content.progress==100">
+            <mat-icon class="level-icon" *ngFor="let level of getLevels(content.level)">star</mat-icon>
+          </div>
+          <div *ngIf="content.progress<100">
+            <mat-icon class="level-icon" *ngFor="let level of getLevels(content.level)">star_border</mat-icon>
+          </div>
           <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
           <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
         </mat-panel-title>
