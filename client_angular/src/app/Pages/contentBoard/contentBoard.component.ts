@@ -21,6 +21,7 @@ interface ContentViewData {
 
 interface TaskViewData {
   contentNodeId: number;
+  contentElementId: number;
   id: number;
   name: string;
   type: string;
@@ -118,6 +119,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
         }
         const input: TaskViewData = {
           contentNodeId: content.contentNodeId,
+          contentElementId: contentElement.id,
           id: contentElement.question.id,
           name: contentElement.question.name ? contentElement.question.name : content.name,
           type: contentElement.question.type,
@@ -151,15 +153,15 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     this.dialog.open(ContentViewComponent, dialogConfig);
   }
 
-  onTaskClick(id: number, type: string) {
-    console.log('active task id: ' + id);
+  onTaskClick(questionId: number, contentElementId: number, type: string) {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.data = {
-      question_id: id,
+      question_id: questionId,
+      contentElement_id: contentElementId, 
     };
     dialogConfig.maxHeight = "80vh";
     let dialogRef;
-    if (type == 'MC') { // why SC and not MC?
+    if (type == 'MC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
       /*
       dialogRef.afterClosed().subscribe(result => {
@@ -184,7 +186,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
       dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
     }
     if (type == 'CodingQuestion') {
-      this.router.navigate([this.getRouterLink(id)]);
+      this.router.navigate([this.getRouterLink(questionId)]);
     }
   }
 

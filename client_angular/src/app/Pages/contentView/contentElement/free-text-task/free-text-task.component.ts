@@ -37,6 +37,7 @@ export class FreeTextTaskComponent {
 
   freeTextQuestion: freeTextQuestionDTO = {
     questionId: -1,
+    contentElementId: -1,
     title: "",
     text: "",
     expectations: "",
@@ -44,7 +45,7 @@ export class FreeTextTaskComponent {
   }
 
 
-  constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: {question_id: number}, private quesitonService: QuestionDataService) {
+  constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: {question_id: number, contentElement_id: number}, private quesitonService: QuestionDataService) {
     /* this.quesitonService.getQuestionData(this.data.question_id).subscribe(data => {
       this.questionData = data;
     }); */
@@ -64,6 +65,7 @@ export class FreeTextTaskComponent {
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
       questionId: this.freeTextQuestion.questionId,
+      contentElementId: this.freeTextQuestion.contentElementId,
       userId: -1,
       userFreetextAnswer: text,
       userFreetextAnswerRaw: rawText,

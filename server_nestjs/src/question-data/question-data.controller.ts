@@ -73,6 +73,7 @@ export class QuestionDataController {
     //@roles('ANY')
     @Post('userAnswer/create')
     async createUserAnswer(@Body() data: UserAnswerDataDTO, @Req() req: any) {
+        console.log('createUserAnswer data' + ' ' + data.contentElementId + ' ' + req.user.id);
         return this.questionDataService.createUserAnswer(req.user.id, data);
     }
 

@@ -62,6 +62,7 @@ export class McTaskComponent implements OnInit {
 
   //the requested question
   questionId: number;
+  contentElementID: any;
 
   //isSelfAssessment
   @Input() isSelfAssessment: boolean = false;
@@ -87,8 +88,10 @@ export class McTaskComponent implements OnInit {
 
   onSubmit() :void {
     //Create new submit
+    console.log('create submit for contentElementId: ' + this.contentElementID);
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
+      contentElementId: this.contentElementID,
       userId: -1,
       questionId: this.questionData.id,
       userMCAnswer: this.selectedOptions,
@@ -110,8 +113,10 @@ export class McTaskComponent implements OnInit {
     public dialogRef: MatDialogRef<McTaskComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private questionDataService: QuestionDataService) {
-
-    this.questionId = data.question_id as number;
+    console.log('constructor data: '+data.contentElement_id);
+    this.questionId = data.question_id;
+    this.contentElementID = data.contentElementId;
+    console.log('constructor data: '+this.contentElementID);
   }
 
   ngOnInit() {

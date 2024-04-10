@@ -1,5 +1,6 @@
 export interface UserAnswerDataDTO {
     id: number;
+    contentElementId?: number;
     userId: number;
     questionId: number;
     userFreetextAnswer?: string;

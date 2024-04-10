@@ -135,6 +135,7 @@ export interface CodingQuestionDto {
 
   export interface freeTextQuestionDTO {
     questionId: number;
+    contentElementId?: number;
     title: string;
     text: string;
     textHTML?: string;
