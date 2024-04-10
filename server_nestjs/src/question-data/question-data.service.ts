@@ -350,9 +350,11 @@ export class QuestionDataService {
 
             const progress = userScore / question.score;
             let feedbackText = "";
+            let markedAsDone: boolean = false;
             if(progress == 1) {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
                 this.contentService.toggleCheckmark(answerData.contentElementId, userId);
+                markedAsDone = true;
             }
             else {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
@@ -375,7 +377,9 @@ export class QuestionDataService {
                 id: feedback.id,
                 userAnswerId: feedback.userAnswerId,
                 score: feedback.score,
-                feedbackText: feedback.text
+                feedbackText: feedback.text,
+                elementDone: markedAsDone,
+                progress: progress*100,
             }
         }
 
@@ -395,6 +399,15 @@ export class QuestionDataService {
               });
             }
 
+            const progress = userScore / question.score;
+            let markedAsDone: boolean = false;
+            console.log('progress: '+progress);
+
+            if(progress == 1) {
+                this.contentService.toggleCheckmark(answerData.contentElementId, userId);
+                markedAsDone = true;
+            }
+
             console.log('generated Text:', feedbackText);
             console.log('userScore: ' + userScore);
             //create feedback for user answer
@@ -412,7 +425,9 @@ export class QuestionDataService {
                 id: feedback.id,
                 userAnswerId: feedback.userAnswerId,
                 score: feedback.score,
-                feedbackText: feedback.text
+                feedbackText: feedback.text,
+                elementDone: markedAsDone,
+                progress: progress*100,
             }
 
         }

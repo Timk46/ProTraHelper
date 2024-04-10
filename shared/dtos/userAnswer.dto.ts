@@ -20,4 +20,6 @@ export interface userAnswerFeedbackDTO {
     userAnswerId: number;
     feedbackText: string;
     score: number;
+    elementDone: boolean;
+    progress: number;
 }

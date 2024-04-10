@@ -23,6 +23,7 @@ export class FreeTextTaskComponent {
   answerText: string = '';
   feedbackText: string = '';
   isSending: boolean = false;
+  contentElementID: number;
 
   /* questionData : QuestionDTO = {
     id : -1,
@@ -46,11 +47,10 @@ export class FreeTextTaskComponent {
 
 
   constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: {question_id: number, contentElement_id: number}, private quesitonService: QuestionDataService) {
-    /* this.quesitonService.getQuestionData(this.data.question_id).subscribe(data => {
-      this.questionData = data;
-    }); */
+    this.contentElementID = data.contentElement_id;
     this.quesitonService.getFreeTextQuestion(this.data.question_id).subscribe(data => {
       this.freeTextQuestion = data;
+      this.freeTextQuestion.contentElementId = this.contentElementID;
     });
     this.quesitonService.getNewestUserAnswer(this.data.question_id).subscribe(data => {
       this.answerText = data.userFreetextAnswer || '';

@@ -43,28 +43,29 @@ export class UserConceptService {
             });
         }
         else {
-            userConcept = await this.prisma.userConcept.update({
-                where: {
-                    id: userConcept.id
-                },
+            if(userConcept.level < level) {
+                userConcept = await this.prisma.userConcept.update({
+                    where: {
+                        id: userConcept.id
+                    },
+                    data: {
+                        level: level
+                    }
+                });
+            }   
+            // create a userConceptEvent
+            await this.prisma.userConceptEvent.create({
                 data: {
-                    level: level
+                    userConcept: {
+                        connect: {
+                            id: userConcept.id
+                        }
+                    },
+                    level: level,
+                    eventType: userConceptEventType.LEVEL_CHANGE
                 }
             });
         }
-
-        // create a userConceptEvent
-        await this.prisma.userConceptEvent.create({
-            data: {
-                userConcept: {
-                    connect: {
-                        id: userConcept.id
-                    }
-                },
-                level: level,
-                eventType: userConceptEventType.LEVEL_CHANGE
-            }
-        });
         return userConcept;
     }
 

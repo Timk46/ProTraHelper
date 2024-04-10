@@ -153,40 +153,25 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     this.dialog.open(ContentViewComponent, dialogConfig);
   }
 
-  onTaskClick(questionId: number, contentElementId: number, type: string) {
+  onTaskClick(taskViewData: TaskViewData) {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.data = {
-      question_id: questionId,
-      contentElement_id: contentElementId, 
+      taskViewData: taskViewData,
     };
     dialogConfig.maxHeight = "80vh";
     let dialogRef;
-    if (type == 'MC') {
+    if (taskViewData.type == 'MC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
-      /*
-      dialogRef.afterClosed().subscribe(result => {
-        const new_progress = result['reached_score'] / result['question_score'];
-        // Find the specific question in the data source and update its progress
-        for (const element of this.dataSource.data) {
-          if (new_progress > element.progress) {
-            element.progress = new_progress;
-            break;
-          }
-        }
-      // Update the data source
-      this.dataSource = new MatTableDataSource(this.dataSource.data);
-      });
-      */
     }
 
-    if (type == 'SC') {
+    if (taskViewData.type == 'SC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
     }
-    if (type == 'FreeText') {
+    if (taskViewData.type == 'FreeText') {
       dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
     }
-    if (type == 'CodingQuestion') {
-      this.router.navigate([this.getRouterLink(questionId)]);
+    if (taskViewData.type == 'CodingQuestion') {
+      this.router.navigate([this.getRouterLink(taskViewData.id)]);
     }
   }
 
