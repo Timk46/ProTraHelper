@@ -103,7 +103,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
 
   dataSource: MatTableDataSource<TaskViewData>;
 
-  constructor(private router: Router, public dialog: MatDialog, private graphDataService: GraphDataService) {
+  constructor(private router: Router, public dialog: MatDialog) {
     this.dataSource = new MatTableDataSource<TaskViewData>();
     this.sort = new MatSort();
   }
@@ -166,13 +166,6 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     let dialogRef;
     if (taskViewData.type == 'MC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
-      dialogRef.afterClosed().subscribe( result => {
-        console.log('element done: '+result)
-        const elementDone = result;
-        if (elementDone) {
-          this.graphDataService.updateUserLevel(this.activeConceptNodeId, taskViewData.level);
-        }
-      });
     }
     
     if (taskViewData.type == 'SC') {

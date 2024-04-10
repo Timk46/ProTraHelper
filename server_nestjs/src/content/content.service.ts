@@ -12,10 +12,11 @@ import {
 import { ContentElementStatusDTO } from '@DTOs/index';
 import { async, last } from 'rxjs';
 import { tr } from '@faker-js/faker';
+import { UserConceptService } from '@/graph/user-concept/user-concept.service';
 
 @Injectable()
 export class ContentService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService, private userConceptService: UserConceptService) { }
 
   /**
    * Retrieves all contents associated with a particular concept node by trainedBy and requiredBy relations.
@@ -99,6 +100,7 @@ export class ContentService {
       let number = 0;
 
       const total = contentNode.ContentView.length;
+      const level = Number(contentNode.trains[0].awards);
       if (total === 0) {
         return 0;
       } else {
@@ -112,7 +114,14 @@ export class ContentService {
             }
           }
         }
-        return (number / total) * 100;
+        const progress = (number / total) * 100;
+
+        if (progress === 100) {
+          console.log('update user level');
+          this.userConceptService.updateUserLevel(Number(userId), Number(conceptNodeId), level);
+        }
+
+        return progress;
       }
     };
 

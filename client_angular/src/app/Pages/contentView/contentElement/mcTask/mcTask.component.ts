@@ -153,6 +153,7 @@ export class McTaskComponent implements OnInit {
 
   //Close the dialog
   onClose(): void {
+    console.log('element done: ' + this.feedback.elementDone);
     this.dialogRef.close(this.feedback.elementDone);
   }
 
