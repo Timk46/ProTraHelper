@@ -167,6 +167,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     if (taskViewData.type == 'MC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
       dialogRef.afterClosed().subscribe( result => {
+        console.log('element done: '+result)
         const elementDone = result;
         if (elementDone) {
           this.graphDataService.updateUserLevel(this.activeConceptNodeId, taskViewData.level);

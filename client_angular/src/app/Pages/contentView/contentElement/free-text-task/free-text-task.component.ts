@@ -54,7 +54,7 @@ export class FreeTextTaskComponent {
       this.freeTextQuestion = data;
       this.freeTextQuestion.contentElementId = this.taskViewData.contentElementId;
     });
-    this.quesitonService.getNewestUserAnswer(this.data.question_id).subscribe(data => {
+    this.quesitonService.getNewestUserAnswer(this.taskViewData.id).subscribe(data => {
       this.answerText = data.userFreetextAnswer || '';
     });
   }
