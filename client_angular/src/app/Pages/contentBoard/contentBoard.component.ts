@@ -10,6 +10,7 @@ import { ContentService } from 'src/app/Services/content/content.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
+import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 
 interface ContentViewData {
   id: number;
@@ -27,6 +28,7 @@ interface TaskViewData {
   type: string;
   progress: number;
   description?: string;
+  level: number;
 }
 
 @Component({
@@ -101,7 +103,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
 
   dataSource: MatTableDataSource<TaskViewData>;
 
-  constructor(private router: Router, public dialog: MatDialog, private contentService: ContentService) {
+  constructor(private router: Router, public dialog: MatDialog, private graphDataService: GraphDataService) {
     this.dataSource = new MatTableDataSource<TaskViewData>();
     this.sort = new MatSort();
   }
@@ -125,6 +127,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
           type: contentElement.question.type,
           progress: contentElement.question.progress,
           description: contentElement.question.description,
+          level: contentElement.question.level,
         };
         data.push(input);
       }
@@ -163,14 +166,22 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     let dialogRef;
     if (taskViewData.type == 'MC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
+      dialogRef.afterClosed().subscribe( result => {
+        const elementDone = result;
+        if (elementDone) {
+          this.graphDataService.updateUserLevel(this.activeConceptNodeId, taskViewData.level);
+        }
+      });
     }
-
+    
     if (taskViewData.type == 'SC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
     }
+
     if (taskViewData.type == 'FreeText') {
       dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
     }
+
     if (taskViewData.type == 'CodingQuestion') {
       this.router.navigate([this.getRouterLink(taskViewData.id)]);
     }
