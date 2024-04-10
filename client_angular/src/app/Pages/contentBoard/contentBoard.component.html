@@ -6,10 +6,9 @@
         <mat-panel-title class="panel-title">
           {{ content.name }}
           <mat-icon class="level-icon" *ngFor="let level of getLevels(content.level)">star</mat-icon>
-          <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält zu lösende Aufgaben.">rate_review</mat-icon>
           <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
         </mat-panel-title>
-        <p matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." style="margin-top: 10px;">Level-Fortschritt: </p><mat-progress-bar class="node-progress" mode="determinate" [value]="content.progress"></mat-progress-bar>
+        <p matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." style="margin-top: 10px;">Level-Fortschritt: </p><mat-progress-bar matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." class="node-progress" mode="determinate" [value]="content.progress"></mat-progress-bar>
         <button class="content-view" [style.visibility]="hasContentElementType(content, 'PDF') ? 'visible' : 'hidden'" matTooltip="Zeigt alle PDF (z.B. Vorlesungsfolien) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['PDF'])">PDF</button>
         <button class="content-view" [style.visibility]="hasContentElementType(content, 'VIDEO') ? 'visible' : 'hidden'" matTooltip="Zeigt alle Videos (z.B. Vorlesungsaufzeichungen) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['VIDEO'])">Video</button>
       </mat-expansion-panel-header>
