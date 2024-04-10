@@ -116,6 +116,7 @@ export class ContentService {
       }
     };
 
+    /*
     const getAttemptsForQuestion = async (question_id) => {
       return await this.prisma.userAnswer.count({
         where: {
@@ -124,8 +125,8 @@ export class ContentService {
         },
       });
     }
-
-
+    */
+   
     const getQuestionProgress = async (question) => {
       const maxScoreResult = await this.prisma.feedback.aggregate({
         _max: {

@@ -1,5 +1,6 @@
 export interface UserAnswerDataDTO {
     id: number;
+    contentElementId?: number;
     userId: number;
     questionId: number;
     userFreetextAnswer?: string;
@@ -19,4 +20,6 @@ export interface userAnswerFeedbackDTO {
     userAnswerId: number;
     feedbackText: string;
     score: number;
+    elementDone: boolean;
+    progress: number;
 }

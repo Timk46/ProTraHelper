@@ -23,6 +23,7 @@ export class FreeTextTaskComponent {
   answerText: string = '';
   feedbackText: string = '';
   isSending: boolean = false;
+  contentElementID: number;
 
   /* questionData : QuestionDTO = {
     id : -1,
@@ -37,6 +38,7 @@ export class FreeTextTaskComponent {
 
   freeTextQuestion: freeTextQuestionDTO = {
     questionId: -1,
+    contentElementId: -1,
     title: "",
     text: "",
     expectations: "",
@@ -44,12 +46,11 @@ export class FreeTextTaskComponent {
   }
 
 
-  constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: {question_id: number}, private quesitonService: QuestionDataService) {
-    /* this.quesitonService.getQuestionData(this.data.question_id).subscribe(data => {
-      this.questionData = data;
-    }); */
+  constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: {question_id: number, contentElement_id: number}, private quesitonService: QuestionDataService) {
+    this.contentElementID = data.contentElement_id;
     this.quesitonService.getFreeTextQuestion(this.data.question_id).subscribe(data => {
       this.freeTextQuestion = data;
+      this.freeTextQuestion.contentElementId = this.contentElementID;
     });
     this.quesitonService.getNewestUserAnswer(this.data.question_id).subscribe(data => {
       this.answerText = data.userFreetextAnswer || '';
@@ -64,6 +65,7 @@ export class FreeTextTaskComponent {
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
       questionId: this.freeTextQuestion.questionId,
+      contentElementId: this.freeTextQuestion.contentElementId,
       userId: -1,
       userFreetextAnswer: text,
       userFreetextAnswerRaw: rawText,

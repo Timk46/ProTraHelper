@@ -21,6 +21,7 @@ interface ContentViewData {
 
 interface TaskViewData {
   contentNodeId: number;
+  contentElementId: number;
   id: number;
   name: string;
   type: string;
@@ -118,6 +119,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
         }
         const input: TaskViewData = {
           contentNodeId: content.contentNodeId,
+          contentElementId: contentElement.id,
           id: contentElement.question.id,
           name: contentElement.question.name ? contentElement.question.name : content.name,
           type: contentElement.question.type,
@@ -151,27 +153,26 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     this.dialog.open(ContentViewComponent, dialogConfig);
   }
 
-  onTaskClick(id: number, type: string) {
-    console.log('active task id: ' + id);
+  onTaskClick(taskViewData: TaskViewData) {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.data = {
-      question_id: id,
+      taskViewData: taskViewData,
     };
     //dialogConfig.maxHeight = "80vh";
     dialogConfig.width = "auto";
     let dialogRef;
-    if (type == 'MC') { // why SC and not MC?
+    if (taskViewData.type == 'MC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
     }
 
-    if (type == 'SC') {
+    if (taskViewData.type == 'SC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
     }
-    if (type == 'FreeText') {
+    if (taskViewData.type == 'FreeText') {
       dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
     }
-    if (type == 'CodingQuestion') {
-      this.router.navigate([this.getRouterLink(id)]);
+    if (taskViewData.type == 'CodingQuestion') {
+      this.router.navigate([this.getRouterLink(taskViewData.id)]);
     }
   }
 

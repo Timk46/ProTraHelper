@@ -8,7 +8,7 @@ import { seedFreetext } from './seedFreetext';
 import { seedAllEmbeddingsForVideo } from './seedEmbeddings';
 import { seedMCQnew } from './seedNewMCQ';
 
-const createEmbeddings = true; // set false to skip embedding creation and save costs!!!
+const createEmbeddings = false; // set false to skip embedding creation and save costs!!!
 
 const prisma = new PrismaClient();
 interface excel_OFP {
@@ -441,127 +441,6 @@ async function main() {
       currentconceptNodeId: conceptNode.id,
     },
   });
-
-  // Question
-  const conceptNodeForMCQ = await prisma.conceptNode.findUnique({
-    where: { id: 8 },
-  });
-
-  // Free Text Question
-  const questionFreeText = await prisma.question.create({
-    data: {
-      name: 'Primitive Datentypen in Python',
-      description: 'Beschreibung primitiver Datentyp',
-      score: 5,
-      type: 'FreeText',
-      author: { connect: { id: adminUser.id } },
-      text: 'Beschreibe in eigenen Worten, was ein primitiver Datentyp ist. Beschreibe dabei zu den folgenden Aspekten: Definition, Eigenschaften, Beispiele, Speicherung und Unterscheidung zu nicht-primitiven Datentypen.',
-      conceptNode: { connect: { id: conceptNodeForMCQ.id } },
-      isApproved: true,
-      version: 1,
-    },
-  });
-  // connect it to itself
-  await prisma.question.update({
-    where: { id: questionFreeText.id },
-    data: { origin: { connect: { id: questionFreeText.id } } },
-  });
-
-  await prisma.freeTextQuestion.create({
-    data: {
-      expectations: `
-          Folgende Punkte sollten beachtet werden, dabei wird für jeden korrekten Aspekt ein Punkt vergeben:
-          1. Definition: Eine Erklärung, was ein primitiver Datentyp ist.
-          2. Eigenschaften: Die grundlegenden Eigenschaften primitiver Datentypen, wie zum Beispiel Unveränderlichkeit und Einfachheit.
-          3. Beispiele: Nennung einiger Beispiele für primitive Datentypen. Es reicht ein Beispiel, um den Punkt zu erhalten.
-          4. Speicherung: Eine grobe Erklärung, wie primitive Datentypen im Speicher abgelegt werden. Es reicht ein oberflächlicher Einblick.
-          5. Unterscheidung: Der grobe Unterschied zwischen primitiven und nicht-primitiven Datentypen. Es reicht eine implizite Erklärung.
-          Es soll freundlich bewertet werden, da lediglich ein knappes Anreißen der Aspekte erwartet wird und keine detaillierte Analyse.
-          Sollten Details in der Antwort fehlen, kann ein Punkt immernoch als richtig bewertet werden, wenn ein Teil richtig ist.
-          `,
-      exampleSolution: `
-          Ein primitiver Datentyp ist ein grundlegender Datentyp, der in einer Programmiersprache zur Darstellung einfacher Werte verwendet wird.
-          Diese Datentypen sind in der Regel direkt in die Sprache integriert und bieten eine grundlegende Möglichkeit, Daten zu speichern und zu manipulieren,
-          ohne dass komplexe Strukturen oder Operationen erforderlich sind.
-          Primitive Datentypen sind in der Regel unveränderlich, was bedeutet, dass ihre Werte nach der Erstellung nicht mehr geändert werden können.
-          Sie repräsentieren einfache Werte und haben in der Regel keine eingebauten Methoden oder Funktionen zur Manipulation.
-          Beispiele für primitive Datentypen: Integer (int), Float (float), Complex (complex), String (str), Boolean (bool)
-          Primitive Datentypen werden in der Regel direkt im Speicher abgelegt und benötigen eine feste Menge an Speicherplatz, der je nach Typ variieren kann.
-          Zum Beispiel benötigt ein Integer normalerweise 4 oder 8 Bytes, abhängig von der Plattform.
-          Primitive Datentypen repräsentieren einfache Werte und haben keine eingebauten Methoden oder Funktionen zur Manipulation.
-          Nicht-primitive Datentypen (auch als zusammengesetzte oder zusammengesetzte Datentypen bezeichnet) können komplexe Strukturen wie Listen, Tupel,
-          Mengen und Wörterbücher darstellen und bieten eingebaute Methoden und Funktionen zur Manipulation dieser Datenstrukturen.
-        `,
-      question: { connect: { id: questionFreeText.id } },
-    },
-  });
-
-  // connect it to itself
-  await prisma.question.update({
-    where: { id: questionFreeText.id },
-    data: { origin: { connect: { id: questionFreeText.id } } },
-  });
-
-  //create content element and connect it to the question
-  const contentElement = await prisma.contentElement.create({
-    data: {
-        type: contentElementType.QUESTION,
-        question: { connect: { id: questionFreeText.id } },
-        title: questionFreeText.name,
-    },
-});
-
-//connect the content element to the the concept node by setting the training
-const training = await prisma.training.findFirst({
-    where: {
-        conceptNodeId: questionFreeText.conceptNodeId,
-        awards: questionFreeText.level,
-     }
-});
-if(training) {
-    const contentNode = await prisma.contentNode.findFirst({
-        where: { id: training.contentNodeId }
-    });
-    //ermittle die höchste Position in der content view und setze die Position des neuen content elements auf +1
-    const contentViews = await prisma.contentView.findMany({
-        where: { contentNodeId: contentNode.id }
-    });
-    let maxPosition = 0;
-    for (const contentView of contentViews) {
-        if(contentView.position > maxPosition) {
-            maxPosition = contentView.position;
-        }
-    }
-    await prisma.contentView.create({
-        data: {
-            contentNode: { connect: { id: contentNode.id } },
-            contentElement: { connect: { id: contentElement.id } },
-            position: maxPosition + 1,
-        },
-    });
-}
-else {
-    //erzeuge eine neue content node mit dem award level und verbinde sie mit dem content element
-    const contentNode = await prisma.contentNode.create({
-        data: {
-            name: 'Training ' + questionFreeText.level,
-        },
-    });
-    await prisma.training.create({
-        data: {
-            conceptNode: { connect: { id: questionFreeText.conceptNodeId } },
-            contentNode: { connect: { id: contentNode.id } },
-            awards: questionFreeText.level,
-        },
-    });
-    await prisma.contentView.create({
-        data: {
-            contentNode: { connect: { id: contentNode.id } },
-            contentElement: { connect: { id: contentElement.id } },
-            position: 1,
-        },
-    });
-}
 
   // Discussion, Message --------------------------------------------------------------
   const anonymousAdmin = await prisma.anonymousUser.create({

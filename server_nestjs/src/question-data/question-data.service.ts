@@ -1,6 +1,7 @@
 /* eslint-disable prefer-const */
 /* eslint-disable prettier/prettier */
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
+import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { McQuestionDTO, MCOptionDTO, MCOptionViewDTO, QuestionDTO, questionType, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
@@ -9,7 +10,7 @@ import {  } from '@prisma/client';
 
 @Injectable()
 export class QuestionDataService {
-    constructor(private prisma: PrismaService, private feedbackGenerationService: FeedbackGenerationService) {}
+    constructor(private prisma: PrismaService, private feedbackGenerationService: FeedbackGenerationService, private contentService: ContentService) {}
 
     /**
      *
@@ -338,6 +339,8 @@ export class QuestionDataService {
      * @returns the new user answer
      */
     async createUserAnswer(userId: number, answerData: UserAnswerDataDTO) : Promise<userAnswerFeedbackDTO> {
+        console.log('create user answer: '+userId + ' ' + answerData.questionId + ' ' + answerData.contentElementId);
+        
         const createdData = await this.prisma.userAnswer.create({
             data: {
                 userId: userId,
@@ -377,7 +380,17 @@ export class QuestionDataService {
                 }
             }
 
-            const feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
+            const progress = userScore / question.score;
+            let feedbackText = "";
+            let markedAsDone: boolean = false;
+            if(progress == 1) {
+                feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
+                this.contentService.toggleCheckmark(answerData.contentElementId, userId);
+                markedAsDone = true;
+            }
+            else {
+                feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
+            }
 
             console.log(feedbackText);
 
@@ -396,7 +409,9 @@ export class QuestionDataService {
                 id: feedback.id,
                 userAnswerId: feedback.userAnswerId,
                 score: feedback.score,
-                feedbackText: feedback.text
+                feedbackText: feedback.text,
+                elementDone: markedAsDone,
+                progress: progress*100,
             }
         }
 
@@ -416,6 +431,15 @@ export class QuestionDataService {
               });
             }
 
+            const progress = userScore / question.score;
+            let markedAsDone: boolean = false;
+            console.log('progress: '+progress);
+
+            if(progress == 1) {
+                this.contentService.toggleCheckmark(answerData.contentElementId, userId);
+                markedAsDone = true;
+            }
+
             console.log('generated Text:', feedbackText);
             console.log('userScore: ' + userScore);
             //create feedback for user answer
@@ -433,7 +457,9 @@ export class QuestionDataService {
                 id: feedback.id,
                 userAnswerId: feedback.userAnswerId,
                 score: feedback.score,
-                feedbackText: feedback.text
+                feedbackText: feedback.text,
+                elementDone: markedAsDone,
+                progress: progress*100,
             }
 
         }

@@ -6,6 +6,16 @@ import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
+interface TaskViewData {
+  contentNodeId: number;
+  contentElementId: number;
+  id: number;
+  name: string;
+  type: string;
+  progress: number;
+  description?: string;
+}
+
 @Component({
   selector: 'app-mcTask',
   templateUrl: './mcTask.component.html',
@@ -58,10 +68,12 @@ export class McTaskComponent implements OnInit {
     userAnswerId: -1,
     score: -1,
     feedbackText: '',
+    elementDone: false,
+    progress: -1,
   }
 
   //the requested question
-  questionId: number;
+  taskViewData : TaskViewData;
 
   //isSelfAssessment
   @Input() isSelfAssessment: boolean = false;
@@ -87,8 +99,10 @@ export class McTaskComponent implements OnInit {
 
   onSubmit() :void {
     //Create new submit
+    console.log('create submit for contentElementId: ' + this.taskViewData.contentElementId);
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
+      contentElementId: this.taskViewData.contentElementId,
       userId: -1,
       questionId: this.questionData.id,
       userMCAnswer: this.selectedOptions,
@@ -97,6 +111,10 @@ export class McTaskComponent implements OnInit {
     this.questionDataService.createUserAnswer(userAnswerData).subscribe(data => {
       this.feedback = data;
     });
+
+    if(this.feedback.progress > this.taskViewData.progress) {
+      this.taskViewData.progress = this.feedback.progress;
+    }
 
     setTimeout(() => {
       //timeout for showing the feedback
@@ -110,13 +128,12 @@ export class McTaskComponent implements OnInit {
     public dialogRef: MatDialogRef<McTaskComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private questionDataService: QuestionDataService) {
-
-    this.questionId = data.question_id as number;
+    this.taskViewData = data.taskViewData;
   }
 
   ngOnInit() {
     //Show the newest Version of the questions
-    this.questionDataService.getQuestionData(this.questionId).subscribe(data => {
+    this.questionDataService.getQuestionData(this.taskViewData.id).subscribe(data => {
       this.questionData = data;
       this.dataLoaded = true;
 
@@ -136,9 +153,7 @@ export class McTaskComponent implements OnInit {
 
   //Close the dialog
   onClose(): void {
-    const result = {reached_score: this.feedback.score, question_score: this.questionData.score};
-    //mit dem close() soll die Punktzahl an die parent component übergeben werden
-    this.dialogRef.close(result);
+    this.dialogRef.close(this.feedback.elementDone);
   }
 
 }
