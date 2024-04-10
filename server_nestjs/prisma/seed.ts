@@ -6,6 +6,7 @@ import { seedMCQ } from './seedMCQ';
 import { seedCodeQuestions } from './seedCodeQuestions';
 import { seedFreetext } from './seedFreetext';
 import { seedAllEmbeddingsForVideo } from './seedEmbeddings';
+import { seedMCQnew } from './seedNewMCQ';
 
 const createEmbeddings = true; // set false to skip embedding creation and save costs!!!
 
@@ -610,6 +611,7 @@ else {
   console.log('Importing Tasks from Excel...');
   await seedCodeQuestions(adminUser.id);
   await seedMCQ(adminUser.id);
+  await seedMCQnew();
   await seedFreetext(adminUser.id);
   console.log('Importing Done!');
 }
