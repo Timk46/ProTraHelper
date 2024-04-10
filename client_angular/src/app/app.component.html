@@ -39,7 +39,8 @@
 
   <!-- User-Information auf der rechten Seite -->
   <div class="right-content">
-    <span style="font-size:15px;">User: {{userMail? userMail : "nicht eingeloggt"}}</span>
+    <span style="font-size:15px;">User: {{userMail? userMail : "nicht eingeloggt"}}  </span>
+    <button mat-button style="margin-left: 5px" *ngIf="userIsLoggedIn" (click)="logOut()">Logout</button>
   </div>
 </mat-toolbar>
 

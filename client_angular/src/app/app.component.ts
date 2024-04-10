@@ -58,6 +58,7 @@ export class AppComponent {
   }
 
   logOut() {
+    this.userIsLoggedIn = false;
     this.userService.removeTokens();
     this.router.navigate(['/login']);
   }
