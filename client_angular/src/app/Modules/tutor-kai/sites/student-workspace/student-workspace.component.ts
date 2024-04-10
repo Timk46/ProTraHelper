@@ -223,6 +223,7 @@ export class StudentWorkspaceComponent implements OnInit {
     if (result.CodeSubmissionResult.score === 100) {
       this.confettiService.celebrate(6,800); // small confetti animation :)
     }
+    result.CodeSubmissionResult.score = Math.trunc(result.CodeSubmissionResult.score);
   }
 
   /**

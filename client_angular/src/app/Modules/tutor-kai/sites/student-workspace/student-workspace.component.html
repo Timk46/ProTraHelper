@@ -30,7 +30,7 @@
               -->
             </div>
               <mat-card>
-                <mat-card-content class = "polarNight_4_text"  [innerHTML]="taskDescription"></mat-card-content>
+                <mat-card-content class = "polarNight_4_text" [innerHTML]="taskDescription"></mat-card-content>
               </mat-card>
       </div>
 
@@ -90,10 +90,12 @@
             <div class="test-circles">
               <svg *ngFor="let test of lastResult.CodeSubmissionResult.testResults" width="24" height="24" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10"
-                        [attr.fill]="test.status === 'SUCCESSFUL' ? '#4caf50' : '#f44336'"></circle>
+                        [attr.fill]="test.status === 'SUCCESSFUL' ? '#4caf50' : '#f44336'"
+                        matTooltip="{{test.test}}-{{test.status}}: {{test.exception}}" matTooltipPosition="above"></circle>
               </svg>
             </div>
           </div>
+
 
       </div>
 
