@@ -50,7 +50,6 @@ export class StudentWorkspaceComponent implements OnInit {
   rating: number = 0;
   hoverState: number = 0;
   feedback: string = '';
-  lastSubmissionId: string = ''; // encrypted - only server can decrypt
   defaultWeek: number = 0;
   taskDescription: string =
     'Hi :)\n ich bin Kai. Ich bin hier, um dir Feedback zu deinen Lösungen zu geben.\n Wähle hierzu zunächst oben im Dropdown eine Aufgabe aus. Im rechten Fenster kannst du deinen Programmcode eingeben.';
@@ -120,7 +119,7 @@ export class StudentWorkspaceComponent implements OnInit {
   sendStudentFeedback(): void {
     this.currentState = States.sendStudentFeedback;
     this.runCodeService
-      .postFeedback(this.rating, this.feedback, this.lastSubmissionId)
+      .postFeedback(this.rating, this.feedback, this.lastResult.encryptedCodeSubissionId)
       .subscribe({
         next: (response) => {
           this.openSnackBar('Vielen Dank für Ihr Feedback!', 'done');
