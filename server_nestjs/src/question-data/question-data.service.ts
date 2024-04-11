@@ -364,7 +364,7 @@ export class QuestionDataService {
 
         //generate feedback for user answer
         if (question.type === questionType.MULTIPLECHOICE) {
-            console.log('generate feedback for user answer');
+            console.log('generate feedback for multiple choice user answer');
             //const question = await this.getQuestion(answerData.questionId);
             const mcOptions = await this.getMCCheckOptions((await this.getMCQuestion(answerData.questionId)).id);
             let userScore = 0;
@@ -417,7 +417,7 @@ export class QuestionDataService {
         }
 
         if (question.type === questionType.SINGLECHOICE) {
-            console.log('generate feedback for user answer');
+            console.log('generate feedback for single choice user answer');
             //const question = await this.getQuestion(answerData.questionId);
             const mcOptions = await this.getMCCheckOptions((await this.getMCQuestion(answerData.questionId)).id);
             let userScore = 0;
@@ -428,8 +428,10 @@ export class QuestionDataService {
                 if (mcOption.correct && answerData.userMCAnswer.includes(mcOption.id)) {
                     userScore += question.score;
                     progress = 1;
+                    break;
                 }
                 else {
+                    console.log('answer not correct');
                     userScore = 0;
                 } 
             }
@@ -470,8 +472,8 @@ export class QuestionDataService {
         }
 
         //generate feedback for user freetext answer
-        if (question.type === questionType.FREETEXT && question.description) {
-            console.log('generate feedback for user answer');
+        if (question.type === questionType.FREETEXT && question.text) {
+            console.log('generate feedback for freetext user answer');
 
             //TODO: generate a feedback text based on the user answer
             let feedbackText: string = 'Du hast keine Antwort eingeben.';
