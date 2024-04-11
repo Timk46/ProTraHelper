@@ -1,3 +1,21 @@
+<mat-toolbar class="header" style="min-height: 30px !important; height: 30px !important;" color="primary">
+
+   <div class="left-content">
+    <a mat-list-item routerLink="/dashboard" style="cursor: pointer;" routerLinkActive="active-link">
+      <span style="font-size:15px;">Zurück zum Dashboard</span>
+    </a>
+  </div>
+
+  <div class="center-content">
+    <span style="font-size:15px;" *ngIf="this.currentTask">{{this.currentTask.name}}</span>
+  </div>
+
+  <div class="right-content">
+    <span style="font-size:15px; margin-right: 10px;">Tutor Kai</span>
+    <img src="../../../../../assets/img/kai_logo_small.png" alt="Tutor Kai Logo">
+  </div>
+</mat-toolbar>
+
 <div class="container mx-auto px-4">
 
   <div class="max-w-screen-xl mx-auto my-4">
