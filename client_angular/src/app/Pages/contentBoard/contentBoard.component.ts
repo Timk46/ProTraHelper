@@ -166,14 +166,44 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     let dialogRef;
     if (taskViewData.type == 'MC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
+      const dialogSubmitSubscription = dialogRef.componentInstance.submitClicked.subscribe((data) => {
+        console.log('submit clicked', data);
+        this.dataSource.data = this.dataSource.data.map((element) => {
+          if (element.id === taskViewData.id) {
+            element.progress = data;
+          }
+          return element;
+        });
+        dialogSubmitSubscription.unsubscribe();
+      });
     }
     
     if (taskViewData.type == 'SC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
+      const dialogSubmitSubscription = dialogRef.componentInstance.submitClicked.subscribe((data) => {
+        console.log('submit clicked', data);
+        this.dataSource.data = this.dataSource.data.map((element) => {
+          if (element.id === taskViewData.id) {
+            element.progress = data;
+          }
+          return element;
+        });
+        dialogSubmitSubscription.unsubscribe();
+      });
     }
 
     if (taskViewData.type == 'FreeText') {
       dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
+      const dialogSubmitSubscription = dialogRef.componentInstance.submitClicked.subscribe((data) => {
+        console.log('submit clicked', data);
+        this.dataSource.data = this.dataSource.data.map((element) => {
+          if (element.id === taskViewData.id) {
+            element.progress = data;
+          }
+          return element;
+        });
+        dialogSubmitSubscription.unsubscribe();
+      });
     }
 
     if (taskViewData.type == 'CodingQuestion') {

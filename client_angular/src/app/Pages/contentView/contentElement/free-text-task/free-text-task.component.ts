@@ -1,6 +1,6 @@
 import { QuestionDTO, UserAnswerDataDTO, freeTextQuestionDTO } from '@DTOs/index';
 import { DialogRef } from '@angular/cdk/dialog';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, EventEmitter, Output } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 
@@ -20,6 +20,8 @@ interface TaskViewData {
   styleUrls: ['./free-text-task.component.scss']
 })
 export class FreeTextTaskComponent {
+  
+  @Output() submitClicked = new EventEmitter<any>();
 
   editorConfig = { //tinyMCE
     readonly: false,
@@ -76,6 +78,7 @@ export class FreeTextTaskComponent {
       console.log(data);
       this.feedbackText = data.feedbackText.replace(/\n/g, '<br>');
       this.isSending = false;
+      this.submitClicked.emit(data.progress);
     });
   }
 

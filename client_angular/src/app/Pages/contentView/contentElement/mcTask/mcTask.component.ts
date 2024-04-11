@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Inject } from '@angular/core';
+import { Component, OnInit, Input, Inject, EventEmitter, Output } from '@angular/core';
 import { MatList, MatSelectionListChange } from '@angular/material/list';
 import { MatListOption } from '@angular/material/list';
 import { MCOptionViewDTO, McQuestionDTO, QuestionDTO, QuestionVersionDTO } from '@DTOs/question.dto';
@@ -23,6 +23,8 @@ interface TaskViewData {
 })
 
 export class McTaskComponent implements OnInit {
+  
+  @Output() submitClicked = new EventEmitter<any>();
 
   editorConfig = { //tinyMCE
     readonly: true,
@@ -110,6 +112,7 @@ export class McTaskComponent implements OnInit {
 
     this.questionDataService.createUserAnswer(userAnswerData).subscribe(data => {
       this.feedback = data;
+      this.submitClicked.emit(data.progress);
     });
 
     if(this.feedback.progress > this.taskViewData.progress) {
