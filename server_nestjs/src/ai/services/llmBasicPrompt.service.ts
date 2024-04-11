@@ -11,7 +11,7 @@ import {
 } from "langchain/prompts";
 
 const llm = new ChatOpenAI({
-  modelName: 'gpt-4-1106-preview', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
+  modelName: 'gpt-4-turbo-2024-04-09', // other options: 'gpt-4-1106-preview', 'gpt-4-0314', 'gpt-3.5-turbo'
   openAIApiKey: process.env.OPENAI_API_KEY,
   temperature: 0, // Low Temperature favours the words with higher probability = less creative
   streaming: true
