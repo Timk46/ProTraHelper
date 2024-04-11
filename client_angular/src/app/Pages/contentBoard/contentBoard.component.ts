@@ -140,7 +140,8 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     this.dataSource.sort = this.sort;
   }
 
-  onContentClick(content: ContentDTO, type: string[]) {
+  onContentClick(content: ContentDTO, type: string[], event: MouseEvent) {
+    event.stopPropagation(); // prevents any reaction from the expansion panel for clicks on video/pdf
 
     // Create Dialog Config https://material.angular.io/components/dialog/api#MatDialogConfig
     const dialogConfig = new MatDialogConfig();
@@ -177,7 +178,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
         dialogSubmitSubscription.unsubscribe();
       });
     }
-    
+
     if (taskViewData.type == 'SC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
       const dialogSubmitSubscription = dialogRef.componentInstance.submitClicked.subscribe((data) => {
@@ -221,6 +222,21 @@ export class ContentBoardComponent implements OnInit, OnChanges {
 
   getLevels(num: number) {
     return new Array(num);
+  }
+
+  genBetterElementNames(type: string): string {
+    switch (type) {
+      case 'MC':
+        return 'Multiple Choice';
+      case 'SC':
+        return 'Single Choice';
+      case 'FreeText':
+        return 'Frei Text';
+      case 'CodingQuestion':
+        return 'Programmieraufgabe';
+      default:
+        return 'undefiniert';
+    }
   }
 
 }

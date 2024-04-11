@@ -38,9 +38,10 @@ export class RunCodeService {
             automatedTests: true,
           },
         },
+        contentElement: true,
       },
     });
-
+    console.log(JSON.stringify(question))
     if (!question) {
       throw new HttpException('Diese Question existiert nicht.', HttpStatus.NOT_FOUND);
     }
