@@ -148,7 +148,7 @@ export class McTaskComponent implements OnInit {
         this.questionDataService.getMCOptions(this.mcQuestion.id).subscribe(data => {
           console.log(this.mcQuestion.id);
           this.options = data;
-
+          this.options.sort(() => Math.random() - 0.5);
         });
       })
     });
