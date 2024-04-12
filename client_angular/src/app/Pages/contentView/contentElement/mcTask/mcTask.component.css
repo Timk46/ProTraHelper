@@ -63,3 +63,7 @@
   .feedback {
     background-color: #ffb700;
   }
+
+  .mat-list-option {
+    margin-bottom: 10px;
+  }
