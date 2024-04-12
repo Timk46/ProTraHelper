@@ -190,7 +190,9 @@ export class ContentBoardComponent implements OnInit, OnChanges {
           this.dataSource.data = this.dataSource.data.map((element) => {
             if (element.id === taskViewData.id) {
               // Update the progress value of the task
-              element.progress = score;
+              if(score > prevScore) {
+                element.progress = score;
+              }             
               // Update the contentNode that is connected to the task
               if (score == 100 && prevScore != 100) {
                 this.contentsForActiveConceptNode.trainedBy.map((content) => {
