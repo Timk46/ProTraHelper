@@ -5,14 +5,16 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from '../crypto/crypto.service';
-import { CodeSubmissionResult, CodeSubmissionResultDto } from '@Interfaces/index';
+import { CodeSubmissionResult, CodeSubmissionResultDto, ContentElementDTO } from '@Interfaces/index';
 import { CodeSubmission, Question, CodingQuestion } from '@prisma/client';
+import { ContentService } from '@/content/content.service';
 
 @Injectable()
 export class RunCodeService {
   constructor(
     private prisma: PrismaService,
     private readonly cryptoService: CryptoService,
+    private contentService: ContentService,
   ) {}
 
   // API URL for code execution service.
@@ -56,7 +58,7 @@ export class RunCodeService {
     } else {
       response = await this.submitCodeForExecutionPython(filesBase64, testFilesBase64, question.codingQuestions.automatedTests[0].runMethod, question.codingQuestions.automatedTests[0].inputArguments);
     }
-    const result = await this.processExecutionResponse(response, question.codingQuestions, question, userId, studentCode);
+    const result = await this.processExecutionResponse(response, question.codingQuestions, question, userId, studentCode, question.contentElement.id);
     return result;
   }
   /**
@@ -114,8 +116,8 @@ export class RunCodeService {
   /**
    * Processes the response from the code execution API, logs the response, and saves the results to the database.
    */
-  private async processExecutionResponse(response: CodeSubmissionResult, codingQuestion: CodingQuestion, question: Question, userId: number, studentCode: { [fileName: string]: string }): Promise<CodeSubmissionResultDto> {
-    const codeSubmission = await this.saveToDatabase(response, codingQuestion, question, userId, studentCode);
+  private async processExecutionResponse(response: CodeSubmissionResult, codingQuestion: CodingQuestion, question: Question, userId: number, studentCode: { [fileName: string]: string }, contentElementId: number): Promise<CodeSubmissionResultDto> {
+    const codeSubmission = await this.saveToDatabase(response, codingQuestion, question, userId, studentCode, contentElementId);
     return {
       CodeSubmissionResult: response,
       encryptedCodeSubissionId: this.cryptoService.encrypt(codeSubmission.id.toString())
@@ -125,7 +127,7 @@ export class RunCodeService {
   /**
    * Saves the execution result to the database.
    */
-  private async saveToDatabase(response: CodeSubmissionResult, codingQuestion: CodingQuestion, question: Question, userId: number, studentCode: { [fileName: string]: string }): Promise<CodeSubmission> {
+  private async saveToDatabase(response: CodeSubmissionResult, codingQuestion: CodingQuestion, question: Question, userId: number, studentCode: { [fileName: string]: string }, contentElementId): Promise<CodeSubmission> {
     // Create a new code submission record with the execution result.
     const codeSubmission: CodeSubmission = await this.prisma.codeSubmission.create({
       data: {
@@ -148,6 +150,13 @@ export class RunCodeService {
         },
       },
     });
+
+    const progress = question.score / response.score;
+    let markedAsDone: boolean = false;
+    if (progress === 1) {
+      markedAsDone = true;
+      this.contentService.toggleCheckmark(contentElementId, userId);
+    }
 
     return codeSubmission;
   }
