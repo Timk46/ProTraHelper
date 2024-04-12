@@ -109,7 +109,7 @@
               <svg *ngFor="let test of lastResult.CodeSubmissionResult.testResults" width="24" height="24" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10"
                         [attr.fill]="test.status === 'SUCCESSFUL' ? '#4caf50' : '#f44336'"
-                        matTooltip="{{test.test}}-{{test.status}}: {{test.exception}}" matTooltipPosition="above"></circle>
+                        matTooltip="{{getTooltipText(test.test, test.status, test.exception)}}" matTooltipPosition="above"></circle>
               </svg>
             </div>
           </div>
@@ -127,7 +127,7 @@
               </div>
           </div>
           </form>
-          <button *ngIf="currentState != 0" mat-raised-button color="primary" (click)="downloadFiles()" class="downloadButton"><mat-icon>save</mat-icon></button>
+          <button *ngIf="currentState != 0" mat-raised-button color="primary" (click)="downloadFiles()" class="downloadButton"  matTooltip="Programmcode herunterladen"><mat-icon>save</mat-icon></button>
         </div>
 
 

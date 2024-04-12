@@ -8,7 +8,7 @@ import { seedFreetext } from './seedFreetext';
 import { seedAllEmbeddingsForVideo } from './seedEmbeddings';
 import { seedMCQnew } from './seedNewMCQ';
 
-const createEmbeddings = false; // set false to skip embedding creation and save costs!!!
+const createEmbeddings = true; // set false to skip embedding creation and save costs!!!
 
 const prisma = new PrismaClient();
 interface excel_OFP {

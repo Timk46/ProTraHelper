@@ -269,7 +269,7 @@ export class FeedbackRAGService {
       tracer
     ],
     );
-    this.saveFeedbackInDB(relatedCodeSubmissionResult, openAiResponse, flavor);
+    this.saveFeedbackInDB(relatedCodeSubmissionResult, openAiResponse, flavor, ragFormattedPrompt);
     this.eventLogService.log(
       "info",
       "FeedbackRAGService/usedTool",
@@ -284,6 +284,7 @@ export class FeedbackRAGService {
     relatedCodeSubmissionResult: CodeSubmissionResultDto,
     openAiResponse,
     flavor: string,
+    ragFormattedPrompt: string
   ) {
     const sumbissionId = Number(
       this.cryptoService.decrypt(relatedCodeSubmissionResult.encryptedCodeSubissionId),
@@ -295,7 +296,8 @@ export class FeedbackRAGService {
             id: sumbissionId,
           },
         },
-        text: openAiResponse.generations[0][0].text,
+        prompt: ragFormattedPrompt,
+        response: openAiResponse.generations[0][0].text,
         model: KImodel,
         flavor: flavor,
       },

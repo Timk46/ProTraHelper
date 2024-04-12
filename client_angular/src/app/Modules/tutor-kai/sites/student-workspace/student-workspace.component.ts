@@ -142,12 +142,7 @@ export class StudentWorkspaceComponent implements OnInit {
     if (this.currentTask) {
       for (const file of this.currentTask.codingQuestion!.codeGerueste) {
         submitCode +=
-          'Beginn ' +
-          file.codeFileName +
-          file.code +
-          ' Ende ' +
-          file.codeFileName +
-          '`';
+          '## Code in ' + file.codeFileName + '\n' + file.code + '\n\n'; // all studencode in markdown string format
       }
     }
 
@@ -315,8 +310,9 @@ export class StudentWorkspaceComponent implements OnInit {
     status: string,
     exception: string
   ): string {
-    return `Testname: ${test}\n
-    Passed: ${status}`
+    return `Testname: ${test} --
+    Passed: ${status}` +
+    (exception ? ` -- Exception: ${exception}` : '');
   }
 
   /**
