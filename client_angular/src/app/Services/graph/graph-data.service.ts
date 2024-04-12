@@ -70,8 +70,6 @@ export class GraphDataService {
     return this.http.put(environment.server + `/graph/concept/${conceptId}/newParent/${parentId}`, {})
   }
 
-
-
   updateUserLevel(conceptId: number, level: number) {
     console.log("in updateUserLevel: ", level)
     return this.http.put(environment.server + `/user-concept/${conceptId}/level/${level}`, {})
