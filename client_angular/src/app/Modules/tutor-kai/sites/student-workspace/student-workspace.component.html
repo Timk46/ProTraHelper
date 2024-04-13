@@ -62,7 +62,12 @@
               </div>
             </ng-template>
               <div class = "code-editor-parent">
-                <app-code-editor #codeEditorMonaco [selectedLanguage] = "currentTask?.codingQuestion?.programmingLanguage" [(code)] = "codeStructure.code"></app-code-editor>
+                <app-code-editor #codeEditorMonaco
+                    [selectedLanguage]="currentTask?.codingQuestion?.programmingLanguage"
+                    [(code)]="codeStructure.code"
+                    (codeChange)="onCodeChanged($event)"> <!--Trigger onCodeChanged with new code everytime the code changed-->
+                </app-code-editor>
+
             </div>
           </mat-tab>
         </mat-tab-group>

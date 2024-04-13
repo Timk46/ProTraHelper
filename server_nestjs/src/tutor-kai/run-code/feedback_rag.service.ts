@@ -296,7 +296,7 @@ export class FeedbackRAGService {
             id: sumbissionId,
           },
         },
-        prompt: ragFormattedPrompt,
+        prompt: JSON.stringify(ragFormattedPrompt),
         response: openAiResponse.generations[0][0].text,
         model: KImodel,
         flavor: flavor,

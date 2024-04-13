@@ -52,11 +52,11 @@ export class StudentWorkspaceComponent implements OnInit {
   feedback: string = '';
   defaultWeek: number = 0;
   taskDescription: string =
-    'Hi :)\n ich bin Kai. Ich bin hier, um dir Feedback zu deinen Lösungen zu geben.\n Wähle hierzu zunächst oben im Dropdown eine Aufgabe aus. Im rechten Fenster kannst du deinen Programmcode eingeben.';
+    'Hi :)\n ich bin Kai. Ich bin hier, um dir Feedback zu deinen Lösungen zu geben.';
   isLoading: boolean = false;
   compilerOutput: string | null = '';
   feedbackMessage: string =
-    'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben. Klicke hierzu auf den Button "Feedback erzeugen".';
+    'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben. Führe dafür erst deinen Programmcode aus und klicke dann auf den Button "Feedback erzeugen".';
   currentLoadingFeedbackMessage: string = '';
   lastResult: any;
 
@@ -114,6 +114,19 @@ export class StudentWorkspaceComponent implements OnInit {
   }
 
   /**
+   * Handles the event when the code is changed.
+   * This is important because the code submitted for execution needs to match the one which is submitted for feedback.
+   * If the student changes the code after exection, he needs to execute it again before he can ask for feedback.
+   * @param newCode The new code value. (gets emitted by code-editor component)
+   */
+  onCodeChanged(newCode: string): void {
+    // prevent state resetting change if feedback is already in generation
+    if (this.currentState != States.startGeneratingKIFeedback && this.currentState!= States.receivingKIFeedback && this.currentState!= States.finishedGeneratingKIFeedback) {
+      this.currentState = States.editingCode;
+    }
+  }
+
+  /**
    * Send student feedback to the API.
    */
   sendStudentFeedback(): void {
@@ -168,7 +181,7 @@ export class StudentWorkspaceComponent implements OnInit {
           this.checkError(error);
         },
         complete: () => {
-          console.log(this.currentLoadingFeedbackMessage);
+          //console.log(this.currentLoadingFeedbackMessage);
           this.currentState = States.finishedGeneratingKIFeedback;
         },
       });
@@ -205,14 +218,13 @@ export class StudentWorkspaceComponent implements OnInit {
    * @param result - The API response data.
    */
   handleCodeSubmissionResponse(result: CodeSubmissionResultDto): void {
-    console.log(result);
+    //console.log(result);
     this.lastResult = result;
     this.compilerOutput = result.CodeSubmissionResult.output;
     this.compilerOutput +=
       result.CodeSubmissionResult.output.length === 0 ? 'Keine Ausgabe' : '';
     this.isLoading = false;
-    this.feedbackMessage =
-      'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben. Klicke hierzu auf den Button "Feedback erzeugen".';
+    this.feedbackMessage = 'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben. Führe dafür erst deinen Programmcode aus und klicke dann auf den Button "Feedback erzeugen".';
     this.currentState = States.submittedCode;
     if (result.CodeSubmissionResult.score === 100) {
       this.confettiService.celebrate(6,800); // small confetti animation :)

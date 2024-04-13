@@ -129,7 +129,7 @@ export class FeedbackNormalService {
             id: sumbissionId,
           },
         },
-        prompt: formattedPrompt,
+        prompt: JSON.stringify(formattedPrompt),
         response: openAiResponse.generations[0][0].text,
         model: KImodel,
         flavor: flavor,
