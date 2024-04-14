@@ -83,7 +83,7 @@ export class ContentViewComponent implements OnInit {
 
   onToggleCheckmark(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
-    this.contentService.toggleContentElementCompletionStatus(contentElementId).subscribe(status => this.applyCompletedStyle[position] = status);
+    this.contentService.toggleContentElementCompletionStatus(contentElementId, this.activeConceptNodeId, this.contentViewData.level).subscribe(status => this.applyCompletedStyle[position] = status);
     if(typeof this.contentViewData.progress === 'number'){
       const sign = this.applyCompletedStyle[position] ? -1 : 1;
       console.log('sign: ' + sign);

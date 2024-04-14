@@ -112,7 +112,19 @@ export class ContentService {
             }
           }
         }
+<<<<<<< Updated upstream
         return (number / total) * 100;
+=======
+        
+        const progress = (number / total) * 100;
+
+        if (progress === 100) {
+          console.log('update user level');
+          this.userConceptService.updateUserLevel(Number(userId), Number(conceptNodeId), level);
+        }
+
+        return progress;
+>>>>>>> Stashed changes
       }
     };
 
@@ -255,6 +267,8 @@ export class ContentService {
    */
   async toggleCheckmark(
     contentElementId: number,
+    conceptNodeId: number,
+    level: number,
     userId: number,
   ): Promise<boolean> {
     //get checkmark status
@@ -269,6 +283,7 @@ export class ContentService {
           markedAsDone: true,
         },
       });
+      //check if user has level award
 
     if (!checkmarkStatus) {
       //create new entry in userContentProgress if not exists
@@ -291,6 +306,10 @@ export class ContentService {
         markedAsDone: !checkmarkStatus.markedAsDone,
       },
     });
+
+    if(checkmarkStatus.markedAsDone) {
+      this.userConceptService.checkUserConceptLevelAward(userId, contentElementId, conceptNodeId, level);
+    }
 
     return !checkmarkStatus.markedAsDone;
   }
@@ -404,8 +423,6 @@ export class ContentService {
   }
 
 }
-
-
 
 
 /*

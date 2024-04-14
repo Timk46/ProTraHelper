@@ -5,8 +5,14 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from '../crypto/crypto.service';
+<<<<<<< Updated upstream
 import { CodeSubmissionResult, CodeSubmissionResultDto } from '@Interfaces/index';
 import { CodeSubmission, Question, CodingQuestion } from '@prisma/client';
+=======
+import { CodeSubmissionResult, CodeSubmissionResultDto, ContentElementDTO } from '@Interfaces/index';
+import { CodeSubmission, Question, CodingQuestion, ContentElement } from '@prisma/client';
+import { ContentService } from '@/content/content.service';
+>>>>>>> Stashed changes
 
 @Injectable()
 export class RunCodeService {
@@ -38,6 +44,11 @@ export class RunCodeService {
             automatedTests: true,
           },
         },
+<<<<<<< Updated upstream
+=======
+        contentElement: true,
+        conceptNode: true,
+>>>>>>> Stashed changes
       },
     });
 
@@ -55,7 +66,11 @@ export class RunCodeService {
     } else {
       response = await this.submitCodeForExecutionPython(filesBase64, testFilesBase64, question.codingQuestions.automatedTests[0].runMethod, question.codingQuestions.automatedTests[0].inputArguments);
     }
+<<<<<<< Updated upstream
     const result = await this.processExecutionResponse(response, question.codingQuestions, question, userId, studentCode);
+=======
+    const result = await this.processExecutionResponse(response, question.codingQuestions, question.contentElement, question, userId, studentCode);
+>>>>>>> Stashed changes
     return result;
   }
   /**
@@ -113,8 +128,13 @@ export class RunCodeService {
   /**
    * Processes the response from the code execution API, logs the response, and saves the results to the database.
    */
+<<<<<<< Updated upstream
   private async processExecutionResponse(response: CodeSubmissionResult, codingQuestion: CodingQuestion, question: Question, userId: number, studentCode: { [fileName: string]: string }): Promise<CodeSubmissionResultDto> {
     const codeSubmission = await this.saveToDatabase(response, codingQuestion, question, userId, studentCode);
+=======
+  private async processExecutionResponse(response: CodeSubmissionResult, codingQuestion: CodingQuestion, contentElement: ContentElement, question: Question, userId: number, studentCode: { [fileName: string]: string }): Promise<CodeSubmissionResultDto> {
+    const codeSubmission = await this.saveToDatabase(response, codingQuestion, contentElement, question, userId, studentCode);
+>>>>>>> Stashed changes
     return {
       CodeSubmissionResult: response,
       encryptedCodeSubissionId: this.cryptoService.encrypt(codeSubmission.id.toString())
@@ -124,7 +144,11 @@ export class RunCodeService {
   /**
    * Saves the execution result to the database.
    */
+<<<<<<< Updated upstream
   private async saveToDatabase(response: CodeSubmissionResult, codingQuestion: CodingQuestion, question: Question, userId: number, studentCode: { [fileName: string]: string }): Promise<CodeSubmission> {
+=======
+  private async saveToDatabase(response: CodeSubmissionResult, codingQuestion: CodingQuestion, contentElement: ContentElement, question: Question, userId: number, studentCode: { [fileName: string]: string }): Promise<CodeSubmission> {
+>>>>>>> Stashed changes
     // Create a new code submission record with the execution result.
     const codeSubmission: CodeSubmission = await this.prisma.codeSubmission.create({
       data: {
@@ -148,6 +172,16 @@ export class RunCodeService {
       },
     });
 
+<<<<<<< Updated upstream
+=======
+    const progress = question.score / response.score;
+    let markedAsDone: boolean = false;
+    if (progress === 1) {
+      markedAsDone = true;
+      this.contentService.toggleCheckmark(contentElement.id, question.conceptNodeId, question.level, userId);
+    }
+
+>>>>>>> Stashed changes
     return codeSubmission;
   }
 

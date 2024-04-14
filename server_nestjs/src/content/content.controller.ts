@@ -65,9 +65,11 @@ export class ContentController {
    * @example http://localhost:3000/content/toggleCheckmark/14
    */
   @roles('ANY')
-  @Get('/toggleCheckmark/:contentElementId')
+  @Get('/toggleCheckmark/:contentElementId/:conceptNodeId/:level')
   async toggleContentElementStatus(
     @Param('contentElementId') contentElementId: number,
+    @Param('conceptNodeId') conceptNodeId: number,
+    @Param('level') level: number,
     @Req() req,
   ): Promise<boolean> {
     if (isNaN(contentElementId)) {
@@ -75,6 +77,8 @@ export class ContentController {
     }
     return this.contentService.toggleCheckmark(
       Number(contentElementId),
+      Number(conceptNodeId),
+      Number(level),
       req.user.id,
     );
   }
