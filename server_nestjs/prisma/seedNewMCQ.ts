@@ -46,9 +46,16 @@ export const seedMCQnew = async () => {
         approved = false;
     }
     const correctOptionsCount = options.filter(option => option.correct === 1).length;
+    const type = correctOptionsCount > 1 ? 'MC' : 'SC';
+    let score = 0;
+    if(type === 'MC') {
+        score = options.length/2;
+    } else {
+        score = 1;
+    }
     const question: MCQuestion = {
-        score: 3,
-        type: correctOptionsCount > 1 ? 'MC' : 'SC',
+        score: score,
+        type: type,
         author: 1,
         text: mcq['Frage'],
         concept: mcq['ConceptNodeId'],

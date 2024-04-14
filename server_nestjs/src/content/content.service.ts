@@ -304,9 +304,11 @@ export class ContentService {
       },
     });
 
+    /* this service is not working yet.
     if(checkmarkStatus.markedAsDone) {
       this.userConceptService.checkUserConceptLevelAward(userId, contentElementId, conceptNodeId, level);
     }
+    */
 
     return !checkmarkStatus.markedAsDone;
   }
