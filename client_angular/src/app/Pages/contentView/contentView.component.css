@@ -59,7 +59,7 @@ p{
   margin-top: 10px;
   padding: 2px;
   height: 65vh;
-  max-width: 80%;
+  max-width: 100%;
   overflow: auto;
   text-align: center;
 }
