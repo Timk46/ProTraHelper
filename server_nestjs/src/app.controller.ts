@@ -39,4 +39,10 @@ export class AppController {
   getAdmin(): string {
     return "Role admin  worked"
   }
+
+  @Public() // This route is public and can be accessed without being logged in
+  @Get("/healthcheck")
+  healthcheck(): string {
+    return "GOALS is up"
+  }
 }
