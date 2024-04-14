@@ -16,7 +16,7 @@ export interface ContentDTO {
     requiresConceptIds: number[];
     trainsConceptIds: number[];
 
-    progress?: number;
+    progress: number;
     questionMarked?: boolean;
 
     //discussion: Discussion // TODO: implement

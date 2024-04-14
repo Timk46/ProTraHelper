@@ -5,20 +5,18 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from '../crypto/crypto.service';
-<<<<<<< Updated upstream
-import { CodeSubmissionResult, CodeSubmissionResultDto } from '@Interfaces/index';
-import { CodeSubmission, Question, CodingQuestion } from '@prisma/client';
-=======
+
 import { CodeSubmissionResult, CodeSubmissionResultDto, ContentElementDTO } from '@Interfaces/index';
 import { CodeSubmission, Question, CodingQuestion, ContentElement } from '@prisma/client';
 import { ContentService } from '@/content/content.service';
->>>>>>> Stashed changes
+
 
 @Injectable()
 export class RunCodeService {
   constructor(
     private prisma: PrismaService,
     private readonly cryptoService: CryptoService,
+    private contentService: ContentService,
   ) {}
 
   // API URL for code execution service.
@@ -44,14 +42,10 @@ export class RunCodeService {
             automatedTests: true,
           },
         },
-<<<<<<< Updated upstream
-=======
         contentElement: true,
-        conceptNode: true,
->>>>>>> Stashed changes
       },
     });
-
+    console.log(JSON.stringify(question))
     if (!question) {
       throw new HttpException('Diese Question existiert nicht.', HttpStatus.NOT_FOUND);
     }
@@ -66,11 +60,7 @@ export class RunCodeService {
     } else {
       response = await this.submitCodeForExecutionPython(filesBase64, testFilesBase64, question.codingQuestions.automatedTests[0].runMethod, question.codingQuestions.automatedTests[0].inputArguments);
     }
-<<<<<<< Updated upstream
-    const result = await this.processExecutionResponse(response, question.codingQuestions, question, userId, studentCode);
-=======
     const result = await this.processExecutionResponse(response, question.codingQuestions, question.contentElement, question, userId, studentCode);
->>>>>>> Stashed changes
     return result;
   }
   /**
@@ -83,8 +73,8 @@ export class RunCodeService {
   private async submitCodeForExecutionJava(files: { [fileName: string]: string }, testFiles: { [fileName: string]: string }, mainClassName: string): Promise<CodeSubmissionResult> {
 
     const tempClassName = "de.goals.testing." + mainClassName.split(".java")[0];
-    //console.log("Jury1: Run Assignment Java:");
-    //console.log(JSON.stringify({mainClassName: tempClassName, files, testFiles }));
+    console.log("Jury1: Run Assignment Java:");
+    console.log(JSON.stringify({mainClassName: tempClassName, files, testFiles }));
     const response = await fetch(`${this.apiUrl}java-assignment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -96,8 +86,8 @@ export class RunCodeService {
     }
 
     const result: CodeSubmissionResult = await response.json();
-    //console.log("Jury1: Run Assignment Java RESULTS: ");
-    //console.log(result);
+    console.log("Jury1: Run Assignment Java RESULTS: ");
+    console.log(result);
     return result;
   }
 
@@ -108,8 +98,8 @@ export class RunCodeService {
    * @returns The execution result from the external API.
    */
   private async submitCodeForExecutionPython(mainFile: { [fileName: string]: string }, testFiles: { [fileName: string]: string }, runMethod: string, inputArguments: string): Promise<any> {
-    //console.log("Jury1: Run Assignment Python:");
-    //console.log(JSON.stringify({input: inputArguments, runMethod: runMethod, mainFile, testFiles }));
+    console.log("Jury1: Run Assignment Python:");
+    console.log(JSON.stringify({input: inputArguments, runMethod: runMethod, mainFile, testFiles }));
     const response = await fetch(`${this.apiUrl}python-assignment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -120,21 +110,18 @@ export class RunCodeService {
       throw new HttpException(`Failed to execute code. Status: ${response.status}`, HttpStatus.BAD_GATEWAY);
     }
     const result = await response.json();
-    //console.log("Jury1: Run Assignment Python RESULTS: ");
-    //console.log(result);
+    console.log("Jury1: Run Assignment Python RESULTS: ");
+    console.log(result);
     return result;
   }
 
   /**
    * Processes the response from the code execution API, logs the response, and saves the results to the database.
    */
-<<<<<<< Updated upstream
-  private async processExecutionResponse(response: CodeSubmissionResult, codingQuestion: CodingQuestion, question: Question, userId: number, studentCode: { [fileName: string]: string }): Promise<CodeSubmissionResultDto> {
-    const codeSubmission = await this.saveToDatabase(response, codingQuestion, question, userId, studentCode);
-=======
+
   private async processExecutionResponse(response: CodeSubmissionResult, codingQuestion: CodingQuestion, contentElement: ContentElement, question: Question, userId: number, studentCode: { [fileName: string]: string }): Promise<CodeSubmissionResultDto> {
     const codeSubmission = await this.saveToDatabase(response, codingQuestion, contentElement, question, userId, studentCode);
->>>>>>> Stashed changes
+
     return {
       CodeSubmissionResult: response,
       encryptedCodeSubissionId: this.cryptoService.encrypt(codeSubmission.id.toString())
@@ -144,11 +131,7 @@ export class RunCodeService {
   /**
    * Saves the execution result to the database.
    */
-<<<<<<< Updated upstream
-  private async saveToDatabase(response: CodeSubmissionResult, codingQuestion: CodingQuestion, question: Question, userId: number, studentCode: { [fileName: string]: string }): Promise<CodeSubmission> {
-=======
   private async saveToDatabase(response: CodeSubmissionResult, codingQuestion: CodingQuestion, contentElement: ContentElement, question: Question, userId: number, studentCode: { [fileName: string]: string }): Promise<CodeSubmission> {
->>>>>>> Stashed changes
     // Create a new code submission record with the execution result.
     const codeSubmission: CodeSubmission = await this.prisma.codeSubmission.create({
       data: {
@@ -172,8 +155,6 @@ export class RunCodeService {
       },
     });
 
-<<<<<<< Updated upstream
-=======
     const progress = question.score / response.score;
     let markedAsDone: boolean = false;
     if (progress === 1) {
@@ -181,7 +162,6 @@ export class RunCodeService {
       this.contentService.toggleCheckmark(contentElement.id, question.conceptNodeId, question.level, userId);
     }
 
->>>>>>> Stashed changes
     return codeSubmission;
   }
 

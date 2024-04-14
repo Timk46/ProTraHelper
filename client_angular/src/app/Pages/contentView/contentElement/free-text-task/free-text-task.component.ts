@@ -1,8 +1,18 @@
 import { QuestionDTO, UserAnswerDataDTO, freeTextQuestionDTO } from '@DTOs/index';
 import { DialogRef } from '@angular/cdk/dialog';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, EventEmitter, Output } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+
+interface TaskViewData {
+  contentNodeId: number;
+  contentElementId: number;
+  id: number;
+  name: string;
+  type: string;
+  progress: number;
+  description?: string;
+}
 
 @Component({
   selector: 'app-free-text-task',
@@ -10,6 +20,8 @@ import { QuestionDataService } from 'src/app/Services/question/question-data.ser
   styleUrls: ['./free-text-task.component.scss']
 })
 export class FreeTextTaskComponent {
+  
+  @Output() submitClicked = new EventEmitter<any>();
 
   editorConfig = { //tinyMCE
     readonly: false,
@@ -23,18 +35,10 @@ export class FreeTextTaskComponent {
   answerText: string = '';
   feedbackText: string = '';
   isSending: boolean = false;
-  contentElementID: number;
+  
+  taskViewData: TaskViewData;
 
-  /* questionData : QuestionDTO = {
-    id : -1,
-    name : '',
-    description : '',
-    score : -1,
-    type : '',
-    text : '',
-    isApproved: false,
-    originId: -1,
-  } */
+
 
   freeTextQuestion: freeTextQuestionDTO = {
     questionId: -1,
@@ -46,13 +50,13 @@ export class FreeTextTaskComponent {
   }
 
 
-  constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: {question_id: number, contentElement_id: number}, private quesitonService: QuestionDataService) {
-    this.contentElementID = data.contentElement_id;
-    this.quesitonService.getFreeTextQuestion(this.data.question_id).subscribe(data => {
+  constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: any, private quesitonService: QuestionDataService) {
+    this.taskViewData = data.taskViewData;
+    this.quesitonService.getFreeTextQuestion(this.taskViewData.id).subscribe(data => {
       this.freeTextQuestion = data;
-      this.freeTextQuestion.contentElementId = this.contentElementID;
+      this.freeTextQuestion.contentElementId = this.taskViewData.contentElementId;
     });
-    this.quesitonService.getNewestUserAnswer(this.data.question_id).subscribe(data => {
+    this.quesitonService.getNewestUserAnswer(this.taskViewData.id).subscribe(data => {
       this.answerText = data.userFreetextAnswer || '';
     });
   }
@@ -74,6 +78,7 @@ export class FreeTextTaskComponent {
       console.log(data);
       this.feedbackText = data.feedbackText.replace(/\n/g, '<br>');
       this.isSending = false;
+      this.submitClicked.emit(data.progress);
     });
   }
 

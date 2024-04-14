@@ -1,0 +1,26 @@
+{
+  "name": "language_servers",
+  "version": "1.0.0",
+  "description": "Language Servers For Code Editor",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:server:python": "node --loader ts-node/esm monaco_pyright/python/server/direct.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "pyright": "^1.1.347",
+    "ts-node": "^10.9.2",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-ws-jsonrpc": "^3.1.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/ws": "^8.5.10",
+    "typescript": "^5.3.3"
+  }
+}

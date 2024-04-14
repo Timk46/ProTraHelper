@@ -74,7 +74,7 @@ async function importProgrammingTasksFromExcel(filename: string, description: st
                                     language: task.Programming_Language,
                                     testClassName: task.testClassName,
                                     runMethod: task.runMethod,
-                                    inputArguments: "" + task.input,
+                                    inputArguments: task.input? ""+task.input : " ",
                                 },
                             ],
                         },

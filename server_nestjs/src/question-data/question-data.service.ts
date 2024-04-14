@@ -2,9 +2,8 @@
 /* eslint-disable prettier/prettier */
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { ContentService } from '@/content/content.service';
-import { UserConceptService } from '@/graph/user-concept/user-concept.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { McQuestionDTO, MCOptionDTO, QuestionDTO, questionType, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
+import { McQuestionDTO, MCOptionDTO, MCOptionViewDTO, QuestionDTO, questionType, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { Injectable } from '@nestjs/common';
 import {  } from '@prisma/client';
@@ -72,7 +71,39 @@ export class QuestionDataService {
      * @param mcQuestion_id
      * @returns the options of the mc question
      */
-    async getMCOptions(mcQuestion_id: number): Promise<MCOptionDTO[]> {
+    async getMCOptions(mcQuestion_id: number): Promise<MCOptionViewDTO[]> {
+        let mcOptions : MCOptionViewDTO[] = [];
+
+        let mcQuestionOptions = await this.prisma.mCQuestionOption.findMany({
+            where: {
+                mcQuestionId: Number(mcQuestion_id)
+            }
+        });
+
+        for(let mcQuestionOption of mcQuestionOptions) {
+            let mcOption = await this.prisma.mCOption.findUnique({
+                where: {
+                    id: Number(mcQuestionOption.mcOptionId)
+                }
+            })
+
+            let mcOptionData : MCOptionViewDTO = {
+                id: mcOption.id,
+                text: mcOption.text,
+            }
+
+            mcOptions.push(mcOptionData);
+        }
+
+        return mcOptions;
+    }
+    
+    /**
+     *
+     * @param mcQuestion_id
+     * @returns the options of the mc question
+     */
+    async getMCCheckOptions(mcQuestion_id: number): Promise<MCOptionDTO[]> {
         let mcOptions : MCOptionDTO[] = [];
 
         let mcQuestionOptions = await this.prisma.mCQuestionOption.findMany({
@@ -91,15 +122,15 @@ export class QuestionDataService {
             let mcOptionData : MCOptionDTO = {
                 id: mcOption.id,
                 text: mcOption.text,
-                correct: mcOption.is_correct
+                correct: mcOption.is_correct,
             }
 
             mcOptions.push(mcOptionData);
         }
 
         return mcOptions;
-    }
-
+    }    
+    
     /**
      * get the free text question, including the solution and expectations if requested
      * @param questionVersionId
@@ -333,9 +364,9 @@ export class QuestionDataService {
 
         //generate feedback for user answer
         if (question.type === questionType.MULTIPLECHOICE) {
-            console.log('generate feedback for user answer');
+            console.log('generate feedback for multiple choice user answer');
             //const question = await this.getQuestion(answerData.questionId);
-            const mcOptions = await this.getMCOptions((await this.getMCQuestion(answerData.questionId)).id);
+            const mcOptions = await this.getMCCheckOptions((await this.getMCQuestion(answerData.questionId)).id);
             let userScore = 0;
             const scorePerOption = question.score / mcOptions.length;
 
@@ -375,8 +406,6 @@ export class QuestionDataService {
 
             if (!feedback) throw new Error('Could not create Feedback');
 
-<<<<<<< Updated upstream
-=======
             console.log('element done: ' + markedAsDone);
             return {
                 id: feedback.id,
@@ -433,7 +462,61 @@ export class QuestionDataService {
             if (!feedback) throw new Error('Could not create Feedback');
 
             console.log('element done: ' + markedAsDone);
->>>>>>> Stashed changes
+            return {
+                id: feedback.id,
+                userAnswerId: feedback.userAnswerId,
+                score: feedback.score,
+                feedbackText: feedback.text,
+                elementDone: markedAsDone,
+                progress: progress*100,
+            }
+        }
+
+        if (question.type === questionType.SINGLECHOICE) {
+            console.log('generate feedback for single choice user answer');
+            //const question = await this.getQuestion(answerData.questionId);
+            const mcOptions = await this.getMCCheckOptions((await this.getMCQuestion(answerData.questionId)).id);
+            let userScore = 0;
+            let progress = 0;
+
+            //generate user score
+            for(const mcOption of mcOptions) {
+                if (mcOption.correct && answerData.userMCAnswer.includes(mcOption.id)) {
+                    userScore += question.score;
+                    progress = 1;
+                    break;
+                }
+                else {
+                    console.log('answer not correct');
+                    userScore = 0;
+                } 
+            }
+
+            let feedbackText = "";
+            let markedAsDone: boolean = false;
+            if(progress == 1) {
+                feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
+                this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
+                markedAsDone = true;
+            }
+            else {
+                feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
+            }
+
+            console.log(feedbackText);
+
+            //create feedback for user answer
+            const feedback = await this.prisma.feedback.create({
+                data: {
+                    userAnswerId: createdData.id,
+                    text: feedbackText,
+                    score: userScore
+                }
+            });
+
+            if (!feedback) throw new Error('Could not create Feedback');
+
+            console.log('element done: ' + markedAsDone);
             return {
                 id: feedback.id,
                 userAnswerId: feedback.userAnswerId,
@@ -445,8 +528,8 @@ export class QuestionDataService {
         }
 
         //generate feedback for user freetext answer
-        if (question.type === questionType.FREETEXT && question.description) {
-            console.log('generate feedback for user answer');
+        if (question.type === questionType.FREETEXT && question.text) {
+            console.log('generate feedback for freetext user answer');
 
             //TODO: generate a feedback text based on the user answer
             let feedbackText: string = 'Du hast keine Antwort eingeben.';
@@ -467,6 +550,7 @@ export class QuestionDataService {
             if(progress == 1) {
                 this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
+                
             }
 
             console.log('generated Text:', feedbackText);

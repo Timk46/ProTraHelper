@@ -86,7 +86,6 @@ export class ContentViewComponent implements OnInit {
     this.contentService.toggleContentElementCompletionStatus(contentElementId, this.activeConceptNodeId, this.contentViewData.level).subscribe(status => this.applyCompletedStyle[position] = status);
     if(typeof this.contentViewData.progress === 'number'){
       const sign = this.applyCompletedStyle[position] ? -1 : 1;
-      console.log('sign: ' + sign);
       this.contentViewData.progress = this.contentViewData.progress + (sign/this.elementCount * 100);
     }
   }

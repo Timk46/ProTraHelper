@@ -15,7 +15,7 @@ const {
 
 //const KImodel = 'gpt-4-0314';
 //const KImodel = 'gpt-3.5-turbo';
-const KImodel = 'gpt-4-1106-preview';
+const KImodel = 'gpt-4-turbo-2024-04-09';
 
 const chat = new ChatOpenAI({
   modelName: KImodel,
@@ -129,7 +129,8 @@ export class FeedbackNormalService {
             id: sumbissionId,
           },
         },
-        text: openAiResponse.generations[0][0].text,
+        prompt: JSON.stringify(formattedPrompt),
+        response: openAiResponse.generations[0][0].text,
         model: KImodel,
         flavor: flavor,
       },

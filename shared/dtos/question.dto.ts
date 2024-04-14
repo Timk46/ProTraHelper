@@ -60,11 +60,10 @@ export interface MCOptionDTO {
 /**
  * This DTO is for checking the mc answers of the user
  */
-export interface MCOptionCheckDTO {
+export interface MCOptionViewDTO {
     id: number;
     text: string;
     files?: FileDto[];
-    isCorrect: boolean;
     selected?: boolean;
 }
 
@@ -121,6 +120,7 @@ export interface CodingQuestionDto {
   }
 
   export enum questionType {
+    SINGLECHOICE = "SC",
     MULTIPLECHOICE = "MC",
     FREETEXT = "FreeText",
     CODE = "CodingQuestion",

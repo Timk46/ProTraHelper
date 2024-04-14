@@ -1,7 +1,7 @@
-import { Component, OnInit, Input, Inject } from '@angular/core';
+import { Component, OnInit, Input, Inject, EventEmitter, Output } from '@angular/core';
 import { MatList, MatSelectionListChange } from '@angular/material/list';
 import { MatListOption } from '@angular/material/list';
-import { MCOptionDTO, McQuestionDTO, QuestionDTO, QuestionVersionDTO } from '@DTOs/question.dto';
+import { MCOptionViewDTO, McQuestionDTO, QuestionDTO, QuestionVersionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -23,6 +23,8 @@ interface TaskViewData {
 })
 
 export class McTaskComponent implements OnInit {
+  
+  @Output() submitClicked = new EventEmitter<any>();
 
   editorConfig = { //tinyMCE
     readonly: true,
@@ -79,7 +81,7 @@ export class McTaskComponent implements OnInit {
   @Input() isSelfAssessment: boolean = false;
 
   //the mc options
-  options : MCOptionDTO[] = [];
+  options : MCOptionViewDTO[] = [];
 
   //the selected option(s)
   selectedOptions : number[] = [];
@@ -110,6 +112,7 @@ export class McTaskComponent implements OnInit {
 
     this.questionDataService.createUserAnswer(userAnswerData).subscribe(data => {
       this.feedback = data;
+      this.submitClicked.emit(data.progress);
     });
 
     if(this.feedback.progress > this.taskViewData.progress) {
@@ -145,7 +148,7 @@ export class McTaskComponent implements OnInit {
         this.questionDataService.getMCOptions(this.mcQuestion.id).subscribe(data => {
           console.log(this.mcQuestion.id);
           this.options = data;
-
+          this.options.sort(() => Math.random() - 0.5);
         });
       })
     });
@@ -153,6 +156,7 @@ export class McTaskComponent implements OnInit {
 
   //Close the dialog
   onClose(): void {
+    console.log('element done: ' + this.feedback.elementDone);
     this.dialogRef.close(this.feedback.elementDone);
   }
 

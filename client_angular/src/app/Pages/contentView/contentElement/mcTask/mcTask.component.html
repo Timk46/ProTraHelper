@@ -43,13 +43,13 @@
   <h3>Maximale Punktzahl: {{questionData.score}}</h3>
   <div *ngIf="mcQuestion.isSC">
     <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="false" (selectionChange)="onSelectionChange()">
-      <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected}" [selected]="option.selected"><span [innerHTML]="option.text"></span></mat-list-option>
+      <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected}" [selected]="option.selected"><span [innerHTML]="option.text" style="white-space: normal; word-wrap: break-word;"></span></mat-list-option>
     </mat-selection-list>
   </div>   
 
   <div *ngIf="!mcQuestion.isSC">
     <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="true" (selectionChange)="onSelectionChange()">
-      <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected}" [selected]="option.selected"><span [innerHTML]="option.text"></span></mat-list-option>
+      <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected}" [selected]="option.selected"><span [innerHTML]="option.text" style="white-space: normal; word-wrap: break-word;"></span></mat-list-option>
     </mat-selection-list>
   </div>
 

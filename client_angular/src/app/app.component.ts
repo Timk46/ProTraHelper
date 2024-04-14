@@ -1,6 +1,7 @@
 import { UserService } from './Services/auth/user.service';
 import { ToolbarService } from './Services/toolbar/toolbar.service';
 import { Component } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { globalRole } from '@DTOs/roles.enum';
 
@@ -17,6 +18,7 @@ export class AppComponent {
     (
       private userService: UserService,
       private router: Router,
+      public dialog: MatDialog,
       public toolbarService: ToolbarService
     )
     {
@@ -31,13 +33,54 @@ export class AppComponent {
       });
     }
 
+  openContact() {
+    const dialogRef = this.dialog.open(ContactComponent);
+
+    dialogRef.afterClosed().subscribe(result => {
+    });
+  }
+  openDatenschutz() {
+    const dialogRef = this.dialog.open(DatenschutzComponent);
+
+    dialogRef.afterClosed().subscribe(result => {
+    });
+  }
+  openImpressum() {
+    const dialogRef = this.dialog.open(ImpressumComponent);
+
+    dialogRef.afterClosed().subscribe(result => {
+    });
+  }
+
+
   ngOnInit() {
     //this.toolbarService.show();
   }
 
   logOut() {
+    this.userIsLoggedIn = false;
     this.userService.removeTokens();
     this.router.navigate(['/login']);
   }
 
 }
+
+@Component({
+  selector: 'impressum',
+  templateUrl: './about/impressum.html',
+})
+export class ImpressumComponent {}
+
+@Component({
+  selector: 'datenschutz',
+  templateUrl: './about/datenschutz.html',
+})
+
+export class DatenschutzComponent {}
+
+@Component({
+  selector: 'contact',
+  templateUrl: './about/contact.html',
+})
+
+export class ContactComponent {}

@@ -5,17 +5,23 @@
       <mat-expansion-panel-header>
         <mat-panel-title class="panel-title">
           {{ content.name }}
-          <mat-icon class="level-icon" *ngFor="let level of getLevels(content.level)">star</mat-icon>
+          <div *ngIf="content.progress==100">
+            <mat-icon class="level-icon" *ngFor="let level of getLevels(content.level)">star</mat-icon>
+          </div>
+          <div *ngIf="content.progress<100">
+            <mat-icon class="level-icon" *ngFor="let level of getLevels(content.level)">star_border</mat-icon>
+          </div>
+          <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
           <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
         </mat-panel-title>
         <p matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." style="margin-top: 10px;">Level-Fortschritt: </p><mat-progress-bar matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." class="node-progress" mode="determinate" [value]="content.progress"></mat-progress-bar>
-        <button class="content-view" [style.visibility]="hasContentElementType(content, 'PDF') ? 'visible' : 'hidden'" matTooltip="Zeigt alle PDF (z.B. Vorlesungsfolien) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['PDF'])">PDF</button>
-        <button class="content-view" [style.visibility]="hasContentElementType(content, 'VIDEO') ? 'visible' : 'hidden'" matTooltip="Zeigt alle Videos (z.B. Vorlesungsaufzeichungen) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['VIDEO'])">Video</button>
+        <button class="content-view" [style.visibility]="hasContentElementType(content, 'PDF') ? 'visible' : 'hidden'" matTooltip="Zeigt alle PDF (z.B. Vorlesungsfolien) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['PDF'], $event)">PDF</button>
+        <button class="content-view" [style.visibility]="hasContentElementType(content, 'VIDEO') ? 'visible' : 'hidden'" matTooltip="Zeigt alle Videos (z.B. Vorlesungsaufzeichungen) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['VIDEO'], $event)">Video</button>
       </mat-expansion-panel-header>
       <mat-panel-description>
         <p class="description">{{ content.description }}</p>
       </mat-panel-description>
-      
+
       <!-- table with the content node details and elements -->
       <div class="content-container" *ngIf="hasContentElementType(content, 'QUESTION')">
         <h3>Fragenübersicht</h3>
@@ -26,33 +32,33 @@
               <th mat-header-cell *matHeaderCellDef> ID </th>
               <td mat-cell *matCellDef="let element"> {{ element.id }} </td>
             </ng-container>
-          
+
             <!-- Name Column -->
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef> Name </th>
               <td mat-cell *matCellDef="let element"> {{ element.name }} </td>
             </ng-container>
-  
+
             <!-- Type Column -->
             <ng-container matColumnDef="type">
               <th mat-header-cell *matHeaderCellDef> Fragentyp </th>
-              <td mat-cell *matCellDef="let element"> {{ element.type }} </td>
+              <td mat-cell *matCellDef="let element"> {{ genBetterElementNames(element.type) }} </td>
             </ng-container>
-  
+
             <!-- Attempts Column -> not used anymore
             <ng-container matColumnDef="attempts">
               <th mat-header-cell *matHeaderCellDef> Versuche </th>
               <td mat-cell *matCellDef="let element"> {{ element.attempts }} </td>
             </ng-container>
             -->
-  
+
             <!-- Level Column -> not used anymore, because the level shown in the content node title
             <ng-container matColumnDef="level">
               <th mat-header-cell *matHeaderCellDef> Level </th>
               <td mat-cell *matCellDef="let element"> {{ element.level }} </td>
             </ng-container>
             -->
-          
+
             <!-- Progress Column -->
             <ng-container matColumnDef="progress">
               <th mat-header-cell *matHeaderCellDef> Fortschritt </th>
@@ -60,7 +66,7 @@
                 <mat-progress-spinner [value]="row.progress" [mode]="'determinate'" [diameter]="30"></mat-progress-spinner>
               </td>
             </ng-container>
-          
+
             <!-- Symbol Column -->
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef> Aktion </th>
@@ -68,10 +74,10 @@
                 <button mat-raised-button color="primary" (click)="onTaskClick(element)" class="button">Öffnen</button>
               </td>
             </ng-container>
-            
+
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          
+
           </table>
         </div>
       </div>

@@ -15,3 +15,50 @@
   align-items: center;
   justify-content: center;
 }
+
+.mat-divider {
+  margin-top:16px;
+  margin-bottom: 16px;
+  background-color: lightgrey;
+}
+
+
+.footer {
+  height: 30px; /* Reduzierte Höhe */
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px; /* Reduzierte Schriftgröße */
+  color: #434c5e;
+  padding: 0 10px;
+}
+
+.left-content, .center-content, .right-content {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.center-content {
+  justify-content: center;
+  gap: 8px; /* Etwas kleinerer Abstand zwischen den Elementen */
+}
+
+.divider {
+  height: 15px; /* Reduzierte Höhe für visuelle Trennzeichen */
+  background-color: lightgrey;
+}
+
+button, a {
+  line-height: 1; /* Reduziert den Zeilenabstand, um die Elemente kompakter zu machen */
+  padding: 0 5px; /* Reduziertes Padding für Buttons und Links */
+}
+
+.mat-button {
+  min-height: 0; /* Entfernt die Mindesthöhe für mat-buttons, um sie kleiner zu machen */
+  height: auto; /* Ermöglicht es den Buttons, sich der kleineren Höhe anzupassen */
+  padding: 0 5px; /* Reduziert das Padding für eine kompaktere Erscheinung */
+}

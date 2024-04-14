@@ -98,3 +98,44 @@ resize {
   margin-top: 20px; /* Fügt einen Abstand nach oben hinzu */
 }
 
+
+// HEADER
+
+.mat-divider {
+  margin-top:16px;
+  margin-bottom: 16px;
+  background-color: lightgrey;
+}
+
+
+.header {
+  height: 30px; /* Reduzierte Höhe */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px; /* Reduzierte Schriftgröße */
+  padding: 0 0px;
+}
+
+.left-content, .center-content, .right-content {
+  display: flex;
+  align-items: center;
+}
+
+.right-content img {
+  right: 0px;
+  height: 100%; /* Passt die Höhe des Bildes an den Header an */
+  width: auto; /* Erhält das Seitenverhältnis des Bildes */
+  max-height: 30px; /* Stellt sicher, dass das Bild den Header nicht überschreitet */
+}
+
+.center-content {
+  justify-content: center;
+  gap: 8px; /* Etwas kleinerer Abstand zwischen den Elementen */
+}
+
+.divider {
+  height: 15px; /* Reduzierte Höhe für visuelle Trennzeichen */
+  background-color: lightgrey;
+}

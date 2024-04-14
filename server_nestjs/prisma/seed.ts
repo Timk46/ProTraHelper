@@ -1,18 +1,14 @@
 import { PrismaClient, contentElementType } from '@prisma/client';
-import { el, faker, hy } from '@faker-js/faker';
-import { ConsoleLogger } from '@nestjs/common';
-import { Console } from 'console';
+import { faker } from '@faker-js/faker';
 import * as XLSX from 'xlsx';
-import { WorkSheet, utils } from 'xlsx';
 import * as fs from 'fs';
-import { last, of } from 'rxjs';
-import e from 'express';
 import { seedMCQ } from './seedMCQ';
 import { seedCodeQuestions } from './seedCodeQuestions';
 import { seedFreetext } from './seedFreetext';
 import { seedAllEmbeddingsForVideo } from './seedEmbeddings';
+import { seedMCQnew } from './seedNewMCQ';
 
-const createEmbeddings = false; // set false to skip embedding creation and save costs!!!
+const createEmbeddings = true; // set false to skip embedding creation and save costs!!!
 
 const prisma = new PrismaClient();
 interface excel_OFP {
@@ -494,6 +490,7 @@ async function main() {
   console.log('Importing Tasks from Excel...');
   await seedCodeQuestions(adminUser.id);
   await seedMCQ(adminUser.id);
+  await seedMCQnew();
   await seedFreetext(adminUser.id);
   console.log('Importing Done!');
 }

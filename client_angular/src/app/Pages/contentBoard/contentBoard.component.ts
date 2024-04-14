@@ -1,5 +1,12 @@
 import { ContentDTO, ContentsForConceptDTO } from '@DTOs/content.dto';
-import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+  ViewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ContentViewComponent } from '../contentView/contentView.component';
@@ -10,6 +17,7 @@ import { ContentService } from 'src/app/Services/content/content.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
+import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 
 interface ContentViewData {
   id: number;
@@ -27,6 +35,7 @@ interface TaskViewData {
   type: string;
   progress: number;
   description?: string;
+  level: number;
 }
 
 @Component({
@@ -46,12 +55,12 @@ export class ContentBoardComponent implements OnInit, OnChanges {
 
   //the data for the table of questions
   displayedColumns: string[] = [
-    'id', 
-    'name', 
-    'type',  
-    'progress', 
-    //'level', 
-    'actions'
+    'id',
+    'name',
+    'type',
+    'progress',
+    //'level',
+    'actions',
   ];
 
   getRouterLink(index: number): string {
@@ -59,56 +68,54 @@ export class ContentBoardComponent implements OnInit, OnChanges {
   }
 
   titles = [
-    "Python Kapitalwert",
-    "Python Buchhandlung",
-    "Python Quersumme",
-    "Python_Fibonacci Index",
-    "Buchstabenfrequenz",
-    "Rekursive Summe",
-    "Euklidischer Algorithmus",
-    "Sieb des Erathostenes",
-    "Java Alter",
-    "Java Bruchsumme",
-    "Java Discount",
-    "Java Maximalwert",
-    "Java Arrays und Schleifen",
-    "Java Königsschach",
-    "Java Switch",
-    "Java Bibliothek",
-    "Java GGT",
-    "Java Uni",
-    "Java VektorWork",
-    "Java_KFZ",
-    "Java_Punkt",
-    "Java_Bank",
-    "Java_Radio",
-    "UMLtoJava",
-    "Java_Airline",
-    "Java_Koerper",
-    "Java_Threads",
-    "Python Matrix",
-    "Python Funktionen",
-    "Python Potenz",
-    "Python Drehe String",
-    "Python Steuer",
-    "Python Filter Liste",
-    "Python Reduziere Liste",
-    "Python Fibonacci",
-    "Java Wettrennen",
-    "Java BubbleSort",
-    "Java UML to Java"
+    'Python Kapitalwert',
+    'Python Buchhandlung',
+    'Python Quersumme',
+    'Python_Fibonacci Index',
+    'Buchstabenfrequenz',
+    'Rekursive Summe',
+    'Euklidischer Algorithmus',
+    'Sieb des Erathostenes',
+    'Java Alter',
+    'Java Bruchsumme',
+    'Java Discount',
+    'Java Maximalwert',
+    'Java Arrays und Schleifen',
+    'Java Königsschach',
+    'Java Switch',
+    'Java Bibliothek',
+    'Java GGT',
+    'Java Uni',
+    'Java VektorWork',
+    'Java_KFZ',
+    'Java_Punkt',
+    'Java_Bank',
+    'Java_Radio',
+    'UMLtoJava',
+    'Java_Airline',
+    'Java_Koerper',
+    'Java_Threads',
+    'Python Matrix',
+    'Python Funktionen',
+    'Python Potenz',
+    'Python Drehe String',
+    'Python Steuer',
+    'Python Filter Liste',
+    'Python Reduziere Liste',
+    'Python Fibonacci',
+    'Java Wettrennen',
+    'Java BubbleSort',
+    'Java UML to Java',
   ];
 
   dataSource: MatTableDataSource<TaskViewData>;
 
-  constructor(private router: Router, public dialog: MatDialog, private contentService: ContentService) {
+  constructor(private router: Router, public dialog: MatDialog) {
     this.dataSource = new MatTableDataSource<TaskViewData>();
     this.sort = new MatSort();
   }
-  
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   ngOnChanges() {
     const data: TaskViewData[] = [];
@@ -121,23 +128,26 @@ export class ContentBoardComponent implements OnInit, OnChanges {
           contentNodeId: content.contentNodeId,
           contentElementId: contentElement.id,
           id: contentElement.question.id,
-          name: contentElement.question.name ? contentElement.question.name : content.name,
+          name: contentElement.question.name
+            ? contentElement.question.name
+            : content.name,
           type: contentElement.question.type,
           progress: contentElement.question.progress,
           description: contentElement.question.description,
+          level: contentElement.question.level,
         };
         data.push(input);
       }
-      
     }
     this.dataSource = new MatTableDataSource(data);
   }
 
-  ngAfterViewInit() { 
+  ngAfterViewInit() {
     this.dataSource.sort = this.sort;
   }
 
-  onContentClick(content: ContentDTO, type: string[]) {
+  onContentClick(content: ContentDTO, type: string[], event: MouseEvent) {
+    event.stopPropagation(); // prevents any reaction from the expansion panel for clicks on video/pdf
 
     // Create Dialog Config https://material.angular.io/components/dialog/api#MatDialogConfig
     const dialogConfig = new MatDialogConfig();
@@ -158,7 +168,8 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     dialogConfig.data = {
       taskViewData: taskViewData,
     };
-    dialogConfig.maxHeight = "80vh";
+    //dialogConfig.maxHeight = "80vh";
+    dialogConfig.width = 'auto';
     let dialogRef;
     if (taskViewData.type == 'MC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
@@ -167,24 +178,73 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     if (taskViewData.type == 'SC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
     }
+
     if (taskViewData.type == 'FreeText') {
       dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
     }
+
+    if (dialogRef) {
+      const prevScore = taskViewData.progress;
+      const dialogSubmitSubscription =
+        dialogRef.componentInstance.submitClicked.subscribe((score) => {
+          this.dataSource.data = this.dataSource.data.map((element) => {
+            if (element.id === taskViewData.id) {
+              // Update the progress value of the task
+              if(score > prevScore) {
+                element.progress = score;
+              }             
+              // Update the contentNode that is connected to the task
+              if (score == 100 && prevScore != 100) {
+                this.contentsForActiveConceptNode.trainedBy.map((content) => {
+                  if (
+                    content.contentElements.some(
+                      (element) => element.id === taskViewData.contentElementId
+                    )
+                  ) {
+                    const elementCount = content.contentElements.length;
+                    content.progress += 100 / elementCount;
+                  }
+                });
+              }
+            }
+            return element;
+          });
+
+          dialogSubmitSubscription.unsubscribe();
+        });
+    }
+
     if (taskViewData.type == 'CodingQuestion') {
       this.router.navigate([this.getRouterLink(taskViewData.id)]);
     }
   }
 
-  hasContentElementType(content : ContentDTO, type: string) {
-    return content.contentElements.some(element => element.type === type);
+  hasContentElementType(content: ContentDTO, type: string) {
+    return content.contentElements.some((element) => element.type === type);
   }
-  
+
   getFilteredData(contentNodeId: number) {
-    return this.dataSource.data.filter(element => element.contentNodeId === contentNodeId);
+    return this.dataSource.data.filter(
+      (element) => element.contentNodeId === contentNodeId
+    );
   }
 
   getLevels(num: number) {
     return new Array(num);
   }
 
+  genBetterElementNames(type: string): string {
+    switch (type) {
+      case 'MC':
+        return 'Multiple Choice';
+      case 'SC':
+        return 'Single Choice';
+      case 'FreeText':
+        return 'Frei Text';
+      case 'CodingQuestion':
+        return 'Programmieraufgabe';
+      default:
+        return 'undefiniert';
+    }
+  }
 }
