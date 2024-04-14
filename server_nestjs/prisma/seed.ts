@@ -7,7 +7,8 @@ import { seedCodeQuestions } from './seedCodeQuestions';
 import { seedFreetext } from './seedFreetext';
 import { seedAllEmbeddingsForVideo } from './seedEmbeddings';
 import { seedMCQnew } from './seedNewMCQ';
-
+import { seedUser } from './seedUser';
+import * as bcrypt from 'bcryptjs';
 const createEmbeddings = true; // set false to skip embedding creation and save costs!!!
 
 const prisma = new PrismaClient();
@@ -37,45 +38,7 @@ function getFilenameByLink(hyperlink: string): string {
 }
 
 async function main() {
-  // npx prisma migrate reset ist jetzt in seed integriert. Deshalb müssen wir das hier nicht mehr manuell machen.
-  /*
-  // delete everything
-  console.log('Deleting everything...');
-  await prisma.kIFeedback.deleteMany();
-  await prisma.codeSubmissionFile.deleteMany();
-  await prisma.testcase.deleteMany();
-  await prisma.automatedTest.deleteMany();
-  await prisma.codeGeruest.deleteMany();
-  await prisma.userMCAnswer.deleteMany();
-  await prisma.feedback.deleteMany();
-  await prisma.file.deleteMany();
-  await prisma.vote.deleteMany();
-  await prisma.message.deleteMany();
-  await prisma.discussion.deleteMany();
-  await prisma.anonymousUser.deleteMany();
-  await prisma.codeSubmission.deleteMany();
-  await prisma.codingQuestion.deleteMany();
-  await prisma.mCQuestionOption.deleteMany();
-  await prisma.mCQuestion.deleteMany();
-  await prisma.questionVersion.deleteMany();
-  await prisma.question.deleteMany();
-  await prisma.mCQuestion.deleteMany();
-  await prisma.training.deleteMany();
-  await prisma.requirement.deleteMany();
-  await prisma.contentEdge.deleteMany();
-  await prisma.userContentElementProgress.deleteMany();
-  await prisma.userContentView.deleteMany();
-  await prisma.contentNode.deleteMany();
-  await prisma.conceptEdge.deleteMany();
-  await prisma.conceptFamily.deleteMany();
-  await prisma.userConcept.deleteMany();
-  await prisma.moduleConceptGoal.deleteMany();
-  await prisma.module.deleteMany();
-  await prisma.subject.deleteMany();
-  await prisma.conceptNode.deleteMany();
-  await prisma.conceptGraph.deleteMany();
-  await prisma.user.deleteMany();
-  */
+
 
   console.log('Creating everything...');
 
@@ -103,50 +66,17 @@ async function main() {
   // Admin
   const adminUser = await prisma.user.create({
     data: {
-      email: 'admin@admin.de',
+      email: 'admiuiojeASNFIUOASDHBNFIOAn@admiSUIODFHIOAASDn.de',
       firstname: 'Admin',
       lastname: 'User',
-      password: '$2b$10$Bn9kqoUAJXE2SAXyqK5LbOk2t2QqDuJ4WKBA.aLjlxuJepwRxRf5C', // plain = admin
+      password:  await bcrypt.hash("sjdfAios4357843#!ddfGs3", 10), // changed on production
       globalRole: 'ADMIN',
       modules: { connect: [{ id: moduleInformatik.id }] },
     },
   });
 
-  // Teacher
-  const teacherUser = await prisma.user.create({
-    data: {
-      email: 'lehrer@lehrer.de',
-      firstname: 'Lehrer',
-      lastname: 'User',
-      password: '$2b$10$NnM.nnNJ0T0XD1BkqVbGCedYwEQgWQHiz0ao0H6AkSYFX9Kqq9UrO', // plain = lehrer
-      globalRole: 'TEACHER',
-      modules: { connect: [{ id: moduleInformatik.id }] },
-    },
-  });
-
-  // Student
-  const studentUser = await prisma.user.create({
-    data: {
-      email: 'student@student.de',
-      firstname: 'Student',
-      lastname: 'User',
-      password: '$2b$10$VPheWSunU2/ntaC/s5wBkO5ZjYN8ogxqtdAJis5n3Bvgmm99Fkxxm', // plain = student
-      globalRole: 'STUDENT',
-      modules: { connect: [{ id: moduleInformatik.id }] },
-    },
-  });
-
-  // Sven
-  const svenUser = await prisma.user.create({
-    data: {
-      email: 'sven@student.de',
-      firstname: 'Sven',
-      lastname: 'Jacobs',
-      password: '$2b$10$VPheWSunU2/ntaC/s5wBkO5ZjYN8ogxqtdAJis5n3Bvgmm99Fkxxm', // plain = student
-      globalRole: 'STUDENT',
-      modules: { connect: [{ id: moduleInformatik.id }] },
-    },
-  });
+  // seed mor users for other usecases (evaluation etc.)
+  await seedUser(moduleInformatik.id);
 
   // More users
   const numberOfUsers = 10;
@@ -443,6 +373,8 @@ async function main() {
   });
 
   // Discussion, Message --------------------------------------------------------------
+
+  /*
   const anonymousAdmin = await prisma.anonymousUser.create({
     data: {
       user: { connect: { id: adminUser.id } },
@@ -458,6 +390,7 @@ async function main() {
       isSolved: true,
     },
   });
+
 
   // the question
   const exampleQuestion = await prisma.message.create({
@@ -486,6 +419,8 @@ async function main() {
       message: { connect: { id: exampleQuestion.id } },
     },
   });
+
+  */
 
   console.log('Importing Tasks from Excel...');
   await seedCodeQuestions(adminUser.id);
