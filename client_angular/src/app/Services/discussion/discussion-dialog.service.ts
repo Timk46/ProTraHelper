@@ -30,8 +30,8 @@ export class DiscussionDialogService {
 
         dialogRef.afterClosed().subscribe((result: discussionFilterContentNodeDTO) => {
           if (result) {
-            console.log("created discussion id: ");
-            console.log(result);
+            //console.log("created discussion id: ");
+            //console.log(result);
             this.openDiscussionCreation(conceptNode, result.id, -1).then((result: number) => {
               resolve(result);
             });
@@ -65,12 +65,12 @@ export class DiscussionDialogService {
 
       dialogRef.afterClosed().subscribe((result: number) => {
         if (result && result != -1) {
-          console.log("created discussion id: " + result);
+          //console.log("created discussion id: " + result);
           const url = `/discussion-view/${result}`;
           window.open(url, "_blank");
           resolve(result);
         } else {
-          console.log("no discussion created");
+          //console.log("no discussion created");
           reject("No discussion created");
         }
       });

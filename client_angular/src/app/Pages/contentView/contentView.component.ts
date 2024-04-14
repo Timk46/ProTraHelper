@@ -131,7 +131,7 @@ export class ContentViewComponent implements OnInit {
   }
 
   getLastOpenedDate(){
-    console.log('ContentViewComponent: getLastOpenedDate');
+    //console.log('ContentViewComponent: getLastOpenedDate');
     this.contentService.updateLastOpenedDate(this.contentViewData.contentNodeId).subscribe(status => {this.lastOpenedDate = new Date(status); this.readableDate = this.getDateDisplay(this.lastOpenedDate);});
   }
     /**
@@ -140,7 +140,6 @@ export class ContentViewComponent implements OnInit {
    * @returns
    */
     getDateDisplay(date: Date): string {
-      console.log("getDateDisplay called");
       const today = new Date();
       const newDate = new Date(date);
       const dbDate = new Date(date);

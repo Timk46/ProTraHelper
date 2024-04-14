@@ -23,7 +23,7 @@ interface TaskViewData {
 })
 
 export class McTaskComponent implements OnInit {
-  
+
   @Output() submitClicked = new EventEmitter<any>();
 
   editorConfig = { //tinyMCE
@@ -101,7 +101,7 @@ export class McTaskComponent implements OnInit {
 
   onSubmit() :void {
     //Create new submit
-    console.log('create submit for contentElementId: ' + this.taskViewData.contentElementId);
+    //console.log('create submit for contentElementId: ' + this.taskViewData.contentElementId);
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
       contentElementId: this.taskViewData.contentElementId,
@@ -123,7 +123,7 @@ export class McTaskComponent implements OnInit {
       //timeout for showing the feedback
       this.submitDisabled = true;
     }, 500);
-  
+
   }
 
   //Get data from dialog
@@ -146,7 +146,7 @@ export class McTaskComponent implements OnInit {
 
         //Get the MC-Options of the question
         this.questionDataService.getMCOptions(this.mcQuestion.id).subscribe(data => {
-          console.log(this.mcQuestion.id);
+          //console.log(this.mcQuestion.id);
           this.options = data;
           this.options.sort(() => Math.random() - 0.5);
         });
@@ -156,7 +156,7 @@ export class McTaskComponent implements OnInit {
 
   //Close the dialog
   onClose(): void {
-    console.log('element done: ' + this.feedback.elementDone);
+    //console.log('element done: ' + this.feedback.elementDone);
     this.dialogRef.close(this.feedback.elementDone);
   }
 

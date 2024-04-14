@@ -71,7 +71,7 @@ export class DiscussionViewComponent {
     this.subscriptions.push(pSub);
     // get messages
     const tsSub = this.discussionViewService.toggleStatus.subscribe(toggleStatus => {
-      console.log("got some toggle", toggleStatus);
+      //console.log("got some toggle", toggleStatus);
       this.messagesData.forEach(message => {
         if (message.messageId != toggleStatus.messageId) {
           message.isSolution = false;

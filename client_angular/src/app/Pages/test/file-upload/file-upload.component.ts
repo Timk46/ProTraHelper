@@ -31,7 +31,7 @@ export class FileUploadComponent {
   uploadFile(): void {
     if (this.fileToUpload) {
       this.fileService.uploadFile(this.fileToUpload).subscribe((response) => {
-        console.log(response);
+        //console.log(response);
         // Handle the response as needed.
       });
     }
@@ -48,7 +48,7 @@ export class FileUploadComponent {
         .downloadFile(this.uniqueIdentifier)
         .subscribe((response) => {
           const blobData = response.body;
-          console.log(JSON.stringify(response.headers));
+          //console.log(JSON.stringify(response.headers));
           if (blobData !== null) {
             const blob = new Blob([blobData], {
               type: 'application/octet-stream',

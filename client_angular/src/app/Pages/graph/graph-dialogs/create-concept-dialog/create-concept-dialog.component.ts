@@ -16,7 +16,7 @@ export class CreateConceptDialogComponent {
   currentModuleId: number = 1;
   levels: number[] = [1,2,3,4,5,6];
   moduleGoal: number = 0;
-  
+
     constructor(
       public dialogRef: MatDialogRef<CreateConceptDialogComponent>,
       @Inject(MAT_DIALOG_DATA) public data: any,
@@ -24,17 +24,17 @@ export class CreateConceptDialogComponent {
       ) {
 
       }
-  
+
 
     onDialogOpen(): void {
-      console.log("in onDialogOpen")
+      //console.log("in onDialogOpen")
     }
     onNoClick(): void {
       this.dialogRef.close('cancel');
     }
 
     createConcept(): void {
-      console.log("trying to create concept: ", this.name, this.description)
+      //console.log("trying to create concept: ", this.name, this.description)
       this.graphService.createConcept(this.data.parentId, this.name, this.description, [{ moduleId: this.currentModuleId, goal: this.moduleGoal }]);
       this.dialogRef.close('success');
     }

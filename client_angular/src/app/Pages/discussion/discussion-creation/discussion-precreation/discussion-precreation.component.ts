@@ -27,7 +27,7 @@ export class DiscussionPrecreationComponent {
    * Closes the dialog and passes a common content node to the parent component
    */
   onAllSelect(){
-    console.log("Alle");
+    //console.log("Alle");
     this.dialogRef.close({
       id: -1,
       name: "Alle",

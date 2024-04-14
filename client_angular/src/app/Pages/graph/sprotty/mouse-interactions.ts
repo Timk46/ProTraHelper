@@ -1,5 +1,5 @@
-import { ContextMenuMouseListener, ContextMenuProviderRegistry, IActionDispatcher, IButtonHandler, IContextMenuService, IContextMenuServiceProvider, 
-    MouseListener, SModelElementImpl, TYPES, findParentByFeature, isExpandable, isSelectable, 
+import { ContextMenuMouseListener, ContextMenuProviderRegistry, IActionDispatcher, IButtonHandler, IContextMenuService, IContextMenuServiceProvider,
+    MouseListener, SModelElementImpl, TYPES, findParentByFeature, isExpandable, isSelectable,
     isSelected } from "sprotty";
 import { Action, CollapseExpandAction, SModelElement, Point, SelectAction } from 'sprotty-protocol';
 import { injectable, inject } from 'inversify';
@@ -12,7 +12,7 @@ export const NodeCreator = Symbol('NodeCreator');
 
 export class CustomMouseListener extends MouseListener {
     @inject(TYPES.IActionDispatcher) protected actionDispatcher!: IActionDispatcher;
-    
+
     constructor(
         @inject(TYPES.IContextMenuServiceProvider) protected readonly contextMenuService: IContextMenuServiceProvider,
     @inject(TYPES.IContextMenuProviderRegistry) protected readonly menuProvider: ContextMenuProviderRegistry,
@@ -22,8 +22,8 @@ export class CustomMouseListener extends MouseListener {
 
     // sends a collapse/expand action to the action dispatcher when a node is double-clicked
     override doubleClick(target: SModelElement, event: MouseEvent): (Action | Promise<Action>)[] {
-        console.log('double clicked ' + target.id, target)
-        
+        //console.log('double clicked ' + target.id, target)
+
         if(target.type === 'node:concept') {
             const conceptNode = target as SprottyConceptNode;
             const action = CollapseExpandAction.create({
@@ -40,11 +40,11 @@ export class CustomMouseListener extends MouseListener {
         // this function is called when the user right-clicks on an element
         // it selects the right-clicked element and deselects all other elements
         // the context menu is opened by the standard sprotty context menu service
-        console.log('context menu ' + target.id, target)
+        //console.log('context menu ' + target.id, target)
 
 
         const root = target.root;
-        const options = { selectedElementsIDs: [target.id], deselectedElementsIDs: Array.from(root.index.all().filter(isSelected), 
+        const options = { selectedElementsIDs: [target.id], deselectedElementsIDs: Array.from(root.index.all().filter(isSelected),
             (val) => { return val.id; }) };
         this.actionDispatcher.dispatch(SelectAction.create(options));
         return [];

@@ -78,7 +78,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       case CreateEdgeAction.KIND:
         this.handleCreateEdgeAction(action as CreateEdgeAction);
         break;
-      
+
       case MoveNodeAction.KIND:
         this.handleMoveNodeAction(action as MoveNodeAction);
         break;
@@ -97,7 +97,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * Initializes the graph with the given flatGraph by creating the 
+   * Initializes the graph with the given flatGraph by creating the
    * root node and adding the first layer of nodes and edges
    * the recursive function addChildren is called for each node to add its children
    * @param flatGraph the graph to be initialized
@@ -154,7 +154,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   /**
    * This recursive function adds children to a node in the graph. It also calculates the level and goal summaries for parent nodes.
-   * @param parentNode 
+   * @param parentNode
    * @param type of the children being added, is 'concept' for parent and leaf nodes, 'mini-concept' for mini concepts and 'not-visible' for dummy nodes
    * @returns levels and goals of leaf nodes
    */
@@ -257,7 +257,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
    * Is called every time a node is selected. Updates the active node in the graphCommunication service,
    * updates the selected concept in the database and handles edge creating and node moving if the respective
    * private variables are set
-   * @param action 
+   * @param action
    */
   handleSelectAction(action: SelectAction): void {
     // send data to contentOverview
@@ -287,7 +287,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   /**
    * Opens the dialog for creating a new concept
-   * @param action 
+   * @param action
    */
   handleCreateConceptAction(action: CreateConceptAction): void {
     const index = new SModelIndex();
@@ -315,7 +315,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   /**
    * Deletes the current concept
-   * @param action 
+   * @param action
    */
   handleDeleteConceptAction(action: DeleteConceptAction): void {
     const index = new SModelIndex();
@@ -330,7 +330,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       if (sprottyNode !== undefined) {
         //todo: check if node is deletable and if it has multiple parents?
         this.graphData!.deleteConcept(sprottyNode.databaseId).subscribe((res) => {
-          console.log("deleted concept: ", res);
+          //console.log("deleted concept: ", res);
           this.getUserGraph();
         });
       }
@@ -339,7 +339,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       const sprottyEdge = index.getById(action.conceptId) as SprottyConceptEdge;
       if (sprottyEdge !== undefined) {
         this.graphData!.deleteEdge(sprottyEdge.databaseId).subscribe((res) => {
-          console.log("deleted edge: ", res);
+          //console.log("deleted edge: ", res);
           this.getUserGraph();
         });
       }
@@ -348,7 +348,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   /**
    * Expands and collapses nodes in the graph
-   * @param action 
+   * @param action
    */
   async handleCollapseExpandAction(action: CollapseExpandAction): Promise<void> {
     const index = new SModelIndex();
@@ -396,7 +396,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   /**
    * called through the context menu, increases level of the node by one
-   * @param action 
+   * @param action
    */
   handleAwardLevelAction(action: AwardLevelAction): void {
     const index = new SModelIndex();
@@ -406,7 +406,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     const newLevel = currentLevel + 1;
     this.graphData!.updateUserLevel(sprottyNode.databaseId, newLevel ).subscribe(
       (res) => {
-        console.log("updated concept: ", res);
+        //console.log("updated concept: ", res);
         this.getUserGraph();
       }
     );
@@ -415,7 +415,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   /**
    * called through the context menu, sets the EdgeCreator variable to the selected node
-   * @param action 
+   * @param action
    */
   handleCreateEdgeAction(action: CreateEdgeAction): void {
     // set private variable that will be checked when a new node is selected
@@ -431,7 +431,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
    * was selected when the CreateEdgeAction was dispatched
    * @param index index of the current graph
    * @param firstSelectedNode the first of the currently selected nodes
-   * @returns 
+   * @returns
    */
   private CreateEdge(index: SModelIndex, firstSelectedNode: SprottyConceptNode) {
     const sprottyNode = index.getById(this.EdgeCreator!.concept) as SprottyConceptNode;
@@ -454,7 +454,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       if (this.EdgeCreator!.type === 'prerequisite') {
         // newly selected node is prerequisite of sprottyNode
         this.graphData!.createEdge(parentNodeDatabaseId, firstSelectedNode.databaseId, sprottyNode.databaseId).subscribe((res) => {
-          console.log("created edge: ", res);
+          //console.log("created edge: ", res);
           this.getUserGraph();
           this.updateModel();
         });
@@ -462,7 +462,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
       else if (this.EdgeCreator!.type === 'successor') {
         // newly selected node is successor of sprottyNode
         this.graphData!.createEdge(parentNodeDatabaseId, sprottyNode.databaseId, firstSelectedNode.databaseId).subscribe((res) => {
-          console.log("created edge: ", res);
+          //console.log("created edge: ", res);
           this.getUserGraph();
           this.updateModel();
         });
@@ -473,7 +473,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   /**
    * called through the context menu, sets the NodeMover variable to the selected node
-   * @param action 
+   * @param action
    */
   handleMoveNodeAction(action: MoveNodeAction): void {
     const index = new SModelIndex();
@@ -484,16 +484,16 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
   /**
    * moves the node that was selected when the MoveNodeAction was dispatched to the currently selected node
-   * @param index 
-   * @param firstSelectedNode 
+   * @param index
+   * @param firstSelectedNode
    */
   private MoveNode(index: SModelIndex, firstSelectedNode: SprottyConceptNode) {
     const sprottyNode = index.getById(this.NodeMover!.concept) as SprottyConceptNode;
     const newParentNodeId = firstSelectedNode.databaseId;
-    
+
 
     this.graphData!.moveConceptNode(sprottyNode.databaseId, newParentNodeId).subscribe((res) => {
-      console.log("moved node: ", res);
+      //console.log("moved node: ", res);
       this.getUserGraph();
       this.updateModel();
     });
@@ -501,7 +501,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.NodeMover = undefined;
   }
 
-  
+
   /**
    * creates new sprotty concept node
    * @param parentId the sprotty id of the parent
@@ -556,7 +556,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
 
 
   /**
-   * creates new mini concept node 
+   * creates new mini concept node
    * @param parentId the sprotty id of the parent
    * @param id sprotty graph id , usually 'node_' + databaseId
    * @param name title of the node
@@ -604,7 +604,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * Deletes all edge bends. This is a temporary solution to a bug in elk. 
+   * Deletes all edge bends. This is a temporary solution to a bug in elk.
    * When the issue is fixed (and integrated into sprotty), this function should be removed
    * to reduce unnecessary lag.
    * Link to issue in elk: https://github.com/eclipse/elk/issues/1001
@@ -612,7 +612,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
    * The function recursively goes through the graph and deletes all edge bends.
    */
   deleteEdgeBends(node: SGraph | SNode) {
-    
+
     for (const child of node.children!) {
       if(child.type === 'edge'){
         const edge = child as SEdge;

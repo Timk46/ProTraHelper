@@ -47,7 +47,7 @@ export class DiscussionViewService {
    * @returns the new solution status as boolean
    */
   toggleSolution(messageId: number) : Observable<boolean> {
-    console.log('DiscussionViewService: toggleSolution')
+    //console.log('DiscussionViewService: toggleSolution')
     return this.http.get<boolean>(environment.server + `/discussion/view/messages/toggleSolution/${messageId}`)
       .pipe(
         tap((toggleStatus: boolean) => {
