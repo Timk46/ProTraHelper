@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ElementRef, Input, SimpleChanges } from '@angular/core';
+import { environment } from 'src/environments/environment';
 
 declare var tinymce: any;
 
@@ -81,10 +82,16 @@ export class TinymceComponent {
    * @returns the content of the editor
    */
   getContent(): string {
-    console.log("TinymceComponent: getContent");
+    //console.log("TinymceComponent: getContent");
     if (this.editorInstance) {
-      console.log('editor instance', this.editorInstance);
-      return this.editorInstance.getContent();
+      //console.log('editor instance', this.editorInstance);
+      const content = this.editorInstance.getContent();
+      const textSize = new Blob([content]).size;
+      if (textSize < environment.max_html_body_size) {
+        return this.editorInstance.getContent();
+      } else {
+        throw new Error('Message size exceeds the maximum allowed size.');
+      }
     }
     return '';
   }
@@ -94,7 +101,7 @@ export class TinymceComponent {
    * @returns The raw content as a string.
    */
   getRawContent(): string {
-    console.log("TinymceComponent: getRawContent");
+    //console.log("TinymceComponent: getRawContent");
     if (this.editorInstance) {
       return this.editorInstance.getContent({format: 'text'});
     }
@@ -106,7 +113,7 @@ export class TinymceComponent {
    * @param content the content to set
    */
   setContent(content: string): void {
-    console.log('set content', content);
+    //console.log('set content', content);
     if (this.editorInstance) {
       this.editorInstance.setContent(content);
     }

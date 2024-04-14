@@ -15,7 +15,8 @@ export class DiscussionViewCreateComponent {
 
   editorConfig = { // for later
     plugins: 'autoresize lists table link image code codesample',
-    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | link image | code codesample',
+    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
+    min_height: 300,
   }
 
   anonymousUser: AnonymousUserDTO = {
@@ -43,13 +44,12 @@ export class DiscussionViewCreateComponent {
    */
   onSubmit(editor: TinymceComponent) {
     const text = editor.getContent();
-    console.log(text);
     // empty text is not allowed
     if (text && text != '') {
       // check if the discussion id is present
       if (this.discussionId != -1) {
         this.creationService.getAnonymousUser(this.discussionId).subscribe(anonymousUser => {
-          console.log(anonymousUser);
+          //console.log(anonymousUser);
           // check if user has answered so far
           if (anonymousUser.id != -1){
             this.anonymousUser = anonymousUser;
@@ -64,7 +64,7 @@ export class DiscussionViewCreateComponent {
               isSolution: false
             }
             this.creationService.createDiscussionMessage(message).subscribe(creationResult => {
-              console.log(creationResult);
+              //console.log(creationResult);
               this.expanded = false;
               // refresh the messages by telling the parent 'discussion-page' component to do so
               this.refreshMessages.emit();
@@ -74,7 +74,7 @@ export class DiscussionViewCreateComponent {
             // if no anonymous user was found
           } else {
             this.creationService.createAnonymousUser().subscribe(creationResult => {
-              console.log(creationResult);
+              //console.log(creationResult);
               this.anonymousUser = creationResult;
 
               // wrap the comment in a messageDTO and send it to the backend
@@ -87,7 +87,7 @@ export class DiscussionViewCreateComponent {
                 isSolution: false
               }
               this.creationService.createDiscussionMessage(message).subscribe(creationResult => {
-                console.log(creationResult);
+                //console.log(creationResult);
                 this.expanded = false;
                 // refresh the messages by telling the parent 'discussion-page' component to do so
                 this.refreshMessages.emit();

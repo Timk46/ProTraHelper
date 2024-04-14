@@ -14,7 +14,7 @@ export class DiscussionCreationComponent {
   editorConfig = {
     readonly: false,
     plugins: 'autoresize lists table link image code codesample',
-    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | link image | code codesample',
+    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
     min_height: 300,
     max_height: 500,
     resize: false,
@@ -62,7 +62,7 @@ export class DiscussionCreationComponent {
    *
    */
   onSubmit(title: string, text: string) {
-    console.log("Submit: " + title + text);
+    //console.log("Submit: " + title + text);
     if (title != "" && text != "") {
       this.discussionData.title = title;
 
