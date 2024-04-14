@@ -69,6 +69,70 @@ export class UserConceptService {
         return userConcept;
     }
 
+    async checkUserConceptLevelAward(userId: number, contentElementId: number, level: number, conceptNodeId: number): Promise<[boolean, number]> {
+        let levelAward : boolean = false;
+        
+        let userConcept = await this.prisma.userConcept.findFirst({
+            where: {
+                conceptNodeId: conceptNodeId,
+                userId: userId
+            }
+        });
+
+    
+        if(userConcept.level < level) {
+            let conceptNode = await this.prisma.conceptNode.findFirst({
+                where: {
+                    id: conceptNodeId,
+                },
+                select: {
+                    trainedBy: {
+                        select: {
+                            contentNode: {
+                                include: {
+                                    ContentView: {
+                                        include: {
+                                            contentElement: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+             });
+
+            for(const contentNode of conceptNode.trainedBy) {
+                for(const contentView of contentNode.contentNode.ContentView) {
+                    if(contentView.contentElement.id === contentElementId) {
+                        break;
+                    }
+                }
+                //schaue in user content element progress nach ob alle content elemente erledigt sind
+                let allContentElementsDone = true;
+                for(const contentView of contentNode.contentNode.ContentView) {
+                    let contentElement = contentView.contentElement;
+                    let userContentElement = await this.prisma.userContentElementProgress.findFirst({
+                        where: {
+                            userId: userId,
+                            contentElementId: contentElement.id,
+                        },
+                    });
+                    if(userContentElement === null) {
+                        allContentElementsDone = false;
+                        break;
+                    }
+                    if(!userContentElement.markedAsDone) {
+                        allContentElementsDone = false;
+                        break;
+                    }
+                }
+            }
+        } 
+
+        return [levelAward, level];
+    }
+
     /**
      * updates the user's concept expansion state and saves a timestamped event
      * @param userId

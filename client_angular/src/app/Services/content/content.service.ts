@@ -55,11 +55,13 @@ export class ContentService {
    * @returns ContentElementStatusDTO - the status of the content element.
    */
   toggleContentElementCompletionStatus(
-    contentElementId: number
+    contentElementId: number,
+    conceptNodeId: number,
+    level: number
   ): Observable<boolean> {
     return this.http
       .get<boolean>(
-        environment.server + `/content/toggleCheckmark/${contentElementId}`
+        environment.server + `/content/toggleCheckmark/${contentElementId}/${conceptNodeId}/${level}`
       )
       .pipe(
         tap((status: boolean) => {

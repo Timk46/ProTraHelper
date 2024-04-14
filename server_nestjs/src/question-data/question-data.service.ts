@@ -385,7 +385,8 @@ export class QuestionDataService {
             let markedAsDone: boolean = false;
             if(progress == 1) {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
-                this.contentService.toggleCheckmark(answerData.contentElementId, userId);
+                //set contentElement as done
+                this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
             }
             else {
@@ -440,7 +441,62 @@ export class QuestionDataService {
             let markedAsDone: boolean = false;
             if(progress == 1) {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
-                this.contentService.toggleCheckmark(answerData.contentElementId, userId);
+                this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
+                markedAsDone = true;
+            }
+            else {
+                feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
+            }
+
+            console.log(feedbackText);
+
+            //create feedback for user answer
+            const feedback = await this.prisma.feedback.create({
+                data: {
+                    userAnswerId: createdData.id,
+                    text: feedbackText,
+                    score: userScore
+                }
+            });
+
+            if (!feedback) throw new Error('Could not create Feedback');
+
+            console.log('element done: ' + markedAsDone);
+            return {
+                id: feedback.id,
+                userAnswerId: feedback.userAnswerId,
+                score: feedback.score,
+                feedbackText: feedback.text,
+                elementDone: markedAsDone,
+                progress: progress*100,
+            }
+        }
+
+        if (question.type === questionType.SINGLECHOICE) {
+            console.log('generate feedback for single choice user answer');
+            //const question = await this.getQuestion(answerData.questionId);
+            const mcOptions = await this.getMCCheckOptions((await this.getMCQuestion(answerData.questionId)).id);
+            let userScore = 0;
+            let progress = 0;
+
+            //generate user score
+            for(const mcOption of mcOptions) {
+                if (mcOption.correct && answerData.userMCAnswer.includes(mcOption.id)) {
+                    userScore += question.score;
+                    progress = 1;
+                    break;
+                }
+                else {
+                    console.log('answer not correct');
+                    userScore = 0;
+                } 
+            }
+
+            let feedbackText = "";
+            let markedAsDone: boolean = false;
+            if(progress == 1) {
+                feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
+                this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
             }
             else {
@@ -492,7 +548,7 @@ export class QuestionDataService {
             console.log('progress: '+progress);
 
             if(progress == 1) {
-                this.contentService.toggleCheckmark(answerData.contentElementId, userId);
+                this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
                 
             }
