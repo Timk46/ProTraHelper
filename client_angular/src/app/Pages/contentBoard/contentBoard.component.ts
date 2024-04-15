@@ -241,7 +241,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
       case 'SC':
         return 'Single Choice';
       case 'FreeText':
-        return 'Frei Text';
+        return 'Freitext';
       case 'CodingQuestion':
         return 'Programmieraufgabe';
       default:
