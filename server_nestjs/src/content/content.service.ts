@@ -309,6 +309,7 @@ export class ContentService {
       this.userConceptService.checkUserConceptLevelAward(userId, contentElementId, conceptNodeId, level);
     }
     */
+    
 
     return !checkmarkStatus.markedAsDone;
   }

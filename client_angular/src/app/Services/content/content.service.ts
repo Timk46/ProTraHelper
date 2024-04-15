@@ -59,6 +59,7 @@ export class ContentService {
     conceptNodeId: number,
     level: number
   ): Observable<boolean> {
+    console.log("toggleContentElementCompletionStatus: "+contentElementId+" "+conceptNodeId+" "+level);
     return this.http
       .get<boolean>(
         environment.server + `/content/toggleCheckmark/${contentElementId}/${conceptNodeId}/${level}`

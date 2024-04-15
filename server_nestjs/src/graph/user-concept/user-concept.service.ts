@@ -78,8 +78,8 @@ export class UserConceptService {
                 userId: userId
             }
         });
+        console.log("userConcept: "+userConcept);
 
-    
         if(userConcept.level < level) {
             let conceptNode = await this.prisma.conceptNode.findFirst({
                 where: {
@@ -105,10 +105,11 @@ export class UserConceptService {
             for(const contentNode of conceptNode.trainedBy) {
                 for(const contentView of contentNode.contentNode.ContentView) {
                     if(contentView.contentElement.id === contentElementId) {
+                        console.log("content element found: "+contentView.contentElement.id);
                         break;
                     }
                 }
-                //schaue in user content element progress nach ob alle content elemente erledigt sind
+                //schaue in user content element progress nach, ob alle content elemente erledigt sind
                 let allContentElementsDone = true;
                 for(const contentView of contentNode.contentNode.ContentView) {
                     let contentElement = contentView.contentElement;
@@ -118,6 +119,7 @@ export class UserConceptService {
                             contentElementId: contentElement.id,
                         },
                     });
+                    console.log("content element: "+contentElement.id+" userContentElement: "+userContentElement);
                     if(userContentElement === null) {
                         allContentElementsDone = false;
                         break;
@@ -126,6 +128,11 @@ export class UserConceptService {
                         allContentElementsDone = false;
                         break;
                     }
+                }
+                if(allContentElementsDone) {
+                    levelAward = true;
+                    this.updateUserLevel(userId, conceptNodeId, level);
+                    break;
                 }
             }
         } 
