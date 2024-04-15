@@ -3,7 +3,7 @@ import { configureModelElement, configureViewerOptions, loadDefaultModules, Loca
     PolylineEdgeView, SCompartmentView, SCompartmentImpl, SEdgeImpl, SGraphImpl, SGraphView, SLabelImpl, SLabelView, 
     SNodeImpl, TYPES, RectangularNode, expandFeature, nameFeature, SButtonImpl,
     configureButtonHandler, SRoutingHandleImpl, SRoutingHandleView, SModelElementImpl, SPortImpl, ConsoleLogger, 
-    LogLevel, moveFeature } from 'sprotty';
+    LogLevel, moveFeature, selectFeature, editFeature } from 'sprotty';
 import { ConceptNodeView, CustomExpandButtonView, LeafConceptView, MiniConceptView,} from './views';
 import { ConceptGraphModelSource } from './model-source';
 import ElkConstructor, { LayoutOptions } from 'elkjs';
@@ -58,7 +58,9 @@ export default (containerId: string) => {
         configureModelElement(context, 'node:leaf-concept', RectangularNode, LeafConceptView, {
             disable: [moveFeature]
         });
-        configureModelElement(context, 'edge', SEdgeImpl, PolylineEdgeView);
+        configureModelElement(context, 'edge', SEdgeImpl, PolylineEdgeView, {
+            disable: [editFeature]
+        });
         configureModelElement(context, 'label:heading', SLabelImpl, SLabelView)
         configureModelElement(context, 'label:text', SLabelImpl, SLabelView)
         configureModelElement(context, 'comp', SCompartmentImpl, SCompartmentView)
