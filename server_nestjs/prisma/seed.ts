@@ -424,7 +424,7 @@ async function main() {
 
   console.log('Importing Tasks from Excel...');
   await seedCodeQuestions(adminUser.id);
-  await seedMCQ(adminUser.id);
+  //await seedMCQ(adminUser.id);
   await seedMCQnew();
   await seedFreetext(adminUser.id);
   console.log('Importing Done!');
