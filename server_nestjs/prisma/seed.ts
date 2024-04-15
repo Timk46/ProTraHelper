@@ -289,7 +289,7 @@ async function main() {
           const file = await prisma.file.findUnique({
             where: { uniqueIdentifier: elementList[+elemId] },
           });
-          if (file) {
+          if (file && file.type !== 'CODE') {
             const TempContentElement = await prisma.contentElement.create({
               data: {
                 type: contentElementType[file.type],
