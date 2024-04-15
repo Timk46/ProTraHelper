@@ -10,5 +10,4 @@ export interface discussionFilterContentNodeDTO {
     id: number,
     name: string,
     description: string,
-    awards: number
 }

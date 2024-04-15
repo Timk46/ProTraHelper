@@ -4,7 +4,6 @@
     <mat-list-item (click)="onAllSelect()"><em>Betrifft Alle...</em></mat-list-item>
     <mat-list-item *ngFor="let contentNode of contentNodes" (click)="onSelect(contentNode)">
       {{ contentNode.name }}
-      <mat-icon class="level-icon" *ngFor="let _ of [].constructor(contentNode.awards)">star</mat-icon>
     </mat-list-item>
   </mat-list>
 </mat-dialog-content>

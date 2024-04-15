@@ -116,8 +116,7 @@ export class DiscussionListService {
             name: true,
             description: true
           }
-        },
-        awards: true
+        }
       }
     });
 
@@ -129,8 +128,7 @@ export class DiscussionListService {
       return {
         id: contentNode.contentNode.id,
         name: contentNode.contentNode.name,
-        description: contentNode.contentNode.description,
-        awards: contentNode.awards
+        description: contentNode.contentNode.description
       }
     });
   }
