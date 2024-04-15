@@ -154,6 +154,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     const dialogConfig = new MatDialogConfig();
 
     dialogConfig.width = '70vw';
+    dialogConfig.maxHeight = '95vh';
     dialogConfig.data = {
       contentViewData: content,
       conceptNodeId: this.activeConceptNodeId,
@@ -171,6 +172,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     };
     //dialogConfig.maxHeight = "80vh";
     dialogConfig.width = 'auto';
+    dialogConfig.maxHeight = '95vh';
     let dialogRef;
     if (taskViewData.type == 'MC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
