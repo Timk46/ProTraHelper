@@ -14,4 +14,8 @@
     ## check /var/log/syslog
     ## https://torsion.org/borgmatic/docs/how-to/inspect-your-backups/#logging
 
-borgmatic restore --repository ssh://jsoau056@jsoau056.repo.borgbase.com/./repo --archive GOALS_borgbase_bsvs-hefl-1-2024-04-12-234652 --database production --hostname 172.17.0.1 --port 3002 --username root --password qzx5vQG9WQ2b35eZUWujPUhVb8xRr
+# Alternative:
+    ## Download Archive mit: borgmatic extract --archive latest --repository ssh://jsoau056@jsoau056.repo.borgbase.com/./repo
+    ## cd root/.borgmatic/postgresql_databases//172.17.0.1/
+    ## transform to .sql mit: pg_restore -f production.sql production
+borgmatic restore --repository ssh://jsoau056@jsoau056.repo.borgbase.com/./repo --archive GOALS_borgbase_bsvs-hefl-1-2024-04-15-220120 --database production --hostname 172.17.0.1 --port 3002 --username root --password qzx5vQG9WQ2b35eZUWujPUhVb8xRr
