@@ -40,17 +40,17 @@
     background: #eceff4;
     color: black;
   }
-  
+
   .content {
     height: 20h;
     width: auto;
     margin: 16px;
     padding: 16px;
-  
+
     contain: content;
     overflow-y: hidden;
     scrollbar-width: thin;
-  
+
     font-size: 14px;
     border-radius: 10px;
   }
@@ -61,7 +61,7 @@
   }
 
   .feedback {
-    background-color: #ffb700;
+    background-color: #29ff169c;
   }
 
   .mat-list-option {

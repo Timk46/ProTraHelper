@@ -9,19 +9,19 @@
     <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="false" (selectionChange)="onSelectionChange()">
       <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected, 'selectedCorrect' : option.selected && submitDisabled && option.correct}" [selected]="option.selected">{{option.text}}</mat-list-option>
     </mat-selection-list>
-  </div>   
+  </div>
 
   <div *ngIf="!mcQuestion.isSC">
     <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="true" (selectionChange)="onSelectionChange()">
-      <mat-list-option *ngFor="let option of options" 
-        [disabled]="submitDisabled" 
-        [value]="option.id" 
+      <mat-list-option *ngFor="let option of options"
+        [disabled]="submitDisabled"
+        [value]="option.id"
         [ngClass]="{
-          'selected' : option.selected, 
+          'selected' : option.selected,
           'selectedCorrect' : option.selected && submitDisabled && option.correct,
           'selectedIncorrect' : option.selected && submitDisabled && !option.correct,
           'correctNotSelected' : !option.selected && submitDisabled && option.correct,
-        }" 
+        }"
         [selected]="option.selected">{{option.text}}
       </mat-list-option>
     </mat-selection-list>
@@ -45,7 +45,7 @@
     <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="false" (selectionChange)="onSelectionChange()">
       <mat-list-option *ngFor="let option of options" [disabled]="submitDisabled" [value]="option.id" [ngClass]="{'selected' : option.selected}" [selected]="option.selected"><span [innerHTML]="option.text" style="white-space: normal; word-wrap: break-word;"></span></mat-list-option>
     </mat-selection-list>
-  </div>   
+  </div>
 
   <div *ngIf="!mcQuestion.isSC">
     <mat-selection-list [(ngModel)]="selectedOptions" [multiple]="true" (selectionChange)="onSelectionChange()">
@@ -54,21 +54,28 @@
   </div>
 
   <div class="submit">
-    <button mat-flat-button color="accent" (click)="onSubmit()" [disabled]="submitDisabled">
+    <button *ngIf="!submitDisabled" mat-flat-button color="accent" (click)="onSubmit()" [disabled]="submitDisabled">
       <mat-icon>submit</mat-icon>
       Antworten
+    </button>
+    <button *ngIf="submitDisabled && !checkCorrect()" mat-flat-button color="accent" (click)="retry()">
+      <mat-icon>refresh</mat-icon>
+      Aufgabe erneut versuchen
+    </button>
+    <button *ngIf="submitDisabled && checkCorrect()" mat-flat-button color="accent" (click) ="onClose()">
+      Schließen
     </button>
   </div>
 </div>
 
 <!-- Show feedback for this attempt -->
-<div *ngIf="submitDisabled" class="content feedback mat-elevation-z8">
+<div *ngIf="submitDisabled" class="content feedback mat-elevation-z8" [ngStyle]="{'background-color': getFeedbackColor()}">
   <h2>Feedback</h2>
   <p>Score: {{feedback.score}} von {{questionData.score}} Punkten</p>
   <p>{{feedback.feedbackText}}</p>
 </div>
 
-<!-- Show the feedback of the latest attempt 
+<!-- Show the feedback of the latest attempt
 <div class="content mat-elevation-z8">
   <h2>Feedback des letzten Versuchs</h2>
   <div>

@@ -87,7 +87,7 @@ export class McTaskComponent implements OnInit {
   selectedOptions : number[] = [];
 
   submitDisabled : boolean = false;
-
+  fullscore : number = 0;
   onSelectionChange(): void {
     for (const option of this.options) {
       if(this.selectedOptions.includes(option.id)) {
@@ -126,12 +126,17 @@ export class McTaskComponent implements OnInit {
 
   }
 
+
   //Get data from dialog
   constructor(
     public dialogRef: MatDialogRef<McTaskComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private questionDataService: QuestionDataService) {
     this.taskViewData = data.taskViewData;
+  }
+
+  checkCorrect() {
+    return this.questionData.score === this.feedback.score;
   }
 
   ngOnInit() {
@@ -152,6 +157,32 @@ export class McTaskComponent implements OnInit {
         });
       })
     });
+  }
+
+  retry() {
+    this.submitDisabled = false;
+    this.feedback = {
+      id: -1,
+      userAnswerId: -1,
+      score: -1,
+      feedbackText: '',
+      elementDone: false,
+      progress: -1,
+    }
+    this.options.sort(() => Math.random() - 0.5);
+
+  }
+
+  getFeedbackColor() {
+
+    if (this.feedback.score === this.questionData.score) {
+      return '#29ff169c';
+    } else if (this.feedback.score >= this.questionData.score! * 0.5) {
+      return '#ffa500';
+    } else {
+      return '#ff0000';
+    }
+
   }
 
   //Close the dialog

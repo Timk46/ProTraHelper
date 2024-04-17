@@ -32,7 +32,6 @@ export const seedMCQnew = async () => {
   const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
   // Daten in die Datenbank einfügen
   for (const mcq of data) {
-    console.log("apporved is: ", Boolean(mcq['Approved']))
     const options = letters
         .filter(letter => mcq[`Antwort ${letter}`] !== undefined)
         .map(letter => ({
