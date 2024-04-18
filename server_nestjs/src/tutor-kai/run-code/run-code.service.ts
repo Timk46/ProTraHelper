@@ -157,7 +157,7 @@ export class RunCodeService {
     if (progress === 1) {
       markedAsDone = true;
       console.log("Running toggleCheckmark with parameters: " + contentElement.id + " " + conceptNode.id + " " + 3 + " " + userId);
-      this.contentService.toggleCheckmark(contentElement.id, conceptNode.id, 3, userId);
+      this.contentService.questionContentElementDone(contentElement.id, conceptNode.id, 3, userId);
     }
 
     return codeSubmission;

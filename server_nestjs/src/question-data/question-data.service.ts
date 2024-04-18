@@ -386,7 +386,7 @@ export class QuestionDataService {
             if(progress == 1) {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
                 //set contentElement as done
-                this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
+                this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
             }
             else {
@@ -441,7 +441,7 @@ export class QuestionDataService {
             let markedAsDone: boolean = false;
             if(progress == 1) {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
-                this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
+                this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
             }
             else {
@@ -496,7 +496,7 @@ export class QuestionDataService {
             let markedAsDone: boolean = false;
             if(progress == 1) {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
-                this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
+                this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
             }
             else {
@@ -548,7 +548,7 @@ export class QuestionDataService {
             console.log('progress: '+progress);
 
             if(progress == 1) {
-                this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
+                this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
                 
             }
