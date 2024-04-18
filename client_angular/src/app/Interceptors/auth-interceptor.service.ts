@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UserService } from '../../Services/auth/user.service';
+import { UserService } from '../Services/auth/user.service';
 
 /**
  * The AuthInterceptor class intercepts Http requests and

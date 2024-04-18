@@ -6,8 +6,8 @@ import * as bodyParser from 'body-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true});
   app.enableCors({
-    allowedHeaders: ['Authorization', 'Content-Type', 'X-Filename'],
-    exposedHeaders: ['X-Filename'],  // We need to expose this header so that Angular can access it.
+    allowedHeaders: ['Authorization', 'Content-Type', 'X-Filename', 'X-App-Version'],
+    exposedHeaders: ['X-Filename', 'X-App-Version'],  // We need to expose this header so that Angular can access it.
   });
   app.useLogger(app.get(Logger));
   app.useGlobalInterceptors(new LoggerErrorInterceptor());

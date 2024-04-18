@@ -27,7 +27,7 @@ import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
 import { ChatBotDialogComponent } from './Pages/chat-bot/chat-bot-dialog/chat-bot-dialog.component';
 import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
 import { LoginComponent } from './Pages/login/login.component';
-import { AuthInterceptor } from "./Services/auth/auth-interceptor.service";
+import { AuthInterceptor } from "./Interceptors/auth-interceptor.service";
 import { LoggedInGuard } from "./Guards/is-logged-in.guard";
 import { TinymceComponent } from './Pages/tinymce/tinymce.component';
 import { EditorModule, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
@@ -48,6 +48,7 @@ import { ScoreComponent } from './Pages/contentView/contentElement/mc-task-creat
 import { DescriptionDialogComponent } from './Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component';
 import { DraggableHeightDirective } from "./Directives/draggable-height.directive";
 import { ConfettiService } from "./Services/animations/confetti.service";
+import { VersionInterceptor } from "./Interceptors/version.interceptor";
 
 
 
@@ -100,6 +101,7 @@ import { ConfettiService } from "./Services/animations/confetti.service";
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
     { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
     LoggedInGuard,
     EditorModule,
