@@ -176,7 +176,7 @@ export class McTaskComponent implements OnInit {
   getFeedbackColor() {
 
     if (this.feedback.score === this.questionData.score) {
-      return '#29ff169c';
+      return '#a3be8c';
     } else if (this.feedback.score >= this.questionData.score! * 0.5) {
       return '#ffa500';
     } else {
