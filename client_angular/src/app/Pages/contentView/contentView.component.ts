@@ -87,6 +87,9 @@ export class ContentViewComponent implements OnInit {
     if(typeof this.contentViewData.progress === 'number'){
       const sign = this.applyCompletedStyle[position] ? -1 : 1;
       this.contentViewData.progress = this.contentViewData.progress + (sign/this.elementCount * 100);
+      if(100 - this.contentViewData.progress < 0.0001){
+        this.contentViewData.progress = 100;
+      }
     }
   }
 
