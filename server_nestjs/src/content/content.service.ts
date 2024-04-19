@@ -115,12 +115,12 @@ export class ContentService {
           }
         }
         const progress = (number / total) * 100;
-
+        /* old version of updating user level that pruduces too many db tracking events
         if (progress === 100) {
           console.log('update user level');
           this.userConceptService.updateUserLevel(Number(userId), Number(conceptNodeId), level);
         }
-
+        */
         return progress;
       }
     };
@@ -254,6 +254,51 @@ export class ContentService {
     };
   }
 
+  async questionContentElementDone(
+    contentElementId: number,
+    conceptNodeId: number,
+    level: number,
+    userId: number,
+  ): Promise<boolean> {
+    //get element done status
+    let questionDone =
+    await this.prisma.userContentElementProgress.findFirst({
+      where: {
+        contentElementId: contentElementId,
+        userId: userId,
+      },
+      select: {
+        id: true,
+        markedAsDone: true,
+      },
+    });
+
+    if (!questionDone) {
+      //create new entry in userContentProgress if not exists and set markedAsDone to true
+      questionDone = await this.prisma.userContentElementProgress.create({
+        data: {
+          markedAsDone: true,
+          markedAsQuestion: false,
+          contentElementId: contentElementId,
+          userId: userId,
+        },
+      });
+    }
+    else if (!questionDone.markedAsDone) {
+      //set markedAsDone to true
+      await this.prisma.userContentElementProgress.update({
+        where: {
+          id: questionDone.id,
+        },
+        data: {
+          markedAsDone: true,
+        },
+      });
+    }
+    this.userConceptService.checkUserConceptLevelAward(userId, contentElementId, conceptNodeId, level);
+    return questionDone.markedAsDone;
+  }
+
   /**
    * Toggle Content Element Status
    *
@@ -265,8 +310,8 @@ export class ContentService {
   async toggleCheckmark(
     contentElementId: number,
     conceptNodeId: number,
-    level: number,
     userId: number,
+    level: number,
   ): Promise<boolean> {
     //get checkmark status
     let checkmarkStatus =
@@ -280,8 +325,7 @@ export class ContentService {
           markedAsDone: true,
         },
       });
-      //check if user has level award
-
+   
     if (!checkmarkStatus) {
       //create new entry in userContentProgress if not exists
       checkmarkStatus = await this.prisma.userContentElementProgress.create({
@@ -295,7 +339,7 @@ export class ContentService {
     }
 
     //toggle checkmark status
-    await this.prisma.userContentElementProgress.update({
+    checkmarkStatus = await this.prisma.userContentElementProgress.update({
       where: {
         id: checkmarkStatus.id,
       },
@@ -304,11 +348,14 @@ export class ContentService {
       },
     });
 
+    console.log("checkmarkStatus: " + checkmarkStatus.markedAsDone);
+
     if(checkmarkStatus.markedAsDone) {
+      console.log("Running toggleCheckmark with parameters: " + contentElementId + " " + conceptNodeId + " " + level + " " + userId)
       this.userConceptService.checkUserConceptLevelAward(userId, contentElementId, conceptNodeId, level);
     }
-
-    return !checkmarkStatus.markedAsDone;
+    
+    return checkmarkStatus.markedAsDone;
   }
 
   /**

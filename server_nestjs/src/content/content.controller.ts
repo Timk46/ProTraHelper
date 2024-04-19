@@ -78,8 +78,8 @@ export class ContentController {
     return this.contentService.toggleCheckmark(
       Number(contentElementId),
       Number(conceptNodeId),
-      Number(level),
       req.user.id,
+      Number(level),
     );
   }
 
