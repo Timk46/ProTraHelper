@@ -9,10 +9,6 @@ export interface discussionDTO {
     isSolved: boolean;
 }
 
-export interface discussionsDTO {
-    discussions: discussionDTO[];
-}
-
 export interface nodeNameDTO {
     name: string;
 }

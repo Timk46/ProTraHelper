@@ -9,6 +9,7 @@ export class DiscussionCreationService {
 
   /** Returns the anonymous user data for a given user id and discussion id
    * If no anonymous user is found, a dummy is returned
+   * Important: This function only detects the anonymous user if the user has already written a message in the discussion
    *
    * @param userId
    * @param discussionId
@@ -93,30 +94,49 @@ export class DiscussionCreationService {
    * Creates a new anonymous user in the database and returns it
    * @param userId
    * @param name
-   * @returns the anonymous user
+   * @returns AnonymousUserDTO
    */
-  async createAnonymousUser(userId: number, name: string) : Promise<AnonymousUserDTO> {
-    return await this.prisma.anonymousUser.create({
+  async createAnonymousUser(userId: number, name: string = '') : Promise<AnonymousUserDTO> {
+    const funnyWords: string[] = ["Narwal", "Quokka", "Axolotl", "Blobfisch", "Pangolin", "Wombat", "Kakapo", "Fuchskusu", "Gibbon", "Tapir", "Schnabeltier", "Alpaka", "Koala", "Lemming", "Marmelade", "Muffin", "Pudding", "Schokolade", "Zimtstern", "Donut", "Einhorn", "Flamingo", "Giraffe", "Hummel", "Igel", "Jaguar", "Kolibri", "Lama", "Maulwurf", "Nashorn", "Otter", "Pinguin", "Qualle", "Raubkatze", "Seestern", "Tukan", "Uhu", "Vogelspinne", "Yak", "Zebra"];
+    let nameString: string = name;
+    if (name === '') {
+      nameString = funnyWords[Math.floor(Math.random() * funnyWords.length)] + 's ' + funnyWords[Math.floor(Math.random() * funnyWords.length)];
+    }
+
+    const anonymousUser = await this.prisma.anonymousUser.create({
       data: {
         userId: userId,
-        anonymousName: name
+        anonymousName: nameString
       }
     });
+
+    if (!anonymousUser) {
+      throw new Error('Anonymous user not created');
+    }
+
+    return anonymousUser;
   }
 
-  /** Creates a new discussion message in the database and returns
+  /** Creates a new discussion message in the database. If the user is not yet an anonymous user, one is created.
    *
    * @param discussionData
-   * @returns a creation status if successful
+   * @param userId used to find or create the anonymous user
+   * @param isInitiator (optional) default is false
+   * @param isSolution (optional) default is false
+   * @returns message id
    */
-  async createDiscussionMessage(messageData: discussionMessageCreationDTO) : Promise<discussionMessageCreationDTO> {
+  async createDiscussionMessage(messageData: discussionMessageCreationDTO, userId: number, isInitiator: boolean = false, isSolution: boolean = false) : Promise<number> {
+    let anonymousUser = await this.getAnonymousUser(userId, messageData.discussionId);
+    if (anonymousUser.id === -1) {
+      anonymousUser = await this.createAnonymousUser(userId);
+    }
     const message = await this.prisma.message.create({
       data: {
         text: messageData.text,
-        authorId: messageData.authorId,
+        authorId: anonymousUser.id,
         discussionId: messageData.discussionId,
-        isInitiator: messageData.isInitiator,
-        isSolution: messageData.isSolution
+        isInitiator: isInitiator,
+        isSolution: isSolution
       }
     });
 
@@ -124,23 +144,27 @@ export class DiscussionCreationService {
       throw new Error('Message not created');
     }
 
-    return message;
+    return message.id;
   }
 
   /**
-   * Creates a new discussion in the database and returns it
+   * Creates a new discussion in the database, including the anonymous user author and the initial message
    * @param discussionData
-   * @returns the discussion
+   * @param userId
+   * @param isSolved (optional) default is false
+   * @returns the discussion id
    */
-  async createDiscussion(discussionData: discussionCreationDTO) : Promise<discussionCreationDTO> {
+  async createDiscussion(discussionData: discussionCreationDTO, userId: number, isSolved: boolean = false) : Promise<number> {
+    const anonymousUser = await this.createAnonymousUser(userId);
+
     const discussion = await this.prisma.discussion.create({
       data: {
         title: discussionData.title,
         conceptNodeId: discussionData.conceptNodeId,
         contentNodeId: discussionData.contentNodeId != -1 ? discussionData.contentNodeId : null,
         contentElementId: discussionData.contentElementId != -1 ? discussionData.contentElementId : null,
-        authorId: discussionData.authorId,
-        isSolved: discussionData.isSolved
+        authorId: anonymousUser.id,
+        isSolved: isSolved
       }
     });
 
@@ -148,15 +172,21 @@ export class DiscussionCreationService {
       throw new Error('Discussion not created');
     }
 
-    return {
-      id: discussion.id,
-      title: discussion.title,
-      conceptNodeId: discussion.conceptNodeId,
-      contentNodeId: discussion.contentNodeId,
-      contentElementId: discussion.contentElementId,
-      authorId: discussion.authorId,
-      isSolved: discussion.isSolved
-    };
+    const message = await this.prisma.message.create({
+      data: {
+        text: discussionData.text,
+        authorId: anonymousUser.id,
+        discussionId: discussion.id,
+        isInitiator: true,
+        isSolution: false
+      }
+    });
+
+    if (!message) {
+      throw new Error('Message not created');
+    }
+
+    return discussion.id;
   }
 
 }

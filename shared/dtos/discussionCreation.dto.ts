@@ -1,20 +1,14 @@
 export interface discussionCreationDTO {
-    id: number;
     title: string;
+    text: string;
     conceptNodeId: number;
     contentNodeId: number;
     contentElementId: number;
-    authorId: number;
-    isSolved: boolean;
 }
 
 export interface discussionMessageCreationDTO {
-    id: number;
     text: string;
-    authorId: number;
     discussionId: number;
-    isInitiator: boolean;
-    isSolution: boolean;
 }
 
 export interface discussionNodeNamesDTO {
