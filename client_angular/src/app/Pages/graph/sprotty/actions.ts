@@ -1,11 +1,26 @@
 import { Action } from "sprotty-protocol";
 import { SprottyConceptNode } from "./sprottyModels.interface";
 
-// these actions are handled in the model-source. 
+// these actions are handled in the model-source.
 // to use, the actionDispatcher.dispatch() function is called with the action as an argument
 // it needs to be injected into the class that calls it, for an example see the mouse-interactions.ts file
 // @inject has to be imported from inversify for this to work, not from angular/core!
 
+export interface TouchEventAction extends Action {
+    kind: typeof TouchEventAction.KIND;
+    touchEvent: TouchEvent;
+}
+
+export namespace TouchEventAction {
+    export const KIND = 'touchEvent';
+
+    export function create(touchEvent: TouchEvent): TouchEventAction {
+        return {
+            kind: KIND,
+            touchEvent: touchEvent
+        };
+    }
+}
 export interface CreateConceptAction extends Action {
     kind: typeof CreateConceptAction.KIND;
     parentId: string;
@@ -28,7 +43,7 @@ export interface DeleteConceptAction extends Action {
 }
 export namespace DeleteConceptAction {
     export const KIND = 'deleteConcept';
-    
+
     export function create(options: { conceptId: string }): DeleteConceptAction {
         return {
             kind: KIND,
@@ -45,7 +60,7 @@ export interface AwardLevelAction extends Action {
 
 export namespace AwardLevelAction {
     export const KIND = 'awardLevel';
-    
+
     export function create(options: { conceptId: string }): AwardLevelAction {
         return {
             kind: KIND,
@@ -62,7 +77,7 @@ export interface CreateEdgeAction extends Action {
 
 export namespace CreateEdgeAction {
     export const KIND = 'createEdge';
-    
+
     export function create(options: { conceptId: string, connectionType: string }): CreateEdgeAction {
         return {
             kind: KIND,
@@ -80,7 +95,7 @@ export interface MoveNodeAction extends Action {
 
 export namespace MoveNodeAction {
     export const KIND = 'moveNode';
-    
+
     export function create(options: { conceptId: string}): MoveNodeAction {
         return {
             kind: KIND,

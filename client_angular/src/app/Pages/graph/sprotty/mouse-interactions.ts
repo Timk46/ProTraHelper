@@ -12,10 +12,11 @@ export const NodeCreator = Symbol('NodeCreator');
 
 export class CustomMouseListener extends MouseListener {
     @inject(TYPES.IActionDispatcher) protected actionDispatcher!: IActionDispatcher;
-
+    // the last touch position is stored to calculate the panning distance
+    private lastTouchPosition: { x: number; y: number } | null = null;
     constructor(
-        @inject(TYPES.IContextMenuServiceProvider) protected readonly contextMenuService: IContextMenuServiceProvider,
-    @inject(TYPES.IContextMenuProviderRegistry) protected readonly menuProvider: ContextMenuProviderRegistry,
+      @inject(TYPES.IContextMenuServiceProvider) protected readonly contextMenuService: IContextMenuServiceProvider,
+      @inject(TYPES.IContextMenuProviderRegistry) protected readonly menuProvider: ContextMenuProviderRegistry,
     ){
         super();
     }
@@ -49,6 +50,50 @@ export class CustomMouseListener extends MouseListener {
         this.actionDispatcher.dispatch(SelectAction.create(options));
         return [];
     }
+
+    // Touch event handlers
+    touchStart(event: TouchEvent): void {
+      console.log('Touch start');
+      event.preventDefault();
+      const touch = event.touches[0];
+      const targetElement = document.elementFromPoint(touch.clientX, touch.clientY) as unknown as SModelElement;
+      if (!targetElement) return;
+      // Call any specific actions or create a new action if needed
+      console.log('Touch start on element', targetElement.id);
+      // Dispatch an action if necessary
+    }
+
+    touchMove(event: TouchEvent): void {
+      console.log('Touch move');
+      event.preventDefault();
+      if (this.lastTouchPosition && event.touches.length === 1) {
+          const touch = event.touches[0];
+          const dx = touch.clientX - this.lastTouchPosition.x;
+          const dy = touch.clientY - this.lastTouchPosition.y;
+          this.panGraph(dx, dy);
+          this.lastTouchPosition = { x: touch.clientX, y: touch.clientY };
+          console.log('Touch move', dx, dy);
+      }
+    }
+
+    touchEnd(event: TouchEvent): void {
+      event.preventDefault();
+      console.log('Touch end');
+      this.lastTouchPosition = null;
+    }
+
+    touchCancel(target: SModelElement, event: TouchEvent): (Action | Promise<Action>)[] {
+        // Handle touch cancel event, if needed
+        console.log('Touch cancel');
+        this.lastTouchPosition = null;
+        return [];
+    }
+
+     private panGraph(dx: number, dy: number): void {
+      // Implement graph panning here, typically adjusting the viewBox or a similar property of your SVG/graph rendering
+      console.log(`Graph panned by: dx=${dx}, dy=${dy}`);
+    }
+
 
 }
 
