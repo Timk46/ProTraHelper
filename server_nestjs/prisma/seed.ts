@@ -536,7 +536,7 @@ async function createFilesOFP() {
   createFile('Java_Variablen.pdf','89685233-4c76-4311-8e85-140d638192b0','OFP/Java_Variablen.pdf','PDF');
   createFile('Java_Variablen.mp4','4a250618-eec3-4ec9-864a-0e07d2b553d5','OFP/Java_Variablen.mp4','VIDEO');
   createFile('Java_Anweisungen_Ausdruecke.pdf','b29462eb-fdfa-41c2-8098-7931d3201f7c','OFP/Java_Anweisungen_Ausdruecke.pdf','PDF');
-  createFile('Java_Anwesungen_Ausdruecke.mp4','21c7cc0d-9687-4c34-96af-6d8d714eb54d','OFP/Java_Anwesungen_Ausdruecke.mp4','VIDEO');
+  createFile('Java_Anweisungen_Ausdruecke.mp4','21c7cc0d-9687-4c34-96af-6d8d714eb54d','OFP/Java_Anwesungen_Ausdruecke.mp4','VIDEO');
   createFile('Java_Anweisungen_Operatoren.pdf','e272fd46-2e10-4b71-ba54-2d9ce76e3369','OFP/Java_Anweisungen_Operatoren.pdf','PDF');
   createFile('Java_Anweisungen_Operatoren.mp4','440e4f75-5960-4f1c-b453-293c4f8e4484','OFP/Java_Anweisungen_Operatoren.mp4','VIDEO');
   createFile('Java_Anweisungen_Zuweisungen.pdf','e2815f41-b1cd-48f5-bb46-1d7403c8f7ba','OFP/Java_Anweisungen_Zuweisungen.pdf','PDF');
