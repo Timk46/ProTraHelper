@@ -1,4 +1,4 @@
-import { AnonymousUserDTO, discussionMessageCreationDTO } from '@DTOs/index';
+import { AnonymousUserDTO } from '@DTOs/index';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { TinymceComponent } from 'src/app/Pages/tinymce/tinymce.component';
 import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';

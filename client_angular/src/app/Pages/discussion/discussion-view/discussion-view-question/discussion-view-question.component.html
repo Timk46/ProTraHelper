@@ -16,8 +16,9 @@
             <p style="margin: 0 0 10px;">Verbundener Inhalt: {{conceptNodeName}} • {{discussionData.contentNodeName}}</p>
           </div>
         </div>
-        <!-- <p>{{messageData.messageText}}</p> -->
-        <div [innerHTML]="sanitizeContent(messageData.messageText)"></div>
+        <div>
+          <div style="max-height: 80vh; overflow: auto;" #messageText [innerHTML]="sanitizedContent"></div>
+        </div>
       </div>
       <br>
       <p>{{discussionData.commentCount}} {{discussionData.commentCount == 1 ? 'Kommentar' : 'Kommentare'}}</p>

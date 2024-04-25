@@ -1,5 +1,4 @@
-import { discussionMessageDTO } from '@DTOs/discussionMessage.dto';
-import { discussionDTO } from '@DTOs/discussion.dto';
+import { discussionMessageDTO, discussionDTO } from '@DTOs/index';
 import { Component, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DiscussionViewService } from 'src/app/Services/discussion/discussion-view.service';

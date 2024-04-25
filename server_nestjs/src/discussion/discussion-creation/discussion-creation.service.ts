@@ -1,9 +1,18 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
+import * as xss from 'xss';
 
 @Injectable()
 export class DiscussionCreationService {
+
+  // cross side script prevention filter options
+  xssFilterOptions = {
+    whiteList: {
+      ...xss.getDefaultWhiteList(),
+      pre: ['class'], //important for code highlighting
+    },
+  };
 
   constructor(private prisma: PrismaService) {}
 
@@ -130,9 +139,12 @@ export class DiscussionCreationService {
     if (anonymousUser.id === -1) {
       anonymousUser = await this.createAnonymousUser(userId);
     }
+    // xss protection
+    const sanitizedText = xss.filterXSS(messageData.text, this.xssFilterOptions);
+
     const message = await this.prisma.message.create({
       data: {
-        text: messageData.text,
+        text: sanitizedText,
         authorId: anonymousUser.id,
         discussionId: messageData.discussionId,
         isInitiator: isInitiator,
@@ -172,9 +184,13 @@ export class DiscussionCreationService {
       throw new Error('Discussion not created');
     }
 
+    // xss protection
+    console.log("DISCUSSION TEXT",discussionData.text);
+    const sanitizedText = xss.filterXSS(discussionData.text, this.xssFilterOptions);
+
     const message = await this.prisma.message.create({
       data: {
-        text: discussionData.text,
+        text: sanitizedText,
         authorId: anonymousUser.id,
         discussionId: discussion.id,
         isInitiator: true,
