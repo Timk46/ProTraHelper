@@ -36,7 +36,7 @@ export class CodeEditorComponent {
   changeLanguage(language: string | undefined): void {
     if (language === undefined) return;
     this.selectedLanguage = language;
-    console.log(language);
+    //console.log(language);
     this.editorOptions = {
       ...this.editorOptions,
       language: this.selectedLanguage,

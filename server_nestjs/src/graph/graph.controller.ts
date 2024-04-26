@@ -44,7 +44,7 @@ export class GraphController {
     @roles("ANY")
     @Get(':moduleId')
     async getModuleUserConceptGraph( @Req() req,
-    @Param('moduleId', ParseIntPipe) moduleId: number): 
+    @Param('moduleId', ParseIntPipe) moduleId: number):
     Promise<ConceptGraphDTO>{
         const userId = req.user.id;
         const graph: ConceptGraphDTO = await this.graphService.getConceptGraph(userId, moduleId);
@@ -58,6 +58,10 @@ export class GraphController {
      * @returns the new concept
      */
     // todo: add body for description and moduleGoals
+
+  // Aus sicherheitsgründen lieber vollständig auskommentiert, obwohl die Rolle korrekt gesetzt ist!
+
+  /*
     @roles("ADMIN")
     @Post('concept/:parentId/:name')
     async createConceptNode(@Param('parentId', ParseIntPipe) parentId:number, @Param('name') name: string): Promise<any> { // todo: there must be a better way than any
@@ -97,5 +101,5 @@ export class GraphController {
         console.log("in moveConcept controller: ", conceptId, parentId)
         await this.graphService.moveConceptNode(conceptId, parentId);
     }
-
+*/
 }

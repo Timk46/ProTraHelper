@@ -31,9 +31,9 @@ export class GraphDataService {
    * @returns The new concept node
    */
   createConcept(parentId: string, conceptName: string, description?: string, moduleGoals?: { moduleId: number, goal: number }[]) {
-    console.log("in graph-data.service. Trying to create concept: ", parentId, conceptName)
+    //console.log("in graph-data.service. Trying to create concept: ", parentId, conceptName)
     const x = this.http.post(environment.server + `/graph/concept/${parentId}/${conceptName}`, { description: description, moduleGoals: moduleGoals }).subscribe()
-    console.log("x: ", x)
+    //console.log("x: ", x)
     return x
   }
 
@@ -44,7 +44,7 @@ export class GraphDataService {
    * @throws Will throw an error if the concept node has children
    */
   deleteConcept(conceptId: number) {
-    console.log("trying to delete node with id: ", conceptId)
+    //console.log("trying to delete node with id: ", conceptId)
     return this.http.delete(environment.server + `/graph/concept/${conceptId}`)
   }
 
@@ -56,22 +56,22 @@ export class GraphDataService {
    * @returns The new edge
    */
   createEdge(parentId: number, prerequisiteId: number, successorId: number) {
-    console.log("in createEdge: ", parentId, prerequisiteId, successorId)
+    //console.log("in createEdge: ", parentId, prerequisiteId, successorId)
     return this.http.post(environment.server + `/graph/edge`, {parentId: parentId, prerequisiteId: prerequisiteId, successorId: successorId})
   }
 
   deleteEdge(edgeId: number) {
-    console.log("in deleteEdge: ", edgeId)
+    //console.log("in deleteEdge: ", edgeId)
     return this.http.delete(environment.server + `/graph/edge/${edgeId}`)
   }
 
   moveConceptNode(conceptId: number, parentId: number) {
-    console.log("in moveConcept: ", conceptId, parentId)
+    //console.log("in moveConcept: ", conceptId, parentId)
     return this.http.put(environment.server + `/graph/concept/${conceptId}/newParent/${parentId}`, {})
   }
 
   updateUserLevel(conceptId: number, level: number) {
-    console.log("in updateUserLevel: ", level)
+    //console.log("in updateUserLevel: ", level)
     return this.http.put(environment.server + `/user-concept/${conceptId}/level/${level}`, {})
   }
 

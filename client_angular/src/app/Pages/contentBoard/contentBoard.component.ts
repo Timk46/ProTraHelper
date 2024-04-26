@@ -146,13 +146,15 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     this.dataSource.sort = this.sort;
   }
 
+  // For Video und PDF
   onContentClick(content: ContentDTO, type: string[], event: MouseEvent) {
     event.stopPropagation(); // prevents any reaction from the expansion panel for clicks on video/pdf
 
     // Create Dialog Config https://material.angular.io/components/dialog/api#MatDialogConfig
     const dialogConfig = new MatDialogConfig();
 
-    // Communicate ContentDTO with all ContentElements of that ContentView to the Dialog/ContentViewComponent
+    dialogConfig.width = '70vw';
+    dialogConfig.maxHeight = '95vh';
     dialogConfig.data = {
       contentViewData: content,
       conceptNodeId: this.activeConceptNodeId,
@@ -170,6 +172,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     };
     //dialogConfig.maxHeight = "80vh";
     dialogConfig.width = 'auto';
+    dialogConfig.maxHeight = '95vh';
     let dialogRef;
     if (taskViewData.type == 'MC') {
       dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
@@ -192,7 +195,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
               // Update the progress value of the task
               if(score > prevScore) {
                 element.progress = score;
-              }             
+              }
               // Update the contentNode that is connected to the task
               if (score == 100 && prevScore != 100) {
                 this.contentsForActiveConceptNode.trainedBy.map((content) => {
@@ -240,7 +243,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
       case 'SC':
         return 'Single Choice';
       case 'FreeText':
-        return 'Frei Text';
+        return 'Freitext';
       case 'CodingQuestion':
         return 'Programmieraufgabe';
       default:

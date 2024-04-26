@@ -3,7 +3,7 @@ import { ToolbarService } from './Services/toolbar/toolbar.service';
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { globalRole } from '@DTOs/roles.enum';
+import { version } from '@DTOs/version';
 
 @Component({
   selector: 'app-root',
@@ -13,15 +13,17 @@ import { globalRole } from '@DTOs/roles.enum';
 export class AppComponent {
   userMail: string = "";
   userRole: string = "";
+  version: string = "";
   userIsLoggedIn: boolean = false;
   constructor
     (
       private userService: UserService,
       private router: Router,
       public dialog: MatDialog,
-      public toolbarService: ToolbarService
+      public toolbarService: ToolbarService,
     )
     {
+      this.version = version; // Client Version Number
       // Subscribe to the authentication observable
       this.userService.isAuthenticated$.subscribe((isAuthenticated) => {
         this.userIsLoggedIn = isAuthenticated;

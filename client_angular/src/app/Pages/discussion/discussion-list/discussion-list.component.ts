@@ -70,7 +70,7 @@ export class DiscussionListComponent implements OnChanges {
    */
   onNewDiscussion(){
     this.discussionDialogService.openContentSelection(this.activeConceptNodeId).then((result: number) => {
-      console.log("Want to refresh? result: " + result);
+      //console.log("Want to refresh? result: " + result);
       if (!isNaN(result)) {
         this.listDiscussions(this.filterData, true);
       }
@@ -83,7 +83,7 @@ export class DiscussionListComponent implements OnChanges {
    * @returns true if the given filter data is different from the current filter data
    */
   isDifferent(filterData: discussionFilterDTO): boolean {
-    console.log("checking differences...");
+    //console.log("checking differences...");
     return filterData.conceptNodeId != this.filterData.conceptNodeId ||
     filterData.contentNodeId != this.filterData.contentNodeId ||
     filterData.authorId != this.filterData.authorId ||

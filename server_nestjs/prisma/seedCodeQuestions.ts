@@ -30,7 +30,8 @@ interface excel_Codegeruest {
 export const seedCodeQuestions = async (user_id: number) => {
     await importProgrammingTasksFromExcel('programming-tasks/programmieraufgaben_JACK_SOSE23_WORKSHOP_WISE2324.xlsx', 'Automatisch Import aus Excel: JACK Aufgaben aus SoSe 23 + Workshopsaufgaben aus WiSe 23/24', user_id);
     await importProgrammingTasksFromExcel('programming-tasks/programmieraufgaben_bechtel.xlsx', 'Automatisch Import aus Excel: Aufgaben aus dem TutorKai-Einsatz in Schulen von Herrn Bechtel WiSe 23/24', user_id);
-    await importProgrammingTasksFromExcel('programming-tasks/programmieraufgaben_linden.xlsx', 'Automatisch Import aus Excel: ufgaben aus dem TutorKai-Einsatz in Schulen von Frau Linden WiSe 23/244', user_id);
+    await importProgrammingTasksFromExcel('programming-tasks/programmieraufgaben_linden.xlsx', 'Automatisch Import aus Excel: Aufgaben aus dem TutorKai-Einsatz in Schulen von Frau Linden WiSe 23/244', user_id);
+    await importProgrammingTasksFromExcel('programming-tasks/programmieraufgaben_basicTasks_genByGPT_sven.xlsx', 'Automatisch Import aus Excel: Einfache Aufgaben generiert von Sven Jacobs und einem GPT', user_id);
 }
 
 async function importProgrammingTasksFromExcel(filename: string, description: string, adminUserId: number = 1) {
@@ -41,6 +42,10 @@ async function importProgrammingTasksFromExcel(filename: string, description: st
     const tasks: excel_Aufgabe[] = utils.sheet_to_json(taskSheet);
     const codeSheet: WorkSheet = workbook.Sheets[workbook.SheetNames[1]];
     const codes: excel_Codegeruest[] = utils.sheet_to_json(codeSheet);
+    console.log("\n\n Aufgaben")
+    console.log(JSON.stringify(tasks));
+    console.log("\n\n Codegerueste:")
+    console.log(JSON.stringify(codes));
 
     for (const task of tasks) {
         const conceptNode = await prisma.conceptNode.findFirst({
@@ -91,6 +96,13 @@ async function importProgrammingTasksFromExcel(filename: string, description: st
                 },
             },
         });
+
+        if (newTask.name === "Python None")
+          {
+            console.log("Found a None task")
+            console.log(JSON.stringify(task))
+          }
+
 
         // connect it to itself
         await prisma.question.update({

@@ -16,14 +16,14 @@ export class GraphComponent implements OnInit {
 
   // create inversify container in di.config
   container = createContainer('concept-graph');
-  
+
   modelSource = this.container.get<ConceptGraphModelSource>(TYPES.ModelSource);
   modules: ModuleDTO[] = [];
 
   constructor(private graphData: GraphDataService, private moduleData: ModuleDataService) {
     this.moduleData.getUserModules().subscribe((modules) => {
       this.modules = modules;
-      console.log("User modules: ", this.modules);
+      //console.log("User modules: ", this.modules);
     }
     );
   }

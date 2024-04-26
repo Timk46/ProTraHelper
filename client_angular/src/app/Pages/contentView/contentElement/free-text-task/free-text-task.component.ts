@@ -20,7 +20,7 @@ interface TaskViewData {
   styleUrls: ['./free-text-task.component.scss']
 })
 export class FreeTextTaskComponent {
-  
+
   @Output() submitClicked = new EventEmitter<any>();
 
   editorConfig = { //tinyMCE
@@ -35,7 +35,7 @@ export class FreeTextTaskComponent {
   answerText: string = '';
   feedbackText: string = '';
   isSending: boolean = false;
-  
+
   taskViewData: TaskViewData;
 
 
@@ -65,7 +65,7 @@ export class FreeTextTaskComponent {
     this.isSending = true;
     this.answerText = text;
     this.feedbackText = '';
-    console.log(this.answerText);
+    //console.log(this.answerText);
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
       questionId: this.freeTextQuestion.questionId,

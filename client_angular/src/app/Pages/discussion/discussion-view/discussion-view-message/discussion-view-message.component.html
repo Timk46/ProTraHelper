@@ -6,7 +6,7 @@
 
     <div class="vertical-line"></div>
 
-    <div class="vertical-container" style="width: 100%;">
+    <div class="vertical-container">
       <div>
         <div class="question-row">
           <mat-icon>account_circle</mat-icon>
@@ -15,7 +15,9 @@
           <p>{{readableDate}}</p>
         </div>
         <!-- <p>{{ messageData.messageText }}</p> -->
-        <div [innerHTML]="sanitizeContent(messageData.messageText)"></div>
+        <div>
+          <div style="max-height: 80vh; overflow: auto;" [innerHTML]="sanitizedContent"></div>
+        </div>
       </div>
     </div>
   </div>

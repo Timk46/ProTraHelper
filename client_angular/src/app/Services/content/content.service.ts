@@ -59,6 +59,7 @@ export class ContentService {
     conceptNodeId: number,
     level: number
   ): Observable<boolean> {
+    console.log("toggleContentElementCompletionStatus: "+contentElementId+" "+conceptNodeId+" "+level);
     return this.http
       .get<boolean>(
         environment.server + `/content/toggleCheckmark/${contentElementId}/${conceptNodeId}/${level}`
@@ -95,7 +96,7 @@ export class ContentService {
    * @returns Date - the last opened date of the content node.
    */
   updateLastOpenedDate(contentNodeId: number): Observable<Date> {
-    console.log('ContentService: updateLastOpenedDate');
+    //console.log('ContentService: updateLastOpenedDate');
     return this.http.get<Date>(
       environment.server + `/content/lastOpenedDate/${contentNodeId}`
     );

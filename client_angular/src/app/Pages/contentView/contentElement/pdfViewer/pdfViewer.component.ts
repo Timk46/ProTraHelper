@@ -34,7 +34,7 @@ export class PdfViewerComponent implements OnInit {
 
     this.uniqueIdentifier = this.route.snapshot.params['uniqueIdentifier'];
     if (this.uniqueIdentifier != null) {
-      console.log('uniqueIdentifier: ' + this.uniqueIdentifier);
+      //console.log('uniqueIdentifier: ' + this.uniqueIdentifier);
       this.pdfFromUniqueIdentifier(this.uniqueIdentifier);
     }
     //Only needed if pdf is opened using iframe to hide toolbar

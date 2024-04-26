@@ -58,10 +58,10 @@ export class QuestionDataController {
             throw new Error('Invalid questionId or userId');
         }
         if (req.user.role == 'ADMIN' || req.user.role == 'TEACHER'){
-            return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(userId));
+            return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
         } else {
             return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
-        } 
+        }
     }
 
     /**
@@ -82,52 +82,57 @@ export class QuestionDataController {
         return this.questionDataService.createUserMCOptionSelected(data.userAnswerId, data.mcOptionId);
     }
 
-    /**
+
+    /** Aus Sicherheitsgründen erst mal entfernt.
      *
      * @param question
      * @returns the created Question
      */
+        /*
     @roles('ANY')
     @Post('/createQuestion')
     async createQuestion(@Body() question: QuestionDTO) {
       console.log('createQuestion question author', question.author);
         return this.questionDataService.createQuestion(question);
     }
-
+*/
     /**
      *
      * @param mcOptions
      * @returns the created MCOptions
      */
+    /** Aus Sicherheitsgründen erst mal entfernt.
     @roles('ANY')
     @Post('/createOptions')
     async createOptions(@Body() mcOptions: MCOptionDTO[]) {
         return await this.questionDataService.createOptions(mcOptions);
     }
-
+*/
 
     /**
      *
      * @param mcQuestion
      * @returns the created McQuestion
      */
+    /** Aus Sicherheitsgründen erst mal entfernt.
     @roles('ANY')
     @Post('/createMcQuestion')
     async createMcQuestion(@Body() mcQuestion: McQuestionDTO) {
         return await this.questionDataService.createMcQuestion(mcQuestion);
     }
-
+*/
 
     /**
      *
      * @param mcQuestionOption
      * @returns the created McQuestionOption
      */
+    /** Aus Sicherheitsgründen erst mal entfernt.
     @roles('ANY')
     @Post('/createMcQuestionOption')
     async createMcQuestionOption(@Body() mcQuestionOption: McQuestionOptionDTO) {
         return await this.questionDataService.createMcQuestionOption(mcQuestionOption);
     }
-
+*/
 
 }

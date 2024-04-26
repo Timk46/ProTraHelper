@@ -1,5 +1,4 @@
-import { discussionMessageDTO } from '@DTOs/discussionMessage.dto';
-import { discussionDTO } from '@DTOs/discussion.dto';
+import { discussionMessageDTO, discussionDTO } from '@DTOs/index';
 import { Component, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DiscussionViewService } from 'src/app/Services/discussion/discussion-view.service';
@@ -71,7 +70,7 @@ export class DiscussionViewComponent {
     this.subscriptions.push(pSub);
     // get messages
     const tsSub = this.discussionViewService.toggleStatus.subscribe(toggleStatus => {
-      console.log("got some toggle", toggleStatus);
+      //console.log("got some toggle", toggleStatus);
       this.messagesData.forEach(message => {
         if (message.messageId != toggleStatus.messageId) {
           message.isSolution = false;

@@ -1,7 +1,16 @@
 import { discussionDTO } from '@DTOs/discussion.dto';
 import { discussionMessageDTO } from '@DTOs/discussionMessage.dto';
-import { Component, Input, OnChanges } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import DOMPurify from 'dompurify';
+import Prism from 'prismjs';
+
+//prism languages
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-markup'; // For HTML
 
 @Component({
   selector: 'app-discussion-view-question',
@@ -11,6 +20,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 export class DiscussionViewQuestionComponent implements OnChanges{
 
   readableDate: string = 'dummy date';
+  sanitizedContent: SafeHtml = '';
 
   @Input() conceptNodeName: string = 'dummy concept';
 
@@ -38,19 +48,38 @@ export class DiscussionViewQuestionComponent implements OnChanges{
 
   constructor(private sanitizer: DomSanitizer) { }
 
-  ngOnChanges() {
+ /*  ngOnChanges() {
     if (this.discussionData.id != -1 && this.discussionData.createdAt != null && this.readableDate == 'dummy date'){
       this.readableDate = this.getDateDisplay(this.discussionData.createdAt);
+    }
+  } */
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['discussionData'] && changes['discussionData'].currentValue.id != -1 && changes['discussionData'].currentValue.createdAt != null && this.readableDate == 'dummy date'){
+      this.readableDate = this.getDateDisplay(changes['discussionData'].currentValue.createdAt);
+    }
+
+    if (changes['messageData'] && changes['messageData'].currentValue) {
+      let messageData = changes['messageData'].currentValue;
+      if (messageData.messageId != -1 && messageData.createdAt != null) {
+        this.readableDate = this.getDateDisplay(messageData.createdAt);
+        this.sanitizedContent =  this.prepareContent(messageData.messageText);
+      }
     }
   }
 
   /**
-   * Sanitizes the content of the message, trusting its content because it was generated ty the tinymce editor
+   * Prepares the content for display by highlighting code blocks and sanitizing the content
    * @param content
-   * @returns the sanitized content
+   * @returns SafeHtml
    */
-  sanitizeContent(content: string) {
-    return this.sanitizer.bypassSecurityTrustHtml(content);
+  prepareContent(content: string): SafeHtml {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = DOMPurify.sanitize(content);
+    tempDiv.querySelectorAll('code').forEach(codeElement => {
+      Prism.highlightElement(codeElement);
+    });
+    return this.sanitizer.bypassSecurityTrustHtml(tempDiv.innerHTML);
   }
 
   /**
@@ -68,5 +97,14 @@ export class DiscussionViewQuestionComponent implements OnChanges{
       return `${newDate.getDate()}.${newDate.getMonth() + 1}.${newDate.getFullYear()}`;
     }
   }
+
+  /* getLanguageFromContent(content: string): string | null{
+    const match = content.match(/<pre class="language-(.*?)">/);
+    if (match && Prism.languages[match[1]]) {
+      return match[1];
+    } else {
+      return null;
+    }
+  } */
 
 }

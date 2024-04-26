@@ -137,7 +137,7 @@ export class QuestionDataService {
      * @param fullData if true, the solution and expectations are returned
      * @returns the free text question
      */
-    async getFreeTextQuestion(questionId: number, fullData: boolean = false): Promise<freeTextQuestionDTO> {
+    async getFreeTextQuestion(questionId: number, fullData = false): Promise<freeTextQuestionDTO> {
       const question = await this.getQuestion(questionId);
       const freeTextQuestion = await this.prisma.freeTextQuestion.findFirst({
           where: {
@@ -382,7 +382,7 @@ export class QuestionDataService {
 
             const progress = userScore / question.score;
             let feedbackText = "";
-            let markedAsDone: boolean = false;
+            let markedAsDone = false;
             if(progress == 1) {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
                 //set contentElement as done
@@ -439,7 +439,7 @@ export class QuestionDataService {
             }
 
             let feedbackText = "";
-            let markedAsDone: boolean = false;
+            let markedAsDone = false;
             if(progress == 1) {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
                 console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNode + ' level: ' + question.level + ' userId: ' + userId)
@@ -495,7 +495,7 @@ export class QuestionDataService {
             }
 
             let feedbackText = "";
-            let markedAsDone: boolean = false;
+            let markedAsDone = false;
             if(progress == 1) {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
                 this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
@@ -534,7 +534,7 @@ export class QuestionDataService {
             console.log('generate feedback for freetext user answer');
 
             //TODO: generate a feedback text based on the user answer
-            let feedbackText: string = 'Du hast keine Antwort eingeben.';
+            let feedbackText = 'Du hast keine Antwort eingeben.';
             let userScore = 0;
             if (answerData.userFreetextAnswerRaw && answerData.userFreetextAnswerRaw != '') {
               await this.getFreeTextQuestion(answerData.questionId, true).then(async (questionData) => {
@@ -546,7 +546,7 @@ export class QuestionDataService {
             }
 
             const progress = userScore / question.score;
-            let markedAsDone: boolean = false;
+            let markedAsDone = false;
             console.log('progress: '+progress);
 
             if(progress == 1) {

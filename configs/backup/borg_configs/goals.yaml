@@ -1,15 +1,9 @@
 postgresql_databases:
         - name: production
-          hostname: 172.19.0.6
-          port: 5432
+          hostname: 172.17.0.1
+          port: 4000
           username: root
-          password: qzx5vQG9WQ2b35eZUWujPUhVb8xRr
-          pg_dump_command: docker exec postgres_vector pg_dump
-        - name: dev
-          hostname: 172.19.0.6
-          port: 5432
-          username: root
-          password: qzx5vQG9WQ2b35eZUWujPUhVb8xRr
+          password: zETrTkEYCwrkz4shz85jZZ7
           pg_dump_command: docker exec postgres_vector pg_dump
 
 repositories:

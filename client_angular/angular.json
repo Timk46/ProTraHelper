@@ -48,7 +48,8 @@
               "src/styles.scss",
               "src/styles/sprotty-styles.scss",
               "src/styles/highlightThemes/nord.css",
-              "node_modules/ngx-toastr/toastr.css"
+              "node_modules/ngx-toastr/toastr.css",
+              "node_modules/prismjs/themes/prism.css"
             ],
             "scripts": [
               "node_modules/markdown-it-footnote/dist/markdown-it-footnote.min.js",

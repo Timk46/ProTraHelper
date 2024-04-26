@@ -34,6 +34,8 @@ import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-gene
 // import { McqCreationModule } from './mcqcreation/mcqcreation.module'; CURRENTLY DISABLED
 // import { McqevaluationModule } from './mcqevaluation/mcqevaluation.module'; CURRENTLY DISABLED
 import { EventLogModule } from './EventLog/event-log.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { VersionInterceptor } from './common/interceptors/version.interceptor';
 
 @Module({
   imports: [
@@ -81,6 +83,10 @@ import { EventLogModule } from './EventLog/event-log.module';
     DiscussionViewService,
     DiscussionCreationService,
     CryptoService,
+    {// Intercept and add version number to all answers. We could add this to single components instead.
+      provide: APP_INTERCEPTOR,
+      useClass: VersionInterceptor,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard, // All Routes are protected by JWTGuard. Users only get Tokens by using CAS of the university

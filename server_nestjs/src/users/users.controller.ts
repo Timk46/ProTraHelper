@@ -13,6 +13,7 @@ export class UsersController {
  // currently all login logic is done in the auth.controller.ts and auth.service.ts with CAS
 
 
+ /** Aus Sicherheitsgründen erst mal entfernt. Kann hilfreich sein, wenn wir nachträglich viele Probanden mit einem einfachen Python Script hinzufügen wollen.
  @Public()
  @Post()
  createUser(
@@ -23,5 +24,6 @@ export class UsersController {
  ) {
    return this.usersService.createUser(email, firstName, lastName, password);
  }
+ */
 }
 

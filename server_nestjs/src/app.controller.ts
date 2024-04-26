@@ -3,12 +3,14 @@ import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { RolesGuard, roles } from './auth/roles.guard';
 import { Public } from './public.decorator';
+import { version } from '@DTOs/version';
 
 @UseGuards(RolesGuard) // This guard is used for all routes in this controller. So you have to use the roles decorator for every route
 @Controller()
 
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppService) {
+  }
 
   @roles("ANY") // ANY means all loggin in users. Our default (for all routes) jwt strategy will check if the user is logged in
   @Get("/testAuth/any")
@@ -38,5 +40,12 @@ export class AppController {
   @Get("/testAuth/admin")
   getAdmin(): string {
     return "Role admin  worked"
+  }
+
+  @Public() // This route is public and can be accessed without being logged in
+  @roles("NONE")
+  @Get("/healthcheck")
+  healthcheck(): string {
+    return "GOALS is up"
   }
 }

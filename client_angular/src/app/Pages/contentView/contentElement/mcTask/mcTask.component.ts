@@ -23,7 +23,7 @@ interface TaskViewData {
 })
 
 export class McTaskComponent implements OnInit {
-  
+
   @Output() submitClicked = new EventEmitter<any>();
 
   editorConfig = { //tinyMCE
@@ -87,7 +87,7 @@ export class McTaskComponent implements OnInit {
   selectedOptions : number[] = [];
 
   submitDisabled : boolean = false;
-
+  fullscore : number = 0;
   onSelectionChange(): void {
     for (const option of this.options) {
       if(this.selectedOptions.includes(option.id)) {
@@ -101,7 +101,7 @@ export class McTaskComponent implements OnInit {
 
   onSubmit() :void {
     //Create new submit
-    console.log('create submit for contentElementId: ' + this.taskViewData.contentElementId);
+    //console.log('create submit for contentElementId: ' + this.taskViewData.contentElementId);
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
       contentElementId: this.taskViewData.contentElementId,
@@ -123,8 +123,9 @@ export class McTaskComponent implements OnInit {
       //timeout for showing the feedback
       this.submitDisabled = true;
     }, 500);
-  
+
   }
+
 
   //Get data from dialog
   constructor(
@@ -132,6 +133,10 @@ export class McTaskComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private questionDataService: QuestionDataService) {
     this.taskViewData = data.taskViewData;
+  }
+
+  checkCorrect() {
+    return this.questionData.score === this.feedback.score;
   }
 
   ngOnInit() {
@@ -146,7 +151,7 @@ export class McTaskComponent implements OnInit {
 
         //Get the MC-Options of the question
         this.questionDataService.getMCOptions(this.mcQuestion.id).subscribe(data => {
-          console.log(this.mcQuestion.id);
+          //console.log(this.mcQuestion.id);
           this.options = data;
           this.options.sort(() => Math.random() - 0.5);
         });
@@ -154,9 +159,35 @@ export class McTaskComponent implements OnInit {
     });
   }
 
+  retry() {
+    this.submitDisabled = false;
+    this.feedback = {
+      id: -1,
+      userAnswerId: -1,
+      score: -1,
+      feedbackText: '',
+      elementDone: false,
+      progress: -1,
+    }
+    this.options.sort(() => Math.random() - 0.5);
+
+  }
+
+  getFeedbackColor() {
+
+    if (this.feedback.score === this.questionData.score) {
+      return '#a3be8c';
+    } else if (this.feedback.score >= this.questionData.score! * 0.5) {
+      return '#ffa500';
+    } else {
+      return '#ff0000';
+    }
+
+  }
+
   //Close the dialog
   onClose(): void {
-    console.log('element done: ' + this.feedback.elementDone);
+    //console.log('element done: ' + this.feedback.elementDone);
     this.dialogRef.close(this.feedback.elementDone);
   }
 

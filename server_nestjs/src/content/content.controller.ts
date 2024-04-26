@@ -1,12 +1,13 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Req, UseGuards} from '@nestjs/common';
 import { ContentService } from './content.service';
-import { ContentDTO, ContentsForConceptDTO } from '@Interfaces/index';
+import { ContentsForConceptDTO } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
 import { RolesGuard, roles } from '@/auth/roles.guard';
 
 @UseGuards(RolesGuard)
 @Controller('content')
+
 export class ContentController {
   constructor(private readonly contentService: ContentService) {}
 
@@ -23,7 +24,7 @@ export class ContentController {
   @roles('ANY')
   @Get('/byConceptNode/:conceptNodeId')
   async getContentByConceptNode(
-    @Param('conceptNodeId') conceptNodeId: number, 
+    @Param('conceptNodeId') conceptNodeId: number,
     @Req() req,
   ): Promise<ContentsForConceptDTO> {
     return this.contentService.getContentsByConceptNode(conceptNodeId, req.user.id);

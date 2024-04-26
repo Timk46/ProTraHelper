@@ -71,6 +71,8 @@ export class QuestionController {
    * @throws {NotFoundException} Throws an exception if a question with the provided ID is not found.
    * @returns {Promise<void>} A promise that resolves when the question is deleted, or rejects with an error.
    */
+
+  /** Aus Sicherheitsgründen erst mal entfernt.
   @Delete(':id')
   async remove(@Param('id') id: number): Promise<void> {
     const question = await this.questionService.findOne(id);
@@ -79,4 +81,5 @@ export class QuestionController {
     }
     await this.questionService.remove(id);
   }
+  */
 }
