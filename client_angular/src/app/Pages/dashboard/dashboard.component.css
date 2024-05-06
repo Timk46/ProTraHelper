@@ -17,7 +17,7 @@
 
 .content {
   margin: 16px;
-  margin-left: 32px;
+  /* margin-left: 32px; */
   padding:16px;
   contain: content;
   overflow-y: hide; /* Hide vertical scrollbar because we can already move content by clicking on whitespace */

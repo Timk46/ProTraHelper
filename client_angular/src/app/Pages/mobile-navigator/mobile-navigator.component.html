@@ -1,0 +1,33 @@
+<div class="navigation-container" *ngIf="loadingDone">
+  <mat-tab-group [selectedIndex]="openLayers.length - 1" (selectedTabChange)="onTabClick($event.index)" class="tab-container">
+    <mat-tab *ngFor="let item of openLayers" [label]="item.name">
+
+      <div class="table-container">
+        <mat-table [dataSource]="item.nodes">
+          <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+            <mat-cell class="cell" *matCellDef="let entry; let i = index" [ngClass]="{'selected': entry.databaseId == currentNodeId, 'first-cell': i === 0}">
+              <div *ngIf="i === 0 && !item.isRoot" class="cell-container">
+                <mat-icon>reply</mat-icon>
+                <span>Zurück ({{entry.name}})</span>
+              </div>
+              <div *ngIf="i !== 0 || item.isRoot" class="cell-container">
+                <mat-icon *ngIf="entry.childIds.length > 0">folder</mat-icon>
+                <span>{{entry.name}}</span>
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <mat-row *matRowDef="let row; let i = index; columns: ['name']" (click)="onTableRowClick(row, i, item.isRoot)"></mat-row>
+        </mat-table>
+      </div>
+
+    </mat-tab>
+  </mat-tab-group>
+
+  <div class="button-container">
+    <button mat-raised-button color="primary" (click)="changeActiveNode(currentNodeId)">Anzeigen: {{userGraphData.nodeMap[currentNodeId].name}}</button>
+  </div>
+
+</div>
+

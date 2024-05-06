@@ -13,5 +13,9 @@ export class DashboardComponent implements OnInit {
     title.setTitle('GOALS: Dashboard');
   }
 
+  get isMobile() {
+    return window.innerWidth < 768;
+  }
+
   ngOnInit() {}
 }
