@@ -47,6 +47,7 @@ export class FilesController {
    * @param {Response} response - The Express response object
    * @returns {StreamableFile} The StreamableFile for downloading
    */
+  @Public()
   @Get('download/:uniqueIdentifier')
   async downloadFile(
     @Param('uniqueIdentifier') uniqueIdentifier: string,

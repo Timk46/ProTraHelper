@@ -1,6 +1,11 @@
 <!--Show content based on node (Could be a Video(s) and/or PDF(s) and/or code, which can be executed-->
 <!--Idea: Put everything in Angular Material Expansion Panels to make the navigation easier-->
-<div class="center">
-  <ngx-extended-pdf-viewer [src]="pdfSrc" [zoom]="'page-fit'"> <!--ToDo: Customize Size-->
-  </ngx-extended-pdf-viewer>
+<div *ngIf="pdfSrc">
+  <div class="center">
+    <object [data]="pdfSrc" type="application/pdf" class="pdf-content">
+      <a [href]="pdfSrc" type="application/pdf" target="_self">
+        <p>Download PDF</p>
+      </a>
+    </object>
+  </div>
 </div>

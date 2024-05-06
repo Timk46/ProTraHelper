@@ -1,4 +1,5 @@
 <!-- Create a Card for each Content Element and display PDF, Video etc. depending on type-->
+<div class="center">
 <mat-card *ngFor="let contentElem of viewableElements " class="contentView-card">
 
   <!--Show Content Title, if it has any-->
@@ -25,8 +26,7 @@
     <!--PDF-->
     <div *ngIf="contentElem.type == 'PDF' && contentElem.file " class = "contentElement-Container">
       <!-- Our current PDF Component cant be initialized multiple times... using an iframe instead for now -->
-      <iframe *ngIf="pdfCount > 1" id="embedded" [src]="getPdfUrl(contentElem.file.uniqueIdentifier)" style="height: 60vh; width: 100pv"></iframe>
-      <app-pdfViewer *ngIf="pdfCount == 1" [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-pdfViewer>
+      <app-pdfViewer [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-pdfViewer>
     </div>
 
     <!--VIDEO-->
@@ -52,7 +52,6 @@
 
   <!-- Create Button for each Content Element to mark the Element as 'Completed'  -->
   <div class="progressButton-Container" >
-    <div class="progress-button">
       <button class="progress-button" (click)="onToggleCheckmark(contentElem.id)" mat-stroked-button [ngStyle]="applyCheckmarkStyles(contentElem.id)" >
         <mat-icon class="small-icon">check</mat-icon>
         <p class="button-text"> Ich habe diesen Inhalt verstanden.</p>
@@ -62,7 +61,6 @@
         <mat-icon class="small-icon">?</mat-icon>
         <p class="button-text"> Für später markieren.</p>
       </button>
-    </div>
   </div>
 
     <!--********** END: Show Content depending on type **********-->
@@ -71,6 +69,7 @@
 
 
 </mat-card>
+</div>
 <!--
   <h2>For Debugging the stringyfied ContentElements:</h2>
   <ul>
