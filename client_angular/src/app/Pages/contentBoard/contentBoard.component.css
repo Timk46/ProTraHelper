@@ -54,20 +54,22 @@ mat-icon {
 
 }
 @media screen and (max-width: 1000px) {
-  .content-view {
-    margin-left: 10px;
-  }
 
   .level-icon-container {
     display: flex;
     flex-direction: row;
   }
 
-   .mat-expansion-panel-header {
-    display: table-cell;
+  .mat-expansion-panel-header {
+    display: flex;
   }
+
   .mat-expansion-panel-description {
     font-size: 8px;
+  }
+
+  .mobile-button {
+    margin-bottom: 10px;
   }
 }
 

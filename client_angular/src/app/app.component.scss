@@ -34,6 +34,8 @@
   font-size: 10px; /* Reduzierte Schriftgröße */
   color: #434c5e;
   padding: 0 10px;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .left-content, .center-content, .right-content {
