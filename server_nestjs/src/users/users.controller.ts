@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   Req
 } from '@nestjs/common';
@@ -10,6 +11,17 @@ import { Public } from '@/public.decorator';
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
+
+  /**
+   * 
+   * @param req 
+   * @returns the total progress of the user
+   */
+  @Get(':totalProgress')
+  async getProgress(@Req() req: any) {
+    return this.usersService.getUserTotalProgress(req.user.id);
+  }
+
  // currently all login logic is done in the auth.controller.ts and auth.service.ts with CAS
 
 

@@ -54,6 +54,20 @@ export class AppComponent {
     });
   }
 
+  
+  showProgress() {
+    this.userService.getUserTotalProgress().subscribe(data => {
+      const userTotalProgress = data;
+      const dialogRef = this.dialog.open(ProgressComponent);
+      dialogRef.componentInstance.userTotalProgress = userTotalProgress;
+      dialogRef.afterClosed().subscribe(result => {
+      });
+    });
+    //console.log("User Total Progress: " + userTotalProgress);    
+    
+    
+  }
+  
 
   ngOnInit() {
     //this.toolbarService.show();
@@ -86,3 +100,12 @@ export class DatenschutzComponent {}
 })
 
 export class ContactComponent {}
+
+@Component({
+  selector: 'progressInfo',
+  templateUrl: './about/progress.html',
+})
+
+export class ProgressComponent {
+  userTotalProgress: number = -1;
+}
