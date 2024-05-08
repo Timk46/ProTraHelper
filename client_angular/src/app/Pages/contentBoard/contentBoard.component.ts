@@ -104,9 +104,6 @@ export class ContentBoardComponent implements OnInit, OnChanges {
   dataSource: MatTableDataSource<TaskViewData>;
 
   constructor(private router: Router, public dialog: MatDialog, private bps: BreakpointObserver) {
-
-
-
     this.dataSource = new MatTableDataSource<TaskViewData>();
     this.sort = new MatSort();
   }
@@ -117,19 +114,19 @@ export class ContentBoardComponent implements OnInit, OnChanges {
       Breakpoints.Tablet,
       Breakpoints.Web]).subscribe(result => {
         console.log("result what breakpoints to handle",result.breakpoints);
-        this.handleBreakpoints(result.breakpoints);
+        this.handleBreakpoints();
     });
   }
 
-  handleBreakpoints(breakpoints: { [key: string]: boolean }) {
+  handleBreakpoints() {
 
     if (this.bps.isMatched(Breakpoints.Handset)) {
         console.log('Handset');
-        this.updateDisplayedColumns(['type', 'progress', 'actions']);
+        this.updateDisplayedColumns(['name','type', 'progress', 'actions']);
     }
     else if (this.bps.isMatched(Breakpoints.Tablet)) {
       console.log('Tablet');
-        this.updateDisplayedColumns([ 'name', 'type', 'progress']);
+        this.updateDisplayedColumns(['id','name','type', 'progress', 'actions']);
     }
   }
    updateDisplayedColumns(columns: string[]) {

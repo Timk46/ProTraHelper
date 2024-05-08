@@ -20,14 +20,21 @@
         <button *ngIf="(isHandset$ | async) === false" class="content-view" [style.visibility]="hasContentElementType(content, 'VIDEO') ? 'visible' : 'hidden'" matTooltip="Zeigt alle Videos (z.B. Vorlesungsaufzeichungen) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['VIDEO'], $event)">Video</button>
       </mat-expansion-panel-header>
 
-      <div *ngIf="(isHandset$ | async) === true">
+      <div class="mobile-button" *ngIf="(isHandset$ | async) === true">
         <button class="content-view" [style.visibility]="hasContentElementType(content, 'PDF') ? 'visible' : 'hidden'" matTooltip="Zeigt alle PDF (z.B. Vorlesungsfolien) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['PDF'], $event)">PDF</button>
         <button class="content-view" [style.visibility]="hasContentElementType(content, 'VIDEO') ? 'visible' : 'hidden'" matTooltip="Zeigt alle Videos (z.B. Vorlesungsaufzeichungen) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['VIDEO'], $event)">Video</button>
       </div>
+      <mat-divider></mat-divider>
+      <div>
+        <p matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." style="margin-top: 10px;">Level-Fortschritt: </p>
+        <mat-progress-bar style="margin-bottom: 15px" matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." mode="determinate" [value]="content.progress">asdasd</mat-progress-bar>
+      </div>
+      <mat-divider></mat-divider>
       <mat-panel-description>
-        <p class="description">{{ content.description }}</p>
+        <p class="description">
+          {{ content.description }}
+          </p>
       </mat-panel-description>
-
       <!-- table with the content node details and elements -->
       <div class="content-container" *ngIf="hasContentElementType(content, 'QUESTION')">
         <h3>Fragenübersicht</h3>
