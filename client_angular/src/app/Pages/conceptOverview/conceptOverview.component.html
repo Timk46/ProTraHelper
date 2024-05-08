@@ -1,6 +1,6 @@
 <div *ngIf="activeConceptNode.databaseId != -1" class="content mat-elevation-z8">
   <div class="header">
-    <h1 matTooltip="Id: {{activeConceptNode.databaseId}}">{{activeConceptNode.name}}</h1>
+    <h1>{{activeConceptNode.name}}</h1>
     <div class="button-group">
       <button mat-button [ngClass]="{'active': activeTab === 'content'}" (click)="activeTab = 'content'">Bearbeiten</button>
       <button mat-button [ngClass]="{'active': activeTab === 'discussion'}" (click)="activeTab = 'discussion'">Diskutieren</button>
