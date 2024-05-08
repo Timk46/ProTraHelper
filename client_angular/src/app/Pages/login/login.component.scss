@@ -1,3 +1,4 @@
+
 .outer-container {
   display: flex;
   flex-direction: column;
@@ -6,42 +7,79 @@
   margin-top: 30px;
 }
 
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
 .logo-container img {
-  max-width: 350px; /* oder die gewünschte maximale Breite */
-  max-height: 350px; /* oder die gewünschte maximale Höhe */
-  //border-radius: 15px;
-  //box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .login-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   border-radius: 15px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  width: fit-content;
+  width: 90%;
   padding: 20px;
   background-color: #E5E9F0;
 }
 
 .main-div {
   display: flex;
+  flex-direction: column;
   align-items: center;
 }
 
-
-.logo-container {
-  margin-right: 1rem;
-}
-
 .video-container {
-  margin-top: 1rem;
   text-align: center;
-  max-width: 720px;
+  width: 100%;
 }
 
 video {
-  border-radius: 10px; // Fügt abgerundete Ecken hinzu
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); // Fügt einen Boxschatten hinzu
-  margin-top: 1rem; // Fügt einen oberen Rand hinzu
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
+}
+
+
+
+@media (min-width: 768px) {
+  .outer-container {
+    flex-direction: column;
+    justify-content: space-around;
+  }
+
+  .logo-container img {
+    max-width: 350px;
+    max-height: 350px;
+  }
+
+  .login-container {
+    width: auto;
+    flex-direction: row;
+  }
+
+  .main-div {
+    flex-direction: row;
+  }
+
+  .video-container {
+    max-width: 720px;
+  }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+  .logo-container img {
+    max-width: 50%;
+  }
 }

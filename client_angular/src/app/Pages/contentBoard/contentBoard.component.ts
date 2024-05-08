@@ -10,22 +10,12 @@ import {
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ContentViewComponent } from '../contentView/contentView.component';
-import { MatTab } from '@angular/material/tabs';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { ContentService } from 'src/app/Services/content/content.service';
-import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
-import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
-
-interface ContentViewData {
-  id: number;
-  name: string;
-  progress: any;
-  question: any;
-  action: ContentDTO;
-}
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { map, Observable } from 'rxjs';
 
 interface TaskViewData {
   contentNodeId: number;
@@ -107,15 +97,44 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     'Java BubbleSort',
     'Java UML to Java',
   ];
-
+  isHandset$: Observable<boolean> = this.bps.observe(Breakpoints.Handset)
+  .pipe(
+    map(result => result.matches)
+  );
   dataSource: MatTableDataSource<TaskViewData>;
 
-  constructor(private router: Router, public dialog: MatDialog) {
+  constructor(private router: Router, public dialog: MatDialog, private bps: BreakpointObserver) {
+
+
+
     this.dataSource = new MatTableDataSource<TaskViewData>();
     this.sort = new MatSort();
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.bps.observe([
+      Breakpoints.Handset,
+      Breakpoints.Tablet,
+      Breakpoints.Web]).subscribe(result => {
+        console.log("result what breakpoints to handle",result.breakpoints);
+        this.handleBreakpoints(result.breakpoints);
+    });
+  }
+
+  handleBreakpoints(breakpoints: { [key: string]: boolean }) {
+
+    if (this.bps.isMatched(Breakpoints.Handset)) {
+        console.log('Handset');
+        this.updateDisplayedColumns(['type', 'progress', 'actions']);
+    }
+    else if (this.bps.isMatched(Breakpoints.Tablet)) {
+      console.log('Tablet');
+        this.updateDisplayedColumns([ 'name', 'type', 'progress']);
+    }
+  }
+   updateDisplayedColumns(columns: string[]) {
+     this.displayedColumns = columns;
+  }
 
   ngOnChanges() {
     const data: TaskViewData[] = [];
