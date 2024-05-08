@@ -78,7 +78,6 @@ export class DiscussionVoteboxComponent {
     this.timeoutID = setTimeout(() => {
       const voteCreationData: discussionMessageVoteCreationDTO = {
         messageId: this.messageId,
-        userId: -1,
         voteStatus: this.voteData.userVoteStatus
       }
       this.discussionVoteService.createOrModifyVote(voteCreationData).subscribe();

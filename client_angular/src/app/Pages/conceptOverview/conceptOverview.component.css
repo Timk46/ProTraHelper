@@ -33,7 +33,7 @@
 .content {
   height: 20h;
   margin: 16px;
-  margin-left: 32px;
+  /* margin-left: 32px; */
   padding:16px;
 
   contain: content;

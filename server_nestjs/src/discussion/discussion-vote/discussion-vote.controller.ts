@@ -34,7 +34,10 @@ export class DiscussionVoteController {
   @Post('create')
   async createOrModifyVote(@Body() voteCreationData: discussionMessageVoteCreationDTO, @Req() req): Promise<discussionMessageVoteCreationDTO> {
     debug && console.log('DiscussionVoteController: createOrModifyVote')
-    return this.voteService.createOrModifyVote(voteCreationData, req.user.id);
+    if (isNaN(req.user.id)) {
+      throw new Error('Invalid user id');
+    }
+    return this.voteService.createOrModifyVote(voteCreationData, Number(req.user.id));
   }
 
 }

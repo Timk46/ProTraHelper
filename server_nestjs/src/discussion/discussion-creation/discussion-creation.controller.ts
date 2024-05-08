@@ -34,12 +34,12 @@ export class DiscussionCreationController {
    */
   @roles('ANY')
   @Get('anonymousUserByMessageId/:userId/:messageId')
-  async getAnonymousUserByMessageId(@Param('userId') userId: number, @Param('messageId') messageId: number): Promise<AnonymousUserDTO> {
+  async getAnonymousUserByMessageId(@Req() req, @Param('messageId') messageId: number): Promise<AnonymousUserDTO> {
     debug && console.log('DiscussionCreationController: getAnonymousUserByMessageId')
-    if (isNaN(userId) || isNaN(messageId)) {
+    if (isNaN(req.user.id) || isNaN(messageId)) {
       throw new Error('Invalid user id or message id');
     }
-    return this.creationService.getAnonymousUserByMessageId(Number(userId), Number(messageId));
+    return this.creationService.getAnonymousUserByMessageId(Number(req.user.id), Number(messageId));
   }
 
   /**
@@ -47,9 +47,9 @@ export class DiscussionCreationController {
    * @param data
    * @returns
    */
-  @roles('ANY')
+  @roles('ADMIN')
   @Post('anonymousUser/create')
-  async createAnonymousUser(@Body() data: { name: string }, @Req() req): Promise<AnonymousUserDTO> {
+  async createAnonymousUser(@Req() req, @Body() data: { name: string }): Promise<AnonymousUserDTO> {
     debug && console.log('DiscussionCreationController: createAnonymousUser')
     if (isNaN(req.user.id)) {
       throw new Error('Invalid user id');
@@ -60,25 +60,31 @@ export class DiscussionCreationController {
   /**
    * Creates a new discussion in the database and returns it
    * @param discussionData
-   * @returns the discussion
+   * @returns discussion id
    */
   @roles('ANY')
   @Post('create')
-  async createDiscussion(@Body() discussionData: discussionCreationDTO): Promise<discussionCreationDTO> {
+  async createDiscussion(@Req() req, @Body() discussionData: discussionCreationDTO): Promise<number> {
     debug && console.log('DiscussionCreationController: createDiscussion');
-    return this.creationService.createDiscussion(discussionData);
+    if (isNaN(req.user.id)) {
+      throw new Error('Invalid user id');
+    }
+    return this.creationService.createDiscussion(discussionData, Number(req.user.id));
   }
 
   /** Creates a new message in the database and returns
    *
    * @param messageData
-   * @returns a creation status if successful
+   * @returns message number
    */
   @roles('ANY')
   @Post('messages/create')
-  async createDiscussionMessage(@Body() messageData: discussionMessageCreationDTO): Promise<discussionMessageCreationDTO> {
+  async createDiscussionMessage(@Req() req, @Body() messageData: discussionMessageCreationDTO): Promise<number> {
     debug && console.log('DiscussionCreationController: createMessage')
-    return this.creationService.createDiscussionMessage(messageData);
+    if (isNaN(req.user.id)) {
+      throw new Error('Invalid user id');
+    }
+    return this.creationService.createDiscussionMessage(messageData, Number(req.user.id));
   }
 
   /**

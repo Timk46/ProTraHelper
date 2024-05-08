@@ -1,4 +1,4 @@
-import { AnonymousUserDTO, discussionMessageCreationDTO } from '@DTOs/index';
+import { AnonymousUserDTO } from '@DTOs/index';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { TinymceComponent } from 'src/app/Pages/tinymce/tinymce.component';
 import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
@@ -48,54 +48,11 @@ export class DiscussionViewCreateComponent {
     if (text && text != '') {
       // check if the discussion id is present
       if (this.discussionId != -1) {
-        this.creationService.getAnonymousUser(this.discussionId).subscribe(anonymousUser => {
-          //console.log(anonymousUser);
-          // check if user has answered so far
-          if (anonymousUser.id != -1){
-            this.anonymousUser = anonymousUser;
-
-            // wrap the comment in a messageDTO and send it to the backend
-            const message: discussionMessageCreationDTO = {
-              id: -1,
-              text: text,
-              authorId: this.anonymousUser.id,
-              discussionId: this.discussionId,
-              isInitiator: false,
-              isSolution: false
-            }
-            this.creationService.createDiscussionMessage(message).subscribe(creationResult => {
-              //console.log(creationResult);
-              this.expanded = false;
-              // refresh the messages by telling the parent 'discussion-page' component to do so
-              this.refreshMessages.emit();
-              editor.setContent('');
-            });
-
-            // if no anonymous user was found
-          } else {
-            this.creationService.createAnonymousUser().subscribe(creationResult => {
-              //console.log(creationResult);
-              this.anonymousUser = creationResult;
-
-              // wrap the comment in a messageDTO and send it to the backend
-              const message: discussionMessageCreationDTO = {
-                id: -1,
-                text: text,
-                authorId: this.anonymousUser.id,
-                discussionId: this.discussionId,
-                isInitiator: false,
-                isSolution: false
-              }
-              this.creationService.createDiscussionMessage(message).subscribe(creationResult => {
-                //console.log(creationResult);
-                this.expanded = false;
-                // refresh the messages by telling the parent 'discussion-page' component to do so
-                this.refreshMessages.emit();
-                editor.setContent('');
-              });
-            });
-          }
-
+        this.creationService.createDiscussionMessage({text: text, discussionId: this.discussionId}).subscribe(messageId => {
+          this.expanded = false;
+          // refresh the messages by telling the parent 'discussion-page' component to do so
+          this.refreshMessages.emit();
+          editor.setContent('');
         });
       } else {
         console.log('Error. No discussion id');

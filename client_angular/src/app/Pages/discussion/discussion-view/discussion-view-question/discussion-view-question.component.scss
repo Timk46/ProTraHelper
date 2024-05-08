@@ -21,7 +21,7 @@
 }
 
 .vertical-container {
-  width: 100%;
+  width: calc(100% - 60px);
   min-height: 100px;
   padding-right: 10px;
   display: flex;

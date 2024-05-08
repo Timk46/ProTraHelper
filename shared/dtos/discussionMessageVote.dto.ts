@@ -6,6 +6,5 @@ export interface discussionMessageVoteDTO {
 
 export interface discussionMessageVoteCreationDTO {
     messageId: number;
-    userId: number;
     voteStatus: number;
 }

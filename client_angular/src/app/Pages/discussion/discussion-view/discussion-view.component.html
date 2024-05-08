@@ -13,15 +13,15 @@
     <div class="content mat-elevation-z8">
       <h1>Antworten</h1>
       <!-- <app-discussion-view-message *ngFor="let message of messagesData" [messageData]="message" [userIsAuthor]="userId == initiatorMessage.authorId"></app-discussion-view-message> -->
-      <table mat-table [dataSource]="messagesData" matSort (matSortChange)="onSort($event)" style="visibility: hidden;">
+      <table mat-table [dataSource]="messagesData" matSort (matSortChange)="onSort($event)" style="visibility: hidden; table-layout: fixed; width: 100%;">
         <ng-container matColumnDef="message">
           <!-- <th style="visibility: visible;" mat-header-cell *matHeaderCellDef mat-sort-header> Message </th> -->
           <th mat-header-cell *matHeaderCellDef mat-sort-header class="sortColumn" style="visibility: visible;"> Sortiert nach: {{sortingText}} </th>
-          <td mat-cell *matCellDef="let message" style="padding: 0;"> 
+          <td mat-cell *matCellDef="let message" style="padding: 0;">
             <app-discussion-view-message style="visibility: visible;" [messageData]="message" [userIsAuthor]="userId == initiatorMessage.authorId"></app-discussion-view-message>
           </td>
         </ng-container>
-    
+
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
       </table>
