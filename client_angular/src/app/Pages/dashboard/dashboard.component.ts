@@ -12,6 +12,12 @@ export class DashboardComponent implements OnInit {
   constructor(public toolbarService: ToolbarService, public sSS: ScreenSizeService, private title:Title) {
     toolbarService.show();
     title.setTitle('GOALS: Dashboard');
+    sSS.isHandset.subscribe((result) => {
+      console.log('HANDSET', result);
+    });
+    sSS.isWeb.subscribe((result) => {
+      console.log('WEB', result);
+    });
   }
 
   get isMobile() {

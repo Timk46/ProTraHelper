@@ -1,12 +1,17 @@
-<div appDraggableHeight class="content graph mat-elevation-z8" *ngIf="!sSS.isHandset$">
+<div appDraggableHeight class="content graph mat-elevation-z8" *ngIf="(sSS.isLandscape | async)">
   <app-graph></app-graph>
   <div class="resize-handle">
     <mat-icon aria-hidden="false" aria-label="Example drag handle icon" style="transform: scale(2); color: black;">drag_handle</mat-icon>
   </div>
 </div>
-<div class="content graph mat-elevation-z8" *ngIf="sSS.isHandset$">
+<div class="content graph mat-elevation-z8" *ngIf="!(sSS.isLandscape | async)">
   <app-mobile-navigator></app-mobile-navigator>
 </div>
+<div *ngIf="(sSS.isHandset | async)">You are on a handset device.</div>
+<div *ngIf="(sSS.isWeb | async)">You are on a web device.</div>
+<div *ngIf="(sSS.isTablet | async)">You are on a tablet device.</div>
+<div *ngIf="(sSS.isLandscape | async)">You are in landscape.</div>
+<div *ngIf="!(sSS.isLandscape | async)">You are in portrait.</div>
 <app-conceptOverview></app-conceptOverview>
 
 
