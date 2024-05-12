@@ -8,7 +8,8 @@
   <button mat-button [ngClass]="{'active': activeTab === 'discussion'}" (click)="activeTab = 'discussion'">Diskutieren</button>
 </div>
   <div class="header">
-    <h1>{{activeConceptNode.name}}</h1>
+    <h1 *ngIf="sSS.isLandscape | async" matTooltip="Id: {{activeConceptNode.databaseId}}">{{activeConceptNode.name}}</h1>
+    <h1 *ngIf="!(sSS.isLandscape | async)">{{activeConceptNode.name}}</h1>
     <div *ngIf="(isHandset$ | async) === false" class="button-group">
       <button mat-button [ngClass]="{'active': activeTab === 'content'}" (click)="activeTab = 'content'">Bearbeiten</button>
       <button mat-button [ngClass]="{'active': activeTab === 'discussion'}" (click)="activeTab = 'discussion'">Diskutieren</button>

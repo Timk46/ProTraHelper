@@ -6,6 +6,7 @@ import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
 import { ContentsForConceptDTO } from '@DTOs/content.dto';
 import { ContentService } from 'src/app/Services/content/content.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 
 @Component({
   selector: 'app-conceptOverview',
@@ -42,7 +43,7 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
   };
 
 
-  constructor(private contentService: ContentService, private bps: BreakpointObserver) {
+  constructor(private contentService: ContentService, private bps: BreakpointObserver, public sSS: ScreenSizeService) {
       // subscribe to activeConceptNode changes in the graph and update the activeConceptNode and contentsForActiveConceptNode accordingly
       this.activeConceptNodeSubscription = this.graphCommunicationService.currentActiveNode.subscribe((activeConceptNode) => {
       if (activeConceptNode.databaseId > 0) { // dummy node is 0 - only update if a real node is selected
