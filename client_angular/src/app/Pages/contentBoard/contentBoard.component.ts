@@ -15,7 +15,8 @@ import { MatSort } from '@angular/material/sort';
 import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { map, Observable } from 'rxjs';
+import { firstValueFrom, map, Observable } from 'rxjs';
+import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 
 interface TaskViewData {
   contentNodeId: number;
@@ -103,7 +104,7 @@ export class ContentBoardComponent implements OnInit, OnChanges {
   );
   dataSource: MatTableDataSource<TaskViewData>;
 
-  constructor(private router: Router, public dialog: MatDialog, private bps: BreakpointObserver) {
+  constructor(private router: Router, public dialog: MatDialog, private bps: BreakpointObserver, public sSS: ScreenSizeService) {
     this.dataSource = new MatTableDataSource<TaskViewData>();
     this.sort = new MatSort();
   }
@@ -163,14 +164,16 @@ export class ContentBoardComponent implements OnInit, OnChanges {
   }
 
   // For Video und PDF
-  onContentClick(content: ContentDTO, type: string[], event: MouseEvent) {
+  async onContentClick(content: ContentDTO, type: string[], event: MouseEvent) {
     event.stopPropagation(); // prevents any reaction from the expansion panel for clicks on video/pdf
 
     // Create Dialog Config https://material.angular.io/components/dialog/api#MatDialogConfig
     const dialogConfig = new MatDialogConfig();
 
-    dialogConfig.width = '70vw';
-    dialogConfig.maxHeight = '95vh';
+    const isLandscape = await firstValueFrom(this.sSS.isLandscape);
+
+    dialogConfig.width = isLandscape ? '70vw' : '90%';
+    dialogConfig.maxHeight = isLandscape ? '95vh' : '80vh';
     dialogConfig.data = {
       contentViewData: content,
       conceptNodeId: this.activeConceptNodeId,

@@ -4,14 +4,15 @@ import { MatDialog } from '@angular/material/dialog';
 import { DiscussionCreationComponent } from 'src/app/Pages/discussion/discussion-creation/discussion-creation.component';
 import { DiscussionPrecreationComponent } from 'src/app/Pages/discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
 import { DiscussionListService } from './discussion-list.service';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
+import { ScreenSizeService } from '../mobile/screen-size.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DiscussionDialogService {
 
-  constructor(private dialog: MatDialog, private listService: DiscussionListService) { }
+  constructor(public sSS: ScreenSizeService , private dialog: MatDialog, private listService: DiscussionListService) { }
 
   /**
    * Opens the discussion creation dialog. The dialog is used to choose a content node for the discussion.
@@ -23,22 +24,25 @@ export class DiscussionDialogService {
   async openContentSelection(conceptNode: number): Promise<number> {
     return new Promise<number>((resolve, reject) => {
       this.listService.getFilterContentNodes(conceptNode).subscribe(contentNodes => {
-        const dialogRef = this.dialog.open(DiscussionPrecreationComponent, {
-          width: '40%',
-          data: contentNodes
-        });
+        const landsub = this.sSS.isLandscape.subscribe(isLandscape => {
+          const dialogRef = this.dialog.open(DiscussionPrecreationComponent, {
+            width: isLandscape ? '40vw' : '80%',
+            data: contentNodes
+          });
 
-        dialogRef.afterClosed().subscribe((result: discussionFilterContentNodeDTO) => {
-          if (result) {
-            //console.log("created discussion id: ");
-            //console.log(result);
-            this.openDiscussionCreation(conceptNode, result.id, -1).then((result: number) => {
-              resolve(result);
-            });
-          } else {
-            reject("No result"); // Reject the promise with an error message
-          }
+          dialogRef.afterClosed().subscribe((result: discussionFilterContentNodeDTO) => {
+            if (result) {
+              //console.log("created discussion id: ");
+              //console.log(result);
+              this.openDiscussionCreation(conceptNode, result.id, -1).then((result: number) => {
+                resolve(result);
+              });
+            } else {
+              reject("No result"); // Reject the promise with an error message
+            }
+          });
         });
+        landsub.unsubscribe();
       });
     });
   }
@@ -48,9 +52,10 @@ export class DiscussionDialogService {
    * @param discussionData
    */
   async openDiscussionCreation(conceptNodeId: number, contentNodeId: number, contentElementId: number): Promise<number> {
+    const isLandscape = await firstValueFrom(this.sSS.isLandscape);
     return new Promise<number>((resolve, reject) => {
       const dialogRef = this.dialog.open(DiscussionCreationComponent, {
-        width: '50%',
+        width: isLandscape ? '50vw' : '80%',
         panelClass: 'discussionDialog',
         data: {
           id: -1,

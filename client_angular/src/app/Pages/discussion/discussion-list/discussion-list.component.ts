@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { discussionFilterDTO } from '@DTOs/discussionFilter.dto';
 import { DiscussionListService } from 'src/app/Services/discussion/discussion-list.service';
 import { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
+import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 
 @Component({
   selector: 'app-discussion-list',
@@ -25,7 +26,12 @@ export class DiscussionListComponent implements OnChanges {
     searchString: ""
   }
 
-  constructor(private discussionListService: DiscussionListService, public dialog : MatDialog, private discussionDialogService: DiscussionDialogService) { }
+  constructor(
+    private discussionListService: DiscussionListService,
+    public dialog : MatDialog,
+    private discussionDialogService: DiscussionDialogService,
+    public sSS: ScreenSizeService
+  ) { }
 
   //mache listDiscussions, wenn activeConceptNodeId sich ändert
   ngOnChanges() {

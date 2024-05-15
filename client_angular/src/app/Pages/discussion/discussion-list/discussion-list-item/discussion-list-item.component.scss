@@ -1,6 +1,7 @@
 .question-box {
   height: 150px;
   max-height: 70vh;
+  width: 100%;
  /*  padding-left:14px; /* please adjust when changing font size
   padding-top: 14px; /* please adjust when changing font size
  */
@@ -21,6 +22,7 @@
 .question-row {
   display: flex;
   gap: 10px;
+  width: 100%;
 }
 
 .padding-box {
@@ -38,4 +40,12 @@
   flex-direction: column; /* Anordnung der Elemente vertikal */
   justify-content: space-between;
   padding-top: 14px;
+  width: calc(100% - 60px); /* 2x 10px gap + 40px vote area */
+}
+
+.nowrap-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
