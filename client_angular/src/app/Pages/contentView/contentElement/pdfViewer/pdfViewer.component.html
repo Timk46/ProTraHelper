@@ -2,8 +2,12 @@
 <!--Idea: Put everything in Angular Material Expansion Panels to make the navigation easier-->
 <div *ngIf="pdfSrc">
   <div class="center">
+    <a [href]="pdfSrc" type="application/pdf" target="_blank">
+      <p><i class=" inline-icon material-icons">download_for_offline</i>
+      Download PDF</p>
+    </a>
     <object [data]="pdfSrc" type="application/pdf" class="pdf-content">
-      <a [href]="pdfSrc" type="application/pdf" target="_self">
+      <a [href]="pdfSrc" type="application/pdf" target="_blank">
         <p>Download PDF</p>
       </a>
     </object>
