@@ -168,4 +168,12 @@ export class UserService {
       verticalPosition: 'top',
     });
   }
+
+  /**
+   * This function gets the total progress of the user.
+   * @returns { Observable<number> } The total progress of the user.
+   */
+  getUserTotalProgress(): Observable<number> {
+    return this.http.get<number>(environment.server + '/users/totalProgress');
+  }  
 }

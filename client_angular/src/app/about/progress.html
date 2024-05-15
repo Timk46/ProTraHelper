@@ -1,0 +1,9 @@
+<h2 mat-dialog-title>Prüfungsvorleistung</h2>
+<mat-dialog-content class="mat-typography">
+  <p>Für die Prüfungsvorleistung (Studienleistung) müssen 80% der Inhalte abgeschlossen sein. Der Fortschritt wird gewichtet nach dem Level der Inhalte ermittelt.</p>
+  <p>Ihr aktueller Fortschritt beträgt: <b>{{userTotalProgress | number:'1.2-2'}}%</b></p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Okay</button>
+<!--  <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Install</button>-->
+</mat-dialog-actions>

@@ -90,4 +90,55 @@ export class UsersService {
     });
     return result.globalRole as globalRole;
   }
+
+  async getUserTotalProgress(userId: number): Promise<number> {
+    console.log('userId: ' + userId);
+
+    //gehe alle contnet elements durch und schaue, ob sie abgeschlossen sind
+    let maxProgress = 0;
+    let userTotalProgress = 0;
+    const contentElements = await this.prisma.contentElement.findMany({
+      select: {
+        id: true,
+        type: true,
+        question: true,
+      },
+    });
+
+    const userContentElementsProgress = await this.prisma.userContentElementProgress.findMany({
+      where: {
+        userId: userId,
+      },
+      select: {
+        contentElementId: true,
+        markedAsDone: true,
+      },
+    });
+
+    console.log('User Content Elements Progress: ' + userContentElementsProgress);
+
+    for (const contentElement of contentElements) {
+      if(contentElement.type === 'QUESTION') {
+        maxProgress = maxProgress + contentElement.question.level;
+      }
+      else {
+        maxProgress = maxProgress + 1;
+      }
+      if(userContentElementsProgress.find((element) => element.contentElementId === contentElement.id && element.markedAsDone === true)) {
+        if(contentElement.type === 'QUESTION') {
+          userTotalProgress = userTotalProgress + contentElement.question.level;
+        }
+        else {
+          userTotalProgress = userTotalProgress + 1;
+        }
+      }
+    }
+
+    console.log('Max Progress: ' + maxProgress);
+    console.log('User Total Progress: ' + userTotalProgress);
+
+    const userPercentage = userTotalProgress / maxProgress * 100;
+    console.log('User Total Progress: ' + userPercentage);
+    return userPercentage;
+  }
 }
