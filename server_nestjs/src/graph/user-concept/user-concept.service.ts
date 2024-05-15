@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { userConceptEventType } from '@prisma/client';
+import e from 'express';
 
 @Injectable()
 export class UserConceptService {
@@ -78,13 +79,31 @@ export class UserConceptService {
     level: number,
   ): Promise<[boolean, number]> {
     let levelAward = false;
-    const userConcept = await this.prisma.userConcept.findFirst({
+    let userConcept = await this.prisma.userConcept.findFirst({
       where: {
         conceptNodeId: conceptNodeId,
         userId: userId,
       },
     });
-    if (userConcept) {
+    
+    if (!userConcept) {
+      userConcept = await this.prisma.userConcept.create({
+        data: {
+          concept: {
+            connect: {
+              id: conceptNodeId,
+            },
+          },
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+          expanded: false,
+          level: 0,
+        },
+      });
+    }
       if (userConcept.level < level) {
         const conceptNode = await this.prisma.conceptNode.findFirst({
           where: {
@@ -146,7 +165,6 @@ export class UserConceptService {
           }
         }
       }
-    }
 
     return [levelAward, level];
   }

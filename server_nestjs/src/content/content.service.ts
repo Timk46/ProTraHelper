@@ -300,6 +300,39 @@ export class ContentService {
   }
 
   /**
+   * Get Leaf Concepts For Element
+   *
+   * Retrieves the leaf concepts associated with a content element.
+   * @param {number} contentElementId The ID of the content element
+   * @returns {Promise<number[]>} A promise that resolves to an array of numbers.
+   *
+   */
+  async getLeafConceptsForElement(contentElementId: number): Promise<number[]> {
+    const conceptNodes = await this.prisma.conceptNode.findMany({
+      where: {
+        trainedBy: {
+          some: {
+            contentNode: {
+              ContentView: {
+                some: {
+                  contentElementId: contentElementId,
+                },
+              },
+            },
+          },
+        },
+        myChildren: {
+          none: {},
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+    return conceptNodes.map((concept) => concept.id as number);
+  }
+
+  /**
    * Toggle Content Element Status
    *
    * Toggles the completion status of a content element for a specific user.
@@ -350,9 +383,13 @@ export class ContentService {
 
     console.log("checkmarkStatus: " + checkmarkStatus.markedAsDone);
 
+    const concepts = await this.getLeafConceptsForElement(contentElementId);
+
     if(checkmarkStatus.markedAsDone) {
-      console.log("Running toggleCheckmark with parameters: " + contentElementId + " " + conceptNodeId + " " + level + " " + userId)
-      this.userConceptService.checkUserConceptLevelAward(userId, contentElementId, conceptNodeId, level);
+      for(const concept of concepts) {
+        console.log("Test: Running toggleCheckmark with parameters: " + contentElementId + " " + concept + " " + level + " " + userId)
+        await this.userConceptService.checkUserConceptLevelAward(userId, contentElementId, concept, level);
+      }
     }
     
     return checkmarkStatus.markedAsDone;
