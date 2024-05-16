@@ -1,8 +1,8 @@
 import { Container, ContainerModule } from 'inversify';
-import { configureModelElement, configureViewerOptions, loadDefaultModules, LocalModelSource, 
-    PolylineEdgeView, SCompartmentView, SCompartmentImpl, SEdgeImpl, SGraphImpl, SGraphView, SLabelImpl, SLabelView, 
+import { configureModelElement, configureViewerOptions, loadDefaultModules, LocalModelSource,
+    PolylineEdgeView, SCompartmentView, SCompartmentImpl, SEdgeImpl, SGraphImpl, SGraphView, SLabelImpl, SLabelView,
     SNodeImpl, TYPES, RectangularNode, expandFeature, nameFeature, SButtonImpl,
-    configureButtonHandler, SRoutingHandleImpl, SRoutingHandleView, SModelElementImpl, SPortImpl, ConsoleLogger, 
+    configureButtonHandler, SRoutingHandleImpl, SRoutingHandleView, SModelElementImpl, SPortImpl, ConsoleLogger,
     LogLevel, moveFeature, selectFeature, editFeature } from 'sprotty';
 import { ConceptNodeView, CustomExpandButtonView, LeafConceptView, MiniConceptView,} from './views';
 import { ConceptGraphModelSource } from './model-source';
@@ -14,6 +14,9 @@ import { SGraph as SGraphP, SModelIndex, SNode as SNodeP, Point} from 'sprotty-p
 import { CustomMouseListener } from './mouse-interactions';
 import { PopupModelProvider } from './popup';
 import { ClassContextMenuItemProvider, ClassContextMenuService } from './context-menu';
+import { ActionHandlerInitializer } from './actionHandler';
+import { TouchEventActionHandler } from './touchEventActionHandler';
+import {TYPESS} from './symbols';
 
 
 // This file creates an inversify container for the sprotty diagram.
@@ -21,7 +24,7 @@ export default (containerId: string) => {
     const elkFactory: ElkFactory = () => new ElkConstructor({
         algorithms: ['layered']
     });
-    
+
     const myModule = new ContainerModule((bind, unbind, isBound, rebind) => {
         bind(TYPES.ModelSource).to(ConceptGraphModelSource).inSingletonScope();
         rebind(TYPES.ILogger).to(ConsoleLogger).inSingletonScope();
@@ -30,10 +33,11 @@ export default (containerId: string) => {
         bind(ElkFactory).toConstantValue(elkFactory);
         rebind(ILayoutConfigurator).to(RandomGraphLayoutConfigurator);
 
+
         //popup (doesn't work)
         //bind(TYPES.IPopupModelProvider).to(PopupModelProvider);
 
-        // context menu 
+        // context menu
         //bind(TYPES.IContextMenuService).to(ClassContextMenuService);
         //bind(TYPES.IContextMenuItemProvider).to(ClassContextMenuItemProvider);
 
@@ -41,6 +45,9 @@ export default (containerId: string) => {
         bind(CustomMouseListener).toSelf().inSingletonScope();
         bind(TYPES.MouseListener).toService(CustomMouseListener);
 
+        //TOUCH HANDLING, BUT IF UNCOMMENTED, THE GRAPH WILL STOP SHOWING, BUT PANNING AND MOVING METHODS WORK (dont yet know how to use touch events in sprotty)
+        //bind(TYPES.IActionHandlerInitializer).to(ActionHandlerInitializer).inSingletonScope();
+        //bind(TYPESS.TouchEventActionHandler).to(TouchEventActionHandler).inSingletonScope();
 
         //drag and drop
         //bind(NodeCreator).toConstantValue(nodeCreator);
@@ -64,9 +71,9 @@ export default (containerId: string) => {
         configureModelElement(context, 'label:heading', SLabelImpl, SLabelView)
         configureModelElement(context, 'label:text', SLabelImpl, SLabelView)
         configureModelElement(context, 'comp', SCompartmentImpl, SCompartmentView)
-        
+
         //collapse expand button
-        configureModelElement(context, 'button:expand', SButtonImpl, CustomExpandButtonView); 
+        configureModelElement(context, 'button:expand', SButtonImpl, CustomExpandButtonView);
 
 
         configureViewerOptions(context, {
@@ -110,7 +117,7 @@ export class RandomGraphLayoutConfigurator extends DefaultLayoutConfigurator {
         if(snode.type === 'node:leaf-concept'){
             return {
                 'org.eclipse.elk.nodeSize.constraints': 'PORTS PORT_LABELS NODE_LABELS MINIMUM_SIZE',
-                'org.eclipse.elk.nodeSize.minimum': '(130, 40)', 
+                'org.eclipse.elk.nodeSize.minimum': '(130, 40)',
                 'org.eclipse.elk.nodeLabels.placement': 'INSIDE H_CENTER V_CENTER', // very important
                 'org.eclipse.elk.nodeLabels.padding': '[top=10, bottom=10, left=25, right=25]',
                 'org.eclipse.elk.spacing.edgeNode': '20', // space between node and edge

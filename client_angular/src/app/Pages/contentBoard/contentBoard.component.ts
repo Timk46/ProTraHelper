@@ -10,22 +10,13 @@ import {
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ContentViewComponent } from '../contentView/contentView.component';
-import { MatTab } from '@angular/material/tabs';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { ContentService } from 'src/app/Services/content/content.service';
-import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
-import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
-
-interface ContentViewData {
-  id: number;
-  name: string;
-  progress: any;
-  question: any;
-  action: ContentDTO;
-}
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { firstValueFrom, map, Observable } from 'rxjs';
+import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 
 interface TaskViewData {
   contentNodeId: number;
@@ -107,15 +98,41 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     'Java BubbleSort',
     'Java UML to Java',
   ];
-
+  isHandset$: Observable<boolean> = this.bps.observe(Breakpoints.Handset)
+  .pipe(
+    map(result => result.matches)
+  );
   dataSource: MatTableDataSource<TaskViewData>;
 
-  constructor(private router: Router, public dialog: MatDialog) {
+  constructor(private router: Router, public dialog: MatDialog, private bps: BreakpointObserver, public sSS: ScreenSizeService) {
     this.dataSource = new MatTableDataSource<TaskViewData>();
     this.sort = new MatSort();
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.bps.observe([
+      Breakpoints.Handset,
+      Breakpoints.Tablet,
+      Breakpoints.Web]).subscribe(result => {
+        console.log("result what breakpoints to handle",result.breakpoints);
+        this.handleBreakpoints();
+    });
+  }
+
+  handleBreakpoints() {
+
+    if (this.bps.isMatched(Breakpoints.Handset)) {
+        console.log('Handset');
+        this.updateDisplayedColumns(['name','type', 'progress', 'actions']);
+    }
+    else if (this.bps.isMatched(Breakpoints.Tablet)) {
+      console.log('Tablet');
+        this.updateDisplayedColumns(['id','name','type', 'progress', 'actions']);
+    }
+  }
+   updateDisplayedColumns(columns: string[]) {
+     this.displayedColumns = columns;
+  }
 
   ngOnChanges() {
     const data: TaskViewData[] = [];
@@ -147,14 +164,16 @@ export class ContentBoardComponent implements OnInit, OnChanges {
   }
 
   // For Video und PDF
-  onContentClick(content: ContentDTO, type: string[], event: MouseEvent) {
+  async onContentClick(content: ContentDTO, type: string[], event: MouseEvent) {
     event.stopPropagation(); // prevents any reaction from the expansion panel for clicks on video/pdf
 
     // Create Dialog Config https://material.angular.io/components/dialog/api#MatDialogConfig
     const dialogConfig = new MatDialogConfig();
 
-    dialogConfig.width = '70vw';
-    dialogConfig.maxHeight = '95vh';
+    const isLandscape = await firstValueFrom(this.sSS.isLandscape);
+
+    dialogConfig.width = isLandscape ? '70vw' : '90%';
+    dialogConfig.maxHeight = isLandscape ? '95vh' : '80vh';
     dialogConfig.data = {
       contentViewData: content,
       conceptNodeId: this.activeConceptNodeId,

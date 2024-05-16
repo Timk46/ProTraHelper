@@ -1,5 +1,6 @@
 import { discussionDTO } from '@DTOs/index';
 import { Component, Input, OnChanges } from '@angular/core';
+import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 
 @Component({
   selector: 'app-discussion-list-item',
@@ -20,6 +21,8 @@ export class DiscussionListItemComponent implements OnChanges {
     commentCount: 0,
     isSolved: false
   };
+
+  constructor(public sSS: ScreenSizeService) { }
 
   ngOnChanges() {
     if (this.questionData.id != -1 && this.questionData.createdAt != null && this.readableDate == 'dummy date'){

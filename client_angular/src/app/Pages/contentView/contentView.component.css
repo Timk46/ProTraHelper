@@ -1,9 +1,9 @@
-.contentView-Container{
+/* .contentView-Container{
   height: 100vh;
   width: 80vw;
   overflow: scroll;
   text-align: center;
-}
+} */
 
 .contentView-Title{
   display: inline-block;
@@ -48,9 +48,10 @@ p{
     border-radius: 5px;
     background-color: #fff;
     box-shadow: 0 0 5px #ccc;
-    width: 90%;
+    /* width: 90%; */
     overflow: hidden;
-    max-height: 95vh;
+    /* max-height: 95vh; */
+    width: calc(100% - 20px);
     text-align: center;
 }
 

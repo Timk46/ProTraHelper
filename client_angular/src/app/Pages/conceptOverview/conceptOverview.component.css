@@ -15,6 +15,7 @@
 }
 
 .button-group button.active {
+
   background-color: #3b4252;
   color: white;
 }
@@ -33,7 +34,7 @@
 .content {
   height: 20h;
   margin: 16px;
-  margin-left: 32px;
+  /* margin-left: 32px; */
   padding:16px;
 
   contain: content;
@@ -46,8 +47,34 @@
 
 .tab-content-container {
   margin: 5px;
-  padding: 10px;
   border-radius: 10px;
+  flex-direction: column;
+  justify-content: center;
 /*   background-color: #C0E0FC; */
   background-color: #eceff4;
+}
+
+@media screen and (orientation: portrait){
+  .tab-content-container {
+    padding: 0px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}
+
+@media screen and (orientation: landscape){
+  .tab-content-container {
+    padding: 10px;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .button-group {
+    margin-bottom: 10px;
+    justify-content: center;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
 }

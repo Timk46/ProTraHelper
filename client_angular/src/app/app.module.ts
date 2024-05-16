@@ -49,6 +49,7 @@ import { DescriptionDialogComponent } from './Pages/contentView/contentElement/m
 import { DraggableHeightDirective } from "./Directives/draggable-height.directive";
 import { ConfettiService } from "./Services/animations/confetti.service";
 import { VersionInterceptor } from "./Interceptors/version.interceptor";
+import { MobileNavigatorComponent } from './Pages/mobile-navigator/mobile-navigator.component';
 
 
 
@@ -88,6 +89,7 @@ import { VersionInterceptor } from "./Interceptors/version.interceptor";
     ContactComponent,
     ImpressumComponent,
     DatenschutzComponent,
+    MobileNavigatorComponent,
     ProgressComponent,
   ],
   imports: [
