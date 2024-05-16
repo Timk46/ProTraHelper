@@ -6,7 +6,7 @@
 }
 
 .list-container {
-    display: inline-block;
+    display: inline flow-root list-item;
     height: auto;
     width: auto;
   }
@@ -42,7 +42,7 @@
   }
 
   .content {
-    height: 20h;
+    height: auto;
     width: auto;
     margin: 16px;
     padding: 16px;
@@ -67,3 +67,35 @@
   .mat-list-option {
     margin-bottom: 10px;
   }
+
+
+  .mdc-list-item__content {
+    margin: 5px;
+  }
+
+
+  @media screen and (max-width: 600px) {
+    mat-selection-list {
+      display: inline flow-root list-item;
+    }
+
+    .mdc-list-item.mdc-list-item--with-one-line {
+      height: fit-content;
+    }
+
+    .questionSpan {
+      font-size: 12px;
+      padding: 5px;
+    }
+
+    .question-text {
+      font-size: 14px;
+    }
+
+    .max-points {
+      margin-left: 4px;
+      font-size: 13px;
+    }
+
+}
+

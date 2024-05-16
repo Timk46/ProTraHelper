@@ -3,6 +3,7 @@ import {
   Component,
   Input,
   OnChanges,
+  OnDestroy,
   OnInit,
   SimpleChanges,
   ViewChild,
@@ -15,7 +16,7 @@ import { MatSort } from '@angular/material/sort';
 import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { firstValueFrom, map, Observable } from 'rxjs';
+import { firstValueFrom, map, Observable, Subject, takeUntil } from 'rxjs';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 
 interface TaskViewData {
@@ -34,7 +35,7 @@ interface TaskViewData {
   templateUrl: './contentBoard.component.html',
   styleUrls: ['./contentBoard.component.css'],
 })
-export class ContentBoardComponent implements OnInit, OnChanges {
+export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   @Input() activeConceptNodeId: any; //needed for the discussion creation dialog
 
   @Input() contentsForActiveConceptNode: ContentsForConceptDTO = {
@@ -98,38 +99,28 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     'Java BubbleSort',
     'Java UML to Java',
   ];
-  isHandset$: Observable<boolean> = this.bps.observe(Breakpoints.Handset)
-  .pipe(
-    map(result => result.matches)
-  );
+  private destroy$ = new Subject<void>();
   dataSource: MatTableDataSource<TaskViewData>;
 
-  constructor(private router: Router, public dialog: MatDialog, private bps: BreakpointObserver, public sSS: ScreenSizeService) {
+  constructor(private router: Router, public dialog: MatDialog, public sSS: ScreenSizeService) {
     this.dataSource = new MatTableDataSource<TaskViewData>();
     this.sort = new MatSort();
   }
 
   ngOnInit() {
-    this.bps.observe([
-      Breakpoints.Handset,
-      Breakpoints.Tablet,
-      Breakpoints.Web]).subscribe(result => {
-        console.log("result what breakpoints to handle",result.breakpoints);
-        this.handleBreakpoints();
+    this.sSS.isHandset.pipe(takeUntil(this.destroy$)).subscribe((isHandset) => {
+      if (isHandset) {
+        this.updateDisplayedColumns(['name', 'type', 'progress', 'actions']);
+      }
     });
-  }
 
-  handleBreakpoints() {
-
-    if (this.bps.isMatched(Breakpoints.Handset)) {
-        console.log('Handset');
-        this.updateDisplayedColumns(['name','type', 'progress', 'actions']);
-    }
-    else if (this.bps.isMatched(Breakpoints.Tablet)) {
-      console.log('Tablet');
+    this.sSS.isTablet.pipe(takeUntil(this.destroy$)).subscribe((isTablet) => {
+      if (isTablet) {
         this.updateDisplayedColumns(['id','name','type', 'progress', 'actions']);
-    }
+      }
+    })
   }
+
    updateDisplayedColumns(columns: string[]) {
      this.displayedColumns = columns;
   }
@@ -161,6 +152,11 @@ export class ContentBoardComponent implements OnInit, OnChanges {
 
   ngAfterViewInit() {
     this.dataSource.sort = this.sort;
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // For Video und PDF

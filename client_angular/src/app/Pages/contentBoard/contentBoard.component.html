@@ -14,22 +14,22 @@
           <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
           <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
         </mat-panel-title>
-        <p *ngIf="(isHandset$ | async) === false" class="level-progress" matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." style="margin-top: 10px;">Level-Fortschritt: </p>
-        <mat-progress-bar *ngIf="(isHandset$ | async) === false"  matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." class="node-progress" mode="determinate" [value]="content.progress"></mat-progress-bar>
-        <button *ngIf="(isHandset$ | async) === false" class="content-view" [style.visibility]="hasContentElementType(content, 'PDF') ? 'visible' : 'hidden'" matTooltip="Zeigt alle PDF (z.B. Vorlesungsfolien) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['PDF'], $event)">PDF</button>
-        <button *ngIf="(isHandset$ | async) === false" class="content-view" [style.visibility]="hasContentElementType(content, 'VIDEO') ? 'visible' : 'hidden'" matTooltip="Zeigt alle Videos (z.B. Vorlesungsaufzeichungen) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['VIDEO'], $event)">Video</button>
+        <p *ngIf="!(sSS.isHandset | async)" class="level-progress" matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." style="margin-top: 10px;">Level-Fortschritt: </p>
+        <mat-progress-bar *ngIf="!(sSS.isHandset | async)"  matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." class="node-progress" mode="determinate" [value]="content.progress"></mat-progress-bar>
+        <button *ngIf="!(sSS.isHandset | async)" class="content-view" [style.visibility]="hasContentElementType(content, 'PDF') ? 'visible' : 'hidden'" matTooltip="Zeigt alle PDF (z.B. Vorlesungsfolien) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['PDF'], $event)">PDF</button>
+        <button *ngIf="!(sSS.isHandset | async)" class="content-view" [style.visibility]="hasContentElementType(content, 'VIDEO') ? 'visible' : 'hidden'" matTooltip="Zeigt alle Videos (z.B. Vorlesungsaufzeichungen) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['VIDEO'], $event)">Video</button>
       </mat-expansion-panel-header>
 
-      <div class="mobile-button" *ngIf="(isHandset$ | async) === true">
+      <div class="mobile-button" *ngIf="(sSS.isHandset | async)">
         <button class="content-view" [style.visibility]="hasContentElementType(content, 'PDF') ? 'visible' : 'hidden'" matTooltip="Zeigt alle PDF (z.B. Vorlesungsfolien) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['PDF'], $event)">PDF</button>
         <button class="content-view" [style.visibility]="hasContentElementType(content, 'VIDEO') ? 'visible' : 'hidden'" matTooltip="Zeigt alle Videos (z.B. Vorlesungsaufzeichungen) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['VIDEO'], $event)">Video</button>
       </div>
-      <mat-divider></mat-divider>
-      <div>
+      <mat-divider *ngIf="(sSS.isHandset | async)"></mat-divider>
+      <div *ngIf="(sSS.isHandset | async)">
         <p matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." style="margin-top: 10px;">Level-Fortschritt: </p>
         <mat-progress-bar style="margin-bottom: 15px" matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." mode="determinate" [value]="content.progress">asdasd</mat-progress-bar>
       </div>
-      <mat-divider></mat-divider>
+      <mat-divider *ngIf="(sSS.isHandset | async)"></mat-divider>
       <mat-panel-description>
         <p class="description">
           {{ content.description }}

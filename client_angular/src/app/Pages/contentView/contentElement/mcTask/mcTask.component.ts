@@ -5,6 +5,7 @@ import { MCOptionViewDTO, McQuestionDTO, QuestionDTO, QuestionVersionDTO } from 
 import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 
 interface TaskViewData {
   contentNodeId: number;
@@ -131,7 +132,8 @@ export class McTaskComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<McTaskComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private questionDataService: QuestionDataService) {
+    private questionDataService: QuestionDataService,
+    private screenSizeService: ScreenSizeService) {
     this.taskViewData = data.taskViewData;
   }
 

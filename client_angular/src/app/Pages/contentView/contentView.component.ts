@@ -27,7 +27,12 @@ export class ContentViewComponent implements OnInit {
   pdfCount: number = 0;
 
   // Get Data from Dialog
-  constructor(public dialogRef: MatDialogRef<ContentViewComponent>, @Inject(MAT_DIALOG_DATA) public data: any, private sanitizer: DomSanitizer, private discussionDialogService: DiscussionDialogService, private contentService: ContentService) {
+  constructor(
+      public dialogRef: MatDialogRef<ContentViewComponent>,
+      @Inject(MAT_DIALOG_DATA) public data: any,
+      private sanitizer: DomSanitizer,
+      private discussionDialogService: DiscussionDialogService,
+      private contentService: ContentService) {
     this.contentViewData = data.contentViewData as ContentDTO;
     this.activeConceptNodeId = data.conceptNodeId as number;
     this.contentTypes = data.contentTypes;
