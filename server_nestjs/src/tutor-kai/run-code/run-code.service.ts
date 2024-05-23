@@ -6,6 +6,7 @@ import {
   CodeSubmissionResult,
   CodeSubmissionResultDto,
   ContentElementDTO,
+  NotificationDTO,
 } from '@Interfaces/index';
 import {
   CodeSubmission,
@@ -14,6 +15,7 @@ import {
   ContentElement,
 } from '@prisma/client';
 import { ContentService } from '@/content/content.service';
+import { NotificationService } from '@/notification/notification.service';
 
 @Injectable()
 export class RunCodeService {
@@ -21,6 +23,7 @@ export class RunCodeService {
     private prisma: PrismaService,
     private readonly cryptoService: CryptoService,
     private contentService: ContentService,
+    private notificationService: NotificationService,
   ) {}
 
   // API URL for code execution service.
@@ -90,6 +93,13 @@ export class RunCodeService {
       userId,
       studentCode,
     );
+    if (result.CodeSubmissionResult.score === 100) {
+      const notification: NotificationDTO = {
+        userId: userId,
+        message: 'Du hast die Programmieraufgabe erfolgreich gelöst!',
+      }
+      this.notificationService.notifyUser(notification)
+    }
     return result;
   }
   /**

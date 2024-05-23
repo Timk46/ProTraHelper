@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,7 @@ export class UserService {
   (
     private router: Router,
     private snackBar: MatSnackBar,
-    private http: HttpClient
+    private http: HttpClient,
   )
   {
     this.isAuthenticated$ = new BehaviorSubject<boolean>(false);
@@ -175,5 +176,5 @@ export class UserService {
    */
   getUserTotalProgress(): Observable<number> {
     return this.http.get<number>(environment.server + '/users/totalProgress');
-  }  
+  }
 }

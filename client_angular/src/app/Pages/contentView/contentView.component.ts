@@ -7,6 +7,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
 import { ContentService } from 'src/app/Services/content/content.service';
 import { last } from 'rxjs';
+import { NotificationService } from 'src/app/Services/notification/notification.service';
 
 @Component({
   selector: 'app-contentView',
@@ -32,7 +33,8 @@ export class ContentViewComponent implements OnInit {
       @Inject(MAT_DIALOG_DATA) public data: any,
       private sanitizer: DomSanitizer,
       private discussionDialogService: DiscussionDialogService,
-      private contentService: ContentService) {
+      private contentService: ContentService,
+      private notificationService: NotificationService) {
     this.contentViewData = data.contentViewData as ContentDTO;
     this.activeConceptNodeId = data.conceptNodeId as number;
     this.contentTypes = data.contentTypes;
@@ -70,6 +72,10 @@ export class ContentViewComponent implements OnInit {
         }
       });
     }
+    this.notificationService.getNotifications().subscribe(message => {
+      console.log('Neue Benachrichtigung:', message);
+      
+    })
   }
 
   // needed for pdf iframe (we need iframe for multiple pdfs in a row: https://pdfviewer.net/extended-pdf-viewer/side-by-side)

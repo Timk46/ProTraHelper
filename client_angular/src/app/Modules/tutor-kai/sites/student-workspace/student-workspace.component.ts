@@ -2,7 +2,7 @@ import { Component, HostListener, OnInit, ViewChild } from "@angular/core";
 import { RunCodeService } from "../../services/runCode.service";
 import { TaskDataService } from "../../services/task-data.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { CodeSubmissionResultDto, QuestionDTO } from "@DTOs/index";
+import { CodeSubmissionResultDto, NotificationDTO, QuestionDTO } from "@DTOs/index";
 import { FormArray, FormBuilder, Validators } from "@angular/forms";
 import { saveAs } from "file-saver";
 import * as JSZip from "jszip";
@@ -13,6 +13,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from '@angular/router';
 import { ConfettiService } from "src/app/Services/animations/confetti.service";
 import { Title } from '@angular/platform-browser';
+import { NotificationService } from "src/app/Services/notification/notification.service";
 /**
  * The different states representing the current status of the student workspace.
  */
@@ -75,7 +76,8 @@ export class StudentWorkspaceComponent implements OnInit {
     private dialog: MatDialog,
     private route: ActivatedRoute,
     private confettiService: ConfettiService,
-    private title: Title
+    private title: Title,
+    private notificationService: NotificationService
   ) {}
 
   /**
@@ -85,6 +87,9 @@ export class StudentWorkspaceComponent implements OnInit {
   ngOnInit(): void {
     this.getCurrentTaskFromRoute();
     this.title.setTitle('GOALS: Tutor Kai');
+    this.notificationService.getNotifications().subscribe((notification: any) => {
+      console.log(notification);
+    })
   }
 
   getCurrentTaskFromRoute(): void {
@@ -228,6 +233,7 @@ export class StudentWorkspaceComponent implements OnInit {
     this.currentState = States.submittedCode;
     if (result.CodeSubmissionResult.score === 100) {
       this.confettiService.celebrate(6,800); // small confetti animation :)
+
     }
     result.CodeSubmissionResult.score = Math.trunc(result.CodeSubmissionResult.score);
   }

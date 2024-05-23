@@ -121,7 +121,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     })
   }
 
-   updateDisplayedColumns(columns: string[]) {
+  updateDisplayedColumns(columns: string[]) {
      this.displayedColumns = columns;
   }
 

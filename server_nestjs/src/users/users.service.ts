@@ -1,11 +1,15 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import  { globalRole } from '@DTOs/roles.enum';
+import { NotificationService } from '@/notification/notification.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationService: NotificationService) {}
 
   // The Cas User will be created or updated after each login
   createCASuser(username: string) {
@@ -139,6 +143,14 @@ export class UsersService {
 
     const userPercentage = userTotalProgress / maxProgress * 100;
     console.log('User Total Progress: ' + userPercentage);
+    // send notification upon completion
+    if(userPercentage === 100) {
+      const notification = {
+        userId: userId,
+        message: 'You have completed all content elements. Congratulations!',
+      }
+      this.notificationService.notifyUser(notification);
+    }
     return userPercentage;
   }
 }

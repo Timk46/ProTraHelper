@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+import { NotificationService } from 'src/app/Services/notification/notification.service';
 import { ToolbarService } from 'src/app/Services/toolbar/toolbar.service';
 
 @Component({
@@ -9,7 +10,11 @@ import { ToolbarService } from 'src/app/Services/toolbar/toolbar.service';
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
-  constructor(public toolbarService: ToolbarService, public sSS: ScreenSizeService, private title:Title) {
+  constructor(
+    public toolbarService: ToolbarService,
+    public sSS: ScreenSizeService,
+    private title:Title,
+    private notificationService: NotificationService) {
     toolbarService.show();
     title.setTitle('GOALS: Dashboard');
     sSS.isHandset.subscribe((result) => {
@@ -24,5 +29,9 @@ export class DashboardComponent implements OnInit {
     return window.innerWidth < 768;
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.notificationService.getNotifications().subscribe(message => {
+      console.log('Neue Benachrichtigung:', message);
+    })
+  }
 }

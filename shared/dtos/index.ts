@@ -23,3 +23,4 @@ export * from "./user.dto"; // ToDo: Merge with hefl
 export * from "./file.dto"; // ToDo: Merge with hefl
 export * from "./userAnswer.dto";
 export * from "./feedbackGeneration.dto";
+export * from "./notification.dto";

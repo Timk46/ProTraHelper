@@ -2,15 +2,21 @@
 /* eslint-disable prettier/prettier */
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { ContentService } from '@/content/content.service';
+import { NotificationService } from '@/notification/notification.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { McQuestionDTO, MCOptionDTO, MCOptionViewDTO, QuestionDTO, questionType, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import { NotificationDTO } from '@Interfaces/notification.dto';
 import { Injectable } from '@nestjs/common';
 import {  } from '@prisma/client';
 
 @Injectable()
 export class QuestionDataService {
-    constructor(private prisma: PrismaService, private feedbackGenerationService: FeedbackGenerationService, private contentService: ContentService) {}
+    constructor(
+      private prisma: PrismaService,
+      private feedbackGenerationService: FeedbackGenerationService,
+      private contentService: ContentService,
+      private notificationService: NotificationService) {}
 
     /**
      *
@@ -97,7 +103,7 @@ export class QuestionDataService {
 
         return mcOptions;
     }
-    
+
     /**
      *
      * @param mcQuestion_id
@@ -129,8 +135,8 @@ export class QuestionDataService {
         }
 
         return mcOptions;
-    }    
-    
+    }
+
     /**
      * get the free text question, including the solution and expectations if requested
      * @param questionVersionId
@@ -340,7 +346,7 @@ export class QuestionDataService {
      */
     async createUserAnswer(userId: number, answerData: UserAnswerDataDTO) : Promise<userAnswerFeedbackDTO> {
         console.log('create user answer: '+userId + ' ' + answerData.questionId + ' ' + answerData.contentElementId);
-        
+
         const createdData = await this.prisma.userAnswer.create({
             data: {
                 userId: userId,
@@ -389,6 +395,12 @@ export class QuestionDataService {
                 console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNode + ' level: ' + question.level + ' userId: ' + userId)
                 this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
+                // send notification!
+                const notification: NotificationDTO = {
+                  userId: userId,
+                  message: 'Du hast eine Aufgabe gelöst! Schau dir das Feedback an.'
+                }
+                this.notificationService.notifyUser(notification);
             }
             else {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
@@ -435,7 +447,7 @@ export class QuestionDataService {
                 else {
                     console.log('answer not correct');
                     userScore = 0;
-                } 
+                }
             }
 
             let feedbackText = "";
@@ -445,6 +457,12 @@ export class QuestionDataService {
                 console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNode + ' level: ' + question.level + ' userId: ' + userId)
                 this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
+                // send notification!
+                const notification: NotificationDTO = {
+                  userId: userId,
+                  message: 'Du hast eine Aufgabe gelöst! Schau dir das Feedback an.'
+                }
+                this.notificationService.notifyUser(notification);
             }
             else {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
@@ -491,7 +509,7 @@ export class QuestionDataService {
                 else {
                     console.log('answer not correct');
                     userScore = 0;
-                } 
+                }
             }
 
             let feedbackText = "";
@@ -500,6 +518,13 @@ export class QuestionDataService {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
                 this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
+
+                // send notification!
+                const notification: NotificationDTO = {
+                  userId: userId,
+                  message: 'Du hast eine Aufgabe gelöst! Schau dir das Feedback an.'
+                }
+                this.notificationService.notifyUser(notification);
             }
             else {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
@@ -552,7 +577,12 @@ export class QuestionDataService {
             if(progress == 1) {
                 this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
-                
+                // send notification!
+                const notification: NotificationDTO = {
+                  userId: userId,
+                  message: 'Du hast eine Aufgabe gelöst! Schau dir das Feedback an.'
+                }
+                this.notificationService.notifyUser(notification);
             }
 
             console.log('generated Text:', feedbackText);
