@@ -594,6 +594,7 @@ model Notification {
   readTimestamp DateTime?
   //priority      Int      @default(0)
   type          String
+  delivered     Boolean  @default(false)
   User          User?    @relation(fields: [userId], references: [id])
   //data      Json?
 }

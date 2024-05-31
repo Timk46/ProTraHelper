@@ -1,58 +1,78 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { UserService } from '../auth/user.service';
-import { SwPush } from '@angular/service-worker';
+
 import { environment } from 'src/environments/environment';
 import { NotificationDTO } from '@DTOs/notification.dto';
+import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationComponent } from 'src/app/Pages/notification/notification.component';
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
   private socket: Socket;
-  private swPushPayload: any;
+  private notificationsSubject = new BehaviorSubject<NotificationDTO[]>([]);
+  private notifications: NotificationDTO[] = [];
+
   constructor(
-    private toastr: ToastrService,
     private userService: UserService,
-    private swPush: SwPush) {
-      const userId = this.userService.getTokenID();
+    private snackBar: MatSnackBar,
+    private router: Router
+    ) {
+
       this.socket = io('http://localhost:3001/notifications', {
-        query: {
-          userId: userId
-        },
+        query: { token: this.userService.getAccessToken()},
         withCredentials: true,
         transports: ['websocket']
       });
-      this.socket.on('notification', (message: string) => {
-        // this opens green notification popup (could be exchanged with a seperate component for example)
-        this.toastr.success(message, 'Neue Benachrichtigung');
+      this.socket.on('notification', (notification: NotificationDTO) => {
+        this.addNotification(notification);
+        console.log("YOU DID IT")
+        this.showNotification(notification.message, 'View', '/dashboard', () => this.handleNotificationClick(notification));
       });
   }
 
+  /***
+   * Get the notifications
+   */
+  getNotifications(): Observable<NotificationDTO[]> {
+    return this.notificationsSubject.asObservable();
+  }
 
   /**
    *
-   * @returns an observable that emits the notification message
+   * @param notification
    */
-  getNotifications(): Observable<string> {
-    return new Observable(observer => {
-      this.socket.on('notification', (message: string) => {
-        observer.next(message);
-      });
-      return () => this.socket.off('notification');
-    });
+  addNotification(notification: NotificationDTO): void {
+    this.notifications.push(notification);
+    this.notificationsSubject.next(this.notifications);
+  }
+
+  // EXAMPLE IMPLEMENTATION OF HOW TO HANDLE THE CLICK
+  /** TODO: Implement this types
+   * handle the click on a notification
+   * @param notification
+   */
+  handleNotificationClick(notification: NotificationDTO): void {
+    if(notification.type === 'comment') {
+      console.log("COMMENT reached the frontendservice")
+      this.router.navigate(['/discussion-view', notification.discussionId]);
+    }
+
+    this.removeNotification(notification);
   }
 
   /**
-   * Subscribe to pushmessages sent by the server
+   * Remove a notification from the list
+   * @param notification
    */
-  subscribeMessage(): void {
-    this.swPush.messages.subscribe((res: any) => {
-      console.log('Received push notification', res);
-    });
+  private removeNotification(notification: NotificationDTO): void {
+    this.notifications = this.notifications.filter(notif => notif !== notification);
+    this.notificationsSubject.next(this.notifications);
   }
-
 
   /**
    * Sends a notification to the user with the given id
@@ -60,5 +80,21 @@ export class NotificationService {
    */
   sendNotification(notification: NotificationDTO) {
     this.socket.emit('notifications', { userId: notification.userId, message: notification.message});
+  }
+
+  /**
+   * Shows a notification with links or action for certain events to trigger
+   * @param message
+   * @param actionText
+   * @param route
+   * @param action
+   */
+  showNotification(message: string, actionText?: string, route?: string, action?: () => void) {
+    this.snackBar.openFromComponent(NotificationComponent, {
+      data: { message, actionText, route, action },
+      duration: 5000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
+    });
   }
 }

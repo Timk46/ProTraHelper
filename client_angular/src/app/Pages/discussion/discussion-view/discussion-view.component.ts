@@ -1,12 +1,13 @@
 import { discussionMessageDTO, discussionDTO } from '@DTOs/index';
 import { Component, Input } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DiscussionViewService } from 'src/app/Services/discussion/discussion-view.service';
 import { Subscription } from 'rxjs';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
 import { Title } from '@angular/platform-browser';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+import { NotificationService } from 'src/app/Services/notification/notification.service';
 
 @Component({
   selector: 'app-discussion-view',
@@ -52,7 +53,9 @@ export class DiscussionViewComponent {
     private discussionViewService: DiscussionViewService,
     private discussionCreationService: DiscussionCreationService,
     private userService: UserService,
-    private title: Title
+    private title: Title,
+    private notificationService: NotificationService,
+    private router: Router
   ) {
 
     this.userId = parseInt(this.userService.getTokenID());
@@ -156,6 +159,22 @@ export class DiscussionViewComponent {
   }
   ngOnInit(): void {
     this.title.setTitle('GOALS: Diskutieren');
+    this.notificationService.getNotifications().subscribe(notifications => {
+      // handle notification if its a comment => this should make it pop up
+      notifications.forEach(notification => {
+        if(notification.type === 'comment') {
+          this.notificationService.showNotification(
+            notification.message,
+            'Watch comment',
+            `discussion-view/${notification.discussionId}`, // path to the discussion?
+            () => {
+              // or route here?
+              this.router.navigate(['/discussion-view', notification.discussionId]);
+              console.log("we navigated")
+          });
+        }
+      })
+    })
   }
 
   ngOnDestory() {

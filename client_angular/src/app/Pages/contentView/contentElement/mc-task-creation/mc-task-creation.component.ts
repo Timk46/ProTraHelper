@@ -13,6 +13,7 @@ import { McqcreationService } from 'src/app/Services/mcqCreation/mcqcreation.ser
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { ContentService } from 'src/app/Services/content/content.service';
 import { catchError } from 'rxjs/operators';
+import { NotificationService } from 'src/app/Services/notification/notification.service';
 interface Answer {
   answer?: string;
   correct?: boolean;
@@ -92,7 +93,8 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
     private dialog: MatDialog,
     private _snackBar: MatSnackBar,
     private mcqService: McqcreationService,
-    private contentService: ContentService) {
+    private contentService: ContentService,
+    private notificationService: NotificationService) {
     this.taskForm = new FormGroup({
       'title': new FormControl(null, Validators.required),
       'numberOfOptions': new FormControl(4, [Validators.required]),
@@ -119,6 +121,15 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
       )
 
     //console.log("concepts: ",this.filteredConcepts)
+  }
+
+  show() {
+    this.notificationService.showNotification(
+      'This is a test notification',
+      'View',
+      '/dashboard',
+      () => { console.log('Action performed!'); }
+    );
   }
 
   private filter(value: string): string[] {
