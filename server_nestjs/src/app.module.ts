@@ -25,6 +25,14 @@ import { QuestionModule } from './tutor-kai/question/question.module';
 import { RunCodeModule } from './tutor-kai/run-code/run-code.module';
 // END Tutor-Kai Imports
 
+// BEGIN UMLearn Imports
+import { DatabaseCourseCommunicationModule } from './umlearn/database-course-communication/database-course-communication.module';
+import { DatabaseTaskCommunicationModule } from './umlearn/database-task-communication/database-task-communication.module';
+import { DatabaseEditorCommunicationModule } from './umlearn/database-editor-communication/database-editor-communication.module';
+import { GptModule } from './umlearn/gpt/gpt.module';
+import { CompareModule } from './umlearn/compare/compare.module';
+// END UMLearn Imports
+
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
@@ -36,6 +44,7 @@ import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-gene
 import { EventLogModule } from './EventLog/event-log.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { VersionInterceptor } from './common/interceptors/version.interceptor';
+
 
 @Module({
   imports: [
@@ -70,6 +79,12 @@ import { VersionInterceptor } from './common/interceptors/version.interceptor';
     // McqCreationModule, CURRENTLY DISABLED
     // McqevaluationModule, CURRENTLY DISABLED
     EventLogModule,
+    // UMLearnModules
+    //DatabaseCourseCommunicationModule,
+    DatabaseTaskCommunicationModule,
+    DatabaseEditorCommunicationModule,
+    GptModule,
+    CompareModule,
   ],
   controllers: [
     AppController,

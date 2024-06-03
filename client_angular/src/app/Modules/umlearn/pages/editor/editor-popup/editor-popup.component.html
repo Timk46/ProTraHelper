@@ -1,0 +1,214 @@
+<div *ngIf="elementType === 'node'" class="node-container">
+
+  <div class="scroll-container">
+
+    <mat-card class="mat-card">
+
+      <div class="section-1">
+        <mat-form-field appearance="outline">
+          <mat-label>Name der Klasse</mat-label>
+          <input matInput [ngModel]="nodeData?.title" (ngModelChange)="updateNodeTitle($event)" *ngIf="elementType === 'node'">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Typ</mat-label>
+          <mat-select [(ngModel)]="elementData.type">
+            <mat-option *ngFor="let type of nodeTypes" [value]="type">{{ type }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="divider-container">
+        <hr class="divider">
+      </div>
+
+      <div class="section-2" *ngIf="elementData.type !== editorElement.CD_INTERFACE">
+
+        <div class="node-table-heading-container">
+          <h4 style="text-align: center">Attribute</h4>
+          <button mat-icon-button color="primary" class="add-button" (click)="addAttributeRow()">
+            <mat-icon>add_circle</mat-icon>
+          </button>
+        </div>
+
+        <mat-table class="attribute-table" [dataSource]="attributesDataSource">
+
+          <ng-container matColumnDef="visibility">
+            <mat-header-cell *matHeaderCellDef> Sichtbarkeit </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-select [(value)]="row.visibility">
+                  <mat-option *ngFor="let visibility of visibilityTypes" [value]="visibility">{{ visibility }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <input matInput [(ngModel)]="row.name" />
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="dataType">
+            <mat-header-cell *matHeaderCellDef> Datentyp </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-select [(value)]="row.dataType">
+                  <mat-option *ngFor="let dataType of dataTypes" [value]="dataType">{{ dataType }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="delete">
+            <mat-header-cell *matHeaderCellDef></mat-header-cell>
+            <mat-cell *matCellDef="let row; let i = index">
+              <button mat-icon-button color="warn" class="trash-button" (click)="deleteRow(i, 'attribute')">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="['visibility', 'name', 'dataType', 'delete']"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: ['visibility', 'name', 'dataType', 'delete']"></mat-row>
+        </mat-table>
+
+      </div>
+
+
+      <div class="divider-container" *ngIf="elementData.type !== editorElement.CD_INTERFACE">
+        <hr class="divider">
+      </div>
+
+      <div class="section-3">
+
+        <div class="node-table-heading-container">
+          <h4 style="text-align: center">Methoden</h4>
+          <button mat-icon-button color="primary" class="add-button" (click)="addMethodRow()">
+            <mat-icon>add_circle</mat-icon>
+          </button>
+        </div>
+
+        <mat-table class="method-table" [dataSource]="methodsDataSource">
+
+          <ng-container matColumnDef="visibility">
+            <mat-header-cell *matHeaderCellDef> Sichtbarkeit </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-select [(value)]="row.visibility">
+                  <mat-option *ngFor="let visibility of visibilityTypes" [value]="visibility">{{ visibility }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <input matInput [(ngModel)]="row.name" />
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="dataType">
+            <mat-header-cell *matHeaderCellDef> Datentyp </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-select [(value)]="row.dataType">
+                  <mat-option *ngFor="let dataType of dataTypes" [value]="dataType">{{ dataType }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="delete">
+            <mat-header-cell *matHeaderCellDef></mat-header-cell>
+            <mat-cell *matCellDef="let row; let i = index">
+              <button mat-icon-button color="warn" class="trash-button" (click)="deleteRow(i, 'method')">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="['visibility', 'name', 'dataType', 'delete']"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: ['visibility', 'name', 'dataType', 'delete']"></mat-row>
+
+        </mat-table>
+
+      </div>
+
+    </mat-card>
+
+  </div>
+
+
+  <div mat-dialog-actions class="button_container">
+    <div>
+       <button mat-raised-button color="warn" (click)="onDelete()">Knoten löschen</button>
+    </div>
+    <div>
+       <button mat-raised-button color="accent" (click)="onCancel()">Abbrechen</button>
+       <button mat-raised-button color="primary" (click)="onAccept()">Speichern</button>
+    </div>
+  </div>
+
+</div>  <!-- End  of Content for NODE element -->
+
+
+  <!-- Content for EDGE element -->
+<div *ngIf="elementType === 'edge'" class="edge-container">
+
+  <div class="edge-heading-container">
+    <mat-form-field class="class-name-container" appearance="outline" style="width: 100%">
+      <mat-label>Pfeiltyp:</mat-label>
+      <mat-select [(value)]="elementData.type" (valueChange)="updateEdgeType()">
+        <mat-option *ngFor="let edgeType of edgeTypes" [value]="edgeType">{{ edgeType }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+
+  <div class="edge-line-edit-container" [ngStyle]="{'flex-direction': switchPosition ? 'row-reverse' : 'row'}">
+    <mat-form-field appearance="outline" class="cardinality-container">
+      <mat-label>Kardinalität Start:</mat-label>
+      <input matInput [ngModel]="edgeData?.cardinalityStart" (ngModelChange)="updateEdgeCardinalityStart($event)" *ngIf="elementType === 'edge'" placeholder="Bsp. 1..*">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="cardinality-container">
+      <mat-label>Beschriftung:</mat-label>
+      <input matInput [ngModel]="edgeData?.description" (ngModelChange)="updateEdgeDescription($event)" *ngIf="elementType === 'edge'" placeholder="Bsp. AssignedTo">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="cardinality-container">
+      <mat-label>Kardinalität Ziel:</mat-label>
+      <input matInput [ngModel]="edgeData?.cardinalityEnd" (ngModelChange)="updateEdgeCardinalityEnd($event)" *ngIf="elementType === 'edge'" placeholder="Bsp. 0..1">
+    </mat-form-field>
+
+  </div>
+
+  <div *ngIf="edgeData" #previewViewport [ngStyle]="{'flex-direction': switchPosition ? 'row-reverse' : 'row'}" style="display: flex; justify-content: space-around; align-items: center; width: calc(100% - 10px); height: 100px; position: relative; background-color: white; border: 1px solid white; border-radius: 10px;">
+    <div #start style="width: 10px; height: 10px"></div>
+    <app-editor-edge-new #previewLine [viewportElem]="previewViewport"
+      [startElem]="start"
+      [endElem]="end"
+      [edgeData]="edgeDisplayData" [interactionsDisabled]="true">
+    </app-editor-edge-new>
+    <div #end style="width: 10px; height: 10px"></div>
+  </div>
+
+  <div mat-dialog-actions class="button_container">
+    <div>
+      <button mat-raised-button color="warn" (click)="onDelete()">Kante löschen</button>
+    </div>
+    <div>
+      <button mat-raised-button color="accent" (click)="onCancel()">Abbrechen</button>
+      <button mat-raised-button color="primary" (click)="onAccept()">Speichern</button>
+    </div>
+  </div>
+
+</div>  <!-- End  of Content for EDGE element -->

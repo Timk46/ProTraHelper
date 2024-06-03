@@ -1,0 +1,27 @@
+<div class="h-box">
+  <div class="information-container mat-elevation-z8">
+    <div class="title-container">
+      <h3>Aufgabe: {{ taskWorkspaceData.title }}</h3>
+    </div>
+
+    <div class="tinymce-container" *ngIf="init">
+      <app-tinymce style="width: 100%" [content]="taskWorkspaceData.description" [tinymceConfig]="tinyMceConfig" [isMarkOnly]="true"></app-tinymce>
+    </div>
+
+    <div class="button-container">
+      <button mat-raised-button color="accent" style="width: 50%;" (click)="onCancel()">Abbrechen</button>
+      <button mat-raised-button color="primary" style="width: 50%;" (click)="onAccept(editor.getSaveData())">Abgabe speichern und zurück</button>
+    </div>
+
+  </div>
+
+  <div class="editor-container">
+  <app-editor #editor
+    [selectableNodes]="taskWorkspaceData.taskSettings.allowedNodeTypes"
+    [selectableEdges]="taskWorkspaceData.taskSettings.allowedEdgeTypes"
+    [nodes]="taskAttemptData.attemptData.nodes"
+    [edges]="taskAttemptData.attemptData.edges"
+  ></app-editor>
+  </div>
+
+</div>

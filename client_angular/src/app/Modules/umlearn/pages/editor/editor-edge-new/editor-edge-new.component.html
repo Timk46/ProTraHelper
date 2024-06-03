@@ -1,0 +1,17 @@
+<svg #svgElem class="svg-container" [attr.width]="viewPortElemProps.width" [attr.height]="viewPortElemProps.height"></svg>
+<app-edge-grab-point #grabStart *ngIf="options.draggableStart"
+  style="position: absolute"
+  [targetElem]="startElem"
+  [targetSide]="calculatedClosestSides.startSide"
+  [sideOffset]="options.startDirectionOffset"
+  [visible]="options.draggableStart"
+  (onPointDrag)="setDragPointOptions('start', $event.side, $event.offset)">
+</app-edge-grab-point>
+<app-edge-grab-point #grabEnd *ngIf="options.draggableEnd"
+  style="position: absolute"
+  [targetElem]="endElem"
+  [targetSide]="calculatedClosestSides.endSide"
+  [sideOffset]="options.endDirectionOffset"
+  [visible]="options.draggableEnd"
+  (onPointDrag)="setDragPointOptions('end', $event.side, $event.offset)">
+</app-edge-grab-point>

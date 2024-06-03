@@ -174,10 +174,10 @@ model Training {
 // for example a user can have a level 3 for the concept "while loop"
 // "expanded" saves the state of the concept graph between sessions
 model UserConcept {
-  id            Int         @id @default(autoincrement())
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            Int                @id @default(autoincrement())
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        Int
-  concept       ConceptNode @relation(fields: [conceptNodeId], references: [id], onDelete: Cascade)
+  concept       ConceptNode        @relation(fields: [conceptNodeId], references: [id], onDelete: Cascade)
   conceptNodeId Int
   level         Int?
   expanded      Boolean // remembers if the concept was expanded in the concept graph
@@ -193,13 +193,12 @@ enum userConceptEventType {
 
 // events that change the userConcept (level, expand state, selected nodes)
 model UserConceptEvent {
-  id            Int         @id @default(autoincrement())
-  userConcept   UserConcept @relation(fields: [userConceptId], references: [id], onDelete: Cascade)
+  id            Int                  @id @default(autoincrement())
+  userConcept   UserConcept          @relation(fields: [userConceptId], references: [id], onDelete: Cascade)
   userConceptId Int
   eventType     userConceptEventType
   level         Int
-  createdAt     DateTime    @default(now())
-
+  createdAt     DateTime             @default(now())
 }
 
 // for example a MC question or a video or a piece of text
@@ -218,23 +217,23 @@ model ContentElement {
 }
 
 model File {
-  id               Int             @id @default(autoincrement())
-  uniqueIdentifier String          @unique
-  name             String
-  path             String
-  type             String
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  question         Question?       @relation(fields: [questionId], references: [id], onDelete: SetNull)
-  questionId       Int?
-  MCAnswer         MCOption?       @relation(fields: [mCAnswerId], references: [id], onDelete: SetNull)
-  mCAnswerId       Int?
-  contentElement   ContentElement?
-  contentElementId Int?
-  TranscriptEmbeddings    TranscriptEmbedding[]
+  id                   Int                   @id @default(autoincrement())
+  uniqueIdentifier     String                @unique
+  name                 String
+  path                 String
+  type                 String
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  question             Question?             @relation(fields: [questionId], references: [id], onDelete: SetNull)
+  questionId           Int?
+  MCAnswer             MCOption?             @relation(fields: [mCAnswerId], references: [id], onDelete: SetNull)
+  mCAnswerId           Int?
+  contentElement       ContentElement?
+  contentElementId     Int?
+  TranscriptEmbeddings TranscriptEmbedding[]
 }
 
-model ContentView { // n to n between content elements and content node. This way each content element can be used for multiple conctent nodes with different positions.
+model ContentView {
   id               Int            @id @default(autoincrement())
   contentNode      ContentNode    @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
   contentNodeId    Int
@@ -345,16 +344,17 @@ model UserMCAnswer {
 }
 
 model UserAnswer {
-  id                   Int                    @id @default(autoincrement())
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt
-  user                 User                   @relation(fields: [userId], references: [id])
-  userId               Int
-  question             Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  questionId           Int
-  userMCOptionSelected UserMCOptionSelected[]
-  userFreetextAnswer   String?                @db.Text
-  feedbacks            Feedback[]
+  id                    Int                     @id @default(autoincrement())
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  user                  User                    @relation(fields: [userId], references: [id])
+  userId                Int
+  question              Question                @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId            Int
+  userMCOptionSelected  UserMCOptionSelected[]
+  userFreetextAnswer    String?                 @db.Text
+  feedbacks             Feedback[]
+  UserUmlQuestionAnswer UserUmlQuestionAnswer[]
 }
 
 model UserMCOptionSelected {
@@ -581,6 +581,46 @@ model TranscriptEmbedding {
   id      String                 @id @default(cuid())
   content String                 @db.Text // contains all metadata in a stringified JSON because vectorstore for prisma doesnt supper metadata fields yet. Because of that we can not filter by concept etc. yet (we could with rawqueries)
   vector  Unsupported("vector")? // https://js.langchain.com/docs/integrations/vectorstores/prisma
-  file   File? @relation(fields: [fileId], references: [id])
-  fileId Int?
+  file    File?                  @relation(fields: [fileId], references: [id])
+  fileId  Int?
+}
+
+//********************************************************************************************* Begin Umlearn Tables
+
+model UmlEditorModel {
+  id            Int                @id @default(autoincrement())
+  model         String             @unique
+  title         String
+  description   String             @db.Text
+  EditorElement UmlEditorElement[]
+}
+
+model UmlEditorElement {
+  id            Int            @id @default(autoincrement())
+  element       String         @unique //the unique element string
+  elementType   String //can be NODE or EDGE
+  title         String
+  description   String         @db.Text
+  editorModel   UmlEditorModel @relation(fields: [editorModelId], references: [id])
+  editorModelId Int
+  data          String //maybe the element definition and/or the style data
+}
+
+model UmlQuestion {
+  id           Int      @id @default(autoincrement())
+  title        String
+  editorData   Json? //editor content //ist die Musterloesung, die der Lecturer erstellt
+  dataImage    String?  @db.Text //the image of the task
+  taskSettings Json? //siehe taskSettingsDTO
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model UserUmlQuestionAnswer {
+  id           Int        @id @default(autoincrement())
+  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id])
+  userAnswerId Int
+  attemptData  Json //editor content - students work
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }

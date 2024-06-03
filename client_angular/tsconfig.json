@@ -28,7 +28,7 @@
     "paths": {
       "@Interfaces/*": ["../shared/dtos/*"],
       "@DTOs/*": ["../shared/dtos/*"],
-
+      "@UMLearnServices/*": ["./src/app/Modules/umlearn/services/*"]
     }
   },
   "angularCompilerOptions": {

@@ -1,0 +1,76 @@
+<div #editorContainer class="editor-container">
+
+  <div *ngIf="mode == 'create'">
+    <div #widthReference style="position: absolute; width: 100%;"></div>
+
+    <div class="add-container mat-elevation-z8"
+      [ngClass]="{'connection-0-mode': activeConnectionMode}"
+      [ngClass]="{'connection-1-mode': nodesToConnect.length == 1}"
+      [style.width]="(editorContainer.offsetWidth / widthReference.offsetWidth * 100) + '%'">
+
+      <div class="add-container-content interactable">
+        <div class="item-box">
+        <div *ngFor="let node of selectableNodes" class="item-node" cdkDropList (cdkDropListDropped)="drop($event,node)">
+          <app-editor-node
+            [ngClass]="{'disable-interaction': activeConnectionMode}"
+            [ngStyle]="{'cursor': activeConnectionMode ? 'crosshair' : 'default'}"
+            cdkDrag
+            matTooltipShowDelay="1000"
+            matTooltip="{{node.title}} - {{node.description}}"
+            [elementData]="{
+              identification: '',
+              type: node.element,
+              id: 'dummy-uuid-v1-lol',
+              position: {x: 0, y:0},
+              width: 0,
+              height: 0,
+              title: node.title,
+              attributes: [],
+              methods: [],
+            }">
+          </app-editor-node>
+        </div>
+        </div>
+
+        <div class="item-box" style="display: flex; gap: 10px;">
+          <div *ngFor="let edge of selectableEdges" style="display: flex; flex-direction: column; align-items: center;">
+            <mat-card class="item-edge"
+            [ngClass]="{'active-edge': edge.element === activeEdge}" (click)="onConnectionMode(edge.element)" matTooltip="{{edge.title}} - {{edge.description}}" matTooltipShowDelay="1000">
+              <svg width="100" height="50" [innerHTML]="getSvgForEdgeType(edge.element)"></svg>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div [style.height.px]="editorContainer.offsetHeight / 10"></div>
+  </div>
+
+
+  <div [ngClass]="mode == 'create' ? 'workspace-container' : 'workspace-container-highlight'" class="mat-elevation-z8" (wheel)="zoomEditor(scrollContainer, $event)">
+    <div #scrollContainer (mousedown)="dragStart(scrollContainer, $event)" (mousemove)="dragMove(scrollContainer, $event)" (mouseup)="dragEnd($event)" style="width: 100%; height: 100%; overflow: auto;">
+      <!-- editorField -->
+      <div #editorField class="editor-field" style="user-select: none;">
+        <div #domNode *ngFor="let node of nodes" [attr.id]="'node_' + node.id" class="node-container" cdkDrag
+          [cdkDragBoundary]="'.editor-field'" [cdkDragFreeDragPosition]="node.position"
+          (cdkDragStarted)="onCdkDragStart($event,node)" (cdkDragMoved)="onCdkDragMove($event,node); nodeClickDisabled = true;"
+          (cdkDragEnded)="setNodePosition(node.id)">
+          <app-editor-node [model]="testElement.title" [elementData]="node" (click)="(mode === 'create') ? onNodeClick($event, node) : '' "
+            [backgroundColor]="node.id === activeNode ? '#D3D3D3' : 'white'">
+          </app-editor-node>
+        </div>
+
+        <app-editor-edge-new *ngFor="let edge of edges" [attr.id]="'edge_' + edge.id"
+        [startElem]="'node_' + edge.start"
+        [endElem]="'node_' + edge.end"
+        [viewportElem]="editorField"
+        [edgeData]="edge"
+        [draggable]="mode === 'create'"
+        (edgeClicked)="onEdgeClick(edge)"
+        (edgeUpdated)="onEdgeUpdate(edge, $event)">
+        </app-editor-edge-new>
+
+      </div>
+    </div>
+  </div>
+  <div class="zoom-level" [class.fade-out]="fadeOut">{{ zoomLevel*100 | number:'1.2-2' }}%</div>
+</div>
