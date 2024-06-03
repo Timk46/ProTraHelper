@@ -1,9 +1,10 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { Body, Post } from '@nestjs/common';
-import { Lecturer } from '@/auth/custom.decorators';
 import { GptService } from './gpt.service';
 import { editorDataDTO } from '@DTOs/index';
+import { RolesGuard, roles } from '@/auth/roles.guard';
 
+@UseGuards(RolesGuard)
 @Controller('gpt')
 export class GptController {
 
@@ -14,7 +15,7 @@ export class GptController {
      * @param body - The request body containing the solution and attempt data.
      * @returns A Promise that resolves to the result of the feedback request.
      */
-    @Lecturer()
+    @roles('TEACHER, ADMIN')
     @Post('getGptFeedback')
     async getGptFeedback(@Body() body: {solution: editorDataDTO, attempt: editorDataDTO}) {
         return await this.gptService.sendFeedbackRequest(body.solution, body.attempt);

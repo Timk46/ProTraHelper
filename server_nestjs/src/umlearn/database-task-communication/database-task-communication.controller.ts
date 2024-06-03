@@ -1,13 +1,13 @@
-import { Body, Controller, Get, Post, Request, Delete, Param, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, Delete, Param, Req, UseGuards } from '@nestjs/common';
 import { DatabaseTaskCommunicationService } from './database-task-communication.service';
 import { taskCreationPopupDTO, taskInformationDTO, tokenRequestDTO, taskFeedbackDTO, taskDataDTO, taskAttemptDataDTO, taskFeedbackDataDTO, editorModelDTO, jaroWinklerDTO, studentTaskStatusDTO, tasksOverviewDTO, tasksInformationDTO, taskWorkspaceDataDTO } from '@DTOs/index';
-import { Lecturer } from '@/auth/custom.decorators';
 import { ClassNode } from '@Interfaces/index';
+import { RolesGuard, roles } from '@/auth/roles.guard';
 
-
+@UseGuards(RolesGuard)
 @Controller('database-task-communication')
 export class DatabaseTaskCommunicationController {
-  
+
   constructor(private readonly tasksService: DatabaseTaskCommunicationService) {}
 
   /**
@@ -26,7 +26,7 @@ export class DatabaseTaskCommunicationController {
    * @param req - The request object containing the token payload data.
    * @returns A promise that resolves to a tasksOverviewDTO object.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Get('taskOverviewData')
   async getTasksOverview(@Request() req: tokenRequestDTO): Promise<tasksOverviewDTO> {
   return this.tasksService.getTasksOverview(req.tokenPayloadData.sub);
@@ -37,7 +37,7 @@ export class DatabaseTaskCommunicationController {
    * @param {tokenRequestDTO} req - The request object containing the token payload data.
    * @returns {Promise<tasksInformationDTO>} - A promise that resolves to the tasks information.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Get('taskOverview')
   async getTasks(@Request() req: tokenRequestDTO): Promise<tasksInformationDTO> {
   return this.tasksService.getTasksOverviewData(req.tokenPayloadData.sub);
@@ -48,7 +48,7 @@ export class DatabaseTaskCommunicationController {
    * @param {taskCreationPopupDTO} taskCreationData - The task creation data.
    * @returns {Promise<taskCreationPopupDTO>} A promise that resolves to the task creation data.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Post('taskCreation')
   setTaskCreationData(@Body() taskCreationData: taskCreationPopupDTO): Promise<taskCreationPopupDTO> {
     return this.tasksService.createTask(taskCreationData);
@@ -59,7 +59,7 @@ export class DatabaseTaskCommunicationController {
    * @param {taskDataDTO} taskData - The task data to be set.
    * @returns {Promise<taskDataDTO>} A promise that resolves to the updated task data.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Post('setTaskData')
   setTaskData(@Body() taskData: taskDataDTO): Promise<taskDataDTO> {
     return this.tasksService.setTaskData(taskData);
@@ -71,7 +71,7 @@ export class DatabaseTaskCommunicationController {
    * @param data - The data object containing the taskId and imageB64.
    * @returns A Promise that resolves to the number of affected rows in the database.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Post('setTaskImage')
   setTaskImage(@Body() data: {taskId: number, imageB64: string}): Promise<number> {
     return this.tasksService.setTaskImage(data.taskId, data.imageB64);
@@ -83,7 +83,7 @@ export class DatabaseTaskCommunicationController {
    * @returns A promise that resolves to an object containing the base64-encoded image.
    * @throws Error if the taskId is invalid.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Get('getTaskImage/:taskId')
   async getTaskImage(@Param('taskId') taskId: number): Promise<{imageB64: string}> {
     if (isNaN(taskId)) {
@@ -163,7 +163,7 @@ export class DatabaseTaskCommunicationController {
    * @param {tokenRequestDTO} req - The request object containing the token payload data.
    * @returns {Promise<taskFeedbackDTO>} A promise that resolves to the created task feedback data.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Post('taskFeedback')
   setTaskFeedbackData(@Body() taskFeedbackData: taskFeedbackDTO, @Request() req: tokenRequestDTO): Promise<taskFeedbackDTO> {
     console.log('FEEDBACK')
@@ -178,7 +178,7 @@ export class DatabaseTaskCommunicationController {
    * @param {string} taskId - The ID of the task to be deleted.
    * @returns {Promise<taskInformationDTO>} - A promise that resolves to the deleted task information.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Delete('taskDeletion/:taskId')
   deleteTask(@Request() req: tokenRequestDTO, @Param('taskId') taskId: string): Promise<taskInformationDTO> {
     console.log('controller: deleteTask');
@@ -268,7 +268,7 @@ export class DatabaseTaskCommunicationController {
    * @returns A Promise that resolves to a boolean indicating whether there are any task attempts.
    * @throws Error if the taskId is invalid (not a number).
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Get('checkForTaskAttempts/:taskId/')
   async checkForTaskAttempts(@Param('taskId')taskId: number): Promise<boolean> {
     if (isNaN(taskId)) {
@@ -284,7 +284,7 @@ export class DatabaseTaskCommunicationController {
    * @returns A Promise that resolves to a boolean indicating whether there are any task attempts for the given course and task.
    * @throws Error if the input is invalid (courseId or taskId is NaN).
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Get('checkForTaskAttemptsForTask/:courseId/:taskId/')
   async checkForTaskAttemptsForCourse(@Param('courseId') courseId: number, @Param('taskId')taskId: number): Promise<boolean> {
     if (isNaN(courseId) || isNaN(taskId)) {
@@ -300,7 +300,7 @@ export class DatabaseTaskCommunicationController {
    * @returns A Promise that resolves to a boolean indicating whether there are any task attempts for the given course and student.
    * @throws Error if the input is invalid (courseId or studentId is NaN).
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Get('checkForTaskAttemptsForCourseAndStudent/:courseId/:studentId/')
   async checkForTaskAttemptsForCourseAndStudent(@Param('courseId') courseId: number, @Param('studentId')studentId: number): Promise<boolean> {
     if (isNaN(courseId) || isNaN(studentId)) {

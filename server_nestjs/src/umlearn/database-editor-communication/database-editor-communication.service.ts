@@ -13,7 +13,7 @@ export class DatabaseEditorCommunicationService {
    */
   async getEditorModels(): Promise<editorModelDTO[]> {
     try{
-      const editorModels = await this.prisma.editorModel.findMany();
+      const editorModels = await this.prisma.umlEditorModel.findMany();
       if (editorModels === null) {
         throw new Error('No editor Models found');
       }
@@ -38,7 +38,7 @@ export class DatabaseEditorCommunicationService {
    */
   async getEditorModel(id: number): Promise<editorModelDTO>{
     try{
-      const editorModel = await this.prisma.editorModel.findUnique({
+      const editorModel = await this.prisma.umlEditorModel.findUnique({
         where: {
           id: id
         }
@@ -64,7 +64,7 @@ export class DatabaseEditorCommunicationService {
    */
   async getEditorElements(editorModel: string): Promise<editorElementDTO[]> {
     try{
-      const editorElements = await this.prisma.editorElement.findMany({
+      const editorElements = await this.prisma.umlEditorElement.findMany({
         where: {
           editorModel: {
             model: editorModel
@@ -98,7 +98,7 @@ export class DatabaseEditorCommunicationService {
    */
   async getEditorElement(id: number): Promise<editorElementDTO>{
     try{
-      const editorElement = await this.prisma.editorElement.findUnique({
+      const editorElement = await this.prisma.umlEditorElement.findUnique({
         where: {
           id: id
         }
@@ -119,5 +119,5 @@ export class DatabaseEditorCommunicationService {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
     }
   }
-  
+
 }

@@ -20,7 +20,7 @@ export class DatabaseTaskCommunicationService {
  * @returns {Promise<{ newAttempt: string }>} - A promise that resolves to an object containing the new attempt word.
  */
   async synonym(string1: string, string2: string): Promise<{newAttempt:string}> {
-    try{ 
+    try{
       const natural = require('natural');
       const wordnet = new natural.WordNet();
 
@@ -49,7 +49,7 @@ export class DatabaseTaskCommunicationService {
    * @param userId - The ID of the user.
    * @returns A Promise that resolves to a tasksInformationDTO object containing the task information.
    */
-  async getTasksOverviewData(userId: number): Promise<tasksInformationDTO> {
+  /* async getTasksOverviewData(userId: number): Promise<tasksInformationDTO> {
     try{
       const tasks = await this.prisma.task.findMany({
         where: {
@@ -72,7 +72,7 @@ export class DatabaseTaskCommunicationService {
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
   /**
    * Retrieves the overview of tasks for a given user.
@@ -80,7 +80,7 @@ export class DatabaseTaskCommunicationService {
    * @param {number} userId - The ID of the user.
    * @returns {Promise<tasksOverviewDTO>} The tasks overview.
    */
-  async getTasksOverview(userId: number): Promise<tasksOverviewDTO> {
+  /* async getTasksOverview(userId: number): Promise<tasksOverviewDTO> {
     try{
       const tasks = await this.prisma.task.findMany({
         where: {
@@ -104,7 +104,7 @@ export class DatabaseTaskCommunicationService {
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
 
 
@@ -113,7 +113,7 @@ export class DatabaseTaskCommunicationService {
    * @param {taskCreationPopupDTO} taskCreationData - The data for creating the task.
    * @returns {Promise<taskCreationPopupDTO>} - The created task data.
    */
-  async createTask(taskCreationData: taskCreationPopupDTO): Promise<taskCreationPopupDTO> {
+  /* async createTask(taskCreationData: taskCreationPopupDTO): Promise<taskCreationPopupDTO> {
     try{
       // Create a new task in the database using Prisma.
       const returnedData = await this.prisma.task.create({
@@ -140,15 +140,15 @@ export class DatabaseTaskCommunicationService {
     } catch (error) {
       throw new HttpException('Fehler beim Speichern der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
   /**
    * Sets the task data in the database.
    * @param {taskDataDTO} taskData - The task data to be set.
    * @returns {Promise<taskDataDTO>} - The updated task data.
    */
-  async setTaskData(taskData: taskDataDTO): Promise<taskDataDTO> {
-    try{ 
+  /* async setTaskData(taskData: taskDataDTO): Promise<taskDataDTO> {
+    try{
       const data = await this.prisma.task.update({
         where: {
           id: taskData.id
@@ -156,19 +156,11 @@ export class DatabaseTaskCommunicationService {
         data: {
           title: taskData.title,
           description: taskData.description,
-  /*         editorData: {...taskData.editorData}, */
           editorData: JSON.parse(JSON.stringify({...taskData.editorData})),
           taskSettings: JSON.parse(JSON.stringify({...taskData.taskSettings})),
           maxPoints: taskData.maxPoints,
           updatedAt: new Date()
-
-          /* title: taskData.title,
-          description: taskData.description,
-          editorData: {...taskData.editorData},
-          taskSettings: {...taskData.taskSettings},
-          maxPoints: taskData.maxPoints,
-          updatedAt: new Date() */
-        }        
+        }
       });
 
       return {
@@ -185,7 +177,7 @@ export class DatabaseTaskCommunicationService {
     } catch (error) {
       throw new HttpException('Fehler beim Speichern der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
   /**
    * Sets the task image in the database.
@@ -193,7 +185,7 @@ export class DatabaseTaskCommunicationService {
    * @param image
    * @returns a Promise that resolves to the ID of the task.
    */
-  async setTaskImage(taskId: number, imageB4: string): Promise<number> {
+  /* async setTaskImage(taskId: number, imageB4: string): Promise<number> {
     try{
       const task = await this.prisma.task.update({
         where: {
@@ -211,7 +203,7 @@ export class DatabaseTaskCommunicationService {
     } catch (error) {
       throw new HttpException('Fehler beim Speichern der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
   /**
    * Sets the task image in the database.
@@ -220,7 +212,7 @@ export class DatabaseTaskCommunicationService {
    */
   async getTaskImage(taskId: number): Promise<{imageB64: string}> {
     try{
-      const task = await this.prisma.task.findUnique({
+      const task = await this.prisma.umlQuestion.findUnique({
         where: {
           id: taskId
         },
@@ -240,12 +232,12 @@ export class DatabaseTaskCommunicationService {
 
   /**
    * Deletes a task and its associated data from the database.
-   * 
+   *
    * @param taskId - The ID of the task to be deleted.
    * @returns A promise that resolves to a taskInformationDTO object representing the deleted task.
    * @throws HttpException with status code 400 if there is an error while deleting the data.
    */
-  async deleteTask(taskId: number): Promise<taskInformationDTO> {
+  /* async deleteTask(taskId: number): Promise<taskInformationDTO> {
     try{
       // Delete all TaskAttempts associated with the Task
       await this.prisma.taskAttempt.deleteMany({
@@ -253,21 +245,21 @@ export class DatabaseTaskCommunicationService {
           taskId: taskId
         }
       });
-  
+
       // Delete all TasksForCourse associated with the Task
       await this.prisma.tasksForCourse.deleteMany({
         where: {
           taskId: taskId
         }
       });
-    
+
       // Then delete the Task
       const task = await this.prisma.task.delete({
         where: {
           id: taskId
         }
       });
-    
+
       return {
           taskId: task.id,
           deadline: null,
@@ -277,7 +269,7 @@ export class DatabaseTaskCommunicationService {
     } catch (error) {
       throw new HttpException('Fehler beim Löschen der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
   /**
      * Retrieves task data for a given task ID.
@@ -286,11 +278,13 @@ export class DatabaseTaskCommunicationService {
      */
   async getTaskData(taskId: number): Promise<taskDataDTO> {
     try{
-      const task = await this.prisma.task.findUnique({
+      const
+
+      const task = await this.prisma.umlQuestion.findUnique({
         where: {
           id: taskId
         },
-        select: {
+        /* select: {
           title: true,
           description: true,
           lecturerId: true,
@@ -299,8 +293,10 @@ export class DatabaseTaskCommunicationService {
           maxPoints: true,
           createdAt: true,
           updatedAt: true,
-        }
+        } */
       });
+
+      const question
 
       const editorData: editorDataDTO = task.editorData as unknown as editorDataDTO;
 
@@ -524,7 +520,7 @@ export class DatabaseTaskCommunicationService {
           deadline: true,
         }
       });
-  
+
       return {
         feedback: {
           feedbackId: taskFeedback? taskFeedback.id : -1,

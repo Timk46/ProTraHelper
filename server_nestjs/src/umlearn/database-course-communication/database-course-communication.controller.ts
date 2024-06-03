@@ -1,8 +1,10 @@
-import { Controller, Get, Param, Request, Post, Delete, Body } from '@nestjs/common';
+import { Controller, Get, Param, Request, Post, Delete, Body, UseGuards } from '@nestjs/common';
 import { courseCreationDTO, courseOverviewDataDTO, tokenRequestDTO, coursePageLecturerDataDTO, coursePageStudentDataDTO, courseDTO, tasksForCourseDTO, tasksInformationDTO, userDTO, taskAttemptDTO } from '@DTOs/index';
 import { DatabaseCourseCommunicationService } from './database-course-communication.service';
-import { Lecturer } from '@/auth/custom.decorators';
+import { RolesGuard, roles } from '@/auth/roles.guard';
 
+
+@UseGuards(RolesGuard)
 @Controller('course')
 export class DatabaseCourseCommunicationController {
 
@@ -44,7 +46,7 @@ export class DatabaseCourseCommunicationController {
    * @returns A Promise that resolves to a coursePageLecturerDataDTO object.
    * @throws An error if the courseId is not a valid number.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Get('coursePageLecturer/:courseId')
   async getCoursePageLecturerData(@Param('courseId') courseId : number): Promise<coursePageLecturerDataDTO> {
     console.log("dbc-controller: courseId: " + courseId);
@@ -63,7 +65,7 @@ export class DatabaseCourseCommunicationController {
    * @returns A Promise that resolves to a taskAttemptsDTO object.
    * @throws An error if either courseId or taskId is not a number.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Get('coursePageLecturer/:courseId/:taskId')
   async getTaskAttemptData(@Param('courseId') courseId: number, @Param('taskId') taskId: number): Promise<taskAttemptDTO[]> {
     if (isNaN(courseId) || isNaN(taskId)) {
@@ -80,7 +82,7 @@ export class DatabaseCourseCommunicationController {
    * @param req - The request object containing the token payload data.
    * @returns A promise that resolves to the course creation DTO.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Post('create')
   createCourse(@Body() courseTitle:{data:string} , @Request() req: tokenRequestDTO): Promise<courseCreationDTO> {
     return this.dccs.createCourse(courseTitle.data, req.tokenPayloadData.sub);
@@ -109,7 +111,7 @@ export class DatabaseCourseCommunicationController {
    * @returns A Promise that resolves to a courseDTO object containing the course data.
    * @throws An error if the courseId is not a number.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Get('courseEdit/course/:courseId')
   async getCourseData(@Param('courseId') courseId : number): Promise<courseDTO> {
     if (isNaN(courseId)) {
@@ -142,7 +144,7 @@ export class DatabaseCourseCommunicationController {
    * @returns A Promise that resolves to a studentsDTO object containing the data for all students in the course.
    * @throws An error if the courseId is not a number.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Get('courseEdit/students/:courseId')
   async getStudentsData(@Param('courseId') courseId : number): Promise<userDTO[]> {
     if (isNaN(courseId)) {
@@ -156,7 +158,7 @@ export class DatabaseCourseCommunicationController {
    * Retrieves data for all students.
    * @returns A Promise that resolves to an array of userDTO objects representing the student data.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Get('courseEdit/allStudents')
   async getAllStudentsData(): Promise<userDTO[]> {
     console.log('DatabaseCourseCommunicationController: getAllStudentsData()');
@@ -168,7 +170,7 @@ export class DatabaseCourseCommunicationController {
    * @param courseData The course data to be updated.
    * @returns A Promise that resolves to the updated course data.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Post('courseEdit/updateCourseData')
   updateCourseData(@Body() courseData: courseDTO): Promise<courseDTO> {
     return this.dccs.updateCourseData(courseData);
@@ -181,7 +183,7 @@ export class DatabaseCourseCommunicationController {
    * @returns A Promise that resolves to the updated tasks information.
    * @throws An error if the courseId is not a number.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Post('courseEdit/updateTasksForCourseData/:courseId')
   updateTasksForCourseData(@Param('courseId') courseId: number, @Body() taskData: tasksInformationDTO): Promise<tasksInformationDTO> {
     if (isNaN(courseId)) {
@@ -197,7 +199,7 @@ export class DatabaseCourseCommunicationController {
    * @returns A Promise that resolves to the updated student data.
    * @throws An error if either courseId or studentId is not a number.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Delete('courseEdit/removeStudentFromCourse/:courseId/:studentId')
   async removeStudentFromCourse(@Param('courseId') courseId: number, @Param('studentId') studentId: number): Promise<userDTO> {
     if (isNaN(courseId) || isNaN(studentId)) {
@@ -213,7 +215,7 @@ export class DatabaseCourseCommunicationController {
    * @returns A Promise that resolves to the updated tasks information.
    * @throws An error if either courseId or taskId is not a number.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Delete('courseEdit/removeTaskFromCourse/:courseId/:taskId')
   async removeTaskFromCourse(@Param('courseId') courseId: number, @Param('taskId') taskId: number): Promise<tasksInformationDTO> {
     if (isNaN(courseId) || isNaN(taskId)) {
@@ -229,7 +231,7 @@ export class DatabaseCourseCommunicationController {
    * @returns A Promise that resolves to a userDTO object representing the added student.
    * @throws An error if either courseId or studentId is not a number.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Post('courseEdit/addStudentToCourse/:courseId/:studentId')
   async addStudentToCourse(@Param('courseId') courseId: number, @Param('studentId') studentId: number): Promise<userDTO> {
     if (isNaN(courseId) || isNaN(studentId)) {
@@ -244,7 +246,7 @@ export class DatabaseCourseCommunicationController {
    * @returns A Promise that resolves to the deleted course as a courseDTO object.
    * @throws An error if the courseId is not a number.
    */
-  @Lecturer()
+  @roles('TEACHER, ADMIN')
   @Delete('courseEdit/deleteCourse/:courseId')
   async deleteCourse(@Param('courseId') courseId: number): Promise<courseDTO> {
     if (isNaN(courseId)) {

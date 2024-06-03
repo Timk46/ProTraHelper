@@ -26,7 +26,7 @@ import { RunCodeModule } from './tutor-kai/run-code/run-code.module';
 // END Tutor-Kai Imports
 
 // BEGIN UMLearn Imports
-import { DatabaseCourseCommunicationModule } from './umlearn/database-course-communication/database-course-communication.module';
+//import { DatabaseCourseCommunicationModule } from './umlearn/database-course-communication/database-course-communication.module';
 import { DatabaseTaskCommunicationModule } from './umlearn/database-task-communication/database-task-communication.module';
 import { DatabaseEditorCommunicationModule } from './umlearn/database-editor-communication/database-editor-communication.module';
 import { GptModule } from './umlearn/gpt/gpt.module';
