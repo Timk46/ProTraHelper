@@ -9,34 +9,59 @@ import { NotificationDTO } from '@DTOs/notification.dto';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NotificationComponent } from 'src/app/Pages/notification/notification.component';
+import { HttpClient } from '@angular/common/http';
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
-  private socket: Socket;
+  private socket!: Socket;
   private notificationsSubject = new BehaviorSubject<NotificationDTO[]>([]);
   private notifications: NotificationDTO[] = [];
 
   constructor(
     private userService: UserService,
     private snackBar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private http: HttpClient,
     ) {
-
-      this.socket = io('http://localhost:3001/notifications', {
-        query: { token: this.userService.getAccessToken()},
-        withCredentials: true,
-        transports: ['websocket']
-      });
-      this.socket.on('notification', (notification: NotificationDTO) => {
-        this.addNotification(notification);
-        console.log("YOU DID IT")
-        this.showNotification(notification.message, 'View', '/dashboard', () => this.handleNotificationClick(notification));
-      });
+      this.userService.isAuthenticated$.subscribe((isAuthenticated) => {
+        if(isAuthenticated) {
+          this.startListening();
+        } else {
+          this.stopListening();
+        }
+      })
   }
 
-  /***
+  /**
+   * Start listening for notifications and establish a connection to the websocket
+   */
+  private startListening(): void {
+    this.socket = io('http://localhost:3001/notifications', {
+      query: { token: this.userService.getAccessToken()},
+      withCredentials: true,
+      transports: ['websocket']
+    });
+    this.socket.on('notification', (notification: NotificationDTO) => {
+      console.log("Received notification from websocket: ", notification)
+      this.addNotification(notification);
+      console.log("notification added, showing notification")
+      this.showNotification(notification.message, 'View', () => this.handleNotificationClick(notification));
+    });
+  }
+
+  /**
+   * Stop listening for notifications and disconnect from the websocket
+   */
+  private stopListening(): void {
+    if(this.socket) {
+      this.socket.disconnect();
+    }
+  }
+
+  /**
    * Get the notifications
+   * @returns {Observable<NotificationDTO[]>} the notifications as observable
    */
   getNotifications(): Observable<NotificationDTO[]> {
     return this.notificationsSubject.asObservable();
@@ -51,15 +76,14 @@ export class NotificationService {
     this.notificationsSubject.next(this.notifications);
   }
 
-  // EXAMPLE IMPLEMENTATION OF HOW TO HANDLE THE CLICK
-  /** TODO: Implement this types
+  /** TODO: Implement different actions for different types of notifications???
    * handle the click on a notification
    * @param notification
    */
   handleNotificationClick(notification: NotificationDTO): void {
     if(notification.type === 'comment') {
       console.log("COMMENT reached the frontendservice")
-      this.router.navigate(['/discussion-view', notification.discussionId]);
+      this.router.navigate(['/discussion-view/'+ Number(notification.discussionId)]);
     }
 
     this.removeNotification(notification);
@@ -75,7 +99,7 @@ export class NotificationService {
   }
 
   /**
-   * Sends a notification to the user with the given id
+   * Sends a notification from the client to the user with the given id
    * @param notification
    */
   sendNotification(notification: NotificationDTO) {
@@ -89,12 +113,23 @@ export class NotificationService {
    * @param route
    * @param action
    */
-  showNotification(message: string, actionText?: string, route?: string, action?: () => void) {
+  showNotification(message: string, actionText?: string, action?: () => void) {
     this.snackBar.openFromComponent(NotificationComponent, {
-      data: { message, actionText, route, action },
-      duration: 5000,
+      data: { message, actionText, action },
+      duration: 50000,
       horizontalPosition: 'right',
-      verticalPosition: 'top'
+      verticalPosition: 'top',
+      panelClass: ['notification-snackbar-container']
     });
   }
+
+  /**
+   * Mark a notification as read
+   * @returns {Observable<NotificationDTO>} the updated notification
+   */
+  markNotificationAsRead(notification: NotificationDTO): Observable<NotificationDTO> {
+    console.log("marking notification as read: ", notification.id)
+    return this.http.put<NotificationDTO>(`${environment.server}/notifications/${notification.id}/read`, notification);
+  }
+
 }

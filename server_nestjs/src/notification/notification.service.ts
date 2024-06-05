@@ -1,16 +1,18 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
-import { EventEmitter2 } from 'eventemitter2';
 import { NotificationDTO } from '@Interfaces/index';
 import { PrismaService } from '@/prisma/prisma.service';
+import { Subject } from 'rxjs';
+
 
 
 
 @Injectable()
-export class NotificationService  {
+export class NotificationService   {
+  private notificationSubject = new Subject<NotificationDTO>();
+  notification$ = this.notificationSubject.asObservable();
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly eventEmitter: EventEmitter2) {
+    private readonly prisma: PrismaService) {
   }
 
   /** TODO (MAYBE BUILD MULTIPLE NOTIFY METHODS FOR DIFFERENT TYPES OF EVENTS)
@@ -18,9 +20,17 @@ export class NotificationService  {
    * @param {NotificationDTO} notification
    */
   async notifyUser(notification: NotificationDTO) {
-    console.log('NotificationService: notifyUser');
-    await this.createNotification(notification);
-    this.eventEmitter.emit('notification', notification);
+    console.log('NotificationService: notifyUser with message: ', notification.message , "for user: ", notification.userId);
+    const createdNotification = await this.createNotification(notification);
+    this.notificationSubject.next(createdNotification);
+    console.log(`emitted notification: ${createdNotification.message} for user: ${createdNotification.userId}`)
+  }
+
+  /**
+   * Get notifications as Observable
+   */
+  async getNotifications() {
+    return this.notificationSubject.asObservable();
   }
 
   /**
@@ -28,7 +38,7 @@ export class NotificationService  {
    * @param {NotificationDTO} notification
    * @returns {Promise<Notification>}
    */
-  private async createNotification(notification: NotificationDTO): Promise<NotificationDTO> {
+  async createNotification(notification: NotificationDTO): Promise<NotificationDTO> {
    const createdNotification = await this.prisma.notification.create({
       data: {
         message: notification.message,
@@ -37,15 +47,10 @@ export class NotificationService  {
         delivered: false,
         isRead: notification.isRead,
         readTimestamp: notification.readTimestamp,
-        type: notification.type
+        type: notification.type,
+        discussionId: notification.discussionId,
       }
     });
-
-    // Emit the notification event????
-    // this.eventemitter.emit(
-    //   'notification.created',
-    //   notification
-    // );
 
     return createdNotification;
   }
@@ -117,6 +122,7 @@ export class NotificationService  {
    * @returns {Promise<void>}
    */
   async markNotificationsAsDelivered(notificationIds: number[]): Promise<void>{
+    console.log('NotificationService: markNotificationsAsDelivered');
     await this.prisma.notification.updateMany({
       where: {
         id: {
@@ -135,6 +141,7 @@ export class NotificationService  {
    * @returns {Promise<NotificationDTO[]>} undelivered notifications
    */
   async getUndeliveredNotifications(userId: number): Promise<NotificationDTO[]> {
+    console.log('NotificationService: getUndeliveredNotifications');
     return this.prisma.notification.findMany({
       where: {
         userId,
@@ -152,6 +159,7 @@ export class NotificationService  {
    * @returns {Promise<NotificationDTO>}
    */
   async markNotificationAsRead(notificationId: number): Promise<NotificationDTO>{
+    console.log('NotificationService: markNotificationAsRead');
     return this.prisma.notification.update({
       where: {
         id: notificationId

@@ -13,7 +13,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from '@angular/router';
 import { ConfettiService } from "src/app/Services/animations/confetti.service";
 import { Title } from '@angular/platform-browser';
-import { NotificationService } from "src/app/Services/notification/notification.service";
+
 /**
  * The different states representing the current status of the student workspace.
  */
@@ -77,7 +77,6 @@ export class StudentWorkspaceComponent implements OnInit {
     private route: ActivatedRoute,
     private confettiService: ConfettiService,
     private title: Title,
-    private notificationService: NotificationService
   ) {}
 
   /**
@@ -87,9 +86,6 @@ export class StudentWorkspaceComponent implements OnInit {
   ngOnInit(): void {
     this.getCurrentTaskFromRoute();
     this.title.setTitle('GOALS: Tutor Kai');
-    this.notificationService.getNotifications().subscribe((notification: any) => {
-      console.log(notification);
-    })
   }
 
   getCurrentTaskFromRoute(): void {

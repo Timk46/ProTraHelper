@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { PrismaService } from '@/prisma/prisma.service';
 import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
@@ -203,6 +204,29 @@ export class DiscussionCreationService {
     }
 
     return discussion.id;
+  }
+
+
+  /**
+   * Gets all original user IDs from the anonymous users in a given discussion.
+   * @param discussionId The ID of the discussion.
+   * @returns An array of user IDs.
+   */
+  async getOriginalUserIdsFromDiscussion(discussionId: number): Promise<number[]> {
+    const anonymousUsers = await this.prisma.anonymousUser.findMany({
+      where: {
+        Message: {
+          some: {
+            discussionId: Number(discussionId),
+          },
+        },
+      },
+      select: {
+        userId: true,
+      },
+    });
+
+    return anonymousUsers.map(user => user.userId);
   }
 
 }

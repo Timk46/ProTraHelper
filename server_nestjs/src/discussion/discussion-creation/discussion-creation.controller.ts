@@ -100,26 +100,27 @@ export class DiscussionCreationController {
       messageData,
       Number(req.user.id)
     );
+    console.log("userId: ", req.user.id)
 
-    // notify users that commented on that post
-    const users = await this.dataService.getUsersByDiscussionId(
-      messageData.discussionId,
-      req.user.id
-    );
-    // create a new notification for each user
-    const notifications = users.map(user => this.createNotification(
-      {userId: user,
-        message: 'A new comment has been posted',
-        type:'comment'
+    const userIds = await this.creationService.getOriginalUserIdsFromDiscussion(messageData.discussionId);
+    const uniqueUserIds = [...new Set(userIds)];
+    console.log("hopefully sending notifications to Users: ", uniqueUserIds)
+    for (const userId of uniqueUserIds) {
+      try {
+        const notification: NotificationDTO = {
+            userId: userId,
+            message: `A new comment by User: ${req.user.id} has been posted in a discussion you participated in.`,
+            type: 'comment',
+            timestamp: new Date(),
+            isRead: false,
+            delivered: false,
+            discussionId: messageData.discussionId,
+        };
+        await this.notificationService.notifyUser(notification);
+      } catch (error) {
+        console.log('Error while sending notification to user: ',userId, error);
       }
-    ));
-    // notify the users
-    await Promise.all(
-      notifications.map(
-        notification => this.notificationService.notifyUser(
-          notification)
-        )
-      );
+    }
     console.log('Notifications sent');
     return discussionMessageId
   }

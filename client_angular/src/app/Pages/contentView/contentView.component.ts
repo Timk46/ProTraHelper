@@ -72,10 +72,9 @@ export class ContentViewComponent implements OnInit {
         }
       });
     }
-    this.notificationService.getNotifications().subscribe(message => {
-      console.log('Neue Benachrichtigung:', message);
-      
-    })
+    // this.notificationService.getNotifications().subscribe(message => {
+    //   console.log('Neue Benachrichtigung:', message.map(n => n.message));
+    // })
   }
 
   // needed for pdf iframe (we need iframe for multiple pdfs in a row: https://pdfviewer.net/extended-pdf-viewer/side-by-side)

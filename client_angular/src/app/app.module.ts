@@ -1,5 +1,5 @@
 import "reflect-metadata"
-import { NgModule, isDevMode } from '@angular/core';
+import { NgModule} from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { MaterialModule } from './Modules/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -51,8 +51,9 @@ import { ConfettiService } from "./Services/animations/confetti.service";
 import { VersionInterceptor } from "./Interceptors/version.interceptor";
 import { MobileNavigatorComponent } from './Pages/mobile-navigator/mobile-navigator.component';
 import { ToastrModule } from "ngx-toastr";
-import { ServiceWorkerModule } from '@angular/service-worker';
 import { NotificationComponent } from './Pages/notification/notification.component';
+import { NotificationBellComponent } from "./Pages/notification/notification-bell/notification-bell.component";
+
 
 
 @NgModule({
@@ -94,6 +95,7 @@ import { NotificationComponent } from './Pages/notification/notification.compone
         MobileNavigatorComponent,
         ProgressComponent,
         NotificationComponent,
+        NotificationBellComponent,
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

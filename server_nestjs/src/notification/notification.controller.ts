@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Post, Body, Get, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Delete, Put } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { NotificationDTO } from '@DTOs/notification.dto';
 
@@ -36,9 +36,16 @@ export class NotificationController {
     return this.notificationService.getAll();
   }
 
-  @Patch(':id')
+  @Put(':id')
   async updateNotification(@Body() notification: NotificationDTO, @Param('id') id: number) {
+    console.log("updating notification with id: ", id, " and notification: ", notification)
     return this.notificationService.updateNotification(notification, +id);
+  }
+
+  @Put(':id/read')
+  async markAsRead(@Body() notification: NotificationDTO, @Param('id') id: number) {
+    console.log("marking notification as read with id: ", id, " and notification: ", notification)
+    return this.notificationService.markNotificationAsRead(+id)
   }
 
   /**

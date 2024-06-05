@@ -1,6 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
 import { NotificationDTO } from '@DTOs//notification.dto';
 import { NotificationService } from 'src/app/Services/notification/notification.service';
 
@@ -16,7 +15,6 @@ export class NotificationComponent implements OnInit {
   constructor(
     @Inject(MAT_SNACK_BAR_DATA) public data: any,
     private snackBarRef: MatSnackBarRef<NotificationComponent>,
-    private router: Router,
     private notificationService: NotificationService
   ) {}
 
@@ -35,10 +33,7 @@ export class NotificationComponent implements OnInit {
   }
 
   performAction() {
-    if (this.data.route) {
-      this.router.navigate([this.data.route]);
-      this.closeSnackBar();
-    } else if (this.data.action) {
+    if (this.data.action) {
       this.data.action();
       this.closeSnackBar();
     }

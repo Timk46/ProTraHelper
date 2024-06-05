@@ -502,6 +502,7 @@ model Discussion {
   authorId         Int             @unique
   isSolved         Boolean         @default(false)
   messages         Message[]
+  Notification     Notification[]
 }
 
 model Message {
@@ -586,15 +587,17 @@ model TranscriptEmbedding {
 }
 
 model Notification {
-  id            Int      @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   userId        Int?
   message       String
-  timestamp     DateTime @default(now())
-  isRead        Boolean  @default(false)
+  timestamp     DateTime    @default(now())
+  isRead        Boolean     @default(false)
   readTimestamp DateTime?
   //priority      Int      @default(0)
   type          String
-  delivered     Boolean  @default(false)
-  User          User?    @relation(fields: [userId], references: [id])
+  delivered     Boolean     @default(false)
+  User          User?       @relation(fields: [userId], references: [id])
+  discussion    Discussion? @relation(fields: [discussionId], references: [id])
+  discussionId  Int?
   //data      Json?
 }

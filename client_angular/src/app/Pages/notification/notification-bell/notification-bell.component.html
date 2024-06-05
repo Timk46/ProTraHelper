@@ -1,0 +1,21 @@
+<div class="notification-bell">
+  <mat-icon (click)="toggleNotifications()">notifications</mat-icon>
+  <span *ngIf="unreadCount > 0" class="notification-count">{{ unreadCount }}</span>
+
+  <div class="notifications-panel" *ngIf="showNotifications">
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let notification of allNotifications" #panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{ notification.message }}
+          </mat-panel-title>
+          <mat-panel-description>
+            <span *ngIf="!notification.isRead" class="notification-status">Unread</span>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <p>{{ notification.message }}</p>
+        <button mat-button (click)="markAsRead(notification, panel)">Mark as read</button>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+</div>

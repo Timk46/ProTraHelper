@@ -127,7 +127,6 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
     this.notificationService.showNotification(
       'This is a test notification',
       'View',
-      '/dashboard',
       () => { console.log('Action performed!'); }
     );
   }
