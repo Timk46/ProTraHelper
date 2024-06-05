@@ -38,7 +38,7 @@
 
   <!-- User-Information auf der rechten Seite -->
   <div class="right-content">
-    <button mat-button style="font-size:15px;" (click)="showProgress()">User: {{userMail? userMail : "nicht eingeloggt"}}  </button>
+    <button mat-button style="font-size:15px;" (click)="showProgress()">User: {{userMail? userMail : "nicht eingeloggt"}} | {{userRole}}  </button>
     <button mat-button style="margin-left: 5px" *ngIf="userIsLoggedIn" (click)="logOut()">Logout</button>
   </div>
 </mat-toolbar>

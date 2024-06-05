@@ -249,7 +249,7 @@ export class RunCodeService {
     let markedAsDone = false;
     if (progress === 1) {
       markedAsDone = true;
-      this.contentService.toggleCheckmark(
+      this.contentService.questionContentElementDone(
         contentElement.id,
         question.conceptNodeId,
         question.level,
