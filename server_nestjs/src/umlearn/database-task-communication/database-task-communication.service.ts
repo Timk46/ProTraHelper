@@ -278,38 +278,36 @@ export class DatabaseTaskCommunicationService {
      */
   async getTaskData(taskId: number): Promise<taskDataDTO> {
     try{
-      const
-
-      const task = await this.prisma.umlQuestion.findUnique({
+      const question = await this.prisma.question.findUnique({
         where: {
           id: taskId
         },
-        /* select: {
-          title: true,
-          description: true,
-          lecturerId: true,
-          editorData: true,
-          taskSettings: true,
-          maxPoints: true,
+        select: {
+          authorId: true,
+          name: true,
+          text: true,
+          score: true,
           createdAt: true,
           updatedAt: true,
-        } */
+          UmlQuestion: {
+            select: {
+              editorData: true,
+              taskSettings: true
+            }
+          }
+        }
       });
-
-      const question
-
-      const editorData: editorDataDTO = task.editorData as unknown as editorDataDTO;
 
       return {
         id: taskId,
-        title: task.title,
-        description: task.description,
-        lecturerId: task.lecturerId,
-        editorData: task.editorData? task.editorData as unknown as editorDataDTO : {nodes: [], edges: []},
-        taskSettings: task.taskSettings ? task.taskSettings as unknown as taskSettingsDTO : { allowedNodeTypes: [], allowedEdgeTypes: [], editorModel: EditorModel.CLASSDIAGRAM},
-        maxPoints: task.maxPoints,
-        createdAt: task.createdAt,
-        updatedAt: task.updatedAt
+        title: question.name,
+        description: question.text,
+        lecturerId: question.authorId,
+        editorData: question.UmlQuestion.editorData? question.UmlQuestion.editorData as unknown as editorDataDTO : {nodes: [], edges: []},
+        taskSettings: question.UmlQuestion.taskSettings ? question.UmlQuestion.taskSettings as unknown as taskSettingsDTO : { allowedNodeTypes: [], allowedEdgeTypes: [], editorModel: EditorModel.CLASSDIAGRAM},
+        maxPoints: question.score,
+        createdAt: question.createdAt,
+        updatedAt: question.updatedAt
       };
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
@@ -324,24 +322,28 @@ export class DatabaseTaskCommunicationService {
    */
   async getTaskWorkspaceData(taskId: number): Promise<taskWorkspaceDataDTO> {
     try{
-      const task = await this.prisma.task.findUnique({
+      const task = await this.prisma.question.findUnique({
         where: {
           id: taskId
         },
         select: {
-          title: true,
-          description: true,
-          taskSettings: true,
-          maxPoints: true,
+          name: true,
+          text: true,
+          UmlQuestion: {
+            select: {
+              taskSettings: true
+            }
+          },
+          score: true,
         }
       });
 
       return {
         id: taskId,
-        title: task.title,
-        description: task.description,
-        taskSettings: task.taskSettings ? task.taskSettings as unknown as taskSettingsDTO : { allowedNodeTypes: [], allowedEdgeTypes: [], editorModel: EditorModel.CLASSDIAGRAM},
-        maxPoints: task.maxPoints,
+        title: task.name,
+        description: task.text,
+        taskSettings: task.UmlQuestion.taskSettings ? task.UmlQuestion.taskSettings as unknown as taskSettingsDTO : { allowedNodeTypes: [], allowedEdgeTypes: [], editorModel: EditorModel.CLASSDIAGRAM},
+        maxPoints: task.score,
       };
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
@@ -353,7 +355,7 @@ export class DatabaseTaskCommunicationService {
    * @param {number} taskAttemptId - The ID of the task attempt.
    * @returns {Promise<taskFeedbackDataDTO>} - The task feedback data.
    */
-  async getTaskFeedbackData(taskAttemptId: number): Promise<taskFeedbackDataDTO> {
+  /* async getTaskFeedbackData(taskAttemptId: number): Promise<taskFeedbackDataDTO> {
     try{
       const taskFeedback = await this.prisma.feedback.findUnique({
         where: {
@@ -437,7 +439,7 @@ export class DatabaseTaskCommunicationService {
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
 
   /**
@@ -449,7 +451,7 @@ export class DatabaseTaskCommunicationService {
    * @returns A promise that resolves to a taskFeedbackDataDTO object containing the feedback, task, and attempt information.
    * @throws HttpException if there is an error while loading the data.
    */
-  async getTaskFeedbackDataByStudent(courseId: number, taskId: number, studentId: number, globalRole: string): Promise<taskFeedbackDataDTO> {
+  /* async getTaskFeedbackDataByStudent(courseId: number, taskId: number, studentId: number, globalRole: string): Promise<taskFeedbackDataDTO> {
     try{
       let taskAttempt = await this.prisma.taskAttempt.findFirst({
         where: {
@@ -553,14 +555,14 @@ export class DatabaseTaskCommunicationService {
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
   /**
    * Retrieves task feedback data for a given course.
    * @param {number} courseId - The ID of the course.
    * @returns {Promise<taskFeedbackDataDTO[]>} - A promise that resolves to an array of task feedback data objects.
    */
-  async getTaskFeedbackDataByCourse(courseId: number): Promise<taskFeedbackDataDTO[]> {
+  /* async getTaskFeedbackDataByCourse(courseId: number): Promise<taskFeedbackDataDTO[]> {
     try{
       const taskAttempts = await this.prisma.taskAttempt.findMany({
         where: {
@@ -654,7 +656,7 @@ export class DatabaseTaskCommunicationService {
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
   /**
    * Retrieves the task attempt data for a specific task and student.
@@ -662,7 +664,7 @@ export class DatabaseTaskCommunicationService {
    * @param studentId - The ID of the student.
    * @returns A Promise that resolves to a taskAttemptDataDTO object containing the task attempt data.
    */
-  async getTaskAttemptData(courseId: number, taskId: number, studentId: number): Promise<taskAttemptDataDTO> {
+  /* async getTaskAttemptData(courseId: number, taskId: number, studentId: number): Promise<taskAttemptDataDTO> {
     try{
       const taskAttempt = await this.prisma.taskAttempt.findFirst({
         where: {
@@ -700,14 +702,14 @@ export class DatabaseTaskCommunicationService {
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
 /**
  * Retrieves task attempt data for a lecturer.
  * @param taskAttemptId - The ID of the task attempt.
  * @returns A Promise that resolves to a taskAttemptDataDTO object.
  */
-async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptDataDTO> {
+/* async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptDataDTO> {
     try{
       const taskAttempt = await this.prisma.taskAttempt.findUnique({
         where: {
@@ -743,7 +745,7 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
   /**
    * Sets the task attempt data in the database.
@@ -752,7 +754,7 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
    * @param taskAttemptData - The task attempt data to be set or updated.
    * @returns A Promise that resolves to the updated or newly created task attempt data.
    */
-  async setTaskAttemptData(taskAttemptData: taskAttemptDataDTO, studentId: number): Promise<taskAttemptDataDTO> {
+  /* async setTaskAttemptData(taskAttemptData: taskAttemptDataDTO, studentId: number): Promise<taskAttemptDataDTO> {
     try{
       if (taskAttemptData.id == -1) {
         const newTaskAttempt = await this.prisma.taskAttempt.create({
@@ -760,7 +762,6 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
             studentId: studentId,
             taskId: taskAttemptData.taskId,
             courseId: taskAttemptData.courseId,
-  /*           attemptData: {...taskAttemptData.attemptData}, */
             attemptData: JSON.parse(JSON.stringify({...taskAttemptData.attemptData})),
             updatedAt: new Date()
           }
@@ -779,7 +780,6 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
             id: taskAttemptData.id
           },
           data: {
-  /*           attemptData: {...taskAttemptData.attemptData}, */
             attemptData: JSON.parse(JSON.stringify({...taskAttemptData.attemptData})),
             updatedAt: new Date()
           }
@@ -796,7 +796,7 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
     } catch (error) {
       throw new HttpException('Fehler beim Speichern der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
 
 
@@ -808,7 +808,7 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
    * @returns {Promise<taskFeedbackDTO>} - The created task feedback.
    * @throws {Error} - If the given task attempt or feedback ID does not exist.
    */
-  async createFeedback(taskFeedbackData: taskFeedbackDTO, lecturerId: number): Promise<taskFeedbackDTO> {
+  /* async createFeedback(taskFeedbackData: taskFeedbackDTO, lecturerId: number): Promise<taskFeedbackDTO> {
     try{
       const taskAttempt = await this.prisma.taskAttempt.findFirst({
         where: {
@@ -880,7 +880,7 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
     } catch (error) {
       throw new HttpException('Fehler beim Speichern der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
   /**
    * Retrieves the task status for a specific student in a course.
@@ -889,7 +889,7 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
    * @param {number} taskId - The ID of the task.
    * @returns {Promise<studentTaskStatusDTO[]>} - A promise that resolves to an array of student task status objects.
    */
-  async getStudentTaskStatus(courseId: number, taskId: number): Promise<studentTaskStatusDTO[]> {
+  /* async getStudentTaskStatus(courseId: number, taskId: number): Promise<studentTaskStatusDTO[]> {
     try{
       const taskAttempts = await this.prisma.taskAttempt.findMany({
         where: {
@@ -927,7 +927,7 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
 
   /**
@@ -937,7 +937,7 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
    * @returns A Promise that resolves to a boolean indicating if there are any task attempts.
    * @throws HttpException with a status code of BAD_REQUEST if there is an error loading the data.
    */
-  async checkForTaskAttempts(taskId: number): Promise<boolean> {
+  /* async checkForTaskAttempts(taskId: number): Promise<boolean> {
     try{
       const taskAttempt = await this.prisma.taskAttempt.findFirst({
         where: {
@@ -948,7 +948,7 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
   /**
    * Checks if there are any task attempts for a given course and task.
@@ -957,7 +957,7 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
    * @returns A Promise that resolves to a boolean indicating whether there are any task attempts or not.
    * @throws HttpException with a message 'Fehler beim Laden der Daten' and HttpStatus.BAD_REQUEST if an error occurs while loading the data.
    */
-  async checkForTaskAttemptsForCourse(courseId: number, taskId: number): Promise<boolean> {
+  /* async checkForTaskAttemptsForCourse(courseId: number, taskId: number): Promise<boolean> {
     try{
       const taskAttempt = await this.prisma.taskAttempt.findFirst({
         where: {
@@ -969,7 +969,7 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
   /**
    * Checks if there are any task attempts for a given course and student.
@@ -979,7 +979,7 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
    * @returns A Promise that resolves to a boolean indicating whether there are any task attempts.
    * @throws HttpException if there is an error while loading the data.
    */
-  async checkForTaskAttemptsForCourseAndStudent(courseId: number, studentId: number): Promise<boolean> {
+  /* async checkForTaskAttemptsForCourseAndStudent(courseId: number, studentId: number): Promise<boolean> {
     try{
       const taskAttempt = await this.prisma.taskAttempt.findFirst({
         where: {
@@ -991,6 +991,6 @@ async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptD
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
     }
-  }
+  } */
 
 }

@@ -54,8 +54,15 @@ export class ContentBoardComponent implements OnInit, OnChanges {
     'actions',
   ];
 
-  getRouterLink(index: number): string {
-    return `/tutor-kai/code/${index}`;
+  getRouterLink(type: string, index: number): string {
+    switch (type) {
+      case 'CodingQuestion':
+        return `/tutor-kai/code/${index}`;
+      case 'UML':
+        return `/umlearn/task-workspace/${index}`;
+      default:
+        throw new Error('Unknown question type');
+    }
   }
 
   titles = [
@@ -205,6 +212,14 @@ export class ContentBoardComponent implements OnInit, OnChanges {
       dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
     }
 
+    if (taskViewData.type == 'CodingQuestion') {
+      this.router.navigate([this.getRouterLink("CodingQuestion" ,taskViewData.id)]);
+    }
+
+    if (taskViewData.type == 'UML') {
+      this.router.navigate([this.getRouterLink("UML", taskViewData.id)]);
+    }
+
     if (dialogRef) {
       const prevScore = taskViewData.progress;
       const dialogSubmitSubscription =
@@ -235,10 +250,6 @@ export class ContentBoardComponent implements OnInit, OnChanges {
           dialogSubmitSubscription.unsubscribe();
         });
     }
-
-    if (taskViewData.type == 'CodingQuestion') {
-      this.router.navigate([this.getRouterLink(taskViewData.id)]);
-    }
   }
 
   hasContentElementType(content: ContentDTO, type: string) {
@@ -265,6 +276,8 @@ export class ContentBoardComponent implements OnInit, OnChanges {
         return 'Freitext';
       case 'CodingQuestion':
         return 'Programmieraufgabe';
+      case 'UML':
+        return 'UML-Aufgabe';
       default:
         return 'undefiniert';
     }

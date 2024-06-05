@@ -1,3 +1,21 @@
+<mat-toolbar class="header" color="primary">
+
+  <div class="left-content">
+   <a mat-list-item routerLink="/dashboard" style="cursor: pointer;" routerLinkActive="active-link">
+     <span style="font-size:15px;">Zurück zum Dashboard</span>
+   </a>
+ </div>
+
+ <div class="center-content">
+   <span style="font-size:15px;" *ngIf="taskWorkspaceData.title">{{taskWorkspaceData.title}}</span>
+ </div>
+
+ <div class="right-content">
+   <span style="font-size:15px; margin-right: 10px;">UMLearn</span>
+   <img src="../../../../../assets/img/umlearn_logo_small.png" alt="Umlearn Logo">
+ </div>
+</mat-toolbar>
+
 <div class="h-box">
   <div class="information-container mat-elevation-z8">
     <div class="title-container">
@@ -16,12 +34,12 @@
   </div>
 
   <div class="editor-container">
-  <app-editor #editor
-    [selectableNodes]="taskWorkspaceData.taskSettings.allowedNodeTypes"
-    [selectableEdges]="taskWorkspaceData.taskSettings.allowedEdgeTypes"
-    [nodes]="taskAttemptData.attemptData.nodes"
-    [edges]="taskAttemptData.attemptData.edges"
-  ></app-editor>
+    <app-editor #editor
+      [selectableNodes]="taskWorkspaceData.taskSettings.allowedNodeTypes"
+      [selectableEdges]="taskWorkspaceData.taskSettings.allowedEdgeTypes"
+      [nodes]="taskAttemptData.attemptData.nodes"
+      [edges]="taskAttemptData.attemptData.edges"
+    ></app-editor>
   </div>
 
 </div>

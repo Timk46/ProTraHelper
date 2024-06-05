@@ -3,7 +3,6 @@ import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { DatabaseEditorCommunicationService } from './database-editor-communication.service';
 import { RolesGuard, roles } from '@/auth/roles.guard';
 
-@UseGuards(RolesGuard)
 @Controller('editor')
 export class DatabaseEditorCommunicationController {
 

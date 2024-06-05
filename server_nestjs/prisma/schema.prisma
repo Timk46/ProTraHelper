@@ -281,7 +281,7 @@ model Question {
   QuestionVersionAsQuestion  QuestionVersion[]  @relation("QuestionToQuestionVersion")
   QuestionVersionAsSuccessor QuestionVersion[]  @relation("QuestionToSuccessorQuestionVersion")
   FreeTextQuestion           FreeTextQuestion[]
-  UmlQuestion                UmlQuestion[]
+  UmlQuestion                UmlQuestion?
 }
 
 model QuestionVersion {
@@ -610,7 +610,7 @@ model UmlEditorElement {
 model UmlQuestion {
   id           Int      @id @default(autoincrement())
   question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  questionId   Int
+  questionId   Int @unique
   title        String
   editorData   Json? //editor content //ist die Musterloesung, die der Lecturer erstellt
   dataImage    String?  @db.Text //the image of the task

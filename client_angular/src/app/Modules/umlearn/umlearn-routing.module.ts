@@ -5,9 +5,8 @@ import { TaskWorkspaceComponent } from './pages/task-workspace/task-workspace.co
 // Fügen Sie weitere Komponentenimporte hier ein
 
 const routes: Routes = [
-  { path: 'editor', component: EditorComponent },
+  //{ path: 'editor', component: EditorComponent },
   { path: 'task-workspace/:taskId', component: TaskWorkspaceComponent },
-  // Definieren Sie weitere Routen hier
 ];
 
 @NgModule({
