@@ -4,8 +4,9 @@ export interface NotificationDTO {
     message: string;
     timestamp?: Date;
     isRead?: boolean;
-    delivered?: boolean;
     readTimestamp?: Date;
+    isDelivered?: boolean;
+    
     type?: string
     discussionId?: number;
     conceptNodeId?: number;

@@ -1,4 +1,4 @@
-import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, HostListener, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { NotificationService } from 'src/app/Services/notification/notification.service';
 import { NotificationDTO } from '@DTOs/notification.dto';
 import { MatExpansionPanel } from '@angular/material/expansion';
@@ -12,6 +12,8 @@ export class NotificationBellComponent implements OnInit {
   allNotifications: NotificationDTO[] = [];
   unreadCount: number = 0;
   showNotifications: boolean = false;
+  limit: number = 20;
+  offset: number = 0;
 
   @ViewChildren(MatExpansionPanel) panels!: QueryList<MatExpansionPanel>
 
@@ -24,8 +26,23 @@ export class NotificationBellComponent implements OnInit {
     });
   }
 
+  loadMoreNotifications(): void {
+    this.offset += this.limit;
+    this.notificationService.fetchMoreNotifications(this.limit, this.offset);
+  }
+
+  @HostListener('scroll', ['$event'])
+  onScroll(event: any): void {
+    const element = event.target;
+    if (element.scrollHeight - element.scrollTop === element.clientHeight) {
+      this.loadMoreNotifications();
+    }
+  }
+
   toggleNotifications() {
-    this.showNotifications = !this.showNotifications;
+    if(this.allNotifications.length > 0) {
+      this.showNotifications = !this.showNotifications;
+    }
   }
 
   markAsRead(notification: NotificationDTO, panel: MatExpansionPanel) {

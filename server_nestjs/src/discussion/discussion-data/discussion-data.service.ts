@@ -116,33 +116,39 @@ export class DiscussionDataService {
     };
   }
 
-  /**
- * This function returns all user ids for a given discussion, excluding the provided userId
+
+/**
+ * This function returns all original user ids for a given discussion.
  *
  * @param discussionId
- * @returns the user ids
+ * @returns {Promise<number[]>} the user ids
  */
-  async getUsersByDiscussionId(discussionId: number, excludeUserId: number) : Promise<number[]> {
-    const messages = await this.prisma.message.findMany({
-      where: {
-        discussionId: Number(discussionId),
-        // exclude the user that just commented
-        authorId: {
-          not: Number(excludeUserId)
+async getUserIdsByDiscussionId(discussionId: number, excludedUserId: number): Promise<number[]> {
+  const messages = await this.prisma.message.findMany({
+    where: {
+      discussionId: Number(discussionId),
+      author: {
+        userId: {
+          not: Number(excludedUserId)
         }
-      },
-      select: {
-        authorId: true
       }
-    });
-
-    if (!messages) {
-      throw new Error('Messages not found');
+    },
+    select: {
+      author: {
+        select: {
+          userId: true
+        }
+      }
     }
+  });
 
-    const userIds = messages.map(message => message.authorId);
-    return userIds;
+  if (!messages) {
+    throw new Error('Messages not found');
   }
+
+  const userIds = messages.map(message => message.author.userId);
+  return userIds;
+}
 
 
 }

@@ -102,7 +102,8 @@ export class DiscussionCreationController {
     );
     console.log("userId: ", req.user.id)
 
-    const userIds = await this.creationService.getOriginalUserIdsFromDiscussion(messageData.discussionId);
+    const userIds = await this.dataService.getUserIdsByDiscussionId(messageData.discussionId, req.user.id);
+    console.log("userIds: ", userIds)
     const uniqueUserIds = [...new Set(userIds)];
     console.log("hopefully sending notifications to Users: ", uniqueUserIds)
     for (const userId of uniqueUserIds) {
@@ -113,7 +114,7 @@ export class DiscussionCreationController {
             type: 'comment',
             timestamp: new Date(),
             isRead: false,
-            delivered: false,
+            isDelivered: false,
             discussionId: messageData.discussionId,
         };
         await this.notificationService.notifyUser(notification);

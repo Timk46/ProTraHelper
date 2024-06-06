@@ -15,6 +15,8 @@ export * from "./discussionCreation.dto"
 export * from "./discussionFilter.dto"
 export * from "./module.dto"
 export * from "./contentElementStatus.dto"
+export * from "./notification.dto";
+export * from "./notificationType.enum";
 
 //TutorKai DTOs
 export * from "./tutorKaiDtos/kiFeedback.dto";
@@ -23,4 +25,3 @@ export * from "./user.dto"; // ToDo: Merge with hefl
 export * from "./file.dto"; // ToDo: Merge with hefl
 export * from "./userAnswer.dto";
 export * from "./feedbackGeneration.dto";
-export * from "./notification.dto";

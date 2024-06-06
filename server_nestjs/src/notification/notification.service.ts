@@ -15,7 +15,7 @@ export class NotificationService   {
     private readonly prisma: PrismaService) {
   }
 
-  /** TODO (MAYBE BUILD MULTIPLE NOTIFY METHODS FOR DIFFERENT TYPES OF EVENTS)
+  /**
    * Notify a user by emitting an event
    * @param {NotificationDTO} notification
    */
@@ -44,7 +44,7 @@ export class NotificationService   {
         message: notification.message,
         userId: notification.userId,
         timestamp: notification.timestamp,
-        delivered: false,
+        isDelivered: false,
         isRead: notification.isRead,
         readTimestamp: notification.readTimestamp,
         type: notification.type,
@@ -55,28 +55,37 @@ export class NotificationService   {
     return createdNotification;
   }
 
-  /**
-   * get the notification with the given id
-   * @param {number} id
-   * @returns {Promise<NotificationDTO> | null} the notification with the given id
-   */
-  async getOne(id: number): Promise<NotificationDTO | null> {
-    return this.prisma.notification.findUnique({
-      where: {
-        id: id
-      }
-    })
-  }
+  // /**
+  //  * get the notification with the given id
+  //  * @param {number} id
+  //  * @param {number} userId
+  //  * @returns {Promise<NotificationDTO> | null} the notification with the given id
+  //  */
+  // async getOne(id: number, userId: number): Promise<NotificationDTO | null> {
+  //   return this.prisma.notification.findUnique({
+  //     where: {
+  //       id: id,
+  //       userId: userId
+  //     }
+  //   })
+  // }
 
   /**
    * get all notifications with descending timestamp order
+   * @param {number} userId
    * @returns {Promise<NotificationDTO>} all notifications
    */
-  async getAll(): Promise<NotificationDTO[]> {
+  async getAll(userId: number, limit: number, offset: number): Promise<NotificationDTO[]> {
     return this.prisma.notification.findMany({
+      where: {
+        userId: userId
+      },
       orderBy: {
         timestamp: 'desc'
-      }
+      },
+      //just taking a few notifications because of pagination
+      take: Number(limit),
+      skip: Number(offset)
     });
   }
 
@@ -96,7 +105,7 @@ export class NotificationService   {
         userId: notification.userId,
         timestamp: notification.timestamp,
         isRead: notification.isRead,
-        delivered: notification.delivered,
+        isDelivered: notification.isDelivered,
         readTimestamp: notification.readTimestamp,
         type: notification.type
       }
@@ -117,25 +126,6 @@ export class NotificationService   {
   }
 
   /**
-   * Mark notifications as delivered
-   * @param {number[]} notificationIds
-   * @returns {Promise<void>}
-   */
-  async markNotificationsAsDelivered(notificationIds: number[]): Promise<void>{
-    console.log('NotificationService: markNotificationsAsDelivered');
-    await this.prisma.notification.updateMany({
-      where: {
-        id: {
-          in: notificationIds
-        }
-      },
-      data: {
-        delivered: true
-      }
-    });
-  }
-
-  /**
    * Get undelivered notifications for a user
    * @param {number} userId
    * @returns {Promise<NotificationDTO[]>} undelivered notifications
@@ -145,7 +135,7 @@ export class NotificationService   {
     return this.prisma.notification.findMany({
       where: {
         userId,
-        delivered: false
+        isDelivered: false
       },
       orderBy: {
         timestamp: 'desc'
@@ -167,10 +157,26 @@ export class NotificationService   {
       data: {
         isRead: true,
         readTimestamp: new Date(),
-        delivered: true
+        isDelivered: true
       }
     });
   }
 
+  /**
+   * Mark notifications as delivered
+   * @param {number} notificationId
+   * @returns {Promise<void>}
+   */
+  async markNotificationAsDelivered(notificationId: number): Promise<void>{
+    console.log('NotificationService: markNotificationsAsDelivered');
+    await this.prisma.notification.updateMany({
+      where: {
+        id: notificationId
+      },
+      data: {
+        isDelivered: true
+      }
+    });
+  }
 
 }

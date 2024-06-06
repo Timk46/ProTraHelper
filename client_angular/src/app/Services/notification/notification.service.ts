@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
+import {NotificationType} from '@DTOs/notificationType.enum';
 import { UserService } from '../auth/user.service';
 
 import { environment } from 'src/environments/environment';
@@ -37,6 +37,7 @@ export class NotificationService {
    * Start listening for notifications and establish a connection to the websocket
    */
   private startListening(): void {
+    this.fetchInitialNotifications(20, 0);
     this.socket = io('http://localhost:3001/notifications', {
       query: { token: this.userService.getAccessToken()},
       withCredentials: true,
@@ -59,6 +60,23 @@ export class NotificationService {
     }
   }
 
+  private fetchInitialNotifications(limit: number, offset: number): void {
+    const userId = this.userService.getTokenID();
+    this.http.get<NotificationDTO[]>(`${environment.server}/notifications/${userId}/all?limit=${limit}&offset=${offset}`).subscribe(notifications => {
+      this.notifications = notifications;
+      this.notificationsSubject.next(this.notifications);
+    });
+  }
+
+  fetchMoreNotifications(limit: number, offset: number): void {
+    const userId = this.userService.getTokenID();
+    this.http.get<NotificationDTO[]>(`${environment.server}/notifications/${userId}/all?limit=${limit}&offset=${offset}`).subscribe(notifications => {
+      this.notifications = [...this.notifications, ...notifications];
+      this.notificationsSubject.next(this.notifications);
+    });
+  }
+
+
   /**
    * Get the notifications
    * @returns {Observable<NotificationDTO[]>} the notifications as observable
@@ -69,29 +87,33 @@ export class NotificationService {
 
   /**
    *
-   * @param notification
+   * @param {NotificationDTO} notification
    */
   addNotification(notification: NotificationDTO): void {
     this.notifications.push(notification);
     this.notificationsSubject.next(this.notifications);
   }
 
-  /** TODO: Implement different actions for different types of notifications???
+  /** TODO: Implement different actions for different types of notifications
    * handle the click on a notification
-   * @param notification
+   * @param {NotificationDTO} notification
    */
   handleNotificationClick(notification: NotificationDTO): void {
-    if(notification.type === 'comment') {
-      console.log("COMMENT reached the frontendservice")
-      this.router.navigate(['/discussion-view/'+ Number(notification.discussionId)]);
+    switch(notification.type) {
+      case NotificationType.Comment:
+        console.log("comment reached the frontend");
+        this.router.navigate(['/discussion-view/' + notification.discussionId]);
+        break;
+      default:
+        console.log("Unknown notification type");
+        break;
     }
-
     this.removeNotification(notification);
   }
 
   /**
    * Remove a notification from the list
-   * @param notification
+   * @param {NotificationDTO} notification
    */
   private removeNotification(notification: NotificationDTO): void {
     this.notifications = this.notifications.filter(notif => notif !== notification);
@@ -99,8 +121,8 @@ export class NotificationService {
   }
 
   /**
-   * Sends a notification from the client to the user with the given id
-   * @param notification
+   * NOT USED YET: emits a notification from the client to the user with the given id
+   * @param {NotificationDTO} notification
    */
   sendNotification(notification: NotificationDTO) {
     this.socket.emit('notifications', { userId: notification.userId, message: notification.message});
@@ -110,7 +132,6 @@ export class NotificationService {
    * Shows a notification with links or action for certain events to trigger
    * @param message
    * @param actionText
-   * @param route
    * @param action
    */
   showNotification(message: string, actionText?: string, action?: () => void) {
@@ -125,11 +146,17 @@ export class NotificationService {
 
   /**
    * Mark a notification as read
+   * @param {NotificationDTO} notification
    * @returns {Observable<NotificationDTO>} the updated notification
    */
   markNotificationAsRead(notification: NotificationDTO): Observable<NotificationDTO> {
     console.log("marking notification as read: ", notification.id)
-    return this.http.put<NotificationDTO>(`${environment.server}/notifications/${notification.id}/read`, notification);
+    return this.http.patch<NotificationDTO>(`${environment.server}/notifications/${notification.id}/read`, {isRead: true});
+  }
+
+  markNotificationAsDelivered(notification: NotificationDTO): Observable<NotificationDTO> {
+    console.log("marking notification as delivered: ", notification.id)
+    return this.http.patch<NotificationDTO>(`${environment.server}/notifications/${notification.id}/delivered`, {delivered: true});
   }
 
 }

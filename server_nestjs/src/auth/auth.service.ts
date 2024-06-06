@@ -1,9 +1,11 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+import {  Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 import { EventLogService } from '@/EventLog/event-log.service';
+
 
 /**
  * Provides authentication services
@@ -19,7 +21,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private eventLogService: EventLogService
+    private eventLogService: EventLogService,
   ) {}
 
   /**
@@ -70,7 +72,7 @@ export class AuthService {
   async login(user: User) {
     const tokens = await this.generateTokens(user);
     return {
-      ...tokens,
+      ...tokens
     };
   }
 

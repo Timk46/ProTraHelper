@@ -93,7 +93,7 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
       console.log(`Sending Notification:  ${notification.message} to user:  ${notification.userId}`);
       client.emit('notification', notification);
       console.log(`emitted notification: ${notification.message} for user: ${notification.userId}`)
-      await this.notificationService.markNotificationsAsDelivered([notification.id]);
+      await this.notificationService.markNotificationAsDelivered(notification.id);
       console.log(`marked Notification delivered: ${notification.id}`);
     } else {
       console.log(`User ${notification.userId} is not connected`);
