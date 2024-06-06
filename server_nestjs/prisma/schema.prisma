@@ -612,7 +612,10 @@ model UmlQuestion {
   question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId   Int @unique
   title        String
-  editorData   Json? //editor content //ist die Musterloesung, die der Lecturer erstellt
+  text         String?   @db.Text
+  textHTML     String?   @db.Text
+  editorData   Json? //editor content - teachers work
+  startData    Json? //optional data for the start of the task displayed in the editor
   dataImage    String?  @db.Text //the image of the task
   taskSettings Json? //siehe taskSettingsDTO
   createdAt    DateTime @default(now())

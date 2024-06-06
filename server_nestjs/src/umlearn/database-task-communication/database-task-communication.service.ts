@@ -212,18 +212,22 @@ export class DatabaseTaskCommunicationService {
    */
   async getTaskImage(taskId: number): Promise<{imageB64: string}> {
     try{
-      const task = await this.prisma.umlQuestion.findUnique({
+      const task = await this.prisma.question.findUnique({
         where: {
           id: taskId
         },
         select: {
-          dataImage: true
+          UmlQuestion: {
+            select: {
+              dataImage: true
+            }
+          }
         }
       });
       if (!task) {
         throw new Error('Given Task id does not exist.');
       }
-      return {imageB64: task.dataImage};
+      return {imageB64: task.UmlQuestion.dataImage};
     } catch (error) {
       throw new HttpException('Fehler beim Speichern der Daten', HttpStatus.BAD_REQUEST);
     }
@@ -285,14 +289,17 @@ export class DatabaseTaskCommunicationService {
         select: {
           authorId: true,
           name: true,
-          text: true,
+          //text: true,
           score: true,
           createdAt: true,
           updatedAt: true,
           UmlQuestion: {
             select: {
               editorData: true,
-              taskSettings: true
+              startData: true,
+              taskSettings: true,
+              text: true,
+              textHTML: true
             }
           }
         }
@@ -301,7 +308,7 @@ export class DatabaseTaskCommunicationService {
       return {
         id: taskId,
         title: question.name,
-        description: question.text,
+        description: question.UmlQuestion.textHTML || question.UmlQuestion.text || '',
         lecturerId: question.authorId,
         editorData: question.UmlQuestion.editorData? question.UmlQuestion.editorData as unknown as editorDataDTO : {nodes: [], edges: []},
         taskSettings: question.UmlQuestion.taskSettings ? question.UmlQuestion.taskSettings as unknown as taskSettingsDTO : { allowedNodeTypes: [], allowedEdgeTypes: [], editorModel: EditorModel.CLASSDIAGRAM},
@@ -328,10 +335,12 @@ export class DatabaseTaskCommunicationService {
         },
         select: {
           name: true,
-          text: true,
+          //text: true,
           UmlQuestion: {
             select: {
-              taskSettings: true
+              taskSettings: true,
+              text: true,
+              textHTML: true
             }
           },
           score: true,
@@ -341,7 +350,7 @@ export class DatabaseTaskCommunicationService {
       return {
         id: taskId,
         title: task.name,
-        description: task.text,
+        description: task.UmlQuestion.textHTML || task.UmlQuestion.text || '',
         taskSettings: task.UmlQuestion.taskSettings ? task.UmlQuestion.taskSettings as unknown as taskSettingsDTO : { allowedNodeTypes: [], allowedEdgeTypes: [], editorModel: EditorModel.CLASSDIAGRAM},
         maxPoints: task.score,
       };
