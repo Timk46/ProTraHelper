@@ -22,23 +22,25 @@
 <mat-toolbar class="footer">
   <!-- Dashboard-Link auf der linken Seite -->
   <div class="left-content">
-    <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link">
-      <span style="font-size:15px;cursor: pointer;">Version: {{version}}</span>
-    </a>
+
+      <button  style="font-size:15px;cursor: pointer;">Version: {{version}}</button>
+      <mat-divider vertical="true" class="divider"></mat-divider>
+      <button mat-button style="font-size:15px;">User: {{userMail? userMail : "nicht eingeloggt"}} </button>
   </div>
 
   <!-- Zentrierte Inhalte für Impressum, Datenschutz und Hilfe -->
   <div class="center-content">
     <button mat-button (click)="openImpressum()">Impressum</button>
     <mat-divider vertical="true" class="divider"></mat-divider>
-    <button style="font-weight:bolder" mat-button (click)="openContact()">Hilfe</button>
+    <button mat-button (click)="openContact()">Hilfe</button>
     <mat-divider vertical="true" class="divider"></mat-divider>
     <button mat-button (click)="openDatenschutz()">Datenschutz</button>
   </div>
 
   <!-- User-Information auf der rechten Seite -->
   <div class="right-content">
-    <button mat-button style="font-size:15px;" (click)="showProgress()">User: {{userMail? userMail : "nicht eingeloggt"}} | {{userRole}}  </button>
+    <button mat-button style="font-size:15px; font-weight:bolder;" (click)="showProgress()"> Fortschritt anzeigen </button>
+    <mat-divider vertical="true" class="divider"></mat-divider>
     <button mat-button style="margin-left: 5px" *ngIf="userIsLoggedIn" (click)="logOut()">Logout</button>
   </div>
 </mat-toolbar>
