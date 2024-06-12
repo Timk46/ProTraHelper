@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, catchError, Observable, of } from 'rxjs';
 import {NotificationType} from '@DTOs/notificationType.enum';
 import { UserService } from '../auth/user.service';
 
@@ -60,6 +60,11 @@ export class NotificationService {
     }
   }
 
+  /**
+   * Fetch the initial notifications
+   * @param {number} limit for pagination
+   * @param {number} offset for pagination offset
+   */
   private fetchInitialNotifications(limit: number, offset: number): void {
     const userId = this.userService.getTokenID();
     this.http.get<NotificationDTO[]>(`${environment.server}/notifications/${userId}/all?limit=${limit}&offset=${offset}`).subscribe(notifications => {
@@ -68,6 +73,11 @@ export class NotificationService {
     });
   }
 
+  /**
+   * Fetch more notifications when scrolling
+   * @param {number} limit for pagination
+   * @param {number} offset for pagination offset
+   */
   fetchMoreNotifications(limit: number, offset: number): void {
     const userId = this.userService.getTokenID();
     this.http.get<NotificationDTO[]>(`${environment.server}/notifications/${userId}/all?limit=${limit}&offset=${offset}`).subscribe(notifications => {
@@ -75,7 +85,6 @@ export class NotificationService {
       this.notificationsSubject.next(this.notifications);
     });
   }
-
 
   /**
    * Get the notifications
@@ -90,7 +99,7 @@ export class NotificationService {
    * @param {NotificationDTO} notification
    */
   addNotification(notification: NotificationDTO): void {
-    this.notifications.push(notification);
+    this.notifications.unshift(notification);
     this.notificationsSubject.next(this.notifications);
   }
 
@@ -102,20 +111,21 @@ export class NotificationService {
     switch(notification.type) {
       case NotificationType.Comment:
         console.log("comment reached the frontend");
+        this.markNotificationAsRead(notification).subscribe();
         this.router.navigate(['/discussion-view/' + notification.discussionId]);
         break;
       default:
         console.log("Unknown notification type");
         break;
     }
-    this.removeNotification(notification);
+    //this.removeNotification(notification);
   }
 
   /**
    * Remove a notification from the list
    * @param {NotificationDTO} notification
    */
-  private removeNotification(notification: NotificationDTO): void {
+  removeNotification(notification: NotificationDTO): void {
     this.notifications = this.notifications.filter(notif => notif !== notification);
     this.notificationsSubject.next(this.notifications);
   }
@@ -154,9 +164,21 @@ export class NotificationService {
     return this.http.patch<NotificationDTO>(`${environment.server}/notifications/${notification.id}/read`, {isRead: true});
   }
 
-  markNotificationAsDelivered(notification: NotificationDTO): Observable<NotificationDTO> {
-    console.log("marking notification as delivered: ", notification.id)
-    return this.http.patch<NotificationDTO>(`${environment.server}/notifications/${notification.id}/delivered`, {delivered: true});
+  /**
+   * Get the count of unread notifications for a user
+   * @returns {Observable<number>} The count of unread notifications
+   */
+  getUnreadCount(): Observable<number> {
+    const userId = this.userService.getTokenID();
+    return this.http.get<number>(`${environment.server}/notifications/${userId}/unread-count`)
+    .pipe(
+        catchError(error => {
+          // Log the error or handle it as needed
+          console.error('Error fetching unread notifications count:', error);
+          // Return an Observable that emits 0 as the default unread count
+          return of(0);
+        })
+      );;
   }
 
 }

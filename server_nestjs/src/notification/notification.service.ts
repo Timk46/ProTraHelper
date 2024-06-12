@@ -4,9 +4,6 @@ import { NotificationDTO } from '@Interfaces/index';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Subject } from 'rxjs';
 
-
-
-
 @Injectable()
 export class NotificationService   {
   private notificationSubject = new Subject<NotificationDTO>();
@@ -16,7 +13,7 @@ export class NotificationService   {
   }
 
   /**
-   * Notify a user by emitting an event
+   * Notify a user by creating a notification and emitting it
    * @param {NotificationDTO} notification
    */
   async notifyUser(notification: NotificationDTO) {
@@ -24,6 +21,28 @@ export class NotificationService   {
     const createdNotification = await this.createNotification(notification);
     this.notificationSubject.next(createdNotification);
     console.log(`emitted notification: ${createdNotification.message} for user: ${createdNotification.userId}`)
+  }
+
+  /**
+   *
+   * @param {NotificationDTO} notification
+   */
+  async notifyAllUsers(notification: NotificationDTO) {
+    const users = await this.prisma.user.findMany();
+    const notifications = users.map(user => ({
+      userId: user.id,
+      message: notification.message,
+      type: notification.type,
+      timestamp: new Date(),
+      isRead: false,
+    }));
+    await this.prisma.notification.createMany({
+      data: notifications,
+    });
+    console.log('Notifications created for all users');
+    notifications.forEach(notification => {
+      this.notificationSubject.next(notification);
+    });
   }
 
   /**
@@ -43,9 +62,8 @@ export class NotificationService   {
       data: {
         message: notification.message,
         userId: notification.userId,
-        timestamp: notification.timestamp,
-        isDelivered: false,
-        isRead: notification.isRead,
+        timestamp: new Date(),
+        isRead: false,
         readTimestamp: notification.readTimestamp,
         type: notification.type,
         discussionId: notification.discussionId,
@@ -81,7 +99,7 @@ export class NotificationService   {
         userId: userId
       },
       orderBy: {
-        timestamp: 'desc'
+        timestamp: 'asc'
       },
       //just taking a few notifications because of pagination
       take: Number(limit),
@@ -105,7 +123,6 @@ export class NotificationService   {
         userId: notification.userId,
         timestamp: notification.timestamp,
         isRead: notification.isRead,
-        isDelivered: notification.isDelivered,
         readTimestamp: notification.readTimestamp,
         type: notification.type
       }
@@ -117,7 +134,7 @@ export class NotificationService   {
    * @param {number} id
    * @returns
    */
-  async deleteNotification(id: number) {
+  async deleteNotification(id: number): Promise<NotificationDTO> {
     return this.prisma.notification.delete({
       where: {
         id: id
@@ -126,19 +143,15 @@ export class NotificationService   {
   }
 
   /**
-   * Get undelivered notifications for a user
+   * get all unread notifications
    * @param {number} userId
-   * @returns {Promise<NotificationDTO[]>} undelivered notifications
+   * @returns {Promise<NotificationDTO[]>} all unread notifications
    */
-  async getUndeliveredNotifications(userId: number): Promise<NotificationDTO[]> {
-    console.log('NotificationService: getUndeliveredNotifications');
+  async getUnreadNotifications(userId: number): Promise<NotificationDTO[]> {
     return this.prisma.notification.findMany({
       where: {
-        userId,
-        isDelivered: false
-      },
-      orderBy: {
-        timestamp: 'desc'
+        userId: userId,
+        isRead: false
       }
     });
   }
@@ -157,26 +170,72 @@ export class NotificationService   {
       data: {
         isRead: true,
         readTimestamp: new Date(),
-        isDelivered: true
       }
     });
   }
 
   /**
-   * Mark notifications as delivered
-   * @param {number} notificationId
-   * @returns {Promise<void>}
+   * Mark a notification as read
+   * @param {number} userId
+   * @returns {Promise<NotificationDTO[]>} all notifications
    */
-  async markNotificationAsDelivered(notificationId: number): Promise<void>{
-    console.log('NotificationService: markNotificationsAsDelivered');
-    await this.prisma.notification.updateMany({
+  async markAllNotificationsAsRead(userId: number): Promise<NotificationDTO[]> {
+    console.log('NotificationService: markAllNotificationsAsRead');
+    const notifications = await this.prisma.notification.findMany({
       where: {
-        id: notificationId
-      },
-      data: {
-        isDelivered: true
+        userId: userId,
+        isRead: false
       }
     });
+
+    // Perform all updates and wait for them to complete
+    const updatePromises = notifications.map(notification => {
+      return this.prisma.notification.update({
+        where: {
+          id: notification.id
+        },
+        data: {
+          isRead: true,
+          readTimestamp: new Date()
+        }
+      });
+    });
+    const updatedNotifications = await Promise.all(updatePromises);
+
+    // Assuming you have a method or a way to transform the Prisma notification objects to NotificationDTO objects
+    // For example, a simple map operation if NotificationDTO is a subset of the Prisma notification object
+    const notificationDTOs: NotificationDTO[] = updatedNotifications.map(notification => {
+      // Transform the notification object to match the NotificationDTO structure
+      // This is a placeholder transformation. Adjust according to your NotificationDTO structure
+      return {
+        id: notification.id,
+        userId: notification.userId,
+        message: notification.message,
+        timestamp: notification.timestamp,
+        isRead: notification.isRead,
+        readTimestamp: notification.readTimestamp,
+        type: notification.type,
+        discussionId: notification.discussionId
+      };
+    });
+
+    return notificationDTOs;
   }
 
+  /**
+   * Get the count of unread notifications for a user
+   * @param {number} userId
+   * @returns {Promise<number>} The count of unread notifications
+   */
+  async getUnreadCount(userId: number): Promise<number> {
+    const count = await this.prisma.notification.count({
+      where: {
+        userId: Number(userId),
+        isRead: false,
+      },
+    });
+    return count;
+  }
 }
+
+

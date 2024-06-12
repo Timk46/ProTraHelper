@@ -46,20 +46,19 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
       if(userId && !this.connectedUsers.has(String(userId))) {
         this.connectedUsers.set(String(userId), client);
         console.log(`Client connected: ${client.id}, User ID: ${userId}`);
+
+      // const unreadNotifications = await this.notificationService.getUnreadNotifications(userId);
+      // console.log("unread Notifications: ", unreadNotifications.map(notification => notification.message));
+      // if (unreadNotifications.length > 0) {
+      //    unreadNotifications.forEach(notification => {
+      //      client.emit('notification', notification);
+      //    });
+
+      // }
       } else {
         throw new Error("Invalid token")
       }
-      // TODO: Implement fetching undelivered notifications
-      // fetching undelivered notifications
-      // const undeliveredNotifications = await this.notificationService.getUndeliveredNotifications(Number(userId));
-      // if (undeliveredNotifications.length > 0) {
-      //    undeliveredNotifications.forEach(notification => {
-      //      client.emit('notification', notification);
-      //    });
-      //   // Mark notifications as delivered
-      //   const notificationIds = undeliveredNotifications.map(notification => notification.id);
-      //   await this.notificationService.markNotificationsAsDelivered(notificationIds);
-      // }
+
     } catch (error) {
       client.disconnect();
       console.log(`Client disconnected: ${client.id}, Reason: Invalid token`);
@@ -93,8 +92,6 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
       console.log(`Sending Notification:  ${notification.message} to user:  ${notification.userId}`);
       client.emit('notification', notification);
       console.log(`emitted notification: ${notification.message} for user: ${notification.userId}`)
-      await this.notificationService.markNotificationAsDelivered(notification.id);
-      console.log(`marked Notification delivered: ${notification.id}`);
     } else {
       console.log(`User ${notification.userId} is not connected`);
     }

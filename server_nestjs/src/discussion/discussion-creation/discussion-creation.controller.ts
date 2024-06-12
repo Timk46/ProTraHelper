@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { DiscussionCreationService } from './discussion-creation.service';
-import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO, discussionNodeNamesDTO, NotificationDTO } from '@DTOs/index';
+import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO, discussionNodeNamesDTO, NotificationDTO, NotificationType } from '@DTOs/index';
 import { DiscussionDataService } from '../discussion-data/discussion-data.service';
 import { RolesGuard, roles } from '@/auth/roles.guard';
 import { NotificationService } from '@/notification/notification.service';
@@ -107,14 +107,14 @@ export class DiscussionCreationController {
     const uniqueUserIds = [...new Set(userIds)];
     console.log("hopefully sending notifications to Users: ", uniqueUserIds)
     for (const userId of uniqueUserIds) {
+      const anonymousUser = await this.creationService.getAnonymousUserByMessageId(userId, discussionMessageId);
       try {
         const notification: NotificationDTO = {
             userId: userId,
-            message: `A new comment by User: ${req.user.id} has been posted in a discussion you participated in.`,
-            type: 'comment',
+            message: `A new comment by User: ${anonymousUser.anonymousName} has been posted in a discussion you participated in.`,
+            type: NotificationType.Comment,
             timestamp: new Date(),
             isRead: false,
-            isDelivered: false,
             discussionId: messageData.discussionId,
         };
         await this.notificationService.notifyUser(notification);
@@ -146,19 +146,4 @@ export class DiscussionCreationController {
     return await this.dataService.getDiscussionNodeNames(Number(conceptNodeId), Number(contentNodeId), Number(contentElementId));
   }
 
-  /**
-   * Creates a new notification for the given user
-   * @param notification
-   * @returns the notificationDTO
-   */
-  private createNotification(notification: NotificationDTO): NotificationDTO {
-    return {
-      userId: notification.userId,
-      message: notification.message,
-      timestamp: new Date(),
-      isRead: false,
-      readTimestamp: null,
-      type: notification.type,
-    };
-  }
 }

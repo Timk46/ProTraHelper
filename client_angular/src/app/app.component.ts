@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { version } from '@DTOs/version';
+import { NotificationService } from './Services/notification/notification.service';
 
 @Component({
   selector: 'app-root',

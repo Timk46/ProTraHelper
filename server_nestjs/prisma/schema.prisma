@@ -525,7 +525,6 @@ model Notification {
   readTimestamp DateTime?
   type          String
   discussionId  Int?
-  isDelivered   Boolean     @default(false)
   discussion    Discussion? @relation(fields: [discussionId], references: [id])
   User          User?       @relation(fields: [userId], references: [id])
 }
