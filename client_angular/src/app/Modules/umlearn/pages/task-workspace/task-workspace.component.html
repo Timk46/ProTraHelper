@@ -17,18 +17,28 @@
 </mat-toolbar>
 
 <div class="h-box">
-  <div class="information-container mat-elevation-z8">
+  <div [ngClass]="{'submitted': isSubmitted}" class="information-container">
     <!-- <div class="title-container">
       <h3>Aufgabe: {{ taskWorkspaceData.title }}</h3>
     </div> -->
 
-    <div class="tinymce-container" *ngIf="init">
-      <app-tinymce style="width: 100%" [content]="taskWorkspaceData.description" [tinymceConfig]="tinyMceConfig" [isMarkOnly]="true"></app-tinymce>
+    <div [ngClass]="{'submitted': isSubmitted}" class="task-container mat-elevation-z8" style="display: flex; flex-direction: column;">
+      <div class="tinymce-container" *ngIf="init">
+        <app-tinymce style="width: 100%" [content]="taskWorkspaceData.description" [tinymceConfig]="tinyMceConfig" [isMarkOnly]="true"></app-tinymce>
+      </div>
+
+      <div class="button-container">
+        <!-- <button mat-raised-button color="accent" style="width: 50%;" (click)="onCancel()">Abbrechen</button> -->
+        <button mat-raised-button color="primary" style="width: 50%;" (click)="onAccept(editor.getSaveData())">Abgeben</button>
+      </div>
     </div>
 
-    <div class="button-container">
-      <button mat-raised-button color="accent" style="width: 50%;" (click)="onCancel()">Abbrechen</button>
-      <button mat-raised-button color="primary" style="width: 50%;" (click)="onAccept(editor.getSaveData())">Abgabe speichern und zurück</button>
+    <div [ngClass]="{'submitted': isSubmitted}" class="feedback-container mat-elevation-z8">
+      <div *ngIf="helpVisible">
+        <h1>Erreichte Punkte: {{isSubmitted}} von {{taskWorkspaceData.maxPoints}}</h1>
+        <p>Hi, ich bin Kai, kann ich dir helfen?</p>
+        <!-- <mat-progress-spinner mode="indeterminate" diameter="100"></mat-progress-spinner> -->
+      </div>
     </div>
 
   </div>

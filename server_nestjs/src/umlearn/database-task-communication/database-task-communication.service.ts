@@ -6,6 +6,7 @@ import { log } from 'console';
 import { JaroWinklerDistance } from 'natural';
 import * as natural from 'natural';
 import { ClassNode } from '@Interfaces/index';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class DatabaseTaskCommunicationService {
@@ -673,45 +674,54 @@ export class DatabaseTaskCommunicationService {
    * @param studentId - The ID of the student.
    * @returns A Promise that resolves to a taskAttemptDataDTO object containing the task attempt data.
    */
-  /* async getTaskAttemptData(courseId: number, taskId: number, studentId: number): Promise<taskAttemptDataDTO> {
+  async getTaskAttemptData(taskId: number, studentId: number): Promise<taskAttemptDataDTO> {
     try{
-      const taskAttempt = await this.prisma.taskAttempt.findFirst({
+      const taskAttempt = await this.prisma.question.findFirst({
         where: {
-          courseId: courseId,
-          taskId: taskId,
-          studentId: studentId
+          id: taskId,
+          userAnswer: {
+            some: {
+              userId: studentId,
+            },
+          },
         },
         select: {
-          id: true,
-          studentId: true,
-          taskId: true,
-          courseId: true,
-          attemptData: true,
-        }
+          userAnswer: {
+            take: 1,
+            orderBy: {
+              createdAt: 'desc',
+            },
+            select: {
+              id: true,
+              UserUmlQuestionAnswer: {
+                select: {
+                  attemptData: true,
+                }
+              }
+            }
+          }
+        },
       });
 
       if (!taskAttempt) {
         // Return dummy data
         return {
-          id: -1,
-          studentId: studentId,
+          //userAnswerId: -1,
           taskId: taskId,
-          courseId: courseId,
           attemptData: { nodes: [], edges: [] },
         };
       }
 
       return {
-        id: taskAttempt.id,
-        studentId: taskAttempt.studentId,
-        taskId: taskAttempt.taskId,
-        courseId: taskAttempt.courseId,
-        attemptData: taskAttempt.attemptData ? (taskAttempt.attemptData as unknown as editorDataDTO) : { nodes: [], edges: [] },
+        //userAnswerId: taskAttempt.userAnswer[0].id,
+        taskId: taskId,
+        attemptData: taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData as unknown as editorDataDTO,
+        //attemptData: taskAttempt.userAnswer[0].UserUmlQuestionAnswer ? (taskAttempt.userAnswer[0].UserUmlQuestionAnswer as unknown as editorDataDTO) : { nodes: [], edges: [] },
       };
     } catch (error) {
       throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
     }
-  } */
+  }
 
 /**
  * Retrieves task attempt data for a lecturer.
@@ -757,55 +767,122 @@ export class DatabaseTaskCommunicationService {
   } */
 
   /**
-   * Sets the task attempt data in the database.
-   * If the task attempt data has an ID, it updates the existing task attempt.
-   * If the task attempt data does not have an ID, it creates a new task attempt.
+   * Sets the task attempt data in the database, creating a new task attempt if necessary.
+   * If the task attempt data is different from the task attempt, a new task attempt is created.
    * @param taskAttemptData - The task attempt data to be set or updated.
    * @returns A Promise that resolves to the updated or newly created task attempt data.
    */
-  /* async setTaskAttemptData(taskAttemptData: taskAttemptDataDTO, studentId: number): Promise<taskAttemptDataDTO> {
+  async setTaskAttemptData(taskAttemptData: taskAttemptDataDTO, studentId: number): Promise<taskAttemptDataDTO> {
     try{
-      if (taskAttemptData.id == -1) {
-        const newTaskAttempt = await this.prisma.taskAttempt.create({
-          data: {
-            studentId: studentId,
-            taskId: taskAttemptData.taskId,
-            courseId: taskAttemptData.courseId,
-            attemptData: JSON.parse(JSON.stringify({...taskAttemptData.attemptData})),
-            updatedAt: new Date()
-          }
-        });
-
-        return {
-          id: newTaskAttempt.id,
-          studentId: newTaskAttempt.studentId,
-          taskId: newTaskAttempt.taskId,
-          courseId: newTaskAttempt.courseId,
-          attemptData: newTaskAttempt.attemptData as unknown as editorDataDTO,
-        };
-      } else {
-        const updatedTaskAttempt = await this.prisma.taskAttempt.update({
-          where: {
-            id: taskAttemptData.id
+      const taskAttempt = await this.prisma.question.findFirst({
+        where: {
+          id: taskAttemptData.taskId,
+          userAnswer: {
+            some: {
+              userId: studentId,
+            },
           },
+        },
+        select: {
+          userAnswer: {
+            take: 1,
+            orderBy: {
+              createdAt: 'desc',
+            },
+            select: {
+              id: true,
+              UserUmlQuestionAnswer: {
+                select: {
+                  attemptData: true,
+                }
+              }
+            }
+          }
+        },
+      });
+
+      if (!taskAttempt || (taskAttempt && this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData))) {
+        //create a new userAnswer and a new UserUmlQuestionAnswer and connect them
+        console.log("not the same",'inDB: ', this.sortObject(JSON.parse(JSON.stringify(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData))), 'new: ', this.sortObject(JSON.parse(JSON.stringify(taskAttemptData.attemptData))), 'isDifferent: ', this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData));
+        const newAnswer = await this.prisma.userAnswer.create({
           data: {
-            attemptData: JSON.parse(JSON.stringify({...taskAttemptData.attemptData})),
-            updatedAt: new Date()
+            userId: studentId,
+            questionId: taskAttemptData.taskId,
+            UserUmlQuestionAnswer: {
+              create: {
+                attemptData: JSON.parse(JSON.stringify({...taskAttemptData.attemptData})),
+              }
+            }
+          },
+          select: {
+            UserUmlQuestionAnswer: {
+              select: {
+                attemptData: true,
+              }
+            }
           }
         });
-
         return {
-          id: updatedTaskAttempt.id,
-          studentId: updatedTaskAttempt.studentId,
-          taskId: updatedTaskAttempt.taskId,
-          courseId: updatedTaskAttempt.courseId,
-          attemptData: updatedTaskAttempt.attemptData as unknown as editorDataDTO,
+          //userAnswerId: taskAttempt.userAnswer[0].id,
+          taskId: taskAttemptData.taskId,
+          attemptData: newAnswer.UserUmlQuestionAnswer.attemptData as unknown as editorDataDTO,
         };
       }
+      console.log("the same");
+      return {
+        //userAnswerId: taskAttempt.userAnswer[0].id,
+        taskId: taskAttemptData.taskId,
+        attemptData: taskAttemptData.attemptData,
+      };
     } catch (error) {
+      console.error(error);
       throw new HttpException('Fehler beim Speichern der Daten', HttpStatus.BAD_REQUEST);
     }
-  } */
+  }
+
+  /**
+   * Checks if the task attempt data is different from the task attempt.
+   * @param {Prisma.JsonValue} taskAttempt - The task attempt data stored in the database.
+   * @param {editorDataDTO} taskAttemptData - The task attempt data received from the client.
+   * @returns {boolean} - Returns true if the task attempt data is different, otherwise false.
+   */
+  private isDifferentAttemptData(taskAttempt: Prisma.JsonValue, taskAttemptData: editorDataDTO): boolean {
+    const sortedTaskAttempt = this.sortAndStringify(taskAttempt);
+    const sortedTaskAttemptData = this.sortAndStringify(taskAttemptData);
+    console.log('sortedTaskAttempt: ', sortedTaskAttempt, 'sortedTaskAttemptData: ', sortedTaskAttemptData);
+    return sortedTaskAttempt != sortedTaskAttemptData;
+  }
+
+  /**
+   * Sorts and stringifies the given data.
+   *
+   * @param data - The data to be sorted and stringified.
+   * @returns The sorted and stringified data.
+   */
+  private sortAndStringify(data: any): string {
+    const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+    const sortedData = this.sortObject(parsedData);
+    return JSON.stringify(sortedData);
+  }
+
+  /**
+   * Sorts the properties of an object recursively.
+   *
+   * @param obj - The object to be sorted.
+   * @returns The sorted object.
+   */
+  private sortObject(obj: any): any {
+    if (typeof obj !== 'object' || obj === null) {
+      return obj;
+    }
+    if (Array.isArray(obj)) {
+      return obj.map(this.sortObject.bind(this));
+    }
+    return Object.keys(obj).sort().reduce((result: { [key: string]: any }, key: string) => {
+      result[key] = this.sortObject(obj[key]);
+      return result;
+    }, {});
+  }
 
 
 

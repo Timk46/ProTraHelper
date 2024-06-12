@@ -130,8 +130,8 @@ export class DatabaseTaskCommunicationService {
    * @param courseId - The ID of the course.
    * @returns An Observable that emits the task attempt data as a taskAttemptDataDTO object.
    */
-  getTaskAttemptData(taskId: number, courseId: number): Observable<taskAttemptDataDTO> {
-    return this.http.get<taskAttemptDataDTO>(environment.server + `/database-task-communication/taskAttempt/${courseId}/${taskId}`);
+  getTaskAttemptData(taskId: number): Observable<taskAttemptDataDTO> {
+    return this.http.get<taskAttemptDataDTO>(environment.server + `/database-task-communication/taskAttempt/${taskId}`);
   }
 
   /**

@@ -355,7 +355,7 @@ model UserAnswer {
   userMCOptionSelected  UserMCOptionSelected[]
   userFreetextAnswer    String?                 @db.Text
   feedbacks             Feedback[]
-  UserUmlQuestionAnswer UserUmlQuestionAnswer[]
+  UserUmlQuestionAnswer UserUmlQuestionAnswer?
 }
 
 model UserMCOptionSelected {
@@ -625,7 +625,7 @@ model UmlQuestion {
 model UserUmlQuestionAnswer {
   id           Int        @id @default(autoincrement())
   userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id])
-  userAnswerId Int
+  userAnswerId Int        @unique
   attemptData  Json //editor content - students work
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt

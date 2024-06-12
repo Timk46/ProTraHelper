@@ -46,10 +46,7 @@ export interface taskAttemptDTO {
 }
 
 export interface taskAttemptDataDTO {
-    id: number;
     taskId: number;
-    courseId: number;
-    studentId: number;    
     attemptData: editorDataDTO;
 }
 

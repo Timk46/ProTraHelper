@@ -100,17 +100,15 @@ export class DatabaseTaskCommunicationController {
    * @param studentId - The ID of the student.
    * @returns A Promise that resolves to the taskAttemptDataDTO object containing the task attempt data.
    */
-  /* @Get('taskAttempt/:courseId/:taskId')
-  async getTaskAttemptData(@Param('courseId') courseId: number, @Param('taskId')taskId: number, @Request() req: tokenRequestDTO): Promise<taskAttemptDataDTO> {
-    if (isNaN(courseId)) {
-      throw new Error('Invalid courseId');
-    }
+  @roles('ANY')
+  @Get('taskAttempt/:taskId')
+  async getTaskAttemptData(@Param('taskId')taskId: number, @Req() req): Promise<taskAttemptDataDTO> {
     if (isNaN(taskId)) {
       throw new Error('Invalid taskId');
     }
-    console.log('LOG VOM SERVER-CONTROLLER ' + 'taskId= ' + taskId + 'CourseId= ' + courseId + 'studentId= ' + req.tokenPayloadData.sub);
-    return this.tasksService.getTaskAttemptData(Number(courseId), Number(taskId), req.tokenPayloadData.sub);
-  } */
+    //console.log('LOG VOM SERVER-CONTROLLER ' + 'taskId= ' + taskId + 'CourseId= ' + courseId + 'studentId= ' + req.tokenPayloadData.sub);
+    return this.tasksService.getTaskAttemptData(Number(taskId), req.user.id);
+  }
 
   /**
    * Retrieves task attempt data for a specific student.
@@ -142,10 +140,11 @@ export class DatabaseTaskCommunicationController {
    * @param taskAttemptData - The task attempt data to be set.
    * @returns A Promise that resolves to the taskAttemptDataDTO object.
    */
-  /* @Post('taskAttempt')
-  setTaskAttemptData(@Body() taskAttemptData: taskAttemptDataDTO, @Request() req: tokenRequestDTO): Promise<taskAttemptDataDTO> {
-    return this.tasksService.setTaskAttemptData(taskAttemptData, req.tokenPayloadData.sub);
-  } */
+  @roles('ANY')
+  @Post('taskAttempt')
+  setTaskAttemptData(@Body() taskAttemptData: taskAttemptDataDTO, @Req() req): Promise<taskAttemptDataDTO> {
+    return this.tasksService.setTaskAttemptData(taskAttemptData, req.user.id);
+  }
 
   /**
    * Retrieves the feedback data for a specific attempt.
