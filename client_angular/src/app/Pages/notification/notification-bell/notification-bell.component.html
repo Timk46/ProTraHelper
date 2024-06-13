@@ -3,19 +3,19 @@
   <span *ngIf="unreadCount > 0" class="notification-count">{{ unreadCount }}</span>
   <div class="notifications-panel" *ngIf="showNotifications" (scroll)="onScroll($event)">
     <mat-accordion>
-      <mat-expansion-panel *ngFor="let notification of allNotifications" (opened)="markAsRead(notification)" #panel>
+      <mat-expansion-panel *ngFor="let notification of allNotifications" #panel appNotificationStyle [notification]="notification">
         <mat-expansion-panel-header>
           <mat-panel-title>
-            {{notification.type}}
+            {{ getNotificationTitle(notification.type!) }}
           </mat-panel-title>
           <mat-panel-description>
-            <span *ngIf="!notification.isRead" class="notification-status">Unread</span>
+            <span *ngIf="!notification.isRead" class="notification-status">New</span>
           </mat-panel-description>
         </mat-expansion-panel-header>
         <p>{{ notification.message+ " at: " + notification.timestamp}} </p>
         <div class= "buttons">
         <button mat-raised-button color="primary" (click)="onClick(notification)"> View </button>
-        <button mat-raised-button color="danger" (click)="onDelete(notification)"  >Delete</button>
+        <button mat-raised-button color="accent" (click)="markAsRead(notification)"  >Mark as Read</button>
         </div>
       </mat-expansion-panel>
     </mat-accordion>

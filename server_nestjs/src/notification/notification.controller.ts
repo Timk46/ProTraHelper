@@ -10,10 +10,10 @@ export class NotificationController {
   /**
    *
    * @param {NotificationDTO} notification
-   * @returns
+   * @returns {Promise<NotificationDTO>} notification
    */
   @Post('createNotification')
-  async createNotification(@Body() notification: NotificationDTO) {
+  async createNotification(@Body() notification: NotificationDTO): Promise<NotificationDTO> {
     return this.notificationService.createNotification(notification);
   }
 
@@ -32,13 +32,13 @@ export class NotificationController {
    *
    * @returns all notifications
    */
-  @Get('/:id/all')
-  async getAll(
-   @Param('id)') userId: number,
-   @Query('limit') limit: number,
-   @Query('offset') offset: number,
-  ) {
-    return this.notificationService.getAll(userId, limit, offset);
+  @Get('all')
+  async getNotifications(
+    @Query('userId') userId: number,
+    @Query('limit') limit: number,
+    @Query('offset') offset: number,
+  ): Promise<NotificationDTO[]> {
+    return this.notificationService.getAllNotifications(userId, limit, offset);
   }
 
   /**
@@ -62,7 +62,7 @@ export class NotificationController {
   @Patch(':id/read')
   async markAsRead(@Body() notification: NotificationDTO, @Param('id') id: number): Promise<NotificationDTO> {
     console.log("marking notification as read with id: ", id, " and notification: ", notification)
-    return this.notificationService.markNotificationAsRead(+id)
+    return this.notificationService.markNotificationAsRead(id)
   }
   /**
    * Send a notification
@@ -102,6 +102,7 @@ export class NotificationController {
    */
   @Get(':userId/unread-count')
   async getUnreadCount(@Param('userId') userId: number): Promise<number> {
+    console.log("tpye of number userId send through @Param for unread count:", typeof userId)
     return this.notificationService.getUnreadCount(userId) ?  this.notificationService.getUnreadCount(userId) : 0;
   }
 }

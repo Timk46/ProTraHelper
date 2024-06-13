@@ -206,4 +206,32 @@ export class DiscussionCreationService {
     return discussion.id;
   }
 
+  /**
+   * Returns all anonymous users for a given discussion ID
+   * @param {number} discussionId
+   * @returns {Promise<AnonymousUserDTO[]>} the anonymous users
+   */
+  async getAnonymousUsersByDiscussionId(discussionId: number): Promise<AnonymousUserDTO[]> {
+    const anonymousUsers = await this.prisma.anonymousUser.findMany({
+      where: {
+        Message: {
+          some: {
+            discussionId: Number(discussionId),
+          },
+        },
+      },
+      select: {
+        id: true,
+        userId: true,
+        anonymousName: true,
+      },
+    });
+
+    return anonymousUsers.map(user => ({
+      id: user.id,
+      anonymousName: user.anonymousName,
+      userId: user.userId,
+    }));
+  }
 }
+

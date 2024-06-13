@@ -17,15 +17,17 @@ export class NotificationService {
   private socket!: Socket;
   private notificationsSubject = new BehaviorSubject<NotificationDTO[]>([]);
   private notifications: NotificationDTO[] = [];
-
+  private userId: number | undefined;
   constructor(
     private userService: UserService,
     private snackBar: MatSnackBar,
     private router: Router,
     private http: HttpClient,
     ) {
+
       this.userService.isAuthenticated$.subscribe((isAuthenticated) => {
         if(isAuthenticated) {
+          this.userId = Number(this.userService.getTokenID());
           this.startListening();
         } else {
           this.stopListening();
@@ -37,6 +39,7 @@ export class NotificationService {
    * Start listening for notifications and establish a connection to the websocket
    */
   private startListening(): void {
+    // fetching initial Notifications and add more while scrolling
     this.fetchInitialNotifications(20, 0);
     this.socket = io('http://localhost:3001/notifications', {
       query: { token: this.userService.getAccessToken()},
@@ -66,8 +69,18 @@ export class NotificationService {
    * @param {number} offset for pagination offset
    */
   private fetchInitialNotifications(limit: number, offset: number): void {
-    const userId = this.userService.getTokenID();
-    this.http.get<NotificationDTO[]>(`${environment.server}/notifications/${userId}/all?limit=${limit}&offset=${offset}`).subscribe(notifications => {
+    this.http.get<NotificationDTO[]>(`${environment.server}/notifications/all`, {
+      params: {
+        userId: this.userId!.toString(),
+        limit: limit.toString(),
+        offset: offset.toString(),
+      }
+    }).pipe(
+      catchError(error => {
+        console.error('Error fetching initial notifications:', error);
+        return of([]);
+      })
+    ).subscribe(notifications => {
       this.notifications = notifications;
       this.notificationsSubject.next(this.notifications);
     });
@@ -79,12 +92,23 @@ export class NotificationService {
    * @param {number} offset for pagination offset
    */
   fetchMoreNotifications(limit: number, offset: number): void {
-    const userId = this.userService.getTokenID();
-    this.http.get<NotificationDTO[]>(`${environment.server}/notifications/${userId}/all?limit=${limit}&offset=${offset}`).subscribe(notifications => {
+    this.http.get<NotificationDTO[]>(`${environment.server}/notifications/all`, {
+      params: {
+        userId: this.userId!!.toString(),
+        limit: limit.toString(),
+        offset: offset.toString(),
+      }
+    }).pipe(
+      catchError(error => {
+        console.error('Error fetching more notifications:', error);
+        return of([]);
+      })
+    ).subscribe(notifications => {
       this.notifications = [...this.notifications, ...notifications];
       this.notificationsSubject.next(this.notifications);
     });
   }
+
 
   /**
    * Get the notifications
@@ -109,7 +133,7 @@ export class NotificationService {
    */
   handleNotificationClick(notification: NotificationDTO): void {
     switch(notification.type) {
-      case NotificationType.Comment:
+      case NotificationType.COMMENT:
         console.log("comment reached the frontend");
         this.markNotificationAsRead(notification).subscribe();
         this.router.navigate(['/discussion-view/' + notification.discussionId]);
@@ -130,8 +154,8 @@ export class NotificationService {
     this.notificationsSubject.next(this.notifications);
   }
 
-  /**
-   * NOT USED YET: emits a notification from the client to the user with the given id
+  /** NOT USED YET:
+   * emits a notification from the client to the user with the given id
    * @param {NotificationDTO} notification
    */
   sendNotification(notification: NotificationDTO) {
@@ -147,7 +171,7 @@ export class NotificationService {
   showNotification(message: string, actionText?: string, action?: () => void) {
     this.snackBar.openFromComponent(NotificationComponent, {
       data: { message, actionText, action },
-      duration: 50000,
+      duration: 5000,
       horizontalPosition: 'right',
       verticalPosition: 'top',
       panelClass: ['notification-snackbar-container']
@@ -169,8 +193,7 @@ export class NotificationService {
    * @returns {Observable<number>} The count of unread notifications
    */
   getUnreadCount(): Observable<number> {
-    const userId = this.userService.getTokenID();
-    return this.http.get<number>(`${environment.server}/notifications/${userId}/unread-count`)
+    return this.http.get<number>(`${environment.server}/notifications/${this.userId}/unread-count`)
     .pipe(
         catchError(error => {
           // Log the error or handle it as needed

@@ -1,3 +1,26 @@
+mat-expansion-panel-header {
+  display: flex;
+  align-items: center;
+
+  .mat-panel-title {
+    flex: 1;
+    margin-right: 8px; // Add some space between title and description
+  }
+
+  .mat-panel-description {
+    white-space: nowrap;
+  }
+}
+
+.mat-expansion-panel-header-title, .mat-expansion-panel-header-description {
+  flex: 1;
+  overflow: visible;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size : 13px;
+
+}
+
 .notification-bell {
   position: fixed;
   margin-top: 20px;
@@ -57,3 +80,4 @@
     color: red;
   }
 }
+

@@ -1,3 +1,5 @@
 export enum NotificationType {
-    Comment = "comment",
+    COMMENT = "comment",
+    SOLUTION = "solution",
+    INFO = "info",
 }

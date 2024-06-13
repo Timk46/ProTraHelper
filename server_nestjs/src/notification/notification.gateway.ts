@@ -17,7 +17,7 @@ import { NotificationService } from './notification.service';
 })
 export class NotificationGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
-  private connectedUsers: Map<string, Socket> = new Map();
+  private connectedUsers: Map<number, Socket> = new Map();
 
   constructor(
     private readonly jwtService: JwtService,
@@ -27,7 +27,7 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
 
   async onModuleInit() {
     console.log('NotificationGateway initialized');
-    (await this.notificationService.getNotifications()).subscribe((notification: NotificationDTO) => {
+    this.notificationService.notification$.subscribe((notification: NotificationDTO) => {
       console.log('NotificationGateway: received notification from service:', notification);
       this.sendNotification(notification);
     });
@@ -43,9 +43,11 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
       const userId = decoded.id;
       console.log("verified")
       // Check if the user is already connected and add the user to the connected users map
-      if(userId && !this.connectedUsers.has(String(userId))) {
-        this.connectedUsers.set(String(userId), client);
+      if(userId && !this.connectedUsers.has(userId)) {
+        this.connectedUsers.set(userId, client);
         console.log(`Client connected: ${client.id}, User ID: ${userId}`);
+
+      // probably not necesseary as clients fetch all their notifications elsewhere and they are sorted
 
       // const unreadNotifications = await this.notificationService.getUnreadNotifications(userId);
       // console.log("unread Notifications: ", unreadNotifications.map(notification => notification.message));
@@ -58,7 +60,6 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
       } else {
         throw new Error("Invalid token")
       }
-
     } catch (error) {
       client.disconnect();
       console.log(`Client disconnected: ${client.id}, Reason: Invalid token`);
@@ -83,10 +84,7 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
    * @param {NotificationDTO} notification
    */
   async sendNotification(notification: NotificationDTO) {
-    this.connectedUsers.forEach((client, userId) => {
-      console.log(`Connected Users: ${userId} to client: ${client.id}`)
-    })
-    const client = this.connectedUsers.get(String(notification.userId));
+    const client = this.connectedUsers.get(notification.userId);
     console.log(`Client: ${client} for user: ${notification.userId} with id: ${client}`);
     if (client) {
       console.log(`Sending Notification:  ${notification.message} to user:  ${notification.userId}`);
@@ -97,9 +95,16 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
     }
   }
 
-  // @SubscribeMessage('notifications')
-  // handleNotification(@MessageBody() notification: NotificationDTO): void {
-  //   console.log("received a notification from the client:", notification)
-  //   this.sendNotification(notification);
-  // }
+  /** NOT USED
+   * Handle sendNotification event from clients or elsewhere
+   * @param {NotificationDTO} notification
+   */
+  @SubscribeMessage('sendNotification')
+  async handleSendNotification(@MessageBody() notification: NotificationDTO) {
+    const createdNotification = await this.notificationService.createNotification(notification);
+    const client = this.connectedUsers.get(notification.userId);
+    if (client) {
+      client.emit('notification', createdNotification);
+    }
+  }
 }

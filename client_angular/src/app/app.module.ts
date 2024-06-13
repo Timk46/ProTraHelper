@@ -53,6 +53,8 @@ import { MobileNavigatorComponent } from './Pages/mobile-navigator/mobile-naviga
 import { ToastrModule } from "ngx-toastr";
 import { NotificationComponent } from './Pages/notification/notification.component';
 import { NotificationBellComponent } from "./Pages/notification/notification-bell/notification-bell.component";
+import { BellDirective } from "./Pages/notification/notification-bell/belldirective.directive";
+
 
 
 
@@ -96,6 +98,7 @@ import { NotificationBellComponent } from "./Pages/notification/notification-bel
         ProgressComponent,
         NotificationComponent,
         NotificationBellComponent,
+        BellDirective
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

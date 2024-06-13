@@ -2,6 +2,7 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { discussionNodeNamesDTO, nodeNameDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class DiscussionDataService {
@@ -136,16 +137,17 @@ async getUserIdsByDiscussionId(discussionId: number, excludedUserId: number): Pr
     select: {
       author: {
         select: {
-          userId: true
+          userId: true,
         }
-      }
+      },
+
     }
   });
 
   if (!messages) {
     throw new Error('Messages not found');
   }
-
+  
   const userIds = messages.map(message => message.author.userId);
   return userIds;
 }

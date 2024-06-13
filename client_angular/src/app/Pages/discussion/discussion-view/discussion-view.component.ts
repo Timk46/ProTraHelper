@@ -7,6 +7,7 @@ import { UserService } from 'src/app/Services/auth/user.service';
 import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
 import { Title } from '@angular/platform-browser';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+import { NotificationService } from 'src/app/Services/notification/notification.service';
 
 
 @Component({
@@ -54,7 +55,8 @@ export class DiscussionViewComponent {
     private discussionCreationService: DiscussionCreationService,
     private userService: UserService,
     private title: Title,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {
 
     this.userId = parseInt(this.userService.getTokenID());
@@ -159,6 +161,7 @@ export class DiscussionViewComponent {
 
   ngOnInit(): void {
     this.title.setTitle('GOALS: Diskutieren');
+    this.notificationService.getNotifications().subscribe();
   }
 
   ngOnDestory() {

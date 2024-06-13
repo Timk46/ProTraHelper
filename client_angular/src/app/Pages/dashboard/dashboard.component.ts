@@ -30,8 +30,6 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.notificationService.getNotifications().subscribe(message => {
-      console.log('Neue Benachrichtigung:', message);
-    })
+    this.notificationService.getNotifications().subscribe()
   }
 }

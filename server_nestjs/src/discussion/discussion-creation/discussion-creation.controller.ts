@@ -103,27 +103,23 @@ export class DiscussionCreationController {
     console.log("userId: ", req.user.id)
 
     const userIds = await this.dataService.getUserIdsByDiscussionId(messageData.discussionId, req.user.id);
-    console.log("userIds: ", userIds)
-    const uniqueUserIds = [...new Set(userIds)];
-    console.log("hopefully sending notifications to Users: ", uniqueUserIds)
-    for (const userId of uniqueUserIds) {
-      const anonymousUser = await this.creationService.getAnonymousUserByMessageId(userId, discussionMessageId);
-      try {
-        const notification: NotificationDTO = {
-            userId: userId,
-            message: `A new comment by User: ${anonymousUser.anonymousName} has been posted in a discussion you participated in.`,
-            type: NotificationType.Comment,
-            timestamp: new Date(),
-            isRead: false,
-            discussionId: messageData.discussionId,
-        };
-        await this.notificationService.notifyUser(notification);
-      } catch (error) {
-        console.log('Error while sending notification to user: ',userId, error);
-      }
-    }
-    console.log('Notifications sent');
-    return discussionMessageId
+    console.log("hopefully sending notifications to only Users: wiht IDS ", userIds, "and not to ", req.user.id)
+    // Fetch all anonymous users involved in the discussion
+    const anonymousUsers = await this.creationService.getAnonymousUsersByDiscussionId(messageData.discussionId);
+    const filteredAnonymousUsers = anonymousUsers.filter(user => user.userId !== req.user.id);
+    // Send notifications to all users
+    const notifications: NotificationDTO[] = filteredAnonymousUsers.map(user => ({
+      userId: user.userId,
+      message: `A new comment by User: ${user.anonymousName} has been posted in a discussion you participated in.`,
+      type: NotificationType.COMMENT,
+      timestamp: new Date(),
+      isRead: false,
+      discussionId: messageData.discussionId,
+    }));
+
+    await this.notificationService.notifyUsers(notifications);
+
+    return discussionMessageId;
   }
 
   /**
