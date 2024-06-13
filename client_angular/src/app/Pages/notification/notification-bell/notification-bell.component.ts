@@ -92,7 +92,7 @@ export class NotificationBellComponent implements OnInit {
    */
   markAsRead(notification: NotificationDTO): void {
   if (!notification.isRead) {
-    console.log("typeof notification ID: ", typeof notification.id), " and the id: ", notification.id)
+    console.log("typeof notification ID: ", typeof notification.id, " and the id: ", notification.id)
     this.notificationService.markNotificationAsRead(notification).subscribe(() => {
       // Update the local state to reflect the notification is now read
       notification.isRead = true;
