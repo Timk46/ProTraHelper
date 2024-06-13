@@ -7,11 +7,12 @@ import { JaroWinklerDistance } from 'natural';
 import * as natural from 'natural';
 import { ClassNode } from '@Interfaces/index';
 import { Prisma } from '@prisma/client';
+import { CompareService } from '../compare/compare.service';
 
 @Injectable()
 export class DatabaseTaskCommunicationService {
 
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService, private compareService: CompareService) { }
 
 /**
  * Finds synonyms for a given word and checks if a target word is a synonym.
@@ -706,14 +707,14 @@ export class DatabaseTaskCommunicationService {
       if (!taskAttempt) {
         // Return dummy data
         return {
-          //userAnswerId: -1,
+          userAnswerId: -1,
           taskId: taskId,
           attemptData: { nodes: [], edges: [] },
         };
       }
 
       return {
-        //userAnswerId: taskAttempt.userAnswer[0].id,
+        userAnswerId: taskAttempt.userAnswer[0].id,
         taskId: taskId,
         attemptData: taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData as unknown as editorDataDTO,
         //attemptData: taskAttempt.userAnswer[0].UserUmlQuestionAnswer ? (taskAttempt.userAnswer[0].UserUmlQuestionAnswer as unknown as editorDataDTO) : { nodes: [], edges: [] },
@@ -767,6 +768,76 @@ export class DatabaseTaskCommunicationService {
   } */
 
   /**
+   * Retrieves the points earned by a student for a task attempt and saves the attempt data.
+   * @param taskAttemptData - The data of the task attempt.
+   * @param studentId - The ID of the student.
+   * @returns A Promise that resolves to the number of points earned.
+   * @throws An error if the attempt data fails to save or if the related question cannot be found.
+   */
+  async commitAttemptGetPoints(taskAttemptData: taskAttemptDataDTO, studentId: number): Promise<number> {
+    const savedAttempt = await this.setTaskAttemptData(taskAttemptData, studentId);
+    if (!savedAttempt){
+      throw new Error('Failed to save UML attempt');
+    }
+
+    //feedback exists for savedAttempt?
+    if (taskAttemptData.userAnswerId != -1){
+      const existingFeedback = await this.prisma.userAnswer.findFirst({
+        where: {
+          id: savedAttempt.userAnswerId,
+        },
+        select: {
+          feedbacks: true,
+        }
+      });
+      if (existingFeedback && existingFeedback.feedbacks[0]){
+        console.log("feedback existing");
+        return existingFeedback.feedbacks[0].score;
+      }
+    }
+
+
+    //get task solution
+    const taskSolution = await this.prisma.question.findFirst({
+      where: {
+        id: savedAttempt.taskId,
+      },
+      select: {
+        score: true,
+        UmlQuestion: {
+          select: {
+            editorData: true,
+          }
+        }
+      }
+    });
+
+    console.log("found solution: ", taskSolution);
+
+    if (!taskSolution){
+      throw new Error('Failed to find related question');
+    }
+
+    const reachedPoints: number = await this.compareService.compareAndCalculate(taskSolution.UmlQuestion.editorData as undefined as editorDataDTO, taskAttemptData.attemptData, taskSolution.score);
+
+    //save feedback
+    const feedback = await this.prisma.feedback.create({
+      data: {
+        userAnswerId: savedAttempt.userAnswerId,
+        score: reachedPoints,
+        text: '',
+      }
+    });
+
+    if (!feedback){
+      throw new Error('Failed to save feedback');
+    }
+
+    console.log('calculated: ', reachedPoints);
+    return reachedPoints;
+  }
+
+  /**
    * Sets the task attempt data in the database, creating a new task attempt if necessary.
    * If the task attempt data is different from the task attempt, a new task attempt is created.
    * @param taskAttemptData - The task attempt data to be set or updated.
@@ -815,6 +886,7 @@ export class DatabaseTaskCommunicationService {
             }
           },
           select: {
+            id: true,
             UserUmlQuestionAnswer: {
               select: {
                 attemptData: true,
@@ -823,14 +895,14 @@ export class DatabaseTaskCommunicationService {
           }
         });
         return {
-          //userAnswerId: taskAttempt.userAnswer[0].id,
+          userAnswerId: newAnswer.id,
           taskId: taskAttemptData.taskId,
           attemptData: newAnswer.UserUmlQuestionAnswer.attemptData as unknown as editorDataDTO,
         };
       }
       console.log("the same");
       return {
-        //userAnswerId: taskAttempt.userAnswer[0].id,
+        userAnswerId: taskAttempt.userAnswer[0].id,
         taskId: taskAttemptData.taskId,
         attemptData: taskAttemptData.attemptData,
       };

@@ -36,6 +36,36 @@ export class CompareService {
 
   }
 
+  /**
+   * Compares the solutions and calculates the reached points based on the maximum points.
+   *
+   * @param {editorDataDTO} solution - The solution data to compare.
+   * @param {editorDataDTO} attempt - The attempt data to compare.
+   * @param maxPoints The maximum points that can be achieved.
+   * @returns The reached points calculated based on the comparison.
+   */
+  async compareAndCalculate(solution: editorDataDTO, attempt: editorDataDTO, maxPoints: number): Promise<number> {
+    console.log("datatatat: ", attempt);
+    if (attempt.nodes.length == 0) {
+      return 0;
+    }
+    if (solution.nodes.length == 0){
+      //for later: what to do when a task is given, but no solution?
+      return 0;
+    }
+
+    const highlightedData = await this.compare(solution, attempt);
+
+    const nodes = highlightedData.nodes;
+    const edges = highlightedData.edges;
+
+    const nodesMistakes = nodes.filter(item => item.highlighted).length;
+    const edgesMistakes = edges.filter(item => item.highlighted).length;
+
+    const reachedPoints = maxPoints - (nodesMistakes + edgesMistakes);
+
+    return reachedPoints;
+  }
 
   /**
    * Highlights the nodes based on the final matches, no matches, solution nodes, and attempt nodes.

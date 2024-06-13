@@ -47,6 +47,7 @@ export interface taskAttemptDTO {
 
 export interface taskAttemptDataDTO {
     taskId: number;
+    userAnswerId: number;
     attemptData: editorDataDTO;
 }
 

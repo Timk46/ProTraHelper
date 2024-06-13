@@ -35,7 +35,7 @@
 
     <div [ngClass]="{'submitted': isSubmitted}" class="feedback-container mat-elevation-z8">
       <div *ngIf="helpVisible">
-        <h1>Erreichte Punkte: {{isSubmitted}} von {{taskWorkspaceData.maxPoints}}</h1>
+        <h1>Erreichte Punkte: {{reachedPoints}} von {{taskWorkspaceData.maxPoints}}</h1>
         <p>Hi, ich bin Kai, kann ich dir helfen?</p>
         <!-- <mat-progress-spinner mode="indeterminate" diameter="100"></mat-progress-spinner> -->
       </div>

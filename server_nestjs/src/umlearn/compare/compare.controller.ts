@@ -16,10 +16,10 @@ export class CompareController {
     //     return this.compareService.compare(solution, attempt);
     // }
 
-    @Post('compare')
+    /* @Post('compare')
     async compare(@Body('solutionData') solution: editorDataDTO, @Body('attemptData') attempt: editorDataDTO ): Promise<editorDataDTO> {
       return this.compareService.compare(solution, attempt);
-  }
+    } */
 
 
 }

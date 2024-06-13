@@ -147,6 +147,18 @@ export class DatabaseTaskCommunicationController {
   }
 
   /**
+   * Sets the task attempt data and the feedback data.
+   *
+   * @param taskAttemptData - The task attempt data to be set.
+   * @returns A Promise that resolves to the reached points.
+   */
+  @roles('ANY')
+  @Post('commitAttempt')
+  commitAttemptGetPoints(@Body() taskAttemptData: taskAttemptDataDTO, @Req() req): Promise<number> {
+    return this.tasksService.commitAttemptGetPoints(taskAttemptData, req.user.id);
+  }
+
+  /**
    * Retrieves the feedback data for a specific attempt.
    * @param attemptId The ID of the attempt.
    * @returns A Promise that resolves to the taskFeedbackDataDTO object containing the feedback data.

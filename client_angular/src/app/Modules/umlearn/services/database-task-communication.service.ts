@@ -115,6 +115,10 @@ export class DatabaseTaskCommunicationService {
     return this.http.get<taskFeedbackDataDTO>(environment.server + `/database-task-communication/taskFeedback/${taskAttemptId}`);
   }
 
+  commitAttemptGetPoints(taskAttemptData: taskAttemptDataDTO): Observable<number> {
+    return this.http.post<number>(environment.server + '/database-task-communication/commitAttempt', taskAttemptData);
+  }
+
   /**
    * Sets the task attempt data by making a POST request to the server.
    * @param taskAttemptData - The task attempt data to be set.

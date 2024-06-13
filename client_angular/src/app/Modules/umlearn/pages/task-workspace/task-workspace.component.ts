@@ -19,6 +19,7 @@ export class TaskWorkspaceComponent implements OnDestroy {
 
   isSubmitted: boolean = false;
   helpVisible: boolean = false;
+  reachedPoints: number = 0;
 
   tinyMceConfig: any = {
     readonly: false,
@@ -36,6 +37,7 @@ export class TaskWorkspaceComponent implements OnDestroy {
 
   taskAttemptData: taskAttemptDataDTO = {
     taskId: -1,
+    userAnswerId: -1,
     attemptData: {
       nodes: [],
       edges: [],
@@ -103,9 +105,10 @@ export class TaskWorkspaceComponent implements OnDestroy {
   onAccept(data: editorDataDTO) {
     this.notification.info("Änderungen werden übernommen...");
     this.taskAttemptData.attemptData = data;
-    const setTaskAttemptDataSubscription = this.dtcs.setTaskAttemptData(this.taskAttemptData).subscribe((data: taskAttemptDataDTO) => {
-      //this.taskAttemptData = data;
+    //const setTaskAttemptDataSubscription = this.dtcs.setTaskAttemptData(this.taskAttemptData).subscribe((data: taskAttemptDataDTO) => {
+    const setTaskAttemptDataSubscription = this.dtcs.commitAttemptGetPoints(this.taskAttemptData).subscribe((data: number) => {
       this.isSubmitted = !this.isSubmitted;
+      this.reachedPoints = data;
       //after 0.5 seconds, the transition is finished
       if (this.isSubmitted) {
         setTimeout(() => {

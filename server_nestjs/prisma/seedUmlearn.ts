@@ -19,7 +19,7 @@ export const seedUmlearn = async (user_id: number) => {
       name: 'Bestellsystem',
       description: 'Per Seed importierte UML Aufgabe.',
       text: 'Modelliere ein Gebrauchtwagenhaus.',
-      score: 100,
+      score: 36,
       type: 'UML',
       level: 3,
       mode: 'practise',
