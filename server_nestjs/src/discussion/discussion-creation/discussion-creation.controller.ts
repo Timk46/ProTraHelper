@@ -107,6 +107,7 @@ export class DiscussionCreationController {
     // Fetch all anonymous users involved in the discussion
     const anonymousUsers = await this.creationService.getAnonymousUsersByDiscussionId(messageData.discussionId);
     const filteredAnonymousUsers = anonymousUsers.filter(user => user.userId !== req.user.id);
+    console.log("filteredAnonymousUsers: ", filteredAnonymousUsers)
     // Send notifications to all users
     const notifications: NotificationDTO[] = filteredAnonymousUsers.map(user => ({
       userId: user.userId,

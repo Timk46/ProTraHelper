@@ -25,6 +25,9 @@ export class NotificationBellComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUnreadCount();
+    this.notificationService.getUnreadCount().subscribe(count => {
+      this.unreadCount = count;
+    })
     // listening to Notifications incoming from the service
     this.notificationService.getNotifications().subscribe(notifications => {
       this.allNotifications = notifications
@@ -54,9 +57,7 @@ export class NotificationBellComponent implements OnInit {
    * Load the unread count of notifications
    */
   loadUnreadCount(): void {
-    this.notificationService.getUnreadCount().subscribe(count => {
-      this.unreadCount = count;
-    });
+    this.notificationService.getUnreadCountFromServer().subscribe()
   }
 
   /**

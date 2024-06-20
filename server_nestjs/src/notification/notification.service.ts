@@ -28,25 +28,44 @@ export class NotificationService   {
    */
   async notifyUsers(notifications: NotificationDTO[]) {
     console.log('NotificationService: notifyUsers for multiple users');
-
-    // Create notifications in bulk
-    const createdNotifications = await this.prisma.notification.createMany({
-      data: notifications.map(notification => ({
-        message: notification.message,
-        userId: notification.userId,
-        timestamp: new Date(),
-        isRead: false,
-        type: notification.type,
-        discussionId: notification.discussionId,
-      })),
-    });
+    // Create notifications individually to get their IDs
+    const createNotificationPromises = notifications.map(notification =>
+        this.prisma.notification.create({
+            data: {
+                message: notification.message,
+                userId: notification.userId,
+                timestamp: new Date(),
+                isRead: false,
+                type: notification.type,
+                discussionId: notification.discussionId,
+            },
+        })
+    );
+    const createdNotifications = await Promise.all(createNotificationPromises);
     // Emit notifications
-    notifications.forEach(notification => {
-      this.notificationSubject.next(notification);
+    createdNotifications.forEach(createdNotification => {
+      const notificationDTO = this.toNotificationDTO(createdNotification);
+      this.notificationSubject.next(notificationDTO);
     });
-    console.log('Notifications created and emitted for multiple users');
   }
 
+  /**
+   * Convert a Prisma notification to a NotificationDTO
+   * @param prismaNotification
+   * @returns {NotificationDTO} the notification as DTO 
+   */
+  private toNotificationDTO(prismaNotification: NotificationDTO): NotificationDTO {
+    return {
+        id: prismaNotification.id,
+        userId: prismaNotification.userId,
+        message: prismaNotification.message,
+        timestamp: prismaNotification.timestamp,
+        isRead: prismaNotification.isRead,
+        readTimestamp: prismaNotification.readTimestamp,
+        type: prismaNotification.type,
+        discussionId: prismaNotification.discussionId,
+    };
+}
 
   /**
    *
@@ -178,6 +197,7 @@ export class NotificationService   {
    * @returns {Promise<NotificationDTO>} the updated notification
    */
   async markNotificationAsRead(notificationId: number): Promise<NotificationDTO>{
+    console.log("marking notification as read: ", notificationId)
     return this.prisma.notification.update({
       where: {
         id: Number(notificationId)

@@ -10,6 +10,7 @@ import { ToolbarService } from 'src/app/Services/toolbar/toolbar.service';
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
+  unreadCount: number = 0;
   constructor(
     public toolbarService: ToolbarService,
     public sSS: ScreenSizeService,
@@ -30,6 +31,9 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.notificationService.getUnreadCount().subscribe(count => {
+      this.unreadCount = count;
+    });
     this.notificationService.getNotifications().subscribe()
   }
 }

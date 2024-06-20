@@ -101,7 +101,7 @@ export class NotificationController {
    * @returns {Promise<number>} The count of unread notifications
    */
   @Get(':userId/unread-count')
-  async getUnreadCount(@Param('userId') userId: number): Promise<number> {
+  async getUnreadCountFromServer(@Param('userId') userId: number): Promise<number> {
     console.log("tpye of number userId send through @Param for unread count:", typeof userId)
     return this.notificationService.getUnreadCount(userId) ?  this.notificationService.getUnreadCount(userId) : 0;
   }
