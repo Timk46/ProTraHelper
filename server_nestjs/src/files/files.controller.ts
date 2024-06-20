@@ -55,14 +55,16 @@ export class FilesController {
   ): Promise<StreamableFile> {
     const file = await this.filesService.getFile(uniqueIdentifier);
 
+    // If the file is a PDF, set the content type to 'application/pdf' and content-Disposition Header to inline instead of attachment (to open the PDF in the browser instead of downloading it)
     response.set({
-      'Content-Type': file.type,
-      'Content-Disposition': `attachment; filename=${file.name}`,
+      'Content-Type': file.type == 'PDF' ? 'application/pdf' : file.type,
+      'Content-Disposition': file.type == 'PDF' ? `inline; filename=${file.name}` : `attachment; filename=${file.name}`,
       'X-Filename': file.name, // additional header with filename because Angular's HttpClient cant access the filename from the response while using responseType: 'blob'
     });
 
     return this.filesService.downloadFile(uniqueIdentifier);
   }
+
 
   /**
    * Download an existing file by its name
