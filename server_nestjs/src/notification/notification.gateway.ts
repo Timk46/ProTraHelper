@@ -38,22 +38,16 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
   async handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
     const token = client.handshake.query.token as string;
-    // Check if the token is valid
     try {
       console.log(`Token: ${token}`);
       const decoded = await this.jwtService.verifyAsync(token, { secret: process.env.JWT_SECRET_KEY });
       const userId = decoded.id;
       console.log("verified with user id: ", userId)
-      // Check if the user is already connected and add the user to the connected users map
       if(userId) {
         if(!this.connectedUsers.has(userId)) {
           this.connectedUsers.set(userId, new Set());
         }
         this.connectedUsers.get(userId)?.add(client);
-        // OLD WAY:
-        // const connections = this.connectedUsers.get(userId) || [];
-        // connections.push(client);
-        // this.connectedUsers.set(userId, connections);
         console.log(`Client connected: ${client.id}, User ID: ${userId}`);
       } else {
         throw new Error("user already connected")
@@ -96,7 +90,6 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
    * @param {NotificationDTO} notification
    */
   async sendNotification(notification: NotificationDTO) {
-    //OLD WAY:
     const clients = this.connectedUsers.get(notification.userId);
     if(clients && clients.size > 0) {
     clients.forEach(client => {
@@ -104,13 +97,6 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
       client.emit('notification', notification);
     })
   }
-    // const sockets = this.connectedUsers.get(notification.userId);
-    // if (sockets && sockets.size > 0) {
-    //   // Send the notification to only one socket (the first one in the set)
-    //   const firstSocket = sockets.values().next().value;
-    //   console.log(`Sending Notification: ${notification.message} to user: ${notification.userId}`);
-    //   firstSocket.emit('notification', notification);
-    // }
   }
 
   /** NOT USED

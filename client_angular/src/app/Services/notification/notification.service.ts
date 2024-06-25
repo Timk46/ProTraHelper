@@ -31,6 +31,7 @@ export class NotificationService {
     ) {
       this.broadcastChannel = new BroadcastChannel('unreadCountChannel');
       this.userService.isAuthenticated$.subscribe((isAuthenticated) => {
+        // after checking authentication status we start listening to incoming messages thorough the socket, synchronize the UnreadCount and setup our broadcastChannel which synchronizes necessary values throughout opened tabs and windows
         if(isAuthenticated) {
           this.userId = Number(this.userService.getTokenID());
           this.startListening();
@@ -42,14 +43,26 @@ export class NotificationService {
       })
   }
 
+  /**
+   * Setup the broadcast channel to communicate with other tabs
+   * currently havin 3 types to sync: 
+   * 1. new incoming notification, 
+   * 2. the unread Count of the notification Bell 
+   * 3. notificaitons being read
+   * @returns {void}
+   */
   private setupBroadcastChannel(): void {
     this.broadcastChannel.onmessage = (event) => {
-      if (event.data.type === 'newNotification') {
-        this.handleNewNotification(event.data.notification, false);
-      } else if (event.data.type === 'unreadCount') {
-        this.setUnreadCount(event.data.count, false);
-      } else if (event.data.type === 'notificationRead') {
-        this.syncUnreadCount();
+      switch (event.data.type) {
+        case 'newNotification':
+          this.handleNewNotification(event.data.notification, false);
+          break;
+        case 'unreadCount':
+          this.setUnreadCount(event.data.count, false);
+          break;
+        case 'notificationRead':
+          this.syncUnreadCount();
+          break;
       }
     };
   }
@@ -70,18 +83,23 @@ export class NotificationService {
     });
   }
 
+  /**
+   * Handle a new notification by creating UID out of the notification ID and timestamp and adding it to the panel if it is not already there
+   * @param {NotificationDTO} notification
+   * @param {boolean} isBroadcast
+   * @returns {void}
+   */
   private handleNewNotification(notification: NotificationDTO, isBroadcast: boolean): void {
+    // creating unique id for the notification and checking processed notifications
     const notificationId = `${notification.id}-${notification.timestamp}`;
     if (!this.processedNotifications.has(notificationId)) {
-      console.log("not adding the notification in the panel")
       this.processedNotifications.add(notificationId);
       this.addNotification(notification);
-
       if (isBroadcast) {
         this.incrementUnreadCount();
+        // Broadcast the new notification to other tabs
         this.broadcastChannel.postMessage({ type: 'newNotification', notification });
       }
-
       this.showNotification(notification.message, 'View', () => this.handleNotificationClick(notification));
     }
   }
@@ -178,14 +196,16 @@ export class NotificationService {
         });
         this.router.navigate(['/discussion-view/' + notification.discussionId]);
         break;
+      case NotificationType.SOLUTION:
+        // TODO IMPLEMENT
+        break;
       default:
         console.log("Unknown notification type");
         break;
     }
-    //this.removeNotification(notification);
   }
 
-  /**
+  /** NOT BEING USED
    * Remove a notification from the list
    * @param {NotificationDTO} notification
    */
@@ -255,8 +275,7 @@ export class NotificationService {
    * Increment the unread count in the local storage and notify subscribers
    */
   private incrementUnreadCount(): void {
-    const newCount = this.unreadCountSubject.value + 1;
-    this.setUnreadCount(newCount, true);
+    this.setUnreadCount(this.unreadCountSubject.value + 1, true);
   }
 
 
@@ -273,8 +292,7 @@ export class NotificationService {
    * Decrement the unread count in the local storage and notify subscribers
    */
   decrementUnreadCount(broadcast: boolean): void {
-    const newCount = Math.max(this.unreadCountSubject.value - 1, 0);
-    this.setUnreadCount(newCount, broadcast);
+    this.setUnreadCount(Math.max(this.unreadCountSubject.value - 1, 0), broadcast);
   }
 
   /**
