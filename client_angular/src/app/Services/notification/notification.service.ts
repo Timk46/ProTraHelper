@@ -21,6 +21,7 @@ export class NotificationService {
   private unreadCountSubject = new BehaviorSubject<number>(0); // new subject for unread count
   //private receivedNotificationIds = new Set<number>(); // Track received notification IDs to avoid duplicates
   private broadcastChannel: BroadcastChannel;
+  private processedNotifications = new Set<string>();
 
   constructor(
     private userService: UserService,
@@ -34,37 +35,57 @@ export class NotificationService {
           this.userId = Number(this.userService.getTokenID());
           this.startListening();
           this.syncUnreadCount();
-          this.broadcastChannel.onmessage = (event) => {
-            console.log("BROADCASTING event.data: ", event.data)
-            this.setUnreadCount(event.data)
-          }
+          this.setupBroadcastChannel();
         } else {
           this.stopListening();
         }
       })
   }
 
+  private setupBroadcastChannel(): void {
+    this.broadcastChannel.onmessage = (event) => {
+      if (event.data.type === 'newNotification') {
+        this.handleNewNotification(event.data.notification, false);
+      } else if (event.data.type === 'unreadCount') {
+        this.setUnreadCount(event.data.count, false);
+      } else if (event.data.type === 'notificationRead') {
+        this.syncUnreadCount();
+      }
+    };
+  }
+
+
   /**
    * Start listening for notifications and establish a connection to the websocket
    */
   private startListening(): void {
-    // fetching initial Notifications and add more while scrolling
     this.fetchInitialNotifications(20, 0);
     this.socket = io('http://localhost:3001/notifications', {
-      query: { token: this.userService.getAccessToken()},
+      query: { token: this.userService.getAccessToken() },
       withCredentials: true,
       transports: ['websocket']
     });
     this.socket.on('notification', (notification: NotificationDTO) => {
-      console.log("Received notification from websocket: ", notification)
-      // if(this.isDuplicate(notification)) {
-        this.addNotification(notification);
-        console.log("notification added, showing notification")
-        this.showNotification(notification.message, 'View', () => this.handleNotificationClick(notification));
-        this.incrementUnreadCount();
-      //}
+      this.handleNewNotification(notification, true);
     });
   }
+
+  private handleNewNotification(notification: NotificationDTO, isBroadcast: boolean): void {
+    const notificationId = `${notification.id}-${notification.timestamp}`;
+    if (!this.processedNotifications.has(notificationId)) {
+      console.log("not adding the notification in the panel")
+      this.processedNotifications.add(notificationId);
+      this.addNotification(notification);
+
+      if (isBroadcast) {
+        this.incrementUnreadCount();
+        this.broadcastChannel.postMessage({ type: 'newNotification', notification });
+      }
+
+      this.showNotification(notification.message, 'View', () => this.handleNotificationClick(notification));
+    }
+  }
+
 
   /**
    * Stop listening for notifications and disconnect from the websocket
@@ -135,7 +156,7 @@ export class NotificationService {
    * @param {NotificationDTO} notification
    */
   addNotification(notification: NotificationDTO): void {
-    this.notifications.push(notification);
+    this.notifications.unshift(notification);
     this.notificationsSubject.next(this.notifications);
     // const exists = this.notifications.some(n => n.id === notification.id);
     // if (!exists) {
@@ -153,7 +174,7 @@ export class NotificationService {
       case NotificationType.COMMENT:
         console.log("comment reached the frontend");
         this.markNotificationAsRead(notification).subscribe(() => {
-          this.decrementUnreadCount();
+          this.broadcastChannel.postMessage({ type: 'notificationRead' });
         });
         this.router.navigate(['/discussion-view/' + notification.discussionId]);
         break;
@@ -221,12 +242,7 @@ export class NotificationService {
     return this.http.get<number>(`${environment.server}/notifications/${this.userId}/unread-count`)
       .pipe(
         tap(count => {
-          // Update the unread count in the local storage and notify subscribers
-          //localStorage.setItem('unreadCount', count.toString());
-          this.unreadCountSubject.next(count);
-
-          // Broadcast the unread count to other tabs????
-          this.broadcastChannel?.postMessage(count);
+          this.setUnreadCount(count, false);
         }),
         catchError(error => {
           console.error('Error fetching unread notifications count:', error);
@@ -239,13 +255,8 @@ export class NotificationService {
    * Increment the unread count in the local storage and notify subscribers
    */
   private incrementUnreadCount(): void {
-    const currentCount = this.unreadCountSubject.value
-    //const currentCount = Number(localStorage.getItem('unreadCount')) || 0;
-    const newCount = currentCount + 1;
-    //localStorage.setItem('unreadCount', newCount.toString());
-    this.unreadCountSubject.next(newCount);
-    // Broadcast the unread count to other tabs????
-    this.broadcastChannel.postMessage(newCount);
+    const newCount = this.unreadCountSubject.value + 1;
+    this.setUnreadCount(newCount, true);
   }
 
 
@@ -253,22 +264,17 @@ export class NotificationService {
    * Synchronize the unread count with the local storage
    */
   private syncUnreadCount(): void {
-    // const unreadCount = Number(localStorage.getItem('unreadCount')) || 0;
-    // this.unreadCountSubject.next(unreadCount);
+    const storedCount = Number(localStorage.getItem('unreadCount')) || 0;
+    this.setUnreadCount(storedCount, false);
     this.getUnreadCountFromServer().subscribe();
   }
 
   /**
    * Decrement the unread count in the local storage and notify subscribers
    */
-  private decrementUnreadCount(): void {
-    const currentCount = this.unreadCountSubject.value
-    //const currentCount = Number(localStorage.getItem('unreadCount')) || 0;
-    const newCount = Math.max(currentCount - 1, 0);
-    //localStorage.setItem('unreadCount', newCount.toString());
-    this.unreadCountSubject.next(newCount);
-    //sharing it with other tabs and sessions?
-    this.broadcastChannel.postMessage(newCount);
+  decrementUnreadCount(broadcast: boolean): void {
+    const newCount = Math.max(this.unreadCountSubject.value - 1, 0);
+    this.setUnreadCount(newCount, broadcast);
   }
 
   /**
@@ -281,19 +287,13 @@ export class NotificationService {
 
   /**
    * Set the unread count in the local storage and notify subscribers
+   * @param {number} newCount
    */
-  private setUnreadCount(newCount: number): void {
-    //localStorage.setItem('unreadCount', newCount.toString());
+  private setUnreadCount(newCount: number, broadcast: boolean): void {
+    localStorage.setItem('unreadCount', newCount.toString());
     this.unreadCountSubject.next(newCount);
-  }
-
-  /**
-   *
-   * @param {NotificationDTO} notification
-   * @returns {boolean} true if the notification is a duplicate
-   */
-  private isDuplicate(notification: NotificationDTO): boolean {
-    return this.notifications.some(n => n.id === notification.id);
-
+    if(broadcast) {
+      this.broadcastChannel.postMessage({ type: 'unreadCount', count: newCount });
+    }
   }
 }

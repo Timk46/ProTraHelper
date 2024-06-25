@@ -3,6 +3,7 @@ import { NotificationService } from 'src/app/Services/notification/notification.
 import { NotificationDTO } from '@DTOs/notification.dto';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { NotificationType } from '@DTOs/notificationType.enum';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-notification-bell',
@@ -11,7 +12,7 @@ import { NotificationType } from '@DTOs/notificationType.enum';
 })
 export class NotificationBellComponent implements OnInit {
   allNotifications: NotificationDTO[] = [];
-  unreadCount: number = 0;
+  unreadCount$: Observable<number>;
   showNotifications: boolean = false;
   limit: number = 10;
   offset: number = 0;
@@ -21,17 +22,15 @@ export class NotificationBellComponent implements OnInit {
 
   constructor(
     private notificationService: NotificationService
-  ){}
+  ){
+    this.unreadCount$ = this.notificationService.getUnreadCount();
+  }
 
   ngOnInit(): void {
     this.loadUnreadCount();
-    this.notificationService.getUnreadCount().subscribe(count => {
-      this.unreadCount = count;
-    })
     // listening to Notifications incoming from the service
     this.notificationService.getNotifications().subscribe(notifications => {
       this.allNotifications = notifications
-      this.unreadCount = notifications.filter(notification => !notification.isRead).length;
     });
     // listener for clicks outside the notification bell to make it close
     document.addEventListener('click', this.handleOutsideClick.bind(this));
@@ -97,8 +96,7 @@ export class NotificationBellComponent implements OnInit {
     this.notificationService.markNotificationAsRead(notification).subscribe(() => {
       // Update the local state to reflect the notification is now read
       notification.isRead = true;
-      // Optionally, update the unread count
-      this.unreadCount = this.allNotifications.filter(n => !n.isRead).length;
+      this.notificationService.decrementUnreadCount(true)
     });
   }
   }

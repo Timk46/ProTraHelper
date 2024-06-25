@@ -26,6 +26,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatStepperModule } from '@angular/material/stepper';
+import {MatBadgeModule} from '@angular/material/badge';
 @NgModule({
   imports: [
     MatButtonModule,
@@ -55,6 +56,7 @@ import { MatStepperModule } from '@angular/material/stepper';
     MatTableModule,
     MatSortModule,
     MatStepperModule,
+    MatBadgeModule,
   ],
   exports: [
     MatButtonModule,
@@ -84,6 +86,7 @@ import { MatStepperModule } from '@angular/material/stepper';
     MatTableModule,
     MatSortModule,
     MatStepperModule,
+    MatBadgeModule,
   ],
 })
 export class MaterialModule {}

@@ -1,6 +1,7 @@
 <div class="notification-bell" #notificationBell>
-  <mat-icon (click)="toggleNotifications()" >notifications</mat-icon>
-  <span *ngIf="unreadCount > 0" class="notification-count">{{ unreadCount }}</span>
+  <button mat-icon-button [matBadge]="(unreadCount$ | async)" matBadgeOverlap="true" matBadgeColor="warn" (click)="toggleNotifications()">
+    <mat-icon>notifications</mat-icon>
+  </button>
   <div class="notifications-panel" *ngIf="showNotifications" (scroll)="onScroll($event)">
     <mat-accordion>
       <mat-expansion-panel *ngFor="let notification of allNotifications" #panel appNotificationStyle [notification]="notification">
