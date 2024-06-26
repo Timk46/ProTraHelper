@@ -96,31 +96,11 @@ export class DiscussionCreationController {
     if (isNaN(req.user.id)) {
       throw new BadRequestException('Invalid user id');
     }
-    const discussionMessageId = await this.creationService.createDiscussionMessage(
+    return await this.creationService.createDiscussionMessage(
       messageData,
       Number(req.user.id)
     );
-    console.log("userId: ", req.user.id)
 
-    const userIds = await this.dataService.getUserIdsByDiscussionId(messageData.discussionId, req.user.id);
-    console.log("hopefully sending notifications to only Users: wiht IDS ", userIds, "and not to ", req.user.id)
-    // Fetch all anonymous users involved in the discussion
-    const anonymousUsers = await this.creationService.getAnonymousUsersByDiscussionId(messageData.discussionId);
-    const filteredAnonymousUsers = anonymousUsers.filter(user => user.userId !== req.user.id);
-    console.log("filteredAnonymousUsers: ", filteredAnonymousUsers)
-    // Send notifications to all users
-    const notifications: NotificationDTO[] = filteredAnonymousUsers.map(user => ({
-      userId: user.userId,
-      message: `A new comment by User: ${user.anonymousName} has been posted in a discussion you participated in.`,
-      type: NotificationType.COMMENT,
-      timestamp: new Date(),
-      isRead: false,
-      discussionId: messageData.discussionId,
-    }));
-
-    await this.notificationService.notifyUsers(notifications);
-
-    return discussionMessageId;
   }
 
   /**

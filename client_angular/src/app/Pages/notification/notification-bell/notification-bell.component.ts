@@ -28,11 +28,9 @@ export class NotificationBellComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUnreadCount();
-    // listening to Notifications incoming from the service
     this.notificationService.getNotifications().subscribe(notifications => {
       this.allNotifications = notifications
     });
-    // listener for clicks outside the notification bell to make it close
     document.addEventListener('click', this.handleOutsideClick.bind(this));
   }
 
@@ -45,7 +43,6 @@ export class NotificationBellComponent implements OnInit {
    */
   handleOutsideClick(event: MouseEvent): void {
     const clickedInside = this.notificationBellRef.nativeElement.contains(event.target);
-    console.log("we clicked inside: ", clickedInside)
     if (!clickedInside) {
       this.showNotifications = false;
     }
@@ -90,15 +87,20 @@ export class NotificationBellComponent implements OnInit {
    * Mark a notification as read
    * @param {NotificationDTO} notification
    */
-  markAsRead(notification: NotificationDTO): void {
-  if (!notification.isRead) {
-    console.log("typeof notification ID: ", typeof notification.id, " and the id: ", notification.id)
-    this.notificationService.markNotificationAsRead(notification).subscribe(() => {
-      // Update the local state to reflect the notification is now read
-      notification.isRead = true;
-      this.notificationService.decrementUnreadCount(true)
-    });
-  }
+  markAsRead(notification: NotificationDTO, panel: MatExpansionPanel): void {
+    if (!notification.isRead) {
+      console.log("typeof notification ID: ", typeof notification.id, " and the id: ", notification.id)
+      this.notificationService.markNotificationAsRead(notification).subscribe(() => {
+        notification.isRead = true;
+        const updatedNotification = { ...notification };
+        const index = this.allNotifications.findIndex(n => n.id === notification.id);
+        if (index !== -1) {
+          this.allNotifications[index] = updatedNotification;
+          this.allNotifications = [...this.allNotifications]; // Trigger change detection
+        }
+        panel.close()
+      });
+    }
   }
 
   /**
@@ -118,14 +120,31 @@ export class NotificationBellComponent implements OnInit {
   getNotificationTitle(type: string): string {
     switch (type) {
       case NotificationType.COMMENT:
-        return 'Kommentar im Beitrag';
+        return 'Kommentar';
 
       case NotificationType.SOLUTION:
-        return 'Kommentar als Lösung!';
+        return 'Lösung';
 
       // Add more cases for other notification types if needed
       default:
         return type;
     }
+  }
+
+  /**
+   * Format a timestamp to a readable date
+   * @param {string} timestamp
+   * @returns {string} The formatted date
+   */
+  formatTimeStamp(timestamp: Date | undefined): string {
+    if(!timestamp) {
+      return 'Unknown Time';
+    }
+    const date = new Date(timestamp);
+    return date.toLocaleString('de-DE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
   }
 }

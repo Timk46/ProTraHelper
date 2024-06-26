@@ -1,5 +1,5 @@
 // notification-style.directive.ts
-import { Directive, ElementRef, Input, OnChanges, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, Input, OnChanges, Renderer2, SimpleChanges } from '@angular/core';
 import { NotificationDTO } from '@DTOs/notification.dto';
 import { NotificationType } from '@DTOs/notificationType.enum';
 
@@ -12,24 +12,25 @@ export class BellDirective implements OnChanges {
 
   constructor(private el: ElementRef, private renderer: Renderer2) {}
 
-  ngOnChanges() {
-    this.applyStylesAndText();
+  ngOnChanges(changes: SimpleChanges) {
+    if(changes['notification']) {
+      this.applyStylesAndText();
+    }
   }
 
   private applyStylesAndText() {
-    if (!this.notification || !this.notification.type) {
+    if (!this.notification) {
       return;
     }
-
-    switch (this.notification.type) {
-      case NotificationType.COMMENT:
-        this.renderer.setStyle(this.el.nativeElement, 'backgroundColor', '#e0f7fa');
-        this.renderer.setStyle(this.el.nativeElement, 'color', '#00695c');
-        break;
-      // Add more cases for other notification types if needed
-      default:
-        this.renderer.removeStyle(this.el.nativeElement, 'backgroundColor');
-        this.renderer.removeStyle(this.el.nativeElement, 'color');
+    if (!this.notification.isRead) {
+      this.renderer.setStyle(this.el.nativeElement, 'backgroundColor', '#e0f7fa');
+    } else {
+      this.renderer.setStyle(this.el.nativeElement, 'backgroundColor', 'white');
+    }
+    if (this.notification.type === NotificationType.COMMENT) {
+      this.renderer.setStyle(this.el.nativeElement, 'borderLeft', '4px solid darkblue');
+    } else if (this.notification.type === NotificationType.SOLUTION) {
+      this.renderer.setStyle(this.el.nativeElement, 'borderLeft', '4px solid darkgreen');
     }
   }
 }

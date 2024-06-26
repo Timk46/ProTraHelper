@@ -1,12 +1,14 @@
+/* eslint-disable prettier/prettier */
 import { PrismaService } from '@/prisma/prisma.service';
-import { discussionDTO, discussionMessageDTO, nodeNameDTO } from '@DTOs/index';
+import { discussionDTO, discussionMessageDTO, nodeNameDTO, NotificationType } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { DiscussionDataService } from '../discussion-data/discussion-data.service';
+import { NotificationService } from '@/notification/notification.service';
 
 @Injectable()
 export class DiscussionViewService {
 
-  constructor(private prisma: PrismaService, private discussionDataService: DiscussionDataService) { }
+  constructor(private prisma: PrismaService, private discussionDataService: DiscussionDataService, private notificationService: NotificationService) { }
 
   /** This function returns the name of the concept node for a given concept node id
    *
@@ -141,7 +143,7 @@ export class DiscussionViewService {
       throw new Error('Messages not found');
     }
 
-    
+
 
 
     let messageData: discussionMessageDTO[] = [];
@@ -186,7 +188,8 @@ export class DiscussionViewService {
             id: true,
             author: {
               select: {
-                userId: true
+                userId: true,
+                anonymousName: true
               }
             }
           }
@@ -203,45 +206,59 @@ export class DiscussionViewService {
     if (message.discussion.author.userId != userId) {
       throw new Error('User is not author of message');
     }
-
+    const newSolutionStatus = !message.isSolution;
     //set all messages in discussion to not solution except toggle message and init message
-    await this.prisma.message.updateMany({
-      where: {
-        discussionId: message.discussion.id,
-        NOT: {
-          id: messageId,
-          isInitiator: true
+    await this.prisma.$transaction([
+      // Set all messages in discussion to not solution except toggle message and init message
+      this.prisma.message.updateMany({
+        where: {
+          discussionId: message.discussion.id,
+          NOT: {
+            id: messageId,
+            isInitiator: true
+          }
+        },
+        data: {
+          isSolution: false
         }
-      },
-      data: {
-        isSolution: false
-      }
-    });
+      }),
 
-    //toggle message solution status and init message solution status
-    await this.prisma.message.updateMany({
-      where: {
+      // Toggle message solution status and init message solution status
+      this.prisma.message.updateMany({
+        where: {
+          discussionId: message.discussion.id,
+          OR: [
+            { id: messageId },
+            { isInitiator: true }
+          ]
+        },
+        data: {
+          isSolution: !message.isSolution
+        }
+      }),
+
+      // Set discussion solution status
+      this.prisma.discussion.update({
+        where: {
+          id: message.discussion.id
+        },
+        data: {
+          isSolved: !message.isSolution
+        }
+      })
+    ]);
+
+    if(newSolutionStatus) {
+        const notification = {
+        userId: message.discussion.author.userId,
+        message: `Dein Kommentar wurde von ${message.discussion.author.anonymousName} als Lösung in einem Beitrag markiert.`,
+        type: NotificationType.SOLUTION,
+        timestamp: new Date(),
+        isRead: false,
         discussionId: message.discussion.id,
-        OR: [
-          { id: messageId },
-          { isInitiator: true }
-        ]
-      },
-      data: {
-        isSolution: !message.isSolution
-      }
-    });
-    console.log(message.isSolution);
-
-    //set discussion solution status
-    await this.prisma.discussion.update({
-      where: {
-        id: message.discussion.id
-      },
-      data: {
-        isSolved: !message.isSolution
-      }
-    });
+      };
+      await this.notificationService.notifyUser(notification);
+    }
 
     return !message.isSolution;
   }

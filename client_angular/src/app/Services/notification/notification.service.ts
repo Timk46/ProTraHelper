@@ -45,9 +45,9 @@ export class NotificationService {
 
   /**
    * Setup the broadcast channel to communicate with other tabs
-   * currently havin 3 types to sync: 
-   * 1. new incoming notification, 
-   * 2. the unread Count of the notification Bell 
+   * currently havin 3 types to sync:
+   * 1. new incoming notification,
+   * 2. the unread Count of the notification Bell
    * 3. notificaitons being read
    * @returns {void}
    */
@@ -61,12 +61,20 @@ export class NotificationService {
           this.setUnreadCount(event.data.count, false);
           break;
         case 'notificationRead':
+          this.updateNotificationReadStatus(event.data.notificationId);
           this.syncUnreadCount();
           break;
       }
     };
   }
 
+  private updateNotificationReadStatus(notificationId: number): void {
+    const notification = this.notifications.find(n => n.id === notificationId);
+    if (notification) {
+      notification.isRead = true;
+      this.notificationsSubject.next([...this.notifications]);
+    }
+  }
 
   /**
    * Start listening for notifications and establish a connection to the websocket
@@ -132,7 +140,7 @@ export class NotificationService {
         return of([]);
       })
     ).subscribe(notifications => {
-      this.notifications = notifications;
+      this.notifications = notifications
       this.notificationsSubject.next(this.notifications);
       this.syncUnreadCount();
     });
@@ -197,7 +205,10 @@ export class NotificationService {
         this.router.navigate(['/discussion-view/' + notification.discussionId]);
         break;
       case NotificationType.SOLUTION:
-        // TODO IMPLEMENT
+        this.markNotificationAsRead(notification).subscribe(() => {
+          this.broadcastChannel.postMessage({ type: 'notificationRead' });
+        });
+        this.router.navigate(['/discussion-view/' + notification.discussionId]);
         break;
       default:
         console.log("Unknown notification type");
@@ -247,8 +258,9 @@ export class NotificationService {
     console.log("marking notification as read: ", notification.id);
     return this.http.patch<NotificationDTO>(`${environment.server}/notifications/${notification.id}/read`, {isRead: true}).pipe(
       map((response) => {
+        this.updateNotificationReadStatus(notification.id!);
+        this.broadcastChannel.postMessage({ type: 'notificationRead', notificationId: notification.id });
         this.syncUnreadCount();
-        console.log("response in markNotificationsasRead: ", response)
         return response; // You must return the response to not alter the stream
       }),
     );
@@ -262,7 +274,7 @@ export class NotificationService {
     return this.http.get<number>(`${environment.server}/notifications/${this.userId}/unread-count`)
       .pipe(
         tap(count => {
-          this.setUnreadCount(count, false);
+          this.setUnreadCount(count, true);
         }),
         catchError(error => {
           console.error('Error fetching unread notifications count:', error);

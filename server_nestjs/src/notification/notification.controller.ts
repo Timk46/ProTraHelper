@@ -14,7 +14,7 @@ export class NotificationController {
    */
   @Post('createNotification')
   async createNotification(@Body() notification: NotificationDTO): Promise<NotificationDTO> {
-    return this.notificationService.createNotification(notification);
+    return await this.notificationService.createNotification(notification);
   }
 
   // /**
@@ -38,7 +38,7 @@ export class NotificationController {
     @Query('limit') limit: number,
     @Query('offset') offset: number,
   ): Promise<NotificationDTO[]> {
-    return this.notificationService.getAllNotifications(userId, limit, offset);
+    return await this.notificationService.getAllNotifications(userId, limit, offset);
   }
 
   /**
@@ -50,7 +50,7 @@ export class NotificationController {
   @Put(':id')
   async updateNotification(@Body() notification: NotificationDTO, @Param('id') id: number): Promise<NotificationDTO> {
     console.log("updating notification with id: ", id, " and notification: ", notification)
-    return this.notificationService.updateNotification(notification, +id);
+    return await this.notificationService.updateNotification(notification, +id);
   }
 
   /**
@@ -62,7 +62,7 @@ export class NotificationController {
   @Patch(':id/read')
   async markAsRead(@Body() notification: NotificationDTO, @Param('id') id: number): Promise<NotificationDTO> {
     console.log("marking notification as read with id: ", id, " and notification: ", notification)
-    return this.notificationService.markNotificationAsRead(id)
+    return await this.notificationService.markNotificationAsRead(id)
   }
   /**
    * Send a notification
@@ -82,7 +82,7 @@ export class NotificationController {
    */
   @Delete(':id')
   async deleteNotification(@Param('id') id: number): Promise<NotificationDTO> {
-    return this.notificationService.deleteNotification(+id);
+    return await this.notificationService.deleteNotification(+id);
   }
 
   /**
@@ -103,6 +103,6 @@ export class NotificationController {
   @Get(':userId/unread-count')
   async getUnreadCountFromServer(@Param('userId') userId: number): Promise<number> {
     console.log("tpye of number userId send through @Param for unread count:", typeof userId)
-    return this.notificationService.getUnreadCount(userId) ?  this.notificationService.getUnreadCount(userId) : 0;
+    return await this.notificationService.getUnreadCount(userId) ?  this.notificationService.getUnreadCount(userId) : 0;
   }
 }

@@ -4,7 +4,7 @@ mat-expansion-panel-header {
 
   .mat-panel-title {
     flex: 1;
-    margin-right: 8px; 
+    margin-right: 8px;
   }
 
   .mat-panel-description {
@@ -50,6 +50,19 @@ mat-expansion-panel-header {
     border-radius: 5px;
     padding: 10px;
 
+
+
+    mat-expansion-panel {
+      margin-bottom: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+
     .notification-item {
       margin-bottom: 10px;
       padding: 5px;
@@ -62,8 +75,34 @@ mat-expansion-panel-header {
     }
   }
 
-  .notification-status {
-    color: red;
+    .notification-date {
+      font-size: 12px;
+      color: #666;
+      margin-right: 8px;
+    }
+
+
+    .notification-status {
+      color: #f44336;
+      font-weight: 500;
+      font-size: 12px;
+    }
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+
+  button {
+    flex: 1;
+    font-size: 12px;
+    padding: 0 8px;
+    min-width: 0;
+
+    &:first-child {
+      margin-right: 8px;
+    }
   }
 }
 

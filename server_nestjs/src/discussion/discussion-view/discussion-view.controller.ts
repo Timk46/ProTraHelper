@@ -70,6 +70,4 @@ export class DiscussionViewController {
     return this.viewService.toggleSolution(Number(messageId), req.user.id);
   }
 
-
-
 }

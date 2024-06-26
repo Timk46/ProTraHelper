@@ -99,7 +99,7 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
   }
   }
 
-  /** NOT USED
+  /** NOT USED (its for clients to send notifications to other clients)
    * Handle sendNotification event from clients or elsewhere
    * @param {NotificationDTO} notification
    */

@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
+import { NotificationService } from '@/notification/notification.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO } from '@DTOs/index';
+import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO, NotificationType } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import * as xss from 'xss';
 
@@ -15,7 +16,7 @@ export class DiscussionCreationService {
     },
   };
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private notificationService: NotificationService) {}
 
   /** Returns the anonymous user data for a given user id and discussion id
    * If no anonymous user is found, a dummy is returned
@@ -157,8 +158,33 @@ export class DiscussionCreationService {
       throw new Error('Message not created');
     }
 
+    await this.sendCommentNotifications(messageData.discussionId, userId, anonymousUser.anonymousName);
+
     return message.id;
   }
+
+  /**
+   * Sends notifications to all users that have written a message in the discussion except the author of the new comment
+   * @param {number} discussionId
+   * @param {number} commentAuthorId
+   * @param {string} anonymousName
+   */
+  private async sendCommentNotifications(discussionId: number, commentAuthorId: number, anonymousName: string) {
+    const anonymousUsers = await this.getAnonymousUsersByDiscussionId(discussionId);
+    const filteredAnonymousUsers = anonymousUsers.filter(user => user.userId !== commentAuthorId);
+
+    const notifications = filteredAnonymousUsers.map(user => ({
+      userId: user.userId,
+      message: `Ein neuer Kommentar von User: ${anonymousName} wurde unter einem deiner Beiträge verfasst.`,
+      type: NotificationType.COMMENT,
+      timestamp: new Date(),
+      isRead: false,
+      discussionId: discussionId,
+    }));
+
+    await this.notificationService.notifyUsers(notifications);
+  }
+
 
   /**
    * Creates a new discussion in the database, including the anonymous user author and the initial message

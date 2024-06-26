@@ -527,7 +527,13 @@ model Notification {
   discussionId  Int?
   discussion    Discussion? @relation(fields: [discussionId], references: [id])
   User          User?       @relation(fields: [userId], references: [id])
+
+  @@index([userId, isRead])
+  @@index([userId, timestamp])
+  @@index([type])
+  @@index([discussionId])
 }
+
 
 enum GlobalRole {
   STUDENT
