@@ -15,6 +15,11 @@ Willkommen in unserem Gitlab Repository für Code und Projektmanagement :)
  - (nur beim ersten Einrichten oder wenn eine neue Libary hinzugefügt wurde: jeweils `npm install`)
  - Start client_angular: `ng serve` & Start server_nestjs: `npm start`
 
+ ## Code Reviews
+- Änderungen auf den Branches Main und Stable sind nur über Pull Requests möglich
+- Pull Requests müssen von mindestens von zwei Personen genehmigt werden, bevor sie gemerged werden können
+- Main bleibt der aktive Entwicklungsbranch, Stable ist der aktuelle Stand der Anwendung
+
 ### Dokumentation:
 
  - Für die Dokumentation nutzen wir [Compodoc](https://compodoc.app/). Dieses habe ich bereits für Server und Client eingerichtet. 
