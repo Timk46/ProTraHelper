@@ -106,16 +106,18 @@ export class TaskWorkspaceComponent implements OnDestroy {
     this.notification.info("Änderungen werden übernommen...");
     this.taskAttemptData.attemptData = data;
     //const setTaskAttemptDataSubscription = this.dtcs.setTaskAttemptData(this.taskAttemptData).subscribe((data: taskAttemptDataDTO) => {
-    const setTaskAttemptDataSubscription = this.dtcs.commitAttemptGetPoints(this.taskAttemptData).subscribe((data: number) => {
+    const setTaskAttemptDataSubscription = this.dtcs.commitAttemptGetPoints(this.taskAttemptData).subscribe((data: {points: number, highlightData: editorDataDTO}) => {
       this.isSubmitted = !this.isSubmitted;
-      this.reachedPoints = data;
+      this.reachedPoints = data.points;
+      console.log("score: ", data.points, "hdata: ", data.highlightData);
       //after 0.5 seconds, the transition is finished
       if (this.isSubmitted) {
         setTimeout(() => {
           this.helpVisible = true;
         }, 500);
       } else {
-        this.helpVisible = false;
+        this.isSubmitted = true;
+        //this.helpVisible = false;
       }
 
     });

@@ -44,6 +44,7 @@ import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-gene
 import { EventLogModule } from './EventLog/event-log.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { VersionInterceptor } from './common/interceptors/version.interceptor';
+import { PointCalculationModule } from './umlearn/point-calculation/point-calculation.module';
 
 
 @Module({
@@ -85,6 +86,7 @@ import { VersionInterceptor } from './common/interceptors/version.interceptor';
     DatabaseEditorCommunicationModule,
     GptModule,
     CompareModule,
+    PointCalculationModule,
   ],
   controllers: [
     AppController,

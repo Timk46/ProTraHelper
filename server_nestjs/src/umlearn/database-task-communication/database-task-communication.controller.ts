@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Request, Delete, Param, Req, UseGuards } from '@nestjs/common';
 import { DatabaseTaskCommunicationService } from './database-task-communication.service';
-import { taskCreationPopupDTO, taskInformationDTO, tokenRequestDTO, taskFeedbackDTO, taskDataDTO, taskAttemptDataDTO, taskFeedbackDataDTO, editorModelDTO, jaroWinklerDTO, studentTaskStatusDTO, tasksOverviewDTO, tasksInformationDTO, taskWorkspaceDataDTO } from '@DTOs/index';
+import { taskCreationPopupDTO, taskInformationDTO, tokenRequestDTO, taskFeedbackDTO, taskDataDTO, taskAttemptDataDTO, taskFeedbackDataDTO, editorModelDTO, jaroWinklerDTO, studentTaskStatusDTO, tasksOverviewDTO, tasksInformationDTO, taskWorkspaceDataDTO, editorDataDTO } from '@DTOs/index';
 import { ClassNode } from '@Interfaces/index';
 import { RolesGuard, roles } from '@/auth/roles.guard';
 
@@ -154,7 +154,7 @@ export class DatabaseTaskCommunicationController {
    */
   @roles('ANY')
   @Post('commitAttempt')
-  commitAttemptGetPoints(@Body() taskAttemptData: taskAttemptDataDTO, @Req() req): Promise<number> {
+  commitAttemptGetPoints(@Body() taskAttemptData: taskAttemptDataDTO, @Req() req): Promise<{points: number, highlightData: editorDataDTO}> {
     return this.tasksService.commitAttemptGetPoints(taskAttemptData, req.user.id);
   }
 

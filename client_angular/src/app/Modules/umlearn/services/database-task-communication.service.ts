@@ -1,7 +1,8 @@
 import {
   taskCreationPopupDTO, taskInformationDTO, tasksInformationDTO, taskAttemptDTO,
   taskAttemptDataDTO, taskFeedbackDTO, taskFeedbackDataDTO, studentTaskStatusDTO,
-  tasksOverviewDTO, jaroWinklerDTO, taskDataDTO, taskWorkspaceDataDTO
+  tasksOverviewDTO, jaroWinklerDTO, taskDataDTO, taskWorkspaceDataDTO,
+  editorDataDTO
 } from '@DTOs/index';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -115,8 +116,8 @@ export class DatabaseTaskCommunicationService {
     return this.http.get<taskFeedbackDataDTO>(environment.server + `/database-task-communication/taskFeedback/${taskAttemptId}`);
   }
 
-  commitAttemptGetPoints(taskAttemptData: taskAttemptDataDTO): Observable<number> {
-    return this.http.post<number>(environment.server + '/database-task-communication/commitAttempt', taskAttemptData);
+  commitAttemptGetPoints(taskAttemptData: taskAttemptDataDTO): Observable<{points: number, highlightData: editorDataDTO}> {
+    return this.http.post<{points: number, highlightData: editorDataDTO}>(environment.server + '/database-task-communication/commitAttempt', taskAttemptData);
   }
 
   /**

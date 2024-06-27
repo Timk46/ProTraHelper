@@ -34,6 +34,12 @@ export enum EditorElement {
     // ...
 }
 
+export const SwappableEditorElement: EditorElement[]= [
+    EditorElement.CD_ASSOCIATION,
+    EditorElement.CD_BIDIRECTIONAL_ASSOCIATION,
+];
+
+
 export enum EditorElementType {
     NODE = "node",
     EDGE = "edge",

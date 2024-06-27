@@ -2,10 +2,11 @@ import { Module } from '@nestjs/common';
 import { DatabaseTaskCommunicationService } from './database-task-communication.service';
 import { DatabaseTaskCommunicationController } from './database-task-communication.controller';
 import { PrismaService } from '@/prisma/prisma.service';
-import { CompareService } from '../compare/compare.service';
+import { CompareModule } from '../compare/compare.module';
 
 @Module({
-  providers: [DatabaseTaskCommunicationService, PrismaService, CompareService],
+  imports: [CompareModule],
+  providers: [DatabaseTaskCommunicationService, PrismaService],
   controllers: [DatabaseTaskCommunicationController]
 })
 export class DatabaseTaskCommunicationModule {}

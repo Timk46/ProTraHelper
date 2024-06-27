@@ -1,17 +1,19 @@
-import { editorDataDTO } from '@DTOs/index';
+import { SwappableEditorElement, editorDataDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { detailedDiff } from 'deep-object-diff';
 import { ClassNode, ClassAttribute, ClassMethod, NodeMatch } from '@DTOs/index';
 import { ClassEdge, EdgeMatch } from '@DTOs/index';
 import * as _ from 'lodash';
 import { JaroWinklerDistance } from 'natural';
+import { PointCalculationService } from '../point-calculation/point-calculation.service';
+import { pointDefinitions } from '../point-calculation/point-calculation.settings';
 
 
 @Injectable()
 export class CompareService {
 
 
-  constructor() { }
+  constructor(private pointCalculator: PointCalculationService) { }
 
   /**
  * Compares the solution and the attempt and returns the attempt with highlights.
@@ -44,27 +46,29 @@ export class CompareService {
    * @param maxPoints The maximum points that can be achieved.
    * @returns The reached points calculated based on the comparison.
    */
-  async compareAndCalculate(solution: editorDataDTO, attempt: editorDataDTO, maxPoints: number): Promise<number> {
-    console.log("datatatat: ", attempt);
+  async compareAndCalculate(solution: editorDataDTO, attempt: editorDataDTO, maxPoints: number): Promise<{points: number, highlightData: editorDataDTO}> {
+    //console.log("datatatat: ", attempt);
     if (attempt.nodes.length == 0) {
-      return 0;
+      //return 0;
+      return {points: 0, highlightData: {nodes: [], edges: []}};
     }
     if (solution.nodes.length == 0){
       //for later: what to do when a task is given, but no solution?
-      return 0;
+      //return 0;
+      return {points: 0, highlightData: {nodes: [], edges: []}};
     }
 
     const highlightedData = await this.compare(solution, attempt);
 
-    const nodes = highlightedData.nodes;
-    const edges = highlightedData.edges;
 
-    const nodesMistakes = nodes.filter(item => item.highlighted).length;
-    const edgesMistakes = edges.filter(item => item.highlighted).length;
+    const reachedPoints = await this.pointCalculator.calculatePoints(highlightedData, maxPoints);
 
-    const reachedPoints = maxPoints - (nodesMistakes + edgesMistakes);
-
-    return reachedPoints;
+    /* console.log("##### solution: #####", solution);
+    console.log("##### attempt: #####", attempt);
+    console.log("##### highlightedData: #####", highlightedData);
+    console.log("##### mistakes: #####", (nodesMistakes + edgesMistakes), " / ", maxPoints); */
+    //return reachedPoints;
+    return {points: reachedPoints, highlightData: highlightedData};
   }
 
   /**
@@ -366,13 +370,31 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
         // if both start and end node have a match in finalMatches
         if (startMatch && endMatch) {
           // then search for corresponding edge in solutionEdges with startMatch.solutionNode.id and endMatch.solutionNode.id
-          let solutionEdge = solutionEdges.find(edge => edge.start === startMatch?.solutionNode.id && edge.end === endMatch?.solutionNode.id);
+          let solutionEdge = solutionEdges.find(edge => edge.start === startMatch?.solutionNode.id && edge.end === endMatch?.solutionNode.id && edge.type === attemptEdge.type);
+          // alternatively search for edges in the wrong direction, but only allow directionless edge types - NEEDS TESTING
+          let swappedEdge = solutionEdges.find(edge => edge.start === endMatch?.solutionNode.id && edge.end === startMatch?.solutionNode.id && edge.type === attemptEdge.type && SwappableEditorElement.includes(attemptEdge.type));
+          console.log("##### swappedEdge: ", swappedEdge, solutionEdge);
 
           if (solutionEdge) {
             // Create match object
             const match: EdgeMatch = {
               solutionEdge: solutionEdge,
               attemptEdge: attemptEdge,
+            };
+            // Add match to edgeMatches
+            edgeMatches.push(match);
+          } else if (swappedEdge) {
+            console.log("Swapped edge found");
+            // Create match object, but with swapped start and end
+            const match: EdgeMatch = {
+              solutionEdge: swappedEdge,
+              attemptEdge: {
+                ...attemptEdge,
+                start: attemptEdge.end,
+                end: attemptEdge.start,
+                cardinalityStart: attemptEdge.cardinalityEnd,
+                cardinalityEnd: attemptEdge.cardinalityStart,
+              },
             };
             // Add match to edgeMatches
             edgeMatches.push(match);
@@ -579,8 +601,20 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
     const resultWithoutTypoCorrection: ClassNode = _.cloneDeep(attempt);
     var result = this.typoDetection(solution, attempt);
 
+    // define the node points
+    //const nodePoints: {attributePoints: number, methodPoints: number} = this.pointCalculator.defineNodePoints(solution);
+    const nodePoints = {
+      attributes: (pointDefinitions.node.attribute * solution.attributes.length),
+      methods: (pointDefinitions.node.method * solution.methods.length)
+    };
+
     // initialize the highlighted object
-    result.highlighted = { code: 'found', added: {}, deleted: {}, updated: {} };
+    result.highlighted = {
+      code: 'found',
+      maxPoints: nodePoints,
+      added: {},
+      deleted: {},
+      updated: {} };
 
     // compare title and type and add them to the updated object if they are different
     if (result.type.localeCompare(solution.type, undefined, { sensitivity: 'base' }) !== 0) {
@@ -599,6 +633,7 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
     // compare attributes and add them to updated object if they are different or to added object if they are not in the solution
     result.attributes?.forEach((attr, index) => {
       const match = solution.attributes?.find(sAttr => sAttr.name.localeCompare(attr.name, undefined, { sensitivity: 'base' }) === 0);
+      console.log("##### match: ", match, "##### attr: ", attr);
       if (!match) {
         result.highlighted!.added!.attributes = result.highlighted!.added!.attributes || []; // Initialize the array if it's undefined
         result.highlighted!.added!.attributes[index] = attr;
@@ -649,8 +684,15 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
   compareEdges(solution: ClassEdge, attempt: ClassEdge): ClassEdge {
     // clone the attempt edge
     const result: ClassEdge = _.cloneDeep(attempt);
+
+    // define the edge points
+    const edgePoints = pointDefinitions.edge.type
+      + (solution.cardinalityStart? pointDefinitions.edge.cardinalityStart : 0)
+      + (solution.cardinalityEnd? pointDefinitions.edge.cardinalityEnd : 0)
+      + (solution.description? pointDefinitions.edge.description : 0);
+
     // initialize the highlighted object
-    result.highlighted = { code: 'found', added: {}, deleted: {}, updated: {} };
+    result.highlighted = { code: 'found', maxPoints: edgePoints, added: {}, deleted: {}, updated: {} };
 
     // compare type and add it to the updated object if it is different
     if (result.type.localeCompare(solution.type, undefined, { sensitivity: 'base' }) !== 0) {

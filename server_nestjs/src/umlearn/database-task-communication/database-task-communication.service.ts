@@ -774,7 +774,7 @@ export class DatabaseTaskCommunicationService {
    * @returns A Promise that resolves to the number of points earned.
    * @throws An error if the attempt data fails to save or if the related question cannot be found.
    */
-  async commitAttemptGetPoints(taskAttemptData: taskAttemptDataDTO, studentId: number): Promise<number> {
+  async commitAttemptGetPoints(taskAttemptData: taskAttemptDataDTO, studentId: number): Promise<{points: number, highlightData: editorDataDTO}> {
     const savedAttempt = await this.setTaskAttemptData(taskAttemptData, studentId);
     if (!savedAttempt){
       throw new Error('Failed to save UML attempt');
@@ -792,7 +792,11 @@ export class DatabaseTaskCommunicationService {
       });
       if (existingFeedback && existingFeedback.feedbacks[0]){
         console.log("feedback existing");
-        return existingFeedback.feedbacks[0].score;
+        //return existingFeedback.feedbacks[0].score;
+        return {
+          points: existingFeedback.feedbacks[0].score,
+          highlightData: savedAttempt.attemptData,
+        };
       }
     }
 
@@ -812,19 +816,19 @@ export class DatabaseTaskCommunicationService {
       }
     });
 
-    console.log("found solution: ", taskSolution);
+    //console.log("found solution: ", taskSolution);
 
     if (!taskSolution){
       throw new Error('Failed to find related question');
     }
 
-    const reachedPoints: number = await this.compareService.compareAndCalculate(taskSolution.UmlQuestion.editorData as undefined as editorDataDTO, taskAttemptData.attemptData, taskSolution.score);
+    const reachedPoints = await this.compareService.compareAndCalculate(taskSolution.UmlQuestion.editorData as undefined as editorDataDTO, taskAttemptData.attemptData, taskSolution.score);
 
     //save feedback
     const feedback = await this.prisma.feedback.create({
       data: {
         userAnswerId: savedAttempt.userAnswerId,
-        score: reachedPoints,
+        score: reachedPoints.points,
         text: '',
       }
     });
@@ -874,7 +878,7 @@ export class DatabaseTaskCommunicationService {
 
       if (!taskAttempt || (taskAttempt && this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData))) {
         //create a new userAnswer and a new UserUmlQuestionAnswer and connect them
-        console.log("not the same",'inDB: ', this.sortObject(JSON.parse(JSON.stringify(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData))), 'new: ', this.sortObject(JSON.parse(JSON.stringify(taskAttemptData.attemptData))), 'isDifferent: ', this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData));
+        //console.log("not the same",'inDB: ', this.sortObject(JSON.parse(JSON.stringify(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData))), 'new: ', this.sortObject(JSON.parse(JSON.stringify(taskAttemptData.attemptData))), 'isDifferent: ', this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData));
         const newAnswer = await this.prisma.userAnswer.create({
           data: {
             userId: studentId,
@@ -921,7 +925,7 @@ export class DatabaseTaskCommunicationService {
   private isDifferentAttemptData(taskAttempt: Prisma.JsonValue, taskAttemptData: editorDataDTO): boolean {
     const sortedTaskAttempt = this.sortAndStringify(taskAttempt);
     const sortedTaskAttemptData = this.sortAndStringify(taskAttemptData);
-    console.log('sortedTaskAttempt: ', sortedTaskAttempt, 'sortedTaskAttemptData: ', sortedTaskAttemptData);
+    //console.log('sortedTaskAttempt: ', sortedTaskAttempt, 'sortedTaskAttemptData: ', sortedTaskAttemptData);
     return sortedTaskAttempt != sortedTaskAttemptData;
   }
 

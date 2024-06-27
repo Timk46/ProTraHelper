@@ -14,7 +14,12 @@ export interface ClassEdge {
   cardinalityStart?: string;
   description?: string;
   cardinalityEnd?: string;
-  highlighted?: {code: string, added?: ClassEdgeHighlightContent, deleted?: ClassEdgeHighlightContent, updated?: ClassEdgeHighlightContent};
+  highlighted?: {
+    code: string,
+    maxPoints?: number,
+    added?: ClassEdgeHighlightContent,
+    deleted?: ClassEdgeHighlightContent,
+    updated?: ClassEdgeHighlightContent};
 }
 
 export interface ClassEdgeHighlightContent {
