@@ -395,12 +395,6 @@ export class QuestionDataService {
                 console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNode + ' level: ' + question.level + ' userId: ' + userId)
                 this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
-                // send notification!
-                const notification: NotificationDTO = {
-                  userId: userId,
-                  message: 'Du hast eine Aufgabe gelöst! Schau dir das Feedback an.'
-                }
-                this.notificationService.notifyUser(notification);
             }
             else {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
@@ -457,12 +451,6 @@ export class QuestionDataService {
                 console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNode + ' level: ' + question.level + ' userId: ' + userId)
                 this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
-                // send notification!
-                const notification: NotificationDTO = {
-                  userId: userId,
-                  message: 'Du hast eine Aufgabe gelöst! Schau dir das Feedback an.'
-                }
-                this.notificationService.notifyUser(notification);
             }
             else {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
@@ -519,12 +507,6 @@ export class QuestionDataService {
                 this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
 
-                // send notification!
-                const notification: NotificationDTO = {
-                  userId: userId,
-                  message: 'Du hast eine Aufgabe gelöst! Schau dir das Feedback an.'
-                }
-                this.notificationService.notifyUser(notification);
             }
             else {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
@@ -577,12 +559,7 @@ export class QuestionDataService {
             if(progress == 1) {
                 this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
-                // send notification!
-                const notification: NotificationDTO = {
-                  userId: userId,
-                  message: 'Du hast eine Aufgabe gelöst! Schau dir das Feedback an.'
-                }
-                this.notificationService.notifyUser(notification);
+                
             }
 
             console.log('generated Text:', feedbackText);

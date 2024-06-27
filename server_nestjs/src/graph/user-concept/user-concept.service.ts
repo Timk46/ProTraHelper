@@ -166,12 +166,6 @@ export class UserConceptService {
             levelAward = true;
             console.log('update user level on ' + level);
             this.updateUserLevel(userId, conceptNodeId, level);
-            // send notification upon completion
-            const notification: NotificationDTO = {
-              userId: userId,
-              message: 'You have completed all content elements. Congratulations!',
-            }
-            this.notificationService.notifyUser(notification);
             break;
           }
         }

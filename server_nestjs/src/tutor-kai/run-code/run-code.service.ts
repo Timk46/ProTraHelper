@@ -93,13 +93,7 @@ export class RunCodeService {
       userId,
       studentCode,
     );
-    if (result.CodeSubmissionResult.score === 100) {
-      const notification: NotificationDTO = {
-        userId: userId,
-        message: 'Du hast die Programmieraufgabe erfolgreich gelöst!',
-      }
-      this.notificationService.notifyUser(notification)
-    }
+
     return result;
   }
   /**

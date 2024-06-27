@@ -143,14 +143,6 @@ export class UsersService {
 
     const userPercentage = userTotalProgress / maxProgress * 100;
     console.log('User Total Progress: ' + userPercentage);
-    // send notification upon completion
-    if(userPercentage === 100) {
-      const notification = {
-        userId: userId,
-        message: 'You have completed all content elements. Congratulations!',
-      }
-      this.notificationService.notifyUser(notification);
-    }
     return userPercentage;
   }
 }

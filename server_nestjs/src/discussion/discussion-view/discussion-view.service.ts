@@ -255,8 +255,7 @@ export class DiscussionViewService {
     ]);
 
     // sending notification to author of the whole discussion
-    console.log("Author ID is: ",message.discussion.author.userId, "from discussion: ", message.discussion)
-    console.log("sending to author with id :", message.author.userId)
+
     if(newSolutionStatus) {
         const notification = {
         userId: message.author.userId,
