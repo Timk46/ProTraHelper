@@ -3,7 +3,7 @@ import { NotificationService } from 'src/app/Services/notification/notification.
 import { NotificationDTO } from '@DTOs/notification.dto';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { NotificationType } from '@DTOs/notificationType.enum';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-notification-bell',
@@ -16,7 +16,7 @@ export class NotificationBellComponent implements OnInit {
   showNotifications: boolean = false;
   limit: number = 10;
   offset: number = 0;
-
+  private closeNotificationSubscription?: Subscription;
   @ViewChildren(MatExpansionPanel) panels!: QueryList<MatExpansionPanel>
   @ViewChild('notificationBell') notificationBellRef!: ElementRef
 
@@ -31,11 +31,19 @@ export class NotificationBellComponent implements OnInit {
     this.notificationService.getNotifications().subscribe(notifications => {
       this.allNotifications = notifications
     });
+    this.closeNotificationSubscription = this.notificationService.closeNotificationPanel$.subscribe(shouldClose => {
+      if (shouldClose) {
+        this.showNotifications = false;
+      }
+    });
     document.addEventListener('click', this.handleOutsideClick.bind(this));
   }
 
   ngOnDestroy(): void {
     document.removeEventListener('click', this.handleOutsideClick.bind(this));
+    if (this.closeNotificationSubscription) {
+      this.closeNotificationSubscription.unsubscribe();
+    }
   }
 
   /**
@@ -79,28 +87,10 @@ export class NotificationBellComponent implements OnInit {
    * Handle the click event on a notification
    * @param {NotificationDTO} notification
    */
-  onClick(notification: NotificationDTO) {
-    this.notificationService.handleNotificationClick(notification);
-  }
-
-  /**
-   * Mark a notification as read
-   * @param {NotificationDTO} notification
-   */
-  markAsRead(notification: NotificationDTO, panel: MatExpansionPanel): void {
-    if (!notification.isRead) {
-      console.log("typeof notification ID: ", typeof notification.id, " and the id: ", notification.id)
-      this.notificationService.markNotificationAsRead(notification).subscribe(() => {
-        notification.isRead = true;
-        const updatedNotification = { ...notification };
-        const index = this.allNotifications.findIndex(n => n.id === notification.id);
-        if (index !== -1) {
-          this.allNotifications[index] = updatedNotification;
-          this.allNotifications = [...this.allNotifications]; // Trigger change detection
-        }
-        panel.close()
-      });
-    }
+  onClick(notification: NotificationDTO, panel: MatExpansionPanel, action: string) {
+    this.notificationService.handleNotificationClick(notification, action).subscribe(() => {
+      panel.close()
+    });
   }
 
   /**
@@ -137,6 +127,25 @@ export class NotificationBellComponent implements OnInit {
    * @returns {string} The formatted date
    */
   formatTimeStamp(timestamp: Date | undefined): string {
+    if(!timestamp) {
+      return 'Unknown Time';
+    }
+    const date = new Date(timestamp);
+    return date.toLocaleString('de-DE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  /**
+   * Format a timestamp to a readable date for the title
+   * @param {string} timestamp
+   * @returns {string} The formatted date
+   */
+  formatTimeStampTitle(timestamp: Date | undefined): string {
     if(!timestamp) {
       return 'Unknown Time';
     }

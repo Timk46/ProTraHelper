@@ -24,10 +24,6 @@ export class NotificationComponent implements OnInit {
     });
   }
 
-  handleClick(notification: NotificationDTO): void {
-     this.notificationService.handleNotificationClick(notification);
-  }
-
   closeSnackBar(): void {
     this.snackBarRef.dismiss();
   }

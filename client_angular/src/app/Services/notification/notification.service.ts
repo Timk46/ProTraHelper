@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
-import { BehaviorSubject, catchError, map, Observable, of, tap } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, Subject, tap } from 'rxjs';
 import {NotificationType} from '@DTOs/notificationType.enum';
 import { UserService } from '../auth/user.service';
 
@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NotificationComponent } from 'src/app/Pages/notification/notification.component';
 import { HttpClient } from '@angular/common/http';
+import { MatExpansionPanel } from '@angular/material/expansion';
 @Injectable({
   providedIn: 'root'
 })
@@ -18,11 +19,13 @@ export class NotificationService {
   private notificationsSubject = new BehaviorSubject<NotificationDTO[]>([]);
   private notifications: NotificationDTO[] = [];
   private userId: number | undefined;
-  private unreadCountSubject = new BehaviorSubject<number>(0); // new subject for unread count
-  //private receivedNotificationIds = new Set<number>(); // Track received notification IDs to avoid duplicates
+  private unreadCountSubject = new BehaviorSubject<number>(0);
   private broadcastChannel: BroadcastChannel;
   private processedNotifications = new Set<string>();
-
+  private closeNotificationPanelSubject = new BehaviorSubject<boolean>(false);
+  closeNotificationPanel$ = this.closeNotificationPanelSubject.asObservable();
+  private refreshDiscussionSubject = new BehaviorSubject<number | null>(null);
+  refreshDiscussion$ = this.refreshDiscussionSubject.asObservable();
   constructor(
     private userService: UserService,
     private snackBar: MatSnackBar,
@@ -76,6 +79,10 @@ export class NotificationService {
     }
   }
 
+  triggerDiscussionRefresh(discussionId: number) {
+    this.refreshDiscussionSubject.next(discussionId);
+  }
+
   /**
    * Start listening for notifications and establish a connection to the websocket
    */
@@ -108,10 +115,9 @@ export class NotificationService {
         // Broadcast the new notification to other tabs
         this.broadcastChannel.postMessage({ type: 'newNotification', notification });
       }
-      this.showNotification(notification.message, 'View', () => this.handleNotificationClick(notification));
+      this.showNotification(notification.message, 'Anzeigen', () => this.handleNotificationClick(notification, 'view').subscribe());
     }
   }
-
 
   /**
    * Stop listening for notifications and disconnect from the websocket
@@ -184,35 +190,61 @@ export class NotificationService {
   addNotification(notification: NotificationDTO): void {
     this.notifications.unshift(notification);
     this.notificationsSubject.next(this.notifications);
-    // const exists = this.notifications.some(n => n.id === notification.id);
-    // if (!exists) {
-    //   this.notifications.unshift(notification);
-    //   this.notificationsSubject.next(this.notifications);
-    // }
   }
 
-  /** TODO: Implement different actions for different types of notifications
+  /**
    * handle the click on a notification
    * @param {NotificationDTO} notification
    */
-  handleNotificationClick(notification: NotificationDTO): void {
+  handleNotificationClick(notification: NotificationDTO, action: string): Observable<NotificationDTO> {
+    if (!notification.isRead) {
+      console.log("typeof notification ID: ", typeof notification.id, " and the id: ", notification.id);
+      return this.markNotificationAsRead(notification).pipe(
+        tap((updatedNotification) => {
+          this.updateLocalNotification(updatedNotification);
+          this.broadcastChannel.postMessage({ type: 'notificationRead', notificationId: updatedNotification.id });
+
+          if(action === 'view') {
+            this.closeNotificationPanelSubject.next(true);
+            this.navigate(updatedNotification)
+          }
+        })
+      );
+    } else if(action === 'view') {
+      // If the notification is already read, just navigate
+      this.closeNotificationPanelSubject.next(true);
+      this.navigate(notification);
+      return of(notification);
+    } else {
+      return of(notification)
+    }
+  }
+
+  /**
+   * Navigate to the discussion of the notification
+   * @param {NotificationDTO} notification
+   */
+  private navigate(notification: NotificationDTO): void {
     switch(notification.type) {
       case NotificationType.COMMENT:
-        console.log("comment reached the frontend");
-        this.markNotificationAsRead(notification).subscribe(() => {
-          this.broadcastChannel.postMessage({ type: 'notificationRead' });
-        });
-        this.router.navigate(['/discussion-view/' + notification.discussionId]);
-        break;
       case NotificationType.SOLUTION:
-        this.markNotificationAsRead(notification).subscribe(() => {
-          this.broadcastChannel.postMessage({ type: 'notificationRead' });
-        });
         this.router.navigate(['/discussion-view/' + notification.discussionId]);
+        this.triggerDiscussionRefresh(notification.discussionId!);
         break;
       default:
         console.log("Unknown notification type");
-        break;
+    }
+  }
+
+  /**
+   * Update a notification in the list to trigger change detection
+   * @param {NotificationDTO} updatedNotification
+   */
+  private updateLocalNotification(updatedNotification: NotificationDTO): void {
+    const index = this.notifications.findIndex(n => n.id === updatedNotification.id);
+    if (index !== -1) {
+      this.notifications[index] = updatedNotification;
+      this.notificationsSubject.next([...this.notifications]); // Trigger change detection
     }
   }
 

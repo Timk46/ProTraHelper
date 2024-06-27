@@ -1,25 +1,23 @@
 import { discussionMessageDTO, discussionDTO } from '@DTOs/index';
-import { Component, Input } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { DiscussionViewService } from 'src/app/Services/discussion/discussion-view.service';
-import { Subscription } from 'rxjs';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
 import { Title } from '@angular/platform-browser';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 import { NotificationService } from 'src/app/Services/notification/notification.service';
-
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-discussion-view',
   templateUrl: './discussion-view.component.html',
   styleUrls: ['./discussion-view.component.scss']
 })
-export class DiscussionViewComponent {
-
+export class DiscussionViewComponent implements OnInit, OnDestroy {
   conceptNodeName: string = 'dummy concept';
   messagesData: discussionMessageDTO[] = [];
-  subscriptions: Subscription[] = [];
   userId: number;
   displayedColumns: string[] = ['message'];
   sortingText: 'Hilfreich' | 'Datum' = 'Hilfreich';
@@ -35,6 +33,7 @@ export class DiscussionViewComponent {
     commentCount: 0,
     isSolved: false,
   }
+
   initiatorMessage: discussionMessageDTO = {
     messageId: -1,
     discussionId: -1,
@@ -46,6 +45,7 @@ export class DiscussionViewComponent {
     isInitiator: true
   };
 
+  private destroy$ = new Subject<void>();
   @Input() discussionId: number = -1;
 
   constructor(
@@ -55,47 +55,112 @@ export class DiscussionViewComponent {
     private discussionCreationService: DiscussionCreationService,
     private userService: UserService,
     private title: Title,
-    private router: Router,
     private notificationService: NotificationService
   ) {
-
     this.userId = parseInt(this.userService.getTokenID());
-    const pSub = this.route.params.subscribe(params => {
-      this.discussionId = parseInt(params['discussionId']);
-      // get anonymous user id
-      const auSub = this.discussionCreationService.getAnonymousUser(this.discussionId).subscribe(anonymousUser => {
+  }
+
+  ngOnInit(): void {
+    this.title.setTitle('GOALS: Diskutieren');
+    this.initializeSubscriptions();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Initializes the subscriptions for the component.
+   */
+  private initializeSubscriptions() {
+    this.handleRouteParams();
+    this.handleToggleStatus();
+    this.handleRefreshDiscussion();
+    this.handleNotifications();
+  }
+
+  /**
+   * Handles the route parameters and loads the discussion data.
+   */
+  private handleRouteParams() {
+    this.route.params
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        this.discussionId = parseInt(params['discussionId']);
+        this.loadAnonymousUser();
+        this.loadDiscussionData();
+      });
+  }
+
+  /**
+   * Loads the anonymous user for the discussion.
+   */
+  private loadAnonymousUser() {
+    this.discussionCreationService.getAnonymousUser(this.discussionId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(anonymousUser => {
         if (anonymousUser) {
           this.userId = anonymousUser.id;
         }
       });
-      this.subscriptions.push(auSub);
-      // get discussion data
-      if (this.discussionId != -1) {
-        const cnnSub = this.discussionViewService.getConceptNodeName(this.discussionId).subscribe(conceptNodeName => this.conceptNodeName = conceptNodeName.name);
-        const dSub = this.discussionViewService.getDiscussion(this.discussionId).subscribe(discussion => {
+  }
+
+  /**
+   * Loads the discussion data and the messages of the discussion.
+   */
+  private loadDiscussionData() {
+    if (this.discussionId != -1) {
+      this.discussionViewService.getConceptNodeName(this.discussionId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(conceptNodeName => this.conceptNodeName = conceptNodeName.name);
+
+      this.discussionViewService.getDiscussion(this.discussionId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(discussion => {
           this.discussionData = discussion;
           this.refreshMessages();
         });
-        this.subscriptions.push(cnnSub);
-        this.subscriptions.push(dSub);
-      }
-    });
-    this.subscriptions.push(pSub);
-    // get messages
-    const tsSub = this.discussionViewService.toggleStatus.subscribe(toggleStatus => {
-      //console.log("got some toggle", toggleStatus);
-      this.messagesData.forEach(message => {
-        if (message.messageId != toggleStatus.messageId) {
-          message.isSolution = false;
-        } else {
-          message.isSolution = toggleStatus.isSolution;
-        }
-      });
-      this.initiatorMessage.isSolution = toggleStatus.isSolution;
-      this.discussionData.isSolved = toggleStatus.isSolution;
+    }
+  }
 
-    });
-    this.subscriptions.push(tsSub);
+  /**
+   * Subscribes to the toggleStatus observable and updates the messagesData array accordingly.
+   */
+  private handleToggleStatus() {
+    this.discussionViewService.toggleStatus
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(toggleStatus => {
+        this.messagesData.forEach(message => {
+          if (message.messageId != toggleStatus.messageId) {
+            message.isSolution = false;
+          } else {
+            message.isSolution = toggleStatus.isSolution;
+          }
+        });
+        this.initiatorMessage.isSolution = toggleStatus.isSolution;
+        this.discussionData.isSolved = toggleStatus.isSolution;
+      });
+  }
+
+  /**
+   * Subscribes to the refreshDiscussion observable and refreshes the messagesData array.
+   */
+  private handleRefreshDiscussion() {
+    this.notificationService.refreshDiscussion$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.refreshMessages();
+      });
+  }
+
+  /**
+   * Subscribes to the getNotifications observable and fetches the notifications.
+   */
+  private handleNotifications() {
+    this.notificationService.getNotifications()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
   }
 
   /**
@@ -112,13 +177,14 @@ export class DiscussionViewComponent {
    * @param messageId the id of the message to be separated from the messages (usually the initiating question message)
    */
   refreshMessages(discussionId: number = this.discussionId, messageId: number = this.discussionData.initMessageId) {
-    const gmSub = this.discussionViewService.getMessages(discussionId).subscribe(messages => {
-      this.messagesData = messages;
-      this.initiatorMessage = this.getAndSeparateMessage(messageId);
-      this.discussionData.commentCount = this.messagesData.length;
-      this.onSort(this.sortingDirection);
-    });
-    this.subscriptions.push(gmSub);
+    this.discussionViewService.getMessages(discussionId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(messages => {
+        this.messagesData = messages;
+        this.initiatorMessage = this.getAndSeparateMessage(messageId);
+        this.discussionData.commentCount = this.messagesData.length;
+        this.onSort(this.sortingDirection);
+      });
   }
 
   /**
@@ -158,14 +224,4 @@ export class DiscussionViewComponent {
         break;
     }
   }
-
-  ngOnInit(): void {
-    this.title.setTitle('GOALS: Diskutieren');
-    this.notificationService.getNotifications().subscribe();
-  }
-
-  ngOnDestory() {
-    this.subscriptions.forEach(subscription => subscription.unsubscribe());
-  }
-
 }

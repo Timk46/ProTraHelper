@@ -10,7 +10,7 @@
                             [notification]="notification">
         <mat-expansion-panel-header>
           <mat-panel-title>
-            <span class="notification-date">{{ formatTimeStamp(notification.timestamp) }}</span>
+            <span class="notification-date">{{ formatTimeStampTitle(notification.timestamp) }}</span>
             <span class="notification-title">{{ getNotificationTitle(notification.type!) }}</span>
           </mat-panel-title>
           <mat-panel-description>
@@ -18,10 +18,12 @@
             <span *ngIf="!notification.isRead" class="notification-status">New</span>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <p>{{ notification.message+ " at: " + formatTimeStamp(notification.timestamp)}} </p>
+        <p>{{ notification.message}} </p>
+        <mat-divider class="divider"></mat-divider>
+        <p>{{formatTimeStamp(notification.timestamp)}}</p>
         <div class= "buttons">
-        <button mat-raised-button color="primary" (click)="onClick(notification)">Anzeigen</button>
-        <button mat-raised-button color="accent" (click)="markAsRead(notification, panel)" [disabled]="notification.isRead"  >als gelesen markieren</button>
+        <button mat-raised-button color="primary" (click)="onClick(notification, panel, 'view')">Anzeigen</button>
+        <button mat-raised-button color="accent" (click)="onClick(notification, panel, 'read')" [disabled]="notification.isRead"  >als gelesen markieren</button>
         </div>
       </mat-expansion-panel>
     </mat-accordion>

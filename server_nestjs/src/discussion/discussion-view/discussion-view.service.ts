@@ -183,6 +183,13 @@ export class DiscussionViewService {
       },
       select: {
         isSolution: true,
+        authorId: true,
+        author: {
+          select: {
+            userId: true, // need that for notiying the author of the message
+            anonymousName: true
+          }
+        },
         discussion: {
           select: {
             id: true,
@@ -201,14 +208,13 @@ export class DiscussionViewService {
       throw new Error('Message not found');
     }
 
-    console.log(message.discussion.author.userId, userId);
     //check if user is author of message
     if (message.discussion.author.userId != userId) {
       throw new Error('User is not author of message');
     }
     const newSolutionStatus = !message.isSolution;
     //set all messages in discussion to not solution except toggle message and init message
-    await this.prisma.$transaction([
+    await this.prisma.$transaction([ // $transaction to ensure atomicity
       // Set all messages in discussion to not solution except toggle message and init message
       this.prisma.message.updateMany({
         where: {
@@ -248,9 +254,12 @@ export class DiscussionViewService {
       })
     ]);
 
+    // sending notification to author of the whole discussion
+    console.log("Author ID is: ",message.discussion.author.userId, "from discussion: ", message.discussion)
+    console.log("sending to author with id :", message.author.userId)
     if(newSolutionStatus) {
         const notification = {
-        userId: message.discussion.author.userId,
+        userId: message.author.userId,
         message: `Dein Kommentar wurde von ${message.discussion.author.anonymousName} als Lösung in einem Beitrag markiert.`,
         type: NotificationType.SOLUTION,
         timestamp: new Date(),
