@@ -214,7 +214,7 @@ export class DiscussionViewService {
     }
     const newSolutionStatus = !message.isSolution;
     //set all messages in discussion to not solution except toggle message and init message
-    await this.prisma.$transaction([ // $transaction to ensure atomicity
+    await this.prisma.$transaction([ // $transaction to ensure atomicity of the operations (less roundtrips and less error-prone)
       // Set all messages in discussion to not solution except toggle message and init message
       this.prisma.message.updateMany({
         where: {

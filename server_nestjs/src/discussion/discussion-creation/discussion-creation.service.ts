@@ -175,7 +175,7 @@ export class DiscussionCreationService {
 
     const notifications = filteredAnonymousUsers.map(user => ({
       userId: user.userId,
-      message: `Ein neuer Kommentar von User: ${anonymousName} wurde unter einem deiner Beiträge verfasst.`,
+      message: `Ein neuer Kommentar von User: ${anonymousName} wurde unter deinem Beitrag verfasst`,
       type: NotificationType.COMMENT,
       timestamp: new Date(),
       isRead: false,
@@ -184,7 +184,6 @@ export class DiscussionCreationService {
 
     await this.notificationService.notifyUsers(notifications);
   }
-
 
   /**
    * Creates a new discussion in the database, including the anonymous user author and the initial message

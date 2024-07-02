@@ -31,6 +31,9 @@ export class BellDirective implements OnChanges {
       this.renderer.setStyle(this.el.nativeElement, 'borderLeft', '4px solid darkblue');
     } else if (this.notification.type === NotificationType.SOLUTION) {
       this.renderer.setStyle(this.el.nativeElement, 'borderLeft', '4px solid darkgreen');
+      // INFO is for notificaitons that are sent by admins or by the system(?) (NOT BEING USED)
+    } else if (this.notification.type === NotificationType.INFO) {
+      this.renderer.setStyle(this.el.nativeElement, 'borderLeft', '4px solid red');
     }
   }
 }

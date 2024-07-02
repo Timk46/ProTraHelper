@@ -87,7 +87,7 @@ export class NotificationService {
    * Start listening for notifications and establish a connection to the websocket
    */
   private startListening(): void {
-    this.fetchInitialNotifications(20, 0);
+    this.fetchInitialNotifications(20, 0).subscribe();
     this.socket = io('http://localhost:3001/notifications', {
       query: { token: this.userService.getAccessToken() },
       withCredentials: true,
@@ -132,9 +132,10 @@ export class NotificationService {
    * Fetch the initial notifications
    * @param {number} limit for pagination
    * @param {number} offset for pagination offset
+   * @returns {Observable<NotificationDTO[]>} the fetched notifications as an observable
    */
-  private fetchInitialNotifications(limit: number, offset: number): void {
-    this.http.get<NotificationDTO[]>(`${environment.server}/notifications/all`, {
+  private fetchInitialNotifications(limit: number, offset: number): Observable<NotificationDTO[]> {
+    return this.http.get<NotificationDTO[]>(`${environment.server}/notifications/all`, {
       params: {
         userId: this.userId!.toString(),
         limit: limit.toString(),
@@ -144,21 +145,23 @@ export class NotificationService {
       catchError(error => {
         console.error('Error fetching initial notifications:', error);
         return of([]);
+      }),
+      tap(notifications => {
+        this.notifications = notifications;
+        this.notificationsSubject.next(this.notifications);
+        this.syncUnreadCount();
       })
-    ).subscribe(notifications => {
-      this.notifications = notifications
-      this.notificationsSubject.next(this.notifications);
-      this.syncUnreadCount();
-    });
+    );
   }
 
   /**
    * Fetch more notifications when scrolling
    * @param {number} limit for pagination
    * @param {number} offset for pagination offset
+   * @returns {Observable<NotificationDTO[]>} the fetched notifications as an observable
    */
-  fetchMoreNotifications(limit: number, offset: number): void {
-    this.http.get<NotificationDTO[]>(`${environment.server}/notifications/all`, {
+  fetchMoreNotifications(limit: number, offset: number): Observable<NotificationDTO[]> {
+    return this.http.get<NotificationDTO[]>(`${environment.server}/notifications/all`, {
       params: {
         userId: this.userId!!.toString(),
         limit: limit.toString(),
@@ -168,11 +171,12 @@ export class NotificationService {
       catchError(error => {
         console.error('Error fetching more notifications:', error);
         return of([]);
+      }),
+      tap(notifications => {
+        this.notifications = [...this.notifications, ...notifications];
+        this.notificationsSubject.next(this.notifications);
       })
-    ).subscribe(notifications => {
-      this.notifications = [...this.notifications, ...notifications];
-      this.notificationsSubject.next(this.notifications);
-    });
+    );
   }
 
   /**

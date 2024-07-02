@@ -1,9 +1,9 @@
-import { Component, ElementRef, HostListener, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, QueryList, Renderer2, ViewChild, ViewChildren } from '@angular/core';
 import { NotificationService } from 'src/app/Services/notification/notification.service';
 import { NotificationDTO } from '@DTOs/notification.dto';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { NotificationType } from '@DTOs/notificationType.enum';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subject, Subscription, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-notification-bell',
@@ -19,31 +19,31 @@ export class NotificationBellComponent implements OnInit {
   private closeNotificationSubscription?: Subscription;
   @ViewChildren(MatExpansionPanel) panels!: QueryList<MatExpansionPanel>
   @ViewChild('notificationBell') notificationBellRef!: ElementRef
+  private unsubscribe$ = new Subject<void>();
 
   constructor(
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private renderer: Renderer2,
   ){
     this.unreadCount$ = this.notificationService.getUnreadCount();
   }
 
   ngOnInit(): void {
     this.loadUnreadCount();
-    this.notificationService.getNotifications().subscribe(notifications => {
-      this.allNotifications = notifications
+    this.notificationService.getNotifications().pipe(takeUntil(this.unsubscribe$)).subscribe(notifications => {
+      this.allNotifications = notifications;
     });
-    this.closeNotificationSubscription = this.notificationService.closeNotificationPanel$.subscribe(shouldClose => {
+    this.notificationService.closeNotificationPanel$.pipe(takeUntil(this.unsubscribe$)).subscribe(shouldClose => {
       if (shouldClose) {
         this.showNotifications = false;
       }
     });
-    document.addEventListener('click', this.handleOutsideClick.bind(this));
+    this.renderer.listen('document', 'click', this.handleOutsideClick.bind(this));
   }
 
   ngOnDestroy(): void {
-    document.removeEventListener('click', this.handleOutsideClick.bind(this));
-    if (this.closeNotificationSubscription) {
-      this.closeNotificationSubscription.unsubscribe();
-    }
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   /**
@@ -61,7 +61,7 @@ export class NotificationBellComponent implements OnInit {
    * Load the unread count of notifications
    */
   loadUnreadCount(): void {
-    this.notificationService.getUnreadCountFromServer().subscribe()
+    this.notificationService.getUnreadCountFromServer().pipe(takeUntil(this.unsubscribe$)).subscribe();
   }
 
   /**
@@ -69,7 +69,9 @@ export class NotificationBellComponent implements OnInit {
    */
   loadMoreNotifications(): void {
     this.offset += this.limit;
-    this.notificationService.fetchMoreNotifications(this.limit, this.offset);
+    this.notificationService.fetchMoreNotifications(this.limit, this.offset).pipe(takeUntil(this.unsubscribe$)).subscribe(notifications => {
+      this.allNotifications = [...this.allNotifications, ...notifications];
+    });
   }
 
   /**
@@ -88,8 +90,8 @@ export class NotificationBellComponent implements OnInit {
    * @param {NotificationDTO} notification
    */
   onClick(notification: NotificationDTO, panel: MatExpansionPanel, action: string) {
-    this.notificationService.handleNotificationClick(notification, action).subscribe(() => {
-      panel.close()
+    this.notificationService.handleNotificationClick(notification, action).pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
+      panel.close();
     });
   }
 

@@ -15,47 +15,52 @@ export class NotificationService   {
    * Notify a user by creating a notification and emitting it
    * @param {NotificationDTO} notification
    */
-  async notifyUser(notification: NotificationDTO) {
-    console.log('NotificationService: notifyUser with message: ', notification.message , "for user: ", notification.userId);
-    const createdNotification = await this.createNotification(notification);
-    this.notificationSubject.next(createdNotification);
-    console.log(`emitted notification: ${createdNotification.message} for user: ${createdNotification.userId}`)
+  async notifyUser(notification: NotificationDTO): Promise<void> {
+    try {
+      const createdNotification = await this.createNotification(notification);
+      this.notificationSubject.next(createdNotification);
+    } catch (error) {
+      console.error('Error notifying user:', error);
+    }
   }
 
   /**
    * Notify multiple users by creating notifications and emitting them
    * @param {NotificationDTO[]} notifications
    */
-  async notifyUsers(notifications: NotificationDTO[]) {
-    console.log('NotificationService: notifyUsers for multiple users');
+  async notifyUsers(notifications: NotificationDTO[]): Promise<NotificationDTO[]> {
+    try {
+      await this.prisma.notification.createMany({
+        data: notifications.map(notification => ({
+          message: notification.message,
+          userId: notification.userId,
+          timestamp: new Date(),
+          isRead: false,
+          type: notification.type,
+          discussionId: notification.discussionId,
+        })),
+      });
 
-    const createdNotifications = await this.prisma.notification.createMany({
-      data: notifications.map(notification => ({
-        message: notification.message,
-        userId: notification.userId,
-        timestamp: new Date(),
-        isRead: false,
-        type: notification.type,
-        discussionId: notification.discussionId,
-      })),
-    });
+      // Fetch the created notifications to get their IDs
+      const newNotifications = await this.prisma.notification.findMany({
+        where: {
+          userId: { in: notifications.map(n => n.userId) },
+          timestamp: { gte: new Date(Date.now() - 1000) } // Assuming creation took less than a second
+        },
+        orderBy: { timestamp: 'desc' },
+        take: notifications.length
+      });
 
-    // Fetch the created notifications to get their IDs
-    const newNotifications = await this.prisma.notification.findMany({
-      where: {
-        userId: { in: notifications.map(n => n.userId) },
-        timestamp: { gte: new Date(Date.now() - 1000) } // Assuming creation took less than a second
-      },
-      orderBy: { timestamp: 'desc' },
-      take: notifications.length
-    });
+      // Emit notifications
+      newNotifications.forEach(notification => {
+        this.notificationSubject.next(this.toNotificationDTO(notification));
+      });
 
-    // Emit notifications
-    newNotifications.forEach(notification => {
-      this.notificationSubject.next(this.toNotificationDTO(notification));
-    });
-
-    return newNotifications;
+      return newNotifications;
+    } catch (error) {
+      console.error('Error notifying users:', error);
+      throw error;
+    }
   }
 
   /**
@@ -80,29 +85,33 @@ export class NotificationService   {
    * paginated approach to notify all users
    * @param {NotificationDTO} notification
    */
-  async notifyAllUsers(notification: Omit<NotificationDTO, 'userId'>, page = 1, pageSize = 100) {
-    const skip = (page - 1) * pageSize;
+  async notifyAllUsers(notification: Omit<NotificationDTO, 'userId'>, page = 1, pageSize = 100): Promise<void> {
+   const skip = (page - 1) * pageSize;
 
-    const users = await this.prisma.user.findMany({
-      select: { id: true },
-      take: pageSize,
-      skip: skip
-    });
+    try {
+      const users = await this.prisma.user.findMany({
+        select: { id: true },
+        take: pageSize,
+        skip: skip
+      });
 
-    if (users.length > 0) {
-      const notifications = users.map(user => ({
-        ...notification,
-        userId: user.id,
-        timestamp: new Date(),
-        isRead: false,
-      }));
+      if (users.length > 0) {
+        const notifications = users.map(user => ({
+          ...notification,
+          userId: user.id,
+          timestamp: new Date(),
+          isRead: false,
+        }));
 
-      await this.notifyUsers(notifications);
+        await this.notifyUsers(notifications);
 
-      // Recursively call for next page if there are more users
-      if (users.length === pageSize) {
-        await this.notifyAllUsers(notification, page + 1, pageSize);
+        // Recursively call for next page if there are more users
+        if (users.length === pageSize) {
+          await this.notifyAllUsers(notification, page + 1, pageSize);
+        }
       }
+    } catch (error) {
+      console.error('Error notifying all users:', error);
     }
   }
 
@@ -112,19 +121,24 @@ export class NotificationService   {
    * @returns {Promise<Notification>}
    */
   async createNotification(notification: NotificationDTO): Promise<NotificationDTO> {
-   const createdNotification = await this.prisma.notification.create({
-      data: {
-        message: notification.message,
-        userId: notification.userId,
-        timestamp: new Date(),
-        isRead: false,
-        readTimestamp: notification.readTimestamp,
-        type: notification.type,
-        discussionId: notification.discussionId,
-      }
-    });
+    try {
+      const createdNotification = await this.prisma.notification.create({
+        data: {
+          message: notification.message,
+          userId: notification.userId,
+          timestamp: new Date(),
+          isRead: false,
+          readTimestamp: notification.readTimestamp,
+          type: notification.type,
+          discussionId: notification.discussionId,
+        }
+      });
 
-    return createdNotification;
+      return this.toNotificationDTO(createdNotification);
+    } catch (error) {
+      console.error('Error creating notification:', error);
+      throw error;
+    }
   }
 
   /**
@@ -133,21 +147,22 @@ export class NotificationService   {
    * @returns {Promise<NotificationDTO>} all notifications
    */
   async getAllNotifications(userId: number, limit: number, offset: number): Promise<NotificationDTO[]> {
-    return this.prisma.notification.findMany({
-      where: {
-        userId: Number(userId)
-      },
-      orderBy: [
-        {
-          isRead: 'asc' // 'false' values (unread notifications) will come before 'true' values
-        },
-        {
-          timestamp: 'desc'
-        }
-      ],
-      take: Number(limit),
-      skip: Number(offset)
-    });
+    try {
+      const notifications = await this.prisma.notification.findMany({
+        where: { userId: Number(userId) },
+        orderBy: [
+          { isRead: 'asc' }, // Unread notifications come first
+          { timestamp: 'desc' }
+        ],
+        take: Number(limit),
+        skip: Number(offset)
+      });
+
+      return notifications.map(this.toNotificationDTO);
+    } catch (error) {
+      console.error('Error fetching all notifications:', error);
+      throw error;
+    }
   }
 
   /**
@@ -157,19 +172,24 @@ export class NotificationService   {
    * @returns {Promise<NotificationDTO>} updated notification
    */
   async updateNotification(notification: NotificationDTO, id: number): Promise<NotificationDTO>{
-    return this.prisma.notification.update({
-      where: {
-        id: id
-      },
-      data: {
-        message: notification.message,
-        userId: notification.userId,
-        timestamp: notification.timestamp,
-        isRead: notification.isRead,
-        readTimestamp: notification.readTimestamp,
-        type: notification.type
-      }
-    });
+   try {
+      const updatedNotification = await this.prisma.notification.update({
+        where: { id: id },
+        data: {
+          message: notification.message,
+          userId: notification.userId,
+          timestamp: notification.timestamp,
+          isRead: notification.isRead,
+          readTimestamp: notification.readTimestamp,
+          type: notification.type
+        }
+      });
+
+      return this.toNotificationDTO(updatedNotification);
+    } catch (error) {
+      console.error('Error updating notification:', error);
+      throw error;
+    }
   }
 
   /**
@@ -178,45 +198,46 @@ export class NotificationService   {
    * @returns {Promise<NotificationDTO>} deleted notification
    */
   async deleteNotification(id: number): Promise<NotificationDTO> {
-    return this.prisma.notification.delete({
-      where: {
-        id: id
-      }
-    });
+    try {
+      const deletedNotification = await this.prisma.notification.delete({
+        where: { id: id }
+      });
+      return this.toNotificationDTO(deletedNotification);
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      throw error;
+    }
   }
 
   /**
-   * get all unread notifications
+   * Get all unread notifications
    * @param {number} userId
-   * @returns {Promise<NotificationDTO[]>} all unread notifications
+   * @param {number} page
+   * @param {number} pageSize
+   * @returns {Promise<{ notifications: NotificationDTO[], totalCount: number }>} all unread notifications
    */
   async getUnreadNotifications(userId: number, page = 1, pageSize = 10): Promise<{ notifications: NotificationDTO[], totalCount: number }> {
     const skip = (page - 1) * pageSize;
 
-    const [notifications, totalCount] = await this.prisma.$transaction([
-      this.prisma.notification.findMany({
-        where: {
-          userId: userId,
-          isRead: false
-        },
-        orderBy: {
-          timestamp: 'desc'
-        },
-        skip: skip,
-        take: pageSize
-      }),
-      this.prisma.notification.count({
-        where: {
-          userId: userId,
-          isRead: false
-        }
-      })
-    ]);
+    try {
+      const [notifications, totalCount] = await this.prisma.$transaction([
+        this.prisma.notification.findMany({
+          where: { userId: userId, isRead: false },
+          orderBy: { timestamp: 'desc' },
+          skip: skip,
+          take: pageSize
+        }),
+        this.prisma.notification.count({ where: { userId: userId, isRead: false } })
+      ]);
 
-    return {
-      notifications: notifications.map(this.toNotificationDTO),
-      totalCount: totalCount
-    };
+      return {
+        notifications: notifications.map(this.toNotificationDTO),
+        totalCount: totalCount
+      };
+    } catch (error) {
+      console.error('Error fetching unread notifications:', error);
+      throw error;
+    }
   }
 
   /**
@@ -224,62 +245,69 @@ export class NotificationService   {
    * @param {number} notificationId
    * @returns {Promise<NotificationDTO>} the updated notification
    */
-  async markNotificationAsRead(notificationId: number): Promise<NotificationDTO>{
-    return this.prisma.notification.update({
-      where: {
-        id: Number(notificationId)
-      },
-      data: {
-        isRead: true,
-        readTimestamp: new Date(),
-      }
-    });
+  async markNotificationAsRead(notificationId: number): Promise<NotificationDTO> {
+    try {
+      const updatedNotification = await this.prisma.notification.update({
+        where: { id: Number(notificationId) },
+        data: {
+          isRead: true,
+          readTimestamp: new Date(),
+        }
+      });
+
+      return this.toNotificationDTO(updatedNotification);
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      throw error;
+    }
   }
 
   /**
-   * Mark a notification as read
+   * Mark all notifications as read for a user
    * @param {number} userId
    * @returns {Promise<NotificationDTO[]>} all notifications
    */
   async markAllNotificationsAsRead(userId: number): Promise<NotificationDTO[]> {
     const currentTime = new Date();
 
-    const [updatedCount, updatedNotifications] = await this.prisma.$transaction([
-      this.prisma.notification.updateMany({
-        where: {
-          userId: userId,
-          isRead: false
-        },
-        data: {
-          isRead: true,
-          readTimestamp: currentTime
-        }
-      }),
-      this.prisma.notification.findMany({
-        where: {
-          userId: userId,
-          isRead: true,
-          readTimestamp: currentTime
-        }
-      })
-    ]);
+    try {
+      const [updatedCount, updatedNotifications] = await this.prisma.$transaction([
+        this.prisma.notification.updateMany({
+          where: { userId: userId, isRead: false },
+          data: {
+            isRead: true,
+            readTimestamp: currentTime
+          }
+        }),
+        this.prisma.notification.findMany({
+          where: { userId: userId, isRead: true, readTimestamp: currentTime }
+        })
+      ]);
 
-    return updatedNotifications.map(this.toNotificationDTO);
+      return updatedNotifications.map(this.toNotificationDTO);
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      throw error;
+    }
   }
 
-  /**
+   /**
    * Get the count of unread notifications for a user
    * @param {number} userId
    * @returns {Promise<number>} The count of unread notifications
    */
   async getUnreadCount(userId: number): Promise<number> {
-    return await this.prisma.notification.count({
-      where: {
-        userId: Number(userId),
-        isRead: false,
-      },
-    });
-
+    try {
+      return await this.prisma.notification.count({
+        where: {
+          userId: Number(userId),
+          isRead: false,
+        },
+      });
+    } catch (error) {
+      console.error('Error getting unread notification count:', error);
+      throw error;
+    }
   }
 }
 
