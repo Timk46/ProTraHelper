@@ -76,12 +76,13 @@ export class PointCalculationService {
   }
 
   // only for highlighted data
-  async calculatePoints(taskData: editorDataDTO, maxPoints = -1): Promise<number> {
+  async calculatePoints(highlightData: editorDataDTO, solutionData: editorDataDTO, maxPoints = -1): Promise<number> {
     let points = 0;
     let solutionPoints = 0;
+    const possiblePoints = await this.definePoints(solutionData);
 
     // calculate points for nodes
-    for (let node of taskData.nodes) {
+    for (let node of highlightData.nodes) {
       if (node.highlighted && node.highlighted.code == "found" && node.highlighted.maxPoints) {
         // the maxPoints.attributes and maxPoints.methods are already multiplied with the pointDefinitions
         solutionPoints += this.pointDefinitions.node.found
@@ -154,7 +155,7 @@ export class PointCalculationService {
     console.log("Points after nodes:", points);
 
     // calculate points for edges
-    for (let edge of taskData.edges) {
+    for (let edge of highlightData.edges) {
       if (edge.highlighted && edge.highlighted.code == "found" && edge.highlighted.maxPoints) {
         // the maxPoints are already multiplied with the pointDefinitions
         solutionPoints += this.pointDefinitions.edge.found + edge.highlighted.maxPoints;
@@ -179,13 +180,16 @@ export class PointCalculationService {
         }
         console.log("are u breaking it:", edgePoints);
         points += this.pointDefinitions.edge.found + Math.max(0, edgePoints);
+      } else if (edge.highlighted && edge.highlighted.code == "not_found") {
+        points += this.pointDefinitions.edge.notFound;
       }
       console.log("after single edge:", points);
     }
-    console.log("Total points: ", points, "/", solutionPoints);
+    points = Math.max(0, points);
+    console.log("Total points: ", points, "/", solutionPoints, "Percentage: ", Math.floor(points/possiblePoints * maxPoints), possiblePoints);
 
     //return maxPoints > -1? Math.floor((points/solutionPoints) * maxPoints) : points;
-    return maxPoints > -1? Math.floor((points)) : points;
+    return maxPoints > -1? Math.floor((points/possiblePoints * maxPoints)) : points;
   }
 
 }

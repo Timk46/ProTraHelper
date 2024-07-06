@@ -61,7 +61,7 @@ export class CompareService {
     const highlightedData = await this.compare(solution, attempt);
 
 
-    const reachedPoints = await this.pointCalculator.calculatePoints(highlightedData, maxPoints);
+    const reachedPoints = await this.pointCalculator.calculatePoints(highlightedData, solution, maxPoints);
 
     /* console.log("##### solution: #####", solution);
     console.log("##### attempt: #####", attempt);

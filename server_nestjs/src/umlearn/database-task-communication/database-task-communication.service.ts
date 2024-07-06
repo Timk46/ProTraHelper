@@ -716,7 +716,7 @@ export class DatabaseTaskCommunicationService {
       return {
         userAnswerId: taskAttempt.userAnswer[0].id,
         taskId: taskId,
-        attemptData: taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData as unknown as editorDataDTO,
+        attemptData: taskAttempt.userAnswer[0].UserUmlQuestionAnswer[0].attemptData as unknown as editorDataDTO,
         //attemptData: taskAttempt.userAnswer[0].UserUmlQuestionAnswer ? (taskAttempt.userAnswer[0].UserUmlQuestionAnswer as unknown as editorDataDTO) : { nodes: [], edges: [] },
       };
     } catch (error) {
@@ -876,7 +876,7 @@ export class DatabaseTaskCommunicationService {
         },
       });
 
-      if (!taskAttempt || (taskAttempt && this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData))) {
+      if (!taskAttempt || (taskAttempt && this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer[0].attemptData, taskAttemptData.attemptData))) {
         //create a new userAnswer and a new UserUmlQuestionAnswer and connect them
         //console.log("not the same",'inDB: ', this.sortObject(JSON.parse(JSON.stringify(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData))), 'new: ', this.sortObject(JSON.parse(JSON.stringify(taskAttemptData.attemptData))), 'isDifferent: ', this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData));
         const newAnswer = await this.prisma.userAnswer.create({
@@ -901,7 +901,7 @@ export class DatabaseTaskCommunicationService {
         return {
           userAnswerId: newAnswer.id,
           taskId: taskAttemptData.taskId,
-          attemptData: newAnswer.UserUmlQuestionAnswer.attemptData as unknown as editorDataDTO,
+          attemptData: newAnswer.UserUmlQuestionAnswer[0].attemptData as unknown as editorDataDTO,
         };
       }
       console.log("the same");

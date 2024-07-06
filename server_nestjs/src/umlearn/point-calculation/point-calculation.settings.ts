@@ -8,6 +8,7 @@ export const pointDefinitions = {
   },
   edge: {
     found: 1,
+    notFound: -3,
     type: 1,
     //sourceText: 1,
     cardinalityStart: 1,
