@@ -37,6 +37,8 @@
       <div *ngIf="helpVisible">
         <h1>Erreichte Punkte: {{reachedPoints}} von {{taskWorkspaceData.maxPoints}}</h1>
         <p>Hi, ich bin Kai, kann ich dir helfen?</p>
+        <button mat-raised-button color="primary" (click)="onGenerateFeedback()">Hilfe holen</button>
+        <p>{{feedbackText}}</p>
         <!-- <mat-progress-spinner mode="indeterminate" diameter="100"></mat-progress-spinner> -->
       </div>
     </div>

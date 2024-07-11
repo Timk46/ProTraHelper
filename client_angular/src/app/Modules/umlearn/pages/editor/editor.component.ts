@@ -229,8 +229,8 @@ export class EditorComponent implements OnDestroy {
   drop(event: CdkDragDrop<string[]> , node: editorElementDTO) {
     moveItemInArray(this.selectableNodes, event.previousIndex, event.currentIndex);
     const positionInEditorField = {
-      x: this.mousePosition.x / this.zoomLevel - 100,
-      y: this.mousePosition.y / this.zoomLevel - 100,
+      x: parseFloat((this.mousePosition.x / this.zoomLevel - 100).toFixed(3)),
+      y: parseFloat((this.mousePosition.y / this.zoomLevel - 100).toFixed(3)),
     };
     this.onSelectNode(node, positionInEditorField);
   }
@@ -296,8 +296,8 @@ export class EditorComponent implements OnDestroy {
   onCdkDragMove(event: CdkDragMove<CdkDrag<any>>,node: ClassNode) {
     if (this.relativePosition) {
       const newPosition = {
-        x: (this.mousePosition.x - this.relativePosition.x) / this.zoomLevel,
-        y: (this.mousePosition.y - this.relativePosition.y) / this.zoomLevel,
+        x: parseFloat(((this.mousePosition.x - this.relativePosition.x) / this.zoomLevel).toFixed(3)),
+        y: parseFloat(((this.mousePosition.y - this.relativePosition.y) / this.zoomLevel).toFixed(3)),
       };
         if (newPosition.x < 0) {
           newPosition.x = 0;

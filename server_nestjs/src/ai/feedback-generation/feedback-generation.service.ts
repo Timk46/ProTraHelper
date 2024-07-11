@@ -1,4 +1,4 @@
-import { ChatBotMessageDTO, freeTextQuestionDTO, freetextFeedbackRequestDTO } from '@Interfaces/index';
+import { ChatBotMessageDTO, editorDataDTO, freeTextQuestionDTO, freetextFeedbackRequestDTO } from '@Interfaces/index';
 import { Injectable } from '@nestjs/common';
 import { RagService } from '../services/rag.service';
 import { LlmBasicPromptService } from '../services/llmBasicPrompt.service';
@@ -54,6 +54,22 @@ export class FeedbackGenerationService {
     const llmResponse = await this.llmService.generateLlmAnswer( feedbackGenerationPrompts.byTranscriptSearch(requestData.question, lecture_data), requestData.answer );
 
     return llmResponse;
+  }
+
+  /**
+   * Generates feedback for a UMLearn question.
+   * @param question - The UMLearn question.
+   * @param attempt - The user's attempt at solving the question.
+   * @param solution - The correct solution to the question.
+   * @returns A Promise that resolves to the generated feedback.
+   */
+  async generateUMLearnFeedback(question: string, attempt: editorDataDTO, solution: editorDataDTO): Promise<string> {
+    const llmResponse = await this.llmService.generateLlmAnswer( feedbackGenerationPrompts.byUmlQuestion(question, JSON.stringify(solution)), JSON.stringify(attempt));
+    return llmResponse;
+  }
+
+  async escapeBraces (text: string): Promise<string> {
+    return text.replace(/[{]/g, '{{').replace(/[}]/g, '}}');
   }
 
 

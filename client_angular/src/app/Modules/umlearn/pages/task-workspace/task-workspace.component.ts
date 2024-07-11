@@ -20,6 +20,7 @@ export class TaskWorkspaceComponent implements OnDestroy {
   isSubmitted: boolean = false;
   helpVisible: boolean = false;
   reachedPoints: number = 0;
+  feedbackText: string = "";
 
   tinyMceConfig: any = {
     readonly: false,
@@ -83,6 +84,12 @@ export class TaskWorkspaceComponent implements OnDestroy {
       });
       this.subscriptions.push(routeParamsSubscription);
     }
+
+  onGenerateFeedback() {
+    this.dtcs.generateUmlFeedback(this.taskAttemptData.taskId).subscribe((data: string) => {
+      this.feedbackText = data;
+    });
+  }
 
   /**
    * Navigates to the course page for a student when the cancel button is clicked.

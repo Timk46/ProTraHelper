@@ -8,11 +8,12 @@ import * as natural from 'natural';
 import { ClassNode } from '@Interfaces/index';
 import { Prisma } from '@prisma/client';
 import { CompareService } from '../compare/compare.service';
+import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 
 @Injectable()
 export class DatabaseTaskCommunicationService {
 
-  constructor(private prisma: PrismaService, private compareService: CompareService) { }
+  constructor(private prisma: PrismaService, private compareService: CompareService, private feedbackGenerationService: FeedbackGenerationService) { }
 
 /**
  * Finds synonyms for a given word and checks if a target word is a synonym.
@@ -712,15 +713,16 @@ export class DatabaseTaskCommunicationService {
           attemptData: { nodes: [], edges: [] },
         };
       }
+      console.log("taskAttempt: ", taskAttempt);
 
       return {
         userAnswerId: taskAttempt.userAnswer[0].id,
         taskId: taskId,
-        attemptData: taskAttempt.userAnswer[0].UserUmlQuestionAnswer[0].attemptData as unknown as editorDataDTO,
+        attemptData: taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData as unknown as editorDataDTO,
         //attemptData: taskAttempt.userAnswer[0].UserUmlQuestionAnswer ? (taskAttempt.userAnswer[0].UserUmlQuestionAnswer as unknown as editorDataDTO) : { nodes: [], edges: [] },
       };
     } catch (error) {
-      throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Fehler beim Laden der Daten', error);
     }
   }
 
@@ -841,6 +843,29 @@ export class DatabaseTaskCommunicationService {
     return reachedPoints;
   }
 
+  async generateUmlFeedback(taskId: number, studentId: number){
+    //get the task solution and the student's attempt
+    const taskSolution = await this.prisma.question.findFirst({
+      where: {
+        id: taskId,
+      },
+      select: {
+        score: true,
+        UmlQuestion: {
+          select: {
+            text: true,
+            editorData: true,
+          }
+        }
+      }
+    });
+
+    //find the student's attempt
+    const studentAttempt = await this.getTaskAttemptData(taskId, studentId);
+
+    return this.feedbackGenerationService.generateUMLearnFeedback(taskSolution.UmlQuestion.text, studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
+  }
+
   /**
    * Sets the task attempt data in the database, creating a new task attempt if necessary.
    * If the task attempt data is different from the task attempt, a new task attempt is created.
@@ -876,9 +901,9 @@ export class DatabaseTaskCommunicationService {
         },
       });
 
-      if (!taskAttempt || (taskAttempt && this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer[0].attemptData, taskAttemptData.attemptData))) {
+      if (!taskAttempt || (taskAttempt && this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData))) {
         //create a new userAnswer and a new UserUmlQuestionAnswer and connect them
-        //console.log("not the same",'inDB: ', this.sortObject(JSON.parse(JSON.stringify(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData))), 'new: ', this.sortObject(JSON.parse(JSON.stringify(taskAttemptData.attemptData))), 'isDifferent: ', this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData));
+        console.log("not the same",'inDB: ', this.sortObject(JSON.parse(JSON.stringify(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData))), 'new: ', this.sortObject(JSON.parse(JSON.stringify(taskAttemptData.attemptData))), 'isDifferent: ', this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData));
         const newAnswer = await this.prisma.userAnswer.create({
           data: {
             userId: studentId,
@@ -898,21 +923,22 @@ export class DatabaseTaskCommunicationService {
             }
           }
         });
+        console.log("ATTEMPT JSON: ", JSON.stringify(taskAttemptData.attemptData));
         return {
           userAnswerId: newAnswer.id,
           taskId: taskAttemptData.taskId,
-          attemptData: newAnswer.UserUmlQuestionAnswer[0].attemptData as unknown as editorDataDTO,
+          attemptData: newAnswer.UserUmlQuestionAnswer.attemptData as unknown as editorDataDTO,
         };
       }
       console.log("the same");
+      console.log("ATTEMPT JSON: ", JSON.stringify(taskAttemptData.attemptData));
       return {
         userAnswerId: taskAttempt.userAnswer[0].id,
         taskId: taskAttemptData.taskId,
         attemptData: taskAttemptData.attemptData,
       };
     } catch (error) {
-      console.error(error);
-      throw new HttpException('Fehler beim Speichern der Daten', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Fehler beim Speichern der Daten', error);
     }
   }
 
@@ -925,7 +951,7 @@ export class DatabaseTaskCommunicationService {
   private isDifferentAttemptData(taskAttempt: Prisma.JsonValue, taskAttemptData: editorDataDTO): boolean {
     const sortedTaskAttempt = this.sortAndStringify(taskAttempt);
     const sortedTaskAttemptData = this.sortAndStringify(taskAttemptData);
-    //console.log('sortedTaskAttempt: ', sortedTaskAttempt, 'sortedTaskAttemptData: ', sortedTaskAttemptData);
+    console.log('sortedTaskAttempt: ', sortedTaskAttempt, 'sortedTaskAttemptData: ', sortedTaskAttemptData);
     return sortedTaskAttempt != sortedTaskAttemptData;
   }
 

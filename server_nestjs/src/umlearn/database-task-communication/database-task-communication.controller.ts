@@ -146,6 +146,16 @@ export class DatabaseTaskCommunicationController {
     return this.tasksService.setTaskAttemptData(taskAttemptData, req.user.id);
   }
 
+  @roles('ANY')
+  @Get('generateUmlFeedback/:taskId')
+  generateUmlFeedback(@Req() req, @Param('taskId') taskAttempt: number): Promise<string> {
+    console.log("###### generation for taskId:", taskAttempt);
+    if (isNaN(Number(taskAttempt))) {
+      throw new Error('Invalid taskId');
+    }
+    return this.tasksService.generateUmlFeedback(Number(taskAttempt), req.user.id);
+  }
+
   /**
    * Sets the task attempt data and the feedback data.
    *

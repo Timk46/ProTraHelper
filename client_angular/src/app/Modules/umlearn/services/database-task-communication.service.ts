@@ -120,6 +120,11 @@ export class DatabaseTaskCommunicationService {
     return this.http.post<{points: number, highlightData: editorDataDTO}>(environment.server + '/database-task-communication/commitAttempt', taskAttemptData);
   }
 
+  generateUmlFeedback(taskId: number): Observable<string> {
+    console.log("generateUmlFeedback", taskId);
+    return this.http.get<string>(environment.server + '/database-task-communication/generateUmlFeedback/' + taskId);
+  }
+
   /**
    * Sets the task attempt data by making a POST request to the server.
    * @param taskAttemptData - The task attempt data to be set.
