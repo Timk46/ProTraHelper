@@ -9,11 +9,17 @@ import { ClassNode } from '@Interfaces/index';
 import { Prisma } from '@prisma/client';
 import { CompareService } from '../compare/compare.service';
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
+import { FeedbackRAGService } from '@/ai/feedback-generation/feedback-rag.service';
 
 @Injectable()
 export class DatabaseTaskCommunicationService {
 
-  constructor(private prisma: PrismaService, private compareService: CompareService, private feedbackGenerationService: FeedbackGenerationService) { }
+  constructor(
+    private prisma: PrismaService,
+    private compareService: CompareService,
+    private feedbackGenerationService: FeedbackGenerationService,
+    private feedbackRagService: FeedbackRAGService
+  ) { }
 
 /**
  * Finds synonyms for a given word and checks if a target word is a synonym.
@@ -843,7 +849,7 @@ export class DatabaseTaskCommunicationService {
     return reachedPoints;
   }
 
-  async generateUmlFeedback(taskId: number, studentId: number){
+  async generateUmlFeedback(taskId: number, studentId: number): Promise<{response: string}> {
     //get the task solution and the student's attempt
     const taskSolution = await this.prisma.question.findFirst({
       where: {
@@ -863,7 +869,8 @@ export class DatabaseTaskCommunicationService {
     //find the student's attempt
     const studentAttempt = await this.getTaskAttemptData(taskId, studentId);
 
-    return this.feedbackGenerationService.generateUMLearnFeedback(taskSolution.UmlQuestion.text, studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
+    //return this.feedbackGenerationService.generateUMLearnFeedback(taskSolution.UmlQuestion.text, studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
+    return this.feedbackRagService.generateUmlFeedback(taskSolution.UmlQuestion.text, studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
   }
 
   /**

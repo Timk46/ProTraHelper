@@ -148,7 +148,7 @@ export class DatabaseTaskCommunicationController {
 
   @roles('ANY')
   @Get('generateUmlFeedback/:taskId')
-  generateUmlFeedback(@Req() req, @Param('taskId') taskAttempt: number): Promise<string> {
+  generateUmlFeedback(@Req() req, @Param('taskId') taskAttempt: number): Promise<{response: string}> {
     console.log("###### generation for taskId:", taskAttempt);
     if (isNaN(Number(taskAttempt))) {
       throw new Error('Invalid taskId');

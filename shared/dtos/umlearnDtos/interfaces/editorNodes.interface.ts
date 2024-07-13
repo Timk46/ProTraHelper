@@ -21,6 +21,14 @@ export interface ClassNode {
         updated?: ClassNodeHighlightContent};
   }
 
+export interface rawClassNode {
+    id: string;
+    type: EditorElement;
+    title?: string;
+    attributes?: ClassAttribute[];
+    methods?: ClassMethod[];
+}
+
 export interface ClassNodeHighlightContent {
     title?: string;
     type?: EditorElement;

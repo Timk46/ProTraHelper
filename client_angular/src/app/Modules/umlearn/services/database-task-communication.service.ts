@@ -120,9 +120,9 @@ export class DatabaseTaskCommunicationService {
     return this.http.post<{points: number, highlightData: editorDataDTO}>(environment.server + '/database-task-communication/commitAttempt', taskAttemptData);
   }
 
-  generateUmlFeedback(taskId: number): Observable<string> {
+  generateUmlFeedback(taskId: number): Observable<{response: string}> {
     console.log("generateUmlFeedback", taskId);
-    return this.http.get<string>(environment.server + '/database-task-communication/generateUmlFeedback/' + taskId);
+    return this.http.get<{response: string}>(environment.server + '/database-task-communication/generateUmlFeedback/' + taskId);
   }
 
   /**

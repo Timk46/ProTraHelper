@@ -22,6 +22,16 @@ export interface ClassEdge {
     updated?: ClassEdgeHighlightContent};
 }
 
+export interface rawClassEdge {
+  id: string;
+  type: EditorElement;
+  start: string;
+  end: string;
+  cardinalityStart?: string;
+  description?: string;
+  cardinalityEnd?: string;
+}
+
 export interface ClassEdgeHighlightContent {
   type?: EditorElement;
   start?: string;

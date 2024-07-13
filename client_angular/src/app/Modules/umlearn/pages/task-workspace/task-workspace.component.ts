@@ -86,8 +86,8 @@ export class TaskWorkspaceComponent implements OnDestroy {
     }
 
   onGenerateFeedback() {
-    this.dtcs.generateUmlFeedback(this.taskAttemptData.taskId).subscribe((data: string) => {
-      this.feedbackText = data;
+    this.dtcs.generateUmlFeedback(this.taskAttemptData.taskId).subscribe((data: {response: string}) => {
+      this.feedbackText = data.response;
     });
   }
 
