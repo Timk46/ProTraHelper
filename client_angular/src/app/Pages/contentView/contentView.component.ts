@@ -25,6 +25,7 @@ export class ContentViewComponent implements OnInit {
   readableDate: string = 'dummy date';
   elementCount: number = 0;
   pdfCount: number = 0;
+  isSafari: boolean = false;
 
   // Get Data from Dialog
   constructor(
@@ -47,6 +48,7 @@ export class ContentViewComponent implements OnInit {
       this.applyQuestionStyle[i] = false;
     }
     this.pdfCount = this.getPdfCount();
+    this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   }
 
   // for testing -> print ContentElems as String
