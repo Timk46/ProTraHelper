@@ -3,18 +3,17 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin: -20px;
+  margin-bottom: -20px;
 }
 
 .edge-container {
   display: flex;
-  height: flex;
   flex-direction: column;
   align-items: stretch;
   border-radius: 3px;
   border: 1.5px solid black;
   overflow: auto;
-  padding: 1%;
+  padding: 10px;
 }
 
 .edge-heading-container {
@@ -26,6 +25,7 @@
 .edge-line-edit-container {
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 100%;
 }
 
@@ -64,7 +64,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 50px;
+  height: 80px;
   padding-top: 20px;
 }
 
@@ -74,6 +74,7 @@
   align-items: center;
   flex-direction: column;
   justify-content: center;
+  padding-bottom: 20px;
 }
 
 .section-3 {

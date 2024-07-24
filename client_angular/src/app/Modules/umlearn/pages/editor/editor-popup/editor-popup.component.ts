@@ -6,6 +6,7 @@ import { EditorCommunicationService } from '@UMLearnServices/editor-communicatio
 import { NotificationService } from '@UMLearnServices/notification.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { EditorEdgeNewComponent } from '../editor-edge-new/editor-edge-new.component';
+import { timer } from 'rxjs';
 
 @Component({
   selector: 'app-editor-popup',
@@ -55,13 +56,17 @@ export class EditorPopupComponent {
 
   constructor(
     public dialogRef: MatDialogRef<EditorPopupComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: {elementData: ClassNode | ClassEdge, elementType: EditorElementType, switchPosition: boolean},
+    @Inject(MAT_DIALOG_DATA) public data: {elementData: ClassNode | ClassEdge, elementType: EditorElementType, switchPosition: boolean, additionalDataTypes: string[]},
     private notification: NotificationService,
     private ecs: EditorCommunicationService,
     )
     {
       this.attributesDataSource = new MatTableDataSource(this.attributes || []);
       this.methodsDataSource = new MatTableDataSource(this.methods || []);
+      this.dataTypes = [
+        ...Object.values(dataType) as string[],
+        ...this.data.additionalDataTypes,
+      ];
 
 
       this.elementType = data.elementType;
@@ -233,6 +238,22 @@ export class EditorPopupComponent {
       this.edgeData.description = newDescription;
       this.edgeDisplayData!.description = newDescription;
       this.previewLine.refresh();
+    }
+  }
+
+  /**
+   * Swaps the direction of the edge.
+   */
+  onSwapEdgeDirection(): void {
+    if (this.edgeData) {
+      const temp = this.edgeData.start;
+      this.edgeData.start = this.edgeData.end;
+      this.edgeData.end = temp;
+
+      this.switchPosition == true ? this.switchPosition = false : this.switchPosition = true;
+      setTimeout(() => {
+        this.previewLine.refresh();
+      }, 0);
     }
   }
 }

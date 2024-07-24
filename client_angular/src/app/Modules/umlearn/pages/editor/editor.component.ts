@@ -451,6 +451,18 @@ export class EditorComponent implements OnDestroy {
   }
 
   /**
+   * Retrieves additional data types from the nodes (in form of their titles).
+   * @returns An array of additional data types.
+   */
+  getAdditionalDataTypes(): string[] {
+    const additionalDataTypes: string[] = [];
+    for (const element of this.nodes) {
+      if (element.title) additionalDataTypes.push(element.title);
+    }
+    return additionalDataTypes;
+  }
+
+  /**
    * Retrieves the data needed to save the editor state.
    * @returns {editorDataDTO} The editor data object containing the nodes and edges.
    */
@@ -473,6 +485,7 @@ export class EditorComponent implements OnDestroy {
         elementType: elementType,
         elementData: copiedElementData,
         switchPosition: switchPosition,
+        additionalDataTypes: this.getAdditionalDataTypes(),
       }
     };
     const dialogRef = this.dialog.open(EditorPopupComponent, configData);

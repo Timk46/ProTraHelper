@@ -25,7 +25,7 @@
       <div class="section-2" *ngIf="elementData.type !== editorElement.CD_INTERFACE">
 
         <div class="node-table-heading-container">
-          <h4 style="text-align: center">Attribute</h4>
+          <h4 style="text-align: center; margin-top: 16px;">Attribute</h4>
           <button mat-icon-button color="primary" class="add-button" (click)="addAttributeRow()">
             <mat-icon>add_circle</mat-icon>
           </button>
@@ -87,7 +87,7 @@
       <div class="section-3">
 
         <div class="node-table-heading-container">
-          <h4 style="text-align: center">Methoden</h4>
+          <h4 style="text-align: center; margin-top: 16px">Methoden</h4>
           <button mat-icon-button color="primary" class="add-button" (click)="addMethodRow()">
             <mat-icon>add_circle</mat-icon>
           </button>
@@ -204,6 +204,7 @@
   <div mat-dialog-actions class="button_container">
     <div>
       <button mat-raised-button color="warn" (click)="onDelete()">Kante löschen</button>
+      <button mat-raised-button color="primary" (click)="onSwapEdgeDirection()">Richtung vertauschen</button>
     </div>
     <div>
       <button mat-raised-button color="accent" (click)="onCancel()">Abbrechen</button>
