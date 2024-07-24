@@ -14,12 +14,7 @@ export interface ClassEdge {
   cardinalityStart?: string;
   description?: string;
   cardinalityEnd?: string;
-  highlighted?: {
-    code: string,
-    maxPoints?: number,
-    added?: ClassEdgeHighlightContent,
-    deleted?: ClassEdgeHighlightContent,
-    updated?: ClassEdgeHighlightContent};
+  highlighted?: ClassEdgeHighlight;
 }
 
 export interface rawClassEdge {
@@ -30,6 +25,15 @@ export interface rawClassEdge {
   cardinalityStart?: string;
   description?: string;
   cardinalityEnd?: string;
+  highlighted?: ClassEdgeHighlight;
+}
+
+export interface ClassEdgeHighlight {
+  code: string;
+  maxPoints?: number;
+  added?: ClassEdgeHighlightContent;
+  deleted?: ClassEdgeHighlightContent;
+  updated?: ClassEdgeHighlightContent;
 }
 
 export interface ClassEdgeHighlightContent {

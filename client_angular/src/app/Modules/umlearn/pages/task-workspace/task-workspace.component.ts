@@ -20,7 +20,11 @@ export class TaskWorkspaceComponent implements OnDestroy {
   isSubmitted: boolean = false;
   helpVisible: boolean = false;
   reachedPoints: number = 0;
+
   feedbackText: string = "";
+  feedbackLoading: boolean = false;
+  feedbackTextHighlight: string = "";
+  feedbackHighlightLoading: boolean = false;
 
   tinyMceConfig: any = {
     readonly: false,
@@ -86,8 +90,16 @@ export class TaskWorkspaceComponent implements OnDestroy {
     }
 
   onGenerateFeedback() {
+    this.feedbackLoading = true;
+    this.feedbackHighlightLoading = true;
+
     this.dtcs.generateUmlFeedback(this.taskAttemptData.taskId).subscribe((data: {response: string}) => {
       this.feedbackText = data.response;
+      this.feedbackLoading = false;
+    });
+    this.dtcs.generateUmlFeedbackByHighlighted(this.taskAttemptData.taskId).subscribe((data: {response: string}) => {
+      this.feedbackTextHighlight = data.response;
+      this.feedbackHighlightLoading = false;
     });
   }
 

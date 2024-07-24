@@ -17,7 +17,7 @@
 </mat-toolbar>
 
 <div class="h-box">
-  <div [ngClass]="{'submitted': isSubmitted}" class="information-container">
+  <div [ngClass]="{'submitted': isSubmitted}" class="information-container" style="height: 100%;">
     <!-- <div class="title-container">
       <h3>Aufgabe: {{ taskWorkspaceData.title }}</h3>
     </div> -->
@@ -34,11 +34,30 @@
     </div>
 
     <div [ngClass]="{'submitted': isSubmitted}" class="feedback-container mat-elevation-z8">
-      <div *ngIf="helpVisible">
-        <h1>Erreichte Punkte: {{reachedPoints}} von {{taskWorkspaceData.maxPoints}}</h1>
-        <p>Hi, ich bin Kai, kann ich dir helfen?</p>
-        <button mat-raised-button color="primary" (click)="onGenerateFeedback()">Hilfe holen</button>
-        <p>{{feedbackText}}</p>
+      <div *ngIf="helpVisible" style="height: 100%;">
+        <div style="height: 40%;">
+          <h1>Erreichte Punkte: {{reachedPoints}} von {{taskWorkspaceData.maxPoints}}</h1>
+          <p>Hi, ich bin Kai, kann ich dir helfen?</p>
+          <div style="display: flex; flex-direction: row;">
+            <button *ngIf="!feedbackLoading && !feedbackHighlightLoading" mat-raised-button color="primary" (click)="onGenerateFeedback()">
+              Feedback generieren
+            </button>
+          </div>
+        </div>
+
+
+        <div style="display: grid; height: 60%; grid-template-columns: 1fr 1fr;">
+          <div style="background: lightblue">
+            <mat-spinner *ngIf="feedbackLoading" color="primary" style="width: 20px; height: 20px;"></mat-spinner>
+            <p>{{feedbackText}}</p>
+          </div>
+          <div style="background: lightgreen">
+            <mat-spinner *ngIf="feedbackHighlightLoading" color="accent" style="width: 20px; height: 20px;"></mat-spinner>
+            <p>{{feedbackTextHighlight}}</p>
+          </div>
+        </div>
+
+
         <!-- <mat-progress-spinner mode="indeterminate" diameter="100"></mat-progress-spinner> -->
       </div>
     </div>

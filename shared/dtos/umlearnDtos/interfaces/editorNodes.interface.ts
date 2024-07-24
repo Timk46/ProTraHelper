@@ -10,15 +10,7 @@ export interface ClassNode {
     title?: string;
     attributes?: ClassAttribute[];
     methods?: ClassMethod[];
-    highlighted?: {
-        code: string,
-        maxPoints?: {
-            attributes: number,
-            methods: number
-        },
-        added?: ClassNodeHighlightContent,
-        deleted?: ClassNodeHighlightContent,
-        updated?: ClassNodeHighlightContent};
+    highlighted?: ClassNodeHighlight;
   }
 
 export interface rawClassNode {
@@ -27,6 +19,18 @@ export interface rawClassNode {
     title?: string;
     attributes?: ClassAttribute[];
     methods?: ClassMethod[];
+    highlighted?: ClassNodeHighlight;
+}
+
+export interface ClassNodeHighlight {
+    code: string;
+    maxPoints?: {
+        attributes: number,
+        methods: number
+    };
+    added?: ClassNodeHighlightContent;
+    deleted?: ClassNodeHighlightContent;
+    updated?: ClassNodeHighlightContent;
 }
 
 export interface ClassNodeHighlightContent {

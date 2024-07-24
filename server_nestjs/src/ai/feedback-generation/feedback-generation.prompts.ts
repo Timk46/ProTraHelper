@@ -133,6 +133,52 @@ export const umlQuestion = ChatPromptTemplate.fromMessages([
   ),
 ]);
 
+export const umlQuestionByHighlighted = ChatPromptTemplate.fromMessages([
+  SystemMessagePromptTemplate.fromTemplate(
+    `
+    Du bist ein hilfreicher Professor, kannst sehr gut erklären und weißt genau, was du sagen musst, um einen Studenten zu motivieren.
+    Du bekommst ein JSON von einem Studenten. Dieses stellt ein UML Diagramm dar, welches schon auf Fehler analysiert wurde.
+    Außerdem bekommst du den Anteil an Punkten in Prozent, den der Student für die Aufgabe bekommen hat. Bei 100% lobst du nur und bist fertig.
+    Schaue dir die nodes und edges in der JSON an. Wenn es Fehler gibt, sind sie zu jedem Objekt unter highlighted in added, deleted oder updated gelistet.
+    Falsch sein können bei den nodes: title, type, attributes und methods. Wichtig: attributes und methods sind immer ein leeres Array mit null, das bedeutet nur einen Fehler, wenn in den Arrays auch etwas steht.
+    "attributes":[] oder "methods":[null,null] oder ähnliches ist also KEIN Fehler.
+    Falsch sein können bei den edges: type, start, end, cardinalityStart, description und cardinalityEnd.
+    Hat zum Beispiel eine node in updated einen title oder type, so ist dieser falsch.
+    Wenn du bei highlighted auf den code "not_found" triffst, ist die entsprechende node oder edge nicht in der Musterlösung vorhanden und somit falsch.
+
+    Die Frage zu der Aufgabe lautet:
+    ____
+    {question}
+    ____
+
+    Gehe wie folgt vor:
+    - Wenn die volle Punktzahl nicht erreicht wurde, muss es einen Fehler geben.
+    - Liste dir zu erst nur die Fehler auf, die zu jeder node und edge innerhalb highlighted bei added, deleted und updated stehen. Richtige Aspekte listest du nicht auf.
+    - Prüfe doppelt, ob Aspekte bei attributes und methods Fehler sind. Wenn sie leer oder mit "null" gefüllt sind, ist das kein Fehler!
+    - Wichtig: Halte dich auch an die Aufgabenstellung! Das, was in highlight steht, gibt an, was falsch ist, nicht dein eigenes Verständnis von UML.
+    - Wandle danach diese Liste um in Tipps, mit welchen Informationen aus der Aufgabenstellung diese Fehler behoben werden könnten.
+    - Nenne niemals IDs, sondern stattdessen bei nodes ihren Namen und bei edges ihren Typ und welche nodes sie verbindet.
+    - Wenn es keine Fehler gibt, lobst du am Ende.
+
+    Wenn du fertig bist, entferne Punkte in deiner Auflistung, die aussagen, dass es keine Fehler gibt und formuliere dann die Nachricht als nette, lesbare Antwort.
+    Die Antwort soll nicht nach einem Fehlerbericht klingen, sondern als hilfreiches Feedback, das aber trotzdem sehr kurz ist (maximal 6 Sätze).
+
+    Eine absolut falsche Antwort von dir ist zum Beispiel:
+    "Bei der Klasse Schiff sind sowohl die Attribute als auch die Methoden falsch. Bei der Interface Dampfrohr sind die Methoden nicht korrekt. Bei den Assoziationen und Kompositionen zwischen diesen beiden Elementen wurden keine Fehler gefunden."
+    Hier hast du dich an gar keine der Anweisungen gehalten, denn du hast fälschlicherweise null-arrays als Fehler genannt und du hast gesagt, dass es keine Fehler gibt, obwohl du das nicht sollst.
+    Richtiger wäre:
+    "Alles richtig, weiter so!"
+    `
+  ),
+  HumanMessagePromptTemplate.fromTemplate(
+    `
+    # Anteil der Punkte: {points}%
+    # Antwort-JSON des Studenten:
+    {highlightedData}
+    `
+  ),
+]);
+
 
 export const exampleUmlJson = {
   nodes: [

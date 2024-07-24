@@ -719,7 +719,6 @@ export class DatabaseTaskCommunicationService {
           attemptData: { nodes: [], edges: [] },
         };
       }
-      console.log("taskAttempt: ", taskAttempt);
 
       return {
         userAnswerId: taskAttempt.userAnswer[0].id,
@@ -824,8 +823,6 @@ export class DatabaseTaskCommunicationService {
       }
     });
 
-    //console.log("found solution: ", taskSolution);
-
     if (!taskSolution){
       throw new Error('Failed to find related question');
     }
@@ -873,6 +870,33 @@ export class DatabaseTaskCommunicationService {
     return this.feedbackRagService.generateUmlFeedback(taskSolution.UmlQuestion.text, studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
   }
 
+  async generateUmlFeedbackByHighlighted(taskId: number, studentId: number): Promise<{response: string}> {
+    //get the task solution and the student's attempt
+    const taskSolution = await this.prisma.question.findFirst({
+      where: {
+        id: taskId,
+      },
+      select: {
+        score: true,
+        UmlQuestion: {
+          select: {
+            text: true,
+            editorData: true,
+          }
+        }
+      }
+    });
+
+    //find the student's attempt
+    const studentAttempt = await this.getTaskAttemptData(taskId, studentId);
+    if (!taskSolution || !studentAttempt){
+      throw new Error('dbtc-service: Failed to find related question or student attempt');
+    }
+    const compareData = await this.compareService.compareAndCalculate(taskSolution.UmlQuestion.editorData as unknown as editorDataDTO, studentAttempt.attemptData, taskSolution.score);
+
+    return this.feedbackRagService.generateUmlFeedbackByHighlighted(taskSolution.UmlQuestion.text, compareData.highlightData, Math.floor(compareData.points/taskSolution.score * 100));
+  }
+
   /**
    * Sets the task attempt data in the database, creating a new task attempt if necessary.
    * If the task attempt data is different from the task attempt, a new task attempt is created.
@@ -910,7 +934,7 @@ export class DatabaseTaskCommunicationService {
 
       if (!taskAttempt || (taskAttempt && this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData))) {
         //create a new userAnswer and a new UserUmlQuestionAnswer and connect them
-        console.log("not the same",'inDB: ', this.sortObject(JSON.parse(JSON.stringify(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData))), 'new: ', this.sortObject(JSON.parse(JSON.stringify(taskAttemptData.attemptData))), 'isDifferent: ', this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData));
+        //console.log("not the same",'inDB: ', this.sortObject(JSON.parse(JSON.stringify(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData))), 'new: ', this.sortObject(JSON.parse(JSON.stringify(taskAttemptData.attemptData))), 'isDifferent: ', this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData));
         const newAnswer = await this.prisma.userAnswer.create({
           data: {
             userId: studentId,
@@ -930,7 +954,6 @@ export class DatabaseTaskCommunicationService {
             }
           }
         });
-        console.log("ATTEMPT JSON: ", JSON.stringify(taskAttemptData.attemptData));
         return {
           userAnswerId: newAnswer.id,
           taskId: taskAttemptData.taskId,
@@ -938,7 +961,6 @@ export class DatabaseTaskCommunicationService {
         };
       }
       console.log("the same");
-      console.log("ATTEMPT JSON: ", JSON.stringify(taskAttemptData.attemptData));
       return {
         userAnswerId: taskAttempt.userAnswer[0].id,
         taskId: taskAttemptData.taskId,
@@ -958,7 +980,6 @@ export class DatabaseTaskCommunicationService {
   private isDifferentAttemptData(taskAttempt: Prisma.JsonValue, taskAttemptData: editorDataDTO): boolean {
     const sortedTaskAttempt = this.sortAndStringify(taskAttempt);
     const sortedTaskAttemptData = this.sortAndStringify(taskAttemptData);
-    console.log('sortedTaskAttempt: ', sortedTaskAttempt, 'sortedTaskAttemptData: ', sortedTaskAttemptData);
     return sortedTaskAttempt != sortedTaskAttemptData;
   }
 

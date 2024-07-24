@@ -373,7 +373,6 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
           let solutionEdge = solutionEdges.find(edge => edge.start === startMatch?.solutionNode.id && edge.end === endMatch?.solutionNode.id && edge.type === attemptEdge.type);
           // alternatively search for edges in the wrong direction, but only allow directionless edge types - NEEDS TESTING
           let swappedEdge = solutionEdges.find(edge => edge.start === endMatch?.solutionNode.id && edge.end === startMatch?.solutionNode.id && edge.type === attemptEdge.type && SwappableEditorElement.includes(attemptEdge.type));
-          console.log("##### swappedEdge: ", swappedEdge, solutionEdge);
 
           if (solutionEdge) {
             // Create match object
