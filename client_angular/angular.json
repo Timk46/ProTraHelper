@@ -47,7 +47,7 @@
               "@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.scss",
               "src/styles/sprotty-styles.scss",
-              "src/styles/highlightThemes/nord.css",
+              "src/styles/highlightThemes/atom-one-light.css",
               "node_modules/ngx-toastr/toastr.css",
               "node_modules/prismjs/themes/prism.css"
             ],

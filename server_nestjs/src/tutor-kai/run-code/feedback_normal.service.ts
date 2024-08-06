@@ -15,7 +15,7 @@ const {
 
 //const KImodel = 'gpt-4-0314';
 //const KImodel = 'gpt-3.5-turbo';
-const KImodel = 'gpt-4-turbo-2024-04-09';
+const KImodel = 'gpt-4o-2024-05-13';
 
 const chat = new ChatOpenAI({
   modelName: KImodel,

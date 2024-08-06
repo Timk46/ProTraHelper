@@ -1,28 +1,56 @@
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component } from '@angular/core';
 
-import { MatDialog } from '@angular/material/dialog';
-import { ChatBotDialogComponent } from './chat-bot-dialog/chat-bot-dialog.component';
+enum DisplayType {
+  Fixed = 'fixed-chat',
+  Collapsible = 'collapsible-chat'
+}
 
 @Component({
   selector: 'app-chat-bot',
   templateUrl: './chat-bot.component.html',
-  styleUrls: ['./chat-bot.component.scss']
+  styleUrls: ['./chat-bot.component.scss'],
+  animations: [
+    trigger('rotateAnimation', [
+      state('rotated', style({ transform: 'rotate(0deg)' })),
+      state('default', style({ transform: 'rotate(-360deg)' })),
+      transition('default => rotated', animate('500ms ease-out')),
+      transition('rotated => default', animate('500ms ease-out')),
+    ]),
+    trigger('fadeAnimation', [
+      transition(":enter", [
+        style({ opacity: 0 }),
+        animate(
+          "150ms ease-in-out",
+          style({ opacity: 1})
+        )
+      ]),
+      transition(":leave", [
+        style({ opacity: 1}),
+        animate(
+          "150ms ease-in-out",
+          style({ opacity: 0,})
+        )
+      ])
+    ]),
+  ]
 })
 
 export class ChatBotComponent {
-  chatOpen: boolean = false;
+  private readonly botIconPath = '../../../assets/img/kai_logo_small.png';
+  private readonly chatIconPath = '../../../assets/img/chat.png';
 
-  constructor(public dialog: MatDialog) { }
+  public isOpen = false;
+  public iconSrc = this.botIconPath;
+  public iconState = 'default';
 
-  openDialog(): void {
-    this.chatOpen = true;
-    const dialogRef = this.dialog.open(ChatBotDialogComponent, {
-      width: '80%',
-      height: 'auto',
-    });
+  public displayType = DisplayType;
 
-    dialogRef.afterClosed().subscribe(result => {
-      this.chatOpen = false;
-    });
+  public onChangeChatState(): void {
+    this.isOpen = !this.isOpen;
+    this.iconState = (this.iconState === 'default' ? 'rotated' : 'default');
+
+    if (this.isOpen) this.iconSrc = this.chatIconPath;
+    else this.iconSrc = this.botIconPath;
   }
 }

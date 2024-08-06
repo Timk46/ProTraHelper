@@ -6,7 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphModule } from './graph/graph.module';
 import { PrismaModule } from './prisma/prisma.module';
-//import { ChatBotModule } from './ai/chat-bot/chat-bot.module'; PERMANENT DISABLED
+import { ChatBotModule } from './ai/chat-bot/chat-bot.module';
 import { DiscussionListController } from './discussion/discussion-list/discussion-list.controller';
 import { DiscussionListService } from './discussion/discussion-list/discussion-list.service';
 import { DiscussionDataService } from './discussion/discussion-data/discussion-data.service';
@@ -61,7 +61,7 @@ import { VersionInterceptor } from './common/interceptors/version.interceptor';
     AuthModule,
     UsersModule,
     ContentModule,
-    //ChatBotModule, PERMANANT DISABLED
+    ChatBotModule,
     ModulesModule,
     QuestionDataModule,
     RunCodeModule,
