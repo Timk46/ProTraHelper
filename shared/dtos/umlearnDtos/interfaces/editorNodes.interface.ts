@@ -1,7 +1,7 @@
 import { EditorElement } from "../dtos/index";
 
 export interface ClassNode {
-    identification: string;
+    identification?: string;
     type: EditorElement;
     id: string;
     position: {x: number, y: number};
