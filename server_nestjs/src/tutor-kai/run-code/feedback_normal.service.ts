@@ -6,6 +6,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Response } from 'express';
 import { EventLogService } from '@/EventLog/event-log.service';
 import { ChatOpenAI } from "langchain/chat_models/openai";
+import { Client } from "langsmith";
+import { LangChainTracer } from "langchain/callbacks";
 
 const {
   ChatPromptTemplate,
@@ -29,8 +31,9 @@ const chatPrompt = ChatPromptTemplate.fromPromptMessages([
     'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
     'Die Studenten lösen Programmieraufgaben und du gibst Ihnen kurzes hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken. ' + // entfernt: und passende Quellen aus der Vorlesung verlinken.
     'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren. '+
-    'DU VERRÄST DU NIEMALS DIE LÖSUNG. ES IST DIR VERBOTEN, PROGRAMMCODE ZU FORMULIEREN! ' +
-    'Dein kurzes hilfreichses Feedback ist maximal sechs Sätze auf drei Absätze lang oder kürzer. Es ist verboten, die Unit-Tests zu erwähnen!',
+
+    'Dein kurzes hilfreichses Feedback ist maximal sechs Sätze auf drei Absätze lang oder kürzer. Es ist verboten, die Unit-Tests zu erwähnen!' +
+    'DU VERRÄST DU NIEMALS DIE LÖSUNG. '
   ),
   HumanMessagePromptTemplate.fromTemplate(
     '# Aufgabe die vom Studenten gelöst werden soll:\n{task}\n' +
@@ -43,6 +46,16 @@ const chatPrompt = ChatPromptTemplate.fromPromptMessages([
       '## Ergebnis der Unit-Tests \n {unitTestsResults}\n'
   ),
 ]);
+
+const client = new Client({
+  apiUrl: "https://api.smith.langchain.com",
+  apiKey: process.env.LANGCHAIN_API_KEY
+});
+const tracer = new LangChainTracer({
+  projectName: "GOALS_feedback_normal",
+  client
+});
+
 @Injectable()
 export class FeedbackNormalService {
   constructor(
@@ -51,6 +64,7 @@ export class FeedbackNormalService {
     private readonly cryptoService: CryptoService,
     private eventLogService: EventLogService
   ) { }
+
 
   /**
    * Gets feedback from the AI.
@@ -112,6 +126,7 @@ export class FeedbackNormalService {
           res.write(token);
         },
       },
+      tracer
     ],
     );
     this.eventLogService.log(

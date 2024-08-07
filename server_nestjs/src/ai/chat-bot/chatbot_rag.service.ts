@@ -29,7 +29,7 @@ const client = new Client({
   apiKey: process.env.LANGCHAIN_API_KEY,
 });
 const tracer = new LangChainTracer({
-  projectName: 'GOALS',
+  projectName: 'GOALS_chatbot',
   client,
 });
 
@@ -39,7 +39,6 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
       // Erläuterungen zu dem Aufbau der Informationen aus RAG
       '# Schritt 1: Erklärung basierend auf der Vorlesung \n' +
       'Bei deiner Antwort beziehst du dich auf relevante Erklärungen aus den Vorlesungsausschnitten und nennst die korrekte Quelle. Du verwendest Markdown-Syntax, um die Antwort übersichtlich zu formatieren.' +
-      'Du MUSST IMMER wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% KORREKT DIREKT DAHINTER angeben! Die Zeichen ^ und [] dürfen dabei NIEMALS vergessen werden!' +
       'Hier ein korrektes Beispiel dazu: ' +
       'Beispiel 1: Jede Zeile Code, die zur Funktion gehört, muss um eine Ebene eingerückt sein. Schau dir dazu noch einmal den Abschnitt zur Python Syntax in der Vorlesung an, um dich mit den Einrückungsregeln vertraut zu machen ^[[Python_Kontrollstrukturen_if_else_Code-Beispiel bei 00:02:12](/video?fileName=Python_Kontrollstrukturen_if_else_Code-Beispiel&timeStamp=00:02:12,000)] ' +
       'Beispiel 2: Denke auch daran, dass die Verkettung von Strings in Python mit dem `+` Operator erfolgt, wie im Vorlesungsausschnitt über Datentypen und Operationen in Python erklärt wird: ^[[Python_Datentypen_Umwandeln bei 00:02:31](/video?fileName=Python_Datentypen_Umwandeln&timeStamp=00:02:31,000)].'+
@@ -136,7 +135,6 @@ export class ChatBotRAGService {
         tracer,
       ],
     );
-    console.log(JSON.stringify(openAiResponse));
 
     resStream.end();
   }

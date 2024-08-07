@@ -47,7 +47,7 @@ export class RunCodeController {
     res.set('Content-Type', 'text/plain');
     res.setHeader('Transfer-Encoding', 'chunked');
 
-    if (flavor == 'Schnelles Feedback') {
+    if (flavor == 'Standard Feedback') {
       const result = await this.feedbackNormalService.getKiFeedback(
         Number(questionId),
         flavor,
@@ -57,7 +57,7 @@ export class RunCodeController {
       );
     }
 
-      if (flavor == 'Feedback mit Vorlesungsinformationen') {
+      if (flavor == 'Feedback mit Konzept-Erklärung') {
       const result = await this.feedbackRAGService.getKiFeedback(
         Number(questionId),
         flavor,

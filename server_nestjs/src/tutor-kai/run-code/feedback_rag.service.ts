@@ -24,8 +24,14 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
     'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
     'Die Studenten lösen Programmieraufgaben und du gibst Ihnen kurzes hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
     'Sind 100 Punkte erreicht sollst du lediglich zur korrekten Lösung gratulieren. '+
-    'DU VERRÄST DU NIEMALS DIE LÖSUNG. ES IST DIR VERBOTEN, PROGRAMMCODE ZU FORMULIEREN! ' +
-    'Dein kurzes hilfreichses Feedback ist maximal sechs Sätze auf drei Absätze lang oder kürzer.  Es ist verboten, die Unit-Tests zu erwähnen!',
+
+    // NEU <- ist nicht im normalen Feedback
+    'Du formatierst deine Antwort übersichtlich mit der Markdown-Syntax. '+
+    'Gebbe immer wenn es passt Code-Beispiele (anderer Kontext als in der Aufgabe), wie die Syntax demonstrieren. ' +
+    'Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise auf darauf und ergänze um Erkärungen. Das ist wichtig, damit der Student lernt, die Compiler-Ausgabe zu lesen und zu verstehen. ' +
+    // Etwas länger als normales Feedback
+    'Dein kurzes hilfreichses Feedback ist maximal acht Sätze auf vier Absätze lang oder kürzer. Es ist verboten, die Unit-Tests zu erwähnen!',
+    'DU VERRÄST DU NIEMALS DIE LÖSUNG.  ' +
 
     // Erläuterungen zu dem Aufbau der Informationen aus RAG
     'Bei deinem Feedback beziehst du dich IMMER auf Erklärungen aus den Vorlesungsausschnitten und nennst die korrekte Quelle. Diese liegen im folgenden JSON-Format vor:' +
@@ -97,7 +103,7 @@ const client = new Client({
   apiKey: process.env.LANGCHAIN_API_KEY
 });
 const tracer = new LangChainTracer({
-  projectName: "Tutor-Kai",
+  projectName: "GOALS_feedback_RAG",
   client
 });
 

@@ -40,10 +40,10 @@ export class StudentWorkspaceComponent implements OnInit {
   currentTaskId: number = 0;
   tasks: QuestionDTO[] = [];
   tasksOfSelectedWeek: QuestionDTO[] = [];
-  flavor: string = 'Schnelles Feedback';
+  flavor: string = 'Feedback mit Konzept-Erklärung';
   flavorOptions: string[] = [
-    'Schnelles Feedback',
-    'Feedback mit Vorlesungsinformationen',
+    'Standard Feedback',
+    'Feedback mit Konzept-Erklärung',
   ];
 
   selectedWeek = 0;

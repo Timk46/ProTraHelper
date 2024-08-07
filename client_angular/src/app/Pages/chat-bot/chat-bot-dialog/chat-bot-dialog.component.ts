@@ -23,7 +23,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
 
   public form: FormGroup;
   public messages: Array<{ text?: string; type: MessageType }> = [];
-  private canSendMessage = true;
+  protected canSendMessage = true;
 
   /**
    * The current lecture.
@@ -91,7 +91,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
         this.messages.pop();
         const botMessage = { text: this.markdownService.parse(data), type: MessageType.Bot };
         this.messages.push(botMessage);
-        this.canSendMessage = true;
+        this.canSendMessage = false;
       },
       error: (error) => {
         console.log(error);

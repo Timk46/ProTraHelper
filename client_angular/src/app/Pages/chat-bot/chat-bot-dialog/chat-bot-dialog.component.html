@@ -1,5 +1,5 @@
 <form [formGroup]="form" class="chat-container">
-  <mat-card [ngClass]="display">
+  <mat-card [ngClass]="display" class="collapsible-chat">
       <mat-card-header class="chat-header">
           <img mat-card-avatar src="../../../../assets/img/kai_logo_small.png" class="chat-icon">
           <mat-card-title class="chat-title">Chatbot</mat-card-title>
@@ -17,26 +17,27 @@
           </div>
       </mat-card-content>
       <mat-card-actions class="chat-actions">
-          <mat-form-field appearance="outline" style = "background-color: #eceff4" class="chat-form">
-              <textarea
-                  class="chat-input"
-                  matInput
-                  type="text"
-                  placeholder="Deine Frage..."
-                  formControlName="message"
-                  (keydown.enter)="onClickEnter($event)"
-              ></textarea>
-              <button
-                  class="send-button"
-                  matSuffix
-                  mat-icon-button
-                  aria-label="Send"
-                  (click)="onClickSendMessage()"
-                  [disableRipple]="true"
-              >
-                  <mat-icon class="send-icon">send</mat-icon>
-              </button>
-          </mat-form-field>
+        <mat-form-field appearance="outline" class="chat-form">
+          <textarea
+            class="chat-input"
+            matInput
+            type="text"
+            placeholder="Deine Frage..."
+            formControlName="message"
+            (keydown.enter)="onClickEnter($event)"
+          ></textarea>
+          <button
+            class="send-button"
+            matSuffix
+            mat-icon-button
+            aria-label="Send"
+            (click)="onClickSendMessage()"
+            [disableRipple]="true"
+            [disabled]="!canSendMessage"
+          >
+            <mat-icon class="send-icon">{{ canSendMessage ? 'send' : 'stop' }}</mat-icon>
+          </button>
+        </mat-form-field>
       </mat-card-actions>
   </mat-card>
 </form>
