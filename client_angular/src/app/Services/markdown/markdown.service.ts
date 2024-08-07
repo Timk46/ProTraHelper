@@ -27,28 +27,50 @@ export class MarkdownService {
           '<pre class="hljs"><code>' + this.escapeHtml(str) + '</code></pre>'
         );
       },
-      breaks: true, // sorgt dafür, dass Zeilenumbrüche beachtet werden
+      breaks: true,
+      html: true,
+      linkify: true,
+      typographer: true,
     });
+
     this.md.use(markdownItFootnote);
 
-    // Customize output for footnotes
-    this.md.renderer.rules['footnote_ref'] = (tokens, idx, options, env, slf) => {
-      const id = slf.rules['footnote_anchor_name']?.(tokens, idx, options, env, slf);
-      const caption = slf.rules['footnote_caption']?.(tokens, idx, options, env, slf);
-      let refid = id ?? '';
-      if (tokens[idx].meta.subId > 0) {
-        refid += ':' + tokens[idx].meta.subId;
+    // Anpassen der Listenelemente-Rendering
+    this.md.renderer.rules['list_item_open'] = (tokens, idx, options, env, self) => {
+      const token = tokens[idx];
+      if (token.markup === '1.') {
+        return '<li class="ordered-list-item">';
       }
+      return '<li>';
+    };
+
+    this.md.renderer.rules['list_item_close'] = () => '</li>';
+
+    // Anpassen des Inhalts-Renderings für Listenelemente
+    this.md.renderer.rules['paragraph_open'] = (tokens, idx, options, env, self) => {
+      const token = tokens[idx];
+      if (token.level > 0 && tokens[idx - 1] && tokens[idx - 1].type === 'list_item_open') {
+        return ''; // Kein zusätzliches <p>-Tag innerhalb von Listenelementen
+      }
+      return '<p>';
+    };
+
+    this.md.renderer.rules['paragraph_close'] = (tokens, idx, options, env, self) => {
+      const token = tokens[idx];
+      if (token.level > 0 && tokens[idx + 1] && tokens[idx + 1].type === 'list_item_close') {
+        return ''; // Kein schließendes </p>-Tag innerhalb von Listenelementen
+      }
+      return '</p>';
+    };
+
+    // Bestehende Anpassungen für Fußnoten beibehalten
+    this.md.renderer.rules['footnote_ref'] = (tokens, idx, options, env, slf) => {
+      const caption = slf.rules['footnote_caption']?.(tokens, idx, options, env, slf);
       return '<sup class="footnote-ref"><a>' + caption + '</a></sup>';
     };
 
-    this.md.renderer.rules['footnote_anchor'] = (tokens, idx, options, env, slf) => {
-      let id = slf.rules['footnote_anchor_name']?.(tokens, idx, options, env, slf);
-      if (id && tokens[idx].meta.subId > 0) {
-        id += ':' + tokens[idx].meta.subId;
-      }
-      return ' <a class="footnote-backref">\u21a9\uFE0E</a>';
-    };
+    this.md.renderer.rules['footnote_anchor'] = () =>
+      ' <a class="footnote-backref">\u21a9\uFE0E</a>';
 
     this.md.renderer.rules['footnote_block_open'] = () =>
       '<h4 class="mt-3">Quellen:</h4>\n<section class="footnotes">\n<ol class="footnotes-list">\n';
@@ -58,7 +80,6 @@ export class MarkdownService {
     return this.md.render(markdown);
   }
 
-  // HTML-Escape-Funktion definieren
   private escapeHtml(str: string): string {
     return str.replace(/[&<>"']/g, (tag) => {
       const charsToReplace: { [key: string]: string } = {

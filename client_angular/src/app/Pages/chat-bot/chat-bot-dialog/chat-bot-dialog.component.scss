@@ -1,9 +1,8 @@
 $orange: #FF893B;
-$black: #465461;
-$blue: #729CA2;
+$black: #3b4252;
+$blue: #d8dee9;
 $light_blue: #C4DCDF;
-$white: #ECF3F4;
-
+$white: #eceff4;
 
 .chat-container {
   width: 100%;
@@ -29,7 +28,7 @@ $white: #ECF3F4;
   background-color: $black;
   color: $white;
   border-radius: 8px;
-  padding: 5%;
+  padding: 1%;
 
   .chat-icon {
   }
@@ -60,7 +59,7 @@ $white: #ECF3F4;
 .chat-content {
   flex-grow: 1;
   overflow: auto;
-  margin: 5%;
+  margin: 2%;
 
   .messages {
       display: flex;
@@ -85,7 +84,7 @@ $white: #ECF3F4;
 
   &.bot {
       background-color: $blue;
-      color: black;
+      color: #2e3440;
       border-top-left-radius: 0px;
       margin-right: 0;
       margin-left: 0;
@@ -94,7 +93,7 @@ $white: #ECF3F4;
 
   &.user {
       background-color: $white;
-      color: $blue;
+      color: #4c566a;
       border-top-right-radius: 0px;
       margin-left: auto;
       margin-right: 0;
@@ -135,11 +134,16 @@ $white: #ECF3F4;
   }
 }
 
+.mdc-notched-outline--no-label {
+  border-color: $blue;
+}
+
 .chat-actions {
   display: flex;
   flex-direction: row;
   justify-content: center;
   margin-bottom: 10px;
+
 
   .chat-form {
       width: 90%;
@@ -157,7 +161,7 @@ $white: #ECF3F4;
   }
 
   .send-button {
-      color: $blue;
+      color: $black;
 
       .send-icon {
           font-size: 20px;
@@ -166,10 +170,6 @@ $white: #ECF3F4;
 }
 
 @media only screen and (max-width: 1000px) {
-  [class*="fixed-chat"] {
-    width: 80%;
-  }
-
   [class*="collapsible-chat"] {
       width: 80%;
     }

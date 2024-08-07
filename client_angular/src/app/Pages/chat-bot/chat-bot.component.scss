@@ -5,24 +5,19 @@ $light_blue: #C4DCDF;
 $white: #ECF3F4;
 
 .chat-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: fixed;
-  bottom: 5%;
-  right: 3%;
-  background-color: $black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: 5%;
+    right: 3%;
+    background-color: $black;
+    z-index: 1000;
+  
+    .button-icon {
+      width: 75%; 
+      padding-left: 12px;
 
-  .button-icon {
-
-      &.chat {
-          width: 70%;
-          -webkit-filter: invert(100%);
-          filter: invert(100%);
-      }
-
-      &.bot {
-          width: 75%;
-      }
+    }
   }
-}
+  

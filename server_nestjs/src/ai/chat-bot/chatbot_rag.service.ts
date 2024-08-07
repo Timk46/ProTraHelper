@@ -38,7 +38,7 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
     'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
       // Erläuterungen zu dem Aufbau der Informationen aus RAG
       '# Schritt 1: Erklärung basierend auf der Vorlesung \n' +
-      'Bei deiner Antwort beziehst du dich IMMER auf Erklärungen aus den Vorlesungsausschnitten und nennst die korrekte Quelle. Du nutzt maximal die 4 relevantesten Quellen. Diese liegen im folgenden JSON-Array vor mir jeweils Paaren aus Erklärung und Quelle. Du verwendest Markdown-Syntax, um die Antwort übersichtlich zu formatieren.' +
+      'Bei deiner Antwort beziehst du dich auf relevante Erklärungen aus den Vorlesungsausschnitten und nennst die korrekte Quelle. Du verwendest Markdown-Syntax, um die Antwort übersichtlich zu formatieren.' +
       'Du MUSST IMMER wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% KORREKT DIREKT DAHINTER angeben! Die Zeichen ^ und [] dürfen dabei NIEMALS vergessen werden!' +
       'Hier ein korrektes Beispiel dazu: ' +
       'Beispiel 1: Jede Zeile Code, die zur Funktion gehört, muss um eine Ebene eingerückt sein. Schau dir dazu noch einmal den Abschnitt zur Python Syntax in der Vorlesung an, um dich mit den Einrückungsregeln vertraut zu machen ^[[Python_Kontrollstrukturen_if_else_Code-Beispiel bei 00:02:12](/video?fileName=Python_Kontrollstrukturen_if_else_Code-Beispiel&timeStamp=00:02:12,000)] ' +
@@ -67,7 +67,7 @@ export class ChatBotRAGService {
 
     const tempsimilaritySearchResult = await this.ragService.lectureSimilaritySearch(
       question,
-      6,
+      4,
     );
 
     const similaritySearchResult = this.transformSearchResult(

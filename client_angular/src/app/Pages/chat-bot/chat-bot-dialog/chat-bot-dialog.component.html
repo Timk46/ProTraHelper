@@ -5,7 +5,7 @@
           <mat-card-title class="chat-title">Chatbot</mat-card-title>
           <mat-card-subtitle class="chat-subtitle">
               <div class="status-icon"></div>
-              <span>Online</span>
+              <span>LectureLinker</span>
           </mat-card-subtitle>
       </mat-card-header>
       <mat-card-content class="chat-content" #messageContainer>
@@ -17,12 +17,12 @@
           </div>
       </mat-card-content>
       <mat-card-actions class="chat-actions">
-          <mat-form-field appearance="outline" class="chat-form">
+          <mat-form-field appearance="outline" style = "background-color: #eceff4" class="chat-form">
               <textarea
                   class="chat-input"
                   matInput
                   type="text"
-                  placeholder="Type message..."
+                  placeholder="Deine Frage..."
                   formControlName="message"
                   (keydown.enter)="onClickEnter($event)"
               ></textarea>

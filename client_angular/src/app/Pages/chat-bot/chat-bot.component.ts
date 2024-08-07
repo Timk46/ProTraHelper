@@ -37,7 +37,7 @@ enum DisplayType {
 })
 
 export class ChatBotComponent {
-  private readonly botIconPath = '../../../assets/img/kai_logo_small.png';
+  private readonly botIconPath = '../../../assets/img/kai_logo_small_no_background.png';
   private readonly chatIconPath = '../../../assets/img/chat.png';
 
   public isOpen = false;
