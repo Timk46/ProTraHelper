@@ -16,7 +16,9 @@ export class DiscussionCreationService {
     },
   };
 
-  constructor(private prisma: PrismaService, private notificationService: NotificationService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly notificationService: NotificationService) {}
 
   /** Returns the anonymous user data for a given user id and discussion id
    * If no anonymous user is found, a dummy is returned

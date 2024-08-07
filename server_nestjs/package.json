@@ -39,7 +39,6 @@
     "bcrypt": "^5.1.0",
     "csv": "^6.3.8",
     "csv-parse": "^5.5.5",
-    "eventemitter2": "^6.4.9",
     "exceljs": "^4.4.0",
     "faker": "^5.5.3",
     "fs": "^0.0.1-security",
@@ -56,7 +55,6 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "uuid": "^9.0.1",
-    "web-push": "^3.6.7",
     "xlsx": "^0.18.5",
     "xss": "^1.0.15"
   },

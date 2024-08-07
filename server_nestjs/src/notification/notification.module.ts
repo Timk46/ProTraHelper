@@ -5,7 +5,6 @@ import { NotificationService } from './notification.service';
 import { NotificationController } from './notification.controller';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@/prisma/prisma.service';
-import EventEmitter2 from 'eventemitter2';
 
 @Module({
   providers: [NotificationGateway, NotificationService, JwtService, PrismaService],

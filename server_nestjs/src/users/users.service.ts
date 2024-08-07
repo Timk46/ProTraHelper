@@ -3,13 +3,11 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import  { globalRole } from '@DTOs/roles.enum';
-import { NotificationService } from '@/notification/notification.service';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private prisma: PrismaService,
-    private notificationService: NotificationService) {}
+    private prisma: PrismaService) {}
 
   // The Cas User will be created or updated after each login
   createCASuser(username: string) {

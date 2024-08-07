@@ -1,10 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { DiscussionCreationService } from './discussion-creation.service';
-import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO, discussionNodeNamesDTO, NotificationDTO, NotificationType } from '@DTOs/index';
+import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO, discussionNodeNamesDTO } from '@DTOs/index';
 import { DiscussionDataService } from '../discussion-data/discussion-data.service';
 import { RolesGuard, roles } from '@/auth/roles.guard';
-import { NotificationService } from '@/notification/notification.service';
+
 
 const debug = true; // set this to false to disable console logs
 @UseGuards(RolesGuard)
@@ -13,8 +13,7 @@ export class DiscussionCreationController {
 
   constructor(
     private readonly creationService: DiscussionCreationService,
-    private readonly dataService: DiscussionDataService,
-    private readonly notificationService: NotificationService) {}
+    private readonly dataService: DiscussionDataService,) {}
 
   /** Returns the anonymous user for a given discussion
    *

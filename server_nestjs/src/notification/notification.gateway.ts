@@ -37,18 +37,19 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
    */
   async handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
-    const token = client.handshake.query.token as string;
+
     try {
+      const token = client.handshake.query.token as string;
       console.log(`Token: ${token}`);
       const decoded = await this.jwtService.verifyAsync(token, { secret: process.env.JWT_SECRET_KEY });
-      const userId = decoded.id;
-      console.log("verified with user id: ", userId)
-      if(userId) {
-        if(!this.connectedUsers.has(userId)) {
-          this.connectedUsers.set(userId, new Set());
+      client.data.userId = decoded.id;
+      console.log("verified with user id: ", decoded.id);
+      if(decoded.id) {
+        if(!this.connectedUsers.has(decoded.id)) {
+          this.connectedUsers.set(decoded.id, new Set());
         }
-        this.connectedUsers.get(userId)?.add(client);
-        console.log(`Client connected: ${client.id}, User ID: ${userId}`);
+        this.connectedUsers.get(decoded.id)?.add(client);
+        console.log(`Client connected: ${client.id}, User ID: ${decoded.id}`);
       } else {
         throw new Error("user already connected")
       }
@@ -92,15 +93,23 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
   async sendNotification(notification: NotificationDTO) {
     const clients = this.connectedUsers.get(notification.userId);
     if(clients && clients.size > 0) {
+    const clientNotification = {
+      id: notification.id,
+      message: notification.message,
+      timestamp: notification.timestamp,
+      isRead: notification.isRead,
+      type: notification.type,
+      discussionId: notification.discussionId
+    };
     clients.forEach(client => {
-      console.log(`Sending Notification:  ${notification.message} to user:  ${notification.userId}`);
-      client.emit('notification', notification);
+      console.log(`Sending Notification:  ${notification.message} to user:  ${JSON.stringify(clientNotification)}`);
+      client.emit('notification', clientNotification);
     })
   }
   }
 
   /** NOT USED (its for clients to send notifications to other clients)
-   * Handle sendNotification event from clients 
+   * Handle sendNotification event from clients
    * @param {NotificationDTO} notification
    */
   @SubscribeMessage('sendNotification')

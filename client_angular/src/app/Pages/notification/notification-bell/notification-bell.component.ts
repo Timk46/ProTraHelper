@@ -5,22 +5,48 @@ import { MatExpansionPanel } from '@angular/material/expansion';
 import { NotificationType } from '@DTOs/notificationType.enum';
 import { Observable, Subject, Subscription, takeUntil } from 'rxjs';
 
+/**
+ * Component that displays a notification bell icon and manages the display of notifications.
+ * It handles loading, displaying, and interacting with notifications.
+ */
 @Component({
   selector: 'app-notification-bell',
   templateUrl: './notification-bell.component.html',
   styleUrls: ['./notification-bell.component.scss']
 })
 export class NotificationBellComponent implements OnInit {
+  /** Array to store all notifications */
   allNotifications: NotificationDTO[] = [];
+
+  /** Observable for the count of unread notifications */
   unreadCount$: Observable<number>;
+
+  /** Boolean to control the visibility of notifications panel */
   showNotifications: boolean = false;
+
+  /** Number of notifications to load at a time with init value 10 */
   limit: number = 10;
+
+  /** Offset for pagination of notifications */
   offset: number = 0;
+
+  /** Subscription to handle closing of notification panel */
   private closeNotificationSubscription?: Subscription;
+
+  /** QueryList of MatExpansionPanel elements in the template */
   @ViewChildren(MatExpansionPanel) panels!: QueryList<MatExpansionPanel>
+
+  /** Reference to the notification bell element in the template */
   @ViewChild('notificationBell') notificationBellRef!: ElementRef
+
+  /** Subject to handle unsubscription from observables */
   private unsubscribe$ = new Subject<void>();
 
+  /**
+   * Creates an instance of NotificationBellComponent.
+   * @param {NotificationService} notificationService - Service to handle notification-related operations
+   * @param {Renderer2} renderer - Renderer2 for DOM manipulation
+   */
   constructor(
     private notificationService: NotificationService,
     private renderer: Renderer2,
@@ -28,6 +54,10 @@ export class NotificationBellComponent implements OnInit {
     this.unreadCount$ = this.notificationService.getUnreadCount();
   }
 
+  /**
+   * Lifecycle hook that is called after data-bound properties of a directive are initialized.
+   * It sets up subscriptions and event listeners.
+   */
   ngOnInit(): void {
     this.loadUnreadCount();
     this.notificationService.getNotifications().pipe(takeUntil(this.unsubscribe$)).subscribe(notifications => {
@@ -41,13 +71,18 @@ export class NotificationBellComponent implements OnInit {
     this.renderer.listen('document', 'click', this.handleOutsideClick.bind(this));
   }
 
+  /**
+   * Lifecycle hook that is called when a directive, pipe, or service is destroyed.
+   * It completes the unsubscribe Subject to prevent memory leaks.
+   */
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
 
   /**
-   * Handle clicks outside the notification bell to close it
+   * Handles clicks outside the notification bell to close the notification panel.
+   * @param {MouseEvent} event - The mouse event
    */
   handleOutsideClick(event: MouseEvent): void {
     const clickedInside = this.notificationBellRef.nativeElement.contains(event.target);
@@ -56,16 +91,15 @@ export class NotificationBellComponent implements OnInit {
     }
   }
 
-
   /**
-   * Load the unread count of notifications
+   * Loads the count of unread notifications from the server.
    */
   loadUnreadCount(): void {
     this.notificationService.getUnreadCountFromServer().pipe(takeUntil(this.unsubscribe$)).subscribe();
   }
 
   /**
-   * Load more notifications based on previous offset and limit
+   * Loads more notifications based on the current offset and limit.
    */
   loadMoreNotifications(): void {
     this.offset += this.limit;
@@ -75,7 +109,8 @@ export class NotificationBellComponent implements OnInit {
   }
 
   /**
-   * Listen for scroll events on the notification bell to paginate the notifications
+   * Handles scroll events on the notification panel for infinite scrolling.
+   * @param {any} event - The scroll event
    */
   @HostListener('scroll', ['$event'])
   onScroll(event: any): void {
@@ -86,8 +121,10 @@ export class NotificationBellComponent implements OnInit {
   }
 
   /**
-   * Handle the click event on a notification
-   * @param {NotificationDTO} notification
+   * Handles click events on notifications.
+   * @param {NotificationDTO} notification - The clicked notification
+   * @param {MatExpansionPanel} panel - The expansion panel associated with the notification
+   * @param {string} action - The action to perform ('view' or 'mark as read')
    */
   onClick(notification: NotificationDTO, panel: MatExpansionPanel, action: string) {
     this.notificationService.handleNotificationClick(notification, action).pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
@@ -96,7 +133,7 @@ export class NotificationBellComponent implements OnInit {
   }
 
   /**
-   * Mark all notifications as read
+   * Toggles the visibility of the notifications panel.
    */
   toggleNotifications() {
     if(this.allNotifications.length > 0) {
@@ -105,28 +142,25 @@ export class NotificationBellComponent implements OnInit {
   }
 
   /**
-   * Get the display title for a notification type
-   * @param {string} type
-   * @returns {string} The title of the notification
+   * Gets the display title for a notification based on its type.
+   * @param {string} type - The type of the notification
+   * @returns {string} The display title for the notification
    */
   getNotificationTitle(type: string): string {
     switch (type) {
       case NotificationType.COMMENT:
         return 'Kommentar';
-
       case NotificationType.SOLUTION:
         return 'Lösung';
-
-      // Add more cases for other notification types if needed
       default:
         return type;
     }
   }
 
   /**
-   * Format a timestamp to a readable date
-   * @param {string} timestamp
-   * @returns {string} The formatted date
+   * Formats a timestamp to a readable date string.
+   * @param {Date | undefined} timestamp - The timestamp to format
+   * @returns {string} A formatted date string
    */
   formatTimeStamp(timestamp: Date | undefined): string {
     if(!timestamp) {
@@ -143,9 +177,9 @@ export class NotificationBellComponent implements OnInit {
   }
 
   /**
-   * Format a timestamp to a readable date for the title
-   * @param {string} timestamp
-   * @returns {string} The formatted date
+   * Formats a timestamp to a readable date string for the title.
+   * @param {Date | undefined} timestamp - The timestamp to format
+   * @returns {string} A formatted date string for the title
    */
   formatTimeStampTitle(timestamp: Date | undefined): string {
     if(!timestamp) {

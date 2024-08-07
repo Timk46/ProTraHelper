@@ -2,11 +2,9 @@
 /* eslint-disable prettier/prettier */
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { ContentService } from '@/content/content.service';
-import { NotificationService } from '@/notification/notification.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { McQuestionDTO, MCOptionDTO, MCOptionViewDTO, QuestionDTO, questionType, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
-import { NotificationDTO } from '@Interfaces/notification.dto';
 import { Injectable } from '@nestjs/common';
 import {  } from '@prisma/client';
 
@@ -15,8 +13,7 @@ export class QuestionDataService {
     constructor(
       private prisma: PrismaService,
       private feedbackGenerationService: FeedbackGenerationService,
-      private contentService: ContentService,
-      private notificationService: NotificationService) {}
+      private contentService: ContentService) {}
 
     /**
      *
@@ -559,7 +556,7 @@ export class QuestionDataService {
             if(progress == 1) {
                 this.contentService.toggleCheckmark(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
-                
+
             }
 
             console.log('generated Text:', feedbackText);

@@ -1,58 +1,98 @@
-import { Injectable } from '@angular/core';
-import { io, Socket } from 'socket.io-client';
-import { BehaviorSubject, catchError, map, Observable, of, Subject, tap } from 'rxjs';
-import {NotificationType} from '@DTOs/notificationType.enum';
+import { Injectable, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
+import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { NotificationType } from '@DTOs/notificationType.enum';
 import { UserService } from '../auth/user.service';
-
 import { environment } from 'src/environments/environment';
 import { NotificationDTO } from '@DTOs/notification.dto';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NotificationComponent } from 'src/app/Pages/notification/notification.component';
 import { HttpClient } from '@angular/common/http';
-import { MatExpansionPanel } from '@angular/material/expansion';
+import { WebSocketService } from '../websocket/web-socket-service.service';
+
+/**
+ * Service responsible for managing notifications in the frontend.
+ * Handles real-time notifications via WebSocket, fetches notifications from the server,
+ * and provides methods to interact with notifications.
+ */
 @Injectable({
   providedIn: 'root'
 })
-export class NotificationService {
-  private socket!: Socket;
+export class NotificationService implements OnDestroy {
+  /** BehaviorSubject to store and emit notifications */
   private notificationsSubject = new BehaviorSubject<NotificationDTO[]>([]);
+  /** Array to store notifications */
   private notifications: NotificationDTO[] = [];
+  /** ID of the current user */
   private userId: number | undefined;
+  /** BehaviorSubject to store and emit the count of unread notifications */
   private unreadCountSubject = new BehaviorSubject<number>(0);
+  /** BroadcastChannel for cross-tab communication */
   private broadcastChannel: BroadcastChannel;
+  /** Set to keep track of processed notifications to avoid duplicates */
   private processedNotifications = new Set<string>();
+  /** BehaviorSubject to control closing of the notification panel */
   private closeNotificationPanelSubject = new BehaviorSubject<boolean>(false);
+  /** Observable for closing the notification panel */
   closeNotificationPanel$ = this.closeNotificationPanelSubject.asObservable();
+  /** BehaviorSubject to trigger refreshing of discussions */
   private refreshDiscussionSubject = new BehaviorSubject<number | null>(null);
+  /** Observable for refreshing discussions */
   refreshDiscussion$ = this.refreshDiscussionSubject.asObservable();
+  /** Subscription for WebSocket notifications */
+  private notificationSubscription?: Subscription;
+
+  /**
+   * Creates an instance of NotificationService.
+   * @param {UserService} userService - Service to handle user-related operations
+   * @param {MatSnackBar} snackBar - Service to show snackbar notifications
+   * @param {Router} router - Angular router for navigation
+   * @param {HttpClient} http - HttpClient for making HTTP requests
+   * @param {WebSocketService} webSocketService - Service for WebSocket communications
+   */
   constructor(
     private userService: UserService,
     private snackBar: MatSnackBar,
     private router: Router,
     private http: HttpClient,
-    ) {
-      this.broadcastChannel = new BroadcastChannel('unreadCountChannel');
-      this.userService.isAuthenticated$.subscribe((isAuthenticated) => {
-        // after checking authentication status we start listening to incoming messages thorough the socket, synchronize the UnreadCount and setup our broadcastChannel which synchronizes necessary values throughout opened tabs and windows
-        if(isAuthenticated) {
-          this.userId = Number(this.userService.getTokenID());
-          this.startListening();
-          this.syncUnreadCount();
-          this.setupBroadcastChannel();
-        } else {
-          this.stopListening();
-        }
-      })
+    private webSocketService: WebSocketService
+  ) {
+    this.broadcastChannel = new BroadcastChannel('unreadCountChannel');
+    this.userService.isAuthenticated$.subscribe((isAuthenticated) => {
+      if (isAuthenticated) {
+        this.userId = Number(this.userService.getTokenID());
+        this.startListening();
+        this.syncUnreadCount();
+        this.setupBroadcastChannel();
+      } else {
+        this.stopListening();
+      }
+    });
   }
 
   /**
-   * Setup the broadcast channel to communicate with other tabs
-   * currently havin 3 types to sync:
-   * 1. new incoming notification,
-   * 2. the unread Count of the notification Bell
-   * 3. notificaitons being read
-   * @returns {void}
+   * Lifecycle hook that performs cleanup on service destruction.
+   */
+  ngOnDestroy() {
+    this.stopListening();
+    if (this.notificationSubscription) {
+      this.notificationSubscription.unsubscribe();
+    }
+  }
+
+  initializeWebSocket(): void {
+    if (!this.webSocketService.isConnected()) {
+      this.startListening();
+    }
+  }
+
+  /**
+   * Sets up the broadcast channel to communicate with other tabs.
+   * Handles three types of synchronization:
+   * 1. New incoming notifications
+   * 2. Unread count of the notification bell
+   * 3. Notifications being read
    */
   private setupBroadcastChannel(): void {
     this.broadcastChannel.onmessage = (event) => {
@@ -71,6 +111,10 @@ export class NotificationService {
     };
   }
 
+  /**
+   * Updates the read status of a notification locally.
+   * @param {number} notificationId - ID of the notification to update
+   */
   private updateNotificationReadStatus(notificationId: number): void {
     const notification = this.notifications.find(n => n.id === notificationId);
     if (notification) {
@@ -79,60 +123,75 @@ export class NotificationService {
     }
   }
 
+  /**
+   * Triggers a refresh for a specific discussion.
+   * @param {number} discussionId - ID of the discussion to refresh
+   */
   triggerDiscussionRefresh(discussionId: number) {
     this.refreshDiscussionSubject.next(discussionId);
   }
 
   /**
-   * Start listening for notifications and establish a connection to the websocket
+   * Starts listening for notifications and establishes a connection to the WebSocket.
    */
   private startListening(): void {
     this.fetchInitialNotifications(20, 0).subscribe();
-    this.socket = io('http://localhost:3001/notifications', {
-      query: { token: this.userService.getAccessToken() },
-      withCredentials: true,
-      transports: ['websocket']
-    });
-    this.socket.on('notification', (notification: NotificationDTO) => {
-      this.handleNewNotification(notification, true);
-    });
-  }
+    this.webSocketService.connect();
 
-  /**
-   * Handle a new notification by creating UID out of the notification ID and timestamp and adding it to the panel if it is not already there
-   * @param {NotificationDTO} notification
-   * @param {boolean} isBroadcast
-   * @returns {void}
+    // Wait for the WebSocket to connect before setting up the listener
+    this.notificationSubscription = this.webSocketService.onConnectionChange()
+      .pipe(
+        tap(connected => console.log('WebSocket connection status:', connected)),
+        filter((connected: boolean) => connected), // Only proceed when connected is true
+        take(1), // Take only the first 'connected' event
+        switchMap(() => this.webSocketService.on<Partial<NotificationDTO>>('notification'))
+      )
+      .subscribe((notification: Partial<NotificationDTO>) => {
+        console.log('Received notification:', notification);
+        this.handleNewNotification(notification, true);
+      });
+  }
+    /**
+   * Handles a new notification by creating a unique ID and adding it to the panel if it's not already there.
+   * @param {Partial<NotificationDTO>} notification - The new notification
+   * @param {boolean} isBroadcast - Whether the notification is from a broadcast
    */
-  private handleNewNotification(notification: NotificationDTO, isBroadcast: boolean): void {
-    // creating unique id for the notification and checking processed notifications
+  private handleNewNotification(notification: Partial<NotificationDTO>, isBroadcast: boolean): void {
+    const notificationToSent = {
+      id: notification.id,
+      message: notification.message,
+      timestamp: notification.timestamp,
+      isRead: notification.isRead,
+      readTimestamp: notification.readTimestamp,
+      type: notification.type,
+      discussionId: notification.discussionId,
+      conceptNodeId: notification.conceptNodeId,
+      videoId: notification.videoId
+    };
     const notificationId = `${notification.id}-${notification.timestamp}`;
     if (!this.processedNotifications.has(notificationId)) {
       this.processedNotifications.add(notificationId);
-      this.addNotification(notification);
+      this.addNotification(notificationToSent as NotificationDTO);
       if (isBroadcast) {
         this.incrementUnreadCount();
-        // Broadcast the new notification to other tabs
-        this.broadcastChannel.postMessage({ type: 'newNotification', notification });
+        this.broadcastChannel.postMessage({ type: 'newNotification', notificationToSent });
       }
-      this.showNotification(notification.message, 'Anzeigen', () => this.handleNotificationClick(notification, 'view').subscribe());
+      this.showNotification(notificationToSent.message!, 'Anzeigen', () => this.handleNotificationClick(notificationToSent as NotificationDTO, 'view').subscribe());
     }
   }
 
   /**
-   * Stop listening for notifications and disconnect from the websocket
+   * Stops listening for notifications and disconnects from the WebSocket.
    */
   private stopListening(): void {
-    if(this.socket) {
-      this.socket.disconnect();
-    }
+    this.webSocketService.disconnect();
   }
 
   /**
-   * Fetch the initial notifications
-   * @param {number} limit for pagination
-   * @param {number} offset for pagination offset
-   * @returns {Observable<NotificationDTO[]>} the fetched notifications as an observable
+   * Fetches the initial notifications from the server.
+   * @param {number} limit - Number of notifications to fetch
+   * @param {number} offset - Offset for pagination
+   * @returns {Observable<NotificationDTO[]>} Observable of fetched notifications
    */
   private fetchInitialNotifications(limit: number, offset: number): Observable<NotificationDTO[]> {
     return this.http.get<NotificationDTO[]>(`${environment.server}/notifications/all`, {
@@ -155,10 +214,10 @@ export class NotificationService {
   }
 
   /**
-   * Fetch more notifications when scrolling
-   * @param {number} limit for pagination
-   * @param {number} offset for pagination offset
-   * @returns {Observable<NotificationDTO[]>} the fetched notifications as an observable
+   * Fetches more notifications when scrolling.
+   * @param {number} limit - Number of notifications to fetch
+   * @param {number} offset - Offset for pagination
+   * @returns {Observable<NotificationDTO[]>} Observable of fetched notifications
    */
   fetchMoreNotifications(limit: number, offset: number): Observable<NotificationDTO[]> {
     return this.http.get<NotificationDTO[]>(`${environment.server}/notifications/all`, {
@@ -180,56 +239,56 @@ export class NotificationService {
   }
 
   /**
-   * Get the notifications
-   * @returns {Observable<NotificationDTO[]>} the notifications as observable
+   * Gets the notifications as an Observable.
+   * @returns {Observable<NotificationDTO[]>} Observable of notifications
    */
   getNotifications(): Observable<NotificationDTO[]> {
     return this.notificationsSubject.asObservable();
   }
 
   /**
-   *
-   * @param {NotificationDTO} notification
+   * Adds a new notification to the list.
+   * @param {NotificationDTO} notification - The notification to add
    */
-  addNotification(notification: NotificationDTO): void {
-    this.notifications.unshift(notification);
+  addNotification(notification: Partial<NotificationDTO>): void {
+    this.notifications.unshift(notification as NotificationDTO);
     this.notificationsSubject.next(this.notifications);
   }
 
   /**
-   * handle the click on a notification
-   * @param {NotificationDTO} notification
+   * Handles a click on a notification.
+   * @param {NotificationDTO} notification - The clicked notification
+   * @param {string} action - The action to perform ('view' or other)
+   * @returns Observable of the updated notification
    */
   handleNotificationClick(notification: NotificationDTO, action: string): Observable<NotificationDTO> {
     if (!notification.isRead) {
-      console.log("typeof notification ID: ", typeof notification.id, " and the id: ", notification.id);
       return this.markNotificationAsRead(notification).pipe(
         tap((updatedNotification) => {
           this.updateLocalNotification(updatedNotification);
           this.broadcastChannel.postMessage({ type: 'notificationRead', notificationId: updatedNotification.id });
 
-          if(action === 'view') {
+          if (action === 'view') {
             this.closeNotificationPanelSubject.next(true);
-            this.navigate(updatedNotification)
+            this.navigate(updatedNotification);
           }
         })
       );
-    } else if(action === 'view') {
-      // If the notification is already read, just navigate
+    } else if (action === 'view') {
       this.closeNotificationPanelSubject.next(true);
       this.navigate(notification);
       return of(notification);
     } else {
-      return of(notification)
+      return of(notification);
     }
   }
 
   /**
-   * Navigate to the discussion of the notification
-   * @param {NotificationDTO} notification
+   * Navigates to the appropriate page based on the notification type.
+   * @param {NotificationDTO} notification - The notification to navigate to
    */
   private navigate(notification: NotificationDTO): void {
-    switch(notification.type) {
+    switch (notification.type) {
       case NotificationType.COMMENT:
       case NotificationType.SOLUTION:
         this.router.navigate(['/discussion-view/' + notification.discussionId]);
@@ -241,70 +300,74 @@ export class NotificationService {
   }
 
   /**
-   * Update a notification in the list to trigger change detection
-   * @param {NotificationDTO} updatedNotification
+   * Updates a notification in the local list to trigger change detection.
+   * @param {NotificationDTO} updatedNotification - The updated notification
    */
   private updateLocalNotification(updatedNotification: NotificationDTO): void {
     const index = this.notifications.findIndex(n => n.id === updatedNotification.id);
     if (index !== -1) {
       this.notifications[index] = updatedNotification;
-      this.notificationsSubject.next([...this.notifications]); // Trigger change detection
+      this.notificationsSubject.next([...this.notifications]);
     }
   }
 
-  /** NOT BEING USED
-   * Remove a notification from the list
-   * @param {NotificationDTO} notification
+  /**
+   * Removes a notification from the list (currently not in use).
+   * @param {NotificationDTO} notification - The notification to remove
    */
   removeNotification(notification: NotificationDTO): void {
     this.notifications = this.notifications.filter(notif => notif !== notification);
     this.notificationsSubject.next(this.notifications);
   }
 
-  /** NOT USED YET:
-   * emits a notification from the client to the user with the given id
-   * @param {NotificationDTO} notification
+  /**
+   * Emits a notification from the client to the user with the given id (currently not in use).
+   * @param {NotificationDTO} notification - The notification to send
    */
   sendNotification(notification: NotificationDTO) {
-    this.socket.emit('notifications', { userId: notification.userId, message: notification.message});
+    this.webSocketService.emit('notifications', { userId: notification.userId, message: notification.message });
   }
 
   /**
-   * Shows a notification with links or action for certain events to trigger
-   * @param message
-   * @param actionText
-   * @param action
+   * Shows a notification using a snackbar.
+   * @param {string} message - The message to display
+   * @param {string} actionText - The text for the action button
+   * @param {() => void} action - The function to call when the action button is clicked
    */
   showNotification(message: string, actionText?: string, action?: () => void) {
-    this.snackBar.openFromComponent(NotificationComponent, {
-      data: { message, actionText, action },
-      duration: 5000,
-      horizontalPosition: 'right',
-      verticalPosition: 'top',
-      panelClass: ['notification-snackbar-container']
-    });
+    console.log("showing notification: ", message);
+    if (this.userService.isUserLoggedIn()) {
+      console.log("showing notification: ", message);
+      this.snackBar.openFromComponent(NotificationComponent, {
+        data: { message, actionText, action },
+        duration: 5000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+        panelClass: ['notification-snackbar-container']
+      });
+    }
   }
 
   /**
-   * Mark a notification as read
-   * @param {NotificationDTO} notification
-   * @returns {Observable<NotificationDTO>} the updated notification
+   * Marks a notification as read.
+   * @param {NotificationDTO} notification - The notification to mark as read
+   * @returns {Observable<NotificationDTO>} Observable of the updated notification
    */
   markNotificationAsRead(notification: NotificationDTO): Observable<NotificationDTO> {
     console.log("marking notification as read: ", notification.id);
-    return this.http.patch<NotificationDTO>(`${environment.server}/notifications/${notification.id}/read`, {isRead: true}).pipe(
+    return this.http.patch<NotificationDTO>(`${environment.server}/notifications/${notification.id}/read`, { isRead: true }).pipe(
       map((response) => {
         this.updateNotificationReadStatus(notification.id!);
         this.broadcastChannel.postMessage({ type: 'notificationRead', notificationId: notification.id });
         this.syncUnreadCount();
-        return response; // You must return the response to not alter the stream
+        return response;
       }),
     );
   }
 
   /**
-   * Get the count of unread notifications for a user
-   * @returns {Observable<number>} The count of unread notifications
+   * Gets the count of unread notifications from the server.
+   * @returns {Observable<number>} Observable of the unread count
    */
   getUnreadCountFromServer(): Observable<number> {
     return this.http.get<number>(`${environment.server}/notifications/${this.userId}/unread-count`)
@@ -314,21 +377,20 @@ export class NotificationService {
         }),
         catchError(error => {
           console.error('Error fetching unread notifications count:', error);
-          return of(0); // Return an Observable that emits 0 in case of an error
+          return of(0);
         })
       );
   }
 
   /**
-   * Increment the unread count in the local storage and notify subscribers
+   * Increments the unread count in local storage and notifies subscribers.
    */
   private incrementUnreadCount(): void {
     this.setUnreadCount(this.unreadCountSubject.value + 1, true);
   }
 
-
   /**
-   * Synchronize the unread count with the local storage
+   * Synchronizes the unread count with local storage.
    */
   private syncUnreadCount(): void {
     const storedCount = Number(localStorage.getItem('unreadCount')) || 0;
@@ -336,29 +398,31 @@ export class NotificationService {
     this.getUnreadCountFromServer().subscribe();
   }
 
-  /**
-   * Decrement the unread count in the local storage and notify subscribers
+/**
+   * Decrements the unread count in local storage and notifies subscribers.
+   * @param {boolean} broadcast - Whether to broadcast the change to other tabs
    */
   decrementUnreadCount(broadcast: boolean): void {
     this.setUnreadCount(Math.max(this.unreadCountSubject.value - 1, 0), broadcast);
   }
 
   /**
-   *
-   * @returns {Observable<number>} The count of unread notifications
+   * Gets the unread count as an Observable.
+   * @returns {Observable<number>} Observable of the unread count
    */
   getUnreadCount(): Observable<number> {
     return this.unreadCountSubject.asObservable();
   }
 
   /**
-   * Set the unread count in the local storage and notify subscribers
-   * @param {number} newCount
+   * Sets the unread count in local storage and notifies subscribers.
+   * @param {number} newCount - The new unread count
+   * @param {boolean} broadcast - Whether to broadcast the change to other tabs
    */
   private setUnreadCount(newCount: number, broadcast: boolean): void {
     localStorage.setItem('unreadCount', newCount.toString());
     this.unreadCountSubject.next(newCount);
-    if(broadcast) {
+    if (broadcast) {
       this.broadcastChannel.postMessage({ type: 'unreadCount', count: newCount });
     }
   }

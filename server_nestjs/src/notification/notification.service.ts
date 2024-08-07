@@ -18,6 +18,7 @@ export class NotificationService   {
   async notifyUser(notification: NotificationDTO): Promise<void> {
     try {
       const createdNotification = await this.createNotification(notification);
+      console.log('Notification created:', createdNotification);
       this.notificationSubject.next(createdNotification);
     } catch (error) {
       console.error('Error notifying user:', error);
@@ -62,24 +63,6 @@ export class NotificationService   {
       throw error;
     }
   }
-
-  /**
-   * Convert a Prisma notification to a NotificationDTO
-   * @param prismaNotification
-   * @returns {NotificationDTO} the notification as DTO
-   */
-  private toNotificationDTO(prismaNotification: NotificationDTO): NotificationDTO {
-    return {
-        id: prismaNotification.id,
-        userId: prismaNotification.userId,
-        message: prismaNotification.message,
-        timestamp: prismaNotification.timestamp,
-        isRead: prismaNotification.isRead,
-        readTimestamp: prismaNotification.readTimestamp,
-        type: prismaNotification.type,
-        discussionId: prismaNotification.discussionId,
-    };
-}
 
   /**
    * paginated approach to notify all users
@@ -309,6 +292,25 @@ export class NotificationService   {
       throw error;
     }
   }
+
+  /**
+   * Convert a Prisma notification to a NotificationDTO
+   * @param prismaNotification
+   * @returns {NotificationDTO} the notification as DTO
+   */
+  private toNotificationDTO(prismaNotification: NotificationDTO): NotificationDTO {
+    return {
+        id: prismaNotification.id,
+        userId: prismaNotification.userId,
+        message: prismaNotification.message,
+        timestamp: prismaNotification.timestamp,
+        isRead: prismaNotification.isRead,
+        readTimestamp: prismaNotification.readTimestamp,
+        type: prismaNotification.type,
+        discussionId: prismaNotification.discussionId,
+    };
+  }
+
 }
 
 

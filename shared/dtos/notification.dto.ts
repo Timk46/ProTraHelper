@@ -1,6 +1,6 @@
 export interface NotificationDTO {
     id?: number;
-    userId: number;
+    userId?: number;
     message: string;
     timestamp?: Date;
     isRead?: boolean;

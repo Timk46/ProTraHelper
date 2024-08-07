@@ -6,7 +6,6 @@ import { environment } from 'src/environments/environment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { NotificationService } from '../notification/notification.service';
 
 @Injectable({
   providedIn: 'root',
