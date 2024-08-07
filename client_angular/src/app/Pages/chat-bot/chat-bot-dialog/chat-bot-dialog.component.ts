@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { LlmService } from 'src/app/Services/ai/llm.service';
 import { MarkdownService } from 'src/app/Services/markdown/markdown.service';
-import { ChatBotMessageDTO } from '@DTOs/chatBot.dto';
 import { VideoTimeStampComponent } from '../../../Modules/tutor-kai/sites/video-time-stamp/video-time-stamp.component';
 
 enum MessageType {
@@ -24,7 +23,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
   public form: FormGroup;
   public messages: Array<{ text?: string; type: MessageType }> = [];
   protected canSendMessage = true;
-  private dialogSessionId: string
+  private dialogSessionId: string;
 
   /**
    * The current lecture.
@@ -49,9 +48,13 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
   }
 
   ngAfterViewChecked(): void {
-    //this.scrollToBottom();
+    this.scrollToBottom();
   }
 
+  /**
+   * Listens for click events on urls for lecturelinker so we can open the videoplayer instead.
+   * @param event The mouse event.
+   */
   @HostListener('click', ['$event'])
   public onClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -61,10 +64,18 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  /**
+   * Opens a modal dialog for video timestamp.
+   * @param href The link to the video.
+   * @param lecture The current lecture.
+   */
   private openModal(href: string | null, lecture: string) {
     this.dialog.open(VideoTimeStampComponent, { data: { href, lecture } });
   }
 
+  /**
+   * Handles the send message button click.
+   */
   public onClickSendMessage(): void {
     const message = this.form.get('message')?.value;
 
@@ -78,6 +89,9 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  /**
+   * Sends the question and chat history to the server.
+   */
   private sendQuestionToBot(question: string): void {
     this.canSendMessage = false;
     const waitMessage = { type: MessageType.Loading };
@@ -108,6 +122,10 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  /**
+   * Handles the Enter key press event to send a message.
+   * @param event The keyboard event.
+   */
   public onClickEnter(event: Event): void {
     if (event instanceof KeyboardEvent) {
       event.preventDefault();
@@ -115,12 +133,18 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  /**
+   * Scrolls the message container to the bottom.
+   */
   private scrollToBottom(): void {
     if (this.messageContainer) {
       this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
     }
   }
 
+  /**
+   * Gets the initial bot message.
+   */
   private getBotMessage(): void {
     this.canSendMessage = false;
     const waitMessage = { type: MessageType.Loading };
@@ -134,7 +158,12 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     }, 1000);
   }
 
-  generateRandomString(length: number): string {
+  /**
+   * Generates a random string of specified length (for initial dialog session id).
+   * @param length The length of the random string.
+   * @returns A random string.
+   */
+  private generateRandomString(length: number): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     const charactersLength = characters.length;

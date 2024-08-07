@@ -73,7 +73,7 @@ export class MarkdownService {
       ' <a class="footnote-backref">\u21a9\uFE0E</a>';
 
     this.md.renderer.rules['footnote_block_open'] = () =>
-      '<h4 class="mt-3">Quellen:</h4>\n<section class="footnotes">\n<ol class="footnotes-list">\n';
+      '<h4 class="mt-3">Quellen (Links zum Video):</h4>\n<section class="footnotes">\n<ol class="footnotes-list">\n';
   }
 
   parse(markdown: string): string {

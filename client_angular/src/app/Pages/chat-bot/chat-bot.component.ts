@@ -11,46 +11,44 @@ enum DisplayType {
   templateUrl: './chat-bot.component.html',
   styleUrls: ['./chat-bot.component.scss'],
   animations: [
+    // Animation for rotating the icon
     trigger('rotateAnimation', [
       state('rotated', style({ transform: 'rotate(0deg)' })),
       state('default', style({ transform: 'rotate(-360deg)' })),
       transition('default => rotated', animate('500ms ease-out')),
       transition('rotated => default', animate('500ms ease-out')),
     ]),
+    // Animation for fading in and out
     trigger('fadeAnimation', [
-      transition(":enter", [
+      transition(':enter', [
         style({ opacity: 0 }),
-        animate(
-          "150ms ease-in-out",
-          style({ opacity: 1})
-        )
+        animate('150ms ease-in-out', style({ opacity: 1 }))
       ]),
-      transition(":leave", [
-        style({ opacity: 1}),
-        animate(
-          "150ms ease-in-out",
-          style({ opacity: 0,})
-        )
+      transition(':leave', [
+        style({ opacity: 1 }),
+        animate('150ms ease-in-out', style({ opacity: 0 }))
       ])
     ]),
   ]
 })
-
 export class ChatBotComponent {
-  private readonly botIconPath = '../../../assets/img/kai_logo_small_no_background.png';
-  private readonly chatIconPath = '../../../assets/img/chat.png';
+  private readonly botIconPath = '../../../assets/img/kai_logo_small_no_background.png'; // Path to the bot icon
+  private readonly chatIconPath = '../../../assets/img/chat.png'; // Path to the chat icon
 
-  public isOpen = false;
-  public iconSrc = this.botIconPath;
-  public iconState = 'default';
+  public isOpen = false; // State to track if the chat bot is open or not
+  public iconSrc = this.botIconPath; // Source for the icon image
+  public iconState = 'default'; // State for the rotation animation
 
-  public displayType = DisplayType;
+  public displayType = DisplayType; // Enum for display types
 
+  /**
+   * Toggles the state of the chat bot between open and closed.
+   */
   public onChangeChatState(): void {
-    this.isOpen = !this.isOpen;
-    this.iconState = (this.iconState === 'default' ? 'rotated' : 'default');
+    this.isOpen = !this.isOpen; // Toggle the isOpen state
+    this.iconState = this.iconState === 'default' ? 'rotated' : 'default'; // Toggle the icon rotation state
 
-    if (this.isOpen) this.iconSrc = this.chatIconPath;
-    else this.iconSrc = this.botIconPath;
+    // Update the icon source based on the isOpen state
+    this.iconSrc = this.isOpen ? this.chatIconPath : this.botIconPath;
   }
 }

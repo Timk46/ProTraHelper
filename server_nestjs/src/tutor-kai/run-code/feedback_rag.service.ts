@@ -26,20 +26,21 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
     'Sind 100 Punkte erreicht sollst du lediglich zur korrekten Lösung gratulieren. '+
 
     // NEU <- ist nicht im normalen Feedback
-    'Du formatierst deine Antwort übersichtlich mit der Markdown-Syntax. '+
-    'Gebbe immer wenn es passt Code-Beispiele (anderer Kontext als in der Aufgabe), wie die Syntax demonstrieren. ' +
+    'Formatiere deine Antwort übersichtlich mit der Markdown-Syntax, sodass sie gut für den Studenten lesbar ist. '+
+    'Gebe immer wenn es passt Code-Beispiele, die die Syntax demonstrieren. VERWENDE DAZU EINE KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN!' +
     'Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise auf darauf und ergänze um Erkärungen. Das ist wichtig, damit der Student lernt, die Compiler-Ausgabe zu lesen und zu verstehen. ' +
     // Etwas länger als normales Feedback
-    'Dein kurzes hilfreichses Feedback ist maximal acht Sätze auf vier Absätze lang oder kürzer. Es ist verboten, die Unit-Tests zu erwähnen!',
+    'Es ist verboten, die Unit-Tests zu erwähnen!',
     'DU VERRÄST DU NIEMALS DIE LÖSUNG.  ' +
 
     // Erläuterungen zu dem Aufbau der Informationen aus RAG
     'Bei deinem Feedback beziehst du dich IMMER auf Erklärungen aus den Vorlesungsausschnitten und nennst die korrekte Quelle. Diese liegen im folgenden JSON-Format vor:' +
     '{ "Vorlesungsausschnitte": [ { "Konzept": String, "Inhalt": [ { "Erklärung": String, "Quelle": String }, ... // Weitere Erklärungen mit zugehörigen Quellen] }, ... // Weitere Konzepte ] }' +
     'Du MUSST IMMER wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% KORREKT DIREKT DAHINTER angeben! Die Zeichen ^ und [] dürfen dabei NIEMALS vergessen werden!' +
-    'Hier ein korrektes Beispiel dazu: ' +
+    'Hier korrekte Beispiel dazu: ' +
     'Beispiel 1: Jede Zeile Code, die zur Funktion gehört, muss um eine Ebene eingerückt sein. Schau dir dazu noch einmal den Abschnitt zur Python Syntax in der Vorlesung an, um dich mit den Einrückungsregeln vertraut zu machen ^[[Python_Kontrollstrukturen_if_else_Code-Beispiel bei 00:02:12](/video?fileName=Python_Kontrollstrukturen_if_else_Code-Beispiel&timeStamp=00:02:12,000)] ' +
-    'Beispiel 2: Denke auch daran, dass die Verkettung von Strings in Python mit dem `+` Operator erfolgt, wie im Vorlesungsausschnitt über Datentypen und Operationen in Python erklärt wird: ^[[Python_Datentypen_Umwandeln bei 00:02:31](/video?fileName=Python_Datentypen_Umwandeln&timeStamp=00:02:31,000)].'
+    'Beispiel 2: Denke auch daran, dass die Verkettung von Strings in Python mit dem `+` Operator erfolgt, wie im Vorlesungsausschnitt über Datentypen und Operationen in Python erklärt wird: ^[[Python_Datentypen_Umwandeln bei 00:02:31](/video?fileName=Python_Datentypen_Umwandeln&timeStamp=00:02:31,000)].'+
+    'Beispiel 3: Diese Methoden sollten dann in den abgeleiteten Klassen `Pyramide` und `Kegel` implementiert werden. Sieh dir die Vorlesung über abstrakte Klassen und Methoden an, um mehr darüber zu erfahren: ^[[Java_UML_Interfaces bei 00:01:09,000](/video?fileName=Java_UML_Interfaces&timeStamp=00:01:09,000)]'
   ),
   HumanMessagePromptTemplate.fromTemplate(
     '# Aufgabe die vom Studenten gelöst werden soll:\n{task}\n' +
@@ -53,7 +54,7 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
     '# Ausschnitt aus der Vorlesung:\n' +
       '{lectureSnippet}\n' +
     '# Wichtige Anweisung\n' +
-      'Verweise immer auf die Erklärungen auf den Vorlesungsausschnitten exakt so wie beschrieben! Die Zeichen ^ und [] dürfen dabei NIEMALS vergessen werden!'
+      'Verweise immer auf die Erklärungen auf den Vorlesungsausschnitten EXAKT so wie beschrieben! Setze die Zeichen ^ und [] EXAKT GENAU WIE in den drei Beispielen korrekt ein.'
   ),
 ]);
 
