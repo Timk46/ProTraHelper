@@ -81,7 +81,12 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     const waitMessage = { type: MessageType.Loading };
     this.messages.push(waitMessage);
 
-    const chatSubscription = this.llmService.getLlmAnswerStream(question).subscribe({
+    const context = this.messages.map(msg => ({
+      role: msg.type === MessageType.User ? 'user' : 'assistant',
+      content: msg.text || ''
+    }));
+
+    const chatSubscription = this.llmService.getLlmAnswerStreamDialog(context, question).subscribe({
       next: (data: string) => {
         this.messages.pop();
         const botMessage = { text: this.markdownService.parse(data), type: MessageType.Bot };
@@ -124,6 +129,6 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
       const botMessage = { text: 'Hallo, wie kann ich dir helfen?', type: MessageType.Bot };
       this.messages.push(botMessage);
       this.canSendMessage = true;
-   }, 1000);
+    }, 1000);
   }
 }

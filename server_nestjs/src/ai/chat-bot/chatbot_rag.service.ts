@@ -48,11 +48,24 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
       'Falls es zu der Frage oder deiner bisherigen Antwort ein passendes, kurzes (z.B. Programmcode Python) gibt, dann füge dieses übersichtlich mit Erklärungen in einfacher Sprache hinzu.',
   ),
   HumanMessagePromptTemplate.fromTemplate(
-    '# Frage des Studenten:\n{question}\n' +
+    '# Frage des Studenten\n{question}\n' +
       '# Ausschnitt aus der Vorlesung:\n' +
       '{lectureSnippet}\n' +
       '# Wichtige Anweisung\n' +
       'Verweise immer auf die Erklärungen auf den Vorlesungsausschnitten exakt so wie beschrieben! Die Zeichen ^ und [] dürfen dabei NIEMALS vergessen werden!',
+  ),
+]);
+
+const dialogPrompt = ChatPromptTemplate.fromPromptMessages([
+  SystemMessagePromptTemplate.fromTemplate(
+    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
+      'Du gibst kurze und hilfreiche Antworten auf die Rückfragen der Studenten in einfacher Sprache. Berücksichtige dabei den bisherigen Chatverlauf.',
+  ),
+  HumanMessagePromptTemplate.fromTemplate(
+    '# Chatverlauf\n' +
+      '{chatHistory}\n' +
+    '# Frage des Studenten:\n' +
+      '{question}\n'
   ),
 ]);
 
@@ -81,6 +94,36 @@ export class ChatBotRAGService {
     });
     const openAiResponse = await chatStream.generatePrompt(
       [ragFormattedPrompt],
+      undefined,
+      [
+        {
+          ignoreAgent: true,
+          ignoreChain: true,
+          handleLLMNewToken(token: string) {
+            resStream.write(token);
+          },
+        },
+        tracer,
+      ],
+    );
+    console.log(JSON.stringify(openAiResponse));
+
+    resStream.end();
+  }
+
+  async chatBotRagAnswerDialog(context, question: string, resStream: Response): Promise<void> {
+
+    const chatHistory: string = context.slice(0, -2).map(msg =>
+      `## ${msg.role === 'user' ? 'HumanMessage' : 'AIMessage'}\n${msg.content}`
+    ).join('\n');
+
+
+    const DialogPrompt = await dialogPrompt.formatPromptValue({
+      chatHistory: chatHistory,
+      question: question,
+    });
+    const openAiResponse = await chatStream.generatePrompt(
+      [DialogPrompt],
       undefined,
       [
         {

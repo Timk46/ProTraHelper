@@ -45,14 +45,14 @@ const tracer = new LangChainTracer({
 
 // change to accessing sensitive data from .env(?)
 const llmConfig = {
-  modelName: 'gpt-4o-2024-05-13', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
+  modelName: 'gpt-4o-2024-08-06', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
   openAIApiKey: env.OPEN_API_KEY,
   temperature: 0, // Low Temperature favours the words with higher probability = less creative
   streaming: true
 };
 
 const regenerateLLmconfig = {
-  modelName: 'gpt-4o-2024-05-13', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
+  modelName: 'gpt-4o-2024-08-06', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
   openAIApiKey: env.OPEN_API_KEY,
   temperature: 0.33, // higher Temperature favours the words with lower probability = more creative
   streaming: true

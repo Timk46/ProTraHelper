@@ -6,10 +6,9 @@ import { ChatBotRAGService } from './chatbot_rag.service';
 @Controller('chat-bot')
 export class ChatBotController {
   constructor(
-
     private readonly llmBasicPromptService: LlmBasicPromptService,
     private readonly chatBotRAGService: ChatBotRAGService
-    ) {}
+  ) {}
 
   @Post('ask/basic')
   async askBasic(@Body('question') question: string): Promise<any> {
@@ -17,14 +16,23 @@ export class ChatBotController {
     return { answer: answer };
   }
 
-  @Post('ask/basic/getStream')
-  async askBasicWithStreamAnswer(
+
+  //For Dialogs with multiple messages
+  @Post('ask/basic/getStreamDialog')
+  async askBasicWithStreamAnswerDialog(
+    @Body('context') context: Array<{ role: string, content: string }>,
     @Body('question') question: string,
     @Res() res: Response
   ): Promise<void> {
     res.set('Content-Type', 'text/plain');
     res.setHeader('Transfer-Encoding', 'chunked');
 
-    const result = await this.chatBotRAGService.chatBotRagAnswer( question, res)
+    if (context.length > 3) { // 3 is the minimum an default number including the default question by the llm
+        const result = await this.chatBotRAGService.chatBotRagAnswerDialog(context, question, res);
+      }
+    else {
+        const result = await this.chatBotRAGService.chatBotRagAnswer(question, res);
+    }
+
   }
 }

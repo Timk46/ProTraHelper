@@ -65,4 +65,58 @@ export class LlmService {
     return this.http.post<string>(`${this.apiUrl}/ask/basic`, body, { responseType: 'text' as 'json' });
   }
 
+    /**
+   * Retrieves the answer stream for a given question with context.
+   * @param context The previous conversation context.
+   * @param question The question to be asked.
+   * @returns An Observable that emits the answer stream as a string.
+   */
+    getLlmAnswerStreamDialog(context: Array<{ role: string, content: string }>, question: string): Observable<string> {
+      const body = {
+        context: context,
+        question: question,
+      };
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json'
+      });
+
+      return new Observable<string>(observer => {
+        this.http.post(`${this.apiUrl}/ask/basic/getStreamDialog`, body, {
+          headers: headers,
+          reportProgress: true,
+          observe: 'events',
+          responseType: 'text'
+        }).subscribe({
+          next: (event) => {
+            switch (event.type) {
+              case HttpEventType.Response:
+                observer.next(event.body!);
+                observer.complete();
+                break;
+              case HttpEventType.DownloadProgress:
+                const downloadEvent = event as HttpDownloadProgressEvent;
+                if (downloadEvent.partialText != undefined) {
+                  observer.next(downloadEvent.partialText);
+                }
+                break;
+            }
+          },
+          error: (err: any) => {
+            observer.error(err);
+          }
+        });
+      });
+    }
+
+    /**
+     * Retrieves the completed answer (no stream) to a given question with context.
+     * @param context The previous conversation context.
+     * @param question The question to be asked.
+     * @returns An Observable that emits the answer as a string.
+     */
+    getLlmAnswerDialog(context: Array<{ role: string, content: string }>, question: string): Observable<string> {
+      const body = { context: context, question: question };
+      return this.http.post<string>(`${this.apiUrl}/ask/basic/getStreamDialog`, body, { responseType: 'text' as 'json' });
+    }
+
 }
