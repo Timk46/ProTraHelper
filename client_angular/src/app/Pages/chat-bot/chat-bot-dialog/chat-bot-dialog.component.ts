@@ -24,6 +24,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
   public form: FormGroup;
   public messages: Array<{ text?: string; type: MessageType }> = [];
   protected canSendMessage = true;
+  private dialogSessionId: string
 
   /**
    * The current lecture.
@@ -40,6 +41,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     this.form = this.formBuilder.group({
       message: ['']
     });
+    this.dialogSessionId = this.generateRandomString(20);
   }
 
   ngOnInit(): void {
@@ -86,7 +88,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
       content: msg.text || ''
     }));
 
-    const chatSubscription = this.llmService.getLlmAnswerStreamDialog(context, question).subscribe({
+    const chatSubscription = this.llmService.getLlmAnswerStreamDialog(context, question, this.dialogSessionId).subscribe({
       next: (data: string) => {
         this.messages.pop();
         const botMessage = { text: this.markdownService.parse(data), type: MessageType.Bot };
@@ -130,5 +132,15 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
       this.messages.push(botMessage);
       this.canSendMessage = true;
     }, 1000);
+  }
+
+  generateRandomString(length: number): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
   }
 }

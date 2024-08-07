@@ -71,10 +71,11 @@ export class LlmService {
    * @param question The question to be asked.
    * @returns An Observable that emits the answer stream as a string.
    */
-    getLlmAnswerStreamDialog(context: Array<{ role: string, content: string }>, question: string): Observable<string> {
+    getLlmAnswerStreamDialog(context: Array<{ role: string, content: string }>, question: string, dialogSessionId: string): Observable<string> {
       const body = {
         context: context,
         question: question,
+        dialogSessionId: dialogSessionId
       };
       const headers = new HttpHeaders({
         'Content-Type': 'application/json'

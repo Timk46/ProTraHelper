@@ -6,6 +6,7 @@ import { Client } from 'langsmith';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { RagService } from '../services/rag.service';
 import { TranscriptChunk } from '@Interfaces/index';
+import { PrismaService } from '../../prisma/prisma.service';
 
 // IMPORTANT: THIS IS OUTDATED !!!
 // THIS API ENDPOINT IS DISABLED AND THIS CODE NEEDS TO BE UPDATED WITH CURRENT LECTURE LINKER CODE !!!
@@ -55,6 +56,7 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
   ),
 ]);
 
+// Wird für alle Nachrichten im Chatverlauf verwendet (RAG nur für die erste Frage)
 const dialogPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
     'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
@@ -73,9 +75,10 @@ export class ChatBotRAGService {
   constructor(
     @Inject(REQUEST) private readonly request: Request,
     private ragService: RagService,
+    private prisma: PrismaService,
   ) {}
 
-  async chatBotRagAnswer(question: string, resStream: Response): Promise<void> {
+  async chatBotRagAnswer(question: string, resStream: Response, userid: string, dialogSessionId): Promise<void> {
 
     const tempsimilaritySearchResult = await this.ragService.lectureSimilaritySearch(
       question,
@@ -105,12 +108,12 @@ export class ChatBotRAGService {
         tracer,
       ],
     );
-    console.log(JSON.stringify(openAiResponse));
 
+    await this.saveChatBotMessage(question, openAiResponse, similaritySearchResult, userid, dialogSessionId);
     resStream.end();
   }
 
-  async chatBotRagAnswerDialog(context, question: string, resStream: Response): Promise<void> {
+  async chatBotRagAnswerDialog(context, question: string, resStream: Response, userid: string, dialogSessionId): Promise<void> {
 
     const chatHistory: string = context.slice(0, -2).map(msg =>
       `## ${msg.role === 'user' ? 'HumanMessage' : 'AIMessage'}\n${msg.content}`
@@ -136,6 +139,7 @@ export class ChatBotRAGService {
       ],
     );
 
+    await this.saveChatBotMessage(question, openAiResponse, null, userid, dialogSessionId);
     resStream.end();
   }
 
@@ -144,5 +148,21 @@ export class ChatBotRAGService {
       Erklärung: item.TranscriptChunkContent,
       Quelle: item.metadata.markdownLink
     }));
+  }
+
+  private async saveChatBotMessage(question: string, response: any, usedChunks: any, userid, dialogSessionId) {
+    try {
+      await this.prisma.chatBotMessage.create({
+        data: {
+          question: question,
+          answer: response.generations[0][0].text,
+          usedChunks: dialogSessionId,
+          isBot: false, // imemr Frage + Antwort ... isBot Feld daher unnötig
+          userId: userid,
+        },
+      });
+    } catch (error) {
+      console.error('Error saving chatbot message:', error);
+    }
   }
 }
