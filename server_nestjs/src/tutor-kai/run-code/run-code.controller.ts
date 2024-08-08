@@ -40,6 +40,7 @@ export class RunCodeController {
   async evaluateCode(
     @Body('questionId') questionId: number,
     @Body('flavor') flavor: string,
+    @Body('feedbackLevel') feedbackLevel: string,
     @Body('relatedCodeSubmissionResult') relatedCodeSubmissionResult: CodeSubmissionResultDto,
     @Res() res: Response,
     @Req() req
@@ -51,6 +52,7 @@ export class RunCodeController {
       const result = await this.feedbackNormalService.getKiFeedback(
         Number(questionId),
         flavor,
+        feedbackLevel,
         relatedCodeSubmissionResult,
         res,
         req.user.id
@@ -61,6 +63,7 @@ export class RunCodeController {
       const result = await this.feedbackRAGService.getKiFeedback(
         Number(questionId),
         flavor,
+        feedbackLevel,
         relatedCodeSubmissionResult,
         res,
         req.user.id

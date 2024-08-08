@@ -182,12 +182,22 @@
             <pre class = "text-center polarNight_4_text break-words whitespace-pre-wrap text-xs">Hat dir das Feedback geholfen? Dein ehrliche Meinung macht Kai noch besser.</pre>
           </mat-card-actions>
           <mat-card-actions *ngIf="currentState == 2" class="actions-container">
+            <p style = "text-align: left;">Welchen Feedbacktyp möchtest du?</p>
             <mat-radio-group
             aria-labelledby="example-radio-group-label"
             class="example-radio-group"
             [(ngModel)]="flavor">
               <mat-radio-button  class="example-radio-button" *ngFor="let flavor of flavorOptions" [value]="flavor">{{flavor}}</mat-radio-button>
-          </mat-radio-group>
+            </mat-radio-group>
+            <br>
+            <p style = "text-align: left;">Wie sehr soll dich das Feedback unterstützen?</p>
+
+            <mat-radio-group
+            aria-labelledby="example-radio-group-label"
+            class="example-radio-group"
+            [(ngModel)]="feedbackLevel">
+              <mat-radio-button  class="example-radio-button" *ngFor="let feedbackLevel of feedbackLevelOptions" [value]="feedbackLevel">{{feedbackLevel}}</mat-radio-button>
+            </mat-radio-group>
             <div class="feedback-form">
               <button mat-raised-button color="primary" (click)="getKIFeedback()">
                 <mat-icon>assistant</mat-icon>

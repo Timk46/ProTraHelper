@@ -19,22 +19,38 @@ const {ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTempla
 
 const KImodel = 'gpt-4o-2024-08-06';
 
+const individualFeedbackPromptLevel1: String =
+'Gebe immer wenn es passt Code-Beispiele, die die Syntax demonstrieren. VERWENDE DAZU EINE KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN!' +
+'Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise auf darauf und ergänze um Erkärungen. Das ist wichtig, damit der Student lernt, die Compiler-Ausgabe zu lesen und zu verstehen. ' +
+
+'Die Studenten lösen Programmieraufgaben und du gibst Ihnen kurzes hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
+'Sind 100 Punkte erreicht sollst du lediglich zur korrekten Lösung gratulieren.'+
+'Verwende sehr einfache Sprache und erkläre die Konzepte ausführlich. Biete viele Details und Beispiele an, um das Verständnis zu fördern. Stelle sicher, dass die Erklärungen schrittweise sind und grundlegende Prinzipien abdecken, sodass ein absoluter Programmieranfänger sie versteht.\n'
+
+const individualFeedbackPromptLevel2: String =
+'Gebe immer wenn es passt Code-Beispiele, die die Syntax demonstrieren. VERWENDE DAZU EINE KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN!' +
+'Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise auf darauf und ergänze um Erkärungen. Das ist wichtig, damit der Student lernt, die Compiler-Ausgabe zu lesen und zu verstehen. ' +
+
+'Die Studenten lösen Programmieraufgaben und du gibst Ihnen kurzes hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
+'Sind 100 Punkte erreicht sollst du lediglich zur korrekten Lösung gratulieren.'
+
+const individualFeedbackPromptLevel3: String =
+'Stelle nur EINE EINZIGE sokratische Frage, um den Studenten zur eigenen Problemlösung zu führen. Reduziere die direkte Hilfestellung und fördere eigenständiges Denken. Deine Antwort besteht nur aus einer einzigen sokratischen Frage und Hinweisen zur Vorlesungsinhalten (maximal 2 Sätze). '
+
+
 const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
-    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
-    'Die Studenten lösen Programmieraufgaben und du gibst Ihnen kurzes hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
-    'Sind 100 Punkte erreicht sollst du lediglich zur korrekten Lösung gratulieren. '+
+    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung.\n' +
+    'Formatiere deine Antwort übersichtlich mit der Markdown-Syntax, sodass sie gut für den Studenten lesbar ist. '+
+     '{individualFeedbackPrompt}' +
 
     // NEU <- ist nicht im normalen Feedback
-    'Formatiere deine Antwort übersichtlich mit der Markdown-Syntax, sodass sie gut für den Studenten lesbar ist. '+
-    'Gebe immer wenn es passt Code-Beispiele, die die Syntax demonstrieren. VERWENDE DAZU EINE KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN!' +
-    'Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise auf darauf und ergänze um Erkärungen. Das ist wichtig, damit der Student lernt, die Compiler-Ausgabe zu lesen und zu verstehen. ' +
     // Etwas länger als normales Feedback
     'Es ist verboten, die Unit-Tests zu erwähnen!',
     'DU VERRÄST DU NIEMALS DIE LÖSUNG.  ' +
 
     // Erläuterungen zu dem Aufbau der Informationen aus RAG
-    'Bei deinem Feedback beziehst du dich IMMER auf Erklärungen aus den Vorlesungsausschnitten und nennst die korrekte Quelle. Diese liegen im folgenden JSON-Format vor:' +
+    'Bei deiner Antwort beziehst du dich auf Erklärungen aus den Vorlesungsausschnitten und nennst die korrekte Quelle. Diese liegen im folgenden JSON-Format vor:' +
     '{ "Vorlesungsausschnitte": [ { "Konzept": String, "Inhalt": [ { "Erklärung": String, "Quelle": String }, ... // Weitere Erklärungen mit zugehörigen Quellen] }, ... // Weitere Konzepte ] }' +
     'Du MUSST IMMER wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% KORREKT DIREKT DAHINTER angeben! Die Zeichen ^ und [] dürfen dabei NIEMALS vergessen werden!' +
     'Hier korrekte Beispiel dazu: ' +
@@ -164,6 +180,7 @@ export class FeedbackRAGService {
   async getKiFeedback(
     questionId: number,
     flavor: string,
+    feedbackLevel: string,
     relatedCodeSubmissionResult: CodeSubmissionResultDto,
     resStream: Response,
     userId: number,
@@ -192,6 +209,8 @@ export class FeedbackRAGService {
         },
       },
     });
+
+    const individualFeedbackPrompt: String = feedbackLevel === 'Wenig Unterstützung' ? individualFeedbackPromptLevel3 : feedbackLevel === 'Standard Unterstützung' ? individualFeedbackPromptLevel2 : individualFeedbackPromptLevel1;
 
     const conceptsFormattedPrompt = await getConceptsPrompt.formatPromptValue({
       task: question.codingQuestions.text,
@@ -256,6 +275,7 @@ export class FeedbackRAGService {
 
 
     const ragFormattedPrompt = await finalRAGPrompt.formatPromptValue({
+      individualFeedbackPrompt: individualFeedbackPrompt,
       task: question.codingQuestions.text,
       language: question.codingQuestions.programmingLanguage,
       code: relatedCodeSubmission.code,
@@ -276,7 +296,7 @@ export class FeedbackRAGService {
       tracer
     ],
     );
-    this.saveFeedbackInDB(relatedCodeSubmissionResult, openAiResponse, flavor, ragFormattedPrompt);
+    this.saveFeedbackInDB(relatedCodeSubmissionResult, openAiResponse, flavor, feedbackLevel, ragFormattedPrompt);
     this.eventLogService.log(
       "info",
       "FeedbackRAGService/usedTool",
@@ -291,6 +311,7 @@ export class FeedbackRAGService {
     relatedCodeSubmissionResult: CodeSubmissionResultDto,
     openAiResponse,
     flavor: string,
+    feedbackLevel: string,
     ragFormattedPrompt: string
   ) {
     const sumbissionId = Number(
@@ -306,7 +327,7 @@ export class FeedbackRAGService {
         prompt: JSON.stringify(ragFormattedPrompt),
         response: openAiResponse.generations[0][0].text,
         model: KImodel,
-        flavor: flavor,
+        flavor: flavor + ": " + feedbackLevel,
       },
     });
   }
