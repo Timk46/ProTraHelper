@@ -50,13 +50,13 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
     'DU VERRÄST DU NIEMALS DIE LÖSUNG.  ' +
 
     // Erläuterungen zu dem Aufbau der Informationen aus RAG
-    'Bei deiner Antwort beziehst du dich auf Erklärungen aus den Vorlesungsausschnitten und nennst die korrekte Quelle. Diese liegen im folgenden JSON-Format vor:' +
+    'Bei deiner Antwort beziehst du dich auf Erklärungen aus den Vorlesungsausschnitten. Dabei zitierst du nur indirekt und baust diese in deine eigene Antwort ein. Dies Quellen liegen im folgenden JSON-Format vor:' +
     '{ "Vorlesungsausschnitte": [ { "Konzept": String, "Inhalt": [ { "Erklärung": String, "Quelle": String }, ... // Weitere Erklärungen mit zugehörigen Quellen] }, ... // Weitere Konzepte ] }' +
-    'Du MUSST IMMER wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% KORREKT DIREKT DAHINTER angeben! Die Zeichen ^ und [] dürfen dabei NIEMALS vergessen werden!' +
-    'Hier korrekte Beispiel dazu: ' +
-    'Beispiel 1: Jede Zeile Code, die zur Funktion gehört, muss um eine Ebene eingerückt sein. Schau dir dazu noch einmal den Abschnitt zur Python Syntax in der Vorlesung an, um dich mit den Einrückungsregeln vertraut zu machen ^[[Python_Kontrollstrukturen_if_else_Code-Beispiel bei 00:02:12](/video?fileName=Python_Kontrollstrukturen_if_else_Code-Beispiel&timeStamp=00:02:12,000)] ' +
-    'Beispiel 2: Denke auch daran, dass die Verkettung von Strings in Python mit dem `+` Operator erfolgt, wie im Vorlesungsausschnitt über Datentypen und Operationen in Python erklärt wird: ^[[Python_Datentypen_Umwandeln bei 00:02:31](/video?fileName=Python_Datentypen_Umwandeln&timeStamp=00:02:31,000)].'+
-    'Beispiel 3: Diese Methoden sollten dann in den abgeleiteten Klassen `Pyramide` und `Kegel` implementiert werden. Sieh dir die Vorlesung über abstrakte Klassen und Methoden an, um mehr darüber zu erfahren: ^[[Java_UML_Interfaces bei 00:01:09,000](/video?fileName=Java_UML_Interfaces&timeStamp=00:01:09,000)]'
+    'Du MUSST IMMER wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% GENAU WIE IN DEN BEISPIELEN DIREKT DAHINTER AUSSCHLIEßLICH im Format $$Zahl$$ OHNE weitere "[" oder "Quelle".' +
+    'Hier Beispiele zur korrekten Zitation. Gehe beim Zitieren genau so vor:\n ' +
+    'Beispiel 1: Jede Zeile Code, die zur Funktion gehört, muss um eine Ebene eingerückt sein $$5$$.\n' +
+    'Beispiel 2: Denke auch daran, dass die Verkettung von Strings in Python mit dem `+` Operator erfolgt, wie im Vorlesungsausschnitt über Datentypen und Operationen in Python erklärt wird $$2$$.\n'+
+    'Beispiel 3: Diese Methoden sollten dann in den abgeleiteten Klassen `Pyramide` und `Kegel` implementiert werden $$1$$.\n'
   ),
   HumanMessagePromptTemplate.fromTemplate(
     '# Aufgabe die vom Studenten gelöst werden soll:\n{task}\n' +
@@ -70,7 +70,7 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
     '# Ausschnitt aus der Vorlesung:\n' +
       '{lectureSnippet}\n' +
     '# Wichtige Anweisung\n' +
-      'Verweise immer auf die Erklärungen auf den Vorlesungsausschnitten EXAKT so wie beschrieben! Setze die Zeichen ^ und [] EXAKT GENAU WIE in den drei Beispielen korrekt ein.'
+      'Verweise immer auf die Erklärungen auf den Vorlesungsausschnitten AUSSCHLIEßLICH im Format $$Zahl$$.'
   ),
 ]);
 
@@ -246,16 +246,21 @@ export class FeedbackRAGService {
     );
 
     let concepts = []; // Ein Array zum Speichern aller Konzepte
+    let sourceCounter: number = 0;
+    let sourceMapDict = {};
 
     for (const toolMessage of toolMessages) {
       if (typeof toolMessage.content === 'string') {
         let content: IpgVectorContent = JSON.parse(toolMessage.content);// Angenommen, content enthält das JSON-Format
         let explanations = [];
         for (var explanation of content.explanation) {
+          sourceCounter++;
           explanations.push({
             Erklärung: explanation.TranscriptChunkContent,
-            Quelle: explanation.metadata.markdownLink // we have access to all metadata
+            //Quelle: explanation.metadata.markdownLink, // we have access to all metadata
+            Quelle: "$$" + sourceCounter.toString() + "$$" // we have access to all metadata
           });
+          sourceMapDict[sourceCounter.toString()] = explanation.metadata.markdownLink;
         }
         concepts.push({
           Konzept: content.data.concept,
@@ -285,17 +290,76 @@ export class FeedbackRAGService {
       lectureSnippet: conceptString,
     });
 
-    const openAiResponse = await chatStream.generatePrompt([ragFormattedPrompt], undefined, [
-      {
-        ignoreAgent: true,
-        ignoreChain: true,
-        handleLLMNewToken(token: string) {
-          resStream.write(token);
-        },
+    let ongoingBuffer = ''; // Buffer to capture potential reference across tokens
+
+const openAiResponse = await chatStream.generatePrompt(
+  [ragFormattedPrompt],
+  undefined,
+  [
+    {
+      ignoreAgent: true,
+      ignoreChain: true,
+      handleLLMNewToken(token: string) {
+        // Handle each token of the response to replace references with actual markdown links
+        for (let i = 0; i < token.length; i++) {
+          const char = token[i];
+
+          // Start buffering if we encounter the first $
+          if (char === '$') {
+            ongoingBuffer += char;
+          } else if (ongoingBuffer) {
+            ongoingBuffer += char;
+
+            // Check if the buffer now contains a complete reference ending with "$$"
+            if (ongoingBuffer.match(/\$\$\d+\$\$/)) {
+              const match = ongoingBuffer.match(/\$\$(\d+)\$\$/);
+
+              if (match) {
+                const sourceCounter = match[1];
+                const markdownLink = sourceMapDict[sourceCounter];
+                if (markdownLink) {
+                  const replacedText = ongoingBuffer.replace(`$$${sourceCounter}$$`, markdownLink);
+                  resStream.write(replacedText);
+                } else {
+                  resStream.write(ongoingBuffer);
+                }
+              } else {
+                resStream.write(ongoingBuffer);
+              }
+
+              ongoingBuffer = ''; // Clear the buffer after processing
+            }
+          } else {
+            // If not buffering, directly write the character to the response stream
+            resStream.write(char);
+          }
+        }
+
+        // Handle the case where ongoingBuffer contains the beginning of a reference
+        if (ongoingBuffer && !ongoingBuffer.match(/\$\$\d+\$\$/)) {
+          // Do not flush; wait for more tokens to complete the reference
+        } else if (ongoingBuffer.match(/\$\$\d+\$\$/)) {
+          // If buffer is complete but wasn't processed yet, process now
+          const match = ongoingBuffer.match(/\$\$(\d+)\$\$/);
+          if (match) {
+            const sourceCounter = match[1];
+            const markdownLink = sourceMapDict[sourceCounter];
+            const replacedText = markdownLink ? ongoingBuffer.replace(`$$${sourceCounter}$$`, markdownLink) : ongoingBuffer;
+            resStream.write(replacedText);
+          } else {
+            resStream.write(ongoingBuffer);
+          }
+          ongoingBuffer = ''; // Clear the buffer
+        }
       },
-      tracer
-    ],
-    );
+    },
+    tracer,
+  ],
+);
+
+resStream.end();
+
+
     this.saveFeedbackInDB(relatedCodeSubmissionResult, openAiResponse, flavor, feedbackLevel, ragFormattedPrompt);
     this.eventLogService.log(
       "info",

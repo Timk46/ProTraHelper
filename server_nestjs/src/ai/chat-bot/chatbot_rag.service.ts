@@ -38,10 +38,14 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
       // Erläuterungen zu dem Aufbau der Informationen aus RAG
       '# Schritt 1: Erklärung basierend auf der Vorlesung \n' +
       'Bei deiner Antwort beziehst du dich auf relevante Erklärungen aus den Vorlesungsausschnitten und nennst die korrekte Quelle. Du verwendest Markdown-Syntax, um die Antwort übersichtlich zu formatieren.' +
-      'Hier ein korrektes Beispiel dazu: ' +
-      'Beispiel 1: Jede Zeile Code, die zur Funktion gehört, muss um eine Ebene eingerückt sein. Schau dir dazu noch einmal den Abschnitt zur Python Syntax in der Vorlesung an, um dich mit den Einrückungsregeln vertraut zu machen ^[[Python_Kontrollstrukturen_if_else_Code-Beispiel bei 00:02:12](/video?fileName=Python_Kontrollstrukturen_if_else_Code-Beispiel&timeStamp=00:02:12,000)] ' +
-      'Beispiel 2: Denke auch daran, dass die Verkettung von Strings in Python mit dem `+` Operator erfolgt, wie im Vorlesungsausschnitt über Datentypen und Operationen in Python erklärt wird: ^[[Python_Datentypen_Umwandeln bei 00:02:31](/video?fileName=Python_Datentypen_Umwandeln&timeStamp=00:02:31,000)].'+
+
+      'Du MUSST IMMER wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% GENAU WIE IN DEN BEISPIELEN DIREKT DAHINTER AUSSCHLIEßLICH im Format $$Zahl$$ OHNE weitere "[" oder "Quelle".' +
+      'Hier Beispiele zur korrekten Zitation. Gehe beim Zitieren genau so vor:\n ' +
+      'Beispiel 1: Jede Zeile Code, die zur Funktion gehört, muss um eine Ebene eingerückt sein $$5$$.\n' +
+      'Beispiel 2: Denke auch daran, dass die Verkettung von Strings in Python mit dem `+` Operator erfolgt, wie im Vorlesungsausschnitt über Datentypen und Operationen in Python erklärt wird $$2$$.\n'+
+      'Beispiel 3: Diese Methoden sollten dann in den abgeleiteten Klassen `Pyramide` und `Kegel` implementiert werden $$1$$.\n'+
       '\n # Hinweis: Zitiere die Erklärungen nicht wortwörtlich, sondern baue sie inhaltlich in deine Antwort ein.' +
+
       '# Schritt 2: Beispiel \n' +
       'Falls es zu der Frage oder deiner bisherigen Antwort ein passendes, kurzes (z.B. Programmcode Python) gibt, dann füge dieses übersichtlich mit Erklärungen in einfacher Sprache hinzu.',
   ),
@@ -49,8 +53,9 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
     '# Frage des Studenten\n{question}\n' +
       '# Ausschnitt aus der Vorlesung:\n' +
       '{lectureSnippet}\n' +
-      '# Wichtige Anweisung\n' +
-      'Verweise immer auf die Erklärungen auf den Vorlesungsausschnitten exakt so wie beschrieben! Die Zeichen ^ und [] dürfen dabei NIEMALS vergessen werden!',
+      '# Wichtige Anweisungen\n' +
+      '1. Verweise immer auf die Erklärungen auf den Vorlesungsausschnitten AUSSCHLIEßLICH im Format $$Zahl$$.\n' +
+      '2. Wenn die Frage keinen Bezug zur Informatik oder Objektorientierte und funktionale Programmierung hat, antworte: "Das ist ein interessante Frage, aber leider nicht Teil des Vorlesungsstoffs."',
   ),
 ]);
 
@@ -58,7 +63,9 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
 const dialogPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
     'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
-      'Du gibst kurze und hilfreiche Antworten auf die Rückfragen der Studenten in einfacher Sprache. Berücksichtige dabei den bisherigen Chatverlauf.',
+      'Du gibst kurze und hilfreiche Antworten auf die Rückfragen der Studenten in einfacher Sprache. Berücksichtige dabei den bisherigen Chatverlauf.'+
+      '# Wichtige Anweisungen\n' +
+      '1. Wenn die Frage keinen Bezug zur Informatik oder Objektorientierte und funktionale Programmierung hat, antworte: "Das ist ein interessante Frage, aber leider nicht Teil des Vorlesungsstoffs."',
   ),
   HumanMessagePromptTemplate.fromTemplate(
     '# Chatverlauf\n' +
@@ -88,12 +95,22 @@ export class ChatBotRAGService {
     const tempsimilaritySearchResult = await this.ragService.lectureSimilaritySearch(question, 4);
     const similaritySearchResult = this.transformSearchResult(tempsimilaritySearchResult);
 
+    let sourceCounter: number = 0;
+    let sourceMapDict = {};
+
+    console.log(JSON.stringify(similaritySearchResult));
+    for (const item of similaritySearchResult) {
+      sourceCounter++;
+      sourceMapDict[sourceCounter.toString()] = item.Quelle;
+    }
+
     // Format the prompt for the RAG model
     const ragFormattedPrompt = await finalRAGPrompt.formatPromptValue({
       question: question,
       lectureSnippet: JSON.stringify(similaritySearchResult),
     });
 
+    let ongoingBuffer = ''; // Buffer to capture potential reference across tokens
     // Generate response using the RAG model
     const openAiResponse = await chatStream.generatePrompt(
       [ragFormattedPrompt],
@@ -103,7 +120,59 @@ export class ChatBotRAGService {
           ignoreAgent: true,
           ignoreChain: true,
           handleLLMNewToken(token: string) {
-            resStream.write(token);
+            // Handle each token of the response to replace references with actual markdown links
+            for (let i = 0; i < token.length; i++) {
+              const char = token[i];
+
+              // Start buffering if we encounter the first $
+              if (char === '$') {
+                ongoingBuffer += char;
+              } else if (ongoingBuffer) {
+                ongoingBuffer += char;
+
+                // Check if the buffer now contains a complete reference ending with "$$"
+                if (ongoingBuffer.match(/\$\$\d+\$\$/)) {
+                  const match = ongoingBuffer.match(/\$\$(\d+)\$\$/);
+
+                  if (match) {
+                    const sourceCounter = match[1];
+                    const markdownLink = sourceMapDict[sourceCounter];
+                    console.log("Processing completed reference:", ongoingBuffer, markdownLink);
+                    if (markdownLink) {
+                      const replacedText = ongoingBuffer.replace(`$$${sourceCounter}$$`, markdownLink);
+                      resStream.write(replacedText);
+                    } else {
+                      resStream.write(ongoingBuffer);
+                    }
+                  } else {
+                    resStream.write(ongoingBuffer);
+                  }
+
+                  ongoingBuffer = ''; // Clear the buffer after processing
+                }
+              } else {
+                // If not buffering, directly write the character to the response stream
+                resStream.write(char);
+              }
+            }
+
+            // Handle the case where ongoingBuffer contains the beginning of a reference
+            if (ongoingBuffer && !ongoingBuffer.match(/\$\$\d+\$\$/)) {
+              // Do not flush; wait for more tokens to complete the reference
+            } else if (ongoingBuffer.match(/\$\$\d+\$\$/)) {
+              // If buffer is complete but wasn't processed yet, process now
+              const match = ongoingBuffer.match(/\$\$(\d+)\$\$/);
+              if (match) {
+                const sourceCounter = match[1];
+                const markdownLink = sourceMapDict[sourceCounter];
+                console.log("Processing completed reference:", ongoingBuffer, markdownLink);
+                const replacedText = markdownLink ? ongoingBuffer.replace(`$$${sourceCounter}$$`, markdownLink) : ongoingBuffer;
+                resStream.write(replacedText);
+              } else {
+                resStream.write(ongoingBuffer);
+              }
+              ongoingBuffer = ''; // Clear the buffer
+            }
           },
         },
         tracer,
@@ -154,6 +223,8 @@ export class ChatBotRAGService {
     await this.saveChatBotMessage(question, openAiResponse, null, userid, dialogSessionId);
     resStream.end();
   }
+
+
 
   /**
    * Transforms the search result into a formatted structure.
