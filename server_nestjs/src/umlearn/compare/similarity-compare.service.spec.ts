@@ -20,7 +20,7 @@ describe('SimilarityCompareService', () => {
       { name: 'attr3', dataType: dataType.number, visibility: visibilityType.private }
     ];
 
-    const result = service.getAttributesMatching(attemptAttributes, solutionAttributes);
+    const result = service.getElementMatching(attemptAttributes, solutionAttributes, service.getSingleAttributeSimilarity);
 
     expect(result).toEqual([
       { attempt: attemptAttributes[0], solution: solutionAttributes[0], similarity: 1 },
@@ -80,7 +80,7 @@ describe('SimilarityCompareService', () => {
       height: 1
     };
 
-    const result = service.getNodeSimilarity(attemptElement, solutionElement);
+    const result = service.getSingleNodeSimilarity(attemptElement, solutionElement);
 
     expect(result).toBeCloseTo(0.4995, 4);
 
