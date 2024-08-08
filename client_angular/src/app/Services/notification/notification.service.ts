@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
-import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { catchError, filter, map, switchMap } from 'rxjs/operators';
 import { NotificationType } from '@DTOs/notificationType.enum';
 import { UserService } from '../auth/user.service';
 import { environment } from 'src/environments/environment';
@@ -20,7 +20,6 @@ import { WebSocketService } from '../websocket/websocket.service';
   providedIn: 'root'
 })
 export class NotificationService implements OnDestroy {
-  private readonly NOTIFICATION_URL = 'http://localhost:3001';
   private readonly NOTIFICATION_NAMESPACE = 'notifications';
   private readonly NOTIFICATION_RECEIVEEVENT = 'notification';
   private readonly NOTIFICATION_SENDEVENT = 'notifications';
@@ -96,7 +95,7 @@ export class NotificationService implements OnDestroy {
   }
 
   initializeWebSocket(): void {
-    if (!this.webSocketService.isConnected(this.NOTIFICATION_URL, this.NOTIFICATION_NAMESPACE)) {
+    if (!this.webSocketService.isConnected(environment.websocketUrl, this.NOTIFICATION_NAMESPACE)) {
       this.startListening();
     }
   }
@@ -150,15 +149,15 @@ export class NotificationService implements OnDestroy {
    */
   private startListening(): void {
     this.fetchInitialNotifications(20, 0).subscribe();
-    this.webSocketService.connect(this.NOTIFICATION_URL, this.NOTIFICATION_NAMESPACE);
+    this.webSocketService.connect(environment.websocketUrl, this.NOTIFICATION_NAMESPACE);
 
     this.notificationSubscription = this.webSocketService
-      .onConnectionChange(this.NOTIFICATION_URL, this.NOTIFICATION_NAMESPACE)
+      .onConnectionChange(environment.websocketUrl, this.NOTIFICATION_NAMESPACE)
       .pipe(
         filter((connected: boolean) => connected),
         switchMap(() =>
           this.webSocketService.on<Partial<NotificationDTO>>(
-            this.NOTIFICATION_URL,
+            environment.websocketUrl,
             this.NOTIFICATION_NAMESPACE,
             this.NOTIFICATION_RECEIVEEVENT
           )
@@ -178,7 +177,7 @@ export class NotificationService implements OnDestroy {
    * Stops listening for notifications and disconnects from the WebSocket.
    */
   private stopListening(): void {
-    this.webSocketService.disconnect(this.NOTIFICATION_URL, this.NOTIFICATION_NAMESPACE);
+    this.webSocketService.disconnect(environment.websocketUrl, this.NOTIFICATION_NAMESPACE);
   }
 
     /**
@@ -385,7 +384,7 @@ export class NotificationService implements OnDestroy {
    */
   sendNotification(notification: NotificationDTO) {
     this.webSocketService.emit(
-      this.NOTIFICATION_URL,
+      environment.websocketUrl,
       this.NOTIFICATION_NAMESPACE,
       this.NOTIFICATION_SENDEVENT,
       { userId: notification.userId, message: notification.message });

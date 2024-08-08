@@ -4,16 +4,19 @@ import { Observable, Subject, BehaviorSubject, timer } from 'rxjs';
 import { UserService } from '../auth/user.service';
 import { takeUntil, retry, switchMap } from 'rxjs/operators';
 
-
 interface SocketConnection {
   socket: Socket;
   connectionSubject: BehaviorSubject<boolean>;
 }
-
+/**
+ * Service for managing WebSocket connections.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class WebSocketService implements OnDestroy {
+  /** A map of WebSocket connections, indexed by the full URL of the connection.
+   * The value is an object containing the socket instance and a BehaviorSubject for the connection status.*/
   private sockets: Map<string, SocketConnection> = new Map();
   private destroyed$ = new Subject<void>();
 
@@ -166,6 +169,9 @@ export class WebSocketService implements OnDestroy {
     return this.sockets.get(`${url}/${namespace}`)?.socket;
   }
 
+  /**
+   * Unsubscribes from all Observables and disconnects all WebSocket connections.
+   */
   ngOnDestroy(): void {
     this.destroyed$.next();
     this.destroyed$.complete();
