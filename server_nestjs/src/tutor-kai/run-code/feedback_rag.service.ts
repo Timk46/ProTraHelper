@@ -20,40 +20,40 @@ const {ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTempla
 const KImodel = 'gpt-4o-2024-08-06';
 
 const individualFeedbackPromptLevel1: String =
-'Gebe immer wenn es passt Code-Beispiele, die die Syntax demonstrieren. VERWENDE DAZU EINE KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN!' +
-'Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise auf darauf und ergänze um Erkärungen. Das ist wichtig, damit der Student lernt, die Compiler-Ausgabe zu lesen und zu verstehen. ' +
+'Gib immer, wenn es passt, Code-Beispiele, die die Syntax demonstrieren. VERWENDE DAZU EINEN KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN!' +
+'Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise darauf und ergänze Erklärungen. Das ist wichtig, damit die Studenten lernen, die Compiler-Ausgabe zu lesen und zu verstehen. ' +
 
-'Die Studenten lösen Programmieraufgaben und du gibst Ihnen kurzes hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
-'Sind 100 Punkte erreicht sollst du lediglich zur korrekten Lösung gratulieren.'+
-'Verwende sehr einfache Sprache und erkläre die Konzepte ausführlich. Biete viele Details und Beispiele an, um das Verständnis zu fördern. Stelle sicher, dass die Erklärungen schrittweise sind und grundlegende Prinzipien abdecken, sodass ein absoluter Programmieranfänger sie versteht.\n'
+'Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
+'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren.'+
+'Verwende eine sehr einfache Sprache und erkläre die Konzepte ausführlich. Gib viele Details und Beispiele, um das Verständnis zu fördern. Stelle sicher, dass die Erklärungen schrittweise sind und grundlegende Prinzipien abdecken, sodass ein absoluter Programmieranfänger sie versteht.\n'
 
 const individualFeedbackPromptLevel2: String =
-'Gebe immer wenn es passt Code-Beispiele, die die Syntax demonstrieren. VERWENDE DAZU EINE KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN!' +
-'Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise auf darauf und ergänze um Erkärungen. Das ist wichtig, damit der Student lernt, die Compiler-Ausgabe zu lesen und zu verstehen. ' +
+'Gib immer, wenn es passt, Code-Beispiele, die die Syntax demonstrieren. VERWENDE DAZU EINEN KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN!' +
+'Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise darauf und ergänze es mit Erklärungen. Das ist wichtig, damit der Student lernt, die Compiler-Ausgabe zu lesen und zu verstehen. ' +
 
-'Die Studenten lösen Programmieraufgaben und du gibst Ihnen kurzes hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
-'Sind 100 Punkte erreicht sollst du lediglich zur korrekten Lösung gratulieren.'
+'Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
+'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren.'
 
 const individualFeedbackPromptLevel3: String =
-'Stelle nur EINE EINZIGE sokratische Frage, um den Studenten zur eigenen Problemlösung zu führen. Reduziere die direkte Hilfestellung und fördere eigenständiges Denken. Deine Antwort besteht nur aus einer einzigen sokratischen Frage und Hinweisen zur Vorlesungsinhalten (maximal 2 Sätze). '
+'Stelle nur EINE EINZIGE sokratische Frage, um den Studenten zur eigenen Problemlösung zu führen. Reduziere die direkte Hilfestellung und fördere das eigenständige Denken. Deine Antwort besteht nur aus einer einzigen sokratischen Frage und aus Hinweisen auf Vorlesungsinhalte (maximal 2 Sätze).'
 
 
 const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
-    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung.\n' +
-    'Formatiere deine Antwort übersichtlich mit der Markdown-Syntax, sodass sie gut für den Studenten lesbar ist. '+
+    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen von Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung.\n' +
+    'Formatiere deine Antwort übersichtlich mit der Markdown-Syntax, sodass sie für die Studenten gut lesbar ist.\n'+
      '{individualFeedbackPrompt}' +
 
     // NEU <- ist nicht im normalen Feedback
     // Etwas länger als normales Feedback
-    'Es ist verboten, die Unit-Tests zu erwähnen!',
-    'DU VERRÄST DU NIEMALS DIE LÖSUNG.  ' +
+    'Es ist verboten, die Unit-Tests zu erwähnen.',
+    'DU VERRÄTST NIEMALS DIE LÖSUNG. ' +
 
     // Erläuterungen zu dem Aufbau der Informationen aus RAG
     'Bei deiner Antwort beziehst du dich auf Erklärungen aus den Vorlesungsausschnitten. Dabei zitierst du nur indirekt und baust diese in deine eigene Antwort ein. Dies Quellen liegen im folgenden JSON-Format vor:' +
     '{ "Vorlesungsausschnitte": [ { "Konzept": String, "Inhalt": [ { "Erklärung": String, "Quelle": String }, ... // Weitere Erklärungen mit zugehörigen Quellen] }, ... // Weitere Konzepte ] }' +
-    'Du MUSST IMMER wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% GENAU WIE IN DEN BEISPIELEN DIREKT DAHINTER AUSSCHLIEßLICH im Format $$Zahl$$ OHNE weitere "[" oder "Quelle".' +
-    'Hier Beispiele zur korrekten Zitation. Gehe beim Zitieren genau so vor:\n ' +
+    'Du MUSST IMMER, wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% GENAU WIE IN DEN BEISPIELEN DIREKT DAHINTER AUSSCHLIEßLICH im Format $$Zahl$$ OHNE weitere "[" oder "Quelle".' +
+    'Hier sind Beispiele zur korrekten Zitation. Gehe beim Zitieren genauso vor:\n ' +
     'Beispiel 1: Jede Zeile Code, die zur Funktion gehört, muss um eine Ebene eingerückt sein $$5$$.\n' +
     'Beispiel 2: Denke auch daran, dass die Verkettung von Strings in Python mit dem `+` Operator erfolgt, wie im Vorlesungsausschnitt über Datentypen und Operationen in Python erklärt wird $$2$$.\n'+
     'Beispiel 3: Diese Methoden sollten dann in den abgeleiteten Klassen `Pyramide` und `Kegel` implementiert werden $$1$$.\n'
@@ -76,9 +76,9 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
 
 const getConceptsPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
-    'Du bist Lehrer für Stunden und Experte der Didaktik.' + // role
-      'Basierd auf den Informationzwischen zwischen BEGINCONTEXT und ENDCONTEXT, extrahierst du die wichtigsten zwei Informatik-Konzepte, welche der Student noch verstehen muss, damit er die Aufgabe selbstständig lösen kann. ' +
-      'Für jedes dieser Konzept nutzt du das dir zur Verfügung stehende Tool, um weitere Informationen zu den Konzepten aus der Vorlesung zu erhalten.',
+    'Du bist Lehrer für Studenten und Experte der Didaktik.' + // role
+      'Basierend auf den Informationen zwischen BEGINCONTEXT und ENDCONTEXT, extrahierst du die zwei wichtigsten Informatik-Konzepte, die der Student noch verstehen muss, damit er die Aufgabe selbstständig lösen kann. ' +
+      'Für jedes dieser Konzepte nutzt du das dir zur Verfügung stehende Tool, um weitere Informationen zu den Konzepten aus der Vorlesung zu erhalten.',
   ),
   HumanMessagePromptTemplate.fromTemplate(
     'BEGINCONTEXT' +

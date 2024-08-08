@@ -39,23 +39,23 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
       '# Schritt 1: Erklärung basierend auf der Vorlesung \n' +
       'Bei deiner Antwort beziehst du dich auf relevante Erklärungen aus den Vorlesungsausschnitten und nennst die korrekte Quelle. Du verwendest Markdown-Syntax, um die Antwort übersichtlich zu formatieren.' +
 
-      'Du MUSST IMMER wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% GENAU WIE IN DEN BEISPIELEN DIREKT DAHINTER AUSSCHLIEßLICH im Format $$Zahl$$ OHNE weitere "[" oder "Quelle".' +
-      'Hier Beispiele zur korrekten Zitation. Gehe beim Zitieren genau so vor:\n ' +
+      'Du MUSST IMMER, wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% GENAU SO WIE IN DEN BEISPIELEN DIREKT DAHINTER AUSSCHLIEßLICH im Format $$Zahl$$ OHNE weitere "[" oder "Quelle".' +
+      'Hier sind Beispiele zur korrekten Zitation. Gehe beim Zitieren genauso vor:\n ' +
       'Beispiel 1: Jede Zeile Code, die zur Funktion gehört, muss um eine Ebene eingerückt sein $$5$$.\n' +
       'Beispiel 2: Denke auch daran, dass die Verkettung von Strings in Python mit dem `+` Operator erfolgt, wie im Vorlesungsausschnitt über Datentypen und Operationen in Python erklärt wird $$2$$.\n'+
       'Beispiel 3: Diese Methoden sollten dann in den abgeleiteten Klassen `Pyramide` und `Kegel` implementiert werden $$1$$.\n'+
       '\n # Hinweis: Zitiere die Erklärungen nicht wortwörtlich, sondern baue sie inhaltlich in deine Antwort ein.' +
 
       '# Schritt 2: Beispiel \n' +
-      'Falls es zu der Frage oder deiner bisherigen Antwort ein passendes, kurzes (z.B. Programmcode Python) gibt, dann füge dieses übersichtlich mit Erklärungen in einfacher Sprache hinzu.',
+      'Falls es zu der Frage oder deiner bisherigen Antwort ein passendes, kurzes Code-Beispiel (z.B. Programmcode Python) gibt, dann füge dieses übersichtlich mit Erklärungen in einfacher Sprache hinzu.',
   ),
   HumanMessagePromptTemplate.fromTemplate(
     '# Frage des Studenten\n{question}\n' +
       '# Ausschnitt aus der Vorlesung:\n' +
       '{lectureSnippet}\n' +
       '# Wichtige Anweisungen\n' +
-      '1. Verweise immer auf die Erklärungen auf den Vorlesungsausschnitten AUSSCHLIEßLICH im Format $$Zahl$$.\n' +
-      '2. Wenn die Frage keinen Bezug zur Informatik oder Objektorientierte und funktionale Programmierung hat, antworte: "Das ist ein interessante Frage, aber leider nicht Teil des Vorlesungsstoffs."',
+      '1. Verweise immer auf die Erklärungen aus den Vorlesungsausschnitten AUSSCHLIEßLICH im Format $$Zahl$$.\n' +
+      '2. Wenn die Frage keinen Bezug zur Informatik oder Objektorientierte und funktionale Programmierung hat, antworte: "Das ist eine interessante Frage, aber leider nicht Teil des Vorlesungsstoffs."',
   ),
 ]);
 
@@ -65,7 +65,7 @@ const dialogPrompt = ChatPromptTemplate.fromPromptMessages([
     'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
       'Du gibst kurze und hilfreiche Antworten auf die Rückfragen der Studenten in einfacher Sprache. Berücksichtige dabei den bisherigen Chatverlauf.'+
       '# Wichtige Anweisungen\n' +
-      '1. Wenn die Frage keinen Bezug zur Informatik oder Objektorientierte und funktionale Programmierung hat, antworte: "Das ist ein interessante Frage, aber leider nicht Teil des Vorlesungsstoffs."',
+      '1. Wenn die Frage keinen Bezug zur Informatik oder Objektorientierte und funktionale Programmierung hat, antworte: "Das ist eine interessante Frage, aber leider nicht Teil des Vorlesungsstoffs."',
   ),
   HumanMessagePromptTemplate.fromTemplate(
     '# Chatverlauf\n' +
@@ -98,7 +98,6 @@ export class ChatBotRAGService {
     let sourceCounter: number = 0;
     let sourceMapDict = {};
 
-    console.log(JSON.stringify(similaritySearchResult));
     for (const item of similaritySearchResult) {
       sourceCounter++;
       sourceMapDict[sourceCounter.toString()] = item.Quelle;
@@ -137,7 +136,6 @@ export class ChatBotRAGService {
                   if (match) {
                     const sourceCounter = match[1];
                     const markdownLink = sourceMapDict[sourceCounter];
-                    console.log("Processing completed reference:", ongoingBuffer, markdownLink);
                     if (markdownLink) {
                       const replacedText = ongoingBuffer.replace(`$$${sourceCounter}$$`, markdownLink);
                       resStream.write(replacedText);
@@ -165,7 +163,6 @@ export class ChatBotRAGService {
               if (match) {
                 const sourceCounter = match[1];
                 const markdownLink = sourceMapDict[sourceCounter];
-                console.log("Processing completed reference:", ongoingBuffer, markdownLink);
                 const replacedText = markdownLink ? ongoingBuffer.replace(`$$${sourceCounter}$$`, markdownLink) : ongoingBuffer;
                 resStream.write(replacedText);
               } else {

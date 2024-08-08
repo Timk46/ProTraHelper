@@ -27,25 +27,25 @@ const chat = new ChatOpenAI({
 });
 
 const individualFeedbackPromptLevel1: String =
-'Die Studenten lösen Programmieraufgaben und du gibst Ihnen kurzes hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
-'Sind 100 Punkte erreicht sollst du lediglich zur korrekten Lösung gratulieren.'+
-'Verwende sehr einfache Sprache und erkläre die Konzepte ausführlich. Biete viele Details und Beispiele an, um das Verständnis zu fördern. Stelle sicher, dass die Erklärungen schrittweise sind und grundlegende Prinzipien abdecken, sodass ein absoluter Programmieranfänger sie versteht.\n'
+'Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
+'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren.'+
+'Verwende eine sehr einfache Sprache und erkläre die Konzepte ausführlich. Gib viele Details und Beispiele, um das Verständnis zu fördern. Stelle sicher, dass die Erklärungen schrittweise sind und grundlegende Prinzipien abdecken, sodass ein absoluter Programmieranfänger sie versteht.\n'
 
 const individualFeedbackPromptLevel2: String =
-'Die Studenten lösen Programmieraufgaben und du gibst Ihnen kurzes hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
-'Sind 100 Punkte erreicht sollst du lediglich zur korrekten Lösung gratulieren.'
+'Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
+'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren.'
 
 const individualFeedbackPromptLevel3: String =
-'Stelle nur EINE EINZIGE sokratische Frage, um den Studenten zur eigenen Problemlösung zu führen. Reduziere die direkte Hilfestellung und fördere eigenständiges Denken.'
+'Stelle nur EINE EINZIGE sokratische Frage, um den Studenten zur eigenen Problemlösung zu führen. Reduziere die direkte Hilfestellung und fördere das eigenständige Denken. Deine Antwort besteht nur aus einer einzigen sokratischen Frage und aus Hinweisen auf Vorlesungsinhalte (maximal 2 Sätze).'
 
 
 const chatPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
-    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
+    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen von Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung.\n' +
     '{individualFeedbackPrompt}' +
 
-    'Dein kurzes hilfreichses Feedback ist maximal sechs Sätze auf drei Absätze lang oder kürzer. Es ist verboten, die Unit-Tests zu erwähnen!' +
-    'DU VERRÄST DU NIEMALS DIE LÖSUNG. '
+    'Dein kurzes, hilfreiches Feedback besteht aus maximal sechs Sätzen, aufgeteilt auf höchstens drei Absätze. Es ist verboten, die Unit-Tests zu erwähnen!' +
+    'DU VERRÄTST NIEMALS DIE LÖSUNG.'
   ),
   HumanMessagePromptTemplate.fromTemplate(
     '# Aufgabe die vom Studenten gelöst werden soll:\n{task}\n' +
