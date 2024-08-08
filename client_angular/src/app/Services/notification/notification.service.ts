@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NotificationComponent } from 'src/app/Pages/notification/notification.component';
 import { HttpClient } from '@angular/common/http';
-import { WebSocketService } from '../websocket/web-socket-service.service';
+import { WebSocketService } from '../websocket/websocket.service';
 
 /**
  * Service responsible for managing notifications in the frontend.
@@ -20,6 +20,19 @@ import { WebSocketService } from '../websocket/web-socket-service.service';
   providedIn: 'root'
 })
 export class NotificationService implements OnDestroy {
+  private readonly NOTIFICATION_URL = 'http://localhost:3001';
+  private readonly NOTIFICATION_NAMESPACE = 'notifications';
+  private readonly NOTIFICATION_RECEIVEEVENT = 'notification';
+  private readonly NOTIFICATION_SENDEVENT = 'notifications';
+  private readonly BROADCAST_CHANNEL_NAME = 'unreadCountChannel';
+  private readonly NOTIFICATION_TYPES = {
+    NEW_NOTIFICATION: 'newNotification',
+    UNREAD_COUNT: 'unreadCount',
+    NOTIFICATION_READ: 'notificationRead'
+  };
+  private readonly NOTIFICATION_ACTIONS = {
+    VIEW: 'view'
+  };
   /** BehaviorSubject to store and emit notifications */
   private notificationsSubject = new BehaviorSubject<NotificationDTO[]>([]);
   /** Array to store notifications */
@@ -43,6 +56,7 @@ export class NotificationService implements OnDestroy {
   /** Subscription for WebSocket notifications */
   private notificationSubscription?: Subscription;
 
+
   /**
    * Creates an instance of NotificationService.
    * @param {UserService} userService - Service to handle user-related operations
@@ -58,7 +72,7 @@ export class NotificationService implements OnDestroy {
     private http: HttpClient,
     private webSocketService: WebSocketService
   ) {
-    this.broadcastChannel = new BroadcastChannel('unreadCountChannel');
+    this.broadcastChannel = new BroadcastChannel(this.BROADCAST_CHANNEL_NAME);
     this.userService.isAuthenticated$.subscribe((isAuthenticated) => {
       if (isAuthenticated) {
         this.userId = Number(this.userService.getTokenID());
@@ -82,7 +96,7 @@ export class NotificationService implements OnDestroy {
   }
 
   initializeWebSocket(): void {
-    if (!this.webSocketService.isConnected()) {
+    if (!this.webSocketService.isConnected(this.NOTIFICATION_URL, this.NOTIFICATION_NAMESPACE)) {
       this.startListening();
     }
   }
@@ -97,13 +111,13 @@ export class NotificationService implements OnDestroy {
   private setupBroadcastChannel(): void {
     this.broadcastChannel.onmessage = (event) => {
       switch (event.data.type) {
-        case 'newNotification':
+        case this.NOTIFICATION_TYPES.NEW_NOTIFICATION:
           this.handleNewNotification(event.data.notification, false);
           break;
-        case 'unreadCount':
+        case this.NOTIFICATION_TYPES.UNREAD_COUNT:
           this.setUnreadCount(event.data.count, false);
           break;
-        case 'notificationRead':
+        case this.NOTIFICATION_TYPES.NOTIFICATION_READ:
           this.updateNotificationReadStatus(event.data.notificationId);
           this.syncUnreadCount();
           break;
@@ -136,21 +150,37 @@ export class NotificationService implements OnDestroy {
    */
   private startListening(): void {
     this.fetchInitialNotifications(20, 0).subscribe();
-    this.webSocketService.connect();
+    this.webSocketService.connect(this.NOTIFICATION_URL, this.NOTIFICATION_NAMESPACE);
 
-    // Wait for the WebSocket to connect before setting up the listener
-    this.notificationSubscription = this.webSocketService.onConnectionChange()
+    this.notificationSubscription = this.webSocketService
+      .onConnectionChange(this.NOTIFICATION_URL, this.NOTIFICATION_NAMESPACE)
       .pipe(
-        tap(connected => console.log('WebSocket connection status:', connected)),
-        filter((connected: boolean) => connected), // Only proceed when connected is true
-        take(1), // Take only the first 'connected' event
-        switchMap(() => this.webSocketService.on<Partial<NotificationDTO>>('notification'))
+        filter((connected: boolean) => connected),
+        switchMap(() =>
+          this.webSocketService.on<Partial<NotificationDTO>>(
+            this.NOTIFICATION_URL,
+            this.NOTIFICATION_NAMESPACE,
+            this.NOTIFICATION_RECEIVEEVENT
+          )
+        )
       )
-      .subscribe((notification: Partial<NotificationDTO>) => {
-        console.log('Received notification:', notification);
-        this.handleNewNotification(notification, true);
+      .subscribe({
+        next: (notification: Partial<NotificationDTO>) => {
+          console.log('WebSocket connected and received notification:', notification);
+          this.handleNewNotification(notification, true);
+        },
+        error: (error) => console.error('WebSocket error:', error),
+        complete: () => console.log('WebSocket connection closed')
       });
   }
+
+  /**
+   * Stops listening for notifications and disconnects from the WebSocket.
+   */
+  private stopListening(): void {
+    this.webSocketService.disconnect(this.NOTIFICATION_URL, this.NOTIFICATION_NAMESPACE);
+  }
+
     /**
    * Handles a new notification by creating a unique ID and adding it to the panel if it's not already there.
    * @param {Partial<NotificationDTO>} notification - The new notification
@@ -159,16 +189,12 @@ export class NotificationService implements OnDestroy {
   private handleNewNotification(notification: Partial<NotificationDTO>, isBroadcast: boolean): void {
     const notificationToSent = {
       id: notification.id,
-      message: notification.message,
-      timestamp: notification.timestamp,
-      isRead: notification.isRead,
-      readTimestamp: notification.readTimestamp,
-      type: notification.type,
-      discussionId: notification.discussionId,
-      conceptNodeId: notification.conceptNodeId,
-      videoId: notification.videoId
+      message: notification.message!,
+      timestamp: notification.timestamp!,
+      type: notification.type!,
     };
     const notificationId = `${notification.id}-${notification.timestamp}`;
+
     if (!this.processedNotifications.has(notificationId)) {
       this.processedNotifications.add(notificationId);
       this.addNotification(notificationToSent as NotificationDTO);
@@ -181,19 +207,30 @@ export class NotificationService implements OnDestroy {
   }
 
   /**
-   * Stops listening for notifications and disconnects from the WebSocket.
+   * Creates a handler for HTTP errors.
+   * @param operation - The name of the operation that failed
+   * @param {T} result - The optional result to return as the observable result
+   * @returns {Observable<T>} An observable of the result type
    */
-  private stopListening(): void {
-    this.webSocketService.disconnect();
+  private handleError<T>(operation = 'operation', result?: T): (error: any) => Observable<T>  {
+    return (error: any): Observable<T> => {
+      console.error(`${operation} failed: ${error.message}`);
+      // Optionally, we can even send a notification to the user here
+      return new Observable<T>(subscriber => {
+        subscriber.next(result as T);
+        subscriber.complete();
+      });
+    };
   }
 
   /**
-   * Fetches the initial notifications from the server.
-   * @param {number} limit - Number of notifications to fetch
-   * @param {number} offset - Offset for pagination
-   * @returns {Observable<NotificationDTO[]>} Observable of fetched notifications
+   * Fetches notifications from the server.
+   * @param {number} limit - The maximum number of notifications to fetch.
+   * @param {number} offset - The offset for pagination.
+   * @param {boolean} isInitial - Whether this is the initial fetch or a subsequent one.
+   * @returns {Observable<NotificationDTO[]>} An Observable of fetched notifications.
    */
-  private fetchInitialNotifications(limit: number, offset: number): Observable<NotificationDTO[]> {
+  private fetchNotifications(limit: number, offset: number, isInitial: boolean): Observable<NotificationDTO[]> {
     return this.http.get<NotificationDTO[]>(`${environment.server}/notifications/all`, {
       params: {
         userId: this.userId!.toString(),
@@ -201,41 +238,40 @@ export class NotificationService implements OnDestroy {
         offset: offset.toString(),
       }
     }).pipe(
-      catchError(error => {
-        console.error('Error fetching initial notifications:', error);
-        return of([]);
-      }),
-      tap(notifications => {
-        this.notifications = notifications;
+      catchError(this.handleError<NotificationDTO[]>('fetchNotifications', [])),
+      map(notifications => {
+        if (isInitial) {
+          this.notifications = notifications;
+        } else {
+          this.notifications = [...this.notifications, ...notifications];
+        }
         this.notificationsSubject.next(this.notifications);
-        this.syncUnreadCount();
+        if (isInitial) {
+          this.syncUnreadCount();
+        }
+        return notifications;
       })
     );
   }
 
   /**
-   * Fetches more notifications when scrolling.
-   * @param {number} limit - Number of notifications to fetch
-   * @param {number} offset - Offset for pagination
-   * @returns {Observable<NotificationDTO[]>} Observable of fetched notifications
+   * Fetches the initial notifications from the server.
+   * @param {number} limit - The maximum number of notifications to fetch.
+   * @param {number} offset - The offset for pagination.
+   * @returns {Observable<NotificationDTO[]>} An Observable of fetched notifications.
+   */
+  private fetchInitialNotifications(limit: number, offset: number): Observable<NotificationDTO[]> {
+    return this.fetchNotifications(limit, offset, true);
+  }
+
+  /**
+   * Fetches more notifications from the server.
+   * @param {number} limit - The maximum number of notifications to fetch
+   * @param {number} offset - The offset for pagination
+   * @returns {Observable<NotificationDTO[]>} An Observable of fetched notifications
    */
   fetchMoreNotifications(limit: number, offset: number): Observable<NotificationDTO[]> {
-    return this.http.get<NotificationDTO[]>(`${environment.server}/notifications/all`, {
-      params: {
-        userId: this.userId!!.toString(),
-        limit: limit.toString(),
-        offset: offset.toString(),
-      }
-    }).pipe(
-      catchError(error => {
-        console.error('Error fetching more notifications:', error);
-        return of([]);
-      }),
-      tap(notifications => {
-        this.notifications = [...this.notifications, ...notifications];
-        this.notificationsSubject.next(this.notifications);
-      })
-    );
+    return this.fetchNotifications(limit, offset, false);
   }
 
   /**
@@ -259,28 +295,51 @@ export class NotificationService implements OnDestroy {
    * Handles a click on a notification.
    * @param {NotificationDTO} notification - The clicked notification
    * @param {string} action - The action to perform ('view' or other)
-   * @returns Observable of the updated notification
+   * @returns {Observable<NotificationDTO>} Observable of the updated notification
    */
   handleNotificationClick(notification: NotificationDTO, action: string): Observable<NotificationDTO> {
     if (!notification.isRead) {
-      return this.markNotificationAsRead(notification).pipe(
-        tap((updatedNotification) => {
-          this.updateLocalNotification(updatedNotification);
-          this.broadcastChannel.postMessage({ type: 'notificationRead', notificationId: updatedNotification.id });
-
-          if (action === 'view') {
-            this.closeNotificationPanelSubject.next(true);
-            this.navigate(updatedNotification);
-          }
-        })
-      );
-    } else if (action === 'view') {
-      this.closeNotificationPanelSubject.next(true);
-      this.navigate(notification);
-      return of(notification);
-    } else {
-      return of(notification);
+      return this.markAndNavigate(notification, action);
+    } else if (action === this.NOTIFICATION_ACTIONS.VIEW) {
+      return this.viewNotification(notification);
     }
+    return new Observable<NotificationDTO>(subscriber => {
+      subscriber.next(notification);
+      subscriber.complete();
+    });
+  }
+
+  /**
+   * Marks a notification as read and navigates to the appropriate page.
+   * @param {NotificationDTO} notification - The notification to mark as read
+   * @param {string} action - The action to perform ('view' or other)
+   * @returns {Observable<NotificationDTO>} Observable of the updated notification
+   */
+  private markAndNavigate(notification: NotificationDTO, action: string): Observable<NotificationDTO> {
+    return this.markNotificationAsRead(notification).pipe(
+      map((updatedNotification) => {
+        this.updateLocalNotification(updatedNotification);
+        this.broadcastChannel.postMessage({ type: this.NOTIFICATION_TYPES.NOTIFICATION_READ, notificationId: updatedNotification.id });
+        if (action === this.NOTIFICATION_ACTIONS.VIEW) {
+          this.viewNotification(updatedNotification);
+        }
+        return updatedNotification;
+      })
+    );
+  }
+
+  /**
+   *
+   * @param {NotificationDTO} notification - The notification to view
+   * @returns {Observable<NotificationDTO>} Observable of the viewed notification
+   */
+  private viewNotification(notification: NotificationDTO): Observable<NotificationDTO> {
+    this.closeNotificationPanelSubject.next(true);
+    this.navigate(notification);
+    return new Observable<NotificationDTO>(subscriber => {
+      subscriber.next(notification);
+      subscriber.complete();
+    });
   }
 
   /**
@@ -325,7 +384,11 @@ export class NotificationService implements OnDestroy {
    * @param {NotificationDTO} notification - The notification to send
    */
   sendNotification(notification: NotificationDTO) {
-    this.webSocketService.emit('notifications', { userId: notification.userId, message: notification.message });
+    this.webSocketService.emit(
+      this.NOTIFICATION_URL,
+      this.NOTIFICATION_NAMESPACE,
+      this.NOTIFICATION_SENDEVENT,
+      { userId: notification.userId, message: notification.message });
   }
 
   /**
@@ -362,6 +425,7 @@ export class NotificationService implements OnDestroy {
         this.syncUnreadCount();
         return response;
       }),
+      catchError(this.handleError<NotificationDTO>('markNotificationAsRead', notification))
     );
   }
 
@@ -372,8 +436,9 @@ export class NotificationService implements OnDestroy {
   getUnreadCountFromServer(): Observable<number> {
     return this.http.get<number>(`${environment.server}/notifications/${this.userId}/unread-count`)
       .pipe(
-        tap(count => {
+        map(count => {
           this.setUnreadCount(count, true);
+          return count;
         }),
         catchError(error => {
           console.error('Error fetching unread notifications count:', error);
@@ -420,10 +485,16 @@ export class NotificationService implements OnDestroy {
    * @param {boolean} broadcast - Whether to broadcast the change to other tabs
    */
   private setUnreadCount(newCount: number, broadcast: boolean): void {
-    localStorage.setItem('unreadCount', newCount.toString());
-    this.unreadCountSubject.next(newCount);
-    if (broadcast) {
-      this.broadcastChannel.postMessage({ type: 'unreadCount', count: newCount });
+    try {
+      localStorage.setItem('unreadCount', newCount.toString());
+      this.unreadCountSubject.next(newCount);
+      if (broadcast) {
+        this.broadcastChannel.postMessage({ type: 'unreadCount', count: newCount });
+      }
+    } catch (error) {
+      console.error('Error setting unread count:', error);
+      // Fallback behavior or error notification
     }
   }
+
 }
