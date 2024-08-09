@@ -6,6 +6,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Response } from 'express';
 import { EventLogService } from '@/EventLog/event-log.service';
 import { ChatOpenAI } from "langchain/chat_models/openai";
+import { Client } from "langsmith";
+import { LangChainTracer } from "langchain/callbacks";
 
 const {
   ChatPromptTemplate,
@@ -15,7 +17,7 @@ const {
 
 //const KImodel = 'gpt-4-0314';
 //const KImodel = 'gpt-3.5-turbo';
-const KImodel = 'gpt-4-turbo-2024-04-09';
+const KImodel = 'gpt-4o-2024-08-06';
 
 const chat = new ChatOpenAI({
   modelName: KImodel,
@@ -24,13 +26,26 @@ const chat = new ChatOpenAI({
   streaming: true
 });
 
+const individualFeedbackPromptLevel1: String =
+'Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken. ' +
+'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren.'+
+'Verwende eine sehr einfache Sprache und erkläre die Konzepte ausführlich Schritt für Schritt. Gib viele Details und Beispiele, um das Verständnis zu fördern. Die Antwort muss so formuliert sein, sodass ein absoluter Programmieranfänger sie versteht.\n'
+
+const individualFeedbackPromptLevel2: String =
+'Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken. ' +
+'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren.'
+
+const individualFeedbackPromptLevel3: String =
+'Deine Antwort besteht nur aus EINER EINZIGEN sokratischen Frage, um den Studenten zur eigenen Problemlösung zu führen. Reduziere die direkte Hilfestellung und fördere das eigenständige Denken.'
+
+
 const chatPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
-    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
-    'Die Studenten lösen Programmieraufgaben und du gibst Ihnen kurzes hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken. ' + // entfernt: und passende Quellen aus der Vorlesung verlinken.
-    'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren. '+
-    'DU VERRÄST DU NIEMALS DIE LÖSUNG. ES IST DIR VERBOTEN, PROGRAMMCODE ZU FORMULIEREN! ' +
-    'Dein kurzes hilfreichses Feedback ist maximal sechs Sätze auf drei Absätze lang oder kürzer. Es ist verboten, die Unit-Tests zu erwähnen!',
+    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen von Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung.\n' +
+    '{individualFeedbackPrompt}' +
+
+    'Dein kurzes, hilfreiches Feedback besteht aus maximal sechs Sätzen, aufgeteilt auf höchstens drei Absätze. Es ist verboten, die Unit-Tests zu erwähnen!' +
+    'DU VERRÄTST NIEMALS DIE LÖSUNG.'
   ),
   HumanMessagePromptTemplate.fromTemplate(
     '# Aufgabe die vom Studenten gelöst werden soll:\n{task}\n' +
@@ -43,6 +58,16 @@ const chatPrompt = ChatPromptTemplate.fromPromptMessages([
       '## Ergebnis der Unit-Tests \n {unitTestsResults}\n'
   ),
 ]);
+
+const client = new Client({
+  apiUrl: "https://api.smith.langchain.com",
+  apiKey: process.env.LANGCHAIN_API_KEY
+});
+const tracer = new LangChainTracer({
+  projectName: "GOALS_feedback_normal",
+  client
+});
+
 @Injectable()
 export class FeedbackNormalService {
   constructor(
@@ -51,6 +76,7 @@ export class FeedbackNormalService {
     private readonly cryptoService: CryptoService,
     private eventLogService: EventLogService
   ) { }
+
 
   /**
    * Gets feedback from the AI.
@@ -64,13 +90,13 @@ export class FeedbackNormalService {
   async getKiFeedback(
     questionId: number,
     flavor: string,
+    feedbackLevel: string,
     relatedCodeSubmissionResult: CodeSubmissionResultDto,
     res: Response,
     userId: number,
   ): Promise<void> {
 
     const sumbissionId = Number(this.cryptoService.decrypt(relatedCodeSubmissionResult.encryptedCodeSubissionId));
-    console.log("Question ID: " + questionId);
     const question = await this.prisma.question.findUnique({
       where: { id: questionId },
       include: {
@@ -95,7 +121,11 @@ export class FeedbackNormalService {
       },
     });
 
+    const individualFeedbackPrompt: String = feedbackLevel === 'Wenig Unterstützung' ? individualFeedbackPromptLevel3 : feedbackLevel === 'Standard Unterstützung' ? individualFeedbackPromptLevel2 : individualFeedbackPromptLevel1;
+
+
     const formattedPrompt = await chatPrompt.formatPromptValue({
+      individualFeedbackPrompt: individualFeedbackPrompt,
       task: question.codingQuestions.text,
       language: question.codingQuestions.programmingLanguage,
       code: relatedCodeSubmission.code,
@@ -112,6 +142,7 @@ export class FeedbackNormalService {
           res.write(token);
         },
       },
+      tracer
     ],
     );
     this.eventLogService.log(
@@ -132,7 +163,7 @@ export class FeedbackNormalService {
         prompt: JSON.stringify(formattedPrompt),
         response: openAiResponse.generations[0][0].text,
         model: KImodel,
-        flavor: flavor,
+        flavor: flavor + ": " + feedbackLevel,
       },
     });
 

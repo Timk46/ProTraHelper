@@ -48,12 +48,14 @@ export class RunCodeService {
   getKiFeedback(
     questionId: number,
     flavor: string,
+    feedbackLevel: string,
     relatedCodeSubmissionResult: CodeSubmissionResultDto
   ): Observable<string> {
 
     const body = {
       questionId: questionId,
       flavor: flavor,
+      feedbackLevel: feedbackLevel,
       relatedCodeSubmissionResult: relatedCodeSubmissionResult
     };
 
