@@ -27,16 +27,16 @@ const chat = new ChatOpenAI({
 });
 
 const individualFeedbackPromptLevel1: String =
-'Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
+'Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken. ' +
 'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren.'+
-'Verwende eine sehr einfache Sprache und erkläre die Konzepte ausführlich. Gib viele Details und Beispiele, um das Verständnis zu fördern. Stelle sicher, dass die Erklärungen schrittweise sind und grundlegende Prinzipien abdecken, sodass ein absoluter Programmieranfänger sie versteht.\n'
+'Verwende eine sehr einfache Sprache und erkläre die Konzepte ausführlich Schritt für Schritt. Gib viele Details und Beispiele, um das Verständnis zu fördern. Die Antwort muss so formuliert sein, sodass ein absoluter Programmieranfänger sie versteht.\n'
 
 const individualFeedbackPromptLevel2: String =
-'Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
+'Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken. ' +
 'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren.'
 
 const individualFeedbackPromptLevel3: String =
-'Stelle nur EINE EINZIGE sokratische Frage, um den Studenten zur eigenen Problemlösung zu führen. Reduziere die direkte Hilfestellung und fördere das eigenständige Denken. Deine Antwort besteht nur aus einer einzigen sokratischen Frage und aus Hinweisen auf Vorlesungsinhalte (maximal 2 Sätze).'
+'Deine Antwort besteht nur aus EINER EINZIGEN sokratischen Frage, um den Studenten zur eigenen Problemlösung zu führen. Reduziere die direkte Hilfestellung und fördere das eigenständige Denken.'
 
 
 const chatPrompt = ChatPromptTemplate.fromPromptMessages([
