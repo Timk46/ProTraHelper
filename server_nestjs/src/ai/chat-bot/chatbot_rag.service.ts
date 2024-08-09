@@ -14,7 +14,7 @@ const {
   SystemMessagePromptTemplate,
 } = require('langchain/prompts');
 
-const KImodel = 'gpt-4o-2024-05-13';
+const KImodel = 'gpt-4o-2024-08-06';
 
 const chatStream = new ChatOpenAI({
   modelName: KImodel,
