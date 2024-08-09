@@ -20,11 +20,12 @@ const {ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTempla
 const KImodel = 'gpt-4o-2024-08-06';
 
 const individualFeedbackPromptLevel1: String =
-'Gib immer, wenn es passt, Code-Beispiele, die die Syntax demonstrieren. VERWENDE DAZU EINEN KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN!' +
+'Gib immer, wenn es passt, Code-Beispiele, die die Syntax demonstrieren. VERWENDE DAZU EINEN KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN! ES IST STRENG VERBOTEN, DIE LÖSUNG ZUR AUFGABE DIREKT ZU VERRATEN!' +
 'Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise darauf und ergänze Erklärungen. Das ist wichtig, damit die Studenten lernen, die Compiler-Ausgabe zu lesen und zu verstehen. ' +
 
 'Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
 'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren.'+
+
 'Verwende eine sehr einfache Sprache und erkläre die Konzepte ausführlich. Gib viele Details und Beispiele, um das Verständnis zu fördern. Stelle sicher, dass die Erklärungen schrittweise sind und grundlegende Prinzipien abdecken, sodass ein absoluter Programmieranfänger sie versteht.\n'
 
 const individualFeedbackPromptLevel2: String =
