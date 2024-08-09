@@ -101,6 +101,7 @@ export class ChatBotRAGService {
     for (const item of similaritySearchResult) {
       sourceCounter++;
       sourceMapDict[sourceCounter.toString()] = item.Quelle;
+      item.Quelle = "$$" + sourceCounter.toString() + "$$";
     }
 
     // Format the prompt for the RAG model
