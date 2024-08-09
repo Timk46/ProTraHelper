@@ -2,7 +2,7 @@ import { EditorElement } from "../dtos/index";
 import { Side } from "./UMLines.interface";
 
 export interface ClassEdge {
-  identification: string;
+  identification?: string;
   type: EditorElement;
   id: string;
   start: string;

@@ -34,7 +34,7 @@ export enum EditorElement {
     // ...
 }
 
-export const SwappableEditorElement: EditorElement[]= [
+export const swappableEditorElement: EditorElement[]= [
     EditorElement.CD_ASSOCIATION,
     EditorElement.CD_BIDIRECTIONAL_ASSOCIATION,
 ];

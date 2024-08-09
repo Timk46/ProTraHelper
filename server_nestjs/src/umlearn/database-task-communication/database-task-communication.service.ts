@@ -10,6 +10,7 @@ import { Prisma } from '@prisma/client';
 import { CompareService } from '../compare/compare.service';
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { FeedbackRAGService } from '@/ai/feedback-generation/feedback-rag.service';
+import { SimilarityCompareService } from '../compare/similarity-compare.service';
 
 @Injectable()
 export class DatabaseTaskCommunicationService {
@@ -17,6 +18,7 @@ export class DatabaseTaskCommunicationService {
   constructor(
     private prisma: PrismaService,
     private compareService: CompareService,
+    private similarityCompareService: SimilarityCompareService,
     private feedbackGenerationService: FeedbackGenerationService,
     private feedbackRagService: FeedbackRAGService
   ) { }
@@ -867,7 +869,8 @@ export class DatabaseTaskCommunicationService {
     const studentAttempt = await this.getTaskAttemptData(taskId, studentId);
 
     //return this.feedbackGenerationService.generateUMLearnFeedback(taskSolution.UmlQuestion.text, studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
-    return this.feedbackRagService.generateUmlFeedback(taskSolution.UmlQuestion.text, studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
+    //return this.feedbackRagService.generateUmlFeedback(taskSolution.UmlQuestion.text, studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
+    return { response: this.similarityCompareService.findAndGenerateGraphSimilarityLog(studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO) };
   }
 
   async generateUmlFeedbackByHighlighted(taskId: number, studentId: number): Promise<{response: string}> {

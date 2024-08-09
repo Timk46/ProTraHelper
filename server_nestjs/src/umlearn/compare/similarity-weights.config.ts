@@ -21,8 +21,8 @@ export const edgeWeights = {
   type: 0.2,
   start: 0.15,
   end: 0.15,
-  cardinalityStart: 0.2,
-  description: 0.1,
-  cardinalityEnd: 0.2,
+  cardinalityStart: 0.1,
+  description: 0.3,
+  cardinalityEnd: 0.1,
 }
 
