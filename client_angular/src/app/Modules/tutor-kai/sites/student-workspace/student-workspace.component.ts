@@ -41,10 +41,17 @@ export class StudentWorkspaceComponent implements OnInit {
   currentTaskId: number = 0;
   tasks: QuestionDTO[] = [];
   tasksOfSelectedWeek: QuestionDTO[] = [];
-  flavor: string = 'Schnelles Feedback';
+  flavor: string = 'Feedback mit Konzept-Erklärung';
   flavorOptions: string[] = [
-    'Schnelles Feedback',
-    'Feedback mit Vorlesungsinformationen',
+    'Standard Feedback',
+    'Feedback mit Konzept-Erklärung',
+  ];
+
+  feedbackLevel: string = 'Standard Unterstützung';
+  feedbackLevelOptions: string[] = [
+    'Wenig Unterstützung',
+    'Standard Unterstützung',
+    'Viel Unterstützung',
   ];
 
   selectedWeek = 0;
@@ -57,7 +64,7 @@ export class StudentWorkspaceComponent implements OnInit {
   isLoading: boolean = false;
   compilerOutput: string | null = '';
   feedbackMessage: string =
-    'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben. Führe dafür erst deinen Programmcode aus und klicke dann auf den Button "Feedback erzeugen".';
+    'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben.';
   currentLoadingFeedbackMessage: string = '';
   lastResult: any;
 
@@ -166,6 +173,7 @@ export class StudentWorkspaceComponent implements OnInit {
       .getKiFeedback(
         this.currentTaskId,
         this.flavor,
+        this.feedbackLevel,
         this.lastResult
       )
       .subscribe({
@@ -225,7 +233,7 @@ export class StudentWorkspaceComponent implements OnInit {
     this.compilerOutput +=
       result.CodeSubmissionResult.output.length === 0 ? 'Keine Ausgabe' : '';
     this.isLoading = false;
-    this.feedbackMessage = 'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben. Führe dafür erst deinen Programmcode aus und klicke dann auf den Button "Feedback erzeugen".';
+    this.feedbackMessage = 'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben.';
     this.currentState = States.submittedCode;
     if (result.CodeSubmissionResult.score === 100) {
       this.confettiService.celebrate(6,800); // small confetti animation :)

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from "@angular/core";
 
 /**
  * A component that wraps the ngx-monaco-editor and provides additional functionality.
@@ -8,10 +8,19 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   templateUrl: './code-editor.component.html',
   styleUrls: ['./code-editor.component.scss'],
 })
-export class CodeEditorComponent {
+
+export class CodeEditorComponent implements AfterViewInit {
+  @ViewChild('resizeHandle', { static: false }) resizeHandle!: ElementRef;
+  @ViewChild('monacoEditor', { static: false }) monacoEditor!: any;
+
   @Input() selectedLanguage: string | undefined = 'java';
   @Input() code: string = '';
   @Output() codeChange = new EventEmitter<string>();
+
+  editorHeight: number = 600; // Default height
+  private isDragging: boolean = false;
+  private startY: number = 0;
+  private startHeight: number = 0;
 
   // For Monaco Code Editor
   editorOptions = {
@@ -21,6 +30,12 @@ export class CodeEditorComponent {
     automaticLayout: true,
   };
 
+  constructor(private cdr: ChangeDetectorRef) {}
+
+  ngAfterViewInit() {
+    this.setupResizeListener();
+  }
+
   ngOnInit(): void {
     this.editorOptions = {
       ...this.editorOptions,
@@ -28,6 +43,42 @@ export class CodeEditorComponent {
     };
   }
 
+  /**
+   * Sets up event listeners for resizing the editor.
+   */
+  private setupResizeListener(): void {
+    const resizeHandle = this.resizeHandle.nativeElement;
+
+    resizeHandle.addEventListener('mousedown', (e: MouseEvent) => {
+      this.isDragging = true;
+      this.startY = e.clientY;
+      this.startHeight = this.editorHeight;
+      document.addEventListener('mousemove', this.resize);
+      document.addEventListener('mouseup', this.stopResize);
+    });
+  }
+
+  /**
+   * Handles the resizing of the editor.
+   */
+  private resize = (e: MouseEvent) => {
+    if (!this.isDragging) return;
+    const deltaY = e.clientY - this.startY;
+    this.editorHeight = Math.max(200, Math.min(800, this.startHeight + deltaY));
+    this.cdr.detectChanges(); // Trigger change detection
+    if (this.monacoEditor && this.monacoEditor.editor) {
+      this.monacoEditor.editor.layout();
+    }
+  }
+
+  /**
+   * Stops the resizing operation.
+   */
+  private stopResize = () => {
+    this.isDragging = false;
+    document.removeEventListener('mousemove', this.resize);
+    document.removeEventListener('mouseup', this.stopResize);
+  }
 
   /**
    * Change the language of the editor.
@@ -36,7 +87,6 @@ export class CodeEditorComponent {
   changeLanguage(language: string | undefined): void {
     if (language === undefined) return;
     this.selectedLanguage = language;
-    //console.log(language);
     this.editorOptions = {
       ...this.editorOptions,
       language: this.selectedLanguage,

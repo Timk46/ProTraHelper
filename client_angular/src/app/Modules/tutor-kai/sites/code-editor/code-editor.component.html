@@ -1,1 +1,12 @@
-<ngx-monaco-editor [(ngModel)]="code" (ngModelChange)="changeCode($event)" [options]="editorOptions" style="height: 100%; overflow: auto;"></ngx-monaco-editor>
+<div class="code-editor-container" [style.height.px]="editorHeight">
+  <ngx-monaco-editor
+    #monacoEditor
+    [(ngModel)]="code"
+    (ngModelChange)="changeCode($event)"
+    [options]="editorOptions"
+    style="width: 100%; height: calc(100% - 10px);">
+  </ngx-monaco-editor>
+  <div #resizeHandle class="resize-handle">
+    <div class="resize-icon"></div>
+  </div>
+</div>

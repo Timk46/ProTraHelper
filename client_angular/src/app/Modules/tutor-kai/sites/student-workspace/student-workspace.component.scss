@@ -4,6 +4,11 @@ $snowstorm_3: #d8dee9;
 
 $polarNight_4: #2e3440;
 
+.feedback-message {
+  font-size: 1.2em;
+  line-height: 1.6;
+}
+
 .polarNight_4_text {
   color: $polarNight_4;
 }
@@ -78,7 +83,7 @@ resize {
 }
 .code-editor-parent
 {
-  height: 400px;
+  height: 100%;
 }
 
 .test-results {

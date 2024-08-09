@@ -472,9 +472,9 @@ model ChatBotMessage {
   answer     String?
   createdAt  DateTime @default(now())
   isBot      Boolean  @default(false)
-  usedChunks String?
-  userId     Int?
+  usedChunks String?  @db.Text // wird für die Dialog ID gentutzt
   user       User?    @relation(fields: [userId], references: [id])
+  userId     Int?
 }
 
 model UserContentElementProgress {

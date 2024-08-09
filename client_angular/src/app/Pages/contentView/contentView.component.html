@@ -1,12 +1,12 @@
 <!-- Create a Card for each Content Element and display PDF, Video etc. depending on type-->
 <!-- <div class="center"> -->
-<mat-card *ngFor="let contentElem of viewableElements " class="contentView-card">
+<mat-card *ngFor="let contentElem of viewableElements; index as i; let l = count " class="contentView-card">
 
   <!--Show Content Title, if it has any-->
   <mat-card-header *ngIf="contentElem.title">
     <mat-card-title-group>
       <mat-card-title>
-        {{contentViewData.name}} - Zuletzt geöffnet: {{ readableDate }}</mat-card-title>
+        {{contentViewData.name}} ( {{i+1}} von {{l}} ) - Zuletzt geöffnet: {{ readableDate }}</mat-card-title>
           <!-- We could add an subtitle or icon to the header aswell
           <mat-card-subtitle>Extra large</mat-card-subtitle>
           <img mat-card-xl-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" >
