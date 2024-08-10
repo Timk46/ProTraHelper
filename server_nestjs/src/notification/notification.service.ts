@@ -1,15 +1,28 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
-import { NotificationDTO } from '@Interfaces/index';
+import { NotificationDTO, NotificationType } from '@Interfaces/index';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Subject } from 'rxjs';
-
+import { Prisma } from '@prisma/client';
+import { Notification } from '@prisma/client';
 @Injectable()
-export class NotificationService   {
+export class NotificationService {
   private notificationSubject = new Subject<NotificationDTO>();
   notification$ = this.notificationSubject.asObservable();
 
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
+
+  // Select fields for notifications
+  private notificationSelect: Prisma.NotificationSelect = {
+    id: true,
+    userId: true,
+    message: true,
+    timestamp: true,
+    isRead: true,
+    readTimestamp: true,
+    type: true,
+    discussionId: true,
+  };
 
   /**
    * Notify a user by creating a notification and emitting it
@@ -28,6 +41,7 @@ export class NotificationService   {
   /**
    * Notify multiple users by creating notifications and emitting them
    * @param {NotificationDTO[]} notifications
+   * @returns {Promise<NotificationDTO[]>} the created notifications
    */
   async notifyUsers(notifications: NotificationDTO[]): Promise<NotificationDTO[]> {
     try {
@@ -42,22 +56,21 @@ export class NotificationService   {
         })),
       });
 
-      // Fetch the created notifications to get their IDs
       const newNotifications = await this.prisma.notification.findMany({
         where: {
           userId: { in: notifications.map(n => n.userId) },
-          timestamp: { gte: new Date(Date.now() - 1000) } // Assuming creation took less than a second
+          timestamp: { gte: new Date(Date.now() - 1000) }
         },
         orderBy: { timestamp: 'desc' },
-        take: notifications.length
+        take: notifications.length,
+        select: this.notificationSelect,
       });
 
-      // Emit notifications
       newNotifications.forEach(notification => {
         this.notificationSubject.next(this.toNotificationDTO(notification));
       });
 
-      return newNotifications;
+      return newNotifications.map(this.toNotificationDTO);
     } catch (error) {
       console.error('Error notifying users:', error);
       throw error;
@@ -65,11 +78,13 @@ export class NotificationService   {
   }
 
   /**
-   * paginated approach to notify all users
-   * @param {NotificationDTO} notification
+   * Paginated approach to notify all users
+   * @param {Omit<NotificationDTO, 'userId'>} notification
+   * @param {number} page
+   * @param {number} pageSize
    */
   async notifyAllUsers(notification: Omit<NotificationDTO, 'userId'>, page = 1, pageSize = 100): Promise<void> {
-   const skip = (page - 1) * pageSize;
+    const skip = (page - 1) * pageSize;
 
     try {
       const users = await this.prisma.user.findMany({
@@ -88,7 +103,6 @@ export class NotificationService   {
 
         await this.notifyUsers(notifications);
 
-        // Recursively call for next page if there are more users
         if (users.length === pageSize) {
           await this.notifyAllUsers(notification, page + 1, pageSize);
         }
@@ -99,9 +113,9 @@ export class NotificationService   {
   }
 
   /**
-   * save the notification to the database
+   * Save the notification to the database
    * @param {NotificationDTO} notification
-   * @returns {Promise<Notification>}
+   * @returns {Promise<NotificationDTO>}
    */
   async createNotification(notification: NotificationDTO): Promise<NotificationDTO> {
     try {
@@ -114,7 +128,8 @@ export class NotificationService   {
           readTimestamp: notification.readTimestamp,
           type: notification.type,
           discussionId: notification.discussionId,
-        }
+        },
+        select: this.notificationSelect,
       });
 
       return this.toNotificationDTO(createdNotification);
@@ -125,20 +140,23 @@ export class NotificationService   {
   }
 
   /**
-   * get all notifications with descending timestamp order
+   * Get all notifications with descending timestamp order
    * @param {number} userId
-   * @returns {Promise<NotificationDTO>} all notifications
+   * @param {number} limit
+   * @param {number} offset
+   * @returns {Promise<NotificationDTO[]>} all notifications
    */
   async getAllNotifications(userId: number, limit: number, offset: number): Promise<NotificationDTO[]> {
     try {
       const notifications = await this.prisma.notification.findMany({
         where: { userId: Number(userId) },
         orderBy: [
-          { isRead: 'asc' }, // Unread notifications come first
+          { isRead: 'asc' },
           { timestamp: 'desc' }
         ],
         take: Number(limit),
-        skip: Number(offset)
+        skip: Number(offset),
+        select: this.notificationSelect,
       });
 
       return notifications.map(this.toNotificationDTO);
@@ -149,13 +167,13 @@ export class NotificationService   {
   }
 
   /**
-   * update the notification with the given id
+   * Update the notification with the given id
    * @param {NotificationDTO} notification
    * @param {number} id
    * @returns {Promise<NotificationDTO>} updated notification
    */
-  async updateNotification(notification: NotificationDTO, id: number): Promise<NotificationDTO>{
-   try {
+  async updateNotification(notification: NotificationDTO, id: number): Promise<NotificationDTO> {
+    try {
       const updatedNotification = await this.prisma.notification.update({
         where: { id: id },
         data: {
@@ -165,7 +183,8 @@ export class NotificationService   {
           isRead: notification.isRead,
           readTimestamp: notification.readTimestamp,
           type: notification.type
-        }
+        },
+        select: this.notificationSelect,
       });
 
       return this.toNotificationDTO(updatedNotification);
@@ -176,14 +195,15 @@ export class NotificationService   {
   }
 
   /**
-   * delete the notification with the given id
+   * Delete the notification with the given id
    * @param {number} id
    * @returns {Promise<NotificationDTO>} deleted notification
    */
   async deleteNotification(id: number): Promise<NotificationDTO> {
     try {
       const deletedNotification = await this.prisma.notification.delete({
-        where: { id: id }
+        where: { id: id },
+        select: this.notificationSelect,
       });
       return this.toNotificationDTO(deletedNotification);
     } catch (error) {
@@ -208,7 +228,8 @@ export class NotificationService   {
           where: { userId: userId, isRead: false },
           orderBy: { timestamp: 'desc' },
           skip: skip,
-          take: pageSize
+          take: pageSize,
+          select: this.notificationSelect,
         }),
         this.prisma.notification.count({ where: { userId: userId, isRead: false } })
       ]);
@@ -235,7 +256,8 @@ export class NotificationService   {
         data: {
           isRead: true,
           readTimestamp: new Date(),
-        }
+        },
+        select: this.notificationSelect,
       });
 
       return this.toNotificationDTO(updatedNotification);
@@ -263,7 +285,8 @@ export class NotificationService   {
           }
         }),
         this.prisma.notification.findMany({
-          where: { userId: userId, isRead: true, readTimestamp: currentTime }
+          where: { userId: userId, isRead: true, readTimestamp: currentTime },
+          select: this.notificationSelect,
         })
       ]);
 
@@ -274,7 +297,7 @@ export class NotificationService   {
     }
   }
 
-   /**
+  /**
    * Get the count of unread notifications for a user
    * @param {number} userId
    * @returns {Promise<number>} The count of unread notifications
@@ -295,22 +318,13 @@ export class NotificationService   {
 
   /**
    * Convert a Prisma notification to a NotificationDTO
-   * @param prismaNotification
+   * @param {Notification} prismaNotification
    * @returns {NotificationDTO} the notification as DTO
    */
-  private toNotificationDTO(prismaNotification: NotificationDTO): NotificationDTO {
+  private toNotificationDTO(prismaNotification: Notification): NotificationDTO {
     return {
-        id: prismaNotification.id,
-        userId: prismaNotification.userId,
-        message: prismaNotification.message,
-        timestamp: prismaNotification.timestamp,
-        isRead: prismaNotification.isRead,
-        readTimestamp: prismaNotification.readTimestamp,
-        type: prismaNotification.type,
-        discussionId: prismaNotification.discussionId,
+      ...prismaNotification,
+      type: prismaNotification.type as NotificationType
     };
   }
-
 }
-
-
