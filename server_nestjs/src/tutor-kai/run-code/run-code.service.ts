@@ -231,7 +231,7 @@ export class RunCodeService {
     let markedAsDone = false;
     if (progress === 1) {
       markedAsDone = true;
-      this.contentService.questionContentElementDone(
+      await this.contentService.questionContentElementDone(
         contentElement.id,
         question.conceptNodeId,
         question.level,

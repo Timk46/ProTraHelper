@@ -97,7 +97,7 @@ export class QuestionDataService {
 
         return mcOptions;
     }
-    
+
     /**
      *
      * @param mcQuestion_id
@@ -129,8 +129,8 @@ export class QuestionDataService {
         }
 
         return mcOptions;
-    }    
-    
+    }
+
     /**
      * get the free text question, including the solution and expectations if requested
      * @param questionVersionId
@@ -340,7 +340,7 @@ export class QuestionDataService {
      */
     async createUserAnswer(userId: number, answerData: UserAnswerDataDTO) : Promise<userAnswerFeedbackDTO> {
         console.log('create user answer: '+userId + ' ' + answerData.questionId + ' ' + answerData.contentElementId);
-        
+
         const createdData = await this.prisma.userAnswer.create({
             data: {
                 userId: userId,
@@ -387,7 +387,7 @@ export class QuestionDataService {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
                 //set contentElement as done
                 console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNode + ' level: ' + question.level + ' userId: ' + userId)
-                this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
+                await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
             }
             else {
@@ -435,7 +435,7 @@ export class QuestionDataService {
                 else {
                     console.log('answer not correct');
                     userScore = 0;
-                } 
+                }
             }
 
             let feedbackText = "";
@@ -443,7 +443,7 @@ export class QuestionDataService {
             if(progress == 1) {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
                 console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNode + ' level: ' + question.level + ' userId: ' + userId)
-                this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
+                await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
             }
             else {
@@ -495,9 +495,9 @@ export class QuestionDataService {
             console.log('progress: '+progress);
 
             if(progress == 1) {
-                this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
+                await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
-                
+
             }
 
             console.log('generated Text:', feedbackText);

@@ -381,7 +381,7 @@ export class ContentService {
         },
       });
     }
-    this.userConceptService.checkUserConceptLevelAward(
+    await this.userConceptService.checkUserConceptLevelAward(
       userId,
       contentElementId,
       conceptNodeId,
