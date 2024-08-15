@@ -1,6 +1,23 @@
+$orange: #FF893B;
+$black: #465461;
+$blue: #729CA2;
+$light_blue: #C4DCDF;
+$white: #ECF3F4;
+
 .chat-button {
-  z-index:2;
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-}
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: 5%;
+    right: 3%;
+    background-color: $black;
+    z-index: 1000;
+  
+    .button-icon {
+      width: 75%; 
+      padding-left: 12px;
+
+    }
+  }
+  

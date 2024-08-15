@@ -40,6 +40,7 @@ export class RunCodeController {
   async evaluateCode(
     @Body('questionId') questionId: number,
     @Body('flavor') flavor: string,
+    @Body('feedbackLevel') feedbackLevel: string,
     @Body('relatedCodeSubmissionResult') relatedCodeSubmissionResult: CodeSubmissionResultDto,
     @Res() res: Response,
     @Req() req
@@ -47,20 +48,22 @@ export class RunCodeController {
     res.set('Content-Type', 'text/plain');
     res.setHeader('Transfer-Encoding', 'chunked');
 
-    if (flavor == 'Schnelles Feedback') {
+    if (flavor == 'Standard Feedback') {
       const result = await this.feedbackNormalService.getKiFeedback(
         Number(questionId),
         flavor,
+        feedbackLevel,
         relatedCodeSubmissionResult,
         res,
         req.user.id
       );
     }
 
-      if (flavor == 'Feedback mit Vorlesungsinformationen') {
+      if (flavor == 'Feedback mit Konzept-Erklärung') {
       const result = await this.feedbackRAGService.getKiFeedback(
         Number(questionId),
         flavor,
+        feedbackLevel,
         relatedCodeSubmissionResult,
         res,
         req.user.id
