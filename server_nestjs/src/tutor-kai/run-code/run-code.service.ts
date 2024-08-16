@@ -52,7 +52,6 @@ export class RunCodeService {
         conceptNode: true,
       },
     });
-    console.log(JSON.stringify(question));
     if (!question) {
       throw new HttpException(
         'Diese Question existiert nicht.',
@@ -105,10 +104,6 @@ export class RunCodeService {
     mainClassName: string,
   ): Promise<CodeSubmissionResult> {
     const tempClassName = 'de.goals.testing.' + mainClassName.split('.java')[0];
-    console.log('Jury1: Run Assignment Java:');
-    console.log(
-      JSON.stringify({ mainClassName: tempClassName, files, testFiles }),
-    );
     const response = await fetch(`${this.apiUrl}java-assignment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -123,8 +118,6 @@ export class RunCodeService {
     }
 
     const result: CodeSubmissionResult = await response.json();
-    console.log('Jury1: Run Assignment Java RESULTS: ');
-    console.log(result);
     return result;
   }
 
@@ -140,15 +133,6 @@ export class RunCodeService {
     runMethod: string,
     inputArguments: string,
   ): Promise<any> {
-    console.log('Jury1: Run Assignment Python:');
-    console.log(
-      JSON.stringify({
-        input: inputArguments,
-        runMethod: runMethod,
-        mainFile,
-        testFiles,
-      }),
-    );
     const response = await fetch(`${this.apiUrl}python-assignment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -167,8 +151,6 @@ export class RunCodeService {
       );
     }
     const result = await response.json();
-    console.log('Jury1: Run Assignment Python RESULTS: ');
-    console.log(result);
     return result;
   }
 
@@ -249,7 +231,7 @@ export class RunCodeService {
     let markedAsDone = false;
     if (progress === 1) {
       markedAsDone = true;
-      this.contentService.questionContentElementDone(
+      await this.contentService.questionContentElementDone(
         contentElement.id,
         question.conceptNodeId,
         question.level,

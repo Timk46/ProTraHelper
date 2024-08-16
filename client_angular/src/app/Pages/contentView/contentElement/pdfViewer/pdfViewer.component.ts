@@ -1,7 +1,7 @@
-import { 
-  Component, 
-  Input, 
-  OnInit, 
+import {
+  Component,
+  Input,
+  OnInit,
   ChangeDetectionStrategy,
   ViewChild,
   ElementRef,

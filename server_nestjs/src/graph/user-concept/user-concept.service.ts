@@ -85,7 +85,7 @@ export class UserConceptService {
         userId: userId,
       },
     });
-    
+
     if (!userConcept) {
       userConcept = await this.prisma.userConcept.create({
         data: {
@@ -160,7 +160,7 @@ export class UserConceptService {
           if (allContentElementsDone) {
             levelAward = true;
             console.log('update user level on ' + level);
-            this.updateUserLevel(userId, conceptNodeId, level);
+            await this.updateUserLevel(userId, conceptNodeId, level);
             break;
           }
         }

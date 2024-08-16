@@ -1,13 +1,6 @@
+import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { ContentDTO, ContentsForConceptDTO } from '@DTOs/content.dto';
-import {
-  Component,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  SimpleChanges,
-  ViewChild,
-} from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ContentViewComponent } from '../contentView/contentView.component';
@@ -18,6 +11,7 @@ import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-t
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { firstValueFrom, map, Observable, Subject, takeUntil } from 'rxjs';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+
 
 interface TaskViewData {
   contentNodeId: number;
@@ -36,8 +30,12 @@ interface TaskViewData {
   styleUrls: ['./contentBoard.component.css'],
 })
 export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
-  @Input() activeConceptNodeId: any; //needed for the discussion creation dialog
 
+  @Input() activeConceptNodeId: any;
+
+  /**
+   * The contents for the active concept node
+   */
   @Input() contentsForActiveConceptNode: ContentsForConceptDTO = {
     trainedBy: [],
     requiredBy: [],
@@ -45,69 +43,41 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
   @ViewChild(MatSort) sort: MatSort;
 
-  //the data for the table of questions
+  /**
+   * Columns to be displayed in the table
+   */
   displayedColumns: string[] = [
     'id',
     'name',
     'type',
     'progress',
-    //'level',
     'actions',
   ];
 
-  getRouterLink(index: number): string {
-    return `/tutor-kai/code/${index}`;
-  }
-
-  titles = [
-    'Python Kapitalwert',
-    'Python Buchhandlung',
-    'Python Quersumme',
-    'Python_Fibonacci Index',
-    'Buchstabenfrequenz',
-    'Rekursive Summe',
-    'Euklidischer Algorithmus',
-    'Sieb des Erathostenes',
-    'Java Alter',
-    'Java Bruchsumme',
-    'Java Discount',
-    'Java Maximalwert',
-    'Java Arrays und Schleifen',
-    'Java Königsschach',
-    'Java Switch',
-    'Java Bibliothek',
-    'Java GGT',
-    'Java Uni',
-    'Java VektorWork',
-    'Java_KFZ',
-    'Java_Punkt',
-    'Java_Bank',
-    'Java_Radio',
-    'UMLtoJava',
-    'Java_Airline',
-    'Java_Koerper',
-    'Java_Threads',
-    'Python Matrix',
-    'Python Funktionen',
-    'Python Potenz',
-    'Python Drehe String',
-    'Python Steuer',
-    'Python Filter Liste',
-    'Python Reduziere Liste',
-    'Python Fibonacci',
-    'Java Wettrennen',
-    'Java BubbleSort',
-    'Java UML to Java',
-  ];
-  private destroy$ = new Subject<void>();
+  /**
+   * Data source for the MatTable
+   */
   dataSource: MatTableDataSource<TaskViewData>;
 
-  constructor(private router: Router, public dialog: MatDialog, public sSS: ScreenSizeService) {
+  /**
+   * Subject to manage subscriptions and trigger their unsubscription on component destruction
+   */
+  private destroy$ = new Subject<void>();
+
+
+  constructor(
+    private router: Router,
+    public dialog: MatDialog,
+    public sSS: ScreenSizeService,
+    private progressService: ProgressService
+  ) {
+    // Initialize the data source for the table
     this.dataSource = new MatTableDataSource<TaskViewData>();
     this.sort = new MatSort();
   }
 
   ngOnInit() {
+    // Subscribe to screen size changes for responsive design
     this.sSS.isHandset.pipe(takeUntil(this.destroy$)).subscribe((isHandset) => {
       if (isHandset) {
         this.updateDisplayedColumns(['name', 'type', 'progress', 'actions']);
@@ -118,20 +88,178 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       if (isTablet) {
         this.updateDisplayedColumns(['id','name','type', 'progress', 'actions']);
       }
-    })
+    });
   }
 
-   updateDisplayedColumns(columns: string[]) {
-     this.displayedColumns = columns;
+  /**
+   * @description
+   * Updates the columns displayed in the table based on screen size
+   * @param columns - Array of column names to be displayed
+   */
+  updateDisplayedColumns(columns: string[]) {
+    this.displayedColumns = columns;
   }
 
+  /**
+   * @description
+   * Lifecycle hook that is called when any data-bound property of a directive changes.
+   * Updates the data source when the input properties change.
+   */
   ngOnChanges() {
+    this.updateDataSource();
+  }
+
+  /**
+   * @description
+   * Lifecycle hook that is called after the view has been initialized.
+   * Sets up sorting for the table.
+   */
+  ngAfterViewInit() {
+    this.dataSource.sort = this.sort;
+  }
+
+  /**
+   * @description
+   * Lifecycle hook that is called when the component is about to be destroyed.
+   * Cleans up subscriptions to prevent memory leaks.
+   */
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * @description
+   * Handles the click event for content elements Video and PDF.
+   * Opens a dialog to display the content and updates progress if necessary.
+   * @param content - The ContentDTO object that was clicked
+   * @param type - Array of content types
+   * @param event - The mouse event
+   */
+  async onContentClick(content: ContentDTO, type: string[], event: MouseEvent) {
+    // Prevent event propagation to parent elements
+    event.stopPropagation();
+
+    const dialogConfig = new MatDialogConfig();
+
+    // Determine if the device is in landscape mode
+    const isLandscape = await firstValueFrom(this.sSS.isLandscape);
+
+    // Set dialog dimensions based on screen orientation
+    dialogConfig.width = isLandscape ? '70vw' : '90%';
+    dialogConfig.maxHeight = isLandscape ? '95vh' : '80vh';
+
+    // Set dialog data
+    dialogConfig.data = {
+      contentViewData: content,
+      conceptNodeId: this.activeConceptNodeId,
+      contentTypes: type,
+    };
+
+    // Open the dialog
+    const dialogRef = this.dialog.open(ContentViewComponent, dialogConfig);
+
+    // Handle dialog close event
+    // We use this to update the data source and refresh graph is progress is 100%
+    dialogRef.afterClosed().subscribe(() => {
+      // Find the updated content in contentsForActiveConceptNode
+      const updatedContent = this.contentsForActiveConceptNode.trainedBy.find(
+        c => c.contentNodeId === content.contentNodeId
+      );
+
+      // If the content is fully completed (100% progress), trigger a graph update
+      if (updatedContent && updatedContent.progress > 99) {
+        this.progressService.answerSubmitted();
+      }
+
+      // Update the data source to reflect any changes
+      this.updateDataSource();
+    });
+  }
+
+  /**
+   * @description
+   * Handles the click event for content elements MC, SC, FreeText, or CodingQuestion
+   * Opens a dialog or navigates to the appropriate component based on the task type.
+   * @param taskViewData - The TaskViewData object that was clicked
+   */
+  onTaskClick(taskViewData: TaskViewData) {
+    // Create dialog configuration
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.data = {
+      taskViewData: taskViewData,
+    };
+    dialogConfig.width = 'auto';
+    dialogConfig.maxHeight = '95vh';
+
+    let dialogRef;
+
+    // Open the appropriate dialog based on the task type
+    switch (taskViewData.type) {
+      case 'MC':
+      case 'SC':
+        dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
+        break;
+      case 'FreeText':
+        dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
+        break;
+      case 'CodingQuestion':
+        // Navigate to coding question component
+        this.router.navigate([this.getRouterLink(taskViewData.id)]);
+        return;
+    }
+
+    // Handle dialog submission if a dialog was opened
+    if (dialogRef) {
+      const prevScore = taskViewData.progress;
+      const dialogSubmitSubscription = dialogRef.componentInstance.submitClicked.subscribe((score) => {
+        console.log("ABGABE: ");
+        this.dataSource.data = this.dataSource.data.map((element) => {
+          if (element.id === taskViewData.id) {
+            // Update the progress value of the task if the new score is higher
+            if(score > prevScore) {
+              element.progress = score;
+            }
+            // Update the contentNode that is connected to the task
+            if (score == 100 && prevScore != 100) {
+              this.contentsForActiveConceptNode.trainedBy.map((content) => {
+                if (content.contentElements.some(
+                  (element) => element.id === taskViewData.contentElementId
+                )) {
+                  const elementCount = content.contentElements.length;
+                  content.progress += 100 / elementCount;
+                  if (content.progress > 99) {
+                    content.progress = 100; // Prevent rounding errors
+                    this.progressService.answerSubmitted(); // Trigger graph update if content is fully completed
+                  }
+                  console.log("content.progress: ", content.progress);
+                }
+              });
+            }
+          }
+          return element;
+        });
+
+        // Unsubscribe from the dialog submit event
+        dialogSubmitSubscription.unsubscribe();
+      });
+    }
+  }
+
+  /**
+   * @description
+   * Updates the data source for the table based on the current contentsForActiveConceptNode
+   */
+  private updateDataSource() {
     const data: TaskViewData[] = [];
+    // Iterate through all content and their elements
     for (let content of this.contentsForActiveConceptNode.trainedBy) {
       for (let contentElement of content.contentElements) {
+        // Only include elements with questions
         if (contentElement.question == null) {
           continue;
         }
+        // Create a TaskViewData object for each question
         const input: TaskViewData = {
           contentNodeId: content.contentNodeId,
           contentElementId: contentElement.id,
@@ -147,110 +275,59 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         data.push(input);
       }
     }
-    this.dataSource = new MatTableDataSource(data);
+    // Update the data source with the new data
+    this.dataSource.data = data;
   }
 
-  ngAfterViewInit() {
-    this.dataSource.sort = this.sort;
+  /**
+   * @description
+   * Generates a router link for a coding question
+   * @param index - The ID of the coding question
+   * @returns The router link string
+   */
+  getRouterLink(index: number): string {
+    return `/tutor-kai/code/${index}`;
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  // For Video und PDF
-  async onContentClick(content: ContentDTO, type: string[], event: MouseEvent) {
-    event.stopPropagation(); // prevents any reaction from the expansion panel for clicks on video/pdf
-
-    // Create Dialog Config https://material.angular.io/components/dialog/api#MatDialogConfig
-    const dialogConfig = new MatDialogConfig();
-
-    const isLandscape = await firstValueFrom(this.sSS.isLandscape);
-
-    dialogConfig.width = isLandscape ? '70vw' : '90%';
-    dialogConfig.maxHeight = isLandscape ? '95vh' : '80vh';
-    dialogConfig.data = {
-      contentViewData: content,
-      conceptNodeId: this.activeConceptNodeId,
-      contentTypes: type,
-    };
-
-    // Open the Dialog with ContentViewComponent. We could navigate to the component instead aswell.
-    this.dialog.open(ContentViewComponent, dialogConfig);
-  }
-
-  onTaskClick(taskViewData: TaskViewData) {
-    const dialogConfig = new MatDialogConfig();
-    dialogConfig.data = {
-      taskViewData: taskViewData,
-    };
-    //dialogConfig.maxHeight = "80vh";
-    dialogConfig.width = 'auto';
-    dialogConfig.maxHeight = '95vh';
-    let dialogRef;
-    if (taskViewData.type == 'MC') {
-      dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
-    }
-
-    if (taskViewData.type == 'SC') {
-      dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
-    }
-
-    if (taskViewData.type == 'FreeText') {
-      dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
-    }
-
-    if (dialogRef) {
-      const prevScore = taskViewData.progress;
-      const dialogSubmitSubscription =
-        dialogRef.componentInstance.submitClicked.subscribe((score) => {
-          this.dataSource.data = this.dataSource.data.map((element) => {
-            if (element.id === taskViewData.id) {
-              // Update the progress value of the task
-              if(score > prevScore) {
-                element.progress = score;
-              }
-              // Update the contentNode that is connected to the task
-              if (score == 100 && prevScore != 100) {
-                this.contentsForActiveConceptNode.trainedBy.map((content) => {
-                  if (
-                    content.contentElements.some(
-                      (element) => element.id === taskViewData.contentElementId
-                    )
-                  ) {
-                    const elementCount = content.contentElements.length;
-                    content.progress += 100 / elementCount;
-                  }
-                });
-              }
-            }
-            return element;
-          });
-
-          dialogSubmitSubscription.unsubscribe();
-        });
-    }
-
-    if (taskViewData.type == 'CodingQuestion') {
-      this.router.navigate([this.getRouterLink(taskViewData.id)]);
-    }
-  }
-
+  /**
+   * @description
+   * Checks if a content has a specific element type
+   * @param content - The ContentDTO to check
+   * @param type - The type to check for
+   * @returns True if the content has an element of the specified type, false otherwise
+   */
   hasContentElementType(content: ContentDTO, type: string) {
     return content.contentElements.some((element) => element.type === type);
   }
 
+  /**
+   * @description
+   * Filters the data source by content node ID
+   * @param contentNodeId - The ID of the content node to filter by
+   * @returns An array of TaskViewData objects for the specified content node
+   */
   getFilteredData(contentNodeId: number) {
     return this.dataSource.data.filter(
       (element) => element.contentNodeId === contentNodeId
     );
   }
 
+  /**
+   * @description
+   * Generates an array of a specified length
+   * @param num - The length of the array to generate
+   * @returns An array of the specified length
+   */
   getLevels(num: number) {
     return new Array(num);
   }
 
+  /**
+   * @description
+   * Generates a more readable name for element types
+   * @param type - The original element type
+   * @returns A more human-readable name for the element type
+   */
   genBetterElementNames(type: string): string {
     switch (type) {
       case 'MC':

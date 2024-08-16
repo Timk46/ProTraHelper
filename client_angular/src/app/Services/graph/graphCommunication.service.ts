@@ -1,37 +1,45 @@
 import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 export class GraphCommunicationService {
-    private static instance: GraphCommunicationService;
+  private static instance: GraphCommunicationService;
 
-    // init with dummy node
-    dummyNode: ConceptNodeDTO = {
-        databaseId: 0,
-        name: 'dummy',
-        level: 0,
-        expanded: false,
-        parentIds: [],
-        childIds: [],
-        prerequisiteEdgeIds: [],
-        successorEdgeIds: [],
-        edgeChildIds: [],
-    };
+  // init with dummy node
+  dummyNode: ConceptNodeDTO = {
+    databaseId: 0,
+    name: 'dummy',
+    level: 0,
+    expanded: false,
+    parentIds: [],
+    childIds: [],
+    prerequisiteEdgeIds: [],
+    successorEdgeIds: [],
+    edgeChildIds: [],
+  };
 
-    private ActiveNode = new BehaviorSubject<ConceptNodeDTO>(this.dummyNode);
-    currentActiveNode = this.ActiveNode.asObservable();
+  private ActiveNode = new BehaviorSubject<ConceptNodeDTO>(this.dummyNode);
+  currentActiveNode = this.ActiveNode.asObservable();
 
-    private constructor() {}
+  private graphUpdateTrigger = new Subject<void>();
+  graphUpdateNeeded = this.graphUpdateTrigger.asObservable();
 
-    // Singleton pattern
-    public static getInstance(): GraphCommunicationService {
-        if (!GraphCommunicationService.instance) {
-            GraphCommunicationService.instance = new GraphCommunicationService();
-        }
-        return GraphCommunicationService.instance;
+  private constructor() {}
+
+  // Singleton pattern
+  public static getInstance(): GraphCommunicationService {
+    if (!GraphCommunicationService.instance) {
+      GraphCommunicationService.instance = new GraphCommunicationService();
     }
+    return GraphCommunicationService.instance;
+  }
 
-    // communication between graph and contentOverview
-    changeActiveNode(ActiveNode: ConceptNodeDTO) {
-        this.ActiveNode.next(ActiveNode);
-    }
+  // communication between graph and contentOverview
+  changeActiveNode(ActiveNode: ConceptNodeDTO) {
+    this.ActiveNode.next(ActiveNode);
+  }
+
+  // Trigger graph update (graph/sprotty/model.source.ts is listening)
+  triggerGraphUpdate() {
+    this.graphUpdateTrigger.next();
+  }
 }
