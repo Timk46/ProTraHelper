@@ -15,13 +15,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { CreateConceptDialogComponent } from '../graph-dialogs/create-concept-dialog/create-concept-dialog.component';
 import { has } from 'markdown-it/lib/common/utils';
 import { first } from 'rxjs';
-
+import { Subscription } from 'rxjs';
 
 
 @injectable()
 export class ConceptGraphModelSource extends LocalModelSource {
 
   private GraphCommunicationService: GraphCommunicationService = GraphCommunicationService.getInstance();
+  private graphUpdateSubscription: Subscription;
   private flatGraph: ConceptGraphDTO = { id: 0, name: "", nodeMap: {}, edgeMap: {}, trueRootId: 0 }
   graphData: GraphDataService | undefined;
   private dialog: MatDialog | undefined;
@@ -39,6 +40,9 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.graphData = injectAngular(GraphDataService)
     //this.initTestGraph();
     this.getUserGraph();
+    this.graphUpdateSubscription = this.GraphCommunicationService.graphUpdateNeeded.subscribe(() => {
+      this.getUserGraph();
+    });
   }
 
   override initialize(registry: ActionHandlerRegistry): void {
@@ -93,6 +97,7 @@ export class ConceptGraphModelSource extends LocalModelSource {
   private getUserGraph() {
     this.graphData!.fetchUserGraph(this.currentModule).subscribe((graph) => {
       this.initGraph(graph);
+      console.log("graph updated");
     });
   }
 
