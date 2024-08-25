@@ -165,7 +165,7 @@ export class UserConceptService {
           if (allContentElementsDone) {
             levelAward = true;
             console.log('update user level on ' + level);
-            this.updateUserLevel(userId, conceptNodeId, level);
+            await this.updateUserLevel(userId, conceptNodeId, level);
             break;
           }
         }

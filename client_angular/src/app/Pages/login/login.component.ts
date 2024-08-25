@@ -31,6 +31,9 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   isLoggedIn: boolean = false;
 
+  browserName = '';
+  isChrome = false;
+
   /**
    * It checks for accessToken in the queryParams and uses them to set tokens in the UserService.
    * This is needed because the authentication server (CAS) redirects to the client with the tokens as query parameters.
@@ -46,6 +49,30 @@ export class LoginComponent implements OnInit {
       }
     });
     this.title.setTitle('GOALS: Login');
+
+    this.browserName = this.getBrowserName();
+    this.isChrome = this.browserName === 'Chrome';
+  }
+
+  getBrowserName() {
+    const agent = window.navigator.userAgent.toLowerCase();
+    console.log(agent);
+    switch (true) {
+      case agent.indexOf('edge') > -1:
+        return 'Edge';
+      case agent.indexOf('opr') > -1 && !!(<any>window).opr:
+        return 'Opera';
+      case agent.indexOf('chrome') > -1 && !!(<any>window).chrome:
+        return 'Chrome';
+      case agent.indexOf('trident') > -1:
+        return 'Internet Explorer';
+      case agent.indexOf('firefox') > -1:
+        return 'Firefox';
+      case agent.indexOf('safari') > -1:
+        return 'Safari';
+      default:
+        return 'other';
+      }
   }
 
   /**

@@ -390,7 +390,7 @@ export class QuestionDataService {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
                 //set contentElement as done
                 console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNode + ' level: ' + question.level + ' userId: ' + userId)
-                this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
+                await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
             }
             else {
@@ -446,7 +446,7 @@ export class QuestionDataService {
             if(progress == 1) {
                 feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
                 console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNode + ' level: ' + question.level + ' userId: ' + userId)
-                this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
+                await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
             }
             else {
@@ -499,7 +499,7 @@ export class QuestionDataService {
             console.log('progress: '+progress);
 
             if(progress == 1) {
-                this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
+                await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
                 markedAsDone = true;
 
             }

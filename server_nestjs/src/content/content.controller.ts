@@ -76,7 +76,7 @@ export class ContentController {
     if (isNaN(contentElementId)) {
       throw new Error('Invalid contentElement id');
     }
-    return this.contentService.toggleCheckmark(
+    return await this.contentService.toggleCheckmark(
       Number(contentElementId),
       Number(conceptNodeId),
       req.user.id,

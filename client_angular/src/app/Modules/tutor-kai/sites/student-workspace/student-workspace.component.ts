@@ -13,6 +13,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from '@angular/router';
 import { ConfettiService } from "src/app/Services/animations/confetti.service";
 import { Title } from '@angular/platform-browser';
+import { ProgressService } from "src/app/Services/progress/progress.service";
 
 /**
  * The different states representing the current status of the student workspace.
@@ -75,6 +76,7 @@ export class StudentWorkspaceComponent implements OnInit {
   ];
 
   constructor(
+    private progressService: ProgressService,
     private runCodeService: RunCodeService,
     private taskDataService: TaskDataService,
     private snackBar: MatSnackBar,
@@ -237,7 +239,7 @@ export class StudentWorkspaceComponent implements OnInit {
     this.currentState = States.submittedCode;
     if (result.CodeSubmissionResult.score === 100) {
       this.confettiService.celebrate(6,800); // small confetti animation :)
-
+      this.progressService.answerSubmitted();
     }
     result.CodeSubmissionResult.score = Math.trunc(result.CodeSubmissionResult.score);
   }
