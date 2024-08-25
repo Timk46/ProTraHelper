@@ -18,6 +18,10 @@
       <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>
+<div *ngIf="userIsLoggedIn">
+  <app-notification-bell></app-notification-bell>
+</div>
+
 
 <mat-toolbar class="footer">
   <!-- Dashboard-Link auf der linken Seite -->
@@ -43,5 +47,8 @@
     <mat-divider vertical="true" class="divider"></mat-divider>
     <button mat-button style="margin-left: 5px" *ngIf="userIsLoggedIn" (click)="logOut()">Logout</button>
   </div>
+    <!-- NOTIFICATION BELL
+      <app-notification-bell class="bell"></app-notification-bell>
+    -->
 </mat-toolbar>
 

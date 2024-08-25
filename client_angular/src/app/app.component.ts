@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { version } from '@DTOs/version';
 
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -37,24 +38,23 @@ export class AppComponent {
 
   openContact() {
     const dialogRef = this.dialog.open(ContactComponent);
-
     dialogRef.afterClosed().subscribe(result => {
     });
   }
+
   openDatenschutz() {
     const dialogRef = this.dialog.open(DatenschutzComponent);
-
     dialogRef.afterClosed().subscribe(result => {
     });
   }
+
   openImpressum() {
     const dialogRef = this.dialog.open(ImpressumComponent);
-
     dialogRef.afterClosed().subscribe(result => {
     });
   }
 
-  
+
   showProgress() {
     this.userService.getUserTotalProgress().subscribe(data => {
       const userTotalProgress = data;
@@ -63,11 +63,9 @@ export class AppComponent {
       dialogRef.afterClosed().subscribe(result => {
       });
     });
-    //console.log("User Total Progress: " + userTotalProgress);    
-    
-    
+    //console.log("User Total Progress: " + userTotalProgress);
   }
-  
+
 
   ngOnInit() {
     //this.toolbarService.show();

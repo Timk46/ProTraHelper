@@ -6,10 +6,17 @@ import { FeedbackGenerationModule } from '@/ai/feedback-generation/feedback-gene
 import { ContentModule } from '@/content/content.module';
 import { ContentService } from '@/content/content.service';
 import { UserConceptModule } from '@/graph/user-concept/user-concept.module';
+import { NotificationModule } from '@/notification/notification.module';
 
 @Module({
   providers: [QuestionDataService, ContentService],
   controllers: [QuestionDataController],
-  imports: [PrismaModule, FeedbackGenerationModule, ContentModule, UserConceptModule],
+  imports: [
+    PrismaModule,
+    FeedbackGenerationModule,
+    ContentModule,
+    UserConceptModule,
+    NotificationModule,
+  ],
 })
 export class QuestionDataModule {}

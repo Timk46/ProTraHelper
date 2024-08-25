@@ -1,5 +1,7 @@
+/* eslint-disable prettier/prettier */
+import { NotificationService } from '@/notification/notification.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO } from '@DTOs/index';
+import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO, NotificationType } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import * as xss from 'xss';
 
@@ -14,7 +16,9 @@ export class DiscussionCreationService {
     },
   };
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly notificationService: NotificationService) {}
 
   /** Returns the anonymous user data for a given user id and discussion id
    * If no anonymous user is found, a dummy is returned
@@ -156,7 +160,31 @@ export class DiscussionCreationService {
       throw new Error('Message not created');
     }
 
+    await this.sendCommentNotifications(messageData.discussionId, userId, anonymousUser.anonymousName);
+
     return message.id;
+  }
+
+  /**
+   * Sends notifications to all users that have written a message in the discussion except the author of the new comment
+   * @param {number} discussionId
+   * @param {number} commentAuthorId
+   * @param {string} anonymousName
+   */
+  private async sendCommentNotifications(discussionId: number, commentAuthorId: number, anonymousName: string) {
+    const anonymousUsers = await this.getAnonymousUsersByDiscussionId(discussionId);
+    const filteredAnonymousUsers = anonymousUsers.filter(user => user.userId !== commentAuthorId);
+
+    const notifications = filteredAnonymousUsers.map(user => ({
+      userId: user.userId,
+      message: `Ein neuer Kommentar von User: ${anonymousName} wurde unter deinem Beitrag verfasst`,
+      type: NotificationType.COMMENT,
+      timestamp: new Date(),
+      isRead: false,
+      discussionId: discussionId,
+    }));
+
+    await this.notificationService.notifyUsers(notifications);
   }
 
   /**
@@ -205,4 +233,32 @@ export class DiscussionCreationService {
     return discussion.id;
   }
 
+  /**
+   * Returns all anonymous users for a given discussion ID
+   * @param {number} discussionId
+   * @returns {Promise<AnonymousUserDTO[]>} the anonymous users
+   */
+  async getAnonymousUsersByDiscussionId(discussionId: number): Promise<AnonymousUserDTO[]> {
+    const anonymousUsers = await this.prisma.anonymousUser.findMany({
+      where: {
+        Message: {
+          some: {
+            discussionId: Number(discussionId),
+          },
+        },
+      },
+      select: {
+        id: true,
+        userId: true,
+        anonymousName: true,
+      },
+    });
+
+    return anonymousUsers.map(user => ({
+      id: user.id,
+      anonymousName: user.anonymousName,
+      userId: user.userId,
+    }));
+  }
 }
+

@@ -36,6 +36,7 @@ import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-gene
 import { EventLogModule } from './EventLog/event-log.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { VersionInterceptor } from './common/interceptors/version.interceptor';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { VersionInterceptor } from './common/interceptors/version.interceptor';
     // McqCreationModule, CURRENTLY DISABLED
     // McqevaluationModule, CURRENTLY DISABLED
     EventLogModule,
+    NotificationModule,
   ],
   controllers: [
     AppController,

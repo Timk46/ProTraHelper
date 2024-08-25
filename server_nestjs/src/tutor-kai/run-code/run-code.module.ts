@@ -10,10 +10,11 @@ import { FeedbackRAGService } from './feedback_rag.service';
 import { ContentService } from '@/content/content.service';
 import { ContentModule } from '@/content/content.module';
 import { UserConceptModule } from '@/graph/user-concept/user-concept.module';
+import { NotificationModule } from '@/notification/notification.module';
 
 @Module({
   providers: [RunCodeService, CryptoService, QuestionService, FeedbackNormalService, StudentRatingService, FeedbackRAGService, ContentService],
-  imports: [PrismaModule, ContentModule, UserConceptModule],
+  imports: [PrismaModule, ContentModule, UserConceptModule, NotificationModule],
   controllers: [RunCodeController],
 })
 export class RunCodeModule {}

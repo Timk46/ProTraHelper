@@ -1,12 +1,10 @@
 
-import { Component, Inject, Input, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { ContentDTO, ContentElementDTO } from '@DTOs/content.dto';
-import  { FileDto} from '@DTOs/file.dto';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DomSanitizer } from '@angular/platform-browser';
 import { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
 import { ContentService } from 'src/app/Services/content/content.service';
-import { last } from 'rxjs';
 
 @Component({
   selector: 'app-contentView',

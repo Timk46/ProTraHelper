@@ -1,6 +1,8 @@
+/* eslint-disable prettier/prettier */
 import { PrismaService } from '@/prisma/prisma.service';
 import { discussionNodeNamesDTO, nodeNameDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class DiscussionDataService {
@@ -114,5 +116,41 @@ export class DiscussionDataService {
       contentElementName: elementNodeName?.title || "Allgemein"
     };
   }
+
+
+/**
+ * This function returns all original user ids for a given discussion.
+ *
+ * @param discussionId
+ * @returns {Promise<number[]>} the user ids
+ */
+async getUserIdsByDiscussionId(discussionId: number, excludedUserId: number): Promise<number[]> {
+  const messages = await this.prisma.message.findMany({
+    where: {
+      discussionId: Number(discussionId),
+      author: {
+        userId: {
+          not: Number(excludedUserId)
+        }
+      }
+    },
+    select: {
+      author: {
+        select: {
+          userId: true,
+        }
+      },
+
+    }
+  });
+
+  if (!messages) {
+    throw new Error('Messages not found');
+  }
+  
+  const userIds = messages.map(message => message.author.userId);
+  return userIds;
+}
+
 
 }

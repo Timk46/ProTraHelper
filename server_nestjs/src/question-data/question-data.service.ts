@@ -10,7 +10,10 @@ import {  } from '@prisma/client';
 
 @Injectable()
 export class QuestionDataService {
-    constructor(private prisma: PrismaService, private feedbackGenerationService: FeedbackGenerationService, private contentService: ContentService) {}
+    constructor(
+      private prisma: PrismaService,
+      private feedbackGenerationService: FeedbackGenerationService,
+      private contentService: ContentService) {}
 
     /**
      *
@@ -473,6 +476,7 @@ export class QuestionDataService {
                 progress: progress*100,
             }
         }
+
 
         //generate feedback for user freetext answer
         if (question.type === questionType.FREETEXT && question.text) {

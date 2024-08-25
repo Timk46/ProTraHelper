@@ -2,7 +2,7 @@ import { Component, HostListener, OnInit, ViewChild } from "@angular/core";
 import { RunCodeService } from "../../services/runCode.service";
 import { TaskDataService } from "../../services/task-data.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { CodeSubmissionResultDto, QuestionDTO } from "@DTOs/index";
+import { CodeSubmissionResultDto, NotificationDTO, QuestionDTO } from "@DTOs/index";
 import { FormArray, FormBuilder, Validators } from "@angular/forms";
 import { saveAs } from "file-saver";
 import * as JSZip from "jszip";
@@ -14,6 +14,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ConfettiService } from "src/app/Services/animations/confetti.service";
 import { Title } from '@angular/platform-browser';
 import { ProgressService } from "src/app/Services/progress/progress.service";
+
 /**
  * The different states representing the current status of the student workspace.
  */
@@ -84,7 +85,7 @@ export class StudentWorkspaceComponent implements OnInit {
     private dialog: MatDialog,
     private route: ActivatedRoute,
     private confettiService: ConfettiService,
-    private title: Title
+    private title: Title,
   ) {}
 
   /**

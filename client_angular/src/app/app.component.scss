@@ -64,3 +64,9 @@ button, a {
   height: auto; /* Ermöglicht es den Buttons, sich der kleineren Höhe anzupassen */
   padding: 0 5px; /* Reduziert das Padding für eine kompaktere Erscheinung */
 }
+
+.bell {
+  margin-top: 10px;
+  overflow-y: auto;
+  overflow-x: auto;
+}

@@ -1,11 +1,16 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { userConceptEventType } from '@prisma/client';
 import e from 'express';
+import { NotificationService } from '@/notification/notification.service';
+import { NotificationDTO } from '@Interfaces/notification.dto';
 
 @Injectable()
 export class UserConceptService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationService: NotificationService) {}
 
   /**
    * updates the user level of a concept node and saves a timestamped event

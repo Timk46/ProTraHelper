@@ -1,15 +1,19 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+import { BadRequestException, Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { DiscussionCreationService } from './discussion-creation.service';
 import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO, discussionNodeNamesDTO } from '@DTOs/index';
 import { DiscussionDataService } from '../discussion-data/discussion-data.service';
 import { RolesGuard, roles } from '@/auth/roles.guard';
 
-const debug: boolean = true; // set this to false to disable console logs
+
+const debug = true; // set this to false to disable console logs
 @UseGuards(RolesGuard)
 @Controller('discussion/creation')
 export class DiscussionCreationController {
 
-  constructor(private creationService: DiscussionCreationService, private dataService: DiscussionDataService) {}
+  constructor(
+    private readonly creationService: DiscussionCreationService,
+    private readonly dataService: DiscussionDataService,) {}
 
   /** Returns the anonymous user for a given discussion
    *
@@ -23,7 +27,7 @@ export class DiscussionCreationController {
     if (isNaN(req.user.id) || isNaN(discussionId)) {
       throw new Error('Invalid user id or discussion id');
     }
-    return this.creationService.getAnonymousUser(Number(req.user.id), Number(discussionId));
+    return await this.creationService.getAnonymousUser(Number(req.user.id), Number(discussionId));
   }
 
   /**
@@ -39,7 +43,7 @@ export class DiscussionCreationController {
     if (isNaN(req.user.id) || isNaN(messageId)) {
       throw new Error('Invalid user id or message id');
     }
-    return this.creationService.getAnonymousUserByMessageId(Number(req.user.id), Number(messageId));
+    return await this.creationService.getAnonymousUserByMessageId(Number(req.user.id), Number(messageId));
   }
 
   /**
@@ -54,7 +58,7 @@ export class DiscussionCreationController {
     if (isNaN(req.user.id)) {
       throw new Error('Invalid user id');
     }
-    return this.creationService.createAnonymousUser(Number(req.user.id), data.name);
+    return await this.creationService.createAnonymousUser(Number(req.user.id), data.name);
   }
 
   /**
@@ -69,7 +73,11 @@ export class DiscussionCreationController {
     if (isNaN(req.user.id)) {
       throw new Error('Invalid user id');
     }
-    return this.creationService.createDiscussion(discussionData, Number(req.user.id));
+    const discussionId = await this.creationService.createDiscussion(discussionData, Number(req.user.id));
+
+    // notify potential users?
+
+    return discussionId
   }
 
   /** Creates a new message in the database and returns
@@ -79,12 +87,19 @@ export class DiscussionCreationController {
    */
   @roles('ANY')
   @Post('messages/create')
-  async createDiscussionMessage(@Req() req, @Body() messageData: discussionMessageCreationDTO): Promise<number> {
+  async createDiscussionMessage(
+    @Req() req,
+    @Body() messageData: discussionMessageCreationDTO
+  ): Promise<number> {
     debug && console.log('DiscussionCreationController: createMessage')
     if (isNaN(req.user.id)) {
-      throw new Error('Invalid user id');
+      throw new BadRequestException('Invalid user id');
     }
-    return this.creationService.createDiscussionMessage(messageData, Number(req.user.id));
+    return await this.creationService.createDiscussionMessage(
+      messageData,
+      Number(req.user.id)
+    );
+
   }
 
   /**
@@ -104,6 +119,7 @@ export class DiscussionCreationController {
     if (isNaN(conceptNodeId) || isNaN(contentNodeId) || isNaN(contentElementId)) {
       throw new Error('Invalid node ids');
     }
-    return this.dataService.getDiscussionNodeNames(Number(conceptNodeId), Number(contentNodeId), Number(contentElementId));
+    return await this.dataService.getDiscussionNodeNames(Number(conceptNodeId), Number(contentNodeId), Number(contentElementId));
   }
+
 }

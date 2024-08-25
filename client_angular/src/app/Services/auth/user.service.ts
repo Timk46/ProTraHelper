@@ -17,7 +17,7 @@ export class UserService {
   (
     private router: Router,
     private snackBar: MatSnackBar,
-    private http: HttpClient
+    private http: HttpClient,
   )
   {
     this.isAuthenticated$ = new BehaviorSubject<boolean>(false);
@@ -175,5 +175,5 @@ export class UserService {
    */
   getUserTotalProgress(): Observable<number> {
     return this.http.get<number>(environment.server + '/users/totalProgress');
-  }  
+  }
 }

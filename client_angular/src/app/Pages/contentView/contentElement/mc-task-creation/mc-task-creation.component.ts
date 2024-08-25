@@ -12,7 +12,6 @@ import { DescriptionDialogComponent } from './description-dialog/description-dia
 import { McqcreationService } from 'src/app/Services/mcqCreation/mcqcreation.service';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { ContentService } from 'src/app/Services/content/content.service';
-import { catchError } from 'rxjs/operators';
 interface Answer {
   answer?: string;
   correct?: boolean;
@@ -120,6 +119,7 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
 
     //console.log("concepts: ",this.filteredConcepts)
   }
+
 
   private filter(value: string): string[] {
     const filterValue = value.toLowerCase();

@@ -15,6 +15,8 @@ export * from "./discussionCreation.dto"
 export * from "./discussionFilter.dto"
 export * from "./module.dto"
 export * from "./contentElementStatus.dto"
+export * from "./notification.dto";
+export * from "./notificationType.enum";
 
 //TutorKai DTOs
 export * from "./tutorKaiDtos/kiFeedback.dto";

@@ -19,7 +19,11 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   max-height: 95vh;
   overflow: auto;
 }
-
+.notification-snackbar-container {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
 // workaround preventing a angular-tailwind bug that summons a blue vertical line on activated mat-form-field elements with appearance="outline"
 .mdc-notched-outline__notch {
   border-right: none !important;

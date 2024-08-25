@@ -1,0 +1,13 @@
+.notification-snackbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: rgb(57, 57, 57);
+  color: white; // White text color
+  border-radius: 4px; // Rounded corners
+  padding: 8px; // Padding inside the snackbar
+  button {
+    color: white; // White color for the buttons
+  }
+}
