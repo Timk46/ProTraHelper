@@ -15,10 +15,10 @@ export class GptController {
      * @param body - The request body containing the solution and attempt data.
      * @returns A Promise that resolves to the result of the feedback request.
      */
-    @roles('TEACHER, ADMIN')
+    /* @roles('TEACHER, ADMIN')
     @Post('getGptFeedback')
     async getGptFeedback(@Body() body: {solution: editorDataDTO, attempt: editorDataDTO}) {
         return await this.gptService.sendFeedbackRequest(body.solution, body.attempt);
-    }
+    } */
 
 }

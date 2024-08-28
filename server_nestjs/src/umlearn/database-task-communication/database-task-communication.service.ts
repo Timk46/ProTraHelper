@@ -1,11 +1,6 @@
-import { taskAttemptDTO, taskCreationPopupDTO, taskDataDTO, taskInformationDTO, taskSettingsDTO, taskFeedbackDataDTO, taskFeedbackDTO, taskAttemptDataDTO, editorModelDTO, EditorModel, editorDataDTO, jaroWinklerDTO, studentTaskStatusDTO, tasksOverviewDTO, tasksInformationDTO, taskWorkspaceDataDTO } from '@DTOs/index';
+import { taskDataDTO, taskSettingsDTO, taskAttemptDataDTO, EditorModel, editorDataDTO, taskWorkspaceDataDTO } from '@DTOs/index';
 import { PrismaService } from '@/prisma/prisma.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { getEnvironmentData } from 'worker_threads';
-import { log } from 'console';
-import { JaroWinklerDistance } from 'natural';
-import * as natural from 'natural';
-import { ClassNode } from '@Interfaces/index';
 import { Prisma } from '@prisma/client';
 import { CompareService } from '../compare/compare.service';
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
@@ -22,102 +17,6 @@ export class DatabaseTaskCommunicationService {
     private feedbackGenerationService: FeedbackGenerationService,
     private feedbackRagService: FeedbackRAGService
   ) { }
-
-/**
- * Finds synonyms for a given word and checks if a target word is a synonym.
- * If the target word is a synonym, it replaces it with the original word.
- * @param {string} string1 - The original word.
- * @param {string} string2 - The target word to check if it is a synonym.
- * @returns {Promise<{ newAttempt: string }>} - A promise that resolves to an object containing the new attempt word.
- */
-  async synonym(string1: string, string2: string): Promise<{newAttempt:string}> {
-    try{
-      const natural = require('natural');
-      const wordnet = new natural.WordNet();
-
-      let resultList = [];
-      await new Promise<void>((resolve, reject) => {
-        wordnet.lookup(string1, function(results) {
-            results.forEach(function(result) {
-              resultList.push(...result.synonyms);
-            });
-            resolve();
-        });
-      });
-
-      if (resultList.includes(string2)) {
-        string2 = string1;
-    }
-      return {newAttempt:string2};
-    } catch (error) {
-      throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  /**
-   * Retrieves the overview data of tasks for a specific user.
-   *
-   * @param userId - The ID of the user.
-   * @returns A Promise that resolves to a tasksInformationDTO object containing the task information.
-   */
-  /* async getTasksOverviewData(userId: number): Promise<tasksInformationDTO> {
-    try{
-      const tasks = await this.prisma.task.findMany({
-        where: {
-          lecturerId: userId
-        },
-        select: {
-          id: true,
-          description: true,
-          title: true,
-        }
-      });
-      return {
-        tasksInformations: tasks.map(task => ({
-          taskId: task.id,
-          deadline: null,
-          taskDescription: task.description,
-          taskTitle: task.title
-        }))
-      };
-    } catch (error) {
-      throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
-    }
-  } */
-
-  /**
-   * Retrieves the overview of tasks for a given user.
-   *
-   * @param {number} userId - The ID of the user.
-   * @returns {Promise<tasksOverviewDTO>} The tasks overview.
-   */
-  /* async getTasksOverview(userId: number): Promise<tasksOverviewDTO> {
-    try{
-      const tasks = await this.prisma.task.findMany({
-        where: {
-          lecturerId: userId
-        },
-        select: {
-          id: true,
-          description: true,
-          title: true,
-          maxPoints: true,
-        }
-      });
-      return {
-        tasksInformations: tasks.map(task => ({
-          taskId: task.id,
-          maxPoints: task.maxPoints,
-          taskDescription: task.description,
-          taskTitle: task.title
-        }))
-      };
-    } catch (error) {
-      throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
-    }
-  } */
-
-
 
   /**
    * Creates a new task in the database.
@@ -371,314 +270,6 @@ export class DatabaseTaskCommunicationService {
   }
 
   /**
-   * Retrieves task feedback data for a given task attempt ID.
-   * @param {number} taskAttemptId - The ID of the task attempt.
-   * @returns {Promise<taskFeedbackDataDTO>} - The task feedback data.
-   */
-  /* async getTaskFeedbackData(taskAttemptId: number): Promise<taskFeedbackDataDTO> {
-    try{
-      const taskFeedback = await this.prisma.feedback.findUnique({
-        where: {
-          id: taskAttemptId
-        },
-        select: {
-          id: true,
-          lecturerId: true,
-          taskAttemptId: true,
-          reachedPoints: true,
-          feedbackText: true,
-          createdAt: true,
-          updatedAt: true,
-        }
-      });
-      const attempt = await this.prisma.taskAttempt.findUnique({
-        where: {
-          id: taskAttemptId
-        },
-        select: {
-          id: true,
-          studentId: true,
-          taskId: true,
-          courseId: true,
-          attemptData: true,
-        }
-      });
-      const task = await this.prisma.task.findUnique({
-        where: {
-          id: attempt.taskId
-        },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          lecturerId: true,
-          editorData: true,
-          taskSettings: true,
-          maxPoints: true,
-          createdAt: true,
-          updatedAt: true,
-        }
-      });
-      const taskInfo = await this.prisma.tasksForCourse.findUnique({
-        where: {
-          id: attempt.taskId
-        },
-        select: {
-          deadline: true,
-        }
-      });
-      return {
-        feedback: {
-          feedbackId: taskFeedback? taskFeedback.id : -1,
-          lecturerId: taskFeedback? taskFeedback.lecturerId : -1,
-          taskAttemptId: taskAttemptId,
-          reachedPoints: taskFeedback? taskFeedback.reachedPoints : 0,
-          feedbackText: taskFeedback? taskFeedback.feedbackText : '',
-          createdAt: taskFeedback? taskFeedback.createdAt : new Date(),
-          updatedAt: taskFeedback? taskFeedback.updatedAt : new Date(),
-        },
-        task: {
-          id: task.id,
-          title: task.title,
-          description: task.description,
-          lecturerId: task.lecturerId,
-          editorData: task.editorData? task.editorData as unknown as editorDataDTO : {nodes: [], edges: []},
-          taskSettings: task.taskSettings ? task.taskSettings as unknown as taskSettingsDTO : { allowedNodeTypes: [], allowedEdgeTypes: [], editorModel: EditorModel.CLASSDIAGRAM},
-          maxPoints: task.maxPoints,
-          createdAt: task.createdAt,
-          updatedAt: task.updatedAt
-        },
-        attempt: {
-          id: attempt.id,
-          taskId: attempt.taskId,
-          courseId: attempt.courseId,
-          studentId: attempt.studentId,
-          attemptData: attempt.attemptData ? attempt.attemptData as unknown as editorDataDTO : {nodes: [], edges: []},
-        },
-      };
-    } catch (error) {
-      throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
-    }
-  } */
-
-
-  /**
-   * Retrieves task feedback data for a specific student.
-   * @param courseId - The ID of the course.
-   * @param taskId - The ID of the task.
-   * @param studentId - The ID of the student.
-   * @param globalRole - The global role of the user.
-   * @returns A promise that resolves to a taskFeedbackDataDTO object containing the feedback, task, and attempt information.
-   * @throws HttpException if there is an error while loading the data.
-   */
-  /* async getTaskFeedbackDataByStudent(courseId: number, taskId: number, studentId: number, globalRole: string): Promise<taskFeedbackDataDTO> {
-    try{
-      let taskAttempt = await this.prisma.taskAttempt.findFirst({
-        where: {
-          courseId: courseId,
-          taskId: taskId,
-          studentId: studentId
-        },
-        select: {
-          id: true,
-          studentId: true,
-          taskId: true,
-          courseId: true,
-          attemptData: true,
-        }
-      });
-      if (!taskAttempt) {
-        taskAttempt = await this.prisma.taskAttempt.create({
-          data: {
-            courseId: courseId,
-            taskId: taskId,
-            studentId: studentId,
-            attemptData: {nodes: [], edges: []}, // Empty attemptData
-          },
-          select: {
-            id: true,
-            studentId: true,
-            taskId: true,
-            courseId: true,
-            attemptData: true,
-          }
-        });
-      }
-      const taskFeedback = await this.prisma.feedback.findFirst({
-        where: {
-          taskAttemptId: taskAttempt.id
-        },
-        select: {
-          id: true,
-          lecturerId: true,
-          taskAttemptId: true,
-          reachedPoints: true,
-          feedbackText: true,
-          createdAt: true,
-          updatedAt: true,
-        }
-      });
-      const task = await this.prisma.task.findUnique({
-        where: {
-          id: taskAttempt.taskId
-        },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          lecturerId: true,
-          editorData: true,
-          taskSettings: true,
-          maxPoints: true,
-          createdAt: true,
-          updatedAt: true,
-        }
-      });
-      const taskInfo = await this.prisma.tasksForCourse.findUnique({
-        where: {
-          id: taskAttempt.taskId
-        },
-        select: {
-          deadline: true,
-        }
-      });
-
-      return {
-        feedback: {
-          feedbackId: taskFeedback? taskFeedback.id : -1,
-          lecturerId: taskFeedback? taskFeedback.lecturerId : -1,
-          taskAttemptId: taskAttempt.id,
-          reachedPoints: taskFeedback? taskFeedback.reachedPoints : 0,
-          feedbackText: taskFeedback? taskFeedback.feedbackText : '',
-          createdAt: taskFeedback? taskFeedback.createdAt : new Date(),
-          updatedAt: taskFeedback? taskFeedback.updatedAt : new Date(),
-        },
-        task: {
-          id: task.id,
-          title: task.title,
-          description: task.description,
-          lecturerId: task.lecturerId,
-          editorData: (globalRole === 'LECTURER') ? (task.editorData ? task.editorData as unknown as editorDataDTO : {nodes: [], edges: []}) : {nodes: [], edges: []},
-          taskSettings: task.taskSettings ? task.taskSettings as unknown as taskSettingsDTO : { allowedNodeTypes: [], allowedEdgeTypes: [], editorModel: EditorModel.CLASSDIAGRAM},
-          maxPoints: task.maxPoints,
-          createdAt: task.createdAt,
-          updatedAt: task.updatedAt
-        },
-        attempt: {
-          id: taskAttempt.id,
-          taskId: taskAttempt.taskId,
-          courseId: taskAttempt.courseId,
-          studentId: taskAttempt.studentId,
-          attemptData: taskAttempt.attemptData ? taskAttempt.attemptData as unknown as editorDataDTO : {nodes: [], edges: []},
-        },
-      };
-    } catch (error) {
-      throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
-    }
-  } */
-
-  /**
-   * Retrieves task feedback data for a given course.
-   * @param {number} courseId - The ID of the course.
-   * @returns {Promise<taskFeedbackDataDTO[]>} - A promise that resolves to an array of task feedback data objects.
-   */
-  /* async getTaskFeedbackDataByCourse(courseId: number): Promise<taskFeedbackDataDTO[]> {
-    try{
-      const taskAttempts = await this.prisma.taskAttempt.findMany({
-        where: {
-          courseId: courseId
-        },
-        select: {
-          id: true,
-          studentId: true,
-          taskId: true,
-          courseId: true,
-          attemptData: true,
-        }
-      });
-      const taskFeedbacks = await this.prisma.feedback.findMany({
-        where: {
-          taskAttemptId: {
-            in: taskAttempts.map(taskAttempt => taskAttempt.id)
-          }
-        },
-        select: {
-          id: true,
-          lecturerId: true,
-          taskAttemptId: true,
-          reachedPoints: true,
-          feedbackText: true,
-          createdAt: true,
-          updatedAt: true,
-        }
-      });
-      const tasks = await this.prisma.task.findMany({
-        where: {
-          id: {
-            in: taskAttempts.map(taskAttempt => taskAttempt.taskId)
-          }
-        },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          lecturerId: true,
-          editorData: true,
-          taskSettings: true,
-          maxPoints: true,
-          createdAt: true,
-          updatedAt: true,
-        }
-      });
-      const taskInfos = await this.prisma.tasksForCourse.findMany({
-        where: {
-          id: {
-            in: taskAttempts.map(taskAttempt => taskAttempt.taskId)
-          }
-        },
-        select: {
-          deadline: true,
-        }
-      });
-      return taskAttempts.map(taskAttempt => {
-        const taskFeedback = taskFeedbacks.find(taskFeedback => taskFeedback.taskAttemptId === taskAttempt.id);
-        const task = tasks.find(task => task.id === taskAttempt.taskId);
-        return {
-          feedback: {
-            feedbackId: taskFeedback? taskFeedback.id : -1,
-            lecturerId: taskFeedback? taskFeedback.lecturerId : -1,
-            taskAttemptId: taskAttempt.id,
-            reachedPoints: taskFeedback? taskFeedback.reachedPoints : 0,
-            feedbackText: taskFeedback? taskFeedback.feedbackText : '',
-            createdAt: taskFeedback? taskFeedback.createdAt : new Date(),
-            updatedAt: taskFeedback? taskFeedback.updatedAt : new Date(),
-          },
-          task: {
-            id: task.id,
-            title: task.title,
-            description: task.description,
-            lecturerId: task.lecturerId,
-            editorData: task.editorData? task.editorData as unknown as editorDataDTO : {nodes: [], edges: []},
-            taskSettings: task.taskSettings ? task.taskSettings as unknown as taskSettingsDTO : { allowedNodeTypes: [], allowedEdgeTypes: [], editorModel: EditorModel.CLASSDIAGRAM},
-            maxPoints: task.maxPoints,
-            createdAt: task.createdAt,
-            updatedAt: task.updatedAt
-          },
-          attempt: {
-            id: taskAttempt.id,
-            taskId: taskAttempt.taskId,
-            courseId: taskAttempt.courseId,
-            studentId: taskAttempt.studentId,
-            attemptData: taskAttempt.attemptData ? taskAttempt.attemptData as unknown as editorDataDTO : {nodes: [], edges: []},
-          },
-        };
-      });
-    } catch (error) {
-      throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
-    }
-  } */
-
-  /**
    * Retrieves the task attempt data for a specific task and student.
    * @param taskId - The ID of the task.
    * @param studentId - The ID of the student.
@@ -783,7 +374,7 @@ export class DatabaseTaskCommunicationService {
    * @returns A Promise that resolves to the number of points earned.
    * @throws An error if the attempt data fails to save or if the related question cannot be found.
    */
-  async commitAttemptGetPoints(taskAttemptData: taskAttemptDataDTO, studentId: number): Promise<{points: number, highlightData: editorDataDTO}> {
+  async commitAttemptGetPoints(taskAttemptData: taskAttemptDataDTO, studentId: number): Promise<{points: number}> {
     const savedAttempt = await this.setTaskAttemptData(taskAttemptData, studentId);
     if (!savedAttempt){
       throw new Error('Failed to save UML attempt');
@@ -804,7 +395,6 @@ export class DatabaseTaskCommunicationService {
         //return existingFeedback.feedbacks[0].score;
         return {
           points: existingFeedback.feedbacks[0].score,
-          highlightData: savedAttempt.attemptData,
         };
       }
     }
@@ -829,13 +419,14 @@ export class DatabaseTaskCommunicationService {
       throw new Error('Failed to find related question');
     }
 
-    const reachedPoints = await this.compareService.compareAndCalculate(taskSolution.UmlQuestion.editorData as undefined as editorDataDTO, taskAttemptData.attemptData, taskSolution.score);
+    //const reachedPoints = await this.compareService.compareAndCalculate(taskSolution.UmlQuestion.editorData as undefined as editorDataDTO, taskAttemptData.attemptData, taskSolution.score);
+    const reachedPoints = Math.floor(taskSolution.score * this.similarityCompareService.calcGraphSimilarity(taskSolution.UmlQuestion.editorData as unknown as editorDataDTO, taskAttemptData.attemptData));
 
     //save feedback
     const feedback = await this.prisma.feedback.create({
       data: {
         userAnswerId: savedAttempt.userAnswerId,
-        score: reachedPoints.points,
+        score: reachedPoints,
         text: '',
       }
     });
@@ -845,7 +436,7 @@ export class DatabaseTaskCommunicationService {
     }
 
     console.log('calculated: ', reachedPoints);
-    return reachedPoints;
+    return {points : reachedPoints};
   }
 
   async generateUmlFeedback(taskId: number, studentId: number): Promise<{response: string}> {
@@ -868,9 +459,11 @@ export class DatabaseTaskCommunicationService {
     //find the student's attempt
     const studentAttempt = await this.getTaskAttemptData(taskId, studentId);
 
-    //return this.feedbackGenerationService.generateUMLearnFeedback(taskSolution.UmlQuestion.text, studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
+    const matchingLog = this.similarityCompareService.findAndGenerateGraphSimilarityLog(studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
+
+    return this.feedbackRagService.generateUmlFeedbackByLog(taskSolution.UmlQuestion.text, matchingLog);
     //return this.feedbackRagService.generateUmlFeedback(taskSolution.UmlQuestion.text, studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
-    return { response: this.similarityCompareService.findAndGenerateGraphSimilarityLog(studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO) };
+    //return { response: this.similarityCompareService.findAndGenerateGraphSimilarityLog(studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO) };
   }
 
   async generateUmlFeedbackByHighlighted(taskId: number, studentId: number): Promise<{response: string}> {
@@ -1016,200 +609,5 @@ export class DatabaseTaskCommunicationService {
       return result;
     }, {});
   }
-
-
-
-  /**
-   * Creates a new feedback for a task attempt.
-   *
-   * @param {taskFeedbackDTO} taskFeedbackData - The data for the task feedback.
-   * @param {number} lecturerId - The ID of the lecturer.
-   * @returns {Promise<taskFeedbackDTO>} - The created task feedback.
-   * @throws {Error} - If the given task attempt or feedback ID does not exist.
-   */
-  /* async createFeedback(taskFeedbackData: taskFeedbackDTO, lecturerId: number): Promise<taskFeedbackDTO> {
-    try{
-      const taskAttempt = await this.prisma.taskAttempt.findFirst({
-        where: {
-          id: taskFeedbackData.taskAttemptId
-        }
-      });
-
-      if (!taskAttempt) {
-        throw new Error('Given Task Attempt does not exist.');
-      }
-
-      if (taskFeedbackData.feedbackId == -1) {
-        const newFeedbackData = await this.prisma.feedback.create({
-          data: {
-            reachedPoints: taskFeedbackData.reachedPoints,
-            feedbackText: taskFeedbackData.feedbackText,
-            taskAttempt: {
-              connect: { id: taskFeedbackData.taskAttemptId }
-            },
-            lecturer: {
-              connect: { id: lecturerId }
-            },
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }
-        });
-
-        return {
-          feedbackId: newFeedbackData.id,
-          lecturerId: newFeedbackData.lecturerId,
-          taskAttemptId: newFeedbackData.taskAttemptId,
-          reachedPoints: newFeedbackData.reachedPoints,
-          feedbackText: newFeedbackData.feedbackText,
-          createdAt: newFeedbackData.createdAt,
-          updatedAt: newFeedbackData.updatedAt
-        };
-      } else {
-        const existingFeedback = await this.prisma.feedback.findFirst({
-          where: {
-            taskAttemptId: taskFeedbackData.taskAttemptId
-          },
-        });
-
-        if (!existingFeedback) {
-          throw new Error('Given Feedback id does not exist.');
-        }
-
-        const updatedFeedback = await this.prisma.feedback.update({
-          where: {
-            id: taskFeedbackData.feedbackId
-          },
-          data: {
-            reachedPoints: taskFeedbackData.reachedPoints,
-            feedbackText: taskFeedbackData.feedbackText,
-            updatedAt: new Date()
-          }
-        });
-
-        return {
-          feedbackId: updatedFeedback.id,
-          lecturerId: updatedFeedback.lecturerId,
-          taskAttemptId: updatedFeedback.taskAttemptId,
-          reachedPoints: updatedFeedback.reachedPoints,
-          feedbackText: updatedFeedback.feedbackText,
-          createdAt: updatedFeedback.createdAt,
-          updatedAt: updatedFeedback.updatedAt
-        };
-      }
-    } catch (error) {
-      throw new HttpException('Fehler beim Speichern der Daten', HttpStatus.BAD_REQUEST);
-    }
-  } */
-
-  /**
-   * Retrieves the task status for a specific student in a course.
-   *
-   * @param {number} courseId - The ID of the course.
-   * @param {number} taskId - The ID of the task.
-   * @returns {Promise<studentTaskStatusDTO[]>} - A promise that resolves to an array of student task status objects.
-   */
-  /* async getStudentTaskStatus(courseId: number, taskId: number): Promise<studentTaskStatusDTO[]> {
-    try{
-      const taskAttempts = await this.prisma.taskAttempt.findMany({
-        where: {
-          courseId: courseId,
-          taskId: taskId
-        }
-      });
-      const students = await this.prisma.user.findMany({
-        where: {
-          id: {
-            in: taskAttempts.map(taskAttempt => taskAttempt.studentId)
-          }
-        }
-      });
-      const taskFeedbacks = await this.prisma.feedback.findMany({
-        where: {
-          taskAttemptId: {
-            in: taskAttempts.map(taskAttempt => taskAttempt.id)
-          }
-        }
-      });
-      return students.map(student => {
-        const taskAttempt = taskAttempts.find(taskAttempt => taskAttempt.studentId === student.id);
-        const taskFeedback = taskFeedbacks.find(taskFeedback => taskFeedback.taskAttemptId === taskAttempt.id);
-        return {
-          student: {
-            id: student.id,
-            firstname: student.firstname,
-            lastname: student.lastname,
-          },
-          hasAttempt: !!taskAttempt,
-          hasFeedback: !!taskFeedback,
-        };
-      });
-    } catch (error) {
-      throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
-    }
-  } */
-
-
-  /**
-   * Checks if there are any task attempts for a given task ID.
-   *
-   * @param taskId - The ID of the task to check for attempts.
-   * @returns A Promise that resolves to a boolean indicating if there are any task attempts.
-   * @throws HttpException with a status code of BAD_REQUEST if there is an error loading the data.
-   */
-  /* async checkForTaskAttempts(taskId: number): Promise<boolean> {
-    try{
-      const taskAttempt = await this.prisma.taskAttempt.findFirst({
-        where: {
-          taskId: taskId
-        }
-      });
-      return !!taskAttempt;
-    } catch (error) {
-      throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
-    }
-  } */
-
-  /**
-   * Checks if there are any task attempts for a given course and task.
-   * @param courseId - The ID of the course.
-   * @param taskId - The ID of the task.
-   * @returns A Promise that resolves to a boolean indicating whether there are any task attempts or not.
-   * @throws HttpException with a message 'Fehler beim Laden der Daten' and HttpStatus.BAD_REQUEST if an error occurs while loading the data.
-   */
-  /* async checkForTaskAttemptsForCourse(courseId: number, taskId: number): Promise<boolean> {
-    try{
-      const taskAttempt = await this.prisma.taskAttempt.findFirst({
-        where: {
-          courseId: courseId,
-          taskId: taskId
-        }
-      });
-      return !!taskAttempt;
-    } catch (error) {
-      throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
-    }
-  } */
-
-  /**
-   * Checks if there are any task attempts for a given course and student.
-   *
-   * @param courseId - The ID of the course.
-   * @param studentId - The ID of the student.
-   * @returns A Promise that resolves to a boolean indicating whether there are any task attempts.
-   * @throws HttpException if there is an error while loading the data.
-   */
-  /* async checkForTaskAttemptsForCourseAndStudent(courseId: number, studentId: number): Promise<boolean> {
-    try{
-      const taskAttempt = await this.prisma.taskAttempt.findFirst({
-        where: {
-          courseId: courseId,
-          studentId: studentId
-        }
-      });
-      return !!taskAttempt;
-    } catch (error) {
-      throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
-    }
-  } */
 
 }

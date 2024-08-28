@@ -46,15 +46,9 @@
         </div>
 
 
-        <div style="display: grid; height: 60%; grid-template-columns: 1fr 1fr;">
-          <div style="background: lightblue">
-            <mat-spinner *ngIf="feedbackLoading" color="primary" style="width: 20px; height: 20px;"></mat-spinner>
-            <p>{{feedbackText}}</p>
-          </div>
-          <div style="background: lightgreen">
-            <mat-spinner *ngIf="feedbackHighlightLoading" color="accent" style="width: 20px; height: 20px;"></mat-spinner>
-            <p>{{feedbackTextHighlight}}</p>
-          </div>
+        <div style="background: lightblue">
+          <mat-spinner *ngIf="feedbackLoading" color="primary" style="width: 20px; height: 20px;"></mat-spinner>
+          <pre style="white-space: pre-wrap; word-wrap: break-word;">{{feedbackText}}</pre>
         </div>
 
 

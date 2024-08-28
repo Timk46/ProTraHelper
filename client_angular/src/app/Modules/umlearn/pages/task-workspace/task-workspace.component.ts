@@ -91,16 +91,16 @@ export class TaskWorkspaceComponent implements OnDestroy {
 
   onGenerateFeedback() {
     this.feedbackLoading = true;
-    this.feedbackHighlightLoading = true;
+    //this.feedbackHighlightLoading = true;
 
     this.dtcs.generateUmlFeedback(this.taskAttemptData.taskId).subscribe((data: {response: string}) => {
       this.feedbackText = data.response;
       this.feedbackLoading = false;
     });
-    this.dtcs.generateUmlFeedbackByHighlighted(this.taskAttemptData.taskId).subscribe((data: {response: string}) => {
+    /* this.dtcs.generateUmlFeedbackByHighlighted(this.taskAttemptData.taskId).subscribe((data: {response: string}) => {
       this.feedbackTextHighlight = data.response;
       this.feedbackHighlightLoading = false;
-    });
+    }); */
   }
 
   /**
@@ -125,10 +125,10 @@ export class TaskWorkspaceComponent implements OnDestroy {
     this.notification.info("Änderungen werden übernommen...");
     this.taskAttemptData.attemptData = data;
     //const setTaskAttemptDataSubscription = this.dtcs.setTaskAttemptData(this.taskAttemptData).subscribe((data: taskAttemptDataDTO) => {
-    const setTaskAttemptDataSubscription = this.dtcs.commitAttemptGetPoints(this.taskAttemptData).subscribe((data: {points: number, highlightData: editorDataDTO}) => {
+    const setTaskAttemptDataSubscription = this.dtcs.commitAttemptGetPoints(this.taskAttemptData).subscribe((data: {points: number}) => {
       this.isSubmitted = !this.isSubmitted;
       this.reachedPoints = data.points;
-      console.log("score: ", data.points, "hdata: ", data.highlightData);
+      console.log("score: ", data.points);
       //after 0.5 seconds, the transition is finished
       if (this.isSubmitted) {
         setTimeout(() => {

@@ -4,15 +4,15 @@ export const nodeWeights = {
   title: 0.4,
   attributes: {
     total: 0.2,
-    name: 0.51,
+    name: 0.6,
     dataType: 0.25,
-    visibility: 0.24,
+    visibility: 0.15,
   },
   methods: {
     total: 0.2,
-    name: 0.51,
+    name: 0.6,
     dataType: 0.25,
-    visibility: 0.24,
+    visibility: 0.15,
   }
 };
 

@@ -16,7 +16,6 @@ export class SimilarityCompareService {
   public findGraphMatching(attemptGraph: editorDataDTO, solutionGraph: editorDataDTO): GraphMatching {
     const nodeMatching = this.findElementMatching(attemptGraph.nodes, solutionGraph.nodes, this.calcSingleNodeSimilarity);
     const mappedAttemptEdges = attemptGraph.edges;
-
     // we need to map the node ids to the solution ids to ensure that the edges are correctly matched
     for (const edge of mappedAttemptEdges) {
       edge.start = nodeMatching.find(node => node.attempt.id == edge.start).solution.id || edge.start;
@@ -36,6 +35,7 @@ export class SimilarityCompareService {
     const edgeSimilarity = edgeMatchings.reduce((acc, curr) => acc + curr.similarity, 0) / edgeMatchings.length;
 
     const similarity = nodeSimilarity * nodeWeights.total + edgeSimilarity * edgeWeights.total;
+    console.log(similarity);
     return similarity;
   }
 
@@ -55,10 +55,10 @@ export class SimilarityCompareService {
 
   public generateEdgesSimilarityLog(edgesMatching: {attempt: ClassEdge, solution: ClassEdge, similarity: number}[]): string {
     const edgesSimilarity = edgesMatching.reduce((acc, curr) => acc + curr.similarity, 0) / edgesMatching.length;
+    let log = similarityLogEntries.LOG_EDGES_INTRODUCTION + "\n";
     if (edgesSimilarity == 1) {
-      return "";
+      return log + similarityLogEntries.LOG_EDGES_NOTHINGFOUND + "\n";
     } else {
-      let log = similarityLogEntries.LOG_EDGES_INTRODUCTION + "\n";
       for (const edge of edgesMatching) {
         if (edge.similarity < 1) {
           if (edge.attempt == null) {
@@ -70,8 +70,8 @@ export class SimilarityCompareService {
           }
         }
       }
-      return log;
     }
+    return log;
   }
 
 
@@ -83,10 +83,10 @@ export class SimilarityCompareService {
 
   public generateNodesSimilarityLog(nodesMatching: {attempt: ClassNode, solution: ClassNode, similarity: number}[]): string {
     const nodesSimilarity = nodesMatching.reduce((acc, curr) => acc + curr.similarity, 0) / nodesMatching.length;
+    let log = similarityLogEntries.LOG_NODES_INTRODUCTION + "\n";
     if (nodesSimilarity == 1) {
-      return "";
+      return log + similarityLogEntries.LOG_NODES_NOTHINGFOUND + "\n";
     } else {
-      let log = similarityLogEntries.LOG_NODES_INTRODUCTION + "\n";
       for (const node of nodesMatching) {
         if (node.similarity < 1) {
           if (node.attempt == null) {
@@ -98,18 +98,24 @@ export class SimilarityCompareService {
           }
         }
       }
-      return log;
     }
+    return log;
   }
 
 
   public calcAttributesSimilarity(attemptAttributes: ClassAttribute[], solutionAttributes: ClassAttribute[]): number{
+    if (attemptAttributes.length == 0 && solutionAttributes.length == 0) {
+      return 1;
+    }
     const matching = this.findElementMatching(attemptAttributes, solutionAttributes, this.calcSingleAttributeSimilarity);
     return (matching.reduce((acc, curr) => acc + curr.similarity, 0)) / matching.length;
   }
 
 
   public calcMethodsSimilarity(attemptMethods: ClassMethod[], solutionMethods: ClassMethod[]): number {
+    if (attemptMethods.length == 0 && solutionMethods.length == 0) {
+      return 1;
+    }
     const matching = this.findElementMatching(attemptMethods, solutionMethods, this.calcSingleMethodSimilarity);
     return (matching.reduce((acc, curr) => acc + curr.similarity, 0)) / matching.length;
   }
@@ -126,7 +132,6 @@ export class SimilarityCompareService {
       typeSimilarity * nodeWeights.type +
       attributesSimilarity * nodeWeights.attributes.total +
       methodsSimilarity * nodeWeights.methods.total;
-
     return similarity;
   }
 
@@ -142,9 +147,9 @@ export class SimilarityCompareService {
     if (attributesSimilarity < 1) {
       for (const attribute of this.findElementMatching(attemptElement.attributes || [], solutionElement.attributes || [], this.calcSingleAttributeSimilarity)) {
         if (attribute.attempt == null) {
-          attributesSimilarityLog += similarityLogEntries.CLASS_NODE_ATTRIBUTE_MISSING(attribute.solution.name);
+          attributesSimilarityLog += similarityLogEntries.CLASS_NODE_ATTRIBUTE_MISSING(attribute.solution.name) + "\n";
         } else if (attribute.solution == null) {
-          attributesSimilarityLog += similarityLogEntries.CLASS_NODE_ATTRIBUTE_ADDED(attribute.attempt.name);
+          attributesSimilarityLog += similarityLogEntries.CLASS_NODE_ATTRIBUTE_ADDED(attribute.attempt.name) + "\n";
         } else {
           attributesSimilarityLog += this.generateSingleAttributeSimilarityLog(attribute.attempt, attribute.solution);
         }
@@ -153,9 +158,9 @@ export class SimilarityCompareService {
     if (methodsSimilarity < 1) {
       for (const method of this.findElementMatching(attemptElement.methods || [], solutionElement.methods || [], this.calcSingleMethodSimilarity)) {
         if (method.attempt == null) {
-          methodsSimilarityLog += similarityLogEntries.CLASS_NODE_METHOD_MISSING(method.solution.name);
+          methodsSimilarityLog += similarityLogEntries.CLASS_NODE_METHOD_MISSING(method.solution.name) + "\n";
         } else if (method.solution == null) {
-          methodsSimilarityLog += similarityLogEntries.CLASS_NODE_METHOD_ADDED(method.attempt.name);
+          methodsSimilarityLog += similarityLogEntries.CLASS_NODE_METHOD_ADDED(method.attempt.name) + "\n";
         } else {
           methodsSimilarityLog += this.generateSingleMethodSimilarityLog(method.attempt, method.solution);
         }
@@ -253,7 +258,6 @@ export class SimilarityCompareService {
       cardinalityStartSimilarity * edgeWeights.cardinalityStart +
       descriptionSimilarity * edgeWeights.description +
       cardinalityEndSimilarity * edgeWeights.cardinalityEnd;
-
     return similarity;
   }
 
@@ -317,7 +321,8 @@ export class SimilarityCompareService {
             }
           }
         }
-        matching.push({ attempt: tempAttempt[currentAttemptIndex], solution: tempSolution[bestMatchIndex], similarity: bestMatch });
+        // we found the best match and remove it from the arrays (providing a rounded similarity)
+        matching.push({ attempt: tempAttempt[currentAttemptIndex], solution: tempSolution[bestMatchIndex], similarity: Math.round(bestMatch * 1000000) / 1000000 });
         tempAttempt.splice(currentAttemptIndex, 1);
         tempSolution.splice(bestMatchIndex, 1);
       }

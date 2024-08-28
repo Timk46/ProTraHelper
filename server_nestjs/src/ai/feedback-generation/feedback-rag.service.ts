@@ -8,7 +8,7 @@ import { editorDataDTO, rawClassEdge, rawClassNode } from "@Interfaces/index";
 import { Response } from 'express';
 import { ChatPromptValue } from "langchain/dist/prompts/chat";
 
-const KImodel = 'gpt-4-1106-preview';
+const KImodel = 'gpt-4o-2024-05-13';
 
 const chatStream = new ChatOpenAI({
   modelName: KImodel,
@@ -58,6 +58,15 @@ export class FeedbackRAGService {
       question: question,
       points: points,
       highlightedData: JSON.stringify(await this.filterUmlData(highlightedData, true)),
+    });
+
+    return this.generateByChatPromptValue(ragFormattedPrompt, resStream);
+  }
+
+  async generateUmlFeedbackByLog(question: String, log: string, resStream: Response = undefined): Promise<{response: string}> {
+    const ragFormattedPrompt = await fGPrompts.umlQuestionByLog.formatPromptValue({
+      question: question,
+      log: log,
     });
 
     return this.generateByChatPromptValue(ragFormattedPrompt, resStream);

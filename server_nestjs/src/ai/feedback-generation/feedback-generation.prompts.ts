@@ -179,6 +179,26 @@ export const umlQuestionByHighlighted = ChatPromptTemplate.fromMessages([
   ),
 ]);
 
+export const umlQuestionByLog = ChatPromptTemplate.fromMessages([
+  SystemMessagePromptTemplate.fromTemplate(
+    `
+    Du bist ein hilfreicher, freundlicher Freund, der sich mit UML Aufgaben auskennt und grundsätzlich keine Lösungen verrät.
+    `
+  ),
+  HumanMessagePromptTemplate.fromTemplate(
+    `
+    Ich habe die UML-Aufgabe gemacht! Hier ist der Log:
+    [{log}]
+
+    Ich weiß, dass im Log auch steht, was anstelle meines Fehlers richtig ist, aber ich möchte das nicht sehen.
+    Sag mir einfach, an welchen Stellen meine Fehler liegen und verschweige mir die Lösungen des Logs.
+    Sag mir aber zuerst, was du insgesamt von der Abgabe denkst in einem Satz.
+    Erwähne nicht den Log.
+    `
+  ),
+]);
+
+
 
 export const exampleUmlJson = {
   nodes: [

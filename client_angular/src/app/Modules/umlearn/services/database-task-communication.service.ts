@@ -125,9 +125,9 @@ export class DatabaseTaskCommunicationService {
     return this.http.get<{response: string}>(environment.server + '/database-task-communication/generateUmlFeedback/' + taskId);
   }
 
-  generateUmlFeedbackByHighlighted(taskId: number): Observable<{response: string}> {
+  /* generateUmlFeedbackByHighlighted(taskId: number): Observable<{response: string}> {
     return this.http.get<{response: string}>(environment.server + '/database-task-communication/generateUmlFeedbackByHighlighted/' + taskId);
-  }
+  } */
 
   /**
    * Sets the task attempt data by making a POST request to the server.

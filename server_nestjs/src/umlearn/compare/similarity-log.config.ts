@@ -34,4 +34,8 @@ export const similarityLogEntries = {
   CLASS_EDGE_ADDED: (edge: string) => `Unnecessary edge: ${edge}.`,
   CLASS_NODE_ATTRIBUTE_ADDED: (attribute: string) => `- Unnecessary node attribute: ${attribute}.`,
   CLASS_NODE_METHOD_ADDED: (method: string) => `- Unnecessary node method: ${method}.`,
+
+  LOG_NODES_NOTHINGFOUND: `No node mistakes found.`,
+  LOG_EDGES_NOTHINGFOUND: `No edge mistakes found.`,
+
 };
