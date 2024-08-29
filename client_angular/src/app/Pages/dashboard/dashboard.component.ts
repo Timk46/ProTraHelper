@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Subscription } from 'rxjs';
+import { UserService } from 'src/app/Services/auth/user.service';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 import { NotificationService } from 'src/app/Services/notification/notification.service';
 import { ToolbarService } from 'src/app/Services/toolbar/toolbar.service';
@@ -13,11 +14,17 @@ import { ToolbarService } from 'src/app/Services/toolbar/toolbar.service';
 export class DashboardComponent implements OnInit, OnDestroy {
   unreadCount: number = 0;
   private subscriptions: Subscription[] = [];
+
+  protected isAdmin: boolean = false;
+  protected editModeActive: boolean = false;
+
   constructor(
     public toolbarService: ToolbarService,
     public sSS: ScreenSizeService,
     private title:Title,
-    private notificationService: NotificationService) {
+    private notificationService: NotificationService,
+    private userService: UserService
+  ) {
     toolbarService.show();
     title.setTitle('GOALS: Dashboard');
     sSS.isHandset.subscribe((result) => {
@@ -26,6 +33,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     sSS.isWeb.subscribe((result) => {
       console.log('WEB', result);
     });
+
+    // for lecturers view - get edit status from local storage
+    this.isAdmin = this.userService.getRole() === 'ADMIN';
+    localStorage.getItem('editModeActive') === 'true' ? this.editModeActive = true : this.editModeActive = false;
   }
 
   get isMobile() {
@@ -42,6 +53,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }),
       this.notificationService.getNotifications().subscribe()
     );
+  }
+
+  // lecturers view
+  onToggleEditMode() {
+    this.editModeActive = !this.editModeActive;
+    //save in local storage or delete
+    if (this.editModeActive) {
+      localStorage.setItem('editModeActive', 'true');
+    } else {
+      localStorage.removeItem('editModeActive');
+    }
+    window.location.reload();
   }
 
   ngOnDestroy() {

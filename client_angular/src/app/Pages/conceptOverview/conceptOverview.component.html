@@ -3,17 +3,18 @@
   <button mat-button [ngClass]="{'active': activeTab === 'discussion'}" (click)="activeTab = 'discussion'">Diskutieren</button>
 </div> -->
 <div *ngIf="activeConceptNode.databaseId != -1" class="content mat-elevation-z8">
-  <div *ngIf="(isHandset$ | async) === true" class="button-group" style="display: flex;">
-  <button mat-button [ngClass]="{'active': activeTab === 'content'}" (click)="activeTab = 'content'">Bearbeiten</button>
-  <button mat-button [ngClass]="{'active': activeTab === 'discussion'}" (click)="activeTab = 'discussion'">Diskutieren</button>
-</div>
+  <div *ngIf="(isHandset$ | async) === true   && !editModeActive" class="button-group" style="display: flex;">
+    <button mat-button [ngClass]="{'active': activeTab === 'content'}" (click)="activeTab = 'content'">Bearbeiten</button>
+    <button mat-button [ngClass]="{'active': activeTab === 'discussion'}" (click)="activeTab = 'discussion'">Diskutieren</button>
+  </div>
   <div class="header">
     <h1 *ngIf="sSS.isLandscape | async" matTooltip="Id: {{activeConceptNode.databaseId}}">{{activeConceptNode.name}}</h1>
     <h1 *ngIf="!(sSS.isLandscape | async)">{{activeConceptNode.name}}</h1>
-    <div *ngIf="(isHandset$ | async) === false" class="button-group">
+    <div *ngIf="(isHandset$ | async) === false  && !editModeActive" class="button-group">
       <button mat-button [ngClass]="{'active': activeTab === 'content'}" (click)="activeTab = 'content'">Bearbeiten</button>
       <button mat-button [ngClass]="{'active': activeTab === 'discussion'}" (click)="activeTab = 'discussion'">Diskutieren</button>
     </div>
+    <button *ngIf="isAdmin && editModeActive" mat-raised-button color="primary">Neue Aufgabe hinzufügen</button>
   </div>
   <p>{{activeConceptNode.description}}</p>
 
@@ -22,7 +23,7 @@
       [activeConceptNodeId]="activeConceptNode.databaseId"></app-contentBoard>
   </div>
 
-  <div [ngStyle]="{'display': activeTab === 'discussion' ? 'block' : 'none'}" class="tab-content-container">
+  <div *ngIf="!editModeActive" [ngStyle]="{'display': activeTab === 'discussion' ? 'block' : 'none'}" class="tab-content-container">
     <app-discussion-list [activeConceptNodeId]="activeConceptNode.databaseId"></app-discussion-list>
   </div>
 </div>

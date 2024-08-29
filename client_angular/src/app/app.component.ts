@@ -16,6 +16,8 @@ export class AppComponent {
   userRole: string = "";
   version: string = "";
   userIsLoggedIn: boolean = false;
+
+  editModeActive: boolean = false;
   constructor
     (
       private userService: UserService,
@@ -34,6 +36,9 @@ export class AppComponent {
           this.userRole = userService.getRole();
         }
       });
+
+      // lecturers view - get edit status from local storage
+      localStorage.getItem('editModeActive') === 'true' ? this.editModeActive = true : this.editModeActive = false;
     }
 
   openContact() {

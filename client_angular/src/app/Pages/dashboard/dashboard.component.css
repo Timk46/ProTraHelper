@@ -31,3 +31,14 @@
 .graph {
   height: 50vh;
 }
+
+.lectureview-button {
+  position: fixed;
+  width: 48px;
+  height: 48px;
+  top: 30px;
+  right: 90px;
+  z-index: 1000; /* Stellen Sie sicher, dass der Button über anderen Elementen liegt */
+  background-color: #3f51b5; /* Farbe des Buttons */
+  color: white; /* Farbe des Symbols */
+}

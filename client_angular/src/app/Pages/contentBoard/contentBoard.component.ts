@@ -11,6 +11,7 @@ import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-t
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { firstValueFrom, map, Observable, Subject, takeUntil } from 'rxjs';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+import { UserService } from 'src/app/Services/auth/user.service';
 
 
 interface TaskViewData {
@@ -51,7 +52,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     'name',
     'type',
     'progress',
-    'actions',
+    'actions'
   ];
 
   /**
@@ -64,16 +65,26 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    */
   private destroy$ = new Subject<void>();
 
+  // for lecturers view
+  protected isAdmin: boolean = false;
+  protected editModeActive: boolean = false;
+
 
   constructor(
     private router: Router,
     public dialog: MatDialog,
     public sSS: ScreenSizeService,
-    private progressService: ProgressService
+    private progressService: ProgressService,
+    private userService: UserService
   ) {
     // Initialize the data source for the table
     this.dataSource = new MatTableDataSource<TaskViewData>();
     this.sort = new MatSort();
+
+    // for lecturers view
+    this.isAdmin = this.userService.getRole() === 'ADMIN';
+    localStorage.getItem('editModeActive') === 'true' ? this.editModeActive = true : this.editModeActive = false;
+
   }
 
   ngOnInit() {
@@ -244,6 +255,14 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         dialogSubmitSubscription.unsubscribe();
       });
     }
+  }
+
+  onTaskEdit(taskViewData: TaskViewData) {
+    console.log("onTaskEdit: ", taskViewData);
+  }
+
+  onDeleteClick(elementId: number) {
+    console.log("onDeleteClick: ", elementId);
   }
 
   /**
