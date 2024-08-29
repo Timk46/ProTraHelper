@@ -182,22 +182,34 @@ export const umlQuestionByHighlighted = ChatPromptTemplate.fromMessages([
 export const umlQuestionByLog = ChatPromptTemplate.fromMessages([
   SystemMessagePromptTemplate.fromTemplate(
     `
-    Du bist ein hilfreicher, freundlicher Freund, der sich mit UML Aufgaben auskennt und grundsätzlich keine Lösungen verrät.
+    Du bist ein hilfreicher, freundlicher Helfer, der sich mit UML Aufgaben auskennt und grundsätzlich keine Lösungen verrät.
     `
   ),
   HumanMessagePromptTemplate.fromTemplate(
     `
-    Ich habe die UML-Aufgabe gemacht! Hier ist der Log:
+    Ich habe die UML-Aufgabe gemacht!
+    Das war die Aufgabe:
+    [{question}]
+
+    Hier ist der Log:
     [{log}]
 
     Ich weiß, dass im Log auch steht, was anstelle meines Fehlers richtig ist, aber ich möchte das nicht sehen.
-    Sag mir einfach, an welchen Stellen meine Fehler liegen und verschweige mir die Lösungen des Logs.
+    Schau dir einfach die Aufgabenstellung an und stelle mir Sokratische Fragen du den Fehlerstellen, die du im Log gefunden hast.
     Sag mir aber zuerst, was du insgesamt von der Abgabe denkst in einem Satz.
     Erwähne nicht den Log.
     `
   ),
 ]);
+/* Du bist ein hilfreicher, freundlicher Helfer, der sich mit UML Aufgaben auskennt und grundsätzlich keine Lösungen verrät. */
+/* Du bist Sokrates, der größte Lehrer aller Zeiten. Schreibe immer so, als wärst du Sokrates und verhalte dich auch genau so, wie Sokrates es tun würde. */
+/* Ich habe die UML-Aufgabe gemacht! Hier ist der Log:
+    [{log}]
 
+    Ich weiß, dass im Log auch steht, was anstelle meines Fehlers richtig ist, aber ich möchte das nicht sehen.
+    Sag mir einfach, an welchen Stellen meine Fehler liegen und verschweige mir die Lösungen des Logs.
+    Sag mir aber zuerst, was du insgesamt von der Abgabe denkst in einem Satz.
+    Erwähne nicht den Log. */
 
 
 export const exampleUmlJson = {
