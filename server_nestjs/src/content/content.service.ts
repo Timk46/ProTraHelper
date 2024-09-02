@@ -47,7 +47,7 @@ export class ContentService {
   async getContentsByConceptNode(
     conceptNodeId: number,
     userId: number,
-  ): Promise<ContentsForConceptDTO> {
+    ): Promise<ContentsForConceptDTO> {
     // Step 1: Fetch concept node with all related data in a single query
     // We use Prisma's findUnique method to get a specific concept node
     // The 'include' option tells Prisma to also fetch related data

@@ -1,6 +1,6 @@
 import { ProgressService } from 'src/app/Services/progress/progress.service';
-import { ContentDTO, ContentsForConceptDTO } from '@DTOs/content.dto';
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { ContentDTO, ContentsForConceptDTO, QuestionDTO, LinkableContentElementDTO, contentElementType } from '@DTOs/index';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild, ViewChildren } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ContentViewComponent } from '../contentView/contentView.component';
@@ -12,6 +12,9 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { firstValueFrom, map, Observable, Subject, takeUntil } from 'rxjs';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 import { UserService } from 'src/app/Services/auth/user.service';
+import { CreateContentElementDialogComponent } from '../lecturersView/create-content-element-dialog/create-content-element-dialog.component';
+import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
+import { MatExpansionPanel } from '@angular/material/expansion';
 
 
 interface TaskViewData {
@@ -44,6 +47,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
   @ViewChild(MatSort) sort: MatSort;
 
+  // emitter for refreshing
+  @Output() fetchContentsForConcept = new EventEmitter<void>();
+
   /**
    * Columns to be displayed in the table
    */
@@ -69,13 +75,13 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   protected isAdmin: boolean = false;
   protected editModeActive: boolean = false;
 
-
   constructor(
     private router: Router,
     public dialog: MatDialog,
     public sSS: ScreenSizeService,
     private progressService: ProgressService,
-    private userService: UserService
+    private userService: UserService,
+    private contentLinkerService: ContentLinkerService
   ) {
     // Initialize the data source for the table
     this.dataSource = new MatTableDataSource<TaskViewData>();
@@ -85,21 +91,27 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
     localStorage.getItem('editModeActive') === 'true' ? this.editModeActive = true : this.editModeActive = false;
 
+
+
   }
 
   ngOnInit() {
     // Subscribe to screen size changes for responsive design
-    this.sSS.isHandset.pipe(takeUntil(this.destroy$)).subscribe((isHandset) => {
-      if (isHandset) {
-        this.updateDisplayedColumns(['name', 'type', 'progress', 'actions']);
-      }
-    });
+    if (this.editModeActive) {
+      this.updateDisplayedColumns(['id', 'name', 'type', 'actions']);
+    } else {
+      this.sSS.isHandset.pipe(takeUntil(this.destroy$)).subscribe((isHandset) => {
+        if (isHandset) {
+          this.updateDisplayedColumns(['name', 'type', 'progress', 'actions']);
+        }
+      });
 
-    this.sSS.isTablet.pipe(takeUntil(this.destroy$)).subscribe((isTablet) => {
-      if (isTablet) {
-        this.updateDisplayedColumns(['id','name','type', 'progress', 'actions']);
-      }
-    });
+      this.sSS.isTablet.pipe(takeUntil(this.destroy$)).subscribe((isTablet) => {
+        if (isTablet) {
+          this.updateDisplayedColumns(['id','name','type', 'progress', 'actions']);
+        }
+      });
+    }
   }
 
   /**
@@ -257,13 +269,64 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  /**
+   * Opens a dialog to create a new task.
+   *
+   * @param contentNodeId - The ID of the content node.
+   */
+  onNewTask(contentNodeId: number) {
+    console.log("onNewTask");
+    if (this.isAdmin){
+      const dialogRef = this.dialog.open(CreateContentElementDialogComponent, {
+        width: '50vw',
+        height: '80vh'
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          console.log('Dialog result:', result);
+          const linkableContentElement: LinkableContentElementDTO = {
+            contentNodeId: contentNodeId,
+
+            questionId: Number(result.questionId) || undefined,
+            question: result.questionId ? undefined : {
+              id: -1,
+              text: "",
+              isApproved: false, //TODO: implement approval
+              name: result.questionTitle || "New question",
+              type: result.questionType,
+              description: result.questionDescription || "Manuell per GUI erstellte Frage",
+              level: Number(result.questionDifficulty),
+              score: Number(result.questionScore) || 100,
+            },
+            contentElementTitle: result.contentElementTitle || undefined,
+            contentElementText: result.contentElementDescription || undefined,
+            position: result.contentElementPosition || undefined
+          };
+
+          this.contentLinkerService.createLinkedContentElement(linkableContentElement).subscribe((linkableContentElement) => {
+            console.log("linked contentElement: ", linkableContentElement);
+            this.fetchContentsForConcept.emit();
+          });
+        }
+      });
+    }
+  }
+
   onTaskEdit(taskViewData: TaskViewData) {
     console.log("onTaskEdit: ", taskViewData);
   }
 
-  onDeleteClick(elementId: number) {
+  onTaskDelete(elementId: number) {
     console.log("onDeleteClick: ", elementId);
   }
+
+  //TODO
+  onContentNodeDelete(contentNodeId: number) {
+    console.log("onContentNodeDelete", contentNodeId);
+  }
+
+
 
   /**
    * @description

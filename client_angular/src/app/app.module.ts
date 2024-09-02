@@ -54,6 +54,8 @@ import { ToastrModule } from "ngx-toastr";
 import { NotificationComponent } from './Pages/notification/notification.component';
 import { NotificationBellComponent } from "./Pages/notification/notification-bell/notification-bell.component";
 import { BellDirective } from "./Pages/notification/notification-bell/belldirective.directive";
+import { CreateContentNodeDialogComponent } from './Pages/lecturersView/create-content-node-dialog/create-content-node-dialog.component';
+import { CreateContentElementDialogComponent } from './Pages/lecturersView/create-content-element-dialog/create-content-element-dialog.component';
 
 
 
@@ -98,7 +100,9 @@ import { BellDirective } from "./Pages/notification/notification-bell/belldirect
         ProgressComponent,
         NotificationComponent,
         NotificationBellComponent,
-        BellDirective
+        BellDirective,
+        CreateContentNodeDialogComponent,
+        CreateContentElementDialogComponent
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

@@ -37,6 +37,8 @@ import { EventLogModule } from './EventLog/event-log.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { VersionInterceptor } from './common/interceptors/version.interceptor';
 import { NotificationModule } from './notification/notification.module';
+import { ContentLinkerService } from './content-linker/content-linker.service';
+import { ContentLinkerModule } from './content-linker/content-linker.module';
 
 @Module({
   imports: [
@@ -62,6 +64,7 @@ import { NotificationModule } from './notification/notification.module';
     AuthModule,
     UsersModule,
     ContentModule,
+    ContentLinkerModule,
     ChatBotModule,
     ModulesModule,
     QuestionDataModule,
@@ -72,6 +75,7 @@ import { NotificationModule } from './notification/notification.module';
     // McqevaluationModule, CURRENTLY DISABLED
     EventLogModule,
     NotificationModule,
+    ContentLinkerModule,
   ],
   controllers: [
     AppController,
@@ -93,6 +97,7 @@ import { NotificationModule } from './notification/notification.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard, // All Routes are protected by JWTGuard. Users only get Tokens by using CAS of the university
     },
+    ContentLinkerService,
 
   ],
 })

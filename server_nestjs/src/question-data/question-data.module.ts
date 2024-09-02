@@ -18,5 +18,6 @@ import { NotificationModule } from '@/notification/notification.module';
     UserConceptModule,
     NotificationModule,
   ],
+  exports: [QuestionDataService],
 })
 export class QuestionDataModule {}

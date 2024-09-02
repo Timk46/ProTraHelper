@@ -28,7 +28,7 @@ export class QuestionDataService {
         });
 
         if(!question) {
-            throw new Error('Question not found');
+            throw new Error('Question ' + questionId + ' not found');
         }
 
         let questionData: QuestionDTO = {
@@ -201,30 +201,31 @@ export class QuestionDataService {
       };
     }
 
+
     /**
+     * Creates a new question.
      *
-     * @param question
-     * @returns question Data
+     * @param question - The question data.
+     * @param authorId - The ID of the author.
+     * @returns A promise that resolves to the created question.
+     * @throws An error if the concept node is not defined or if the question is not created.
      */
-    async createQuestion(question: QuestionDTO): Promise<QuestionDTO> {
-         if(question.author === undefined) {
-           throw new Error('Author not defined');
-         }
-        const concept = await this.prisma.conceptNode.findFirst({
-            where: {
-                name: question.conceptNodeName
-            }
-        });
+    async createQuestion(question: QuestionDTO, authorId: number): Promise<QuestionDTO> {
         console.log("question origin Id", question.originId);
         let newQuestion = await this.prisma.question.create({
             data: {
-                author:  {connect: {id: question.author}},
-                description: question.description,
-                score: question.score,
+                name: question.name || 'New Question',
+                author:  {connect: {id: authorId}},
+                description: question.description || null,
+                score: question.score || 100,
                 type: question.type,
+                level: question.level,
+                mode: question.mode || 'practise',
                 text: question.text,
-                isApproved: question.isApproved,
-                conceptNode: {connect: {id: concept.id}},
+                isApproved: question.isApproved || false,
+                version: question.version || 1,
+                //origin has to be set in the next step
+                conceptNode: question.conceptNode? {connect: {id: question.conceptNode}}: undefined,
             }
         });
 

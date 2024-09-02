@@ -14,6 +14,8 @@ export interface QuestionDTO {
     originId?: number;
     codingQuestion?: CodingQuestionDto,
     level: number;
+    mode?: string;
+    version?: number;
 }
 
 /*export interface QuestionDto { // This is the Tutor-Kai Question DTO. ToDo: NEEDS MERGE

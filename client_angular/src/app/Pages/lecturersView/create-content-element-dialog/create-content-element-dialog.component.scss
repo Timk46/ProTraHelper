@@ -1,0 +1,14 @@
+form {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+}
+
+mat-form-field {
+  margin-bottom: 15px;
+}
+
+.expansion {
+  display: flex;
+  flex-direction: column;
+}
