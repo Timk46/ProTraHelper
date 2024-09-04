@@ -18,6 +18,10 @@ import { LoginComponent } from './Pages/login/login.component';
 import { LoggedInGuard } from './Guards/is-logged-in.guard';
 import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overview/task-evaluation-overview.component';
 import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
+import { EditFreetextComponent } from './Pages/lecturersView/edit-freetext/edit-freetext.component';
+import { EditChoiceComponent } from './Pages/lecturersView/edit-choice/edit-choice.component';
+import { EditCodingComponent } from './Pages/lecturersView/edit-coding/edit-coding.component';
+import { AdminGuard } from './Guards/is-admin.guard';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -35,7 +39,14 @@ const routes: Routes = [
   { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard] },
   { path: 'discussion-view/:discussionId', component: DiscussionViewComponent, canActivate: [LoggedInGuard] },
   { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent },
+
   { path: 'mcqcreation', component: McTaskCreationComponent, canActivate: [LoggedInGuard]},
+
+  { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [LoggedInGuard, AdminGuard]},
+  { path: 'editcoding/:questionId', component: EditCodingComponent, canActivate: [LoggedInGuard, AdminGuard]},
+  { path: 'editfillin/:questionId', component: EditFreetextComponent, canActivate: [LoggedInGuard, AdminGuard]},
+  { path: 'editfreetext/:questionId', component: EditFreetextComponent, canActivate: [LoggedInGuard, AdminGuard]},
+
   // just for testing
   { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
 

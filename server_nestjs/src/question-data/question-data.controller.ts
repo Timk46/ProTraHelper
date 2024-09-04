@@ -1,11 +1,7 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Param, Body, Req, UseGuards, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req} from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
-import { UserAnswerDataDTO } from '@DTOs/userAnswer.dto';
-import { RolesGuard, roles } from '@/auth/roles.guard';
-import { MCOptionDTO, McQuestionDTO, McQuestionOptionDTO, QuestionDTO } from '@Interfaces/question.dto';
-import { uptime } from 'process';
-import { th } from '@faker-js/faker';
+import { freeTextQuestionDTO, UserAnswerDataDTO } from '@DTOs/index';
 
 //@UseGuards(RolesGuard)
 @Controller('question-data')
@@ -44,12 +40,12 @@ export class QuestionDataController {
 
     /**
      *
-     * @param questionVersionId
+     * @param questionId
      * @returns the free text question
      */
-    @Get('/freeTextQuestion/:questionVersionId')
-    async getFreeTextQuestion(@Param('questionVersionId') questionVersionId: number) {
-        return this.questionDataService.getFreeTextQuestion(questionVersionId);
+    @Get('/freeTextQuestion/:questionId')
+    async getFreeTextQuestion(@Param('questionId') questionId: number): Promise<freeTextQuestionDTO> {
+        return this.questionDataService.getFreeTextQuestion(questionId);
     }
 
     @Get('/newestUserAnswer/:questionId/:userId')

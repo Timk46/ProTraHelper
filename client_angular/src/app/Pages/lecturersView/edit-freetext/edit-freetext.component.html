@@ -1,0 +1,75 @@
+<div class="content mat-elevation-z8">
+  <h1 style="display: flex; justify-content: center;">Freitextaufgabe bearbeiten</h1>
+
+  <div class="horizontal-align-container">
+    <div class="text-container" style="width: 30%;">
+      <div class="wrap-container">
+
+        <h2>Optionen</h2>
+
+        <form [formGroup]="freeTextForm">
+          <mat-form-field style="width: 100%;">
+            <input matInput placeholder="Titel der Frage" formControlName="questionTitle">
+            <mat-error *ngIf="freeTextForm.get('questionTitle')!.hasError('required')">Titel der Frage ist erforderlich</mat-error>
+          </mat-form-field>
+          <mat-form-field style="width: 100%;">
+            <mat-label>Schwierigkeit</mat-label>
+            <mat-select formControlName="questionDifficulty">
+              <mat-option value="1">Level 1</mat-option>
+              <mat-option value="2">Level 2</mat-option>
+              <mat-option value="3">Level 3</mat-option>
+              <mat-option value="4" disabled>Level 4</mat-option>
+              <mat-option value="5" disabled>Level 5</mat-option>
+            </mat-select>
+            <mat-error *ngIf="freeTextForm.get('questionDifficulty')!.hasError('required')">Schwierigkeitsgrad ist erforderlich</mat-error>
+          </mat-form-field>
+          <mat-form-field style="width: 100%;">
+            <input matInput type="number" min="0" step="1" placeholder="Punkte" formControlName="questionScore">
+            <mat-hint>Punkte</mat-hint>
+            <mat-error *ngIf="freeTextForm.get('questionScore')!.hasError('required')">Punkte sind
+              erforderlich</mat-error>
+          </mat-form-field>
+        </form>
+
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Erweiterte Optionen (optional)</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="expansion">
+            <p>Die Auswirkungen dieser Einstellungen sind in der Übersicht nicht sichtbar und beziehen sich nur auf interne Datenbankparameter</p>
+            <mat-form-field>
+              <textarea matInput placeholder="Beschreibung der Frage" formControlName="questionDescription"></textarea>
+              <mat-hint>Zum Beispiel "manuell erstellt" oder "automatisch importiert"</mat-hint>
+            </mat-form-field>
+          </div>
+        </mat-expansion-panel>
+      </div>
+    </div>
+
+    <div class="text-container" style="width: 70%;">
+      <div class="wrap-container">
+
+        <div style="width: 100%;">
+          <h2>Aufgabentext</h2>
+          <app-tinymce #question [config]="editorConfig"></app-tinymce>
+        </div>
+
+        <div style="width: 100%;">
+          <h2>Erwartungshorizont</h2>
+          <app-tinymce #expectations [config]="editorConfig"></app-tinymce>
+        </div>
+
+        <div style="width: 100%;">
+          <h2>Musterlösung</h2>
+          <app-tinymce #solution [config]="editorConfig"></app-tinymce>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="button-container">
+    <button mat-raised-button color="primary">Speichern</button>
+    <button mat-raised-button color="warn">Abbrechen</button>
+  </div>
+</div>

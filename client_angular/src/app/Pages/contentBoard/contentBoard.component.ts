@@ -315,6 +315,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
   onTaskEdit(taskViewData: TaskViewData) {
     console.log("onTaskEdit: ", taskViewData);
+    if (taskViewData.type === 'FreeText') {
+      this.router.navigate(['/editfreetext/', taskViewData.id]);
+    }
   }
 
   onTaskDelete(elementId: number) {

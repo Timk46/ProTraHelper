@@ -56,6 +56,11 @@ import { NotificationBellComponent } from "./Pages/notification/notification-bel
 import { BellDirective } from "./Pages/notification/notification-bell/belldirective.directive";
 import { CreateContentNodeDialogComponent } from './Pages/lecturersView/create-content-node-dialog/create-content-node-dialog.component';
 import { CreateContentElementDialogComponent } from './Pages/lecturersView/create-content-element-dialog/create-content-element-dialog.component';
+import { EditFreetextComponent } from './Pages/lecturersView/edit-freetext/edit-freetext.component';
+import { EditChoiceComponent } from './Pages/lecturersView/edit-choice/edit-choice.component';
+import { EditFillinComponent } from './Pages/lecturersView/edit-fillin/edit-fillin.component';
+import { EditCodingComponent } from './Pages/lecturersView/edit-coding/edit-coding.component';
+import { AdminGuard } from "./Guards/is-admin.guard";
 
 
 
@@ -102,13 +107,18 @@ import { CreateContentElementDialogComponent } from './Pages/lecturersView/creat
         NotificationBellComponent,
         BellDirective,
         CreateContentNodeDialogComponent,
-        CreateContentElementDialogComponent
+        CreateContentElementDialogComponent,
+        EditFreetextComponent,
+        EditChoiceComponent,
+        EditFillinComponent,
+        EditCodingComponent
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
         { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
         LoggedInGuard,
+        AdminGuard,
         EditorModule,
         ConfettiService,
         Title
