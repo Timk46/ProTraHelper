@@ -18,6 +18,7 @@ export * from "./contentElementStatus.dto"
 export * from "./notification.dto";
 export * from "./notificationType.enum";
 export * from "./contentLinking.dto";
+export * from "./detailedQuestion.dto";
 
 //TutorKai DTOs
 export * from "./tutorKaiDtos/kiFeedback.dto";

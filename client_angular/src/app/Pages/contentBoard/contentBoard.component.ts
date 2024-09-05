@@ -313,6 +313,10 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  onTaskApprove(taskViewData: TaskViewData) {
+    console.log("onTaskApprove: ", taskViewData);
+  }
+
   onTaskEdit(taskViewData: TaskViewData) {
     console.log("onTaskEdit: ", taskViewData);
     if (taskViewData.type === 'FreeText') {

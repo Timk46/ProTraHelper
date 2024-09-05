@@ -1,5 +1,15 @@
-import { McQuestionDTO, QuestionDTO, QuestionVersionDTO, MCOptionDTO, MCOptionViewDTO, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
-import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import {
+  McQuestionDTO,
+  QuestionDTO,
+  MCOptionDTO,
+  MCOptionViewDTO,
+  McQuestionOptionDTO,
+  freeTextQuestionDTO,
+  detailedQuestionDTO,
+  UserAnswerDataDTO,
+  userAnswerFeedbackDTO,
+  UserMCOptionSelectedDTO
+} from '@DTOs/index';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
@@ -20,6 +30,16 @@ export class QuestionDataService {
   getQuestionData(questionId: number) : Observable<QuestionDTO> {
     return this.http.get<QuestionDTO>(environment.server + `/question-data/${questionId}`);
   }
+
+  /**
+   * Retrieves detailed question (a question with all its connected specific questions based on the question type) data for a given question ID.
+   * @param questionId - The ID of the question to retrieve detailed data for.
+   * @returns An Observable that emits a detailedQuestionDTO object.
+   */
+  getDetailedQuestionData(questionId: number) : Observable<detailedQuestionDTO> {
+    return this.http.get<detailedQuestionDTO>(environment.server + `/question-data/detailed/${questionId}`);
+  }
+
 
   getNewestQuestionVersion(questionId: number) : Observable<QuestionDTO> {
     return this.http.get<QuestionDTO>(environment.server + `/question-data/newestQuestionVersion/${questionId}`);
@@ -56,6 +76,18 @@ export class QuestionDataService {
 
   createQuestion(question: QuestionDTO) : Observable<QuestionDTO> {
     return this.http.post<QuestionDTO>(environment.server + `/question-data/createQuestion`, question)
+  }
+
+  updateQuestion(question: QuestionDTO) : Observable<QuestionDTO> {
+    return this.http.put<QuestionDTO>(environment.server + `/question-data/updateQuestion`, question)
+  }
+
+  createFreeTextQuestion(freeTextQuestion: freeTextQuestionDTO) : Observable<freeTextQuestionDTO> {
+    return this.http.post<freeTextQuestionDTO>(environment.server + `/question-data/createFreeTextQuestion`, freeTextQuestion)
+  }
+
+  updateFreeTextQuestion(freeTextQuestion: freeTextQuestionDTO) : Observable<freeTextQuestionDTO> {
+    return this.http.put<freeTextQuestionDTO>(environment.server + `/question-data/updateFreeTextQuestion`, freeTextQuestion)
   }
 
 

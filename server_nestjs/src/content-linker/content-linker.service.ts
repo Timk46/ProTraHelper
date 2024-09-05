@@ -60,7 +60,9 @@ export class ContentLinkerService {
 
 
   /**
-   * Creates a linked question based on the provided data. Prefers the provided question data over the provided question ID.
+   * Creates a linked ContentElement linked with a question based on the provided data.
+   * The question can be provided as a new question object or as an existing question ID.
+   * Prefers the provided question data over the provided question ID.
    *
    * @param linkData - The data for the linked question.
    * @param authorId - The ID of the author creating the linked question.

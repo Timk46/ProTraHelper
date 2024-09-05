@@ -61,6 +61,7 @@ import { EditChoiceComponent } from './Pages/lecturersView/edit-choice/edit-choi
 import { EditFillinComponent } from './Pages/lecturersView/edit-fillin/edit-fillin.component';
 import { EditCodingComponent } from './Pages/lecturersView/edit-coding/edit-coding.component';
 import { AdminGuard } from "./Guards/is-admin.guard";
+import { ConfirmationBoxComponent } from './Pages/confirmation-box/confirmation-box.component';
 
 
 
@@ -111,7 +112,8 @@ import { AdminGuard } from "./Guards/is-admin.guard";
         EditFreetextComponent,
         EditChoiceComponent,
         EditFillinComponent,
-        EditCodingComponent
+        EditCodingComponent,
+        ConfirmationBoxComponent
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

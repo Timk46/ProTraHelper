@@ -1,9 +1,10 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Param, Body, Req} from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req, UseGuards} from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
-import { freeTextQuestionDTO, UserAnswerDataDTO } from '@DTOs/index';
+import { detailedFreetextQuestionDTO, detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO } from '@DTOs/index';
+import { roles, RolesGuard } from '@/auth/roles.guard';
 
-//@UseGuards(RolesGuard)
+@UseGuards(RolesGuard)
 @Controller('question-data')
 export class QuestionDataController {
     constructor(private questionDataService: QuestionDataService) {}
@@ -13,9 +14,16 @@ export class QuestionDataController {
      * @param questionId
      * @returns the question
      */
+    @roles('ANY')
     @Get(':questionId')
     async getQuestion(@Param('questionId') questionId: number) {
         return this.questionDataService.getQuestion(questionId);
+    }
+
+    @roles('ADMIN')
+    @Get('detailed/:questionId')
+    async getDetailedQuestion(@Param('questionId') questionId: number): Promise<detailedQuestionDTO> {
+        return this.questionDataService.getDetailedQuestion(questionId);
     }
 
     /**
@@ -23,6 +31,7 @@ export class QuestionDataController {
      * @param questionVersionId
      * @returns the mc question
      */
+    @roles('ANY')
     @Get('/mcQuestion/:questionVersionId')
     async getMCQuestion(@Param('questionVersionId') questionVersionId: number) {
         return this.questionDataService.getMCQuestion(questionVersionId);
@@ -33,6 +42,7 @@ export class QuestionDataController {
      * @param mcQuestionId
      * @returns the mc options for the mc question
      */
+    @roles('ANY')
     @Get('/mcOptions/:mcQuestionId')
     async getMCOptions(@Param('mcQuestionId') mcQuestionId: number) {
         return this.questionDataService.getMCOptions(mcQuestionId);
@@ -43,11 +53,13 @@ export class QuestionDataController {
      * @param questionId
      * @returns the free text question
      */
+    @roles('ANY')
     @Get('/freeTextQuestion/:questionId')
     async getFreeTextQuestion(@Param('questionId') questionId: number): Promise<freeTextQuestionDTO> {
         return this.questionDataService.getFreeTextQuestion(questionId);
     }
 
+    @roles('ANY')
     @Get('/newestUserAnswer/:questionId/:userId')
     async getNewestUserAnswer(@Param('questionId') questionId: number, @Param('userId') userId: number, @Req() req: any) {
         if (isNaN(questionId) || isNaN(userId)) {
@@ -66,32 +78,47 @@ export class QuestionDataController {
      * @param req
      * @returns the the new user answer
      */
-    //@roles('ANY')
+    @roles('ANY')
     @Post('userAnswer/create')
     async createUserAnswer(@Body() data: UserAnswerDataDTO, @Req() req: any) {
         console.log('createUserAnswer data' + ' ' + data.contentElementId + ' ' + req.user.id);
         return this.questionDataService.createUserAnswer(req.user.id, data);
     }
 
+    @roles('ANY')
     @Post('userMCOptionSelected/create')
     async createUserMCOptionSelected(@Body() data: {userAnswerId: number, mcOptionId: number}) {
         return this.questionDataService.createUserMCOptionSelected(data.userAnswerId, data.mcOptionId);
     }
 
 
-    /** Aus Sicherheitsgründen erst mal entfernt.
-     *
-     * @param question
-     * @returns the created Question
-     */
-        /*
-    @roles('ANY')
+
+    @roles('ADMIN')
     @Post('/createQuestion')
-    async createQuestion(@Body() question: QuestionDTO) {
-      console.log('createQuestion question author', question.author);
-        return this.questionDataService.createQuestion(question);
+    /**
+     * Creates a new question.
+     *
+     * @param question - The question data.
+     * @param req - The request object.
+     * @returns A promise that resolves to the created question.
+     */
+    async createQuestion( @Body() question: QuestionDTO, @Req() req: any): Promise<QuestionDTO> {
+        return this.questionDataService.createQuestion(question, req.user.id);
     }
-*/
+
+    @roles('ADMIN')
+    @Post('/updateWholeQuestion')
+    /**
+     * Updates a question.
+     *
+     * @param question The question to be updated.
+     * @returns A promise that resolves to the updated question.
+     */
+    async updateWholeQuestion( @Body() question: detailedQuestionDTO, @Req() req: any): Promise<detailedQuestionDTO> {
+        return this.questionDataService.updateWholeQuestion(question, req.user.id);
+    }
+
+
     /**
      *
      * @param mcOptions

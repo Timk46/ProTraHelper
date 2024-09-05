@@ -19,6 +19,9 @@ export interface ContentDTO {
     progress: number;
     questionMarked?: boolean;
 
+    //for lecturers view
+    isApproved?: boolean;
+
     //discussion: Discussion // TODO: implement
 }
 
@@ -51,4 +54,7 @@ export interface taskViewDTO {
     level: number;
     progress: number;
     feedback?: userAnswerFeedbackDTO[];
+
+    //for lecturers view
+    isApproved?: boolean;
 }

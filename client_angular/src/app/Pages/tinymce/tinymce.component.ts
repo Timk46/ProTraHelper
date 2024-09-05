@@ -45,7 +45,7 @@ export class TinymceComponent {
     if (this.isInitialized){
       if (changes['content']) {
         this.content = changes['content'].currentValue;
-        if (this.content != undefined) {
+        if (this.content != '') {
           this.setContent(this.content);
         }
       }
@@ -71,7 +71,9 @@ export class TinymceComponent {
       setup: (editor: any) =>	{
         this.editorInstance = editor;
         editor.on('init', () => {
-          editor.setContent(this.content == undefined ? '' : this.content);
+          if (this.content != '') {
+            editor.setContent(this.content);
+          }
         });
       }
     });
@@ -127,9 +129,9 @@ export class TinymceComponent {
    * @param content the content to set
    */
   setContent(content: string): void {
-    //console.log('set content', content);
+    console.log("AUFTRAG:", this.isInitialized, this.editorInstance, content);
     if (this.editorInstance) {
-      this.editorInstance.setContent(content);
+      this.content = content;
     }
   }
 

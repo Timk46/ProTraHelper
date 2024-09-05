@@ -5,6 +5,7 @@ import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { McQuestionDTO, MCOptionDTO, MCOptionViewDTO, QuestionDTO, questionType, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import { detailedFreetextQuestionDTO, detailedQuestionDTO } from '@Interfaces/detailedQuestion.dto';
 import { Injectable } from '@nestjs/common';
 import {  } from '@prisma/client';
 
@@ -21,30 +22,102 @@ export class QuestionDataService {
      * @returns the question data
      */
     async getQuestion(questionId: number): Promise<QuestionDTO> {
-        let question = await this.prisma.question.findUnique({
-            where: {
-                id: Number(questionId)
-            }
-        });
-
-        if(!question) {
-            throw new Error('Question ' + questionId + ' not found');
+      let question = await this.prisma.question.findUnique({
+        where: {
+          id: Number(questionId)
         }
+      });
 
-        let questionData: QuestionDTO = {
-            id: question.id,
-            name: question.name,
-            description: question.description,
-            score: question.score,
-            type: question.type,
-            text: question.text,
-            isApproved: question.isApproved,
-            originId: question.originId,
-            conceptNode: question.conceptNodeId || undefined,
-            level: question.level,
-        };
+      if(!question) {
+        throw new Error('Question ' + questionId + ' not found');
+      }
 
-        return questionData;
+      let questionData: QuestionDTO = {
+        id: question.id,
+        name: question.name,
+        description: question.description,
+        score: question.score,
+        type: question.type,
+        text: question.text,
+        isApproved: question.isApproved,
+        originId: question.originId,
+        conceptNode: question.conceptNodeId || undefined,
+        level: question.level,
+      };
+
+      return questionData;
+    }
+
+    /**
+     * Retrieves a detailed question by its ID. Primarily used in the lecturers view.
+     * @param questionId - The ID of the question to retrieve.
+     * @returns A promise that resolves to a detailedQuestionDTO object representing the detailed question.
+     * @throws An error if the question with the specified ID is not found.
+     */
+    async getDetailedQuestion(questionId: number): Promise<detailedQuestionDTO> {
+      const question = await this.prisma.question.findUnique({
+        where: {
+          id: Number(questionId)
+        },
+      });
+
+      if(!question) {
+        throw new Error('Question ' + questionId + ' not found');
+      }
+
+      //find the coding question if it exists
+      const codingQuestion = await this.prisma.codingQuestion.findFirst({
+        where: {
+          questionId: Number(questionId)
+        }
+      });
+      // find the code geruests if they exist
+      let codeGeruests = [];
+      if (codingQuestion) {
+        codeGeruests = await this.prisma.codeGeruest.findMany({
+          where: {
+            codingQuestionId: codingQuestion.id
+          }
+        });
+      }
+
+      //find the freetext question if it exists
+      const freeTextQuestion = await this.prisma.freeTextQuestion.findFirst({
+        where: {
+          questionId: Number(questionId)
+        }
+      });
+
+      //find the mc question if it exists
+      const mcQuestion = await this.prisma.mCQuestion.findFirst({
+        where: {
+          questionId: Number(questionId)
+        }
+      });
+      // find the mc options if they exist (connected over MCQuestionOption)
+      let mcOptions = [];
+      if (mcQuestion) {
+        mcOptions = await this.prisma.mCQuestionOption.findMany({
+          where: {
+            mcQuestionId: mcQuestion.id
+          }
+        });
+      }
+
+      const questionData: detailedQuestionDTO = {
+        ...question,
+        codingQuestion: codingQuestion? {
+          ...codingQuestion,
+          codeGeruests: codeGeruests
+        }: undefined,
+        freetextQuestion: freeTextQuestion || undefined,
+        mcQuestion: mcQuestion? {
+          ...mcQuestion,
+          mcOptions: mcOptions
+        }: undefined,
+      };
+
+      return questionData;
     }
 
     /**
@@ -203,7 +276,7 @@ export class QuestionDataService {
 
 
     /**
-     * Creates a new question.
+     * Creates a new question. Also works for version control.
      *
      * @param question - The question data.
      * @param authorId - The ID of the author.
@@ -234,7 +307,7 @@ export class QuestionDataService {
             id: newQuestion.id
           },
           data: {
-            originId: newQuestion.id
+            originId: question.originId || newQuestion.id
           }
         });
 
@@ -244,6 +317,108 @@ export class QuestionDataService {
 
         return newQuestion;
     }
+
+    // this function can initialize, make a new version of or overwrite a question including all its specific question types, based on
+    // the provided version differences and the object presence of the defined specific question types
+    // a existing question (with or without its type data) has to be provided
+    async updateWholeQuestion(question: detailedQuestionDTO, authorId: number): Promise<detailedQuestionDTO> {
+      const currentQuestion = await this.getDetailedQuestion(question.id);
+
+      if (!this.detailedQuestionsUpdateable(currentQuestion, question)) {
+        throw new Error('Question not updateable');
+      }
+
+      let newQuestion = null;
+      // if we have a version difference, we create a new version of the question
+      if (currentQuestion.version < question.version) {
+        newQuestion = await this.createQuestion({
+          id: question.id,
+          name: question.name,
+          description: question.description,
+          score: question.score,
+          type: question.type,
+
+          text: question.text,
+          conceptNode: question.conceptNodeId || undefined,
+          isApproved: question.isApproved,
+          originId: currentQuestion.originId,
+          level: question.level,
+          mode: question.mode,
+          version: question.version
+        }, authorId);
+
+      // if versions are equal, we update the question
+      } else if (currentQuestion.version === question.version) {
+        newQuestion = await this.prisma.question.update({
+          where: {
+            id: question.id
+          },
+          data: {
+            updatedAt: new Date(),
+            name: question.name,
+            description: question.description,
+            score: question.score,
+            type: question.type,
+            level: question.level,
+            mode: question.mode,
+            text: question.text,
+            isApproved: question.isApproved,
+            conceptNode: question.conceptNodeId? {connect: {id: question.conceptNodeId}}: (currentQuestion.conceptNodeId? {connect: {id: currentQuestion.conceptNodeId}}: undefined),
+          }
+        });
+      }
+
+      // if the question version differs or no type data is present, we initialize or add the specific question type data
+      if(
+        currentQuestion.version < question.version ||
+        !currentQuestion.freetextQuestion &&
+        !currentQuestion.mcQuestion &&
+        !currentQuestion.codingQuestion
+        //TODO: fill, uml, graph
+      ){
+        switch (question.type) {
+          case questionType.FREETEXT:
+            await this.createFreeTextQuestion(question.freetextQuestion, newQuestion.id);
+            break;
+          case questionType.MULTIPLECHOICE:
+          case questionType.SINGLECHOICE:
+          case questionType.CODE:
+          //TODO: fill, uml, graph
+        }
+      // else we update
+      } else {
+        switch (question.type) {
+          case questionType.FREETEXT:
+            await this.updateFreeTextQuestion(question.freetextQuestion);
+            break;
+          case questionType.MULTIPLECHOICE:
+          case questionType.SINGLECHOICE:
+          case questionType.CODE:
+          //TODO: fill, uml, graph
+        }
+      }
+
+      return await this.getDetailedQuestion(newQuestion.id);
+    }
+
+    private detailedQuestionsUpdateable(currQuestion: detailedQuestionDTO, newQuestion: detailedQuestionDTO): boolean {
+      if (
+        currQuestion &&
+        newQuestion &&
+        currQuestion.type === newQuestion.type &&
+        currQuestion.version <= newQuestion.version &&
+        (
+          newQuestion.codingQuestion ||
+          newQuestion.freetextQuestion ||
+          newQuestion.mcQuestion
+          //TODO: fill, uml, graph
+        )
+      ){
+        return true;
+      }
+      return false;
+    }
+
 
     /**
      *
@@ -334,6 +509,64 @@ export class QuestionDataService {
                 mcQuestion: {...newMcQuestionOption.question,
                             shuffleOptions: newMcQuestionOption.question.shuffleoptions,
                           }};
+    }
+
+    /**
+     * Creates a new free text question.
+     *
+     * @param freeTextQuestion - The detailed information of the free text question to be created.
+     * @returns A promise that resolves to the created free text question.
+     * @throws An error if the free text question is not created.
+     */
+    async createFreeTextQuestion(freeTextQuestion: detailedFreetextQuestionDTO, questionId: number): Promise<detailedFreetextQuestionDTO> {
+      const newFreeTextQuestion = await this.prisma.freeTextQuestion.create({
+        data: {
+          textHTML: freeTextQuestion.textHTML || undefined,
+          expectations: freeTextQuestion.expectations,
+          expectationsHTML: freeTextQuestion.expectationsHTML || undefined,
+          exampleSolution: freeTextQuestion.exampleSolution,
+          exampleSolutionHTML: freeTextQuestion.exampleSolutionHTML || undefined,
+          question: {connect: {id: questionId}},
+        },
+      });
+
+      if(!newFreeTextQuestion) {
+        throw new Error('FreeTextQuestion not created');
+      }
+      return newFreeTextQuestion;
+    }
+
+    /**
+     * Updates a free text question.
+     *
+     * @param freeTextQuestion - The detailed free text question DTO.
+     * @returns A promise that resolves to the updated detailed free text question DTO.
+     * @throws An error if the free text question is not updated.
+     */
+    async updateFreeTextQuestion(freeTextQuestion: detailedFreetextQuestionDTO): Promise<detailedFreetextQuestionDTO> {
+      const originalFreeTextQuestion = await this.prisma.freeTextQuestion.findFirst({
+        where: {
+          questionId: freeTextQuestion.questionId
+        }
+      });
+
+      const updatedFreeTextQuestion = await this.prisma.freeTextQuestion.update({
+        where: {
+          id: freeTextQuestion.id
+        },
+        data: {
+          textHTML: freeTextQuestion.textHTML || originalFreeTextQuestion.textHTML,
+          expectations: freeTextQuestion.expectations,
+          expectationsHTML: freeTextQuestion.expectationsHTML || originalFreeTextQuestion.expectationsHTML,
+          exampleSolution: freeTextQuestion.exampleSolution,
+          exampleSolutionHTML: freeTextQuestion.exampleSolutionHTML || originalFreeTextQuestion.exampleSolutionHTML,
+        },
+      });
+
+      if(!updatedFreeTextQuestion) {
+        throw new Error('FreeTextQuestion not updated');
+      }
+      return updatedFreeTextQuestion;
     }
 
     /**
