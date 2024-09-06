@@ -27,7 +27,7 @@ export class RunCodeService {
   ) {}
 
   // API URL for code execution service.
-  private readonly apiUrl = 'http://jury1.unidashboard.de:3000/execute/';
+  private readonly apiUrl = 'http://jury1.bshefl2.bs.informatik.uni-siegen.de/execute/';
 
   /**
    * Executes student-submitted code against predefined tests with Jury1.
@@ -76,14 +76,25 @@ export class RunCodeService {
         testFilesBase64,
         question.codingQuestions.mainFileName,
       );
-    } else {
+    } else if (question.codingQuestions.automatedTests[0].language === 'python') {
       response = await this.submitCodeForExecutionPython(
         filesBase64,
         testFilesBase64,
         question.codingQuestions.automatedTests[0].runMethod,
         question.codingQuestions.automatedTests[0].inputArguments,
       );
+    } else if (question.codingQuestions.automatedTests[0].language === 'cpp') {
+      response = await this.submitCodeForExecutionCpp(
+        filesBase64,
+        testFilesBase64
+      );
+    } else {
+      throw new HttpException(
+        `Unsupported language: ${question.codingQuestions.automatedTests[0].language}`,
+        HttpStatus.BAD_REQUEST
+      );
     }
+
     const result = await this.processExecutionResponse(
       response,
       question.codingQuestions,
@@ -155,6 +166,41 @@ export class RunCodeService {
       );
     }
     const result = await response.json();
+    return result;
+  }
+
+  /**
+   * Submits encoded student C++ code and test files for execution with Jury1.
+   * @param files Base64-encoded student code files.
+   * @param testFiles Base64-encoded test files.
+   * @returns The execution result from the external API.
+   */
+  private async submitCodeForExecutionCpp(
+    files: { [fileName: string]: string },
+    testFiles: { [fileName: string]: string },
+  ): Promise<CodeSubmissionResult> {
+    console.log(JSON.stringify({
+      files: files,
+      testFile: Object.values(testFiles)[0]
+    }))
+    const response = await fetch(`${this.apiUrl}cpp-assignment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        files: files,
+        testFile: Object.values(testFiles)[0]
+      }),
+    });
+
+    if (!response.ok) {
+      throw new HttpException(
+        `Failed to execute C++ code. Status: ${response.status}`,
+        HttpStatus.BAD_GATEWAY,
+      );
+    }
+
+    const result: CodeSubmissionResult = await response.json();
+    console.log(result)
     return result;
   }
 
