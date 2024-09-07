@@ -14,8 +14,8 @@ import { switchMap } from 'rxjs/operators';
 })
 export class EditCodingComponent implements OnInit {
   codingForm: FormGroup;
-  questionData: detailedQuestionDTO| null = null;
   thisQuestionType = questionType.CODE;
+  questionData: detailedQuestionDTO| null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -32,9 +32,9 @@ export class EditCodingComponent implements OnInit {
       this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
         this.questionData = data;
         this.populateForm();
-  });
-  })
-}
+      });
+    })
+  }
 
   createForm(): FormGroup {
     return this.fb.group({
@@ -91,6 +91,11 @@ export class EditCodingComponent implements OnInit {
     return (this.codingForm.get('automatedTests') as FormArray).controls;
   }
 
+  onCodeChange(newCode: string, index: number, type: 'codeGerueste' | 'automatedTests') {
+    const formArray = this.codingForm.get(type) as FormArray;
+    formArray.at(index).patchValue({ code: newCode });
+  }
+
   onSubmit() {
     if (this.codingForm.valid && this.questionData && this.questionData.codingQuestion) {
       const updatedQuestion: detailedQuestionDTO = {
@@ -99,7 +104,7 @@ export class EditCodingComponent implements OnInit {
         text: this.codingForm.value.text,
         codingQuestion: {
           ...this.questionData.codingQuestion,
-          id: this.questionData.codingQuestion.id ?? 0, // Ensure id is always a number
+          id: this.questionData.codingQuestion.id ?? 0,
           programmingLanguage: this.codingForm.value.programmingLanguage,
           codeGerueste: this.codingForm.value.codeGerueste,
           automatedTests: this.codingForm.value.automatedTests

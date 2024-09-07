@@ -29,7 +29,6 @@ import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video
 import { LoginComponent } from './Pages/login/login.component';
 import { AuthInterceptor } from "./Interceptors/auth-interceptor.service";
 import { LoggedInGuard } from "./Guards/is-logged-in.guard";
-import { TinymceComponent } from './Pages/tinymce/tinymce.component';
 import { EditorModule, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
 import { DiscussionListComponent } from './Pages/discussion/discussion-list/discussion-list.component';
 import { DiscussionViewComponent } from './Pages/discussion/discussion-view/discussion-view.component';
@@ -54,17 +53,11 @@ import { ToastrModule } from "ngx-toastr";
 import { NotificationComponent } from './Pages/notification/notification.component';
 import { NotificationBellComponent } from "./Pages/notification/notification-bell/notification-bell.component";
 import { BellDirective } from "./Pages/notification/notification-bell/belldirective.directive";
-import { CreateContentNodeDialogComponent } from './Pages/lecturersView/create-content-node-dialog/create-content-node-dialog.component';
-import { CreateContentElementDialogComponent } from './Pages/lecturersView/create-content-element-dialog/create-content-element-dialog.component';
-import { EditFreetextComponent } from './Pages/lecturersView/edit-freetext/edit-freetext.component';
-import { EditChoiceComponent } from './Pages/lecturersView/edit-choice/edit-choice.component';
-import { EditFillinComponent } from './Pages/lecturersView/edit-fillin/edit-fillin.component';
-import { EditCodingComponent } from './Pages/lecturersView/edit-coding/edit-coding.component';
 import { AdminGuard } from "./Guards/is-admin.guard";
 import { ConfirmationBoxComponent } from './Pages/confirmation-box/confirmation-box.component';
 
-
-
+// Import LecturersViewModule
+import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module';
 
 @NgModule({
     declarations: [
@@ -81,8 +74,10 @@ import { ConfirmationBoxComponent } from './Pages/confirmation-box/confirmation-
         CreateConceptDialogComponent,
         VideoViewerComponent,
         CompetenciesComponent,
-        ChatBotComponent, ChatBotDialogComponent, VideoTimeStampComponent, LoginComponent,
-        TinymceComponent,
+        ChatBotComponent,
+        ChatBotDialogComponent,
+        VideoTimeStampComponent,
+        LoginComponent,
         DiscussionListComponent,
         DiscussionViewComponent,
         DiscussionFilterComponent,
@@ -107,25 +102,8 @@ import { ConfirmationBoxComponent } from './Pages/confirmation-box/confirmation-
         NotificationComponent,
         NotificationBellComponent,
         BellDirective,
-        CreateContentNodeDialogComponent,
-        CreateContentElementDialogComponent,
-        EditFreetextComponent,
-        EditChoiceComponent,
-        EditFillinComponent,
-        EditCodingComponent,
         ConfirmationBoxComponent
     ],
-    providers: [
-        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-        { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
-        { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
-        LoggedInGuard,
-        AdminGuard,
-        EditorModule,
-        ConfettiService,
-        Title
-    ],
-    bootstrap: [AppComponent],
     imports: [
         ToastrModule.forRoot(),
         BrowserModule,
@@ -136,7 +114,18 @@ import { ConfirmationBoxComponent } from './Pages/confirmation-box/confirmation-
         MaterialModule,
         NgxExtendedPdfViewerModule,
         HttpClientModule,
-
-    ]
+        LecturersViewModule,
+        EditorModule
+    ],
+    providers: [
+        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
+        { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
+        LoggedInGuard,
+        AdminGuard,
+        ConfettiService,
+        Title
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }
