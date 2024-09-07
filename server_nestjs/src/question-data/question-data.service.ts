@@ -50,12 +50,13 @@ export class QuestionDataService {
     }
 
     /**
-     * Retrieves a detailed question by its ID. Primarily used in the lecturers view.
+     * Retrieves a detailed question by its ID and type. Primarily used in the lecturers view.
      * @param questionId - The ID of the question to retrieve.
+     * @param questionType - The type of the question.
      * @returns A promise that resolves to a detailedQuestionDTO object representing the detailed question.
      * @throws An error if the question with the specified ID is not found.
      */
-    async getDetailedQuestion(questionId: number): Promise<detailedQuestionDTO> {
+    async getDetailedQuestion(questionId: number, questionTypeStr: string): Promise<detailedQuestionDTO> {
       const question = await this.prisma.question.findUnique({
         where: {
           id: Number(questionId)
@@ -66,49 +67,53 @@ export class QuestionDataService {
         throw new Error('Question ' + questionId + ' not found');
       }
 
-      //find the coding question if it exists
-      const codingQuestion = await this.prisma.codingQuestion.findFirst({
-        where: {
-          questionId: Number(questionId)
-        },
-        include: {
-          codeGerueste: true,
-          automatedTests: true
-      }})
+      let specificQuestionData;
 
-      //find the freetext question if it exists
-      const freeTextQuestion = await this.prisma.freeTextQuestion.findFirst({
-        where: {
-          questionId: Number(questionId)
-        }
-      });
-
-      //find the mc question if it exists
-      const mcQuestion = await this.prisma.mCQuestion.findFirst({
-        where: {
-          questionId: Number(questionId)
-        }
-      });
-      // find the mc options if they exist (connected over MCQuestionOption)
-      let mcOptions = [];
-      if (mcQuestion) {
-        mcOptions = await this.prisma.mCQuestionOption.findMany({
-          where: {
-            mcQuestionId: mcQuestion.id
+      switch (questionTypeStr) {
+        case questionType.CODE:
+          specificQuestionData = await this.prisma.codingQuestion.findFirst({
+            where: {
+              questionId: Number(questionId)
+            },
+            include: {
+              codeGerueste: true,
+              automatedTests: true
+            }
+          });
+          break;
+        case questionType.FREETEXT:
+          specificQuestionData = await this.prisma.freeTextQuestion.findFirst({
+            where: {
+              questionId: Number(questionId)
+            }
+          });
+          break;
+        case questionType.MULTIPLECHOICE:
+        case questionType.SINGLECHOICE:
+          const mcQuestion = await this.prisma.mCQuestion.findFirst({
+            where: {
+              questionId: Number(questionId)
+            }
+          });
+          if (mcQuestion) {
+            const mcOptions = await this.prisma.mCQuestionOption.findMany({
+              where: {
+                mcQuestionId: mcQuestion.id
+              }
+            });
+            specificQuestionData = {
+              ...mcQuestion,
+              mcOptions: mcOptions
+            };
           }
-        });
+          break;
       }
 
       const questionData: detailedQuestionDTO = {
         ...question,
-        codingQuestion: codingQuestion ? {
-          ...codingQuestion
-        } : undefined,
-        freetextQuestion: freeTextQuestion || undefined,
-        mcQuestion: mcQuestion? {
-          ...mcQuestion,
-          mcOptions: mcOptions
-        }: undefined,
+        codingQuestion: questionTypeStr === questionType.CODE ? specificQuestionData : undefined,
+        freetextQuestion: questionTypeStr === questionType.FREETEXT ? specificQuestionData : undefined,
+        mcQuestion: (questionTypeStr === questionType.MULTIPLECHOICE || questionTypeStr === questionType.SINGLECHOICE) ? specificQuestionData : undefined,
       };
 
       return questionData;
@@ -316,7 +321,7 @@ export class QuestionDataService {
     // the provided version differences and the object presence of the defined specific question types
     // a existing question (with or without its type data) has to be provided
     async updateWholeQuestion(question: detailedQuestionDTO, authorId: number): Promise<detailedQuestionDTO> {
-      const currentQuestion = await this.getDetailedQuestion(question.id);
+      const currentQuestion = await this.getDetailedQuestion(question.id, question.type as questionType);
 
       if (!this.detailedQuestionsUpdateable(currentQuestion, question)) {
         throw new Error('Question not updateable');
@@ -391,7 +396,7 @@ export class QuestionDataService {
         }
       }
 
-      return await this.getDetailedQuestion(newQuestion.id);
+      return await this.getDetailedQuestion(newQuestion.id, question.type as questionType);
     }
 
     private detailedQuestionsUpdateable(currQuestion: detailedQuestionDTO, newQuestion: detailedQuestionDTO): boolean {

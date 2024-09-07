@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { detailedQuestionDTO } from '@DTOs/index';
+import { detailedQuestionDTO, questionType } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
@@ -18,6 +18,8 @@ export class EditFreetextComponent {
   @ViewChild('solution') solutionField!: TinymceComponent;
 
   freeTextForm: FormGroup;
+
+  thisQuestionType = questionType.CODE;
 
   editorConfig = {
     readonly: false,
@@ -73,8 +75,8 @@ export class EditFreetextComponent {
   private handleRouteParams() {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
-      this.questionDataService.getDetailedQuestionData(questionId).subscribe(data => {
-        if (data.type === 'FreeText') {
+      this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
+        if (data.type === questionType.FREETEXT) { // Kommentar Sven: hab hier auch die entsprechende questionType anstelle des Strings eingefügt. Bitte testen.
           this.detailedQuestionData = data;
           console.log(this.detailedQuestionData);
           this.setContent();

@@ -8,7 +8,8 @@ import {
   detailedQuestionDTO,
   UserAnswerDataDTO,
   userAnswerFeedbackDTO,
-  UserMCOptionSelectedDTO
+  UserMCOptionSelectedDTO,
+  questionType
 } from '@DTOs/index';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -32,12 +33,13 @@ export class QuestionDataService {
   }
 
   /**
-   * Retrieves detailed question (a question with all its connected specific questions based on the question type) data for a given question ID.
+   * Retrieves detailed question (a question with all its connected specific questions based on the question type) data for a given question ID and type.
    * @param questionId - The ID of the question to retrieve detailed data for.
+   * @param questionType - The type of the question.
    * @returns An Observable that emits a detailedQuestionDTO object.
    */
-  getDetailedQuestionData(questionId: number) : Observable<detailedQuestionDTO> {
-    return this.http.get<detailedQuestionDTO>(environment.server + `/question-data/detailed/${questionId}`);
+  getDetailedQuestionData(questionId: number, questionType: questionType) : Observable<detailedQuestionDTO> {
+    return this.http.post<detailedQuestionDTO>(environment.server + `/question-data/detailed`, { questionId, questionType });
   }
 
 

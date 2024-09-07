@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { detailedQuestionDTO } from '@DTOs/index';
+import { detailedQuestionDTO, questionType } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
@@ -18,6 +18,7 @@ export class EditCodingComponent {
   @ViewChild('expectations') expectationField!: TinymceComponent;
   @ViewChild('solution') solutionField!: TinymceComponent;
 
+  thisQuestionType = questionType.CODE;
   freeTextForm: FormGroup;
   tempAllData: String = "";
   parsedAllData: any; // New property to store parsed JSON
@@ -74,10 +75,10 @@ export class EditCodingComponent {
   private handleRouteParams() {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
-      this.questionDataService.getDetailedQuestionData(questionId).subscribe(data => {
+      this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
         this.tempAllData = JSON.stringify(data);
         this.parsedAllData = data; // Store the parsed JSON
-        if (data.type === 'FreeText') {
+        if (data.type === questionType.CODE) {
           this.detailedQuestionData = data;
           console.log(this.detailedQuestionData);
           this.setContent();
@@ -91,16 +92,15 @@ export class EditCodingComponent {
 
   // BEGIN JSON OUTPUT AND DEBUGGING ****************************************************
   private setContent() {
-    if (this.detailedQuestionData.freetextQuestion){
+    if (this.detailedQuestionData.codingQuestion){
       this.freeTextForm.patchValue({
         questionTitle: this.detailedQuestionData.name,
         questionDifficulty: this.detailedQuestionData.level.toString(),
         questionDescription: this.detailedQuestionData.description,
         questionScore: this.detailedQuestionData.score,
       });
-      this.questionField.setContent(this.detailedQuestionData.freetextQuestion.textHTML || this.detailedQuestionData.text);
-      this.expectationField.setContent(this.detailedQuestionData.freetextQuestion.expectationsHTML || this.detailedQuestionData.freetextQuestion.expectations);
-      this.solutionField.setContent(this.detailedQuestionData.freetextQuestion.exampleSolutionHTML || this.detailedQuestionData.freetextQuestion.exampleSolution || '');
+      this.questionField.setContent(this.detailedQuestionData.codingQuestion.textHTML || this.detailedQuestionData.text);
+      // Note: Expectations and solution fields might need to be updated based on the coding question structure
     }
   }
 

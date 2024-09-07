@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Post, Param, Body, Req, UseGuards} from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
-import { detailedFreetextQuestionDTO, detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO } from '@DTOs/index';
+import { detailedFreetextQuestionDTO, detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, questionType } from '@DTOs/index';
 import { roles, RolesGuard } from '@/auth/roles.guard';
 
 @UseGuards(RolesGuard)
@@ -21,9 +21,9 @@ export class QuestionDataController {
     }
 
     @roles('ADMIN')
-    @Get('detailed/:questionId')
-    async getDetailedQuestion(@Param('questionId') questionId: number): Promise<detailedQuestionDTO> {
-        return this.questionDataService.getDetailedQuestion(questionId);
+    @Post('detailed')
+    async getDetailedQuestion(@Body() data: { questionId: number, questionType: string }): Promise<detailedQuestionDTO> {
+        return this.questionDataService.getDetailedQuestion(data.questionId, data.questionType);
     }
 
     /**
