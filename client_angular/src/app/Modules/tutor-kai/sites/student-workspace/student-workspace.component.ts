@@ -319,9 +319,9 @@ export class StudentWorkspaceComponent implements OnInit {
     // Add Input Args if there are any
     if (
       this.currentTask &&
-      this.currentTask.codingQuestion!.countInputArgs !== undefined
+      this.currentTask.codingQuestion!.count_InputArgs !== undefined
     ) {
-      this.createInputArgs(this.currentTask.codingQuestion!.countInputArgs);
+      this.createInputArgs(this.currentTask.codingQuestion!.count_InputArgs);
     }
   }
 

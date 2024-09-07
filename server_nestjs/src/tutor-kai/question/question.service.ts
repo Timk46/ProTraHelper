@@ -117,7 +117,7 @@ export class QuestionService {
   private mapCodingQuestionToDto(codingQuestion): CodingQuestionDto {
     const codingQuestionDto: CodingQuestionDto = {
       id: codingQuestion.id,
-      countInputArgs: codingQuestion.count_InputArgs,
+      count_InputArgs: codingQuestion.count_InputArgs,
       mainFileName: codingQuestion.mainFileName,
       text: codingQuestion.text,
       textHTML: codingQuestion.textHTML,
@@ -139,7 +139,7 @@ export class QuestionService {
   private mapCodingQuestionToInternal(codingQuestion): CodingQuestionInternal {
     const codingQuestionInternal: CodingQuestionInternal = {
       id: codingQuestion.id,
-      countInputArgs: codingQuestion.count_InputArgs,
+      count_InputArgs: codingQuestion.count_InputArgs,
       mainFileName: codingQuestion.mainFileName,
       text: codingQuestion.text,
       programmingLanguage: codingQuestion.programmingLanguage,

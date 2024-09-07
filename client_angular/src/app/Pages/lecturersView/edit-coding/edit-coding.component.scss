@@ -1,0 +1,20 @@
+.container {
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.json-container {
+  margin-bottom: 20px;
+}
+.json-item {
+  margin-bottom: 10px;
+}
+.nested-json {
+  margin-left: 20px;
+  margin-top: 5px;
+}
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

@@ -1,1 +1,49 @@
-<p>edit-coding works!</p>
+<div class="container">
+  <h2>Structured JSON Data</h2>
+  <mat-expansion-panel *ngIf="parsedAllData" class="json-container">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        JSON Data for Debugging
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <ng-container *ngTemplateOutlet="recursiveList; context:{ list: parsedAllData }"></ng-container>
+  </mat-expansion-panel>
+</div>
+
+<ng-template #recursiveList let-list="list">
+  <ng-container *ngFor="let key of objectKeys(list)">
+    <div class="json-item">
+      <strong>{{ key }}:</strong>
+      <ng-container [ngSwitch]="true">
+        <span *ngSwitchCase="!isObject(list[key])">{{ list[key] }}</span>
+        <mat-expansion-panel *ngSwitchCase="isObject(list[key])" class="nested-json">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              {{ key }}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <ng-container *ngTemplateOutlet="recursiveList; context:{ list: list[key] }"></ng-container>
+        </mat-expansion-panel>
+      </ng-container>
+    </div>
+  </ng-container>
+</ng-template>
+
+<style>
+  .container {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .json-container {
+    margin-bottom: 20px;
+  }
+  .json-item {
+    margin-bottom: 10px;
+  }
+  .nested-json {
+    margin-left: 20px;
+    margin-top: 5px;
+  }
+</style>

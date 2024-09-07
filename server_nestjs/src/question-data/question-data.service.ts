@@ -1,13 +1,14 @@
+import { Client } from 'langsmith';
 /* eslint-disable prefer-const */
 /* eslint-disable prettier/prettier */
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { McQuestionDTO, MCOptionDTO, MCOptionViewDTO, QuestionDTO, questionType, McQuestionOptionDTO, freeTextQuestionDTO } from '@DTOs/question.dto';
+import { McQuestionDTO, MCOptionDTO, MCOptionViewDTO, QuestionDTO, questionType, McQuestionOptionDTO, freeTextQuestionDTO, CodingQuestionInternal } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, UserMCOptionSelectedDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { detailedFreetextQuestionDTO, detailedQuestionDTO } from '@Interfaces/detailedQuestion.dto';
+import { CodingQuestion } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
-import {  } from '@prisma/client';
 
 @Injectable()
 export class QuestionDataService {
@@ -69,17 +70,11 @@ export class QuestionDataService {
       const codingQuestion = await this.prisma.codingQuestion.findFirst({
         where: {
           questionId: Number(questionId)
-        }
-      });
-      // find the code geruests if they exist
-      let codeGeruests = [];
-      if (codingQuestion) {
-        codeGeruests = await this.prisma.codeGeruest.findMany({
-          where: {
-            codingQuestionId: codingQuestion.id
-          }
-        });
-      }
+        },
+        include: {
+          codeGerueste: true,
+          automatedTests: true
+      }})
 
       //find the freetext question if it exists
       const freeTextQuestion = await this.prisma.freeTextQuestion.findFirst({
@@ -106,10 +101,9 @@ export class QuestionDataService {
 
       const questionData: detailedQuestionDTO = {
         ...question,
-        codingQuestion: codingQuestion? {
-          ...codingQuestion,
-          codeGeruests: codeGeruests
-        }: undefined,
+        codingQuestion: codingQuestion ? {
+          ...codingQuestion
+        } : undefined,
         freetextQuestion: freeTextQuestion || undefined,
         mcQuestion: mcQuestion? {
           ...mcQuestion,
@@ -337,7 +331,6 @@ export class QuestionDataService {
           description: question.description,
           score: question.score,
           type: question.type,
-
           text: question.text,
           conceptNode: question.conceptNodeId || undefined,
           isApproved: question.isApproved,

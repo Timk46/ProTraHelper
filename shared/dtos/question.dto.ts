@@ -93,7 +93,7 @@ export interface UserAnswerDTO {
 
 export interface CodingQuestionDto {
     id: number;
-    countInputArgs: number;
+    count_InputArgs: number;
     programmingLanguage: string;
     mainFileName: string;
     text: string;

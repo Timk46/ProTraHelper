@@ -1,3 +1,4 @@
+import {CodingQuestionInternal} from './question.dto';
 export interface detailedQuestionDTO {
   id: number;
   createdAt?: Date;
@@ -15,29 +16,9 @@ export interface detailedQuestionDTO {
   originId: number;
   conceptNodeId?: number;
 
-  codingQuestion?: detailedCodingQuestionDTO;
+  codingQuestion?: CodingQuestionInternal;
   freetextQuestion?: detailedFreetextQuestionDTO;
   mcQuestion?: detailedMcQuestionDTO;
-  
-}
-
-export interface detailedCodingQuestionDTO {
-  id: number;
-  count_InputArgs: number;
-  text: string;
-  textHTML?: string;
-  mainFileName: string;
-  programmingLanguage: string;
-  questionId: number;
-  codeGeruests: detailedCodeGeruestDTO[];
-}
-
-export interface detailedCodeGeruestDTO {
-  id: number;
-  codingQuestionId: number;
-  codeFileName: string;
-  code: string;
-  language: string;
 }
 
 export interface detailedFreetextQuestionDTO {

@@ -322,6 +322,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     if (taskViewData.type === 'FreeText') {
       this.router.navigate(['/editfreetext/', taskViewData.id]);
     }
+    if (taskViewData.type === 'CodingQuestion') {
+      this.router.navigate(['/editcoding/', taskViewData.id]);
+    }
   }
 
   onTaskDelete(elementId: number) {
