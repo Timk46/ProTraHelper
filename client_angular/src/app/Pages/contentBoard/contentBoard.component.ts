@@ -1,5 +1,5 @@
 import { ProgressService } from 'src/app/Services/progress/progress.service';
-import { ContentDTO, ContentsForConceptDTO, QuestionDTO, LinkableContentElementDTO, contentElementType } from '@DTOs/index';
+import { ContentDTO, ContentsForConceptDTO, QuestionDTO, LinkableContentElementDTO, contentElementType, questionType } from '@DTOs/index';
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild, ViewChildren } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -219,14 +219,14 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
     // Open the appropriate dialog based on the task type
     switch (taskViewData.type) {
-      case 'MC':
-      case 'SC':
+      case questionType.SINGLECHOICE:
+      case questionType.MULTIPLECHOICE:
         dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
         break;
-      case 'FreeText':
+      case questionType.FREETEXT:
         dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
         break;
-      case 'CodingQuestion':
+      case questionType.CODE:
         // Navigate to coding question component
         this.router.navigate([this.getRouterLink(taskViewData.id)]);
         return;
@@ -319,10 +319,10 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
   onTaskEdit(taskViewData: TaskViewData) {
     console.log("onTaskEdit: ", taskViewData);
-    if (taskViewData.type === 'FreeText') {
+    if (taskViewData.type === questionType.FREETEXT) {
       this.router.navigate(['/editfreetext/', taskViewData.id]);
     }
-    if (taskViewData.type === 'CodingQuestion') {
+    if (taskViewData.type === questionType.CODE) {
       this.router.navigate(['/editcoding/', taskViewData.id]);
     }
   }
@@ -422,13 +422,13 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    */
   genBetterElementNames(type: string): string {
     switch (type) {
-      case 'MC':
+      case questionType.MULTIPLECHOICE:
         return 'Multiple Choice';
-      case 'SC':
+      case questionType.SINGLECHOICE:
         return 'Single Choice';
-      case 'FreeText':
+      case questionType.FREETEXT:
         return 'Freitext';
-      case 'CodingQuestion':
+      case questionType.CODE:
         return 'Programmieraufgabe';
       default:
         return 'undefiniert';
