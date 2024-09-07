@@ -1,116 +1,123 @@
-import { Component, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { QuestionDataService } from '../../../Services/question/question-data.service';
+import { questionType } from '@DTOs/question.dto';
+import { detailedQuestionDTO} from '@DTOs/index';
 import { ActivatedRoute } from '@angular/router';
-import { detailedQuestionDTO, questionType } from '@DTOs/index';
-import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { TinymceComponent } from '../../tinymce/tinymce.component';
-import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-edit-coding',
   templateUrl: './edit-coding.component.html',
   styleUrls: ['./edit-coding.component.scss']
 })
-export class EditCodingComponent {
-
-  @ViewChild('question') questionField!: TinymceComponent;
-  @ViewChild('expectations') expectationField!: TinymceComponent;
-  @ViewChild('solution') solutionField!: TinymceComponent;
-
+export class EditCodingComponent implements OnInit {
+  codingForm: FormGroup;
+  questionData: detailedQuestionDTO| null = null;
   thisQuestionType = questionType.CODE;
-  freeTextForm: FormGroup;
-  tempAllData: String = "";
-  parsedAllData: any; // New property to store parsed JSON
-
-  editorConfig = {
-    readonly: false,
-    plugins: 'autoresize lists table link image code codesample',
-    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
-    min_height: 300,
-    max_height: 600,
-    resize: false,
-  }
-
-  detailedQuestionData: detailedQuestionDTO = {
-    id: -1,
-    name: '',
-    description: '',
-    score: 0,
-    type: 'FreeText',
-    level: 1,
-    mode: 'practise',
-    authorId: -1,
-    text: '',
-    isApproved: false,
-    version: 1,
-    originId: -1,
-  };
 
   constructor(
     private fb: FormBuilder,
     private questionDataService: QuestionDataService,
-    private route: ActivatedRoute,
-    private confirmationService: ConfirmationService,
-
+    private snackBar: MatSnackBar,
+    private route: ActivatedRoute
   ) {
-    this.freeTextForm = this.fb.group({
-      questionTitle: ['', Validators.required],
-      questionDifficulty: ['', Validators.required],
-      questionDescription: [''],
-      questionScore: ['', Validators.required],
-    });
+    this.codingForm = this.createForm();
   }
 
-  ngOnInit(): void {
-    //this.handleRouteParams();
-  }
-
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.handleRouteParams();
-    }, 0);
-  }
-
-  private handleRouteParams() {
+  ngOnInit() {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
       this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
-        this.tempAllData = JSON.stringify(data);
-        this.parsedAllData = data; // Store the parsed JSON
-        if (data.type === questionType.CODE) {
-          this.detailedQuestionData = data;
-          console.log(this.detailedQuestionData);
-          this.setContent();
-        } else {
-          this.detailedQuestionData.type = data.type;
-        }
-      });
+        this.questionData = data;
+        this.populateForm();
+  });
+  })
+}
+
+  createForm(): FormGroup {
+    return this.fb.group({
+      name: [''],
+      programmingLanguage: [''],
+      text: [''],
+      codeGerueste: this.fb.array([]),
+      automatedTests: this.fb.array([])
     });
   }
 
-
-  // BEGIN JSON OUTPUT AND DEBUGGING ****************************************************
-  private setContent() {
-    if (this.detailedQuestionData.codingQuestion){
-      this.freeTextForm.patchValue({
-        questionTitle: this.detailedQuestionData.name,
-        questionDifficulty: this.detailedQuestionData.level.toString(),
-        questionDescription: this.detailedQuestionData.description,
-        questionScore: this.detailedQuestionData.score,
+  populateForm() {
+    if (this.questionData) {
+      this.codingForm.patchValue({
+        name: this.questionData.name,
+        programmingLanguage: this.questionData.codingQuestion!.programmingLanguage,
+        text: this.questionData.text
       });
-      this.questionField.setContent(this.detailedQuestionData.codingQuestion.textHTML || this.detailedQuestionData.text);
-      // Note: Expectations and solution fields might need to be updated based on the coding question structure
+
+      this.populateCodeGerueste();
+      this.populateAutomatedTests();
     }
   }
 
-  // Methods for template
-  objectKeys(obj: any): string[] {
-    return Object.keys(obj);
+  populateCodeGerueste() {
+    const codeGeruesteFormArray = this.codingForm.get('codeGerueste') as FormArray;
+    codeGeruesteFormArray.clear();
+    this.questionData?.codingQuestion!.codeGerueste.forEach((codeGeruest: any) => {
+      codeGeruesteFormArray.push(this.fb.group({
+        id: codeGeruest.id,
+        codeFileName: codeGeruest.codeFileName,
+        code: codeGeruest.code
+      }));
+    });
   }
 
-  isObject(value: any): boolean {
-    return typeof value === 'object' && value !== null;
+  populateAutomatedTests() {
+    const automatedTestsFormArray = this.codingForm.get('automatedTests') as FormArray;
+    automatedTestsFormArray.clear();
+    this.questionData?.codingQuestion!.automatedTests.forEach((test: any) => {
+      automatedTestsFormArray.push(this.fb.group({
+        id: test.id,
+        testFileName: test.testFileName,
+        code: test.code
+      }));
+    });
   }
-  // END JSON OUTPUT AND DEBUGGING ****************************************************
+
+  get codeGeruesteControls() {
+    return (this.codingForm.get('codeGerueste') as FormArray).controls;
+  }
+
+  get automatedTestsControls() {
+    return (this.codingForm.get('automatedTests') as FormArray).controls;
+  }
+
+  onSubmit() {
+    if (this.codingForm.valid && this.questionData && this.questionData.codingQuestion) {
+      const updatedQuestion: detailedQuestionDTO = {
+        ...this.questionData,
+        name: this.codingForm.value.name,
+        text: this.codingForm.value.text,
+        codingQuestion: {
+          ...this.questionData.codingQuestion,
+          id: this.questionData.codingQuestion.id ?? 0, // Ensure id is always a number
+          programmingLanguage: this.codingForm.value.programmingLanguage,
+          codeGerueste: this.codingForm.value.codeGerueste,
+          automatedTests: this.codingForm.value.automatedTests
+        }
+      };
+
+      this.questionDataService.updateQuestion(updatedQuestion).subscribe(
+        response => {
+          console.log('Question updated successfully:', response);
+          this.snackBar.open('Question updated successfully', 'Close', { duration: 3000 });
+        },
+        error => {
+          console.error('Error updating question:', error);
+          this.snackBar.open('Error updating question', 'Close', { duration: 3000 });
+        }
+      );
+    } else {
+      this.snackBar.open('Please fill all required fields', 'Close', { duration: 3000 });
+    }
+  }
 }

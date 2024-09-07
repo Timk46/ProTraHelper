@@ -1,20 +1,32 @@
-.container {
-  font-family: Arial, sans-serif;
+.edit-coding-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
 }
-.json-container {
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+.form-field {
+  flex: 1;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  margin-top: 20px;
+  text-align: right;
+}
+
+mat-accordion {
   margin-bottom: 20px;
 }
-.json-item {
+
+h3 {
+  margin-top: 30px;
   margin-bottom: 10px;
-}
-.nested-json {
-  margin-left: 20px;
-  margin-top: 5px;
-}
-pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
 }

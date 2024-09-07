@@ -1,49 +1,59 @@
-<div class="container">
-  <h2>Structured JSON Data</h2>
-  <mat-expansion-panel *ngIf="parsedAllData" class="json-container">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        JSON Data for Debugging
-      </mat-panel-title>
-    </mat-expansion-panel-header>
-    <ng-container *ngTemplateOutlet="recursiveList; context:{ list: parsedAllData }"></ng-container>
-  </mat-expansion-panel>
-</div>
+<div class="edit-coding-container">
+  <h2>Edit Coding Question</h2>
+  <form [formGroup]="codingForm" (ngSubmit)="onSubmit()">
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" required>
+      </mat-form-field>
 
-<ng-template #recursiveList let-list="list">
-  <ng-container *ngFor="let key of objectKeys(list)">
-    <div class="json-item">
-      <strong>{{ key }}:</strong>
-      <ng-container [ngSwitch]="true">
-        <span *ngSwitchCase="!isObject(list[key])">{{ list[key] }}</span>
-        <mat-expansion-panel *ngSwitchCase="isObject(list[key])" class="nested-json">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Programming Language</mat-label>
+        <input matInput formControlName="programmingLanguage" required>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="form-field full-width">
+      <mat-label>Question Text</mat-label>
+      <textarea matInput formControlName="text" rows="10" required></textarea>
+    </mat-form-field>
+
+    <div formArrayName="codeGerueste">
+      <h3>Code Templates</h3>
+      <mat-accordion>
+        <mat-expansion-panel *ngFor="let codeGeruest of codeGeruesteControls; let i = index" [formGroupName]="i">
           <mat-expansion-panel-header>
             <mat-panel-title>
-              {{ key }}
+              {{codeGeruest.get('codeFileName')?.value}}
             </mat-panel-title>
           </mat-expansion-panel-header>
-          <ng-container *ngTemplateOutlet="recursiveList; context:{ list: list[key] }"></ng-container>
+          <mat-form-field appearance="outline" class="form-field full-width">
+            <mat-label>Code</mat-label>
+            <textarea matInput formControlName="code" rows="10"></textarea>
+          </mat-form-field>
         </mat-expansion-panel>
-      </ng-container>
+      </mat-accordion>
     </div>
-  </ng-container>
-</ng-template>
 
-<style>
-  .container {
-    font-family: Arial, sans-serif;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  .json-container {
-    margin-bottom: 20px;
-  }
-  .json-item {
-    margin-bottom: 10px;
-  }
-  .nested-json {
-    margin-left: 20px;
-    margin-top: 5px;
-  }
-</style>
+    <div formArrayName="automatedTests">
+      <h3>Automated Tests</h3>
+      <mat-accordion>
+        <mat-expansion-panel *ngFor="let test of automatedTestsControls; let i = index" [formGroupName]="i">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              {{test.get('testFileName')?.value}}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-form-field appearance="outline" class="form-field full-width">
+            <mat-label>Test Code</mat-label>
+            <textarea matInput formControlName="code" rows="10"></textarea>
+          </mat-form-field>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="submit">Save Changes</button>
+    </div>
+  </form>
+</div>
