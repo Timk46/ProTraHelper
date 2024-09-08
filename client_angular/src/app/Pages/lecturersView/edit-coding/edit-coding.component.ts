@@ -248,11 +248,11 @@ export class EditCodingComponent implements OnInit {
           programmingLanguage: this.codingForm.value.programmingLanguage,
           codeGerueste: this.codingForm.value.codeGerueste,
           modelSolutions: this.codingForm.value.modelSolutions,
-          automatedTests: {
-            ...this.codingForm.value.automatedTests,
+          automatedTests: this.codingForm.value.automatedTests.map((test: any) => ({
+            ...test,
             runMethod: this.codingForm.value.runMethod,
             inputArguments: this.codingForm.value.inputArguments
-          },
+          })),
           expectations: this.codingForm.value.expectations,
           mainFileName: this.codingForm.value.mainFileName,
         }
@@ -285,11 +285,11 @@ export class EditCodingComponent implements OnInit {
           programmingLanguage: this.codingForm.value.programmingLanguage,
           codeGerueste: this.codingForm.value.codeGerueste,
           modelSolutions: this.codingForm.value.modelSolutions,
-          automatedTests: {
-            ...this.codingForm.value.automatedTests,
+          automatedTests: this.codingForm.value.automatedTests.map((test: any) => ({
+            ...test,
             runMethod: this.codingForm.value.runMethod,
             inputArguments: this.codingForm.value.inputArguments
-          },
+          })),
           expectations: this.codingForm.value.expectations,
           mainFileName: this.codingForm.value.mainFileName,
         }
