@@ -321,14 +321,28 @@ export class EditCodingComponent implements OnInit {
 
   exportTask() {
     if (this.questionData && this.questionData.codingQuestion) {
-      const exportData = {
+      const exportQuestion: detailedQuestionDTO = {
         ...this.questionData,
+        name: this.codingForm.value.name,
+        text: this.codingForm.value.text,
+        isApproved: this.codingForm.value.isApproved,
+        level: this.codingForm.value.level,
         codingQuestion: {
           ...this.questionData.codingQuestion,
-          ...this.codingForm.value
+          id: this.questionData.codingQuestion.id ?? 0,
+          programmingLanguage: this.codingForm.value.programmingLanguage,
+          codeGerueste: this.codingForm.value.codeGerueste,
+          modelSolutions: this.codingForm.value.modelSolutions,
+          automatedTests: this.codingForm.value.automatedTests.map((test: any) => ({
+            ...test,
+            runMethod: this.codingForm.value.runMethod,
+            inputArguments: this.codingForm.value.inputArguments
+          })),
+          expectations: this.codingForm.value.expectations,
+          mainFileName: this.codingForm.value.mainFileName,
         }
       };
-      const jsonString = JSON.stringify(exportData, null, 2);
+      const jsonString = JSON.stringify(exportQuestion, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -347,6 +361,13 @@ export class EditCodingComponent implements OnInit {
         try {
           const importedData = JSON.parse(e.target?.result as string);
           this.questionData = importedData;
+          if (this.questionData && this.questionData.codingQuestion) {
+            this.codingForm.patchValue({
+              runMethod: this.questionData.codingQuestion.automatedTests[0].runMethod || '',
+              inputArguments: this.questionData.codingQuestion.automatedTests[0].inputArguments || '',
+              mainFileName: this.questionData.codingQuestion.mainFileName || ''
+            });
+          }
           this.populateForm();
           this.snackBar.open('Task imported successfully', 'Close', { duration: 3000 });
         } catch (error) {
