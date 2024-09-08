@@ -178,6 +178,7 @@ export class EditCodingComponent implements OnInit {
   }
 
   onSubmit() {
+    console.log('Form submitted:', this.codingForm.value);
     if (this.codingForm.valid && this.questionData && this.questionData.codingQuestion) {
       const updatedQuestion: detailedQuestionDTO = {
         ...this.questionData,
@@ -206,6 +207,45 @@ export class EditCodingComponent implements OnInit {
       );
     } else {
       this.snackBar.open('Please fill all required fields', 'Close', { duration: 3000 });
+    }
+  }
+
+  exportTask() {
+    if (this.questionData && this.questionData.codingQuestion) {
+      const exportData = {
+        ...this.questionData,
+        codingQuestion: {
+          ...this.questionData.codingQuestion,
+          ...this.codingForm.value
+        }
+      };
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `coding_task_${this.questionData.id}.json`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+  }
+
+  importTask(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        try {
+          const importedData = JSON.parse(e.target?.result as string);
+          this.questionData = importedData;
+          this.populateForm();
+          this.snackBar.open('Task imported successfully', 'Close', { duration: 3000 });
+        } catch (error) {
+          console.error('Error parsing imported JSON:', error);
+          this.snackBar.open('Error importing task', 'Close', { duration: 3000 });
+        }
+      };
+      reader.readAsText(file);
     }
   }
 }

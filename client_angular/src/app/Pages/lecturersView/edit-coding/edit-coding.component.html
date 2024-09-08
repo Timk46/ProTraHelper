@@ -35,7 +35,7 @@
           <mat-expansion-panel-header>
             <mat-panel-title style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
               <span>{{codeGeruest.get('codeFileName')?.value}}</span>
-              <button mat-icon-button color="warn" (click)="confirmDelete('codeGerueste', i, codeGeruest.get('codeFileName')?.value); $event.stopPropagation();">
+              <button mat-icon-button color="warn" type="button" (click)="confirmDelete('codeGerueste', i, codeGeruest.get('codeFileName')?.value); $event.stopPropagation();">
                 <mat-icon>delete</mat-icon>
               </button>
             </mat-panel-title>
@@ -62,7 +62,7 @@
           <mat-expansion-panel-header>
             <mat-panel-title style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
               <span>{{solution.get('solutionFileName')?.value || 'Solution ' + (i + 1)}}</span>
-              <button mat-icon-button color="warn" (click)="confirmDelete('modelSolutions', i, solution.get('solutionFileName')?.value || 'Solution ' + (i + 1)); $event.stopPropagation();">
+              <button mat-icon-button color="warn" type="button" (click)="confirmDelete('modelSolutions', i, solution.get('solutionFileName')?.value || 'Solution ' + (i + 1)); $event.stopPropagation();">
                 <mat-icon>delete</mat-icon>
               </button>
             </mat-panel-title>
@@ -89,7 +89,7 @@
           <mat-expansion-panel-header>
             <mat-panel-title style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
               <span>{{test.get('testFileName')?.value || 'Test ' + (i + 1)}}</span>
-              <button mat-icon-button color="warn" (click)="confirmDelete('automatedTests', i, test.get('testFileName')?.value || 'Test ' + (i + 1)); $event.stopPropagation();">
+              <button mat-icon-button type="button" color="warn" (click)="confirmDelete('automatedTests', i, test.get('testFileName')?.value || 'Test ' + (i + 1)); $event.stopPropagation();">
                 <mat-icon>delete</mat-icon>
               </button>
             </mat-panel-title>
@@ -104,11 +104,16 @@
     </div>
 
     <mat-form-field appearance="outline" class="form-field full-width">
-      <mat-label>Expectations</mat-label>
-      <textarea matInput formControlName="expectations" rows="5" placeholder="Enter expectations for the automated tests..."></textarea>
+      <mat-label>Erwartungshorizont</mat-label>
+      <textarea matInput formControlName="expectations" rows="5" placeholder="Der Erwartungshorizont für die Aufgabe."></textarea>
     </mat-form-field>
 
-    <div class="form-actions">
+    <div class="form-actions" style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <button mat-raised-button color="basic" type="button" (click)="exportTask()" style="margin-right: 10px;">Export Task</button>
+        <input type="file" #fileInput style="display: none" (change)="importTask($event)" accept=".json">
+        <button mat-raised-button color="basic" type="button" (click)="fileInput.click()">Import Task</button>
+      </div>
       <button mat-raised-button color="primary" type="submit">Save Changes</button>
     </div>
   </form>
