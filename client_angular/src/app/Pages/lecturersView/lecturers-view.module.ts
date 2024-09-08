@@ -11,6 +11,7 @@ import { EditFreetextComponent } from './edit-freetext/edit-freetext.component';
 import { EditChoiceComponent } from './edit-choice/edit-choice.component';
 import { EditFillinComponent } from './edit-fillin/edit-fillin.component';
 import { EditCodingComponent } from './edit-coding/edit-coding.component';
+import { AddElementModalComponent } from './edit-coding/add-element-modal.component';
 import { TinymceComponent } from '../tinymce/tinymce.component';
 
 @NgModule({
@@ -21,6 +22,7 @@ import { TinymceComponent } from '../tinymce/tinymce.component';
     EditChoiceComponent,
     EditFillinComponent,
     EditCodingComponent,
+    AddElementModalComponent,
     TinymceComponent
   ],
   imports: [

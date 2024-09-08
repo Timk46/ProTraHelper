@@ -98,13 +98,22 @@ export interface CodingQuestionDto {
     mainFileName: string;
     text: string;
     textHTML: string;
+    expectations?: string;
     codeGerueste: CodeGeruestDto[];
   }
   
   export interface CodingQuestionInternal extends CodingQuestionDto { // for backend only
     automatedTests: AutomatedTestDto[];
+    modelSolutions?: ModelSolutionDto[];
   }
-  
+  export interface ModelSolutionDto {
+    id: number;
+    codingQuestionId: number;
+    codeFileName: string;
+    code: string;
+    language: string;
+  }
+
   export interface CodeGeruestDto {
     id: number;
     codingQuestionId: number;

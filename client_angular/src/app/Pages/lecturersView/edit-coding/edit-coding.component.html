@@ -22,14 +22,22 @@
       <textarea matInput formControlName="text" rows="10" required></textarea>
     </mat-form-field>
 
-    <div formArrayName="codeGerueste">
-      <h3>Code-Gerüste</h3>
-      <p>Diese Dateien werden den Lernenden bei Bearbeitung der Aufgabe zur Verfügung gestellt.</p>
+    <div formArrayName="codeGerueste" class="section-container" style="margin-bottom: 30px;">
+      <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 style="margin: 0;">Code-Gerüste</h3>
+        <button mat-mini-fab color="primary" type="button" (click)="openAddModal('codeGerueste')">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+      <p style="margin-top: 0; margin-bottom: 10px;">Diese Dateien werden den Lernenden bei Bearbeitung der Aufgabe zur Verfügung gestellt.</p>
       <mat-accordion>
         <mat-expansion-panel *ngFor="let codeGeruest of codeGeruesteControls; let i = index" [formGroupName]="i">
           <mat-expansion-panel-header>
-            <mat-panel-title>
-              {{codeGeruest.get('codeFileName')?.value}}
+            <mat-panel-title style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span>{{codeGeruest.get('codeFileName')?.value}}</span>
+              <button mat-icon-button color="warn" (click)="confirmDelete('codeGerueste', i, codeGeruest.get('codeFileName')?.value); $event.stopPropagation();">
+                <mat-icon>delete</mat-icon>
+              </button>
             </mat-panel-title>
           </mat-expansion-panel-header>
           <app-code-editor
@@ -41,14 +49,49 @@
       </mat-accordion>
     </div>
 
-    <div formArrayName="automatedTests">
-      <h3>Unit Tests</h3>
-      <p>Die Unit-Tests überprüfen die Lösungen der Lernenden auf Korrektheit.</p>
+    <div formArrayName="modelSolutions" class="section-container" style="margin-bottom: 30px;">
+      <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 style="margin: 0;">Model Solutions</h3>
+        <button mat-mini-fab color="primary" type="button" (click)="openAddModal('modelSolutions')">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+      <p style="margin-top: 0; margin-bottom: 10px;">Musterlösungen für die Aufgabe.</p>
+      <mat-accordion>
+        <mat-expansion-panel *ngFor="let solution of modelSolutionsControls; let i = index" [formGroupName]="i">
+          <mat-expansion-panel-header>
+            <mat-panel-title style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span>{{solution.get('solutionFileName')?.value || 'Solution ' + (i + 1)}}</span>
+              <button mat-icon-button color="warn" (click)="confirmDelete('modelSolutions', i, solution.get('solutionFileName')?.value || 'Solution ' + (i + 1)); $event.stopPropagation();">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <app-code-editor
+            [code]="solution.get('code')?.value"
+            [selectedLanguage]="codingForm.get('programmingLanguage')?.value"
+            (codeChange)="onCodeChange($event, i, 'modelSolutions')"
+          ></app-code-editor>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+
+    <div formArrayName="automatedTests" class="section-container" style="margin-bottom: 30px;">
+      <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 style="margin: 0;">Unit Tests</h3>
+        <button mat-mini-fab color="primary" type="button" (click)="openAddModal('automatedTests')">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+      <p style="margin-top: 0; margin-bottom: 10px;">Die Unit-Tests überprüfen die Lösungen der Lernenden auf Korrektheit.</p>
       <mat-accordion>
         <mat-expansion-panel *ngFor="let test of automatedTestsControls; let i = index" [formGroupName]="i">
           <mat-expansion-panel-header>
-            <mat-panel-title>
-              {{test.get('testFileName')?.value || 'Test ' + (i)}}
+            <mat-panel-title style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span>{{test.get('testFileName')?.value || 'Test ' + (i + 1)}}</span>
+              <button mat-icon-button color="warn" (click)="confirmDelete('automatedTests', i, test.get('testFileName')?.value || 'Test ' + (i + 1)); $event.stopPropagation();">
+                <mat-icon>delete</mat-icon>
+              </button>
             </mat-panel-title>
           </mat-expansion-panel-header>
           <app-code-editor
@@ -59,6 +102,11 @@
         </mat-expansion-panel>
       </mat-accordion>
     </div>
+
+    <mat-form-field appearance="outline" class="form-field full-width">
+      <mat-label>Expectations</mat-label>
+      <textarea matInput formControlName="expectations" rows="5" placeholder="Enter expectations for the automated tests..."></textarea>
+    </mat-form-field>
 
     <div class="form-actions">
       <button mat-raised-button color="primary" type="submit">Save Changes</button>

@@ -55,6 +55,7 @@ import { NotificationBellComponent } from "./Pages/notification/notification-bel
 import { BellDirective } from "./Pages/notification/notification-bell/belldirective.directive";
 import { AdminGuard } from "./Guards/is-admin.guard";
 import { ConfirmationBoxComponent } from './Pages/confirmation-box/confirmation-box.component';
+import { ConfirmDialogComponent } from './Pages/lecturersView/edit-coding/confirm-dialog.component';
 
 // Import LecturersViewModule
 import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module';
@@ -102,7 +103,8 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
         NotificationComponent,
         NotificationBellComponent,
         BellDirective,
-        ConfirmationBoxComponent
+        ConfirmationBoxComponent,
+        ConfirmDialogComponent
     ],
     imports: [
         ToastrModule.forRoot(),

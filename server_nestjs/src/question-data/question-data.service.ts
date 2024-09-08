@@ -77,7 +77,8 @@ export class QuestionDataService {
             },
             include: {
               codeGerueste: true,
-              automatedTests: true
+              automatedTests: true,
+              modelSolutions: true
             }
           });
           break;

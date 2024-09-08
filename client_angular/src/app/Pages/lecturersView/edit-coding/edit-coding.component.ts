@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { QuestionDataService } from '../../../Services/question/question-data.service';
 import { questionType } from '@DTOs/question.dto';
 import { detailedQuestionDTO} from '@DTOs/index';
 import { ActivatedRoute } from '@angular/router';
-import { switchMap } from 'rxjs/operators';
+import { AddElementModalComponent } from './add-element-modal.component';
+import { ConfirmDialogComponent } from './confirm-dialog.component';
 
 @Component({
   selector: 'app-edit-coding',
@@ -21,7 +23,8 @@ export class EditCodingComponent implements OnInit {
     private fb: FormBuilder,
     private questionDataService: QuestionDataService,
     private snackBar: MatSnackBar,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private dialog: MatDialog
   ) {
     this.codingForm = this.createForm();
   }
@@ -42,7 +45,9 @@ export class EditCodingComponent implements OnInit {
       programmingLanguage: [''],
       text: [''],
       codeGerueste: this.fb.array([]),
-      automatedTests: this.fb.array([])
+      modelSolutions: this.fb.array([]),
+      automatedTests: this.fb.array([]),
+      expectations: ['']
     });
   }
 
@@ -51,10 +56,12 @@ export class EditCodingComponent implements OnInit {
       this.codingForm.patchValue({
         name: this.questionData.name,
         programmingLanguage: this.questionData.codingQuestion!.programmingLanguage,
-        text: this.questionData.text
+        text: this.questionData.text,
+        expectations: this.questionData.codingQuestion!.expectations || ''
       });
 
       this.populateCodeGerueste();
+      this.populateModelSolutions();
       this.populateAutomatedTests();
     }
   }
@@ -67,6 +74,18 @@ export class EditCodingComponent implements OnInit {
         id: codeGeruest.id,
         codeFileName: codeGeruest.codeFileName,
         code: codeGeruest.code
+      }));
+    });
+  }
+
+  populateModelSolutions() {
+    const modelSolutionsFormArray = this.codingForm.get('modelSolutions') as FormArray;
+    modelSolutionsFormArray.clear();
+    this.questionData?.codingQuestion!.modelSolutions?.forEach((solution: any) => {
+      modelSolutionsFormArray.push(this.fb.group({
+        id: solution.id,
+        solutionFileName: solution.solutionFileName,
+        code: solution.code
       }));
     });
   }
@@ -87,13 +106,75 @@ export class EditCodingComponent implements OnInit {
     return (this.codingForm.get('codeGerueste') as FormArray).controls;
   }
 
+  get modelSolutionsControls() {
+    return (this.codingForm.get('modelSolutions') as FormArray).controls;
+  }
+
   get automatedTestsControls() {
     return (this.codingForm.get('automatedTests') as FormArray).controls;
   }
 
-  onCodeChange(newCode: string, index: number, type: 'codeGerueste' | 'automatedTests') {
+  onCodeChange(newCode: string, index: number, type: 'codeGerueste' | 'automatedTests' | 'modelSolutions') {
     const formArray = this.codingForm.get(type) as FormArray;
     formArray.at(index).patchValue({ code: newCode });
+  }
+
+  openAddModal(type: 'codeGerueste' | 'modelSolutions' | 'automatedTests') {
+    const dialogRef = this.dialog.open(AddElementModalComponent, {
+      width: '500px',
+      data: { type: type }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.addElement(type, result);
+      }
+    });
+  }
+
+  addElement(type: 'codeGerueste' | 'modelSolutions' | 'automatedTests', data: any) {
+    const formArray = this.codingForm.get(type) as FormArray;
+    switch (type) {
+      case 'codeGerueste':
+        formArray.push(this.fb.group({
+          codeFileName: data.fileName,
+          code: data.code
+        }));
+        break;
+      case 'modelSolutions':
+        formArray.push(this.fb.group({
+          solutionFileName: data.fileName,
+          code: data.code
+        }));
+        break;
+      case 'automatedTests':
+        formArray.push(this.fb.group({
+          testFileName: data.fileName,
+          code: data.code
+        }));
+        break;
+    }
+  }
+
+  confirmDelete(type: 'codeGerueste' | 'modelSolutions' | 'automatedTests', index: number, fileName: string) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '350px',
+      data: {
+        title: 'Bestätigung',
+        message: `Möchten Sie wirklich "${fileName}" löschen?`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.deleteElement(type, index);
+      }
+    });
+  }
+
+  deleteElement(type: 'codeGerueste' | 'modelSolutions' | 'automatedTests', index: number) {
+    const formArray = this.codingForm.get(type) as FormArray;
+    formArray.removeAt(index);
   }
 
   onSubmit() {
@@ -107,7 +188,9 @@ export class EditCodingComponent implements OnInit {
           id: this.questionData.codingQuestion.id ?? 0,
           programmingLanguage: this.codingForm.value.programmingLanguage,
           codeGerueste: this.codingForm.value.codeGerueste,
-          automatedTests: this.codingForm.value.automatedTests
+          modelSolutions: this.codingForm.value.modelSolutions,
+          automatedTests: this.codingForm.value.automatedTests,
+          expectations: this.codingForm.value.expectations
         }
       };
 
