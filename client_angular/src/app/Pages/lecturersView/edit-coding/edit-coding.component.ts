@@ -4,7 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { QuestionDataService } from '../../../Services/question/question-data.service';
 import { questionType } from '@DTOs/question.dto';
-import { detailedQuestionDTO} from '@DTOs/index';
+import { detailedQuestionDTO, CodeGeruestDto, ModelSolutionDto, AutomatedTestDto } from '@DTOs/index';
 import { ActivatedRoute } from '@angular/router';
 import { AddElementModalComponent } from './add-element-modal.component';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
@@ -18,6 +18,8 @@ export class EditCodingComponent implements OnInit {
   codingForm: FormGroup;
   thisQuestionType = questionType.CODE;
   questionData: detailedQuestionDTO| null = null;
+  markdownLanguage = 'markdown';
+  showPreview = false;
 
   constructor(
     private fb: FormBuilder,
@@ -69,7 +71,7 @@ export class EditCodingComponent implements OnInit {
   populateCodeGerueste() {
     const codeGeruesteFormArray = this.codingForm.get('codeGerueste') as FormArray;
     codeGeruesteFormArray.clear();
-    this.questionData?.codingQuestion!.codeGerueste.forEach((codeGeruest: any) => {
+    this.questionData?.codingQuestion!.codeGerueste.forEach((codeGeruest: CodeGeruestDto) => {
       codeGeruesteFormArray.push(this.fb.group({
         id: codeGeruest.id,
         codeFileName: codeGeruest.codeFileName,
@@ -81,10 +83,10 @@ export class EditCodingComponent implements OnInit {
   populateModelSolutions() {
     const modelSolutionsFormArray = this.codingForm.get('modelSolutions') as FormArray;
     modelSolutionsFormArray.clear();
-    this.questionData?.codingQuestion!.modelSolutions?.forEach((solution: any) => {
+    this.questionData?.codingQuestion!.modelSolutions?.forEach((solution: ModelSolutionDto) => {
       modelSolutionsFormArray.push(this.fb.group({
         id: solution.id,
-        solutionFileName: solution.solutionFileName,
+        codeFileName: solution.codeFileName,
         code: solution.code
       }));
     });
@@ -93,7 +95,7 @@ export class EditCodingComponent implements OnInit {
   populateAutomatedTests() {
     const automatedTestsFormArray = this.codingForm.get('automatedTests') as FormArray;
     automatedTestsFormArray.clear();
-    this.questionData?.codingQuestion!.automatedTests.forEach((test: any) => {
+    this.questionData?.codingQuestion!.automatedTests.forEach((test: AutomatedTestDto) => {
       automatedTestsFormArray.push(this.fb.group({
         id: test.id,
         testFileName: test.testFileName,
@@ -114,9 +116,22 @@ export class EditCodingComponent implements OnInit {
     return (this.codingForm.get('automatedTests') as FormArray).controls;
   }
 
-  onCodeChange(newCode: string, index: number, type: 'codeGerueste' | 'automatedTests' | 'modelSolutions') {
-    const formArray = this.codingForm.get(type) as FormArray;
-    formArray.at(index).patchValue({ code: newCode });
+  onCodeChange(newCode: string, index: number, type: 'codeGerueste' | 'automatedTests' | 'modelSolutions' | 'text') {
+    if (type === 'text') {
+      this.codingForm.patchValue({ text: newCode });
+      if (this.questionData) {
+        this.questionData.text = newCode;
+      }
+    } else {
+      const formArray = this.codingForm.get(type) as FormArray;
+      formArray.at(index).patchValue({ code: newCode });
+      if (this.questionData && this.questionData.codingQuestion) {
+        const questionDataArray = this.questionData.codingQuestion[type];
+        if (Array.isArray(questionDataArray) && questionDataArray[index]) {
+          questionDataArray[index].code = newCode;
+        }
+      }
+    }
   }
 
   openAddModal(type: 'codeGerueste' | 'modelSolutions' | 'automatedTests') {
@@ -134,25 +149,51 @@ export class EditCodingComponent implements OnInit {
 
   addElement(type: 'codeGerueste' | 'modelSolutions' | 'automatedTests', data: any) {
     const formArray = this.codingForm.get(type) as FormArray;
-    switch (type) {
-      case 'codeGerueste':
-        formArray.push(this.fb.group({
-          codeFileName: data.fileName,
-          code: data.code
-        }));
-        break;
-      case 'modelSolutions':
-        formArray.push(this.fb.group({
-          solutionFileName: data.fileName,
-          code: data.code
-        }));
-        break;
-      case 'automatedTests':
-        formArray.push(this.fb.group({
-          testFileName: data.fileName,
-          code: data.code
-        }));
-        break;
+    const newElement = this.fb.group({
+      id: 0,
+      [type === 'automatedTests' ? 'testFileName' : 'codeFileName']: data.fileName,
+      code: data.code
+    });
+    formArray.push(newElement);
+
+    if (this.questionData && this.questionData.codingQuestion) {
+      const questionDataArray = this.questionData.codingQuestion[type];
+      if (Array.isArray(questionDataArray)) {
+        let newItem;
+        switch (type) {
+          case 'codeGerueste':
+            newItem = {
+              id: 0,
+              codeFileName: data.fileName,
+              code: data.code,
+              codingQuestionId: this.questionData.codingQuestion.id,
+              language: this.questionData.codingQuestion.programmingLanguage
+            } as CodeGeruestDto;
+            (questionDataArray as CodeGeruestDto[]).push(newItem);
+            break;
+          case 'modelSolutions':
+            newItem = {
+              id: 0,
+              codeFileName: data.fileName,
+              code: data.code,
+              codingQuestionId: this.questionData.codingQuestion.id,
+              language: this.questionData.codingQuestion.programmingLanguage
+            } as ModelSolutionDto;
+            (questionDataArray as ModelSolutionDto[]).push(newItem);
+            break;
+          case 'automatedTests':
+            newItem = {
+              id: 0,
+              testFileName: data.fileName,
+              code: data.code,
+              codingQuestionId: this.questionData.codingQuestion.id,
+              language: this.questionData.codingQuestion.programmingLanguage,
+              questionId: this.questionData.id
+            } as AutomatedTestDto;
+            (questionDataArray as AutomatedTestDto[]).push(newItem);
+            break;
+        }
+      }
     }
   }
 
@@ -175,6 +216,13 @@ export class EditCodingComponent implements OnInit {
   deleteElement(type: 'codeGerueste' | 'modelSolutions' | 'automatedTests', index: number) {
     const formArray = this.codingForm.get(type) as FormArray;
     formArray.removeAt(index);
+
+    if (this.questionData && this.questionData.codingQuestion) {
+      const questionDataArray = this.questionData.codingQuestion[type];
+      if (Array.isArray(questionDataArray)) {
+        questionDataArray.splice(index, 1);
+      }
+    }
   }
 
   onSubmit() {
@@ -247,5 +295,9 @@ export class EditCodingComponent implements OnInit {
       };
       reader.readAsText(file);
     }
+  }
+
+  togglePreview() {
+    this.showPreview = !this.showPreview;
   }
 }

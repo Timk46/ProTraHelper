@@ -17,10 +17,28 @@
       </mat-form-field>
     </div>
 
-    <mat-form-field appearance="outline" class="form-field full-width">
-      <mat-label>Question Text</mat-label>
-      <textarea matInput formControlName="text" rows="10" required></textarea>
-    </mat-form-field>
+    <div class="form-field full-width">
+      <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 style="margin: 0;">Question Text</h3>
+        <button mat-mini-fab color="primary" type="button" (click)="togglePreview()">
+          <mat-icon>{{ showPreview ? 'edit' : 'preview' }}</mat-icon>
+        </button>
+      </div>
+      <p>Die Aufgabenstellung. Diese wird mit der Markdown-Syntax formatiert.</p>
+      <div class="markdown-editor-container">
+        <div [hidden]="showPreview">
+          <app-code-editor
+            [code]="codingForm.get('text')?.value"
+            [selectedLanguage]="markdownLanguage"
+            (codeChange)="onCodeChange($event, 0, 'text')"
+          ></app-code-editor>
+        </div>
+        <div [hidden]="!showPreview">
+          <markdown [data]="codingForm.get('text')?.value"></markdown>
+        </div>
+      </div>
+    </div>
+
 
     <div formArrayName="codeGerueste" class="section-container" style="margin-bottom: 30px;">
       <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -61,8 +79,8 @@
         <mat-expansion-panel *ngFor="let solution of modelSolutionsControls; let i = index" [formGroupName]="i">
           <mat-expansion-panel-header>
             <mat-panel-title style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-              <span>{{solution.get('solutionFileName')?.value || 'Solution ' + (i + 1)}}</span>
-              <button mat-icon-button color="warn" type="button" (click)="confirmDelete('modelSolutions', i, solution.get('solutionFileName')?.value || 'Solution ' + (i + 1)); $event.stopPropagation();">
+              <span>{{solution.get('codeFileName')?.value || 'Solution ' + (i + 1)}}</span>
+              <button mat-icon-button color="warn" type="button" (click)="confirmDelete('modelSolutions', i, solution.get('codeFileName')?.value || 'Solution ' + (i + 1)); $event.stopPropagation();">
                 <mat-icon>delete</mat-icon>
               </button>
             </mat-panel-title>

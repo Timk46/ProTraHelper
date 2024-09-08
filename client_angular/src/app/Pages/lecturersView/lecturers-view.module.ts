@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from '../../Modules/material.module';
 import { TutorKaiModule } from '../../Modules/tutor-kai/tutor-kai.module';
 import { EditorModule } from '@tinymce/tinymce-angular';
+import { MarkdownModule } from 'ngx-markdown';
 
 import { CreateContentNodeDialogComponent } from './create-content-node-dialog/create-content-node-dialog.component';
 import { CreateContentElementDialogComponent } from './create-content-element-dialog/create-content-element-dialog.component';
@@ -31,7 +32,8 @@ import { TinymceComponent } from '../tinymce/tinymce.component';
     ReactiveFormsModule,
     MaterialModule,
     TutorKaiModule,
-    EditorModule
+    EditorModule,
+    MarkdownModule.forChild()
   ],
   exports: [
     CreateContentNodeDialogComponent,

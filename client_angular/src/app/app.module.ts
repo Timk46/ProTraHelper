@@ -3,6 +3,7 @@ import { NgModule} from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { MaterialModule } from './Modules/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MarkdownModule } from 'ngx-markdown';
 
 // Components
 import { ContactComponent, ImpressumComponent, DatenschutzComponent, ProgressComponent } from './app.component'
@@ -117,7 +118,8 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
         NgxExtendedPdfViewerModule,
         HttpClientModule,
         LecturersViewModule,
-        EditorModule
+        EditorModule,
+        MarkdownModule.forRoot()
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
