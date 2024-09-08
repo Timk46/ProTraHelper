@@ -59,7 +59,7 @@ export class QuestionService {
   async findAll(): Promise<QuestionDTO[]> {
     const questions = await this.prismaService.question.findMany({
       include: {
-        codingQuestions: {
+        codingQuestion: {
           include: {
             codeGerueste: true,
             automatedTests: true
@@ -80,7 +80,7 @@ export class QuestionService {
     const question = await this.prismaService.question.findUnique({
       where: { id },
       include: {
-        codingQuestions: {
+        codingQuestion: {
           include: {
             codeGerueste: true,
             automatedTests: true
@@ -92,7 +92,7 @@ export class QuestionService {
       console.log(`ERROR: Question with ID ${id} not found`);
       throw new NotFoundException(`Question with ID ${id} not found`);
     }
-    if (!question.codingQuestions) {
+    if (!question.codingQuestion) {
       console.log(`ERROR: Question with ID ${id} is not a coding question`);
       throw new BadRequestException(`Question with ID ${id} is not a coding question`);
     }
@@ -186,7 +186,7 @@ export class QuestionService {
       isApproved: question.isApproved,
       originId: question.originId,
       text: question.text,
-      codingQuestion: this.mapCodingQuestionToDto(question.codingQuestions),
+      codingQuestion: this.mapCodingQuestionToDto(question.codingQuestion),
       level: question.level,
     };
     return questionDto;

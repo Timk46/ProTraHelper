@@ -122,6 +122,37 @@
       </mat-accordion>
     </div>
 
+    <!-- Programming Language specific extra information for Unit-Tests -->
+    <div class="section-container" [ngSwitch]="codingForm.get('programmingLanguage')?.value">
+      <p>Extra Informationen je nach Programmiersprache, um den Code auszuführen.</p>
+      <div *ngSwitchCase="'python'" class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Run Method</mat-label>
+          <input matInput formControlName="runMethod">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Input Arguments</mat-label>
+          <input matInput formControlName="inputArguments">
+        </mat-form-field>
+      </div>
+      <div *ngSwitchCase="'java'" class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Main File Name</mat-label>
+          <input matInput formControlName="mainFileName">
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- New "Testen" button and test results section -->
+    <div class="section-container">
+      <p>Die Musterlösung gegen die Unit-Tests prüfen.</p>
+      <button mat-raised-button color="primary" type="button" (click)="testCode()">Testen</button>
+      <div *ngIf="testResults" class="test-results">
+        <h4>Test Results:</h4>
+        <pre>{{ testResults | json }}</pre>
+      </div>
+    </div>
+
     <div class="section-container">
       <mat-form-field appearance="outline" class="form-field full-width">
         <mat-label>Erwartungshorizont</mat-label>

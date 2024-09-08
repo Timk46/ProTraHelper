@@ -226,7 +226,7 @@ model Question {
   version                    Int                @default(1)
   originId                   Int?
   conceptNodeId              Int?
-  codingQuestions            CodingQuestion?
+  codingQuestion            CodingQuestion?
   contentElement             ContentElement?
   files                      File[]
   FreeTextQuestion           FreeTextQuestion[]

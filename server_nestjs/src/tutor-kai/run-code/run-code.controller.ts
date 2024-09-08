@@ -2,7 +2,7 @@ import { Controller, Post, Body, Res, Req } from '@nestjs/common';
 import { RunCodeService } from './run-code.service';
 import { FeedbackNormalService } from './feedback_normal.service';
 import { FeedbackRAGService } from './feedback_rag.service';
-import { CodeSubmissionResultDto } from '@DTOs/index';
+import { CodeSubmissionResultDto, detailedQuestionDTO } from '@DTOs/index';
 import { StudentRatingService } from './student-rating.service';
 import { Response } from 'express';
 
@@ -22,7 +22,16 @@ export class RunCodeController {
     @Body('inputArgs') inputArgs: string[],
     @Body('CodeFiles') files: { [fileName: string]: string },
   ): Promise<CodeSubmissionResultDto> {
-    const results = await this.runCodeService.executeCode(files, parseInt(taskId), req.user.id);
+    const results = await this.runCodeService.executeCodeForSubmission(files, parseInt(taskId), req.user.id);
+    return results;
+  }
+
+  @Post('executeForTaskCreation')
+  async executeForTaskCreation(
+    @Req() req,
+    @Body('detailedQuestion') detailedQuestion: detailedQuestionDTO,
+  ): Promise<CodeSubmissionResultDto> {
+    const results = await this.runCodeService.executeCodeForTaskCreation(detailedQuestion, req.user.id);
     return results;
   }
 

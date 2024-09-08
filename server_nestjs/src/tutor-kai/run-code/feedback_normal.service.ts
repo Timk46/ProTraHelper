@@ -100,7 +100,7 @@ export class FeedbackNormalService {
     const question = await this.prisma.question.findUnique({
       where: { id: questionId },
       include: {
-        codingQuestions: {
+        codingQuestion: {
           include: {
             codeGerueste: true,
             automatedTests: true,
@@ -126,8 +126,8 @@ export class FeedbackNormalService {
 
     const formattedPrompt = await chatPrompt.formatPromptValue({
       individualFeedbackPrompt: individualFeedbackPrompt,
-      task: question.codingQuestions.text,
-      language: question.codingQuestions.programmingLanguage,
+      task: question.codingQuestion.text,
+      language: question.codingQuestion.programmingLanguage,
       code: relatedCodeSubmission.code,
       output: relatedCodeSubmissionResult.CodeSubmissionResult.output ? relatedCodeSubmissionResult.CodeSubmissionResult.output : "Es liegt kein Output vor.",
       unitTests: relatedCodeSubmission.codingQuestion.automatedTests[0].code ? relatedCodeSubmission.codingQuestion.automatedTests[0].code : "Es liegen keine Unit-Tests vor.",

@@ -194,7 +194,7 @@ export class FeedbackRAGService {
     const question = await this.prisma.question.findUnique({
       where: { id: questionId },
       include: {
-        codingQuestions: {
+        codingQuestion: {
           include: {
             codeGerueste: true,
             automatedTests: true,
@@ -223,8 +223,8 @@ export class FeedbackRAGService {
         : individualFeedbackPromptLevel1;
 
     const conceptsFormattedPrompt = await getConceptsPrompt.formatPromptValue({
-      task: question.codingQuestions.text,
-      language: question.codingQuestions.programmingLanguage,
+      task: question.codingQuestion.text,
+      language: question.codingQuestion.programmingLanguage,
       code: relatedCodeSubmission.code,
       output: relatedCodeSubmissionResult.CodeSubmissionResult.output
         ? relatedCodeSubmissionResult.CodeSubmissionResult.output
@@ -300,8 +300,8 @@ export class FeedbackRAGService {
 
     const ragFormattedPrompt = await finalRAGPrompt.formatPromptValue({
       individualFeedbackPrompt: individualFeedbackPrompt,
-      task: question.codingQuestions.text,
-      language: question.codingQuestions.programmingLanguage,
+      task: question.codingQuestion.text,
+      language: question.codingQuestion.programmingLanguage,
       code: relatedCodeSubmission.code,
       output: relatedCodeSubmissionResult.CodeSubmissionResult.output
         ? relatedCodeSubmissionResult.CodeSubmissionResult.output

@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from '../crypto/crypto.service';
-
+import { CodingQuestionInternal, detailedQuestionDTO } from '@DTOs/index';
 import {
   CodeSubmissionResult,
   CodeSubmissionResultDto,
@@ -29,6 +29,29 @@ export class RunCodeService {
   // API URL for code execution service.
   private readonly apiUrl = 'http://jury1.unidashboard.de:3000/execute/';
 
+  // Need a third way for teachers to test in student view. #TODO
+
+
+  /**
+   * During edit-coding to test model solution and unit-tests
+   */
+  async executeCodeForTaskCreation(detailedQuestion: detailedQuestionDTO, userId: number): Promise<any> {
+    const codingQuestion = detailedQuestion.codingQuestion;
+    if (!codingQuestion.modelSolutions || codingQuestion.modelSolutions.length === 0) {
+      throw new Error('No model solutions found for this coding question.');
+    }
+
+    const modelSolution = codingQuestion.modelSolutions.reduce((acc, solution) => {
+      acc[solution.codeFileName] = solution.code;
+      return acc;
+    }, {});
+
+    let response: CodeSubmissionResult = await this.executeCode(modelSolution, codingQuestion);
+    console.log('response', response);
+    return response;
+  }
+
+
   /**
    * Executes student-submitted code against predefined tests with Jury1.
    * @param studentCode An object containing file names as keys and file contents as values.
@@ -36,16 +59,31 @@ export class RunCodeService {
    * @param userId The ID of the user submitting the code.
    * @returns A promise resolving to the execution results.
    */
-  async executeCode(
+  async executeCodeForSubmission(
     studentCode: { [fileName: string]: string },
     questionId: number,
     userId: number,
   ): Promise<CodeSubmissionResultDto> {
     // Retrieve the specified question and its associated coding question details from the database.
+    const question = await this.findRelatedQuestion(questionId);
+    // Generate Base64-encoded strings of student code and test files for submission (needed for Jury1)
+    let response: CodeSubmissionResult = await this.executeCode(studentCode, question.codingQuestion);
+    const result = await this.processExecutionResponse(
+      response,
+      question.codingQuestion,
+      question.contentElement,
+      question,
+      userId,
+      studentCode,
+    );
+
+    return result;
+  }
+  private async findRelatedQuestion(questionId: number) {
     const question = await this.prisma.question.findUnique({
       where: { id: questionId },
       include: {
-        codingQuestions: {
+        codingQuestion: {
           include: {
             codeGerueste: true,
             automatedTests: true,
@@ -58,43 +96,39 @@ export class RunCodeService {
     if (!question) {
       throw new HttpException(
         'Diese Question existiert nicht.',
-        HttpStatus.NOT_FOUND,
+        HttpStatus.NOT_FOUND
       );
     }
-    // Generate Base64-encoded strings of student code and test files for submission (needed for Jury1)
+    return question;
+  }
+
+  private async executeCode(studentCode: { [fileName: string]: string; }, codingQuestion: CodingQuestionInternal) {
+    console.log('studentCode', studentCode);
+    console.log('codingQuestion', codingQuestion);
     const filesBase64 = await this.generateBase64(studentCode);
     const testFilesBase64 = await this.generateBase64({
-      [question.codingQuestions.automatedTests[0].testClassName]:
-        question.codingQuestions.automatedTests[0].code,
+      [codingQuestion.automatedTests[0].testClassName]: codingQuestion.automatedTests[0].code,
     });
 
     // Submit encoded files for execution and process the response.
     let response: CodeSubmissionResult;
-    if (question.codingQuestions.automatedTests[0].language === 'java') {
+    if (codingQuestion.automatedTests[0].language === 'java') {
       response = await this.submitCodeForExecutionJava(
         filesBase64,
         testFilesBase64,
-        question.codingQuestions.mainFileName,
+        codingQuestion.mainFileName
       );
     } else {
       response = await this.submitCodeForExecutionPython(
         filesBase64,
         testFilesBase64,
-        question.codingQuestions.automatedTests[0].runMethod,
-        question.codingQuestions.automatedTests[0].inputArguments,
+        codingQuestion.automatedTests[0].runMethod,
+        codingQuestion.automatedTests[0].inputArguments
       );
     }
-    const result = await this.processExecutionResponse(
-      response,
-      question.codingQuestions,
-      question.contentElement,
-      question,
-      userId,
-      studentCode,
-    );
-
-    return result;
+    return response;
   }
+
   /**
    * Submits encoded student java code and test files for execution with Jury1.
    * @param files Base64-encoded student code files.

@@ -128,6 +128,9 @@ export interface CodingQuestionDto {
     testFileName: string;
     language: string;
     questionId: number;
+    testClassName?:  string;
+    runMethod?:      string;
+    inputArguments?: string;
   }
 
   export enum questionType {

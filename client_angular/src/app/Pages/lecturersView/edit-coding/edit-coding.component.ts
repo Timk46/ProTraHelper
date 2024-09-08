@@ -3,8 +3,9 @@ import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { QuestionDataService } from '../../../Services/question/question-data.service';
+import { EditCodeService } from './edit-coding.service';
 import { questionType } from '@DTOs/question.dto';
-import { detailedQuestionDTO, CodeGeruestDto, ModelSolutionDto, AutomatedTestDto } from '@DTOs/index';
+import { detailedQuestionDTO, CodeGeruestDto, ModelSolutionDto, AutomatedTestDto, CodeSubmissionResultDto } from '@DTOs/index';
 import { ActivatedRoute } from '@angular/router';
 import { AddElementModalComponent } from './add-element-modal.component';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
@@ -20,10 +21,12 @@ export class EditCodingComponent implements OnInit {
   questionData: detailedQuestionDTO| null = null;
   markdownLanguage = 'markdown';
   showPreview = false;
+  testResults: CodeSubmissionResultDto | null = null;
 
   constructor(
     private fb: FormBuilder,
     private questionDataService: QuestionDataService,
+    private editCodeService: EditCodeService,
     private snackBar: MatSnackBar,
     private route: ActivatedRoute,
     private dialog: MatDialog
@@ -36,6 +39,7 @@ export class EditCodingComponent implements OnInit {
       const questionId = parseInt(params['questionId']);
       this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
         this.questionData = data;
+        console.log('Question data:', this.questionData);
         this.populateForm();
       });
     })
@@ -49,17 +53,23 @@ export class EditCodingComponent implements OnInit {
       codeGerueste: this.fb.array([]),
       modelSolutions: this.fb.array([]),
       automatedTests: this.fb.array([]),
-      expectations: ['']
+      expectations: [''],
+      mainFileName: [''],
+      runMethod: [''],
+      inputArguments: ['']
     });
   }
 
   populateForm() {
-    if (this.questionData) {
+    if (this.questionData && this.questionData.codingQuestion) {
       this.codingForm.patchValue({
         name: this.questionData.name,
-        programmingLanguage: this.questionData.codingQuestion!.programmingLanguage,
+        programmingLanguage: this.questionData.codingQuestion.programmingLanguage,
         text: this.questionData.text,
-        expectations: this.questionData.codingQuestion!.expectations || ''
+        expectations: this.questionData.codingQuestion.expectations || '',
+        mainFileName: this.questionData.codingQuestion.mainFileName || '',
+        runMethod: this.questionData.codingQuestion.automatedTests[0].runMethod || '',
+        inputArguments: this.questionData.codingQuestion.automatedTests[0].inputArguments || ''
       });
 
       this.populateCodeGerueste();
@@ -238,8 +248,13 @@ export class EditCodingComponent implements OnInit {
           programmingLanguage: this.codingForm.value.programmingLanguage,
           codeGerueste: this.codingForm.value.codeGerueste,
           modelSolutions: this.codingForm.value.modelSolutions,
-          automatedTests: this.codingForm.value.automatedTests,
-          expectations: this.codingForm.value.expectations
+          automatedTests: {
+            ...this.codingForm.value.automatedTests,
+            runMethod: this.codingForm.value.runMethod,
+            inputArguments: this.codingForm.value.inputArguments
+          },
+          expectations: this.codingForm.value.expectations,
+          mainFileName: this.codingForm.value.mainFileName,
         }
       };
 
@@ -255,6 +270,44 @@ export class EditCodingComponent implements OnInit {
       );
     } else {
       this.snackBar.open('Please fill all required fields', 'Close', { duration: 3000 });
+    }
+  }
+
+  testCode() {
+    if (this.codingForm.valid && this.questionData && this.questionData.codingQuestion) {
+      const questionToTest: detailedQuestionDTO = {
+        ...this.questionData,
+        name: this.codingForm.value.name,
+        text: this.codingForm.value.text,
+        codingQuestion: {
+          ...this.questionData.codingQuestion,
+          id: this.questionData.codingQuestion.id ?? 0,
+          programmingLanguage: this.codingForm.value.programmingLanguage,
+          codeGerueste: this.codingForm.value.codeGerueste,
+          modelSolutions: this.codingForm.value.modelSolutions,
+          automatedTests: {
+            ...this.codingForm.value.automatedTests,
+            runMethod: this.codingForm.value.runMethod,
+            inputArguments: this.codingForm.value.inputArguments
+          },
+          expectations: this.codingForm.value.expectations,
+          mainFileName: this.codingForm.value.mainFileName,
+        }
+      };
+
+      this.editCodeService.executeForTaskCreation(questionToTest).subscribe(
+        (result: CodeSubmissionResultDto) => {
+          this.testResults = result;
+          console.log('Test results:', this.testResults);
+          this.snackBar.open('Code tested successfully', 'Close', { duration: 3000 });
+        },
+        error => {
+          console.error('Error testing code:', error);
+          this.snackBar.open('Error testing code', 'Close', { duration: 3000 });
+        }
+      );
+    } else {
+      this.snackBar.open('Please fill all required fields before testing', 'Close', { duration: 3000 });
     }
   }
 
