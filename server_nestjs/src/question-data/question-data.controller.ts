@@ -1,13 +1,14 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Param, Body, Req, UseGuards} from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req, UseGuards, Put} from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
 import { detailedFreetextQuestionDTO, detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, questionType } from '@DTOs/index';
 import { roles, RolesGuard } from '@/auth/roles.guard';
+import { EditCodeService } from './edit-code.service';
 
 @UseGuards(RolesGuard)
 @Controller('question-data')
 export class QuestionDataController {
-    constructor(private questionDataService: QuestionDataService) {}
+    constructor(private questionDataService: QuestionDataService, private editCodeService: EditCodeService) {}
 
     /**
      *
@@ -24,6 +25,12 @@ export class QuestionDataController {
     @Post('detailed')
     async getDetailedQuestion(@Body() data: { questionId: number, questionType: string }): Promise<detailedQuestionDTO> {
         return this.questionDataService.getDetailedQuestion(data.questionId, data.questionType);
+    }
+
+    @roles('ADMIN')
+    @Put('/updateCodingQuestion')
+    async updateCodingQuestion(@Body() question: detailedQuestionDTO): Promise<QuestionDTO> {
+      return this.editCodeService.updateCodingQuestion(question);
     }
 
     /**

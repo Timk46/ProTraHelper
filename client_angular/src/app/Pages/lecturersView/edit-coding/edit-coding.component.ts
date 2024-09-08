@@ -56,7 +56,9 @@ export class EditCodingComponent implements OnInit {
       expectations: [''],
       mainFileName: [''],
       runMethod: [''],
-      inputArguments: ['']
+      inputArguments: [''],
+      isApproved: [false],
+      level: ['']
     });
   }
 
@@ -68,8 +70,10 @@ export class EditCodingComponent implements OnInit {
         text: this.questionData.text,
         expectations: this.questionData.codingQuestion.expectations || '',
         mainFileName: this.questionData.codingQuestion.mainFileName || '',
-        runMethod: this.questionData.codingQuestion.automatedTests[0].runMethod || '',
-        inputArguments: this.questionData.codingQuestion.automatedTests[0].inputArguments || ''
+        runMethod: this.questionData.codingQuestion.automatedTests[0]?.runMethod || '',
+        inputArguments: this.questionData.codingQuestion.automatedTests[0]?.inputArguments || '',
+        isApproved: this.questionData.isApproved,
+        level: this.questionData.level
       });
 
       this.populateCodeGerueste();
@@ -242,6 +246,8 @@ export class EditCodingComponent implements OnInit {
         ...this.questionData,
         name: this.codingForm.value.name,
         text: this.codingForm.value.text,
+        isApproved: this.codingForm.value.isApproved,
+        level: this.codingForm.value.level,
         codingQuestion: {
           ...this.questionData.codingQuestion,
           id: this.questionData.codingQuestion.id ?? 0,
@@ -258,7 +264,7 @@ export class EditCodingComponent implements OnInit {
         }
       };
 
-      this.questionDataService.updateQuestion(updatedQuestion).subscribe(
+      this.questionDataService.updateCodingQuestion(updatedQuestion).subscribe(
         response => {
           console.log('Question updated successfully:', response);
           this.snackBar.open('Question updated successfully', 'Close', { duration: 3000 });
@@ -279,6 +285,8 @@ export class EditCodingComponent implements OnInit {
         ...this.questionData,
         name: this.codingForm.value.name,
         text: this.codingForm.value.text,
+        isApproved: this.codingForm.value.isApproved,
+        level: this.codingForm.value.level,
         codingQuestion: {
           ...this.questionData.codingQuestion,
           id: this.questionData.codingQuestion.id ?? 0,

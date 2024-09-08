@@ -92,6 +92,10 @@ export class QuestionDataService {
     return this.http.put<freeTextQuestionDTO>(environment.server + `/question-data/updateFreeTextQuestion`, freeTextQuestion)
   }
 
+  updateCodingQuestion(question: detailedQuestionDTO) : Observable<QuestionDTO> {
+    return this.http.put<detailedQuestionDTO>(environment.server + `/question-data/updateCodingQuestion`, question)
+  }
+
 
   createMcQuestion(mcQuestion: McQuestionDTO) : Observable<McQuestionDTO> {
     return this.http.post<McQuestionDTO>(environment.server + `/question-data/createMcQuestion`, mcQuestion)
