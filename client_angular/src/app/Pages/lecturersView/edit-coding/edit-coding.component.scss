@@ -17,16 +17,80 @@
   width: 100%;
 }
 
-.form-actions {
-  margin-top: 20px;
-  text-align: right;
+.section-container {
+  background-color: #eceff4;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+}
+
+.markdown-editor-container {
+  margin-top: 16px;
 }
 
 mat-accordion {
   margin-bottom: 20px;
 }
 
-h3 {
-  margin-top: 30px;
-  margin-bottom: 10px;
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+}
+
+.action-button {
+  margin-right: 16px;
+}
+
+// Styles for better visual separation of expansion panels
+mat-expansion-panel {
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+mat-expansion-panel-header {
+  background-color: #ffffff;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+}
+
+mat-panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+// Add some spacing to the paragraphs
+p {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+// Style for the code editor to make it stand out
+app-code-editor {
+  display: block;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
 }

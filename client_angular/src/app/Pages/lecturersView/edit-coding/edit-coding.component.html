@@ -17,14 +17,15 @@
       </mat-form-field>
     </div>
 
-    <div class="form-field full-width">
-      <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h3 style="margin: 0;">Question Text</h3>
+    <div class="form-field full-width section-container">
+      <div class="section-header">
+        <h3>Question Text</h3>
         <button mat-mini-fab color="primary" type="button" (click)="togglePreview()">
           <mat-icon>{{ showPreview ? 'edit' : 'preview' }}</mat-icon>
         </button>
       </div>
       <p>Die Aufgabenstellung. Diese wird mit der Markdown-Syntax formatiert.</p>
+      <mat-divider></mat-divider>
       <div class="markdown-editor-container">
         <div [hidden]="showPreview">
           <app-code-editor
@@ -40,18 +41,18 @@
     </div>
 
 
-    <div formArrayName="codeGerueste" class="section-container" style="margin-bottom: 30px;">
-      <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h3 style="margin: 0;">Code-Gerüste</h3>
+    <div formArrayName="codeGerueste" class="section-container">
+      <div class="section-header">
+        <h3>Code-Gerüste</h3>
         <button mat-mini-fab color="primary" type="button" (click)="openAddModal('codeGerueste')">
           <mat-icon>add</mat-icon>
         </button>
       </div>
-      <p style="margin-top: 0; margin-bottom: 10px;">Diese Dateien werden den Lernenden bei Bearbeitung der Aufgabe zur Verfügung gestellt.</p>
+      <p>Diese Dateien werden den Lernenden bei Bearbeitung der Aufgabe zur Verfügung gestellt.</p>
       <mat-accordion>
         <mat-expansion-panel *ngFor="let codeGeruest of codeGeruesteControls; let i = index" [formGroupName]="i">
           <mat-expansion-panel-header>
-            <mat-panel-title style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <mat-panel-title>
               <span>{{codeGeruest.get('codeFileName')?.value}}</span>
               <button mat-icon-button color="warn" type="button" (click)="confirmDelete('codeGerueste', i, codeGeruest.get('codeFileName')?.value); $event.stopPropagation();">
                 <mat-icon>delete</mat-icon>
@@ -67,18 +68,18 @@
       </mat-accordion>
     </div>
 
-    <div formArrayName="modelSolutions" class="section-container" style="margin-bottom: 30px;">
-      <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h3 style="margin: 0;">Model Solutions</h3>
+    <div formArrayName="modelSolutions" class="section-container">
+      <div class="section-header">
+        <h3>Model Solutions</h3>
         <button mat-mini-fab color="primary" type="button" (click)="openAddModal('modelSolutions')">
           <mat-icon>add</mat-icon>
         </button>
       </div>
-      <p style="margin-top: 0; margin-bottom: 10px;">Musterlösungen für die Aufgabe.</p>
+      <p>Musterlösungen für die Aufgabe.</p>
       <mat-accordion>
         <mat-expansion-panel *ngFor="let solution of modelSolutionsControls; let i = index" [formGroupName]="i">
           <mat-expansion-panel-header>
-            <mat-panel-title style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <mat-panel-title>
               <span>{{solution.get('codeFileName')?.value || 'Solution ' + (i + 1)}}</span>
               <button mat-icon-button color="warn" type="button" (click)="confirmDelete('modelSolutions', i, solution.get('codeFileName')?.value || 'Solution ' + (i + 1)); $event.stopPropagation();">
                 <mat-icon>delete</mat-icon>
@@ -94,18 +95,18 @@
       </mat-accordion>
     </div>
 
-    <div formArrayName="automatedTests" class="section-container" style="margin-bottom: 30px;">
-      <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h3 style="margin: 0;">Unit Tests</h3>
+    <div formArrayName="automatedTests" class="section-container">
+      <div class="section-header">
+        <h3>Unit Tests</h3>
         <button mat-mini-fab color="primary" type="button" (click)="openAddModal('automatedTests')">
           <mat-icon>add</mat-icon>
         </button>
       </div>
-      <p style="margin-top: 0; margin-bottom: 10px;">Die Unit-Tests überprüfen die Lösungen der Lernenden auf Korrektheit.</p>
+      <p>Die Unit-Tests überprüfen die Lösungen der Lernenden auf Korrektheit.</p>
       <mat-accordion>
         <mat-expansion-panel *ngFor="let test of automatedTestsControls; let i = index" [formGroupName]="i">
           <mat-expansion-panel-header>
-            <mat-panel-title style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <mat-panel-title>
               <span>{{test.get('testFileName')?.value || 'Test ' + (i + 1)}}</span>
               <button mat-icon-button type="button" color="warn" (click)="confirmDelete('automatedTests', i, test.get('testFileName')?.value || 'Test ' + (i + 1)); $event.stopPropagation();">
                 <mat-icon>delete</mat-icon>
@@ -121,18 +122,20 @@
       </mat-accordion>
     </div>
 
-    <mat-form-field appearance="outline" class="form-field full-width">
-      <mat-label>Erwartungshorizont</mat-label>
-      <textarea matInput formControlName="expectations" rows="5" placeholder="Der Erwartungshorizont für die Aufgabe."></textarea>
-    </mat-form-field>
+    <div class="section-container">
+      <mat-form-field appearance="outline" class="form-field full-width">
+        <mat-label>Erwartungshorizont</mat-label>
+        <textarea matInput formControlName="expectations" rows="5" placeholder="Der Erwartungshorizont für die Aufgabe."></textarea>
+      </mat-form-field>
+    </div>
 
-    <div class="form-actions" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="form-actions">
       <div>
-        <button mat-raised-button color="basic" type="button" (click)="exportTask()" style="margin-right: 10px;">Export Task</button>
+        <button mat-raised-button color="basic" type="button" (click)="exportTask()" class="action-button">Export Task</button>
         <input type="file" #fileInput style="display: none" (change)="importTask($event)" accept=".json">
-        <button mat-raised-button color="basic" type="button" (click)="fileInput.click()">Import Task</button>
+        <button mat-raised-button color="basic" type="button" (click)="fileInput.click()" class="action-button">Import Task</button>
       </div>
-      <button mat-raised-button color="primary" type="submit">Save Changes</button>
+      <button mat-raised-button color="primary" type="submit" class="action-button">Save Changes</button>
     </div>
   </form>
 </div>
