@@ -84,17 +84,25 @@ export class QuestionDataService {
     return this.http.put<QuestionDTO>(environment.server + `/question-data/updateQuestion`, question)
   }
 
+  updateWholeQuestion(question: detailedQuestionDTO) : Observable<QuestionDTO> {
+    return this.http.post<detailedQuestionDTO>(environment.server + `/question-data/updateWholeQuestion`, question)
+  }
+
+  versionUpdateWholeQuestion(question: detailedQuestionDTO) : Observable<QuestionDTO> {
+    return this.http.post<detailedQuestionDTO>(environment.server + `/question-data/versionUpdateWholeQuestion`, question)
+  }
+
   createFreeTextQuestion(freeTextQuestion: freeTextQuestionDTO) : Observable<freeTextQuestionDTO> {
     return this.http.post<freeTextQuestionDTO>(environment.server + `/question-data/createFreeTextQuestion`, freeTextQuestion)
   }
 
-  updateFreeTextQuestion(freeTextQuestion: freeTextQuestionDTO) : Observable<freeTextQuestionDTO> {
+  /* updateFreeTextQuestion(freeTextQuestion: freeTextQuestionDTO) : Observable<freeTextQuestionDTO> {
     return this.http.put<freeTextQuestionDTO>(environment.server + `/question-data/updateFreeTextQuestion`, freeTextQuestion)
-  }
+  } */
 
-  updateCodingQuestion(question: detailedQuestionDTO) : Observable<QuestionDTO> {
+  /* updateCodingQuestion(question: detailedQuestionDTO) : Observable<QuestionDTO> {
     return this.http.put<detailedQuestionDTO>(environment.server + `/question-data/updateCodingQuestion`, question)
-  }
+  } */
 
 
   createMcQuestion(mcQuestion: McQuestionDTO) : Observable<McQuestionDTO> {

@@ -63,22 +63,25 @@ export class EditCodingComponent implements OnInit {
   }
 
   populateForm() {
-    if (this.questionData && this.questionData.codingQuestion) {
+    if (this.questionData) { // since a name can be predefined, we should continue even if there is no codingQuestion data present
       this.codingForm.patchValue({
-        name: this.questionData.name,
-        programmingLanguage: this.questionData.codingQuestion.programmingLanguage,
-        text: this.questionData.text,
-        expectations: this.questionData.codingQuestion.expectations || '',
-        mainFileName: this.questionData.codingQuestion.mainFileName || '',
-        runMethod: this.questionData.codingQuestion.automatedTests[0]?.runMethod || '',
-        inputArguments: this.questionData.codingQuestion.automatedTests[0]?.inputArguments || '',
-        isApproved: this.questionData.isApproved,
-        level: this.questionData.level
+        name: this.questionData.name || '',
+        programmingLanguage: this.questionData.codingQuestion?.programmingLanguage || '',
+        text: this.questionData.text || '',
+        expectations: this.questionData.codingQuestion?.expectations || '',
+        mainFileName: this.questionData.codingQuestion?.mainFileName || '',
+        runMethod: this.questionData.codingQuestion?.automatedTests[0]?.runMethod || '',
+        inputArguments: this.questionData.codingQuestion?.automatedTests[0]?.inputArguments || '',
+        isApproved: this.questionData.isApproved || false,
+        level: this.questionData.level || ''
       });
 
-      this.populateCodeGerueste();
-      this.populateModelSolutions();
-      this.populateAutomatedTests();
+      if (this.questionData.codingQuestion) {
+        this.populateCodeGerueste();
+        this.populateModelSolutions();
+        this.populateAutomatedTests();
+      }
+
     }
   }
 
@@ -264,7 +267,7 @@ export class EditCodingComponent implements OnInit {
         }
       };
 
-      this.questionDataService.updateCodingQuestion(updatedQuestion).subscribe(
+      this.questionDataService.updateWholeQuestion(updatedQuestion).subscribe(
         response => {
           console.log('Question updated successfully:', response);
           this.snackBar.open('Question updated successfully', 'Close', { duration: 3000 });

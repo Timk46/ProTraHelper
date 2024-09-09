@@ -1,10 +1,11 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { detailedQuestionDTO, questionType } from '@DTOs/index';
+import { detailedFreetextQuestionDTO, detailedQuestionDTO, questionType } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-edit-freetext',
@@ -19,7 +20,7 @@ export class EditFreetextComponent {
 
   freeTextForm: FormGroup;
 
-  thisQuestionType = questionType.CODE;
+  thisQuestionType = questionType.FREETEXT;
 
   editorConfig = {
     readonly: false,
@@ -30,26 +31,14 @@ export class EditFreetextComponent {
     resize: false,
   }
 
-  detailedQuestionData: detailedQuestionDTO = {
-    id: -1,
-    name: '',
-    description: '',
-    score: 0,
-    type: 'FreeText',
-    level: 1,
-    mode: 'practise',
-    authorId: -1,
-    text: '',
-    isApproved: false,
-    version: 1,
-    originId: -1,
-  };
+  detailedQuestionData: detailedQuestionDTO | null = null;
 
   constructor(
     private fb: FormBuilder,
     private questionDataService: QuestionDataService,
     private route: ActivatedRoute,
     private confirmationService: ConfirmationService,
+    private snackBar: MatSnackBar
 
   ) {
     this.freeTextForm = this.fb.group({
@@ -81,23 +70,26 @@ export class EditFreetextComponent {
           console.log(this.detailedQuestionData);
           this.setContent();
         } else {
-          this.detailedQuestionData.type = data.type;
+          this.snackBar.open('ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Freitextaufgabe!', 'Schließen', { duration: 10000 });
+          this.thisQuestionType = data.type as questionType;
         }
       });
     });
   }
 
   private setContent() {
-    if (this.detailedQuestionData.freetextQuestion){
+    if (this.thisQuestionType === questionType.FREETEXT && this.detailedQuestionData) {
       this.freeTextForm.patchValue({
         questionTitle: this.detailedQuestionData.name,
         questionDifficulty: this.detailedQuestionData.level.toString(),
         questionDescription: this.detailedQuestionData.description,
         questionScore: this.detailedQuestionData.score,
       });
-      this.questionField.setContent(this.detailedQuestionData.freetextQuestion.textHTML || this.detailedQuestionData.text);
-      this.expectationField.setContent(this.detailedQuestionData.freetextQuestion.expectationsHTML || this.detailedQuestionData.freetextQuestion.expectations);
-      this.solutionField.setContent(this.detailedQuestionData.freetextQuestion.exampleSolutionHTML || this.detailedQuestionData.freetextQuestion.exampleSolution || '');
+      if (this.detailedQuestionData.freetextQuestion) {
+        this.questionField.setContent(this.detailedQuestionData.freetextQuestion.textHTML || this.detailedQuestionData.text);
+        this.expectationField.setContent(this.detailedQuestionData.freetextQuestion.expectationsHTML || this.detailedQuestionData.freetextQuestion.expectations);
+        this.solutionField.setContent(this.detailedQuestionData.freetextQuestion.exampleSolutionHTML || this.detailedQuestionData.freetextQuestion.exampleSolution || '');
+      }
     }
 
   }
@@ -110,16 +102,24 @@ export class EditFreetextComponent {
       acceptLabel: 'Aktualisieren',
       declineLabel: 'Abbrechen',
       accept: () => {
-        //this.saveQuestion();
-        console.log('Overwrite accepted');
+        const submitData = this.buildDTO();
+        if (submitData){
+          this.questionDataService.updateWholeQuestion(submitData).subscribe({
+            next: response => {
+              console.log('Question updated successfully:', response);
+              this.snackBar.open('Frage erfolgreich aktualisiert', 'Schließen', { duration: 3000 });
+            },
+            error: error => {
+              console.error('Error updating question:', error);
+              this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', { duration: 3000 });
+            }
+          });
+        }
       },
       decline: () => {
         console.log('Overwrite declined');
       }
     });
-    if (this.detailedQuestionData.type === 'FreeText'){
-      //
-    }
   }
 
   protected onSaveNewVersion() {
@@ -152,5 +152,29 @@ export class EditFreetextComponent {
         console.log('Save declined');
       }
     });
+  }
+
+  private buildDTO(): detailedQuestionDTO | null {
+    if (this.thisQuestionType === questionType.FREETEXT && this.freeTextForm.valid && this.detailedQuestionData){
+      const newData: detailedQuestionDTO = {
+        ...this.detailedQuestionData,
+        name: this.freeTextForm.value.questionTitle,
+        level: parseInt(this.freeTextForm.value.questionDifficulty),
+        description: this.freeTextForm.value.questionDescription,
+        score: this.freeTextForm.value.questionScore,
+        text: this.questionField.getRawContent(),
+        freetextQuestion: {
+          id: this.detailedQuestionData.freetextQuestion?.id || undefined,
+          questionId: this.detailedQuestionData.id,
+          textHTML: this.questionField.getContent(),
+          expectations: this.expectationField.getRawContent(),
+          expectationsHTML: this.expectationField.getContent(),
+          exampleSolution: this.solutionField.getRawContent(),
+          exampleSolutionHTML: this.solutionField.getContent(),
+        }
+      }
+      return newData;
+    }
+    return null;
   }
 }

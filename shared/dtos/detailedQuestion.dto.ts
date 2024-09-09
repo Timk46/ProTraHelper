@@ -22,8 +22,8 @@ export interface detailedQuestionDTO {
 }
 
 export interface detailedFreetextQuestionDTO {
-  id: number;
-  textHTML: string;
+  id?: number;
+  textHTML?: string;
   expectations: string;
   expectationsHTML?: string;
   exampleSolution?: string;

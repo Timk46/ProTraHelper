@@ -79,10 +79,12 @@ export class LoginComponent implements OnInit {
    * The login method navigates to the authentication server to authenticate the user.
    */
   loginWithCAS(): void {
+    localStorage.removeItem('editModeActive');
     window.location.href = `${environment.server}/auth/cas/`;
   }
 
   loginWithPassword(){
+    localStorage.removeItem('editModeActive');
     if (this.loginForm.invalid) {
       Object.values(this.loginForm.controls).forEach(control => {
         control.markAsTouched();

@@ -6,7 +6,7 @@ import { detailedQuestionDTO, QuestionDTO } from '../../../shared/dtos';
 export class EditCodeService {
   constructor(private prisma: PrismaService) {}
 
-  async updateCodingQuestion(question: detailedQuestionDTO): Promise<QuestionDTO> {
+  /* async updateCodingQuestion(question: detailedQuestionDTO): Promise<QuestionDTO> {
     const updatedQuestion = await this.prisma.question.update({
       where: { id: question.id },
       data: {
@@ -69,5 +69,5 @@ export class EditCodeService {
       level: updatedQuestion.level,
       codingQuestion: updatedQuestion.codingQuestion,
     };
-  }
+  } */
 }

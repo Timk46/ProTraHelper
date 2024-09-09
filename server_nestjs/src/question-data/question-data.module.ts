@@ -8,9 +8,21 @@ import { ContentModule } from '@/content/content.module';
 import { ContentService } from '@/content/content.service';
 import { UserConceptModule } from '@/graph/user-concept/user-concept.module';
 import { NotificationModule } from '@/notification/notification.module';
+import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
+import { QuestionDataCodeService } from './question-data-code/question-data-code.service';
+import { QuestionDataFillinService } from './question-data-fillin/question-data-fillin.service';
+import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 
 @Module({
-  providers: [QuestionDataService, EditCodeService, ContentService],
+  providers: [
+    QuestionDataService,
+    QuestionDataChoiceService,
+    QuestionDataFreetextService,
+    QuestionDataCodeService,
+    QuestionDataFillinService,
+    EditCodeService,
+    ContentService,
+  ],
   controllers: [QuestionDataController],
   imports: [
     PrismaModule,
@@ -19,6 +31,8 @@ import { NotificationModule } from '@/notification/notification.module';
     UserConceptModule,
     NotificationModule,
   ],
-  exports: [QuestionDataService],
+  exports: [
+    QuestionDataService,
+  ],
 })
 export class QuestionDataModule {}
