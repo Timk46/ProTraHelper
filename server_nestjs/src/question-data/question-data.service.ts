@@ -275,8 +275,16 @@ export class QuestionDataService {
           }
           break;
         case questionType.MULTIPLECHOICE:
+          break;
         case questionType.SINGLECHOICE:
+          break;
         case questionType.CODE:
+          if (createNewVersion || !currentQuestion.codingQuestion) {
+            await this.qdCode.createCodingQuestion(question.codingQuestion, updatedQuestion.id);
+          } else {
+            await this.qdCode.updateCodingQuestion(question.codingQuestion);
+          }
+          break;
       }
 
       return await this.getDetailedQuestion(updatedQuestion.id, question.type as questionType);
