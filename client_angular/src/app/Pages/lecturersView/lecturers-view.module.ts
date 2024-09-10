@@ -14,6 +14,8 @@ import { EditFillinComponent } from './edit-fillin/edit-fillin.component';
 import { EditCodingComponent } from './edit-coding/edit-coding.component';
 import { AddElementModalComponent } from './edit-coding/add-element-modal.component';
 import { TinymceComponent } from '../tinymce/tinymce.component';
+import { ScoreComponent } from './edit-choice/score/score.component';
+import { DescriptionDialogComponent } from './edit-choice/description-dialog/description-dialog.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +23,8 @@ import { TinymceComponent } from '../tinymce/tinymce.component';
     CreateContentElementDialogComponent,
     EditFreetextComponent,
     EditChoiceComponent,
+    ScoreComponent,
+    DescriptionDialogComponent,
     EditFillinComponent,
     EditCodingComponent,
     AddElementModalComponent,

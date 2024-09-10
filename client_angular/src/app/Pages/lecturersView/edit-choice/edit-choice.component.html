@@ -1,1 +1,277 @@
-<p>edit-choice works!</p>
+<div
+  class="content mat-elevation-z8 container wrapper"
+  style="margin: 0 auto; max-width: 90%"
+>
+  <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="task-form">
+    <mat-horizontal-stepper #stepper="matHorizontalStepper">
+      <!-- Step 1-->
+      <mat-step [completed]="false" label="Step 1">
+        <mat-divider class="divider"></mat-divider>
+        <div class="step-content">
+          <div class="row">
+            <mat-form-field appearance="fill" class="conceptinput">
+              <mat-label>Concept</mat-label>
+              <input
+                type="text"
+                placeholder="Concepts"
+                matInput
+                formControlName="conceptName"
+                [matAutocomplete]="auto"
+              />
+              <mat-autocomplete #auto="matAutocomplete">
+                <mat-option
+                  *ngFor="let concept of filteredConcepts | async"
+                  [value]="concept"
+                >
+                  {{ concept }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+            <mat-form-field appearance="fill" class="half-width-input">
+              <mat-label>Options</mat-label>
+              <input
+                matInput
+                type="number"
+                placeholder="in Total"
+                formControlName="numberOfOptions"
+                value="4"
+                max="6"
+              />
+            </mat-form-field>
+          </div>
+          <div class="buttonrow">
+            <button
+              mat-raised-button
+              color="warn"
+              type="button"
+              (click)="clearAllFields()"
+            >
+              Clear
+            </button>
+            <button
+              mat-raised-button
+              color="primary"
+              type="button"
+              matStepperNext
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </mat-step>
+      <mat-step [completed]="false" label="Step 2">
+        <mat-divider class="divider"></mat-divider>
+        <div class="step-content">
+          <div class="row">
+            <mat-form-field class="full-width-input">
+              <textarea
+                matInput
+                cdkTextareaAutosize
+                #autosize="cdkTextareaAutosize"
+                cdkAutosizeMinRows="1"
+                formControlName="text"
+                [placeholder]="fetchingTitle ? 'Fetching...' : 'Title...'"
+                formControlName="title"
+              >
+              </textarea>
+              <button
+                type="button"
+                *ngIf="!taskForm.get('title')?.value"
+                matSuffix
+                mat-icon-button
+                aria-label="Clear"
+                (click)="generateTitle()"
+              >
+                <mat-icon> sync </mat-icon>
+              </button>
+              <button
+                type="button"
+                *ngIf="taskForm.get('title')?.value"
+                matSuffix
+                mat-icon-button
+                aria-label="Clear"
+                (click)="clearTitle()"
+                type="button"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+              <mat-error
+                *ngIf="taskForm.controls['title'].invalid"
+                align="start"
+              >
+                Title is required
+              </mat-error>
+            </mat-form-field>
+            <!--<mat-checkbox> immediately generate options?</mat-checkbox>-->
+          </div>
+          <div class="buttonrow">
+            <button
+              mat-raised-button
+              color="warn"
+              (onclick)="clearAllFields()"
+              matStepperPrevious
+            >
+              Back
+            </button>
+            <button
+              [disabled]="!titleAndNumberOfOptionsFilled()"
+              mat-raised-button
+              color="primary"
+              type="button"
+              matStepperNext
+              (click)="generate()"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </mat-step>
+      <mat-step [completed]="false" label="Step 3">
+        <mat-divider class="divider"></mat-divider>
+        <div class="step-content3">
+          <!-- Loop through options with *ngFor -->
+          <div formArrayName="options" class="options-container">
+            <ng-container
+              *ngFor="let option of getOptions().controls; let i = index"
+            >
+              <div class="option-pair" *ngIf="i % 2 === 0">
+                <div class="option-group" [formGroupName]="i">
+                  <mat-form-field>
+                    <textarea
+                      class="textarea"
+                      matInput
+                      cdkTextareaAutosize
+                      #autosize="cdkTextareaAutosize"
+                      cdkAutosizeMinRows="1"
+                      formControlName="text"
+                      required="false"
+                      [placeholder]="
+                        fetchingStates[i]
+                          ? 'Fetching...'
+                          : placeholder + (i + 1)
+                      "
+                    >
+                    </textarea>
+                    <button
+                      *ngIf="getOptions().at(i).get('text')?.value"
+                      matSuffix
+                      mat-icon-button
+                      aria-label="Clear"
+                      type="button"
+                      (click)="clearOption(i)"
+                    >
+                      <mat-icon>close</mat-icon>
+                    </button>
+                    <mat-error
+                      *ngIf="taskForm.controls['options'].invalid"
+                      align="end"
+                    >
+                      Option must be set
+                    </mat-error>
+                  </mat-form-field>
+                  <div class="buttons">
+                    <mat-checkbox formControlName="correct"
+                      >Correct</mat-checkbox
+                    >
+                    <button
+                      mat-raised-button
+                      color="primary"
+                      type="button"
+                      (click)="generateOption(i)"
+                    >
+                      {{ getButtonLabel(i) }}
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  *ngIf="getOptions().at(i + 1)"
+                  [formGroupName]="i + 1"
+                  class="option-group"
+                >
+                  <mat-form-field>
+                    <textarea
+                      class="textarea"
+                      matInput
+                      cdkTextareaAutosize
+                      #autosize="cdkTextareaAutosize"
+                      cdkAutosizeMinRows="1"
+                      formControlName="text"
+                      required="false"
+                      [placeholder]="
+                        fetchingStates[i + 1]
+                          ? 'Fetching...'
+                          : placeholder + (i + 2)
+                      "
+                    >
+                    </textarea>
+                    <button
+                      *ngIf="
+                        getOptions()
+                          .at(i + 1)
+                          .get('text')?.value
+                      "
+                      matSuffix
+                      mat-icon-button
+                      aria-label="Clear"
+                      (click)="clearOption(i + 1)"
+                      type="button"
+                    >
+                      <mat-icon>close</mat-icon>
+                    </button>
+                    <mat-error
+                      *ngIf="taskForm.controls['options'].invalid"
+                      align="end"
+                    >
+                      Option must be set
+                    </mat-error>
+                  </mat-form-field>
+                  <div class="buttons">
+                    <mat-checkbox formControlName="correct"
+                      >Correct</mat-checkbox
+                    >
+                    <button
+                      mat-raised-button
+                      color="primary"
+                      (click)="generateOption(i + 1)"
+                      type="button"
+                    >
+                      {{ getButtonLabel(i + 1) }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            <div class="buttonrow">
+              <button
+                mat-raised-button
+                color="warn"
+                (onclick)="clearAllFields()"
+                matStepperPrevious
+              >
+                Back
+              </button>
+              <button
+                mat-raised-button
+                color="primary"
+                type="button"
+                matStepperNext
+                type="submit"
+              >
+                Submit
+              </button>
+              <mat-checkbox
+                style="margin-right: 400px"
+                (change)="onCheckboxChange($event)"
+                [disabled]="mcDisabled"
+                [checked]="getCorrectOptionsCount() >= 2"
+                >Multiple Choice</mat-checkbox
+              >
+            </div>
+          </div>
+        </div>
+      </mat-step>
+    </mat-horizontal-stepper>
+  </form>
+</div>
+

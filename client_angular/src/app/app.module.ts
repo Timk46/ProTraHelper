@@ -43,9 +43,6 @@ import { DiscussionCreationComponent } from './Pages/discussion/discussion-creat
 import { DiscussionPrecreationComponent } from './Pages/discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
 import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overview/task-evaluation-overview.component';
 import { FreeTextTaskComponent } from './Pages/contentView/contentElement/free-text-task/free-text-task.component';
-import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
-import { ScoreComponent } from './Pages/contentView/contentElement/mc-task-creation/score/score.component';
-import { DescriptionDialogComponent } from './Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component';
 import { DraggableHeightDirective } from "./Directives/draggable-height.directive";
 import { ConfettiService } from "./Services/animations/confetti.service";
 import { VersionInterceptor } from "./Interceptors/version.interceptor";
@@ -92,9 +89,6 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
         DiscussionPrecreationComponent,
         TaskEvaluationOverviewComponent,
         FreeTextTaskComponent,
-        McTaskCreationComponent,
-        ScoreComponent,
-        DescriptionDialogComponent,
         DraggableHeightDirective,
         ContactComponent,
         ImpressumComponent,

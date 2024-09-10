@@ -17,7 +17,6 @@ import { FileUploadComponent } from './Pages/test/file-upload/file-upload.compon
 import { LoginComponent } from './Pages/login/login.component';
 import { LoggedInGuard } from './Guards/is-logged-in.guard';
 import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overview/task-evaluation-overview.component';
-import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
 import { EditFreetextComponent } from './Pages/lecturersView/edit-freetext/edit-freetext.component';
 import { EditChoiceComponent } from './Pages/lecturersView/edit-choice/edit-choice.component';
 import { EditCodingComponent } from './Pages/lecturersView/edit-coding/edit-coding.component';
@@ -40,8 +39,7 @@ const routes: Routes = [
   { path: 'discussion-view/:discussionId', component: DiscussionViewComponent, canActivate: [LoggedInGuard] },
   { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent },
 
-  { path: 'mcqcreation', component: McTaskCreationComponent, canActivate: [LoggedInGuard]},
-
+  // lecturers view
   { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [LoggedInGuard, AdminGuard]},
   { path: 'editcoding/:questionId', component: EditCodingComponent, canActivate: [LoggedInGuard, AdminGuard]},
   { path: 'editfillin/:questionId', component: EditFreetextComponent, canActivate: [LoggedInGuard, AdminGuard]},

@@ -319,11 +319,17 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
   onTaskEdit(taskViewData: TaskViewData) {
     console.log("onTaskEdit: ", taskViewData);
-    if (taskViewData.type === questionType.FREETEXT) {
-      this.router.navigate(['/editfreetext/', taskViewData.id]);
-    }
-    if (taskViewData.type === questionType.CODE) {
-      this.router.navigate(['/editcoding/', taskViewData.id]);
+    switch (taskViewData.type) {
+      case questionType.SINGLECHOICE:
+      case questionType.MULTIPLECHOICE:
+        this.router.navigate(['/editchoice/', taskViewData.id]);
+        break;
+      case questionType.FREETEXT:
+        this.router.navigate(['/editfreetext/', taskViewData.id]);
+        break;
+      case questionType.CODE:
+        this.router.navigate(['/editcoding/', taskViewData.id]);
+        break;
     }
   }
 
