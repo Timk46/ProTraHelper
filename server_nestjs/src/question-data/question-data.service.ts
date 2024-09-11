@@ -104,11 +104,13 @@ export class QuestionDataService {
             const mcOptions = await this.prisma.mCQuestionOption.findMany({
               where: {
                 mcQuestionId: mcQuestion.id
+              }, select: {
+                option: true
               }
             });
             specificQuestionData = {
               ...mcQuestion,
-              mcOptions: mcOptions
+              mcOptions: mcOptions.map(option => option.option)
             };
           }
           break;

@@ -22,6 +22,7 @@ export class QuestionDataChoiceService {
     let mcQuestionData: McQuestionDTO = {
         id: mcQuestion.id,
         questionId: mcQuestion.questionId,
+        textHTML: mcQuestion.textHTML,
         isSC: mcQuestion.isSC,
         shuffleOptions: mcQuestion.shuffleoptions
     }

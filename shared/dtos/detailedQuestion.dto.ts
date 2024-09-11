@@ -34,11 +34,12 @@ export interface detailedFreetextQuestionDTO {
 }
 
 export interface detailedMcQuestionDTO {
-  id: number;
+  id?: number;
   createdAt?: Date;
   updatedAt?: Date;
   questionVersionId?: number; // unnecessary?
   questionId: number;
+  textHTML?: string;
   shuffleoptions: boolean;
   isSC: boolean; // single choice
   mcOptions: detailedMcOptionDTO[];

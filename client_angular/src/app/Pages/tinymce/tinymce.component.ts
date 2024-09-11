@@ -131,7 +131,9 @@ export class TinymceComponent {
   setContent(content: string): void {
     console.log("AUFTRAG:", this.isInitialized, this.editorInstance, content);
     if (this.editorInstance) {
-      this.content = content;
+      setTimeout(() => {
+        this.editorInstance.setContent(content);
+      }, 0);
     }
   }
 

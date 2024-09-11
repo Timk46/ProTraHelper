@@ -1,0 +1,111 @@
+
+:host {
+  display: flex;
+  flex-direction: column;
+
+  //padding-right: 450px;
+  //background-color: #cd3939;
+
+  box-shadow: 0 0 0px 0 rgba(0, 0, 0, 0.2);
+  width: 100%;
+  height: 100%;
+}
+
+.mat-checkbox {
+  background-color: #efefef;
+}
+
+.task-form {
+  width: 100%;
+
+  .section {
+    margin-top: 10px;
+    display: flex;
+    //flex: ;
+    justify-content: flex-start;
+    // flex-direction: row;
+    align-items: center;
+    gap: 185px;
+
+    .full-width-input {
+      width: 51%; // Full width for the title input
+    }
+
+    .half-width-input {
+      margin-left: 45px;
+      width: 48%; // Smaller width for the number of options input
+      //max-width: 200px; // Restricting the maximum width
+    }
+  }
+}
+
+.options-container {
+  margin-top: 10px; // Space between the form fields and options
+
+
+  .option-pair {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    // Wrap options if they don't fit in one line
+    // gap: 10px;
+
+    .option-group {
+      flex: auto; // Make each option take almost half width
+      max-width: 45%; // Ensuring options don't exceed half width
+
+      mat-form-field {
+        width: 69.5%; //
+      }
+    }
+  }
+}
+
+.buttons {
+  display: flex;
+  //justify-content: space-between; // Space out the buttons
+  margin-top: -3px; // Space between options and buttons
+  gap: 10px; // Space between individual buttons
+  margin-bottom: 20px;
+
+  button {
+    margin-bottom: 20px;
+    margin-left: 10px;
+  }
+}
+
+mat-divider {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.corner {
+  width: 25%;
+}
+
+.row {
+  margin-top: 10px;
+  display: flex;
+  gap: 20px;
+}
+
+.buttonrow {
+  display: flex;
+  gap: 240px;
+    button {
+    font-size: 15px; // Ändern Sie die Schriftgröße
+    padding: 10px 20px; // Ändern Sie das Padding
+    min-width: 100px; // Ändern Sie die minimale Breite
+  }
+}
+
+.half-width-input {
+  width: 110px;
+}
+
+.full-width-input {
+  width: 30%;
+}
+.conceptinput {
+  width: 21%;
+}

@@ -42,6 +42,7 @@ export interface QuestionVersionDTO {
 export interface McQuestionDTO {
     id: number;
     questionId: number;
+    textHTML?: string;
     isSC: boolean;
     shuffleOptions: boolean;
 }

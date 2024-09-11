@@ -146,10 +146,10 @@ export class EditFreetextComponent {
       declineLabel: 'Weiter bearbeiten',
       accept: () => {
         //this.saveQuestion();
-        console.log('Save accepted');
+        console.log('Cancel accepted');
       },
       decline: () => {
-        console.log('Save declined');
+        console.log('Cancel declined');
       }
     });
   }
@@ -161,7 +161,7 @@ export class EditFreetextComponent {
         name: this.freeTextForm.value.questionTitle,
         level: parseInt(this.freeTextForm.value.questionDifficulty),
         description: this.freeTextForm.value.questionDescription,
-        score: this.freeTextForm.value.questionScore,
+        score: parseInt(this.freeTextForm.value.questionScore),
         text: this.questionField.getRawContent(),
         freetextQuestion: {
           id: this.detailedQuestionData.freetextQuestion?.id || undefined,

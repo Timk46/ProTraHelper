@@ -21,6 +21,7 @@ import { EditFreetextComponent } from './Pages/lecturersView/edit-freetext/edit-
 import { EditChoiceComponent } from './Pages/lecturersView/edit-choice/edit-choice.component';
 import { EditCodingComponent } from './Pages/lecturersView/edit-coding/edit-coding.component';
 import { AdminGuard } from './Guards/is-admin.guard';
+import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -38,6 +39,8 @@ const routes: Routes = [
   { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard] },
   { path: 'discussion-view/:discussionId', component: DiscussionViewComponent, canActivate: [LoggedInGuard] },
   { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent },
+
+  { path: 'mcqcreation', component: McTaskCreationComponent, canActivate: [LoggedInGuard]},
 
   // lecturers view
   { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [LoggedInGuard, AdminGuard]},

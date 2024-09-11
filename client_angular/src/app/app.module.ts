@@ -57,6 +57,9 @@ import { ConfirmDialogComponent } from './Pages/lecturersView/edit-coding/confir
 
 // Import LecturersViewModule
 import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module';
+import { McTaskCreationComponent } from "./Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component";
+import { MCDescriptionDialogComponent } from "./Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component";
+import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-creation/score/score.component";
 
 @NgModule({
     declarations: [
@@ -99,7 +102,10 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
         NotificationBellComponent,
         BellDirective,
         ConfirmationBoxComponent,
-        ConfirmDialogComponent
+        ConfirmDialogComponent,
+        McTaskCreationComponent,
+        MCDescriptionDialogComponent,
+        MCScoreComponent
     ],
     imports: [
         ToastrModule.forRoot(),
