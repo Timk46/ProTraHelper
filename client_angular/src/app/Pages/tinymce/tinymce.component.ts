@@ -1,6 +1,8 @@
-import { AfterViewInit, Component, ElementRef, Input, SimpleChanges } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, SimpleChanges, OnChanges, AfterViewInit } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { v4 as uuidv4 } from 'uuid';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { takeUntil, debounceTime } from 'rxjs/operators';
 
 declare var tinymce: any;
 
@@ -9,10 +11,7 @@ declare var tinymce: any;
   templateUrl: './tinymce.component.html',
   styleUrls: ['./tinymce.component.scss']
 })
-export class TinymceComponent {
-
-
-
+export class TinymceComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
   readonly DEFAULT_CONFIG: any = {
     base_url: '/tinymce',
     suffix: '.min',
@@ -28,50 +27,62 @@ export class TinymceComponent {
   uuid: string = '';
   isReadonly: boolean = false;
   editorInstance: any;
-  isInitialized: boolean = false;
+  private contentSubject = new BehaviorSubject<string>('');
+  private destroy$ = new Subject<void>();
 
-  constructor(){}
+  constructor() {}
 
   ngOnInit(): void {
-    this.uuid = "editor" + uuidv4();
+    this.uuid = "editor-" + uuidv4(); // Fügen Sie einen Bindestrich hinzu, um sicherzustellen, dass es kein reiner Zahlen-Selektor ist
+
+    this.contentSubject
+      .pipe(
+        takeUntil(this.destroy$),
+        debounceTime(300)
+      )
+      .subscribe(content => {
+        if (this.editorInstance) {
+          this.editorInstance.setContent(content);
+        }
+      });
   }
 
   ngAfterViewInit(): void {
-    this.isInitialized = true;
     this.initEditor();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.isInitialized){
-      if (changes['content']) {
-        this.content = changes['content'].currentValue;
-        if (this.content != '') {
-          this.setContent(this.content);
-        }
-      }
-      if (changes['config']) {
-        this.initEditor();
-      }
+    if (changes['content']) {
+      this.contentSubject.next(changes['content'].currentValue);
+    }
+    if (changes['config'] && this.editorInstance) {
+      this.initEditor();
     }
   }
 
-  /**
-   * Initializes the editor.
-   */
   private initEditor(): void {
-    console.log('init editor', this.uuid);
+    if (typeof tinymce === 'undefined') {
+      console.error('TinyMCE is not loaded. Make sure it is properly included in your project.');
+      return;
+    }
+
+    if (!document.getElementById(this.uuid)) {
+      console.error(`Element with id ${this.uuid} not found in the DOM.`);
+      return;
+    }
+
     if (this.editorInstance) {
       this.editorInstance.destroy();
     }
-    //this.config = Object.assign(this.DEFAULT_CONFIG, this.config);
+
     tinymce.init({
       selector: `#${this.uuid}`,
       ...this.DEFAULT_CONFIG,
       ...this.config,
-      setup: (editor: any) =>	{
+      setup: (editor: any) => {
         this.editorInstance = editor;
         editor.on('init', () => {
-          if (this.content != '') {
+          if (this.content !== '') {
             editor.setContent(this.content);
           }
         });
@@ -79,12 +90,8 @@ export class TinymceComponent {
     });
   }
 
-
-  /**
-   * Change the view of the editor
-   */
   changeView() {
-    if (this.editorInstance){
+    if (this.editorInstance && this.editorInstance.mode) {
       if (this.isReadonly) {
         this.editorInstance.mode.set("readonly");
       } else {
@@ -93,18 +100,12 @@ export class TinymceComponent {
     }
   }
 
-  /**
-   * Get the content of the editor
-   * @returns the content of the editor
-   */
   getContent(): string {
-    //console.log("TinymceComponent: getContent");
     if (this.editorInstance) {
-      //console.log('editor instance', this.editorInstance);
       const content = this.editorInstance.getContent();
       const textSize = new Blob([content]).size;
       if (textSize < environment.max_html_body_size) {
-        return this.editorInstance.getContent();
+        return content;
       } else {
         throw new Error('Message size exceeds the maximum allowed size.');
       }
@@ -112,44 +113,22 @@ export class TinymceComponent {
     return '';
   }
 
-  /**
-   * Retrieves the raw content from the TinyMCE editor.
-   * @returns The raw content as a string.
-   */
   getRawContent(): string {
-    //console.log("TinymceComponent: getRawContent");
     if (this.editorInstance) {
       return this.editorInstance.getContent({format: 'text'});
     }
     return '';
   }
 
-  /**
-   * Set the content of the editor
-   * @param content the content to set
-   */
   setContent(content: string): void {
-    console.log("AUFTRAG:", this.isInitialized, this.editorInstance, content);
-    if (this.editorInstance) {
-      setTimeout(() => {
-        this.editorInstance.setContent(content);
-      }, 0);
-    }
-  }
-
-  /**
-   * Destroys the editor
-   */
-  destroy(): void {
-    if (this.editorInstance) {
-      this.editorInstance.destroy();
-    }
+    this.contentSubject.next(content);
   }
 
   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
     if (this.editorInstance) {
       this.editorInstance.destroy();
     }
   }
-
 }

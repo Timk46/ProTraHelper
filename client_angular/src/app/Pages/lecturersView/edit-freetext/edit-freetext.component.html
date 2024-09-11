@@ -8,11 +8,12 @@
         <h2>Optionen</h2>
 
         <form [formGroup]="freeTextForm">
-          <mat-form-field style="width: 100%;">
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Titel</mat-label>
             <input matInput placeholder="Titel der Frage" formControlName="questionTitle">
             <mat-error *ngIf="freeTextForm.get('questionTitle')!.hasError('required')">Titel der Frage ist erforderlich</mat-error>
           </mat-form-field>
-          <mat-form-field style="width: 100%;">
+          <mat-form-field appearance="outline" style="width: 100%;">
             <mat-label>Schwierigkeit</mat-label>
             <mat-select formControlName="questionDifficulty">
               <mat-option value="1">Level 1: Erinnern</mat-option>
@@ -24,9 +25,9 @@
             </mat-select>
             <mat-error *ngIf="freeTextForm.get('questionDifficulty')!.hasError('required')">Schwierigkeitsgrad ist erforderlich</mat-error>
           </mat-form-field>
-          <mat-form-field style="width: 100%;">
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Punkte</mat-label>
             <input matInput type="number" min="0" step="1" placeholder="Punkte" formControlName="questionScore">
-            <mat-hint>Punkte</mat-hint>
             <mat-error *ngIf="freeTextForm.get('questionScore')!.hasError('required')">Punkte sind
               erforderlich</mat-error>
           </mat-form-field>
@@ -39,7 +40,8 @@
           <div class="expansion">
             <p>Die Auswirkungen dieser Einstellungen sind in der Übersicht nicht sichtbar und beziehen sich nur auf interne Datenbankparameter</p>
             <form [formGroup]="freeTextForm">
-              <mat-form-field>
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-label>Beschreibung der Frage</mat-label>
                 <textarea matInput placeholder="Beschreibung der Frage" formControlName="questionDescription"></textarea>
                 <mat-hint>Zum Beispiel "manuell erstellt" oder "automatisch importiert"</mat-hint>
               </mat-form-field>

@@ -90,6 +90,10 @@ export class EditFreetextComponent {
         this.expectationField.setContent(this.detailedQuestionData.freetextQuestion.expectationsHTML || this.detailedQuestionData.freetextQuestion.expectations);
         this.solutionField.setContent(this.detailedQuestionData.freetextQuestion.exampleSolutionHTML || this.detailedQuestionData.freetextQuestion.exampleSolution || '');
       }
+      if (this.questionField.getRawContent() !== this.detailedQuestionData.text) {
+        console.warn('Content mismatch');
+        //this.setContent();
+      }
     }
 
   }
