@@ -9,6 +9,7 @@ import { detailedQuestionDTO, CodeGeruestDto, ModelSolutionDto, AutomatedTestDto
 import { ActivatedRoute } from '@angular/router';
 import { AddElementModalComponent } from './add-element-modal.component';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
+import { genTaskDto } from '@DTOs/tutorKaiDtos/genTask.dto';
 
 @Component({
   selector: 'app-edit-coding',
@@ -37,16 +38,20 @@ export class EditCodingComponent implements OnInit {
   ngOnInit() {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
-      this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
-        this.questionData = data;
-        console.log('Question data:', this.questionData);
-        this.populateForm();
-      });
+      if (questionId) {
+        this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
+          this.questionData = data;
+          console.log('Question data:', this.questionData);
+          this.populateForm();
+        });
+      }
     })
   }
 
   createForm(): FormGroup {
     return this.fb.group({
+      inhalt: [''],
+      kontext: [''],
       name: [''],
       programmingLanguage: [''],
       text: [''],
@@ -63,7 +68,7 @@ export class EditCodingComponent implements OnInit {
   }
 
   populateForm() {
-    if (this.questionData) { // since a name can be predefined, we should continue even if there is no codingQuestion data present
+    if (this.questionData) {
       this.codingForm.patchValue({
         name: this.questionData.name || '',
         programmingLanguage: this.questionData.codingQuestion?.programmingLanguage || '',
@@ -81,7 +86,6 @@ export class EditCodingComponent implements OnInit {
         this.populateModelSolutions();
         this.populateAutomatedTests();
       }
-
     }
   }
 
@@ -384,5 +388,83 @@ export class EditCodingComponent implements OnInit {
 
   togglePreview() {
     this.showPreview = !this.showPreview;
+  }
+
+  generateTask() {
+    const inhalt = this.codingForm.get('inhalt')?.value;
+    const kontext = this.codingForm.get('kontext')?.value;
+
+    if (inhalt && kontext) {
+      this.editCodeService.generateTask(inhalt, kontext).subscribe(
+        (genTask: genTaskDto) => {
+          console.log('Generated task:', genTask);
+          this.populateFormWithGenTask(genTask);
+          this.snackBar.open('Task generated successfully', 'Close', { duration: 3000 });
+        },
+        error => {
+          console.error('Error generating task:', error);
+          this.snackBar.open('Error generating task', 'Close', { duration: 3000 });
+        }
+      );
+    } else {
+      this.snackBar.open('Please fill in both content and context', 'Close', { duration: 3000 });
+    }
+  }
+
+  populateFormWithGenTask(genTask: genTaskDto) {
+    console.log(genTask)
+    /*
+    this.codingForm.patchValue({
+      name: genTask.name,
+      text: genTask.text,
+      programmingLanguage: genTask.programmingLanguage,
+      expectations: genTask.expectations,
+      mainFileName: genTask.mainFileName,
+      level: genTask.level
+    });
+
+    // Clear existing arrays
+    (this.codingForm.get('codeGerueste') as FormArray).clear();
+    (this.codingForm.get('modelSolutions') as FormArray).clear();
+    (this.codingForm.get('automatedTests') as FormArray).clear();
+
+    // Populate codeGerueste
+    genTask.codeGerueste.forEach(codeGeruest => {
+      (this.codingForm.get('codeGerueste') as FormArray).push(
+        this.fb.group({
+          id: 0,
+          codeFileName: codeGeruest.codeFileName,
+          code: codeGeruest.code
+        })
+      );
+    });
+
+    // Populate modelSolutions
+    genTask.modelSolutions.forEach(solution => {
+      (this.codingForm.get('modelSolutions') as FormArray).push(
+        this.fb.group({
+          id: 0,
+          codeFileName: solution.codeFileName,
+          code: solution.code
+        })
+      );
+    });
+
+    // Populate automatedTests
+    genTask.automatedTests.forEach(test => {
+      (this.codingForm.get('automatedTests') as FormArray).push(
+        this.fb.group({
+          id: 0,
+          testFileName: test.testFileName,
+          code: test.code,
+          runMethod: test.runMethod,
+          inputArguments: test.inputArguments
+        })
+      );
+    });
+
+    // Update the form controls
+    this.codingForm.updateValueAndValidity();
+    */
   }
 }

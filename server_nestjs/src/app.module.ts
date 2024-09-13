@@ -1,3 +1,4 @@
+
 /* eslint-disable prettier/prettier */
 import { ContentModule } from './content/content.module';
 import { FilesModule } from './files/files.module';
@@ -13,6 +14,7 @@ import { DiscussionDataService } from './discussion/discussion-data/discussion-d
 import { DiscussionVoteService } from './discussion/discussion-vote/discussion-vote.service';
 import { DiscussionVoteController } from './discussion/discussion-vote/discussion-vote.controller';
 import { DiscussionViewController } from './discussion/discussion-view/discussion-view.controller';
+import { CodingQuestionGeneratorModule } from './tutor-kai/codingQuestionGenerator/codingQuestionGenerator.module';
 import { DiscussionViewService } from './discussion/discussion-view/discussion-view.service';
 import { DiscussionCreationService } from './discussion/discussion-creation/discussion-creation.service';
 import { DiscussionCreationController } from './discussion/discussion-creation/discussion-creation.controller';
@@ -76,6 +78,7 @@ import { ContentLinkerModule } from './content-linker/content-linker.module';
     EventLogModule,
     NotificationModule,
     ContentLinkerModule,
+    CodingQuestionGeneratorModule
   ],
   controllers: [
     AppController,
