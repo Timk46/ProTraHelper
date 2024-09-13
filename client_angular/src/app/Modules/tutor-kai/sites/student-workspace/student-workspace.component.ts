@@ -232,7 +232,7 @@ export class StudentWorkspaceComponent implements OnInit {
   handleCodeSubmissionResponse(result: CodeSubmissionResultDto): void {
     //console.log(result);
     this.lastResult = result;
-    if (result.CodeSubmissionResult.output) {
+    if (!result.CodeSubmissionResult.output) {
       this.compilerOutput = 'Keine Ausgabe'
     } else {
       this.compilerOutput = result.CodeSubmissionResult.output;

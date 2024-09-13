@@ -7,6 +7,8 @@ import {
   CodeSubmissionResultDto,
   ContentElementDTO,
   NotificationDTO,
+  questionType
+
 } from '@Interfaces/index';
 import {
   CodeSubmission,
@@ -112,27 +114,27 @@ export class RunCodeService {
 
     // Submit encoded files for execution and process the response.
     let response: CodeSubmissionResult;
-    if (codingQuestion.automatedTests[0].language === 'java') {
+    if (codingQuestion.programmingLanguage === 'java') {
       response = await this.submitCodeForExecutionJava(
         filesBase64,
         testFilesBase64,
         codingQuestion.mainFileName
       );
-    } else if (question.codingQuestions.automatedTests[0].language === 'python') {
+    } else if (codingQuestion.programmingLanguage === 'python') {
       response = await this.submitCodeForExecutionPython(
         filesBase64,
         testFilesBase64,
         codingQuestion.automatedTests[0].runMethod,
         codingQuestion.automatedTests[0].inputArguments
       );
-    } else if (question.codingQuestions.automatedTests[0].language === 'cpp') {
+    } else if (codingQuestion.programmingLanguage === 'cpp') {
       response = await this.submitCodeForExecutionCpp(
         filesBase64,
         testFilesBase64
       );
     } else {
       throw new HttpException(
-        `Unsupported language: ${question.codingQuestions.automatedTests[0].language}`,
+        `Unsupported language: ${codingQuestion.programmingLanguage}`,
         HttpStatus.BAD_REQUEST
       );
     }
