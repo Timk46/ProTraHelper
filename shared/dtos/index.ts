@@ -23,6 +23,7 @@ export * from "./detailedQuestion.dto";
 //TutorKai DTOs
 export * from "./tutorKaiDtos/kiFeedback.dto";
 export * from "./tutorKaiDtos/submission.dto";
+export * from "./tutorKaiDtos/genTask.dto";
 export * from "./user.dto"; // ToDo: Merge with hefl
 export * from "./file.dto"; // ToDo: Merge with hefl
 export * from "./userAnswer.dto";

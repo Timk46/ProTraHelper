@@ -427,6 +427,38 @@ model KIFeedback {
   submission        CodeSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 }
 
+model genTaskData {
+  id                Int               @id @default(autoincrement())
+  timestamp         DateTime          @default(now())
+  topic             String
+  context           String
+  taskPrompt        String?           @db.Text
+  task              String            @db.Text
+  expectationPrompt String?           @db.Text
+  expectation       String            @db.Text
+  solutionPrompt    String?           @db.Text
+  solutionOne       String            @db.Text
+  solutionTwo       String?           @db.Text
+  solutionThree     String?           @db.Text
+  unitTestPrompt    String?           @db.Text
+  unitTestOne       String            @db.Text
+  unitTestTwo       String?           @db.Text
+  unitTestThree     String?           @db.Text
+  errorIteration    Int
+  isErrorAtEnd      Boolean
+  errorOne          String?           @db.Text
+  errorTwo          String?           @db.Text
+  errorThree        String?           @db.Text
+  juryOne           Json?
+  juryTwo           Json?
+  juryThree         Json?
+  codeFramework     String            @db.Text
+  runMethod         String?           @db.Text
+  runMethodInput    String?           @db.Text
+  allTaskData       Json?
+  judgeTask         Json?
+}
+
 model anonymousUser {
   id            Int         @id @default(autoincrement())
   userId        Int
