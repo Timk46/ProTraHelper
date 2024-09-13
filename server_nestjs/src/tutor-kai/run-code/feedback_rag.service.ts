@@ -4,7 +4,6 @@ import { REQUEST } from '@nestjs/core';
 import { CryptoService } from '../crypto/crypto.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Response } from 'express';
-import { LangChainTracer } from 'langchain/callbacks';
 import { Client } from 'langsmith';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { ToolMessage } from 'langchain/schema';
@@ -117,10 +116,6 @@ const chatStream = new ChatOpenAI({
 const client = new Client({
   apiUrl: 'https://api.smith.langchain.com',
   apiKey: process.env.LANGCHAIN_API_KEY,
-});
-const tracer = new LangChainTracer({
-  projectName: 'GOALS_feedback_RAG',
-  client,
 });
 
 const chat = new ChatOpenAI({
@@ -238,7 +233,7 @@ export class FeedbackRAGService {
     });
     // Ask initial question that requires multiple tool calls
     const res = await chat.invoke(conceptsFormattedPrompt, {
-      callbacks: [tracer],
+      callbacks: [],
     });
 
     //console.log(res.additional_kwargs.tool_calls);
@@ -390,7 +385,6 @@ export class FeedbackRAGService {
             }
           },
         },
-        tracer,
       ],
     );
 

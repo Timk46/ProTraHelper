@@ -7,7 +7,6 @@ import { Response } from 'express';
 import { EventLogService } from '@/EventLog/event-log.service';
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { Client } from "langsmith";
-import { LangChainTracer } from "langchain/callbacks";
 
 const {
   ChatPromptTemplate,
@@ -62,10 +61,6 @@ const chatPrompt = ChatPromptTemplate.fromPromptMessages([
 const client = new Client({
   apiUrl: "https://api.smith.langchain.com",
   apiKey: process.env.LANGCHAIN_API_KEY
-});
-const tracer = new LangChainTracer({
-  projectName: "GOALS_feedback_normal",
-  client
 });
 
 @Injectable()
@@ -142,7 +137,6 @@ export class FeedbackNormalService {
           res.write(token);
         },
       },
-      tracer
     ],
     );
     this.eventLogService.log(

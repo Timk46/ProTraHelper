@@ -15,7 +15,6 @@ import { PGVectorStore} from 'langchain/vectorstores/pgvector';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Client } from "langsmith";
-import { LangChainTracer } from "langchain/callbacks";
 import { McqGenerationDTO } from '@Interfaces/question.dto';
 import { env } from 'process';
 import { JsonLoaderService } from './jsonloader.service';
@@ -36,11 +35,6 @@ interface McqEvaluations {
 const client = new Client({
   apiUrl: "https://api.smith.langchain.com",
   apiKey: "ls__f3c8aba313dd43aeb5f85c89487a7652"
-});
-
-const tracer = new LangChainTracer({
-  projectName: "Tim ",
-  client
 });
 
 // change to accessing sensitive data from .env(?)
@@ -502,7 +496,7 @@ export class McqCreationService {
       PromptTemplate.fromTemplate(questionTitlePrompt),
       this.llm,
       parser,
-      ]).invoke({callbacks: [tracer]})
+      ]).invoke({callbacks: []})
 
       this.addQuestion(concept, response.question);
 
@@ -519,7 +513,7 @@ export class McqCreationService {
         PromptTemplate.fromTemplate(questionTitlePrompt2),
         this.llm,
         parser,
-      ]).invoke({callbacks: [tracer]})
+      ]).invoke({callbacks: []})
       this.addQuestion(concept, response2.question);
 
       return response2;
@@ -563,7 +557,7 @@ export class McqCreationService {
       PromptTemplate.fromTemplate(regeneratePrompt),
       this.regenLlm,
       parser,
-      ]).invoke({callbacks: [tracer]})
+      ]).invoke({callbacks: []})
 
       this.addOption(concept,question,response.answer);
       console.log("all answers: ", this.askedQuestions[concept].map(mcq => mcq.answers).flat().map(answer => answer.answer))
@@ -583,7 +577,7 @@ export class McqCreationService {
       PromptTemplate.fromTemplate(regeneratePrompt2),
       this.regenLlm,
       parser,
-      ]).invoke({callbacks: [tracer]})
+      ]).invoke({callbacks: []})
 
 
       this.addOption(concept,question,response2.answer);
@@ -632,7 +626,7 @@ export class McqCreationService {
       PromptTemplate.fromTemplate(systemMsg),
       this.llm,
       parser,
-    ]).invoke({callbacks: [tracer]});
+    ]).invoke({callbacks: []});
 
     contextResult.answers.forEach(result => {
         this.addOptionsToQuestion(concept, question, [result]);
@@ -655,7 +649,7 @@ export class McqCreationService {
         PromptTemplate.fromTemplate(systemMsg2),
         this.llm,
         parser,
-      ]).invoke({callbacks: [tracer]});
+      ]).invoke({callbacks: []});
 
       contextResult2.answers.forEach(result => {
         this.addOptionsToQuestion(concept, question, [result]);
@@ -718,7 +712,7 @@ export class McqCreationService {
         PromptTemplate.fromTemplate(questionAndAnswerPrompt),
         this.llm,
         parser,
-      ]).invoke({callbacks: [tracer]});
+      ]).invoke({callbacks: []});
 
       this.addQuestionAndOptions(concept, result.question, result.answers);
 
@@ -738,7 +732,7 @@ export class McqCreationService {
           PromptTemplate.fromTemplate(questionAndAnswerPrompt2),
           this.llm,
           parser,
-        ]).invoke({callbacks: [tracer]});
+        ]).invoke({callbacks: []});
 
         this.addQuestionAndOptions(concept, result2.question, result2.answers);
 
@@ -790,7 +784,7 @@ export class McqCreationService {
       PromptTemplate.fromTemplate(evaluationPrompt),
       this.llm,
       parser,
-    ]).invoke({callbacks: [tracer]});
+    ]).invoke({callbacks: []});
 
     console.log("Evaluation result: ", result)
 
@@ -830,7 +824,7 @@ export class McqCreationService {
       PromptTemplate.fromTemplate(reevaluationPrompt),
       this.llm,
       parser,
-    ]).invoke({callbacks: [tracer]});
+    ]).invoke({callbacks: []});
     console.log("result: ", result)
 
     this.addQuestionAndOptions(concept, result.question, result.answers);

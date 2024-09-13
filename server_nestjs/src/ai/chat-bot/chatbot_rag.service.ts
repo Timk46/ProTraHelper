@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Response } from 'express';
-import { LangChainTracer } from 'langchain/callbacks';
 import { Client } from 'langsmith';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { RagService } from '../services/rag.service';
@@ -27,10 +26,7 @@ const client = new Client({
   apiUrl: 'https://api.smith.langchain.com',
   apiKey: process.env.LANGCHAIN_API_KEY,
 });
-const tracer = new LangChainTracer({
-  projectName: 'GOALS_chatbot',
-  client,
-});
+
 
 const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
@@ -191,7 +187,6 @@ export class ChatBotRAGService {
             }
           },
         },
-        tracer,
       ],
     );
 
@@ -249,7 +244,6 @@ export class ChatBotRAGService {
             resStream.write(token);
           },
         },
-        tracer,
       ],
     );
 
