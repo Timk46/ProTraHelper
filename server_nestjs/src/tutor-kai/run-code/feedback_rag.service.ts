@@ -4,8 +4,7 @@ import { REQUEST } from '@nestjs/core';
 import { CryptoService } from '../crypto/crypto.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Response } from 'express';
-import { Client } from 'langsmith';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { ChatOpenAI } from "@langchain/openai";
 import { ToolMessage } from 'langchain/schema';
 import { Prisma, PrismaClient, TranscriptEmbedding } from '@prisma/client';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
@@ -106,16 +105,11 @@ const vectorStore = PrismaVectorStore.withModel<TranscriptEmbedding>(db).create(
   },
 );
 
-const chatStream = new ChatOpenAI({
+const llm = new ChatOpenAI({
   modelName: KImodel,
   openAIApiKey: process.env.OPENAI_API_KEY,
   temperature: 0, // Low Temperature favours the words with higher probability = less creative
   streaming: true,
-});
-
-const client = new Client({
-  apiUrl: 'https://api.smith.langchain.com',
-  apiKey: process.env.LANGCHAIN_API_KEY,
 });
 
 const chat = new ChatOpenAI({
@@ -313,7 +307,7 @@ export class FeedbackRAGService {
     let ongoingBuffer = ''; // Buffer to capture potential reference across tokens
 
     let openAiAnswerWithMarkdownLinks = '';
-    const openAiResponse = await chatStream.generatePrompt(
+    const openAiResponse = await llm.generatePrompt(
       [ragFormattedPrompt],
       undefined,
       [

@@ -24,7 +24,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@langchain/community": "^0.0.44",
+    "@langchain/community": "^0.2.33",
+    "@langchain/core": "^0.2.32",
+    "@langchain/openai": "^0.2.11",
     "@nestjs/axios": "^3.0.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^3.1.1",
@@ -42,7 +44,6 @@
     "exceljs": "^4.4.0",
     "faker": "^5.5.3",
     "fs": "^0.0.1-security",
-    "langchain": "^0.0.203",
     "nestjs-pino": "^4.0.0",
     "newman": "^6.1.1",
     "passport": "^0.6.0",

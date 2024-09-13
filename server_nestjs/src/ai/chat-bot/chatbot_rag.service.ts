@@ -1,11 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Response } from 'express';
-import { Client } from 'langsmith';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { RagService } from '../services/rag.service';
 import { TranscriptChunk } from '@Interfaces/index';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ChatOpenAI } from "@langchain/openai";
 
 const {
   ChatPromptTemplate,
@@ -15,17 +14,13 @@ const {
 
 const KImodel = 'gpt-4o-2024-08-06';
 
-const chatStream = new ChatOpenAI({
+const llm = new ChatOpenAI({
   modelName: KImodel,
   openAIApiKey: process.env.OPENAI_API_KEY,
   temperature: 0,
   streaming: true,
 });
 
-const client = new Client({
-  apiUrl: 'https://api.smith.langchain.com',
-  apiKey: process.env.LANGCHAIN_API_KEY,
-});
 
 
 const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
@@ -115,7 +110,7 @@ export class ChatBotRAGService {
     let ongoingBuffer = ''; // Buffer to capture potential reference across tokens
 
     let openAiAnswerWithMarkdownLinks = '';
-    const openAiResponse = await chatStream.generatePrompt(
+    const openAiResponse = await llm.generatePrompt(
       [ragFormattedPrompt],
       undefined,
       [
@@ -233,7 +228,7 @@ export class ChatBotRAGService {
     });
 
     // Generate response using the dialog model
-    const openAiResponse = await chatStream.generatePrompt(
+    const openAiResponse = await llm.generatePrompt(
       [DialogPrompt],
       undefined,
       [

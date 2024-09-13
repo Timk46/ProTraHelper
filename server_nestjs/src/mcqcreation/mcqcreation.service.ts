@@ -14,7 +14,6 @@ import { PoolConfig } from 'pg';
 import { PGVectorStore} from 'langchain/vectorstores/pgvector';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Client } from "langsmith";
 import { McqGenerationDTO } from '@Interfaces/question.dto';
 import { env } from 'process';
 import { JsonLoaderService } from './jsonloader.service';
@@ -32,10 +31,6 @@ interface McqEvaluations {
   evaluations?: McqEvaluation[];
 }
 
-const client = new Client({
-  apiUrl: "https://api.smith.langchain.com",
-  apiKey: "ls__f3c8aba313dd43aeb5f85c89487a7652"
-});
 
 // change to accessing sensitive data from .env(?)
 const llmConfig = {

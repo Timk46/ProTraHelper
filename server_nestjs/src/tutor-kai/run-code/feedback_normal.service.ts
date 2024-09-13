@@ -5,8 +5,7 @@ import { CryptoService } from '../crypto/crypto.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Response } from 'express';
 import { EventLogService } from '@/EventLog/event-log.service';
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { Client } from "langsmith";
+import { ChatOpenAI } from "@langchain/openai";
 
 const {
   ChatPromptTemplate,
@@ -18,7 +17,7 @@ const {
 //const KImodel = 'gpt-3.5-turbo';
 const KImodel = 'gpt-4o-2024-08-06';
 
-const chat = new ChatOpenAI({
+const llm = new ChatOpenAI({
   modelName: KImodel,
   openAIApiKey: process.env.OPENAI_API_KEY,
   temperature: 0, // Low Temperature favours the words with higher probability = less creative
@@ -58,10 +57,6 @@ const chatPrompt = ChatPromptTemplate.fromPromptMessages([
   ),
 ]);
 
-const client = new Client({
-  apiUrl: "https://api.smith.langchain.com",
-  apiKey: process.env.LANGCHAIN_API_KEY
-});
 
 @Injectable()
 export class FeedbackNormalService {
@@ -129,7 +124,7 @@ export class FeedbackNormalService {
       unitTestsResults: relatedCodeSubmission.unitTestResults? relatedCodeSubmission.unitTestResults : "Es liegen keine Testergebnisse vor.",
     });
 
-    const openAiResponse = await chat.generatePrompt([formattedPrompt], undefined, [
+    const openAiResponse = await llm.generatePrompt([formattedPrompt], undefined, [
       {
         ignoreAgent: true,
         ignoreChain: true,
