@@ -457,7 +457,7 @@ export class EditCodingComponent implements OnInit {
     const kontext = this.codingForm.get('kontext')?.value;
 
     if (inhalt && kontext) {
-      this.editCodeService.generateTask(inhalt, kontext).subscribe(
+      this.editCodeService.generateCppTask(this.codingForm.value.text, this.codingForm.value.codeGerueste).subscribe(
         (genTask: genTaskDto) => {
           console.log('Generated task:', genTask);
           this.populateFormWithGenTask(genTask);
