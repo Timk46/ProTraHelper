@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { QuestionDataService } from '../../../Services/question/question-data.service';
@@ -42,6 +42,23 @@ export class EditCodingComponent implements OnInit {
         this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
           this.questionData = data;
           console.log('Question data:', this.questionData);
+
+          // If codingQuestion doesn't exist, create an empty one
+          if (!this.questionData.codingQuestion) {
+            this.questionData.codingQuestion = {
+              id: 0,
+              programmingLanguage: '',
+              codeGerueste: [],
+              modelSolutions: [],
+              automatedTests: [],
+              expectations: '',
+              mainFileName: '',
+              count_InputArgs: 0,
+              text: '',
+              textHTML: ''
+            };
+          }
+
           this.populateForm();
         });
       }
@@ -52,18 +69,18 @@ export class EditCodingComponent implements OnInit {
     return this.fb.group({
       inhalt: [''],
       kontext: [''],
-      name: [''],
-      programmingLanguage: [''],
-      text: [''],
+      name: ['', Validators.required],
+      programmingLanguage: ['', Validators.required],
+      text: ['', Validators.required],
       codeGerueste: this.fb.array([]),
       modelSolutions: this.fb.array([]),
       automatedTests: this.fb.array([]),
-      expectations: [''],
+      expectations: ['', Validators.required],
       mainFileName: [''],
       runMethod: [''],
       inputArguments: [''],
       isApproved: [false],
-      level: ['']
+      level: ['', Validators.required]
     });
   }
 
@@ -248,7 +265,7 @@ export class EditCodingComponent implements OnInit {
 
   onSubmit() {
     console.log('Form submitted:', this.codingForm.value);
-    if (this.codingForm.valid && this.questionData && this.questionData.codingQuestion) {
+    if (this.codingForm.valid && this.questionData) {
       const updatedQuestion: detailedQuestionDTO = {
         ...this.questionData,
         name: this.codingForm.value.name,
@@ -257,10 +274,13 @@ export class EditCodingComponent implements OnInit {
         level: this.codingForm.value.level,
         codingQuestion: {
           ...this.questionData.codingQuestion,
-          id: this.questionData.codingQuestion.id ?? 0,
+          id: this.questionData.codingQuestion!.id ?? 0,
           programmingLanguage: this.codingForm.value.programmingLanguage,
           codeGerueste: this.codingForm.value.codeGerueste,
           modelSolutions: this.codingForm.value.modelSolutions,
+          count_InputArgs: 0,
+          text: this.codingForm.value.text,
+          textHTML: this.codingForm.value.text,
           automatedTests: this.codingForm.value.automatedTests.map((test: any) => ({
             ...test,
             runMethod: this.codingForm.value.runMethod,
@@ -282,8 +302,48 @@ export class EditCodingComponent implements OnInit {
         }
       );
     } else {
-      this.snackBar.open('Please fill all required fields', 'Close', { duration: 3000 });
+      const missingFields = this.getMissingFields();
+      const errorMessage = `Bitte füllen Sie alle erforderlichen Felder aus: ${missingFields.join(', ')}`;
+      this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
     }
+  }
+
+  getMissingFields(): string[] {
+    const missingFields: string[] = [];
+    const requiredFields = ['name', 'programmingLanguage', 'text', 'expectations', 'level'];
+
+    for (const field of requiredFields) {
+      if (this.codingForm.get(field)?.invalid) {
+        missingFields.push(this.getFieldDisplayName(field));
+      }
+    }
+
+    const codeGerueste = this.codingForm.get('codeGerueste') as FormArray;
+    const modelSolutions = this.codingForm.get('modelSolutions') as FormArray;
+    const automatedTests = this.codingForm.get('automatedTests') as FormArray;
+
+    if (codeGerueste.length === 0) {
+      missingFields.push('Code-Gerüste');
+    }
+    if (modelSolutions.length === 0) {
+      missingFields.push('Musterlösungen');
+    }
+    if (automatedTests.length === 0) {
+      missingFields.push('Automatisierte Tests');
+    }
+
+    return missingFields;
+  }
+
+  getFieldDisplayName(field: string): string {
+    const displayNames: { [key: string]: string } = {
+      name: 'Name',
+      programmingLanguage: 'Programmiersprache',
+      text: 'Aufgabentext',
+      expectations: 'Erwartungshorizont',
+      level: 'Schwierigkeitsgrad'
+    };
+    return displayNames[field] || field;
   }
 
   testCode() {
@@ -322,7 +382,9 @@ export class EditCodingComponent implements OnInit {
         }
       );
     } else {
-      this.snackBar.open('Please fill all required fields before testing', 'Close', { duration: 3000 });
+      const missingFields = this.getMissingFields();
+      const errorMessage = `Bitte füllen Sie alle erforderlichen Felder aus, bevor Sie testen: ${missingFields.join(', ')}`;
+      this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
     }
   }
 
