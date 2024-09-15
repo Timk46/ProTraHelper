@@ -128,8 +128,18 @@ export class RunCodeService {
         codingQuestion.automatedTests[0].inputArguments
       );
     } else if (codingQuestion.programmingLanguage === 'cpp') {
+      // Modifizieren der Dateien, um die main-Funktion zu umschließen
+      // #ifndef UNIT_TEST vor der main methode und #endif // UNIT_TEST nach der Main Methode
+      // Ansonsten wird die main-Funktion nicht ausgeführt, wenn die Unit-Tests ausgeführt werden (doppelte main = konflikt)
+      const modifiedFiles: { [fileName: string]: string } = {};
+
+      for (const [fileName, content] of Object.entries(studentCode)) {
+          // Suchen nach der main-Funktion im Code
+          const modifiedContent = this.wrapMainFunction(content);
+          modifiedFiles[fileName] = modifiedContent;
+      }
       response = await this.submitCodeForExecutionCpp(
-        filesBase64,
+        await this.generateBase64(modifiedFiles),
         testFilesBase64
       );
     } else {
@@ -214,10 +224,12 @@ export class RunCodeService {
     files: { [fileName: string]: string },
     testFiles: { [fileName: string]: string },
   ): Promise<CodeSubmissionResult> {
+
     console.log(JSON.stringify({
       files: files,
       testFile: Object.values(testFiles)[0]
-    }))
+    }));
+
     const response = await fetch(`${this.apiUrl}cpp-assignment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -235,10 +247,49 @@ export class RunCodeService {
     }
 
     const result: CodeSubmissionResult = await response.json();
-    console.log(result)
+    console.log(result);
     return result;
   }
+  // add Präprozessor-Direktiven
+  // Um die Unit-Tests ohne Konflikte ausführen zu können, haben wir die main-Funktion mit Präprozessor-Direktiven umgeben
+  private wrapMainFunction(content: string): string {
+    // Suche nach 'int main(...) {'
+    const mainFunctionRegex = /int\s+main\s*\([^)]*\)\s*\{/m;
 
+    const match = mainFunctionRegex.exec(content);
+    if (match) {
+        const mainFunctionStart = match.index;
+        const openingBraceIndex = content.indexOf('{', mainFunctionStart);
+        if (openingBraceIndex !== -1) {
+            // Finde die schließende Klammer der main-Funktion
+            let braceCount = 1;
+            let currentIndex = openingBraceIndex + 1;
+            while (braceCount > 0 && currentIndex < content.length) {
+                if (content[currentIndex] === '{') {
+                    braceCount++;
+                } else if (content[currentIndex] === '}') {
+                    braceCount--;
+                }
+                currentIndex++;
+            }
+
+            if (braceCount === 0) {
+                const mainFunctionEnd = currentIndex; // Position nach der schließenden '}'
+
+                const beforeMain = content.substring(0, mainFunctionStart);
+                const mainFunction = content.substring(mainFunctionStart, mainFunctionEnd);
+                const afterMain = content.substring(mainFunctionEnd);
+
+                return `${beforeMain}\n#ifndef UNIT_TEST\n${mainFunction}\n#endif // UNIT_TEST\n${afterMain}`;
+            } else {
+                console.log("Konnte die schließende Klammer der main-Funktion nicht finden.");
+            }
+        }
+    } else {
+        console.log("Keine main-Funktion gefunden.");
+    }
+    return content;
+}
   /**
    * Processes the response from the code execution API, logs the response, and saves the results to the database.
    */

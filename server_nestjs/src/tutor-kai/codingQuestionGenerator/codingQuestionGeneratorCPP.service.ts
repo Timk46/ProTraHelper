@@ -316,7 +316,7 @@ export class CodingQuestionGeneratorCppService {
             Beachte, dass immer die folgenden zwei Zeilen am Anfang enthalten sein müssen:
             #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
             #include <JsonReporter.h>
-            Erstelle auf Basis der Aufgabenstellung sowie der Musterlösung Unit-Tests, welche alle Edge-Cases abdecken. Die Unit-Tests sollen wie im Beispiel aufgebaut sein.
+            Erstelle auf Basis der Aufgabenstellung sowie der Musterlösung passende Unit-Tests. Die Unit-Tests sollen wie im Beispiel aufgebaut sein.
             Gib den Unit-Test als "String" wieder und markiere den Code nicht mit "'''cpp" oder ähnlichem.
 
                 Beispiel:
