@@ -23,6 +23,12 @@ import {
 import axios from 'axios';
 import { CodeGeruestDto } from '@DTOs/question.dto';
 import { StructuredOutputParser } from "langchain/output_parsers";
+
+interface localCodeFile {
+  filename: string;
+  code: string;
+}
+
 @Injectable()
 export class CodingQuestionGeneratorCppService {
   constructor(
@@ -70,8 +76,8 @@ export class CodingQuestionGeneratorCppService {
 
     const dbEntry = await this.prisma.genTaskData.create({
       data: {
-        topic: data.topic,
-        context: data.context,
+        topic: "TESTING", //data.topic,
+        context: "TESTING", //data.context,
         task: data.task,
         expectation: data.expectation,
         solutionOne: solutionOne,
@@ -108,7 +114,7 @@ export class CodingQuestionGeneratorCppService {
   async genCPPTask(taksdecription: string, codeGerueste: CodeGeruestDto[]): Promise<genTaskDto> {
     console.log('genTask gestartet');
 
-    const gptModel = 'gpt-4o'; //Aktuelles Modell "GPT-4o"
+    const gptModel = 'gpt-4o-2024-08-06'; //Aktuelles Modell "GPT-4o"
     const maxIterations = 5; //Maximale Anzahl an Iterationen für die Codeüberprüfung
     const langGraphRecursionLimit = 50; //Maximale Anzahl an Rekursionen für LangGraph
     const jury1url =
@@ -116,14 +122,14 @@ export class CodingQuestionGeneratorCppService {
 
     const model = new ChatOpenAI({
       temperature: 0,
-      streaming: true,
+      streaming: false,
       model: gptModel,
     });
     interface TaskGenState {
       messages: BaseMessage[];
       task: string;
       expectation: string;
-      solution: string[];
+      solution: localCodeFile[];
       unitTest: string[];
       checkCodeIteration: number;
       checkCodeError: string[];
@@ -142,7 +148,7 @@ export class CodingQuestionGeneratorCppService {
       }),
       task: Annotation<string>(),
       expectation: Annotation<string>(),
-      solution: Annotation<string[]>({
+      solution: Annotation<localCodeFile[]>({
         reducer: (x, y) => x.concat(y),
         default: () => [],
       }),
@@ -218,7 +224,7 @@ export class CodingQuestionGeneratorCppService {
         ]);
       }
 
-      const model = new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel });
+      const model = new ChatOpenAI({ temperature: 0, streaming: false, model: gptModel });
 
       const response = await prompt.pipe(model).invoke({ messages });
 
@@ -252,103 +258,43 @@ export class CodingQuestionGeneratorCppService {
           new SystemMessage(
             `Du bist Senior C++ Entwickler und Hochschuldozent. Im Rahmen eines Universitätskurses "Algorithmen und Datenstrukturen mit C++" erhalten Studierende Programmieraufgaben.
             Die Lösungen der Studierenden sollen durch Unit-Tests automatisch bewertet werden.
-            Erstelle auf Basis der Aufgabenstellung sowie der Musterlösung einen Unit-Test sowie ein Unit-Programm. Es sollen nur Unit-Test und Unit-Programm erstellt werden.
-            Gib den Unit-Test als "String" wieder und markiere den Code nicht mit "'''python" oder ähnlichem.
-            Importiere die Methode immer aus der Datei "main.py" durch "from main import <METHODENNAME>". Kontrolliere durch den Test auch Randbedingungen.
-            Der Test soll sich dabei an den folgenden Unit-Tests orientieren:
+            Beachte, dass immer die folgenden zwei Zeilen am Anfang enthalten sein müssen:
+            #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+            #include <JsonReporter.h>
+            Erstelle auf Basis der Aufgabenstellung sowie der Musterlösung Unit-Tests, welche alle Edge-Cases abdecken. Die Unit-Tests sollen wie im Beispiel aufgebaut sein.
+            Gib den Unit-Test als "String" wieder und markiere den Code nicht mit "'''cpp" oder ähnlichem.
 
-                Jeder Test soll in einer eigenen Funktion sein. Hier ein Beispiel:
+                Beispiel:
 
-                class TestZaehleBlaetter(unittest.TestCase):
-                def test_einfacher_baum(self):
-                    self.assertEqual(zaehle_blaetter([1, [2, 3], [4, [5, 6]], 7]), 7)
+                #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+                #include <JsonReporter.h>
+                #include "Calculator.h"
+                #include "Greeter.h"
 
-                def test_leerer_baum(self):
-                    self.assertEqual(zaehle_blaetter([]), 0)
+                TEST_CASE("Calculator add method") {
+                    Calculator calc;
 
-                def test_ein_blatt(self):
-                    self.assertEqual(zaehle_blaetter([1]), 1)
+                    SUBCASE("Adding positive numbers") {
+                        REQUIRE(calc.add(5, 3) == 8);
+                    }
 
-                def test_verschachtelter_baum(self):
-                    self.assertEqual(zaehle_blaetter([1, [2, [3, 4]], 5]), 5)
+                    SUBCASE("Adding negative numbers") {
+                        REQUIRE(calc.add(-2, -4) == -6);
+                    }
+                }
 
-                def test_tief_verschachtelter_baum(self):
-                    self.assertEqual(zaehle_blaetter([1, [2, [3, [4, [5]]]]]), 5)
+                TEST_CASE("Greeter greet method") {
+                    Greeter greeter;
 
-                Beispiel Aufgabe:
-                Schreibe eine Funktion warmkalt(temp), die eine Zahl als Parameter erhält und einen String zurückgibt. Wenn die Temperatur unter 18 Grad liegt, soll „Es ist sehr kalt!“ zurückgegeben werden. Wenn die Temperatur über 25 Grad liegt, soll „Es ist sehr warm!“ zurückgegeben werden. Ansonsten soll „Es ist angenehm!“ Zurückgegeben werden.
-                Beispiel Musterlösung:
-                def warmkalt(temp):
-                    if temp < 18:
-                        return "Es ist sehr kalt!"
-                    elif temp > 25:
-                        return "Es ist sehr warm!"
-                    else:
-                        return "Es ist angenehm!"
+                    SUBCASE("Greeting a person") {
+                        REQUIRE(greeter.greet("John") == "Hello, John!");
+                    }
 
-                Beispiel Unit-Test:
-                import unittest
-
-                from warmkalt import warmkalt
-
-                class TestWarmKalt(unittest.TestCase):
-                    def test_sehr_kalt(self):
-                        self.assertEqual(warmkalt(10), "Es ist sehr kalt!")
-
-                    def test_angenehm(self):
-                        self.assertEqual(warmkalt(20), "Es ist angenehm!")
-
-                    def test_sehr_warm(self):
-                        self.assertEqual(warmkalt(30), "Es ist sehr warm!")
-
-                if __name__ == '__main__':
-                    unittest.main()
-
-                Beispiel Unit-Programm:
-                def run_tests():
-                        tests = [
-                                {
-                                        'name': 'Testcase 1 - Very Cold',
-                                        'input': 10,  # Temperature well below 18
-                                        'expected': "Es ist sehr kalt!"
-                                },
-                                {
-                                        'name': 'Testcase 2 - Very Warm',
-                                        'input': 30,  # Temperature above 25
-                                        'expected': "Es ist sehr warm!"
-                                },
-                                {
-                                        'name': 'Testcase 3 - Pleasant',
-                                        'input': 20,  # Temperature between 18 and 25
-                                        'expected': "Es ist angenehm!"
-                                },
-                        ]
-
-                        print(f'Running {tests[0]["name"]} for syntax check...')
-                        try:
-                                result = warmkalt(tests[0]['input'])
-                                print(f'Syntax check passed.')
-                        except Exception as e:
-                                print(f'Syntax check failed: {e}')
-                                return
-
-                        total_score = 0
-                        points_per_test = 100 / len(tests)
-                        for test in tests:
-                                print(f'\nRunning {test["name"]}...')
-                                try:
-                                        result = warmkalt(test['input'])
-                                        assert result == test['expected'], "Berechnung falsch"
-                                        print(f'{test["name"]} passed.')
-                                        total_score += points_per_test
-                                except AssertionError as e:
-                                        print(f'{test["name"]} failed: {e}')
-                                except Exception as e:
-                                        print(f'{test["name"]} encountered an error: {e}')
-                        print(f'\nTotal score: {total_score}')
-
-                if __name__ == '__main__':
-                        run_tests()`),
+                    SUBCASE("Greeting an empty string") {
+                        REQUIRE(greeter.greet("") == "Hello, !");
+                    }
+                }
+                        `),
           new HumanMessage(`Erstelle einen Unit-Test für die Programmieraufgabe inklusive aller benötigten Imports zu der nachfolgenden Musterlösung. Generiere nur den Unit-Test ohne zusätzlichen Text. Der Unit-Test soll direkt ausführbar sein.
                 Du hast bereits einmal versucht diesen Unit-Test zu erstellen, es gab aber einen Fehler. Generiere hier nur den korrigierten Unit-Test. \n
                 \n
@@ -363,100 +309,48 @@ export class CodingQuestionGeneratorCppService {
         ]);
       } else {
         prompt = ChatPromptTemplate.fromMessages([
-          new SystemMessage(`Du bist Programmierexperte und Hochschuldozent. Im Rahmen eines Universitätskurses "Einführung in die Programmierung" erhalten Studierende Aufgaben. Die Lösungen der Studierenden sollen durch Unit-Tests automatisch bewertet werden.
-                Erstelle auf Basis der Aufgabenstellung sowie der Musterlösung einen Unit-Test sowie Unit-Programm. Es sollen nur Unit-Test und Unit-Programm erstellt werden. Gib den Unit-Test als "String" wieder und markiere den Code nicht mit "'''python" oder ähnlichem. Importiere die Methode immer aus der Datei "main.py" durch "from main import <METHODENNAME>". Kontrolliere durch den Test auch Randbedingungen. Der Test soll sich dabei an den folgenden Unit-Tests orientieren:
+          new SystemMessage(
+            `
+            Du bist Senior C++ Entwickler und Hochschuldozent. Im Rahmen eines Universitätskurses "Algorithmen und Datenstrukturen mit C++" erhalten Studierende Programmieraufgaben.
+            Die Lösungen der Studierenden sollen durch Unit-Tests automatisch bewertet werden.
+            Beachte, dass immer die folgenden zwei Zeilen am Anfang enthalten sein müssen:
+            #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+            #include <JsonReporter.h>
+            Erstelle auf Basis der Aufgabenstellung sowie der Musterlösung Unit-Tests, welche alle Edge-Cases abdecken. Die Unit-Tests sollen wie im Beispiel aufgebaut sein.
+            Gib den Unit-Test als "String" wieder und markiere den Code nicht mit "'''cpp" oder ähnlichem.
 
-                Jeder Test soll in einer eigenen Funktion sein. Hier ein Beispiel:
+                Beispiel:
 
-                class TestZaehleBlaetter(unittest.TestCase):
-                def test_einfacher_baum(self):
-                    self.assertEqual(zaehle_blaetter([1, [2, 3], [4, [5, 6]], 7]), 7)
+                #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+                #include <JsonReporter.h>
+                #include "Calculator.h"
+                #include "Greeter.h"
 
-                def test_leerer_baum(self):
-                    self.assertEqual(zaehle_blaetter([]), 0)
+                TEST_CASE("Calculator add method") {
+                    Calculator calc;
 
-                def test_ein_blatt(self):
-                    self.assertEqual(zaehle_blaetter([1]), 1)
+                    SUBCASE("Adding positive numbers") {
+                        REQUIRE(calc.add(5, 3) == 8);
+                    }
 
-                def test_verschachtelter_baum(self):
-                    self.assertEqual(zaehle_blaetter([1, [2, [3, 4]], 5]), 5)
+                    SUBCASE("Adding negative numbers") {
+                        REQUIRE(calc.add(-2, -4) == -6);
+                    }
+                }
 
-                def test_tief_verschachtelter_baum(self):
-                    self.assertEqual(zaehle_blaetter([1, [2, [3, [4, [5]]]]]), 5)
+                TEST_CASE("Greeter greet method") {
+                    Greeter greeter;
 
-                Beispiel Aufgabe: Schreibe eine Funktion warmkalt(temp), die eine Zahl als Parameter erhält und einen String zurückgibt. Wenn die Temperatur unter 18 Grad liegt, soll „Es ist sehr kalt!“ zurückgegeben werden. Wenn die Temperatur über 25 Grad liegt, soll „Es ist sehr warm!“ zurückgegeben werden. Ansonsten soll „Es ist angenehm!“ Zurückgegeben werden.
-                Beispiel Musterlösung:
-                def warmkalt(temp):
-                    if temp < 18:
-                        return "Es ist sehr kalt!"
-                    elif temp > 25:
-                        return "Es ist sehr warm!"
-                    else:
-                        return "Es ist angenehm!"
+                    SUBCASE("Greeting a person") {
+                        REQUIRE(greeter.greet("John") == "Hello, John!");
+                    }
 
-                Beispiel Unit-Test:
-                import unittest
+                    SUBCASE("Greeting an empty string") {
+                        REQUIRE(greeter.greet("") == "Hello, !");
+                    }
+                }
 
-                from warmkalt import warmkalt
-
-                class TestWarmKalt(unittest.TestCase):
-                    def test_sehr_kalt(self):
-                        self.assertEqual(warmkalt(10), "Es ist sehr kalt!")
-
-                    def test_angenehm(self):
-                        self.assertEqual(warmkalt(20), "Es ist angenehm!")
-
-                    def test_sehr_warm(self):
-                        self.assertEqual(warmkalt(30), "Es ist sehr warm!")
-
-                if __name__ == '__main__':
-                    unittest.main()
-
-                Beispiel Unit-Programm:
-                def run_tests():
-                        tests = [
-                                {
-                                        'name': 'Testcase 1 - Very Cold',
-                                        'input': 10,  # Temperature well below 18
-                                        'expected': "Es ist sehr kalt!"
-                                },
-                                {
-                                        'name': 'Testcase 2 - Very Warm',
-                                        'input': 30,  # Temperature above 25
-                                        'expected': "Es ist sehr warm!"
-                                },
-                                {
-                                        'name': 'Testcase 3 - Pleasant',
-                                        'input': 20,  # Temperature between 18 and 25
-                                        'expected': "Es ist angenehm!"
-                                },
-                        ]
-
-                        print(f'Running {tests[0]["name"]} for syntax check...')
-                        try:
-                                result = warmkalt(tests[0]['input'])
-                                print(f'Syntax check passed.')
-                        except Exception as e:
-                                print(f'Syntax check failed: {e}')
-                                return
-
-                        total_score = 0
-                        points_per_test = 100 / len(tests)
-                        for test in tests:
-                                print(f'\nRunning {test["name"]}...')
-                                try:
-                                        result = warmkalt(test['input'])
-                                        assert result == test['expected'], "Berechnung falsch"
-                                        print(f'{test["name"]} passed.')
-                                        total_score += points_per_test
-                                except AssertionError as e:
-                                        print(f'{test["name"]} failed: {e}')
-                                except Exception as e:
-                                        print(f'{test["name"]} encountered an error: {e}')
-                        print(f'\nTotal score: {total_score}')
-
-                if __name__ == '__main__':
-                        run_tests()`),
+                        `),
           new HumanMessage(
             'Entwickle einen Unit-Test für eine Programmieraufgabe inklusive aller benötigten Imports zu der nachfolgenden Musterlösung. Generiere nur den Unit-Test ohne zusätzlichen Text. Der Unit-Test soll direkt ausführbar sein.',
           ),
@@ -466,7 +360,7 @@ export class CodingQuestionGeneratorCppService {
 
       const response = await prompt
         .pipe(
-          new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }),
+          new ChatOpenAI({ temperature: 0, streaming: false, model: gptModel }),
         )
         .invoke({ messages });
 
@@ -494,7 +388,7 @@ export class CodingQuestionGeneratorCppService {
 
       const response = await prompt
         .pipe(
-          new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }),
+          new ChatOpenAI({ temperature: 0, streaming: false, model: gptModel }),
         )
         .invoke({ messages });
 
@@ -514,15 +408,17 @@ export class CodingQuestionGeneratorCppService {
       let errorMessages = '';
 
       console.log('--- CheckCode ---');
+      console.log("BEGIN SOLUTION");
+      console.log(JSON.stringify(state.solution));
+      console.log("END");
 
       //HIER DER TEST MIT JURY1 OB DER CODE FUNKTIONIERT - Rückgabe true oder false
       const jury1Response = await axios.post(jury1url, {
-        mainFile: {
-          'main.py': this.encodeBased64(solution),
-        },
-        testFiles: {
-          'test_main.py': this.encodeBased64(unitTest),
-        },
+        files: state.solution.reduce((acc, file) => ({
+          ...acc,
+          [file.filename]: this.encodeBased64(file.code)
+        }), {}),
+        testFile: this.encodeBased64(unitTest),
       });
 
       console.log('jury1Response: ', jury1Response.data);
@@ -593,201 +489,12 @@ export class CodingQuestionGeneratorCppService {
       }
     };
 
-    const genRunMethodArgs = async (state: typeof TaskGenState.State) => {
-      const { messages } = state;
-
-      const prompt = ChatPromptTemplate.fromMessages([
-        new SystemMessage(
-          'Du bist ein JSON-Experte. Gib immer nur das direkte JSON-Objekt wieder, welches sofort genutzt werden kann.',
-        ),
-        new HumanMessage(`Suche aus den folgenden Informationen zwei Argumente heraus und gebe diese in Form eines JSON-Objektes wieder. Konkret wird zum einen der Funktionsname der Python-Funktion benötigt, welche implementiert werden soll. Zum anderen werden Beispielargumente benötigt, welche an die Funktion übergeben werden können, um diese testweise aufzurufen. Gib die Argumente als JSON-Objekt wieder und formatiere die jeweiligen Inhalte so, dass diese als Strings direkt übergeben werden können. Das Python Format soll dabei wie folgt aussehen: {"runMethod": "<Funktionsname>", "input": "<Argumente>"}. Gib niemals zusätzlichen Text oder sonstige Zeichen zum Formatieren an. Es soll nur das fertige JSON-Objekt zurückgegeben werden.\n
-
-            Beispiel:
-                Aufgabe:
-                    ### Übungsaufgabe: Haustiere zählen
-                    Schreibe eine Funktion namens "zaehle_haustiere(hunde, katzen)", die zwei Integer-Parameter "hunde" und "katzen" entgegennimmt. Die Funktion soll die Gesamtzahl der Haustiere berechnen und zurückgeben.
-
-                    Beispielaufruf: "zaehle_haustiere(3, 4)" gibt "7" zurück.
-
-                Musterlösung:
-                    def zaehle_haustiere(hunde, katzen):
-                        return hunde + katzen
-
-                UnitTest:
-                    import unittest
-                    from main import zaehle_haustiere
-
-                    class TestZaehleHaustiere(unittest.TestCase):
-                        def test_einfacher_fall(self):
-                            self.assertEqual(zaehle_haustiere(3, 4), 7)
-
-                        def test_null_haustiere(self):
-                            self.assertEqual(zaehle_haustiere(0, 0), 0)
-
-
-            Rückgabe für das vorliegende Beispiel:
-            {
-                "runMethod": "zaehle_haustiere",
-                "input": "3, 4"
-            }
-
-
-            Beispiel 2:
-                Musterlösung:
-                    def pc_beschreibung(cpu, gpu, ram):
-                        return f"Dieser Gaming PC hat eine {cpu} CPU, eine {gpu} GPU und {ram} RAM."
-
-                    print(pc_beschreibung("Intel i9", "NVIDIA RTX 3080", "32GB"))
-
-                UnitTest:
-                    import unittest
-                    from main import pc_beschreibung
-
-                    class TestPcBeschreibung(unittest.TestCase):
-                        def test_standard(self):
-                            self.assertEqual(pc_beschreibung("Intel i9", "NVIDIA RTX 3080", "32GB"), "Dieser Gaming PC hat eine Intel i9 CPU, eine NVIDIA RTX 3080 GPU und 32GB RAM.")
-
-                        def test_andere_werte(self):
-                            self.assertEqual(pc_beschreibung("AMD Ryzen 7", "AMD Radeon RX 6800", "16GB"), "Dieser Gaming PC hat eine AMD Ryzen 7 CPU, eine AMD Radeon RX 6800 GPU und 16GB RAM.")
-
-                        def test_leere_werte(self):
-                            self.assertEqual(pc_beschreibung("", "", ""), "Dieser Gaming PC hat eine  CPU, eine  GPU und  RAM.")
-
-                        def test_nur_cpu(self):
-                            self.assertEqual(pc_beschreibung("Intel i5", "", ""), "Dieser Gaming PC hat eine Intel i5 CPU, eine  GPU und  RAM.")
-
-                        def test_nur_gpu(self):
-                            self.assertEqual(pc_beschreibung("", "NVIDIA GTX 1660", ""), "Dieser Gaming PC hat eine  CPU, eine NVIDIA GTX 1660 GPU und  RAM.")
-
-                        def test_nur_ram(self):
-                            self.assertEqual(pc_beschreibung("", "", "8GB"), "Dieser Gaming PC hat eine  CPU, eine  GPU und 8GB RAM.")
-
-                    if __name__ == '__main__':
-                        unittest.main()
-
-            Rückgabe für das vorliegende Beispiel 2:
-            {
-                "runMethod": "pc_beschreibung",
-                "input": "\"Intel i9\", \"NVIDIA RTX 3080\", \"32GB\""
-            }
-
-            `),
-        new MessagesPlaceholder('messages'),
-      ]);
-
-      const response = await prompt
-        .pipe(
-          new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }),
-        )
-        .invoke({ messages });
-
-      console.log('genRunMethodArgs - response: ', response.content);
-
-      let jsonData = {
-        runMethod: '',
-        input: '',
-      };
-
-      try {
-        jsonData = JSON.parse(String(response.content));
-        console.log(
-          'Die Methode lautet: ' +
-            jsonData.runMethod +
-            ' und die Argumente sind: ' +
-            jsonData.input,
-        );
-      } catch (error) {
-        console.log('Fehler bei der Verarbeitung der Antwort: ', error);
-      }
-
-      const jury1Response = await axios.post(jury1url, {
-        runMethod: jsonData.runMethod,
-        input: jsonData.input,
-        mainFile: {
-          'main.py': this.encodeBased64(
-            state.solution[state.solution.length - 1],
-          ),
-        },
-        testFiles: {
-          'test_main.py': this.encodeBased64(
-            state.unitTest[state.unitTest.length - 1],
-          ),
-        },
-      });
-
-      console.log('jury1Response to RunMethod!: ', jury1Response.data);
-
-      return {
-        runMethod: jsonData.runMethod,
-        runMethodInput: jsonData.input,
-        messages: [response],
-      };
-    };
-
-    const judgeGenTask = async (state: typeof TaskGenState.State) => {
-      const { messages } = state;
-
-      const prompt = ChatPromptTemplate.fromMessages([
-        new SystemMessage(
-          `Du bist ein Dozent an einer Hochschule und leitest den Kurs 'Einführung in die Informatik'. Im Rahmen dieses Kurses sollst du Programmieraufgaben bewerten. Die Programmieraufgaben wurden von einer künstlichen Intelligenz erstellt und sollen nun von dir bewertet werden`,
-        ),
-        new HumanMessage(`Bewerte die nachfolgende Programmieraufgabe anhand der folgenden Kriterien:
-                1. Ist das Programmierkonzept bzw. sind alle Programmierkonzepte in der Musterlösung vertreten?
-                2. Sind in der Aufgabenstellung alle zum Lösen der Aufgabe benötigten Informationen enthalten? \n
-                3. Wird in der Aufgabenstellung ein Beispielaufruf der Funktion gezeigt? \n
-                4. Wird durch die Musterlösung das in der Aufgenstellung beschriebene Problem gelöst? \n
-                5. Werden durch den Unit-Test alle in der Aufgabenstellung angegebenen Fälle abgedeckt? Sollten im Unit-Test mehr Fälle abgefragt werden, als in der Aufgabenstellung spezifiziert, ist dieses Kriterium mit "False" zu bewerten. \n
-                6. Welche Offenheit nimmt die Aufgabe ein? \n
-                    6.1: Die Offenheit ist "Definiert und konvergent" wenn eine Aufgabe einen eindeutigen Arbeitsauftrag (well structured tasks) bzw. eine klar identifizierbare Fragestellung hat. Eine Lösung ist gesucht bzw. richtig. Wobei die richtige Lösung nicht unbedingt sichtbar sein muss. \n
-                    6.2: Die Offenheit ist "Definiert und divergent" wenn eine Aufgabe einen eindeutigen Arbeitsauftrag bzw. eine klar identifizierbare Fragestellung hat (well structured tasks). Allerdings sind mehrere Lösungen (bzw. Lösungswege) denkbar bzw. gesucht. \n
-                    6.3: Die Offenheit ist "Nicht definierte und divergent" wenn eine Aufgabe Informationen über ein Problem bzw. eine Situation gibt. Allerdings wird keine klare Frage gestellt oder kein Arbeitsauftrag gegeben (ill structured tasks). Die Situation impliziert unterschiedliche Fragestellungen. Die Problemsituation an sich ist die „Handlungsaufforderung“. Damit sind auch automatisch mehrere Lösungen (bzw. Lösungswege) denkbar bzw. richtig. \n
-                7. Welche Art von Lebensweltbezug hat die Aufgabe? \n
-                    7.1: Aufgaben "ohne Lebensweltbezug": In der Aufgabenstellung wird keine Verknüpfung zwischen Fachwissen und Erfahrungswelt der Schüler vorgegeben oder gefordert.
-                    7.2: Aufgaben mit "konstruiertem Lebensweltbezug": In der Aufgabenstellung wird eine Verknüpfung zwischen Fachwissen und einer stark konstruierten Lebenswelt (entspricht eher nicht den Erfahrungen des Schülers; Analogien zur eigenen Erfahrung kaum erkennbar) vorgegeben oder gefordert. \n
-                    7.3: Aufgaben mit "konstruiertem, aber authentisch wirkendem Lebensweltbezug": Der Lebensweltbezug ist zwar konstruiert, macht im Zusammenhang der Aufgabe aber Sinn und wirkt damit zumindest authentisch. Beispielsweise werden sinnvolle Anwendungen von Fachwissen im Alltag oder im Berufsleben in die Aufgabe eingebunden.
-                    7.4: Aufgaben mit "realem Lebensweltbezug": Hier geht die Differenz zwischen Aufgabe und Lebenswelt bzw. Schule und eigener Erfahrungswelt gegen Null. Die Schüler beschäftigen sich mit einer Problemstellung, die tatsächlich auch gelöst werden muss. Typische Beispiele wären die Vorbereitung einer Klassenfahrt oder die Vorbereitung von Bewerbungsschreiben.
-
-                Die Aufgabe lautet: \n
-                ${state.task} \n
-
-                Musterlösung: \n
-                ${state.solution[state.solution.length - 1]} \n
-
-                Unit-Test: \n
-                ${state.unitTest[state.unitTest.length - 1]} \n
-
-                Bewerte die Aufgabe anhand der Kriterien, indem du jedes Kriterium bewertest. Gebe deine Bewertung als JSON-Objekt wieder. Gebe niemals zusätzlichen Text, Formatierungszeichen oder sonstige Zeichen zum Formatieren an. Es soll nur das fertige JSON-Objekt zurückgegeben werden. Orientiere dich dabei an dem folgenden Beispiel:
-                {
-                    "1. Kriterium": True/False,
-                    "2. Kriterium": True/False,
-                    "3. Kriterium": True/False,
-                    "4. Kriterium": True/False,
-                    "5. Kriterium": True/False,
-                    "6. Kriterium": "Definiert und konvergent"/"Definiert und divergent"/"Nicht definierte und divergent",
-                    "7. Kriterium": "ohne Lebensweltbezug"/"konstruiertem Lebensweltbezug"/"konstruiertem, aber authentisch wirkendem Lebensweltbezug"/"realem Lebensweltbezug"
-                }`),
-        new MessagesPlaceholder('messages'),
-      ]);
-
-      const response = await prompt
-        .pipe(
-          new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }),
-        )
-        .invoke({ messages });
-
-      return {
-        judgeTask: response.content,
-        messages: [response],
-      };
-    };
 
     const workflow = new StateGraph(TaskGenState)
       .addNode('genSolution', genSolution)
       .addNode('genUnitTest', genUnitTest)
       .addNode('genExpectation', genExpectation)
       .addNode('checkCode', checkCode)
-      .addNode('genRunMethodArgs', genRunMethodArgs)
-      .addNode('judgeGenTask', judgeGenTask)
       .addEdge(START, 'genSolution')
       .addEdge('genSolution', 'genUnitTest')
       .addEdge('genUnitTest', 'checkCode')
@@ -795,9 +502,7 @@ export class CodingQuestionGeneratorCppService {
         retry: 'genSolution',
         continue: 'genExpectation',
       })
-      .addEdge('genExpectation', 'genRunMethodArgs')
-      .addEdge('genRunMethodArgs', 'judgeGenTask')
-      .addEdge('judgeGenTask', END);
+      .addEdge('genExpectation', END)
 
     const app = workflow.compile();
 
