@@ -4,10 +4,10 @@ import { CodingQuestionGeneratorCppService } from './codingQuestionGeneratorCPP.
 import { CodingQuestionGeneratorController } from './codingQuestionGenerator.controller';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '../../prisma/prisma.module';
-
+import { RunCodeModule } from '../run-code/run-code.module';
 @Module({
   providers: [CodingQuestionGeneratorService,  CodingQuestionGeneratorCppService],
   controllers: [CodingQuestionGeneratorController],
-  imports: [PrismaModule, ConfigModule.forRoot()],
+  imports: [RunCodeModule, PrismaModule, ConfigModule.forRoot()],
 })
 export class CodingQuestionGeneratorModule {}

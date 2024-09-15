@@ -4,6 +4,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { genTaskDto } from '@DTOs/tutorKaiDtos/genTask.dto';
 import { ChatOpenAI } from '@langchain/openai';
 import { z } from "zod";
+import { RunCodeService } from '../run-code/run-code.service';
+import { CodeSubmissionResult } from '@DTOs/index';
 
 import {
   HumanMessage,
@@ -34,6 +36,7 @@ export class CodingQuestionGeneratorCppService {
   constructor(
     private configService: ConfigService,
     private prisma: PrismaService,
+    private runCodeService: RunCodeService
   ) {}
 
   encodeBased64(text: string): string {
@@ -177,8 +180,8 @@ export class CodingQuestionGeneratorCppService {
       const { messages } = state;
 
       const SolutionSchema = z.array(z.object({
-        filename: z.string(),
-        code: z.string()
+        filename: z.string().describe("Der Dateiname der Datei, die den Code enthält."),
+        code: z.array(z.string().describe("Der korrekte Programmcode zum filename. Der Code sollte als Array von Strings zurückgegeben werden, wobei jeder String eine Zeile des Codes repräsentiert. Daher muss kein \\n verwendet werden!"))
       }));
 
       const outputParser = StructuredOutputParser.fromZodSchema(SolutionSchema);
@@ -193,14 +196,19 @@ export class CodingQuestionGeneratorCppService {
           new SystemMessage(
             `Du bist ein Programmierexperte. Erstelle eine strukturierte Lösung mit Dateinamen und Code.`
           ),
-          new HumanMessage(`Erstelle die korrigierte Musterlösung für eine Programmieraufgabe. Du hast dies bereits versucht, es gab aber einen Fehler. Generiere hier nur die korrigierte Musterlösung und keinen UnitTest. \n
+          new HumanMessage(`Erstelle die korrigierte Musterlösung für eine Programmieraufgabe. Du hast dies bereits versucht, es gab aber einen Fehler.
+            Generiere hier nur die korrigierte Musterlösung und keinen UnitTest. \n
                 Die Aufgabe lautet: ${taksdecription} \n
                 Die aufgetauchte Fehlermeldung: ${
                   state.checkCodeError[state.checkCodeError.length - 1]
                 }
-                Gib die Lösung als Array von Objekten zurück, wobei jedes Objekt einen Dateinamen und den zugehörigen Code enthält.`),
+                Gib die Musterlösung als Array von Objekten zurück, wobei jedes Objekt einen Dateinamen und den zugehörigen Code enthält.
+                **Der Code sollte als Array von Strings zurückgegeben werden, wobei jeder String eine Zeile des Codes repräsentiert. Daher muss kein \\n verwendet werden!**
+                In dem Code soll niemals nach einer Eingabe gefragt werden. Ausgaben in der Konsole sind gewollt.
+                Der Code soll ohne weitere Eingaben sofort ausführbar sein.\n
+            `),
           new MessagesPlaceholder('messages'),
-          new SystemMessage(outputParser.getFormatInstructions()),
+          //new SystemMessage(outputParser.getFormatInstructions()),
         ]);
       } else {
         prompt = ChatPromptTemplate.fromMessages([
@@ -213,6 +221,7 @@ export class CodingQuestionGeneratorCppService {
             Kommentare sind nur an entscheidenden beziehungsweise komplexen Stellen zu ergänzen.
             Erstelle eine Musterlösung für die Aufgabe in der übergebenen Programmiersprache. Implementiere in der Musterlösung immer die Funktion aus der Aufgabenstellung.
             Gib die Musterlösung als Array von Objekten zurück, wobei jedes Objekt einen Dateinamen und den zugehörigen Code enthält.
+            **Der Code sollte als Array von Strings zurückgegeben werden, wobei jeder String eine Zeile des Codes repräsentiert. Daher muss kein \\n verwendet werden!**
             In dem Code soll niemals nach einer Eingabe gefragt werden. Ausgaben in der Konsole sind gewollt.
             Der Code soll ohne weitere Eingaben sofort ausführbar sein.\n
             ${taskDescriptionString}\n
@@ -240,11 +249,18 @@ export class CodingQuestionGeneratorCppService {
       }
 
       const parsedSolution = await outputParser.parse(contentString);
+      const reconstructedSolution = parsedSolution.map(item => ({
+        ...item,
+        code: item.code.join('\n')
+      }));
+      console.log("******************************* BEGIN PROGRAMMCODE");
+      console.log(reconstructedSolution);
+      console.log("******************************* ENDE PROGRAMMCODE");
 
       return {
         messages: [response],
         checkCodeIteration: state.checkCodeIteration + 1,
-        solution: parsedSolution,
+        solution: reconstructedSolution,
       };
     };
 
@@ -260,13 +276,15 @@ export class CodingQuestionGeneratorCppService {
             Die Lösungen der Studierenden sollen durch Unit-Tests automatisch bewertet werden.
             Beachte, dass immer die folgenden zwei Zeilen am Anfang enthalten sein müssen:
             #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+            #define UNIT_TEST
             #include <JsonReporter.h>
             Erstelle auf Basis der Aufgabenstellung sowie der Musterlösung Unit-Tests, welche alle Edge-Cases abdecken. Die Unit-Tests sollen wie im Beispiel aufgebaut sein.
             Gib den Unit-Test als "String" wieder und markiere den Code nicht mit "'''cpp" oder ähnlichem.
 
-                Beispiel:
+                # 1. Beispiel:
 
                 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+                #define UNIT_TEST
                 #include <JsonReporter.h>
                 #include "Calculator.h"
                 #include "Greeter.h"
@@ -294,9 +312,60 @@ export class CodingQuestionGeneratorCppService {
                         REQUIRE(greeter.greet("") == "Hello, !");
                     }
                 }
+
+                # 2. Beispiel:
+                #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+                #define UNIT_TEST
+                #include <JsonReporter.h>
+                #include "doctest.h"
+
+                // Definiere UNIT_TEST, um die main-Funktion in Ausleihe.cpp auszuschließen
+                #define UNIT_TEST
+                #include "Ausleihe.cpp"
+
+                TEST_CASE("Book-Klasse") {
+                    Book book("Introduction to Algorithms", "Th. Cormen, Ch. Leiserson, R. Rivest", "0262531968");
+
+                    SUBCASE("Getter-Funktionen") {
+                        CHECK(book.getTitle() == "Introduction to Algorithms");
+                        CHECK(book.getAuthor() == "Th. Cormen, Ch. Leiserson, R. Rivest");
+                        CHECK(book.getISBN() == "0262531968");
+                    }
+
+                    SUBCASE("Setter-Funktionen") {
+                        book.setTitle("Neuer Titel");
+                        book.setAuthor("Neuer Autor");
+                        book.setISBN("1234567890");
+                        CHECK(book.getTitle() == "Neuer Titel");
+                        CHECK(book.getAuthor() == "Neuer Autor");
+                        CHECK(book.getISBN() == "1234567890");
+                    }
+                }
+
+                TEST_CASE("Student-Klasse") {
+                    Student student;
+                    Book book1("Introduction to Algorithms", "Th. Cormen, Ch. Leiserson, R. Rivest", "0262531968");
+                    Book book2("The C++ Programming Language", "Bjarne Stroustrup", "0201700735");
+
+                    SUBCASE("Bücher hinzufügen und ausgeben") {
+                        student.addBook(book1);
+                        student.addBook(book2);
+                        // Da printBooks() cout verwendet, können wir den Output nicht direkt testen, ohne cout umzuleiten.
+                        // Wir stellen jedoch sicher, dass keine Ausnahmen geworfen werden.
+                        CHECK_NOTHROW(student.printBooks());
+                    }
+
+                    SUBCASE("Buch entfernen") {
+                        student.addBook(book1);
+                        student.addBook(book2);
+                        student.removeBook(book1);
+                        CHECK_NOTHROW(student.printBooks());
+                    }
+                }
+
                         `),
           new HumanMessage(`Erstelle einen Unit-Test für die Programmieraufgabe inklusive aller benötigten Imports zu der nachfolgenden Musterlösung. Generiere nur den Unit-Test ohne zusätzlichen Text. Der Unit-Test soll direkt ausführbar sein.
-                Du hast bereits einmal versucht diesen Unit-Test zu erstellen, es gab aber einen Fehler. Generiere hier nur den korrigierten Unit-Test. \n
+                Du hast bereits einmal versucht diesen Unit-Test zu erstellen, es gab aber einen Fehler. Generiere hier nur den korrigierten Unit-Test. ES DARF NUR DER CODE OHNE SONSTIGEN TEXT DAVOR ODER DANACH SEIN! \n
                 \n
                 Die Musterlösung lautet: ${
                   state.solution[state.solution.length - 1]
@@ -315,13 +384,14 @@ export class CodingQuestionGeneratorCppService {
             Die Lösungen der Studierenden sollen durch Unit-Tests automatisch bewertet werden.
             Beachte, dass immer die folgenden zwei Zeilen am Anfang enthalten sein müssen:
             #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+            #define UNIT_TEST
             #include <JsonReporter.h>
             Erstelle auf Basis der Aufgabenstellung sowie der Musterlösung passende Unit-Tests. Die Unit-Tests sollen wie im Beispiel aufgebaut sein.
-            Gib den Unit-Test als "String" wieder und markiere den Code nicht mit "'''cpp" oder ähnlichem.
+            Gib den Unit-Test als "String" wieder und markiere den Code nicht mit "'''cpp" oder ähnlichem. ES DARF NUR DER CODE OHNE SONSTIGEN TEXT DAVOR ODER DANACH SEIN!
 
-                Beispiel:
-
+            # 1. Beispiel:
                 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+                #define UNIT_TEST
                 #include <JsonReporter.h>
                 #include "Calculator.h"
                 #include "Greeter.h"
@@ -347,6 +417,56 @@ export class CodingQuestionGeneratorCppService {
 
                     SUBCASE("Greeting an empty string") {
                         REQUIRE(greeter.greet("") == "Hello, !");
+                    }
+                }
+
+            # 2. Beispiel:
+                #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+                #define UNIT_TEST
+                #include <JsonReporter.h>
+                #include "doctest.h"
+
+                // Definiere UNIT_TEST, um die main-Funktion in Ausleihe.cpp auszuschließen
+                #define UNIT_TEST
+                #include "Ausleihe.cpp"
+
+                TEST_CASE("Book-Klasse") {
+                    Book book("Introduction to Algorithms", "Th. Cormen, Ch. Leiserson, R. Rivest", "0262531968");
+
+                    SUBCASE("Getter-Funktionen") {
+                        CHECK(book.getTitle() == "Introduction to Algorithms");
+                        CHECK(book.getAuthor() == "Th. Cormen, Ch. Leiserson, R. Rivest");
+                        CHECK(book.getISBN() == "0262531968");
+                    }
+
+                    SUBCASE("Setter-Funktionen") {
+                        book.setTitle("Neuer Titel");
+                        book.setAuthor("Neuer Autor");
+                        book.setISBN("1234567890");
+                        CHECK(book.getTitle() == "Neuer Titel");
+                        CHECK(book.getAuthor() == "Neuer Autor");
+                        CHECK(book.getISBN() == "1234567890");
+                    }
+                }
+
+                TEST_CASE("Student-Klasse") {
+                    Student student;
+                    Book book1("Introduction to Algorithms", "Th. Cormen, Ch. Leiserson, R. Rivest", "0262531968");
+                    Book book2("The C++ Programming Language", "Bjarne Stroustrup", "0201700735");
+
+                    SUBCASE("Bücher hinzufügen und ausgeben") {
+                        student.addBook(book1);
+                        student.addBook(book2);
+                        // Da printBooks() cout verwendet, können wir den Output nicht direkt testen, ohne cout umzuleiten.
+                        // Wir stellen jedoch sicher, dass keine Ausnahmen geworfen werden.
+                        CHECK_NOTHROW(student.printBooks());
+                    }
+
+                    SUBCASE("Buch entfernen") {
+                        student.addBook(book1);
+                        student.addBook(book2);
+                        student.removeBook(book1);
+                        CHECK_NOTHROW(student.printBooks());
                     }
                 }
 
@@ -408,24 +528,21 @@ export class CodingQuestionGeneratorCppService {
       let errorMessages = '';
 
       console.log('--- CheckCode ---');
-      console.log("BEGIN SOLUTION");
-      console.log(JSON.stringify(state.solution));
-      console.log("END");
 
-      //HIER DER TEST MIT JURY1 OB DER CODE FUNKTIONIERT - Rückgabe true oder false
-      const jury1Response = await axios.post(jury1url, {
-        files: state.solution.reduce((acc, file) => ({
-          ...acc,
-          [file.filename]: this.encodeBased64(file.code)
-        }), {}),
-        testFile: this.encodeBased64(unitTest),
-      });
+      const files = state.solution.reduce((acc, file) => {
+        acc[file.filename] = file.code;
+        return acc;
+      }, {} as { [fileName: string]: string });
 
-      console.log('jury1Response: ', jury1Response.data);
+      // Prepare the testFiles object
+      const testFiles = { 'testFile': this.encodeBased64(unitTest) };
+      // student code will be first searched for main method in submitCodeForExecutionCpp and transformed to base64 later
 
-      const testResults = jury1Response.data.testResults;
-      const testsPassed = jury1Response.data.testsPassed;
-      const output = jury1Response.data.output;
+      const jury1Response: CodeSubmissionResult = await this.runCodeService.submitCodeForExecutionCpp(files, testFiles);
+
+      const testResults = jury1Response.testResults;
+      const testsPassed = jury1Response.testsPassed;
+      const output = jury1Response.output;
 
       if (!testsPassed) {
         for (let i = 0; i < testResults.length; i++) {
@@ -441,7 +558,9 @@ export class CodingQuestionGeneratorCppService {
               const testException = testResults[i].exception;
               errorMessages += `Fehler in Testcase: ${testCase}\n Fehlermeldung: ${testException} \n`;
             }
-          } else if (testResults[i].status === 'ERROR') {
+          }
+          /*
+          else if (testResults[i].status === 'ERROR') {
             //ERROR -> alter Kompilierungsfehler
             const testCase = testResults[i].test;
             const testError = testResults[i].error;
@@ -452,19 +571,20 @@ export class CodingQuestionGeneratorCppService {
 
             errorMessages += `Kompilierungsfehler: ${output} \n`;
           }
+            */
         }
       }
 
       if (testsPassed) {
         return {
           checkCodeErrorHappend: false,
-          juryResponses: [jury1Response.data],
+          juryResponses: [jury1Response],
         };
       } else {
         return {
           checkCodeErrorHappend: true,
           checkCodeError: [errorMessages],
-          juryResponses: [jury1Response.data],
+          juryResponses: [jury1Response],
         };
       }
     };

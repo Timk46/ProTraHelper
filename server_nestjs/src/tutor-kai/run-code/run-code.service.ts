@@ -49,7 +49,7 @@ export class RunCodeService {
     }, {});
 
     let response: CodeSubmissionResult = await this.executeCode(modelSolution, codingQuestion);
-    console.log('response', response);
+    //console.log('response', response);
     return response;
   }
 
@@ -105,9 +105,6 @@ export class RunCodeService {
   }
 
   private async executeCode(studentCode: { [fileName: string]: string; }, codingQuestion: CodingQuestionInternal) {
-    console.log('studentCode', studentCode);
-    console.log('codingQuestion', codingQuestion);
-    const filesBase64 = await this.generateBase64(studentCode);
     const testFilesBase64 = await this.generateBase64({
       [codingQuestion.automatedTests[0].testClassName]: codingQuestion.automatedTests[0].code,
     });
@@ -115,12 +112,14 @@ export class RunCodeService {
     // Submit encoded files for execution and process the response.
     let response: CodeSubmissionResult;
     if (codingQuestion.programmingLanguage === 'java') {
+      const filesBase64 = await this.generateBase64(studentCode);
       response = await this.submitCodeForExecutionJava(
         filesBase64,
         testFilesBase64,
         codingQuestion.mainFileName
       );
     } else if (codingQuestion.programmingLanguage === 'python') {
+      const filesBase64 = await this.generateBase64(studentCode);
       response = await this.submitCodeForExecutionPython(
         filesBase64,
         testFilesBase64,
@@ -128,18 +127,8 @@ export class RunCodeService {
         codingQuestion.automatedTests[0].inputArguments
       );
     } else if (codingQuestion.programmingLanguage === 'cpp') {
-      // Modifizieren der Dateien, um die main-Funktion zu umschließen
-      // #ifndef UNIT_TEST vor der main methode und #endif // UNIT_TEST nach der Main Methode
-      // Ansonsten wird die main-Funktion nicht ausgeführt, wenn die Unit-Tests ausgeführt werden (doppelte main = konflikt)
-      const modifiedFiles: { [fileName: string]: string } = {};
-
-      for (const [fileName, content] of Object.entries(studentCode)) {
-          // Suchen nach der main-Funktion im Code
-          const modifiedContent = this.wrapMainFunction(content);
-          modifiedFiles[fileName] = modifiedContent;
-      }
       response = await this.submitCodeForExecutionCpp(
-        await this.generateBase64(modifiedFiles),
+        studentCode,
         testFilesBase64
       );
     } else {
@@ -216,17 +205,28 @@ export class RunCodeService {
 
   /**
    * Submits encoded student C++ code and test files for execution with Jury1.
-   * @param files Base64-encoded student code files.
+   * @param files Student code files.
    * @param testFiles Base64-encoded test files.
    * @returns The execution result from the external API.
    */
-  private async submitCodeForExecutionCpp(
+  public async submitCodeForExecutionCpp(
     files: { [fileName: string]: string },
     testFiles: { [fileName: string]: string },
   ): Promise<CodeSubmissionResult> {
+    // Modifizieren der Dateien, um die main-Funktion zu umschließen
+    const modifiedFiles: { [fileName: string]: string } = {};
 
+    for (const [fileName, content] of Object.entries(files)) {
+      const modifiedContent = this.wrapMainFunction(content);
+      modifiedFiles[fileName] = modifiedContent;
+    }
+
+    // Konvertierung zu Base64
+    const filesBase64 = await this.generateBase64(modifiedFiles);
+
+    console.log("JURY 1 CPP Anfrage");
     console.log(JSON.stringify({
-      files: files,
+      files: filesBase64,
       testFile: Object.values(testFiles)[0]
     }));
 
@@ -234,7 +234,7 @@ export class RunCodeService {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        files: files,
+        files: filesBase64,
         testFile: Object.values(testFiles)[0]
       }),
     });
@@ -247,9 +247,11 @@ export class RunCodeService {
     }
 
     const result: CodeSubmissionResult = await response.json();
-    console.log(result);
+    console.log("JURY 1 CPP Antwort");
+    console.log(JSON.stringify(result));
     return result;
   }
+
   // add Präprozessor-Direktiven
   // Um die Unit-Tests ohne Konflikte ausführen zu können, haben wir die main-Funktion mit Präprozessor-Direktiven umgeben
   private wrapMainFunction(content: string): string {
@@ -280,6 +282,7 @@ export class RunCodeService {
                 const mainFunction = content.substring(mainFunctionStart, mainFunctionEnd);
                 const afterMain = content.substring(mainFunctionEnd);
 
+                console.log("Main Methode mit Präprozessor-Direktiven umschlossen.");
                 return `${beforeMain}\n#ifndef UNIT_TEST\n${mainFunction}\n#endif // UNIT_TEST\n${afterMain}`;
             } else {
                 console.log("Konnte die schließende Klammer der main-Funktion nicht finden.");
@@ -289,11 +292,11 @@ export class RunCodeService {
         console.log("Keine main-Funktion gefunden.");
     }
     return content;
-}
+  }
+
   /**
    * Processes the response from the code execution API, logs the response, and saves the results to the database.
    */
-
   private async processExecutionResponse(
     response: CodeSubmissionResult,
     codingQuestion: CodingQuestion,
