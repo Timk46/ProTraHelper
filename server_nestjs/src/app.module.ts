@@ -1,4 +1,3 @@
-
 /* eslint-disable prettier/prettier */
 import { ContentModule } from './content/content.module';
 import { FilesModule } from './files/files.module';
@@ -19,7 +18,6 @@ import { DiscussionViewService } from './discussion/discussion-view/discussion-v
 import { DiscussionCreationService } from './discussion/discussion-creation/discussion-creation.service';
 import { DiscussionCreationController } from './discussion/discussion-creation/discussion-creation.controller';
 import { QuestionDataModule } from './question-data/question-data.module';
-import { LoggerModule } from 'nestjs-pino';
 
 // BEGIN Tutor-Kai Imports
 import { CryptoService } from './tutor-kai/crypto/crypto.service';
@@ -44,22 +42,6 @@ import { ContentLinkerModule } from './content-linker/content-linker.module';
 
 @Module({
   imports: [
-    LoggerModule.forRoot({
-      pinoHttp: {
-        customProps: (req, res) => ({
-          context: 'HTTP',
-        }),
-        transport: {
-          target: 'pino-pretty',
-          options: {
-            colorize: true,
-            levelFirst: true,
-            translateTime: 'SYS:dd.mm.yyyy hh:MM:ss TT Z',
-            singleLine: true,
-          },
-      },
-    },
-    }),
     FilesModule,
     GraphModule,
     PrismaModule,
@@ -101,7 +83,6 @@ import { ContentLinkerModule } from './content-linker/content-linker.module';
       useClass: JwtAuthGuard, // All Routes are protected by JWTGuard. Users only get Tokens by using CAS of the university
     },
     ContentLinkerService,
-
   ],
 })
 

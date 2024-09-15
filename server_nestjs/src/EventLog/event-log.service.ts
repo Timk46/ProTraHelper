@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { PinoLogger } from 'nestjs-pino';
+//import { PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class EventLogService {
 
-  constructor(private prisma: PrismaService, private logger: PinoLogger) {}
+  constructor
+  (
+    private prisma: PrismaService,
+    //private logger: PinoLogger
+  ) {}
 
   /**
    * Logs an event with given parameters, storing in the database and forwarding to the external logger.
@@ -17,6 +21,7 @@ export class EventLogService {
    * @returns {Promise<void>} A promise that resolves when the log is stored and logged externally.
    */
   async log(level: string, type: string, user: number, message: string, data?: any): Promise<void> {
+
     await this.prisma.eventLog.create({ // without await so we don't block the request
       data: {
         level: level,
@@ -27,6 +32,6 @@ export class EventLogService {
       },
     });
     // Utilize dynamic logging levels based on the 'level' parameter.
-    this.logger[level](message, data);
+    //this.logger[level](message, data);
   }
 }
