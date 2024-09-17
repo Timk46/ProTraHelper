@@ -273,7 +273,6 @@ export class EditCodingComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log('Form submitted:', this.codingForm.value);
     if (this.codingForm.valid && this.questionData) {
       const updatedQuestion: detailedQuestionDTO = {
         ...this.questionData,

@@ -101,3 +101,49 @@ app-code-editor {
   border-radius: 4px;
   overflow: hidden;
 }
+
+// Styles for markdown-rendered content
+::ng-deep markdown {
+  // Unordered lists
+  ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-bottom: 16px;
+  }
+
+  // Ordered lists
+  ol {
+    list-style-type: decimal;
+    padding-left: 20px;
+    margin-bottom: 16px;
+  }
+
+  // List items
+  li {
+    margin-bottom: 8px;
+  }
+
+  // Nested lists
+  ul ul, ol ul {
+    list-style-type: circle;
+  }
+
+  ul ol, ol ol {
+    list-style-type: lower-alpha;
+  }
+
+  // Task lists
+  ul.contains-task-list {
+    list-style-type: none;
+    padding-left: 0;
+  }
+
+  .task-list-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .task-list-item-checkbox {
+    margin-right: 8px;
+  }
+}

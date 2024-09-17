@@ -660,7 +660,7 @@ export class CodingQuestionGeneratorCppService {
     const genereatedCodingQuestion: CodingQuestionInternal = {
       id : -1, // temp - real value will be set by database
       count_InputArgs : 0, // none fpr cp tasks
-      programmingLanguage : "CPP",
+      programmingLanguage : "cpp",
       mainFileName : "", // not needed for cpp tasks
       text : result.task,
       textHTML : result.task,
@@ -670,11 +670,6 @@ export class CodingQuestionGeneratorCppService {
       modelSolutions : [result.solution[result.solution.length - 1]]
 
     };
-
-    console.log("RESULT:**************************************************************")
-    console.log(jsonData);
-    //const dbEntry = await this.createDatabaseEntry(jsonData);
-    //console.log('Datenbank Eintrag erstellt - ID der Aufgabe: ', dbEntry.id);
 
     return genereatedCodingQuestion;
   }
