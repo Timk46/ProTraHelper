@@ -1,46 +1,49 @@
+
+
 <div class="edit-coding-container">
   <h2>Programmieraufgabe erstellen/bearbeiten</h2>
   <form [formGroup]="codingForm" (ngSubmit)="onSubmit()">
-    <div class="form-row">
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Name</mat-label>
-        <input matInput formControlName="name" required>
-      </mat-form-field>
+  <div class = "section-container">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" required>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Programming Language</mat-label>
-        <mat-select formControlName="programmingLanguage" required>
-          <mat-option value="python">Python</mat-option>
-          <mat-option value="java">Java</mat-option>
-          <mat-option value="cpp">C++</mat-option>
-        </mat-select>
-      </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Programming Language</mat-label>
+          <mat-select formControlName="programmingLanguage" required>
+            <mat-option value="python">Python</mat-option>
+            <mat-option value="java">Java</mat-option>
+            <mat-option value="cpp">C++</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="form-field full-width subsection-container">
+        <div class="section-header">
+          <h3>Aufgabenstellung</h3>
+          <button mat-mini-fab color="primary" type="button" (click)="togglePreview()">
+            <mat-icon>{{ showPreview ? 'edit' : 'preview' }}</mat-icon>
+          </button>
+        </div>
+        <p>Die Aufgabenstellung. Diese wird mit der Markdown-Syntax formatiert.</p>
+        <mat-divider></mat-divider>
+        <div class="markdown-editor-container">
+          <div [hidden]="showPreview">
+            <app-code-editor
+              [code]="codingForm.get('text')?.value"
+              [selectedLanguage]="markdownLanguage"
+              (codeChange)="onCodeChange($event, 0, 'text')"
+            ></app-code-editor>
+          </div>
+          <div [hidden]="!showPreview">
+            <markdown [data]="codingForm.get('text')?.value"></markdown>
+          </div>
+        </div>
     </div>
 
-    <div class="form-field full-width section-container">
-      <div class="section-header">
-        <h3>Question Text</h3>
-        <button mat-mini-fab color="primary" type="button" (click)="togglePreview()">
-          <mat-icon>{{ showPreview ? 'edit' : 'preview' }}</mat-icon>
-        </button>
-      </div>
-      <p>Die Aufgabenstellung. Diese wird mit der Markdown-Syntax formatiert.</p>
-      <mat-divider></mat-divider>
-      <div class="markdown-editor-container">
-        <div [hidden]="showPreview">
-          <app-code-editor
-            [code]="codingForm.get('text')?.value"
-            [selectedLanguage]="markdownLanguage"
-            (codeChange)="onCodeChange($event, 0, 'text')"
-          ></app-code-editor>
-        </div>
-        <div [hidden]="!showPreview">
-          <markdown [data]="codingForm.get('text')?.value"></markdown>
-        </div>
-      </div>
-    </div>
-
-    <div formArrayName="codeGerueste" class="section-container">
+    <div formArrayName="codeGerueste" class="subsection-container">
       <div class="section-header">
         <h3>Code-Gerüste</h3>
         <button mat-mini-fab color="primary" type="button" (click)="openAddModal('codeGerueste')">
@@ -66,102 +69,106 @@
         </mat-expansion-panel>
       </mat-accordion>
     </div>
-
+  </div>
     <!-- Generate Task button moved here, below the code scaffolds -->
-    <div class="section-container">
-      <button mat-raised-button color="primary" type="button" (click)="generateTask()">Aufgabe generieren</button>
-    </div>
 
-    <div formArrayName="modelSolutions" class="section-container">
-      <div class="section-header">
-        <h3>Model Solutions</h3>
-        <button mat-mini-fab color="primary" type="button" (click)="openAddModal('modelSolutions')">
-          <mat-icon>add</mat-icon>
-        </button>
+      <div style="text-align: center; margin-bottom: 15px">
+        <button mat-raised-button color="primary" type="button" (click)="generateTask()">Aufgabe generieren</button>
       </div>
-      <p>Musterlösungen für die Aufgabe.</p>
-      <mat-accordion>
-        <mat-expansion-panel *ngFor="let solution of modelSolutionsControls; let i = index" [formGroupName]="i">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <span>{{solution.get('codeFileName')?.value || 'Solution ' + (i + 1)}}</span>
-              <button mat-icon-button color="warn" type="button" (click)="confirmDelete('modelSolutions', i, solution.get('codeFileName')?.value || 'Solution ' + (i + 1)); $event.stopPropagation();">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <app-code-editor
-            [code]="solution.get('code')?.value"
-            [selectedLanguage]="codingForm.get('programmingLanguage')?.value"
-            (codeChange)="onCodeChange($event, i, 'modelSolutions')"
-          ></app-code-editor>
-        </mat-expansion-panel>
-      </mat-accordion>
-    </div>
 
-    <div formArrayName="automatedTests" class="section-container">
-      <div class="section-header">
-        <h3>Unit Tests</h3>
-        <button mat-mini-fab color="primary" type="button" (click)="openAddModal('automatedTests')">
-          <mat-icon>add</mat-icon>
-        </button>
+
+    <div class = "section-container">
+      <div formArrayName="modelSolutions" class="subsection-container">
+        <div class="section-header">
+          <h3>Musterlösung</h3>
+          <button mat-mini-fab color="primary" type="button" (click)="openAddModal('modelSolutions')">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        <p>Musterlösungen für die Aufgabe.</p>
+        <mat-accordion>
+          <mat-expansion-panel *ngFor="let solution of modelSolutionsControls; let i = index" [formGroupName]="i">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <span>{{solution.get('codeFileName')?.value || 'Solution ' + (i + 1)}}</span>
+                <button mat-icon-button color="warn" type="button" (click)="confirmDelete('modelSolutions', i, solution.get('codeFileName')?.value || 'Solution ' + (i + 1)); $event.stopPropagation();">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <app-code-editor
+              [code]="solution.get('code')?.value"
+              [selectedLanguage]="codingForm.get('programmingLanguage')?.value"
+              (codeChange)="onCodeChange($event, i, 'modelSolutions')"
+            ></app-code-editor>
+          </mat-expansion-panel>
+        </mat-accordion>
       </div>
-      <p>Die Unit-Tests überprüfen die Lösungen der Lernenden auf Korrektheit.</p>
-      <mat-accordion>
-        <mat-expansion-panel *ngFor="let test of automatedTestsControls; let i = index" [formGroupName]="i">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <span>{{test.get('testFileName')?.value || 'Test ' + (i + 1)}}</span>
-              <button mat-icon-button type="button" color="warn" (click)="confirmDelete('automatedTests', i, test.get('testFileName')?.value || 'Test ' + (i + 1)); $event.stopPropagation();">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <app-code-editor
-            [code]="test.get('code')?.value"
-            [selectedLanguage]="codingForm.get('programmingLanguage')?.value"
-            (codeChange)="onCodeChange($event, i, 'automatedTests')"
-          ></app-code-editor>
-        </mat-expansion-panel>
-      </mat-accordion>
-    </div>
 
-    <!-- Programming Language specific extra information for Unit-Tests -->
-    <div class="section-container" [ngSwitch]="codingForm.get('programmingLanguage')?.value">
-      <p>Extra Informationen je nach Programmiersprache, um den Code auszuführen.</p>
-      <div *ngSwitchCase="'python'" class="form-row">
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Run Method</mat-label>
-          <input matInput formControlName="runMethod">
+      <div formArrayName="automatedTests" class="subsection-container">
+        <div class="section-header">
+          <h3>Unit-Tests</h3>
+          <button mat-mini-fab color="primary" type="button" (click)="openAddModal('automatedTests')">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        <p>Die Unit-Tests überprüfen die Lösungen der Lernenden auf Korrektheit.</p>
+        <mat-accordion>
+          <mat-expansion-panel *ngFor="let test of automatedTestsControls; let i = index" [formGroupName]="i">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <span>{{test.get('testFileName')?.value || 'Test ' + (i + 1)}}</span>
+                <button mat-icon-button type="button" color="warn" (click)="confirmDelete('automatedTests', i, test.get('testFileName')?.value || 'Test ' + (i + 1)); $event.stopPropagation();">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <app-code-editor
+              [code]="test.get('code')?.value"
+              [selectedLanguage]="codingForm.get('programmingLanguage')?.value"
+              (codeChange)="onCodeChange($event, i, 'automatedTests')"
+            ></app-code-editor>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+
+      <!-- Programming Language specific extra information for Unit-Tests -->
+      <div class="subsection-container" *ngIf="codingForm.get('programmingLanguage')?.value != 'cpp'" [ngSwitch]="codingForm.get('programmingLanguage')?.value">
+        <p>Extra Informationen je nach Programmiersprache, um den Code auszuführen.</p>
+        <div *ngSwitchCase="'python'" class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Run Method</mat-label>
+            <input matInput formControlName="runMethod">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Input Arguments</mat-label>
+            <input matInput formControlName="inputArguments">
+          </mat-form-field>
+        </div>
+        <div *ngSwitchCase="'java'" class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Main File Name</mat-label>
+            <input matInput formControlName="mainFileName">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- New "Testen" button and test results section -->
+        <div style="text-align: center; margin-bottom: 15px">
+          <button mat-raised-button color="primary" type="button" (click)="testCode()">Die Musterlösung gegen die Unit-Tests prüfen.</button>
+        </div>
+        <div *ngIf="testResults" class="test-results">
+          <h4>Test Results:</h4>
+          <pre>{{ testResults | json }}</pre>
+        </div>
+
+
+      <div class="subsection-container">
+        <mat-form-field appearance="outline" class="form-field full-width">
+          <mat-label>Erwartungshorizont</mat-label>
+          <textarea matInput formControlName="expectations" rows="5" placeholder="Der Erwartungshorizont für die Aufgabe."></textarea>
         </mat-form-field>
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Input Arguments</mat-label>
-          <input matInput formControlName="inputArguments">
-        </mat-form-field>
       </div>
-      <div *ngSwitchCase="'java'" class="form-row">
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Main File Name</mat-label>
-          <input matInput formControlName="mainFileName">
-        </mat-form-field>
-      </div>
-    </div>
-
-    <!-- New "Testen" button and test results section -->
-    <div class="section-container">
-      <p>Die Musterlösung gegen die Unit-Tests prüfen.</p>
-      <button mat-raised-button color="primary" type="button" (click)="testCode()">Testen</button>
-      <div *ngIf="testResults" class="test-results">
-        <h4>Test Results:</h4>
-        <pre>{{ testResults | json }}</pre>
-      </div>
-    </div>
-
-    <div class="section-container">
-      <mat-form-field appearance="outline" class="form-field full-width">
-        <mat-label>Erwartungshorizont</mat-label>
-        <textarea matInput formControlName="expectations" rows="5" placeholder="Der Erwartungshorizont für die Aufgabe."></textarea>
-      </mat-form-field>
     </div>
 
     <div class="form-actions">
@@ -172,5 +179,6 @@
       </div>
       <button mat-raised-button color="primary" type="submit" class="action-button">Save Changes</button>
     </div>
+
   </form>
 </div>

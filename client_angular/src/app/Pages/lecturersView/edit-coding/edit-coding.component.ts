@@ -18,7 +18,7 @@ import { ConfirmDialogComponent } from './confirm-dialog.component';
 export class EditCodingComponent implements OnInit {
   codingForm: FormGroup;
   thisQuestionType = questionType.CODE;
-  questionData: detailedQuestionDTO| null = null;
+  questionData: detailedQuestionDTO | null = null;
   markdownLanguage = 'markdown';
   showPreview = false;
   testResults: CodeSubmissionResultDto | null = null;
@@ -42,7 +42,6 @@ export class EditCodingComponent implements OnInit {
           this.questionData = data;
           console.log('Question data:', this.questionData);
 
-          // If codingQuestion doesn't exist, create an empty one
           if (!this.questionData.codingQuestion) {
             this.questionData.codingQuestion = {
               id: 0,
@@ -61,7 +60,7 @@ export class EditCodingComponent implements OnInit {
           this.populateForm();
         });
       }
-    })
+    });
   }
 
   createForm(): FormGroup {
@@ -159,11 +158,14 @@ export class EditCodingComponent implements OnInit {
       }
     } else {
       const formArray = this.codingForm.get(type) as FormArray;
-      formArray.at(index).patchValue({ code: newCode });
-      if (this.questionData && this.questionData.codingQuestion) {
-        const questionDataArray = this.questionData.codingQuestion[type];
-        if (Array.isArray(questionDataArray) && questionDataArray[index]) {
-          questionDataArray[index].code = newCode;
+      const control = formArray.at(index);
+      if (control) {
+        control.patchValue({ code: newCode });
+        if (this.questionData && this.questionData.codingQuestion) {
+          const questionDataArray = this.questionData.codingQuestion[type];
+          if (Array.isArray(questionDataArray) && questionDataArray[index]) {
+            questionDataArray[index].code = newCode;
+          }
         }
       }
     }
@@ -425,12 +427,12 @@ export class EditCodingComponent implements OnInit {
       const reader = new FileReader();
       reader.onload = (e: ProgressEvent<FileReader>) => {
         try {
-          const importedData = JSON.parse(e.target?.result as string);
+          const importedData = JSON.parse(e.target?.result as string) as detailedQuestionDTO;
           this.questionData = importedData;
           if (this.questionData && this.questionData.codingQuestion) {
             this.codingForm.patchValue({
-              runMethod: this.questionData.codingQuestion.automatedTests[0].runMethod || '',
-              inputArguments: this.questionData.codingQuestion.automatedTests[0].inputArguments || '',
+              runMethod: this.questionData.codingQuestion.automatedTests[0]?.runMethod || '',
+              inputArguments: this.questionData.codingQuestion.automatedTests[0]?.inputArguments || '',
               mainFileName: this.questionData.codingQuestion.mainFileName || ''
             });
           }
@@ -471,46 +473,42 @@ export class EditCodingComponent implements OnInit {
   }
 
   populateFormWithGenTask(genTask: CodingQuestionInternal) {
-    console.log(genTask);
+    console.log('Populating form with generated task:', genTask);
+
     this.codingForm.patchValue({
       programmingLanguage: genTask.programmingLanguage,
-      text: genTask.text,
       expectations: genTask.expectations,
       mainFileName: genTask.mainFileName,
       count_InputArgs: genTask.count_InputArgs
     });
 
-    // Do not clear or update codeGerueste as per the feedback
+    // Clear existing arrays
+    (this.codingForm.get('codeGerueste') as FormArray).clear();
+    (this.codingForm.get('modelSolutions') as FormArray).clear();
+    (this.codingForm.get('automatedTests') as FormArray).clear();
 
-    // Clear and update modelSolutions
-    const modelSolutionsFormArray = this.codingForm.get('modelSolutions') as FormArray;
-    modelSolutionsFormArray.clear();
+    // Add code scaffolds
+    genTask.codeGerueste?.forEach(codeGeruest => {
+      this.addElement('codeGerueste', {
+        fileName: codeGeruest.codeFileName,
+        code: codeGeruest.code
+      });
+    });
+
+    // Add model solutions
     genTask.modelSolutions?.forEach(solution => {
-      modelSolutionsFormArray.push(
-        this.fb.group({
-          id: 0,
-          codeFileName: solution.codeFileName,
-          code: solution.code
-        })
-      );
+      this.addElement('modelSolutions', {
+        fileName: solution.codeFileName,
+        code: solution.code
+      });
     });
 
-    // Clear and update automatedTests
-    const automatedTestsFormArray = this.codingForm.get('automatedTests') as FormArray;
-    automatedTestsFormArray.clear();
-    genTask.automatedTests.forEach(test => {
-      automatedTestsFormArray.push(
-        this.fb.group({
-          id: 0,
-          testFileName: test.testFileName,
-          code: test.code,
-          runMethod: test.runMethod,
-          inputArguments: test.inputArguments
-        })
-      );
+    // Add automated tests
+    genTask.automatedTests?.forEach(test => {
+      this.addElement('automatedTests', {
+        fileName: test.testFileName ? test.testFileName : 'testFile',
+        code: test
+      });
     });
-
-    // Update the form controls
-    this.codingForm.updateValueAndValidity();
   }
 }

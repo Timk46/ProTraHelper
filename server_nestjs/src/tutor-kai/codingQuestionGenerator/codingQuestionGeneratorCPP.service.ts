@@ -27,7 +27,7 @@ import axios from 'axios';
 import { StructuredOutputParser } from "langchain/output_parsers";
 
 interface localCodeFile {
-  filename: string;
+  codeFileName: string;
   code: string;
 }
 
@@ -180,8 +180,8 @@ export class CodingQuestionGeneratorCppService {
       const { messages } = state;
 
       const SolutionSchema = z.array(z.object({
-        filename: z.string().describe("Der Dateiname der Datei, die den Code enthält."),
-        code: z.array(z.string().describe("Der korrekte Programmcode zum filename. Der Code sollte als Array von Strings zurückgegeben werden, wobei jeder String eine Zeile des Codes repräsentiert. Daher muss kein \\n verwendet werden!"))
+        codeFileName: z.string().describe("Der Dateiname der Datei, die den Code enthält."),
+        code: z.array(z.string().describe("Der korrekte Programmcode zum codeFileName. Der Code sollte als Array von Strings zurückgegeben werden, wobei jeder String eine Zeile des Codes repräsentiert. Daher muss kein \\n verwendet werden!"))
       }));
 
       const outputParser = StructuredOutputParser.fromZodSchema(SolutionSchema);
@@ -204,7 +204,7 @@ export class CodingQuestionGeneratorCppService {
             # Die Unit-Tests:\n
             ${state.unitTest[state.unitTest.length - 1]} \n
             # Die falsche Musterlösung:
-            ## Datei ${state.solution[state.solution.length - 1].filename} \n
+            ## Datei ${state.solution[state.solution.length - 1].codeFileName} \n
             ${state.solution[state.solution.length - 1].code}
             # Die aufgetauchte Fehlermeldung:\n
             ${ state.checkCodeError[state.checkCodeError.length - 1]} \n
@@ -378,7 +378,7 @@ export class CodingQuestionGeneratorCppService {
                 # Aufgabenstellung:\n
                 ${taksdecription} \n
                 # Die Musterlösung:
-                ## Datei ${state.solution[state.solution.length - 1].filename} \n
+                ## Datei ${state.solution[state.solution.length - 1].codeFileName} \n
                 ${state.solution[state.solution.length - 1].code}
                 # Die fehlerhaften Unit-Tests:\n
                 ${state.unitTest[state.unitTest.length - 1]} \n
@@ -485,7 +485,7 @@ export class CodingQuestionGeneratorCppService {
           new HumanMessage(
             `Entwickle einen Unit-Test für eine Programmieraufgabe inklusive aller benötigten Imports zu der nachfolgenden Musterlösung. Generiere nur den Unit-Test ohne zusätzlichen Text. Der Unit-Test soll direkt ausführbar sein.
             # Musterlösung
-            ## Datei ${ state.solution[state.solution.length - 1].filename} \n
+            ## Datei ${ state.solution[state.solution.length - 1].codeFileName} \n
             ${state.solution[state.solution.length - 1].code} \n
             `,
           ),
@@ -545,9 +545,9 @@ export class CodingQuestionGeneratorCppService {
       console.log('--- CheckCode ---');
 
       const files = state.solution.reduce((acc, file) => {
-        acc[file.filename] = file.code;
+        acc[file.codeFileName] = file.code;
         return acc;
-      }, {} as { [fileName: string]: string });
+      }, {} as { [codeFileName: string]: string });
 
       // Prepare the testFiles object
       const testFiles = { 'testFile': this.encodeBased64(unitTest) };

@@ -22,7 +22,7 @@ export class EditCodeService {
     return this.http.post<genTaskDto>(`${this.genTaskUrl}/contextualizedTask`, { inhalt, kontext });
   }
 
-  generateCppTask(taksdecription: string, codeGerueste: CodeGeruestDto[]): Observable<CodingQuestionInternal> {
-    return this.http.post<CodingQuestionInternal>(`${this.genTaskUrl}/genCppTask`, {taksdecription, codeGerueste });
+  generateCppTask(taskDescription: string, codeGerueste: CodeGeruestDto[]): Observable<CodingQuestionInternal> {
+    return this.http.post<CodingQuestionInternal>(`${this.genTaskUrl}/genCppTask`, { taskDescription, codeGerueste });
   }
 }
