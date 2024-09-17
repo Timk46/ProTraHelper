@@ -21,14 +21,14 @@
       <div class="form-field full-width subsection-container">
         <div class="section-header">
           <h3>Aufgabenstellung</h3>
-          <button mat-mini-fab color="primary" type="button" (click)="togglePreview()">
-            <mat-icon>{{ showPreview ? 'edit' : 'preview' }}</mat-icon>
+          <button mat-mini-fab color="primary" type="button" (click)="togglePreview('task')">
+            <mat-icon>{{ showTaskPreview ? 'edit' : 'preview' }}</mat-icon>
           </button>
         </div>
         <p>Die Aufgabenstellung. Diese wird mit der Markdown-Syntax formatiert.</p>
         <mat-divider></mat-divider>
         <div class="markdown-editor-container">
-          <div [hidden]="showPreview">
+          <div [hidden]="showTaskPreview">
             <ng-container *ngIf="!isGenerating; else readOnlyText">
               <app-code-editor
                 [code]="codingForm.get('text')?.value"
@@ -40,7 +40,7 @@
               <pre>{{ codingForm.get('text')?.value }}</pre>
             </ng-template>
           </div>
-          <div [hidden]="!showPreview">
+          <div [hidden]="!showTaskPreview">
             <markdown [data]="codingForm.get('text')?.value"></markdown>
           </div>
         </div>
@@ -183,10 +183,31 @@
         </div>
 
       <div class="subsection-container">
-        <mat-form-field appearance="outline" class="form-field full-width">
-          <mat-label>Erwartungshorizont</mat-label>
-          <textarea matInput formControlName="expectations" rows="5" placeholder="Der Erwartungshorizont für die Aufgabe." [disabled]="isGenerating"></textarea>
-        </mat-form-field>
+        <div class="section-header">
+          <h3>Erwartungshorizont</h3>
+          <button mat-mini-fab color="primary" type="button" (click)="togglePreview('expectations')">
+            <mat-icon>{{ showExpectationsPreview ? 'edit' : 'preview' }}</mat-icon>
+          </button>
+        </div>
+        <p>Der Erwartungshorizont für die Aufgabe. Dieser wird mit der Markdown-Syntax formatiert.</p>
+        <mat-divider></mat-divider>
+        <div class="markdown-editor-container">
+          <div [hidden]="showExpectationsPreview">
+            <ng-container *ngIf="!isGenerating; else readOnlyExpectations">
+              <app-code-editor
+                [code]="codingForm.get('expectations')?.value"
+                [selectedLanguage]="markdownLanguage"
+                (codeChange)="onCodeChange($event, 0, 'expectations')"
+              ></app-code-editor>
+            </ng-container>
+            <ng-template #readOnlyExpectations>
+              <pre>{{ codingForm.get('expectations')?.value }}</pre>
+            </ng-template>
+          </div>
+          <div [hidden]="!showExpectationsPreview">
+            <markdown [data]="codingForm.get('expectations')?.value"></markdown>
+          </div>
+        </div>
       </div>
     </div>
 

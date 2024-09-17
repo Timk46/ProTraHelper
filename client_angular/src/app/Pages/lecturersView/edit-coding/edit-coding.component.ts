@@ -24,7 +24,8 @@ export class EditCodingComponent implements OnInit {
   thisQuestionType = questionType.CODE;
   questionData: detailedQuestionDTO | null = null;
   markdownLanguage = 'markdown';
-  showPreview = false;
+  showTaskPreview = false;
+  showExpectationsPreview = false;
   testResults: CodeSubmissionResultDto | null = null;
   isGenerating = false; // Loading state variable
 
@@ -155,11 +156,15 @@ export class EditCodingComponent implements OnInit {
     return (this.codingForm.get('automatedTests') as FormArray).controls;
   }
 
-  onCodeChange(newCode: string, index: number, type: 'codeGerueste' | 'automatedTests' | 'modelSolutions' | 'text') {
-    if (type === 'text') {
-      this.codingForm.patchValue({ text: newCode });
+  onCodeChange(newCode: string, index: number, type: 'codeGerueste' | 'automatedTests' | 'modelSolutions' | 'text' | 'expectations') {
+    if (type === 'text' || type === 'expectations') {
+      this.codingForm.patchValue({ [type]: newCode });
       if (this.questionData) {
-        this.questionData.text = newCode;
+        if (type === 'text') {
+          this.questionData.text = newCode;
+        } else if (type === 'expectations' && this.questionData.codingQuestion) {
+          this.questionData.codingQuestion.expectations = newCode;
+        }
       }
     } else {
       const formArray = this.codingForm.get(type) as FormArray;
@@ -457,8 +462,12 @@ export class EditCodingComponent implements OnInit {
     }
   }
 
-  togglePreview() {
-    this.showPreview = !this.showPreview;
+  togglePreview(type: 'task' | 'expectations') {
+    if (type === 'task') {
+      this.showTaskPreview = !this.showTaskPreview;
+    } else if (type === 'expectations') {
+      this.showExpectationsPreview = !this.showExpectationsPreview;
+    }
   }
 
   // New method to determine if editor should be read-only
@@ -557,10 +566,12 @@ export class EditCodingComponent implements OnInit {
 
   // Helper method to update all code editors with the new language
   private updateCodeEditorsLanguage(newLanguage: string) {
-    // Skip the first editor (index 0) which is the task description
-    this.codeEditors.forEach((editor, index) => {
-      if (index === 0) {
-        // Ensure the first editor (task description) always uses Markdown
+    const editors = this.codeEditors.toArray();
+    const lastIndex = editors.length - 1;
+
+    editors.forEach((editor, index) => {
+      if (index === 0 || index === lastIndex) {
+        // Ensure the first editor (task description) and last editor (Erwartungshorizont) always use Markdown
         editor.changeLanguage(this.markdownLanguage);
       } else {
         editor.changeLanguage(newLanguage);
