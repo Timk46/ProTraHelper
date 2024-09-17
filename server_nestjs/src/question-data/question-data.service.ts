@@ -277,8 +277,12 @@ export class QuestionDataService {
           }
           break;
         case questionType.MULTIPLECHOICE:
-          break;
         case questionType.SINGLECHOICE:
+          if (createNewVersion || !currentQuestion.mcQuestion) {
+            await this.qdChoice.createChoiceQuestion(question.mcQuestion, updatedQuestion.id);
+          } else {
+            await this.qdChoice.updateChoiceQuestion(question.mcQuestion);
+          }
           break;
         case questionType.CODE:
           if (createNewVersion || !currentQuestion.codingQuestion) {

@@ -84,11 +84,11 @@ export class QuestionDataService {
     return this.http.put<QuestionDTO>(environment.server + `/question-data/updateQuestion`, question)
   }
 
-  updateWholeQuestion(question: detailedQuestionDTO) : Observable<QuestionDTO> {
+  updateWholeQuestion(question: detailedQuestionDTO) : Observable<detailedQuestionDTO> {
     return this.http.post<detailedQuestionDTO>(environment.server + `/question-data/updateWholeQuestion`, question)
   }
 
-  versionUpdateWholeQuestion(question: detailedQuestionDTO) : Observable<QuestionDTO> {
+  versionUpdateWholeQuestion(question: detailedQuestionDTO) : Observable<detailedQuestionDTO> {
     return this.http.post<detailedQuestionDTO>(environment.server + `/question-data/versionUpdateWholeQuestion`, question)
   }
 

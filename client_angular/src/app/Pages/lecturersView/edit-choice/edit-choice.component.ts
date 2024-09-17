@@ -1,7 +1,7 @@
 import { Component, ViewChild } from "@angular/core";
 import { TinymceComponent } from "../../tinymce/tinymce.component";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
-import { detailedQuestionDTO, questionType } from "@DTOs/index";
+import { detailedChoiceOptionDTO, detailedQuestionDTO, questionType } from "@DTOs/index";
 import { QuestionDataService } from "src/app/Services/question/question-data.service";
 import { ActivatedRoute } from "@angular/router";
 import { ConfirmationService } from "src/app/Services/confirmation/confirmation.service";
@@ -106,6 +106,7 @@ export class EditChoiceComponent {
       if (this.detailedQuestionData.mcQuestion) {
         console.log('Setting options:', this.detailedQuestionData.mcQuestion.textHTML || this.detailedQuestionData.text);
         this.questionField.setContent(this.detailedQuestionData.mcQuestion.textHTML || this.detailedQuestionData.text);
+        this.optionsData.clear();
         this.detailedQuestionData.mcQuestion.mcOptions.forEach(option => {
           this.addOption(option.id, option.text, option.is_correct);
         });
@@ -123,10 +124,13 @@ export class EditChoiceComponent {
       declineLabel: 'Abbrechen',
       accept: () => {
         const submitData = this.buildDTO();
+        console.log('Submit data:', submitData);
         if (submitData){
           this.questionDataService.updateWholeQuestion(submitData).subscribe({
             next: response => {
               console.log('Question updated successfully:', response);
+              this.detailedQuestionData = response;
+              this.setContent();
               this.snackBar.open('Frage erfolgreich aktualisiert', 'Schließen', { duration: 3000 });
             },
             error: error => {
@@ -190,11 +194,12 @@ export class EditChoiceComponent {
           textHTML: this.questionField.getContent(),
           shuffleoptions: false,
           isSC: this.thisQuestionType === questionType.SINGLECHOICE,
-          mcOptions: this.optionsData.value.map((option: FormControl) => {
+          mcOptions: this.optionsData.value.map((option: {id: number, text: string, is_correct: boolean}) => {
+            console.log('Option:', option.id);
             return {
-              id: option.value.id,
-              text: option.value.text,
-              is_correct: option.value.is_correct
+              id: option.id,
+              text: option.text,
+              is_correct: option.is_correct
             }
           })
         }

@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { MCOptionDTO, MCOptionViewDTO, McQuestionDTO, McQuestionOptionDTO, UserMCOptionSelectedDTO } from '@DTOs/index';
+import { detailedChoiceOptionDTO, detailedChoiceQuestionDTO, MCOptionDTO, MCOptionViewDTO, McQuestionDTO, McQuestionOptionDTO, UserMCOptionSelectedDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -100,15 +100,14 @@ export class QuestionDataChoiceService {
      * @param mcOptions
      * @returns Options
      */
-  async createOptions(mcOptions: MCOptionDTO[]): Promise<MCOptionDTO[]> {
-    let newOptions : MCOptionDTO[] = [];
+  async createOptions(mcOptions: detailedChoiceOptionDTO[]): Promise<detailedChoiceOptionDTO[]> {
+    let newOptions : detailedChoiceOptionDTO[] = [];
 
      const optionPromises = mcOptions.map(async (mcOption) => {
          const newOption =  await this.prisma.mCOption.create({
             data: {
-                id: mcOption.id,
                 text: mcOption.text,
-                is_correct: mcOption.correct
+                is_correct: mcOption.is_correct
             }
         });
         if(!newOption) {
@@ -146,7 +145,7 @@ export class QuestionDataChoiceService {
     };
   }
 
-      /**
+  /**
    *
    * @param mcQuestionOption
    * @returns McQuestionOption Object
@@ -203,6 +202,130 @@ export class QuestionDataChoiceService {
         }
     })
   }
+
+  async createChoiceQuestion(mcQuestion: detailedChoiceQuestionDTO, question_id: number): Promise<detailedChoiceQuestionDTO> {
+    let newMcQuestion = await this.prisma.mCQuestion.create({
+      data: {
+        question: {connect: {id: mcQuestion.questionId}},
+        isSC: mcQuestion.isSC,
+        shuffleoptions: mcQuestion.shuffleoptions
+      },
+    });
+
+    let newOptions = await this.createOptions(mcQuestion.mcOptions);
+
+    newOptions.map(async (option) => {
+        await this.prisma.mCQuestionOption.create({
+          data: {
+            question: {connect: {id: newMcQuestion.id}},
+            option: {connect: {id: option.id}}
+          }
+        });
+    });
+
+    return {
+      id: newMcQuestion.id,
+      questionId: newMcQuestion.questionId,
+      textHTML: newMcQuestion.textHTML,
+      shuffleoptions: newMcQuestion.shuffleoptions,
+      isSC: newMcQuestion.isSC,
+      mcOptions: newOptions
+    }
+  }
+
+  async updateChoiceQuestion(choiceQuestion: detailedChoiceQuestionDTO): Promise<detailedChoiceQuestionDTO> {
+    let updatedMcQuestion = await this.prisma.mCQuestion.update({
+      where: {
+        id: choiceQuestion.id
+      },
+      data: {
+        updatedAt: new Date(),
+        shuffleoptions: choiceQuestion.shuffleoptions,
+        isSC: choiceQuestion.isSC,
+        textHTML: choiceQuestion.textHTML,
+      }
+    });
+
+    let updatedOptions = await this.updateOptions(choiceQuestion.id, choiceQuestion.mcOptions);
+
+    return {
+      id: updatedMcQuestion.id,
+      questionId: updatedMcQuestion.questionId,
+      textHTML: updatedMcQuestion.textHTML,
+      shuffleoptions: updatedMcQuestion.shuffleoptions,
+      isSC: updatedMcQuestion.isSC,
+      mcOptions: updatedOptions
+    }
+  }
+
+  async updateOptions(choiceQuestionId: number, choiceOptions: detailedChoiceOptionDTO[]): Promise<detailedChoiceOptionDTO[]> {
+    let updatedOptions : detailedChoiceOptionDTO[] = [];
+    // get existing option links
+    const exisitingOptions = await this.prisma.mCQuestionOption.findMany({
+      where: {
+        mcQuestionId: choiceQuestionId
+      },
+      select: {
+        id: true,
+        mcOptionId: true
+      }
+    });
+    // delete options that are not in the new options
+    for (const optionLink of exisitingOptions){
+      if (!choiceOptions.find((o) => o.id === optionLink.mcOptionId)) {
+        // unlink the option
+        await this.prisma.mCQuestionOption.deleteMany({
+          where: {
+            id: optionLink.id
+          }
+        });
+        // delete the option
+        await this.prisma.mCOption.delete({
+          where: {
+            id: optionLink.mcOptionId
+          }
+        });
+      }
+    }
+
+    // update or create new options
+    for(const mcOption of choiceOptions) {
+      if (mcOption.id && mcOption.id != -1) {
+        const updatedOption = await this.prisma.mCOption.update({
+          where: {
+            id: mcOption.id
+          },
+          data: {
+            updatedAt: new Date(),
+            text: mcOption.text,
+            is_correct: mcOption.is_correct
+          }
+        });
+        updatedOptions.push(updatedOption);
+      } else {
+        const newOption = await this.prisma.mCOption.create({
+          data: {
+            text: mcOption.text,
+            is_correct: mcOption.is_correct
+          }
+        });
+        // link the new option to the question
+        await this.prisma.mCQuestionOption.create({
+          data: {
+            question: {connect: {id: choiceQuestionId}},
+            option: {connect: {id: newOption.id}}
+          }
+        });
+        updatedOptions.push(newOption);
+      }
+    }
+
+    return updatedOptions;
+  }
+
+
+
+
 
 
 }

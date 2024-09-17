@@ -18,7 +18,7 @@ export interface detailedQuestionDTO {
 
   codingQuestion?: CodingQuestionInternal;
   freetextQuestion?: detailedFreetextQuestionDTO;
-  mcQuestion?: detailedMcQuestionDTO;
+  mcQuestion?: detailedChoiceQuestionDTO;
 }
 
 export interface detailedFreetextQuestionDTO {
@@ -33,7 +33,7 @@ export interface detailedFreetextQuestionDTO {
   questionId: number;
 }
 
-export interface detailedMcQuestionDTO {
+export interface detailedChoiceQuestionDTO {
   id?: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -42,11 +42,11 @@ export interface detailedMcQuestionDTO {
   textHTML?: string;
   shuffleoptions: boolean;
   isSC: boolean; // single choice
-  mcOptions: detailedMcOptionDTO[];
+  mcOptions: detailedChoiceOptionDTO[];
 }
 
-export interface detailedMcOptionDTO {
-  id: number;
+export interface detailedChoiceOptionDTO {
+  id?: number;
   createdAt?: Date;
   updatedAt?: Date;
   text: string;

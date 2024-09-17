@@ -121,6 +121,7 @@ export class TinymceComponent implements OnInit, OnDestroy, OnChanges, AfterView
   }
 
   setContent(content: string): void {
+    this.content = content;
     this.contentSubject.next(content);
   }
 
