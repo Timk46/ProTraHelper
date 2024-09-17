@@ -30,6 +30,9 @@ interface localCodeFile {
   codeFileName: string;
   code: string;
 }
+interface localCodeFiles {
+  codeFiles: localCodeFile[];
+}
 
 @Injectable()
 export class CodingQuestionGeneratorCppService {
@@ -114,11 +117,11 @@ export class CodingQuestionGeneratorCppService {
    * @param context the context of the Programming task
    * @returns a JSON object with the task, expectation, solution, unitTest, codeFramework and hasFailure (true = error in Response from Jury1 during testing Solution and Unittest, false = No error from Jury1)
    */
-  async genCPPTask(taksdecription: string, codeGerueste: CodeGeruestDto[]): Promise<CodingQuestionInternal> {
+  async genCPPTask(taskDescription: string, codeGerueste: CodeGeruestDto[]): Promise<CodingQuestionInternal> {
     console.log('genTask gestartet');
 
     const gptModel = 'gpt-4o-2024-08-06'; //Aktuelles Modell "GPT-4o"
-    const maxIterations = 5; //Maximale Anzahl an Iterationen für die Codeüberprüfung
+    const maxIterations = 7; //Maximale Anzahl an Iterationen für die Codeüberprüfung
     const langGraphRecursionLimit = 50; //Maximale Anzahl an Rekursionen für LangGraph
     const jury1url =
       'http://jury1.bshefl2.bs.informatik.uni-siegen.de/execute/cpp-assignment';
@@ -132,7 +135,7 @@ export class CodingQuestionGeneratorCppService {
       messages: BaseMessage[];
       task: string;
       expectation: string;
-      solution: localCodeFile[];
+      solution: localCodeFiles[];
       unitTest: string[];
       checkCodeIteration: number;
       checkCodeError: string[];
@@ -151,7 +154,7 @@ export class CodingQuestionGeneratorCppService {
       }),
       task: Annotation<string>(),
       expectation: Annotation<string>(),
-      solution: Annotation<localCodeFile[]>({
+      solution: Annotation<localCodeFiles[]>({
         reducer: (x, y) => x.concat(y),
         default: () => [],
       }),
@@ -188,10 +191,12 @@ export class CodingQuestionGeneratorCppService {
 
       let prompt: ChatPromptTemplate = null;
 
-      const taskDescriptionString = `## Aufgabestellung\n ${taksdecription}`;
+      const taskDescriptionString = `## Aufgabestellung\n ${taskDescription}`;
       const codeGeruesteDescriptionString = `\n \n${codeGerueste.map((geruest) => `## ${geruest.codeFileName}:\n${geruest.code}`).join('\n\n')}`;
 
+
       if (state.checkCodeErrorHappend) {
+        const modelSolutionString = `\n${state.solution[state.solution.length - 1].codeFiles.map((modelSolution) => `## ${modelSolution.codeFileName}:\n${modelSolution.code}`).join('\n\n')}`;
         prompt = ChatPromptTemplate.fromMessages([
           new SystemMessage(
             `Du bist ein Programmierexperte. Erstelle eine strukturierte Lösung mit Dateinamen und Code.`
@@ -200,12 +205,11 @@ export class CodingQuestionGeneratorCppService {
             Erstelle die korrigierte Musterlösung für eine Programmieraufgabe. Du hast dies bereits versucht, es gab aber einen Fehler.
             Generiere hier nur die korrigierte Musterlösung und keinen UnitTest. \n
             # Aufgabenstellung:\n
-            ${taksdecription} \n
+            ${taskDescription} \n
             # Die Unit-Tests:\n
             ${state.unitTest[state.unitTest.length - 1]} \n
             # Die falsche Musterlösung:
-            ## Datei ${state.solution[state.solution.length - 1].codeFileName} \n
-            ${state.solution[state.solution.length - 1].code}
+            ${modelSolutionString} \n
             # Die aufgetauchte Fehlermeldung:\n
             ${ state.checkCodeError[state.checkCodeError.length - 1]} \n
             Gib die Musterlösung als Array von Objekten zurück, wobei jedes Objekt einen Dateinamen und den zugehörigen Code enthält.
@@ -257,13 +261,14 @@ export class CodingQuestionGeneratorCppService {
       }
 
       const parsedSolution = await outputParser.parse(contentString);
-      const reconstructedSolution = parsedSolution.map(item => ({
-        ...item,
-        code: item.code.join('\n')
-      }));
-      console.log("******************************* BEGIN PROGRAMMCODE");
-      console.log(reconstructedSolution);
-      console.log("******************************* ENDE PROGRAMMCODE");
+
+      const reconstructedSolution: localCodeFiles = {
+        codeFiles: parsedSolution.map(item => ({
+          ...item,
+          code: item.code.join('\n'),
+          codeFileName: item.codeFileName || 'defaultFileName.cpp', // Ensure codeFileName is defined
+        })),
+      };
 
       return {
         messages: [response],
@@ -274,6 +279,8 @@ export class CodingQuestionGeneratorCppService {
 
     const genUnitTest = async (state: typeof TaskGenState.State) => {
       const { messages } = state;
+
+      const modelSolutionString = `\n${state.solution[state.solution.length - 1].codeFiles.map((modelSolution) => `## ${modelSolution.codeFileName}:\n${modelSolution.code}`).join('\n')}`;
 
       let prompt: ChatPromptTemplate = null;
 
@@ -376,10 +383,9 @@ export class CodingQuestionGeneratorCppService {
                 Du hast bereits einmal versucht diesen Unit-Test zu erstellen, es gab aber einen Fehler. Generiere hier nur den korrigierten Unit-Test. ES DARF NUR DER CODE OHNE SONSTIGEN TEXT DAVOR ODER DANACH SEIN! \n
                 Korrigiere die Unit-Tests basierend auf den folgenden Informationen:
                 # Aufgabenstellung:\n
-                ${taksdecription} \n
+                ${taskDescription} \n
                 # Die Musterlösung:
-                ## Datei ${state.solution[state.solution.length - 1].codeFileName} \n
-                ${state.solution[state.solution.length - 1].code}
+                ${modelSolutionString} \n
                 # Die fehlerhaften Unit-Tests:\n
                 ${state.unitTest[state.unitTest.length - 1]} \n
                 # Die aufgetauchte Fehlermeldung:\n
@@ -485,8 +491,7 @@ export class CodingQuestionGeneratorCppService {
           new HumanMessage(
             `Entwickle einen Unit-Test für eine Programmieraufgabe inklusive aller benötigten Imports zu der nachfolgenden Musterlösung. Generiere nur den Unit-Test ohne zusätzlichen Text. Der Unit-Test soll direkt ausführbar sein.
             # Musterlösung
-            ## Datei ${ state.solution[state.solution.length - 1].codeFileName} \n
-            ${state.solution[state.solution.length - 1].code} \n
+            ${modelSolutionString} \n
             `,
           ),
           //new MessagesPlaceholder('messages'),
@@ -515,7 +520,7 @@ export class CodingQuestionGeneratorCppService {
             2. Erstelle nun einen Erwartungshorizont, welcher mit durchnummerierten Schritten den jeweiligen Code und die dazugehörigen Kompetenzen notiert, welcher der Student durchführen muss um diese Zeile zu lösen. \n
             3. Erstelle nun einen Erwartungshorizont, welcher die jeweiligen Kompetenzen aus Schritt 2 als Übersicht darstellt, sodass mehrfach auftauchende Kompetenzen nur einmal in der Liste vorkommen. Markiere den Anfang des Erwartungshorizontes einmalig mit "## FinalStep" und schreibe einmalig in die erste Zeile "Erwartungshorizont".
 
-            Aufgabenstellung:\n ${state.task} \n \n Musterlösung:\n ${
+            Aufgabenstellung:\n ${taskDescription} \n \n Musterlösung:\n ${
           state.solution[state.solution.length - 1]
         }`),
         new MessagesPlaceholder('messages'),
@@ -528,7 +533,6 @@ export class CodingQuestionGeneratorCppService {
         .invoke({ messages });
 
       const expectation = this.extractFinalStep(response.content.toString());
-      console.log('Erwartungshorizont NACH Parsen:\n ', expectation);
 
       return {
         messages: [response],
@@ -539,25 +543,23 @@ export class CodingQuestionGeneratorCppService {
     const checkCode = async (state: typeof TaskGenState.State) => {
       const solution = state.solution[state.solution.length - 1];
       const unitTest = state.unitTest[state.unitTest.length - 1];
-      let reflection = '';
-      let errorMessages = '';
 
       console.log('--- CheckCode ---');
 
-      const files = state.solution.reduce((acc, file) => {
-        acc[file.codeFileName] = file.code;
-        return acc;
-      }, {} as { [codeFileName: string]: string });
+      const files = solution.codeFiles;
 
       // Prepare the testFiles object
       const testFiles = { 'testFile': this.encodeBased64(unitTest) };
       // student code will be first searched for main method in submitCodeForExecutionCpp and transformed to base64 later
 
-      const jury1Response: CodeSubmissionResult = await this.runCodeService.submitCodeForExecutionCpp(files, testFiles);
+      const filesObj: { [fileName: string]: string } = {};
+      files.forEach(file => {
+        filesObj[file.codeFileName] = file.code;
+      });
 
+      const jury1Response: CodeSubmissionResult = await this.runCodeService.submitCodeForExecutionCpp(filesObj, testFiles);
 
       const jury1ResponseString = JSON.stringify(jury1Response);
-
 
       if (jury1Response.testsPassed) {
         return {
@@ -616,46 +618,10 @@ export class CodingQuestionGeneratorCppService {
 
     const result = await app.invoke(
       {},
-      { recursionLimit: langGraphRecursionLimit },
+      { recursionLimit: langGraphRecursionLimit, debug : false },
     );
-    //console.log("result", result);
 
-    //console.log("---------- ALLES ----------");
-    //console.log(result);
-    /*
-    console.log('---------- Aufgabe ----------');
-    console.log(result.task);
-    console.log('---------- Erwartungshorizont ----------');
-    console.log(result.expectation);
-    console.log('---------- Codegerüst ----------');
-    console.log(result.codeFramework);
-    console.log('---------- Musterlösung ----------');
-    console.log(result.solution[result.solution.length - 1]);
-    console.log('---------- UnitTest ----------');
-    console.log(result.unitTest[result.unitTest.length - 1]);
-    console.log('---------- JudgeTask ----------');
-    console.log(result.judgeTask);
-    console.log('---------- CheckCodeError ----------');
-    console.log(
-      `Nach dem ${result.checkCodeIteration}. Versuche den Code zu testen (Anzahl Solutions: ${result.solution.length}, Anzahl UnitTests: ${result.unitTest.length}) lag noch ein Fehler vor (true = ja / false = nein): ${result.checkCodeErrorHappend}`,
-    );
-*/
-    //Erstelle einen Eintrag in der Datenbank, in welchem alle Daten als JSON-Objekt gespeichert werden
-
-    var jsonData = {
-      task: result.task,
-      expectation: result.expectation,
-      solution: result.solution[result.solution.length - 1],
-      unitTest: result.unitTest[result.unitTest.length - 1],
-      checkCodeInteration: result.checkCodeIteration,
-      checkCodeErrorHappend: result.checkCodeErrorHappend,
-      checkCodeError: result.checkCodeError,
-      codeFramework: result.codeFramework,
-      juryResponses: result.juryResponses,
-      runMethod: result.runMethod,
-      runMethodInput: result.runMethodInput,
-      judgeTask: result.judgeTask
-    };
+    const modelSolution = result.solution[result.solution.length - 1].codeFiles;
 
     const genereatedCodingQuestion: CodingQuestionInternal = {
       id : -1, // temp - real value will be set by database
@@ -666,9 +632,8 @@ export class CodingQuestionGeneratorCppService {
       textHTML : result.task,
       codeGerueste : codeGerueste,
       expectations : result.expectation,
-      automatedTests : [result.unitTest[result.unitTest.length - 1]],
-      modelSolutions : [result.solution[result.solution.length - 1]]
-
+      automatedTests : [result.unitTest[result.unitTest.length - 1]], // #ToDo: Hier gibts noch ein riesen Problem:
+      modelSolutions : modelSolution
     };
 
     return genereatedCodingQuestion;

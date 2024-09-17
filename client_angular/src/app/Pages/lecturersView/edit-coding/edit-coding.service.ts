@@ -23,6 +23,7 @@ export class EditCodeService {
   }
 
   generateCppTask(taskDescription: string, codeGerueste: CodeGeruestDto[]): Observable<CodingQuestionInternal> {
+    console.log(taskDescription);
     return this.http.post<CodingQuestionInternal>(`${this.genTaskUrl}/genCppTask`, { taskDescription, codeGerueste });
   }
 }

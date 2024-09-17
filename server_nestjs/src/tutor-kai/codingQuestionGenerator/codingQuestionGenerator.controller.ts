@@ -27,12 +27,10 @@ export class CodingQuestionGeneratorController {
     }
 
     @Post('genCppTask')
-    async genCppTask(@Req() req, @Body() body: {taksdecription: string, codeGerueste: CodeGeruestDto[]}) {
+    async genCppTask(@Req() req, @Body() body: {taskDescription: string, codeGerueste: CodeGeruestDto[]}) {
         console.log("genTask in Controller ausgeführt ...");
-
-        const {taksdecription, codeGerueste} = body;
-        const genTask: CodingQuestionInternal = await this.codingQuestionGeneratorCppService.genCPPTask(taksdecription, codeGerueste);
-
+        const {taskDescription, codeGerueste} = body;
+        const genTask: CodingQuestionInternal = await this.codingQuestionGeneratorCppService.genCPPTask(taskDescription, codeGerueste);
 
         return genTask;
     }
