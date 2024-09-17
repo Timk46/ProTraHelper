@@ -1,24 +1,6 @@
 <div class="edit-coding-container">
   <h2>Programmieraufgabe erstellen/bearbeiten</h2>
   <form [formGroup]="codingForm" (ngSubmit)="onSubmit()">
-    <!-- New section for task generation -->
-    <div class="section-container">
-      <h3>Aufgabe generieren</h3>
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Inhalt</mat-label>
-          <textarea matInput formControlName="inhalt" rows="3" placeholder="Geben Sie den Inhalt für die Aufgabe ein"></textarea>
-        </mat-form-field>
-      </div>
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Kontext</mat-label>
-          <textarea matInput formControlName="kontext" rows="3" placeholder="Geben Sie den Kontext für die Aufgabe ein"></textarea>
-        </mat-form-field>
-      </div>
-      <button mat-raised-button color="primary" type="button" (click)="generateTask()">Aufgabe generieren</button>
-    </div>
-
     <div class="form-row">
       <mat-form-field appearance="outline" class="form-field">
         <mat-label>Name</mat-label>
@@ -58,7 +40,6 @@
       </div>
     </div>
 
-
     <div formArrayName="codeGerueste" class="section-container">
       <div class="section-header">
         <h3>Code-Gerüste</h3>
@@ -84,6 +65,11 @@
           ></app-code-editor>
         </mat-expansion-panel>
       </mat-accordion>
+    </div>
+
+    <!-- Generate Task button moved here, below the code scaffolds -->
+    <div class="section-container">
+      <button mat-raised-button color="primary" type="button" (click)="generateTask()">Aufgabe generieren</button>
     </div>
 
     <div formArrayName="modelSolutions" class="section-container">

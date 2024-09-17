@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { genTaskDto } from '@DTOs/tutorKaiDtos/genTask.dto';
+import { CodingQuestionInternal, CodeGeruestDto } from '@DTOs/question.dto';
 import { ChatOpenAI } from '@langchain/openai';
 import { z } from "zod";
 import { RunCodeService } from '../run-code/run-code.service';
@@ -23,7 +24,6 @@ import {
   MessagesPlaceholder,
 } from '@langchain/core/prompts';
 import axios from 'axios';
-import { CodeGeruestDto } from '@DTOs/question.dto';
 import { StructuredOutputParser } from "langchain/output_parsers";
 
 interface localCodeFile {
@@ -114,7 +114,7 @@ export class CodingQuestionGeneratorCppService {
    * @param context the context of the Programming task
    * @returns a JSON object with the task, expectation, solution, unitTest, codeFramework and hasFailure (true = error in Response from Jury1 during testing Solution and Unittest, false = No error from Jury1)
    */
-  async genCPPTask(taksdecription: string, codeGerueste: CodeGeruestDto[]): Promise<genTaskDto> {
+  async genCPPTask(taksdecription: string, codeGerueste: CodeGeruestDto[]): Promise<CodingQuestionInternal> {
     console.log('genTask gestartet');
 
     const gptModel = 'gpt-4o-2024-08-06'; //Aktuelles Modell "GPT-4o"
@@ -654,7 +654,21 @@ export class CodingQuestionGeneratorCppService {
       juryResponses: result.juryResponses,
       runMethod: result.runMethod,
       runMethodInput: result.runMethodInput,
-      judgeTask: result.judgeTask,
+      judgeTask: result.judgeTask
+    };
+
+    const genereatedCodingQuestion: CodingQuestionInternal = {
+      id : -1, // temp - real value will be set by database
+      count_InputArgs : 0, // none fpr cp tasks
+      programmingLanguage : "CPP",
+      mainFileName : "", // not needed for cpp tasks
+      text : result.task,
+      textHTML : result.task,
+      codeGerueste : codeGerueste,
+      expectations : result.expectation,
+      automatedTests : [result.unitTest[result.unitTest.length - 1]],
+      modelSolutions : [result.solution[result.solution.length - 1]]
+
     };
 
     console.log("RESULT:**************************************************************")
@@ -662,6 +676,6 @@ export class CodingQuestionGeneratorCppService {
     //const dbEntry = await this.createDatabaseEntry(jsonData);
     //console.log('Datenbank Eintrag erstellt - ID der Aufgabe: ', dbEntry.id);
 
-    return result;
+    return genereatedCodingQuestion;
   }
 }

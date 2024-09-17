@@ -3,7 +3,7 @@ import { CodingQuestionGeneratorService } from './codingQuestionGenerator.servic
 import { Public } from '../../public.decorator';
 import { genTaskDto } from '@DTOs/tutorKaiDtos/genTask.dto';
 import { CodingQuestionGeneratorCppService } from './codingQuestionGeneratorCPP.service';
-import { CodeGeruestDto } from '@Interfaces/question.dto';
+import { CodeGeruestDto, CodingQuestionInternal } from '@Interfaces/question.dto';
 
 @Controller('coding-question-generator')
 export class CodingQuestionGeneratorController {
@@ -31,7 +31,7 @@ export class CodingQuestionGeneratorController {
         console.log("genTask in Controller ausgeführt ...");
 
         const {taksdecription, codeGerueste} = body;
-        const genTask: genTaskDto = await this.codingQuestionGeneratorCppService.genCPPTask(taksdecription, codeGerueste);
+        const genTask: CodingQuestionInternal = await this.codingQuestionGeneratorCppService.genCPPTask(taksdecription, codeGerueste);
 
 
         return genTask;

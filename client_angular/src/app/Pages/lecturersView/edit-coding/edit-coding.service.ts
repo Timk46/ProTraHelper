@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { detailedQuestionDTO, CodeSubmissionResultDto, CodeGeruestDto } from '@DTOs/index';
+import { detailedQuestionDTO, CodeSubmissionResultDto, CodeGeruestDto, CodingQuestionInternal } from '@DTOs/index';
 import { environment } from 'src/environments/environment';
 import { genTaskDto } from '@DTOs/tutorKaiDtos/genTask.dto';
 
@@ -22,7 +22,7 @@ export class EditCodeService {
     return this.http.post<genTaskDto>(`${this.genTaskUrl}/contextualizedTask`, { inhalt, kontext });
   }
 
-  generateCppTask(taksdecription: string, codeGerueste: CodeGeruestDto[]): Observable<genTaskDto> {
-    return this.http.post<genTaskDto>(`${this.genTaskUrl}/genCppTask`, {taksdecription, codeGerueste });
+  generateCppTask(taksdecription: string, codeGerueste: CodeGeruestDto[]): Observable<CodingQuestionInternal> {
+    return this.http.post<CodingQuestionInternal>(`${this.genTaskUrl}/genCppTask`, {taksdecription, codeGerueste });
   }
 }
