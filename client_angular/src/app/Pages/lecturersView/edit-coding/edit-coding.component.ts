@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChildren, QueryList } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,6 +9,8 @@ import { detailedQuestionDTO, CodeGeruestDto, ModelSolutionDto, AutomatedTestDto
 import { ActivatedRoute } from '@angular/router';
 import { AddElementModalComponent } from './add-element-modal.component';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
+import { MatSelectChange } from '@angular/material/select';
+import { CodeEditorComponent } from '../../../Modules/tutor-kai/sites/code-editor/code-editor.component';
 
 @Component({
   selector: 'app-edit-coding',
@@ -16,12 +18,15 @@ import { ConfirmDialogComponent } from './confirm-dialog.component';
   styleUrls: ['./edit-coding.component.scss']
 })
 export class EditCodingComponent implements OnInit {
+  @ViewChildren(CodeEditorComponent) codeEditors!: QueryList<CodeEditorComponent>;
+
   codingForm: FormGroup;
   thisQuestionType = questionType.CODE;
   questionData: detailedQuestionDTO | null = null;
   markdownLanguage = 'markdown';
   showPreview = false;
   testResults: CodeSubmissionResultDto | null = null;
+  isGenerating = false; // Loading state variable
 
   constructor(
     private fb: FormBuilder,
@@ -346,6 +351,11 @@ export class EditCodingComponent implements OnInit {
   }
 
   testCode() {
+    if (!this.isProgrammingLanguageSelected()) {
+      this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', { duration: 5000 });
+      return;
+    }
+
     if (this.codingForm.valid && this.questionData && this.questionData.codingQuestion) {
       const questionToTest: detailedQuestionDTO = {
         ...this.questionData,
@@ -451,20 +461,33 @@ export class EditCodingComponent implements OnInit {
     this.showPreview = !this.showPreview;
   }
 
+  // New method to determine if editor should be read-only
+  isEditorReadOnly(): boolean {
+    return this.isGenerating;
+  }
+
   generateTask() {
+    if (!this.isProgrammingLanguageSelected()) {
+      this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', { duration: 5000 });
+      return;
+    }
+
     const text = this.codingForm.get('text')?.value;
     const codeGerueste = this.codingForm.get('codeGerueste')?.value;
 
     if (text && codeGerueste && codeGerueste.length > 0) {
+      this.isGenerating = true; // Set loading state to true
       this.editCodeService.generateCppTask(text, codeGerueste).subscribe(
         (genTask: CodingQuestionInternal) => {
           console.log('Generated task:', genTask);
           this.populateFormWithGenTask(genTask);
           this.snackBar.open('Task generated successfully', 'Close', { duration: 3000 });
+          this.isGenerating = false; // Set loading state to false
         },
         error => {
           console.error('Error generating task:', error);
           this.snackBar.open('Error generating task', 'Close', { duration: 3000 });
+          this.isGenerating = false; // Set loading state to false
         }
       );
     } else {
@@ -510,5 +533,41 @@ export class EditCodingComponent implements OnInit {
         code: test
       });
     });
+
+    // Update the language for all code editors
+    this.updateCodeEditorsLanguage(genTask.programmingLanguage);
+  }
+
+  // New method to check if a programming language is selected
+  isProgrammingLanguageSelected(): boolean {
+    const programmingLanguage = this.codingForm.get('programmingLanguage')?.value;
+    return !!programmingLanguage;
+  }
+
+  // New method to handle language change
+  onLanguageChange(event: MatSelectChange) {
+    const newLanguage = event.value;
+    console.log('Language changed to:', newLanguage);
+
+    // Update the language for all code editors except the first one (task description)
+    this.updateCodeEditorsLanguage(newLanguage);
+
+    // We could do some logic for the language server etc. here.
+  }
+
+  // Helper method to update all code editors with the new language
+  private updateCodeEditorsLanguage(newLanguage: string) {
+    // Skip the first editor (index 0) which is the task description
+    this.codeEditors.forEach((editor, index) => {
+      if (index === 0) {
+        // Ensure the first editor (task description) always uses Markdown
+        editor.changeLanguage(this.markdownLanguage);
+      } else {
+        editor.changeLanguage(newLanguage);
+      }
+    });
+
+    // Trigger change detection for the entire form
+    this.codingForm.updateValueAndValidity();
   }
 }
