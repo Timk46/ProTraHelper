@@ -2,6 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { questionType } from '@DTOs/question.dto';
 
 @Component({
   selector: 'app-create-content-element-dialog',
@@ -11,6 +12,7 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 export class CreateContentElementDialogComponent {
   creationForm: FormGroup;
   connectionForm: FormGroup;
+  questionTypes = questionType;
 
   activeTab: 'new' | 'existing' = 'new';
 

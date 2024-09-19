@@ -327,6 +327,10 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       case questionType.FREETEXT:
         this.router.navigate(['/editfreetext/', taskViewData.id]);
         break;
+      case questionType.FILLIN:
+        console.log("FILLIN");
+        this.router.navigate(['/editfillin/', taskViewData.id]);
+        break;
       case questionType.CODE:
         this.router.navigate(['/editcoding/', taskViewData.id]);
         break;
@@ -434,6 +438,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         return 'Single Choice';
       case questionType.FREETEXT:
         return 'Freitext';
+      case questionType.FILLIN:
+        return 'Lückentext';
       case questionType.CODE:
         return 'Programmieraufgabe';
       default:

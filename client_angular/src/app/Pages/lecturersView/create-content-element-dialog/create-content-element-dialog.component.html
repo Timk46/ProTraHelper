@@ -10,11 +10,11 @@
         </mat-form-field>
         <mat-form-field>
           <mat-select placeholder="Fragentyp" formControlName="questionType">
-            <mat-option value="FreeText">Freitext</mat-option>
-            <mat-option value="SC">Single Choice</mat-option>
-            <mat-option value="MC">Multiple Choice</mat-option>
-            <mat-option value="Fillin">Lückentext</mat-option>
-            <mat-option value="CodingQuestion">Programmieraufgabe</mat-option>
+            <mat-option [value]="questionTypes.FREETEXT">Freitext</mat-option>
+            <mat-option [value]="questionTypes.SINGLECHOICE">Single Choice</mat-option>
+            <mat-option [value]="questionTypes.MULTIPLECHOICE">Multiple Choice</mat-option>
+            <mat-option [value]="questionTypes.FILLIN">Lückentext</mat-option>
+            <mat-option [value]="questionTypes.CODE">Programmieraufgabe</mat-option>
             <mat-option value="UML" disabled>UML</mat-option>
           </mat-select>
           <mat-error *ngIf="creationForm.get('questionType')!.hasError('required')">Fragentyp ist erforderlich</mat-error>
