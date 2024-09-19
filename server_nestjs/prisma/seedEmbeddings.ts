@@ -43,7 +43,7 @@ export const seedAllEmbeddingsForVideo = async (file: File, lectureName: string)
     },
   );
 
-  const filePath = '../../files/OFP/Transkripte/' + file.name.split(".mp4")[0] + '.srt'; // srt file names are the same as the video file names
+  const filePath = '../../files/AUD/Transkripte/' + file.name.split(".mp4")[0] + '.srt'; // srt file names are the same as the video file names
   const absolutePath = path.resolve(__dirname, filePath);
   if (!fs.existsSync(absolutePath)) {
     console.log(`There is no matching SRT Transcript for File ${file.name}.\n I have searched for it here: ${absolutePath}`);
@@ -94,14 +94,14 @@ function  generateTranscriptChunks(chunkSize: number, chunkOverlap: number, file
  * @returns {{ timestamp: string, text: string }[]} An array of objects, each containing a timestamp and the corresponding text.
  */
 function parseSrtFile(fileContent: string): { timestamp: string, text: string }[] {
-  const pattern = /(\d{2}:\d{2}:\d{2},\d{3}) --> \d{2}:\d{2}:\d{2},\d{3}\s+(.*?)\s+(?=\d|$)/gs;
+  const pattern = /(\d{2}:\d{2}:\d{2},\d{3}) --> \d{2}:\d{2}:\d{2},\d{3}\s+([\s\S]*?)(?=\d{2}:\d{2}:\d{2},\d{3}|$)/g;
   let matches;
   const results = [];
 
   while ((matches = pattern.exec(fileContent)) !== null) {
     results.push({
       timestamp: matches[1],
-      text: matches[2].replace(/\n/g, ' ') + " "
+      text: matches[2].replace(/\n/g, ' ').trim() + " "
     });
   }
   return results;
@@ -178,5 +178,3 @@ function genSplitOverlap(subs: { timestamp: string, text: string }[], chunkSize:
   }
   return documents;
 }
-
-
