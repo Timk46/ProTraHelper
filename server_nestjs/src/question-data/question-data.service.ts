@@ -114,6 +114,9 @@ export class QuestionDataService {
             };
           }
           break;
+        case questionType.FILLIN:
+          // todo: hol die Daten aus der fillin Datenbank
+          break;
       }
 
       const questionData: detailedQuestionDTO = {
@@ -228,7 +231,7 @@ export class QuestionDataService {
       }
 
       let updatedQuestion = null;
-      // if we have a version difference, we create a new version of the question
+      // if createNewVersion is true, we create a new version of the question
       if (createNewVersion) {
         updatedQuestion = await this.prisma.question.create({
           data: {
@@ -289,6 +292,13 @@ export class QuestionDataService {
             await this.qdCode.createCodingQuestion(question.codingQuestion, updatedQuestion.id);
           } else {
             await this.qdCode.updateCodingQuestion(question.codingQuestion);
+          }
+          break;
+        case questionType.FILLIN:
+          if (createNewVersion || !currentQuestion.codingQuestion) {
+            // z.B. await this.qdFillin.createFillinQuestion(question.fillinQuestion, updatedQuestion.id);
+          } else {
+            // update
           }
           break;
       }
