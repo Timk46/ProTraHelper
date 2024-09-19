@@ -27,7 +27,7 @@
             <mat-error *ngIf="fillinForm.get('questionDifficulty')!.hasError('required')">Schwierigkeitsgrad ist
               erforderlich</mat-error>
           </mat-form-field>
-          <mat-form-field appearance="outline" style="width: 100%;">
+          <!-- <mat-form-field appearance="outline" style="width: 100%;">
             <mat-label>Choice-Typ</mat-label>
             <mat-select formControlName="questionType">
               <mat-option value="SC">Single Choice</mat-option>
@@ -35,7 +35,7 @@
             </mat-select>
             <mat-error *ngIf="fillinForm.get('questionDifficulty')!.hasError('required')">Schwierigkeitsgrad ist
               erforderlich</mat-error>
-          </mat-form-field>
+          </mat-form-field> -->
           <mat-form-field appearance="outline" style="width: 100%;">
             <input matInput type="number" min="0" step="1" placeholder="Punkte" formControlName="questionScore">
             <mat-label>Punkte</mat-label>

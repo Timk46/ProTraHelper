@@ -19,6 +19,7 @@ export interface detailedQuestionDTO {
   codingQuestion?: CodingQuestionInternal;
   freetextQuestion?: detailedFreetextQuestionDTO;
   mcQuestion?: detailedChoiceQuestionDTO;
+  // fillinQuestion?: detailedFillinQuestionDTO;
 }
 
 export interface detailedFreetextQuestionDTO {

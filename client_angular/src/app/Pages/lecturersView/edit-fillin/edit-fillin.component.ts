@@ -29,11 +29,9 @@ export class EditFillinComponent {
       questionTitle: ['', Validators.required],
       questionDifficulty: ['', Validators.required],
       questionDescription: [''],
-      questionType: ['', Validators.required],
+      //questionType: ['', Validators.required], // hier vielleicht fillin types
       questionScore: ['', Validators.required],
-      questionShuffle: [false],
-      questionConcept: [''],
-      optionsData: this.fb.array([]),
+      //questionConcept: [''], // fals du concept ids brauchst, sonst egal
     });
   }
 
@@ -67,7 +65,7 @@ export class EditFillinComponent {
         questionDescription: this.detailedQuestionData.description,
         questionScore: this.detailedQuestionData.score,
       });
-      if (this.detailedQuestionData.freetextQuestion) {
+      if (this.detailedQuestionData.freetextQuestion) { // fillinQuestion
         // TODO: restliche Felder fuellen
       }
     }
@@ -84,7 +82,7 @@ export class EditFillinComponent {
         score: parseInt(this.choiceForm.value.questionScore),
         text: this.questionField.getRawContent(),
         conceptNodeId: parseInt(this.choiceForm.value.questionConcept) || undefined,
-        mcQuestion: {
+        mcQuestion: { // hier deine fillin dto daten
           id: this.detailedQuestionData.mcQuestion?.id || undefined,
           questionId: this.detailedQuestionData.id,
           textHTML: this.questionField.getContent(),
