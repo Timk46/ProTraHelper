@@ -300,7 +300,10 @@ export class QuestionDataService {
       if (
         currQuestion &&
         newQuestion &&
-        currQuestion.type === newQuestion.type &&
+        (currQuestion.type === newQuestion.type ||
+          (currQuestion.type === questionType.MULTIPLECHOICE && newQuestion.type === questionType.SINGLECHOICE) ||
+          (currQuestion.type === questionType.SINGLECHOICE && newQuestion.type === questionType.MULTIPLECHOICE)
+        ) &&
         currQuestion.version <= newQuestion.version &&
         (
           newQuestion.codingQuestion ||

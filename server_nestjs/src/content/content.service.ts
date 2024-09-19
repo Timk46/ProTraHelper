@@ -13,6 +13,7 @@ import { ContentElementStatusDTO } from '@DTOs/index';
 import { async, last } from 'rxjs';
 import { tr } from '@faker-js/faker';
 import { UserConceptService } from '@/graph/user-concept/user-concept.service';
+import { ConceptNode } from '@prisma/client';
 
 @Injectable()
 export class ContentService {
@@ -606,6 +607,16 @@ export class ContentService {
       ? allConcepts.splice(allConcepts.indexOf('root'), 1)
       : null;
     return Array.from(new Set(allConcepts));
+  }
+
+  async getConcepts(): Promise<ConceptNode[]> {
+    return this.prisma.conceptNode.findMany({
+      where: {
+        NOT: {
+          name: 'root',
+        },
+      },
+    });
   }
 }
 

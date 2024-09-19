@@ -42,3 +42,31 @@
   gap: 20px;
   justify-content: flex-end;
 }
+
+
+
+::ng-deep {
+  .custom-mat-select {
+    .mat-select-panel {
+      /* Erhöhen Sie diesen Wert, wenn nötig */
+      max-height: 400px !important;
+    }
+
+    .mat-select-search-input {
+      background: white !important;
+      width: 100%;
+    }
+
+    .mat-select-panel .mat-option {
+      height: auto;
+      line-height: normal;
+      padding: 8px 16px;
+    }
+
+    .mat-select-panel .mat-option:first-child {
+      height: auto;
+      line-height: normal;
+      padding: 0;
+    }
+  }
+}
