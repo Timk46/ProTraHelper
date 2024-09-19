@@ -60,6 +60,7 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
 import { McTaskCreationComponent } from "./Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component";
 import { MCDescriptionDialogComponent } from "./Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component";
 import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-creation/score/score.component";
+import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-task/graph-task.component';
 
 @NgModule({
     declarations: [
@@ -105,7 +106,8 @@ import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-cre
         ConfirmDialogComponent,
         McTaskCreationComponent,
         MCDescriptionDialogComponent,
-        MCScoreComponent
+        MCScoreComponent,
+        GraphTaskComponent
     ],
     imports: [
         ToastrModule.forRoot(),

@@ -330,6 +330,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       case questionType.CODE:
         this.router.navigate(['/editcoding/', taskViewData.id]);
         break;
+      case questionType.GRAPH:
+        this.router.navigate(['/editgraph/', taskViewData.id]);
+        break;
     }
   }
 

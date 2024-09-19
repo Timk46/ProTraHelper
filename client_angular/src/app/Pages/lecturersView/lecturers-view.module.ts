@@ -11,6 +11,7 @@ import { EditFreetextComponent } from './edit-freetext/edit-freetext.component';
 import { EditFillinComponent } from './edit-fillin/edit-fillin.component';
 import { EditCodingComponent } from './edit-coding/edit-coding.component';
 import { EditChoiceComponent } from './edit-choice/edit-choice.component';
+import { EditGraphComponent } from './edit-graph/edit-graph.component';
 import { AddElementModalComponent } from './edit-coding/add-element-modal.component';
 import { TinymceComponent } from '../tinymce/tinymce.component';
 import { ScoreComponent } from './edit-choice/score/score.component';
@@ -26,6 +27,7 @@ import { DescriptionDialogComponent } from './edit-choice/description-dialog/des
     DescriptionDialogComponent,
     EditFillinComponent,
     EditCodingComponent,
+    EditGraphComponent,
     AddElementModalComponent,
     TinymceComponent
   ],
@@ -45,6 +47,7 @@ import { DescriptionDialogComponent } from './edit-choice/description-dialog/des
     EditChoiceComponent,
     EditFillinComponent,
     EditCodingComponent,
+    EditGraphComponent,
     TinymceComponent
   ]
 })
