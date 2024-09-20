@@ -16,8 +16,14 @@ import * as fs from 'fs';
 import * as uuid from 'uuid';
 const path = require('path');
 
-const db = new PrismaClient();
-
+// Initialize Prisma client with connection pool settings
+const db = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL + '?connection_limit=40&pool_timeout=60',
+    },
+  },
+});
 
 /**
  * Seeds the database with embeddings.
@@ -25,8 +31,7 @@ const db = new PrismaClient();
  * @returns {Promise<void>} A promise that resolves when the seeding is complete.
  */
 export const seedAllEmbeddingsForVideo = async (file: File, lectureName: string) => {
-
-  if (file.type!== 'VIDEO') {
+  if (file.type !== 'VIDEO') {
     return;
   }
 
@@ -55,14 +60,19 @@ export const seedAllEmbeddingsForVideo = async (file: File, lectureName: string)
   // Generate new transcript chunks
   let transcriptChunks = generateTranscriptChunks(chunkSize, chunkOverlap, absolutePath, lectureName, file.name);
 
-  // Add the new transcripts to the vector store
-  await vectorStore.addModels(
-    await db.$transaction(
-      transcriptChunks.map((transcriptChunk: TranscriptChunk) => db.transcriptEmbedding.create({
-        data: { content: JSON.stringify(transcriptChunk), fileId: file.id } // all metadata is stored in the content field, because we can explicit retrieve metadata with Prisma Vectorstore yet...
-      }))
-    )
-  );
+  // Add the new transcripts to the vector store in smaller batches
+  const batchSize = 100;
+  for (let i = 0; i < transcriptChunks.length; i += batchSize) {
+    const batch = transcriptChunks.slice(i, i + batchSize);
+    await vectorStore.addModels(
+      await db.$transaction(
+        batch.map((transcriptChunk: TranscriptChunk) => db.transcriptEmbedding.create({
+          data: { content: JSON.stringify(transcriptChunk), fileId: file.id }
+        }))
+      )
+    );
+    console.log(`Processed batch ${i / batchSize + 1} of ${Math.ceil(transcriptChunks.length / batchSize)}`);
+  }
 }
 
 /**
@@ -74,14 +84,14 @@ export const seedAllEmbeddingsForVideo = async (file: File, lectureName: string)
  *
  * @returns {TranscriptChunk[]} An array of transcript chunks.
  */
-function  generateTranscriptChunks(chunkSize: number, chunkOverlap: number, filePath: string, lectureName: string, fileName:string): TranscriptChunk[] {
+function generateTranscriptChunks(chunkSize: number, chunkOverlap: number, filePath: string, lectureName: string, fileName:string): TranscriptChunk[] {
   const transcriptChunks: TranscriptChunk[] = [];
 
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    const subs = parseSrtFile(fileContent);
+  const fileContent = fs.readFileSync(filePath, 'utf-8');
+  const subs = parseSrtFile(fileContent);
 
-    transcriptChunks.push(...genSplitOverlap(subs, chunkSize, chunkOverlap, fileName, lectureName));
-    console.log(`Generated transcript chunks for ${filePath}.`);
+  transcriptChunks.push(...genSplitOverlap(subs, chunkSize, chunkOverlap, fileName, lectureName));
+  console.log(`Generated transcript chunks for ${filePath}.`);
 
   return transcriptChunks;
 }
@@ -172,7 +182,7 @@ function genSplitOverlap(subs: { timestamp: string, text: string }[], chunkSize:
       },
     };
     if (page.TranscriptChunkContent.length > 1) { // fix empty chunks at the end of a transcript
-    documents.push(page);
+      documents.push(page);
     }
     firstSubTimestamp = '';
   }

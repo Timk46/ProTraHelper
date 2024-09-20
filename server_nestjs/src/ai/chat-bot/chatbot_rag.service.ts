@@ -21,11 +21,34 @@ const llm = new ChatOpenAI({
   streaming: true,
 });
 
-
-
-const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
+const finalRAGPromptAUD = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
-    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
+    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Das Thema ist Algorithmen und Datenstrukturen. ' +
+      // Erläuterungen zu dem Aufbau der Informationen aus RAG
+      '# Schritt 1: Erklärung basierend auf der Vorlesung \n' +
+      'Bei deiner Antwort beziehst du dich auf relevante Erklärungen aus den Vorlesungsausschnitten und nennst die korrekte Quelle. Du verwendest Markdown-Syntax, um die Antwort übersichtlich zu formatieren.' +
+      'Du MUSST IMMER, wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% GENAU SO WIE IN DEN BEISPIELEN DIREKT DAHINTER AUSSCHLIEßLICH im Format $$Zahl$$ OHNE weitere "[" oder "Quelle".' +
+      'Hier sind Beispiele zur korrekten Zitation. Gehe beim Zitieren genauso vor:\n ' +
+      'Beispiel 1: Jede Zeile Code, die zur Funktion gehört, muss um eine Ebene eingerückt sein $$5$$.\n' +
+      'Beispiel 2: Denke auch daran, dass die Verkettung von Strings in Python mit dem `+` Operator erfolgt, wie im Vorlesungsausschnitt über Datentypen und Operationen in Python erklärt wird $$2$$.\n' +
+      'Beispiel 3: Diese Methoden sollten dann in den abgeleiteten Klassen `Pyramide` und `Kegel` implementiert werden $$1$$.\n' +
+      '\n # Hinweis: Zitiere die Erklärungen nicht wortwörtlich, sondern baue sie inhaltlich in deine Antwort ein.' +
+      'Falls es zu der Frage oder deiner bisherigen Antwort ein passendes, kurzes Code-Beispiel (z.B. Programmcode C++) gibt, dann füge dieses mit Erklärungen in einfacher Sprache hinzu.',
+  ),
+  HumanMessagePromptTemplate.fromTemplate(
+    '# Frage des Studenten\n{question}\n' +
+      '# Ausschnitt aus der Vorlesung:\n' +
+      '{lectureSnippet}\n' +
+      '# Wichtige Anweisungen\n' +
+      '1. Verweise immer auf die Erklärungen aus den Vorlesungsausschnitten AUSSCHLIEßLICH im Format $$Zahl$$.\n' +
+      '2. Wenn die Frage keinen Bezug zur Informatik oder Objektorientierte und funktionale Programmierung hat, antworte: "Das ist eine interessante Frage, aber leider nicht Teil des Vorlesungsstoffs."',
+  ),
+]);
+
+
+const finalRAGPromptOFP = ChatPromptTemplate.fromPromptMessages([
+  SystemMessagePromptTemplate.fromTemplate(
+    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
       // Erläuterungen zu dem Aufbau der Informationen aus RAG
       '# Schritt 1: Erklärung basierend auf der Vorlesung \n' +
       'Bei deiner Antwort beziehst du dich auf relevante Erklärungen aus den Vorlesungsausschnitten und nennst die korrekte Quelle. Du verwendest Markdown-Syntax, um die Antwort übersichtlich zu formatieren.' +
@@ -44,12 +67,26 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
       '{lectureSnippet}\n' +
       '# Wichtige Anweisungen\n' +
       '1. Verweise immer auf die Erklärungen aus den Vorlesungsausschnitten AUSSCHLIEßLICH im Format $$Zahl$$.\n' +
-      '2. Wenn die Frage keinen Bezug zur Informatik oder Objektorientierte und funktionale Programmierung hat, antworte: "Das ist eine interessante Frage, aber leider nicht Teil des Vorlesungsstoffs."',
+      '2. Wenn die Frage keinen Bezug zur Informatik oder Algorithmen und Datenstrukturen hat, antworte: "Das ist eine interessante Frage, aber leider nicht Teil des Vorlesungsstoffs."',
   ),
 ]);
 
 // Wird für alle Nachrichten im Chatverlauf verwendet (RAG nur für die erste Frage)
-const dialogPrompt = ChatPromptTemplate.fromPromptMessages([
+const dialogPromptAUD = ChatPromptTemplate.fromPromptMessages([
+  SystemMessagePromptTemplate.fromTemplate(
+    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Das Thema ist Algorithmen und Datenstrukturen. ' +
+      'Du gibst kurze und hilfreiche Antworten auf die Rückfragen der Studenten in einfacher Sprache. Berücksichtige dabei den bisherigen Chatverlauf.' +
+      '# Wichtige Anweisungen\n' +
+      '1. Wenn die Frage keinen Bezug zur Informatik oder Algorithmen und Datenstrukturen hat, antworte: "Das ist eine interessante Frage, aber leider nicht Teil des Vorlesungsstoffs."',
+  ),
+  HumanMessagePromptTemplate.fromTemplate(
+    '# Chatverlauf\n' +
+      '{chatHistory}\n' +
+      '# Frage des Studenten:\n' +
+      '{question}\n',
+  ),
+]);
+const dialogPromptOFP = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
     'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
       'Du gibst kurze und hilfreiche Antworten auf die Rückfragen der Studenten in einfacher Sprache. Berücksichtige dabei den bisherigen Chatverlauf.' +
@@ -102,7 +139,7 @@ export class ChatBotRAGService {
     }
 
     // Format the prompt for the RAG model
-    const ragFormattedPrompt = await finalRAGPrompt.formatPromptValue({
+    const ragFormattedPrompt = await finalRAGPromptAUD.formatPromptValue({
       question: question,
       lectureSnippet: JSON.stringify(similaritySearchResult),
     });
@@ -222,7 +259,7 @@ export class ChatBotRAGService {
       .join('\n');
 
     // Format the dialog prompt
-    const DialogPrompt = await dialogPrompt.formatPromptValue({
+    const DialogPrompt = await dialogPromptAUD.formatPromptValue({
       chatHistory: chatHistory,
       question: question,
     });
