@@ -124,6 +124,7 @@ export class QuestionDataService {
         codingQuestion: questionTypeStr === questionType.CODE ? specificQuestionData : undefined,
         freetextQuestion: questionTypeStr === questionType.FREETEXT ? specificQuestionData : undefined,
         mcQuestion: (questionTypeStr === questionType.MULTIPLECHOICE || questionTypeStr === questionType.SINGLECHOICE) ? specificQuestionData : undefined,
+        // fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
       };
 
       return questionData;
@@ -298,7 +299,7 @@ export class QuestionDataService {
           if (createNewVersion || !currentQuestion.codingQuestion) {
             // z.B. await this.qdFillin.createFillinQuestion(question.fillinQuestion, updatedQuestion.id);
           } else {
-            // update
+            // z.B. await this.qdFillin.updateFillinQuestion(question.fillinQuestion);
           }
           break;
       }
@@ -318,8 +319,9 @@ export class QuestionDataService {
         (
           newQuestion.codingQuestion ||
           newQuestion.freetextQuestion ||
-          newQuestion.mcQuestion
+          newQuestion.mcQuestion // ||
           //TODO: fill, uml, graph
+          // newQuestion.fillinQuestion // das hier einfügen
         )
       ){
         return true;
