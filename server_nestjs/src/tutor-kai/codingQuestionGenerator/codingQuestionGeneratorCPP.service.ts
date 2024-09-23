@@ -201,22 +201,22 @@ export class CodingQuestionGeneratorCppService {
           new SystemMessage(
             `Du bist ein Programmierexperte. Erstelle eine strukturierte Lösung mit Dateinamen und Code.`
           ),
-          new HumanMessage(`
-            Erstelle die korrigierte Musterlösung für eine Programmieraufgabe. Du hast dies bereits versucht, es gab aber einen Fehler.
-            Generiere hier nur die korrigierte Musterlösung und keinen UnitTest. \n
-            # Aufgabenstellung:\n
-            ${taskDescription} \n
-            # Die Unit-Tests:\n
-            ${state.unitTest[state.unitTest.length - 1]} \n
-            # Die falsche Musterlösung:
-            ${modelSolutionString} \n
-            # Die aufgetauchte Fehlermeldung:\n
-            ${ state.checkCodeError[state.checkCodeError.length - 1]} \n
-            Gib die Musterlösung als Array von Objekten zurück, wobei jedes Objekt einen Dateinamen und den zugehörigen Code enthält.
-            **Der Code sollte als Array von Strings zurückgegeben werden, wobei jeder String eine Zeile des Codes repräsentiert. Daher muss kein \\n verwendet werden!**
-            In dem Code soll niemals nach einer Eingabe gefragt werden. Ausgaben in der Konsole sind gewollt.
-            Der Code soll ohne weitere Eingaben sofort ausführbar sein.\n
-            `),
+          new HumanMessage(
+`Erstelle die korrigierte Musterlösung für eine Programmieraufgabe. Du hast dies bereits versucht, es gab aber einen Fehler (siehe Fehlermeldung).
+Generiere hier nur die korrigierte Musterlösung und keinen UnitTest. \n
+# Aufgabenstellung:\n
+${taskDescription} \n
+# Die Unit-Tests:\n
+${state.unitTest[state.unitTest.length - 1]} \n
+# Die falsche Musterlösung:
+${modelSolutionString} \n
+# Die aufgetauchte Fehlermeldung:\n
+${ state.checkCodeError[state.checkCodeError.length - 1]} \n
+Gibt die Musterlösung als Array von Objekten zurück, wobei jedes Objekt einen Dateinamen und den zugehörigen Code enthält.
+**Der Code sollte als Array von Strings zurückgegeben werden, wobei jeder String eine Zeile des Codes repräsentiert. Daher darf kein \\n verwendet werden!**.
+Der Code sollte niemals nach einer Eingabe fragen. Ausgaben auf die Konsole sind erwünscht.
+Der Code sollte ohne weitere Eingaben sofort ausführbar sein.
+`),
           //new MessagesPlaceholder('messages'),
           new SystemMessage(outputParser.getFormatInstructions()),
         ]);
@@ -226,19 +226,15 @@ export class CodingQuestionGeneratorCppService {
             `Du bist Senior C++ Entwickler. Erstelle eine strukturierte Lösung mit Dateinamen und Code.`
           ),
           new HumanMessage(
-            `Für eine Programmieraufgabe sollst du eine Musterlösung erstellen. Die Musterlösung soll auf einem einfachen Weg das Ziel erreichen.
-            Für jedes Codegerüst muss eine entsprechende Musterlösung erstellt werden.
-            Kommentare sind nur an entscheidenden beziehungsweise komplexen Stellen zu ergänzen.
-            Erstelle eine Musterlösung für die Aufgabe in der übergebenen Programmiersprache. Implementiere in der Musterlösung immer die Funktion aus der Aufgabenstellung.
-            Gib die Musterlösung als Array von Objekten zurück, wobei jedes Objekt einen Dateinamen und den zugehörigen Code enthält.
-            **Der Code sollte als Array von Strings zurückgegeben werden, wobei jeder String eine Zeile des Codes repräsentiert. Daher muss kein \\n verwendet werden!**
-            In dem Code soll niemals nach einer Eingabe gefragt werden. Ausgaben in der Konsole sind gewollt.
-            Der Code soll ohne weitere Eingaben sofort ausführbar sein.\n
-            # Aufgabenstellung:\n
-            ${taskDescriptionString}\n
-            # Codegerüste:\n
-            ${codeGeruesteDescriptionString}\n
             `
+Zu einer Programmieraufgabe sollst du eine Musterlösung erstellen. Die Musterlösung soll auf einfache Weise zum Ziel führen. Für jedes Codegerüst ist eine entsprechende Musterlösung zu erstellen. Kommentare sind nur an kritischen oder komplexen Stellen hinzuzufügen. Erstelle eine Musterlösung für die Aufgabe in der vorgegebenen Programmiersprache. Implementiere in der Musterlösung immer die Funktion aus der Aufgabenstellung. Gib die Musterlösung als Array von Objekten zurück, wobei jedes Objekt einen Dateinamen und den zugehörigen Code enthält.
+**Der Code sollte als Array von Strings zurückgegeben werden, wobei jeder String eine Zeile des Codes repräsentiert. Daher darf kein \\n verwendet werden!**.
+Der Code wird auf einer separaten Maschine ausgeführt, daher sind Eingaben mit cin o.ä. nicht möglich. Der Code darf daher niemals nach einer Eingabe fragen. Außerdem sind Ausgaben in die Konsole erwünscht.
+Der Code sollte ohne weitere Eingaben sofort ausführbar sein.
+# Aufgabenstellung:\n
+${taskDescriptionString}\n
+# Codegerüste:\n
+${codeGeruesteDescriptionString}`
           ),
           //new MessagesPlaceholder('messages'),
           new SystemMessage(outputParser.getFormatInstructions()),
@@ -287,9 +283,10 @@ export class CodingQuestionGeneratorCppService {
       if (state.checkCodeErrorHappend) {
         prompt = ChatPromptTemplate.fromMessages([
           new SystemMessage(
-            `Du bist Senior C++ Entwickler und Hochschuldozent. Im Rahmen eines Universitätskurses "Algorithmen und Datenstrukturen mit C++" erhalten Studierende Programmieraufgaben.
-            Die Lösungen der Studierenden sollen durch Unit-Tests automatisch bewertet werden.
-            Beachte, dass immer die folgenden zwei Zeilen am Anfang enthalten sein müssen:
+            `Du bist Senior C++ Entwickler und Hochschullehrer. Im Rahmen einer Hochschulveranstaltung "Algorithmen und Datenstrukturen mit C++" erhalten die Studierenden Programmieraufgaben.
+            Die Lösungen der Studierenden sollen durch Unit-Tests automatisch bewertet werden. Die Ergebnisse für jeden TEST_CASE (aber nicht SUBCASE) werden den Studierenden nach dem Einreichen ihrer Lösung angezeigt.
+            Daher sollten möglichst viele TEST_CASE mit passenden Namen verwendet werden, um den Studierenden möglichst viele Informationen zu geben. Die Unit-Tests sollten alle Edge-Cases abdecken.
+            Beachte, dass die folgenden zwei Zeilen immer am Anfang stehen müssen:
             #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
             #define UNIT_TEST
             #include <JsonReporter.h>
@@ -397,9 +394,10 @@ export class CodingQuestionGeneratorCppService {
         prompt = ChatPromptTemplate.fromMessages([
           new SystemMessage(
             `
-            Du bist Senior C++ Entwickler und Hochschuldozent. Im Rahmen eines Universitätskurses "Algorithmen und Datenstrukturen mit C++" erhalten Studierende Programmieraufgaben.
-            Die Lösungen der Studierenden sollen durch Unit-Tests automatisch bewertet werden.
-            Beachte, dass immer die folgenden zwei Zeilen am Anfang enthalten sein müssen:
+            Du bist Senior C++ Entwickler und Hochschullehrer. Im Rahmen einer Hochschulveranstaltung "Algorithmen und Datenstrukturen mit C++" erhalten die Studierenden Programmieraufgaben.
+            Die Lösungen der Studierenden sollen durch Unit-Tests automatisch bewertet werden. Die Ergebnisse für jeden TEST_CASE (aber nicht SUBCASE) werden den Studierenden nach dem Einreichen ihrer Lösung angezeigt.
+            Daher sollten möglichst viele TEST_CASE mit passenden Namen verwendet werden, um den Studierenden möglichst viele Informationen zu geben. Die Unit-Tests sollten alle Edge-Cases abdecken.
+            Beachte, dass die folgenden zwei Zeilen immer am Anfang stehen müssen:
             #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
             #define UNIT_TEST
             #include <JsonReporter.h>
@@ -512,17 +510,23 @@ export class CodingQuestionGeneratorCppService {
 
     const genExpectation = async (state: typeof TaskGenState.State) => {
       const { messages } = state;
+      const codeGeruesteDescriptionString = `\n \n${codeGerueste.map((geruest) => `## ${geruest.codeFileName}:\n${geruest.code}`).join('\n\n')}`;
 
       const prompt = ChatPromptTemplate.fromMessages([
         new SystemMessage('Du bist ein Dozent an einer Hochschule.'),
-        new HumanMessage(`Erstelle einen Erwartungshorizont zu der nachfolgenden Programmieraufgabe und der Musterlösung. Der Erwartungshorizont soll dabei jeden Schritt, welcher für das Lösen der Aufgabe nötig ist, einzeln erfassen und im Anschluss die konkret benötigten Kompetenzen zu den einzelnen Schritten festhalten. Gehe dabei wie folgt vor:
-            1. Gehe Zeile für Zeile durch die Musterlösung und entscheide, was ein Student können muss, der diese Zeile programmiert. Schreibe diesen Schritt in dreifach Anführungszeichen (""") \n
-            2. Erstelle nun einen Erwartungshorizont, welcher mit durchnummerierten Schritten den jeweiligen Code und die dazugehörigen Kompetenzen notiert, welcher der Student durchführen muss um diese Zeile zu lösen. \n
-            3. Erstelle nun einen Erwartungshorizont, welcher die jeweiligen Kompetenzen aus Schritt 2 als Übersicht darstellt, sodass mehrfach auftauchende Kompetenzen nur einmal in der Liste vorkommen. Markiere den Anfang des Erwartungshorizontes einmalig mit "## FinalStep" und schreibe einmalig in die erste Zeile "Erwartungshorizont".
+        new HumanMessage(`
+Erstelle auf Basis der Codegerüste und der Musterlösung einen Erwartungshorizont für die folgende Programmieraufgabe. Der Erwartungshorizont soll dabei jeden Schritt, der zur Lösung der Aufgabe notwendig ist, einzeln erfassen und anschließend die konkret benötigten Kompetenzen für die einzelnen Schritte festhalten. Gehe dazu wie folgt vor:
+1. Gehe die Musterlösung Zeile für Zeile durch. Wenn diese Zeile nicht schon im Codegerüst vorkommt, musst du entscheiden, was ein Studierender können muss, der diese Zeile programmiert. Schreibe diesen Schritt in dreifache Anführungszeichen (""") \n
+2. Erstelle nun einen Erwartungshorizont, der mit nummerierten Schritten den Code und die dazugehörigen Kompetenzen auflistet, die der Student ausführen muss, um diese Zeile zu lösen. \n
+3. Erstelle nun einen Erwartungshorizont, welcher die jeweiligen Kompetenzen aus Schritt 2 als Übersicht darstellt, sodass mehrfach vorkommende Kompetenzen nur einmal in der Liste auftauchen. Markiere den Anfang des Erwartungshorizontes einmal mit "## FinalStep" und schreibe in die erste Zeile einmal "Erwartungshorizont".
 
-            Aufgabenstellung:\n ${taskDescription} \n \n Musterlösung:\n ${
-          state.solution[state.solution.length - 1]
-        }`),
+# Aufgabenstellung:\n
+${taskDescription} \n
+# Codegerüste:\n
+${codeGeruesteDescriptionString} \n
+# Musterlösung:\n
+${state.solution[state.solution.length - 1]}
+`),
         new MessagesPlaceholder('messages'),
       ]);
 
