@@ -186,6 +186,7 @@ export class QuestionService {
       isApproved: question.isApproved,
       originId: question.originId,
       text: question.text,
+      conceptNodeId: question.conceptNodeId,
       codingQuestion: this.mapCodingQuestionToDto(question.codingQuestion),
       level: question.level,
     };

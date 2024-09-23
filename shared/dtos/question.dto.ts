@@ -8,7 +8,7 @@ export interface QuestionDTO {
     type: string;
     author?: number;
     text: string;
-    conceptNode?: number;
+    conceptNodeId: number;
     conceptNodeName?: string;
     isApproved: boolean;
     originId?: number;

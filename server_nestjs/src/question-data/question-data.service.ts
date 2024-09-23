@@ -46,7 +46,7 @@ export class QuestionDataService {
         text: question.text,
         isApproved: question.isApproved,
         originId: question.originId,
-        conceptNode: question.conceptNodeId || undefined,
+        conceptNodeId: question.conceptNodeId || undefined,
         level: question.level,
       };
 
@@ -194,7 +194,7 @@ export class QuestionDataService {
                 isApproved: question.isApproved || false,
                 version: question.version || 1,
                 //origin has to be set in the next step
-                conceptNode: question.conceptNode? {connect: {id: question.conceptNode}}: undefined,
+                conceptNode: {connect: {id: question.conceptNodeId}},
             }
         });
 
@@ -408,8 +408,8 @@ export class QuestionDataService {
         if(progress == 1) {
           feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
           //set contentElement as done
-          console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNode + ' level: ' + question.level + ' userId: ' + userId)
-          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
+          console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNodeId + ' level: ' + question.level + ' userId: ' + userId)
+          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
           markedAsDone = true;
         }
         else {
@@ -464,8 +464,8 @@ export class QuestionDataService {
         let markedAsDone = false;
         if(progress == 1) {
           feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
-          console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNode + ' level: ' + question.level + ' userId: ' + userId)
-          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
+          console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNodeId + ' level: ' + question.level + ' userId: ' + userId)
+          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
           markedAsDone = true;
         }
         else {
@@ -518,7 +518,7 @@ export class QuestionDataService {
         console.log('progress: '+progress);
 
         if(progress == 1) {
-          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
+          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
           markedAsDone = true;
 
         }

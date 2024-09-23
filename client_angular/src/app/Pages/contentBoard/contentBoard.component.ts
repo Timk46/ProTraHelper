@@ -285,16 +285,21 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
           console.log('Dialog result:', result);
+          if (this.activeConceptNodeId == undefined) {
+            console.error("activeConceptNodeId is undefined");
+            return;
+          }
           const linkableContentElement: LinkableContentElementDTO = {
             contentNodeId: contentNodeId,
 
             questionId: Number(result.questionId) || undefined,
-            question: result.questionId ? undefined : {
-              id: -1,
+            question: {
+              id: -1, // -1 for temporary id
               text: "",
               isApproved: false, //TODO: implement approval
               name: result.questionTitle || "New question",
               type: result.questionType,
+              conceptNodeId: this.activeConceptNodeId,
               description: result.questionDescription || "Manuell per GUI erstellte Frage",
               level: Number(result.questionDifficulty),
               score: Number(result.questionScore) || 100,
@@ -306,6 +311,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
           this.contentLinkerService.createLinkedContentElement(linkableContentElement).subscribe((linkableContentElement) => {
             console.log("linked contentElement: ", linkableContentElement);
+            this.progressService.questionCreated();
             this.fetchContentsForConcept.emit();
           });
         }
