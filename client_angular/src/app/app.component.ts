@@ -14,7 +14,7 @@ import { globalRole } from '@DTOs/roles.enum';
 })
 export class AppComponent {
   userMail: string = "";
-  userRole: globalRole = this.userService.getRole();
+  userRole: string = "";
   version: string = "";
   userIsLoggedIn: boolean = false;
 
