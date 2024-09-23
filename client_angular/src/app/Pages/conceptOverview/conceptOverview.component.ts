@@ -65,10 +65,6 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
         this.contentService.fetchContentsForConcept(this.activeConceptNode.databaseId).subscribe(contentsForConcept =>  this.contentsForActiveConceptNode = contentsForConcept );
         }
     });
-
-    // for lecturers view - check if user is admin
-    this.isAdmin = this.userService.getRole() === 'ADMIN';
-    localStorage.getItem('editModeActive') === 'true' ? this.editModeActive = true : this.editModeActive = false;
   }
 
   ngOnInit() {
@@ -76,6 +72,9 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
       Breakpoints.Handset,
       Breakpoints.Tablet,
       Breakpoints.Web]).subscribe(result => {
+    });
+    this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
+      this.editModeActive = hasEditModeActive;
     });
   }
 

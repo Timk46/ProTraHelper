@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { version } from '@DTOs/version';
+import { globalRole } from '@DTOs/roles.enum';
 
 
 @Component({
@@ -13,7 +14,7 @@ import { version } from '@DTOs/version';
 })
 export class AppComponent {
   userMail: string = "";
-  userRole: string = "";
+  userRole: globalRole = this.userService.getRole();
   version: string = "";
   userIsLoggedIn: boolean = false;
 
@@ -34,11 +35,11 @@ export class AppComponent {
         {
           this.userMail= userService.getEmail();
           this.userRole = userService.getRole();
+          if (this.userRole != 'ADMIN') {
+            this.userService.disableEditMode();
+          }
         }
       });
-
-      // lecturers view - get edit status from local storage
-      localStorage.getItem('editModeActive') === 'true' ? this.editModeActive = true : this.editModeActive = false;
     }
 
   openContact() {
@@ -69,6 +70,17 @@ export class AppComponent {
       });
     });
     //console.log("User Total Progress: " + userTotalProgress);
+  }
+
+  // lecturers view
+  onToggleEditorMode() {
+    this.editModeActive = !this.editModeActive;
+    if(this.editModeActive) {
+      this.userService.enableEditMode();
+    }
+    else {
+      this.userService.disableEditMode();
+    }
   }
 
 

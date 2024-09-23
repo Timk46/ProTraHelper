@@ -89,29 +89,31 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
     // for lecturers view
     this.isAdmin = this.userService.getRole() === 'ADMIN';
-    localStorage.getItem('editModeActive') === 'true' ? this.editModeActive = true : this.editModeActive = false;
-
-
-
   }
 
   ngOnInit() {
-    // Subscribe to screen size changes for responsive design
-    if (this.editModeActive) {
-      this.updateDisplayedColumns(['id', 'name', 'type', 'actions']);
-    } else {
-      this.sSS.isHandset.pipe(takeUntil(this.destroy$)).subscribe((isHandset) => {
-        if (isHandset) {
-          this.updateDisplayedColumns(['name', 'type', 'progress', 'actions']);
-        }
-      });
 
-      this.sSS.isTablet.pipe(takeUntil(this.destroy$)).subscribe((isTablet) => {
-        if (isTablet) {
-          this.updateDisplayedColumns(['id','name','type', 'progress', 'actions']);
-        }
-      });
-    }
+    // Subscribe to screen size changes for responsive design
+    this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
+      this.editModeActive = hasEditModeActive;
+      if (hasEditModeActive) {
+        this.updateDisplayedColumns(['id', 'name', 'type', 'actions']);
+      } else {
+        this.sSS.isHandset.pipe(takeUntil(this.destroy$)).subscribe((isHandset) => {
+          if (isHandset) {
+            this.updateDisplayedColumns(['name', 'type', 'progress', 'actions']);
+          }
+        });
+
+        this.sSS.isTablet.pipe(takeUntil(this.destroy$)).subscribe((isTablet) => {
+          if (isTablet) {
+            this.updateDisplayedColumns(['id','name','type', 'progress', 'actions']);
+          }
+        });
+      }
+    });
+
+
   }
 
   /**

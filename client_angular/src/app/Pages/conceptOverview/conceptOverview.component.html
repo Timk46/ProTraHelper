@@ -18,7 +18,7 @@
 
   <p>{{activeConceptNode.description}}</p>
 
-  <button *ngIf="isAdmin && editModeActive" mat-raised-button color="primary" (click)="onCreateContentNode()" disabled>ContentNode hinzufügen</button>
+  <button *ngIf="editModeActive" mat-raised-button color="primary" (click)="onCreateContentNode()" disabled>ContentNode hinzufügen</button>
 
   <div [ngStyle]="{'display': activeTab === 'content' ? 'block' : 'none'}" class="tab-content-container">
     <app-contentBoard class="tab-content" [contentsForActiveConceptNode]="contentsForActiveConceptNode"
