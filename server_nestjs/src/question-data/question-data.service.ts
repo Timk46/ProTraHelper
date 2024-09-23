@@ -272,6 +272,23 @@ export class QuestionDataService {
         });
       }
 
+      // we also need to update the awards level
+      const contentNodes = await this.prisma.contentView.findMany({
+        where: {
+          contentElement: {
+            questionId: question.originId
+          }
+        }
+      });
+
+      for (const contentNode of contentNodes) {
+        if (contentNode.contentNodeId) {
+          await this.contentService.updateAwardsLevel(contentNode.contentNodeId);
+        } else {
+          console.log('Cannot update awards for content node ' + contentNode.contentNodeId);
+        }
+      }
+
       switch (question.type) {
         case questionType.FREETEXT:
           if (createNewVersion || !currentQuestion.freetextQuestion) {
@@ -307,6 +324,13 @@ export class QuestionDataService {
       return await this.getDetailedQuestion(updatedQuestion.id, question.type as questionType);
     }
 
+    /**
+     * Checks if the detailed questions can be updated based on certain conditions.
+     *
+     * @param currQuestion - The current detailed question data transfer object.
+     * @param newQuestion - The new detailed question data transfer object.
+     * @returns `true` if the detailed questions are updateable, `false` otherwise.
+     */
     private detailedQuestionsUpdateable(currQuestion: detailedQuestionDTO, newQuestion: detailedQuestionDTO): boolean {
       if (
         currQuestion &&

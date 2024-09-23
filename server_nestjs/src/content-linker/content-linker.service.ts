@@ -1,3 +1,4 @@
+import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { QuestionDataService } from '@/question-data/question-data.service';
 import { LinkableContentElementDTO, LinkableContentNodeDTO, QuestionDTO } from '@DTOs/index';
@@ -10,6 +11,7 @@ export class ContentLinkerService {
   constructor(
     private prisma: PrismaService,
     private questionDataService: QuestionDataService,
+    private contentService: ContentService,
   ) {}
 
   /**
@@ -129,6 +131,9 @@ export class ContentLinkerService {
       }
     });
 
+    //since we may have a higher award level, update them
+    await this.contentService.updateAwardsLevel(linkData.contentNodeId);
+
     if (!dbContentView) {
       throw new Error('Error creating linked content element while creating content view');
     }
@@ -145,8 +150,4 @@ export class ContentLinkerService {
 
 
   // TODO: repositionContentElement
-
-
-
-
 }
