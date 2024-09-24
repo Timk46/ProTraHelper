@@ -46,6 +46,9 @@ export class ContentViewComponent implements OnInit {
       this.applyQuestionStyle[i] = false;
     }
     this.pdfCount = this.getPdfCount();
+    
+    // check if browser is Safari
+    // pdfViewer component is not supported in Safari therefor a warning message is displayed
     this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   }
 
@@ -72,20 +75,42 @@ export class ContentViewComponent implements OnInit {
     }
   }
 
-  // needed for pdf iframe (we need iframe for multiple pdfs in a row: https://pdfviewer.net/extended-pdf-viewer/side-by-side)
+  /**
+   * @description
+   * Returns the pdf url for the iframe
+   * (we need iframe for multiple pdfs in a row: https://pdfviewer.net/extended-pdf-viewer/side-by-side)
+   * @param uniqueIdentifier - uuid of the pdf
+   */
   getPdfUrl(uniqueIdentifier: string) {
     return this.sanitizer.bypassSecurityTrustResourceUrl(`/pdfViewer/${uniqueIdentifier}`);
   }
 
+  /**
+   * @description
+   * Returns the number of pdfs for the current content node
+   */
   getPdfCount() {
     return this.contentViewData.contentElements.filter(x => x.type === 'PDF').length;
   }
 
+  /**
+   * @description
+   * Handles the click event of the discussion button 
+   * Opens a dialog for creating a new discussion/question
+   * @param contentElementId - id of the content element
+   */
   onCreateDiscussion(contentElementId: number) {
     this.discussionDialogService.openDiscussionCreation(this.activeConceptNodeId, this.contentViewData.contentNodeId, contentElementId);
     this.dialogRef.close();
   }
 
+  /**
+   * @description
+   * Handles the click event of the checkmark button
+   * Toggles the completion status of the content element
+   * Toggles the appearance of the checkmark button
+   * @param contentElementId - id of the content element
+   */
   onToggleCheckmark(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
     this.contentService.toggleContentElementCompletionStatus(contentElementId, this.activeConceptNodeId, this.contentViewData.level).subscribe(status => this.applyCompletedStyle[position] = status);
@@ -98,6 +123,13 @@ export class ContentViewComponent implements OnInit {
     }
   }
 
+  /**
+   * @description
+   * Handles the click event of the questionmark button
+   * Toggles the question status of the content element
+   * Toggles the appearance of the questionmark button
+   * @param contentElementId - id of the content element
+   */
   onToggleQuestionmark(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
     this.contentService.toggleContentElementQuestionStatus(contentElementId).subscribe(status => this.applyQuestionStyle[position] = status);
@@ -114,6 +146,11 @@ export class ContentViewComponent implements OnInit {
     }
   }
 
+  /**
+   * @description
+   * Applies the styles for the checkmark button within contentView
+   * @param contentElementId - id of the content element
+   */
   applyCheckmarkStyles(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
 
@@ -126,6 +163,11 @@ export class ContentViewComponent implements OnInit {
     return styles;
   }
 
+  /**
+   * @description
+   * Applies the styles for the questionmark button within contentView
+   * @param contentElementId - id of the content element
+   */
   applyQuestionmarkStyles(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
 
@@ -138,11 +180,14 @@ export class ContentViewComponent implements OnInit {
     return styles;
   }
 
+  /**
+   * @description
+   * Returns the date of the last time the content node was opened
+   */
   getLastOpenedDate(){
-    //console.log('ContentViewComponent: getLastOpenedDate');
     this.contentService.updateLastOpenedDate(this.contentViewData.contentNodeId).subscribe(status => {this.lastOpenedDate = new Date(status); this.readableDate = this.getDateDisplay(this.lastOpenedDate);});
   }
-    /**
+  /**
    * Returns the date in a human readable format
    * @param date
    * @returns
