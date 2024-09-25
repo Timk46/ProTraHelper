@@ -42,5 +42,19 @@ export class ContentLinkerController {
     return this.contentLinkerService.createLinkedContentElement(linkableQuestion, req.user.id);
   }
 
+  @roles('ADMIN')
+  @Get('/unlinkContentElement/:contentElementId')
+  /**
+   * Unlinks a content element by its ID.
+   *
+   * @param contentElementId - The ID of the content element to unlink.
+   * @returns A promise that resolves to a boolean indicating whether the unlinking was successful.
+   */
+  async unlinkContentElement(
+    @Param('contentElementId') contentElementId: string,
+  ): Promise<boolean> {
+    return this.contentLinkerService.unlinkContentElement(Number(contentElementId));
+  }
+
 
 }

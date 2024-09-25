@@ -32,5 +32,15 @@ export class ContentLinkerService {
     return this.http.post<LinkableContentElementDTO>(environment.server + '/content/linker/createLinkedContentElement', linkableContentElement);
   }
 
+  /**
+   * Unlinks a content element by its ID.
+   *
+   * @param contentElementId - The ID of the content element to unlink.
+   * @returns An Observable that emits a boolean indicating the success of the operation.
+   */
+  unlinkContentElement(contentElementId: number): Observable<boolean> {
+    return this.http.get<boolean>(environment.server + '/content/linker/unlinkContentElement/' + contentElementId);
+  }
+
 
 }
