@@ -9,6 +9,10 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatCheckboxChange } from "@angular/material/checkbox";
 import { McqcreationService } from "src/app/Services/mcqCreation/mcqcreation.service";
 import { MatTableDataSource } from "@angular/material/table";
+import { ContentService } from "src/app/Services/content/content.service";
+import { ConceptNode } from "@DTOs/prisma.dto";
+import { Observable, of, ReplaySubject, Subject } from "rxjs";
+import { map, startWith, takeUntil } from "rxjs/operators";
 
 interface Answer {
   answer?: string;
@@ -26,6 +30,10 @@ export class EditChoiceComponent {
   @ViewChild('question') questionField!: TinymceComponent;
 
   choiceForm: FormGroup;
+  conceptFilterControl = new FormControl('');
+
+  concepts: ConceptNode[] = [];
+  filteredConcepts: ReplaySubject<ConceptNode[]> = new ReplaySubject<ConceptNode[]>(1);
   dataSource: MatTableDataSource<any>;
 
   thisQuestionType = questionType.SINGLECHOICE;
@@ -41,6 +49,8 @@ export class EditChoiceComponent {
 
   displayedColumns: string[] = ['option', 'correct', 'action'];
 
+  private _onDestroy = new Subject<void>();
+
 
   constructor(
     private fb: FormBuilder,
@@ -48,7 +58,8 @@ export class EditChoiceComponent {
     private route: ActivatedRoute,
     private confirmationService: ConfirmationService,
     private snackBar: MatSnackBar,
-    private mcqService: McqcreationService
+    private mcqService: McqcreationService,
+    private contentService: ContentService
 
   ) {
     this.dataSource = new MatTableDataSource<any>([]);
@@ -60,12 +71,22 @@ export class EditChoiceComponent {
       questionType: ['', Validators.required],
       questionScore: ['', Validators.required],
       questionShuffle: [false],
+      questionConcept: [''],
       optionsData: this.fb.array([]),
     });
   }
 
+
+
   ngOnInit(): void {
     //this.handleRouteParams();
+    this.filteredConcepts.next(this.concepts.slice());
+
+    this.conceptFilterControl.valueChanges
+      .pipe(takeUntil(this._onDestroy))
+      .subscribe(() => {
+        this.filterConcepts();
+      });
   }
 
   ngAfterViewInit(): void {
@@ -74,7 +95,10 @@ export class EditChoiceComponent {
     }, 0);
   }
 
-
+  ngOnDestroy(): void {
+    this._onDestroy.next();
+    this._onDestroy.complete();
+  }
 
   private handleRouteParams() {
     this.route.params.subscribe(params => {
@@ -101,7 +125,9 @@ export class EditChoiceComponent {
         questionDescription: this.detailedQuestionData.description,
         questionType: this.thisQuestionType,
         questionScore: this.detailedQuestionData.score,
-        questionShuffle: this.detailedQuestionData.mcQuestion?.shuffleoptions || false
+        questionShuffle: this.detailedQuestionData.mcQuestion?.shuffleoptions || false,
+        questionConcept: this.detailedQuestionData.conceptNodeId || ''
+
       });
       if (this.detailedQuestionData.mcQuestion) {
         console.log('Setting options:', this.detailedQuestionData.mcQuestion.textHTML || this.detailedQuestionData.text);
@@ -109,6 +135,12 @@ export class EditChoiceComponent {
         this.optionsData.clear();
         this.detailedQuestionData.mcQuestion.mcOptions.forEach(option => {
           this.addOption(option.id, option.text, option.is_correct);
+        });
+      }
+      if (this.detailedQuestionData.conceptNodeId) {
+        this.contentService.getConcepts().subscribe(concepts => {
+          this.concepts = concepts;
+          this.filteredConcepts.next(this.concepts.slice());
         });
       }
     }
@@ -147,6 +179,8 @@ export class EditChoiceComponent {
   }
 
   protected onSaveNewVersion() {
+    return // disabled for now
+
     this.confirmationService.confirm({
       title: 'Neue Version erstellen',
       message: 'Dies speichert die Frage unter einer neuen Version. Die alte Version bleibt erhalten, aber nicht mehr sichtbar. Fortfahren?',
@@ -188,12 +222,13 @@ export class EditChoiceComponent {
         description: this.choiceForm.value.questionDescription,
         score: parseInt(this.choiceForm.value.questionScore),
         text: this.questionField.getRawContent(),
+        conceptNodeId: parseInt(this.choiceForm.value.questionConcept) || undefined,
         mcQuestion: {
           id: this.detailedQuestionData.mcQuestion?.id || undefined,
           questionId: this.detailedQuestionData.id,
           textHTML: this.questionField.getContent(),
           shuffleoptions: false,
-          isSC: this.thisQuestionType === questionType.SINGLECHOICE,
+          isSC: this.choiceForm.value.questionType === questionType.SINGLECHOICE,
           mcOptions: this.optionsData.value.map((option: {id: number, text: string, is_correct: boolean}) => {
             console.log('Option:', option.id);
             return {
@@ -213,6 +248,34 @@ export class EditChoiceComponent {
 
   get optionsData(): FormArray {
     return this.choiceForm.get('optionsData') as FormArray;
+  }
+
+  get generationBasis(): FormControl {
+    return this.choiceForm.get('generationBasis') as FormControl;
+  }
+
+  get correctOptionsCount(): number {
+    return this.optionsData.value.filter((option: {id: number, text: string, is_correct: boolean}) => option.is_correct).length;
+  }
+
+  onSelectClick() {
+    this.filterConcepts();
+  }
+
+  private filterConcepts() {
+    if (!this.concepts) {
+      return;
+    }
+    let search = this.conceptFilterControl.value;
+    if (!search) {
+      this.filteredConcepts.next(this.concepts.slice());
+      return;
+    } else {
+      search = search.toLowerCase();
+    }
+    this.filteredConcepts.next(
+      this.concepts.filter(concept => concept.name.toLowerCase().indexOf(search!) > -1)
+    );
   }
 
   addOption(id: number = -1, text: string = '', isCorrect: boolean = false): void {

@@ -4,6 +4,7 @@ import { ContentService } from './content.service';
 import { ContentsForConceptDTO } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
 import { RolesGuard, roles } from '@/auth/roles.guard';
+import { ConceptNode } from '@prisma/client';
 
 @UseGuards(RolesGuard)
 @Controller('content')
@@ -144,5 +145,11 @@ export class ContentController {
       return formattedConcept.charAt(0).toUpperCase() + formattedConcept.slice(1);
     });
     return formattedConcepts
+  }
+
+  @roles('ADMIN')
+  @Get('/conceptsFull')
+  async getConcepts(): Promise<ConceptNode[]> {
+    return this.contentService.getConcepts();
   }
 }

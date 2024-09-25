@@ -1,0 +1,72 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: calc(100% - 40px);
+  margin: 20px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.horizontal-align-container {
+  flex-grow: 1;
+  display: flex;
+  gap: 20px;
+  overflow: hidden;
+}
+
+.text-container {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.wrap-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.wrap-container > * {
+  flex: 1 1 700px;
+}
+
+.expansion {
+  display: flex;
+  flex-direction: column;
+}
+
+.button-container {
+  display: flex;
+  gap: 20px;
+  justify-content: flex-end;
+}
+
+
+
+::ng-deep {
+  .custom-mat-select {
+    .mat-select-panel {
+      /* Erhöhen Sie diesen Wert, wenn nötig */
+      max-height: 400px !important;
+    }
+
+    .mat-select-search-input {
+      background: white !important;
+      width: 100%;
+    }
+
+    .mat-select-panel .mat-option {
+      height: auto;
+      line-height: normal;
+      padding: 8px 16px;
+    }
+
+    .mat-select-panel .mat-option:first-child {
+      height: auto;
+      line-height: normal;
+      padding: 0;
+    }
+  }
+}

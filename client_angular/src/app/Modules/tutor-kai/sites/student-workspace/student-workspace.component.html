@@ -48,7 +48,10 @@
              -->
            </div>
              <mat-card>
-               <mat-card-content class = "polarNight_4_text" [innerHTML]="taskDescription"></mat-card-content>
+              <!-- <mat-card-content class = "polarNight_4_text" [innerHTML]="taskDescription"></mat-card-content> -->
+              <mat-card-content class = "polarNight_4_text">
+                <markdown [data]="taskDescription"></markdown>
+              </mat-card-content>
              </mat-card>
      </div>
 

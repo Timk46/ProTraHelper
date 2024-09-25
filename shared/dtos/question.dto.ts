@@ -8,7 +8,7 @@ export interface QuestionDTO {
     type: string;
     author?: number;
     text: string;
-    conceptNode?: number;
+    conceptNodeId: number;
     conceptNodeName?: string;
     isApproved: boolean;
     originId?: number;
@@ -139,8 +139,8 @@ export interface CodingQuestionDto {
     MULTIPLECHOICE = "MC",
     FREETEXT = "FreeText",
     CODE = "CodingQuestion",
-    FILLIN = "Lückentext",
     GRAPH = "GraphQuestion",
+    FILLIN = "FillIn"
   }
 
   export interface McqGenerationDTO {

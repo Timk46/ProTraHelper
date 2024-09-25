@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { ContentsForConceptDTO, ContentElementStatusDTO, ConceptNodeDTO } from '@DTOs/index';
 import { catchError, Observable, tap, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { ConceptNode } from '@DTOs/prisma.dto';
 
 @Injectable({
   providedIn: 'root',
@@ -34,6 +35,10 @@ export class ContentService {
    */
   fetchAllConceptNames(): Observable<string[]> {
     return this.http.get<string[]>(environment.server + `/content/concepts`)
+  }
+
+  getConcepts(): Observable<ConceptNode[]> {
+    return this.http.get<ConceptNode[]>(environment.server + `/content/conceptsFull`)
   }
 
   /**

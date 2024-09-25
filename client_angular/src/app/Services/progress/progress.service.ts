@@ -25,4 +25,8 @@ export class ProgressService {
     // ToDo: auch contents for concept neu holen ?
     // ToDo: Fortschritt unten rechts direkt anzeigen und immer mit dieser Funktion neu?
   }
+
+  questionCreated(): void {
+    this.graphCommunicationService.triggerGraphUpdate();
+  }
 }

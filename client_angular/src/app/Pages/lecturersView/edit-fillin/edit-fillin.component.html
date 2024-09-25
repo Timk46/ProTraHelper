@@ -1,1 +1,89 @@
-<p>edit-fillin works!</p>
+<div class="content mat-elevation-z8">
+  <h1 style="display: flex; justify-content: center;">Lückentext Aufgabe bearbeiten</h1>
+
+  <div class="horizontal-align-container">
+    <div class="text-container" style="width: 30%;">
+      <div class="wrap-container">
+
+        <h2>Optionen</h2>
+
+        <form [formGroup]="fillinForm">
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Titel</mat-label>
+            <input matInput placeholder="Titel der Frage" formControlName="questionTitle">
+            <mat-error *ngIf="fillinForm.get('questionTitle')!.hasError('required')">Titel der Frage ist
+              erforderlich</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Schwierigkeit</mat-label>
+            <mat-select formControlName="questionDifficulty">
+              <mat-option value="1">Level 1: Erinnern</mat-option>
+              <mat-option value="2">Level 2: Verstehen</mat-option>
+              <mat-option value="3">Level 3: Anwenden</mat-option>
+              <mat-option value="4">Level 4: Analysieren</mat-option>
+              <mat-option value="5">Level 5: Evaluieren</mat-option>
+              <mat-option value="6">Level 6: Kreieren</mat-option>
+            </mat-select>
+            <mat-error *ngIf="fillinForm.get('questionDifficulty')!.hasError('required')">Schwierigkeitsgrad ist
+              erforderlich</mat-error>
+          </mat-form-field>
+          <!-- <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Choice-Typ</mat-label>
+            <mat-select formControlName="questionType">
+              <mat-option value="SC">Single Choice</mat-option>
+              <mat-option value="MC">Multiple Choice</mat-option>
+            </mat-select>
+            <mat-error *ngIf="fillinForm.get('questionDifficulty')!.hasError('required')">Schwierigkeitsgrad ist
+              erforderlich</mat-error>
+          </mat-form-field> -->
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <input matInput type="number" min="0" step="1" placeholder="Punkte" formControlName="questionScore">
+            <mat-label>Punkte</mat-label>
+            <mat-error *ngIf="fillinForm.get('questionScore')!.hasError('required')">Punkte sind
+              erforderlich</mat-error>
+          </mat-form-field>
+        </form>
+
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Erweiterte Optionen (optional)</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="expansion">
+            <p>Die Auswirkungen dieser Einstellungen sind in der Übersicht nicht sichtbar und beziehen sich nur auf
+              interne Datenbankparameter</p>
+            <form [formGroup]="fillinForm">
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-label>Beschreibung der Frage</mat-label>
+                <textarea matInput placeholder="Beschreibung der Frage"
+                  formControlName="questionDescription"></textarea>
+                <mat-hint>Zum Beispiel "manuell erstellt" oder "automatisch importiert"</mat-hint>
+              </mat-form-field>
+            </form>
+          </div>
+        </mat-expansion-panel>
+      </div>
+    </div>
+
+
+    <div class="text-container" style="width: 70%;">
+      <div class="wrap-container">
+
+        <!-- hier fillin -->
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="button-container">
+    <button mat-raised-button color="primary" (click)="onOverwrite()">Speichern (aktualisieren)</button>
+    <div matTooltip="Die aktuelle Version hat noch keine Single/Multiple Choice Daten."
+      [matTooltipDisabled]="!!detailedQuestionData?.mcQuestion">
+      <button mat-raised-button color="primary"
+        (click)="onSaveNewVersion()"
+        [disabled]="!detailedQuestionData?.mcQuestion || true"
+        >Als neue Version speichern</button>
+    </div>
+    <button mat-raised-button color="warn" (click)="onCancel()">Abbrechen</button>
+  </div>
+</div>

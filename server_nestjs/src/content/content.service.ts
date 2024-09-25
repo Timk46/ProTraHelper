@@ -13,6 +13,7 @@ import { ContentElementStatusDTO } from '@DTOs/index';
 import { async, last } from 'rxjs';
 import { tr } from '@faker-js/faker';
 import { UserConceptService } from '@/graph/user-concept/user-concept.service';
+import { ConceptNode } from '@prisma/client';
 
 @Injectable()
 export class ContentService {
@@ -607,6 +608,154 @@ export class ContentService {
       : null;
     return Array.from(new Set(allConcepts));
   }
+
+  async getConcepts(): Promise<ConceptNode[]> {
+    return this.prisma.conceptNode.findMany({
+      where: {
+        NOT: {
+          name: 'root',
+        },
+      },
+    });
+  }
+
+
+    /**
+   * Updates the awards level for a given content node and its associated concept nodes.
+   *
+   * This method performs the following steps:
+   * 1. Retrieves the highest question level for the specified content node.
+   * 2. Updates the `awards` field in the `training` table for the given content node.
+   * 3. Retrieves all concept nodes associated with the specified content node.
+   * 4. For each concept node (excluding the root concept node), finds the highest awards level.
+   * 5. Updates the `level` field in the `ModuleConceptGoal` table for each concept node.
+   *
+   * @param contentNodeId - The ID of the content node to update.
+   * @returns A promise that resolves to `true` if the update is successful.
+   * @throws An error if the highest awards level cannot be found for any content or concept node.
+   */
+  async updateAwardsLevel(contentNodeId: number): Promise<boolean> {
+    const highestLevel: number = await this.getHighestQuestionLevel(contentNodeId);
+    if (highestLevel === -1) {
+      throw new Error('Error finding the highest awards level for contentNode ' + contentNodeId);
+    }
+
+    const updatedTraining = await this.prisma.training.updateMany({
+      where: {
+        contentNodeId: contentNodeId,
+      },
+      data: {
+        awards: highestLevel,
+      },
+    });
+
+    // now we need to update the ModuleConceptGoal table by finding the highest awards level for each concept node
+    const conceptNodes = await this.prisma.training.findMany({
+      where: {
+        contentNodeId: contentNodeId,
+      },
+      select: {
+        conceptNodeId: true,
+      },
+    });
+
+    //for each concept node, find the highest awards in the training table
+    for (const conceptNode of conceptNodes) {
+      if (conceptNode.conceptNodeId !== 1) { //skip the root concept node
+        const highestAwards = await this.getHighestContentLevel(conceptNode.conceptNodeId);
+        if (highestAwards === -1) {
+          throw new Error('Error finding highest awards level for conceptNode ' + conceptNode.conceptNodeId);
+        }
+
+        //update ModuleConceptGoal
+        await this.prisma.moduleConceptGoal.updateMany({
+          where: {
+            conceptNodeId: conceptNode.conceptNodeId,
+          },
+          data: {
+            level: highestAwards,
+          },
+        });
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Retrieves the highest question level associated with a given content node.
+   *
+   * @param contentNodeId - The ID of the content node to search for.
+   * @returns A promise that resolves to the highest question level found, or throws an error if no content elements are found.
+   * @throws Will throw an error if no content elements are found for the given content node ID.
+   */
+  async getHighestQuestionLevel(contentNodeId: number): Promise<number> {
+    const highestLevelResult = await this.prisma.contentView.findFirst({
+      where: {
+        contentNode: {id: contentNodeId},
+        contentElement: {
+          type: 'QUESTION',
+        },
+      },
+      select: {
+        contentElement: {
+          select: {
+            question: {
+              select: {
+                level: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        contentElement: {
+          question: {
+            level: 'desc',
+          },
+        },
+      },
+    });
+
+    if (!highestLevelResult) {
+      throw new Error('No content elements found for content node ' + contentNodeId);
+    }
+
+    console.log('#### highestLevelResult', highestLevelResult);
+
+    const highestLevel: number = highestLevelResult.contentElement?.question?.level || -1;
+    return highestLevel;
+  }
+
+  /**
+   * Retrieves the highest content level associated with a given concept node.
+   *
+   * @param conceptNodeId - The ID of the concept node to search for.
+   * @returns A promise that resolves to the highest content level found, or throws an error if no content nodes are found.
+   * @throws Will throw an error if no content nodes are found for the given concept node ID.
+   */
+  async getHighestContentLevel(conceptNodeId: number): Promise<number> {
+    const highestAwardsResult = await this.prisma.training.findFirst({
+      where: {
+        conceptNodeId: conceptNodeId,
+      },
+      select: {
+        awards: true,
+      },
+      orderBy: {
+        awards: 'desc',
+      },
+    });
+
+    if (!highestAwardsResult) {
+      throw new Error('No content nodes found for concept node ' + conceptNodeId);
+    }
+
+    const highestLevel: number = highestAwardsResult.awards || -1;
+    return highestLevel;
+  }
+
+
+
 }
 
 /*

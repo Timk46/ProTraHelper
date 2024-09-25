@@ -16,8 +16,14 @@ import * as fs from 'fs';
 import * as uuid from 'uuid';
 const path = require('path');
 
-const db = new PrismaClient();
-
+// Initialize Prisma client with connection pool settings
+const db = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL + '?connection_limit=40&pool_timeout=60',
+    },
+  },
+});
 
 /**
  * Seeds the database with embeddings.
@@ -25,8 +31,7 @@ const db = new PrismaClient();
  * @returns {Promise<void>} A promise that resolves when the seeding is complete.
  */
 export const seedAllEmbeddingsForVideo = async (file: File, lectureName: string) => {
-
-  if (file.type!== 'VIDEO') {
+  if (file.type !== 'VIDEO') {
     return;
   }
 
@@ -43,7 +48,7 @@ export const seedAllEmbeddingsForVideo = async (file: File, lectureName: string)
     },
   );
 
-  const filePath = '../../files/OFP/Transkripte/' + file.name.split(".mp4")[0] + '.srt'; // srt file names are the same as the video file names
+  const filePath = '../../files/AUD/Transkripte/' + file.name.split(".mp4")[0] + '.srt'; // srt file names are the same as the video file names
   const absolutePath = path.resolve(__dirname, filePath);
   if (!fs.existsSync(absolutePath)) {
     console.log(`There is no matching SRT Transcript for File ${file.name}.\n I have searched for it here: ${absolutePath}`);
@@ -55,14 +60,19 @@ export const seedAllEmbeddingsForVideo = async (file: File, lectureName: string)
   // Generate new transcript chunks
   let transcriptChunks = generateTranscriptChunks(chunkSize, chunkOverlap, absolutePath, lectureName, file.name);
 
-  // Add the new transcripts to the vector store
-  await vectorStore.addModels(
-    await db.$transaction(
-      transcriptChunks.map((transcriptChunk: TranscriptChunk) => db.transcriptEmbedding.create({
-        data: { content: JSON.stringify(transcriptChunk), fileId: file.id } // all metadata is stored in the content field, because we can explicit retrieve metadata with Prisma Vectorstore yet...
-      }))
-    )
-  );
+  // Add the new transcripts to the vector store in smaller batches
+  const batchSize = 100;
+  for (let i = 0; i < transcriptChunks.length; i += batchSize) {
+    const batch = transcriptChunks.slice(i, i + batchSize);
+    await vectorStore.addModels(
+      await db.$transaction(
+        batch.map((transcriptChunk: TranscriptChunk) => db.transcriptEmbedding.create({
+          data: { content: JSON.stringify(transcriptChunk), fileId: file.id }
+        }))
+      )
+    );
+    console.log(`Processed batch ${i / batchSize + 1} of ${Math.ceil(transcriptChunks.length / batchSize)}`);
+  }
 }
 
 /**
@@ -74,14 +84,14 @@ export const seedAllEmbeddingsForVideo = async (file: File, lectureName: string)
  *
  * @returns {TranscriptChunk[]} An array of transcript chunks.
  */
-function  generateTranscriptChunks(chunkSize: number, chunkOverlap: number, filePath: string, lectureName: string, fileName:string): TranscriptChunk[] {
+function generateTranscriptChunks(chunkSize: number, chunkOverlap: number, filePath: string, lectureName: string, fileName:string): TranscriptChunk[] {
   const transcriptChunks: TranscriptChunk[] = [];
 
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    const subs = parseSrtFile(fileContent);
+  const fileContent = fs.readFileSync(filePath, 'utf-8');
+  const subs = parseSrtFile(fileContent);
 
-    transcriptChunks.push(...genSplitOverlap(subs, chunkSize, chunkOverlap, fileName, lectureName));
-    console.log(`Generated transcript chunks for ${filePath}.`);
+  transcriptChunks.push(...genSplitOverlap(subs, chunkSize, chunkOverlap, fileName, lectureName));
+  console.log(`Generated transcript chunks for ${filePath}.`);
 
   return transcriptChunks;
 }
@@ -94,14 +104,14 @@ function  generateTranscriptChunks(chunkSize: number, chunkOverlap: number, file
  * @returns {{ timestamp: string, text: string }[]} An array of objects, each containing a timestamp and the corresponding text.
  */
 function parseSrtFile(fileContent: string): { timestamp: string, text: string }[] {
-  const pattern = /(\d{2}:\d{2}:\d{2},\d{3}) --> \d{2}:\d{2}:\d{2},\d{3}\s+(.*?)\s+(?=\d|$)/gs;
+  const pattern = /(\d{2}:\d{2}:\d{2},\d{3}) --> \d{2}:\d{2}:\d{2},\d{3}\s+([\s\S]*?)(?=\d{2}:\d{2}:\d{2},\d{3}|$)/g;
   let matches;
   const results = [];
 
   while ((matches = pattern.exec(fileContent)) !== null) {
     results.push({
       timestamp: matches[1],
-      text: matches[2].replace(/\n/g, ' ') + " "
+      text: matches[2].replace(/\n/g, ' ').trim() + " "
     });
   }
   return results;
@@ -172,11 +182,9 @@ function genSplitOverlap(subs: { timestamp: string, text: string }[], chunkSize:
       },
     };
     if (page.TranscriptChunkContent.length > 1) { // fix empty chunks at the end of a transcript
-    documents.push(page);
+      documents.push(page);
     }
     firstSubTimestamp = '';
   }
   return documents;
 }
-
-

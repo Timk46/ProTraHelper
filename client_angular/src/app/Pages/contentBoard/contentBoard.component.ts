@@ -89,29 +89,31 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
     // for lecturers view
     this.isAdmin = this.userService.getRole() === 'ADMIN';
-    localStorage.getItem('editModeActive') === 'true' ? this.editModeActive = true : this.editModeActive = false;
-
-
-
   }
 
   ngOnInit() {
-    // Subscribe to screen size changes for responsive design
-    if (this.editModeActive) {
-      this.updateDisplayedColumns(['id', 'name', 'type', 'actions']);
-    } else {
-      this.sSS.isHandset.pipe(takeUntil(this.destroy$)).subscribe((isHandset) => {
-        if (isHandset) {
-          this.updateDisplayedColumns(['name', 'type', 'progress', 'actions']);
-        }
-      });
 
-      this.sSS.isTablet.pipe(takeUntil(this.destroy$)).subscribe((isTablet) => {
-        if (isTablet) {
-          this.updateDisplayedColumns(['id','name','type', 'progress', 'actions']);
-        }
-      });
-    }
+    // Subscribe to screen size changes for responsive design
+    this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
+      this.editModeActive = hasEditModeActive;
+      if (hasEditModeActive) {
+        this.updateDisplayedColumns(['id', 'name', 'type', 'actions']);
+      } else {
+        this.sSS.isHandset.pipe(takeUntil(this.destroy$)).subscribe((isHandset) => {
+          if (isHandset) {
+            this.updateDisplayedColumns(['name', 'type', 'progress', 'actions']);
+          }
+        });
+
+        this.sSS.isTablet.pipe(takeUntil(this.destroy$)).subscribe((isTablet) => {
+          if (isTablet) {
+            this.updateDisplayedColumns(['id','name','type', 'progress', 'actions']);
+          }
+        });
+      }
+    });
+
+
   }
 
   /**
@@ -285,16 +287,21 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
           console.log('Dialog result:', result);
+          if (this.activeConceptNodeId == undefined) {
+            console.error("activeConceptNodeId is undefined");
+            return;
+          }
           const linkableContentElement: LinkableContentElementDTO = {
             contentNodeId: contentNodeId,
 
             questionId: Number(result.questionId) || undefined,
-            question: result.questionId ? undefined : {
-              id: -1,
+            question: {
+              id: -1, // -1 for temporary id
               text: "",
               isApproved: false, //TODO: implement approval
               name: result.questionTitle || "New question",
               type: result.questionType,
+              conceptNodeId: this.activeConceptNodeId,
               description: result.questionDescription || "Manuell per GUI erstellte Frage",
               level: Number(result.questionDifficulty),
               score: Number(result.questionScore) || 100,
@@ -306,6 +313,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
           this.contentLinkerService.createLinkedContentElement(linkableContentElement).subscribe((linkableContentElement) => {
             console.log("linked contentElement: ", linkableContentElement);
+            this.progressService.questionCreated();
             this.fetchContentsForConcept.emit();
           });
         }
@@ -326,6 +334,10 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         break;
       case questionType.FREETEXT:
         this.router.navigate(['/editfreetext/', taskViewData.id]);
+        break;
+      case questionType.FILLIN:
+        console.log("FILLIN");
+        this.router.navigate(['/editfillin/', taskViewData.id]);
         break;
       case questionType.CODE:
         this.router.navigate(['/editcoding/', taskViewData.id]);
@@ -437,6 +449,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         return 'Single Choice';
       case questionType.FREETEXT:
         return 'Freitext';
+      case questionType.FILLIN:
+        return 'Lückentext';
       case questionType.CODE:
         return 'Programmieraufgabe';
       default:

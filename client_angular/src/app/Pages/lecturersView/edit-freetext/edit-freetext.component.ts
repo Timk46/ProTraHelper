@@ -123,6 +123,8 @@ export class EditFreetextComponent {
   }
 
   protected onSaveNewVersion() {
+    return // disabled for now
+
     this.confirmationService.confirm({
       title: 'Neue Version erstellen',
       message: 'Dies speichert die Frage unter einer neuen Version. Die alte Version bleibt erhalten, aber nicht mehr sichtbar. Fortfahren?',

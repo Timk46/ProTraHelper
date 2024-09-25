@@ -237,6 +237,7 @@ CREATE TABLE "MCQuestion" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "questionVersionId" INTEGER,
     "questionId" INTEGER NOT NULL,
+    "textHTML" TEXT,
     "shuffleoptions" BOOLEAN NOT NULL DEFAULT true,
     "isSC" BOOLEAN NOT NULL,
 
@@ -323,6 +324,7 @@ CREATE TABLE "CodingQuestion" (
     "textHTML" TEXT NOT NULL,
     "mainFileName" TEXT NOT NULL,
     "programmingLanguage" TEXT NOT NULL,
+    "expectations" TEXT,
     "questionId" INTEGER NOT NULL,
 
     CONSTRAINT "CodingQuestion_pkey" PRIMARY KEY ("id")
@@ -337,6 +339,17 @@ CREATE TABLE "CodeGeruest" (
     "language" TEXT,
 
     CONSTRAINT "CodeGeruest_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ModelSolution" (
+    "id" SERIAL NOT NULL,
+    "codingQuestionId" INTEGER NOT NULL,
+    "codeFileName" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "language" TEXT,
+
+    CONSTRAINT "ModelSolution_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -398,6 +411,41 @@ CREATE TABLE "KIFeedback" (
     "flavor" TEXT NOT NULL DEFAULT 'normal',
 
     CONSTRAINT "KIFeedback_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "genTaskData" (
+    "id" SERIAL NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "topic" TEXT NOT NULL,
+    "context" TEXT NOT NULL,
+    "taskPrompt" TEXT,
+    "task" TEXT NOT NULL,
+    "expectationPrompt" TEXT,
+    "expectation" TEXT NOT NULL,
+    "solutionPrompt" TEXT,
+    "solutionOne" TEXT NOT NULL,
+    "solutionTwo" TEXT,
+    "solutionThree" TEXT,
+    "unitTestPrompt" TEXT,
+    "unitTestOne" TEXT NOT NULL,
+    "unitTestTwo" TEXT,
+    "unitTestThree" TEXT,
+    "errorIteration" INTEGER NOT NULL,
+    "isErrorAtEnd" BOOLEAN NOT NULL,
+    "errorOne" TEXT,
+    "errorTwo" TEXT,
+    "errorThree" TEXT,
+    "juryOne" JSONB,
+    "juryTwo" JSONB,
+    "juryThree" JSONB,
+    "codeFramework" TEXT NOT NULL,
+    "runMethod" TEXT,
+    "runMethodInput" TEXT,
+    "allTaskData" JSONB,
+    "judgeTask" JSONB,
+
+    CONSTRAINT "genTaskData_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -507,6 +555,20 @@ CREATE TABLE "TranscriptEmbedding" (
 );
 
 -- CreateTable
+CREATE TABLE "Notification" (
+    "id" SERIAL NOT NULL,
+    "userId" INTEGER,
+    "message" TEXT NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "isRead" BOOLEAN NOT NULL DEFAULT false,
+    "readTimestamp" TIMESTAMP(3),
+    "type" TEXT NOT NULL,
+    "discussionId" INTEGER,
+
+    CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_ModuleToSubject" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
@@ -549,6 +611,18 @@ CREATE UNIQUE INDEX "Discussion_authorId_key" ON "Discussion"("authorId");
 CREATE UNIQUE INDEX "Vote_userId_messageId_key" ON "Vote"("userId", "messageId");
 
 -- CreateIndex
+CREATE INDEX "Notification_userId_isRead_idx" ON "Notification"("userId", "isRead");
+
+-- CreateIndex
+CREATE INDEX "Notification_userId_timestamp_idx" ON "Notification"("userId", "timestamp");
+
+-- CreateIndex
+CREATE INDEX "Notification_type_idx" ON "Notification"("type");
+
+-- CreateIndex
+CREATE INDEX "Notification_discussionId_idx" ON "Notification"("discussionId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "_ModuleToSubject_AB_unique" ON "_ModuleToSubject"("A", "B");
 
 -- CreateIndex
@@ -564,10 +638,10 @@ CREATE INDEX "_ModuleToUser_B_index" ON "_ModuleToUser"("B");
 ALTER TABLE "User" ADD CONSTRAINT "User_currentconceptNodeId_fkey" FOREIGN KEY ("currentconceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ModuleConceptGoal" ADD CONSTRAINT "ModuleConceptGoal_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ModuleConceptGoal" ADD CONSTRAINT "ModuleConceptGoal_conceptNodeId_fkey" FOREIGN KEY ("conceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ModuleConceptGoal" ADD CONSTRAINT "ModuleConceptGoal_conceptNodeId_fkey" FOREIGN KEY ("conceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ModuleConceptGoal" ADD CONSTRAINT "ModuleConceptGoal_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ConceptGraph" ADD CONSTRAINT "ConceptGraph_rootId_fkey" FOREIGN KEY ("rootId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -579,13 +653,13 @@ ALTER TABLE "ConceptFamily" ADD CONSTRAINT "ConceptFamily_childId_fkey" FOREIGN 
 ALTER TABLE "ConceptFamily" ADD CONSTRAINT "ConceptFamily_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "ConceptEdge" ADD CONSTRAINT "ConceptEdge_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "ConceptEdge" ADD CONSTRAINT "ConceptEdge_prerequisiteId_fkey" FOREIGN KEY ("prerequisiteId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ConceptEdge" ADD CONSTRAINT "ConceptEdge_successorId_fkey" FOREIGN KEY ("successorId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ConceptEdge" ADD CONSTRAINT "ConceptEdge_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ContentEdge" ADD CONSTRAINT "ContentEdge_prerequisiteId_fkey" FOREIGN KEY ("prerequisiteId") REFERENCES "ContentNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -594,22 +668,22 @@ ALTER TABLE "ContentEdge" ADD CONSTRAINT "ContentEdge_prerequisiteId_fkey" FOREI
 ALTER TABLE "ContentEdge" ADD CONSTRAINT "ContentEdge_successorId_fkey" FOREIGN KEY ("successorId") REFERENCES "ContentNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Requirement" ADD CONSTRAINT "Requirement_contentNodeId_fkey" FOREIGN KEY ("contentNodeId") REFERENCES "ContentNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Requirement" ADD CONSTRAINT "Requirement_conceptNodeId_fkey" FOREIGN KEY ("conceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Training" ADD CONSTRAINT "Training_contentNodeId_fkey" FOREIGN KEY ("contentNodeId") REFERENCES "ContentNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Requirement" ADD CONSTRAINT "Requirement_contentNodeId_fkey" FOREIGN KEY ("contentNodeId") REFERENCES "ContentNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Training" ADD CONSTRAINT "Training_conceptNodeId_fkey" FOREIGN KEY ("conceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserConcept" ADD CONSTRAINT "UserConcept_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Training" ADD CONSTRAINT "Training_contentNodeId_fkey" FOREIGN KEY ("contentNodeId") REFERENCES "ContentNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserConcept" ADD CONSTRAINT "UserConcept_conceptNodeId_fkey" FOREIGN KEY ("conceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserConcept" ADD CONSTRAINT "UserConcept_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserConceptEvent" ADD CONSTRAINT "UserConceptEvent_userConceptId_fkey" FOREIGN KEY ("userConceptId") REFERENCES "UserConcept"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -621,16 +695,16 @@ ALTER TABLE "ContentElement" ADD CONSTRAINT "ContentElement_fileId_fkey" FOREIGN
 ALTER TABLE "ContentElement" ADD CONSTRAINT "ContentElement_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "File" ADD CONSTRAINT "File_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "File" ADD CONSTRAINT "File_mCAnswerId_fkey" FOREIGN KEY ("mCAnswerId") REFERENCES "MCOption"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ContentView" ADD CONSTRAINT "ContentView_contentNodeId_fkey" FOREIGN KEY ("contentNodeId") REFERENCES "ContentNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "File" ADD CONSTRAINT "File_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ContentView" ADD CONSTRAINT "ContentView_contentElementId_fkey" FOREIGN KEY ("contentElementId") REFERENCES "ContentElement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ContentView" ADD CONSTRAINT "ContentView_contentNodeId_fkey" FOREIGN KEY ("contentNodeId") REFERENCES "ContentNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_userAnswerId_fkey" FOREIGN KEY ("userAnswerId") REFERENCES "UserAnswer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -639,10 +713,10 @@ ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_userAnswerId_fkey" FOREIGN KEY (
 ALTER TABLE "Question" ADD CONSTRAINT "Question_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Question" ADD CONSTRAINT "Question_originId_fkey" FOREIGN KEY ("originId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Question" ADD CONSTRAINT "Question_conceptNodeId_fkey" FOREIGN KEY ("conceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Question" ADD CONSTRAINT "Question_conceptNodeId_fkey" FOREIGN KEY ("conceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Question" ADD CONSTRAINT "Question_originId_fkey" FOREIGN KEY ("originId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "QuestionVersion" ADD CONSTRAINT "QuestionVersion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -651,34 +725,34 @@ ALTER TABLE "QuestionVersion" ADD CONSTRAINT "QuestionVersion_questionId_fkey" F
 ALTER TABLE "QuestionVersion" ADD CONSTRAINT "QuestionVersion_successorId_fkey" FOREIGN KEY ("successorId") REFERENCES "Question"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "MCQuestion" ADD CONSTRAINT "MCQuestion_questionVersionId_fkey" FOREIGN KEY ("questionVersionId") REFERENCES "QuestionVersion"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "MCQuestion" ADD CONSTRAINT "MCQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "MCQuestionOption" ADD CONSTRAINT "MCQuestionOption_mcQuestionId_fkey" FOREIGN KEY ("mcQuestionId") REFERENCES "MCQuestion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "MCQuestion" ADD CONSTRAINT "MCQuestion_questionVersionId_fkey" FOREIGN KEY ("questionVersionId") REFERENCES "QuestionVersion"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "MCQuestionOption" ADD CONSTRAINT "MCQuestionOption_mcOptionId_fkey" FOREIGN KEY ("mcOptionId") REFERENCES "MCOption"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserMCAnswer" ADD CONSTRAINT "UserMCAnswer_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "MCQuestionOption" ADD CONSTRAINT "MCQuestionOption_mcQuestionId_fkey" FOREIGN KEY ("mcQuestionId") REFERENCES "MCQuestion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserMCAnswer" ADD CONSTRAINT "UserMCAnswer_mcQuestionId_fkey" FOREIGN KEY ("mcQuestionId") REFERENCES "MCQuestion"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserAnswer" ADD CONSTRAINT "UserAnswer_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserMCAnswer" ADD CONSTRAINT "UserMCAnswer_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserAnswer" ADD CONSTRAINT "UserAnswer_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserMCOptionSelected" ADD CONSTRAINT "UserMCOptionSelected_userAnswerId_fkey" FOREIGN KEY ("userAnswerId") REFERENCES "UserAnswer"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserAnswer" ADD CONSTRAINT "UserAnswer_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserMCOptionSelected" ADD CONSTRAINT "UserMCOptionSelected_mcOptionId_fkey" FOREIGN KEY ("mcOptionId") REFERENCES "MCOption"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserMCOptionSelected" ADD CONSTRAINT "UserMCOptionSelected_userAnswerId_fkey" FOREIGN KEY ("userAnswerId") REFERENCES "UserAnswer"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "FreeTextQuestion" ADD CONSTRAINT "FreeTextQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -690,19 +764,22 @@ ALTER TABLE "CodingQuestion" ADD CONSTRAINT "CodingQuestion_questionId_fkey" FOR
 ALTER TABLE "CodeGeruest" ADD CONSTRAINT "CodeGeruest_codingQuestionId_fkey" FOREIGN KEY ("codingQuestionId") REFERENCES "CodingQuestion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AutomatedTest" ADD CONSTRAINT "AutomatedTest_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "CodingQuestion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ModelSolution" ADD CONSTRAINT "ModelSolution_codingQuestionId_fkey" FOREIGN KEY ("codingQuestionId") REFERENCES "CodingQuestion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CodeSubmission" ADD CONSTRAINT "CodeSubmission_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "AutomatedTest" ADD CONSTRAINT "AutomatedTest_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "CodingQuestion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CodeSubmission" ADD CONSTRAINT "CodeSubmission_codingQuestionId_fkey" FOREIGN KEY ("codingQuestionId") REFERENCES "CodingQuestion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CodeSubmissionFile" ADD CONSTRAINT "CodeSubmissionFile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "CodeSubmission" ADD CONSTRAINT "CodeSubmission_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CodeSubmissionFile" ADD CONSTRAINT "CodeSubmissionFile_CodeSubmissionId_fkey" FOREIGN KEY ("CodeSubmissionId") REFERENCES "CodeSubmission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CodeSubmissionFile" ADD CONSTRAINT "CodeSubmissionFile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "KIFeedback" ADD CONSTRAINT "KIFeedback_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "CodeSubmission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -711,7 +788,7 @@ ALTER TABLE "KIFeedback" ADD CONSTRAINT "KIFeedback_submissionId_fkey" FOREIGN K
 ALTER TABLE "anonymousUser" ADD CONSTRAINT "anonymousUser_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Discussion" ADD CONSTRAINT "Discussion_contentNodeId_fkey" FOREIGN KEY ("contentNodeId") REFERENCES "ContentNode"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Discussion" ADD CONSTRAINT "Discussion_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "anonymousUser"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Discussion" ADD CONSTRAINT "Discussion_conceptNodeId_fkey" FOREIGN KEY ("conceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -720,7 +797,7 @@ ALTER TABLE "Discussion" ADD CONSTRAINT "Discussion_conceptNodeId_fkey" FOREIGN 
 ALTER TABLE "Discussion" ADD CONSTRAINT "Discussion_contentElementId_fkey" FOREIGN KEY ("contentElementId") REFERENCES "ContentElement"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Discussion" ADD CONSTRAINT "Discussion_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "anonymousUser"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Discussion" ADD CONSTRAINT "Discussion_contentNodeId_fkey" FOREIGN KEY ("contentNodeId") REFERENCES "ContentNode"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Message" ADD CONSTRAINT "Message_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "anonymousUser"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -729,31 +806,37 @@ ALTER TABLE "Message" ADD CONSTRAINT "Message_authorId_fkey" FOREIGN KEY ("autho
 ALTER TABLE "Message" ADD CONSTRAINT "Message_discussionId_fkey" FOREIGN KEY ("discussionId") REFERENCES "Discussion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Vote" ADD CONSTRAINT "Vote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Vote" ADD CONSTRAINT "Vote_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "Message"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Vote" ADD CONSTRAINT "Vote_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "Message"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Vote" ADD CONSTRAINT "Vote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ChatBotMessage" ADD CONSTRAINT "ChatBotMessage_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserContentElementProgress" ADD CONSTRAINT "UserContentElementProgress_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "UserContentElementProgress" ADD CONSTRAINT "UserContentElementProgress_contentElementId_fkey" FOREIGN KEY ("contentElementId") REFERENCES "ContentElement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserContentView" ADD CONSTRAINT "UserContentView_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserContentElementProgress" ADD CONSTRAINT "UserContentElementProgress_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserContentView" ADD CONSTRAINT "UserContentView_contentNodeId_fkey" FOREIGN KEY ("contentNodeId") REFERENCES "ContentNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserContentView" ADD CONSTRAINT "UserContentView_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "EventLog" ADD CONSTRAINT "EventLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "TranscriptEmbedding" ADD CONSTRAINT "TranscriptEmbedding_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "File"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Notification" ADD CONSTRAINT "Notification_discussionId_fkey" FOREIGN KEY ("discussionId") REFERENCES "Discussion"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Notification" ADD CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ModuleToSubject" ADD CONSTRAINT "_ModuleToSubject_A_fkey" FOREIGN KEY ("A") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;

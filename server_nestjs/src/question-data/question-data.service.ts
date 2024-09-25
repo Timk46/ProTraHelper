@@ -46,7 +46,7 @@ export class QuestionDataService {
         text: question.text,
         isApproved: question.isApproved,
         originId: question.originId,
-        conceptNode: question.conceptNodeId || undefined,
+        conceptNodeId: question.conceptNodeId || undefined,
         level: question.level,
       };
 
@@ -114,6 +114,9 @@ export class QuestionDataService {
             };
           }
           break;
+        case questionType.FILLIN:
+          // todo: hol die Daten aus der fillin Datenbank
+          break;
       }
 
       const questionData: detailedQuestionDTO = {
@@ -121,6 +124,7 @@ export class QuestionDataService {
         codingQuestion: questionTypeStr === questionType.CODE ? specificQuestionData : undefined,
         freetextQuestion: questionTypeStr === questionType.FREETEXT ? specificQuestionData : undefined,
         mcQuestion: (questionTypeStr === questionType.MULTIPLECHOICE || questionTypeStr === questionType.SINGLECHOICE) ? specificQuestionData : undefined,
+        // fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
       };
 
       return questionData;
@@ -190,7 +194,7 @@ export class QuestionDataService {
                 isApproved: question.isApproved || false,
                 version: question.version || 1,
                 //origin has to be set in the next step
-                conceptNode: question.conceptNode? {connect: {id: question.conceptNode}}: undefined,
+                conceptNode: {connect: {id: question.conceptNodeId}},
             }
         });
 
@@ -228,7 +232,7 @@ export class QuestionDataService {
       }
 
       let updatedQuestion = null;
-      // if we have a version difference, we create a new version of the question
+      // if createNewVersion is true, we create a new version of the question
       if (createNewVersion) {
         updatedQuestion = await this.prisma.question.create({
           data: {
@@ -268,6 +272,23 @@ export class QuestionDataService {
         });
       }
 
+      // we also need to update the awards level
+      const contentNodes = await this.prisma.contentView.findMany({
+        where: {
+          contentElement: {
+            questionId: question.originId
+          }
+        }
+      });
+
+      for (const contentNode of contentNodes) {
+        if (contentNode.contentNodeId) {
+          await this.contentService.updateAwardsLevel(contentNode.contentNodeId);
+        } else {
+          console.log('Cannot update awards for content node ' + contentNode.contentNodeId);
+        }
+      }
+
       switch (question.type) {
         case questionType.FREETEXT:
           if (createNewVersion || !currentQuestion.freetextQuestion) {
@@ -291,22 +312,40 @@ export class QuestionDataService {
             await this.qdCode.updateCodingQuestion(question.codingQuestion);
           }
           break;
+        case questionType.FILLIN:
+          if (createNewVersion || !currentQuestion.codingQuestion) {
+            // z.B. await this.qdFillin.createFillinQuestion(question.fillinQuestion, updatedQuestion.id);
+          } else {
+            // z.B. await this.qdFillin.updateFillinQuestion(question.fillinQuestion);
+          }
+          break;
       }
 
       return await this.getDetailedQuestion(updatedQuestion.id, question.type as questionType);
     }
 
+    /**
+     * Checks if the detailed questions can be updated based on certain conditions.
+     *
+     * @param currQuestion - The current detailed question data transfer object.
+     * @param newQuestion - The new detailed question data transfer object.
+     * @returns `true` if the detailed questions are updateable, `false` otherwise.
+     */
     private detailedQuestionsUpdateable(currQuestion: detailedQuestionDTO, newQuestion: detailedQuestionDTO): boolean {
       if (
         currQuestion &&
         newQuestion &&
-        currQuestion.type === newQuestion.type &&
+        (currQuestion.type === newQuestion.type ||
+          (currQuestion.type === questionType.MULTIPLECHOICE && newQuestion.type === questionType.SINGLECHOICE) ||
+          (currQuestion.type === questionType.SINGLECHOICE && newQuestion.type === questionType.MULTIPLECHOICE)
+        ) &&
         currQuestion.version <= newQuestion.version &&
         (
           newQuestion.codingQuestion ||
           newQuestion.freetextQuestion ||
-          newQuestion.mcQuestion
+          newQuestion.mcQuestion // ||
           //TODO: fill, uml, graph
+          // newQuestion.fillinQuestion // das hier einfügen
         )
       ){
         return true;
@@ -369,8 +408,8 @@ export class QuestionDataService {
         if(progress == 1) {
           feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
           //set contentElement as done
-          console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNode + ' level: ' + question.level + ' userId: ' + userId)
-          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
+          console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNodeId + ' level: ' + question.level + ' userId: ' + userId)
+          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
           markedAsDone = true;
         }
         else {
@@ -425,8 +464,8 @@ export class QuestionDataService {
         let markedAsDone = false;
         if(progress == 1) {
           feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
-          console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNode + ' level: ' + question.level + ' userId: ' + userId)
-          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
+          console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNodeId + ' level: ' + question.level + ' userId: ' + userId)
+          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
           markedAsDone = true;
         }
         else {
@@ -479,7 +518,7 @@ export class QuestionDataService {
         console.log('progress: '+progress);
 
         if(progress == 1) {
-          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNode, question.level, userId);
+          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
           markedAsDone = true;
 
         }

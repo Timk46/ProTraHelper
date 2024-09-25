@@ -26,7 +26,7 @@
       "dom"
     ],
     "paths": {
-      "@Interfaces/*": ["../shared/dtos/*"],
+      //"@Interfaces/*": ["../shared/dtos/*"],
       "@DTOs/*": ["../shared/dtos/*"],
 
     }

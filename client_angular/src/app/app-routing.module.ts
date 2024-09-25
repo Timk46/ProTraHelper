@@ -21,6 +21,7 @@ import { EditFreetextComponent } from './Pages/lecturersView/edit-freetext/edit-
 import { EditChoiceComponent } from './Pages/lecturersView/edit-choice/edit-choice.component';
 import { EditCodingComponent } from './Pages/lecturersView/edit-coding/edit-coding.component';
 import { EditGraphComponent } from './Pages/lecturersView/edit-graph/edit-graph.component';
+import { EditFillinComponent } from './Pages/lecturersView/edit-fillin/edit-fillin.component';
 import { AdminGuard } from './Guards/is-admin.guard';
 import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
 
@@ -46,7 +47,7 @@ const routes: Routes = [
   // lecturers view
   { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [LoggedInGuard, AdminGuard]},
   { path: 'editcoding/:questionId', component: EditCodingComponent, canActivate: [LoggedInGuard, AdminGuard]},
-  { path: 'editfillin/:questionId', component: EditFreetextComponent, canActivate: [LoggedInGuard, AdminGuard]},
+  { path: 'editfillin/:questionId', component: EditFillinComponent, canActivate: [LoggedInGuard, AdminGuard]},
   { path: 'editfreetext/:questionId', component: EditFreetextComponent, canActivate: [LoggedInGuard, AdminGuard]},
   { path: 'editgraph/:questionId', component: EditGraphComponent, canActivate: [LoggedInGuard, AdminGuard]},
 

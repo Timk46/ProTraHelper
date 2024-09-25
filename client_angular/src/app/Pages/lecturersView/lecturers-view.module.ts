@@ -16,6 +16,9 @@ import { AddElementModalComponent } from './edit-coding/add-element-modal.compon
 import { TinymceComponent } from '../tinymce/tinymce.component';
 import { ScoreComponent } from './edit-choice/score/score.component';
 import { DescriptionDialogComponent } from './edit-choice/description-dialog/description-dialog.component';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @NgModule({
   declarations: [
@@ -38,7 +41,10 @@ import { DescriptionDialogComponent } from './edit-choice/description-dialog/des
     MaterialModule,
     TutorKaiModule,
     EditorModule,
-    MarkdownModule.forChild()
+    MarkdownModule.forChild(),
+    NgxMatSelectSearchModule,
+    MatSelectModule,
+    MatFormFieldModule
   ],
   exports: [
     CreateContentNodeDialogComponent,
