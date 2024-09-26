@@ -43,26 +43,47 @@
               erforderlich</mat-error>
           </mat-form-field>
           <mat-checkbox formControlName="questionShuffle">Antwortoptionen mischen</mat-checkbox>
-          <p style="margin-top: 20px;">Auf Basis des folgenden Konzeptes sollen Antworten generiert werden:</p>
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Generierbasis</mat-label>
-            <mat-select formControlName="questionConcept" (click)="onSelectClick()">
-              <mat-option>
-                <ngx-mat-select-search class="custom-mat-select"
-                  placeholderLabel="Suche..."
-                  noEntriesFoundLabel="Keine Ergebnisse gefunden"
-                  [formControl]="conceptFilterControl"
-                ></ngx-mat-select-search>
-              </mat-option>
-              <mat-option
-                *ngFor="let concept of filteredConcepts | async"
-                [value]="concept.id"
-              >
-                {{ concept.name }} (Id: {{ concept.id }})
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
         </form>
+
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Frage generieren</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="expansion">
+            <form [formGroup]="choiceForm">
+              <p>Thema der Frage</p>
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <input matInput [placeholder]="choiceForm.value.questionTitle" formControlName="generateTitle">
+                <mat-label>Thema</mat-label>
+              </mat-form-field>
+              <p>Wahl der Wissensquelle</p>
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-label>Konzept</mat-label>
+                <mat-select formControlName="questionConcept" (click)="onSelectClick()">
+                  <mat-option>
+                    <ngx-mat-select-search class="custom-mat-select"
+                      placeholderLabel="Suche..."
+                      noEntriesFoundLabel="Keine Ergebnisse gefunden"
+                      [formControl]="conceptFilterControl"
+                    ></ngx-mat-select-search>
+                  </mat-option>
+                  <mat-option
+                    *ngFor="let concept of filteredConcepts | async"
+                    [value]="concept.id"
+                  >
+                    {{ concept.name }} (Id: {{ concept.id }})
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <p>Anzahl zu generierender Optionen</p>
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <input matInput type="number" min="0" step="1" placeholder="Anzahl Optionen" formControlName="generateCount" value=4>
+                <mat-label>Anzahl Optionen</mat-label>
+              </mat-form-field>
+              <button mat-raised-button color="primary" (click)="generateQuestion()">Generieren</button>
+            </form>
+          </div>
+        </mat-expansion-panel>
 
         <mat-expansion-panel>
           <mat-expansion-panel-header>

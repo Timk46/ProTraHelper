@@ -307,6 +307,10 @@ export class EditChoiceComponent {
     });
   }
 
+  generateQuestion(): void {
+    console.log('generate question clicked');
+  }
+
   deleteOption(index: number): void {
     this.optionsData.removeAt(index);
     this.updateTableData();
