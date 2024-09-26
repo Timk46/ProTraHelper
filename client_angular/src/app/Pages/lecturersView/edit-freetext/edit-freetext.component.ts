@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { detailedFreetextQuestionDTO, detailedQuestionDTO, questionType } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
@@ -38,7 +38,8 @@ export class EditFreetextComponent {
     private questionDataService: QuestionDataService,
     private route: ActivatedRoute,
     private confirmationService: ConfirmationService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
 
   ) {
     this.freeTextForm = this.fb.group({
@@ -146,9 +147,10 @@ export class EditFreetextComponent {
       message: 'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
       acceptLabel: 'Bearbeitung abbrechen',
       declineLabel: 'Weiter bearbeiten',
+      swapColors: true,
       accept: () => {
-        //this.saveQuestion();
         console.log('Cancel accepted');
+        this.router.navigate(['dashboard']);
       },
       decline: () => {
         console.log('Cancel declined');

@@ -11,6 +11,6 @@ import { EvaluationController } from './evaluation.controller';
 @Module({
   imports: [PrismaModule, HttpModule],
   providers: [McqCreationService, JsonLoaderService, EvaluationService],
-  controllers: [McqcreationController, EvaluationController]
+  controllers: [McqcreationController] //, EvaluationController] CURRENTLY DISABLED
 })
 export class McqCreationModule {}

@@ -355,11 +355,11 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     this.confirmService.confirm({
       title: "Verknüpfung löschen",
       message: "Die Verknüpfung zur Frage wird gelöscht. Die Frage bleibt bestehen. Fortfahren?",
-      acceptLabel: "Abbrechen",
-      declineLabel: "Löschen",
+      acceptLabel: "Löschen",
+      declineLabel: "Abbrechen",
+      swapButtons: true,
+      swapColors: true,
       accept: () => {
-        console.log("aborted");
-      }, decline: () => {
         console.log("deleting");
         this.contentLinkerService.unlinkContentElement(element.contentElementId).subscribe(
           (success) => {
@@ -369,6 +369,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
             this.fetchContentsForConcept.emit();
           }
         );
+      }, decline: () => {
+        console.log("aborted");
       }
     });
   }

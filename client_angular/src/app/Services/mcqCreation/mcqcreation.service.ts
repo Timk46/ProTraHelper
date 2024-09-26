@@ -24,13 +24,14 @@ export class McqcreationService {
    */
   getAnswer(question: string, currentOption: string, otherOptions: string[], concept: string) :Observable<Answer> {
 
-    const body = new HttpParams()
-      .set('question', question)
-      .set('option', currentOption)
-      .set('otherOptions', otherOptions.join(','))
-      .set('concept', concept);
+    const body = {
+      question: question,
+      option: currentOption,
+      otherOptions: otherOptions,
+      concept: concept
+    };
 
-    return this.http.get<Answer>(environment.server + `/mcqcreation/answer`, {params: body})
+    return this.http.post<Answer>(environment.server + `/mcqcreation/answer`, body);
   }
 
   /**

@@ -3,7 +3,7 @@ import { TinymceComponent } from "../../tinymce/tinymce.component";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { detailedChoiceOptionDTO, detailedQuestionDTO, questionType } from "@DTOs/index";
 import { QuestionDataService } from "src/app/Services/question/question-data.service";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { ConfirmationService } from "src/app/Services/confirmation/confirmation.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatCheckboxChange } from "@angular/material/checkbox";
@@ -36,6 +36,8 @@ export class EditChoiceComponent {
   filteredConcepts: ReplaySubject<ConceptNode[]> = new ReplaySubject<ConceptNode[]>(1);
   dataSource: MatTableDataSource<any>;
 
+  isGenerating: boolean[] = [];
+
   thisQuestionType = questionType.SINGLECHOICE;
   editorConfig = {
     readonly: false,
@@ -59,7 +61,8 @@ export class EditChoiceComponent {
     private confirmationService: ConfirmationService,
     private snackBar: MatSnackBar,
     private mcqService: McqcreationService,
-    private contentService: ContentService
+    private contentService: ContentService,
+    private router: Router
 
   ) {
     this.dataSource = new MatTableDataSource<any>([]);
@@ -202,9 +205,10 @@ export class EditChoiceComponent {
       message: 'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
       acceptLabel: 'Bearbeitung abbrechen',
       declineLabel: 'Weiter bearbeiten',
+      swapColors: true,
       accept: () => {
-        //this.saveQuestion();
         console.log('Cancel accepted');
+        this.router.navigate(['dashboard']);
       },
       decline: () => {
         console.log('Cancel declined');
@@ -258,6 +262,10 @@ export class EditChoiceComponent {
     return this.optionsData.value.filter((option: {id: number, text: string, is_correct: boolean}) => option.is_correct).length;
   }
 
+  getConceptById(id: number): string {
+    return this.concepts.find(concept => concept.id === id)?.name || '';
+  }
+
   onSelectClick() {
     this.filterConcepts();
   }
@@ -291,6 +299,12 @@ export class EditChoiceComponent {
 
   generateOption(index: number): void {
     // TODO: Implement
+    console.log('Generating option', index, 'concept:', this.choiceForm.value.questionConcept, this.getConceptById(Number(this.choiceForm.value.questionConcept)));
+    this.isGenerating[index] = true;
+    this.mcqService.getAnswer(this.questionField.getRawContent(), this.optionsData.at(index).get('text')!.value || '', this.optionsData.value.map((option: {id: number, text: string, is_correct: boolean}) => option.text), this.getConceptById(Number(this.choiceForm.value.questionConcept))).subscribe(answer => {
+      this.optionsData.at(index).get('text')!.setValue(answer.answer);
+      this.isGenerating[index] = false;
+    });
   }
 
   deleteOption(index: number): void {

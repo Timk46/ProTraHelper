@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { detailedQuestionDTO, questionType } from '@DTOs/index';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
@@ -23,6 +23,7 @@ export class EditFillinComponent {
     private route: ActivatedRoute,
     private confirmationService: ConfirmationService,
     private snackBar: MatSnackBar,
+    private router: Router
 
   ) {
     this.fillinForm = this.fb.group({
@@ -157,9 +158,10 @@ export class EditFillinComponent {
       message: 'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
       acceptLabel: 'Bearbeitung abbrechen',
       declineLabel: 'Weiter bearbeiten',
+      swapColors: true,
       accept: () => {
-        //this.saveQuestion();
         console.log('Cancel accepted');
+        this.router.navigate(['dashboard']);
       },
       decline: () => {
         console.log('Cancel declined');

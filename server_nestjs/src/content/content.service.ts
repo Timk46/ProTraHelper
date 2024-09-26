@@ -694,6 +694,9 @@ export class ContentService {
         contentNode: {id: contentNodeId},
         contentElement: {
           type: 'QUESTION',
+          NOT: {
+            question: null,
+          },
         },
       },
       select: {

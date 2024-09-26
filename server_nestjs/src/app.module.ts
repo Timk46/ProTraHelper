@@ -39,6 +39,7 @@ import { VersionInterceptor } from './common/interceptors/version.interceptor';
 import { NotificationModule } from './notification/notification.module';
 import { ContentLinkerService } from './content-linker/content-linker.service';
 import { ContentLinkerModule } from './content-linker/content-linker.module';
+import { McqCreationModule } from './mcqcreation/mcqcreation.module';
 
 @Module({
   imports: [
@@ -55,7 +56,7 @@ import { ContentLinkerModule } from './content-linker/content-linker.module';
     RunCodeModule,
     QuestionModule,
     FeedbackGenerationModule,
-    // McqCreationModule, CURRENTLY DISABLED
+    //McqCreationModule, CURRENTLY DISABLED
     // McqevaluationModule, CURRENTLY DISABLED
     EventLogModule,
     NotificationModule,
