@@ -30,6 +30,8 @@ export class EditChoiceComponent {
   @ViewChild('question') questionField!: TinymceComponent;
 
   choiceForm: FormGroup;
+  generationForm: FormGroup;
+
   conceptFilterControl = new FormControl('');
 
   concepts: ConceptNode[] = [];
@@ -37,6 +39,8 @@ export class EditChoiceComponent {
   dataSource: MatTableDataSource<any>;
 
   isGenerating: boolean[] = [];
+  isQuestionGenerating = false;
+  isSaving = false;
 
   thisQuestionType = questionType.SINGLECHOICE;
   editorConfig = {
@@ -74,8 +78,14 @@ export class EditChoiceComponent {
       questionType: ['', Validators.required],
       questionScore: ['', Validators.required],
       questionShuffle: [false],
-      questionConcept: [''],
+      //questionConcept: [''],
       optionsData: this.fb.array([]),
+    });
+
+    this.generationForm = this.fb.group({
+      generationConcept: ['', Validators.required],
+      generationTopic: [''], //['', Validators.required], CURRENTLY NOT IMPLEMENTED
+      generationOptionCount: ['', Validators.required],
     });
   }
 
@@ -129,8 +139,12 @@ export class EditChoiceComponent {
         questionType: this.thisQuestionType,
         questionScore: this.detailedQuestionData.score,
         questionShuffle: this.detailedQuestionData.mcQuestion?.shuffleoptions || false,
-        questionConcept: this.detailedQuestionData.conceptNodeId || ''
-
+        //questionConcept: this.detailedQuestionData.conceptNodeId || ''
+      });
+      this.generationForm.patchValue({
+        generationConcept: this.detailedQuestionData.conceptNodeId || '',
+        generationTopic: '',
+        generationOptionCount: this.detailedQuestionData.mcQuestion?.mcOptions.length || 4
       });
       if (this.detailedQuestionData.mcQuestion) {
         console.log('Setting options:', this.detailedQuestionData.mcQuestion.textHTML || this.detailedQuestionData.text);
@@ -158,6 +172,7 @@ export class EditChoiceComponent {
       acceptLabel: 'Aktualisieren',
       declineLabel: 'Abbrechen',
       accept: () => {
+        this.isSaving = true;
         const submitData = this.buildDTO();
         console.log('Submit data:', submitData);
         if (submitData){
@@ -167,12 +182,16 @@ export class EditChoiceComponent {
               this.detailedQuestionData = response;
               this.setContent();
               this.snackBar.open('Frage erfolgreich aktualisiert', 'Schließen', { duration: 3000 });
+              this.isSaving = false
             },
             error: error => {
               console.error('Error updating question:', error);
               this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', { duration: 3000 });
+              this.isSaving = false;
             }
           });
+        } else {
+          this.isSaving = false;
         }
       },
       decline: () => {
@@ -226,7 +245,7 @@ export class EditChoiceComponent {
         description: this.choiceForm.value.questionDescription,
         score: parseInt(this.choiceForm.value.questionScore),
         text: this.questionField.getRawContent(),
-        conceptNodeId: parseInt(this.choiceForm.value.questionConcept) || undefined,
+        conceptNodeId: parseInt(this.generationForm.value.generationConcept) || undefined,
         mcQuestion: {
           id: this.detailedQuestionData.mcQuestion?.id || undefined,
           questionId: this.detailedQuestionData.id,
@@ -299,15 +318,32 @@ export class EditChoiceComponent {
 
   generateOption(index: number): void {
     // TODO: Implement
-    console.log('Generating option', index, 'concept:', this.choiceForm.value.questionConcept, this.getConceptById(Number(this.choiceForm.value.questionConcept)));
+    console.log('Generating option', index, 'concept:', this.generationForm.value.generationConcept, this.getConceptById(Number(this.generationForm.value.generationConcept)));
     this.isGenerating[index] = true;
-    this.mcqService.getAnswer(this.questionField.getRawContent(), this.optionsData.at(index).get('text')!.value || '', this.optionsData.value.map((option: {id: number, text: string, is_correct: boolean}) => option.text), this.getConceptById(Number(this.choiceForm.value.questionConcept))).subscribe(answer => {
+    this.mcqService.getAnswer(this.questionField.getRawContent(), this.optionsData.at(index).get('text')!.value || '', this.optionsData.value.map((option: {id: number, text: string, is_correct: boolean}) => option.text), this.getConceptById(Number(this.generationForm.value.generationConcept))).subscribe(answer => {
       this.optionsData.at(index).get('text')!.setValue(answer.answer);
       this.isGenerating[index] = false;
     });
   }
 
   generateQuestion(): void {
+    if (this.generationForm.invalid) {
+      this.generationForm.markAllAsTouched();
+      return;
+    }
+
+    this.isQuestionGenerating = true;
+    this.mcqService.getQuestionAndAnswers(this.getConceptById(Number(this.generationForm.value.generationConcept)), this.generationForm.value.generationOptionCount, this.generationForm.value.generationTopic).subscribe(data => {
+      console.log('Generated question:', data);
+      this.questionField.setContent(data.question || '');
+      this.optionsData.clear();
+      if (data.answers) {
+        data.answers.forEach((answer: Answer) => {
+          this.addOption(-1, answer.answer, answer.correct);
+        });
+      }
+      this.resetLoadingIndicators();
+    });
     console.log('generate question clicked');
   }
 
@@ -318,5 +354,10 @@ export class EditChoiceComponent {
 
   updateTableData(): void {
     this.dataSource.data = this.optionsData.controls;
+  }
+
+  private resetLoadingIndicators(): void {
+    this.isGenerating = [];
+    this.isQuestionGenerating = false;
   }
 }

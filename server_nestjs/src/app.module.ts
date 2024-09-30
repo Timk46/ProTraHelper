@@ -31,15 +31,14 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ModulesModule } from './modules/modules.module';
 import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
-// import { McqCreationModule } from './mcqcreation/mcqcreation.module'; CURRENTLY DISABLED
-// import { McqevaluationModule } from './mcqevaluation/mcqevaluation.module'; CURRENTLY DISABLED
+import { McqCreationModule } from './mcqcreation/mcqcreation.module';
+//import { McqevaluationModule } from './mcqevaluation/mcqevaluation.module'; CURRENTLY DISABLED
 import { EventLogModule } from './EventLog/event-log.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { VersionInterceptor } from './common/interceptors/version.interceptor';
 import { NotificationModule } from './notification/notification.module';
 import { ContentLinkerService } from './content-linker/content-linker.service';
 import { ContentLinkerModule } from './content-linker/content-linker.module';
-import { McqCreationModule } from './mcqcreation/mcqcreation.module';
 
 @Module({
   imports: [
@@ -56,8 +55,8 @@ import { McqCreationModule } from './mcqcreation/mcqcreation.module';
     RunCodeModule,
     QuestionModule,
     FeedbackGenerationModule,
-    //McqCreationModule, CURRENTLY DISABLED
-    // McqevaluationModule, CURRENTLY DISABLED
+    McqCreationModule,
+    //McqevaluationModule, CURRENTLY DISABLED
     EventLogModule,
     NotificationModule,
     ContentLinkerModule,

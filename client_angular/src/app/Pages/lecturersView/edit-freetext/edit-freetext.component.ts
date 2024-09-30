@@ -22,6 +22,8 @@ export class EditFreetextComponent {
 
   thisQuestionType = questionType.FREETEXT;
 
+  isSaving = false;
+
   editorConfig = {
     readonly: false,
     plugins: 'autoresize lists table link image code codesample',
@@ -103,18 +105,23 @@ export class EditFreetextComponent {
       acceptLabel: 'Aktualisieren',
       declineLabel: 'Abbrechen',
       accept: () => {
+        this.isSaving = true;
         const submitData = this.buildDTO();
         if (submitData){
           this.questionDataService.updateWholeQuestion(submitData).subscribe({
             next: response => {
               console.log('Question updated successfully:', response);
               this.snackBar.open('Frage erfolgreich aktualisiert', 'Schließen', { duration: 3000 });
+              this.isSaving = false
             },
             error: error => {
               console.error('Error updating question:', error);
               this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', { duration: 3000 });
+              this.isSaving = false;
             }
           });
+        } else {
+          this.isSaving = false;
         }
       },
       decline: () => {

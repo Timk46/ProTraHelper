@@ -52,8 +52,8 @@ export class McqcreationController {
      */
     @roles('ADMIN')
     @Get('questionAndAnswers')
-    async getQuestionAndAnswers(@Query('concept') concept: string, @Query('options') options: number): Promise<McqGenerationDTO> {
-      return await this.mcqCreationService.getQuestionAndAnswers(concept, options);
+    async getQuestionAndAnswers(@Query('concept') concept: string, @Query('options') options: number, @Query('topic') topic: string = undefined): Promise<McqGenerationDTO> {
+      return await this.mcqCreationService.getQuestionAndAnswers(concept, options, topic);
     }
 
     /**

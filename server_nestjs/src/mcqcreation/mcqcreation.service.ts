@@ -17,6 +17,8 @@ import * as path from 'path';
 import { McqGenerationDTO } from '@Interfaces/question.dto';
 import { env } from 'process';
 import { JsonLoaderService } from './jsonloader.service';
+import { RagService } from '@/ai/services/rag.service';
+import { TranscriptChunk } from '@Interfaces/file.dto';
 
 interface Answer{
   answer?: string;
@@ -229,6 +231,8 @@ Der thematische Teil der objektorientierten Programmierung wird hier anhand der 
 Beziehe dich immer auf das konkrete Konzept, welches als übergeordnetes Thema dienen soll zu welchem die Fragestellung und die dazugehörigen Antwortmöglichkeiten erstellt werden sollen.
 Es ist verboten, bereits existierenden Multiple Choice Questions erneut vorzuschlagen. Benutze in den Antwortmöglichkeiten keine Aufzählungen verschiedener Optionen und nutze maximal 2 Sätze. Benutze unbedingt immer die deutsche Sprache.
 ---
+Die gewünschte Thematik der Frage: {topic}
+---
 Das dazugehörige Transkript: {transcript}
 ---
 thematisch verwandter Kontext: {context}
@@ -254,6 +258,8 @@ Bereits vorgeschlagene Fragen: {questions}.
 --------------
 Keine der zuvor beschriebenen Fragen sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden, also denke hier erneut kurz nach und generiere zur not neue. Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
 Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte antworte auf jeden Fall auf deutsch. Beachte dass die Beschreibung, die du generierst nichts über die Lösung der Fragestellung verraten soll, sondern viel mehr das Thema der Fragestellung beschreibend in einen Kontext setzen soll.
+--------------
+Thema der zu generierenden Frage: {topic}
 --------------
 format instructions: {format_instructions}
 `
@@ -318,10 +324,13 @@ export class McqCreationService {
   private askedQuestions: { [concept: string]: McqGenerationDTO[] } = {};
   private mcqToEvaluate: { [question: string]: string[] } = {};
   private mcqs: { questions: McqGenerationDTO[] } = { questions: [] };
-  constructor(private jsonLoaderService : JsonLoaderService) {
-    this.pgVectorStore = this.initPgVectorStore();
-    this.folderPath = path.join(__dirname, '..', '..', '..', '..', '..', 'shared', 'transcripts');
 
+  constructor(
+    private jsonLoaderService : JsonLoaderService,
+    private ragService: RagService
+  ) {
+    //this.pgVectorStore = this.initPgVectorStore(); // not used, vectorstore origin changed
+    this.folderPath = path.join(__dirname, '..', '..', '..', '..', '..', 'shared', 'transcripts');
   }
 
   /** adds a question and options to the askedQuestions object
@@ -477,7 +486,7 @@ export class McqCreationService {
     const parser = StructuredOutputParser.fromZodSchema(z.object({
       question: z.string().describe("Question to the user without answering options"),
     }));
-    const completeContext = formatDocumentsAsString(await (await this.pgVectorStore).similaritySearch(concept, 15));
+    const completeContext = await this.getSimilaritySearchString(concept, 15);
     const conceptContext = await this.getFileFromFolder(concept);
     if(!(conceptContext === null)) {
       const response = await RunnableSequence.from([
@@ -523,27 +532,27 @@ export class McqCreationService {
    */
   async getAnswer(question: string, option: string, otherOptions: string[], concept: string) :Promise<Answer> {
 
-    if (!this.askedQuestions[concept].some(questionDto => questionDto.question === question)) {
+    if (!this.askedQuestions[concept]?.some(questionDto => questionDto.question === question)) {
       this.addQuestion(concept, question);
       this.addOptionsToQuestion(concept, question, otherOptions.map(option => ({ answer: option})));
     }
 
     console.log("this.askedQuestions: ", this.askedQuestions[concept].map(mcq => mcq.question))
-    console.log("this.otherOptions for: ","QUESTION: " ,this.otherOptions[question].map(option => option))
+    console.log("this.otherOptions for: ","QUESTION: " , this.otherOptions[question]?.map(option => option) || "no other options")
     const parser = StructuredOutputParser.fromZodSchema(
       z.object(
                 {
                   answer: z.string().describe("Answer to the user's question. Dont enumerate"),
                   correct: z.boolean().describe("Indicates if the answer is correct (true/false)"),
                 }));
-    const completeContext = formatDocumentsAsString(await (await this.pgVectorStore).similaritySearch(question, 10));
+    const completeContext = await this.getSimilaritySearchString(question, 10);
     const conceptContext = await this.getFileFromFolder(concept);
     if(!(conceptContext === null)) {
       const response = await RunnableSequence.from([
       {
         option: () => option,
         concept: () => concept,
-        options: () => this.askedQuestions[concept].map(mcq => mcq.answers).flat().map(answer => answer.answer),
+        options: () => this.askedQuestions[concept]?.map(mcq => mcq.answers).flat().map(answer => answer.answer) || [],
         question: () => question,
         completeContext: () => completeContext,
         conceptText:  () =>  conceptContext,
@@ -555,7 +564,7 @@ export class McqCreationService {
       ]).invoke({callbacks: []})
 
       this.addOption(concept,question,response.answer);
-      console.log("all answers: ", this.askedQuestions[concept].map(mcq => mcq.answers).flat().map(answer => answer.answer))
+      console.log("all answers: ", this.askedQuestions[concept]?.map(mcq => mcq.answers).flat().map(answer => answer.answer) || [])
 
       return response;
     } else
@@ -564,7 +573,7 @@ export class McqCreationService {
       {
         option: () => option,
         concept: () => concept,
-        options: () => this.askedQuestions[concept].map(mcq => mcq.answers).flat().map(answer => answer.answer),
+        options: () => this.askedQuestions[concept]?.map(mcq => mcq.answers).flat().map(answer => answer.answer) || [],
         question: () => question,
         completeContext: async () => completeContext,
         format_instructions: () => parser.getFormatInstructions(),
@@ -602,7 +611,7 @@ export class McqCreationService {
         score: z.number().describe("Score for answering the Question right ranging from 0 for an easy Question to 5 for a hard question. Choose according to the difficulty of the question."),
       })
     )
-    const completeContext = formatDocumentsAsString(await (await this.pgVectorStore).similaritySearch(concept, 15));
+    const completeContext = await this.getSimilaritySearchString(concept, 15);
     const conceptContext = await this.getFileFromFolder(concept);
 
     if(!(conceptContext === null))
@@ -660,16 +669,18 @@ export class McqCreationService {
    * @param options
    * @returns question and answers to the user's question
    */
-  async getQuestionAndAnswers(concept: string, options: number) :Promise<McqGenerationDTO> {
+  async getQuestionAndAnswers(concept: string, options: number, topic: string = '(wähle selbst)') :Promise<McqGenerationDTO> {
     console.log("concept: ", concept)
     console.log("otherOptions: ", options)
     console.log("askedquestions = undefined?: ", this.askedQuestions[concept] === undefined)
 
     this.mcqs = await this.jsonLoaderService.loadJson(concept);
 
+    console.log("mcqs: ", this.mcqs);
+
     this.mcqs.questions.forEach(mcq => {
       this.addQuestionAndOptions(concept, mcq.question, mcq.answers);
-    })
+    });
 
     // parser for formatting the output in the desired way
     const parser = StructuredOutputParser.fromZodSchema(
@@ -687,21 +698,22 @@ export class McqCreationService {
       })
     )
     // context retrieval for the question
-    const completeContext = formatDocumentsAsString(await (await this.pgVectorStore).similaritySearch(concept, 15));
+    const completeContext = await this.getSimilaritySearchString(concept, 15);
     const transcript = await this.getFileFromFolder(concept);
 
-    console.log("loaded questions:", this.askedQuestions[concept].map(mcq => mcq.question));
+    console.log("loaded questions:", this.askedQuestions[concept]?.map(mcq => mcq.question) || []);
     if(!(transcript === null)) {
       console.log("result with concept context is fired")
 
       const result = await RunnableSequence.from([
         {
+          topic: () => topic,
           concept: () => concept,
           options: () => options,
           context: () => completeContext,
           completeContext: () => completeContext,
           transcript: () => transcript,
-          questions: () => this.askedQuestions[concept].map(mcq => mcq.question),
+          questions: () => this.askedQuestions[concept]?.map(mcq => mcq.question) || [],
           format_instructions: () => parser.getFormatInstructions(),
         },
         PromptTemplate.fromTemplate(questionAndAnswerPrompt),
@@ -713,14 +725,15 @@ export class McqCreationService {
 
       return result;
     } else {
-      const completeContext2 = formatDocumentsAsString(await (await this.pgVectorStore).similaritySearch(concept, 20));
+      const completeContext2 = await this.getSimilaritySearchString(concept, 20);
       console.log("result without concept fired:");
         const result2 = await RunnableSequence.from([
           {
+            topic: () => topic,
             concept: () => concept,
             options: () => options,
             completeContext: () => completeContext2,
-            questions: () => this.askedQuestions[concept].map(mcq => mcq.question),
+            questions: () => this.askedQuestions[concept]?.map(mcq => mcq.question) || [],
             //otherOptions: () => this.chosenOptions[concept],
             format_instructions: () => parser.getFormatInstructions(),
           },
@@ -803,10 +816,9 @@ export class McqCreationService {
       })
     )
 
-    const context = await (await this.pgVectorStore).similaritySearch(question, 10);
-    const completeContext = formatDocumentsAsString(context);
+    const completeContext = await this.getSimilaritySearchString(question, 10);
     const contextText = await this.getFileFromFolder(concept);
-    console.log("context: ", context)
+    console.log("context: ", completeContext)
     const result = await RunnableSequence.from([
       {
         concept: () => concept,
@@ -826,6 +838,12 @@ export class McqCreationService {
 
 
     return result;
+  }
+
+  private async getSimilaritySearchString(searchString: string, results: number): Promise<string[]> {
+    //return formatDocumentsAsString(await (await this.pgVectorStore).similaritySearch(searchString, results)); // old version
+    const transcript: TranscriptChunk[] = await this.ragService.lectureSimilaritySearch(searchString, results);
+    return transcript.map(chunk => chunk.TranscriptChunkContent);
   }
 
 

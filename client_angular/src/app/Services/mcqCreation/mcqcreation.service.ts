@@ -56,11 +56,12 @@ export class McqcreationService {
    * @param options
    * @returns generated question and answers
    */
-  getQuestionAndAnswers(concept: string, options: number) :Observable<McqGenerationDTO> {
+  getQuestionAndAnswers(concept: string, options: number, topic: string = '') :Observable<McqGenerationDTO> {
 
       const body = new HttpParams()
         .set('concept', concept)
-        .set('options', options);
+        .set('options', options)
+        .set('topic', topic);
       return this.http.get<McqGenerationDTO>(environment.server + `/mcqcreation/questionAndAnswers`, {params: body})
   }
 
