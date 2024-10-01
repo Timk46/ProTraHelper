@@ -720,7 +720,8 @@ export class ContentService {
     });
 
     if (!highestLevelResult) {
-      throw new Error('No content elements found for content node ' + contentNodeId);
+      console.log('No content elements found for content node ' + contentNodeId + '. Returning 1.');
+      return 1;
     }
 
     console.log('#### highestLevelResult', highestLevelResult);
@@ -750,17 +751,12 @@ export class ContentService {
     });
 
     if (!highestAwardsResult) {
-      throw new Error('No content nodes found for concept node ' + conceptNodeId);
+      console.log('No content nodes found for concept node ' + conceptNodeId + '. Returning 1.');
+      return 1;
     }
 
     const highestLevel: number = highestAwardsResult.awards || -1;
     return highestLevel;
   }
 
-
-
 }
-
-/*
-
-*/
