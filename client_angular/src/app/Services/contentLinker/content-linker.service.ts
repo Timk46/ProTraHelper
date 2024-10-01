@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { LinkableContentElementDTO, LinkableContentNodeDTO } from '@DTOs/index';
+import { LinkableContentElementDTO, LinkableContentNodeDTO, QuestionDTO } from '@DTOs/index';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -40,6 +40,16 @@ export class ContentLinkerService {
    */
   unlinkContentElement(contentElementId: number): Observable<boolean> {
     return this.http.get<boolean>(environment.server + '/content/linker/unlinkContentElement/' + contentElementId);
+  }
+
+
+  /**
+   * Fetches a list of unlinked questions from the server.
+   *
+   * @returns An Observable that emits an array of QuestionDTO objects representing the unlinked questions.
+   */
+  getUnlinkedQuestions(): Observable<QuestionDTO[]> {
+    return this.http.get<QuestionDTO[]>(environment.server + '/content/linker/unlinkedQuestions');
   }
 
 

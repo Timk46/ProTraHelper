@@ -12,3 +12,29 @@ mat-form-field {
   display: flex;
   flex-direction: column;
 }
+
+
+::ng-deep {
+  .custom-mat-select {
+    .mat-select-panel {
+      max-height: 400px !important;
+    }
+
+    .mat-select-search-input {
+      background: white !important;
+      width: 100%;
+    }
+
+    .mat-select-panel .mat-option {
+      height: auto;
+      line-height: normal;
+      padding: 8px 16px;
+    }
+
+    .mat-select-panel .mat-option:first-child {
+      height: auto;
+      line-height: normal;
+      padding: 0;
+    }
+  }
+}

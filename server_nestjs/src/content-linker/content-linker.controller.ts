@@ -57,4 +57,16 @@ export class ContentLinkerController {
   }
 
 
+  @roles('ADMIN')
+  @Get('unlinkedQuestions')
+  /**
+   * Retrieves a list of questions that are not linked to any content.
+   *
+   * @returns {Promise<QuestionDTO[]>} A promise that resolves to an array of QuestionDTO objects representing the unlinked questions.
+   */
+  async getUnlinkedQuestions(): Promise<QuestionDTO[]> {
+    return this.contentLinkerService.getUnlinkedQuestions();
+  }
+
+
 }

@@ -177,4 +177,31 @@ export class ContentLinkerService {
   }
 
 
+  async getUnlinkedQuestions(): Promise<QuestionDTO[]> {
+    const linkedQuestions = await this.prisma.contentElement.findMany({
+      where: {
+        type: 'QUESTION',
+        questionId: {
+          not: null,
+        },
+      },
+      select: {
+        questionId: true,
+      },
+    });
+
+    const linkedQuestionIds = linkedQuestions.map((linkedQuestion) => linkedQuestion.questionId);
+
+    const unlinkedQuestions = await this.prisma.question.findMany({
+      where: {
+        id: {
+          notIn: linkedQuestionIds,
+        },
+      },
+    });
+
+    return unlinkedQuestions;
+  }
+
+
 }
