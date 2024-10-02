@@ -1,6 +1,6 @@
 import { ProgressService } from 'src/app/Services/progress/progress.service';
-import { ContentDTO, ContentsForConceptDTO } from '@DTOs/content.dto';
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { ContentDTO, ContentsForConceptDTO, LinkableContentElementDTO, questionType } from '@DTOs/index';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ContentViewComponent } from '../contentView/contentView.component';
@@ -8,9 +8,13 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { firstValueFrom, map, Observable, Subject, takeUntil } from 'rxjs';
+import { firstValueFrom, Subject, takeUntil } from 'rxjs';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+import { UserService } from 'src/app/Services/auth/user.service';
+import { CreateContentElementDialogComponent } from '../lecturersView/create-content-element-dialog/create-content-element-dialog.component';
+import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
+import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 interface TaskViewData {
@@ -43,6 +47,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
   @ViewChild(MatSort) sort: MatSort;
 
+  // emitter for refreshing
+  @Output() fetchContentsForConcept = new EventEmitter<void>();
+
   /**
    * Columns to be displayed in the table
    */
@@ -51,7 +58,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     'name',
     'type',
     'progress',
-    'actions',
+    'actions'
   ];
 
   /**
@@ -64,31 +71,51 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    */
   private destroy$ = new Subject<void>();
 
+  // for lecturers view
+  protected isAdmin: boolean = false;
+  protected editModeActive: boolean = false;
 
   constructor(
     private router: Router,
     public dialog: MatDialog,
     public sSS: ScreenSizeService,
-    private progressService: ProgressService
+    private progressService: ProgressService,
+    private userService: UserService,
+    private contentLinkerService: ContentLinkerService,
+    private confirmService: ConfirmationService,
+    private snackBar: MatSnackBar
   ) {
     // Initialize the data source for the table
     this.dataSource = new MatTableDataSource<TaskViewData>();
     this.sort = new MatSort();
+
+    // for lecturers view
+    this.isAdmin = this.userService.getRole() === 'ADMIN';
   }
 
   ngOnInit() {
+
     // Subscribe to screen size changes for responsive design
-    this.sSS.isHandset.pipe(takeUntil(this.destroy$)).subscribe((isHandset) => {
-      if (isHandset) {
-        this.updateDisplayedColumns(['name', 'type', 'progress', 'actions']);
+    this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
+      this.editModeActive = hasEditModeActive;
+      if (hasEditModeActive) {
+        this.updateDisplayedColumns(['id', 'name', 'type', 'actions']);
+      } else {
+        this.sSS.isHandset.pipe(takeUntil(this.destroy$)).subscribe((isHandset) => {
+          if (isHandset) {
+            this.updateDisplayedColumns(['name', 'type', 'progress', 'actions']);
+          }
+        });
+
+        this.sSS.isTablet.pipe(takeUntil(this.destroy$)).subscribe((isTablet) => {
+          if (isTablet) {
+            this.updateDisplayedColumns(['id','name','type', 'progress', 'actions']);
+          }
+        });
       }
     });
 
-    this.sSS.isTablet.pipe(takeUntil(this.destroy$)).subscribe((isTablet) => {
-      if (isTablet) {
-        this.updateDisplayedColumns(['id','name','type', 'progress', 'actions']);
-      }
-    });
+
   }
 
   /**
@@ -196,14 +223,14 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
     // Open the appropriate dialog based on the task type
     switch (taskViewData.type) {
-      case 'MC':
-      case 'SC':
+      case questionType.SINGLECHOICE:
+      case questionType.MULTIPLECHOICE:
         dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
         break;
-      case 'FreeText':
+      case questionType.FREETEXT:
         dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
         break;
-      case 'CodingQuestion':
+      case questionType.CODE:
         // Navigate to coding question component
         this.router.navigate([this.getRouterLink(taskViewData.id)]);
         return;
@@ -245,6 +272,114 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       });
     }
   }
+
+  /**
+   * Opens a dialog to create a new task.
+   *
+   * @param contentNodeId - The ID of the content node.
+   */
+  onNewTask(contentNodeId: number) {
+    console.log("onNewTask");
+    if (this.isAdmin){
+      const dialogRef = this.dialog.open(CreateContentElementDialogComponent, {
+        width: '50vw',
+        height: '80vh'
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          console.log('Dialog result:', result);
+          if (this.activeConceptNodeId == undefined) {
+            console.error("activeConceptNodeId is undefined");
+            return;
+          }
+          const linkableContentElement: LinkableContentElementDTO = {
+            contentNodeId: contentNodeId,
+
+            questionId: Number(result.questionId) || undefined,
+            question: Number(result.questionId) ? undefined : {
+              id: -1, // -1 for temporary id
+              text: "",
+              isApproved: false, //TODO: implement approval
+              name: result.questionTitle || "New question",
+              type: result.questionType,
+              conceptNodeId: this.activeConceptNodeId,
+              description: result.questionDescription || "Manuell per GUI erstellte Frage",
+              level: Number(result.questionDifficulty),
+              score: Number(result.questionScore) || 100,
+            },
+            contentElementTitle: result.contentElementTitle || undefined,
+            contentElementText: result.contentElementDescription || undefined,
+            position: result.contentElementPosition || undefined
+          };
+
+          this.contentLinkerService.createLinkedContentElement(linkableContentElement).subscribe(
+            (linkableContentElement) => {
+              console.log("linked contentElement: ", linkableContentElement);
+              this.snackBar.open("Frage erstellt", "OK", { duration: 3000 });
+              this.progressService.questionCreated();
+              this.fetchContentsForConcept.emit();
+            }
+          );
+        }
+      });
+    }
+  }
+
+  onTaskApprove(taskViewData: TaskViewData) {
+    console.log("onTaskApprove: ", taskViewData);
+  }
+
+  onTaskEdit(taskViewData: TaskViewData) {
+    console.log("onTaskEdit: ", taskViewData);
+    switch (taskViewData.type) {
+      case questionType.SINGLECHOICE:
+      case questionType.MULTIPLECHOICE:
+        this.router.navigate(['/editchoice/', taskViewData.id]);
+        break;
+      case questionType.FREETEXT:
+        this.router.navigate(['/editfreetext/', taskViewData.id]);
+        break;
+      case questionType.FILLIN:
+        console.log("FILLIN");
+        this.router.navigate(['/editfillin/', taskViewData.id]);
+        break;
+      case questionType.CODE:
+        this.router.navigate(['/editcoding/', taskViewData.id]);
+        break;
+    }
+  }
+
+  onTaskDelete(element: any) {
+    console.log("onDeleteClick: ", element);
+    this.confirmService.confirm({
+      title: "Verknüpfung löschen",
+      message: "Die Verknüpfung zur Frage wird gelöscht. Die Frage bleibt bestehen. Fortfahren?",
+      acceptLabel: "Löschen",
+      declineLabel: "Abbrechen",
+      swapButtons: true,
+      swapColors: true,
+      accept: () => {
+        console.log("deleting");
+        this.contentLinkerService.unlinkContentElement(element.contentElementId).subscribe(
+          (success) => {
+            console.log("unlink success: ", success);
+            this.snackBar.open("Verknüpfung gelöscht", "OK", { duration: 3000 });
+            this.progressService.questionLinkDeleted();
+            this.fetchContentsForConcept.emit();
+          }
+        );
+      }, decline: () => {
+        console.log("aborted");
+      }
+    });
+  }
+
+  //TODO
+  onContentNodeDelete(contentNodeId: number) {
+    console.log("onContentNodeDelete", contentNodeId);
+  }
+
 
   /**
    * @description
@@ -330,13 +465,15 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    */
   genBetterElementNames(type: string): string {
     switch (type) {
-      case 'MC':
+      case questionType.MULTIPLECHOICE:
         return 'Multiple Choice';
-      case 'SC':
+      case questionType.SINGLECHOICE:
         return 'Single Choice';
-      case 'FreeText':
+      case questionType.FREETEXT:
         return 'Freitext';
-      case 'CodingQuestion':
+      case questionType.FILLIN:
+        return 'Lückentext';
+      case questionType.CODE:
         return 'Programmieraufgabe';
       default:
         return 'undefiniert';

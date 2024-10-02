@@ -35,7 +35,10 @@ import { VideoTimeStampComponent } from './sites/video-time-stamp/video-time-sta
     ToastrModule.forRoot(),
     MonacoEditorModule.forRoot(),
   ],
-  //providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true } ], Use hefl interceptor instead!
+  exports: [
+    CodeEditorComponent,
+    VideoTimeStampComponent
+  ],
   bootstrap: [TutorKaiComponent],
 })
 export class TutorKaiModule {}

@@ -1,0 +1,130 @@
+<h2 mat-dialog-title>Frage hinzufügen</h2>
+<mat-dialog-content style="height: 100%;">
+  <mat-tab-group style="height: 100%;" [selectedIndex]="activeTab === 'new' ? 0 : 1" (selectedTabChange)="onTabChange($event)">
+    <mat-tab label="Neue Frage">
+      <form class="tab-content" [formGroup]="creationForm">
+        <mat-form-field appearance="outline">
+          <mat-label>Titel</mat-label>
+          <input matInput placeholder="Titel der Frage" formControlName="questionTitle">
+          <mat-error *ngIf="creationForm.get('questionTitle')!.hasError('required')">Titel der Frage ist
+            erforderlich</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Typ</mat-label>
+          <mat-select placeholder="Fragentyp" formControlName="questionType">
+            <mat-option [value]="questionTypes.FREETEXT">Freitext</mat-option>
+            <mat-option [value]="questionTypes.SINGLECHOICE">Single Choice</mat-option>
+            <mat-option [value]="questionTypes.MULTIPLECHOICE">Multiple Choice</mat-option>
+            <mat-option [value]="questionTypes.FILLIN">Lückentext</mat-option>
+            <mat-option [value]="questionTypes.CODE">Programmieraufgabe</mat-option>
+            <mat-option value="UML" disabled>UML</mat-option>
+          </mat-select>
+          <mat-error *ngIf="creationForm.get('questionType')!.hasError('required')">Fragentyp ist erforderlich</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Schwierigkeit</mat-label>
+          <mat-select formControlName="questionDifficulty">
+            <mat-option value="1">Level 1: Erinnern</mat-option>
+            <mat-option value="2">Level 2: Verstehen</mat-option>
+            <mat-option value="3">Level 3: Anwenden</mat-option>
+            <mat-option value="4">Level 4: Analysieren</mat-option>
+            <mat-option value="5">Level 5: Evaluieren</mat-option>
+            <mat-option value="6">Level 6: Kreieren</mat-option>
+          </mat-select>
+          <mat-error *ngIf="creationForm.get('questionDifficulty')!.hasError('required')">Schwierigkeitsgrad ist
+            erforderlich</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Punkte</mat-label>
+          <input matInput type="number" min="0" step="1" placeholder="Punkte" formControlName="questionScore">
+          <mat-error *ngIf="creationForm.get('questionScore')!.hasError('required')">Punkte sind erforderlich</mat-error>
+        </mat-form-field>
+
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Erweiterte Optionen (optional)</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="expansion">
+            <p>Die Auswirkungen dieser Einstellungen sind in der Übersicht nicht sichtbar und beziehen sich nur auf interne Datenbankparameter</p>
+            <mat-form-field appearance="outline">
+              <mat-label>Beschreibung Frage</mat-label>
+              <textarea matInput placeholder="Beschreibung der Frage" formControlName="questionDescription"></textarea>
+              <mat-hint>Zum Beispiel "manuell erstellt" oder "automatisch importiert"</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>ContentElement Titel</mat-label>
+              <input matInput placeholder="Titel des ContentElements" formControlName="contentElementTitle">
+              <mat-hint>Standardmäßig der Titel der Frage</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>ContentElement Beschreibung</mat-label>
+              <textarea matInput placeholder="Beschreibung des ContentElements" formControlName="contentElementDescription"></textarea>
+              <mat-hint>Standardmäßig keine Beschreibung</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <input matInput placeholder="Position des ContentElements" disabled>
+            </mat-form-field>
+          </div>
+        </mat-expansion-panel>
+      </form>
+    </mat-tab>
+    <mat-tab label="Vorhandene Frage">
+      <form [formGroup]="connectionForm">
+
+        <!-- <mat-form-field>
+          <input matInput type="number" min="0" placeholder="QuestionId" formControlName="questionId">
+          <mat-error *ngIf="connectionForm.get('questionId')!.hasError('required')">QuestionId ist erforderlich</mat-error>
+          <mat-hint>Id einer existierenden, unverlinkten Frage</mat-hint>
+        </mat-form-field> -->
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>Frage</mat-label>
+          <mat-select formControlName="questionId" (click)="onSelectClick()">
+            <mat-option>
+              <ngx-mat-select-search class="custom-mat-select"
+                placeholderLabel="Suche..."
+                noEntriesFoundLabel="Keine Ergebnisse gefunden"
+                [formControl]="questionFilterControl"
+              ></ngx-mat-select-search>
+            </mat-option>
+            <mat-option
+              *ngFor="let question of filteredQuestions | async"
+              [value]="question.id"
+            >
+              {{ question.name }} (Id: {{ question.id }})
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="connectionForm.get('questionId')!.hasError('required')">Fragenwahl ist erforderlich</mat-error>
+          <mat-hint>Wahl einer existierenden, unverlinkten Frage</mat-hint>
+        </mat-form-field>
+
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Erweiterte Optionen (optional)</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="expansion">
+            <p>Die Auswirkungen dieser Einstellungen sind in der Übersicht nicht sichtbar und beziehen sich nur auf interne Datenbankparameter</p>
+            <mat-form-field appearance="outline">
+              <mat-label>ContentElement Titel</mat-label>
+              <input matInput placeholder="Titel des ContentElements" formControlName="contentElementTitle">
+              <mat-hint>Standardmäßig der Titel der Frage</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>ContentElement Beschreibung</mat-label>
+              <textarea matInput placeholder="Beschreibung des ContentElements" formControlName="contentElementDescription"></textarea>
+              <mat-hint>Standardmäßig keine Beschreibung</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <input matInput placeholder="Position des ContentElements" disabled>
+            </mat-form-field>
+          </div>
+        </mat-expansion-panel>
+
+      </form>
+    </mat-tab>
+  </mat-tab-group>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onCancel()">Abbrechen</button>
+  <button mat-button (click)="onSubmit()">Erstellen</button>
+</mat-dialog-actions>

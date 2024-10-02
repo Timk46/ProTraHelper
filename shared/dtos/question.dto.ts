@@ -8,12 +8,14 @@ export interface QuestionDTO {
     type: string;
     author?: number;
     text: string;
-    conceptNode?: number;
+    conceptNodeId: number;
     conceptNodeName?: string;
     isApproved: boolean;
     originId?: number;
     codingQuestion?: CodingQuestionDto,
     level: number;
+    mode?: string;
+    version?: number;
 }
 
 /*export interface QuestionDto { // This is the Tutor-Kai Question DTO. ToDo: NEEDS MERGE
@@ -40,6 +42,7 @@ export interface QuestionVersionDTO {
 export interface McQuestionDTO {
     id: number;
     questionId: number;
+    textHTML?: string;
     isSC: boolean;
     shuffleOptions: boolean;
 }
@@ -91,18 +94,27 @@ export interface UserAnswerDTO {
 
 export interface CodingQuestionDto {
     id: number;
-    countInputArgs: number;
+    count_InputArgs: number;
     programmingLanguage: string;
     mainFileName: string;
     text: string;
     textHTML: string;
+    expectations?: string;
     codeGerueste: CodeGeruestDto[];
   }
   
   export interface CodingQuestionInternal extends CodingQuestionDto { // for backend only
     automatedTests: AutomatedTestDto[];
+    modelSolutions?: ModelSolutionDto[];
   }
-  
+  export interface ModelSolutionDto {
+    id: number;
+    codingQuestionId: number;
+    codeFileName: string;
+    code: string;
+    language: string;
+  }
+
   export interface CodeGeruestDto {
     id: number;
     codingQuestionId: number;
@@ -117,6 +129,9 @@ export interface CodingQuestionDto {
     testFileName: string;
     language: string;
     questionId: number;
+    testClassName?:  string;
+    runMethod?:      string;
+    inputArguments?: string;
   }
 
   export enum questionType {
@@ -124,6 +139,7 @@ export interface CodingQuestionDto {
     MULTIPLECHOICE = "MC",
     FREETEXT = "FreeText",
     CODE = "CodingQuestion",
+    FILLIN = "FillIn"
   }
 
   export interface McqGenerationDTO {

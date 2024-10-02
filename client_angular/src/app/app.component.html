@@ -23,6 +23,7 @@
 </div>
 
 
+
 <mat-toolbar class="footer">
   <!-- Dashboard-Link auf der linken Seite -->
   <div class="left-content">
@@ -43,6 +44,10 @@
 
   <!-- User-Information auf der rechten Seite -->
   <div class="right-content">
+    <mat-slide-toggle *ngIf="userRole === 'ADMIN'" (change)="onToggleEditorMode()" [checked]="editModeActive" color="primary" style="margin-right: 10px;">
+      Edit Mode
+    </mat-slide-toggle>
+    <mat-divider vertical="true" class="divider"></mat-divider>
     <button mat-button style="font-size:15px; font-weight:bolder;" (click)="showProgress()"> Fortschritt anzeigen </button>
     <mat-divider vertical="true" class="divider"></mat-divider>
     <button mat-button style="margin-left: 5px" *ngIf="userIsLoggedIn" (click)="logOut()">Logout</button>
@@ -51,4 +56,3 @@
       <app-notification-bell class="bell"></app-notification-bell>
     -->
 </mat-toolbar>
-

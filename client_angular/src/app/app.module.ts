@@ -3,6 +3,7 @@ import { NgModule} from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { MaterialModule } from './Modules/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MarkdownModule } from 'ngx-markdown';
 
 // Components
 import { ContactComponent, ImpressumComponent, DatenschutzComponent, ProgressComponent } from './app.component'
@@ -29,7 +30,6 @@ import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video
 import { LoginComponent } from './Pages/login/login.component';
 import { AuthInterceptor } from "./Interceptors/auth-interceptor.service";
 import { LoggedInGuard } from "./Guards/is-logged-in.guard";
-import { TinymceComponent } from './Pages/tinymce/tinymce.component';
 import { EditorModule, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
 import { DiscussionListComponent } from './Pages/discussion/discussion-list/discussion-list.component';
 import { DiscussionViewComponent } from './Pages/discussion/discussion-view/discussion-view.component';
@@ -43,9 +43,6 @@ import { DiscussionCreationComponent } from './Pages/discussion/discussion-creat
 import { DiscussionPrecreationComponent } from './Pages/discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
 import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overview/task-evaluation-overview.component';
 import { FreeTextTaskComponent } from './Pages/contentView/contentElement/free-text-task/free-text-task.component';
-import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
-import { ScoreComponent } from './Pages/contentView/contentElement/mc-task-creation/score/score.component';
-import { DescriptionDialogComponent } from './Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component';
 import { DraggableHeightDirective } from "./Directives/draggable-height.directive";
 import { ConfettiService } from "./Services/animations/confetti.service";
 import { VersionInterceptor } from "./Interceptors/version.interceptor";
@@ -54,9 +51,15 @@ import { ToastrModule } from "ngx-toastr";
 import { NotificationComponent } from './Pages/notification/notification.component';
 import { NotificationBellComponent } from "./Pages/notification/notification-bell/notification-bell.component";
 import { BellDirective } from "./Pages/notification/notification-bell/belldirective.directive";
+import { AdminGuard } from "./Guards/is-admin.guard";
+import { ConfirmationBoxComponent } from './Pages/confirmation-box/confirmation-box.component';
+import { ConfirmDialogComponent } from './Pages/lecturersView/edit-coding/confirm-dialog.component';
 
-
-
+// Import LecturersViewModule
+import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module';
+import { McTaskCreationComponent } from "./Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component";
+import { MCDescriptionDialogComponent } from "./Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component";
+import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-creation/score/score.component";
 
 @NgModule({
     declarations: [
@@ -73,8 +76,10 @@ import { BellDirective } from "./Pages/notification/notification-bell/belldirect
         CreateConceptDialogComponent,
         VideoViewerComponent,
         CompetenciesComponent,
-        ChatBotComponent, ChatBotDialogComponent, VideoTimeStampComponent, LoginComponent,
-        TinymceComponent,
+        ChatBotComponent,
+        ChatBotDialogComponent,
+        VideoTimeStampComponent,
+        LoginComponent,
         DiscussionListComponent,
         DiscussionViewComponent,
         DiscussionFilterComponent,
@@ -87,9 +92,6 @@ import { BellDirective } from "./Pages/notification/notification-bell/belldirect
         DiscussionPrecreationComponent,
         TaskEvaluationOverviewComponent,
         FreeTextTaskComponent,
-        McTaskCreationComponent,
-        ScoreComponent,
-        DescriptionDialogComponent,
         DraggableHeightDirective,
         ContactComponent,
         ImpressumComponent,
@@ -98,18 +100,13 @@ import { BellDirective } from "./Pages/notification/notification-bell/belldirect
         ProgressComponent,
         NotificationComponent,
         NotificationBellComponent,
-        BellDirective
+        BellDirective,
+        ConfirmationBoxComponent,
+        ConfirmDialogComponent,
+        McTaskCreationComponent,
+        MCDescriptionDialogComponent,
+        MCScoreComponent
     ],
-    providers: [
-        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-        { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
-        { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
-        LoggedInGuard,
-        EditorModule,
-        ConfettiService,
-        Title
-    ],
-    bootstrap: [AppComponent],
     imports: [
         ToastrModule.forRoot(),
         BrowserModule,
@@ -120,7 +117,19 @@ import { BellDirective } from "./Pages/notification/notification-bell/belldirect
         MaterialModule,
         NgxExtendedPdfViewerModule,
         HttpClientModule,
-
-    ]
+        LecturersViewModule,
+        EditorModule,
+        MarkdownModule.forRoot()
+    ],
+    providers: [
+        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
+        { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
+        LoggedInGuard,
+        AdminGuard,
+        ConfettiService,
+        Title
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }

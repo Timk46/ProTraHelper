@@ -6,9 +6,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { Observable, of, switchMap, startWith, map, max } from 'rxjs';
 import { McQuestionOptionDTO } from '@DTOs/question.dto';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { ScoreComponent } from './score/score.component';
+import { MCScoreComponent } from './score/score.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { DescriptionDialogComponent } from './description-dialog/description-dialog.component';
+import { MCDescriptionDialogComponent } from './description-dialog/description-dialog.component';
 import { McqcreationService } from 'src/app/Services/mcqCreation/mcqcreation.service';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { ContentService } from 'src/app/Services/content/content.service';
@@ -428,7 +428,7 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
 
   // method to open the dialogbox for adding score
   openDialog(): void {
-    const dialogRef = this.dialog.open(ScoreComponent, {
+    const dialogRef = this.dialog.open(MCScoreComponent, {
       height: '270px',
       width: '270px',
       data: { score: this.taskForm.get('score')?.value }
@@ -444,7 +444,7 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
   }
   // method to open the dialogbox for adding description
   openDescripDialog(): void {
-    const dialogRef = this.dialog.open(DescriptionDialogComponent, {
+    const dialogRef = this.dialog.open(MCDescriptionDialogComponent, {
       height: '320px',
       width: '320px',
       data: { description: this.taskForm.get('description')?.value }

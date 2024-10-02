@@ -17,10 +17,13 @@ export * from "./module.dto"
 export * from "./contentElementStatus.dto"
 export * from "./notification.dto";
 export * from "./notificationType.enum";
+export * from "./contentLinking.dto";
+export * from "./detailedQuestion.dto";
 
 //TutorKai DTOs
 export * from "./tutorKaiDtos/kiFeedback.dto";
 export * from "./tutorKaiDtos/submission.dto";
+export * from "./tutorKaiDtos/genTask.dto";
 export * from "./user.dto"; // ToDo: Merge with hefl
 export * from "./file.dto"; // ToDo: Merge with hefl
 export * from "./userAnswer.dto";

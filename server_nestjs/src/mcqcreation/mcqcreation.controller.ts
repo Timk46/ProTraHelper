@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { McqCreationService } from './mcqcreation.service';
-import { roles } from '@/auth/roles.guard';
-import { McqGenerationDTO } from '@Interfaces/question.dto';
+import { roles, RolesGuard } from '@/auth/roles.guard';
+import { McqGenerationDTO } from '@DTOs/question.dto';
 interface Answer {
   answer?: string;
   isCorrect?: boolean;
@@ -15,6 +15,8 @@ interface McqEvaluation {
 interface McqEvaluations {
   evaluations?: McqEvaluation[];
 }
+
+@UseGuards(RolesGuard)
 @Controller('mcqcreation')
 export class McqcreationController {
 
@@ -25,9 +27,10 @@ export class McqcreationController {
      * @param questionId
      * @returns the question
      */
-    @Get('answer')
-    async getAnswer(@Query('question') question: string, @Query('option') option: string , @Query('otherOptions') otherOptions: string[], @Query('concept') concept: string): Promise<Answer> {
-      return await this.mcqCreationService.getAnswer(question, option, otherOptions, concept);
+    @roles('ADMIN')
+    @Post('answer')
+    async getAnswer(@Body() answerData: { question: string, option: string, otherOptions: string[], concept: string }): Promise<Answer> {
+      return await this.mcqCreationService.getAnswer(answerData.question, answerData.option, answerData.otherOptions, answerData.concept);
     }
 
     /**
@@ -35,6 +38,7 @@ export class McqcreationController {
      * @param questionId
      * @returns the question
      */
+    @roles('ADMIN')
     @Get('answers')
     async getAnswers(@Query('question') question:string, @Query('options') options: number, @Query('concept') concept: string ): Promise<McqGenerationDTO> {
       return await this.mcqCreationService.getAnswers(options,question, concept);
@@ -46,9 +50,10 @@ export class McqcreationController {
      * @param options
      * @returns suggested question and answers
      */
+    @roles('ADMIN')
     @Get('questionAndAnswers')
-    async getQuestionAndAnswers(@Query('concept') concept: string, @Query('options') options: number): Promise<McqGenerationDTO> {
-      return await this.mcqCreationService.getQuestionAndAnswers(concept, options);
+    async getQuestionAndAnswers(@Query('concept') concept: string, @Query('options') options: number, @Query('topic') topic: string = undefined): Promise<McqGenerationDTO> {
+      return await this.mcqCreationService.getQuestionAndAnswers(concept, options, topic);
     }
 
     /**
@@ -56,6 +61,7 @@ export class McqcreationController {
      * @param concept
      * @returns
      */
+    @roles('ADMIN')
     @Get('questionTitle')
     async getQuestionTitle(@Query('concept') concept: string): Promise<{question?: string}> {
       return await this.mcqCreationService.getQuestionTitle(concept);
@@ -67,6 +73,7 @@ export class McqcreationController {
      * @param options
      * @returns reevaluated question and answers
      */
+    @roles('ADMIN')
     @Get('reevaluatedQuestionAndAnswers')
     async getReevaluatedQuestionAndAnswers(@Query('question') question: string, @Query('concept') concept: string, @Query('options') options: string): Promise<McqGenerationDTO> {
       return await this.mcqCreationService.getReevaluatedQuestionAndAnswers(question, concept, options);
@@ -79,6 +86,7 @@ export class McqcreationController {
      * @param answers
      * @returns evaluated answers in text form
      */
+    @roles('ADMIN')
     @Get('evaluateOptions')
     async getEvaluation(@Query('question') question: string, @Query('answers') answers: string[]): Promise<McqEvaluations> {
       console.log("question in controller",question);

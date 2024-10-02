@@ -12,5 +12,6 @@ import { VersionInterceptor } from '@/common/interceptors/version.interceptor';
   providers: [
     ContentService
   ],
+  exports: [ContentService],
 })
 export class ContentModule {}

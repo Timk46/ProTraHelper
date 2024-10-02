@@ -214,6 +214,7 @@ export class StudentWorkspaceComponent implements OnInit {
       .executeStudentCode(this.currentTaskId, inputArgs, additionalFiles)
       .subscribe({
         next: (result) => {
+          console.log(result);
           this.handleCodeSubmissionResponse(result);
         },
         error: (error) => {
@@ -231,9 +232,11 @@ export class StudentWorkspaceComponent implements OnInit {
   handleCodeSubmissionResponse(result: CodeSubmissionResultDto): void {
     //console.log(result);
     this.lastResult = result;
-    this.compilerOutput = result.CodeSubmissionResult.output;
-    this.compilerOutput +=
-      result.CodeSubmissionResult.output.length === 0 ? 'Keine Ausgabe' : '';
+    if (!result.CodeSubmissionResult.output) {
+      this.compilerOutput = 'Keine Ausgabe'
+    } else {
+      this.compilerOutput = result.CodeSubmissionResult.output;
+    }
     this.isLoading = false;
     this.feedbackMessage = 'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben.';
     this.currentState = States.submittedCode;
@@ -319,9 +322,9 @@ export class StudentWorkspaceComponent implements OnInit {
     // Add Input Args if there are any
     if (
       this.currentTask &&
-      this.currentTask.codingQuestion!.countInputArgs !== undefined
+      this.currentTask.codingQuestion!.count_InputArgs !== undefined
     ) {
-      this.createInputArgs(this.currentTask.codingQuestion!.countInputArgs);
+      this.createInputArgs(this.currentTask.codingQuestion!.count_InputArgs);
     }
   }
 

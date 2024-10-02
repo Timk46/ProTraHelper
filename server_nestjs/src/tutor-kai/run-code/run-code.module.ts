@@ -16,5 +16,6 @@ import { NotificationModule } from '@/notification/notification.module';
   providers: [RunCodeService, CryptoService, QuestionService, FeedbackNormalService, StudentRatingService, FeedbackRAGService, ContentService],
   imports: [PrismaModule, ContentModule, UserConceptModule, NotificationModule],
   controllers: [RunCodeController],
+  exports: [RunCodeService],
 })
 export class RunCodeModule {}

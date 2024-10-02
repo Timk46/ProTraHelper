@@ -1,0 +1,201 @@
+<div class="content mat-elevation-z8">
+  <h1 style="display: flex; justify-content: center;">Single- / Multiple Choice Aufgabe bearbeiten</h1>
+
+  <div class="horizontal-align-container">
+    <div class="text-container" style="width: 30%;">
+      <div class="wrap-container">
+
+        <h2>Optionen</h2>
+
+        <form [formGroup]="choiceForm">
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Titel</mat-label>
+            <input matInput placeholder="Titel der Frage" formControlName="questionTitle">
+            <mat-error *ngIf="choiceForm.get('questionTitle')!.hasError('required')">Titel der Frage ist
+              erforderlich</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Schwierigkeit</mat-label>
+            <mat-select formControlName="questionDifficulty">
+              <mat-option value="1">Level 1: Erinnern</mat-option>
+              <mat-option value="2">Level 2: Verstehen</mat-option>
+              <mat-option value="3">Level 3: Anwenden</mat-option>
+              <mat-option value="4">Level 4: Analysieren</mat-option>
+              <mat-option value="5">Level 5: Evaluieren</mat-option>
+              <mat-option value="6">Level 6: Kreieren</mat-option>
+            </mat-select>
+            <mat-error *ngIf="choiceForm.get('questionDifficulty')!.hasError('required')">Schwierigkeitsgrad ist
+              erforderlich</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Choice-Typ</mat-label>
+            <mat-select formControlName="questionType">
+              <mat-option value="SC">Single Choice</mat-option>
+              <mat-option value="MC">Multiple Choice</mat-option>
+            </mat-select>
+            <mat-error *ngIf="choiceForm.get('questionDifficulty')!.hasError('required')">Schwierigkeitsgrad ist
+              erforderlich</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <input matInput type="number" min="0" step="1" placeholder="Punkte" formControlName="questionScore">
+            <mat-label>Punkte</mat-label>
+            <mat-error *ngIf="choiceForm.get('questionScore')!.hasError('required')">Punkte sind
+              erforderlich</mat-error>
+          </mat-form-field>
+          <mat-checkbox formControlName="questionShuffle">Antwortoptionen mischen</mat-checkbox>
+        </form>
+
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Frage generieren</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="expansion">
+            <form [formGroup]="generationForm">
+              <p>Wahl der Wissensquelle</p>
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-label>Konzept</mat-label>
+                <mat-select formControlName="generationConcept" (click)="onSelectClick()">
+                  <mat-option>
+                    <ngx-mat-select-search class="custom-mat-select"
+                      placeholderLabel="Suche..."
+                      noEntriesFoundLabel="Keine Ergebnisse gefunden"
+                      [formControl]="conceptFilterControl"
+                    ></ngx-mat-select-search>
+                  </mat-option>
+                  <mat-option
+                    *ngFor="let concept of filteredConcepts | async"
+                    [value]="concept.id"
+                  >
+                    {{ concept.name }} (Id: {{ concept.id }})
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <p>Anzahl zu generierender Optionen</p>
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <input matInput type="number" min="0" step="1" placeholder="Anzahl Optionen" formControlName="generationOptionCount" value=4>
+                <mat-label>Anzahl Optionen</mat-label>
+              </mat-form-field>
+              <p>Thema der Frage (experimentiell, zur Not leer lassen)</p>
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <input matInput [placeholder]="choiceForm.value.questionTitle" formControlName="generationTopic">
+                <mat-label>Thema</mat-label>
+              </mat-form-field>
+              <ng-container *ngIf="!isQuestionGenerating; else loadingButton">
+                <button mat-raised-button color="primary" (click)="generateQuestion()">Generieren</button>
+              </ng-container>
+              <ng-template #loadingButton>
+                <button mat-raised-button color="primary" disabled>
+                  <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+                </button>
+              </ng-template>
+            </form>
+          </div>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Erweiterte Optionen (optional)</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="expansion">
+            <p>Die Auswirkungen dieser Einstellungen sind in der Übersicht nicht sichtbar und beziehen sich nur auf
+              interne Datenbankparameter</p>
+            <form [formGroup]="choiceForm">
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-label>Beschreibung der Frage</mat-label>
+                <textarea matInput placeholder="Beschreibung der Frage"
+                  formControlName="questionDescription"></textarea>
+                <mat-hint>Zum Beispiel "manuell erstellt" oder "automatisch importiert"</mat-hint>
+              </mat-form-field>
+            </form>
+          </div>
+        </mat-expansion-panel>
+      </div>
+    </div>
+
+
+    <div class="text-container" style="width: 70%;">
+      <div class="wrap-container">
+
+        <div style="width: 100%;">
+          <h2>Aufgabentext</h2>
+          <app-tinymce #question [config]="editorConfig"></app-tinymce>
+        </div>
+
+        <div>
+          <div style="display: flex; justify-content: space-between;">
+            <h2>
+              Mögliche Antwortoptionen
+              <mat-icon
+                *ngIf="choiceForm.value.questionType === 'SC' && correctOptionsCount > 1"
+                matTooltip="Dies ist eine Single Choice Frage. Sollen mehrere Optionen richtig sein?">warning</mat-icon>
+            </h2>
+            <button mat-mini-fab color="primary" (click)="addOption()" style="margin-right: 10px;">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          <form [formGroup]="choiceForm">
+            <table mat-table [dataSource]="dataSource">
+              <ng-container matColumnDef="option">
+                <th mat-header-cell *matHeaderCellDef> Option </th>
+                <td mat-cell *matCellDef="let optionGroup">
+                  <mat-form-field appearance="outline" [formGroup]="optionGroup" style="margin-top: 22px; width: 100%;">
+                    <textarea matInput cdkTextareaAutosize placeholder="Option" formControlName="text"></textarea>
+                  </mat-form-field>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="correct">
+                <th mat-header-cell *matHeaderCellDef> Korrekt? </th>
+                <td mat-cell *matCellDef="let optionGroup">
+                  <div [formGroup]="optionGroup">
+                    <mat-checkbox formControlName="is_correct"></mat-checkbox>
+                  </div>
+
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef> Aktion </th>
+                <td mat-cell *matCellDef="let option; let i = index">
+                  <div style="display: flex; gap: 10px; align-items: center;">
+                    <ng-container *ngIf="!isGenerating[i]; else spinner">
+                      <button mat-icon-button color="primary" (click)="generateOption(i)" matTooltip="Antwort generieren (experimentiell)" class="action-button">
+                        <mat-icon>model_training</mat-icon>
+                      </button>
+                    </ng-container>
+                    <ng-template #spinner>
+                      <div style="width: 48px; height: 48px; display: flex; justify-content: center; align-items: center;">
+                        <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+                      </div>
+                    </ng-template>
+                    <button mat-icon-button color="warn" (click)="deleteOption(i)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['option', 'correct', 'action']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['option', 'correct', 'action'];"></tr>
+            </table>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="button-container">
+    <mat-progress-spinner *ngIf="isSaving" diameter="20" mode="indeterminate"></mat-progress-spinner>
+    <button [disabled]="isSaving" mat-raised-button color="primary" (click)="onOverwrite()">Speichern (aktualisieren)</button>
+    <div matTooltip="Die aktuelle Version hat noch keine Single/Multiple Choice Daten."
+      [matTooltipDisabled]="!!detailedQuestionData?.mcQuestion">
+      <button mat-raised-button color="primary"
+        (click)="onSaveNewVersion()"
+        [disabled]="!detailedQuestionData?.mcQuestion || isSaving || true"
+        >Als neue Version speichern</button>
+    </div>
+    <button mat-raised-button color="warn" (click)="onCancel()">Abbrechen</button>
+  </div>
+</div>

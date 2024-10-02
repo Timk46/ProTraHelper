@@ -6,11 +6,11 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
   templateUrl:  './score.component.html',
   styleUrls: ['./score.component.scss']
 })
-export class ScoreComponent {
+export class MCScoreComponent {
 
 
   constructor(
-    public dialogref: MatDialogRef<ScoreComponent>,
+    public dialogref: MatDialogRef<MCScoreComponent>,
     @Inject(MAT_DIALOG_DATA) public data: {score: number}  ) { }
 
 

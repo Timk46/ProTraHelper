@@ -4,9 +4,7 @@ import { REQUEST } from '@nestjs/core';
 import { CryptoService } from '../crypto/crypto.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Response } from 'express';
-import { LangChainTracer } from 'langchain/callbacks';
-import { Client } from 'langsmith';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { ChatOpenAI } from "@langchain/openai";
 import { ToolMessage } from 'langchain/schema';
 import { Prisma, PrismaClient, TranscriptEmbedding } from '@prisma/client';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
@@ -107,20 +105,11 @@ const vectorStore = PrismaVectorStore.withModel<TranscriptEmbedding>(db).create(
   },
 );
 
-const chatStream = new ChatOpenAI({
+const llm = new ChatOpenAI({
   modelName: KImodel,
   openAIApiKey: process.env.OPENAI_API_KEY,
   temperature: 0, // Low Temperature favours the words with higher probability = less creative
   streaming: true,
-});
-
-const client = new Client({
-  apiUrl: 'https://api.smith.langchain.com',
-  apiKey: process.env.LANGCHAIN_API_KEY,
-});
-const tracer = new LangChainTracer({
-  projectName: 'GOALS_feedback_RAG',
-  client,
 });
 
 const chat = new ChatOpenAI({
@@ -194,7 +183,7 @@ export class FeedbackRAGService {
     const question = await this.prisma.question.findUnique({
       where: { id: questionId },
       include: {
-        codingQuestions: {
+        codingQuestion: {
           include: {
             codeGerueste: true,
             automatedTests: true,
@@ -223,8 +212,8 @@ export class FeedbackRAGService {
         : individualFeedbackPromptLevel1;
 
     const conceptsFormattedPrompt = await getConceptsPrompt.formatPromptValue({
-      task: question.codingQuestions.text,
-      language: question.codingQuestions.programmingLanguage,
+      task: question.codingQuestion.text,
+      language: question.codingQuestion.programmingLanguage,
       code: relatedCodeSubmission.code,
       output: relatedCodeSubmissionResult.CodeSubmissionResult.output
         ? relatedCodeSubmissionResult.CodeSubmissionResult.output
@@ -238,7 +227,7 @@ export class FeedbackRAGService {
     });
     // Ask initial question that requires multiple tool calls
     const res = await chat.invoke(conceptsFormattedPrompt, {
-      callbacks: [tracer],
+      callbacks: [],
     });
 
     //console.log(res.additional_kwargs.tool_calls);
@@ -300,8 +289,8 @@ export class FeedbackRAGService {
 
     const ragFormattedPrompt = await finalRAGPrompt.formatPromptValue({
       individualFeedbackPrompt: individualFeedbackPrompt,
-      task: question.codingQuestions.text,
-      language: question.codingQuestions.programmingLanguage,
+      task: question.codingQuestion.text,
+      language: question.codingQuestion.programmingLanguage,
       code: relatedCodeSubmission.code,
       output: relatedCodeSubmissionResult.CodeSubmissionResult.output
         ? relatedCodeSubmissionResult.CodeSubmissionResult.output
@@ -318,7 +307,7 @@ export class FeedbackRAGService {
     let ongoingBuffer = ''; // Buffer to capture potential reference across tokens
 
     let openAiAnswerWithMarkdownLinks = '';
-    const openAiResponse = await chatStream.generatePrompt(
+    const openAiResponse = await llm.generatePrompt(
       [ragFormattedPrompt],
       undefined,
       [
@@ -390,7 +379,6 @@ export class FeedbackRAGService {
             }
           },
         },
-        tracer,
       ],
     );
 

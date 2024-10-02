@@ -73,7 +73,7 @@ async function importProgrammingTasksFromExcel(
         id: task.ConceptNodeID,
       },
     });
-    
+
     const newTask = await prisma.question.create({
       data: {
         name: task.Titel,
@@ -85,7 +85,7 @@ async function importProgrammingTasksFromExcel(
         conceptNode: { connect: { id: conceptNode.id } },
         isApproved: true,
         level: 3, // this is the default level for all tasks currently
-        codingQuestions: {
+        codingQuestion: {
           create: {
             text: task.Task,
             textHTML: task.Task_html,

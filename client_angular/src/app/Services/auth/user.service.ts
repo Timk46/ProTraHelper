@@ -12,6 +12,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class UserService {
   isAuthenticated$: Observable<boolean>;
+  hasEditModeActive$: Observable<boolean>;
 
   constructor
   (
@@ -21,6 +22,7 @@ export class UserService {
   )
   {
     this.isAuthenticated$ = new BehaviorSubject<boolean>(false);
+    this.hasEditModeActive$ = new BehaviorSubject<boolean>(false);
   }
 
     /**
@@ -153,6 +155,15 @@ export class UserService {
   getTokenID(): string {
     const decodedToken = this.decodeAccessToken();
     return decodedToken.id;
+  }
+
+  enableEditMode(): void {
+    if (this.getRole() === globalRole.ADMIN) {
+    (this.hasEditModeActive$ as BehaviorSubject<boolean>).next(true);
+    }
+  }
+  disableEditMode(): void {
+    (this.hasEditModeActive$ as BehaviorSubject<boolean>).next(false);
   }
    /**
    * Open a MatSnackBar with the provided message and icon.

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ScoreComponent } from './score.component';
+import { MCScoreComponent } from './score.component';
 
 describe('ScoreComponent', () => {
-  let component: ScoreComponent;
-  let fixture: ComponentFixture<ScoreComponent>;
+  let component: MCScoreComponent;
+  let fixture: ComponentFixture<MCScoreComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ScoreComponent ]
+      declarations: [ MCScoreComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ScoreComponent);
+    fixture = TestBed.createComponent(MCScoreComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

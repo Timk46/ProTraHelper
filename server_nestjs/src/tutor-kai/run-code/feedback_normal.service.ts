@@ -5,9 +5,7 @@ import { CryptoService } from '../crypto/crypto.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Response } from 'express';
 import { EventLogService } from '@/EventLog/event-log.service';
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { Client } from "langsmith";
-import { LangChainTracer } from "langchain/callbacks";
+import { ChatOpenAI } from "@langchain/openai";
 
 const {
   ChatPromptTemplate,
@@ -19,7 +17,7 @@ const {
 //const KImodel = 'gpt-3.5-turbo';
 const KImodel = 'gpt-4o-2024-08-06';
 
-const chat = new ChatOpenAI({
+const llm = new ChatOpenAI({
   modelName: KImodel,
   openAIApiKey: process.env.OPENAI_API_KEY,
   temperature: 0, // Low Temperature favours the words with higher probability = less creative
@@ -59,14 +57,6 @@ const chatPrompt = ChatPromptTemplate.fromPromptMessages([
   ),
 ]);
 
-const client = new Client({
-  apiUrl: "https://api.smith.langchain.com",
-  apiKey: process.env.LANGCHAIN_API_KEY
-});
-const tracer = new LangChainTracer({
-  projectName: "GOALS_feedback_normal",
-  client
-});
 
 @Injectable()
 export class FeedbackNormalService {
@@ -100,7 +90,7 @@ export class FeedbackNormalService {
     const question = await this.prisma.question.findUnique({
       where: { id: questionId },
       include: {
-        codingQuestions: {
+        codingQuestion: {
           include: {
             codeGerueste: true,
             automatedTests: true,
@@ -126,15 +116,15 @@ export class FeedbackNormalService {
 
     const formattedPrompt = await chatPrompt.formatPromptValue({
       individualFeedbackPrompt: individualFeedbackPrompt,
-      task: question.codingQuestions.text,
-      language: question.codingQuestions.programmingLanguage,
+      task: question.codingQuestion.text,
+      language: question.codingQuestion.programmingLanguage,
       code: relatedCodeSubmission.code,
       output: relatedCodeSubmissionResult.CodeSubmissionResult.output ? relatedCodeSubmissionResult.CodeSubmissionResult.output : "Es liegt kein Output vor.",
       unitTests: relatedCodeSubmission.codingQuestion.automatedTests[0].code ? relatedCodeSubmission.codingQuestion.automatedTests[0].code : "Es liegen keine Unit-Tests vor.",
       unitTestsResults: relatedCodeSubmission.unitTestResults? relatedCodeSubmission.unitTestResults : "Es liegen keine Testergebnisse vor.",
     });
 
-    const openAiResponse = await chat.generatePrompt([formattedPrompt], undefined, [
+    const openAiResponse = await llm.generatePrompt([formattedPrompt], undefined, [
       {
         ignoreAgent: true,
         ignoreChain: true,
@@ -142,7 +132,6 @@ export class FeedbackNormalService {
           res.write(token);
         },
       },
-      tracer
     ],
     );
     this.eventLogService.log(

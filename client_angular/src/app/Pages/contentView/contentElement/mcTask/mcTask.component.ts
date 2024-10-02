@@ -37,13 +37,14 @@ export class McTaskComponent implements OnInit {
   }
 
   //init question data
-  questionData : QuestionDTO = {
+  questionData : QuestionDTO = { // dummy data
     id : -1,
     name : '',
     description : '',
     score : -1,
     type : '',
     text : '',
+    conceptNodeId : -1,
     isApproved: false,
     originId: -1,
     level: -1,

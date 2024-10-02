@@ -8,11 +8,11 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
   templateUrl: './description-dialog.component.html',
   styleUrls: ['./description-dialog.component.scss']
 })
-export class DescriptionDialogComponent {
+export class MCDescriptionDialogComponent {
 
   @ViewChild('autosize') autosize: CdkTextareaAutosize | undefined;
   constructor(
-    public dialogref: MatDialogRef<DescriptionDialogComponent>,
+    public dialogref: MatDialogRef<MCDescriptionDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: {description: string}  ) { }
 
 
