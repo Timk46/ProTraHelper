@@ -62,6 +62,9 @@ import { MCDescriptionDialogComponent } from "./Pages/contentView/contentElement
 import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-creation/score/score.component";
 import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-task/graph-task.component';
 
+// Import GraphTasksModule
+import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
+
 @NgModule({
     declarations: [
         AppComponent,
@@ -121,7 +124,8 @@ import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-tas
         HttpClientModule,
         LecturersViewModule,
         EditorModule,
-        MarkdownModule.forRoot()
+        MarkdownModule.forRoot(),
+        GraphTasksModule
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
