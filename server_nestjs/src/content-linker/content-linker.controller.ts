@@ -42,5 +42,31 @@ export class ContentLinkerController {
     return this.contentLinkerService.createLinkedContentElement(linkableQuestion, req.user.id);
   }
 
+  @roles('ADMIN')
+  @Get('/unlinkContentElement/:contentElementId')
+  /**
+   * Unlinks a content element by its ID.
+   *
+   * @param contentElementId - The ID of the content element to unlink.
+   * @returns A promise that resolves to a boolean indicating whether the unlinking was successful.
+   */
+  async unlinkContentElement(
+    @Param('contentElementId') contentElementId: string,
+  ): Promise<boolean> {
+    return this.contentLinkerService.unlinkContentElement(Number(contentElementId));
+  }
+
+
+  @roles('ADMIN')
+  @Get('unlinkedQuestions')
+  /**
+   * Retrieves a list of questions that are not linked to any content.
+   *
+   * @returns {Promise<QuestionDTO[]>} A promise that resolves to an array of QuestionDTO objects representing the unlinked questions.
+   */
+  async getUnlinkedQuestions(): Promise<QuestionDTO[]> {
+    return this.contentLinkerService.getUnlinkedQuestions();
+  }
+
 
 }

@@ -24,13 +24,14 @@ export class McqcreationService {
    */
   getAnswer(question: string, currentOption: string, otherOptions: string[], concept: string) :Observable<Answer> {
 
-    const body = new HttpParams()
-      .set('question', question)
-      .set('option', currentOption)
-      .set('otherOptions', otherOptions.join(','))
-      .set('concept', concept);
+    const body = {
+      question: question,
+      option: currentOption,
+      otherOptions: otherOptions,
+      concept: concept
+    };
 
-    return this.http.get<Answer>(environment.server + `/mcqcreation/answer`, {params: body})
+    return this.http.post<Answer>(environment.server + `/mcqcreation/answer`, body);
   }
 
   /**
@@ -55,11 +56,12 @@ export class McqcreationService {
    * @param options
    * @returns generated question and answers
    */
-  getQuestionAndAnswers(concept: string, options: number) :Observable<McqGenerationDTO> {
+  getQuestionAndAnswers(concept: string, options: number, topic: string = '') :Observable<McqGenerationDTO> {
 
       const body = new HttpParams()
         .set('concept', concept)
-        .set('options', options);
+        .set('options', options)
+        .set('topic', topic);
       return this.http.get<McqGenerationDTO>(environment.server + `/mcqcreation/questionAndAnswers`, {params: body})
   }
 

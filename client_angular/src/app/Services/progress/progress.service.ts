@@ -29,4 +29,8 @@ export class ProgressService {
   questionCreated(): void {
     this.graphCommunicationService.triggerGraphUpdate();
   }
+
+  questionLinkDeleted(): void {
+    this.graphCommunicationService.triggerGraphUpdate();
+  }
 }

@@ -148,6 +148,60 @@ export class ContentLinkerService {
     };
   }
 
-
   // TODO: repositionContentElement
+
+  async unlinkContentElement(contentElementId: number): Promise<boolean> {
+    // get the corresponding content views
+    const contentViews = await this.prisma.contentView.findMany({
+      where: {
+        contentElement: {id: contentElementId},
+      },
+    });
+
+    const contentElement = await this.prisma.contentElement.delete({ // this will also delete the corresponding contentView
+      where: {
+        id: contentElementId,
+      },
+    });
+
+    if (!contentElement) {
+      throw new Error('Error deleting content element');
+    }
+
+    //since we may have a lower award level, update them for all contentNodes
+    for (const contentView of contentViews) {
+      await this.contentService.updateAwardsLevel(contentView.contentNodeId);
+    }
+
+    return true;
+  }
+
+
+  async getUnlinkedQuestions(): Promise<QuestionDTO[]> {
+    const linkedQuestions = await this.prisma.contentElement.findMany({
+      where: {
+        type: 'QUESTION',
+        questionId: {
+          not: null,
+        },
+      },
+      select: {
+        questionId: true,
+      },
+    });
+
+    const linkedQuestionIds = linkedQuestions.map((linkedQuestion) => linkedQuestion.questionId);
+
+    const unlinkedQuestions = await this.prisma.question.findMany({
+      where: {
+        id: {
+          notIn: linkedQuestionIds,
+        },
+      },
+    });
+
+    return unlinkedQuestions;
+  }
+
+
 }

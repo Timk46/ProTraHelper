@@ -4,7 +4,13 @@
     <p>{{data.message}}</p>
   </div>
   <div mat-dialog-actions align="end">
-    <button #accept mat-flat-button color="primary" tabindex="-1" [mat-dialog-close]="true">{{data.accept}}</button>
-    <button #decline mat-flat-button color="warn" mat-dialog-close>{{data.decline}}</button>
+    <div *ngIf="!data.swapButtons; else swap">
+      <button #accept mat-flat-button [color]="!data.swapColors ? 'primary' : 'warn'" tabindex="-1" [mat-dialog-close]="true">{{data.accept}}</button>
+      <button #decline mat-flat-button [color]="!data.swapColors ? 'warn' : 'primary'" mat-dialog-close>{{data.decline}}</button>
+    </div>
+    <ng-template #swap>
+      <button #decline mat-flat-button [color]="!data.swapColors ? 'warn' : 'primary'" mat-dialog-close>{{data.decline}}</button>
+      <button #accept mat-flat-button [color]="!data.swapColors ? 'primary' : 'warn'" tabindex="-1" [mat-dialog-close]="true">{{data.accept}}</button>
+    </ng-template>
   </div>
 </div>

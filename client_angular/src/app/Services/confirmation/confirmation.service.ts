@@ -8,6 +8,8 @@ interface ConfirmOptions {
   message?: string;
   acceptLabel?: string;
   declineLabel?: string;
+  swapButtons?: boolean;
+  swapColors?: boolean;
   accept?: () => void;
   decline?: () => void;
 }
@@ -32,7 +34,9 @@ export class ConfirmationService {
         title: options.title || "Achtung!",
         message: options.message || "Sind Sie sicher, dass Sie diese Aktion durchführen möchten?",
         decline: options.declineLabel || "Abbrechen",
-        accept: options.acceptLabel || "Bestätigen"
+        accept: options.acceptLabel || "Bestätigen",
+        swapButtons: options.swapButtons || false,
+        swapColors: options.swapColors || false,
       },
       autoFocus: false,
     });

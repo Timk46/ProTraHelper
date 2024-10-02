@@ -1,8 +1,10 @@
 import { Component, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { trigger, state, style, animate, transition } from '@angular/animations';
-import { questionType } from '@DTOs/question.dto';
+import { QuestionDTO, questionType } from '@DTOs/question.dto';
+import { ReplaySubject, Subject, takeUntil } from 'rxjs';
+import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
 
 @Component({
   selector: 'app-create-content-element-dialog',
@@ -16,9 +18,15 @@ export class CreateContentElementDialogComponent {
 
   activeTab: 'new' | 'existing' = 'new';
 
+  unlinkedQuestions: QuestionDTO[] = [];
+  filteredQuestions: ReplaySubject<QuestionDTO[]> = new ReplaySubject<QuestionDTO[]>(1);
+  questionFilterControl = new FormControl('');
+  private _onDestroy = new Subject<void>();
+
   constructor(
     public dialogRef: MatDialogRef<CreateContentElementDialogComponent>,
     private fb: FormBuilder,
+    private contentLinkerService: ContentLinkerService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.creationForm = this.fb.group({
@@ -37,6 +45,39 @@ export class CreateContentElementDialogComponent {
       contentElementDescription: [''],
       contentElementPosition: [''],
     });
+  }
+
+  ngOnInit() {
+    this.contentLinkerService.getUnlinkedQuestions().subscribe((questions) => {
+      this.unlinkedQuestions = questions;
+      this.filteredQuestions.next(this.unlinkedQuestions.slice());
+    });
+
+    this.questionFilterControl.valueChanges
+      .pipe(takeUntil(this._onDestroy))
+      .subscribe(() => {
+        this.filterQuestions();
+      });
+  }
+
+  onSelectClick() {
+    this.filterQuestions();
+  }
+
+  private filterQuestions() {
+    if (!this.unlinkedQuestions) {
+      return;
+    }
+    let search = this.questionFilterControl.value;
+    if (!search) {
+      this.filteredQuestions.next(this.unlinkedQuestions.slice());
+      return;
+    } else {
+      search = search.toLowerCase();
+    }
+    this.filteredQuestions.next(
+      this.unlinkedQuestions.filter(question => question.name!.toLowerCase().indexOf(search!) > -1)
+    );
   }
 
   onCancel(): void {

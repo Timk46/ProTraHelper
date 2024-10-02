@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { detailedQuestionDTO, questionType } from '@DTOs/index';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
@@ -16,6 +16,7 @@ export class EditFillinComponent {
   fillinForm: FormGroup;
   thisQuestionType = questionType.FILLIN;
   detailedQuestionData: detailedQuestionDTO | null = null;
+  isSaving = false;
 
   constructor(
     private fb: FormBuilder,
@@ -23,6 +24,7 @@ export class EditFillinComponent {
     private route: ActivatedRoute,
     private confirmationService: ConfirmationService,
     private snackBar: MatSnackBar,
+    private router: Router
 
   ) {
     this.fillinForm = this.fb.group({
@@ -110,6 +112,7 @@ export class EditFillinComponent {
       acceptLabel: 'Aktualisieren',
       declineLabel: 'Abbrechen',
       accept: () => {
+        this.isSaving = true;
         const submitData = this.buildDTO();
         console.log('Submit data:', submitData);
         if (submitData){
@@ -119,12 +122,16 @@ export class EditFillinComponent {
               this.detailedQuestionData = response;
               this.setContent();
               this.snackBar.open('Frage erfolgreich aktualisiert', 'Schließen', { duration: 3000 });
+              this.isSaving = false;
             },
             error: error => {
               console.error('Error updating question:', error);
               this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', { duration: 3000 });
+              this.isSaving = false;
             }
           });
+        } else {
+          this.isSaving = false;
         }
       },
       decline: () => {
@@ -157,9 +164,10 @@ export class EditFillinComponent {
       message: 'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
       acceptLabel: 'Bearbeitung abbrechen',
       declineLabel: 'Weiter bearbeiten',
+      swapColors: true,
       accept: () => {
-        //this.saveQuestion();
         console.log('Cancel accepted');
+        this.router.navigate(['dashboard']);
       },
       decline: () => {
         console.log('Cancel declined');

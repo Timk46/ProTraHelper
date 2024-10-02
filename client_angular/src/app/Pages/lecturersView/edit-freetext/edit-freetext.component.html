@@ -74,11 +74,12 @@
   </div>
 
   <div class="button-container">
-    <button mat-raised-button color="primary" (click)="onOverwrite()">Speichern (aktualisieren)</button>
+    <mat-progress-spinner *ngIf="isSaving" diameter="20" mode="indeterminate"></mat-progress-spinner>
+    <button mat-raised-button [disabled]="isSaving" color="primary" (click)="onOverwrite()">Speichern (aktualisieren)</button>
     <div matTooltip="Die aktuelle Version hat noch keine Freitextdaten." [matTooltipDisabled]="!!detailedQuestionData?.freetextQuestion">
       <button mat-raised-button color="primary"
         (click)="onSaveNewVersion()"
-        [disabled]="!detailedQuestionData?.freetextQuestion || true"
+        [disabled]="!detailedQuestionData?.freetextQuestion || isSaving || true"
         >Als neue Version speichern</button>
     </div>
     <button mat-raised-button color="warn" (click)="onCancel()">Abbrechen</button>

@@ -20,17 +20,15 @@ export class JsonLoaderService {
     try {
       const data = readFileSync(filePath, 'utf8');
       const json: { questions: McqGenerationDTO[] } = JSON.parse(data);
-      console.log('json data: ', json)
-      return json
+      console.log('json data: ', json);
+      return json;
     } catch (error) {
       if (error.code === 'ENOENT') {
         console.error(`Datei nicht gefunden: ${filePath}`);
+        return { questions: [] };
       } else {
         throw error;
       }
     }
-
-
-
   }
 }
