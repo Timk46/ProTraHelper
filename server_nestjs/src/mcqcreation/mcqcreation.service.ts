@@ -140,9 +140,9 @@ Es ist verboten, die bereits existierenden Fragen nur etwas umformuliert erneut 
 ---
 Bereits existierende Fragen: {questions}.
 ---
-Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Objektorientierte und Funktionale Programmierung". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen mit dem Wissen daraus beantwortet werden können sollen.
+Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Algorithmen und Datenstrukturen". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen mit dem Wissen daraus beantwortet werden können sollen.
 Die MCQs müssen aber nicht ausschließlich aus dem Transkript generiert werden, sie dürfen auch aus dem allgemeinen Wissen zu den Themen generiert werden.
-Der thematische Teil der objektorientierten Programmierung wird hier anhand der Programmiersprache Java gelehrt. Der thematische Teil der funktionalen Programmierung hingegen eher anhand der Programmiersprache Python.
+Der praktische Teil wird hier anhand der Programmiersprache C++ gelehrt.
 Beziehe dich immer auf das konkrete Konzept, welches als übergeordnetes Thema dienen soll zu welchem die Fragestellung und die dazugehörigen Antwortmöglichkeiten erstellt werden sollen.
 Es ist verboten, bereits existierenden Multiple Choice Questions erneut vorzuschlagen. Benutze in den Antwortmöglichkeiten keine Aufzählungen verschiedener Optionen und nutze maximal 2 Sätze. Benutze unbedingt immer die deutsche Sprache.
 ---
@@ -225,9 +225,9 @@ Es ist verboten, die bereits existierenden Fragen nur etwas umformuliert erneut 
 ---
 Bereits existierende Fragen: {questions}.
 ---
-Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Objektorientierte und Funktionale Programmierung". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen mit dem Wissen daraus beantwortet werden können sollen.
+Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Algorithmen und Datenstrukturen". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen mit dem Wissen daraus beantwortet werden können sollen.
 Die MCQs müssen aber nicht ausschließlich aus dem Transkript generiert werden, sie dürfen auch aus dem allgemeinen Wissen zu den Themen generiert werden.
-Der thematische Teil der objektorientierten Programmierung wird hier anhand der Programmiersprache Java gelehrt. Der thematische Teil der funktionalen Programmierung hingegen eher anhand der Programmiersprache Python.
+Der praktische Teil der Programmierung wird hier anhand der Programmiersprache C++ gelehrt.
 Beziehe dich immer auf das konkrete Konzept, welches als übergeordnetes Thema dienen soll zu welchem die Fragestellung und die dazugehörigen Antwortmöglichkeiten erstellt werden sollen.
 Es ist verboten, bereits existierenden Multiple Choice Questions erneut vorzuschlagen. Benutze in den Antwortmöglichkeiten keine Aufzählungen verschiedener Optionen und nutze maximal 2 Sätze. Benutze unbedingt immer die deutsche Sprache.
 ---
@@ -269,7 +269,7 @@ Anweisungen zur Bewertung innerhalb der triple quotes ("""):
 """
 A. Für jede Frage bewertest du, ob die Formulierung gut ist. Eine gute Formulierung ist klar, präzise, nicht zu lang und sofort verständlich.
 B. Für jede Antwortoption musst du bewerten, ob diese wahr oder falsch im Kontext der gestellten Frage ist. Solltest du eine als "wahr" gekennzeichnete Antwort für "falsch" halten, begründe deine Entscheidung ausführlich. Gleiches gilt, wenn du eine als "falsch" markierte Antwortoption für "wahr" hältst.
-C. Die MCQs müssen thematisch zur universitären Einführungsverstanstaltung "Objektorientierte Programmierung mit Java" und "Funktionale Programmierung mit Python" passen. Die Fragen und Antworten müssen sich auf die spezifischen Konzepte beziehen, die in den Vorlesungen behandelt werden und Fragen zu anderen Programmiersprachen sind nicht zulässig.
+C. Die MCQs müssen thematisch zur universitären Einführungsverstanstaltung "Algorithmen und Datenstrukturen" und "Funktionale Programmierung mit Python" passen. Die Fragen und Antworten müssen sich auf die spezifischen Konzepte beziehen, die in den Vorlesungen behandelt werden und Fragen zu anderen Programmiersprachen sind nicht zulässig.
 D. Die Eigenschaften der MCQ müssen den Vorgaben der Definition entsprechen:
 Beschreibung der wesentlichen 3 Eigenschaften einer MCQ:
   1. MCQs bestehen aus einem klaren Fragestamm und mehreren Antwortoptionen, darunter eine richtige Antwort und plausible Distraktoren, um effektives Lernen zu unterstützen.
