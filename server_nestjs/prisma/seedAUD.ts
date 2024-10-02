@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 
 const createEmbeddings = true; // set false to skip embedding creation and save costs!!!
 
+// columns from the AuD sheet
 interface columns_AUD {
   conceptId: number | null;
   conceptEdge: number[] | null;
@@ -29,6 +30,14 @@ interface columns_AUD {
   description: string | null;
 }
 
+/**
+ * creates an entry in the file table
+ * @param name - file name
+ * @param uniqueIdentifier - uuid4 
+ * @param path - path to file
+ * @param type - type of file (contentElementType)
+ * @returns file object
+ */
 async function createFile(
     name: string,
     uniqueIdentifier: string,
@@ -49,6 +58,11 @@ async function createFile(
     return file;
   }
 
+/**
+ * Create all relevant database entries for AuD
+ * @param audData - data from the AuD sheet
+ * @param moduleInformatik - module object
+ */
 async function createAUDConcepts(audData: columns_AUD[], moduleInformatik: any) {
     //------------------------------------------
       //Start of creating from audData
@@ -195,6 +209,10 @@ async function createAUDConcepts(audData: columns_AUD[], moduleInformatik: any) 
       //------------------------------------------
 }
 
+/**
+ * Creates all files for AuD
+ * uuid corresponds to entries in Kompetzenzraster_AUD.csv
+ */
 async function createFilesAUD() {
     console.log('Creating Files for AuD...');
     // createfile also creates embeddings for SRTs with the same name if the file is type VIDEO
@@ -1930,6 +1948,7 @@ export const seedAUD = async () => {
       },
     });
 
+
     // seed mor users for other usecases (evaluation etc.)
     await seedUser(moduleInformatik.id);
 
@@ -1973,6 +1992,8 @@ export const seedAUD = async () => {
 
     const audData = [];
 
+    // read data from csv file
+    // each row represents a concept node and/or a content node
     const filename = 'Kompetenzraster_AUD.csv';
     const filePath = process.env.FILE_PATH + filename;
     if (fs.existsSync(filePath)) {
@@ -1986,22 +2007,22 @@ export const seedAUD = async () => {
       const options = {
         delimiter: ',',
         headers: [
-          'conceptId',
-          'conceptEdge',
-          'contentId',
-          'requiresId',
-          'trainsId',
-          'topic',
-          'parentId',
-          'moduleGoalId',
-          'level',
-          'elementId1',
+          'conceptId',            // should start with 2
+          'conceptEdge',          // list of successor conceptIds
+          'contentId',            
+          'requiresId',           // list of conceptIds that are required to understand this content (currently not used)
+          'trainsId',             // list of conceptIds that are trained by this content node (used for listing all content nodes of a concept node)
+          'topic',                // topic of the concept and/or content node
+          'parentId',             // conceptId of the parent concept node
+          'moduleGoalId',         // maximal level achievable for this concept node
+          'level',                // level of the content node
+          'elementId1',           // uuid of the corresponding files
           'elementId2',
           'elementId3',
           'elementId4',
           'elementId5',
-          'contentNodeTitle',
-          'description',
+          'contentNodeTitle',     // title of the content node (if empty the topic is used)
+          'description',          // description of the concept and/or content node
         ],
         skipRows: 1,
         trim: true,
@@ -2011,7 +2032,7 @@ export const seedAUD = async () => {
 
       fastCsv.parseStream(readableStream, options)
         .on('data', (data) => {
-          // console.log(data);
+          // in case a concept includes multiple content nodes the same topic is used for all content nodes of the concept
           if(data.topic != null) {
             lastTopic = data.topic;
           }
