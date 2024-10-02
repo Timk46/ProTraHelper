@@ -320,8 +320,11 @@ export class EditChoiceComponent {
     // TODO: Implement
     console.log('Generating option', index, 'concept:', this.generationForm.value.generationConcept, this.getConceptById(Number(this.generationForm.value.generationConcept)));
     this.isGenerating[index] = true;
-    this.mcqService.getAnswer(this.questionField.getRawContent(), this.optionsData.at(index).get('text')!.value || '', this.optionsData.value.map((option: {id: number, text: string, is_correct: boolean}) => option.text), this.getConceptById(Number(this.generationForm.value.generationConcept))).subscribe(answer => {
+    this.mcqService.getAnswer(this.questionField.getRawContent(), this.optionsData.at(index).get('text')!.value || '', this.optionsData.value.map((option: {id: number, text: string, is_correct: boolean}) => option.text), this.getConceptById(Number(this.generationForm.value.generationConcept))).subscribe((answer: Answer) => {
+      this.optionsData.at(index).get('id')!.setValue("-1");
       this.optionsData.at(index).get('text')!.setValue(answer.answer);
+      this.optionsData.at(index).get('is_correct')!.setValue(answer.correct);
+      console.log('Generated answer:', answer);
       this.isGenerating[index] = false;
     });
   }
