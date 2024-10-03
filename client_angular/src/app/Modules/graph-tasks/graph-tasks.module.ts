@@ -4,7 +4,7 @@ import { GraphTasksComponent } from './graph-tasks.component';
 import { FormsModule } from '@angular/forms';
 import { CdkDrag, DragDropModule } from '@angular/cdk/drag-drop';
 import { NodeGraphComponent } from './node-graph/node-graph.component';
-import { GraphComponent } from './graph/graph.component';
+import { GraphStructureComponent } from './graph-structure/graph-structure.component';
 import { EdgeGraphComponent } from './edge-graph/edge-graph.component';
 import { EdgeToolsetGraphComponent } from './edge-toolset-graph/edge-toolset-graph.component';
 import { AssignmentContainerComponent } from './assignment-container/assignment-container.component';
@@ -14,7 +14,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
   declarations: [
     GraphTasksComponent,
     NodeGraphComponent,
-    GraphComponent,
+    GraphStructureComponent,
     EdgeGraphComponent,
     EdgeToolsetGraphComponent,
     AssignmentContainerComponent
@@ -24,7 +24,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     CdkDrag, FormsModule, DragDropModule, MatButtonToggleModule
   ],
   exports: [
-    GraphTasksComponent
+    GraphTasksComponent,
+    GraphStructureComponent
   ],
   bootstrap: [GraphTasksComponent],
 })

@@ -13,11 +13,11 @@ import { Subscription } from 'rxjs';
 import { readFile } from '../utils';
 
 @Component({
-  selector: 'app-graph',
-  templateUrl: './graph.component.html',
-  styleUrls: ['./graph.component.scss']
+  selector: 'app-graph-structure',
+  templateUrl: './graph-structure.component.html',
+  styleUrls: ['./graph-structure.component.scss']
 })
-export class GraphComponent  implements OnInit, AfterViewInit, OnDestroy {
+export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestroy {
 
   // #############################
   // References for HTML Elements
