@@ -99,7 +99,7 @@
       <!-- ################### -->
       <!-- Edges presenting new relations between nodes -->
       <line
-      *ngIf="newEdge.started && newEdge.node1 !== null && newEdge.node1.center !== null" 
+      *ngIf="newEdge.started && newEdge.node1 !== null" 
       #newLinkLine [attr.x1]="newEdge.node1 ? newEdge.node1.center.x : 0" [attr.y1]="newEdge.node1 ? newEdge.node1.center.y : 0" [attr.x2]="mouseX - workspaceRect.topLeft.x" [attr.y2]="mouseY - workspaceRect.topLeft.y"
       style="stroke:rgb(129, 129, 129);stroke-width:2" />
 

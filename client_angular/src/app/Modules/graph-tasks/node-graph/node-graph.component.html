@@ -50,14 +50,19 @@
         <!-- Display if the node is weighted --> 
             <!-- ################### -->
             <!-- Node weight -->
-            <div *ngIf="graphConfiguration.nodeWeight" class="node-weight form" (mouseenter)="onFieldHover($event)">
+            <div 
+                *ngIf="graphConfiguration.nodeWeight" 
+                class="node-weight form" 
+                (mouseenter)="onFieldHover($event)"
+            >
                 <form (submit)="editNodeWeight=false" [ngStyle]="{display: editNodeWeight ? 'block' : 'none'}">
                 <input #nodeWeightInput  type="number" [(ngModel)]="node.weight.value" (change)="updateNodeWeight($event)" name="weight" placeholder="Gewicht eingeben"
                     (blur)="editNodeWeight=false"
                 />
                 </form>
             </div>
-            <div 
+            <div  
+                *ngIf="graphConfiguration.nodeWeight" 
                 [ngStyle]="{display: !editNodeWeight ? 'block' : 'none'}" 
                 class="node-weight display" 
                 (mouseenter)="onFieldHover($event)" 
@@ -97,8 +102,8 @@
         <!-- Display if the edge is directed --> 
         <!-- ################### -->
         <!-- Generate new node connected to current node -->
-        <div 
-            *ngIf="graphConfiguration.edgeDirected === true"
+        <div
+            *ngIf="graphConfiguration.edgeDirected"
             [ngStyle]="{display: newEdge.started ? 'none' : 'block'}"
             class="new-node-incoming container-item" 
             title="Eingehende Kante - Einen neuen Knoten erzeugen und verbinden" 
@@ -113,6 +118,7 @@
             </svg>
         </div>
         <div 
+            *ngIf="graphConfiguration.edgeDirected"
             [ngStyle]="{display: newEdge.started ? 'none' : 'block'}"
             class="new-node-outgoing container-item"
             title="Ausgehende Kante - Einen neuen Knoten erzeugen und verbinden" 
@@ -132,6 +138,7 @@
         <!-- ################### -->
         <!-- Generate new edge to connect two existing nodes -->
         <div
+            *ngIf="graphConfiguration.edgeDirected"
             [ngStyle]="{display: (newEdge.started && newEdge.node2 !== null) ? 'none' : 'block'}"
             class="new-edge-incoming container-item" 
             title="Eingehende Kante - Mit einem Knoten verbinden"
@@ -143,6 +150,7 @@
         </div>
 
         <div 
+            *ngIf="graphConfiguration.edgeDirected"
             [ngStyle]="{display: (newEdge.started && newEdge.node1 !== null) ? 'none' : 'block'}"
             class="new-edge-outgoing container-item"
             title="Ausgehende Kante - Mit einem Knoten verbinden"
@@ -159,7 +167,7 @@
         <!-- ################### -->
         <!-- Generate new node connected to current node -->
         <div 
-            *ngIf="graphConfiguration.edgeDirected === false"
+            *ngIf="!graphConfiguration.edgeDirected"
             [ngStyle]="{display: newEdge.started ? 'none' : 'block'}"
             class="new-node container-item" 
             title="Einen neuen Knoten erzeugen und verbinden" 
@@ -170,7 +178,7 @@
             </svg>
         </div>
         <div 
-            *ngIf="graphConfiguration.edgeDirected === false"
+            *ngIf="!graphConfiguration.edgeDirected"
             class="new-edge container-item"
             title="Mit einem Knoten verbinden"
             (click)="onConnectNodeUndirectedClick($event)"
@@ -186,7 +194,7 @@
         
         <!-- Edit Weight -->
         <div 
-        *ngIf="graphConfiguration.nodeWeight === true"
+        *ngIf="graphConfiguration.nodeWeight"
         [ngStyle]="{display: newEdge.started ? 'none' : 'block'}"
         class="edit-weight container-item" 
         title="Das Gewicht ändern" 
@@ -200,6 +208,7 @@
 
         <!-- Set Weight Infinity -->
         <div 
+        *ngIf="graphConfiguration.nodeWeight"
         [ngStyle]="{display: newEdge.started ? 'none' : 'block'}"
         class="set-weight-infinity container-item" 
         title="Das Gewicht auf unendlich setzen" 
