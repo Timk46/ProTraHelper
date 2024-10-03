@@ -1,0 +1,78 @@
+<div class="container" *ngIf="assignment; else noAssignment">
+    
+    <div class="assignment box">
+        <h2>{{ assignment.title }}</h2>   
+        <p>
+            {{ assignment.text }}
+        </p>
+    </div>
+    <div class="evaluation box">
+        <h2>Bewertung der Lösung</h2>
+        <hr>
+        <p style="white-space: pre-line;">{{ feedback }}</p>
+    </div>
+    <div class="solution box">
+        <app-graph [toolbarEnabled]="false"/>
+    </div>
+
+    <div class="controls box">
+
+        <div style="display: flex; justify-content: start; align-items: center; gap: 1em; height: 100%;">
+            
+            <mat-button-toggle-group 
+                name="mode" 
+                aria-label="mode" 
+                [(ngModel)]="workspaceModeCurrent"        
+                (ngModelChange)="updateWorkspace()"
+            >
+                <mat-button-toggle value="assignment">Aufgabenstellung</mat-button-toggle>
+                <mat-button-toggle value="solution">Lösung</mat-button-toggle>
+            </mat-button-toggle-group>
+
+            <mat-button-toggle-group 
+                *ngIf="assignment.stepsEnabled && workspaceModeCurrent === 'solution'"
+                name="solution-step" 
+                aria-label="solution-step" 
+                [(ngModel)]="solutionStepCurrent"
+                (ngModelChange)="updateWorkspace()"
+            >       
+                    <mat-button-toggle 
+                        *ngFor="let step of solutionGraph; let i = index; trackBy:trackByIndex"    
+                        [value]="i"
+                    >
+                        Schritt {{ i + 1 }}
+                    </mat-button-toggle>
+
+            </mat-button-toggle-group>
+
+            <button
+                class="image-button"
+                type="button"
+                (click)="addNewSolutionStep()"
+            > 
+                <!-- Neuen Schritt -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                </svg>
+            </button>
+
+        </div>
+        <button
+            type="button"
+            (click)="onSubmitButtonClick()"
+        > 
+            Abgeben 
+        </button>
+    </div>
+
+</div>
+
+<ng-template #noAssignment>
+    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; background-color: rgb(248, 242, 233);">
+        <h2>Keine Aufgabe vorhanden</h2>
+        <a 
+            routerLink="/assignments">
+            Zurück zur Liste der Beispiel-Aufgaben
+        </a>
+    </div>
+</ng-template>

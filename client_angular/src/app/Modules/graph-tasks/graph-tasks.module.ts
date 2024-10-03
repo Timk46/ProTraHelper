@@ -7,6 +7,8 @@ import { NodeGraphComponent } from './node-graph/node-graph.component';
 import { GraphComponent } from './graph/graph.component';
 import { EdgeGraphComponent } from './edge-graph/edge-graph.component';
 import { EdgeToolsetGraphComponent } from './edge-toolset-graph/edge-toolset-graph.component';
+import { AssignmentContainerComponent } from './assignment-container/assignment-container.component';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 @NgModule({
   declarations: [
@@ -14,11 +16,12 @@ import { EdgeToolsetGraphComponent } from './edge-toolset-graph/edge-toolset-gra
     NodeGraphComponent,
     GraphComponent,
     EdgeGraphComponent,
-    EdgeToolsetGraphComponent
+    EdgeToolsetGraphComponent,
+    AssignmentContainerComponent
   ],
   imports: [
     CommonModule,
-    CdkDrag, FormsModule, DragDropModule
+    CdkDrag, FormsModule, DragDropModule, MatButtonToggleModule
   ],
   exports: [
     GraphTasksComponent
