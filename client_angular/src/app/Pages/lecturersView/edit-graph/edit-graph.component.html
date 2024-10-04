@@ -1,1 +1,69 @@
-<p>edit-graph works!</p>
+<div class="container" >
+        
+    <div class="form-group">
+        <label for="uploadJson">Aufgabe von JSON importieren:</label>
+        <input type="file" (change)="onLoadAssignmentFromJSON($event)" id="uploadJson">
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onCreateAssignment()" class="form">
+
+        <h2>Eine neue Graphaufgabe erstellen</h2>
+
+        <div class="form-group">
+            <label for="title">Aufgabentitel:</label>
+            <input class="text-input" type="text" formControlName="title" id="title" placeholder="Titel eingeben">
+        </div>
+
+        <div class="form-group">
+            <label for="text">Aufgabenstellung:</label>
+            <textarea class="text-input" formControlName="text" id="text" rows="5" placeholder="Text eingeben"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="selectedAssignmentType">Einen Aufgabentyp auswählen:</label>
+            <select formControlName="selectedAssignmentType" >
+                <option value="dijkstra" disabled>Aufgabentyp auswählen</option>
+                <option *ngFor="let assignmentType of assignmentTypes" [value]="assignmentType">{{ assignmentType }}</option>
+            </select>
+        </div>
+
+        <div *ngIf="showCheckbox" class="form-group checkboxes">
+            <label>
+                <input type="checkbox" formControlName="checkboxEdgeDirected" > Gerichtete Kanten
+            </label>
+            <label>
+                <input type="checkbox" formControlName="checkboxEdgeWeighted" > Kanten mit Gewichten
+            </label>
+            <label>
+                <input type="checkbox" formControlName="checkboxNodeWeighted" > Knoten mit Gewichten
+            </label>
+            <label>
+                <input type="checkbox" formControlName="checkboxNodeVisited" > Knoten mit Attribut besucht 
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" formControlName="stepsEnabled"> Lösung mit mehreren Schritten
+            </label>
+        </div>
+
+        <button 
+            class="form-btn"
+            type="button" 
+            (click)="activateWorkspace()" 
+            [disabled]="!form.controls['selectedAssignmentType'].value" 
+        >
+            Initialstruktur bearbeiten
+        </button>
+    
+        <div class="form-group">
+            <label for="maxPoints">Maximale Punktanzahl: </label>
+            <input class="text-input" type="number" formControlName="maxPoints" id="maxPoints" placeholder="Maximale Punktanzahl eingeben">
+        </div>
+            
+        <button class="form-btn" type="button" (click)="onDownloadAssignmentAsJSON()" [disabled]="form.invalid" class="submit-btn">Als JSON downloaden</button>
+        <button class="form-btn" type="submit" [disabled]="form.invalid" class="submit-btn">Aufgabe erstellen</button>
+    </form>
+
+</div>

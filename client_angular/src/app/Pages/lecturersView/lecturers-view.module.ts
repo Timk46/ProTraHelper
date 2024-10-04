@@ -19,6 +19,8 @@ import { DescriptionDialogComponent } from './edit-choice/description-dialog/des
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { GraphTasksModule } from 'src/app/Modules/graph-tasks/graph-tasks.module';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 @NgModule({
   declarations: [
@@ -44,7 +46,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MarkdownModule.forChild(),
     NgxMatSelectSearchModule,
     MatSelectModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    GraphTasksModule, 
+    MatButtonToggleModule
   ],
   exports: [
     CreateContentNodeDialogComponent,
