@@ -68,7 +68,77 @@
     <div class="text-container" style="width: 70%;">
       <div class="wrap-container">
 
-        <!-- hier fillin -->
+        <!-- --- hier fillin ---- -->
+
+
+
+        <div class="container">
+          <div *ngIf="!isEditorLoaded" class="loading-indicator">
+            Loading editor...
+          </div>
+
+          <form [formGroup]="fillinForm">
+            <!-- <app-tinymce #editor [config]="editorConfig" formControlName="fillinContent"></app-tinymce> -->
+            <textarea id="fillinEditor"></textarea>
+          </form>
+
+          <!-- <button class="generate-task-btn" mat-raised-button color="primary" [disabled]="this.fillinForm.invalid" (click)="generateTask()">
+            {{ buttonText }}
+          </button> -->
+
+          <!-- Add the distractor section here, after the generate task button -->
+          <div class="distractor-section">
+            <h3>Falsche Antworten (Distraktoren)</h3>
+            <div class="distractor-input">
+              <input
+                type="text"
+                [(ngModel)]="distractorInput"
+                (keyup)="onDistractorKeyUp($event)"
+                placeholder="Falsche Antwort hier eintragen">
+              <button (click)="addGlobalDistractor(distractorInput)">Add</button>
+            </div>
+            <ul class="distractor-list">
+              <li *ngFor="let distractor of distractors">
+                {{ distractor.word }}
+                <button (click)="removeGlobalDistractor(distractor)">Remove</button>
+              </li>
+            </ul>
+          </div>
+
+          <div *ngIf="questionDetails.name || questionDetails.text" class="question-details-display">
+            <div class="details-column">
+              <h3>Aufgabendetails: </h3>
+              <div class="task-type">
+                <strong>Aufgabentyp: </strong> {{ questionDetails.taskType }}
+              </div>
+              <div class="question-name">
+                <strong>Name der Frage: </strong> {{ questionDetails.name }}
+              </div>
+              <div class="question-text">
+                <strong>Fragentext: </strong> {{ questionDetails.text }}
+              </div>
+              <div class="conceptName">
+                <strong>Konzeptname: </strong> {{ questionDetails.conceptName }}
+              </div>
+              <!-- <button mat-raised-button color="primary" (click)="openQuestionDetailsDialog()">
+                Aufgabendetails bearbeiten
+              </button> -->
+            </div>
+            <div class="generated-content-column" id="generated-content-container" >
+              <h3>Generierte Aufgabe:</h3>
+              <!-- <div *ngIf="generatedContent"
+                   [innerHTML]="generatedContent | safeHtml"
+                   (click)="handleGeneratedContentClick($event)">
+              </div> -->
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+        <!-- -------------------- -->
 
       </div>
     </div>

@@ -18,6 +18,8 @@ import { DescriptionDialogComponent } from './edit-choice/description-dialog/des
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { EditBlankComponent } from './edit-fillin/edit-blank/edit-blank.component';
+import { ImageUploadDialogComponent } from './edit-fillin/image-upload-dialog/image-upload-dialog.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +30,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     ScoreComponent,
     DescriptionDialogComponent,
     EditFillinComponent,
+    EditBlankComponent,
+    ImageUploadDialogComponent,
     EditCodingComponent,
     AddElementModalComponent,
     TinymceComponent
