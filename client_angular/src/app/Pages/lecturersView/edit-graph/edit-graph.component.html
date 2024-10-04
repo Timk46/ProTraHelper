@@ -1,4 +1,4 @@
-<div class="container" >
+<div *ngIf="!workspaceIsActive;else workspaceContainer" class="container" >
         
     <div class="form-group">
         <label for="uploadJson">Aufgabe von JSON importieren:</label>
@@ -21,7 +21,7 @@
 
         <div class="form-group">
             <label for="selectedAssignmentType">Einen Aufgabentyp auswählen:</label>
-            <select formControlName="selectedAssignmentType" >
+            <select formControlName="selectedAssignmentType" (change)="onChangeAssignmentType($event)">
                 <option value="dijkstra" disabled>Aufgabentyp auswählen</option>
                 <option *ngFor="let assignmentType of assignmentTypes" [value]="assignmentType">{{ assignmentType }}</option>
             </select>
@@ -29,16 +29,16 @@
 
         <div *ngIf="showCheckbox" class="form-group checkboxes">
             <label>
-                <input type="checkbox" formControlName="checkboxEdgeDirected" > Gerichtete Kanten
+                <input type="checkbox" formControlName="checkboxEdgeDirected"(change)="onChangeCheckbox($event)"> Gerichtete Kanten
             </label>
             <label>
-                <input type="checkbox" formControlName="checkboxEdgeWeighted" > Kanten mit Gewichten
+                <input type="checkbox" formControlName="checkboxEdgeWeighted" (change)="onChangeCheckbox($event)"> Kanten mit Gewichten
             </label>
             <label>
-                <input type="checkbox" formControlName="checkboxNodeWeighted" > Knoten mit Gewichten
+                <input type="checkbox" formControlName="checkboxNodeWeighted" (change)="onChangeCheckbox($event)"> Knoten mit Gewichten
             </label>
             <label>
-                <input type="checkbox" formControlName="checkboxNodeVisited" > Knoten mit Attribut besucht 
+                <input type="checkbox" formControlName="checkboxNodeVisited" (change)="onChangeCheckbox($event)"> Knoten mit Attribut besucht 
             </label>
         </div>
 
@@ -67,3 +67,63 @@
     </form>
 
 </div>
+
+<ng-template #workspaceContainer>
+    <div class="workspace-container">
+        <div class="solution box">
+            <app-graph-structure />
+        </div>
+        <div class="controls box">
+
+            <div style="display: flex; justify-content: start; align-items: center; gap: 1em; height: 100%;">
+            
+                <mat-button-toggle-group 
+                    name="mode" 
+                    aria-label="mode" 
+                    [(ngModel)]="workspaceModeCurrent"
+                    (ngModelChange)="updateWorkspace()"
+                >
+                    <mat-button-toggle value="assignment">Aufgabenstellung</mat-button-toggle>
+                    <mat-button-toggle value="solution">Musterlösung</mat-button-toggle>
+                </mat-button-toggle-group>
+     <!-- [hideSingleSelectionIndicator]="true"
+                     -->
+                
+                <mat-button-toggle-group
+                    *ngIf="this.form.value.stepsEnabled && workspaceModeCurrent === 'solution'"
+                    name="solution-step"
+                    aria-label="solution-step" 
+                    [(ngModel)]="solutionStepCurrent"
+                    (ngModelChange)="updateWorkspace()"
+                >   
+                    <mat-button-toggle 
+                        *ngFor="let step of solutionGraphStructure; let i = index; trackBy:trackByIndex"    
+                        [value]="i"
+                    >
+                        Schritt {{ i + 1 }}
+                    </mat-button-toggle>
+
+                </mat-button-toggle-group>
+                <!-- [hideSingleSelectionIndicator]="true" -->
+                    
+                <button
+                    *ngIf="this.form.value.stepsEnabled && workspaceModeCurrent === 'solution'"
+                    class="image-button"
+                    type="button"
+                    (click)="addNewSolutionStep()"
+                > 
+                    <!-- Neuen Schritt -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                    </svg>
+                </button>
+
+            </div>
+
+            <button
+                type="button" 
+                (click)="deactivateWorkspace()" 
+            > Bestätigen </button>
+        </div>
+    </div>
+</ng-template>
