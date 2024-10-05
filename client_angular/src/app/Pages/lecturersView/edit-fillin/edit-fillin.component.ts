@@ -2,10 +2,9 @@ import { Component, HostListener, SecurityContext, ViewChild } from '@angular/co
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BlankDTO, detailedQuestionDTO, FillInTaskDTO, FillInTaskType, questionType } from '@DTOs/index';
+import { BlankDTO, detailedFillinBlankDTO, detailedQuestionDTO, FillInTaskDTO, FillInTaskType, questionType } from '@DTOs/index';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { TinymceComponent } from '../../tinymce/tinymce.component';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageUploadDialogComponent } from './image-upload-dialog/image-upload-dialog.component';
@@ -24,18 +23,22 @@ export class EditFillinComponent {
   thisQuestionType = questionType.FILLIN;
   detailedQuestionData: detailedQuestionDTO | null = null;
   isSaving = false;
+  fillinTypes = FillInTaskType;
 
   /* fillin vars */
 
-  @ViewChild('editor') editorComponent!: TinymceComponent;
+  //@ViewChild('fillinEditor') editorComponent!: TinymceComponent;
+  editorInstance: any;
   editorConfig: any;
   FillInTaskType = FillInTaskType;
-  questionDetails = {
+
+  /* questionDetails = {
     taskType: FillInTaskType.FillIn,
     name: '',
     text: '',
     conceptName: '',
-  };
+  }; */
+
   isEditorLoaded = false;
   generatedContent: SafeHtml | null = null;
   isExistingTask = false;
@@ -70,12 +73,12 @@ export class EditFillinComponent {
       questionScore: ['', Validators.required],
       questionConcept: [''], // fals du concept ids brauchst, sonst egal
 
-      fillinType: [FillInTaskType.FillIn, Validators.required], // fillin types
-      fillinContent: ['', Validators.required],
+      fillinType: [FillInTaskType.FillInText, Validators.required], // fillin types
+      //fillinContent: ['', Validators.required],
     });
   }
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     setTimeout(() => {
       this.handleRouteParams();
       this.initializeEditor();
@@ -83,12 +86,12 @@ export class EditFillinComponent {
 
   }
 
-  ngOnInit(): void {
-    /* this.handleRouteParams();
+ /*  ngOnInit(): void {
+    this.handleRouteParams();
     this.initializeEditorConfig();
     console.log('Initializing editor');
-    this.initializeEditor(); */
-  }
+    this.initializeEditor();
+  } */
 
   private handleRouteParams() {
     this.route.params.subscribe(params => {
@@ -121,34 +124,41 @@ export class EditFillinComponent {
   }
 
   private buildDTO(): detailedQuestionDTO | null {
-    /* if ( this.thisQuestionType === questionType.FILLIN && this.choiceForm.valid && this.detailedQuestionData){
+
+    console.log(this.thisQuestionType === questionType.FILLIN, this.fillinForm.valid, this.detailedQuestionData)
+
+    const doc = new DOMParser().parseFromString(this.editorInstance.getContent(), 'text/html');
+    const distractors: BlankDTO[] = this.distractors;
+    const blanks: BlankDTO[] = this.processBlanks(doc);
+
+    if ( this.thisQuestionType === questionType.FILLIN && this.fillinForm.valid && this.detailedQuestionData && this.editorInstance.getContent().length > 0) {
       const newData: detailedQuestionDTO = {
         ...this.detailedQuestionData,
-        name: this.choiceForm.value.questionTitle,
-        level: parseInt(this.choiceForm.value.questionDifficulty),
-        type: this.choiceForm.value.questionType,
-        description: this.choiceForm.value.questionDescription,
-        score: parseInt(this.choiceForm.value.questionScore),
-        text: this.questionField.getRawContent(),
-        conceptNodeId: parseInt(this.choiceForm.value.questionConcept) || undefined,
-        mcQuestion: { // hier deine fillin dto daten
-          id: this.detailedQuestionData.mcQuestion?.id || undefined,
-          questionId: this.detailedQuestionData.id,
-          textHTML: this.questionField.getContent(),
-          shuffleoptions: false,
-          isSC: this.choiceForm.value.questionType === questionType.SINGLECHOICE,
-          mcOptions: this.optionsData.value.map((option: {id: number, text: string, is_correct: boolean}) => {
-            console.log('Option:', option.id);
+        name: this.fillinForm.value.questionTitle,
+        level: parseInt(this.fillinForm.value.questionDifficulty),
+        type: this.fillinForm.value.questionType,
+        description: this.fillinForm.value.questionDescription,
+        score: parseInt(this.fillinForm.value.questionScore),
+        text: '', //this.questionField.getRawContent(),
+        conceptNodeId: parseInt(this.fillinForm.value.questionConcept) || undefined,
+        fillinQuestion: {
+          id: this.detailedQuestionData.fillinQuestion?.id,
+          content: this.editorInstance.getContent(),
+          taskType: this.fillinForm.value.fillinType,
+          table: false,
+          blanks: [...blanks, ...distractors].map(blank => {
             return {
-              id: option.id,
-              text: option.text,
-              is_correct: option.is_correct
+              word: blank.word || '<missingStr>',
+              position: blank.position ? parseInt(blank.position) : -1,
+              isDistractor: blank.isDistractor || false,
+              //isImage: blank.isImage,
+              //imageUrl: blank.imageUrl
             }
           })
         }
       }
       return newData;
-    } */
+    }
     return null;
   }
 
@@ -227,6 +237,13 @@ export class EditFillinComponent {
 
   // ----------------- Freetext specific methods -----------------
 
+  protected logContent(): void {
+    console.log(this.editorInstance);
+    if (this.editorInstance) {
+      console.log('Built DTO:', this.buildDTO());
+    }
+  }
+
 
   private initializeEditor(): void {
     if (typeof tinymce === 'undefined') {
@@ -298,6 +315,7 @@ export class EditFillinComponent {
           this.applyStyles(editor);
         });
         editor.on('keydown', (e: KeyboardEvent) => this.handleEditorKeydown(editor, e));
+        this.editorInstance = editor;
       },
       extended_valid_elements: 'span[class|style|data-word|title],div[class|contenteditable]'
     };
@@ -318,7 +336,7 @@ export class EditFillinComponent {
           return editor.on('markBlankModeChanged', (e: any) => api.setActive(e.active));
         }
       },
-      {
+      /* {
         name: 'editBlanks',
         text: 'Lücken bearbeiten',
         action: () => this.toggleEditBlanksMode(editor),
@@ -331,7 +349,7 @@ export class EditFillinComponent {
           updateButtonState({ isExistingTask: this.isExistingTask });
           return () => editor.off('EditBlanksStateChanged', updateButtonState);
         }
-      },
+      }, */
       {
         name: 'markDistractor',
         text: 'Mark Distractor',
@@ -379,8 +397,8 @@ export class EditFillinComponent {
    * @param imageData The uploaded image data
    */
   private insertImageIntoEditor(imageData: any): void {
-    if (this.editorComponent && this.editorComponent.editorInstance) {
-      const editor = this.editorComponent.editorInstance;
+    if (this.editorInstance) {
+      const editor = this.editorInstance;
       const imageHtml = `<img src="${imageData.url}" alt="${imageData.altDescription}" width="${imageData.width}" height="${imageData.height}">`;
       editor.insertContent(imageHtml);
     }
@@ -632,7 +650,7 @@ export class EditFillinComponent {
   private openEditBlankDialog(element: HTMLElement): void {
     let position = element.getAttribute('data-position');
     const isImage = element.tagName.toLowerCase() === 'img';
-    const isInEditor = this.editorComponent.editorInstance?.getBody().contains(element);
+    const isInEditor = this.editorInstance?.getBody().contains(element);
 
     if (!position) {
       const htmlContent = this.sanitizer.sanitize(SecurityContext.HTML, this.generatedContent) || '';
@@ -667,8 +685,8 @@ export class EditFillinComponent {
   }
 
   private updateEditorImageContent(position: string, newImage: string | File): void {
-    if (this.editorComponent && this.editorComponent.editorInstance) {
-      const editor = this.editorComponent.editorInstance;
+    if (this.editorInstance) {
+      const editor = this.editorInstance;
       const editorBody = editor.getBody();
       const imageInEditor = editorBody.querySelector(`[data-position="${position}"]`) as HTMLImageElement;
 
@@ -1073,8 +1091,8 @@ export class EditFillinComponent {
   }
 
   private updateEditorButtonStates(): void {
-    if (this.editorComponent && this.editorComponent.editorInstance) {
-      const editor = this.editorComponent.editorInstance;
+    if (this.editorInstance) {
+      const editor = this.editorInstance;
       editor.fire('EditBlanksStateChanged', { isExistingTask: this.isExistingTask });
     }
   }
@@ -1156,8 +1174,8 @@ export class EditFillinComponent {
    * updates the text content of the editor with the updated content
    */
   private updateEditorContent(): void {
-    if (this.editorComponent && this.editorComponent.editorInstance) {
-      const editor = this.editorComponent.editorInstance;
+    if (this.editorInstance) {
+      const editor = this.editorInstance;
       const content = editor.getContent();
       const doc = new DOMParser().parseFromString(content, 'text/html');
 
@@ -1287,8 +1305,8 @@ export class EditFillinComponent {
       }
     };
 
-    if (this.editorComponent && this.editorComponent.editorInstance) {
-      this.editorComponent.editorInstance.getBody().querySelectorAll('.generated-blank').forEach(updateElement);
+    if (this.editorInstance) {
+      this.editorInstance.getBody().querySelectorAll('.generated-blank').forEach(updateElement);
     }
 
     const generatedContentContainer = document.getElementById('generated-content-container');
@@ -1385,8 +1403,8 @@ export class EditFillinComponent {
 
   @HostListener('document:click', ['$event'])
   clickOutside(event: Event): void {
-    if (this.editorComponent && this.editorComponent.editorInstance) {
-      const editor = this.editorComponent.editorInstance;
+    if (this.editorInstance) {
+      const editor = this.editorInstance;
       const clickedElement = event.target as HTMLElement;
       if (!editor.getContainer().contains(clickedElement)) {
         editor.fire('closemenu');

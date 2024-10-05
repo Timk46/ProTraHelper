@@ -1,6 +1,6 @@
 export enum FillInTaskType {
-    FillIn = "FillIn",
+    FillInText = "FillInText",
     FillInDrag = "FillInDrag",
-    Dropdown = "Dropdown",
+    FillinDropdown = "FillinDropdown",
     GroupingTask = "GroupingTask",
 }
