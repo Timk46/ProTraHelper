@@ -8,6 +8,7 @@ import { QuestionDataChoiceService } from './question-data-choice/question-data-
 import { QuestionDataCodeService } from './question-data-code/question-data-code.service';
 import { QuestionDataFillinService } from './question-data-fillin/question-data-fillin.service';
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
+import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
 
 @Injectable()
 export class QuestionDataService {
@@ -19,6 +20,7 @@ export class QuestionDataService {
     private qdCode: QuestionDataCodeService,
     private qdFillin: QuestionDataFillinService,
     private qdFreetext: QuestionDataFreetextService,
+    private qdGraph: QuestionDataGraphService,
   ) {}
 
   /**
@@ -118,6 +120,13 @@ export class QuestionDataService {
       case questionType.FILLIN:
         // todo: hol die Daten aus der fillin Datenbank
         break;
+      case questionType.GRAPH:
+        specificQuestionData = await this.prisma.graphQuestion.findFirst({
+          where: {
+            questionId: Number(questionId)
+          }
+        });
+        break;
     }
 
     const questionData: detailedQuestionDTO = {
@@ -125,6 +134,7 @@ export class QuestionDataService {
       codingQuestion: questionTypeStr === questionType.CODE ? specificQuestionData : undefined,
       freetextQuestion: questionTypeStr === questionType.FREETEXT ? specificQuestionData : undefined,
       mcQuestion: (questionTypeStr === questionType.MULTIPLECHOICE || questionTypeStr === questionType.SINGLECHOICE) ? specificQuestionData : undefined,
+      graphQuestion: questionTypeStr === questionType.GRAPH ? specificQuestionData : undefined,
       // fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
     };
 
@@ -312,6 +322,13 @@ export class QuestionDataService {
           await this.qdCode.updateCodingQuestion(question.codingQuestion);
         }
         break;
+      case questionType.GRAPH:
+        if (createNewVersion || !currentQuestion.graphQuestion) {
+          await this.qdGraph.createGraphQuestion(question.graphQuestion, updatedQuestion.id);
+        } else {
+          await this.qdGraph.updateGraphQuestion(question.graphQuestion);
+        }
+        break;
       case questionType.FILLIN:
         if (createNewVersion || !currentQuestion.codingQuestion) {
           // z.B. await this.qdFillin.createFillinQuestion(question.fillinQuestion, updatedQuestion.id);
@@ -344,8 +361,9 @@ export class QuestionDataService {
       (
         newQuestion.codingQuestion ||
         newQuestion.freetextQuestion ||
-        newQuestion.mcQuestion // ||
-        //TODO: fill, uml, graph
+        newQuestion.mcQuestion ||
+        newQuestion.graphQuestion // ||
+        //TODO: fill, uml
         // newQuestion.fillinQuestion // das hier einfügen
       )
     ){
