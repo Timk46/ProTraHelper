@@ -280,7 +280,8 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
       // Calculate Workspace rectangle
       const { x: wX, y: wY, width: wWidth, height: wHeight } = this.workspace.nativeElement.getBoundingClientRect();
       this.workspaceRect = { 
-        topLeft: { x: wX, y: wY },
+        // topLeft: { x: wX, y: wY },
+        topLeft: { x: wX, y: this.workspace.nativeElement.offsetTop },
         bottomRight: { x: wX + wWidth, y: wY + wHeight },
         size: { width: wWidth, height: wHeight }
       }
@@ -288,7 +289,8 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
       // Calculate Toolbar rectangle
       const { x: tX, y: tY, width: tWidth, height: tHeight } = this.toolbar.nativeElement.getBoundingClientRect();
       this.toolbarRect = { 
-        topLeft: { x: tX, y: tY },
+        // topLeft: { x: tX, y: tY },
+        topLeft: { x: tX, y: this.toolbar.nativeElement.offsetTop },
         bottomRight: { x: tX + tWidth, y: tY + tHeight },
         size: { width: tWidth, height: tHeight }
       }
