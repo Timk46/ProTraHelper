@@ -5,7 +5,7 @@
         <input type="file" (change)="onLoadAssignmentFromJSON($event)" id="uploadJson">
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="onCreateAssignment()" class="form">
+    <form [formGroup]="form" (ngSubmit)="onOverwrite()" class="form">
 
         <h2>Eine neue Graphaufgabe erstellen</h2>
 
@@ -86,7 +86,7 @@
                     <mat-button-toggle value="assignment">Aufgabenstellung</mat-button-toggle>
                     <mat-button-toggle value="solution">Musterlösung</mat-button-toggle>
                 </mat-button-toggle-group>
-     <!-- [hideSingleSelectionIndicator]="true"
+                <!-- [hideSingleSelectionIndicator]="true"
                      -->
                 
                 <mat-button-toggle-group

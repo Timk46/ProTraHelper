@@ -1,17 +1,23 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import IAssignment from 'src/app/Modules/graph-tasks/models/Assignment.interface';
 import { IGraphConfiguration } from 'src/app/Modules/graph-tasks/models/GraphConfiguration.interface';
 import { IGraphDataJSON } from 'src/app/Modules/graph-tasks/models/GraphDataJSON.interface';
 import { GraphTaskService } from 'src/app/Modules/graph-tasks/services/graph-task.service';
 import { readFile } from 'src/app/Modules/graph-tasks/utils';
+import { ActivatedRoute, Router } from '@angular/router';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { questionType } from '@DTOs/question.dto';
+import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
+import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-edit-graph',
   templateUrl: './edit-graph.component.html',
   styleUrls: ['./edit-graph.component.scss']
 })
-export class EditGraphComponent {
+export class EditGraphComponent implements AfterViewInit {
 
   // ########################################
   // Component class properties
@@ -43,13 +49,21 @@ export class EditGraphComponent {
   // }
   ];
 
+  thisQuestionType = questionType.GRAPH;
+  
+  isSaving = false;
 
+  detailedQuestionData: detailedQuestionDTO | null = null;
 
   // #######################################################
   // Constructor - Component lifecycle related
   constructor(
     private fb: FormBuilder,
+    private questionDataService: QuestionDataService,
     private graphTaskService: GraphTaskService,
+    private route: ActivatedRoute,
+    private confirmationService: ConfirmationService,
+    private snackBar: MatSnackBar,
   ) {
 
     this.form = this.fb.group({
@@ -72,7 +86,6 @@ export class EditGraphComponent {
   // #######################################################
   // Workspace Content Related
 
-  //TODO:
   updateWorkspace() {
     // Save the previous content before resetting it
     this.saveWorkspaceContent(this.workspaceModePrevious, this.solutionStepPrevious);
@@ -126,7 +139,6 @@ export class EditGraphComponent {
     this.solutionStepPrevious = this.solutionStepCurrent;
   }
 
-  //TODO:
   loadWorkspaceContent(params: Partial<{
     graphContent: IGraphDataJSON;
     graphConfiguration: IGraphConfiguration | null
@@ -155,7 +167,6 @@ export class EditGraphComponent {
 
   }
 
-  //TODO:
   saveWorkspaceContent(mode: string, step: number) {
     
       
@@ -175,7 +186,6 @@ export class EditGraphComponent {
     }
   }
 
-  //TODO:
   activateWorkspace() {
     // Display workspace
     this.workspaceIsActive = true;
@@ -288,23 +298,7 @@ export class EditGraphComponent {
   
   // #######################################################
   // Assignment Content Related
-
-  onCreateAssignment(): void {
-    let newAssignment: Partial<IAssignment>;
-    try {
-      newAssignment = this.getFormValuesAsAssignment();
-    } catch (err) {
-      console.error(err);
-      alert(err);
-      return;
-    }
-
-    // TODO: Submit new assignment data to backend
-    console.log(newAssignment);
-    alert('Die Erstellung neuer Aufgaben ist noch nicht implementiert.');
-
-  }
-
+  
   onDownloadAssignmentAsJSON(): void {
     let newAssignment: Partial<IAssignment>;
     try {
@@ -334,7 +328,6 @@ export class EditGraphComponent {
     };
 
     // Set configuration for graph
-
     newAssignment.initialStructure = {
       nodes: this.assignmentGraphStructure.nodes,
       edges: this.assignmentGraphStructure.edges,
@@ -454,8 +447,6 @@ export class EditGraphComponent {
       
       this.showCheckbox = true; 
     }
-    
-
   }
 
   onChangeCheckbox(event: any): void {
@@ -483,4 +474,131 @@ export class EditGraphComponent {
   trackByIndex(index: number, obj: any): any {
     return index;
   }
+
+  // #####
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.handleRouteParams();
+    }, 0);
+  }
+
+  private handleRouteParams() {
+    this.route.params.subscribe(params => {
+      const questionId = parseInt(params['questionId']);
+      this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
+        if (data.type === questionType.GRAPH) { // TODO: Kommentar Sven: hab hier auch die entsprechende questionType anstelle des Strings eingefügt. Bitte testen.
+          this.detailedQuestionData = data;
+          console.log(this.detailedQuestionData);
+          this.setContent();
+        } else {
+          this.snackBar.open('ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Graphaufgabe!', 'Schließen', { duration: 10000 });
+          this.thisQuestionType = data.type as questionType;
+        }
+      });
+    });
+  }
+
+  // TODO: complete missing fields
+  private setContent() {
+    this.resetWorkspaceContent();
+
+    if (this.thisQuestionType === questionType.GRAPH && this.detailedQuestionData) {
+      this.form.patchValue({
+        title: this.detailedQuestionData.name,
+        text: this.detailedQuestionData.text,
+        maxPoints: this.detailedQuestionData.score || 100,
+        // questionDifficulty: this.detailedQuestionData.level.toString(),
+      });
+      if (this.detailedQuestionData.graphQuestion) {
+        
+        // Update form controls
+        this.form.patchValue({
+          stepsEnabled: this.detailedQuestionData.graphQuestion.stepsEnabled,
+          selectedAssignmentType: this.detailedQuestionData.graphQuestion.type,
+          checkboxEdgeDirected: this.detailedQuestionData.graphQuestion.configuration.edgeDirected || false,
+          checkboxEdgeWeighted: this.detailedQuestionData.graphQuestion.configuration.edgeWeight || false,
+          checkboxNodeWeighted: this.detailedQuestionData.graphQuestion.configuration.nodeWeight || false,
+          checkboxNodeVisited: this.detailedQuestionData.graphQuestion.configuration.nodeVisited || false
+        });
+
+        const clonedInitialStructure: IGraphDataJSON = JSON.parse(JSON.stringify(this.detailedQuestionData.graphQuestion.initialStructure))
+        this.assignmentGraphStructure = clonedInitialStructure;
+        
+        const clonedExSolGraphSteps: IGraphDataJSON[] = JSON.parse(JSON.stringify(this.detailedQuestionData.graphQuestion.exampleSolution))
+        this.solutionGraphStructure = clonedExSolGraphSteps;
+        
+        this.showCheckbox = true;
+        this.structureIsSet = true;
+      }
+    }
+  }
+
+  protected onOverwrite() {
+    this.confirmationService.confirm({
+      title: 'Frage aktualisieren',
+      message: 'Dies überschreibt die aktuelle Version der Frage. Fortfahren?',
+      acceptLabel: 'Aktualisieren',
+      declineLabel: 'Abbrechen',
+      accept: () => {
+        this.isSaving = true;
+        const submitData = this.buildDTO();
+        if (submitData){
+          this.questionDataService.updateWholeQuestion(submitData).subscribe({
+            next: response => {
+              console.log('Question updated successfully:', response);
+              this.snackBar.open('Frage erfolgreich aktualisiert', 'Schließen', { duration: 3000 });
+              this.isSaving = false
+            },
+            error: error => {
+              console.error('Error updating question:', error);
+              this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', { duration: 3000 });
+              this.isSaving = false;
+            }
+          });
+        } else {
+          this.isSaving = false;
+        }
+      },
+      decline: () => {
+        console.log('Overwrite declined');
+      }
+    });
+  }
+
+  // TODO: complete missing fields
+  private buildDTO(): detailedQuestionDTO | null {
+    if (this.thisQuestionType === questionType.GRAPH && this.form.valid && this.detailedQuestionData){
+      const newData: detailedQuestionDTO = {
+        ...this.detailedQuestionData,
+        name: this.form.value.questionTitle,
+        //level: parseInt(this.freeTextForm.value.questionDifficulty),
+        //description: this.freeTextForm.value.questionDescription,
+        score: parseInt(this.form.value.maxPoints),
+        text: this.form.value.text,
+        graphQuestion: {
+          id: this.detailedQuestionData.graphQuestion?.id || undefined,
+          questionId: this.detailedQuestionData.id,
+          // texthtml: 
+          expectations: this.detailedQuestionData.graphQuestion?.expectations || '',
+          // expectationsHTML: this.expectationField.getContent(),
+          type: this.form.value.selectedAssignmentType,
+          initialStructure: {
+            nodes: this.assignmentGraphStructure.nodes,
+            edges: this.assignmentGraphStructure.edges,
+          },
+          exampleSolution: this.solutionGraphStructure,
+          stepsEnabled: this.form.value.stepsEnabled,
+          configuration: {
+            nodeWeight: this.form.value.checkboxNodeWeighted,
+            nodeVisited: this.form.value.checkboxNodeVisited,
+            edgeWeight: this.form.value.checkboxEdgeWeighted,
+            edgeDirected: this.form.value.checkboxEdgeDirected,
+          },
+        }
+      }
+      return newData;
+    }
+    return null;
+  }
+
 }
