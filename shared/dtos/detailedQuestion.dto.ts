@@ -70,9 +70,10 @@ export interface detailedFillinBlankDTO {
   id?: number;
   createdAt?: Date;
   updatedAt?: Date;
-  word: string;
+  blankContent: string;
   position?: number;
   isDistractor: boolean;
-  fillinTaskId?: number;
+  isCorrect: boolean;
+  fillinQuestionId?: number;
 }
 

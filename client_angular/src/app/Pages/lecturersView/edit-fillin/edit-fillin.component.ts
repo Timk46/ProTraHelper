@@ -2,7 +2,7 @@ import { Component, HostListener, SecurityContext, ViewChild } from '@angular/co
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BlankDTO, detailedFillinBlankDTO, detailedQuestionDTO, FillInTaskDTO, FillInTaskType, questionType } from '@DTOs/index';
+import { BlankDTO, detailedQuestionDTO, FillinQuestionType, questionType } from '@DTOs/index';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -23,17 +23,17 @@ export class EditFillinComponent {
   thisQuestionType = questionType.FILLIN;
   detailedQuestionData: detailedQuestionDTO | null = null;
   isSaving = false;
-  fillinTypes = FillInTaskType;
+  fillinTypes = FillinQuestionType;
 
   /* fillin vars */
 
   //@ViewChild('fillinEditor') editorComponent!: TinymceComponent;
   editorInstance: any;
   editorConfig: any;
-  FillInTaskType = FillInTaskType;
+  FillinQuestionType = FillinQuestionType;
 
   /* questionDetails = {
-    taskType: FillInTaskType.FillIn,
+    taskType: FillinQuestionype.Fillin,
     name: '',
     text: '',
     conceptName: '',
@@ -73,7 +73,7 @@ export class EditFillinComponent {
       questionScore: ['', Validators.required],
       questionConcept: [''], // fals du concept ids brauchst, sonst egal
 
-      fillinType: [FillInTaskType.FillInText, Validators.required], // fillin types
+      fillinType: [FillinQuestionType.FillinText, Validators.required], // fillin types
       //fillinContent: ['', Validators.required],
     });
   }
@@ -81,7 +81,7 @@ export class EditFillinComponent {
   ngOnInit(): void {
     setTimeout(() => {
       this.handleRouteParams();
-      this.initializeEditor();
+      //this.initializeEditor();
     }, 0);
 
   }
@@ -100,6 +100,7 @@ export class EditFillinComponent {
         if (data.type === questionType.FILLIN) {
           this.detailedQuestionData = data;
           console.log(this.detailedQuestionData);
+          this.initializeEditor();
           this.setContent();
         } else {
           this.snackBar.open('ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Lückentextaufgabe', 'Schließen', { duration: 10000 });
@@ -117,8 +118,12 @@ export class EditFillinComponent {
         questionDescription: this.detailedQuestionData.description,
         questionScore: this.detailedQuestionData.score,
       });
-      if (this.detailedQuestionData.freetextQuestion) { // fillinQuestion
+      if (this.detailedQuestionData.fillinQuestion) { // fillinQuestion
         // TODO: restliche Felder fuellen
+        this.fillinForm.patchValue({
+          fillinType: this.detailedQuestionData.fillinQuestion.taskType,
+        });
+        this.generatedContent = this.sanitizeContent(new DOMParser().parseFromString(this.detailedQuestionData.fillinQuestion.content, 'text/html'));
       }
     }
   }
@@ -148,9 +153,10 @@ export class EditFillinComponent {
           table: false,
           blanks: [...blanks, ...distractors].map(blank => {
             return {
-              word: blank.word || '<missingStr>',
+              blankContent: blank.blankContent || '<missingStr>',
               position: blank.position ? parseInt(blank.position) : -1,
               isDistractor: blank.isDistractor || false,
+              isCorrect: blank.isCorrect || false,
               //isImage: blank.isImage,
               //imageUrl: blank.imageUrl
             }
@@ -312,6 +318,7 @@ export class EditFillinComponent {
         this.setupEditorEventListeners(editor);
         editor.on('init', () => {
           this.isEditorLoaded = true;
+          editor.setContent(this.detailedQuestionData?.fillinQuestion?.content || 'nix drin');
           this.applyStyles(editor);
         });
         editor.on('keydown', (e: KeyboardEvent) => this.handleEditorKeydown(editor, e));
@@ -633,7 +640,7 @@ export class EditFillinComponent {
 
     const dialogRef = this.dialog.open(EditBlankComponent, {
       width: '250px',
-      data: { word: distractor.word, isDistractor: true }
+      data: { word: distractor.blankContent, isDistractor: true }
     });
 
     dialogRef.afterClosed().subscribe((result: string) => {
@@ -828,9 +835,9 @@ export class EditFillinComponent {
    * @param {string} word - The distractor word to add
    */
   addGlobalDistractor(word: string): void {
-    if (word && !this.distractors.some(d => d.word === word)) {
+    if (word && !this.distractors.some(d => d.blankContent === word)) {
       this.distractors.push({
-        word,
+        blankContent: word,
         position: '-1',  // Use -1 to indicate it's a global distractor
         isDistractor: true
       });
@@ -843,7 +850,7 @@ export class EditFillinComponent {
    * @param {BlankDTO} distractor - The distractor to remove
    */
   removeGlobalDistractor(distractor: BlankDTO): void {
-    const index = this.distractors.findIndex(d => d.word === distractor.word);
+    const index = this.distractors.findIndex(d => d.blankContent === distractor.blankContent);
     if (index > -1) {
       this.distractors.splice(index, 1);
     }
@@ -1022,7 +1029,7 @@ export class EditFillinComponent {
       return;
     }
 
-    this.distractors[index].word = newWord;
+    this.distractors[index].blankContent = newWord;
 
     if (this.generatedContent) {
       const htmlContent = this.sanitizer.sanitize(SecurityContext.HTML, this.generatedContent) || '';
@@ -1133,13 +1140,13 @@ export class EditFillinComponent {
 
     const updateBlankDto: BlankDTO = {
       id,
-      fillInTaskId: this.currentTaskId!,
+      fillinQuestionId: this.currentTaskId!,
       position,
       word: imageData,
       isDistractor: false
     };
 
-    this.fillInTaskService.updateBlank(updateBlankDto).subscribe(
+    this.fillinQuestionService.updateBlank(updateBlankDto).subscribe(
       updatedBlank => {
         console.log('Image blank updated successfully', updatedBlank);
         this.blankInfo.set(position, { id, word: imageData });
@@ -1153,13 +1160,13 @@ export class EditFillinComponent {
   private updateBlankWithNewWord(blankElement: HTMLElement, position: string, id: number, newWord: string): void {
     /* const updateBlankDto: BlankDTO = {
       id,
-      fillInTaskId: this.currentTaskId!,
+      fillinQuestionId: this.currentTaskId!,
       position,
       word: newWord,
       isDistractor: false
     };
 
-    this.fillInTaskService.updateBlank(updateBlankDto).subscribe(
+    this.fillinQuestionService.updateBlank(updateBlankDto).subscribe(
       updatedBlank => {
         console.log('Text blank updated successfully', updatedBlank);
         this.blankInfo.set(position, { id, word: newWord });
@@ -1249,12 +1256,12 @@ export class EditFillinComponent {
     // Add new distractors only if they don't already exist
     const existingDistractorWords = new Set(existingDistractors.map(d => d.textContent));
     this.distractors.forEach((distractor, index) => {
-      if (!existingDistractorWords.has(distractor.word)) {
+      if (!existingDistractorWords.has(distractor.blankContent)) {
         const distractorElement = doc.createElement('span');
         distractorElement.className = this.isEditBlanksModeActive ? 'distractor editable-distractor' : 'distractor';
         distractorElement.setAttribute('data-distractor-id', (existingDistractors.length + index).toString());
-        distractorElement.setAttribute('data-word', distractor.word!);
-        distractorElement.textContent = distractor.word;
+        distractorElement.setAttribute('data-word', distractor.blankContent!);
+        distractorElement.textContent = distractor.blankContent;
         doc.body.appendChild(document.createTextNode(' ')); // Add space before distractor
         doc.body.appendChild(distractorElement);
       }
@@ -1354,7 +1361,7 @@ export class EditFillinComponent {
     const stringContent = this.sanitizer.sanitize(SecurityContext.HTML, content) || '';
     const contentWithPlaceholders = this.replaceBlanksWithPlaceholders(stringContent);
 
-    const updateTaskDto: FillInTaskDTO = {
+    const updateTaskDto: FillinQuestionDTO = {
       id: this.currentTaskId,
       content: contentWithPlaceholders,
       taskType: this.form.get('taskType')?.value,
@@ -1374,7 +1381,7 @@ export class EditFillinComponent {
       blanks: allBlanksAndDistractors
     };
 
-    this.fillInTaskService.updateFillInTask(updateTaskDto).subscribe(updatedTask => {
+    this.fillinQuestionService.updateFillinQuestion(updateTaskDto).subscribe(updatedTask => {
       console.log('Task updated successfully', updatedTask);
       this.currentTaskId = updatedTask.id;
 
@@ -1468,7 +1475,7 @@ export class EditFillinComponent {
       }
 
       const blankDto: BlankDTO = {
-        word,
+        blankContent: word,
         position: blankIndex.toString(),
         isDistractor
       };
@@ -1583,7 +1590,7 @@ export class EditFillinComponent {
     console.log("my blanks", blanks);
     console.log("my distractors", this.distractors);
     const allBlanks = [...blanks, ...this.distractors];
-    const createTaskDto: FillInTaskDTO = {
+    const createTaskDto: FillinQuestionDTO = {
       content: contentWithPlaceholders,
       taskType: this.form.get('taskType')?.value,
       table: hasTable,
@@ -1602,7 +1609,7 @@ export class EditFillinComponent {
       blanks: allBlanks
     };
 
-    this.fillInTaskService.createFillInTask(createTaskDto).subscribe(task => {
+    this.fillinQuestionService.createFillinQuestion(createTaskDto).subscribe(task => {
       this.currentTaskId = task.id;
       this.blankInfo.clear(); // Clear existing data
       this.distractors = [];

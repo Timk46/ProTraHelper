@@ -313,10 +313,10 @@ export class QuestionDataService {
         }
         break;
       case questionType.FILLIN:
-        if (createNewVersion || !currentQuestion.codingQuestion) {
-          // z.B. await this.qdFillin.createFillinQuestion(question.fillinQuestion, updatedQuestion.id);
+        if (createNewVersion || !currentQuestion.fillinQuestion) {
+          await this.qdFillin.createFillinQuestion(question.fillinQuestion, updatedQuestion.id);
         } else {
-          // z.B. await this.qdFillin.updateFillinQuestion(question.fillinQuestion);
+          await this.qdFillin.updateFillinQuestion(question.fillinQuestion);
         }
         break;
     }
@@ -344,9 +344,9 @@ export class QuestionDataService {
       (
         newQuestion.codingQuestion ||
         newQuestion.freetextQuestion ||
-        newQuestion.mcQuestion // ||
-        //TODO: fill, uml, graph
-        // newQuestion.fillinQuestion // das hier einfügen
+        newQuestion.mcQuestion ||
+        newQuestion.fillinQuestion
+        //TODO: uml, graph
       )
     ){
       return true;

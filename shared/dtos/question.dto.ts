@@ -139,7 +139,7 @@ export interface CodingQuestionDto {
     MULTIPLECHOICE = "MC",
     FREETEXT = "FreeText",
     CODE = "CodingQuestion",
-    FILLIN = "FillIn"
+    FILLIN = "Fillin"
   }
 
   export interface McqGenerationDTO {

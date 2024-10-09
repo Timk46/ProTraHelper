@@ -32,7 +32,6 @@ model User {
   Vote                 Vote[]
   anonymousUser        anonymousUser[]
   modules              Module[]                     @relation("ModuleToUser")
-  FillInTask           FillInTask[]
 }
 
 model Module {
@@ -239,7 +238,7 @@ model Question {
   QuestionVersionAsQuestion  QuestionVersion[]  @relation("QuestionToQuestionVersion")
   QuestionVersionAsSuccessor QuestionVersion[]  @relation("QuestionToSuccessorQuestionVersion")
   userAnswer                 UserAnswer[]
-  FillInTask                 FillInTask?
+  FillinQuestion             FillinQuestion?
 }
 
 model QuestionVersion {
@@ -414,13 +413,11 @@ model CodeSubmissionFile {
   user             User           @relation(fields: [userId], references: [id])
 }
 
-model FillInTask {
+model FillinQuestion {
   id         Int      @id @default(autoincrement())
   content    String // Stores sanitized HTML or structured JSON
   taskType   String
   table      Boolean
-  authorId   Int
-  author     User     @relation(fields: [authorId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   questionId Int      @unique
@@ -429,14 +426,15 @@ model FillInTask {
 }
 
 model Blank {
-  id           Int        @id @default(autoincrement())
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  word         String
-  position     String // JSON string for flexibility (e.g., "0" for sentences, "0,1" for table cells)
-  isDistractor Boolean    @default(false)
-  fillInTaskId Int
-  fillInTask   FillInTask @relation(fields: [fillInTaskId], references: [id])
+  id               Int            @id @default(autoincrement())
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  blankContent     String
+  position         Int
+  isDistractor     Boolean        @default(false)
+  isCorrect        Boolean        @default(false)
+  fillinQuestionId Int
+  fillinQuestion   FillinQuestion @relation(fields: [fillinQuestionId], references: [id])
 }
 
 model KIFeedback {

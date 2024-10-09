@@ -17,8 +17,8 @@
           <mat-form-field appearance="outline" style="width: 100%;">
             <mat-label>FillinType</mat-label>
             <mat-select formControlName="fillinType">
-              <mat-option [value]="fillinTypes.FillInText">Texteingabe</mat-option>
-              <mat-option [value]="fillinTypes.FillInDrag">Drag & Drop</mat-option>
+              <mat-option [value]="fillinTypes.FillinText">Texteingabe</mat-option>
+              <mat-option [value]="fillinTypes.FillinDrag">Drag & Drop</mat-option>
               <mat-option [value]="fillinTypes.FillinDropdown">Dropdown</mat-option>
               <mat-option disabled [value]="fillinTypes.GroupingTask">GroupingTask</mat-option>
             </mat-select>
@@ -108,7 +108,7 @@
             </div>
             <ul class="distractor-list">
               <li *ngFor="let distractor of distractors">
-                {{ distractor.word }}
+                {{ distractor.blankContent }}
                 <button (click)="removeGlobalDistractor(distractor)">Remove</button>
               </li>
             </ul>

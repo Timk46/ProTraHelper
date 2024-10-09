@@ -1,6 +1,6 @@
-export enum FillInTaskType {
-    FillInText = "FillInText",
-    FillInDrag = "FillInDrag",
+export enum FillinQuestionType {
+    FillinText = "FillinText",
+    FillinDrag = "FillinDrag",
     FillinDropdown = "FillinDropdown",
     GroupingTask = "GroupingTask",
 }

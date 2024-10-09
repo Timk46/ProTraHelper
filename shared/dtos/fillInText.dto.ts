@@ -1,7 +1,7 @@
 import { QuestionDTO } from "./question.dto";
 
-// FillInTaskDTO - for retrieving task data
-export interface FillInTaskDTO {
+// FillinQuestionDTO - for retrieving task data
+export interface FillinQuestionDTO {
   id?: number;
   content: string;
   taskType?: string;
@@ -16,10 +16,11 @@ export interface FillInTaskDTO {
 // BlankDTO - for retrieving blank data
 export interface BlankDTO {
   id?: number;
-  word: string | null;
+  blankContent: string | null;
   position?: string;
   isDistractor?: boolean;
-  fillInTaskId?: number;
+  isCorrect?: boolean;
+  fillinQuestionId?: number;
   isImage?: boolean;
   imageUrl?: string;
 }
