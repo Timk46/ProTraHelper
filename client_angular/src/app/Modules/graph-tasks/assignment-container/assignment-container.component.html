@@ -46,6 +46,7 @@
             </mat-button-toggle-group>
 
             <button
+                *ngIf="graphQuestionData.stepsEnabled && workspaceModeCurrent === 'solution'"
                 class="image-button"
                 type="button"
                 (click)="addNewSolutionStep()"
