@@ -1,9 +1,9 @@
-<div class="container" *ngIf="assignment; else noAssignment">
+<div class="container" *ngIf="questionData && graphQuestionData; else noQuestion">
     
     <div class="assignment box">
-        <h2>{{ assignment.title }}</h2>   
+        <h2>{{ questionData.name }}</h2>   
         <p>
-            {{ assignment.text }}
+            {{ questionData.text }}
         </p>
     </div>
     <div class="evaluation box">
@@ -30,7 +30,7 @@
             </mat-button-toggle-group>
 
             <mat-button-toggle-group 
-                *ngIf="assignment.stepsEnabled && workspaceModeCurrent === 'solution'"
+                *ngIf="graphQuestionData.stepsEnabled && workspaceModeCurrent === 'solution'"
                 name="solution-step" 
                 aria-label="solution-step" 
                 [(ngModel)]="solutionStepCurrent"
@@ -67,7 +67,7 @@
 
 </div>
 
-<ng-template #noAssignment>
+<ng-template #noQuestion>
     <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; background-color: rgb(248, 242, 233);">
         <h2>Keine Aufgabe vorhanden</h2>
         <a 

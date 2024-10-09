@@ -233,6 +233,10 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       case questionType.CODE:
         // Navigate to coding question component
         this.router.navigate([this.getRouterLink(taskViewData.id)]);
+        break;
+      case questionType.GRAPH:
+        // Navigate to graph question component
+        this.router.navigate([`/graphtask/${taskViewData.id}`]);
         return;
     }
 
@@ -478,6 +482,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         return 'Lückentext';
       case questionType.CODE:
         return 'Programmieraufgabe';
+      case questionType.GRAPH:
+        return 'Graphaufgabe';
       default:
         return 'undefiniert';
     }

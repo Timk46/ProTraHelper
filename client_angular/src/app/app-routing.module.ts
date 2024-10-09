@@ -55,7 +55,7 @@ const routes: Routes = [
   // just for testing
   { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
 
-  { path: 'graphtask', component: GraphTasksComponent, canActivate: [LoggedInGuard]},
+  { path: 'graphtask/:questionId', component: GraphTasksComponent, canActivate: [LoggedInGuard]},
 
   // Tutor-Kai as lazy loaded module (https://medium.com/@jaydeepvpatil225/feature-module-with-lazy-loading-in-angular-15-53bb8e15d193) Maybe we can use the same for UML Tasks?
   { path: 'tutor-kai', loadChildren: () => import('./Modules/tutor-kai/tutor-kai.module').then(m => m.TutorKaiModule) },
