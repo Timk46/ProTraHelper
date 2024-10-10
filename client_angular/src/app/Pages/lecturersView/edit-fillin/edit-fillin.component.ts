@@ -9,6 +9,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageUploadDialogComponent } from './image-upload-dialog/image-upload-dialog.component';
 import { EditBlankComponent } from './edit-blank/edit-blank.component';
+import { v4 as uuidv4 } from 'uuid';
 
 declare var tinymce: any;
 
@@ -159,7 +160,7 @@ export class EditFillinComponent {
           blanks: [...blanks, ...distractors].map(blank => {
             return {
               blankContent: blank.blankContent || '<missingStr>',
-              position: blank.position ? blank.position : -1,
+              position: blank.position ? blank.position : '<missingPos>',
               isDistractor: blank.isDistractor || false,
               isCorrect: blank.isCorrect || false,
               //isImage: blank.isImage,
@@ -845,7 +846,7 @@ export class EditFillinComponent {
     if (word && !this.distractors.some(d => d.blankContent === word)) {
       this.distractors.push({
         blankContent: word,
-        position: -1,  // Use -1 to indicate it's a global distractor
+        position: '-1',  // Use -1 to indicate it's a global distractor
         isDistractor: true,
         isCorrect: false
       });
@@ -919,7 +920,7 @@ export class EditFillinComponent {
    * @param blankSpan - The span element representing the new blank
    */
   private updateBlankInfo(blankSpan: HTMLElement): void {
-    const position = this.blankInfo.size.toString();
+    const position = uuidv4() //this.blankInfo.size.toString();
     const word = blankSpan.getAttribute('data-word') || '';
     this.blankInfo.set(position, { id: -1, word });
     blankSpan.setAttribute('data-position', position);
@@ -1462,7 +1463,7 @@ export class EditFillinComponent {
    */
   private processBlanks(doc: Document): detailedFillinBlankDTO[] {
     const blanks: detailedFillinBlankDTO[] = [];
-    let blankIndex = 0;
+    //let blankIndex = 0;
 
     // Remove empty paragraphs and paragraphs with only <br> tags
     doc.querySelectorAll('p').forEach((p) => {
@@ -1474,6 +1475,7 @@ export class EditFillinComponent {
     doc.querySelectorAll('.text-blank, td.table-blank, .generated-blank, .distractor, .image-blank').forEach((blank) => {
       const isImage = blank.tagName.toLowerCase() === 'img';
       const word = isImage ? (blank as HTMLImageElement).src: (blank.getAttribute('data-word') || blank.textContent || ''); //  anstatt "Image-Blank"????
+      const positionId = blank.getAttribute('data-position') || '-1';
       const isDistractor = blank.classList.contains('distractor');
 
       // Skip empty or whitespace-only blanks
@@ -1484,7 +1486,7 @@ export class EditFillinComponent {
 
       const blankDto: detailedFillinBlankDTO = {
         blankContent: word,
-        position: blankIndex,
+        position: positionId,
         isDistractor,
         isCorrect: true,
       };
@@ -1500,9 +1502,9 @@ export class EditFillinComponent {
           blank.textContent = '______';
           blank.className = 'generated-blank';
         }
-        blank.setAttribute('data-position', blankIndex.toString());
+        //blank.setAttribute('data-position', blankIndex.toString());
         blank.setAttribute('data-word', word);
-        blankIndex++;
+        //blankIndex++;
       }
     });
 

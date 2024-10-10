@@ -6,7 +6,7 @@ export interface UserAnswerDataDTO {
     userFreetextAnswer?: string;
     userFreetextAnswerRaw?: string;
     userMCAnswer?: number[];
-    userFillinTextAnswer?: string[];
+    userFillinTextAnswer?: UserFillinAnswer[];
     //space for more types of answers
 }
 
@@ -23,4 +23,9 @@ export interface userAnswerFeedbackDTO {
     score: number;
     elementDone: boolean;
     progress: number;
+}
+
+export interface UserFillinAnswer {
+    position: string;
+    answer: string;
 }

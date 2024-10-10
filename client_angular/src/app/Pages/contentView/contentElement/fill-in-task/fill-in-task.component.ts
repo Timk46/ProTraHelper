@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef, OnDestroy,
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { DialogRef } from '@angular/cdk/dialog';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { QuestionDTO, BlankDTO, userAnswerFeedbackDTO, UserAnswerDataDTO, FillinQuestionDTO, FillinQuestionType } from '@DTOs/index';
+import { QuestionDTO, BlankDTO, userAnswerFeedbackDTO, UserAnswerDataDTO, FillinQuestionDTO, FillinQuestionType, UserFillinAnswer } from '@DTOs/index';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { SafeUrl } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
@@ -454,14 +454,18 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
       }, 500);
   }
 
-  private gatherFilledBlanks(): string[] {
-    const filledBlanks: string[] = [];
+  private gatherFilledBlanks(): UserFillinAnswer[] {
+    const filledBlanks: UserFillinAnswer[] = [];
     Object.keys(this.taskForm.controls).forEach(key => {
       const value = this.taskForm.get(key)?.value;
       if (value) {
-        filledBlanks.push(value);
+        filledBlanks.push({
+          position: key.slice(6), // Remove 'blank-' prefix
+          answer: value.toString()
+        });
       }
     });
+    console.log('Filled blanks:', filledBlanks);
     return filledBlanks;
   }
 

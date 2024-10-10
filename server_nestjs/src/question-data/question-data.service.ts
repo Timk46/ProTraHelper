@@ -2,7 +2,7 @@ import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-gen
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { QuestionDTO, questionType, detailedQuestionDTO, FillinQuestionDTO } from '@DTOs/index';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswer } from '@DTOs/userAnswer.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataCodeService } from './question-data-code/question-data-code.service';
@@ -564,7 +564,6 @@ export class QuestionDataService {
       const fillInTask = await this.prisma.fillinQuestion.findFirst({
         where: {
           questionId: question.id,
-
         },
         include: {
           blanks: true
@@ -575,42 +574,46 @@ export class QuestionDataService {
       const correctAnswers = await this.prisma.blank.findMany({
         where: {
           fillinQuestionId: fillInTask.id,
-          isDistractor: false
+          isDistractor: false,
+          isCorrect: true
         },
         orderBy: {
           position: 'asc'
-        }
+        },
       });
+
+      const importantBlankPositions = [...new Set(correctAnswers.map(blank => blank.position))];
       console.log("correct answers: ", correctAnswers);
       let userScore = 0;
-      const scorePerBlank = question.score / correctAnswers.length;
 
       // Compare user answers with correct answers
-      const userAnswers = answerData.userFillinTextAnswer;
+      const userAnswers: UserFillinAnswer[] = answerData.userFillinTextAnswer;
       const feedbackDetails = [];
       console.log("user answers: ", userAnswers);
-      for (let i = 0; i < correctAnswers.length; i++) {
-        const userAnswer = userAnswers[i]?.toLowerCase().trim();
-        const correctAnswer = correctAnswers[i].blankContent.toLowerCase().trim();
 
-        if (userAnswer === correctAnswer) {
-          userScore += scorePerBlank;
-          feedbackDetails.push(`Blank ${i + 1}: Correct`);
+      for (let blankPosition of importantBlankPositions) {
+        const userAnswer = userAnswers.find(answer => answer.position === blankPosition)?.answer?.toLowerCase().trim();
+        const correctPositionAnswers = correctAnswers.filter(blank => blank.position === blankPosition).map(blank => blank.blankContent.toLowerCase().trim());
+
+        if (correctPositionAnswers.includes(userAnswer)) {
+          userScore += 1;
+          feedbackDetails.push(`Blank ${blankPosition}: Correct`);
         } else {
-          feedbackDetails.push(`Blank ${i + 1}: Incorrect.`)
+          feedbackDetails.push(`Blank ${blankPosition}: Incorrect`);
         }
+
       }
 
-      const progress = userScore / question.score;
       let feedbackText = '';
       let markedAsDone = false;
+      const reachedPoints = Math.floor(userScore * (question.score / importantBlankPositions.length));
 
-      if (progress === 1) {
-        feedbackText = `Herzlichen Glückwunsch! Du hast alle ${correctAnswers.length} Lücken richtig ausgefüllt. Du hast ${userScore} von ${question.score} Punkten erreicht. Die Aufgabe ist als abgeschlossen markiert und dein Fortschritt wurde aktualisiert.`;
+      if (userScore === importantBlankPositions.length) {
+        feedbackText = `Herzlichen Glückwunsch! Du hast alle ${importantBlankPositions.length} Lücken richtig ausgefüllt. Du hast ${question.score} von ${question.score} Punkten erreicht. Die Aufgabe ist als abgeschlossen markiert und dein Fortschritt wurde aktualisiert.`;
         this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
         markedAsDone = true;
       } else {
-        feedbackText = `Du hast ${userScore / scorePerBlank} von ${correctAnswers.length} Lücken richtig ausgefüllt. Du hast ${userScore} von ${question.score} Punkten erreicht.\n\n`;
+        feedbackText = `Du hast ${userScore} von ${importantBlankPositions.length} Lücken richtig ausgefüllt. Du hast ${reachedPoints} von ${question.score} Punkten erreicht.\n\n`;
         feedbackText += feedbackDetails.join('\n');
       }
 
@@ -621,7 +624,7 @@ export class QuestionDataService {
         data: {
           userAnswerId: createdData.id,
           text: feedbackText,
-          score: userScore
+          score: reachedPoints
         }
       });
 
@@ -634,7 +637,7 @@ export class QuestionDataService {
         score: feedback.score,
         feedbackText: feedback.text,
         elementDone: markedAsDone,
-        progress: progress * 100,
+        progress: Math.floor((feedback.score/question.score) * 100),
       }
     }
   }

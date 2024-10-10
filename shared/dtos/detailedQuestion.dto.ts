@@ -71,7 +71,7 @@ export interface detailedFillinBlankDTO {
   createdAt?: Date;
   updatedAt?: Date;
   blankContent: string;
-  position?: number;
+  position?: string;
   isDistractor: boolean;
   isCorrect: boolean;
   fillinQuestionId?: number;
