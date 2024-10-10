@@ -67,23 +67,29 @@ export class QuestionDataFillinService {
         taskType: questionData.taskType,
         table: questionData.table || false,
         blanks: {
-          upsert: questionData.blanks.map(blank => ({
-            where: {id: blank.id},
-            update: {
-              updatedAt: new Date(),
-              blankContent: blank.blankContent,
-              position: blank.position,
-              isDistractor: blank.isDistractor,
-              isCorrect: blank.isCorrect,
-            },
-            create: {
-              blankContent: blank.blankContent,
-              position: blank.position,
-              isDistractor: blank.isDistractor,
-              isCorrect: blank.isCorrect,
-            },
-          })),
-        },
+          updateMany: questionData.blanks
+            .filter(blank => blank.id !== undefined)
+            .map(blank => ({
+              where: { id: blank.id },
+              data: {
+                updatedAt: new Date(),
+                blankContent: blank.blankContent,
+                position: blank.position,
+                isDistractor: blank.isDistractor,
+                isCorrect: blank.isCorrect,
+              }
+            })),
+          createMany: {
+            data: questionData.blanks
+              .filter(blank => blank.id === undefined)
+              .map(blank => ({
+                blankContent: blank.blankContent,
+                position: blank.position,
+                isDistractor: blank.isDistractor,
+                isCorrect: blank.isCorrect,
+              }))
+          }
+        }
       },
       include: {
         blanks: true,

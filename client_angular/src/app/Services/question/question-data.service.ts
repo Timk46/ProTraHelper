@@ -9,7 +9,8 @@ import {
   UserAnswerDataDTO,
   userAnswerFeedbackDTO,
   UserMCOptionSelectedDTO,
-  questionType
+  questionType,
+  FillinQuestionDTO
 } from '@DTOs/index';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -61,6 +62,10 @@ export class QuestionDataService {
 
   getFreeTextQuestion(questionVersionId: number) : Observable<freeTextQuestionDTO> {
     return this.http.get<freeTextQuestionDTO>(environment.server + `/question-data/freeTextQuestion/${questionVersionId}`);
+  }
+
+  getFillinTask(questionId: number) : Observable<FillinQuestionDTO> {
+    return this.http.get<FillinQuestionDTO>(environment.server + `/question-data/fillinQuestion/${questionId}`);
   }
 
   /* createUserAnswer(userId: number, questionId: number) : Observable<UserAnswerDTO> {

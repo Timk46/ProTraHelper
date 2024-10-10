@@ -1,9 +1,9 @@
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { QuestionDTO, questionType, detailedQuestionDTO } from '@DTOs/index';
+import { QuestionDTO, questionType, detailedQuestionDTO, FillinQuestionDTO } from '@DTOs/index';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataCodeService } from './question-data-code/question-data-code.service';
 import { QuestionDataFillinService } from './question-data-fillin/question-data-fillin.service';
@@ -116,7 +116,14 @@ export class QuestionDataService {
         }
         break;
       case questionType.FILLIN:
-        // todo: hol die Daten aus der fillin Datenbank
+        specificQuestionData = await this.prisma.fillinQuestion.findFirst({
+          where: {
+            questionId: Number(questionId)
+          },
+          include: {
+            blanks: true
+          }
+        });
         break;
     }
 
@@ -125,7 +132,7 @@ export class QuestionDataService {
       codingQuestion: questionTypeStr === questionType.CODE ? specificQuestionData : undefined,
       freetextQuestion: questionTypeStr === questionType.FREETEXT ? specificQuestionData : undefined,
       mcQuestion: (questionTypeStr === questionType.MULTIPLECHOICE || questionTypeStr === questionType.SINGLECHOICE) ? specificQuestionData : undefined,
-      // fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
+      fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
     };
 
     return questionData;
@@ -228,7 +235,10 @@ export class QuestionDataService {
     const currentQuestion = await this.getDetailedQuestion(question.id, question.type as questionType);
 
     if (!this.detailedQuestionsUpdateable(currentQuestion, question)) {
+      console.log('currentQuestion: ', currentQuestion);
+      console.log('newQuestion: ', question);
       throw new Error('Question not updateable');
+
     }
 
     let updatedQuestion = null;
@@ -548,6 +558,136 @@ export class QuestionDataService {
 
     }
 
+    // fillin
+    if(question.type === questionType.FILLIN) {
+      console.log('generate feedback for fill-in-the-blank user answer');
+      const fillInTask = await this.prisma.fillinQuestion.findFirst({
+        where: {
+          questionId: question.id,
+
+        },
+        include: {
+          blanks: true
+        }
+      });
+
+      // Fetch the correct answers from the blanks table
+      const correctAnswers = await this.prisma.blank.findMany({
+        where: {
+          fillinQuestionId: fillInTask.id,
+          isDistractor: false
+        },
+        orderBy: {
+          position: 'asc'
+        }
+      });
+      console.log("correct answers: ", correctAnswers);
+      let userScore = 0;
+      const scorePerBlank = question.score / correctAnswers.length;
+
+      // Compare user answers with correct answers
+      const userAnswers = answerData.userFillinTextAnswer;
+      const feedbackDetails = [];
+      console.log("user answers: ", userAnswers);
+      for (let i = 0; i < correctAnswers.length; i++) {
+        const userAnswer = userAnswers[i]?.toLowerCase().trim();
+        const correctAnswer = correctAnswers[i].blankContent.toLowerCase().trim();
+
+        if (userAnswer === correctAnswer) {
+          userScore += scorePerBlank;
+          feedbackDetails.push(`Blank ${i + 1}: Correct`);
+        } else {
+          feedbackDetails.push(`Blank ${i + 1}: Incorrect.`)
+        }
+      }
+
+      const progress = userScore / question.score;
+      let feedbackText = '';
+      let markedAsDone = false;
+
+      if (progress === 1) {
+        feedbackText = `Herzlichen Glückwunsch! Du hast alle ${correctAnswers.length} Lücken richtig ausgefüllt. Du hast ${userScore} von ${question.score} Punkten erreicht. Die Aufgabe ist als abgeschlossen markiert und dein Fortschritt wurde aktualisiert.`;
+        this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
+        markedAsDone = true;
+      } else {
+        feedbackText = `Du hast ${userScore / scorePerBlank} von ${correctAnswers.length} Lücken richtig ausgefüllt. Du hast ${userScore} von ${question.score} Punkten erreicht.\n\n`;
+        feedbackText += feedbackDetails.join('\n');
+      }
+
+      console.log(feedbackText);
+
+      // Create feedback for user answer
+      const feedback = await this.prisma.feedback.create({
+        data: {
+          userAnswerId: createdData.id,
+          text: feedbackText,
+          score: userScore
+        }
+      });
+
+      if (!feedback) throw new Error('Could not create Feedback');
+
+      console.log('element done: ' + markedAsDone);
+      return {
+        id: feedback.id,
+        userAnswerId: feedback.userAnswerId,
+        score: feedback.score,
+        feedbackText: feedback.text,
+        elementDone: markedAsDone,
+        progress: progress * 100,
+      }
+    }
+  }
+
+
+  /**
+   * Get the fill-in-the-blank task for a specific question.
+   * @param {number} questionId
+   * @returns {Promise<FillinQuestionDTO>} The task
+   */
+  async getFillinTask(questionId: number): Promise<FillinQuestionDTO> {
+    console.log('getFillInTaskId', questionId);
+    const task = await this.prisma.fillinQuestion.findUnique({
+      where: {
+        questionId: Number(questionId)
+      },
+      include: {
+        blanks: true,
+        question: true
+      }
+    });
+
+    if (!task) {
+      throw new NotFoundException(`FillInTask for question ID ${questionId} not found`);
+    }
+    console.log('task', JSON.stringify(task));
+    console.log("tasktype: " + task.taskType);
+    return {
+      id: task.id,
+      content: task.content,
+      taskType: task.taskType ,
+      table: task.table,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+      blanks: task.blanks.map(blank => ({
+        id: blank.id,
+        blankContent: blank.blankContent,
+        position: blank.position.toString(),
+        fillinQuestionId: blank.fillinQuestionId
+      })),
+      question: {
+        id: task.question.id,
+        name: task.question.name,
+        description: task.question.description,
+        score: task.question.score,
+        type: task.question.type,
+        text: task.question.text,
+        level: task.question.level,
+        isApproved: task.question.isApproved,
+        originId: task.question.originId,
+        conceptNodeId: task.question.conceptNodeId
+      }
+    };
   }
 
 }

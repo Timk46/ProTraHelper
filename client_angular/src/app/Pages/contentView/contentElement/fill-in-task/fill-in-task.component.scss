@@ -1,0 +1,395 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px;
+  font-family: Arial, sans-serif;
+}
+
+.header {
+  margin-bottom: 20px;
+  h2 {
+    margin: 0;
+    color: #333;
+  }
+}
+
+.question-container {
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.question-description {
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #34495e;
+}
+
+.fill-in-container {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.options-container {
+  background-color: #e6f3ff;
+  padding: 15px;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.content-area {
+  background-color: #ffffff;
+  padding: 20px;
+  border: 1px solid #000000;
+  border-radius: 8px;
+}
+
+.sentence {
+  display: initial;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 16px;
+
+}
+
+.sentence-part {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  font-size: 18px;
+}
+
+.table-container {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    td {
+      border: 1px solid #000000;
+      padding: 10px;
+      text-align: center;
+
+      &.table-blank-cell {
+        background-color: #e6e6e6;
+      }
+    }
+  }
+}
+
+// Styles for FillInDrag
+.fillInDrag {
+  .table-blank-cell {
+    background-color: #f8f9fa;
+    border: 2px dashed #ced4da !important;
+    border-radius: 4px;
+    padding: 5px; // maybe remove later
+    margin: 4px;
+    width: calc(100% - 8px) !important;
+    display: table-cell !important;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    &.cdk-drop-list-dragging {
+      border-color: #007bff !important;
+      background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .word-box {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
+  }
+}
+
+// Styles for FillIn (normal input)
+.fillIn {
+  .table-blank-cell {
+    padding: 0;
+    background-color: #f8f9fa;
+    border: 2px dashed #ced4da !important;
+    border-radius: 4px;
+  }
+
+  .table-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: 16px;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    -moz-appearance: textfield;
+    appearance: textfield;
+
+    &:focus {
+      outline: none;
+      background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
+
+// Styles for FillInDropdown
+.fillInDropdown {
+  .table-blank-cell {
+    padding: 0;
+    background-color: #f8f9fa;
+    border: 2px dashed #ced4da !important;
+    border-radius: 4px;
+    position: relative;
+
+    &::after {
+      content: '\25BC';
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+  }
+
+  .table-dropdown {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    text-align-last: center;
+    font-size: 16px;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+      background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    option {
+      text-align: center;
+    }
+  }
+}
+
+.blank-dropdown {
+  width: 150px;
+  height: 40px;
+  padding: 5px 10px;
+  border: 2px solid #bdc3c7;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #fff;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #3498db;
+  }
+}
+
+.question-text {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 10px;
+  font-size: 18px;
+  span {
+    white-space: pre-wrap;
+  }
+}
+
+.blank-input,
+.blank-dropdown,
+.blank-box {
+  flex-shrink: 0; // Prevent shrinking
+  min-width: 100px; // Set a minimum width
+  max-width: 150px; // Set a maximum width
+  width: auto; // Allow flexible width
+  height: 50px;
+  margin: 0 5px;
+}
+
+.submit {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 30px;
+  margin-top: 30px;
+}
+
+.submit-button {
+  padding: 12px 24px;
+  font-size: 16px;
+  width: 100%;
+  transition: background-color 0.3s, transform 0.1s;
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  &:not(:disabled):hover {
+    transform: translateY(-2px);
+  }
+}
+
+.feedback-container {
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #2c3e50;
+  }
+  p {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+}
+
+.blank-box {
+  display: inline-flex;
+  min-width: 100px;
+  height: 30px;
+  background-color: #e6e6e6;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 5px;
+  vertical-align: middle; // Add this line
+  flex: 0 0 auto;
+  max-width: 150px;
+}
+
+.options-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.word-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 50px;
+  background-color: lightgray;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: move;
+  // Remove any additional padding or margin that may affect sizing
+  padding: 0;
+  margin: 0;
+
+  // Prevent text overflow
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  .image-option {
+    max-width: 100%;
+    max-height: 50px; // Adjust this value as needed
+    object-fit: contain;
+  }
+    &.in-table-cell {
+    margin: 0;
+  }
+}
+
+// Adjust images to fit perfectly within word-box
+.word-box img, .blank-box img {
+  max-width: 90%; // Reduce slightly to accommodate padding and borders
+  max-height: 50px;
+  object-fit: contain;
+}
+
+// Ensure that text within word-boxes doesn't exceed boundaries
+.word-box span, .blank-box span {
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 4px;
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+              0 8px 10px 1px rgba(0, 0, 0, 0.14),
+              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+  color: #666;
+}
+.blank-box.cdk-drop-list-dragged-over {
+  border-color: #3498db; // Blue dashed border
+  background-color: rgba(52, 152, 219, 0.1); // Light blue background
+  transition: border-color 0.3s, background-color 0.3s;
+}
+// Ensure blanks have the same dimensions as options
+.table-blank-container, .blank-box {
+  width: 100px;   // Match the width of .word-box
+  height: 50px;   // Match the height of .word-box
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #ced4da;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  box-sizing: border-box;
+}
+
+// Adjust word-box within table cells to prevent overflow
+.table-blank-container .word-box.in-table-cell {
+  width: 100px;  // Ensure it matches .word-box
+  height: 50px;
+  margin: 0;
+}
+
+// Ensure images do not overflow their containers
+.dropped-image {
+  max-width: 100%;
+  max-height: 50px;
+  object-fit: contain;
+}

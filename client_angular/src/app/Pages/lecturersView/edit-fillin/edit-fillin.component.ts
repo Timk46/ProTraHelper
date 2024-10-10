@@ -2,7 +2,7 @@ import { Component, HostListener, SecurityContext, ViewChild } from '@angular/co
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BlankDTO, detailedQuestionDTO, FillinQuestionType, questionType } from '@DTOs/index';
+import { BlankDTO, detailedFillinBlankDTO, detailedQuestionDTO, FillinQuestionType, questionType } from '@DTOs/index';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -48,7 +48,7 @@ export class EditFillinComponent {
   private isEditBlanksModeActive = false;
   private currentTaskId?: number;
   private blankInfo = new Map<string, { id: number, word: string | null }>();
-  distractors: BlankDTO[] = [];
+  distractors: detailedFillinBlankDTO[] = [];
   distractorInput = '';
   isMarkDistractorModeActive = false;
   private currentPositionCounter: number = 0;
@@ -112,6 +112,7 @@ export class EditFillinComponent {
 
   private setContent() {
     if (this.thisQuestionType === questionType.FILLIN && this.detailedQuestionData) {
+      console.log('### Setting content:', this.detailedQuestionData.fillinQuestion?.content);
       this.fillinForm.patchValue({
         questionTitle: this.detailedQuestionData.name,
         questionDifficulty: this.detailedQuestionData.level.toString(),
@@ -123,7 +124,11 @@ export class EditFillinComponent {
         this.fillinForm.patchValue({
           fillinType: this.detailedQuestionData.fillinQuestion.taskType,
         });
-        this.generatedContent = this.sanitizeContent(new DOMParser().parseFromString(this.detailedQuestionData.fillinQuestion.content, 'text/html'));
+        //this.generatedContent = this.sanitizeContent(new DOMParser().parseFromString(this.detailedQuestionData.fillinQuestion.content, 'text/html'));
+        if (this.editorInstance) {
+          this.editorInstance.setContent(this.detailedQuestionData.fillinQuestion.content);
+        }
+        this.distractors = this.detailedQuestionData.fillinQuestion.blanks.filter(blank => blank.isDistractor);
       }
     }
   }
@@ -133,15 +138,15 @@ export class EditFillinComponent {
     console.log(this.thisQuestionType === questionType.FILLIN, this.fillinForm.valid, this.detailedQuestionData)
 
     const doc = new DOMParser().parseFromString(this.editorInstance.getContent(), 'text/html');
-    const distractors: BlankDTO[] = this.distractors;
-    const blanks: BlankDTO[] = this.processBlanks(doc);
+    const distractors: detailedFillinBlankDTO[] = this.distractors;
+    const blanks: detailedFillinBlankDTO[] = this.processBlanks(doc);
 
     if ( this.thisQuestionType === questionType.FILLIN && this.fillinForm.valid && this.detailedQuestionData && this.editorInstance.getContent().length > 0) {
       const newData: detailedQuestionDTO = {
         ...this.detailedQuestionData,
         name: this.fillinForm.value.questionTitle,
         level: parseInt(this.fillinForm.value.questionDifficulty),
-        type: this.fillinForm.value.questionType,
+        type: this.thisQuestionType,
         description: this.fillinForm.value.questionDescription,
         score: parseInt(this.fillinForm.value.questionScore),
         text: '', //this.questionField.getRawContent(),
@@ -154,7 +159,7 @@ export class EditFillinComponent {
           blanks: [...blanks, ...distractors].map(blank => {
             return {
               blankContent: blank.blankContent || '<missingStr>',
-              position: blank.position ? parseInt(blank.position) : -1,
+              position: blank.position ? blank.position : -1,
               isDistractor: blank.isDistractor || false,
               isCorrect: blank.isCorrect || false,
               //isImage: blank.isImage,
@@ -230,6 +235,7 @@ export class EditFillinComponent {
       swapColors: true,
       accept: () => {
         console.log('Cancel accepted');
+        this.editorInstance.destroy();
         this.router.navigate(['dashboard']);
       },
       decline: () => {
@@ -246,6 +252,7 @@ export class EditFillinComponent {
   protected logContent(): void {
     console.log(this.editorInstance);
     if (this.editorInstance) {
+      console.log('Curr content:', this.detailedQuestionData?.fillinQuestion?.content);
       console.log('Built DTO:', this.buildDTO());
     }
   }
@@ -838,8 +845,9 @@ export class EditFillinComponent {
     if (word && !this.distractors.some(d => d.blankContent === word)) {
       this.distractors.push({
         blankContent: word,
-        position: '-1',  // Use -1 to indicate it's a global distractor
-        isDistractor: true
+        position: -1,  // Use -1 to indicate it's a global distractor
+        isDistractor: true,
+        isCorrect: false
       });
       this.distractorInput = '';
     }
@@ -849,7 +857,7 @@ export class EditFillinComponent {
    * Removes a global distractor
    * @param {BlankDTO} distractor - The distractor to remove
    */
-  removeGlobalDistractor(distractor: BlankDTO): void {
+  removeGlobalDistractor(distractor: detailedFillinBlankDTO): void {
     const index = this.distractors.findIndex(d => d.blankContent === distractor.blankContent);
     if (index > -1) {
       this.distractors.splice(index, 1);
@@ -1452,8 +1460,8 @@ export class EditFillinComponent {
    * @param {Document} doc - The Document object containing the editor content
    * @returns {BlankDTO[]} An array of BlankDTO objects representing the processed blanks
    */
-  private processBlanks(doc: Document): BlankDTO[] {
-    const blanks: BlankDTO[] = [];
+  private processBlanks(doc: Document): detailedFillinBlankDTO[] {
+    const blanks: detailedFillinBlankDTO[] = [];
     let blankIndex = 0;
 
     // Remove empty paragraphs and paragraphs with only <br> tags
@@ -1474,10 +1482,11 @@ export class EditFillinComponent {
         return;
       }
 
-      const blankDto: BlankDTO = {
+      const blankDto: detailedFillinBlankDTO = {
         blankContent: word,
-        position: blankIndex.toString(),
-        isDistractor
+        position: blankIndex,
+        isDistractor,
+        isCorrect: true,
       };
 
       blanks.push(blankDto);

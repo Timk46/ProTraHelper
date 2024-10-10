@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Post, Param, Body, Req, UseGuards, Put} from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
-import { detailedFreetextQuestionDTO, detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, questionType } from '@DTOs/index';
+import { detailedFreetextQuestionDTO, detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, questionType, FillinQuestionDTO } from '@DTOs/index';
 import { roles, RolesGuard } from '@/auth/roles.guard';
 import { EditCodeService } from './edit-code.service';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
@@ -76,6 +76,12 @@ export class QuestionDataController {
     @Get('/freeTextQuestion/:questionId')
     async getFreeTextQuestion(@Param('questionId') questionId: number): Promise<freeTextQuestionDTO> {
         return this.qdFreetextService.getFreeTextQuestion(questionId);
+    }
+
+    @roles('ANY')
+    @Get('fillinQuestion/:fillinQuestionId')
+    async getFillinTask(@Param('fillinQuestionId') fillinQuestionId: number): Promise<FillinQuestionDTO> {
+        return this.questionDataService.getFillinTask(fillinQuestionId);
     }
 
     @roles('ANY')
