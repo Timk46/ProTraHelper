@@ -597,9 +597,9 @@ export class QuestionDataService {
 
         if (correctPositionAnswers.includes(userAnswer)) {
           userScore += 1;
-          feedbackDetails.push(`Blank ${blankPosition}: Correct`);
+          //feedbackDetails.push(`Blank ${blankPosition}: Correct`);
         } else {
-          feedbackDetails.push(`Blank ${blankPosition}: Incorrect`);
+          //feedbackDetails.push(`Blank ${blankPosition}: Incorrect`);
         }
 
       }

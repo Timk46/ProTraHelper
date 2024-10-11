@@ -61,6 +61,8 @@ import { McTaskCreationComponent } from "./Pages/contentView/contentElement/mc-t
 import { MCDescriptionDialogComponent } from "./Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component";
 import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-creation/score/score.component";
 import { FillinTaskComponent } from "./Pages/contentView/contentElement/fill-in-task/fill-in-task.component";
+import { FillinTaskNewComponent } from './Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
+import { DynamicBlankComponent } from './Pages/contentView/contentElement/fill-in-task-new/dynamic-blank/dynamic-blank.component';
 
 @NgModule({
     declarations: [
@@ -107,7 +109,9 @@ import { FillinTaskComponent } from "./Pages/contentView/contentElement/fill-in-
         ConfirmDialogComponent,
         McTaskCreationComponent,
         MCDescriptionDialogComponent,
-        MCScoreComponent
+        MCScoreComponent,
+        FillinTaskNewComponent,
+        DynamicBlankComponent
     ],
     imports: [
         ToastrModule.forRoot(),

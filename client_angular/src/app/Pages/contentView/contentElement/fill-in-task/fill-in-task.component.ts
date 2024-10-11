@@ -51,6 +51,9 @@ interface TaskViewData {
   description?: string;
 }
 
+/**
+ * @deprecated This component is deprecated and may be removed in future releases. Please use the new FillinTaskNewComponent instead.
+ */
 @Component({
   selector: 'app-fill-in-task',
   templateUrl: './fill-in-task.component.html',

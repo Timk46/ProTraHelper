@@ -291,8 +291,8 @@ export class EditFillinComponent {
      */
   private initializeEditorConfig(): void {
     this.editorConfig = {
-      plugins: 'link code table',
-      toolbar: 'undo redo | code | formatselect | bold italic | table | insertImage | markBlank | editBlanks | addQuestionDetails | newTask',
+      plugins: 'link code table textcolor colorpicker fontsize',
+      toolbar: 'undo redo | code | formatselect | forecolor backcolor | fontsize | bold italic | table | insertImage | markBlank',
       images_upload_url: 'linkToImages', // update to right path(!!!!)
       table_toolbar: '',
       table_cell_advtab: false,

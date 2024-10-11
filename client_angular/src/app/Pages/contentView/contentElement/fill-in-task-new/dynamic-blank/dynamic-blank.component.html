@@ -1,0 +1,16 @@
+
+<mat-form-field *ngIf="id && blankMode === fillinTypes.FillinText" subscriptSizing="dynamic" class="text-blank" appearance="outline">
+  <input matInput [id]="id" [(ngModel)]="answer" (ngModelChange)="onValueChange()" />
+</mat-form-field>
+
+<mat-form-field *ngIf="id && blankMode === fillinTypes.FillinDropdown" class="select-blank" appearance="outline">
+  <mat-select [id]="id" [(ngModel)]="answer" (ngModelChange)="onValueChange()">
+    <mat-option *ngFor="let option of blankOptions" [value]="option">
+      {{ option }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+
+
+
