@@ -4,11 +4,26 @@
   </div>
 
   <div class="question-container">
-    {{ fillinQuestionData.question.text }}
+    {{ fillinQuestionData.question.text || 'Fülle die Lücken aus!' }}
   </div>
 
   <div class="content-area">
     <div [innerHTML]="processedContent"></div>
+  </div>
+
+  <div
+    *ngIf="fillinQuestionData.taskType === fillinTypes.FillinDrag"
+    cdkDropList id="drag-drop-global-list"
+    cdkDropListOrientation="horizontal"
+    class="drag-list"
+    [cdkDropListConnectedTo]="gapIds"
+    [cdkDropListData]="possibleAnswers"
+    (cdkDropListDropped)="drop($event)"
+    >
+    <div cdkDrag class="drag-item"  *ngFor="let item of possibleAnswers; let i = index">
+      <div class="custom-placeholder" *cdkDragPlaceholder></div>
+      <div class="drag-item-content" [innerHTML]="item"></div>
+    </div>
   </div>
 
   <div class="submit-container">
@@ -19,9 +34,9 @@
     <!-- <button *ngIf="submitDisabled && !isCorrect" mat-raised-button color="accent" (click)="onRetry()">
       Erneut versuchen
     </button> -->
-    <button *ngIf="submitDisabled && isCorrect"  mat-flat-button color="accent" (click)="onClose()">
+    <!-- <button *ngIf="submitDisabled && isCorrect"  mat-flat-button color="accent" (click)="onClose()">
       Schließen
-    </button>
+    </button> -->
   </div>
 
   <div class="feedback-container" *ngIf="feedbackText" [ngStyle]="{'background-color': feedbackColor}">

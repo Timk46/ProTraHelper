@@ -1,12 +1,62 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { detailedFillinBlankDTO, detailedFillinQuestionDTO } from '@Interfaces/detailedQuestion.dto';
-import { Injectable } from '@nestjs/common';
+import { detailedFillinBlankDTO, detailedFillinQuestionDTO, FillinQuestionDTO } from '@DTOs/index';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class QuestionDataFillinService {
 
   constructor(private prisma: PrismaService) {}
 
+  /**
+   * Get the fill-in-the-blank task for a specific question.
+   * @param {number} questionId
+   * @returns {Promise<FillinQuestionDTO>} The task
+   */
+  async getFillinQuestion(questionId: number): Promise<FillinQuestionDTO> {
+    console.log('getFillInTaskId', questionId);
+    const task = await this.prisma.fillinQuestion.findUnique({
+      where: {
+        questionId: Number(questionId)
+      },
+      include: {
+        blanks: true,
+        question: true
+      }
+    });
+
+    if (!task) {
+      throw new NotFoundException(`FillInTask for question ID ${questionId} not found`);
+    }
+
+    console.log('task', JSON.stringify(task));
+    console.log("tasktype: " + task.taskType);
+    return {
+      id: task.id,
+      content: task.content,
+      taskType: task.taskType ,
+      table: task.table,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+      blanks: task.blanks.map(blank => ({
+        id: blank.id,
+        blankContent: blank.blankContent,
+        position: blank.position.toString(),
+        fillinQuestionId: blank.fillinQuestionId
+      })),
+      question: {
+        id: task.question.id,
+        name: task.question.name,
+        description: task.question.description,
+        score: task.question.score,
+        type: task.question.type,
+        text: task.question.text,
+        level: task.question.level,
+        isApproved: task.question.isApproved,
+        originId: task.question.originId,
+        conceptNodeId: task.question.conceptNodeId
+      }
+    };
+  }
 
   /**
    * Creates a new fill-in-the-blank question and associates it with a given question ID.

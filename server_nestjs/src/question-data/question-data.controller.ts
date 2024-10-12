@@ -80,8 +80,8 @@ export class QuestionDataController {
 
     @roles('ANY')
     @Get('fillinQuestion/:fillinQuestionId')
-    async getFillinTask(@Param('fillinQuestionId') fillinQuestionId: number): Promise<FillinQuestionDTO> {
-        return this.questionDataService.getFillinTask(fillinQuestionId);
+    async getFillinQuestion(@Param('fillinQuestionId') fillinQuestionId: number): Promise<FillinQuestionDTO> {
+        return this.qdFillinService.getFillinQuestion(fillinQuestionId);
     }
 
     @roles('ANY')

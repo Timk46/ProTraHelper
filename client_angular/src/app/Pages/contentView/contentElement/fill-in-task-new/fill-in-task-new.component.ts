@@ -8,6 +8,7 @@ import { QuestionDataService } from 'src/app/Services/question/question-data.ser
 import { DynamicBlankComponent } from './dynamic-blank/dynamic-blank.component';
 import { Subject, takeUntil } from 'rxjs';
 import { FillinQuestionType } from '@DTOs/fillInType.enum';
+import { CdkDrag, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-fill-in-task-new',
@@ -18,6 +19,7 @@ export class FillinTaskNewComponent {
   @Output() submitClicked = new EventEmitter<any>();
 
   private destroy$ = new Subject<void>();
+  protected fillinTypes = FillinQuestionType;
   protected processedContent: SafeHtml | undefined;
   protected taskViewData: taskViewDTO;
   protected contentElementId: number;
@@ -27,6 +29,7 @@ export class FillinTaskNewComponent {
   protected isCorrect: boolean = false;
   protected submitDisabled: boolean = false;
   protected gapValues: UserFillinAnswer[] = [];
+  protected gapIds: string[] = [];
   protected possibleAnswers: string[] = [];
   protected feedbackText: userAnswerFeedbackDTO | undefined;
   protected feedbackColor: string = '';
@@ -60,6 +63,7 @@ export class FillinTaskNewComponent {
     const parser = new DOMParser();
     const doc = parser.parseFromString(this.fillinQuestionData.content, 'text/html');
     const gaps = doc.querySelectorAll('.generated-blank');
+    this.gapIds = Array.from(gaps).map(gap => "gap_" + gap.getAttribute('data-position') || '');
     this.possibleAnswers = this.fillinQuestionData.blanks.map(blank => blank.blankContent || '<missingStr>');
 
     gaps.forEach((gap, index) => {
@@ -84,12 +88,16 @@ export class FillinTaskNewComponent {
     const gapElements = this.viewContainerRef.element.nativeElement.querySelectorAll('app-dynamic-blank');
 
     gapElements.forEach((element: HTMLElement) => {
-      if (element.getAttribute('id') === null || !this.fillinQuestionData) return;
-      const componentRef = this.viewContainerRef.createComponent(DynamicBlankComponent);
+      if (element.getAttribute('id') === null || !this.fillinQuestionData || !this.fillinQuestionData.taskType) return;
 
+      const componentRef = this.viewContainerRef.createComponent(DynamicBlankComponent);
       componentRef.instance.id = element.getAttribute('id');
       componentRef.instance.blankMode = this.fillinQuestionData.taskType || FillinQuestionType.FillinText;
-      if (this.fillinQuestionData.taskType === FillinQuestionType.FillinDropdown) componentRef.instance.blankOptions = this.possibleAnswers;
+      componentRef.instance.otherBlankIds = this.gapIds;
+      if (this.fillinQuestionData.taskType === FillinQuestionType.FillinDropdown
+      ) {
+        componentRef.instance.blankOptions = [...this.possibleAnswers]
+      }
 
       this.gapValues.push({ position: element.getAttribute('id')!.slice(4), answer: '' }); // remove 'gap_' from id and add to gapValues
 
@@ -116,6 +124,18 @@ export class FillinTaskNewComponent {
     const totalScore = this.fillinQuestionData.question.score!;
     this.feedbackColor = score === totalScore ? '#a3be8c' :
                          score >= totalScore * 0.5 ? '#ffa500' : '#ff0000';
+  }
+
+  drop(event: CdkDragDrop<string[]>) {
+    console.log('outer drop event:', event);
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.previousContainer.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(event.previousContainer.data,
+                        event.container.data,
+                        event.previousIndex,
+                        event.currentIndex);
+    }
   }
 
   onLog(){
