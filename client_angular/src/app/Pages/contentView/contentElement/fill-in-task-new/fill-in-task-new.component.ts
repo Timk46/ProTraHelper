@@ -64,7 +64,11 @@ export class FillinTaskNewComponent {
     const doc = parser.parseFromString(this.fillinQuestionData.content, 'text/html');
     const gaps = doc.querySelectorAll('.generated-blank');
     this.gapIds = Array.from(gaps).map(gap => "gap_" + gap.getAttribute('data-position') || '');
-    this.possibleAnswers = this.fillinQuestionData.blanks.map(blank => blank.blankContent || '<missingStr>');
+    if (this.fillinQuestionData.taskType === FillinQuestionType.FillinDropdown) {
+      this.possibleAnswers = Array.from(new Set(this.fillinQuestionData.blanks.map(blank => blank.blankContent || '<missingStr>')));
+    } else {
+      this.possibleAnswers = this.fillinQuestionData.blanks.map(blank => blank.blankContent || '<missingStr>');
+    }
 
     gaps.forEach((gap, index) => {
       const id = gap.getAttribute('data-position');
