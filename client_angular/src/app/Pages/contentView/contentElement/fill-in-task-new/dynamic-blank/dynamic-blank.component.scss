@@ -1,3 +1,8 @@
+.fitting {
+  margin-left: 2px;
+  margin-right: 5px;
+}
+
 .text-blank {
   display: inline-flex;
   align-items: center;
@@ -8,7 +13,7 @@
 
 /* drag and drop */
 
-.drag-list {
+.drag-blank {
   width: auto;
   min-width: 100px;
   border: solid 1px #ccc;
@@ -59,6 +64,6 @@
   border: none;
 }
 
-.drag-list.cdk-drop-list-dragging .drag-item:not(.cdk-drag-placeholder) {
+.drag-blank.cdk-drop-list-dragging .drag-item:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
