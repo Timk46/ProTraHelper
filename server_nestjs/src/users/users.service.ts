@@ -19,7 +19,7 @@ export class UsersService {
       data: {
         firstname: 'casUSER', // we only get university id number but no name or mail
         lastname: 'UniSiegen',
-        email: email,
+        email: email.toLowerCase(), // to lowercase to prevent multiple Accounts by caslogin (students cant use big or small g in g-number in unisono)
         password: bcrypt.hashSync(
           email + process.env.CAS_PW_SECRET_KEY, // all cas users get a hash based on email and a secret server salt
           bcrypt.genSaltSync(10),
@@ -36,7 +36,7 @@ export class UsersService {
     });
 
     // Add the user to the default subject (assuming subject with id 1 is the default)
-    await this.addUserToSubject(user.id, 1, 'STUDENT', false);
+    await this.addUserToSubject(user.id, 1, 'STUDENT', false); // 1 is AuD
 
     this.logger.debug(`CAS user created: ${JSON.stringify(user)}`);
     return this.mapToUserDTO(user);
@@ -71,7 +71,7 @@ export class UsersService {
 
   async findOne(email: string): Promise<UserDTO | null> {
     const user = await this.prisma.user.findUnique({
-      where: { email: email },
+      where: { email: email.toLowerCase() }, // to lowercase to prevent multiple Accounts by caslogin (students cant use big or small g in g-number in unisono)
       include: {
         userSubjects: {
           include: {
@@ -104,6 +104,8 @@ export class UsersService {
     return this.mapToUserDTO(user);
   }
 
+  // If users can register later with their own e-mail, this may only be written in lowercase. This is because when searching for a user by email, the email is set to lowercase.
+  // Currently this is not a problem, as all logins by mail are only possible through the accounts created in the seed (these are already lowercase)
   async createUser(
     email: string,
     firstName: string,
