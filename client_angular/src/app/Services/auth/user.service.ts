@@ -7,6 +7,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
+interface SubjectInfo {
+  subjectId: number;
+  subjectname: string;
+  role: string;
+  registeredForSL: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -60,6 +67,20 @@ export class UserService {
         }
       });
     });
+  }
+
+  /**
+   * Checks if the user is registered for the specified subject
+   * @param subjectName The name of the subject to check
+   * @returns { boolean } A boolean indicating whether the user is registered
+   */
+  isRegisteredForSubject(subjectName: string): boolean {
+    const decodedToken = this.decodeAccessToken();
+    if (decodedToken && decodedToken.subjects) {
+      const subject = decodedToken.subjects.find((s: SubjectInfo) => s.subjectname === subjectName);
+      return subject ? subject.registeredForSL : false;
+    }
+    return false;
   }
 
   /**

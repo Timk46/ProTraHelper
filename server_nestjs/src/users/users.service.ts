@@ -26,7 +26,13 @@ export class UsersService {
         ),
         globalRole: 'STUDENT', // Set default role to STUDENT
       },
-      include: { userSubjects: true },
+      include: {
+        userSubjects: {
+          include: {
+            subject: true
+          }
+        }
+      },
     });
 
     // Add the user to the default subject (assuming subject with id 1 is the default)
@@ -37,14 +43,28 @@ export class UsersService {
   }
 
   async findAll(): Promise<UserDTO[]> {
-    const users = await this.prisma.user.findMany({ include: { userSubjects: true } });
+    const users = await this.prisma.user.findMany({
+      include: {
+        userSubjects: {
+          include: {
+            subject: true
+          }
+        }
+      }
+    });
     return users.map(this.mapToUserDTO);
   }
 
   async findOneById(userId: number): Promise<UserDTO | null> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { userSubjects: true }
+      include: {
+        userSubjects: {
+          include: {
+            subject: true
+          }
+        }
+      }
     });
     return user ? this.mapToUserDTO(user) : null;
   }
@@ -52,7 +72,13 @@ export class UsersService {
   async findOne(email: string): Promise<UserDTO | null> {
     const user = await this.prisma.user.findUnique({
       where: { email: email },
-      include: { userSubjects: true }
+      include: {
+        userSubjects: {
+          include: {
+            subject: true
+          }
+        }
+      }
     });
     if (user) {
       return this.mapToUserDTO(user);
@@ -67,7 +93,13 @@ export class UsersService {
     this.logger.debug(`Deleting user with email: ${email}`);
     const user = await this.prisma.user.delete({
       where: { email: email },
-      include: { userSubjects: true },
+      include: {
+        userSubjects: {
+          include: {
+            subject: true
+          }
+        }
+      },
     });
     return this.mapToUserDTO(user);
   }
@@ -85,7 +117,13 @@ export class UsersService {
         lastname: lastName,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
       },
-      include: { userSubjects: true },
+      include: {
+        userSubjects: {
+          include: {
+            subject: true
+          }
+        }
+      },
     });
 
     // Add the user to the default subject (assuming subject with id 1 is the default)
@@ -101,6 +139,9 @@ export class UsersService {
         subjectSpecificRole: role,
         registeredForSL: registeredForSL,
       },
+      include: {
+        subject: true
+      }
     });
     return this.mapToUserSubjectDTO(userSubject);
   }
@@ -218,6 +259,7 @@ export class UsersService {
   private mapToUserSubjectDTO(userSubject: any): UserSubjectDTO {
     return {
       id: userSubject.id,
+      name: userSubject.subject.name,
       userId: userSubject.userId,
       subjectId: userSubject.subjectId,
       subjectSpecificRole: userSubject.subjectSpecificRole,

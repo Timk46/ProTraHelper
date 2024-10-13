@@ -98,6 +98,7 @@ export class AuthService {
       globalRole: user.globalRole,
       subjects: user.userSubjects?.map(us => ({
         subjectId: us.subjectId,
+        subjectname: us.name,
         role: us.subjectSpecificRole,
         registeredForSL: us.registeredForSL
       })) || []

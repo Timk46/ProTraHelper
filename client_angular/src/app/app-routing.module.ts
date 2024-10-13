@@ -23,25 +23,28 @@ import { EditCodingComponent } from './Pages/lecturersView/edit-coding/edit-codi
 import { EditFillinComponent } from './Pages/lecturersView/edit-fillin/edit-fillin.component';
 import { AdminGuard } from './Guards/is-admin.guard';
 import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
+import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
+import { RegisteredForSubjectGuard } from './Guards/registered-for-subject.guard';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
-  { path: 'app', component: AppComponent,},
-  { path: 'contentBoard', component: ContentBoardComponent, canActivate: [LoggedInGuard] },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [LoggedInGuard] },
-  { path: 'conceptOverview', component: ConceptOverviewComponent, canActivate: [LoggedInGuard] },
-  { path: 'discussion', component: DiscussionListComponent, canActivate: [LoggedInGuard] },
-  { path: 'codeTask', component: CodeTaskComponent, canActivate: [LoggedInGuard] },
-  { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent, canActivate: [LoggedInGuard] },
-  { path: 'mcTask', component: McTaskComponent, canActivate: [LoggedInGuard] },
-  { path: 'graph', component: GraphComponent, canActivate: [LoggedInGuard] },
-  { path: 'chatbot', component: ChatBotComponent, canActivate: [LoggedInGuard] },
-  { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard] },
-  { path: 'discussion-view/:discussionId', component: DiscussionViewComponent, canActivate: [LoggedInGuard] },
-  { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent },
+  { path: 'app', component: AppComponent },
+  { path: 'not-registered', component: NotRegisteredComponent, canActivate: [LoggedInGuard] },
+  { path: 'contentBoard', component: ContentBoardComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  { path: 'conceptOverview', component: ConceptOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  { path: 'discussion', component: DiscussionListComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  { path: 'codeTask', component: CodeTaskComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  { path: 'mcTask', component: McTaskComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  { path: 'graph', component: GraphComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  { path: 'chatbot', component: ChatBotComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  { path: 'discussion-view/:discussionId', component: DiscussionViewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
 
-  { path: 'mcqcreation', component: McTaskCreationComponent, canActivate: [LoggedInGuard]},
+  { path: 'mcqcreation', component: McTaskCreationComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard]},
 
   // lecturers view
   { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [LoggedInGuard, AdminGuard]},
@@ -53,7 +56,7 @@ const routes: Routes = [
   { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
 
   // Tutor-Kai as lazy loaded module (https://medium.com/@jaydeepvpatil225/feature-module-with-lazy-loading-in-angular-15-53bb8e15d193) Maybe we can use the same for UML Tasks?
-  { path: 'tutor-kai', loadChildren: () => import('./Modules/tutor-kai/tutor-kai.module').then(m => m.TutorKaiModule) },
+  { path: 'tutor-kai', loadChildren: () => import('./Modules/tutor-kai/tutor-kai.module').then(m => m.TutorKaiModule), canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
 
 ];
 @NgModule({

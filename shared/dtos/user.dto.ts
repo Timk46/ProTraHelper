@@ -11,6 +11,7 @@ export interface UserDTO {
 
 export interface UserSubjectDTO {
     id: number;
+    name: string;
     userId: number;
     subjectId: number;
     subjectSpecificRole: string;

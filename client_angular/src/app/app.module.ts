@@ -61,6 +61,9 @@ import { McTaskCreationComponent } from "./Pages/contentView/contentElement/mc-t
 import { MCDescriptionDialogComponent } from "./Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component";
 import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-creation/score/score.component";
 
+// Import NotRegisteredComponent
+import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
+
 @NgModule({
     declarations: [
         AppComponent,
@@ -105,7 +108,8 @@ import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-cre
         ConfirmDialogComponent,
         McTaskCreationComponent,
         MCDescriptionDialogComponent,
-        MCScoreComponent
+        MCScoreComponent,
+        NotRegisteredComponent // Add NotRegisteredComponent here
     ],
     imports: [
         ToastrModule.forRoot(),
