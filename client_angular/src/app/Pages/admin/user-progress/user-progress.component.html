@@ -1,0 +1,23 @@
+<div class="user-progress-container" *ngIf="userProgress">
+  <h2>User Progress Details PLACEHOLDER IMPLEMENTATION !!!!</h2>
+  <p>User ID: {{ userId }}</p>
+  <p>Total Progress: {{ userProgress.totalProgress | percent:'1.0-2' }}</p>
+
+  <h3>Subject Progress</h3>
+  <table mat-table [dataSource]="userProgress.subjects" class="mat-elevation-z8">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Subject Name</th>
+      <td mat-cell *matCellDef="let subject">{{ subject.name }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="progress">
+      <th mat-header-cell *matHeaderCellDef>Progress</th>
+      <td mat-cell *matCellDef="let subject">{{ subject.progress | percent:'1.0-2' }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="['name', 'progress']"></tr>
+    <tr mat-row *matRowDef="let row; columns: ['name', 'progress'];"></tr>
+  </table>
+</div>
+
+<p *ngIf="!userProgress">Loading user progress...</p>

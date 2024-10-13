@@ -38,6 +38,7 @@ import { VersionInterceptor } from './common/interceptors/version.interceptor';
 import { NotificationModule } from './notification/notification.module';
 import { ContentLinkerService } from './content-linker/content-linker.service';
 import { ContentLinkerModule } from './content-linker/content-linker.module';
+import { AdminModule } from './admin/admin.module'; // Add this line
 
 @Module({
   imports: [
@@ -58,7 +59,8 @@ import { ContentLinkerModule } from './content-linker/content-linker.module';
     EventLogModule,
     NotificationModule,
     ContentLinkerModule,
-    CodingQuestionGeneratorModule
+    CodingQuestionGeneratorModule,
+    AdminModule, // Add this line
   ],
   controllers: [
     AppController,
