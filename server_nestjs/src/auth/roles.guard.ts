@@ -48,15 +48,13 @@ export class RolesGuard implements CanActivate {
 
     const { user }: { user: User } = request;
 
-    console.log('Role required: ' + requiredRoles.toString());
-
     const globalRole = await this.getGlobalRole(user.id);
-    console.log('User role: ' + globalRole);
 
     if (requiredRoles.includes(globalRole)) {
       return true;
     }
     // else
+    console.log('User: ' + user.email + ' has Role: ' + globalRole + ' but needs Role: ' + requiredRoles.toString());
     return false;
   }
 

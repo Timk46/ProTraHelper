@@ -13,6 +13,11 @@ interface UserListItem {
   subjects: { id: number; name: string; registeredForSL: boolean }[];
 }
 
+interface Subject {
+  id: number;
+  name: string;
+}
+
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
@@ -21,6 +26,9 @@ interface UserListItem {
 export class UserListComponent implements OnInit, AfterViewInit {
   dataSource: MatTableDataSource<UserListItem> = new MatTableDataSource<UserListItem>([]);
   displayedColumns: string[] = ['email', 'id', 'kiFeedbackCount', 'chatBotMessageCount', 'totalProgress', 'subjects'];
+  subjects: Subject[] = [];
+  selectedSubject: number | null = null;
+  selectedFile: File | null = null;
 
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -28,17 +36,11 @@ export class UserListComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadSubjects();
   }
 
   ngAfterViewInit() {
     this.dataSource.sort = this.sort;
-    this.dataSource.sortingDataAccessor = (item, property) => {
-      switch(property) {
-        case 'id': return item.id;
-        case 'totalProgress': return item.totalProgress;
-        default: return (item as any)[property];
-      }
-    };
   }
 
   loadUsers(): void {
@@ -48,6 +50,15 @@ export class UserListComponent implements OnInit, AfterViewInit {
         this.dataSource.sort = this.sort;
       },
       (error: any) => console.error('Error loading users:', error)
+    );
+  }
+
+  loadSubjects(): void {
+    this.adminService.getSubjects().subscribe(
+      (subjects: Subject[]) => {
+        this.subjects = subjects;
+      },
+      (error: any) => console.error('Error loading subjects:', error)
     );
   }
 
@@ -67,5 +78,33 @@ export class UserListComponent implements OnInit, AfterViewInit {
       },
       (error: any) => console.error('Error toggling registeredForSL:', error)
     );
+  }
+
+  onFileSelected(event: Event): void {
+    const element = event.target as HTMLInputElement;
+    const fileList: FileList | null = element.files;
+    if (fileList) {
+      this.selectedFile = fileList[0];
+    }
+  }
+
+  uploadFile(): void {
+    if (this.selectedFile && this.selectedSubject !== null) {
+      const reader = new FileReader();
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const content = e.target?.result as string;
+        const emails = content.split(';').map(email => email.trim());
+        this.adminService.processEmailsForSubject(emails, this.selectedSubject as number).subscribe(
+          () => {
+            console.log('File processed successfully');
+            this.loadUsers(); // Reload the user list to reflect the changes
+          },
+          (error: any) => console.error('Error processing file:', error)
+        );
+      };
+      reader.readAsText(this.selectedFile);
+    } else {
+      console.error('No file selected or subject not chosen');
+    }
   }
 }

@@ -12,9 +12,9 @@ interface UserListItem {
   subjects: { id: number; name: string; registeredForSL: boolean }[];
 }
 
-interface UserProgress {
-  totalProgress: number;
-  subjects: { name: string; progress: number }[];
+interface Subject {
+  id: number;
+  name: string;
 }
 
 @Injectable({
@@ -29,11 +29,19 @@ export class AdminService {
     return this.http.get<UserListItem[]>(`${this.apiUrl}/users`);
   }
 
-  getUserTotalProgress(userId: number): Observable<UserProgress> {
-    return this.http.get<UserProgress>(`${this.apiUrl}/users/${userId}/progress`);
+  getUserTotalProgress(userId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/users/${userId}/progress`);
   }
 
   toggleRegisteredForSL(userId: number, subjectId: number, value: boolean): Observable<any> {
     return this.http.patch(`${this.apiUrl}/users/${userId}/subjects/${subjectId}`, { registeredForSL: value });
+  }
+
+  getSubjects(): Observable<Subject[]> {
+    return this.http.get<Subject[]>(`${this.apiUrl}/subjects`);
+  }
+
+  processEmailsForSubject(emails: string[], subjectId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/process-emails`, { emails, subjectId });
   }
 }

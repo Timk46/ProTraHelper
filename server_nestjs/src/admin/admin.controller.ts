@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Patch, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
+import { UsersService } from '../users/users.service';
 import { RolesGuard, roles } from '../auth/roles.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -7,7 +8,10 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @roles('ADMIN')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly usersService: UsersService
+  ) {}
 
   @Get('users')
   async getAllUsers() {
@@ -16,7 +20,7 @@ export class AdminController {
 
   @Get('users/:userId/progress')
   async getUserTotalProgress(@Param('userId') userId: string) {
-    return this.adminService.getUserTotalProgress(+userId);
+    return this.usersService.getUserTotalProgress(+userId);
   }
 
   @Patch('users/:userId/subjects/:subjectId')
@@ -26,5 +30,18 @@ export class AdminController {
     @Body('registeredForSL') registeredForSL: boolean,
   ) {
     return this.adminService.toggleRegisteredForSL(+userId, +subjectId, registeredForSL);
+  }
+
+  @Get('subjects')
+  async getSubjects() {
+    return this.adminService.getSubjects();
+  }
+
+  @Post('process-emails')
+  async processEmailsForSubject(
+    @Body('emails') emails: string[],
+    @Body('subjectId') subjectId: number,
+  ) {
+    return this.adminService.processEmailsForSubject(emails, subjectId);
   }
 }
