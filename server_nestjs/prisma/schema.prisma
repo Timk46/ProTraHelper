@@ -31,7 +31,7 @@ model User {
   userMCAnswer         UserMCAnswer[]
   Vote                 Vote[]
   anonymousUser        anonymousUser[]
-  modules              Module[]                     @relation("ModuleToUser")
+  userSubjects         UserSubject[]
 }
 
 model Module {
@@ -40,7 +40,6 @@ model Module {
   description String
   goals       ModuleConceptGoal[]
   subjects    Subject[]           @relation("ModuleToSubject")
-  users       User[]              @relation("ModuleToUser")
 }
 
 model ModuleConceptGoal {
@@ -57,6 +56,19 @@ model Subject {
   name        String   @unique
   description String
   modules     Module[] @relation("ModuleToSubject")
+  userSubjects UserSubject[]
+}
+
+model UserSubject {
+  id                 Int     @id @default(autoincrement())
+  userId             Int
+  subjectId          Int
+  subjectSpecificRole String
+  registeredForSL Boolean @default(false)
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject            Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subjectId])
 }
 
 model ConceptGraph {
@@ -586,6 +598,11 @@ enum GlobalRole {
   ADMIN
 }
 
+enum SubjectRole {
+  STUDENT
+  TEACHERASSIST
+  TEACHER
+}
 enum contentElementType {
   TEXT
   IMAGE

@@ -1,7 +1,9 @@
 CREATE EXTENSION IF NOT EXISTS vector;
-
 -- CreateEnum
 CREATE TYPE "GlobalRole" AS ENUM ('STUDENT', 'TEACHER', 'ADMIN');
+
+-- CreateEnum
+CREATE TYPE "SubjectRole" AS ENUM ('STUDENT', 'TEACHERASSIST', 'TEACHER');
 
 -- CreateEnum
 CREATE TYPE "contentElementType" AS ENUM ('TEXT', 'IMAGE', 'VIDEO', 'AUDIO', 'CODE', 'PDF', 'QUESTION');
@@ -49,6 +51,17 @@ CREATE TABLE "Subject" (
     "description" TEXT NOT NULL,
 
     CONSTRAINT "Subject_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UserSubject" (
+    "id" SERIAL NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "subjectId" INTEGER NOT NULL,
+    "subjectSpecificRole" TEXT NOT NULL,
+    "registeredForSL" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "UserSubject_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -574,12 +587,6 @@ CREATE TABLE "_ModuleToSubject" (
     "B" INTEGER NOT NULL
 );
 
--- CreateTable
-CREATE TABLE "_ModuleToUser" (
-    "A" INTEGER NOT NULL,
-    "B" INTEGER NOT NULL
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -588,6 +595,9 @@ CREATE UNIQUE INDEX "Module_name_key" ON "Module"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Subject_name_key" ON "Subject"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserSubject_userId_subjectId_key" ON "UserSubject"("userId", "subjectId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ConceptGraph_rootId_key" ON "ConceptGraph"("rootId");
@@ -628,12 +638,6 @@ CREATE UNIQUE INDEX "_ModuleToSubject_AB_unique" ON "_ModuleToSubject"("A", "B")
 -- CreateIndex
 CREATE INDEX "_ModuleToSubject_B_index" ON "_ModuleToSubject"("B");
 
--- CreateIndex
-CREATE UNIQUE INDEX "_ModuleToUser_AB_unique" ON "_ModuleToUser"("A", "B");
-
--- CreateIndex
-CREATE INDEX "_ModuleToUser_B_index" ON "_ModuleToUser"("B");
-
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_currentconceptNodeId_fkey" FOREIGN KEY ("currentconceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -642,6 +646,12 @@ ALTER TABLE "ModuleConceptGoal" ADD CONSTRAINT "ModuleConceptGoal_conceptNodeId_
 
 -- AddForeignKey
 ALTER TABLE "ModuleConceptGoal" ADD CONSTRAINT "ModuleConceptGoal_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserSubject" ADD CONSTRAINT "UserSubject_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserSubject" ADD CONSTRAINT "UserSubject_subjectId_fkey" FOREIGN KEY ("subjectId") REFERENCES "Subject"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ConceptGraph" ADD CONSTRAINT "ConceptGraph_rootId_fkey" FOREIGN KEY ("rootId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -843,9 +853,3 @@ ALTER TABLE "_ModuleToSubject" ADD CONSTRAINT "_ModuleToSubject_A_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "_ModuleToSubject" ADD CONSTRAINT "_ModuleToSubject_B_fkey" FOREIGN KEY ("B") REFERENCES "Subject"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_ModuleToUser" ADD CONSTRAINT "_ModuleToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_ModuleToUser" ADD CONSTRAINT "_ModuleToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

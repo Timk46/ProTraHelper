@@ -1,3 +1,6 @@
+/* CURRENTLY OUTDATED
+
+
 import { PrismaClient, contentElementType } from '@prisma/client';
 import { WorkSheet, utils } from 'xlsx';
 import { faker } from '@faker-js/faker';
@@ -1319,10 +1322,10 @@ async function createFile(
 
 export const seedOFP = async () => {
     console.log('Creating everything...');
-  
+
     // Create Files
     createFilesOFP();
-  
+
     const moduleInformatik = await prisma.module.create({
       data: {
         id: 1,
@@ -1330,7 +1333,7 @@ export const seedOFP = async () => {
         description: 'Beschreibung für den Studiengang Informatik.',
       },
     });
-  
+
     const subjectOFP = await prisma.subject.create({
       data: {
         id: 1,
@@ -1339,7 +1342,7 @@ export const seedOFP = async () => {
         modules: { connect: { id: moduleInformatik.id } },
       },
     });
-  
+
     // Admin
     const adminUser = await prisma.user.create({
       data: {
@@ -1351,14 +1354,14 @@ export const seedOFP = async () => {
         modules: { connect: [{ id: moduleInformatik.id }] },
       },
     });
-  
+
     // seed mor users for other usecases (evaluation etc.)
     await seedUser(moduleInformatik.id);
-  
+
     // More users
     const numberOfUsers = 10;
     const createdUsers = [];
-  
+
     for (let i = 0; i < numberOfUsers; i++) {
       const user = await prisma.user.create({
         data: {
@@ -1374,7 +1377,7 @@ export const seedOFP = async () => {
       });
       createdUsers.push(user);
     }
-  
+
     // root node
     const conceptNode = await prisma.conceptNode.create({
       data: {
@@ -1383,7 +1386,7 @@ export const seedOFP = async () => {
         description: 'root description',
       },
     });
-  
+
     await prisma.userConcept.create({
       data: {
         user: { connect: { id: adminUser.id } },
@@ -1413,7 +1416,7 @@ export const seedOFP = async () => {
         level: 10,
       },
     });
-  
+
     // ConceptGraph
     const conceptGraph = await prisma.conceptGraph.create({
       data: {
@@ -1421,21 +1424,21 @@ export const seedOFP = async () => {
         root: { connect: { id: conceptNode.id } },
       },
     });
-  
+
     // TODO: Put this in a separate function
     console.log('Importing Concepts from CSV...');
-  
+
     const ofpData = [];
-  
+
     const filePath = process.env.FILE_PATH + 'Kompetenzraster_OFP.csv';
     if (fs.existsSync(filePath)) {
-  
+
       //in case the topic column for the Content is empty we need to save the last topic
       let lastTopic = 'No topic found!';
-  
-      const fs = require('fs');      
+
+      const fs = require('fs');
       const fastCsv = require('fast-csv');
-  
+
       const options = {
         delimiter: '§',
         headers: [
@@ -1459,9 +1462,9 @@ export const seedOFP = async () => {
         skipRows: 1,
         trim: true,
       };
-  
+
       const readableStream = fs.createReadStream(filePath);
-  
+
       fastCsv.parseStream(readableStream, options)
         .on('data', (data) => {
           // console.log(data);
@@ -1497,17 +1500,17 @@ export const seedOFP = async () => {
           await seedFreetext(adminUser.id);
           console.log('Importing Tasks Done!');
         });
-  
-  
-  
+
+
+
     } else {
       console.log(
         'To import ContentNodes please save "Kompetenzraster.csv" in the storage folder!',
       );
     }
-  
+
     console.log('Creating rest from Seed.ts...');
-  
+
     // update user to have a current concept node
     await prisma.user.updateMany({
       data: {
@@ -1529,3 +1532,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+*/

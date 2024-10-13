@@ -1,79 +1,134 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import  { globalRole } from '@DTOs/roles.enum';
+import { globalRole } from '@DTOs/roles.enum';
+import { UserDTO, UserSubjectDTO } from '../../../shared/dtos/user.dto';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     private prisma: PrismaService) {}
 
   // The Cas User will be created or updated after each login
-  createCASuser(username: string) {
-    return this.prisma.user.create({
+  async createCASuser(email: string): Promise<UserDTO> {
+    //this.logger.debug(`Creating CAS user with email: ${email}`);
+    const user = await this.prisma.user.create({
       data: {
         firstname: 'casUSER', // we only get university id number but no name or mail
         lastname: 'UniSiegen',
-        email: username,
+        email: email,
         password: bcrypt.hashSync(
-          username + process.env.CAS_PW_SECRET_KEY, // all cas users get a hash based on username and a secret server salt
+          email + process.env.CAS_PW_SECRET_KEY, // all cas users get a hash based on email and a secret server salt
           bcrypt.genSaltSync(10),
         ),
-        modules: { connect: [{ id: 1 }] }, // ToDo: Make dynamic
-        // GlobalRole entfernt, da es nicht im User-Modell definiert ist und der Standardwert STUDENT automatisch zugewiesen wird
+        globalRole: 'STUDENT', // Set default role to STUDENT
       },
+      include: { userSubjects: true },
     });
+
+    // Add the user to the default subject (assuming subject with id 1 is the default)
+    await this.addUserToSubject(user.id, 1, 'STUDENT', false);
+
+    this.logger.debug(`CAS user created: ${JSON.stringify(user)}`);
+    return this.mapToUserDTO(user);
   }
 
-  findAll() {
-    //returns all users
-    return this.prisma.user.findMany();
+  async findAll(): Promise<UserDTO[]> {
+    const users = await this.prisma.user.findMany({ include: { userSubjects: true } });
+    return users.map(this.mapToUserDTO);
   }
 
-  findOneById(userId: number) {
-    //returns one user
-    console.log('UsersService.findOne() with id ' + userId);
-    return this.prisma.user.findUnique({ where: { id: userId } });
+  async findOneById(userId: number): Promise<UserDTO | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { userSubjects: true }
+    });
+    return user ? this.mapToUserDTO(user) : null;
   }
 
-  findOne(email: string) {
-    //returns one user
-    console.log('UsersService.findOne()');
-    return this.prisma.user.findUnique({ where: { email: email } });
+  async findOne(email: string): Promise<UserDTO | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: email },
+      include: { userSubjects: true }
+    });
+    if (user) {
+      return this.mapToUserDTO(user);
+    } else {
+      this.logger.debug(`User not found for email: ${email}`);
+      return null;
+    }
   }
 
   //deletes one user, based on email -- needs testing
-  deleteUser(email: string) {
-    return this.prisma.user.delete({
-      where: {
-        email: email,
-      },
+  async deleteUser(email: string): Promise<UserDTO> {
+    this.logger.debug(`Deleting user with email: ${email}`);
+    const user = await this.prisma.user.delete({
+      where: { email: email },
+      include: { userSubjects: true },
     });
+    return this.mapToUserDTO(user);
   }
 
-  createUser(
+  async createUser(
     email: string,
     firstName: string,
     lastName: string,
     password: string,
-  ) {
-    console.log(
-      'createUser() in users.service.ts with arguments email: ' +
-        email +
-        ', firstName: ' +
-        firstName +
-        ', lastName: ' +
-        lastName,
-    );
-    return this.prisma.user.create({
+  ): Promise<UserDTO> {
+    const user = await this.prisma.user.create({
       data: {
         email: email,
         firstname: firstName,
         lastname: lastName,
         password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
       },
+      include: { userSubjects: true },
     });
+
+    // Add the user to the default subject (assuming subject with id 1 is the default)
+    await this.addUserToSubject(user.id, 1, 'STUDENT', false);
+    return this.mapToUserDTO(user);
+  }
+
+  async addUserToSubject(userId: number, subjectId: number, role: string, registeredForSL: boolean): Promise<UserSubjectDTO> {
+    const userSubject = await this.prisma.userSubject.create({
+      data: {
+        userId: userId,
+        subjectId: subjectId,
+        subjectSpecificRole: role,
+        registeredForSL: registeredForSL,
+      },
+    });
+    return this.mapToUserSubjectDTO(userSubject);
+  }
+
+  async updateUserSubjectRole(userId: number, subjectId: number, newRole: string): Promise<number> {
+    const result = await this.prisma.userSubject.updateMany({
+      where: {
+        userId: userId,
+        subjectId: subjectId,
+      },
+      data: {
+        subjectSpecificRole: newRole,
+      },
+    });
+    return result.count;
+  }
+
+  async updateUserSubjectRegistration(userId: number, subjectId: number, registeredForSL: boolean): Promise<number> {
+    const result = await this.prisma.userSubject.updateMany({
+      where: {
+        userId: userId,
+        subjectId: subjectId,
+      },
+      data: {
+        registeredForSL: registeredForSL,
+      },
+    });
+    return result.count;
   }
 
   /**
@@ -94,9 +149,7 @@ export class UsersService {
   }
 
   async getUserTotalProgress(userId: number): Promise<number> {
-    console.log('userId: ' + userId);
 
-    //gehe alle contnet elements durch und schaue, ob sie abgeschlossen sind
     let maxProgress = 0;
     let userTotalProgress = 0;
     const contentElements = await this.prisma.contentElement.findMany({
@@ -117,8 +170,6 @@ export class UsersService {
       },
     });
 
-    console.log('User Content Elements Progress: ' + userContentElementsProgress);
-
     for (const contentElement of contentElements) {
       if(contentElement.type === 'QUESTION') {
         maxProgress = maxProgress + contentElement.question.level;
@@ -136,11 +187,41 @@ export class UsersService {
       }
     }
 
-    console.log('Max Progress: ' + maxProgress);
-    console.log('User Total Progress: ' + userTotalProgress);
-
     const userPercentage = userTotalProgress / maxProgress * 100;
-    console.log('User Total Progress: ' + userPercentage);
     return userPercentage;
+  }
+
+  async validateUserPassword(email: string, password: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: email },
+      select: { password: true }
+    });
+    if (!user) {
+      this.logger.debug(`User not found for email: ${email}`);
+      return false;
+    }
+    const isValid = await bcrypt.compare(password, user.password);
+    return isValid;
+  }
+
+  private mapToUserDTO(user: any): UserDTO {
+    return {
+      id: user.id,
+      email: user.email,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      globalRole: user.globalRole,
+      userSubjects: user.userSubjects ? user.userSubjects.map(this.mapToUserSubjectDTO) : [],
+    };
+  }
+
+  private mapToUserSubjectDTO(userSubject: any): UserSubjectDTO {
+    return {
+      id: userSubject.id,
+      userId: userSubject.userId,
+      subjectId: userSubject.subjectId,
+      subjectSpecificRole: userSubject.subjectSpecificRole,
+      registeredForSL: userSubject.registeredForSL,
+    };
   }
 }

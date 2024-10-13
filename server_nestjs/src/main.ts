@@ -1,15 +1,21 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as bodyParser from 'body-parser';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'debug', 'log', 'verbose'],
+  });
   app.enableCors({
     allowedHeaders: ['Authorization', 'Content-Type', 'X-Filename', 'X-App-Version'],
     exposedHeaders: ['X-Filename', 'X-App-Version'],  // We need to expose this header so that Angular can access it.
   });
   app.use(bodyParser.json({ limit: '5mb' }));
   app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
-  await app.listen(3000);
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  Logger.log(`Application is running on: http://localhost:${port}`);
 }
 bootstrap();

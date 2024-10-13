@@ -1,10 +1,10 @@
-import { Controller, Request, Res, Get, Post, UseGuards } from '@nestjs/common';
+import { Controller, Request, Res, Get, Post, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { Response as ExpressResponse } from 'express';
 import { LocalAuthGuard } from './local-auth.guard';
 import { AuthService } from './auth.service';
-import { User } from '@prisma/client';
 import { CasAuthGuard } from './cas-auth.guard';
 import { Public } from '../public.decorator';
+import { UserDTO } from '../../../shared/dtos/user.dto';
 
 /**
  * This class is used to define the auth routes of the application
@@ -17,10 +17,13 @@ export class AuthController {
   @UseGuards(CasAuthGuard)
   @Get('cas')
   async casLogin(
-    @Request() req: { user: User },
+    @Request() req: { user?: Partial<UserDTO> },
     @Res() res: ExpressResponse,
   ): Promise<void> {
-    const tokens = await this.authService.loginCAS(req.user.id.toString());
+    if (!req.user || !req.user.email) {
+      throw new UnauthorizedException('User email not provided');
+    }
+    const tokens = await this.authService.loginCAS(req.user.email);
 
     // Redirect to the website with tokens as URL parameters - not super secure, but cant send in body because its not a request by the client
     res.redirect(
@@ -36,8 +39,8 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req: { user: User }) {
+  async login(@Request() req: { user: UserDTO }) {
+    // The LocalAuthGuard has already validated the user, so we can directly login
     return this.authService.login(req.user);
   }
-
 }
