@@ -308,6 +308,7 @@ model UserAnswer {
   userId               Int
   questionId           Int
   userFreetextAnswer   String?
+  userGraphAnswer      Json?
   feedbacks            Feedback[]
   question             Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
   user                 User                   @relation(fields: [userId], references: [id])
