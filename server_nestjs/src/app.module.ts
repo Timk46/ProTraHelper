@@ -39,6 +39,8 @@ import { VersionInterceptor } from './common/interceptors/version.interceptor';
 import { NotificationModule } from './notification/notification.module';
 import { ContentLinkerService } from './content-linker/content-linker.service';
 import { ContentLinkerModule } from './content-linker/content-linker.module';
+import { GraphSolutionEvaluationService } from './graph-solution-evaluation/graph-solution-evaluation.service';
+import { GraphSolutionEvaluationModule } from './graph-solution-evaluation/graph-solution-evaluation.module';
 
 @Module({
   imports: [
@@ -60,7 +62,8 @@ import { ContentLinkerModule } from './content-linker/content-linker.module';
     EventLogModule,
     NotificationModule,
     ContentLinkerModule,
-    CodingQuestionGeneratorModule
+    CodingQuestionGeneratorModule,
+    GraphSolutionEvaluationModule
   ],
   controllers: [
     AppController,
@@ -83,6 +86,7 @@ import { ContentLinkerModule } from './content-linker/content-linker.module';
       useClass: JwtAuthGuard, // All Routes are protected by JWTGuard. Users only get Tokens by using CAS of the university
     },
     ContentLinkerService,
+    GraphSolutionEvaluationService,
   ],
 })
 

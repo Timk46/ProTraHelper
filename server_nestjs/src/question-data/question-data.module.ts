@@ -13,6 +13,7 @@ import { QuestionDataCodeService } from './question-data-code/question-data-code
 import { QuestionDataFillinService } from './question-data-fillin/question-data-fillin.service';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
+import { GraphSolutionEvaluationModule } from '@/graph-solution-evaluation/graph-solution-evaluation.module';
 
 @Module({
   providers: [
@@ -32,6 +33,7 @@ import { QuestionDataGraphService } from './question-data-graph/question-data-gr
     ContentModule,
     UserConceptModule,
     NotificationModule,
+    GraphSolutionEvaluationModule,
   ],
   exports: [
     QuestionDataService,
