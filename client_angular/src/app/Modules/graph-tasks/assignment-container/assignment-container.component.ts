@@ -6,6 +6,7 @@ import { GraphTaskService } from '../services/graph-task.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { graphQuestionDTO, QuestionDTO, questionType } from '@DTOs/question.dto';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { UserAnswerDataDTO } from '@DTOs/userAnswer.dto';
 
 
 @Component({
@@ -25,9 +26,8 @@ export class AssignmentContainerComponent implements OnInit {
   };
 
   public solutionGraph: IGraphDataJSON[] = [];
-
-  // public feedback$!: Observable<string>;
-  public feedback: string = 'feedback';
+  
+  public feedback: string = '';
 
   thisQuestionType = questionType.GRAPH;
   
@@ -77,11 +77,33 @@ export class AssignmentContainerComponent implements OnInit {
   }
 
   onSubmitButtonClick() {
+    
+    if (!this.graphQuestionData) { return; }
+
     // To save workpace content if it is in solution mode
     this.updateWorkspace();
     
+    //this.isSending = true;
+    // this.answerText = text;
+    this.feedback = '';
+    
+    const userAnswerData: UserAnswerDataDTO = {
+      id: -1,
+      questionId: this.graphQuestionData.questionId,
+      contentElementId: this.graphQuestionData.contentElementId,
+      userId: -1,
+      userGraphAnswer: this.solutionGraph
+    }
+
+    this.questionDataService.createUserAnswer(userAnswerData).subscribe(data => {
+      console.log(data);
+      this.feedback = data.feedbackText.replace(/\n/g, '<br>');
+      //this.isSending = false;
+      //this.submitClicked.emit(data.progress);
+    });
+
     // TODO: Submit Solution
-    alert('Abgabe der Lösung wurde noch nicht implementiert.')
+    //alert('Abgabe der Lösung wurde noch nicht implementiert.')
   }
 
   addNewSolutionStep() {

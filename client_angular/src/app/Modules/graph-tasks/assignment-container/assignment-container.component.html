@@ -9,7 +9,7 @@
     <div class="evaluation box">
         <h2>Bewertung der Lösung</h2>
         <hr>
-        <p style="white-space: pre-line;">{{ feedback }}</p>
+        <p [innerHTML]="feedback"></p>
     </div>
     <div class="solution box">
         <app-graph-structure [toolbarEnabled]="false"/>
