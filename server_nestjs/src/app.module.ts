@@ -41,6 +41,7 @@ import { ContentLinkerService } from './content-linker/content-linker.service';
 import { ContentLinkerModule } from './content-linker/content-linker.module';
 import { GraphSolutionEvaluationService } from './graph-solution-evaluation/graph-solution-evaluation.service';
 import { GraphSolutionEvaluationModule } from './graph-solution-evaluation/graph-solution-evaluation.module';
+import { TransitiveClosureService } from './graph-solution-evaluation/transitive-closure/transitive-closure.service';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { GraphSolutionEvaluationModule } from './graph-solution-evaluation/graph
     },
     ContentLinkerService,
     GraphSolutionEvaluationService,
+    TransitiveClosureService
   ],
 })
 

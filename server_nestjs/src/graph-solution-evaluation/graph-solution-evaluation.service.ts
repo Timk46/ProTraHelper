@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { TransitiveClosureService } from './transitive-closure/transitive-closure.service';
 
 @Injectable()
 export class GraphSolutionEvaluationService {
 
     constructor(
+        private readonly transitiveClosureService: TransitiveClosureService,
         // Add services for individual question types here
     ){}
 
@@ -33,10 +35,13 @@ export class GraphSolutionEvaluationService {
                 }
 
             case 'transitive_closure':
-                return {
-                    feedback: 'Not implemented yet', 
-                    receivedPoints: 0
-                }
+                return this.transitiveClosureService.evaluateSolution(
+                    question.initialStructure, 
+                    studentSolution[0], 
+                    question.exampleSolution[0], 
+                    question.maxPoints
+                );
+
 
             default:
                 throw new Error(`Der Aufgabentyp ${question.type} wird nicht unterstützt.`);
