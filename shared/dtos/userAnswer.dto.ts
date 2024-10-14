@@ -1,3 +1,5 @@
+import { GraphStructureDTO } from "./graphTask.dto";
+
 export interface UserAnswerDataDTO {
     id: number;
     contentElementId?: number;
@@ -6,6 +8,7 @@ export interface UserAnswerDataDTO {
     userFreetextAnswer?: string;
     userFreetextAnswerRaw?: string;
     userMCAnswer?: number[];
+    userGraphAnswer?: GraphStructureDTO[];
     //space for more types of answers
 }
 
