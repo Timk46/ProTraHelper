@@ -269,7 +269,11 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
   // Functions for interactions with workspace
   
   onWorkspaceClick(event: MouseEvent) {
-    // TODO: implement onWorkspaceClick listener 
+    // Cancel the new edge creation if workspace is clicked
+    // Used stop event propogation on node click 
+    if (this.newEdge.started) {
+      this.graphService.resetNewEdge();
+    }
   }
 
   onMouseMove(event: MouseEvent) {

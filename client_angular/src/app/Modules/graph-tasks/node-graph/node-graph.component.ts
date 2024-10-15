@@ -111,7 +111,8 @@ export class NodeGraphComponent implements OnInit, OnDestroy {
   }
 
   onClick(event: MouseEvent) {
-    
+    event.stopPropagation(); // so that the click event is not propagated to the workspace
+    // Workspace click event is used to cancel the new edge creation
   }
 
   // Drag start
