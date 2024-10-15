@@ -3,10 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { IGraphNode } from '../models/GraphNode.interface';
 import { IGraphEdge } from '../models/GraphEdge.interface';
 import { IGraphNewEdge } from '../models/GraphNewEdge.interface';
-import { IGraphConfiguration } from '../models/GraphConfiguration.interface';
-import { IGraphNodeJSON } from '../models/GraphNodeJSON.interface';
-import { IGraphEdgeJSON } from '../models/GraphEdgeJSON.interface';
-import { IGraphDataSemantic } from '../models/GraphDataSemantic.interface';
+import { GraphConfigurationDTO, GraphNodeDTO, GraphEdgeDTO, GraphStructureSemanticDTO } from '@DTOs/graphTask.dto';
 import { calculateShapeCenter, downloadJSON, graphToSemantic } from '../utils';
 
 @Injectable({
@@ -15,7 +12,7 @@ import { calculateShapeCenter, downloadJSON, graphToSemantic } from '../utils';
 
 export class GraphTaskService {
 
-  private graphConfiguration$!: BehaviorSubject<IGraphConfiguration>;
+  private graphConfiguration$!: BehaviorSubject<GraphConfigurationDTO>;
   private nodes$!: BehaviorSubject<IGraphNode[]>;
   private edges$!: BehaviorSubject<IGraphEdge[]>;
   private newEdge$!: BehaviorSubject<IGraphNewEdge>;
@@ -25,7 +22,7 @@ export class GraphTaskService {
 
     // ##############
     // Initialize
-    this.graphConfiguration$ = new BehaviorSubject<IGraphConfiguration>({
+    this.graphConfiguration$ = new BehaviorSubject<GraphConfigurationDTO>({
       nodeWeight: true, nodeVisited: true, edgeWeight: true, edgeDirected: true
     });
     this.nodes$ = new BehaviorSubject<IGraphNode[]>([]);
@@ -38,7 +35,7 @@ export class GraphTaskService {
 
   // ###########
   // Getters
-  getGraphConfiguration(): Observable<IGraphConfiguration> {
+  getGraphConfiguration(): Observable<GraphConfigurationDTO> {
     return this.graphConfiguration$;
   }
 
@@ -56,7 +53,7 @@ export class GraphTaskService {
 
   // ###########
   // Update
-  configureGraph(graphConfiguration: IGraphConfiguration) {
+  configureGraph(graphConfiguration: GraphConfigurationDTO) {
     this.graphConfiguration$.next(graphConfiguration);
   }
 
@@ -341,7 +338,7 @@ export class GraphTaskService {
   }
   // #############
   // Utility functions
-  adjustNodeAttributes(node: IGraphNode): IGraphNodeJSON {
+  adjustNodeAttributes(node: IGraphNode): GraphNodeDTO {
     // Destructure node object
     const { 
       visited: { value: visitedValue, ...visitedRest },
@@ -354,7 +351,7 @@ export class GraphTaskService {
     };
   }
 
-  adjustEdgeAttributes(edge: IGraphEdge): IGraphEdgeJSON {
+  adjustEdgeAttributes(edge: IGraphEdge): GraphEdgeDTO {
     // Destructure edge object
     const { 
       weight: { value: weightValue, ...weightRest },
@@ -395,12 +392,12 @@ export class GraphTaskService {
     //return json;
   }
 
-  graphToSemantic(): IGraphDataSemantic {
+  graphToSemantic(): GraphStructureSemanticDTO {
     // get the nodes and edges as list
     const nodesList = this.nodes$.getValue();
     const edgesList = this.edges$.getValue();
 
-    const graphSemantic: IGraphDataSemantic = graphToSemantic({ 
+    const graphSemantic: GraphStructureSemanticDTO = graphToSemantic({ 
       nodes: nodesList, edges: edgesList
     });
 
@@ -412,7 +409,7 @@ export class GraphTaskService {
     downloadJSON(graphAsJSON, 'graph');
   }
 
-  graphDataFromJSON(initialNodeData: IGraphNodeJSON[], initialEdgeData: IGraphEdgeJSON[]) {
+  graphDataFromJSON(initialNodeData: GraphNodeDTO[], initialEdgeData: GraphEdgeDTO[]) {
     
     // reset the graph state
     //this.resetGraph();

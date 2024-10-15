@@ -1,7 +1,6 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { IPosition } from '../models/Position.interface';
 import { IGraphEdge } from '../models/GraphEdge.interface';
-import { ISize } from '../models/Size.interface';
+import { SizeDTO, PositionDTO } from '@DTOs/graphTask.dto';
 import { calculateLineCenter } from '../utils';
 
 @Component({
@@ -35,7 +34,7 @@ export class EdgeToolsetGraphComponent implements OnInit {
   weightZIndex: number;
   displayEdgeToolbar: boolean;
   editEdgeWeight: boolean;
-  componentSize!: ISize;
+  componentSize!: SizeDTO;
   
 
   // #############################
@@ -112,8 +111,8 @@ export class EdgeToolsetGraphComponent implements OnInit {
   // #############################
   // Utility functions
 
-  calculateComponentPosition(): IPosition {
-    let position: IPosition;
+  calculateComponentPosition(): PositionDTO {
+    let position: PositionDTO;
     if (this.edge.node1 === this.edge.node2) { // edges which connect a node with itself
       return { 
         x: this.edge.node1.position.x - 20 - (this.componentSize.width / 2), 

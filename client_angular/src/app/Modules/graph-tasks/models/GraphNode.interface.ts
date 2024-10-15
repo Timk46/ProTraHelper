@@ -1,5 +1,4 @@
-import { IPosition } from "./Position.interface";
-import { ISize } from "./Size.interface";
+import { PositionDTO, SizeDTO } from "@DTOs/graphTask.dto";
 
 export interface IGraphNode {
     nodeId: number;
@@ -12,7 +11,7 @@ export interface IGraphNode {
         enabled: boolean,
         value: number | null
     },
-    position: IPosition;
-    size: ISize;
-    center: IPosition;
+    position: PositionDTO;
+    size: SizeDTO;
+    center: PositionDTO;
 }

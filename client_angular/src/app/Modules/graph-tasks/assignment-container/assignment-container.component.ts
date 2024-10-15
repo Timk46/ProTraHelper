@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { IGraphDataJSON } from '../models/GraphDataJSON.interface';
-import { IGraphConfiguration } from '../models/GraphConfiguration.interface';
+import { GraphStructureDTO, GraphConfigurationDTO } from '@DTOs/graphTask.dto';
 import { GraphTaskService } from '../services/graph-task.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { GraphQuestionDTO, QuestionDTO, questionType } from '@DTOs/question.dto';
@@ -21,11 +20,11 @@ export class AssignmentContainerComponent implements OnInit {
   public solutionStepPrevious: number = 0;
   public solutionStepCurrent: number = 0;
 
-  initialStructure: IGraphDataJSON = {
+  initialStructure: GraphStructureDTO = {
     nodes: [], edges: []
   };
 
-  public solutionGraph: IGraphDataJSON[] = [];
+  public solutionGraph: GraphStructureDTO[] = [];
 
   public feedback: string = '';
 
@@ -116,7 +115,7 @@ export class AssignmentContainerComponent implements OnInit {
     // Add new solution step
 
     // Use the data of the last step for the new step if exists ; else use assignment data
-    let last: IGraphDataJSON;
+    let last: GraphStructureDTO;
 
     const numberOfSolutionSteps = this.solutionGraph.length;
 
@@ -173,11 +172,11 @@ export class AssignmentContainerComponent implements OnInit {
       }
 
       // Get Current Step
-      const graphContent: IGraphDataJSON = this.solutionGraph[this.solutionStepCurrent];
+      const graphContent: GraphStructureDTO = this.solutionGraph[this.solutionStepCurrent];
 
       // TODO: Find a proper solution to prevent this
       // added this line to use only values and not the references
-      const clonedGraphContent: IGraphDataJSON = JSON.parse(JSON.stringify(graphContent));
+      const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
       this.loadWorkspaceContent({ graphStructure: clonedGraphContent, graphConfiguration: this.graphQuestionData?.configuration });
     } 
 
@@ -204,8 +203,8 @@ export class AssignmentContainerComponent implements OnInit {
   }
 
   loadWorkspaceContent(params: {
-    graphStructure?: IGraphDataJSON,
-    graphConfiguration?: IGraphConfiguration
+    graphStructure?: GraphStructureDTO,
+    graphConfiguration?: GraphConfigurationDTO
   }
   ) {
 

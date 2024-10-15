@@ -1,8 +1,5 @@
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { IPosition } from '../models/Position.interface';
-import { IRectangle } from '../models/Rectangle.interface';
 import { GraphTaskService } from '../services/graph-task.service';
-import { ISize } from '../models/Size.interface';
 import { CdkDrag, CdkDragEnd, CdkDragMove, CdkDragStart, DragDropModule } from '@angular/cdk/drag-drop';
 import { NodeGraphComponent } from '../node-graph/node-graph.component';
 import { IGraphNode } from '../models/GraphNode.interface';
@@ -11,6 +8,7 @@ import { IGraphNewEdge } from '../models/GraphNewEdge.interface';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { readFile } from '../utils';
+import { SizeDTO, PositionDTO, RectangleDTO } from '@DTOs/graphTask.dto';
 
 @Component({
   selector: 'app-graph-structure',
@@ -28,10 +26,10 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
 
   // #############################
   // Class properties
-  dragPosition: IPosition;
-  wsRelativeToTb: IPosition;
-  workspaceRect: IRectangle;
-  toolbarRect: IRectangle;
+  dragPosition: PositionDTO;
+  wsRelativeToTb: PositionDTO;
+  workspaceRect: RectangleDTO;
+  toolbarRect: RectangleDTO;
   // TODO: Find a proper way to listen to UI change to update workSpaceRect etc. 
 
   mouseX: number;
@@ -224,7 +222,7 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
     this.calculateUI()
 
     // TODO: how to set size dynamically?
-    const newNodeSize: ISize = {
+    const newNodeSize: SizeDTO = {
       width: 100,
       height: 100
       // width: event.source.element.nativeElement.clientWidth,
@@ -232,7 +230,7 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
     }
 
     // Get the drag point to set the size of new node
-    const newNodePosition: IPosition = {
+    const newNodePosition: PositionDTO = {
       x: event.source.getFreeDragPosition().x + event.source.element.nativeElement.offsetLeft - this.wsRelativeToTb.x,
       y: event.source.getFreeDragPosition().y + + event.source.element.nativeElement.offsetTop - this.wsRelativeToTb.y
     }

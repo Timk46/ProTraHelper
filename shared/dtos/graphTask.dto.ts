@@ -36,6 +36,12 @@ export interface SizeDTO {
     height: number;
 }
 
+export interface RectangleDTO {
+    topLeft: PositionDTO;
+    bottomRight: PositionDTO;
+    size: SizeDTO;
+}
+
 // DTOs for question evaluation (can be removed if base DTOs are improved)
 export interface GraphStructureSemanticDTO {
     nodes: GraphNodeSemanticDTO[],

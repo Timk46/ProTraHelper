@@ -1,7 +1,6 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IGraphConfiguration } from 'src/app/Modules/graph-tasks/models/GraphConfiguration.interface';
-import { IGraphDataJSON } from 'src/app/Modules/graph-tasks/models/GraphDataJSON.interface';
+import { GraphConfigurationDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
 import { GraphTaskService } from 'src/app/Modules/graph-tasks/services/graph-task.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
@@ -54,10 +53,10 @@ export class EditGraphComponent implements AfterViewInit {
   public solutionStepPrevious: number = 0;
   public solutionStepCurrent: number = 0;
   
-  assignmentGraphStructure: IGraphDataJSON = {
+  assignmentGraphStructure: GraphStructureDTO = {
     nodes: [], edges: []
   };
-  solutionGraphStructure: IGraphDataJSON[] = [
+  solutionGraphStructure: GraphStructureDTO[] = [
   //   {
   //   nodes: [], edges: []
   // }
@@ -149,10 +148,10 @@ export class EditGraphComponent implements AfterViewInit {
           checkboxNodeVisited: this.detailedQuestionData.graphQuestion.configuration.nodeVisited || false
         });
 
-        const clonedInitialStructure: IGraphDataJSON = JSON.parse(JSON.stringify(this.detailedQuestionData.graphQuestion.initialStructure))
+        const clonedInitialStructure: GraphStructureDTO = JSON.parse(JSON.stringify(this.detailedQuestionData.graphQuestion.initialStructure))
         this.assignmentGraphStructure = clonedInitialStructure;
         
-        const clonedExSolGraphSteps: IGraphDataJSON[] = JSON.parse(JSON.stringify(this.detailedQuestionData.graphQuestion.exampleSolution))
+        const clonedExSolGraphSteps: GraphStructureDTO[] = JSON.parse(JSON.stringify(this.detailedQuestionData.graphQuestion.exampleSolution))
         this.solutionGraphStructure = clonedExSolGraphSteps;
         
         this.structureIsSet = true;
@@ -268,10 +267,10 @@ export class EditGraphComponent implements AfterViewInit {
       }
 
       // Get Current Step
-      const graphContent: IGraphDataJSON = this.solutionGraphStructure[this.solutionStepCurrent];
+      const graphContent: GraphStructureDTO = this.solutionGraphStructure[this.solutionStepCurrent];
       
       // Clone the graph content and load it to the GraphService
-      const clonedGraphContent: IGraphDataJSON = JSON.parse(JSON.stringify(graphContent));
+      const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
       this.loadWorkspaceContent({
         graphContent: clonedGraphContent,
         graphConfiguration: {
@@ -290,7 +289,7 @@ export class EditGraphComponent implements AfterViewInit {
     else if (this.workspaceModeCurrent === 'assignment') {
       
         // Clone the graph content and load it to the GraphService
-        const clonedGraphContent: IGraphDataJSON = JSON.parse(JSON.stringify(this.assignmentGraphStructure));
+        const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(this.assignmentGraphStructure));
         this.loadWorkspaceContent({
           graphContent: clonedGraphContent,
           graphConfiguration: {
@@ -308,8 +307,8 @@ export class EditGraphComponent implements AfterViewInit {
   }
 
   loadWorkspaceContent(params: Partial<{
-    graphContent: IGraphDataJSON;
-    graphConfiguration: IGraphConfiguration | null
+    graphContent: GraphStructureDTO;
+    graphConfiguration: GraphConfigurationDTO | null
   }>) {
 
     let {
@@ -341,10 +340,10 @@ export class EditGraphComponent implements AfterViewInit {
     // graphToJSON returns also the configuration and structureType
     // Use only nodes and edges
     const graph = this.graphTaskService.graphToJSON();
-    const graphDataJSON: IGraphDataJSON = { nodes: graph.nodes, edges: graph.edges };
+    const graphDataJSON: GraphStructureDTO = { nodes: graph.nodes, edges: graph.edges };
 
     // Clone GraphService content
-    const clonedGraphContent: IGraphDataJSON = JSON.parse(JSON.stringify(graphDataJSON));
+    const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphDataJSON));
 
     // Update the graph structure according to the mode. It can be initial structure or example solution
     if (mode === 'solution') {
@@ -379,7 +378,7 @@ export class EditGraphComponent implements AfterViewInit {
     })
 
     // Clone the graph structure according to the mode. It can be initial structure or example solution
-    let clonedGraphContent!: IGraphDataJSON;
+    let clonedGraphContent!: GraphStructureDTO;
     if (this.workspaceModeCurrent === 'assignment') {
       clonedGraphContent = JSON.parse(JSON.stringify(this.assignmentGraphStructure)); 
     } else if (this.workspaceModeCurrent === 'solution') {
@@ -441,7 +440,7 @@ export class EditGraphComponent implements AfterViewInit {
     // Add new solution
 
     // Use the data of the last step for the new step if exists ; else use assignment data
-    let last: IGraphDataJSON;
+    let last: GraphStructureDTO;
 
     if (this.solutionGraphStructure.length !== 0) {
       last = this.solutionGraphStructure[this.solutionGraphStructure.length - 1];
@@ -601,10 +600,10 @@ export class EditGraphComponent implements AfterViewInit {
         });
         this.onChangeGraphQuestionType(questionData.graphQuestion.type);
       
-        const clonedInitialStructure: IGraphDataJSON = JSON.parse(JSON.stringify(questionData.graphQuestion.initialStructure || { nodes: [], edges: [] }))
+        const clonedInitialStructure: GraphStructureDTO = JSON.parse(JSON.stringify(questionData.graphQuestion.initialStructure || { nodes: [], edges: [] }))
         this.assignmentGraphStructure = clonedInitialStructure;
         
-        const clonedExSolGraphSteps: IGraphDataJSON[] = JSON.parse(JSON.stringify(questionData.graphQuestion.exampleSolution || []))
+        const clonedExSolGraphSteps: GraphStructureDTO[] = JSON.parse(JSON.stringify(questionData.graphQuestion.exampleSolution || []))
         this.solutionGraphStructure = clonedExSolGraphSteps;
 
         this.structureIsSet = true;

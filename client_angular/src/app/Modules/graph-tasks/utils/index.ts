@@ -1,20 +1,15 @@
-import { IBstNode } from "../models/BstNode.interface";
-import { IBstNodeJSON } from "../models/BstNodeJSON.interface";
-import { IBstNodeSemantic } from "../models/BstNodeSemantic.interface";
-import { IGraphData } from "../models/GraphData.interface";
-import { IGraphDataJSON } from "../models/GraphDataJSON.interface";
-import { IGraphDataSemantic } from "../models/GraphDataSemantic.interface";
+import { IGraphStructure } from "../models/GraphStructure.interface";
 import { IGraphEdge } from "../models/GraphEdge.interface";
-import { IGraphEdgeJSON } from "../models/GraphEdgeJSON.interface";
-import { IGraphEdgeSemantic } from "../models/GraphEdgeSemantic.interface";
 import { IGraphNode } from "../models/GraphNode.interface";
-import { IGraphNodeJSON } from "../models/GraphNodeJSON.interface";
-import { IGraphNodeSemantic } from "../models/GraphNodeSemantic.interface";
-import { IPosition } from "../models/Position.interface";
-import { ISize } from "../models/Size.interface";
+import { 
+  PositionDTO, SizeDTO, 
+  GraphNodeSemanticDTO, GraphNodeDTO, 
+  GraphEdgeSemanticDTO, GraphEdgeDTO, 
+  GraphStructureSemanticDTO, GraphStructureDTO 
+} from "@DTOs/graphTask.dto";
 
-export function calculateShapeCenter(position: IPosition, size: ISize): IPosition {
-    const center: IPosition = {
+export function calculateShapeCenter(position: PositionDTO, size: SizeDTO): PositionDTO {
+    const center: PositionDTO = {
       x: position.x + (size.width / 2),
       y: position.y + (size.height / 2)
     };
@@ -22,13 +17,13 @@ export function calculateShapeCenter(position: IPosition, size: ISize): IPositio
 }
 
 
-export function calculateLineCenter(from: IPosition, to: IPosition, size: ISize): IPosition{
+export function calculateLineCenter(from: PositionDTO, to: PositionDTO, size: SizeDTO): PositionDTO{
     const x = (from.x + to.x - size.width) / 2;
     const y = (from.y + to.y - size.height) / 2;
     return { x, y };
 }
 
-export function calculateEdgeStart(from: IBstNode | IGraphNode, to: IBstNode | IGraphNode): IPosition {
+export function calculateEdgeStart(from: IGraphNode, to: IGraphNode): PositionDTO {
     // Calculate the distance between the center of two nodes
     const diffX = to.center.x - from.center.x;
     const diffY = to.center.y - from.center.y;
@@ -56,7 +51,7 @@ export function calculateEdgeStart(from: IBstNode | IGraphNode, to: IBstNode | I
     return { x, y };
 }
 
-export function calculateEdgeEnd(from: IBstNode | IGraphNode, to: IBstNode | IGraphNode) {
+export function calculateEdgeEnd(from: IGraphNode, to: IGraphNode) {
     // Calculate the distance between the center of two nodes
     const diffX = from.center.x - to.center.x;
     const diffY = from.center.y - to.center.y;
@@ -84,10 +79,10 @@ export function calculateEdgeEnd(from: IBstNode | IGraphNode, to: IBstNode | IGr
     return { x, y };
 }
 
-export function calculateArrowPoints(from: IBstNode | IGraphNode, to: IBstNode | IGraphNode) {
+export function calculateArrowPoints(from: IGraphNode, to: IGraphNode) {
     // Specify where the arrowhead starts and ends
-    let start: IPosition;  
-    let end: IPosition;  
+    let start: PositionDTO;  
+    let end: PositionDTO;  
     if (from === to) { // connects the node with itself
       const xOffset = 30;
       const yOffset = -10;
@@ -168,44 +163,21 @@ export function downloadJSON(content: any, fileName: string = 'data') {
   window.URL.revokeObjectURL(link.href);
 }
 
-// ############################################ 
-// ############ binary-search-tree ############ 
-
-export function binarySearchTreeSemantic(node: IBstNode | IBstNodeJSON): IBstNodeSemantic {
-  return {
-    value: node.value,
-    leftChild: node.leftChild ? binarySearchTreeSemantic(node.leftChild) : null,
-    rightChild: node.rightChild ? binarySearchTreeSemantic(node.rightChild) : null,
-  };
-}
-
-export function binarySearchTreeToJSON(node: IBstNode): IBstNodeJSON {
-  return {
-    nodeId: node.nodeId,
-    value: node.value,
-    leftChild: node.leftChild ? binarySearchTreeToJSON(node.leftChild) : null,
-    rightChild: node.rightChild ? binarySearchTreeToJSON(node.rightChild) : null,
-    position: node.position,
-    size: node.size,
-    center: node.center,
-  };
-}
-
 // ############################### 
 // ############ graph ############ 
 
 // Graph -> Semantic
-export function graphToSemantic(graphData: IGraphData): IGraphDataSemantic {
-  const nodesSemantic: IGraphNodeSemantic[] = [];
-  const edgesSemantic: IGraphEdgeSemantic[] = [];
+export function graphToSemantic(graphData: IGraphStructure): GraphStructureSemanticDTO {
+  const nodesSemantic: GraphNodeSemanticDTO[] = [];
+  const edgesSemantic: GraphEdgeSemanticDTO[] = [];
 
   graphData.nodes.forEach( node => {
-    const nodeSemantic: IGraphNodeSemantic = graphNodeToSemantic(node);
+    const nodeSemantic: GraphNodeSemanticDTO = graphNodeToSemantic(node);
     nodesSemantic.push(nodeSemantic);
   });
 
   graphData.edges.forEach( edge => {
-    const edgeSemantic: IGraphEdgeSemantic = graphEdgeToSemantic(edge);
+    const edgeSemantic: GraphEdgeSemanticDTO = graphEdgeToSemantic(edge);
     edgesSemantic.push(edgeSemantic);
   });
 
@@ -215,8 +187,8 @@ export function graphToSemantic(graphData: IGraphData): IGraphDataSemantic {
   };
 }
 
-export function graphNodeToSemantic(node: IGraphNode): IGraphNodeSemantic {
-  const nodeSemantic: IGraphNodeSemantic = {
+export function graphNodeToSemantic(node: IGraphNode): GraphNodeSemanticDTO {
+  const nodeSemantic: GraphNodeSemanticDTO = {
     value: node.value,
   };
 
@@ -230,8 +202,8 @@ export function graphNodeToSemantic(node: IGraphNode): IGraphNodeSemantic {
   return nodeSemantic;
 }
 
-export function graphEdgeToSemantic(edge: IGraphEdge): IGraphEdgeSemantic {
-  const edgeSemantic: IGraphEdgeSemantic = {
+export function graphEdgeToSemantic(edge: IGraphEdge): GraphEdgeSemanticDTO {
+  const edgeSemantic: GraphEdgeSemanticDTO = {
     node1Value: edge.node1.value,
     node2Value: edge.node2.value,
   };
@@ -245,17 +217,17 @@ export function graphEdgeToSemantic(edge: IGraphEdge): IGraphEdgeSemantic {
 
 
 // GraphJSON -> Semantic
-export function graphJSONToSemantic(graphData: IGraphDataJSON): IGraphDataSemantic {
-  const nodesSemantic: IGraphNodeSemantic[] = [];
-  const edgesSemantic: IGraphEdgeSemantic[] = [];
+export function graphJSONToSemantic(graphData: GraphStructureDTO): GraphStructureSemanticDTO {
+  const nodesSemantic: GraphNodeSemanticDTO[] = [];
+  const edgesSemantic: GraphEdgeSemanticDTO[] = [];
 
   graphData.nodes.forEach( node => {
-    const nodeSemantic: IGraphNodeSemantic = graphNodeJSONToSemantic(node);
+    const nodeSemantic: GraphNodeSemanticDTO = graphNodeJSONToSemantic(node);
     nodesSemantic.push(nodeSemantic);
   });
 
   graphData.edges.forEach( edge => {
-    const edgeSemantic: IGraphEdgeSemantic = graphEdgeJSONToSemantic(edge, graphData.nodes);
+    const edgeSemantic: GraphEdgeSemanticDTO = graphEdgeJSONToSemantic(edge, graphData.nodes);
     edgesSemantic.push(edgeSemantic);
   });
 
@@ -265,8 +237,8 @@ export function graphJSONToSemantic(graphData: IGraphDataJSON): IGraphDataSemant
   };
 }
 
-export function graphNodeJSONToSemantic(node: IGraphNodeJSON): IGraphNodeSemantic {
-  const nodeSemantic: IGraphNodeSemantic = {
+export function graphNodeJSONToSemantic(node: GraphNodeDTO): GraphNodeSemanticDTO {
+  const nodeSemantic: GraphNodeSemanticDTO = {
     value: node.value,
   };
 
@@ -280,7 +252,7 @@ export function graphNodeJSONToSemantic(node: IGraphNodeJSON): IGraphNodeSemanti
   return nodeSemantic;
 }
 
-export function graphEdgeJSONToSemantic(edge: IGraphEdgeJSON, nodesList: IGraphNodeJSON[]): IGraphEdgeSemantic {
+export function graphEdgeJSONToSemantic(edge: GraphEdgeDTO, nodesList: GraphNodeDTO[]): GraphEdgeSemanticDTO {
   let node1Value: string = 'no-value'
   let node2Value: string = 'no-value'
   nodesList.forEach(node => {
@@ -292,7 +264,7 @@ export function graphEdgeJSONToSemantic(edge: IGraphEdgeJSON, nodesList: IGraphN
     }
   });
 
-  const edgeSemantic: IGraphEdgeSemantic = {
+  const edgeSemantic: GraphEdgeSemanticDTO = {
     node1Value: node1Value,
     node2Value: node2Value,
   };

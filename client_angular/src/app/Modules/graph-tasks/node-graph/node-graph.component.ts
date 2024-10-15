@@ -1,10 +1,9 @@
 import { CdkDragEnd, CdkDragMove, CdkDragStart } from '@angular/cdk/drag-drop';
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { IPosition } from '../models/Position.interface';
+import { PositionDTO, GraphConfigurationDTO } from '@DTOs/graphTask.dto';
 import { IGraphNode } from '../models/GraphNode.interface';
 import { GraphTaskService } from '../services/graph-task.service';
 import { IGraphNewEdge } from '../models/GraphNewEdge.interface';
-import { IGraphConfiguration } from '../models/GraphConfiguration.interface';
 import { Subscription } from 'rxjs';
 import { calculateShapeCenter } from '../utils';
 
@@ -38,7 +37,7 @@ export class NodeGraphComponent implements OnInit, OnDestroy {
   private graphConfigurationSubscription!: Subscription;
 
   newEdge!: IGraphNewEdge;
-  graphConfiguration!: IGraphConfiguration;
+  graphConfiguration!: GraphConfigurationDTO;
   
   // #############################
   // Constructor
@@ -144,7 +143,7 @@ export class NodeGraphComponent implements OnInit, OnDestroy {
     // TODO: Size is not being configured here, instead the default value in the service (100, 100) is being used
 
 
-    let position: IPosition = {
+    let position: PositionDTO = {
       x: this.node.position.x + 130,
       y: this.node.position.y + 130,
     }
