@@ -131,7 +131,6 @@ export class FillinTaskNewComponent {
   }
 
   drop(event: CdkDragDrop<string[]>) {
-    console.log('outer drop event:', event);
     if (event.previousContainer === event.container) {
       moveItemInArray(event.previousContainer.data, event.previousIndex, event.currentIndex);
     } else {

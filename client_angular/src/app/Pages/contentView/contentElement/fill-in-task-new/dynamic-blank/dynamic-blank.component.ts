@@ -21,7 +21,6 @@ export class DynamicBlankComponent {
   protected answer: string = '';
 
   ngOnInit() {
-    console.log('im a blank!', this.id, 'myOptions:', this.blankOptions, 'otherBlanks:', this.otherBlankIds);
   }
 
   /**
