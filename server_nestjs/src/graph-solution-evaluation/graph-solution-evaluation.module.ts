@@ -3,9 +3,10 @@ import { GraphSolutionEvaluationService } from './graph-solution-evaluation.serv
 import { TransitiveClosureService } from './transitive-closure/transitive-closure.service';
 import { DijkstraService } from './dijkstra/dijkstra.service';
 import { FloydService } from './floyd/floyd.service';
+import { KruskalService } from './kruskal/kruskal.service';
 
 @Module({
-  providers: [GraphSolutionEvaluationService, TransitiveClosureService, DijkstraService, FloydService],
+  providers: [GraphSolutionEvaluationService, TransitiveClosureService, DijkstraService, FloydService, KruskalService],
   exports: [GraphSolutionEvaluationService],
 })
 export class GraphSolutionEvaluationModule {}

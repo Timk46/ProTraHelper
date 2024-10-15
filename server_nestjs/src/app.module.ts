@@ -44,6 +44,7 @@ import { GraphSolutionEvaluationModule } from './graph-solution-evaluation/graph
 import { TransitiveClosureService } from './graph-solution-evaluation/transitive-closure/transitive-closure.service';
 import { DijkstraService } from './graph-solution-evaluation/dijkstra/dijkstra.service'; 
 import { FloydService } from './graph-solution-evaluation/floyd/floyd.service';
+import { KruskalService } from './graph-solution-evaluation/kruskal/kruskal.service';
 
 @Module({
   imports: [
@@ -92,7 +93,8 @@ import { FloydService } from './graph-solution-evaluation/floyd/floyd.service';
     GraphSolutionEvaluationService,
     TransitiveClosureService,
     DijkstraService,
-    FloydService
+    FloydService,
+    KruskalService
   ],
 })
 
