@@ -1,0 +1,142 @@
+
+
+<!-- ################### -->
+<!-- Toolbar -->
+<div #toolbar class="toolbar">
+
+  <!-- ################### -->
+  <!-- Elements in the toolbar -->
+  <div class="tools">
+    <div class="toolbar-item">
+      <div 
+        #toolElements
+        cdkDrag 
+        class="toolbar-item-icon" 
+        (cdkDragStarted)="toolOnDragStart($event)" 
+        (cdkDragMoved)="toolOnDragMove($event)"
+        (cdkDragEnded)="toolOnDragEnd($event)">
+      </div>
+      <span>Neuer Knoten</span>
+    </div>
+  </div>
+  <!-- End - Elements -->
+  <!-- ################### -->
+
+
+  <!-- ################### -->
+  <!-- Functionalities (JSON-Output etc.) -->
+  <div *ngIf="toolbarEnabled" class="functionalities">
+    <!-- <div class="functionality">
+      <button class="image-button" (click)="navigateToRoute('/')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sliders" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1z"/>
+        </svg>
+      </button>
+      <span>Change Configuration</span>
+    </div>
+    <div class="functionality">
+      <button class="image-button" (click)="onJSONToConsoleClick()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filetype-json" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M14 4.5V11h-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM4.151 15.29a1.2 1.2 0 0 1-.111-.449h.764a.58.58 0 0 0 .255.384q.105.073.25.114.142.041.319.041.245 0 .413-.07a.56.56 0 0 0 .255-.193.5.5 0 0 0 .084-.29.39.39 0 0 0-.152-.326q-.152-.12-.463-.193l-.618-.143a1.7 1.7 0 0 1-.539-.214 1 1 0 0 1-.352-.367 1.1 1.1 0 0 1-.123-.524q0-.366.19-.639.192-.272.528-.422.337-.15.777-.149.456 0 .779.152.326.153.5.41.18.255.2.566h-.75a.56.56 0 0 0-.12-.258.6.6 0 0 0-.246-.181.9.9 0 0 0-.37-.068q-.324 0-.512.152a.47.47 0 0 0-.185.384q0 .18.144.3a1 1 0 0 0 .404.175l.621.143q.326.075.566.211a1 1 0 0 1 .375.358q.135.222.135.56 0 .37-.188.656a1.2 1.2 0 0 1-.539.439q-.351.158-.858.158-.381 0-.665-.09a1.4 1.4 0 0 1-.478-.252 1.1 1.1 0 0 1-.29-.375m-3.104-.033a1.3 1.3 0 0 1-.082-.466h.764a.6.6 0 0 0 .074.27.5.5 0 0 0 .454.246q.285 0 .422-.164.137-.165.137-.466v-2.745h.791v2.725q0 .66-.357 1.005-.355.345-.985.345a1.6 1.6 0 0 1-.568-.094 1.15 1.15 0 0 1-.407-.266 1.1 1.1 0 0 1-.243-.39m9.091-1.585v.522q0 .384-.117.641a.86.86 0 0 1-.322.387.9.9 0 0 1-.47.126.9.9 0 0 1-.47-.126.87.87 0 0 1-.32-.387 1.55 1.55 0 0 1-.117-.641v-.522q0-.386.117-.641a.87.87 0 0 1 .32-.387.87.87 0 0 1 .47-.129q.265 0 .47.129a.86.86 0 0 1 .322.387q.117.255.117.641m.803.519v-.513q0-.565-.205-.973a1.46 1.46 0 0 0-.59-.63q-.38-.22-.916-.22-.534 0-.92.22a1.44 1.44 0 0 0-.589.628q-.205.407-.205.975v.513q0 .562.205.973.205.407.589.626.386.217.92.217.536 0 .917-.217.384-.22.589-.626.204-.41.205-.973m1.29-.935v2.675h-.746v-3.999h.662l1.752 2.66h.032v-2.66h.75v4h-.656l-1.761-2.676z"/>
+        </svg>
+      </button>
+      <span>JSON Output</span>
+    </div>
+    <div class="functionality">
+      <button class="image-button" (click)="notImplemented()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-diagram-2" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6v1H11a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 5 7h2.5V6A1.5 1.5 0 0 1 6 4.5zM8.5 5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5zM3 11.5A1.5 1.5 0 0 1 4.5 10h1A1.5 1.5 0 0 1 7 11.5v1A1.5 1.5 0 0 1 5.5 14h-1A1.5 1.5 0 0 1 3 12.5zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm4.5.5a1.5 1.5 0 0 1 1.5-1.5h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1A1.5 1.5 0 0 1 9 12.5zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z"/>
+        </svg>
+      </button>
+      <span>Positionen anpassen</span>
+    </div>
+    <div class="functionality">
+      <button class="image-button" (click)="onDownloadAsJSONClick()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-arrow-down" viewBox="0 0 16 16">
+          <path d="M8 5a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 1 1 .708-.708L7.5 9.293V5.5A.5.5 0 0 1 8 5"/>
+          <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
+        </svg>
+      </button>
+      <span>Als JSON exportieren</span>
+    </div>
+    <div class="functionality">
+      <label class="image-button">
+        <input type="file" (change)="onJSONFileSelected($event)" accept=".json" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-arrow-up" viewBox="0 0 16 16">
+          <path d="M8 11a.5.5 0 0 0 .5-.5V6.707l1.146 1.147a.5.5 0 0 0 .708-.708l-2-2a.5.5 0 0 0-.708 0l-2 2a.5.5 0 1 0 .708.708L7.5 6.707V10.5a.5.5 0 0 0 .5.5"/>
+          <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
+        </svg>
+      </label>
+      <span>Von JSON importieren</span>
+    </div> -->
+  </div>
+
+  <!-- End - Functionalities -->
+  <!-- ################### -->
+
+</div>
+<!-- End - Toolbar -->
+<!-- ################### -->
+
+
+<!-- ################### -->
+<!-- Workspace -->
+<div #workspace class="workspace-boundary" (mousemove)="onMouseMove($event)" (click)="onWorkspaceClick($event)">
+  
+
+  <!-- ################### -->
+  <!-- svg for edges in workspace -->
+  <svg class="svg" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- ################### -->
+      <!-- Edges presenting existing relations between nodes -->
+      <g *ngFor="let edge of edges" app-edge-graph [edge]="edge" />
+
+      <!-- End - Edges for existing relations
+      <!-- ################### -->
+
+
+      <!-- ################### -->
+      <!-- Edges presenting new relations between nodes -->
+      <line
+      *ngIf="newEdge.started && newEdge.node1 !== null" 
+      #newLinkLine [attr.x1]="newEdge.node1 ? newEdge.node1.center.x : 0" [attr.y1]="newEdge.node1 ? newEdge.node1.center.y : 0" [attr.x2]="mouseX - workspaceRect.topLeft.x" [attr.y2]="mouseY - workspaceRect.topLeft.y"
+      style="stroke:rgb(129, 129, 129);stroke-width:2" />
+
+      <line 
+      *ngIf="newEdge.started && newEdge.node2 !== null" 
+      #newLinkLine [attr.x1]="newEdge.node2 ? newEdge.node2.center.x : 0" [attr.y1]="newEdge.node2 ? newEdge.node2.center.y : 0" [attr.x2]="mouseX - workspaceRect.topLeft.x" [attr.y2]="mouseY - workspaceRect.topLeft.y"
+      style="stroke:rgb(129, 129, 129);stroke-width:2" />
+      <!-- End - Edges for new relations -->
+      <!-- ################### -->
+
+  </svg>
+  <!-- End - svg -->
+  <!-- ################### -->
+
+
+  <!-- ################### -->
+  <!-- Toolset for edges -->
+  <app-edge-toolset-graph 
+    *ngFor="let edge of edges; let i = index; trackBy:trackByIndex"
+      [edge]="edge" 
+      [index]="i"
+      (removeEdge)="removeEdge($event)"
+      (changeEdgeDirection)="changeEdgeDirection($event)"
+      (changeEdgeWeight)="changeEdgeWeight($event)" 
+  />
+  <!-- End - Toolset for edges -->
+  <!-- ################### -->
+   
+
+  <!-- ################### -->
+  <!-- Nodes in workspace -->
+  <app-node-graph  *ngFor="let node of nodes; let i = index; trackBy:trackByIndex" [node]="node" [index]="i"/>
+
+  <!-- End - Nodes -->
+  <!-- ################### -->
+
+
+</div>
+<!-- End - Workspace -->
+<!-- ################### -->

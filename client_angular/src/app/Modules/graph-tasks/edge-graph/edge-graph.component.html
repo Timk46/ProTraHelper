@@ -1,0 +1,44 @@
+<svg:path
+    *ngIf="edge.node1 === edge.node2"
+    [attr.d]="calculateSelfLoopPath(edge)"
+    style="stroke:rgb(129, 129, 129);stroke-width:2; fill: none;"
+/> 
+
+    <svg:polygon 
+    *ngIf="edge.node1 === edge.node2 && edge.directed"
+    [attr.points]="calculateArrowPoints(edge.node1, edge.node2)" 
+    fill="black" 
+/>
+
+
+<!-- Display if the edge is directed --> 
+<!-- Edge - Line -->
+
+<svg:line 
+    *ngIf="edge.node1 !== edge.node2 && edge.directed"
+    [attr.x1]="calculateEdgeStart(edge.node1, edge.node2).x" 
+    [attr.y1]="calculateEdgeStart(edge.node1, edge.node2).y" 
+    [attr.x2]="calculateEdgeEnd(edge.node1, edge.node2).x" 
+    [attr.y2]="calculateEdgeEnd(edge.node1, edge.node2).y"
+    style="stroke:rgb(129, 129, 129);stroke-width:2" 
+/>
+
+<!-- Edge - Arrow head -->
+<svg:polygon 
+    *ngIf="edge.node1 !== edge.node2 && edge.directed"
+    [attr.points]="calculateArrowPoints(edge.node1, edge.node2)" 
+    fill="black" 
+/>
+
+<!-- Display if the edge is undirected --> 
+<!-- Edge - Line -->
+<svg:line 
+    *ngIf="edge.node1 !== edge.node2 && !edge.directed"
+    [attr.x1]="edge.node1.center.x" 
+    [attr.y1]="edge.node1.center.y" 
+    [attr.x2]="edge.node2.center.x" 
+    [attr.y2]="edge.node2.center.y"
+    style="stroke:rgb(129, 129, 129);stroke-width:2" 
+/>
+
+

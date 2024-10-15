@@ -18,6 +18,7 @@
             <mat-option [value]="questionTypes.FILLIN">Lückentext</mat-option>
             <mat-option [value]="questionTypes.CODE">Programmieraufgabe</mat-option>
             <mat-option value="UML" disabled>UML</mat-option>
+            <mat-option value="GraphQuestion">Graphen</mat-option>
           </mat-select>
           <mat-error *ngIf="creationForm.get('questionType')!.hasError('required')">Fragentyp ist erforderlich</mat-error>
         </mat-form-field>

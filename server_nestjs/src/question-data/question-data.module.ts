@@ -12,6 +12,8 @@ import { QuestionDataFreetextService } from './question-data-freetext/question-d
 import { QuestionDataCodeService } from './question-data-code/question-data-code.service';
 import { QuestionDataFillinService } from './question-data-fillin/question-data-fillin.service';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
+import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
+import { GraphSolutionEvaluationModule } from '@/graph-solution-evaluation/graph-solution-evaluation.module';
 
 @Module({
   providers: [
@@ -22,6 +24,7 @@ import { QuestionDataChoiceService } from './question-data-choice/question-data-
     QuestionDataFillinService,
     EditCodeService,
     ContentService,
+    QuestionDataGraphService,
   ],
   controllers: [QuestionDataController],
   imports: [
@@ -30,6 +33,7 @@ import { QuestionDataChoiceService } from './question-data-choice/question-data-
     ContentModule,
     UserConceptModule,
     NotificationModule,
+    GraphSolutionEvaluationModule,
   ],
   exports: [
     QuestionDataService,
