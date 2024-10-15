@@ -43,6 +43,7 @@ import { GraphSolutionEvaluationService } from './graph-solution-evaluation/grap
 import { GraphSolutionEvaluationModule } from './graph-solution-evaluation/graph-solution-evaluation.module';
 import { TransitiveClosureService } from './graph-solution-evaluation/transitive-closure/transitive-closure.service';
 import { DijkstraService } from './graph-solution-evaluation/dijkstra/dijkstra.service'; 
+import { FloydService } from './graph-solution-evaluation/floyd/floyd.service';
 
 @Module({
   imports: [
@@ -90,7 +91,8 @@ import { DijkstraService } from './graph-solution-evaluation/dijkstra/dijkstra.s
     ContentLinkerService,
     GraphSolutionEvaluationService,
     TransitiveClosureService,
-    DijkstraService
+    DijkstraService,
+    FloydService
   ],
 })
 

@@ -3,6 +3,7 @@ import { TransitiveClosureService } from './transitive-closure/transitive-closur
 import { DijkstraService } from './dijkstra/dijkstra.service';
 import { GraphQuestionDTO } from '@DTOs/question.dto';
 import { GraphStructureDTO } from '@Interfaces/graphTask.dto';
+import { FloydService } from './floyd/floyd.service';
 
 @Injectable()
 export class GraphSolutionEvaluationService {
@@ -10,6 +11,7 @@ export class GraphSolutionEvaluationService {
     constructor(
         private readonly transitiveClosureService: TransitiveClosureService,
         private readonly dijkstraService: DijkstraService,
+        private readonly floydService: FloydService,
         // Add services for individual question types here
     ){}
 
@@ -28,10 +30,11 @@ export class GraphSolutionEvaluationService {
                 );
 
             case 'floyd':
-                return {
-                    feedback: 'Not implemented yet', 
-                    receivedPoints: 0
-                }
+                return this.floydService.evaluateSolution(
+                    question.initialStructure, 
+                    studentSolution,
+                    question.maxPoints
+                );
 
             case 'kruskal':
                 return {
