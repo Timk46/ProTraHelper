@@ -476,6 +476,34 @@ export class EditGraphComponent implements AfterViewInit {
     this.updateWorkspace();
   }
 
+  deleteCurrentSolutionStep() {
+    if (this.solutionGraphStructure.length > 1) {
+
+      // Remove the current step
+      this.solutionGraphStructure.splice(this.solutionStepCurrent, 1);
+
+      // Set the current/previuos step
+      if (this.solutionStepCurrent >= this.solutionGraphStructure.length) {
+        this.solutionStepCurrent = this.solutionGraphStructure.length - 1;
+      }
+      if (this.solutionStepCurrent < 0) {
+        this.solutionStepCurrent = 0;
+      }
+
+      this.solutionStepPrevious = this.solutionStepCurrent;
+
+      // Did not use updateWorkspace function because it would override the removed content from prev step to the new current step
+      // Get Current Step
+      const graphContent: GraphStructureDTO = this.solutionGraphStructure[this.solutionStepCurrent];
+
+      // To use only values and not the references
+      const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
+      this.loadWorkspaceContent({ graphContent: clonedGraphContent, graphConfiguration: this.detailedQuestionData?.graphQuestion?.configuration });
+    } else {
+        console.warn('Not enough steps to delete. Current steps:', this.solutionGraphStructure.length);
+    }
+  }
+
   onChangeGraphQuestionType(gqType: string): void {
 
     if (this.structureIsSet) {

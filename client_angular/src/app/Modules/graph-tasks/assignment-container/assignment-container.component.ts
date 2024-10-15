@@ -153,7 +153,33 @@ export class AssignmentContainerComponent implements OnInit {
     this.updateWorkspace();
   }
   
+  deleteCurrentSolutionStep() {
+    if (this.solutionGraph.length > 1) {
 
+      // Remove the current step
+      this.solutionGraph.splice(this.solutionStepCurrent, 1);
+
+      // Set the current/previuos step
+      if (this.solutionStepCurrent >= this.solutionGraph.length) {
+        this.solutionStepCurrent = this.solutionGraph.length - 1;
+      }
+      if (this.solutionStepCurrent < 0) {
+        this.solutionStepCurrent = 0;
+      }
+
+      this.solutionStepPrevious = this.solutionStepCurrent;
+
+      // Did not use updateWorkspace function because it would override the removed content from prev step to the new current step
+      // Get Current Step
+      const graphContent: GraphStructureDTO = this.solutionGraph[this.solutionStepCurrent];
+
+      // To use only values and not the references
+      const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
+      this.loadWorkspaceContent({ graphStructure: clonedGraphContent, graphConfiguration: this.graphQuestionData?.configuration });
+    } else {
+        console.warn('Not enough steps to delete. Current steps:', this.solutionGraph.length);
+    }
+  }
 
   updateWorkspace() {
 
