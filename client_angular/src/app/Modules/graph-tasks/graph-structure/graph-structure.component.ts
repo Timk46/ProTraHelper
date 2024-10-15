@@ -105,23 +105,26 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
     this.newEdgeSubscription = this.graphService.getNewEdge().subscribe( newEdge => {
       this.newEdge = newEdge;
     });
-    
-    this.calculateUI();
 
     // #############################
     // Set up event listeners
     window.addEventListener('keydown', this.onKeyDown);
+    window.addEventListener('resize', this.onWindowResize);
+    window.addEventListener('scroll', this.onWindowScroll, true);
   }
 
   ngAfterViewInit() {
-    this.calculateUI();
+    setTimeout(() => {
+      this.calculateUI();
+    }, 0);  
   }
 
   ngOnDestroy() {
     // #############################
     // Remove event listeners
     window.removeEventListener('keydown', this.onKeyDown);
-
+    window.removeEventListener('resize', this.onWindowResize);
+    window.removeEventListener('scroll', this.onWindowScroll, true);
     
     // #############################
     // Unsubscribe from all subscriptions to prevent memory leaks
@@ -145,6 +148,13 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
     }
   }
 
+  private onWindowResize = () => {
+    this.calculateUI();
+  }
+
+  private onWindowScroll = () => {
+    this.calculateUI();
+  }
 
   // #############################
   // Functions for children events
@@ -276,10 +286,13 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
     if (this.workspace && this.toolbar) {
 
       // Calculate Workspace rectangle
-      const { x: wX, y: wY, width: wWidth, height: wHeight } = this.workspace.nativeElement.getBoundingClientRect();
+      const { 
+        x: wX, y: wY, 
+        width: wWidth, height: wHeight,
+       } = this.workspace.nativeElement.getBoundingClientRect();
+
       this.workspaceRect = { 
-        // topLeft: { x: wX, y: wY },
-        topLeft: { x: wX, y: this.workspace.nativeElement.offsetTop },
+        topLeft: { x: wX, y: wY },
         bottomRight: { x: wX + wWidth, y: wY + wHeight },
         size: { width: wWidth, height: wHeight }
       }
@@ -288,7 +301,7 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
       const { x: tX, y: tY, width: tWidth, height: tHeight } = this.toolbar.nativeElement.getBoundingClientRect();
       this.toolbarRect = { 
         // topLeft: { x: tX, y: tY },
-        topLeft: { x: tX, y: this.toolbar.nativeElement.offsetTop },
+        topLeft: { x: tX, y: tY },
         bottomRight: { x: tX + tWidth, y: tY + tHeight },
         size: { width: tWidth, height: tHeight }
       }
