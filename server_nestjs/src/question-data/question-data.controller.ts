@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Post, Param, Body, Req, UseGuards, Put} from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
-import { detailedFreetextQuestionDTO, detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, questionType, graphQuestionDTO } from '@DTOs/index';
+import { detailedFreetextQuestionDTO, detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, questionType, GraphQuestionDTO } from '@DTOs/index';
 import { roles, RolesGuard } from '@/auth/roles.guard';
 import { EditCodeService } from './edit-code.service';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
@@ -87,7 +87,7 @@ export class QuestionDataController {
      */
     @roles('ANY')
     @Get('/graphQuestion/:questionId')
-    async getGraphQuestion(@Param('questionId') questionId: number): Promise<graphQuestionDTO> {
+    async getGraphQuestion(@Param('questionId') questionId: number): Promise<GraphQuestionDTO> {
         return this.qdGraphService.getGraphQuestion(questionId);
     }
 

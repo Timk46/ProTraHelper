@@ -4,7 +4,7 @@ import { IGraphDataJSON } from '../models/GraphDataJSON.interface';
 import { IGraphConfiguration } from '../models/GraphConfiguration.interface';
 import { GraphTaskService } from '../services/graph-task.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { graphQuestionDTO, QuestionDTO, questionType } from '@DTOs/question.dto';
+import { GraphQuestionDTO, QuestionDTO, questionType } from '@DTOs/question.dto';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserAnswerDataDTO } from '@DTOs/userAnswer.dto';
 
@@ -26,13 +26,13 @@ export class AssignmentContainerComponent implements OnInit {
   };
 
   public solutionGraph: IGraphDataJSON[] = [];
-  
+
   public feedback: string = '';
 
   thisQuestionType = questionType.GRAPH;
   
   questionData: QuestionDTO | null = null;
-  graphQuestionData: graphQuestionDTO | null = null;
+  graphQuestionData: GraphQuestionDTO | null = null;
 
   constructor(
     private graphTaskService: GraphTaskService,

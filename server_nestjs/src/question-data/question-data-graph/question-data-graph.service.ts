@@ -1,7 +1,7 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { detailedGraphQuestionDTO } from '@Interfaces/detailedQuestion.dto';
 import { GraphStructureDTO } from '@Interfaces/graphTask.dto';
-import { graphQuestionDTO } from '@Interfaces/question.dto';
+import { GraphQuestionDTO } from '@Interfaces/question.dto';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class QuestionDataGraphService {
 
     constructor(private prisma: PrismaService) {}
 
-    async getGraphQuestion(questionId: number, fullData = false): Promise<graphQuestionDTO> {
+    async getGraphQuestion(questionId: number, fullData = false): Promise<GraphQuestionDTO> {
         const question = await this.prisma.question.findUnique({
         where: {
             id: Number(questionId)

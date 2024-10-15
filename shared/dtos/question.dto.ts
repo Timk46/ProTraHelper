@@ -164,7 +164,7 @@ export interface CodingQuestionDto {
     maxPoints: number;
   }
 
-  export interface graphQuestionDTO {
+  export interface GraphQuestionDTO {
     questionId: number;
     contentElementId?: number;
     title: string;
