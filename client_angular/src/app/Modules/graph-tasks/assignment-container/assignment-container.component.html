@@ -7,9 +7,16 @@
         </p>
     </div>
     <div class="evaluation box">
-        <h2>Bewertung der Lösung</h2>
+        <h2>Feedback</h2>
         <hr>
-        <p [innerHTML]="feedback"></p>
+        <p *ngIf="!isSending" [innerHTML]="feedback"></p>
+        <div 
+            *ngIf="isSending"
+            class="spinner-contaier"
+            style="display: flex; justify-content: center; align-items: center; height: 60%;"
+        >
+            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+        </div>
     </div>
     <div class="solution box">
         <app-graph-structure [toolbarEnabled]="false"/>
@@ -25,8 +32,8 @@
                 [(ngModel)]="workspaceModeCurrent"        
                 (ngModelChange)="updateWorkspace()"
             >
-                <mat-button-toggle value="assignment">Aufgabenstellung</mat-button-toggle>
-                <mat-button-toggle value="solution">Lösung</mat-button-toggle>
+                <mat-button-toggle value="assignment" [disabled]="isSending">Aufgabenstellung</mat-button-toggle>
+                <mat-button-toggle value="solution" [disabled]="isSending">Lösung</mat-button-toggle>
             </mat-button-toggle-group>
 
             <mat-button-toggle-group 
@@ -39,6 +46,7 @@
                     <mat-button-toggle 
                         *ngFor="let step of solutionGraph; let i = index; trackBy:trackByIndex"    
                         [value]="i"
+                        [disabled]="isSending"
                     >
                         Schritt {{ i + 1 }}
                     </mat-button-toggle>
@@ -58,12 +66,16 @@
             </button>
 
         </div>
-        <button
-            type="button"
-            (click)="onSubmitButtonClick()"
-        > 
-            Abgeben 
-        </button>
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 20px;">
+                <mat-progress-spinner *ngIf="isSending" diameter="20" mode="indeterminate"></mat-progress-spinner>
+                <button
+                    type="button"
+                    [disabled]="isSending"
+                    (click)="onSubmitButtonClick()"
+                > 
+                    Abgeben 
+                </button>
+            </div>
     </div>
 
 </div>

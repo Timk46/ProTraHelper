@@ -75,6 +75,13 @@
     cursor: pointer;
 }
 
+.controls button:disabled {
+    background-color: #bbb;
+    cursor: not-allowed;
+    background-color: #d3d3d3;
+    color: #808080;
+}
+
 .copy-button {
     position: relative;
     background-color: #eee;

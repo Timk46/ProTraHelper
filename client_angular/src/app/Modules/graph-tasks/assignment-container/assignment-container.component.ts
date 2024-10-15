@@ -5,7 +5,8 @@ import { GraphTaskService } from '../services/graph-task.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { GraphQuestionDTO, QuestionDTO, questionType } from '@DTOs/question.dto';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UserAnswerDataDTO } from '@DTOs/userAnswer.dto';
+import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import { ProgressService } from 'src/app/Services/progress/progress.service';
 
 
 @Component({
@@ -33,20 +34,19 @@ export class AssignmentContainerComponent implements OnInit {
   questionData: QuestionDTO | null = null;
   graphQuestionData: GraphQuestionDTO | null = null;
 
+  isSending: boolean = false;
+
   constructor(
     private graphTaskService: GraphTaskService,
     private route: ActivatedRoute,
     private questionDataService: QuestionDataService,
     private snackBar: MatSnackBar,
+    private progressService: ProgressService
   ) {
 
   }
 
   ngOnInit(): void {
-
-    // TODO: get feedback observable and subscribe
-    // this.feedback$ = 
-    // this.feedback$.subscribe( data => { this.feedback = data }) 
 
     // get assignment id from url
     this.route.params.subscribe(params => {
@@ -81,9 +81,7 @@ export class AssignmentContainerComponent implements OnInit {
 
     // To save workpace content if it is in solution mode
     this.updateWorkspace();
-    
-    //this.isSending = true;
-    // this.answerText = text;
+    this.isSending = true;
     this.feedback = '';
     
     const userAnswerData: UserAnswerDataDTO = {
@@ -94,15 +92,18 @@ export class AssignmentContainerComponent implements OnInit {
       userGraphAnswer: this.solutionGraph
     }
 
-    this.questionDataService.createUserAnswer(userAnswerData).subscribe(data => {
-      console.log(data);
-      this.feedback = data.feedbackText.replace(/\n/g, '<br>');
-      //this.isSending = false;
-      //this.submitClicked.emit(data.progress);
+    this.questionDataService.createUserAnswer(userAnswerData).subscribe(result => {
+      this.handleCodeSubmissionResponse(result);
     });
 
-    // TODO: Submit Solution
-    //alert('Abgabe der Lösung wurde noch nicht implementiert.')
+  }
+
+  handleCodeSubmissionResponse(result: userAnswerFeedbackDTO): void {
+    this.isSending = false;
+    this.feedback = '<br>' + result.feedbackText.replace(/\n/g, '<br>');
+    if (result.progress === 100) {
+      this.progressService.answerSubmitted();
+    }
   }
 
   addNewSolutionStep() {
@@ -174,8 +175,7 @@ export class AssignmentContainerComponent implements OnInit {
       // Get Current Step
       const graphContent: GraphStructureDTO = this.solutionGraph[this.solutionStepCurrent];
 
-      // TODO: Find a proper solution to prevent this
-      // added this line to use only values and not the references
+      // To use only values and not the references
       const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
       this.loadWorkspaceContent({ graphStructure: clonedGraphContent, graphConfiguration: this.graphQuestionData?.configuration });
     } 
