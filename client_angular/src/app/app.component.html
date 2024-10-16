@@ -22,12 +22,9 @@
   <app-notification-bell></app-notification-bell>
 </div>
 
-
-
 <mat-toolbar class="footer">
   <!-- Dashboard-Link auf der linken Seite -->
   <div class="left-content">
-
       <button  style="font-size:15px;cursor: pointer;">Version: {{version}}</button>
       <mat-divider vertical="true" class="divider"></mat-divider>
       <button mat-button style="font-size:15px;">User: {{userMail? userMail : "nicht eingeloggt"}} </button>
@@ -48,8 +45,10 @@
       Edit Mode
     </mat-slide-toggle>
     <mat-divider vertical="true" class="divider"></mat-divider>
-    <button mat-button style="font-size:15px; font-weight:bolder;" (click)="showProgress()"> Fortschritt anzeigen </button>
+    <button mat-button *ngIf="userRole === 'ADMIN'" routerLink="/admin" style="font-size:15px; font-weight:bolder;">Admin Panel</button>
     <mat-divider vertical="true" class="divider"></mat-divider>
+    <button mat-button style="font-size:15px; font-weight:bolder;" (click)="showProgress()"> Fortschritt anzeigen </button>
+    <mat-divider *ngIf="userRole === 'ADMIN'" vertical="true" class="divider"></mat-divider>
     <button mat-button style="margin-left: 5px" *ngIf="userIsLoggedIn" (click)="logOut()">Logout</button>
   </div>
     <!-- NOTIFICATION BELL

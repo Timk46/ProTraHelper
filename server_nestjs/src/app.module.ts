@@ -29,7 +29,6 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { ModulesModule } from './modules/modules.module';
 import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
 import { McqCreationModule } from './mcqcreation/mcqcreation.module';
 //import { McqevaluationModule } from './mcqevaluation/mcqevaluation.module'; CURRENTLY DISABLED
@@ -39,6 +38,9 @@ import { VersionInterceptor } from './common/interceptors/version.interceptor';
 import { NotificationModule } from './notification/notification.module';
 import { ContentLinkerService } from './content-linker/content-linker.service';
 import { ContentLinkerModule } from './content-linker/content-linker.module';
+
+import { AdminModule } from './admin/admin.module'; // Add this line
+
 import { GraphSolutionEvaluationService } from './graph-solution-evaluation/graph-solution-evaluation.service';
 import { GraphSolutionEvaluationModule } from './graph-solution-evaluation/graph-solution-evaluation.module';
 import { TransitiveClosureService } from './graph-solution-evaluation/transitive-closure/transitive-closure.service';
@@ -56,7 +58,6 @@ import { KruskalService } from './graph-solution-evaluation/kruskal/kruskal.serv
     ContentModule,
     ContentLinkerModule,
     ChatBotModule,
-    ModulesModule,
     QuestionDataModule,
     RunCodeModule,
     QuestionModule,
@@ -67,7 +68,10 @@ import { KruskalService } from './graph-solution-evaluation/kruskal/kruskal.serv
     NotificationModule,
     ContentLinkerModule,
     CodingQuestionGeneratorModule,
-    GraphSolutionEvaluationModule
+
+    AdminModule, // Add this line
+
+    GraphSolutionEvaluationModule,
   ],
   controllers: [
     AppController,

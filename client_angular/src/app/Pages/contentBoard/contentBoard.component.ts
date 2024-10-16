@@ -101,7 +101,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
       this.editModeActive = hasEditModeActive;
       if (hasEditModeActive) {
-        this.updateDisplayedColumns(['id', 'name', 'type', 'actions']);
+        this.updateDisplayedColumns(['id', 'name', 'type','progress', 'actions']);
       } else {
         this.sSS.isHandset.pipe(takeUntil(this.destroy$)).subscribe((isHandset) => {
           if (isHandset) {

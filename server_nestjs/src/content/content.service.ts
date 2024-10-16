@@ -151,13 +151,13 @@ export class ContentService {
       },
     });
 
-    // Create a map of question IDs to their maximum scores
-    const questionProgressMap = new Map<number, number>();
-    questionProgress.forEach((qp) => {
-      // For each question, we find the highest score the user has achieved
-      const maxScore = Math.max(...qp.feedbacks.map((f) => f.score), 0);
-      questionProgressMap.set(qp.questionId, maxScore);
-    });
+        // Create a map of question IDs to their maximum scores
+        const questionProgressMap = new Map<number, number>();
+        questionProgress.forEach((qp) => {
+          const currentMaxScore = questionProgressMap.get(qp.questionId) || 0;
+          const newMaxScore = Math.max(...qp.feedbacks.map((f) => f.score), currentMaxScore);
+          questionProgressMap.set(qp.questionId, newMaxScore);
+        });
 
     // Step 4: Transform data
     // We create a function that turns our raw database data into a format our application can use

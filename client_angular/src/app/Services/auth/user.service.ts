@@ -5,7 +5,14 @@ import { globalRole } from '@DTOs/roles.enum';
 import { environment } from 'src/environments/environment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+
+interface SubjectInfo {
+  subjectId: number;
+  subjectname: string;
+  role: string;
+  registeredForSL: boolean;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -25,34 +32,56 @@ export class UserService {
     this.hasEditModeActive$ = new BehaviorSubject<boolean>(false);
   }
 
-    /**
+  /**
    * This method is used to handle the login
    * @param username the username (email)
    * @param password the password
    * @returns { Promise<boolean> } a promise containing a boolean indicating whether the login was successful
    */
-    login(username: string, password: string): Promise<boolean> {
-      return new Promise((resolve, reject) => {
-        const credentials = { username: username, password: password };
-        this.http.post(environment.server + '/auth/login', credentials).subscribe(
-          {
-            next: (response: any) => {
-              // Handle successful login
-              const accessToken = response.accessToken;
-              localStorage.setItem('accessToken', accessToken);
-              this.openSnackBar("Hallo " + username);
-              this.router.navigate(['/dashboard']);
-              resolve(true);
-            },
-            error: (error: any) => {
-              // Handle login error
-              console.error(error);
-              this.openSnackBar("Der Login ist fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.");
-              resolve(false);
-            }
-          });
+  login(username: string, password: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const credentials = { email: username, password: password };
+      console.log('Attempting login with:', { email: username, password: '******' });
+      console.log('Server URL:', environment.server + '/auth/login');
+
+      this.http.post(environment.server + '/auth/login', credentials).subscribe({
+        next: (response: any) => {
+          console.log('Login successful:', response);
+          const accessToken = response.accessToken;
+          localStorage.setItem('accessToken', accessToken);
+          this.openSnackBar("Hallo " + username);
+          this.router.navigate(['/dashboard']);
+          resolve(true);
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error('Login error:', error);
+          console.error('Error status:', error.status);
+          console.error('Error message:', error.message);
+          if (error.error instanceof ErrorEvent) {
+            console.error('Client-side error:', error.error.message);
+          } else {
+            console.error('Server-side error:', error.error);
+          }
+          this.openSnackBar("Der Login ist fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.");
+          resolve(false);
+        }
       });
+    });
+  }
+
+  /**
+   * Checks if the user is registered for the specified subject
+   * @param subjectName The name of the subject to check
+   * @returns { boolean } A boolean indicating whether the user is registered
+   */
+  isRegisteredForSubject(subjectName: string): boolean {
+    const decodedToken = this.decodeAccessToken();
+    if (decodedToken && decodedToken.subjects) {
+      const subject = decodedToken.subjects.find((s: SubjectInfo) => s.subjectname === subjectName);
+      return subject ? subject.registeredForSL : false;
     }
+    return false;
+  }
 
   /**
    * Checks if the user is logged in by verifying the existence of authentication tokens.

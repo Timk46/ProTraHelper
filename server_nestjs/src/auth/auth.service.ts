@@ -1,22 +1,22 @@
 /* eslint-disable prettier/prettier */
-import {  Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { User } from '@prisma/client';
-import { EventLogService } from '@/EventLog/event-log.service';
-
+import { EventLogService } from '../EventLog/event-log.service';
+import { UserDTO } from '@DTOs/user.dto';
 
 /**
  * Provides authentication services
  */
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   /**
    * Constructor
    * @param usersService user service
-   * @param userGlobalRoleService user global role service
    * @param jwtService jwt service
+   * @param eventLogService event log service
    */
   constructor(
     private usersService: UsersService,
@@ -26,20 +26,23 @@ export class AuthService {
 
   /**
    * Checks if a user exists in the database and returns the user, access and refresh tokens if it does
-   * @param { User } user the user to log in
+   * @param { string } email the email to log in
    * @returns the user, access and refresh tokens if the user exists
    */
-  async loginCAS(username: string) {
-    let user = await this.usersService.findOne(username);
+  async loginCAS(email: string) {
+    //this.logger.debug(`Attempting CAS login for email: ${email}`);
+    let user = await this.usersService.findOne(email);
     if (user) {
+      //this.logger.debug(`User found for CAS login: ${JSON.stringify(user)}`);
       this.eventLogService.log('info', 'login', user.id, 'User logged in', {email: user.email, role: user.globalRole});
-
     }
     else { // If the user doesn't exist, create a new one
-      user = await this.usersService.createCASuser(username);
+      this.logger.debug(`User not found for CAS login, creating new user`);
+      user = await this.usersService.createCASuser(email);
       this.eventLogService.log('info', 'login', user.id, 'User created', {email: user.email, role: user.globalRole});
     }
     const tokens = await this.generateTokens(user);
+    //this.logger.debug(`Tokens generated for CAS login`);
     return {
       ...tokens,
     };
@@ -51,66 +54,79 @@ export class AuthService {
    * @param { string } pass password of the user
    * @returns the user if the validation was successful, otherwise null
    */
-  async validateUser(email: string, pass: string): Promise<User> {
-    const user = await this.usersService.findOne(email);
-    if (user && bcrypt.compareSync(pass, user.password)) {
-      this.eventLogService.log('info', 'login', user.id, 'User ' + email + ' validated', {email: user.email, role: user.globalRole});
-      return {
-        ...user,
-        password: undefined, // we dont want to return the passwordhash
-      };
+  async validateUser(email: string, pass: string): Promise<UserDTO | null> {
+    //this.logger.debug(`Attempting to validate user: ${email}`);
+    const isValid = await this.usersService.validateUserPassword(email, pass);
+    if (isValid) {
+      const user = await this.usersService.findOne(email);
+      if (user) {
+        //this.logger.debug(`User validated successfully: ${JSON.stringify(user)}`);
+        this.eventLogService.log('info', 'login', user.id, 'User ' + email + ' validated', {email: user.email, role: user.globalRole});
+        return user;
+      }
     }
-    this.eventLogService.log('warn', 'login', user.id, 'User ' + email + ' NOT validated', {email: email});
+    this.logger.debug(`User validation failed for: ${email}`);
+    this.eventLogService.log('warn', 'login', null, 'User ' + email + ' NOT validated', {email: email});
     return null;
   }
 
   /**
    * Checks if a user exists in the database and returns the user, access and refresh tokens if it does
-   * @param { User } user the user to log in
+   * @param { UserDTO } user the user to log in
    * @returns the user, access and refresh tokens if the user exists
    */
-  async login(user: User) {
+  async login(user: UserDTO) {
+    //this.logger.debug(`Generating tokens for user: ${user.email}`);
     const tokens = await this.generateTokens(user);
     return {
       ...tokens
     };
   }
 
-   /**
-     * Generates the access and refresh tokens for a user
-     * @param { User } user the user to generate the tokens for
-     * @returns { Promise<{ accessToken: string }> } the access and refresh tokens
-     */
-   async generateTokens(user: User): Promise<{ accessToken: string; }> {
+  /**
+   * Generates the access and refresh tokens for a user
+   * @param { UserDTO } user the user to generate the tokens for
+   * @returns { Promise<{ accessToken: string }> } the access and refresh tokens
+   */
+  async generateTokens(user: UserDTO): Promise<{ accessToken: string; }> {
+    //this.logger.debug(`Generating tokens for user: ${user.email}`);
     const payload = {
-        email: user.email, firstName: user.firstname,
-        lastName: user.lastname,
-        id: user.id,
-        globalRole: await this.usersService.getGlobalRole(user.id)
+      email: user.email,
+      firstName: user.firstname,
+      lastName: user.lastname,
+      id: user.id,
+      globalRole: user.globalRole,
+      subjects: user.userSubjects?.map(us => ({
+        subjectId: us.subjectId,
+        subjectname: us.name,
+        role: us.subjectSpecificRole,
+        registeredForSL: us.registeredForSL
+      })) || []
     };
     const [accessToken] = await Promise.all([
-        this.jwtService.signAsync(
-            {
-                ...payload,
-            },
-            {
-                secret: process.env.JWT_SECRET_KEY,
-                expiresIn: String(process.env.JWT_EXPIRATION_TIME),
-            },
-        ),
-        this.jwtService.signAsync(
-            {
-                email: user.email,
-            },
-            {
-                secret: process.env.JWT_REFRESH_SECRET_KEY,
-                expiresIn: String(process.env.JWT_REFRESH_EXPIRATION_TIME),
-            },
-        ),
+      this.jwtService.signAsync(
+        {
+          ...payload,
+        },
+        {
+          secret: process.env.JWT_SECRET_KEY,
+          expiresIn: String(process.env.JWT_EXPIRATION_TIME),
+        },
+      ),
+      this.jwtService.signAsync(
+        {
+          email: user.email,
+        },
+        {
+          secret: process.env.JWT_REFRESH_SECRET_KEY,
+          expiresIn: String(process.env.JWT_REFRESH_EXPIRATION_TIME),
+        },
+      ),
     ]);
+    //this.logger.debug(`Tokens generated for user: ${user.email}`);
     this.eventLogService.log('info', 'login', user.id, 'Tokens generated', {email: user.email, role: user.globalRole, accessToken: accessToken});
     return {
-        accessToken
+      accessToken
     };
-}
+  }
 }

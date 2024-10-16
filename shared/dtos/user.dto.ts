@@ -1,5 +1,4 @@
 import { globalRole } from "./roles.enum";
-import { ModuleDTO } from "./module.dto";
 
 export interface UserDTO {
     id: number;
@@ -7,6 +6,16 @@ export interface UserDTO {
     firstname: string;
     lastname: string;
     globalRole: globalRole;
+    userSubjects?: UserSubjectDTO[];
+}
+
+export interface UserSubjectDTO {
+    id: number;
+    name: string;
+    userId: number;
+    subjectId: number;
+    subjectSpecificRole: string;
+    registeredForSL: boolean;
 }
 
 /**

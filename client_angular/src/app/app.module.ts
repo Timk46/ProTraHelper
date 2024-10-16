@@ -68,6 +68,9 @@ import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-tas
 // Import GraphTasksModule
 import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
 
+// Import NotRegisteredComponent
+import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
+
 @NgModule({
     declarations: [
         AppComponent,
@@ -114,8 +117,12 @@ import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
         McTaskCreationComponent,
         MCDescriptionDialogComponent,
         MCScoreComponent,
+
+        NotRegisteredComponent, // Add NotRegisteredComponent here
+
         FillinTaskNewComponent,
         DynamicBlankComponent
+
     ],
     imports: [
         ToastrModule.forRoot(),
