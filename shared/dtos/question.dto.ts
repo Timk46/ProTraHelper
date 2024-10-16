@@ -140,7 +140,7 @@ export interface CodingQuestionDto {
     MULTIPLECHOICE = "MC",
     FREETEXT = "FreeText",
     CODE = "CodingQuestion",
-    FILLIN = "Fillin"
+    FILLIN = "Fillin",
     GRAPH = "GraphQuestion",
   }
 

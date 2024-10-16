@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { globalRole } from '@DTOs/roles.enum';
-import { UserDTO, UserSubjectDTO } from '../../../shared/dtos/user.dto';
+import { UserDTO, UserSubjectDTO } from '@DTOs/user.dto';
 
 @Injectable()
 export class UsersService {

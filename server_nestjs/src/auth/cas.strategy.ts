@@ -1,7 +1,7 @@
 import { Strategy } from 'passport-cas';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import { UserDTO } from '../../../shared/dtos/user.dto';
+import { UserDTO } from '@DTOs/user.dto';
 
 /**
  * This class provides a passport strategy for CAS authentication

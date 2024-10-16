@@ -4,7 +4,7 @@ import { LocalAuthGuard } from './local-auth.guard';
 import { AuthService } from './auth.service';
 import { CasAuthGuard } from './cas-auth.guard';
 import { Public } from '../public.decorator';
-import { UserDTO } from '../../../shared/dtos/user.dto';
+import { UserDTO } from '@DTOs/user.dto';
 
 /**
  * This class is used to define the auth routes of the application

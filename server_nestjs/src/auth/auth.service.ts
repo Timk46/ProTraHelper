@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { EventLogService } from '../EventLog/event-log.service';
-import { UserDTO } from '../../../shared/dtos/user.dto';
+import { UserDTO } from '@DTOs/user.dto';
 
 /**
  * Provides authentication services
