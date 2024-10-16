@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GraphStructureDTO, GraphConfigurationDTO } from '@DTOs/graphTask.dto';
 import { GraphTaskService } from '../services/graph-task.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
@@ -41,7 +41,8 @@ export class AssignmentContainerComponent implements OnInit {
     private route: ActivatedRoute,
     private questionDataService: QuestionDataService,
     private snackBar: MatSnackBar,
-    private progressService: ProgressService
+    private progressService: ProgressService,
+    private router: Router
   ) {
 
   }
@@ -282,5 +283,9 @@ export class AssignmentContainerComponent implements OnInit {
 
   trackByIndex(index: number, obj: any): any {
     return index;
+  }
+
+  navigateToDashboard() {
+    this.router.navigate(['/dashboard']);
   }
 }
