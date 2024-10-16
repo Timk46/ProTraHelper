@@ -507,7 +507,7 @@ export class EditGraphComponent implements AfterViewInit {
   onChangeGraphQuestionType(gqType: string): void {
 
     if (this.structureIsSet) {
-      alert('Der Entwurf wurde zurückgesetzt.')
+      this.snackBar.open('Die Graphstruktur wurde zurückgesetzt.', 'Schließen', { duration: 3000 });
       this.resetWorkspaceContent();
     }
 
@@ -557,26 +557,19 @@ export class EditGraphComponent implements AfterViewInit {
   // #######################################################
   // Exporting and Importing Task
   exportTask() {
-    if (this.detailedQuestionData && this.detailedQuestionData.graphQuestion) {
-
-      const exportQuestion: detailedQuestionDTO | null = this.buildDTO();
-
-      if (!exportQuestion) {
-        this.snackBar.open('Fehler beim Exportieren der Aufgabe', 'Schließen', { duration: 3000 });
-        return;
-      }
-      const jsonString = JSON.stringify(exportQuestion, null, 2);
-      const blob = new Blob([jsonString], { type: 'application/json' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `graph_task_${this.detailedQuestionData.id}.json`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    }
-    else {
+    const exportQuestion: detailedQuestionDTO | null = this.buildDTO();
+    if (!exportQuestion) {
       this.snackBar.open('Fehler beim Exportieren der Aufgabe', 'Schließen', { duration: 3000 });
+      return;
     }
+    const jsonString = JSON.stringify(exportQuestion, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `graph_task_${exportQuestion.name}.json`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   }
 
   importTask(event: Event) {
