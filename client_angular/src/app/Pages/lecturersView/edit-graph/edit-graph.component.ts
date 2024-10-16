@@ -504,6 +504,19 @@ export class EditGraphComponent implements AfterViewInit {
     }
   }
 
+  resetSolution() {
+    // Reset the solution steps
+    this.solutionGraphStructure = [];
+    this.solutionStepCurrent = 0;
+    this.solutionStepPrevious = this.solutionStepCurrent;
+
+    this.workspaceModeCurrent = 'assignment';
+    this.workspaceModePrevious = this.workspaceModeCurrent;
+
+    // To use only values and not the references
+    this.updateWorkspace();
+  }
+
   onChangeGraphQuestionType(gqType: string): void {
 
     if (this.structureIsSet) {

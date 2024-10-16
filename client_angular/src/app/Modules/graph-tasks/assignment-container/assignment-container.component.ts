@@ -189,6 +189,20 @@ export class AssignmentContainerComponent implements OnInit {
     }
   }
 
+  resetSolution() {
+    // Reset the solution steps
+    this.solutionGraph = [];
+    this.solutionStepCurrent = 0;
+    this.solutionStepPrevious = this.solutionStepCurrent;
+
+    this.workspaceModeCurrent = 'assignment';
+    this.workspaceModePrevious = this.workspaceModeCurrent;
+
+    // To use only values and not the references
+    this.updateWorkspace();
+  }
+
+
   updateWorkspace() {
 
     // If workspace was in solution mode before update
