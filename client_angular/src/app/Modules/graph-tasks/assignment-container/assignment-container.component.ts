@@ -72,6 +72,14 @@ export class AssignmentContainerComponent implements OnInit {
           }
         });
       });
+
+      this.questionDataService.getNewestUserAnswer(questionId).subscribe(data => {
+        if (data.userGraphAnswer) {
+          this.solutionGraph = data.userGraphAnswer;
+          this.workspaceModeCurrent = 'solution';
+          this.updateWorkspace();
+        }
+      });
     });
   }
 

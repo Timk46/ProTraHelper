@@ -182,6 +182,7 @@ export class QuestionDataService {
       userId: userAnswer.userId,
       userFreetextAnswer: userAnswer.userFreetextAnswer || undefined,
       userFreetextAnswerRaw: undefined,
+      userGraphAnswer: JSON.parse(JSON.stringify(userAnswer.userGraphAnswer)) || undefined,
       userMCAnswer: (await this.prisma.userMCOptionSelected.findMany({
         where: {
           userAnswerId: userAnswer.id
