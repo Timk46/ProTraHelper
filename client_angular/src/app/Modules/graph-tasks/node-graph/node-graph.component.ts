@@ -262,6 +262,9 @@ export class NodeGraphComponent implements OnInit, OnDestroy {
   
   activateEditNodeWeightInput() {
     this.editNodeWeight = true;
+    if (this.node.weight.value === Number.MAX_SAFE_INTEGER) {
+      this.node.weight.value = null;
+    }
 
     // Ensure that the input element is mounted
     setTimeout(() => {
