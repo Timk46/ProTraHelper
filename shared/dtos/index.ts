@@ -19,6 +19,8 @@ export * from "./notification.dto";
 export * from "./notificationType.enum";
 export * from "./contentLinking.dto";
 export * from "./detailedQuestion.dto";
+export * from "./fillInType.enum";
+export * from "./fillInText.dto";
 
 //TutorKai DTOs
 export * from "./tutorKaiDtos/kiFeedback.dto";

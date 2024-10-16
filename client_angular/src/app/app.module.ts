@@ -60,6 +60,13 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
 import { McTaskCreationComponent } from "./Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component";
 import { MCDescriptionDialogComponent } from "./Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component";
 import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-creation/score/score.component";
+import { FillinTaskComponent } from "./Pages/contentView/contentElement/fill-in-task/fill-in-task.component";
+import { FillinTaskNewComponent } from './Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
+import { DynamicBlankComponent } from './Pages/contentView/contentElement/fill-in-task-new/dynamic-blank/dynamic-blank.component';
+import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-task/graph-task.component';
+
+// Import GraphTasksModule
+import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
 
 // Import NotRegisteredComponent
 import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
@@ -95,6 +102,7 @@ import { NotRegisteredComponent } from './Pages/not-registered/not-registered.co
         DiscussionPrecreationComponent,
         TaskEvaluationOverviewComponent,
         FreeTextTaskComponent,
+        FillinTaskComponent,
         DraggableHeightDirective,
         ContactComponent,
         ImpressumComponent,
@@ -109,7 +117,12 @@ import { NotRegisteredComponent } from './Pages/not-registered/not-registered.co
         McTaskCreationComponent,
         MCDescriptionDialogComponent,
         MCScoreComponent,
-        NotRegisteredComponent // Add NotRegisteredComponent here
+
+        NotRegisteredComponent, // Add NotRegisteredComponent here
+
+        FillinTaskNewComponent,
+        DynamicBlankComponent
+
     ],
     imports: [
         ToastrModule.forRoot(),
@@ -123,7 +136,8 @@ import { NotRegisteredComponent } from './Pages/not-registered/not-registered.co
         HttpClientModule,
         LecturersViewModule,
         EditorModule,
-        MarkdownModule.forRoot()
+        MarkdownModule.forRoot(),
+        GraphTasksModule
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

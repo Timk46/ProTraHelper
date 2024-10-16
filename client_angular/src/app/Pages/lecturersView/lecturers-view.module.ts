@@ -11,6 +11,7 @@ import { EditFreetextComponent } from './edit-freetext/edit-freetext.component';
 import { EditFillinComponent } from './edit-fillin/edit-fillin.component';
 import { EditCodingComponent } from './edit-coding/edit-coding.component';
 import { EditChoiceComponent } from './edit-choice/edit-choice.component';
+import { EditGraphComponent } from './edit-graph/edit-graph.component';
 import { AddElementModalComponent } from './edit-coding/add-element-modal.component';
 import { TinymceComponent } from '../tinymce/tinymce.component';
 import { ScoreComponent } from './edit-choice/score/score.component';
@@ -18,6 +19,10 @@ import { DescriptionDialogComponent } from './edit-choice/description-dialog/des
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { EditBlankComponent } from './edit-fillin/edit-blank/edit-blank.component';
+import { ImageUploadDialogComponent } from './edit-fillin/image-upload-dialog/image-upload-dialog.component';
+import { GraphTasksModule } from 'src/app/Modules/graph-tasks/graph-tasks.module';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 @NgModule({
   declarations: [
@@ -28,7 +33,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     ScoreComponent,
     DescriptionDialogComponent,
     EditFillinComponent,
+    EditBlankComponent,
+    ImageUploadDialogComponent,
     EditCodingComponent,
+    EditGraphComponent,
     AddElementModalComponent,
     TinymceComponent
   ],
@@ -42,7 +50,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MarkdownModule.forChild(),
     NgxMatSelectSearchModule,
     MatSelectModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    GraphTasksModule,
+    MatButtonToggleModule
   ],
   exports: [
     CreateContentNodeDialogComponent,
@@ -51,6 +61,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     EditChoiceComponent,
     EditFillinComponent,
     EditCodingComponent,
+    EditGraphComponent,
     TinymceComponent
   ]
 })

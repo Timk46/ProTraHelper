@@ -1,0 +1,18 @@
+<h2 mat-dialog-title>{{ data.isDistractor ? 'Edit Distractor' : (isImage ? 'Edit Image Blank' : 'Edit Blank') }}</h2>
+<mat-dialog-content [style.width]="isImage ? '500px' : '250px'">
+  <form [formGroup]="form">
+    <ng-container *ngIf="!isImage">
+      <mat-form-field style="width: 100%;">
+        <input matInput formControlName="word" placeholder="Enter word">
+      </mat-form-field>
+    </ng-container>
+    <ng-container *ngIf="isImage">
+      <img *ngIf="previewImage" [src]="previewImage" alt="Current image" style="max-width: 100%; max-height: 300px; margin-bottom: 10px;">
+      <input type="file" (change)="onFileSelected($event)" accept="image/*">
+    </ng-container>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button (click)="onSave()" [disabled]="!form.valid">Save</button>
+</mat-dialog-actions>

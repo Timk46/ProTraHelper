@@ -1,4 +1,6 @@
 import {CodingQuestionInternal} from './question.dto';
+import { GraphConfigurationDTO, GraphStructureDTO } from './graphTask.dto';
+
 export interface detailedQuestionDTO {
   id: number;
   createdAt?: Date;
@@ -19,6 +21,8 @@ export interface detailedQuestionDTO {
   codingQuestion?: CodingQuestionInternal;
   freetextQuestion?: detailedFreetextQuestionDTO;
   mcQuestion?: detailedChoiceQuestionDTO;
+  fillinQuestion?: detailedFillinQuestionDTO;
+  graphQuestion?: detailedGraphQuestionDTO;
   // fillinQuestion?: detailedFillinQuestionDTO;
 }
 
@@ -54,3 +58,40 @@ export interface detailedChoiceOptionDTO {
   is_correct: boolean;
 }
 
+export interface detailedFillinQuestionDTO {
+  id?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  questionId?: number;
+  authorId?: number;
+  content: string;
+  table?: boolean;
+  taskType: string;
+  blanks: detailedFillinBlankDTO[];
+}
+
+export interface detailedFillinBlankDTO {
+  id?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  blankContent: string;
+  position?: string;
+  isDistractor: boolean;
+  isCorrect: boolean;
+  fillinQuestionId?: number;
+}
+
+export interface detailedGraphQuestionDTO {
+  id?: number;
+  textHTML?: string;
+  expectations: string;
+  expectationsHTML?: string;
+  type: string;
+  initialStructure: GraphStructureDTO;
+  exampleSolution: GraphStructureDTO[];
+  stepsEnabled: boolean;
+  configuration: GraphConfigurationDTO;
+  createdAt?: Date;
+  updatedAt?: Date;
+  questionId: number;
+}

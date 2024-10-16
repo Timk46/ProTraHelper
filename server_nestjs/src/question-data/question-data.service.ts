@@ -1,13 +1,15 @@
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { QuestionDTO, questionType, detailedQuestionDTO } from '@DTOs/index';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
-import { Injectable } from '@nestjs/common';
+import { QuestionDTO, questionType, detailedQuestionDTO, FillinQuestionDTO } from '@DTOs/index';
+import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswer } from '@DTOs/userAnswer.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataCodeService } from './question-data-code/question-data-code.service';
 import { QuestionDataFillinService } from './question-data-fillin/question-data-fillin.service';
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
+import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
+import { GraphSolutionEvaluationService } from '@/graph-solution-evaluation/graph-solution-evaluation.service';
 
 @Injectable()
 export class QuestionDataService {
@@ -19,6 +21,8 @@ export class QuestionDataService {
     private qdCode: QuestionDataCodeService,
     private qdFillin: QuestionDataFillinService,
     private qdFreetext: QuestionDataFreetextService,
+    private qdGraph: QuestionDataGraphService,
+    private graphEvalService: GraphSolutionEvaluationService
   ) {}
 
   /**
@@ -116,7 +120,21 @@ export class QuestionDataService {
         }
         break;
       case questionType.FILLIN:
-        // todo: hol die Daten aus der fillin Datenbank
+        specificQuestionData = await this.prisma.fillinQuestion.findFirst({
+          where: {
+            questionId: Number(questionId)
+          },
+          include: {
+            blanks: true
+          }
+        });
+        break;
+      case questionType.GRAPH:
+        specificQuestionData = await this.prisma.graphQuestion.findFirst({
+          where: {
+            questionId: Number(questionId)
+          }
+        });
         break;
     }
 
@@ -125,6 +143,8 @@ export class QuestionDataService {
       codingQuestion: questionTypeStr === questionType.CODE ? specificQuestionData : undefined,
       freetextQuestion: questionTypeStr === questionType.FREETEXT ? specificQuestionData : undefined,
       mcQuestion: (questionTypeStr === questionType.MULTIPLECHOICE || questionTypeStr === questionType.SINGLECHOICE) ? specificQuestionData : undefined,
+      fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
+      graphQuestion: questionTypeStr === questionType.GRAPH ? specificQuestionData : undefined,
       // fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
     };
 
@@ -228,7 +248,10 @@ export class QuestionDataService {
     const currentQuestion = await this.getDetailedQuestion(question.id, question.type as questionType);
 
     if (!this.detailedQuestionsUpdateable(currentQuestion, question)) {
+      console.log('currentQuestion: ', currentQuestion);
+      console.log('newQuestion: ', question);
       throw new Error('Question not updateable');
+
     }
 
     let updatedQuestion = null;
@@ -312,11 +335,18 @@ export class QuestionDataService {
           await this.qdCode.updateCodingQuestion(question.codingQuestion);
         }
         break;
-      case questionType.FILLIN:
-        if (createNewVersion || !currentQuestion.codingQuestion) {
-          // z.B. await this.qdFillin.createFillinQuestion(question.fillinQuestion, updatedQuestion.id);
+      case questionType.GRAPH:
+        if (createNewVersion || !currentQuestion.graphQuestion) {
+          await this.qdGraph.createGraphQuestion(question.graphQuestion, updatedQuestion.id);
         } else {
-          // z.B. await this.qdFillin.updateFillinQuestion(question.fillinQuestion);
+          await this.qdGraph.updateGraphQuestion(question.graphQuestion);
+        }
+        break;
+      case questionType.FILLIN:
+        if (createNewVersion || !currentQuestion.fillinQuestion) {
+          await this.qdFillin.createFillinQuestion(question.fillinQuestion, updatedQuestion.id);
+        } else {
+          await this.qdFillin.updateFillinQuestion(question.fillinQuestion);
         }
         break;
     }
@@ -344,8 +374,11 @@ export class QuestionDataService {
       (
         newQuestion.codingQuestion ||
         newQuestion.freetextQuestion ||
-        newQuestion.mcQuestion // ||
-        //TODO: fill, uml, graph
+        newQuestion.mcQuestion ||
+        newQuestion.fillinQuestion ||
+        //TODO: uml, graph
+        newQuestion.graphQuestion // ||
+        //TODO: fill, uml
         // newQuestion.fillinQuestion // das hier einfügen
       )
     ){
@@ -370,6 +403,8 @@ export class QuestionDataService {
           questionId: answerData.questionId,
           //if answerData has a userFreetextAnswer, use it, else use null
           userFreetextAnswer: answerData.userFreetextAnswer ?? null,
+          //if answerData has a userGraphAnswer, use it, else use null
+          userGraphAnswer: answerData.userGraphAnswer ? JSON.parse(JSON.stringify(answerData.userGraphAnswer)) : null,
       }
     });
 
@@ -548,6 +583,139 @@ export class QuestionDataService {
 
     }
 
-  }
+    // fillin
+    if(question.type === questionType.FILLIN) {
+      console.log('generate feedback for fill-in-the-blank user answer');
+      const fillInTask = await this.prisma.fillinQuestion.findFirst({
+        where: {
+          questionId: question.id,
+        },
+        include: {
+          blanks: true
+        }
+      });
 
+      // Fetch the correct answers from the blanks table
+      const correctAnswers = await this.prisma.blank.findMany({
+        where: {
+          fillinQuestionId: fillInTask.id,
+          isDistractor: false,
+          isCorrect: true
+        },
+        orderBy: {
+          position: 'asc'
+        },
+      });
+
+      const importantBlankPositions = [...new Set(correctAnswers.map(blank => blank.position))];
+      console.log("correct answers: ", correctAnswers);
+      let userScore = 0;
+
+      // Compare user answers with correct answers
+      const userAnswers: UserFillinAnswer[] = answerData.userFillinTextAnswer;
+      const feedbackDetails = [];
+      console.log("user answers: ", userAnswers);
+
+      for (let blankPosition of importantBlankPositions) {
+        const userAnswer = userAnswers.find(answer => answer.position === blankPosition)?.answer?.toLowerCase().trim();
+        const correctPositionAnswers = correctAnswers.filter(blank => blank.position === blankPosition).map(blank => blank.blankContent.toLowerCase().trim());
+
+        if (correctPositionAnswers.includes(userAnswer)) {
+          userScore += 1;
+          //feedbackDetails.push(`Blank ${blankPosition}: Correct`);
+        } else {
+          //feedbackDetails.push(`Blank ${blankPosition}: Incorrect`);
+        }
+
+      }
+
+      let feedbackText = '';
+      let markedAsDone = false;
+      const reachedPoints = Math.floor(userScore * (question.score / importantBlankPositions.length));
+
+      if (userScore === importantBlankPositions.length) {
+        feedbackText = `Herzlichen Glückwunsch! Du hast alle ${importantBlankPositions.length} Lücken richtig ausgefüllt. Du hast ${question.score} von ${question.score} Punkten erreicht. Die Aufgabe ist als abgeschlossen markiert und dein Fortschritt wurde aktualisiert.`;
+        this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
+        markedAsDone = true;
+      } else {
+        feedbackText = `Du hast ${userScore} von ${importantBlankPositions.length} Lücken richtig ausgefüllt. Du hast ${reachedPoints} von ${question.score} Punkten erreicht.\n\n`;
+        feedbackText += feedbackDetails.join('\n');
+      }
+
+      //create feedback for user answer
+      const feedback = await this.prisma.feedback.create({
+        data: {
+          userAnswerId: createdData.id,
+          text: feedbackText,
+          score: reachedPoints
+        }
+      });
+
+      if (!feedback) throw new Error('Could not create Feedback');
+
+      console.log('element done: ' + markedAsDone);
+      return {
+        id: feedback.id,
+        userAnswerId: feedback.userAnswerId,
+        score: feedback.score,
+        feedbackText: feedback.text,
+        elementDone: markedAsDone,
+        progress: Math.floor((feedback.score/question.score) * 100),
+      }
+
+    }
+      // Create feedback for user answer
+
+    //generate feedback for user graph answer
+    if (question.type === questionType.GRAPH) {
+      console.log('generate feedback for graph user answer');
+
+      let feedbackText = 'Du hast keine Antwort eingegeben.';
+      let userScore = 0;
+
+      if (answerData.userGraphAnswer) {
+
+        await this.qdGraph.getGraphQuestion(answerData.questionId, true).then(async (questionData) => {
+
+          // Generate feedback based on the user answer
+          const { feedback, receivedPoints } = this.graphEvalService.evaluateSolution(questionData, answerData.userGraphAnswer);
+          feedbackText = feedback;
+          userScore = receivedPoints;
+        });
+      }
+
+      const progress = userScore / question.score;
+      let markedAsDone = false;
+      console.log('progress: '+progress);
+
+      if(progress == 1) {
+        await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
+        markedAsDone = true;
+      }
+
+      console.log('generated Text:', feedbackText);
+      console.log('userScore: ' + userScore);
+
+      //create feedback for user answer
+      const feedback = await this.prisma.feedback.create({
+        data: {
+          userAnswerId: createdData.id,
+          text: feedbackText,
+          score: userScore
+        }
+      });
+
+      if (!feedback) throw new Error('Could not create Feedback');
+
+      console.log('element done: ' + markedAsDone);
+      return {
+        id: feedback.id,
+        userAnswerId: feedback.userAnswerId,
+        score: feedback.score,
+        feedbackText: feedback.text,
+        elementDone: markedAsDone,
+        progress: Math.floor((feedback.score/question.score) * 100),
+      }
+    }
+  }
 }
