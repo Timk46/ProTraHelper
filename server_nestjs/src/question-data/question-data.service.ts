@@ -8,6 +8,8 @@ import { QuestionDataChoiceService } from './question-data-choice/question-data-
 import { QuestionDataCodeService } from './question-data-code/question-data-code.service';
 import { QuestionDataFillinService } from './question-data-fillin/question-data-fillin.service';
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
+import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
+import { GraphSolutionEvaluationService } from '@/graph-solution-evaluation/graph-solution-evaluation.service';
 
 @Injectable()
 export class QuestionDataService {
@@ -19,6 +21,8 @@ export class QuestionDataService {
     private qdCode: QuestionDataCodeService,
     private qdFillin: QuestionDataFillinService,
     private qdFreetext: QuestionDataFreetextService,
+    private qdGraph: QuestionDataGraphService,
+    private graphEvalService: GraphSolutionEvaluationService
   ) {}
 
   /**
@@ -125,6 +129,13 @@ export class QuestionDataService {
           }
         });
         break;
+      case questionType.GRAPH:
+        specificQuestionData = await this.prisma.graphQuestion.findFirst({
+          where: {
+            questionId: Number(questionId)
+          }
+        });
+        break;
     }
 
     const questionData: detailedQuestionDTO = {
@@ -133,6 +144,8 @@ export class QuestionDataService {
       freetextQuestion: questionTypeStr === questionType.FREETEXT ? specificQuestionData : undefined,
       mcQuestion: (questionTypeStr === questionType.MULTIPLECHOICE || questionTypeStr === questionType.SINGLECHOICE) ? specificQuestionData : undefined,
       fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
+      graphQuestion: questionTypeStr === questionType.GRAPH ? specificQuestionData : undefined,
+      // fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
     };
 
     return questionData;
@@ -322,6 +335,13 @@ export class QuestionDataService {
           await this.qdCode.updateCodingQuestion(question.codingQuestion);
         }
         break;
+      case questionType.GRAPH:
+        if (createNewVersion || !currentQuestion.graphQuestion) {
+          await this.qdGraph.createGraphQuestion(question.graphQuestion, updatedQuestion.id);
+        } else {
+          await this.qdGraph.updateGraphQuestion(question.graphQuestion);
+        }
+        break;
       case questionType.FILLIN:
         if (createNewVersion || !currentQuestion.fillinQuestion) {
           await this.qdFillin.createFillinQuestion(question.fillinQuestion, updatedQuestion.id);
@@ -355,8 +375,11 @@ export class QuestionDataService {
         newQuestion.codingQuestion ||
         newQuestion.freetextQuestion ||
         newQuestion.mcQuestion ||
-        newQuestion.fillinQuestion
+        newQuestion.fillinQuestion ||
         //TODO: uml, graph
+        newQuestion.graphQuestion // ||
+        //TODO: fill, uml
+        // newQuestion.fillinQuestion // das hier einfügen
       )
     ){
       return true;
@@ -380,6 +403,8 @@ export class QuestionDataService {
           questionId: answerData.questionId,
           //if answerData has a userFreetextAnswer, use it, else use null
           userFreetextAnswer: answerData.userFreetextAnswer ?? null,
+          //if answerData has a userGraphAnswer, use it, else use null
+          userGraphAnswer: answerData.userGraphAnswer ? JSON.parse(JSON.stringify(answerData.userGraphAnswer)) : null,
       }
     });
 
@@ -617,9 +642,7 @@ export class QuestionDataService {
         feedbackText += feedbackDetails.join('\n');
       }
 
-      console.log(feedbackText);
-
-      // Create feedback for user answer
+      //create feedback for user answer
       const feedback = await this.prisma.feedback.create({
         data: {
           userAnswerId: createdData.id,
@@ -639,7 +662,60 @@ export class QuestionDataService {
         elementDone: markedAsDone,
         progress: Math.floor((feedback.score/question.score) * 100),
       }
+
+    }
+      // Create feedback for user answer
+
+    //generate feedback for user graph answer
+    if (question.type === questionType.GRAPH) {
+      console.log('generate feedback for graph user answer');
+
+      let feedbackText = 'Du hast keine Antwort eingegeben.';
+      let userScore = 0;
+
+      if (answerData.userGraphAnswer) {
+
+        await this.qdGraph.getGraphQuestion(answerData.questionId, true).then(async (questionData) => {
+
+          // Generate feedback based on the user answer
+          const { feedback, receivedPoints } = this.graphEvalService.evaluateSolution(questionData, answerData.userGraphAnswer);
+          feedbackText = feedback;
+          userScore = receivedPoints;
+        });
+      }
+
+      const progress = userScore / question.score;
+      let markedAsDone = false;
+      console.log('progress: '+progress);
+
+      if(progress == 1) {
+        await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
+        markedAsDone = true;
+      }
+
+      console.log('generated Text:', feedbackText);
+      console.log('userScore: ' + userScore);
+
+      //create feedback for user answer
+      const feedback = await this.prisma.feedback.create({
+        data: {
+          userAnswerId: createdData.id,
+          text: feedbackText,
+          score: userScore
+        }
+      });
+
+      if (!feedback) throw new Error('Could not create Feedback');
+
+      console.log('element done: ' + markedAsDone);
+      return {
+        id: feedback.id,
+        userAnswerId: feedback.userAnswerId,
+        score: feedback.score,
+        feedbackText: feedback.text,
+        elementDone: markedAsDone,
+        progress: Math.floor((feedback.score/question.score) * 100),
+      }
     }
   }
-
 }

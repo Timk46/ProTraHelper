@@ -1,0 +1,104 @@
+<div class="form-container" *ngIf="questionData && graphQuestionData; else noQuestion">
+    
+    <div class="assignment box">
+        <h2>{{ questionData.name }}</h2>   
+        <p>
+            {{ questionData.text }}
+        </p>
+    </div>
+    <div class="evaluation box">
+        <h2>Feedback</h2>
+        <hr>
+        <p *ngIf="!isSending" [innerHTML]="feedback"></p>
+        <div 
+            *ngIf="isSending"
+            class="spinner-contaier"
+            style="display: flex; justify-content: center; align-items: center; height: 60%;"
+        >
+            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+        </div>
+    </div>
+    <div class="solution box">
+        <app-graph-structure [toolbarEnabled]="false"/>
+    </div>
+
+    <div class="controls box">
+
+        <div style="display: flex; justify-content: start; align-items: center; gap: 1em; height: 100%;">
+            
+            <mat-button-toggle-group 
+                name="mode" 
+                aria-label="mode" 
+                [(ngModel)]="workspaceModeCurrent"        
+                (ngModelChange)="updateWorkspace()"
+            >
+                <mat-button-toggle value="assignment" [disabled]="isSending">Aufgabenstellung</mat-button-toggle>
+                <mat-button-toggle value="solution" [disabled]="isSending">Lösung</mat-button-toggle>
+            </mat-button-toggle-group>
+
+            <mat-button-toggle-group 
+                *ngIf="graphQuestionData.stepsEnabled && workspaceModeCurrent === 'solution'"
+                name="solution-step" 
+                aria-label="solution-step" 
+                [(ngModel)]="solutionStepCurrent"
+                (ngModelChange)="updateWorkspace()"
+            >       
+                    <mat-button-toggle 
+                        *ngFor="let step of solutionGraph; let i = index; trackBy:trackByIndex"    
+                        [value]="i"
+                        [disabled]="isSending"
+                    >
+                        Schritt {{ i + 1 }}
+                    </mat-button-toggle>
+
+            </mat-button-toggle-group>
+
+            <button
+                *ngIf="graphQuestionData.stepsEnabled && workspaceModeCurrent === 'solution'"
+                class="image-button"
+                type="button"
+                (click)="addNewSolutionStep()"
+            > 
+                <!-- Neuen Schritt -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                </svg>
+            </button>
+
+            <button
+                *ngIf="graphQuestionData.stepsEnabled && workspaceModeCurrent === 'solution' && solutionGraph.length > 1"
+                class="image-button"
+                type="button"
+                (click)="deleteCurrentSolutionStep()"
+            > 
+                <!-- Schritt löschen -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                    </svg>
+            </button>
+
+        </div>
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 20px;">
+                <mat-progress-spinner *ngIf="isSending" diameter="20" mode="indeterminate"></mat-progress-spinner>
+                <button
+                    type="button"
+                    [disabled]="isSending"
+                    (click)="onSubmitButtonClick()"
+                > 
+                    Abgeben 
+                </button>
+            </div>
+    </div>
+
+</div>
+
+<ng-template #noQuestion>
+    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; background-color: rgb(248, 242, 233);">
+        <h2>Keine Aufgabe vorhanden</h2>
+        <a 
+            routerLink="/assignments">
+            Zurück zur Liste der Beispiel-Aufgaben
+        </a>
+    </div>
+</ng-template>

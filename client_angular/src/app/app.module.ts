@@ -63,6 +63,10 @@ import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-cre
 import { FillinTaskComponent } from "./Pages/contentView/contentElement/fill-in-task/fill-in-task.component";
 import { FillinTaskNewComponent } from './Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { DynamicBlankComponent } from './Pages/contentView/contentElement/fill-in-task-new/dynamic-blank/dynamic-blank.component';
+import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-task/graph-task.component';
+
+// Import GraphTasksModule
+import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
 
 @NgModule({
     declarations: [
@@ -125,7 +129,8 @@ import { DynamicBlankComponent } from './Pages/contentView/contentElement/fill-i
         HttpClientModule,
         LecturersViewModule,
         EditorModule,
-        MarkdownModule.forRoot()
+        MarkdownModule.forRoot(),
+        GraphTasksModule
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

@@ -1,4 +1,5 @@
 import { FileDto } from "./file.dto";
+import { GraphConfigurationDTO, GraphStructureDTO } from "./graphTask.dto";
 
 export interface QuestionDTO {
     id: number;
@@ -140,6 +141,7 @@ export interface CodingQuestionDto {
     FREETEXT = "FreeText",
     CODE = "CodingQuestion",
     FILLIN = "Fillin"
+    GRAPH = "GraphQuestion",
   }
 
   export interface McqGenerationDTO {
@@ -159,5 +161,20 @@ export interface CodingQuestionDto {
     expectationsHTML?: string;
     exampleSolution?: string;
     exampleSolutionHTML?: string;
+    maxPoints: number;
+  }
+
+  export interface GraphQuestionDTO {
+    questionId: number;
+    contentElementId?: number;
+    title: string;
+    textHTML?: string;
+    expectations: string;
+    expectationsHTML?: string;
+    type: string;
+    initialStructure: GraphStructureDTO;
+    exampleSolution: GraphStructureDTO[];
+    stepsEnabled: boolean;
+    configuration: GraphConfigurationDTO;
     maxPoints: number;
   }

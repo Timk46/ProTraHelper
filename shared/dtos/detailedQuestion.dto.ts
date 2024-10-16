@@ -1,4 +1,6 @@
 import {CodingQuestionInternal} from './question.dto';
+import { GraphConfigurationDTO, GraphStructureDTO } from './graphTask.dto';
+
 export interface detailedQuestionDTO {
   id: number;
   createdAt?: Date;
@@ -20,6 +22,8 @@ export interface detailedQuestionDTO {
   freetextQuestion?: detailedFreetextQuestionDTO;
   mcQuestion?: detailedChoiceQuestionDTO;
   fillinQuestion?: detailedFillinQuestionDTO;
+  graphQuestion?: detailedGraphQuestionDTO;
+  // fillinQuestion?: detailedFillinQuestionDTO;
 }
 
 export interface detailedFreetextQuestionDTO {
@@ -77,3 +81,17 @@ export interface detailedFillinBlankDTO {
   fillinQuestionId?: number;
 }
 
+export interface detailedGraphQuestionDTO {
+  id?: number;
+  textHTML?: string;
+  expectations: string;
+  expectationsHTML?: string;
+  type: string;
+  initialStructure: GraphStructureDTO;
+  exampleSolution: GraphStructureDTO[];
+  stepsEnabled: boolean;
+  configuration: GraphConfigurationDTO;
+  createdAt?: Date;
+  updatedAt?: Date;
+  questionId: number;
+}

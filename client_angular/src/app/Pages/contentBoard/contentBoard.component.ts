@@ -235,6 +235,10 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       case questionType.CODE:
         // Navigate to coding question component
         this.router.navigate([this.getRouterLink(taskViewData.id)]);
+        break;
+      case questionType.GRAPH:
+        // Navigate to graph question component
+        this.router.navigate([`/graphtask/${taskViewData.id}`]);
         return;
       case questionType.FILLIN:
         dialogRef = this.dialog.open(FillinTaskNewComponent, {...dialogConfig, width: '50vw'});
@@ -351,6 +355,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         break;
       case questionType.CODE:
         this.router.navigate(['/editcoding/', taskViewData.id]);
+        break;
+      case questionType.GRAPH:
+        this.router.navigate(['/editgraph/', taskViewData.id]);
         break;
     }
   }
@@ -480,6 +487,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         return 'Lückentext';
       case questionType.CODE:
         return 'Programmieraufgabe';
+      case questionType.GRAPH:
+        return 'Graphaufgabe';
       default:
         return 'undefiniert';
     }
