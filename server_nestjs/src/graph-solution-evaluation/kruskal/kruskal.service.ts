@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GraphEdgeSemanticDTO, GraphStructureSemanticDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
-import { getExtraEdges, graphJSONToSemantic, graphsContainSameNodes } from '../utils/graph-utils';
+import { getExtraEdges, getExtraEdgesUndirectedGraph, graphJSONToSemantic, graphsContainSameNodes } from '../utils/graph-utils';
 
 export interface IUnionFind {
     parent: { [key: string]: string };
@@ -44,8 +44,8 @@ export class KruskalService {
             const currentStepEdges: GraphEdgeSemanticDTO[] = studentSolutionSemantic[stepIndex].edges;
             const prevStepEdges: GraphEdgeSemanticDTO[] = stepIndex > 0 ? studentSolutionSemantic[stepIndex-1].edges : [];
 
-            const studentNewEdges = getExtraEdges(currentStepEdges, prevStepEdges);
-            const studentRemovedEdges = getExtraEdges(prevStepEdges, currentStepEdges);
+            const studentNewEdges = getExtraEdgesUndirectedGraph(currentStepEdges, prevStepEdges);
+            const studentRemovedEdges = getExtraEdgesUndirectedGraph(prevStepEdges, currentStepEdges);
 
             studentNewEdgesByStep.push(studentNewEdges); 
             studentRemovedEdgesByStep.push(studentRemovedEdges);

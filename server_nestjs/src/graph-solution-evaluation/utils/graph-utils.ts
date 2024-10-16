@@ -357,3 +357,58 @@ export function graphEdgeJSONToSemantic(edge: GraphEdgeDTO, nodesList: GraphNode
   
     return edgeSemantic;
 }
+
+
+/**
+ * Identifies edges in the first graph that are not present in the second graph.
+ *
+ * This function compares two lists of edges, `edgesGraph1` and `edgesGraph2`, and 
+ * returns a list of edges that are present in `edgesGraph1` but not in `edgesGraph2`.
+ * It iterates through each edge in `edgesGraph1` and checks if there is a matching 
+ * edge in `edgesGraph2` using the `compareEdges` method. If no matching edge is found, 
+ * the edge is considered an "extra" edge and added to the result list.
+ *
+ * @param {GraphEdgeSemanticDTO[]} edgesGraph1 - The list of edges from the first graph.
+ * @param {GraphEdgeSemanticDTO[]} edgesGraph2 - The list of edges from the second graph.
+ * @returns {GraphEdgeSemanticDTO[]} - Returns an array of edges that are present in `edgesGraph1` but not in `edgesGraph2`.
+ */
+export function getExtraEdgesUndirectedGraph(edgesGraph1: GraphEdgeSemanticDTO[], edgesGraph2: GraphEdgeSemanticDTO[]): GraphEdgeSemanticDTO[] {
+  const extraEdges: GraphEdgeSemanticDTO[] = [];
+
+  for (const edge1 of edgesGraph1) {
+    const matchingEdge = edgesGraph2.find(edge2 => undirectedEdgesConnectNodesWithSameValues(edge1, edge2));
+    if (!matchingEdge) {
+      extraEdges.push(edge1);
+    }
+  }
+
+  return extraEdges;
+}
+
+
+
+
+/**
+ * Checks if two undirected edges connect nodes with the same values.
+ *
+ * This function compares two directed graph edges, `edge1` and `edge2`, and returns `true`
+ * if both edges connect the same pair of nodes based on their `node1Value` and `node2Value` properties.
+ * It does not consider other properties like `weight`.
+ *
+ * @param {GraphEdgeSemanticDTO} edge1 - The first edge to compare.
+ * @param {GraphEdgeSemanticDTO} edge2 - The second edge to compare.
+ * @returns {boolean} - Returns `true` if both edges connect nodes with the same values, otherwise `false`.
+ */
+export function undirectedEdgesConnectNodesWithSameValues(edge1: GraphEdgeSemanticDTO, edge2: GraphEdgeSemanticDTO) {
+  return (
+    (
+    edge1.node1Value === edge2.node1Value &&
+    edge1.node2Value === edge2.node2Value
+    )
+    ||
+    (
+      edge1.node1Value === edge2.node2Value &&
+      edge1.node2Value === edge2.node1Value
+    )
+  );
+};
