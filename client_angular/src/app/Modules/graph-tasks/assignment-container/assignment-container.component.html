@@ -1,6 +1,9 @@
 <div class="form-container" *ngIf="questionData && graphQuestionData; else noQuestion">
     
     <div class="assignment box">
+        <button class="navigation-button" (click)="navigateToDashboard()" aria-label="Zurück zum Dashboard">
+            Zurück zum Dashboard
+        </button>
         <h2>{{ questionData.name }}</h2>   
         <p>
             {{ questionData.text }}

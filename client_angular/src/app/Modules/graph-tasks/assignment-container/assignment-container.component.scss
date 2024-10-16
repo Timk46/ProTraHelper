@@ -109,6 +109,21 @@ mat-button-toggle-group {
     color: #eee;
 }
 
+.navigation-button {
+    width: 100%; 
+    background-color: rgb(63,81,181);
+    color: #fff;
+    font-weight: 500;
+    border-radius: .5em; 
+    padding: .4em; 
+    margin-bottom: 2em;
+}
+
+.navigation-button:hover {
+    background-color: rgb(80, 99, 206);
+    cursor: pointer;
+}
+
 .image-button {
     position: relative;
     border: none;
