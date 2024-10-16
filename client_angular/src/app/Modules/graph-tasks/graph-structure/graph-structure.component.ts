@@ -8,7 +8,7 @@ import { IGraphNewEdge } from '../models/GraphNewEdge.interface';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { readFile } from '../utils';
-import { SizeDTO, PositionDTO, RectangleDTO } from '@DTOs/graphTask.dto';
+import { SizeDTO, PositionDTO, RectangleDTO, GraphConfigurationDTO } from '@DTOs/graphTask.dto';
 
 @Component({
   selector: 'app-graph-structure',
@@ -40,10 +40,12 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
   private nodesSubscription!: Subscription;
   private edgesSubscription!: Subscription;
   private newEdgeSubscription!: Subscription;
+  private graphConfigurationSubscription!: Subscription;
   
   nodes!: IGraphNode[];
   edges!: IGraphEdge[];
   newEdge!: IGraphNewEdge;
+  graphConfiguration!: GraphConfigurationDTO;
   
   private _toolbarEnabled: boolean = true;
 
@@ -106,6 +108,10 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
       this.newEdge = newEdge;
     });
 
+    this.graphConfigurationSubscription = this.graphService.getGraphConfiguration().subscribe( graphConfiguration => {
+      this.graphConfiguration = graphConfiguration;
+    });
+
     // #############################
     // Set up event listeners
     window.addEventListener('keydown', this.onKeyDown);
@@ -136,6 +142,9 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
     }
     if (this.newEdgeSubscription) {
       this.newEdgeSubscription.unsubscribe();
+    }
+    if (this.graphConfigurationSubscription) {
+      this.graphConfigurationSubscription.unsubscribe();
     }
   }
 
@@ -325,5 +334,22 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
 
   trackByIndex(index: number, obj: any): any {
     return index; // or obj.id if each edge has a unique id
+  }
+
+  getReverseEdgeState(edge: IGraphEdge): 0 | 1 | 2 {
+    // Check if the graph contains directed edges
+    if (!this.graphConfiguration.edgeDirected) { return 0; } 
+
+    const reverseEdge: IGraphEdge | undefined = this.edges.find(e => e.node1 === edge.node2 && e.node2 === edge.node1);
+    
+    // There is no reverse edge
+    if (!reverseEdge) { return 0; }
+
+    // The reverse edge source node has smaller id than the target node
+    if (reverseEdge.node1.nodeId < reverseEdge.node2.nodeId) { return 1; }
+
+    // The reverse edge source node has greater id than the target node
+    // if (reverseEdge.node1.nodeId > reverseEdge.node2.nodeId) 
+    return 2;
   }
 }
