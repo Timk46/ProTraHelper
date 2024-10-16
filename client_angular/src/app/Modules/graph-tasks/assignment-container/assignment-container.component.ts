@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GraphStructureDTO, GraphConfigurationDTO } from '@DTOs/graphTask.dto';
 import { GraphTaskService } from '../services/graph-task.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
@@ -41,7 +41,8 @@ export class AssignmentContainerComponent implements OnInit {
     private route: ActivatedRoute,
     private questionDataService: QuestionDataService,
     private snackBar: MatSnackBar,
-    private progressService: ProgressService
+    private progressService: ProgressService,
+    private router: Router
   ) {
 
   }
@@ -71,6 +72,14 @@ export class AssignmentContainerComponent implements OnInit {
             this.thisQuestionType = questionData.type as questionType;
           }
         });
+      });
+
+      this.questionDataService.getNewestUserAnswer(questionId).subscribe(data => {
+        if (data.userGraphAnswer) {
+          this.solutionGraph = data.userGraphAnswer;
+          this.workspaceModeCurrent = 'solution';
+          this.updateWorkspace();
+        }
       });
     });
   }
@@ -181,6 +190,20 @@ export class AssignmentContainerComponent implements OnInit {
     }
   }
 
+  resetSolution() {
+    // Reset the solution steps
+    this.solutionGraph = [];
+    this.solutionStepCurrent = 0;
+    this.solutionStepPrevious = this.solutionStepCurrent;
+
+    this.workspaceModeCurrent = 'assignment';
+    this.workspaceModePrevious = this.workspaceModeCurrent;
+
+    // To use only values and not the references
+    this.updateWorkspace();
+  }
+
+
   updateWorkspace() {
 
     // If workspace was in solution mode before update
@@ -260,5 +283,9 @@ export class AssignmentContainerComponent implements OnInit {
 
   trackByIndex(index: number, obj: any): any {
     return index;
+  }
+
+  navigateToDashboard() {
+    this.router.navigate(['/dashboard']);
   }
 }

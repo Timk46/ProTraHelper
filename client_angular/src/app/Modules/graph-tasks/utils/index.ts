@@ -17,13 +17,35 @@ export function calculateShapeCenter(position: PositionDTO, size: SizeDTO): Posi
 }
 
 
-export function calculateLineCenter(from: PositionDTO, to: PositionDTO, size: SizeDTO): PositionDTO{
-    const x = (from.x + to.x - size.width) / 2;
-    const y = (from.y + to.y - size.height) / 2;
+export function calculateLineCenter(from: PositionDTO, to: PositionDTO, size: SizeDTO, align: 0 | 1 | 2): PositionDTO{
+    let x = (from.x + to.x - size.width) / 2;
+    let y = (from.y + to.y - size.height) / 2;
+
+    if (align === 0) { return { x, y }; }
+
+    // Calculate the perpendicular shift vector
+    // Calculate the difference between node centers
+    const diffX = to.x - from.x;
+    const diffY = to.y - from.y;
+
+    // Calculate the perpendicular vector
+    const perpendicularX = -diffY;
+    const perpendicularY = diffX;
+
+    // Normalize the perpendicular vector
+    const perpendicularDistance = Math.sqrt(perpendicularX * perpendicularX + perpendicularY * perpendicularY);
+    const normPerpendicularX = perpendicularX / perpendicularDistance;
+    const normPerpendicularY = perpendicularY / perpendicularDistance;
+  
+    // If align is 1 or 2, adjust the start point perpendicularly
+    const perpendicularShift = 20; // Adjust this value to control spacing
+    x += normPerpendicularX * perpendicularShift;
+    y += normPerpendicularY * perpendicularShift;
+
     return { x, y };
 }
 
-export function calculateEdgeStart(from: IGraphNode, to: IGraphNode): PositionDTO {
+export function calculateEdgeStart(from: IGraphNode, to: IGraphNode, align: 0 | 1 | 2): PositionDTO {
     // Calculate the distance between the center of two nodes
     const diffX = to.center.x - from.center.x;
     const diffY = to.center.y - from.center.y;
@@ -46,12 +68,23 @@ export function calculateEdgeStart(from: IGraphNode, to: IGraphNode): PositionDT
     const extendedDistance = distanceToBoundary + 10;
     
     // Return the position for the start of the edge
-    const x = from.center.x + (diffX * extendedDistance) / distance;
-    const y = from.center.y + (diffY * extendedDistance) / distance;
+    let x = from.center.x + (diffX * extendedDistance) / distance;
+    let y = from.center.y + (diffY * extendedDistance) / distance;
+
+    // Calculate the perpendicular shift vector
+    const { normPerpendicularX, normPerpendicularY } = calculatePerpendicularVector(from, to);
+
+    // If align is 1 or 2, adjust the start point perpendicularly
+    if (align !== 0) {
+        const perpendicularShift = 20; // Adjust this value to control spacing
+        x += normPerpendicularX * perpendicularShift;
+        y += normPerpendicularY * perpendicularShift;
+    }
+
     return { x, y };
 }
 
-export function calculateEdgeEnd(from: IGraphNode, to: IGraphNode) {
+export function calculateEdgeEnd(from: IGraphNode, to: IGraphNode, align: 0 | 1 | 2) {
     // Calculate the distance between the center of two nodes
     const diffX = from.center.x - to.center.x;
     const diffY = from.center.y - to.center.y;
@@ -74,12 +107,40 @@ export function calculateEdgeEnd(from: IGraphNode, to: IGraphNode) {
     const extendedDistance = distanceToBoundary + 10;
     
     // Return the position for the end of the edge
-    const x = to.center.x + (diffX * extendedDistance) / distance;
-    const y = to.center.y + (diffY * extendedDistance) / distance;
+    let x = to.center.x + (diffX * extendedDistance) / distance;
+    let y = to.center.y + (diffY * extendedDistance) / distance;
+
+    // Calculate the perpendicular shift vector
+    const { normPerpendicularX, normPerpendicularY } = calculatePerpendicularVector(from, to);
+
+    // If align is 1 or 2, adjust the end point perpendicularly
+    if (align !== 0) {
+        const perpendicularShift = 20; // Adjust this value to control spacing
+        x += normPerpendicularX * perpendicularShift;
+        y += normPerpendicularY * perpendicularShift;
+    }
+
     return { x, y };
 }
 
-export function calculateArrowPoints(from: IGraphNode, to: IGraphNode) {
+function calculatePerpendicularVector(from: IGraphNode, to: IGraphNode) {
+  // Calculate the difference between node centers
+  const diffX = to.center.x - from.center.x;
+  const diffY = to.center.y - from.center.y;
+
+  // Calculate the perpendicular vector
+  const perpendicularX = -diffY;
+  const perpendicularY = diffX;
+
+  // Normalize the perpendicular vector
+  const perpendicularDistance = Math.sqrt(perpendicularX * perpendicularX + perpendicularY * perpendicularY);
+  const normPerpendicularX = perpendicularX / perpendicularDistance;
+  const normPerpendicularY = perpendicularY / perpendicularDistance;
+
+  return { normPerpendicularX, normPerpendicularY };
+}
+
+export function calculateArrowPoints(from: IGraphNode, to: IGraphNode, align: 0 | 1 | 2) {
     // Specify where the arrowhead starts and ends
     let start: PositionDTO;  
     let end: PositionDTO;  
@@ -90,7 +151,7 @@ export function calculateArrowPoints(from: IGraphNode, to: IGraphNode) {
       end = { x: from.position.x + xOffset, y: from.position.y + yOffset };
     } else {
       start = from.center; // to specify the direction of the startpoint
-      end = calculateEdgeEnd(from, to);  
+      end = calculateEdgeEnd(from, to, align);  
     }
     
     // Size of the arrowhead

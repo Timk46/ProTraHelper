@@ -20,6 +20,7 @@ export class EdgeGraphComponent {
   // #############################
   // Inputs from parent component
   @Input() edge!: IGraphEdge;
+  @Input() reverseEdgeState!: 0 | 1 | 2;
   
 
   // #############################

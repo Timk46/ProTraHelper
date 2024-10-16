@@ -37,6 +37,7 @@
         <form (submit)="editNodeValue=false" [ngStyle]="{display: editNodeValue ? 'block' : 'none'}">
             <input #nodeValueInput type="text" [(ngModel)]="node.value" (change)="updateNodeValue($event)" name="value" placeholder="Wert eingeben"
             (blur)="editNodeValue=false"
+            style="text-align: center;"
             />
         </form>
         </div>

@@ -48,7 +48,7 @@ export class DijkstraService {
         const maxStepPoints: number = maxPoints / expectedSolutionSemantic.length;
 
         let receivedPoints: number = 0;
-        const feedback: string[] = [];
+        let feedback: string[] = [];
 
 
         // Check each student solution step successively
@@ -126,6 +126,11 @@ export class DijkstraService {
         if (hasLessSteps) {
             feedback.push(`Die Lösung enthält weniger Schritte als erwartet.`);
             feedback.push('\n###############\n')
+        }
+
+        // If student solution is correct than only give feedback that the solution is correct
+        if (receivedPoints === maxPoints) {
+            feedback = ['Die Lösung ist korrekt.'];
         }
         
         // Final feedback

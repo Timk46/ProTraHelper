@@ -182,6 +182,7 @@ export class QuestionDataService {
       userId: userAnswer.userId,
       userFreetextAnswer: userAnswer.userFreetextAnswer || undefined,
       userFreetextAnswerRaw: undefined,
+      userGraphAnswer: JSON.parse(JSON.stringify(userAnswer.userGraphAnswer)) || undefined,
       userMCAnswer: (await this.prisma.userMCOptionSelected.findMany({
         where: {
           userAnswerId: userAnswer.id
@@ -689,7 +690,13 @@ export class QuestionDataService {
       console.log('progress: '+progress);
 
       if(progress == 1) {
-        await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
+        // answerData for graphQuestions does not contain a contentElementId, so we need to fetch it from the database
+        const contentElement = await this.prisma.contentElement.findUnique({
+          where: {
+            questionId: question.originId
+          }
+        });
+        await this.contentService.questionContentElementDone(contentElement.id, question.conceptNodeId, question.level, userId);
         markedAsDone = true;
       }
 

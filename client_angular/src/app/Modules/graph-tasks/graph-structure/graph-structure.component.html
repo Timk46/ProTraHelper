@@ -90,7 +90,7 @@
 
       <!-- ################### -->
       <!-- Edges presenting existing relations between nodes -->
-      <g *ngFor="let edge of edges" app-edge-graph [edge]="edge" />
+      <g *ngFor="let edge of edges" app-edge-graph [edge]="edge" [reverseEdgeState]="getReverseEdgeState(edge)" />
 
       <!-- End - Edges for existing relations
       <!-- ################### -->
@@ -120,6 +120,7 @@
   <app-edge-toolset-graph 
     *ngFor="let edge of edges; let i = index; trackBy:trackByIndex"
       [edge]="edge" 
+      [reverseEdgeState]="getReverseEdgeState(edge)"
       [index]="i"
       (removeEdge)="removeEdge($event)"
       (changeEdgeDirection)="changeEdgeDirection($event)"

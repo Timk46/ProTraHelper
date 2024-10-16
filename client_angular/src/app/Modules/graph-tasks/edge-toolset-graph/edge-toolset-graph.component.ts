@@ -20,6 +20,7 @@ export class EdgeToolsetGraphComponent implements OnInit {
   // Inputs from parent component
   @Input() edge!: IGraphEdge;
   @Input() index!: number;
+  @Input() reverseEdgeState!: 0 | 1 | 2;
 
 
   // #############################
@@ -89,6 +90,8 @@ export class EdgeToolsetGraphComponent implements OnInit {
     if (this.edge.weight.enabled) {
       this.editEdgeWeight = true;
 
+      this.edgeWeightValueInput.nativeElement.value = '';
+
       // Ensure that the input element is mounted 
       setTimeout(() => {
         this.edgeWeightValueInput.nativeElement.focus();
@@ -119,7 +122,7 @@ export class EdgeToolsetGraphComponent implements OnInit {
         y: this.edge.node1.position.y - 20 - (this.componentSize.height / 2)
       }; 
     } else { // edges which connect two different nodes
-      return calculateLineCenter(this.edge.node1.center, this.edge.node2.center, this.componentSize);
+      return calculateLineCenter(this.edge.node1.center, this.edge.node2.center, this.componentSize, this.reverseEdgeState);
     }
   }
 
