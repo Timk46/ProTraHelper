@@ -15,6 +15,8 @@ import { CreateContentElementDialogComponent } from '../lecturersView/create-con
 import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { FillinTaskComponent } from '../contentView/contentElement/fill-in-task/fill-in-task.component';
+import { FillinTaskNewComponent } from '../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 
 
 interface TaskViewData {
@@ -238,6 +240,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         // Navigate to graph question component
         this.router.navigate([`/graphtask/${taskViewData.id}`]);
         return;
+      case questionType.FILLIN:
+        dialogRef = this.dialog.open(FillinTaskNewComponent, {...dialogConfig, width: '50vw'});
+        break;
     }
 
     // Handle dialog submission if a dialog was opened

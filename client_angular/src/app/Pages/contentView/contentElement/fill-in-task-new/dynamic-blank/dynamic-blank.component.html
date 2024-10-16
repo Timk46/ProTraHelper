@@ -1,0 +1,30 @@
+
+<mat-form-field *ngIf="id && blankMode === fillinTypes.FillinText" subscriptSizing="dynamic" class="text-blank fitting" appearance="outline">
+  <input matInput [id]="id" [(ngModel)]="answer" (ngModelChange)="onValueChange()" />
+</mat-form-field>
+
+<mat-form-field *ngIf="id && blankMode === fillinTypes.FillinDropdown" class="select-blank fitting" appearance="outline">
+  <mat-select [id]="id" [(ngModel)]="answer" (ngModelChange)="onValueChange()">
+    <mat-option *ngFor="let option of blankOptions" [value]="option">
+      {{ option }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+<div
+  *ngIf="id && blankMode === fillinTypes.FillinDrag"
+  cdkDropList
+  [id]="id"
+  [cdkDropListData]="blankOptions"
+  [cdkDropListConnectedTo]="otherBlankIds.concat('drag-drop-global-list')"
+  [cdkDropListEnterPredicate]="canDrop"
+  (cdkDropListDropped)="drop($event)"
+  class="drag-blank fitting"
+  >
+  <div cdkDrag class="drag-item"  *ngFor="let item of blankOptions; let i = index">
+    <div class="custom-placeholder" *cdkDragPlaceholder></div>
+    <div class="drag-item-content" [innerHTML]="item"></div>
+  </div>
+</div>
+
+

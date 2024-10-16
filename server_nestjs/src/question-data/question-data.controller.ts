@@ -1,7 +1,9 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Post, Param, Body, Req, UseGuards, Put} from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
-import { detailedFreetextQuestionDTO, detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, questionType, GraphQuestionDTO } from '@DTOs/index';
+
+import { detailedFreetextQuestionDTO, detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, questionType, FillinQuestionDTO, GraphQuestionDTO } from '@DTOs/index';
+
 import { roles, RolesGuard } from '@/auth/roles.guard';
 import { EditCodeService } from './edit-code.service';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
@@ -79,7 +81,7 @@ export class QuestionDataController {
     async getFreeTextQuestion(@Param('questionId') questionId: number): Promise<freeTextQuestionDTO> {
         return this.qdFreetextService.getFreeTextQuestion(questionId);
     }
-    
+
     /**
      *
      * @param questionId
@@ -89,6 +91,12 @@ export class QuestionDataController {
     @Get('/graphQuestion/:questionId')
     async getGraphQuestion(@Param('questionId') questionId: number): Promise<GraphQuestionDTO> {
         return this.qdGraphService.getGraphQuestion(questionId);
+    }
+
+    @roles('ANY')
+    @Get('fillinQuestion/:fillinQuestionId')
+    async getFillinQuestion(@Param('fillinQuestionId') fillinQuestionId: number): Promise<FillinQuestionDTO> {
+        return this.qdFillinService.getFillinQuestion(fillinQuestionId);
     }
 
     @roles('ANY')

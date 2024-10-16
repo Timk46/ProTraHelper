@@ -60,6 +60,9 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
 import { McTaskCreationComponent } from "./Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component";
 import { MCDescriptionDialogComponent } from "./Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component";
 import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-creation/score/score.component";
+import { FillinTaskComponent } from "./Pages/contentView/contentElement/fill-in-task/fill-in-task.component";
+import { FillinTaskNewComponent } from './Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
+import { DynamicBlankComponent } from './Pages/contentView/contentElement/fill-in-task-new/dynamic-blank/dynamic-blank.component';
 import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-task/graph-task.component';
 
 // Import GraphTasksModule
@@ -96,6 +99,7 @@ import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
         DiscussionPrecreationComponent,
         TaskEvaluationOverviewComponent,
         FreeTextTaskComponent,
+        FillinTaskComponent,
         DraggableHeightDirective,
         ContactComponent,
         ImpressumComponent,
@@ -110,7 +114,8 @@ import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
         McTaskCreationComponent,
         MCDescriptionDialogComponent,
         MCScoreComponent,
-        GraphTaskComponent
+        FillinTaskNewComponent,
+        DynamicBlankComponent
     ],
     imports: [
         ToastrModule.forRoot(),

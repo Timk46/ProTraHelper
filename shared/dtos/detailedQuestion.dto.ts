@@ -21,6 +21,7 @@ export interface detailedQuestionDTO {
   codingQuestion?: CodingQuestionInternal;
   freetextQuestion?: detailedFreetextQuestionDTO;
   mcQuestion?: detailedChoiceQuestionDTO;
+  fillinQuestion?: detailedFillinQuestionDTO;
   graphQuestion?: detailedGraphQuestionDTO;
   // fillinQuestion?: detailedFillinQuestionDTO;
 }
@@ -55,6 +56,29 @@ export interface detailedChoiceOptionDTO {
   updatedAt?: Date;
   text: string;
   is_correct: boolean;
+}
+
+export interface detailedFillinQuestionDTO {
+  id?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  questionId?: number;
+  authorId?: number;
+  content: string;
+  table?: boolean;
+  taskType: string;
+  blanks: detailedFillinBlankDTO[];
+}
+
+export interface detailedFillinBlankDTO {
+  id?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  blankContent: string;
+  position?: string;
+  isDistractor: boolean;
+  isCorrect: boolean;
+  fillinQuestionId?: number;
 }
 
 export interface detailedGraphQuestionDTO {

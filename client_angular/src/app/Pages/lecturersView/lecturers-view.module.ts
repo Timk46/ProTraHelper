@@ -19,6 +19,8 @@ import { DescriptionDialogComponent } from './edit-choice/description-dialog/des
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { EditBlankComponent } from './edit-fillin/edit-blank/edit-blank.component';
+import { ImageUploadDialogComponent } from './edit-fillin/image-upload-dialog/image-upload-dialog.component';
 import { GraphTasksModule } from 'src/app/Modules/graph-tasks/graph-tasks.module';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
@@ -31,6 +33,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     ScoreComponent,
     DescriptionDialogComponent,
     EditFillinComponent,
+    EditBlankComponent,
+    ImageUploadDialogComponent,
     EditCodingComponent,
     EditGraphComponent,
     AddElementModalComponent,
@@ -47,7 +51,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     NgxMatSelectSearchModule,
     MatSelectModule,
     MatFormFieldModule,
-    GraphTasksModule, 
+    GraphTasksModule,
     MatButtonToggleModule
   ],
   exports: [

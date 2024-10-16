@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["relationJoins"]
 }
 
@@ -226,7 +226,7 @@ model Question {
   version                    Int                @default(1)
   originId                   Int?
   conceptNodeId              Int?
-  codingQuestion            CodingQuestion?
+  codingQuestion             CodingQuestion?
   contentElement             ContentElement?
   files                      File[]
   GraphQuestion              GraphQuestion?
@@ -239,6 +239,7 @@ model Question {
   QuestionVersionAsQuestion  QuestionVersion[]  @relation("QuestionToQuestionVersion")
   QuestionVersionAsSuccessor QuestionVersion[]  @relation("QuestionToSuccessorQuestionVersion")
   userAnswer                 UserAnswer[]
+  FillinQuestion             FillinQuestion?
 }
 
 model QuestionVersion {
@@ -430,6 +431,30 @@ model CodeSubmissionFile {
   user             User           @relation(fields: [userId], references: [id])
 }
 
+model FillinQuestion {
+  id         Int      @id @default(autoincrement())
+  content    String // Stores sanitized HTML or structured JSON
+  taskType   String
+  table      Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  questionId Int      @unique
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  blanks     Blank[]
+}
+
+model Blank {
+  id               Int            @id @default(autoincrement())
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  blankContent     String
+  position         String
+  isDistractor     Boolean        @default(false)
+  isCorrect        Boolean        @default(false)
+  fillinQuestionId Int
+  fillinQuestion   FillinQuestion @relation(fields: [fillinQuestionId], references: [id])
+}
+
 model KIFeedback {
   id                Int            @id @default(autoincrement())
   updatedAt         DateTime       @updatedAt
@@ -446,33 +471,33 @@ model KIFeedback {
 }
 
 model genTaskData {
-  id                Int               @id @default(autoincrement())
-  timestamp         DateTime          @default(now())
+  id                Int      @id @default(autoincrement())
+  timestamp         DateTime @default(now())
   topic             String
   context           String
-  taskPrompt        String?           @db.Text
-  task              String            @db.Text
-  expectationPrompt String?           @db.Text
-  expectation       String            @db.Text
-  solutionPrompt    String?           @db.Text
-  solutionOne       String            @db.Text
-  solutionTwo       String?           @db.Text
-  solutionThree     String?           @db.Text
-  unitTestPrompt    String?           @db.Text
-  unitTestOne       String            @db.Text
-  unitTestTwo       String?           @db.Text
-  unitTestThree     String?           @db.Text
+  taskPrompt        String?  @db.Text
+  task              String   @db.Text
+  expectationPrompt String?  @db.Text
+  expectation       String   @db.Text
+  solutionPrompt    String?  @db.Text
+  solutionOne       String   @db.Text
+  solutionTwo       String?  @db.Text
+  solutionThree     String?  @db.Text
+  unitTestPrompt    String?  @db.Text
+  unitTestOne       String   @db.Text
+  unitTestTwo       String?  @db.Text
+  unitTestThree     String?  @db.Text
   errorIteration    Int
   isErrorAtEnd      Boolean
-  errorOne          String?           @db.Text
-  errorTwo          String?           @db.Text
-  errorThree        String?           @db.Text
+  errorOne          String?  @db.Text
+  errorTwo          String?  @db.Text
+  errorThree        String?  @db.Text
   juryOne           Json?
   juryTwo           Json?
   juryThree         Json?
-  codeFramework     String            @db.Text
-  runMethod         String?           @db.Text
-  runMethodInput    String?           @db.Text
+  codeFramework     String   @db.Text
+  runMethod         String?  @db.Text
+  runMethodInput    String?  @db.Text
   allTaskData       Json?
   judgeTask         Json?
 }
@@ -596,7 +621,6 @@ model Notification {
   @@index([type])
   @@index([discussionId])
 }
-
 
 enum GlobalRole {
   STUDENT
