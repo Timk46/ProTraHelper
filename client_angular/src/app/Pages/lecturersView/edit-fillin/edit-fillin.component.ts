@@ -291,8 +291,12 @@ export class EditFillinComponent {
      */
   private initializeEditorConfig(): void {
     this.editorConfig = {
-      plugins: 'link code table textcolor colorpicker fontsize',
-      toolbar: 'undo redo | code | formatselect | forecolor backcolor | fontsize | bold italic | table | insertImage | markBlank',
+      plugins: 'link code table lists emoticons charmap fullscreen',
+      toolbar: [
+        'undo redo | code | markBlank | insertImage | fullscreen',
+        'fontsize | bold italic underline | forecolor backcolor | superscript subscript',
+        'alignleft aligncenter alignright | bullist numlist outdent indent | table | charmap emoticons'
+      ],
       images_upload_url: 'linkToImages', // update to right path(!!!!)
       table_toolbar: '',
       table_cell_advtab: false,
@@ -326,7 +330,7 @@ export class EditFillinComponent {
         this.setupEditorEventListeners(editor);
         editor.on('init', () => {
           this.isEditorLoaded = true;
-          editor.setContent(this.detailedQuestionData?.fillinQuestion?.content || 'nix drin');
+          editor.setContent(this.detailedQuestionData?.fillinQuestion?.content || '');
           this.applyStyles(editor);
         });
         editor.on('keydown', (e: KeyboardEvent) => this.handleEditorKeydown(editor, e));
