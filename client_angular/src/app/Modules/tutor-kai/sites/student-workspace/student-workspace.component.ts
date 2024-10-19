@@ -43,7 +43,7 @@ export class StudentWorkspaceComponent implements OnInit {
   tasks: QuestionDTO[] = [];
   tasksOfSelectedWeek: QuestionDTO[] = [];
   flavor: string = 'Feedback mit Konzept-Erklärung';
-  flavorOptions: string[] = [
+  flavorOptions: string[] = [ // currently disabled. Automatically set to 'Feedback mit Konzept-Erklärung'
     'Standard Feedback',
     'Feedback mit Konzept-Erklärung',
   ];
@@ -58,7 +58,6 @@ export class StudentWorkspaceComponent implements OnInit {
   selectedWeek = 0;
   rating: number = 0;
   hoverState: number = 0;
-  feedback: string = '';
   defaultWeek: number = 0;
   taskDescription: string =
     'Hi :)\n ich bin Kai. Ich bin hier, um dir Feedback zu deinen Lösungen zu geben.';
@@ -139,10 +138,10 @@ export class StudentWorkspaceComponent implements OnInit {
   /**
    * Send student feedback to the API.
    */
-  sendStudentFeedback(): void {
+  sendStudentFeedback(starRating: number): void {
     this.currentState = States.sendStudentFeedback;
     this.runCodeService
-      .postFeedback(this.rating, this.feedback, this.lastResult.encryptedCodeSubissionId)
+      .postFeedback(starRating, "", this.lastResult.encryptedCodeSubissionId)
       .subscribe({
         next: (response) => {
           this.openSnackBar('Vielen Dank für Ihr Feedback!', 'done');
@@ -155,17 +154,17 @@ export class StudentWorkspaceComponent implements OnInit {
 
   /**
    * Get AI-generated feedback for the user's code.
+   * @param level The selected feedback level
    */
-  getKIFeedback(): void {
+  getKIFeedback(level: string): void {
+    this.feedbackLevel = level;
     this.rating = 0;
     this.currentState = States.startGeneratingKIFeedback;
-    this.feedbackMessage =
-      'Lass mich einen Augenblick über die Aufgabe nachdenken...';
+    this.feedbackMessage = 'Lass mich einen Augenblick über die Aufgabe nachdenken...';
     let submitCode = '';
     if (this.currentTask) {
       for (const file of this.currentTask.codingQuestion!.codeGerueste) {
-        submitCode +=
-          '## Code in ' + file.codeFileName + '\n' + file.code + '\n\n'; // all studencode in markdown string format
+        submitCode += '## Code in ' + file.codeFileName + '\n' + file.code + '\n\n';
       }
     }
 
@@ -182,7 +181,6 @@ export class StudentWorkspaceComponent implements OnInit {
         next: (response) => {
           if (isFirstResponse) {
             this.currentState = States.receivingKIFeedback;
-
             isFirstResponse = false;
           }
           this.currentLoadingFeedbackMessage = response;
@@ -192,7 +190,6 @@ export class StudentWorkspaceComponent implements OnInit {
           this.checkError(error);
         },
         complete: () => {
-          //console.log(this.currentLoadingFeedbackMessage);
           this.currentState = States.finishedGeneratingKIFeedback;
         },
       });
