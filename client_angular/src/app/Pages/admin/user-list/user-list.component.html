@@ -1,4 +1,10 @@
 <div class="user-list-container">
+  <p class="info-text">
+    Hier können durch Semikolon getrennte Zimt-IDs in einer txt-Datei hochgeladen werden.
+    Diese werden für die SL in GOALS registriert.
+    Falls noch kein Account für die Zimt ID existiert, wird zuvor ein Account in GOALS erstellt.
+  </p>
+
   <div class="controls-container">
     <mat-form-field class="search-field">
       <input matInput (keyup)="applyFilter($event)" placeholder="Filter users">

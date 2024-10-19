@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AdminService } from '../services/admin.service';
 
 interface UserListItem {
@@ -32,7 +33,11 @@ export class UserListComponent implements OnInit, AfterViewInit {
 
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private adminService: AdminService, private router: Router) {}
+  constructor(
+    private adminService: AdminService,
+    private router: Router,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -95,16 +100,32 @@ export class UserListComponent implements OnInit, AfterViewInit {
         const content = e.target?.result as string;
         const emails = content.split(';').map(email => email.trim());
         this.adminService.processEmailsForSubject(emails, this.selectedSubject as number).subscribe(
-          () => {
+          (response: { message: string }) => {
             console.log('File processed successfully');
+            this.snackBar.open(response.message, 'Close', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom',
+            });
             this.loadUsers(); // Reload the user list to reflect the changes
           },
-          (error: any) => console.error('Error processing file:', error)
+          (error: any) => {
+            console.error('Error processing file:', error);
+            this.snackBar.open('Error processing file: ' + error.message, 'Close', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom',
+            });
+          }
         );
       };
       reader.readAsText(this.selectedFile);
     } else {
-      console.error('No file selected or subject not chosen');
+      this.snackBar.open('No file selected or subject not chosen', 'Close', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+      });
     }
   }
 }

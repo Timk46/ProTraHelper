@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
+import { User } from '@prisma/client';
+import { UserDTO } from '@DTOs/user.dto';
 
 /**
  * Service responsible for administrative operations such as managing users and subjects.
@@ -97,34 +99,74 @@ export class AdminService {
 
   /**
    * Registers multiple users for a subject based on their email addresses.
+   * If a user doesn't exist, it creates a new CAS user before registering.
    *
    * @param emails An array of user emails.
    * @param subjectId The ID of the subject to register users for.
-   * @returns A message indicating how many users were processed.
+   * @returns A message indicating how many users were processed and created.
    */
   async processEmailsForSubject(emails: string[], subjectId: number) {
-    const users = await this.prisma.user.findMany({
-      where: {
-        email: {
-          in: emails,
+    let createdUsers = 0;
+    let processedUsers = 0;
+
+    for (const email of emails) {
+      const fullEmail = email.includes('@') ? email : `${email}@uni-siegen.de`;
+      let user = await this.prisma.user.findUnique({
+        where: { email: fullEmail.toLowerCase() },
+      });
+
+      if (!user) {
+        const newUserDTO: UserDTO = await this.usersService.createCASuser(fullEmail);
+        user = {
+          id: newUserDTO.id,
+          email: newUserDTO.email,
+          firstname: newUserDTO.firstname,
+          lastname: newUserDTO.lastname,
+          globalRole: newUserDTO.globalRole,
+        } as User;
+        createdUsers++;
+      }
+
+      // Check if the user is already registered for the subject
+      const existingUserSubject = await this.prisma.userSubject.findUnique({
+        where: {
+          userId_subjectId: {
+            userId: user.id,
+            subjectId: subjectId,
+          },
         },
-      },
-    });
+      });
 
-    const userIds = users.map(user => user.id);
+      if (!existingUserSubject) {
+        // If not registered, create a new UserSubject entry
+        await this.prisma.userSubject.create({
+          data: {
+            userId: user.id,
+            subjectId: subjectId,
+            registeredForSL: true,
+            subjectSpecificRole: 'STUDENT',
+          },
+        });
+      } else {
+        // If already registered, update the registeredForSL status
+        await this.prisma.userSubject.update({
+          where: {
+            userId_subjectId: {
+              userId: user.id,
+              subjectId: subjectId,
+            },
+          },
+          data: {
+            registeredForSL: true,
+          },
+        });
+      }
 
-    await this.prisma.userSubject.updateMany({
-      where: {
-        userId: {
-          in: userIds,
-        },
-        subjectId: subjectId,
-      },
-      data: {
-        registeredForSL: true,
-      },
-    });
+      processedUsers++;
+    }
 
-    return { message: `Processed ${userIds.length} users for subject ${subjectId}` };
+    return {
+      message: `Processed ${processedUsers} users for subject ${subjectId}. Created ${createdUsers} new users.`
+    };
   }
 }
