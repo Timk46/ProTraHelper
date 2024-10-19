@@ -46,7 +46,7 @@ export class ContentViewComponent implements OnInit {
       this.applyQuestionStyle[i] = false;
     }
     this.pdfCount = this.getPdfCount();
-    
+
     // check if browser is Safari
     // pdfViewer component is not supported in Safari therefor a warning message is displayed
     this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
@@ -95,7 +95,7 @@ export class ContentViewComponent implements OnInit {
 
   /**
    * @description
-   * Handles the click event of the discussion button 
+   * Handles the click event of the discussion button
    * Opens a dialog for creating a new discussion/question
    * @param contentElementId - id of the content element
    */
@@ -114,6 +114,7 @@ export class ContentViewComponent implements OnInit {
   onToggleCheckmark(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
     this.contentService.toggleContentElementCompletionStatus(contentElementId, this.activeConceptNodeId, this.contentViewData.level).subscribe(status => this.applyCompletedStyle[position] = status);
+    /* Removed because we dont give Progress for PDF/VIDEO anymore
     if(typeof this.contentViewData.progress === 'number'){
       const sign = this.applyCompletedStyle[position] ? -1 : 1;
       this.contentViewData.progress = this.contentViewData.progress + (sign/this.elementCount * 100);
@@ -121,6 +122,7 @@ export class ContentViewComponent implements OnInit {
         this.contentViewData.progress = 100;
       }
     }
+      */
   }
 
   /**

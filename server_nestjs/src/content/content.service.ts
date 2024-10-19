@@ -260,17 +260,8 @@ export class ContentService {
     });
   }
 
-  /**
-   * Calculates the progress for a content node.
-   *
-   * @param contentNode - The content node to calculate progress for
-   * @param userStatus - An array of user progress statuses for content elements
-   * @returns The calculated progress as a percentage
-   *
-   * @description
-   * This method calculates the progress for a content node by counting the number of completed content elements
-   * and dividing it by the total number of content elements.
-   */
+  /** REMOVED because we dont want to give progress on PDF and Video
+
   private calculateProgress(contentNode: any, userStatus: any[]): number {
     const total = contentNode.ContentView.length;
     if (total === 0) return 0;
@@ -285,6 +276,38 @@ export class ContentService {
 
     return (completedCount / total) * 100;
   }
+  */
+
+    /**
+   * Calculates the progress for a content node.
+   *
+   * @param contentNode - The content node to calculate progress for
+   * @param userStatus - An array of user progress statuses for content elements
+   * @returns The calculated progress as a percentage
+   *
+   * @description
+   * This method calculates the progress for a content node by counting the number of completed question elements
+   * and dividing it by the total number of question elements.
+   */
+    private calculateProgress(contentNode: any, userStatus: any[]): number {
+      const questionElements = contentNode.ContentView.filter((cv: any) =>
+        cv.contentElement.type === 'QUESTION'
+      );
+      const total = questionElements.length;
+      if (total === 0) return 0;
+
+      const completedCount = questionElements.filter((cv: any) =>
+        userStatus.some(
+          (status) =>
+            cv.contentElement.type === 'QUESTION' &&
+            status.contentElementId === cv.contentElement.id &&
+            status.markedAsDone,
+        ),
+      ).length;
+
+      return (completedCount / total) * 100;
+    }
+
 
   /**
    * Calculates the progress for a question.
@@ -473,22 +496,11 @@ export class ContentService {
       },
     });
 
-    console.log('checkmarkStatus: ' + checkmarkStatus.markedAsDone);
 
     const concepts = await this.getLeafConceptsForElement(contentElementId);
 
     if (checkmarkStatus.markedAsDone) {
       for (const concept of concepts) {
-        console.log(
-          'Test: Running toggleCheckmark with parameters: ' +
-            contentElementId +
-            ' ' +
-            concept +
-            ' ' +
-            level +
-            ' ' +
-            userId,
-        );
         await this.userConceptService.checkUserConceptLevelAward(
           userId,
           contentElementId,
@@ -723,8 +735,6 @@ export class ContentService {
       console.log('No content elements found for content node ' + contentNodeId + '. Returning 1.');
       return 1;
     }
-
-    console.log('#### highestLevelResult', highestLevelResult);
 
     const highestLevel: number = highestLevelResult.contentElement?.question?.level || -1;
     return highestLevel;
