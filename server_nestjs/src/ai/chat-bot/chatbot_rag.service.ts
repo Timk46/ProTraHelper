@@ -5,6 +5,7 @@ import { RagService } from '../services/rag.service';
 import { TranscriptChunk } from '@Interfaces/index';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ChatOpenAI } from "@langchain/openai";
+import { ChatBotMessage } from '@Prisma/client';
 
 const {
   ChatPromptTemplate,
@@ -100,6 +101,7 @@ const dialogPromptOFP = ChatPromptTemplate.fromPromptMessages([
       '{question}\n',
   ),
 ]);
+
 @Injectable()
 export class ChatBotRAGService {
   constructor(
@@ -112,22 +114,22 @@ export class ChatBotRAGService {
    * Handles the first RAG-based chatbot response generation.
    * Only the first question is answered using RAG, the rest are answered using the dialog prompt.
    * @param question The student's question.
-   * @param resStream The response stream to send the chatbot's reply.
    * @param userid The ID of the user asking the question.
    * @param dialogSessionId The ID of the current dialog session.
+   * @returns The ID of the created message.
    */
   async chatBotRagAnswer(
     question: string,
-    resStream: Response,
     userid: number,
     dialogSessionId: string,
-  ): Promise<void> {
+  ): Promise<ChatBotMessage> {
     // Perform similarity search using RAG service
     const tempsimilaritySearchResult =
       await this.ragService.lectureSimilaritySearch(question, 4);
     const similaritySearchResult = this.transformSearchResult(
       tempsimilaritySearchResult,
     );
+    let answer = '';
 
     let sourceCounter: number = 0;
     let sourceMapDict = {};
@@ -177,14 +179,14 @@ export class ChatBotRAGService {
                         `$$${sourceCounter}$$`,
                         markdownLink,
                       );
-                      resStream.write(replacedText);
+                      answer += replacedText;
                       openAiAnswerWithMarkdownLinks += replacedText;
                     } else {
-                      resStream.write(ongoingBuffer);
+                      answer += ongoingBuffer;
                       openAiAnswerWithMarkdownLinks += ongoingBuffer;
                     }
                   } else {
-                    resStream.write(ongoingBuffer);
+                    answer += ongoingBuffer;
                     openAiAnswerWithMarkdownLinks += ongoingBuffer;
                   }
 
@@ -192,7 +194,7 @@ export class ChatBotRAGService {
                 }
               } else {
                 // If not buffering, directly write the character to the response stream
-                resStream.write(char);
+                answer += char;
                 openAiAnswerWithMarkdownLinks += char;
               }
             }
@@ -209,10 +211,10 @@ export class ChatBotRAGService {
                 const replacedText = markdownLink
                   ? ongoingBuffer.replace(`$$${sourceCounter}$$`, markdownLink)
                   : ongoingBuffer;
-                resStream.write(replacedText);
+                answer += replacedText;
                 openAiAnswerWithMarkdownLinks += replacedText;
               } else {
-                resStream.write(ongoingBuffer);
+                answer += ongoingBuffer;
                 openAiAnswerWithMarkdownLinks += ongoingBuffer;
               }
               ongoingBuffer = ''; // Clear the buffer
@@ -222,32 +224,32 @@ export class ChatBotRAGService {
       ],
     );
 
-    // Save the chatbot's response
-    await this.saveChatBotMessage(
+    // Save the chatbot's response and return the message ID
+    const message = await this.saveChatBotMessage(
       question,
       openAiAnswerWithMarkdownLinks,
       similaritySearchResult,
       userid,
       dialogSessionId,
     );
-    resStream.end();
+
+    return message;
   }
 
   /**
    * Handles the dialog-based chatbot response generation.
    * @param context The context of the ongoing conversation.
    * @param question The student's question.
-   * @param resStream The response stream to send the chatbot's reply.
    * @param userid The ID of the user asking the question.
    * @param dialogSessionId The ID of the current dialog session.
+   * @returns The ID of the created message.
    */
   async chatBotRagAnswerDialog(
     context,
     question: string,
-    resStream: Response,
     userid: number,
     dialogSessionId: string,
-  ): Promise<void> {
+  ): Promise<ChatBotMessage> {
     const chatHistory: string = context
       .slice(0, -2)
       .map(
@@ -273,21 +275,21 @@ export class ChatBotRAGService {
           ignoreAgent: true,
           ignoreChain: true,
           handleLLMNewToken(token: string) {
-            resStream.write(token);
+            //resStream.write(token);
           },
         },
       ],
     );
 
-    // Save the chatbot's response
-    await this.saveChatBotMessage(
+    // Save the chatbot's response and return the message ID
+    const message = await this.saveChatBotMessage(
       question,
       openAiResponse.generations[0][0].text,
       null,
       userid,
       dialogSessionId,
     );
-    resStream.end();
+    return message;
   }
 
   /**
@@ -309,6 +311,7 @@ export class ChatBotRAGService {
    * @param usedChunks The used chunks from the RAG model.
    * @param userid The ID of the user.
    * @param dialogSessionId The ID of the dialog session.
+   * @returns The ID of the created message.
    */
   private async saveChatBotMessage(
     question: string,
@@ -316,19 +319,40 @@ export class ChatBotRAGService {
     usedChunks: any,
     userid: number,
     dialogSessionId: string,
-  ) {
+  ): Promise<ChatBotMessage> {
     try {
-      await this.prisma.chatBotMessage.create({
+      const createdMessage = await this.prisma.chatBotMessage.create({
         data: {
           question: question,
           answer: openAIResponse,
-          usedChunks: dialogSessionId, // using usedChunks field in db for the session ID so we dont need to migrate the db
-          isBot: false, // This field might be unnecessary as all messages include both question and answer
+          usedChunks: dialogSessionId,
+          isBot: false,
           userId: userid,
+          ratingByStudent: null, // Initialize rating as null
         },
       });
+      return createdMessage;
     } catch (error) {
       console.error('Error saving chatbot message:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Saves or updates the rating for a specific chatbot message.
+   * @param messageId The ID of the message to be rated.
+   * @param rating The rating given by the user (1, 2, or 3).
+   * @param userId The ID of the user providing the rating.
+   */
+  async saveOrUpdateRating(messageId: number, rating: number, userId: number): Promise<void> {
+    try {
+      await this.prisma.chatBotMessage.update({
+        where: { id: messageId },
+        data: { ratingByStudent: rating },
+      });
+    } catch (error) {
+      console.error('Error saving or updating rating:', error);
+      throw error;
     }
   }
 }

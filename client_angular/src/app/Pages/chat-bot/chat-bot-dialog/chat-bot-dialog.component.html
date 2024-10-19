@@ -1,26 +1,46 @@
-<form [formGroup]="form" class="chat-container">
-  <mat-card [ngClass]="display" class="collapsible-chat">
+<div class="chat-container">
+  <form [formGroup]="form">
+    <mat-card [ngClass]="display" class="collapsible-chat">
       <mat-card-header class="chat-header">
-          <img mat-card-avatar src="../../../../assets/img/kai_logo_small.png" class="chat-icon">
-          <mat-card-title class="chat-title">Chatbot</mat-card-title>
-          <mat-card-subtitle class="chat-subtitle">
-              <div class="status-icon"></div>
-              <span>LectureLinker</span>
-          </mat-card-subtitle>
+        <img mat-card-avatar src="../../../../assets/img/kai_logo_small.png" class="chat-icon">
+        <mat-card-title class="chat-title">Chatbot</mat-card-title>
+        <mat-card-subtitle class="chat-subtitle">
+          <div class="status-icon"></div>
+          <span>LectureLinker</span>
+        </mat-card-subtitle>
+        <button mat-icon-button class="close-button" (click)="closeChat()" type="button">
+          <mat-icon>close</mat-icon>
+        </button>
       </mat-card-header>
       <mat-card-content class="chat-content" #messageContainer>
-          <div *ngFor="let message of messages" class="messages">
-              <div [ngClass]="'message ' + message.type">
-                  <!--<div class="prose max-w-none prose-stone prose-base" [innerHTML]="message.text"></div>-->
-                  <div [innerHTML]="message.text"></div>
+        <div *ngFor="let message of messages" class="messages">
+          <div [ngClass]="'message ' + message.type">
+            <div [innerHTML]="message.text"></div>
+            <div *ngIf="message.type === 'bot' && message.id !== -1" class="rating-container">
+              <span class="rating-question">War diese Antwort hilfreich?</span>
+              <div class="rating-buttons">
+                <button mat-icon-button (click)="rateMessage(message.id, 1)" [ngClass]="{'selected-rating': message.rating === 1}" type="button">
+                  <mat-icon>sentiment_very_dissatisfied</mat-icon>
+                </button>
+                <button mat-icon-button (click)="rateMessage(message.id, 2)" [ngClass]="{'selected-rating': message.rating === 2}" type="button">
+                  <mat-icon>sentiment_neutral</mat-icon>
+                </button>
+                <button mat-icon-button (click)="rateMessage(message.id, 3)" [ngClass]="{'selected-rating': message.rating === 3}" type="button">
+                  <mat-icon>sentiment_very_satisfied</mat-icon>
+                </button>
               </div>
+            </div>
           </div>
+        </div>
       </mat-card-content>
       <mat-card-actions class="chat-actions">
         <mat-form-field appearance="outline" class="chat-form">
           <textarea
             class="chat-input"
             matInput
+            cdkTextareaAutosize
+            [cdkAutosizeMinRows]="1"
+            [cdkAutosizeMaxRows]="4"
             type="text"
             placeholder="Deine Frage..."
             formControlName="message"
@@ -34,10 +54,12 @@
             (click)="onClickSendMessage()"
             [disableRipple]="true"
             [disabled]="!canSendMessage"
+            type="button"
           >
             <mat-icon class="send-icon">{{ canSendMessage ? 'send' : 'stop' }}</mat-icon>
           </button>
         </mat-form-field>
       </mat-card-actions>
-  </mat-card>
-</form>
+    </mat-card>
+  </form>
+</div>

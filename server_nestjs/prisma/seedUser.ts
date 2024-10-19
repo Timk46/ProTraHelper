@@ -101,7 +101,7 @@ export const seedUser = async (subjectInformatik_id: number, moduleInformatik_id
   await createUserAndSubject('quokka@proband.de', 'Quokka3456');
   await createUserAndSubject('rotkehlchen@proband.de', 'Rotkehlchen7890');
   await createUserAndSubject('seehund@proband.de', 'Seehund1234');
-  await createUserAndSubject('tukan@proband.de', 'Tukan5678');
+  await createUserAndSubject('tukan@proband.de', 'Tukan5678'); // gneutzt von Kathy Albuts zum Testen der C++ Aufgaben.
 
   console.log('Users seeded successfully');
 };

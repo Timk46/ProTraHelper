@@ -1,14 +1,28 @@
-import { AfterViewChecked, Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { LlmService } from 'src/app/Services/ai/llm.service';
 import { MarkdownService } from 'src/app/Services/markdown/markdown.service';
 import { VideoTimeStampComponent } from '../../../Modules/tutor-kai/sites/video-time-stamp/video-time-stamp.component';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 enum MessageType {
   Bot = 'bot',
   User = 'user',
   Loading = 'loading'
+}
+
+interface Message {
+  text?: string;
+  type: MessageType;
+  id: number;
+  rating?: number;
+}
+
+interface ComponentChatBotResponse {
+  content: string;
+  messageId: number;
 }
 
 @Component({
@@ -19,9 +33,10 @@ enum MessageType {
 export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
   @ViewChild('messageContainer') private messageContainer: ElementRef | null = null;
   @Input() public display: string = '';
+  @Output() public close: EventEmitter<void> = new EventEmitter<void>();
 
   public form: FormGroup;
-  public messages: Array<{ text?: string; type: MessageType }> = [];
+  public messages: Array<Message> = [];
   protected canSendMessage = true;
   private dialogSessionId: string;
 
@@ -35,7 +50,8 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     private llmService: LlmService,
     private markdownService: MarkdownService,
     private el: ElementRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private http: HttpClient
   ) {
     this.form = this.formBuilder.group({
       message: ['']
@@ -80,7 +96,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     const message = this.form.get('message')?.value;
 
     if (message && this.canSendMessage) {
-      const userMessage = { text: message, type: MessageType.User };
+      const userMessage: Message = { text: message, type: MessageType.User, id: -1 };
       this.messages.push(userMessage);
 
       this.form.get('message')?.setValue('');
@@ -94,7 +110,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
    */
   private sendQuestionToBot(question: string): void {
     this.canSendMessage = false;
-    const waitMessage = { type: MessageType.Loading };
+    const waitMessage: Message = { type: MessageType.Loading, id: -1 };
     this.messages.push(waitMessage);
 
     const context = this.messages.map(msg => ({
@@ -102,22 +118,21 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
       content: msg.text || ''
     }));
 
-    const chatSubscription = this.llmService.getLlmAnswerStreamDialog(context, question, this.dialogSessionId).subscribe({
-      next: (data: string) => {
+    this.llmService.getLlmAnswerDialog(context, question, this.dialogSessionId).subscribe({
+      next: (response: ComponentChatBotResponse) => {
         this.messages.pop();
-        const botMessage = { text: this.markdownService.parse(data), type: MessageType.Bot };
+        const botMessage: Message = {
+          text: this.markdownService.parse(response.content),
+          type: MessageType.Bot,
+          id: response.messageId
+        };
         this.messages.push(botMessage);
-        this.canSendMessage = false;
+        this.canSendMessage = true;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.log(error);
         this.messages.pop();
         this.canSendMessage = true;
-        chatSubscription.unsubscribe();
-      },
-      complete: () => {
-        this.canSendMessage = true;
-        chatSubscription.unsubscribe();
       }
     });
   }
@@ -147,12 +162,16 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
    */
   private getBotMessage(): void {
     this.canSendMessage = false;
-    const waitMessage = { type: MessageType.Loading };
+    const waitMessage: Message = { type: MessageType.Loading, id: -1 };
     this.messages.push(waitMessage);
 
     setTimeout(() => {
       this.messages.pop();
-      const botMessage = { text: 'Hallo, wie kann ich dir helfen?', type: MessageType.Bot };
+      const botMessage: Message = {
+        text: 'Hallo, wie kann ich dir helfen?',
+        type: MessageType.Bot,
+        id: -1 // Use a placeholder ID for the initial message
+      };
       this.messages.push(botMessage);
       this.canSendMessage = true;
     }, 1000);
@@ -171,5 +190,42 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
+  }
+
+  /**
+   * Rates a bot message.
+   * @param messageId The ID of the message to rate.
+   * @param rating The rating value (1, 2, or 3).
+   */
+  public rateMessage(messageId: number, rating: number): void {
+    const message = this.messages.find(msg => msg.id === messageId);
+    if (message && message.type === MessageType.Bot && message.id !== -1) {
+      message.rating = rating;
+      this.sendRatingToBackend(messageId, rating);
+    }
+  }
+
+  /**
+   * Sends the rating to the backend.
+   * @param messageId The ID of the message being rated.
+   * @param rating The rating value (1, 2, or 3).
+   */
+  private sendRatingToBackend(messageId: number, rating: number): void {
+    this.http.post(`${environment.server}/chat-bot/rate`, { messageId, rating })
+      .subscribe({
+        next: (response: any) => {
+          console.log('Rating saved successfully:', response);
+        },
+        error: (error: any) => {
+          console.error('Error saving rating:', error);
+        }
+      });
+  }
+
+  /**
+   * Closes the chat dialog.
+   */
+  public closeChat(): void {
+    this.close.emit();
   }
 }
