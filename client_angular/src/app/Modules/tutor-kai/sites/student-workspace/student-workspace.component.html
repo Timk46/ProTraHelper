@@ -145,7 +145,7 @@
           </div>
         </mat-card-actions>
          <mat-card-content>
-           <div class="feedback-message" [innerHTML]="feedbackMessage"></div>
+           <div class="feedback-message" [innerHTML]="safeFeedbackMessage"></div>
            <mat-divider></mat-divider>
          </mat-card-content>
          <mat-card-actions *ngIf="currentState == 2" class="actions-container">

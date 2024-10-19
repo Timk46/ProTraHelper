@@ -14,6 +14,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ConfettiService } from "src/app/Services/animations/confetti.service";
 import { Title } from '@angular/platform-browser';
 import { ProgressService } from "src/app/Services/progress/progress.service";
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 /**
  * The different states representing the current status of the student workspace.
@@ -65,6 +66,7 @@ export class StudentWorkspaceComponent implements OnInit {
   compilerOutput: string | null = '';
   feedbackMessage: string =
     'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben.';
+  safeFeedbackMessage: SafeHtml;
   currentLoadingFeedbackMessage: string = '';
   lastResult: any;
 
@@ -85,7 +87,10 @@ export class StudentWorkspaceComponent implements OnInit {
     private route: ActivatedRoute,
     private confettiService: ConfettiService,
     private title: Title,
-  ) {}
+    private sanitizer: DomSanitizer
+  ) {
+    this.safeFeedbackMessage = this.sanitizer.bypassSecurityTrustHtml(this.feedbackMessage);
+  }
 
   /**
    * Initialize the component by getting question data from the API.
@@ -161,6 +166,7 @@ export class StudentWorkspaceComponent implements OnInit {
     this.rating = 0;
     this.currentState = States.startGeneratingKIFeedback;
     this.feedbackMessage = 'Lass mich einen Augenblick über die Aufgabe nachdenken...';
+    this.safeFeedbackMessage = this.sanitizer.bypassSecurityTrustHtml(this.feedbackMessage);
     let submitCode = '';
     if (this.currentTask) {
       for (const file of this.currentTask.codingQuestion!.codeGerueste) {
@@ -184,7 +190,8 @@ export class StudentWorkspaceComponent implements OnInit {
             isFirstResponse = false;
           }
           this.currentLoadingFeedbackMessage = response;
-          this.feedbackMessage = this.markdownService.parse(response);
+          const parsedMarkdown = this.markdownService.parse(response);
+          this.safeFeedbackMessage = this.sanitizer.bypassSecurityTrustHtml(parsedMarkdown);
         },
         error: (error) => {
           this.checkError(error);
@@ -236,6 +243,7 @@ export class StudentWorkspaceComponent implements OnInit {
     }
     this.isLoading = false;
     this.feedbackMessage = 'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben.';
+    this.safeFeedbackMessage = this.sanitizer.bypassSecurityTrustHtml(this.feedbackMessage);
     this.currentState = States.submittedCode;
     if (result.CodeSubmissionResult.score === 100) {
       this.confettiService.celebrate(6,800); // small confetti animation :)
