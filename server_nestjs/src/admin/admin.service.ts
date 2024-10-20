@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
-import { User } from '@prisma/client';
+import { User, contentElementType } from '@prisma/client';
 import { UserDTO } from '@DTOs/user.dto';
 
 /**
@@ -167,6 +167,182 @@ export class AdminService {
 
     return {
       message: `Processed ${processedUsers} users for subject ${subjectId}. Created ${createdUsers} new users.`
+    };
+  }
+
+  /**
+   * Fetches user progress by question type, including total questions per type.
+   * Only considers questions that are associated with a content element.
+   *
+   * @param userId The ID of the user.
+   * @returns An object containing the count of solved questions and total questions for each question type.
+   */
+  async getUserProgressByQuestionType(userId: number) {
+    const userProgress = await this.prisma.userContentElementProgress.findMany({
+      where: {
+        userId: userId,
+        contentElement: {
+          type: contentElementType.QUESTION,
+        },
+        markedAsDone: true,
+      },
+      include: {
+        contentElement: {
+          include: {
+            question: {
+              select: {
+                type: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const totalQuestions = await this.prisma.question.groupBy({
+      by: ['type'],
+      _count: {
+        _all: true,
+      },
+      where: {
+        contentElement: {
+          isNot: null,
+        },
+      },
+    });
+
+    const progressByType = totalQuestions.reduce((acc, questionType) => {
+      acc[questionType.type] = {
+        total: questionType._count._all,
+        completed: 0,
+      };
+      return acc;
+    }, {});
+
+    userProgress.forEach((progress) => {
+      const questionType = progress.contentElement.question?.type;
+      if (questionType && progressByType[questionType]) {
+        progressByType[questionType].completed += 1;
+      }
+    });
+
+    return progressByType;
+  }
+
+  /**
+   * Fetches user daily progress, showing the number of tasks completed each day.
+   *
+   * @param userId The ID of the user.
+   * @returns An array of objects, each containing a date and the count of tasks completed on that date.
+   */
+  async getUserDailyProgress(userId: number) {
+    const userProgress = await this.prisma.userContentElementProgress.findMany({
+      where: {
+        userId: userId,
+        contentElement: {
+          type: contentElementType.QUESTION,
+        },
+        markedAsDone: true,
+      },
+      select: {
+        updatedAt: true,
+      },
+      orderBy: {
+        updatedAt: 'asc',
+      },
+    });
+
+    const dailyProgress = userProgress.reduce((acc, progress) => {
+      const date = progress.updatedAt.toISOString().split('T')[0];
+      acc[date] = (acc[date] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(dailyProgress).map(([date, count]) => ({
+      date,
+      count,
+    }));
+  }
+
+  /**
+   * Fetches daily progress for all users, grouped by question type.
+   *
+   * @returns An array of objects, each containing a date, question type, and count of completed tasks.
+   */
+  async getAllUsersDailyProgress() {
+    const userProgress = await this.prisma.userContentElementProgress.findMany({
+      where: {
+        contentElement: {
+          type: contentElementType.QUESTION,
+        },
+        markedAsDone: true,
+      },
+      select: {
+        updatedAt: true,
+        contentElement: {
+          select: {
+            question: {
+              select: {
+                type: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        updatedAt: 'asc',
+      },
+    });
+
+    const dailyProgress = userProgress.reduce((acc, progress) => {
+      const date = progress.updatedAt.toISOString().split('T')[0];
+      const questionType = progress.contentElement.question?.type || 'Unknown';
+
+      if (!acc[date]) {
+        acc[date] = {};
+      }
+
+      acc[date][questionType] = (acc[date][questionType] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(dailyProgress).flatMap(([date, types]) =>
+      Object.entries(types).map(([type, count]) => ({
+        date,
+        type,
+        count,
+      }))
+    );
+  }
+
+  /**
+   * Fetches detailed information for a specific user.
+   *
+   * @param userId The ID of the user.
+   * @returns An object containing user details and total progress.
+   */
+  async getUserDetails(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        firstname: true,
+        lastname: true,
+        globalRole: true,
+        createdAt: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const totalProgress = await this.usersService.getUserTotalProgress(userId);
+
+    return {
+      ...user,
+      totalProgress,
     };
   }
 }

@@ -11,6 +11,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSortModule } from '@angular/material/sort';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 @NgModule({
   declarations: [
@@ -28,7 +32,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatCheckboxModule,
     MatSortModule,
     MatSelectModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatPaginatorModule,
+    MatCardModule,
+    MatProgressBarModule,
+    NgxChartsModule
   ]
 })
 export class AdminModule { }
