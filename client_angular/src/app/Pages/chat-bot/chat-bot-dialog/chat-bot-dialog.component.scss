@@ -27,6 +27,7 @@ $white: #eceff4;
     color: $white;
     border-radius: 8px;
     padding: 1%;
+    position: relative;
 
     .chat-icon {}
 
@@ -51,6 +52,37 @@ $white: #eceff4;
         height: 8px;
       }
     }
+
+    .llm-info {
+      font-size: 0.75rem;
+      color: rgba($white, 0.8);
+      background-color: rgba($white, 0.1);
+      padding: 6px 10px;
+      border-radius: 4px;
+      margin-top: 8px;
+      margin-right: 50px;
+      line-height: 1.2;
+      max-width: 90%;
+    }
+
+    .close-button {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      color: $white;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+
+      mat-icon {
+        font-size: 20px;
+      }
+
+      &:hover {
+        color: $orange;
+      }
+    }
   }
 
   .chat-content {
@@ -67,7 +99,7 @@ $white: #eceff4;
   }
 
   .chat-actions {
-    flex: 0 1 15%;
+    flex: 0 1 12%;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -99,7 +131,7 @@ $white: #eceff4;
 
 .message {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   padding: 6px 10px;
   border-radius: 12px;
   min-height: 36px;
@@ -158,6 +190,40 @@ $white: #eceff4;
     @-webkit-keyframes loading-message {
       to {
         width: 18px;
+      }
+    }
+  }
+
+  .rating-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 10px;
+
+    .rating-question {
+      margin-right: 10px;
+      font-size: 1em;
+      color: #4c566a;
+    }
+
+    .rating-buttons {
+      display: flex;
+
+      button {
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+
+        mat-icon {
+          font-size: 25x;
+          color: #4c566a;
+        }
+
+        &.selected-rating {
+          mat-icon {
+            color: #a3be8c; // Gold color
+          }
+        }
       }
     }
   }

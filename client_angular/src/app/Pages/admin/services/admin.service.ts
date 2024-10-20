@@ -17,6 +17,34 @@ interface Subject {
   name: string;
 }
 
+export interface QuestionTypeProgress {
+  [key: string]: {
+    total: number;
+    completed: number;
+  };
+}
+
+export interface DailyProgress {
+  date: string;
+  count: number;
+}
+
+export interface AllUsersDailyProgress {
+  date: string;
+  type: string;
+  count: number;
+}
+
+export interface UserDetails {
+  id: number;
+  email: string;
+  firstname: string;
+  lastname: string;
+  globalRole: string;
+  createdAt: string;
+  totalProgress: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -31,6 +59,22 @@ export class AdminService {
 
   getUserTotalProgress(userId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/users/${userId}/progress`);
+  }
+
+  getUserProgressByQuestionType(userId: number): Observable<QuestionTypeProgress> {
+    return this.http.get<QuestionTypeProgress>(`${this.apiUrl}/users/${userId}/progress-by-question-type`);
+  }
+
+  getUserDailyProgress(userId: number): Observable<DailyProgress[]> {
+    return this.http.get<DailyProgress[]>(`${this.apiUrl}/users/${userId}/daily-progress`);
+  }
+
+  getAllUsersDailyProgress(): Observable<AllUsersDailyProgress[]> {
+    return this.http.get<AllUsersDailyProgress[]>(`${this.apiUrl}/all-users-daily-progress`);
+  }
+
+  getUserDetails(userId: number): Observable<UserDetails> {
+    return this.http.get<UserDetails>(`${this.apiUrl}/users/${userId}/details`);
   }
 
   toggleRegisteredForSL(userId: number, subjectId: number, value: boolean): Observable<any> {

@@ -1,4 +1,10 @@
 <div class="user-list-container">
+  <p class="info-text">
+    Hier können durch Semikolon getrennte Zimt-IDs in einer txt-Datei hochgeladen werden.
+    Diese werden für die SL in GOALS registriert.
+    Falls noch kein Account für die Zimt ID existiert, wird zuvor ein Account in GOALS erstellt.
+  </p>
+
   <div class="controls-container">
     <mat-form-field class="search-field">
       <input matInput (keyup)="applyFilter($event)" placeholder="Filter users">
@@ -30,50 +36,76 @@
     </div>
   </div>
 
-  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
-    <ng-container matColumnDef="email">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
-      <td mat-cell *matCellDef="let user"> {{user.email}} </td>
-    </ng-container>
+  <div class="data-container">
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
+        <td mat-cell *matCellDef="let user"> {{user.email}} </td>
+      </ng-container>
 
-    <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> User ID </th>
-      <td mat-cell *matCellDef="let user"> {{user.id}} </td>
-    </ng-container>
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> User ID </th>
+        <td mat-cell *matCellDef="let user"> {{user.id}} </td>
+      </ng-container>
 
-    <ng-container matColumnDef="kiFeedbackCount">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> KI Feedback Count </th>
-      <td mat-cell *matCellDef="let user"> {{user.kiFeedbackCount}} </td>
-    </ng-container>
+      <ng-container matColumnDef="kiFeedbackCount">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> KI Feedback Count </th>
+        <td mat-cell *matCellDef="let user"> {{user.kiFeedbackCount}} </td>
+      </ng-container>
 
-    <ng-container matColumnDef="chatBotMessageCount">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Chatbot Message Count </th>
-      <td mat-cell *matCellDef="let user"> {{user.chatBotMessageCount}} </td>
-    </ng-container>
+      <ng-container matColumnDef="chatBotMessageCount">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Chatbot Message Count </th>
+        <td mat-cell *matCellDef="let user"> {{user.chatBotMessageCount}} </td>
+      </ng-container>
 
-    <ng-container matColumnDef="totalProgress">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Total Progress </th>
-      <td mat-cell *matCellDef="let user">
-        <a class="clickable-progress" (click)="viewUserProgress(user.id)">{{user.totalProgress | percent:'1.0-0'}}</a>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="totalProgress">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Total Progress </th>
+        <td mat-cell *matCellDef="let user">
+          <a class="clickable-progress" (click)="viewUserProgress(user.id)">{{user.totalProgress | percent:'1.0-0'}}</a>
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="subjects">
-      <th mat-header-cell *matHeaderCellDef> Subjects </th>
-      <td mat-cell *matCellDef="let user">
-        <div *ngFor="let subject of user.subjects">
-          {{subject.name}}
-          <mat-checkbox
-            [checked]="subject.registeredForSL"
-            (change)="toggleRegisteredForSL(user.id, subject.id, subject.registeredForSL)"
-          >
-            Registered for SL
-          </mat-checkbox>
-        </div>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="subjects">
+        <th mat-header-cell *matHeaderCellDef> Subjects </th>
+        <td mat-cell *matCellDef="let user">
+          <div *ngFor="let subject of user.subjects">
+            {{subject.name}}
+            <mat-checkbox
+              [checked]="subject.registeredForSL"
+              (change)="toggleRegisteredForSL(user.id, subject.id, subject.registeredForSL)"
+            >
+              Registered for SL
+            </mat-checkbox>
+          </div>
+        </td>
+      </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons></mat-paginator>
+
+    <div class="chart-container">
+      <h2>All Users Daily Progress</h2>
+      <div *ngIf="allUsersDailyProgressData.length === 0" class="loading-indicator">
+        Loading chart data...
+      </div>
+      <ngx-charts-line-chart
+        *ngIf="allUsersDailyProgressData.length > 0"
+        [view]="view"
+        [scheme]="colorScheme"
+        [legend]="showLegend"
+        [showXAxisLabel]="showXAxisLabel"
+        [showYAxisLabel]="showYAxisLabel"
+        [xAxis]="showXAxis"
+        [yAxis]="showYAxis"
+        [xAxisLabel]="xAxisLabel"
+        [yAxisLabel]="yAxisLabel"
+        [timeline]="true"
+        [results]="allUsersDailyProgressData"
+        [autoScale]="true">
+      </ngx-charts-line-chart>
+    </div>
+  </div>
 </div>

@@ -63,17 +63,25 @@ export class MarkdownService {
       return '</p>';
     };
 
-    // Bestehende Anpassungen für Fußnoten beibehalten
+    // Anpassungen für Fußnoten mit blauer Farbe und Unterstreichung
     this.md.renderer.rules['footnote_ref'] = (tokens, idx, options, env, slf) => {
       const caption = slf.rules['footnote_caption']?.(tokens, idx, options, env, slf);
-      return '<sup class="footnote-ref"><a>' + caption + '</a></sup>';
+      return `<sup class="footnote-ref"><a style="color: blue; text-decoration: underline;">${caption}</a></sup>`;
     };
 
     this.md.renderer.rules['footnote_anchor'] = () =>
-      ' <a class="footnote-backref">\u21a9\uFE0E</a>';
+      ' <a class="footnote-backref" style="color: blue; text-decoration: underline;">\u21a9\uFE0E</a>';
 
     this.md.renderer.rules['footnote_block_open'] = () =>
       '<h4 class="mt-3">Quellen (Links zum Video):</h4>\n<section class="footnotes">\n<ol class="footnotes-list">\n';
+
+    // Regel für Links mit blauer Farbe und Unterstreichung
+    this.md.renderer.rules['link_open'] = (tokens, idx, options, env, self) => {
+      const token = tokens[idx];
+      const hrefIndex = token.attrIndex('href');
+      const href = token.attrs?.[hrefIndex]?.[1] ?? '#';
+      return `<a href="${href}" style="color: blue; text-decoration: underline;">`;
+    };
   }
 
   parse(markdown: string): string {
@@ -84,9 +92,9 @@ export class MarkdownService {
     return str.replace(/[&<>"']/g, (tag) => {
       const charsToReplace: { [key: string]: string } = {
         '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
+        '<': '<',
+        '>': '>',
+        '"': '"',
         "'": '&#39;',
       };
       return charsToReplace[tag] || tag;

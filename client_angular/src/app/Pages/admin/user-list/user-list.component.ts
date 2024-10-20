@@ -2,7 +2,10 @@ import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { AdminService } from '../services/admin.service';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AdminService, AllUsersDailyProgress } from '../services/admin.service';
+import { Color, ScaleType } from '@swimlane/ngx-charts';
 
 interface UserListItem {
   id: number;
@@ -31,16 +34,41 @@ export class UserListComponent implements OnInit, AfterViewInit {
   selectedFile: File | null = null;
 
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private adminService: AdminService, private router: Router) {}
+  // New properties for the all users daily progress chart
+  allUsersDailyProgressData: any[] = [];
+  view: [number, number] = [700, 400];
+  showXAxis: boolean = true;
+  showYAxis: boolean = true;
+  gradient: boolean = false;
+  showLegend: boolean = true;
+  showXAxisLabel: boolean = true;
+  xAxisLabel: string = 'Date';
+  showYAxisLabel: boolean = true;
+  yAxisLabel: string = 'Completed Tasks';
+  colorScheme: Color = {
+    name: 'custom',
+    selectable: true,
+    group: ScaleType.Ordinal,
+    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
+  };
+
+  constructor(
+    private adminService: AdminService,
+    private router: Router,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
     this.loadSubjects();
+    this.loadAllUsersDailyProgress();
   }
 
   ngAfterViewInit() {
     this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator;
   }
 
   loadUsers(): void {
@@ -48,6 +76,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
       (users: UserListItem[]) => {
         this.dataSource = new MatTableDataSource(users);
         this.dataSource.sort = this.sort;
+        this.dataSource.paginator = this.paginator;
       },
       (error: any) => console.error('Error loading users:', error)
     );
@@ -62,9 +91,38 @@ export class UserListComponent implements OnInit, AfterViewInit {
     );
   }
 
+  loadAllUsersDailyProgress(): void {
+    this.adminService.getAllUsersDailyProgress().subscribe(
+      (progress: AllUsersDailyProgress[]) => {
+        // Process the data for the chart
+        const progressByType: { [key: string]: { name: string; series: { name: string; value: number }[] } } = {};
+
+        progress.forEach((item) => {
+          if (!progressByType[item.type]) {
+            progressByType[item.type] = {
+              name: item.type,
+              series: []
+            };
+          }
+          progressByType[item.type].series.push({
+            name: item.date,
+            value: item.count
+          });
+        });
+
+        this.allUsersDailyProgressData = Object.values(progressByType);
+      },
+      (error: any) => console.error('Error loading all users daily progress:', error)
+    );
+  }
+
   applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   viewUserProgress(userId: number): void {
@@ -95,16 +153,32 @@ export class UserListComponent implements OnInit, AfterViewInit {
         const content = e.target?.result as string;
         const emails = content.split(';').map(email => email.trim());
         this.adminService.processEmailsForSubject(emails, this.selectedSubject as number).subscribe(
-          () => {
+          (response: { message: string }) => {
             console.log('File processed successfully');
+            this.snackBar.open(response.message, 'Close', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom',
+            });
             this.loadUsers(); // Reload the user list to reflect the changes
           },
-          (error: any) => console.error('Error processing file:', error)
+          (error: any) => {
+            console.error('Error processing file:', error);
+            this.snackBar.open('Error processing file: ' + error.message, 'Close', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom',
+            });
+          }
         );
       };
       reader.readAsText(this.selectedFile);
     } else {
-      console.error('No file selected or subject not chosen');
+      this.snackBar.open('No file selected or subject not chosen', 'Close', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+      });
     }
   }
 }

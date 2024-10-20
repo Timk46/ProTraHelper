@@ -51,4 +51,13 @@ export class ChatBotComponent {
     // Update the icon source based on the isOpen state
     this.iconSrc = this.isOpen ? this.chatIconPath : this.botIconPath;
   }
+
+  /**
+   * Handles the close event from the chat-bot-dialog component.
+   */
+  public onChatClose(): void {
+    if (this.isOpen) {
+      this.onChangeChatState(); // Reuse the existing method to close the chat
+    }
+  }
 }

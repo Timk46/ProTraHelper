@@ -572,6 +572,7 @@ model ChatBotMessage {
   answer     String?
   createdAt  DateTime @default(now())
   isBot      Boolean  @default(false)
+  ratingByStudent   Int?
   usedChunks String?  @db.Text // wird für die Dialog ID gentutzt
   user       User?    @relation(fields: [userId], references: [id])
   userId     Int?

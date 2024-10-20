@@ -22,38 +22,39 @@ const {
 const KImodel = 'gpt-4o-2024-08-06';
 
 const individualFeedbackPromptLevel1: String =
-  'Gib immer, wenn es passt, Code-Beispiele, die die Syntax demonstrieren. VERWENDE DAZU EINEN KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN! ES IST STRENG VERBOTEN, DIE LÖSUNG ZUR AUFGABE DIREKT ZU VERRATEN!' +
-  'Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise darauf und ergänze Erklärungen. Das ist wichtig, damit die Studenten lernen, die Compiler-Ausgabe zu lesen und zu verstehen. ' +
-  'Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
-  'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren.' +
-  'Verwende eine sehr einfache Sprache und erkläre die Konzepte ausführlich Schritt für Schritt. Gib viele Details und Beispiele, um das Verständnis zu fördern. Die Antwort muss so formuliert sein, sodass ein absoluter Programmieranfänger sie versteht.\n';
+  '- Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken.\n' +
+  '- Gib immer, wenn es passt, Code-Beispiele, die die nur Syntax einzelner Programmierkontexte beispielhaft erklären. Die Erklärung und das Code-Beispiel dürfen nichts mit der Aufgabe zu tun haben. VERWENDE DAZU EINEN KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN!\n' +
+  '- Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise nur darauf und ergänze Erklärungen. Das ist wichtig, damit die Studenten lernen, die Compiler-Ausgabe zu lesen und zu verstehen.\n' +
+  '- Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren.' +
+  '- Verwende eine sehr einfache Sprache und erkläre die Konzepte ausführlich Schritt für Schritt. Es sind viele Details und Beispiele notwendig, um das Verständnis zu fördern. Die Antwort muss so formuliert sein, sodass ein absoluter Programmieranfänger sie versteht.\n';
 
 const individualFeedbackPromptLevel2: String =
-  'Gib immer, wenn es passt, Code-Beispiele, die die Syntax demonstrieren. VERWENDE DAZU EINEN KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN!' +
-  'Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise darauf und ergänze es mit Erklärungen. Das ist wichtig, damit der Student lernt, die Compiler-Ausgabe zu lesen und zu verstehen. ' +
-  'Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken. ' +
-  'Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren.';
+  '- Die Studenten lösen Programmieraufgaben, und du gibst ihnen kurzes, hilfreiches Feedback. Dieses darf auf keinen Fall die Lösung verraten, sondern nur in die richtige Richtung lenken und passende Quellen aus der Vorlesung verlinken.\n' +
+  '- Gib immer, wenn es passt, Code-Beispiele, die die nur Syntax einzelner Programmierkontexte beispielhaft erklären. Die Erklärung und das Code-Beispiel dürfen nichts mit der Aufgabe zu tun haben. VERWENDE DAZU EINEN KOMPLETT ANDEREN KONTEXT ALS IN DER AUFGABE ODER DER LÖSUNG DES STUDENTEN!\n' +
+  '- Wenn das Problem bereits eindeutig in der Compiler-Ausgabe steht, dann verweise nur darauf und ergänze es mit Erklärungen. Das ist wichtig, damit der Student lernt, die Compiler-Ausgabe zu lesen und zu verstehen.\n' +
+  '- Sind 100 Punkte erreicht, sollst du lediglich zur korrekten Lösung gratulieren.\n';
 
 const individualFeedbackPromptLevel3: String =
   'Stelle nur EINE EINZIGE sokratische Frage, um den Studenten zur eigenen Problemlösung zu führen. Reduziere die direkte Hilfestellung und fördere das eigenständige Denken. Deine Antwort besteht nur aus einer einzigen sokratischen Frage und aus Hinweisen auf Vorlesungsinhalte (maximal 2 Sätze).';
 
 const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
-    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen von Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung.\n' +
+    'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen von C++ lernen. Das Thema der Vorlesung ist Algorithmen und Datenstrukturen.\n' +
+    '# Regeln\n' +
       'Formatiere deine Antwort übersichtlich mit der Markdown-Syntax, sodass sie für die Studenten gut lesbar ist.\n' +
       '{individualFeedbackPrompt}' +
       // NEU <- ist nicht im normalen Feedback
       // Etwas länger als normales Feedback
-      'Es ist verboten, die Unit-Tests zu erwähnen.',
-    'DU VERRÄTST NIEMALS DIE LÖSUNG. ' +
+      '- Es ist verboten, die Unit-Tests zu erwähnen.\n',
+      '- DU VERRÄTST NIEMALS DIE LÖSUNG. Auch keine Codesnippets, die nah an der Lösung dran sind!\n' +
       // Erläuterungen zu dem Aufbau der Informationen aus RAG
-      'Bei deiner Antwort beziehst du dich auf Erklärungen aus den Vorlesungsausschnitten. Dabei zitierst du nur indirekt und baust diese in deine eigene Antwort ein. Dies Quellen liegen im folgenden JSON-Format vor:' +
-      '{ "Vorlesungsausschnitte": [ { "Konzept": String, "Inhalt": [ { "Erklärung": String, "Quelle": String }, ... // Weitere Erklärungen mit zugehörigen Quellen] }, ... // Weitere Konzepte ] }' +
-      'Du MUSST IMMER, wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% GENAU WIE IN DEN BEISPIELEN DIREKT DAHINTER AUSSCHLIEßLICH im Format $$Zahl$$ OHNE weitere "[" oder "Quelle".' +
-      'Hier sind Beispiele zur korrekten Zitation. Gehe beim Zitieren genauso vor:\n ' +
-      'Beispiel 1: Jede Zeile Code, die zur Funktion gehört, muss um eine Ebene eingerückt sein $$5$$.\n' +
-      'Beispiel 2: Denke auch daran, dass die Verkettung von Strings in Python mit dem `+` Operator erfolgt, wie im Vorlesungsausschnitt über Datentypen und Operationen in Python erklärt wird $$2$$.\n' +
-      'Beispiel 3: Diese Methoden sollten dann in den abgeleiteten Klassen `Pyramide` und `Kegel` implementiert werden $$1$$.\n',
+      '- Bei deiner Antwort beziehst du dich auf passende Erklärungen aus den Vorlesungsausschnitten. Dabei zitierst du nur indirekt und baust diese in deine eigene Antwort ein. Dies Quellen liegen im folgenden JSON-Format vor:\n' +
+      '{ "Vorlesungsausschnitte": [ { "Konzept": String, "Inhalt": [ { "Erklärung": String, "Quelle": String }, ... // Weitere Erklärungen mit zugehörigen Quellen] }, ... // Weitere Konzepte ] }\n' +
+      '- Du MUSST IMMER, wenn du eine Erklärung verwendest, die zugehörige Quelle EXAKT und 100% GENAU WIE IN DEN BEISPIELEN DIREKT DAHINTER AUSSCHLIEßLICH im Format $$Zahl$$ OHNE weitere "[" oder "Quelle"\n.' +
+      '- Hier sind Beispiele zur korrekten Zitation. Gehe beim Zitieren genauso vor:\n ' +
+      '   - Beispiel 1: Jede Zeile Code, die zur Funktion gehört, muss um eine Ebene eingerückt sein $$5$$.\n' +
+      '   - Beispiel 2: Denke auch daran, dass die Verkettung von Strings in Python mit dem `+` Operator erfolgt, wie im Vorlesungsausschnitt über Datentypen und Operationen in Python erklärt wird $$2$$.\n' +
+      '   - Beispiel 3: Diese Methoden sollten dann in den abgeleiteten Klassen `Pyramide` und `Kegel` implementiert werden $$1$$.\n',
   ),
   HumanMessagePromptTemplate.fromTemplate(
     '# Aufgabe die vom Studenten gelöst werden soll:\n{task}\n' +
@@ -74,7 +75,7 @@ const finalRAGPrompt = ChatPromptTemplate.fromPromptMessages([
 const getConceptsPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
     'Du bist Lehrer für Studenten und Experte der Didaktik.' + // role
-      'Basierend auf den Informationen zwischen BEGINCONTEXT und ENDCONTEXT, extrahierst du die zwei wichtigsten Informatik-Konzepte, die der Student noch verstehen muss, damit er die Aufgabe selbstständig lösen kann. ' +
+      'Basierend auf den Informationen zwischen BEGINCONTEXT und ENDCONTEXT, extrahierst du die drei wichtigsten Informatik-Konzepte, die der Student noch verstehen muss, damit er die Aufgabe selbstständig lösen kann. ' +
       'Für jedes dieser Konzepte nutzt du das dir zur Verfügung stehende Tool, um weitere Informationen zu den Konzepten aus der Vorlesung zu erhalten.',
   ),
   HumanMessagePromptTemplate.fromTemplate(
@@ -159,7 +160,7 @@ export class FeedbackRAGService {
   async getProgrammingConcepts(data: any): Promise<string> {
     const tempsimilaritySearchResult = await vectorStore.similaritySearch(
       data.question,
-      4,
+      5,
     );
     const similaritySearchResult = this.transformToTranscriptChunks(
       JSON.stringify(tempsimilaritySearchResult),

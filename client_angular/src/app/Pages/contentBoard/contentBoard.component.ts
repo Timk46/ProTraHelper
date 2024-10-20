@@ -262,7 +262,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
                 if (content.contentElements.some(
                   (element) => element.id === taskViewData.contentElementId
                 )) {
-                  const elementCount = content.contentElements.length;
+                  // const elementCount = content.contentElements.length;
+                  const questionElements = content.contentElements.filter(element => element.type === "QUESTION"); // FILTER OUT PDF/VIDEO
+                  const elementCount = questionElements.length;
                   content.progress += 100 / elementCount;
                   if (content.progress > 99) {
                     content.progress = 100; // Prevent rounding errors

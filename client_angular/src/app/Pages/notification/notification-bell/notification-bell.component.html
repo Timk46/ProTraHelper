@@ -1,5 +1,5 @@
 <div class="notification-bell" #notificationBell>
-  <button mat-icon-button [matBadge]="(unreadCount$ | async)" matBadgeOverlap="true" matBadgeColor="warn" (click)="toggleNotifications()">
+  <button mat-icon-button [matBadge]="(unreadCount$ | async)" matBadgeOverlap="true" (click)="toggleNotifications()">
     <mat-icon>notifications</mat-icon>
   </button>
   <div class="notifications-panel"

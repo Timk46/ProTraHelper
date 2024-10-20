@@ -14,6 +14,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ConfettiService } from "src/app/Services/animations/confetti.service";
 import { Title } from '@angular/platform-browser';
 import { ProgressService } from "src/app/Services/progress/progress.service";
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 /**
  * The different states representing the current status of the student workspace.
@@ -43,7 +44,7 @@ export class StudentWorkspaceComponent implements OnInit {
   tasks: QuestionDTO[] = [];
   tasksOfSelectedWeek: QuestionDTO[] = [];
   flavor: string = 'Feedback mit Konzept-Erklärung';
-  flavorOptions: string[] = [
+  flavorOptions: string[] = [ // currently disabled. Automatically set to 'Feedback mit Konzept-Erklärung'
     'Standard Feedback',
     'Feedback mit Konzept-Erklärung',
   ];
@@ -58,7 +59,6 @@ export class StudentWorkspaceComponent implements OnInit {
   selectedWeek = 0;
   rating: number = 0;
   hoverState: number = 0;
-  feedback: string = '';
   defaultWeek: number = 0;
   taskDescription: string =
     'Hi :)\n ich bin Kai. Ich bin hier, um dir Feedback zu deinen Lösungen zu geben.';
@@ -66,6 +66,7 @@ export class StudentWorkspaceComponent implements OnInit {
   compilerOutput: string | null = '';
   feedbackMessage: string =
     'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben.';
+  safeFeedbackMessage: SafeHtml;
   currentLoadingFeedbackMessage: string = '';
   lastResult: any;
 
@@ -86,7 +87,10 @@ export class StudentWorkspaceComponent implements OnInit {
     private route: ActivatedRoute,
     private confettiService: ConfettiService,
     private title: Title,
-  ) {}
+    private sanitizer: DomSanitizer
+  ) {
+    this.safeFeedbackMessage = this.sanitizer.bypassSecurityTrustHtml(this.feedbackMessage);
+  }
 
   /**
    * Initialize the component by getting question data from the API.
@@ -139,10 +143,10 @@ export class StudentWorkspaceComponent implements OnInit {
   /**
    * Send student feedback to the API.
    */
-  sendStudentFeedback(): void {
+  sendStudentFeedback(starRating: number): void {
     this.currentState = States.sendStudentFeedback;
     this.runCodeService
-      .postFeedback(this.rating, this.feedback, this.lastResult.encryptedCodeSubissionId)
+      .postFeedback(starRating, "", this.lastResult.encryptedCodeSubissionId)
       .subscribe({
         next: (response) => {
           this.openSnackBar('Vielen Dank für Ihr Feedback!', 'done');
@@ -155,17 +159,18 @@ export class StudentWorkspaceComponent implements OnInit {
 
   /**
    * Get AI-generated feedback for the user's code.
+   * @param level The selected feedback level
    */
-  getKIFeedback(): void {
+  getKIFeedback(level: string): void {
+    this.feedbackLevel = level;
     this.rating = 0;
     this.currentState = States.startGeneratingKIFeedback;
-    this.feedbackMessage =
-      'Lass mich einen Augenblick über die Aufgabe nachdenken...';
+    this.feedbackMessage = 'Lass mich einen Augenblick über die Aufgabe nachdenken...';
+    this.safeFeedbackMessage = this.sanitizer.bypassSecurityTrustHtml(this.feedbackMessage);
     let submitCode = '';
     if (this.currentTask) {
       for (const file of this.currentTask.codingQuestion!.codeGerueste) {
-        submitCode +=
-          '## Code in ' + file.codeFileName + '\n' + file.code + '\n\n'; // all studencode in markdown string format
+        submitCode += '## Code in ' + file.codeFileName + '\n' + file.code + '\n\n';
       }
     }
 
@@ -182,17 +187,16 @@ export class StudentWorkspaceComponent implements OnInit {
         next: (response) => {
           if (isFirstResponse) {
             this.currentState = States.receivingKIFeedback;
-
             isFirstResponse = false;
           }
           this.currentLoadingFeedbackMessage = response;
-          this.feedbackMessage = this.markdownService.parse(response);
+          const parsedMarkdown = this.markdownService.parse(response);
+          this.safeFeedbackMessage = this.sanitizer.bypassSecurityTrustHtml(parsedMarkdown);
         },
         error: (error) => {
           this.checkError(error);
         },
         complete: () => {
-          //console.log(this.currentLoadingFeedbackMessage);
           this.currentState = States.finishedGeneratingKIFeedback;
         },
       });
@@ -239,6 +243,7 @@ export class StudentWorkspaceComponent implements OnInit {
     }
     this.isLoading = false;
     this.feedbackMessage = 'Hallo, ich bin Kai. Ich kann dir Tipps und Hilfestellungen geben.';
+    this.safeFeedbackMessage = this.sanitizer.bypassSecurityTrustHtml(this.feedbackMessage);
     this.currentState = States.submittedCode;
     if (result.CodeSubmissionResult.score === 100) {
       this.confettiService.celebrate(6,800); // small confetti animation :)

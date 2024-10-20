@@ -218,14 +218,14 @@ export class UsersService {
         maxProgress = maxProgress + contentElement.question.level;
       }
       else {
-        maxProgress = maxProgress + 1;
+        //maxProgress = maxProgress + 0.2; // Points for PDF/VIDEO
       }
       if(userContentElementsProgress.find((element) => element.contentElementId === contentElement.id && element.markedAsDone === true)) {
         if(contentElement.type === 'QUESTION') {
           userTotalProgress = userTotalProgress + contentElement.question.level;
         }
         else {
-          userTotalProgress = userTotalProgress + 1;
+          //userTotalProgress = userTotalProgress + 0.2; // Points for PDF/VIDEO
         }
       }
     }
