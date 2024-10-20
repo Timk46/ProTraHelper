@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { version } from '@DTOs/version';
 import { globalRole } from '@DTOs/roles.enum';
+import { environment } from 'src/environments/environment';
 
 
 @Component({
@@ -86,7 +87,18 @@ export class AppComponent {
 
   ngOnInit() {
     //this.toolbarService.show();
+    this.disableConsoleInProduction()
   }
+
+  disableConsoleInProduction(): void { if (environment.production)
+    {
+     console.warn(`🚨 Console output is disabled on production!`);
+     console.log = function (): void { };
+     console.debug = function (): void { };
+     console.warn = function (): void { };
+     console.info = function (): void { };
+           }
+    }
 
   logOut() {
     this.userIsLoggedIn = false;

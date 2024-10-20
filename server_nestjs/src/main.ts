@@ -14,6 +14,14 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '5mb' }));
   app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
 
+
+    console.log = () => {}; // disable console.log in production - use nest.js logger instead, if important logs are needed
+    //console.debug = () => {};
+    //console.info = () => {};
+    //console.warn = () => {};
+    //console.error = () => {};
+
+
   const port = process.env.PORT || 3000;
   await app.listen(port);
   Logger.log(`Application is running on: http://localhost:${port}`);
