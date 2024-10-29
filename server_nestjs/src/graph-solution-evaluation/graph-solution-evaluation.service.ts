@@ -29,8 +29,8 @@ export class GraphSolutionEvaluationService {
             
             case 'dijkstra':
                 return this.dijkstraService.evaluateSolution(
-                    studentSolution, 
-                    question.exampleSolution,
+                    question.initialStructure,
+                    studentSolution,
                     question.maxPoints
                 );
 
