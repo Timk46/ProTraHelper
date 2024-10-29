@@ -1,7 +1,7 @@
 import { ConceptGraphDTO } from '@DTOs/index';
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { GraphService } from './graph.service';
-import { roles, RolesGuard } from './../auth/roles.guard';
+import { roles, RolesGuard } from '../auth/common/guards/roles.guard';
 
 @UseGuards(RolesGuard)
 @Controller('graph')

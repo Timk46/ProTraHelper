@@ -1,4 +1,4 @@
-import { RolesGuard, roles } from '@/auth/roles.guard';
+import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 import { Body, Controller, Param, ParseIntPipe, Put, Req, UseGuards } from '@nestjs/common';
 import { UserConceptService } from './user-concept.service';
 

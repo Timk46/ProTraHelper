@@ -1,8 +1,8 @@
 import { Controller, Request, Res, Get, Post, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { Response as ExpressResponse } from 'express';
-import { LocalAuthGuard } from './local-auth.guard';
+import { LocalAuthGuard } from './common/guards/local-auth.guard';
 import { AuthService } from './auth.service';
-import { CasAuthGuard } from './cas-auth.guard';
+import { CasAuthGuard } from './common/guards/cas-auth.guard';
 import { Public } from '../public.decorator';
 import { UserDTO } from '@DTOs/user.dto';
 
