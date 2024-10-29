@@ -261,7 +261,7 @@ export class EditGraphComponent implements AfterViewInit {
     if (this.graphForm.value.graphQuestionType === 'dijkstra') {
 
       // Find the start node
-      const startNode: GraphNodeDTO | undefined = this.assignmentGraphStructure.nodes.find(node => { node.weight === 0 });
+      const startNode: GraphNodeDTO | undefined = this.assignmentGraphStructure.nodes.find(node => node.weight === 0 );
       
       if (!startNode) {
         this.snackBar.open('Die Graphstruktur muss ein Startknoten mit Gewicht 0 enthalten.', 'Schließen', { duration: 3000 });
@@ -273,7 +273,7 @@ export class EditGraphComponent implements AfterViewInit {
 
       // Adjust the text
       textHTML = `
-      Gegeben sei der folgende ungerichtete Graph G mit den Knoten V = {${nodeValues.join(', ')}}.
+      Gegeben sei der folgende ungerichtete Graph G mit den Knoten V = {${nodeValues.join(', ')}}.<br>
       Berechnen Sie den kürzesten Weg für alle Knoten ausgehend vom Startknoten ${startNode.value}.<br>
       Verwenden Sie den Dijkstra-Algorithmus und zeichnen Sie dabei jeden Schritt in ein eigenes Diagramm.<br> 
       Markieren Sie dabei den aktuell besuchten Knoten.
