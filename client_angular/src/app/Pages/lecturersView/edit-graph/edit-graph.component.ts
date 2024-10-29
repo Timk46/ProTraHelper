@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { GraphConfigurationDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
+import { GraphConfigurationDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
 import { GraphTaskService } from 'src/app/Modules/graph-tasks/services/graph-task.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
@@ -248,6 +248,83 @@ export class EditGraphComponent implements AfterViewInit {
       return newData;
     }
     return null;
+  }
+
+  generateTextFromStructure() {
+    let textHTML = null;
+
+    if (this.assignmentGraphStructure.nodes.length === 0) {
+      this.snackBar.open('Die Graphstruktur muss zunächst erstellt werden.', 'Schließen', { duration: 3000 });
+      return;
+    }
+
+    if (this.graphForm.value.graphQuestionType === 'dijkstra') {
+
+      // Find the start node
+      const startNode: GraphNodeDTO | undefined = this.assignmentGraphStructure.nodes.find(node => { node.weight === 0 });
+      
+      if (!startNode) {
+        this.snackBar.open('Die Graphstruktur muss ein Startknoten mit Gewicht 0 enthalten.', 'Schließen', { duration: 3000 });
+        return;
+      }
+
+      // Get the node values
+      const nodeValues: string[] = this.assignmentGraphStructure.nodes.map(node => node.value);
+
+      // Adjust the text
+      textHTML = `
+      Gegeben sei der folgende ungerichtete Graph G mit den Knoten V = {${nodeValues.join(', ')}}.
+      Berechnen Sie den kürzesten Weg für alle Knoten ausgehend vom Startknoten ${startNode.value}.<br>
+      Verwenden Sie den Dijkstra-Algorithmus und zeichnen Sie dabei jeden Schritt in ein eigenes Diagramm.<br> 
+      Markieren Sie dabei den aktuell besuchten Knoten.
+      `;
+
+    }
+    
+    if (this.graphForm.value.graphQuestionType === 'floyd') {
+      
+      // Get the node values
+      const nodeValues: string[] = this.assignmentGraphStructure.nodes.map(node => node.value);
+
+      // Adjust the text
+      textHTML = `
+      Berechnen Sie den kürzesten Weg nach Verarbeitung der Knoten ${nodeValues.join(', ')} in <strong>beliebiger</strong> Reihenfolge unter Verwendung des Algorithmus von Floyd.<br>
+      Fügen Sie zugehörige Kantengewichte und falls erforderlich zusätzliche Kanten ein.<br>
+      Übernehmen Sie bereits hinzugefügte Kanten und aktualisierte Kantengewichte in späteren Schritten.
+      `;
+    }
+    
+    if (this.graphForm.value.graphQuestionType === 'kruskal') {
+
+      // Get the node values
+      const nodeValues: string[] = this.assignmentGraphStructure.nodes.map(node => node.value);
+
+      // Adjust the text
+      textHTML = `
+      Gegeben sei der folgende ungerichtete Graph G mit den Knoten V = {${nodeValues.join(', ')}}.<br>
+      Nutzen Sie den Algorithmus von Kruskal, um den Minimalen Spannbaum B zu erzeugen.<br>
+      Erstellen Sie jeden Schritt in ein eigenes Diagramm.
+      `;
+      
+    }
+    
+    if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
+
+      // Get the node values
+      const nodeValues: string[] = this.assignmentGraphStructure.nodes.map(node => node.value);
+
+      // Adjust the text
+      textHTML = `
+      Gegeben sei der folgende gerichtete Graph G mit V = {${nodeValues.join(', ')}}.<br>
+      Fügen Sie alle Kanten zu G hinzu, die zu dessen Transitive Hülle gehören.<br>
+      Der Graph <strong>muss</strong> auch bereits vorhandene Kanten enthalten.
+      `;
+      
+    }
+
+    if (textHTML) {
+      this.questionField.setContent(textHTML);
+    }    
   }
 
 

@@ -55,7 +55,10 @@
         <div class="wrap-container">
   
             <div style="width: 100%;">
-                <h2>Aufgabentext</h2>
+                <div style="display: flex; justify-content: space-between;">
+                    <h2>Aufgabentext</h2>
+                    <button mat-raised-button color="primary" (click)="generateTextFromStructure()">Generate Text</button>
+                </div>
                 <app-tinymce #question [config]="editorConfig"></app-tinymce>
             </div>
 
