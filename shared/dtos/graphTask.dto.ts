@@ -5,7 +5,7 @@ export interface GraphStructureDTO {
 
 export interface GraphConfigurationDTO {
     nodeWeight: boolean,
-    nodeVisited: boolean,
+    nodeSelected: boolean,
     edgeWeight: boolean
     edgeDirected: boolean,
 }
@@ -13,7 +13,7 @@ export interface GraphConfigurationDTO {
 export interface GraphNodeDTO {
     nodeId: number;
     value: string;
-    visited: boolean | null;
+    selected: boolean | null;
     weight: number | null;
     position: PositionDTO;
     size: SizeDTO;
@@ -50,7 +50,7 @@ export interface GraphStructureSemanticDTO {
 
 export interface GraphNodeSemanticDTO {
     value: string;
-    visited?: boolean;
+    selected?: boolean;
     weight?: number;
 }
 

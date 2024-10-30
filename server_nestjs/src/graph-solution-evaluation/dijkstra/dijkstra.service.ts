@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getExtraVisitedNodes, getNodesWithDifferentWeights, getVisitedNodes, graphJSONToSemantic, graphsContainSameEdges, graphsContainSameNodes } from '../utils/graph-utils';
+import { getExtraSelectedNodes, getNodesWithDifferentWeights, graphJSONToSemantic, graphsContainSameEdges, graphsContainSameNodes } from '../utils/graph-utils';
 import { GraphStructureDTO, GraphStructureSemanticDTO, GraphNodeSemanticDTO } from '@DTOs/graphTask.dto';
 
 @Injectable()
@@ -84,7 +84,7 @@ export class DijkstraService {
             }
 
             // Find student visited node
-            const studentNewVisitedNodes: GraphNodeSemanticDTO[] = getExtraVisitedNodes(studentStep.nodes, studentPrevStep.nodes);
+            const studentNewVisitedNodes: GraphNodeSemanticDTO[] = getExtraSelectedNodes(studentStep.nodes, studentPrevStep.nodes);
             if (studentNewVisitedNodes.length !== 1) {
                 feedback.push(`${stepFeedback} \nIn jedem Schritt muss genau ein neuer Knoten als besucht markiert werden.`);
                 feedback.push(`Punkte für diesen Schritt: ${stepReceivedPoints.toFixed(2)} / ${maxStepPoints.toFixed(2)}`);
@@ -178,7 +178,7 @@ export class DijkstraService {
     } {
 
         // Find the node with the smallest distance value among the unvisited nodes
-        const unvisitedNodes = previousStep.nodes.filter(node => !node.visited);
+        const unvisitedNodes = previousStep.nodes.filter(node => !node.selected);
 
         const minWeight = Math.min(...unvisitedNodes.map(node => node.weight));
         const possibleNextNodes = unvisitedNodes.filter(node => node.weight === minWeight);
@@ -203,7 +203,7 @@ export class DijkstraService {
 
         const nextStep: GraphStructureSemanticDTO = JSON.parse(JSON.stringify(previousStep));
         const visitedNodeCurr = nextStep.nodes.find(node => node.value === visitedNodeValue);
-        visitedNodeCurr.visited = true;
+        visitedNodeCurr.selected = true;
 
         previousStep.edges.forEach(edge => {
             

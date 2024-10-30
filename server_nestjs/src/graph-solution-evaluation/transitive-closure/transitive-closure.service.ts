@@ -15,7 +15,7 @@ export class TransitiveClosureService {
      * Assumptions:
      * - The student's solution must include all edges from the initial structure; otherwise, the score is zero.
      * - The edges in graph are directed.
-     * - Attributes unrelated to the assignment (e.g., weight, visited) are not considered in the evaluation.
+     * - Attributes unrelated to the assignment (e.g., weight, selected) are not considered in the evaluation.
      *
      * @param {GraphStructureDTO} initialStructure - The initial graph structure in JSON format.
      * @param {GraphStructureDTO} studentSolution - The student's graph solution in JSON format.
@@ -28,7 +28,7 @@ export class TransitiveClosureService {
 
         // Assumption: It is trivial if the studentSolution contains all/some/none of the edges which initialStructure contains
         // Assumption: Graph has only directed edges
-        // Assumption: The node/ edge attributes which are not related to the assignment are not considered in the evaluation such as weight, visited etc.
+        // Assumption: The node/ edge attributes which are not related to the assignment are not considered in the evaluation such as weight, selected etc.
 
         let receivedPoints = maxPoints;
         const feedback: string[] = [];
