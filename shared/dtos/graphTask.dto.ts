@@ -6,6 +6,7 @@ export interface GraphStructureDTO {
 export interface GraphConfigurationDTO {
     nodeWeight: boolean,
     nodeSelected: boolean,
+    nodeSelectedText: { selected: string, unselected: string },
     edgeWeight: boolean
     edgeDirected: boolean,
 }

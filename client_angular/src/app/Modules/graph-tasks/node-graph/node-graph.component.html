@@ -85,8 +85,8 @@
                 (mouseenter)="onFieldHover($event)" 
                 (dblclick)="onNodeSelectedDoubleClick($event)"
             >
-                <span *ngIf="node.selected.value === true" style="display: flex; justify-content: center;">Besucht</span>
-                <span *ngIf="node.selected.value === false" style="display: flex; justify-content: center;">Nicht Besucht</span>
+                <span *ngIf="node.selected.value === true" style="display: flex; justify-content: center;">{{ graphConfiguration.nodeSelectedText !== undefined ? graphConfiguration.nodeSelectedText.selected : 'Selected' }}</span>
+                <span *ngIf="node.selected.value === false" style="display: flex; justify-content: center;">{{ graphConfiguration.nodeSelectedText !== undefined ? graphConfiguration.nodeSelectedText.selected : 'Unselected' }}</span>
             </div>
             <!-- End - Input -->
             <!-- ################### -->

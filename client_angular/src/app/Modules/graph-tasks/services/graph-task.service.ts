@@ -23,7 +23,7 @@ export class GraphTaskService {
     // ##############
     // Initialize
     this.graphConfiguration$ = new BehaviorSubject<GraphConfigurationDTO>({
-      nodeWeight: true, nodeSelected: true, edgeWeight: true, edgeDirected: true
+      nodeWeight: true, nodeSelected: true, nodeSelectedText: { selected: '', unselected: '' }, edgeWeight: true, edgeDirected: true
     });
     this.nodes$ = new BehaviorSubject<IGraphNode[]>([]);
     this.edges$ = new BehaviorSubject<IGraphEdge[]>([]);

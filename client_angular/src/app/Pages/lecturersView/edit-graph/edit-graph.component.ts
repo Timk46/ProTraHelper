@@ -89,7 +89,8 @@ export class EditGraphComponent implements AfterViewInit {
       checkboxEdgeDirected: [false],
       checkboxEdgeWeighted: [false],
       checkboxNodeWeighted: [false],
-      checkboxNodeSelected: [false]
+      checkboxNodeSelected: [false],
+      checkboxNodeSelectedText: [{ selected: '', unselected: '' }]
     });
   }
 
@@ -145,7 +146,8 @@ export class EditGraphComponent implements AfterViewInit {
           checkboxEdgeDirected: this.detailedQuestionData.graphQuestion.configuration.edgeDirected || false,
           checkboxEdgeWeighted: this.detailedQuestionData.graphQuestion.configuration.edgeWeight || false,
           checkboxNodeWeighted: this.detailedQuestionData.graphQuestion.configuration.nodeWeight || false,
-          checkboxNodeSelected: this.detailedQuestionData.graphQuestion.configuration.nodeSelected || false
+          checkboxNodeSelected: this.detailedQuestionData.graphQuestion.configuration.nodeSelected || false,
+          checkboxNodeSelectedText: this.detailedQuestionData.graphQuestion.configuration.nodeSelectedText || { selected: '', unselected: '' }
         });
 
         const clonedInitialStructure: GraphStructureDTO = JSON.parse(JSON.stringify(this.detailedQuestionData.graphQuestion.initialStructure))
@@ -240,6 +242,7 @@ export class EditGraphComponent implements AfterViewInit {
           configuration: {
             nodeWeight: this.graphForm.value.checkboxNodeWeighted,
             nodeSelected: this.graphForm.value.checkboxNodeSelected,
+            nodeSelectedText: this.graphForm.value.checkboxNodeSelectedText,
             edgeWeight: this.graphForm.value.checkboxEdgeWeighted,
             edgeDirected: this.graphForm.value.checkboxEdgeDirected,
           },
@@ -352,6 +355,7 @@ export class EditGraphComponent implements AfterViewInit {
         graphContent: clonedGraphContent,
         graphConfiguration: {
           nodeSelected: this.graphForm.value.checkboxNodeSelected,
+          nodeSelectedText: this.graphForm.value.checkboxNodeSelectedText,
           nodeWeight: this.graphForm.value.checkboxNodeWeighted,
           edgeWeight: this.graphForm.value.checkboxEdgeWeighted,
           edgeDirected: this.graphForm.value.checkboxEdgeDirected,
@@ -371,6 +375,7 @@ export class EditGraphComponent implements AfterViewInit {
           graphContent: clonedGraphContent,
           graphConfiguration: {
             nodeSelected: this.graphForm.value.checkboxNodeSelected,
+            nodeSelectedText: this.graphForm.value.checkboxNodeSelectedText,
             nodeWeight: this.graphForm.value.checkboxNodeWeighted,
             edgeWeight: this.graphForm.value.checkboxEdgeWeighted,
             edgeDirected: this.graphForm.value.checkboxEdgeDirected,
@@ -449,6 +454,7 @@ export class EditGraphComponent implements AfterViewInit {
     // Get Graph Configuration from form data
     this.graphTaskService.configureGraph({
       nodeSelected: this.graphForm.value.checkboxNodeSelected,
+      nodeSelectedText: this.graphForm.value.checkboxNodeSelectedText,
       nodeWeight: this.graphForm.value.checkboxNodeWeighted,
       edgeWeight: this.graphForm.value.checkboxEdgeWeighted,
       edgeDirected: this.graphForm.value.checkboxEdgeDirected, 
@@ -467,6 +473,7 @@ export class EditGraphComponent implements AfterViewInit {
       graphContent: clonedGraphContent,
       graphConfiguration: {
         nodeSelected: this.graphForm.value.checkboxNodeSelected,
+        nodeSelectedText: this.graphForm.value.checkboxNodeSelectedText,
         nodeWeight: this.graphForm.value.checkboxNodeWeighted,
         edgeWeight: this.graphForm.value.checkboxEdgeWeighted,
         edgeDirected: this.graphForm.value.checkboxEdgeDirected,
@@ -608,7 +615,8 @@ export class EditGraphComponent implements AfterViewInit {
         checkboxEdgeDirected: false,
         checkboxEdgeWeighted: true,
         checkboxNodeWeighted: true,
-        checkboxNodeSelected: true
+        checkboxNodeSelected: true,
+        checkboxNodeSelectedText: { selected: 'Besucht', unselected: 'Nicht Besucht' }
       });  
       
     }
@@ -618,7 +626,8 @@ export class EditGraphComponent implements AfterViewInit {
         checkboxEdgeDirected: true,
         checkboxEdgeWeighted: true,
         checkboxNodeWeighted: false,
-        checkboxNodeSelected: true
+        checkboxNodeSelected: true,
+        checkboxNodeSelectedText: { selected: 'Aktuell', unselected: '-' }
       });  
       
     }
@@ -628,7 +637,8 @@ export class EditGraphComponent implements AfterViewInit {
         checkboxEdgeDirected: false,
         checkboxEdgeWeighted: true,
         checkboxNodeWeighted: false,
-        checkboxNodeSelected: false
+        checkboxNodeSelected: false,
+        checkboxNodeSelectedText: { selected: '', unselected: '' }
       }); 
 
     }
@@ -638,7 +648,8 @@ export class EditGraphComponent implements AfterViewInit {
         checkboxEdgeDirected: true,
         checkboxEdgeWeighted: false,
         checkboxNodeWeighted: false,
-        checkboxNodeSelected: false
+        checkboxNodeSelected: false,
+        checkboxNodeSelectedText: { selected: '', unselected: '' }
       }); 
       
     }
