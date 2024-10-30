@@ -601,6 +601,30 @@ export class EditGraphComponent implements AfterViewInit {
     this.updateWorkspace();
   }
 
+  resetStructure() {
+    // Reset the solution steps
+    this.assignmentGraphStructure = {
+      nodes: [], edges: []
+    };
+
+    this.workspaceModeCurrent = 'assignment';
+    this.workspaceModePrevious = this.workspaceModeCurrent;
+
+    this.loadWorkspaceContent({
+      graphContent: this.assignmentGraphStructure,
+      graphConfiguration: {
+        nodeSelected: this.graphForm.value.checkboxNodeSelected,
+        nodeSelectedText: this.graphForm.value.checkboxNodeSelectedText,
+        nodeWeight: this.graphForm.value.checkboxNodeWeighted,
+        edgeWeight: this.graphForm.value.checkboxEdgeWeighted,
+        edgeDirected: this.graphForm.value.checkboxEdgeDirected,
+        }
+    });
+
+    // To use only values and not the references
+    this.updateWorkspace();
+  }
+
   onChangeGraphQuestionType(gqType: string): void {
 
     if (this.structureIsSet) {

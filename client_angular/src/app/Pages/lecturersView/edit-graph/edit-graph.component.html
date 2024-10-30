@@ -113,7 +113,11 @@
         </div>
         <div class="controls box">
 
-            <div style="display: flex; justify-content: start; align-items: center; gap: 1em; height: 100%;">
+            <!-- Is not being displayed for now as we do not need to create manuell solution for questions -->
+            <!-- In future, can be activated again -->
+            <div 
+            *ngIf="false"
+            style="display: flex; justify-content: start; align-items: center; gap: 1em; height: 100%;">
             
                 <mat-button-toggle-group 
                     name="mode" 
@@ -183,6 +187,15 @@
                 </button>
 
             </div>
+
+
+            <button
+                type="button"
+                (click)="resetStructure()"
+            > 
+            <!-- Die Struktur zurücksetzen -->
+                Zurücksetzen
+            </button>
 
             <button
                 type="button" 
