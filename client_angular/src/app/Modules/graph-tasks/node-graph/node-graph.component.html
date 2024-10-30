@@ -86,7 +86,7 @@
                 (dblclick)="onNodeSelectedDoubleClick($event)"
             >
                 <span *ngIf="node.selected.value === true" style="display: flex; justify-content: center;">{{ graphConfiguration.nodeSelectedText !== undefined ? graphConfiguration.nodeSelectedText.selected : 'Selected' }}</span>
-                <span *ngIf="node.selected.value === false" style="display: flex; justify-content: center;">{{ graphConfiguration.nodeSelectedText !== undefined ? graphConfiguration.nodeSelectedText.selected : 'Unselected' }}</span>
+                <span *ngIf="node.selected.value === false" style="display: flex; justify-content: center;">{{ graphConfiguration.nodeSelectedText !== undefined ? graphConfiguration.nodeSelectedText.unselected : 'Unselected' }}</span>
             </div>
             <!-- End - Input -->
             <!-- ################### -->
