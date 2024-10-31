@@ -2,7 +2,7 @@ import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { ContentDTO, ContentsForConceptDTO, LinkableContentElementDTO, questionType } from '@DTOs/index';
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { ContentViewComponent } from '../contentView/contentView.component';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
@@ -96,7 +96,6 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit() {
-
     // Subscribe to screen size changes for responsive design
     this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
       this.editModeActive = hasEditModeActive;
@@ -116,8 +115,6 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         });
       }
     });
-
-
   }
 
   /**
@@ -221,7 +218,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     dialogConfig.width = 'auto';
     dialogConfig.maxHeight = '95vh';
 
-    let dialogRef;
+    let dialogRef: MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined;
 
     // Open the appropriate dialog based on the task type
     switch (taskViewData.type) {
@@ -248,38 +245,44 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     // Handle dialog submission if a dialog was opened
     if (dialogRef) {
       const prevScore = taskViewData.progress;
-      const dialogSubmitSubscription = dialogRef.componentInstance.submitClicked.subscribe((score) => {
-        console.log("ABGABE: ");
-        this.dataSource.data = this.dataSource.data.map((element) => {
-          if (element.id === taskViewData.id) {
-            // Update the progress value of the task if the new score is higher
-            if(score > prevScore) {
-              element.progress = score;
-            }
-            // Update the contentNode that is connected to the task
-            if (score == 100 && prevScore != 100) {
-              this.contentsForActiveConceptNode.trainedBy.map((content) => {
-                if (content.contentElements.some(
-                  (element) => element.id === taskViewData.contentElementId
-                )) {
-                  // const elementCount = content.contentElements.length;
-                  const questionElements = content.contentElements.filter(element => element.type === "QUESTION"); // FILTER OUT PDF/VIDEO
-                  const elementCount = questionElements.length;
-                  content.progress += 100 / elementCount;
-                  if (content.progress > 99) {
-                    content.progress = 100; // Prevent rounding errors
-                    this.progressService.answerSubmitted(); // Trigger graph update if content is fully completed
+
+      // Subscribe to dialog events and manage with takeUntil
+      dialogRef.componentInstance.submitClicked
+        .pipe(takeUntil(dialogRef.afterClosed()))
+        .subscribe((score: number) => {
+          console.log("ABGABE: ");
+          console.log("score: " + score);
+          this.dataSource.data = this.dataSource.data.map((element) => {
+            if (element.id === taskViewData.id) {
+              // Update the progress value of the task if the new score is higher
+              if(score > prevScore) {
+                element.progress = score;
+              }
+              // Update the contentNode that is connected to the task
+              if (score == 100 && prevScore != 100) {
+                this.contentsForActiveConceptNode.trainedBy.map((content) => {
+                  if (content.contentElements.some(
+                    (element) => element.id === taskViewData.contentElementId
+                  )) {
+                    const questionElements = content.contentElements.filter(element => element.type === "QUESTION"); // FILTER OUT PDF/VIDEO
+                    const elementCount = questionElements.length;
+                    content.progress += 100 / elementCount;
+                    if (content.progress > 99) {
+                      content.progress = 100; // Prevent rounding errors
+                      this.progressService.answerSubmitted(); // Trigger graph update if content is fully completed
+                    }
+                    console.log("content.progress: ", content.progress);
                   }
-                  console.log("content.progress: ", content.progress);
-                }
-              });
+                });
+              }
             }
-          }
-          return element;
+            return element;
+          });
         });
 
-        // Unsubscribe from the dialog submit event
-        dialogSubmitSubscription.unsubscribe();
+      // Clean up subscription when dialog closes
+      dialogRef.afterClosed().subscribe(() => {
+        this.updateDataSource();
       });
     }
   }

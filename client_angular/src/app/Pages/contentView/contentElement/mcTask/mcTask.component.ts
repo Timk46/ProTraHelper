@@ -103,7 +103,7 @@ export class McTaskComponent implements OnInit {
 
   onSubmit() :void {
     //Create new submit
-    //console.log('create submit for contentElementId: ' + this.taskViewData.contentElementId);
+    console.log('create submit for contentElementId: ' + this.taskViewData.contentElementId);
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
       contentElementId: this.taskViewData.contentElementId,
@@ -114,18 +114,11 @@ export class McTaskComponent implements OnInit {
 
     this.questionDataService.createUserAnswer(userAnswerData).subscribe(data => {
       this.feedback = data;
+      // Emit progress before setting submitDisabled
       this.submitClicked.emit(data.progress);
-    });
-
-    if(this.feedback.progress > this.taskViewData.progress) {
-      this.taskViewData.progress = this.feedback.progress;
-    }
-
-    setTimeout(() => {
-      //timeout for showing the feedback
+      // Set submitDisabled immediately after emitting
       this.submitDisabled = true;
-    }, 500);
-
+    });
   }
 
 
@@ -172,8 +165,14 @@ export class McTaskComponent implements OnInit {
       elementDone: false,
       progress: -1,
     }
+    // Clear selected options
+    this.selectedOptions = [];
+    // Reset selected state for all options
+    this.options.forEach(option => {
+      option.selected = false;
+    });
+    // Shuffle options if needed
     this.options.sort(() => Math.random() - 0.5);
-
   }
 
   getFeedbackColor() {
