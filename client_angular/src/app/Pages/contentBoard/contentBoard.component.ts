@@ -187,20 +187,22 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
     // Handle dialog close event
     // We use this to update the data source and refresh graph is progress is 100%
-    dialogRef.afterClosed().subscribe(() => {
-      // Find the updated content in contentsForActiveConceptNode
-      const updatedContent = this.contentsForActiveConceptNode.trainedBy.find(
-        c => c.contentNodeId === content.contentNodeId
-      );
+    if (type[0] != "VIDEO" && type[0] != "PDF") { // Dont update progress for video and pdf
+      dialogRef.afterClosed().subscribe(() => {
+        // Find the updated content in contentsForActiveConceptNode
+        const updatedContent = this.contentsForActiveConceptNode.trainedBy.find(
+          c => c.contentNodeId === content.contentNodeId
+        );
 
-      // If the content is fully completed (100% progress), trigger a graph update
-      if (updatedContent && updatedContent.progress > 99) {
-        this.progressService.answerSubmitted();
-      }
+        // If the content is fully completed (100% progress), trigger a graph update
+        if (updatedContent && updatedContent.progress > 99) {
+          this.progressService.answerSubmitted();
+        }
 
-      // Update the data source to reflect any changes
-      this.updateDataSource();
-    });
+        // Fetch fresh data from server
+        this.fetchContentsForConcept.emit();
+      });
+    }
   }
 
   /**
@@ -250,8 +252,6 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       dialogRef.componentInstance.submitClicked
         .pipe(takeUntil(dialogRef.afterClosed()))
         .subscribe((score: number) => {
-          console.log("ABGABE: ");
-          console.log("score: " + score);
           this.dataSource.data = this.dataSource.data.map((element) => {
             if (element.id === taskViewData.id) {
               // Update the progress value of the task if the new score is higher
@@ -271,7 +271,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
                       content.progress = 100; // Prevent rounding errors
                       this.progressService.answerSubmitted(); // Trigger graph update if content is fully completed
                     }
-                    console.log("content.progress: ", content.progress);
+                    //console.log("content.progress: ", content.progress);
                   }
                 });
               }
@@ -282,7 +282,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
       // Clean up subscription when dialog closes
       dialogRef.afterClosed().subscribe(() => {
-        this.updateDataSource();
+        // Fetch fresh data from server
+        this.fetchContentsForConcept.emit();
       });
     }
   }
