@@ -256,8 +256,8 @@ export function graphNodeToSemantic(node: IGraphNode): GraphNodeSemanticDTO {
   if (node.weight.enabled && node.weight.value !== null) {
     nodeSemantic.weight = node.weight.value;
   }
-  if (node.visited.enabled && node.visited.value !== null) {
-    nodeSemantic.visited = node.visited.value;
+  if (node.selected.enabled && node.selected.value !== null) {
+    nodeSemantic.selected = node.selected.value;
   }
 
   return nodeSemantic;
@@ -306,8 +306,8 @@ export function graphNodeJSONToSemantic(node: GraphNodeDTO): GraphNodeSemanticDT
   if (node.weight !== null) {
     nodeSemantic.weight = node.weight;
   }
-  if (node.visited !== null) {
-    nodeSemantic.visited = node.visited;
+  if (node.selected !== null) {
+    nodeSemantic.selected = node.selected;
   }
 
   return nodeSemantic;

@@ -55,7 +55,10 @@
         <div class="wrap-container">
   
             <div style="width: 100%;">
-                <h2>Aufgabentext</h2>
+                <div style="display: flex; justify-content: space-between;">
+                    <h2>Aufgabentext</h2>
+                    <button mat-raised-button color="primary" (click)="generateTextFromStructure()">Generate Text</button>
+                </div>
                 <app-tinymce #question [config]="editorConfig"></app-tinymce>
             </div>
 
@@ -106,11 +109,15 @@
 <ng-template #workspaceContainer>
     <div class="workspace-container">
         <div class="solution box">
-            <app-graph-structure />
+            <app-graph-structure [toolbarEnabled]="true"/>
         </div>
         <div class="controls box">
 
-            <div style="display: flex; justify-content: start; align-items: center; gap: 1em; height: 100%;">
+            <!-- Is not being displayed for now as we do not need to create manuell solution for questions -->
+            <!-- In future, can be activated again -->
+            <div 
+            *ngIf="false"
+            style="display: flex; justify-content: start; align-items: center; gap: 1em; height: 100%;">
             
                 <mat-button-toggle-group 
                     name="mode" 
@@ -180,6 +187,15 @@
                 </button>
 
             </div>
+
+
+            <button
+                type="button"
+                (click)="resetStructure()"
+            > 
+            <!-- Die Struktur zurücksetzen -->
+                Zurücksetzen
+            </button>
 
             <button
                 type="button" 

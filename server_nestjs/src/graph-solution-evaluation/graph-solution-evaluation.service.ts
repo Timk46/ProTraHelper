@@ -29,8 +29,8 @@ export class GraphSolutionEvaluationService {
             
             case 'dijkstra':
                 return this.dijkstraService.evaluateSolution(
-                    studentSolution, 
-                    question.exampleSolution,
+                    question.initialStructure,
+                    studentSolution,
                     question.maxPoints
                 );
 
@@ -51,8 +51,7 @@ export class GraphSolutionEvaluationService {
             case 'transitive_closure':
                 return this.transitiveClosureService.evaluateSolution(
                     question.initialStructure, 
-                    studentSolution[0], 
-                    question.exampleSolution[0], 
+                    studentSolution[0],
                     question.maxPoints
                 );
 

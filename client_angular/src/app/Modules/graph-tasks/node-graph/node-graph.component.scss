@@ -34,12 +34,12 @@
     align-items: center;
 }
 
-.node-value, .node-weight, .node-visited {
+.node-value, .node-weight, .node-selected {
     width: 100%;
     z-index: 1;
 }
 
-.node-weight.display, .node-visited.display {
+.node-weight.display, .node-selected.display {
     padding: .5em 0;
     border-top: .1em solid #919191;
 }
@@ -114,13 +114,13 @@
     transform: translate(-50%, -50%) scale(1.2, 1.2);
 }
 
-.edit-visited {
+.edit-selected {
     top: 75%;
     left: 95%;
     transform: translate(-50%, -50%);
 }
 
-.edit-visited:hover {
+.edit-selected:hover {
     transform: translate(-50%, -50%) scale(1.2, 1.2);
 }
 
