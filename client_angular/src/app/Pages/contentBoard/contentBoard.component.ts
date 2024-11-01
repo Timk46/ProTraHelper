@@ -198,9 +198,6 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         if (updatedContent && updatedContent.progress > 99) {
           this.progressService.answerSubmitted();
         }
-
-        // Fetch fresh data from server
-        this.fetchContentsForConcept.emit();
       });
     }
   }
@@ -258,20 +255,28 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
               if(score > prevScore) {
                 element.progress = score;
               }
+              console.log("Element: " +  element.type + ", TaskID: " + element.id + " Answer submitted. Erreichter Score: " + score + " Vorheriger Score: "+ prevScore);
+
               // Update the contentNode that is connected to the task
-              if (score == 100 && prevScore != 100) {
-                this.contentsForActiveConceptNode.trainedBy.map((content) => {
+              if (score === 100 && prevScore !== 100) {
+                this.contentsForActiveConceptNode.trainedBy.forEach((content) => {
                   if (content.contentElements.some(
                     (element) => element.id === taskViewData.contentElementId
                   )) {
-                    const questionElements = content.contentElements.filter(element => element.type === "QUESTION"); // FILTER OUT PDF/VIDEO
+                    const questionElements = content.contentElements.filter(element => element.type === "QUESTION");
                     const elementCount = questionElements.length;
-                    content.progress += 100 / elementCount;
-                    if (content.progress > 99) {
-                      content.progress = 100; // Prevent rounding errors
-                      this.progressService.answerSubmitted(); // Trigger graph update if content is fully completed
+                    const completedElements = questionElements.filter(element =>
+                      element.question?.progress === 100 ||
+                      (element.id === taskViewData.contentElementId && score === 100)
+                    ).length;
+
+                    // Calculate progress based on completed elements
+                    content.progress = Math.floor((completedElements / elementCount) * 100);
+
+                    if (content.progress === 100) {
+                      console.log("Aufgabe wurde zum ersten Mal erfolgreich gelöst.");
+                      this.progressService.answerSubmitted();
                     }
-                    //console.log("content.progress: ", content.progress);
                   }
                 });
               }

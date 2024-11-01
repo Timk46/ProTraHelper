@@ -103,7 +103,7 @@ export class McTaskComponent implements OnInit {
 
   onSubmit() :void {
     //Create new submit
-    console.log('create submit for contentElementId: ' + this.taskViewData.contentElementId);
+    //console.log('create submit for contentElementId: ' + this.taskViewData.contentElementId);
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
       contentElementId: this.taskViewData.contentElementId,
