@@ -29,7 +29,6 @@ $white: #eceff4;
     padding: 1%;
     position: relative;
 
-    .chat-icon {}
 
     .chat-title {
       font-size: 1rem;
@@ -99,31 +98,32 @@ $white: #eceff4;
   }
 
   .chat-actions {
-    flex: 0 1 12%;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-
     .chat-form {
       width: 90%;
       height: 60%;
       margin-bottom: 5%;
       border-radius: 20px;
-    }
-
-    .chat-input {
-      height: 50px;
-      min-height: 50px;
-      font-size: 14px;
-      overflow-y: hidden;
-      color: $black;
-    }
-
-    .send-button {
-      color: $black;
-
-      .send-icon {
-        font-size: 20px;
+  
+      // Add these rules
+      display: flex;
+      flex-direction: column;
+  
+      .chat-input {
+        height: 50px;
+        min-height: 50px;
+        font-size: 14px;
+        overflow-y: hidden;
+        color: $black;
+        // Add this rule
+        max-width: 100%;
+      }
+  
+      .send-button {
+        color: $black;
+  
+        .send-icon {
+          font-size: 20px;
+        }
       }
     }
   }
@@ -236,5 +236,50 @@ $white: #eceff4;
 @media only screen and (max-width: 1000px) {
   [class*="collapsible-chat"] {
     width: 80%;
+  }
+}
+
+::ng-deep markdown {
+  // Unordered lists
+  ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-bottom: 16px;
+  }
+
+  // Ordered lists
+  ol {
+    list-style-type: decimal;
+    padding-left: 20px;
+    margin-bottom: 16px;
+  }
+
+  // List items
+  li {
+    margin-bottom: 8px;
+  }
+
+  // Nested lists
+  ul ul, ol ul {
+    list-style-type: circle;
+  }
+
+  ul ol, ol ol {
+    list-style-type: lower-alpha;
+  }
+
+  // Task lists
+  ul.contains-task-list {
+    list-style-type: none;
+    padding-left: 0;
+  }
+
+  .task-list-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .task-list-item-checkbox {
+    margin-right: 8px;
   }
 }

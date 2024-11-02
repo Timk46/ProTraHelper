@@ -64,7 +64,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
   }
 
   ngAfterViewChecked(): void {
-    this.scrollToBottom();
+    //this.scrollToBottom();
   }
 
   /**
