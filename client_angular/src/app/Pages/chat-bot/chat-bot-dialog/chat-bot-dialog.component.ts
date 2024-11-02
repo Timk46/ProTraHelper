@@ -37,6 +37,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
   protected canSendMessage = true;
   protected showSessions = true;
   private dialogSessionId: string;
+  private isInitialGreeting = true;
 
   lecture: string = 'OFP';
 
@@ -66,13 +67,17 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     this.llmService.getChatSessions().subscribe({
       next: (sessions) => {
         this.sessions = sessions;
-        if (!this.currentSession) {
+        if (!this.currentSession && this.isInitialGreeting) {
           this.getBotMessage();
+          this.isInitialGreeting = false;
         }
       },
       error: (error) => {
         console.error('Error loading sessions:', error);
-        this.getBotMessage();
+        if (this.isInitialGreeting) {
+          this.getBotMessage();
+          this.isInitialGreeting = false;
+        }
       }
     });
   }
@@ -165,7 +170,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
         this.messages.push(botMessage);
         this.canSendMessage = true;
 
-        // Reload sessions to get the updated list with new session if created
+        // Reload sessions without showing greeting
         if (!this.currentSession) {
           this.loadSessions();
         }
