@@ -1,7 +1,7 @@
 import { AfterViewChecked, Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { LlmService } from 'src/app/Services/ai/llm.service';
+import { LlmService, ChatSession, ChatBotMessage } from 'src/app/Services/ai/llm.service';
 import { MarkdownService } from 'src/app/Services/markdown/markdown.service';
 import { VideoTimeStampComponent } from '../../../Modules/tutor-kai/sites/video-time-stamp/video-time-stamp.component';
 import { HttpClient } from '@angular/common/http';
@@ -20,15 +20,67 @@ interface Message {
   rating?: number;
 }
 
-interface ComponentChatBotResponse {
-  content: string;
-  messageId: number;
-}
-
 @Component({
   selector: 'app-chat-bot-dialog',
-  templateUrl: './chat-bot-dialog.component.html',
-  styleUrls: ['./chat-bot-dialog.component.scss'],
+  template: `
+    <div class="chat-container" [class]="display">
+      <div class="chat-header">
+        <button mat-icon-button (click)="closeChat()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="chat-content">
+        <app-chat-session-list
+          *ngIf="showSessions"
+          [sessions]="sessions"
+          [activeSessionId]="currentSession?.id"
+          (sessionSelect)="onSessionSelect($event)"
+          (newChat)="onNewChat()"
+        ></app-chat-session-list>
+        <div class="chat-messages">
+          <div #messageContainer class="message-container">
+            <div *ngFor="let message of messages; let i = index" class="message" [ngClass]="message.type">
+              <div class="message-content" [innerHTML]="message.text"></div>
+              <div *ngIf="message.type === 'bot' && message.id !== -1" class="rating">
+                <button mat-icon-button
+                  (click)="rateMessage(i, message.id, 1)"
+                  [class.selected]="message.rating === 1"
+                  [attr.aria-label]="'Bewertung: Schlecht'">
+                  <mat-icon>sentiment_very_dissatisfied</mat-icon>
+                </button>
+                <button mat-icon-button
+                  (click)="rateMessage(i, message.id, 2)"
+                  [class.selected]="message.rating === 2"
+                  [attr.aria-label]="'Bewertung: Neutral'">
+                  <mat-icon>sentiment_neutral</mat-icon>
+                </button>
+                <button mat-icon-button
+                  (click)="rateMessage(i, message.id, 3)"
+                  [class.selected]="message.rating === 3"
+                  [attr.aria-label]="'Bewertung: Gut'">
+                  <mat-icon>sentiment_very_satisfied</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+          <form [formGroup]="form" class="input-container">
+            <mat-form-field appearance="outline">
+              <input matInput
+                formControlName="message"
+                placeholder="Schreibe eine Nachricht..."
+                (keydown.enter)="$event.preventDefault(); onClickSendMessage()">
+            </mat-form-field>
+            <button mat-icon-button
+              [disabled]="!canSendMessage"
+              (click)="onClickSendMessage()">
+              <mat-icon>send</mat-icon>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  `,
+  styleUrls: ['./chat-bot-dialog.component.scss']
 })
 export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
   @ViewChild('messageContainer') private messageContainer: ElementRef | null = null;
@@ -37,12 +89,12 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
 
   public form: FormGroup;
   public messages: Array<Message> = [];
+  public sessions: ChatSession[] = [];
+  public currentSession?: ChatSession;
   protected canSendMessage = true;
+  protected showSessions = true;
   private dialogSessionId: string;
 
-  /**
-   * The current lecture.
-   */
   lecture: string = 'OFP';
 
   constructor(
@@ -60,17 +112,67 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
   }
 
   ngOnInit(): void {
-    this.getBotMessage();
+    this.loadSessions();
   }
 
   ngAfterViewChecked(): void {
-    //this.scrollToBottom();
+    this.scrollToBottom();
   }
 
-  /**
-   * Listens for click events on urls for lecturelinker so we can open the videoplayer instead.
-   * @param event The mouse event.
-   */
+  private loadSessions(): void {
+    this.llmService.getChatSessions().subscribe({
+      next: (sessions) => {
+        this.sessions = sessions;
+        if (!this.currentSession) {
+          this.getBotMessage();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading sessions:', error);
+        this.getBotMessage();
+      }
+    });
+  }
+
+  public onSessionSelect(session: ChatSession): void {
+    this.currentSession = session;
+    this.messages = [];
+
+    // Process messages in chronological order
+    const sortedMessages = [...session.messages].sort((a, b) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+
+    sortedMessages.forEach(msg => {
+      if (!msg.isBot) {
+        // User message
+        this.messages.push({
+          text: msg.question,
+          type: MessageType.User,
+          id: msg.id
+        });
+      }
+      // Bot message
+      if (msg.answer) {
+        this.messages.push({
+          text: this.markdownService.parse(msg.answer),
+          type: MessageType.Bot,
+          id: msg.id,
+          rating: msg.ratingByStudent
+        });
+      }
+    });
+
+    // Scroll to bottom after loading messages
+    setTimeout(() => this.scrollToBottom(), 0);
+  }
+
+  public onNewChat(): void {
+    this.currentSession = undefined;
+    this.messages = [];
+    this.getBotMessage();
+  }
+
   @HostListener('click', ['$event'])
   public onClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -80,18 +182,10 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     }
   }
 
-  /**
-   * Opens a modal dialog for video timestamp.
-   * @param href The link to the video.
-   * @param lecture The current lecture.
-   */
   private openModal(href: string | null, lecture: string) {
     this.dialog.open(VideoTimeStampComponent, { data: { href, lecture } });
   }
 
-  /**
-   * Handles the send message button click.
-   */
   public onClickSendMessage(): void {
     const message = this.form.get('message')?.value;
 
@@ -105,61 +199,48 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     }
   }
 
-  /**
-   * Sends the question and chat history to the server.
-   */
   private sendQuestionToBot(question: string): void {
     this.canSendMessage = false;
     const waitMessage: Message = { type: MessageType.Loading, id: -1 };
     this.messages.push(waitMessage);
 
-    const context = this.messages.map(msg => ({
-      role: msg.type === MessageType.User ? 'user' : 'assistant',
-      content: msg.text || ''
-    }));
+    const context = this.messages
+      .filter(msg => msg.type !== MessageType.Loading)
+      .map(msg => ({
+        role: msg.type === MessageType.User ? 'user' : 'assistant',
+        content: msg.text || ''
+      }));
 
-    this.llmService.getLlmAnswerDialog(context, question, this.dialogSessionId).subscribe({
-      next: (response: ComponentChatBotResponse) => {
+    this.llmService.getLlmAnswerDialog(context, question, this.dialogSessionId, this.currentSession?.id).subscribe({
+      next: (response: ChatBotMessage) => {
         this.messages.pop();
         const botMessage: Message = {
-          text: this.markdownService.parse(response.content),
+          text: this.markdownService.parse(response.answer),
           type: MessageType.Bot,
-          id: response.messageId
+          id: response.id
         };
         this.messages.push(botMessage);
         this.canSendMessage = true;
+
+        // Reload sessions to get the updated list with new session if created
+        if (!this.currentSession) {
+          this.loadSessions();
+        }
       },
       error: (error: any) => {
-        console.log(error);
+        console.error(error);
         this.messages.pop();
         this.canSendMessage = true;
       }
     });
   }
 
-  /**
-   * Handles the Enter key press event to send a message.
-   * @param event The keyboard event.
-   */
-  public onClickEnter(event: Event): void {
-    if (event instanceof KeyboardEvent) {
-      event.preventDefault();
-      this.onClickSendMessage();
-    }
-  }
-
-  /**
-   * Scrolls the message container to the bottom.
-   */
   private scrollToBottom(): void {
     if (this.messageContainer) {
       this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
     }
   }
 
-  /**
-   * Gets the initial bot message.
-   */
   private getBotMessage(): void {
     this.canSendMessage = false;
     const waitMessage: Message = { type: MessageType.Loading, id: -1 };
@@ -170,18 +251,13 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
       const botMessage: Message = {
         text: 'Hallo, wie kann ich dir helfen?',
         type: MessageType.Bot,
-        id: -1 // Use a placeholder ID for the initial message
+        id: -1
       };
       this.messages.push(botMessage);
       this.canSendMessage = true;
     }, 1000);
   }
 
-  /**
-   * Generates a random string of specified length (for initial dialog session id).
-   * @param length The length of the random string.
-   * @returns A random string.
-   */
   private generateRandomString(length: number): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -192,29 +268,32 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     return result;
   }
 
-  /**
-   * Rates a bot message.
-   * @param messageId The ID of the message to rate.
-   * @param rating The rating value (1, 2, or 3).
-   */
-  public rateMessage(messageId: number, rating: number): void {
-    const message = this.messages.find(msg => msg.id === messageId);
+  public rateMessage(messageIndex: number, messageId: number, rating: number): void {
+    const message = this.messages[messageIndex];
     if (message && message.type === MessageType.Bot && message.id !== -1) {
+      // Update local state immediately
       message.rating = rating;
+
+      // Update in current session if it exists
+      if (this.currentSession) {
+        const sessionMessage = this.currentSession.messages.find(msg => msg.id === messageId);
+        if (sessionMessage) {
+          sessionMessage.ratingByStudent = rating;
+        }
+      }
+
+      // Send rating to backend
       this.sendRatingToBackend(messageId, rating);
     }
   }
 
-  /**
-   * Sends the rating to the backend.
-   * @param messageId The ID of the message being rated.
-   * @param rating The rating value (1, 2, or 3).
-   */
   private sendRatingToBackend(messageId: number, rating: number): void {
     this.http.post(`${environment.server}/chat-bot/rate`, { messageId, rating })
       .subscribe({
         next: (response: any) => {
           console.log('Rating saved successfully:', response);
+          // Refresh sessions to get updated ratings
+          this.loadSessions();
         },
         error: (error: any) => {
           console.error('Error saving rating:', error);
@@ -222,9 +301,6 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
       });
   }
 
-  /**
-   * Closes the chat dialog.
-   */
   public closeChat(): void {
     this.close.emit();
   }
