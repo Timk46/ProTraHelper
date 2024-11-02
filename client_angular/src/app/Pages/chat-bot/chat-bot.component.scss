@@ -7,15 +7,35 @@ $white: #ECF3F4;
 .chat-button {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 8px;
     position: fixed;
     bottom: 10%;
     right: 1%;
     background-color: $black;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 100;
 
-    .button-icon {
-      width: 75%;
-      padding-left: 12px;
+    &:hover {
+        background-color: lighten($black, 5%);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transform: translateY(-2px);
+    }
+
+    mat-icon {
+        font-size: 20px;
+        height: 20px;
+        width: 20px;
+    }
+
+    .button-text {
+        margin-top: 1px;
     }
 }

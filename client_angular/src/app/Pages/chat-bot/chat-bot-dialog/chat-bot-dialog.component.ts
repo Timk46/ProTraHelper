@@ -22,64 +22,7 @@ interface Message {
 
 @Component({
   selector: 'app-chat-bot-dialog',
-  template: `
-    <div class="chat-container" [class]="display">
-      <div class="chat-header">
-        <button mat-icon-button (click)="closeChat()">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-      <div class="chat-content">
-        <app-chat-session-list
-          *ngIf="showSessions"
-          [sessions]="sessions"
-          [activeSessionId]="currentSession?.id"
-          (sessionSelect)="onSessionSelect($event)"
-          (newChat)="onNewChat()"
-        ></app-chat-session-list>
-        <div class="chat-messages">
-          <div #messageContainer class="message-container">
-            <div *ngFor="let message of messages; let i = index" class="message" [ngClass]="message.type">
-              <div class="message-content" [innerHTML]="message.text"></div>
-              <div *ngIf="message.type === 'bot' && message.id !== -1" class="rating">
-                <button mat-icon-button
-                  (click)="rateMessage(i, message.id, 1)"
-                  [class.selected]="message.rating === 1"
-                  [attr.aria-label]="'Bewertung: Schlecht'">
-                  <mat-icon>sentiment_very_dissatisfied</mat-icon>
-                </button>
-                <button mat-icon-button
-                  (click)="rateMessage(i, message.id, 2)"
-                  [class.selected]="message.rating === 2"
-                  [attr.aria-label]="'Bewertung: Neutral'">
-                  <mat-icon>sentiment_neutral</mat-icon>
-                </button>
-                <button mat-icon-button
-                  (click)="rateMessage(i, message.id, 3)"
-                  [class.selected]="message.rating === 3"
-                  [attr.aria-label]="'Bewertung: Gut'">
-                  <mat-icon>sentiment_very_satisfied</mat-icon>
-                </button>
-              </div>
-            </div>
-          </div>
-          <form [formGroup]="form" class="input-container">
-            <mat-form-field appearance="outline">
-              <input matInput
-                formControlName="message"
-                placeholder="Schreibe eine Nachricht..."
-                (keydown.enter)="$event.preventDefault(); onClickSendMessage()">
-            </mat-form-field>
-            <button mat-icon-button
-              [disabled]="!canSendMessage"
-              (click)="onClickSendMessage()">
-              <mat-icon>send</mat-icon>
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './chat-bot-dialog.component.html',
   styleUrls: ['./chat-bot-dialog.component.scss']
 })
 export class ChatBotDialogComponent implements OnInit, AfterViewChecked {

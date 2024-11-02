@@ -25,7 +25,7 @@ const llm = new ChatOpenAI({
 // Title generation prompt
 const titleGenerationPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
-    'Generiere einen kurzen, prägnanten Titel (maximal 50 Zeichen) für diese Chat-Konversation. ' +
+    'Generiere einen kurzen, prägnanten Titel (maximal 30 Zeichen) für diese Chat-Konversation. ' +
     'Der Titel soll das Hauptthema der Unterhaltung widerspiegeln.'
   ),
   HumanMessagePromptTemplate.fromTemplate(
