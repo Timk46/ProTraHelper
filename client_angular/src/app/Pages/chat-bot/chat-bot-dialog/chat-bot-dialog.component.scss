@@ -1,8 +1,8 @@
 .chat-container {
   position: fixed;
-  bottom: 37px;
+  bottom: 40px;
   right: 10px;
-  width: 1200px;
+  width: 900px;
   height: 80vh;
   background-color: white;
   border-radius: 12px;
@@ -13,7 +13,7 @@
   z-index: 101;
 
   // Tablet styles
-  @media (max-width: 1292px) {
+  @media (max-width: 992px) {
     width: 90vw;
     height: 70vh;
     right: 5vw;
@@ -154,18 +154,52 @@
 .rating {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 8px;
   margin-top: 8px;
 
+  .rating-question {
+    color: #666;
+    font-size: 0.85rem;
+    margin-right: auto;
+  }
+
   button {
+    transition: transform 0.3s ease, color 0.3s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
     &.selected {
       color: #2196f3;
+    }
+
+    &.just-rated {
+      animation: rateAnimation 1s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 40px;
+        height: 40px;
+        background: radial-gradient(circle, rgba(33, 150, 243, 0.2) 0%, rgba(33, 150, 243, 0) 70%);
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        animation: glowAnimation 1s ease-out;
+      }
     }
   }
 
   @media (max-width: 480px) {
     gap: 4px;
     margin-top: 6px;
+
+    .rating-question {
+      font-size: 0.8rem;
+    }
   }
 }
 
@@ -191,4 +225,39 @@
   0% { content: "."; }
   33% { content: ".."; }
   66% { content: "..."; }
+}
+
+@keyframes rateAnimation {
+  0% {
+    transform: scale(1) rotate(0);
+  }
+  20% {
+    transform: scale(1.4) rotate(-10deg);
+  }
+  40% {
+    transform: scale(1.2) rotate(10deg);
+  }
+  60% {
+    transform: scale(1.3) rotate(-5deg);
+  }
+  80% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes glowAnimation {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
 }

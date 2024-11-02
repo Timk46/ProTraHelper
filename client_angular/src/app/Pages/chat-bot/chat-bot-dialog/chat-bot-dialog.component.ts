@@ -18,6 +18,7 @@ interface Message {
   type: MessageType;
   id: number;
   rating?: number;
+  justRated?: boolean;
 }
 
 @Component({
@@ -106,7 +107,8 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
           text: this.markdownService.parse(msg.answer),
           type: MessageType.Bot,
           id: msg.id,
-          rating: msg.ratingByStudent
+          rating: msg.ratingByStudent,
+          justRated: false
         });
       }
     });
@@ -165,7 +167,8 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
         const botMessage: Message = {
           text: this.markdownService.parse(response.answer),
           type: MessageType.Bot,
-          id: response.id
+          id: response.id,
+          justRated: false
         };
         this.messages.push(botMessage);
         this.canSendMessage = true;
@@ -199,7 +202,8 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
       const botMessage: Message = {
         text: 'Hallo, wie kann ich dir helfen?',
         type: MessageType.Bot,
-        id: -1
+        id: -1,
+        justRated: false
       };
       this.messages.push(botMessage);
       this.canSendMessage = true;
@@ -221,6 +225,12 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     if (message && message.type === MessageType.Bot && message.id !== -1) {
       // Update local state immediately
       message.rating = rating;
+      message.justRated = true;
+
+      // Reset justRated after animation
+      setTimeout(() => {
+        message.justRated = false;
+      }, 1000);
 
       // Update in current session if it exists
       if (this.currentSession) {
