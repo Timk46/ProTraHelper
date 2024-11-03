@@ -6,6 +6,7 @@ import { TranscriptChunk } from '@Interfaces/index';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatBotMessage } from '@Prisma/client';
+import { UnauthorizedException } from '@nestjs/common';
 
 const {
   ChatPromptTemplate,
@@ -425,6 +426,22 @@ export class ChatBotRAGService {
    */
   async saveOrUpdateRating(messageId: number, rating: number, userId: number): Promise<void> {
     try {
+      // First check if the message belongs to the user
+      const message = await this.prisma.chatBotMessage.findUnique({
+        where: { id: messageId },
+        include: { session: true }
+      });
+
+      if (!message) {
+        throw new Error('Message not found');
+      }
+
+      // Check if the message belongs to the user's session
+      if (message.session?.userId !== userId) {
+        throw new UnauthorizedException('You can only rate your own messages');
+      }
+
+      // Update the rating if the message belongs to the user
       await this.prisma.chatBotMessage.update({
         where: { id: messageId },
         data: { ratingByStudent: rating },

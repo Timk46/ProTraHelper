@@ -59,7 +59,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
   }
 
   ngAfterViewChecked(): void {
-    this.scrollToBottom();
+    //this.scrollToBottom();
   }
 
   private loadSessions(): void {
@@ -205,7 +205,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
       };
       this.messages.push(botMessage);
       this.canSendMessage = true;
-    }, 1000);
+    }, 500);
   }
 
   private generateRandomString(length: number): string {
