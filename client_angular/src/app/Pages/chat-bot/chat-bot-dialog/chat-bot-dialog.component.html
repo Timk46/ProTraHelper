@@ -1,6 +1,7 @@
 <div class="chat-container" [class]="display">
   <div class="chat-header">
     <div class="header-content">
+      <img src="assets/img/kai_logo_small.png" alt="KAI Logo" class="kai-logo">
       <div class="warning-message">
         Hinweis: Die Antworten werden von einer KI generiert. Bitte überprüfen Sie die Korrektheit anhand der verlinkten Videos.
       </div>
@@ -20,7 +21,10 @@
     <div class="chat-messages">
       <div #messageContainer class="message-container">
         <div *ngFor="let message of messages; let i = index" class="message" [ngClass]="message.type">
-          <div class="message-content" [innerHTML]="message.text"></div>
+          <div class="message-content">
+            <markdown *ngIf="message.type === 'bot'" [data]="message.text"></markdown>
+            <span *ngIf="message.type === 'user'">{{message.text}}</span>
+          </div>
           <div *ngIf="message.type === 'bot' && message.id !== -1" class="rating">
             <span class="rating-question">War diese Antwort hilfreich?</span>
             <button mat-icon-button
@@ -51,7 +55,7 @@
         <mat-form-field appearance="outline">
           <input matInput
             formControlName="message"
-            placeholder="Schreibe eine Nachricht..."
+            placeholder="Frage etwas zur Vorlesung..."
             (keydown.enter)="$event.preventDefault(); onClickSendMessage()">
         </mat-form-field>
         <button mat-icon-button

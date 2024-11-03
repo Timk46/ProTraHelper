@@ -269,7 +269,11 @@ export class ChatBotRAGService {
               const match = ongoingBuffer.match(/\$\$(\d+)\$\$/);
               if (match) {
                 const sourceCounter = match[1];
-                const markdownLink = sourceMapDict[sourceCounter];
+                const markdownLink = "(Quelle: " +
+                  sourceMapDict[sourceCounter]
+                    .replace(/^\^\[/, '') // TEMP FIX TO REPLACE FOOTNOTE LINK WITH NORMAL MARKDOWN LINK
+                    .replace(/\]$/, '') +
+                  ")";
                 const replacedText = markdownLink
                   ? ongoingBuffer.replace(`$$${sourceCounter}$$`, markdownLink)
                   : ongoingBuffer;

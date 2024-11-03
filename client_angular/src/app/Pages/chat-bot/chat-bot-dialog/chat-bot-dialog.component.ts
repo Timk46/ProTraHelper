@@ -2,7 +2,6 @@ import { AfterViewChecked, Component, ElementRef, EventEmitter, HostListener, In
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { LlmService, ChatSession, ChatBotMessage } from 'src/app/Services/ai/llm.service';
-import { MarkdownService } from 'src/app/Services/markdown/markdown.service';
 import { VideoTimeStampComponent } from '../../../Modules/tutor-kai/sites/video-time-stamp/video-time-stamp.component';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
@@ -45,7 +44,6 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
   constructor(
     private formBuilder: FormBuilder,
     private llmService: LlmService,
-    private markdownService: MarkdownService,
     private el: ElementRef,
     private dialog: MatDialog,
     private http: HttpClient
@@ -104,7 +102,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
       // Bot message
       if (msg.answer) {
         this.messages.push({
-          text: this.markdownService.parse(msg.answer),
+          text: msg.answer,
           type: MessageType.Bot,
           id: msg.id,
           rating: msg.ratingByStudent,
@@ -165,7 +163,7 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
       next: (response: ChatBotMessage) => {
         this.messages.pop();
         const botMessage: Message = {
-          text: this.markdownService.parse(response.answer),
+          text: response.answer,
           type: MessageType.Bot,
           id: response.id,
           justRated: false
