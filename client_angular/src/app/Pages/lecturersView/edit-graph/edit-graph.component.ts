@@ -10,12 +10,73 @@ import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
 
+
+interface GraphQuestionConfiguration extends GraphConfigurationDTO {
+  stepsEnabled: boolean;
+}
+
+
 @Component({
   selector: 'app-edit-graph',
   templateUrl: './edit-graph.component.html',
   styleUrls: ['./edit-graph.component.scss']
 })
 export class EditGraphComponent implements AfterViewInit {
+
+  // ########################################
+  // Configuration for the graph question types
+  dijkstraConfig: GraphQuestionConfiguration = {
+    nodeSelected: true,
+    nodeSelectedText: { selected: 'Besucht', unselected: 'Nicht Besucht' },
+    nodeWeight: true,
+    edgeWeight: true,
+    edgeDirected: false,
+    stepsEnabled: true
+  }
+  
+  kruskalConfig: GraphQuestionConfiguration = {
+    nodeSelected: false,
+    nodeSelectedText: { selected: '', unselected: '' },
+    nodeWeight: false,
+    edgeWeight: true,
+    edgeDirected: false,
+    stepsEnabled: true
+  }
+  
+  floydConfig: GraphQuestionConfiguration = {
+    nodeSelected: true,
+    nodeSelectedText: { selected: 'Aktuell', unselected: '-' },
+    nodeWeight: false,
+    edgeWeight: true,
+    edgeDirected: true,
+    stepsEnabled: true
+  }
+  
+  transitiveClosureConfig: GraphQuestionConfiguration = {
+    nodeSelected: false,
+    nodeSelectedText: { selected: '', unselected: '' },
+    nodeWeight: false,
+    edgeWeight: false,
+    edgeDirected: true,
+    stepsEnabled: false
+  }
+
+  getGraphQuestionConfigruation(graphQuestionType: string): GraphQuestionConfiguration {
+    if (graphQuestionType === 'dijkstra') {
+      return JSON.parse(JSON.stringify(this.dijkstraConfig));
+    }
+    if (graphQuestionType === 'kruskal') {
+      return JSON.parse(JSON.stringify(this.kruskalConfig));
+    }
+    if (graphQuestionType === 'floyd') {
+      return JSON.parse(JSON.stringify(this.floydConfig));
+    }
+    if (graphQuestionType === 'transitive_closure') {
+      return JSON.parse(JSON.stringify(this.transitiveClosureConfig));
+    }
+    throw new Error('Invalid question type');
+  }
+
 
   // ########################################
   // Form related properties 
@@ -85,12 +146,6 @@ export class EditGraphComponent implements AfterViewInit {
       questionDescription: ['', Validators.required],
       questionScore: ['', Validators.required],
       graphQuestionType: ['', Validators.required],
-      stepsEnabled: [false],
-      checkboxEdgeDirected: [false],
-      checkboxEdgeWeighted: [false],
-      checkboxNodeWeighted: [false],
-      checkboxNodeSelected: [false],
-      checkboxNodeSelectedText: [{ selected: '', unselected: '' }]
     });
   }
 
@@ -142,12 +197,6 @@ export class EditGraphComponent implements AfterViewInit {
         // Update form controls
         this.graphForm.patchValue({
           graphQuestionType: this.detailedQuestionData.graphQuestion.type,
-          stepsEnabled: this.detailedQuestionData.graphQuestion.stepsEnabled,
-          checkboxEdgeDirected: this.detailedQuestionData.graphQuestion.configuration.edgeDirected || false,
-          checkboxEdgeWeighted: this.detailedQuestionData.graphQuestion.configuration.edgeWeight || false,
-          checkboxNodeWeighted: this.detailedQuestionData.graphQuestion.configuration.nodeWeight || false,
-          checkboxNodeSelected: this.detailedQuestionData.graphQuestion.configuration.nodeSelected || false,
-          checkboxNodeSelectedText: this.detailedQuestionData.graphQuestion.configuration.nodeSelectedText || { selected: '', unselected: '' }
         });
 
         const clonedInitialStructure: GraphStructureDTO = JSON.parse(JSON.stringify(this.detailedQuestionData.graphQuestion.initialStructure))
@@ -219,6 +268,9 @@ export class EditGraphComponent implements AfterViewInit {
   // TODO: complete missing fields
   private buildDTO(): detailedQuestionDTO | null {
     if (this.thisQuestionType === questionType.GRAPH && this.graphForm.valid && this.detailedQuestionData){
+      
+      const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+
       const newData: detailedQuestionDTO = {
         ...this.detailedQuestionData,
         name: this.graphForm.value.questionTitle,
@@ -238,13 +290,13 @@ export class EditGraphComponent implements AfterViewInit {
             edges: this.assignmentGraphStructure.edges,
           },
           exampleSolution: this.solutionGraphStructure,
-          stepsEnabled: this.graphForm.value.stepsEnabled,
+          stepsEnabled: graphQuestionConfigruation.stepsEnabled,
           configuration: {
-            nodeWeight: this.graphForm.value.checkboxNodeWeighted,
-            nodeSelected: this.graphForm.value.checkboxNodeSelected,
-            nodeSelectedText: this.graphForm.value.checkboxNodeSelectedText,
-            edgeWeight: this.graphForm.value.checkboxEdgeWeighted,
-            edgeDirected: this.graphForm.value.checkboxEdgeDirected,
+            nodeWeight: graphQuestionConfigruation.nodeWeight,
+            nodeSelected: graphQuestionConfigruation.nodeSelected,
+            nodeSelectedText: graphQuestionConfigruation.nodeSelectedText,
+            edgeWeight: graphQuestionConfigruation.edgeWeight,
+            edgeDirected:graphQuestionConfigruation.edgeDirected,
           },
         }
       }
@@ -348,18 +400,15 @@ export class EditGraphComponent implements AfterViewInit {
 
       // Get Current Step
       const graphContent: GraphStructureDTO = this.solutionGraphStructure[this.solutionStepCurrent];
+
+      // Get configuration
+      const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
       
       // Clone the graph content and load it to the GraphService
       const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
       this.loadWorkspaceContent({
         graphContent: clonedGraphContent,
-        graphConfiguration: {
-          nodeSelected: this.graphForm.value.checkboxNodeSelected,
-          nodeSelectedText: this.graphForm.value.checkboxNodeSelectedText,
-          nodeWeight: this.graphForm.value.checkboxNodeWeighted,
-          edgeWeight: this.graphForm.value.checkboxEdgeWeighted,
-          edgeDirected: this.graphForm.value.checkboxEdgeDirected,
-          }
+        graphConfiguration: graphQuestionConfigruation
       });
 
     }
@@ -368,18 +417,15 @@ export class EditGraphComponent implements AfterViewInit {
     // #####
     // ## CASE 2: Initial Structure ->  Load it to the workspace
     else if (this.workspaceModeCurrent === 'assignment') {
-      
+
+        // Get configuration
+        const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+
         // Clone the graph content and load it to the GraphService
         const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(this.assignmentGraphStructure));
         this.loadWorkspaceContent({
           graphContent: clonedGraphContent,
-          graphConfiguration: {
-            nodeSelected: this.graphForm.value.checkboxNodeSelected,
-            nodeSelectedText: this.graphForm.value.checkboxNodeSelectedText,
-            nodeWeight: this.graphForm.value.checkboxNodeWeighted,
-            edgeWeight: this.graphForm.value.checkboxEdgeWeighted,
-            edgeDirected: this.graphForm.value.checkboxEdgeDirected,
-          }
+          graphConfiguration: graphQuestionConfigruation
         });
     }
 
@@ -449,16 +495,11 @@ export class EditGraphComponent implements AfterViewInit {
     // To reset structure content in case assignment configuration changes 
     this.structureIsSet = true;
 
-
+    // Get configuration
+    const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
     
     // Get Graph Configuration from form data
-    this.graphTaskService.configureGraph({
-      nodeSelected: this.graphForm.value.checkboxNodeSelected,
-      nodeSelectedText: this.graphForm.value.checkboxNodeSelectedText,
-      nodeWeight: this.graphForm.value.checkboxNodeWeighted,
-      edgeWeight: this.graphForm.value.checkboxEdgeWeighted,
-      edgeDirected: this.graphForm.value.checkboxEdgeDirected, 
-    })
+    this.graphTaskService.configureGraph(graphQuestionConfigruation);
 
     // Clone the graph structure according to the mode. It can be initial structure or example solution
     let clonedGraphContent!: GraphStructureDTO;
@@ -471,13 +512,7 @@ export class EditGraphComponent implements AfterViewInit {
     // Load workspace to the service
     this.loadWorkspaceContent({
       graphContent: clonedGraphContent,
-      graphConfiguration: {
-        nodeSelected: this.graphForm.value.checkboxNodeSelected,
-        nodeSelectedText: this.graphForm.value.checkboxNodeSelectedText,
-        nodeWeight: this.graphForm.value.checkboxNodeWeighted,
-        edgeWeight: this.graphForm.value.checkboxEdgeWeighted,
-        edgeDirected: this.graphForm.value.checkboxEdgeDirected,
-        }
+      graphConfiguration: graphQuestionConfigruation
     });
     
   }
@@ -580,9 +615,12 @@ export class EditGraphComponent implements AfterViewInit {
       // Get Current Step
       const graphContent: GraphStructureDTO = this.solutionGraphStructure[this.solutionStepCurrent];
 
+      // Get configuration
+      const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+
       // To use only values and not the references
       const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
-      this.loadWorkspaceContent({ graphContent: clonedGraphContent, graphConfiguration: this.detailedQuestionData?.graphQuestion?.configuration });
+      this.loadWorkspaceContent({ graphContent: clonedGraphContent, graphConfiguration: graphQuestionConfigruation });
     } else {
         console.warn('Not enough steps to delete. Current steps:', this.solutionGraphStructure.length);
     }
@@ -610,15 +648,12 @@ export class EditGraphComponent implements AfterViewInit {
     this.workspaceModeCurrent = 'assignment';
     this.workspaceModePrevious = this.workspaceModeCurrent;
 
+    // Get configuration
+    const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+
     this.loadWorkspaceContent({
       graphContent: this.assignmentGraphStructure,
-      graphConfiguration: {
-        nodeSelected: this.graphForm.value.checkboxNodeSelected,
-        nodeSelectedText: this.graphForm.value.checkboxNodeSelectedText,
-        nodeWeight: this.graphForm.value.checkboxNodeWeighted,
-        edgeWeight: this.graphForm.value.checkboxEdgeWeighted,
-        edgeDirected: this.graphForm.value.checkboxEdgeDirected,
-        }
+      graphConfiguration: graphQuestionConfigruation
     });
 
     // To use only values and not the references
@@ -632,51 +667,6 @@ export class EditGraphComponent implements AfterViewInit {
       this.resetWorkspaceContent();
     }
 
-    // Update form controls according to the assignment type
-    if (this.graphForm.value.graphQuestionType === 'dijkstra') {
-      this.graphForm.patchValue({
-        stepsEnabled: true,
-        checkboxEdgeDirected: false,
-        checkboxEdgeWeighted: true,
-        checkboxNodeWeighted: true,
-        checkboxNodeSelected: true,
-        checkboxNodeSelectedText: { selected: 'Besucht', unselected: 'Nicht Besucht' }
-      });  
-      
-    }
-    else if (this.graphForm.value.graphQuestionType === 'floyd') {
-      this.graphForm.patchValue({
-        stepsEnabled: true,
-        checkboxEdgeDirected: true,
-        checkboxEdgeWeighted: true,
-        checkboxNodeWeighted: false,
-        checkboxNodeSelected: true,
-        checkboxNodeSelectedText: { selected: 'Aktuell', unselected: '-' }
-      });  
-      
-    }
-    else if (this.graphForm.value.graphQuestionType === 'kruskal') {
-      this.graphForm.patchValue({
-        stepsEnabled: true,
-        checkboxEdgeDirected: false,
-        checkboxEdgeWeighted: true,
-        checkboxNodeWeighted: false,
-        checkboxNodeSelected: false,
-        checkboxNodeSelectedText: { selected: '', unselected: '' }
-      }); 
-
-    }
-    else if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
-      this.graphForm.patchValue({
-        stepsEnabled: false,
-        checkboxEdgeDirected: true,
-        checkboxEdgeWeighted: false,
-        checkboxNodeWeighted: false,
-        checkboxNodeSelected: false,
-        checkboxNodeSelectedText: { selected: '', unselected: '' }
-      }); 
-      
-    }
   }
 
   // #######################################################
@@ -744,7 +734,6 @@ export class EditGraphComponent implements AfterViewInit {
         this.graphForm.patchValue({
           graphQuestionType: questionData.graphQuestion.type,
         });
-        this.onChangeGraphQuestionType(questionData.graphQuestion.type);
       
         const clonedInitialStructure: GraphStructureDTO = JSON.parse(JSON.stringify(questionData.graphQuestion.initialStructure || { nodes: [], edges: [] }))
         this.assignmentGraphStructure = clonedInitialStructure;

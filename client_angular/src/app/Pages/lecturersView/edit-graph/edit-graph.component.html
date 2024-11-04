@@ -132,7 +132,7 @@
                      -->
                 
                 <mat-button-toggle-group
-                    *ngIf="this.graphForm.value.stepsEnabled && workspaceModeCurrent === 'solution'"
+                    *ngIf="this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType).stepsEnabled && workspaceModeCurrent === 'solution'"
                     name="solution-step"
                     aria-label="solution-step" 
                     [(ngModel)]="solutionStepCurrent"
@@ -149,7 +149,7 @@
                 <!-- [hideSingleSelectionIndicator]="true" -->
                     
                 <button
-                    *ngIf="this.graphForm.value.stepsEnabled && workspaceModeCurrent === 'solution'"
+                    *ngIf="this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType).stepsEnabled && workspaceModeCurrent === 'solution'"
                     class="image-button"
                     type="button"
                     (click)="addNewSolutionStep()"
@@ -161,7 +161,7 @@
                 </button>
 
                 <button
-                    *ngIf="detailedQuestionData?.graphQuestion?.stepsEnabled && workspaceModeCurrent === 'solution' && solutionGraphStructure.length > 1"
+                    *ngIf="this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType).stepsEnabled && workspaceModeCurrent === 'solution' && solutionGraphStructure.length > 1"
                     class="image-button"
                     type="button"
                     (click)="deleteCurrentSolutionStep()"
