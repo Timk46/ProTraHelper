@@ -79,7 +79,8 @@ export class LoginComponent implements OnInit {
    * The login method navigates to the authentication server to authenticate the user.
    */
   loginWithCAS(): void {
-    window.location.href = `${environment.server}/auth/cas/`;
+    const deviceId = this.userService.getDeviceId();
+    window.location.href = `${environment.server}/auth/cas/?device-id=${deviceId}`;
   }
 
   loginWithPassword(){

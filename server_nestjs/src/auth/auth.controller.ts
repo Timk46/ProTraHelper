@@ -23,7 +23,10 @@ export class AuthController {
     if (!req.user || !req.user.email) {
       throw new UnauthorizedException('User email not provided');
     }
-    const tokens = await this.authService.loginCAS(req.user.email);
+    const tokens = await this.authService.loginCAS(
+      req.user.email,
+      req.user.currentDeviceId,
+    );
 
     // Redirect to the website with tokens as URL parameters - not super secure, but cant send in body because its not a request by the client
     res.redirect(
@@ -39,7 +42,10 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req: { user: UserDTO }) {
+  async login(
+    @Request() req: { user: UserDTO },
+    @Headers('device-id') deviceId: string,
+  ) {
     // The LocalAuthGuard has already validated the user, so we can directly login
     return this.authService.login(req.user);
   }

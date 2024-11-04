@@ -6,6 +6,8 @@ import { environment } from 'src/environments/environment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { v4 as uuid } from 'uuid';
+import {catchError, tap} from "rxjs/operators";
 
 interface SubjectInfo {
   subjectId: number;
@@ -18,6 +20,8 @@ interface SubjectInfo {
   providedIn: 'root',
 })
 export class UserService {
+  private readonly DEVICE_ID_KEY = 'deviceId';
+  deviceID: string = this.getDeviceId();
   isAuthenticated$: Observable<boolean>;
   hasEditModeActive$: Observable<boolean>;
 
@@ -130,6 +134,20 @@ export class UserService {
     } else {
       throw new Error('No access token found');
     }
+  }
+
+  getDeviceId(): string {
+    let deviceId = localStorage.getItem(this.DEVICE_ID_KEY);
+
+    if (!deviceId) {
+      deviceId = uuid();
+      if (!deviceId) {
+        throw new Error('Device ID could not be generated');
+      }
+      localStorage.setItem(this.DEVICE_ID_KEY, deviceId);
+    }
+
+    return deviceId;
   }
 
   /**

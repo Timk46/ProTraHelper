@@ -29,7 +29,7 @@ export class AuthService {
    * @param { string } email the email to log in
    * @returns the user, access and refresh tokens if the user exists
    */
-  async loginCAS(email: string) {
+  async loginCAS(email: string, deviceId: string) {
     //this.logger.debug(`Attempting CAS login for email: ${email}`);
     let user = await this.usersService.findOne(email);
     if (user) {

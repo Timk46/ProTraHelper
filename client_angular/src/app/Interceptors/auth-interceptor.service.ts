@@ -23,20 +23,29 @@ export class AuthInterceptor implements HttpInterceptor {
   /**
    * Intercepts an HttpRequest and adds an "Authorization" header.
    *
-   * @param req - The HttpRequest being intercepted
+   * @param request - The HttpRequest being intercepted
    * @param next - The HttpHandler to continue handling the request
    * @returns An Observable of the HttpEvent with a modified HttpRequest
    */
   intercept(
-    req: HttpRequest<any>,
+    request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
     const accessToken = localStorage.getItem('accessToken');
+    const deviceId = this.userService.getDeviceId();
 
     // Clone the request and set the new header in one step.
     const authReq = req.clone({
       setHeaders: { Authorization: `Bearer ${accessToken}` },
     });
+    // Add the device ID to the request
+    if (deviceId) {
+      request = request.clone({
+        setHeaders: {
+          'Device-ID': deviceId,
+        },
+      });
+    }
 
     // send cloned request with header to the next handler.
     return next.handle(authReq).pipe(

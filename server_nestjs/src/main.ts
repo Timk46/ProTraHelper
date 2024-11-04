@@ -8,7 +8,7 @@ async function bootstrap() {
     logger: ['error', 'warn', 'debug', 'log', 'verbose'],
   });
   app.enableCors({
-    allowedHeaders: ['Authorization', 'Content-Type', 'X-Filename', 'X-App-Version'],
+    allowedHeaders: ['Authorization', 'Content-Type', 'X-Filename', 'X-App-Version', 'Device-Id'],
     exposedHeaders: ['X-Filename', 'X-App-Version'],  // We need to expose this header so that Angular can access it.
   });
   app.use(bodyParser.json({ limit: '5mb' }));
