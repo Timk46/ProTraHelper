@@ -438,6 +438,8 @@ export class QuestionDataService {
           userScore += scorePerOption;
         }
       }
+      // Round the userScore to avoid floating point precision issues
+      userScore = Math.round(userScore * 100) / 100;
 
       const progress = userScore / question.score;
       let feedbackText = "";
