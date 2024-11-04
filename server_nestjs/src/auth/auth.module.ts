@@ -8,11 +8,14 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './auth.controller';
 import { CasStrategy } from './strategies/cas.strategy';
+import { RefreshTokenModule } from './refresh-token/refresh-token.module';
+import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
+    RefreshTokenModule,
     // support for loading multiple .env files
     ConfigModule.forRoot({ envFilePath: ['.env', '.env.auth'] }),
     JwtModule.register({}),
@@ -21,6 +24,7 @@ import { CasStrategy } from './strategies/cas.strategy';
     AuthService,
     LocalStrategy,
     JwtStrategy,
+    JwtRefreshStrategy,
     CasStrategy,
   ],
   exports: [AuthService],
