@@ -9,6 +9,7 @@ import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
+import { GenerateGraphService } from './generate-graph.service';
 
 
 interface GraphQuestionConfiguration extends GraphConfigurationDTO {
@@ -137,7 +138,8 @@ export class EditGraphComponent implements AfterViewInit {
     private route: ActivatedRoute,
     private confirmationService: ConfirmationService,
     private snackBar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private generateGraphService: GenerateGraphService
   ) {
 
     this.graphForm = this.fb.group({
@@ -748,6 +750,13 @@ export class EditGraphComponent implements AfterViewInit {
 
   trackByIndex(index: number, obj: any): any {
     return index;
+  }
+
+  generateGraph() {
+    const { nodes, edges } = this.generateGraphService.generateTransitiveClosureTask();
+    
+    this.graphTaskService.resetGraph();
+    this.graphTaskService.graphDataFromJSON(nodes, edges);
   }
 
 }
