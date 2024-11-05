@@ -9,7 +9,8 @@ import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
-import { GenerateGraphService } from './generate-graph.service';
+import { GenerateTransitiveClosureService } from './generate-graph/generate-transitive-closure.service';
+import { GenerateDijkstraService } from './generate-graph/generate-dijkstra.service';
 
 
 interface GraphQuestionConfiguration extends GraphConfigurationDTO {
@@ -139,7 +140,8 @@ export class EditGraphComponent implements AfterViewInit {
     private confirmationService: ConfirmationService,
     private snackBar: MatSnackBar,
     private router: Router,
-    private generateGraphService: GenerateGraphService
+    private generateTransitiveClosureService: GenerateTransitiveClosureService,
+    private generateDijkstraService: GenerateDijkstraService,
   ) {
 
     this.graphForm = this.fb.group({
@@ -753,10 +755,17 @@ export class EditGraphComponent implements AfterViewInit {
   }
 
   generateGraph() {
-    const { nodes, edges } = this.generateGraphService.generateTransitiveClosureTask();
     
-    this.graphTaskService.resetGraph();
-    this.graphTaskService.graphDataFromJSON(nodes, edges);
+    if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
+      const { nodes, edges } = this.generateTransitiveClosureService.generate();
+      this.graphTaskService.resetGraph();
+      this.graphTaskService.graphDataFromJSON(nodes, edges);
+    }
+    else if (this.graphForm.value.graphQuestionType === 'dijkstra') {
+      const { nodes, edges } = this.generateDijkstraService.generate();
+      this.graphTaskService.resetGraph();
+      this.graphTaskService.graphDataFromJSON(nodes, edges);
+    }
   }
 
 }
