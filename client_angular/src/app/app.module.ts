@@ -29,6 +29,7 @@ import { ChatBotDialogComponent } from './Pages/chat-bot/chat-bot-dialog/chat-bo
 import { ChatSessionListComponent } from './Pages/chat-bot/chat-session-list/chat-session-list.component';
 import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
 import { LoginComponent } from './Pages/login/login.component';
+import { ChangelogComponent } from './Pages/changelog/changelog.component';
 import { AuthInterceptor } from "./Interceptors/auth-interceptor.service";
 import { LoggedInGuard } from "./Guards/is-logged-in.guard";
 import { EditorModule, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
@@ -86,6 +87,7 @@ import { NotRegisteredComponent } from './Pages/not-registered/not-registered.co
         ChatSessionListComponent,
         VideoTimeStampComponent,
         LoginComponent,
+        ChangelogComponent,
         DiscussionListComponent,
         DiscussionViewComponent,
         DiscussionFilterComponent,
