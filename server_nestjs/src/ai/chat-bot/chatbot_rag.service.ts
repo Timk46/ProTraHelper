@@ -6,6 +6,7 @@ import { TranscriptChunk } from '@Interfaces/index';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatBotMessage } from '@Prisma/client';
+import { UnauthorizedException } from '@nestjs/common';
 
 const {
   ChatPromptTemplate,
@@ -21,6 +22,17 @@ const llm = new ChatOpenAI({
   temperature: 0,
   streaming: true,
 });
+
+// Title generation prompt
+const titleGenerationPrompt = ChatPromptTemplate.fromPromptMessages([
+  SystemMessagePromptTemplate.fromTemplate(
+    'Generiere einen kurzen, prägnanten Titel (maximal 30 Zeichen) für diese Chat-Konversation. ' +
+    'Der Titel soll das Hauptthema der Unterhaltung widerspiegeln.'
+  ),
+  HumanMessagePromptTemplate.fromTemplate(
+    'Frage: {question}\nAntwort: {answer}'
+  ),
+]);
 
 const finalRAGPromptAUD = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
@@ -45,7 +57,6 @@ const finalRAGPromptAUD = ChatPromptTemplate.fromPromptMessages([
       '2. Wenn die Frage keinen Bezug zur Informatik oder Objektorientierte und funktionale Programmierung hat, antworte: "Das ist eine interessante Frage, aber leider nicht Teil des Vorlesungsstoffs."',
   ),
 ]);
-
 
 const finalRAGPromptOFP = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
@@ -72,7 +83,6 @@ const finalRAGPromptOFP = ChatPromptTemplate.fromPromptMessages([
   ),
 ]);
 
-// Wird für alle Nachrichten im Chatverlauf verwendet (RAG nur für die erste Frage)
 const dialogPromptAUD = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
     'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Das Thema ist Algorithmen und Datenstrukturen. ' +
@@ -87,6 +97,7 @@ const dialogPromptAUD = ChatPromptTemplate.fromPromptMessages([
       '{question}\n',
   ),
 ]);
+
 const dialogPromptOFP = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
     'Du bist ein hilfreicher Professor für eine Informatik Einführungsvorlesung und du kannst sehr gut erklären. Die Studenten sollen die Grundlagen für Python und Java lernen. Das Thema ist Objektorientierte und funktionale Programmierung. ' +
@@ -111,17 +122,69 @@ export class ChatBotRAGService {
   ) {}
 
   /**
+   * Creates a new chat session and generates a title based on the first message
+   * @param question The first question in the session
+   * @param answer The first answer in the session
+   * @param userId The ID of the user
+   * @returns The created session
+   */
+  private async createChatSession(question: string, answer: string, userId: number) {
+    try {
+      // Generate title using GPT-4
+      const titlePrompt = await titleGenerationPrompt.formatPromptValue({
+        question: question,
+        answer: answer
+      });
+
+      const titleResponse = await llm.generatePrompt([titlePrompt]);
+      const sessionTitle = titleResponse.generations[0][0].text.trim();
+
+      // Create new session
+      const session = await this.prisma.chatSession.create({
+        data: {
+          title: sessionTitle,
+          userId: userId
+        }
+      });
+
+      return session;
+    } catch (error) {
+      console.error('Error creating chat session:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves all chat sessions for a user
+   * @param userId The ID of the user
+   * @returns Array of chat sessions with their messages
+   */
+  async getChatSessions(userId: number) {
+    return await this.prisma.chatSession.findMany({
+      where: { userId },
+      include: {
+        messages: {
+          orderBy: { createdAt: 'asc' }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
+  /**
    * Handles the first RAG-based chatbot response generation.
    * Only the first question is answered using RAG, the rest are answered using the dialog prompt.
    * @param question The student's question.
    * @param userid The ID of the user asking the question.
    * @param dialogSessionId The ID of the current dialog session.
+   * @param sessionId Optional ID of an existing chat session
    * @returns The ID of the created message.
    */
   async chatBotRagAnswer(
     question: string,
     userid: number,
     dialogSessionId: string,
+    sessionId?: number,
   ): Promise<ChatBotMessage> {
     // Perform similarity search using RAG service
     const tempsimilaritySearchResult =
@@ -207,7 +270,11 @@ export class ChatBotRAGService {
               const match = ongoingBuffer.match(/\$\$(\d+)\$\$/);
               if (match) {
                 const sourceCounter = match[1];
-                const markdownLink = sourceMapDict[sourceCounter];
+                const markdownLink = "(Quelle: " +
+                  sourceMapDict[sourceCounter]
+                    .replace(/^\^\[/, '') // TEMP FIX TO REPLACE FOOTNOTE LINK WITH NORMAL MARKDOWN LINK
+                    .replace(/\]$/, '') +
+                  ")";
                 const replacedText = markdownLink
                   ? ongoingBuffer.replace(`$$${sourceCounter}$$`, markdownLink)
                   : ongoingBuffer;
@@ -224,13 +291,20 @@ export class ChatBotRAGService {
       ],
     );
 
-    // Save the chatbot's response and return the message ID
+    let session;
+    if (!sessionId) {
+      // Create new session for first message
+      session = await this.createChatSession(question, openAiAnswerWithMarkdownLinks, userid);
+    }
+
+    // Save the chatbot's response with session
     const message = await this.saveChatBotMessage(
       question,
       openAiAnswerWithMarkdownLinks,
       similaritySearchResult,
       userid,
       dialogSessionId,
+      session?.id || sessionId,
     );
 
     return message;
@@ -242,6 +316,7 @@ export class ChatBotRAGService {
    * @param question The student's question.
    * @param userid The ID of the user asking the question.
    * @param dialogSessionId The ID of the current dialog session.
+   * @param sessionId The ID of the chat session
    * @returns The ID of the created message.
    */
   async chatBotRagAnswerDialog(
@@ -249,6 +324,7 @@ export class ChatBotRAGService {
     question: string,
     userid: number,
     dialogSessionId: string,
+    sessionId: number,
   ): Promise<ChatBotMessage> {
     const chatHistory: string = context
       .slice(0, -2)
@@ -281,13 +357,14 @@ export class ChatBotRAGService {
       ],
     );
 
-    // Save the chatbot's response and return the message ID
+    // Save the chatbot's response with session
     const message = await this.saveChatBotMessage(
       question,
       openAiResponse.generations[0][0].text,
       null,
       userid,
       dialogSessionId,
+      sessionId,
     );
     return message;
   }
@@ -311,6 +388,7 @@ export class ChatBotRAGService {
    * @param usedChunks The used chunks from the RAG model.
    * @param userid The ID of the user.
    * @param dialogSessionId The ID of the dialog session.
+   * @param sessionId Optional ID of the chat session
    * @returns The ID of the created message.
    */
   private async saveChatBotMessage(
@@ -319,6 +397,7 @@ export class ChatBotRAGService {
     usedChunks: any,
     userid: number,
     dialogSessionId: string,
+    sessionId?: number,
   ): Promise<ChatBotMessage> {
     try {
       const createdMessage = await this.prisma.chatBotMessage.create({
@@ -328,7 +407,8 @@ export class ChatBotRAGService {
           usedChunks: dialogSessionId,
           isBot: false,
           userId: userid,
-          ratingByStudent: null, // Initialize rating as null
+          ratingByStudent: null,
+          sessionId: sessionId,
         },
       });
       return createdMessage;
@@ -346,6 +426,22 @@ export class ChatBotRAGService {
    */
   async saveOrUpdateRating(messageId: number, rating: number, userId: number): Promise<void> {
     try {
+      // First check if the message belongs to the user
+      const message = await this.prisma.chatBotMessage.findUnique({
+        where: { id: messageId },
+        include: { session: true }
+      });
+
+      if (!message) {
+        throw new Error('Message not found');
+      }
+
+      // Check if the message belongs to the user's session
+      if (message.session?.userId !== userId) {
+        throw new UnauthorizedException('You can only rate your own messages');
+      }
+
+      // Update the rating if the message belongs to the user
       await this.prisma.chatBotMessage.update({
         where: { id: messageId },
         data: { ratingByStudent: rating },
