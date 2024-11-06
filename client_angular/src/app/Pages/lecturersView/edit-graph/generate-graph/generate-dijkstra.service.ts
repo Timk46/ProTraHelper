@@ -48,7 +48,7 @@ export class GenerateDijkstraService {
       updatedEdges.push({
         node1Id: edge.node1.nodeId,
         node2Id: edge.node2.nodeId,
-        weight: edge.weight || undefined
+        weight: edge.weight || 1
     })
     });
 

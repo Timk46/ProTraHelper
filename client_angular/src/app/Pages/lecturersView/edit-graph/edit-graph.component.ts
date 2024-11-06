@@ -9,9 +9,9 @@ import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
-import { GenerateTransitiveClosureService } from './generate-graph/generate-transitive-closure.service';
 import { GenerateDijkstraService } from './generate-graph/generate-dijkstra.service';
 import { GenerateKruskalService } from './generate-graph/generate-kruskal.service';
+import { GenerateFloydService } from './generate-graph/generate-floyd.service';
 
 
 interface GraphQuestionConfiguration extends GraphConfigurationDTO {
@@ -142,7 +142,7 @@ export class EditGraphComponent implements AfterViewInit {
     private confirmationService: ConfirmationService,
     private snackBar: MatSnackBar,
     private router: Router,
-    private generateTransitiveClosureService: GenerateTransitiveClosureService,
+    private generateFloydService: GenerateFloydService,
     private generateDijkstraService: GenerateDijkstraService,
     private generateKruskalService: GenerateKruskalService,
   ) {
@@ -844,12 +844,33 @@ export class EditGraphComponent implements AfterViewInit {
   generateGraph(): GraphStructureDTO | undefined {
 
     
-    if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
+    if (this.graphForm.value.graphQuestionType === 'floyd') {
 
-      const { nodes, edges } = this.generateTransitiveClosureService.generate({
+      const { nodes, edges } = this.generateFloydService.generate({
         nodesCount: this.generateGraphForm.value.graphNodeCount,
         edgesCount: this.generateGraphForm.value.graphEdgeCount,
         maxSelfEdges: this.generateGraphForm.value.graphSelfEdgeCountMax,
+        edgeWeight: {
+          enabled: true,
+          min: this.generateGraphForm.value.graphEdgeWeightMin,
+          max: this.generateGraphForm.value.graphEdgeWeightMax,
+        }
+      });
+
+      return {nodes, edges};
+    }
+
+    if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
+
+      const { nodes, edges } = this.generateFloydService.generate({
+        nodesCount: this.generateGraphForm.value.graphNodeCount,
+        edgesCount: this.generateGraphForm.value.graphEdgeCount,
+        maxSelfEdges: this.generateGraphForm.value.graphSelfEdgeCountMax,
+        edgeWeight: {
+          enabled: false,
+          min: 0,
+          max: 0,
+        }
       });
 
       return {nodes, edges};
