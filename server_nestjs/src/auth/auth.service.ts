@@ -6,6 +6,7 @@ import { EventLogService } from '../EventLog/event-log.service';
 import { UserDTO } from '@DTOs/user.dto';
 import { RefreshTokenService } from './refresh-token/refresh-token.service';
 import * as bcrypt from 'bcrypt';
+import { User } from "@prisma/client";
 
 /**
  * Provides authentication services
@@ -110,6 +111,13 @@ export class AuthService {
     this.logger.debug(`Tokens refreshed for user: ${user.email}`); // TODO: hide
     await this.eventLogService.log('info', 'login', user.id, 'User update refresh token', { email: user.email });
     return tokens;
+  }
+
+  async logout(user: User, deviceId: string) {
+    this.logger.debug(`Logging out user: ${user.email}`); // TODO: hide
+    await this.refreshTokenService.deleteRefreshToken(user.email, deviceId);
+    this.logger.debug(`User logged out: ${user.email}`); // TODO: hide
+    await this.eventLogService.log('info', 'login', user.id, 'User logged out', { email: user.email, role: user.globalRole });
   }
 
   /**

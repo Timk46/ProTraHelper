@@ -83,4 +83,25 @@ export class RefreshTokenService {
       },
     });
   }
+
+  async deleteRefreshToken(email: string, deviceId: string) {
+    const existingRefreshToken = await this.prisma.refreshToken.findFirst({
+      where: {
+        user: {
+          email: email,
+        },
+        deviceId: deviceId,
+      },
+    });
+
+    if (!existingRefreshToken) {
+      throw new Error(`Refresh token not found for email ${email} and device ID ${deviceId}`);
+    }
+
+    return this.prisma.refreshToken.delete({
+      where: {
+        id: existingRefreshToken.id,
+      },
+    });
+  }
 }

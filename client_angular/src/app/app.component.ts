@@ -101,8 +101,8 @@ export class AppComponent {
     }
 
   logOut() {
+    this.userService.logout()
     this.userIsLoggedIn = false;
-    this.userService.removeTokens();
 
     // Open CAS logout URL in a new tab
     window.open('https://cas.zimt.uni-siegen.de/cas/logout', '_blank');

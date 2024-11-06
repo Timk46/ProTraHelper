@@ -62,6 +62,21 @@ export class AuthController {
     // The LocalAuthGuard has already validated the user, so we can directly login
     return this.authService.login(req.user);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('logout')
+  async logout(
+    @Request() req: { user: User },
+    @Headers('device-id') deviceId: string,
+  ) {
+    try {
+      await this.authService.logout(req.user, deviceId);
+      return { message: 'Logout successful' };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
   @Public()
   @UseGuards(JwtRefreshAuthGuard)
   @Get('refresh')

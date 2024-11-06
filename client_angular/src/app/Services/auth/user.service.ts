@@ -7,7 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { v4 as uuid } from 'uuid';
-import {catchError, tap} from "rxjs/operators";
+import { catchError, finalize, tap } from "rxjs/operators";
 
 interface SubjectInfo {
   subjectId: number;
@@ -71,6 +71,33 @@ export class UserService {
           this.openSnackBar("Der Login ist fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.");
           resolve(false);
         }
+      });
+    });
+  }
+
+  logout(): Promise<boolean> {
+    return new Promise<boolean>(async (resolve) => {
+      this.http.get(environment.server + '/auth/logout').pipe(
+        finalize(() => {
+          this.removeTokens();
+          this.router.navigate(['/login']);
+        })
+      ).subscribe({
+        next: (response: any) => {
+          if (response.message === "Logout successful") {
+            this.openSnackBar("Successfully logged out.");
+            resolve(true);
+          } else {
+            this.openSnackBar("Error at logout.");
+            resolve(false);
+          }
+        },
+        error: (error: any) => {
+          this.openSnackBar("Error at logout.");
+          resolve(false);
+        },
+        complete: () => {
+        },
       });
     });
   }
