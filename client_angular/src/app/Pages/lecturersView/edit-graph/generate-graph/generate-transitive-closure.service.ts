@@ -2,6 +2,12 @@ import { Injectable } from '@angular/core';
 import { GenerateGraphService } from './generate-graph.service';
 import { GraphEdgeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
 
+export interface GenerateTransitiveClosureConfiguration {
+  nodesCount: number,
+  edgesCount: number,
+  maxSelfEdges: number
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -9,15 +15,21 @@ export class GenerateTransitiveClosureService {
 
   constructor(private generateGraphService: GenerateGraphService) { }
 
-  generate(): GraphStructureDTO {
+  generate( configuration: GenerateTransitiveClosureConfiguration ): GraphStructureDTO {
 
     const {nodes, edges} = this.generateGraphService.generateGraph({
-      nodesCount: 5,
-      edgesCount: 5,
-      selfEdges: true,
+      ...configuration,
       edgeDirected: true,
-      edgeWeight: false,
-      nodeWeight: false,
+      edgeWeight: {
+        enabled: false,
+        min: 0,
+        max: 0
+      },
+      nodeWeight: {
+        enabled: false,
+        min: 0,
+        max: 0
+      },
       nodeSelected: false,
     });
 

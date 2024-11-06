@@ -1,6 +1,24 @@
 import { Injectable } from '@angular/core';
 import { GraphNodeDTO } from '@DTOs/graphTask.dto';
 
+export interface GenerateGraphConfiguration {
+  nodesCount: number,
+  edgesCount: number,
+  maxSelfEdges: number,
+  edgeDirected: boolean,
+  edgeWeight: {
+    enabled: boolean,
+    min: number,
+    max: number,
+  },
+  nodeWeight: {
+    enabled: boolean,
+    min: number,
+    max: number,
+  },
+  nodeSelected: boolean,
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -8,30 +26,20 @@ export class GenerateGraphService {
 
   constructor() { }
     
-  generateGraph(
-    configuration : {
-      nodesCount: number,
-      edgesCount: number,
-      nodeWeight: boolean,
-      nodeSelected: boolean,
-      edgeWeight: boolean,
-      edgeDirected: boolean,
-      selfEdges: boolean,
-    }
-  ): { nodes: GraphNodeDTO[], edges: any[] } {
+  generateGraph(configuration : GenerateGraphConfiguration): { nodes: GraphNodeDTO[], edges: any[] } {
   
     // Generate nodes
     const nodes: GraphNodeDTO[] = []
     let nodeIndex = 0;
   
     while (nodeIndex < configuration.nodesCount) {
-      const node = this.generateNode(nodeIndex, configuration.nodesCount, configuration.nodeWeight, configuration.nodeSelected);
+      const node = this.generateNode(nodeIndex, configuration);
       nodes.push(node);
       nodeIndex++;
     }
     
     // Generate edges
-    const edges = this.generateEdges(nodes, configuration.edgesCount, configuration.edgeWeight, configuration.edgeDirected, configuration.selfEdges);
+    const edges = this.generateEdges(nodes, configuration);
   
     return {
       nodes,
@@ -41,16 +49,14 @@ export class GenerateGraphService {
 
   generateNode(
     nodeIndex: number,
-    nodesCount: number,
-    nodeWeight: boolean,
-    nodeSelected: boolean
+    configuration: GenerateGraphConfiguration
   ): GraphNodeDTO {
   
     // Generate node
     const nodeValue = this.generateNodeValue(nodeIndex)
     const {
       nodePosition, nodeSize, nodeCenter
-    } = this.generateNodeGeometry(nodeIndex, nodesCount);
+    } = this.generateNodeGeometry(nodeIndex, configuration.nodesCount);
   
     const node: any = {
       nodeId: nodeIndex,
@@ -61,11 +67,11 @@ export class GenerateGraphService {
     }
   
     // Generate optional attributes according to the configuration
-    if (nodeWeight) {
-      node.weight = this.getRandomNumber(0, 10) // generate random number
+    if (configuration.nodeWeight) {
+      node.weight = this.getRandomNumber(configuration.nodeWeight.min, configuration.nodeWeight.max) // generate random number
     }
   
-    if (nodeSelected) {
+    if (configuration.nodeSelected) {
       node.selected = false;
     }
   
@@ -74,16 +80,14 @@ export class GenerateGraphService {
   
   generateEdges(
     nodes: GraphNodeDTO[], 
-    edgesCount: number,
-    edgeWeight: boolean,
-    edgeDirected: boolean,
-    selfEdges: boolean
+    configuration: GenerateGraphConfiguration
   ) {
   
     const edges: any[] = [];
     let edgeIndex = 0;
-  
-    while (edgeIndex < edgesCount) {
+    let selfEdgesCounter = 0;
+
+    while (edgeIndex < configuration.edgesCount) {
   
       let node1Index = 0 //generate random number between 0 - nodes.length - 1
       let node2Index = 0 //generate random number between 0 - nodes.length - 1
@@ -94,14 +98,14 @@ export class GenerateGraphService {
         node1Index = this.getRandomNumber(0, nodes.length - 1);
         node2Index = this.getRandomNumber(0, nodes.length - 1);
 
-        if (!selfEdges && node1Index === node2Index) {
-          continue;
+        if (node1Index === node2Index) {
+          if (selfEdgesCounter >= configuration.maxSelfEdges) { continue; }
         }
   
-        if (edgeDirected) {
+        if (configuration.edgeDirected) {
           sameEdge = edges.find(edge => (edge.node1 === nodes[node1Index] && edge.node2 === nodes[node2Index]))
         }
-        else if (!edgeDirected) {
+        else if (!configuration.edgeDirected) {
           sameEdge = edges.find(edge => 
           (
           (edge.node1 === nodes[node1Index] && edge.node2 === nodes[node2Index]) ||
@@ -109,14 +113,18 @@ export class GenerateGraphService {
           )
         )}
       }
+
+      if (node1Index === node2Index) { 
+        selfEdgesCounter++;
+      }
   
       const edge: any = {
         node1: nodes[node1Index],
         node2: nodes[node2Index]
       }
   
-      if (edgeWeight) {
-        edge.weight = this.getRandomNumber(0, 10) // Generate random weight
+      if (configuration.edgeWeight.enabled) {
+        edge.weight = this.getRandomNumber(configuration.edgeWeight.min, configuration.edgeWeight.max) // Generate random weight
       }
   
       edges.push(edge);

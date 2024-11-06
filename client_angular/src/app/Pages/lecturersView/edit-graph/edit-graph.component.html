@@ -47,6 +47,61 @@
                     </mat-form-field>
                 </form>
                 </div>
+            </mat-expansion-panel>    
+            
+            <mat-expansion-panel style="margin-bottom: 2em;">
+
+                <mat-expansion-panel-header>
+                    <mat-panel-title>Aufgabe generieren</mat-panel-title>
+                </mat-expansion-panel-header>
+                
+                <div class="expansion">
+                <!-- <p>Die Auswirkungen dieser Einstellungen sind in der Übersicht nicht sichtbar und beziehen sich nur auf interne Datenbankparameter</p> -->
+                
+                <form [formGroup]="generateGraphForm">
+
+                    <mat-form-field *ngIf="generateGraphFormVisibility('NODES_EDGES_COUNT')" appearance="outline" style="width: 100%;">
+                        <mat-label>Knoten Anzahl</mat-label>
+                        <input matInput type="number" min="0" step="1" placeholder="Knoten Anzahl" formControlName="graphNodeCount">
+                    </mat-form-field>
+
+                    <mat-form-field *ngIf="generateGraphFormVisibility('NODES_EDGES_COUNT')" appearance="outline" style="width: 100%;">
+                        <mat-label>Kanten Anzahl</mat-label>
+                        <input matInput type="number" min="0" step="1" placeholder="Kanten Anzahl" formControlName="graphEdgeCount">
+                    </mat-form-field>
+
+                    <div *ngIf="generateGraphFormVisibility('NODE_WEIGHT')" style="display: flex; flex-direction: row; width: 100%; justify-content: space-between;">                        
+                        <mat-form-field appearance="outline" style="width: 48%;">
+                            <mat-label>Min Knotengewicht</mat-label>
+                            <input matInput type="number" min="0" step="1" placeholder="Knotengewicht Min" formControlName="graphNodeWeightMin">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" style="width: 48%;">
+                            <mat-label>Max Knotengewicht</mat-label>
+                            <input matInput type="number" min="0" step="1" placeholder="Knotengewicht Max" formControlName="graphNodeWeightMax">
+                        </mat-form-field>
+                    </div>
+
+                    <div *ngIf="generateGraphFormVisibility('EDGE_WEIGHT')" style="display: flex; flex-direction: row; width: 100%; justify-content: space-between;">                        
+                        <mat-form-field appearance="outline" style="width: 48%;">
+                            <mat-label>Min Kantengewicht</mat-label>
+                            <input matInput type="number" min="0" step="1" placeholder="Kantengewicht Min" formControlName="graphEdgeWeightMin">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" style="width: 48%;">
+                            <mat-label>Max Kantengewicht</mat-label>
+                            <input matInput type="number" min="0" step="1" placeholder="Kantengewicht Max" formControlName="graphEdgeWeightMax">
+                        </mat-form-field>
+                    </div>
+
+                    <mat-form-field *ngIf="generateGraphFormVisibility('NODES_EDGES_COUNT')" appearance="outline" style="width: 100%;">
+                        <mat-label>Max Schlingen Anzahl</mat-label>
+                        <input matInput type="number" min="0" step="1" placeholder="Max Schlingen Anzahl" formControlName="graphSelfEdgeCountMax">
+                    </mat-form-field>
+                    
+                    <button mat-raised-button color="primary" (click)="onGenerate()" [disabled]="generateGraphForm.invalid" >Generieren</button>
+                </form>
+                </div>
             </mat-expansion-panel>
         </div>
       </div>
@@ -200,7 +255,7 @@
             
             <button
                 type="button" 
-                (click)="generateGraph()" 
+                (click)="onQuickGenerate()" 
             > Generieren </button>
 
             <button

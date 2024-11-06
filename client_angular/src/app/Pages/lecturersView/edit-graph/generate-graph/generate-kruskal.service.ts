@@ -2,6 +2,17 @@ import { Injectable } from '@angular/core';
 import { GenerateGraphService } from './generate-graph.service';
 import { GraphEdgeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
 
+export interface GenerateKruskalConfiguration {
+  nodesCount: number,
+  edgesCount: number,
+  edgeWeight: {
+    enabled: true,
+    min: number,
+    max: number
+  },
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -9,19 +20,22 @@ export class GenerateKruskalService {
 
   constructor(private generateGraphService: GenerateGraphService) { }
 
-  generate(): GraphStructureDTO {
+  generate(configuration: GenerateKruskalConfiguration): GraphStructureDTO {
 
-    const configuration = {
-      nodesCount: 5,
-      edgesCount: 5,
-      selfEdges: false,
+    const _configuration = {
+      ...configuration,
+      maxSelfEdges: 0,
       edgeDirected: false,
-      edgeWeight: true,
-      nodeWeight: false,
       nodeSelected: false,
+      nodeWeight: {
+        enabled: false,
+        min: 0,
+        max: 0
+      },
+
     }
 
-    const {nodes, edges} = this.generateGraphService.generateGraph(configuration);
+    const {nodes, edges} = this.generateGraphService.generateGraph(_configuration);
    
     const updatedEdges: GraphEdgeDTO[] = []; 
     

@@ -2,6 +2,16 @@ import { Injectable } from '@angular/core';
 import { GraphEdgeDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
 import { GenerateGraphService } from './generate-graph.service';
 
+export interface GenerateDijkstraConfiguration {
+  nodesCount: number,
+  edgesCount: number,
+  edgeWeight: {
+    enabled: true,
+    min: number,
+    max: number
+  },
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -9,19 +19,21 @@ export class GenerateDijkstraService {
 
   constructor(private generateGraphService: GenerateGraphService) { }
 
-  generate(): GraphStructureDTO {
+  generate(configuration: GenerateDijkstraConfiguration): GraphStructureDTO {
 
-    const configuration = {
-      nodesCount: 5,
-      edgesCount: 5,
-      selfEdges: false,
+    const _configuration = {
+      ...configuration,
+      maxSelfEdges: 0,
       edgeDirected: false,
-      edgeWeight: true,
-      nodeWeight: false, // false as it won't be generated randomly
-      nodeSelected: true, // It will be set to false automatically for all nodes
+      nodeWeight: { // disabled, as it won't be generated randomly
+        enabled: false,
+        min: 0,
+        max: 0
+      }, 
+      nodeSelected: true, // It is enabled and the attribute selected will be set to false automatically for all nodes
     }
 
-    const {nodes, edges} = this.generateGraphService.generateGraph(configuration);
+    const {nodes, edges} = this.generateGraphService.generateGraph(_configuration);
     
     // Randomly select a starting node for Dijkstra's algorithm
     const startNodeIndex = this.generateGraphService.getRandomNumber(0, configuration.nodesCount - 1);

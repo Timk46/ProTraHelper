@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { GraphConfigurationDTO, GraphEdgeDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
 import { GraphTaskService } from 'src/app/Modules/graph-tasks/services/graph-task.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -87,6 +87,7 @@ export class EditGraphComponent implements AfterViewInit {
   @ViewChild('expectations', { static: false }) expectationField!: TinymceComponent;
 
   graphForm: FormGroup;
+  generateGraphForm: FormGroup;
 
   thisQuestionType = questionType.GRAPH;
 
@@ -153,6 +154,19 @@ export class EditGraphComponent implements AfterViewInit {
       questionScore: ['', Validators.required],
       graphQuestionType: ['', Validators.required],
     });
+
+    this.generateGraphForm = this.fb.group(
+      {
+        graphNodeCount: [0, [Validators.required, Validators.min(0)]],
+        graphEdgeCount: [0, [Validators.required, Validators.min(0)]],
+        graphNodeWeightMin: [0, [Validators.required, Validators.min(0)]],
+        graphNodeWeightMax: [0, [Validators.required, Validators.min(0)]],
+        graphEdgeWeightMin: [0, [Validators.required, Validators.min(0)]],
+        graphEdgeWeightMax: [0, [Validators.required, Validators.min(0)]],
+        graphSelfEdgeCountMax: [0, [Validators.required, Validators.min(0)]],
+      }
+    );
+      
   }
 
   ngOnInit(): void {
@@ -756,31 +770,122 @@ export class EditGraphComponent implements AfterViewInit {
     return index;
   }
 
-  generateGraph() {
     
-    const generatedNodes: GraphNodeDTO[] = [];
-    const generatedEdges: GraphEdgeDTO[] = [];
+  // #######################################################
+  // Generate Graph Task
 
+  generateGraphFormVisibility(FIELD: string)  {
+    
+    if ( FIELD === 'NODES_EDGES_COUNT' ) { 
+      return (
+        this.graphForm.value.graphQuestionType === 'dijkstra' ||
+        this.graphForm.value.graphQuestionType === 'floyd' ||
+        this.graphForm.value.graphQuestionType === 'kruskal' ||
+        this.graphForm.value.graphQuestionType === 'transitive_closure'
+      );
+    }
+
+    if ( FIELD === 'NODE_WEIGHT' ) {
+      return false;
+    }
+
+    if ( FIELD === 'EDGE_WEIGHT' ) {
+      return (
+        this.graphForm.value.graphQuestionType === 'dijkstra' ||
+        this.graphForm.value.graphQuestionType === 'floyd' ||
+        this.graphForm.value.graphQuestionType === 'kruskal'
+      );
+    }
+
+    if ( FIELD === 'SELF_EDGE' ) {
+      return (
+        this.graphForm.value.graphQuestionType === 'floyd' ||
+        this.graphForm.value.graphQuestionType === 'transitive_closure'
+      );
+    }
+
+    return false;
+  }
+
+  onGenerate() {
+    const graphStructure = this.generateGraph();
+
+    if (graphStructure === undefined) {
+      this.snackBar.open('Fehler beim Generieren der Graphstruktur.', 'Schließen', { duration: 3000 });
+      return;
+    }
+
+    this.resetWorkspaceContent();
+
+    const clonedInitialStructure: GraphStructureDTO = JSON.parse(JSON.stringify(graphStructure));
+    this.assignmentGraphStructure = clonedInitialStructure;
+    
+    this.structureIsSet = true;
+
+    this.generateTextFromStructure();
+  }
+
+  onQuickGenerate() {
+    const graphStructure = this.generateGraph();
+
+    if (graphStructure === undefined) {
+      this.snackBar.open('Fehler beim Generieren der Graphstruktur.', 'Schließen', { duration: 3000 });
+      return;
+    }
+
+    this.graphTaskService.resetGraph();
+    this.graphTaskService.graphDataFromJSON(graphStructure.nodes, graphStructure.edges);
+
+    this.structureIsSet = true;
+
+    this.generateTextFromStructure();
+  }
+
+  generateGraph(): GraphStructureDTO | undefined {
+
+    
     if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
-      const { nodes, edges } = this.generateTransitiveClosureService.generate();
-      generatedNodes.push(...nodes);
-      generatedEdges.push(...edges);
-    }
-    else if (this.graphForm.value.graphQuestionType === 'dijkstra') {
-      const { nodes, edges } = this.generateDijkstraService.generate();
-      generatedNodes.push(...nodes);
-      generatedEdges.push(...edges);
-    }
-    else if (this.graphForm.value.graphQuestionType === 'kruskal') {
-      const { nodes, edges } = this.generateKruskalService.generate();
-      generatedNodes.push(...nodes);
-      generatedEdges.push(...edges);
+
+      const { nodes, edges } = this.generateTransitiveClosureService.generate({
+        nodesCount: this.generateGraphForm.value.graphNodeCount,
+        edgesCount: this.generateGraphForm.value.graphEdgeCount,
+        maxSelfEdges: this.generateGraphForm.value.graphSelfEdgeCountMax,
+      });
+
+      return {nodes, edges};
     }
 
-    if (generatedNodes.length !== 0 && generatedEdges.length !== 0) {
-      this.graphTaskService.resetGraph();
-      this.graphTaskService.graphDataFromJSON(generatedNodes, generatedEdges);
+    if (this.graphForm.value.graphQuestionType === 'dijkstra') {
+
+      const { nodes, edges } = this.generateDijkstraService.generate({
+        nodesCount: this.generateGraphForm.value.graphNodeCount,
+        edgesCount: this.generateGraphForm.value.graphEdgeCount,
+        edgeWeight: {
+          enabled: true,
+          min: this.generateGraphForm.value.graphEdgeWeightMin,
+          max: this.generateGraphForm.value.graphEdgeWeightMax,
+        }
+      });
+
+      return {nodes, edges};
     }
+
+    if (this.graphForm.value.graphQuestionType === 'kruskal') {
+      
+      const { nodes, edges } = this.generateKruskalService.generate({
+        nodesCount: this.generateGraphForm.value.graphNodeCount,
+        edgesCount: this.generateGraphForm.value.graphEdgeCount,
+        edgeWeight: {
+          enabled: true,
+          min: this.generateGraphForm.value.graphEdgeWeightMin,
+          max: this.generateGraphForm.value.graphEdgeWeightMax,
+        }
+      });
+
+      return {nodes, edges};
+    }
+
+    return undefined;
 
   }
 
