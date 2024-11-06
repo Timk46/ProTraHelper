@@ -1,10 +1,23 @@
-import { Controller, Request, Res, Get, Post, UseGuards, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Request,
+  Res,
+  Get,
+  Post,
+  UseGuards,
+  UnauthorizedException,
+  Headers,
+  BadRequestException,
+} from '@nestjs/common';
 import { Response as ExpressResponse } from 'express';
 import { LocalAuthGuard } from './common/guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { CasAuthGuard } from './common/guards/cas-auth.guard';
 import { Public } from '../public.decorator';
 import { UserDTO } from '@DTOs/user.dto';
+import { JwtAuthGuard } from '@/auth/common/guards/jwt-auth.guard';
+import { JwtRefreshAuthGuard } from '@/auth/common/guards/jwt-refresh-auth.guard';
+import { User } from '@prisma/client';
 
 /**
  * This class is used to define the auth routes of the application
@@ -30,7 +43,7 @@ export class AuthController {
 
     // Redirect to the website with tokens as URL parameters - not super secure, but cant send in body because its not a request by the client
     res.redirect(
-      `${process.env.WEBSITE_URL}/login?accessToken=${tokens.accessToken}`,
+      `${process.env.WEBSITE_URL}/login?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
     );
   }
 
@@ -48,5 +61,25 @@ export class AuthController {
   ) {
     // The LocalAuthGuard has already validated the user, so we can directly login
     return this.authService.login(req.user);
+  }
+  @Public()
+  @UseGuards(JwtRefreshAuthGuard)
+  @Get('refresh')
+  async refresh(
+    @Request() req: { user: User },
+    @Headers('device-id') deviceId: string,
+  ) {
+    try {
+      const email = req.user['email'];
+      const refreshToken = req.user['refreshToken'];
+
+      return await this.authService.refreshTokens(
+        email,
+        refreshToken,
+        deviceId,
+      );
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }

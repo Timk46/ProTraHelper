@@ -1,9 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { EventLogService } from '../EventLog/event-log.service';
 import { UserDTO } from '@DTOs/user.dto';
+import { RefreshTokenService } from './refresh-token/refresh-token.service';
+import * as bcrypt from 'bcrypt';
 
 /**
  * Provides authentication services
@@ -22,6 +24,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private eventLogService: EventLogService,
+    private refreshTokenService: RefreshTokenService
   ) {}
 
   /**
@@ -42,6 +45,7 @@ export class AuthService {
       this.eventLogService.log('info', 'login', user.id, 'User created', {email: user.email, role: user.globalRole});
     }
     const tokens = await this.generateTokens(user);
+    await this.refreshTokenService.createRefreshToken(user.email, deviceId, tokens.refreshToken);
     //this.logger.debug(`Tokens generated for CAS login`);
     return {
       ...tokens,
@@ -83,13 +87,38 @@ export class AuthService {
     };
   }
 
+  async refreshTokens(email: string, deviceId: string, refreshToken: string) {
+    this.logger.debug(`Refresh tokens for user: ${email}`); // TODO: hide
+    const user = await this.usersService.findOne(email);
+    const userRefreshToken = await this.refreshTokenService.getRefreshToken(email, deviceId);
+
+    if (!user || !userRefreshToken) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    const refreshTokenMatches = await bcrypt.compare(
+      refreshToken,
+      userRefreshToken.token
+    );
+
+    if (!refreshTokenMatches) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    const tokens = await this.generateTokens(user);
+    await this.refreshTokenService.updateRefreshToken(email, deviceId, tokens.refreshToken);
+    this.logger.debug(`Tokens refreshed for user: ${user.email}`); // TODO: hide
+    await this.eventLogService.log('info', 'login', user.id, 'User update refresh token', { email: user.email });
+    return tokens;
+  }
+
   /**
    * Generates the access and refresh tokens for a user
    * @param { UserDTO } user the user to generate the tokens for
    * @returns { Promise<{ accessToken: string }> } the access and refresh tokens
    */
-  async generateTokens(user: UserDTO): Promise<{ accessToken: string; }> {
-    //this.logger.debug(`Generating tokens for user: ${user.email}`);
+  async generateTokens(user: UserDTO): Promise<{ accessToken: string; refreshToken: string; }> {
+    this.logger.debug(`Generating tokens for user: ${user.email}`); // TODO: hide
     const payload = {
       email: user.email,
       firstName: user.firstname,
@@ -103,7 +132,7 @@ export class AuthService {
         registeredForSL: us.registeredForSL
       })) || []
     };
-    const [accessToken] = await Promise.all([
+    const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         {
           ...payload,
@@ -123,10 +152,15 @@ export class AuthService {
         },
       ),
     ]);
-    //this.logger.debug(`Tokens generated for user: ${user.email}`);
-    this.eventLogService.log('info', 'login', user.id, 'Tokens generated', {email: user.email, role: user.globalRole, accessToken: accessToken});
+    this.logger.debug(`Tokens generated for user: ${user.email}`); // TODO: hide
+    await this.eventLogService.log('info', 'login', user.id, 'Tokens generated', {
+      email: user.email,
+      role: user.globalRole,
+      accessToken: accessToken
+    });
     return {
-      accessToken
+      accessToken,
+      refreshToken,
     };
   }
 }

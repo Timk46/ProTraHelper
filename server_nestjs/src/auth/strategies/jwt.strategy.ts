@@ -7,7 +7,7 @@ import { User } from '@prisma/client';
  * This class provides a passport strategy for JWT authentication
  */
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   /**
    * Constructor
    */

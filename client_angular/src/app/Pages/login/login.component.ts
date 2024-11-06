@@ -35,16 +35,17 @@ export class LoginComponent implements OnInit {
   isChrome = false;
 
   /**
-   * It checks for accessToken in the queryParams and uses them to set tokens in the UserService.
+   * It checks for accessToken and refreshToken in the queryParams and uses them to set tokens in the UserService.
    * This is needed because the authentication server (CAS) redirects to the client with the tokens as query parameters.
    * If both tokens are present, it then navigates to the '/dashboard' page.
    */
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
       const accessToken = params['accessToken'];
+      const refreshToken = params['refreshToken'];
 
-      if (accessToken) {
-        this.userService.setTokens(accessToken);
+      if (accessToken && refreshToken) {
+        this.userService.setTokens(accessToken, refreshToken);
         this.router.navigate(['/dashboard']);
       }
     });

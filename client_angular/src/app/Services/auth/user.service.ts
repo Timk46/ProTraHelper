@@ -52,7 +52,9 @@ export class UserService {
         next: (response: any) => {
           console.log('Login successful:', response);
           const accessToken = response.accessToken;
+          const refreshToken = response.refreshToken;
           localStorage.setItem('accessToken', accessToken);
+          localStorage.setItem('refreshToken', refreshToken);
           this.openSnackBar("Hallo " + username);
           this.router.navigate(['/dashboard']);
           resolve(true);
@@ -106,8 +108,9 @@ export class UserService {
    *
    * @param accessToken - The user accessToken to be saved in local storage
    */
-  setTokens(accessToken: string): void {
+  setTokens(accessToken: string, refreshToken: string): void {
     localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
     (this.isAuthenticated$ as BehaviorSubject<boolean>).next(true);// Update authentication status
   }
 
@@ -117,9 +120,12 @@ export class UserService {
    */
   removeTokens(): void {
     const accessToken = 'accessToken';
+    const refreshToken = 'refreshToken';
 
-    if (localStorage.getItem(accessToken)) {
+    if (localStorage.getItem(accessToken) && localStorage.getItem(refreshToken)) {
       localStorage.removeItem(accessToken);
+      localStorage.removeItem(refreshToken);
+      // TODO: ggf. Device-ID auch löschen
       (this.isAuthenticated$ as BehaviorSubject<boolean>).next(false);// Update authentication status
     }
   }
@@ -134,6 +140,37 @@ export class UserService {
     } else {
       throw new Error('No access token found');
     }
+  }
+
+  getRefreshToken(): string {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) {
+      return refreshToken;
+    } else {
+      throw new Error('No refresh token found');
+    }
+  }
+
+  refreshTokens(refreshToken: string): Observable<any> {
+    return this.http.get(environment.server + '/auth/refresh', {
+      headers: {
+        'Authorization': `Bearer ${refreshToken}`,
+      },
+    })
+      .pipe(
+        tap((response: any) => {
+          // Update the access token in local storage or cookie
+          const accessToken = response.accessToken;
+          const refreshToken = response.refreshToken;
+          localStorage.setItem('accessToken', accessToken);
+          localStorage.setItem('refreshToken', refreshToken);
+        }),
+        catchError((error: any) => {
+          this.openSnackBar('Session expired. Please login again');
+          this.removeTokens()
+          return error;
+        })
+      );
   }
 
   getDeviceId(): string {
