@@ -75,8 +75,8 @@ export class AuthController {
 
       return await this.authService.refreshTokens(
         email,
-        refreshToken,
         deviceId,
+        refreshToken,
       );
     } catch (error) {
       throw new BadRequestException(error.message);
