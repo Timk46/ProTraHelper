@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { GraphConfigurationDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
+import { GraphConfigurationDTO, GraphEdgeDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
 import { GraphTaskService } from 'src/app/Modules/graph-tasks/services/graph-task.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
@@ -11,6 +11,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
 import { GenerateTransitiveClosureService } from './generate-graph/generate-transitive-closure.service';
 import { GenerateDijkstraService } from './generate-graph/generate-dijkstra.service';
+import { GenerateKruskalService } from './generate-graph/generate-kruskal.service';
 
 
 interface GraphQuestionConfiguration extends GraphConfigurationDTO {
@@ -142,6 +143,7 @@ export class EditGraphComponent implements AfterViewInit {
     private router: Router,
     private generateTransitiveClosureService: GenerateTransitiveClosureService,
     private generateDijkstraService: GenerateDijkstraService,
+    private generateKruskalService: GenerateKruskalService,
   ) {
 
     this.graphForm = this.fb.group({
@@ -756,16 +758,30 @@ export class EditGraphComponent implements AfterViewInit {
 
   generateGraph() {
     
+    const generatedNodes: GraphNodeDTO[] = [];
+    const generatedEdges: GraphEdgeDTO[] = [];
+
     if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
       const { nodes, edges } = this.generateTransitiveClosureService.generate();
-      this.graphTaskService.resetGraph();
-      this.graphTaskService.graphDataFromJSON(nodes, edges);
+      generatedNodes.push(...nodes);
+      generatedEdges.push(...edges);
     }
     else if (this.graphForm.value.graphQuestionType === 'dijkstra') {
       const { nodes, edges } = this.generateDijkstraService.generate();
-      this.graphTaskService.resetGraph();
-      this.graphTaskService.graphDataFromJSON(nodes, edges);
+      generatedNodes.push(...nodes);
+      generatedEdges.push(...edges);
     }
+    else if (this.graphForm.value.graphQuestionType === 'kruskal') {
+      const { nodes, edges } = this.generateKruskalService.generate();
+      generatedNodes.push(...nodes);
+      generatedEdges.push(...edges);
+    }
+
+    if (generatedNodes.length !== 0 && generatedEdges.length !== 0) {
+      this.graphTaskService.resetGraph();
+      this.graphTaskService.graphDataFromJSON(generatedNodes, generatedEdges);
+    }
+
   }
 
 }
