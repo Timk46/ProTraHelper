@@ -10,7 +10,10 @@
       <a mat-list-item routerLink="/task-evaluation-overview" routerLinkActive="active-link">Task Evaluation Overview</a>
       <a mat-list-item routerLink="/file-upload" routerLinkActive="active-link">file-upload</a>
       <!--<a mat-list-item routerLink="/chatbot" routerLinkActive="active-link">Chat Bot</a>-->
-      <a mat-list-item *ngIf="userIsLoggedIn" (click)="logOut()">Logout</a>
+      <mat-menu #logoutMenu="matMenu">
+        <button mat-menu-item (click)="logOut(false)">Logout</button>
+        <button mat-menu-item (click)="logOut(true)">Logout from All Devices</button>
+      </mat-menu>
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
@@ -49,7 +52,11 @@
     <mat-divider vertical="true" class="divider" *ngIf="userIsLoggedIn"></mat-divider>
     <button mat-button *ngIf="userIsLoggedIn" style="font-size:15px; font-weight:bolder;" (click)="showProgress()"> Fortschritt anzeigen </button>
     <mat-divider *ngIf="userRole === 'ADMIN'" vertical="true" class="divider"></mat-divider>
-    <button mat-button style="margin-left: 5px" *ngIf="userIsLoggedIn" (click)="logOut()">Logout</button>
+    <button mat-button [matMenuTriggerFor]="logoutMenu" *ngIf="userIsLoggedIn">Logout</button>
+    <mat-menu #logoutMenu="matMenu">
+      <button mat-menu-item (click)="logOut(false)">Logout</button>
+      <button mat-menu-item (click)="logOut(true)">Logout from All Devices</button>
+    </mat-menu>
   </div>
     <!-- NOTIFICATION BELL
       <app-notification-bell class="bell"></app-notification-bell>

@@ -104,4 +104,26 @@ export class RefreshTokenService {
       },
     });
   }
+
+  async deleteAllUserRefreshTokens(email: string) {
+    const existingRefreshTokens = await this.prisma.refreshToken.findMany({
+      where: {
+        user: {
+          email: email,
+        },
+      },
+    });
+
+    if (!existingRefreshTokens) {
+      throw new Error(`Refresh tokens not found for email ${email}`);
+    }
+
+    return this.prisma.refreshToken.deleteMany({
+      where: {
+        user: {
+          email: email,
+        },
+      },
+    });
+  }
 }

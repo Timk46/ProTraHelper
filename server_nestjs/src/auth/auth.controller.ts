@@ -77,6 +77,17 @@ export class AuthController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('logoutAllUserDevices')
+  async logoutAllUserDevices(@Request() req: { user: User }) {
+    try {
+      await this.authService.logoutAllUserDevices(req.user);
+      return { message: 'Logout from all devices successful' };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
   @Public()
   @UseGuards(JwtRefreshAuthGuard)
   @Get('refresh')

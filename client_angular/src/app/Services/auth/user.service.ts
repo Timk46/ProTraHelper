@@ -75,9 +75,11 @@ export class UserService {
     });
   }
 
-  logout(): Promise<boolean> {
+  logout(logoutFromAllDevices: boolean): Promise<boolean> {
+    const url = logoutFromAllDevices ? environment.server + '/auth/logoutAllUserDevices' : environment.server + '/auth/logout';
+
     return new Promise<boolean>(async (resolve) => {
-      this.http.get(environment.server + '/auth/logout').pipe(
+      this.http.get(url).pipe(
         finalize(() => {
           this.removeTokens();
           this.router.navigate(['/login']);
@@ -86,6 +88,9 @@ export class UserService {
         next: (response: any) => {
           if (response.message === "Logout successful") {
             this.openSnackBar("Successfully logged out.");
+            resolve(true);
+          } else if (response.message === "Logout from all devices successful") {
+            this.openSnackBar("Successfully logged out from all devices.");
             resolve(true);
           } else {
             this.openSnackBar("Error at logout.");
