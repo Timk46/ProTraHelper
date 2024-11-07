@@ -117,7 +117,9 @@ export class AuthInterceptor implements HttpInterceptor {
    * @param error - The error object
    */
   checkError(error: any) {
-    if (error.status === 429) {
+    if (error.status === 401) {
+      return; // Unauthorized error is handled in the interceptor
+    } else if (error.status === 429) {
       this.openSnackBar(
         'Too many requests in a short time. Please try again in a minute.',
         'Warning'
