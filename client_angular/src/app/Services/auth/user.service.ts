@@ -153,11 +153,12 @@ export class UserService {
   removeTokens(): void {
     const accessToken = 'accessToken';
     const refreshToken = 'refreshToken';
+    const deviceId = this.DEVICE_ID_KEY;
 
     if (localStorage.getItem(accessToken) && localStorage.getItem(refreshToken)) {
       localStorage.removeItem(accessToken);
       localStorage.removeItem(refreshToken);
-      // TODO: ggf. Device-ID auch löschen
+      localStorage.removeItem(deviceId);
       (this.isAuthenticated$ as BehaviorSubject<boolean>).next(false);// Update authentication status
     }
   }
