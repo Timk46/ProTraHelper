@@ -94,7 +94,7 @@ export class AuthInterceptor implements HttpInterceptor {
             }),
             catchError((error: any) => {
               // Refresh token is invalid or expired
-              this.openSnackBar('Session expired. Please login again', 'Warning');
+              this.openSnackBar('Sitzung abgelaufen. Bitte erneut anmelden', 'Warning');
               this.userService.removeTokens();
 
               this.router.navigate(['/login']);

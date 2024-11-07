@@ -87,18 +87,18 @@ export class UserService {
       ).subscribe({
         next: (response: any) => {
           if (response.message === "Logout successful") {
-            this.openSnackBar("Successfully logged out.");
+            this.openSnackBar("Erfolgreich abgemeldet.");
             resolve(true);
           } else if (response.message === "Logout from all devices successful") {
-            this.openSnackBar("Successfully logged out from all devices.");
+            this.openSnackBar("Erfolgreich von allen Geräten abgemeldet.");
             resolve(true);
           } else {
-            this.openSnackBar("Error at logout.");
+            this.openSnackBar("Fehler bei der Abmeldung.");
             resolve(false);
           }
         },
         error: (error: any) => {
-          this.openSnackBar("Error at logout.");
+          this.openSnackBar("Fehler bei der Abmeldung.");
           resolve(false);
         },
         complete: () => {
@@ -198,7 +198,7 @@ export class UserService {
           localStorage.setItem('refreshToken', refreshToken);
         }),
         catchError((error: any) => {
-          this.openSnackBar('Session expired. Please login again');
+          this.openSnackBar('Sitzung abgelaufen. Bitte erneut anmelden');
           this.removeTokens()
           return error;
         })

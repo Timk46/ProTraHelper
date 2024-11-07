@@ -49,10 +49,10 @@
     <mat-divider vertical="true" class="divider" *ngIf="userIsLoggedIn"></mat-divider>
     <button mat-button *ngIf="userIsLoggedIn" style="font-size:15px; font-weight:bolder;" (click)="showProgress()"> Fortschritt anzeigen </button>
     <mat-divider *ngIf="userRole === 'ADMIN'" vertical="true" class="divider"></mat-divider>
-    <button mat-button [matMenuTriggerFor]="logoutMenu" *ngIf="userIsLoggedIn">Logout</button>
+    <button mat-button [matMenuTriggerFor]="logoutMenu" *ngIf="userIsLoggedIn">Abmelden</button>
     <mat-menu #logoutMenu="matMenu">
-      <button mat-menu-item (click)="logOut(false)">Logout</button>
-      <button mat-menu-item (click)="logOut(true)">Logout from All Devices</button>
+      <button mat-menu-item (click)="logOut(false)">Abmelden</button>
+      <button mat-menu-item (click)="logOut(true)">Von allen Geräten abmelden</button>
     </mat-menu>
   </div>
     <!-- NOTIFICATION BELL

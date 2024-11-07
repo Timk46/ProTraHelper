@@ -105,10 +105,10 @@ export class AppComponent {
     if (logOutAllUserDevices) {
       const dialog = this.dialog.open(ConfirmationBoxComponent, {
         data: {
-          title: 'Confirm Logout',
-          message: 'Are you sure you want to logout from all devices?',
-          decline: 'Cancel',
-          accept: 'Logout',
+          title: 'Abmeldung bestätigen',
+          message: 'Möchten Sie sich wirklich von allen Geräten abmelden?',
+          decline: 'Abbrechen',
+          accept: 'Abmelden',
           swapButtons: false,
           swapColors: false
         }
