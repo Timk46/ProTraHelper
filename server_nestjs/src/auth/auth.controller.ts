@@ -13,7 +13,7 @@ import { Response as ExpressResponse } from 'express';
 import { LocalAuthGuard } from './common/guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { CasAuthGuard } from './common/guards/cas-auth.guard';
-import { Public } from '../public.decorator';
+import { Public } from '@/public.decorator';
 import { UserDTO } from '@DTOs/user.dto';
 import { JwtAuthGuard } from '@/auth/common/guards/jwt-auth.guard';
 import { JwtRefreshAuthGuard } from '@/auth/common/guards/jwt-refresh-auth.guard';
@@ -50,6 +50,7 @@ export class AuthController {
   /**
    * Login route (local strategy)
    * @param req the request object
+   * @param deviceId
    * @returns the access and refresh tokens
    */
   @Public()
@@ -60,7 +61,7 @@ export class AuthController {
     @Headers('device-id') deviceId: string,
   ) {
     // The LocalAuthGuard has already validated the user, so we can directly login
-    return this.authService.login(req.user);
+    return this.authService.login(req.user, deviceId);
   }
 
   @UseGuards(JwtAuthGuard)

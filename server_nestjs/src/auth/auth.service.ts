@@ -80,9 +80,10 @@ export class AuthService {
    * @param { UserDTO } user the user to log in
    * @returns the user, access and refresh tokens if the user exists
    */
-  async login(user: UserDTO) {
+  async login(user: UserDTO, deviceId: string) {
     //this.logger.debug(`Generating tokens for user: ${user.email}`);
     const tokens = await this.generateTokens(user);
+    await this.refreshTokenService.createRefreshToken(user.email, deviceId, tokens.refreshToken);
     return {
       ...tokens
     };
