@@ -60,7 +60,7 @@ export class AuthInterceptor implements HttpInterceptor {
     // send cloned request with header to the next handler.
     return next.handle(request).pipe(
       catchError((err: HttpErrorResponse) => {
-        // this.checkError(err); // TODO: check when this is needed
+        this.checkError(err);
 
         if (err.status === 403 || err.status === 498) {
           this.userService.removeTokens();
@@ -117,9 +117,7 @@ export class AuthInterceptor implements HttpInterceptor {
    * @param error - The error object
    */
   checkError(error: any) {
-    if (error.status === 401) {
-      this.openSnackBar('Please log in again.', 'Warning');
-    } else if (error.status === 429) {
+    if (error.status === 429) {
       this.openSnackBar(
         'Too many requests in a short time. Please try again in a minute.',
         'Warning'
