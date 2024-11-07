@@ -60,46 +60,103 @@
                 
                 <form [formGroup]="generateGraphForm">
 
+                    <!-- Node Count -->
                     <mat-form-field *ngIf="generateGraphFormVisibility('NODES_EDGES_COUNT')" appearance="outline" style="width: 100%;">
                         <mat-label>Knoten Anzahl</mat-label>
                         <input matInput type="number" min="0" step="1" placeholder="Knoten Anzahl" formControlName="graphNodeCount">
+                        <mat-error *ngIf="generateGraphForm.get('graphNodeCount')?.hasError('required')">
+                            Knoten Anzahl ist erforderlich
+                        </mat-error>
+                        <mat-error *ngIf="generateGraphForm.get('graphNodeCount')?.hasError('min')">
+                            Knoten Anzahl muss mindestens 1 sein
+                        </mat-error>
                     </mat-form-field>
 
+                    <!-- Edge Count -->
                     <mat-form-field *ngIf="generateGraphFormVisibility('NODES_EDGES_COUNT')" appearance="outline" style="width: 100%;">
                         <mat-label>Kanten Anzahl</mat-label>
                         <input matInput type="number" min="0" step="1" placeholder="Kanten Anzahl" formControlName="graphEdgeCount">
+                        <mat-error *ngIf="generateGraphForm.get('graphEdgeCount')?.hasError('required')">
+                            Kanten Anzahl ist erforderlich
+                        </mat-error>
+                        <mat-error *ngIf="generateGraphForm.get('graphEdgeCount')?.hasError('min')">
+                            Kanten Anzahl muss mindestens 0 sein
+                        </mat-error>
+                        <!-- TODO: is not working properly -->
+                        <!-- <mat-error *ngIf="generateGraphForm.get('graphEdgeCount')?.hasError('edgesTooFew')">
+                            Kanten Anzahl muss mindestens (Knoten Anzahl - 1) sein
+                        </mat-error> -->
                     </mat-form-field>
 
+                    <!-- Node Weights Min and Max -->
                     <div *ngIf="generateGraphFormVisibility('NODE_WEIGHT')" style="display: flex; flex-direction: row; width: 100%; justify-content: space-between;">                        
                         <mat-form-field appearance="outline" style="width: 48%;">
                             <mat-label>Min Knotengewicht</mat-label>
                             <input matInput type="number" min="0" step="1" placeholder="Knotengewicht Min" formControlName="graphNodeWeightMin">
+                            <mat-error *ngIf="generateGraphForm.get('graphNodeWeightMin')?.hasError('required')">
+                                Min Knotengewicht ist erforderlich
+                            </mat-error>
+                            <mat-error *ngIf="generateGraphForm.hasError('minGreaterThanMax', ['graphNodeWeightMin', 'graphNodeWeightMax'])">
+                                Min Knotengewicht darf nicht größer als Max sein
+                            </mat-error>
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" style="width: 48%;">
                             <mat-label>Max Knotengewicht</mat-label>
                             <input matInput type="number" min="0" step="1" placeholder="Knotengewicht Max" formControlName="graphNodeWeightMax">
+                            <mat-error *ngIf="generateGraphForm.get('graphNodeWeightMax')?.hasError('required')">
+                                Max Knotengewicht ist erforderlich
+                            </mat-error>
+                            <mat-error *ngIf="generateGraphForm.hasError('minGreaterThanMax', ['graphNodeWeightMin', 'graphNodeWeightMax'])">
+                                Max Knotengewicht darf nicht kleiner als Min sein
+                            </mat-error>
                         </mat-form-field>
                     </div>
 
+                    <!-- Edge Weights Min and Max -->
                     <div *ngIf="generateGraphFormVisibility('EDGE_WEIGHT')" style="display: flex; flex-direction: row; width: 100%; justify-content: space-between;">                        
                         <mat-form-field appearance="outline" style="width: 48%;">
                             <mat-label>Min Kantengewicht</mat-label>
                             <input matInput type="number" min="0" step="1" placeholder="Kantengewicht Min" formControlName="graphEdgeWeightMin">
+                            <mat-error *ngIf="generateGraphForm.get('graphEdgeWeightMin')?.hasError('required')">
+                                Min Kantengewicht ist erforderlich
+                            </mat-error>
+                            <mat-error *ngIf="generateGraphForm.get('graphEdgeWeightMin')?.hasError('min')">
+                                Min Kantengewicht muss positiv sein
+                            </mat-error>
+                            <mat-error *ngIf="generateGraphForm.hasError('minGreaterThanMax', ['graphEdgeWeightMin', 'graphEdgeWeightMax'])">
+                                Min Kantengewicht darf nicht größer als Max sein
+                            </mat-error>
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" style="width: 48%;">
                             <mat-label>Max Kantengewicht</mat-label>
                             <input matInput type="number" min="0" step="1" placeholder="Kantengewicht Max" formControlName="graphEdgeWeightMax">
+                            <mat-error *ngIf="generateGraphForm.get('graphEdgeWeightMax')?.hasError('required')">
+                                Max Kantengewicht ist erforderlich
+                            </mat-error>
+                            <mat-error *ngIf="generateGraphForm.get('graphEdgeWeightMax')?.hasError('min')">
+                                Max Kantengewicht muss positiv sein
+                            </mat-error>
+                            <mat-error *ngIf="generateGraphForm.hasError('minGreaterThanMax', ['graphEdgeWeightMin', 'graphEdgeWeightMax'])">
+                                Max Kantengewicht darf nicht kleiner als Min sein
+                            </mat-error>
                         </mat-form-field>
                     </div>
 
-                    <mat-form-field *ngIf="generateGraphFormVisibility('NODES_EDGES_COUNT')" appearance="outline" style="width: 100%;">
+                    <!-- Self Edge Count -->
+                    <mat-form-field *ngIf="generateGraphFormVisibility('SELF_EDGES_COUNT')" appearance="outline" style="width: 100%;">
                         <mat-label>Max Schlingen Anzahl</mat-label>
                         <input matInput type="number" min="0" step="1" placeholder="Max Schlingen Anzahl" formControlName="graphSelfEdgeCountMax">
+                        <mat-error *ngIf="generateGraphForm.get('graphSelfEdgeCountMax')?.hasError('required')">
+                            Max Schlingen Anzahl ist erforderlich
+                        </mat-error>
+                        <mat-error *ngIf="generateGraphForm.get('graphSelfEdgeCountMax')?.hasError('min')">
+                            Max Schlingen Anzahl muss mindestens 0 sein
+                        </mat-error>
                     </mat-form-field>
                     
-                    <button mat-raised-button color="primary" (click)="onGenerate()" [disabled]="generateGraphForm.invalid" >Generieren</button>
+                    <button mat-raised-button color="primary" (click)="onGenerate()" [disabled]="generateButtonDisabled()" >Generieren</button>
                 </form>
                 </div>
             </mat-expansion-panel>
@@ -245,6 +302,7 @@
 
 
             <button
+                mat-raised-button color="primary"
                 type="button"
                 (click)="resetStructure()"
             > 
@@ -254,11 +312,15 @@
 
             
             <button
+                mat-raised-button color="primary"
                 type="button" 
                 (click)="onQuickGenerate()" 
+                [disabled]="generateButtonDisabled()"
+                [matTooltip]="generateButtonDisabled() ? 'Die eingegebene Parameter überprüfen!' : ''"
             > Generieren </button>
 
             <button
+                mat-raised-button color="primary"
                 type="button" 
                 (click)="deactivateWorkspace()" 
             > Bestätigen </button>

@@ -86,22 +86,39 @@ export class GenerateGraphService {
     const edges: any[] = [];
     let edgeIndex = 0;
     let selfEdgesCounter = 0;
+    const maxAttempts = 1000; // Limit attempts for generating valid edges
 
-    while (edgeIndex < configuration.edgesCount) {
+
+    // Calculate maximum number of unique edges based on configuration
+    const maxEdges = configuration.edgeDirected 
+    ? nodes.length * (nodes.length - 1) + configuration.maxSelfEdges
+    : (nodes.length * (nodes.length - 1)) / 2 + configuration.maxSelfEdges;
+
+    const targetEdgeCount = Math.min(configuration.edgesCount, maxEdges);
+
+    while (edgeIndex < targetEdgeCount) {
+      let attemptCount = 0;
   
       let node1Index = 0 //generate random number between 0 - nodes.length - 1
       let node2Index = 0 //generate random number between 0 - nodes.length - 1
       let sameEdge = 0;
    
-      while (sameEdge !== undefined) {
-  
+      // Ensure we do not endlessly loop trying to find unique edges
+      while (attemptCount < maxAttempts) {
+        attemptCount++;
+
+        // Generate random node indices
         node1Index = this.getRandomNumber(0, nodes.length - 1);
         node2Index = this.getRandomNumber(0, nodes.length - 1);
 
+        // Check if it's a valid self-edge (if allowed)
         if (node1Index === node2Index) {
-          if (selfEdgesCounter >= configuration.maxSelfEdges) { continue; }
+          if (selfEdgesCounter >= configuration.maxSelfEdges) { 
+            continue; // Skip if self-edge limit reached 
+          } 
         }
   
+        // Check for duplicate edges based on directed/undirected configuration
         if (configuration.edgeDirected) {
           sameEdge = edges.find(edge => (edge.node1 === nodes[node1Index] && edge.node2 === nodes[node2Index]))
         }
@@ -112,6 +129,14 @@ export class GenerateGraphService {
           (edge.node1 === nodes[node2Index] && edge.node2 === nodes[node1Index])
           )
         )}
+        
+        if (!sameEdge) break; // Valid unique edge found
+      }
+
+      // Check if max attempts or time limit reached
+      if (attemptCount >= maxAttempts) {
+        console.warn('Max attempts reached, exiting edge generation early');
+        break;
       }
 
       if (node1Index === node2Index) { 

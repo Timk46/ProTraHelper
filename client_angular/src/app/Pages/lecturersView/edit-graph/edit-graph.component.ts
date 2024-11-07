@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { GraphConfigurationDTO, GraphEdgeDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
 import { GraphTaskService } from 'src/app/Modules/graph-tasks/services/graph-task.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -157,13 +157,13 @@ export class EditGraphComponent implements AfterViewInit {
 
     this.generateGraphForm = this.fb.group(
       {
-        graphNodeCount: [0, [Validators.required, Validators.min(0)]],
-        graphEdgeCount: [0, [Validators.required, Validators.min(0)]],
-        graphNodeWeightMin: [0, [Validators.required, Validators.min(0)]],
-        graphNodeWeightMax: [0, [Validators.required, Validators.min(0)]],
-        graphEdgeWeightMin: [0, [Validators.required, Validators.min(0)]],
-        graphEdgeWeightMax: [0, [Validators.required, Validators.min(0)]],
-        graphSelfEdgeCountMax: [0, [Validators.required, Validators.min(0)]],
+        graphNodeCount: [0],
+        graphEdgeCount: [0],
+        graphNodeWeightMin: [0],
+        graphNodeWeightMax: [0],
+        graphEdgeWeightMin: [0],
+        graphEdgeWeightMax: [0],
+        graphSelfEdgeCountMax: [0],
       }
     );
       
@@ -171,6 +171,13 @@ export class EditGraphComponent implements AfterViewInit {
 
   ngOnInit(): void {
     this.resetWorkspaceContent();
+
+    // Subscribe for changes in the graph question type
+    this.graphForm.get('graphQuestionType')?.valueChanges.subscribe(type => {
+
+      // For each graph question type, apply required validators for generateGraphForm
+      this.applyValidatorsByType(type);
+    });
   }
 
   ngAfterViewInit(): void {
@@ -774,6 +781,122 @@ export class EditGraphComponent implements AfterViewInit {
   // #######################################################
   // Generate Graph Task
 
+  applyValidatorsByType(type: string) {
+    // Clear any previous validators
+    this.generateGraphForm.get('graphNodeCount')?.clearValidators();
+    this.generateGraphForm.get('graphEdgeCount')?.clearValidators();
+    this.generateGraphForm.get('graphNodeWeightMin')?.clearValidators();
+    this.generateGraphForm.get('graphNodeWeightMax')?.clearValidators();
+    this.generateGraphForm.get('graphEdgeWeightMin')?.clearValidators();
+    this.generateGraphForm.get('graphEdgeWeightMax')?.clearValidators();
+
+    // Set default validators for all question types
+    this.generateGraphForm.get('graphNodeCount')?.setValidators([
+      Validators.required,
+      Validators.min(1)  // Default min count
+    ]);
+    this.generateGraphForm.get('graphEdgeCount')?.setValidators([
+      Validators.required,
+      Validators.min(0)  // Default min edges count
+    ]);
+    this.generateGraphForm.get('graphSelfEdgeCount')?.setValidators([
+      Validators.required,
+      Validators.min(0)  // Default min self edges count
+    ]);
+    
+    // Set validators based on type
+    if (type === 'kruskal') {
+      // TODO: is not working properly
+      // this.generateGraphForm.get('graphEdgeCount')?.setValidators([
+      //   Validators.required,
+      //   this.edgesCountMinNodesValidator('graphNodeCount')
+      // ]);
+    } else if (type === 'dijkstra') {
+      this.generateGraphForm.get('graphEdgeWeightMin')?.setValidators([
+        Validators.required,
+        Validators.min(0)  // Only positive weights
+      ]);
+      this.generateGraphForm.get('graphEdgeWeightMax')?.setValidators([
+        Validators.required,
+        Validators.min(0)  // Only positive weights
+      ]);
+    } else if (type === 'floyd') {
+      // Allow negative weights for Floyd, no specific validator required
+      this.generateGraphForm.get('graphEdgeWeightMin')?.setValidators([
+        Validators.required
+      ]);
+      this.generateGraphForm.get('graphEdgeWeightMax')?.setValidators([
+        Validators.required
+      ]);
+    }
+
+    // Add form-level validator for min <= max
+      this.generateGraphForm.setValidators([
+        this.minLessThanOrEqualMaxValidator('graphNodeWeightMin', 'graphNodeWeightMax'),
+        this.minLessThanOrEqualMaxValidator('graphEdgeWeightMin', 'graphEdgeWeightMax')
+    ]);
+
+    this.generateGraphForm.updateValueAndValidity();
+  }
+
+  // Validator for ensuring edges count is at least nodes count - 1 for Kruskal
+  edgesCountMinNodesValidator(nodeCountControlName: string): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const nodesCount = this.generateGraphForm.get(nodeCountControlName)?.value || 0;
+      const edgesCount = control.value || 0;
+      return edgesCount >= nodesCount - 1 ? null : { edgesTooFew: true };
+    };
+  }
+
+  minLessThanOrEqualMaxValidator(minControlName: string, maxControlName: string): ValidatorFn {
+    return (form: AbstractControl): ValidationErrors | null => {
+        const minControl = form.get(minControlName);
+        const maxControl = form.get(maxControlName);
+
+        if (!minControl || !maxControl) {
+            return null;  // If either control is missing, no error
+        }
+
+        const min = minControl.value;
+        const max = maxControl.value;
+
+        // Check if min > max
+        return (min !== null && max !== null && min > max)
+            ? { minGreaterThanMax: true }
+            : null;
+    };
+  }
+
+  // TODO: is being used as form validation is not working properly for kruskal specific edge count
+  generateButtonDisabled() {
+    if (this.graphForm.value.graphQuestionType === 'kruskal') {
+      return (
+        this.generateGraphForm.invalid ||
+        this.generateGraphForm.value.graphEdgeCount < this.generateGraphForm.value.graphNodeCount - 1 ||
+        // Ensure the number of edges are not more than the maximum possible for a indirected graph with n nodes
+        this.generateGraphForm.value.graphEdgeCount > this.generateGraphForm.value.graphNodeCount * (this.generateGraphForm.value.graphNodeCount - 1) / 2 + this.generateGraphForm.value.graphSelfEdgeCountMax
+      );
+    }
+
+    if (this.graphForm.value.graphQuestionType === 'dijkstra') {
+      return ( 
+        this.generateGraphForm.invalid ||
+        // Ensure the number of edges are not more than the maximum possible for a indirected graph with n nodes
+        this.generateGraphForm.value.graphEdgeCount > this.generateGraphForm.value.graphNodeCount * (this.generateGraphForm.value.graphNodeCount - 1) / 2 + this.generateGraphForm.value.graphSelfEdgeCountMax
+      );
+    }
+
+    if (this.graphForm.value.graphQuestionType === 'floyd' || this.graphForm.value.graphQuestionType === 'transitive_closure') {
+      return ( 
+        this.generateGraphForm.invalid ||
+        // Ensure the number of edges are not more than the maximum possible for a directed graph with n nodes
+        this.generateGraphForm.value.graphEdgeCount > this.generateGraphForm.value.graphNodeCount * (this.generateGraphForm.value.graphNodeCount - 1) + this.generateGraphForm.value.graphSelfEdgeCountMax
+      );
+    }
+
+    return this.generateGraphForm.invalid;
+  }
+
   generateGraphFormVisibility(FIELD: string)  {
     
     if ( FIELD === 'NODES_EDGES_COUNT' ) { 
@@ -797,7 +920,7 @@ export class EditGraphComponent implements AfterViewInit {
       );
     }
 
-    if ( FIELD === 'SELF_EDGE' ) {
+    if ( FIELD === 'SELF_EDGES_COUNT' ) {
       return (
         this.graphForm.value.graphQuestionType === 'floyd' ||
         this.graphForm.value.graphQuestionType === 'transitive_closure'

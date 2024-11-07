@@ -21,6 +21,18 @@ export class GenerateKruskalService {
   constructor(private generateGraphService: GenerateGraphService) { }
 
   generate(configuration: GenerateKruskalConfiguration): GraphStructureDTO {
+    
+    if (configuration.nodesCount < 1) {
+      throw new Error('Number of nodes must be at least 1');
+    }
+
+    if (configuration.edgesCount < configuration.nodesCount - 1) {
+      throw new Error('Number of edges must be at least number of nodes - 1');
+    }
+
+    if (configuration.edgeWeight.min > configuration.edgeWeight.max) {
+      throw new Error('Min edge weight cannot be less than max edge weight');
+    }
 
     const _configuration = {
       ...configuration,
@@ -43,7 +55,7 @@ export class GenerateKruskalService {
       updatedEdges.push({
         node1Id: edge.node1.nodeId,
         node2Id: edge.node2.nodeId,
-        weight: edge.weight || 1,
+        weight: edge.weight,
     })
     });
 

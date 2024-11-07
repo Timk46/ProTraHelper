@@ -21,6 +21,14 @@ export class GenerateFloydService {
   constructor(private generateGraphService: GenerateGraphService) { }
 
   generate( configuration: GenerateFloydConfiguration ): GraphStructureDTO {
+    
+    if (configuration.nodesCount < 1) {
+      throw new Error('Number of nodes must be at least 1');
+    }
+
+    if (configuration.edgeWeight.min > configuration.edgeWeight.max) {
+      throw new Error('Min edge weight cannot be less than max edge weight');
+    }
 
     const {nodes, edges} = this.generateGraphService.generateGraph({
       ...configuration,

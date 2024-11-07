@@ -101,22 +101,23 @@
     align-items: center;
 }
 
-.controls button {
-    padding: .8em;
-    color: #eee;
-    font-size: 1.2em;
-    background-color: rgb(70, 129, 244);
-    border: none;
-    border-radius: .5em;
-    box-shadow: 0 1px 1px -2px rgba(0, 0, 0, 0.2),
-    0 2px 2px 0 rgba(0, 0, 0, 0.14),
-    0 1px 5px 0 rgba(0, 0, 0, 0.12);
-}
+// For now using mat-button with primary color and not custom buttoms 
+// .controls button {
+//     padding: .8em;
+//     color: #eee;
+//     font-size: 1.2em;
+//     background-color: rgb(70, 129, 244);
+//     border: none;
+//     border-radius: .5em;
+//     box-shadow: 0 1px 1px -2px rgba(0, 0, 0, 0.2),
+//     0 2px 2px 0 rgba(0, 0, 0, 0.14),
+//     0 1px 5px 0 rgba(0, 0, 0, 0.12);
+// }
 
-.controls button:hover {
-    background-color: rgb(86, 142, 255);
-    cursor: pointer;
-}
+// .controls button:hover {
+//     background-color: rgb(86, 142, 255);
+//     cursor: pointer;
+// }
 
 mat-button-toggle-group {
     border-radius: 1em;
