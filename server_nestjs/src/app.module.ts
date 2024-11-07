@@ -29,6 +29,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/common/guards/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { RefreshTokenModule } from "./auth/refresh-token/refresh-token.module";
+import { ScheduleModule } from "@nestjs/schedule";
 import { UsersModule } from './users/users.module';
 import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
 import { McqCreationModule } from './mcqcreation/mcqcreation.module';
@@ -70,6 +71,7 @@ import { KruskalService } from './graph-solution-evaluation/kruskal/kruskal.serv
     NotificationModule,
     ContentLinkerModule,
     CodingQuestionGeneratorModule,
+    ScheduleModule.forRoot(),
 
     AdminModule, // Add this line
 

@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import * as process from 'node:process';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class RefreshTokenService {
@@ -68,7 +70,9 @@ export class RefreshTokenService {
     });
 
     if (!existingRefreshToken) {
-      throw new Error(`Refresh token not found for email ${email} and device ID ${deviceId}`);
+      throw new Error(
+        `Refresh token not found for email ${email} and device ID ${deviceId}`,
+      );
     }
 
     const hashedRefreshToken = await bcrypt.hash(token, 10);
@@ -95,7 +99,9 @@ export class RefreshTokenService {
     });
 
     if (!existingRefreshToken) {
-      throw new Error(`Refresh token not found for email ${email} and device ID ${deviceId}`);
+      throw new Error(
+        `Refresh token not found for email ${email} and device ID ${deviceId}`,
+      );
     }
 
     return this.prisma.refreshToken.delete({
@@ -125,5 +131,44 @@ export class RefreshTokenService {
         },
       },
     });
+  }
+
+  @Cron('0 * * * *') // Run every hour
+  async purgeExpiredRefreshTokens() {
+    const expirationThreshold = new Date();
+    expirationThreshold.setMinutes(
+      expirationThreshold.getMinutes() -
+        parseInt(process.env.JWT_REFRESH_EXPIRATION_TIME),
+    );
+
+    this.logger.log(
+      `Purging expired refresh tokens older than ${expirationThreshold.toISOString()}`,
+    );
+
+    const expiredTokens = await this.prisma.refreshToken.findMany({
+      where: {
+        createdAt: {
+          lte: expirationThreshold,
+        },
+      },
+    });
+
+    if (expiredTokens.length > 0) {
+      const tokenIds = expiredTokens.map((token) => token.id);
+
+      await this.prisma.refreshToken.deleteMany({
+        where: {
+          id: {
+            in: tokenIds,
+          },
+        },
+      });
+
+      this.logger.log(
+        `${expiredTokens.length} expired refresh tokens have been purged from the database.`,
+      );
+    } else {
+      this.logger.log('No expired refresh tokens found.');
+    }
   }
 }
