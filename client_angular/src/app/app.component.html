@@ -10,10 +10,7 @@
       <a mat-list-item routerLink="/task-evaluation-overview" routerLinkActive="active-link">Task Evaluation Overview</a>
       <a mat-list-item routerLink="/file-upload" routerLinkActive="active-link">file-upload</a>
       <!--<a mat-list-item routerLink="/chatbot" routerLinkActive="active-link">Chat Bot</a>-->
-      <mat-menu #logoutMenu="matMenu">
-        <button mat-menu-item (click)="logOut(false)">Logout</button>
-        <button mat-menu-item (click)="logOut(true)">Logout from All Devices</button>
-      </mat-menu>
+      <a mat-list-item *ngIf="userIsLoggedIn" (click)="logOut(false)">Logout</a>
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
