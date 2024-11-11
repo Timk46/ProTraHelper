@@ -177,6 +177,9 @@ export class EditGraphComponent implements AfterViewInit {
 
       // For each graph question type, apply required validators for generateGraphForm
       this.applyValidatorsByType(type);
+
+      // Set the default parameters for question generation based on the type
+      this.setDefaultsForGeneration(type);
     });
   }
 
@@ -432,10 +435,8 @@ export class EditGraphComponent implements AfterViewInit {
 
   activateWorkspace() {
     // Save text content before activating workspace
-    console.error("a", this.questionField.getContent());
     this.questionDescriptionHTML = this.questionField.getContent();
     this.expectationsHTML = this.expectationField.getContent();
-    console.log(this.questionDescriptionHTML);
 
     // Display workspace
     this.workspaceIsActive = true;
@@ -779,6 +780,49 @@ export class EditGraphComponent implements AfterViewInit {
       this.questionDescriptionHTML = textHTML;
       this.questionField.setContent(textHTML);
     }    
+  }
+
+  setDefaultsForGeneration(type: string) {
+
+    if (type === 'dijkstra') {
+      this.generateGraphForm.patchValue({
+        graphNodeCount: 5,
+        graphEdgeCount: 6,
+        graphNodeWeightMin: 0,
+        graphNodeWeightMax: 7,
+        graphEdgeWeightMin: 0,
+        graphEdgeWeightMax: 7,
+        graphSelfEdgeCountMax: 0,
+      })
+    }
+    if (type === 'kruskal') {
+      this.generateGraphForm.patchValue({
+        graphNodeCount: 5,
+        graphEdgeCount: 7,
+        graphNodeWeightMin: 0,
+        graphNodeWeightMax: 7,
+        graphEdgeWeightMin: 0,
+        graphEdgeWeightMax: 7,
+        graphSelfEdgeCountMax: 0,
+      })
+    }
+    if (type === 'transitive_closure') {
+      this.generateGraphForm.patchValue({
+        graphNodeCount: 5,
+        graphEdgeCount: 5,
+        graphSelfEdgeCountMax: 0,
+      })
+    }
+    if (type === 'floyd') {
+      this.generateGraphForm.patchValue({
+        graphNodeCount: 5,
+        graphEdgeCount: 5,
+        graphEdgeWeightMin: 0,
+        graphEdgeWeightMax: 10,
+        graphSelfEdgeCountMax: 0,
+      })
+    }
+
   }
 
   applyValidatorsByType(type: string) {
