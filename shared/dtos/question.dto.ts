@@ -106,82 +106,89 @@ export interface CodingQuestionDto {
     codeGerueste: CodeGeruestDto[];
   }
   
-  export interface CodingQuestionInternal extends CodingQuestionDto { // for backend only
-    automatedTests: AutomatedTestDto[];
-    modelSolutions?: ModelSolutionDto[];
-  }
-  export interface ModelSolutionDto {
-    id: number;
-    codingQuestionId: number;
-    codeFileName: string;
-    code: string;
-    language: string;
-  }
+export interface CodingQuestionInternal extends CodingQuestionDto { // for backend only
+  automatedTests: AutomatedTestDto[];
+  modelSolutions?: ModelSolutionDto[];
+}
 
-  export interface CodeGeruestDto {
-    id: number;
-    codingQuestionId: number;
-    codeFileName: string;
-    code: string;
-    language: string;
-  }
+export interface ModelSolutionDto {
+  id: number;
+  codingQuestionId: number;
+  codeFileName: string;
+  code: string;
+  language: string;
+}
+
+export interface CodeGeruestDto {
+  id: number;
+  codingQuestionId: number;
+  codeFileName: string;
+  code: string;
+  language: string;
+}
   
-  export interface AutomatedTestDto {
-    id: number;
-    code: string;
-    testFileName: string;
-    language: string;
-    questionId: number;
-    testClassName?:  string;
-    runMethod?:      string;
-    inputArguments?: string;
-  }
+export interface AutomatedTestDto {
+  id: number;
+  code: string;
+  testFileName: string;
+  language: string;
+  questionId: number;
+  testClassName?:  string;
+  runMethod?:      string;
+  inputArguments?: string;
+}
 
-  export enum questionType {
-    SINGLECHOICE = "SC",
-    MULTIPLECHOICE = "MC",
-    FREETEXT = "FreeText",
-    CODE = "CodingQuestion",
-    FILLIN = "Fillin",
-    GRAPH = "GraphQuestion",
-  }
+export enum questionType {
+  SINGLECHOICE = "SC",
+  MULTIPLECHOICE = "MC",
+  FREETEXT = "FreeText",
+  CODE = "CodingQuestion",
+  FILLIN = "Fillin",
+  GRAPH = "GraphQuestion",
+}
 
-  export interface McqGenerationDTO {
-    question?: string;
-    answers?: {answer?: string; correct?: boolean}[];
-    description?: string;
-    score?: number;
-  }
+export interface McqGenerationDTO {
+  question?: string;
+  answers?: {answer?: string; correct?: boolean}[];
+  description?: string;
+  score?: number;
+}
 
-  export interface freeTextQuestionDTO {
-    questionId: number;
-    contentElementId?: number;
-    title: string;
-    text: string;
-    textHTML?: string;
-    expectations: string;
-    expectationsHTML?: string;
-    exampleSolution?: string;
-    exampleSolutionHTML?: string;
-    maxPoints: number;
-  }
+export interface freeTextQuestionDTO {
+  questionId: number;
+  contentElementId?: number;
+  title: string;
+  text: string;
+  textHTML?: string;
+  expectations: string;
+  expectationsHTML?: string;
+  exampleSolution?: string;
+  exampleSolutionHTML?: string;
+  maxPoints: number;
+}
 
-  export interface GraphQuestionDTO {
-    questionId: number;
-    contentElementId?: number;
-    title: string;
-    textHTML?: string;
-    expectations: string;
-    expectationsHTML?: string;
-    type: string;
-    initialStructure: GraphStructureDTO;
-    exampleSolution: GraphStructureDTO[];
-    stepsEnabled: boolean;
-    configuration: GraphConfigurationDTO;
-    maxPoints: number;
-  }
+export interface GraphQuestionDTO {
+  questionId: number;
+  contentElementId?: number;
+  title: string;
+  textHTML?: string;
+  expectations: string;
+  expectationsHTML?: string;
+  type: string;
+  initialStructure: GraphStructureDTO;
+  exampleSolution: GraphStructureDTO[];
+  stepsEnabled: boolean;
+  configuration: GraphConfigurationDTO;
+  maxPoints: number;
+}
 
-  export interface OptionDTO {
-    answer: string;
-    correct: boolean;
-  }
+export interface OptionDTO {
+  answer: string;
+  correct: boolean;
+}
+
+export interface McqEvaluation {
+  question: string;
+  evaluations?: {reasoning?: string, correct?: boolean}[];
+  commentOnQuality?: string;
+}

@@ -8,25 +8,11 @@ import {PromptTemplate,} from "langchain/prompts";
 import { RunnableSequence } from "langchain/schema/runnable";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { z } from "zod";
-import { McqGenerationDTO, OptionDTO } from '@Interfaces/question.dto';
+import { McqGenerationDTO, OptionDTO, McqEvaluation } from '@Interfaces/question.dto';
 import { env } from 'process';
 import { RagService } from '@/ai/services/rag.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { encode, decode } from 'gpt-3-encoder'; // Install if necessary
-
-interface Answer{
-  answer?: string;
-  correct?: boolean;
-}
-interface McqEvaluation {
-  correct?: boolean;
-  reasoning?: string;
-}
-interface McqEvaluations {
-  question?: string;
-  evaluations?: McqEvaluation[];
-}
-
 
 // change to accessing sensitive data from .env(?)
 const llmConfig = {
@@ -146,7 +132,7 @@ format instructions: {format_instructions}
 `
 
 // needs to be altered because llm needs to know what kind of expert he needs to be etc. (example: suggests network related stuff when asking about interfaces in programming languages if not specified in question field in the frontend
-/*const regeneratePrompt = `Du bist ein Programmierexperte und erstellst eine neue auswählbare Antwortmöglichkeit für eine bestehende Multiple Choice Frage. Folgendes Konzept ist das Oberthema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen wurden:
+const regeneratePrompt = `Du bist ein Programmierexperte und erstellst eine neue auswählbare Antwortmöglichkeit für eine bestehende Multiple Choice Frage. Folgendes Konzept ist das Oberthema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen wurden:
 ---
 Konzept: {concept}
 ---
@@ -167,71 +153,71 @@ Die bereits vorgeschlagenen Antwortmöglichkeiten dürfen sich nicht widerholen.
 bestehende Multiple Choice Frage: {question}
 ---
 format instructions: {format_instructions}
-`*/
+`
 
- /*const regeneratePrompt2 = `Du bist ein Programmierexperte und hilfst mir dabei eine neue Antwortmöglichkeit für eine bestehende Multiple Choice Aufgabenstellung zu erstellen. Nutze dabei folgendes Konzept:
- ----------------
- Konzept: {concept}
- ----------------
- Beachte dabei folgenden Gesamtkontext: {completeContext}
- ----------------
- und liefere mir bitte eine andere Antwortmöglichkeit für folgende bereits von dir vorgeschlagene Antwortmöglichkeit:
- ----------------
- bereits vorgeschlagene Antwortmöglichkeit: {option}.
- ----------------
- Achte darauf, dass folgende Antwortmöglichkeiten schon bestehen und du diese nicht erneut vorschlagen darfst. Lies diese bereits verwendeten Antwortmöglichkeiten genau durch, um keine leicht umformulierten Antwortmöglichkeiten zu generieren:
- ----------------
- Bereits vorgeschlagene Antwortmöglichkeiten: {options}.
- ----------------
- Die Antwortmöglichkeit soll eine Antwort auf die Frage sein, die du bereits vorgeschlagen hast:
- ----------------
- Frage: {question}
- ----------------
- Keine der zuvor beschriebenen Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden.
- Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
- Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte schreibe die Antwortmöglichkeit auf jeden Fall auf deutsch.
- ----------------
- format instructions: {format_instructions}
- `*/
+const regeneratePrompt2 = `Du bist ein Programmierexperte und hilfst mir dabei eine neue Antwortmöglichkeit für eine bestehende Multiple Choice Aufgabenstellung zu erstellen. Nutze dabei folgendes Konzept:
+----------------
+Konzept: {concept}
+----------------
+Beachte dabei folgenden Gesamtkontext: {completeContext}
+----------------
+und liefere mir bitte eine andere Antwortmöglichkeit für folgende bereits von dir vorgeschlagene Antwortmöglichkeit:
+----------------
+bereits vorgeschlagene Antwortmöglichkeit: {option}.
+----------------
+Achte darauf, dass folgende Antwortmöglichkeiten schon bestehen und du diese nicht erneut vorschlagen darfst. Lies diese bereits verwendeten Antwortmöglichkeiten genau durch, um keine leicht umformulierten Antwortmöglichkeiten zu generieren:
+----------------
+Bereits vorgeschlagene Antwortmöglichkeiten: {options}.
+----------------
+Die Antwortmöglichkeit soll eine Antwort auf die Frage sein, die du bereits vorgeschlagen hast:
+----------------
+Frage: {question}
+----------------
+Keine der zuvor beschriebenen Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden.
+Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
+Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte schreibe die Antwortmöglichkeit auf jeden Fall auf deutsch.
+----------------
+format instructions: {format_instructions}
+`
 
- const questionAndAnswerPrompt = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
- Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein müssen innerhalb der triple quotes ("""):
- """Beschreibung der wesentlichen 3 Eigenschaften einer MCQ:
- 1. MCQs bestehen aus einem klaren Fragestamm und mehreren Antwortoptionen, darunter eine richtige Antwort und plausible Distraktoren, um effektives Lernen zu unterstützen.
- 2. Effektive MCQs testen höhere kognitive Fähigkeiten, indem sie Verständnis, Anwendung und Analyse von Konzepten über Faktenwissen hinaus fordern.
- 3. Gute MCQs zeichnen sich durch eindeutige Fragen, plausible Distraktoren, die Vermeidung von sprachlichen Verzerrungen und die Fähigkeit aus, höhere Denkprozesse zu prüfen, ohne dass die Antwort erraten werden kann.
+const questionAndAnswerPrompt = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
+Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein müssen innerhalb der triple quotes ("""):
+"""Beschreibung der wesentlichen 3 Eigenschaften einer MCQ:
+1. MCQs bestehen aus einem klaren Fragestamm und mehreren Antwortoptionen, darunter eine richtige Antwort und plausible Distraktoren, um effektives Lernen zu unterstützen.
+2. Effektive MCQs testen höhere kognitive Fähigkeiten, indem sie Verständnis, Anwendung und Analyse von Konzepten über Faktenwissen hinaus fordern.
+3. Gute MCQs zeichnen sich durch eindeutige Fragen, plausible Distraktoren, die Vermeidung von sprachlichen Verzerrungen und die Fähigkeit aus, höhere Denkprozesse zu prüfen, ohne dass die Antwort erraten werden kann.
 
- Zu den Merkmalen einer gut konstruierten MCQ gehören eindeutige und relevante Fragestellungen, plausible und gleichmäßig überzeugende Distraktoren. Beachte hierbei die folgenden 5 Eigenschaften von Distraktoren:
- 1. Distraktoren müssen plausibel und herausfordernd für Unkundige sein, um effektiv das Verständnis statt Erkennungsfähigkeit zu prüfen.
- 2. Sie sollten thematisch zum Fragestamm passen und die Konzentration auf die geprüften Konzepte lenken.
- 3. Jedes erkennbare Muster, das zur Antwortfindung durch Eliminierung führen könnte, ist zu vermeiden.
- 4. Distraktoren sollen herausfordernd, aber nicht verwirrend oder irreführend sein, um Klarheit zu bewahren.
- 5. Sie sollten verschiedene häufige Missverständnisse abdecken, um das Verständnis gründlich zu testen."""
- ---
- Hier eine Liste bereits existierender Multiple Choice Questions, welche nicht widerholt werden dürfen.
- Sind bereits die gleichen Fragen bereits vorhanden, so sollten diese nicht erneut generiert werden.
- Die bereits existierenden Fragen sollten nicht wiederholt werden.
- ---
- Bereits existierende Fragen: {existingQuestions}.
- ---
- Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Algorithmen und Datenstrukturen". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen mit dem Wissen daraus beantwortet werden können sollen.
- Die MCQs müssen aber nicht ausschließlich aus dem Transkript generiert werden, sie dürfen auch aus dem allgemeinen Wissen zu den Themen generiert werden.
- Der praktische Teil der Programmierung wird hier anhand der Programmiersprache C++ gelehrt.
- Beziehe dich immer auf das konkrete Konzept, welches als übergeordnetes Thema dienen soll zu welchem die Fragestellung und die dazugehörigen Antwortmöglichkeiten erstellt werden sollen.
- Es ist verboten, bereits existierenden Multiple Choice Questions erneut vorzuschlagen. Benutze in den Antwortmöglichkeiten keine Aufzählungen verschiedener Optionen und nutze maximal 2 Sätze. Benutze unbedingt immer die deutsche Sprache.
- ---
- Die gewünschte Thematik der Frage: {topic}
- ---
- Das dazugehörige Transkript: {transcript}
- ---
- thematisch verwandter Kontext: {similaritySearchResults}
- ---
- Anzahl an Antwortmöglichkeiten: {options}
- ---
- Konzept, welches als übergeordnetes Thema dienen soll: {concept}
- ---
- format instructions: {format_instructions}
- `
+Zu den Merkmalen einer gut konstruierten MCQ gehören eindeutige und relevante Fragestellungen, plausible und gleichmäßig überzeugende Distraktoren. Beachte hierbei die folgenden 5 Eigenschaften von Distraktoren:
+1. Distraktoren müssen plausibel und herausfordernd für Unkundige sein, um effektiv das Verständnis statt Erkennungsfähigkeit zu prüfen.
+2. Sie sollten thematisch zum Fragestamm passen und die Konzentration auf die geprüften Konzepte lenken.
+3. Jedes erkennbare Muster, das zur Antwortfindung durch Eliminierung führen könnte, ist zu vermeiden.
+4. Distraktoren sollen herausfordernd, aber nicht verwirrend oder irreführend sein, um Klarheit zu bewahren.
+5. Sie sollten verschiedene häufige Missverständnisse abdecken, um das Verständnis gründlich zu testen."""
+---
+Hier eine Liste bereits existierender Multiple Choice Questions, welche nicht widerholt werden dürfen.
+Sind bereits die gleichen Fragen bereits vorhanden, so sollten diese nicht erneut generiert werden.
+Die bereits existierenden Fragen sollten nicht wiederholt werden.
+---
+Bereits existierende Fragen: {existingQuestions}.
+---
+Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Algorithmen und Datenstrukturen". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen mit dem Wissen daraus beantwortet werden können sollen.
+Die MCQs müssen aber nicht ausschließlich aus dem Transkript generiert werden, sie dürfen auch aus dem allgemeinen Wissen zu den Themen generiert werden.
+Der praktische Teil der Programmierung wird hier anhand der Programmiersprache C++ gelehrt.
+Beziehe dich immer auf das konkrete Konzept, welches als übergeordnetes Thema dienen soll zu welchem die Fragestellung und die dazugehörigen Antwortmöglichkeiten erstellt werden sollen.
+Es ist verboten, bereits existierenden Multiple Choice Questions erneut vorzuschlagen. Benutze in den Antwortmöglichkeiten keine Aufzählungen verschiedener Optionen und nutze maximal 2 Sätze. Benutze unbedingt immer die deutsche Sprache.
+---
+Die gewünschte Thematik der Frage: {topic}
+---
+Das dazugehörige Transkript: {transcript}
+---
+thematisch verwandter Kontext: {similaritySearchResults}
+---
+Anzahl an Antwortmöglichkeiten: {options}
+---
+Konzept, welches als übergeordnetes Thema dienen soll: {concept}
+---
+format instructions: {format_instructions}
+`
 
 const questionAndAnswerPrompt2 = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
 Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein müssen innerhalb der triple quotes ("""):
@@ -300,28 +286,6 @@ Antwortoptionen der MCQ: {answers}
 format instructions: {format_instructions}
 `
 
-/**
- * Splits input text into chunks based on maximum token size.
- *
- * @param inputText - The large input text to be chunked.
- * @param maxTokens - The maximum number of tokens per chunk.
- * @returns An array of text chunks.
- */
-function chunkText(inputText: string, maxTokens: number): string[] {
-  const encodedText = encode(inputText);
-  const chunks: number[][] = [];
-  let start = 0;
-
-  while (start < encodedText.length) {
-    const end = start + maxTokens;
-    const chunk = encodedText.slice(start, end);
-    chunks.push(chunk);
-    start = end;
-  }
-
-  return chunks.map(chunk => decode(chunk));
-}
-
 @Injectable()
 export class McqCreationService {
   private readonly logger: Logger;
@@ -350,7 +314,7 @@ export class McqCreationService {
    * @param question
    * @param options
    */
-  private addQuestionAndOptions(concept: string, question: string, options: Answer[]) {
+  private addQuestionAndOptions(concept: string, question: string, options: OptionDTO[]) {
     if (!(concept in this.askedQuestions)) {
       this.askedQuestions[concept] = [];
     }
@@ -400,7 +364,7 @@ export class McqCreationService {
    * @param question
    * @param options
    */
-  private addOptionsToQuestion(concept: string, question: string, options: Answer[]) {
+  private addOptionsToQuestion(concept: string, question: string, options: OptionDTO[]) {
   if (concept in this.askedQuestions) {
     const mcq = this.askedQuestions[concept].find(mcq => mcq.question === question);
 
@@ -418,7 +382,7 @@ export class McqCreationService {
    */
   async getQuestionTitle(concept: string): Promise<McqGenerationDTO> {
     this.mcqs.questions.forEach(mcq => {
-      this.addQuestionAndOptions(concept, mcq.question, mcq.answers)
+      this.addQuestionAndOptions(concept, mcq.question, mcq.answers.map(answer => ({ answer: answer.answer, correct: answer.correct })))
     });
     console.log("this.askedQuestions: ", this.askedQuestions[concept].map(mcq => mcq.question))
 
@@ -481,12 +445,12 @@ export class McqCreationService {
     option: OptionDTO,
     otherOptions: OptionDTO[],
     concept: string
-  ): Promise<Answer> {
-     Ensure the question exists in askedQuestions
+  ): Promise<OptionDTO> {
+    // Ensure the question exists in askedQuestions
     if (!this.askedQuestions[concept]?.some(q => q.question === question)) {
       this.addQuestion(concept, question);
-       Adjusted to use otherOptions correctly
-      this.addOptionsToQuestion(concept, question, otherOptions.map(opt => ({ answer: opt.answer })));
+      // Adjusted to use otherOptions correctly
+      this.addOptionsToQuestion(concept, question, otherOptions.map(opt => ({ answer: opt.answer, correct: opt.correct })));
     }
     this.logger.log("concept: ", concept);
     this.logger.log("Asked questions:", this.askedQuestions[concept].map(mcq => mcq.question));
@@ -609,7 +573,7 @@ export class McqCreationService {
     );
     this.logger.log("Generated response correctness:", response.correct);
 
-    return response;
+    return { answer: response.answer, correct: response.correct };
   }
 
   /** Called when question, concept  and number of options is entered into the frontend
@@ -633,7 +597,7 @@ export class McqCreationService {
       })
     )
 
-    const similaritySearchResults = await this.getSimilaritySearchString(concept, 15);
+    const similaritySearchResults = await this.ragService.lectureSimilaritySearch(concept, 10);
     const transcriptData = await this.prisma.conceptNode.findFirst({
       where: {
         name: concept,
@@ -688,7 +652,7 @@ export class McqCreationService {
     ]).invoke({ callbacks: [] });
 
     // Adding the generated question and answers to prevent duplicates
-    this.addQuestionAndOptions(concept, question, response.answers);
+    this.addQuestionAndOptions(concept, question, response.answers.map(ans => ({ answer: ans.answer, correct: ans.correct })));
 
     return response;
   }
@@ -818,7 +782,7 @@ export class McqCreationService {
     // Parse the LLM response
     const result = await parser.parse(response);
 
-    this.addQuestionAndOptions(concept, result.question, result.answers);
+    this.addQuestionAndOptions(concept, result.question, result.answers.map(ans => ({ answer: ans.answer, correct: ans.correct })));
     this.logger.log("result: ", result);
     return result;
   }
@@ -827,9 +791,9 @@ export class McqCreationService {
   * returns evaluation of given answer options and the reasoning behind its evaluation
   * @param question
   * @param answers
-  * @returns
+  * @returns Promise<McqEvaluation>
   */
-  async getEvaluation(question: string, answers: string[]) : Promise<McqEvaluations> {
+  async getEvaluation(question: string, answers: string[]) : Promise<McqEvaluation> {
 
     this.mcqToEvaluate[question] = answers
 
@@ -838,11 +802,11 @@ export class McqCreationService {
         question: z.string().describe("Die Frage an den User"),
         evaluations: z.array(
           z.object({
-            reasoning: z.string().describe("Eine ausführliche Erklärung dazu, warum diese Antwortmöglichkeit Mit Bezug zur Frage wahr oder falsch ist."),
-            correct: z.boolean().describe("Evaluiert, ob die gegebene Antwortmöglichkeit auf die jeweilige Frage korrekt ist (wahr/falsch)"),
+            reasoning: z.string().describe("Eine ausführliche Erklärung dazu, warum diese Antwortmöglichkeit Mit Bezug zur Frage wahr oder falsch ist.").optional(),
+            correct: z.boolean().describe("Evaluiert, ob die gegebene Antwortmöglichkeit auf die jeweilige Frage korrekt ist (wahr/falsch)").optional(),
 
           })
-        ).optional().default([]),
+        ).default([]),
         commentOnQuality: z.string().describe("Die Bewertung der Gesamtfrage und der Antwortmöglichkeiten als Gut, Sehr Gut oder Exzellent. kurze Begründung für die Bewertung anhand der Anweisungen A bis D."),
       })
     )
@@ -860,31 +824,21 @@ export class McqCreationService {
 
     console.log("Evaluation result: ", result)
 
-    return result;
-
+    return {
+      question: result.question,
+      evaluations: result.evaluations,
+      commentOnQuality: result.commentOnQuality,
+    };
   }
 
-  private async getSimilaritySearchString(concept: string, maxTokensPerChunk: number): Promise<string> {
-    const similaritySearchResults = await this.ragService.lectureSimilaritySearch(concept, 50);
-
-    // Split the similarity search results into chunks
-    const chunks = chunkText(similaritySearchResults.map(chunk => chunk).join(' '), maxTokensPerChunk);
-
-    // Process each chunk if necessary
-    // For this case, we'll join the chunks back together
-    const aggregatedResult = chunks.join(' ');
-
-    return aggregatedResult;
-  }
-
-    /**
+  /**
    * Adjusts the prompt inputs to fit within the token limit while ensuring at least minTokens are sent.
    *
    * @param promptTemplate - The prompt template used for formatting.
    * @param promptInput - The initial prompt input object.
    * @param maxTokens - The maximum allowed tokens.
    * @param minTokens - The minimum tokens to send to the LLM.
-   * @returns A formatted prompt that fits within the token constraints.
+   * @returns A formatted prompt that fits within the token constraints as Promise<string>.
    */
   private async adjustPrompt(
     promptTemplate: PromptTemplate,
@@ -920,5 +874,4 @@ export class McqCreationService {
     this.logger.log(`Adjusted prompt contains ${numTokens} tokens`);
     return formattedPrompt;
   }
-
 }
