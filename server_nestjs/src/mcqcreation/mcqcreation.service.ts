@@ -32,14 +32,14 @@ interface McqEvaluations {
 const llmConfig = {
   modelName: 'gpt-4o-2024-08-06', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
   openAIApiKey: env.OPEN_API_KEY,
-  temperature: 0, // Low Temperature favours the words with higher probability = less creative
+  temperature: 1, // Low Temperature favours the words with higher probability = less creative
   streaming: true
 };
 
 const regenerateLLmconfig = {
   modelName: 'gpt-4o-2024-08-06', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
   openAIApiKey: env.OPEN_API_KEY,
-  temperature: 0.66, // higher Temperature favours the words with lower probability = more creative
+  temperature: 1, // higher Temperature favours the words with lower probability = more creative
   streaming: true
 }
 
@@ -209,7 +209,8 @@ Zu den Merkmalen einer gut konstruierten MCQ gehören eindeutige und relevante F
 5. Sie sollten verschiedene häufige Missverständnisse abdecken, um das Verständnis gründlich zu testen."""
 ---
 Hier eine Liste bereits existierender Multiple Choice Questions, welche nicht widerholt werden dürfen.
-Es ist verboten, die bereits existierenden Fragen nur etwas umformuliert erneut vorzuschlagen.
+Sind bereits die gleichen Fragen bereits vorhanden, so sollten diese nicht erneut generiert werden.
+Die bereits existierenden Fragen sollten nicht wiederholt werden.
 ---
 Bereits existierende Fragen: {existingQuestions}.
 ---
@@ -247,9 +248,10 @@ Zu den Merkmalen einer gut konstruierten MCQ gehören eindeutige und relevante F
 5. Sie sollten verschiedene häufige Missverständnisse abdecken, um das Verständnis gründlich zu testen."""
 ---
 Hier eine Liste bereits existierender Multiple Choice Questions, welche nicht widerholt werden dürfen.
-Es ist verboten, die bereits existierenden Fragen nur etwas umformuliert erneut vorzuschlagen.
+Sind bereits die gleichen Fragen bereits vorhanden, so dürfen diese nicht erneut generiert werden.
+Ähnlich formulierte Fragen dürfen nicht erneut generiert werden.
 ---
-Bereits existierende Fragen: {questions}.
+Bereits existierende Fragen: {existingQuestions}.
 ---
 Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Algorithmen und Datenstrukturen". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen mit dem Wissen daraus beantwortet werden können sollen.
 Die MCQs müssen aber nicht ausschließlich aus dem Transkript generiert werden, sie dürfen auch aus dem allgemeinen Wissen zu den Themen generiert werden.
@@ -351,6 +353,7 @@ export class McqCreationService {
     if (!(this.askedQuestions[concept].some(mcq => mcq.question === question))) {
       const mcqOptions = options ? options.map(option => ({ answer: option.answer, correct: option.correct })) : [];
       this.askedQuestions[concept].push({ question: question, answers: mcqOptions });
+      this.logger.log("askedQuestions added: ", this.askedQuestions[concept]);
     }
 
   }
@@ -480,7 +483,7 @@ export class McqCreationService {
       // Adjusted to use otherOptions correctly
       this.addOptionsToQuestion(concept, question, otherOptions.map(opt => ({ answer: opt.answer })));
     }
-
+    this.logger.log("concept: ", concept);
     this.logger.log("Asked questions:", this.askedQuestions[concept].map(mcq => mcq.question));
     this.logger.log(
       "Other options for question:",
@@ -489,19 +492,23 @@ export class McqCreationService {
 
     const parser = StructuredOutputParser.fromZodSchema(
       z.object({
-        answer: z.string().describe("Answer to the user's question. Don't enumerate."),
-        correct: z.boolean().describe("Indicates if the answer is correct (true/false)."),
+        answer: z.string().describe("Antwort auf die Frage des Benutzers. Keine Aufzählungen verwenden."),
+        correct: z.boolean().describe("Gibt an, ob die Antwort korrekt ist (wahr/falsch)."),
       })
     );
 
     let transcript = await this.cacheManager.get<string>(`transcript_${concept}`);
     if(!transcript) {
       // Retrieve context for the prompt
-      const conceptNode = await this.prisma.conceptNode.findFirst({
-        where: { name: concept },
-        select: { transcript: true },
+      const transcriptData = await this.prisma.conceptNode.findFirst({
+        where: {
+          name: concept,
+        },
+        select: {
+          transcript: true,
+        },
       });
-      transcript = conceptNode?.transcript || "";
+      transcript = transcriptData?.transcript || "";
       // Cache the transcript
       await this.cacheManager.set(`transcript_${concept}`, transcript, Number({ ttl: 3600 })); // cache for 1 hour
     } else {
@@ -559,7 +566,7 @@ export class McqCreationService {
     const promptTemplate = PromptTemplate.fromTemplate(regeneratePromptWithCorrectness);
 
     // Adjust the prompt to fit within token limits
-    const MAX_MODEL_TOKENS = 12000;
+    const MAX_MODEL_TOKENS = 120000;
     const MIN_TOKENS = 1000;
     const formattedPrompt = await this.adjustPrompt(promptTemplate, promptInput, MAX_MODEL_TOKENS, MIN_TOKENS);
 
@@ -688,10 +695,11 @@ export class McqCreationService {
    * @returns question and answers to the user's question
    */
   async getQuestionAndAnswers(concept: string, options: number, topic = '(wähle selbst)'): Promise<McqGenerationDTO> {
-    console.log("concept: ", concept);
-    console.log("options: ", options);
-    console.log("askedQuestions undefined?: ", this.askedQuestions[concept] === undefined);
-
+    this.logger.log("concept: ", concept);
+    this.logger.log("options: ", options);
+    this.logger.log("askedQuestions undefined?: ", this.askedQuestions[concept] === undefined);
+    // Log all asked questions for debugging
+    this.logger.log("All asked questions:", JSON.stringify(this.askedQuestions, null, 2));
     // Fetch the ConceptNode matching the concept name
     const conceptNode = await this.prisma.conceptNode.findFirst({
       where: {
@@ -777,7 +785,9 @@ export class McqCreationService {
     } else {
       promptTemplate = PromptTemplate.fromTemplate(questionAndAnswerPrompt2);
     }
-
+    this.logger.log("this.askedQuestions[concept]?.map(mcq => mcq.question): ", this.askedQuestions[concept]?.map(mcq => mcq.question));
+    let existingQuestions = this.askedQuestions[concept]?.map(mcq => mcq.question);
+    this.logger.log("existingQuestions: ", existingQuestions);
     // Initial prompt input
     const promptInput = {
       topic: topic,
@@ -785,12 +795,12 @@ export class McqCreationService {
       options: options,
       similaritySearchResults: similaritySearchResults,
       transcript: transcript,
-      existingQuestions: this.askedQuestions[concept]?.map(mcq => mcq.question) || [],
+      existingQuestions: existingQuestions ? existingQuestions.map(question => question.toLowerCase()) : [],
       format_instructions: parser.getFormatInstructions(),
     };
 
     // Adjust the prompt to fit within token limits
-    const MAX_MODEL_TOKENS = 128000; // Model's maximum context length
+    const MAX_MODEL_TOKENS = 120000; // Model's maximum context length
     const MIN_TOKENS = 1000;        // Minimum tokens to send to the LLM
     const formattedPrompt = await this.adjustPrompt(promptTemplate, promptInput, MAX_MODEL_TOKENS, MIN_TOKENS);
 
@@ -804,7 +814,7 @@ export class McqCreationService {
     const result = await parser.parse(response);
 
     this.addQuestionAndOptions(concept, result.question, result.answers);
-
+    this.logger.log("result: ", result);
     return result;
   }
 
