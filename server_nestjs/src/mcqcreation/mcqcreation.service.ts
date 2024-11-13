@@ -146,7 +146,7 @@ format instructions: {format_instructions}
 `
 
 // needs to be altered because llm needs to know what kind of expert he needs to be etc. (example: suggests network related stuff when asking about interfaces in programming languages if not specified in question field in the frontend
-const regeneratePrompt = `Du bist ein Programmierexperte und erstellst eine neue auswählbare Antwortmöglichkeit für eine bestehende Multiple Choice Frage. Folgendes Konzept ist das Oberthema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen wurden:
+/*const regeneratePrompt = `Du bist ein Programmierexperte und erstellst eine neue auswählbare Antwortmöglichkeit für eine bestehende Multiple Choice Frage. Folgendes Konzept ist das Oberthema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen wurden:
 ---
 Konzept: {concept}
 ---
@@ -167,71 +167,71 @@ Die bereits vorgeschlagenen Antwortmöglichkeiten dürfen sich nicht widerholen.
 bestehende Multiple Choice Frage: {question}
 ---
 format instructions: {format_instructions}
-`
+`*/
 
-const regeneratePrompt2 = `Du bist ein Programmierexperte und hilfst mir dabei eine neue Antwortmöglichkeit für eine bestehende Multiple Choice Aufgabenstellung zu erstellen. Nutze dabei folgendes Konzept:
-----------------
-Konzept: {concept}
-----------------
-Beachte dabei folgenden Gesamtkontext: {completeContext}
-----------------
-und liefere mir bitte eine andere Antwortmöglichkeit für folgende bereits von dir vorgeschlagene Antwortmöglichkeit:
-----------------
-bereits vorgeschlagene Antwortmöglichkeit: {option}.
-----------------
-Achte darauf, dass folgende Antwortmöglichkeiten schon bestehen und du diese nicht erneut vorschlagen darfst. Lies diese bereits verwendeten Antwortmöglichkeiten genau durch, um keine leicht umformulierten Antwortmöglichkeiten zu generieren:
-----------------
-Bereits vorgeschlagene Antwortmöglichkeiten: {options}.
-----------------
-Die Antwortmöglichkeit soll eine Antwort auf die Frage sein, die du bereits vorgeschlagen hast:
-----------------
-Frage: {question}
-----------------
-Keine der zuvor beschriebenen Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden.
-Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
-Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte schreibe die Antwortmöglichkeit auf jeden Fall auf deutsch.
-----------------
-format instructions: {format_instructions}
-`
+ /*const regeneratePrompt2 = `Du bist ein Programmierexperte und hilfst mir dabei eine neue Antwortmöglichkeit für eine bestehende Multiple Choice Aufgabenstellung zu erstellen. Nutze dabei folgendes Konzept:
+ ----------------
+ Konzept: {concept}
+ ----------------
+ Beachte dabei folgenden Gesamtkontext: {completeContext}
+ ----------------
+ und liefere mir bitte eine andere Antwortmöglichkeit für folgende bereits von dir vorgeschlagene Antwortmöglichkeit:
+ ----------------
+ bereits vorgeschlagene Antwortmöglichkeit: {option}.
+ ----------------
+ Achte darauf, dass folgende Antwortmöglichkeiten schon bestehen und du diese nicht erneut vorschlagen darfst. Lies diese bereits verwendeten Antwortmöglichkeiten genau durch, um keine leicht umformulierten Antwortmöglichkeiten zu generieren:
+ ----------------
+ Bereits vorgeschlagene Antwortmöglichkeiten: {options}.
+ ----------------
+ Die Antwortmöglichkeit soll eine Antwort auf die Frage sein, die du bereits vorgeschlagen hast:
+ ----------------
+ Frage: {question}
+ ----------------
+ Keine der zuvor beschriebenen Antwortmöglichkeiten sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden.
+ Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
+ Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte schreibe die Antwortmöglichkeit auf jeden Fall auf deutsch.
+ ----------------
+ format instructions: {format_instructions}
+ `*/
 
-const questionAndAnswerPrompt = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
-Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein müssen innerhalb der triple quotes ("""):
-"""Beschreibung der wesentlichen 3 Eigenschaften einer MCQ:
-1. MCQs bestehen aus einem klaren Fragestamm und mehreren Antwortoptionen, darunter eine richtige Antwort und plausible Distraktoren, um effektives Lernen zu unterstützen.
-2. Effektive MCQs testen höhere kognitive Fähigkeiten, indem sie Verständnis, Anwendung und Analyse von Konzepten über Faktenwissen hinaus fordern.
-3. Gute MCQs zeichnen sich durch eindeutige Fragen, plausible Distraktoren, die Vermeidung von sprachlichen Verzerrungen und die Fähigkeit aus, höhere Denkprozesse zu prüfen, ohne dass die Antwort erraten werden kann.
+ const questionAndAnswerPrompt = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
+ Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein müssen innerhalb der triple quotes ("""):
+ """Beschreibung der wesentlichen 3 Eigenschaften einer MCQ:
+ 1. MCQs bestehen aus einem klaren Fragestamm und mehreren Antwortoptionen, darunter eine richtige Antwort und plausible Distraktoren, um effektives Lernen zu unterstützen.
+ 2. Effektive MCQs testen höhere kognitive Fähigkeiten, indem sie Verständnis, Anwendung und Analyse von Konzepten über Faktenwissen hinaus fordern.
+ 3. Gute MCQs zeichnen sich durch eindeutige Fragen, plausible Distraktoren, die Vermeidung von sprachlichen Verzerrungen und die Fähigkeit aus, höhere Denkprozesse zu prüfen, ohne dass die Antwort erraten werden kann.
 
-Zu den Merkmalen einer gut konstruierten MCQ gehören eindeutige und relevante Fragestellungen, plausible und gleichmäßig überzeugende Distraktoren. Beachte hierbei die folgenden 5 Eigenschaften von Distraktoren:
-1. Distraktoren müssen plausibel und herausfordernd für Unkundige sein, um effektiv das Verständnis statt Erkennungsfähigkeit zu prüfen.
-2. Sie sollten thematisch zum Fragestamm passen und die Konzentration auf die geprüften Konzepte lenken.
-3. Jedes erkennbare Muster, das zur Antwortfindung durch Eliminierung führen könnte, ist zu vermeiden.
-4. Distraktoren sollen herausfordernd, aber nicht verwirrend oder irreführend sein, um Klarheit zu bewahren.
-5. Sie sollten verschiedene häufige Missverständnisse abdecken, um das Verständnis gründlich zu testen."""
----
-Hier eine Liste bereits existierender Multiple Choice Questions, welche nicht widerholt werden dürfen.
-Sind bereits die gleichen Fragen bereits vorhanden, so sollten diese nicht erneut generiert werden.
-Die bereits existierenden Fragen sollten nicht wiederholt werden.
----
-Bereits existierende Fragen: {existingQuestions}.
----
-Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Algorithmen und Datenstrukturen". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen mit dem Wissen daraus beantwortet werden können sollen.
-Die MCQs müssen aber nicht ausschließlich aus dem Transkript generiert werden, sie dürfen auch aus dem allgemeinen Wissen zu den Themen generiert werden.
-Der praktische Teil der Programmierung wird hier anhand der Programmiersprache C++ gelehrt.
-Beziehe dich immer auf das konkrete Konzept, welches als übergeordnetes Thema dienen soll zu welchem die Fragestellung und die dazugehörigen Antwortmöglichkeiten erstellt werden sollen.
-Es ist verboten, bereits existierenden Multiple Choice Questions erneut vorzuschlagen. Benutze in den Antwortmöglichkeiten keine Aufzählungen verschiedener Optionen und nutze maximal 2 Sätze. Benutze unbedingt immer die deutsche Sprache.
----
-Die gewünschte Thematik der Frage: {topic}
----
-Das dazugehörige Transkript: {transcript}
----
-thematisch verwandter Kontext: {similaritySearchResults}
----
-Anzahl an Antwortmöglichkeiten: {options}
----
-Konzept, welches als übergeordnetes Thema dienen soll: {concept}
----
-format instructions: {format_instructions}
-`
+ Zu den Merkmalen einer gut konstruierten MCQ gehören eindeutige und relevante Fragestellungen, plausible und gleichmäßig überzeugende Distraktoren. Beachte hierbei die folgenden 5 Eigenschaften von Distraktoren:
+ 1. Distraktoren müssen plausibel und herausfordernd für Unkundige sein, um effektiv das Verständnis statt Erkennungsfähigkeit zu prüfen.
+ 2. Sie sollten thematisch zum Fragestamm passen und die Konzentration auf die geprüften Konzepte lenken.
+ 3. Jedes erkennbare Muster, das zur Antwortfindung durch Eliminierung führen könnte, ist zu vermeiden.
+ 4. Distraktoren sollen herausfordernd, aber nicht verwirrend oder irreführend sein, um Klarheit zu bewahren.
+ 5. Sie sollten verschiedene häufige Missverständnisse abdecken, um das Verständnis gründlich zu testen."""
+ ---
+ Hier eine Liste bereits existierender Multiple Choice Questions, welche nicht widerholt werden dürfen.
+ Sind bereits die gleichen Fragen bereits vorhanden, so sollten diese nicht erneut generiert werden.
+ Die bereits existierenden Fragen sollten nicht wiederholt werden.
+ ---
+ Bereits existierende Fragen: {existingQuestions}.
+ ---
+ Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Algorithmen und Datenstrukturen". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen mit dem Wissen daraus beantwortet werden können sollen.
+ Die MCQs müssen aber nicht ausschließlich aus dem Transkript generiert werden, sie dürfen auch aus dem allgemeinen Wissen zu den Themen generiert werden.
+ Der praktische Teil der Programmierung wird hier anhand der Programmiersprache C++ gelehrt.
+ Beziehe dich immer auf das konkrete Konzept, welches als übergeordnetes Thema dienen soll zu welchem die Fragestellung und die dazugehörigen Antwortmöglichkeiten erstellt werden sollen.
+ Es ist verboten, bereits existierenden Multiple Choice Questions erneut vorzuschlagen. Benutze in den Antwortmöglichkeiten keine Aufzählungen verschiedener Optionen und nutze maximal 2 Sätze. Benutze unbedingt immer die deutsche Sprache.
+ ---
+ Die gewünschte Thematik der Frage: {topic}
+ ---
+ Das dazugehörige Transkript: {transcript}
+ ---
+ thematisch verwandter Kontext: {similaritySearchResults}
+ ---
+ Anzahl an Antwortmöglichkeiten: {options}
+ ---
+ Konzept, welches als übergeordnetes Thema dienen soll: {concept}
+ ---
+ format instructions: {format_instructions}
+ `
 
 const questionAndAnswerPrompt2 = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
 Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein müssen innerhalb der triple quotes ("""):
@@ -324,19 +324,24 @@ function chunkText(inputText: string, maxTokens: number): string[] {
 
 @Injectable()
 export class McqCreationService {
-  private readonly logger = new Logger(McqCreationService.name);
-  private llm = new ChatOpenAI(llmConfig);
-  private regenLlm = new ChatOpenAI(regenerateLLmconfig);
-  private askedQuestions: { [concept: string]: McqGenerationDTO[] } = {};
-  private mcqToEvaluate: { [question: string]: string[] } = {};
-  private mcqs: { questions: McqGenerationDTO[] } = { questions: [] };
-
+  private readonly logger: Logger;
+  private llm: ChatOpenAI;
+  private regenLlm: ChatOpenAI;
+  private askedQuestions: { [concept: string]: McqGenerationDTO[] };
+  private mcqToEvaluate: { [question: string]: string[] };
+  private mcqs: { questions: McqGenerationDTO[] };
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly ragService: RagService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache
   ) {
+    this.logger = new Logger(McqCreationService.name);
+    this.llm = new ChatOpenAI(llmConfig);
+    this.regenLlm = new ChatOpenAI(regenerateLLmconfig);
+    this.askedQuestions = {};
+    this.mcqToEvaluate = {};
+    this.mcqs = { questions: [] };
   }
 
   /** adds a question and options to the askedQuestions object to prevent generating duplicates
@@ -477,10 +482,10 @@ export class McqCreationService {
     otherOptions: OptionDTO[],
     concept: string
   ): Promise<Answer> {
-    // Ensure the question exists in askedQuestions
+     Ensure the question exists in askedQuestions
     if (!this.askedQuestions[concept]?.some(q => q.question === question)) {
       this.addQuestion(concept, question);
-      // Adjusted to use otherOptions correctly
+       Adjusted to use otherOptions correctly
       this.addOptionsToQuestion(concept, question, otherOptions.map(opt => ({ answer: opt.answer })));
     }
     this.logger.log("concept: ", concept);
@@ -800,7 +805,7 @@ export class McqCreationService {
     };
 
     // Adjust the prompt to fit within token limits
-    const MAX_MODEL_TOKENS = 120000; // Model's maximum context length
+    const MAX_MODEL_TOKENS = 128000; // Model's maximum context length
     const MIN_TOKENS = 1000;        // Minimum tokens to send to the LLM
     const formattedPrompt = await this.adjustPrompt(promptTemplate, promptInput, MAX_MODEL_TOKENS, MIN_TOKENS);
 
