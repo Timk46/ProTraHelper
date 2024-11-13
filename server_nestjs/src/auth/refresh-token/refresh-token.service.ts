@@ -133,6 +133,10 @@ export class RefreshTokenService {
     });
   }
 
+  async deleteAllRefreshTokens() {
+    return this.prisma.refreshToken.deleteMany({});
+  }
+
   @Cron('0 * * * *') // Run every hour
   async purgeExpiredRefreshTokens() {
     const expirationThreshold = new Date();

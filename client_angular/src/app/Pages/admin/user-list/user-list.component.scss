@@ -8,11 +8,11 @@
     margin-bottom: 20px;
 
     .search-field {
-      width: 48%;
+      width: 40%;
     }
 
     .upload-container {
-      width: 48%;
+      width: 40%;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -46,6 +46,15 @@
         button {
           align-self: flex-start;
         }
+      }
+    }
+
+    .logout-all-container {
+      width: 15%;
+      display: flex;
+
+      button {
+        align-self: flex-start;
       }
     }
   }

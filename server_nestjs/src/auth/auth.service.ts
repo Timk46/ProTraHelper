@@ -128,6 +128,13 @@ export class AuthService {
     await this.eventLogService.log('info', 'login', user.id, 'User logged out of all devices', { email: user.email, role: user.globalRole });
   }
 
+  async logoutAllUser(user: User) {
+    this.logger.debug(`Logging out all user`); // TODO: hide
+    await this.refreshTokenService.deleteAllRefreshTokens();
+    this.logger.debug(`All user logged out`); // TODO: hide
+    await this.eventLogService.log('info', 'login', user.id, 'All user logged out', { email: user.email, role: user.globalRole });
+  }
+
   /**
    * Generates the access and refresh tokens for a user
    * @param { UserDTO } user the user to generate the tokens for

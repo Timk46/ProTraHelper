@@ -107,6 +107,33 @@ export class UserService {
     });
   }
 
+  logoutAllUser(): Promise<boolean> {
+    return new Promise<boolean>(async (resolve) => {
+      this.http.get(environment.server + '/auth/logoutAllUser').pipe(
+        finalize(() => {
+          this.removeTokens();
+          this.router.navigate(['/login']);
+        })
+      ).subscribe({
+        next: (response: any) => {
+          if (response.message === "All user logout out successful") {
+            this.openSnackBar("Alle Nutzer erfolgreich abgemeldet.");
+            resolve(true);
+          } else {
+            this.openSnackBar("Fehler bei der Abmeldung aller Nutzer.");
+            resolve(false);
+          }
+        },
+        error: (error: any) => {
+          this.openSnackBar("Fehler bei der Abmeldung aller Nutzer.");
+          resolve(false);
+        },
+        complete: () => {
+        },
+      });
+    });
+  }
+
   /**
    * Checks if the user is registered for the specified subject
    * @param subjectName The name of the subject to check

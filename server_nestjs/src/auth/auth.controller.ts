@@ -18,6 +18,7 @@ import { UserDTO } from '@DTOs/user.dto';
 import { JwtAuthGuard } from '@/auth/common/guards/jwt-auth.guard';
 import { JwtRefreshAuthGuard } from '@/auth/common/guards/jwt-refresh-auth.guard';
 import { User } from '@prisma/client';
+import { roles } from '@/auth/common/guards/roles.guard';
 
 /**
  * This class is used to define the auth routes of the application
@@ -84,6 +85,18 @@ export class AuthController {
     try {
       await this.authService.logoutAllUserDevices(req.user);
       return { message: 'Logout from all devices successful' };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @roles('ADMIN')
+  @Get('logoutAllUser')
+  async logoutAllUser(@Request() req: { user: User }) {
+    try {
+      await this.authService.logoutAllUser(req.user);
+      return { message: 'All user logout out successful' };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
