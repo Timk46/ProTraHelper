@@ -44,11 +44,11 @@
     <mat-slide-toggle *ngIf="userRole === 'ADMIN'" (change)="onToggleEditorMode()" [checked]="editModeActive" color="primary" style="margin-right: 10px;">
       Edit Mode
     </mat-slide-toggle>
-    <mat-divider vertical="true" class="divider" *ngIf="userIsLoggedIn"></mat-divider>
+    <mat-divider vertical="true" class="divider" *ngIf="userIsLoggedIn && userRole === 'ADMIN'"></mat-divider>
     <button mat-button *ngIf="userRole === 'ADMIN'" routerLink="/admin" style="font-size:15px; font-weight:bolder;">Admin Panel</button>
-    <mat-divider vertical="true" class="divider" *ngIf="userIsLoggedIn"></mat-divider>
+    <mat-divider vertical="true" class="divider" *ngIf="userIsLoggedIn && userRole === 'ADMIN'"></mat-divider>
     <button mat-button *ngIf="userIsLoggedIn" style="font-size:15px; font-weight:bolder;" (click)="showProgress()"> Fortschritt anzeigen </button>
-    <mat-divider *ngIf="userRole === 'ADMIN'" vertical="true" class="divider"></mat-divider>
+    <mat-divider vertical="true" class="divider" *ngIf="userIsLoggedIn"></mat-divider>
     <button mat-button [matMenuTriggerFor]="logoutMenu" *ngIf="userIsLoggedIn">Abmelden</button>
     <mat-menu #logoutMenu="matMenu">
       <button mat-menu-item (click)="logOut(false)">Abmelden</button>
