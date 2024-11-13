@@ -32,11 +32,11 @@ export interface QuestionDTO {
 */
   
 export interface QuestionVersionDTO {
-    id: number;
-    questionId: number;
-    version: number;
-    isApproved: boolean;
-    successor: number | null;
+    id?: number;
+    questionId?: number;
+    version?: number;
+    isApproved?: boolean;
+    successor?: number | null;
 }
 
 //MC-Question
@@ -46,6 +46,8 @@ export interface McQuestionDTO {
     textHTML?: string;
     isSC: boolean;
     shuffleOptions: boolean;
+    questionVersion?: QuestionVersionDTO;
+    mcQuestionOption?: McQuestionOptionDTO[];
 }
 
 /**
@@ -74,7 +76,7 @@ export interface MCOptionViewDTO {
 export interface McQuestionOptionDTO {
     id: number;
     mcQuestion?: McQuestionDTO;
-    mcOption: MCOptionDTO;
+    option: MCOptionDTO;
 }
 
 export interface UserMCAnswerDTO {
@@ -177,4 +179,9 @@ export interface CodingQuestionDto {
     stepsEnabled: boolean;
     configuration: GraphConfigurationDTO;
     maxPoints: number;
+  }
+
+  export interface OptionDTO {
+    text: string;
+    correct: boolean;
   }

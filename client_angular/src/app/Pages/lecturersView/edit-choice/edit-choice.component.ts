@@ -92,7 +92,6 @@ export class EditChoiceComponent {
 
 
   ngOnInit(): void {
-    //this.handleRouteParams();
     this.filteredConcepts.next(this.concepts.slice());
 
     this.conceptFilterControl.valueChanges
@@ -317,10 +316,29 @@ export class EditChoiceComponent {
   }
 
   generateOption(index: number): void {
-    // TODO: Implement
     console.log('Generating option', index, 'concept:', this.generationForm.value.generationConcept, this.getConceptById(Number(this.generationForm.value.generationConcept)));
     this.isGenerating[index] = true;
-    this.mcqService.getAnswer(this.questionField.getRawContent(), this.optionsData.at(index).get('text')!.value || '', this.optionsData.value.map((option: {id: number, text: string, is_correct: boolean}) => option.text), this.getConceptById(Number(this.generationForm.value.generationConcept))).subscribe((answer: Answer) => {
+
+    // Get the current option with text and correctness
+    const currentOption = {
+      text: this.optionsData.at(index).get('text')!.value || '',
+      correct: this.optionsData.at(index).get('is_correct')!.value || false
+    };
+
+    // Get other options with text and correctness
+    const otherOptions = this.optionsData.value
+      .filter((_: any, i: number) => i !== index) // Exclude the current option
+      .map((option: { id: number; text: string; is_correct: boolean }) => ({
+        text: option.text,
+        correct: option.is_correct
+      }));
+
+    this.mcqService.getAnswer(
+      this.questionField.getRawContent(),
+      currentOption,
+      otherOptions,
+      this.getConceptById(Number(this.generationForm.value.generationConcept))
+    ).subscribe((answer: Answer) => {
       this.optionsData.at(index).get('id')!.setValue("-1");
       this.optionsData.at(index).get('text')!.setValue(answer.answer);
       this.optionsData.at(index).get('is_correct')!.setValue(answer.correct);
@@ -336,9 +354,14 @@ export class EditChoiceComponent {
     }
 
     this.isQuestionGenerating = true;
-    this.mcqService.getQuestionAndAnswers(this.getConceptById(Number(this.generationForm.value.generationConcept)), this.generationForm.value.generationOptionCount, this.generationForm.value.generationTopic).subscribe(data => {
+    this.mcqService.getQuestionAndAnswers(
+      this.getConceptById(Number(this.generationForm.value.generationConcept)),
+      this.generationForm.value.generationOptionCount,
+      this.generationForm.value.generationTopic
+    ).subscribe(data => {
       console.log('Generated question:', data);
       this.questionField.setContent(data.question || '');
+      this.generationForm.get('generationTopic')?.setValue(data.description || '');
       this.optionsData.clear();
       if (data.answers) {
         data.answers.forEach((answer: Answer) => {

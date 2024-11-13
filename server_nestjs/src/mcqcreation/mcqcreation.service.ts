@@ -1,24 +1,18 @@
 /* eslint-disable prefer-const */
 /* eslint-disable prettier/prettier */
-
-
-import { Injectable } from '@nestjs/common';
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { Injectable, Logger } from '@nestjs/common';
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import {PromptTemplate,} from "langchain/prompts";
 import { RunnableSequence } from "langchain/schema/runnable";
-import { formatDocumentsAsString } from "langchain/util/document";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { z } from "zod";
-import { PoolConfig } from 'pg';
-import { PGVectorStore} from 'langchain/vectorstores/pgvector';
-import * as fs from 'fs';
-import * as path from 'path';
 import { McqGenerationDTO } from '@Interfaces/question.dto';
 import { env } from 'process';
-import { JsonLoaderService } from './jsonloader.service';
 import { RagService } from '@/ai/services/rag.service';
 import { TranscriptChunk } from '@Interfaces/file.dto';
+import { PrismaService } from '@/prisma/prisma.service';
+import { encode, decode } from 'gpt-3-encoder'; // Install if necessary
+import { HumanMessage } from '@langchain/core/messages';
 
 interface Answer{
   answer?: string;
@@ -45,28 +39,9 @@ const llmConfig = {
 const regenerateLLmconfig = {
   modelName: 'gpt-4o-2024-08-06', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
   openAIApiKey: env.OPEN_API_KEY,
-  temperature: 0.33, // higher Temperature favours the words with lower probability = more creative
+  temperature: 0.66, // higher Temperature favours the words with lower probability = more creative
   streaming: true
 }
-// change to accessing sensitive data from .env(?)
-const pg_config_lectureTranscripts = {
-  // we use the pg_vector plugin for postgres so we can connect all data later in
-  postgresConnectionOptions: {
-    type: 'postgres',
-    host: 'vectordb.bshefl0.bs.informatik.uni-siegen.de', // only accessable from vpn
-    port: 3306,
-    user: 'root',
-    password: 'qzx5vQG9WQ2b35eZUWujPUhVb8xRr', // ToDo: Move to .env
-    database: 'vectordb',
-  } as PoolConfig,
-  tableName: 'langchain_pg_embedding', // all embeddings are stored in this table. Lectures are seperated by collections. Filter by collection ist not used here so we get embeddings from all.
-  columns: { // the metadata columns which will be returned with the search result
-    idColumnName: 'uuid',
-    vectorColumnName: 'embedding',
-    contentColumnName: 'document',
-    metadataColumnName: 'cmetadata',
-  },
-};
 
 const questionTitlePrompt = `Du bist ein Programmierexperte und hilfst mir nur dabei eine Fragestellung für eine Multiple Choice Aufgabe zu erstellen. Nutze dabei folgendes Konzept:
 --------------
@@ -100,28 +75,43 @@ Achte zusätzlich darauf, dass du keine Antwortmöglichkeiten mit in deine Antwo
 format instructions: {format_instructions}
 `
 
-// needs to be altered because llm needs to know what kind of expert he needs to be etc. (example: suggests network related stuff when asking about interfaces in programming languages if not specified in question field in the frontend
-const systemMsg = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und dazugehörige Antwortmöglichkeiten, eine Beschreibung und eine Punktzahl für eine Multiple Choice Aufgabe zu erstellen. Die Punktzahl soll dabei von 0 für besonders einfach bis 5 für besonders schwer reichen. Nutze dabei folgendes Konzept:
-----------------
-Konzept: {concept}
----------------
-Liefere mir bitte genau eine Anzahl von: {options} sich unterscheidenden Antwortmöglichkeiten. Hier ist der spezielle Kontext des Konzepts, also des Oberthemas:
-----------------
-Oberthema: {conceptText}
-----------------
-Beachte dabei bitte folgenden Gesamtkontext des Oberthemas:
-----------------
-Gesamtkontext: {completeContext}
-----------------
-Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
-Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte schreibe die Antwortmöglichkeit auf jeden Fall auf deutsch. Dies ist die Frage zu der du die Antwortmöglichkeiten vorschlagen sollst:
-----------------
-Frage: {question}
-----------------
+const answersPrompt = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
+Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein m��ssen innerhalb der triple quotes ("""):
+"""Beschreibung der wesentlichen 3 Eigenschaften einer MCQ:
+1. MCQs bestehen aus einem klaren Fragestamm und mehreren Antwortoptionen, darunter eine richtige Antwort und plausible Distraktoren, um effektives Lernen zu unterstützen.
+2. Effektive MCQs testen höhere kognitive Fähigkeiten, indem sie Verständnis, Anwendung und Analyse von Konzepten über Faktenwissen hinaus fordern.
+3. Gute MCQs zeichnen sich durch eindeutige Fragen, plausible Distraktoren, die Vermeidung von sprachlichen Verzerrungen und die Fähigkeit aus, höhere Denkprozesse zu prüfen, ohne dass die Antwort erraten werden kann.
+
+Zu den Merkmalen einer gut konstruierten MCQ gehören eindeutige und relevante Fragestellungen, plausible und gleichmäßig überzeugende Distraktoren. Beachte hierbei die folgenden 5 Eigenschaften von Distraktoren:
+1. Distraktoren müssen plausibel und herausfordernd für Unkundige sein, um effektiv das Verständnis statt Erkennungsfähigkeit zu prüfen.
+2. Sie sollten thematisch zum Fragestamm passen und die Konzentration auf die geprüften Konzepte lenken.
+3. Jedes erkennbare Muster, das zur Antwortfindung durch Eliminierung führen könnte, ist zu vermeiden.
+4. Distraktoren sollen herausfordernd, aber nicht verwirrend oder irreführend sein, um Klarheit zu bewahren.
+5. Sie sollten verschiedene häufige Missverständnisse abdecken, um das Verständnis gründlich zu testen."""
+---
+Hier eine Liste bereits existierender Multiple Choice Questions, welche nicht widerholt werden dürfen.
+Es ist verboten, die bereits existierenden Fragen nur etwas umformuliert erneut vorzuschlagen.
+---
+Bereits existierende Fragen: {question}.
+---
+Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Algorithmen und Datenstrukturen". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen mit dem Wissen daraus beantwortet werden können sollen.
+Die MCQs müssen aber nicht ausschließlich aus dem Transkript generiert werden, sie dürfen auch aus dem allgemeinen Wissen zu den Themen generiert werden.
+Der praktische Teil wird hier anhand der Programmiersprache C++ gelehrt.
+Beziehe dich immer auf das konkrete Konzept, welches als übergeordnetes Thema dienen soll zu welchem die Fragestellung und die dazugehörigen Antwortmöglichkeiten erstellt werden sollen.
+Es ist verboten, bereits existierenden Multiple Choice Questions erneut vorzuschlagen. Benutze in den Antwortmöglichkeiten keine Aufzählungen verschiedener Optionen und nutze maximal 2 Sätze. Benutze unbedingt immer die deutsche Sprache.
+---
+Das dazugehörige Transkript: {transcript}
+---
+thematisch verwandter Kontext: {similaritySearchResults}
+---
+Anzahl an Antwortmöglichkeiten: {options}
+---
+Konzept, welches als übergeordnetes Thema dienen soll: {concept}
+---
 format instructions: {format_instructions}
 `
 
-const systemMsg2 = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
+const answersPrompt2 = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
 Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein müssen innerhalb der triple quotes ("""):
 """Beschreibung der wesentlichen 3 Eigenschaften einer MCQ:
 1. MCQs bestehen aus einem klaren Fragestamm und mehreren Antwortoptionen, darunter eine richtige Antwort und plausible Distraktoren, um effektives Lernen zu unterstützen.
@@ -138,7 +128,7 @@ Zu den Merkmalen einer gut konstruierten MCQ gehören eindeutige und relevante F
 Hier eine Liste bereits existierender Multiple Choice Questions, welche nicht widerholt werden dürfen.
 Es ist verboten, die bereits existierenden Fragen nur etwas umformuliert erneut vorzuschlagen.
 ---
-Bereits existierende Fragen: {questions}.
+Frage, zu welcher die Antwortmöglichkeiten generiert werden: {question}.
 ---
 Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Algorithmen und Datenstrukturen". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen mit dem Wissen daraus beantwortet werden können sollen.
 Die MCQs müssen aber nicht ausschließlich aus dem Transkript generiert werden, sie dürfen auch aus dem allgemeinen Wissen zu den Themen generiert werden.
@@ -146,24 +136,22 @@ Der praktische Teil wird hier anhand der Programmiersprache C++ gelehrt.
 Beziehe dich immer auf das konkrete Konzept, welches als übergeordnetes Thema dienen soll zu welchem die Fragestellung und die dazugehörigen Antwortmöglichkeiten erstellt werden sollen.
 Es ist verboten, bereits existierenden Multiple Choice Questions erneut vorzuschlagen. Benutze in den Antwortmöglichkeiten keine Aufzählungen verschiedener Optionen und nutze maximal 2 Sätze. Benutze unbedingt immer die deutsche Sprache.
 ---
-Das dazugehörige Transkript: {transcript}
----
-thematisch verwandter Kontext: {context}
+thematisch verwandter Kontext: {similaritySearchResults}
 ---
 Anzahl an Antwortmöglichkeiten: {options}
 ---
 Konzept, welches als übergeordnetes Thema dienen soll: {concept}
-
 ---
 format instructions: {format_instructions}
 `
+
 // needs to be altered because llm needs to know what kind of expert he needs to be etc. (example: suggests network related stuff when asking about interfaces in programming languages if not specified in question field in the frontend
 const regeneratePrompt = `Du bist ein Programmierexperte und erstellst eine neue auswählbare Antwortmöglichkeit für eine bestehende Multiple Choice Frage. Folgendes Konzept ist das Oberthema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen wurden:
 ---
 Konzept: {concept}
 ---
 Beachte dabei unter anderem das Transkript des Oberthemas, um neue Antwortmöglichkeiten zu generieren. Beachte ausserdem den thematisch verwandten Kontext, um bessere Antwortmöglichkeiten zu erstellen.
-Transkript des Oberthemas: {conceptText}
+Transkript des Oberthemas: {transcript}
 ---
 thematisch verwandter Kontext: {completeContext}
 ---
@@ -223,7 +211,7 @@ Zu den Merkmalen einer gut konstruierten MCQ gehören eindeutige und relevante F
 Hier eine Liste bereits existierender Multiple Choice Questions, welche nicht widerholt werden dürfen.
 Es ist verboten, die bereits existierenden Fragen nur etwas umformuliert erneut vorzuschlagen.
 ---
-Bereits existierende Fragen: {questions}.
+Bereits existierende Fragen: {existingQuestions}.
 ---
 Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Algorithmen und Datenstrukturen". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen mit dem Wissen daraus beantwortet werden können sollen.
 Die MCQs müssen aber nicht ausschließlich aus dem Transkript generiert werden, sie dürfen auch aus dem allgemeinen Wissen zu den Themen generiert werden.
@@ -235,32 +223,48 @@ Die gewünschte Thematik der Frage: {topic}
 ---
 Das dazugehörige Transkript: {transcript}
 ---
-thematisch verwandter Kontext: {context}
+thematisch verwandter Kontext: {similaritySearchResults}
 ---
 Anzahl an Antwortmöglichkeiten: {options}
 ---
 Konzept, welches als übergeordnetes Thema dienen soll: {concept}
-
 ---
 format instructions: {format_instructions}
 `
-// To Add: Bigger context if no transcript is found
-const questionAndAnswerPrompt2 = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und dazugehörige Antwortmöglichkeiten, eine Beschreibung und eine Punktzahl für eine Multiple Choice Aufgabe zu erstellen. Die Punktzahl soll dabei von 0 für besonders einfach bis 5 für besonders schwer reichen. Nutze dabei folgendes Konzept:
---------------
-Konzept: {concept}
---------------
-Dieses Konzept ist das OberThema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen werden sollen. Denke lange und gut drüber nach, um mit den generierten Fragen den Umfang des Oberthemas gut abzudecken.
-Überelege dir zusätzlich bis zu {options} verschiedene Antwortmöglichkeiten auf diese Frage.
---------------
-Achte darauf, dass folgende Fragen schon bestehen und du diese nicht erneut vorschlagen darfst. Nimm dir nun erstmal etwas Zeit und lies diese bereits verwendeten Fragen genau durch. Anschließend denke genau nach, du darfst auf keinen Fall nur leicht umformulierte Fragen generieren. Wenn die Frage einen ähnlichen Kern wie eine bereits vorgeschlagene Frage hat, dann denke dir eine neue aus. Wenn die Fragen bisher zu leicht waren, dann denke dir schwerere aus:
---------------
-Bereits vorgeschlagene Fragen: {questions}.
---------------
-Keine der zuvor beschriebenen Fragen sollen in ihrer Sinnhaftigkeit in die neue Generierung mit aufgenommen werden, also denke hier erneut kurz nach und generiere zur not neue. Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
-Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte antworte auf jeden Fall auf deutsch. Beachte dass die Beschreibung, die du generierst nichts über die Lösung der Fragestellung verraten soll, sondern viel mehr das Thema der Fragestellung beschreibend in einen Kontext setzen soll.
---------------
-Thema der zu generierenden Frage: {topic}
---------------
+
+const questionAndAnswerPrompt2 = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
+Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein müssen innerhalb der triple quotes ("""):
+"""Beschreibung der wesentlichen 3 Eigenschaften einer MCQ:
+1. MCQs bestehen aus einem klaren Fragestamm und mehreren Antwortoptionen, darunter eine richtige Antwort und plausible Distraktoren, um effektives Lernen zu unterstützen.
+2. Effektive MCQs testen höhere kognitive Fähigkeiten, indem sie Verständnis, Anwendung und Analyse von Konzepten über Faktenwissen hinaus fordern.
+3. Gute MCQs zeichnen sich durch eindeutige Fragen, plausible Distraktoren, die Vermeidung von sprachlichen Verzerrungen und die Fähigkeit aus, höhere Denkprozesse zu prüfen, ohne dass die Antwort erraten werden kann.
+
+Zu den Merkmalen einer gut konstruierten MCQ gehören eindeutige und relevante Fragestellungen, plausible und gleichmäßig überzeugende Distraktoren. Beachte hierbei die folgenden 5 Eigenschaften von Distraktoren:
+1. Distraktoren müssen plausibel und herausfordernd für Unkundige sein, um effektiv das Verständnis statt Erkennungsfähigkeit zu prüfen.
+2. Sie sollten thematisch zum Fragestamm passen und die Konzentration auf die geprüften Konzepte lenken.
+3. Jedes erkennbare Muster, das zur Antwortfindung durch Eliminierung führen könnte, ist zu vermeiden.
+4. Distraktoren sollen herausfordernd, aber nicht verwirrend oder irreführend sein, um Klarheit zu bewahren.
+5. Sie sollten verschiedene häufige Missverständnisse abdecken, um das Verständnis gründlich zu testen."""
+---
+Hier eine Liste bereits existierender Multiple Choice Questions, welche nicht widerholt werden dürfen.
+Es ist verboten, die bereits existierenden Fragen nur etwas umformuliert erneut vorzuschlagen.
+---
+Bereits existierende Fragen: {questions}.
+---
+Erstelle die MCQs ausschließlich zur Thematik und dem jeweiligen Konzept aus der Einführungsverstanstaltung "Algorithmen und Datenstrukturen". Lies das dazugehörige Transkript aufmerksam durch, denn die Multiple Choice Questions müssen mit dem Wissen daraus beantwortet werden können sollen.
+Die MCQs müssen aber nicht ausschließlich aus dem Transkript generiert werden, sie dürfen auch aus dem allgemeinen Wissen zu den Themen generiert werden.
+Der praktische Teil der Programmierung wird hier anhand der Programmiersprache C++ gelehrt.
+Beziehe dich immer auf das konkrete Konzept, welches als übergeordnetes Thema dienen soll zu welchem die Fragestellung und die dazugehörigen Antwortmöglichkeiten erstellt werden sollen.
+Es ist verboten, bereits existierenden Multiple Choice Questions erneut vorzuschlagen. Benutze in den Antwortmöglichkeiten keine Aufzählungen verschiedener Optionen und nutze maximal 2 Sätze. Benutze unbedingt immer die deutsche Sprache.
+---
+Die gewünschte Thematik der Frage: {topic}
+---
+thematisch verwandter Kontext: {similaritySearchResults2}
+---
+Anzahl an Antwortmöglichkeiten: {options}
+---
+Konzept, welches als übergeordnetes Thema dienen soll: {concept}
+---
 format instructions: {format_instructions}
 `
 
@@ -294,46 +298,46 @@ Antwortoptionen der MCQ: {answers}
 format instructions: {format_instructions}
 `
 
-// not used
-const reevaluationPrompt = `Du bist ein Programmierexperte und hilfst mir dabei eine Frage und dazugehörige Antwortmöglichkeiten für eine Multiple Choice Aufgabe zu bewerten und zu verbessern.
---------------
-Folgendes Konzept ist das Thema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen wurden: {concept}. Hier ist der spezielle Kontext des Konzepts, also des Oberthemas: {conceptText}
---------------
-Der Kontext zu dieser Frage ergibt sich aus der Fragestellung und lautet: {completeContext}
---------------
-Die Fragestellung lautet: {question}
---------------
-Die Antwortmöglichkeiten lauten: {options}
---------------
-Bewerte bitte die Fragestellung und die Antwortmöglichkeiten und schlage gegebenenfalls Verbesserungen vor.
-Solltest du Verbesserungen vorschlagen, achte darauf, dass diese Verbesserungen sinnvoller sind als zuvor und nicht bereits vorgeschlagen wurden.
-Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist.
-Achte darauf, KEINE AUFZÄHLUNGEN zu verwenden und halte die Antwortmöglichkeiten maximal 2 Sätze lang.
-Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten.
-Gib zusätzlich eine Begründung dafür an, weshalb du die Frage und/oder Antwortmöglichkeiten verändert hast.
---------------
-format instructions: {format_instructions}
-`
+/**
+ * Splits input text into chunks based on maximum token size.
+ *
+ * @param inputText - The large input text to be chunked.
+ * @param maxTokens - The maximum number of tokens per chunk.
+ * @returns An array of text chunks.
+ */
+function chunkText(inputText: string, maxTokens: number): string[] {
+  const encodedText = encode(inputText);
+  const chunks: number[][] = [];
+  let start = 0;
+
+  while (start < encodedText.length) {
+    const end = start + maxTokens;
+    const chunk = encodedText.slice(start, end);
+    chunks.push(chunk);
+    start = end;
+  }
+
+  return chunks.map(chunk => decode(chunk));
+}
+
 @Injectable()
 export class McqCreationService {
-  private pgVectorStore: Promise<PGVectorStore>;
-  private folderPath: string;
+  private readonly logger = new Logger(McqCreationService.name);
   private llm = new ChatOpenAI(llmConfig);
   private regenLlm = new ChatOpenAI(regenerateLLmconfig);
   private otherOptions : { [question: string]: string[] } = {};
   private askedQuestions: { [concept: string]: McqGenerationDTO[] } = {};
   private mcqToEvaluate: { [question: string]: string[] } = {};
   private mcqs: { questions: McqGenerationDTO[] } = { questions: [] };
+  private transcript: string;
 
   constructor(
-    private jsonLoaderService : JsonLoaderService,
+    private prisma: PrismaService,
     private ragService: RagService
   ) {
-    //this.pgVectorStore = this.initPgVectorStore(); // not used, vectorstore origin changed
-    this.folderPath = path.join(__dirname, '..', '..', '..', '..', '..', 'shared', 'transcripts');
   }
 
-  /** adds a question and options to the askedQuestions object
+  /** adds a question and options to the askedQuestions object to prevent generating duplicates
    *
    * @param concept
    * @param question
@@ -366,11 +370,10 @@ export class McqCreationService {
     }
   }
 
-  /** replaces an option in the askedQuestions object to prevent regenerating duplicates
+  /** adds an option in the askedQuestions object to prevent regenerating duplicates
    *
    * @param concept
    * @param question
-   * @param oldOption
    * @param newOption
    */
   private addOption(concept: string, question: string, newOption: string) {
@@ -381,7 +384,7 @@ export class McqCreationService {
         }
       });
     }
-}
+  }
 
   /** adds options to the question in the askedQuestions object to prevent regenerating duplicates
    *
@@ -401,100 +404,35 @@ export class McqCreationService {
   }
 }
 
-  private initPgVectorStore() {
-    return PGVectorStore.initialize(
-      new OpenAIEmbeddings({openAIApiKey: env.OPEN_API_KEY}),
-      pg_config_lectureTranscripts,
-    );
-  }
-
-  /**
-   *
-   * @param concept
-   * @returns if concept has Umlauts
-   */
-  private hasUmlauts(concept: string): boolean {
-    return /[äöüÄÖÜß]/i.test(concept);
-  }
-
-  /**
-   *
-   * @param concept
-   * @returns formattedString without Umlauts
-   */
-  private replaceUmlauts(concept: string): string {
-    return concept.replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss');
-  }
-
-  /** this function gets all necessary text files (transcripts)
-   *
-   * @param concept
-   * @returns document of the concept if it matches
-   */
-  public async getFileFromFolder(searchStr: string) {
-    if (this.hasUmlauts(searchStr)) {
-      searchStr = this.replaceUmlauts(searchStr);
-    }
-
-    const searchStrLower = searchStr.toLowerCase();
-    const prefixes = ['python_', 'java_'];
-    const selectedPrefix = prefixes[Math.floor(Math.random() * prefixes.length)]; // Zufällige Auswahl zwischen 'python_' und 'java_'
-
-    try {
-      const files = fs.readdirSync(this.folderPath);
-      let matchingFiles = files.filter(file => {
-        const lowerCaseFileName = file.toLowerCase();
-        // Prüfen, ob der Dateiname den Suchstring enthält und mit dem ausgewählten Präfix beginnt
-        return lowerCaseFileName.includes(searchStrLower) && lowerCaseFileName.startsWith(selectedPrefix);
-      });
-
-      console.log("Matching files before random selection: ", matchingFiles);
-
-      // Zufällige Auswahl von bis zu 3 Dateien, wenn mehr als 3 übereinstimmen
-      if (matchingFiles.length > 3) {
-        matchingFiles = matchingFiles.sort(() => 0.5 - Math.random()).slice(0, 3);
-      }
-
-      console.log("Matching files after random selection: ", matchingFiles);
-
-      if (matchingFiles.length > 0) {
-        // Inhalt aller ausgewählten Dateien zurückgeben
-        return matchingFiles.map(file => {
-          const filePath = path.join(this.folderPath, file);
-          return fs.readFileSync(filePath, 'utf8');
-        });
-      } else {
-        return null;
-      }
-    } catch (err) {
-      console.error("An error occurred: ", err);
-      return null;
-    }
-  }
-
   /** Called when generating a question title
    * @param concept
    * @returns
    */
   async getQuestionTitle(concept: string): Promise<McqGenerationDTO> {
-    this.mcqs = await this.jsonLoaderService.loadJson(concept);
     this.mcqs.questions.forEach(mcq => {
       this.addQuestionAndOptions(concept, mcq.question, mcq.answers)
     });
     console.log("this.askedQuestions: ", this.askedQuestions[concept].map(mcq => mcq.question))
 
     const parser = StructuredOutputParser.fromZodSchema(z.object({
-      question: z.string().describe("Question to the user without answering options"),
+      question: z.string().describe("Frage an den Nutzer. Ohne Antwortmöglichekiten"),
     }));
-    const completeContext = await this.getSimilaritySearchString(concept, 15);
-    const conceptContext = await this.getFileFromFolder(concept);
-    if(!(conceptContext === null)) {
+    const completeContext = await this.ragService.lectureSimilaritySearch(concept, 10);
+    const transcript = await this.prisma.conceptNode.findFirst({
+      where: {
+        name: concept,
+      },
+      select: {
+        transcript: true,
+      },
+    });
+    if(!(transcript === null)) {
       const response = await RunnableSequence.from([
       {
         concept: () => concept,
         completeContext: () => completeContext,
         questions: () => this.askedQuestions[concept].map(mcq => mcq.question),
-        conceptText:  () =>  conceptContext,
+        transcript:  () =>  transcript,
         format_instructions: () => parser.getFormatInstructions(),
       },
       PromptTemplate.fromTemplate(questionTitlePrompt),
@@ -530,65 +468,130 @@ export class McqCreationService {
    * @param otherOptions
    * @returns Answer to the user's question
    */
-  async getAnswer(question: string, option: string, otherOptions: string[], concept: string) :Promise<Answer> {
-
-    if (!this.askedQuestions[concept]?.some(questionDto => questionDto.question === question)) {
+  async getAnswer(
+    question: string,
+    option: { text: string; correct: boolean },
+    otherOptions: { text: string; correct: boolean }[],
+    concept: string
+  ): Promise<Answer> {
+    // Ensure the question exists in askedQuestions
+    if (!this.askedQuestions[concept]?.some(q => q.question === question)) {
       this.addQuestion(concept, question);
-      this.addOptionsToQuestion(concept, question, otherOptions.map(option => ({ answer: option})));
+      // Adjusted to use otherOptions correctly
+      this.addOptionsToQuestion(concept, question, otherOptions.map(opt => ({ answer: opt.text })));
     }
 
-    console.log("this.askedQuestions: ", this.askedQuestions[concept].map(mcq => mcq.question))
-    console.log("this.otherOptions for: ","QUESTION: " , this.otherOptions[question]?.map(option => option) || "no other options")
+    this.logger.log("Asked questions:", this.askedQuestions[concept].map(mcq => mcq.question));
+    this.logger.log(
+      "Other options for question:",
+      this.askedQuestions[concept]?.flatMap(mcq => mcq.answers).map(ans => ans.answer) || []
+    );
+
     const parser = StructuredOutputParser.fromZodSchema(
-      z.object(
-                {
-                  answer: z.string().describe("Answer to the user's question. Dont enumerate"),
-                  correct: z.boolean().describe("Indicates if the answer is correct (true/false)"),
-                }));
-    const completeContext = await this.getSimilaritySearchString(question, 10);
-    const conceptContext = await this.getFileFromFolder(concept);
-    if(!(conceptContext === null)) {
-      const response = await RunnableSequence.from([
-      {
-        option: () => option,
-        concept: () => concept,
-        options: () => this.askedQuestions[concept]?.map(mcq => mcq.answers).flat().map(answer => answer.answer) || [],
-        question: () => question,
-        completeContext: () => completeContext,
-        conceptText:  () =>  conceptContext,
-        format_instructions: () => parser.getFormatInstructions(),
-      },
-      PromptTemplate.fromTemplate(regeneratePrompt),
-      this.regenLlm,
-      parser,
-      ]).invoke({callbacks: []})
+      z.object({
+        answer: z.string().describe("Answer to the user's question. Don't enumerate."),
+        correct: z.boolean().describe("Indicates if the answer is correct (true/false)."),
+      })
+    );
 
-      this.addOption(concept,question,response.answer);
-      console.log("all answers: ", this.askedQuestions[concept]?.map(mcq => mcq.answers).flat().map(answer => answer.answer) || [])
+    // Retrieve context for the prompt
+    const completeContext = await this.ragService.lectureSimilaritySearch(question, 10);
+    const conceptNode = await this.prisma.conceptNode.findFirst({
+      where: { name: concept },
+      select: { transcript: true },
+    });
+    const transcript = conceptNode?.transcript || "";
 
-      return response;
-    } else
-    {
-      const response2 = await RunnableSequence.from([
-      {
-        option: () => option,
-        concept: () => concept,
-        options: () => this.askedQuestions[concept]?.map(mcq => mcq.answers).flat().map(answer => answer.answer) || [],
-        question: () => question,
-        completeContext: async () => completeContext,
-        format_instructions: () => parser.getFormatInstructions(),
-      },
-      PromptTemplate.fromTemplate(regeneratePrompt2),
-      this.regenLlm,
-      parser,
-      ]).invoke({callbacks: []})
+    // Convert completeContext from TranscriptChunk[] to string
+    const completeContextString = completeContext.map(chunk => chunk).join(' ');
 
+    // Combine otherOptions into a single string
+    const optionsString = otherOptions.map(opt => opt.text).join('\n');
 
-      this.addOption(concept,question,response2.answer);
+    // Use the correctness from the option parameter
+    const previousCorrectness = option.correct;
+    const desiredCorrectness = !previousCorrectness;
 
-      return response2;
+    // Prepare prompt input
+    const promptInput = {
+      option: option.text,
+      concept: concept,
+      options: optionsString,
+      question: question,
+      completeContext: completeContextString,
+      transcript: transcript,
+      desiredCorrectness: desiredCorrectness ? 'korrekt' : 'falsch',
+      format_instructions: parser.getFormatInstructions(),
+    };
+
+    // Update the prompt template to include desired correctness
+    const regeneratePromptWithCorrectness = `
+      Du bist ein Programmierexperte und erstellst eine neue auswählbare Antwortmöglichkeit für eine bestehende Multiple-Choice-Frage. Folgendes Konzept ist das Oberthema, zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen wurden:
+      ---
+      Konzept: {concept}
+      ---
+      Beachte dabei unter anderem das Transkript des Oberthemas und den thematisch verwandten Kontext, um neue Antwortmöglichkeiten zu generieren.
+      Transkript des Oberthemas: {transcript}
+      ---
+      Thematisch verwandter Kontext: {completeContext}
+      ---
+      Es ist verboten, bereits vorgeschlagene Antwortmöglichkeiten erneut vorzuschlagen. Nachdem du die bereits vorgeschlagenen Antwortmöglichkeiten gelesen hast, liefere mir bitte eine **neue** Antwortmöglichkeit.
+
+      **Die neue Antwortmöglichkeit soll {desiredCorrectness} sein.**
+
+      ---
+      Bereits vorgeschlagene Antwortmöglichkeiten: {options}
+      ---
+      Schreibe dazu, ob die vorgeschlagene Antwort für die ursprüngliche Frage wahr oder falsch ist. Benutze in den Antwortmöglichkeiten keine Aufzählungen verschiedener Optionen und nutze maximal zwei Sätze. Verwende unbedingt die deutsche Sprache.
+      ---
+      Bestehende Multiple-Choice-Frage: {question}
+      ---
+      Format instructions: {format_instructions}
+    `;
+
+    // Create the prompt template
+    const promptTemplate = PromptTemplate.fromTemplate(regeneratePromptWithCorrectness);
+
+    // Adjust the prompt to fit within token limits
+    const MAX_MODEL_TOKENS = 12000;
+    const MIN_TOKENS = 1000;
+    const formattedPrompt = await this.adjustPrompt(promptTemplate, promptInput, MAX_MODEL_TOKENS, MIN_TOKENS);
+
+    // Log the token count
+    const numTokens = await this.llm.getNumTokens(formattedPrompt);
+    this.logger.log(`Adjusted prompt contains ${numTokens} tokens.`);
+
+    // Ensure the prompt is within the model's token limit
+    if (numTokens > MAX_MODEL_TOKENS) {
+      throw new Error(`Prompt exceeds the maximum token limit of ${MAX_MODEL_TOKENS}.`);
     }
 
+    // Prepare the runnable sequence
+    const sequence = RunnableSequence.from([
+      promptTemplate,
+      this.regenLlm,
+      parser,
+    ]);
+
+    // Invoke the sequence with promptInput
+    const response = await sequence.invoke(promptInput, { callbacks: [] });
+
+    // Verify that the generated answer has the desired correctness
+    if (response.correct !== desiredCorrectness) {
+      this.logger.log("The generated answer did not match the desired correctness. Regenerating...");
+      // Implement retry logic if necessary
+    }
+
+    // Add the generated answer to prevent duplicates
+    this.addOption(concept, question, response.answer);
+
+    this.logger.log(
+      "All answers:",
+      this.askedQuestions[concept]?.flatMap(mcq => mcq.answers).map(ans => ans.answer) || []
+    );
+    this.logger.log("Generated response correctness:", response.correct);
+
+    return response;
   }
 
   /** Called when question, concept  and number of options is entered into the frontend
@@ -603,168 +606,207 @@ export class McqCreationService {
       z.object({
         answers: z.array(
           z.object({
-            answer: z.string().describe("Answer to the user's question. Dont enumerate"),
-            correct: z.boolean().describe("Indicates if the answer is correct (true/false)"),
+            answer: z.string().describe("Antwortmöglichkeit des Nutzers. Keine Aufzählungen nutzen."),
+            correct: z.boolean().describe("Markiert die Korrektheit der Antwortmöglichkeit (wahr/falsch)"),
           })
         ),
-        description: z.string().describe("Brief Description of the Question with regards to the Topic/Concept"),
-        score: z.number().describe("Score for answering the Question right ranging from 0 for an easy Question to 5 for a hard question. Choose according to the difficulty of the question."),
+        description: z.string().describe("Kurze Beschreibung der Fragestellung mit Bezug auf das Oberthema"),
+        score: z.number().describe("Punktzahl für das richtige beantworten der Frage. 1 für sehr einfach und 5 für sehr schwierig."),
       })
     )
-    const completeContext = await this.getSimilaritySearchString(concept, 15);
-    const conceptContext = await this.getFileFromFolder(concept);
 
-    if(!(conceptContext === null))
-    {
-      console.log("result with concept context is fired")
-      const contextResult = await RunnableSequence.from([
+    const similaritySearchResults = await this.getSimilaritySearchString(concept, 15);
+    const transcriptData = await this.prisma.conceptNode.findFirst({
+      where: {
+        name: concept,
+      },
+      select: {
+        transcript: true,
+      },
+    })
+    const transcript = transcriptData?.transcript || "";
+    // Prepare the prompt template
+    let promptTemplate;
+    if (transcript) {
+      promptTemplate = PromptTemplate.fromTemplate(answersPrompt);
+    } else {
+      promptTemplate = PromptTemplate.fromTemplate(answersPrompt2);
+    }
+
+    const promptInput = {
+      options: options.toString(),
+      concept: concept,
+      question: question,
+      similaritySearchResults: similaritySearchResults,
+      transcript: transcript,
+      format_instructions: parser.getFormatInstructions(),
+    };
+
+    // Get formatted prompt
+    const formattedPrompt = await promptTemplate.format(promptInput);
+
+    // Calculate tokens for the prompt
+    const numTokens = await this.llm.getNumTokens(formattedPrompt);
+    this.logger.log(`Prompt contains ${numTokens} tokens`);
+
+    // Ensure the token count is within the model's limit
+    const MAX_MODEL_TOKENS = 128000; // Adjust based on model capacity
+    if (numTokens > MAX_MODEL_TOKENS) {
+      throw new Error(`Prompt exceeds the maximum token limit of ${MAX_MODEL_TOKENS}.`);
+    }
+
+    const response = await RunnableSequence.from([
       {
         options: () => options.toString(),
         concept: () => concept,
-        // otherOptions??
         question: () => question,
-        completeContext:  () => completeContext,
-        conceptText:  () => conceptContext,
+        similaritySearchResults: () => similaritySearchResults,
+        transcript: () => transcript,
         format_instructions: () => parser.getFormatInstructions(),
       },
-      PromptTemplate.fromTemplate(systemMsg),
+      promptTemplate,
       this.llm,
       parser,
-    ]).invoke({callbacks: []});
+    ]).invoke({ callbacks: [] });
 
-    contextResult.answers.forEach(result => {
-        this.addOptionsToQuestion(concept, question, [result]);
-      });
+    // Adding the generated question and answers to prevent duplicates
+    this.addQuestionAndOptions(concept, question, response.answers);
 
-    return contextResult;
-
-    } else
-    {
-      console.log("result without concept context is fired")
-      const contextResult2 = await RunnableSequence.from([
-        {
-          options: () => options.toString(),
-          concept: () => concept,
-          // otherOptions??
-          question: () => question,
-          completeContext: () => completeContext,
-          format_instructions: () => parser.getFormatInstructions(),
-        },
-        PromptTemplate.fromTemplate(systemMsg2),
-        this.llm,
-        parser,
-      ]).invoke({callbacks: []});
-
-      contextResult2.answers.forEach(result => {
-        this.addOptionsToQuestion(concept, question, [result]);
-      });
-      console.log("this.chosenOptions: ", this.otherOptions[concept])
-
-      return contextResult2
-    }
+    return response;
   }
 
   /** Called when only  concept and number of options is entered into the frontend
    * @param concept
    * @param options
+   * @param topic
    * @returns question and answers to the user's question
    */
-  async getQuestionAndAnswers(concept: string, options: number, topic: string = '(wähle selbst)') :Promise<McqGenerationDTO> {
-    console.log("concept: ", concept)
-    console.log("otherOptions: ", options)
-    console.log("askedquestions = undefined?: ", this.askedQuestions[concept] === undefined)
+  async getQuestionAndAnswers(concept: string, options: number, topic = '(wähle selbst)'): Promise<McqGenerationDTO> {
+    console.log("concept: ", concept);
+    console.log("options: ", options);
+    console.log("askedQuestions undefined?: ", this.askedQuestions[concept] === undefined);
 
-    this.mcqs = await this.jsonLoaderService.loadJson(concept);
-
-    console.log("mcqs: ", this.mcqs);
-
-    this.mcqs.questions.forEach(mcq => {
-      this.addQuestionAndOptions(concept, mcq.question, mcq.answers);
+    // Fetch the ConceptNode matching the concept name
+    const conceptNode = await this.prisma.conceptNode.findFirst({
+      where: {
+        name: concept,
+      },
     });
 
-    // parser for formatting the output in the desired way
+    if (!conceptNode) {
+      throw new Error(`Concept with name '${concept}' not found.`);
+    }
+
+    // Fetch all SC and MC questions associated with the conceptId
+    const mcqs = await this.prisma.question.findMany({
+      where: {
+        type: {
+          in: ['SC', 'MC'],
+        },
+        conceptNodeId: conceptNode.id,
+      },
+      include: {
+        mcQuestion: {
+          include: {
+            MCQuestionOption: {
+              include: {
+                option: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    console.log("mcqs: ", mcqs);
+
+    // Process fetched questions
+    mcqs.forEach(mcq => {
+      mcq.mcQuestion?.forEach(question => {
+        const answers = question.MCQuestionOption.map(opt => ({
+          answer: opt.option.text,
+          correct: opt.option.is_correct,
+        }));
+
+        this.addQuestionAndOptions(concept, mcq.name || mcq.text, answers);
+      });
+    });
+
+    // Parser for formatting the output in the desired way
     const parser = StructuredOutputParser.fromZodSchema(
       z.object({
-        question: z.string().describe("Frage an den Nutzer"),
+        question: z.string().describe("Fragestellung an den Nutzer"),
         answers: z.array(
           z.object({
-            answer: z.string().describe("Antworrtmöglichkeit des Nutzers. Keine Aufzählungen"),
+            answer: z.string().describe("Antwortmöglichkeit des Nutzers. Keine Aufzählungen nutzen."),
             correct: z.boolean().describe("Markiert die Korrektheit der Antwortmöglichkeit (wahr/falsch)"),
           })
         ).optional().default([]),
-        description: z.string().describe("Kurze Beschreibung des Themas/Konzepts"),
-        score: z.number().describe("Punktzahl für das richtige beantworten der Frage, wo 1 für sehr einfach und 5 für sher schwierig steht. Wähle anhand des Schwierigekeitsgrades."),
-
+        description: z.string().describe("Kurze Beschreibung der Fragestellung"),
+        score: z.number().describe("Punktzahl für das richtige beantworten der Frage. 1 für sehr einfach und 5 für sehr schwierig."),
       })
-    )
-    // context retrieval for the question
-    const completeContext = await this.getSimilaritySearchString(concept, 15);
-    const transcript = await this.getFileFromFolder(concept);
+    );
 
-    console.log("loaded questions:", this.askedQuestions[concept]?.map(mcq => mcq.question) || []);
-    if(!(transcript === null)) {
-      console.log("result with concept context is fired")
+    // Context retrieval for the question
+    const similaritySearchResults = await this.ragService.lectureSimilaritySearch(concept, 15);
+    const transcriptData = await this.prisma.conceptNode.findFirst({
+      where: {
+        name: concept,
+      },
+      select: {
+        transcript: true,
+      },
+    });
+    const transcript = transcriptData?.transcript || "";
 
-      const result = await RunnableSequence.from([
-        {
-          topic: () => topic,
-          concept: () => concept,
-          options: () => options,
-          context: () => completeContext,
-          completeContext: () => completeContext,
-          transcript: () => transcript,
-          questions: () => this.askedQuestions[concept]?.map(mcq => mcq.question) || [],
-          format_instructions: () => parser.getFormatInstructions(),
-        },
-        PromptTemplate.fromTemplate(questionAndAnswerPrompt),
-        this.llm,
-        parser,
-      ]).invoke({callbacks: []});
-
-      this.addQuestionAndOptions(concept, result.question, result.answers);
-
-      return result;
+    // Prepare the prompt template
+    let promptTemplate;
+    if (transcript) {
+      promptTemplate = PromptTemplate.fromTemplate(questionAndAnswerPrompt);
     } else {
-      const completeContext2 = await this.getSimilaritySearchString(concept, 20);
-      console.log("result without concept fired:");
-        const result2 = await RunnableSequence.from([
-          {
-            topic: () => topic,
-            concept: () => concept,
-            options: () => options,
-            completeContext: () => completeContext2,
-            questions: () => this.askedQuestions[concept]?.map(mcq => mcq.question) || [],
-            //otherOptions: () => this.chosenOptions[concept],
-            format_instructions: () => parser.getFormatInstructions(),
-          },
-          PromptTemplate.fromTemplate(questionAndAnswerPrompt2),
-          this.llm,
-          parser,
-        ]).invoke({callbacks: []});
-
-        this.addQuestionAndOptions(concept, result2.question, result2.answers);
-
-
-        return result2;
+      promptTemplate = PromptTemplate.fromTemplate(questionAndAnswerPrompt2);
     }
+
+    // Initial prompt input
+    const promptInput = {
+      topic: topic,
+      concept: concept,
+      options: options,
+      similaritySearchResults: similaritySearchResults,
+      transcript: transcript,
+      existingQuestions: this.askedQuestions[concept]?.map(mcq => mcq.question) || [],
+      format_instructions: parser.getFormatInstructions(),
+    };
+
+    // Adjust the prompt to fit within token limits
+    const MAX_MODEL_TOKENS = 128000; // Model's maximum context length
+    const MIN_TOKENS = 12000;        // Minimum tokens to send to the LLM
+    const formattedPrompt = await this.adjustPrompt(promptTemplate, promptInput, MAX_MODEL_TOKENS, MIN_TOKENS);
+
+    // Calculate tokens
+    const numTokens = await this.llm.getNumTokens(formattedPrompt);
+    this.logger.log(`Adjusted prompt contains ${numTokens} tokens`);
+
+    // Proceed with invoking the model using the adjusted prompt
+    const response = await this.llm.predict(formattedPrompt);
+    // Parse the LLM response
+    const result = await parser.parse(response);
+
+    this.addQuestionAndOptions(concept, result.question, result.answers);
+
+    return result;
   }
 
-   /**
+  /**
   * returns evaluation of given answer options and the reasoning behind its evaluation
   * @param question
   * @param answers
   * @returns
   */
   async getEvaluation(question: string, answers: string[]) : Promise<McqEvaluations> {
-    console.log("answers", answers)
 
     this.mcqToEvaluate[question] = answers
-    console.log("mcqtoevaluateanswers: ", this.mcqToEvaluate.answers)
-    console.log("mcqtoevaluateanswers: ", this.mcqToEvaluate[question])
-    console.log("type of mcqtoevaluateanswers: ", typeof this.mcqToEvaluate.answers)
-    console.log("evaluation fired")
-    console.log("mcq question: ", question, "and: ", answers)
-    console.log("types: ", typeof question, "and: ", typeof answers)
+
     const parser = StructuredOutputParser.fromZodSchema(
       z.object({
         question: z.string().describe("Die Frage an den User"),
@@ -775,14 +817,10 @@ export class McqCreationService {
 
           })
         ).optional().default([]),
-        commentOnQuality: z.string().describe("Die Bewertung der Gesamtfrage und der Antwortmöglichkeiten als Gut, Sehr Gut oder Exzellent. kurze Begründung für die Bewertung anhand der Anweisungen."),
+        commentOnQuality: z.string().describe("Die Bewertung der Gesamtfrage und der Antwortmöglichkeiten als Gut, Sehr Gut oder Exzellent. kurze Begründung für die Bewertung anhand der Anweisungen A bis D."),
       })
     )
-    const options: string[] = []
-    console.log("options: ", options)
-    console.log("typeof options: ", typeof options)
-    console.log("answers: ", answers)
-    console.log("typeof answers: ", typeof answers)
+
     const result = await RunnableSequence.from([
       {
         question: () => question,
@@ -800,52 +838,61 @@ export class McqCreationService {
 
   }
 
-  //NOT IMPLEMENTED YET: ToDo: creating a chain, which reevaluates the given question and its options and maybe returns changes afterwards
-  async getReevaluatedQuestionAndAnswers(question: string, options: string, concept: string) :Promise<McqGenerationDTO> {
-    console.log("reevaluation fired")
-    const parser = StructuredOutputParser.fromZodSchema(
-      z.object({
-        question: z.string().describe("Question to the user"),
-        answers: z.array(
-          z.object({
-            answer: z.string().describe("Answer to the user's question. No Enumerations"),
-            correct: z.boolean().describe("Indicates if the answer is correct (true/false)"),
-          })
-        ).optional().default([]),
-        reasoning: z.string().describe("Reasoning for the change of the question and/or answer"),
-      })
-    )
+  private async getSimilaritySearchString(concept: string, maxTokensPerChunk: number): Promise<string> {
+    const similaritySearchResults = await this.ragService.lectureSimilaritySearch(concept, 50);
 
-    const completeContext = await this.getSimilaritySearchString(question, 10);
-    const contextText = await this.getFileFromFolder(concept);
-    console.log("context: ", completeContext)
-    const result = await RunnableSequence.from([
-      {
-        concept: () => concept,
-        completeContext: () => completeContext,
-        contextText: () => contextText,
-        question: () => question,
-        answers: () => options,
-        format_instructions: () => parser.getFormatInstructions(),
-      },
-      PromptTemplate.fromTemplate(reevaluationPrompt),
-      this.llm,
-      parser,
-    ]).invoke({callbacks: []});
-    console.log("result: ", result)
+    // Split the similarity search results into chunks
+    const chunks = chunkText(similaritySearchResults.map(chunk => chunk).join(' '), maxTokensPerChunk);
 
-    this.addQuestionAndOptions(concept, result.question, result.answers);
+    // Process each chunk if necessary
+    // For this case, we'll join the chunks back together
+    const aggregatedResult = chunks.join(' ');
 
-
-    return result;
+    return aggregatedResult;
   }
 
-  private async getSimilaritySearchString(searchString: string, results: number): Promise<string[]> {
-    //return formatDocumentsAsString(await (await this.pgVectorStore).similaritySearch(searchString, results)); // old version
-    const transcript: TranscriptChunk[] = await this.ragService.lectureSimilaritySearch(searchString, results);
-    return transcript.map(chunk => chunk.TranscriptChunkContent);
+    /**
+   * Adjusts the prompt inputs to fit within the token limit while ensuring at least minTokens are sent.
+   *
+   * @param promptTemplate - The prompt template used for formatting.
+   * @param promptInput - The initial prompt input object.
+   * @param maxTokens - The maximum allowed tokens.
+   * @param minTokens - The minimum tokens to send to the LLM.
+   * @returns A formatted prompt that fits within the token constraints.
+   */
+  private async adjustPrompt(
+    promptTemplate: PromptTemplate,
+    promptInput: any,
+    maxTokens: number,
+    minTokens: number
+  ): Promise<string> {
+    let formattedPrompt = await promptTemplate.format(promptInput);
+    let numTokens = await this.llm.getNumTokens(formattedPrompt);
+
+    // Reduce the size of the inputs iteratively until it fits within maxTokens
+    while (numTokens > maxTokens && numTokens > minTokens) {
+      // Adjust the inputs contributing to the token count
+      if (promptInput.similaritySearchResults) {
+        promptInput.similaritySearchResults = promptInput.similaritySearchResults.slice(0, Math.floor(promptInput.similaritySearchResults.length * 0.9));
+      }
+      if (promptInput.transcript) {
+        promptInput.transcript = promptInput.transcript.slice(0, Math.floor(promptInput.transcript.length * 0.9));
+      }
+      if (promptInput.existingQuestions) {
+        promptInput.existingQuestions = promptInput.existingQuestions.slice(0, Math.floor(promptInput.existingQuestions.length * 0.9));
+      }
+      // Reformat the prompt
+      formattedPrompt = await promptTemplate.format(promptInput);
+      numTokens = await this.llm.getNumTokens(formattedPrompt);
+    }
+
+    // Ensure at least minTokens are sent
+    if (numTokens < minTokens) {
+      throw new Error(`Unable to create a prompt with at least ${minTokens} tokens.`);
+    }
+
+    this.logger.log(`Adjusted prompt contains ${numTokens} tokens`);
+    return formattedPrompt;
   }
-
-
 
 }

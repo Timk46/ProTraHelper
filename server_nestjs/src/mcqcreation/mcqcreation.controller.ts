@@ -3,6 +3,7 @@ import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { McqCreationService } from './mcqcreation.service';
 import { roles, RolesGuard } from '@/auth/roles.guard';
 import { McqGenerationDTO } from '@DTOs/question.dto';
+import { OptionDTO } from '@DTOs/question.dto';
 interface Answer {
   answer?: string;
   isCorrect?: boolean;
@@ -29,8 +30,20 @@ export class McqcreationController {
      */
     @roles('ADMIN')
     @Post('answer')
-    async getAnswer(@Body() answerData: { question: string, option: string, otherOptions: string[], concept: string }): Promise<Answer> {
-      return await this.mcqCreationService.getAnswer(answerData.question, answerData.option, answerData.otherOptions, answerData.concept);
+    async getAnswer(
+      @Body() answerData: {
+        question: string;
+        option: OptionDTO;
+        otherOptions: OptionDTO[];
+        concept: string;
+      }
+    ): Promise<Answer> {
+      return await this.mcqCreationService.getAnswer(
+        answerData.question,
+        answerData.option,
+        answerData.otherOptions,
+        answerData.concept
+      );
     }
 
     /**
@@ -65,18 +78,6 @@ export class McqcreationController {
     @Get('questionTitle')
     async getQuestionTitle(@Query('concept') concept: string): Promise<{question?: string}> {
       return await this.mcqCreationService.getQuestionTitle(concept);
-    }
-
-    /** NOT IMPELEMENTED YET
-     * @param question
-     * @param concept
-     * @param options
-     * @returns reevaluated question and answers
-     */
-    @roles('ADMIN')
-    @Get('reevaluatedQuestionAndAnswers')
-    async getReevaluatedQuestionAndAnswers(@Query('question') question: string, @Query('concept') concept: string, @Query('options') options: string): Promise<McqGenerationDTO> {
-      return await this.mcqCreationService.getReevaluatedQuestionAndAnswers(question, concept, options);
     }
 
     /** NOT IMPELEMENTED YET

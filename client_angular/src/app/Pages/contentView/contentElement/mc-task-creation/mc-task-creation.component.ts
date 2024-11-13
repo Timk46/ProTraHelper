@@ -1,7 +1,7 @@
 import { Component, OnInit,ViewChild } from '@angular/core';
-import { FormGroup, Validators, FormArray, FormControl } from '@angular/forms';
+import { FormGroup, Validators, FormArray, FormControl, AbstractControl } from '@angular/forms';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { McQuestionDTO, QuestionDTO, QuestionVersionDTO, MCOptionDTO, McqGenerationDTO } from '@DTOs/question.dto';
+import { McQuestionDTO, QuestionDTO, QuestionVersionDTO, MCOptionDTO, McqGenerationDTO, OptionDTO } from '@DTOs/question.dto';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, of, switchMap, startWith, map, max } from 'rxjs';
 import { McQuestionOptionDTO } from '@DTOs/question.dto';
@@ -63,7 +63,8 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
     questionVersion: this.versionData,
     isSC: false,
     shuffleOptions: false,
-  } as McQuestionDTO;
+    mcQuestionOption: []
+  };
 
   mcQuestionOption: McQuestionOptionDTO = {} as McQuestionOptionDTO;
 
@@ -331,35 +332,46 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
     }
   }
 
-  generateOption(index: number) {
-    const option = (this.getOptions().at(index) as FormGroup).get('text')!;
-    const correct = (this.getOptions().at(index) as FormGroup).get('correct')!;
-    const opt = option!.value;
-    const title = this.taskForm.get('title')?.value
-    const concept = this.taskForm.get('conceptName')?.value
-    let otherOpts: string[] = [];
-    for (let i = 0; i < this.getOptions().length; i++) {
-      if (i !== index) {
-        const otherOption = (this.getOptions().at(i) as FormGroup).get('text');
-        otherOpts.push(otherOption?.value);
-      }
-    }
+  generateOption(index: number): void {
+    const optionControl = this.getOptions().at(index) as FormGroup;
+    const optionTextControl = optionControl.get('text')!;
+    const optionCorrectControl = optionControl.get('correct')!;
 
-    //console.log("otherOptions: ",otherOpts);
-    if(title) {
-      option.setValue('');
+    const currentOption: OptionDTO = {
+      text: optionTextControl.value || '',
+      correct: optionCorrectControl.value || false
+    };
+
+    const title = this.taskForm.get('title')?.value;
+    const concept = this.taskForm.get('conceptName')?.value;
+
+    // Get other options with text and correctness
+    const otherOptions: OptionDTO[] = this.getOptions().controls
+      .filter((_, i) => i !== index) // Exclude the current option
+      .map((control: AbstractControl) => {
+        const optGroup = control as FormGroup;
+        return {
+          text: optGroup.get('text')?.value || '',
+          correct: optGroup.get('correct')?.value || false
+        };
+      });
+
+    if (title) {
+      optionTextControl.setValue('');
       this.fetchingStates[index] = true;
-      //console.log("option before sending: ",opt)
-      this.mcqService.getAnswer(title, opt, otherOpts, concept).subscribe(
+
+      this.mcqService.getAnswer(
+        title,
+        currentOption,
+        otherOptions,
+        concept
+      ).subscribe(
         (answer: Answer) => {
-         // console.log("answer: ",answer)
-         // console.log("answer: ",answer.answer)
-         // console.log("correct", answer.correct)
-          option.setValue(answer.answer);
-          correct.setValue(answer.correct);
+          optionTextControl.setValue(answer.answer);
+          optionCorrectControl.setValue(answer.correct);
           this.fetchingStates[index] = false;
         }
-      )
+      );
     }
   }
 
@@ -534,7 +546,7 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
         this.mcOptions.forEach(option => {
           //console.log("option: ",option);
           this.mcQuestionOption.mcQuestion = mcQuestion;
-          this.mcQuestionOption.mcOption = option;
+          this.mcQuestionOption.option = option;
           this.questionService.createMcQuestionOption(this.mcQuestionOption).subscribe(
 
           );
