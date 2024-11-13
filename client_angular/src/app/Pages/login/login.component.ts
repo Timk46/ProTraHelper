@@ -78,6 +78,8 @@ export class LoginComponent implements OnInit {
 
   /**
    * The login method navigates to the authentication server to authenticate the user.
+   * The device id is passed as a query parameter to the server. This is to save the
+   * refresh token in the database with the device id.
    */
   loginWithCAS(): void {
     const deviceId = this.userService.getDeviceId();

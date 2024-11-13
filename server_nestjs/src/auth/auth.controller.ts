@@ -27,6 +27,14 @@ import { roles } from '@/auth/common/guards/roles.guard';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  /**
+   * Handles the CAS login process.
+   *
+   * @param req - The request object containing the user information.
+   * @param res - The response object used to redirect the user.
+   * @throws { UnauthorizedException } If the user email is not provided.
+   * @returns { Promise<void> } A promise that resolves when the redirection is complete.
+   */
   @Public()
   @UseGuards(CasAuthGuard)
   @Get('cas')
@@ -65,6 +73,14 @@ export class AuthController {
     return this.authService.login(req.user, deviceId);
   }
 
+  /**
+   * Logs out the user by invalidating their token.
+   *
+   * @param req - The request object containing the user information.
+   * @param deviceId - The ID of the device from which the user is logging out.
+   * @returns An object containing a success message if the logout is successful.
+   * @throws { BadRequestException } If an error occurs during the logout process.
+   */
   @UseGuards(JwtAuthGuard)
   @Get('logout')
   async logout(
@@ -79,6 +95,13 @@ export class AuthController {
     }
   }
 
+  /**
+   * Logs out the user from all devices by invalidating all their tokens.
+   *
+   * @param req - The request object containing the user information.
+   * @returns An object containing a success message if the logout is successful.
+   * @throws { BadRequestException } If an error occurs during the logout process.
+   */
   @UseGuards(JwtAuthGuard)
   @Get('logoutAllUserDevices')
   async logoutAllUserDevices(@Request() req: { user: User }) {
@@ -90,6 +113,13 @@ export class AuthController {
     }
   }
 
+  /**
+   * Logs out all sessions for the authenticated user.
+   *
+   * @param req - The request object containing the authenticated user.
+   * @returns A message indicating the success of the logout operation.
+   * @throws { BadRequestException } If an error occurs during the logout process.
+   */
   @UseGuards(JwtAuthGuard)
   @roles('ADMIN')
   @Get('logoutAllUser')
@@ -102,6 +132,17 @@ export class AuthController {
     }
   }
 
+  /**
+   * Refreshes the authentication tokens for the user.
+   *
+   * @param req - The request object containing the user information.
+   * @param req.user - The user object containing user details.
+   * @param req.user.email - The email of the user.
+   * @param req.user.refreshToken - The refresh token of the user.
+   * @param deviceId - The device ID from the request headers.
+   * @returns A promise that resolves with the new authentication tokens.
+   * @throws { BadRequestException } If an error occurs during the token refresh process.
+   */
   @Public()
   @UseGuards(JwtRefreshAuthGuard)
   @Get('refresh')

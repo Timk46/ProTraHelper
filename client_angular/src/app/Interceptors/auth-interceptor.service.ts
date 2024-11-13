@@ -19,13 +19,13 @@ export class AuthInterceptor implements HttpInterceptor {
     private userService: UserService
   ) {}
 
-  // Currently only using access token. Refresh token and device tokens not implemented yet.
+
   /**
-   * Intercepts an HttpRequest and adds an "Authorization" header.
+   * Intercepts HTTP requests to add authentication headers and handle errors.
    *
-   * @param request - The HttpRequest being intercepted
-   * @param next - The HttpHandler to continue handling the request
-   * @returns An Observable of the HttpEvent with a modified HttpRequest
+   * @param request - The outgoing HTTP request.
+   * @param next - The next interceptor in the chain.
+   * @returns An observable of the HTTP event.
    */
   intercept(
     request: HttpRequest<any>,
@@ -112,9 +112,9 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   /**
-   * Check the error status and display an appropriate message via the snackBar.
-   *
-   * @param error - The error object
+   * Checks the error status and handles it accordingly.
+   * 
+   * @param error - The error object to be checked.
    */
   checkError(error: any) {
     if (error.status === 401) {

@@ -75,6 +75,12 @@ export class UserService {
     });
   }
 
+  /**
+   * Logs out the user from the application.
+   *
+   * @param { boolean } logoutFromAllDevices - Indicates whether to log out from all devices.
+   * @returns { Promise<boolean> } - A promise that resolves to true if the logout was successful, otherwise false.
+   */
   logout(logoutFromAllDevices: boolean): Promise<boolean> {
     const url = logoutFromAllDevices ? environment.server + '/auth/logoutAllUserDevices' : environment.server + '/auth/logout';
 
@@ -107,6 +113,12 @@ export class UserService {
     });
   }
 
+  /**
+   * Logs out all users by making an HTTP GET request to the server's logout endpoint.
+   *
+   * @returns { Promise<boolean> } A promise that resolves to `true` if all users were
+   * successfully logged out, or `false` if there was an error.
+   */
   logoutAllUser(): Promise<boolean> {
     return new Promise<boolean>(async (resolve) => {
       this.http.get(environment.server + '/auth/logoutAllUser').pipe(
@@ -163,9 +175,10 @@ export class UserService {
   }
 
   /**
-   * Sets the authentication accessToken in local storage.
+   * Sets the access and refresh tokens in the local storage and updates the authentication status.
    *
-   * @param accessToken - The user accessToken to be saved in local storage
+   * @param accessToken - The access token to be stored.
+   * @param refreshToken - The refresh token to be stored.
    */
   setTokens(accessToken: string, refreshToken: string): void {
     localStorage.setItem('accessToken', accessToken);
@@ -174,7 +187,7 @@ export class UserService {
   }
 
   /**
-   * Removes both accessToken from local storage,
+   * Removes both accessToken, refreshToken and deviceId from local storage,
    * if either of them exists.
    */
   removeTokens(): void {
@@ -182,13 +195,14 @@ export class UserService {
     const refreshToken = 'refreshToken';
     const deviceId = this.DEVICE_ID_KEY;
 
-    if (localStorage.getItem(accessToken) && localStorage.getItem(refreshToken)) {
+    if (localStorage.getItem(accessToken) && localStorage.getItem(refreshToken) && localStorage.getItem(deviceId)) {
       localStorage.removeItem(accessToken);
       localStorage.removeItem(refreshToken);
       localStorage.removeItem(deviceId);
       (this.isAuthenticated$ as BehaviorSubject<boolean>).next(false);// Update authentication status
     }
   }
+
   /**
    * This function gets the access token from the local storage.
    * @returns { string } The access token.
@@ -202,6 +216,12 @@ export class UserService {
     }
   }
 
+  /**
+   * Retrieves the refresh token from the local storage.
+   *
+   * @returns { string } The refresh token.
+   * @throws { Error } If no refresh token is found in the local storage.
+   */
   getRefreshToken(): string {
     const refreshToken = localStorage.getItem('refreshToken');
     if (refreshToken) {
@@ -211,6 +231,12 @@ export class UserService {
     }
   }
 
+  /**
+   * Refreshes the access and refresh tokens using the provided refresh token.
+   *
+   * @param { string } refreshToken - The refresh token used to obtain new access and refresh tokens.
+   * @returns { Observable<any> } - An observable that emits the server's response or an error.
+   */
   refreshTokens(refreshToken: string): Observable<any> {
     return this.http.get(environment.server + '/auth/refresh', {
       headers: {
@@ -233,6 +259,13 @@ export class UserService {
       );
   }
 
+  /**
+   * Retrieves the device ID from local storage. If the device ID does not exist,
+   * it generates a new one, stores it in local storage, and then returns it.
+   *
+   * @returns { string } The device ID.
+   * @throws { Error } If a new device ID could not be generated.
+   */
   getDeviceId(): string {
     let deviceId = localStorage.getItem(this.DEVICE_ID_KEY);
 

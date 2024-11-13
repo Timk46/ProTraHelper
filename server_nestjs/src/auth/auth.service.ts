@@ -29,9 +29,11 @@ export class AuthService {
   ) {}
 
   /**
-   * Checks if a user exists in the database and returns the user, access and refresh tokens if it does
-   * @param { string } email the email to log in
-   * @returns the user, access and refresh tokens if the user exists
+   * Handles the login process using CAS (Central Authentication Service).
+   *
+   * @param email - The email of the user attempting to log in.
+   * @param deviceId - The device ID from which the login attempt is made.
+   * @returns An object containing the generated tokens.
    */
   async loginCAS(email: string, deviceId: string) {
     //this.logger.debug(`Attempting CAS login for email: ${email}`);
@@ -76,9 +78,11 @@ export class AuthService {
   }
 
   /**
-   * Checks if a user exists in the database and returns the user, access and refresh tokens if it does
-   * @param { UserDTO } user the user to log in
-   * @returns the user, access and refresh tokens if the user exists
+   * Logs in a user by generating authentication tokens and creating a refresh token.
+   *
+   * @param { UserDTO } user - The user data transfer object containing user information.
+   * @param { string } deviceId - The device identifier for the user's device.
+   * @returns { Promise<{ accessToken: string, refreshToken: string }> } An object containing the generated access and refresh tokens.
    */
   async login(user: UserDTO, deviceId: string) {
     //this.logger.debug(`Generating tokens for user: ${user.email}`);
@@ -89,6 +93,15 @@ export class AuthService {
     };
   }
 
+  /**
+   * Refreshes the access and refresh tokens for a user.
+   *
+   * @param email - The email of the user requesting token refresh.
+   * @param deviceId - The device ID from which the request is made.
+   * @param refreshToken - The current refresh token of the user.
+   * @returns A promise that resolves to the new tokens.
+   * @throws { ForbiddenException } If the user or refresh token is not found, or if the refresh token does not match.
+   */
   async refreshTokens(email: string, deviceId: string, refreshToken: string) {
     this.logger.debug(`Refresh tokens for user: ${email}`); // TODO: hide
     const user = await this.usersService.findOne(email);
@@ -114,6 +127,13 @@ export class AuthService {
     return tokens;
   }
 
+  /**
+   * Logs out the user by deleting their refresh token and logging the event.
+   *
+   * @param user - The user who is logging out.
+   * @param deviceId - The ID of the device from which the user is logging out.
+   * @returns A promise that resolves when the logout process is complete.
+   */
   async logout(user: User, deviceId: string) {
     this.logger.debug(`Logging out user: ${user.email}`); // TODO: hide
     await this.refreshTokenService.deleteRefreshToken(user.email, deviceId);
@@ -121,6 +141,12 @@ export class AuthService {
     await this.eventLogService.log('info', 'login', user.id, 'User logged out', { email: user.email, role: user.globalRole });
   }
 
+  /**
+   * Logs out the user from all devices by deleting all refresh tokens associated with the user's email.
+   *
+   * @param user - The user object containing user details.
+   * @returns A promise that resolves when the operation is complete.
+   */
   async logoutAllUserDevices(user: User) {
     this.logger.debug(`Logging out all devices for user: ${user.email}`); // TODO: hide
     await this.refreshTokenService.deleteAllUserRefreshTokens(user.email);
@@ -128,6 +154,12 @@ export class AuthService {
     await this.eventLogService.log('info', 'login', user.id, 'User logged out of all devices', { email: user.email, role: user.globalRole });
   }
 
+  /**
+   * Logs out all users by deleting all refresh tokens and logging the event.
+   *
+   * @param user - The user initiating the logout action.
+   * @returns A promise that resolves when the logout process is complete.
+   */
   async logoutAllUser(user: User) {
     this.logger.debug(`Logging out all user`); // TODO: hide
     await this.refreshTokenService.deleteAllRefreshTokens();
@@ -136,9 +168,11 @@ export class AuthService {
   }
 
   /**
-   * Generates the access and refresh tokens for a user
-   * @param { UserDTO } user the user to generate the tokens for
-   * @returns { Promise<{ accessToken: string }> } the access and refresh tokens
+   * Generates access and refresh tokens for a given user.
+   *
+   * @param { UserDTO } user - The user data transfer object containing user information.
+   * @returns { Promise<{ accessToken: string; refreshToken: string; }> } A promise that resolves to an object containing the access token and refresh token.
+   * @throws { Error } If token generation fails.
    */
   async generateTokens(user: UserDTO): Promise<{ accessToken: string; refreshToken: string; }> {
     this.logger.debug(`Generating tokens for user: ${user.email}`); // TODO: hide
