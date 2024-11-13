@@ -182,6 +182,6 @@ export interface CodingQuestionDto {
   }
 
   export interface OptionDTO {
-    text: string;
+    answer: string;
     correct: boolean;
   }

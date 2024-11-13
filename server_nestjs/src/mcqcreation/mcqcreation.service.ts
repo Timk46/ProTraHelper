@@ -1,18 +1,18 @@
 /* eslint-disable prefer-const */
 /* eslint-disable prettier/prettier */
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import type { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import {PromptTemplate,} from "langchain/prompts";
 import { RunnableSequence } from "langchain/schema/runnable";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { z } from "zod";
-import { McqGenerationDTO } from '@Interfaces/question.dto';
+import { McqGenerationDTO, OptionDTO } from '@Interfaces/question.dto';
 import { env } from 'process';
 import { RagService } from '@/ai/services/rag.service';
-import { TranscriptChunk } from '@Interfaces/file.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 import { encode, decode } from 'gpt-3-encoder'; // Install if necessary
-import { HumanMessage } from '@langchain/core/messages';
 
 interface Answer{
   answer?: string;
@@ -325,15 +325,15 @@ export class McqCreationService {
   private readonly logger = new Logger(McqCreationService.name);
   private llm = new ChatOpenAI(llmConfig);
   private regenLlm = new ChatOpenAI(regenerateLLmconfig);
-  private otherOptions : { [question: string]: string[] } = {};
   private askedQuestions: { [concept: string]: McqGenerationDTO[] } = {};
   private mcqToEvaluate: { [question: string]: string[] } = {};
   private mcqs: { questions: McqGenerationDTO[] } = { questions: [] };
-  private transcript: string;
+
 
   constructor(
-    private prisma: PrismaService,
-    private ragService: RagService
+    private readonly prisma: PrismaService,
+    private readonly ragService: RagService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache
   ) {
   }
 
@@ -470,15 +470,15 @@ export class McqCreationService {
    */
   async getAnswer(
     question: string,
-    option: { text: string; correct: boolean },
-    otherOptions: { text: string; correct: boolean }[],
+    option: OptionDTO,
+    otherOptions: OptionDTO[],
     concept: string
   ): Promise<Answer> {
     // Ensure the question exists in askedQuestions
     if (!this.askedQuestions[concept]?.some(q => q.question === question)) {
       this.addQuestion(concept, question);
       // Adjusted to use otherOptions correctly
-      this.addOptionsToQuestion(concept, question, otherOptions.map(opt => ({ answer: opt.text })));
+      this.addOptionsToQuestion(concept, question, otherOptions.map(opt => ({ answer: opt.answer })));
     }
 
     this.logger.log("Asked questions:", this.askedQuestions[concept].map(mcq => mcq.question));
@@ -494,19 +494,25 @@ export class McqCreationService {
       })
     );
 
-    // Retrieve context for the prompt
+    let transcript = await this.cacheManager.get<string>(`transcript_${concept}`);
+    if(!transcript) {
+      // Retrieve context for the prompt
+      const conceptNode = await this.prisma.conceptNode.findFirst({
+        where: { name: concept },
+        select: { transcript: true },
+      });
+      transcript = conceptNode?.transcript || "";
+      // Cache the transcript
+      await this.cacheManager.set(`transcript_${concept}`, transcript, Number({ ttl: 3600 })); // cache for 1 hour
+    } else {
+      this.logger.log(`Retrieved transcript from cache for concept: ${concept}`);
+    }
     const completeContext = await this.ragService.lectureSimilaritySearch(question, 10);
-    const conceptNode = await this.prisma.conceptNode.findFirst({
-      where: { name: concept },
-      select: { transcript: true },
-    });
-    const transcript = conceptNode?.transcript || "";
-
     // Convert completeContext from TranscriptChunk[] to string
-    const completeContextString = completeContext.map(chunk => chunk).join(' ');
+    const completeContextString = completeContext.map(chunk => chunk.TranscriptChunkContent).join(' ');
 
     // Combine otherOptions into a single string
-    const optionsString = otherOptions.map(opt => opt.text).join('\n');
+    const optionsString = otherOptions.map(opt => opt.answer).join('\n');
 
     // Use the correctness from the option parameter
     const previousCorrectness = option.correct;
@@ -514,7 +520,7 @@ export class McqCreationService {
 
     // Prepare prompt input
     const promptInput = {
-      option: option.text,
+      option: option.answer,
       concept: concept,
       options: optionsString,
       question: question,
@@ -718,7 +724,7 @@ export class McqCreationService {
       },
     });
 
-    console.log("mcqs: ", mcqs);
+    this.logger.log("mcqs: ", mcqs);
 
     // Process fetched questions
     mcqs.forEach(mcq => {
@@ -746,21 +752,26 @@ export class McqCreationService {
         score: z.number().describe("Punktzahl für das richtige beantworten der Frage. 1 für sehr einfach und 5 für sehr schwierig."),
       })
     );
-
+    let transcript = await this.cacheManager.get<string>(`transcript_${concept}`);
     // Context retrieval for the question
-    const similaritySearchResults = await this.ragService.lectureSimilaritySearch(concept, 15);
-    const transcriptData = await this.prisma.conceptNode.findFirst({
-      where: {
-        name: concept,
-      },
-      select: {
-        transcript: true,
-      },
-    });
-    const transcript = transcriptData?.transcript || "";
+    if(!transcript) {
+      const transcriptData = await this.prisma.conceptNode.findFirst({
+        where: {
+          name: concept,
+        },
+        select: {
+          transcript: true,
+        },
+      });
+      transcript = transcriptData?.transcript || "";
+      await this.cacheManager.set(`transcript_${concept}`, transcript, Number({ ttl: 3600 })); // cache for 1 hour
+    } else {
+      this.logger.log(`Retrieved transcript from cache for concept: ${concept}`);
+    }
 
+    const similaritySearchResults = await this.ragService.lectureSimilaritySearch(concept, 15);
     // Prepare the prompt template
-    let promptTemplate;
+    let promptTemplate: PromptTemplate<any, any>;
     if (transcript) {
       promptTemplate = PromptTemplate.fromTemplate(questionAndAnswerPrompt);
     } else {
@@ -780,7 +791,7 @@ export class McqCreationService {
 
     // Adjust the prompt to fit within token limits
     const MAX_MODEL_TOKENS = 128000; // Model's maximum context length
-    const MIN_TOKENS = 12000;        // Minimum tokens to send to the LLM
+    const MIN_TOKENS = 1000;        // Minimum tokens to send to the LLM
     const formattedPrompt = await this.adjustPrompt(promptTemplate, promptInput, MAX_MODEL_TOKENS, MIN_TOKENS);
 
     // Calculate tokens

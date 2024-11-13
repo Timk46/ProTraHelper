@@ -321,7 +321,7 @@ export class EditChoiceComponent {
 
     // Get the current option with text and correctness
     const currentOption = {
-      text: this.optionsData.at(index).get('text')!.value || '',
+      answer: this.optionsData.at(index).get('text')!.value || '',
       correct: this.optionsData.at(index).get('is_correct')!.value || false
     };
 
@@ -329,7 +329,7 @@ export class EditChoiceComponent {
     const otherOptions = this.optionsData.value
       .filter((_: any, i: number) => i !== index) // Exclude the current option
       .map((option: { id: number; text: string; is_correct: boolean }) => ({
-        text: option.text,
+        answer: option.text,
         correct: option.is_correct
       }));
 

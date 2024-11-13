@@ -338,7 +338,7 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
     const optionCorrectControl = optionControl.get('correct')!;
 
     const currentOption: OptionDTO = {
-      text: optionTextControl.value || '',
+      answer: optionTextControl.value || '',
       correct: optionCorrectControl.value || false
     };
 
@@ -351,7 +351,7 @@ export class McTaskCreationComponent implements OnInit /*,OnChanges*/ {
       .map((control: AbstractControl) => {
         const optGroup = control as FormGroup;
         return {
-          text: optGroup.get('text')?.value || '',
+          answer: optGroup.get('text')?.value || '',
           correct: optGroup.get('correct')?.value || false
         };
       });

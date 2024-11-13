@@ -6,7 +6,7 @@ import * as path from 'path';
 const prisma = new PrismaClient();
 
 // after running the script we need to copy the content of the "Schleifen" ConceptNode "transcript" column into "while-Schleife" as its the only row without content in this column (although we do have transcripts belonging to "while-Schleife" topic)
-async function seedTranscriptsToConceptNodes() {
+export async function seedTranscriptsToConceptNodes() {
   console.log('Starting to seed transcripts into ConceptNode table...');
   // Add debug logging for current directory
   console.log('Current directory:', __dirname);
@@ -53,7 +53,7 @@ async function seedTranscriptsToConceptNodes() {
   console.log(`Found ${conceptNodes.length} concept nodes`);
 
   for (const conceptNode of conceptNodes) {
-    let allVideos = new Set();
+    const allVideos = new Set();
 
     // Process Requirements
     for (const requirement of conceptNode.requiredBy) {
@@ -122,6 +122,53 @@ async function seedTranscriptsToConceptNodes() {
     } else {
       console.log(`No transcript content for ConceptNode ${conceptNode.id}`);
     }
+  }
+    // Additional Processing: Copy transcript from "Schleifen" to "while-Schleife"
+  console.log('Starting to copy transcript from "Schleifen" to "while-Schleife"...');
+  try {
+    // Fetch the "Schleifen" ConceptNode
+    const schleifenNode = await prisma.conceptNode.findFirst({
+      where: { name: 'Schleifen' },
+      select: { transcript: true },
+    });
+
+    if (!schleifenNode) {
+      console.error('ConceptNode with name "Schleifen" not found.');
+      return;
+    }
+
+    const schleifenTranscript = schleifenNode.transcript;
+
+    if (!schleifenTranscript) {
+      console.error('Transcript for ConceptNode "Schleifen" is empty.');
+      return;
+    }
+
+    // Fetch the "while-Schleife" ConceptNode
+    const whileSchleifeNode = await prisma.conceptNode.findFirst({
+      where: { name: 'while-Schleife' },
+      select: { id: true, transcript: true },
+    });
+
+    if (!whileSchleifeNode) {
+      console.error('ConceptNode with name "while-Schleife" not found.');
+      return;
+    }
+
+    if (whileSchleifeNode.transcript && whileSchleifeNode.transcript.trim().length > 0) {
+      console.log('Transcript for "while-Schleife" already exists. Skipping copy.');
+      return;
+    }
+
+    // Update the "while-Schleife" ConceptNode with the transcript from "Schleifen"
+    await prisma.conceptNode.update({
+      where: { id: whileSchleifeNode.id },
+      data: { transcript: schleifenTranscript },
+    });
+
+    console.log('Successfully copied transcript from "Schleifen" to "while-Schleife".');
+  } catch (error) {
+    console.error('Error copying transcript from "Schleifen" to "while-Schleife":', error);
   }
 }
 
