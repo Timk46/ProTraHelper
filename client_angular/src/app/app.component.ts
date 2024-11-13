@@ -110,7 +110,7 @@ export class AppComponent {
           decline: 'Abbrechen',
           accept: 'Abmelden',
           swapButtons: false,
-          swapColors: false
+          swapColors: true
         }
       });
 
