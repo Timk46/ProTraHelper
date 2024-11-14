@@ -103,7 +103,7 @@ export class AuthService {
    * @throws { ForbiddenException } If the user or refresh token is not found, or if the refresh token does not match.
    */
   async refreshTokens(email: string, deviceId: string, refreshToken: string) {
-    this.logger.debug(`Refresh tokens for user: ${email}`); // TODO: hide
+    // this.logger.debug(`Refresh tokens for user: ${email}`);
     const user = await this.usersService.findOne(email);
     const userRefreshToken = await this.refreshTokenService.getRefreshToken(email, deviceId);
 
@@ -122,7 +122,7 @@ export class AuthService {
 
     const tokens = await this.generateTokens(user);
     await this.refreshTokenService.updateRefreshToken(email, deviceId, tokens.refreshToken);
-    this.logger.debug(`Tokens refreshed for user: ${user.email}`); // TODO: hide
+    // this.logger.debug(`Tokens refreshed for user: ${user.email}`);
     await this.eventLogService.log('info', 'login', user.id, 'User update refresh token', { email: user.email });
     return tokens;
   }
@@ -135,9 +135,9 @@ export class AuthService {
    * @returns A promise that resolves when the logout process is complete.
    */
   async logout(user: User, deviceId: string) {
-    this.logger.debug(`Logging out user: ${user.email}`); // TODO: hide
+    // this.logger.debug(`Logging out user: ${user.email}`);
     await this.refreshTokenService.deleteRefreshToken(user.email, deviceId);
-    this.logger.debug(`User logged out: ${user.email}`); // TODO: hide
+    // this.logger.debug(`User logged out: ${user.email}`);
     await this.eventLogService.log('info', 'login', user.id, 'User logged out', { email: user.email, role: user.globalRole });
   }
 
@@ -148,9 +148,9 @@ export class AuthService {
    * @returns A promise that resolves when the operation is complete.
    */
   async logoutAllUserDevices(user: User) {
-    this.logger.debug(`Logging out all devices for user: ${user.email}`); // TODO: hide
+    // this.logger.debug(`Logging out all devices for user: ${user.email}`);
     await this.refreshTokenService.deleteAllUserRefreshTokens(user.email);
-    this.logger.debug(`User logged out of all devices: ${user.email}`); // TODO: hide
+    // this.logger.debug(`User logged out of all devices: ${user.email}`);
     await this.eventLogService.log('info', 'login', user.id, 'User logged out of all devices', { email: user.email, role: user.globalRole });
   }
 
@@ -161,9 +161,9 @@ export class AuthService {
    * @returns A promise that resolves when the logout process is complete.
    */
   async logoutAllUser(user: User) {
-    this.logger.debug(`Logging out all user`); // TODO: hide
+    // this.logger.debug(`Logging out all user`);
     await this.refreshTokenService.deleteAllRefreshTokens();
-    this.logger.debug(`All user logged out`); // TODO: hide
+    // this.logger.debug(`All user logged out`);
     await this.eventLogService.log('info', 'login', user.id, 'All user logged out', { email: user.email, role: user.globalRole });
   }
 
@@ -175,7 +175,7 @@ export class AuthService {
    * @throws { Error } If token generation fails.
    */
   async generateTokens(user: UserDTO): Promise<{ accessToken: string; refreshToken: string; }> {
-    this.logger.debug(`Generating tokens for user: ${user.email}`); // TODO: hide
+    // this.logger.debug(`Generating tokens for user: ${user.email}`);
     const payload = {
       email: user.email,
       firstName: user.firstname,
@@ -209,7 +209,7 @@ export class AuthService {
         },
       ),
     ]);
-    this.logger.debug(`Tokens generated for user: ${user.email}`); // TODO: hide
+    // this.logger.debug(`Tokens generated for user: ${user.email}`);
     await this.eventLogService.log('info', 'login', user.id, 'Tokens generated', {
       email: user.email,
       role: user.globalRole,
