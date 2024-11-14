@@ -206,13 +206,14 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    * @description
    * Handles the click event for content elements MC, SC, FreeText, or CodingQuestion
    * Opens a dialog or navigates to the appropriate component based on the task type.
-   * @param taskViewData - The TaskViewData object that was clicked
+   * @param selectedTask - The TaskViewData object that was clicked (The task)
+   * @param selectedContentNode - The ContentDTO object that was clicked (Contains the tasks)
    */
-  onTaskClick(taskViewData: TaskViewData) {
+  onTaskClick(selectedTask: TaskViewData, selectedContentNode: ContentDTO) {
     // Create dialog configuration
     const dialogConfig = new MatDialogConfig();
     dialogConfig.data = {
-      taskViewData: taskViewData,
+      taskViewData: selectedTask,
     };
     dialogConfig.width = 'auto';
     dialogConfig.maxHeight = '95vh';
@@ -220,7 +221,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     let dialogRef: MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined;
 
     // Open the appropriate dialog based on the task type
-    switch (taskViewData.type) {
+    switch (selectedTask.type) {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
         dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
@@ -230,11 +231,11 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         break;
       case questionType.CODE:
         // Navigate to coding question component
-        this.router.navigate([this.getRouterLink(taskViewData.id)]);
+        this.router.navigate([this.getRouterLink(selectedTask.id)]);
         break;
       case questionType.GRAPH:
         // Navigate to graph question component
-        this.router.navigate([`/graphtask/${taskViewData.id}`]);
+        this.router.navigate([`/graphtask/${selectedTask.id}`]);
         return;
       case questionType.FILLIN:
         dialogRef = this.dialog.open(FillinTaskNewComponent, {...dialogConfig, width: '50vw'});
@@ -243,52 +244,87 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
     // Handle dialog submission if a dialog was opened
     if (dialogRef) {
-      const prevScore = taskViewData.progress;
+      //const prevScore = selectedTask.progress;
 
       // Subscribe to dialog events and manage with takeUntil
       dialogRef.componentInstance.submitClicked
         .pipe(takeUntil(dialogRef.afterClosed()))
         .subscribe((score: number) => {
-          this.dataSource.data = this.dataSource.data.map((element) => {
-            if (element.id === taskViewData.id) {
-              // Update the progress value of the task if the new score is higher
-              if(score > prevScore) {
-                element.progress = score;
+          console.log("current score:", selectedTask.progress, "submitted score:", score);
+
+          // update the score if higher
+          if (score > selectedTask.progress) {
+            // the tasks score is taken from dataSource
+            selectedTask.progress = score;
+            //while the contentNodes score is taken from the contentsForActiveConceptNode data
+            selectedContentNode.contentElements.find(element => element.id === selectedTask.contentElementId)!.question!.progress = score;
+
+            console.log("new score set:", selectedTask.progress, "contentNode score:", selectedContentNode.progress);
+
+            if (score === 100) {
+
+              const questionElements = selectedContentNode.contentElements.filter(element => element.type === "QUESTION");
+              const elementCount = questionElements.length;
+              const completedElements = questionElements.filter(element =>
+                element.question?.progress === 100 ||
+                (element.id === selectedTask.contentElementId && score === 100)
+              ).length;
+
+              // Calculate progress based on completed elements
+              selectedContentNode.progress = Math.floor((completedElements / elementCount) * 100);
+              console.log("Progress calc triggered. Progress:", selectedContentNode.progress, "ElementCount:", elementCount, "CompletedElements:", completedElements);
+
+              if (selectedContentNode.progress === 100) {
+                console.log("Aufgabe wurde zum ersten Mal erfolgreich gelöst.");
+                this.progressService.answerSubmitted();
               }
-              console.log("Element: " +  element.type + ", TaskID: " + element.id + " Answer submitted. Erreichter Score: " + score + " Vorheriger Score: "+ prevScore);
+            }
+          }
 
-              // Update the contentNode that is connected to the task
-              if (score === 100 && prevScore !== 100) {
-                this.contentsForActiveConceptNode.trainedBy.forEach((content) => {
-                  if (content.contentElements.some(
-                    (element) => element.id === taskViewData.contentElementId
-                  )) {
-                    const questionElements = content.contentElements.filter(element => element.type === "QUESTION");
-                    const elementCount = questionElements.length;
-                    const completedElements = questionElements.filter(element =>
-                      element.question?.progress === 100 ||
-                      (element.id === taskViewData.contentElementId && score === 100)
-                    ).length;
 
-                    // Calculate progress based on completed elements
-                    content.progress = Math.floor((completedElements / elementCount) * 100);
+          // DISABLED - Since we do not have the same question in multiple contents, we do not need this extended logic
 
-                    if (content.progress === 100) {
-                      console.log("Aufgabe wurde zum ersten Mal erfolgreich gelöst.");
-                      this.progressService.answerSubmitted();
+          /* this.dataSource.data = this.dataSource.data.map((element) => {
+            if (element.id === selectedTask.id) {
+              // Update the progress value of the task if the new score is higher
+              if(score > element.progress) {
+                element.progress = score;
+
+                console.log("Element: " +  element.type + ", TaskID: " + element.id + " Answer submitted. Erreichter Score: " + score + " Vorheriger Score: "+ prevScore);
+
+                // Update the contentNode that is connected to the task
+                if (score === 100) {
+                  this.contentsForActiveConceptNode.trainedBy.forEach((content) => {
+                    if (content.contentElements.some(
+                      (element) => element.id === selectedTask.contentElementId
+                    )) {
+                      const questionElements = content.contentElements.filter(element => element.type === "QUESTION");
+                      const elementCount = questionElements.length;
+                      const completedElements = questionElements.filter(element =>
+                        element.question?.progress === 100 ||
+                        (element.id === selectedTask.contentElementId && score === 100)
+                      ).length;
+
+                      // Calculate progress based on completed elements
+                      content.progress = Math.floor((completedElements / elementCount) * 100);
+
+                      if (content.progress === 100) {
+                        console.log("Aufgabe wurde zum ersten Mal erfolgreich gelöst.");
+                        this.progressService.answerSubmitted();
+                      }
                     }
-                  }
-                });
+                  });
+                }
               }
             }
             return element;
-          });
+          }); */
         });
 
       // Clean up subscription when dialog closes
       dialogRef.afterClosed().subscribe(() => {
-        // Fetch fresh data from server
-        this.fetchContentsForConcept.emit();
+        // Fetch fresh data from server - We do not need this since we update the data source directly
+        //this.fetchContentsForConcept.emit();
       });
     }
   }
