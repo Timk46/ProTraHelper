@@ -18,6 +18,7 @@ model User {
   globalRole           GlobalRole                   @default(STUDENT)
   currentconceptNodeId Int?
   chatBotMessage       ChatBotMessage[]
+  chatSessions        ChatSession[]
   codeSubmission       CodeSubmission[]
   codeSubmissionFile   CodeSubmissionFile[]
   EventLogs            EventLog[]
@@ -578,16 +579,27 @@ model Vote {
   @@unique([userId, messageId], name: "unique_vote")
 }
 
+model ChatSession {
+  id        Int             @id @default(autoincrement())
+  title     String
+  createdAt DateTime        @default(now())
+  userId    Int
+  user      User            @relation(fields: [userId], references: [id])
+  messages  ChatBotMessage[]
+}
+
 model ChatBotMessage {
-  id         Int      @id @default(autoincrement())
-  question   String
-  answer     String?
-  createdAt  DateTime @default(now())
-  isBot      Boolean  @default(false)
-  ratingByStudent   Int?
-  usedChunks String?  @db.Text // wird für die Dialog ID gentutzt
-  user       User?    @relation(fields: [userId], references: [id])
-  userId     Int?
+  id              Int          @id @default(autoincrement())
+  question        String
+  answer          String?
+  createdAt       DateTime     @default(now())
+  isBot           Boolean      @default(false)
+  ratingByStudent Int?
+  usedChunks      String?      @db.Text
+  user            User?        @relation(fields: [userId], references: [id])
+  userId          Int?
+  sessionId       Int?
+  session         ChatSession?  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
 model UserContentElementProgress {
@@ -658,6 +670,7 @@ enum SubjectRole {
   TEACHERASSIST
   TEACHER
 }
+
 enum contentElementType {
   TEXT
   IMAGE

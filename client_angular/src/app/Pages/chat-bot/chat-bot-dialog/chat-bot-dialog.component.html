@@ -1,68 +1,69 @@
-<div class="chat-container">
-  <form [formGroup]="form">
-    <mat-card [ngClass]="display" class="collapsible-chat">
-      <mat-card-header class="chat-header">
-        <img mat-card-avatar src="../../../../assets/img/kai_logo_small.png" class="chat-icon">
-        <mat-card-title class="chat-title">Chatbot</mat-card-title>
-        <mat-card-subtitle class="chat-subtitle">
-          <div class="status-icon"></div>
-          <span>LectureLinker</span>
-        </mat-card-subtitle>
-        <div class="llm-info">
-          Die Antworten werden durch eine KI generiert. Es ist daher erforderlich, die Richtigkeit anhand der verlinkten Videos zu überprüfen.
-        </div>
-        <button mat-icon-button class="close-button" (click)="closeChat()" type="button">
-          <mat-icon>close</mat-icon>
-        </button>
-      </mat-card-header>
-      <mat-card-content class="chat-content" #messageContainer>
-        <div *ngFor="let message of messages" class="messages">
-          <div [ngClass]="'message ' + message.type">
-            <div [innerHTML]="message.text"></div>
-            <div *ngIf="message.type === 'bot' && message.id !== -1" class="rating-container">
-              <span class="rating-question">War diese Antwort hilfreich?</span>
-              <div class="rating-buttons">
-                <button mat-icon-button (click)="rateMessage(message.id, 1)" [ngClass]="{'selected-rating': message.rating === 1}" type="button">
-                  <mat-icon>sentiment_very_dissatisfied</mat-icon>
-                </button>
-                <button mat-icon-button (click)="rateMessage(message.id, 2)" [ngClass]="{'selected-rating': message.rating === 2}" type="button">
-                  <mat-icon>sentiment_neutral</mat-icon>
-                </button>
-                <button mat-icon-button (click)="rateMessage(message.id, 3)" [ngClass]="{'selected-rating': message.rating === 3}" type="button">
-                  <mat-icon>sentiment_very_satisfied</mat-icon>
-                </button>
-              </div>
-            </div>
+<div class="chat-container" [class]="display">
+  <div class="chat-header">
+    <div class="header-content">
+      <img src="assets/img/kai_logo_small.png" alt="KAI Logo" class="kai-logo">
+      <div class="warning-message">
+        Hinweis: Die Antworten werden von einer KI generiert. Bitte überprüfen Sie die Korrektheit anhand der verlinkten Videos.
+      </div>
+      <button mat-icon-button (click)="closeChat()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+  <div class="chat-content">
+    <app-chat-session-list
+      *ngIf="showSessions"
+      [sessions]="sessions"
+      [activeSessionId]="currentSession?.id"
+      (sessionSelect)="onSessionSelect($event)"
+      (newChat)="onNewChat()"
+    ></app-chat-session-list>
+    <div class="chat-messages">
+      <div #messageContainer class="message-container">
+        <div *ngFor="let message of messages; let i = index" class="message" [ngClass]="message.type">
+          <div class="message-content">
+            <markdown *ngIf="message.type === 'bot'" [data]="message.text"></markdown>
+            <span *ngIf="message.type === 'user'">{{message.text}}</span>
+          </div>
+          <div *ngIf="message.type === 'bot' && message.id !== -1" class="rating">
+            <span class="rating-question">War diese Antwort hilfreich?</span>
+            <button mat-icon-button
+              (click)="rateMessage(i, message.id, 1)"
+              [class.selected]="message.rating === 1"
+              [class.just-rated]="message.justRated && message.rating === 1"
+              [attr.aria-label]="'Bewertung: Schlecht'">
+              <mat-icon>sentiment_very_dissatisfied</mat-icon>
+            </button>
+            <button mat-icon-button
+              (click)="rateMessage(i, message.id, 2)"
+              [class.selected]="message.rating === 2"
+              [class.just-rated]="message.justRated && message.rating === 2"
+              [attr.aria-label]="'Bewertung: Neutral'">
+              <mat-icon>sentiment_neutral</mat-icon>
+            </button>
+            <button mat-icon-button
+              (click)="rateMessage(i, message.id, 3)"
+              [class.selected]="message.rating === 3"
+              [class.just-rated]="message.justRated && message.rating === 3"
+              [attr.aria-label]="'Bewertung: Gut'">
+              <mat-icon>sentiment_very_satisfied</mat-icon>
+            </button>
           </div>
         </div>
-      </mat-card-content>
-      <mat-card-actions class="chat-actions">
-        <mat-form-field appearance="outline" class="chat-form">
-          <textarea
-            class="chat-input"
-            matInput
-            cdkTextareaAutosize
-            [cdkAutosizeMinRows]="1"
-            [cdkAutosizeMaxRows]="4"
-            type="text"
-            placeholder="Deine Frage..."
+      </div>
+      <form [formGroup]="form" class="input-container">
+        <mat-form-field appearance="outline">
+          <input matInput
             formControlName="message"
-            (keydown.enter)="onClickEnter($event)"
-          ></textarea>
-          <button
-            class="send-button"
-            matSuffix
-            mat-icon-button
-            aria-label="Send"
-            (click)="onClickSendMessage()"
-            [disableRipple]="true"
-            [disabled]="!canSendMessage"
-            type="button"
-          >
-            <mat-icon class="send-icon">{{ canSendMessage ? 'send' : 'stop' }}</mat-icon>
-          </button>
+            placeholder="Frage etwas zur Vorlesung..."
+            (keydown.enter)="$event.preventDefault(); onClickSendMessage()">
         </mat-form-field>
-      </mat-card-actions>
-    </mat-card>
-  </form>
+        <button mat-icon-button
+          [disabled]="!canSendMessage"
+          (click)="onClickSendMessage()">
+          <mat-icon>send</mat-icon>
+        </button>
+      </form>
+    </div>
+  </div>
 </div>

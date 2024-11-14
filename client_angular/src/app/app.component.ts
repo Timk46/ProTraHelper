@@ -88,7 +88,7 @@ export class AppComponent {
 
   ngOnInit() {
     //this.toolbarService.show();
-    this.disableConsoleInProduction()
+    //this.disableConsoleInProduction()
   }
 
   disableConsoleInProduction(): void { if (environment.production)

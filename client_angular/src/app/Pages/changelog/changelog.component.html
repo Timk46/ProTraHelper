@@ -1,0 +1,20 @@
+<div class="changelog-wrapper">
+  <div class="changelog-container" *ngIf="!loading && !error">
+    <div class="changelog-header">
+      <h2>Changelog</h2>
+      <div class="changelog-divider"></div>
+    </div>
+    <div class="changelog-content">
+      <markdown [data]="changelog" class="markdown-body"></markdown>
+    </div>
+  </div>
+
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div class="error-container" *ngIf="error">
+    <mat-icon color="warn">error_outline</mat-icon>
+    <span>{{ error }}</span>
+  </div>
+</div>

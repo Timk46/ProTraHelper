@@ -21,7 +21,6 @@ export class FloydService {
      * @returns {{ receivedPoints: number, feedback: string }} - The total points earned and detailed feedback for each step.
      */
     evaluateSolution(initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
-        // TODO: For now using the visited attribute, but find a solution for this
 
         // Convert solutions from IGraphDataJSON to IGraphDataSemantic, where edges use node values instead of IDs, 
         // as IDs may differ in different solutions even for the same node values.
@@ -195,8 +194,8 @@ export class FloydService {
     
           // Modify nodes so that only the current node is marked
           currentStep.nodes = currentStep.nodes.map( node => {
-            if (node.value === currentNodeValue) { return { ...node, visited: true } }
-            return { ...node, visited: false }
+            if (node.value === currentNodeValue) { return { ...node, selected: true } }
+            return { ...node, selected: false }
           })
     
           // We need the edges where the current node is intermediate node
@@ -248,7 +247,7 @@ export class FloydService {
 
 
     /**
-     * Determines the order in which nodes are marked as "visited" in each step of the solution.
+     * Determines the order in which nodes are marked as "selected" in each step of the solution.
      * Ensures that each step has exactly one marked node, and that no node is marked more than once.
      * 
      * @param solution - An array of graph structures representing the steps of the student's solution.
@@ -265,7 +264,7 @@ export class FloydService {
         for (const step of solution) {
           
             // Get the marked node (Only one node can marked in a step )
-            const markedNodes = step.nodes.filter( node => node.visited )
+            const markedNodes = step.nodes.filter( node => node.selected )
           
             // Check if only one single node is marked as current
             if (markedNodes.length !== 1) {

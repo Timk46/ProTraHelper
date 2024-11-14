@@ -95,7 +95,9 @@
     box-shadow: none;
     padding: 2em;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
+    gap: 1em;
+    // justify-content: space-between;
     align-items: center;
 }
 
