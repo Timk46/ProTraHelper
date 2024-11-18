@@ -95,7 +95,7 @@
     box-shadow: none;
     padding: 2em;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 1em;
     // justify-content: space-between;
     align-items: center;
@@ -127,6 +127,6 @@ mat-button-toggle-group {
 }
 
 .mat-button-toggle-appearance-standard.mat-button-toggle-checked {
-    background-color: rgb(86, 142, 255);
+    background-color: rgb(63,81,181);
     color: #eee;
 }

@@ -8,7 +8,7 @@ export class ExampleSolutionGenerationService {
 
   constructor (private readonly transitiveClosureService: TransitiveClosureService) {}
 
-  generateTransitiveClosureExampleSolution(initialStructure: GraphStructureDTO): GraphStructureDTO {
+  generateTransitiveClosureExampleSolution(initialStructure: GraphStructureDTO): GraphStructureDTO[] {
 
     // Convert the initial structure to semantic representation
     const initialStructureSemantic = graphJSONToSemantic(initialStructure);
@@ -34,7 +34,7 @@ export class ExampleSolutionGenerationService {
       }
     });
 
-    return initialStructure;
+    return [initialStructure];
   }
   
 }

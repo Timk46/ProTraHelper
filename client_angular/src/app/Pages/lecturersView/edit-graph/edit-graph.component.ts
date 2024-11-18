@@ -12,6 +12,8 @@ import { TinymceComponent } from '../../tinymce/tinymce.component';
 import { GenerateDijkstraService } from './generate-graph/generate-dijkstra.service';
 import { GenerateKruskalService } from './generate-graph/generate-kruskal.service';
 import { GenerateFloydService } from './generate-graph/generate-floyd.service';
+import { GenerateExampleSolutionService } from './generateExampleSolution/generate-example-solution.service';
+import { Observable } from 'rxjs';
 
 
 interface GraphQuestionConfiguration extends GraphConfigurationDTO {
@@ -145,6 +147,7 @@ export class EditGraphComponent implements AfterViewInit {
     private generateFloydService: GenerateFloydService,
     private generateDijkstraService: GenerateDijkstraService,
     private generateKruskalService: GenerateKruskalService,
+    private generateExampleSolutionService: GenerateExampleSolutionService,
   ) {
 
     this.graphForm = this.fb.group({
@@ -338,31 +341,32 @@ export class EditGraphComponent implements AfterViewInit {
   // #######################################################
   // Workspace Content Related
   updateWorkspace() {
-    // Save the previous content before resetting it
-    this.saveWorkspaceContent(this.workspaceModePrevious, this.solutionStepPrevious);
+    // Save the previous content before resetting it (Only for initial structure)
+    if (this.workspaceModePrevious === 'assignment') {
+      this.saveWorkspaceContent(this.workspaceModePrevious, this.solutionStepPrevious);
+    }
 
     // #####
     // ## CASE 1: Example Solution ->  Load it to the service
     if (this.workspaceModeCurrent === 'solution') {
 
-      // If there is no step yet, add the first step
-      if (this.solutionGraphStructure.length === 0) {
-        this.addNewSolutionStep()
-      }
+      // Generate the example solution based on the question type
+      this.generateExampleSolution().subscribe( generatedExampleSolution => {
+        this.solutionGraphStructure = generatedExampleSolution;
 
-      // Get Current Step
-      const graphContent: GraphStructureDTO = this.solutionGraphStructure[this.solutionStepCurrent];
+        // Get Current Step
+        const graphContent: GraphStructureDTO = this.solutionGraphStructure[this.solutionStepCurrent];
 
-      // Get configuration
-      const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
-      
-      // Clone the graph content and load it to the GraphService
-      const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
-      this.loadWorkspaceContent({
-        graphContent: clonedGraphContent,
-        graphConfiguration: graphQuestionConfigruation
+        // Get configuration
+        const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+
+        // Clone the graph content and load it to the GraphService
+        const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
+        this.loadWorkspaceContent({
+          graphContent: clonedGraphContent,
+          graphConfiguration: graphQuestionConfigruation
+        });
       });
-
     }
 
 
@@ -416,7 +420,11 @@ export class EditGraphComponent implements AfterViewInit {
 
   saveWorkspaceContent(mode: string, step: number) {
     
-      
+    // Do not save changes for example solution mode as it is being generated and not edited
+    if (mode === 'solution') {
+      return;
+    }
+
     // graphToJSON returns also the configuration and structureType
     // Use only nodes and edges
     const graph = this.graphTaskService.graphToJSON();
@@ -425,12 +433,8 @@ export class EditGraphComponent implements AfterViewInit {
     // Clone GraphService content
     const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphDataJSON));
 
-    // Update the graph structure according to the mode. It can be initial structure or example solution
-    if (mode === 'solution') {
-      this.solutionGraphStructure[step] = clonedGraphContent;
-    } else if (mode === 'assignment') {
-      this.assignmentGraphStructure = clonedGraphContent;
-    }
+    // Update the initial graph structure. It can only be initial structure
+    this.assignmentGraphStructure = clonedGraphContent;
   }
 
   activateWorkspace() {
@@ -471,9 +475,11 @@ export class EditGraphComponent implements AfterViewInit {
     // Hide workspace
     this.workspaceIsActive = false;
     
-    // Save recent updated workspace content 
-    this.saveWorkspaceContent(this.workspaceModePrevious, this.solutionStepCurrent);
-    
+    // Save recent updated workspace content (only for initial structure)
+    if (this.workspaceModePrevious === 'assignment') {
+      this.saveWorkspaceContent(this.workspaceModePrevious, this.solutionStepCurrent);
+    }
+
     // Reset the content in service for future use
     this.graphTaskService.resetGraph();
 
@@ -503,6 +509,8 @@ export class EditGraphComponent implements AfterViewInit {
   }
 
   addNewSolutionStep() {
+    return; // disabled for now as the solution is being generated automatically and not edited manually 
+
     // Before adding new step, the current step need to be saved
     this.saveWorkspaceContent(this.workspaceModePrevious, this.solutionStepPrevious);
 
@@ -546,6 +554,8 @@ export class EditGraphComponent implements AfterViewInit {
   }
 
   deleteCurrentSolutionStep() {
+    return; // disabled for now as the solution is being generated automatically and not edited manually 
+
     if (this.solutionGraphStructure.length > 1) {
 
       // Remove the current step
@@ -576,24 +586,16 @@ export class EditGraphComponent implements AfterViewInit {
     }
   }
 
-  resetSolution() {
+  resetStructure() {
+    // Reset the initial structure
+    this.assignmentGraphStructure = {
+      nodes: [], edges: []
+    }
+
     // Reset the solution steps
     this.solutionGraphStructure = [];
     this.solutionStepCurrent = 0;
     this.solutionStepPrevious = this.solutionStepCurrent;
-
-    this.workspaceModeCurrent = 'assignment';
-    this.workspaceModePrevious = this.workspaceModeCurrent;
-
-    // To use only values and not the references
-    this.updateWorkspace();
-  }
-
-  resetStructure() {
-    // Reset the solution steps
-    this.assignmentGraphStructure = {
-      nodes: [], edges: []
-    };
 
     this.workspaceModeCurrent = 'assignment';
     this.workspaceModePrevious = this.workspaceModeCurrent;
@@ -605,6 +607,7 @@ export class EditGraphComponent implements AfterViewInit {
       graphContent: this.assignmentGraphStructure,
       graphConfiguration: graphQuestionConfigruation
     });
+
 
     // To use only values and not the references
     this.updateWorkspace();
@@ -1077,6 +1080,24 @@ export class EditGraphComponent implements AfterViewInit {
 
     return undefined;
 
+  }
+
+  generateExampleSolution(): Observable<GraphStructureDTO[]> {
+    // Generate the example solution based on the question type
+    if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
+      return this.generateExampleSolutionService.generateTransitiveClosureExampleSolution(this.assignmentGraphStructure);
+    }
+    if (this.graphForm.value.graphQuestionType === 'dijsktra') {
+      return this.generateExampleSolutionService.generateDijkstraExampleSolution(this.assignmentGraphStructure);
+    }
+    if (this.graphForm.value.graphQuestionType === 'floyd') {
+      return this.generateExampleSolutionService.generateFloydExampleSolution(this.assignmentGraphStructure);
+    }
+    if (this.graphForm.value.graphQuestionType === 'kruskal') {
+      return this.generateExampleSolutionService.generateKruskalExampleSolution(this.assignmentGraphStructure);
+    }
+
+    throw new Error('No example solution generator found for the given question type');
   }
 
 }
