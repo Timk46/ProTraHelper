@@ -1003,10 +1003,20 @@ export class EditGraphComponent implements AfterViewInit {
       return;
     }
 
-    this.graphTaskService.resetGraph();
-    this.graphTaskService.graphDataFromJSON(graphStructure.nodes, graphStructure.edges);
+    this.resetWorkspaceContent();
 
-    this.saveWorkspaceContent(this.workspaceModePrevious, this.solutionStepPrevious);
+    const clonedInitialStructure: GraphStructureDTO = JSON.parse(JSON.stringify(graphStructure));
+    this.assignmentGraphStructure = clonedInitialStructure;
+
+    // Get configuration
+    const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+
+    // Clone the graph content and load it to the GraphService
+    const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(this.assignmentGraphStructure));
+    this.loadWorkspaceContent({
+      graphContent: clonedGraphContent,
+      graphConfiguration: graphQuestionConfigruation
+    });
 
     this.structureIsSet = true;
 
