@@ -6,10 +6,11 @@ import { TransitiveClosureService } from '../transitive-closure/transitive-closu
 import { PrismaModule } from '@/prisma/prisma.module';
 import { FloydService } from '../floyd/floyd.service';
 import { DijkstraService } from '../dijkstra/dijkstra.service';
+import { KruskalService } from '../kruskal/kruskal.service';
 
 @Module({
   controllers: [ExampleSolutionGenerationController],
-  providers: [ExampleSolutionGenerationService, TransitiveClosureService, FloydService, DijkstraService],
+  providers: [ExampleSolutionGenerationService, TransitiveClosureService, FloydService, DijkstraService, KruskalService],
   imports: [PrismaModule, GraphSolutionEvaluationModule],
 })
 export class ExampleSolutionGenerationModule {}

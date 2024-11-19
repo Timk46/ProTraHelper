@@ -17,8 +17,7 @@ export class ExampleSolutionGenerationController {
   @roles('ADMIN')
   @Post('/kruskal')
   generateKruskalExampleSolution(@Body() createExampleSolutionGenerationDto: CreateExampleSolutionGenerationDto) {
-    // return this.exampleSolutionGenerationService.generateKruskalExampleSolution();
-    throw new Error('Not implemented.');
+    return this.exampleSolutionGenerationService.generateKruskalExampleSolution(createExampleSolutionGenerationDto.initialStructure);
   }
   
   @roles('ADMIN')

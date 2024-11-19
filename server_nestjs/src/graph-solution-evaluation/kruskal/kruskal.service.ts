@@ -208,8 +208,9 @@ export class KruskalService {
     // Recursive Kruskal's algorithm to generate all possible minimum spanning trees (MSTs)
     kruskalRecursive(
         remainingEdges: GraphEdgeSemanticDTO[],    // The remaining edges to process
-        unionFind: IUnionFind,                   // Current union-find structure tracking connected components
-        currentMST: GraphEdgeSemanticDTO[] = []    // The current MST being built
+        unionFind: IUnionFind,                     // Current union-find structure tracking connected components
+        currentMST: GraphEdgeSemanticDTO[] = [],    // The current MST being built
+        findOne: boolean = false                   // Flag to stop after finding one MST
     ): GraphEdgeSemanticDTO[][] {
 
         // Base case: no more edges to process
@@ -258,7 +259,7 @@ export class KruskalService {
         let allPossibleMSTs: GraphEdgeSemanticDTO[][] = [];
 
         // Recursively process each candidate minimum edge and continue building the MST
-        minWeightEdges.forEach(edgeGroup => {
+        for (const edgeGroup of minWeightEdges) {
             const clonedMST = JSON.parse(JSON.stringify(currentMST));
             const clonedUnionFind = this.cloneUnionFindStructure(unionFind);
 
@@ -269,15 +270,21 @@ export class KruskalService {
             }
 
             // Recursive call with the updated edge list, MST, and union-find structure
-            const newMSTs = this.kruskalRecursive(edgeGroup.otherEdges, clonedUnionFind, clonedMST);
+            const newMSTs = this.kruskalRecursive(edgeGroup.otherEdges, clonedUnionFind, clonedMST, findOne);
+            
+            // If `findOne` is true, return immediately if any solution is found
+            if (findOne && newMSTs.length > 0) {
+                return newMSTs;
+            }
+
             allPossibleMSTs = allPossibleMSTs.concat(newMSTs);  // Collect all generated MSTs
-        });
+        }
 
         return allPossibleMSTs;  // Return the full set of possible MSTs
     }
 
     // Initialize Kruskal's algorithm to generate all possible solutions
-    generatePossibleMSTs(edges: GraphEdgeSemanticDTO[]): GraphEdgeSemanticDTO[][] {
+    generatePossibleMSTs(edges: GraphEdgeSemanticDTO[], findOne: boolean = false): GraphEdgeSemanticDTO[][] {
         // Create a set of all unique nodes in the graph
         const uniqueNodes = new Set(edges.map(e => [e.node1Value, e.node2Value]).flat());
 
@@ -285,7 +292,7 @@ export class KruskalService {
         const unionFind = this.createUnionFind(Array.from(uniqueNodes));
 
         // Start the recursive generation of possible MSTs
-        return this.kruskalRecursive(edges, unionFind);
+        return this.kruskalRecursive(edges, unionFind, [], findOne);
     }    
 
 }

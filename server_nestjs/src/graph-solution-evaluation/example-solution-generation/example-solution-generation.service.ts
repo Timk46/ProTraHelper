@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { TransitiveClosureService } from '../transitive-closure/transitive-closure.service';
 import { graphJSONToSemantic } from '../utils/graph-utils';
-import { GraphStructureDTO, GraphStructureSemanticDTO } from '@Interfaces/graphTask.dto';
+import { GraphEdgeSemanticDTO, GraphStructureDTO, GraphStructureSemanticDTO } from '@Interfaces/graphTask.dto';
 import { FloydService } from '../floyd/floyd.service';
 import { DijkstraService } from '../dijkstra/dijkstra.service';
+import { KruskalService } from '../kruskal/kruskal.service';
 
 @Injectable()
 export class ExampleSolutionGenerationService {
@@ -12,6 +13,7 @@ export class ExampleSolutionGenerationService {
     private readonly transitiveClosureService: TransitiveClosureService,
     private readonly floydService: FloydService,
     private readonly dijkstraService: DijkstraService,
+    private readonly kruskalService: KruskalService,
   ) {}
 
   generateTransitiveClosureExampleSolution(initialStructure: GraphStructureDTO): GraphStructureDTO[] {
@@ -93,52 +95,103 @@ export class ExampleSolutionGenerationService {
     const solution: GraphStructureDTO[] = [];
     let stepIndex = 0;
 
+    // Generate the solution step by step
     while (stepIndex < initialStructure.nodes.length) {
 
-        let previousStep: GraphStructureDTO = JSON.parse(JSON.stringify(stepIndex === 0 ? initialStructure : solution[stepIndex - 1]));
-        let previousStepSemantic: GraphStructureSemanticDTO = graphJSONToSemantic(previousStep);
+      // Copy the previous step
+      let previousStep: GraphStructureDTO = JSON.parse(JSON.stringify(stepIndex === 0 ? initialStructure : solution[stepIndex - 1]));
+      let previousStepSemantic: GraphStructureSemanticDTO = graphJSONToSemantic(previousStep);
 
-        const unvisitedNodes = previousStepSemantic.nodes.filter(node => !node.selected);
+      // Find the unvisited nodes
+      const unvisitedNodes = previousStepSemantic.nodes.filter(node => !node.selected);
 
-        if (unvisitedNodes.length === 0) {
-            break;
-        }
+      // If there are no unvisited nodes, break the loop
+      if (unvisitedNodes.length === 0) {
+          break;
+      }
 
-        const minWeight = Math.min(...unvisitedNodes.map(node => node.weight));
-        const possibleNextNodes = unvisitedNodes.filter(node => node.weight === minWeight);
+      // Find the nodes with the minimum weight
+      const minWeight = Math.min(...unvisitedNodes.map(node => node.weight));
+      const possibleNextNodes = unvisitedNodes.filter(node => node.weight === minWeight);
 
-        if (possibleNextNodes.length === 0) {
-            break;
-        }
+      // If there are no possible next nodes, break the loop
+      if (possibleNextNodes.length === 0) {
+          break;
+      }
 
-        const visitedNode = possibleNextNodes[0];
+      // Select the first node from the possible next nodes
+      const visitedNode = possibleNextNodes[0];
 
-        const { possibleNextStep, continueEvaluation } = this.dijkstraService.findPossibleNextStep(previousStepSemantic, visitedNode.value);
+      // Find the possible next step
+      const { possibleNextStep, continueEvaluation } = this.dijkstraService.findPossibleNextStep(previousStepSemantic, visitedNode.value);
 
-        if (!continueEvaluation) {
-            throw new Error('An unknown error is occurred when generating an example solution for dijkstra question.');
-        }
+      // If the evaluation cannot be continued, throw an error
+      if (!continueEvaluation) {
+          throw new Error('An unknown error is occurred when generating an example solution for dijkstra question.');
+      }
 
-        const currentStep: GraphStructureDTO = {
-            nodes: [],
-            edges: JSON.parse(JSON.stringify(previousStep.edges))
-        }
+      // Create the current step
+      const currentStep: GraphStructureDTO = {
+          nodes: [],
+          edges: JSON.parse(JSON.stringify(previousStep.edges))
+      }
 
-        for (let node of previousStep.nodes) {
-            const nodeCopy = JSON.parse(JSON.stringify(node));
-            const { selected, weight } = possibleNextStep.nodes.find(n => n.value === node.value);
+      // Adjust the nodes of the current step
+      for (let node of previousStep.nodes) {
+          const nodeCopy = JSON.parse(JSON.stringify(node));
+          const { selected, weight } = possibleNextStep.nodes.find(n => n.value === node.value);
 
-            nodeCopy.selected = selected;
-            nodeCopy.weight = weight;
+          nodeCopy.selected = selected;
+          nodeCopy.weight = weight;
 
-            currentStep.nodes.push(nodeCopy);
-        }
+          currentStep.nodes.push(nodeCopy);
+      }
 
-        solution.push(currentStep);
-        stepIndex++;
+      solution.push(currentStep);
+      stepIndex++;
     }
     
     return solution;
+  }
+
+  generateKruskalExampleSolution(initialStructure: GraphStructureDTO): GraphStructureDTO[] {
+
+    // Convert the initial structure to semantic representation
+    const initialStructureSemantic = graphJSONToSemantic(initialStructure);
+
+    // Generate new edges for each step (findOne flag is set to true to generate only one possible solution)
+    const solutionEdgesSemantic: GraphEdgeSemanticDTO[][] = this.kruskalService.generatePossibleMSTs(initialStructureSemantic.edges, true);
+
+    // Solution to be returned
+    const generatedSolution: GraphStructureDTO[] = [];
+
+    // Check if the array of possible solutions is empty
+    if (solutionEdgesSemantic.length === 0) {
+      throw new Error('An unknown error is occurred when generating an example solution for kruskal question.');
+    }
+
+    // Generate the solution using the generated edges for each step
+    for (let generatedEdgeSemantic of solutionEdgesSemantic[0]) {
+
+      const generatedSolutionStep: GraphStructureDTO = {
+        nodes: JSON.parse(JSON.stringify(initialStructure.nodes)),
+        edges: generatedSolution.length === 0 ? [] : JSON.parse(JSON.stringify(generatedSolution[generatedSolution.length - 1].edges))
+      }
+
+      const node1Id = initialStructure.nodes.find(node => node.value == generatedEdgeSemantic.node1Value).nodeId;
+      const node2Id = initialStructure.nodes.find(node => node.value == generatedEdgeSemantic.node2Value).nodeId;
+
+      // Add edges edges to the solution step
+      generatedSolutionStep.edges.push({
+        node1Id: node1Id,
+        node2Id: node2Id,
+        weight: generatedEdgeSemantic.weight
+      });
+
+      generatedSolution.push(generatedSolutionStep);
+    }
+
+    return generatedSolution;
   }
   
 }
