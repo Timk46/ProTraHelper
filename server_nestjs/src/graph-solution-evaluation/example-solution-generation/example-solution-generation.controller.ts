@@ -25,8 +25,7 @@ export class ExampleSolutionGenerationController {
   @roles('ADMIN')
   @Post('/floyd')
   generateFloydExampleSolution(@Body() createExampleSolutionGenerationDto: CreateExampleSolutionGenerationDto) {
-    // return this.exampleSolutionGenerationService.generateFloydExampleSolution();
-    throw new Error('Not implemented.');
+    return this.exampleSolutionGenerationService.generateFloydExampleSolution(createExampleSolutionGenerationDto.initialStructure);
   }
   
   @roles('ADMIN')
