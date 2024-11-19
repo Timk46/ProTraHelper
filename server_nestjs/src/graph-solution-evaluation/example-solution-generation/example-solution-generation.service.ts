@@ -3,13 +3,15 @@ import { TransitiveClosureService } from '../transitive-closure/transitive-closu
 import { graphJSONToSemantic } from '../utils/graph-utils';
 import { GraphStructureDTO, GraphStructureSemanticDTO } from '@Interfaces/graphTask.dto';
 import { FloydService } from '../floyd/floyd.service';
+import { DijkstraService } from '../dijkstra/dijkstra.service';
 
 @Injectable()
 export class ExampleSolutionGenerationService {
 
   constructor (
     private readonly transitiveClosureService: TransitiveClosureService,
-    private readonly floydService: FloydService
+    private readonly floydService: FloydService,
+    private readonly dijkstraService: DijkstraService,
   ) {}
 
   generateTransitiveClosureExampleSolution(initialStructure: GraphStructureDTO): GraphStructureDTO[] {
@@ -84,6 +86,59 @@ export class ExampleSolutionGenerationService {
 
 
     return generatedSolution;
+  }
+
+  generateDijkstraExampleSolution(initialStructure: GraphStructureDTO): GraphStructureDTO[] {
+
+    const solution: GraphStructureDTO[] = [];
+    let stepIndex = 0;
+
+    while (stepIndex < initialStructure.nodes.length) {
+
+        let previousStep: GraphStructureDTO = JSON.parse(JSON.stringify(stepIndex === 0 ? initialStructure : solution[stepIndex - 1]));
+        let previousStepSemantic: GraphStructureSemanticDTO = graphJSONToSemantic(previousStep);
+
+        const unvisitedNodes = previousStepSemantic.nodes.filter(node => !node.selected);
+
+        if (unvisitedNodes.length === 0) {
+            break;
+        }
+
+        const minWeight = Math.min(...unvisitedNodes.map(node => node.weight));
+        const possibleNextNodes = unvisitedNodes.filter(node => node.weight === minWeight);
+
+        if (possibleNextNodes.length === 0) {
+            break;
+        }
+
+        const visitedNode = possibleNextNodes[0];
+
+        const { possibleNextStep, continueEvaluation } = this.dijkstraService.findPossibleNextStep(previousStepSemantic, visitedNode.value);
+
+        if (!continueEvaluation) {
+            throw new Error('An unknown error is occurred when generating an example solution for dijkstra question.');
+        }
+
+        const currentStep: GraphStructureDTO = {
+            nodes: [],
+            edges: JSON.parse(JSON.stringify(previousStep.edges))
+        }
+
+        for (let node of previousStep.nodes) {
+            const nodeCopy = JSON.parse(JSON.stringify(node));
+            const { selected, weight } = possibleNextStep.nodes.find(n => n.value === node.value);
+
+            nodeCopy.selected = selected;
+            nodeCopy.weight = weight;
+
+            currentStep.nodes.push(nodeCopy);
+        }
+
+        solution.push(currentStep);
+        stepIndex++;
+    }
+    
+    return solution;
   }
   
 }

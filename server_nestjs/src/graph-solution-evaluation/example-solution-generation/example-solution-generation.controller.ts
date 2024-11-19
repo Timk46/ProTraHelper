@@ -11,8 +11,7 @@ export class ExampleSolutionGenerationController {
   @roles('ADMIN')
   @Post('/dijkstra')
   generateDijkstraExampleSolution(@Body() createExampleSolutionGenerationDto: CreateExampleSolutionGenerationDto) {
-    // return this.exampleSolutionGenerationService.generateDijsktraExampleSolution();
-    throw new Error('Not implemented.');
+    return this.exampleSolutionGenerationService.generateDijkstraExampleSolution(createExampleSolutionGenerationDto.initialStructure);
   }
   
   @roles('ADMIN')

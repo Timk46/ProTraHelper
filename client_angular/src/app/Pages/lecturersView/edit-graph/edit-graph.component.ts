@@ -1097,7 +1097,7 @@ export class EditGraphComponent implements AfterViewInit {
     if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
       return this.generateExampleSolutionService.generateTransitiveClosureExampleSolution(this.assignmentGraphStructure);
     }
-    if (this.graphForm.value.graphQuestionType === 'dijsktra') {
+    if (this.graphForm.value.graphQuestionType === 'dijkstra') {
       return this.generateExampleSolutionService.generateDijkstraExampleSolution(this.assignmentGraphStructure);
     }
     if (this.graphForm.value.graphQuestionType === 'floyd') {

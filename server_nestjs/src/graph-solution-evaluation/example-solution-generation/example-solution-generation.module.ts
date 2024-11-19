@@ -5,10 +5,11 @@ import { GraphSolutionEvaluationModule } from '../graph-solution-evaluation.modu
 import { TransitiveClosureService } from '../transitive-closure/transitive-closure.service';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { FloydService } from '../floyd/floyd.service';
+import { DijkstraService } from '../dijkstra/dijkstra.service';
 
 @Module({
   controllers: [ExampleSolutionGenerationController],
-  providers: [ExampleSolutionGenerationService, TransitiveClosureService, FloydService],
+  providers: [ExampleSolutionGenerationService, TransitiveClosureService, FloydService, DijkstraService],
   imports: [PrismaModule, GraphSolutionEvaluationModule],
 })
 export class ExampleSolutionGenerationModule {}
