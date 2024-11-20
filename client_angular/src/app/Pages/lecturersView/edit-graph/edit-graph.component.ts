@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { GraphConfigurationDTO, GraphEdgeDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
+import { GraphConfigurationDTO, GraphEdgeDTO, GraphNodeDTO, GraphStructureDTO, GraphStructureSemanticDTO } from '@DTOs/graphTask.dto';
 import { GraphTaskService } from 'src/app/Modules/graph-tasks/services/graph-task.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
@@ -14,6 +14,7 @@ import { GenerateKruskalService } from './generate-graph/generate-kruskal.servic
 import { GenerateFloydService } from './generate-graph/generate-floyd.service';
 import { GenerateExampleSolutionService } from './generateExampleSolution/generate-example-solution.service';
 import { Observable } from 'rxjs';
+import { graphEdgeJSONToSemantic, graphJSONToSemantic } from 'src/app/Modules/graph-tasks/utils';
 
 
 interface GraphQuestionConfiguration extends GraphConfigurationDTO {
@@ -123,6 +124,10 @@ export class EditGraphComponent implements AfterViewInit {
   assignmentGraphStructure: GraphStructureDTO = {
     nodes: [], edges: []
   };
+  initialUsedForExampleSolution: GraphStructureDTO = {
+    nodes: [], edges: []
+  };
+
   solutionGraphStructure: GraphStructureDTO[] = [
   //   {
   //   nodes: [], edges: []
@@ -235,8 +240,8 @@ export class EditGraphComponent implements AfterViewInit {
         const clonedInitialStructure: GraphStructureDTO = JSON.parse(JSON.stringify(this.detailedQuestionData.graphQuestion.initialStructure))
         this.assignmentGraphStructure = clonedInitialStructure;
         
-        const clonedExSolGraphSteps: GraphStructureDTO[] = JSON.parse(JSON.stringify(this.detailedQuestionData.graphQuestion.exampleSolution))
-        this.solutionGraphStructure = clonedExSolGraphSteps;
+        // const clonedExSolGraphSteps: GraphStructureDTO[] = JSON.parse(JSON.stringify(this.detailedQuestionData.graphQuestion.exampleSolution))
+        // this.solutionGraphStructure = clonedExSolGraphSteps;
         
         this.structureIsSet = true;
       }
@@ -322,7 +327,7 @@ export class EditGraphComponent implements AfterViewInit {
             nodes: this.assignmentGraphStructure.nodes,
             edges: this.assignmentGraphStructure.edges,
           },
-          exampleSolution: this.solutionGraphStructure,
+          exampleSolution: [],//this.solutionGraphStructure,
           stepsEnabled: graphQuestionConfigruation.stepsEnabled,
           configuration: {
             nodeWeight: graphQuestionConfigruation.nodeWeight,
@@ -350,23 +355,43 @@ export class EditGraphComponent implements AfterViewInit {
     // ## CASE 1: Example Solution ->  Load it to the service
     if (this.workspaceModeCurrent === 'solution') {
 
+      // If the structure has changed
       // Generate the example solution based on the question type
-      this.generateExampleSolution().subscribe( generatedExampleSolution => {
-        this.solutionGraphStructure = generatedExampleSolution;
+      if(!this.structuresAreEqual(this.assignmentGraphStructure, this.initialUsedForExampleSolution)) {
+        
+        this.generateExampleSolution().subscribe( generatedExampleSolution => {
+          this.solutionGraphStructure = generatedExampleSolution;
 
+          this.snackBar.open('Die Musterlösung wurde neu generiert, da die Graphstruktur geändert wurde.', 'Schließen', { duration: 3000 });  
+          
+          // Get Current Step
+          const graphContent: GraphStructureDTO = this.solutionGraphStructure[this.solutionStepCurrent];
+          
+          // Get configuration
+          const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+          
+          // Clone the graph content and load it to the GraphService
+          const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
+          this.loadWorkspaceContent({
+            graphContent: clonedGraphContent,
+            graphConfiguration: graphQuestionConfigruation
+          });
+        });
+      }
+      else {
         // Get Current Step
         const graphContent: GraphStructureDTO = this.solutionGraphStructure[this.solutionStepCurrent];
-
+          
         // Get configuration
         const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
-
+        
         // Clone the graph content and load it to the GraphService
         const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
         this.loadWorkspaceContent({
           graphContent: clonedGraphContent,
           graphConfiguration: graphQuestionConfigruation
         });
-      });
+      }
     }
 
 
@@ -596,6 +621,10 @@ export class EditGraphComponent implements AfterViewInit {
     this.solutionGraphStructure = [];
     this.solutionStepCurrent = 0;
     this.solutionStepPrevious = this.solutionStepCurrent;
+
+    this.initialUsedForExampleSolution = {
+      nodes: [], edges: []
+    }
 
     this.workspaceModeCurrent = 'assignment';
     this.workspaceModePrevious = this.workspaceModeCurrent;
@@ -1093,6 +1122,9 @@ export class EditGraphComponent implements AfterViewInit {
   }
 
   generateExampleSolution(): Observable<GraphStructureDTO[]> {
+    // Update the initialUsedForExampleSolution so that we can know if the example solution is need to be generated again
+    this.initialUsedForExampleSolution = JSON.parse(JSON.stringify(this.assignmentGraphStructure));
+
     // Generate the example solution based on the question type
     if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
       return this.generateExampleSolutionService.generateTransitiveClosureExampleSolution(this.assignmentGraphStructure);
@@ -1108,6 +1140,78 @@ export class EditGraphComponent implements AfterViewInit {
     }
 
     throw new Error('No example solution generator found for the given question type');
+  }
+
+  structuresAreEqual(structure1: GraphStructureDTO, structure2: GraphStructureDTO): boolean {
+
+    if (structure1.nodes.length !== structure2.nodes.length) {
+      return false;
+    }
+
+    if (structure1.edges.length !== structure2.edges.length) {
+      return false;
+    }
+
+    for (let i = 0; i < structure1.nodes.length; i++) {
+
+      const sameNode = structure2.nodes.find(node => 
+        node.nodeId === structure1.nodes[i].nodeId && node.value === structure1.nodes[i].value
+      )
+
+      if (!sameNode) {
+        return false;
+      }
+
+      if (structure1.nodes[i].value !== sameNode.value) {
+        return false;
+      }
+      if (structure1.nodes[i].weight !== sameNode.weight) {
+        return false;
+      }
+      if (structure1.nodes[i].selected !== sameNode.selected) {
+        return false;
+      }
+      if (structure1.nodes[i].position.x !== sameNode.position.x) {
+        return false;
+      }
+      if (structure1.nodes[i].position.y !== sameNode.position.y) {
+        return false;
+      }
+      if (structure1.nodes[i].nodeId !== sameNode.nodeId) {
+        return false;
+      }
+      if (structure1.nodes[i].size.width !== sameNode.size.width) {
+        return false;
+      }
+      if (structure1.nodes[i].size.height !== sameNode.size.height) {
+        return false;
+      }
+      if (structure1.nodes[i].center.x !== sameNode.center.x) {
+        return false;
+      }
+      if (structure1.nodes[i].center.y !== sameNode.center.y) {
+        return false;
+      }
+    }
+
+    const structure1Semantic: GraphStructureSemanticDTO = graphJSONToSemantic(structure1);
+    const structure2Semantic: GraphStructureSemanticDTO = graphJSONToSemantic(structure1);
+
+    for (let i = 0; i < structure1Semantic.edges.length; i++) {
+      const sameEdge = structure2Semantic.edges.find(edge => 
+        edge.node1Value === structure1Semantic.edges[i].node1Value && edge.node2Value === structure1Semantic.edges[i].node2Value
+      )
+
+      if (!sameEdge) {
+        return false;
+      }
+
+      if (sameEdge.weight !== structure1.edges[i].weight) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
 }
