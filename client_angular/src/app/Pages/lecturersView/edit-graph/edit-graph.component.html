@@ -156,7 +156,13 @@
                         </mat-error>
                     </mat-form-field>
                     
-                    <button mat-raised-button color="primary" (click)="onGenerate()" [disabled]="generateButtonDisabled()" >Generieren</button>
+                    <button
+                        mat-raised-button
+                        color="primary"
+                        (click)="onGenerate()"
+                        [disabled]="generateButtonDisabled()"
+                    > Generieren </button>
+                    <mat-error *ngIf="generateButtonDisabled()">Die eingegebenen Parameter überprüfen!</mat-error>
                 </form>
                 </div>
             </mat-expansion-panel>
