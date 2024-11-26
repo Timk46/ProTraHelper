@@ -47,6 +47,7 @@ import { TransitiveClosureService } from './graph-solution-evaluation/transitive
 import { DijkstraService } from './graph-solution-evaluation/dijkstra/dijkstra.service'; 
 import { FloydService } from './graph-solution-evaluation/floyd/floyd.service';
 import { KruskalService } from './graph-solution-evaluation/kruskal/kruskal.service';
+import { ExampleSolutionGenerationModule } from './graph-solution-evaluation/example-solution-generation/example-solution-generation.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { KruskalService } from './graph-solution-evaluation/kruskal/kruskal.serv
     AdminModule, // Add this line
 
     GraphSolutionEvaluationModule,
+    ExampleSolutionGenerationModule
   ],
   controllers: [
     AppController,
