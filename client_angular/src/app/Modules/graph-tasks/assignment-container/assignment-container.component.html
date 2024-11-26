@@ -11,8 +11,20 @@
     </div>
     <div class="evaluation box">
         <h2>Feedback</h2>
-        <hr>
-        <p *ngIf="!isSending" [innerHTML]="feedback"></p>
+        <mat-button-toggle-group
+            class="feedback-type-toggle-group"
+            name="feedback-type" 
+            aria-label="Feedback Type"
+            [(ngModel)]="feedbackTypeCurrent"
+        >
+            <mat-button-toggle class="feedback-type-toggle-item" value="algoFeedback" [disabled]="feedbackDisabled">Algo-Check</mat-button-toggle>
+            <mat-button-toggle class="feedback-type-toggle-item" value="llmFeedback" [disabled]="feedbackDisabled">KI-Analyse</mat-button-toggle>
+        </mat-button-toggle-group>
+
+        
+        <hr style="margin-top: 1em;">
+
+        <p *ngIf="!isSending" [innerHTML]="feedbackTypeCurrent === 'algoFeedback' ? algoFeedback : llmFeedback"></p>
         <div 
             *ngIf="isSending"
             class="spinner-contaier"
@@ -29,17 +41,19 @@
 
         <div style="display: flex; justify-content: start; align-items: center; gap: 1em; height: 100%;">
             
-            <mat-button-toggle-group 
+            <mat-button-toggle-group
+                class="workspace-toggle-group"
                 name="mode" 
                 aria-label="mode" 
                 [(ngModel)]="workspaceModeCurrent"        
                 (ngModelChange)="updateWorkspace()"
             >
-                <mat-button-toggle value="assignment" [disabled]="isSending">Aufgabenstellung</mat-button-toggle>
-                <mat-button-toggle value="solution" [disabled]="isSending">Lösung</mat-button-toggle>
+                <mat-button-toggle class="workspace-toggle-item" value="assignment" [disabled]="isSending">Aufgabenstellung</mat-button-toggle>
+                <mat-button-toggle class="workspace-toggle-item" value="solution" [disabled]="isSending">Lösung</mat-button-toggle>
             </mat-button-toggle-group>
 
             <mat-button-toggle-group 
+                class="solution-step-toggle-group"
                 *ngIf="graphQuestionData.stepsEnabled && workspaceModeCurrent === 'solution'"
                 name="solution-step" 
                 aria-label="solution-step" 
@@ -47,6 +61,7 @@
                 (ngModelChange)="updateWorkspace()"
             >       
                     <mat-button-toggle 
+                        class="solution-step-toggle-item"
                         *ngFor="let step of solutionGraph; let i = index; trackBy:trackByIndex"    
                         [value]="i"
                         [disabled]="isSending"

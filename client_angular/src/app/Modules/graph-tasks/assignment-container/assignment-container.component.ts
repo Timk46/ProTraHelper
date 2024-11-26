@@ -27,7 +27,10 @@ export class AssignmentContainerComponent implements OnInit {
 
   public solutionGraph: GraphStructureDTO[] = [];
 
-  public feedback: string = '';
+  public algoFeedback: string = '';
+  public llmFeedback: string = '';
+  public feedbackTypeCurrent:  'algoFeedback' | 'llmFeedback' | '' = '';
+  public feedbackDisabled: boolean = true;
 
   thisQuestionType = questionType.GRAPH;
   
@@ -91,7 +94,8 @@ export class AssignmentContainerComponent implements OnInit {
     // To save workpace content if it is in solution mode
     this.updateWorkspace();
     this.isSending = true;
-    this.feedback = '';
+    this.algoFeedback = '';
+    this.llmFeedback = '';
     
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
@@ -109,11 +113,47 @@ export class AssignmentContainerComponent implements OnInit {
 
   handleCodeSubmissionResponse(result: userAnswerFeedbackDTO): void {
     this.isSending = false;
-    this.feedback = '<br>' + result.feedbackText.replace(/\n/g, '<br>');
+
+    // for first submission, enable the feedback and set the feedback type to algoFeedback 
+    if (this.feedbackDisabled) {
+      this.feedbackTypeCurrent = 'algoFeedback';
+    }
+    this.feedbackDisabled = false;
+
+    const feedbackJSON = result.feedbackText;
+    const feedbackObj = JSON.parse(feedbackJSON);
+
+    console.error(result);
+    console.error(feedbackJSON);
+    console.error(feedbackObj);
+
+    try {
+      if (feedbackObj.algo) {
+        this.algoFeedback = '<br>' + feedbackObj.algo.replace(/\n/g, '<br>');
+      }
+      else {
+        this.algoFeedback = "<br>Fehler beim Generieren des Algorithmischen Feedbacks";
+      }
+    } catch {
+      this.algoFeedback = "<br>Fehler beim Generieren des Algorithmischen Feedbacks";
+    }
+
+    try {
+      if (feedbackObj.llm) {
+        this.llmFeedback = '<br>' + feedbackObj.llm.replace(/\n/g, '<br>');
+      }
+      else {
+        this.llmFeedback = "<br>Fehler beim Generieren des KI Feedbacks";
+      }
+    } catch {
+      this.llmFeedback = "<br>Fehler beim Generieren des KI Feedbacks";
+    }
+
     if (result.progress === 100) {
       this.progressService.answerSubmitted();
     }
   }
+
 
   addNewSolutionStep() {
     // Before adding new step, the current step need to be saved
