@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { GraphEdgeSemanticDTO, GraphStructureSemanticDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
-import { getExtraEdges, getExtraEdgesUndirectedGraph, graphJSONToSemantic, graphsContainSameNodes } from '../utils/graph-utils';
+import { getExtraEdgesUndirectedGraph, graphJSONToSemantic, graphsContainSameNodes } from '../utils/graph-utils';
+import { graphFeedbackGenerationPrompts } from '../utils/graph-feedback-generation.prompts';
+import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 
 export interface IUnionFind {
     parent: { [key: string]: string };
@@ -9,7 +11,9 @@ export interface IUnionFind {
 @Injectable()
 export class KruskalService {
 
-    evaluateSolution(questionText: string, initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
+    constructor(private readonly feedbackGenerationService: FeedbackGenerationService) {}
+
+    async evaluateSolution(questionText: string, initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
  
         // Convert solutions from IGraphDataJSON to IGraphDataSemantic, where edges use node values instead of IDs, 
         // as IDs may differ in different solutions even for the same node values.
@@ -56,6 +60,7 @@ export class KruskalService {
 
         let receivedPoints = 0;
         let feedback = ''; 
+        let indexOfBestSolution = -1;
 
         // Iterate through each generated possible solution to evaluate against the student's submission
         allPossibleSolutions.forEach( (possibleSolution: GraphEdgeSemanticDTO[]) => {
@@ -69,15 +74,31 @@ export class KruskalService {
             if (possibleReceivedPoints >= receivedPoints) {
                 receivedPoints = possibleReceivedPoints;
                 feedback = possibleFeedback;
+                indexOfBestSolution = allPossibleSolutions.indexOf(possibleSolution);
             }
-
         })
 
-        // Return the total points received and the corresponding feedback
-        return {
-            receivedPoints, feedback
-        }
+        // Improve the feedback by using LLM to generate a more detailed feedback
+        const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
+            questionText.replace(/{/g, '{{').replace(/}/g, '}}'),
+            JSON.stringify(initialStructureSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            indexOfBestSolution === -1 ? '' : JSON.stringify(allPossibleSolutions[indexOfBestSolution]).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            feedback.replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            maxPoints
+        );
 
+        const generatedFeedback = await this.feedbackGenerationService.generateGraphFeedback(
+            graphSystemMessage, JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+        );
+
+        return {
+            receivedPoints,
+            feedback: JSON.stringify({
+                algo: feedback,
+                llm: generatedFeedback
+            }),
+        }
     }
 
     evaluatePossibleSolution(studentNewEdgesByStep: GraphEdgeSemanticDTO[][], studentRemovedEdgesByStep: GraphEdgeSemanticDTO[][], possibleSolution: GraphEdgeSemanticDTO[], maxPoints: number) {

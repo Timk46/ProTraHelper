@@ -2,9 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { GraphStructureDTO, GraphStructureSemanticDTO } from '@DTOs/graphTask.dto';
 import { getExtraEdges, graphJSONToSemantic, graphsContainSameNodes, graphsIdentical } from '../utils/graph-utils'
 import { GraphEdgeSemanticDTO } from '@DTOs/graphTask.dto';
+import { graphFeedbackGenerationPrompts } from '../utils/graph-feedback-generation.prompts';
+import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 
 @Injectable()
 export class TransitiveClosureService {
+
+    constructor(private readonly feedbackGenerationService: FeedbackGenerationService) {}
 
     /**
      * Evaluates a student's graph solution against the expected solution.
@@ -24,19 +28,46 @@ export class TransitiveClosureService {
      * 
      * @returns {{ receivedPoints: number, feedback: string }} - An object containing the number of points received and feedback.
      */
-    evaluateSolution(questionText: string, initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO, maxPoints: number) {
+    async evaluateSolution(questionText: string, initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO, maxPoints: number) {
 
         // Assumption: It is trivial if the studentSolution contains all/some/none of the edges which initialStructure contains
         // Assumption: Graph has only directed edges
         // Assumption: The node/ edge attributes which are not related to the assignment are not considered in the evaluation such as weight, selected etc.
 
-        let receivedPoints = maxPoints;
-        const feedback: string[] = [];
-        
         // Convert solutions from IGraphDataJSON to IGraphDataSemantic, where edges use node values instead of IDs, 
         // as IDs may differ in different solutions even for the same node values.
         const initialStructureSemantic = graphJSONToSemantic(initialStructure);
         const studentSolutionSemantic = graphJSONToSemantic(studentSolution);
+
+        const { receivedPoints, feedback, expectedSolutionSemantic } = this.algorithmicEvaluation(initialStructureSemantic, studentSolutionSemantic, maxPoints);
+
+        // Improve the feedback by using LLM to generate a more detailed feedback
+        const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
+            questionText.replace(/{/g, '{{').replace(/}/g, '}}'),
+            JSON.stringify(initialStructureSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            JSON.stringify(expectedSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            feedback.replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            maxPoints
+        );
+
+        const generatedFeedback = await this.feedbackGenerationService.generateGraphFeedback(
+            graphSystemMessage, JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+        );
+
+        return {
+            receivedPoints,
+            feedback: JSON.stringify({
+                algo: feedback,
+                llm: generatedFeedback
+            }),
+        }       
+    }
+
+    algorithmicEvaluation(initialStructureSemantic: GraphStructureSemanticDTO, studentSolutionSemantic: GraphStructureSemanticDTO, maxPoints: number) {
+        
+        let receivedPoints = maxPoints;
+        const feedback: string[] = [];
 
         // Solve the question (nodesOrder is not important for this task)
         const nodesOrder: string[] = initialStructureSemantic.nodes.map(node => node.value);
@@ -51,6 +82,7 @@ export class TransitiveClosureService {
             return {
                 receivedPoints,
                 feedback: feedback.join('\n'),
+                expectedSolutionSemantic
             }        
         }
         
@@ -64,6 +96,7 @@ export class TransitiveClosureService {
             return {
                 receivedPoints: 0,
                 feedback: feedback.join('\n'),
+                expectedSolutionSemantic
             };
         }
 
@@ -76,6 +109,7 @@ export class TransitiveClosureService {
             return {
                 receivedPoints,
                 feedback: feedback.join('\n'),
+                expectedSolutionSemantic
             };  
         }
     
@@ -103,11 +137,12 @@ export class TransitiveClosureService {
         }
 
         feedback.push(`\n > Insgesamt erzielte Punkte: ${receivedPoints} / ${maxPoints}.`);
+
         return {
             receivedPoints,
             feedback: feedback.join('\n'),
-        }       
-
+            expectedSolutionSemantic,
+        };
     }
 
     /**
