@@ -16,7 +16,7 @@ export class GraphSolutionEvaluationService {
         private readonly kruskalService: KruskalService,
     ){}
 
-    evaluateSolution(question: GraphQuestionDTO, studentSolution: GraphStructureDTO[]) {
+    evaluateSolution(questionText: string, question: GraphQuestionDTO, studentSolution: GraphStructureDTO[]) {
 
         if (!studentSolution || studentSolution.length === 0) {
             return { feedback: 'Keine Lösung abgegeben.', receivedPoints: 0 };
@@ -29,6 +29,7 @@ export class GraphSolutionEvaluationService {
             
             case 'dijkstra':
                 return this.dijkstraService.evaluateSolution(
+                    questionText,
                     question.initialStructure,
                     studentSolution,
                     question.maxPoints
@@ -36,6 +37,7 @@ export class GraphSolutionEvaluationService {
 
             case 'floyd':
                 return this.floydService.evaluateSolution(
+                    questionText,
                     question.initialStructure, 
                     studentSolution,
                     question.maxPoints
@@ -43,6 +45,7 @@ export class GraphSolutionEvaluationService {
 
             case 'kruskal':
                 return this.kruskalService.evaluateSolution(
+                    questionText,
                     question.initialStructure, 
                     studentSolution,
                     question.maxPoints
@@ -50,6 +53,7 @@ export class GraphSolutionEvaluationService {
 
             case 'transitive_closure':
                 return this.transitiveClosureService.evaluateSolution(
+                    questionText,
                     question.initialStructure, 
                     studentSolution[0],
                     question.maxPoints

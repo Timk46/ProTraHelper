@@ -24,7 +24,7 @@ export class TransitiveClosureService {
      * 
      * @returns {{ receivedPoints: number, feedback: string }} - An object containing the number of points received and feedback.
      */
-    evaluateSolution(initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO, maxPoints: number) {
+    evaluateSolution(questionText: string, initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO, maxPoints: number) {
 
         // Assumption: It is trivial if the studentSolution contains all/some/none of the edges which initialStructure contains
         // Assumption: Graph has only directed edges

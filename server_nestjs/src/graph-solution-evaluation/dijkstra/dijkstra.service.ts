@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { getExtraSelectedNodes, getNodesWithDifferentWeights, graphJSONToSemantic, graphsContainSameEdges, graphsContainSameNodes } from '../utils/graph-utils';
 import { GraphStructureDTO, GraphStructureSemanticDTO, GraphNodeSemanticDTO } from '@DTOs/graphTask.dto';
+import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
+import { graphFeedbackGenerationPrompts } from '../utils/graph-feedback-generation.prompts';
 
 @Injectable()
 export class DijkstraService {
+
+    constructor(private readonly feedbackGenerationService: FeedbackGenerationService) {}
 
      /**
      * Evaluates a student's Dijkstra solution against the expected solution.
@@ -24,7 +28,7 @@ export class DijkstraService {
      * 
      * @throws {Error} If the expected solution does not contain at least one step.
      */
-     evaluateSolution(initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
+    async evaluateSolution(questionText: string, initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
 
         // Convert solutions from IGraphDataJSON to IGraphDataSemantic, where edges use node values instead of IDs, 
         // as IDs may differ in different solutions even for the same node values.
@@ -165,10 +169,30 @@ export class DijkstraService {
         // Final feedback
         feedback.push(`\n> Insgesamt erzielte Punkte: ${receivedPoints.toFixed(2)} / ${maxPoints}.`);
 
+        const feedbackString = feedback.join('\n');
+
+        // Improve the feedback by using LLM to generate a more detailed feedback
+
+        const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
+            questionText.replace(/{/g, '{{').replace(/}/g, '}}'),
+            JSON.stringify(initialStructureSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            JSON.stringify(expectedSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            feedbackString.replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            maxPoints
+        );
+
+        const generatedFeedback = await this.feedbackGenerationService.generateGraphFeedback(
+            graphSystemMessage, JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+        );
+
         return {
             receivedPoints,
-            feedback: feedback.join('\n')
-        }
+            feedback: JSON.stringify({
+                algo: feedbackString,
+                llm: generatedFeedback
+            }),
+        }     
     }
 
     findPossibleNextStep(previousStep: GraphStructureSemanticDTO, visitedNodeValue: string): {

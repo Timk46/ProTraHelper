@@ -681,7 +681,7 @@ export class QuestionDataService {
         await this.qdGraph.getGraphQuestion(answerData.questionId, true).then(async (questionData) => {
 
           // Generate feedback based on the user answer
-          const { feedback, receivedPoints } = this.graphEvalService.evaluateSolution(questionData, answerData.userGraphAnswer);
+          const { feedback, receivedPoints } = await this.graphEvalService.evaluateSolution(question.text, questionData, answerData.userGraphAnswer);
           feedbackText = feedback;
           userScore = receivedPoints;
         });

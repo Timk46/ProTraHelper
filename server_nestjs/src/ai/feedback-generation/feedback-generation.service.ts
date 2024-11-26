@@ -56,6 +56,20 @@ export class FeedbackGenerationService {
     return llmResponse;
   }
 
+  /**
+   * Generates graph feedback based on the provided data and user answer.
+   * @param freeTextData - The data for the freetext question.
+   * @param userAnswer - The user's answer to the freetext question.
+   * @returns A promise that resolves to an object containing the generated feedback text and the reached points.
+   */
+      async generateGraphFeedback(graphSystemMessage: string, studentSolution: string): Promise<string> {
+        console.log("FeedbackGenerationService.generateGraphQuestion");
+    
+        const llmResponse = await this.llmService.generateLlmAnswer(graphSystemMessage, studentSolution);
+    
+        return llmResponse;
+  }
+
 
   /**
    * Retrieves similarities for a given question.
