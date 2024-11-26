@@ -26,8 +26,10 @@ import { VideoViewerComponent } from './Pages/contentView/contentElement/videoVi
 import { CompetenciesComponent } from './Pages/competencies/competencies.component';
 import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
 import { ChatBotDialogComponent } from './Pages/chat-bot/chat-bot-dialog/chat-bot-dialog.component';
+import { ChatSessionListComponent } from './Pages/chat-bot/chat-session-list/chat-session-list.component';
 import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
 import { LoginComponent } from './Pages/login/login.component';
+import { ChangelogComponent } from './Pages/changelog/changelog.component';
 import { AuthInterceptor } from "./Interceptors/auth-interceptor.service";
 import { LoggedInGuard } from "./Guards/is-logged-in.guard";
 import { EditorModule, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
@@ -54,8 +56,6 @@ import { BellDirective } from "./Pages/notification/notification-bell/belldirect
 import { AdminGuard } from "./Guards/is-admin.guard";
 import { ConfirmationBoxComponent } from './Pages/confirmation-box/confirmation-box.component';
 import { ConfirmDialogComponent } from './Pages/lecturersView/edit-coding/confirm-dialog.component';
-
-// Import LecturersViewModule
 import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module';
 import { McTaskCreationComponent } from "./Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component";
 import { MCDescriptionDialogComponent } from "./Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component";
@@ -64,11 +64,7 @@ import { FillinTaskComponent } from "./Pages/contentView/contentElement/fill-in-
 import { FillinTaskNewComponent } from './Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { DynamicBlankComponent } from './Pages/contentView/contentElement/fill-in-task-new/dynamic-blank/dynamic-blank.component';
 import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-task/graph-task.component';
-
-// Import GraphTasksModule
 import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
-
-// Import NotRegisteredComponent
 import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
 
 @NgModule({
@@ -88,8 +84,10 @@ import { NotRegisteredComponent } from './Pages/not-registered/not-registered.co
         CompetenciesComponent,
         ChatBotComponent,
         ChatBotDialogComponent,
+        ChatSessionListComponent,
         VideoTimeStampComponent,
         LoginComponent,
+        ChangelogComponent,
         DiscussionListComponent,
         DiscussionViewComponent,
         DiscussionFilterComponent,
@@ -117,12 +115,10 @@ import { NotRegisteredComponent } from './Pages/not-registered/not-registered.co
         McTaskCreationComponent,
         MCDescriptionDialogComponent,
         MCScoreComponent,
-
-        NotRegisteredComponent, // Add NotRegisteredComponent here
-
+        NotRegisteredComponent,
         FillinTaskNewComponent,
-        DynamicBlankComponent
-
+        DynamicBlankComponent,
+        GraphTaskComponent
     ],
     imports: [
         ToastrModule.forRoot(),

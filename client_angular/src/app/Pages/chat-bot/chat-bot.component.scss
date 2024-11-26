@@ -7,68 +7,62 @@ $white: #ECF3F4;
 .chat-button {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 8px;
     position: fixed;
     bottom: 10%;
     right: 1%;
     background-color: $black;
-    z-index: 1000;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 100;
 
-    .button-icon {
-      width: 75%;
-      padding-left: 12px;
-    }
-}
-
-.chat-container {
-  max-width: 400px;
-  width: 100%;
-  position: fixed;
-  bottom: 10%;
-  right: 5%;
-  z-index: 1000;
-
-  @media (max-width: 480px) {
-    max-width: 94%;
-    right: 3%;
-    bottom: 10%;
-  }
-
-  .collapsible-chat {
-    width: 100%;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-
-    .chat-content {
-      flex-grow: 1;
-      overflow-y: auto;
+    &:hover {
+        background-color: lighten($black, 5%);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transform: translateY(-2px);
     }
 
-    .chat-actions {
-      .chat-form {
-        width: 100%;
-
-        ::ng-deep .mat-form-field-flex {
-          align-items: flex-end !important;
-        }
-
-        ::ng-deep .mat-form-field-wrapper {
-          padding-bottom: 0;
-        }
-
-        .chat-input {
-          width: 100%;
-          max-width: 100%;
-          resize: none;
-          max-height: 100px;
-          overflow-y: auto;
-        }
-      }
+    mat-icon {
+        font-size: 20px;
+        height: 20px;
+        width: 20px;
     }
-  }
-}
 
-::ng-deep .mat-form-field-flex {
-  align-items: flex-end !important;
+    .button-text {
+        margin-top: 1px;
+    }
+
+    // Tablet styles
+    @media (max-width: 768px) {
+        padding: 10px 20px;
+        font-size: 14px;
+        bottom: 8%;
+
+        mat-icon {
+            font-size: 18px;
+            height: 18px;
+            width: 18px;
+        }
+    }
+
+    // Mobile styles
+    @media (max-width: 480px) {
+        padding: 8px 16px;
+        font-size: 13px;
+        bottom: 5%;
+        right: 3%;
+
+        mat-icon {
+            font-size: 16px;
+            height: 16px;
+            width: 16px;
+        }
+    }
 }
