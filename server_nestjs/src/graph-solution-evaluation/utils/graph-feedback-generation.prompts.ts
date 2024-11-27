@@ -10,8 +10,9 @@ export const graphFeedbackGenerationPrompts = {
       Im Folgenden findest du die für die Bewertung relevanten Informationen:
       - Die Initialstruktur des Graphen (Ausgangsgraph):
       [${initialStructure}]
-      - Die Musterlösung (erwartete Lösung):
-      [${expectedSolution}]
+      ${
+        expectedSolution !== null ? '- Die Musterlösung (erwartete Lösung):' + '\n' + `[${expectedSolution}]` : ''
+      }
       - Die Lösung des Schülers:
       [${studentSolution}]
       - Das Feedback, das der Algorithmus automatisch erstellt hat:

@@ -33,9 +33,25 @@ export class KruskalService {
         })
 
         if (!correctNodes) {
+            const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
+                questionText.replace(/{/g, '{{').replace(/}/g, '}}'),
+                JSON.stringify(initialStructureSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+                null,
+                JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+                'Der Graph muss dieselben Knoten wie der Ausgangsgraph haben.',
+                maxPoints
+            );
+    
+            const generatedFeedback = await this.feedbackGenerationService.generateGraphFeedback(
+                graphSystemMessage, JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            );
+    
             return {
                 receivedPoints: 0,
-                feedback: 'Der Graph muss dieselben Knoten wie der Ausgangsgraph haben.'
+                feedback: JSON.stringify({
+                    algo: 'Der Graph muss dieselben Knoten wie der Ausgangsgraph haben.',
+                    llm: generatedFeedback
+                }),
             }
         }
 
@@ -82,7 +98,7 @@ export class KruskalService {
         const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
             questionText.replace(/{/g, '{{').replace(/}/g, '}}'),
             JSON.stringify(initialStructureSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            indexOfBestSolution === -1 ? '' : JSON.stringify(allPossibleSolutions[indexOfBestSolution]).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            indexOfBestSolution === -1 ? null : JSON.stringify(allPossibleSolutions[indexOfBestSolution]).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
             JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
             feedback.replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
             maxPoints

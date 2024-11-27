@@ -19,7 +19,7 @@ export class GraphSolutionEvaluationService {
     evaluateSolution(questionText: string, question: GraphQuestionDTO, studentSolution: GraphStructureDTO[]) {
 
         if (!studentSolution || studentSolution.length === 0) {
-            return { feedback: 'Keine Lösung abgegeben.', receivedPoints: 0 };
+            return { feedback: JSON.stringify({algo:"Keine Lösung abgegeben."}), receivedPoints: 0 };
         }
 
         // Some questions types require evaluating a single-step solution, while others require a multi-step solution 

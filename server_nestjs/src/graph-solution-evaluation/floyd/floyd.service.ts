@@ -48,10 +48,30 @@ export class FloydService {
         if (!continueEvaluation) {
             feedback.push(feedbackNodesOrder);
             feedback.push(`\n > Insgesamt erzielte Punkte: 0 / ${maxPoints}.`);
+
+            const feedbackString = feedback.join('\n');
+
+            // Improve the feedback by using LLM to generate a more detailed feedback
+            const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
+                questionText.replace(/{/g, '{{').replace(/}/g, '}}'),
+                JSON.stringify(initialStructureSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+                null,
+                JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+                feedbackString.replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+                maxPoints
+            );
+    
+            const generatedFeedback = await this.feedbackGenerationService.generateGraphFeedback(
+                graphSystemMessage, JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            );
+    
             return {
-                receivedPoints: 0,
-                feedback: feedback.join('\n')
-            };
+                receivedPoints,
+                feedback: JSON.stringify({
+                    algo: feedbackString,
+                    llm: generatedFeedback
+                }),
+            }
         }
 
         // Solve the assignment with given nodesOrder
@@ -151,7 +171,7 @@ export class FloydService {
         }
   
         // Check if the studentSolution has less steps than expectedSolution
-        const hasLessSteps = (studentSolutionSemantic.length < expectedSolutionSemantic.length);
+        const hasLessSteps = (studentSolutionSemantic.length < initialStructure.nodes.length);
         if (hasLessSteps) {
               feedback.push(`Die Lösung enthält weniger Schritte als erwartet.`);
               feedback.push('\n###############\n')

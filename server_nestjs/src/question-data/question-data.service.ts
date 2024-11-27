@@ -673,7 +673,7 @@ export class QuestionDataService {
     if (question.type === questionType.GRAPH) {
       console.log('generate feedback for graph user answer');
 
-      let feedbackText = 'Du hast keine Antwort eingegeben.';
+      let feedbackText = JSON.stringify({algo:"Du hast keine Antwort eingegeben."});
       let userScore = 0;
 
       if (answerData.userGraphAnswer) {

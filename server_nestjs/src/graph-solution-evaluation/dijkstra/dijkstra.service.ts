@@ -174,16 +174,17 @@ export class DijkstraService {
         // Improve the feedback by using LLM to generate a more detailed feedback
 
         const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
-            questionText.replace(/{/g, '{{').replace(/}/g, '}}'),
-            JSON.stringify(initialStructureSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            JSON.stringify(expectedSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            feedbackString.replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            questionText,
+            JSON.stringify(initialStructureSemantic),
+            JSON.stringify(expectedSolutionSemantic),
+            JSON.stringify(studentSolutionSemantic),
+            feedbackString,
             maxPoints
         );
 
         const generatedFeedback = await this.feedbackGenerationService.generateGraphFeedback(
-            graphSystemMessage, JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            graphSystemMessage.replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
+            JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
         );
 
         return {
