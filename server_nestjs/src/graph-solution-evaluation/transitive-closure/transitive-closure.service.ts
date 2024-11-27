@@ -39,7 +39,9 @@ export class TransitiveClosureService {
         const initialStructureSemantic = graphJSONToSemantic(initialStructure);
         const studentSolutionSemantic = graphJSONToSemantic(studentSolution);
 
-        const { receivedPoints, feedback, expectedSolutionSemantic } = this.algorithmicEvaluation(initialStructureSemantic, studentSolutionSemantic, maxPoints);
+        const { receivedPoints, feedbackHTML, expectedSolutionSemantic } = this.algorithmicEvaluation(initialStructureSemantic, studentSolutionSemantic, maxPoints);
+
+        const feedback = feedbackHTML.replace('<strong>', '').replace('</strong>', '');
 
         // Improve the feedback by using LLM to generate a more detailed feedback
         const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
@@ -58,7 +60,7 @@ export class TransitiveClosureService {
         return {
             receivedPoints,
             feedback: JSON.stringify({
-                algo: feedback,
+                algo: feedbackHTML,
                 llm: generatedFeedback
             }),
         }       
@@ -67,7 +69,7 @@ export class TransitiveClosureService {
     algorithmicEvaluation(initialStructureSemantic: GraphStructureSemanticDTO, studentSolutionSemantic: GraphStructureSemanticDTO, maxPoints: number) {
         
         let receivedPoints = maxPoints;
-        const feedback: string[] = [];
+        const feedbackHTML: string[] = [];
 
         // Solve the question (nodesOrder is not important for this task)
         const nodesOrder: string[] = initialStructureSemantic.nodes.map(node => node.value);
@@ -77,11 +79,11 @@ export class TransitiveClosureService {
         const sameNodesExist = graphsContainSameNodes(studentSolutionSemantic, expectedSolutionSemantic);
 
         if (!sameNodesExist) {
-            feedback.push('Die Lösung enthält entweder inkorrekte oder fehlende Knoten.');
-            feedback.push(`\n > Insgesamt erzielte Punkte: 0 / ${maxPoints}.`);
+            feedbackHTML.push('Die Lösung enthält entweder inkorrekte oder fehlende Knoten.');
+            feedbackHTML.push(`\n<strong>> Insgesamt erzielte Punkte:</strong> 0 / ${maxPoints}.`);
             return {
                 receivedPoints,
-                feedback: feedback.join('\n'),
+                feedbackHTML: feedbackHTML.join('\n'),
                 expectedSolutionSemantic
             }        
         }
@@ -91,11 +93,11 @@ export class TransitiveClosureService {
         const studentMissingInitialEdges = getExtraEdges(initialStructureSemantic.edges, studentSolutionSemantic.edges);
 
         if (studentMissingInitialEdges.length > 0) {
-            feedback.push('Die Lösung muss alle Kanten des Ausgangsgraphen enthalten.');
-            feedback.push(`\n > Insgesamt erzielte Punkte: 0 / ${maxPoints}.`);
+            feedbackHTML.push('Die Lösung muss alle Kanten des Ausgangsgraphen enthalten.');
+            feedbackHTML.push(`\n<strong>> Insgesamt erzielte Punkte:</strong> 0 / ${maxPoints}.`);
             return {
                 receivedPoints: 0,
-                feedback: feedback.join('\n'),
+                feedbackHTML: feedbackHTML.join('\n'),
                 expectedSolutionSemantic
             };
         }
@@ -104,11 +106,11 @@ export class TransitiveClosureService {
         const areIdentical = graphsIdentical(studentSolutionSemantic, expectedSolutionSemantic);
 
         if (areIdentical) {
-            feedback.push('Die Lösung ist korrekt.');
-            feedback.push(`\n > Insgesamt erzielte Punkte: ${receivedPoints} / ${maxPoints}.`);
+            feedbackHTML.push('Die Lösung ist korrekt.');
+            feedbackHTML.push(`\n<strong>> Insgesamt erzielte Punkte:</strong> ${maxPoints} / ${maxPoints}.`);
             return {
                 receivedPoints,
-                feedback: feedback.join('\n'),
+                feedbackHTML: feedbackHTML.join('\n'),
                 expectedSolutionSemantic
             };  
         }
@@ -129,18 +131,18 @@ export class TransitiveClosureService {
 
         // Adjust the feedback according to the mistakes in the solution
         if (countStudentExtraEdges > 0) {
-            feedback.push('Die Lösung enthält inkorrekte Kanten.');
+            feedbackHTML.push('Die Lösung enthält inkorrekte Kanten.');
         }
 
         if (countStudentMissingEdges > 0) {
-            feedback.push('Die Lösung enthält fehlende Kanten.');
+            feedbackHTML.push('Die Lösung enthält fehlende Kanten.');
         }
 
-        feedback.push(`\n > Insgesamt erzielte Punkte: ${receivedPoints} / ${maxPoints}.`);
+        feedbackHTML.push(`\n<strong>> Insgesamt erzielte Punkte:</strong> ${receivedPoints} / ${maxPoints}.`);
 
         return {
             receivedPoints,
-            feedback: feedback.join('\n'),
+            feedbackHTML: feedbackHTML.join('\n'),
             expectedSolutionSemantic,
         };
     }
