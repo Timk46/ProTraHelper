@@ -7,6 +7,7 @@ export interface UserDTO {
     lastname: string;
     globalRole: globalRole;
     userSubjects?: UserSubjectDTO[];
+    currentDeviceId?: string;
 }
 
 export interface UserSubjectDTO {

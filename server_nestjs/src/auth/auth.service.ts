@@ -1,9 +1,12 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { EventLogService } from '../EventLog/event-log.service';
 import { UserDTO } from '@DTOs/user.dto';
+import { RefreshTokenService } from './refresh-token/refresh-token.service';
+import * as bcrypt from 'bcrypt';
+import { User } from "@prisma/client";
 
 /**
  * Provides authentication services
@@ -22,14 +25,17 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private eventLogService: EventLogService,
+    private refreshTokenService: RefreshTokenService
   ) {}
 
   /**
-   * Checks if a user exists in the database and returns the user, access and refresh tokens if it does
-   * @param { string } email the email to log in
-   * @returns the user, access and refresh tokens if the user exists
+   * Handles the login process using CAS (Central Authentication Service).
+   *
+   * @param email - The email of the user attempting to log in.
+   * @param deviceId - The device ID from which the login attempt is made.
+   * @returns An object containing the generated tokens.
    */
-  async loginCAS(email: string) {
+  async loginCAS(email: string, deviceId: string) {
     //this.logger.debug(`Attempting CAS login for email: ${email}`);
     let user = await this.usersService.findOne(email);
     if (user) {
@@ -42,6 +48,7 @@ export class AuthService {
       this.eventLogService.log('info', 'login', user.id, 'User created', {email: user.email, role: user.globalRole});
     }
     const tokens = await this.generateTokens(user);
+    await this.refreshTokenService.createRefreshToken(user.email, deviceId, tokens.refreshToken);
     //this.logger.debug(`Tokens generated for CAS login`);
     return {
       ...tokens,
@@ -71,25 +78,104 @@ export class AuthService {
   }
 
   /**
-   * Checks if a user exists in the database and returns the user, access and refresh tokens if it does
-   * @param { UserDTO } user the user to log in
-   * @returns the user, access and refresh tokens if the user exists
+   * Logs in a user by generating authentication tokens and creating a refresh token.
+   *
+   * @param { UserDTO } user - The user data transfer object containing user information.
+   * @param { string } deviceId - The device identifier for the user's device.
+   * @returns { Promise<{ accessToken: string, refreshToken: string }> } An object containing the generated access and refresh tokens.
    */
-  async login(user: UserDTO) {
+  async login(user: UserDTO, deviceId: string) {
     //this.logger.debug(`Generating tokens for user: ${user.email}`);
     const tokens = await this.generateTokens(user);
+    await this.refreshTokenService.createRefreshToken(user.email, deviceId, tokens.refreshToken);
     return {
       ...tokens
     };
   }
 
   /**
-   * Generates the access and refresh tokens for a user
-   * @param { UserDTO } user the user to generate the tokens for
-   * @returns { Promise<{ accessToken: string }> } the access and refresh tokens
+   * Refreshes the access and refresh tokens for a user.
+   *
+   * @param email - The email of the user requesting token refresh.
+   * @param deviceId - The device ID from which the request is made.
+   * @param refreshToken - The current refresh token of the user.
+   * @returns A promise that resolves to the new tokens.
+   * @throws { ForbiddenException } If the user or refresh token is not found, or if the refresh token does not match.
    */
-  async generateTokens(user: UserDTO): Promise<{ accessToken: string; }> {
-    //this.logger.debug(`Generating tokens for user: ${user.email}`);
+  async refreshTokens(email: string, deviceId: string, refreshToken: string) {
+    // this.logger.debug(`Refresh tokens for user: ${email}`);
+    const user = await this.usersService.findOne(email);
+    const userRefreshToken = await this.refreshTokenService.getRefreshToken(email, deviceId);
+
+    if (!user || !userRefreshToken) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    const refreshTokenMatches = await bcrypt.compare(
+      refreshToken,
+      userRefreshToken.token
+    );
+
+    if (!refreshTokenMatches) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    const tokens = await this.generateTokens(user);
+    await this.refreshTokenService.updateRefreshToken(email, deviceId, tokens.refreshToken);
+    // this.logger.debug(`Tokens refreshed for user: ${user.email}`);
+    await this.eventLogService.log('info', 'login', user.id, 'User update refresh token', { email: user.email });
+    return tokens;
+  }
+
+  /**
+   * Logs out the user by deleting their refresh token and logging the event.
+   *
+   * @param user - The user who is logging out.
+   * @param deviceId - The ID of the device from which the user is logging out.
+   * @returns A promise that resolves when the logout process is complete.
+   */
+  async logout(user: User, deviceId: string) {
+    // this.logger.debug(`Logging out user: ${user.email}`);
+    await this.refreshTokenService.deleteRefreshToken(user.email, deviceId);
+    // this.logger.debug(`User logged out: ${user.email}`);
+    await this.eventLogService.log('info', 'login', user.id, 'User logged out', { email: user.email, role: user.globalRole });
+  }
+
+  /**
+   * Logs out the user from all devices by deleting all refresh tokens associated with the user's email.
+   *
+   * @param user - The user object containing user details.
+   * @returns A promise that resolves when the operation is complete.
+   */
+  async logoutAllUserDevices(user: User) {
+    // this.logger.debug(`Logging out all devices for user: ${user.email}`);
+    await this.refreshTokenService.deleteAllUserRefreshTokens(user.email);
+    // this.logger.debug(`User logged out of all devices: ${user.email}`);
+    await this.eventLogService.log('info', 'login', user.id, 'User logged out of all devices', { email: user.email, role: user.globalRole });
+  }
+
+  /**
+   * Logs out all users by deleting all refresh tokens and logging the event.
+   *
+   * @param user - The user initiating the logout action.
+   * @returns A promise that resolves when the logout process is complete.
+   */
+  async logoutAllUser(user: User) {
+    // this.logger.debug(`Logging out all user`);
+    await this.refreshTokenService.deleteAllRefreshTokens();
+    // this.logger.debug(`All user logged out`);
+    await this.eventLogService.log('info', 'login', user.id, 'All user logged out', { email: user.email, role: user.globalRole });
+  }
+
+  /**
+   * Generates access and refresh tokens for a given user.
+   *
+   * @param { UserDTO } user - The user data transfer object containing user information.
+   * @returns { Promise<{ accessToken: string; refreshToken: string; }> } A promise that resolves to an object containing the access token and refresh token.
+   * @throws { Error } If token generation fails.
+   */
+  async generateTokens(user: UserDTO): Promise<{ accessToken: string; refreshToken: string; }> {
+    // this.logger.debug(`Generating tokens for user: ${user.email}`);
     const payload = {
       email: user.email,
       firstName: user.firstname,
@@ -103,7 +189,7 @@ export class AuthService {
         registeredForSL: us.registeredForSL
       })) || []
     };
-    const [accessToken] = await Promise.all([
+    const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         {
           ...payload,
@@ -123,10 +209,15 @@ export class AuthService {
         },
       ),
     ]);
-    //this.logger.debug(`Tokens generated for user: ${user.email}`);
-    this.eventLogService.log('info', 'login', user.id, 'Tokens generated', {email: user.email, role: user.globalRole, accessToken: accessToken});
+    // this.logger.debug(`Tokens generated for user: ${user.email}`);
+    await this.eventLogService.log('info', 'login', user.id, 'Tokens generated', {
+      email: user.email,
+      role: user.globalRole,
+      accessToken: accessToken
+    });
     return {
-      accessToken
+      accessToken,
+      refreshToken,
     };
   }
 }

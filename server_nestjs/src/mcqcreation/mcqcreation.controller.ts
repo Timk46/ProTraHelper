@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { McqCreationService } from './mcqcreation.service';
-import { roles, RolesGuard } from '@/auth/roles.guard';
+import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 import { McqGenerationDTO } from '@DTOs/question.dto';
 interface Answer {
   answer?: string;

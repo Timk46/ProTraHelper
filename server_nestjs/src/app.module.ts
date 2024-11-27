@@ -26,8 +26,10 @@ import { RunCodeModule } from './tutor-kai/run-code/run-code.module';
 // END Tutor-Kai Imports
 
 import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { JwtAuthGuard } from './auth/common/guards/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
+import { RefreshTokenModule } from "./auth/refresh-token/refresh-token.module";
+import { ScheduleModule } from "@nestjs/schedule";
 import { UsersModule } from './users/users.module';
 import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
 import { McqCreationModule } from './mcqcreation/mcqcreation.module';
@@ -55,6 +57,7 @@ import { ExampleSolutionGenerationModule } from './graph-solution-evaluation/exa
     GraphModule,
     PrismaModule,
     AuthModule,
+    RefreshTokenModule,
     UsersModule,
     ContentModule,
     ContentLinkerModule,
@@ -69,6 +72,7 @@ import { ExampleSolutionGenerationModule } from './graph-solution-evaluation/exa
     NotificationModule,
     ContentLinkerModule,
     CodingQuestionGeneratorModule,
+    ScheduleModule.forRoot(),
 
     AdminModule, // Add this line
 

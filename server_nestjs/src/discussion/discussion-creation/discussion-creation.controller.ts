@@ -3,7 +3,7 @@ import { BadRequestException, Body, Controller, Get, Param, Post, Req, UseGuards
 import { DiscussionCreationService } from './discussion-creation.service';
 import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO, discussionNodeNamesDTO } from '@DTOs/index';
 import { DiscussionDataService } from '../discussion-data/discussion-data.service';
-import { RolesGuard, roles } from '@/auth/roles.guard';
+import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 
 
 const debug = true; // set this to false to disable console logs
