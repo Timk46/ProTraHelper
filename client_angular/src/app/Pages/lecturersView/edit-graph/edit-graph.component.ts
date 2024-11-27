@@ -612,34 +612,44 @@ export class EditGraphComponent implements AfterViewInit {
   }
 
   resetStructure() {
-    // Reset the initial structure
-    this.assignmentGraphStructure = {
-      nodes: [], edges: []
-    }
 
-    // Reset the solution steps
-    this.solutionGraphStructure = [];
-    this.solutionStepCurrent = 0;
-    this.solutionStepPrevious = this.solutionStepCurrent;
+    this.confirmationService.confirm({
+      title: 'Struktur zurücksetzen',
+      message: 'Sind Sie sicher, dass Sie die Struktur zurücksetzen möchten? Diese Aktion kann nicht rückgängig gemacht werden. Fortfahren?',
+      acceptLabel: 'Zurücksetzen',
+      declineLabel: 'Abbrechen',
+      accept: () => {   
+        // Reset the initial structure
+        this.assignmentGraphStructure = {
+          nodes: [], edges: []
+        }
 
-    this.initialUsedForExampleSolution = {
-      nodes: [], edges: []
-    }
+        // Reset the solution steps
+        this.solutionGraphStructure = [];
+        this.solutionStepCurrent = 0;
+        this.solutionStepPrevious = this.solutionStepCurrent;
 
-    this.workspaceModeCurrent = 'assignment';
-    this.workspaceModePrevious = this.workspaceModeCurrent;
+        this.initialUsedForExampleSolution = {
+          nodes: [], edges: []
+        }
 
-    // Get configuration
-    const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+        this.workspaceModeCurrent = 'assignment';
+        this.workspaceModePrevious = this.workspaceModeCurrent;
 
-    this.loadWorkspaceContent({
-      graphContent: this.assignmentGraphStructure,
-      graphConfiguration: graphQuestionConfigruation
+        // Get configuration
+        const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+
+        this.loadWorkspaceContent({
+          graphContent: this.assignmentGraphStructure,
+          graphConfiguration: graphQuestionConfigruation
+        });
+
+
+        // To use only values and not the references
+        this.updateWorkspace();
+      }
     });
 
-
-    // To use only values and not the references
-    this.updateWorkspace();
   }
 
   onChangeGraphQuestionType(gqType: string): void {
@@ -1006,6 +1016,25 @@ export class EditGraphComponent implements AfterViewInit {
     return false;
   }
 
+  onGenerateClick() {
+    
+    // If the structure is empty, generate it
+    if (this.assignmentGraphStructure.nodes.length === 0 && this.graphTaskService.graphToJSON().nodes.length === 0) {
+      this.onGenerate();
+      return;
+    }
+    
+    // If the structure is not empty, confirm the user to overwrite it
+
+    this.confirmationService.confirm({
+      title: 'Struktur neu generieren',
+      message: 'Möchten Sie die Struktur wirklich neu generieren? Dabei geht die aktuelle Struktur unwiderruflich verloren. Fortfahren?',
+      acceptLabel: 'Neu generieren',
+      declineLabel: 'Abbrechen',
+      accept: () => { this.onGenerate() } 
+    });
+  }
+
   onGenerate() {
     const graphStructure = this.generateGraph();
 
@@ -1018,10 +1047,30 @@ export class EditGraphComponent implements AfterViewInit {
 
     const clonedInitialStructure: GraphStructureDTO = JSON.parse(JSON.stringify(graphStructure));
     this.assignmentGraphStructure = clonedInitialStructure;
+
+    this.snackBar.open('Neue Graphstruktur wurde generiert.', 'Schließen', { duration: 3000 });
     
     this.structureIsSet = true;
 
     this.generateTextFromStructure();
+  }
+
+  onQuickGenerateClick() {
+    
+    // If the structure is empty, generate it
+    if (this.assignmentGraphStructure.nodes.length === 0 && this.graphTaskService.graphToJSON().nodes.length === 0) {
+      this.onQuickGenerate();
+      return;
+    }
+    
+    // If the structure is not empty, confirm the user to overwrite it
+    this.confirmationService.confirm({
+      title: 'Struktur neu generieren',
+      message: 'Möchten Sie die Struktur wirklich neu generieren? Dabei geht die aktuelle Struktur unwiderruflich verloren. Fortfahren?',
+      acceptLabel: 'Neu generieren',
+      declineLabel: 'Abbrechen',
+      accept: () => { this.onQuickGenerate() } 
+    });
   }
 
   onQuickGenerate() {
@@ -1046,6 +1095,8 @@ export class EditGraphComponent implements AfterViewInit {
       graphContent: clonedGraphContent,
       graphConfiguration: graphQuestionConfigruation
     });
+
+    this.snackBar.open('Neue Graphstruktur wurde generiert.', 'Schließen', { duration: 3000 });
 
     this.structureIsSet = true;
 

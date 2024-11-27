@@ -7,6 +7,7 @@ import { GraphQuestionDTO, QuestionDTO, questionType } from '@DTOs/question.dto'
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { ProgressService } from 'src/app/Services/progress/progress.service';
+import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 
 
 @Component({
@@ -45,7 +46,8 @@ export class AssignmentContainerComponent implements OnInit {
     private questionDataService: QuestionDataService,
     private snackBar: MatSnackBar,
     private progressService: ProgressService,
-    private router: Router
+    private router: Router,
+    private confirmationService: ConfirmationService,
   ) {
 
   }
@@ -105,7 +107,9 @@ export class AssignmentContainerComponent implements OnInit {
       userGraphAnswer: this.solutionGraph
     }
 
+    console.log(JSON.stringify(userAnswerData, null, 2));
     this.questionDataService.createUserAnswer(userAnswerData).subscribe(result => {
+      console.log(result);
       this.handleCodeSubmissionResponse(result);
     });
 
@@ -121,12 +125,14 @@ export class AssignmentContainerComponent implements OnInit {
     this.feedbackDisabled = false;
 
     const feedbackJSON = result.feedbackText;
-    const feedbackObj = JSON.parse(feedbackJSON);
-
-    console.error(result);
-    console.error(feedbackJSON);
-    console.error(feedbackObj);
-
+    let feedbackObj: any;
+    try {
+      feedbackObj = JSON.parse(feedbackJSON);
+    } catch {
+      this.algoFeedback = "<br>Fehler beim Generieren des Algorithmischen Feedbacks";
+      this.llmFeedback = "<br>Fehler beim Generieren des KI Feedbacks";
+    }
+    
     try {
       if (feedbackObj.algo) {
         this.algoFeedback = '<br>' + feedbackObj.algo.replace(/\n/g, '<br>');
@@ -231,16 +237,25 @@ export class AssignmentContainerComponent implements OnInit {
   }
 
   resetSolution() {
-    // Reset the solution steps
-    this.solutionGraph = [];
-    this.solutionStepCurrent = 0;
-    this.solutionStepPrevious = this.solutionStepCurrent;
 
-    this.workspaceModeCurrent = 'assignment';
-    this.workspaceModePrevious = this.workspaceModeCurrent;
+    this.confirmationService.confirm({
+      title: 'Lösung zurücksetzen',
+      message: 'Sind Sie sicher, dass Sie Ihre Lösung zurücksetzen möchten? Diese Aktion kann nicht rückgängig gemacht werden. Fortfahren?',
+      acceptLabel: 'Zurücksetzen',
+      declineLabel: 'Abbrechen',
+      accept: () => {
+        // Reset the solution steps
+        this.solutionGraph = [];
+        this.solutionStepCurrent = 0;
+        this.solutionStepPrevious = this.solutionStepCurrent;
 
-    // To use only values and not the references
-    this.updateWorkspace();
+        this.workspaceModeCurrent = 'assignment';
+        this.workspaceModePrevious = this.workspaceModeCurrent;
+
+        // To use only values and not the references
+        this.updateWorkspace();
+      }
+    });
   }
 
 
