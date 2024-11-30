@@ -49,7 +49,6 @@ export class RunCodeService {
     }, {});
 
     let response: CodeSubmissionResult = await this.executeCode(modelSolution, codingQuestion);
-    //console.log('response', response);
     return response;
   }
 
@@ -105,13 +104,13 @@ export class RunCodeService {
   }
 
   private async executeCode(studentCode: { [fileName: string]: string; }, codingQuestion: CodingQuestionInternal) {
-    const testFilesBase64 = await this.generateBase64({
-      [codingQuestion.automatedTests[0].testClassName]: codingQuestion.automatedTests[0].code,
-    });
 
     // Submit encoded files for execution and process the response.
     let response: CodeSubmissionResult;
     if (codingQuestion.programmingLanguage === 'java') {
+      const testFilesBase64 = await this.generateBase64({
+        [codingQuestion.automatedTests[0].testClassName]: codingQuestion.automatedTests[0].code,
+      });
       const filesBase64 = await this.generateBase64(studentCode);
       response = await this.submitCodeForExecutionJava(
         filesBase64,
@@ -119,6 +118,9 @@ export class RunCodeService {
         codingQuestion.mainFileName
       );
     } else if (codingQuestion.programmingLanguage === 'python') {
+      const testFilesBase64 = await this.generateBase64({
+        [codingQuestion.automatedTests[0].testFileName]: codingQuestion.automatedTests[0].code,
+      });
       const filesBase64 = await this.generateBase64(studentCode);
       response = await this.submitCodeForExecutionPython(
         filesBase64,
@@ -126,7 +128,14 @@ export class RunCodeService {
         codingQuestion.automatedTests[0].runMethod,
         codingQuestion.automatedTests[0].inputArguments
       );
+      console.log(filesBase64);
+      console.log(testFilesBase64);
+      console.log(codingQuestion.automatedTests[0].runMethod)
+      console.log(codingQuestion.automatedTests[0].inputArguments)
     } else if (codingQuestion.programmingLanguage === 'cpp') {
+      const testFilesBase64 = await this.generateBase64({
+        [codingQuestion.automatedTests[0].testClassName]: codingQuestion.automatedTests[0].code,
+      });
       response = await this.submitCodeForExecutionCpp(
         studentCode,
         testFilesBase64
