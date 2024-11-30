@@ -82,7 +82,9 @@ export class EditCodingComponent implements OnInit {
       runMethod: [''], // needed for python-tasks
       inputArguments: [''],  // needed for python-tasks
       isApproved: [false],
-      level: ['', Validators.required]
+      level: ['', Validators.required],
+      context: [''], // new field for python task generation
+      concept: [''] // new field for python task generation
     });
   }
 
@@ -97,7 +99,9 @@ export class EditCodingComponent implements OnInit {
         runMethod: this.questionData.codingQuestion?.automatedTests[0]?.runMethod || '',
         inputArguments: this.questionData.codingQuestion?.automatedTests[0]?.inputArguments || '',
         isApproved: this.questionData.isApproved || false,
-        level: this.questionData.level || ''
+        level: this.questionData.level || '',
+        context: '', // Initialize with empty string
+        concept: '' // Initialize with empty string
       });
 
       if (this.questionData.codingQuestion) {
@@ -401,6 +405,65 @@ export class EditCodingComponent implements OnInit {
     }
   }
 
+  generateTaskCpp() {
+    if (!this.isProgrammingLanguageSelected()) {
+      this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', { duration: 5000 });
+      return;
+    }
+
+    const text = this.codingForm.get('text')?.value;
+    const codeGerueste = this.codingForm.get('codeGerueste')?.value;
+
+    if (text && codeGerueste && codeGerueste.length > 0) {
+      this.isGenerating = true; // Set loading state to true
+      this.editCodeService.generateCppTask(text, codeGerueste).subscribe(
+        (genTask: CodingQuestionInternal) => {
+          console.log('Generated task:', genTask);
+          this.populateFormWithGenTask(genTask);
+          this.snackBar.open('Task generated successfully', 'Close', { duration: 3000 });
+          this.isGenerating = false; // Set loading state to false
+        },
+        error => {
+          console.error('Error generating task:', error);
+          this.snackBar.open('Error generating task', 'Close', { duration: 3000 });
+          this.isGenerating = false; // Set loading state to false
+        }
+      );
+    } else {
+      this.snackBar.open('Please fill in the question text and add at least one code scaffold', 'Close', { duration: 3000 });
+    }
+  }
+
+  generateTaskPython() {
+    if (!this.isProgrammingLanguageSelected()) {
+      this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', { duration: 5000 });
+      return;
+    }
+
+    const context = this.codingForm.get('context')?.value;
+    const concept = this.codingForm.get('concept')?.value;
+
+    if (!context || !concept) {
+      this.snackBar.open('Bitte füllen Sie Kontext und Konzept aus.', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.isGenerating = true; // Set loading state to true
+    this.editCodeService.generatePythonTask(concept, context).subscribe(
+      (genTask: CodingQuestionInternal) => {
+        console.log('Generated task:', genTask);
+        this.populateFormWithGenTask(genTask);
+        this.snackBar.open('Task generated successfully', 'Close', { duration: 3000 });
+        this.isGenerating = false; // Set loading state to false
+      },
+      error => {
+        console.error('Error generating task:', error);
+        this.snackBar.open('Error generating task', 'Close', { duration: 3000 });
+        this.isGenerating = false; // Set loading state to false
+      }
+    );
+  }
+
   exportTask() {
     if (this.questionData && this.questionData.codingQuestion) {
       const exportQuestion: detailedQuestionDTO = {
@@ -469,67 +532,34 @@ export class EditCodingComponent implements OnInit {
     }
   }
 
-  // New method to determine if editor should be read-only
   isEditorReadOnly(): boolean {
     return this.isGenerating;
   }
 
-  generateTaskCpp() {
-    if (!this.isProgrammingLanguageSelected()) {
-      this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', { duration: 5000 });
-      return;
-    }
-
-    const text = this.codingForm.get('text')?.value;
-    const codeGerueste = this.codingForm.get('codeGerueste')?.value;
-
-    if (text && codeGerueste && codeGerueste.length > 0) {
-      this.isGenerating = true; // Set loading state to true
-      this.editCodeService.generateCppTask(text, codeGerueste).subscribe(
-        (genTask: CodingQuestionInternal) => {
-          console.log('Generated task:', genTask);
-          this.populateFormWithGenTask(genTask);
-          this.snackBar.open('Task generated successfully', 'Close', { duration: 3000 });
-          this.isGenerating = false; // Set loading state to false
-        },
-        error => {
-          console.error('Error generating task:', error);
-          this.snackBar.open('Error generating task', 'Close', { duration: 3000 });
-          this.isGenerating = false; // Set loading state to false
-        }
-      );
-    } else {
-      this.snackBar.open('Please fill in the question text and add at least one code scaffold', 'Close', { duration: 3000 });
-    }
+  isProgrammingLanguageSelected(): boolean {
+    const programmingLanguage = this.codingForm.get('programmingLanguage')?.value;
+    return !!programmingLanguage;
   }
 
-  generateTaskPython() {
-    if (!this.isProgrammingLanguageSelected()) {
-      this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', { duration: 5000 });
-      return;
-    }
+  onLanguageChange(event: MatSelectChange) {
+    const newLanguage = event.value;
+    console.log('Language changed to:', newLanguage);
+    this.updateCodeEditorsLanguage(newLanguage);
+  }
 
-    const text = this.codingForm.get('text')?.value;
-    const codeGerueste = this.codingForm.get('codeGerueste')?.value;
+  private updateCodeEditorsLanguage(newLanguage: string) {
+    const editors = this.codeEditors.toArray();
+    const lastIndex = editors.length - 1;
 
-    if (text && codeGerueste && codeGerueste.length > 0) {
-      this.isGenerating = true; // Set loading state to true
-      this.editCodeService.generatePythonTask(concept, context).subscribe(
-        (genTask: CodingQuestionInternal) => {
-          console.log('Generated task:', genTask);
-          this.populateFormWithGenTask(genTask);
-          this.snackBar.open('Task generated successfully', 'Close', { duration: 3000 });
-          this.isGenerating = false; // Set loading state to false
-        },
-        error => {
-          console.error('Error generating task:', error);
-          this.snackBar.open('Error generating task', 'Close', { duration: 3000 });
-          this.isGenerating = false; // Set loading state to false
-        }
-      );
-    } else {
-      this.snackBar.open('Please fill in the question text and add at least one code scaffold', 'Close', { duration: 3000 });
-    }
+    editors.forEach((editor, index) => {
+      if (index === 0 || index === lastIndex) {
+        editor.changeLanguage(this.markdownLanguage);
+      } else {
+        editor.changeLanguage(newLanguage);
+      }
+    });
+
+    this.codingForm.updateValueAndValidity();
   }
 
   populateFormWithGenTask(genTask: CodingQuestionInternal) {
@@ -542,12 +572,10 @@ export class EditCodingComponent implements OnInit {
       count_InputArgs: genTask.count_InputArgs
     });
 
-    // Clear existing arrays
     (this.codingForm.get('codeGerueste') as FormArray).clear();
     (this.codingForm.get('modelSolutions') as FormArray).clear();
     (this.codingForm.get('automatedTests') as FormArray).clear();
 
-    // Add code scaffolds
     genTask.codeGerueste?.forEach(codeGeruest => {
       this.addElement('codeGerueste', {
         fileName: codeGeruest.codeFileName,
@@ -555,7 +583,6 @@ export class EditCodingComponent implements OnInit {
       });
     });
 
-    // Add model solutions
     genTask.modelSolutions?.forEach(solution => {
       this.addElement('modelSolutions', {
         fileName: solution.codeFileName,
@@ -563,7 +590,6 @@ export class EditCodingComponent implements OnInit {
       });
     });
 
-    // Add automated tests
     genTask.automatedTests?.forEach(test => {
       this.addElement('automatedTests', {
         fileName: test.testFileName ? test.testFileName : 'testFile',
@@ -571,42 +597,6 @@ export class EditCodingComponent implements OnInit {
       });
     });
 
-    // Update the language for all code editors
     this.updateCodeEditorsLanguage(genTask.programmingLanguage);
-  }
-
-  // New method to check if a programming language is selected
-  isProgrammingLanguageSelected(): boolean {
-    const programmingLanguage = this.codingForm.get('programmingLanguage')?.value;
-    return !!programmingLanguage;
-  }
-
-  // New method to handle language change
-  onLanguageChange(event: MatSelectChange) {
-    const newLanguage = event.value;
-    console.log('Language changed to:', newLanguage);
-
-    // Update the language for all code editors except the first one (task description)
-    this.updateCodeEditorsLanguage(newLanguage);
-
-    // We could do some logic for the language server etc. here.
-  }
-
-  // Helper method to update all code editors with the new language
-  private updateCodeEditorsLanguage(newLanguage: string) {
-    const editors = this.codeEditors.toArray();
-    const lastIndex = editors.length - 1;
-
-    editors.forEach((editor, index) => {
-      if (index === 0 || index === lastIndex) {
-        // Ensure the first editor (task description) and last editor (Erwartungshorizont) always use Markdown
-        editor.changeLanguage(this.markdownLanguage);
-      } else {
-        editor.changeLanguage(newLanguage);
-      }
-    });
-
-    // Trigger change detection for the entire form
-    this.codingForm.updateValueAndValidity();
   }
 }
