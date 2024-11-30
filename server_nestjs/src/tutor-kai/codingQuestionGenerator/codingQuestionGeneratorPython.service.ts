@@ -21,6 +21,7 @@ import {
 } from '@langchain/core/prompts';
 import axios from 'axios';
 import { contentElementType } from '@prisma/client';
+import { AutomatedTestDto, CodeGeruestDto, CodingQuestionInternal, ModelSolutionDto } from '@Interfaces/index';
 @Injectable()
 export class CodingQuestionGeneratorService {
   constructor(
@@ -99,17 +100,17 @@ export class CodingQuestionGeneratorService {
 
   /**
    * Generates a task for the given topic and context
-   * @param topic the topic of the Programming task
+   * @param concept the topic of the Programming task
    * @param context the context of the Programming task
    * @returns a JSON object with the task, expectation, solution, unitTest, codeFramework and hasFailure (true = error in Response from Jury1 during testing Solution and Unittest, false = No error from Jury1)
    */
-  async genTask(topic: string, context: string): Promise<genTaskDto> {
+  async genPythonTaskWithTopic(concept: string, context: string): Promise<CodingQuestionInternal> {
     console.log('genTask gestartet');
 
-    const gptModel = 'gpt-4o'; //Aktuelles Modell "GPT-4o"
+    const gptModel = 'gpt-4o-2024-08-06'; //Aktuelles Modell "GPT-4o"
     const maxIterations = 5; //Maximale Anzahl an Iterationen für die Codeüberprüfung
     const langGraphRecursionLimit = 50; //Maximale Anzahl an Rekursionen für LangGraph
-    const paramTopic = topic;
+    const paramTopic = concept;
     const paramContext = context;
     const jury1url =
       'http://jury1.bshefl2.bs.informatik.uni-siegen.de/execute/python-assignment';
@@ -892,17 +893,45 @@ export class CodingQuestionGeneratorService {
     const dbEntry = await this.createDatabaseEntry(jsonData);
     console.log('Datenbank Eintrag erstellt - ID der Aufgabe: ', dbEntry.id);
 
-    return {
-      id: dbEntry.id,
-      task: result.task,
-      expectation: result.expectation,
-      solution: result.solution[result.solution.length - 1],
-      unitTest: result.unitTest[result.unitTest.length - 1],
-      codeFramework: result.codeFramework,
-      hasFailure: result.checkCodeErrorHappend,
-      iterations: result.checkCodeIteration,
-      runMethod: result.runMethod,
-      runMethodInput: result.runMethodInput,
+    const codeGeruest: CodeGeruestDto = {
+      id : -1, // temp - real value will be set by database
+      codingQuestionId : -1, // temp - real value will be set by database
+      code : result.codeFramework,
+      codeFileName: "main.py",
+      language : "python",
     };
+
+    const modelSolution: ModelSolutionDto = {
+      id : -1, // temp - real value will be set by database
+      codingQuestionId : -1, // temp - real value will be set by database
+      code : result.solution[result.solution.length - 1],
+      codeFileName: "main.py",
+      language : "python",
+    };
+
+    const automatedTest: AutomatedTestDto = {
+      id : -1, // temp - real value will be set by database
+      code : result.unitTest[result.unitTest.length - 1],
+      testFileName: "test_main.py",
+      language : "python",
+      questionId : -1, // temp - real value will be set by database
+      runMethod : result.runMethod,
+      inputArguments : result.runMethodInput,
+    };
+
+    const genereatedCodingQuestion: CodingQuestionInternal = {
+      id : -1, // temp - real value will be set by database
+      count_InputArgs : 0, // none for python tasks
+      programmingLanguage : "python",
+      mainFileName : "main.py", // currently only one single python file
+      text : result.task,
+      textHTML : result.task,
+      codeGerueste : [codeGeruest],
+      expectations : result.expectation,
+      automatedTests : [automatedTest],
+      modelSolutions : [modelSolution]
+    };
+
+    return genereatedCodingQuestion;
   }
 }

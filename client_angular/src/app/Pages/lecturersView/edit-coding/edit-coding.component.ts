@@ -78,9 +78,9 @@ export class EditCodingComponent implements OnInit {
       modelSolutions: this.fb.array([]),
       automatedTests: this.fb.array([]),
       expectations: ['', Validators.required],
-      mainFileName: [''],
-      runMethod: [''],
-      inputArguments: [''],
+      mainFileName: [''], // needed for python-tasks
+      runMethod: [''], // needed for python-tasks
+      inputArguments: [''],  // needed for python-tasks
       isApproved: [false],
       level: ['', Validators.required]
     });
@@ -474,7 +474,7 @@ export class EditCodingComponent implements OnInit {
     return this.isGenerating;
   }
 
-  generateTask() {
+  generateTaskCpp() {
     if (!this.isProgrammingLanguageSelected()) {
       this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', { duration: 5000 });
       return;
@@ -486,6 +486,35 @@ export class EditCodingComponent implements OnInit {
     if (text && codeGerueste && codeGerueste.length > 0) {
       this.isGenerating = true; // Set loading state to true
       this.editCodeService.generateCppTask(text, codeGerueste).subscribe(
+        (genTask: CodingQuestionInternal) => {
+          console.log('Generated task:', genTask);
+          this.populateFormWithGenTask(genTask);
+          this.snackBar.open('Task generated successfully', 'Close', { duration: 3000 });
+          this.isGenerating = false; // Set loading state to false
+        },
+        error => {
+          console.error('Error generating task:', error);
+          this.snackBar.open('Error generating task', 'Close', { duration: 3000 });
+          this.isGenerating = false; // Set loading state to false
+        }
+      );
+    } else {
+      this.snackBar.open('Please fill in the question text and add at least one code scaffold', 'Close', { duration: 3000 });
+    }
+  }
+
+  generateTaskPython() {
+    if (!this.isProgrammingLanguageSelected()) {
+      this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', { duration: 5000 });
+      return;
+    }
+
+    const text = this.codingForm.get('text')?.value;
+    const codeGerueste = this.codingForm.get('codeGerueste')?.value;
+
+    if (text && codeGerueste && codeGerueste.length > 0) {
+      this.isGenerating = true; // Set loading state to true
+      this.editCodeService.generatePythonTask(concept, context).subscribe(
         (genTask: CodingQuestionInternal) => {
           console.log('Generated task:', genTask);
           this.populateFormWithGenTask(genTask);

@@ -18,6 +18,14 @@
         </mat-form-field>
       </div>
 
+       <!--Generation Button for Python Tasks based on concept and context-->
+    <div *ngIf="codingForm.get('programmingLanguage')?.value == 'python'" style="text-align: center; margin-bottom: 15px">
+      <button mat-raised-button color="primary" type="button" (click)="generateTaskPython()" [disabled]="isGenerating">
+        <mat-spinner *ngIf="isGenerating" diameter="20" style="display: inline-block; margin-right: 5px;"></mat-spinner>
+        {{isGenerating ? 'Generiere Aufgabe...' : 'Aufgabe generieren'}}
+      </button>
+    </div>
+
       <div class="form-field full-width subsection-container">
         <div class="section-header">
           <h3>Aufgabenstellung</h3>
@@ -78,10 +86,10 @@
       </mat-accordion>
     </div>
   </div>
-    <!-- Generate Task button moved here, below the code scaffolds -->
 
-    <div style="text-align: center; margin-bottom: 15px">
-      <button mat-raised-button color="primary" type="button" (click)="generateTask()" [disabled]="isGenerating">
+     <!--Generation Button for CPP Tasks bases on Task Desc and Codeskeleton-->
+    <div *ngIf="codingForm.get('programmingLanguage')?.value == 'cpp'" style="text-align: center; margin-bottom: 15px">
+      <button mat-raised-button color="primary" type="button" (click)="generateTaskCpp()" [disabled]="isGenerating">
         <mat-spinner *ngIf="isGenerating" diameter="20" style="display: inline-block; margin-right: 5px;"></mat-spinner>
         {{isGenerating ? 'Generiere Aufgabe...' : 'Aufgabe generieren'}}
       </button>
