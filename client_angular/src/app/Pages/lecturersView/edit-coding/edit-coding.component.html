@@ -19,25 +19,30 @@
       </div>
 
       <!-- New input fields for Python task generation -->
-      <div *ngIf="codingForm.get('programmingLanguage')?.value == 'python'" class="form-row" style="margin-bottom: 15px">
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Context</mat-label>
-          <input matInput formControlName="context" placeholder="Enter context">
-        </mat-form-field>
+      <div class="form-field full-width subsection-container"  *ngIf="codingForm.get('programmingLanguage')?.value == 'python'">
+        <div class="form-row" style="margin-bottom: 15px">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Kontext (z.B. Fussball)</mat-label>
+            <input matInput formControlName="context" placeholder="Enter context (z.B. Fussball)">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Konzept (z.B. If-Else)</mat-label>
+            <input matInput formControlName="concept" placeholder="Enter concept (z.B. If-Else)">
+          </mat-form-field>
+        </div>
+        <div>
+          <p>Also Konzept sind auch umfangreichere Angaben wie z.B. For-Schleife mit If-Else und elif</p>
+          <p>Muss nur ausgefüllt werden, wenn eine neue Aufgabe generiert werden soll.</p>
+        </div>
 
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Concept</mat-label>
-          <input matInput formControlName="concept" placeholder="Enter concept">
-        </mat-form-field>
-      </div>
-
-      <!--Generation Button for Python Tasks based on concept and context-->
-      <div *ngIf="codingForm.get('programmingLanguage')?.value == 'python'" style="text-align: center; margin-bottom: 15px">
-        <button mat-raised-button color="primary" type="button" (click)="generateTaskPython()" [disabled]="isGenerating">
-          <mat-spinner *ngIf="isGenerating" diameter="20" style="display: inline-block; margin-right: 5px;"></mat-spinner>
-          {{isGenerating ? 'Generiere Aufgabe...' : 'Aufgabe generieren'}}
-        </button>
-      </div>
+        <!--Generation Button for Python Tasks based on concept and context-->
+        <div style="text-align: center; margin-bottom: 15px">
+          <button mat-raised-button color="primary" type="button" (click)="generateTaskPython()" [disabled]="isGenerating">
+            <mat-spinner *ngIf="isGenerating" diameter="20" style="display: inline-block; margin-right: 5px;"></mat-spinner>
+            {{isGenerating ? 'Generiere Aufgabe...' : 'Aufgabe generieren'}}
+          </button>
+        </div>
+    </div>
 
       <div class="form-field full-width subsection-container">
         <div class="section-header">

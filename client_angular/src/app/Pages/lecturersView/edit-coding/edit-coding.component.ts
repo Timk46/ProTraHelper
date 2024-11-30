@@ -569,7 +569,11 @@ export class EditCodingComponent implements OnInit {
       programmingLanguage: genTask.programmingLanguage,
       expectations: genTask.expectations,
       mainFileName: genTask.mainFileName,
-      count_InputArgs: genTask.count_InputArgs
+      count_InputArgs: genTask.count_InputArgs,
+      text: genTask.text, // Add text field
+      // Get runMethod and inputArguments from the first automated test if available
+      runMethod: genTask.automatedTests[0]?.runMethod || '',
+      inputArguments: genTask.automatedTests[0]?.inputArguments || ''
     });
 
     (this.codingForm.get('codeGerueste') as FormArray).clear();
@@ -593,7 +597,7 @@ export class EditCodingComponent implements OnInit {
     genTask.automatedTests?.forEach(test => {
       this.addElement('automatedTests', {
         fileName: test.testFileName ? test.testFileName : 'testFile',
-        code: test
+        code: test.code // Pass the code directly
       });
     });
 
