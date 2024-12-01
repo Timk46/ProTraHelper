@@ -1,0 +1,4 @@
+world 16 12
+actor PLAYER 8 6 EAST
+actor DESTINATION 12 6 EAST
+actor OBSTACLE 10 6 EAST
