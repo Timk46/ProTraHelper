@@ -505,7 +505,9 @@ export class EditCodingComponent implements OnInit {
       reader.onload = (e: ProgressEvent<FileReader>) => {
         try {
           const importedData = JSON.parse(e.target?.result as string) as detailedQuestionDTO;
+          const tempId = this.questionData?.id || 0;
           this.questionData = importedData;
+          this.questionData.id = tempId; // Keep the original ID of the edited question. We cant override with the id of the imported question because its might not fit to database (trying to save id 11 if there is already on)
           if (this.questionData && this.questionData.codingQuestion) {
             this.codingForm.patchValue({
               runMethod: this.questionData.codingQuestion.automatedTests[0]?.runMethod || '',
