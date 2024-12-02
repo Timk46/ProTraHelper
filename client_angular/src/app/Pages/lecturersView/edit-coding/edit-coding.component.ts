@@ -572,11 +572,13 @@ export class EditCodingComponent implements OnInit {
       expectations: genTask.expectations,
       mainFileName: genTask.mainFileName,
       count_InputArgs: genTask.count_InputArgs,
-      text: genTask.text, // Add text field
       // Get runMethod and inputArguments from the first automated test if available
       runMethod: genTask.automatedTests[0]?.runMethod || '',
       inputArguments: genTask.automatedTests[0]?.inputArguments || ''
     });
+
+    if (genTask.programmingLanguage === "python") {this.codingForm.patchValue({text: genTask.text});} // Update task description for c++ only (python task description is already set)
+
 
     (this.codingForm.get('codeGerueste') as FormArray).clear();
     (this.codingForm.get('modelSolutions') as FormArray).clear();
@@ -597,6 +599,7 @@ export class EditCodingComponent implements OnInit {
     });
 
     genTask.automatedTests?.forEach(test => {
+      console.log(test);
       this.addElement('automatedTests', {
         fileName: test.testFileName ? test.testFileName : 'testFile',
         code: test.code // Pass the code directly
