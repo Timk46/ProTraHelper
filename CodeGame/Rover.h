@@ -12,6 +12,9 @@ class Rover: public Actor {
     private:
         void drive();
         bool checkObstacle();
+        bool checkObstacle(ActorDirection direction);
+        bool checkWorldBounds(ActorDirection direction);
+        bool checkDestination();
 };
 
 #endif // ROVER_H

@@ -27,6 +27,9 @@ class World {
         void moveObject(Actor& actor, int x, int y);
         Rover* getPlayer(int x, int y);
         std::vector<Obstacle*> getObstacles(int x, int y);
+        bool checkDestination(int x, int y);
+        int getWidth();
+        int getHeight();
 
     private:
         std::vector<std::vector<std::vector<Actor*>>> worldMap;

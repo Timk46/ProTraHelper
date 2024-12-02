@@ -12,7 +12,7 @@ void SystemOutput::outputMove(int& x, int& y)
 {
     std::lock_guard<std::mutex> lock(mtx);
 
-    std::cout << "#SYS-Move " << x << " " << y << std::endl;
+    std::cout << "#SYS-Move:" << x << "/" << y << std::endl;
 }
 
 /**
@@ -24,7 +24,7 @@ void SystemOutput::outputTrun(const std::string& message)
 {
     std::lock_guard<std::mutex> lock(mtx);
 
-    std::cout << "#SYS-Turn " << message << std::endl;
+    std::cout << "#SYS-Turn:" << message << std::endl;
 }
 
 /**
@@ -32,9 +32,9 @@ void SystemOutput::outputTrun(const std::string& message)
  * 
  * @param message The information message to be output.
  */
-void SystemOutput::outputInformation(std::string& message)
+void SystemOutput::outputInformation(std::string message)
 {
     std::lock_guard<std::mutex> lock(mtx);
 
-    std::cout << "#SYS-Info " << message << std::endl;
+    std::cout << "#SYS-Info:" << message << std::endl;
 }

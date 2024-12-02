@@ -108,15 +108,22 @@ void World::moveObject(Actor& actor, int newX, int newY)
 
 // MARK: - Getter/Setter
 
+
 /**
- * @brief Retrieves the player (Rover) at the specified coordinates.
+ * @brief Retrieves the player Rover at the specified coordinates.
  * 
- * @param x The x-coordinate of the player.
- * @param y The y-coordinate of the player.
- * @return A pointer to the Rover object at the specified coordinates, or nullptr if no player is found.
+ * @param x The x-coordinate of the location.
+ * @param y The y-coordinate of the location.
+ * 
+ * @return Rover* Pointer to the player Rover at the specified coordinates, or nullptr if no player is found.
  */
 Rover* World::getPlayer(int x, int y)
 {
+    if (x < 0 || x >= worldMap[0].size() || y < 0 || y >= worldMap.size())
+    {
+        return nullptr;
+    }
+
     if (worldMap[y][x].empty())
     {
         return nullptr;
@@ -133,16 +140,23 @@ Rover* World::getPlayer(int x, int y)
     return nullptr;
 }
 
+
 /**
- * @brief Retrieves all obstacles at the specified coordinates.
+ * @brief Retrieves a list of obstacles at the specified coordinates.
+ *
+ * @param x The x-coordinate in the world map.
+ * @param y The y-coordinate in the world map.
  * 
- * @param x The x-coordinate of the obstacles.
- * @param y The y-coordinate of the obstacles.
- * @return A vector of pointers to the Obstacle objects at the specified coordinates.
+ * @return A vector of pointers to Obstacle objects at the specified coordinates.
  */
 std::vector<Obstacle*> World::getObstacles(int x, int y)
 {
     std::vector<Obstacle*> obstacles;
+
+    if (x < 0 || x >= worldMap[0].size() || y < 0 || y >= worldMap.size())
+    {
+        return obstacles;
+    }
 
     if (worldMap[y][x].empty())
     {
@@ -158,4 +172,55 @@ std::vector<Obstacle*> World::getObstacles(int x, int y)
     }
 
     return obstacles;
+}
+
+/**
+ * @brief Checks if the specified coordinates (x, y) are a valid destination.
+ * 
+ * @param x The x-coordinate to check.
+ * @param y The y-coordinate to check.
+ * 
+ * @return true if the coordinates are within bounds and contain a DESTINATION actor, false otherwise.
+ */
+bool World::checkDestination(int x, int y)
+{
+    if (x < 0 || x >= worldMap[0].size() || y < 0 || y >= worldMap.size())
+    {
+        return false;
+    }
+
+    if (worldMap[y][x].empty())
+    {
+        return false;
+    }
+
+    for (const auto& actor : worldMap[y][x])
+    {
+        if (actor->getType() == Actor::ActorType::DESTINATION)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * @brief Retrieves the width of the world.
+ * 
+ * @return The width of the world.
+ */
+int World::getWidth()
+{
+    return worldMap[0].size();
+}
+
+/**
+ * @brief Retrieves the height of the world.
+ * 
+ * @return The height of the world.
+ */
+int World::getHeight()
+{
+    return worldMap.size();
 }

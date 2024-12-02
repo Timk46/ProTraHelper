@@ -32,7 +32,7 @@ class SystemOutput {
 
         void outputMove(int& x, int& y);
         void outputTrun(const std::string& message);
-        void outputInformation(std::string& message);
+        void outputInformation(std::string message);
 };
 
 #endif // SYSTEMOUTPUT_H
