@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 /**
  * @brief Constructs a World object with specified dimensions.
