@@ -49,13 +49,45 @@ void parseTxt(const std::string& txtString, int& worldWidth, int& worldHeight, s
     }
 }
 
+/**
+ * @brief Parses a grid string and extracts actor data.
+ * 
+ * @param gridString The string representation of the grid.
+ * @param worldWidth Reference to an integer where the width of the world will be stored.
+ * @param worldHeight Reference to an integer where the height of the world will be stored.
+ * @param actors Reference to a vector of ActorData where the parsed actor data will be stored.
+ */
+void parseGrid(const std::string& gridString, int& worldWidth, int& worldHeight, std::vector<ActorData>& actors) {
+    std::istringstream stream(gridString);
+    std::string line;
+    int y = 0;
+    while (std::getline(stream, line)) {
+        if (worldWidth == 0) {
+            worldWidth = line.length();
+        }
+        for (int x = 0; x < line.length(); ++x) {
+            char cell = line[x];
+            if (cell == 'P' || cell == 'O' || cell == 'D') {
+                ActorData actor;
+                actor.type = (cell == 'P') ? "PLAYER" : (cell == 'O') ? "OBSTACLE" : "DESTINATION";
+                actor.x = x;
+                actor.y = y;
+                actor.direction = "EAST"; // Default direction
+                actors.push_back(actor);
+            }
+        }
+        ++y;
+    }
+    worldHeight = y;
+}
+
 int main() {
 
     // MARK: - Read txt file
 
-    std::ifstream file("game.txt");
+    std::ifstream file("game.grid.txt");
     if (!file.is_open()) {
-        std::cerr << "Could not open game.txt" << std::endl;
+        std::cerr << "Could not open game.grid.txt" << std::endl;
         return 1;
     }
 
@@ -67,7 +99,11 @@ int main() {
     int worldHeight = 0;
     std::vector<ActorData> actors;
 
-    parseTxt(txtString, worldWidth, worldHeight, actors);
+    /*
+    * Select the paring method to generate the world.
+    */
+    // parseTxt(txtString, worldWidth, worldHeight, actors);
+    parseGrid(txtString, worldWidth, worldHeight, actors);
 
     World world(worldWidth, worldHeight);
 
