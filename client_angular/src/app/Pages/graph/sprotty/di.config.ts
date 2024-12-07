@@ -12,11 +12,10 @@ import {
 } from 'sprotty-elk/lib/inversify';
 import { SGraph as SGraphP, SModelIndex, SNode as SNodeP, Point} from 'sprotty-protocol';
 import { CustomMouseListener } from './mouse-interactions';
-import { PopupModelProvider } from './popup';
-import { ClassContextMenuItemProvider, ClassContextMenuService } from './context-menu';
+import { CustomActionHandler } from './customActionHandler';
+import { TYPESS } from './symbols';
 import { ActionHandlerInitializer } from './actionHandler';
-import { TouchEventActionHandler } from './touchEventActionHandler';
-import {TYPESS} from './symbols';
+
 
 
 // This file creates an inversify container for the sprotty diagram.
@@ -32,27 +31,12 @@ export default (containerId: string) => {
         bind(TYPES.IModelLayoutEngine).toService(ElkLayoutEngine);
         bind(ElkFactory).toConstantValue(elkFactory);
         rebind(ILayoutConfigurator).to(RandomGraphLayoutConfigurator);
-
-
-        //popup (doesn't work)
-        //bind(TYPES.IPopupModelProvider).to(PopupModelProvider);
-
-        // context menu
-        //bind(TYPES.IContextMenuService).to(ClassContextMenuService);
-        //bind(TYPES.IContextMenuItemProvider).to(ClassContextMenuItemProvider);
-
+        bind(TYPESS.CustomActionHandler).to(CustomActionHandler).inSingletonScope();
+        bind(ActionHandlerInitializer).toSelf().inSingletonScope();
         //double click
         bind(CustomMouseListener).toSelf().inSingletonScope();
         bind(TYPES.MouseListener).toService(CustomMouseListener);
 
-        //TOUCH HANDLING, BUT IF UNCOMMENTED, THE GRAPH WILL STOP SHOWING, BUT PANNING AND MOVING METHODS WORK (dont yet know how to use touch events in sprotty)
-        //bind(TYPES.IActionHandlerInitializer).to(ActionHandlerInitializer).inSingletonScope();
-        //bind(TYPESS.TouchEventActionHandler).to(TouchEventActionHandler).inSingletonScope();
-
-        //drag and drop
-        //bind(NodeCreator).toConstantValue(nodeCreator);
-        // bind(DroppableMouseListener).toSelf().inSingletonScope();
-        // bind(TYPES.MouseListener).toService(DroppableMouseListener);
 
         const context = { bind, unbind, isBound, rebind };
         configureModelElement(context, 'graph', SGraphImpl, SGraphView);

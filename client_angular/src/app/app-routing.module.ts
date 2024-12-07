@@ -30,43 +30,57 @@ import { RegisteredForSubjectGuard } from './Guards/registered-for-subject.guard
 
 import { GraphTasksComponent } from './Modules/graph-tasks/graph-tasks.component';
 
+// refactor that routes with dashboard as parent component and the rest as children
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'app', component: AppComponent },
   { path: 'not-registered', component: NotRegisteredComponent, canActivate: [LoggedInGuard] },
-  { path: 'contentBoard', component: ContentBoardComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'conceptOverview', component: ConceptOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'discussion', component: DiscussionListComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'codeTask', component: CodeTaskComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'mcTask', component: McTaskComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'graph', component: GraphComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'chatbot', component: ChatBotComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'discussion-view/:discussionId', component: DiscussionViewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+    children: [
+      { path: 'contentBoard', component: ContentBoardComponent },
+      { path: 'conceptOverview', component: ConceptOverviewComponent },
+      { path: 'conceptOverview/:conceptId', component: ConceptOverviewComponent },
+      { path: 'conceptOverview/:conceptId/question/:questionId', component: ConceptOverviewComponent },
+      { path: 'discussion', component: DiscussionListComponent },
+      { path: 'codeTask', component: CodeTaskComponent },
+      { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent },
+      { path: 'mcTask', component: McTaskComponent },
+      { path: 'graph', component: GraphComponent },
+      { path: 'chatbot', component: ChatBotComponent },
+      { path: 'video', component: VideoTimeStampComponent },
+      { path: 'discussion-view/:discussionId', component: DiscussionViewComponent },
+      { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent },
+      { path: 'mcqcreation', component: McTaskCreationComponent },
 
-  { path: 'mcqcreation', component: McTaskCreationComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard]},
+      // lecturers view
+      { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [AdminGuard] },
+      { path: 'editcoding/:questionId', component: EditCodingComponent, canActivate: [AdminGuard] },
+      { path: 'editfillin/:questionId', component: EditFillinComponent, canActivate: [AdminGuard] },
+      { path: 'editfreetext/:questionId', component: EditFreetextComponent, canActivate: [AdminGuard] },
+      { path: 'editgraph/:questionId', component: EditGraphComponent, canActivate: [AdminGuard] },
 
-  // lecturers view
-  { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [LoggedInGuard, AdminGuard]},
-  { path: 'editcoding/:questionId', component: EditCodingComponent, canActivate: [LoggedInGuard, AdminGuard]},
-  { path: 'editfillin/:questionId', component: EditFillinComponent, canActivate: [LoggedInGuard, AdminGuard]},
-  { path: 'editfreetext/:questionId', component: EditFreetextComponent, canActivate: [LoggedInGuard, AdminGuard]},
-  { path: 'editgraph/:questionId', component: EditGraphComponent, canActivate: [LoggedInGuard, AdminGuard]},
+      // just for testing
+      { path: 'file-upload', component: FileUploadComponent },
 
-  // just for testing
-  { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
+      { path: 'graphtask/:questionId', component: GraphTasksComponent },
 
-  { path: 'graphtask/:questionId', component: GraphTasksComponent, canActivate: [LoggedInGuard]},
-
-  // Tutor-Kai as lazy loaded module (https://medium.com/@jaydeepvpatil225/feature-module-with-lazy-loading-in-angular-15-53bb8e15d193) Maybe we can use the same for UML Tasks?
-  { path: 'tutor-kai', loadChildren: () => import('./Modules/tutor-kai/tutor-kai.module').then(m => m.TutorKaiModule), canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-
-  { path: 'admin', loadChildren: () => import('./Pages/admin/admin.module').then(m => m.AdminModule), canActivate: [LoggedInGuard, AdminGuard] },
+      // Lazy loaded modules
+      {
+        path: 'tutor-kai',
+        loadChildren: () => import('./Modules/tutor-kai/tutor-kai.module').then(m => m.TutorKaiModule)
+      },
+      {
+        path: 'admin',
+        loadChildren: () => import('./Pages/admin/admin.module').then(m => m.AdminModule),
+        canActivate: [AdminGuard]
+      }
+    ]
+  }
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],

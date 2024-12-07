@@ -15,7 +15,6 @@ import { CreateContentElementDialogComponent } from '../lecturersView/create-con
 import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { FillinTaskComponent } from '../contentView/contentElement/fill-in-task/fill-in-task.component';
 import { FillinTaskNewComponent } from '../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 
 
@@ -37,7 +36,7 @@ interface TaskViewData {
 })
 export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
-  @Input() activeConceptNodeId: any;
+  @Input() activeConceptNodeId: number | undefined;
 
   /**
    * The contents for the active concept node
@@ -224,7 +223,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     switch (selectedTask.type) {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
-        dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
+        console.log("moin", selectedTask.id);
+        this.router.navigate([`/question/${selectedTask.id}`]);
         break;
       case questionType.FREETEXT:
         dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
@@ -326,6 +326,13 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         // Fetch fresh data from server - We do not need this since we update the data source directly
         //this.fetchContentsForConcept.emit();
       });
+      this.router.navigate([
+        'dashboard',
+        'conceptOverview',
+        this.activeConceptNodeId,
+        'question',
+        selectedTask.id,
+      ]);
     }
   }
 

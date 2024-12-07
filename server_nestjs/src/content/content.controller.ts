@@ -5,12 +5,14 @@ import { ContentsForConceptDTO } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 import { ConceptNode } from '@prisma/client';
+import { QuestionDataService } from '@/question-data/question-data.service';
 
 @UseGuards(RolesGuard)
 @Controller('content')
-
 export class ContentController {
-  constructor(private readonly contentService: ContentService) {}
+  constructor(
+    private readonly contentService: ContentService,
+  ) {}
 
   /**
    * Get Content by Concept Node ID
@@ -28,7 +30,10 @@ export class ContentController {
     @Param('conceptNodeId') conceptNodeId: number,
     @Req() req,
   ): Promise<ContentsForConceptDTO> {
-    return this.contentService.getContentsByConceptNode(conceptNodeId, req.user.id);
+    return this.contentService.getContentsByConceptNode(
+      conceptNodeId,
+      req.user.id,
+    );
   }
 
   /**
@@ -140,11 +145,13 @@ export class ContentController {
   @Get('/concepts')
   async fetchAllConceptNames(): Promise<string[]> {
     const concepts = await this.contentService.fetchAllConceptNames();
-    const formattedConcepts = concepts.map(concept => {
+    const formattedConcepts = concepts.map((concept) => {
       const formattedConcept = concept.replace(/^\d+\s/, '');
-      return formattedConcept.charAt(0).toUpperCase() + formattedConcept.slice(1);
+      return (
+        formattedConcept.charAt(0).toUpperCase() + formattedConcept.slice(1)
+      );
     });
-    return formattedConcepts
+    return formattedConcepts;
   }
 
   @roles('ADMIN')

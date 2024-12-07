@@ -2,7 +2,7 @@
 import { Controller, Get, Post, Param, Body, Req, UseGuards, Put} from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
 
-import { detailedFreetextQuestionDTO, detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, questionType, FillinQuestionDTO, GraphQuestionDTO } from '@DTOs/index';
+import { detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, FillinQuestionDTO, GraphQuestionDTO } from '@DTOs/index';
 
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 import { EditCodeService } from './edit-code.service';
@@ -17,7 +17,6 @@ import { QuestionDataGraphService } from './question-data-graph/question-data-gr
 export class QuestionDataController {
     constructor(
       private questionDataService: QuestionDataService,
-      private editCodeService: EditCodeService,
       private qdChoiceService: QuestionDataChoiceService,
       private qdFreetextService: QuestionDataFreetextService,
       private qdGraphService: QuestionDataGraphService,
@@ -34,6 +33,7 @@ export class QuestionDataController {
     @roles('ANY')
     @Get(':questionId')
     async getQuestion(@Param('questionId') questionId: number) {
+        console.log(typeof questionId);
         return this.questionDataService.getQuestion(questionId);
     }
 
