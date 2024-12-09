@@ -86,6 +86,10 @@ int main() {
 
     // MARK: - Read txt file
 
+    // debugging
+    // std::string filePath = "CodeGame/game.grid.txt"; // Relativer Pfad zur Datei
+    // std::ifstream file(filePath);
+
     std::ifstream file("game.grid.txt");
     if (!file.is_open()) {
         std::cerr << "Could not open game.grid.txt" << std::endl;

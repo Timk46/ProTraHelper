@@ -60,18 +60,21 @@ void World::printWorld()
 
 void World::addObject(Actor::ActorType actorType, Actor::ActorDirection actorDirection, int x, int y) 
 {
+    const int i = y; // y is the height coordinate, row in the world map
+    const int j = x; // x is the width coordinate, column in the world map
+
     if (actorType == Actor::ActorType::PLAYER) {
         Rover* rover = new Rover(x, y, actorDirection, actorType, this);
 
-        worldMap[x][y].push_back(rover);
+        worldMap[i][j].push_back(rover);
     } else if (actorType == Actor::ActorType::DESTINATION) {
         Destination* destination = new Destination(x, y, actorDirection, actorType, this);
 
-        worldMap[x][y].push_back(destination);
+        worldMap[i][j].push_back(destination);
     } else if (actorType == Actor::ActorType::OBSTACLE) {
         Obstacle* obstacle = new Obstacle(x, y, actorDirection, actorType, this);
 
-         worldMap[x][y].push_back(obstacle);
+         worldMap[i][j].push_back(obstacle);
     } else {
         std::cerr << "Wold.cpp - addObject: could not add the object" << std::endl;
     }
@@ -102,8 +105,6 @@ void World::run() {
         std::cerr << "World.cpp - run: Actor not found in the world map" << std::endl;
         return;
     }
-
-    
 }
 
 
