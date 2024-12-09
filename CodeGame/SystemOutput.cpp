@@ -8,7 +8,7 @@
  * @param x Reference to the x-coordinate of the move.
  * @param y Reference to the y-coordinate of the move.
  */
-void SystemOutput::outputMove(int& x, int& y)
+void SystemOutput::outputMove(int x, int y)
 {
     std::lock_guard<std::mutex> lock(mtx);
 
@@ -20,7 +20,7 @@ void SystemOutput::outputMove(int& x, int& y)
  * 
  * @param message The message to be output.
  */
-void SystemOutput::outputTrun(const std::string& message)
+void SystemOutput::outputTrun(const std::string message)
 {
     std::lock_guard<std::mutex> lock(mtx);
 

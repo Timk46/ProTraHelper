@@ -13,19 +13,11 @@
  * @param actorType The type of the actor (player or obstacle).
  * @param world A reference to the world the actor belongs to.
  */
-Actor::Actor(int _x, int _y, ActorDirection _direction, ActorType _actorType, World& _world)
+Actor::Actor(int _x, int _y, ActorDirection _direction, ActorType _actorType, World* _world)
     : x(_x), y(_y), actorDiraction(_direction), actorType(_actorType), world(_world)
 {
     std::cout << "Actor is created. " << "Type: " << getActorTypeString() << "\n";
 }
-
-/**
- * @brief Performs the actor's action.
- * 
- * This function defines the behavior of the actor when it acts.
- */
-void Actor::act()
-{}
 
 // MARK: - movements
 
@@ -54,9 +46,14 @@ void Actor::move(int distance)
             break;
     }
 
-    world.moveObject(*this, newX, newY);
-    x = newX;
-    y = newY;
+    if (world) {
+        world->moveObject(static_cast<Rover&>(*this), newX, newY);
+        x = newX;
+        y = newY;
+    } else {
+         std::cerr << "Actor.cpp - move: World instance is not reachable." << std::endl;
+    }
+    
 }
 
 /**
@@ -128,7 +125,7 @@ std::string Actor::getDirectionString()
  * 
  * @return The type of the actor (player or obstacle).
  */
-Actor::ActorType Actor::getType()
+Actor::ActorType Actor::getType() const
 {
     return actorType;
 }

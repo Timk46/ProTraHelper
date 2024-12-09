@@ -8,16 +8,15 @@
 #include <vector>
 #include <algorithm>
 
-/**
- * @brief Constructs a World object with specified dimensions.
- * 
- * @param worldWidth The width of the world.
- * @param worldHeight The height of the world.
- */
-World::World(int worldWidth, int worldHeight)
-    : worldMap(worldHeight, std::vector<std::vector<Actor*>>(worldWidth))
+
+World::World(int _width, int _height) : width(_width), height(_height)
 {
+    worldMap.resize(height, std::vector<std::vector<Actor*>>(width));
     std::cout << "World is created.\n";
+}
+
+World::~World() {
+    clear();
 }
 
 /**
@@ -25,9 +24,9 @@ World::World(int worldWidth, int worldHeight)
  */
 void World::printWorld()
 {
-    for (int i = 0; i < worldMap.size(); i++)
+    for (int i = 0; i < height; i++)
     {
-        for (int j = 0; j < worldMap[i].size(); j++)
+        for (int j = 0; j < width; j++)
         {
             if (worldMap[i][j].empty())
             {
@@ -58,37 +57,69 @@ void World::printWorld()
 
 // MARK: - Actor actions
 
-/**
- * @brief Adds an actor to the world at the specified coordinates.
- * 
- * @param actor The actor to be added.
- * @param x The x-coordinate where the actor will be placed.
- * @param y The y-coordinate where the actor will be placed.
- */
-void World::addObject(Actor& actor, int x, int y)
+
+void World::addObject(Actor::ActorType actorType, Actor::ActorDirection actorDirection, int x, int y) 
 {
-    worldMap[y][x].push_back(&actor);
+    if (actorType == Actor::ActorType::PLAYER) {
+        Rover* rover = new Rover(x, y, actorDirection, actorType, this);
+
+        worldMap[x][y].push_back(rover);
+    } else if (actorType == Actor::ActorType::DESTINATION) {
+        Destination* destination = new Destination(x, y, actorDirection, actorType, this);
+
+        worldMap[x][y].push_back(destination);
+    } else if (actorType == Actor::ActorType::OBSTACLE) {
+        Obstacle* obstacle = new Obstacle(x, y, actorDirection, actorType, this);
+
+         worldMap[x][y].push_back(obstacle);
+    } else {
+        std::cerr << "Wold.cpp - addObject: could not add the object" << std::endl;
+    }
 }
 
-/**
- * @brief Moves an actor to a new position within the world.
- * 
- * @param actor The actor to be moved.
- * @param x The new x-coordinate for the actor.
- * @param y The new y-coordinate for the actor.
- */
-void World::moveObject(Actor& actor, int newX, int newY)
-{
+void World::run() {
     bool isActorFound = false;
 
     for (int i = 0; i < worldMap.size(); i++)
     {
-        for (int j = 0; j < worldMap[i].size(); j++)
+        for (int j = 0; j < worldMap[i].size(); j++) 
+        {
+            std::vector<Actor*> actors = worldMap[i][j];
+
+            for (auto& actor : actors) {
+                if (actor->getType() == Actor::ActorType::PLAYER) {
+                    Rover* rover = static_cast<Rover*>(actor);
+                    rover->act();
+                    isActorFound = true;
+                    break;
+                }
+            }
+        }
+        if (isActorFound) break;
+    }
+
+    if (!isActorFound) {
+        std::cerr << "World.cpp - run: Actor not found in the world map" << std::endl;
+        return;
+    }
+
+    
+}
+
+
+void World::moveObject(Rover& rover, int newX, int newY) {
+    // find the actor in the world map and replace it with the new position
+    bool isActorFound = false;
+
+    for (int i = 0; i < worldMap.size(); i++)
+    {
+        for (int j = 0; j < worldMap[i].size(); j++) 
         {
             auto& actors = worldMap[i][j];
-            auto it = std::find(actors.begin(), actors.end(), &actor);
-            if (it != actors.end())
-            {
+            auto it = std::find_if(actors.begin(), actors.end(), [&rover](const Actor* actor) {
+                return actor == &rover;
+            });
+            if (it != actors.end()) {
                 actors.erase(it);
                 isActorFound = true;
                 break;
@@ -97,50 +128,20 @@ void World::moveObject(Actor& actor, int newX, int newY)
         if (isActorFound) break;
     }
 
-    if (!isActorFound)
-    {
-        std::cerr << "Actor not found in the world map\n";
+    if (!isActorFound) {
+        std::cerr << "World.cpp - moveObject: Actor not found in the world map" << std::endl;
         return;
     }
 
-    worldMap[newY][newX].push_back(&actor);
-    SystemOutput::getInstance().outputMove(newX, newY);
+    if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
+        worldMap[newY][newX].push_back(&rover);
+        SystemOutput::getInstance().outputMove(newX, newY);
+    } else {
+        std::cerr << "World.cpp - moveObject: Invalid position (" << newX << ", " << newY << ") for moving object" << std::endl;
+    }
 }
 
 // MARK: - Getter/Setter
-
-
-/**
- * @brief Retrieves the player Rover at the specified coordinates.
- * 
- * @param x The x-coordinate of the location.
- * @param y The y-coordinate of the location.
- * 
- * @return Rover* Pointer to the player Rover at the specified coordinates, or nullptr if no player is found.
- */
-Rover* World::getPlayer(int x, int y)
-{
-    if (x < 0 || x >= worldMap[0].size() || y < 0 || y >= worldMap.size())
-    {
-        return nullptr;
-    }
-
-    if (worldMap[y][x].empty())
-    {
-        return nullptr;
-    }
-
-    for (const auto& actor : worldMap[y][x])
-    {
-        if (actor->getType() == Actor::ActorType::PLAYER)
-        {
-            return dynamic_cast<Rover*>(actor);
-        }
-    }
-
-    return nullptr;
-}
-
 
 /**
  * @brief Retrieves a list of obstacles at the specified coordinates.
@@ -154,21 +155,20 @@ std::vector<Obstacle*> World::getObstacles(int x, int y)
 {
     std::vector<Obstacle*> obstacles;
 
-    if (x < 0 || x >= worldMap[0].size() || y < 0 || y >= worldMap.size())
-    {
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        std::cerr << "World.cpp - getObstacles: Invalid position (" << x << ", " << y << ") for retrieving obstacles" << std::endl;
         return obstacles;
     }
 
-    if (worldMap[y][x].empty())
-    {
+    if (worldMap[y][x].empty()) {
         return obstacles;
     }
 
-    for (const auto& actor : worldMap[y][x])
-    {
-        if (actor->getType() == Actor::ActorType::OBSTACLE)
-        {
-            obstacles.push_back(dynamic_cast<Obstacle*>(actor));
+    for (auto& actor : worldMap[y][x]) {
+        if (actor->getType() == Actor::ActorType::OBSTACLE) {
+            if (auto obstacle = dynamic_cast<Obstacle*>(actor)) {
+                obstacles.push_back(obstacle);
+            }
         }
     }
 
@@ -185,24 +185,16 @@ std::vector<Obstacle*> World::getObstacles(int x, int y)
  */
 bool World::checkDestination(int x, int y)
 {
-    if (x < 0 || x >= worldMap[0].size() || y < 0 || y >= worldMap.size())
-    {
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        std::cerr << "World.cpp - checkDestination: Invalid position (" << x << ", " << y << ") for checking destination" << std::endl;
         return false;
     }
 
-    if (worldMap[y][x].empty())
-    {
-        return false;
-    }
-
-    for (const auto& actor : worldMap[y][x])
-    {
-        if (actor->getType() == Actor::ActorType::DESTINATION)
-        {
+    for (auto& actor : worldMap[y][x]) {
+        if (dynamic_cast<Destination*>(actor)) {
             return true;
         }
     }
-
     return false;
 }
 
@@ -213,7 +205,7 @@ bool World::checkDestination(int x, int y)
  */
 int World::getWidth()
 {
-    return worldMap[0].size();
+    return width;
 }
 
 /**
@@ -223,5 +215,17 @@ int World::getWidth()
  */
 int World::getHeight()
 {
-    return worldMap.size();
+    return height;
+}
+
+// MARK: - Clear
+
+void World::clear() {
+    for (auto& row : worldMap) {
+        for (auto& cell : row) {
+            cell.clear();
+        }
+    }
+    worldMap.clear();
+    std::cout << "World map cleared." << std::endl;
 }

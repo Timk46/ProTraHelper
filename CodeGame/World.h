@@ -2,16 +2,20 @@
 #define WORLD_H
 
 #include <vector>
+#include <memory>
 
 #include "Actor.h"
+#include "Rover.h"
 #include "Obstacle.h"
+#include "Destination.h"
 
 /*
 ** Forward declaration is used to declare a class without defining it.
 */
 class Actor;
 class Rover;
-class Obstical;
+class Obstacle;
+class Destination;
 
 /**
  * @class World
@@ -21,18 +25,23 @@ class Obstical;
  */
 class World {
     public:
-        World(int worldWidth, int worldHeight);
+        World(int _width, int _height);
+        ~World();
         void printWorld();
-        void addObject(Actor& actor, int x, int y);
-        void moveObject(Actor& actor, int x, int y);
-        Rover* getPlayer(int x, int y);
+        void addObject(Actor::ActorType actorType, Actor::ActorDirection actorDirection, int x, int y);
+        void moveObject(Rover& rover, int x, int y);
+        // Rover* getPlayer(int x, int y);
+        void run();
         std::vector<Obstacle*> getObstacles(int x, int y);
         bool checkDestination(int x, int y);
         int getWidth();
         int getHeight();
+        void clear();
 
     private:
         std::vector<std::vector<std::vector<Actor*>>> worldMap;
+        int width;
+        int height;
 };
 
 

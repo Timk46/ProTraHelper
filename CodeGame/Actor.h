@@ -46,15 +46,15 @@ class Actor {
             WEST,
         };
 
-        Actor(int x, int y, ActorDirection actorDirection, ActorType actorType, World& world);
+        Actor(int x, int y, ActorDirection actorDirection, ActorType actorType, World* world);
         virtual ~Actor() = default; // virtual destructor, for dynamic polymorphism (casting)
 
-        void act();
+        virtual void act() = 0; // pure virtual function, must be implemented by derived classes
         void move(int distance);
         void turn(ActorDirection diraction);
         int getX();
         int getY();
-        ActorType getType();
+        ActorType getType() const;
         ActorDirection getDirection();
 
         // make Rover a friend class to access private members
@@ -65,7 +65,7 @@ class Actor {
         int y;
         ActorType actorType;
         ActorDirection actorDiraction;
-        World& world;
+        World* world;
 
         std::string getDirectionString();
         std::string getActorTypeString();

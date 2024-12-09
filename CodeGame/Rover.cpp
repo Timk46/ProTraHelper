@@ -5,30 +5,23 @@
 #include <iostream>
 #include <string>
 
-Rover::Rover(int _x, int _y, ActorDirection _actorDirection, ActorType _actorType, World& _world)
+Rover::Rover(int _x, int _y, ActorDirection _actorDirection, ActorType _actorType, World* _world)
     : Actor(_x, _y, _actorDirection, _actorType, _world)
 {}
 
-void Rover::act() 
+void Rover::act()
 {
     drive();
-    drive();
     turn(ActorDirection::SOUTH);
-    drive();
-    drive();
     drive();
     drive();
     drive();
     turn(ActorDirection::EAST);
     drive();
     drive();
-
-    if (checkDestination()) {
-        std::cout << "Rover has reached the destination." << std::endl;
-    }
 }
 
-void Rover::drive() 
+void Rover::drive()
 {    
     if (checkObstacle(actorDiraction)) {
         SystemOutput::getInstance().outputInformation("Obstacle detected in front.");
@@ -37,6 +30,10 @@ void Rover::drive()
     } else {
         move(1);
     }
+
+    if (checkDestination()) {
+        std::cout << "Rover has reached the destination." << std::endl;
+    }
 }
 
 /**
@@ -44,22 +41,22 @@ void Rover::drive()
  *
  * @return true if there is an obstacle in the direction the rover is facing, false otherwise.
  */
-bool Rover::checkObstacle() 
+bool Rover::checkObstacle()
 {
     if (getDirection() == ActorDirection::NORTH) {
-        if (world.getObstacles(getX(), getY() - 1).size() > 0) {
+        if (world->getObstacles(getX(), getY() - 1).size() > 0) {
             return true;
         }
     } else if (getDirection() == ActorDirection::EAST) {
-        if (world.getObstacles(getX() + 1, getY()).size() > 0) {
+        if (world->getObstacles(getX() + 1, getY()).size() > 0) {
             return true;
         }
     } else if (getDirection() == ActorDirection::SOUTH) {
-        if (world.getObstacles(getX(), getY() + 1).size() > 0) {
+        if (world->getObstacles(getX(), getY() + 1).size() > 0) {
             return true;
         }
     } else if (getDirection() == ActorDirection::WEST) {
-        if (world.getObstacles(getX() - 1, getY()).size() > 0) {
+        if (world->getObstacles(getX() - 1, getY()).size() > 0) {
             return true;
         }
     }
@@ -79,22 +76,27 @@ bool Rover::checkObstacle()
  * @return true if there is at least one obstacle in the specified direction,
  *         false otherwise.
  */
-bool Rover::checkObstacle(ActorDirection direction) 
+bool Rover::checkObstacle(ActorDirection direction)
 {
+    if (!world) {
+        std::cerr << "Rover.cpp - checkObstacle: World instance is not reachable." << std::endl;
+        return false;
+    }
+
     if (direction == ActorDirection::NORTH) {
-        if (world.getObstacles(getX(), getY() - 1).size() > 0) {
+        if (world->getObstacles(getX(), getY() - 1).size() > 0) {
             return true;
         }
     } else if (direction == ActorDirection::EAST) {
-        if (world.getObstacles(getX() + 1, getY()).size() > 0) {
+        if (world->getObstacles(getX() + 1, getY()).size() > 0) {
             return true;
         }
     } else if (direction == ActorDirection::SOUTH) {
-        if (world.getObstacles(getX(), getY() + 1).size() > 0) {
+        if (world->getObstacles(getX(), getY() + 1).size() > 0) {
             return true;
         }
     } else if (direction == ActorDirection::WEST) {
-        if (world.getObstacles(getX() - 1, getY()).size() > 0) {
+        if (world->getObstacles(getX() - 1, getY()).size() > 0) {
             return true;
         }
     }
@@ -112,18 +114,23 @@ bool Rover::checkObstacle(ActorDirection direction)
  * 
  * @return true if the rover would move out of the world bounds, false otherwise.
  */
-bool Rover::checkWorldBounds(ActorDirection direction) 
+bool Rover::checkWorldBounds(ActorDirection direction)
 {
+    if (!world) {
+        std::cerr << "Rover.cpp - checkWorldBounds: World instance is not reachable." << std::endl;
+        return false;
+    }
+
     if (direction == ActorDirection::NORTH) {
         if (getY() - 1 < 0) {
             return true;
         }
     } else if (direction == ActorDirection::EAST) {
-        if (getX() + 1 >= world.getWidth()) {
+        if (getX() + 1 >= world->getWidth()) {
             return true;
         }
     } else if (direction == ActorDirection::SOUTH) {
-        if (getY() + 1 >= world.getHeight()) {
+        if (getY() + 1 >= world->getHeight()) {
             return true;
         }
     } else if (direction == ActorDirection::WEST) {
@@ -139,7 +146,7 @@ bool Rover::checkWorldBounds(ActorDirection direction)
  * 
  * @return true if the destination is valid, false otherwise.
  */
-bool Rover::checkDestination() 
+bool Rover::checkDestination()
 {
-    return world.checkDestination(getX(), getY());
+    return world->checkDestination(getX(), getY());
 }

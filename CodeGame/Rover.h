@@ -2,12 +2,13 @@
 #define ROVER_H
 
 #include "Actor.h"
+#include "World.h"
 
 class Rover: public Actor {
 
     public:
-        Rover(int x, int y, ActorDirection actorDirection, ActorType actorType, World& world);
-        void act();
+        Rover(int x, int y, ActorDirection actorDirection, ActorType actorType, World* world);
+        void act() override;
 
     private:
         void drive();

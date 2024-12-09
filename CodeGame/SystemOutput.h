@@ -30,8 +30,8 @@ class SystemOutput {
             return instance;
         }   
 
-        void outputMove(int& x, int& y);
-        void outputTrun(const std::string& message);
+        void outputMove(int x, int y);
+        void outputTrun(const std::string message);
         void outputInformation(std::string message);
 };
 

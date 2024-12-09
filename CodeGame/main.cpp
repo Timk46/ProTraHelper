@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <memory>
 
 struct ActorData {
     std::string type;
@@ -110,39 +111,16 @@ int main() {
     // MARK: - Creation
 
     for (const auto& actor : actors) {
-        if (actor.type == "PLAYER") {
-            Rover rover(actor.x, actor.y, getActorDirection(actor.direction), getActorType(actor.type), world);
-            world.addObject(rover, rover.getX(), rover.getY());
-        } else if (actor.type == "DESTINATION") {
-            Destination destination(actor.x, actor.y, getActorDirection(actor.direction), getActorType(actor.type), world);
-            world.addObject(destination, destination.getX(), destination.getY());
-        } else if (actor.type == "OBSTACLE") {
-            Obstacle obstacle(actor.x, actor.y, getActorDirection(actor.direction), getActorType(actor.type), world);
-            world.addObject(obstacle, obstacle.getX(), obstacle.getY());
-        }
+        std::cout << "Creating actor: Type = " << actor.type << ", Position = (" << actor.x << ", " << actor.y << "), Direction = " << actor.direction << std::endl;
+
+        world.addObject(getActorType(actor.type), getActorDirection(actor.direction), actor.x, actor.y);
     }
 
     world.printWorld();
 
     // MARK: - Act
 
-    int numberOfActors = actors.size();
-    bool playerFound = false;
-    if (numberOfActors > 0) {
-        for (int i = 0; i < numberOfActors; i++) {
-            if (actors[i].type == "PLAYER") {
-                Rover* player = world.getPlayer(actors[i].x, actors[i].y);
-                if (player != nullptr) {
-                    player->act();
-                    playerFound = true;
-                }
-            }
-        }
-
-        if (!playerFound) {
-            std::cerr << "Player not found in the world map" << std::endl;
-        }
-    }
+    world.run();
 
     world.printWorld();
 
