@@ -30,7 +30,6 @@ class World {
         void printWorld();
         void addObject(Actor::ActorType actorType, Actor::ActorDirection actorDirection, int x, int y);
         void moveObject(Rover& rover, int x, int y);
-        // Rover* getPlayer(int x, int y);
         void run();
         std::vector<Obstacle*> getObstacles(int x, int y);
         bool checkDestination(int x, int y);

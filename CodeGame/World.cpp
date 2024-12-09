@@ -57,7 +57,14 @@ void World::printWorld()
 
 // MARK: - Actor actions
 
-
+/**
+ * @brief Adds an object of specified type and direction to the world map at the given coordinates.
+ * 
+ * @param actorType The type of the actor to be added (PLAYER, DESTINATION, OBSTACLE).
+ * @param actorDirection The direction the actor is facing.
+ * @param x The x-coordinate (width) where the actor will be placed.
+ * @param y The y-coordinate (height) where the actor will be placed.
+ */
 void World::addObject(Actor::ActorType actorType, Actor::ActorDirection actorDirection, int x, int y) 
 {
     const int i = y; // y is the height coordinate, row in the world map
@@ -80,6 +87,9 @@ void World::addObject(Actor::ActorType actorType, Actor::ActorDirection actorDir
     }
 }
 
+/**
+ * @brief Executes the main logic for the World.
+ */
 void World::run() {
     bool isActorFound = false;
 
@@ -108,8 +118,17 @@ void World::run() {
 }
 
 
+/**
+ * @brief Moves the specified rover to a new position on the world map.
+ * 
+ * @param rover The rover object to be moved.
+ * @param newX The new x-coordinate to move the rover to.
+ * @param newY The new y-coordinate to move the rover to.
+ * 
+ * @note If the rover is not found in the world map, an error message is printed to std::cerr.
+ * @note If the new coordinates are out of bounds, an error message is printed to std::cerr.
+ */
 void World::moveObject(Rover& rover, int newX, int newY) {
-    // find the actor in the world map and replace it with the new position
     bool isActorFound = false;
 
     for (int i = 0; i < worldMap.size(); i++)
