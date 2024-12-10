@@ -7,6 +7,9 @@ import { CodeEditorComponent } from './sites/code-editor/code-editor.component';
 import { WorkspaceComponent } from './sites/workspace/workspace.component';
 
 import { MaterialModule } from '../material.module';
+import { MonacoEditorModule } from "ngx-monaco-editor-v2";
+import { FormsModule } from "@angular/forms";
+import { MarkdownModule} from "ngx-markdown";
 
 @NgModule({
   declarations: [
@@ -14,10 +17,16 @@ import { MaterialModule } from '../material.module';
     CodeEditorComponent,
     WorkspaceComponent
   ],
-  imports: [
-    CommonModule,
-    CodeGameRoutingModule,
-    MaterialModule
-  ]
+    imports: [
+        CommonModule,
+        CodeGameRoutingModule,
+        MaterialModule,
+        FormsModule,
+        MonacoEditorModule,
+        MarkdownModule,
+    ],
+  exports: [
+    CodeEditorComponent
+  ],
 })
 export class CodeGameModule { }

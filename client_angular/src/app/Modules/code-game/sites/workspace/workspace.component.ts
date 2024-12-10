@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import { CodeEditorComponent } from "../code-editor/code-editor.component";
+
 
 @Component({
   selector: 'app-workspace',
@@ -6,5 +8,17 @@ import { Component } from '@angular/core';
   styleUrls: ['./workspace.component.scss']
 })
 export class WorkspaceComponent {
+  @ViewChild('codeEditorMonaco') codeEditorComponent?: CodeEditorComponent;
 
+  selectedLanguage: string = 'cpp';
+  code: string = '';
+  compilerOutput: string | null = '';
+
+  onCodeChanged(newCode: string): void {
+    console.log('Code changed: ', newCode);
+  }
+
+  submitCode(): void {
+    this.compilerOutput = 'Compiling...';
+  }
 }

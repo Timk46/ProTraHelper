@@ -1,3 +1,9 @@
-<div class="code-editor">
-  <p>code-editor works!</p>
+<div class="code-editor" [style.height.px]="editorHeight">
+  <ngx-monaco-editor
+    #monacoEditor
+    [(ngModel)]="code"
+    (ngModelChange)="changeCode($event)"
+    [options]="editorOptions"
+    style="width: 100%; height: calc(100% - 10px);">
+  </ngx-monaco-editor>
 </div>
