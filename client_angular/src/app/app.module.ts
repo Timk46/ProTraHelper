@@ -67,6 +67,7 @@ import { DynamicBlankComponent } from './Pages/contentView/contentElement/fill-i
 import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-task/graph-task.component';
 import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
 import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
+import { CodeGameModule } from "./Modules/code-game/code-game.module";
 
 @NgModule({
     declarations: [
@@ -135,7 +136,8 @@ import { NotRegisteredComponent } from './Pages/not-registered/not-registered.co
         EditorModule,
         MarkdownModule.forRoot(),
         GraphTasksModule,
-        MatMenuModule
+        MatMenuModule,
+        CodeGameModule
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

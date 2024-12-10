@@ -1,0 +1,23 @@
+// header
+
+.header {
+  height: 30px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  padding: 0 0px;
+}
+
+.left-content, .center-content, .right-content {
+  display: flex;
+  align-items: center;
+}
+
+.center-content {
+  justify-content: center;
+  gap: 8px;
+}
+
+// body
