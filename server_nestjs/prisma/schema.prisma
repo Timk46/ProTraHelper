@@ -252,6 +252,7 @@ model Question {
   originId                   Int?
   conceptNodeId              Int?
   codingQuestion             CodingQuestion?
+  codeGameQuestion           CodeGameQuestion?
   contentElement             ContentElement?
   files                      File[]
   GraphQuestion              GraphQuestion?
@@ -454,6 +455,28 @@ model CodeSubmissionFile {
   CodeSubmissionId Int
   CodeSubmission   CodeSubmission @relation(fields: [CodeSubmissionId], references: [id], onDelete: Cascade)
   user             User           @relation(fields: [userId], references: [id])
+}
+
+model CodeGameQuestion {
+  id                  Int              @id @default(autoincrement())
+  text                String
+  textHTML            String
+  mainFileName        String
+  programmingLanguage String
+  questionId          Int              @unique
+  codeGameScaffolds   CodeGameScaffold[]
+  gameFileName       String
+  game               String
+  question            Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model CodeGameScaffold {
+  id                 Int            @id @default(autoincrement())
+  codeGameQuestionId Int
+  codeFileName       String
+  code               String
+  language           String?
+  codeGameQuestion   CodeGameQuestion @relation(fields: [codeGameQuestionId], references: [id], onDelete: Cascade)
 }
 
 model FillinQuestion {
