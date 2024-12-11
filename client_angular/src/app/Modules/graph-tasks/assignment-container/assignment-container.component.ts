@@ -110,56 +110,31 @@ export class AssignmentContainerComponent implements OnInit {
     console.log(JSON.stringify(userAnswerData, null, 2));
     this.questionDataService.createUserAnswer(userAnswerData).subscribe(result => {
       console.log(result);
-      this.handleCodeSubmissionResponse(result);
+      this.handleGraphSubmissionResponse(result);
     });
 
   }
 
-  handleCodeSubmissionResponse(result: userAnswerFeedbackDTO): void {
+  handleGraphSubmissionResponse(result: userAnswerFeedbackDTO): void {
     this.isSending = false;
 
     // for first submission, enable the feedback and set the feedback type to algoFeedback 
     if (this.feedbackDisabled) {
       this.feedbackTypeCurrent = 'algoFeedback';
     }
+
     this.feedbackDisabled = false;
-
-    const feedbackJSON = result.feedbackText;
-    let feedbackObj: any;
-    try {
-      feedbackObj = JSON.parse(feedbackJSON);
-    } catch {
-      this.algoFeedback = "<br>Fehler beim Generieren des Algorithmischen Feedbacks";
-      this.llmFeedback = "<br>Fehler beim Generieren des KI Feedbacks";
+    if (result.feedbackText) {
+      this.algoFeedback = '<br>' + result.feedbackText.replace(/\n/g, '<br>');
     }
-    
-    try {
-      if (feedbackObj.algo) {
-        this.algoFeedback = '<br>' + feedbackObj.algo.replace(/\n/g, '<br>');
-      }
-      else {
-        this.algoFeedback = "<br>Fehler beim Generieren des Algorithmischen Feedbacks";
-      }
-    } catch {
-      this.algoFeedback = "<br>Fehler beim Generieren des Algorithmischen Feedbacks";
-    }
-
-    try {
-      if (feedbackObj.llm) {
-        this.llmFeedback = '<br>' + feedbackObj.llm.replace(/\n/g, '<br>');
-      }
-      else {
-        this.llmFeedback = "<br>Fehler beim Generieren des KI Feedbacks";
-      }
-    } catch {
-      this.llmFeedback = "<br>Fehler beim Generieren des KI Feedbacks";
+    else {
+      this.algoFeedback = "<br>Fehler beim Generieren des Algo Feedbacks";
     }
 
     if (result.progress === 100) {
       this.progressService.answerSubmitted();
     }
   }
-
 
   addNewSolutionStep() {
     // Before adding new step, the current step need to be saved

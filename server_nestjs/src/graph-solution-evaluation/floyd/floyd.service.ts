@@ -1,13 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { GraphStructureDTO, GraphStructureSemanticDTO } from '@DTOs/graphTask.dto';
 import { getEdgesWithDifferentWeights, getExtraEdges, graphJSONToSemantic, graphsContainSameNodes } from '../utils/graph-utils';
-import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
-import { graphFeedbackGenerationPrompts } from '../utils/graph-feedback-generation.prompts';
 
 @Injectable()
 export class FloydService {
-
-    constructor(private readonly feedbackGenerationService: FeedbackGenerationService) {}
 
     /**
      * Evaluates the student's solution for a graph-based assignment by comparing it to an expected solution.
@@ -22,9 +18,9 @@ export class FloydService {
      * @param {GraphStructureDTO[]} studentSolution - The student's solution, containing multiple steps with graph structures.
      * @param {number} maxPoints - The maximum points the student can earn for the entire solution.
      * 
-     * @returns {{ receivedPoints: number, feedback: string }} - The total points earned and detailed feedback for each step.
+     * @returns {{ receivedPoints: number, feedback: string, feedbackHTML: string }} - The total points earned and detailed feedback for each step.
      */
-    async evaluateSolution(questionText: string, initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
+    evaluateSolution(initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
 
         // Convert solutions from IGraphDataJSON to IGraphDataSemantic, where edges use node values instead of IDs, 
         // as IDs may differ in different solutions even for the same node values.
@@ -53,27 +49,11 @@ export class FloydService {
             feedbackHTML.push(`\n<strong>> Insgesamt erzielte Punkte:</strong> 0 / ${maxPoints}.`);
 
             const feedbackString = feedback.join('\n');
-
-            // Improve the feedback by using LLM to generate a more detailed feedback
-            const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
-                questionText.replace(/{/g, '{{').replace(/}/g, '}}'),
-                JSON.stringify(initialStructureSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-                null,
-                JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-                feedbackString.replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-                maxPoints
-            );
-    
-            const generatedFeedback = await this.feedbackGenerationService.generateGraphFeedback(
-                graphSystemMessage, JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            );
     
             return {
                 receivedPoints,
-                feedback: JSON.stringify({
-                    algo: feedbackHTML.join('\n'),
-                    llm: generatedFeedback
-                }),
+                feedback: feedback.join('\n'),
+                feedbackHTML: feedbackHTML.join('\n')
             }
         }
 
@@ -204,28 +184,10 @@ export class FloydService {
         feedback.push(`\n> Insgesamt erzielte Punkte: ${receivedPoints.toFixed(2)} / ${maxPoints}.`);
         feedbackHTML.push(`<strong>> Insgesamt erzielte Punkte:</strong> ${receivedPoints.toFixed(2)} / ${maxPoints}.`);
 
-        const feedbackString = feedback.join('\n');
-
-        // Improve the feedback by using LLM to generate a more detailed feedback
-        const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
-            questionText.replace(/{/g, '{{').replace(/}/g, '}}'),
-            JSON.stringify(initialStructureSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            JSON.stringify(expectedSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            feedbackString.replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            maxPoints
-        );
-
-        const generatedFeedback = await this.feedbackGenerationService.generateGraphFeedback(
-            graphSystemMessage, JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-        );
-
         return {
             receivedPoints,
-            feedback: JSON.stringify({
-                algo: feedbackHTML.join('\n'),
-                llm: generatedFeedback
-            }),
+            feedback: feedback.join('\n'),
+            feedbackHTML: feedbackHTML.join('\n')
         }
     }
 

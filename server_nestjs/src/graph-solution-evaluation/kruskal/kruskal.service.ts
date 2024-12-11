@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GraphEdgeSemanticDTO, GraphStructureSemanticDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
 import { getExtraEdgesUndirectedGraph, graphJSONToSemantic, graphsContainSameNodes } from '../utils/graph-utils';
-import { graphFeedbackGenerationPrompts } from '../utils/graph-feedback-generation.prompts';
-import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 
 export interface IUnionFind {
     parent: { [key: string]: string };
@@ -11,9 +9,7 @@ export interface IUnionFind {
 @Injectable()
 export class KruskalService {
 
-    constructor(private readonly feedbackGenerationService: FeedbackGenerationService) {}
-
-    async evaluateSolution(questionText: string, initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
+    evaluateSolution(initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
  
         // Convert solutions from IGraphDataJSON to IGraphDataSemantic, where edges use node values instead of IDs, 
         // as IDs may differ in different solutions even for the same node values.
@@ -33,25 +29,10 @@ export class KruskalService {
         })
 
         if (!correctNodes) {
-            const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
-                questionText.replace(/{/g, '{{').replace(/}/g, '}}'),
-                JSON.stringify(initialStructureSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-                null,
-                JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-                'Der Graph muss dieselben Knoten wie der Ausgangsgraph haben.',
-                maxPoints
-            );
-    
-            const generatedFeedback = await this.feedbackGenerationService.generateGraphFeedback(
-                graphSystemMessage, JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            );
-    
             return {
                 receivedPoints: 0,
-                feedback: JSON.stringify({
-                    algo: 'Der Graph muss dieselben Knoten wie der Ausgangsgraph haben.',
-                    llm: generatedFeedback
-                }),
+                feedback: 'Der Graph muss dieselben Knoten wie der Ausgangsgraph haben.',
+                feedbackHTML: 'Der Graph muss dieselben Knoten wie der Ausgangsgraph haben.'
             }
         }
 
@@ -96,26 +77,10 @@ export class KruskalService {
             }
         })
 
-        // Improve the feedback by using LLM to generate a more detailed feedback
-        const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
-            questionText.replace(/{/g, '{{').replace(/}/g, '}}'),
-            JSON.stringify(initialStructureSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            indexOfBestSolution === -1 ? null : JSON.stringify(allPossibleSolutions[indexOfBestSolution]).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            feedback.replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            maxPoints
-        );
-
-        const generatedFeedback = await this.feedbackGenerationService.generateGraphFeedback(
-            graphSystemMessage, JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-        );
-
         return {
             receivedPoints,
-            feedback: JSON.stringify({
-                algo: feedbackHTML,
-                llm: generatedFeedback
-            }),
+            feedback: feedback,
+            feedbackHTML: feedbackHTML
         }
     }
 

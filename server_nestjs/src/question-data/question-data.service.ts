@@ -167,6 +167,9 @@ export class QuestionDataService {
       },
       orderBy: {
         createdAt: 'desc'
+      },
+      include: {
+        userGraphAnswer: true,
       }
     });
     if (!userAnswer) {
@@ -176,13 +179,16 @@ export class QuestionDataService {
         userId: userId
       };
     }
+    
     return {
       id: userAnswer.id,
       questionId: userAnswer.questionId,
       userId: userAnswer.userId,
       userFreetextAnswer: userAnswer.userFreetextAnswer || undefined,
       userFreetextAnswerRaw: undefined,
-      userGraphAnswer: JSON.parse(JSON.stringify(userAnswer.userGraphAnswer)) || undefined,
+      userGraphAnswer: userAnswer.userGraphAnswer.length > 0 
+                        ? JSON.parse(JSON.stringify(userAnswer.userGraphAnswer[0]?.graphStructure)) 
+                        : undefined,
       userMCAnswer: (await this.prisma.userMCOptionSelected.findMany({
         where: {
           userAnswerId: userAnswer.id
@@ -404,8 +410,7 @@ export class QuestionDataService {
           questionId: answerData.questionId,
           //if answerData has a userFreetextAnswer, use it, else use null
           userFreetextAnswer: answerData.userFreetextAnswer ?? null,
-          //if answerData has a userGraphAnswer, use it, else use null
-          userGraphAnswer: answerData.userGraphAnswer ? JSON.parse(JSON.stringify(answerData.userGraphAnswer)) : null,
+          //if answerData has a userGraphAnswer, do nothing. It will be created later
       }
     });
 
@@ -673,7 +678,8 @@ export class QuestionDataService {
     if (question.type === questionType.GRAPH) {
       console.log('generate feedback for graph user answer');
 
-      let feedbackText = JSON.stringify({algo:"Du hast keine Antwort eingegeben."});
+      let algoFeedbackText = "Du hast keine Antwort eingegeben.";
+      let algoFeedbackTextHTML = "Du hast keine Antwort eingegeben.";
       let userScore = 0;
 
       if (answerData.userGraphAnswer) {
@@ -681,8 +687,9 @@ export class QuestionDataService {
         await this.qdGraph.getGraphQuestion(answerData.questionId, true).then(async (questionData) => {
 
           // Generate feedback based on the user answer
-          const { feedback, receivedPoints } = await this.graphEvalService.evaluateSolution(question.text, questionData, answerData.userGraphAnswer);
-          feedbackText = feedback;
+          const { feedback, feedbackHTML, receivedPoints } = this.graphEvalService.evaluateSolution(questionData, answerData.userGraphAnswer);
+          algoFeedbackText = feedback;
+          algoFeedbackTextHTML = feedbackHTML;
           userScore = receivedPoints;
         });
       }
@@ -702,28 +709,45 @@ export class QuestionDataService {
         markedAsDone = true;
       }
 
-      console.log('generated Text:', feedbackText);
+      console.log('algorithmically generated Text:', algoFeedbackText);
       console.log('userScore: ' + userScore);
 
-      //create feedback for user answer
-      const feedback = await this.prisma.feedback.create({
+      // create new entry in feedback table for user answer
+      const generalFeedback = await this.prisma.feedback.create({
         data: {
           userAnswerId: createdData.id,
-          text: feedbackText,
+          text: 'Feedback for Graph Task got its own table',
           score: userScore
         }
       });
 
-      if (!feedback) throw new Error('Could not create Feedback');
+      if (!generalFeedback) {
+        throw new Error('Could not create Feedback');
+      }
+      
+      // Create a new entry in the graphSubmission table for the user answer
+      const graphSubmission = await this.prisma.graphSubmission.create({
+        data: {
+          userAnswerId: createdData.id,
+          graphStructure: JSON.parse(JSON.stringify(answerData.userGraphAnswer)),
+          algorithmicFeedback: algoFeedbackText,
+          algorithmicFeedbackHTML: algoFeedbackTextHTML,
+          score: userScore,
+        }
+      });
 
+      if (!graphSubmission) {
+        throw new Error('Could not create GraphSubmission');
+      }
+      
       console.log('element done: ' + markedAsDone);
       return {
-        id: feedback.id,
-        userAnswerId: feedback.userAnswerId,
-        score: feedback.score,
-        feedbackText: feedback.text,
+        id: generalFeedback.id,
+        userAnswerId: generalFeedback.userAnswerId,
+        score: generalFeedback.score,
+        feedbackText: graphSubmission.algorithmicFeedbackHTML,
         elementDone: markedAsDone,
-        progress: Math.floor((feedback.score/question.score) * 100),
+        progress: Math.floor((generalFeedback.score/question.score) * 100),
       }
     }
   }

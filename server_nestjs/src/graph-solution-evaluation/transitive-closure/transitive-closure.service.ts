@@ -2,13 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { GraphStructureDTO, GraphStructureSemanticDTO } from '@DTOs/graphTask.dto';
 import { getExtraEdges, graphJSONToSemantic, graphsContainSameNodes, graphsIdentical } from '../utils/graph-utils'
 import { GraphEdgeSemanticDTO } from '@DTOs/graphTask.dto';
-import { graphFeedbackGenerationPrompts } from '../utils/graph-feedback-generation.prompts';
-import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 
 @Injectable()
 export class TransitiveClosureService {
-
-    constructor(private readonly feedbackGenerationService: FeedbackGenerationService) {}
 
     /**
      * Evaluates a student's graph solution against the expected solution.
@@ -26,9 +22,9 @@ export class TransitiveClosureService {
      * @param {GraphStructureDTO} expectedSolution - The expected correct solution in JSON format.
      * @param {number} maxPoints - The maximum number of points that can be awarded for this assignment.
      * 
-     * @returns {{ receivedPoints: number, feedback: string }} - An object containing the number of points received and feedback.
+     * @returns {{ receivedPoints: number, feedback: string, feedbackHTML: string }} - An object containing the number of points received and feedback.
      */
-    async evaluateSolution(questionText: string, initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO, maxPoints: number) {
+    evaluateSolution(initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO, maxPoints: number) {
 
         // Assumption: It is trivial if the studentSolution contains all/some/none of the edges which initialStructure contains
         // Assumption: Graph has only directed edges
@@ -43,26 +39,10 @@ export class TransitiveClosureService {
 
         const feedback = feedbackHTML.replace('<strong>', '').replace('</strong>', '');
 
-        // Improve the feedback by using LLM to generate a more detailed feedback
-        const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
-            questionText.replace(/{/g, '{{').replace(/}/g, '}}'),
-            JSON.stringify(initialStructureSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            JSON.stringify(expectedSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            feedback.replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            maxPoints
-        );
-
-        const generatedFeedback = await this.feedbackGenerationService.generateGraphFeedback(
-            graphSystemMessage, JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-        );
-
         return {
             receivedPoints,
-            feedback: JSON.stringify({
-                algo: feedbackHTML,
-                llm: generatedFeedback
-            }),
+            feedback: feedback,
+            feedbackHTML: feedbackHTML
         }       
     }
 

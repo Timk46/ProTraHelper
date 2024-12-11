@@ -1,13 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { getExtraSelectedNodes, getNodesWithDifferentWeights, graphJSONToSemantic, graphsContainSameEdges, graphsContainSameNodes } from '../utils/graph-utils';
 import { GraphStructureDTO, GraphStructureSemanticDTO, GraphNodeSemanticDTO } from '@DTOs/graphTask.dto';
-import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
-import { graphFeedbackGenerationPrompts } from '../utils/graph-feedback-generation.prompts';
 
 @Injectable()
 export class DijkstraService {
-
-    constructor(private readonly feedbackGenerationService: FeedbackGenerationService) {}
 
      /**
      * Evaluates a student's Dijkstra solution against the expected solution.
@@ -24,11 +20,11 @@ export class DijkstraService {
      * @param {GraphStructureDTO[]} expectedSolution - The expected correct solution, with each element representing a step in the process.
      * @param {number} maxPoints - The maximum number of points that can be awarded for the assignment.
      * 
-     * @returns {{ receivedPoints: number, feedback: string }} - An object containing the points awarded and feedback for each step.
+     * @returns {{ receivedPoints: number, feedback: string, feedbackHTML: string }} - An object containing the points awarded and feedback for each step.
      * 
      * @throws {Error} If the expected solution does not contain at least one step.
      */
-    async evaluateSolution(questionText: string, initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
+    evaluateSolution(initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
 
         // Convert solutions from IGraphDataJSON to IGraphDataSemantic, where edges use node values instead of IDs, 
         // as IDs may differ in different solutions even for the same node values.
@@ -192,30 +188,10 @@ export class DijkstraService {
         feedback.push(`\n> Insgesamt erzielte Punkte: ${receivedPoints.toFixed(2)} / ${maxPoints}.`);
         feedbackHTML.push(`\n<strong>> Insgesamt erzielte Punkte:</strong> ${receivedPoints.toFixed(2)} / ${maxPoints}.`);
 
-        const feedbackString = feedback.join('\n');
-
-        // Improve the feedback by using LLM to generate a more detailed feedback
-
-        const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
-            questionText,
-            JSON.stringify(initialStructureSemantic),
-            JSON.stringify(expectedSolutionSemantic),
-            JSON.stringify(studentSolutionSemantic),
-            feedbackString,
-            maxPoints
-        );
-
-        const generatedFeedback = await this.feedbackGenerationService.generateGraphFeedback(
-            graphSystemMessage.replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-            JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}'),
-        );
-
         return {
             receivedPoints,
-            feedback: JSON.stringify({
-                algo: feedbackHTML.join('\n'),
-                llm: generatedFeedback
-            }),
+            feedback: feedback.join('\n'),
+            feedbackHTML: feedbackHTML.join('\n')
         }     
     }
 

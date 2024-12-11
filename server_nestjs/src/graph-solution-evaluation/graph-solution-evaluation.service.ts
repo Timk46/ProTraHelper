@@ -16,10 +16,10 @@ export class GraphSolutionEvaluationService {
         private readonly kruskalService: KruskalService,
     ){}
 
-    evaluateSolution(questionText: string, question: GraphQuestionDTO, studentSolution: GraphStructureDTO[]) {
+    evaluateSolution(question: GraphQuestionDTO, studentSolution: GraphStructureDTO[]) {
 
         if (!studentSolution || studentSolution.length === 0) {
-            return { feedback: JSON.stringify({algo:"Keine Lösung abgegeben."}), receivedPoints: 0 };
+            return { feedback: "Keine Lösung abgegeben.", feedbackHTML: "Keine Lösung abgegeben.", receivedPoints: 0 };
         }
 
         // Some questions types require evaluating a single-step solution, while others require a multi-step solution 
@@ -29,7 +29,6 @@ export class GraphSolutionEvaluationService {
             
             case 'dijkstra':
                 return this.dijkstraService.evaluateSolution(
-                    questionText,
                     question.initialStructure,
                     studentSolution,
                     question.maxPoints
@@ -37,7 +36,6 @@ export class GraphSolutionEvaluationService {
 
             case 'floyd':
                 return this.floydService.evaluateSolution(
-                    questionText,
                     question.initialStructure, 
                     studentSolution,
                     question.maxPoints
@@ -45,7 +43,6 @@ export class GraphSolutionEvaluationService {
 
             case 'kruskal':
                 return this.kruskalService.evaluateSolution(
-                    questionText,
                     question.initialStructure, 
                     studentSolution,
                     question.maxPoints
@@ -53,7 +50,6 @@ export class GraphSolutionEvaluationService {
 
             case 'transitive_closure':
                 return this.transitiveClosureService.evaluateSolution(
-                    questionText,
                     question.initialStructure, 
                     studentSolution[0],
                     question.maxPoints
