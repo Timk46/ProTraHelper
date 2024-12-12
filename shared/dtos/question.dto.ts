@@ -142,6 +142,7 @@ export interface CodingQuestionDto {
     CODE = "CodingQuestion",
     FILLIN = "Fillin",
     GRAPH = "GraphQuestion",
+    CODEGAME = "CodeGameQuestion",
   }
 
   export interface McqGenerationDTO {
@@ -178,3 +179,23 @@ export interface CodingQuestionDto {
     configuration: GraphConfigurationDTO;
     maxPoints: number;
   }
+
+// CodeGame CodingQuestion DTOs
+
+export interface CodeGameQuestionDto {
+    id: number;
+    text: string;
+    mainFileName: string;
+    programmingLanguage: string;
+    codeGameScaffolds: CodeGameScaffoldDto[];
+    gameFileName: string;
+    game: string;
+}
+
+export interface CodeGameScaffoldDto {
+    id: number;
+    codeGameQuestionId: number;
+    codeFileName: string;
+    code: string;
+    language: string;
+}

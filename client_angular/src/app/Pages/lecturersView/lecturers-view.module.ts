@@ -23,6 +23,9 @@ import { EditBlankComponent } from './edit-fillin/edit-blank/edit-blank.componen
 import { ImageUploadDialogComponent } from './edit-fillin/image-upload-dialog/image-upload-dialog.component';
 import { GraphTasksModule } from 'src/app/Modules/graph-tasks/graph-tasks.module';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { EditCodeGameComponent } from './edit-code-game/edit-code-game.component';
+import { CodeGameAddElementModalComponent } from "./edit-code-game/code-game-add-element-modal.component";
+import { CodeGameModule } from "../../Modules/code-game/code-game.module";
 
 @NgModule({
   declarations: [
@@ -38,7 +41,9 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     EditCodingComponent,
     EditGraphComponent,
     AddElementModalComponent,
-    TinymceComponent
+    TinymceComponent,
+    EditCodeGameComponent,
+    CodeGameAddElementModalComponent
   ],
   imports: [
     CommonModule,
@@ -52,7 +57,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     MatSelectModule,
     MatFormFieldModule,
     GraphTasksModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    CodeGameModule
   ],
   exports: [
     CreateContentNodeDialogComponent,

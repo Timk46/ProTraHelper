@@ -29,6 +29,7 @@ import { NotRegisteredComponent } from './Pages/not-registered/not-registered.co
 import { RegisteredForSubjectGuard } from './Guards/registered-for-subject.guard';
 
 import { GraphTasksComponent } from './Modules/graph-tasks/graph-tasks.component';
+import { EditCodeGameComponent } from "./Pages/lecturersView/edit-code-game/edit-code-game.component";
 
 
 const routes: Routes = [
@@ -57,6 +58,7 @@ const routes: Routes = [
   { path: 'editfillin/:questionId', component: EditFillinComponent, canActivate: [LoggedInGuard, AdminGuard]},
   { path: 'editfreetext/:questionId', component: EditFreetextComponent, canActivate: [LoggedInGuard, AdminGuard]},
   { path: 'editgraph/:questionId', component: EditGraphComponent, canActivate: [LoggedInGuard, AdminGuard]},
+  { path: 'editcodegame/:questionId', component: EditCodeGameComponent, canActivate: [LoggedInGuard, AdminGuard]},
 
   // just for testing
   { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },

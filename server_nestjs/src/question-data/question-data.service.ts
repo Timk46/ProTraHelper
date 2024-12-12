@@ -10,6 +10,7 @@ import { QuestionDataFillinService } from './question-data-fillin/question-data-
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
 import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
 import { GraphSolutionEvaluationService } from '@/graph-solution-evaluation/graph-solution-evaluation.service';
+import { QuestionDataCodeGameService } from '@/question-data/question-data-code-game/question-data-code-game.service';
 
 @Injectable()
 export class QuestionDataService {
@@ -22,7 +23,8 @@ export class QuestionDataService {
     private qdFillin: QuestionDataFillinService,
     private qdFreetext: QuestionDataFreetextService,
     private qdGraph: QuestionDataGraphService,
-    private graphEvalService: GraphSolutionEvaluationService
+    private graphEvalService: GraphSolutionEvaluationService,
+    private qdCodeGame: QuestionDataCodeGameService
   ) {}
 
   /**
@@ -136,6 +138,13 @@ export class QuestionDataService {
           }
         });
         break;
+      case questionType.CODEGAME:
+        specificQuestionData = await this.prisma.codeGameQuestion.findFirst({
+          where: {
+            questionId: Number(questionId)
+          }
+        });
+        break;
     }
 
     const questionData: detailedQuestionDTO = {
@@ -146,6 +155,7 @@ export class QuestionDataService {
       fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
       graphQuestion: questionTypeStr === questionType.GRAPH ? specificQuestionData : undefined,
       // fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
+      codeGameQuestion: questionTypeStr === questionType.CODEGAME ? specificQuestionData : undefined,
     };
 
     return questionData;
@@ -350,6 +360,13 @@ export class QuestionDataService {
           await this.qdFillin.updateFillinQuestion(question.fillinQuestion);
         }
         break;
+      case questionType.CODEGAME:
+        if (createNewVersion || !currentQuestion.codeGameQuestion) {
+          await this.qdCodeGame.createCodeGameQuestion(question.codeGameQuestion, updatedQuestion.id);
+        } else {
+          await this.qdCodeGame.updateCodeGameQuestion(question.codeGameQuestion);
+        }
+        break;
     }
 
     return await this.getDetailedQuestion(updatedQuestion.id, question.type as questionType);
@@ -378,11 +395,11 @@ export class QuestionDataService {
         newQuestion.mcQuestion ||
         newQuestion.fillinQuestion ||
         //TODO: uml, graph
-        newQuestion.graphQuestion // ||
+        newQuestion.graphQuestion ||
         //TODO: fill, uml
         // newQuestion.fillinQuestion // das hier einfügen
-      )
-    ){
+        newQuestion.codeGameQuestion)
+    ) {
       return true;
     }
     return false;

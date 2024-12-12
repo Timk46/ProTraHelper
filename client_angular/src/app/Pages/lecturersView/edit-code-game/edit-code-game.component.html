@@ -1,0 +1,105 @@
+<div class="edit-code-game-container">
+  <h2>Programmierspiel erstellen/bearbeiten</h2>
+  <form [formGroup]="codeGameForm" (ngSubmit)="onSubmit()">
+    <div class="section-container">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" required>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Programming Language</mat-label>
+          <mat-select formControlName="programmingLanguage" required (selectionChange)="onLanguageChange($event)">
+<!--            <mat-option value="python">Python</mat-option>-->
+<!--            <mat-option value="java">Java</mat-option>-->
+            <mat-option value="cpp">C++</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="form-field full-width subsection-container">
+        <div class="section-header">
+          <h3>Aufgabenstellung</h3>
+          <button mat-mini-fab color="primary" type="button" (click)="togglePreview()">
+            <mat-icon>{{ showTaskPreview ? 'edit' : 'preview' }}</mat-icon>
+          </button>
+        </div>
+        <p>Die Aufgabenstellung. Diese wird mit der Markdown-Syntax formatiert.</p>
+        <mat-divider></mat-divider>
+        <div class="markdown-editor-container">
+          <div [hidden]="showTaskPreview">
+            <ng-container>
+              <app-code-editor-code-game
+                [code]="codeGameForm.get('text')?.value"
+                [selectedLanguage]="markdownLanguage"
+                (codeChange)="onCodeChange($event, 0, 'text')"
+              ></app-code-editor-code-game>
+            </ng-container>
+          </div>
+          <div [hidden]="!showTaskPreview">
+            <markdown [data]="codeGameForm.get('text')?.value"></markdown>
+          </div>
+        </div>
+      </div>
+
+      <div formArrayName="codeGameScaffolds" class="subsection-container">
+        <div class="section-header">
+          <h3>Code-Gerüste</h3>
+          <button mat-mini-fab color="primary" type="button" (click)="openAddModal('codeGameScaffolds')">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        <p>Diese Dateien werden den Lernenden bei Bearbeitung der Aufgabe zur Verfügung gestellt.</p>
+        <mat-accordion>
+          <mat-expansion-panel *ngFor="let codeGameScaffold of codeGameScaffoldsControls; let i = index" [formGroupName]="i">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <span>{{codeGameScaffold.get('codeFileName')?.value}}</span>
+                <button mat-icon-button color="warn" type="button" (click)="confirmDelete('codeGameScaffolds', i, codeGameScaffold.get('codeFileName')?.value); $event.stopPropagation();">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <ng-container>
+              <app-code-editor-code-game
+                [code]="codeGameScaffold.get('code')?.value"
+                [selectedLanguage]="codeGameForm.get('programmingLanguage')?.value"
+                (codeChange)="onCodeChange($event, i, 'codeGameScaffolds')"
+              ></app-code-editor-code-game>
+            </ng-container>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+
+<!--      TODO: dropdown -->
+      <div class="subsection-container">
+        <p>Extra Informationen, um den Code auszuführen.</p>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Main File Name</mat-label>
+            <input matInput formControlName="mainFileName" required>
+          </mat-form-field>
+      </div>
+
+      <div class="form-field full-width subsection-container">
+        <div class="section-header">
+          <h3>Game</h3>
+        </div>
+        <p>Diese (txt) Datei dient als beschreibung des Spielfledes.</p>
+        <mat-divider></mat-divider>
+          <ng-container>
+            <app-code-editor-code-game
+              [code]="codeGameForm.get('game')?.value"
+              [selectedLanguage]="txtLanguage"
+              (codeChange)="onCodeChange($event, 0, 'game')"
+            ></app-code-editor-code-game>
+          </ng-container>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="submit" class="action-button">Save Changes</button>
+    </div>
+
+  </form>
+</div>

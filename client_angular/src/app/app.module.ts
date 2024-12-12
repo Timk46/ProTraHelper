@@ -68,6 +68,7 @@ import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-tas
 import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
 import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
 import { CodeGameModule } from "./Modules/code-game/code-game.module";
+import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-game/code-game-confirm-dialog.component";
 
 @NgModule({
     declarations: [
@@ -120,7 +121,8 @@ import { CodeGameModule } from "./Modules/code-game/code-game.module";
         NotRegisteredComponent,
         FillinTaskNewComponent,
         DynamicBlankComponent,
-        GraphTaskComponent
+        GraphTaskComponent,
+        CodeGameConfirmDialogComponent
     ],
     imports: [
         ToastrModule.forRoot(),

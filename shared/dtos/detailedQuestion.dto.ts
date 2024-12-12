@@ -1,4 +1,4 @@
-import {CodingQuestionInternal} from './question.dto';
+import { CodeGameQuestionDto, CodingQuestionInternal } from './question.dto';
 import { GraphConfigurationDTO, GraphStructureDTO } from './graphTask.dto';
 
 export interface detailedQuestionDTO {
@@ -24,6 +24,7 @@ export interface detailedQuestionDTO {
   fillinQuestion?: detailedFillinQuestionDTO;
   graphQuestion?: detailedGraphQuestionDTO;
   // fillinQuestion?: detailedFillinQuestionDTO;
+  codeGameQuestion?: CodeGameQuestionDto;
 }
 
 export interface detailedFreetextQuestionDTO {

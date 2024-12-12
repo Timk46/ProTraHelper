@@ -406,6 +406,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       case questionType.GRAPH:
         this.router.navigate(['/editgraph/', taskViewData.id]);
         break;
+      case questionType.CODEGAME:
+        this.router.navigate(['/editcodegame/', taskViewData.id]);
+        break;
     }
   }
 
@@ -536,6 +539,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         return 'Programmieraufgabe';
       case questionType.GRAPH:
         return 'Graphaufgabe';
+      case questionType.CODEGAME:
+        return 'Programmierspiel';
       default:
         return 'undefiniert';
     }

@@ -27,11 +27,11 @@
       <div class="code-editor-column">
         <mat-card>
           <mat-card-content>
-            <app-code-editor #codeEditorMonaco
+            <app-code-editor-code-game #codeEditorMonaco
                              [selectedLanguage]="selectedLanguage"
                              [(code)]="code"
                              (codeChange)="onCodeChanged($event)">
-            </app-code-editor>
+            </app-code-editor-code-game>
           </mat-card-content>
         </mat-card>
       </div>

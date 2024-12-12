@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 
 @Component({
-  selector: 'app-code-editor',
+  selector: 'app-code-editor-code-game',
   templateUrl: './code-editor.component.html',
   styleUrls: ['./code-editor.component.scss']
 })
@@ -13,7 +13,7 @@ export class CodeEditorComponent {
   @Input() code: string = '';
   @Output() codeChange = new EventEmitter<string>();
 
-  editorHeight: number = 700; // Default height
+  editorHeight: number = 600; // Default height
 
   // For Monaco Code Editor
   editorOptions = {
@@ -30,6 +30,23 @@ export class CodeEditorComponent {
     };
   }
 
+  /**
+   * Change the language of the editor.
+   * @param language - The new language to set for the editor.
+   */
+  changeLanguage(language: string | undefined): void {
+    if (language === undefined) return;
+    this.selectedLanguage = language;
+    this.editorOptions = {
+      ...this.editorOptions,
+      language: this.selectedLanguage,
+    };
+  }
+
+  /**
+   * Emit the new code to the parent component (student-workspace) when the code is changed.
+   * @param code - The updated code from the editor.
+   */
   changeCode(code: string): void {
     this.codeChange.emit(code);
   }
