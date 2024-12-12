@@ -460,13 +460,12 @@ model CodeSubmissionFile {
 model CodeGameQuestion {
   id                  Int              @id @default(autoincrement())
   text                String
-  textHTML            String
   mainFileName        String
   programmingLanguage String
   questionId          Int              @unique
   codeGameScaffolds   CodeGameScaffold[]
-  gameFileName       String
-  game               String
+  gameFileName        String
+  game                String
   question            Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
