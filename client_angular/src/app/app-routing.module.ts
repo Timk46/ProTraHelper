@@ -6,7 +6,6 @@ import { DashboardComponent } from './Pages/dashboard/dashboard.component';
 import { ConceptOverviewComponent } from './Pages/conceptOverview/conceptOverview.component';
 import { CodeTaskComponent } from './Pages/contentView/contentElement/codeTask/codeTask.component';
 import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer/pdfViewer.component';
-import { McTaskComponent } from './Pages/contentView/contentElement/mcTask/mcTask.component';
 import { GraphComponent } from './Pages/graph/graph.component';
 import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
 import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
@@ -24,11 +23,10 @@ import { EditGraphComponent } from './Pages/lecturersView/edit-graph/edit-graph.
 import { EditFillinComponent } from './Pages/lecturersView/edit-fillin/edit-fillin.component';
 import { AdminGuard } from './Guards/is-admin.guard';
 import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
-
 import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
 import { RegisteredForSubjectGuard } from './Guards/registered-for-subject.guard';
-
 import { GraphTasksComponent } from './Modules/graph-tasks/graph-tasks.component';
+import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-question.component';
 
 // refactor that routes with dashboard as parent component and the rest as children
 
@@ -44,19 +42,21 @@ const routes: Routes = [
     children: [
       { path: 'contentBoard', component: ContentBoardComponent },
       { path: 'conceptOverview', component: ConceptOverviewComponent },
-      { path: 'conceptOverview/:conceptId', component: ConceptOverviewComponent },
-      { path: 'conceptOverview/:conceptId/question/:questionId', component: ConceptOverviewComponent },
+      {
+        path: 'conceptOverview/:conceptId',
+        component: ConceptOverviewComponent,
+        children: [
+          { path: 'question/:questionId', component: DynamicQuestionComponent }
+        ]
+      },
       { path: 'discussion', component: DiscussionListComponent },
       { path: 'codeTask', component: CodeTaskComponent },
       { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent },
-      { path: 'mcTask', component: McTaskComponent },
       { path: 'graph', component: GraphComponent },
       { path: 'chatbot', component: ChatBotComponent },
       { path: 'video', component: VideoTimeStampComponent },
-      { path: 'discussion-view/:discussionId', component: DiscussionViewComponent },
       { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent },
       { path: 'mcqcreation', component: McTaskCreationComponent },
-
       // lecturers view
       { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [AdminGuard] },
       { path: 'editcoding/:questionId', component: EditCodingComponent, canActivate: [AdminGuard] },
@@ -66,20 +66,20 @@ const routes: Routes = [
 
       // just for testing
       { path: 'file-upload', component: FileUploadComponent },
-
-      { path: 'graphtask/:questionId', component: GraphTasksComponent },
-
-      // Lazy loaded modules
-      {
-        path: 'tutor-kai',
-        loadChildren: () => import('./Modules/tutor-kai/tutor-kai.module').then(m => m.TutorKaiModule)
-      },
-      {
-        path: 'admin',
-        loadChildren: () => import('./Pages/admin/admin.module').then(m => m.AdminModule),
-        canActivate: [AdminGuard]
-      }
     ]
+  },
+  { path: 'discussion-view/:discussionId', component: DiscussionViewComponent },
+  { path: 'graphtask/:questionId', component: GraphTasksComponent },
+  // Lazy loaded modules
+  {
+    path: 'tutor-kai',
+    loadChildren: () => import('./Modules/tutor-kai/tutor-kai.module').then(m => m.TutorKaiModule),
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard]
+  },
+  {
+    path: 'admin',
+    loadChildren: () => import('./Pages/admin/admin.module').then(m => m.AdminModule),
+    canActivate: [AdminGuard]
   }
 ];
 @NgModule({

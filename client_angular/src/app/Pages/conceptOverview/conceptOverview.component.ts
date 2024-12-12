@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { map, Observable, Subscription } from 'rxjs';
+import { filter, map, Observable, Subscription } from 'rxjs';
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
-import { ConceptNodeDTO, ContentsForConceptDTO, LinkableContentNodeDTO } from '@DTOs/index';
+import { ConceptNodeDTO, ContentsForConceptDTO, LinkableContentNodeDTO, QuestionDTO } from '@DTOs/index';
 import { ContentService } from 'src/app/Services/content/content.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
@@ -9,7 +9,7 @@ import { UserService } from 'src/app/Services/auth/user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateContentNodeDialogComponent } from '../lecturersView/create-content-node-dialog/create-content-node-dialog.component';
 import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 
 @Component({
@@ -19,8 +19,8 @@ import { QuestionDataService } from 'src/app/Services/question/question-data.ser
 })
 export class ConceptOverviewComponent implements OnInit, OnDestroy {
   private graphCommunicationService: GraphCommunicationService =
-    GraphCommunicationService.getInstance();
-
+  GraphCommunicationService.getInstance();
+  isQuestionRoute = false;
   private activeConceptNodeSubscription: Subscription;
   activeTab: string = 'content';
   isHandset$: Observable<boolean> = this.bps
@@ -60,7 +60,8 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private contentLinkerSerivce: ContentLinkerService,
     private route: ActivatedRoute,
-    private questionService: QuestionDataService
+    private questionService: QuestionDataService,
+    private router: Router
   ) {
     // subscribe to activeConceptNode changes in the graph and update the activeConceptNode and contentsForActiveConceptNode accordingly
     this.activeConceptNodeSubscription =
@@ -78,6 +79,11 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
           }
         }
       );
+      this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.isQuestionRoute = this.router.url.includes('/question/');
+    });
   }
 
   ngOnInit() {
@@ -107,10 +113,30 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Navigates to the dynamic question route with questionType
+   */
   loadQuestion(questionId: number) {
-    this.questionService.getQuestionData(questionId).subscribe((question) => {
-      this.activeQuestion = question;
+    console.log('loadQuestion in conceptOverview', questionId);
+    this.questionService.getQuestionData(questionId).subscribe((question: QuestionDTO) => {
+      this.navigateToQuestion(this.activeConceptNode.databaseId, question.id);
     });
+  }
+
+  /**
+   * Navigates to the dynamic question route
+   * @param conceptId
+   * @param questionId
+   * @param questionType
+   */
+  navigateToQuestion(conceptId: number, questionId: number): void {
+    console.log("navigateToQuestion in conceptOverview", conceptId, questionId);
+    this.router.navigate([
+      '/dashboard/conceptOverview',
+      conceptId,
+      'question',
+      questionId,
+    ]);
   }
 
   loadConceptNode(conceptNodeId: number) {

@@ -108,6 +108,7 @@ export interface CodingQuestionDto {
     automatedTests: AutomatedTestDto[];
     modelSolutions?: ModelSolutionDto[];
   }
+
   export interface ModelSolutionDto {
     id: number;
     codingQuestionId: number;
@@ -178,3 +179,15 @@ export interface CodingQuestionDto {
     configuration: GraphConfigurationDTO;
     maxPoints: number;
   }
+
+  export interface TaskViewData {
+    contentNodeId: number;
+    contentElementId: number;
+    id: number;
+    name?: string;
+    type: string;
+    progress?: number;
+    description?: string;
+    level?: number;
+    
+}

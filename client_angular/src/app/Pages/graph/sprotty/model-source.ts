@@ -1,28 +1,27 @@
 import { injectable } from 'inversify';
-import { ActionHandlerRegistry, Expandable, LocalModelSource, TYPES } from 'sprotty';
+import { ActionHandlerRegistry, LocalModelSource } from 'sprotty';
 import { ConceptGraphDTO, ConceptNodeDTO } from '@DTOs/index';
 import { SprottyConceptEdge, SprottyConceptNode } from './sprottyModels.interface'
 //import { SModelIndex } from 'sprotty-protocol/lib/utils/model-utils';
 import {
-  Action, CollapseExpandAction, CollapseExpandAllAction, SCompartment, SEdge, SGraph, SLabel,
-  SModelIndex, SNode, SelectAction, CenterAction, FitToScreenAction, SShapeElement
+  Action, CollapseExpandAction, SEdge, SGraph, SLabel,
+  SModelIndex, SNode, SelectAction, CenterAction, FitToScreenAction, SShapeElement,
+  Expandable
 } from 'sprotty-protocol';
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
-import { inject, inject as injectAngular } from '@angular/core';
+import { inject as injectAngular, OnDestroy } from '@angular/core';
 import { AwardLevelAction, CreateConceptAction, CreateEdgeAction, DeleteConceptAction, MoveNodeAction } from './actions';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateConceptDialogComponent } from '../graph-dialogs/create-concept-dialog/create-concept-dialog.component';
-import { has } from 'markdown-it/lib/common/utils';
-import { first } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 
 
 @injectable()
-export class ConceptGraphModelSource extends LocalModelSource {
+export class ConceptGraphModelSource extends LocalModelSource implements OnDestroy {
   private GraphCommunicationService: GraphCommunicationService =
-    GraphCommunicationService.getInstance();
+  GraphCommunicationService.getInstance();
   private graphUpdateSubscription: Subscription;
   private flatGraph: ConceptGraphDTO = {
     id: 0,
@@ -45,7 +44,6 @@ export class ConceptGraphModelSource extends LocalModelSource {
     this.router = injectAngular(Router);
     this.dialog = injectAngular(MatDialog);
     this.graphData = injectAngular(GraphDataService);
-    //this.initTestGraph();
     this.getUserGraph();
     this.graphUpdateSubscription =
       this.GraphCommunicationService.graphUpdateNeeded.subscribe(() => {
@@ -53,6 +51,11 @@ export class ConceptGraphModelSource extends LocalModelSource {
       });
   }
 
+  /**
+   * @description Initializes the model source.
+   * @param {ActionHandlerRegistry} registry - The action handler registry.
+   * @returns {void}
+   */
   override initialize(registry: ActionHandlerRegistry): void {
     super.initialize(registry);
     // register all actions handled by this model source
@@ -65,7 +68,12 @@ export class ConceptGraphModelSource extends LocalModelSource {
     registry.register(MoveNodeAction.KIND, this);
   }
 
-  override handle(action: Action) {
+  /**
+   * @description Handles the action.
+   * @param {Action} action - The action to handle.
+   * @returns {void}
+   */
+  override handle(action: Action): void {
     //console.log("action: ", action)
     switch (action.kind) {
       case SelectAction.KIND:
@@ -101,9 +109,10 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * Fetches the user graph from the server and initializes the graph
+   * @description Fetches the user graph from the server and initializes the graph
+   * @returns {void}
    */
-  private getUserGraph() {
+  private getUserGraph(): void {
     this.graphData!.fetchUserGraph(this.currentModule).subscribe((graph) => {
       this.initGraph(graph);
       console.log('graph updated');
@@ -111,12 +120,12 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * Initializes the graph with the given flatGraph by creating the
-   * root node and adding the first layer of nodes and edges
-   * the recursive function addChildren is called for each node to add its children
-   * @param flatGraph the graph to be initialized
+   * @description Initializes the graph with the given flatGraph by creating the root node and adding the first layer of nodes and edges.
+   * The recursive function addChildren is called for each node to add its children.
+   * @param {ConceptGraphDTO} flatGraph - The graph to be initialized.
+   * @returns {void}
    */
-  public initGraph(flatGraph: ConceptGraphDTO) {
+  public initGraph(flatGraph: ConceptGraphDTO): void {
     this.flatGraph = flatGraph;
 
     const graph: SGraph = {
@@ -184,10 +193,10 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * This recursive function adds children to a node in the graph. It also calculates the level and goal summaries for parent nodes.
-   * @param parentNode
-   * @param type of the children being added, is 'concept' for parent and leaf nodes, 'mini-concept' for mini concepts and 'not-visible' for dummy nodes
-   * @returns levels and goals of leaf nodes
+   * @description This recursive function adds children to a node in the graph. It also calculates the level and goal summaries for parent nodes.
+   * @param {SprottyConceptNode} parentNode - The parent node to add children to.
+   * @param {string} type - The type of the children being added, is 'concept' for parent and leaf nodes, 'mini-concept' for mini concepts and 'not-visible' for dummy nodes.
+   * @returns {Object} levels and goals of leaf nodes
    */
   private addChildren(
     parentNode: SprottyConceptNode,
@@ -327,10 +336,11 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * Is called every time a node is selected. Updates the active node in the graphCommunication service,
+   * @description Is called every time a node is selected. Updates the active node in the graphCommunication service,
    * updates the selected concept in the database and handles edge creating and node moving if the respective
    * private variables are set
-   * @param action
+   * @param {SelectAction} action - The action to handle.
+   * @returns {void}
    */
   handleSelectAction(action: SelectAction): void {
     // send data to contentOverview
@@ -377,8 +387,9 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * Opens the dialog for creating a new concept
-   * @param action
+   * @description Opens the dialog for creating a new concept
+   * @param {CreateConceptAction} action - The action to handle.
+   * @returns {void}
    */
   handleCreateConceptAction(action: CreateConceptAction): void {
     const index = new SModelIndex();
@@ -405,8 +416,9 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * Deletes the current concept
-   * @param action
+   * @description Deletes the current concept
+   * @param {DeleteConceptAction} action - The action to handle.
+   * @returns {void}
    */
   handleDeleteConceptAction(action: DeleteConceptAction): void {
     const index = new SModelIndex();
@@ -437,8 +449,9 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * Expands and collapses nodes in the graph
-   * @param action
+   * @description Expands and collapses nodes in the graph
+   * @param {CollapseExpandAction} action - The action to handle.
+   * @returns {Promise<void>}
    */
   async handleCollapseExpandAction(
     action: CollapseExpandAction
@@ -493,7 +506,13 @@ export class ConceptGraphModelSource extends LocalModelSource {
     }
   }
 
-  private updateExpandedState(node: SprottyConceptNode, expanded: boolean) {
+  /**
+   * @description Updates the expanded state of a node
+   * @param {SprottyConceptNode} node - The node to update.
+   * @param {boolean} expanded - Whether the node is expanded or not.
+   * @returns {void}
+   */
+  private updateExpandedState(node: SprottyConceptNode, expanded: boolean): void {
     this.flatGraph.nodeMap[node.databaseId].expanded = expanded;
     this.graphData!.updateConceptExpansionState(
       node.databaseId,
@@ -502,8 +521,9 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * called through the context menu, increases level of the node by one
-   * @param action
+   * @description Called through the context menu, increases level of the node by one
+   * @param {AwardLevelAction} action - The action to handle.
+   * @returns {void}
    */
   handleAwardLevelAction(action: AwardLevelAction): void {
     const index = new SModelIndex();
@@ -520,8 +540,9 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * called through the context menu, sets the EdgeCreator variable to the selected node
-   * @param action
+   * @description Called through the context menu, sets the EdgeCreator variable to the selected node
+   * @param {CreateEdgeAction} action - The action to handle.
+   * @returns {void}
    */
   handleCreateEdgeAction(action: CreateEdgeAction): void {
     // set private variable that will be checked when a new node is selected
@@ -536,16 +557,16 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * Sends a request to the server to create an edge between the currently selected node and the node that
+   * @description Sends a request to the server to create an edge between the currently selected node and the node that
    * was selected when the CreateEdgeAction was dispatched
-   * @param index index of the current graph
-   * @param firstSelectedNode the first of the currently selected nodes
-   * @returns
+   * @param {SModelIndex} index - The index of the current graph.
+   * @param {SprottyConceptNode} firstSelectedNode - The first of the currently selected nodes.
+   * @returns {void}
    */
   private CreateEdge(
     index: SModelIndex,
     firstSelectedNode: SprottyConceptNode
-  ) {
+  ): void {
     const sprottyNode = index.getById(
       this.EdgeCreator!.concept
     ) as SprottyConceptNode;
@@ -594,8 +615,9 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * called through the context menu, sets the NodeMover variable to the selected node
-   * @param action
+   * @description Called through the context menu, sets the NodeMover variable to the selected node
+   * @param {MoveNodeAction} action - The action to handle.
+   * @returns {void}
    */
   handleMoveNodeAction(action: MoveNodeAction): void {
     const index = new SModelIndex();
@@ -605,11 +627,12 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * moves the node that was selected when the MoveNodeAction was dispatched to the currently selected node
-   * @param index
-   * @param firstSelectedNode
+   * @description Moves the node that was selected when the MoveNodeAction was dispatched to the currently selected node
+   * @param {SModelIndex} index - The index of the current graph.
+   * @param {SprottyConceptNode} firstSelectedNode - The first of the currently selected nodes.
+   * @returns {void}
    */
-  private MoveNode(index: SModelIndex, firstSelectedNode: SprottyConceptNode) {
+  private MoveNode(index: SModelIndex, firstSelectedNode: SprottyConceptNode): void {
     const sprottyNode = index.getById(
       this.NodeMover!.concept
     ) as SprottyConceptNode;
@@ -628,15 +651,15 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * creates new sprotty concept node
-   * @param parentId the sprotty id of the parent
-   * @param id sprotty id of the node being created, is 'node_' + databaseId
-   * @param name title of the node
-   * @param expanded true or false, if the node is expanded or not
-   * @param level integer from 0 to 6, the level of the node for the current user
-   * @param levelGoal integer from 0 to 6, the goal level of the node for the current module
-   * @param databaseId id of this node in the database
-   * @returns a ConceptNode
+   * @description Creates a new sprotty concept node
+   * @param {string} parentId - The sprotty id of the parent.
+   * @param {string} id - The sprotty id of the node being created, is 'node_' + databaseId.
+   * @param {string} name - The title of the node.
+   * @param {boolean} expanded - Whether the node is expanded or not.
+   * @param {number} level - The level of the node for the current user.
+   * @param {number} levelGoal - The goal level of the node for the current module.
+   * @param {number} databaseId - The id of this node in the database.
+   * @returns {SprottyConceptNode} The created concept node.
    */
   createConceptNode(
     parentId: string,
@@ -687,14 +710,14 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * creates new mini concept node
-   * @param parentId the sprotty id of the parent
-   * @param id sprotty graph id , usually 'node_' + databaseId
-   * @param name title of the node
-   * @param level integer from 0 to 6, the level of the node for the current user
-   * @param levelGoal integer from 0 to 6, the goal level of the node for the current module
-   * @param databaseId id of this node in the database
-   * @returns a ConceptNode
+   * @description Creates a new mini concept node
+   * @param {string} parentId - The sprotty id of the parent.
+   * @param {string} id - The sprotty graph id, usually 'node_' + databaseId.
+   * @param {string} name - The title of the node.
+   * @param {number} level - The level of the node for the current user.
+   * @param {number} levelGoal - The goal level of the node for the current module.
+   * @param {number} databaseId - The id of this node in the database.
+   * @returns {SprottyConceptNode} The created mini concept node.
    */
   createMiniConceptNode(
     parentId: string,
@@ -721,13 +744,13 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * Creates a sprotty edge for the graph
-   * @param id string, 'edge_' + databaseId
-   * @param sourceId string, 'node_' + databaseId
-   * @param targetId string, 'node_' + databaseId
-   * @param parentId string, 'node_' + databaseId (except if it is the root, then it is 'root')
-   * @param databaseId id of this edge in the database
-   * @returns SpottyConceptEdge
+   * @description Creates a sprotty edge for the graph
+   * @param {string} id - The sprotty id of the edge, 'edge_' + databaseId.
+   * @param {string} sourceId - The sprotty id of the source node, 'node_' + databaseId.
+   * @param {string} targetId - The sprotty id of the target node, 'node_' + databaseId.
+   * @param {string} parentId - The sprotty id of the parent node, 'node_' + databaseId (except if it is the root, then it is 'root').
+   * @param {number} databaseId - The id of this edge in the database.
+   * @returns {SEdge} The created edge.
    */
   createEdge(
     id: string,
@@ -748,14 +771,15 @@ export class ConceptGraphModelSource extends LocalModelSource {
   }
 
   /**
-   * Deletes all edge bends. This is a temporary solution to a bug in elk.
+   * @description Deletes all edge bends. This is a temporary solution to a bug in elk.
    * When the issue is fixed (and integrated into sprotty), this function should be removed
    * to reduce unnecessary lag.
    * Link to issue in elk: https://github.com/eclipse/elk/issues/1001
    * Link to (closed) issue in sprotty: https://github.com/eclipse-sprotty/sprotty/issues/427
-   * The function recursively goes through the graph and deletes all edge bends.
+   * @param {SGraph | SNode} node - The node to delete the edge bends from.
+   * @returns {void}
    */
-  deleteEdgeBends(node: SGraph | SNode) {
+  deleteEdgeBends(node: SGraph | SNode): void {
     for (const child of node.children!) {
       if (child.type === 'edge') {
         const edge = child as SEdge;
@@ -764,5 +788,9 @@ export class ConceptGraphModelSource extends LocalModelSource {
         this.deleteEdgeBends(child);
       }
     }
+  }
+
+  ngOnDestroy(): void {
+    this.graphUpdateSubscription.unsubscribe();
   }
 }

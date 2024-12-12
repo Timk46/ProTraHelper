@@ -1,214 +1,214 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Param, Body, Req, UseGuards, Put} from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Req, UseGuards, ParseIntPipe} from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
-
-import { detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, FillinQuestionDTO, GraphQuestionDTO } from '@DTOs/index';
-
+import { detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, FillinQuestionDTO, GraphQuestionDTO, userAnswerFeedbackDTO, MCOptionDTO, McQuestionDTO, MCOptionViewDTO, UserMCOptionSelectedDTO } from '@DTOs/index';
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
-import { EditCodeService } from './edit-code.service';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
-import { QuestionDataCodeService } from './question-data-code/question-data-code.service';
 import { QuestionDataFillinService } from './question-data-fillin/question-data-fillin.service';
 import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
+
 
 @UseGuards(RolesGuard)
 @Controller('question-data')
 export class QuestionDataController {
+
     constructor(
       private questionDataService: QuestionDataService,
       private qdChoiceService: QuestionDataChoiceService,
       private qdFreetextService: QuestionDataFreetextService,
       private qdGraphService: QuestionDataGraphService,
-      private qdCodeService: QuestionDataCodeService,
       private qdFillinService: QuestionDataFillinService,
 
     ) {}
 
-    /**
-     *
-     * @param questionId
-     * @returns the question
-     */
-    @roles('ANY')
-    @Get(':questionId')
-    async getQuestion(@Param('questionId') questionId: number) {
-        console.log(typeof questionId);
-        return this.questionDataService.getQuestion(questionId);
-    }
-
-    @roles('ADMIN')
-    @Post('detailed')
-    async getDetailedQuestion(@Body() data: { questionId: number, questionType: string }): Promise<detailedQuestionDTO> {
-        return this.questionDataService.getDetailedQuestion(data.questionId, data.questionType);
-    }
-
-    /* @roles('ADMIN')
-    @Put('/updateCodingQuestion')
-    async updateCodingQuestion(@Body() question: detailedQuestionDTO): Promise<QuestionDTO> {
-      return this.qdCodeService.updateCodingQuestion(question);
-    } */
-
-    /**
-     *
-     * @param questionVersionId
-     * @returns the mc question
-     */
-    @roles('ANY')
-    @Get('/mcQuestion/:questionVersionId')
-    async getMCQuestion(@Param('questionVersionId') questionVersionId: number) {
-        return this.qdChoiceService.getMCQuestion(questionVersionId);
-    }
-
-    /**
-     *
-     * @param mcQuestionId
-     * @returns the mc options for the mc question
-     */
-    @roles('ANY')
-    @Get('/mcOptions/:mcQuestionId')
-    async getMCOptions(@Param('mcQuestionId') mcQuestionId: number) {
-        return this.qdChoiceService.getMCOptions(mcQuestionId);
-    }
-
-    /**
-     *
-     * @param questionId
-     * @returns the free text question
-     */
-    @roles('ANY')
-    @Get('/freeTextQuestion/:questionId')
-    async getFreeTextQuestion(@Param('questionId') questionId: number): Promise<freeTextQuestionDTO> {
-        return this.qdFreetextService.getFreeTextQuestion(questionId);
-    }
-
-    /**
-     *
-     * @param questionId
-     * @returns the graph question
-     */
-    @roles('ANY')
-    @Get('/graphQuestion/:questionId')
-    async getGraphQuestion(@Param('questionId') questionId: number): Promise<GraphQuestionDTO> {
-        return this.qdGraphService.getGraphQuestion(questionId);
-    }
-
-    @roles('ANY')
-    @Get('fillinQuestion/:fillinQuestionId')
-    async getFillinQuestion(@Param('fillinQuestionId') fillinQuestionId: number): Promise<FillinQuestionDTO> {
-        return this.qdFillinService.getFillinQuestion(fillinQuestionId);
-    }
-
-    @roles('ANY')
-    @Get('/newestUserAnswer/:questionId/:userId')
-    async getNewestUserAnswer(@Param('questionId') questionId: number, @Param('userId') userId: number, @Req() req: any) {
-        if (isNaN(questionId) || isNaN(userId)) {
-            throw new Error('Invalid questionId or userId');
+        /**
+         * @description Retrieves a question by its ID.
+         * @param {number} questionId - The ID of the question.
+         * @returns {Promise<QuestionDTO>} The question data.
+         */
+        @roles('ANY')
+        @Get(':questionId')
+        async getQuestion(@Param('questionId') questionId: number) {
+            console.log(typeof questionId);
+            return this.questionDataService.getQuestion(questionId);
         }
-        if (req.user.role == 'ADMIN' || req.user.role == 'TEACHER'){
-            return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
-        } else {
-            return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
+
+        /**
+         * @description Retrieves detailed information about a question based on its ID and type.
+         * @param {detailedQuestionDTO} data - An object containing the questionId and questionType.
+         * @returns {Promise<detailedQuestionDTO>} A promise that resolves to detailedQuestionDTO.
+         */
+        @roles('ADMIN')
+        @Post('detailed')
+        async getDetailedQuestion(@Body() data: { questionId: number, questionType: string }): Promise<detailedQuestionDTO> {
+          return this.questionDataService.getDetailedQuestion(data.questionId, data.questionType);
         }
-    }
 
-    /**
-     *
-     * @param data
-     * @param req
-     * @returns the the new user answer
-     */
-    @roles('ANY')
-    @Post('userAnswer/create')
-    async createUserAnswer(@Body() data: UserAnswerDataDTO, @Req() req: any) {
-        console.log('createUserAnswer data' + ' ' + data.contentElementId + ' ' + req.user.id);
-        return this.questionDataService.createUserAnswer(req.user.id, data);
-    }
+        /**
+         * @description Retrieves the multiple choice question based on the question version ID.
+         * @param {number} questionVersionId - The version ID of the question.
+         * @returns {Promise<McQuestionDTO>} The mc question data.
+         */
+        @roles('ANY')
+        @Get('/mcQuestion/:questionVersionId')
+        async getMCQuestion(@Param('questionVersionId') questionVersionId: number): Promise<McQuestionDTO> {
+          return this.qdChoiceService.getMCQuestion(questionVersionId);
+        }
 
-    @roles('ANY')
-    @Post('userMCOptionSelected/create')
-    async createUserMCOptionSelected(@Body() data: {userAnswerId: number, mcOptionId: number}) {
-        return this.qdChoiceService.createUserMCOptionSelected(data.userAnswerId, data.mcOptionId);
-    }
+        /**
+         * @description Retrieves the multiple choice options for a given mc question.
+         * @param {number} mcQuestionId - The ID of the multiple choice question.
+         * @returns {Promise<MCOptionViewDTO[]>} The mc options associated with the question.
+         */
+        @roles('ANY')
+        @Get('/mcOptions/:mcQuestionId')
+        async getMCOptions(@Param('mcQuestionId') mcQuestionId: number): Promise<MCOptionViewDTO[]> {
+            return this.qdChoiceService.getMCOptions(mcQuestionId);
+        }
+
+        /**
+         * @description Retrieves the free text question based on question ID.
+         * @param {number} questionId - The ID of the free text question.
+         * @returns {Promise<freeTextQuestionDTO>} A promise that resolves to freeTextQuestionDTO.
+         */
+        @roles('ANY')
+        @Get('/freeTextQuestion/:questionId')
+        async getFreeTextQuestion(@Param('questionId') questionId: number): Promise<freeTextQuestionDTO> {
+            return this.qdFreetextService.getFreeTextQuestion(questionId);
+        }
+
+        /**
+         * @description Retrieves the graph question based on question ID.
+         * @param {number} questionId - The ID of the graph question.
+         * @returns {Promise<GraphQuestionDTO>} A promise that resolves to GraphQuestionDTO.
+         */
+        @roles('ANY')
+        @Get('/graphQuestion/:questionId')
+        async getGraphQuestion(@Param('questionId') questionId: number): Promise<GraphQuestionDTO> {
+            return this.qdGraphService.getGraphQuestion(questionId);
+        }
+
+        /**
+         * @description Retrieves the fill-in question based on fill-in question ID.
+         * @param {number} fillinQuestionId - The ID of the fill-in question.
+         * @returns {Promise<FillinQuestionDTO>} A promise that resolves to FillinQuestionDTO.
+         */
+        @roles('ANY')
+        @Get('fillinQuestion/:fillinQuestionId')
+        async getFillinQuestion(@Param('fillinQuestionId') fillinQuestionId: number): Promise<FillinQuestionDTO> {
+            return this.qdFillinService.getFillinQuestion(fillinQuestionId);
+        }
+
+        /**
+         * @description Retrieves the newest user answer for a given question and user.
+         * @param {number} questionId - The ID of the question.
+         * @param {number} userId - The ID of the user.
+         * @param {any} req - The request object, containing user information.
+         * @returns {Promise<UserAnswerDTO>} The newest user answer.
+         * @throws Error if questionId or userId is invalid.
+         */
+        @roles('ANY')
+        @Get('/newestUserAnswer/:questionId/:userId')
+        async getNewestUserAnswer(@Param('questionId') questionId: number, @Param('userId') userId: number, @Req() req: any): Promise<UserAnswerDataDTO> {
+            if (isNaN(questionId) || isNaN(userId)) {
+                throw new Error('Invalid questionId or userId');
+            }
+            if (req.user.role == 'ADMIN' || req.user.role == 'TEACHER'){
+                return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
+            } else {
+                return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
+            }
+        }
+
+        /**
+         * @description Creates a new user answer.
+         * @param {UserAnswerDataDTO} data - The user answer data.
+         * @param {any} req - The request object, containing user information.
+         * @returns {Promise<userAnswerFeedbackDTO>} A promise that resolves to the user answer feedback.
+         */
+        @roles('ANY')
+        @Post('userAnswer/create')
+        async createUserAnswer(@Body() data: UserAnswerDataDTO, @Req() req: any): Promise<userAnswerFeedbackDTO> {
+            return this.questionDataService.createUserAnswer(req.user.id, data);
+        }
+
+        /**
+         * @description Creates a new user MC option selected record.
+         * @param {Partial<UserMCOptionSelectedDTO>} data - An object containing userAnswerId and mcOptionId.
+         * @returns {Promise<UserMCOptionSelectedDTO>} The created userMCOptionSelected.
+         */
+        @roles('ANY')
+        @Post('userMCOptionSelected/create')
+        async createUserMCOptionSelected(@Body() data: Partial<UserMCOptionSelectedDTO>): Promise<UserMCOptionSelectedDTO> {
+            return this.qdChoiceService.createUserMCOptionSelected(data.userAnswerId, data.mcOptionId);
+        }
+
+        /**
+         * @description Creates a new question.
+         * @param {QuestionDTO} question - The question data.
+         * @param {any} req - The request object.
+         * @returns {Promise<QuestionDTO>} A promise that resolves to the created question.
+         */
+        @roles('ADMIN')
+        @Post('/createQuestion')
+        async createQuestion( @Body() question: QuestionDTO, @Req() req: any): Promise<QuestionDTO> {
+            return this.questionDataService.createQuestion(question, req.user.id);
+        }
+
+        /**
+         * @description Updates a question.
+         * @param {detailedQuestionDTO} question - The question to be updated.
+         * @param {any} req - The request object.
+         * @returns {Promise<detailedQuestionDTO>} A promise that resolves to the updated question.
+         */
+        @roles('ADMIN')
+        @Post('updateWholeQuestion')
+        async updateWholeQuestion( @Body() question: detailedQuestionDTO, @Req() req: any): Promise<detailedQuestionDTO> {
+          return this.questionDataService.updateWholeQuestion(question, req.user.id);
+        }
+
+        /**
+         * @description Updates the whole question with the provided data.
+         * @param {detailedQuestionDTO} question - The detailed question DTO containing the updated question data.
+         * @param {any} req - The request object.
+         * @returns {Promise<detailedQuestionDTO>} A promise that resolves to the updated detailed question DTO.
+         */
+        @roles('ADMIN')
+        @Post('versionUpdateWholeQuestion')
+        async versionUpdateWholeQuestion( @Body() question: detailedQuestionDTO, @Req() req: any): Promise<detailedQuestionDTO> {
+            return this.questionDataService.updateWholeQuestion(question, req.user.id, true);
+        }
 
 
+      /**
+       * @description Endpoint to query the progress of a question for a user.
+       * @param {number} questionId - The ID of the question to get progress for
+       * @param {any} req - The request object.
+       * @returns {Promise<{ progress: number }>} The progress of the question as a number between 0-100
+       */
+      @roles('ANY')
+      @Get('progress/:questionId')
+      async getProgress(
+        @Param('questionId', ParseIntPipe) questionId: number,
+        @Req() req: any,
+      ): Promise<{ progress: number }> {
+        const userId = req.user.id;
+        const progress = await this.questionDataService.getQuestionProgress(questionId, userId);
+        return { progress };
+      }
 
-    @roles('ADMIN')
-    @Post('/createQuestion')
-    /**
-     * Creates a new question.
-     *
-     * @param question - The question data.
-     * @param req - The request object.
-     * @returns A promise that resolves to the created question.
-     */
-    async createQuestion( @Body() question: QuestionDTO, @Req() req: any): Promise<QuestionDTO> {
-        return this.questionDataService.createQuestion(question, req.user.id);
-    }
-
-    @roles('ADMIN')
-    @Post('updateWholeQuestion')
-    /**
-     * Updates a question.
-     *
-     * @param question The question to be updated.
-     * @returns A promise that resolves to the updated question.
-     */
-    async updateWholeQuestion( @Body() question: detailedQuestionDTO, @Req() req: any): Promise<detailedQuestionDTO> {
-      return this.questionDataService.updateWholeQuestion(question, req.user.id);
-    }
-
-    @roles('ADMIN')
-    @Post('versionUpdateWholeQuestion')
-    /**
-     * Updates the whole question with the provided data.
-     *
-     * @param question - The detailed question DTO containing the updated question data.
-     * @param req - The request object.
-     * @returns A promise that resolves to the updated detailed question DTO.
-     */
-    async versionUpdateWholeQuestion( @Body() question: detailedQuestionDTO, @Req() req: any): Promise<detailedQuestionDTO> {
-        return this.questionDataService.updateWholeQuestion(question, req.user.id, true);
-    }
-
-
-    /**
-     *
-     * @param mcOptions
-     * @returns the created MCOptions
-     */
-    /** Aus Sicherheitsgründen erst mal entfernt.
-    @roles('ANY')
-    @Post('/createOptions')
-    async createOptions(@Body() mcOptions: MCOptionDTO[]) {
-        return await this.questionDataService.createOptions(mcOptions);
-    }
-*/
-
-    /**
-     *
-     * @param mcQuestion
-     * @returns the created McQuestion
-     */
-    /** Aus Sicherheitsgründen erst mal entfernt.
-    @roles('ANY')
-    @Post('/createMcQuestion')
-    async createMcQuestion(@Body() mcQuestion: McQuestionDTO) {
-        return await this.questionDataService.createMcQuestion(mcQuestion);
-    }
-*/
-
-    /**
-     *
-     * @param mcQuestionOption
-     * @returns the created McQuestionOption
-     */
-    /** Aus Sicherheitsgründen erst mal entfernt.
-    @roles('ANY')
-    @Post('/createMcQuestionOption')
-    async createMcQuestionOption(@Body() mcQuestionOption: McQuestionOptionDTO) {
-        return await this.questionDataService.createMcQuestionOption(mcQuestionOption);
-    }
-*/
+      /**
+       * @description Retrieves the contentNodeIds and contentElementIds associated with a specific question.
+       * @param {number} questionId - The ID of the question.
+       * @returns {Promise<{ contentNodeId: number, contentElementId: number }>} An object containing arrays of contentNodeIds and contentElementIds.
+       */
+      @roles('ANY')
+      @Get('contentIds/:questionId')
+      async getContentIds(
+        @Param('questionId', ParseIntPipe) questionId: number,
+      ): Promise<{ contentNodeId: number, contentElementId: number }> {
+        return this.questionDataService.getContentIdsForQuestion(questionId);
+      }
 
 }

@@ -1,25 +1,26 @@
+/* eslint-disable prettier/prettier */
 import { PrismaService } from '@/prisma/prisma.service';
 import { detailedChoiceOptionDTO, detailedChoiceQuestionDTO, MCOptionDTO, MCOptionViewDTO, McQuestionDTO, McQuestionOptionDTO, UserMCOptionSelectedDTO } from '@DTOs/index';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class QuestionDataChoiceService {
-
+  private readonly logger = new Logger(QuestionDataChoiceService.name);
   constructor(private prisma: PrismaService) {}
 
   /**
-     *
-     * @param question_id
-     * @returns the mc question data
-     */
+   * @description Retrieves the mc question data
+   * @param {number} question_id - The ID of the question.
+   * @returns {Promise<McQuestionDTO>} The mc question data.
+   */
   async getMCQuestion(question_id: number): Promise<McQuestionDTO> {
-    let mcQuestion = await this.prisma.mCQuestion.findFirst({
+    const mcQuestion = await this.prisma.mCQuestion.findFirst({
         where: {
             questionId: Number(question_id)
         }
     })
-
-    let mcQuestionData: McQuestionDTO = {
+    this.logger.log(`mcQuestion: ${JSON.stringify(mcQuestion)}`);
+    const mcQuestionData: McQuestionDTO = {
         id: mcQuestion.id,
         questionId: mcQuestion.questionId,
         textHTML: mcQuestion.textHTML,
@@ -31,27 +32,27 @@ export class QuestionDataChoiceService {
   }
 
   /**
-   *
-   * @param mcQuestion_id
-   * @returns the options of the mc question
+   * @description Retrieves the options of the mc question
+   * @param {number} mcQuestion_id - The ID of the mc question.
+   * @returns {Promise<MCOptionViewDTO[]>} The options of the mc question.
    */
   async getMCOptions(mcQuestion_id: number): Promise<MCOptionViewDTO[]> {
-      let mcOptions : MCOptionViewDTO[] = [];
+      const mcOptions : MCOptionViewDTO[] = [];
 
-      let mcQuestionOptions = await this.prisma.mCQuestionOption.findMany({
+      const mcQuestionOptions = await this.prisma.mCQuestionOption.findMany({
           where: {
               mcQuestionId: Number(mcQuestion_id)
           }
       });
 
-      for(let mcQuestionOption of mcQuestionOptions) {
-          let mcOption = await this.prisma.mCOption.findUnique({
+      for(const mcQuestionOption of mcQuestionOptions) {
+          const mcOption = await this.prisma.mCOption.findUnique({
               where: {
                   id: Number(mcQuestionOption.mcOptionId)
               }
           })
 
-          let mcOptionData : MCOptionViewDTO = {
+          const mcOptionData : MCOptionViewDTO = {
               id: mcOption.id,
               text: mcOption.text,
           }
@@ -63,27 +64,27 @@ export class QuestionDataChoiceService {
   }
 
   /**
-   *
-   * @param mcQuestion_id
-   * @returns the options of the mc question
+   * @description Retrieves the options of the mc question
+   * @param {number} mcQuestion_id - The ID of the mc question.
+   * @returns {Promise<MCOptionDTO[]>} The options of the mc question.
    */
   async getMCCheckOptions(mcQuestion_id: number): Promise<MCOptionDTO[]> {
-      let mcOptions : MCOptionDTO[] = [];
+      const mcOptions : MCOptionDTO[] = [];
 
-      let mcQuestionOptions = await this.prisma.mCQuestionOption.findMany({
+      const mcQuestionOptions = await this.prisma.mCQuestionOption.findMany({
           where: {
               mcQuestionId: Number(mcQuestion_id)
           }
       });
 
-      for(let mcQuestionOption of mcQuestionOptions) {
-          let mcOption = await this.prisma.mCOption.findUnique({
+      for(const mcQuestionOption of mcQuestionOptions) {
+          const mcOption = await this.prisma.mCOption.findUnique({
               where: {
                   id: Number(mcQuestionOption.mcOptionId)
               }
           })
 
-          let mcOptionData : MCOptionDTO = {
+          const mcOptionData : MCOptionDTO = {
               id: mcOption.id,
               text: mcOption.text,
               correct: mcOption.is_correct,
@@ -96,10 +97,10 @@ export class QuestionDataChoiceService {
   }
 
   /**
-     *
-     * @param mcOptions
-     * @returns Options
-     */
+   * @description Creates the options for the mc question
+   * @param {detailedChoiceOptionDTO[]} mcOptions - The options to create.
+   * @returns {Promise<detailedChoiceOptionDTO[]>} The created options.
+   */
   async createOptions(mcOptions: detailedChoiceOptionDTO[]): Promise<detailedChoiceOptionDTO[]> {
     let newOptions : detailedChoiceOptionDTO[] = [];
 
@@ -120,10 +121,10 @@ export class QuestionDataChoiceService {
   }
 
   /**
-     *
-     * @param mcQuestion
-     * @returns McQuestion Object
-     */
+   * @description Creates the mc question
+   * @param {McQuestionDTO} mcQuestion - The mc question to create.
+   * @returns {Promise<McQuestionDTO>} The created mc question.
+   */
   async createMcQuestion(mcQuestion: McQuestionDTO): Promise<McQuestionDTO> {
 
     //console.log("concepts in createMcQuestion", concept);
@@ -146,9 +147,9 @@ export class QuestionDataChoiceService {
   }
 
   /**
-   *
-   * @param mcQuestionOption
-   * @returns McQuestionOption Object
+   * @description Creates the mc question option
+   * @param {McQuestionOptionDTO} mcQuestionOption - The mc question option to create.
+   * @returns {Promise<McQuestionOptionDTO>} The created mc question option.
    */
   async createMcQuestionOption(mcQuestionOption: McQuestionOptionDTO): Promise<McQuestionOptionDTO> {
     if(mcQuestionOption.mcQuestion === undefined) {
@@ -189,11 +190,11 @@ export class QuestionDataChoiceService {
   }
 
   /**
-     *
-     * @param userAnswer_id
-     * @param mcOption_id
-     * @returns the selected options
-     */
+   * @description Creates the user mc option selected
+   * @param {number} userAnswer_id - The ID of the user answer.
+   * @param {number} mcOption_id - The ID of the mc option.
+   * @returns {Promise<UserMCOptionSelectedDTO>} The selected options.
+   */
   async createUserMCOptionSelected(userAnswer_id: number, mcOption_id: number) : Promise<UserMCOptionSelectedDTO> {
     return await this.prisma.userMCOptionSelected.create({
         data: {
@@ -203,8 +204,13 @@ export class QuestionDataChoiceService {
     })
   }
 
-  async createChoiceQuestion(mcQuestion: detailedChoiceQuestionDTO, question_id: number): Promise<detailedChoiceQuestionDTO> {
-    let newMcQuestion = await this.prisma.mCQuestion.create({
+  /**
+   * @description Creates the choice question
+   * @param {detailedChoiceQuestionDTO} mcQuestion - The mc question to create.
+   * @returns {Promise<detailedChoiceQuestionDTO>} The created mc question.
+   */
+  async createChoiceQuestion(mcQuestion: detailedChoiceQuestionDTO): Promise<detailedChoiceQuestionDTO> {
+    const newMcQuestion = await this.prisma.mCQuestion.create({
       data: {
         question: {connect: {id: mcQuestion.questionId}},
         isSC: mcQuestion.isSC,
@@ -212,7 +218,7 @@ export class QuestionDataChoiceService {
       },
     });
 
-    let newOptions = await this.createOptions(mcQuestion.mcOptions);
+    const newOptions = await this.createOptions(mcQuestion.mcOptions);
 
     newOptions.map(async (option) => {
         await this.prisma.mCQuestionOption.create({
@@ -233,8 +239,13 @@ export class QuestionDataChoiceService {
     }
   }
 
+  /**
+   * @description Updates the choice question
+   * @param {detailedChoiceQuestionDTO} choiceQuestion - The choice question to update.
+   * @returns {Promise<detailedChoiceQuestionDTO>} The updated choice question.
+   */
   async updateChoiceQuestion(choiceQuestion: detailedChoiceQuestionDTO): Promise<detailedChoiceQuestionDTO> {
-    let updatedMcQuestion = await this.prisma.mCQuestion.update({
+    const updatedMcQuestion = await this.prisma.mCQuestion.update({
       where: {
         id: choiceQuestion.id
       },
@@ -246,7 +257,7 @@ export class QuestionDataChoiceService {
       }
     });
 
-    let updatedOptions = await this.updateOptions(choiceQuestion.id, choiceQuestion.mcOptions);
+    const updatedOptions = await this.updateOptions(choiceQuestion.id, choiceQuestion.mcOptions);
 
     return {
       id: updatedMcQuestion.id,
@@ -258,8 +269,14 @@ export class QuestionDataChoiceService {
     }
   }
 
+  /**
+   * @description Updates the options for the choice question
+   * @param {number} choiceQuestionId - The ID of the choice question.
+   * @param {detailedChoiceOptionDTO[]} choiceOptions - The options to update.
+   * @returns {Promise<detailedChoiceOptionDTO[]>} The updated options.
+   */
   async updateOptions(choiceQuestionId: number, choiceOptions: detailedChoiceOptionDTO[]): Promise<detailedChoiceOptionDTO[]> {
-    let updatedOptions : detailedChoiceOptionDTO[] = [];
+    const updatedOptions : detailedChoiceOptionDTO[] = [];
     // get existing option links
     const exisitingOptions = await this.prisma.mCQuestionOption.findMany({
       where: {

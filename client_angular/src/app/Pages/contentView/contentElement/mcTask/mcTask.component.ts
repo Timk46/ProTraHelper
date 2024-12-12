@@ -1,21 +1,11 @@
-import { Component, OnInit, Input, Inject, EventEmitter, Output } from '@angular/core';
-import { MatList, MatSelectionListChange } from '@angular/material/list';
-import { MatListOption } from '@angular/material/list';
+import { Component, OnInit, Input, Inject, EventEmitter, Output, Optional } from '@angular/core';
 import { MCOptionViewDTO, McQuestionDTO, QuestionDTO, QuestionVersionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { TaskViewData } from '@DTOs/index';
+import { ActivatedRoute, Router } from '@angular/router';
 
-interface TaskViewData {
-  contentNodeId: number;
-  contentElementId: number;
-  id: number;
-  name: string;
-  type: string;
-  progress: number;
-  description?: string;
-}
 
 @Component({
   selector: 'app-mcTask',
@@ -26,6 +16,11 @@ interface TaskViewData {
 export class McTaskComponent implements OnInit {
 
   @Output() submitClicked = new EventEmitter<any>();
+  
+  @Input() conceptId!: number;
+  @Input() questionId!: number;
+  @Input() isSelfAssessment: boolean = false;
+  @Input() taskViewData!: TaskViewData;
 
   editorConfig = { //tinyMCE
     readonly: true,
@@ -51,7 +46,8 @@ export class McTaskComponent implements OnInit {
   }
 
   dataLoaded : boolean = false;
-
+  conceptIdParam!: number;
+  questionIdParam!: number;
   //the mc question data
   mcQuestion : McQuestionDTO = {
     id : -1,
@@ -76,11 +72,7 @@ export class McTaskComponent implements OnInit {
     progress: -1,
   }
 
-  //the requested question
-  taskViewData : TaskViewData;
-
   //isSelfAssessment
-  @Input() isSelfAssessment: boolean = false;
 
   //the mc options
   options : MCOptionViewDTO[] = [];
@@ -90,6 +82,44 @@ export class McTaskComponent implements OnInit {
 
   submitDisabled : boolean = false;
   fullscore : number = 0;
+
+  //Get data from dialog
+  constructor(
+    //public dialogRef: MatDialogRef<McTaskComponent>,
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: {taskViewData: TaskViewData, conceptId: number, questionId: number},
+    private questionDataService: QuestionDataService,
+    private router: Router,
+    private dialogRef: MatDialogRef<McTaskComponent>
+  ) {
+    if (data && data.taskViewData) {
+      this.taskViewData = data.taskViewData;
+    }
+  }
+
+  ngOnInit() {
+    if (this.taskViewData && this.taskViewData.id) {
+      //Show the newest Version of the questions
+      this.questionDataService.getQuestionData(this.taskViewData.id).subscribe(data => {
+        this.questionData = data;
+        this.dataLoaded = true;
+
+        //Get the mc question data of the newest question version
+        console.log("id: ", this.questionData.id, "typeof", typeof this.questionData.id);
+        this.questionDataService.getMCQuestion(this.questionData.id).subscribe(data => {
+          this.mcQuestion = data;
+          console.log("mcQuestion id: ", this.mcQuestion.id);
+
+          //Get the MC-Options of the question
+          this.questionDataService.getMCOptions(this.mcQuestion.id).subscribe(data => {
+            //console.log(this.mcQuestion.id);
+            this.options = data;
+            this.options.sort(() => Math.random() - 0.5);
+          });
+        })
+      });
+    }
+  }
+
   onSelectionChange(): void {
     for (const option of this.options) {
       if(this.selectedOptions.includes(option.id)) {
@@ -121,38 +151,8 @@ export class McTaskComponent implements OnInit {
     });
   }
 
-
-  //Get data from dialog
-  constructor(
-    public dialogRef: MatDialogRef<McTaskComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
-    private questionDataService: QuestionDataService,
-    private screenSizeService: ScreenSizeService) {
-    this.taskViewData = data.taskViewData;
-  }
-
   checkCorrect() {
     return this.questionData.score === this.feedback.score;
-  }
-
-  ngOnInit() {
-    //Show the newest Version of the questions
-    this.questionDataService.getQuestionData(this.taskViewData.id).subscribe(data => {
-      this.questionData = data;
-      this.dataLoaded = true;
-
-      //Get the mc question data of the newest question version
-      this.questionDataService.getMCQuestion(this.questionData.id).subscribe(data => {
-        this.mcQuestion = data;
-
-        //Get the MC-Options of the question
-        this.questionDataService.getMCOptions(this.mcQuestion.id).subscribe(data => {
-          //console.log(this.mcQuestion.id);
-          this.options = data;
-          this.options.sort(() => Math.random() - 0.5);
-        });
-      })
-    });
   }
 
   retry() {
@@ -187,10 +187,19 @@ export class McTaskComponent implements OnInit {
 
   }
 
-  //Close the dialog
   onClose(): void {
-    //console.log('element done: ' + this.feedback.elementDone);
-    this.dialogRef.close(this.feedback.elementDone);
-  }
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
 
+    if (this.conceptId && this.questionId) {
+      this.router.navigate([`/dashboard/conceptOverview/${this.conceptId}/question/${this.questionId}`]);
+    } else if (this.conceptId) {
+      this.router.navigate([`/dashboard/conceptOverview/${this.conceptId}`]);
+    } else {
+      console.error('conceptId or questionId is undefined. Unable to navigate.');
+      // Fallback navigation or error handling
+      this.router.navigate(['/dashboard']);
+    }
+  }
 }
