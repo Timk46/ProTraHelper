@@ -17,13 +17,17 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
+import { McTaskComponent } from 'src/app/Pages/contentView/contentElement/mcTask/mcTask.component';
+import { FillinTaskNewComponent } from 'src/app/Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
+import { FreeTextTaskComponent } from 'src/app/Pages/contentView/contentElement/free-text-task/free-text-task.component';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 
 @Injectable({
   providedIn: 'root'
 })
 export class QuestionDataService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private dialog: MatDialog) { }
 
   /**
    *
@@ -242,6 +246,27 @@ export class QuestionDataService {
    */
   createMcQuestionOption(mcQuestionOption: McQuestionOptionDTO) : Observable<McQuestionOptionDTO> {
     return this.http.post<McQuestionOptionDTO>(environment.server + `/question-data/createMcQuestionOption`, mcQuestionOption)
+  }
+
+  /**
+   * Opens a dialog for a specific task type.
+   * @param {string} taskType - The type of the task.
+   * @param {MatDialogConfig} config - The configuration for the dialog.
+   * @returns {MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined} The dialog reference or undefined if no dialog is defined.
+   */
+  openDialog(taskType: string, config: MatDialogConfig): MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined {
+    switch (taskType) {
+      case questionType.SINGLECHOICE:
+      case questionType.MULTIPLECHOICE:
+        return this.dialog.open(McTaskComponent, config);
+      case questionType.FREETEXT:
+        return this.dialog.open(FreeTextTaskComponent, config);
+      case questionType.FILLIN:
+        return this.dialog.open(FillinTaskNewComponent, { ...config, width: '50vw' });
+      default:
+        console.warn(`No dialog defined for task type: ${taskType}`);
+        return undefined;
+    }
   }
 
 }

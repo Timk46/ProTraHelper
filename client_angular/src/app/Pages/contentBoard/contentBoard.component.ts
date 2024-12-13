@@ -17,6 +17,7 @@ import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FillinTaskNewComponent } from '../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { TaskViewData } from '@DTOs/index';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 
 @Component({
   selector: 'app-contentBoard',
@@ -81,7 +82,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     private userService: UserService,
     private contentLinkerService: ContentLinkerService,
     private confirmService: ConfirmationService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private questionDataService: QuestionDataService
   ) {
     // Initialize the data source for the table
     this.dataSource = new MatTableDataSource<TaskViewData>();
@@ -229,6 +231,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     switch (selectedTask.type) {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
+      case questionType.FILLIN:
+        dialogRef = this.questionDataService.openDialog(selectedTask.type, dialogConfig);
         this.router.navigate([`/dashboard/conceptOverview/${conceptId}/question/${taskId}`]);
         break;
       case questionType.FREETEXT:
@@ -242,9 +246,6 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         // Navigate to graph question component
         this.router.navigate([`/graphtask/${selectedTask.id}`]);
         return;
-      case questionType.FILLIN:
-        this.router.navigate([`/dashboard/conceptOverview/${conceptId}/question/${taskId}`]);
-        break;
     }
 
     if (dialogRef) {

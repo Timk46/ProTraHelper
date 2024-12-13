@@ -8,7 +8,7 @@ import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.com
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
 import { FillinTaskNewComponent } from '../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { TaskViewData } from '@DTOs/index';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MatDialogConfig } from '@angular/material/dialog';
 
 
@@ -38,10 +38,8 @@ export class DynamicQuestionComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private questionService: QuestionDataService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog,
-    private router: Router
+    private router: Router,
   ) {
-    console.log("constructor of dynamic question component");
   }
 
   ngOnInit(): void {
@@ -58,9 +56,6 @@ export class DynamicQuestionComponent implements OnInit, OnDestroy {
     // Get 'questionId' from the current route
     const questionIdParam = this.route.snapshot.paramMap.get('questionId');
     this.questionId = Number(questionIdParam);
-
-    console.log("conceptId: ", this.conceptId);
-    console.log("questionId: ", this.questionId);
 
     if (isNaN(this.questionId) || isNaN(this.conceptId)) {
       this.snackBar.open('Ungültige Frage-ID oder Konzept-ID.', 'Schließen', { duration: 3000 });
@@ -140,10 +135,11 @@ export class DynamicQuestionComponent implements OnInit, OnDestroy {
     switch (type) {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
-        dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
+      case questionType.FILLIN:
+        dialogRef = this.questionService.openDialog(type, dialogConfig);
         break;
       case questionType.FREETEXT:
-        dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
+        dialogRef = this.questionService.openDialog(type, dialogConfig);
         break;
       case questionType.CODE:
         this.router.navigate([`/tutor-kai/code/${taskViewData.id}`]);
@@ -151,9 +147,9 @@ export class DynamicQuestionComponent implements OnInit, OnDestroy {
       case questionType.GRAPH:
         this.router.navigate([`/graphtask/${taskViewData.id}`]);
         return;
-      case questionType.FILLIN:
-        dialogRef = this.dialog.open(FillinTaskNewComponent, {...dialogConfig, width: '50vw'});
-        break;
+      default:
+        console.warn(`No dialog defined for task type: ${type}`);
+        return;
     }
     if (dialogRef) {
       dialogRef.afterClosed().subscribe(() => {
