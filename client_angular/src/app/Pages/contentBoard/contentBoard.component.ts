@@ -232,7 +232,6 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
       case questionType.FILLIN:
-        dialogRef = this.questionDataService.openDialog(selectedTask.type, dialogConfig);
         this.router.navigate([`/dashboard/conceptOverview/${conceptId}/question/${taskId}`]);
         break;
       case questionType.FREETEXT:
