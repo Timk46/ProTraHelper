@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Patch, Param } from '@nestjs/common';
 import { AiFeedbackService } from './ai-feedback.service';
 
+@Controller('graph-ai-feedback')
 export class AiFeedbackController {
   constructor(private readonly aiFeedbackService: AiFeedbackService) {}
 
