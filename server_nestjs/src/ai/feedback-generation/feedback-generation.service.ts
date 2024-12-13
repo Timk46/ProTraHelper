@@ -58,9 +58,9 @@ export class FeedbackGenerationService {
 
   /**
    * Generates graph feedback based on the provided data and user answer.
-   * @param freeTextData - The data for the freetext question.
-   * @param userAnswer - The user's answer to the freetext question.
-   * @returns A promise that resolves to an object containing the generated feedback text and the reached points.
+   * @param graphSystemMessage - The system message for the graph question.
+   * @param studentSolution - The student's solution to the graph question.
+   * @returns A promise that resolves to an object containing the generated feedback text for the graph question.
    */
       async generateGraphFeedback(graphSystemMessage: string, studentSolution: string): Promise<string> {
         console.log("FeedbackGenerationService.generateGraphQuestion");

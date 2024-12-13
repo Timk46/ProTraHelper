@@ -15,6 +15,13 @@ export class AiFeedbackService {
     private readonly feedbackGenerationService: FeedbackGenerationService
   ) {}
 
+  /**
+   * Creates AI feedback for a given user answer.
+   * 
+   * @param createAiFeedbackDto - The DTO containing the user answer ID.
+   * @returns The created AI feedback including its ID and generated feedback.
+   * @throws Error if the user answer, question, or graph question is not found.
+   */
   async create(createAiFeedbackDto: { userAnswerId: number }) {
  
     // ##############################
@@ -113,6 +120,13 @@ export class AiFeedbackService {
     };
   }
 
+  /**
+   * Rates the AI feedback.
+   * 
+   * @param id - The ID of the AI feedback to be rated.
+   * @param updateAiFeedbackDto - The DTO containing the rating (1 to 5).
+   * @returns The updated AI feedback with the new rating.
+   */
   async rateFeedback(id: number, updateAiFeedbackDto: { rating: 1 | 2 | 3 | 4 | 5 }) {
     const updatedFeedback = await this.prismaService.graphAIFeedback.update({
       data: {
