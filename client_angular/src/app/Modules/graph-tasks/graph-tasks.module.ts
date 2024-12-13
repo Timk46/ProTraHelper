@@ -10,6 +10,7 @@ import { EdgeToolsetGraphComponent } from './edge-toolset-graph/edge-toolset-gra
 import { AssignmentContainerComponent } from './assignment-container/assignment-container.component';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MaterialModule } from '../material.module';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   ],
   imports: [
     CommonModule,
-    CdkDrag, FormsModule, DragDropModule, MatButtonToggleModule, MatProgressSpinnerModule
+    CdkDrag, FormsModule, DragDropModule, MatButtonToggleModule, MatProgressSpinnerModule,
+    MaterialModule
   ],
   exports: [
     GraphTasksComponent,

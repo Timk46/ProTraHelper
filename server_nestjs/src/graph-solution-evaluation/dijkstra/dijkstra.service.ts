@@ -20,7 +20,7 @@ export class DijkstraService {
      * @param {GraphStructureDTO[]} expectedSolution - The expected correct solution, with each element representing a step in the process.
      * @param {number} maxPoints - The maximum number of points that can be awarded for the assignment.
      * 
-     * @returns {{ receivedPoints: number, feedback: string, feedbackHTML: string }} - An object containing the points awarded and feedback for each step.
+     * @returns {{ receivedPoints: number, feedback: string, feedbackHTML: string, expectedSolutionSemantic: GraphStructureSemanticDTO[] }} - An object containing the points awarded and feedback for each step.
      * 
      * @throws {Error} If the expected solution does not contain at least one step.
      */
@@ -191,7 +191,8 @@ export class DijkstraService {
         return {
             receivedPoints,
             feedback: feedback.join('\n'),
-            feedbackHTML: feedbackHTML.join('\n')
+            feedbackHTML: feedbackHTML.join('\n'),
+            expectedSolutionSemantic: expectedSolutionSemantic
         }     
     }
 

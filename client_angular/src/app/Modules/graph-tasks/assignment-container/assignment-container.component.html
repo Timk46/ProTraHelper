@@ -16,14 +16,40 @@
             name="feedback-type" 
             aria-label="Feedback Type"
             [(ngModel)]="feedbackTypeCurrent"
+            (ngModelChange)="onFeedbackTypeChange()"
         >
             <mat-button-toggle class="feedback-type-toggle-item" value="algoFeedback" [disabled]="feedbackDisabled">Algo-Check</mat-button-toggle>
-            <mat-button-toggle class="feedback-type-toggle-item" value="llmFeedback" [disabled]="feedbackDisabled">KI-Analyse</mat-button-toggle>
+            <mat-button-toggle class="feedback-type-toggle-item" value="llmFeedback" [disabled]="feedbackDisabled">KI-Feedback</mat-button-toggle>
         </mat-button-toggle-group>
 
         
         <hr style="margin-top: 1em;">
 
+        <div 
+            *ngIf="feedbackTypeCurrent === 'llmFeedback' && feedbackState === 'LLM'"
+            style="display: flex; flex-direction: column; justify-content: start; align-items: center; background-color: #ddd; border-radius: .5em; padding: .5em 0;"
+        >
+            <div
+                style="flex: 1; display: flex; justify-content: flex-start; align-items: center; font-size: .9em;"
+            >
+                <p style="margin: 0;">Wie hilfreich war das Feedback?</p>
+            </div>
+            <div
+                class="rating" style="margin: 0; flex: 1; display: flex; justify-content: flex-start;"
+            >
+                <button mat-icon-button *ngFor="let star of [1, 2, 3, 4, 5]"
+                    (click)="sendStudentFeedback(star)"
+                    (mouseenter)="onMouseEnter(star)"
+                    (mouseleave)="onMouseLeave()"
+                    class="star-button"
+                >
+                    <mat-icon [ngClass]="{'gold': (star <= hoverState || star <= rating), 'grey': !(star <= hoverState || star <= rating)}">
+                        {{star <= hoverState || star <= rating ? 'star' : 'star_border'}}
+                    </mat-icon>
+                </button>
+            </div>
+        </div>
+        
         <p *ngIf="!isSending" [innerHTML]="feedbackTypeCurrent === 'algoFeedback' ? algoFeedback : llmFeedback"></p>
         <div 
             *ngIf="isSending"

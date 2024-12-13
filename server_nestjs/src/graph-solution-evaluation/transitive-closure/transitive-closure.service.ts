@@ -22,7 +22,7 @@ export class TransitiveClosureService {
      * @param {GraphStructureDTO} expectedSolution - The expected correct solution in JSON format.
      * @param {number} maxPoints - The maximum number of points that can be awarded for this assignment.
      * 
-     * @returns {{ receivedPoints: number, feedback: string, feedbackHTML: string }} - An object containing the number of points received and feedback.
+     * @returns {{ receivedPoints: number, feedback: string, feedbackHTML: string, expectedSolutionSemantic: GraphStructureSemanticDTO }} - An object containing the number of points received and feedback.
      */
     evaluateSolution(initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO, maxPoints: number) {
 
@@ -42,7 +42,8 @@ export class TransitiveClosureService {
         return {
             receivedPoints,
             feedback: feedback,
-            feedbackHTML: feedbackHTML
+            feedbackHTML: feedbackHTML,
+            expectedSolutionSemantic: expectedSolutionSemantic
         }       
     }
 

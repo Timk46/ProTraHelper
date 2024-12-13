@@ -14,7 +14,7 @@ import { GenerateKruskalService } from './generate-graph/generate-kruskal.servic
 import { GenerateFloydService } from './generate-graph/generate-floyd.service';
 import { GenerateExampleSolutionService } from './generateExampleSolution/generate-example-solution.service';
 import { Observable } from 'rxjs';
-import { graphEdgeJSONToSemantic, graphJSONToSemantic } from 'src/app/Modules/graph-tasks/utils';
+import { graphEdgeJSONToSemantic, graphJSONToSemantic, structuresAreEqual } from 'src/app/Modules/graph-tasks/utils';
 
 
 interface GraphQuestionConfiguration extends GraphConfigurationDTO {
@@ -357,7 +357,7 @@ export class EditGraphComponent implements AfterViewInit {
 
       // If the structure has changed
       // Generate the example solution based on the question type
-      if(!this.structuresAreEqual(this.assignmentGraphStructure, this.initialUsedForExampleSolution)) {
+      if(!structuresAreEqual(this.assignmentGraphStructure, this.initialUsedForExampleSolution)) {
         
         this.generateExampleSolution().subscribe( generatedExampleSolution => {
           this.solutionGraphStructure = generatedExampleSolution;
@@ -1192,77 +1192,4 @@ export class EditGraphComponent implements AfterViewInit {
 
     throw new Error('No example solution generator found for the given question type');
   }
-
-  structuresAreEqual(structure1: GraphStructureDTO, structure2: GraphStructureDTO): boolean {
-
-    if (structure1.nodes.length !== structure2.nodes.length) {
-      return false;
-    }
-
-    if (structure1.edges.length !== structure2.edges.length) {
-      return false;
-    }
-
-    for (let i = 0; i < structure1.nodes.length; i++) {
-
-      const sameNode = structure2.nodes.find(node => 
-        node.nodeId === structure1.nodes[i].nodeId && node.value === structure1.nodes[i].value
-      )
-
-      if (!sameNode) {
-        return false;
-      }
-
-      if (structure1.nodes[i].value !== sameNode.value) {
-        return false;
-      }
-      if (structure1.nodes[i].weight !== sameNode.weight) {
-        return false;
-      }
-      if (structure1.nodes[i].selected !== sameNode.selected) {
-        return false;
-      }
-      if (structure1.nodes[i].position.x !== sameNode.position.x) {
-        return false;
-      }
-      if (structure1.nodes[i].position.y !== sameNode.position.y) {
-        return false;
-      }
-      if (structure1.nodes[i].nodeId !== sameNode.nodeId) {
-        return false;
-      }
-      if (structure1.nodes[i].size.width !== sameNode.size.width) {
-        return false;
-      }
-      if (structure1.nodes[i].size.height !== sameNode.size.height) {
-        return false;
-      }
-      if (structure1.nodes[i].center.x !== sameNode.center.x) {
-        return false;
-      }
-      if (structure1.nodes[i].center.y !== sameNode.center.y) {
-        return false;
-      }
-    }
-
-    const structure1Semantic: GraphStructureSemanticDTO = graphJSONToSemantic(structure1);
-    const structure2Semantic: GraphStructureSemanticDTO = graphJSONToSemantic(structure1);
-
-    for (let i = 0; i < structure1Semantic.edges.length; i++) {
-      const sameEdge = structure2Semantic.edges.find(edge => 
-        edge.node1Value === structure1Semantic.edges[i].node1Value && edge.node2Value === structure1Semantic.edges[i].node2Value
-      )
-
-      if (!sameEdge) {
-        return false;
-      }
-
-      if (sameEdge.weight !== structure1.edges[i].weight) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
 }

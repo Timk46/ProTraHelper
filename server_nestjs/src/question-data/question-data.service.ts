@@ -167,9 +167,6 @@ export class QuestionDataService {
       },
       orderBy: {
         createdAt: 'desc'
-      },
-      include: {
-        userGraphAnswer: true,
       }
     });
     if (!userAnswer) {
@@ -186,9 +183,7 @@ export class QuestionDataService {
       userId: userAnswer.userId,
       userFreetextAnswer: userAnswer.userFreetextAnswer || undefined,
       userFreetextAnswerRaw: undefined,
-      userGraphAnswer: userAnswer.userGraphAnswer.length > 0 
-                        ? JSON.parse(JSON.stringify(userAnswer.userGraphAnswer[0]?.graphStructure)) 
-                        : undefined,
+      userGraphAnswer: JSON.parse(JSON.stringify(userAnswer.userGraphAnswer)) || undefined,
       userMCAnswer: (await this.prisma.userMCOptionSelected.findMany({
         where: {
           userAnswerId: userAnswer.id
@@ -410,7 +405,8 @@ export class QuestionDataService {
           questionId: answerData.questionId,
           //if answerData has a userFreetextAnswer, use it, else use null
           userFreetextAnswer: answerData.userFreetextAnswer ?? null,
-          //if answerData has a userGraphAnswer, do nothing. It will be created later
+          //if answerData has a userGraphAnswer, use it, else use null
+          userGraphAnswer: answerData.userGraphAnswer ? JSON.parse(JSON.stringify(answerData.userGraphAnswer)) : null,
       }
     });
 
@@ -678,8 +674,7 @@ export class QuestionDataService {
     if (question.type === questionType.GRAPH) {
       console.log('generate feedback for graph user answer');
 
-      let algoFeedbackText = "Du hast keine Antwort eingegeben.";
-      let algoFeedbackTextHTML = "Du hast keine Antwort eingegeben.";
+      let feedbackText = 'Du hast keine Antwort eingegeben.';
       let userScore = 0;
 
       if (answerData.userGraphAnswer) {
@@ -687,9 +682,8 @@ export class QuestionDataService {
         await this.qdGraph.getGraphQuestion(answerData.questionId, true).then(async (questionData) => {
 
           // Generate feedback based on the user answer
-          const { feedback, feedbackHTML, receivedPoints } = this.graphEvalService.evaluateSolution(questionData, answerData.userGraphAnswer);
-          algoFeedbackText = feedback;
-          algoFeedbackTextHTML = feedbackHTML;
+          const { feedbackHTML, receivedPoints } = this.graphEvalService.evaluateSolution(questionData, answerData.userGraphAnswer);
+          feedbackText = feedbackHTML;
           userScore = receivedPoints;
         });
       }
@@ -709,45 +703,28 @@ export class QuestionDataService {
         markedAsDone = true;
       }
 
-      console.log('algorithmically generated Text:', algoFeedbackText);
+      console.log('generated Text:', feedbackText);
       console.log('userScore: ' + userScore);
 
-      // create new entry in feedback table for user answer
-      const generalFeedback = await this.prisma.feedback.create({
+      //create feedback for user answer
+      const feedback = await this.prisma.feedback.create({
         data: {
           userAnswerId: createdData.id,
-          text: 'Feedback for Graph Task got its own table',
+          text: feedbackText,
           score: userScore
         }
       });
 
-      if (!generalFeedback) {
-        throw new Error('Could not create Feedback');
-      }
-      
-      // Create a new entry in the graphSubmission table for the user answer
-      const graphSubmission = await this.prisma.graphSubmission.create({
-        data: {
-          userAnswerId: createdData.id,
-          graphStructure: JSON.parse(JSON.stringify(answerData.userGraphAnswer)),
-          algorithmicFeedback: algoFeedbackText,
-          algorithmicFeedbackHTML: algoFeedbackTextHTML,
-          score: userScore,
-        }
-      });
+      if (!feedback) throw new Error('Could not create Feedback');
 
-      if (!graphSubmission) {
-        throw new Error('Could not create GraphSubmission');
-      }
-      
       console.log('element done: ' + markedAsDone);
       return {
-        id: generalFeedback.id,
-        userAnswerId: generalFeedback.userAnswerId,
-        score: generalFeedback.score,
-        feedbackText: graphSubmission.algorithmicFeedbackHTML,
+        id: feedback.id,
+        userAnswerId: feedback.userAnswerId,
+        score: feedback.score,
+        feedbackText: feedback.text,
         elementDone: markedAsDone,
-        progress: Math.floor((generalFeedback.score/question.score) * 100),
+        progress: Math.floor((feedback.score/question.score) * 100),
       }
     }
   }

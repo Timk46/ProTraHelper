@@ -322,7 +322,8 @@ model UserAnswer {
   userId               Int
   questionId           Int
   userFreetextAnswer   String?
-  userGraphAnswer      GraphSubmission[]
+  userGraphAnswer      Json?
+  graphAIFeedbacks     GraphAIFeedback[]
   feedbacks            Feedback[]
   question             Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
   user                 User                   @relation(fields: [userId], references: [id])
@@ -368,29 +369,15 @@ model GraphQuestion {
   question            Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
-model GraphSubmission {
-  id                      Int        @id @default(autoincrement())
-  createdAt               DateTime   @default(now())
-  updatedAt               DateTime   @updatedAt
-  graphStructure          Json
-  score                   Float
-  algorithmicFeedback     String
-  algorithmicFeedbackHTML String
-  kiFeedback              GraphKIFeedback[]
-  userAnswerId            Int
-  userAnswer              UserAnswer @relation(fields: [userAnswerId], references: [id])
-}
-
-model GraphKIFeedback {
+model GraphAIFeedback {
   id                  Int            @id @default(autoincrement())
   updatedAt           DateTime       @updatedAt
   createdAt           DateTime       @default(now())
-  model               String
   prompt              String?
   response            String
   ratingByStudent     Int?
-  graphSubmissionId   Int
-  graphSubmission     GraphSubmission @relation(fields: [graphSubmissionId], references: [id])
+  userAnswerId        Int
+  userAnswer          UserAnswer @relation(fields: [userAnswerId], references: [id])
 }
 
 model CodingQuestion {

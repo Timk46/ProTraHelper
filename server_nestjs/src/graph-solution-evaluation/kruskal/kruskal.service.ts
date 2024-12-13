@@ -32,7 +32,8 @@ export class KruskalService {
             return {
                 receivedPoints: 0,
                 feedback: 'Der Graph muss dieselben Knoten wie der Ausgangsgraph haben.',
-                feedbackHTML: 'Der Graph muss dieselben Knoten wie der Ausgangsgraph haben.'
+                feedbackHTML: 'Der Graph muss dieselben Knoten wie der Ausgangsgraph haben.',
+                expectedSolutionSemantic: []
             }
         }
 
@@ -80,7 +81,8 @@ export class KruskalService {
         return {
             receivedPoints,
             feedback: feedback,
-            feedbackHTML: feedbackHTML
+            feedbackHTML: feedbackHTML,
+            expectedSolutionSemantic: allPossibleSolutions[indexOfBestSolution] || []
         }
     }
 

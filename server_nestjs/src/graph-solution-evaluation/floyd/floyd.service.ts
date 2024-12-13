@@ -18,7 +18,7 @@ export class FloydService {
      * @param {GraphStructureDTO[]} studentSolution - The student's solution, containing multiple steps with graph structures.
      * @param {number} maxPoints - The maximum points the student can earn for the entire solution.
      * 
-     * @returns {{ receivedPoints: number, feedback: string, feedbackHTML: string }} - The total points earned and detailed feedback for each step.
+     * @returns {{ receivedPoints: number, feedback: string, feedbackHTML: string, expectedSolutionSemantic: GraphStructureSemanticDTO[] }} - The total points earned and detailed feedback for each step.
      */
     evaluateSolution(initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
 
@@ -53,7 +53,8 @@ export class FloydService {
             return {
                 receivedPoints,
                 feedback: feedback.join('\n'),
-                feedbackHTML: feedbackHTML.join('\n')
+                feedbackHTML: feedbackHTML.join('\n'),
+                expectedSolutionSemantic: []
             }
         }
 
@@ -187,7 +188,8 @@ export class FloydService {
         return {
             receivedPoints,
             feedback: feedback.join('\n'),
-            feedbackHTML: feedbackHTML.join('\n')
+            feedbackHTML: feedbackHTML.join('\n'),
+            expectedSolutionSemantic: expectedSolutionSemantic
         }
     }
 
