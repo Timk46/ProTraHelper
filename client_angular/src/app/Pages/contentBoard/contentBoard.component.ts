@@ -8,7 +8,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
-import { firstValueFrom, Subject, takeUntil } from 'rxjs';
+import { firstValueFrom, lastValueFrom, Subject, takeUntil } from 'rxjs';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { CreateContentElementDialogComponent } from '../lecturersView/create-content-element-dialog/create-content-element-dialog.component';
@@ -207,7 +207,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    * @param {TaskViewData} selectedTask - The TaskViewData object that was clicked (The task)
    * @param {ContentDTO} selectedContentNode - The ContentDTO object that was clicked (Contains the tasks)
    */
-  onTaskClick(selectedTask: TaskViewData, selectedContentNode: ContentDTO) {
+  async onTaskClick(selectedTask: TaskViewData, selectedContentNode: ContentDTO) {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.data = {
       taskViewData: selectedTask,
@@ -232,52 +232,65 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
       case questionType.FILLIN:
-        this.router.navigate([`/dashboard/conceptOverview/${conceptId}/question/${taskId}`]);
+        await this.router.navigate([`/dashboard/conceptOverview/${conceptId}/question/${taskId}`]);
         break;
       case questionType.FREETEXT:
-        this.router.navigate([`/dashboard/conceptOverview/${conceptId}/question/${taskId}`]);
+        await this.router.navigate([`/dashboard/conceptOverview/${conceptId}/question/${taskId}`]);
         break;
       case questionType.CODE:
         // Navigate to coding question component
-        this.router.navigate([`/tutor-kai/code/${selectedTask.id}`]);
+        await this.router.navigate([`/tutor-kai/code/${selectedTask.id}`]);
         break;
       case questionType.GRAPH:
         // Navigate to graph question component
-        this.router.navigate([`/graphtask/${selectedTask.id}`]);
+        await this.router.navigate([`/graphtask/${selectedTask.id}`]);
         return;
     }
 
     if (dialogRef) {
-      dialogRef.componentInstance.submitClicked
-        .pipe(takeUntil(this.destroy$))
-        .subscribe((score: number) => {
-          // Aktualisiere den Score basierend auf dem neuen Wert
-          if (score > selectedTask.progress!) {
-            selectedTask.progress = score;
-            selectedContentNode.contentElements.find(element => element.id === selectedTask.contentElementId)!.question!.progress = score;
+      try {
+        // Await the first emission from submitClicked and automatically unsubscribe when the component is destroyed
+        const score: number = await lastValueFrom(
+          dialogRef.componentInstance.submitClicked.pipe(takeUntil(this.destroy$))
+        );
 
-            if (score === 100) {
-              // Berechne den Fortschritt des ContentNodes
-              const questionElements = selectedContentNode.contentElements.filter(element => element.type === "QUESTION");
-              const elementCount = questionElements.length;
-              const completedElements = questionElements.filter(element =>
-                element.question?.progress === 100 ||
-                (element.id === selectedTask.contentElementId && score === 100)
-              ).length;
+        // Update the score based on the new value
+        if (score > selectedTask.progress!) {
+          selectedTask.progress = score;
+          const contentElement = selectedContentNode.contentElements.find(
+            element => element.id === selectedTask.contentElementId
+          );
+          if (contentElement && contentElement.question) {
+            contentElement.question.progress = score;
+          }
 
-              selectedContentNode.progress = Math.floor((completedElements / elementCount) * 100);
+          if (score === 100) {
+            // Calculate the progress of the ContentNode
+            const questionElements = selectedContentNode.contentElements.filter(
+              element => element.type === "QUESTION"
+            );
+            const elementCount = questionElements.length;
+            const completedElements = questionElements.filter(element =>
+              element.question?.progress === 100 ||
+              (element.id === selectedTask.contentElementId && score === 100)
+            ).length;
 
-              if (selectedContentNode.progress === 100) {
-                this.progressService.answerSubmitted();
-              }
+            selectedContentNode.progress = Math.floor((completedElements / elementCount) * 100);
+
+            if (selectedContentNode.progress === 100) {
+              this.progressService.answerSubmitted();
             }
           }
-        });
+        }
 
-      dialogRef.afterClosed().subscribe(() => {
-        console.log("dialog closed with id: ", conceptId);
-        this.router.navigate([`/dashboard/conceptOverview/${conceptId}`]);
-      });
+        // Await the afterClosed event before navigating
+        await lastValueFrom(dialogRef.afterClosed());
+        console.log("Dialog closed with id: ", conceptId);
+        await this.router.navigate([`/dashboard/conceptOverview/${conceptId}`]);
+      } catch (error) {
+        console.error("Error handling dialog events:", error);
+        this.snackBar.open('Ein Fehler ist aufgetreten.', 'Schließen', { duration: 3000 });
+      }
     }
   }
 
