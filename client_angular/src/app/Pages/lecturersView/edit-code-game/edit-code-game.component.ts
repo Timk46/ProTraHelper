@@ -44,7 +44,7 @@ export class EditCodeGameComponent implements OnInit {
           this.questionData = data;
           console.log('Question data:', this.questionData);
 
-          if (!this.questionData.codingQuestion) {
+          if (!this.questionData.codeGameQuestion) {
             this.questionData.codeGameQuestion = {
               id: 0,
               text: '',
@@ -76,7 +76,7 @@ export class EditCodeGameComponent implements OnInit {
         isApproved: this.questionData.isApproved || false,
       });
 
-      if (this.questionData.codingQuestion) {
+      if (this.questionData.codeGameQuestion) {
         this.populateCodeGameScaffolds();
       }
     }
@@ -283,7 +283,7 @@ export class EditCodeGameComponent implements OnInit {
         isApproved: this.codeGameForm.value.isApproved,
         level: this.codeGameForm.value.level,
         codeGameQuestion: {
-          ...this.questionData.codingQuestion,
+          ...this.questionData.codeGameQuestion,
           id: this.questionData.codeGameQuestion!.id,
           text: this.codeGameForm.value.text,
           mainFileName: this.codeGameForm.value.mainFileName,

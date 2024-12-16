@@ -142,6 +142,9 @@ export class QuestionDataService {
         specificQuestionData = await this.prisma.codeGameQuestion.findFirst({
           where: {
             questionId: Number(questionId)
+          },
+          include: {
+            codeGameScaffolds: true,
           }
         });
         break;
