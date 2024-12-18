@@ -240,6 +240,10 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       case questionType.FILLIN:
         dialogRef = this.dialog.open(FillinTaskNewComponent, {...dialogConfig, width: '50vw'});
         break;
+      case questionType.CODEGAME:
+        // Navigate to coding game component
+        this.router.navigate([`/code-game/${selectedTask.id}`]);
+        return;
     }
 
     // Handle dialog submission if a dialog was opened

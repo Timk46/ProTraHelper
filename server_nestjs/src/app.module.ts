@@ -50,6 +50,7 @@ import { DijkstraService } from './graph-solution-evaluation/dijkstra/dijkstra.s
 import { FloydService } from './graph-solution-evaluation/floyd/floyd.service';
 import { KruskalService } from './graph-solution-evaluation/kruskal/kruskal.service';
 import { ExampleSolutionGenerationModule } from './graph-solution-evaluation/example-solution-generation/example-solution-generation.module';
+import { CodeGameModule } from './code-game/code-game.module';
 
 @Module({
   imports: [
@@ -77,7 +78,8 @@ import { ExampleSolutionGenerationModule } from './graph-solution-evaluation/exa
     AdminModule, // Add this line
 
     GraphSolutionEvaluationModule,
-    ExampleSolutionGenerationModule
+    ExampleSolutionGenerationModule,
+    CodeGameModule
   ],
   controllers: [
     AppController,

@@ -289,7 +289,7 @@ export class EditCodeGameComponent implements OnInit {
           mainFileName: this.codeGameForm.value.mainFileName,
           programmingLanguage: this.codeGameForm.value.programmingLanguage,
           codeGameScaffolds: this.questionData.codeGameQuestion!.codeGameScaffolds,
-          gameFileName: this.codeGameForm.value.mainFileName,
+          gameFileName: "game.grid.txt", // Hardcoded for every game task
           game: this.codeGameForm.value.game
         }
       };

@@ -24,14 +24,24 @@
 
 .workspace {
   display: flex;
+  flex-direction: column;
 
-  .playfield-column {
-    flex: 1;
-    margin-right: 10px;
+  .task-description {
+    margin-bottom: 10px;
   }
 
-  .code-editor-column {
+  .bottom-row {
+    display: flex;
     flex: 1;
+
+    .playfield-column {
+      flex: 1;
+      margin-right: 10px;
+    }
+
+    .code-editor-column {
+      margin-right: 0;
+    }
   }
 }
 

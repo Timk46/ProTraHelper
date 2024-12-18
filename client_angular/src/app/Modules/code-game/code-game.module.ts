@@ -17,14 +17,14 @@ import { MarkdownModule} from "ngx-markdown";
     CodeEditorComponent,
     WorkspaceComponent
   ],
-    imports: [
-        CommonModule,
-        CodeGameRoutingModule,
-        MaterialModule,
-        FormsModule,
-        MonacoEditorModule,
-        MarkdownModule,
-    ],
+  imports: [
+    CommonModule,
+    CodeGameRoutingModule,
+    MaterialModule,
+    FormsModule,
+    MonacoEditorModule,
+    MarkdownModule,
+  ],
   exports: [
     CodeEditorComponent
   ],

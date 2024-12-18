@@ -4,7 +4,7 @@ import {WorkspaceComponent} from "./sites/workspace/workspace.component";
 
 const routes: Routes = [
   {
-    path: 'code-game',
+    path: 'code-game/:taskId',
     component: WorkspaceComponent
   }
 ];
