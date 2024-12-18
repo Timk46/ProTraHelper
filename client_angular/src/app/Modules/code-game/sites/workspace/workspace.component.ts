@@ -61,5 +61,37 @@ export class WorkspaceComponent {
 
   submitCode(): void {
     this.compilerOutput = 'Compiling...';
+
+    // TODO: loading spinner
+
+    const mainFile: { [fileName: string]: string } = {};
+    const additionalFiles: { [fileName: string]: string } = {};
+    const gameFile: { [fileName: string]: string } = {};
+
+    if (this.currentTask) {
+      for (const file of this.currentTask.codeGameQuestion!.codeGameScaffolds) {
+        if (file.codeFileName === this.currentTask.codeGameQuestion!.mainFileName) {
+          mainFile[file.codeFileName] = file.code;
+        } else {
+          additionalFiles[file.codeFileName] = file.code;
+        }
+      }
+
+      gameFile[this.currentTask.codeGameQuestion!.gameFileName] = this.currentTask.codeGameQuestion!.game;
+    }
+
+    this.codeGameTaskDataService
+      .executeCodeGameTask(mainFile, additionalFiles, gameFile)
+      .subscribe({
+        next: (response) => {
+          console.log('Response: ', response);
+
+          this.compilerOutput = response.output.toString();
+        },
+        error: (error) => {
+          console.error('Error: ', error);
+          this.compilerOutput = error.message;
+        }
+      });
   }
 }
