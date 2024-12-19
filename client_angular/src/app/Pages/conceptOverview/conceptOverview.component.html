@@ -20,9 +20,14 @@
 
   <button *ngIf="editModeActive" mat-raised-button color="primary" (click)="onCreateContentNode()" disabled>ContentNode hinzufügen</button>
 
-  <div [ngStyle]="{'display': activeTab === 'content' ? 'block' : 'none'}" class="tab-content-container">
+  <!-- <div [ngStyle]="{'display': activeTab === 'content' ? 'block' : 'none'}" class="tab-content-container">
     <app-contentBoard class="tab-content" [contentsForActiveConceptNode]="contentsForActiveConceptNode"
       [activeConceptNodeId]="activeConceptNode.databaseId" (fetchContentsForConcept)="onFetchContentsForConcept()"></app-contentBoard>
+  </div> -->
+
+  <div [ngStyle]="{'display': activeTab === 'content' ? 'block' : 'none'}" class="tab-content-container">
+    <app-content-list class="tab-content" [contentsForActiveConceptNode]="contentsForActiveConceptNode"
+      [activeConceptNodeId]="activeConceptNode.databaseId" (fetchContentsForConcept)="onFetchContentsForConcept()"></app-content-list>
   </div>
 
   <div *ngIf="!editModeActive" [ngStyle]="{'display': activeTab === 'discussion' ? 'block' : 'none'}" class="tab-content-container">

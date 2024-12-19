@@ -1,0 +1,31 @@
+<mat-accordion class="content-list-accordion">
+  <cdk-accordion-item
+    *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index"
+    #accordionItem = "cdkAccordionItem"
+    class = "content-list-item"
+    role = "button"
+    tabindex="0"
+    [attr.id]="'content-list-item-header-' + i"
+    [attr.aria-expanded]="accordionItem.expanded"
+    [attr.aria-controls]="'content-list-item-body-' + i">
+
+    <div class="content-list-item-header" (click)="accordionItem.toggle()">
+      {{ content.name }}
+      <span class="cotent-list-item-description">
+        Click to {{ accordionItem.expanded ? 'close' : 'open' }}
+      </span>
+    </div>
+    <div
+      class="content-list-item-body"
+      role="region"
+      [style.display]="accordionItem.expanded ? '' : 'none'"
+      [attr.id]="'content-list-item-body-' + i"
+      [attr.aria-labelledby]="'content-list-item-header-' + i">
+      Lorem ipsum dolor, sit amet consectetur adipisicing elit. Perferendis
+      excepturi incidunt ipsum deleniti labore, tempore non nam doloribus blanditiis
+      veritatis illo autem iure aliquid ullam rem tenetur deserunt velit culpa?
+    </div>
+
+  </cdk-accordion-item>
+
+</mat-accordion>
