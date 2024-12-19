@@ -40,9 +40,9 @@ const routes: Routes = [
     canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
     children: [
       { path: 'contentBoard', component: ContentBoardComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-      { path: 'conceptOverview', component: ConceptOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'concept', component: ConceptOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
       {
-        path: 'conceptOverview/:conceptId',
+        path: 'concept/:conceptId',
         component: ConceptOverviewComponent,
         children: [
           { path: 'question/:questionId', component: DynamicQuestionComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] }
@@ -63,7 +63,6 @@ const routes: Routes = [
       { path: 'editfillin/:questionId', component: EditFillinComponent, canActivate: [LoggedInGuard, AdminGuard] },
       { path: 'editfreetext/:questionId', component: EditFreetextComponent, canActivate: [LoggedInGuard, AdminGuard] },
       { path: 'editgraph/:questionId', component: EditGraphComponent, canActivate: [LoggedInGuard, AdminGuard] },
-
       // just for testing
       { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
     ]

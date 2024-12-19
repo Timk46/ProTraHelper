@@ -117,7 +117,6 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
    * Navigates to the dynamic question route with questionType
    */
   loadQuestion(questionId: number) {
-    console.log('loadQuestion in conceptOverview', questionId);
     this.questionService.getQuestionData(questionId).subscribe((question: QuestionDTO) => {
       this.navigateToQuestion(this.activeConceptNode.databaseId, question.id);
     });
@@ -130,9 +129,9 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
    * @param questionType
    */
   navigateToQuestion(conceptId: number, questionId: number): void {
-    console.log("navigateToQuestion in conceptOverview", conceptId, questionId);
+
     this.router.navigate([
-      '/dashboard/conceptOverview',
+      '/dashboard/concept',
       conceptId,
       'question',
       questionId,

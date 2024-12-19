@@ -142,10 +142,22 @@ export class DynamicQuestionComponent implements OnInit, OnDestroy {
         dialogRef = this.questionService.openDialog(type, dialogConfig);
         break;
       case questionType.CODE:
-        this.router.navigate([`/tutor-kai/code/${taskViewData.id}`]);
+        this.router.navigate([`/tutor-kai/code/${taskViewData.id}`],
+          {
+            queryParams: {
+              concept: this.conceptId
+            }
+          }
+        );
         break;
       case questionType.GRAPH:
-        this.router.navigate([`/graphtask/${taskViewData.id}`]);
+        this.router.navigate([`/graphtask/${taskViewData.id}`],
+          {
+            queryParams: {
+              concept: this.conceptId
+            }
+          }
+        );
         return;
       default:
         console.warn(`No dialog defined for task type: ${type}`);
@@ -153,7 +165,7 @@ export class DynamicQuestionComponent implements OnInit, OnDestroy {
     }
     if (dialogRef) {
       dialogRef.afterClosed().subscribe(() => {
-        this.router.navigate([`/dashboard/conceptOverview/${this.conceptId}`]);
+        this.router.navigate([`/dashboard/concept/${this.conceptId}`]);
       });
     }
   }
@@ -169,7 +181,4 @@ export class DynamicQuestionComponent implements OnInit, OnDestroy {
       this.componentRef.destroy();
     }
   }
-
-
-
 }

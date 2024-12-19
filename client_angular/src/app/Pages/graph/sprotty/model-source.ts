@@ -369,7 +369,7 @@ export class ConceptGraphModelSource extends LocalModelSource implements OnDestr
       ).subscribe((res) => {});
       this.router!.navigate([
         'dashboard',
-        'conceptOverview',
+        'concept',
         currentActiveNode.databaseId,
       ]);
     }

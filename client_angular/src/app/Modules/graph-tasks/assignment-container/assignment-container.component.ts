@@ -30,11 +30,14 @@ export class AssignmentContainerComponent implements OnInit {
   public feedback: string = '';
 
   thisQuestionType = questionType.GRAPH;
-  
+
   questionData: QuestionDTO | null = null;
   graphQuestionData: GraphQuestionDTO | null = null;
 
   isSending: boolean = false;
+
+  private conceptId!: number;
+  private questionId!: number;
 
   constructor(
     private graphTaskService: GraphTaskService,
@@ -44,24 +47,29 @@ export class AssignmentContainerComponent implements OnInit {
     private progressService: ProgressService,
     private router: Router
   ) {
-
+    this.route.queryParamMap.subscribe(params => {
+      this.conceptId = Number(params.get('concept'));
+      this.questionId = Number(params.get('questionId'));
+      console.log('AssignmentContainerComponent constructor', this.questionId, this.conceptId);
+    });
   }
 
   ngOnInit(): void {
 
     // get assignment id from url
-    this.route.params.subscribe(params => {
-      const questionId = parseInt(params['questionId']);
-
+    if (!this.questionId) {
+      this.snackBar.open('Keine Frage ID gefunden!', 'Schließen', { duration: 5000 });
+      return;
+    }
       // reset the state of the graph service
       this.graphTaskService.resetGraph();
 
       // get question details
-      this.questionDataService.getGraphQuestion(questionId).subscribe(graphQuestionData => {
+      this.questionDataService.getGraphQuestion(this.questionId!).subscribe(graphQuestionData => {
 
-        this.questionDataService.getQuestionData(questionId).subscribe(questionData => {
-          
-          if (questionData.type === questionType.GRAPH) { // TODO: entsprechende questionType anstelle des Strings, testen.
+        this.questionDataService.getQuestionData(this.questionId!).subscribe(questionData => {
+
+          if (questionData.type === questionType.GRAPH) {
             this.graphQuestionData = graphQuestionData;
             this.initialStructure = JSON.parse(JSON.stringify(this.graphQuestionData.initialStructure));
             this.questionData = questionData;
@@ -74,25 +82,24 @@ export class AssignmentContainerComponent implements OnInit {
         });
       });
 
-      this.questionDataService.getNewestUserAnswer(questionId).subscribe(data => {
+      this.questionDataService.getNewestUserAnswer(this.questionId!).subscribe(data => {
         if (data.userGraphAnswer) {
           this.solutionGraph = data.userGraphAnswer;
           this.workspaceModeCurrent = 'solution';
           this.updateWorkspace();
         }
-      });
     });
   }
 
   onSubmitButtonClick() {
-    
+
     if (!this.graphQuestionData) { return; }
 
     // To save workpace content if it is in solution mode
     this.updateWorkspace();
     this.isSending = true;
     this.feedback = '';
-    
+
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
       questionId: this.graphQuestionData.questionId,
@@ -131,7 +138,7 @@ export class AssignmentContainerComponent implements OnInit {
 
     if (numberOfSolutionSteps !== 0) {
       last = this.solutionGraph[numberOfSolutionSteps - 1];
-    } 
+    }
     else {
       const graphNodes = this.initialStructure.nodes;
       const graphEdges = this.initialStructure.edges;
@@ -147,7 +154,7 @@ export class AssignmentContainerComponent implements OnInit {
         };
       }
     }
-    
+
     // Clone the data to use values and not references
     const cloned = JSON.parse(JSON.stringify(last));
 
@@ -161,7 +168,7 @@ export class AssignmentContainerComponent implements OnInit {
     // call updateWorkspace function for other needed updates required related to the step change
     this.updateWorkspace();
   }
-  
+
   deleteCurrentSolutionStep() {
     if (this.solutionGraph.length > 1) {
 
@@ -208,14 +215,14 @@ export class AssignmentContainerComponent implements OnInit {
 
     // If workspace was in solution mode before update
     if (this.workspaceModePrevious === 'solution') {
-      
+
       // Save the previous content before resetting it
       this.saveWorkspaceContent();
     }
 
     // Load solution to the workspace
     if (this.workspaceModeCurrent === 'solution') {
-      
+
       // If there is no step yet, add the first step
       if (this.solutionGraph.length === 0) {
         this.addNewSolutionStep()
@@ -227,7 +234,7 @@ export class AssignmentContainerComponent implements OnInit {
       // To use only values and not the references
       const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
       this.loadWorkspaceContent({ graphStructure: clonedGraphContent, graphConfiguration: this.graphQuestionData?.configuration });
-    } 
+    }
 
     // Load assignment to the workspace
     else if (this.workspaceModeCurrent === 'assignment') {
@@ -242,7 +249,7 @@ export class AssignmentContainerComponent implements OnInit {
       this.loadWorkspaceContent({
         graphStructure: JSON.parse(JSON.stringify(this.initialStructure)),
         graphConfiguration: this.graphQuestionData.configuration
-      })    
+      })
 
     }
 
@@ -286,6 +293,13 @@ export class AssignmentContainerComponent implements OnInit {
   }
 
   navigateToDashboard() {
-    this.router.navigate(['/dashboard']);
+    console.log('navigateToDashboard', this.conceptId);
+    if (this.conceptId ) {
+      console.log('navigateToDashboard with conceptId', this.conceptId);
+      this.router.navigate(['/dashboard', 'concept', this.conceptId]);
+    } else {
+      console.log('navigateToDashboard without conceptId');
+      this.router.navigate(['/dashboard']);
+    }
   }
 }

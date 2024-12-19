@@ -233,18 +233,30 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
       case questionType.FILLIN:
-        await this.router.navigate([`/dashboard/conceptOverview/${conceptId}/question/${taskId}`]);
+        await this.router.navigate([`/dashboard/concept/${conceptId}/question/${taskId}`]);
         break;
       case questionType.FREETEXT:
-        await this.router.navigate([`/dashboard/conceptOverview/${conceptId}/question/${taskId}`]);
+        await this.router.navigate([`/dashboard/concept/${conceptId}/question/${taskId}`]);
         break;
       case questionType.CODE:
-        // Navigate to coding question component
-        await this.router.navigate([`/tutor-kai/code/${selectedTask.id}`]);
+        await this.router.navigate([`/tutor-kai/code/${taskId}`],
+          {
+            queryParams: {
+              concept: conceptId,
+              taskId: taskId
+            }
+          }
+        );
         break;
       case questionType.GRAPH:
-        // Navigate to graph question component
-        await this.router.navigate([`/graphtask/${selectedTask.id}`]);
+        await this.router.navigate([`/graphtask/${taskId}`],
+          {
+            queryParams: {
+              concept: conceptId,
+              questionId: taskId
+            }
+          }
+        );
         return;
     }
 
@@ -286,7 +298,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
         // Await the afterClosed event before navigating
         await lastValueFrom(dialogRef.afterClosed());
-        await this.router.navigate([`/dashboard/conceptOverview/${conceptId}`]);
+        await this.router.navigate([`/dashboard/concept/${conceptId}`]);
       } catch (error) {
         console.error("Error handling dialog events:", error);
         this.snackBar.open('Ein Fehler ist aufgetreten.', 'Schließen', { duration: 3000 });
