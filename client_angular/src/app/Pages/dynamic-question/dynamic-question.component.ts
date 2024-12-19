@@ -14,8 +14,8 @@ import { MatDialogConfig } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-dynamic-question',
-  template: ` <ng-template #dynamicComponentContainer></ng-template> `,
-  styles: [],
+  templateUrl: './dynamic-question.component.html',
+  styleUrls: ['./dynamic-question.component.scss']
 })
 export class DynamicQuestionComponent implements OnInit, OnDestroy {
   @ViewChild('dynamicComponentContainer', {

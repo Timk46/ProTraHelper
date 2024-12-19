@@ -1,9 +1,9 @@
-import { QuestionDTO, UserAnswerDataDTO, freeTextQuestionDTO } from '@DTOs/index';
+import { UserAnswerDataDTO, freeTextQuestionDTO } from '@DTOs/index';
 import { DialogRef } from '@angular/cdk/dialog';
-import { Component, Inject, EventEmitter, Output } from '@angular/core';
+import { Component, Inject, EventEmitter, Output, Input } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-
+import { Location } from '@angular/common';
 interface TaskViewData {
   contentNodeId: number;
   contentElementId: number;
@@ -22,6 +22,8 @@ interface TaskViewData {
 export class FreeTextTaskComponent {
 
   @Output() submitClicked = new EventEmitter<any>();
+  @Input() conceptId!: number;
+  @Input() questionId!: number;
 
   editorConfig = { //tinyMCE
     readonly: false,
@@ -50,7 +52,7 @@ export class FreeTextTaskComponent {
   }
 
 
-  constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: any, private quesitonService: QuestionDataService) {
+  constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: any, private quesitonService: QuestionDataService, private location: Location) {
     this.taskViewData = data.taskViewData;
     this.quesitonService.getFreeTextQuestion(this.taskViewData.id).subscribe(data => {
       this.freeTextQuestion = data;
@@ -87,5 +89,18 @@ export class FreeTextTaskComponent {
 
   }
 
+  onClose(): void {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
+    if (this.conceptId && this.questionId) {
+
+      this.location.replaceState(`/dashboard/conceptOverview/${this.conceptId}`);
+    } else if (this.conceptId) {
+      this.location.replaceState(`/dashboard/conceptOverview`);
+    } else {
+      this.location.replaceState(`/dashboard`);
+    }
+  }
 
 }

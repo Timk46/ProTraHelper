@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef, OnDestroy, EventEmitter, Output, Inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef, OnDestroy, EventEmitter, Output, Inject, Input } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { DialogRef } from '@angular/cdk/dialog';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
@@ -9,9 +9,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-
-
-
+import { Location } from '@angular/common';
 
 interface ContentPart {
   type: 'sentence' | 'table';
@@ -62,7 +60,8 @@ interface TaskViewData {
 export class FillinTaskComponent implements OnInit, OnDestroy {
   @ViewChild('tableContainer') tableContainer!: ElementRef;
   @Output() submitClicked = new EventEmitter<any>();
-
+  @Input() conceptId!: number;
+  @Input() questionId!: number;
   taskViewData!: TaskViewData;
   fillInTask!: FillinQuestionDTO;
   fillinTaskTypes = FillinQuestionType;
@@ -94,7 +93,8 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private userService: UserService,
     private cdr: ChangeDetectorRef,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private location: Location
   ) {
     this.taskViewData = data.taskViewData;
     this.taskForm = this.fb.group({})
@@ -512,7 +512,19 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
   }
 
   onClose(): void {
-    this.dialogRef.close(this.feedbackText.elementDone);
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
+    if (this.conceptId && this.questionId) {
+      // Navigate to /dashboard/conceptOverview/:conceptId
+      this.location.replaceState(`/dashboard/conceptOverview/${this.conceptId}`);
+    } else if (this.conceptId) {
+      // Navigate to /dashboard/conceptOverview
+      this.location.replaceState(`/dashboard/conceptOverview`);
+    } else {
+      // Navigate to /dashboard
+      this.location.replaceState(`/dashboard`);
+    }
   }
 
   isSentencePart(content: any): content is SentencePart[] {
@@ -538,6 +550,7 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
         return 'drag';
     }
   }
+
 
 
 }

@@ -18,6 +18,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { FillinTaskNewComponent } from '../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { TaskViewData } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { MatAccordion } from '@angular/material/expansion';
 
 @Component({
   selector: 'app-contentBoard',
@@ -83,7 +84,6 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     private contentLinkerService: ContentLinkerService,
     private confirmService: ConfirmationService,
     private snackBar: MatSnackBar,
-    private questionDataService: QuestionDataService
   ) {
     // Initialize the data source for the table
     this.dataSource = new MatTableDataSource<TaskViewData>();
@@ -94,6 +94,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit() {
+
+
     // Subscribe to screen size changes for responsive design
     this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
       this.editModeActive = hasEditModeActive;
@@ -225,7 +227,6 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
     let dialogRef: MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined;
-    // Navigate to the task route
 
 
     switch (selectedTask.type) {
@@ -285,7 +286,6 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
         // Await the afterClosed event before navigating
         await lastValueFrom(dialogRef.afterClosed());
-        console.log("Dialog closed with id: ", conceptId);
         await this.router.navigate([`/dashboard/conceptOverview/${conceptId}`]);
       } catch (error) {
         console.error("Error handling dialog events:", error);

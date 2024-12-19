@@ -28,7 +28,6 @@ import { RegisteredForSubjectGuard } from './Guards/registered-for-subject.guard
 import { GraphTasksComponent } from './Modules/graph-tasks/graph-tasks.component';
 import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-question.component';
 
-// refactor that routes with dashboard as parent component and the rest as children
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -40,36 +39,37 @@ const routes: Routes = [
     component: DashboardComponent,
     canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
     children: [
-      { path: 'contentBoard', component: ContentBoardComponent },
-      { path: 'conceptOverview', component: ConceptOverviewComponent },
+      { path: 'contentBoard', component: ContentBoardComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'conceptOverview', component: ConceptOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
       {
         path: 'conceptOverview/:conceptId',
         component: ConceptOverviewComponent,
         children: [
-          { path: 'question/:questionId', component: DynamicQuestionComponent }
-        ]
+          { path: 'question/:questionId', component: DynamicQuestionComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] }
+        ],
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard]
       },
-      { path: 'discussion', component: DiscussionListComponent },
-      { path: 'codeTask', component: CodeTaskComponent },
-      { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent },
-      { path: 'graph', component: GraphComponent },
-      { path: 'chatbot', component: ChatBotComponent },
-      { path: 'video', component: VideoTimeStampComponent },
-      { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent },
-      { path: 'mcqcreation', component: McTaskCreationComponent },
+      { path: 'discussion', component: DiscussionListComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'codeTask', component: CodeTaskComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'graph', component: GraphComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'chatbot', component: ChatBotComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'mcqcreation', component: McTaskCreationComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
       // lecturers view
-      { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [AdminGuard] },
-      { path: 'editcoding/:questionId', component: EditCodingComponent, canActivate: [AdminGuard] },
-      { path: 'editfillin/:questionId', component: EditFillinComponent, canActivate: [AdminGuard] },
-      { path: 'editfreetext/:questionId', component: EditFreetextComponent, canActivate: [AdminGuard] },
-      { path: 'editgraph/:questionId', component: EditGraphComponent, canActivate: [AdminGuard] },
+      { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [LoggedInGuard, AdminGuard] },
+      { path: 'editcoding/:questionId', component: EditCodingComponent, canActivate: [LoggedInGuard, AdminGuard] },
+      { path: 'editfillin/:questionId', component: EditFillinComponent, canActivate: [LoggedInGuard, AdminGuard] },
+      { path: 'editfreetext/:questionId', component: EditFreetextComponent, canActivate: [LoggedInGuard, AdminGuard] },
+      { path: 'editgraph/:questionId', component: EditGraphComponent, canActivate: [LoggedInGuard, AdminGuard] },
 
       // just for testing
-      { path: 'file-upload', component: FileUploadComponent },
+      { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
     ]
   },
-  { path: 'discussion-view/:discussionId', component: DiscussionViewComponent },
-  { path: 'graphtask/:questionId', component: GraphTasksComponent },
+  { path: 'discussion-view/:discussionId', component: DiscussionViewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  { path: 'graphtask/:questionId', component: GraphTasksComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
   // Lazy loaded modules
   {
     path: 'tutor-kai',
@@ -79,7 +79,7 @@ const routes: Routes = [
   {
     path: 'admin',
     loadChildren: () => import('./Pages/admin/admin.module').then(m => m.AdminModule),
-    canActivate: [AdminGuard]
+    canActivate: [LoggedInGuard, AdminGuard]
   }
 ];
 @NgModule({

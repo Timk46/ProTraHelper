@@ -1,11 +1,11 @@
 import { Component, OnInit, Input, Inject, EventEmitter, Output, Optional } from '@angular/core';
-import { MCOptionViewDTO, McQuestionDTO, QuestionDTO, QuestionVersionDTO } from '@DTOs/question.dto';
+import { MCOptionViewDTO, McQuestionDTO, QuestionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TaskViewData } from '@DTOs/index';
-import { ActivatedRoute, Router } from '@angular/router';
-
+import {  Router } from '@angular/router';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-mcTask',
@@ -16,7 +16,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 export class McTaskComponent implements OnInit {
 
   @Output() submitClicked = new EventEmitter<any>();
-  
+
   @Input() conceptId!: number;
   @Input() questionId!: number;
   @Input() isSelfAssessment: boolean = false;
@@ -89,7 +89,8 @@ export class McTaskComponent implements OnInit {
     @Optional() @Inject(MAT_DIALOG_DATA) public data: {taskViewData: TaskViewData, conceptId: number, questionId: number},
     private questionDataService: QuestionDataService,
     private router: Router,
-    private dialogRef: MatDialogRef<McTaskComponent>
+    private dialogRef: MatDialogRef<McTaskComponent>,
+    private location: Location
   ) {
     if (data && data.taskViewData) {
       this.taskViewData = data.taskViewData;
@@ -193,13 +194,14 @@ export class McTaskComponent implements OnInit {
     }
 
     if (this.conceptId && this.questionId) {
-      this.router.navigate([`/dashboard/conceptOverview/${this.conceptId}/question/${this.questionId}`]);
+      // Navigate to /dashboard/conceptOverview/:conceptId
+      this.location.replaceState(`/dashboard/conceptOverview/${this.conceptId}`);
     } else if (this.conceptId) {
-      this.router.navigate([`/dashboard/conceptOverview/${this.conceptId}`]);
+      // Navigate to /dashboard/conceptOverview
+      this.location.replaceState(`/dashboard/conceptOverview`);
     } else {
-      console.error('conceptId or questionId is undefined. Unable to navigate.');
-      // Fallback navigation or error handling
-      this.router.navigate(['/dashboard']);
+      // Navigate to /dashboard
+      this.location.replaceState(`/dashboard`);
     }
   }
 }
