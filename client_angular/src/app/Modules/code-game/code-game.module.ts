@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 
 import { CodeGameRoutingModule } from './code-game-routing.module';
 import { PlayfieldComponent } from './sites/playfield/playfield.component';
@@ -24,6 +24,7 @@ import { MarkdownModule} from "ngx-markdown";
     FormsModule,
     MonacoEditorModule,
     MarkdownModule,
+    NgOptimizedImage,
   ],
   exports: [
     CodeEditorComponent

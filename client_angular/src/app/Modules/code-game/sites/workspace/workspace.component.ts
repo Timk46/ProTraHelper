@@ -1,13 +1,14 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { CodeEditorComponent } from "../code-editor/code-editor.component";
 import { Title } from "@angular/platform-browser";
 import { ActivatedRoute } from "@angular/router";
 import { CodeGameTaskDataService } from "../../services/code-game-task-data.service";
 import { detailedQuestionDTO } from "@DTOs/detailedQuestion.dto";
+import { PlayfieldComponent } from "../playfield/playfield.component";
 
 enum States {
-  startState = 0, // start state - before a task is selected (hide code editor)
-  editingCode = 1, // after a task is selected (show code editor)
+  startState = 0, // before task is loaded
+  editingCode = 1, // task is loaded
 }
 
 @Component({
@@ -17,10 +18,13 @@ enum States {
 })
 export class WorkspaceComponent {
   @ViewChild('codeEditorMonaco') codeEditorComponent?: CodeEditorComponent;
+  @ViewChild('playfield') playfieldComponent?: PlayfieldComponent;
+  @Output() gameLoaded = new EventEmitter<void>();
 
   selectedLanguage: string = 'cpp';
   code: string = '';
-  compilerOutput: string | null = '';
+  compilerConsoleOutputView: string | null = ''; // to show the compiler output
+  compilerGameOutputView: string[] = []; // used to simulate the game
   currentTaskId: number = 0;
   currentTask: detailedQuestionDTO | undefined;
   taskDescription: string = 'Das Programmierspiel von GOALS';
@@ -49,6 +53,9 @@ export class WorkspaceComponent {
           this.currentState = States.editingCode;
 
           console.log('Current task: ', this.currentTask);
+
+          // trigger playfield component to load the game
+          this.playfieldComponent?.initGameField(this.currentTask?.codeGameQuestion!.game);
         });
       }
     });
@@ -60,7 +67,7 @@ export class WorkspaceComponent {
   }
 
   submitCode(): void {
-    this.compilerOutput = 'Compiling...';
+    this.compilerConsoleOutputView = 'Compiling...';
 
     // TODO: loading spinner
 
@@ -86,12 +93,33 @@ export class WorkspaceComponent {
         next: (response) => {
           console.log('Response: ', response);
 
-          this.compilerOutput = response.output.toString();
+          this.splitCompilerOutput(response.output.toString());
         },
         error: (error) => {
           console.error('Error: ', error);
-          this.compilerOutput = error.message;
+          this.compilerConsoleOutputView = error.message;
         }
       });
   }
+
+  splitCompilerOutput(compilerOutput: string): void {
+    // split the output vor the game view and the compiler output
+    // lines staring with # needed for the game view
+    const lines = compilerOutput.split('\n');
+    let gameOutput: string[] = [];
+    let remainingOutput = '';
+
+    lines.forEach(line => {
+      if (line.startsWith('#')) {
+        gameOutput.push(line);
+      } else {
+        remainingOutput += line + '\n';
+      }
+    });
+
+    this.compilerGameOutputView = gameOutput;
+    this.compilerConsoleOutputView = remainingOutput;
+  }
+
+  protected readonly States = States;
 }
