@@ -118,6 +118,7 @@ export class WorkspaceComponent {
     });
 
     this.compilerGameOutputView = gameOutput;
+    this.playfieldComponent?.startGame(this.compilerGameOutputView);
     this.compilerConsoleOutputView = remainingOutput;
   }
 

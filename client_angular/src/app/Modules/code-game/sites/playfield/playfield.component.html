@@ -1,5 +1,6 @@
 <div class="playfield">
-  <p>{{ compilerGameOutput }}</p>
+<!--  TODO: remove, just for testing-->
+<!--  <p>{{ compilerGameOutput }}</p>-->
 
 <!--  TODO: Show game output informations-->
 
@@ -7,12 +8,17 @@
     <p>{{ gameOutputInformation }}</p>
   </div>
 
-  <div class="field">
-    <div *ngFor="let row of gameField; let i = index" class="row">
-      <div *ngFor="let cell of row; let j = index" class="cell">
-        <img [src]="getFloorImage(i, j)" alt="floorImage" class="floorImage" />
-        <img *ngIf="getActorImage(i, j)" [src]="getActorImage(i, j)" alt="actorImage" class="actorImage" />
+  <div class="playfield">
+    <div class="field">
+      <div *ngFor="let row of gameField; let i = index" class="row">
+        <div *ngFor="let cell of row; let j = index" class="cell">
+          <img [src]="getFloorImage(i, j)" alt="floorImage" class="floorImage" />
+        </div>
       </div>
+      <!-- Render player once and adjust its position via transform -->
+      <img *ngIf="roverPositstionIsSet" [src]="getActorImage()" alt="actorImage"
+           class="actorImage"
+           [style.transform]="roverTransform" />
     </div>
   </div>
 </div>
