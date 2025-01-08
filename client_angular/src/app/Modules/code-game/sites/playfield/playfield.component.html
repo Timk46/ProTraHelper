@@ -16,9 +16,9 @@
         </div>
       </div>
       <!-- Render player once and adjust its position via transform -->
-      <img *ngIf="roverPositstionIsSet" [src]="getActorImage()" alt="actorImage"
+      <img *ngIf="roverPositionIsSet" [src]="getActorImage()" alt="actorImage"
            class="actorImage"
-           [style.transform]="roverTransform" />
+           [style.transform]="playerTransform" />
     </div>
   </div>
 </div>

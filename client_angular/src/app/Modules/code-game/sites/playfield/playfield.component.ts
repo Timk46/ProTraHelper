@@ -23,13 +23,13 @@ export class PlayfieldComponent {
   gameFieldHeight: number = 0;
   cellSize: number = 60;
 
-  @Input() actorPosition = { x: 0, y: 0 };
+  @Input() playerPosition = { x: 0, y: 0 };
   startX = 0;
   startY = 0;
   endX = 0;
   endY = 0;
-  roverTransform: string = '';
-  roverPositstionIsSet = false; // true, if the rover position is set
+  playerTransform: string = '';
+  roverPositionIsSet = false; // true, if the rover position is set
 
   gameOutputInformation: string = 'Bereit für die Ausführung';
   compilerGameOutput: string[] = [];
@@ -67,10 +67,10 @@ export class PlayfieldComponent {
 
           console.log("Actor initialized at: ", this.startX, this.startY);
 
-          this.actorPosition = { x: col, y: row };
-          this.roverTransform = `translate(${this.startX}px, ${this.startY}px)`;
+          this.playerPosition = { x: col, y: row };
+          this.playerTransform = `translate(${this.startX}px, ${this.startY}px)`;
 
-          this.roverPositstionIsSet = true
+          this.roverPositionIsSet = true
           return; // Exit the loop once the player is found
         }
       }
@@ -80,8 +80,8 @@ export class PlayfieldComponent {
   }
 
   moveActorTo(newX: number, newY: number): void {
-    const startX = this.actorPosition.x * this.cellSize;
-    const startY = this.actorPosition.y * this.cellSize;
+    const startX = this.playerPosition.x * this.cellSize;
+    const startY = this.playerPosition.y * this.cellSize;
     const endX = newX * this.cellSize;
     const endY = newY * this.cellSize;
 
@@ -101,12 +101,12 @@ export class PlayfieldComponent {
       console.log("Moving to: ", interpolatedX, interpolatedY);
 
       // Transformation style update
-      this.roverTransform = `translate(${interpolatedX}px, ${interpolatedY}px)`;
+      this.playerTransform = `translate(${interpolatedX}px, ${interpolatedY}px)`;
 
       // End animation
       if (currentStep >= steps) {
         clearInterval(moveInterval);
-        this.actorPosition = { x: newX, y: newY }; // Update the actor position
+        this.playerPosition = { x: newX, y: newY }; // Update the actor position
       }
     }, interval);
   }
