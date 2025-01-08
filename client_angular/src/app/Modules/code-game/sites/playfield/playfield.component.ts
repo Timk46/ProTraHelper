@@ -1,6 +1,13 @@
 import { Component, ElementRef, Input, Renderer2 } from '@angular/core';
 import { animate, style, transition, trigger } from "@angular/animations";
 
+enum PlayerDirection {
+  NORTH = 270,
+  EAST = 0,
+  SOUTH = 90,
+  WEST = 180,
+}
+
 @Component({
   selector: 'app-playfield',
   templateUrl: './playfield.component.html',
@@ -24,6 +31,8 @@ export class PlayfieldComponent {
   cellSize: number = 60;
 
   @Input() playerPosition = { x: 0, y: 0 };
+  playerDirection: PlayerDirection = PlayerDirection.EAST; // default direction
+
   startX = 0;
   startY = 0;
   endX = 0;
@@ -86,7 +95,7 @@ export class PlayfieldComponent {
     const endY = newY * this.cellSize;
 
     const steps = 50; // Number if intermediate positions
-    const interval = 40; // Time between steps in ms
+    const interval = 20; // Time between steps in ms
     let currentStep = 0;
 
     // Update the position step by step
@@ -98,18 +107,55 @@ export class PlayfieldComponent {
       const interpolatedX = startX + (endX - startX) * progress;
       const interpolatedY = startY + (endY - startY) * progress;
 
-      console.log("Moving to: ", interpolatedX, interpolatedY);
-
-      // Transformation style update
-      this.playerTransform = `translate(${interpolatedX}px, ${interpolatedY}px)`;
+      // Transformation style update, rotation remains the same
+      this.playerTransform = `translate(${interpolatedX}px, ${interpolatedY}px) rotate(${this.playerDirection}deg)`;
 
       // End animation
       if (currentStep >= steps) {
         clearInterval(moveInterval);
+
         this.playerPosition = { x: newX, y: newY }; // Update the actor position
+        // Ensure that the actor is at the correct position
+        this.playerTransform = `translate(${endX}px, ${endY}px) rotate(${this.playerDirection}deg)`;
       }
     }, interval);
   }
+
+  rotateActorTo(direction: PlayerDirection): void {
+    const steps = 30; // number of intermediate positions
+    const interval = 30; // time between steps in ms
+    let currentStep = 0;
+
+    // Calculate the target rotation (in degrees)
+    const targetRotation = direction;
+    const startRotation = this.playerDirection;
+    let rotationDelta = (direction - startRotation + 360) % 360;
+
+    // Ensure the player takes the shortest rotation path
+    if (rotationDelta > 180) {
+      rotationDelta -= 360;
+    }
+
+    // Update the rotation step by step
+    const rotateInterval = setInterval(() => {
+      currentStep++;
+      const progress = currentStep / steps;
+      const interpolatedRotation = startRotation + rotationDelta * progress;
+
+      // Transform style update, position remains the same
+      this.playerTransform = `translate(${this.playerPosition.x * this.cellSize}px, ${this.playerPosition.y * this.cellSize}px) rotate(${interpolatedRotation}deg)`;
+
+      // End animation
+      if (currentStep >= steps) {
+        clearInterval(rotateInterval);
+
+        this.playerDirection = direction; // Update the actor direction
+        // Ensure that the actor is at the correct rotation
+        this.playerTransform = `translate(${this.playerPosition.x * this.cellSize}px, ${this.playerPosition.y * this.cellSize}px) rotate(${targetRotation}deg)`;
+      }
+    }, interval);
+  }
+
 
   fillGameField(): void {
     // Generate a 2D array from the input string.
@@ -147,43 +193,49 @@ export class PlayfieldComponent {
     this.gameOutputInformation = 'Spiel wird ausgeführt...';
     this.compilerGameOutput = gameOutput;
 
-    // show each console output line with a delay of 1 second
-    // this.compilerGameOutput.forEach((line, index) => {
-    //   setTimeout(() => {
-    //     this.gameOutputInformation = line;
-    //   }, index * 1000);
-    // });
-
     // move the actor
-    // this.compilerGameOutput.forEach((line, index) => {
-    //   this.actActor(line);
-    //
-    //
-    // });
-
-
-
-    // this.actActor("#SYS-Move:7/8");
-
-    this.moveActorTo(7, 7);
-    this.moveActorTo(7, 8);
+    this.compilerGameOutput.forEach((line, index) => {
+      setTimeout(() => {
+        this.actActor(line);
+      }, index * 2000);
+    });
   }
 
-  actActor(comand: String): void {
-    const action = comand.split(':')[0];
-    const move = comand.split(':')[1];
+  actActor(command: String): void {
+    const action = command.split(':')[0];
+    const move = command.split(':')[1];
 
     if (action == "#SYS-Move") {
-      const cordinates = move.split('/');
-      // this.moveActorTo(parseInt(cordinates[0]), parseInt(cordinates[1]));
+      this.gameOutputInformation = ""; // clear the information
+
+      const coordinates = move.split('/');
+      this.moveActorTo(parseInt(coordinates[0]), parseInt(coordinates[1]));
 
     } else if (action == "#SYS-Turn") {
+      this.gameOutputInformation = ""; // clear the information
+
+      switch (move) {
+        case "NORTH":
+          this.rotateActorTo(PlayerDirection.NORTH);
+          break;
+        case "EAST":
+          this.rotateActorTo(PlayerDirection.EAST);
+          break;
+        case "SOUTH":
+          this.rotateActorTo(PlayerDirection.SOUTH);
+          break;
+        case "WEST":
+          this.rotateActorTo(PlayerDirection.WEST);
+          break;
+        default:
+          console.error("Unknown direction: ", move);
+      }
 
     } else if (action == "#SYS-Info") {
+      this.gameOutputInformation = move;
 
     } else {
       console.error("Unknown action: ", action);
     }
   }
-
 }

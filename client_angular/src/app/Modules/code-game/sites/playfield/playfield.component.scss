@@ -39,11 +39,11 @@
   }
 
   .floorImage,
-  .actorImage {
+  .actorImage,
+  .objectImage{
     width: var(--cell-size, 60px);
     height: var(--cell-size, 60px);
     position: absolute;
-    transition: transform 40ms linear;
   }
 
   .floorImage {
@@ -51,6 +51,11 @@
   }
 
   .actorImage {
+    z-index: 3;
+    transition: transform 20ms linear;
+  }
+
+  .objectImage {
     z-index: 2;
   }
 }
