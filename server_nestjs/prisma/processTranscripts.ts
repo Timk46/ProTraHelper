@@ -90,7 +90,7 @@ export async function seedTranscriptsToConceptNodes() {
       return updates.filter(Boolean).length;
     }, {
       maxWait: 15000, // Maximum time to wait for transaction
-      timeout: 30000, // Maximum time for the transaction to complete
+      timeout: 90000, // Maximum time for the transaction to complete
     });
 
     console.log(`Successfully processed ${result} concept nodes`);

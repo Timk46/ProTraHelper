@@ -357,11 +357,10 @@ export class EditChoiceComponent {
     this.mcqService.getQuestionAndAnswers(
       this.getConceptById(Number(this.generationForm.value.generationConcept)),
       this.generationForm.value.generationOptionCount,
-      this.generationForm.value.generationTopic
+      //this.generationForm.value.generationTopic
     ).subscribe(data => {
       console.log('Generated question:', data);
       this.questionField.setContent(data.question || '');
-      this.generationForm.get('generationTopic')?.setValue(data.description || '');
       this.optionsData.clear();
       if (data.answers) {
         data.answers.forEach((answer: Answer) => {
