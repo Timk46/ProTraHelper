@@ -6,7 +6,7 @@ import { CodeGameTaskDataService } from "../../services/code-game-task-data.serv
 import { detailedQuestionDTO } from "@DTOs/detailedQuestion.dto";
 import { PlayfieldComponent } from "../playfield/playfield.component";
 
-enum States {
+enum States { // TODO: check if needed
   startState = 0, // before task is loaded
   editingCode = 1, // task is loaded
 }
@@ -29,6 +29,7 @@ export class WorkspaceComponent {
   currentTask: detailedQuestionDTO | undefined;
   taskDescription: string = 'Das Programmierspiel von GOALS';
   currentState: States = States.startState;
+  protected readonly States = States;
 
   // flags to control the elements in the view
   isLoading: boolean = false;
@@ -139,8 +140,6 @@ export class WorkspaceComponent {
     this.showCompilerOutput = true;
     this.isGameAnimationFinished = false;
   }
-
-  protected readonly States = States;
 
   resetGame(): void {
     this.showCompilerOutput = false;

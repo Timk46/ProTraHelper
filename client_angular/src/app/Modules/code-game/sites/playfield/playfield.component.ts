@@ -13,7 +13,7 @@ enum PlayerDirection {
   templateUrl: './playfield.component.html',
   styleUrls: ['./playfield.component.scss'],
   animations: [
-    trigger('moveActor', [
+    trigger('movePlayer', [
       transition('* => *', [
         animate('2000ms linear', style({
           transform: 'translate({{endX}}px, {{endY}}px)'
@@ -24,22 +24,21 @@ enum PlayerDirection {
 })
 
 export class PlayfieldComponent {
-  @Input() gameField: string[][] = [];
+  gameField: string[][] = [];
   inputGameFile = '';
   gameFieldWidth: number = 0;
   gameFieldHeight: number = 0;
   cellSize: number = 60;
 
-  @Input() playerPosition = { x: 0, y: 0 };
+  playerPosition = { x: 0, y: 0 };
   playerDirection: PlayerDirection = PlayerDirection.EAST; // default direction
-
   startX = 0;
   startY = 0;
   endX = 0;
   endY = 0;
   playerTransform: string = '';
   playerInitialPosition: { x: number, y: number } = { x: 0, y: 0 };
-  roverPositionIsSet = false; // true, if the rover position is set
+  playerPositionIsSet = false; // true, if the player position is set
 
   gameOutputInformation: string = 'Bereit für die Ausführung';
   compilerGameOutput: string[] = [];
@@ -54,10 +53,10 @@ export class PlayfieldComponent {
 
     this.fillGameField();
     this.setGridDimensions();
-    this.initActor();
+    this.initPlayer();
   }
 
-  initActor(): void {
+  initPlayer(): void {
     if (this.gameFieldHeight === 0 || this.gameFieldWidth === 0) {
       console.error("Game field dimensions are not set.");
       return;
@@ -79,7 +78,7 @@ export class PlayfieldComponent {
           this.playerInitialPosition = { x: col, y: row };
           this.playerPosition = { x: col, y: row };
           this.playerTransform = `translate(${this.startX}px, ${this.startY}px)`;
-          this.roverPositionIsSet = true
+          this.playerPositionIsSet = true
 
           return; // Exit the loop once the player is found
         }
@@ -115,8 +114,8 @@ export class PlayfieldComponent {
       if (currentStep >= steps) {
         clearInterval(moveInterval);
 
-        this.playerPosition = { x: newX, y: newY }; // Update the actor position
-        // Ensure that the actor is at the correct position
+        this.playerPosition = { x: newX, y: newY }; // Update the player position
+        // Ensure that the player is at the correct position
         this.playerTransform = `translate(${endX}px, ${endY}px) rotate(${this.playerDirection}deg)`;
       }
     }, interval);
@@ -150,8 +149,8 @@ export class PlayfieldComponent {
       if (currentStep >= steps) {
         clearInterval(rotateInterval);
 
-        this.playerDirection = direction; // Update the actor direction
-        // Ensure that the actor is at the correct rotation
+        this.playerDirection = direction; // Update the player direction
+        // Ensure that the player is at the correct rotation
         this.playerTransform = `translate(${this.playerPosition.x * this.cellSize}px, ${this.playerPosition.y * this.cellSize}px) rotate(${targetRotation}deg)`;
       }
     }, interval);

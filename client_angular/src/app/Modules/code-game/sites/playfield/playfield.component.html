@@ -12,7 +12,7 @@
         </div>
       </div>
       <!-- Render player once and adjust its position via transform -->
-      <img *ngIf="roverPositionIsSet" [src]="getPlayerImage()" alt="playerImage"
+      <img *ngIf="playerPositionIsSet" [src]="getPlayerImage()" alt="playerImage"
            class="actorImage"
            [style.transform]="playerTransform" />
     </div>
