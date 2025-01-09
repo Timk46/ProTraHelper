@@ -10,6 +10,8 @@ import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { structuresAreEqual } from '../utils';
 import { AiFeedbackService } from '../services/ai-feedback.service';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { GraphTutorialDialogComponent } from '../graph-tutorial-dialog/graph-tutorial-dialog.component';
 
 
 @Component({
@@ -62,6 +64,7 @@ export class AssignmentContainerComponent implements OnInit {
     private graphTaskService: GraphTaskService,
     private aiFeedbackService: AiFeedbackService,
     private questionDataService: QuestionDataService,
+    private dialog: MatDialog,
   ) {
 
   }
@@ -470,5 +473,16 @@ export class AssignmentContainerComponent implements OnInit {
 
   navigateToDashboard() {
     this.router.navigate(['/dashboard']);
+  }
+
+  openTutorialDialog() {
+    const dialogConfig = new MatDialogConfig();
+
+    dialogConfig.maxWidth = '70vw';
+    dialogConfig.maxHeight = '95vh';
+
+    // Open the dialog
+    // const dialogRef = 
+    this.dialog.open(GraphTutorialDialogComponent, dialogConfig);
   }
 }

@@ -95,6 +95,16 @@
     background-color: rgb(246, 103, 92);
 }
 
+.controls button.question {
+    background-color: #fff;
+    // color:#aaa;
+    color: rgb(63,81,181);
+}
+
+.controls button.question:hover {
+    background-color: #ddd;
+}
+
 .controls button:disabled {
     background-color: #bbb;
     cursor: not-allowed;
@@ -189,7 +199,12 @@ mat-button-toggle-group {
     height: 60%;
 }
 
-.star-button .mat-icon.gold {
+.image-button.question svg { // question icon is a little bit bigger
+    height: 70%;
+    width: 70%;
+}
+
+    .star-button .mat-icon.gold {
     color: gold;
 }
 
