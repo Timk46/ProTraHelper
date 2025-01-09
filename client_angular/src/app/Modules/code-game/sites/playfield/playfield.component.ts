@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, Renderer2 } from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, Output, Renderer2} from '@angular/core';
 import { animate, style, transition, trigger } from "@angular/animations";
 
 enum PlayerDirection {
@@ -38,10 +38,14 @@ export class PlayfieldComponent {
   endX = 0;
   endY = 0;
   playerTransform: string = '';
+  playerInitialPosition: { x: number, y: number } = { x: 0, y: 0 };
   roverPositionIsSet = false; // true, if the rover position is set
 
   gameOutputInformation: string = 'Bereit für die Ausführung';
   compilerGameOutput: string[] = [];
+
+  // Event emitter to notify the workspace component that the game animation has finished
+  @Output() gameAnimationFinished = new EventEmitter<void>();
 
   constructor(private renderer: Renderer2, private el: ElementRef) {}
 
@@ -54,8 +58,6 @@ export class PlayfieldComponent {
   }
 
   initActor(): void {
-    console.log("Initializing actor...");
-
     if (this.gameFieldHeight === 0 || this.gameFieldWidth === 0) {
       console.error("Game field dimensions are not set.");
       return;
@@ -74,12 +76,11 @@ export class PlayfieldComponent {
           this.endX = col * this.cellSize;
           this.endY = row * this.cellSize;
 
-          console.log("Actor initialized at: ", this.startX, this.startY);
-
+          this.playerInitialPosition = { x: col, y: row };
           this.playerPosition = { x: col, y: row };
           this.playerTransform = `translate(${this.startX}px, ${this.startY}px)`;
-
           this.roverPositionIsSet = true
+
           return; // Exit the loop once the player is found
         }
       }
@@ -193,12 +194,22 @@ export class PlayfieldComponent {
     this.gameOutputInformation = 'Spiel wird ausgeführt...';
     this.compilerGameOutput = gameOutput;
 
-    // move the actor
+    // game animation
     this.compilerGameOutput.forEach((line, index) => {
       setTimeout(() => {
         this.actActor(line);
       }, index * 2000);
     });
+
+    // Calculate the total duration of the animations
+    const totalDuration = this.compilerGameOutput.length * 2000;
+
+    // Run the code after all animations are finished
+    setTimeout(() => {
+      // game is finished
+      this.gameOutputInformation = 'Spiel wurde ausgeführt';
+      this.gameAnimationFinished.emit();
+    }, totalDuration);
   }
 
   actActor(command: String): void {
@@ -237,5 +248,15 @@ export class PlayfieldComponent {
     } else {
       console.error("Unknown action: ", action);
     }
+  }
+
+  resetGame(): void {
+    // reset the game field
+    this.playerPosition = this.playerInitialPosition;
+    this.playerDirection = PlayerDirection.EAST;
+    this.playerTransform = `translate(${this.startX}px, ${this.startY}px) rotate(${this.playerDirection}deg)`;
+
+    // reset the game output information
+    this.gameOutputInformation = 'Bereit für die Ausführung';
   }
 }

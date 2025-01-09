@@ -30,6 +30,13 @@ export class WorkspaceComponent {
   taskDescription: string = 'Das Programmierspiel von GOALS';
   currentState: States = States.startState;
 
+  // flags to control the elements in the view
+  isLoading: boolean = false;
+  submitButtonIsDisabled: boolean = false;
+  isGameAnimationFinished: boolean = false;
+  resetButtonIsDisabled: boolean = true;
+  showCompilerOutput: boolean = false;
+
   constructor(
     private title: Title,
     private codeGameTaskDataService: CodeGameTaskDataService,
@@ -40,6 +47,12 @@ export class WorkspaceComponent {
   ngOnInit(): void {
     this.getCurrentTaskFromRoute();
     this.title.setTitle('GOALS: Code Game');
+  }
+
+  // Event handler to get notified when the game animation has finished by the playfield component
+  onGameAnimationFinished(): void {
+    this.isGameAnimationFinished = true;
+    this.resetButtonIsDisabled = false;
   }
 
   getCurrentTaskFromRoute(): void {
@@ -67,9 +80,9 @@ export class WorkspaceComponent {
   }
 
   submitCode(): void {
+    this.submitButtonIsDisabled = true;
+    this.isLoading = true;
     this.compilerConsoleOutputView = 'Compiling...';
-
-    // TODO: loading spinner
 
     const mainFile: { [fileName: string]: string } = {};
     const additionalFiles: { [fileName: string]: string } = {};
@@ -93,16 +106,19 @@ export class WorkspaceComponent {
         next: (response) => {
           console.log('Response: ', response);
 
-          this.splitCompilerOutput(response.output.toString());
+          this.splitCompilerOutputAndStartGame(response.output.toString());
         },
         error: (error) => {
           console.error('Error: ', error);
           this.compilerConsoleOutputView = error.message;
+        },
+        complete: () => {
+          this.isLoading = false;
         }
       });
   }
 
-  splitCompilerOutput(compilerOutput: string): void {
+  splitCompilerOutputAndStartGame(compilerOutput: string): void {
     // split the output vor the game view and the compiler output
     // lines staring with # needed for the game view
     const lines = compilerOutput.split('\n');
@@ -120,7 +136,20 @@ export class WorkspaceComponent {
     this.compilerGameOutputView = gameOutput;
     this.playfieldComponent?.startGame(this.compilerGameOutputView);
     this.compilerConsoleOutputView = remainingOutput;
+    this.showCompilerOutput = true;
+    this.isGameAnimationFinished = false;
   }
 
   protected readonly States = States;
+
+  resetGame(): void {
+    this.showCompilerOutput = false;
+    this.compilerConsoleOutputView = '';
+
+    // notify the playfield component to reset the game
+    this.playfieldComponent?.resetGame();
+
+    this.resetButtonIsDisabled = true;
+    this.submitButtonIsDisabled = false;
+  }
 }

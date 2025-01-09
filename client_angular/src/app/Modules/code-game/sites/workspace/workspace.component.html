@@ -28,7 +28,7 @@
           <mat-card>
 <!--            TODO: if task is loaded, show the playfield-->
             <mat-card-content>
-              <app-playfield #playfield>
+              <app-playfield #playfield (gameAnimationFinished)="onGameAnimationFinished()">
               </app-playfield>
             </mat-card-content>
           </mat-card>
@@ -60,11 +60,22 @@
     <div class="run">
       <button
         mat-raised-button color="primary" (click)="submitCode()"
-        class="md:w-auto mb-2 px-4 noOverFlow">Ausführen
+        [disabled]="submitButtonIsDisabled"
+        class="md:w-auto mb-2 px-4 noOverFlow mr-5">Ausführen
+      </button>
+
+      <button
+        mat-raised-button color="primary" (click)="resetGame()"
+        [disabled]="resetButtonIsDisabled"
+        class="md:w-auto mb-2 px-4 noOverFlow ml-5">Zurücksetzen
       </button>
     </div>
 
-    <div class="result">
+    <div *ngIf="isLoading" class="flex justify-center items-center min-h-32">
+      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    </div>
+
+    <div *ngIf="!isLoading && showCompilerOutput" class="result">
       <mat-card>
         <mat-card-header>
           <mat-card-subtitle class="polarNight_4_text">Ausgabe</mat-card-subtitle>
