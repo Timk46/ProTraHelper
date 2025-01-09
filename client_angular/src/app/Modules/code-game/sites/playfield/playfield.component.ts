@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, Output, Renderer2} from '@angular/core';
+import { Component, ElementRef, EventEmitter, Output, Renderer2 } from '@angular/core';
 import { animate, style, transition, trigger } from "@angular/animations";
 
 enum PlayerDirection {
@@ -15,7 +15,7 @@ enum PlayerDirection {
   animations: [
     trigger('movePlayer', [
       transition('* => *', [
-        animate('2000ms linear', style({
+        animate('{{animationSpeedMaster}}ms linear', style({
           transform: 'translate({{endX}}px, {{endY}}px)'
         })),
       ], { params: { endX: 0, endY: 0 } }),
@@ -45,6 +45,7 @@ export class PlayfieldComponent {
 
   // Event emitter to notify the workspace component that the game animation has finished
   @Output() gameAnimationFinished = new EventEmitter<void>();
+  animationSpeedMaster = 500; // animation speed in ms
 
   constructor(private renderer: Renderer2, private el: ElementRef) {}
 
@@ -52,7 +53,7 @@ export class PlayfieldComponent {
     this.inputGameFile = _game;
 
     this.fillGameField();
-    this.setGridDimensions();
+    this.setCSSVariables();
     this.initPlayer();
   }
 
@@ -95,7 +96,7 @@ export class PlayfieldComponent {
     const endY = newY * this.cellSize;
 
     const steps = 50; // Number if intermediate positions
-    const interval = 20; // Time between steps in ms
+    const interval = this.animationSpeedMaster / steps; // Time between steps in ms
     let currentStep = 0;
 
     // Update the position step by step
@@ -123,7 +124,7 @@ export class PlayfieldComponent {
 
   rotatePlayerTo(direction: PlayerDirection): void {
     const steps = 30; // number of intermediate positions
-    const interval = 30; // time between steps in ms
+    const interval = this.animationSpeedMaster / steps; // time between steps in ms
     let currentStep = 0;
 
     // Calculate the target rotation (in degrees)
@@ -165,10 +166,14 @@ export class PlayfieldComponent {
     this.gameFieldHeight = this.gameField.length;
   }
 
-  setGridDimensions(): void {
+  setCSSVariables(): void {
+    // Set the CSS variables for the grid dimensions
     this.renderer.setStyle(this.el.nativeElement.querySelector('.field'), '--rows', this.gameFieldHeight);
     this.renderer.setStyle(this.el.nativeElement.querySelector('.field'), '--columns', this.gameFieldWidth);
     this.renderer.setStyle(this.el.nativeElement.querySelector('.field'), '--cell-size', `${this.cellSize}px`);
+
+    // Set the CSS variable for the animation speed
+    this.renderer.setStyle(this.el.nativeElement.querySelector('.field'), '--animation-speed-master', this.animationSpeedMaster);
   }
 
   // used for the obstacle and destination images
@@ -197,11 +202,11 @@ export class PlayfieldComponent {
     this.compilerGameOutput.forEach((line, index) => {
       setTimeout(() => {
         this.actPlayer(line);
-      }, index * 2000);
+      }, index * this.animationSpeedMaster);
     });
 
     // Calculate the total duration of the animations
-    const totalDuration = this.compilerGameOutput.length * 2000;
+    const totalDuration = this.compilerGameOutput.length * this.animationSpeedMaster;
 
     // Run the code after all animations are finished
     setTimeout(() => {

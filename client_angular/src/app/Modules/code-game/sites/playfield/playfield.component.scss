@@ -47,7 +47,7 @@
   }
 
   .floorImage,
-  .actorImage,
+  .playerImage,
   .objectImage{
     width: var(--cell-size, 60px);
     height: var(--cell-size, 60px);
@@ -58,9 +58,9 @@
     z-index: 1;
   }
 
-  .actorImage {
+  .playerImage {
     z-index: 3;
-    transition: transform 20ms linear;
+    transition: transform  var(--animation-speed-master, 20ms) linear;
   }
 
   .objectImage {
