@@ -16,7 +16,7 @@
 Actor::Actor(int _x, int _y, ActorDirection _direction, ActorType _actorType, World* _world)
     : x(_x), y(_y), actorDiraction(_direction), actorType(_actorType), world(_world)
 {
-    std::cout << "Actor is created. " << "Type: " << getActorTypeString() << "\n";
+    // std::cout << "Actor is created. " << "Type: " << getActorTypeString() << "\n"; // for debugging
 }
 
 // MARK: - movements

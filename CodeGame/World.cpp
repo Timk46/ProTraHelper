@@ -12,7 +12,7 @@
 World::World(int _width, int _height) : width(_width), height(_height)
 {
     worldMap.resize(height, std::vector<std::vector<Actor*>>(width));
-    std::cout << "World is created.\n";
+    // std::cout << "World is created.\n"; // for debugging
 }
 
 World::~World() {
@@ -247,5 +247,5 @@ void World::clear() {
         }
     }
     worldMap.clear();
-    std::cout << "World map cleared." << std::endl;
+    // std::cout << "World map cleared." << std::endl; // for debugging
 }

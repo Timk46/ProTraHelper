@@ -115,18 +115,18 @@ int main() {
     // MARK: - Creation
 
     for (const auto& actor : actors) {
-        std::cout << "Creating actor: Type = " << actor.type << ", Position = (" << actor.x << ", " << actor.y << "), Direction = " << actor.direction << std::endl;
+        // std::cout << "Creating actor: Type = " << actor.type << ", Position = (" << actor.x << ", " << actor.y << "), Direction = " << actor.direction << std::endl; // for debugging
 
         world.addObject(getActorType(actor.type), getActorDirection(actor.direction), actor.x, actor.y);
     }
 
-    world.printWorld();
+    // world.printWorld(); // for debugging
 
     // MARK: - Act
 
     world.run();
 
-    world.printWorld();
+    // world.printWorld(); // for debugging
 
     return 0;
 }
