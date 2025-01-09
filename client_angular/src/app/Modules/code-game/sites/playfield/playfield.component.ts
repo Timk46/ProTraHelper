@@ -89,7 +89,7 @@ export class PlayfieldComponent {
     console.error("Player not found in the game field.");
   }
 
-  moveActorTo(newX: number, newY: number): void {
+  movePlayerTo(newX: number, newY: number): void {
     const startX = this.playerPosition.x * this.cellSize;
     const startY = this.playerPosition.y * this.cellSize;
     const endX = newX * this.cellSize;
@@ -122,7 +122,7 @@ export class PlayfieldComponent {
     }, interval);
   }
 
-  rotateActorTo(direction: PlayerDirection): void {
+  rotatePlayerTo(direction: PlayerDirection): void {
     const steps = 30; // number of intermediate positions
     const interval = 30; // time between steps in ms
     let currentStep = 0;
@@ -180,7 +180,7 @@ export class PlayfieldComponent {
     return '';
   }
 
-  getActorImage(): string {
+  getPlayerImage(): string {
     return 'assets/img/player.png';
   }
 
@@ -197,7 +197,7 @@ export class PlayfieldComponent {
     // game animation
     this.compilerGameOutput.forEach((line, index) => {
       setTimeout(() => {
-        this.actActor(line);
+        this.actPlayer(line);
       }, index * 2000);
     });
 
@@ -212,7 +212,7 @@ export class PlayfieldComponent {
     }, totalDuration);
   }
 
-  actActor(command: String): void {
+  actPlayer(command: String): void {
     const action = command.split(':')[0];
     const move = command.split(':')[1];
 
@@ -220,23 +220,23 @@ export class PlayfieldComponent {
       this.gameOutputInformation = ""; // clear the information
 
       const coordinates = move.split('/');
-      this.moveActorTo(parseInt(coordinates[0]), parseInt(coordinates[1]));
+      this.movePlayerTo(parseInt(coordinates[0]), parseInt(coordinates[1]));
 
     } else if (action == "#SYS-Turn") {
       this.gameOutputInformation = ""; // clear the information
 
       switch (move) {
         case "NORTH":
-          this.rotateActorTo(PlayerDirection.NORTH);
+          this.rotatePlayerTo(PlayerDirection.NORTH);
           break;
         case "EAST":
-          this.rotateActorTo(PlayerDirection.EAST);
+          this.rotatePlayerTo(PlayerDirection.EAST);
           break;
         case "SOUTH":
-          this.rotateActorTo(PlayerDirection.SOUTH);
+          this.rotatePlayerTo(PlayerDirection.SOUTH);
           break;
         case "WEST":
-          this.rotateActorTo(PlayerDirection.WEST);
+          this.rotatePlayerTo(PlayerDirection.WEST);
           break;
         default:
           console.error("Unknown direction: ", move);
