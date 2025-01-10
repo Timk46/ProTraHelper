@@ -2,7 +2,7 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { EvaluationService } from './evaluation.service';
 import * as path from 'path';
-import { roles, RolesGuard } from '@/auth/roles.guard';
+import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 
 @UseGuards(RolesGuard)
 @Controller('evaluation')

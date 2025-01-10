@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, switchMap, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -19,46 +19,106 @@ export class AuthInterceptor implements HttpInterceptor {
     private userService: UserService
   ) {}
 
-  // Currently only using access token. Refresh token and device tokens not implemented yet.
+
   /**
-   * Intercepts an HttpRequest and adds an "Authorization" header.
+   * Intercepts HTTP requests to add authentication headers and handle errors.
    *
-   * @param req - The HttpRequest being intercepted
-   * @param next - The HttpHandler to continue handling the request
-   * @returns An Observable of the HttpEvent with a modified HttpRequest
+   * @param request - The outgoing HTTP request.
+   * @param next - The next interceptor in the chain.
+   * @returns An observable of the HTTP event.
    */
   intercept(
-    req: HttpRequest<any>,
+    request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
     const accessToken = localStorage.getItem('accessToken');
+    const deviceId = this.userService.getDeviceId();
 
-    // Clone the request and set the new header in one step.
-    const authReq = req.clone({
-      setHeaders: { Authorization: `Bearer ${accessToken}` },
-    });
+    // Add the device ID to the request
+    if (deviceId) {
+      request = request.clone({
+        setHeaders: {
+          'Device-ID': deviceId,
+        },
+      });
+    }
+
+    // Exclude the refresh-token request from interception, after the device ID is added
+    if (request.url.includes('/auth/refresh')) {
+      return next.handle(request);
+    }
+
+    // Add the access token to the request
+    if (accessToken) {
+      request = request.clone({
+        setHeaders: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+    }
 
     // send cloned request with header to the next handler.
-    return next.handle(authReq).pipe(
+    return next.handle(request).pipe(
       catchError((err: HttpErrorResponse) => {
         this.checkError(err);
-        if (err.status === 401 || err.status === 403 || err.status === 498) {
+
+        if (err.status === 403 || err.status === 498) {
           this.userService.removeTokens();
           this.router.navigate(['/login']);
         }
+
+        if (err.status === 401) {
+          // Access token expired, try refreshing
+          console.log('Access token expired, trying to refresh...');
+
+          const refreshToken = this.userService.getRefreshToken();
+          if (!refreshToken) {
+            // Refresh token is expired or not available
+            // redirect to login page
+            this.router.navigate(['/login']);
+            return throwError(() => new Error('Unauthorized'));
+          }
+
+          return this.userService.refreshTokens(refreshToken).pipe(
+            switchMap(() => {
+              // Retry the original request with the new access token
+              console.log('Access token refreshed successfully, retrying original request...');
+              request = request.clone({
+                setHeaders: {
+                  Authorization: `Bearer ${this.userService.getAccessToken()}`,
+                  'Device-ID': deviceId,
+                }
+              });
+              return next.handle(request);
+
+            }),
+            catchError((error: any) => {
+              // Refresh token is invalid or expired
+              this.openSnackBar('Sitzung abgelaufen. Bitte erneut anmelden', 'Warning');
+              this.userService.removeTokens();
+
+              this.router.navigate(['/login']);
+              return throwError(() => new Error('Unauthorized'));
+            })
+          );
+
+        } else {
+          return throwError(() => err);
+        }
+
         return throwError(err);
       })
     );
   }
 
   /**
-   * Check the error status and display an appropriate message via the snackBar.
-   *
-   * @param error - The error object
+   * Checks the error status and handles it accordingly.
+   * 
+   * @param error - The error object to be checked.
    */
   checkError(error: any) {
     if (error.status === 401) {
-      this.openSnackBar('Please log in again.', 'Warning');
+      return; // Unauthorized error is handled in the interceptor
     } else if (error.status === 429) {
       this.openSnackBar(
         'Too many requests in a short time. Please try again in a minute.',

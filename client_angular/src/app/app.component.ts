@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { version } from '@DTOs/version';
 import { globalRole } from '@DTOs/roles.enum';
 import { environment } from 'src/environments/environment';
+import { ConfirmationBoxComponent } from "./Pages/confirmation-box/confirmation-box.component";
 
 
 @Component({
@@ -100,15 +101,43 @@ export class AppComponent {
            }
     }
 
-  logOut() {
-    this.userIsLoggedIn = false;
-    this.userService.removeTokens();
+  logOut(logOutAllUserDevices: boolean) {
+    if (logOutAllUserDevices) {
+      const dialog = this.dialog.open(ConfirmationBoxComponent, {
+        data: {
+          title: 'Abmeldung bestätigen',
+          message: 'Möchten Sie sich wirklich von allen Geräten abmelden?',
+          decline: 'Abbrechen',
+          accept: 'Abmelden',
+          swapButtons: false,
+          swapColors: true
+        }
+      });
 
-    // Open CAS logout URL in a new tab
-    window.open('https://cas.zimt.uni-siegen.de/cas/logout', '_blank');
+      dialog.afterClosed().subscribe((result) => {
+        if (result) {
+          this.userService.logout(true).then(() => {
+            this.userIsLoggedIn = false;
 
-    // Navigate to the login page in the current tab
-    this.router.navigate(['/login']);
+            // Open CAS logout URL in a new tab
+            window.open('https://cas.zimt.uni-siegen.de/cas/logout', '_blank');
+
+            // Navigate to the login page in the current tab
+            this.router.navigate(['/login']);
+          });
+        }
+      });
+    } else {
+      this.userService.logout(false).then(() => {
+        this.userIsLoggedIn = false;
+
+        // Open CAS logout URL in a new tab
+        window.open('https://cas.zimt.uni-siegen.de/cas/logout', '_blank');
+
+        // Navigate to the login page in the current tab
+        this.router.navigate(['/login']);
+      });
+    }
   }
 
 }

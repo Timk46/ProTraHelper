@@ -3,13 +3,24 @@
 <div *ngIf="pdfSrc">
   <div class="center">
     <a [href]="pdfSrc" type="application/pdf" target="_blank">
-      <p><i class=" inline-icon material-icons">download_for_offline</i>
-      Download PDF</p>
+      <p style="margin-top: 5px;">
+        <i class=" inline-icon material-icons">download_for_offline</i>
+        PDF herunterladen
+      </p>
     </a>
-    <object [data]="pdfSrc" type="application/pdf" class="pdf-content">
+    <object *ngIf="!isIpad" [data]="pdfSrc" type="application/pdf" class="pdf-content">
       <a [href]="pdfSrc" type="application/pdf" target="_blank">
-        <p>Es gibt Probleme beim Anzeigen des Dokuments. Sollte das Problem länger bestehen, wenden Sie sich an unseren Support.</p>
+        <p>Es gibt Probleme beim Anzeigen des Dokuments. Sollte das Problem länger bestehen, wenden Sie sich an unseren
+          Support.</p>
       </a>
     </object>
+    <div *ngIf="isLoading" class="loading-indicator">
+      <mat-progress-spinner
+        class="example-margin"
+        mode="determinate"
+        [value]="loadingProgress">
+      </mat-progress-spinner>
+    </div>
+    <div #pdfViewer *ngIf="isIpad" [class.hidden]="isLoading" class="pdf-content-ipad"></div>
   </div>
 </div>

@@ -4,7 +4,7 @@ import { QuestionDataService } from './question-data.service';
 
 import { detailedFreetextQuestionDTO, detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, questionType, FillinQuestionDTO, GraphQuestionDTO } from '@DTOs/index';
 
-import { roles, RolesGuard } from '@/auth/roles.guard';
+import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 import { EditCodeService } from './edit-code.service';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';

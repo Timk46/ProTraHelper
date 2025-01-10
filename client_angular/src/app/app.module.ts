@@ -4,6 +4,7 @@ import { BrowserModule, Title } from '@angular/platform-browser';
 import { MaterialModule } from './Modules/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MarkdownModule } from 'ngx-markdown';
+import { MatMenuModule } from "@angular/material/menu";
 
 // Components
 import { ContactComponent, ImpressumComponent, DatenschutzComponent, ProgressComponent } from './app.component'
@@ -133,7 +134,8 @@ import { NotRegisteredComponent } from './Pages/not-registered/not-registered.co
         LecturersViewModule,
         EditorModule,
         MarkdownModule.forRoot(),
-        GraphTasksModule
+        GraphTasksModule,
+        MatMenuModule
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

@@ -28,8 +28,7 @@
     "paths": {
       //"@Interfaces/*": ["../shared/dtos/*"],
       "@DTOs/*": ["../shared/dtos/*"],
-
-    }
+    },
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
@@ -37,5 +36,13 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true
   },
+  "include":[
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.html",
+    "src/**/*.css",
+    "src/**/*.scss",
+    "src/declarations/pdfjsDeclaration.d.ts"
+  ],
   "skibLibCheck": true,
 }

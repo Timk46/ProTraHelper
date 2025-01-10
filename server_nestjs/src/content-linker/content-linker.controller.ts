@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, Req, UseGuards} from '@nestjs/common';
-import { RolesGuard, roles } from '@/auth/roles.guard';
+import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 import { LinkableContentElementDTO, LinkableContentNodeDTO, QuestionDTO } from '@Interfaces/index';
 import { ContentLinkerService } from './content-linker.service';
 

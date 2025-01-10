@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { DiscussionVoteService } from './discussion-vote.service';
 import { discussionMessageVoteCreationDTO, discussionMessageVoteDTO } from '@DTOs/index';
-import { RolesGuard, roles } from '@/auth/roles.guard';
+import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 
 const debug: boolean = true;
 @UseGuards(RolesGuard)

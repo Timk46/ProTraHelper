@@ -33,6 +33,18 @@ model User {
   Vote                 Vote[]
   anonymousUser        anonymousUser[]
   userSubjects         UserSubject[]
+  refreshTokens        RefreshToken[]
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  deviceId  String
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, deviceId])
 }
 
 model Module {

@@ -1,7 +1,7 @@
 import { User } from '@prisma/client';
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
-import { RolesGuard, roles } from './auth/roles.guard';
+import { RolesGuard, roles } from './auth/common/guards/roles.guard';
 import { Public } from './public.decorator';
 import { version } from '@DTOs/version';
 

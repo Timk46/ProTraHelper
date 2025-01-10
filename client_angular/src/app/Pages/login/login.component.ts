@@ -35,16 +35,17 @@ export class LoginComponent implements OnInit {
   isChrome = false;
 
   /**
-   * It checks for accessToken in the queryParams and uses them to set tokens in the UserService.
+   * It checks for accessToken and refreshToken in the queryParams and uses them to set tokens in the UserService.
    * This is needed because the authentication server (CAS) redirects to the client with the tokens as query parameters.
    * If both tokens are present, it then navigates to the '/dashboard' page.
    */
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
       const accessToken = params['accessToken'];
+      const refreshToken = params['refreshToken'];
 
-      if (accessToken) {
-        this.userService.setTokens(accessToken);
+      if (accessToken && refreshToken) {
+        this.userService.setTokens(accessToken, refreshToken);
         this.router.navigate(['/dashboard']);
       }
     });
@@ -77,9 +78,12 @@ export class LoginComponent implements OnInit {
 
   /**
    * The login method navigates to the authentication server to authenticate the user.
+   * The device id is passed as a query parameter to the server. This is to save the
+   * refresh token in the database with the device id.
    */
   loginWithCAS(): void {
-    window.location.href = `${environment.server}/auth/cas/`;
+    const deviceId = this.userService.getDeviceId();
+    window.location.href = `${environment.server}/auth/cas/?device-id=${deviceId}`;
   }
 
   loginWithPassword(){

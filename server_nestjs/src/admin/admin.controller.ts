@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Patch, Body, Param, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { UsersService } from '../users/users.service';
-import { RolesGuard, roles } from '../auth/roles.guard';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard, roles } from '../auth/common/guards/roles.guard';
+import { JwtAuthGuard } from '../auth/common/guards/jwt-auth.guard';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)

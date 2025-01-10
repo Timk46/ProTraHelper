@@ -6,6 +6,8 @@ import { environment } from 'src/environments/environment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { v4 as uuid } from 'uuid';
+import { catchError, finalize, tap } from "rxjs/operators";
 
 interface SubjectInfo {
   subjectId: number;
@@ -18,6 +20,8 @@ interface SubjectInfo {
   providedIn: 'root',
 })
 export class UserService {
+  private readonly DEVICE_ID_KEY = 'deviceId';
+  deviceID: string = this.getDeviceId();
   isAuthenticated$: Observable<boolean>;
   hasEditModeActive$: Observable<boolean>;
 
@@ -48,7 +52,9 @@ export class UserService {
         next: (response: any) => {
           console.log('Login successful:', response);
           const accessToken = response.accessToken;
+          const refreshToken = response.refreshToken;
           localStorage.setItem('accessToken', accessToken);
+          localStorage.setItem('refreshToken', refreshToken);
           this.openSnackBar("Hallo " + username);
           this.router.navigate(['/dashboard']);
           resolve(true);
@@ -65,6 +71,77 @@ export class UserService {
           this.openSnackBar("Der Login ist fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.");
           resolve(false);
         }
+      });
+    });
+  }
+
+  /**
+   * Logs out the user from the application.
+   *
+   * @param { boolean } logoutFromAllDevices - Indicates whether to log out from all devices.
+   * @returns { Promise<boolean> } - A promise that resolves to true if the logout was successful, otherwise false.
+   */
+  logout(logoutFromAllDevices: boolean): Promise<boolean> {
+    const url = logoutFromAllDevices ? environment.server + '/auth/logoutAllUserDevices' : environment.server + '/auth/logout';
+
+    return new Promise<boolean>(async (resolve) => {
+      this.http.get(url).pipe(
+        finalize(() => {
+          this.removeTokens();
+          this.router.navigate(['/login']);
+        })
+      ).subscribe({
+        next: (response: any) => {
+          if (response.message === "Logout successful") {
+            this.openSnackBar("Erfolgreich abgemeldet.");
+            resolve(true);
+          } else if (response.message === "Logout from all devices successful") {
+            this.openSnackBar("Erfolgreich von allen Geräten abgemeldet.");
+            resolve(true);
+          } else {
+            this.openSnackBar("Fehler bei der Abmeldung.");
+            resolve(false);
+          }
+        },
+        error: (error: any) => {
+          this.openSnackBar("Fehler bei der Abmeldung.");
+          resolve(false);
+        },
+        complete: () => {
+        },
+      });
+    });
+  }
+
+  /**
+   * Logs out all users by making an HTTP GET request to the server's logout endpoint.
+   *
+   * @returns { Promise<boolean> } A promise that resolves to `true` if all users were
+   * successfully logged out, or `false` if there was an error.
+   */
+  logoutAllUser(): Promise<boolean> {
+    return new Promise<boolean>(async (resolve) => {
+      this.http.get(environment.server + '/auth/logoutAllUser').pipe(
+        finalize(() => {
+          this.removeTokens();
+          this.router.navigate(['/login']);
+        })
+      ).subscribe({
+        next: (response: any) => {
+          if (response.message === "All user logout out successful") {
+            this.openSnackBar("Alle Nutzer erfolgreich abgemeldet.");
+            resolve(true);
+          } else {
+            this.openSnackBar("Fehler bei der Abmeldung aller Nutzer.");
+            resolve(false);
+          }
+        },
+        error: (error: any) => {
+          this.openSnackBar("Fehler bei der Abmeldung aller Nutzer.");
+          resolve(false);
+        },
+        complete: () => {
+        },
       });
     });
   }
@@ -98,27 +175,34 @@ export class UserService {
   }
 
   /**
-   * Sets the authentication accessToken in local storage.
+   * Sets the access and refresh tokens in the local storage and updates the authentication status.
    *
-   * @param accessToken - The user accessToken to be saved in local storage
+   * @param accessToken - The access token to be stored.
+   * @param refreshToken - The refresh token to be stored.
    */
-  setTokens(accessToken: string): void {
+  setTokens(accessToken: string, refreshToken: string): void {
     localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
     (this.isAuthenticated$ as BehaviorSubject<boolean>).next(true);// Update authentication status
   }
 
   /**
-   * Removes both accessToken from local storage,
+   * Removes both accessToken, refreshToken and deviceId from local storage,
    * if either of them exists.
    */
   removeTokens(): void {
     const accessToken = 'accessToken';
+    const refreshToken = 'refreshToken';
+    const deviceId = this.DEVICE_ID_KEY;
 
-    if (localStorage.getItem(accessToken)) {
+    if (localStorage.getItem(accessToken) && localStorage.getItem(refreshToken) && localStorage.getItem(deviceId)) {
       localStorage.removeItem(accessToken);
+      localStorage.removeItem(refreshToken);
+      localStorage.removeItem(deviceId);
       (this.isAuthenticated$ as BehaviorSubject<boolean>).next(false);// Update authentication status
     }
   }
+
   /**
    * This function gets the access token from the local storage.
    * @returns { string } The access token.
@@ -130,6 +214,70 @@ export class UserService {
     } else {
       throw new Error('No access token found');
     }
+  }
+
+  /**
+   * Retrieves the refresh token from the local storage.
+   *
+   * @returns { string } The refresh token.
+   * @throws { Error } If no refresh token is found in the local storage.
+   */
+  getRefreshToken(): string {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) {
+      return refreshToken;
+    } else {
+      throw new Error('No refresh token found');
+    }
+  }
+
+  /**
+   * Refreshes the access and refresh tokens using the provided refresh token.
+   *
+   * @param { string } refreshToken - The refresh token used to obtain new access and refresh tokens.
+   * @returns { Observable<any> } - An observable that emits the server's response or an error.
+   */
+  refreshTokens(refreshToken: string): Observable<any> {
+    return this.http.get(environment.server + '/auth/refresh', {
+      headers: {
+        'Authorization': `Bearer ${refreshToken}`,
+      },
+    })
+      .pipe(
+        tap((response: any) => {
+          // Update the access token in local storage or cookie
+          const accessToken = response.accessToken;
+          const refreshToken = response.refreshToken;
+          localStorage.setItem('accessToken', accessToken);
+          localStorage.setItem('refreshToken', refreshToken);
+        }),
+        catchError((error: any) => {
+          this.openSnackBar('Sitzung abgelaufen. Bitte erneut anmelden');
+          this.removeTokens()
+          return error;
+        })
+      );
+  }
+
+  /**
+   * Retrieves the device ID from local storage. If the device ID does not exist,
+   * it generates a new one, stores it in local storage, and then returns it.
+   *
+   * @returns { string } The device ID.
+   * @throws { Error } If a new device ID could not be generated.
+   */
+  getDeviceId(): string {
+    let deviceId = localStorage.getItem(this.DEVICE_ID_KEY);
+
+    if (!deviceId) {
+      deviceId = uuid();
+      if (!deviceId) {
+        throw new Error('Device ID could not be generated');
+      }
+      localStorage.setItem(this.DEVICE_ID_KEY, deviceId);
+    }
+
+    return deviceId;
   }
 
   /**
