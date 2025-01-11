@@ -17,16 +17,17 @@ export class AiFeedbackService {
 
   /**
    * Creates AI feedback for a given user answer.
-   * 
+   *
    * @param createAiFeedbackDto - The DTO containing the user answer ID.
    * @returns The created AI feedback including its ID and generated feedback.
    * @throws Error if the user answer, question, or graph question is not found.
    */
   async create(createAiFeedbackDto: { userAnswerId: number }) {
- 
+
     // ##############################
     // Get the user graph answer and graph question
-    const userAnswer = await this.prismaService.userAnswer.findFirst({
+    console.log(createAiFeedbackDto.userAnswerId);
+    const userAnswer = await this.prismaService.userAnswer.findUnique({
       where: {
         id: createAiFeedbackDto.userAnswerId
       },
@@ -51,8 +52,10 @@ export class AiFeedbackService {
       throw new Error('Graph question not found');
     }
 
+    console.log(JSON.stringify(userAnswer,null,'\t'));
+
     // ##############################
-    // Format data appropriately for the algorithmic evaluation and ai feedback generation 
+    // Format data appropriately for the algorithmic evaluation and ai feedback generation
     const graphQuestion = {
         questionId: userAnswer.question.id,
         title: userAnswer.question.name,
@@ -76,7 +79,7 @@ export class AiFeedbackService {
       studentSolutionSemantic.push(graphJSONToSemantic(studentSolutionStep));
     }
 
-        
+
     // ##############################
     // Evaluate and generate algorithmic feedback
     const { feedback, expectedSolutionSemantic } = this.graphSolutionEvaluationService.evaluateSolution(graphQuestion, studentSolution);
@@ -84,7 +87,9 @@ export class AiFeedbackService {
 
     // ##############################
     // Generate ai feedback
+    console.log(userAnswer.question.GraphQuestion.type);
     const graphSystemMessage = graphFeedbackGenerationPrompts.graphFeedbackPrompt(
+      userAnswer.question.GraphQuestion.type,
       userAnswer.question.text,
       JSON.stringify(initialStructureSemantic),
       JSON.stringify(expectedSolutionSemantic),
@@ -115,14 +120,14 @@ export class AiFeedbackService {
 
     // Return ai feedback
     return {
-      feedbackId: feedbackPrisma.id, 
+      feedbackId: feedbackPrisma.id,
       feedback: generatedFeedback
     };
   }
 
   /**
    * Rates the AI feedback.
-   * 
+   *
    * @param id - The ID of the AI feedback to be rated.
    * @param updateAiFeedbackDto - The DTO containing the rating (1 to 5).
    * @returns The updated AI feedback with the new rating.
@@ -136,7 +141,7 @@ export class AiFeedbackService {
         id
       }
     });
-    
+
       return updatedFeedback;
     }
   }

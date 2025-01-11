@@ -84,7 +84,7 @@ export class AssignmentContainerComponent implements OnInit {
 
           this.questionDataService.getQuestionData(questionId).subscribe({
             next: (questionData) => {
-              
+
               if (questionData.type === questionType.GRAPH) { // TODO: entsprechende questionType anstelle des Strings, testen.
                 this.graphQuestionData = graphQuestionData;
                 this.initialStructure = JSON.parse(JSON.stringify(this.graphQuestionData.initialStructure));
@@ -123,7 +123,7 @@ export class AssignmentContainerComponent implements OnInit {
   }
 
   onSubmitButtonClick() {
-    
+
     if (!this.graphQuestionData) { return; }
 
     // To save workpace content if it is in solution mode
@@ -164,9 +164,9 @@ export class AssignmentContainerComponent implements OnInit {
     console.log(result);
     this.isSending = false;
 
-    this.userAnswerId = result.id;
+    this.userAnswerId = result.userAnswerId;
 
-    // for first submission, enable the feedback and set the feedback type to algoFeedback 
+    // for first submission, enable the feedback and set the feedback type to algoFeedback
     if (this.feedbackDisabled) {
       this.feedbackTypeCurrent = 'algoFeedback';
     }
@@ -188,7 +188,7 @@ export class AssignmentContainerComponent implements OnInit {
 
     // To save workpace content if it is in solution mode, as it will check if the structure is the same as the last submitted one
     this.updateWorkspace();
-    
+
     if (this.feedbackTypeCurrent === 'llmFeedback') {
 
       if (this.feedbackState === 'LLM' || this.feedbackState === 'FEEDBACK_RATED') {
@@ -214,7 +214,7 @@ export class AssignmentContainerComponent implements OnInit {
           }
         }
       }
-      
+
       if (!solutionsAreEqual) {
         this.confirmationService.confirm({
           title: 'Neue Lösung abgeben',
@@ -226,7 +226,7 @@ export class AssignmentContainerComponent implements OnInit {
           },
           decline: () => {
             this.llmFeedback = '<br> Die aktuelle Lösung muss abgegeben werden, um KI-Feedback zu erhalten.';
-          } 
+          }
         });
         return;
       }
@@ -268,7 +268,7 @@ export class AssignmentContainerComponent implements OnInit {
     if (starRating !== 1 && starRating !== 2 && starRating !== 3 && starRating !== 4 && starRating !== 5) {
       throw new Error('Invalid star rating: ' + starRating);
     }
-    
+
     this.aiFeedbackService.rateGraphAIFeedback(this.llmFeedbackId, starRating).subscribe({
         next: (response) => {
           this.feedbackState = 'FEEDBACK_RATED';
@@ -284,7 +284,7 @@ export class AssignmentContainerComponent implements OnInit {
   onStar(star: number): void {
     this.rating = star;
   }
-  
+
   onMouseEnter(star: number): void {
     this.hoverState = star;
   }
@@ -308,7 +308,7 @@ export class AssignmentContainerComponent implements OnInit {
 
     if (numberOfSolutionSteps !== 0) {
       last = this.solutionGraph[numberOfSolutionSteps - 1];
-    } 
+    }
     else {
       const graphNodes = this.initialStructure.nodes;
       const graphEdges = this.initialStructure.edges;
@@ -324,7 +324,7 @@ export class AssignmentContainerComponent implements OnInit {
         };
       }
     }
-    
+
     // Clone the data to use values and not references
     const cloned = JSON.parse(JSON.stringify(last));
 
@@ -338,7 +338,7 @@ export class AssignmentContainerComponent implements OnInit {
     // call updateWorkspace function for other needed updates required related to the step change
     this.updateWorkspace();
   }
-  
+
   deleteCurrentSolutionStep() {
     if (this.solutionGraph.length > 1) {
 
@@ -394,14 +394,14 @@ export class AssignmentContainerComponent implements OnInit {
 
     // If workspace was in solution mode before update
     if (this.workspaceModePrevious === 'solution') {
-      
+
       // Save the previous content before resetting it
       this.saveWorkspaceContent();
     }
 
     // Load solution to the workspace
     if (this.workspaceModeCurrent === 'solution') {
-      
+
       // If there is no step yet, add the first step
       if (this.solutionGraph.length === 0) {
         this.addNewSolutionStep()
@@ -413,7 +413,7 @@ export class AssignmentContainerComponent implements OnInit {
       // To use only values and not the references
       const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
       this.loadWorkspaceContent({ graphStructure: clonedGraphContent, graphConfiguration: this.graphQuestionData?.configuration });
-    } 
+    }
 
     // Load assignment to the workspace
     else if (this.workspaceModeCurrent === 'assignment') {
@@ -428,7 +428,7 @@ export class AssignmentContainerComponent implements OnInit {
       this.loadWorkspaceContent({
         graphStructure: JSON.parse(JSON.stringify(this.initialStructure)),
         graphConfiguration: this.graphQuestionData.configuration
-      })    
+      })
 
     }
 
@@ -482,7 +482,7 @@ export class AssignmentContainerComponent implements OnInit {
     dialogConfig.maxHeight = '95vh';
 
     // Open the dialog
-    // const dialogRef = 
+    // const dialogRef =
     this.dialog.open(GraphTutorialDialogComponent, dialogConfig);
   }
 }
