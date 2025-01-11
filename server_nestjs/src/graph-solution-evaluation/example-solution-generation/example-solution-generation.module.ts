@@ -7,10 +7,11 @@ import { PrismaModule } from '@/prisma/prisma.module';
 import { FloydService } from '../floyd/floyd.service';
 import { DijkstraService } from '../dijkstra/dijkstra.service';
 import { KruskalService } from '../kruskal/kruskal.service';
+import { FeedbackGenerationModule } from '@/ai/feedback-generation/feedback-generation.module';
 
 @Module({
   controllers: [ExampleSolutionGenerationController],
   providers: [ExampleSolutionGenerationService, TransitiveClosureService, FloydService, DijkstraService, KruskalService],
-  imports: [PrismaModule, GraphSolutionEvaluationModule],
+  imports: [PrismaModule, GraphSolutionEvaluationModule, FeedbackGenerationModule],
 })
 export class ExampleSolutionGenerationModule {}

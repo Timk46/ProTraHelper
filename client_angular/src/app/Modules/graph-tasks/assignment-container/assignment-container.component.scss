@@ -21,12 +21,12 @@
 
 .assignment {
     grid-column: 1 / span 1;
-    grid-row: 1 / span 7;
+    grid-row: 1 / span 5;
 }
 
 .evaluation {
     grid-column: 1 / span 1;
-    grid-row: 8 / span 3;
+    grid-row: 6 / span 5;
 }
 
 .assignment, .evaluation {
@@ -49,30 +49,60 @@
 }
 
 .controls { 
+    height: 100%;
     border: none;
     background-color: transparent;
     box-shadow: none;
     padding: 2em;
     display: flex;
-    justify-content: space-between;
+    justify-content: start;
     align-items: center;
+    gap: 1em;
 }
 
 .controls button {
+    height: 85%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: .8em;
     color: #eee;
     font-size: 1.2em;
-    background-color: rgb(70, 129, 244);
     border: none;
-    border-radius: .5em;
+    border-radius: .3em;
     box-shadow: 0 1px 1px -2px rgba(0, 0, 0, 0.2),
     0 2px 2px 0 rgba(0, 0, 0, 0.14),
     0 1px 5px 0 rgba(0, 0, 0, 0.12);
 }
 
 .controls button:hover {
-    background-color: rgb(86, 142, 255);
     cursor: pointer;
+}
+
+.controls button.primary {
+    background-color: rgb(63,81,181);
+}
+
+.controls button.primary:hover {
+    background-color: rgb(83,101,201);
+}
+
+.controls button.warn {
+    background-color: rgb(244,67,54);
+}
+
+.controls button.warn:hover {
+    background-color: rgb(246, 103, 92);
+}
+
+.controls button.question {
+    background-color: #fff;
+    // color:#aaa;
+    color: rgb(63,81,181);
+}
+
+.controls button.question:hover {
+    background-color: #ddd;
 }
 
 .controls button:disabled {
@@ -82,31 +112,58 @@
     color: #808080;
 }
 
-.copy-button {
-    position: relative;
-    background-color: #eee;
-    width: 30px;
-    height: 30px;
-    padding: 6px;
-    border-radius: .5em;
-    border: none;
-}
-
-.copy-button:hover {
-    background-color: #ddd;
-    cursor: pointer;
-}
-
 mat-button-toggle-group {
-    border-radius: 1em;
+    border-radius: .5em;
     box-shadow: 0 1px 1px -2px rgba(0, 0, 0, 0.2),
     0 2px 2px 0 rgba(0, 0, 0, 0.14),
     0 1px 5px 0 rgba(0, 0, 0, 0.12);
 }
 
+.controls {
+    mat-button-toggle-group {
+        height: 90%;
+    }
+}
+
+
+.mat-button-toggle-appearance-standard {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .mat-button-toggle-appearance-standard.mat-button-toggle-checked {
-    background-color: rgb(86, 142, 255);
+    background-color: rgb(63,81,181);
     color: #eee;
+}
+
+.mat-button-toggle-appearance-standard.mat-button-toggle-checked:hover {
+    background-color: rgb(83,101,201);
+}
+
+.evaluation {
+    mat-button-toggle-group {
+        width: 100%;
+        border-radius: .4em;
+        background-color: transparent;
+    }
+
+    .mat-button-toggle-appearance-standard {
+        height: 2em;
+        width: 50%;
+        background-color: #ddd;
+        color: #222;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .mat-button-toggle-appearance-standard.mat-button-toggle-checked {
+        background-color: #666;
+        color: #fff;
+        background-color: rgb(63,81,181);
+        color: #eee;
+    }
 }
 
 .navigation-button {
@@ -120,7 +177,7 @@ mat-button-toggle-group {
 }
 
 .navigation-button:hover {
-    background-color: rgb(80, 99, 206);
+    background-color: rgb(83,101,201);
     cursor: pointer;
 }
 
@@ -138,6 +195,19 @@ mat-button-toggle-group {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 70%;
+    width: 60%;
+    height: 60%;
+}
+
+.image-button.question svg { // question icon is a little bit bigger
     height: 70%;
+    width: 70%;
+}
+
+    .star-button .mat-icon.gold {
+    color: gold;
+}
+
+.star-button .mat-icon.grey {
+    color: grey;
 }
