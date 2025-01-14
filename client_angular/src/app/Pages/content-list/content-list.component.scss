@@ -28,6 +28,11 @@
   padding: 16px;
 }
 
+.content-list-item-body {
+  padding: 16px;
+  overflow: hidden;  // Add this to ensure smooth animation
+}
+
 .content-list-item-header:hover {
   cursor: pointer;
   background-color: #eee;

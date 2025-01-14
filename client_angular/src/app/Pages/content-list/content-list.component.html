@@ -18,12 +18,13 @@
     <div
       class="content-list-item-body"
       role="region"
-      [style.display]="accordionItem.expanded ? '' : 'none'"
+      [@contentExpand]="accordionItem.expanded ? 'expanded' : 'collapsed'"
       [attr.id]="'content-list-item-body-' + i"
       [attr.aria-labelledby]="'content-list-item-header-' + i">
       Lorem ipsum dolor, sit amet consectetur adipisicing elit. Perferendis
       excepturi incidunt ipsum deleniti labore, tempore non nam doloribus blanditiis
       veritatis illo autem iure aliquid ullam rem tenetur deserunt velit culpa?
+      <button mat-button color="primary">Der tolle Button</button>
     </div>
 
   </cdk-accordion-item>
