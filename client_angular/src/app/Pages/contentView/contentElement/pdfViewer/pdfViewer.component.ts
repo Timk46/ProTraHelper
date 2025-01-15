@@ -159,8 +159,5 @@ export class PdfViewerComponent implements OnInit, AfterViewInit {
     this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(pdfUrl);
     this.cdr.markForCheck();
 
-    if (this.isIpad) {
-      this.loadPdfForIpad(this.pdfSrc);
-    }
   }
 }
