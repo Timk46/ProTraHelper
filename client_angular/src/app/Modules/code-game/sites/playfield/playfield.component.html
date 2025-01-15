@@ -8,7 +8,7 @@
       <div *ngFor="let row of gameField; let i = index" class="row">
         <div *ngFor="let cell of row; let j = index" class="cell">
           <img [src]="getFloorImage(i, j)" alt="floorImage" class="floorImage" />
-          <img *ngIf="getObjectImage(i, j)" [src]="getObjectImage(i, j)" alt="objectImage" class="objectImage" />
+          <img *ngIf="getObjectImage(i, j)" [src]="getObjectImage(i, j)" [id]="getObjectId(i, j)" alt="objectImage" class="objectImage" />
         </div>
       </div>
       <!-- Render player once and adjust its position via transform -->

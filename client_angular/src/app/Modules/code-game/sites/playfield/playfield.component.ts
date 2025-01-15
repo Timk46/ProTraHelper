@@ -24,12 +24,12 @@ enum PlayerDirection {
 })
 
 export class PlayfieldComponent {
-  gameFieldInitial: string[][] = [];
   gameField: string[][] = [];
   inputGameFile = '';
   gameFieldWidth: number = 0;
   gameFieldHeight: number = 0;
   cellSize: number = 60;
+  hiddenRocks: String[] = [];
 
   playerPosition = { x: 0, y: 0 };
   playerDirection: PlayerDirection = PlayerDirection.EAST; // default direction
@@ -161,11 +161,26 @@ export class PlayfieldComponent {
     }, interval);
   }
 
+  hideRockImage(row: string, col: string): void {
+    const rockImage = this.el.nativeElement.querySelector(`#rock-${row}-${col}`);
+    if (rockImage) {
+      this.renderer.setStyle(rockImage, 'display', 'none');
+      this.hiddenRocks.push(`#rock-${row}-${col}`);
+    }
+  }
+
+  showRockImage(): void {
+    for (let i = 0; i < this.hiddenRocks.length; i++) {
+      this.renderer.setStyle(this.el.nativeElement.querySelector(this.hiddenRocks[i]), 'display', 'block');
+    }
+
+    this.hiddenRocks = [];
+  }
+
 
   fillGameField(): void {
     // Generate a 2D array from the input string.
     // Each new line is a new row, and each character is a new column.
-    this.gameFieldInitial = this.inputGameFile.split('\n').map(row => row.split(''));
     this.gameField = this.inputGameFile.split('\n').map(row => row.split(''));
     this.gameFieldWidth = this.gameField[0].length;
     this.gameFieldHeight = this.gameField.length;
@@ -187,6 +202,14 @@ export class PlayfieldComponent {
     if (cell === 'O') return 'assets/img/obstacle.png';
     if (cell === 'D') return 'assets/img/destination.png';
     if (cell === 'R') return 'assets/img/rock.png';
+    return '';
+  }
+
+  getObjectId(row: number, col: number): string {
+    const cell = this.gameField[row][col];
+    if (cell === 'O') return 'obstacle-' + row + '-' + col;
+    if (cell === 'D') return 'destination-' + row + '-' + col;
+    if (cell === 'R') return 'rock-' + row + '-' + col;
     return '';
   }
 
@@ -254,7 +277,7 @@ export class PlayfieldComponent {
 
     } else if (action == "#SYS-RemoveRock") {
       const coordinates = move.split('/');
-      this.gameField[parseInt(coordinates[1])][parseInt(coordinates[0])] = "#";
+      this.hideRockImage(coordinates[1], coordinates[0]);
 
     } else if (action == "#SYS-Info") {
       this.gameOutputInformation = move;
@@ -280,7 +303,7 @@ export class PlayfieldComponent {
 
   resetGame(): void {
     // reset the game field
-    this.gameField = this.gameFieldInitial;
+    this.showRockImage();
     this.playerPosition = this.playerInitialPosition;
     this.playerDirection = PlayerDirection.EAST;
     this.playerTransform = `translate(${this.startX}px, ${this.startY}px) rotate(${this.playerDirection}deg)`;
