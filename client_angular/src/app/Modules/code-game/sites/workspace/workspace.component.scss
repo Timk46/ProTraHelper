@@ -44,13 +44,45 @@
 
 .run {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   margin-top: 10px;
   margin-bottom: 10px;
 
-  .noOverFlow {
-    min-width: 150px;
-    overflow: hidden;
+  .game-actions,
+  .success-informations,
+  .save {
+    flex: 1;
+    margin: 0 10px;
+  }
+
+  .game-actions,
+  .success-informations,
+  .save {
+    display: flex;
+    align-items: center;
+  }
+
+  .game-actions {
+    width: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .noOverFlow {
+      min-width: 150px;
+      overflow: hidden;
+    }
+  }
+
+  .success-informations {
+    width: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .save {
+    width: 30%;
   }
 }
 

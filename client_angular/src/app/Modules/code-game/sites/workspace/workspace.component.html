@@ -28,7 +28,7 @@
           <mat-card>
 <!--            TODO: if task is loaded, show the playfield-->
             <mat-card-content>
-              <app-playfield #playfield (gameAnimationFinished)="onGameAnimationFinished()">
+              <app-playfield #playfield (gameAnimationFinished)="onGameAnimationFinished($event)">
               </app-playfield>
             </mat-card-content>
           </mat-card>
@@ -58,17 +58,37 @@
     </div>
 
     <div class="run">
-      <button
-        mat-raised-button color="primary" (click)="submitCode()"
-        [disabled]="submitButtonIsDisabled"
-        class="md:w-auto mb-2 px-4 noOverFlow mr-5">Ausführen
-      </button>
+      <div class="success-informations">
+        <div *ngIf="isGameAnimationFinished" class="flex items-center md:w-auto mr-2">
+          <svg width="24" height="24">
+            <circle cx="12" cy="12" r="10" [attr.fill]="reachedDestination ? '#4caf50' : '#f44336'"></circle>
+          </svg>
+          <span class="polarNight_4_text ml-1">Ziel erreicht</span>
+        </div>
+        <div *ngIf="isGameAnimationFinished && rocksInGame" class="flex items-center md:w-auto ml-2">
+          <svg width="24" height="24">
+            <circle cx="12" cy="12" r="10" [attr.fill]="collectedAllRocks ? '#4caf50' : '#f44336'"></circle>
+          </svg>
+          <span class="polarNight_4_text ml-1">Gestein gesammelt</span>
+        </div>
+      </div>
 
-      <button
-        mat-raised-button color="primary" (click)="resetGame()"
-        [disabled]="resetButtonIsDisabled"
-        class="md:w-auto mb-2 px-4 noOverFlow ml-5">Zurücksetzen
-      </button>
+      <div class="game-actions">
+        <button
+          mat-raised-button color="primary" (click)="submitCode()"
+          [disabled]="submitButtonIsDisabled"
+          class="md:w-auto mb-2 px-4 noOverFlow mr-5">Ausführen
+        </button>
+
+        <button
+          mat-raised-button color="primary" (click)="resetGame()"
+          [disabled]="resetButtonIsDisabled"
+          class="md:w-auto mb-2 px-4 noOverFlow ml-5">Zurücksetzen
+        </button>
+      </div>
+
+      <div class="save">
+      </div>
     </div>
 
     <div *ngIf="isLoading" class="flex justify-center items-center min-h-32">

@@ -37,6 +37,9 @@ export class WorkspaceComponent {
   isGameAnimationFinished: boolean = false;
   resetButtonIsDisabled: boolean = true;
   showCompilerOutput: boolean = false;
+  reachedDestination: boolean = false;
+  rocksInGame: boolean = false;
+  collectedAllRocks: boolean = false;
 
   constructor(
     private title: Title,
@@ -51,7 +54,11 @@ export class WorkspaceComponent {
   }
 
   // Event handler to get notified when the game animation has finished by the playfield component
-  onGameAnimationFinished(): void {
+  onGameAnimationFinished(event: { reachedDestination: boolean, rocksInGame: boolean, collectedAllRocks: boolean }): void {
+    this.reachedDestination = event.reachedDestination;
+    this.rocksInGame = event.rocksInGame;
+    this.collectedAllRocks = event.collectedAllRocks;
+
     this.isGameAnimationFinished = true;
     this.resetButtonIsDisabled = false;
   }
@@ -148,7 +155,11 @@ export class WorkspaceComponent {
     // notify the playfield component to reset the game
     this.playfieldComponent?.resetGame();
 
+    this.isGameAnimationFinished = false;
     this.resetButtonIsDisabled = true;
     this.submitButtonIsDisabled = false;
+    this.reachedDestination = false;
+    this.rocksInGame = false;
+    this.collectedAllRocks = false;
   }
 }

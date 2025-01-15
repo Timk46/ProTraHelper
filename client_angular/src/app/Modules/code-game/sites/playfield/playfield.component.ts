@@ -24,6 +24,7 @@ enum PlayerDirection {
 })
 
 export class PlayfieldComponent {
+  gameFieldInitial: string[][] = [];
   gameField: string[][] = [];
   inputGameFile = '';
   gameFieldWidth: number = 0;
@@ -39,12 +40,15 @@ export class PlayfieldComponent {
   playerTransform: string = '';
   playerInitialPosition: { x: number, y: number } = { x: 0, y: 0 };
   playerPositionIsSet = false; // true, if the player position is set
+  reachedDestination = false; // true, if the player reached the destination
+  rocksInGame = false; // true, if there are rocks in the game
+  collectedAllRocks = false; // true, if all rocks are collected
 
   gameOutputInformation: string = 'Bereit für die Ausführung';
   compilerGameOutput: string[] = [];
 
   // Event emitter to notify the workspace component that the game animation has finished
-  @Output() gameAnimationFinished = new EventEmitter<void>();
+  @Output() gameAnimationFinished = new EventEmitter<{ reachedDestination: boolean, rocksInGame: boolean, collectedAllRocks: boolean }>();
   animationSpeedMaster = 500; // animation speed in ms
 
   constructor(private renderer: Renderer2, private el: ElementRef) {}
@@ -161,6 +165,7 @@ export class PlayfieldComponent {
   fillGameField(): void {
     // Generate a 2D array from the input string.
     // Each new line is a new row, and each character is a new column.
+    this.gameFieldInitial = this.inputGameFile.split('\n').map(row => row.split(''));
     this.gameField = this.inputGameFile.split('\n').map(row => row.split(''));
     this.gameFieldWidth = this.gameField[0].length;
     this.gameFieldHeight = this.gameField.length;
@@ -181,6 +186,7 @@ export class PlayfieldComponent {
     const cell = this.gameField[row][col];
     if (cell === 'O') return 'assets/img/obstacle.png';
     if (cell === 'D') return 'assets/img/destination.png';
+    if (cell === 'R') return 'assets/img/rock.png';
     return '';
   }
 
@@ -212,7 +218,7 @@ export class PlayfieldComponent {
     setTimeout(() => {
       // game is finished
       this.gameOutputInformation = 'Spiel wurde ausgeführt';
-      this.gameAnimationFinished.emit();
+      this.gameAnimationFinished.emit({ reachedDestination: this.reachedDestination, rocksInGame: this.rocksInGame, collectedAllRocks: this.collectedAllRocks });
     }, totalDuration);
   }
 
@@ -246,9 +252,27 @@ export class PlayfieldComponent {
           console.error("Unknown direction: ", move);
       }
 
+    } else if (action == "#SYS-RemoveRock") {
+      const coordinates = move.split('/');
+      this.gameField[parseInt(coordinates[1])][parseInt(coordinates[0])] = "#";
+
     } else if (action == "#SYS-Info") {
       this.gameOutputInformation = move;
 
+    } else if (action == "#SYS-Success") {
+      const gameSuccessInformation = move.split('/');
+
+      if (gameSuccessInformation[0] === "1") {
+        this.reachedDestination = true;
+      }
+
+      if (gameSuccessInformation[1] === "1") {
+        this.rocksInGame = true;
+      }
+
+      if (gameSuccessInformation[2] === "1") {
+        this.collectedAllRocks = true;
+      }
     } else {
       console.error("Unknown action: ", action);
     }
@@ -256,9 +280,13 @@ export class PlayfieldComponent {
 
   resetGame(): void {
     // reset the game field
+    this.gameField = this.gameFieldInitial;
     this.playerPosition = this.playerInitialPosition;
     this.playerDirection = PlayerDirection.EAST;
     this.playerTransform = `translate(${this.startX}px, ${this.startY}px) rotate(${this.playerDirection}deg)`;
+    this.reachedDestination = false;
+    this.rocksInGame = false;
+    this.collectedAllRocks = false;
 
     // reset the game output information
     this.gameOutputInformation = 'Bereit für die Ausführung';
