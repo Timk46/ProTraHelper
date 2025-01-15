@@ -22,6 +22,7 @@ Actor::ActorType getActorType(const std::string& type) {
     if (type == "PLAYER") return Actor::ActorType::PLAYER;
     if (type == "DESTINATION") return Actor::ActorType::DESTINATION;
     if (type == "OBSTACLE") return Actor::ActorType::OBSTACLE;
+    if (type == "ROCK") return Actor::ActorType::ROCK;
     throw std::invalid_argument("Unknown actor type");
 }
 
@@ -68,9 +69,27 @@ void parseGrid(const std::string& gridString, int& worldWidth, int& worldHeight,
         }
         for (int x = 0; x < line.length(); ++x) {
             char cell = line[x];
-            if (cell == 'P' || cell == 'O' || cell == 'D') {
+            if (cell == 'P' || cell == 'O' || cell == 'D' || cell == 'R') {
                 ActorData actor;
-                actor.type = (cell == 'P') ? "PLAYER" : (cell == 'O') ? "OBSTACLE" : "DESTINATION";
+
+                switch (cell) {
+                    case 'P':
+                        actor.type = "PLAYER";
+                        break;
+                    case 'O':
+                        actor.type = "OBSTACLE";
+                        break;
+                    case 'D':
+                        actor.type = "DESTINATION";
+                        break;
+                    case 'R':
+                        actor.type = "ROCK";
+                        break;
+                    default:
+                        actor.type = "UNKNOWN";
+                        break;
+                }
+
                 actor.x = x;
                 actor.y = y;
                 actor.direction = "EAST"; // Default direction
@@ -87,7 +106,7 @@ int main() {
     // MARK: - Read txt file
 
     // debugging
-    // std::string filePath = "CodeGame/game.grid.txt"; // Relativer Pfad zur Datei
+    // std::string filePath = "./game.grid.txt"; // Relativer Pfad zur Datei
     // std::ifstream file(filePath);
 
     std::ifstream file("game.grid.txt");
@@ -125,6 +144,7 @@ int main() {
     // MARK: - Act
 
     world.run();
+    world.determineSuccess();
 
     // world.printWorld(); // for debugging
 

@@ -3,6 +3,8 @@
 #include "SystemOutput.h"
 #include "Rover.h"
 #include "Obstacle.h"
+#include "Destination.h"
+#include "Rock.h"
 
 #include <iostream>
 #include <vector>
@@ -48,6 +50,10 @@ void World::printWorld()
                     {
                         std::cout << "D";
                     }
+                    else if (actor->getType() == Actor::ActorType::ROCK)
+                    {
+                        std::cout << "R";
+                    }
                 }
             }
         }
@@ -60,7 +66,7 @@ void World::printWorld()
 /**
  * @brief Adds an object of specified type and direction to the world map at the given coordinates.
  * 
- * @param actorType The type of the actor to be added (PLAYER, DESTINATION, OBSTACLE).
+ * @param actorType The type of the actor to be added (PLAYER, DESTINATION, OBSTACLE, ROCK).
  * @param actorDirection The direction the actor is facing.
  * @param x The x-coordinate (width) where the actor will be placed.
  * @param y The y-coordinate (height) where the actor will be placed.
@@ -82,6 +88,11 @@ void World::addObject(Actor::ActorType actorType, Actor::ActorDirection actorDir
         Obstacle* obstacle = new Obstacle(x, y, actorDirection, actorType, this);
 
          worldMap[i][j].push_back(obstacle);
+    } else if (actorType == Actor::ActorType::ROCK) {
+        Rock* rock = new Rock(x, y, actorDirection, actorType, this);
+
+        worldMap[i][j].push_back(rock);
+        ++totalRocks;
     } else {
         std::cerr << "Wold.cpp - addObject: could not add the object" << std::endl;
     }
@@ -99,16 +110,16 @@ void World::run() {
         {
             std::vector<Actor*> actors = worldMap[i][j];
 
+            if (actors.empty()) continue;
+
             for (auto& actor : actors) {
                 if (actor->getType() == Actor::ActorType::PLAYER) {
                     Rover* rover = static_cast<Rover*>(actor);
                     rover->act();
-                    isActorFound = true;
-                    break;
+                    return;
                 }
             }
         }
-        if (isActorFound) break;
     }
 
     if (!isActorFound) {
@@ -159,6 +170,76 @@ void World::moveObject(Rover& rover, int newX, int newY) {
     } else {
         std::cerr << "World.cpp - moveObject: Invalid position (" << newX << ", " << newY << ") for moving object" << std::endl;
     }
+}
+
+/**
+ * @brief Determines the success of the rover's mission.
+ */
+void World::determineSuccess() {
+    bool reachedDestination = false;
+    bool collectedAllRocks = false;
+
+    // check if the rover is at the destination
+    std::vector<int> roverPosition = findRover();
+
+    if (roverPosition[0] == -1 && roverPosition[1] == -1) {
+        std::cerr << "World.cpp - determineSuccess: Rover not found in the world map" << std::endl;
+        return;
+    }
+
+    if (checkDestination(roverPosition[0], roverPosition[1])) {
+        reachedDestination = true;
+    } 
+
+    // chekc if the rover got all rocks
+    if (totalRocks > 0) {
+        if (collectedRocks == totalRocks) {
+            collectedAllRocks = true;
+        }
+    }
+
+    // output the result
+    if (reachedDestination && collectedAllRocks) {
+        SystemOutput::getInstance().outputInformation("Mission successful.");
+    } else if (reachedDestination) {
+        SystemOutput::getInstance().outputInformation("Rover reached the destination, but not all rocks were collected.");
+    } else if (totalRocks > 0 && collectedAllRocks) {
+        SystemOutput::getInstance().outputInformation("Rover collected all rocks, but did not reach the destination.");
+    } else {
+        if (totalRocks > 0) {
+            SystemOutput::getInstance().outputInformation("Rover did not reach the destination and did not collect all rocks.");
+        } else {
+            SystemOutput::getInstance().outputInformation("Rover did not reach the destination.");
+        }
+    }
+
+    SystemOutput::getInstance().outputSuccess(reachedDestination, totalRocks > 0, collectedAllRocks);
+}
+
+/**
+ * @brief Finds the position of the rover (player) in the world map.
+ * 
+ * @return std::vector<int> A vector containing the x and y coordinates of the rover.
+ */
+std::vector<int> World::findRover() {
+    std::vector<int> roverPosition = {-1, -1};
+
+    for (int i = 0; i < worldMap.size(); i++)
+    {
+        for (int j = 0; j < worldMap[i].size(); j++) 
+        {
+            auto& actors = worldMap[i][j];
+            for (auto& actor : actors) {
+                if (actor->getType() == Actor::ActorType::PLAYER) {
+                    roverPosition[0] = j;
+                    roverPosition[1] = i;
+                    return roverPosition;
+                }
+            }
+        }
+    }
+
+    return roverPosition;
 }
 
 // MARK: - Getter/Setter
@@ -219,6 +300,60 @@ bool World::checkDestination(int x, int y)
 }
 
 /**
+ * @brief Checks if there is a Rock at the specified coordinates in the world.
+ * 
+ * @param x The x-coordinate of the position to check.
+ * @param y The y-coordinate of the position to check.
+ * 
+ * @return true if there is a Rock at the specified coordinates, false otherwise.
+ */
+bool World::checkRock(int x, int y)
+{
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        std::cerr << "World.cpp - checkRock: Invalid position (" << x << ", " << y << ") for checking rock" << std::endl;
+        return false;
+    }
+
+    for (auto& actor : worldMap[y][x]) {
+        if (dynamic_cast<Rock*>(actor)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * @brief Removes a rock from the specified position in the world.
+ *
+ * @param x The x-coordinate of the position from which to remove the rock.
+ * @param y The y-coordinate of the position from which to remove the rock.
+ */
+void World::removeRock(int x, int y)
+{
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        std::cerr << "World.cpp - removeRock: Invalid position (" << x << ", " << y << ") for removing rock" << std::endl;
+        return;
+    }
+
+    std::vector<Actor*> actors = worldMap[y][x];
+
+    for (int i = 0; i < actors.size(); i++) {
+        if (actors[i]->getType() == Actor::ActorType::ROCK) {
+            if (auto rock = dynamic_cast<Rock*>(actors[i])) {
+                worldMap[y][x].erase(worldMap[y][x].begin() + i);
+                delete rock;
+                SystemOutput::getInstance().outputRemoveRock(x, y);
+                ++collectedRocks;
+                SystemOutput::getInstance().outputInformation("Rock removed. Total rocks collected: " + std::to_string(collectedRocks) + "/" + std::to_string(totalRocks));
+                return;
+            }
+        }
+    }
+
+    std::cerr << "World.cpp - removeRock: Rock not found at position (" << x << ", " << y << ")" << std::endl;
+}
+
+/**
  * @brief Retrieves the width of the world.
  * 
  * @return The width of the world.
@@ -240,6 +375,10 @@ int World::getHeight()
 
 // MARK: - Clear
 
+/**
+ * @brief Clears the world map.
+ * 
+ */
 void World::clear() {
     for (auto& row : worldMap) {
         for (auto& cell : row) {

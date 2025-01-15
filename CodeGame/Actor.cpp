@@ -52,8 +52,7 @@ void Actor::move(int distance)
         y = newY;
     } else {
          std::cerr << "Actor.cpp - move: World instance is not reachable." << std::endl;
-    }
-    
+    } 
 }
 
 /**
@@ -144,6 +143,8 @@ std::string Actor::getActorTypeString()
             return "OBSTACLE";
         case Actor::ActorType::DESTINATION:
             return "DESTINATION";
+        case Actor::ActorType::ROCK:
+            return "ROCK";
     }
     return "";
 }

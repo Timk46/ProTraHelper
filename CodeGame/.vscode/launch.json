@@ -5,7 +5,7 @@
         "name": "Debug codegame",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/CodeGame/codegame",
+        "program": "${workspaceFolder}/codegame",
         "args": [], 
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",

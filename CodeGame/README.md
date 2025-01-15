@@ -20,3 +20,7 @@ Remove the generated files with the following command:
 
 ### run
 `./convert_to_base64.sh ./`
+
+## Debuggin
+- Run: `make`
+- At the "Run and Debuig"-Tab click "Start Debugging (F5)"

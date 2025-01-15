@@ -12,15 +12,27 @@ Rover::Rover(int _x, int _y, ActorDirection _actorDirection, ActorType _actorTyp
 void Rover::act()
 {
     drive();
+    drive();
+    analyseRock();
+    drive();
+    drive();
+    drive();
+    drive();
     turn(ActorDirection::SOUTH);
     drive();
+    analyseRock();
     drive();
+    analyseRock();
     drive();
     turn(ActorDirection::EAST);
     drive();
     drive();
+    drive();
 }
 
+/**
+ * @brief Drives the rover forward by one unit.
+ */
 void Rover::drive()
 {    
     if (checkObstacle(actorDiraction)) {
@@ -149,4 +161,27 @@ bool Rover::checkWorldBounds(ActorDirection direction)
 bool Rover::checkDestination()
 {
     return world->checkDestination(getX(), getY());
+}
+
+/**
+ * @brief Checks if there is a rock at the Rover's current position.
+ * 
+ * @return true if there is a rock at the Rover's current position, false otherwise.
+ */
+bool Rover::checkRock()
+{
+    return world->checkRock(getX(), getY());
+}
+
+/**
+ * @brief Analyzes the current position for a rock.
+ */
+void Rover::analyseRock()
+{
+    if (checkRock()) {
+        SystemOutput::getInstance().outputInformation("Rock detected at current position.");
+        world->removeRock(getX(), getY());
+    } else {
+        SystemOutput::getInstance().outputInformation("No rock detected at current position.");
+    }
 }
