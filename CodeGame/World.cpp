@@ -344,7 +344,7 @@ void World::removeRock(int x, int y)
                 delete rock;
                 SystemOutput::getInstance().outputRemoveRock(x, y);
                 ++collectedRocks;
-                SystemOutput::getInstance().outputInformation("Rock removed. Total rocks collected: " + std::to_string(collectedRocks) + "/" + std::to_string(totalRocks));
+                SystemOutput::getInstance().outputInformation("Rock removed. Total rocks collected " + std::to_string(collectedRocks) + "/" + std::to_string(totalRocks));
                 return;
             }
         }
