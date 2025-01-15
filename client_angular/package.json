@@ -4,7 +4,6 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "start-local": "ng serve --host 192.168.178.115 --port 4200",
     "prodtest": "ng s --configuration=production",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
@@ -49,7 +48,7 @@
     "ngx-mat-select-search": "^7.0.7",
     "ngx-monaco-editor-v2": "^15.0.1",
     "ngx-toastr": "^15.2.2",
-    "pdfjs-dist": "4.8.69",
+    "pdfjs-dist": "^3.2.146",
     "prismjs": "^1.29.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~7.8.0",
