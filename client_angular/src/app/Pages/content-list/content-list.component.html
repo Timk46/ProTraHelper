@@ -1,4 +1,4 @@
-<mat-accordion class="content-list-accordion">
+<!-- <mat-accordion class="content-list-accordion" [multi]="false">
   <cdk-accordion-item
     *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index"
     #accordionItem = "cdkAccordionItem"
@@ -25,8 +25,52 @@
       excepturi incidunt ipsum deleniti labore, tempore non nam doloribus blanditiis
       veritatis illo autem iure aliquid ullam rem tenetur deserunt velit culpa?
       <button mat-button color="primary">Der tolle Button</button>
+      <app-content-list-item></app-content-list-item>
     </div>
 
   </cdk-accordion-item>
+</mat-accordion> -->
 
+
+
+<mat-accordion class="content-list">
+  <mat-expansion-panel
+    *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index"
+    [expanded]="false"
+    class="content-list-item"
+  >
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        {{ content.name}}
+      </mat-panel-title>
+      <mat-panel-description class="content-list-element-header-description">
+        <!-- stars to show difficulty and progress -->
+        <div *ngIf="content.progress < 100; else completed">
+          <mat-icon *ngFor="let level of getLevels(content.level)">star_border</mat-icon>
+        </div>
+        <ng-template #completed>
+          <mat-icon *ngFor="let level of getLevels(content.level)">star</mat-icon>
+        </ng-template>
+        <!-- more indicators -->
+          <div class="content-list-element-header-indicators">
+            <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
+            <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
+          </div>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <!-- the content item body -->
+    <div class="content-list-element-introduction">
+      <p class="content-list-element-description">{{ content.description }}</p>
+      <div class="content-list-element-introduction-buttons">
+        <button mat-raised-button color="primary">PDF</button>
+        <button mat-raised-button color="primary">Video</button>
+      </div>
+    </div>
+    <h2 style="margin-top: 10px;">Aufgaben</h2>
+    <div class="content-list-element-items">
+      <app-content-list-item
+        *ngFor="let task of getQuestions(content)" [contentElementData]="task"
+      ></app-content-list-item>
+    </div>
+  </mat-expansion-panel>
 </mat-accordion>

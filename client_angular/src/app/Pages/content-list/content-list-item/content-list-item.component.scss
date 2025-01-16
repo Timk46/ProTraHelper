@@ -1,0 +1,31 @@
+.list-item {
+  width: 400px;
+  height: 150px;
+  justify-content: space-between;
+  overflow: hidden;
+
+  transition: transform 0.2s;
+  border: 2px solid grey;
+  background-color: whitesmoke;
+}
+
+.list-item:hover {
+  transform: translateY(-5px);
+}
+
+.example-header-image {
+  background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
+  background-size: cover;
+}
+
+.list-item-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.completed {
+  //background-color: green !important;
+  --mdc-linear-progress-active-indicator-color: green;
+}
+

@@ -1,49 +1,49 @@
-.content-list-accoridion {
-  display: block;
-  max-width: 500px;
-}
-
-.content-list-item {
-  display: block;
-  border: solid 1px #ccc;
-}
-
-.content-list-item + .content-list-item {
-  border-top: none;
-}
-
-.content-list-item-header {
+.content-list{
   display: flex;
-  align-content: center;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.content-list-element-header-description {
   justify-content: space-between;
+  align-items: center;
 }
 
-.content-list-item-description {
-  font-size: 0.85em;
-  color: #999;
+.content-list-element-header-indicators {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
 }
 
-.content-list-item-header,
-.content-list-item-body {
-  padding: 16px;
+.content-list-element-introduction {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 15px;
 }
 
-.content-list-item-body {
-  padding: 16px;
-  overflow: hidden;  // Add this to ensure smooth animation
+.content-list-element-introduction-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
 }
 
-.content-list-item-header:hover {
-  cursor: pointer;
-  background-color: #eee;
+.content-list-element-description {
+  width: fit-content;
+  margin: 4px;
 }
 
-.content-list-item:first-child {
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-}
-
-.content-list-item:last-child {
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
+.content-list-element-items {
+  margin: 0 20px 20px;
+  padding: 5px;
+  height: 100%;
+  width: calc(100% - 40px) !important;
+  overflow: auto;
+  /* we use a grid to provide the last row to be left-aligned */
+  display: grid;
+  align-content: start;
+  grid-template-columns: repeat(auto-fill, 400px);
+  justify-content: space-evenly;
+  justify-items: center;
+  grid-gap: 15px;
 }

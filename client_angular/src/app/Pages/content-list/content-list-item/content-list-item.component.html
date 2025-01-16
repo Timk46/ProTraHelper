@@ -1,1 +1,41 @@
-<p>content-list-item works!</p>
+<!-- <p>-------------</p>
+<p>{{ contentElementData.file }}</p>
+<p>{{ contentElementData.id }}</p>
+<p>{{ contentElementData.positionInSpecificContentView }}</p>
+<p>{{ contentElementData.question }}</p>
+<p>{{ contentElementData.text }}</p>
+<p>{{ contentElementData.title }}</p>
+<p>{{ contentElementData.type }}</p>
+<p>{{ contentElementData.question?.type }}</p>
+<p>-------------</p> -->
+
+<mat-card class="list-item">
+  <mat-card-header>
+    <!-- <div mat-card-avatar class="example-header-image"></div> -->
+    <div mat-card-avatar class="list-item-avatar" matTooltip="ID: {{contentElementData.id}}, Fortschritt: {{contentElementData.question?.progress}}%">
+      <mat-icon [fontIcon]="getQuestionTypeIcon(contentElementData.question?.type)"></mat-icon>
+    </div>
+    <mat-card-title>{{contentElementData.question?.name}}</mat-card-title>
+    <mat-card-subtitle>{{ getQuestionTypeReadable(contentElementData.question?.type)}}</mat-card-subtitle>
+  </mat-card-header>
+  <!-- <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" alt="Photo of a Shiba Inu"> -->
+  <mat-card-content>
+    <!-- Space for a more specific task description -->
+    <!-- <p>{{contentElementData.question?.description}}</p> -->
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-flat-button color="primary">
+      <mat-icon>play_arrow</mat-icon>
+      Aufgabe Starten
+    </button>
+  </mat-card-actions>
+  <mat-card-footer>
+    <mat-progress-bar
+      *ngIf="contentElementData.question && contentElementData.question.progress > 0"
+      class="list-item-progress-bar"
+      mode="indeterminate"
+      [ngClass]="{'completed': contentElementData.question.progress === 100}"
+      [value]="contentElementData.question.progress"
+    ></mat-progress-bar>
+  </mat-card-footer>
+</mat-card>
