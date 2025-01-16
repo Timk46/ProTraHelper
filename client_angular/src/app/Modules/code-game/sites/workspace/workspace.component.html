@@ -65,11 +65,11 @@
           </svg>
           <span class="polarNight_4_text ml-1">Ziel erreicht</span>
         </div>
-        <div *ngIf="isGameAnimationFinished && rocksInGame" class="flex items-center md:w-auto ml-2">
+        <div *ngIf="isGameAnimationFinished" class="flex items-center md:w-auto ml-2">
           <svg width="24" height="24">
-            <circle cx="12" cy="12" r="10" [attr.fill]="collectedAllRocks ? '#4caf50' : '#f44336'"></circle>
+            <circle cx="12" cy="12" r="10" [attr.fill]="totalRocks == collectedRocks ? '#4caf50' : '#f44336'"></circle>
           </svg>
-          <span class="polarNight_4_text ml-1">Gestein gesammelt</span>
+          <span class="polarNight_4_text ml-1">Gestein gesammelt {{ totalRocks }} / {{ collectedRocks }}</span>
         </div>
       </div>
 

@@ -199,19 +199,19 @@ void World::determineSuccess() {
     // output the result
     if (reachedDestination) {
         if (totalRocks > 0) {
-            SystemOutput::getInstance().outputTrun("Rover reached the destination and collected " + std::to_string(collectedRocks) + "/" + std::to_string(totalRocks) + " rocks.");
+            SystemOutput::getInstance().outputInformation("Rover reached the destination and collected " + std::to_string(collectedRocks) + "/" + std::to_string(totalRocks) + " rocks.");
         } else {
-            SystemOutput::getInstance().outputTrun("Rover reached the destination.");
+            SystemOutput::getInstance().outputInformation("Rover reached the destination.");
         }
     } else {
         if (totalRocks > 0) {
-            SystemOutput::getInstance().outputTrun("Rover did not reach the destination and collected " + std::to_string(collectedRocks) + "/" + std::to_string(totalRocks) + " rocks.");
+            SystemOutput::getInstance().outputInformation("Rover did not reach the destination and collected " + std::to_string(collectedRocks) + "/" + std::to_string(totalRocks) + " rocks.");
         } else {
-            SystemOutput::getInstance().outputTrun("Rover did not reach the destination.");
+            SystemOutput::getInstance().outputInformation("Rover did not reach the destination.");
         }
     }
  
-    SystemOutput::getInstance().outputSuccess(reachedDestination, totalRocks , collectedAllRocks);
+    SystemOutput::getInstance().outputSuccess(reachedDestination, totalRocks , collectedRocks);
 }
 
 /**

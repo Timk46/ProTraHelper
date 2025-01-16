@@ -41,14 +41,14 @@ export class PlayfieldComponent {
   playerInitialPosition: { x: number, y: number } = { x: 0, y: 0 };
   playerPositionIsSet = false; // true, if the player position is set
   reachedDestination = false; // true, if the player reached the destination
-  rocksInGame = false; // true, if there are rocks in the game
-  collectedAllRocks = false; // true, if all rocks are collected
+  totalRocks = 0; // total number of rocks in the game
+  collectedRocks = 0; // number of rocks collected by the player
 
   gameOutputInformation: string = 'Bereit für die Ausführung';
   compilerGameOutput: string[] = [];
 
   // Event emitter to notify the workspace component that the game animation has finished
-  @Output() gameAnimationFinished = new EventEmitter<{ reachedDestination: boolean, rocksInGame: boolean, collectedAllRocks: boolean }>();
+  @Output() gameAnimationFinished = new EventEmitter<{ reachedDestination: boolean, totalRocks: number, collectedRocks: number }>();
   animationSpeedMaster = 500; // animation speed in ms
 
   constructor(private renderer: Renderer2, private el: ElementRef) {}
@@ -241,7 +241,7 @@ export class PlayfieldComponent {
     setTimeout(() => {
       // game is finished
       this.gameOutputInformation = 'Spiel wurde ausgeführt';
-      this.gameAnimationFinished.emit({ reachedDestination: this.reachedDestination, rocksInGame: this.rocksInGame, collectedAllRocks: this.collectedAllRocks });
+      this.gameAnimationFinished.emit({ reachedDestination: this.reachedDestination, totalRocks: this.totalRocks, collectedRocks: this.collectedRocks });
     }, totalDuration);
   }
 
@@ -289,13 +289,13 @@ export class PlayfieldComponent {
         this.reachedDestination = true;
       }
 
-      if (gameSuccessInformation[1] === "1") {
-        this.rocksInGame = true;
+      try {
+        this.totalRocks = parseInt(gameSuccessInformation[1]);
+        this.collectedRocks = parseInt(gameSuccessInformation[2]);
+      } catch (error) {
+        console.error("Error parsing the number of rocks: ", error);
       }
-
-      if (gameSuccessInformation[2] === "1") {
-        this.collectedAllRocks = true;
-      }
+      
     } else {
       console.error("Unknown action: ", action);
     }
@@ -308,8 +308,8 @@ export class PlayfieldComponent {
     this.playerDirection = PlayerDirection.EAST;
     this.playerTransform = `translate(${this.startX}px, ${this.startY}px) rotate(${this.playerDirection}deg)`;
     this.reachedDestination = false;
-    this.rocksInGame = false;
-    this.collectedAllRocks = false;
+    this.totalRocks = 0;
+    this.collectedRocks = 0;
 
     // reset the game output information
     this.gameOutputInformation = 'Bereit für die Ausführung';
