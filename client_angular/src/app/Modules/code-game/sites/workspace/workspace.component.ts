@@ -98,7 +98,7 @@ export class WorkspaceComponent {
 
     if (this.currentTask) {
       for (const file of this.currentTask.codeGameQuestion!.codeGameScaffolds) {
-        if (file.codeFileName === this.currentTask.codeGameQuestion!.mainFileName) {
+        if (file.mainFile) {
           mainFile[file.codeFileName] = file.code;
         } else {
           additionalFiles[file.codeFileName] = file.code;

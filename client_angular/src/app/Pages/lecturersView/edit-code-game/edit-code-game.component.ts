@@ -10,6 +10,7 @@ import { CodeGameScaffoldDto, questionType } from "@DTOs/question.dto";
 import { CodeGameConfirmDialogComponent } from "./code-game-confirm-dialog.component";
 import { CodeGameAddElementModalComponent } from "./code-game-add-element-modal.component";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-edit-code-game',
@@ -31,7 +32,8 @@ export class EditCodeGameComponent implements OnInit {
     private route: ActivatedRoute,
     private questionDataService: QuestionDataService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) {
     this.codeGameForm = this.createForm();
   }
@@ -48,7 +50,6 @@ export class EditCodeGameComponent implements OnInit {
             this.questionData.codeGameQuestion = {
               id: 0,
               text: '',
-              mainFileName: '',
               programmingLanguage: 'cpp', // default code language
               codeGameScaffolds: [],
               gameFileName: 'game.grid.txt',
@@ -62,6 +63,10 @@ export class EditCodeGameComponent implements OnInit {
     });
   }
 
+  navigateToDashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
   populateForm() {
     console.log('Populating form with data:', this.questionData);
 
@@ -69,7 +74,6 @@ export class EditCodeGameComponent implements OnInit {
       this.codeGameForm.patchValue({
         name: this.questionData.name || '',
         text: this.questionData.text || '',
-        mainFileName: this.questionData.codeGameQuestion?.mainFileName || '',
         programmingLanguage: this.questionData.codeGameQuestion?.programmingLanguage || '',
         game: this.questionData.codeGameQuestion?.game || '',
         level: this.questionData.level || '',
@@ -89,7 +93,9 @@ export class EditCodeGameComponent implements OnInit {
       codeGameScaffoldsFormArray.push(this.formBuilder.group({
         id: codeGameScaffold.id,
         codeFileName: codeGameScaffold.codeFileName,
-        code: codeGameScaffold.code
+        code: codeGameScaffold.code,
+        visible: codeGameScaffold.visible,
+        mainFile: codeGameScaffold.mainFile
       }));
     });
   }
@@ -100,7 +106,6 @@ export class EditCodeGameComponent implements OnInit {
       programmingLanguage: ['', Validators.required],
       text: ['', Validators.required],
       codeGameScaffolds: this.formBuilder.array([]),
-      mainFileName: [''],
       gameFileName: ['game.grid.txt'],
       game: [''],
       isApproved: [false],
@@ -160,7 +165,9 @@ export class EditCodeGameComponent implements OnInit {
     const newElement = this.formBuilder.group({
       id: 0,
       ['codeFileName']: data.fileName,
-      code: data.code
+      code: data.code,
+      visible: true,
+      mainFile: false
     });
     formArray.push(newElement);
 
@@ -175,7 +182,9 @@ export class EditCodeGameComponent implements OnInit {
               codeFileName: data.fileName,
               code: data.code,
               codeGameQuestionId: this.questionData.codeGameQuestion.id,
-              language: this.questionData.codeGameQuestion.programmingLanguage
+              language: this.questionData.codeGameQuestion.programmingLanguage,
+              visible: true,
+              mainFile: false
             } as CodeGameScaffoldDto;
             (questionDataArray as CodeGameScaffoldDto[]).push(newItem);
             break;
@@ -212,6 +221,53 @@ export class EditCodeGameComponent implements OnInit {
 
     // Trigger change detection for the entire form
     this.codeGameForm.updateValueAndValidity();
+  }
+
+  fileVisibilityToggle(type: 'codeGameScaffolds', index: number) {
+    const formArray = this.codeGameForm.get(type) as FormArray;
+    const control = formArray.at(index);
+
+    if (control) {
+      control.patchValue({visible: !control.value.visible});
+
+      if (this.questionData && this.questionData.codeGameQuestion) {
+        const questionDataArray = this.questionData.codeGameQuestion[type];
+        if (Array.isArray(questionDataArray) && questionDataArray[index]) {
+          questionDataArray[index].visible = !questionDataArray[index].visible;
+        }
+      }
+    }
+  }
+
+  mainFileToggle(type: 'codeGameScaffolds', index: number) {
+    const formArray = this.codeGameForm.get(type) as FormArray;
+    const control = formArray.at(index);
+
+    if (control) {
+      control.patchValue({ mainFile: !control.value.mainFile });
+
+      // All other files are not main files
+      formArray.controls.forEach((ctrl, i) => {
+        if (i !== index) {
+          ctrl.patchValue({ mainFile: false });
+        }
+      });
+
+      // Update the question data
+      if (this.questionData && this.questionData.codeGameQuestion) {
+        const questionDataArray = this.questionData.codeGameQuestion[type];
+        if (Array.isArray(questionDataArray) && questionDataArray[index]) {
+          questionDataArray[index].mainFile = !questionDataArray[index].mainFile;
+        }
+
+        // All other files are not main files
+        for (let i = 0; i < questionDataArray.length; i++) {
+          if (i !== index) {
+            questionDataArray[i].mainFile = false;
+          }
+        }
+      }
+    }
   }
 
   confirmDelete(type: 'codeGameScaffolds', index: number, fileName: string) {
@@ -257,7 +313,7 @@ export class EditCodeGameComponent implements OnInit {
   // TODO: need to test
   getMissingFields(): string[] {
     const missingFields: string[] = [];
-    const requiredFields = ['name', 'programmingLanguage', 'mainFileName', 'text', 'game'];
+    const requiredFields = ['name', 'programmingLanguage', 'text', 'game'];
 
     for (const field of requiredFields) {
       if (this.codeGameForm.get(field)?.invalid) {
@@ -275,6 +331,14 @@ export class EditCodeGameComponent implements OnInit {
   }
 
   onSubmit() {
+    if (this.questionData) {
+      const mainFile = this.questionData.codeGameQuestion!.codeGameScaffolds.find(scaffold => scaffold.mainFile);
+      if (!mainFile) {
+        this.snackBar.open('Bitte wählen Sie ein MainFile aus.', 'Close', { duration: 5000 });
+        return;
+      }
+    }
+
     if (this.codeGameForm.valid && this.questionData) {
       const updatedQuestion: detailedQuestionDTO = {
         ...this.questionData,
@@ -286,7 +350,6 @@ export class EditCodeGameComponent implements OnInit {
           ...this.questionData.codeGameQuestion,
           id: this.questionData.codeGameQuestion!.id,
           text: this.codeGameForm.value.text,
-          mainFileName: this.codeGameForm.value.mainFileName,
           programmingLanguage: this.codeGameForm.value.programmingLanguage,
           codeGameScaffolds: this.questionData.codeGameQuestion!.codeGameScaffolds,
           gameFileName: "game.grid.txt", // Hardcoded for every game task

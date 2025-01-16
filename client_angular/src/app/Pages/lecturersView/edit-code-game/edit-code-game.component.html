@@ -50,15 +50,27 @@
             <mat-icon>add</mat-icon>
           </button>
         </div>
-        <p>Diese Dateien werden den Lernenden bei Bearbeitung der Aufgabe zur Verfügung gestellt.</p>
+        <p>Hinzufügen aller Dateien die zu dem Programmierspiel gehören. </p>
+        <p>Selektiere die sichtbaren Dateien und die Hauptdatei.</p>
         <mat-accordion>
           <mat-expansion-panel *ngFor="let codeGameScaffold of codeGameScaffoldsControls; let i = index" [formGroupName]="i">
             <mat-expansion-panel-header>
               <mat-panel-title>
                 <span>{{codeGameScaffold.get('codeFileName')?.value}}</span>
-                <button mat-icon-button color="warn" type="button" (click)="confirmDelete('codeGameScaffolds', i, codeGameScaffold.get('codeFileName')?.value); $event.stopPropagation();">
-                  <mat-icon>delete</mat-icon>
-                </button>
+
+                <div class="file-options">
+                  <button mat-mini-fab color="primary" type="button" (click)="fileVisibilityToggle('codeGameScaffolds', i)" (click)="$event.stopPropagation();">
+                    <mat-icon>{{codeGameScaffold.get('visible')?.value ? 'visibility' : 'visibility_off' }}</mat-icon>
+                  </button>
+
+                  <mat-checkbox color="primary" [checked]="codeGameScaffold.get('mainFile')?.value" (click)="mainFileToggle('codeGameScaffolds', i); $event.stopPropagation();">
+                    MainFile
+                  </mat-checkbox>
+
+                  <button mat-icon-button color="warn" type="button" (click)="confirmDelete('codeGameScaffolds', i, codeGameScaffold.get('codeFileName')?.value); $event.stopPropagation();">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
               </mat-panel-title>
             </mat-expansion-panel-header>
             <ng-container>
@@ -70,15 +82,6 @@
             </ng-container>
           </mat-expansion-panel>
         </mat-accordion>
-      </div>
-
-<!--      TODO: dropdown -->
-      <div class="subsection-container">
-        <p>Extra Informationen, um den Code auszuführen.</p>
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Main File Name</mat-label>
-            <input matInput formControlName="mainFileName" required>
-          </mat-form-field>
       </div>
 
       <div class="form-field full-width subsection-container">
@@ -98,7 +101,8 @@
     </div>
 
     <div class="form-actions">
-      <button mat-raised-button color="primary" type="submit" class="action-button">Save Changes</button>
+      <button mat-raised-button color="primary" type="button" class="action-button" (click)="navigateToDashboard()">Zurück zum Dashboard</button>
+      <button mat-raised-button color="primary" type="submit" class="action-button">Änderungen speichern</button>
     </div>
 
   </form>

@@ -38,18 +38,20 @@
           <mat-card>
             <mat-card-content>
               <mat-tab-group dynamicHeight animationDuration="0ms" [backgroundColor]="'primary'" [color]="'primary'">
-                <mat-tab *ngFor="let codeStructure of currentTask?.codeGameQuestion?.codeGameScaffolds; let isLast = last">
-                  <ng-template mat-tab-label>
-                    <div class="tab-label">
-                      <span>{{codeStructure.codeFileName}}</span>
-                    </div>
-                  </ng-template>
-                  <app-code-editor-code-game #codeEditorMonaco
-                                     [selectedLanguage]="currentTask?.codeGameQuestion?.programmingLanguage"
-                                     [(code)]="codeStructure.code"
-                                     (codeChange)="onCodeChanged($event)">
-                  </app-code-editor-code-game>
-                </mat-tab>
+                <ng-container *ngFor="let codeStructure of currentTask?.codeGameQuestion?.codeGameScaffolds">
+                  <mat-tab *ngIf="codeStructure.visible">
+                    <ng-template mat-tab-label>
+                      <div class="tab-label">
+                        <span>{{codeStructure.codeFileName}}</span>
+                      </div>
+                    </ng-template>
+                    <app-code-editor-code-game #codeEditorMonaco
+                                               [selectedLanguage]="currentTask?.codeGameQuestion?.programmingLanguage"
+                                               [(code)]="codeStructure.code"
+                                               (codeChange)="onCodeChanged($event)">
+                    </app-code-editor-code-game>
+                  </mat-tab>
+                </ng-container>
               </mat-tab-group>
             </mat-card-content>
           </mat-card>
@@ -65,11 +67,11 @@
           </svg>
           <span class="polarNight_4_text ml-1">Ziel erreicht</span>
         </div>
-        <div *ngIf="isGameAnimationFinished" class="flex items-center md:w-auto ml-2">
+        <div *ngIf="isGameAnimationFinished && totalRocks > 0" class="flex items-center md:w-auto ml-2">
           <svg width="24" height="24">
             <circle cx="12" cy="12" r="10" [attr.fill]="totalRocks == collectedRocks ? '#4caf50' : '#f44336'"></circle>
           </svg>
-          <span class="polarNight_4_text ml-1">Gestein gesammelt {{ totalRocks }} / {{ collectedRocks }}</span>
+          <span class="polarNight_4_text ml-1">Gestein gesammelt {{ collectedRocks }} / {{ totalRocks }}</span>
         </div>
       </div>
 

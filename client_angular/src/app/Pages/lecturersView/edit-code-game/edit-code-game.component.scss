@@ -79,6 +79,17 @@ mat-expansion-panel-header {
   &:hover {
     background-color: #f0f0f0;
   }
+
+  .file-options {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    align-items: center;
+
+    .mdc-fab.mdc-fab--mini.mat-mdc-mini-fab.mat-primary.mat-mdc-button-base {
+      box-shadow: none !important;
+    }
+  }
 }
 
 mat-panel-title {

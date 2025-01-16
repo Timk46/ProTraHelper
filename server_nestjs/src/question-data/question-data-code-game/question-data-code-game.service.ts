@@ -13,7 +13,6 @@ export class QuestionDataCodeGameService {
     const newCodeGameQuestion = await this.prisma.codeGameQuestion.create({
       data: {
         text: codeGameQuestion.text,
-        mainFileName: codeGameQuestion.mainFileName,
         programmingLanguage: codeGameQuestion.programmingLanguage,
         questionId: questionId,
         codeGameScaffolds: {
@@ -21,6 +20,8 @@ export class QuestionDataCodeGameService {
             codeFileName: cgs.codeFileName,
             code: cgs.code,
             language: cgs.language,
+            visible: cgs.visible,
+            mainFile: cgs.mainFile,
           })),
         },
         gameFileName: codeGameQuestion.gameFileName,
@@ -41,7 +42,6 @@ export class QuestionDataCodeGameService {
       where: { id: codeGameQuestion.id },
       data: {
         text: codeGameQuestion.text,
-        mainFileName: codeGameQuestion.mainFileName,
         programmingLanguage: codeGameQuestion.programmingLanguage,
         codeGameScaffolds: {
           update: codeGameQuestion.codeGameScaffolds.map((cgs) => ({
@@ -50,6 +50,8 @@ export class QuestionDataCodeGameService {
               codeFileName: cgs.codeFileName,
               code: cgs.code,
               language: cgs.language,
+              visible: cgs.visible,
+              mainFile: cgs.mainFile,
             },
           })),
         },

@@ -185,7 +185,6 @@ export interface CodingQuestionDto {
 export interface CodeGameQuestionDto {
     id: number;
     text: string;
-    mainFileName: string;
     programmingLanguage: string;
     codeGameScaffolds: CodeGameScaffoldDto[];
     gameFileName: string;
@@ -197,5 +196,7 @@ export interface CodeGameScaffoldDto {
     codeGameQuestionId: number;
     codeFileName: string;
     code: string;
-    language: string;
+    language?: string;
+    visible?: boolean;
+    mainFile?: boolean;
 }
