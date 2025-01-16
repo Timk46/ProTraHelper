@@ -52,16 +52,17 @@ void SystemOutput::outputRemoveRock(int x, int y)
     std::cout << "#SYS-RemoveRock:" << x << "/" << y << std::endl;
 }
 
+
 /**
  * @brief Outputs the success status of the system.
  *
  * @param reachedDestination A boolean indicating if the destination was reached.
- * @param rocksInGame A boolean indicating if there are rocks in the game.
- * @param collectedAllRocks A boolean indicating if all rocks were collected.
+ * @param totalRocks The total number of rocks.
+ * @param collectedRocks The number of collected rocks.
  */
-void SystemOutput::outputSuccess(bool reachedDestination, bool rocksInGame, bool collectedAllRocks)
+void SystemOutput::outputSuccess(bool reachedDestination, int totalRocks, int collectedRocks)
 {
     std::lock_guard<std::mutex> lock(mtx);
 
-    std::cout << "#SYS-Success:" << reachedDestination << "/" << rocksInGame << "/" << collectedAllRocks << std::endl;
+    std::cout << "#SYS-Success:" << reachedDestination << "/" << totalRocks << "/" << collectedRocks << std::endl;
 }

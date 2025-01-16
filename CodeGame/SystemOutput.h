@@ -34,7 +34,7 @@ class SystemOutput {
         void outputTrun(const std::string message);
         void outputInformation(std::string message);
         void outputRemoveRock(int x, int y);
-        void outputSuccess(bool reachedDestination, bool rocksInGame, bool collectedAllRocks);
+        void outputSuccess(bool reachedDestination, int totalRocks, int collectedRocks);
 };
 
 #endif // SYSTEMOUTPUT_H

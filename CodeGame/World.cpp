@@ -187,11 +187,9 @@ void World::determineSuccess() {
         return;
     }
 
-    if (checkDestination(roverPosition[0], roverPosition[1])) {
-        reachedDestination = true;
-    } 
+    reachedDestination = checkDestination(roverPosition[0], roverPosition[1]);
 
-    // chekc if the rover got all rocks
+    // check if the rover got all rocks
     if (totalRocks > 0) {
         if (collectedRocks == totalRocks) {
             collectedAllRocks = true;
@@ -199,21 +197,21 @@ void World::determineSuccess() {
     }
 
     // output the result
-    if (reachedDestination && collectedAllRocks) {
-        SystemOutput::getInstance().outputInformation("Mission successful.");
-    } else if (reachedDestination) {
-        SystemOutput::getInstance().outputInformation("Rover reached the destination, but not all rocks were collected.");
-    } else if (totalRocks > 0 && collectedAllRocks) {
-        SystemOutput::getInstance().outputInformation("Rover collected all rocks, but did not reach the destination.");
+    if (reachedDestination) {
+        if (totalRocks > 0) {
+            SystemOutput::getInstance().outputTrun("Rover reached the destination and collected " + std::to_string(collectedRocks) + "/" + std::to_string(totalRocks) + " rocks.");
+        } else {
+            SystemOutput::getInstance().outputTrun("Rover reached the destination.");
+        }
     } else {
         if (totalRocks > 0) {
-            SystemOutput::getInstance().outputInformation("Rover did not reach the destination and did not collect all rocks.");
+            SystemOutput::getInstance().outputTrun("Rover did not reach the destination and collected " + std::to_string(collectedRocks) + "/" + std::to_string(totalRocks) + " rocks.");
         } else {
-            SystemOutput::getInstance().outputInformation("Rover did not reach the destination.");
+            SystemOutput::getInstance().outputTrun("Rover did not reach the destination.");
         }
     }
-
-    SystemOutput::getInstance().outputSuccess(reachedDestination, totalRocks > 0, collectedAllRocks);
+ 
+    SystemOutput::getInstance().outputSuccess(reachedDestination, totalRocks , collectedAllRocks);
 }
 
 /**
