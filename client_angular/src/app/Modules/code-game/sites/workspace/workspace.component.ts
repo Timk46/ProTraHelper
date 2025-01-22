@@ -53,16 +53,6 @@ export class WorkspaceComponent {
     this.title.setTitle('GOALS: Code Game');
   }
 
-  // Event handler to get notified when the game animation has finished by the playfield component
-  onGameAnimationFinished(event: { reachedDestination: boolean, totalRocks: number, collectedRocks: number }): void {
-    this.reachedDestination = event.reachedDestination;
-    this.totalRocks = event.totalRocks;
-    this.collectedRocks = event.collectedRocks;
-
-    this.isGameAnimationFinished = true;
-    this.resetButtonIsDisabled = false;
-  }
-
   getCurrentTaskFromRoute(): void {
     this.route.params.subscribe((params) => {
       const taskId = params['taskId'];
@@ -73,13 +63,23 @@ export class WorkspaceComponent {
           this.taskDescription = this.currentTask?.codeGameQuestion!.text;
           this.currentState = States.editingCode;
 
-          console.log('Current task: ', this.currentTask);
+          console.log('CodeGame: Current task: ', this.currentTask); // TODO: remove
 
           // trigger playfield component to load the game
           this.playfieldComponent?.initGameField(this.currentTask?.codeGameQuestion!.game);
         });
       }
     });
+  }
+
+  // Event handler to get notified when the game animation has finished by the playfield component
+  onGameAnimationFinished(event: { reachedDestination: boolean, totalRocks: number, collectedRocks: number }): void {
+    this.reachedDestination = event.reachedDestination;
+    this.totalRocks = event.totalRocks;
+    this.collectedRocks = event.collectedRocks;
+
+    this.isGameAnimationFinished = true;
+    this.resetButtonIsDisabled = false;
   }
 
   onCodeChanged(newCode: string): void {

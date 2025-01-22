@@ -44,7 +44,7 @@ export class EditCodeGameComponent implements OnInit {
       if (questionId) {
         this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
           this.questionData = data;
-          console.log('Question data:', this.questionData);
+          console.log('CodeGame: Question data:', this.questionData); // TODO: remove
 
           if (!this.questionData.codeGameQuestion) {
             this.questionData.codeGameQuestion = {
@@ -68,7 +68,7 @@ export class EditCodeGameComponent implements OnInit {
   }
 
   populateForm() {
-    console.log('Populating form with data:', this.questionData);
+    console.log('CodeGame: Populating form with data:', this.questionData); // TODO: remove
 
     if (this.questionData) {
       this.codeGameForm.patchValue({
@@ -195,7 +195,7 @@ export class EditCodeGameComponent implements OnInit {
 
   onLanguageChange(event: MatSelectChange) {
     const newLanguage = event.value;
-    console.log('Language changed to:', newLanguage);
+    console.log('CodeGame: Language changed to:', newLanguage);
 
     // Update the language for all code editors except the first one (task description) and the last one (game)
     this.updateCodeEditorsLanguage(newLanguage);
@@ -359,7 +359,7 @@ export class EditCodeGameComponent implements OnInit {
 
       this.questionDataService.updateWholeQuestion(updatedQuestion).subscribe(
         response => {
-          console.log('Question updated successfully:', response);
+          console.log('CodeGame: Question updated successfully:', response);
           this.snackBar.open('Question updated successfully', 'Close', { duration: 3000 });
         },
         error => {
