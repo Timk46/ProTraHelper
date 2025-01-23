@@ -33,7 +33,7 @@
 
 
 
-<mat-accordion class="content-list">
+<mat-accordion class="content-list" multi="true">
   <mat-expansion-panel
     *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index"
     [expanded]="false"
@@ -62,14 +62,30 @@
     <div class="content-list-element-introduction">
       <p class="content-list-element-description">{{ content.description }}</p>
       <div class="content-list-element-introduction-buttons">
-        <button mat-raised-button color="primary">PDF</button>
-        <button mat-raised-button color="primary">Video</button>
+        <button
+          *ngIf="hasContentElementType(content, 'PDF')"
+          mat-raised-button
+          color="primary"
+          (click)="onContentClick(content, ['PDF'], $event)"
+        >
+          <mat-icon>picture_as_pdf</mat-icon>
+          PDF
+        </button>
+        <button
+          *ngIf="hasContentElementType(content, 'VIDEO')"
+          mat-raised-button
+          color="primary"
+          (click)="onContentClick(content, ['VIDEO'], $event)"
+        >
+          <mat-icon>play_circle_outline</mat-icon>
+          Video
+        </button>
       </div>
     </div>
     <h2 style="margin-top: 10px;">Aufgaben</h2>
     <div class="content-list-element-items">
       <app-content-list-item
-        *ngFor="let task of getQuestions(content)" [contentElementData]="task"
+        *ngFor="let task of getQuestions(content)" [contentElementData]="task" (scoreUpdated)="onScoreUpdated($event)"
       ></app-content-list-item>
     </div>
   </mat-expansion-panel>

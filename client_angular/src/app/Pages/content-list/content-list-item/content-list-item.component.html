@@ -9,7 +9,7 @@
 <p>{{ contentElementData.question?.type }}</p>
 <p>-------------</p> -->
 
-<mat-card class="list-item">
+<mat-card class="list-item"(click)="onTaskClick()" matRipple [ngClass]="{'item-completed': contentElementData.question?.progress === 100}">
   <mat-card-header>
     <!-- <div mat-card-avatar class="example-header-image"></div> -->
     <div mat-card-avatar class="list-item-avatar" matTooltip="ID: {{contentElementData.id}}, Fortschritt: {{contentElementData.question?.progress}}%">
@@ -23,17 +23,17 @@
     <!-- Space for a more specific task description -->
     <!-- <p>{{contentElementData.question?.description}}</p> -->
   </mat-card-content>
-  <mat-card-actions>
+  <!-- <mat-card-actions>
     <button mat-flat-button color="primary">
       <mat-icon>play_arrow</mat-icon>
       Aufgabe Starten
     </button>
-  </mat-card-actions>
+  </mat-card-actions> -->
   <mat-card-footer>
     <mat-progress-bar
       *ngIf="contentElementData.question && contentElementData.question.progress > 0"
       class="list-item-progress-bar"
-      mode="indeterminate"
+      mode="determinate"
       [ngClass]="{'completed': contentElementData.question.progress === 100}"
       [value]="contentElementData.question.progress"
     ></mat-progress-bar>

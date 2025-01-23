@@ -71,6 +71,7 @@ import { ContentListComponent } from './Pages/content-list/content-list.componen
 import { ContentListItemComponent } from './Pages/content-list/content-list-item/content-list-item.component';
 import { MatExpansionModule } from "@angular/material/expansion";
 import { CdkAccordionItem, CdkAccordionModule } from "@angular/cdk/accordion";
+import { MatRippleModule } from "@angular/material/core";
 
 @NgModule({
     declarations: [
@@ -144,6 +145,7 @@ import { CdkAccordionItem, CdkAccordionModule } from "@angular/cdk/accordion";
         MatMenuModule,
         MatExpansionModule,
         CdkAccordionModule,
+        MatRippleModule
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

@@ -34,16 +34,17 @@
 }
 
 .content-list-element-items {
+  display: grid;
+  overflow: auto;
+  align-content: start;
+  grid-template-columns: repeat(auto-fill, 400px);
+  justify-content: start;
+  justify-items: center;
+  grid-gap: 15px;
+
   margin: 0 20px 20px;
   padding: 5px;
   height: 100%;
   width: calc(100% - 40px) !important;
-  overflow: auto;
   /* we use a grid to provide the last row to be left-aligned */
-  display: grid;
-  align-content: start;
-  grid-template-columns: repeat(auto-fill, 400px);
-  justify-content: space-evenly;
-  justify-items: center;
-  grid-gap: 15px;
 }
