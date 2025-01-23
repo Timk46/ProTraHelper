@@ -40,15 +40,12 @@ export class PlayfieldComponent {
   playerTransform: string = '';
   playerInitialPosition: { x: number, y: number } = { x: 0, y: 0 };
   playerPositionIsSet = false; // true, if the player position is set
-  reachedDestination = false; // true, if the player reached the destination
-  totalRocks = 0; // total number of rocks in the game
-  collectedRocks = 0; // number of rocks collected by the player
 
   gameOutputInformation: string = 'Bereit für die Ausführung';
   compilerGameOutput: string[] = [];
 
   // Event emitter to notify the workspace component that the game animation has finished
-  @Output() gameAnimationFinished = new EventEmitter<{ reachedDestination: boolean, totalRocks: number, collectedRocks: number }>();
+  @Output() gameAnimationFinished = new EventEmitter<void>();
   animationSpeedMaster = 500; // animation speed in ms
 
   constructor(private renderer: Renderer2, private el: ElementRef) {}
@@ -241,7 +238,7 @@ export class PlayfieldComponent {
     setTimeout(() => {
       // game is finished
       this.gameOutputInformation = 'Spiel wurde ausgeführt';
-      this.gameAnimationFinished.emit({ reachedDestination: this.reachedDestination, totalRocks: this.totalRocks, collectedRocks: this.collectedRocks });
+      this.gameAnimationFinished.emit();
     }, totalDuration);
   }
 
@@ -281,21 +278,6 @@ export class PlayfieldComponent {
 
     } else if (action == "#SYS-Info") {
       this.gameOutputInformation = move;
-
-    } else if (action == "#SYS-Success") {
-      const gameSuccessInformation = move.split('/');
-
-      if (gameSuccessInformation[0] === "1") {
-        this.reachedDestination = true;
-      }
-
-      try {
-        this.totalRocks = parseInt(gameSuccessInformation[1]);
-        this.collectedRocks = parseInt(gameSuccessInformation[2]);
-      } catch (error) {
-        console.error("Error parsing the number of rocks: ", error);
-      }
-      
     } else {
       console.error("Unknown action: ", action);
     }
@@ -307,9 +289,6 @@ export class PlayfieldComponent {
     this.playerPosition = this.playerInitialPosition;
     this.playerDirection = PlayerDirection.EAST;
     this.playerTransform = `translate(${this.startX}px, ${this.startY}px) rotate(${this.playerDirection}deg)`;
-    this.reachedDestination = false;
-    this.totalRocks = 0;
-    this.collectedRocks = 0;
 
     // reset the game output information
     this.gameOutputInformation = 'Bereit für die Ausführung';

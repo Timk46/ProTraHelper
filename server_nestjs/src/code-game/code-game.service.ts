@@ -54,8 +54,12 @@ export class CodeGameService {
       ...additionalFiles,
       ...gameFile,
     };
+    const executionResult = await this.executeCppProject(
+      mainFile,
+      additionalFiles,
+    );
 
-    return await this.executeCppProject(mainFile, additionalFiles);
+    return executionResult;
   }
 
   async executeCppProject(

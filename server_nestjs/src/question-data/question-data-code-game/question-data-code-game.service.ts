@@ -43,6 +43,11 @@ export class QuestionDataCodeGameService {
       data: {
         text: codeGameQuestion.text,
         programmingLanguage: codeGameQuestion.programmingLanguage,
+        codeSolutionRestriction: codeGameQuestion.codeSolutionRestriction,
+        fileNameToRestrict: codeGameQuestion.fileNameToRestrict,
+        methodNameToRestrict: codeGameQuestion.methodNameToRestrict,
+        frequencyOfMethodNameToRestrict:
+          codeGameQuestion.frequencyOfMethodNameToRestrict,
         codeGameScaffolds: {
           update: codeGameQuestion.codeGameScaffolds.map((cgs) => ({
             where: { id: cgs.id },

@@ -98,6 +98,37 @@
             ></app-code-editor-code-game>
           </ng-container>
       </div>
+
+      <div class="form-field full-width subsection-container">
+        <div class="section-header">
+          <h3>Lösungseinschränkung</h3>
+        </div>
+        <p>Beschränke die Anzahl der verwendeten Methodenaufrufe in der jeweiligen Datei. Gib die maximale Häufigkeit der Methodenaufrufe an.</p>
+        <div class="form-row">
+          <mat-checkbox color="primary" formControlName="codeSolutionRestriction">Einschränkung aktivieren</mat-checkbox>
+        </div>
+        <div class="form-row" *ngIf="codeGameForm.get('codeSolutionRestriction')?.value" style="margin-top: 15px">
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Datei</mat-label>
+            <mat-select formControlName="fileNameToRestrict" required>
+              <mat-option *ngFor="let codeGameScaffold of codeGameScaffoldsControls" [value]="codeGameScaffold.get('codeFileName')?.value">
+                {{codeGameScaffold.get('codeFileName')?.value}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Methodenname</mat-label>
+            <input matInput formControlName="methodNameToRestrict" required>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Häufigkeit</mat-label>
+            <input matInput type="number" formControlName="frequencyOfMethodNameToRestrict" required>
+          </mat-form-field>
+        </div>
+      </div>
     </div>
 
     <div class="form-actions">

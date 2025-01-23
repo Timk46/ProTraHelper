@@ -31,13 +31,18 @@ export class WorkspaceComponent {
   currentState: States = States.startState;
   protected readonly States = States;
 
-  // flags to control the elements in the view
+  // flags to control the elements in the view and evaluate the assignment
   isLoading: boolean = false;
   submitButtonIsDisabled: boolean = false;
   isGameAnimationFinished: boolean = false;
   resetButtonIsDisabled: boolean = true;
   showCompilerOutput: boolean = false;
+  codeSolutionRestriction: boolean = false; // if the code solution has restrictions
+  methodNameToRestrict: string = ''; // name of the method to restrict
+  frequencyOfMethodEvaluationResult: boolean = false; // if the code fulfills the restrictions
+  frequencyOfMethodCallsResult: number = 0; // number of method calls
   reachedDestination: boolean = false;
+  allRocksCollected: boolean = false;
   totalRocks: number = 0;
   collectedRocks: number = 0;
 
@@ -62,6 +67,8 @@ export class WorkspaceComponent {
           this.currentTask = task;
           this.taskDescription = this.currentTask?.codeGameQuestion!.text;
           this.currentState = States.editingCode;
+          this.codeSolutionRestriction = this.currentTask?.codeGameQuestion!.codeSolutionRestriction || false;
+          this.methodNameToRestrict = this.currentTask?.codeGameQuestion!.methodNameToRestrict || '';
 
           console.log('CodeGame: Current task: ', this.currentTask); // TODO: remove
 
@@ -73,11 +80,7 @@ export class WorkspaceComponent {
   }
 
   // Event handler to get notified when the game animation has finished by the playfield component
-  onGameAnimationFinished(event: { reachedDestination: boolean, totalRocks: number, collectedRocks: number }): void {
-    this.reachedDestination = event.reachedDestination;
-    this.totalRocks = event.totalRocks;
-    this.collectedRocks = event.collectedRocks;
-
+  onGameAnimationFinished(): void {
     this.isGameAnimationFinished = true;
     this.resetButtonIsDisabled = false;
   }
@@ -109,12 +112,20 @@ export class WorkspaceComponent {
     }
 
     this.codeGameTaskDataService
-      .executeCodeGameTask(mainFile, additionalFiles, gameFile)
+      .executeCodeGameTask(this.currentTask?.id, mainFile, additionalFiles, gameFile)
       .subscribe({
         next: (response) => {
-          console.log('Response: ', response);
+          console.log('CodeGame: Response: ', response);
 
-          this.splitCompilerOutputAndStartGame(response.output.toString());
+          this.splitCompilerOutputAndStartGame(response.codeGameExecutionResult.output.toString());
+
+          /* Get evaluation results */
+          this.frequencyOfMethodEvaluationResult = response.frequencyOfMethodEvaluationResult;
+          this.frequencyOfMethodCallsResult = response.frequencyOfMethodCallsResult;
+          this.reachedDestination = response.reachedDestination;
+          this.allRocksCollected = response.allRocksCollected;
+          this.totalRocks = response.totalRocks;
+          this.collectedRocks = response.collectedRocks;
         },
         error: (error) => {
           console.error('Error: ', error);
@@ -158,7 +169,10 @@ export class WorkspaceComponent {
     this.isGameAnimationFinished = false;
     this.resetButtonIsDisabled = true;
     this.submitButtonIsDisabled = false;
+    this.frequencyOfMethodEvaluationResult = false;
+    this.frequencyOfMethodCallsResult = 0;
     this.reachedDestination = false;
+    this.allRocksCollected = false;
     this.totalRocks = 0;
     this.collectedRocks = 0;
   }

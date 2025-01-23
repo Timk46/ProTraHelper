@@ -185,6 +185,10 @@ export interface CodingQuestionDto {
 export interface CodeGameQuestionDto {
     id: number;
     text: string;
+    codeSolutionRestriction: boolean;
+    fileNameToRestrict?: string;
+    methodNameToRestrict?: string;
+    frequencyOfMethodNameToRestrict?: number;
     programmingLanguage: string;
     codeGameScaffolds: CodeGameScaffoldDto[];
     gameFileName: string;

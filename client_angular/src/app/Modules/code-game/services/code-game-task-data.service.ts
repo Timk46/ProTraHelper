@@ -3,7 +3,7 @@ import { environment } from "../../../../environments/environment";
 import { Observable } from "rxjs";
 import { HttpClient } from '@angular/common/http';
 import { detailedQuestionDTO } from "@DTOs/detailedQuestion.dto";
-import {CppProjectExecutionResult} from "@DTOs/codeGame.dto";
+import { CodeGameEvaluationDTO, CppProjectExecutionResult } from "@DTOs/codeGame.dto";
 
 @Injectable({
   providedIn: 'root'
@@ -17,14 +17,20 @@ export class CodeGameTaskDataService {
     return this.http.get<detailedQuestionDTO>(`${this.apiURL}/${id}`);
   }
 
-  executeCodeGameTask(mainFile: { [fileName: string]: string }, additionalFiles: { [fileName: string]: string }, gameFile: { [fileName: string]: string }): Observable<CppProjectExecutionResult> {
+  executeCodeGameTask(
+    questionId: number | undefined,
+    mainFile: { [p: string]: string },
+    additionalFiles: { [p: string]: string },
+    gameFile: { [p: string]: string })
+    : Observable<CodeGameEvaluationDTO> {
     const body = {
+      questionId: questionId,
       mainFile: mainFile,
       additionalFiles: additionalFiles,
       gameFile: gameFile,
     };
 
-    const response: Observable<CppProjectExecutionResult> = this.http.post<CppProjectExecutionResult>(`${this.apiURL}/execute`, body);
+    const response: Observable<CodeGameEvaluationDTO> = this.http.post<CodeGameEvaluationDTO>(`${this.apiURL}/execute`, body);
     return response;
   }
 }

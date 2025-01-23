@@ -51,8 +51,12 @@ export class EditCodeGameComponent implements OnInit {
               id: 0,
               text: '',
               programmingLanguage: 'cpp', // default code language
+              codeSolutionRestriction: false,
+              fileNameToRestrict: '',
+              methodNameToRestrict: 'drive();', // default method name
+              frequencyOfMethodNameToRestrict: 1,
               codeGameScaffolds: [],
-              gameFileName: 'game.grid.txt',
+              gameFileName: 'game.grid.txt', // Hardcoded for every game task
               game: '',
             };
           }
@@ -75,6 +79,10 @@ export class EditCodeGameComponent implements OnInit {
         name: this.questionData.name || '',
         text: this.questionData.text || '',
         programmingLanguage: this.questionData.codeGameQuestion?.programmingLanguage || '',
+        codeSolutionRestriction: this.questionData.codeGameQuestion?.codeSolutionRestriction || false,
+        fileNameToRestrict: this.questionData.codeGameQuestion?.fileNameToRestrict || '',
+        methodNameToRestrict: this.questionData.codeGameQuestion?.methodNameToRestrict || 'drive();',
+        frequencyOfMethodNameToRestrict: this.questionData.codeGameQuestion?.frequencyOfMethodNameToRestrict || 1,
         game: this.questionData.codeGameQuestion?.game || '',
         level: this.questionData.level || '',
         isApproved: this.questionData.isApproved || false,
@@ -109,7 +117,11 @@ export class EditCodeGameComponent implements OnInit {
       gameFileName: ['game.grid.txt'],
       game: [''],
       isApproved: [false],
-      level: ['', Validators.required]
+      level: ['', Validators.required],
+      codeSolutionRestriction: [false],
+      fileNameToRestrict: [''],
+      methodNameToRestrict: ['drive();'],
+      frequencyOfMethodNameToRestrict: [1]
     });
   }
 
@@ -351,6 +363,10 @@ export class EditCodeGameComponent implements OnInit {
           id: this.questionData.codeGameQuestion!.id,
           text: this.codeGameForm.value.text,
           programmingLanguage: this.codeGameForm.value.programmingLanguage,
+          codeSolutionRestriction: this.codeGameForm.value.codeSolutionRestriction,
+          fileNameToRestrict: this.codeGameForm.value.fileNameToRestrict,
+          methodNameToRestrict: this.codeGameForm.value.methodNameToRestrict,
+          frequencyOfMethodNameToRestrict: this.codeGameForm.value.frequencyOfMethodNameToRestrict,
           codeGameScaffolds: this.questionData.codeGameQuestion!.codeGameScaffolds,
           gameFileName: "game.grid.txt", // Hardcoded for every game task
           game: this.codeGameForm.value.game

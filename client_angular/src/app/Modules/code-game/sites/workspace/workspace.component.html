@@ -28,7 +28,7 @@
           <mat-card>
 <!--            TODO: if task is loaded, show the playfield-->
             <mat-card-content>
-              <app-playfield #playfield (gameAnimationFinished)="onGameAnimationFinished($event)">
+              <app-playfield #playfield (gameAnimationFinished)="onGameAnimationFinished()">
               </app-playfield>
             </mat-card-content>
           </mat-card>
@@ -61,15 +61,21 @@
 
     <div class="run">
       <div class="success-informations">
-        <div *ngIf="isGameAnimationFinished" class="flex items-center md:w-auto mr-2">
+        <div *ngIf="isGameAnimationFinished && codeSolutionRestriction" class="flex items-center md:w-auto mr-1">
+          <svg width="24" height="24">
+            <circle cx="12" cy="12" r="10" [attr.fill]="frequencyOfMethodEvaluationResult ? '#4caf50' : '#f44336'"></circle>
+          </svg>
+          <span class="polarNight_4_text ml-1">"{{ methodNameToRestrict }}" wurde {{ frequencyOfMethodCallsResult }} mal aufgerufen</span>
+        </div>
+        <div *ngIf="isGameAnimationFinished" class="flex items-center md:w-auto mr-1">
           <svg width="24" height="24">
             <circle cx="12" cy="12" r="10" [attr.fill]="reachedDestination ? '#4caf50' : '#f44336'"></circle>
           </svg>
           <span class="polarNight_4_text ml-1">Ziel erreicht</span>
         </div>
-        <div *ngIf="isGameAnimationFinished && totalRocks > 0" class="flex items-center md:w-auto ml-2">
+        <div *ngIf="isGameAnimationFinished && totalRocks > 0" class="flex items-center md:w-auto ml-1">
           <svg width="24" height="24">
-            <circle cx="12" cy="12" r="10" [attr.fill]="totalRocks == collectedRocks ? '#4caf50' : '#f44336'"></circle>
+            <circle cx="12" cy="12" r="10" [attr.fill]="allRocksCollected ? '#4caf50' : '#f44336'"></circle>
           </svg>
           <span class="polarNight_4_text ml-1">Gestein gesammelt {{ collectedRocks }} / {{ totalRocks }}</span>
         </div>
