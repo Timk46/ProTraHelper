@@ -1,0 +1,35 @@
+<div class="code-game-playfield-editor">
+  <div class="settings" [formGroup]="codeGameForm">
+    <p>Mithilfe dieses Editors kann ein eigenes Spielfeld erstellt werden.</p>
+    <mat-divider></mat-divider>
+    <p>Wähle ein Theme für das Spielfeld:</p>
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Theme</mat-label>
+      <mat-select formControlName="theme" required>
+        <mat-option value="fantasy">Fantasy</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <p>Setze die Anzahl der Reihen und Spalten:</p>
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Reihen und Spalten</mat-label>
+      <input matInput type="number" formControlName="rowsAndColumns" required min="10" max="15">
+    </mat-form-field>
+  </div>
+
+  <div class="playfield" [style.--rows]="codeGameForm.value.rowsAndColumns" [style.--columns]="codeGameForm.value.rowsAndColumns">
+    <div *ngFor="let row of gameField; let i = index" class="row">
+      <div *ngFor="let cell of row; let j = index" class="cell" (click)="onClick($event, i, j)" [matMenuTriggerFor]="menu">
+        <img [src]="getFloorImage(i, j)" alt="floorImage" class="floorImage" />
+        <img *ngIf="getObjectImage(i, j)" [src]="getObjectImage(i, j)" alt="objectImage" class="objectImage" />
+      </div>
+    </div>
+  </div>
+
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="setObject('O')">Obstacle</button>
+    <button mat-menu-item (click)="setObject('R')">Rock</button>
+    <button mat-menu-item (click)="setObject('P')">Player</button>
+    <button mat-menu-item (click)="setObject('D')">Destination</button>
+  </mat-menu>
+</div>

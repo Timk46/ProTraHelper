@@ -1,0 +1,39 @@
+.playfield {
+  display: grid;
+  // set grid size dynamically
+  grid-template-rows: repeat(var(--rows, 10), var(--cell-size, 1fr));
+  grid-template-columns: repeat(var(--columns, 10), var(--cell-size, 1fr));
+  width: 100%;
+  height: 100%;
+
+  .row {
+    display: contents;
+  }
+
+  .cell {
+    width: 100%;
+    height: 0;
+    padding-bottom: 100%; /* This makes the cells square */
+    position: relative;
+  }
+
+  .floorImage,
+  .playerImage,
+  .objectImage{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
+
+  .floorImage {
+    z-index: 1;
+  }
+
+  .playerImage {
+    z-index: 3;
+  }
+
+  .objectImage {
+    z-index: 2;
+  }
+}

@@ -101,9 +101,19 @@
 
       <div class="form-field full-width subsection-container">
         <div class="section-header">
+          <h3>Spielfeld</h3>
+        </div>
+        <ng-container>
+          <app-code-game-playfield-editor></app-code-game-playfield-editor>
+        </ng-container>
+      </div>
+
+      <div class="form-field full-width subsection-container">
+        <div class="section-header">
           <h3>Lösungseinschränkung</h3>
         </div>
         <p>Beschränke die Anzahl der verwendeten Methodenaufrufe in der jeweiligen Datei. Gib die maximale Häufigkeit der Methodenaufrufe an.</p>
+        <mat-divider></mat-divider>
         <div class="form-row">
           <mat-checkbox color="primary" formControlName="codeSolutionRestriction">Einschränkung aktivieren</mat-checkbox>
         </div>

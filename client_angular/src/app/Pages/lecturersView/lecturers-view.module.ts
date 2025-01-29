@@ -26,6 +26,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { EditCodeGameComponent } from './edit-code-game/edit-code-game.component';
 import { CodeGameAddElementModalComponent } from "./edit-code-game/code-game-add-element-modal.component";
 import { CodeGameModule } from "../../Modules/code-game/code-game.module";
+import { CodeGamePlayfieldEditorComponent } from './edit-code-game/code-game-playfield-editor/code-game-playfield-editor.component';
+import { MatMenuModule } from "@angular/material/menu";
 
 @NgModule({
   declarations: [
@@ -43,23 +45,25 @@ import { CodeGameModule } from "../../Modules/code-game/code-game.module";
     AddElementModalComponent,
     TinymceComponent,
     EditCodeGameComponent,
-    CodeGameAddElementModalComponent
+    CodeGameAddElementModalComponent,
+    CodeGamePlayfieldEditorComponent
   ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MaterialModule,
-    TutorKaiModule,
-    EditorModule,
-    MarkdownModule.forChild(),
-    NgxMatSelectSearchModule,
-    MatSelectModule,
-    MatFormFieldModule,
-    GraphTasksModule,
-    MatButtonToggleModule,
-    CodeGameModule
-  ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MaterialModule,
+        TutorKaiModule,
+        EditorModule,
+        MarkdownModule.forChild(),
+        NgxMatSelectSearchModule,
+        MatSelectModule,
+        MatFormFieldModule,
+        GraphTasksModule,
+        MatButtonToggleModule,
+        CodeGameModule,
+        MatMenuModule
+    ],
   exports: [
     CreateContentNodeDialogComponent,
     CreateContentElementDialogComponent,
