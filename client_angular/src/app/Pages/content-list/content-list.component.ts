@@ -35,6 +35,9 @@ export class ContentListComponent {
     requiredBy: [],
   };
 
+  filteredContents: ContentDTO[] = [];
+
+  searchTerm: string = '';
   expandedIndex = 0;
   panelOpenState = false;
 
@@ -46,6 +49,12 @@ export class ContentListComponent {
     private sSS: ScreenSizeService,
     private progressService: ProgressService
   ) { }
+
+  ngOnChanges() {
+    if (this.contentsForActiveConceptNode.trainedBy.length > 0) {
+      this.filteredContents = this.contentsForActiveConceptNode.trainedBy;
+    }
+  }
 
   /**
    * Generates an array with a specified number of elements.
@@ -139,6 +148,21 @@ export class ContentListComponent {
 
   onScoreUpdated(elementData: ContentElementDTO) {
     console.log("Score updated:", elementData.question?.progress);
+  }
+
+  onApplyFilter(term: string = '') {
+    if (term !== '') this.searchTerm = term;
+    if (this.searchTerm != '') {
+      this.filteredContents = this.contentsForActiveConceptNode.trainedBy.filter(content => {
+        let context: string = content.name + ' ';
+        content.contentElements.forEach(element => {
+          context += element.id + ' ' + element.title + ' ';
+        });
+        return context.toLowerCase().includes(this.searchTerm.toLowerCase());
+      });
+    } else {
+      this.filteredContents = this.contentsForActiveConceptNode.trainedBy;
+    }
   }
 
 

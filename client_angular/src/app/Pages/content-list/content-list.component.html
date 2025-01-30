@@ -30,63 +30,75 @@
 
   </cdk-accordion-item>
 </mat-accordion> -->
+<div style="display: flex; flex-direction: column; gap: 10px;">
+  <div style="display: flex;">
+    <div style="display: flex; flex-direction: row;">
+      <!-- <h3>Suchen</h3> -->
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" style="background-color: white;">
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput type="text"  [(ngModel)]="searchTerm" (keyup)="onApplyFilter()" placeholder="Suche nach Inhalten" />
+        <button *ngIf="searchTerm" matSuffix mat-icon-button aria-label="Clear" (click)="searchTerm=''; onApplyFilter()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+  </div>
 
-
-
-<mat-accordion class="content-list" multi="true">
-  <mat-expansion-panel
-    *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index"
-    [expanded]="false"
-    class="content-list-item"
-  >
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        {{ content.name}}
-      </mat-panel-title>
-      <mat-panel-description class="content-list-element-header-description">
-        <!-- stars to show difficulty and progress -->
-        <div *ngIf="content.progress < 100; else completed">
-          <mat-icon *ngFor="let level of getLevels(content.level)">star_border</mat-icon>
-        </div>
-        <ng-template #completed>
-          <mat-icon *ngFor="let level of getLevels(content.level)">star</mat-icon>
-        </ng-template>
-        <!-- more indicators -->
-          <div class="content-list-element-header-indicators">
-            <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
-            <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
+  <mat-accordion class="content-list" multi="true">
+    <mat-expansion-panel
+      *ngFor="let content of filteredContents; let i = index"
+      [expanded]="false"
+      class="content-list-item"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{ content.name}}
+        </mat-panel-title>
+        <mat-panel-description class="content-list-element-header-description">
+          <!-- stars to show difficulty and progress -->
+          <div *ngIf="content.progress < 100; else completed">
+            <mat-icon *ngFor="let level of getLevels(content.level)">star_border</mat-icon>
           </div>
-      </mat-panel-description>
-    </mat-expansion-panel-header>
-    <!-- the content item body -->
-    <div class="content-list-element-introduction">
-      <p class="content-list-element-description">{{ content.description }}</p>
-      <div class="content-list-element-introduction-buttons">
-        <button
-          *ngIf="hasContentElementType(content, 'PDF')"
-          mat-raised-button
-          color="primary"
-          (click)="onContentClick(content, ['PDF'], $event)"
-        >
-          <mat-icon>picture_as_pdf</mat-icon>
-          PDF
-        </button>
-        <button
-          *ngIf="hasContentElementType(content, 'VIDEO')"
-          mat-raised-button
-          color="primary"
-          (click)="onContentClick(content, ['VIDEO'], $event)"
-        >
-          <mat-icon>play_circle_outline</mat-icon>
-          Video
-        </button>
+          <ng-template #completed>
+            <mat-icon *ngFor="let level of getLevels(content.level)">star</mat-icon>
+          </ng-template>
+          <!-- more indicators -->
+            <div class="content-list-element-header-indicators">
+              <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
+              <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
+            </div>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <!-- the content item body -->
+      <div class="content-list-element-introduction">
+        <p class="content-list-element-description">{{ content.description }}</p>
+        <div class="content-list-element-introduction-buttons">
+          <button
+            *ngIf="hasContentElementType(content, 'PDF')"
+            mat-raised-button
+            color="primary"
+            (click)="onContentClick(content, ['PDF'], $event)"
+          >
+            <mat-icon>picture_as_pdf</mat-icon>
+            PDF
+          </button>
+          <button
+            *ngIf="hasContentElementType(content, 'VIDEO')"
+            mat-raised-button
+            color="primary"
+            (click)="onContentClick(content, ['VIDEO'], $event)"
+          >
+            <mat-icon>play_circle_outline</mat-icon>
+            Video
+          </button>
+        </div>
       </div>
-    </div>
-    <h2 style="margin-top: 10px;">Aufgaben</h2>
-    <div class="content-list-element-items">
-      <app-content-list-item
-        *ngFor="let task of getQuestions(content)" [contentElementData]="task" (scoreUpdated)="onScoreUpdated($event)"
-      ></app-content-list-item>
-    </div>
-  </mat-expansion-panel>
-</mat-accordion>
+      <h2 style="margin-top: 10px;">Aufgaben</h2>
+      <div class="content-list-element-items">
+        <app-content-list-item
+          *ngFor="let task of getQuestions(content)" [contentElementData]="task" (scoreUpdated)="onScoreUpdated($event)"
+        ></app-content-list-item>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>
