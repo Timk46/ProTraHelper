@@ -310,6 +310,12 @@ export class EditCodeGameComponent implements OnInit {
     }
   }
 
+  handleDataChangePayfieldEditor(event: any) {
+    console.log("CodeGame: playfield editor change: ",  event);
+
+    // TODO: Implement the logic to handle the data change from the playfield editor
+  }
+
   // TODO: import/export
 
   getFieldDisplayName(field: string): string {
