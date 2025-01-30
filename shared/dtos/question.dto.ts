@@ -48,6 +48,7 @@ export interface McQuestionDTO {
     shuffleOptions: boolean;
     questionVersion?: QuestionVersionDTO;
     mcQuestionOption?: McQuestionOptionDTO[];
+    additionalInfo?: string[];
 }
 
 /**

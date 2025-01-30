@@ -47,6 +47,7 @@ export interface detailedChoiceQuestionDTO {
   shuffleoptions: boolean;
   isSC: boolean; // single choice
   mcOptions: detailedChoiceOptionDTO[];
+  additionalInfo?: string[]; // array of additional information texts
 }
 
 export interface detailedChoiceOptionDTO {
