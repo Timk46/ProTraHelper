@@ -1,5 +1,4 @@
 ## [0.1.6]
-- 📚 **Studienleistung verbucht**: **Neuer Fortschritt wird nun nicht mehr zur Studienleistung gezählt. Zur Klausurvorbereitung empfehlen wir dringend, alle Aufgaben mehrfach mit minimaler Unterstützung zu üben.**
 - ⭐ **Animierte Bewertungssterne**: Die Sterne zur Bewertung des Feedbacks und der Chatbot-Antworten sind nun animiert, um daran zu erinnern, eine Bewertung abzugeben. Ein Klick genügt – euer Feedback hilft uns enorm, diese Features weiter zu verbessern!
 - 🎥 **Erklärvideos für alle Graphaufgaben**: Ab sofort gibt es für alle Graphaufgaben Erklärvideos, die die Bedienung Schritt für Schritt erläutern.
 - 📄 **Verbesserter PDF-Viewer für iPads**: Die Anzeige von PDF-Dokumenten auf iPads wurde weiter optimiert, um eine bessere Nutzererfahrung zu gewährleisten.
