@@ -62,7 +62,7 @@ export class ContentListComponent {
    * @param num - The number of elements in the array.
    * @returns An array with the specified number of elements.
    */
-  getLevels(num: number) {
+  getLevels(num: number): Array<number> {
     return new Array(num);
   }
 

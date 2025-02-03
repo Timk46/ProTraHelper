@@ -12,7 +12,7 @@
 <mat-card class="list-item"(click)="onTaskClick()" matRipple [ngClass]="{'item-completed': contentElementData.question?.progress === 100}">
   <mat-card-header>
     <!-- <div mat-card-avatar class="example-header-image"></div> -->
-    <div mat-card-avatar class="list-item-avatar" matTooltip="ID: {{contentElementData.id}}, Fortschritt: {{contentElementData.question?.progress}}%">
+    <div mat-card-avatar class="list-item-avatar" matTooltip="CEID: {{contentElementData.id}}, Fortschritt: {{contentElementData.question?.progress}}%, Level: {{contentElementData.question?.level}}">
       <mat-icon [fontIcon]="getQuestionTypeIcon(contentElementData.question?.type)"></mat-icon>
     </div>
     <mat-card-title>{{contentElementData.question?.name}}</mat-card-title>

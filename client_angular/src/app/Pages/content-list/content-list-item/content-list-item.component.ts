@@ -96,7 +96,10 @@ export class ContentListItemComponent {
     // Create dialog configuration
     const dialogConfig = new MatDialogConfig();
     dialogConfig.data = {
-      taskViewData: question,
+      taskViewData: {
+        contentElementId: this.contentElementData.id,
+        ...question,
+      },
     };
     dialogConfig.width = 'auto';
     dialogConfig.maxHeight = '95vh';

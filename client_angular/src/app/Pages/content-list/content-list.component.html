@@ -31,6 +31,8 @@
   </cdk-accordion-item>
 </mat-accordion> -->
 <div style="display: flex; flex-direction: column; gap: 10px;">
+
+  <!-- Search and Sort section -->
   <div style="display: flex;">
     <div style="display: flex; flex-direction: row;">
       <!-- <h3>Suchen</h3> -->
@@ -44,6 +46,7 @@
     </div>
   </div>
 
+  <!-- Task section -->
   <mat-accordion class="content-list" multi="true">
     <mat-expansion-panel
       *ngFor="let content of filteredContents; let i = index"
@@ -52,16 +55,22 @@
     >
       <mat-expansion-panel-header>
         <mat-panel-title>
-          {{ content.name}}
+          {{ content.name}} ({{ content.levelProgress }})
         </mat-panel-title>
         <mat-panel-description class="content-list-element-header-description">
           <!-- stars to show difficulty and progress -->
-          <div *ngIf="content.progress < 100; else completed">
+          <!-- <div *ngIf="content.progress < 100; else completed">
             <mat-icon *ngFor="let level of getLevels(content.level)">star_border</mat-icon>
           </div>
           <ng-template #completed>
             <mat-icon *ngFor="let level of getLevels(content.level)">star</mat-icon>
-          </ng-template>
+          </ng-template> -->
+
+          <div>
+            <mat-icon *ngFor="let reached of getLevels(content.levelProgress || 0)">star</mat-icon>
+            <mat-icon *ngFor="let level of getLevels(content.level-(content.levelProgress || 0))">star_border</mat-icon>
+          </div>
+
           <!-- more indicators -->
             <div class="content-list-element-header-indicators">
               <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
