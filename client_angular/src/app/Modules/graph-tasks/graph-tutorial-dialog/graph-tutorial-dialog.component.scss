@@ -1,0 +1,115 @@
+.dialog-container {
+    position: relative;
+    height: 80vh;
+    width: 80vw;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5em;
+    padding: 1em;
+    padding-right: 2em;
+    overflow: hidden;
+}
+
+.dialog-content-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5em;
+    padding: 1em;
+}
+
+.video-container {
+    height: 100%;
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-element {
+    width: 50%; /* Define a consistent width */
+    height: auto; /* Automatically adjust height based on aspect ratio */
+    object-fit: contain; /* Ensures video content scales properly */
+}
+  
+.video-selection-container {
+    height: 100%;
+    width: 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: start;
+    gap: .2em;
+    padding-bottom: 2em;
+}
+
+.video-selection {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: start;
+    gap: 1em;
+    padding: .8em;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.video-selection-title {
+    width: 95%;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: start;
+    flex-shrink: 0;
+    padding: .5em;
+    padding-left: 1em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.video-selection-title .bottem-border {
+    border-bottom: solid .01em #000;
+    width: 100%;
+}
+
+.video-selection-title h2 {
+    margin: 0;
+}
+
+.video-selection-item {
+    width: 100%;
+    padding: .7em;
+    border-radius: 0.2rem;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: background-color 0.3s;
+    flex-shrink: 0; /* Prevent item from shrinking */
+    cursor: pointer;
+}
+
+.video-selection-item:hover {
+    background-color: rgb(238,238,238);
+}
+
+.video-selection-item h4 {
+    margin: 0;
+}
+
+.video-selection-item.selected {
+    background-color: rgb(63,81,181);
+    color: #fff;
+}
+
+.video-selection-item.selected:hover {
+    background-color: rgb(83,101,201);
+}

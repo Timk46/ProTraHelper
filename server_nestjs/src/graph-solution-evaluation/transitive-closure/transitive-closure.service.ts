@@ -22,7 +22,7 @@ export class TransitiveClosureService {
      * @param {GraphStructureDTO} expectedSolution - The expected correct solution in JSON format.
      * @param {number} maxPoints - The maximum number of points that can be awarded for this assignment.
      * 
-     * @returns {{ receivedPoints: number, feedback: string }} - An object containing the number of points received and feedback.
+     * @returns {{ receivedPoints: number, feedback: string, feedbackHTML: string, expectedSolutionSemantic: GraphStructureSemanticDTO }} - An object containing the number of points received and feedback.
      */
     evaluateSolution(initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO, maxPoints: number) {
 
@@ -30,13 +30,27 @@ export class TransitiveClosureService {
         // Assumption: Graph has only directed edges
         // Assumption: The node/ edge attributes which are not related to the assignment are not considered in the evaluation such as weight, selected etc.
 
-        let receivedPoints = maxPoints;
-        const feedback: string[] = [];
-        
         // Convert solutions from IGraphDataJSON to IGraphDataSemantic, where edges use node values instead of IDs, 
         // as IDs may differ in different solutions even for the same node values.
         const initialStructureSemantic = graphJSONToSemantic(initialStructure);
         const studentSolutionSemantic = graphJSONToSemantic(studentSolution);
+
+        const { receivedPoints, feedbackHTML, expectedSolutionSemantic } = this.algorithmicEvaluation(initialStructureSemantic, studentSolutionSemantic, maxPoints);
+
+        const feedback = feedbackHTML.replace('<strong>', '').replace('</strong>', '');
+
+        return {
+            receivedPoints,
+            feedback: feedback,
+            feedbackHTML: feedbackHTML,
+            expectedSolutionSemantic: expectedSolutionSemantic
+        }       
+    }
+
+    algorithmicEvaluation(initialStructureSemantic: GraphStructureSemanticDTO, studentSolutionSemantic: GraphStructureSemanticDTO, maxPoints: number) {
+        
+        let receivedPoints = maxPoints;
+        const feedbackHTML: string[] = [];
 
         // Solve the question (nodesOrder is not important for this task)
         const nodesOrder: string[] = initialStructureSemantic.nodes.map(node => node.value);
@@ -46,11 +60,12 @@ export class TransitiveClosureService {
         const sameNodesExist = graphsContainSameNodes(studentSolutionSemantic, expectedSolutionSemantic);
 
         if (!sameNodesExist) {
-            feedback.push('Die Lösung enthält entweder inkorrekte oder fehlende Knoten.');
-            feedback.push(`\n > Insgesamt erzielte Punkte: 0 / ${maxPoints}.`);
+            feedbackHTML.push('Die Lösung enthält entweder inkorrekte oder fehlende Knoten.');
+            feedbackHTML.push(`\n<strong>> Insgesamt erzielte Punkte:</strong> 0 / ${maxPoints}.`);
             return {
                 receivedPoints,
-                feedback: feedback.join('\n'),
+                feedbackHTML: feedbackHTML.join('\n'),
+                expectedSolutionSemantic
             }        
         }
         
@@ -59,11 +74,12 @@ export class TransitiveClosureService {
         const studentMissingInitialEdges = getExtraEdges(initialStructureSemantic.edges, studentSolutionSemantic.edges);
 
         if (studentMissingInitialEdges.length > 0) {
-            feedback.push('Die Lösung muss alle Kanten des Ausgangsgraphen enthalten.');
-            feedback.push(`\n > Insgesamt erzielte Punkte: 0 / ${maxPoints}.`);
+            feedbackHTML.push('Die Lösung muss alle Kanten des Ausgangsgraphen enthalten.');
+            feedbackHTML.push(`\n<strong>> Insgesamt erzielte Punkte:</strong> 0 / ${maxPoints}.`);
             return {
                 receivedPoints: 0,
-                feedback: feedback.join('\n'),
+                feedbackHTML: feedbackHTML.join('\n'),
+                expectedSolutionSemantic
             };
         }
 
@@ -71,11 +87,12 @@ export class TransitiveClosureService {
         const areIdentical = graphsIdentical(studentSolutionSemantic, expectedSolutionSemantic);
 
         if (areIdentical) {
-            feedback.push('Die Lösung ist korrekt.');
-            feedback.push(`\n > Insgesamt erzielte Punkte: ${receivedPoints} / ${maxPoints}.`);
+            feedbackHTML.push('Die Lösung ist korrekt.');
+            feedbackHTML.push(`\n<strong>> Insgesamt erzielte Punkte:</strong> ${maxPoints} / ${maxPoints}.`);
             return {
                 receivedPoints,
-                feedback: feedback.join('\n'),
+                feedbackHTML: feedbackHTML.join('\n'),
+                expectedSolutionSemantic
             };  
         }
     
@@ -95,19 +112,20 @@ export class TransitiveClosureService {
 
         // Adjust the feedback according to the mistakes in the solution
         if (countStudentExtraEdges > 0) {
-            feedback.push('Die Lösung enthält inkorrekte Kanten.');
+            feedbackHTML.push('Die Lösung enthält inkorrekte Kanten.');
         }
 
         if (countStudentMissingEdges > 0) {
-            feedback.push('Die Lösung enthält fehlende Kanten.');
+            feedbackHTML.push('Die Lösung enthält fehlende Kanten.');
         }
 
-        feedback.push(`\n > Insgesamt erzielte Punkte: ${receivedPoints} / ${maxPoints}.`);
+        feedbackHTML.push(`\n<strong>> Insgesamt erzielte Punkte:</strong> ${receivedPoints} / ${maxPoints}.`);
+
         return {
             receivedPoints,
-            feedback: feedback.join('\n'),
-        }       
-
+            feedbackHTML: feedbackHTML.join('\n'),
+            expectedSolutionSemantic,
+        };
     }
 
     /**

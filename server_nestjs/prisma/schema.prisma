@@ -335,6 +335,7 @@ model UserAnswer {
   questionId           Int
   userFreetextAnswer   String?
   userGraphAnswer      Json?
+  graphAIFeedbacks     GraphAIFeedback[]
   feedbacks            Feedback[]
   question             Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
   user                 User                   @relation(fields: [userId], references: [id])
@@ -378,6 +379,17 @@ model GraphQuestion {
   updatedAt           DateTime        @updatedAt
   questionId          Int             @unique
   question            Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model GraphAIFeedback {
+  id                  Int            @id @default(autoincrement())
+  updatedAt           DateTime       @updatedAt
+  createdAt           DateTime       @default(now())
+  prompt              String?
+  response            String
+  ratingByStudent     Int?
+  userAnswerId        Int
+  userAnswer          UserAnswer @relation(fields: [userAnswerId], references: [id])
 }
 
 model CodingQuestion {

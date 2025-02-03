@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { forwardRef, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GraphTasksComponent } from './graph-tasks.component';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +10,8 @@ import { EdgeToolsetGraphComponent } from './edge-toolset-graph/edge-toolset-gra
 import { AssignmentContainerComponent } from './assignment-container/assignment-container.component';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MaterialModule } from '../material.module';
+import { GraphTutorialDialogComponent } from './graph-tutorial-dialog/graph-tutorial-dialog.component';
 
 @NgModule({
   declarations: [
@@ -18,11 +20,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     GraphStructureComponent,
     EdgeGraphComponent,
     EdgeToolsetGraphComponent,
-    AssignmentContainerComponent
+    AssignmentContainerComponent,
+    GraphTutorialDialogComponent
   ],
   imports: [
     CommonModule,
-    CdkDrag, FormsModule, DragDropModule, MatButtonToggleModule, MatProgressSpinnerModule
+    CdkDrag, FormsModule, DragDropModule, MatButtonToggleModule, MatProgressSpinnerModule,
+    MaterialModule
   ],
   exports: [
     GraphTasksComponent,
