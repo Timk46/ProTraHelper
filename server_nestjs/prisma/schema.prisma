@@ -469,6 +469,7 @@ model CodeGameQuestion {
   codeGameScaffolds               CodeGameScaffold[]
   gameFileName                    String
   game                            String
+  gameCellRestrictions            String?
   question                        Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 

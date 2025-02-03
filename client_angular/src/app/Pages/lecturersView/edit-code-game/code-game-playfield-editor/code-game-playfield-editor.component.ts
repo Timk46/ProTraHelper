@@ -1,4 +1,4 @@
-import { Component, ElementRef, Renderer2, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Renderer2, OnInit, ViewChild, Output, EventEmitter, Input } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatMenuTrigger } from '@angular/material/menu';
 
@@ -9,9 +9,17 @@ import { MatMenuTrigger } from '@angular/material/menu';
 })
 export class CodeGamePlayfieldEditorComponent implements OnInit {
   @ViewChild(MatMenuTrigger) menuTrigger!: MatMenuTrigger;
+  @Input() inputGameData: any;
+  @Output() dataChange = new EventEmitter<any>(); // TODO: change name
+
   codeGameForm: FormGroup;
+  theme: string = ''
   gameField: any[][] = [];
+  gameCellRestrictions: any[][] = [];
   selectedCell = { row: 0, col: 0 };
+
+  isInputDataAvailable = false;
+  inputDataSet = false;
 
   constructor(
     private fb: FormBuilder,
@@ -19,11 +27,10 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
     private el: ElementRef
   ) {
     this.codeGameForm = this.fb.group({
-      theme: ['fantasy'],
+      theme: ['dino'],
       rowsAndColumns: [10]
     });
   }
-
   ngOnInit(): void {
     this.generateGameField();
     this.codeGameForm.valueChanges.subscribe(() => {
@@ -31,9 +38,36 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
     });
   }
 
+  ngOnChanges(): void {
+    if (this.inputGameData && !this.inputDataSet) {
+      console.log("Input Playfield editor: ", this.inputGameData);
+      this.isInputDataAvailable = true;
+
+      this.theme = this.inputGameData.theme;
+      this.gameField = this.transformStringToArray(this.inputGameData.gameField);
+      this.gameCellRestrictions = this.transformStringToArray(this.inputGameData.gameCellRestrictions);
+
+      this.codeGameForm.patchValue({
+        theme: this.theme,
+        rowsAndColumns: this.gameField.length
+      });
+
+      this.inputDataSet = true;
+    }
+  }
+
   generateGameField(): void {
+    console.log("Generate game field");
+    if ((this.isInputDataAvailable && !this.inputDataSet)) {
+      console.log("Playfield allready generated");
+      return;
+    }
+
+    this.theme = this.codeGameForm.get('theme')?.value || 'dino';
+
     const size = this.codeGameForm.get('rowsAndColumns')?.value || 10;
     this.gameField = Array.from({ length: size }, () => Array(size).fill("#"));
+    this.gameCellRestrictions = Array.from({ length: size }, () => Array(size).fill("."));
 
     this.setCSSVariables();
   }
@@ -48,16 +82,25 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
     }
   }
 
-  getFloorImage(i: number, j: number): string {
-    return 'assets/img/floor.png';
+  getFloorImage(): string {
+    return 'assets/img/codeGame/' + this.theme + '/floor.png';
   }
 
-  getObjectImage(row: number, col: number): string {
-    const cell = this.gameField[row][col];
-    if (cell === 'O') return 'assets/img/obstacle.png';
-    if (cell === 'D') return 'assets/img/destination.png';
-    if (cell === 'R') return 'assets/img/rock.png';
-    if (cell === 'P') return 'assets/img/player.png';
+  getObjectImage(row: number | null, col: number | null, objectPrefix: string | null): string {
+    if (row != null && col != null) {
+      const cell = this.gameField[row][col];
+      if (cell === 'O') return 'assets/img/codeGame/' + this.theme + '/obstacle.png';
+      if (cell === 'D') return 'assets/img/codeGame/' + this.theme + '/destination.png';
+      if (cell === 'R') return 'assets/img/codeGame/' + this.theme + '/rock.png';
+      if (cell === 'P') return 'assets/img/codeGame/' + this.theme + '/player.png';
+      return '';
+    } else if (objectPrefix != null) {
+      if (objectPrefix === 'O') return 'assets/img/codeGame/' + this.theme + '/obstacle.png';
+      if (objectPrefix === 'D') return 'assets/img/codeGame/' + this.theme + '/destination.png';
+      if (objectPrefix === 'R') return 'assets/img/codeGame/' + this.theme + '/rock.png';
+      if (objectPrefix === 'P') return 'assets/img/codeGame/' + this.theme + '/player.png';
+      return '';
+    }
     return '';
   }
 
@@ -66,6 +109,47 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
   }
 
   setObject(object: string): void {
+    // Remove player or destination if already set
+    if (object === 'P') this.removePlayer();
+    if (object === 'D') this.removeDestination();
+
     this.gameField[this.selectedCell.row][this.selectedCell.col] = object;
+    this.emitData();
+  }
+
+  removePlayer(): void {
+    this.gameField = this.gameField.map(row => row.map(cell => cell === 'P' ? '#' : cell));
+  }
+
+  removeDestination(): void {
+    this.gameField = this.gameField.map(row => row.map(cell => cell === 'D' ? '#' : cell));
+  }
+
+  setRestriction(restriction: string): void {
+    this.gameCellRestrictions[this.selectedCell.row][this.selectedCell.col] = restriction;
+    this.emitData();
+  }
+
+  /*
+  ** -------------------------------------------------------------------
+  ** Transfer data to parent component (edit-code-game.component.ts)
+   */
+
+  emitData(): void {
+    const data = {
+      theme: this.theme,
+      gameField: this.transformArrayToString(this.gameField),
+      gameCellRestrictions: this.transformArrayToString(this.gameCellRestrictions)
+    };
+
+    this.dataChange.emit(data);
+  }
+
+  transformArrayToString(array: any[][]): string {
+    return array.map(row => row.join('')).join('\n');
+  }
+
+  transformStringToArray(string: string): any[][] {
+    return string.split('\n').map(row => row.split(''));
   }
 }

@@ -1,12 +1,17 @@
 <div class="code-game-playfield-editor">
   <div class="settings" [formGroup]="codeGameForm">
-    <p>Mithilfe dieses Editors kann ein eigenes Spielfeld erstellt werden.</p>
+    <p>Mithilfe dieses Editors kann ein eigenes Spielfeld erstellt werden.
+      Das Layout des Spielfelds kann durch Klicken auf die Zellen verändert werden.
+      Die Zellen können mit Hindernissen, Steinen (zum Aufsammeln), dem Spieler und dem Ziel belegt werden.
+      Zudem können Zellen auf eine Blacklist oder Whitelist gesetzt werden. Abhänigig davon ob eine Zelle
+      nicht besucht werden darf oder besicht werden kann.</p>
     <mat-divider></mat-divider>
     <p>Wähle ein Theme für das Spielfeld:</p>
     <mat-form-field appearance="outline" class="form-field">
       <mat-label>Theme</mat-label>
       <mat-select formControlName="theme" required>
-        <mat-option value="fantasy">Fantasy</mat-option>
+        <mat-option value="dino">Dino</mat-option>
+        <mat-option value="dragon">Drache</mat-option>
       </mat-select>
     </mat-form-field>
 
@@ -19,17 +24,54 @@
 
   <div class="playfield" [style.--rows]="codeGameForm.value.rowsAndColumns" [style.--columns]="codeGameForm.value.rowsAndColumns">
     <div *ngFor="let row of gameField; let i = index" class="row">
-      <div *ngFor="let cell of row; let j = index" class="cell" (click)="onClick($event, i, j)" [matMenuTriggerFor]="menu">
-        <img [src]="getFloorImage(i, j)" alt="floorImage" class="floorImage" />
-        <img *ngIf="getObjectImage(i, j)" [src]="getObjectImage(i, j)" alt="objectImage" class="objectImage" />
+      <div *ngFor="let cell of row; let j = index"
+           class="cell"
+           (click)="onClick($event, i, j)"
+           [matMenuTriggerFor]="menu">
+        <div class="overlay" [ngClass]="{'black-list': gameCellRestrictions[i][j] === 'B', 'white-list': gameCellRestrictions[i][j] === 'W'}"></div>
+        <img [src]="getFloorImage()" alt="floorImage" class="floorImage" />
+        <img *ngIf="getObjectImage(i, j, null)" [src]="getObjectImage(i, j, null)" alt="objectImage" class="objectImage" />
       </div>
     </div>
   </div>
 
   <mat-menu #menu="matMenu">
-    <button mat-menu-item (click)="setObject('O')">Obstacle</button>
-    <button mat-menu-item (click)="setObject('R')">Rock</button>
-    <button mat-menu-item (click)="setObject('P')">Player</button>
-    <button mat-menu-item (click)="setObject('D')">Destination</button>
+    <button mat-menu-item (click)="setObject('O')" class="menu-item">
+      <mat-icon class="menu-icon" svgIcon>
+        <img *ngIf="getObjectImage(null, null,'O')" [src]="getObjectImage(null, null,'O')" alt="objectImage" />
+      </mat-icon>
+      <span>Hindernis</span>
+    </button>
+    <button mat-menu-item (click)="setObject('R')" class="menu-item">
+      <mat-icon class="menu-icon" svgIcon>
+        <img *ngIf="getObjectImage(null, null,'R')" [src]="getObjectImage(null, null,'R')" alt="objectImage" />
+      </mat-icon>
+      <span>Stein</span>
+    </button>
+    <button mat-menu-item (click)="setObject('P')" class="menu-item">
+      <mat-icon class="menu-icon" svgIcon>
+        <img *ngIf="getObjectImage(null, null,'P')" [src]="getObjectImage(null, null,'P')" alt="objectImage" />
+      </mat-icon>
+      <span>Spieler</span>
+    </button>
+    <button mat-menu-item (click)="setObject('D')" class="menu-item">
+      <mat-icon class="menu-icon" svgIcon>
+        <img *ngIf="getObjectImage(null, null,'D')" [src]="getObjectImage(null, null,'D')" alt="objectImage" />
+      </mat-icon>
+      <span>Ziel</span>
+    </button>
+    <button mat-menu-item (click)="setObject('#')" class="menu-item">
+      <span>Entfernen</span>
+    </button>
+    <mat-divider></mat-divider>
+    <button mat-menu-item (click)="setRestriction('B')" class="menu-item">
+      <span>Black-List</span>
+    </button>
+    <button mat-menu-item (click)="setRestriction('W')" class="menu-item">
+      <span>White-List</span>
+    </button>
+    <button mat-menu-item (click)="setRestriction('.')" class="menu-item">
+      <span>Entfernen</span>
+    </button>
   </mat-menu>
 </div>

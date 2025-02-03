@@ -193,6 +193,7 @@ export interface CodeGameQuestionDto {
     codeGameScaffolds: CodeGameScaffoldDto[];
     gameFileName: string;
     game: string;
+    gameCellRestrictions: string;
 }
 
 export interface CodeGameScaffoldDto {

@@ -196,9 +196,9 @@ export class PlayfieldComponent {
   // used for the obstacle and destination images
   getObjectImage(row: number, col: number): string {
     const cell = this.gameField[row][col];
-    if (cell === 'O') return 'assets/img/obstacle.png';
-    if (cell === 'D') return 'assets/img/destination.png';
-    if (cell === 'R') return 'assets/img/rock.png';
+    if (cell === 'O') return 'assets/img/codeGame/dino/obstacle.png';
+    if (cell === 'D') return 'assets/img/codeGame/dino/destination.png';
+    if (cell === 'R') return 'assets/img/codeGame/dino/rock.png';
     return '';
   }
 
@@ -211,12 +211,12 @@ export class PlayfieldComponent {
   }
 
   getPlayerImage(): string {
-    return 'assets/img/player.png';
+    return 'assets/img/codeGame/dino/player.png';
   }
 
   getFloorImage(row: number, col: number): string {
     const cell = this.gameField[row][col];
-    if (cell) return 'assets/img/floor.png';
+    if (cell) return 'assets/img/codeGame/dino/floor.png';
     return '';
   }
 
@@ -278,6 +278,10 @@ export class PlayfieldComponent {
 
     } else if (action == "#SYS-Info") {
       this.gameOutputInformation = move;
+
+    } else if (action == "#SYS-Success") {
+      // Informations are valuated in the backend
+
     } else {
       console.error("Unknown action: ", action);
     }

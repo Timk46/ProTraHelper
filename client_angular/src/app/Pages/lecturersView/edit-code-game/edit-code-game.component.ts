@@ -20,6 +20,8 @@ import { Router } from '@angular/router';
 export class EditCodeGameComponent implements OnInit {
   @ViewChildren(CodeEditorComponent) codeEditors!: QueryList<CodeEditorComponent>;
 
+  exportGameDataForPlayfieldEditor: any = null;
+
   codeGameForm: FormGroup;
   thisQuestionType = questionType.CODEGAME;
   questionData: detailedQuestionDTO | null = null;
@@ -58,6 +60,7 @@ export class EditCodeGameComponent implements OnInit {
               codeGameScaffolds: [],
               gameFileName: 'game.grid.txt', // Hardcoded for every game task
               game: '',
+              gameCellRestrictions: ''
             };
           }
 
@@ -84,9 +87,17 @@ export class EditCodeGameComponent implements OnInit {
         methodNameToRestrict: this.questionData.codeGameQuestion?.methodNameToRestrict || 'drive();',
         frequencyOfMethodNameToRestrict: this.questionData.codeGameQuestion?.frequencyOfMethodNameToRestrict || 1,
         game: this.questionData.codeGameQuestion?.game || '',
+        gameCellRestrictions: this.questionData.codeGameQuestion?.gameCellRestrictions || '',
         level: this.questionData.level || '',
         isApproved: this.questionData.isApproved || false,
       });
+
+      // Data for the playfield editor
+      this.exportGameDataForPlayfieldEditor = {
+        theme: 'dino',
+        gameField: this.questionData.codeGameQuestion?.game || '',
+        gameCellRestrictions: this.questionData.codeGameQuestion?.gameCellRestrictions || ''
+      };
 
       if (this.questionData.codeGameQuestion) {
         this.populateCodeGameScaffolds();
@@ -116,6 +127,7 @@ export class EditCodeGameComponent implements OnInit {
       codeGameScaffolds: this.formBuilder.array([]),
       gameFileName: ['game.grid.txt'],
       game: [''],
+      gameCellRestrictions: [''],
       isApproved: [false],
       level: ['', Validators.required],
       codeSolutionRestriction: [false],
@@ -311,9 +323,10 @@ export class EditCodeGameComponent implements OnInit {
   }
 
   handleDataChangePayfieldEditor(event: any) {
-    console.log("CodeGame: playfield editor change: ",  event);
+    console.log("CodeGame: playfield editor change: ",  event); // TODO: remove
 
-    // TODO: Implement the logic to handle the data change from the playfield editor
+    this.codeGameForm.patchValue({ game: event.gameField });
+    this.codeGameForm.patchValue({ gameCellRestrictions: event.gameCellRestrictions });
   }
 
   // TODO: import/export
@@ -375,7 +388,8 @@ export class EditCodeGameComponent implements OnInit {
           frequencyOfMethodNameToRestrict: this.codeGameForm.value.frequencyOfMethodNameToRestrict,
           codeGameScaffolds: this.questionData.codeGameQuestion!.codeGameScaffolds,
           gameFileName: "game.grid.txt", // Hardcoded for every game task
-          game: this.codeGameForm.value.game
+          game: this.codeGameForm.value.game,
+          gameCellRestrictions: this.codeGameForm.value.gameCellRestrictions
         }
       };
 
