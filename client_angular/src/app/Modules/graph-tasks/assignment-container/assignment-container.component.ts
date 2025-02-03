@@ -476,13 +476,17 @@ export class AssignmentContainerComponent implements OnInit {
   }
 
   openTutorialDialog() {
-    const dialogConfig = new MatDialogConfig();
-
-    dialogConfig.maxWidth = '70vw';
-    dialogConfig.maxHeight = '95vh';
+    // Dialog can be configured here using MatDialogConfig
+    
+    // const dialogConfig = new MatDialogConfig();
+    // dialogConfig.maxWidth = '70vw';
+    // dialogConfig.maxHeight = '95vh';
 
     // Open the dialog
     // const dialogRef =
-    this.dialog.open(GraphTutorialDialogComponent, dialogConfig);
+    this.dialog.open(
+      GraphTutorialDialogComponent
+    //  ,dialogConfig
+    );
   }
 }
