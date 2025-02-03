@@ -48,7 +48,7 @@
     grid-row: 10 / span 1;
 }
 
-.controls { 
+.controls {
     height: 100%;
     border: none;
     background-color: transparent;
@@ -167,12 +167,12 @@ mat-button-toggle-group {
 }
 
 .navigation-button {
-    width: 100%; 
+    width: 100%;
     background-color: rgb(63,81,181);
     color: #fff;
     font-weight: 500;
-    border-radius: .5em; 
-    padding: .4em; 
+    border-radius: .5em;
+    padding: .4em;
     margin-bottom: 2em;
 }
 
@@ -204,10 +204,37 @@ mat-button-toggle-group {
     width: 70%;
 }
 
-    .star-button .mat-icon.gold {
-    color: gold;
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
 }
 
-.star-button .mat-icon.grey {
-    color: grey;
+.star-button {
+    &.animate-star {
+        animation: bounce 1s infinite;
+        .mat-icon {
+            font-size: 28px;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+        }
+    }
+
+    .mat-icon {
+        &.gold {
+            color: gold;
+        }
+
+        &.grey {
+            color: grey;
+        }
+
+        &.glow-effect {
+            filter: drop-shadow(0 0 2px #ffd700);
+        }
+    }
 }
