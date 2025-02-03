@@ -15,7 +15,7 @@ async function bootstrap() {
   app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
 
 
-    console.log = () => {}; // disable console.log in production - use nest.js logger instead, if important logs are needed
+    //console.log = () => {}; // disable console.log in production - use nest.js logger instead, if important logs are needed
     //console.debug = () => {};
     //console.info = () => {};
     //console.warn = () => {};
