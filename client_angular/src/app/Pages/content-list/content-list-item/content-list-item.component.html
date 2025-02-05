@@ -9,7 +9,16 @@
 <p>{{ contentElementData.question?.type }}</p>
 <p>-------------</p> -->
 
-<mat-card class="list-item"(click)="onTaskClick()" matRipple [ngClass]="{'item-completed': contentElementData.question?.progress === 100}">
+<mat-card
+  class="list-item"
+  (click)="onTaskClick()"
+  matRipple
+  [matRippleDisabled]="!rippleEnabled"
+  [ngClass]="{
+    'item-completed': contentElementData.question?.progress === 100,
+    'edit-mode': isAdmin && editModeActive
+    }"
+  >
   <mat-card-header>
     <!-- <div mat-card-avatar class="example-header-image"></div> -->
     <div mat-card-avatar class="list-item-avatar" matTooltip="CEID: {{contentElementData.id}}, Fortschritt: {{contentElementData.question?.progress}}%, Level: {{contentElementData.question?.level}}">
@@ -23,12 +32,25 @@
     <!-- Space for a more specific task description -->
     <!-- <p>{{contentElementData.question?.description}}</p> -->
   </mat-card-content>
-  <!-- <mat-card-actions>
-    <button mat-flat-button color="primary">
-      <mat-icon>play_arrow</mat-icon>
-      Aufgabe Starten
+
+  <div *ngIf="isAdmin && editModeActive" class="edit-overlay">
+    <!-- edit mode actions -->
+    <button mat-mini-fab color="primary"
+      (mouseenter)="rippleEnabled=false"
+      (mouseleave)="rippleEnabled=true"
+      (click)="$event.stopPropagation();"
+      >
+      <mat-icon>edit</mat-icon>
     </button>
-  </mat-card-actions> -->
+    <button mat-mini-fab color="warn"
+      (mouseenter)="rippleEnabled=false"
+      (mouseleave)="rippleEnabled=true"
+      (click)="$event.stopPropagation();"
+    >
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
+
   <mat-card-footer>
     <mat-progress-bar
       *ngIf="contentElementData.question && contentElementData.question.progress > 0"

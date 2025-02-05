@@ -7,6 +7,7 @@ import { FillinTaskNewComponent } from '../../contentView/contentElement/fill-in
 import { FreeTextTaskComponent } from '../../contentView/contentElement/free-text-task/free-text-task.component';
 import { McTaskComponent } from '../../contentView/contentElement/mcTask/mcTask.component';
 import { Router } from '@angular/router';
+import { UserService } from 'src/app/Services/auth/user.service';
 
 @Component({
   selector: 'app-content-list-item',
@@ -31,12 +32,25 @@ export class ContentListItemComponent {
 
   @Output() scoreUpdated: EventEmitter<ContentElementDTO> = new EventEmitter<ContentElementDTO>();
 
+  protected rippleEnabled: boolean = true;
+
+  protected isAdmin: boolean = false;
+  protected editModeActive: boolean = false;
+
+
   constructor(
     private progressService: ProgressService,
     private dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private userService: UserService
   ) {
+    this.isAdmin = this.userService.getRole() === 'ADMIN';
+  }
 
+  ngOnInit() {
+    this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
+      this.editModeActive = hasEditModeActive;
+    });
   }
 
   /**
