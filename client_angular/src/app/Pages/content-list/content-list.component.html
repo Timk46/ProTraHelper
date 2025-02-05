@@ -22,7 +22,7 @@
       class="content-list-item"
     >
       <mat-expansion-panel-header>
-        <mat-panel-title>
+        <mat-panel-title style="flex-grow: 3;">
           {{ content.name}}
         </mat-panel-title>
         <mat-panel-description class="content-list-element-header-description">
@@ -33,10 +33,10 @@
           </div>
 
           <!-- more indicators -->
-            <div class="content-list-element-header-indicators">
-              <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
-              <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
-            </div>
+          <div class="content-list-element-header-indicators">
+            <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
+            <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
+          </div>
         </mat-panel-description>
       </mat-expansion-panel-header>
       <!-- the content item body -->
