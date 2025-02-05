@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ContentDTO, ContentElementDTO, contentElementType, ContentsForConceptDTO } from '@DTOs/index';
+import { ContentDTO, ContentElementDTO, contentElementType, ContentsForConceptDTO, LinkableContentElementDTO } from '@DTOs/index';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { ContentElement } from '@DTOs/prisma.dto';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
@@ -7,6 +7,11 @@ import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import { ContentViewComponent } from '../contentView/contentView.component';
+import { UserService } from 'src/app/Services/auth/user.service';
+import { CreateContentElementDialogComponent } from '../lecturersView/create-content-element-dialog/create-content-element-dialog.component';
+import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 
 @Component({
   selector: 'app-content-list',
@@ -44,11 +49,26 @@ export class ContentListComponent {
   // emitter for refreshing
   @Output() fetchContentsForConcept = new EventEmitter<void>();
 
+  protected isAdmin: boolean = false;
+  protected editModeActive: boolean = false;
+
   constructor(
     private dialog: MatDialog,
     private sSS: ScreenSizeService,
-    private progressService: ProgressService
-  ) { }
+    private progressService: ProgressService,
+    private userService: UserService,
+    private contentLinkerService: ContentLinkerService,
+    private snackBar: MatSnackBar,
+    private confirmService: ConfirmationService
+  ) {
+    this.isAdmin = this.userService.getRole() === 'ADMIN';
+  }
+
+  ngOnInit() {
+    this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
+      this.editModeActive = hasEditModeActive;
+    });
+  }
 
   ngOnChanges() {
     if (this.contentsForActiveConceptNode.trainedBy.length > 0) {
@@ -146,11 +166,22 @@ export class ContentListComponent {
     }
   }
 
+  // TODO: update total score without reloading
   onScoreUpdated(elementData: ContentElementDTO) {
-    console.log("Score updated:", elementData.question?.progress);
+    //console.log("Score updated:", elementData.question?.progress);
   }
 
-  onApplyFilter(term: string = '') {
+  /**
+   * Filters the contents based on the provided search term.
+   *
+   * @param term - The search term to filter the contents. If not provided, defaults to an empty string.
+   *
+   * If the term is not an empty string, it updates the searchTerm property with the provided term.
+   * Then, it filters the contentsForActiveConceptNode.trainedBy array based on whether the concatenated
+   * string of content name and content elements (id and title) includes the search term (case insensitive).
+   * If the term is an empty string, it resets the filteredContents to the original contentsForActiveConceptNode.trainedBy array.
+   */
+  applyFilter(term: string = '') {
     if (term !== '') this.searchTerm = term;
     if (this.searchTerm != '') {
       this.filteredContents = this.contentsForActiveConceptNode.trainedBy.filter(content => {
@@ -163,6 +194,99 @@ export class ContentListComponent {
     } else {
       this.filteredContents = this.contentsForActiveConceptNode.trainedBy;
     }
+  }
+
+  /**
+   * Opens a dialog to create a new task.
+   *
+   * @param contentNodeId - The ID of the content node.
+   */
+  onAddTask(contentNodeId: number) {
+    console.log("onNewTask");
+    if (this.isAdmin){
+      const dialogRef = this.dialog.open(CreateContentElementDialogComponent, {
+        width: '50vw',
+        height: '80vh'
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          console.log('Dialog result:', result);
+          if (this.activeConceptNodeId == undefined) {
+            console.error("activeConceptNodeId is undefined");
+            return;
+          }
+          const linkableContentElement: LinkableContentElementDTO = {
+            contentNodeId: contentNodeId,
+
+            questionId: Number(result.questionId) || undefined,
+            question: Number(result.questionId) ? undefined : {
+              id: -1, // -1 for temporary id
+              text: "",
+              isApproved: false, //TODO: implement approval
+              name: result.questionTitle || "New question",
+              type: result.questionType,
+              conceptNodeId: this.activeConceptNodeId,
+              description: result.questionDescription || "Manuell per GUI erstellte Frage",
+              level: Number(result.questionDifficulty),
+              score: Number(result.questionScore) || 100,
+            },
+            contentElementTitle: result.contentElementTitle || undefined,
+            contentElementText: result.contentElementDescription || undefined,
+            position: result.contentElementPosition || undefined
+          };
+
+          this.contentLinkerService.createLinkedContentElement(linkableContentElement).subscribe(
+            (linkableContentElement) => {
+              console.log("linked contentElement: ", linkableContentElement);
+              this.snackBar.open("Frage erstellt", "OK", { duration: 3000 });
+              this.progressService.questionCreated();
+              this.fetchContentsForConcept.emit(); // TODO: make this dynamic
+            }
+          );
+        }
+      });
+    }
+  }
+
+  /**
+   * Handles the deletion of a content element from a content node.
+   *
+   * This method iterates through the `contentsForActiveConceptNode.trainedBy` array and
+   * removes the content element with the specified `contentElementId` from the content node
+   * with the specified `contentNodeId`. After the deletion, it applies the current filter.
+   *
+   * @param contentNodeId - The ID of the content node from which the content element is to be deleted.
+   * @param contentElementId - The ID of the content element to be deleted.
+   */
+  onContentElementDeleted(contentNodeId: number, contentElementId: number) {
+    this.contentsForActiveConceptNode.trainedBy.forEach(content => {
+      if (content.contentNodeId === contentNodeId) {
+        content.contentElements = content.contentElements.filter(element => element.id !== contentElementId);
+      }
+    });
+    this.applyFilter();
+  }
+
+  // TODO: implement
+  onDeleteContentNode(contentNodeId: number) {
+    console.log("onContentNodeDelete", contentNodeId);
+    this.confirmService.confirm({
+      title: "Bereich löschen?",
+      message: "Dieser Bereich wird gelöscht und alle darin entahltenen Verknüpfungen werden aufgehoben. Die darin verknüpften Inhalte bleiben bestehen. Fortfahren?",
+      acceptLabel: "Löschen",
+      declineLabel: "Abbrechen",
+      swapButtons: true,
+      swapColors: true,
+      accept: () => {
+        console.log("deleting");
+
+        // TODO: implement
+
+      }, decline: () => {
+        console.log("aborted");
+      }
+    });
   }
 
 

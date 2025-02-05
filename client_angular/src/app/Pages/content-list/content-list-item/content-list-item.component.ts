@@ -8,6 +8,9 @@ import { FreeTextTaskComponent } from '../../contentView/contentElement/free-tex
 import { McTaskComponent } from '../../contentView/contentElement/mcTask/mcTask.component';
 import { Router } from '@angular/router';
 import { UserService } from 'src/app/Services/auth/user.service';
+import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-content-list-item',
@@ -31,18 +34,24 @@ export class ContentListItemComponent {
   };
 
   @Output() scoreUpdated: EventEmitter<ContentElementDTO> = new EventEmitter<ContentElementDTO>();
+  @Output() fetchContentsForConcept = new EventEmitter<void>();
+  @Output() contentElementDeleted = new EventEmitter<number>();
 
   protected rippleEnabled: boolean = true;
 
   protected isAdmin: boolean = false;
   protected editModeActive: boolean = false;
+  protected editModeButtonsClickable: boolean = false;
 
 
   constructor(
     private progressService: ProgressService,
     private dialog: MatDialog,
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private confirmService: ConfirmationService,
+    private contentLinkerService: ContentLinkerService,
+    private snackBar: MatSnackBar
   ) {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
   }
@@ -103,6 +112,18 @@ export class ContentListItemComponent {
     }
   }
 
+  /**
+   * Handles the click event on a task item.
+   *
+   * This method performs the following actions:
+   * - Logs the click event.
+   * - Checks if the task has a question associated with it.
+   * - Configures and opens a dialog based on the type of the question.
+   * - Navigates to different routes for specific question types.
+   * - Subscribes to dialog submission events to update the task's progress.
+   *
+   * @returns {void}
+   */
   onTaskClick() {
     console.log("Task clicked");
     if (!this.contentElementData.question) return;
@@ -166,6 +187,82 @@ export class ContentListItemComponent {
         });
     }
   }
+
+  /**
+   * Handles the task editing process based on the type of question.
+   * If the question or edit mode buttons are not clickable, the function returns early.
+   * Depending on the type of the question, it navigates to the corresponding edit page.
+   *
+   * @returns {void}
+   */
+  onTaskEdit() {
+    if (!this.contentElementData.question || !this.editModeButtonsClickable) return;
+    const question: taskViewDTO = this.contentElementData.question;
+    switch (question.type) {
+      case questionType.SINGLECHOICE:
+      case questionType.MULTIPLECHOICE:
+        this.router.navigate(['/editchoice/', question.id]);
+        break;
+      case questionType.FREETEXT:
+        this.router.navigate(['/editfreetext/', question.id]);
+        break;
+      case questionType.FILLIN:
+        console.log("FILLIN");
+        this.router.navigate(['/editfillin/', question.id]);
+        break;
+      case questionType.CODE:
+        this.router.navigate(['/editcoding/', question.id]);
+        break;
+      case questionType.GRAPH:
+        this.router.navigate(['/editgraph/', question.id]);
+        break;
+    }
+  }
+
+  /**
+   * Handles the deletion of a task by unlinking the content element after user confirmation.
+   *
+   * @returns {void}
+   */
+  onTaskDelete() {
+    if (!this.contentElementData.question || !this.editModeButtonsClickable) return;
+    this.confirmService.confirm({
+      title: "Verknüpfung aufheben?",
+      message: "Die Verknüpfung zur Frage wird aufgehoben. Die Frage bleibt bestehen. Fortfahren?",
+      acceptLabel: "Aufheben",
+      declineLabel: "Abbrechen",
+      swapButtons: true,
+      swapColors: true,
+      accept: () => {
+        console.log("deleting");
+        this.contentLinkerService.unlinkContentElement(this.contentElementData.id).subscribe(
+          (success) => {
+            console.log("unlink success: ", success);
+            this.snackBar.open("Verknüpfung aufgehoben", "OK", { duration: 3000 });
+            this.progressService.questionLinkDeleted();
+            this.contentElementDeleted.emit(this.contentElementData.id);
+          }
+        );
+      }, decline: () => {
+        console.log("aborted");
+      }
+    });
+  }
+
+
+  /**
+   * Event handler for mouse enter event on the hover menu.
+   * Disables the ripple effect and enables edit mode buttons after a delay.
+   *
+   * @param event - The mouse event triggered by entering the hover menu.
+   */
+  onHoverMenuMouseEnter(event: MouseEvent) {
+    this.rippleEnabled = false;
+    setTimeout(() => {
+      this.editModeButtonsClickable = true;
+    }, 200);
+  }
+
 
   /**
    * Generates a router link string based on the provided index.

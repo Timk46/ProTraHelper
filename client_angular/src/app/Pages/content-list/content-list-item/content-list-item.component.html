@@ -1,14 +1,3 @@
-<!-- <p>-------------</p>
-<p>{{ contentElementData.file }}</p>
-<p>{{ contentElementData.id }}</p>
-<p>{{ contentElementData.positionInSpecificContentView }}</p>
-<p>{{ contentElementData.question }}</p>
-<p>{{ contentElementData.text }}</p>
-<p>{{ contentElementData.title }}</p>
-<p>{{ contentElementData.type }}</p>
-<p>{{ contentElementData.question?.type }}</p>
-<p>-------------</p> -->
-
 <mat-card
   class="list-item"
   (click)="onTaskClick()"
@@ -20,32 +9,30 @@
     }"
   >
   <mat-card-header>
-    <!-- <div mat-card-avatar class="example-header-image"></div> -->
     <div mat-card-avatar class="list-item-avatar" matTooltip="CEID: {{contentElementData.id}}, Fortschritt: {{contentElementData.question?.progress}}%, Level: {{contentElementData.question?.level}}">
       <mat-icon [fontIcon]="getQuestionTypeIcon(contentElementData.question?.type)"></mat-icon>
     </div>
     <mat-card-title>{{contentElementData.question?.name}}</mat-card-title>
     <mat-card-subtitle>{{ getQuestionTypeReadable(contentElementData.question?.type)}}</mat-card-subtitle>
   </mat-card-header>
-  <!-- <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg" alt="Photo of a Shiba Inu"> -->
-  <mat-card-content>
-    <!-- Space for a more specific task description -->
-    <!-- <p>{{contentElementData.question?.description}}</p> -->
-  </mat-card-content>
 
-  <div *ngIf="isAdmin && editModeActive" class="edit-overlay">
+  <!-- Space for a more specific task description -->
+  <!-- <mat-card-content>
+    <p>{{contentElementData.question?.description}}</p>
+  </mat-card-content> -->
+
+  <div *ngIf="isAdmin && editModeActive" class="edit-overlay"
+      (mouseenter)="onHoverMenuMouseEnter($event)"
+      (mouseleave)="rippleEnabled = true; editModeButtonsClickable = false"
+  >
     <!-- edit mode actions -->
     <button mat-mini-fab color="primary"
-      (mouseenter)="rippleEnabled=false"
-      (mouseleave)="rippleEnabled=true"
-      (click)="$event.stopPropagation();"
+      (click)="$event.stopPropagation(); onTaskEdit()"
       >
       <mat-icon>edit</mat-icon>
     </button>
     <button mat-mini-fab color="warn"
-      (mouseenter)="rippleEnabled=false"
-      (mouseleave)="rippleEnabled=true"
-      (click)="$event.stopPropagation();"
+      (click)="$event.stopPropagation(); onTaskDelete()"
     >
       <mat-icon>delete</mat-icon>
     </button>

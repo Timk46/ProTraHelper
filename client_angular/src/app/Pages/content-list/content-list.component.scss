@@ -1,3 +1,14 @@
+.content-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.search-bar {
+  display: flex;
+  flex-direction: row;
+}
+
 .content-list{
   display: flex;
   flex-direction: column;
@@ -25,7 +36,7 @@
 .content-list-element-introduction-buttons {
   display: flex;
   flex-direction: row;
-  gap: 10px;
+  gap: 8px;
 }
 
 .content-list-element-description {
