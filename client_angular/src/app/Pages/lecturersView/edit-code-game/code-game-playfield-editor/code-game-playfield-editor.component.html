@@ -9,10 +9,11 @@
     <p>Wähle ein Theme für das Spielfeld:</p>
     <mat-form-field appearance="outline" class="form-field">
       <mat-label>Theme</mat-label>
-      <mat-select formControlName="theme" required>
-        <mat-option value="dino">Dino</mat-option>
-        <mat-option value="dragon">Drache</mat-option>
-      </mat-select>
+        <!-- Used without form control to avoid reset all values of the game when changing the theme -->
+        <mat-select [(value)]="theme" required (selectionChange)="onThemeChange($event.value)">
+          <mat-option value="dino">Dino</mat-option>
+          <mat-option value="dragon">Drache</mat-option>
+        </mat-select>
     </mat-form-field>
 
     <p>Setze die Anzahl der Reihen und Spalten:</p>

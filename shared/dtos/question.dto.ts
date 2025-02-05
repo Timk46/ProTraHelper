@@ -194,6 +194,7 @@ export interface CodeGameQuestionDto {
     gameFileName: string;
     game: string;
     gameCellRestrictions: string;
+    theme: string;
 }
 
 export interface CodeGameScaffoldDto {

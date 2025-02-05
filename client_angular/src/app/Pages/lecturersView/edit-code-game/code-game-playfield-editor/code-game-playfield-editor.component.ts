@@ -13,7 +13,7 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
   @Output() dataChange = new EventEmitter<any>(); // TODO: change name
 
   codeGameForm: FormGroup;
-  theme: string = ''
+  theme: string = 'dino'; // default theme. Used without form control to avoid reset all values of the game when changing the theme
   gameField: any[][] = [];
   gameCellRestrictions: any[][] = [];
   selectedCell = { row: 0, col: 0 };
@@ -27,7 +27,6 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
     private el: ElementRef
   ) {
     this.codeGameForm = this.fb.group({
-      theme: ['dino'],
       rowsAndColumns: [10]
     });
   }
@@ -48,7 +47,6 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
       this.gameCellRestrictions = this.transformStringToArray(this.inputGameData.gameCellRestrictions);
 
       this.codeGameForm.patchValue({
-        theme: this.theme,
         rowsAndColumns: this.gameField.length
       });
 
@@ -62,8 +60,6 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
       console.log("Playfield allready generated");
       return;
     }
-
-    this.theme = this.codeGameForm.get('theme')?.value || 'dino';
 
     const size = this.codeGameForm.get('rowsAndColumns')?.value || 10;
     this.gameField = Array.from({ length: size }, () => Array(size).fill("#"));
@@ -80,6 +76,12 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
     } else {
       console.error('Element with class "playfield" not found');
     }
+  }
+
+  // Change the theme only affects images, not the rest of the setted data
+  onThemeChange(_theme: string): void {
+    this.theme = _theme;
+    this.emitData();
   }
 
   getFloorImage(): string {

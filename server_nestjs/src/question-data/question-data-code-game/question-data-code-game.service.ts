@@ -27,6 +27,7 @@ export class QuestionDataCodeGameService {
         gameFileName: codeGameQuestion.gameFileName,
         game: codeGameQuestion.game,
         gameCellRestrictions: codeGameQuestion.gameCellRestrictions,
+        theme: codeGameQuestion.theme,
       },
       include: {
         codeGameScaffolds: true,
@@ -64,6 +65,7 @@ export class QuestionDataCodeGameService {
         gameFileName: codeGameQuestion.gameFileName,
         game: codeGameQuestion.game,
         gameCellRestrictions: codeGameQuestion.gameCellRestrictions,
+        theme: codeGameQuestion.theme,
       },
       include: {
         codeGameScaffolds: true,

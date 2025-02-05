@@ -60,7 +60,8 @@ export class EditCodeGameComponent implements OnInit {
               codeGameScaffolds: [],
               gameFileName: 'game.grid.txt', // Hardcoded for every game task
               game: '',
-              gameCellRestrictions: ''
+              gameCellRestrictions: '',
+              theme: 'dino' // default theme
             };
           }
 
@@ -88,13 +89,14 @@ export class EditCodeGameComponent implements OnInit {
         frequencyOfMethodNameToRestrict: this.questionData.codeGameQuestion?.frequencyOfMethodNameToRestrict || 1,
         game: this.questionData.codeGameQuestion?.game || '',
         gameCellRestrictions: this.questionData.codeGameQuestion?.gameCellRestrictions || '',
+        theme: this.questionData.codeGameQuestion?.theme || 'dino',
         level: this.questionData.level || '',
         isApproved: this.questionData.isApproved || false,
       });
 
       // Data for the playfield editor
       this.exportGameDataForPlayfieldEditor = {
-        theme: 'dino',
+        theme: this.questionData.codeGameQuestion?.theme || '',
         gameField: this.questionData.codeGameQuestion?.game || '',
         gameCellRestrictions: this.questionData.codeGameQuestion?.gameCellRestrictions || ''
       };
@@ -128,6 +130,7 @@ export class EditCodeGameComponent implements OnInit {
       gameFileName: ['game.grid.txt'],
       game: [''],
       gameCellRestrictions: [''],
+      theme: [''],
       isApproved: [false],
       level: ['', Validators.required],
       codeSolutionRestriction: [false],
@@ -323,10 +326,9 @@ export class EditCodeGameComponent implements OnInit {
   }
 
   handleDataChangePayfieldEditor(event: any) {
-    console.log("CodeGame: playfield editor change: ",  event); // TODO: remove
-
     this.codeGameForm.patchValue({ game: event.gameField });
     this.codeGameForm.patchValue({ gameCellRestrictions: event.gameCellRestrictions });
+    this.codeGameForm.patchValue({ theme: event.theme });
   }
 
   // TODO: import/export
@@ -389,7 +391,8 @@ export class EditCodeGameComponent implements OnInit {
           codeGameScaffolds: this.questionData.codeGameQuestion!.codeGameScaffolds,
           gameFileName: "game.grid.txt", // Hardcoded for every game task
           game: this.codeGameForm.value.game,
-          gameCellRestrictions: this.codeGameForm.value.gameCellRestrictions
+          gameCellRestrictions: this.codeGameForm.value.gameCellRestrictions,
+          theme: this.codeGameForm.value.theme
         }
       };
 

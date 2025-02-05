@@ -73,7 +73,10 @@ export class WorkspaceComponent {
           console.log('CodeGame: Current task: ', this.currentTask); // TODO: remove
 
           // trigger playfield component to load the game
-          this.playfieldComponent?.initGameField(this.currentTask?.codeGameQuestion!.game);
+          this.playfieldComponent?.initGameField(
+            this.currentTask?.codeGameQuestion!.game,
+            this.currentTask?.codeGameQuestion!.theme
+          );
         });
       }
     });

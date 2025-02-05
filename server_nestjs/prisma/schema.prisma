@@ -469,7 +469,8 @@ model CodeGameQuestion {
   codeGameScaffolds               CodeGameScaffold[]
   gameFileName                    String
   game                            String
-  gameCellRestrictions            String?
+  gameCellRestrictions            String?            // TODO: remove optional
+  theme                           String?            @default("dino") // TODO: remove optional
   question                        Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 

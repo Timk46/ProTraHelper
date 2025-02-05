@@ -29,6 +29,7 @@ export class PlayfieldComponent {
   gameFieldWidth: number = 0;
   gameFieldHeight: number = 0;
   cellSize: number = 60;
+  theme: string = ''; // part of the path to the images
   hiddenRocks: String[] = [];
 
   playerPosition = { x: 0, y: 0 };
@@ -50,8 +51,14 @@ export class PlayfieldComponent {
 
   constructor(private renderer: Renderer2, private el: ElementRef) {}
 
-  initGameField(_game: string): void {
+  initGameField(_game: string, _theme: string): void {
     this.inputGameFile = _game;
+    this.theme = _theme;
+
+    if (this.theme === '') {
+      console.error('Theme is not set.');
+      return;
+    }
 
     this.fillGameField();
     this.setCSSVariables();
@@ -196,9 +203,9 @@ export class PlayfieldComponent {
   // used for the obstacle and destination images
   getObjectImage(row: number, col: number): string {
     const cell = this.gameField[row][col];
-    if (cell === 'O') return 'assets/img/codeGame/dino/obstacle.png';
-    if (cell === 'D') return 'assets/img/codeGame/dino/destination.png';
-    if (cell === 'R') return 'assets/img/codeGame/dino/rock.png';
+    if (cell === 'O') return 'assets/img/codeGame/' + this.theme + '/obstacle.png';
+    if (cell === 'D') return 'assets/img/codeGame/' + this.theme + '/destination.png';
+    if (cell === 'R') return 'assets/img/codeGame/' + this.theme + '/rock.png';
     return '';
   }
 
@@ -211,12 +218,12 @@ export class PlayfieldComponent {
   }
 
   getPlayerImage(): string {
-    return 'assets/img/codeGame/dino/player.png';
+    return 'assets/img/codeGame/' + this.theme + '/player.png';
   }
 
   getFloorImage(row: number, col: number): string {
     const cell = this.gameField[row][col];
-    if (cell) return 'assets/img/codeGame/dino/floor.png';
+    if (cell) return 'assets/img/codeGame/' + this.theme + '/floor.png';
     return '';
   }
 
