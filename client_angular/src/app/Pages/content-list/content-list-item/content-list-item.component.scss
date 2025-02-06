@@ -56,3 +56,15 @@
   --mdc-linear-progress-active-indicator-color: green;
 }
 
+.list-item-stars {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding-right: 3px;
+
+  .stars {
+    transform: scale(0.8);
+    transform-origin: bottom right;
+  }
+}
+

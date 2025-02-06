@@ -274,4 +274,15 @@ export class ContentListItemComponent {
     return `/tutor-kai/code/${index}`;
   }
 
+
+  /**
+   * Generates an array with a specified number of elements.
+   *
+   * @param num - The number of elements in the array.
+   * @returns An array with the specified number of elements.
+   */
+  getLevels(num: number): Array<number> {
+    return new Array(num);
+  }
+
 }
