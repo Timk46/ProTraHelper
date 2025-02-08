@@ -68,7 +68,7 @@
         <app-content-list-item
           *ngFor="let task of getQuestions(content)"
           [contentElementData]="task"
-          (scoreUpdated)="onScoreUpdated($event)"
+          (scoreUpdated)="onScoreUpdated(content, $event)"
           (fetchContentsForConcept)="fetchContentsForConcept.emit()"
           (contentElementDeleted)="onContentElementDeleted(content.contentNodeId, $event)"
         ></app-content-list-item>

@@ -167,8 +167,20 @@ export class ContentListComponent {
   }
 
   // TODO: update total score without reloading
-  onScoreUpdated(elementData: ContentElementDTO) {
+  onScoreUpdated(contentNode: ContentDTO, elementData: ContentElementDTO) {
     //console.log("Score updated:", elementData.question?.progress);
+    const foundContent = this.contentsForActiveConceptNode.trainedBy.find(content => content.contentNodeId === contentNode.contentNodeId);
+    if (foundContent) {
+      const foundElement = foundContent.contentElements.find(element => element.id === elementData.id);
+      if (foundElement && foundElement.question && elementData.question) {
+        foundElement.question.progress = elementData.question.progress;
+        foundContent.progress = this.progressService.calculateProgress(foundContent);
+        if(elementData.question.progress == 100) {
+          foundContent.levelProgress = this.progressService.calculateLevelProgress(foundContent);
+        }
+      }
+    }
+    this.applyFilter();
   }
 
   /**
