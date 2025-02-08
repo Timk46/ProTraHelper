@@ -30,6 +30,10 @@ interface TaskViewData {
   level: number;
 }
 
+/**
+ * @deprecated This component is no longer used in the application and should not longer be used.
+ * Please refer to the new content-list component in the content-list folder.
+ */
 @Component({
   selector: 'app-contentBoard',
   templateUrl: './contentBoard.component.html',
