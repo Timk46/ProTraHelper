@@ -7,6 +7,14 @@
   transition: transform 0.2s;
   border: 2px solid #3F51B5;
   background-color: whitesmoke;
+
+  @media screen and (max-width: 580px) {
+    width: 350px;
+  }
+
+  @media screen and (max-width: 400px) {
+    width: 260px;
+  }
 }
 
 .edit-overlay {
@@ -45,10 +53,23 @@
   background-size: cover;
 }
 
+.list-item-title {
+  overflow: hidden;
+   text-overflow: ellipsis;
+   display: -webkit-box;
+   -webkit-line-clamp: 2; /* number of lines to show */
+           line-clamp: 2;
+   -webkit-box-orient: vertical;
+}
+
 .list-item-avatar {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media screen and (max-width: 400px) {
+    display: none;
+  }
 }
 
 .completed {

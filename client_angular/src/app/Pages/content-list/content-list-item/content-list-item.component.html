@@ -9,17 +9,13 @@
     }"
   >
 
-
-
   <mat-card-header>
-    <div mat-card-avatar class="list-item-avatar" matTooltip="CEID: {{contentElementData.id}}, Fortschritt: {{contentElementData.question?.progress}}%, Level: {{contentElementData.question?.level}}">
+    <div mat-card-avatar class="list-item-avatar" matTooltip="CEID: {{contentElementData.id}}" [matTooltipShowDelay]="5000">
       <mat-icon [fontIcon]="getQuestionTypeIcon(contentElementData.question?.type)"></mat-icon>
     </div>
-    <mat-card-title>{{contentElementData.question?.name}}</mat-card-title>
+    <mat-card-title class="list-item-title">{{contentElementData.question?.name}}</mat-card-title>
     <mat-card-subtitle>{{ getQuestionTypeReadable(contentElementData.question?.type)}}</mat-card-subtitle>
   </mat-card-header>
-
-
 
   <!-- Space for a more specific task description -->
   <!-- <mat-card-content>
@@ -32,7 +28,6 @@
       <mat-icon *ngFor="let star of getLevels(contentElementData.question?.level || 0)">{{(contentElementData.question?.progress || 0) < 100 ? 'star_border' : 'star'}}</mat-icon>
     </div>
   </div>
-
 
   <div *ngIf="isAdmin && editModeActive" class="edit-overlay"
       (mouseenter)="onHoverMenuMouseEnter($event)"
@@ -51,8 +46,6 @@
     </button>
   </div>
 
-
-
   <mat-card-footer>
     <mat-progress-bar
       *ngIf="contentElementData.question && contentElementData.question.progress > 0"
@@ -62,6 +55,5 @@
       [value]="contentElementData.question.progress"
     ></mat-progress-bar>
   </mat-card-footer>
-
 
 </mat-card>

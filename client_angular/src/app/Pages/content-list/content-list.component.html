@@ -27,7 +27,7 @@
         </mat-panel-title>
         <mat-panel-description class="content-list-element-header-description">
           <!-- stars to show difficulty and progress -->
-          <div>
+          <div class="content-list-element-header-stars">
             <mat-icon *ngFor="let reached of getLevels(content.levelProgress || 0)">star</mat-icon>
             <mat-icon *ngFor="let level of getLevels(content.level-(content.levelProgress || 0))">star_border</mat-icon>
           </div>
@@ -41,7 +41,16 @@
       </mat-expansion-panel-header>
       <!-- the content item body -->
       <div class="content-list-element-introduction">
+        <!-- stars to show difficulty and progress - only in mobile view -->
+        <div class="content-list-element-introduction-stars">
+          <mat-icon *ngFor="let reached of getLevels(content.levelProgress || 0)">star</mat-icon>
+          <mat-icon *ngFor="let level of getLevels(content.level-(content.levelProgress || 0))">star_border</mat-icon>
+        </div>
+
+        <!-- description -->
         <p class="content-list-element-description">{{ content.description }}</p>
+
+        <!-- button bar -->
         <div class="content-list-element-introduction-buttons">
           <button
             *ngIf="hasContentElementType(content, 'PDF')"
