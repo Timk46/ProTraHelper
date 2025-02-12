@@ -142,6 +142,7 @@ export interface CodingQuestionDto {
     CODE = "CodingQuestion",
     FILLIN = "Fillin",
     GRAPH = "GraphQuestion",
+    UML = "UMLQuestion",
   }
 
   export interface McqGenerationDTO {
