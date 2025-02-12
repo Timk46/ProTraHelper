@@ -1,0 +1,118 @@
+.h-box {
+  width: 100%;
+  height: calc(100% - 30px);
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  padding: 15px;
+}
+
+.information-container {
+  width: calc(40%);
+  height: calc(100%);
+  gap: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: center !important;
+  transition: background-color 0.5s ease, gap 0.5s ease;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.information-container.submitted {
+  gap: 15px;
+}
+
+.task-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border-radius: 15px;
+  padding: 15px;
+  transition: height 0.5s ease;
+}
+
+.task-container.submitted {
+  height: 50%;
+}
+
+.feedback-container {
+  width: 100%;
+  height: 0%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border-radius: 15px;
+  padding: 0px;
+  opacity: 0;
+  transition: height 0.5s ease, opacity 0.5s ease;
+}
+
+.feedback-container.submitted {
+  height: 50%;
+  padding: 15px;
+  opacity: 1;
+}
+
+.title-container {
+  width: 100%;
+  height: 5%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.editor-container {
+  width: calc(60% - 15px);
+}
+
+.title-container {
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.button-container {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.tinymce-container {
+  width: 100%;
+  display: flex;
+  overflow: auto;
+}
+
+.header {
+  height: 30px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  padding: 0 0px;
+}
+
+.left-content, .center-content, .right-content {
+  display: flex;
+  align-items: center;
+}
+
+.right-content img {
+  right: 0px;
+  height: 100%;
+  width: auto;
+  max-height: 30px;
+}
+
+.center-content {
+  justify-content: center;
+  gap: 8px;
+}
