@@ -15,6 +15,8 @@ import { TaskWorkspaceComponent } from './pages/task-workspace/task-workspace.co
 import { UmlearnRoutingModule } from './umlearn-routing.module';
 import { EditorModule, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
 import { TaskDescriptionPopupComponent } from './pages/task-creation/task-description-popup/task-description-popup.component';
+import { TaskCreationComponent } from './pages/task-creation/task-creation.component';
+import { TooltippComponent } from './pages/tooltip/tooltipp.component';
 
 
 
@@ -29,7 +31,9 @@ import { TaskDescriptionPopupComponent } from './pages/task-creation/task-descri
     EdgeGrabPointComponent,
     TinymceComponent,
     TaskWorkspaceComponent,
-    TaskDescriptionPopupComponent
+    TaskDescriptionPopupComponent,
+    TaskCreationComponent,
+    TooltippComponent
   ],
   imports: [
     CommonModule,

@@ -1,0 +1,66 @@
+<div class="h-box" >
+
+  <div class="config-container mat-elevation-z8" [ngClass]="{'grey-out': activeConnectionModeChange}">
+
+    <div class="scroll-container">
+
+      <div class="settings-container">
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" style="padding-top: 5px;">
+          <mat-label>Name der Aufgabe</mat-label>
+          <input matInput [(ngModel)]="taskTitle" name="taskTitle" placeholder="Name der Aufgabe">
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" style="min-height: 36px;" (click)="openDialog()">Beschreibung bearbeiten</button>
+
+        <app-tooltipp [isVisible]="true" [tooltipContent]="maxPointsTooltipp">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>max. Punkte</mat-label>
+              <input matInput type="number" [(ngModel)]="maxPoints" (ngModelChange)="onMaxPointsChange($event)" name="maxPoints" placeholder="max. Punkte" [value]="calculateMaxPoints()">
+        </mat-form-field>
+      </app-tooltipp>
+        <div>
+          <mat-accordion>
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                <app-tooltipp [isVisible]="true" [tooltipContent]="CheckBoxTooltipp">
+                  <mat-panel-title>
+                    Erlaubte Knoten
+                  </mat-panel-title>
+              </app-tooltipp>
+              </mat-expansion-panel-header>
+              <div class="checkbox-item" *ngFor="let node of nodes; index as i">
+                <mat-checkbox [checked]="checkboxStatesNode[node.id]" (click)="onClickCheckboxNode(node,$event)">{{node.title}}</mat-checkbox>
+              </div>
+            </mat-expansion-panel>
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                <app-tooltipp [isVisible]="true" [tooltipContent]="CheckBoxTooltipp">
+                  <mat-panel-title>
+                    Erlaubte Kanten
+                  </mat-panel-title>
+                </app-tooltipp>
+              </mat-expansion-panel-header>
+              <div class="checkbox-item" *ngFor="let edge of edges; index as i">
+                <mat-checkbox [checked]="checkboxStatesEdge[edge.id]" (click)="onClickCheckboxEdge(edge,$event)">{{edge.title}}</mat-checkbox>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </div>
+      </div>
+    </div>  <!-- End of scroll-container -->
+    <div class="button-container">
+      <button mat-raised-button color="accent" (click)="onCancel()">Abbrechen</button>
+      <button mat-raised-button color="primary" (click)="onAccept(editor.getSaveData(), editor.takeSnapshot())">Speichern</button>
+      <button mat-raised-button color="warn"  (click)="onDelete()">Aufgabe löschen</button>
+    </div>
+  </div>
+  <div class="task-container">
+    <app-editor #editor
+    (activeConnectionModeChange)="activeConnectionModeChange = $event"
+    (edgeSelected)="onEdgeSelected($event)" (nodeSelected)="onNodeSelected($event)"
+    [selectableNodes]="nodes" [selectableEdges]="edges" (nodeRemoved)="onNodeRemoved($event)"
+    (edgeRemoved)="onEdgeRemoved($event)"
+    [nodes]="editorData.nodes" [edges]="editorData.edges"></app-editor>
+  </div>
+</div>
