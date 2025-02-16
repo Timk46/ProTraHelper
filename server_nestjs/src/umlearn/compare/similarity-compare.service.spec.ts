@@ -1,6 +1,7 @@
 import { ClassAttribute, ClassNode, dataType, editorDataDTO, EditorElement, visibilityType } from '@DTOs/index';
 import { SimilarityCompareService } from './similarity-compare.service';
 
+
 describe('SimilarityCompareService', () => {
   let service: SimilarityCompareService;
 

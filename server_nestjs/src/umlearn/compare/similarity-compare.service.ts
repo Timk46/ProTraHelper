@@ -1,4 +1,5 @@
-import { BasicMatching, ClassAttribute, ClassEdge, ClassMethod, ClassNode, editorDataDTO, GraphMatching, swappableEditorElement } from "@Interfaces/index";
+import { BasicMatching, GraphMatching, ClassAttribute, ClassEdge, ClassMethod, ClassNode } from "@Interfaces/index";
+import { editorDataDTO, swappableEditorElement } from "@DTOs/index";
 import { Injectable } from "@nestjs/common";
 import { JaroWinklerDistance } from 'natural';
 import { nodeWeights, edgeWeights } from "./similarity-weights.config";
@@ -8,9 +9,37 @@ import { similarityLogEntries } from "./similarity-log.config";
 @Injectable()
 export class SimilarityCompareService {
 
+  private nodeMap: Map<string, string> = null;
+
   constructor() {
     this.calcSingleNodeSimilarity = this.calcSingleNodeSimilarity.bind(this);
   }
+
+  /**
+   * Finds the graph matching between the attempt graph and the solution graph,
+   * and generates a similarity log based on the matching.
+   *
+   * @param attemptGraph - The graph data representing the user's attempt.
+   * @param solutionGraph - The graph data representing the correct solution.
+   * @returns A string containing the similarity log of the graph matching.
+   */
+  public compare(attemptGraph: editorDataDTO, solutionGraph: editorDataDTO): string {
+    this.nodeMap = this.createNodeMap(attemptGraph.nodes, solutionGraph.nodes); // to get a nodes name by its ids, useful for the edge comparison
+    const graphMatching = this.findGraphMatching(attemptGraph, solutionGraph);
+    return this.generateGraphSimilarityLog(graphMatching);
+  }
+
+  private createNodeMap(attemptNodes: ClassNode[], solutionNodes: ClassNode[]): Map<string, string> {
+    const nodeMap = new Map<string, string>();
+    for (const node of attemptNodes) {
+      nodeMap.set(node.id, node.title);
+    }
+    for (const node of solutionNodes) {
+      nodeMap.set(node.id, node.title);
+    }
+    return nodeMap;
+  }
+
 
 
   public findGraphMatching(attemptGraph: editorDataDTO, solutionGraph: editorDataDTO): GraphMatching {
@@ -39,10 +68,6 @@ export class SimilarityCompareService {
     return similarity;
   }
 
-  public findAndGenerateGraphSimilarityLog(attemptGraph: editorDataDTO, solutionGraph: editorDataDTO): string {
-    const graphMatching = this.findGraphMatching(attemptGraph, solutionGraph);
-    return this.generateGraphSimilarityLog(graphMatching);
-  }
 
   public generateGraphSimilarityLog(graphMatching: GraphMatching): string {
     return similarityLogEntries.LOG_GRAPH_INTRODUCTION + "\n"
@@ -282,8 +307,8 @@ export class SimilarityCompareService {
     } else {
       return similarityLogEntries.CLASS_EDGE_INTRODUCTION(attemptEdge.description) + "\n"
       + ((typeSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_TYPE(attemptEdge.type, solutionEdge.type) + "\n" : "")
-      + ((startSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_START(attemptEdge.start, solutionEdge.start) + "\n" : "")
-      + ((endSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_END(attemptEdge.end, solutionEdge.end) + "\n" : "")
+      + ((startSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_START(this.nodeMap.get(attemptEdge.start) ?? 'nameless', this.nodeMap.get(solutionEdge.start) ?? 'nameless') + "\n" : "")
+      + ((endSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_END(this.nodeMap.get(attemptEdge.end) ?? 'nameless', this.nodeMap.get(solutionEdge.end) ?? 'nameless') + "\n" : "")
       + ((cardinalityStartSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_CARDINALITY_START(attemptEdge.cardinalityStart, solutionEdge.cardinalityStart) + "\n" : "")
       + ((descriptionSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_DESCRIPTION(attemptEdge.description, solutionEdge.description) + "\n" : "")
       + ((cardinalityEndSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_CARDINALITY_END(attemptEdge.cardinalityEnd, solutionEdge.cardinalityEnd) + "\n" : "");

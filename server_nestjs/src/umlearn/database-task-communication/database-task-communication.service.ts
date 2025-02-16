@@ -459,7 +459,7 @@ export class DatabaseTaskCommunicationService {
     //find the student's attempt
     const studentAttempt = await this.getTaskAttemptData(taskId, studentId);
 
-    const matchingLog = this.similarityCompareService.findAndGenerateGraphSimilarityLog(studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
+    const matchingLog = this.similarityCompareService.compare(studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
     const response = await this.feedbackRagService.generateUmlFeedbackByLog(taskSolution.UmlQuestion.text, matchingLog);
     return {response: response.response + '\n\n\n###DEBUG MATCHING-LOG###\n\n' + matchingLog};
     //return this.feedbackRagService.generateUmlFeedbackByLog(taskSolution.UmlQuestion.text, matchingLog);
