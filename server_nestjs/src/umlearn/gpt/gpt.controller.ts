@@ -2,7 +2,7 @@ import { Controller, UseGuards } from '@nestjs/common';
 import { Body, Post } from '@nestjs/common';
 import { GptService } from './gpt.service';
 import { editorDataDTO } from '@DTOs/index';
-import { RolesGuard, roles } from '@/auth/roles.guard';
+import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 
 @UseGuards(RolesGuard)
 @Controller('gpt')

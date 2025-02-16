@@ -409,6 +409,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       case questionType.GRAPH:
         this.router.navigate(['/editgraph/', taskViewData.id]);
         break;
+      case questionType.UML:
+        this.router.navigate(['/edituml/', taskViewData.id]);
+        break;
     }
   }
 

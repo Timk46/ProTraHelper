@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Param, Req, UseGuards } from '@nestjs/common';
 import { DatabaseTaskCommunicationService } from './database-task-communication.service';
 import { taskDataDTO, taskAttemptDataDTO, taskWorkspaceDataDTO } from '@DTOs/index';
-import { RolesGuard, roles } from '@/auth/roles.guard';
+import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 
 @UseGuards(RolesGuard)
 @Controller('database-task-communication')

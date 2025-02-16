@@ -1,8 +1,9 @@
 import { EditorModel, editorElementDTO, editorModelDTO } from '@DTOs/index';
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { DatabaseEditorCommunicationService } from './database-editor-communication.service';
-import { RolesGuard, roles } from '@/auth/roles.guard';
+import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 
+@UseGuards(RolesGuard)
 @Controller('editor')
 export class DatabaseEditorCommunicationController {
 
