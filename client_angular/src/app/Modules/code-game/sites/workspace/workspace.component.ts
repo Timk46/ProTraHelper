@@ -45,6 +45,8 @@ export class WorkspaceComponent {
   allRocksCollected: boolean = false;
   totalRocks: number = 0;
   collectedRocks: number = 0;
+  visitedCellsAreAllowed: boolean = false;
+  allWhiteListCellsVisited: boolean = false;
 
   constructor(
     private title: Title,
@@ -75,7 +77,8 @@ export class WorkspaceComponent {
           // trigger playfield component to load the game
           this.playfieldComponent?.initGameField(
             this.currentTask?.codeGameQuestion!.game,
-            this.currentTask?.codeGameQuestion!.theme
+            this.currentTask?.codeGameQuestion!.theme,
+            this.currentTask?.codeGameQuestion!.gameCellRestrictions
           );
         });
       }
@@ -120,8 +123,6 @@ export class WorkspaceComponent {
         next: (response) => {
           console.log('CodeGame: Response: ', response);
 
-          this.splitCompilerOutputAndStartGame(response.codeGameExecutionResult.output.toString());
-
           /* Get evaluation results */
           this.frequencyOfMethodEvaluationResult = response.frequencyOfMethodEvaluationResult;
           this.frequencyOfMethodCallsResult = response.frequencyOfMethodCallsResult;
@@ -129,6 +130,11 @@ export class WorkspaceComponent {
           this.allRocksCollected = response.allRocksCollected;
           this.totalRocks = response.totalRocks;
           this.collectedRocks = response.collectedRocks;
+          this.visitedCellsAreAllowed = response.visitedCellsAreAllowed;
+          this.allWhiteListCellsVisited = response.allWhiteListCellsVisited;
+
+          /* Prepare and start animation of the game */
+          this.splitCompilerOutputAndStartGame(response.codeGameExecutionResult.output.toString());
         },
         error: (error) => {
           console.error('Error: ', error);
@@ -178,5 +184,7 @@ export class WorkspaceComponent {
     this.allRocksCollected = false;
     this.totalRocks = 0;
     this.collectedRocks = 0;
+    this.visitedCellsAreAllowed = false;
+    this.allWhiteListCellsVisited = false;
   }
 }

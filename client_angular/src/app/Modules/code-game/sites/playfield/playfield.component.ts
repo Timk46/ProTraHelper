@@ -26,6 +26,7 @@ enum PlayerDirection {
 export class PlayfieldComponent {
   gameField: string[][] = [];
   inputGameFile = '';
+  gameCellRestrictions: any[][] = []; // restrictions for the game cells ('B' = blacklisted, 'W' = whitelisted)
   gameFieldWidth: number = 0;
   gameFieldHeight: number = 0;
   cellSize: number = 60;
@@ -51,9 +52,10 @@ export class PlayfieldComponent {
 
   constructor(private renderer: Renderer2, private el: ElementRef) {}
 
-  initGameField(_game: string, _theme: string): void {
+  initGameField(_game: string, _theme: string, _gameCellRestrictions: string): void {
     this.inputGameFile = _game;
     this.theme = _theme;
+    this.gameCellRestrictions = this.transformStringToArray(_gameCellRestrictions);
 
     if (this.theme === '') {
       console.error('Theme is not set.');
@@ -95,6 +97,10 @@ export class PlayfieldComponent {
     }
 
     console.error("Player not found in the game field.");
+  }
+
+  transformStringToArray(string: string): any[][] {
+    return string.split('\n').map(row => row.split(''));
   }
 
   movePlayerTo(newX: number, newY: number): void {
@@ -181,6 +187,24 @@ export class PlayfieldComponent {
     this.hiddenRocks = [];
   }
 
+  checkCellRestrictionAndShowWarning(col: number, row: number): void {
+    if (this.gameCellRestrictions[row][col] === 'B') {
+      const overlay = this.el.nativeElement.querySelector(`.row:nth-child(${row + 1}) .cell:nth-child(${col + 1}) .overlay`);
+      if (overlay) {
+        this.renderer.setStyle(overlay, 'display', 'block');
+      } else {
+        console.error('Overlay element not found');
+      }
+    }
+  }
+
+  hideAllWaringOverlays(): void {
+    const overlays = this.el.nativeElement.querySelectorAll('.overlay');
+    overlays.forEach((overlay: any) => {
+      this.renderer.setStyle(overlay, 'display', 'none');
+    });
+  }
+
 
   fillGameField(): void {
     // Generate a 2D array from the input string.
@@ -258,6 +282,7 @@ export class PlayfieldComponent {
 
       const coordinates = move.split('/');
       this.movePlayerTo(parseInt(coordinates[0]), parseInt(coordinates[1]));
+      this.checkCellRestrictionAndShowWarning(parseInt(coordinates[0]), parseInt(coordinates[1]));
 
     } else if (action == "#SYS-Turn") {
       this.gameOutputInformation = ""; // clear the information
@@ -297,6 +322,7 @@ export class PlayfieldComponent {
   resetGame(): void {
     // reset the game field
     this.showRockImage();
+    this.hideAllWaringOverlays();
     this.playerPosition = this.playerInitialPosition;
     this.playerDirection = PlayerDirection.EAST;
     this.playerTransform = `translate(${this.startX}px, ${this.startY}px) rotate(${this.playerDirection}deg)`;

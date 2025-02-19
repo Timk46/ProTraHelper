@@ -65,7 +65,7 @@
           <svg width="24" height="24">
             <circle cx="12" cy="12" r="10" [attr.fill]="frequencyOfMethodEvaluationResult ? '#4caf50' : '#f44336'"></circle>
           </svg>
-          <span class="polarNight_4_text ml-1">"{{ methodNameToRestrict }}" wurde {{ frequencyOfMethodCallsResult }} mal aufgerufen</span>
+          <span class="polarNight_4_text ml-1">"{{ methodNameToRestrict }}" {{ frequencyOfMethodCallsResult }}x aufgerufen</span>
         </div>
         <div *ngIf="isGameAnimationFinished" class="flex items-center md:w-auto mr-1">
           <svg width="24" height="24">
@@ -77,7 +77,13 @@
           <svg width="24" height="24">
             <circle cx="12" cy="12" r="10" [attr.fill]="allRocksCollected ? '#4caf50' : '#f44336'"></circle>
           </svg>
-          <span class="polarNight_4_text ml-1">Gestein gesammelt {{ collectedRocks }} / {{ totalRocks }}</span>
+          <span class="polarNight_4_text ml-1">Gestein: {{ collectedRocks }}/{{ totalRocks }}</span>
+        </div>
+        <div *ngIf="isGameAnimationFinished" class="flex items-center md:w-auto ml-1">
+          <svg width="24" height="24">
+            <circle cx="12" cy="12" r="10" [attr.fill]="visitedCellsAreAllowed ? '#4caf50' : '#f44336'"></circle>
+          </svg>
+          <span class="polarNight_4_text">Vorgesehenden Weg verwendet</span>
         </div>
       </div>
 

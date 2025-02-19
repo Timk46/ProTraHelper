@@ -4,6 +4,7 @@ import {
   CodeGameEvaluationDTO,
   CppProjectExecutionResult,
 } from '@DTOs/codeGame.dto';
+import {el, fa} from '@faker-js/faker';
 
 @Injectable()
 export class CodeGameEvaluationService {
@@ -61,6 +62,20 @@ export class CodeGameEvaluationService {
       );
     }
 
+    /* Check if the visited cells are allowed */
+    let blackAndWhiteListCheckResult = {
+      visitedCellsAreAllowed: false,
+      allWhiteListCellsVisited: false,
+    };
+    if (question.codeGameQuestion.gameCellRestrictions) {
+      blackAndWhiteListCheckResult =
+        await this.checkVisitedCellsAgainstBlackAndWhiteList(
+          question.codeGameQuestion.game,
+          executionResult,
+          question.codeGameQuestion.gameCellRestrictions,
+        );
+    }
+
     /* Create evaluation result */
     const evaluationResult: CodeGameEvaluationDTO = {
       questionId,
@@ -69,6 +84,7 @@ export class CodeGameEvaluationService {
       frequencyOfMethodEvaluationResult,
       frequencyOfMethodCallsResult,
       ...successesFromCodeExecution,
+      ...blackAndWhiteListCheckResult,
     };
 
     return evaluationResult;
@@ -105,5 +121,107 @@ export class CodeGameEvaluationService {
       testPassed,
       frequencyOfMethodCallsResult,
     };
+  }
+
+  async checkVisitedCellsAgainstBlackAndWhiteList(
+    game: string,
+    executionResult: CppProjectExecutionResult,
+    gameCellRestrictions: string,
+  ) {
+
+    const gameArray = await this.transformStringToArray(game);
+    const gameCellRestrictionsArray = await this.transformStringToArray(
+      gameCellRestrictions,
+    );
+
+    console.debug('gameArray', gameArray);
+    console.debug('executionResult', executionResult);
+    console.debug('gameCellRestrictionsArray', gameCellRestrictionsArray);
+
+    /* Extract starting position from the game */
+    const startingPlayerPosition = { row: -1, col: -1 };
+    for (let row = 0; row < gameArray.length; row++) {
+      for (let col = 0; col < gameArray[row].length; col++) {
+        if (gameArray[row][col] === 'P') {
+          startingPlayerPosition.row = row;
+          startingPlayerPosition.col = col;
+          break;
+        }
+      }
+    }
+
+    if (
+      startingPlayerPosition.row === -1 ||
+      startingPlayerPosition.col === -1
+    ) {
+      console.error('CodeGame-Evaluation: Error extracting starting position');
+      return;
+    }
+
+    console.debug('startingPlayerPosition', startingPlayerPosition);
+
+    /* Extract visited cells from the commandline output */
+    const movePattern = /#SYS-Move:(\d+)\/(\d+)/g;
+    const visitedCells = [];
+    let match;
+
+    // Add player starting position to the visited cells
+    visitedCells.push({
+      row: startingPlayerPosition.row,
+      col: startingPlayerPosition.col,
+    });
+
+    // The play field has row's on the x-axis and rows on the y-axis
+    // Therefor the col is the x-axis and the row is the y-axis
+    while ((match = movePattern.exec(executionResult.output)) !== null) {
+      visitedCells.push({
+        row: parseInt(match[2], 10),
+        col: parseInt(match[1], 10),
+      });
+    }
+
+    console.debug('visitedCells', visitedCells);
+
+    /* Check if the visited cells are allowed (not marked as a cell of the black list) */
+    let visitedCellsAreAllowed = true;
+    for (const visitedCell of visitedCells) {
+      if (gameCellRestrictionsArray[visitedCell.row][visitedCell.col] === 'B') {
+        visitedCellsAreAllowed = false;
+        break;
+      }
+    }
+
+    console.debug('visitedCellsAreAllowed:', visitedCellsAreAllowed);
+
+    /* Check if all white list cells are visited */
+    let allWhiteListCellsVisited = true;
+    for (let row = 0; row < gameCellRestrictionsArray.length; row++) {
+      for (let col = 0; col < gameCellRestrictionsArray[row].length; col++) {
+        if (gameCellRestrictionsArray[row][col] === 'W') {
+          let whiteListCellVisited = false;
+          for (const visitedCell of visitedCells) {
+            if (visitedCell.row === row && visitedCell.col === col) {
+              whiteListCellVisited = true;
+              break;
+            }
+          }
+          if (!whiteListCellVisited) {
+            allWhiteListCellsVisited = false;
+            break;
+          }
+        }
+      }
+    }
+
+    console.debug('allWhiteListCellsVisited:', allWhiteListCellsVisited);
+
+    return {
+      visitedCellsAreAllowed,
+      allWhiteListCellsVisited,
+    };
+  }
+
+  async transformStringToArray(string: string): Promise<any[][]> {
+    return string.split('\n').map((row) => row.split(''));
   }
 }

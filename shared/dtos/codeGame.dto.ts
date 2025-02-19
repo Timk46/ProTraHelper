@@ -12,4 +12,6 @@ export interface CodeGameEvaluationDTO {
     allRocksCollected: boolean;
     totalRocks: number;
     collectedRocks: number;
+    visitedCellsAreAllowed: boolean;
+    allWhiteListCellsVisited: boolean;
 }
