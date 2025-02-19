@@ -44,6 +44,10 @@ import { TooltippComponent } from './pages/tooltip/tooltipp.component';
   providers: [
     { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
     EditorModule
+  ],
+  exports: [
+    TaskCreationComponent,
+    EditorComponent
   ]
 })
 export class UmlearnModule { }

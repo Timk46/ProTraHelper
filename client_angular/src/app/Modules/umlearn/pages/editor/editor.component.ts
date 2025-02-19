@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, Output, ViewChild } from '@angular/core';
-import { EditorElement, EditorElementType, EditorModel, editorDataDTO, editorElementDTO } from '@DTOs/index';
+import { ClassEdge, ClassNode, EditorElement, EditorElementType, EditorModel, Side, dataType, editorDataDTO, editorElementDTO, visibilityType } from '@DTOs/index';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { Side, dataType, visibilityType, ClassNode, ClassEdge} from '@Interfaces/index';
+
 import { EditorEdgeService } from '@UMLearnServices/editor-edge.service';
 import { CdkDrag, CdkDragDrop, CdkDragMove, CdkDragStart, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NotificationService } from '@UMLearnServices/notification.service';

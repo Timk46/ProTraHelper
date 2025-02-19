@@ -23,6 +23,10 @@ import { EditBlankComponent } from './edit-fillin/edit-blank/edit-blank.componen
 import { ImageUploadDialogComponent } from './edit-fillin/image-upload-dialog/image-upload-dialog.component';
 import { GraphTasksModule } from 'src/app/Modules/graph-tasks/graph-tasks.module';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { EditUmlComponent } from './edit-uml/edit-uml.component';
+import { TaskWorkspaceComponent } from 'src/app/Modules/umlearn/pages/task-workspace/task-workspace.component';
+import { UmlearnModule } from 'src/app/Modules/umlearn/umlearn.module';
+import { UmlEditorPopupComponent } from './edit-uml/uml-editor-popup/uml-editor-popup.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +42,9 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     EditCodingComponent,
     EditGraphComponent,
     AddElementModalComponent,
-    TinymceComponent
+    TinymceComponent,
+    EditUmlComponent,
+    UmlEditorPopupComponent,
   ],
   imports: [
     CommonModule,
@@ -52,7 +58,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     MatSelectModule,
     MatFormFieldModule,
     GraphTasksModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    UmlearnModule
   ],
   exports: [
     CreateContentNodeDialogComponent,

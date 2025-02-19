@@ -1,7 +1,7 @@
 // import { BaseEdge } from "@Interfaces/editorEdges.interface";
 // import { BaseNode, nodeType } from "@Interfaces/editorNodes.interface";
-import { ClassEdge } from "@Interfaces/index";
-import { ClassNode } from "@Interfaces/index";
+
+import { ClassEdge, ClassNode } from "../interfaces/index";
 
 export enum EditorModel {
     CLASSDIAGRAM = "classdiagram",

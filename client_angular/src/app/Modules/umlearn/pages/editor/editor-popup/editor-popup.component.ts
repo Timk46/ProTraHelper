@@ -1,5 +1,5 @@
-import { EditorElement, EditorElementType } from '@DTOs/index';
-import { ClassAttribute, ClassMethod, dataType, visibilityType, ClassNode, ClassEdge } from '@Interfaces/index';
+import { ClassAttribute, ClassEdge, ClassMethod, ClassNode, dataType, EditorElement, EditorElementType, visibilityType } from '@DTOs/index';
+
 import { Component, Inject, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';

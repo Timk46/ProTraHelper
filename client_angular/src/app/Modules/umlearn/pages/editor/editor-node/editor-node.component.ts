@@ -1,5 +1,5 @@
 import { EditorElement } from '@DTOs/index';
-import { ClassNode } from '@Interfaces/index';
+import { ClassNode } from '@DTOs/index';
 import { Component, ElementRef, Input, SimpleChanges } from '@angular/core';
 import { NotificationService } from '@UMLearnServices/notification.service';
 
