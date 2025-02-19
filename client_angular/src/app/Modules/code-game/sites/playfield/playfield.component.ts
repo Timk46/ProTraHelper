@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, Output, Renderer2 } from '@angular/core';
-import { animate, style, transition, trigger } from "@angular/animations";
+import { animate, style, transition, trigger, state, keyframes } from "@angular/animations";
 
 enum PlayerDirection {
   NORTH = 270,
@@ -20,13 +20,25 @@ enum PlayerDirection {
         })),
       ], { params: { endX: 0, endY: 0 } }),
     ]),
-  ],
+    trigger('dimChase', [
+      state('off', style({ opacity: 0.3 })),
+      state('on', style({ opacity: 1 })),
+      transition('off => on', [
+        animate('1.5s ease-in-out')
+      ]),
+      transition('on => off', [
+        animate('1.5s ease-in-out')
+      ]),
+    ]),
+  ]
 })
 
 export class PlayfieldComponent {
   gameField: string[][] = [];
   inputGameFile = '';
   gameCellRestrictions: any[][] = []; // restrictions for the game cells ('B' = blacklisted, 'W' = whitelisted)
+  cellRestrictionsDimState: ('off' | 'on')[][] = [];
+  cellRestrictionsDimChaseIntervals: any[] = [];
   gameFieldWidth: number = 0;
   gameFieldHeight: number = 0;
   cellSize: number = 60;
@@ -187,11 +199,26 @@ export class PlayfieldComponent {
     this.hiddenRocks = [];
   }
 
+  toggleDimChase(col: number, row: number): void {
+    if (this.cellRestrictionsDimState[row][col] === 'on') {
+      this.cellRestrictionsDimState[row][col] = 'off';
+    } else {
+      this.cellRestrictionsDimState[row][col] = 'on';
+    }
+  }
+
   checkCellRestrictionAndShowWarning(col: number, row: number): void {
     if (this.gameCellRestrictions[row][col] === 'B') {
       const overlay = this.el.nativeElement.querySelector(`.row:nth-child(${row + 1}) .cell:nth-child(${col + 1}) .overlay`);
       if (overlay) {
-        this.renderer.setStyle(overlay, 'display', 'block');
+        setTimeout(() => {
+          this.renderer.setStyle(overlay, 'display', 'block');
+          this.toggleDimChase(col, row);
+          const intervalId = setInterval(() => {
+            this.toggleDimChase(col, row);
+          }, 1500); // Keep toggling the state every 1.5 seconds
+          this.cellRestrictionsDimChaseIntervals.push(intervalId);
+        }, 500); // Delay, show the overlay after the player has moved to the cell
       } else {
         console.error('Overlay element not found');
       }
@@ -202,7 +229,14 @@ export class PlayfieldComponent {
     const overlays = this.el.nativeElement.querySelectorAll('.overlay');
     overlays.forEach((overlay: any) => {
       this.renderer.setStyle(overlay, 'display', 'none');
+      this.renderer.setStyle(overlay, 'opacity', '0');
     });
+
+    // reset everything of the cell restrictions
+    this.cellRestrictionsDimState = this.gameField.map(row => row.map(() => 'off'));
+
+    this.cellRestrictionsDimChaseIntervals.forEach(intervalId => clearInterval(intervalId));
+    this.cellRestrictionsDimChaseIntervals = [];
   }
 
 
@@ -212,6 +246,8 @@ export class PlayfieldComponent {
     this.gameField = this.inputGameFile.split('\n').map(row => row.split(''));
     this.gameFieldWidth = this.gameField[0].length;
     this.gameFieldHeight = this.gameField.length;
+
+    this.cellRestrictionsDimState = this.gameField.map(row => row.map(() => 'off'));
   }
 
   setCSSVariables(): void {
