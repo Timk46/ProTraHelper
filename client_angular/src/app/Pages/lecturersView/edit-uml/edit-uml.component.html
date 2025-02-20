@@ -1,11 +1,10 @@
 <div class="content mat-elevation-z8">
   <h1 style="display: flex; justify-content: center;">UML Aufgabe bearbeiten</h1>
 
-  <div class="horizontal-align-container">
-    <div class="text-container" style="width: 30%;">
+  <div #alignContainer class="horizontal-align-container">
+    <div #leftContainer class="text-container left-container">
       <div class="wrap-container">
-
-        <h2>Optionen</h2>
+        <h2>Aufgabe</h2>
 
         <form [formGroup]="umlForm">
           <mat-form-field appearance="outline" style="width: 100%;">
@@ -32,13 +31,21 @@
             <input matInput type="number" min="0" step="1" placeholder="Punkte" formControlName="questionScore">
             <mat-error *ngIf="umlForm.get('questionScore')!.hasError('required')">Punkte sind
               erforderlich</mat-error>
-          </mat-form-field>
-        </form>
+            </mat-form-field>
+          </form>
 
-        <mat-expansion-panel>
-          <mat-expansion-panel-header>
-            <mat-panel-title>Erlaubte Knoten</mat-panel-title>
-          </mat-expansion-panel-header>
+          <h2>Aufgabentext</h2>
+
+          <div style="width: 100%;">
+            <app-tinymce #question [config]="editorConfig"></app-tinymce>
+          </div>
+
+          <h2>Optionen</h2>
+
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>Erlaubte Knoten</mat-panel-title>
+            </mat-expansion-panel-header>
         </mat-expansion-panel>
 
         <mat-expansion-panel>
@@ -66,35 +73,14 @@
       </div>
     </div>
 
-    <div class="text-container" style="width: 70%;">
-      <div class="wrap-container">
-        <div style="width: 100%;">
-          <h2>Aufgabentext</h2>
-          <app-tinymce #question [config]="editorConfig"></app-tinymce>
-        </div>
+    <div #resizer class="resizer"></div>
 
-        <div style="width: 100%;">
-          <h2>Vorlage</h2>
-          <p>Mit diesem UML-Gerüst startet die Aufgabenbearbeitung.</p>
-          <button mat-raised-button (click)="editUmlPrefab()">Vorlage bearbeiten</button>
-        </div>
+    <div #rightContainer class="text-container right-container">
 
-        <div style="width: 100%;">
-          <h2>Musterlösung</h2>
-          <p>Dieses UML-Gerüst dient dem Feedback und der Bewertung.</p>
-          <button mat-raised-button (click)="editUmlSolution()">Musterlösung bearbeiten</button>
-        </div>
-
-        <!-- <div style="width: 100%;">
-          <h2>Erwartungshorizont</h2>
-          <app-tinymce #expectations [config]="editorConfig"></app-tinymce>
-        </div>
-
-        <div style="width: 100%;">
-          <h2>Musterlösung</h2>
-          <app-tinymce #solution [config]="editorConfig"></app-tinymce>
-        </div> -->
+      <div style="width: 100%; height: 100%; padding: 5px; padding-left: 10px;">
+        <app-editor></app-editor>
       </div>
+
     </div>
   </div>
 

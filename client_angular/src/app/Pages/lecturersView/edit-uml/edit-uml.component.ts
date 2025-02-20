@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { detailedQuestionDTO, questionType } from '@DTOs/index';
@@ -14,11 +14,19 @@ import { UmlEditorPopupComponent } from './uml-editor-popup/uml-editor-popup.com
   templateUrl: './edit-uml.component.html',
   styleUrls: ['./edit-uml.component.scss']
 })
-export class EditUmlComponent {
+export class EditUmlComponent implements AfterViewInit {
+  private isDragging = false;
+  private startX = 0;
+  private startLeftWidth = 0;
 
   @ViewChild('question') questionField!: TinymceComponent;
   @ViewChild('expectations') expectationField!: TinymceComponent;
   @ViewChild('solution') solutionField!: TinymceComponent;
+
+  @ViewChild('alignContainer', { static: false }) alignContainer!: ElementRef;
+  @ViewChild('leftContainer', { static: false }) leftContainer!: ElementRef;
+  @ViewChild('rightContainer', { static: false }) rightContainer!: ElementRef;
+  @ViewChild('resizer', { static: false }) resizer!: ElementRef;
 
   umlForm: FormGroup;
 
@@ -62,7 +70,58 @@ export class EditUmlComponent {
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.handleRouteParams();
+      this.setupResizer();
     }, 0);
+  }
+
+  private setupResizer(): void {
+    const container = this.alignContainer.nativeElement;
+    const leftSide = this.leftContainer.nativeElement;
+    const resizer = this.resizer.nativeElement;
+
+    console.log(container, leftSide, resizer);
+    if (!container || !leftSide || !resizer) return;
+
+    const onMouseDown = (e: MouseEvent) => {
+      this.isDragging = true;
+      this.startX = e.pageX;
+      this.startLeftWidth = leftSide.offsetWidth;
+
+      resizer.classList.add('dragging');
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+
+      // Prevent text selection while dragging
+      document.body.style.userSelect = 'none';
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!this.isDragging) return;
+
+      const deltaX = e.pageX - this.startX;
+      const newLeftWidth = ((this.startLeftWidth + deltaX) / container.offsetWidth) * 100;
+
+      // Apply bounds (minimum 15%, maximum 85%)
+      const boundedWidth = Math.min(Math.max(newLeftWidth, 15), 85);
+
+      leftSide.style.width = `${boundedWidth}%`;
+      const rightSide = this.rightContainer.nativeElement;
+      if (rightSide) {
+        rightSide.style.width = `${100 - boundedWidth}%`;
+      }
+    };
+
+    const onMouseUp = () => {
+      this.isDragging = false;
+      resizer.classList.remove('dragging');
+      document.body.style.userSelect = '';
+
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    resizer.addEventListener('mousedown', onMouseDown);
   }
 
 
@@ -199,6 +258,9 @@ export class EditUmlComponent {
     const dialogData = {
       width: '80vw',
       height: '80vh',
+      data: {
+        mode: 'prefab',
+      }
     }
 
     this.dialog.open(UmlEditorPopupComponent, dialogData).afterClosed().subscribe(result => {
@@ -212,6 +274,9 @@ export class EditUmlComponent {
     const dialogData = {
       width: '80vw',
       height: '80vh',
+      data: {
+        mode: 'solution',
+      }
     }
 
     this.dialog.open(UmlEditorPopupComponent, dialogData).afterClosed().subscribe(result => {

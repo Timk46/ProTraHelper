@@ -20,8 +20,91 @@ export class EditorComponent implements OnDestroy {
   private subscriptions: Subscription[] = []; // Array to store subscriptions to unsubscribe later
 
   @Input() mode: string = "create";
-  @Input() selectableNodes: editorElementDTO[] = [];
-  @Input() selectableEdges: editorElementDTO[] = [];
+  @Input() selectableNodes: editorElementDTO[] = [
+    {
+      id: 1,
+      element: EditorElement.CD_CLASS,
+      elementType: EditorElementType.NODE,
+      editorModelId: 1,
+      title: "Klasse",
+      description: "Eine Klasse ist eine abstrakte Darstellung eines Objekts.",
+      data: "gar nix",
+    },
+    {
+      id: 2,
+      element: EditorElement.CD_ABSTRACT_CLASS,
+      elementType: EditorElementType.NODE,
+      editorModelId: 1,
+      title: "Abstrakte Klasse",
+      description: "Eine abstrakte Klasse ist eine Klasse, die nicht instanziiert werden kann.",
+      data: "gar nix",
+    },
+    {
+      id: 3,
+      element: EditorElement.CD_INTERFACE,
+      elementType: EditorElementType.NODE,
+      editorModelId: 1,
+      title: "Interface",
+      description: "Ein Interface ist eine Schnittstelle, die von Klassen implementiert werden kann.",
+      data: "gar nix",
+    },
+  ];
+  @Input() selectableEdges: editorElementDTO[] = [
+    {
+      id: 1,
+      element: EditorElement.CD_ASSOCIATION,
+      elementType: EditorElementType.EDGE,
+      editorModelId: 1,
+      title: "Assoziation",
+      description: "Eine Assoziation beschreibt eine Beziehung zwischen zwei Klassen.",
+      data: "gar nix",
+    },
+    {
+      id: 2,
+      element: EditorElement.CD_BIDIRECTIONAL_ASSOCIATION,
+      elementType: EditorElementType.EDGE,
+      editorModelId: 1,
+      title: "Bidirektionale Assoziation",
+      description: "Eine bidirektionale Assoziation beschreibt eine Beziehung zwischen zwei Klassen, die in beide Richtungen verläuft.",
+      data: "gar nix",
+    },
+    {
+      id: 3,
+      element: EditorElement.CD_DIRECTIONAL_ASSOCIATION,
+      elementType: EditorElementType.EDGE,
+      editorModelId: 1,
+      title: "Gerichtete Assoziation",
+      description: "Eine gerichtete Assoziation beschreibt eine Beziehung zwischen zwei Klassen, die in eine Richtung verläuft.",
+      data: "gar nix",
+    },
+    {
+      id: 4,
+      element: EditorElement.CD_AGGREGATION,
+      elementType: EditorElementType.EDGE,
+      editorModelId: 1,
+      title: "Aggregation",
+      description: "Eine Aggregation beschreibt eine Beziehung zwischen zwei Klassen, bei der eine Klasse die andere Klasse besitzt.",
+      data: "gar nix",
+    },
+    {
+      id: 5,
+      element: EditorElement.CD_COMPOSITION,
+      elementType: EditorElementType.EDGE,
+      editorModelId: 1,
+      title: "Komposition",
+      description: "Eine Komposition beschreibt eine Beziehung zwischen zwei Klassen, bei der eine Klasse die andere Klasse besitzt und ohne die andere Klasse nicht existieren kann.",
+      data: "gar nix",
+    },
+    {
+      id: 6,
+      element: EditorElement.CD_DEPENDENCY,
+      elementType: EditorElementType.EDGE,
+      editorModelId: 1,
+      title: "Abhängigkeit",
+      description: "Eine Abhängigkeit beschreibt eine Beziehung zwischen zwei Klassen, bei der eine Klasse von der anderen Klasse abhängt.",
+      data: "gar nix",
+    }
+  ];
   @Input() nodes: ClassNode[] = [];
   @Input() edges: ClassEdge[] = [];
   @Input() syncedValue: string = "Child Initial Wert";

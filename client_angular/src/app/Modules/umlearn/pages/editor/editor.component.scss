@@ -33,6 +33,7 @@
   overflow: hidden;
   background-color: #fcfcfc;
   transition: height 0.3s;
+  outline: 1px solid #ccc;
 }
 
 .add-container::before {
@@ -101,6 +102,7 @@
   width: calc(100%);
   padding: 20px;
   border-radius: 15px;
+  outline: 1px solid #ccc;
 }
 
 .workspace-container-highlight {

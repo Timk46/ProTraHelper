@@ -3,7 +3,7 @@
   <div *ngIf="mode == 'create'">
     <div #widthReference style="position: absolute; width: 100%;"></div>
 
-    <div class="add-container mat-elevation-z8"
+    <div class="add-container"
       [ngClass]="{'connection-0-mode': activeConnectionMode}"
       [ngClass]="{'connection-1-mode': nodesToConnect.length == 1}"
       [style.width]="(editorContainer.offsetWidth / widthReference.offsetWidth * 100) + '%'">
@@ -46,7 +46,7 @@
   </div>
 
 
-  <div [ngClass]="mode == 'create' ? 'workspace-container' : 'workspace-container-highlight'" class="mat-elevation-z8" (wheel)="zoomEditor(scrollContainer, $event)">
+  <div [ngClass]="mode == 'create' ? 'workspace-container' : 'workspace-container-highlight'" (wheel)="zoomEditor(scrollContainer, $event)">
     <div #scrollContainer (mousedown)="dragStart(scrollContainer, $event)" (mousemove)="dragMove(scrollContainer, $event)" (mouseup)="dragEnd($event)" style="width: 100%; height: 100%; overflow: auto;">
       <!-- editorField -->
       <div #editorField class="editor-field" style="user-select: none;">

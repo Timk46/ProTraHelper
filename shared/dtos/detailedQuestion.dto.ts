@@ -23,7 +23,6 @@ export interface detailedQuestionDTO {
   mcQuestion?: detailedChoiceQuestionDTO;
   fillinQuestion?: detailedFillinQuestionDTO;
   graphQuestion?: detailedGraphQuestionDTO;
-  // fillinQuestion?: detailedFillinQuestionDTO;
 }
 
 export interface detailedFreetextQuestionDTO {
