@@ -49,7 +49,7 @@
 
 
   <div [ngClass]="mode == 'create' ? 'workspace-container' : 'workspace-container-highlight'" (wheel)="zoomEditor(scrollContainer, $event)">
-    <div #scrollContainer (mousedown)="dragStart(scrollContainer, $event)" (mousemove)="dragMove(scrollContainer, $event)" (mouseup)="dragEnd($event)" style="width: 100%; height: 100%; overflow: auto;">
+    <div #scrollContainer (mousedown)="dragStart(scrollContainer, $event)" (mousemove)="dragMove(scrollContainer, $event)" (mouseup)="dragEnd($event)" class="scroll-container">
       <!-- editorField -->
       <div #editorField class="editor-field" style="user-select: none;">
         <div #domNode *ngFor="let node of nodes" [attr.id]="'node_' + node.id" class="node-container" cdkDrag

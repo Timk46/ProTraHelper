@@ -97,16 +97,51 @@ export class EditorComponent implements OnDestroy {
    */
   zoomEditor(scrollContainer: HTMLElement, event: WheelEvent) {
     event.preventDefault();
+
+    // Get container's viewport dimensions
+    const containerRect = scrollContainer.getBoundingClientRect();
+
+    // Calculate mouse position relative to the container's viewport
+    const viewportX = event.clientX - containerRect.left;
+    const viewportY = event.clientY - containerRect.top;
+
+    // Calculate the point in the content space (before zoom)
+    const contentX = (scrollContainer.scrollLeft + viewportX) / this.zoomLevel;
+    const contentY = (scrollContainer.scrollTop + viewportY) / this.zoomLevel;
+
+    // Store old zoom for ratio calculation
+    const oldZoom = this.zoomLevel;
+
+    // Update zoom level
     if (event.deltaY < 0) {
-      this.zoomLevel += 0.1;
+      this.zoomLevel = Math.min(this.zoomLevel + 0.1, 10);
     } else {
-      this.zoomLevel -= 0.1;
+      this.zoomLevel = Math.max(this.zoomLevel - 0.1, 0.1);
     }
-    this.editorField.nativeElement.style.transformOrigin = '0 0';
-    this.zoomLevel = Math.min(Math.max(this.zoomLevel, 0.1), 10);
-    this.editorField.nativeElement.style.transform = `scale(${this.zoomLevel})`;
+
+    // Calculate the zoom ratio for smooth transitions
+    const zoomRatio = this.zoomLevel / oldZoom;
+
+    // Apply zoom transform with high-performance settings
+    requestAnimationFrame(() => {
+      this.editorField.nativeElement.style.transformOrigin = '0 0';
+      this.editorField.nativeElement.style.transform = `scale3d(${this.zoomLevel}, ${this.zoomLevel}, 1)`;
+    });
+
+    // Calculate new scroll position to keep the mouse point fixed
+    const newScrollLeft = (contentX * this.zoomLevel) - viewportX;
+    const newScrollTop = (contentY * this.zoomLevel) - viewportY;
+
+    // Apply new scroll position
+    scrollContainer.scrollLeft = newScrollLeft;
+    scrollContainer.scrollTop = newScrollTop;
+
+    // Update zoom level display
     this.fadeOut = false;
     setTimeout(() => this.fadeOut = true, 2000);
+
+    // Ensure edges are properly positioned after zoom
+    this.edgeService.positionAll();
   }
 
   /**
