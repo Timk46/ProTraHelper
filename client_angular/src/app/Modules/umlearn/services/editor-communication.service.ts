@@ -1,4 +1,4 @@
-import { editorElementDTO, editorModelDTO } from '@DTOs/index';
+import { editorElementDTO, EditorModel, editorModelDTO } from '@DTOs/index';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/internal/Observable';
@@ -24,7 +24,7 @@ export class EditorCommunicationService {
    * @param editorModelId
    * @returns
    */
-  getEditorElements(editorModel: string): Observable<editorElementDTO[]> {
+  getEditorElements(editorModel: EditorModel): Observable<editorElementDTO[]> {
     return this.http.get<editorElementDTO[]>(environment.server + `/editor/elements/${editorModel}`);
   }
 

@@ -24,7 +24,7 @@ export interface taskWorkspaceDataDTO {
 export interface taskSettingsDTO {
     allowedNodeTypes: editorElementDTO[];
     allowedEdgeTypes: editorElementDTO[];
-    editorModel: string;
+    editorModel: EditorModel;
 }
 
 export interface jaroWinklerDTO {

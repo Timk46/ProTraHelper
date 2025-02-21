@@ -1,5 +1,6 @@
 import { FileDto } from "./file.dto";
 import { GraphConfigurationDTO, GraphStructureDTO } from "./graphTask.dto";
+import { editorDataDTO, taskSettingsDTO } from "./umlearnDtos/dtos";
 
 export interface QuestionDTO {
     id: number;
@@ -177,5 +178,18 @@ export interface CodingQuestionDto {
     exampleSolution: GraphStructureDTO[];
     stepsEnabled: boolean;
     configuration: GraphConfigurationDTO;
+    maxPoints: number;
+  }
+
+  export interface UmlQuestionDTO {
+    questionId: number;
+    contentElementId?: number;
+    title: string;
+    text: string;
+    textHTML?: string;
+    editorData?: editorDataDTO;
+    startData?: editorDataDTO;
+    dataImage?: string;
+    taskSettings?: taskSettingsDTO;
     maxPoints: number;
   }

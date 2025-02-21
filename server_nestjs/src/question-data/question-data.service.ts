@@ -10,6 +10,7 @@ import { QuestionDataFillinService } from './question-data-fillin/question-data-
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
 import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
 import { GraphSolutionEvaluationService } from '@/graph-solution-evaluation/graph-solution-evaluation.service';
+import { QuestionDataUmlService } from './question-data-uml/question-data-uml.service';
 
 @Injectable()
 export class QuestionDataService {
@@ -22,7 +23,8 @@ export class QuestionDataService {
     private qdFillin: QuestionDataFillinService,
     private qdFreetext: QuestionDataFreetextService,
     private qdGraph: QuestionDataGraphService,
-    private graphEvalService: GraphSolutionEvaluationService
+    private graphEvalService: GraphSolutionEvaluationService,
+    private qdUml: QuestionDataUmlService,
   ) {}
 
   /**
@@ -136,6 +138,19 @@ export class QuestionDataService {
           }
         });
         break;
+      case questionType.UML:
+        const questionData = await this.prisma.umlQuestion.findFirst({
+          where: {
+            questionId: Number(questionId)
+          }
+        });
+        specificQuestionData = {
+          ...questionData,
+          editorData: JSON.parse(questionData.editorData as unknown as string),
+          startData: JSON.parse(questionData.startData as unknown as string),
+          taskSettings: JSON.parse(questionData.taskSettings as unknown as string),
+        };
+        break;
     }
 
     const questionData: detailedQuestionDTO = {
@@ -145,7 +160,7 @@ export class QuestionDataService {
       mcQuestion: (questionTypeStr === questionType.MULTIPLECHOICE || questionTypeStr === questionType.SINGLECHOICE) ? specificQuestionData : undefined,
       fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
       graphQuestion: questionTypeStr === questionType.GRAPH ? specificQuestionData : undefined,
-      // fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
+      umlQuestion: questionTypeStr === questionType.UML ? specificQuestionData : undefined,
     };
 
     return questionData;
@@ -176,7 +191,7 @@ export class QuestionDataService {
         userId: userId
       };
     }
-    
+
     return {
       id: userAnswer.id,
       questionId: userAnswer.questionId,
@@ -351,6 +366,12 @@ export class QuestionDataService {
           await this.qdFillin.updateFillinQuestion(question.fillinQuestion);
         }
         break;
+      case questionType.UML:
+        if (createNewVersion || !currentQuestion.umlQuestion) {
+          await this.qdUml.createUmlQuestion(question.umlQuestion, updatedQuestion.id);
+        } else {
+          await this.qdUml.updateUmlQuestion(question.umlQuestion);
+        }
     }
 
     return await this.getDetailedQuestion(updatedQuestion.id, question.type as questionType);
@@ -378,10 +399,10 @@ export class QuestionDataService {
         newQuestion.freetextQuestion ||
         newQuestion.mcQuestion ||
         newQuestion.fillinQuestion ||
-        //TODO: uml, graph
-        newQuestion.graphQuestion // ||
-        //TODO: fill, uml
-        // newQuestion.fillinQuestion // das hier einfügen
+        newQuestion.graphQuestion ||
+        newQuestion.umlQuestion // ||
+        // TODO: Add more types here
+
       )
     ){
       return true;
@@ -727,5 +748,7 @@ export class QuestionDataService {
         progress: Math.floor((feedback.score/question.score) * 100),
       }
     }
+
+    // TODO: Uml
   }
 }

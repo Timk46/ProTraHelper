@@ -35,6 +35,7 @@ export class DatabaseEditorCommunicationController {
      * @param editorModel
      * @returns editorElementsDTO
      */
+    @roles('TEACHER', 'ADMIN')
     @Get('elements/:editorModel')
     async getEditorElements( @Param('editorModel') editorModel: string): Promise<editorElementDTO[]> {
       if (!Object.values(EditorModel).includes(editorModel as EditorModel)) {
@@ -49,6 +50,7 @@ export class DatabaseEditorCommunicationController {
      * @param id
      * @returns editorElementDTO
      */
+    @roles('TEACHER', 'ADMIN')
     @Get('elements/:id')
     async getEditorElement(@Param('id') id: number): Promise<editorElementDTO> {
       console.log('DatabaseEditorCommunicationController: getEditorElement()');

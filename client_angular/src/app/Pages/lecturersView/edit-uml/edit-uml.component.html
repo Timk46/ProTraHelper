@@ -4,11 +4,11 @@
   <div #alignContainer class="horizontal-align-container">
     <div #leftContainer class="text-container left-container">
       <div class="wrap-container">
-        <h2>Aufgabe</h2>
-
-        <form [formGroup]="umlForm">
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Titel</mat-label>
+        <div>
+          <h2>Aufgabe</h2>
+          <form [formGroup]="umlForm">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Titel</mat-label>
             <input matInput placeholder="Titel der Frage" formControlName="questionTitle">
             <mat-error *ngIf="umlForm.get('questionTitle')!.hasError('required')">Titel der Frage ist erforderlich</mat-error>
           </mat-form-field>
@@ -33,27 +33,37 @@
               erforderlich</mat-error>
             </mat-form-field>
           </form>
+        </div>
 
+        <div>
           <h2>Aufgabentext</h2>
-
           <div style="width: 100%;">
             <app-tinymce #question [config]="editorConfig"></app-tinymce>
           </div>
+        </div>
 
+        <div>
+          <h2>Vorlage und Lösung</h2>
+          <mat-button-toggle-group [formControl]="selectedEditor" (valueChange)="onEditorChange($event)" aria-label="Edit" style="width: 100%;">
+            <mat-button-toggle value="prefab" style="width: 100%;">Vorlage bearbeiten</mat-button-toggle>
+            <mat-button-toggle value="solution" style="width: 100%;">Lösung bearbeiten</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+
+        <div>
           <h2>Optionen</h2>
-
           <mat-expansion-panel>
             <mat-expansion-panel-header>
               <mat-panel-title>Erlaubte Knoten</mat-panel-title>
             </mat-expansion-panel-header>
-        </mat-expansion-panel>
+          </mat-expansion-panel>
 
-        <mat-expansion-panel>
-          <mat-expansion-panel-header>
-            <mat-panel-title>Erlaubte Kanten</mat-panel-title>
-          </mat-expansion-panel-header>
-        </mat-expansion-panel>
-
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>Erlaubte Kanten</mat-panel-title>
+            </mat-expansion-panel-header>
+          </mat-expansion-panel>
+        </div>
 
         <mat-expansion-panel>
           <mat-expansion-panel-header>
@@ -70,6 +80,7 @@
             </form>
           </div>
         </mat-expansion-panel>
+
       </div>
     </div>
 
@@ -78,7 +89,14 @@
     <div #rightContainer class="text-container right-container">
 
       <div style="width: 100%; height: 100%; padding: 5px; padding-left: 10px;">
-        <app-editor></app-editor>
+        <app-editor #umleditor
+        mode="create"
+        [addContainerText]="selectedEditorAddText"
+        [nodes]="currentEditorData.nodes"
+        [edges]="currentEditorData.edges"
+        [selectableEdges]="possibleEdgeTypes"
+        [selectableNodes]="possibleNodeTypes"
+        ></app-editor>
       </div>
 
     </div>
@@ -86,7 +104,7 @@
 
   <div class="button-container">
     <mat-progress-spinner *ngIf="isSaving" diameter="20" mode="indeterminate"></mat-progress-spinner>
-    <button mat-raised-button [disabled]="isSaving || true" color="primary" (click)="onOverwrite()">Speichern (aktualisieren)</button>
+    <button mat-raised-button [disabled]="isSaving" color="primary" (click)="onOverwrite()">Speichern (aktualisieren)</button>
     <div matTooltip="Die aktuelle Version hat noch keine Freitextdaten." [matTooltipDisabled]="!!detailedQuestionData?.freetextQuestion">
       <button mat-raised-button color="primary"
         (click)="onSaveNewVersion()"

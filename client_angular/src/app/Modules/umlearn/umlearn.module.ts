@@ -17,6 +17,7 @@ import { EditorModule, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
 import { TaskDescriptionPopupComponent } from './pages/task-creation/task-description-popup/task-description-popup.component';
 import { TaskCreationComponent } from './pages/task-creation/task-creation.component';
 import { TooltippComponent } from './pages/tooltip/tooltipp.component';
+import { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';
 
 
 

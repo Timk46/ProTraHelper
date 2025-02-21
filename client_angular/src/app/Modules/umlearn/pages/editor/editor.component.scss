@@ -37,7 +37,7 @@
 }
 
 .add-container::before {
-  content: "Elemente hinzufügen";
+  content: attr(data-content);
   pointer-events: none;
   position: absolute;
   top: 50%;

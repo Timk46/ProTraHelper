@@ -1,13 +1,15 @@
 import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { detailedQuestionDTO, questionType } from '@DTOs/index';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { detailedQuestionDTO, editorDataDTO, editorElementDTO, EditorElementType, EditorModel, questionType, taskSettingsDTO } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { UmlEditorPopupComponent } from './uml-editor-popup/uml-editor-popup.component';
+import { EditorComponent } from 'src/app/Modules/umlearn/pages/editor/editor.component';
+import { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';
 
 @Component({
   selector: 'app-edit-uml',
@@ -15,26 +17,42 @@ import { UmlEditorPopupComponent } from './uml-editor-popup/uml-editor-popup.com
   styleUrls: ['./edit-uml.component.scss']
 })
 export class EditUmlComponent implements AfterViewInit {
-  private isDragging = false;
-  private startX = 0;
-  private startLeftWidth = 0;
+
 
   @ViewChild('question') questionField!: TinymceComponent;
-  @ViewChild('expectations') expectationField!: TinymceComponent;
-  @ViewChild('solution') solutionField!: TinymceComponent;
+  @ViewChild('umleditor') umlEditor!: EditorComponent;
+  //@ViewChild('expectations') expectationField!: TinymceComponent;
+  //@ViewChild('solution') solutionField!: TinymceComponent;
 
   @ViewChild('alignContainer', { static: false }) alignContainer!: ElementRef;
   @ViewChild('leftContainer', { static: false }) leftContainer!: ElementRef;
   @ViewChild('rightContainer', { static: false }) rightContainer!: ElementRef;
   @ViewChild('resizer', { static: false }) resizer!: ElementRef;
 
-  umlForm: FormGroup;
+  private isDragging = false;
+  private startX = 0;
+  private startLeftWidth = 0;
+  protected isSaving = false;
 
-  thisQuestionType = questionType.UML;
+  protected umlForm: FormGroup;
+  protected selectedEditor = new FormControl('solution');
+  protected selectedEditorAddText: string = 'Elemente zur Lösung hinzufügen';
 
-  isSaving = false;
+  protected thisQuestionType = questionType.UML;
+  protected detailedQuestionData: detailedQuestionDTO | null = null;
+  protected currentEditorData: editorDataDTO = {
+    nodes: [],
+    edges: []
+  }
+  protected taskSettings: taskSettingsDTO = {
+    allowedEdgeTypes: [],
+    allowedNodeTypes: [],
+    editorModel: EditorModel.CLASSDIAGRAM
+  }
+  protected possibleEdgeTypes: editorElementDTO[] = [];
+  protected possibleNodeTypes: editorElementDTO[] = [];
 
-  editorConfig = {
+  protected editorConfig = {
     readonly: false,
     plugins: 'autoresize lists table link image code codesample',
     toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
@@ -43,7 +61,6 @@ export class EditUmlComponent implements AfterViewInit {
     resize: false,
   }
 
-  detailedQuestionData: detailedQuestionDTO | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -52,7 +69,8 @@ export class EditUmlComponent implements AfterViewInit {
     private confirmationService: ConfirmationService,
     private snackBar: MatSnackBar,
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private editorCommunicationService: EditorCommunicationService
 
   ) {
     this.umlForm = this.fb.group({
@@ -60,6 +78,10 @@ export class EditUmlComponent implements AfterViewInit {
       questionDifficulty: ['', Validators.required],
       questionDescription: [''],
       questionScore: ['', Validators.required],
+    });
+    this.editorCommunicationService.getEditorElements(EditorModel.CLASSDIAGRAM).subscribe(data => {
+      this.possibleEdgeTypes = data.filter(e => e.elementType === EditorElementType.EDGE);
+      this.possibleNodeTypes = data.filter(e => e.elementType === EditorElementType.NODE);
     });
   }
 
@@ -150,10 +172,14 @@ export class EditUmlComponent implements AfterViewInit {
         questionDescription: this.detailedQuestionData.description,
         questionScore: this.detailedQuestionData.score,
       });
-      if (this.detailedQuestionData.freetextQuestion) {
-        this.questionField.setContent(this.detailedQuestionData.freetextQuestion.textHTML || this.detailedQuestionData.text);
-        this.expectationField.setContent(this.detailedQuestionData.freetextQuestion.expectationsHTML || this.detailedQuestionData.freetextQuestion.expectations);
-        this.solutionField.setContent(this.detailedQuestionData.freetextQuestion.exampleSolutionHTML || this.detailedQuestionData.freetextQuestion.exampleSolution || '');
+      if (this.detailedQuestionData.umlQuestion) {
+        this.questionField.setContent(this.detailedQuestionData.umlQuestion.textHTML || this.detailedQuestionData.text);
+        if (this.detailedQuestionData.umlQuestion.editorData) {
+          console.log('Setting editor data:', this.detailedQuestionData.umlQuestion.editorData);
+          this.currentEditorData = {
+            ...this.detailedQuestionData.umlQuestion.editorData
+          }
+        }
       }
     }
 
@@ -169,6 +195,7 @@ export class EditUmlComponent implements AfterViewInit {
       accept: () => {
         this.isSaving = true;
         const submitData = this.buildDTO();
+        console.log('about to send:', submitData);
         if (submitData) {
           this.questionDataService.updateWholeQuestion(submitData).subscribe({
             next: response => {
@@ -236,14 +263,14 @@ export class EditUmlComponent implements AfterViewInit {
         description: this.umlForm.value.questionDescription,
         score: parseInt(this.umlForm.value.questionScore),
         text: this.questionField.getRawContent(),
-        freetextQuestion: {
-          id: this.detailedQuestionData.freetextQuestion?.id || undefined,
+        umlQuestion: {
+          id: this.detailedQuestionData.umlQuestion?.id || undefined,
           questionId: this.detailedQuestionData.id,
           textHTML: this.questionField.getContent(),
-          expectations: this.expectationField.getRawContent(),
-          expectationsHTML: this.expectationField.getContent(),
-          exampleSolution: this.solutionField.getRawContent(),
-          exampleSolutionHTML: this.solutionField.getContent(),
+          editorData: this.selectedEditor.value === 'solution' ? this.umlEditor.getSaveData() : this.detailedQuestionData.umlQuestion?.editorData,
+          startData: this.selectedEditor.value === 'prefab' ? this.umlEditor.getSaveData() : this.detailedQuestionData.umlQuestion?.startData,
+          //dataImage: null,
+          taskSettings: this.taskSettings,
         }
       }
       return newData;
@@ -254,36 +281,18 @@ export class EditUmlComponent implements AfterViewInit {
 
   // Task specific functions
 
-  editUmlPrefab() {
-    const dialogData = {
-      width: '80vw',
-      height: '80vh',
-      data: {
-        mode: 'prefab',
+  onEditorChange(event: any) {
+    if (event) {
+      console.log(event);
+      switch (event) {
+        case 'prefab':
+          this.selectedEditorAddText = 'Elemente zur Vorlage hinzufügen';
+          break;
+        case 'solution':
+          this.selectedEditorAddText = 'Elemente zur Lösung hinzufügen';
+          break;
       }
     }
-
-    this.dialog.open(UmlEditorPopupComponent, dialogData).afterClosed().subscribe(result => {
-      if (result) {
-        console.log('Dialog closed:', result);
-      }
-    });
-  }
-
-  editUmlSolution(){
-    const dialogData = {
-      width: '80vw',
-      height: '80vh',
-      data: {
-        mode: 'solution',
-      }
-    }
-
-    this.dialog.open(UmlEditorPopupComponent, dialogData).afterClosed().subscribe(result => {
-      if (result) {
-        console.log('Dialog closed:', result);
-      }
-    });
   }
 
 }

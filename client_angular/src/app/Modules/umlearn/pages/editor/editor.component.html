@@ -6,7 +6,9 @@
     <div class="add-container"
       [ngClass]="{'connection-0-mode': activeConnectionMode}"
       [ngClass]="{'connection-1-mode': nodesToConnect.length == 1}"
-      [style.width]="(editorContainer.offsetWidth / widthReference.offsetWidth * 100) + '%'">
+      [style.width]="(editorContainer.offsetWidth / widthReference.offsetWidth * 100) + '%'"
+      [attr.data-content]="addContainerText"
+      >
 
       <div class="add-container-content interactable">
         <div class="item-box">
