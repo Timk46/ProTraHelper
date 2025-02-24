@@ -48,6 +48,11 @@
             <mat-button-toggle value="prefab" style="width: 100%;">Vorlage bearbeiten</mat-button-toggle>
             <mat-button-toggle value="solution" style="width: 100%;">Lösung bearbeiten</mat-button-toggle>
           </mat-button-toggle-group>
+          <!-- TODO: vorlage mit loesung ueberschreiben button und vice versa -->
+          <div style="margin-top: 5px;">
+            <button *ngIf="selectedEditor.value === 'prefab'" mat-raised-button (click)="copyFromSolution()">Von Lösung kopieren</button>
+            <button *ngIf="selectedEditor.value === 'solution'" mat-raised-button (click)="copyFromPrefab()">Von Vorlage kopieren</button>
+          </div>
         </div>
 
         <div>

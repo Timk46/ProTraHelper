@@ -151,9 +151,17 @@ export class EditUmlComponent implements AfterViewInit {
   private handleRouteParams() {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
-      this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
+      this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe((data: detailedQuestionDTO) => {
         if (data.type === questionType.UML) {
-          this.detailedQuestionData = data;
+          this.detailedQuestionData = {
+            ...data,
+            umlQuestion: {
+              ...data.umlQuestion,
+              editorData: data.umlQuestion?.editorData || { nodes: [], edges: [] },
+              startData: data.umlQuestion?.startData || { nodes: [], edges: [] }
+            }
+          };
+
           console.log(this.detailedQuestionData);
           this.setContent();
         } else {
@@ -176,9 +184,7 @@ export class EditUmlComponent implements AfterViewInit {
         this.questionField.setContent(this.detailedQuestionData.umlQuestion.textHTML || this.detailedQuestionData.text);
         if (this.detailedQuestionData.umlQuestion.editorData) {
           console.log('Setting editor data:', this.detailedQuestionData.umlQuestion.editorData);
-          this.currentEditorData = {
-            ...this.detailedQuestionData.umlQuestion.editorData
-          }
+          this.currentEditorData = JSON.parse(JSON.stringify(this.detailedQuestionData?.umlQuestion?.editorData || { nodes: [], edges: [] }));
         }
       }
     }
@@ -281,18 +287,122 @@ export class EditUmlComponent implements AfterViewInit {
 
   // Task specific functions
 
-  onEditorChange(event: any) {
+  /* private confirmAction(title: string, message: string, acceptLabel: string, declineLabel: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      this.confirmationService.confirm({
+        title,
+        message,
+        acceptLabel,
+        declineLabel,
+        accept: () => resolve(true),
+        decline: () => resolve(false)
+      });
+    });
+  }
+
+  async onEditorChange(event: any) {
     if (event) {
       console.log(event);
+      const currData = this.umlEditor.getSaveData();
+      console.log('Current data:', currData);
       switch (event) {
         case 'prefab':
           this.selectedEditorAddText = 'Elemente zur Vorlage hinzufügen';
+          console.log('Current editorData:', this.detailedQuestionData?.umlQuestion?.editorData);
+          if (JSON.stringify(this.detailedQuestionData?.umlQuestion?.editorData) !== JSON.stringify(currData)) {
+            const confirm = await this.confirmAction(
+              'Änderungen übernehmen?',
+              'Es gibt ungespeicherte Änderungen in der Lösung. Möchten Sie diese übernehmen und fortfahren?',
+              'Speichen und zur Vorlage',
+              'Verwerfen und zur Vorlage'
+            );
+            if (confirm) {
+              this.detailedQuestionData!.umlQuestion!.editorData = { ...currData };
+            }
+          }
+          this.currentEditorData = JSON.parse(JSON.stringify(this.detailedQuestionData?.umlQuestion?.startData || { nodes: [], edges: [] }));
           break;
         case 'solution':
           this.selectedEditorAddText = 'Elemente zur Lösung hinzufügen';
+          console.log('Current startData:', this.detailedQuestionData?.umlQuestion?.startData);
+          if (JSON.stringify(this.detailedQuestionData?.umlQuestion?.startData) !== JSON.stringify(currData)) {
+            const confirm = await this.confirmAction(
+              'Änderungen übernehmen?',
+              'Es gibt ungespeicherte Änderungen in der Vorlage. Möchten Sie diese übernehmen und fortfahren?',
+              'Speichen und zur Lösung',
+              'Verwerfen und zur Lösung'
+            );
+            if (confirm) {
+              this.detailedQuestionData!.umlQuestion!.startData = { ...currData };
+            }
+          }
+          this.currentEditorData = JSON.parse(JSON.stringify(this.detailedQuestionData?.umlQuestion?.editorData || { nodes: [], edges: [] }));
           break;
       }
     }
+  } */
+
+  onEditorChange(event: any) {
+    if (event && this.detailedQuestionData && this.detailedQuestionData.umlQuestion) {
+      switch (event) {
+        case 'prefab':
+          this.selectedEditorAddText = 'Elemente zur Vorlage hinzufügen';
+          if (!this.detailedQuestionData.umlQuestion.startData) {
+            this.detailedQuestionData.umlQuestion.startData = { nodes: [], edges: [] };
+          }
+          // pointing to the start data
+          this.currentEditorData = this.detailedQuestionData.umlQuestion.startData;
+          break;
+        case 'solution':
+          this.selectedEditorAddText = 'Elemente zur Lösung hinzufügen';
+          if (!this.detailedQuestionData.umlQuestion.editorData) {
+            this.detailedQuestionData.umlQuestion.editorData = { nodes: [], edges: [] };
+          }
+          // pointing to the editor data
+          this.currentEditorData = this.detailedQuestionData.umlQuestion.editorData;
+          break;
+      }
+    }
+  }
+
+  protected copyFromSolution(){
+    this.confirmationService.confirm({
+      title: 'Lösung kopieren',
+      message: 'Möchten Sie die Lösung als Vorlage verwenden? Alle bisherigen Änderungen an der Vorlage gehen verloren.',
+      acceptLabel: 'Verwenden',
+      declineLabel: 'Abbrechen',
+      accept: () => {
+        if (this.detailedQuestionData && this.detailedQuestionData.umlQuestion && this.detailedQuestionData.umlQuestion.editorData) {
+          this.detailedQuestionData.umlQuestion.startData = JSON.parse(JSON.stringify(this.detailedQuestionData.umlQuestion.editorData));
+          if (this.detailedQuestionData.umlQuestion.startData) {
+            this.currentEditorData = this.detailedQuestionData.umlQuestion.startData;
+          }
+        }
+      },
+      decline: () => {
+        console.log('Copy declined');
+      }
+    });
+  }
+
+  protected copyFromPrefab(){
+    this.confirmationService.confirm({
+      title: 'Vorlage kopieren',
+      message: 'Möchten Sie die Vorlage als Lösung verwenden? Alle bisherigen Änderungen an der Lösung gehen verloren.',
+      acceptLabel: 'Verwenden',
+      declineLabel: 'Abbrechen',
+      accept: () => {
+        if (this.detailedQuestionData && this.detailedQuestionData.umlQuestion && this.detailedQuestionData.umlQuestion.startData) {
+          this.detailedQuestionData.umlQuestion.editorData = JSON.parse(JSON.stringify(this.detailedQuestionData.umlQuestion.startData));
+          if (this.detailedQuestionData.umlQuestion.editorData) {
+            this.currentEditorData = this.detailedQuestionData.umlQuestion.editorData;
+          }
+        }
+      },
+      decline: () => {
+        console.log('Copy declined');
+      }
+    });
   }
 
 }

@@ -504,8 +504,8 @@ export class EditorComponent implements OnDestroy {
    */
   getSaveData(): editorDataDTO {
     return {
-      nodes: this.nodes,
-      edges: this.edges,
+      nodes: this.nodes? this.nodes : [],
+      edges: this.edges? this.edges : [],
     };
   }
 
