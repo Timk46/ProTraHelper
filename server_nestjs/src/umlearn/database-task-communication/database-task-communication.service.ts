@@ -305,11 +305,24 @@ export class DatabaseTaskCommunicationService {
       });
 
       if (!taskAttempt) {
-        // Return dummy data
+        // Return dummy data if no task start data is available
+        const task = await this.prisma.question.findUnique({
+          where: {
+            id: taskId
+          },
+          select: {
+            UmlQuestion: {
+              select: {
+                startData: true
+              }
+            },
+          }
+        });
+
         return {
           userAnswerId: -1,
           taskId: taskId,
-          attemptData: { nodes: [], edges: [] },
+          attemptData: task? task.UmlQuestion.startData as unknown as editorDataDTO : { nodes: [], edges: [] },
         };
       }
 
@@ -425,7 +438,12 @@ export class DatabaseTaskCommunicationService {
     //save feedback
     const feedback = await this.prisma.feedback.create({
       data: {
-        userAnswerId: savedAttempt.userAnswerId,
+        //userAnswerId: savedAttempt.userAnswerId,
+        userAnswer: {
+          connect: {
+            id: savedAttempt.userAnswerId,
+          }
+        },
         score: reachedPoints,
         text: '',
       }
@@ -461,7 +479,7 @@ export class DatabaseTaskCommunicationService {
 
     const matchingLog = this.similarityCompareService.compare(studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
     const response = await this.feedbackRagService.generateUmlFeedbackByLog(taskSolution.UmlQuestion.text, matchingLog);
-    return {response: response.response + '\n\n\n###DEBUG MATCHING-LOG###\n\n' + matchingLog};
+    return {response: response.response}; //+ '\n\n\n###DEBUG MATCHING-LOG###\n\n' + matchingLog};
     //return this.feedbackRagService.generateUmlFeedbackByLog(taskSolution.UmlQuestion.text, matchingLog);
     //return this.feedbackRagService.generateUmlFeedback(taskSolution.UmlQuestion.text, studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
     //return { response: this.similarityCompareService.findAndGenerateGraphSimilarityLog(studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO) };

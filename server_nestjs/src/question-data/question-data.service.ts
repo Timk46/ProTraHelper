@@ -1,7 +1,7 @@
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { QuestionDTO, questionType, detailedQuestionDTO, FillinQuestionDTO } from '@DTOs/index';
+import { QuestionDTO, questionType, detailedQuestionDTO, FillinQuestionDTO, editorDataDTO, taskSettingsDTO } from '@DTOs/index';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswer } from '@DTOs/userAnswer.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
@@ -146,9 +146,9 @@ export class QuestionDataService {
         });
         specificQuestionData = {
           ...questionData,
-          editorData: JSON.parse(questionData.editorData as unknown as string),
-          startData: JSON.parse(questionData.startData as unknown as string),
-          taskSettings: JSON.parse(questionData.taskSettings as unknown as string),
+          editorData: questionData.editorData as unknown as editorDataDTO,
+          startData: questionData.startData as unknown as editorDataDTO,
+          taskSettings: questionData.taskSettings as unknown as taskSettingsDTO,
         };
         break;
     }

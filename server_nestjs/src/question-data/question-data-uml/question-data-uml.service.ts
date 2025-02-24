@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { detailedUmlQuestionDTO, UmlQuestionDTO } from '@DTOs/index';
+import { detailedUmlQuestionDTO, editorDataDTO, taskSettingsDTO, UmlQuestionDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -38,10 +38,10 @@ export class QuestionDataUmlService {
         title: umlQuestion.title,
         text: umlQuestion.text,
         textHTML: umlQuestion.textHTML || undefined,
-        editorData: JSON.stringify(umlQuestion.editorData) || undefined,
-        startData: JSON.stringify(umlQuestion.startData) || undefined,
+        editorData: JSON.parse(JSON.stringify(umlQuestion.editorData)) || undefined,
+        startData: JSON.parse(JSON.stringify(umlQuestion.startData)) || undefined,
         dataImage: umlQuestion.dataImage || undefined,
-        taskSettings: JSON.stringify(umlQuestion.taskSettings) || undefined,
+        taskSettings: JSON.parse(JSON.stringify(umlQuestion.taskSettings)) || undefined,
         question: {connect: {id: questionId}},
       },
     });
@@ -50,9 +50,9 @@ export class QuestionDataUmlService {
     }
     return {
       ...newUmlQuestion,
-      editorData: JSON.parse(newUmlQuestion.editorData as unknown as string),
-      startData: JSON.parse(newUmlQuestion.startData as unknown as string),
-      taskSettings: JSON.parse(newUmlQuestion.taskSettings as unknown as string),
+      editorData: newUmlQuestion.editorData as unknown as editorDataDTO,
+      startData: newUmlQuestion.startData as unknown as editorDataDTO,
+      taskSettings: newUmlQuestion.taskSettings as unknown as taskSettingsDTO,
     };
   }
 
@@ -71,10 +71,10 @@ export class QuestionDataUmlService {
         title: umlQuestion.title || originalUmlQuestion.title,
         text: umlQuestion.text || originalUmlQuestion.text,
         textHTML: umlQuestion.textHTML || originalUmlQuestion.textHTML,
-        editorData: JSON.stringify(umlQuestion.editorData) || originalUmlQuestion.editorData,
-        startData: JSON.stringify(umlQuestion.startData) || originalUmlQuestion.startData,
+        editorData: JSON.parse(JSON.stringify(umlQuestion.editorData)) || originalUmlQuestion.editorData,
+        startData: JSON.parse(JSON.stringify(umlQuestion.startData)) || originalUmlQuestion.startData,
         dataImage: umlQuestion.dataImage || originalUmlQuestion.dataImage,
-        taskSettings: JSON.stringify(umlQuestion.taskSettings) || originalUmlQuestion.taskSettings,
+        taskSettings: JSON.parse(JSON.stringify(umlQuestion.taskSettings)) || originalUmlQuestion.taskSettings,
       },
     });
     if (!updatedUmlQuestion) {
@@ -82,9 +82,9 @@ export class QuestionDataUmlService {
     }
     return {
       ...updatedUmlQuestion,
-      editorData: JSON.parse(updatedUmlQuestion.editorData as unknown as string),
-      startData: JSON.parse(updatedUmlQuestion.startData as unknown as string),
-      taskSettings: JSON.parse(updatedUmlQuestion.taskSettings as unknown as string),
+      editorData: updatedUmlQuestion.editorData as unknown as editorDataDTO,
+      startData: updatedUmlQuestion.startData as unknown as editorDataDTO,
+      taskSettings: updatedUmlQuestion.taskSettings as unknown as taskSettingsDTO,
     };
   }
 }

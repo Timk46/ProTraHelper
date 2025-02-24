@@ -60,8 +60,9 @@ export class SimilarityCompareService {
   public calcGraphSimilarity(attemptGraph: editorDataDTO, solutionGraph: editorDataDTO): number {
     const { nodeMatchings, edgeMatchings } = this.findGraphMatching(attemptGraph, solutionGraph);
 
-    const nodeSimilarity = nodeMatchings.reduce((acc, curr) => acc + curr.similarity, 0) / nodeMatchings.length;
-    const edgeSimilarity = edgeMatchings.reduce((acc, curr) => acc + curr.similarity, 0) / edgeMatchings.length;
+    // if the matching is empty, there is nothing to compare so it has to be 100% similar
+    const nodeSimilarity = nodeMatchings.length === 0 ? 1 : nodeMatchings.reduce((acc, curr) => acc + curr.similarity, 0) / nodeMatchings.length;
+    const edgeSimilarity = edgeMatchings.length === 0 ? 1 : edgeMatchings.reduce((acc, curr) => acc + curr.similarity, 0) / edgeMatchings.length;
 
     const similarity = nodeSimilarity * nodeWeights.total + edgeSimilarity * edgeWeights.total;
     console.log(similarity);

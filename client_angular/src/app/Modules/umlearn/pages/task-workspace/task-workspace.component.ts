@@ -21,10 +21,13 @@ export class TaskWorkspaceComponent implements OnDestroy {
   helpVisible: boolean = false;
   reachedPoints: number = 0;
 
-  feedbackText: string = "";
+  attemptCommitting: boolean = false;
+
+  feedbackText: string = "Hi, ich bin Kai! Kann ich dir helfen?";
   feedbackLoading: boolean = false;
   feedbackTextHighlight: string = "";
   feedbackHighlightLoading: boolean = false;
+  feedbackGenerated: boolean = false;
 
   tinyMceConfig: any = {
     readonly: false,
@@ -75,6 +78,7 @@ export class TaskWorkspaceComponent implements OnDestroy {
         this.taskAttemptData.taskId = params['taskId'];
         const getTaskWorkspaceDataSubscription = dtcs.getTaskWorkspaceData(this.taskAttemptData.taskId).subscribe((data: taskWorkspaceDataDTO) => {
           this.taskWorkspaceData = data;
+          console.log("taskWorkspaceData: ", this.taskWorkspaceData);
           this.init = true;
         });
         this.subscriptions.push(getTaskWorkspaceDataSubscription);
@@ -82,6 +86,7 @@ export class TaskWorkspaceComponent implements OnDestroy {
         const getTaskAttemptDataSubscription = dtcs.getTaskAttemptData(this.taskAttemptData.taskId).subscribe((data: taskAttemptDataDTO) => {
           notification.info("Daten werden geladen...");
           this.taskAttemptData = data;
+          console.log("taskAttemptData: ", this.taskAttemptData);
           notification.success("Daten wurden erfolgreich geladen!");
         });
         this.subscriptions.push(getTaskAttemptDataSubscription);
@@ -91,6 +96,7 @@ export class TaskWorkspaceComponent implements OnDestroy {
 
   onGenerateFeedback() {
     this.feedbackLoading = true;
+    this.feedbackGenerated = true;
     //this.feedbackHighlightLoading = true;
 
     this.dtcs.generateUmlFeedback(this.taskAttemptData.taskId).subscribe((data: {response: string}) => {
@@ -122,11 +128,16 @@ export class TaskWorkspaceComponent implements OnDestroy {
    * Displays an information message and a success message upon successful saving of the submission.
    */
   onAccept(data: editorDataDTO) {
+    this.feedbackGenerated = false;
+    this.attemptCommitting = true;
+    this.feedbackText = "Hi, ich bin Kai! Kann ich dir helfen?";
+
     this.notification.info("Änderungen werden übernommen...");
     this.taskAttemptData.attemptData = data;
     //const setTaskAttemptDataSubscription = this.dtcs.setTaskAttemptData(this.taskAttemptData).subscribe((data: taskAttemptDataDTO) => {
     const setTaskAttemptDataSubscription = this.dtcs.commitAttemptGetPoints(this.taskAttemptData).subscribe((data: {points: number}) => {
       this.isSubmitted = !this.isSubmitted;
+      this.attemptCommitting = false;
       this.reachedPoints = data.points;
       console.log("score: ", data.points);
       //after 0.5 seconds, the transition is finished

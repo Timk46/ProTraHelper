@@ -15,7 +15,7 @@ export class DatabaseTaskCommunicationController {
    * @returns A promise that resolves to an object containing the base64-encoded image.
    * @throws Error if the taskId is invalid.
    */
-  @roles('TEACHER, ADMIN')
+  @roles('TEACHER', 'ADMIN')
   @Get('getTaskImage/:taskId')
   async getTaskImage(@Param('taskId') taskId: number): Promise<{imageB64: string}> {
     if (isNaN(taskId)) {
@@ -82,7 +82,7 @@ export class DatabaseTaskCommunicationController {
    * @returns A Promise that resolves to a taskDataDTO object containing the task data.
    * @throws Error if the taskId is not a valid number.
    */
-  @roles('ANY')
+  @roles('TEACHER', 'ADMIN')
   @Get('taskWorkspace/:taskId')
   async getTaskData(@Param('taskId') taskId : number): Promise<taskDataDTO> {
     if (isNaN(taskId)) {
@@ -94,6 +94,7 @@ export class DatabaseTaskCommunicationController {
 
     /**
    * Retrieves the workspace data for a specific task.
+   * This data has no solution and is used for the student view.
    *
    * @param taskId - The ID of the task.
    * @returns A Promise that resolves to a taskWorkspaceDataDTO object.
