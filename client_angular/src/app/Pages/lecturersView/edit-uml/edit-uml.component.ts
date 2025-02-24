@@ -1,7 +1,7 @@
 import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ClassEdge, ClassNode, detailedQuestionDTO, editorDataDTO, editorElementDTO, EditorElementType, EditorModel, questionType, taskSettingsDTO } from '@DTOs/index';
+import { ClassEdge, ClassNode, detailedQuestionDTO, editorDataDTO, editorElementDTO, EditorElement, EditorElementType, EditorModel, questionType, taskSettingsDTO } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
@@ -10,6 +10,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { UmlEditorPopupComponent } from './uml-editor-popup/uml-editor-popup.component';
 import { EditorComponent } from 'src/app/Modules/umlearn/pages/editor/editor.component';
 import { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-edit-uml',
@@ -17,7 +18,6 @@ import { EditorCommunicationService } from '@UMLearnServices/editor-communicatio
   styleUrls: ['./edit-uml.component.scss']
 })
 export class EditUmlComponent implements AfterViewInit {
-
 
   @ViewChild('question') questionField!: TinymceComponent;
   @ViewChild('umleditor') umlEditor!: EditorComponent;
@@ -33,6 +33,8 @@ export class EditUmlComponent implements AfterViewInit {
   private startX = 0;
   private startLeftWidth = 0;
   protected isSaving = false;
+
+  // New properties to track optional types
 
   protected umlForm: FormGroup;
   protected selectedEditor = new FormControl('solution');
@@ -51,6 +53,8 @@ export class EditUmlComponent implements AfterViewInit {
   }
   protected possibleEdgeTypes: editorElementDTO[] = [];
   protected possibleNodeTypes: editorElementDTO[] = [];
+  protected optionalNodeTypes: Set<EditorElement> = new Set();
+  protected optionalEdgeTypes: Set<EditorElement> = new Set();
 
   protected editorConfig = {
     readonly: false,
@@ -61,7 +65,6 @@ export class EditUmlComponent implements AfterViewInit {
     resize: false,
   }
 
-
   constructor(
     private fb: FormBuilder,
     private questionDataService: QuestionDataService,
@@ -71,7 +74,6 @@ export class EditUmlComponent implements AfterViewInit {
     private router: Router,
     private dialog: MatDialog,
     private editorCommunicationService: EditorCommunicationService
-
   ) {
     this.umlForm = this.fb.group({
       questionTitle: ['', Validators.required],
@@ -146,8 +148,6 @@ export class EditUmlComponent implements AfterViewInit {
     resizer.addEventListener('mousedown', onMouseDown);
   }
 
-
-
   private handleRouteParams() {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
@@ -157,10 +157,24 @@ export class EditUmlComponent implements AfterViewInit {
             ...data,
             umlQuestion: {
               ...data.umlQuestion,
+              taskSettings: data.umlQuestion?.taskSettings || { allowedEdgeTypes: [], allowedNodeTypes: [], editorModel: EditorModel.CLASSDIAGRAM },
               editorData: data.umlQuestion?.editorData || { nodes: [], edges: [] },
               startData: data.umlQuestion?.startData || { nodes: [], edges: [] }
             }
           };
+
+          this.optionalNodeTypes = new Set(this.detailedQuestionData.umlQuestion!.taskSettings!.allowedNodeTypes.filter(node => {
+            return !this.detailedQuestionData!.umlQuestion!.editorData!.nodes.some(n => n.type === node.element)
+          }).map(node => node.element));
+
+          this.optionalEdgeTypes = new Set(this.detailedQuestionData.umlQuestion!.taskSettings!.allowedEdgeTypes.filter(edge => {
+            return !this.detailedQuestionData!.umlQuestion!.editorData!.edges.some(e => e.type === edge.element)
+          }).map(edge => edge.element));
+
+          this.updateAllowedEdges();
+          this.updateAllowedNodes();
+          this.taskSettings = this.detailedQuestionData.umlQuestion!.taskSettings!;
+          console.log('Task settings:', this.taskSettings);
 
           console.log(this.detailedQuestionData);
           this.setContent();
@@ -184,13 +198,11 @@ export class EditUmlComponent implements AfterViewInit {
         this.questionField.setContent(this.detailedQuestionData.umlQuestion.textHTML || this.detailedQuestionData.text);
         if (this.detailedQuestionData.umlQuestion.editorData) {
           console.log('Setting editor data:', this.detailedQuestionData.umlQuestion.editorData);
-          this.currentEditorData = JSON.parse(JSON.stringify(this.detailedQuestionData?.umlQuestion?.editorData || { nodes: [], edges: [] }));
+          this.currentEditorData = this.detailedQuestionData?.umlQuestion?.editorData;
         }
       }
     }
-
   }
-
 
   protected onOverwrite() {
     this.confirmationService.confirm({
@@ -276,71 +288,13 @@ export class EditUmlComponent implements AfterViewInit {
           editorData: this.selectedEditor.value === 'solution' ? this.umlEditor.getSaveData() : this.detailedQuestionData.umlQuestion?.editorData,
           startData: this.selectedEditor.value === 'prefab' ? this.umlEditor.getSaveData() : this.detailedQuestionData.umlQuestion?.startData,
           //dataImage: null,
-          taskSettings: this.taskSettings,
+          taskSettings: this.detailedQuestionData.umlQuestion?.taskSettings || { allowedEdgeTypes: [], allowedNodeTypes: [], editorModel: EditorModel.CLASSDIAGRAM },
         }
       }
       return newData;
     }
     return null;
   }
-
-
-  // Task specific functions
-
-  /* private confirmAction(title: string, message: string, acceptLabel: string, declineLabel: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      this.confirmationService.confirm({
-        title,
-        message,
-        acceptLabel,
-        declineLabel,
-        accept: () => resolve(true),
-        decline: () => resolve(false)
-      });
-    });
-  }
-
-  async onEditorChange(event: any) {
-    if (event) {
-      console.log(event);
-      const currData = this.umlEditor.getSaveData();
-      console.log('Current data:', currData);
-      switch (event) {
-        case 'prefab':
-          this.selectedEditorAddText = 'Elemente zur Vorlage hinzufügen';
-          console.log('Current editorData:', this.detailedQuestionData?.umlQuestion?.editorData);
-          if (JSON.stringify(this.detailedQuestionData?.umlQuestion?.editorData) !== JSON.stringify(currData)) {
-            const confirm = await this.confirmAction(
-              'Änderungen übernehmen?',
-              'Es gibt ungespeicherte Änderungen in der Lösung. Möchten Sie diese übernehmen und fortfahren?',
-              'Speichen und zur Vorlage',
-              'Verwerfen und zur Vorlage'
-            );
-            if (confirm) {
-              this.detailedQuestionData!.umlQuestion!.editorData = { ...currData };
-            }
-          }
-          this.currentEditorData = JSON.parse(JSON.stringify(this.detailedQuestionData?.umlQuestion?.startData || { nodes: [], edges: [] }));
-          break;
-        case 'solution':
-          this.selectedEditorAddText = 'Elemente zur Lösung hinzufügen';
-          console.log('Current startData:', this.detailedQuestionData?.umlQuestion?.startData);
-          if (JSON.stringify(this.detailedQuestionData?.umlQuestion?.startData) !== JSON.stringify(currData)) {
-            const confirm = await this.confirmAction(
-              'Änderungen übernehmen?',
-              'Es gibt ungespeicherte Änderungen in der Vorlage. Möchten Sie diese übernehmen und fortfahren?',
-              'Speichen und zur Lösung',
-              'Verwerfen und zur Lösung'
-            );
-            if (confirm) {
-              this.detailedQuestionData!.umlQuestion!.startData = { ...currData };
-            }
-          }
-          this.currentEditorData = JSON.parse(JSON.stringify(this.detailedQuestionData?.umlQuestion?.editorData || { nodes: [], edges: [] }));
-          break;
-      }
-    }
-  } */
 
   onEditorChange(event: any) {
     if (event && this.detailedQuestionData && this.detailedQuestionData.umlQuestion) {
@@ -365,10 +319,62 @@ export class EditUmlComponent implements AfterViewInit {
     }
   }
 
-  onElementsChange(event: ClassNode | ClassEdge) {
+  // New methods for type checking and handling
+  protected isNodeTypeUsed(type: EditorElement, settingsOnly: boolean = false): boolean {
+    return this.detailedQuestionData?.umlQuestion?.editorData?.nodes.some(node =>
+      node.type === type) || // Direct match
+      (!settingsOnly && this.optionalNodeTypes.has(type)); // Or optionally selected
+  }
+
+  protected isEdgeTypeUsed(type: EditorElement, settingsOnly: boolean = false): boolean {
+    return this.detailedQuestionData?.umlQuestion?.editorData?.edges.some(edge =>
+      edge.type === type) || // Direct match
+      (!settingsOnly && this.optionalEdgeTypes.has(type)); // Or optionally selected
+  }
+
+  protected onNodeTypeToggle(nodeType: editorElementDTO, event: MatCheckboxChange) {
+    if (event.checked) {
+      this.optionalNodeTypes.add(nodeType.element);
+    } else {
+      this.optionalNodeTypes.delete(nodeType.element);
+    }
+    // Update taskSettings to reflect changes
+    this.updateAllowedNodes();
+  }
+
+  protected onEdgeTypeToggle(edgeType: editorElementDTO, event: MatCheckboxChange) {
+    if (event.checked) {
+      this.optionalEdgeTypes.add(edgeType.element);
+    } else {
+      this.optionalEdgeTypes.delete(edgeType.element);
+    }
+    // Update taskSettings to reflect changes
+    this.updateAllowedEdges();
+  }
+
+  protected onElementsChange(event: ClassNode | ClassEdge) {
     if (this.selectedEditor.value === 'solution') {
       console.log('Elements changed:', event);
+      // Update taskSettings with current types
+      this.updateAllowedNodes();
+      this.updateAllowedEdges();
     }
+  }
+
+  private updateAllowedNodes(){
+    if (!(this.detailedQuestionData && this.detailedQuestionData.umlQuestion && this.detailedQuestionData.umlQuestion.editorData && this.detailedQuestionData.umlQuestion.taskSettings)) return;
+    this.detailedQuestionData.umlQuestion.taskSettings.allowedNodeTypes = this.possibleNodeTypes.filter(node =>
+      this.detailedQuestionData!.umlQuestion!.editorData!.nodes.some(n => n.type === node.element) || // If already used
+      this.optionalNodeTypes.has(node.element) // Or optionally selected
+    );
+  }
+
+  private updateAllowedEdges(){
+    if (!(this.detailedQuestionData && this.detailedQuestionData.umlQuestion && this.detailedQuestionData.umlQuestion.editorData && this.detailedQuestionData.umlQuestion.taskSettings)) return;
+    this.detailedQuestionData.umlQuestion.taskSettings.allowedEdgeTypes = this.possibleEdgeTypes.filter(edge =>
+      this.detailedQuestionData!.umlQuestion!.editorData!.edges.some(e => e.type === edge.element) || // If already used
+      this.optionalEdgeTypes.has(edge.element) // Or optionally selected
+    );
   }
 
   protected copyFromSolution(){
@@ -410,5 +416,4 @@ export class EditUmlComponent implements AfterViewInit {
       }
     });
   }
-
 }

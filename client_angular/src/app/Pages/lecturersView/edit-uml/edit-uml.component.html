@@ -61,12 +61,28 @@
             <mat-expansion-panel-header>
               <mat-panel-title>Erlaubte Knoten</mat-panel-title>
             </mat-expansion-panel-header>
+            <div class="checkbox-list">
+              <mat-checkbox *ngFor="let nodeType of possibleNodeTypes"
+                          [checked]="isNodeTypeUsed(nodeType.element)"
+                          [disabled]="isNodeTypeUsed(nodeType.element, true)"
+                          (change)="onNodeTypeToggle(nodeType, $event)">
+                {{nodeType.title}}
+              </mat-checkbox>
+            </div>
           </mat-expansion-panel>
 
           <mat-expansion-panel>
             <mat-expansion-panel-header>
               <mat-panel-title>Erlaubte Kanten</mat-panel-title>
             </mat-expansion-panel-header>
+            <div class="checkbox-list">
+              <mat-checkbox *ngFor="let edgeType of possibleEdgeTypes"
+                          [checked]="isEdgeTypeUsed(edgeType.element)"
+                          [disabled]="isEdgeTypeUsed(edgeType.element, true)"
+                          (change)="onEdgeTypeToggle(edgeType, $event)">
+                {{edgeType.title}}
+              </mat-checkbox>
+            </div>
           </mat-expansion-panel>
         </div>
 

@@ -70,3 +70,14 @@
   justify-content: flex-end;
   align-items: center;
 }
+
+.checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+
+  .mat-checkbox {
+    margin: 4px 0;
+  }
+}
