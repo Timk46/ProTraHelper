@@ -101,6 +101,10 @@
         [edges]="currentEditorData.edges"
         [selectableEdges]="possibleEdgeTypes"
         [selectableNodes]="possibleNodeTypes"
+        (nodeAdded)="onElementsChange($event)"
+        (edgeAdded)="onElementsChange($event)"
+        (nodeRemoved)="onElementsChange($event)"
+        (edgeRemoved)="onElementsChange($event)"
         ></app-editor>
       </div>
 

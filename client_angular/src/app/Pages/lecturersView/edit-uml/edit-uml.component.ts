@@ -1,7 +1,7 @@
 import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { detailedQuestionDTO, editorDataDTO, editorElementDTO, EditorElementType, EditorModel, questionType, taskSettingsDTO } from '@DTOs/index';
+import { ClassEdge, ClassNode, detailedQuestionDTO, editorDataDTO, editorElementDTO, EditorElementType, EditorModel, questionType, taskSettingsDTO } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
@@ -362,6 +362,12 @@ export class EditUmlComponent implements AfterViewInit {
           this.currentEditorData = this.detailedQuestionData.umlQuestion.editorData;
           break;
       }
+    }
+  }
+
+  onElementsChange(event: ClassNode | ClassEdge) {
+    if (this.selectedEditor.value === 'solution') {
+      console.log('Elements changed:', event);
     }
   }
 

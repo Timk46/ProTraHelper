@@ -29,7 +29,9 @@ export class EditorComponent implements OnDestroy {
 
   @Output() nodeSelected = new EventEmitter<editorElementDTO>();
   @Output() edgeSelected = new EventEmitter<editorElementDTO>();
+  @Output() nodeAdded = new EventEmitter<ClassNode>();
   @Output() nodeRemoved = new EventEmitter<ClassNode>();
+  @Output() edgeAdded = new EventEmitter<ClassEdge>();
   @Output() edgeRemoved = new EventEmitter<ClassEdge>();
   @Output() activeConnectionModeChange = new EventEmitter<boolean>();
   @Output() syncedValueChange: EventEmitter<string> = new EventEmitter<string>();
@@ -305,6 +307,7 @@ export class EditorComponent implements OnDestroy {
       }
       this.nodeSelected.emit(node);
       this.nodes.push(_node);
+      this.nodeAdded.emit(_node); // Signal hinzufügen
     }
   }
 
@@ -483,6 +486,7 @@ export class EditorComponent implements OnDestroy {
       end: this.nodesToConnect[1].id,
     };
     this.edges.push(edge);
+    this.edgeAdded.emit(edge); // Signal hinzufügen
     this.edgeSelected.emit(this.selectableEdges.find(_edge => _edge.element === this.connectionEdge));
   }
 
@@ -530,11 +534,12 @@ export class EditorComponent implements OnDestroy {
         if(elementType === 'node') {
           const index = this.nodes.indexOf(elementData as ClassNode);
           if (index !== -1) {
-            this.nodeRemoved.emit(this.nodes[index]);
+            this.nodeRemoved.emit(this.nodes[index]); // Signal hinzufügen
             this.nodes.splice(index, 1);
           }
           for (let i = 0; i < this.edges.length; i++) {
             if (this.edges[i].start === elementData.id || this.edges[i].end === elementData.id) {
+              this.edgeRemoved.emit(this.edges[i]); // Signal hinzufügen
               this.edges.splice(i, 1);
               i--;
             }
@@ -543,7 +548,7 @@ export class EditorComponent implements OnDestroy {
         else if(elementType === 'edge') {
           const index = this.edges.indexOf(elementData as ClassEdge);
           if (index !== -1) {
-            this.edgeRemoved.emit(this.edges[index]);
+            this.edgeRemoved.emit(this.edges[index]); // Signal hinzufügen
             this.edges.splice(index, 1);
           }
         }
