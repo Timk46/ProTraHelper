@@ -29,9 +29,9 @@
 
       <div class="button-container">
         <!-- <button mat-raised-button color="accent" style="width: 50%;" (click)="onCancel()">Abbrechen</button> -->
-        <button mat-raised-button *ngIf="!attemptCommitting" color="primary" style="width: 50%;" (click)="onAccept(editor.getSaveData())">Abgeben</button>
-        <button *ngIf="attemptCommitting" mat-raised-button disabled style="width: 50%;">
-            <mat-spinner style="width: 20px; height: 20px"></mat-spinner>
+        <button mat-raised-button [disabled]="attemptCommitting" color="primary" style="width: 50%;" (click)="onAccept(editor.getSaveData())">
+          <span *ngIf="!attemptCommitting">Abgeben</span>
+          <mat-spinner *ngIf="attemptCommitting" style="width: 20px; height: 20px"></mat-spinner>
         </button>
       </div>
     </div>
@@ -40,20 +40,18 @@
       <div *ngIf="helpVisible" style="height: 100%; display: flex; flex-direction: column;">
         <div>
           <h1>Erreichte Punkte: {{reachedPoints}} von {{taskWorkspaceData.maxPoints}}</h1>
-          <div style="display: flex; flex-direction: row;">
-            <button *ngIf="!feedbackGenerated && !feedbackLoading && !feedbackHighlightLoading" mat-raised-button color="primary" (click)="onGenerateFeedback()">
-              Feedback generieren
+          <div style="display: flex; flex-direction: row; justify-content: center;">
+            <button [disabled]="!(!feedbackGenerated && !feedbackLoading && !feedbackHighlightLoading)" mat-raised-button color="primary" (click)="onGenerateFeedback()" style="width: 50%;">
+              <span *ngIf="!feedbackLoading">Feedback generieren</span>
+              <mat-spinner *ngIf="feedbackLoading" style="width: 20px; height: 20px;"></mat-spinner>
             </button>
           </div>
         </div>
 
         <div style="overflow: auto; margin-top: 10px; padding-bottom: 10px;">
-          <mat-spinner *ngIf="feedbackLoading" color="primary" style="width: 20px; height: 20px;"></mat-spinner>
           <pre *ngIf="!feedbackLoading" style="white-space: pre-wrap; word-wrap: break-word;">{{feedbackText}}</pre>
         </div>
 
-
-        <!-- <mat-progress-spinner mode="indeterminate" diameter="100"></mat-progress-spinner> -->
       </div>
     </div>
 
