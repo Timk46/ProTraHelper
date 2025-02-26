@@ -67,6 +67,11 @@ import { DynamicBlankComponent } from './Pages/contentView/contentElement/fill-i
 import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-task/graph-task.component';
 import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
 import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
+import { ContentListComponent } from './Pages/content-list/content-list.component';
+import { ContentListItemComponent } from './Pages/content-list/content-list-item/content-list-item.component';
+import { MatExpansionModule } from "@angular/material/expansion";
+import { CdkAccordionItem, CdkAccordionModule } from "@angular/cdk/accordion";
+import { MatRippleModule } from "@angular/material/core";
 
 @NgModule({
     declarations: [
@@ -119,7 +124,9 @@ import { NotRegisteredComponent } from './Pages/not-registered/not-registered.co
         NotRegisteredComponent,
         FillinTaskNewComponent,
         DynamicBlankComponent,
-        GraphTaskComponent
+        GraphTaskComponent,
+        ContentListComponent,
+        ContentListItemComponent
     ],
     imports: [
         ToastrModule.forRoot(),
@@ -135,7 +142,10 @@ import { NotRegisteredComponent } from './Pages/not-registered/not-registered.co
         EditorModule,
         MarkdownModule.forRoot(),
         GraphTasksModule,
-        MatMenuModule
+        MatMenuModule,
+        MatExpansionModule,
+        CdkAccordionModule,
+        MatRippleModule
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
