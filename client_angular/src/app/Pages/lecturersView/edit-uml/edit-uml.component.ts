@@ -21,8 +21,6 @@ export class EditUmlComponent implements AfterViewInit {
 
   @ViewChild('question') questionField!: TinymceComponent;
   @ViewChild('umleditor') umlEditor!: EditorComponent;
-  //@ViewChild('expectations') expectationField!: TinymceComponent;
-  //@ViewChild('solution') solutionField!: TinymceComponent;
 
   @ViewChild('alignContainer', { static: false }) alignContainer!: ElementRef;
   @ViewChild('leftContainer', { static: false }) leftContainer!: ElementRef;
@@ -98,6 +96,17 @@ export class EditUmlComponent implements AfterViewInit {
     }, 0);
   }
 
+  /**
+   * Sets up the resizer functionality for adjusting the width of two containers.
+   * The resizer element is expected to be a child of the container element, and the left
+   * and right containers are siblings within the container.
+   *
+   * The resizing is bounded to a minimum width of 15% and a maximum width of 85% for the left container.
+   *
+   * @private
+   * @method setupResizer
+   * @returns {void}
+   */
   private setupResizer(): void {
     const container = this.alignContainer.nativeElement;
     const leftSide = this.leftContainer.nativeElement;
@@ -148,6 +157,16 @@ export class EditUmlComponent implements AfterViewInit {
     resizer.addEventListener('mousedown', onMouseDown);
   }
 
+  /**
+   * Handles route parameters and fetches detailed question data based on the question ID.
+   * Subscribes to route parameters and retrieves the question ID from the parameters.
+   * Fetches detailed question data using the question ID and updates the component's state accordingly.
+   * If the question type is UML, it processes the UML-specific data and updates the allowed node and edge types.
+   * If the question type is not UML, it displays a warning message.
+   *
+   * @private
+   * @returns {void}
+   */
   private handleRouteParams() {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
@@ -186,6 +205,11 @@ export class EditUmlComponent implements AfterViewInit {
     });
   }
 
+  /**
+   * Sets the content of the UML form based on the detailed question data.
+   *
+   * @private
+   */
   private setContent() {
     if (this.thisQuestionType === questionType.UML && this.detailedQuestionData) {
       this.umlForm.patchValue({
@@ -204,6 +228,15 @@ export class EditUmlComponent implements AfterViewInit {
     }
   }
 
+  /**
+   * Handles the overwrite action by showing a confirmation dialog to the user.
+   * If the user accepts, it builds the data transfer object (DTO) and sends it to update the question.
+   * Displays a success or error message based on the response.
+   *
+   * @protected
+   * @method onOverwrite
+   * @returns {void}
+   */
   protected onOverwrite() {
     this.confirmationService.confirm({
       title: 'Frage aktualisieren',
@@ -255,6 +288,13 @@ export class EditUmlComponent implements AfterViewInit {
     });
   }
 
+  /**
+   * Handles the cancel action by showing a confirmation dialog to the user.
+   * If the user accepts, navigates to the dashboard and logs the action.
+   * If the user declines, logs the action.
+   *
+   * @protected
+   */
   protected onCancel() {
     this.confirmationService.confirm({
       title: 'Bearbeitung abbrechen',
@@ -272,6 +312,18 @@ export class EditUmlComponent implements AfterViewInit {
     });
   }
 
+  /**
+   * Builds a detailedQuestionDTO object based on the current form values and question data.
+   *
+   * @returns {detailedQuestionDTO | null} The constructed detailedQuestionDTO object if the form is valid and the question type is UML, otherwise null.
+   *
+   * The function performs the following steps:
+   * 1. Checks if the question type is UML, the form is valid, and detailed question data is available.
+   * 2. Constructs a new detailedQuestionDTO object by merging the existing detailed question data with the form values.
+   * 3. Sets the UML question properties including id, questionId, textHTML, editorData, startData, and taskSettings.
+   * 4. Returns the constructed detailedQuestionDTO object.
+   * 5. Returns null if the conditions are not met.
+   */
   private buildDTO(): detailedQuestionDTO | null {
     if (this.thisQuestionType === questionType.UML && this.umlForm.valid && this.detailedQuestionData) {
       const newData: detailedQuestionDTO = {
@@ -296,6 +348,17 @@ export class EditUmlComponent implements AfterViewInit {
     return null;
   }
 
+  /**
+   * Handles changes in the UML editor.
+   *
+   * This method is triggered whenever the user switches between 'solution' and 'prefab' mode.
+   * Depending on the event type, it updates the `selectedEditorAddText` and
+   * sets the `currentEditorData` to point to the appropriate data structure
+   * (either `startData` or `editorData`) within `detailedQuestionData.umlQuestion`.
+   *
+   * @param event - The event object that triggered the change. It determines
+   *                the type of change and updates the editor accordingly.
+   */
   onEditorChange(event: any) {
     if (event && this.detailedQuestionData && this.detailedQuestionData.umlQuestion) {
       switch (event) {
@@ -319,19 +382,40 @@ export class EditUmlComponent implements AfterViewInit {
     }
   }
 
-  // New methods for type checking and handling
+  /**
+   * Checks if a specific node type is used within the editor data.
+   *
+   * @param type - The type of the editor element to check for.
+   * @param settingsOnly - If true, only checks the optional node types. Defaults to false.
+   * @returns A boolean indicating whether the specified node type is used.
+   */
   protected isNodeTypeUsed(type: EditorElement, settingsOnly: boolean = false): boolean {
     return this.detailedQuestionData?.umlQuestion?.editorData?.nodes.some(node =>
       node.type === type) || // Direct match
       (!settingsOnly && this.optionalNodeTypes.has(type)); // Or optionally selected
   }
 
+  /**
+   * Checks if a specific edge type is used in the UML editor data.
+   *
+   * @param type - The type of the edge to check.
+   * @param settingsOnly - If true, only checks if the type is in the optional edge types set. Defaults to false.
+   * @returns `true` if the edge type is used, `false` otherwise.
+   */
   protected isEdgeTypeUsed(type: EditorElement, settingsOnly: boolean = false): boolean {
     return this.detailedQuestionData?.umlQuestion?.editorData?.edges.some(edge =>
       edge.type === type) || // Direct match
       (!settingsOnly && this.optionalEdgeTypes.has(type)); // Or optionally selected
   }
 
+  /**
+   * Toggles the inclusion of a node type in the optional node types set based on the checkbox event.
+   * If the checkbox is checked, the node type is added to the set; otherwise, it is removed.
+   * After updating the set, the task settings are updated to reflect the changes.
+   *
+   * @param nodeType - The node type to be toggled, represented by an editorElementDTO object.
+   * @param event - The checkbox change event containing the checked state.
+   */
   protected onNodeTypeToggle(nodeType: editorElementDTO, event: MatCheckboxChange) {
     if (event.checked) {
       this.optionalNodeTypes.add(nodeType.element);
@@ -342,6 +426,17 @@ export class EditUmlComponent implements AfterViewInit {
     this.updateAllowedNodes();
   }
 
+  /**
+   * Handles the toggle event for edge types in the editor.
+   *
+   * @param edgeType - The edge type being toggled.
+   * @param event - The checkbox change event.
+   *
+   * When the checkbox is checked, the edge type is added to the set of optional edge types.
+   * When the checkbox is unchecked, the edge type is removed from the set of optional edge types.
+   *
+   * After updating the set of optional edge types, the task settings are updated to reflect the changes.
+   */
   protected onEdgeTypeToggle(edgeType: editorElementDTO, event: MatCheckboxChange) {
     if (event.checked) {
       this.optionalEdgeTypes.add(edgeType.element);
@@ -352,6 +447,17 @@ export class EditUmlComponent implements AfterViewInit {
     this.updateAllowedEdges();
   }
 
+  /**
+   * Handles changes to elements in the editor.
+   *
+   * This method is triggered when elements (either nodes or edges) are added or deleted.
+   * If the selected editor is set to 'solution', it logs the changes and updates
+   * the task settings with the current types by calling `updateAllowedNodes` and
+   * `updateAllowedEdges`.
+   *
+   * @param event - The event object representing the changed element, which can be
+   *                either a `ClassNode` or a `ClassEdge`.
+   */
   protected onElementsChange(event: ClassNode | ClassEdge) {
     if (this.selectedEditor.value === 'solution') {
       console.log('Elements changed:', event);
@@ -361,6 +467,15 @@ export class EditUmlComponent implements AfterViewInit {
     }
   }
 
+  /**
+   * Updates the allowed node types for the UML question based on the current editor data and task settings.
+   *
+   * This method filters the possible node types and updates the `allowedNodeTypes` property of the `taskSettings`
+   * object within `umlQuestion`. A node type is allowed if it is either already used in the editor data or is
+   * optionally selected.
+   *
+   * If any of these checks fail, the method returns early without making any changes.
+   */
   private updateAllowedNodes(){
     if (!(this.detailedQuestionData && this.detailedQuestionData.umlQuestion && this.detailedQuestionData.umlQuestion.editorData && this.detailedQuestionData.umlQuestion.taskSettings)) return;
     this.detailedQuestionData.umlQuestion.taskSettings.allowedNodeTypes = this.possibleNodeTypes.filter(node =>
@@ -369,6 +484,15 @@ export class EditUmlComponent implements AfterViewInit {
     );
   }
 
+  /**
+   * Updates the allowed edge types for the UML question based on the current editor data and task settings.
+   *
+   * This method filters the possible edge types and updates the `allowedEdgeTypes` property of the `taskSettings`
+   * object within `umlQuestion`. It ensures that only the edge types that are either already used in the editor
+   * or optionally selected are allowed.
+   *
+   * If any of these checks fail, the method returns early without making any changes.
+   */
   private updateAllowedEdges(){
     if (!(this.detailedQuestionData && this.detailedQuestionData.umlQuestion && this.detailedQuestionData.umlQuestion.editorData && this.detailedQuestionData.umlQuestion.taskSettings)) return;
     this.detailedQuestionData.umlQuestion.taskSettings.allowedEdgeTypes = this.possibleEdgeTypes.filter(edge =>
@@ -377,6 +501,16 @@ export class EditUmlComponent implements AfterViewInit {
     );
   }
 
+  /**
+   * Copies the solution data to be used as a template.
+   *
+   * This method prompts the user with a confirmation dialog asking if they want to use the solution as a template.
+   * If the user accepts, the current editor data is replaced with the solution data.
+   *
+   * @protected
+   * @method copyFromSolution
+   * @returns {void}
+   */
   protected copyFromSolution(){
     this.confirmationService.confirm({
       title: 'Lösung kopieren',
@@ -397,6 +531,13 @@ export class EditUmlComponent implements AfterViewInit {
     });
   }
 
+  /**
+   * Copies the UML data from the prefab (template) to the current editor data.
+   * This method shows a confirmation dialog to the user, asking if they want to use the template as the solution.
+   * If the user accepts, the current editor data is replaced with the template data, and any previous changes are lost.
+   *
+   * @protected
+   */
   protected copyFromPrefab(){
     this.confirmationService.confirm({
       title: 'Vorlage kopieren',
