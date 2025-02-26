@@ -33,10 +33,9 @@ export class TaskWorkspaceComponent implements OnDestroy {
     readonly: false,
     plugins: 'autoresize lists table image code codesample',
     toolbar: 'undo redo | bold italic underline | forecolor backcolor',
-    min_height: window.innerHeight * 0.65,
-    max_height: window.innerHeight * 0.65,
+    min_height: window.innerHeight * 0.3,
     autoresize: true,
-    resize: false,
+    resize: true,
   };
 
   init: boolean = false; // Boolean to check if the task data is loaded
