@@ -10,6 +10,13 @@
   gap: 15px;
 }
 
+.download-button {
+  right: 70px;
+  bottom: 70px;
+  position: absolute;
+  z-index: 1;
+}
+
 .interactable {
   pointer-events: auto;
 }

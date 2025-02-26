@@ -576,6 +576,44 @@ export class EditorComponent implements OnDestroy {
   }
 
   /**
+   * Initiates the process of saving a picture by taking a snapshot and allowing the user to download it.
+   *
+   * This method captures the current state of the editor as an image, converts it to a Blob,
+   * creates a downloadable link, and triggers the download of the image file.
+   *
+   * The image is saved with the filename 'editor_snapshot.png'.
+   *
+   * @protected
+   * @returns {void}
+   */
+  protected onSavePicture() {
+    //let the user download the picture
+    this.takeSnapshot().then((dataUrl: string) => {
+      // Convert data URL to Blob
+      const byteString = atob(dataUrl.split(',')[1]);
+      const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+
+      const blob = new Blob([ab], {type: mimeString});
+      const blobUrl = URL.createObjectURL(blob);
+
+      // Use the Blob URL for download
+      const link = document.createElement('a');
+      link.setAttribute('href', blobUrl);
+      link.setAttribute('download', 'editor_snapshot.png');
+      link.click();
+
+      // Clean up the Blob URL after download
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+    });
+  }
+
+  /**
    * Takes a snapshot of the editor component.
    *
    * @returns A promise that resolves to a string representing the snapshot image.

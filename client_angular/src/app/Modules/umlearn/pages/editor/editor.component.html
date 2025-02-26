@@ -1,5 +1,9 @@
 <div #editorContainer class="editor-container">
 
+  <button mat-mini-fab class="download-button" (click)="onSavePicture()">
+    <mat-icon>download</mat-icon>
+  </button>
+
   <div *ngIf="mode == 'create'">
     <div #widthReference style="position: absolute; width: 100%;"></div>
 
