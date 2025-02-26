@@ -7,7 +7,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { UmlEditorPopupComponent } from './uml-editor-popup/uml-editor-popup.component';
 import { EditorComponent } from 'src/app/Modules/umlearn/pages/editor/editor.component';
 import { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';
 import { MatCheckboxChange } from '@angular/material/checkbox';
