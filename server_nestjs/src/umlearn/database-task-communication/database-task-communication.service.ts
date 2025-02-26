@@ -433,7 +433,7 @@ export class DatabaseTaskCommunicationService {
     }
 
     //const reachedPoints = await this.compareService.compareAndCalculate(taskSolution.UmlQuestion.editorData as undefined as editorDataDTO, taskAttemptData.attemptData, taskSolution.score);
-    const reachedPoints = Math.floor(taskSolution.score * this.similarityCompareService.calcGraphSimilarity(taskSolution.UmlQuestion.editorData as unknown as editorDataDTO, taskAttemptData.attemptData));
+    const reachedPoints = Math.floor(taskSolution.score * this.similarityCompareService.calcGraphSimilarity(taskAttemptData.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO));
 
     //save feedback
     const feedback = await this.prisma.feedback.create({
@@ -445,7 +445,7 @@ export class DatabaseTaskCommunicationService {
           }
         },
         score: reachedPoints,
-        text: '',
+        text: 'You reached ' + reachedPoints + ' out of ' + taskSolution.score + ' points.',
       }
     });
 

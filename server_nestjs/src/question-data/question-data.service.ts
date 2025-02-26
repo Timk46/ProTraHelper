@@ -144,6 +144,10 @@ export class QuestionDataService {
             questionId: Number(questionId)
           }
         });
+        if (!questionData) {
+          specificQuestionData = undefined;
+          break;
+        }
         specificQuestionData = {
           ...questionData,
           editorData: questionData.editorData as unknown as editorDataDTO,
