@@ -64,8 +64,6 @@ export class TaskWorkspaceComponent implements OnDestroy {
     maxPoints: -1,
   };
 
-
-
   constructor(
     private dtcs: DatabaseTaskCommunicationService,
     private route: ActivatedRoute,
@@ -78,7 +76,6 @@ export class TaskWorkspaceComponent implements OnDestroy {
         this.taskAttemptData.taskId = params['taskId'];
         const getTaskWorkspaceDataSubscription = dtcs.getTaskWorkspaceData(this.taskAttemptData.taskId).subscribe((data: taskWorkspaceDataDTO) => {
           this.taskWorkspaceData = data;
-          console.log("taskWorkspaceData: ", this.taskWorkspaceData);
           this.init = true;
         });
         this.subscriptions.push(getTaskWorkspaceDataSubscription);
@@ -86,7 +83,6 @@ export class TaskWorkspaceComponent implements OnDestroy {
         const getTaskAttemptDataSubscription = dtcs.getTaskAttemptData(this.taskAttemptData.taskId).subscribe((data: taskAttemptDataDTO) => {
           notification.info("Daten werden geladen...");
           this.taskAttemptData = data;
-          console.log("taskAttemptData: ", this.taskAttemptData);
           notification.success("Daten wurden erfolgreich geladen!");
         });
         this.subscriptions.push(getTaskAttemptDataSubscription);
@@ -139,7 +135,6 @@ export class TaskWorkspaceComponent implements OnDestroy {
       this.isSubmitted = !this.isSubmitted;
       this.attemptCommitting = false;
       this.reachedPoints = data.points;
-      console.log("score: ", data.points);
       //after 0.5 seconds, the transition is finished
       if (this.isSubmitted) {
         setTimeout(() => {

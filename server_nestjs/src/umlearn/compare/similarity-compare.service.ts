@@ -89,7 +89,7 @@ export class SimilarityCompareService {
     const edgeSimilarity = edgeMatchings.length === 0 ? 1 : edgeMatchings.reduce((acc, curr) => acc + curr.similarity, 0) / edgeMatchings.length;
 
     const similarity = nodeSimilarity * nodeWeights.total + edgeSimilarity * edgeWeights.total;
-    console.log(similarity);
+    //console.log(similarity);
     return similarity;
   }
 

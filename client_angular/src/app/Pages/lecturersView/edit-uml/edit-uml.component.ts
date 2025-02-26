@@ -110,7 +110,6 @@ export class EditUmlComponent implements AfterViewInit {
     const leftSide = this.leftContainer.nativeElement;
     const resizer = this.resizer.nativeElement;
 
-    console.log(container, leftSide, resizer);
     if (!container || !leftSide || !resizer) return;
 
     const onMouseDown = (e: MouseEvent) => {
@@ -191,9 +190,7 @@ export class EditUmlComponent implements AfterViewInit {
           this.updateAllowedEdges();
           this.updateAllowedNodes();
           this.taskSettings = this.detailedQuestionData.umlQuestion!.taskSettings!;
-          console.log('Task settings:', this.taskSettings);
 
-          console.log(this.detailedQuestionData);
           this.setContent();
         } else {
           this.snackBar.open('ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine UML-Aufgabe!', 'Schließen', { duration: 10000 });
@@ -219,7 +216,6 @@ export class EditUmlComponent implements AfterViewInit {
       if (this.detailedQuestionData.umlQuestion) {
         this.questionField.setContent(this.detailedQuestionData.umlQuestion.textHTML || this.detailedQuestionData.text);
         if (this.detailedQuestionData.umlQuestion.editorData) {
-          console.log('Setting editor data:', this.detailedQuestionData.umlQuestion.editorData);
           this.currentEditorData = this.detailedQuestionData?.umlQuestion?.editorData;
         }
       }
@@ -244,7 +240,6 @@ export class EditUmlComponent implements AfterViewInit {
       accept: () => {
         this.isSaving = true;
         const submitData = this.buildDTO();
-        console.log('about to send:', submitData);
         if (submitData) {
           this.questionDataService.updateWholeQuestion(submitData).subscribe({
             next: response => {
@@ -458,7 +453,6 @@ export class EditUmlComponent implements AfterViewInit {
    */
   protected onElementsChange(event: ClassNode | ClassEdge) {
     if (this.selectedEditor.value === 'solution') {
-      console.log('Elements changed:', event);
       // Update taskSettings with current types
       this.updateAllowedNodes();
       this.updateAllowedEdges();
