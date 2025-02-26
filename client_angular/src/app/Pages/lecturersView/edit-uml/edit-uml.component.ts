@@ -32,8 +32,6 @@ export class EditUmlComponent implements AfterViewInit {
   private startLeftWidth = 0;
   protected isSaving = false;
 
-  // New properties to track optional types
-
   protected umlForm: FormGroup;
   protected selectedEditor = new FormControl('solution');
   protected selectedEditorAddText: string = 'Elemente zur Lösung hinzufügen';

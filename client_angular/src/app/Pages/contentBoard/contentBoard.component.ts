@@ -551,6 +551,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         return 'Programmieraufgabe';
       case questionType.GRAPH:
         return 'Graphaufgabe';
+      case questionType.UML:
+        return 'UML-Aufgabe';
       default:
         return 'undefiniert';
     }
