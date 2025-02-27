@@ -15,15 +15,6 @@ export class TaskDataService {
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Retrieves all questions with their codeGeruest.
-   *
-   * @returns All available questions with their codeGeruest wrapped in an observable.
-   */
-  getTasks(): Observable<QuestionDTO[]> {
-
-    return this.http.get<QuestionDTO[]>(`${this.apiURL}`);
-  }
   getTask(id: number): Observable<QuestionDTO> {
 
     return this.http.get<QuestionDTO>(`${this.apiURL}/${id}`);
