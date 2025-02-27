@@ -3,15 +3,18 @@ import { Module } from '@nestjs/common';
 import { McqCreationService } from './mcqcreation.service';
 import { McqcreationController } from './mcqcreation.controller';
 import { PrismaModule } from '@/prisma/prisma.module';
-import { JsonLoaderService } from './jsonloader.service';
 import { HttpModule } from '@nestjs/axios';
-import { EvaluationService } from './evaluation.service';
-import { EvaluationController } from './evaluation.controller';
 import { RagService } from '@/ai/services/rag.service';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
-  imports: [PrismaModule, HttpModule],
-  providers: [McqCreationService, JsonLoaderService, EvaluationService, RagService],
+  imports: [PrismaModule, HttpModule,
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 10000,
+    }),
+  ],
+  providers: [McqCreationService, RagService],
   controllers: [McqcreationController] //, EvaluationController] CURRENTLY DISABLED
 })
 export class McqCreationModule {}

@@ -7,6 +7,11 @@ import { GraphQuestionDTO, QuestionDTO, questionType } from '@DTOs/question.dto'
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { ProgressService } from 'src/app/Services/progress/progress.service';
+import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import { structuresAreEqual } from '../utils';
+import { AiFeedbackService } from '../services/ai-feedback.service';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { GraphTutorialDialogComponent } from '../graph-tutorial-dialog/graph-tutorial-dialog.component';
 
 
 @Component({
@@ -16,23 +21,36 @@ import { ProgressService } from 'src/app/Services/progress/progress.service';
 })
 export class AssignmentContainerComponent implements OnInit {
 
-  public workspaceModePrevious: string = 'assignment';
-  public workspaceModeCurrent: string = 'assignment';
-  public solutionStepPrevious: number = 0;
-  public solutionStepCurrent: number = 0;
+  // ### workspace/solution related
+  workspaceModePrevious: string = 'assignment';
+  workspaceModeCurrent: string = 'assignment';
+  solutionStepPrevious: number = 0;
+  solutionStepCurrent: number = 0;
 
   initialStructure: GraphStructureDTO = {
     nodes: [], edges: []
   };
 
-  public solutionGraph: GraphStructureDTO[] = [];
+  solutionGraph: GraphStructureDTO[] = [];
 
-  public feedback: string = '';
+  lastSubmittedGraph: GraphStructureDTO[] | null = null;
 
   thisQuestionType = questionType.GRAPH;
 
   questionData: QuestionDTO | null = null;
   graphQuestionData: GraphQuestionDTO | null = null;
+  // ### feedback related
+  feedbackState: 'INITIAL' | 'ALGO' | 'LLM' | 'FEEDBACK_RATED' = 'INITIAL';
+  feedbackTypeCurrent:  'algoFeedback' | 'llmFeedback' | '' = '';
+  llmFeedbackId: number = -1;
+  algoFeedback: string = '';
+  llmFeedback: string = '';
+  feedbackDisabled: boolean = true;
+
+  rating: number = 0;
+  hoverState: number = 0;
+
+  userAnswerId: number = -1;
 
   isSending: boolean = false;
 
@@ -40,12 +58,15 @@ export class AssignmentContainerComponent implements OnInit {
   private questionId!: number;
 
   constructor(
-    private graphTaskService: GraphTaskService,
     private route: ActivatedRoute,
-    private questionDataService: QuestionDataService,
+    private router: Router,
     private snackBar: MatSnackBar,
+    private confirmationService: ConfirmationService,
     private progressService: ProgressService,
-    private router: Router
+    private graphTaskService: GraphTaskService,
+    private aiFeedbackService: AiFeedbackService,
+    private questionDataService: QuestionDataService,
+    private dialog: MatDialog,
   ) {
     this.route.queryParamMap.subscribe(params => {
       this.conceptId = Number(params.get('concept'));
@@ -65,28 +86,44 @@ export class AssignmentContainerComponent implements OnInit {
       this.graphTaskService.resetGraph();
 
       // get question details
-      this.questionDataService.getGraphQuestion(this.questionId!).subscribe(graphQuestionData => {
+      this.questionDataService.getGraphQuestion(this.questionId).subscribe({
+        next: (graphQuestionData) => {
 
-        this.questionDataService.getQuestionData(this.questionId!).subscribe(questionData => {
+          this.questionDataService.getQuestionData(this.questionId).subscribe({
+            next: (questionData) => {
 
-          if (questionData.type === questionType.GRAPH) {
-            this.graphQuestionData = graphQuestionData;
-            this.initialStructure = JSON.parse(JSON.stringify(this.graphQuestionData.initialStructure));
-            this.questionData = questionData;
-            this.updateWorkspace();
-          }
-          else {
-            this.snackBar.open('ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Graphaufgabe!', 'Schließen', { duration: 10000 });
-            this.thisQuestionType = questionData.type as questionType;
-          }
-        });
+              if (questionData.type === questionType.GRAPH) { // TODO: entsprechende questionType anstelle des Strings, testen.
+                this.graphQuestionData = graphQuestionData;
+                this.initialStructure = JSON.parse(JSON.stringify(this.graphQuestionData.initialStructure));
+                this.questionData = questionData;
+                this.updateWorkspace();
+              }
+              else {
+                this.snackBar.open('ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Graphaufgabe!', 'Schließen', { duration: 5000 });
+                this.thisQuestionType = questionData.type as questionType;
+              }
+            },
+            error: (err) => {
+              this.snackBar.open('Fehler beim Laden der Frage!', 'Schließen', { duration: 5000 });
+            }
+          });
+        },
+        error: (err) => {
+          this.snackBar.open('Fehler beim Laden der Frage!', 'Schließen', { duration: 5000 });
+        }
       });
 
-      this.questionDataService.getNewestUserAnswer(this.questionId!).subscribe(data => {
-        if (data.userGraphAnswer) {
-          this.solutionGraph = data.userGraphAnswer;
-          this.workspaceModeCurrent = 'solution';
-          this.updateWorkspace();
+      // get the last submitted solution by the user
+      this.questionDataService.getNewestUserAnswer(this.questionId).subscribe({
+        next: (data) => {
+          if (data.userGraphAnswer) {
+            this.solutionGraph = data.userGraphAnswer;
+            this.workspaceModeCurrent = 'solution';
+            this.updateWorkspace();
+          }
+        },
+        error: (err) => {
+          this.snackBar.open('Fehler beim Laden der letzten abgegebenen Antwort', 'Schließen', { duration: 5000 });
         }
     });
   }
@@ -97,8 +134,14 @@ export class AssignmentContainerComponent implements OnInit {
 
     // To save workpace content if it is in solution mode
     this.updateWorkspace();
+    this.feedbackState = 'ALGO';
+    this.feedbackTypeCurrent = 'algoFeedback';
     this.isSending = true;
-    this.feedback = '';
+    this.algoFeedback = '';
+    this.llmFeedback = '';
+
+    // reset userAnswerId as it is used to generate ai feedback for the last submitted user answer
+    this.userAnswerId = -1;
 
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
@@ -108,18 +151,151 @@ export class AssignmentContainerComponent implements OnInit {
       userGraphAnswer: this.solutionGraph
     }
 
-    this.questionDataService.createUserAnswer(userAnswerData).subscribe(result => {
-      this.handleCodeSubmissionResponse(result);
+    console.log(JSON.stringify(userAnswerData, null, 2));
+    this.questionDataService.createUserAnswer(userAnswerData).subscribe({
+      next: (result) => {
+        console.log(result);
+        this.lastSubmittedGraph = JSON.parse(JSON.stringify(this.solutionGraph));
+        this.handleGraphSubmissionResponse(result);
+      },
+      error: (err) => {
+        this.snackBar.open('Fehler bei der Abgabe der Antwort!', 'Schließen', { duration: 5000 });
+        this.isSending = false;
+      }
     });
 
   }
 
-  handleCodeSubmissionResponse(result: userAnswerFeedbackDTO): void {
+  handleGraphSubmissionResponse(result: userAnswerFeedbackDTO): void {
+    console.log(result);
     this.isSending = false;
-    this.feedback = '<br>' + result.feedbackText.replace(/\n/g, '<br>');
+
+    this.userAnswerId = result.userAnswerId;
+
+    // for first submission, enable the feedback and set the feedback type to algoFeedback
+    if (this.feedbackDisabled) {
+      this.feedbackTypeCurrent = 'algoFeedback';
+    }
+
+    this.feedbackDisabled = false;
+    if (result.feedbackText) {
+      this.algoFeedback = '<br>' + result.feedbackText.replace(/\n/g, '<br>');
+    }
+    else {
+      this.algoFeedback = "<br>Fehler beim Generieren des Algo Feedbacks";
+    }
+
     if (result.progress === 100) {
       this.progressService.answerSubmitted();
     }
+  }
+
+  onFeedbackTypeChange() {
+
+    // To save workpace content if it is in solution mode, as it will check if the structure is the same as the last submitted one
+    this.updateWorkspace();
+
+    if (this.feedbackTypeCurrent === 'llmFeedback') {
+
+      if (this.feedbackState === 'LLM' || this.feedbackState === 'FEEDBACK_RATED') {
+        return;
+      }
+
+      // If structure has changed since last submission, ask for submission
+      let solutionsAreEqual = true;
+
+      if (this.lastSubmittedGraph === null) {
+        solutionsAreEqual = false;
+      }
+
+      else if (this.solutionGraph.length !== this.lastSubmittedGraph?.length) {
+        solutionsAreEqual = false;
+      }
+
+      else {
+        for (let i = 0; i < this.solutionGraph.length; i++) {
+          if (!structuresAreEqual(this.solutionGraph[i], this.lastSubmittedGraph[i])) {
+            solutionsAreEqual = false;
+            break;
+          }
+        }
+      }
+
+      if (!solutionsAreEqual) {
+        this.confirmationService.confirm({
+          title: 'Neue Lösung abgeben',
+          message: 'Die aktuelle Lösung unterscheidet sich von der zuletzt abgegeben Lösung. Sie müssen die aktuelle Lösung abgeben, um KI-Feedback zu erhalten. Abgeben?',
+          acceptLabel: 'Abgeben',
+          declineLabel: 'Abbrechen',
+          accept: () => {
+            this.onSubmitButtonClick();
+          },
+          decline: () => {
+            this.llmFeedback = '<br> Die aktuelle Lösung muss abgegeben werden, um KI-Feedback zu erhalten.';
+          }
+        });
+        return;
+      }
+
+      this.onGetAIFeedbackClick();
+    }
+  }
+
+  onGetAIFeedbackClick() {
+
+    if (!this.graphQuestionData) { return; }
+
+    // To save workpace content if it is in solution mode
+    this.updateWorkspace();
+    this.isSending = true;
+    this.feedbackTypeCurrent = 'llmFeedback';
+    this.llmFeedback = '<br> Feedback wird geladen...';
+
+    this.aiFeedbackService.generateGraphAIFeedback(this.userAnswerId).subscribe({
+      next: (result) => {
+        this.llmFeedbackId = result.feedbackId;
+        this.llmFeedback = '<br>' + result.feedback.replace(/\n/g, '<br>');
+        this.isSending = false;
+        this.feedbackState = 'LLM';
+      },
+      error: (err) => {
+        this.snackBar.open('Fehler beim Generieren des KI-Feedbacks!', 'Schließen', { duration: 5000 });
+        this.llmFeedbackId = -1;
+        this.llmFeedback = '';
+        this.isSending = false;
+        this.feedbackTypeCurrent = 'algoFeedback';
+      }
+    });
+  }
+
+  sendStudentFeedback(starRating: number): void {
+    this.hoverState = 0;
+
+    if (starRating !== 1 && starRating !== 2 && starRating !== 3 && starRating !== 4 && starRating !== 5) {
+      throw new Error('Invalid star rating: ' + starRating);
+    }
+
+    this.aiFeedbackService.rateGraphAIFeedback(this.llmFeedbackId, starRating).subscribe({
+        next: (response) => {
+          this.feedbackState = 'FEEDBACK_RATED';
+          this.snackBar.open('Feedback Vielen Dank für Ihr Feedback!', 'Schließen', { duration: 5000 });
+        },
+        error: (error) => {
+          this.snackBar.open('Fehler beim Senden des Feedbacks!', 'Schließen', { duration: 5000 });
+        },
+      });
+  }
+
+  // Some Functionality for the Star Rating: Selecting a star, hovering over a star, resetting hover state.
+  onStar(star: number): void {
+    this.rating = star;
+  }
+
+  onMouseEnter(star: number): void {
+    this.hoverState = star;
+  }
+  onMouseLeave(): void {
+    this.hoverState = 0;
   }
 
   addNewSolutionStep() {
@@ -198,16 +374,25 @@ export class AssignmentContainerComponent implements OnInit {
   }
 
   resetSolution() {
-    // Reset the solution steps
-    this.solutionGraph = [];
-    this.solutionStepCurrent = 0;
-    this.solutionStepPrevious = this.solutionStepCurrent;
 
-    this.workspaceModeCurrent = 'assignment';
-    this.workspaceModePrevious = this.workspaceModeCurrent;
+    this.confirmationService.confirm({
+      title: 'Lösung zurücksetzen',
+      message: 'Sind Sie sicher, dass Sie Ihre Lösung zurücksetzen möchten? Diese Aktion kann nicht rückgängig gemacht werden. Fortfahren?',
+      acceptLabel: 'Zurücksetzen',
+      declineLabel: 'Abbrechen',
+      accept: () => {
+        // Reset the solution steps
+        this.solutionGraph = [];
+        this.solutionStepCurrent = 0;
+        this.solutionStepPrevious = this.solutionStepCurrent;
 
-    // To use only values and not the references
-    this.updateWorkspace();
+        this.workspaceModeCurrent = 'assignment';
+        this.workspaceModePrevious = this.workspaceModeCurrent;
+
+        // To use only values and not the references
+        this.updateWorkspace();
+      }
+    });
   }
 
 
@@ -301,5 +486,20 @@ export class AssignmentContainerComponent implements OnInit {
       console.log('navigateToDashboard without conceptId');
       this.router.navigate(['/dashboard']);
     }
+  }
+
+  openTutorialDialog() {
+    // Dialog can be configured here using MatDialogConfig
+
+    // const dialogConfig = new MatDialogConfig();
+    // dialogConfig.maxWidth = '70vw';
+    // dialogConfig.maxHeight = '95vh';
+
+    // Open the dialog
+    // const dialogRef =
+    this.dialog.open(
+      GraphTutorialDialogComponent
+    //  ,dialogConfig
+    );
   }
 }

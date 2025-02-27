@@ -1,0 +1,23 @@
+.svg-container {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  pointer-events: none;
+}
+
+.svg-container .clickable {
+  pointer-events: all;
+}
+
+.svg-container .lineGroup {
+  transition: filter 0.15s ease;
+}
+
+.svg-container .line,
+.svg-container .plug {
+  transition: filter 0.15s ease;
+}
+
+.svg-container .clickable:hover {
+  cursor: pointer;
+}

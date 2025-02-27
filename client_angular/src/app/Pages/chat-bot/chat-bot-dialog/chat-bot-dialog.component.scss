@@ -183,6 +183,15 @@
     margin-right: auto;
   }
 
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
   button {
     transition: transform 0.3s ease, color 0.3s ease;
 
@@ -192,6 +201,20 @@
 
     &.selected {
       color: #2196f3;
+    }
+
+    &.animate-rating {
+      animation: bounce 1s infinite;
+      .mat-icon {
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+
+        &.glow-effect {
+          filter: drop-shadow(0 0 2px #2196f3);
+        }
+      }
     }
 
     &.just-rated {

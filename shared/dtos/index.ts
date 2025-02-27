@@ -30,3 +30,7 @@ export * from "./user.dto"; // ToDo: Merge with hefl
 export * from "./file.dto"; // ToDo: Merge with hefl
 export * from "./userAnswer.dto";
 export * from "./feedbackGeneration.dto";
+
+//UMLearn DTOs
+export * from "./umlearnDtos/dtos/index";
+export * from "./umlearnDtos/interfaces/index";

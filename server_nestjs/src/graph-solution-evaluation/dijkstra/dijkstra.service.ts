@@ -20,11 +20,11 @@ export class DijkstraService {
      * @param {GraphStructureDTO[]} expectedSolution - The expected correct solution, with each element representing a step in the process.
      * @param {number} maxPoints - The maximum number of points that can be awarded for the assignment.
      * 
-     * @returns {{ receivedPoints: number, feedback: string }} - An object containing the points awarded and feedback for each step.
+     * @returns {{ receivedPoints: number, feedback: string, feedbackHTML: string, expectedSolutionSemantic: GraphStructureSemanticDTO[] }} - An object containing the points awarded and feedback for each step.
      * 
      * @throws {Error} If the expected solution does not contain at least one step.
      */
-     evaluateSolution(initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
+    evaluateSolution(initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
 
         // Convert solutions from IGraphDataJSON to IGraphDataSemantic, where edges use node values instead of IDs, 
         // as IDs may differ in different solutions even for the same node values.
@@ -44,6 +44,7 @@ export class DijkstraService {
         let evaluateNextSteps = true;
         let receivedPoints: number = 0;
         let feedback: string[] = [];
+        let feedbackHTML: string[] = [];
         let lastEvaluatedStepIndex = 0
         
 
@@ -53,12 +54,15 @@ export class DijkstraService {
 
             let stepReceivedPoints: number = 0;
             let stepFeedback: string = `> Schritt ${stepIndex + 1}: `;
+            let stepFeedbackHTML: string = `<strong>Schritt ${stepIndex + 1}:</strong>`;
 
             // If the student solution has more steps than the expected solution, 
             // they get no points for any extra steps beyond the expected number.
             // and the half of the total points is deducted.
             if (stepIndex >= initialStructure.nodes.length) {
                 feedback.push(`Die Anzahl der Lösungsschritte überschreitet der maximalen erwarteten Schritte.`);
+                feedbackHTML.push(`<strong>Hinweis:</strong>`);
+                feedbackHTML.push(`Die Anzahl der Lösungsschritte überschreitet der maximalen erwarteten Schritte.`);
                 receivedPoints -= maxPoints / 2;
                 break; // no points for this step
             }
@@ -77,8 +81,11 @@ export class DijkstraService {
             
             if (!sameNodesExist || !sameEdgesExist) {
                 feedback.push(`${stepFeedback} \nDie Lösung muss nur alle korrekte Knoten und Kanten enthalten.`);
-                feedback.push(`Punkte für diesen Schritt: ${stepReceivedPoints.toFixed(2)} / ${maxStepPoints.toFixed(2)}`);
+                feedback.push(`> Punkte für diesen Schritt: ${stepReceivedPoints.toFixed(2)} / ${maxStepPoints.toFixed(2)}`);
                 feedback.push('\n###############\n');
+                feedbackHTML.push(`${stepFeedbackHTML} \nDie Lösung muss nur alle korrekte Knoten und Kanten enthalten.`);
+                feedbackHTML.push(`<strong>></strong> Punkte für diesen Schritt: ${stepReceivedPoints.toFixed(2)} / ${maxStepPoints.toFixed(2)}`);
+                feedbackHTML.push('');
                 evaluateNextSteps = false;
                 break;  // no points for this step
             }
@@ -89,6 +96,9 @@ export class DijkstraService {
                 feedback.push(`${stepFeedback} \nIn jedem Schritt muss genau ein neuer Knoten als besucht markiert werden.`);
                 feedback.push(`Punkte für diesen Schritt: ${stepReceivedPoints.toFixed(2)} / ${maxStepPoints.toFixed(2)}`);
                 feedback.push('\n###############\n');
+                feedbackHTML.push(`${stepFeedbackHTML} \nIn jedem Schritt muss genau ein neuer Knoten als besucht markiert werden.`);
+                feedbackHTML.push(`<strong>></strong> Punkte für diesen Schritt: ${stepReceivedPoints.toFixed(2)} / ${maxStepPoints.toFixed(2)}`);
+                feedbackHTML.push('');
                 evaluateNextSteps = false;
                 break; // no points for this step
             }
@@ -109,6 +119,9 @@ export class DijkstraService {
                 feedback.push(`${stepFeedback} \n${feedbackNextStep}`);
                 feedback.push(`Punkte für diesen Schritt: ${stepReceivedPoints.toFixed(2)} / ${maxStepPoints.toFixed(2)}`);
                 feedback.push('\n###############\n');
+                feedbackHTML.push(`${stepFeedbackHTML} \n${feedbackNextStep}`);
+                feedbackHTML.push(`<strong>></strong> Punkte für diesen Schritt: ${stepReceivedPoints.toFixed(2)} / ${maxStepPoints.toFixed(2)}`);
+                feedbackHTML.push('');
                 evaluateNextSteps = false;
                 break; // no points for this step
             }
@@ -128,15 +141,19 @@ export class DijkstraService {
             const nodesWithDifferentWeights: string[] = getNodesWithDifferentWeights(studentStep.nodes, expectedStep.nodes);
             if (nodesWithDifferentWeights.length > 0) {
                 stepFeedback += '\n Die Lösung enthält Knoten mit falschen Gewichten';
+                stepFeedbackHTML += '\n Die Lösung enthält Knoten mit falschen Gewichten';
             }
             
             if (stepReceivedPoints === maxStepPoints) {
                 stepFeedback += '\n Der Lösungsschritt ist korrekt!';
+                stepFeedbackHTML += '\n Der Lösungsschritt ist korrekt!';
             }
 
             // Update feedback and points for this step
             feedback.push(`${stepFeedback} \n Punkte für diesen Schritt: ${stepReceivedPoints.toFixed(2)} / ${maxStepPoints.toFixed(2)}`);
             feedback.push('\n###############\n')
+            feedbackHTML.push(`${stepFeedbackHTML} \n <strong>></strong> Punkte für diesen Schritt: ${stepReceivedPoints.toFixed(2)} / ${maxStepPoints.toFixed(2)}`);
+            feedbackHTML.push('');
             receivedPoints += stepReceivedPoints
         }
 
@@ -146,17 +163,22 @@ export class DijkstraService {
         // Update feedback according to why the evaluation stopped
         if (evaluateNextSteps === false && lastEvaluatedStepIndex < studentSolutionSemantic.length - 1) {
             feedback.push(`Daher wurden die nächsten Lösungsschritten nicht weiter bewertet.`);
+            feedbackHTML.push(`<strong>Hinweis:</strong>`);
+            feedbackHTML.push(`Daher wurden die nächsten Lösungsschritten nicht weiter bewertet.`);
             // feedback.push('\n###############\n')
 
         }
         else if (hasLessSteps) {
             feedback.push(`Die Lösung enthält weniger Schritte als erwartet.`);
+            feedbackHTML.push(`<strong>Hinweis:</strong>`);
+            feedbackHTML.push(`Die Lösung enthält weniger Schritte als erwartet.`);
             // feedback.push('\n###############\n')
         }
 
         // If student solution is correct than only give feedback that the solution is correct
         if (receivedPoints === maxPoints) {
             feedback = ['Die Lösung ist korrekt.'];
+            feedbackHTML = ['Die Lösung ist korrekt.'];
         }
 
         // Ensure that the points are not less than zero
@@ -164,11 +186,14 @@ export class DijkstraService {
         
         // Final feedback
         feedback.push(`\n> Insgesamt erzielte Punkte: ${receivedPoints.toFixed(2)} / ${maxPoints}.`);
+        feedbackHTML.push(`\n<strong>> Insgesamt erzielte Punkte:</strong> ${receivedPoints.toFixed(2)} / ${maxPoints}.`);
 
         return {
             receivedPoints,
-            feedback: feedback.join('\n')
-        }
+            feedback: feedback.join('\n'),
+            feedbackHTML: feedbackHTML.join('\n'),
+            expectedSolutionSemantic: expectedSolutionSemantic
+        }     
     }
 
     findPossibleNextStep(previousStep: GraphStructureSemanticDTO, visitedNodeValue: string): {

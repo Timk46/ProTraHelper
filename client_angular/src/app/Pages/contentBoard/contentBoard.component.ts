@@ -20,6 +20,10 @@ import { TaskViewData } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MatAccordion } from '@angular/material/expansion';
 
+/**
+ * @deprecated This component is no longer used in the application and should not longer be used.
+ * Please refer to the new content-list component in the content-list folder.
+ */
 @Component({
   selector: 'app-contentBoard',
   templateUrl: './contentBoard.component.html',
@@ -239,11 +243,57 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         await this.router.navigate([`/dashboard/concept/${conceptId}/question/${taskId}`]);
         break;
       case questionType.CODE:
-        await this.router.navigate([`/tutor-kai/code/${taskId}`],
-          {
-            queryParams: {
-              concept: conceptId,
-              taskId: taskId
+        // Navigate to coding question component
+        this.router.navigate([this.getRouterLink('CodingQuestion', selectedTask.id)]);
+        break;
+      case questionType.GRAPH:
+        // Navigate to graph question component
+        this.router.navigate([`/graphtask/${selectedTask.id}`]);
+        return;
+      case questionType.FILLIN:
+        dialogRef = this.dialog.open(FillinTaskNewComponent, {...dialogConfig, width: '50vw'});
+        break;
+      case questionType.UML:
+        this.router.navigate([this.getRouterLink("UML", selectedTask.id)]);
+        break;
+    }
+
+    // Handle dialog submission if a dialog was opened
+    if (dialogRef) {
+      //const prevScore = selectedTask.progress;
+
+      // Subscribe to dialog events and manage with takeUntil
+      dialogRef.componentInstance.submitClicked
+        .pipe(takeUntil(dialogRef.afterClosed()))
+        .subscribe((score: number) => {
+          console.log("current score:", selectedTask.progress, "submitted score:", score);
+
+          // update the score if higher
+          if (score > selectedTask.progress) {
+            // the tasks score is taken from dataSource
+            selectedTask.progress = score;
+            //while the contentNodes score is taken from the contentsForActiveConceptNode data
+            selectedContentNode.contentElements.find(element => element.id === selectedTask.contentElementId)!.question!.progress = score;
+
+            console.log("new score set:", selectedTask.progress, "contentNode score:", selectedContentNode.progress);
+
+            if (score === 100) {
+
+              const questionElements = selectedContentNode.contentElements.filter(element => element.type === "QUESTION");
+              const elementCount = questionElements.length;
+              const completedElements = questionElements.filter(element =>
+                element.question?.progress === 100 ||
+                (element.id === selectedTask.contentElementId && score === 100)
+              ).length;
+
+              // Calculate progress based on completed elements
+              selectedContentNode.progress = Math.floor((completedElements / elementCount) * 100);
+              console.log("Progress calc triggered. Progress:", selectedContentNode.progress, "ElementCount:", elementCount, "CompletedElements:", completedElements);
+
+              if (selectedContentNode.progress === 100) {
+                console.log("Aufgabe wurde zum ersten Mal erfolgreich gelöst.");
+                this.progressService.answerSubmitted();
+              }
             }
           }
         );
@@ -394,6 +444,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       case questionType.GRAPH:
         this.router.navigate(['/editgraph/', taskViewData.id]);
         break;
+      case questionType.UML:
+        this.router.navigate(['/edituml/', taskViewData.id]);
+        break;
     }
   }
 
@@ -473,8 +526,15 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    * @param {number} index - The ID of the coding question
    * @returns {string} The router link string
    */
-  getRouterLink(index: number): string {
-    return `/tutor-kai/code/${index}`;
+  getRouterLink(type: string, index: number): string {
+    switch (type) {
+      case 'CodingQuestion':
+        return `/tutor-kai/code/${index}`;
+      case 'UML':
+        return `/umlearn/task-workspace/${index}`;
+      default:
+        throw new Error('Unknown question type');
+    }
   }
 
   /**
@@ -530,6 +590,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         return 'Programmieraufgabe';
       case questionType.GRAPH:
         return 'Graphaufgabe';
+      case questionType.UML:
+        return 'UML-Aufgabe';
       default:
         return 'undefiniert';
     }

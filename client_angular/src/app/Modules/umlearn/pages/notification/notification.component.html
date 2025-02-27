@@ -1,0 +1,5 @@
+<div class="notification-container">
+  <div *ngFor="let notification of notifications" #notificationBox class="noselect notification {{notification.type}} mat-elevation-z8" [@fadeInOut]="'in'">
+    <p>{{notification.message}}</p>
+  </div>
+</div>

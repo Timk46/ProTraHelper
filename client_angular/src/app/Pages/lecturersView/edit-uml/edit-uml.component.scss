@@ -1,0 +1,83 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: calc(100% - 40px);
+  margin: 20px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.horizontal-align-container {
+  flex-grow: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+.text-container {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.left-container {
+  width: 30%;
+  min-width: 200px;
+  padding-bottom: 5px;
+}
+
+.right-container {
+  width: 70%;
+  min-width: 500px;
+}
+
+.resizer {
+  width: 8px;
+  background: #e0e0e0;
+  cursor: col-resize;
+  margin: 0 -4px;
+  z-index: 100;
+
+  &:hover {
+    background: #bdbdbd;
+  }
+
+  &.dragging {
+    background: #2196f3;
+  }
+}
+
+.wrap-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.wrap-container > * {
+  flex: 1 1 700px;
+}
+
+.expansion {
+  display: flex;
+  flex-direction: column;
+}
+
+.button-container {
+  display: flex;
+  gap: 20px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+
+  .mat-checkbox {
+    margin: 4px 0;
+  }
+}

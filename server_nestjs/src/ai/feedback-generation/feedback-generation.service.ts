@@ -1,4 +1,4 @@
-import { ChatBotMessageDTO, freeTextQuestionDTO, freetextFeedbackRequestDTO } from '@Interfaces/index';
+import { freeTextQuestionDTO, freetextFeedbackRequestDTO } from '@Interfaces/index';
 import { Injectable } from '@nestjs/common';
 import { RagService } from '../services/rag.service';
 import { LlmBasicPromptService } from '../services/llmBasicPrompt.service';
@@ -54,6 +54,20 @@ export class FeedbackGenerationService {
     const llmResponse = await this.llmService.generateLlmAnswer( feedbackGenerationPrompts.byTranscriptSearch(requestData.question, lecture_data), requestData.answer );
 
     return llmResponse;
+  }
+
+  /**
+   * Generates graph feedback based on the provided data and user answer.
+   * @param graphSystemMessage - The system message for the graph question.
+   * @param studentSolution - The student's solution to the graph question.
+   * @returns A promise that resolves to an object containing the generated feedback text for the graph question.
+   */
+      async generateGraphFeedback(graphSystemMessage: string, studentSolution: string): Promise<string> {
+        console.log("FeedbackGenerationService.generateGraphQuestion");
+    
+        const llmResponse = await this.llmService.generateLlmAnswer(graphSystemMessage, studentSolution);
+    
+        return llmResponse;
   }
 
 

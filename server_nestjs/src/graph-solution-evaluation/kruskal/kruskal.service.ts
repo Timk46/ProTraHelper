@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GraphEdgeSemanticDTO, GraphStructureSemanticDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
-import { getExtraEdges, getExtraEdgesUndirectedGraph, graphJSONToSemantic, graphsContainSameNodes } from '../utils/graph-utils';
+import { getExtraEdgesUndirectedGraph, graphJSONToSemantic, graphsContainSameNodes } from '../utils/graph-utils';
 
 export interface IUnionFind {
     parent: { [key: string]: string };
@@ -31,7 +31,9 @@ export class KruskalService {
         if (!correctNodes) {
             return {
                 receivedPoints: 0,
-                feedback: 'Der Graph muss dieselben Knoten wie der Ausgangsgraph haben.'
+                feedback: 'Der Graph muss dieselben Knoten wie der Ausgangsgraph haben.',
+                feedbackHTML: 'Der Graph muss dieselben Knoten wie der Ausgangsgraph haben.',
+                expectedSolutionSemantic: []
             }
         }
 
@@ -56,12 +58,14 @@ export class KruskalService {
 
         let receivedPoints = 0;
         let feedback = ''; 
+        let feedbackHTML = ''; 
+        let indexOfBestSolution = -1;
 
         // Iterate through each generated possible solution to evaluate against the student's submission
         allPossibleSolutions.forEach( (possibleSolution: GraphEdgeSemanticDTO[]) => {
 
             // Evaluate the student's solution using the current possible solution and accumulate points and feedback
-            const { possibleReceivedPoints, possibleFeedback } = this.evaluatePossibleSolution(
+            const { possibleReceivedPoints, possibleFeedback, possibleFeedbackHTML } = this.evaluatePossibleSolution(
                 studentNewEdgesByStep, studentRemovedEdgesByStep, possibleSolution, maxPoints
             );
 
@@ -69,15 +73,17 @@ export class KruskalService {
             if (possibleReceivedPoints >= receivedPoints) {
                 receivedPoints = possibleReceivedPoints;
                 feedback = possibleFeedback;
+                feedbackHTML = possibleFeedbackHTML;
+                indexOfBestSolution = allPossibleSolutions.indexOf(possibleSolution);
             }
-
         })
 
-        // Return the total points received and the corresponding feedback
         return {
-            receivedPoints, feedback
+            receivedPoints,
+            feedback: feedback,
+            feedbackHTML: feedbackHTML,
+            expectedSolutionSemantic: allPossibleSolutions[indexOfBestSolution] || []
         }
-
     }
 
     evaluatePossibleSolution(studentNewEdgesByStep: GraphEdgeSemanticDTO[][], studentRemovedEdgesByStep: GraphEdgeSemanticDTO[][], possibleSolution: GraphEdgeSemanticDTO[], maxPoints: number) {
@@ -86,6 +92,7 @@ export class KruskalService {
         const stepMaxPoints = maxPoints / possibleSolution.length;
         let receivedPoints = 0;
         let feedback: string = '';
+        let feedbackHTML: string = '';
         let violation = false; // Flag to indicate if there is a violation in the student's solution
         let lastEvaluatedIndex = 0;
 
@@ -97,8 +104,12 @@ export class KruskalService {
             if (stepIndex >= possibleSolution.length) {
                 feedback = 'Die Anzahl der Lösungsschritte überschreitet maximalen erwarteten Schritte.\n'
                 feedback += `\n> Insgesamt erzielte Punkte: ${receivedPoints.toFixed(2)} / ${maxPoints}.`
+                feedbackHTML = '<strong>Hinweis:</strong>.\n'
+                feedbackHTML += 'Die Anzahl der Lösungsschritte überschreitet maximalen erwarteten Schritte.\n'
+                feedbackHTML += `\n<strong>> Insgesamt erzielte Punkte:</strong> ${receivedPoints.toFixed(2)} / ${maxPoints}.`
                 return {
                     feedback,
+                    feedbackHTML,
                     receivedPoints: 0
                 }
             }
@@ -106,12 +117,14 @@ export class KruskalService {
             const studentNewEdges = studentNewEdgesByStep[stepIndex];
             const studentRemovedEdges = studentRemovedEdgesByStep[stepIndex];
 
-            feedback += `> Schritt ${stepIndex + 1}: `;
+            feedback += `Schritt ${stepIndex + 1}: `;
+            feedbackHTML += `<strong>Schritt ${stepIndex + 1}:</strong> `;
 
             // Ensure that exactly one new edge is added in each step
             if (studentNewEdges.length !== 1) {
                 feedback += 'In jedem Schritt muss genau eine neue Kante hinzugefügt werden.'
                 feedback += '\n###############\n\n'
+                feedbackHTML += 'In jedem Schritt muss genau eine neue Kante hinzugefügt werden.\n\n'
                 violation = true;
                 break;
             }
@@ -120,6 +133,7 @@ export class KruskalService {
             if (studentRemovedEdges.length > 0) {
                 feedback += 'Hinzugefügte Kanten können in nächsten Schritten nicht gelöscht werden.'
                 feedback += '\n###############\n\n'
+                feedbackHTML += 'Hinzugefügte Kanten können in nächsten Schritten nicht gelöscht werden.\n\n'
                 violation = true;
                 break;
             }
@@ -139,6 +153,7 @@ export class KruskalService {
                 // The edge doesn't match
                 feedback += '\n Es wurde nicht die korrekte Kante hinzugefügt.';
                 feedback += '\n###############\n\n'
+                feedbackHTML += '\n Es wurde nicht die korrekte Kante hinzugefügt.\n\n';
                 violation = true;
                 break;
             }
@@ -147,26 +162,34 @@ export class KruskalService {
             receivedPoints += stepMaxPoints;
             feedback += '\n Der Lösungsschritt ist korrekt!'
             feedback += '\n###############\n\n'
+            feedbackHTML += '\n Der Lösungsschritt ist korrekt!\n\n'
         }
 
         // If there was a violation, indicate that further steps are not evaluated
         if (violation && lastEvaluatedIndex < possibleSolution.length - 1) {
             feedback += 'Daher wurden die weiteren Schritte nicht bewertet.\n'
+            feedbackHTML += '<strong>Hinweis:</strong>.\n'
+            feedbackHTML += 'Daher wurden die weiteren Schritte nicht bewertet.\n'
         }
         else if (studentNewEdgesByStep.length < possibleSolution.length) {
             feedback += 'Die Lösung enthält weniger Schritte als erwartet.\n'
+            feedbackHTML += '<strong>Hinweis:</strong>.\n'
+            feedbackHTML += 'Die Lösung enthält weniger Schritte als erwartet.\n'
         }
 
         if (receivedPoints === maxPoints) {
             feedback = 'Die Lösung ist korrekt!\n'
+            feedbackHTML = 'Die Lösung ist korrekt!\n'
         }
 
         // Provide total points and feedback
         feedback += `\n> Insgesamt erzielte Punkte: ${receivedPoints.toFixed(2)} / ${maxPoints}.`
+        feedbackHTML += `\n<strong>> Insgesamt erzielte Punkte:</strong> ${receivedPoints.toFixed(2)} / ${maxPoints}.`
 
         return {
             possibleReceivedPoints: receivedPoints,
-            possibleFeedback: feedback
+            possibleFeedback: feedback,
+            possibleFeedbackHTML: feedbackHTML
         }
     }
 

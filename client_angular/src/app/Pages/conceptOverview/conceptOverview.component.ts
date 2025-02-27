@@ -64,20 +64,15 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
     private router: Router
   ) {
     // subscribe to activeConceptNode changes in the graph and update the activeConceptNode and contentsForActiveConceptNode accordingly
-    this.activeConceptNodeSubscription =
-      this.graphCommunicationService.currentActiveNode.subscribe(
-        (activeConceptNode) => {
-          if (activeConceptNode.databaseId > 0) {
-            // dummy node is 0 - only update if a real node is selected
-            this.activeConceptNode = activeConceptNode;
-            this.contentService
-              .fetchContentsForConcept(this.activeConceptNode.databaseId)
-              .subscribe(
-                (contentsForConcept) =>
-                  (this.contentsForActiveConceptNode = contentsForConcept)
-              );
-          }
+    this.activeConceptNodeSubscription = this.graphCommunicationService.currentActiveNode.subscribe((activeConceptNode) => {
+      if (activeConceptNode.databaseId > 0) { // dummy node is 0 - only update if a real node is selected
+        this.activeConceptNode = activeConceptNode;
+        this.contentService.fetchContentsForConcept(this.activeConceptNode.databaseId).subscribe(contentsForConcept => {
+          this.contentsForActiveConceptNode = contentsForConcept;
+          console.log('contentsForActiveConceptNode', this.contentsForActiveConceptNode);
+        });
         }
+      }
       );
       this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)

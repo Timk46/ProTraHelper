@@ -1,0 +1,101 @@
+<div class="content-list-container">
+
+  <!-- Search and Sort section -->
+  <div style="display: flex;">
+    <div class="search-bar">
+      <!-- <h3>Suchen</h3> -->
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" style="background-color: white;">
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput type="text"  [(ngModel)]="searchTerm" (keyup)="applyFilter()" placeholder="Suche nach Inhalten" />
+        <button *ngIf="searchTerm" matSuffix mat-icon-button aria-label="Clear" (click)="searchTerm=''; applyFilter()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- Task section -->
+  <mat-accordion class="content-list" multi="true">
+    <mat-expansion-panel
+      *ngFor="let content of filteredContents; let i = index"
+      [expanded]="false"
+      class="content-list-item"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title style="flex-grow: 3;">
+          {{ content.name}}
+        </mat-panel-title>
+        <mat-panel-description class="content-list-element-header-description">
+          <!-- stars to show difficulty and progress -->
+          <div class="content-list-element-header-stars">
+            <mat-icon *ngFor="let reached of getLevels(content.levelProgress || 0)">star</mat-icon>
+            <mat-icon *ngFor="let level of getLevels(content.level-(content.levelProgress || 0))">star_border</mat-icon>
+          </div>
+
+          <!-- more indicators -->
+          <div class="content-list-element-header-indicators">
+            <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
+            <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
+          </div>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <!-- the content item body -->
+      <div class="content-list-element-introduction">
+        <!-- stars to show difficulty and progress - only in mobile view -->
+        <div class="content-list-element-introduction-stars">
+          <mat-icon *ngFor="let reached of getLevels(content.levelProgress || 0)">star</mat-icon>
+          <mat-icon *ngFor="let level of getLevels(content.level-(content.levelProgress || 0))">star_border</mat-icon>
+        </div>
+
+        <!-- description -->
+        <p class="content-list-element-description">{{ content.description }}</p>
+
+        <!-- button bar -->
+        <div class="content-list-element-introduction-buttons">
+          <button
+            *ngIf="hasContentElementType(content, 'PDF')"
+            mat-raised-button
+            color="primary"
+            (click)="onContentClick(content, ['PDF'], $event)"
+          >
+            <mat-icon>picture_as_pdf</mat-icon>
+            PDF
+          </button>
+          <button
+            *ngIf="hasContentElementType(content, 'VIDEO')"
+            mat-raised-button
+            color="primary"
+            (click)="onContentClick(content, ['VIDEO'], $event)"
+          >
+            <mat-icon>play_circle_outline</mat-icon>
+            Video
+          </button>
+        </div>
+      </div>
+      <h2 style="margin-top: 10px;">Aufgaben</h2>
+      <div class="content-list-element-items">
+        <app-content-list-item
+          *ngFor="let task of getQuestions(content)"
+          [contentElementData]="task"
+          (scoreUpdated)="onScoreUpdated(content, $event)"
+          (fetchContentsForConcept)="fetchContentsForConcept.emit()"
+          (contentElementDeleted)="onContentElementDeleted(content.contentNodeId, $event)"
+        ></app-content-list-item>
+      </div>
+
+      <!-- edit mode actions -->
+      <mat-action-row *ngIf="isAdmin && editModeActive">
+        <button mat-raised-button color="primary" (click)="onAddTask(content.contentNodeId)">
+          <mat-icon>add</mat-icon>
+          Aufgabe hinzufügen
+        </button>
+        <!-- TODO: enable button after deletion implementation -->
+        <button mat-raised-button disabled color="warn" (click)="onDeleteContentNode(content.contentNodeId)">
+          <mat-icon>delete</mat-icon>
+          Diesen Bereich löschen
+        </button>
+      </mat-action-row>
+
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>
