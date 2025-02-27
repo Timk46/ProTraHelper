@@ -11,7 +11,7 @@ import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-const createEmbeddings = false; // set false to skip embedding creation and save costs!!!
+const createEmbeddings = true; // set false to skip embedding creation and save costs!!!
 
 interface columns_OFP {
   conceptId: number | null;
