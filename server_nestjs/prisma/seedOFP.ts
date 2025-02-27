@@ -1440,7 +1440,7 @@ export const seedOFP = async () => {
       const fastCsv = require('fast-csv');
 
       const options = {
-        delimiter: '§',
+        delimiter: ',',
         headers: [
           'conceptId',
           'conceptEdge',
@@ -1491,12 +1491,13 @@ export const seedOFP = async () => {
           });
         })
         .on('end', async () => {
+          console.log(ofpData);
           await createOFPConcepts(ofpData, moduleInformatik);
           console.log('Importing Concepts Done!');
           console.log('Importing Tasks from Excel...');
-          await seedCodeQuestions(adminUser.id);
+          //await seedCodeQuestions(adminUser.id);
           //await seedMCQ(adminUser.id);
-          await seedMCQnew();
+          //await seedMCQnew();
           console.log('Importing Tasks Done!');
         });
 
