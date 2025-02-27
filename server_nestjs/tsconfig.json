@@ -21,7 +21,9 @@
       "@/*": ["src/*"],
       "@storage/*": ["./storage*"],
       "@Interfaces/*": ["../shared/dtos/*"],
-      "@DTOs/*": ["../shared/dtos/*"]
+      "@DTOs/*": ["../shared/dtos/*"],
+      "@nestjs/cache-manager": ["./node_modules/@nestjs/cache-manager"],
+      "cache-manager": ["./node_modules/cache-manager"]
 
     }
   }

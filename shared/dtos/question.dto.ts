@@ -33,11 +33,11 @@ export interface QuestionDTO {
 */
   
 export interface QuestionVersionDTO {
-    id: number;
-    questionId: number;
-    version: number;
-    isApproved: boolean;
-    successor: number | null;
+    id?: number;
+    questionId?: number;
+    version?: number;
+    isApproved?: boolean;
+    successor?: number | null;
 }
 
 //MC-Question
@@ -47,6 +47,9 @@ export interface McQuestionDTO {
     textHTML?: string;
     isSC: boolean;
     shuffleOptions: boolean;
+    questionVersion?: QuestionVersionDTO;
+    mcQuestionOption?: McQuestionOptionDTO[];
+    additionalInfo?: string[];
 }
 
 /**
@@ -75,7 +78,7 @@ export interface MCOptionViewDTO {
 export interface McQuestionOptionDTO {
     id: number;
     mcQuestion?: McQuestionDTO;
-    mcOption: MCOptionDTO;
+    option: MCOptionDTO;
 }
 
 export interface UserMCAnswerDTO {
@@ -105,36 +108,37 @@ export interface CodingQuestionDto {
     codeGerueste: CodeGeruestDto[];
   }
   
-  export interface CodingQuestionInternal extends CodingQuestionDto { // for backend only
-    automatedTests: AutomatedTestDto[];
-    modelSolutions?: ModelSolutionDto[];
-  }
-  export interface ModelSolutionDto {
-    id: number;
-    codingQuestionId: number;
-    codeFileName: string;
-    code: string;
-    language: string;
-  }
+export interface CodingQuestionInternal extends CodingQuestionDto { // for backend only
+  automatedTests: AutomatedTestDto[];
+  modelSolutions?: ModelSolutionDto[];
+}
 
-  export interface CodeGeruestDto {
-    id: number;
-    codingQuestionId: number;
-    codeFileName: string;
-    code: string;
-    language: string;
-  }
+export interface ModelSolutionDto {
+  id: number;
+  codingQuestionId: number;
+  codeFileName: string;
+  code: string;
+  language: string;
+}
+
+export interface CodeGeruestDto {
+  id: number;
+  codingQuestionId: number;
+  codeFileName: string;
+  code: string;
+  language: string;
+}
   
-  export interface AutomatedTestDto {
-    id: number;
-    code: string;
-    testFileName: string;
-    language: string;
-    questionId: number;
-    testClassName?:  string;
-    runMethod?:      string;
-    inputArguments?: string;
-  }
+export interface AutomatedTestDto {
+  id: number;
+  code: string;
+  testFileName: string;
+  language: string;
+  questionId: number;
+  testClassName?:  string;
+  runMethod?:      string;
+  inputArguments?: string;
+}
 
   export enum questionType {
     SINGLECHOICE = "SC",
@@ -146,25 +150,25 @@ export interface CodingQuestionDto {
     UML = "UMLQuestion",
   }
 
-  export interface McqGenerationDTO {
-    question?: string;
-    answers?: {answer?: string; correct?: boolean}[];
-    description?: string;
-    score?: number;
-  }
+export interface McqGenerationDTO {
+  question?: string;
+  answers?: {answer?: string; correct?: boolean}[];
+  description?: string;
+  score?: number;
+}
 
-  export interface freeTextQuestionDTO {
-    questionId: number;
-    contentElementId?: number;
-    title: string;
-    text: string;
-    textHTML?: string;
-    expectations: string;
-    expectationsHTML?: string;
-    exampleSolution?: string;
-    exampleSolutionHTML?: string;
-    maxPoints: number;
-  }
+export interface freeTextQuestionDTO {
+  questionId: number;
+  contentElementId?: number;
+  title: string;
+  text: string;
+  textHTML?: string;
+  expectations: string;
+  expectationsHTML?: string;
+  exampleSolution?: string;
+  exampleSolutionHTML?: string;
+  maxPoints: number;
+}
 
   export interface GraphQuestionDTO {
     questionId: number;
@@ -193,3 +197,15 @@ export interface CodingQuestionDto {
     taskSettings?: taskSettingsDTO;
     maxPoints: number;
   }
+
+
+export interface OptionDTO {
+  answer: string;
+  correct: boolean;
+}
+
+export interface McqEvaluation {
+  question: string;
+  evaluations?: {reasoning?: string, correct?: boolean}[];
+  commentOnQuality?: string;
+}

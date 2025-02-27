@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { PrismaService } from '@/prisma/prisma.service';
 import { detailedChoiceOptionDTO, detailedChoiceQuestionDTO, MCOptionDTO, MCOptionViewDTO, McQuestionDTO, McQuestionOptionDTO, UserMCOptionSelectedDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
@@ -68,22 +69,22 @@ export class QuestionDataChoiceService {
    * @returns the options of the mc question
    */
   async getMCCheckOptions(mcQuestion_id: number): Promise<MCOptionDTO[]> {
-      let mcOptions : MCOptionDTO[] = [];
+      const mcOptions : MCOptionDTO[] = [];
 
-      let mcQuestionOptions = await this.prisma.mCQuestionOption.findMany({
+      const mcQuestionOptions = await this.prisma.mCQuestionOption.findMany({
           where: {
               mcQuestionId: Number(mcQuestion_id)
           }
       });
 
-      for(let mcQuestionOption of mcQuestionOptions) {
-          let mcOption = await this.prisma.mCOption.findUnique({
+      for(const mcQuestionOption of mcQuestionOptions) {
+          const mcOption = await this.prisma.mCOption.findUnique({
               where: {
                   id: Number(mcQuestionOption.mcOptionId)
               }
           })
 
-          let mcOptionData : MCOptionDTO = {
+          const mcOptionData : MCOptionDTO = {
               id: mcOption.id,
               text: mcOption.text,
               correct: mcOption.is_correct,
@@ -157,13 +158,13 @@ export class QuestionDataChoiceService {
     if(!mcQuestionOption.mcQuestion.id) {
       throw new Error('McQuestion ID not defined');
     }
-    if(!mcQuestionOption.mcOption.id){
+    if(!mcQuestionOption.option.id){
       throw new Error('McOption ID not defined');
     }
     const newMcQuestionOption = await this.prisma.mCQuestionOption.create({
       data: {
         question: {connect: {id: mcQuestionOption.mcQuestion.id}},
-        option: {connect: {id: mcQuestionOption.mcOption.id}},
+        option: {connect: {id: mcQuestionOption.option.id}},
       },
       include: {
         question: {include: {questionVersion: true}},
@@ -177,13 +178,15 @@ export class QuestionDataChoiceService {
 
     return {
       ...newMcQuestionOption,
-      mcOption: {
+      option: {
         ...newMcQuestionOption.option,
         correct: newMcQuestionOption.option.is_correct
       },
       mcQuestion: {
         ...newMcQuestionOption.question,
         shuffleOptions: newMcQuestionOption.question.shuffleoptions,
+        mcQuestionOption: [],
+
       }
     };
   }
