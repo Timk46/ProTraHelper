@@ -1,5 +1,6 @@
 import {CodingQuestionInternal} from './question.dto';
 import { GraphConfigurationDTO, GraphStructureDTO } from './graphTask.dto';
+import { editorDataDTO, taskSettingsDTO } from './umlearnDtos/dtos';
 
 export interface detailedQuestionDTO {
   id: number;
@@ -23,6 +24,7 @@ export interface detailedQuestionDTO {
   mcQuestion?: detailedChoiceQuestionDTO;
   fillinQuestion?: detailedFillinQuestionDTO;
   graphQuestion?: detailedGraphQuestionDTO;
+  umlQuestion?: detailedUmlQuestionDTO;
 }
 
 export interface detailedFreetextQuestionDTO {
@@ -94,4 +96,18 @@ export interface detailedGraphQuestionDTO {
   createdAt?: Date;
   updatedAt?: Date;
   questionId: number;
+}
+
+export interface detailedUmlQuestionDTO {
+  id?: number;
+  questionId?: number;
+  title?: string;
+  text?: string;
+  textHTML?: string;
+  editorData?: editorDataDTO;
+  startData?: editorDataDTO;
+  dataImage?: string;
+  taskSettings?: taskSettingsDTO;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

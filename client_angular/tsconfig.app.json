@@ -5,8 +5,9 @@
     "outDir": "./out-tsc/app",
     "types": [],
     "paths": {
-      "@Interfaces/*": ["src/app/Interfaces/*"],
+      "@Interfaces/*": ["../shared/dtos/*"],
       "@DTOs/*": ["../shared/dtos/*"],
+      "@UMLearnServices/*": ["./src/app/Modules/umlearn/services/*"]
     }
   },
   "files": [

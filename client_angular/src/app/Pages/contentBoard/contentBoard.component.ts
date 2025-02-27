@@ -235,7 +235,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         break;
       case questionType.CODE:
         // Navigate to coding question component
-        this.router.navigate([this.getRouterLink(selectedTask.id)]);
+        this.router.navigate([this.getRouterLink('CodingQuestion', selectedTask.id)]);
         break;
       case questionType.GRAPH:
         // Navigate to graph question component
@@ -243,6 +243,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         return;
       case questionType.FILLIN:
         dialogRef = this.dialog.open(FillinTaskNewComponent, {...dialogConfig, width: '50vw'});
+        break;
+      case questionType.UML:
+        this.router.navigate([this.getRouterLink("UML", selectedTask.id)]);
         break;
     }
 
@@ -410,6 +413,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       case questionType.GRAPH:
         this.router.navigate(['/editgraph/', taskViewData.id]);
         break;
+      case questionType.UML:
+        this.router.navigate(['/edituml/', taskViewData.id]);
+        break;
     }
   }
 
@@ -478,13 +484,22 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /**
-   * @description
-   * Generates a router link for a coding question
-   * @param index - The ID of the coding question
-   * @returns The router link string
+   * Generates a router link based on the provided question type and index.
+   *
+   * @param type - The type of the question. Can be 'CodingQuestion' or 'UML'.
+   * @param index - The index of the question.
+   * @returns The router link as a string.
+   * @throws Will throw an error if the question type is unknown.
    */
-  getRouterLink(index: number): string {
-    return `/tutor-kai/code/${index}`;
+  getRouterLink(type: string, index: number): string {
+    switch (type) {
+      case 'CodingQuestion':
+        return `/tutor-kai/code/${index}`;
+      case 'UML':
+        return `/umlearn/task-workspace/${index}`;
+      default:
+        throw new Error('Unknown question type');
+    }
   }
 
   /**
@@ -540,6 +555,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         return 'Programmieraufgabe';
       case questionType.GRAPH:
         return 'Graphaufgabe';
+      case questionType.UML:
+        return 'UML-Aufgabe';
       default:
         return 'undefiniert';
     }

@@ -1,4 +1,4 @@
-import { ChatBotMessageDTO, freeTextQuestionDTO, freetextFeedbackRequestDTO } from '@Interfaces/index';
+import { freeTextQuestionDTO, freetextFeedbackRequestDTO } from '@Interfaces/index';
 import { Injectable } from '@nestjs/common';
 import { RagService } from '../services/rag.service';
 import { LlmBasicPromptService } from '../services/llmBasicPrompt.service';

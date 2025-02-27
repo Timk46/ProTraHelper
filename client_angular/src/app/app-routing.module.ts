@@ -29,6 +29,7 @@ import { NotRegisteredComponent } from './Pages/not-registered/not-registered.co
 import { RegisteredForSubjectGuard } from './Guards/registered-for-subject.guard';
 
 import { GraphTasksComponent } from './Modules/graph-tasks/graph-tasks.component';
+import { EditUmlComponent } from './Pages/lecturersView/edit-uml/edit-uml.component';
 
 
 const routes: Routes = [
@@ -57,6 +58,7 @@ const routes: Routes = [
   { path: 'editfillin/:questionId', component: EditFillinComponent, canActivate: [LoggedInGuard, AdminGuard]},
   { path: 'editfreetext/:questionId', component: EditFreetextComponent, canActivate: [LoggedInGuard, AdminGuard]},
   { path: 'editgraph/:questionId', component: EditGraphComponent, canActivate: [LoggedInGuard, AdminGuard]},
+  { path: 'edituml/:questionId', component: EditUmlComponent, canActivate: [LoggedInGuard, AdminGuard]},
 
   // just for testing
   { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
@@ -65,6 +67,8 @@ const routes: Routes = [
 
   // Tutor-Kai as lazy loaded module (https://medium.com/@jaydeepvpatil225/feature-module-with-lazy-loading-in-angular-15-53bb8e15d193) Maybe we can use the same for UML Tasks?
   { path: 'tutor-kai', loadChildren: () => import('./Modules/tutor-kai/tutor-kai.module').then(m => m.TutorKaiModule), canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  // UMLearn as lazy loaded module
+  { path: 'umlearn', loadChildren: () => import('./Modules/umlearn/umlearn.module').then(m => m.UmlearnModule), canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
 
   { path: 'admin', loadChildren: () => import('./Pages/admin/admin.module').then(m => m.AdminModule), canActivate: [LoggedInGuard, AdminGuard] },
 ];

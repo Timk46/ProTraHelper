@@ -1,7 +1,7 @@
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { QuestionDTO, questionType, detailedQuestionDTO, FillinQuestionDTO } from '@DTOs/index';
+import { QuestionDTO, questionType, detailedQuestionDTO, FillinQuestionDTO, editorDataDTO, taskSettingsDTO } from '@DTOs/index';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswer } from '@DTOs/userAnswer.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
@@ -10,6 +10,7 @@ import { QuestionDataFillinService } from './question-data-fillin/question-data-
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
 import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
 import { GraphSolutionEvaluationService } from '@/graph-solution-evaluation/graph-solution-evaluation.service';
+import { QuestionDataUmlService } from './question-data-uml/question-data-uml.service';
 
 @Injectable()
 export class QuestionDataService {
@@ -22,7 +23,8 @@ export class QuestionDataService {
     private qdFillin: QuestionDataFillinService,
     private qdFreetext: QuestionDataFreetextService,
     private qdGraph: QuestionDataGraphService,
-    private graphEvalService: GraphSolutionEvaluationService
+    private graphEvalService: GraphSolutionEvaluationService,
+    private qdUml: QuestionDataUmlService,
   ) {}
 
   /**
@@ -136,6 +138,23 @@ export class QuestionDataService {
           }
         });
         break;
+      case questionType.UML:
+        const questionData = await this.prisma.umlQuestion.findFirst({
+          where: {
+            questionId: Number(questionId)
+          }
+        });
+        if (!questionData) {
+          specificQuestionData = undefined;
+          break;
+        }
+        specificQuestionData = {
+          ...questionData,
+          editorData: questionData.editorData as unknown as editorDataDTO,
+          startData: questionData.startData as unknown as editorDataDTO,
+          taskSettings: questionData.taskSettings as unknown as taskSettingsDTO,
+        };
+        break;
     }
 
     const questionData: detailedQuestionDTO = {
@@ -145,7 +164,7 @@ export class QuestionDataService {
       mcQuestion: (questionTypeStr === questionType.MULTIPLECHOICE || questionTypeStr === questionType.SINGLECHOICE) ? specificQuestionData : undefined,
       fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
       graphQuestion: questionTypeStr === questionType.GRAPH ? specificQuestionData : undefined,
-      // fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
+      umlQuestion: questionTypeStr === questionType.UML ? specificQuestionData : undefined,
     };
 
     return questionData;
@@ -176,7 +195,7 @@ export class QuestionDataService {
         userId: userId
       };
     }
-    
+
     return {
       id: userAnswer.id,
       questionId: userAnswer.questionId,
@@ -351,6 +370,12 @@ export class QuestionDataService {
           await this.qdFillin.updateFillinQuestion(question.fillinQuestion);
         }
         break;
+      case questionType.UML:
+        if (createNewVersion || !currentQuestion.umlQuestion) {
+          await this.qdUml.createUmlQuestion(question.umlQuestion, updatedQuestion.id);
+        } else {
+          await this.qdUml.updateUmlQuestion(question.umlQuestion);
+        }
     }
 
     return await this.getDetailedQuestion(updatedQuestion.id, question.type as questionType);
@@ -378,10 +403,10 @@ export class QuestionDataService {
         newQuestion.freetextQuestion ||
         newQuestion.mcQuestion ||
         newQuestion.fillinQuestion ||
-        //TODO: uml, graph
-        newQuestion.graphQuestion // ||
-        //TODO: fill, uml
-        // newQuestion.fillinQuestion // das hier einfügen
+        newQuestion.graphQuestion ||
+        newQuestion.umlQuestion // ||
+        // TODO: Add more types here
+
       )
     ){
       return true;
@@ -727,5 +752,7 @@ export class QuestionDataService {
         progress: Math.floor((feedback.score/question.score) * 100),
       }
     }
+
+    // TODO: Uml
   }
 }

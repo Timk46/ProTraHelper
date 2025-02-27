@@ -1,5 +1,6 @@
 import { FileDto } from "./file.dto";
 import { GraphConfigurationDTO, GraphStructureDTO } from "./graphTask.dto";
+import { editorDataDTO, taskSettingsDTO } from "./umlearnDtos/dtos";
 
 export interface QuestionDTO {
     id: number;
@@ -139,14 +140,15 @@ export interface AutomatedTestDto {
   inputArguments?: string;
 }
 
-export enum questionType {
-  SINGLECHOICE = "SC",
-  MULTIPLECHOICE = "MC",
-  FREETEXT = "FreeText",
-  CODE = "CodingQuestion",
-  FILLIN = "Fillin",
-  GRAPH = "GraphQuestion",
-}
+  export enum questionType {
+    SINGLECHOICE = "SC",
+    MULTIPLECHOICE = "MC",
+    FREETEXT = "FreeText",
+    CODE = "CodingQuestion",
+    FILLIN = "Fillin",
+    GRAPH = "GraphQuestion",
+    UML = "UMLQuestion",
+  }
 
 export interface McqGenerationDTO {
   question?: string;
@@ -168,20 +170,34 @@ export interface freeTextQuestionDTO {
   maxPoints: number;
 }
 
-export interface GraphQuestionDTO {
-  questionId: number;
-  contentElementId?: number;
-  title: string;
-  textHTML?: string;
-  expectations: string;
-  expectationsHTML?: string;
-  type: string;
-  initialStructure: GraphStructureDTO;
-  exampleSolution: GraphStructureDTO[];
-  stepsEnabled: boolean;
-  configuration: GraphConfigurationDTO;
-  maxPoints: number;
-}
+  export interface GraphQuestionDTO {
+    questionId: number;
+    contentElementId?: number;
+    title: string;
+    textHTML?: string;
+    expectations: string;
+    expectationsHTML?: string;
+    type: string;
+    initialStructure: GraphStructureDTO;
+    exampleSolution: GraphStructureDTO[];
+    stepsEnabled: boolean;
+    configuration: GraphConfigurationDTO;
+    maxPoints: number;
+  }
+
+  export interface UmlQuestionDTO {
+    questionId: number;
+    contentElementId?: number;
+    title: string;
+    text: string;
+    textHTML?: string;
+    editorData?: editorDataDTO;
+    startData?: editorDataDTO;
+    dataImage?: string;
+    taskSettings?: taskSettingsDTO;
+    maxPoints: number;
+  }
+
 
 export interface OptionDTO {
   answer: string;
