@@ -11,6 +11,7 @@ export class CodeGameEvaluationService {
 
   async evaluateSubmission(
     questionId: number,
+    language: string,
     submittedCode: { [fileName: string]: string },
     executionResult: CppProjectExecutionResult,
   ) {
@@ -78,8 +79,10 @@ export class CodeGameEvaluationService {
     /* Create evaluation result */
     const evaluationResult: CodeGameEvaluationDTO = {
       questionId,
+      language,
       submittedCode,
-      codeGameExecutionResult: executionResult,
+      codeGameExecutionResult: executionResult.output,
+      codeSolutionRestriction: question.codeGameQuestion.codeSolutionRestriction,
       frequencyOfMethodEvaluationResult,
       frequencyOfMethodCallsResult,
       ...successesFromCodeExecution,

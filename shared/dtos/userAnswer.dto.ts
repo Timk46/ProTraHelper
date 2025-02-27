@@ -1,4 +1,5 @@
 import { GraphStructureDTO } from "./graphTask.dto";
+import { CodeGameEvaluationDTO } from "./codeGame.dto";
 
 export interface UserAnswerDataDTO {
     id: number;
@@ -10,6 +11,7 @@ export interface UserAnswerDataDTO {
     userMCAnswer?: number[];
     userFillinTextAnswer?: UserFillinAnswer[];
     userGraphAnswer?: GraphStructureDTO[];
+    codeGameEvaluation?: CodeGameEvaluationDTO;
     //space for more types of answers
 }
 

@@ -184,6 +184,7 @@ export interface CodingQuestionDto {
 
 export interface CodeGameQuestionDto {
     id: number;
+    contentElementId?: number;
     text: string;
     codeSolutionRestriction: boolean;
     fileNameToRestrict?: string;

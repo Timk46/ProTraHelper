@@ -5,6 +5,7 @@ import { ActivatedRoute } from "@angular/router";
 import { CodeGameTaskDataService } from "../../services/code-game-task-data.service";
 import { detailedQuestionDTO } from "@DTOs/detailedQuestion.dto";
 import { PlayfieldComponent } from "../playfield/playfield.component";
+import {CodeGameEvaluationDTO} from "@DTOs/codeGame.dto";
 
 enum States { // TODO: check if needed
   startState = 0, // before task is loaded
@@ -30,6 +31,7 @@ export class WorkspaceComponent {
   taskDescription: string = 'Das Programmierspiel von GOALS';
   currentState: States = States.startState;
   protected readonly States = States;
+  codeGameEvaluation: CodeGameEvaluationDTO | undefined;
 
   // flags to control the elements in the view and evaluate the assignment
   isLoading: boolean = false;
@@ -64,7 +66,7 @@ export class WorkspaceComponent {
     this.route.params.subscribe((params) => {
       const taskId = params['taskId'];
       if (taskId) {
-        this.currentTaskId = taskId;
+        this.currentTaskId = parseInt(taskId, 10);
         this.codeGameTaskDataService.getCodeGameTask(this.currentTaskId).subscribe((task) => {
           this.currentTask = task;
           this.taskDescription = this.currentTask?.codeGameQuestion!.text;
@@ -117,13 +119,16 @@ export class WorkspaceComponent {
       gameFile[this.currentTask.codeGameQuestion!.gameFileName] = this.currentTask.codeGameQuestion!.game;
     }
 
+    /* Submit Answer, run the code and get evaluation results */
+    // Submit the code to the server to run the game
     this.codeGameTaskDataService
-      .executeCodeGameTask(this.currentTask?.id, mainFile, additionalFiles, gameFile)
+      .executeCodeGameTask(this.currentTask?.id, this.selectedLanguage, mainFile, additionalFiles, gameFile)
       .subscribe({
         next: (response) => {
           console.log('CodeGame: Response: ', response);
 
           /* Get evaluation results */
+          this.codeGameEvaluation = response;
           this.frequencyOfMethodEvaluationResult = response.frequencyOfMethodEvaluationResult;
           this.frequencyOfMethodCallsResult = response.frequencyOfMethodCallsResult;
           this.reachedDestination = response.reachedDestination;
@@ -134,7 +139,7 @@ export class WorkspaceComponent {
           this.allWhiteListCellsVisited = response.allWhiteListCellsVisited;
 
           /* Prepare and start animation of the game */
-          this.splitCompilerOutputAndStartGame(response.codeGameExecutionResult.output.toString());
+          this.splitCompilerOutputAndStartGame(response.codeGameExecutionResult.toString());
         },
         error: (error) => {
           console.error('Error: ', error);
@@ -142,6 +147,22 @@ export class WorkspaceComponent {
         },
         complete: () => {
           this.isLoading = false;
+
+          // Submit the user answer and evaulation to the server
+          this.codeGameTaskDataService
+            .submitCodeGameUserAnswer(
+              this.currentTaskId,
+              this.currentTask?.codeGameQuestion?.contentElementId ?? -1,
+              this.selectedLanguage,
+              this.codeGameEvaluation ?? {} as CodeGameEvaluationDTO)
+            .subscribe({
+              next: (response: any) => {
+                console.log('CodeGame: Submit Response: ', response);
+              },
+              error: (error: any) => {
+                console.error('Error: ', error);
+              }
+            });
         }
       });
   }

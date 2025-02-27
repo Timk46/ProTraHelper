@@ -746,5 +746,103 @@ export class QuestionDataService {
         progress: Math.floor((feedback.score/question.score) * 100),
       }
     }
+
+    if (question.type === questionType.CODEGAME) {
+      if (!answerData.codeGameEvaluation) {
+        throw new Error('No code game evaluation provided');
+      }
+
+      const codeGameAnswer = await this.prisma.codeGameAnswer.create({
+        data: {
+          codeGameQuestionId: question.originId,
+          userAnswerId: createdData.id,
+          codeGameExecutionResult: answerData.codeGameEvaluation.codeGameExecutionResult,
+          codeSolutionRestriction: answerData.codeGameEvaluation.codeSolutionRestriction,
+          frequencyOfMethodEvaluationResult: answerData.codeGameEvaluation?.frequencyOfMethodEvaluationResult,
+          frequencyOfMethodCallsResult: answerData.codeGameEvaluation?.frequencyOfMethodCallsResult,
+          reachedDestination: answerData.codeGameEvaluation?.reachedDestination,
+          totalRocks: answerData.codeGameEvaluation?.totalRocks,
+          collectedRocks: answerData.codeGameEvaluation?.collectedRocks,
+          allRocksCollected: answerData.codeGameEvaluation?.allRocksCollected,
+          visitedCellsAreAllowed: answerData.codeGameEvaluation?.visitedCellsAreAllowed,
+          allWhiteListCellsVisited: answerData.codeGameEvaluation?.allWhiteListCellsVisited,
+        },
+      });
+
+      let countEvaluationOptions = 4;
+      let userScore = 0; // max. 100
+      if (answerData.codeGameEvaluation.reachedDestination) {
+        userScore += 1;
+      }
+      if (answerData.codeGameEvaluation.allRocksCollected) {
+        userScore += 1;
+      }
+      if (answerData.codeGameEvaluation.visitedCellsAreAllowed) {
+        userScore += 1;
+      }
+      if (answerData.codeGameEvaluation.allWhiteListCellsVisited) {
+        userScore += 1;
+      }
+      if (answerData.codeGameEvaluation.codeSolutionRestriction) {
+        if (answerData.codeGameEvaluation.frequencyOfMethodEvaluationResult) {
+          countEvaluationOptions++;
+          userScore += 1;
+        }
+      }
+      userScore = Math.round((userScore / countEvaluationOptions) * 100);
+
+      const progress = userScore / question.score;
+      let feedbackText = '';
+      let markedAsDone = false;
+      if (progress == 1) {
+        feedbackText =
+          'Du hast ' +
+          userScore +
+          ' von ' +
+          question.score +
+          ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
+        //set contentElement as done
+        console.log(
+          'contentElementId: ' +
+            answerData.contentElementId +
+            ' conceptNode: ' +
+            question.conceptNodeId +
+            ' level: ' +
+            question.level +
+            ' userId: ' +
+            userId,
+        );
+        await this.contentService.questionContentElementDone(
+          answerData.contentElementId,
+          question.conceptNodeId,
+          question.level,
+          userId,
+        );
+        markedAsDone = true;
+      } else {
+        feedbackText =
+          'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
+      }
+
+      const feedback = await this.prisma.feedback.create({
+        data: {
+          userAnswerId: createdData.id,
+          text: feedbackText,
+          score: userScore,
+        },
+      });
+
+      if (!feedback) throw new Error('Could not create Feedback');
+
+      console.log('element done: ' + markedAsDone);
+      return {
+        id: feedback.id,
+        userAnswerId: feedback.userAnswerId,
+        score: feedback.score,
+        feedbackText: feedback.text,
+        elementDone: markedAsDone,
+        progress: progress * 100,
+      };
+    }
   }
 }

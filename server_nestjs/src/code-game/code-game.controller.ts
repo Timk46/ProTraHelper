@@ -29,6 +29,7 @@ export class CodeGameController {
   async execute(
     @Req() req,
     @Body('questionId') questionId: string,
+    @Body('language') language: string,
     @Body('mainFile') mainFile: { [fileName: string]: string },
     @Body('additionalFiles') additionalFiles: { [fileName: string]: string },
     @Body('gameFile') gameFile: { [fileName: string]: string },
@@ -47,6 +48,7 @@ export class CodeGameController {
     const evaluationResult =
       await this.codeGameEvaluationService.evaluateSubmission(
         parseInt(questionId),
+        language,
         submittedCode,
         executionResult,
       );

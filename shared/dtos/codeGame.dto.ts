@@ -2,10 +2,12 @@ export interface CppProjectExecutionResult { // TODO: change to CodeGameExecutio
     output: string;
 }
 
-export interface CodeGameEvaluationDTO {
+export interface CodeGameEvaluationDTO { // TODO: change to CodeGameAnswerDTO
     questionId: number;
+    language: string;
     submittedCode: { [fileName: string]: string };
-    codeGameExecutionResult: CppProjectExecutionResult;
+    codeGameExecutionResult: string;
+    codeSolutionRestriction: boolean; // TODO:  isfrequencyOfMethodOfMethodCallsRestricted
     frequencyOfMethodEvaluationResult: boolean;
     frequencyOfMethodCallsResult: number;
     reachedDestination: boolean;

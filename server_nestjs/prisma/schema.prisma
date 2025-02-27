@@ -340,6 +340,7 @@ model UserAnswer {
   question             Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
   user                 User                   @relation(fields: [userId], references: [id])
   userMCOptionSelected UserMCOptionSelected[]
+  codeGameAnswer       CodeGameAnswer[]
 }
 
 model UserMCOptionSelected {
@@ -469,8 +470,8 @@ model CodeGameQuestion {
   codeGameScaffolds               CodeGameScaffold[]
   gameFileName                    String
   game                            String
-  gameCellRestrictions            String?            // TODO: remove optional
-  theme                           String?            @default("dino") // TODO: remove optional
+  gameCellRestrictions            String?            // TODO: remove optional = "?"
+  theme                           String?            @default("dino") // TODO: remove optional = "?"
   question                        Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
@@ -483,6 +484,35 @@ model CodeGameScaffold {
   visible            Boolean?
   mainFile           Boolean?
   codeGameQuestion   CodeGameQuestion @relation(fields: [codeGameQuestionId], references: [id], onDelete: Cascade)
+}
+
+model CodeGameAnswer {
+  id                                Int        @id @default(autoincrement())
+  createdAt                         DateTime   @default(now())
+  updatedAt                         DateTime   @updatedAt
+  codeGameQuestionId                Int
+  userAnswerId                      Int        @unique
+  userAnswer                        UserAnswer @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
+  codeGameScaffoldAnswers           CodeGameScaffoldAnswer[]
+  codeGameExecutionResult           String
+  codeSolutionRestriction           Boolean
+  frequencyOfMethodEvaluationResult Boolean
+  frequencyOfMethodCallsResult      Int
+  reachedDestination                Boolean
+  allRocksCollected                 Boolean
+  totalRocks                        Int
+  collectedRocks                    Int
+  visitedCellsAreAllowed            Boolean
+  allWhiteListCellsVisited          Boolean
+}
+
+model CodeGameScaffoldAnswer {
+  id                  Int        @id @default(autoincrement())
+  language            String
+  codeFileName        String
+  code                String
+  codeGameAnswerId    Int
+  CodeGameAnswer      CodeGameAnswer @relation(fields: [codeGameAnswerId], references: [id], onDelete: Cascade)
 }
 
 model FillinQuestion {

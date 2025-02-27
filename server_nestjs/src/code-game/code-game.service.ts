@@ -13,9 +13,10 @@ import { CppProjectExecutionResult } from '@DTOs/codeGame.dto';
 export class CodeGameService {
   constructor(private readonly prismaService: PrismaService) {}
 
+  // TODO: cleanup
   // private readonly apiUrl =
   'https://jury1.bshefl2.bs.informatik.uni-siegen.de/execute/';
-  private readonly apiUrl =
+  private readonly apiUrl: string =
     'http://jury1.bshefl2.bs.informatik.uni-siegen.de/execute/';
 
   async findOne(id: number): Promise<detailedQuestionDTO> {
@@ -27,6 +28,7 @@ export class CodeGameService {
             codeGameScaffolds: true,
           },
         },
+        contentElement: true,
       },
     });
 
@@ -42,7 +44,24 @@ export class CodeGameService {
       );
     }
 
-    return question;
+    /* contentElementId passed in codeGameQuestion */
+    const contentElementId = question.contentElement.id;
+
+    const {
+      contentElement,
+      codeGameQuestion,
+      ...questionWithoutContentElementAndCodeGameQuestion
+    } = question;
+
+    const codeGameQuestionWithContentElementId = {
+      ...codeGameQuestion,
+      contentElementId: contentElement.id,
+    };
+
+    return {
+      ...questionWithoutContentElementAndCodeGameQuestion,
+      codeGameQuestion: codeGameQuestionWithContentElementId,
+    };
   }
 
   async executeCodeGameTask(

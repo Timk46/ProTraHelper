@@ -51,6 +51,7 @@ export class EditCodeGameComponent implements OnInit {
           if (!this.questionData.codeGameQuestion) {
             this.questionData.codeGameQuestion = {
               id: 0,
+              contentElementId: 0,
               text: '',
               programmingLanguage: 'cpp', // default code language
               codeSolutionRestriction: false,
@@ -382,6 +383,7 @@ export class EditCodeGameComponent implements OnInit {
         codeGameQuestion: {
           ...this.questionData.codeGameQuestion,
           id: this.questionData.codeGameQuestion!.id,
+          contentElementId: this.questionData.codeGameQuestion!.contentElementId,
           text: this.codeGameForm.value.text,
           programmingLanguage: this.codeGameForm.value.programmingLanguage,
           codeSolutionRestriction: this.codeGameForm.value.codeSolutionRestriction,
