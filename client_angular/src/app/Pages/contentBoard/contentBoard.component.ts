@@ -248,7 +248,14 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         break;
       case questionType.GRAPH:
         // Navigate to graph question component
-        this.router.navigate([`/graphtask/${selectedTask.id}`]);
+        await this.router.navigate([`/graphtask/${taskId}`],
+          {
+            queryParams: {
+              concept: conceptId,
+              questionId: taskId
+            }
+          }
+        );
         return;
       case questionType.FILLIN:
         dialogRef = this.dialog.open(FillinTaskNewComponent, {...dialogConfig, width: '50vw'});
@@ -269,7 +276,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
           console.log("current score:", selectedTask.progress, "submitted score:", score);
 
           // update the score if higher
-          if (score > selectedTask.progress) {
+          if (score > selectedTask.progress!) {
             // the tasks score is taken from dataSource
             selectedTask.progress = score;
             //while the contentNodes score is taken from the contentsForActiveConceptNode data
@@ -296,63 +303,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
               }
             }
           }
-        );
-        break;
-      case questionType.GRAPH:
-        await this.router.navigate([`/graphtask/${taskId}`],
-          {
-            queryParams: {
-              concept: conceptId,
-              questionId: taskId
-            }
-          }
-        );
-        return;
-    }
-
-    if (dialogRef) {
-      try {
-        // Await the first emission from submitClicked and automatically unsubscribe when the component is destroyed
-        const score: number = await lastValueFrom(
-          dialogRef.componentInstance.submitClicked.pipe(takeUntil(this.destroy$))
-        );
-
-        // Update the score based on the new value
-        if (score > selectedTask.progress!) {
-          selectedTask.progress = score;
-          const contentElement = selectedContentNode.contentElements.find(
-            element => element.id === selectedTask.contentElementId
-          );
-          if (contentElement && contentElement.question) {
-            contentElement.question.progress = score;
-          }
-
-          if (score === 100) {
-            // Calculate the progress of the ContentNode
-            const questionElements = selectedContentNode.contentElements.filter(
-              element => element.type === "QUESTION"
-            );
-            const elementCount = questionElements.length;
-            const completedElements = questionElements.filter(element =>
-              element.question?.progress === 100 ||
-              (element.id === selectedTask.contentElementId && score === 100)
-            ).length;
-
-            selectedContentNode.progress = Math.floor((completedElements / elementCount) * 100);
-
-            if (selectedContentNode.progress === 100) {
-              this.progressService.answerSubmitted();
-            }
-          }
-        }
-
-        // Await the afterClosed event before navigating
-        await lastValueFrom(dialogRef.afterClosed());
-        await this.router.navigate([`/dashboard/concept/${conceptId}`]);
-      } catch (error) {
-        console.error("Error handling dialog events:", error);
-        this.snackBar.open('Ein Fehler ist aufgetreten.', 'Schließen', { duration: 3000 });
-      }
+        });
     }
   }
 

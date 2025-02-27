@@ -160,6 +160,7 @@ export class QuestionDataService {
 
     const questionData: detailedQuestionDTO = {
       ...question,
+      type: questionTypeStr as questionType,
       codingQuestion: questionTypeStr === questionType.CODE ? specificQuestionData : undefined,
       freetextQuestion: questionTypeStr === questionType.FREETEXT ? specificQuestionData : undefined,
       mcQuestion: (questionTypeStr === questionType.MULTIPLECHOICE || questionTypeStr === questionType.SINGLECHOICE) ? specificQuestionData : undefined,
