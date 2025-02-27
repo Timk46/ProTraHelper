@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { genTaskDto } from '@DTOs/tutorKaiDtos/genTask.dto';
-import { CodingQuestionInternal, CodeGeruestDto } from '@DTOs/question.dto';
+import { CodingQuestionInternal, CodeGeruestDto, AutomatedTestDto } from '@DTOs/question.dto';
 import { ChatOpenAI } from '@langchain/openai';
 import { z } from "zod";
 import { RunCodeService } from '../run-code/run-code.service';
@@ -627,6 +627,14 @@ ${state.solution[state.solution.length - 1]}
 
     const modelSolution = result.solution[result.solution.length - 1].codeFiles;
 
+    const automatedTest: AutomatedTestDto = {
+      id : -1, // temp - real value will be set by database
+      code : result.unitTest[result.unitTest.length - 1],
+      testFileName: "festFile",
+      language : "cpp",
+      questionId : -1, // temp - real value will be set by database
+    };
+
     const genereatedCodingQuestion: CodingQuestionInternal = {
       id : -1, // temp - real value will be set by database
       count_InputArgs : 0, // none fpr cp tasks
@@ -636,7 +644,7 @@ ${state.solution[state.solution.length - 1]}
       textHTML : result.task,
       codeGerueste : codeGerueste,
       expectations : result.expectation,
-      automatedTests : [result.unitTest[result.unitTest.length - 1]], // #ToDo: Hier gibts noch ein riesen Problem:
+      automatedTests : [automatedTest], // #ToDo: Hier gibts noch ein riesen Problem:
       modelSolutions : modelSolution
     };
 

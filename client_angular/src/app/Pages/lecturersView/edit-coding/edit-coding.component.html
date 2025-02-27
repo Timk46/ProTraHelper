@@ -18,6 +18,32 @@
         </mat-form-field>
       </div>
 
+      <!-- New input fields for Python task generation -->
+      <div class="form-field full-width subsection-container"  *ngIf="codingForm.get('programmingLanguage')?.value == 'python'">
+        <div class="form-row" style="margin-bottom: 15px">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Kontext (z.B. Fussball)</mat-label>
+            <input matInput formControlName="context" placeholder="Enter context (z.B. Fussball)">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Konzept (z.B. If-Else)</mat-label>
+            <input matInput formControlName="concept" placeholder="Enter concept (z.B. If-Else)">
+          </mat-form-field>
+        </div>
+        <div>
+          <p>Also Konzept sind auch umfangreichere Angaben wie z.B. For-Schleife mit If-Else und elif</p>
+          <p>Muss nur ausgefüllt werden, wenn eine neue Aufgabe generiert werden soll.</p>
+        </div>
+
+        <!--Generation Button for Python Tasks based on concept and context-->
+        <div style="text-align: center; margin-bottom: 15px">
+          <button mat-raised-button color="primary" type="button" (click)="generateTaskPython()" [disabled]="isGenerating">
+            <mat-spinner *ngIf="isGenerating" diameter="20" style="display: inline-block; margin-right: 5px;"></mat-spinner>
+            {{isGenerating ? 'Generiere Aufgabe...' : 'Aufgabe generieren'}}
+          </button>
+        </div>
+    </div>
+
       <div class="form-field full-width subsection-container">
         <div class="section-header">
           <h3>Aufgabenstellung</h3>
@@ -78,10 +104,10 @@
       </mat-accordion>
     </div>
   </div>
-    <!-- Generate Task button moved here, below the code scaffolds -->
 
-    <div style="text-align: center; margin-bottom: 15px">
-      <button mat-raised-button color="primary" type="button" (click)="generateTask()" [disabled]="isGenerating">
+     <!--Generation Button for CPP Tasks bases on Task Desc and Codeskeleton-->
+    <div *ngIf="codingForm.get('programmingLanguage')?.value == 'cpp'" style="text-align: center; margin-bottom: 15px">
+      <button mat-raised-button color="primary" type="button" (click)="generateTaskCpp()" [disabled]="isGenerating">
         <mat-spinner *ngIf="isGenerating" diameter="20" style="display: inline-block; margin-right: 5px;"></mat-spinner>
         {{isGenerating ? 'Generiere Aufgabe...' : 'Aufgabe generieren'}}
       </button>
@@ -222,3 +248,4 @@
 
   </form>
 </div>
+
