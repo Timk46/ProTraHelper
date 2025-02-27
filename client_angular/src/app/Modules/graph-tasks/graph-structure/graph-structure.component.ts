@@ -47,7 +47,7 @@ export class GraphStructureComponent  implements OnInit, AfterViewInit, OnDestro
   newEdge!: IGraphNewEdge;
   graphConfiguration!: GraphConfigurationDTO;
   
-  private _toolbarEnabled: boolean = true;
+  private _toolbarEnabled: boolean = false;
 
   @Input()
   set toolbarEnabled(value: boolean | undefined) {

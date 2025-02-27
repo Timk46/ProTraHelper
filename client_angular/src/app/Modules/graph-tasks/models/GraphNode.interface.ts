@@ -3,7 +3,7 @@ import { PositionDTO, SizeDTO } from "@DTOs/graphTask.dto";
 export interface IGraphNode {
     nodeId: number;
     value: string;
-    visited: {
+    selected: {
         enabled: boolean,
         value: boolean | null,
     };

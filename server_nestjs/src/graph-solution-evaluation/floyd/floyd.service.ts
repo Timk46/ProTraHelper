@@ -18,10 +18,9 @@ export class FloydService {
      * @param {GraphStructureDTO[]} studentSolution - The student's solution, containing multiple steps with graph structures.
      * @param {number} maxPoints - The maximum points the student can earn for the entire solution.
      * 
-     * @returns {{ receivedPoints: number, feedback: string }} - The total points earned and detailed feedback for each step.
+     * @returns {{ receivedPoints: number, feedback: string, feedbackHTML: string, expectedSolutionSemantic: GraphStructureSemanticDTO[] }} - The total points earned and detailed feedback for each step.
      */
     evaluateSolution(initialStructure: GraphStructureDTO, studentSolution: GraphStructureDTO[], maxPoints: number) {
-        // TODO: For now using the visited attribute, but find a solution for this
 
         // Convert solutions from IGraphDataJSON to IGraphDataSemantic, where edges use node values instead of IDs, 
         // as IDs may differ in different solutions even for the same node values.
@@ -36,6 +35,7 @@ export class FloydService {
         
         let receivedPoints: number = 0;
         let feedback: string[] = [];
+        let feedbackHTML: string[] = [];
 
         // Check in which order the student solved the assignment 
         const { nodesOrder, continueEvaluation, feedback: feedbackNodesOrder } = this.getNodesOrder(studentSolutionSemantic);
@@ -44,11 +44,18 @@ export class FloydService {
         // If not, award no points for this step.
         if (!continueEvaluation) {
             feedback.push(feedbackNodesOrder);
-            feedback.push(`\n > Insgesamt erzielte Punkte: 0 / ${maxPoints}.`);
+            feedback.push(`\n> Insgesamt erzielte Punkte: 0 / ${maxPoints}.`);
+            feedbackHTML.push(feedbackNodesOrder);
+            feedbackHTML.push(`\n<strong>> Insgesamt erzielte Punkte:</strong> 0 / ${maxPoints}.`);
+
+            const feedbackString = feedback.join('\n');
+    
             return {
-                receivedPoints: 0,
-                feedback: feedback.join('\n')
-            };
+                receivedPoints,
+                feedback: feedback.join('\n'),
+                feedbackHTML: feedbackHTML.join('\n'),
+                expectedSolutionSemantic: []
+            }
         }
 
         // Solve the assignment with given nodesOrder
@@ -70,12 +77,15 @@ export class FloydService {
 
             let stepReceivedPoints: number = 0;
             let stepFeedback: string = `Schritt ${stepIndex + 1}: `;
+            let stepFeedbackHTML: string = `<strong>Schritt ${stepIndex + 1}:</strong> `;
   
             // If the student solution has more steps than the expected solution, 
             // they get no points for any extra steps beyond the expected number.
             if (stepIndex >= expectedSolutionSemantic.length) {
                 feedback.push(`${stepFeedback}Keine Punkte da es die Anzahl der maximalen erwarteten Schritte überschreitet.`);
                 feedback.push('\n###############\n')
+                feedbackHTML.push(`${stepFeedbackHTML}Keine Punkte da es die Anzahl der maximalen erwarteten Schritte überschreitet.`);
+                feedbackHTML.push('');
                 continue; // no points for this step
             }
 
@@ -93,6 +103,8 @@ export class FloydService {
             if (!sameNodesExist) {
                 feedback.push(`${stepFeedback} Keine Punkte, da die Lösung nicht die gleiche Knoten enthält, wie die Musterlösung.`);
                 feedback.push('\n###############\n')
+                feedbackHTML.push(`${stepFeedbackHTML} Keine Punkte, da die Lösung nicht die gleiche Knoten enthält, wie die Musterlösung.`);
+                feedbackHTML.push('')
                 continue;  // no points for this step
             }
     
@@ -130,41 +142,54 @@ export class FloydService {
             // Feedback for mistakes
             if (countExtraEdges > 0 || countMissingEdges > 0) {
                 stepFeedback += `\n Die Lösung enthält zusätzliche/fehlende Kanten.`;
+                stepFeedbackHTML += `\n Die Lösung enthält zusätzliche/fehlende Kanten.`;
             }
             if (countDifferentWeights > 0) {
                 stepFeedback += `\n Die Lösung enthält Kanten mit falschen Gewichten.`;
+                stepFeedbackHTML += `\n Die Lösung enthält Kanten mit falschen Gewichten.`;
             }
 
             // Feedback for the current solution step
             if (stepReceivedPoints === maxStepPoints) {
                 stepFeedback += '\n Der Lösungsschritt ist korrekt!';
+                stepFeedbackHTML += '\n Der Lösungsschritt ist korrekt!';
             }
   
             // Update feedback and points for this step
             feedback.push(`${stepFeedback} \n Punkte für diesen Schritt: ${stepReceivedPoints.toFixed(2)} / ${maxStepPoints.toFixed(2)}`);
             feedback.push('\n###############\n')
+            feedbackHTML.push(`${stepFeedbackHTML} \n<strong>></strong> Punkte für diesen Schritt: ${stepReceivedPoints.toFixed(2)} / ${maxStepPoints.toFixed(2)}`);
+            feedbackHTML.push('');
             receivedPoints += stepReceivedPoints
   
         }
   
         // Check if the studentSolution has less steps than expectedSolution
-        const hasLessSteps = (studentSolutionSemantic.length < expectedSolutionSemantic.length);
+        const hasLessSteps = (studentSolutionSemantic.length < initialStructure.nodes.length);
         if (hasLessSteps) {
               feedback.push(`Die Lösung enthält weniger Schritte als erwartet.`);
               feedback.push('\n###############\n')
+              feedbackHTML.push(`<strong>Hinweis:</strong>`);
+              feedbackHTML.push(`Die Lösung enthält weniger Schritte als erwartet.`);
+              feedbackHTML.push('')
         }
         
         // If student solution is correct than only give feedback that the solution is correct
         if (receivedPoints === maxPoints) {
             feedback = ['Die Lösung ist korrekt.'];
+            feedbackHTML = ['Die Lösung ist korrekt.'];
+            feedbackHTML.push('');
         }
 
         // Final feedback
         feedback.push(`\n> Insgesamt erzielte Punkte: ${receivedPoints.toFixed(2)} / ${maxPoints}.`);
+        feedbackHTML.push(`<strong>> Insgesamt erzielte Punkte:</strong> ${receivedPoints.toFixed(2)} / ${maxPoints}.`);
 
         return {
             receivedPoints,
-            feedback: feedback.join('\n')
+            feedback: feedback.join('\n'),
+            feedbackHTML: feedbackHTML.join('\n'),
+            expectedSolutionSemantic: expectedSolutionSemantic
         }
     }
 
@@ -195,8 +220,8 @@ export class FloydService {
     
           // Modify nodes so that only the current node is marked
           currentStep.nodes = currentStep.nodes.map( node => {
-            if (node.value === currentNodeValue) { return { ...node, visited: true } }
-            return { ...node, visited: false }
+            if (node.value === currentNodeValue) { return { ...node, selected: true } }
+            return { ...node, selected: false }
           })
     
           // We need the edges where the current node is intermediate node
@@ -248,7 +273,7 @@ export class FloydService {
 
 
     /**
-     * Determines the order in which nodes are marked as "visited" in each step of the solution.
+     * Determines the order in which nodes are marked as "selected" in each step of the solution.
      * Ensures that each step has exactly one marked node, and that no node is marked more than once.
      * 
      * @param solution - An array of graph structures representing the steps of the student's solution.
@@ -265,7 +290,7 @@ export class FloydService {
         for (const step of solution) {
           
             // Get the marked node (Only one node can marked in a step )
-            const markedNodes = step.nodes.filter( node => node.visited )
+            const markedNodes = step.nodes.filter( node => node.selected )
           
             // Check if only one single node is marked as current
             if (markedNodes.length !== 1) {

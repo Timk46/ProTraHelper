@@ -47,6 +47,124 @@
                     </mat-form-field>
                 </form>
                 </div>
+            </mat-expansion-panel>    
+            
+            <mat-expansion-panel style="margin-bottom: 2em;">
+
+                <mat-expansion-panel-header>
+                    <mat-panel-title>Aufgabe generieren</mat-panel-title>
+                </mat-expansion-panel-header>
+                
+                <div class="expansion">
+                <!-- <p>Die Auswirkungen dieser Einstellungen sind in der Übersicht nicht sichtbar und beziehen sich nur auf interne Datenbankparameter</p> -->
+                
+                <form [formGroup]="generateGraphForm">
+
+                    <!-- Node Count -->
+                    <mat-form-field *ngIf="generateGraphFormVisibility('NODES_EDGES_COUNT')" appearance="outline" style="width: 100%;">
+                        <mat-label>Knoten Anzahl</mat-label>
+                        <input matInput type="number" min="0" step="1" placeholder="Knoten Anzahl" formControlName="graphNodeCount">
+                        <mat-error *ngIf="generateGraphForm.get('graphNodeCount')?.hasError('required')">
+                            Knoten Anzahl ist erforderlich
+                        </mat-error>
+                        <mat-error *ngIf="generateGraphForm.get('graphNodeCount')?.hasError('min')">
+                            Knoten Anzahl muss mindestens 1 sein
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Edge Count -->
+                    <mat-form-field *ngIf="generateGraphFormVisibility('NODES_EDGES_COUNT')" appearance="outline" style="width: 100%;">
+                        <mat-label>Kanten Anzahl</mat-label>
+                        <input matInput type="number" min="0" step="1" placeholder="Kanten Anzahl" formControlName="graphEdgeCount">
+                        <mat-error *ngIf="generateGraphForm.get('graphEdgeCount')?.hasError('required')">
+                            Kanten Anzahl ist erforderlich
+                        </mat-error>
+                        <mat-error *ngIf="generateGraphForm.get('graphEdgeCount')?.hasError('min')">
+                            Kanten Anzahl muss mindestens 0 sein
+                        </mat-error>
+                        <!-- TODO: is not working properly -->
+                        <!-- <mat-error *ngIf="generateGraphForm.get('graphEdgeCount')?.hasError('edgesTooFew')">
+                            Kanten Anzahl muss mindestens (Knoten Anzahl - 1) sein
+                        </mat-error> -->
+                    </mat-form-field>
+
+                    <!-- Node Weights Min and Max -->
+                    <div *ngIf="generateGraphFormVisibility('NODE_WEIGHT')" style="display: flex; flex-direction: row; width: 100%; justify-content: space-between;">                        
+                        <mat-form-field appearance="outline" style="width: 48%;">
+                            <mat-label>Min Knotengewicht</mat-label>
+                            <input matInput type="number" min="0" step="1" placeholder="Knotengewicht Min" formControlName="graphNodeWeightMin">
+                            <mat-error *ngIf="generateGraphForm.get('graphNodeWeightMin')?.hasError('required')">
+                                Min Knotengewicht ist erforderlich
+                            </mat-error>
+                            <mat-error *ngIf="generateGraphForm.hasError('minGreaterThanMax', ['graphNodeWeightMin', 'graphNodeWeightMax'])">
+                                Min Knotengewicht darf nicht größer als Max sein
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" style="width: 48%;">
+                            <mat-label>Max Knotengewicht</mat-label>
+                            <input matInput type="number" min="0" step="1" placeholder="Knotengewicht Max" formControlName="graphNodeWeightMax">
+                            <mat-error *ngIf="generateGraphForm.get('graphNodeWeightMax')?.hasError('required')">
+                                Max Knotengewicht ist erforderlich
+                            </mat-error>
+                            <mat-error *ngIf="generateGraphForm.hasError('minGreaterThanMax', ['graphNodeWeightMin', 'graphNodeWeightMax'])">
+                                Max Knotengewicht darf nicht kleiner als Min sein
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Edge Weights Min and Max -->
+                    <div *ngIf="generateGraphFormVisibility('EDGE_WEIGHT')" style="display: flex; flex-direction: row; width: 100%; justify-content: space-between;">                        
+                        <mat-form-field appearance="outline" style="width: 48%;">
+                            <mat-label>Min Kantengewicht</mat-label>
+                            <input matInput type="number" min="0" step="1" placeholder="Kantengewicht Min" formControlName="graphEdgeWeightMin">
+                            <mat-error *ngIf="generateGraphForm.get('graphEdgeWeightMin')?.hasError('required')">
+                                Min Kantengewicht ist erforderlich
+                            </mat-error>
+                            <mat-error *ngIf="generateGraphForm.get('graphEdgeWeightMin')?.hasError('min')">
+                                Min Kantengewicht muss positiv sein
+                            </mat-error>
+                            <mat-error *ngIf="generateGraphForm.hasError('minGreaterThanMax', ['graphEdgeWeightMin', 'graphEdgeWeightMax'])">
+                                Min Kantengewicht darf nicht größer als Max sein
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" style="width: 48%;">
+                            <mat-label>Max Kantengewicht</mat-label>
+                            <input matInput type="number" min="0" step="1" placeholder="Kantengewicht Max" formControlName="graphEdgeWeightMax">
+                            <mat-error *ngIf="generateGraphForm.get('graphEdgeWeightMax')?.hasError('required')">
+                                Max Kantengewicht ist erforderlich
+                            </mat-error>
+                            <mat-error *ngIf="generateGraphForm.get('graphEdgeWeightMax')?.hasError('min')">
+                                Max Kantengewicht muss positiv sein
+                            </mat-error>
+                            <mat-error *ngIf="generateGraphForm.hasError('minGreaterThanMax', ['graphEdgeWeightMin', 'graphEdgeWeightMax'])">
+                                Max Kantengewicht darf nicht kleiner als Min sein
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Self Edge Count -->
+                    <mat-form-field *ngIf="generateGraphFormVisibility('SELF_EDGES_COUNT')" appearance="outline" style="width: 100%;">
+                        <mat-label>Max Schlingen Anzahl</mat-label>
+                        <input matInput type="number" min="0" step="1" placeholder="Max Schlingen Anzahl" formControlName="graphSelfEdgeCountMax">
+                        <mat-error *ngIf="generateGraphForm.get('graphSelfEdgeCountMax')?.hasError('required')">
+                            Max Schlingen Anzahl ist erforderlich
+                        </mat-error>
+                        <mat-error *ngIf="generateGraphForm.get('graphSelfEdgeCountMax')?.hasError('min')">
+                            Max Schlingen Anzahl muss mindestens 0 sein
+                        </mat-error>
+                    </mat-form-field>
+                    
+                    <button
+                        mat-raised-button
+                        color="primary"
+                        (click)="onGenerateClick()"
+                        [disabled]="generateButtonDisabled()"
+                    > Generieren </button>
+                    <mat-error *ngIf="generateButtonDisabled()">Die eingegebenen Parameter überprüfen!</mat-error>
+                </form>
+                </div>
             </mat-expansion-panel>
         </div>
       </div>
@@ -55,7 +173,10 @@
         <div class="wrap-container">
   
             <div style="width: 100%;">
-                <h2>Aufgabentext</h2>
+                <div style="display: flex; justify-content: space-between;">
+                    <h2>Aufgabentext</h2>
+                    <button mat-raised-button color="primary" (click)="generateTextFromStructure()">Generate Text</button>
+                </div>
                 <app-tinymce #question [config]="editorConfig"></app-tinymce>
             </div>
 
@@ -106,82 +227,84 @@
 <ng-template #workspaceContainer>
     <div class="workspace-container">
         <div class="solution box">
-            <app-graph-structure />
+            <app-graph-structure [toolbarEnabled]="true"/>
         </div>
         <div class="controls box">
-
-            <div style="display: flex; justify-content: start; align-items: center; gap: 1em; height: 100%;">
             
-                <mat-button-toggle-group 
-                    name="mode" 
-                    aria-label="mode" 
-                    [(ngModel)]="workspaceModeCurrent"
-                    (ngModelChange)="updateWorkspace()"
+            <mat-button-toggle-group 
+                name="mode" 
+                aria-label="mode" 
+                [(ngModel)]="workspaceModeCurrent"
+                (ngModelChange)="updateWorkspace()"
+            >
+                <mat-button-toggle value="assignment">Aufgabe</mat-button-toggle>
+                <mat-button-toggle value="solution">Musterlösung</mat-button-toggle>
+            </mat-button-toggle-group>
+            <!-- [hideSingleSelectionIndicator]="true"
+                    -->
+            
+            <mat-button-toggle-group
+                *ngIf="this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType).stepsEnabled && workspaceModeCurrent === 'solution'"
+                name="solution-step"
+                aria-label="solution-step" 
+                [(ngModel)]="solutionStepCurrent"
+                (ngModelChange)="updateWorkspace()"
+            >   
+                <mat-button-toggle 
+                    *ngFor="let step of solutionGraphStructure; let i = index; trackBy:trackByIndex"    
+                    [value]="i"
                 >
-                    <mat-button-toggle value="assignment">Aufgabenstellung</mat-button-toggle>
-                    <mat-button-toggle value="solution">Musterlösung</mat-button-toggle>
-                </mat-button-toggle-group>
-                <!-- [hideSingleSelectionIndicator]="true"
-                     -->
+                    {{ solutionStepCurrent === i ? 'Schritt' : '' }} {{ i + 1 }}
+                </mat-button-toggle>
+
+            </mat-button-toggle-group>
+            <!-- [hideSingleSelectionIndicator]="true" -->
                 
-                <mat-button-toggle-group
-                    *ngIf="this.graphForm.value.stepsEnabled && workspaceModeCurrent === 'solution'"
-                    name="solution-step"
-                    aria-label="solution-step" 
-                    [(ngModel)]="solutionStepCurrent"
-                    (ngModelChange)="updateWorkspace()"
-                >   
-                    <mat-button-toggle 
-                        *ngFor="let step of solutionGraphStructure; let i = index; trackBy:trackByIndex"    
-                        [value]="i"
-                    >
-                        Schritt {{ i + 1 }}
-                    </mat-button-toggle>
-
-                </mat-button-toggle-group>
-                <!-- [hideSingleSelectionIndicator]="true" -->
-                    
-                <button
-                    *ngIf="this.graphForm.value.stepsEnabled && workspaceModeCurrent === 'solution'"
-                    class="image-button"
-                    type="button"
-                    (click)="addNewSolutionStep()"
-                > 
-                    <!-- Neuen Schritt -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
-                    </svg>
-                </button>
-
-                <button
-                    *ngIf="detailedQuestionData?.graphQuestion?.stepsEnabled && workspaceModeCurrent === 'solution' && solutionGraphStructure.length > 1"
-                    class="image-button"
-                    type="button"
-                    (click)="deleteCurrentSolutionStep()"
-                > 
-                    <!-- Schritt löschen -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-                    </svg>
-                </button>
-
-                <button
-                    *ngIf="workspaceModeCurrent === 'solution'"
-                    class="image-button"
-                    type="button"
-                    (click)="resetSolution()"
-                > 
-                    <!-- Die Lösung zurücksetzen -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/>
-                        <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466"/>
-                    </svg>
-                </button>
-
-            </div>
+            <button
+                *ngIf="false && this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType).stepsEnabled && workspaceModeCurrent === 'solution'"
+                class="image-button"
+                type="button"
+                (click)="addNewSolutionStep()"
+            > 
+                <!-- Neuen Schritt -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                </svg>
+            </button>
 
             <button
+                *ngIf="false && this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType).stepsEnabled && workspaceModeCurrent === 'solution' && solutionGraphStructure.length > 1"
+                class="image-button"
+                type="button"
+                (click)="deleteCurrentSolutionStep()"
+            > 
+                <!-- Schritt löschen -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                </svg>
+            </button>
+        
+            <button
+                mat-raised-button color="warn"
+                type="button"
+                (click)="resetStructure()"
+            > 
+                <!-- Die Struktur zurücksetzen -->
+                Zurücksetzen
+            </button>
+
+            
+            <button
+                mat-raised-button color="primary"
+                type="button" 
+                (click)="onQuickGenerateClick()" 
+                [disabled]="generateButtonDisabled()"
+                [matTooltip]="generateButtonDisabled() ? 'Die eingegebene Parameter überprüfen!' : ''"
+            > Generieren </button>
+
+            <button
+                mat-raised-button color="primary"
                 type="button" 
                 (click)="deactivateWorkspace()" 
             > Bestätigen </button>

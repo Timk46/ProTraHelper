@@ -176,6 +176,7 @@ export class QuestionDataService {
         userId: userId
       };
     }
+    
     return {
       id: userAnswer.id,
       questionId: userAnswer.questionId,
@@ -438,6 +439,8 @@ export class QuestionDataService {
           userScore += scorePerOption;
         }
       }
+      // Round the userScore to avoid floating point precision issues
+      userScore = Math.round(userScore * 100) / 100;
 
       const progress = userScore / question.score;
       let feedbackText = "";
@@ -679,8 +682,8 @@ export class QuestionDataService {
         await this.qdGraph.getGraphQuestion(answerData.questionId, true).then(async (questionData) => {
 
           // Generate feedback based on the user answer
-          const { feedback, receivedPoints } = this.graphEvalService.evaluateSolution(questionData, answerData.userGraphAnswer);
-          feedbackText = feedback;
+          const { feedbackHTML, receivedPoints } = this.graphEvalService.evaluateSolution(questionData, answerData.userGraphAnswer);
+          feedbackText = feedbackHTML;
           userScore = receivedPoints;
         });
       }

@@ -23,7 +23,7 @@ export class GraphTaskService {
     // ##############
     // Initialize
     this.graphConfiguration$ = new BehaviorSubject<GraphConfigurationDTO>({
-      nodeWeight: true, nodeVisited: true, edgeWeight: true, edgeDirected: true
+      nodeWeight: true, nodeSelected: true, nodeSelectedText: { selected: '', unselected: '' }, edgeWeight: true, edgeDirected: true
     });
     this.nodes$ = new BehaviorSubject<IGraphNode[]>([]);
     this.edges$ = new BehaviorSubject<IGraphEdge[]>([]);
@@ -78,7 +78,7 @@ export class GraphTaskService {
     let { 
       nodeId = null,
       value = '',
-      visited = null, 
+      selected = null, 
       weight = null,
       position = { x: 0, y: 0},
       size = { width: 100, height: 100 },  // TODO:
@@ -91,10 +91,10 @@ export class GraphTaskService {
       weight = { enabled: false, value: null };
     }
     
-    if (this.graphConfiguration$.getValue().nodeVisited) {
-      visited = { enabled: true, value: visited?.value || false };
+    if (this.graphConfiguration$.getValue().nodeSelected) {
+      selected = { enabled: true, value: selected?.value || false };
     } else {
-      visited = { enabled: false, value: null };
+      selected = { enabled: false, value: null };
     }
 
     // Check if nodeId is provided
@@ -115,7 +115,7 @@ export class GraphTaskService {
     const newNode: IGraphNode = {
       nodeId: nodeId,
       value: value,
-      visited: visited,
+      selected: selected,
       weight: weight,
       position: position,
       size: size,
@@ -215,7 +215,7 @@ export class GraphTaskService {
 
     let { 
       value = null,
-      visited = null, 
+      selected = null, 
       weight, // TODO: just adjusted to be undefined if no value is assigned to be able to assign null value but this not consistent
       position = null,
     } = newValues;
@@ -226,7 +226,7 @@ export class GraphTaskService {
     }
 
 
-    // TODO: update also the attributes visited and weight
+    // TODO: update also the attributes selected and weight
 
     if (position !== null) {
       node.position = position;
@@ -237,8 +237,8 @@ export class GraphTaskService {
       node.weight.value = weight.value;
     }
 
-    if (visited !== null) {
-      node.visited.value = visited.value;
+    if (selected !== null) {
+      node.selected.value = selected.value;
     }
 
     // TODO: if i replace the object in the list with a new object, how will this effect the edges etc. ???
@@ -341,12 +341,12 @@ export class GraphTaskService {
   adjustNodeAttributes(node: IGraphNode): GraphNodeDTO {
     // Destructure node object
     const { 
-      visited: { value: visitedValue, ...visitedRest },
+      selected: { value: selectedValue, ...selectedRest },
       weight: { value: weightValue, ...weightRest },
       ...nodeRest } = node;
     return {
       ...nodeRest,
-      visited: visitedValue,
+      selected: selectedValue,
       weight: weightValue
     };
   }
@@ -424,11 +424,11 @@ export class GraphTaskService {
           value: nodeJSON.weight
         }
       } 
-      // TODO: this is not proper to do but to fix the issue with visited temporarily
-      if (typeof nodeJSON.visited === 'boolean') {
-        nodeJSON.visited = {
-          enabled: this.graphConfiguration$.getValue().nodeVisited,
-          value: nodeJSON.visited
+      // TODO: this is not proper to do but to fix the issue with selected temporarily
+      if (typeof nodeJSON.selected === 'boolean') {
+        nodeJSON.selected = {
+          enabled: this.graphConfiguration$.getValue().nodeSelected,
+          value: nodeJSON.selected
         }
       } 
 
@@ -484,11 +484,11 @@ export class GraphTaskService {
           value: nodeJSON.weight
         }
       } 
-      // TODO: this is not proper to do but to fix the issue with visited temporarily
-      if (typeof nodeJSON.visited === 'boolean') {
-        nodeJSON.visited = {
-          enabled: this.graphConfiguration$.getValue().nodeVisited,
-          value: nodeJSON.visited
+      // TODO: this is not proper to do but to fix the issue with selected temporarily
+      if (typeof nodeJSON.selected === 'boolean') {
+        nodeJSON.selected = {
+          enabled: this.graphConfiguration$.getValue().nodeSelected,
+          value: nodeJSON.selected
         }
       } 
 

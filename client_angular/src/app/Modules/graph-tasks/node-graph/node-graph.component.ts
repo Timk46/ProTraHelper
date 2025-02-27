@@ -91,9 +91,9 @@ export class NodeGraphComponent implements OnInit, OnDestroy {
     this.activateEditNodeWeightInput();
   }
 
-  onNodeVisitedDoubleClick(event: MouseEvent) {
+  onNodeSelectedDoubleClick(event: MouseEvent) {
     event.stopPropagation();
-    this.updateNodeVisited();
+    this.updateNodeSelected();
   }
 
   onFieldHover(event: any) {
@@ -284,10 +284,10 @@ export class NodeGraphComponent implements OnInit, OnDestroy {
     this.graphTaskService.updateNode(this.node, { weight: { enabled: true, value: intValue } });
   }
 
-  updateNodeVisited(){
-    if (this.node.visited.value !== null) {
-      const current: boolean = this.node.visited.value;
-      this.graphTaskService.updateNode(this.node, { visited: { enabled: true, value: !current } })
+  updateNodeSelected(){
+    if (this.node.selected.value !== null) {
+      const current: boolean = this.node.selected.value;
+      this.graphTaskService.updateNode(this.node, { selected: { enabled: true, value: !current } })
     }
   }
 

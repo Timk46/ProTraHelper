@@ -13,6 +13,33 @@ export class UserConceptService {
     private notificationService: NotificationService) {}
 
   /**
+   * Gets the maximum level from training content for a given concept node
+   * @param conceptNodeId - The ID of the concept node to check
+   * @returns The maximum level found in training content, or 0 if no training content exists
+   */
+  async getMaxTrainingLevel(conceptNodeId: number): Promise<number> {
+    const training = await this.prisma.training.findMany({
+      where: {
+        conceptNodeId: conceptNodeId,
+      },
+      select: {
+        awards: true,
+      },
+    });
+
+    if (!training || training.length === 0) {
+      return 0;
+    }
+
+    // Filter out null awards and find maximum
+    const levels = training
+      .map(t => t.awards)
+      .filter(award => award !== null) as number[];
+
+    return levels.length > 0 ? Math.max(...levels) : 0;
+  }
+
+  /**
    * updates the user level of a concept node and saves a timestamped event
    * @param userId
    * @param conceptNodeId
@@ -77,6 +104,14 @@ export class UserConceptService {
     return userConcept;
   }
 
+  /**
+   * Checks if a user should be awarded a concept level (which will be used to display progress in the graph)
+   * @param userId - The ID of the user
+   * @param contentElementId - The ID of the content element being checked
+   * @param conceptNodeId - The ID of the concept node
+   * @param level - The level to potentially award
+   * @returns A tuple containing [boolean indicating if level was awarded, the level]
+   */
   async checkUserConceptLevelAward(
     userId: number,
     contentElementId: number,
@@ -109,67 +144,63 @@ export class UserConceptService {
         },
       });
     }
-      if (userConcept.level < level) {
-        const conceptNode = await this.prisma.conceptNode.findFirst({
-          where: {
-            id: conceptNodeId,
-          },
-          select: {
-            trainedBy: {
-              select: {
-                contentNode: {
-                  include: {
-                    ContentView: {
-                      include: {
-                        contentElement: true,
-                      },
+
+    if (userConcept.level < level) {
+      const conceptNode = await this.prisma.conceptNode.findFirst({
+        where: {
+          id: conceptNodeId,
+        },
+        select: {
+          trainedBy: {
+            select: {
+              contentNode: {
+                include: {
+                  ContentView: {
+                    include: {
+                      contentElement: true,
                     },
                   },
                 },
               },
             },
           },
-        });
+        },
+      });
 
-        for (const contentNode of conceptNode.trainedBy) {
-          for (const contentView of contentNode.contentNode.ContentView) {
-            if (contentView.contentElement.id === contentElementId) {
-              console.log(
-                'content element found: ' + contentView.contentElement.id,
-              );
+      const maxTrainingLevel = await this.getMaxTrainingLevel(conceptNodeId);
+      console.log('max training level: ' + maxTrainingLevel);
+
+      for (const contentNode of conceptNode.trainedBy) {
+        // Check if all QUESTION type content elements are marked as done
+        let allQuestionsCompleted = true;
+        for (const contentView of contentNode.contentNode.ContentView) {
+          const contentElement = contentView.contentElement;
+
+          // Only check elements of type QUESTION (PDF and VIDEO will be ignored)
+          if (contentElement.type === 'QUESTION') {
+            const userContentElement = await this.prisma.userContentElementProgress.findFirst({
+              where: {
+                userId: userId,
+                contentElementId: contentElement.id,
+              },
+            });
+
+            if (!userContentElement || !userContentElement.markedAsDone) {
+              console.log('question content element not done: ' + contentElement.id);
+              allQuestionsCompleted = false;
               break;
             }
-          }
-          //schaue in user content element progress nach, ob alle content elemente erledigt sind
-          let allContentElementsDone = true;
-          for (const contentView of contentNode.contentNode.ContentView) {
-            const contentElement = contentView.contentElement;
-            const userContentElement =
-              await this.prisma.userContentElementProgress.findFirst({
-                where: {
-                  userId: userId,
-                  contentElementId: contentElement.id,
-                },
-              });
-            if (userContentElement === null) {
-              console.log('content element not found: ' + contentElement.id);
-              allContentElementsDone = false;
-              break;
-            }
-            if (!userContentElement.markedAsDone) {
-              console.log('content element not done: ' + contentElement.id);
-              allContentElementsDone = false;
-              break;
-            }
-          }
-          if (allContentElementsDone) {
-            levelAward = true;
-            console.log('update user level on ' + level);
-            await this.updateUserLevel(userId, conceptNodeId, level);
-            break;
           }
         }
+
+        if (allQuestionsCompleted) {
+          levelAward = true;
+          console.log('update user level to ' + maxTrainingLevel);
+          await this.updateUserLevel(userId, conceptNodeId, maxTrainingLevel);
+          break;
+        }
       }
+    }
 
     return [levelAward, level];
   }

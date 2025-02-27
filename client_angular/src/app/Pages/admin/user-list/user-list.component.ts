@@ -6,6 +6,9 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AdminService, AllUsersDailyProgress } from '../services/admin.service';
 import { Color, ScaleType } from '@swimlane/ngx-charts';
+import { ConfirmationBoxComponent } from "../../confirmation-box/confirmation-box.component";
+import { MatDialog } from "@angular/material/dialog";
+import { UserService } from "../../../Services/auth/user.service";
 
 interface UserListItem {
   id: number;
@@ -57,7 +60,9 @@ export class UserListComponent implements OnInit, AfterViewInit {
   constructor(
     private adminService: AdminService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    public dialog: MatDialog,
+    private userService: UserService,
   ) {}
 
   ngOnInit(): void {
@@ -180,5 +185,30 @@ export class UserListComponent implements OnInit, AfterViewInit {
         verticalPosition: 'bottom',
       });
     }
+  }
+
+  logoutAllUsers(): void {
+    const dialog = this.dialog.open(ConfirmationBoxComponent, {
+      data: {
+        title: 'Alle Nutzer abmelden bestätigen',
+        message: 'Möchten Sie sich wirklich ALLE Nutzer abmelden?',
+        decline: 'Abbrechen',
+        accept: 'Abmelden',
+        swapButtons: false,
+        swapColors: true
+      }
+    });
+
+    dialog.afterClosed().subscribe((result) => {
+      if (result) {
+        this.userService.logoutAllUser().then(() => {
+          // Open CAS logout URL in a new tab
+          window.open('https://cas.zimt.uni-siegen.de/cas/logout', '_blank');
+
+          // Navigate to the login page in the current tab
+          this.router.navigate(['/login']);
+        });
+      }
+    });
   }
 }

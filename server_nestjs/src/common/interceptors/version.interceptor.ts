@@ -10,7 +10,10 @@ export class VersionInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map(data => {
         const response = context.switchToHttp().getResponse();
-        response.set('X-App-Version', version);
+        // Check if headers have already been sent
+        if (!response.headersSent) {
+          response.set('X-App-Version', version);
+        }
         return data;
       })
     );

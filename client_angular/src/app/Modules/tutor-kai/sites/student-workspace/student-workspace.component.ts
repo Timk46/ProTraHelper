@@ -164,6 +164,7 @@ export class StudentWorkspaceComponent implements OnInit {
   getKIFeedback(level: string): void {
     this.feedbackLevel = level;
     this.rating = 0;
+    this.hoverState = 0;
     this.currentState = States.startGeneratingKIFeedback;
     this.feedbackMessage = 'Lass mich einen Augenblick über die Aufgabe nachdenken...';
     this.safeFeedbackMessage = this.sanitizer.bypassSecurityTrustHtml(this.feedbackMessage);

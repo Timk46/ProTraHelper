@@ -26,8 +26,10 @@ import { RunCodeModule } from './tutor-kai/run-code/run-code.module';
 // END Tutor-Kai Imports
 
 import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { JwtAuthGuard } from './auth/common/guards/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
+import { RefreshTokenModule } from "./auth/refresh-token/refresh-token.module";
+import { ScheduleModule } from "@nestjs/schedule";
 import { UsersModule } from './users/users.module';
 import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
 import { McqCreationModule } from './mcqcreation/mcqcreation.module';
@@ -47,6 +49,9 @@ import { TransitiveClosureService } from './graph-solution-evaluation/transitive
 import { DijkstraService } from './graph-solution-evaluation/dijkstra/dijkstra.service'; 
 import { FloydService } from './graph-solution-evaluation/floyd/floyd.service';
 import { KruskalService } from './graph-solution-evaluation/kruskal/kruskal.service';
+import { ExampleSolutionGenerationModule } from './graph-solution-evaluation/example-solution-generation/example-solution-generation.module';
+import { AiFeedbackModule } from './graph-solution-evaluation/ai-feedback/ai-feedback.module';
+import { AiFeedbackService } from './graph-solution-evaluation/ai-feedback/ai-feedback.service';
 
 @Module({
   imports: [
@@ -54,6 +59,7 @@ import { KruskalService } from './graph-solution-evaluation/kruskal/kruskal.serv
     GraphModule,
     PrismaModule,
     AuthModule,
+    RefreshTokenModule,
     UsersModule,
     ContentModule,
     ContentLinkerModule,
@@ -68,10 +74,13 @@ import { KruskalService } from './graph-solution-evaluation/kruskal/kruskal.serv
     NotificationModule,
     ContentLinkerModule,
     CodingQuestionGeneratorModule,
+    ScheduleModule.forRoot(),
 
     AdminModule, // Add this line
 
     GraphSolutionEvaluationModule,
+    ExampleSolutionGenerationModule,
+    AiFeedbackModule
   ],
   controllers: [
     AppController,
@@ -98,7 +107,8 @@ import { KruskalService } from './graph-solution-evaluation/kruskal/kruskal.serv
     TransitiveClosureService,
     DijkstraService,
     FloydService,
-    KruskalService
+    KruskalService,
+    AiFeedbackService
   ],
 })
 

@@ -8,14 +8,14 @@ async function bootstrap() {
     logger: ['error', 'warn', 'debug', 'log', 'verbose'],
   });
   app.enableCors({
-    allowedHeaders: ['Authorization', 'Content-Type', 'X-Filename', 'X-App-Version'],
+    allowedHeaders: ['Authorization', 'Content-Type', 'X-Filename', 'X-App-Version', 'Device-Id'],
     exposedHeaders: ['X-Filename', 'X-App-Version'],  // We need to expose this header so that Angular can access it.
   });
   app.use(bodyParser.json({ limit: '5mb' }));
   app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
 
 
-    console.log = () => {}; // disable console.log in production - use nest.js logger instead, if important logs are needed
+    //console.log = () => {}; // disable console.log in production - use nest.js logger instead, if important logs are needed
     //console.debug = () => {};
     //console.info = () => {};
     //console.warn = () => {};

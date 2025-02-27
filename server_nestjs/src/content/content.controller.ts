@@ -3,7 +3,7 @@ import { Controller, Get, Param, Req, UseGuards} from '@nestjs/common';
 import { ContentService } from './content.service';
 import { ContentsForConceptDTO } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
-import { RolesGuard, roles } from '@/auth/roles.guard';
+import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 import { ConceptNode } from '@prisma/client';
 
 @UseGuards(RolesGuard)

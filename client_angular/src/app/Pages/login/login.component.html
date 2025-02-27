@@ -46,27 +46,23 @@
               <button mat-raised-button color="primary" (click)="loginWithCAS()">Login über Uni Siegen</button>
             </div>
           </div>
-
         </div>
-
       </ng-container>
     </div>
   </div>
 
-  <!--
-  <div class="video-container d-flex align-items-center justify-content-center" style = "border-color: red; border-width: 5px; border-style: solid; margin-top: 20px;" >
-    <br>
-    <p><strong>Beachten Sie, dass 80% des Fortschritts bis zum 31.07.2024 erreicht werden müssen, um die Studienleistung zu erhalten.</strong></p>
-    <p>Um Ihren Fortschritt zu sehen, können Sie nach dem Einloggen unten rechts den "Fortschritt anzeigen"-Button nutzen. Bei Fragen und Problemen kommen Sie gerne auf uns zu.</p>
-
-    <p *ngIf="!isChrome">Hinweis: Wir empfehlen die Nutzung des Chrome-Browsers.</p>
+  <div class="notice-container" style="text-align: center; padding: 20px; margin: 20px auto; max-width: 800px; background-color: #f8f9fa; border-radius: 8px; border: 2px solid #007bff;">
+    <p style="margin: 0; color: #0056b3; font-weight: bold;">Wichtige Mitteilung</p>
+    <p style="margin: 10px 0;">Die Studienleistungen wurden nun verbucht und weiterer Fortschritt zählt nicht mehr für die Studienleistung. Wir empfehlen aber, alle Aufgaben mehrfach und mit so wenig Unterstützung wie möglich zu lösen.</p>
   </div>
-  -->
-  <div class="video-container d-flex align-items-center justify-content-center">
-    <br>
-    <video src="../../../assets//videos/goals_intro.mp4" controls width="auto" height="320"></video>
-    <br>
-    <p>Weitere Informationen zu den verschiedenen Aufgabentypen und Diskussionsmöglichkeiten erhaltet ihr in den Übungen.</p>
+
+  <div class="content-grid">
+    <div class="changelog-wrapper">
+      <app-changelog></app-changelog>
+    </div>
+    <div class="video-container">
+      <video src="../../../assets//videos/goals_intro.mp4" controls></video>
+    </div>
   </div>
 
 </div>

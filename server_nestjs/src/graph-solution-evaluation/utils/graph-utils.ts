@@ -121,7 +121,7 @@ export function getExtraEdges(edgesGraph1: GraphEdgeSemanticDTO[], edgesGraph2: 
  *
  * This function compares two graph nodes, `node1` and `node2`, and returns `true` 
  * if they have the same `value` property. The comparison does not consider other 
- * properties such as `visited` or `weight`.
+ * properties such as `selected` or `weight`.
  *
  * @param {GraphNodeSemanticDTO} node1 - The first graph node to compare.
  * @param {GraphNodeSemanticDTO} node2 - The second graph node to compare.
@@ -199,33 +199,33 @@ export function graphsContainSameEdges(graph1: GraphStructureSemanticDTO, graph2
 
 
 /**
- * Returns the list of nodes with visited attribute set to true
+ * Returns the list of nodes with selected attribute set to true
  * @param nodes Array of nodes to check
- * @returns {GraphNodeSemanticDTO[]} Nodes with visited attribute true
+ * @returns {GraphNodeSemanticDTO[]} Nodes with selected attribute true
  */
-export function getVisitedNodes(nodes: GraphNodeSemanticDTO[]): GraphNodeSemanticDTO[] {
-  return nodes.filter(node => node.visited);
+export function getSelectedNodes(nodes: GraphNodeSemanticDTO[]): GraphNodeSemanticDTO[] {
+  return nodes.filter(node => node.selected);
 }
 
 /**
- * Returns the list of extra visited nodes in graph1 that are not visited in graph2
+ * Returns the list of extra selected nodes in graph1 that are not selected in graph2
  * @param nodesGraph1 Nodes to check
  * @param nodesGraph2 Reference nodes
- * @returns {GraphNodeSemanticDTO[]} Extra visited nodes
+ * @returns {GraphNodeSemanticDTO[]} Extra selected nodes
  */
-export function getExtraVisitedNodes(nodesGraph1: GraphNodeSemanticDTO[], nodesGraph2: GraphNodeSemanticDTO[]): GraphNodeSemanticDTO[] {
-  const extraVisitedNodes = [];
+export function getExtraSelectedNodes(nodesGraph1: GraphNodeSemanticDTO[], nodesGraph2: GraphNodeSemanticDTO[]): GraphNodeSemanticDTO[] {
+  const extraSelectedNodes = [];
 
   for (const node1 of nodesGraph1) {
-    if (node1.visited) {
+    if (node1.selected) {
       const matchingNode = nodesGraph2.find(node2 => node1.value === node2.value);
-      if (matchingNode && !matchingNode.visited) {
-        extraVisitedNodes.push(node1);
+      if (matchingNode && !matchingNode.selected) {
+        extraSelectedNodes.push(node1);
       }
     }
   }
 
-  return extraVisitedNodes;
+  return extraSelectedNodes;
 }
 
 
@@ -305,7 +305,7 @@ export function graphJSONToSemantic(graphData: GraphStructureDTO): GraphStructur
 /**
  * Converts a graph node from IGraphNodeJSON type to IGraphNodeSemantic type.
  *
- * @param {GraphNodeDTO} node - The graph node as IGraphNodeJSON, including value, weight, and visited properties.
+ * @param {GraphNodeDTO} node - The graph node as IGraphNodeJSON, including value, weight, and selected properties.
  * @returns {GraphNodeSemanticDTO} - The graph node as IGraphNodeSemantic, with relevant properties copied over.
  */
 export function graphNodeJSONToSemantic(node: GraphNodeDTO): GraphNodeSemanticDTO {
@@ -316,8 +316,8 @@ export function graphNodeJSONToSemantic(node: GraphNodeDTO): GraphNodeSemanticDT
     if (node.weight !== null) {
       nodeSemantic.weight = node.weight;
     }
-    if (node.visited !== null) {
-      nodeSemantic.visited = node.visited;
+    if (node.selected !== null) {
+      nodeSemantic.selected = node.selected;
     }
   
     return nodeSemantic;
