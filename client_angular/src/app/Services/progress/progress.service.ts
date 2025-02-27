@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { GraphCommunicationService } from '../graph/graphCommunication.service';
 import { timer, from, Observable } from 'rxjs';
 import { concatMap, catchError } from 'rxjs/operators';
+import { ContentDTO, ContentElementDTO } from '@DTOs/content.dto';
+import { contentElementType } from '@DTOs/contentElementType.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -47,5 +49,54 @@ export class ProgressService {
    */
   questionLinkDeleted(): void {
     this.graphCommunicationService.triggerGraphUpdate();
+  }
+
+  /**
+   * Calculates the progress of a given content node by averaging the progress of its question elements.
+   *
+   * @param {ContentDTO} contentNode - The content node containing content elements.
+   * @returns {number} - The average progress of the question elements within the content node.
+   */
+  calculateProgress(contentNode: ContentDTO): number {
+    const questionElements: ContentElementDTO[] = contentNode.contentElements.filter(element => element.type === contentElementType.QUESTION);
+    const progress = questionElements.reduce((acc, element) => {
+      return acc + (element.question?.progress || 0);
+    }, 0)/questionElements.length;
+    return progress;
+  }
+
+
+  /**
+   * Calculates the highest level of progress for a given content node.
+   *
+   * This function filters and sorts the content elements of the provided content node
+   * to determine the highest level of progress achieved. It considers only elements
+   * of type `QUESTION` that have a defined level and progress. The highest level is
+   * determined by iterating through the sorted elements and checking their progress.
+   *
+   * @param contentNode - The content node containing the elements to be evaluated.
+   * @returns The highest level of progress achieved for the given content node.
+   */
+  calculateLevelProgress(contentNode: ContentDTO): number {
+    const sortedQuestionElements: ContentElementDTO[] = contentNode.contentElements
+    .filter(element => ((element.type === contentElementType.QUESTION) && element.question && element.question.level))
+    .sort((a, b) => a.question!.level - b.question!.level);
+
+    let highestLevel = 0;
+    for (let i = 0; i < sortedQuestionElements.length; i++) {
+      const cv = sortedQuestionElements[i];
+      if (cv.question!.progress < 100) {
+        break;
+      } else {
+        // only change highestLevel if last element or next element has different (higher) level
+        if (
+          i == sortedQuestionElements.length - 1 ||
+          sortedQuestionElements[i+1].question!.level != cv.question!.level
+        ) {
+          highestLevel = cv.question!.level;
+        }
+      }
+    }
+    return highestLevel;
   }
 }

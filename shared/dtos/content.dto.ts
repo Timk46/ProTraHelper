@@ -17,6 +17,7 @@ export interface ContentDTO {
     trainsConceptIds: number[];
 
     progress: number;
+    levelProgress?: number;
     questionMarked?: boolean;
 
     //for lecturers view
