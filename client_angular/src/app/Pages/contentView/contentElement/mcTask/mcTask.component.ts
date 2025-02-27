@@ -57,7 +57,15 @@ export class McTaskComponent implements OnInit {
     id : -1,
     questionId : -1,
     isSC : false,
-    shuffleOptions : false
+    shuffleOptions : false,
+    questionVersion: {
+      id: -1,
+      version: -1,
+      isApproved: false,
+      questionId: -1,
+      successor: null
+    },
+    mcQuestionOption: []
   }
 
   //the userAnswer data
