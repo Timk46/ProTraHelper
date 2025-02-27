@@ -4,7 +4,6 @@ import {
   CodeGameEvaluationDTO,
   CppProjectExecutionResult,
 } from '@DTOs/codeGame.dto';
-import {el, fa} from '@faker-js/faker';
 
 @Injectable()
 export class CodeGameEvaluationService {
@@ -128,15 +127,10 @@ export class CodeGameEvaluationService {
     executionResult: CppProjectExecutionResult,
     gameCellRestrictions: string,
   ) {
-
     const gameArray = await this.transformStringToArray(game);
     const gameCellRestrictionsArray = await this.transformStringToArray(
       gameCellRestrictions,
     );
-
-    console.debug('gameArray', gameArray);
-    console.debug('executionResult', executionResult);
-    console.debug('gameCellRestrictionsArray', gameCellRestrictionsArray);
 
     /* Extract starting position from the game */
     const startingPlayerPosition = { row: -1, col: -1 };
@@ -158,8 +152,6 @@ export class CodeGameEvaluationService {
       return;
     }
 
-    console.debug('startingPlayerPosition', startingPlayerPosition);
-
     /* Extract visited cells from the commandline output */
     const movePattern = /#SYS-Move:(\d+)\/(\d+)/g;
     const visitedCells = [];
@@ -180,8 +172,6 @@ export class CodeGameEvaluationService {
       });
     }
 
-    console.debug('visitedCells', visitedCells);
-
     /* Check if the visited cells are allowed (not marked as a cell of the black list) */
     let visitedCellsAreAllowed = true;
     for (const visitedCell of visitedCells) {
@@ -190,8 +180,6 @@ export class CodeGameEvaluationService {
         break;
       }
     }
-
-    console.debug('visitedCellsAreAllowed:', visitedCellsAreAllowed);
 
     /* Check if all white list cells are visited */
     let allWhiteListCellsVisited = true;
@@ -212,8 +200,6 @@ export class CodeGameEvaluationService {
         }
       }
     }
-
-    console.debug('allWhiteListCellsVisited:', allWhiteListCellsVisited);
 
     return {
       visitedCellsAreAllowed,
