@@ -6,7 +6,6 @@ import { DashboardComponent } from './Pages/dashboard/dashboard.component';
 import { ConceptOverviewComponent } from './Pages/conceptOverview/conceptOverview.component';
 import { CodeTaskComponent } from './Pages/contentView/contentElement/codeTask/codeTask.component';
 import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer/pdfViewer.component';
-import { McTaskComponent } from './Pages/contentView/contentElement/mcTask/mcTask.component';
 import { GraphComponent } from './Pages/graph/graph.component';
 import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
 import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
@@ -24,11 +23,10 @@ import { EditGraphComponent } from './Pages/lecturersView/edit-graph/edit-graph.
 import { EditFillinComponent } from './Pages/lecturersView/edit-fillin/edit-fillin.component';
 import { AdminGuard } from './Guards/is-admin.guard';
 import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
-
 import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
 import { RegisteredForSubjectGuard } from './Guards/registered-for-subject.guard';
-
 import { GraphTasksComponent } from './Modules/graph-tasks/graph-tasks.component';
+import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-question.component';
 import { EditUmlComponent } from './Pages/lecturersView/edit-uml/edit-uml.component';
 
 
@@ -37,16 +35,39 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'app', component: AppComponent },
   { path: 'not-registered', component: NotRegisteredComponent, canActivate: [LoggedInGuard] },
-  { path: 'contentBoard', component: ContentBoardComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'conceptOverview', component: ConceptOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'discussion', component: DiscussionListComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'codeTask', component: CodeTaskComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'mcTask', component: McTaskComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'graph', component: GraphComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'chatbot', component: ChatBotComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+    children: [
+      { path: 'contentBoard', component: ContentBoardComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'concept', component: ConceptOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      {
+        path: 'concept/:conceptId',
+        component: ConceptOverviewComponent,
+        children: [
+          { path: 'question/:questionId', component: DynamicQuestionComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] }
+        ],
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard]
+      },
+      { path: 'discussion', component: DiscussionListComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'codeTask', component: CodeTaskComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'graph', component: GraphComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'chatbot', component: ChatBotComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'mcqcreation', component: McTaskCreationComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      // lecturers view
+      { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [LoggedInGuard, AdminGuard] },
+      { path: 'editcoding/:questionId', component: EditCodingComponent, canActivate: [LoggedInGuard, AdminGuard] },
+      { path: 'editfillin/:questionId', component: EditFillinComponent, canActivate: [LoggedInGuard, AdminGuard] },
+      { path: 'editfreetext/:questionId', component: EditFreetextComponent, canActivate: [LoggedInGuard, AdminGuard] },
+      { path: 'editgraph/:questionId', component: EditGraphComponent, canActivate: [LoggedInGuard, AdminGuard] },
+      // just for testing
+      { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
+    ]
+  },
   { path: 'discussion-view/:discussionId', component: DiscussionViewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
   { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
 

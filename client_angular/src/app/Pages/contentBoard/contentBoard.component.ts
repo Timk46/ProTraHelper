@@ -8,27 +8,17 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
 import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
-import { firstValueFrom, Subject, takeUntil } from 'rxjs';
+import { firstValueFrom, lastValueFrom, Subject, takeUntil } from 'rxjs';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { CreateContentElementDialogComponent } from '../lecturersView/create-content-element-dialog/create-content-element-dialog.component';
 import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { FillinTaskComponent } from '../contentView/contentElement/fill-in-task/fill-in-task.component';
 import { FillinTaskNewComponent } from '../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
-
-
-interface TaskViewData {
-  contentNodeId: number;
-  contentElementId: number;
-  id: number;
-  name: string;
-  type: string;
-  progress: number;
-  description?: string;
-  level: number;
-}
+import { TaskViewData } from '@DTOs/index';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { MatAccordion } from '@angular/material/expansion';
 
 /**
  * @deprecated This component is no longer used in the application and should not longer be used.
@@ -41,7 +31,18 @@ interface TaskViewData {
 })
 export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
-  @Input() activeConceptNodeId: any;
+  /**
+   * Event emitter that triggers a refresh of the contents for the current concept
+   * Used to notify parent components when content needs to be reloaded
+   */
+  @Output() fetchContentsForConcept = new EventEmitter<void>();
+
+  /**
+   * The ID of the currently active concept node
+   * Used to identify which concept's content should be displayed
+   * Can be undefined if no concept is selected
+   */
+  @Input() activeConceptNodeId: number | undefined;
 
   /**
    * The contents for the active concept node
@@ -52,9 +53,6 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   };
 
   @ViewChild(MatSort) sort: MatSort;
-
-  // emitter for refreshing
-  @Output() fetchContentsForConcept = new EventEmitter<void>();
 
   /**
    * Columns to be displayed in the table
@@ -89,7 +87,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     private userService: UserService,
     private contentLinkerService: ContentLinkerService,
     private confirmService: ConfirmationService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
   ) {
     // Initialize the data source for the table
     this.dataSource = new MatTableDataSource<TaskViewData>();
@@ -100,6 +98,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit() {
+
+
     // Subscribe to screen size changes for responsive design
     this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
       this.editModeActive = hasEditModeActive;
@@ -162,9 +162,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    * @description
    * Handles the click event for content elements Video and PDF.
    * Opens a dialog to display the content and updates progress if necessary.
-   * @param content - The ContentDTO object that was clicked
-   * @param type - Array of content types
-   * @param event - The mouse event
+   * @param {ContentDTO} content - The ContentDTO object that was clicked
+   * @param {string[]} type - Array of content types
+   * @param {MouseEvent} event - The mouse event
    */
   async onContentClick(content: ContentDTO, type: string[], event: MouseEvent) {
     // Prevent event propagation to parent elements
@@ -210,28 +210,37 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    * @description
    * Handles the click event for content elements MC, SC, FreeText, or CodingQuestion
    * Opens a dialog or navigates to the appropriate component based on the task type.
-   * @param selectedTask - The TaskViewData object that was clicked (The task)
-   * @param selectedContentNode - The ContentDTO object that was clicked (Contains the tasks)
+   * @param {TaskViewData} selectedTask - The TaskViewData object that was clicked (The task)
+   * @param {ContentDTO} selectedContentNode - The ContentDTO object that was clicked (Contains the tasks)
    */
-  onTaskClick(selectedTask: TaskViewData, selectedContentNode: ContentDTO) {
-    // Create dialog configuration
+  async onTaskClick(selectedTask: TaskViewData, selectedContentNode: ContentDTO) {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.data = {
       taskViewData: selectedTask,
+      conceptId: this.activeConceptNodeId,
+      questionId: selectedTask.id
     };
     dialogConfig.width = 'auto';
     dialogConfig.maxHeight = '95vh';
+    const conceptId = this.activeConceptNodeId;
+    const taskId = selectedTask.id;
 
+    if (conceptId === undefined || taskId === undefined) {
+      console.error("Concept ID or Task ID is undefined");
+      this.snackBar.open('Ungültige Konzept-ID oder Task-ID.', 'Schließen', { duration: 3000 });
+      return;
+    }
     let dialogRef: MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined;
 
-    // Open the appropriate dialog based on the task type
+
     switch (selectedTask.type) {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
-        dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
+      case questionType.FILLIN:
+        await this.router.navigate([`/dashboard/concept/${conceptId}/question/${taskId}`]);
         break;
       case questionType.FREETEXT:
-        dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
+        await this.router.navigate([`/dashboard/concept/${conceptId}/question/${taskId}`]);
         break;
       case questionType.CODE:
         // Navigate to coding question component
@@ -287,59 +296,70 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
               }
             }
           }
-
-
-          // DISABLED - Since we do not have the same question in multiple contents, we do not need this extended logic
-
-          /* this.dataSource.data = this.dataSource.data.map((element) => {
-            if (element.id === selectedTask.id) {
-              // Update the progress value of the task if the new score is higher
-              if(score > element.progress) {
-                element.progress = score;
-
-                console.log("Element: " +  element.type + ", TaskID: " + element.id + " Answer submitted. Erreichter Score: " + score + " Vorheriger Score: "+ prevScore);
-
-                // Update the contentNode that is connected to the task
-                if (score === 100) {
-                  this.contentsForActiveConceptNode.trainedBy.forEach((content) => {
-                    if (content.contentElements.some(
-                      (element) => element.id === selectedTask.contentElementId
-                    )) {
-                      const questionElements = content.contentElements.filter(element => element.type === "QUESTION");
-                      const elementCount = questionElements.length;
-                      const completedElements = questionElements.filter(element =>
-                        element.question?.progress === 100 ||
-                        (element.id === selectedTask.contentElementId && score === 100)
-                      ).length;
-
-                      // Calculate progress based on completed elements
-                      content.progress = Math.floor((completedElements / elementCount) * 100);
-
-                      if (content.progress === 100) {
-                        console.log("Aufgabe wurde zum ersten Mal erfolgreich gelöst.");
-                        this.progressService.answerSubmitted();
-                      }
-                    }
-                  });
-                }
-              }
+        );
+        break;
+      case questionType.GRAPH:
+        await this.router.navigate([`/graphtask/${taskId}`],
+          {
+            queryParams: {
+              concept: conceptId,
+              questionId: taskId
             }
-            return element;
-          }); */
-        });
+          }
+        );
+        return;
+    }
 
-      // Clean up subscription when dialog closes
-      dialogRef.afterClosed().subscribe(() => {
-        // Fetch fresh data from server - We do not need this since we update the data source directly
-        //this.fetchContentsForConcept.emit();
-      });
+    if (dialogRef) {
+      try {
+        // Await the first emission from submitClicked and automatically unsubscribe when the component is destroyed
+        const score: number = await lastValueFrom(
+          dialogRef.componentInstance.submitClicked.pipe(takeUntil(this.destroy$))
+        );
+
+        // Update the score based on the new value
+        if (score > selectedTask.progress!) {
+          selectedTask.progress = score;
+          const contentElement = selectedContentNode.contentElements.find(
+            element => element.id === selectedTask.contentElementId
+          );
+          if (contentElement && contentElement.question) {
+            contentElement.question.progress = score;
+          }
+
+          if (score === 100) {
+            // Calculate the progress of the ContentNode
+            const questionElements = selectedContentNode.contentElements.filter(
+              element => element.type === "QUESTION"
+            );
+            const elementCount = questionElements.length;
+            const completedElements = questionElements.filter(element =>
+              element.question?.progress === 100 ||
+              (element.id === selectedTask.contentElementId && score === 100)
+            ).length;
+
+            selectedContentNode.progress = Math.floor((completedElements / elementCount) * 100);
+
+            if (selectedContentNode.progress === 100) {
+              this.progressService.answerSubmitted();
+            }
+          }
+        }
+
+        // Await the afterClosed event before navigating
+        await lastValueFrom(dialogRef.afterClosed());
+        await this.router.navigate([`/dashboard/concept/${conceptId}`]);
+      } catch (error) {
+        console.error("Error handling dialog events:", error);
+        this.snackBar.open('Ein Fehler ist aufgetreten.', 'Schließen', { duration: 3000 });
+      }
     }
   }
 
   /**
    * Opens a dialog to create a new task.
    *
-   * @param contentNodeId - The ID of the content node.
+   * @param {number} contentNodeId - The ID of the content node.
    */
   onNewTask(contentNodeId: number) {
     console.log("onNewTask");
@@ -389,10 +409,21 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  /**
+   * @description
+   * Handles the approval of a task/question. Currently only logs the action.
+   * @param {TaskViewData} taskViewData - The data object containing task information to be approved
+   */
   onTaskApprove(taskViewData: TaskViewData) {
     console.log("onTaskApprove: ", taskViewData);
   }
 
+  /**
+   * @description
+   * Handles the editing of different types of tasks/questions by navigating to the appropriate edit view.
+   * Routes to different edit pages based on the question type (multiple choice, free text, fill-in, etc.)
+   * @param {TaskViewData} taskViewData - The data object containing task information to be edited
+   */
   onTaskEdit(taskViewData: TaskViewData) {
     console.log("onTaskEdit: ", taskViewData);
     switch (taskViewData.type) {
@@ -419,7 +450,14 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  onTaskDelete(element: any) {
+  /**
+   * @description
+   * Handles the deletion of a task/question link. Shows a confirmation dialog before proceeding.
+   * If confirmed, unlinks the content element while preserving the original question.
+   * Updates the UI and emits an event to refresh the content list after successful deletion.
+   * @param {TaskViewData} element - The element containing the content element ID to be unlinked
+   */
+  onTaskDelete(element: TaskViewData) {
     console.log("onDeleteClick: ", element);
     this.confirmService.confirm({
       title: "Verknüpfung löschen",
@@ -448,7 +486,6 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   onContentNodeDelete(contentNodeId: number) {
     console.log("onContentNodeDelete", contentNodeId);
   }
-
 
   /**
    * @description
@@ -484,12 +521,10 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /**
-   * Generates a router link based on the provided question type and index.
-   *
-   * @param type - The type of the question. Can be 'CodingQuestion' or 'UML'.
-   * @param index - The index of the question.
-   * @returns The router link as a string.
-   * @throws Will throw an error if the question type is unknown.
+   * @description
+   * Generates a router link for a coding question
+   * @param {number} index - The ID of the coding question
+   * @returns {string} The router link string
    */
   getRouterLink(type: string, index: number): string {
     switch (type) {
@@ -505,21 +540,21 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * @description
    * Checks if a content has a specific element type
-   * @param content - The ContentDTO to check
-   * @param type - The type to check for
-   * @returns True if the content has an element of the specified type, false otherwise
+   * @param {ContentDTO} content - The ContentDTO to check
+   * @param {string} type - The type to check for
+   * @returns {boolean} True if the content has an element of the specified type, false otherwise
    */
-  hasContentElementType(content: ContentDTO, type: string) {
+  hasContentElementType(content: ContentDTO, type: string): boolean {
     return content.contentElements.some((element) => element.type === type);
   }
 
   /**
    * @description
    * Filters the data source by content node ID
-   * @param contentNodeId - The ID of the content node to filter by
-   * @returns An array of TaskViewData objects for the specified content node
+   * @param {number} contentNodeId - The ID of the content node to filter by
+   * @returns {TaskViewData[]} An array of TaskViewData objects for the specified content node
    */
-  getFilteredData(contentNodeId: number) {
+  getFilteredData(contentNodeId: number): TaskViewData[] {
     return this.dataSource.data.filter(
       (element) => element.contentNodeId === contentNodeId
     );
@@ -528,18 +563,18 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * @description
    * Generates an array of a specified length
-   * @param num - The length of the array to generate
-   * @returns An array of the specified length
+   * @param {number} num - The length of the array to generate
+   * @returns {number[]} An array of the specified length
    */
-  getLevels(num: number) {
+  getLevels(num: number): number[] {
     return new Array(num);
   }
 
   /**
    * @description
    * Generates a more readable name for element types
-   * @param type - The original element type
-   * @returns A more human-readable name for the element type
+   * @param {string} type - The original element type
+   * @returns {string} A more human-readable name for the element type
    */
   genBetterElementNames(type: string): string {
     switch (type) {

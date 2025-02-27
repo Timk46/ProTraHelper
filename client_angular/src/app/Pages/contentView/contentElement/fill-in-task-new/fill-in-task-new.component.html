@@ -1,4 +1,9 @@
 <div class="container" *ngIf="!isLoading && fillinQuestionData">
+    <div class="close-button">
+        <button mat-icon-button (click)="onClose()">
+            <mat-icon>close</mat-icon>
+        </button>
+  </div>
   <div class="header">
     <h2>{{fillinQuestionData.question.name}}</h2>
   </div>

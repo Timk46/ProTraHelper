@@ -108,18 +108,18 @@ export interface CodingQuestionDto {
     codeGerueste: CodeGeruestDto[];
   }
   
-export interface CodingQuestionInternal extends CodingQuestionDto { // for backend only
-  automatedTests: AutomatedTestDto[];
-  modelSolutions?: ModelSolutionDto[];
-}
+  export interface CodingQuestionInternal extends CodingQuestionDto { // for backend only
+    automatedTests: AutomatedTestDto[];
+    modelSolutions?: ModelSolutionDto[];
+  }
 
-export interface ModelSolutionDto {
-  id: number;
-  codingQuestionId: number;
-  codeFileName: string;
-  code: string;
-  language: string;
-}
+  export interface ModelSolutionDto {
+    id: number;
+    codingQuestionId: number;
+    codeFileName: string;
+    code: string;
+    language: string;
+  }
 
 export interface CodeGeruestDto {
   id: number;
@@ -185,6 +185,17 @@ export interface freeTextQuestionDTO {
     maxPoints: number;
   }
 
+  export interface TaskViewData {
+    contentNodeId: number;
+    contentElementId: number;
+    id: number;
+    name?: string;
+    type: string;
+    progress?: number;
+    description?: string;
+    level?: number;
+    
+}
   export interface UmlQuestionDTO {
     questionId: number;
     contentElementId?: number;

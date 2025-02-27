@@ -21,11 +21,6 @@ import { GraphTutorialDialogComponent } from '../graph-tutorial-dialog/graph-tut
 })
 export class AssignmentContainerComponent implements OnInit {
 
-  // ### question related
-  thisQuestionType = questionType.GRAPH;
-  questionData: QuestionDTO | null = null;
-  graphQuestionData: GraphQuestionDTO | null = null;
-
   // ### workspace/solution related
   workspaceModePrevious: string = 'assignment';
   workspaceModeCurrent: string = 'assignment';
@@ -40,6 +35,10 @@ export class AssignmentContainerComponent implements OnInit {
 
   lastSubmittedGraph: GraphStructureDTO[] | null = null;
 
+  thisQuestionType = questionType.GRAPH;
+
+  questionData: QuestionDTO | null = null;
+  graphQuestionData: GraphQuestionDTO | null = null;
   // ### feedback related
   feedbackState: 'INITIAL' | 'ALGO' | 'LLM' | 'FEEDBACK_RATED' = 'INITIAL';
   feedbackTypeCurrent:  'algoFeedback' | 'llmFeedback' | '' = '';
@@ -55,6 +54,9 @@ export class AssignmentContainerComponent implements OnInit {
 
   isSending: boolean = false;
 
+  private conceptId!: number;
+  private questionId!: number;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -66,23 +68,28 @@ export class AssignmentContainerComponent implements OnInit {
     private questionDataService: QuestionDataService,
     private dialog: MatDialog,
   ) {
-
+    this.route.queryParamMap.subscribe(params => {
+      this.conceptId = Number(params.get('concept'));
+      this.questionId = Number(params.get('questionId'));
+      console.log('AssignmentContainerComponent constructor', this.questionId, this.conceptId);
+    });
   }
 
   ngOnInit(): void {
 
     // get assignment id from url
-    this.route.params.subscribe(params => {
-      const questionId = parseInt(params['questionId']);
-
+    if (!this.questionId) {
+      this.snackBar.open('Keine Frage ID gefunden!', 'Schließen', { duration: 5000 });
+      return;
+    }
       // reset the state of the graph service
       this.graphTaskService.resetGraph();
 
       // get question details
-      this.questionDataService.getGraphQuestion(questionId).subscribe({
+      this.questionDataService.getGraphQuestion(this.questionId).subscribe({
         next: (graphQuestionData) => {
 
-          this.questionDataService.getQuestionData(questionId).subscribe({
+          this.questionDataService.getQuestionData(this.questionId).subscribe({
             next: (questionData) => {
 
               if (questionData.type === questionType.GRAPH) { // TODO: entsprechende questionType anstelle des Strings, testen.
@@ -107,7 +114,7 @@ export class AssignmentContainerComponent implements OnInit {
       });
 
       // get the last submitted solution by the user
-      this.questionDataService.getNewestUserAnswer(questionId).subscribe({
+      this.questionDataService.getNewestUserAnswer(this.questionId).subscribe({
         next: (data) => {
           if (data.userGraphAnswer) {
             this.solutionGraph = data.userGraphAnswer;
@@ -118,7 +125,6 @@ export class AssignmentContainerComponent implements OnInit {
         error: (err) => {
           this.snackBar.open('Fehler beim Laden der letzten abgegebenen Antwort', 'Schließen', { duration: 5000 });
         }
-      });
     });
   }
 
@@ -472,12 +478,19 @@ export class AssignmentContainerComponent implements OnInit {
   }
 
   navigateToDashboard() {
-    this.router.navigate(['/dashboard']);
+    console.log('navigateToDashboard', this.conceptId);
+    if (this.conceptId ) {
+      console.log('navigateToDashboard with conceptId', this.conceptId);
+      this.router.navigate(['/dashboard', 'concept', this.conceptId]);
+    } else {
+      console.log('navigateToDashboard without conceptId');
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   openTutorialDialog() {
     // Dialog can be configured here using MatDialogConfig
-    
+
     // const dialogConfig = new MatDialogConfig();
     // dialogConfig.maxWidth = '70vw';
     // dialogConfig.maxHeight = '95vh';

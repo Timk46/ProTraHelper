@@ -12,7 +12,7 @@
 <div *ngIf="(sSS.isTablet | async)">You are on a tablet device.</div>
 <div *ngIf="(sSS.isLandscape | async)">You are in landscape.</div>
 <div *ngIf="!(sSS.isLandscape | async)">You are in portrait.</div> -->
-<app-conceptOverview></app-conceptOverview>
+<router-outlet></router-outlet>
 
 <!-- lecturers view -->
 

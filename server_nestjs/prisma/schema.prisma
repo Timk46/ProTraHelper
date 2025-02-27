@@ -243,7 +243,7 @@ model Question {
   name                       String?
   description                String?
   score                      Float?
-  type                       String
+  type                       questionType
   level                      Int                @default(1)
   mode                       String             @default("practise")
   authorId                   Int
@@ -748,4 +748,13 @@ enum userConceptEventType {
   EXPANDED
   COLLAPSED
   SELECTED
+}
+
+enum questionType {
+  SC
+  MC
+  FreeText
+  Fillin
+  CodingQuestion
+  GraphQuestion
 }

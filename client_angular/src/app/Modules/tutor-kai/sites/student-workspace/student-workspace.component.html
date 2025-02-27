@@ -1,7 +1,7 @@
 <mat-toolbar class="header" style="min-height: 30px !important; height: 30px !important;" color="primary">
   <div class="left-content">
-   <a mat-list-item routerLink="/dashboard" style="cursor: pointer;" routerLinkActive="active-link">
-     <span style="font-size:15px;">Zurück zum Dashboard</span>
+   <a (click)="navigateToDashboard()" mat-list-item style="cursor: pointer;">
+     <span  style="font-size:15px;">Zurück zum Dashboard</span>
    </a>
  </div>
  <div class="center-content">

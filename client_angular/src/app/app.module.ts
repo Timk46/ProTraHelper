@@ -61,12 +61,12 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
 import { McTaskCreationComponent } from "./Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component";
 import { MCDescriptionDialogComponent } from "./Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component";
 import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-creation/score/score.component";
-import { FillinTaskComponent } from "./Pages/contentView/contentElement/fill-in-task/fill-in-task.component";
 import { FillinTaskNewComponent } from './Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { DynamicBlankComponent } from './Pages/contentView/contentElement/fill-in-task-new/dynamic-blank/dynamic-blank.component';
 import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-task/graph-task.component';
 import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
 import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
+import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-question.component';
 import { ContentListComponent } from './Pages/content-list/content-list.component';
 import { ContentListItemComponent } from './Pages/content-list/content-list-item/content-list-item.component';
 import { MatExpansionModule } from "@angular/material/expansion";
@@ -106,7 +106,6 @@ import { MatRippleModule } from "@angular/material/core";
         DiscussionPrecreationComponent,
         TaskEvaluationOverviewComponent,
         FreeTextTaskComponent,
-        FillinTaskComponent,
         DraggableHeightDirective,
         ContactComponent,
         ImpressumComponent,
@@ -125,6 +124,7 @@ import { MatRippleModule } from "@angular/material/core";
         FillinTaskNewComponent,
         DynamicBlankComponent,
         GraphTaskComponent,
+        DynamicQuestionComponent,
         ContentListComponent,
         ContentListItemComponent
     ],
@@ -154,7 +154,7 @@ import { MatRippleModule } from "@angular/material/core";
         LoggedInGuard,
         AdminGuard,
         ConfettiService,
-        Title
+        Title,
     ],
     bootstrap: [AppComponent]
 })

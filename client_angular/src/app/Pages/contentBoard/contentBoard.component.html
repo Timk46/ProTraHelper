@@ -1,5 +1,5 @@
 <div class="content-container" class="mat-elevation-z8">
-  <mat-accordion>
+  <mat-accordion multi="true">
     <mat-expansion-panel [hideToggle]="!hasContentElementType(content, 'QUESTION')" *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index">
     <!-- <mat-expansion-panel [disabled]="!hasContentElementType(content, 'QUESTION')" [hideToggle]="!hasContentElementType(content, 'QUESTION')" *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index"></mat-expansion-panel> -->
       <mat-expansion-panel-header fxLayout = "row">
@@ -102,7 +102,6 @@
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
           </table>
         </div>
       </div>

@@ -1,5 +1,5 @@
-import { Component, ComponentFactory, ComponentFactoryResolver, EventEmitter, Inject, Output, ViewChild, ViewContainerRef } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, EventEmitter, Inject, Input, Output, ViewContainerRef } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { taskViewDTO } from '@DTOs/content.dto';
 import { FillinQuestionDTO } from '@DTOs/fillInText.dto';
@@ -8,8 +8,8 @@ import { QuestionDataService } from 'src/app/Services/question/question-data.ser
 import { DynamicBlankComponent } from './dynamic-blank/dynamic-blank.component';
 import { Subject, takeUntil } from 'rxjs';
 import { FillinQuestionType } from '@DTOs/fillInType.enum';
-import { CdkDrag, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { Location } from '@angular/common';
 @Component({
   selector: 'app-fill-in-task-new',
   templateUrl: './fill-in-task-new.component.html',
@@ -17,7 +17,8 @@ import { CdkDrag, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angul
 })
 export class FillinTaskNewComponent {
   @Output() submitClicked = new EventEmitter<any>();
-
+  @Input() conceptId!: number;
+  @Input() questionId!: number;
   private destroy$ = new Subject<void>();
   protected fillinTypes = FillinQuestionType;
   protected processedContent: SafeHtml | undefined;
@@ -39,6 +40,8 @@ export class FillinTaskNewComponent {
     private sanitizer: DomSanitizer,
     private questionDataService: QuestionDataService,
     private viewContainerRef: ViewContainerRef,
+    private location: Location,
+    private dialogRef: MatDialogRef<FillinTaskNewComponent>
   ) {
     this.taskViewData = data.taskViewData;
     this.contentElementId = data.taskViewData.contentElementId || -1;
@@ -194,7 +197,16 @@ export class FillinTaskNewComponent {
   }
 
   onClose() {
-
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
+    if (this.conceptId && this.questionId) {
+      this.location.replaceState(`/dashboard/conceptOverview/${this.conceptId}`);
+    } else if (this.conceptId) {
+      this.location.replaceState(`/dashboard/conceptOverview`);
+    } else {
+      this.location.replaceState(`/dashboard`);
+    }
   }
 
 }
