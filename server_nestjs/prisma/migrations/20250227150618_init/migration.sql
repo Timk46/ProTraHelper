@@ -11,6 +11,9 @@ CREATE TYPE "contentElementType" AS ENUM ('TEXT', 'IMAGE', 'VIDEO', 'AUDIO', 'CO
 -- CreateEnum
 CREATE TYPE "userConceptEventType" AS ENUM ('LEVEL_CHANGE', 'EXPANDED', 'COLLAPSED', 'SELECTED');
 
+-- CreateEnum
+CREATE TYPE "questionType" AS ENUM ('SC', 'MC', 'FreeText', 'Fillin', 'CodingQuestion', 'GraphQuestion', 'UMLQuestion');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
@@ -23,6 +26,17 @@ CREATE TABLE "User" (
     "currentconceptNodeId" INTEGER,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "RefreshToken" (
+    "id" SERIAL NOT NULL,
+    "deviceId" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "RefreshToken_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -79,6 +93,7 @@ CREATE TABLE "ConceptNode" (
     "name" TEXT NOT NULL,
     "description" TEXT,
     "conceptGraphId" INTEGER,
+    "transcript" TEXT,
 
     CONSTRAINT "ConceptNode_pkey" PRIMARY KEY ("id")
 );
@@ -299,6 +314,7 @@ CREATE TABLE "UserAnswer" (
     "userId" INTEGER NOT NULL,
     "questionId" INTEGER NOT NULL,
     "userFreetextAnswer" TEXT,
+    "userGraphAnswer" JSONB,
 
     CONSTRAINT "UserAnswer_pkey" PRIMARY KEY ("id")
 );
@@ -327,6 +343,37 @@ CREATE TABLE "FreeTextQuestion" (
     "questionId" INTEGER NOT NULL,
 
     CONSTRAINT "FreeTextQuestion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "GraphQuestion" (
+    "id" SERIAL NOT NULL,
+    "textHTML" TEXT,
+    "expectations" TEXT NOT NULL,
+    "expectationsHTML" TEXT,
+    "type" TEXT NOT NULL,
+    "initialStructure" JSONB NOT NULL,
+    "exampleSolution" JSONB NOT NULL,
+    "stepsEnabled" BOOLEAN NOT NULL,
+    "configuration" JSONB NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "questionId" INTEGER NOT NULL,
+
+    CONSTRAINT "GraphQuestion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "GraphAIFeedback" (
+    "id" SERIAL NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "prompt" TEXT,
+    "response" TEXT NOT NULL,
+    "ratingByStudent" INTEGER,
+    "userAnswerId" INTEGER NOT NULL,
+
+    CONSTRAINT "GraphAIFeedback_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -407,6 +454,33 @@ CREATE TABLE "CodeSubmissionFile" (
     "CodeSubmissionId" INTEGER NOT NULL,
 
     CONSTRAINT "CodeSubmissionFile_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "FillinQuestion" (
+    "id" SERIAL NOT NULL,
+    "content" TEXT NOT NULL,
+    "taskType" TEXT NOT NULL,
+    "table" BOOLEAN NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "questionId" INTEGER NOT NULL,
+
+    CONSTRAINT "FillinQuestion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Blank" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "blankContent" TEXT NOT NULL,
+    "position" TEXT NOT NULL,
+    "isDistractor" BOOLEAN NOT NULL DEFAULT false,
+    "isCorrect" BOOLEAN NOT NULL DEFAULT false,
+    "fillinQuestionId" INTEGER NOT NULL,
+
+    CONSTRAINT "Blank_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -510,14 +584,26 @@ CREATE TABLE "Vote" (
 );
 
 -- CreateTable
+CREATE TABLE "ChatSession" (
+    "id" SERIAL NOT NULL,
+    "title" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "userId" INTEGER NOT NULL,
+
+    CONSTRAINT "ChatSession_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "ChatBotMessage" (
     "id" SERIAL NOT NULL,
     "question" TEXT NOT NULL,
     "answer" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "isBot" BOOLEAN NOT NULL DEFAULT false,
+    "ratingByStudent" INTEGER,
     "usedChunks" TEXT,
     "userId" INTEGER,
+    "sessionId" INTEGER,
 
     CONSTRAINT "ChatBotMessage_pkey" PRIMARY KEY ("id")
 );
@@ -582,6 +668,57 @@ CREATE TABLE "Notification" (
 );
 
 -- CreateTable
+CREATE TABLE "UmlEditorModel" (
+    "id" SERIAL NOT NULL,
+    "model" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+
+    CONSTRAINT "UmlEditorModel_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UmlEditorElement" (
+    "id" SERIAL NOT NULL,
+    "element" TEXT NOT NULL,
+    "elementType" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "editorModelId" INTEGER NOT NULL,
+    "data" TEXT NOT NULL,
+
+    CONSTRAINT "UmlEditorElement_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UmlQuestion" (
+    "id" SERIAL NOT NULL,
+    "questionId" INTEGER NOT NULL,
+    "title" TEXT,
+    "text" TEXT,
+    "textHTML" TEXT,
+    "editorData" JSONB,
+    "startData" JSONB,
+    "dataImage" TEXT,
+    "taskSettings" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "UmlQuestion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UserUmlQuestionAnswer" (
+    "id" SERIAL NOT NULL,
+    "userAnswerId" INTEGER NOT NULL,
+    "attemptData" JSONB NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "UserUmlQuestionAnswer_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_ModuleToSubject" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
@@ -589,6 +726,12 @@ CREATE TABLE "_ModuleToSubject" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RefreshToken_token_key" ON "RefreshToken"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RefreshToken_userId_deviceId_key" ON "RefreshToken"("userId", "deviceId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Module_name_key" ON "Module"("name");
@@ -612,7 +755,13 @@ CREATE UNIQUE INDEX "ContentElement_questionId_key" ON "ContentElement"("questio
 CREATE UNIQUE INDEX "File_uniqueIdentifier_key" ON "File"("uniqueIdentifier");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "GraphQuestion_questionId_key" ON "GraphQuestion"("questionId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "CodingQuestion_questionId_key" ON "CodingQuestion"("questionId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FillinQuestion_questionId_key" ON "FillinQuestion"("questionId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Discussion_authorId_key" ON "Discussion"("authorId");
@@ -633,6 +782,18 @@ CREATE INDEX "Notification_type_idx" ON "Notification"("type");
 CREATE INDEX "Notification_discussionId_idx" ON "Notification"("discussionId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "UmlEditorModel_model_key" ON "UmlEditorModel"("model");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UmlEditorElement_element_key" ON "UmlEditorElement"("element");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UmlQuestion_questionId_key" ON "UmlQuestion"("questionId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserUmlQuestionAnswer_userAnswerId_key" ON "UserUmlQuestionAnswer"("userAnswerId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "_ModuleToSubject_AB_unique" ON "_ModuleToSubject"("A", "B");
 
 -- CreateIndex
@@ -640,6 +801,9 @@ CREATE INDEX "_ModuleToSubject_B_index" ON "_ModuleToSubject"("B");
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_currentconceptNodeId_fkey" FOREIGN KEY ("currentconceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RefreshToken" ADD CONSTRAINT "RefreshToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ModuleConceptGoal" ADD CONSTRAINT "ModuleConceptGoal_conceptNodeId_fkey" FOREIGN KEY ("conceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -768,6 +932,12 @@ ALTER TABLE "UserMCOptionSelected" ADD CONSTRAINT "UserMCOptionSelected_userAnsw
 ALTER TABLE "FreeTextQuestion" ADD CONSTRAINT "FreeTextQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "GraphQuestion" ADD CONSTRAINT "GraphQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "GraphAIFeedback" ADD CONSTRAINT "GraphAIFeedback_userAnswerId_fkey" FOREIGN KEY ("userAnswerId") REFERENCES "UserAnswer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "CodingQuestion" ADD CONSTRAINT "CodingQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -790,6 +960,12 @@ ALTER TABLE "CodeSubmissionFile" ADD CONSTRAINT "CodeSubmissionFile_CodeSubmissi
 
 -- AddForeignKey
 ALTER TABLE "CodeSubmissionFile" ADD CONSTRAINT "CodeSubmissionFile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FillinQuestion" ADD CONSTRAINT "FillinQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Blank" ADD CONSTRAINT "Blank_fillinQuestionId_fkey" FOREIGN KEY ("fillinQuestionId") REFERENCES "FillinQuestion"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "KIFeedback" ADD CONSTRAINT "KIFeedback_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "CodeSubmission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -822,7 +998,13 @@ ALTER TABLE "Vote" ADD CONSTRAINT "Vote_messageId_fkey" FOREIGN KEY ("messageId"
 ALTER TABLE "Vote" ADD CONSTRAINT "Vote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "ChatSession" ADD CONSTRAINT "ChatSession_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "ChatBotMessage" ADD CONSTRAINT "ChatBotMessage_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ChatBotMessage" ADD CONSTRAINT "ChatBotMessage_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "ChatSession"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserContentElementProgress" ADD CONSTRAINT "UserContentElementProgress_contentElementId_fkey" FOREIGN KEY ("contentElementId") REFERENCES "ContentElement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -847,6 +1029,15 @@ ALTER TABLE "Notification" ADD CONSTRAINT "Notification_discussionId_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "Notification" ADD CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UmlEditorElement" ADD CONSTRAINT "UmlEditorElement_editorModelId_fkey" FOREIGN KEY ("editorModelId") REFERENCES "UmlEditorModel"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UmlQuestion" ADD CONSTRAINT "UmlQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserUmlQuestionAnswer" ADD CONSTRAINT "UserUmlQuestionAnswer_userAnswerId_fkey" FOREIGN KEY ("userAnswerId") REFERENCES "UserAnswer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ModuleToSubject" ADD CONSTRAINT "_ModuleToSubject_A_fkey" FOREIGN KEY ("A") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;

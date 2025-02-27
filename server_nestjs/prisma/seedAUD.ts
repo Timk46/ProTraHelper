@@ -210,10 +210,10 @@ export const seedAUD = async () => {
     // Admin
     const adminUser = await prisma.user.create({
       data: {
-        email: 'admiuiojeASNFIUOASDHBNFIOAn@admiSUIODFHIOAASDn.de',
+        email: 'admin@test.de',
         firstname: 'Admin',
         lastname: 'User',
-        password: await bcrypt.hash('sjdfAios4357843#!ddfGs3', 10), // changed on production
+        password: await bcrypt.hash('admin', 10), // changed on production
         globalRole: 'ADMIN',
       },
     });
@@ -223,7 +223,7 @@ export const seedAUD = async () => {
         userId: adminUser.id,
         subjectId: subjectAUD.id,
         subjectSpecificRole: 'STUDENT',
-        registeredForSL: false,
+        registeredForSL: true,
       },
     });
 

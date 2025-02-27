@@ -94,9 +94,10 @@ export class StudentWorkspaceComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private router: Router
   ) {
-    this.route.queryParamMap.subscribe(params => {
-      this.conceptId = Number(params.get('concept'));
+    this.route.paramMap.subscribe(params => {
+      this.conceptId = Number(params.get('concept')); // Dies könnte undefined sein, wenn 'concept' ein Query-Parameter ist
       this.currentTaskId = Number(params.get('taskId'));
+      console.log(this.currentTaskId);
       console.log('StudentWorkspaceComponent constructor', this.conceptId, this.currentTaskId);
     });
 
