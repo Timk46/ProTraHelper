@@ -96,6 +96,7 @@ model ConceptNode {
   name              String
   description       String?
   conceptGraphId    Int?
+  transcript        String?
   childEdges        ConceptEdge[]       @relation("conceptEdgeParent")
   mySuccessors      ConceptEdge[]       @relation("prerequisiteConcept")
   myPrerequisites   ConceptEdge[]       @relation("successorConcept")
