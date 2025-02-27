@@ -82,6 +82,8 @@ export class ContentListItemComponent {
         return 'Programmieraufgabe';
       case questionType.GRAPH:
         return 'Graphaufgabe';
+      case questionType.UML:
+        return 'UML-Aufgabe';
       default:
         return 'Aufgabe';
     }
@@ -107,6 +109,8 @@ export class ContentListItemComponent {
         return 'code';
       case questionType.GRAPH:
         return 'device_hub';
+      case questionType.UML:
+        return 'account_tree';
       default:
         return 'help';
     }
@@ -152,7 +156,7 @@ export class ContentListItemComponent {
         break;
       case questionType.CODE:
         // Navigate to coding question component
-        this.router.navigate([this.getRouterLink(question.id)]);
+        this.router.navigate([this.getRouterLink('CodingQuestion', question.id)]);
         break;
       case questionType.GRAPH:
         // Navigate to graph question component
@@ -160,6 +164,9 @@ export class ContentListItemComponent {
         return;
       case questionType.FILLIN:
         dialogRef = this.dialog.open(FillinTaskNewComponent, {...dialogConfig, width: '50vw'});
+        break;
+      case questionType.UML:
+        this.router.navigate([this.getRouterLink("UML", question.id)]);
         break;
     }
 
@@ -216,6 +223,9 @@ export class ContentListItemComponent {
       case questionType.GRAPH:
         this.router.navigate(['/editgraph/', question.id]);
         break;
+      case questionType.UML:
+        this.router.navigate(['/edituml/', question.id]);
+        break;
     }
   }
 
@@ -265,13 +275,22 @@ export class ContentListItemComponent {
 
 
   /**
-   * Generates a router link string based on the provided index.
+   * Generates a router link based on the provided question type and index.
    *
-   * @param {number} index - The index to be included in the router link.
-   * @returns {string} The generated router link string.
+   * @param type - The type of the question. Can be 'CodingQuestion' or 'UML'.
+   * @param index - The index of the question.
+   * @returns The router link as a string.
+   * @throws Will throw an error if the question type is unknown.
    */
-  getRouterLink(index: number): string {
-    return `/tutor-kai/code/${index}`;
+  getRouterLink(type: string, index: number): string {
+    switch (type) {
+      case 'CodingQuestion':
+        return `/tutor-kai/code/${index}`;
+      case 'UML':
+        return `/umlearn/task-workspace/${index}`;
+      default:
+        throw new Error('Unknown question type');
+    }
   }
 
 
