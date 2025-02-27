@@ -12,7 +12,6 @@ import { McqGenerationDTO, OptionDTO, McqEvaluation } from '@Interfaces/question
 import { env } from 'process';
 import { RagService } from '@/ai/services/rag.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { encode, decode } from 'gpt-3-encoder'; // Install if necessary
 
 // change to accessing sensitive data from .env(?)
 const llmConfig = {

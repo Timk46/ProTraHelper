@@ -1,4 +1,4 @@
-import {CodingQuestionInternal} from './question.dto';
+import {CodingQuestionInternal, questionType} from './question.dto';
 import { GraphConfigurationDTO, GraphStructureDTO } from './graphTask.dto';
 import { editorDataDTO, taskSettingsDTO } from './umlearnDtos/dtos';
 
@@ -9,7 +9,7 @@ export interface detailedQuestionDTO {
   name: string;
   description: string;
   score: number;
-  type: string;
+  type: questionType;
   level: number;
   mode: string;
   authorId: number;
