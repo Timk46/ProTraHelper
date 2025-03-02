@@ -2,7 +2,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { ContentDTO, ContentElementDTO } from '@DTOs/content.dto';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
 import { ContentService } from 'src/app/Services/content/content.service';
 
@@ -31,26 +31,28 @@ export class ContentViewComponent implements OnInit {
       @Inject(MAT_DIALOG_DATA) public data: any,
       private sanitizer: DomSanitizer,
       private discussionDialogService: DiscussionDialogService,
-      private contentService: ContentService) {
-    this.contentViewData = data.contentViewData as ContentDTO;
-    this.activeConceptNodeId = data.conceptNodeId as number;
-    this.contentTypes = data.contentTypes;
-    this.elementCount = this.contentViewData.contentElements.length;
-    // filter contentElements by type
-    this.viewableElements = this.contentViewData.contentElements.filter(x => this.contentTypes.includes(x.type));
-    // sort contentElements by position
-    this.viewableElements = this.viewableElements.sort((a, b) => a.positionInSpecificContentView - b.positionInSpecificContentView);
-    // set default button style
-    for(let i = 0; i < this.contentViewData.contentElements.length; i++) {
-      this.applyCompletedStyle[i] = false;
-      this.applyQuestionStyle[i] = false;
-    }
-    this.pdfCount = this.getPdfCount();
+      private contentService: ContentService)
+      {
 
-    // check if browser is Safari
-    // pdfViewer component is not supported in Safari therefor a warning message is displayed
-    this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  }
+        this.contentViewData = data.contentViewData as ContentDTO;
+        this.activeConceptNodeId = data.conceptNodeId as number;
+        this.contentTypes = data.contentTypes;
+        this.elementCount = this.contentViewData.contentElements.length;
+        // filter contentElements by type
+        this.viewableElements = this.contentViewData.contentElements.filter(x => this.contentTypes.includes(x.type));
+        // sort contentElements by position
+        this.viewableElements = this.viewableElements.sort((a, b) => a.positionInSpecificContentView - b.positionInSpecificContentView);
+        // set default button style
+        for(let i = 0; i < this.contentViewData.contentElements.length; i++) {
+          this.applyCompletedStyle[i] = false;
+          this.applyQuestionStyle[i] = false;
+        }
+        this.pdfCount = this.getPdfCount();
+
+        // check if browser is Safari
+        // pdfViewer component is not supported in Safari therefor a warning message is displayed
+      this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    }
 
   // for testing -> print ContentElems as String
   tempForTest(data: ContentElementDTO) :string {
@@ -79,17 +81,19 @@ export class ContentViewComponent implements OnInit {
    * @description
    * Returns the pdf url for the iframe
    * (we need iframe for multiple pdfs in a row: https://pdfviewer.net/extended-pdf-viewer/side-by-side)
-   * @param uniqueIdentifier - uuid of the pdf
+   * @param {string} uniqueIdentifier - uuid of the pdf
+   * @returns {SafeResourceUrl} - pdf url for the iframe
    */
-  getPdfUrl(uniqueIdentifier: string) {
+  getPdfUrl(uniqueIdentifier: string): SafeResourceUrl {
     return this.sanitizer.bypassSecurityTrustResourceUrl(`/pdfViewer/${uniqueIdentifier}`);
   }
 
   /**
    * @description
    * Returns the number of pdfs for the current content node
+   * @returns {number} - number of pdfs
    */
-  getPdfCount() {
+  getPdfCount(): number {
     return this.contentViewData.contentElements.filter(x => x.type === 'PDF').length;
   }
 
@@ -97,7 +101,7 @@ export class ContentViewComponent implements OnInit {
    * @description
    * Handles the click event of the discussion button
    * Opens a dialog for creating a new discussion/question
-   * @param contentElementId - id of the content element
+   * @param {number} contentElementId - id of the content element
    */
   onCreateDiscussion(contentElementId: number) {
     this.discussionDialogService.openDiscussionCreation(this.activeConceptNodeId, this.contentViewData.contentNodeId, contentElementId);
@@ -109,20 +113,11 @@ export class ContentViewComponent implements OnInit {
    * Handles the click event of the checkmark button
    * Toggles the completion status of the content element
    * Toggles the appearance of the checkmark button
-   * @param contentElementId - id of the content element
+   * @param {number} contentElementId - id of the content element
    */
   onToggleCheckmark(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
     this.contentService.toggleContentElementCompletionStatus(contentElementId, this.activeConceptNodeId, this.contentViewData.level).subscribe(status => this.applyCompletedStyle[position] = status);
-    /* Removed because we dont give Progress for PDF/VIDEO anymore
-    if(typeof this.contentViewData.progress === 'number'){
-      const sign = this.applyCompletedStyle[position] ? -1 : 1;
-      this.contentViewData.progress = this.contentViewData.progress + (sign/this.elementCount * 100);
-      if(100 - this.contentViewData.progress < 0.0001){
-        this.contentViewData.progress = 100;
-      }
-    }
-      */
   }
 
   /**
@@ -130,7 +125,7 @@ export class ContentViewComponent implements OnInit {
    * Handles the click event of the questionmark button
    * Toggles the question status of the content element
    * Toggles the appearance of the questionmark button
-   * @param contentElementId - id of the content element
+   * @param {number} contentElementId - id of the content element
    */
   onToggleQuestionmark(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
@@ -192,7 +187,7 @@ export class ContentViewComponent implements OnInit {
   /**
    * Returns the date in a human readable format
    * @param date
-   * @returns
+   * @returns string - date in a human readable format
    */
     getDateDisplay(date: Date): string {
       const today = new Date();

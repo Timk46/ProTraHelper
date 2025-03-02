@@ -23,6 +23,8 @@ import { EditBlankComponent } from './edit-fillin/edit-blank/edit-blank.componen
 import { ImageUploadDialogComponent } from './edit-fillin/image-upload-dialog/image-upload-dialog.component';
 import { GraphTasksModule } from 'src/app/Modules/graph-tasks/graph-tasks.module';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { EditUmlComponent } from './edit-uml/edit-uml.component';
+import { UmlearnModule } from 'src/app/Modules/umlearn/umlearn.module';
 import { EditCodeGameComponent } from './edit-code-game/edit-code-game.component';
 import { CodeGameAddElementModalComponent } from "./edit-code-game/code-game-add-element-modal.component";
 import { CodeGameModule } from "../../Modules/code-game/code-game.module";
@@ -44,26 +46,28 @@ import { MatMenuModule } from "@angular/material/menu";
     EditGraphComponent,
     AddElementModalComponent,
     TinymceComponent,
+    EditUmlComponent,
     EditCodeGameComponent,
     CodeGameAddElementModalComponent,
     CodeGamePlayfieldEditorComponent
   ],
-    imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MaterialModule,
-        TutorKaiModule,
-        EditorModule,
-        MarkdownModule.forChild(),
-        NgxMatSelectSearchModule,
-        MatSelectModule,
-        MatFormFieldModule,
-        GraphTasksModule,
-        MatButtonToggleModule,
-        CodeGameModule,
-        MatMenuModule
-    ],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MaterialModule,
+    TutorKaiModule,
+    EditorModule,
+    MarkdownModule.forChild(),
+    NgxMatSelectSearchModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    GraphTasksModule,
+    MatButtonToggleModule,
+    UmlearnModule,
+    CodeGameModule,
+    MatMenuModule
+  ],
   exports: [
     CreateContentNodeDialogComponent,
     CreateContentElementDialogComponent,

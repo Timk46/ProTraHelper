@@ -1,5 +1,6 @@
-import { CodeGameQuestionDto, CodingQuestionInternal } from './question.dto';
+import {CodingQuestionInternal, questionType, CodeGameQuestionDto} from './question.dto';
 import { GraphConfigurationDTO, GraphStructureDTO } from './graphTask.dto';
+import { editorDataDTO, taskSettingsDTO } from './umlearnDtos/dtos';
 
 export interface detailedQuestionDTO {
   id: number;
@@ -8,7 +9,7 @@ export interface detailedQuestionDTO {
   name: string;
   description: string;
   score: number;
-  type: string;
+  type: questionType;
   level: number;
   mode: string;
   authorId: number;
@@ -23,7 +24,7 @@ export interface detailedQuestionDTO {
   mcQuestion?: detailedChoiceQuestionDTO;
   fillinQuestion?: detailedFillinQuestionDTO;
   graphQuestion?: detailedGraphQuestionDTO;
-  // fillinQuestion?: detailedFillinQuestionDTO;
+  umlQuestion?: detailedUmlQuestionDTO;
   codeGameQuestion?: CodeGameQuestionDto;
 }
 
@@ -49,6 +50,7 @@ export interface detailedChoiceQuestionDTO {
   shuffleoptions: boolean;
   isSC: boolean; // single choice
   mcOptions: detailedChoiceOptionDTO[];
+  additionalInfo?: string[]; // array of additional information texts
 }
 
 export interface detailedChoiceOptionDTO {
@@ -95,4 +97,18 @@ export interface detailedGraphQuestionDTO {
   createdAt?: Date;
   updatedAt?: Date;
   questionId: number;
+}
+
+export interface detailedUmlQuestionDTO {
+  id?: number;
+  questionId?: number;
+  title?: string;
+  text?: string;
+  textHTML?: string;
+  editorData?: editorDataDTO;
+  startData?: editorDataDTO;
+  dataImage?: string;
+  taskSettings?: taskSettingsDTO;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

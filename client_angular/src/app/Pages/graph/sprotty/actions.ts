@@ -103,3 +103,20 @@ export namespace MoveNodeAction {
         };
     }
 }
+
+export interface CustomAction extends Action {
+    kind: typeof CustomAction.KIND;
+    nodeId: string;
+}
+
+export namespace CustomAction {
+    export const KIND = 'custom';
+
+    export function create(options: { nodeId: string }): CustomAction {
+        return {
+            kind: KIND,
+            nodeId: options.nodeId
+        };
+    }
+}
+

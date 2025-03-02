@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { ContentsForConceptDTO, ContentElementStatusDTO, ConceptNodeDTO } from '@DTOs/index';
 import { catchError, Observable, tap, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { ConceptNode } from '@DTOs/prisma.dto';
+import { ConceptNode, Question } from '@DTOs/prisma.dto';
 
 @Injectable({
   providedIn: 'root',

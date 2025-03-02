@@ -10,11 +10,14 @@ import { CodeEditorComponent } from "../code-editor/code-editor.component";
 import { MarkdownService } from "../../services/markdown/markdown.service";
 import { VideoTimeStampComponent } from '../video-time-stamp/video-time-stamp.component';
 import { MatDialog } from "@angular/material/dialog";
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ConfettiService } from "src/app/Services/animations/confetti.service";
 import { Title } from '@angular/platform-browser';
 import { ProgressService } from "src/app/Services/progress/progress.service";
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { switchMap } from "rxjs/operators";
+import { map } from "rxjs/operators";
+import { filter } from "rxjs/operators";
 
 /**
  * The different states representing the current status of the student workspace.
@@ -76,6 +79,7 @@ export class StudentWorkspaceComponent implements OnInit {
     { name: 'TypeScript', value: 'typescript' },
   ];
 
+  private conceptId!: number;
   constructor(
     private progressService: ProgressService,
     private runCodeService: RunCodeService,
@@ -87,8 +91,16 @@ export class StudentWorkspaceComponent implements OnInit {
     private route: ActivatedRoute,
     private confettiService: ConfettiService,
     private title: Title,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private router: Router
   ) {
+    this.route.paramMap.subscribe(params => {
+      this.conceptId = Number(params.get('concept')); // Dies könnte undefined sein, wenn 'concept' ein Query-Parameter ist
+      this.currentTaskId = Number(params.get('taskId'));
+      console.log(this.currentTaskId);
+      console.log('StudentWorkspaceComponent constructor', this.conceptId, this.currentTaskId);
+    });
+
     this.safeFeedbackMessage = this.sanitizer.bypassSecurityTrustHtml(this.feedbackMessage);
   }
 
@@ -102,17 +114,18 @@ export class StudentWorkspaceComponent implements OnInit {
   }
 
   getCurrentTaskFromRoute(): void {
-    this.route.params.subscribe((params) => {
-      const taskId = params['taskId'];
-      if (taskId) {
-        this.currentTaskId = taskId;
-        this.taskDataService.getTask(this.currentTaskId).subscribe((task) => {
+    this.taskDataService.getTask(this.currentTaskId)
+      .subscribe({
+        next: (task) => {
           this.currentTask = task;
-          this.taskDescription = this.currentTask?.codingQuestion!.textHTML;
+          this.taskDescription = this.currentTask?.codingQuestion?.textHTML ?? '';
           this.currentState = States.editingCode;
-        });
-      }
-    });
+        },
+        error: (err) => {
+          console.error('Error fetching task:', err);
+          this.snackBar.open('Fehler beim Laden der Aufgabe.', 'Schließen', { duration: 3000 });
+        }
+      });
   }
 
   @HostListener('click', ['$event'])
@@ -164,6 +177,7 @@ export class StudentWorkspaceComponent implements OnInit {
   getKIFeedback(level: string): void {
     this.feedbackLevel = level;
     this.rating = 0;
+    this.hoverState = 0;
     this.currentState = States.startGeneratingKIFeedback;
     this.feedbackMessage = 'Lass mich einen Augenblick über die Aufgabe nachdenken...';
     this.safeFeedbackMessage = this.sanitizer.bypassSecurityTrustHtml(this.feedbackMessage);
@@ -365,4 +379,13 @@ export class StudentWorkspaceComponent implements OnInit {
       verticalPosition: 'bottom',
     });
   }
+
+  navigateToDashboard(){
+    if(this.conceptId){
+      this.router.navigate([`/dashboard/concept/${this.conceptId}`]);
+    }else{
+      this.router.navigate(['/dashboard']);
+    }
+  }
+
 }

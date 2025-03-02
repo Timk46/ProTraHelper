@@ -61,12 +61,17 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
 import { McTaskCreationComponent } from "./Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component";
 import { MCDescriptionDialogComponent } from "./Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component";
 import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-creation/score/score.component";
-import { FillinTaskComponent } from "./Pages/contentView/contentElement/fill-in-task/fill-in-task.component";
 import { FillinTaskNewComponent } from './Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { DynamicBlankComponent } from './Pages/contentView/contentElement/fill-in-task-new/dynamic-blank/dynamic-blank.component';
 import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-task/graph-task.component';
 import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
 import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
+import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-question.component';
+import { ContentListComponent } from './Pages/content-list/content-list.component';
+import { ContentListItemComponent } from './Pages/content-list/content-list-item/content-list-item.component';
+import { MatExpansionModule } from "@angular/material/expansion";
+import { CdkAccordionItem, CdkAccordionModule } from "@angular/cdk/accordion";
+import { MatRippleModule } from "@angular/material/core";
 import { CodeGameModule } from "./Modules/code-game/code-game.module";
 import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-game/code-game-confirm-dialog.component";
 
@@ -103,7 +108,6 @@ import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-
         DiscussionPrecreationComponent,
         TaskEvaluationOverviewComponent,
         FreeTextTaskComponent,
-        FillinTaskComponent,
         DraggableHeightDirective,
         ContactComponent,
         ImpressumComponent,
@@ -122,6 +126,9 @@ import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-
         FillinTaskNewComponent,
         DynamicBlankComponent,
         GraphTaskComponent,
+        DynamicQuestionComponent,
+        ContentListComponent,
+        ContentListItemComponent,
         CodeGameConfirmDialogComponent
     ],
     imports: [
@@ -139,6 +146,9 @@ import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-
         MarkdownModule.forRoot(),
         GraphTasksModule,
         MatMenuModule,
+        MatExpansionModule,
+        CdkAccordionModule,
+        MatRippleModule,
         CodeGameModule
     ],
     providers: [
@@ -148,7 +158,7 @@ import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-
         LoggedInGuard,
         AdminGuard,
         ConfettiService,
-        Title
+        Title,
     ],
     bootstrap: [AppComponent]
 })

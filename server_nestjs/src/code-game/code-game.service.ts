@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '@/prisma/prisma.service';
 import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
 import { CppProjectExecutionResult } from '@DTOs/codeGame.dto';
+import { questionType } from '@DTOs/question.dto';
 
 @Injectable()
 export class CodeGameService {
@@ -60,6 +61,7 @@ export class CodeGameService {
 
     return {
       ...questionWithoutContentElementAndCodeGameQuestion,
+      type: questionType.CODEGAME,
       codeGameQuestion: codeGameQuestionWithContentElementId,
     };
   }

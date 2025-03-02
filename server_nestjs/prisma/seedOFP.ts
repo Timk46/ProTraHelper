@@ -1,13 +1,9 @@
-/* CURRENTLY OUTDATED
-
-
 import { PrismaClient, contentElementType } from '@prisma/client';
 import { WorkSheet, utils } from 'xlsx';
 import { faker } from '@faker-js/faker';
 import * as fs from 'fs';
 import { seedMCQ } from './seedMCQ';
 import { seedCodeQuestions } from './seedCodeQuestions';
-import { seedFreetext } from './seedFreetext';
 import { seedAllEmbeddingsForVideo } from './seedEmbeddings';
 import { seedMCQnew } from './seedNewMCQ';
 import { seedUser } from './seedUser';
@@ -15,7 +11,7 @@ import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-const createEmbeddings = false; // set false to skip embedding creation and save costs!!!
+const createEmbeddings = true; // set false to skip embedding creation and save costs!!!
 
 interface columns_OFP {
   conceptId: number | null;
@@ -1345,18 +1341,25 @@ export const seedOFP = async () => {
 
     // Admin
     const adminUser = await prisma.user.create({
-      data: {
-        email: 'admiuiojeASNFIUOASDHBNFIOAn@admiSUIODFHIOAASDn.de',
-        firstname: 'Admin',
-        lastname: 'User',
-        password: await bcrypt.hash('sjdfAios4357843#!ddfGs3', 10), // changed on production
-        globalRole: 'ADMIN',
-        modules: { connect: [{ id: moduleInformatik.id }] },
-      },
-    });
+          data: {
+            email: 'admin@test.de',
+            firstname: 'Admin',
+            lastname: 'User',
+            password: await bcrypt.hash('admin', 10), // changed on production
+            globalRole: 'ADMIN',
+          },
+        });
 
+        await prisma.userSubject.create({
+          data: {
+            userId: adminUser.id,
+            subjectId: subjectOFP.id,
+            subjectSpecificRole: 'STUDENT',
+            registeredForSL: true,
+          },
+        });
     // seed mor users for other usecases (evaluation etc.)
-    await seedUser(moduleInformatik.id);
+    await seedUser(subjectOFP.id, moduleInformatik.id);
 
     // More users
     const numberOfUsers = 10;
@@ -1370,9 +1373,6 @@ export const seedOFP = async () => {
           lastname: faker.person.lastName(),
           password: faker.internet.password(), //passwords wont work because they are not hashed like they should. To Login with Users use hardcoded ones (see above)
           globalRole: 'STUDENT',
-          modules: {
-            connect: [{ id: moduleInformatik.id }],
-          },
         },
       });
       createdUsers.push(user);
@@ -1440,7 +1440,7 @@ export const seedOFP = async () => {
       const fastCsv = require('fast-csv');
 
       const options = {
-        delimiter: '§',
+        delimiter: ',',
         headers: [
           'conceptId',
           'conceptEdge',
@@ -1491,13 +1491,13 @@ export const seedOFP = async () => {
           });
         })
         .on('end', async () => {
+          console.log(ofpData);
           await createOFPConcepts(ofpData, moduleInformatik);
           console.log('Importing Concepts Done!');
           console.log('Importing Tasks from Excel...');
           await seedCodeQuestions(adminUser.id);
           //await seedMCQ(adminUser.id);
-          await seedMCQnew();
-          await seedFreetext(adminUser.id);
+          //await seedMCQnew();
           console.log('Importing Tasks Done!');
         });
 
@@ -1532,4 +1532,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-*/

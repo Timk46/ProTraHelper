@@ -14,6 +14,7 @@ import { QuestionDataFillinService } from './question-data-fillin/question-data-
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
 import { GraphSolutionEvaluationModule } from '@/graph-solution-evaluation/graph-solution-evaluation.module';
+import { QuestionDataUmlService } from './question-data-uml/question-data-uml.service';
 import { QuestionDataCodeGameService } from './question-data-code-game/question-data-code-game.service';
 
 @Module({
@@ -26,6 +27,7 @@ import { QuestionDataCodeGameService } from './question-data-code-game/question-
     EditCodeService,
     ContentService,
     QuestionDataGraphService,
+    QuestionDataUmlService,
     QuestionDataCodeGameService,
   ],
   controllers: [QuestionDataController],
@@ -37,8 +39,6 @@ import { QuestionDataCodeGameService } from './question-data-code-game/question-
     NotificationModule,
     GraphSolutionEvaluationModule,
   ],
-  exports: [
-    QuestionDataService,
-  ],
+  exports: [QuestionDataService],
 })
 export class QuestionDataModule {}

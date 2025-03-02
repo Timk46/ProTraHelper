@@ -2,16 +2,12 @@
 // content.service.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-
 import {
   ContentsForConceptDTO,
   ContentElementDTO,
-  ContentViewDTO,
   ContentDTO,
 } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
-import { async, last } from 'rxjs';
-import { tr } from '@faker-js/faker';
 import { UserConceptService } from '@/graph/user-concept/user-concept.service';
 import { ConceptNode } from '@prisma/client';
 
@@ -48,7 +44,7 @@ export class ContentService {
   async getContentsByConceptNode(
     conceptNodeId: number,
     userId: number,
-    ): Promise<ContentsForConceptDTO> {
+  ): Promise<ContentsForConceptDTO> {
     // Step 1: Fetch concept node with all related data in a single query
     // We use Prisma's findUnique method to get a specific concept node
     // The 'include' option tells Prisma to also fetch related data
@@ -151,13 +147,16 @@ export class ContentService {
       },
     });
 
-        // Create a map of question IDs to their maximum scores
-        const questionProgressMap = new Map<number, number>();
-        questionProgress.forEach((qp) => {
-          const currentMaxScore = questionProgressMap.get(qp.questionId) || 0;
-          const newMaxScore = Math.max(...qp.feedbacks.map((f) => f.score), currentMaxScore);
-          questionProgressMap.set(qp.questionId, newMaxScore);
-        });
+    // Create a map of question IDs to their maximum scores
+    const questionProgressMap = new Map<number, number>();
+    questionProgress.forEach((qp) => {
+      const currentMaxScore = questionProgressMap.get(qp.questionId) || 0;
+      const newMaxScore = Math.max(
+        ...qp.feedbacks.map((f) => f.score),
+        currentMaxScore,
+      );
+      questionProgressMap.set(qp.questionId, newMaxScore);
+    });
 
     // Step 4: Transform data
     // We create a function that turns our raw database data into a format our application can use
@@ -178,6 +177,10 @@ export class ContentService {
       requiresConceptIds: contentNode.requires.map((r: any) => r.conceptNodeId),
       trainsConceptIds: contentNode.trains.map((t: any) => t.conceptNodeId),
       progress: this.calculateProgress(contentNode, userStatus),
+      levelProgress: this.calculateHighestLevelProgress(
+        contentNode,
+        userStatus,
+      ),
       questionMarked: contentNode.ContentView.some((cv: any) =>
         userStatus.some(
           (status) =>
@@ -278,7 +281,7 @@ export class ContentService {
   }
   */
 
-    /**
+  /**
    * Calculates the progress for a content node.
    *
    * @param contentNode - The content node to calculate progress for
@@ -289,25 +292,65 @@ export class ContentService {
    * This method calculates the progress for a content node by counting the number of completed question elements
    * and dividing it by the total number of question elements.
    */
-    private calculateProgress(contentNode: any, userStatus: any[]): number {
-      const questionElements = contentNode.ContentView.filter((cv: any) =>
-        cv.contentElement.type === 'QUESTION'
-      );
-      const total = questionElements.length;
-      if (total === 0) return 0;
+  private calculateProgress(contentNode: any, userStatus: any[]): number {
+    const questionElements = contentNode.ContentView.filter(
+      (cv: any) => cv.contentElement.type === 'QUESTION',
+    );
+    const total = questionElements.length;
+    if (total === 0) return 0;
 
-      const completedCount = questionElements.filter((cv: any) =>
-        userStatus.some(
+    const completedCount = questionElements.filter((cv: any) =>
+      userStatus.some(
+        (status) =>
+          cv.contentElement.type === 'QUESTION' &&
+          status.contentElementId === cv.contentElement.id &&
+          status.markedAsDone,
+      ),
+    ).length;
+  }
+
+  /**
+   * Calculates the highest level of progress for a given content node based on the user's status.
+   *
+   * @param contentNode - The content node containing the content elements.
+   * @param userStatus - An array of user status objects indicating which content elements have been marked as done.
+   * @returns The highest level of progress achieved by the user for the given content node.
+   */
+  private calculateHighestLevelProgress(
+    contentNode: any,
+    userStatus: any[],
+  ): number {
+    const sortedQuestionElements = contentNode.ContentView.filter(
+      (cv: any) => cv.contentElement.type === 'QUESTION',
+    ).sort(
+      (a: any, b: any) =>
+        a.contentElement.question.level - b.contentElement.question.level,
+    );
+
+    let highestLevel = 0;
+    for (let i = 0; i < sortedQuestionElements.length; i++) {
+      const cv = sortedQuestionElements[i];
+      if (
+        !userStatus.some(
           (status) =>
-            cv.contentElement.type === 'QUESTION' &&
             status.contentElementId === cv.contentElement.id &&
             status.markedAsDone,
-        ),
-      ).length;
-
-      return (completedCount / total) * 100;
+        )
+      ) {
+        break;
+      } else {
+        // only change highestLevel if last element or next element has different (higher) level
+        if (
+          i == sortedQuestionElements.length - 1 ||
+          sortedQuestionElements[i + 1].contentElement.question.level !=
+            cv.contentElement.question.level
+        ) {
+          highestLevel = cv.contentElement.question.level;
+        }
+      }
     }
-
+    return highestLevel;
+  }
 
   /**
    * Calculates the progress for a question.
@@ -383,6 +426,7 @@ export class ContentService {
         markedAsDone: true,
       },
     });
+    console.log('## questionContentElementDone', questionDone);
 
     if (!questionDone) {
       //create new entry in userContentProgress if not exists and set markedAsDone to true
@@ -410,6 +454,14 @@ export class ContentService {
       contentElementId,
       conceptNodeId,
       level,
+    );
+    console.log(
+      '## questionContentElementDone',
+      questionDone.markedAsDone,
+      'for user ',
+      userId,
+      'for element id ',
+      contentElementId,
     );
     return questionDone.markedAsDone;
   }
@@ -495,7 +547,6 @@ export class ContentService {
         markedAsDone: !checkmarkStatus.markedAsDone,
       },
     });
-
 
     const concepts = await this.getLeafConceptsForElement(contentElementId);
 
@@ -631,8 +682,7 @@ export class ContentService {
     });
   }
 
-
-    /**
+  /**
    * Updates the awards level for a given content node and its associated concept nodes.
    *
    * This method performs the following steps:
@@ -647,9 +697,14 @@ export class ContentService {
    * @throws An error if the highest awards level cannot be found for any content or concept node.
    */
   async updateAwardsLevel(contentNodeId: number): Promise<boolean> {
-    const highestLevel: number = await this.getHighestQuestionLevel(contentNodeId);
+    const highestLevel: number = await this.getHighestQuestionLevel(
+      contentNodeId,
+    );
     if (highestLevel === -1) {
-      throw new Error('Error finding the highest awards level for contentNode ' + contentNodeId);
+      throw new Error(
+        'Error finding the highest awards level for contentNode ' +
+          contentNodeId,
+      );
     }
 
     const updatedTraining = await this.prisma.training.updateMany({
@@ -673,10 +728,16 @@ export class ContentService {
 
     //for each concept node, find the highest awards in the training table
     for (const conceptNode of conceptNodes) {
-      if (conceptNode.conceptNodeId !== 1) { //skip the root concept node
-        const highestAwards = await this.getHighestContentLevel(conceptNode.conceptNodeId);
+      if (conceptNode.conceptNodeId !== 1) {
+        //skip the root concept node
+        const highestAwards = await this.getHighestContentLevel(
+          conceptNode.conceptNodeId,
+        );
         if (highestAwards === -1) {
-          throw new Error('Error finding highest awards level for conceptNode ' + conceptNode.conceptNodeId);
+          throw new Error(
+            'Error finding highest awards level for conceptNode ' +
+              conceptNode.conceptNodeId,
+          );
         }
 
         //update ModuleConceptGoal
@@ -703,7 +764,7 @@ export class ContentService {
   async getHighestQuestionLevel(contentNodeId: number): Promise<number> {
     const highestLevelResult = await this.prisma.contentView.findFirst({
       where: {
-        contentNode: {id: contentNodeId},
+        contentNode: { id: contentNodeId },
         contentElement: {
           type: 'QUESTION',
           NOT: {
@@ -732,11 +793,16 @@ export class ContentService {
     });
 
     if (!highestLevelResult) {
-      console.log('No content elements found for content node ' + contentNodeId + '. Returning 1.');
+      console.log(
+        'No content elements found for content node ' +
+          contentNodeId +
+          '. Returning 1.',
+      );
       return 1;
     }
 
-    const highestLevel: number = highestLevelResult.contentElement?.question?.level || -1;
+    const highestLevel: number =
+      highestLevelResult.contentElement?.question?.level || -1;
     return highestLevel;
   }
 
@@ -761,12 +827,15 @@ export class ContentService {
     });
 
     if (!highestAwardsResult) {
-      console.log('No content nodes found for concept node ' + conceptNodeId + '. Returning 1.');
+      console.log(
+        'No content nodes found for concept node ' +
+          conceptNodeId +
+          '. Returning 1.',
+      );
       return 1;
     }
 
     const highestLevel: number = highestAwardsResult.awards || -1;
     return highestLevel;
   }
-
 }

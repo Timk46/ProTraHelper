@@ -1,7 +1,7 @@
 <mat-toolbar class="header" style="min-height: 30px !important; height: 30px !important;" color="primary">
   <div class="left-content">
-   <a mat-list-item routerLink="/dashboard" style="cursor: pointer;" routerLinkActive="active-link">
-     <span style="font-size:15px;">Zurück zum Dashboard</span>
+   <a (click)="navigateToDashboard()" mat-list-item style="cursor: pointer;">
+     <span  style="font-size:15px;">Zurück zum Dashboard</span>
    </a>
  </div>
  <div class="center-content">
@@ -121,22 +121,27 @@
      <div *ngIf="!isLoading && compilerOutput" class="col-span-1 lg:col-span-6">
        <mat-card class="KI-card">
          <mat-card-header>
-           <mat-card-subtitle class="polarNight_4_text">Kai</mat-card-subtitle>
+           <mat-card-subtitle class="polarNight_4_text">Tutor Kai</mat-card-subtitle>
          </mat-card-header>
          <mat-card-actions *ngIf="currentState == 4" class="actions-container">
-          <div class="rating-container" style="display: flex; align-items: center; width: 100%;">
+          <div class="rating-container" style="display: flex; align-items: center; width: 100%; background-color: #f5f5f5; padding: 10px;">
             <div class="rating-text" style="flex: 2; padding-left: 20px;">
-              <span class="polarNight_4_text">Wie hilfreich war das Feedback? Deine Bewertung hilft uns sehr!</span><br>
-              <span class="polarNight_4_text">1 = Überhaupt nicht hilfreich</span><br>
-              <span class="polarNight_4_text">5 = Sehr hilfreich</span>
+              <span class="polarNight_4_text" style="font-weight: bold;">Wie hilfreich war das Feedback für dich?</span><br>
+              <span class="polarNight_4_text">1 Stern = Überhaupt nicht hilfreich</span><br>
+              <span class="polarNight_4_text">5 Sterne = Sehr hilfreich</span>
             </div>
             <div class="rating" style="flex: 1; display: flex; justify-content: flex-start;">
               <button mat-icon-button *ngFor="let star of [1, 2, 3, 4, 5]"
                       (click)="sendStudentFeedback(star)"
                       (mouseenter)="onMouseEnter(star)"
                       (mouseleave)="onMouseLeave()"
-                      class="star-button">
-                <mat-icon [ngClass]="{'gold': (star <= hoverState || star <= rating), 'grey': !(star <= hoverState || star <= rating)}">
+                      class="star-button"
+                      [ngClass]="{'animate-star': rating === 0}">
+                <mat-icon [ngClass]="{
+                  'gold': (star <= hoverState || star <= rating),
+                  'grey': !(star <= hoverState || star <= rating),
+                  'glow-effect': rating === 0
+                }">
                   {{star <= hoverState || star <= rating ? 'star' : 'star_border'}}
                 </mat-icon>
               </button>

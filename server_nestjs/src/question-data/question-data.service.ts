@@ -1,7 +1,8 @@
+/* eslint-disable prettier/prettier */
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { QuestionDTO, questionType, detailedQuestionDTO, FillinQuestionDTO } from '@DTOs/index';
+import { QuestionDTO, questionType, detailedQuestionDTO, FillinQuestionDTO, editorDataDTO, taskSettingsDTO } from '@DTOs/index';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswer } from '@DTOs/userAnswer.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
@@ -10,6 +11,7 @@ import { QuestionDataFillinService } from './question-data-fillin/question-data-
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
 import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
 import { GraphSolutionEvaluationService } from '@/graph-solution-evaluation/graph-solution-evaluation.service';
+import { QuestionDataUmlService } from './question-data-uml/question-data-uml.service';
 import { QuestionDataCodeGameService } from '@/question-data/question-data-code-game/question-data-code-game.service';
 
 @Injectable()
@@ -24,16 +26,17 @@ export class QuestionDataService {
     private qdFreetext: QuestionDataFreetextService,
     private qdGraph: QuestionDataGraphService,
     private graphEvalService: GraphSolutionEvaluationService,
+    private qdUml: QuestionDataUmlService,
     private qdCodeGame: QuestionDataCodeGameService
   ) {}
 
   /**
-   *
-   * @param questionId
-   * @returns the question data
+   * @description Retrieves a question by its ID.
+   * @param {number} questionId - The ID of the question.
+   * @returns {Promise<QuestionDTO>} the question data
    */
   async getQuestion(questionId: number): Promise<QuestionDTO> {
-    let question = await this.prisma.question.findUnique({
+    const question = await this.prisma.question.findUnique({
       where: {
         id: Number(questionId)
       }
@@ -43,7 +46,7 @@ export class QuestionDataService {
       throw new Error('Question ' + questionId + ' not found');
     }
 
-    let questionData: QuestionDTO = {
+    const questionData: QuestionDTO = {
       id: question.id,
       name: question.name,
       description: question.description,
@@ -61,10 +64,10 @@ export class QuestionDataService {
 
 
   /**
-   * Retrieves a detailed question by its ID and type. Primarily used in the lecturers view.
-   * @param questionId - The ID of the question to retrieve.
-   * @param questionType - The type of the question.
-   * @returns A promise that resolves to a detailedQuestionDTO object representing the detailed question.
+   * @description Retrieves a detailed question by its ID and type. Primarily used in the lecturers view.
+   * @param {number} questionId - The ID of the question to retrieve.
+   * @param {string} questionTypeStr - The type of the question.
+   * @returns {Promise<detailedQuestionDTO>} A promise that resolves to a detailedQuestionDTO object representing the detailed question.
    * @throws An error if the question with the specified ID is not found.
    */
   async getDetailedQuestion(questionId: number, questionTypeStr: string): Promise<detailedQuestionDTO> {
@@ -138,6 +141,23 @@ export class QuestionDataService {
           }
         });
         break;
+      case questionType.UML:
+        const questionData = await this.prisma.umlQuestion.findFirst({
+          where: {
+            questionId: Number(questionId)
+          }
+        });
+        if (!questionData) {
+          specificQuestionData = undefined;
+          break;
+        }
+        specificQuestionData = {
+          ...questionData,
+          editorData: questionData.editorData as unknown as editorDataDTO,
+          startData: questionData.startData as unknown as editorDataDTO,
+          taskSettings: questionData.taskSettings as unknown as taskSettingsDTO,
+        };
+        break;
       case questionType.CODEGAME:
         specificQuestionData = await this.prisma.codeGameQuestion.findFirst({
           where: {
@@ -152,12 +172,13 @@ export class QuestionDataService {
 
     const questionData: detailedQuestionDTO = {
       ...question,
+      type: questionTypeStr as questionType,
       codingQuestion: questionTypeStr === questionType.CODE ? specificQuestionData : undefined,
       freetextQuestion: questionTypeStr === questionType.FREETEXT ? specificQuestionData : undefined,
       mcQuestion: (questionTypeStr === questionType.MULTIPLECHOICE || questionTypeStr === questionType.SINGLECHOICE) ? specificQuestionData : undefined,
       fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
       graphQuestion: questionTypeStr === questionType.GRAPH ? specificQuestionData : undefined,
-      // fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
+      umlQuestion: questionTypeStr === questionType.UML ? specificQuestionData : undefined,
       codeGameQuestion: questionTypeStr === questionType.CODEGAME ? specificQuestionData : undefined,
     };
 
@@ -166,11 +187,10 @@ export class QuestionDataService {
 
 
   /**
-   * Retrieves the newest user answer for a specific question and user.
-   *
-   * @param questionId - The ID of the question.
-   * @param userId - The ID of the user.
-   * @returns A promise that resolves to a UserAnswerDataDTO object representing the newest user answer.
+   * @description Retrieves the newest user answer for a specific question and user.
+   * @param {number} questionId - The ID of the question.
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<UserAnswerDataDTO>} A promise that resolves to a UserAnswerDataDTO object representing the newest user answer.
    */
   async getNewestUserAnswer(questionId: number, userId: number): Promise<UserAnswerDataDTO> {
     const userAnswer = await this.prisma.userAnswer.findFirst({
@@ -189,6 +209,7 @@ export class QuestionDataService {
         userId: userId
       };
     }
+
     return {
       id: userAnswer.id,
       questionId: userAnswer.questionId,
@@ -206,11 +227,10 @@ export class QuestionDataService {
 
 
   /**
-   * Creates a new question. Also works for version control.
-   *
-   * @param question - The question data.
-   * @param authorId - The ID of the author.
-   * @returns A promise that resolves to the created question.
+   * @description Creates a new question. Also works for version control.
+   * @param {QuestionDTO} question - The question data.
+   * @param {number} authorId - The ID of the author.
+   * @returns {Promise<QuestionDTO>} A promise that resolves to the created question.
    * @throws An error if the concept node is not defined or if the question is not created.
    */
   async createQuestion(question: QuestionDTO, authorId: number): Promise<QuestionDTO> {
@@ -250,12 +270,11 @@ export class QuestionDataService {
 
 
   /**
-   * Updates a whole question.
-   *
-   * @param question - The detailed question object to be updated.
-   * @param authorId - The ID of the author.
-   * @param createNewVersion - Optional. Indicates whether to create a new version of the question. Default is false.
-   * @returns A promise that resolves to the updated detailed question object.
+   * @description Updates a whole question.
+   * @param {detailedQuestionDTO} question - The detailed question object to be updated.
+   * @param {number} authorId - The ID of the author.
+   * @param {boolean} createNewVersion - Optional. Indicates whether to create a new version of the question. Default is false.
+   * @returns {Promise<detailedQuestionDTO>} A promise that resolves to the updated detailed question object.
    * @throws Error if the question is not updateable.
    */
   async updateWholeQuestion(question: detailedQuestionDTO, authorId: number, createNewVersion: boolean = false): Promise<detailedQuestionDTO> {
@@ -337,7 +356,7 @@ export class QuestionDataService {
       case questionType.MULTIPLECHOICE:
       case questionType.SINGLECHOICE:
         if (createNewVersion || !currentQuestion.mcQuestion) {
-          await this.qdChoice.createChoiceQuestion(question.mcQuestion, updatedQuestion.id);
+          await this.qdChoice.createChoiceQuestion(question.mcQuestion);
         } else {
           await this.qdChoice.updateChoiceQuestion(question.mcQuestion);
         }
@@ -363,6 +382,12 @@ export class QuestionDataService {
           await this.qdFillin.updateFillinQuestion(question.fillinQuestion);
         }
         break;
+      case questionType.UML:
+        if (createNewVersion || !currentQuestion.umlQuestion) {
+          await this.qdUml.createUmlQuestion(question.umlQuestion, updatedQuestion.id);
+        } else {
+          await this.qdUml.updateUmlQuestion(question.umlQuestion);
+        }
       case questionType.CODEGAME:
         if (createNewVersion || !currentQuestion.codeGameQuestion) {
           await this.qdCodeGame.createCodeGameQuestion(question.codeGameQuestion, updatedQuestion.id);
@@ -377,11 +402,10 @@ export class QuestionDataService {
 
 
   /**
-   * Checks if the detailed questions can be updated based on certain conditions.
-   *
-   * @param currQuestion - The current detailed question data transfer object.
-   * @param newQuestion - The new detailed question data transfer object.
-   * @returns `true` if the detailed questions are updateable, `false` otherwise.
+   * @description Checks if the detailed questions can be updated based on certain conditions.
+   * @param {detailedQuestionDTO} currQuestion - The current detailed question data transfer object.
+   * @param {detailedQuestionDTO} newQuestion - The new detailed question data transfer object.
+   * @returns {boolean} `true` if the detailed questions are updateable, `false` otherwise.
    */
   private detailedQuestionsUpdateable(currQuestion: detailedQuestionDTO, newQuestion: detailedQuestionDTO): boolean {
     if (
@@ -397,12 +421,13 @@ export class QuestionDataService {
         newQuestion.freetextQuestion ||
         newQuestion.mcQuestion ||
         newQuestion.fillinQuestion ||
-        //TODO: uml, graph
         newQuestion.graphQuestion ||
-        //TODO: fill, uml
-        // newQuestion.fillinQuestion // das hier einfügen
-        newQuestion.codeGameQuestion)
-    ) {
+        newQuestion.umlQuestion ||
+        newQuestion.codeGameQuestion // ||
+        // TODO: Add more types here
+
+      )
+    ){
       return true;
     }
     return false;
@@ -410,10 +435,10 @@ export class QuestionDataService {
 
 
   /**
-   *
-   * @param userId
-   * @param answerData
-   * @returns the new user answer
+   * @description Creates a new user answer and generates feedback for it.
+   * @param {number} userId - The ID of the user.
+   * @param {UserAnswerDataDTO} answerData - The user answer data.
+   * @returns {Promise<userAnswerFeedbackDTO>} A promise that resolves to the new user answer feedback.
    */
   async createUserAnswer(userId: number, answerData: UserAnswerDataDTO) : Promise<userAnswerFeedbackDTO> {
     console.log('create user answer: '+userId + ' ' + answerData.questionId + ' ' + answerData.contentElementId);
@@ -639,7 +664,7 @@ export class QuestionDataService {
       const feedbackDetails = [];
       console.log("user answers: ", userAnswers);
 
-      for (let blankPosition of importantBlankPositions) {
+      for (const blankPosition of importantBlankPositions) {
         const userAnswer = userAnswers.find(answer => answer.position === blankPosition)?.answer?.toLowerCase().trim();
         const correctPositionAnswers = correctAnswers.filter(blank => blank.position === blankPosition).map(blank => blank.blankContent.toLowerCase().trim());
 
@@ -701,8 +726,8 @@ export class QuestionDataService {
         await this.qdGraph.getGraphQuestion(answerData.questionId, true).then(async (questionData) => {
 
           // Generate feedback based on the user answer
-          const { feedback, receivedPoints } = this.graphEvalService.evaluateSolution(questionData, answerData.userGraphAnswer);
-          feedbackText = feedback;
+          const { feedbackHTML, receivedPoints } = this.graphEvalService.evaluateSolution(questionData, answerData.userGraphAnswer);
+          feedbackText = feedbackHTML;
           userScore = receivedPoints;
         });
       }
@@ -804,13 +829,13 @@ export class QuestionDataService {
         //set contentElement as done
         console.log(
           'contentElementId: ' +
-            answerData.contentElementId +
-            ' conceptNode: ' +
-            question.conceptNodeId +
-            ' level: ' +
-            question.level +
-            ' userId: ' +
-            userId,
+          answerData.contentElementId +
+          ' conceptNode: ' +
+          question.conceptNodeId +
+          ' level: ' +
+          question.level +
+          ' userId: ' +
+          userId,
         );
         await this.contentService.questionContentElementDone(
           answerData.contentElementId,
@@ -844,5 +869,94 @@ export class QuestionDataService {
         progress: progress * 100,
       };
     }
+
+    // TODO: Uml
   }
+
+  /**
+   * @description Calculates the progress of a question based on the user answers.
+   * The progress is calculated based on the aggregated 'score'.
+   * @param {number} questionId - The ID of the question.
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<number>} The calculated progress in percentage.
+   */
+  async getQuestionProgress(questionId: number, userId: number): Promise<number> {
+    try {
+      // Get the maximum score for the question
+      const question = await this.getQuestion(questionId);
+      if (!question) throw new Error('Question not found');
+
+      // Get the total number of answers for the question and the user
+      const totalAnswers = await this.prisma.userAnswer.count({
+        where: {
+          questionId: questionId,
+          userId: userId,
+        },
+      });
+
+      if (totalAnswers === 0) return 0;
+
+      // Aggregated score of all user answers
+      const aggregatedScoreResult = await this.prisma.feedback.aggregate({
+        where: {
+          userAnswer: {
+            questionId: questionId,
+            userId: userId,
+          }
+        },
+        _max: {
+          score: true
+        }
+      });
+
+      const maxScore = aggregatedScoreResult._max.score || 0;
+
+      // Calculate the progress
+      const progress = Math.floor((maxScore / question.score) * 100);
+
+      // Ensure progress does not exceed 100%
+      return Math.min(progress, 100);
+    } catch (error) {
+      console.error(`Error calculating progress for question ${questionId} and user ${userId}:`, error);
+      throw new Error('Could not calculate progress');
+    }
+  }
+
+  /**
+   * @description Fetches the corresponding contentNodeId and contentElementId for a given question.
+   * @param {number} questionId - The ID of the question.
+   * @returns {Promise<{ contentNodeId: number; contentElementId: number }>} A promise that resolves to an object containing contentNodeId and contentElementId.
+   * @throws {NotFoundException} if the question does not exist or has no associated file.
+   */
+  async getContentIdsForQuestion(questionId: number): Promise<{ contentNodeId: number; contentElementId: number }> {
+    const question = await this.prisma.question.findFirst({
+      where: { id: questionId },
+      select: {
+        id: true,
+        contentElement: {
+          select: {
+            id: true,
+            ContentView: {
+              select: {
+                contentNodeId: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!question) {
+      throw new NotFoundException(`Question with ID ${questionId} not found`);
+    }
+    const contentElementId = question.contentElement.id;
+    const contentNodeId = question.contentElement.ContentView[0].contentNodeId;
+
+    return {
+      contentNodeId,
+      contentElementId,
+    };
+  }
+
 }
+
