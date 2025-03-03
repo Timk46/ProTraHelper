@@ -300,7 +300,7 @@ export class ContentListItemComponent {
       case 'UML':
         return `/umlearn/task-workspace/${index}`;
       case 'CodeGame':
-        return `/codegame/${index}`;
+        return `/code-game/${index}`;
       default:
         throw new Error('Unknown question type');
     }
