@@ -178,8 +178,9 @@ void World::moveObject(Rover& rover, int newX, int newY) {
 void World::determineSuccess() {
     bool reachedDestination = false;
     bool collectedAllRocks = false;
+    bool gameError = false;
 
-    // check if the rover is at the destination
+    /* check if the rover is at the destination */
     std::vector<int> roverPosition = findRover();
 
     if (roverPosition[0] == -1 && roverPosition[1] == -1) {
@@ -187,7 +188,28 @@ void World::determineSuccess() {
         return;
     }
 
-    reachedDestination = checkDestination(roverPosition[0], roverPosition[1]);
+    // check if game error
+    Rover* rover = nullptr;
+    for (int i = 0; i < worldMap.size(); i++)
+    {
+        for (int j = 0; j < worldMap[i].size(); j++) 
+        {
+            auto& actors = worldMap[i][j];
+            for (auto& actor : actors) {
+                if (actor->getType() == Actor::ActorType::PLAYER) {
+                    rover = static_cast<Rover*>(actor);
+                    if (rover->gameError) {
+                        gameError = true;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!gameError) {
+        reachedDestination = checkDestination(roverPosition[0], roverPosition[1]);
+    }
 
     // check if the rover got all rocks
     if (totalRocks > 0) {
@@ -197,17 +219,21 @@ void World::determineSuccess() {
     }
 
     // output the result
-    if (reachedDestination) {
-        if (totalRocks > 0) {
-            SystemOutput::getInstance().outputInformation("Rover reached the destination and collected " + std::to_string(collectedRocks) + "/" + std::to_string(totalRocks) + " rocks.");
-        } else {
-            SystemOutput::getInstance().outputInformation("Rover reached the destination.");
-        }
+    if (gameError) {
+        SystemOutput::getInstance().outputInformation("Rover left the play field. Game over.");
     } else {
-        if (totalRocks > 0) {
-            SystemOutput::getInstance().outputInformation("Rover did not reach the destination and collected " + std::to_string(collectedRocks) + "/" + std::to_string(totalRocks) + " rocks.");
+        if (reachedDestination) {
+            if (collectedAllRocks) {
+                SystemOutput::getInstance().outputInformation("Rover reached the destination and collected all rocks.");
+            } else {
+                SystemOutput::getInstance().outputInformation("Rover reached the destination but did not collect all rocks.");
+            }
         } else {
-            SystemOutput::getInstance().outputInformation("Rover did not reach the destination.");
+            if (collectedAllRocks) {
+                SystemOutput::getInstance().outputInformation("Rover did not reach the destination but collected all rocks.");
+            } else {
+                SystemOutput::getInstance().outputInformation("Rover did not reach the destination and did not collect all rocks.");
+            }
         }
     }
  

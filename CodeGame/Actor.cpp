@@ -22,12 +22,28 @@ Actor::Actor(int _x, int _y, ActorDirection _direction, ActorType _actorType, Wo
 // MARK: - movements
 
 /**
- * @brief Moves the actor by a specified distance.
+ * @brief Moves the actor by a specified distance in the current direction.
  * 
  * @param distance The distance to move the actor.
  */
 void Actor::move(int distance)
 {
+    if (gameError) {
+        return;
+    }
+
+    if (checkObstacle()) {
+        SystemOutput::getInstance().outputInformation("Obstacle detected in front.");
+        return;
+    }
+
+    if (checkWorldBounds()) {
+        SystemOutput::getInstance().outputInformation("World boundary detected.");
+        SystemOutput::getInstance().outputWarning();
+        gameError = true;
+        return;
+    }
+
     int newX = x;
     int newY = y;
 
@@ -62,9 +78,73 @@ void Actor::move(int distance)
  */
 void Actor::turn(ActorDirection diraction)
 {
+    if (gameError) {
+        return;
+    }
+
     actorDiraction = diraction;
 
     SystemOutput::getInstance().outputTrun(getDirectionString());
+}
+
+
+/**
+ * @brief Checks if there is an obstacle in the direction the actor is facing.
+ *
+ * @return true if there is an obstacle in the direction the actor is facing, false otherwise.
+ */
+bool Actor::checkObstacle()
+{
+    if (getDirection() == ActorDirection::NORTH) {
+        if (world->getObstacles(getX(), getY() - 1).size() > 0) {
+            return true;
+        }
+    } else if (getDirection() == ActorDirection::EAST) {
+        if (world->getObstacles(getX() + 1, getY()).size() > 0) {
+            return true;
+        }
+    } else if (getDirection() == ActorDirection::SOUTH) {
+        if (world->getObstacles(getX(), getY() + 1).size() > 0) {
+            return true;
+        }
+    } else if (getDirection() == ActorDirection::WEST) {
+        if (world->getObstacles(getX() - 1, getY()).size() > 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * @brief Checks if the actor is about to move out of the world bounds in the direction the actor is facing.
+ * 
+ * @return true if the actor would move out of the world bounds, false otherwise.
+ */
+bool Actor::checkWorldBounds()
+{
+    if (!world) {
+        std::cerr << "Actor.cpp - checkWorldBounds: World instance is not reachable." << std::endl;
+        return false;
+    }
+
+    if (actorDiraction == ActorDirection::NORTH) {
+        if (getY() - 1 < 0) {
+            return true;
+        }
+    } else if (actorDiraction == ActorDirection::EAST) {
+        if (getX() + 1 >= world->getWidth()) {
+            return true;
+        }
+    } else if (actorDiraction == ActorDirection::SOUTH) {
+        if (getY() + 1 >= world->getHeight()) {
+            return true;
+        }
+    } else if (actorDiraction == ActorDirection::WEST) {
+        if (getX() - 1 < 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // MARK: - getter/setter
@@ -147,4 +227,14 @@ std::string Actor::getActorTypeString()
             return "ROCK";
     }
     return "";
+}
+
+/**
+ * @brief Retrieves the current game error status.
+ * 
+ * @return true if there is a game error, false otherwise.
+ */
+bool Actor::getGameError()
+{
+    return gameError;
 }

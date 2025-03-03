@@ -35,13 +35,7 @@ void Rover::act()
  */
 void Rover::drive()
 {    
-    if (checkObstacle(actorDiraction)) {
-        SystemOutput::getInstance().outputInformation("Obstacle detected in front.");
-    } else if (checkWorldBounds(actorDiraction)) {
-        SystemOutput::getInstance().outputInformation("World boundary detected in front.");
-    } else {
-        move(1);
-    }
+    move(1);
 
     if (checkDestination()) {
         std::cout << "Rover has reached the destination." << std::endl;
@@ -160,6 +154,10 @@ bool Rover::checkWorldBounds(ActorDirection direction)
  */
 bool Rover::checkDestination()
 {
+    if (gameError) {
+        return false;
+    }
+
     return world->checkDestination(getX(), getY());
 }
 
@@ -178,6 +176,10 @@ bool Rover::checkRock()
  */
 void Rover::analyseRock()
 {
+    if (gameError) {
+        return;
+    }
+
     if (checkRock()) {
         SystemOutput::getInstance().outputInformation("Rock detected at current position.");
         world->removeRock(getX(), getY());

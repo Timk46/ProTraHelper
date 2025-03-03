@@ -53,6 +53,20 @@ void SystemOutput::outputRemoveRock(int x, int y)
 }
 
 
+
+/**
+ * @brief Outputs a system warning message to the standard output.
+ * 
+ * In clase the player leaves the play filed - game over.
+ */
+void SystemOutput::outputWarning()
+{
+    std::lock_guard<std::mutex> lock(mtx);
+
+    std::cout << "#SYS-Warning" << std::endl;
+}
+
+
 /**
  * @brief Outputs the success status of the system.
  *

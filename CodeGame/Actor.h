@@ -14,6 +14,7 @@ class World; // Forward declaration
  */
 class Actor {
     public:
+        bool gameError = false; // if the actor leaves the play field
         
         /**
          * @enum Actor::ActorType
@@ -70,8 +71,12 @@ class Actor {
         ActorDirection actorDiraction;
         World* world;
 
+        bool checkObstacle();
+        bool checkWorldBounds();
+
         std::string getDirectionString();
         std::string getActorTypeString();
+        bool getGameError();
 };
 
 #endif // ACTOR_H
