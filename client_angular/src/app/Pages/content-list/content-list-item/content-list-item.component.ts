@@ -84,6 +84,8 @@ export class ContentListItemComponent {
         return 'Graphaufgabe';
       case questionType.UML:
         return 'UML-Aufgabe';
+      case questionType.CODEGAME:
+        return 'Codegame';
       default:
         return 'Aufgabe';
     }
@@ -111,6 +113,8 @@ export class ContentListItemComponent {
         return 'device_hub';
       case questionType.UML:
         return 'account_tree';
+      case questionType.CODEGAME:
+        return 'videogame_asset';
       default:
         return 'help';
     }
@@ -167,6 +171,10 @@ export class ContentListItemComponent {
         break;
       case questionType.UML:
         this.router.navigate([this.getRouterLink("UML", question.id)]);
+        break;
+      case questionType.CODEGAME:
+        // Navigate to coding question component
+        this.router.navigate([this.getRouterLink('CodeGame', question.id)]);
         break;
     }
 
@@ -225,6 +233,9 @@ export class ContentListItemComponent {
         break;
       case questionType.UML:
         this.router.navigate(['/edituml/', question.id]);
+        break;
+      case questionType.CODEGAME:
+        this.router.navigate(['/editcodegame/', question.id]);
         break;
     }
   }
@@ -288,6 +299,8 @@ export class ContentListItemComponent {
         return `/tutor-kai/code/${index}`;
       case 'UML':
         return `/umlearn/task-workspace/${index}`;
+      case 'CodeGame':
+        return `/codegame/${index}`;
       default:
         throw new Error('Unknown question type');
     }
