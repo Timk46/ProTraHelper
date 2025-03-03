@@ -786,9 +786,9 @@ export class QuestionDataService {
           frequencyOfMethodEvaluationResult: answerData.codeGameEvaluation?.frequencyOfMethodEvaluationResult,
           frequencyOfMethodCallsResult: answerData.codeGameEvaluation?.frequencyOfMethodCallsResult,
           reachedDestination: answerData.codeGameEvaluation?.reachedDestination,
-          totalRocks: answerData.codeGameEvaluation?.totalRocks,
-          collectedRocks: answerData.codeGameEvaluation?.collectedRocks,
-          allRocksCollected: answerData.codeGameEvaluation?.allRocksCollected,
+          totalItems: answerData.codeGameEvaluation?.totalItems,
+          collectedItems: answerData.codeGameEvaluation?.collectedItems,
+          allItemsCollected: answerData.codeGameEvaluation?.allItemsCollected,
           visitedCellsAreAllowed: answerData.codeGameEvaluation?.visitedCellsAreAllowed,
           allWhiteListCellsVisited: answerData.codeGameEvaluation?.allWhiteListCellsVisited,
         },
@@ -799,7 +799,7 @@ export class QuestionDataService {
       if (answerData.codeGameEvaluation.reachedDestination) {
         userScore += 1;
       }
-      if (answerData.codeGameEvaluation.allRocksCollected) {
+      if (answerData.codeGameEvaluation.allItemsCollected) {
         userScore += 1;
       }
       if (answerData.codeGameEvaluation.visitedCellsAreAllowed) {

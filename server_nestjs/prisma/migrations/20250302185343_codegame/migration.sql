@@ -41,9 +41,9 @@ CREATE TABLE "CodeGameAnswer" (
     "frequencyOfMethodEvaluationResult" BOOLEAN NOT NULL,
     "frequencyOfMethodCallsResult" INTEGER NOT NULL,
     "reachedDestination" BOOLEAN NOT NULL,
-    "allRocksCollected" BOOLEAN NOT NULL,
-    "totalRocks" INTEGER NOT NULL,
-    "collectedRocks" INTEGER NOT NULL,
+    "allItemsCollected" BOOLEAN NOT NULL,
+    "totalItems" INTEGER NOT NULL,
+    "collectedItems" INTEGER NOT NULL,
     "visitedCellsAreAllowed" BOOLEAN NOT NULL,
     "allWhiteListCellsVisited" BOOLEAN NOT NULL,
 

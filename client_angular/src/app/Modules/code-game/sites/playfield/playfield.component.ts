@@ -43,7 +43,7 @@ export class PlayfieldComponent {
   gameFieldHeight: number = 0;
   cellSize: number = 60;
   theme: string = ''; // part of the path to the images
-  hiddenRocks: String[] = [];
+  hiddenItems: String[] = [];
 
   playerPosition = { x: 0, y: 0 };
   playerDirection: PlayerDirection = PlayerDirection.EAST; // default direction
@@ -183,20 +183,20 @@ export class PlayfieldComponent {
     }, interval);
   }
 
-  hideRockImage(row: string, col: string): void {
-    const rockImage = this.el.nativeElement.querySelector(`#rock-${row}-${col}`);
-    if (rockImage) {
-      this.renderer.setStyle(rockImage, 'display', 'none');
-      this.hiddenRocks.push(`#rock-${row}-${col}`);
+  hideItemImage(row: string, col: string): void {
+    const itemImage = this.el.nativeElement.querySelector(`#item-${row}-${col}`);
+    if (itemImage) {
+      this.renderer.setStyle(itemImage, 'display', 'none');
+      this.hiddenItems.push(`#item-${row}-${col}`);
     }
   }
 
-  showRockImage(): void {
-    for (let i = 0; i < this.hiddenRocks.length; i++) {
-      this.renderer.setStyle(this.el.nativeElement.querySelector(this.hiddenRocks[i]), 'display', 'block');
+  showItemImage(): void {
+    for (let i = 0; i < this.hiddenItems.length; i++) {
+      this.renderer.setStyle(this.el.nativeElement.querySelector(this.hiddenItems[i]), 'display', 'block');
     }
 
-    this.hiddenRocks = [];
+    this.hiddenItems = [];
   }
 
   toggleDimChase(col: number, row: number): void {
@@ -265,7 +265,7 @@ export class PlayfieldComponent {
     const cell = this.gameField[row][col];
     if (cell === 'O') return 'assets/img/codeGame/' + this.theme + '/obstacle.png';
     if (cell === 'D') return 'assets/img/codeGame/' + this.theme + '/destination.png';
-    if (cell === 'R') return 'assets/img/codeGame/' + this.theme + '/rock.png';
+    if (cell === 'I') return 'assets/img/codeGame/' + this.theme + '/item.png';
     return '';
   }
 
@@ -273,7 +273,7 @@ export class PlayfieldComponent {
     const cell = this.gameField[row][col];
     if (cell === 'O') return 'obstacle-' + row + '-' + col;
     if (cell === 'D') return 'destination-' + row + '-' + col;
-    if (cell === 'R') return 'rock-' + row + '-' + col;
+    if (cell === 'I') return 'item-' + row + '-' + col;
     return '';
   }
 
@@ -340,12 +340,16 @@ export class PlayfieldComponent {
           console.error("Unknown direction: ", move);
       }
 
-    } else if (action == "#SYS-RemoveRock") {
+    } else if (action == "#SYS-RemoveItem") {
       const coordinates = move.split('/');
-      this.hideRockImage(coordinates[1], coordinates[0]);
+      this.hideItemImage(coordinates[1], coordinates[0]);
 
     } else if (action == "#SYS-Info") {
       this.gameOutputInformation = move;
+
+    } else if (action == "#SYS-Warning") {
+      // TODO: show warning
+      console.log("Warning: ");
 
     } else if (action == "#SYS-Success") {
       // Informations are valuated in the backend
@@ -357,7 +361,7 @@ export class PlayfieldComponent {
 
   resetGame(): void {
     // reset the game field
-    this.showRockImage();
+    this.showItemImage();
     this.hideAllWaringOverlays();
     this.playerPosition = this.playerInitialPosition;
     this.playerDirection = PlayerDirection.EAST;

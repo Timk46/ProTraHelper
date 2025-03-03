@@ -93,13 +93,13 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
       const cell = this.gameField[row][col];
       if (cell === 'O') return 'assets/img/codeGame/' + this.theme + '/obstacle.png';
       if (cell === 'D') return 'assets/img/codeGame/' + this.theme + '/destination.png';
-      if (cell === 'R') return 'assets/img/codeGame/' + this.theme + '/rock.png';
+      if (cell === 'I') return 'assets/img/codeGame/' + this.theme + '/item.png';
       if (cell === 'P') return 'assets/img/codeGame/' + this.theme + '/player.png';
       return '';
     } else if (objectPrefix != null) {
       if (objectPrefix === 'O') return 'assets/img/codeGame/' + this.theme + '/obstacle.png';
       if (objectPrefix === 'D') return 'assets/img/codeGame/' + this.theme + '/destination.png';
-      if (objectPrefix === 'R') return 'assets/img/codeGame/' + this.theme + '/rock.png';
+      if (objectPrefix === 'I') return 'assets/img/codeGame/' + this.theme + '/item.png';
       if (objectPrefix === 'P') return 'assets/img/codeGame/' + this.theme + '/player.png';
       return '';
     }

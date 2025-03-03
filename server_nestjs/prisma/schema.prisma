@@ -514,9 +514,9 @@ model CodeGameAnswer {
   frequencyOfMethodEvaluationResult Boolean
   frequencyOfMethodCallsResult      Int
   reachedDestination                Boolean
-  allRocksCollected                 Boolean
-  totalRocks                        Int
-  collectedRocks                    Int
+  allItemsCollected                 Boolean
+  totalItems                        Int
+  collectedItems                    Int
   visitedCellsAreAllowed            Boolean
   allWhiteListCellsVisited          Boolean
 }

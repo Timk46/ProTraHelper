@@ -41,18 +41,18 @@ export class CodeGameEvaluationService {
 
     let successesFromCodeExecution = {
       reachedDestination: false,
-      totalRocks: 0,
-      collectedRocks: 0,
-      allRocksCollected: false,
+      totalItems: 0,
+      collectedItems: 0,
+      allItemsCollected: false,
     };
 
     try {
       if (match) {
         successesFromCodeExecution = {
           reachedDestination: parseInt(match[1], 10) === 1 ? true : false,
-          totalRocks: parseInt(match[2], 10),
-          collectedRocks: parseInt(match[3], 10),
-          allRocksCollected: parseInt(match[2], 10) === parseInt(match[3], 10),
+          totalItems: parseInt(match[2], 10),
+          collectedItems: parseInt(match[3], 10),
+          allItemsCollected: parseInt(match[2], 10) === parseInt(match[3], 10),
         };
       }
     } catch (error) {

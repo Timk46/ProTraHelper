@@ -11,9 +11,9 @@ export interface CodeGameEvaluationDTO { // TODO: change to CodeGameAnswerDTO
     frequencyOfMethodEvaluationResult: boolean;
     frequencyOfMethodCallsResult: number;
     reachedDestination: boolean;
-    allRocksCollected: boolean;
-    totalRocks: number;
-    collectedRocks: number;
+    allItemsCollected: boolean;
+    totalItems: number;
+    collectedItems: number;
     visitedCellsAreAllowed: boolean;
     allWhiteListCellsVisited: boolean;
 }

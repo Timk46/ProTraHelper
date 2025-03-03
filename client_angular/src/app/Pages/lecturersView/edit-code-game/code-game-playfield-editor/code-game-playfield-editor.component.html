@@ -19,7 +19,7 @@
     <p>Setze die Anzahl der Reihen und Spalten:</p>
     <mat-form-field appearance="outline" class="form-field">
       <mat-label>Reihen und Spalten</mat-label>
-      <input matInput type="number" formControlName="rowsAndColumns" required min="10" max="15">
+      <input matInput type="number" formControlName="rowsAndColumns" required min="10" max="10"> <!-- TODO: change max to 15, if the codegame supports it -->
     </mat-form-field>
   </div>
 
@@ -43,11 +43,11 @@
       </mat-icon>
       <span>Hindernis</span>
     </button>
-    <button mat-menu-item (click)="setObject('R')" class="menu-item">
+    <button mat-menu-item (click)="setObject('I')" class="menu-item">
       <mat-icon class="menu-icon" svgIcon>
-        <img *ngIf="getObjectImage(null, null,'R')" [src]="getObjectImage(null, null,'R')" alt="objectImage" />
+        <img *ngIf="getObjectImage(null, null,'I')" [src]="getObjectImage(null, null,'I')" alt="objectImage" />
       </mat-icon>
-      <span>Stein</span>
+      <span>Gegenstand</span>
     </button>
     <button mat-menu-item (click)="setObject('P')" class="menu-item">
       <mat-icon class="menu-icon" svgIcon>

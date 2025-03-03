@@ -44,9 +44,9 @@ export class WorkspaceComponent {
   frequencyOfMethodEvaluationResult: boolean = false; // if the code fulfills the restrictions
   frequencyOfMethodCallsResult: number = 0; // number of method calls
   reachedDestination: boolean = false;
-  allRocksCollected: boolean = false;
-  totalRocks: number = 0;
-  collectedRocks: number = 0;
+  allItemsCollected: boolean = false;
+  totalItems: number = 0;
+  collectedItems: number = 0;
   visitedCellsAreAllowed: boolean = false;
   allWhiteListCellsVisited: boolean = false;
 
@@ -132,9 +132,9 @@ export class WorkspaceComponent {
           this.frequencyOfMethodEvaluationResult = response.frequencyOfMethodEvaluationResult;
           this.frequencyOfMethodCallsResult = response.frequencyOfMethodCallsResult;
           this.reachedDestination = response.reachedDestination;
-          this.allRocksCollected = response.allRocksCollected;
-          this.totalRocks = response.totalRocks;
-          this.collectedRocks = response.collectedRocks;
+          this.allItemsCollected = response.allItemsCollected;
+          this.totalItems = response.totalItems;
+          this.collectedItems = response.collectedItems;
           this.visitedCellsAreAllowed = response.visitedCellsAreAllowed;
           this.allWhiteListCellsVisited = response.allWhiteListCellsVisited;
 
@@ -202,9 +202,9 @@ export class WorkspaceComponent {
     this.frequencyOfMethodEvaluationResult = false;
     this.frequencyOfMethodCallsResult = 0;
     this.reachedDestination = false;
-    this.allRocksCollected = false;
-    this.totalRocks = 0;
-    this.collectedRocks = 0;
+    this.allItemsCollected = false;
+    this.totalItems = 0;
+    this.collectedItems = 0;
     this.visitedCellsAreAllowed = false;
     this.allWhiteListCellsVisited = false;
   }
