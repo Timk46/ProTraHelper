@@ -1,15 +1,15 @@
-#include "Rover.h"
+#include "Player.h"
 #include "World.h"
 #include "SystemOutput.h"
 
 #include <iostream>
 #include <string>
 
-Rover::Rover(int _x, int _y, ActorDirection _actorDirection, ActorType _actorType, World* _world)
+Player::Player(int _x, int _y, ActorDirection _actorDirection, ActorType _actorType, World* _world)
     : Actor(_x, _y, _actorDirection, _actorType, _world)
 {}
 
-void Rover::act()
+void Player::act()
 {
     drive();
     drive();
@@ -31,23 +31,23 @@ void Rover::act()
 }
 
 /**
- * @brief Drives the rover forward by one unit.
+ * @brief Drives the player forward by one unit.
  */
-void Rover::drive()
+void Player::drive()
 {    
     move(1);
 
     if (checkDestination()) {
-        std::cout << "Rover has reached the destination." << std::endl;
+        std::cout << "Player has reached the destination." << std::endl;
     }
 }
 
 /**
- * @brief Checks if there is an obstacle in the direction the rover is facing.
+ * @brief Checks if there is an obstacle in the direction the player is facing.
  *
- * @return true if there is an obstacle in the direction the rover is facing, false otherwise.
+ * @return true if there is an obstacle in the direction the player is facing, false otherwise.
  */
-bool Rover::checkObstacle()
+bool Player::checkObstacle()
 {
     if (getDirection() == ActorDirection::NORTH) {
         if (world->getObstacles(getX(), getY() - 1).size() > 0) {
@@ -82,10 +82,10 @@ bool Rover::checkObstacle()
  * @return true if there is at least one obstacle in the specified direction,
  *         false otherwise.
  */
-bool Rover::checkObstacle(ActorDirection direction)
+bool Player::checkObstacle(ActorDirection direction)
 {
     if (!world) {
-        std::cerr << "Rover.cpp - checkObstacle: World instance is not reachable." << std::endl;
+        std::cerr << "Player.cpp - checkObstacle: World instance is not reachable." << std::endl;
         return false;
     }
 
@@ -110,20 +110,20 @@ bool Rover::checkObstacle(ActorDirection direction)
 }
 
 /**
- * @brief Checks if the rover is about to move out of the world bounds in the given direction.
+ * @brief Checks if the player is about to move out of the world bounds in the given direction.
  * 
- * @param direction The direction in which the rover intends to move. It can be one of the following:
+ * @param direction The direction in which the player intends to move. It can be one of the following:
  *                  - ActorDirection::NORTH
  *                  - ActorDirection::EAST
  *                  - ActorDirection::SOUTH
  *                  - ActorDirection::WEST
  * 
- * @return true if the rover would move out of the world bounds, false otherwise.
+ * @return true if the player would move out of the world bounds, false otherwise.
  */
-bool Rover::checkWorldBounds(ActorDirection direction)
+bool Player::checkWorldBounds(ActorDirection direction)
 {
     if (!world) {
-        std::cerr << "Rover.cpp - checkWorldBounds: World instance is not reachable." << std::endl;
+        std::cerr << "Player.cpp - checkWorldBounds: World instance is not reachable." << std::endl;
         return false;
     }
 
@@ -148,11 +148,11 @@ bool Rover::checkWorldBounds(ActorDirection direction)
 }
 
 /**
- * @brief Checks if the current position of the Rover is a valid destination.
+ * @brief Checks if the current position of the Player is a valid destination.
  * 
  * @return true if the destination is valid, false otherwise.
  */
-bool Rover::checkDestination()
+bool Player::checkDestination()
 {
     if (gameError) {
         return false;
@@ -162,11 +162,11 @@ bool Rover::checkDestination()
 }
 
 /**
- * @brief Checks if there is a item at the Rover's current position.
+ * @brief Checks if there is a item at the Player's current position.
  * 
- * @return true if there is a item at the Rover's current position, false otherwise.
+ * @return true if there is a item at the Player's current position, false otherwise.
  */
-bool Rover::checkItem()
+bool Player::checkItem()
 {
     return world->checkItem(getX(), getY());
 }
@@ -174,7 +174,7 @@ bool Rover::checkItem()
 /**
  * @brief Analyzes the current position for a Item.
  */
-void Rover::analyseItem()
+void Player::analyseItem()
 {
     if (gameError) {
         return;

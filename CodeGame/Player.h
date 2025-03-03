@@ -1,13 +1,13 @@
-#ifndef ROVER_H
-#define ROVER_H
+#ifndef PLAYER_H
+#define PLAYER_H
 
 #include "Actor.h"
 #include "World.h"
 
-class Rover: public Actor {
+class Player: public Actor {
 
     public:
-        Rover(int x, int y, ActorDirection actorDirection, ActorType actorType, World* world);
+        Player(int x, int y, ActorDirection actorDirection, ActorType actorType, World* world);
         void act() override;
 
     private:
@@ -20,4 +20,4 @@ class Rover: public Actor {
         void analyseItem();
 };
 
-#endif // ROVER_H
+#endif // PLAYER_H

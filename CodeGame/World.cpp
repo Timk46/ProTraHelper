@@ -1,7 +1,7 @@
 #include "World.h"
 #include "Actor.h"
 #include "SystemOutput.h"
-#include "Rover.h"
+#include "Player.h"
 #include "Obstacle.h"
 #include "Destination.h"
 #include "Item.h"
@@ -77,9 +77,9 @@ void World::addObject(Actor::ActorType actorType, Actor::ActorDirection actorDir
     const int j = x; // x is the width coordinate, column in the world map
 
     if (actorType == Actor::ActorType::PLAYER) {
-        Rover* rover = new Rover(x, y, actorDirection, actorType, this);
+        Player* player = new Player(x, y, actorDirection, actorType, this);
 
-        worldMap[i][j].push_back(rover);
+        worldMap[i][j].push_back(player);
     } else if (actorType == Actor::ActorType::DESTINATION) {
         Destination* destination = new Destination(x, y, actorDirection, actorType, this);
 
@@ -114,8 +114,8 @@ void World::run() {
 
             for (auto& actor : actors) {
                 if (actor->getType() == Actor::ActorType::PLAYER) {
-                    Rover* rover = static_cast<Rover*>(actor);
-                    rover->act();
+                    Player* player = static_cast<Player*>(actor);
+                    player->act();
                     return;
                 }
             }
@@ -130,16 +130,16 @@ void World::run() {
 
 
 /**
- * @brief Moves the specified rover to a new position on the world map.
+ * @brief Moves the specified player to a new position on the world map.
  * 
- * @param rover The rover object to be moved.
- * @param newX The new x-coordinate to move the rover to.
- * @param newY The new y-coordinate to move the rover to.
+ * @param player The player object to be moved.
+ * @param newX The new x-coordinate to move the player to.
+ * @param newY The new y-coordinate to move the player to.
  * 
- * @note If the rover is not found in the world map, an error message is printed to std::cerr.
+ * @note If the player is not found in the world map, an error message is printed to std::cerr.
  * @note If the new coordinates are out of bounds, an error message is printed to std::cerr.
  */
-void World::moveObject(Rover& rover, int newX, int newY) {
+void World::moveObject(Player& player, int newX, int newY) {
     bool isActorFound = false;
 
     for (int i = 0; i < worldMap.size(); i++)
@@ -147,8 +147,8 @@ void World::moveObject(Rover& rover, int newX, int newY) {
         for (int j = 0; j < worldMap[i].size(); j++) 
         {
             auto& actors = worldMap[i][j];
-            auto it = std::find_if(actors.begin(), actors.end(), [&rover](const Actor* actor) {
-                return actor == &rover;
+            auto it = std::find_if(actors.begin(), actors.end(), [&player](const Actor* actor) {
+                return actor == &player;
             });
             if (it != actors.end()) {
                 actors.erase(it);
@@ -165,7 +165,7 @@ void World::moveObject(Rover& rover, int newX, int newY) {
     }
 
     if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
-        worldMap[newY][newX].push_back(&rover);
+        worldMap[newY][newX].push_back(&player);
         SystemOutput::getInstance().outputMove(newX, newY);
     } else {
         std::cerr << "World.cpp - moveObject: Invalid position (" << newX << ", " << newY << ") for moving object" << std::endl;
@@ -173,23 +173,23 @@ void World::moveObject(Rover& rover, int newX, int newY) {
 }
 
 /**
- * @brief Determines the success of the rover's mission.
+ * @brief Determines the success of the player's mission.
  */
 void World::determineSuccess() {
     bool reachedDestination = false;
     bool collectedAllItems = false;
     bool gameError = false;
 
-    /* check if the rover is at the destination */
-    std::vector<int> roverPosition = findRover();
+    /* check if the player is at the destination */
+    std::vector<int> playerPosition = findPlayer();
 
-    if (roverPosition[0] == -1 && roverPosition[1] == -1) {
-        std::cerr << "World.cpp - determineSuccess: Rover not found in the world map" << std::endl;
+    if (playerPosition[0] == -1 && playerPosition[1] == -1) {
+        std::cerr << "World.cpp - determineSuccess: Player not found in the world map" << std::endl;
         return;
     }
 
     // check if game error
-    Rover* rover = nullptr;
+    Player* player = nullptr;
     for (int i = 0; i < worldMap.size(); i++)
     {
         for (int j = 0; j < worldMap[i].size(); j++) 
@@ -197,8 +197,8 @@ void World::determineSuccess() {
             auto& actors = worldMap[i][j];
             for (auto& actor : actors) {
                 if (actor->getType() == Actor::ActorType::PLAYER) {
-                    rover = static_cast<Rover*>(actor);
-                    if (rover->gameError) {
+                    player = static_cast<Player*>(actor);
+                    if (player->gameError) {
                         gameError = true;
                     }
                     break;
@@ -208,10 +208,10 @@ void World::determineSuccess() {
     }
 
     if (!gameError) {
-        reachedDestination = checkDestination(roverPosition[0], roverPosition[1]);
+        reachedDestination = checkDestination(playerPosition[0], playerPosition[1]);
     }
 
-    // check if the rover got all Items
+    // check if the player got all Items
     if (totalItems > 0) {
         if (collectedItems == totalItems) {
             collectedAllItems = true;
@@ -220,19 +220,19 @@ void World::determineSuccess() {
 
     // output the result
     if (gameError) {
-        SystemOutput::getInstance().outputInformation("Rover left the play field. Game over.");
+        SystemOutput::getInstance().outputInformation("Player left the play field. Game over.");
     } else {
         if (reachedDestination) {
             if (collectedAllItems) {
-                SystemOutput::getInstance().outputInformation("Rover reached the destination and collected all items.");
+                SystemOutput::getInstance().outputInformation("Player reached the destination and collected all items.");
             } else {
-                SystemOutput::getInstance().outputInformation("Rover reached the destination but did not collect all items.");
+                SystemOutput::getInstance().outputInformation("Player reached the destination but did not collect all items.");
             }
         } else {
             if (collectedAllItems) {
-                SystemOutput::getInstance().outputInformation("Rover did not reach the destination but collected all items.");
+                SystemOutput::getInstance().outputInformation("Player did not reach the destination but collected all items.");
             } else {
-                SystemOutput::getInstance().outputInformation("Rover did not reach the destination and did not collect all items.");
+                SystemOutput::getInstance().outputInformation("Player did not reach the destination and did not collect all items.");
             }
         }
     }
@@ -241,12 +241,12 @@ void World::determineSuccess() {
 }
 
 /**
- * @brief Finds the position of the rover (player) in the world map.
+ * @brief Finds the position of the player in the world map.
  * 
- * @return std::vector<int> A vector containing the x and y coordinates of the rover.
+ * @return std::vector<int> A vector containing the x and y coordinates of the player.
  */
-std::vector<int> World::findRover() {
-    std::vector<int> roverPosition = {-1, -1};
+std::vector<int> World::findPlayer() {
+    std::vector<int> playerPosition = {-1, -1};
 
     for (int i = 0; i < worldMap.size(); i++)
     {
@@ -255,15 +255,15 @@ std::vector<int> World::findRover() {
             auto& actors = worldMap[i][j];
             for (auto& actor : actors) {
                 if (actor->getType() == Actor::ActorType::PLAYER) {
-                    roverPosition[0] = j;
-                    roverPosition[1] = i;
-                    return roverPosition;
+                    playerPosition[0] = j;
+                    playerPosition[1] = i;
+                    return playerPosition;
                 }
             }
         }
     }
 
-    return roverPosition;
+    return playerPosition;
 }
 
 // MARK: - Getter/Setter

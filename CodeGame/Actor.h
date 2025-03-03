@@ -61,8 +61,8 @@ class Actor {
         ActorType getType() const;
         ActorDirection getDirection();
 
-        // make Rover a friend class to access private members
-        friend class Rover; 
+        // make Player a friend class to access private members
+        friend class Player; 
 
     private:
         int x;

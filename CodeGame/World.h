@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "Actor.h"
-#include "Rover.h"
+#include "Player.h"
 #include "Obstacle.h"
 #include "Destination.h"
 #include "Item.h"
@@ -14,7 +14,7 @@
 ** Forward declaration is used to declare a class without defining it.
 */
 class Actor;
-class Rover;
+class Player;
 class Obstacle;
 class Destination;
 class Item;
@@ -31,10 +31,10 @@ class World {
         ~World();
         void printWorld();
         void addObject(Actor::ActorType actorType, Actor::ActorDirection actorDirection, int x, int y);
-        void moveObject(Rover& rover, int x, int y);
+        void moveObject(Player& player, int x, int y);
         void run();
         void determineSuccess();
-        std::vector<int> findRover();
+        std::vector<int> findPlayer();
         std::vector<Obstacle*> getObstacles(int x, int y);
         bool checkDestination(int x, int y);
         bool checkItem(int x, int y);
@@ -48,7 +48,7 @@ class World {
         int width;
         int height;
         int totalItems = 0; // Total number of items in the world
-        int collectedItems = 0; // Number of items collected by the rover
+        int collectedItems = 0; // Number of items collected by the player
 };
 
 

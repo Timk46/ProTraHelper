@@ -63,7 +63,7 @@ void Actor::move(int distance)
     }
 
     if (world) {
-        world->moveObject(static_cast<Rover&>(*this), newX, newY);
+        world->moveObject(static_cast<Player&>(*this), newX, newY);
         x = newX;
         y = newY;
     } else {
