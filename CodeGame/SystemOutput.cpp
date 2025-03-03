@@ -40,16 +40,16 @@ void SystemOutput::outputInformation(std::string message)
 }
 
 /**
- * @brief Outputs a message indicating the removal of a rock at the specified coordinates.
+ * @brief Outputs a message indicating the removal of a item at the specified coordinates.
  * 
- * @param x The x-coordinate of the rock to be removed.
- * @param y The y-coordinate of the rock to be removed.
+ * @param x The x-coordinate of the item to be removed.
+ * @param y The y-coordinate of the item to be removed.
  */
-void SystemOutput::outputRemoveRock(int x, int y)
+void SystemOutput::outputRemoveItem(int x, int y)
 {
     std::lock_guard<std::mutex> lock(mtx);
 
-    std::cout << "#SYS-RemoveRock:" << x << "/" << y << std::endl;
+    std::cout << "#SYS-RemoveItem:" << x << "/" << y << std::endl;
 }
 
 
@@ -71,12 +71,12 @@ void SystemOutput::outputWarning()
  * @brief Outputs the success status of the system.
  *
  * @param reachedDestination A boolean indicating if the destination was reached.
- * @param totalRocks The total number of rocks.
- * @param collectedRocks The number of collected rocks.
+ * @param totalItems The total number of items.
+ * @param collectedItems The number of collected items.
  */
-void SystemOutput::outputSuccess(bool reachedDestination, int totalRocks, int collectedRocks)
+void SystemOutput::outputSuccess(bool reachedDestination, int totalItems, int collectedItems)
 {
     std::lock_guard<std::mutex> lock(mtx);
 
-    std::cout << "#SYS-Success:" << reachedDestination << "/" << totalRocks << "/" << collectedRocks << std::endl;
+    std::cout << "#SYS-Success:" << reachedDestination << "/" << totalItems << "/" << collectedItems << std::endl;
 }

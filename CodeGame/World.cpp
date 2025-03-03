@@ -4,7 +4,7 @@
 #include "Rover.h"
 #include "Obstacle.h"
 #include "Destination.h"
-#include "Rock.h"
+#include "Item.h"
 
 #include <iostream>
 #include <vector>
@@ -50,9 +50,9 @@ void World::printWorld()
                     {
                         std::cout << "D";
                     }
-                    else if (actor->getType() == Actor::ActorType::ROCK)
+                    else if (actor->getType() == Actor::ActorType::ITEM)
                     {
-                        std::cout << "R";
+                        std::cout << "I";
                     }
                 }
             }
@@ -66,7 +66,7 @@ void World::printWorld()
 /**
  * @brief Adds an object of specified type and direction to the world map at the given coordinates.
  * 
- * @param actorType The type of the actor to be added (PLAYER, DESTINATION, OBSTACLE, ROCK).
+ * @param actorType The type of the actor to be added (PLAYER, DESTINATION, OBSTACLE, ITEM).
  * @param actorDirection The direction the actor is facing.
  * @param x The x-coordinate (width) where the actor will be placed.
  * @param y The y-coordinate (height) where the actor will be placed.
@@ -88,11 +88,11 @@ void World::addObject(Actor::ActorType actorType, Actor::ActorDirection actorDir
         Obstacle* obstacle = new Obstacle(x, y, actorDirection, actorType, this);
 
          worldMap[i][j].push_back(obstacle);
-    } else if (actorType == Actor::ActorType::ROCK) {
-        Rock* rock = new Rock(x, y, actorDirection, actorType, this);
+    } else if (actorType == Actor::ActorType::ITEM) {
+        Item* item = new Item(x, y, actorDirection, actorType, this);
 
-        worldMap[i][j].push_back(rock);
-        ++totalRocks;
+        worldMap[i][j].push_back(item);
+        ++totalItems;
     } else {
         std::cerr << "Wold.cpp - addObject: could not add the object" << std::endl;
     }
@@ -177,7 +177,7 @@ void World::moveObject(Rover& rover, int newX, int newY) {
  */
 void World::determineSuccess() {
     bool reachedDestination = false;
-    bool collectedAllRocks = false;
+    bool collectedAllItems = false;
     bool gameError = false;
 
     /* check if the rover is at the destination */
@@ -211,10 +211,10 @@ void World::determineSuccess() {
         reachedDestination = checkDestination(roverPosition[0], roverPosition[1]);
     }
 
-    // check if the rover got all rocks
-    if (totalRocks > 0) {
-        if (collectedRocks == totalRocks) {
-            collectedAllRocks = true;
+    // check if the rover got all Items
+    if (totalItems > 0) {
+        if (collectedItems == totalItems) {
+            collectedAllItems = true;
         }
     }
 
@@ -223,21 +223,21 @@ void World::determineSuccess() {
         SystemOutput::getInstance().outputInformation("Rover left the play field. Game over.");
     } else {
         if (reachedDestination) {
-            if (collectedAllRocks) {
-                SystemOutput::getInstance().outputInformation("Rover reached the destination and collected all rocks.");
+            if (collectedAllItems) {
+                SystemOutput::getInstance().outputInformation("Rover reached the destination and collected all items.");
             } else {
-                SystemOutput::getInstance().outputInformation("Rover reached the destination but did not collect all rocks.");
+                SystemOutput::getInstance().outputInformation("Rover reached the destination but did not collect all items.");
             }
         } else {
-            if (collectedAllRocks) {
-                SystemOutput::getInstance().outputInformation("Rover did not reach the destination but collected all rocks.");
+            if (collectedAllItems) {
+                SystemOutput::getInstance().outputInformation("Rover did not reach the destination but collected all items.");
             } else {
-                SystemOutput::getInstance().outputInformation("Rover did not reach the destination and did not collect all rocks.");
+                SystemOutput::getInstance().outputInformation("Rover did not reach the destination and did not collect all items.");
             }
         }
     }
  
-    SystemOutput::getInstance().outputSuccess(reachedDestination, totalRocks , collectedRocks);
+    SystemOutput::getInstance().outputSuccess(reachedDestination, totalItems , collectedItems);
 }
 
 /**
@@ -324,22 +324,22 @@ bool World::checkDestination(int x, int y)
 }
 
 /**
- * @brief Checks if there is a Rock at the specified coordinates in the world.
+ * @brief Checks if there is a item at the specified coordinates in the world.
  * 
  * @param x The x-coordinate of the position to check.
  * @param y The y-coordinate of the position to check.
  * 
- * @return true if there is a Rock at the specified coordinates, false otherwise.
+ * @return true if there is a item at the specified coordinates, false otherwise.
  */
-bool World::checkRock(int x, int y)
+bool World::checkItem(int x, int y)
 {
     if (x < 0 || x >= width || y < 0 || y >= height) {
-        std::cerr << "World.cpp - checkRock: Invalid position (" << x << ", " << y << ") for checking rock" << std::endl;
+        std::cerr << "World.cpp - checkItem: Invalid position (" << x << ", " << y << ") for checking Item" << std::endl;
         return false;
     }
 
     for (auto& actor : worldMap[y][x]) {
-        if (dynamic_cast<Rock*>(actor)) {
+        if (dynamic_cast<Item*>(actor)) {
             return true;
         }
     }
@@ -347,34 +347,34 @@ bool World::checkRock(int x, int y)
 }
 
 /**
- * @brief Removes a rock from the specified position in the world.
+ * @brief Removes a item from the specified position in the world.
  *
- * @param x The x-coordinate of the position from which to remove the rock.
- * @param y The y-coordinate of the position from which to remove the rock.
+ * @param x The x-coordinate of the position from which to remove the item.
+ * @param y The y-coordinate of the position from which to remove the item.
  */
-void World::removeRock(int x, int y)
+void World::removeItem(int x, int y)
 {
     if (x < 0 || x >= width || y < 0 || y >= height) {
-        std::cerr << "World.cpp - removeRock: Invalid position (" << x << ", " << y << ") for removing rock" << std::endl;
+        std::cerr << "World.cpp - removeItem: Invalid position (" << x << ", " << y << ") for removing item" << std::endl;
         return;
     }
 
     std::vector<Actor*> actors = worldMap[y][x];
 
     for (int i = 0; i < actors.size(); i++) {
-        if (actors[i]->getType() == Actor::ActorType::ROCK) {
-            if (auto rock = dynamic_cast<Rock*>(actors[i])) {
+        if (actors[i]->getType() == Actor::ActorType::ITEM) {
+            if (auto item = dynamic_cast<Item*>(actors[i])) {
                 worldMap[y][x].erase(worldMap[y][x].begin() + i);
-                delete rock;
-                SystemOutput::getInstance().outputRemoveRock(x, y);
-                ++collectedRocks;
-                SystemOutput::getInstance().outputInformation("Rock removed. Total rocks collected " + std::to_string(collectedRocks) + "/" + std::to_string(totalRocks));
+                delete item;
+                SystemOutput::getInstance().outputRemoveItem(x, y);
+                ++collectedItems;
+                SystemOutput::getInstance().outputInformation("Item removed. Total Items collected " + std::to_string(collectedItems) + "/" + std::to_string(totalItems));
                 return;
             }
         }
     }
 
-    std::cerr << "World.cpp - removeRock: Rock not found at position (" << x << ", " << y << ")" << std::endl;
+    std::cerr << "World.cpp - removeItem: item not found at position (" << x << ", " << y << ")" << std::endl;
 }
 
 /**

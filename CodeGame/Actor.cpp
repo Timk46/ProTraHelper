@@ -223,8 +223,8 @@ std::string Actor::getActorTypeString()
             return "OBSTACLE";
         case Actor::ActorType::DESTINATION:
             return "DESTINATION";
-        case Actor::ActorType::ROCK:
-            return "ROCK";
+        case Actor::ActorType::ITEM:
+            return "ITEM";
     }
     return "";
 }

@@ -13,16 +13,16 @@ void Rover::act()
 {
     drive();
     drive();
-    analyseRock();
+    analyseItem();
     drive();
     drive();
     drive();
     drive();
     turn(ActorDirection::SOUTH);
     drive();
-    analyseRock();
+    analyseItem();
     drive();
-    analyseRock();
+    analyseItem();
     drive();
     turn(ActorDirection::EAST);
     drive();
@@ -162,28 +162,28 @@ bool Rover::checkDestination()
 }
 
 /**
- * @brief Checks if there is a rock at the Rover's current position.
+ * @brief Checks if there is a item at the Rover's current position.
  * 
- * @return true if there is a rock at the Rover's current position, false otherwise.
+ * @return true if there is a item at the Rover's current position, false otherwise.
  */
-bool Rover::checkRock()
+bool Rover::checkItem()
 {
-    return world->checkRock(getX(), getY());
+    return world->checkItem(getX(), getY());
 }
 
 /**
- * @brief Analyzes the current position for a rock.
+ * @brief Analyzes the current position for a Item.
  */
-void Rover::analyseRock()
+void Rover::analyseItem()
 {
     if (gameError) {
         return;
     }
 
-    if (checkRock()) {
-        SystemOutput::getInstance().outputInformation("Rock detected at current position.");
-        world->removeRock(getX(), getY());
+    if (checkItem()) {
+        SystemOutput::getInstance().outputInformation("Item detected at current position.");
+        world->removeItem(getX(), getY());
     } else {
-        SystemOutput::getInstance().outputInformation("No rock detected at current position.");
+        SystemOutput::getInstance().outputInformation("No item detected at current position.");
     }
 }

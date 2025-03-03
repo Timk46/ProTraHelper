@@ -20,17 +20,17 @@ class Actor {
          * @enum Actor::ActorType
          * @brief Defines the type of the actor.
          * 
-         * The ActorType enum specifies whether the actor is a player, obstacle, destination, or rock.
+         * The ActorType enum specifies whether the actor is a player, obstacle, destination, or item.
          * - PLAYER: Represents a player actor.
          * - OBSTACLE: Represents an obstacle actor.
          * - DESTINATION: Represents a destination actor.
-         * - ROCK: Represents a rock actor.
+         * - ITEM: Represents a item actor.
          */
         enum class ActorType {
             PLAYER,
             OBSTACLE,
             DESTINATION,
-            ROCK
+            ITEM
         };
 
         /**

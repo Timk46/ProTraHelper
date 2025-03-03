@@ -22,7 +22,7 @@ Actor::ActorType getActorType(const std::string& type) {
     if (type == "PLAYER") return Actor::ActorType::PLAYER;
     if (type == "DESTINATION") return Actor::ActorType::DESTINATION;
     if (type == "OBSTACLE") return Actor::ActorType::OBSTACLE;
-    if (type == "ROCK") return Actor::ActorType::ROCK;
+    if (type == "ITEM") return Actor::ActorType::ITEM;
     throw std::invalid_argument("Unknown actor type");
 }
 
@@ -69,7 +69,7 @@ void parseGrid(const std::string& gridString, int& worldWidth, int& worldHeight,
         }
         for (int x = 0; x < line.length(); ++x) {
             char cell = line[x];
-            if (cell == 'P' || cell == 'O' || cell == 'D' || cell == 'R') {
+            if (cell == 'P' || cell == 'O' || cell == 'D' || cell == 'I') {
                 ActorData actor;
 
                 switch (cell) {
@@ -82,8 +82,8 @@ void parseGrid(const std::string& gridString, int& worldWidth, int& worldHeight,
                     case 'D':
                         actor.type = "DESTINATION";
                         break;
-                    case 'R':
-                        actor.type = "ROCK";
+                    case 'I':
+                        actor.type = "ITEM";
                         break;
                     default:
                         actor.type = "UNKNOWN";
