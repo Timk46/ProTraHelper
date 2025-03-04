@@ -24,7 +24,7 @@ enum PlayerDirection {
       state('off', style({ opacity: 0.3 })),
       state('on', style({ opacity: 1 })),
       transition('off => on', [
-        animate('1.5s ease-in-out')
+        animate('0.3s ease-in-out')
       ]),
       transition('on => off', [
         animate('1.5s ease-in-out')
@@ -61,6 +61,9 @@ export class PlayfieldComponent {
   // Event emitter to notify the workspace component that the game animation has finished
   @Output() gameAnimationFinished = new EventEmitter<void>();
   animationSpeedMaster = 500; // animation speed in ms
+
+  isSysWarning: boolean = false;
+
 
   constructor(private renderer: Renderer2, private el: ElementRef) {}
 
@@ -225,6 +228,10 @@ export class PlayfieldComponent {
     }
   }
 
+  setSysWarning(state: boolean) {
+    this.isSysWarning = state;
+  }
+
   hideAllWaringOverlays(): void {
     const overlays = this.el.nativeElement.querySelectorAll('.overlay');
     overlays.forEach((overlay: any) => {
@@ -348,8 +355,7 @@ export class PlayfieldComponent {
       this.gameOutputInformation = move;
 
     } else if (action == "#SYS-Warning") {
-      // TODO: show warning
-      console.log("Warning: ");
+      this.setSysWarning(true);
 
     } else if (action == "#SYS-Success") {
       // Informations are valuated in the backend
@@ -363,6 +369,7 @@ export class PlayfieldComponent {
     // reset the game field
     this.showItemImage();
     this.hideAllWaringOverlays();
+    this.setSysWarning(false);
     this.playerPosition = this.playerInitialPosition;
     this.playerDirection = PlayerDirection.EAST;
     this.playerTransform = `translate(${this.startX}px, ${this.startY}px) rotate(${this.playerDirection}deg)`;

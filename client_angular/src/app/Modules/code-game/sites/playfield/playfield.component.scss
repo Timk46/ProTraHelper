@@ -3,7 +3,6 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  margin-bottom: 4px; // same height as the border of the code editor
   margin-left: 5px;
   margin-right: 5px;
 }
@@ -82,4 +81,25 @@
   }
 }
 
+/* Frame overlay */
 
+.frame-overlay {
+  border: 6px solid transparent;
+  pointer-events: none;
+  transition: border-color 0.3s ease-in-out; // off => on
+}
+
+.warning-frame {
+  border-color: red;
+  border-radius: 5px;
+  animation: dimChase 1.5s infinite alternate; // on => off
+}
+
+@keyframes dimChase {
+  0% {
+    border-color: rgba(255, 0, 0, 0);
+  }
+  100% {
+    border-color: rgba(255, 0, 0, 0.5);
+  }
+}
