@@ -32,11 +32,6 @@ void Actor::move(int distance)
         return;
     }
 
-    if (checkObstacle()) {
-        SystemOutput::getInstance().outputInformation("Obstacle detected in front.");
-        return;
-    }
-
     if (checkWorldBounds()) {
         SystemOutput::getInstance().outputInformation("World boundary detected.");
         SystemOutput::getInstance().outputWarning();
@@ -44,6 +39,11 @@ void Actor::move(int distance)
         return;
     }
 
+    if (checkObstacle()) {
+        SystemOutput::getInstance().outputInformation("Obstacle detected in front.");
+        return;
+    }
+    
     int newX = x;
     int newY = y;
 
