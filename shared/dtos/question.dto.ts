@@ -1,5 +1,6 @@
 import { FileDto } from "./file.dto";
 import { GraphConfigurationDTO, GraphStructureDTO } from "./graphTask.dto";
+import { editorDataDTO, taskSettingsDTO } from "./umlearnDtos/dtos";
 
 export interface QuestionDTO {
     id: number;
@@ -32,11 +33,11 @@ export interface QuestionDTO {
 */
   
 export interface QuestionVersionDTO {
-    id: number;
-    questionId: number;
-    version: number;
-    isApproved: boolean;
-    successor: number | null;
+    id?: number;
+    questionId?: number;
+    version?: number;
+    isApproved?: boolean;
+    successor?: number | null;
 }
 
 //MC-Question
@@ -46,6 +47,9 @@ export interface McQuestionDTO {
     textHTML?: string;
     isSC: boolean;
     shuffleOptions: boolean;
+    questionVersion?: QuestionVersionDTO;
+    mcQuestionOption?: McQuestionOptionDTO[];
+    additionalInfo?: string[];
 }
 
 /**
@@ -74,7 +78,7 @@ export interface MCOptionViewDTO {
 export interface McQuestionOptionDTO {
     id: number;
     mcQuestion?: McQuestionDTO;
-    mcOption: MCOptionDTO;
+    option: MCOptionDTO;
 }
 
 export interface UserMCAnswerDTO {
@@ -117,24 +121,24 @@ export interface CodingQuestionDto {
     language: string;
   }
 
-  export interface CodeGeruestDto {
-    id: number;
-    codingQuestionId: number;
-    codeFileName: string;
-    code: string;
-    language: string;
-  }
+export interface CodeGeruestDto {
+  id: number;
+  codingQuestionId: number;
+  codeFileName: string;
+  code: string;
+  language: string;
+}
   
-  export interface AutomatedTestDto {
-    id: number;
-    code: string;
-    testFileName: string;
-    language: string;
-    questionId: number;
-    testClassName?:  string;
-    runMethod?:      string;
-    inputArguments?: string;
-  }
+export interface AutomatedTestDto {
+  id: number;
+  code: string;
+  testFileName: string;
+  language: string;
+  questionId: number;
+  testClassName?:  string;
+  runMethod?:      string;
+  inputArguments?: string;
+}
 
   export enum questionType {
     SINGLECHOICE = "SC",
@@ -143,27 +147,29 @@ export interface CodingQuestionDto {
     CODE = "CodingQuestion",
     FILLIN = "Fillin",
     GRAPH = "GraphQuestion",
+    UML = "UMLQuestion",
+    CODEGAME = "CodeGameQuestion",
   }
 
-  export interface McqGenerationDTO {
-    question?: string;
-    answers?: {answer?: string; correct?: boolean}[];
-    description?: string;
-    score?: number;
-  }
+export interface McqGenerationDTO {
+  question?: string;
+  answers?: {answer?: string; correct?: boolean}[];
+  description?: string;
+  score?: number;
+}
 
-  export interface freeTextQuestionDTO {
-    questionId: number;
-    contentElementId?: number;
-    title: string;
-    text: string;
-    textHTML?: string;
-    expectations: string;
-    expectationsHTML?: string;
-    exampleSolution?: string;
-    exampleSolutionHTML?: string;
-    maxPoints: number;
-  }
+export interface freeTextQuestionDTO {
+  questionId: number;
+  contentElementId?: number;
+  title: string;
+  text: string;
+  textHTML?: string;
+  expectations: string;
+  expectationsHTML?: string;
+  exampleSolution?: string;
+  exampleSolutionHTML?: string;
+  maxPoints: number;
+}
 
   export interface GraphQuestionDTO {
     questionId: number;
@@ -189,5 +195,57 @@ export interface CodingQuestionDto {
     progress?: number;
     description?: string;
     level?: number;
-    
+
+}
+  export interface UmlQuestionDTO {
+    questionId: number;
+    contentElementId?: number;
+    title: string;
+    text: string;
+    textHTML?: string;
+    editorData?: editorDataDTO;
+    startData?: editorDataDTO;
+    dataImage?: string;
+    taskSettings?: taskSettingsDTO;
+    maxPoints: number;
+  }
+
+
+export interface OptionDTO {
+  answer: string;
+  correct: boolean;
+}
+
+export interface McqEvaluation {
+  question: string;
+  evaluations?: {reasoning?: string, correct?: boolean}[];
+  commentOnQuality?: string;
+}
+
+// CodeGame CodingQuestion DTOs
+
+export interface CodeGameQuestionDto {
+    id: number;
+    contentElementId?: number;
+    text: string;
+    codeSolutionRestriction: boolean;
+    fileNameToRestrict?: string;
+    methodNameToRestrict?: string;
+    frequencyOfMethodNameToRestrict?: number;
+    programmingLanguage: string;
+    codeGameScaffolds: CodeGameScaffoldDto[];
+    gameFileName: string;
+    game: string;
+    gameCellRestrictions: string;
+    theme: string;
+}
+
+export interface CodeGameScaffoldDto {
+    id: number;
+    codeGameQuestionId: number;
+    codeFileName: string;
+    code: string;
+    language?: string;
+    visible?: boolean;
+    mainFile?: boolean;
 }

@@ -11,15 +11,12 @@ import { ContentElementStatusDTO } from '@DTOs/index';
 import { UserConceptService } from '@/graph/user-concept/user-concept.service';
 import { ConceptNode } from '@prisma/client';
 
-
 @Injectable()
 export class ContentService {
   constructor(
     private prisma: PrismaService,
     private userConceptService: UserConceptService,
   ) {}
-
-
 
   /**
    * Retrieves contents associated with a specific concept node for a given user (eg. "Funktionale Programmierung mit Python" or "Objektorientierte Programmierung mit Java").
@@ -180,6 +177,10 @@ export class ContentService {
       requiresConceptIds: contentNode.requires.map((r: any) => r.conceptNodeId),
       trainsConceptIds: contentNode.trains.map((t: any) => t.conceptNodeId),
       progress: this.calculateProgress(contentNode, userStatus),
+      levelProgress: this.calculateHighestLevelProgress(
+        contentNode,
+        userStatus,
+      ),
       questionMarked: contentNode.ContentView.some((cv: any) =>
         userStatus.some(
           (status) =>
@@ -306,8 +307,49 @@ export class ContentService {
           status.markedAsDone,
       ),
     ).length;
+  }
 
-    return (completedCount / total) * 100;
+  /**
+   * Calculates the highest level of progress for a given content node based on the user's status.
+   *
+   * @param contentNode - The content node containing the content elements.
+   * @param userStatus - An array of user status objects indicating which content elements have been marked as done.
+   * @returns The highest level of progress achieved by the user for the given content node.
+   */
+  private calculateHighestLevelProgress(
+    contentNode: any,
+    userStatus: any[],
+  ): number {
+    const sortedQuestionElements = contentNode.ContentView.filter(
+      (cv: any) => cv.contentElement.type === 'QUESTION',
+    ).sort(
+      (a: any, b: any) =>
+        a.contentElement.question.level - b.contentElement.question.level,
+    );
+
+    let highestLevel = 0;
+    for (let i = 0; i < sortedQuestionElements.length; i++) {
+      const cv = sortedQuestionElements[i];
+      if (
+        !userStatus.some(
+          (status) =>
+            status.contentElementId === cv.contentElement.id &&
+            status.markedAsDone,
+        )
+      ) {
+        break;
+      } else {
+        // only change highestLevel if last element or next element has different (higher) level
+        if (
+          i == sortedQuestionElements.length - 1 ||
+          sortedQuestionElements[i + 1].contentElement.question.level !=
+            cv.contentElement.question.level
+        ) {
+          highestLevel = cv.contentElement.question.level;
+        }
+      }
+    }
+    return highestLevel;
   }
 
   /**
@@ -384,6 +426,7 @@ export class ContentService {
         markedAsDone: true,
       },
     });
+    console.log('## questionContentElementDone', questionDone);
 
     if (!questionDone) {
       //create new entry in userContentProgress if not exists and set markedAsDone to true
@@ -411,6 +454,14 @@ export class ContentService {
       contentElementId,
       conceptNodeId,
       level,
+    );
+    console.log(
+      '## questionContentElementDone',
+      questionDone.markedAsDone,
+      'for user ',
+      userId,
+      'for element id ',
+      contentElementId,
     );
     return questionDone.markedAsDone;
   }

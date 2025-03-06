@@ -14,7 +14,7 @@ import { GenerateKruskalService } from './generate-graph/generate-kruskal.servic
 import { GenerateFloydService } from './generate-graph/generate-floyd.service';
 import { GenerateExampleSolutionService } from './generateExampleSolution/generate-example-solution.service';
 import { Observable } from 'rxjs';
-import { graphEdgeJSONToSemantic, graphJSONToSemantic } from 'src/app/Modules/graph-tasks/utils';
+import { graphEdgeJSONToSemantic, graphJSONToSemantic, structuresAreEqual } from 'src/app/Modules/graph-tasks/utils';
 
 
 interface GraphQuestionConfiguration extends GraphConfigurationDTO {
@@ -357,7 +357,7 @@ export class EditGraphComponent implements AfterViewInit {
 
       // If the structure has changed
       // Generate the example solution based on the question type
-      if(!this.structuresAreEqual(this.assignmentGraphStructure, this.initialUsedForExampleSolution)) {
+      if(!structuresAreEqual(this.assignmentGraphStructure, this.initialUsedForExampleSolution)) {
         
         this.generateExampleSolution().subscribe( generatedExampleSolution => {
           this.solutionGraphStructure = generatedExampleSolution;
@@ -612,34 +612,44 @@ export class EditGraphComponent implements AfterViewInit {
   }
 
   resetStructure() {
-    // Reset the initial structure
-    this.assignmentGraphStructure = {
-      nodes: [], edges: []
-    }
 
-    // Reset the solution steps
-    this.solutionGraphStructure = [];
-    this.solutionStepCurrent = 0;
-    this.solutionStepPrevious = this.solutionStepCurrent;
+    this.confirmationService.confirm({
+      title: 'Struktur zurücksetzen',
+      message: 'Sind Sie sicher, dass Sie die Struktur zurücksetzen möchten? Diese Aktion kann nicht rückgängig gemacht werden. Fortfahren?',
+      acceptLabel: 'Zurücksetzen',
+      declineLabel: 'Abbrechen',
+      accept: () => {   
+        // Reset the initial structure
+        this.assignmentGraphStructure = {
+          nodes: [], edges: []
+        }
 
-    this.initialUsedForExampleSolution = {
-      nodes: [], edges: []
-    }
+        // Reset the solution steps
+        this.solutionGraphStructure = [];
+        this.solutionStepCurrent = 0;
+        this.solutionStepPrevious = this.solutionStepCurrent;
 
-    this.workspaceModeCurrent = 'assignment';
-    this.workspaceModePrevious = this.workspaceModeCurrent;
+        this.initialUsedForExampleSolution = {
+          nodes: [], edges: []
+        }
 
-    // Get configuration
-    const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+        this.workspaceModeCurrent = 'assignment';
+        this.workspaceModePrevious = this.workspaceModeCurrent;
 
-    this.loadWorkspaceContent({
-      graphContent: this.assignmentGraphStructure,
-      graphConfiguration: graphQuestionConfigruation
+        // Get configuration
+        const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+
+        this.loadWorkspaceContent({
+          graphContent: this.assignmentGraphStructure,
+          graphConfiguration: graphQuestionConfigruation
+        });
+
+
+        // To use only values and not the references
+        this.updateWorkspace();
+      }
     });
 
-
-    // To use only values and not the references
-    this.updateWorkspace();
   }
 
   onChangeGraphQuestionType(gqType: string): void {
@@ -1006,6 +1016,25 @@ export class EditGraphComponent implements AfterViewInit {
     return false;
   }
 
+  onGenerateClick() {
+    
+    // If the structure is empty, generate it
+    if (this.assignmentGraphStructure.nodes.length === 0 && this.graphTaskService.graphToJSON().nodes.length === 0) {
+      this.onGenerate();
+      return;
+    }
+    
+    // If the structure is not empty, confirm the user to overwrite it
+
+    this.confirmationService.confirm({
+      title: 'Struktur neu generieren',
+      message: 'Möchten Sie die Struktur wirklich neu generieren? Dabei geht die aktuelle Struktur unwiderruflich verloren. Fortfahren?',
+      acceptLabel: 'Neu generieren',
+      declineLabel: 'Abbrechen',
+      accept: () => { this.onGenerate() } 
+    });
+  }
+
   onGenerate() {
     const graphStructure = this.generateGraph();
 
@@ -1018,10 +1047,30 @@ export class EditGraphComponent implements AfterViewInit {
 
     const clonedInitialStructure: GraphStructureDTO = JSON.parse(JSON.stringify(graphStructure));
     this.assignmentGraphStructure = clonedInitialStructure;
+
+    this.snackBar.open('Neue Graphstruktur wurde generiert.', 'Schließen', { duration: 3000 });
     
     this.structureIsSet = true;
 
     this.generateTextFromStructure();
+  }
+
+  onQuickGenerateClick() {
+    
+    // If the structure is empty, generate it
+    if (this.assignmentGraphStructure.nodes.length === 0 && this.graphTaskService.graphToJSON().nodes.length === 0) {
+      this.onQuickGenerate();
+      return;
+    }
+    
+    // If the structure is not empty, confirm the user to overwrite it
+    this.confirmationService.confirm({
+      title: 'Struktur neu generieren',
+      message: 'Möchten Sie die Struktur wirklich neu generieren? Dabei geht die aktuelle Struktur unwiderruflich verloren. Fortfahren?',
+      acceptLabel: 'Neu generieren',
+      declineLabel: 'Abbrechen',
+      accept: () => { this.onQuickGenerate() } 
+    });
   }
 
   onQuickGenerate() {
@@ -1046,6 +1095,8 @@ export class EditGraphComponent implements AfterViewInit {
       graphContent: clonedGraphContent,
       graphConfiguration: graphQuestionConfigruation
     });
+
+    this.snackBar.open('Neue Graphstruktur wurde generiert.', 'Schließen', { duration: 3000 });
 
     this.structureIsSet = true;
 
@@ -1141,77 +1192,4 @@ export class EditGraphComponent implements AfterViewInit {
 
     throw new Error('No example solution generator found for the given question type');
   }
-
-  structuresAreEqual(structure1: GraphStructureDTO, structure2: GraphStructureDTO): boolean {
-
-    if (structure1.nodes.length !== structure2.nodes.length) {
-      return false;
-    }
-
-    if (structure1.edges.length !== structure2.edges.length) {
-      return false;
-    }
-
-    for (let i = 0; i < structure1.nodes.length; i++) {
-
-      const sameNode = structure2.nodes.find(node => 
-        node.nodeId === structure1.nodes[i].nodeId && node.value === structure1.nodes[i].value
-      )
-
-      if (!sameNode) {
-        return false;
-      }
-
-      if (structure1.nodes[i].value !== sameNode.value) {
-        return false;
-      }
-      if (structure1.nodes[i].weight !== sameNode.weight) {
-        return false;
-      }
-      if (structure1.nodes[i].selected !== sameNode.selected) {
-        return false;
-      }
-      if (structure1.nodes[i].position.x !== sameNode.position.x) {
-        return false;
-      }
-      if (structure1.nodes[i].position.y !== sameNode.position.y) {
-        return false;
-      }
-      if (structure1.nodes[i].nodeId !== sameNode.nodeId) {
-        return false;
-      }
-      if (structure1.nodes[i].size.width !== sameNode.size.width) {
-        return false;
-      }
-      if (structure1.nodes[i].size.height !== sameNode.size.height) {
-        return false;
-      }
-      if (structure1.nodes[i].center.x !== sameNode.center.x) {
-        return false;
-      }
-      if (structure1.nodes[i].center.y !== sameNode.center.y) {
-        return false;
-      }
-    }
-
-    const structure1Semantic: GraphStructureSemanticDTO = graphJSONToSemantic(structure1);
-    const structure2Semantic: GraphStructureSemanticDTO = graphJSONToSemantic(structure1);
-
-    for (let i = 0; i < structure1Semantic.edges.length; i++) {
-      const sameEdge = structure2Semantic.edges.find(edge => 
-        edge.node1Value === structure1Semantic.edges[i].node1Value && edge.node2Value === structure1Semantic.edges[i].node2Value
-      )
-
-      if (!sameEdge) {
-        return false;
-      }
-
-      if (sameEdge.weight !== structure1.edges[i].weight) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
 }

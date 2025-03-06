@@ -2,7 +2,7 @@
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { QuestionDTO, questionType, detailedQuestionDTO } from '@DTOs/index';
+import { QuestionDTO, questionType, detailedQuestionDTO, FillinQuestionDTO, editorDataDTO, taskSettingsDTO } from '@DTOs/index';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswer } from '@DTOs/userAnswer.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
@@ -11,6 +11,8 @@ import { QuestionDataFillinService } from './question-data-fillin/question-data-
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
 import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
 import { GraphSolutionEvaluationService } from '@/graph-solution-evaluation/graph-solution-evaluation.service';
+import { QuestionDataUmlService } from './question-data-uml/question-data-uml.service';
+import { QuestionDataCodeGameService } from '@/question-data/question-data-code-game/question-data-code-game.service';
 
 @Injectable()
 export class QuestionDataService {
@@ -23,7 +25,9 @@ export class QuestionDataService {
     private qdFillin: QuestionDataFillinService,
     private qdFreetext: QuestionDataFreetextService,
     private qdGraph: QuestionDataGraphService,
-    private graphEvalService: GraphSolutionEvaluationService
+    private graphEvalService: GraphSolutionEvaluationService,
+    private qdUml: QuestionDataUmlService,
+    private qdCodeGame: QuestionDataCodeGameService
   ) {}
 
   /**
@@ -137,16 +141,45 @@ export class QuestionDataService {
           }
         });
         break;
+      case questionType.UML:
+        const questionData = await this.prisma.umlQuestion.findFirst({
+          where: {
+            questionId: Number(questionId)
+          }
+        });
+        if (!questionData) {
+          specificQuestionData = undefined;
+          break;
+        }
+        specificQuestionData = {
+          ...questionData,
+          editorData: questionData.editorData as unknown as editorDataDTO,
+          startData: questionData.startData as unknown as editorDataDTO,
+          taskSettings: questionData.taskSettings as unknown as taskSettingsDTO,
+        };
+        break;
+      case questionType.CODEGAME:
+        specificQuestionData = await this.prisma.codeGameQuestion.findFirst({
+          where: {
+            questionId: Number(questionId)
+          },
+          include: {
+            codeGameScaffolds: true,
+          }
+        });
+        break;
     }
 
     const questionData: detailedQuestionDTO = {
       ...question,
+      type: questionTypeStr as questionType,
       codingQuestion: questionTypeStr === questionType.CODE ? specificQuestionData : undefined,
       freetextQuestion: questionTypeStr === questionType.FREETEXT ? specificQuestionData : undefined,
       mcQuestion: (questionTypeStr === questionType.MULTIPLECHOICE || questionTypeStr === questionType.SINGLECHOICE) ? specificQuestionData : undefined,
       fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
       graphQuestion: questionTypeStr === questionType.GRAPH ? specificQuestionData : undefined,
-      // fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
+      umlQuestion: questionTypeStr === questionType.UML ? specificQuestionData : undefined,
+      codeGameQuestion: questionTypeStr === questionType.CODEGAME ? specificQuestionData : undefined,
     };
 
     return questionData;
@@ -176,6 +209,7 @@ export class QuestionDataService {
         userId: userId
       };
     }
+
     return {
       id: userAnswer.id,
       questionId: userAnswer.questionId,
@@ -348,6 +382,19 @@ export class QuestionDataService {
           await this.qdFillin.updateFillinQuestion(question.fillinQuestion);
         }
         break;
+      case questionType.UML:
+        if (createNewVersion || !currentQuestion.umlQuestion) {
+          await this.qdUml.createUmlQuestion(question.umlQuestion, updatedQuestion.id);
+        } else {
+          await this.qdUml.updateUmlQuestion(question.umlQuestion);
+        }
+      case questionType.CODEGAME:
+        if (createNewVersion || !currentQuestion.codeGameQuestion) {
+          await this.qdCodeGame.createCodeGameQuestion(question.codeGameQuestion, updatedQuestion.id);
+        } else {
+          await this.qdCodeGame.updateCodeGameQuestion(question.codeGameQuestion);
+        }
+        break;
     }
 
     return await this.getDetailedQuestion(updatedQuestion.id, question.type as questionType);
@@ -374,10 +421,11 @@ export class QuestionDataService {
         newQuestion.freetextQuestion ||
         newQuestion.mcQuestion ||
         newQuestion.fillinQuestion ||
-        //TODO: uml, graph
-        newQuestion.graphQuestion // ||
-        //TODO: fill, uml
-        // newQuestion.fillinQuestion // das hier einfügen
+        newQuestion.graphQuestion ||
+        newQuestion.umlQuestion ||
+        newQuestion.codeGameQuestion // ||
+        // TODO: Add more types here
+
       )
     ){
       return true;
@@ -678,8 +726,8 @@ export class QuestionDataService {
         await this.qdGraph.getGraphQuestion(answerData.questionId, true).then(async (questionData) => {
 
           // Generate feedback based on the user answer
-          const { feedback, receivedPoints } = this.graphEvalService.evaluateSolution(questionData, answerData.userGraphAnswer);
-          feedbackText = feedback;
+          const { feedbackHTML, receivedPoints } = this.graphEvalService.evaluateSolution(questionData, answerData.userGraphAnswer);
+          feedbackText = feedbackHTML;
           userScore = receivedPoints;
         });
       }
@@ -723,6 +771,106 @@ export class QuestionDataService {
         progress: Math.floor((feedback.score/question.score) * 100),
       }
     }
+
+    if (question.type === questionType.CODEGAME) {
+      if (!answerData.codeGameEvaluation) {
+        throw new Error('No code game evaluation provided');
+      }
+
+      const codeGameAnswer = await this.prisma.codeGameAnswer.create({
+        data: {
+          codeGameQuestionId: question.originId,
+          userAnswerId: createdData.id,
+          codeGameExecutionResult: answerData.codeGameEvaluation.codeGameExecutionResult,
+          codeSolutionRestriction: answerData.codeGameEvaluation.codeSolutionRestriction,
+          frequencyOfMethodEvaluationResult: answerData.codeGameEvaluation?.frequencyOfMethodEvaluationResult,
+          frequencyOfMethodCallsResult: answerData.codeGameEvaluation?.frequencyOfMethodCallsResult,
+          reachedDestination: answerData.codeGameEvaluation?.reachedDestination,
+          totalItems: answerData.codeGameEvaluation?.totalItems,
+          collectedItems: answerData.codeGameEvaluation?.collectedItems,
+          allItemsCollected: answerData.codeGameEvaluation?.allItemsCollected,
+          visitedCellsAreAllowed: answerData.codeGameEvaluation?.visitedCellsAreAllowed,
+          allWhiteListCellsVisited: answerData.codeGameEvaluation?.allWhiteListCellsVisited,
+        },
+      });
+
+      let countEvaluationOptions = 4;
+      let userScore = 0; // max. 100
+      if (answerData.codeGameEvaluation.reachedDestination) {
+        userScore += 1;
+      }
+      if (answerData.codeGameEvaluation.allItemsCollected) {
+        userScore += 1;
+      }
+      if (answerData.codeGameEvaluation.visitedCellsAreAllowed) {
+        userScore += 1;
+      }
+      if (answerData.codeGameEvaluation.allWhiteListCellsVisited) {
+        userScore += 1;
+      }
+      if (answerData.codeGameEvaluation.codeSolutionRestriction) {
+        if (answerData.codeGameEvaluation.frequencyOfMethodEvaluationResult) {
+          countEvaluationOptions++;
+          userScore += 1;
+        }
+      }
+      userScore = Math.round((userScore / countEvaluationOptions) * 100);
+
+      const progress = userScore / question.score;
+      let feedbackText = '';
+      let markedAsDone = false;
+      if (progress == 1) {
+        feedbackText =
+          'Du hast ' +
+          userScore +
+          ' von ' +
+          question.score +
+          ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
+        //set contentElement as done
+        console.log(
+          'contentElementId: ' +
+          answerData.contentElementId +
+          ' conceptNode: ' +
+          question.conceptNodeId +
+          ' level: ' +
+          question.level +
+          ' userId: ' +
+          userId,
+        );
+        await this.contentService.questionContentElementDone(
+          answerData.contentElementId,
+          question.conceptNodeId,
+          question.level,
+          userId,
+        );
+        markedAsDone = true;
+      } else {
+        feedbackText =
+          'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
+      }
+
+      const feedback = await this.prisma.feedback.create({
+        data: {
+          userAnswerId: createdData.id,
+          text: feedbackText,
+          score: userScore,
+        },
+      });
+
+      if (!feedback) throw new Error('Could not create Feedback');
+
+      console.log('element done: ' + markedAsDone);
+      return {
+        id: feedback.id,
+        userAnswerId: feedback.userAnswerId,
+        score: feedback.score,
+        feedbackText: feedback.text,
+        elementDone: markedAsDone,
+        progress: progress * 100,
+      };
+    }
+
+    // TODO: Uml
   }
 
   /**

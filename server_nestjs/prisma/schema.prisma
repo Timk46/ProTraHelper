@@ -18,7 +18,7 @@ model User {
   globalRole           GlobalRole                   @default(STUDENT)
   currentconceptNodeId Int?
   chatBotMessage       ChatBotMessage[]
-  chatSessions        ChatSession[]
+  chatSessions         ChatSession[]
   codeSubmission       CodeSubmission[]
   codeSubmissionFile   CodeSubmissionFile[]
   EventLogs            EventLog[]
@@ -65,21 +65,21 @@ model ModuleConceptGoal {
 }
 
 model Subject {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String
-  modules     Module[] @relation("ModuleToSubject")
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  description  String
+  modules      Module[]      @relation("ModuleToSubject")
   userSubjects UserSubject[]
 }
 
 model UserSubject {
-  id                 Int     @id @default(autoincrement())
-  userId             Int
-  subjectId          Int
+  id                  Int     @id @default(autoincrement())
+  userId              Int
+  subjectId           Int
   subjectSpecificRole String
-  registeredForSL Boolean @default(false)
-  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  subject            Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  registeredForSL     Boolean @default(false)
+  user                User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject             Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@unique([userId, subjectId])
 }
@@ -243,7 +243,7 @@ model Question {
   name                       String?
   description                String?
   score                      Float?
-  type                       questionType
+  type                       String
   level                      Int                @default(1)
   mode                       String             @default("practise")
   authorId                   Int
@@ -253,6 +253,7 @@ model Question {
   originId                   Int?
   conceptNodeId              Int?
   codingQuestion             CodingQuestion?
+  codeGameQuestion           CodeGameQuestion?
   contentElement             ContentElement?
   files                      File[]
   GraphQuestion              GraphQuestion?
@@ -266,6 +267,7 @@ model Question {
   QuestionVersionAsSuccessor QuestionVersion[]  @relation("QuestionToSuccessorQuestionVersion")
   userAnswer                 UserAnswer[]
   FillinQuestion             FillinQuestion?
+  UmlQuestion                UmlQuestion?
 }
 
 model QuestionVersion {
@@ -329,17 +331,20 @@ model UserMCAnswer {
 }
 
 model UserAnswer {
-  id                   Int                    @id @default(autoincrement())
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt
-  userId               Int
-  questionId           Int
-  userFreetextAnswer   String?
-  userGraphAnswer      Json?
-  feedbacks            Feedback[]
-  question             Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  user                 User                   @relation(fields: [userId], references: [id])
-  userMCOptionSelected UserMCOptionSelected[]
+  id                    Int                    @id @default(autoincrement())
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  userId                Int
+  questionId            Int
+  userFreetextAnswer    String?
+  userGraphAnswer       Json?
+  graphAIFeedbacks      GraphAIFeedback[]
+  feedbacks             Feedback[]
+  question              Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user                  User                   @relation(fields: [userId], references: [id])
+  userMCOptionSelected  UserMCOptionSelected[]
+  UserUmlQuestionAnswer UserUmlQuestionAnswer?
+  codeGameAnswer        CodeGameAnswer[]
 }
 
 model UserMCOptionSelected {
@@ -366,19 +371,30 @@ model FreeTextQuestion {
 }
 
 model GraphQuestion {
-  id                  Int             @id @default(autoincrement())
-  textHTML            String?
-  expectations        String
-  expectationsHTML    String?
-  type                String
-  initialStructure    Json
-  exampleSolution     Json
-  stepsEnabled        Boolean
-  configuration       Json
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
-  questionId          Int             @unique
-  question            Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  id               Int      @id @default(autoincrement())
+  textHTML         String?
+  expectations     String
+  expectationsHTML String?
+  type             String
+  initialStructure Json
+  exampleSolution  Json
+  stepsEnabled     Boolean
+  configuration    Json
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  questionId       Int      @unique
+  question         Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model GraphAIFeedback {
+  id              Int        @id @default(autoincrement())
+  updatedAt       DateTime   @updatedAt
+  createdAt       DateTime   @default(now())
+  prompt          String?
+  response        String
+  ratingByStudent Int?
+  userAnswerId    Int
+  userAnswer      UserAnswer @relation(fields: [userAnswerId], references: [id])
 }
 
 model CodingQuestion {
@@ -455,6 +471,63 @@ model CodeSubmissionFile {
   CodeSubmissionId Int
   CodeSubmission   CodeSubmission @relation(fields: [CodeSubmissionId], references: [id], onDelete: Cascade)
   user             User           @relation(fields: [userId], references: [id])
+}
+
+model CodeGameQuestion {
+  id                              Int                @id @default(autoincrement())
+  text                            String
+  programmingLanguage             String
+  questionId                      Int                @unique
+  codeSolutionRestriction         Boolean            @default(false)
+  fileNameToRestrict              String?
+  methodNameToRestrict            String?
+  frequencyOfMethodNameToRestrict Int?
+  codeGameScaffolds               CodeGameScaffold[]
+  gameFileName                    String
+  game                            String
+  gameCellRestrictions            String?            // TODO: remove optional = "?"
+  theme                           String?            @default("dino") // TODO: remove optional = "?"
+  question                        Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model CodeGameScaffold {
+  id                 Int            @id @default(autoincrement())
+  codeGameQuestionId Int
+  codeFileName       String
+  code               String
+  language           String?
+  visible            Boolean?
+  mainFile           Boolean?
+  codeGameQuestion   CodeGameQuestion @relation(fields: [codeGameQuestionId], references: [id], onDelete: Cascade)
+}
+
+model CodeGameAnswer {
+  id                                Int        @id @default(autoincrement())
+  createdAt                         DateTime   @default(now())
+  updatedAt                         DateTime   @updatedAt
+  codeGameQuestionId                Int
+  userAnswerId                      Int        @unique
+  userAnswer                        UserAnswer @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
+  codeGameScaffoldAnswers           CodeGameScaffoldAnswer[]
+  codeGameExecutionResult           String
+  codeSolutionRestriction           Boolean
+  frequencyOfMethodEvaluationResult Boolean
+  frequencyOfMethodCallsResult      Int
+  reachedDestination                Boolean
+  allItemsCollected                 Boolean
+  totalItems                        Int
+  collectedItems                    Int
+  visitedCellsAreAllowed            Boolean
+  allWhiteListCellsVisited          Boolean
+}
+
+model CodeGameScaffoldAnswer {
+  id                  Int        @id @default(autoincrement())
+  language            String
+  codeFileName        String
+  code                String
+  codeGameAnswerId    Int
+  CodeGameAnswer      CodeGameAnswer @relation(fields: [codeGameAnswerId], references: [id], onDelete: Cascade)
 }
 
 model FillinQuestion {
@@ -581,11 +654,11 @@ model Vote {
 }
 
 model ChatSession {
-  id        Int             @id @default(autoincrement())
+  id        Int              @id @default(autoincrement())
   title     String
-  createdAt DateTime        @default(now())
+  createdAt DateTime         @default(now())
   userId    Int
-  user      User            @relation(fields: [userId], references: [id])
+  user      User             @relation(fields: [userId], references: [id])
   messages  ChatBotMessage[]
 }
 
@@ -600,7 +673,7 @@ model ChatBotMessage {
   user            User?        @relation(fields: [userId], references: [id])
   userId          Int?
   sessionId       Int?
-  session         ChatSession?  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session         ChatSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
 model UserContentElementProgress {
@@ -660,6 +733,53 @@ model Notification {
   @@index([discussionId])
 }
 
+//***************************** Begin Umlearn Tables
+
+model UmlEditorModel {
+  id            Int                @id @default(autoincrement())
+  model         String             @unique
+  title         String
+  description   String             @db.Text
+  EditorElement UmlEditorElement[]
+}
+
+model UmlEditorElement {
+  id            Int            @id @default(autoincrement())
+  element       String         @unique //the unique element string
+  elementType   String //can be NODE or EDGE
+  title         String
+  description   String         @db.Text
+  editorModel   UmlEditorModel @relation(fields: [editorModelId], references: [id])
+  editorModelId Int
+  data          String //maybe the element definition and/or the style data
+}
+
+model UmlQuestion {
+  id           Int      @id @default(autoincrement())
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId   Int      @unique
+  title        String?
+  text         String?  @db.Text
+  textHTML     String?  @db.Text
+  editorData   Json? //editor content - teachers work
+  startData    Json? //optional data for the start of the task displayed in the editor
+  dataImage    String?  @db.Text //the image of the task
+  taskSettings Json? //siehe taskSettingsDTO
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model UserUmlQuestionAnswer {
+  id           Int        @id @default(autoincrement())
+  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id])
+  userAnswerId Int        @unique
+  attemptData  Json //editor content - students work
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+//***************************** End Umlearn Tables
+
 enum GlobalRole {
   STUDENT
   TEACHER
@@ -696,4 +816,5 @@ enum questionType {
   Fillin
   CodingQuestion
   GraphQuestion
+  UMLQuestion
 }

@@ -1,14 +1,33 @@
+/*
+Ipad notices
+- Brave and Firefox do not render underneath the safe area
+- Chrome and Safari do render underneath the safe area, but are additionally sending the safe-area-inset values
+ */
+
 .toolbar-item-spacer {
   flex: 1 1 auto;
 }
 
 .app-container {
-  height:calc(100vh - 30px); /* our toolbar height: 64px */
-  margin: 0;
+  height:calc(100vh - 30px); /* our toolbar height: 30px */
+
+  /* Safari-specific styles */
+  @supports (-webkit-touch-callout:none) {
+    // for ipads brave and firefox we can use 100% while for chrome and safari we need to subtract the safe-area-inset values
+    height: calc(100% - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
 }
+
+.tablet-space {
+  @supports (-webkit-touch-callout:none) {
+    height: 30px; //footer-height
+  }
+}
+
 .app-sidenav {
   width: 230px;
 }
+
 .app-sidenav-content {
   display: flex;
   height: 100vh;
@@ -24,6 +43,7 @@
 
 
 .footer {
+  z-index: 1000;
   height: 30px; /* Reduzierte Höhe */
   position: fixed;
   bottom: 0;
@@ -35,7 +55,14 @@
   color: #434c5e;
   padding: 0 10px;
   overflow-x: auto;
+  overflow-y: hidden;
   white-space: nowrap;
+
+  /* Safari-specific styles */
+  @supports (-webkit-hyphens:none) {
+    // important only for ipads safari
+    bottom: env(safe-area-inset-bottom);
+  }
 }
 
 .left-content, .center-content, .right-content {

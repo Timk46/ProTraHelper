@@ -94,9 +94,10 @@ export class StudentWorkspaceComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private router: Router
   ) {
-    this.route.queryParamMap.subscribe(params => {
-      this.conceptId = Number(params.get('concept'));
+    this.route.paramMap.subscribe(params => {
+      this.conceptId = Number(params.get('concept')); // Dies könnte undefined sein, wenn 'concept' ein Query-Parameter ist
       this.currentTaskId = Number(params.get('taskId'));
+      console.log(this.currentTaskId);
       console.log('StudentWorkspaceComponent constructor', this.conceptId, this.currentTaskId);
     });
 
@@ -176,6 +177,7 @@ export class StudentWorkspaceComponent implements OnInit {
   getKIFeedback(level: string): void {
     this.feedbackLevel = level;
     this.rating = 0;
+    this.hoverState = 0;
     this.currentState = States.startGeneratingKIFeedback;
     this.feedbackMessage = 'Lass mich einen Augenblick über die Aufgabe nachdenken...';
     this.safeFeedbackMessage = this.sanitizer.bypassSecurityTrustHtml(this.feedbackMessage);

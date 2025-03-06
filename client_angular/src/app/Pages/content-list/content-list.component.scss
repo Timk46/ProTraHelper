@@ -1,0 +1,85 @@
+.content-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.search-bar {
+  display: flex;
+  flex-direction: row;
+}
+
+.content-list{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.content-list-element-header-description {
+  justify-content: space-between;
+  align-items: center;
+
+  @media screen and (max-width: 400px) {
+    display: none;
+  }
+}
+
+.content-list-element-introduction-stars {
+  display: none;
+  
+  @media screen and (max-width: 400px) {
+    display: inline
+  }
+}
+
+.content-list-element-header-indicators {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.content-list-element-introduction {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 15px;
+
+  @media screen and (max-width: 800px) {
+    flex-direction: column;
+  }
+}
+
+.content-list-element-introduction-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.content-list-element-description {
+  width: fit-content;
+  margin: 4px;
+}
+
+.content-list-element-items {
+  display: grid;
+  overflow: auto;
+  align-content: start;
+  grid-template-columns: repeat(auto-fill, 400px);
+  justify-content: start;
+  justify-items: center;
+  grid-gap: 15px;
+
+  /* margin: 0 20px 20px; */
+  padding: 5px;
+  height: 100%;
+  /* width: calc(100% - 40px) !important; */
+  /* we use a grid to provide the last row to be left-aligned */
+
+  @media screen and (max-width: 580px) {
+    grid-template-columns: repeat(auto-fill, 350px);
+  }
+
+  @media screen and (max-width: 400px) {
+    grid-template-columns: repeat(auto-fill, 260px);
+  }
+}

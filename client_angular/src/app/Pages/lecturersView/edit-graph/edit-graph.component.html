@@ -159,7 +159,7 @@
                     <button
                         mat-raised-button
                         color="primary"
-                        (click)="onGenerate()"
+                        (click)="onGenerateClick()"
                         [disabled]="generateButtonDisabled()"
                     > Generieren </button>
                     <mat-error *ngIf="generateButtonDisabled()">Die eingegebenen Parameter überprüfen!</mat-error>
@@ -230,104 +230,84 @@
             <app-graph-structure [toolbarEnabled]="true"/>
         </div>
         <div class="controls box">
-
-            <div 
-            style="display: flex; justify-content: start; align-items: center; gap: 1em; height: 100%;">
             
-                <mat-button-toggle-group 
-                    name="mode" 
-                    aria-label="mode" 
-                    [(ngModel)]="workspaceModeCurrent"
-                    (ngModelChange)="updateWorkspace()"
+            <mat-button-toggle-group 
+                name="mode" 
+                aria-label="mode" 
+                [(ngModel)]="workspaceModeCurrent"
+                (ngModelChange)="updateWorkspace()"
+            >
+                <mat-button-toggle value="assignment">Aufgabe</mat-button-toggle>
+                <mat-button-toggle value="solution">Musterlösung</mat-button-toggle>
+            </mat-button-toggle-group>
+            <!-- [hideSingleSelectionIndicator]="true"
+                    -->
+            
+            <mat-button-toggle-group
+                *ngIf="this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType).stepsEnabled && workspaceModeCurrent === 'solution'"
+                name="solution-step"
+                aria-label="solution-step" 
+                [(ngModel)]="solutionStepCurrent"
+                (ngModelChange)="updateWorkspace()"
+            >   
+                <mat-button-toggle 
+                    *ngFor="let step of solutionGraphStructure; let i = index; trackBy:trackByIndex"    
+                    [value]="i"
                 >
-                    <mat-button-toggle value="assignment">Aufgabenstellung</mat-button-toggle>
-                    <mat-button-toggle value="solution">Musterlösung</mat-button-toggle>
-                </mat-button-toggle-group>
-                <!-- [hideSingleSelectionIndicator]="true"
-                     -->
+                    {{ solutionStepCurrent === i ? 'Schritt' : '' }} {{ i + 1 }}
+                </mat-button-toggle>
+
+            </mat-button-toggle-group>
+            <!-- [hideSingleSelectionIndicator]="true" -->
                 
-                <mat-button-toggle-group
-                    *ngIf="this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType).stepsEnabled && workspaceModeCurrent === 'solution'"
-                    name="solution-step"
-                    aria-label="solution-step" 
-                    [(ngModel)]="solutionStepCurrent"
-                    (ngModelChange)="updateWorkspace()"
-                >   
-                    <mat-button-toggle 
-                        *ngFor="let step of solutionGraphStructure; let i = index; trackBy:trackByIndex"    
-                        [value]="i"
-                    >
-                        Schritt {{ i + 1 }}
-                    </mat-button-toggle>
+            <button
+                *ngIf="false && this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType).stepsEnabled && workspaceModeCurrent === 'solution'"
+                class="image-button"
+                type="button"
+                (click)="addNewSolutionStep()"
+            > 
+                <!-- Neuen Schritt -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                </svg>
+            </button>
 
-                </mat-button-toggle-group>
-                <!-- [hideSingleSelectionIndicator]="true" -->
-                    
-                <button
-                    *ngIf="false && this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType).stepsEnabled && workspaceModeCurrent === 'solution'"
-                    class="image-button"
-                    type="button"
-                    (click)="addNewSolutionStep()"
-                > 
-                    <!-- Neuen Schritt -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
-                    </svg>
-                </button>
-
-                <button
-                    *ngIf="false && this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType).stepsEnabled && workspaceModeCurrent === 'solution' && solutionGraphStructure.length > 1"
-                    class="image-button"
-                    type="button"
-                    (click)="deleteCurrentSolutionStep()"
-                > 
-                    <!-- Schritt löschen -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-                    </svg>
-                </button>
-
-                <button
-                    *ngIf="false && workspaceModeCurrent === 'solution'"
-                    mat-raised-button color="primary"
-                    type="button"
-                    (click)="resetStructure()"
-                > 
-                    <!-- Die Lösung zurücksetzen -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/>
-                        <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466"/>
-                    </svg>
-                </button>
-
-            </div>
-            
-            <div style="display: flex; justify-content: flex-end; gap: 1em;">
-                <button
-                    mat-raised-button color="warn"
-                    type="button"
-                    (click)="resetStructure()"
-                > 
+            <button
+                *ngIf="false && this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType).stepsEnabled && workspaceModeCurrent === 'solution' && solutionGraphStructure.length > 1"
+                class="image-button"
+                type="button"
+                (click)="deleteCurrentSolutionStep()"
+            > 
+                <!-- Schritt löschen -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                </svg>
+            </button>
+        
+            <button
+                mat-raised-button color="warn"
+                type="button"
+                (click)="resetStructure()"
+            > 
                 <!-- Die Struktur zurücksetzen -->
-                    Zurücksetzen
-                </button>
+                Zurücksetzen
+            </button>
 
-                
-                <button
-                    mat-raised-button color="primary"
-                    type="button" 
-                    (click)="onQuickGenerate()" 
-                    [disabled]="generateButtonDisabled()"
-                    [matTooltip]="generateButtonDisabled() ? 'Die eingegebene Parameter überprüfen!' : ''"
-                > Generieren </button>
+            
+            <button
+                mat-raised-button color="primary"
+                type="button" 
+                (click)="onQuickGenerateClick()" 
+                [disabled]="generateButtonDisabled()"
+                [matTooltip]="generateButtonDisabled() ? 'Die eingegebene Parameter überprüfen!' : ''"
+            > Generieren </button>
 
-                <button
-                    mat-raised-button color="primary"
-                    type="button" 
-                    (click)="deactivateWorkspace()" 
-                > Bestätigen </button>
-            </div>
+            <button
+                mat-raised-button color="primary"
+                type="button" 
+                (click)="deactivateWorkspace()" 
+            > Bestätigen </button>
         </div>
     </div>
 </ng-template>

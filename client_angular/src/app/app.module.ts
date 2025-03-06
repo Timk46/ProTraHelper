@@ -67,6 +67,13 @@ import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-tas
 import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
 import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
 import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-question.component';
+import { ContentListComponent } from './Pages/content-list/content-list.component';
+import { ContentListItemComponent } from './Pages/content-list/content-list-item/content-list-item.component';
+import { MatExpansionModule } from "@angular/material/expansion";
+import { CdkAccordionItem, CdkAccordionModule } from "@angular/cdk/accordion";
+import { MatRippleModule } from "@angular/material/core";
+import { CodeGameModule } from "./Modules/code-game/code-game.module";
+import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-game/code-game-confirm-dialog.component";
 
 @NgModule({
     declarations: [
@@ -119,7 +126,10 @@ import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-quest
         FillinTaskNewComponent,
         DynamicBlankComponent,
         GraphTaskComponent,
-        DynamicQuestionComponent
+        DynamicQuestionComponent,
+        ContentListComponent,
+        ContentListItemComponent,
+        CodeGameConfirmDialogComponent
     ],
     imports: [
         ToastrModule.forRoot(),
@@ -135,7 +145,11 @@ import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-quest
         EditorModule,
         MarkdownModule.forRoot(),
         GraphTasksModule,
-        MatMenuModule
+        MatMenuModule,
+        MatExpansionModule,
+        CdkAccordionModule,
+        MatRippleModule,
+        CodeGameModule
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

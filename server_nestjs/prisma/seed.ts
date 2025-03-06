@@ -1,12 +1,14 @@
-import { PrismaClient} from '@prisma/client';
-//import { seedOFP } from './seedOFP';
+import { PrismaClient } from '@prisma/client';
+import { seedOFP } from './seedOFP';
 import { seedAUD } from './seedAUD';
-
+import { seedTranscriptsToConceptNodes } from './processTranscripts';
 const prisma = new PrismaClient();
 
 async function main() {
-  await seedAUD();
-  // await seedOFP();
+  //await seedAUD();
+  await seedOFP();
+  await seedTranscriptsToConceptNodes();
+
 }
 
 main()

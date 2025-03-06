@@ -158,13 +158,13 @@ export class QuestionDataChoiceService {
     if(!mcQuestionOption.mcQuestion.id) {
       throw new Error('McQuestion ID not defined');
     }
-    if(!mcQuestionOption.mcOption.id){
+    if(!mcQuestionOption.option.id){
       throw new Error('McOption ID not defined');
     }
     const newMcQuestionOption = await this.prisma.mCQuestionOption.create({
       data: {
         question: {connect: {id: mcQuestionOption.mcQuestion.id}},
-        option: {connect: {id: mcQuestionOption.mcOption.id}},
+        option: {connect: {id: mcQuestionOption.option.id}},
       },
       include: {
         question: {include: {questionVersion: true}},
@@ -178,13 +178,15 @@ export class QuestionDataChoiceService {
 
     return {
       ...newMcQuestionOption,
-      mcOption: {
+      option: {
         ...newMcQuestionOption.option,
         correct: newMcQuestionOption.option.is_correct
       },
       mcQuestion: {
         ...newMcQuestionOption.question,
         shuffleOptions: newMcQuestionOption.question.shuffleoptions,
+        mcQuestionOption: [],
+
       }
     };
   }

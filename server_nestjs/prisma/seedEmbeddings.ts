@@ -48,7 +48,7 @@ export const seedAllEmbeddingsForVideo = async (file: File, lectureName: string)
     },
   );
 
-  const filePath = '../../files/AUD/Transkripte/' + file.name.split(".mp4")[0] + '.srt'; // srt file names are the same as the video file names
+  const filePath = '../../files/'+lectureName+'/Transkripte/' + file.name.split(".mp4")[0] + '.srt'; // srt file names are the same as the video file names
   const absolutePath = path.resolve(__dirname, filePath);
   if (!fs.existsSync(absolutePath)) {
     console.log(`There is no matching SRT Transcript for File ${file.name}.\n I have searched for it here: ${absolutePath}`);

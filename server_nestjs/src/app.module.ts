@@ -25,6 +25,14 @@ import { QuestionModule } from './tutor-kai/question/question.module';
 import { RunCodeModule } from './tutor-kai/run-code/run-code.module';
 // END Tutor-Kai Imports
 
+// BEGIN UMLearn Imports
+//import { DatabaseCourseCommunicationModule } from './umlearn/database-course-communication/database-course-communication.module';
+import { DatabaseTaskCommunicationModule } from './umlearn/database-task-communication/database-task-communication.module';
+import { DatabaseEditorCommunicationModule } from './umlearn/database-editor-communication/database-editor-communication.module';
+import { GptModule } from './umlearn/gpt/gpt.module';
+import { CompareModule } from './umlearn/compare/compare.module';
+// END UMLearn Imports
+
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/common/guards/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
@@ -46,10 +54,15 @@ import { AdminModule } from './admin/admin.module'; // Add this line
 import { GraphSolutionEvaluationService } from './graph-solution-evaluation/graph-solution-evaluation.service';
 import { GraphSolutionEvaluationModule } from './graph-solution-evaluation/graph-solution-evaluation.module';
 import { TransitiveClosureService } from './graph-solution-evaluation/transitive-closure/transitive-closure.service';
-import { DijkstraService } from './graph-solution-evaluation/dijkstra/dijkstra.service'; 
+import { DijkstraService } from './graph-solution-evaluation/dijkstra/dijkstra.service';
 import { FloydService } from './graph-solution-evaluation/floyd/floyd.service';
 import { KruskalService } from './graph-solution-evaluation/kruskal/kruskal.service';
 import { ExampleSolutionGenerationModule } from './graph-solution-evaluation/example-solution-generation/example-solution-generation.module';
+import { AiFeedbackModule } from './graph-solution-evaluation/ai-feedback/ai-feedback.module';
+import { AiFeedbackService } from './graph-solution-evaluation/ai-feedback/ai-feedback.service';
+import { PointCalculationModule } from './umlearn/point-calculation/point-calculation.module';
+
+import { CodeGameModule } from './code-game/code-game.module';
 
 @Module({
   imports: [
@@ -77,7 +90,16 @@ import { ExampleSolutionGenerationModule } from './graph-solution-evaluation/exa
     AdminModule, // Add this line
 
     GraphSolutionEvaluationModule,
-    ExampleSolutionGenerationModule
+    ExampleSolutionGenerationModule,
+    AiFeedbackModule,
+    // UMLearnModules
+    //DatabaseCourseCommunicationModule,
+    DatabaseTaskCommunicationModule,
+    DatabaseEditorCommunicationModule,
+    GptModule,
+    CompareModule,
+    PointCalculationModule,
+    CodeGameModule
   ],
   controllers: [
     AppController,
@@ -104,7 +126,8 @@ import { ExampleSolutionGenerationModule } from './graph-solution-evaluation/exa
     TransitiveClosureService,
     DijkstraService,
     FloydService,
-    KruskalService
+    KruskalService,
+    AiFeedbackService
   ],
 })
 
