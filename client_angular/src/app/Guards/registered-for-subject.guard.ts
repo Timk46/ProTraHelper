@@ -13,7 +13,7 @@ export class RegisteredForSubjectGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
 
-    if (this.userService.isRegisteredForSubject('Objektorientierte und funktionale Programmierung')) { // ToDo Make dynamic
+    if (this.userService.isRegisteredForSubject('Algorithmen und Datenstrukturen')) { // ToDo Make dynamic
       return true;
     } else {
       return this.router.createUrlTree(['/not-registered']);
