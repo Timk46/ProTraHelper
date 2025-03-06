@@ -1,4 +1,4 @@
-import {CodingQuestionInternal, questionType} from './question.dto';
+import {CodingQuestionInternal, questionType, CodeGameQuestionDto} from './question.dto';
 import { GraphConfigurationDTO, GraphStructureDTO } from './graphTask.dto';
 import { editorDataDTO, taskSettingsDTO } from './umlearnDtos/dtos';
 
@@ -25,6 +25,7 @@ export interface detailedQuestionDTO {
   fillinQuestion?: detailedFillinQuestionDTO;
   graphQuestion?: detailedGraphQuestionDTO;
   umlQuestion?: detailedUmlQuestionDTO;
+  codeGameQuestion?: CodeGameQuestionDto;
 }
 
 export interface detailedFreetextQuestionDTO {

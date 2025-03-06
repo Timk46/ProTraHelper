@@ -1,0 +1,138 @@
+<div class="edit-code-game-container">
+  <h2>Programmierspiel erstellen/bearbeiten</h2>
+  <form [formGroup]="codeGameForm" (ngSubmit)="onSubmit()">
+    <div class="section-container">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" required>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Programming Language</mat-label>
+          <mat-select formControlName="programmingLanguage" required (selectionChange)="onLanguageChange($event)">
+<!--            <mat-option value="python">Python</mat-option>-->
+<!--            <mat-option value="java">Java</mat-option>-->
+            <mat-option value="cpp">C++</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="form-field full-width subsection-container">
+        <div class="section-header">
+          <h3>Aufgabenstellung</h3>
+          <button mat-mini-fab color="primary" type="button" (click)="togglePreview()">
+            <mat-icon>{{ showTaskPreview ? 'edit' : 'preview' }}</mat-icon>
+          </button>
+        </div>
+        <p>Die Aufgabenstellung. Diese wird mit der Markdown-Syntax formatiert.</p>
+        <mat-divider></mat-divider>
+        <div class="markdown-editor-container">
+          <div [hidden]="showTaskPreview">
+            <ng-container>
+              <app-code-editor-code-game
+                [code]="codeGameForm.get('text')?.value"
+                [selectedLanguage]="markdownLanguage"
+                (codeChange)="onCodeChange($event, 0, 'text')"
+              ></app-code-editor-code-game>
+            </ng-container>
+          </div>
+          <div [hidden]="!showTaskPreview">
+            <markdown [data]="codeGameForm.get('text')?.value"></markdown>
+          </div>
+        </div>
+      </div>
+
+      <div formArrayName="codeGameScaffolds" class="subsection-container">
+        <div class="section-header">
+          <h3>Code-Gerüste</h3>
+          <button mat-mini-fab color="primary" type="button" (click)="openAddModal('codeGameScaffolds')">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        <p>Hinzufügen aller Dateien die zu dem Programmierspiel gehören. </p>
+        <p>Selektiere die sichtbaren Dateien und die Hauptdatei.</p>
+        <mat-accordion>
+          <mat-expansion-panel *ngFor="let codeGameScaffold of codeGameScaffoldsControls; let i = index" [formGroupName]="i">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <span>{{codeGameScaffold.get('codeFileName')?.value}}</span>
+
+                <div class="file-options">
+                  <button mat-mini-fab color="primary" type="button" (click)="fileVisibilityToggle('codeGameScaffolds', i)" (click)="$event.stopPropagation();">
+                    <mat-icon>{{codeGameScaffold.get('visible')?.value ? 'visibility' : 'visibility_off' }}</mat-icon>
+                  </button>
+
+                  <mat-checkbox color="primary" [checked]="codeGameScaffold.get('mainFile')?.value" (click)="mainFileToggle('codeGameScaffolds', i); $event.stopPropagation();">
+                    MainFile
+                  </mat-checkbox>
+
+                  <button mat-icon-button color="warn" type="button" (click)="confirmDelete('codeGameScaffolds', i, codeGameScaffold.get('codeFileName')?.value); $event.stopPropagation();">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <ng-container>
+              <app-code-editor-code-game
+                [code]="codeGameScaffold.get('code')?.value"
+                [selectedLanguage]="codeGameForm.get('programmingLanguage')?.value"
+                (codeChange)="onCodeChange($event, i, 'codeGameScaffolds')"
+              ></app-code-editor-code-game>
+            </ng-container>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+      
+      <div class="form-field full-width subsection-container">
+        <div class="section-header">
+          <h3>Spielfeld</h3>
+        </div>
+        <ng-container>
+          <app-code-game-playfield-editor
+            [inputGameData]="exportGameDataForPlayfieldEditor"
+            (dataChange)="handleDataChangePayfieldEditor($event)"
+          ></app-code-game-playfield-editor>
+        </ng-container>
+      </div>
+
+      <div class="form-field full-width subsection-container">
+        <div class="section-header">
+          <h3>Lösungseinschränkung</h3>
+        </div>
+        <p>Beschränke die Anzahl der verwendeten Methodenaufrufe in der jeweiligen Datei. Gib die maximale Häufigkeit der Methodenaufrufe an.</p>
+        <mat-divider></mat-divider>
+        <div class="form-row">
+          <mat-checkbox color="primary" formControlName="codeSolutionRestriction">Einschränkung aktivieren</mat-checkbox>
+        </div>
+        <div class="form-row" *ngIf="codeGameForm.get('codeSolutionRestriction')?.value" style="margin-top: 15px">
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Datei</mat-label>
+            <mat-select formControlName="fileNameToRestrict" required>
+              <mat-option *ngFor="let codeGameScaffold of codeGameScaffoldsControls" [value]="codeGameScaffold.get('codeFileName')?.value">
+                {{codeGameScaffold.get('codeFileName')?.value}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Methodenname</mat-label>
+            <input matInput formControlName="methodNameToRestrict" required>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Häufigkeit</mat-label>
+            <input matInput type="number" formControlName="frequencyOfMethodNameToRestrict" required>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="button" class="action-button" (click)="navigateToDashboard()">Zurück zum Dashboard</button>
+      <button mat-raised-button color="primary" type="submit" class="action-button">Änderungen speichern</button>
+    </div>
+
+  </form>
+</div>

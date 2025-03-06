@@ -1,0 +1,23 @@
+<div class="playfield">
+  <div class="game-information">
+    <p>{{ gameOutputInformation }}</p>
+  </div>
+
+  <div class="playfield">
+    <div class="frame-overlay" [ngClass]="{ 'warning-frame': isSysWarning }">
+      <div class="field">
+        <div *ngFor="let row of gameField; let i = index" class="row">
+          <div *ngFor="let cell of row; let j = index" class="cell">
+            <div class="overlay" [@dimChase]="cellRestrictionsDimState[i][j]"></div>
+            <img [src]="getFloorImage(i, j)" alt="floorImage" class="floorImage" />
+            <img *ngIf="getObjectImage(i, j)" [src]="getObjectImage(i, j)" [id]="getObjectId(i, j)" alt="objectImage" class="objectImage" />
+          </div>
+        </div>
+        <!-- Render player once and adjust its position via transform -->
+        <img *ngIf="playerPositionIsSet" [src]="getPlayerImage()" alt="playerImage"
+             class="playerImage"
+             [style.transform]="playerTransform" />
+      </div>
+    </div>
+  </div>
+</div>

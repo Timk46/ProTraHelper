@@ -72,6 +72,8 @@ import { ContentListItemComponent } from './Pages/content-list/content-list-item
 import { MatExpansionModule } from "@angular/material/expansion";
 import { CdkAccordionItem, CdkAccordionModule } from "@angular/cdk/accordion";
 import { MatRippleModule } from "@angular/material/core";
+import { CodeGameModule } from "./Modules/code-game/code-game.module";
+import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-game/code-game-confirm-dialog.component";
 
 @NgModule({
     declarations: [
@@ -126,7 +128,8 @@ import { MatRippleModule } from "@angular/material/core";
         GraphTaskComponent,
         DynamicQuestionComponent,
         ContentListComponent,
-        ContentListItemComponent
+        ContentListItemComponent,
+        CodeGameConfirmDialogComponent
     ],
     imports: [
         ToastrModule.forRoot(),
@@ -145,7 +148,8 @@ import { MatRippleModule } from "@angular/material/core";
         MatMenuModule,
         MatExpansionModule,
         CdkAccordionModule,
-        MatRippleModule
+        MatRippleModule,
+        CodeGameModule
     ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

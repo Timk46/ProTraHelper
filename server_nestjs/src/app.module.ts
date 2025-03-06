@@ -62,6 +62,7 @@ import { AiFeedbackModule } from './graph-solution-evaluation/ai-feedback/ai-fee
 import { AiFeedbackService } from './graph-solution-evaluation/ai-feedback/ai-feedback.service';
 import { PointCalculationModule } from './umlearn/point-calculation/point-calculation.module';
 
+import { CodeGameModule } from './code-game/code-game.module';
 
 @Module({
   imports: [
@@ -98,6 +99,7 @@ import { PointCalculationModule } from './umlearn/point-calculation/point-calcul
     GptModule,
     CompareModule,
     PointCalculationModule,
+    CodeGameModule
   ],
   controllers: [
     AppController,

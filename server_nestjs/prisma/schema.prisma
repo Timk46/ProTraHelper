@@ -253,6 +253,7 @@ model Question {
   originId                   Int?
   conceptNodeId              Int?
   codingQuestion             CodingQuestion?
+  codeGameQuestion           CodeGameQuestion?
   contentElement             ContentElement?
   files                      File[]
   GraphQuestion              GraphQuestion?
@@ -343,6 +344,7 @@ model UserAnswer {
   user                  User                   @relation(fields: [userId], references: [id])
   userMCOptionSelected  UserMCOptionSelected[]
   UserUmlQuestionAnswer UserUmlQuestionAnswer?
+  codeGameAnswer        CodeGameAnswer[]
 }
 
 model UserMCOptionSelected {
@@ -469,6 +471,63 @@ model CodeSubmissionFile {
   CodeSubmissionId Int
   CodeSubmission   CodeSubmission @relation(fields: [CodeSubmissionId], references: [id], onDelete: Cascade)
   user             User           @relation(fields: [userId], references: [id])
+}
+
+model CodeGameQuestion {
+  id                              Int                @id @default(autoincrement())
+  text                            String
+  programmingLanguage             String
+  questionId                      Int                @unique
+  codeSolutionRestriction         Boolean            @default(false)
+  fileNameToRestrict              String?
+  methodNameToRestrict            String?
+  frequencyOfMethodNameToRestrict Int?
+  codeGameScaffolds               CodeGameScaffold[]
+  gameFileName                    String
+  game                            String
+  gameCellRestrictions            String?            // TODO: remove optional = "?"
+  theme                           String?            @default("dino") // TODO: remove optional = "?"
+  question                        Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model CodeGameScaffold {
+  id                 Int            @id @default(autoincrement())
+  codeGameQuestionId Int
+  codeFileName       String
+  code               String
+  language           String?
+  visible            Boolean?
+  mainFile           Boolean?
+  codeGameQuestion   CodeGameQuestion @relation(fields: [codeGameQuestionId], references: [id], onDelete: Cascade)
+}
+
+model CodeGameAnswer {
+  id                                Int        @id @default(autoincrement())
+  createdAt                         DateTime   @default(now())
+  updatedAt                         DateTime   @updatedAt
+  codeGameQuestionId                Int
+  userAnswerId                      Int        @unique
+  userAnswer                        UserAnswer @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
+  codeGameScaffoldAnswers           CodeGameScaffoldAnswer[]
+  codeGameExecutionResult           String
+  codeSolutionRestriction           Boolean
+  frequencyOfMethodEvaluationResult Boolean
+  frequencyOfMethodCallsResult      Int
+  reachedDestination                Boolean
+  allItemsCollected                 Boolean
+  totalItems                        Int
+  collectedItems                    Int
+  visitedCellsAreAllowed            Boolean
+  allWhiteListCellsVisited          Boolean
+}
+
+model CodeGameScaffoldAnswer {
+  id                  Int        @id @default(autoincrement())
+  language            String
+  codeFileName        String
+  code                String
+  codeGameAnswerId    Int
+  CodeGameAnswer      CodeGameAnswer @relation(fields: [codeGameAnswerId], references: [id], onDelete: Cascade)
 }
 
 model FillinQuestion {

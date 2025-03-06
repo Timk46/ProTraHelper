@@ -25,6 +25,11 @@ import { GraphTasksModule } from 'src/app/Modules/graph-tasks/graph-tasks.module
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { EditUmlComponent } from './edit-uml/edit-uml.component';
 import { UmlearnModule } from 'src/app/Modules/umlearn/umlearn.module';
+import { EditCodeGameComponent } from './edit-code-game/edit-code-game.component';
+import { CodeGameAddElementModalComponent } from "./edit-code-game/code-game-add-element-modal.component";
+import { CodeGameModule } from "../../Modules/code-game/code-game.module";
+import { CodeGamePlayfieldEditorComponent } from './edit-code-game/code-game-playfield-editor/code-game-playfield-editor.component';
+import { MatMenuModule } from "@angular/material/menu";
 
 @NgModule({
   declarations: [
@@ -42,6 +47,9 @@ import { UmlearnModule } from 'src/app/Modules/umlearn/umlearn.module';
     AddElementModalComponent,
     TinymceComponent,
     EditUmlComponent,
+    EditCodeGameComponent,
+    CodeGameAddElementModalComponent,
+    CodeGamePlayfieldEditorComponent
   ],
   imports: [
     CommonModule,
@@ -56,7 +64,9 @@ import { UmlearnModule } from 'src/app/Modules/umlearn/umlearn.module';
     MatFormFieldModule,
     GraphTasksModule,
     MatButtonToggleModule,
-    UmlearnModule
+    UmlearnModule,
+    CodeGameModule,
+    MatMenuModule
   ],
   exports: [
     CreateContentNodeDialogComponent,

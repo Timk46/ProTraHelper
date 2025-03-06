@@ -1,0 +1,87 @@
+// header
+
+.header {
+  height: 30px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  padding: 0 0px;
+}
+
+.left-content, .center-content, .right-content {
+  display: flex;
+  align-items: center;
+}
+
+.center-content {
+  justify-content: center;
+  gap: 8px;
+}
+
+// body
+
+.workspace {
+  display: flex;
+  flex-direction: column;
+
+  .task-description {
+    margin-bottom: 10px;
+  }
+
+  .bottom-row {
+    display: flex;
+    flex: 1;
+
+    .playfield-column,
+    .code-editor-column {
+      flex: 1;
+      width: 50%;
+    }
+  }
+}
+
+.run {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+  .game-actions,
+  .success-informations {
+    flex: 1;
+    margin: 0 10px;
+    display: flex;
+    align-items: center;
+  }
+
+  .game-actions {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .noOverFlow {
+      min-width: 150px;
+      overflow: hidden;
+    }
+  }
+
+  .success-informations {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.result {
+  flex: 1;
+  overflow: auto;
+
+  .polarNight_4_text {
+    color: #2e3440;;
+  }
+}
+

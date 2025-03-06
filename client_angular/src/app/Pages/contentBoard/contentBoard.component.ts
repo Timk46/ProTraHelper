@@ -263,6 +263,10 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       case questionType.UML:
         this.router.navigate([this.getRouterLink("UML", selectedTask.id)]);
         break;
+      case questionType.CODEGAME:
+        // Navigate to coding game component
+        this.router.navigate([`/code-game/${selectedTask.id}`]);
+        return;
     }
 
     // Handle dialog submission if a dialog was opened
@@ -397,6 +401,9 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         break;
       case questionType.UML:
         this.router.navigate(['/edituml/', taskViewData.id]);
+        break;
+      case questionType.CODEGAME:
+        this.router.navigate(['/editcodegame/', taskViewData.id]);
         break;
     }
   }
@@ -543,6 +550,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         return 'Graphaufgabe';
       case questionType.UML:
         return 'UML-Aufgabe';
+      case questionType.CODEGAME:
+        return 'Programmierspiel';
       default:
         return 'undefiniert';
     }

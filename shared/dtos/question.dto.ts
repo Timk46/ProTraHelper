@@ -148,6 +148,7 @@ export interface AutomatedTestDto {
     FILLIN = "Fillin",
     GRAPH = "GraphQuestion",
     UML = "UMLQuestion",
+    CODEGAME = "CodeGameQuestion",
   }
 
 export interface McqGenerationDTO {
@@ -194,7 +195,7 @@ export interface freeTextQuestionDTO {
     progress?: number;
     description?: string;
     level?: number;
-    
+
 }
   export interface UmlQuestionDTO {
     questionId: number;
@@ -219,4 +220,32 @@ export interface McqEvaluation {
   question: string;
   evaluations?: {reasoning?: string, correct?: boolean}[];
   commentOnQuality?: string;
+}
+
+// CodeGame CodingQuestion DTOs
+
+export interface CodeGameQuestionDto {
+    id: number;
+    contentElementId?: number;
+    text: string;
+    codeSolutionRestriction: boolean;
+    fileNameToRestrict?: string;
+    methodNameToRestrict?: string;
+    frequencyOfMethodNameToRestrict?: number;
+    programmingLanguage: string;
+    codeGameScaffolds: CodeGameScaffoldDto[];
+    gameFileName: string;
+    game: string;
+    gameCellRestrictions: string;
+    theme: string;
+}
+
+export interface CodeGameScaffoldDto {
+    id: number;
+    codeGameQuestionId: number;
+    codeFileName: string;
+    code: string;
+    language?: string;
+    visible?: boolean;
+    mainFile?: boolean;
 }
