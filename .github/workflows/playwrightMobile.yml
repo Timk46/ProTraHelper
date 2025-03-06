@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - e2e
+      - main
   pull_request:
     branches:
-      - e2e
+      - main
 
 jobs:
   build-and-test:
