@@ -1,19 +1,19 @@
 
-import { PrismaClient, contentElementType } from '@prisma/client';
+import { PrismaClient, contentElementType, questionType } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import { WorkSheet, utils } from 'xlsx';
 import * as fs from 'fs';
-    
+
 const prisma = new PrismaClient();
 
 interface Option {
     text: string;
     correct: boolean;
 }
-    
+
 interface MCQuestion {
-    
-    score: number; 
+
+    score: number;
     type: string; //MC
     author: number; //init = 1
     text: string;
@@ -21,13 +21,13 @@ interface MCQuestion {
     concept: number;
     isApproved: boolean;
     version: number; //init = 1
-    
+
 }
 
 export const seedMCQ = async (user_id: number) => {
     const mcQuestions : MCQuestion[] = [];
 
-    console.log('reading mc questions from Excel...');    
+    console.log('reading mc questions from Excel...');
     const filePath = process.env.FILE_PATH + 'MCQuestions.xlsx';
     if(fs.existsSync(filePath)) {
         const workbook = XLSX.readFile(filePath);
@@ -59,7 +59,7 @@ export const seedMCQ = async (user_id: number) => {
                 options: options,
                 version: 1,
             };
-            
+
             /*
             const question: MCQuestion = {
                 score: mcq['score'],
@@ -81,7 +81,7 @@ export const seedMCQ = async (user_id: number) => {
             */
             mcQuestions.push(question);
             //console.log(question);
-        } 
+        }
 
         //Create all mc questions
         console.log('creating mc questions...');
@@ -91,7 +91,7 @@ export const seedMCQ = async (user_id: number) => {
             const createdQuestion = await prisma.question.create({
                 data: {
                     score: data.score,
-                    type: data.type,
+                    type: data.type as questionType,
                     author: { connect: { id: data.author } },
                     text: data.text,
                     conceptNode: { connect: { id: data.concept } },
@@ -99,13 +99,13 @@ export const seedMCQ = async (user_id: number) => {
                     version: data.version,
                 },
             });
-            
+
             // connect it to itself
             await prisma.question.update({
                 where: { id: createdQuestion.id },
-                data: { 
-                    origin: { connect: { id: createdQuestion.id } }, 
-                    name: 'Multiple-Choice Frage ' + createdQuestion.id, 
+                data: {
+                    origin: { connect: { id: createdQuestion.id } },
+                    name: 'Multiple-Choice Frage ' + createdQuestion.id,
                 },
             });
 
@@ -120,7 +120,7 @@ export const seedMCQ = async (user_id: number) => {
 
             //connect the content element to the the concept node by setting the training
             const training = await prisma.training.findFirst({
-                where: { 
+                where: {
                     conceptNodeId: createdQuestion.conceptNodeId,
                     awards: createdQuestion.level,
                  }
@@ -206,12 +206,12 @@ export const seedMCQ = async (user_id: number) => {
 
         }
 
-    } 
-    
+    }
+
 }
 
 async function main() {
-    
+
 }
 
 main()
@@ -222,4 +222,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-    

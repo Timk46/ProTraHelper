@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { contentElementType, PrismaClient } from '@prisma/client';
 import * as xlsx from 'xlsx';
-import { McqGenerationDTO } from '@DTOs/question.dto';
+import { McqGenerationDTO, questionType } from '@DTOs/question.dto';
 
 const prisma = new PrismaClient();
 interface Option {
@@ -70,7 +70,7 @@ for(const mcq of questions) {
       const createdQuestion = await prisma.question.create({
           data: {
               score: mcq.score,
-              type: mcq.type,
+              type: mcq.type as questionType,
               author: { connect: { id: mcq.author } },
               text: mcq.text,
               conceptNode: { connect: { id: mcq.concept } },
