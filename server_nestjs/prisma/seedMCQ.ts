@@ -1,5 +1,6 @@
 
-import { PrismaClient, contentElementType, questionType } from '@prisma/client';
+import { PrismaClient, contentElementType } from '@prisma/client';
+import { questionType } from '@DTOs/question.dto'
 import * as XLSX from 'xlsx';
 import { WorkSheet, utils } from 'xlsx';
 import * as fs from 'fs';
