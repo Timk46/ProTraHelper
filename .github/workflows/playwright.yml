@@ -1,0 +1,145 @@
+name: CI Playwright Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [Mobile Chrome]
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start PostgreSQL Service
+        run: |
+          docker compose -f Docker/docker-compose.yml up -d
+          sleep 30  # Wait for the database to initialize
+      
+      - name: Set up environment for Prisma
+        run: cp server_nestjs/.env.test server_nestjs/.env
+
+      - name: Verify Database Connection
+        run: docker exec postgres-vector pg_isready -U postgres
+
+      - name: Verify PostgreSQL Container Status
+        run: docker ps -a
+      
+      - name: Check PostgreSQL Logs
+        if: failure()
+        run: docker logs postgres-vector
+      
+      - name: Check PostgreSQL Container Exit Code
+        run: docker inspect postgres-vector --format='{{.State.ExitCode}}'
+      
+      - name: Remove PostgreSQL Volume (if any)
+        if: failure()
+        run: docker volume rm docker_data || true
+      
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-static-cache
+          restore-keys: |
+            ${{ runner.os }}-node-
+      
+      - name: Install dependencies for server
+        working-directory: server_nestjs
+        run: npm ci
+
+      - name: Install dependencies for client
+        working-directory: client_angular
+        run: npm ci
+
+      - name: Create .env file for server
+        working-directory: server_nestjs
+        run: |
+          cp .env.test .env
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+          echo "LANGCHAIN_API_KEY=${{ secrets.LANGCHAIN_API_KEY }}" >> .env
+          echo "CRYPTO_KEY=${{ secrets.CRYPTO_KEY }}" >> .env
+      # - name: Run database migrations
+      #   working-directory: server_nestjs
+      #   run: npx prisma migrate deploy --schema=prisma/schema.prisma
+
+      - name: Reset database and apply migrations
+        working-directory: server_nestjs
+        run: npx prisma migrate reset --force --skip-seed --schema=prisma/schema.prisma
+      
+      - name: Clear old Prisma Client
+        working-directory: server_nestjs
+        run: |
+          rm -rf node_modules/.prisma
+          rm -rf node_modules/@prisma/client
+      
+      - name: Generate Prisma Client
+        working-directory: server_nestjs
+        run: npx prisma generate --schema=prisma/schema.prisma
+        
+      - name: Seed database (non-interactive)
+        working-directory: server_nestjs
+        run: npm run seed
+
+      - name: Start Server
+        working-directory: server_nestjs
+        run: |
+          npm start &
+          sleep 20  
+      - name: Start Client
+        working-directory: client_angular
+        run: |
+          npm start &
+          sleep 20  
+      - name: Install dependencies for Playwright
+        working-directory: tests
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      
+      - name: Run Playwright tests
+        working-directory: tests
+        run: xvfb-run -a npx playwright test | tee playwright-log.txt
+      
+      - name: Check Playwright Test Output
+        working-directory: tests
+        run: ls -la
+      
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-${{ github.run_id }}-${{ github.job }}
+          path: playwright-report/
+          retention-days: 30
+      
+      - name: Debug Tests
+        if: ${{ failure() }}
+        working-directory: tests
+        run: xvfb-run -a npx playwright test --debug
+      
+      - name: Stop Server
+        if: always()
+        run: pkill -f "npm start"
+
+      - name: Stop Docker Services
+        if: always()
+        run: docker compose -f Docker/docker-compose.yml down
