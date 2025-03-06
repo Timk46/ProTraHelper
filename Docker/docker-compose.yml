@@ -5,8 +5,8 @@ services:
     image: ankane/pgvector
     container_name: postgres-vector
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: qzx5vQG9WQ2b35eZUWujPUhVb8xRr
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: yourpassword
       POSTGRES_DB: dev_heba
     ports:
       - "5432:5432"
