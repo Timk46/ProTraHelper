@@ -4,7 +4,7 @@ import { connect } from 'http2';
 
 const prisma = new PrismaClient();
 
-export const seedUmlearn = async (user_id: number) => {
+export const seedUmlearn = async () => {
 
   console.log('Seed Umlearn Model Data');
 
@@ -192,16 +192,3 @@ export const seedUmlearn = async (user_id: number) => {
   console.log('Seed Umlearn Model Data done');
 
 }
-
-async function main() {
-  seedUmlearn(1);
-}
-
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
