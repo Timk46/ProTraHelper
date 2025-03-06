@@ -2,7 +2,7 @@
   <button mat-button [ngClass]="{'active': activeTab === 'content'}" (click)="activeTab = 'content'">Bearbeiten</button>
   <button mat-button [ngClass]="{'active': activeTab === 'discussion'}" (click)="activeTab = 'discussion'">Diskutieren</button>
 </div> -->
-<div *ngIf="activeConceptNode.databaseId != -1" class="content mat-elevation-z8">
+<div *ngIf="activeConceptNode.databaseId > 0 && activeConceptNode.name !== 'dummys'" class="content mat-elevation-z8">
   <div *ngIf="(isHandset$ | async) === true   && !editModeActive" class="button-group" style="display: flex;">
     <button mat-button [ngClass]="{'active': activeTab === 'content'}" (click)="activeTab = 'content'">Bearbeiten</button>
     <button mat-button [ngClass]="{'active': activeTab === 'discussion'}" (click)="activeTab = 'discussion'">Diskutieren</button>
@@ -35,7 +35,10 @@
   <div *ngIf="!editModeActive" [ngStyle]="{'display': activeTab === 'discussion' ? 'block' : 'none'}" class="tab-content-container">
     <app-discussion-list [activeConceptNodeId]="activeConceptNode.databaseId"></app-discussion-list>
   </div>
+</div>
 
-
-
+<!-- Loading indicator while concept data is being loaded -->
+<div *ngIf="activeConceptNode.databaseId <= 0 || activeConceptNode.name === 'dummys'" class="loading-container mat-elevation-z8">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p>Loading concept data...</p>
 </div>
