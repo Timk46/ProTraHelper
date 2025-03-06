@@ -97,7 +97,7 @@ jobs:
         
       - name: Seed database (non-interactive)
         working-directory: server_nestjs
-        run: npm run seed
+        run: npm run seedUnitTest
 
       - name: Start Server
         working-directory: server_nestjs
