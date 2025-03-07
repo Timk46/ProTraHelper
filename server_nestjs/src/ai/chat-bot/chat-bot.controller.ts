@@ -1,8 +1,9 @@
+/* eslint-disable prettier/prettier */
 import { Controller, Post, Body, Req, Res, Get, HttpStatus, HttpException } from '@nestjs/common';
 import { LlmBasicPromptService } from '../services/llmBasicPrompt.service';
 import { Request, Response } from 'express';
 import { ChatBotRAGService } from './chatbot_rag.service';
-import { ChatBotMessage } from '@Prisma/client'
+import { ChatBotMessageDTO } from '@DTOs/index';
 
 interface RequestWithUser extends Request {
   user: {
@@ -93,7 +94,7 @@ export class ChatBotController {
     @Body('dialogSessionId') dialogSessionId: string,
     @Req() req: RequestWithUser,
     @Body('sessionId') sessionId?: number
-  ): Promise<ChatBotMessage> {
+  ): Promise<ChatBotMessageDTO> {
     // Choose the appropriate response generation method based on the context length
     if (context.length > 3) { // 3 is the minimum and default number including the default question by the LLM
       return await this.chatBotRAGService.chatBotRagAnswerDialog(context, question, req.user.id, dialogSessionId, sessionId);
