@@ -45,6 +45,7 @@ export class PlayfieldComponent {
   theme: string = ''; // part of the path to the images
   hiddenItems: String[] = [];
 
+  isPlayerVisible: boolean = true;
   playerPosition = { x: 0, y: 0 };
   playerDirection: PlayerDirection = PlayerDirection.EAST; // default direction
   startX = 0;
@@ -316,6 +317,9 @@ export class PlayfieldComponent {
   }
 
   resetGame(): void {
+    // Hide the player
+    this.isPlayerVisible = false;
+
     // reset the game field
     this.showItemImage();
     this.hideAllWaringOverlays();
@@ -326,5 +330,10 @@ export class PlayfieldComponent {
 
     // reset the game output information
     this.gameOutputInformation = 'Bereit für die Ausführung';
+
+    // Show the player after resetting the position
+    setTimeout(() => {
+      this.isPlayerVisible = true;
+    }, 0); // Adjust the timeout duration if needed
   }
 }
