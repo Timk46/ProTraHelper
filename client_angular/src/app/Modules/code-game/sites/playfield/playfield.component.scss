@@ -59,7 +59,7 @@
 
   .playerImage {
     z-index: 4;
-    transition: transform  var(--animation-speed-master, 20ms) linear;
+    transition: transform var(--animation-speed-master, 500ms) linear;
   }
 
   .objectImage {
