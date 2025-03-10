@@ -1,4 +1,4 @@
-import {Component, OnInit, QueryList, ViewChildren} from '@angular/core';
+import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { ActivatedRoute } from "@angular/router";
 import { QuestionDataService } from "../../../Services/question/question-data.service";
 import { detailedQuestionDTO } from "@DTOs/detailedQuestion.dto";
@@ -9,6 +9,7 @@ import { CodeEditorComponent } from "../../../Modules/code-game/sites/code-edito
 import { CodeGameScaffoldDto, questionType } from "@DTOs/question.dto";
 import { CodeGameConfirmDialogComponent } from "./code-game-confirm-dialog.component";
 import { CodeGameAddElementModalComponent } from "./code-game-add-element-modal.component";
+import { DefaultCodeGameScaffoldsDTO, CodeGameScaffoldDTO } from "@DTOs/codeGame.dto";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Router } from '@angular/router';
 
@@ -25,9 +26,11 @@ export class EditCodeGameComponent implements OnInit {
   codeGameForm: FormGroup;
   thisQuestionType = questionType.CODEGAME;
   questionData: detailedQuestionDTO | null = null;
+  questionLoaded = false;
   showTaskPreview = false;
   markdownLanguage = 'markdown';
-  txtLanguage = 'txt';
+
+  defaultCodeGameScaffolds: DefaultCodeGameScaffoldsDTO = require('./defaultCodeGameScaffolds.json');
 
   constructor(
     private formBuilder: FormBuilder,
@@ -38,6 +41,14 @@ export class EditCodeGameComponent implements OnInit {
     private router: Router
   ) {
     this.codeGameForm = this.createForm();
+
+    // Watch for changes in the programming language and update codeGameScaffolds if empty
+    this.codeGameForm.get('programmingLanguage')?.valueChanges.subscribe(language => {
+      const codeGameScaffolds = this.codeGameForm.get('codeGameScaffolds') as FormArray;
+      if (this.questionLoaded && codeGameScaffolds.length === 0 && language) {
+        this.addDefaultCodeScaffolds(language);
+      }
+    });
   }
 
   ngOnInit() {
@@ -53,7 +64,7 @@ export class EditCodeGameComponent implements OnInit {
               id: 0,
               contentElementId: 0,
               text: '',
-              programmingLanguage: 'cpp', // default code language
+              programmingLanguage: '', // default code language
               codeSolutionRestriction: false,
               fileNameToRestrict: '',
               methodNameToRestrict: 'drive();', // default method name
@@ -64,6 +75,8 @@ export class EditCodeGameComponent implements OnInit {
               gameCellRestrictions: '',
               theme: 'dino' // default theme
             };
+
+            this.questionLoaded = true;
           }
 
           this.populateForm();
@@ -117,7 +130,8 @@ export class EditCodeGameComponent implements OnInit {
         codeFileName: codeGameScaffold.codeFileName,
         code: codeGameScaffold.code,
         visible: codeGameScaffold.visible,
-        mainFile: codeGameScaffold.mainFile
+        mainFile: codeGameScaffold.mainFile,
+        language: codeGameScaffold.language
       }));
     });
   }
@@ -210,7 +224,7 @@ export class EditCodeGameComponent implements OnInit {
               codeFileName: data.fileName,
               code: data.code,
               codeGameQuestionId: this.questionData.codeGameQuestion.id,
-              language: this.questionData.codeGameQuestion.programmingLanguage,
+              language: this.codeGameForm.value.programmingLanguage,
               visible: true,
               mainFile: false
             } as CodeGameScaffoldDto;
@@ -225,7 +239,9 @@ export class EditCodeGameComponent implements OnInit {
     const newLanguage = event.value;
     console.log('CodeGame: Language changed to:', newLanguage);
 
-    // Update the language for all code editors except the first one (task description) and the last one (game)
+    this.codeGameForm.value.programmingLanguage = newLanguage;
+
+    // Update the language for all code editors except the first one (task description)
     this.updateCodeEditorsLanguage(newLanguage);
   }
 
@@ -239,9 +255,6 @@ export class EditCodeGameComponent implements OnInit {
       if (index === 0) {
         // Ensure the first editor (task description) always use Markdown
         editor.changeLanguage(this.markdownLanguage);
-      } else if (index === lastIndex) {
-        // Ensure the last editor (game) always use plain text
-        editor.changeLanguage(this.txtLanguage);
       } else {
         editor.changeLanguage(newLanguage);
       }
@@ -326,13 +339,41 @@ export class EditCodeGameComponent implements OnInit {
     }
   }
 
+  private addDefaultCodeScaffolds(language: keyof DefaultCodeGameScaffoldsDTO) {
+    const codeGameScaffolds = this.codeGameForm.get('codeGameScaffolds') as FormArray;
+    const defaultScaffolds = this.defaultCodeGameScaffolds[language];
+
+    if (defaultScaffolds) {
+      defaultScaffolds.forEach((scaffold: CodeGameScaffoldDTO) => {
+        const scaffoldGroup = this.formBuilder.group({
+          id: scaffold.id,
+          codeFileName: scaffold.codeFileName,
+          code: scaffold.code,
+          visible: scaffold.visible,
+          mainFile: scaffold.mainFile,
+          language: scaffold.language
+        });
+        codeGameScaffolds.push(scaffoldGroup);
+
+        if (this.questionData && this.questionData.codeGameQuestion) {
+          const scaffoldWithId: CodeGameScaffoldDto = {
+            ...scaffold,
+            codeGameQuestionId: this.questionData.codeGameQuestion.id
+          };
+          this.questionData.codeGameQuestion.codeGameScaffolds.push(scaffoldWithId);
+        }
+      });
+    }
+
+    console.log("added default scaffolds", codeGameScaffolds);
+  }
+
+
   handleDataChangePayfieldEditor(event: any) {
     this.codeGameForm.patchValue({ game: event.gameField });
     this.codeGameForm.patchValue({ gameCellRestrictions: event.gameCellRestrictions });
     this.codeGameForm.patchValue({ theme: event.theme });
   }
-
-  // TODO: import/export
 
   getFieldDisplayName(field: string): string {
     const displayNames: { [key: string]: string } = {

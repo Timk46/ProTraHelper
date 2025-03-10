@@ -2,6 +2,14 @@ export interface CppProjectExecutionResult { // TODO: change to CodeGameExecutio
     output: string;
 }
 
+export interface PythonProjectExecutionResult { // TODO: change to CodeGameExecutionResultDTO
+    output: string;
+}
+
+export interface JavaProjectExecutionResult { // TODO: change to CodeGameExecutionResultDTO
+    output: string;
+}
+
 export interface CodeGameEvaluationDTO { // TODO: change to CodeGameAnswerDTO
     questionId: number;
     language: string;
@@ -16,4 +24,20 @@ export interface CodeGameEvaluationDTO { // TODO: change to CodeGameAnswerDTO
     collectedItems: number;
     visitedCellsAreAllowed: boolean;
     allWhiteListCellsVisited: boolean;
+}
+
+export interface CodeGameScaffoldDTO {
+    id: number;
+    codeFileName: string;
+    code: string;
+    codeGameQuestionId?: number;
+    language?: string;
+    visible: boolean;
+    mainFile: boolean;
+}
+
+export interface DefaultCodeGameScaffoldsDTO {
+    cpp: CodeGameScaffoldDTO[];
+    python: CodeGameScaffoldDTO[];
+    java: CodeGameScaffoldDTO[];
 }

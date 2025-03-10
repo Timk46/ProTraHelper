@@ -38,6 +38,7 @@ export class CodeGameController {
       mainFile,
       additionalFiles,
       gameFile,
+      language,
     );
 
     const submittedCode: { [fileName: string]: string } = {

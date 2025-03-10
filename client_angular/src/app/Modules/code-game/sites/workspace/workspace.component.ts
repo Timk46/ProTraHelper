@@ -70,11 +70,14 @@ export class WorkspaceComponent {
         this.codeGameTaskDataService.getCodeGameTask(this.currentTaskId).subscribe((task) => {
           this.currentTask = task;
           this.taskDescription = this.currentTask?.codeGameQuestion!.text;
+          this.selectedLanguage = this.currentTask?.codeGameQuestion!.programmingLanguage;
           this.currentState = States.editingCode;
           this.codeSolutionRestriction = this.currentTask?.codeGameQuestion!.codeSolutionRestriction || false;
           this.methodNameToRestrict = this.currentTask?.codeGameQuestion!.methodNameToRestrict || '';
 
           console.log('CodeGame: Current task: ', this.currentTask); // TODO: remove
+
+          this.codeEditorComponent?.changeLanguage(this.selectedLanguage);
 
           // trigger playfield component to load the game
           this.playfieldComponent?.initGameField(
@@ -93,10 +96,7 @@ export class WorkspaceComponent {
     this.resetButtonIsDisabled = false;
   }
 
-  onCodeChanged(newCode: string): void {
-    console.log('Code changed: ', newCode);
-
-  }
+  onCodeChanged(newCode: string): void {}
 
   submitCode(): void {
     this.submitButtonIsDisabled = true;
