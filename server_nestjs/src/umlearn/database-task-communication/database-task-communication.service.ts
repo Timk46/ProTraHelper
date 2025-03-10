@@ -1,4 +1,11 @@
-import { taskDataDTO, taskSettingsDTO, taskAttemptDataDTO, EditorModel, editorDataDTO, taskWorkspaceDataDTO } from '@DTOs/index';
+import {
+  taskDataDTO,
+  taskSettingsDTO,
+  taskAttemptDataDTO,
+  EditorModel,
+  editorDataDTO,
+  taskWorkspaceDataDTO,
+} from '@DTOs/index';
 import { PrismaService } from '@/prisma/prisma.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -9,14 +16,13 @@ import { SimilarityCompareService } from '../compare/similarity-compare.service'
 
 @Injectable()
 export class DatabaseTaskCommunicationService {
-
   constructor(
     private prisma: PrismaService,
     private compareService: CompareService,
     private similarityCompareService: SimilarityCompareService,
     private feedbackGenerationService: FeedbackGenerationService,
-    private feedbackRagService: FeedbackRAGService
-  ) { }
+    private feedbackRagService: FeedbackRAGService,
+  ) {}
 
   /**
    * Creates a new task in the database.
@@ -120,29 +126,31 @@ export class DatabaseTaskCommunicationService {
    * @param taskId
    * @returns a Promise that resolves to the ID of the task.
    */
-  async getTaskImage(taskId: number): Promise<{imageB64: string}> {
-    try{
+  async getTaskImage(taskId: number): Promise<{ imageB64: string }> {
+    try {
       const task = await this.prisma.question.findUnique({
         where: {
-          id: taskId
+          id: taskId,
         },
         select: {
           UmlQuestion: {
             select: {
-              dataImage: true
-            }
-          }
-        }
+              dataImage: true,
+            },
+          },
+        },
       });
       if (!task) {
         throw new Error('Given Task id does not exist.');
       }
-      return {imageB64: task.UmlQuestion.dataImage};
+      return { imageB64: task.UmlQuestion.dataImage };
     } catch (error) {
-      throw new HttpException('Fehler beim Speichern der Daten', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Fehler beim Speichern der Daten',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
-
 
   /**
    * Deletes a task and its associated data from the database.
@@ -186,15 +194,15 @@ export class DatabaseTaskCommunicationService {
   } */
 
   /**
-     * Retrieves task data for a given task ID.
-     * @param taskId - The ID of the task.
-     * @returns A Promise that resolves to a taskDataDTO object containing the task data.
-     */
+   * Retrieves task data for a given task ID.
+   * @param taskId - The ID of the task.
+   * @returns A Promise that resolves to a taskDataDTO object containing the task data.
+   */
   async getTaskData(taskId: number): Promise<taskDataDTO> {
-    try{
+    try {
       const question = await this.prisma.question.findUnique({
         where: {
-          id: taskId
+          id: taskId,
         },
         select: {
           authorId: true,
@@ -209,25 +217,37 @@ export class DatabaseTaskCommunicationService {
               startData: true,
               taskSettings: true,
               text: true,
-              textHTML: true
-            }
-          }
-        }
+              textHTML: true,
+            },
+          },
+        },
       });
 
       return {
         id: taskId,
         title: question.name,
-        description: question.UmlQuestion.textHTML || question.UmlQuestion.text || '',
+        description:
+          question.UmlQuestion.textHTML || question.UmlQuestion.text || '',
         lecturerId: question.authorId,
-        editorData: question.UmlQuestion.editorData? question.UmlQuestion.editorData as unknown as editorDataDTO : {nodes: [], edges: []},
-        taskSettings: question.UmlQuestion.taskSettings ? question.UmlQuestion.taskSettings as unknown as taskSettingsDTO : { allowedNodeTypes: [], allowedEdgeTypes: [], editorModel: EditorModel.CLASSDIAGRAM},
+        editorData: question.UmlQuestion.editorData
+          ? (question.UmlQuestion.editorData as unknown as editorDataDTO)
+          : { nodes: [], edges: [] },
+        taskSettings: question.UmlQuestion.taskSettings
+          ? (question.UmlQuestion.taskSettings as unknown as taskSettingsDTO)
+          : {
+              allowedNodeTypes: [],
+              allowedEdgeTypes: [],
+              editorModel: EditorModel.CLASSDIAGRAM,
+            },
         maxPoints: question.score,
         createdAt: question.createdAt,
-        updatedAt: question.updatedAt
+        updatedAt: question.updatedAt,
       };
     } catch (error) {
-      throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Fehler beim Laden der Daten',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -238,10 +258,10 @@ export class DatabaseTaskCommunicationService {
    * @throws HttpException with status code 400 if there is an error while loading the data.
    */
   async getTaskWorkspaceData(taskId: number): Promise<taskWorkspaceDataDTO> {
-    try{
+    try {
       const task = await this.prisma.question.findUnique({
         where: {
-          id: taskId
+          id: taskId,
         },
         select: {
           name: true,
@@ -250,22 +270,31 @@ export class DatabaseTaskCommunicationService {
             select: {
               taskSettings: true,
               text: true,
-              textHTML: true
-            }
+              textHTML: true,
+            },
           },
           score: true,
-        }
+        },
       });
 
       return {
         id: taskId,
         title: task.name,
         description: task.UmlQuestion.textHTML || task.UmlQuestion.text || '',
-        taskSettings: task.UmlQuestion.taskSettings ? task.UmlQuestion.taskSettings as unknown as taskSettingsDTO : { allowedNodeTypes: [], allowedEdgeTypes: [], editorModel: EditorModel.CLASSDIAGRAM},
+        taskSettings: task.UmlQuestion.taskSettings
+          ? (task.UmlQuestion.taskSettings as unknown as taskSettingsDTO)
+          : {
+              allowedNodeTypes: [],
+              allowedEdgeTypes: [],
+              editorModel: EditorModel.CLASSDIAGRAM,
+            },
         maxPoints: task.score,
       };
     } catch (error) {
-      throw new HttpException('Fehler beim Laden der Daten', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Fehler beim Laden der Daten',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -275,8 +304,11 @@ export class DatabaseTaskCommunicationService {
    * @param studentId - The ID of the student.
    * @returns A Promise that resolves to a taskAttemptDataDTO object containing the task attempt data.
    */
-  async getTaskAttemptData(taskId: number, studentId: number): Promise<taskAttemptDataDTO> {
-    try{
+  async getTaskAttemptData(
+    taskId: number,
+    studentId: number,
+  ): Promise<taskAttemptDataDTO> {
+    try {
       const taskAttempt = await this.prisma.question.findFirst({
         where: {
           id: taskId,
@@ -297,10 +329,10 @@ export class DatabaseTaskCommunicationService {
               UserUmlQuestionAnswer: {
                 select: {
                   attemptData: true,
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         },
       });
 
@@ -308,28 +340,31 @@ export class DatabaseTaskCommunicationService {
         // Return dummy data if no task start data is available
         const task = await this.prisma.question.findUnique({
           where: {
-            id: taskId
+            id: taskId,
           },
           select: {
             UmlQuestion: {
               select: {
-                startData: true
-              }
+                startData: true,
+              },
             },
-          }
+          },
         });
 
         return {
           userAnswerId: -1,
           taskId: taskId,
-          attemptData: task? task.UmlQuestion.startData as unknown as editorDataDTO : { nodes: [], edges: [] },
+          attemptData: task
+            ? (task.UmlQuestion.startData as unknown as editorDataDTO)
+            : { nodes: [], edges: [] },
         };
       }
 
       return {
         userAnswerId: taskAttempt.userAnswer[0].id,
         taskId: taskId,
-        attemptData: taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData as unknown as editorDataDTO,
+        attemptData: taskAttempt.userAnswer[0].UserUmlQuestionAnswer
+          .attemptData as unknown as editorDataDTO,
         //attemptData: taskAttempt.userAnswer[0].UserUmlQuestionAnswer ? (taskAttempt.userAnswer[0].UserUmlQuestionAnswer as unknown as editorDataDTO) : { nodes: [], edges: [] },
       };
     } catch (error) {
@@ -337,12 +372,12 @@ export class DatabaseTaskCommunicationService {
     }
   }
 
-/**
- * Retrieves task attempt data for a lecturer.
- * @param taskAttemptId - The ID of the task attempt.
- * @returns A Promise that resolves to a taskAttemptDataDTO object.
- */
-/* async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptDataDTO> {
+  /**
+   * Retrieves task attempt data for a lecturer.
+   * @param taskAttemptId - The ID of the task attempt.
+   * @returns A Promise that resolves to a taskAttemptDataDTO object.
+   */
+  /* async getTaskAttemptDataForLecturer(taskAttemptId: number): Promise<taskAttemptDataDTO> {
     try{
       const taskAttempt = await this.prisma.taskAttempt.findUnique({
         where: {
@@ -387,31 +422,36 @@ export class DatabaseTaskCommunicationService {
    * @returns A Promise that resolves to the number of points earned.
    * @throws An error if the attempt data fails to save or if the related question cannot be found.
    */
-  async commitAttemptGetPoints(taskAttemptData: taskAttemptDataDTO, studentId: number): Promise<{points: number}> {
-    const savedAttempt = await this.setTaskAttemptData(taskAttemptData, studentId);
-    if (!savedAttempt){
+  async commitAttemptGetPoints(
+    taskAttemptData: taskAttemptDataDTO,
+    studentId: number,
+  ): Promise<{ points: number }> {
+    const savedAttempt = await this.setTaskAttemptData(
+      taskAttemptData,
+      studentId,
+    );
+    if (!savedAttempt) {
       throw new Error('Failed to save UML attempt');
     }
 
     //feedback exists for savedAttempt?
-    if (taskAttemptData.userAnswerId != -1){
+    if (taskAttemptData.userAnswerId != -1) {
       const existingFeedback = await this.prisma.userAnswer.findFirst({
         where: {
           id: savedAttempt.userAnswerId,
         },
         select: {
           feedbacks: true,
-        }
+        },
       });
-      if (existingFeedback && existingFeedback.feedbacks[0]){
-        console.log("feedback existing");
+      if (existingFeedback && existingFeedback.feedbacks[0]) {
+        console.log('feedback existing');
         //return existingFeedback.feedbacks[0].score;
         return {
           points: existingFeedback.feedbacks[0].score,
         };
       }
     }
-
 
     //get task solution
     const taskSolution = await this.prisma.question.findFirst({
@@ -423,17 +463,23 @@ export class DatabaseTaskCommunicationService {
         UmlQuestion: {
           select: {
             editorData: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
-    if (!taskSolution){
+    if (!taskSolution) {
       throw new Error('Failed to find related question');
     }
 
     //const reachedPoints = await this.compareService.compareAndCalculate(taskSolution.UmlQuestion.editorData as undefined as editorDataDTO, taskAttemptData.attemptData, taskSolution.score);
-    const reachedPoints = Math.floor(taskSolution.score * this.similarityCompareService.calcGraphSimilarity(taskAttemptData.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO));
+    const reachedPoints = Math.floor(
+      taskSolution.score *
+        this.similarityCompareService.calcGraphSimilarity(
+          taskAttemptData.attemptData,
+          taskSolution.UmlQuestion.editorData as unknown as editorDataDTO,
+        ),
+    );
 
     //save feedback
     const feedback = await this.prisma.feedback.create({
@@ -442,22 +488,30 @@ export class DatabaseTaskCommunicationService {
         userAnswer: {
           connect: {
             id: savedAttempt.userAnswerId,
-          }
+          },
         },
         score: reachedPoints,
-        text: 'You reached ' + reachedPoints + ' out of ' + taskSolution.score + ' points.',
-      }
+        text:
+          'You reached ' +
+          reachedPoints +
+          ' out of ' +
+          taskSolution.score +
+          ' points.',
+      },
     });
 
-    if (!feedback){
+    if (!feedback) {
       throw new Error('Failed to save feedback');
     }
 
     console.log('calculated: ', reachedPoints);
-    return {points : reachedPoints};
+    return { points: reachedPoints };
   }
 
-  async generateUmlFeedback(taskId: number, studentId: number): Promise<{response: string}> {
+  async generateUmlFeedback(
+    taskId: number,
+    studentId: number,
+  ): Promise<{ response: string }> {
     //get the task solution and the student's attempt
     const taskSolution = await this.prisma.question.findFirst({
       where: {
@@ -469,23 +523,32 @@ export class DatabaseTaskCommunicationService {
           select: {
             text: true,
             editorData: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     //find the student's attempt
     const studentAttempt = await this.getTaskAttemptData(taskId, studentId);
 
-    const matchingLog = this.similarityCompareService.compare(studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
-    const response = await this.feedbackRagService.generateUmlFeedbackByLog(taskSolution.UmlQuestion.text, matchingLog);
-    return {response: response.response}; //+ '\n\n\n###DEBUG MATCHING-LOG###\n\n' + matchingLog};
+    const matchingLog = this.similarityCompareService.compare(
+      studentAttempt.attemptData,
+      taskSolution.UmlQuestion.editorData as unknown as editorDataDTO,
+    );
+    const response = await this.feedbackRagService.generateUmlFeedbackByLog(
+      taskSolution.UmlQuestion.text,
+      matchingLog,
+    );
+    return { response: response.response }; //+ '\n\n\n###DEBUG MATCHING-LOG###\n\n' + matchingLog};
     //return this.feedbackRagService.generateUmlFeedbackByLog(taskSolution.UmlQuestion.text, matchingLog);
     //return this.feedbackRagService.generateUmlFeedback(taskSolution.UmlQuestion.text, studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO);
     //return { response: this.similarityCompareService.findAndGenerateGraphSimilarityLog(studentAttempt.attemptData, taskSolution.UmlQuestion.editorData as unknown as editorDataDTO) };
   }
 
-  async generateUmlFeedbackByHighlighted(taskId: number, studentId: number): Promise<{response: string}> {
+  async generateUmlFeedbackByHighlighted(
+    taskId: number,
+    studentId: number,
+  ): Promise<{ response: string }> {
     //get the task solution and the student's attempt
     const taskSolution = await this.prisma.question.findFirst({
       where: {
@@ -497,19 +560,29 @@ export class DatabaseTaskCommunicationService {
           select: {
             text: true,
             editorData: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     //find the student's attempt
     const studentAttempt = await this.getTaskAttemptData(taskId, studentId);
-    if (!taskSolution || !studentAttempt){
-      throw new Error('dbtc-service: Failed to find related question or student attempt');
+    if (!taskSolution || !studentAttempt) {
+      throw new Error(
+        'dbtc-service: Failed to find related question or student attempt',
+      );
     }
-    const compareData = await this.compareService.compareAndCalculate(taskSolution.UmlQuestion.editorData as unknown as editorDataDTO, studentAttempt.attemptData, taskSolution.score);
+    const compareData = await this.compareService.compareAndCalculate(
+      taskSolution.UmlQuestion.editorData as unknown as editorDataDTO,
+      studentAttempt.attemptData,
+      taskSolution.score,
+    );
 
-    return this.feedbackRagService.generateUmlFeedbackByHighlighted(taskSolution.UmlQuestion.text, compareData.highlightData, Math.floor(compareData.points/taskSolution.score * 100));
+    return this.feedbackRagService.generateUmlFeedbackByHighlighted(
+      taskSolution.UmlQuestion.text,
+      compareData.highlightData,
+      Math.floor((compareData.points / taskSolution.score) * 100),
+    );
   }
 
   /**
@@ -518,8 +591,11 @@ export class DatabaseTaskCommunicationService {
    * @param taskAttemptData - The task attempt data to be set or updated.
    * @returns A Promise that resolves to the updated or newly created task attempt data.
    */
-  async setTaskAttemptData(taskAttemptData: taskAttemptDataDTO, studentId: number): Promise<taskAttemptDataDTO> {
-    try{
+  async setTaskAttemptData(
+    taskAttemptData: taskAttemptDataDTO,
+    studentId: number,
+  ): Promise<taskAttemptDataDTO> {
+    try {
       const taskAttempt = await this.prisma.question.findFirst({
         where: {
           id: taskAttemptData.taskId,
@@ -540,14 +616,21 @@ export class DatabaseTaskCommunicationService {
               UserUmlQuestionAnswer: {
                 select: {
                   attemptData: true,
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          },
         },
       });
 
-      if (!taskAttempt || (taskAttempt && this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData))) {
+      if (
+        !taskAttempt ||
+        (taskAttempt &&
+          this.isDifferentAttemptData(
+            taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData,
+            taskAttemptData.attemptData,
+          ))
+      ) {
         //create a new userAnswer and a new UserUmlQuestionAnswer and connect them
         //console.log("not the same",'inDB: ', this.sortObject(JSON.parse(JSON.stringify(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData))), 'new: ', this.sortObject(JSON.parse(JSON.stringify(taskAttemptData.attemptData))), 'isDifferent: ', this.isDifferentAttemptData(taskAttempt.userAnswer[0].UserUmlQuestionAnswer.attemptData, taskAttemptData.attemptData));
         const newAnswer = await this.prisma.userAnswer.create({
@@ -556,26 +639,29 @@ export class DatabaseTaskCommunicationService {
             questionId: taskAttemptData.taskId,
             UserUmlQuestionAnswer: {
               create: {
-                attemptData: JSON.parse(JSON.stringify({...taskAttemptData.attemptData})),
-              }
-            }
+                attemptData: JSON.parse(
+                  JSON.stringify({ ...taskAttemptData.attemptData }),
+                ),
+              },
+            },
           },
           select: {
             id: true,
             UserUmlQuestionAnswer: {
               select: {
                 attemptData: true,
-              }
-            }
-          }
+              },
+            },
+          },
         });
         return {
           userAnswerId: newAnswer.id,
           taskId: taskAttemptData.taskId,
-          attemptData: newAnswer.UserUmlQuestionAnswer.attemptData as unknown as editorDataDTO,
+          attemptData: newAnswer.UserUmlQuestionAnswer
+            .attemptData as unknown as editorDataDTO,
         };
       }
-      console.log("the same");
+      console.log('the same');
       return {
         userAnswerId: taskAttempt.userAnswer[0].id,
         taskId: taskAttemptData.taskId,
@@ -592,7 +678,10 @@ export class DatabaseTaskCommunicationService {
    * @param {editorDataDTO} taskAttemptData - The task attempt data received from the client.
    * @returns {boolean} - Returns true if the task attempt data is different, otherwise false.
    */
-  private isDifferentAttemptData(taskAttempt: Prisma.JsonValue, taskAttemptData: editorDataDTO): boolean {
+  private isDifferentAttemptData(
+    taskAttempt: Prisma.JsonValue,
+    taskAttemptData: editorDataDTO,
+  ): boolean {
     const sortedTaskAttempt = this.sortAndStringify(taskAttempt);
     const sortedTaskAttemptData = this.sortAndStringify(taskAttemptData);
     return sortedTaskAttempt != sortedTaskAttemptData;
@@ -623,10 +712,11 @@ export class DatabaseTaskCommunicationService {
     if (Array.isArray(obj)) {
       return obj.map(this.sortObject.bind(this));
     }
-    return Object.keys(obj).sort().reduce((result: { [key: string]: any }, key: string) => {
-      result[key] = this.sortObject(obj[key]);
-      return result;
-    }, {});
+    return Object.keys(obj)
+      .sort()
+      .reduce((result: { [key: string]: any }, key: string) => {
+        result[key] = this.sortObject(obj[key]);
+        return result;
+      }, {});
   }
-
 }

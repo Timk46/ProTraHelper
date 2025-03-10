@@ -1491,10 +1491,9 @@ export const seedOFP = async () => {
           });
         })
         .on('end', async () => {
-          console.log(ofpData);
           await createOFPConcepts(ofpData, moduleInformatik);
-          console.log('Importing Concepts Done!');
-          console.log('Importing Tasks from Excel...');
+          console.log('Importing Concepts Done: ' + ofpData.length + ' Concepts imported!');
+          console.log('Importing Coding Tasks from Excel...');
           await seedCodeQuestions(adminUser.id);
           //await seedMCQ(adminUser.id);
           //await seedMCQnew();

@@ -11,6 +11,7 @@ import { CreateContentNodeDialogComponent } from '../lecturersView/create-conten
 import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 
 @Component({
   selector: 'app-conceptOverview',
@@ -34,7 +35,7 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
   // init with dummy node
   activeConceptNode: ConceptNodeDTO = {
     databaseId: -1,
-    name: 'dummy',
+    name: 'dummys',
     level: 0,
     description: 'dummy',
     expanded: false,
@@ -61,7 +62,8 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
     private contentLinkerSerivce: ContentLinkerService,
     private route: ActivatedRoute,
     private questionService: QuestionDataService,
-    private router: Router
+    private router: Router,
+    private graphDataService: GraphDataService
   ) {
     // subscribe to activeConceptNode changes in the graph and update the activeConceptNode and contentsForActiveConceptNode accordingly
     this.activeConceptNodeSubscription = this.graphCommunicationService.currentActiveNode.subscribe((activeConceptNode) => {
@@ -134,11 +136,29 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
   }
 
   loadConceptNode(conceptNodeId: number) {
+    // First, fetch contents for the concept
     this.contentService
       .fetchContentsForConcept(conceptNodeId)
       .subscribe((contentsForConcept) => {
         this.contentsForActiveConceptNode = contentsForConcept;
       });
+
+    // When navigating directly to a concept URL, we need to fetch concept node data
+    // and update the activeConceptNode instead of showing dummy values
+    if (this.activeConceptNode.databaseId === -1 || this.activeConceptNode.name === 'dummys') {
+      // We'll use GraphDataService to fetch the concept graph and extract the node
+      this.graphDataService.fetchUserGraph(1) // Using module ID 1 as default; adjust if needed
+        .subscribe((graph) => {
+          // Check if the concept node exists in the graph
+          if (graph.nodeMap[conceptNodeId]) {
+            const conceptNode = graph.nodeMap[conceptNodeId];
+            // Update the active concept node
+            this.activeConceptNode = conceptNode;
+            // Also notify the GraphCommunicationService to keep state consistent
+            this.graphCommunicationService.changeActiveNode(conceptNode);
+          }
+        });
+    }
   }
 
   /**

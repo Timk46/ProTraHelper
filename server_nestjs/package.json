@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "seed": "npx prisma generate && npx prisma migrate reset && ts-node prisma/seed.ts",
-    "seedUmlearnModelData": "npx prisma generate && ts-node prisma/seedUmlearnModelData.ts",
+    "seedUnitTest": "npx prisma generate && npx prisma migrate reset --force --skip-generate && ts-node prisma/seed.ts",
     "oldseed": "npx prisma generate && ts-node prisma/seed.ts",
     "resetseed": "npx prisma generate && npx prisma db push --force-reset && ts-node prisma/seed.ts",
     "build": "nest build",
