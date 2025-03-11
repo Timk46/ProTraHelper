@@ -208,15 +208,22 @@ export class PlayfieldComponent {
     this.cellRestrictionsDimState = this.gameField.map(row => row.map(() => 'off'));
   }
 
-  setCSSVariables(): void {
+setCSSVariables(): void {
+  console.log(this.gameFieldHeight, this.gameFieldWidth);
+
+  const fieldElement = this.el.nativeElement.querySelector('.field');
+  if (fieldElement) {
     // Set the CSS variables for the grid dimensions
-    this.renderer.setStyle(this.el.nativeElement.querySelector('.field'), '--rows', this.gameFieldHeight);
-    this.renderer.setStyle(this.el.nativeElement.querySelector('.field'), '--columns', this.gameFieldWidth);
-    this.renderer.setStyle(this.el.nativeElement.querySelector('.field'), '--cell-size', `${this.cellSize}px`);
+    this.renderer.setStyle(fieldElement, '--rows', this.gameFieldHeight);
+    this.renderer.setStyle(fieldElement, '--columns', this.gameFieldWidth);
+    this.renderer.setStyle(fieldElement, '--cell-size', `${this.cellSize}px`);
 
     // Set the CSS variable for the animation speed
-    this.renderer.setStyle(this.el.nativeElement.querySelector('.field'), '--animation-speed-master', this.animationSpeedMaster);
+    this.renderer.setStyle(fieldElement, '--animation-speed-master', this.animationSpeedMaster);
+  } else {
+    console.error('Element with class "field" not found');
   }
+}
 
   // used for the obstacle and destination images
   getObjectImage(row: number, col: number): string {
