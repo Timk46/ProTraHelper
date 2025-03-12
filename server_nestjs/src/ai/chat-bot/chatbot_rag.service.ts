@@ -1,11 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import { Response } from 'express';
 import { RagService } from '../services/rag.service';
 import { TranscriptChunk } from '@Interfaces/index';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ChatOpenAI } from "@langchain/openai";
-import { ChatBotMessage } from '@Prisma/client';
+import { ChatBotMessageDTO } from '@DTOs/index';
 import { UnauthorizedException } from '@nestjs/common';
 
 const {
@@ -185,7 +184,7 @@ export class ChatBotRAGService {
     userid: number,
     dialogSessionId: string,
     sessionId?: number,
-  ): Promise<ChatBotMessage> {
+  ): Promise<ChatBotMessageDTO> {
     // Perform similarity search using RAG service
     const tempsimilaritySearchResult =
       await this.ragService.lectureSimilaritySearch(question, 4);
@@ -325,7 +324,7 @@ export class ChatBotRAGService {
     userid: number,
     dialogSessionId: string,
     sessionId: number,
-  ): Promise<ChatBotMessage> {
+  ): Promise<ChatBotMessageDTO> {
     const chatHistory: string = context
       .slice(0, -2)
       .map(
@@ -398,7 +397,7 @@ export class ChatBotRAGService {
     userid: number,
     dialogSessionId: string,
     sessionId?: number,
-  ): Promise<ChatBotMessage> {
+  ): Promise<ChatBotMessageDTO> {
     try {
       const createdMessage = await this.prisma.chatBotMessage.create({
         data: {

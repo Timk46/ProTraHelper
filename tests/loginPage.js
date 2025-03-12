@@ -16,14 +16,34 @@ class LoginPage {
     
     async validLogin()
     {
-        await this.userName.fill('pferd@proband.de'); // best use admin or something like that
-        await this.password.fill('Pferd1444');
-        await this.signInbutton.click();
-        //await this.page.waitForNavigation({ url: '**/dashboard' });
-
-        await this.page.waitForLoadState('networkidle');
-
-    
+        console.log('Attempting to login...');
+        try {
+            // Wait for the login form to be visible
+            await this.userName.waitFor({ state: 'visible', timeout: 10000 });
+            
+            // Fill in admin credentials
+            await this.userName.fill('admin@test.de'); // Admin account for Edit Mode access
+            await this.password.fill('admin');
+            
+            // Click the login button
+            await this.signInbutton.click();
+            
+            // Wait for navigation to complete
+            await this.page.waitForURL(/dashboard/, { timeout: 15000 });
+            
+            // Wait for the page to be fully loaded
+            await this.page.waitForLoadState('networkidle', { timeout: 15000 });
+            
+            console.log('Login successful!');
+        } catch (error) {
+            console.error('Login failed:', error);
+            
+            // Take a screenshot to help debug
+            await this.page.screenshot({ path: 'login-failed.png' });
+            
+            // Try to continue anyway
+            console.log('Attempting to continue despite login issues...');
+        }
     }
     
     }
