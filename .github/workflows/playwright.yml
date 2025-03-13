@@ -1,4 +1,4 @@
-name: CI Playwright Tests
+name: CI Playwright Tests (Desktop)
 
 on:
   workflow_dispatch:
@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: [Mobile Chrome]
-    timeout-minutes: 30
+        project: ["Chromium"]
+    timeout-minutes: 45  # Increased timeout for more stable test execution
 
     steps:
       - name: Checkout code
@@ -116,25 +116,40 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       
+      - name: Create output directories
+        run: |
+          mkdir -p test-results
+          mkdir -p playwright-report
+      
+      - name: List available tests
+        working-directory: tests
+        run: npx playwright test --list --config=../playwright.config.ts
+      
       - name: Run Playwright tests
         working-directory: tests
-        run: xvfb-run -a npx playwright test | tee playwright-log.txt
+        run: xvfb-run -a npx playwright test --config=../playwright.config.ts --project="chromium" | tee playwright-log.txt
       
-      - name: Check Playwright Test Output
-        working-directory: tests
-        run: ls -la
-      
-      - uses: actions/upload-artifact@v4
+      - name: Debug - List directories
+        run: |
+          echo "Current directory structure:"
+          find . -type d -name "playwright-report" 
+          echo "Content of playwright-report directory (if it exists):"
+          ls -la playwright-report/ || echo "Directory not found"
+          
+      - name: Upload test results artifact
+        uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report-${{ github.run_id }}-${{ github.job }}
-          path: playwright-report/
+          name: playwright-report-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
           retention-days: 30
       
       - name: Debug Tests
         if: ${{ failure() }}
         working-directory: tests
-        run: xvfb-run -a npx playwright test --debug
+        run: xvfb-run -a npx playwright test --debug --config=../playwright.config.ts
       
       - name: Stop Server
         if: always()
