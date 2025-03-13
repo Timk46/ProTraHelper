@@ -6,6 +6,7 @@ import { CodeGameTaskDataService } from "../../services/code-game-task-data.serv
 import { detailedQuestionDTO } from "@DTOs/detailedQuestion.dto";
 import { PlayfieldComponent } from "../playfield/playfield.component";
 import {CodeGameEvaluationDTO} from "@DTOs/codeGame.dto";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 enum States { // TODO: check if needed
   startState = 0, // before task is loaded
@@ -21,6 +22,8 @@ export class WorkspaceComponent {
   @ViewChild('codeEditorMonaco') codeEditorComponent?: CodeEditorComponent;
   @ViewChild('playfield') playfieldComponent?: PlayfieldComponent;
   @Output() gameLoaded = new EventEmitter<void>();
+
+  TIMEOUT_DURATION = 5000; // 5 seconds
 
   selectedLanguage: string = 'cpp';
   code: string = '';
@@ -53,7 +56,8 @@ export class WorkspaceComponent {
   constructor(
     private title: Title,
     private codeGameTaskDataService: CodeGameTaskDataService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private snackBar: MatSnackBar
   ) {
   }
 
@@ -120,14 +124,23 @@ export class WorkspaceComponent {
     }
 
     /* Submit Answer, run the code and get evaluation results */
+    const timeoutId = setTimeout(() => {
+      console.log("CodeGame: Timeout");
+      this.snackBar.open('Die Anfrage dauert zu lange. Bitte versuchen Sie es später erneut.', 'Schließen', { duration: 3000 });
+      this.isLoading = false;
+      this.submitButtonIsDisabled = false;
+    }, this.TIMEOUT_DURATION);
+
+    /* Submit Answer, run the code and get evaluation results */
     // Submit the code to the server to run the game
     this.codeGameTaskDataService
       .executeCodeGameTask(this.currentTask?.id, this.selectedLanguage, mainFile, additionalFiles, gameFile)
       .subscribe({
         next: (response) => {
+          clearTimeout(timeoutId);
           console.log('CodeGame: Response: ', response);
 
-          /* Get evaluation results */
+          // Get evaluation results
           this.codeGameEvaluation = response;
           this.frequencyOfMethodEvaluationResult = response.frequencyOfMethodEvaluationResult;
           this.frequencyOfMethodCallsResult = response.frequencyOfMethodCallsResult;
@@ -138,14 +151,16 @@ export class WorkspaceComponent {
           this.visitedCellsAreAllowed = response.visitedCellsAreAllowed;
           this.allWhiteListCellsVisited = response.allWhiteListCellsVisited;
 
-          /* Prepare and start animation of the game */
+          // Prepare and start animation of the game
           this.splitCompilerOutputAndStartGame(response.codeGameExecutionResult.toString());
         },
         error: (error) => {
+          clearTimeout(timeoutId);
           console.error('Error: ', error);
           this.compilerConsoleOutputView = error.message;
         },
         complete: () => {
+          clearTimeout(timeoutId);
           this.isLoading = false;
 
           // Submit the user answer and evaulation to the server
