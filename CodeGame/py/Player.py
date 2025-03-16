@@ -1,4 +1,4 @@
-from Actor import Actor, ActorDirection, ActorType
+from Actor import Actor, ActorDirectionInWorld, ActorDirection, ActorType
 from SystemOutput import SystemOutput
 
 class Player(Actor):
@@ -30,13 +30,13 @@ class Player(Actor):
         drive()
         drive()
         drive()
-        turn(ActorDirection.SOUTH)
+        turn(ActorDirection.RIGHT)
         drive()
         analyse_item()
         drive()
         analyse_item()
         drive()
-        turn(ActorDirection.EAST)
+        turn(ActorDirection.LEFT)
         drive()
         drive()
         drive()
@@ -62,13 +62,13 @@ class Player(Actor):
         Returns:
             bool: True if there is an obstacle in the direction the actor is facing, False otherwise.
         """
-        if self.actor_direction == ActorDirection.NORTH:
+        if self.actor_direction == ActorDirectionInWorld.NORTH:
             return len(self.world.get_obstacles(self.x, self.y - 1)) > 0
-        elif self.actor_direction == ActorDirection.EAST:
+        elif self.actor_direction == ActorDirectionInWorld.EAST:
             return len(self.world.get_obstacles(self.x + 1, self.y)) > 0
-        elif self.actor_direction == ActorDirection.SOUTH:
+        elif self.actor_direction == ActorDirectionInWorld.SOUTH:
             return len(self.world.get_obstacles(self.x, self.y + 1)) > 0
-        elif self.actor_direction == ActorDirection.WEST:
+        elif self.actor_direction == ActorDirectionInWorld.WEST:
             return len(self.world.get_obstacles(self.x - 1, self.y)) > 0
         return False
 
@@ -79,8 +79,8 @@ class Player(Actor):
         Args:
             direction (ActorDirection): The direction to check for obstacles. 
                                         It should be one of the following: 
-                                        ActorDirection.NORTH, ActorDirection.EAST, 
-                                        ActorDirection.SOUTH, ActorDirection.WEST.
+                                        ActorDirectionInWorld.NORTH, ActorDirectionInWorld.EAST, 
+                                        ActorDirectionInWorld.SOUTH, ActorDirectionInWorld.WEST.
 
         Returns:
             bool: True if there is at least one obstacle in the specified direction, False otherwise.
@@ -93,13 +93,13 @@ class Player(Actor):
             print("Player.py - check_obstacle_in_direction: World instance is not reachable.")
             return False
 
-        if direction == ActorDirection.NORTH:
+        if direction == ActorDirectionInWorld.NORTH:
             return len(self.world.get_obstacles(self.x, self.y - 1)) > 0
-        elif direction == ActorDirection.EAST:
+        elif direction == ActorDirectionInWorld.EAST:
             return len(self.world.get_obstacles(self.x + 1, self.y)) > 0
-        elif direction == ActorDirection.SOUTH:
+        elif direction == ActorDirectionInWorld.SOUTH:
             return len(self.world.get_obstacles(self.x, self.y + 1)) > 0
-        elif direction == ActorDirection.WEST:
+        elif direction == ActorDirectionInWorld.WEST:
             return len(self.world.get_obstacles(self.x - 1, self.y)) > 0
         return False
 
@@ -108,26 +108,26 @@ class Player(Actor):
         Checks if the player is within the world bounds in the given direction.
 
         Args:
-            direction (ActorDirection): The direction in which to check the world bounds.
+            direction (ActorDirectionInWorld): The direction in which to check the world bounds.
 
         Returns:
             bool: True if the player is out of bounds in the given direction, False otherwise.
 
         Notes:
             - If the world instance is not reachable, the function will print an error message and return False.
-            - The directions are defined by the ActorDirection enum, which includes NORTH, EAST, SOUTH, and WEST.
+            - The directions are defined by the ActorDirectionInWorld enum, which includes NORTH, EAST, SOUTH, and WEST.
         """
         if not self.world:
             print("Player.py - check_world_bounds_in_direction: World instance is not reachable.")
             return False
 
-        if direction == ActorDirection.NORTH:
+        if direction == ActorDirectionInWorld.NORTH:
             return self.y - 1 < 0
-        elif direction == ActorDirection.EAST:
+        elif direction == ActorDirectionInWorld.EAST:
             return self.x + 1 >= self.world.get_width()
-        elif direction == ActorDirection.SOUTH:
+        elif direction == ActorDirectionInWorld.SOUTH:
             return self.y + 1 >= self.world.get_height()
-        elif direction == ActorDirection.WEST:
+        elif direction == ActorDirectionInWorld.WEST:
             return self.x - 1 < 0
         return False
 

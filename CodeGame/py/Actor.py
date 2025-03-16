@@ -16,7 +16,7 @@ class ActorType(Enum):
     DESTINATION = 3
     ITEM = 4
 
-class ActorDirection(Enum):
+class ActorDirectionInWorld(Enum):
     """
     Enum class representing the four cardinal directions an actor can face.
 
@@ -30,6 +30,17 @@ class ActorDirection(Enum):
     EAST = 2
     SOUTH = 3
     WEST = 4
+
+class ActorDirection(Enum):
+    """
+    Enum class representing the two possible directions an actor can turn.
+
+    Attributes:
+        LEFT (int): Represents the left direction with a value of 1.
+        RIGHT (int): Represents the right direction with a value of 2.
+    """
+    LEFT = 1
+    RIGHT = 2
 
 class Actor:
     def __init__(self, x, y, direction, actor_type, world):
@@ -84,13 +95,13 @@ class Actor:
         new_x = self.x
         new_y = self.y
 
-        if self.actor_direction == ActorDirection.NORTH:
+        if self.actor_direction == ActorDirectionInWorld.NORTH:
             new_y -= distance
-        elif self.actor_direction == ActorDirection.EAST:
+        elif self.actor_direction == ActorDirectionInWorld.EAST:
             new_x += distance
-        elif self.actor_direction == ActorDirection.SOUTH:
+        elif self.actor_direction == ActorDirectionInWorld.SOUTH:
             new_y += distance
-        elif self.actor_direction == ActorDirection.WEST:
+        elif self.actor_direction == ActorDirectionInWorld.WEST:
             new_x -= distance
 
         if self.world:
@@ -105,15 +116,26 @@ class Actor:
         Changes the direction of the actor.
 
         Args:
-            direction (str): The new direction for the actor.
-
-        Returns:
-            None
+            direction (ActorDirection): The new direction for the actor.
         """
         if self.game_error:
             return
 
-        self.actor_direction = direction
+        if (direction == ActorDirection.LEFT):
+            if (self.actor_direction == ActorDirectionInWorld.NORTH):
+                self.actor_direction = ActorDirectionInWorld.WEST
+            elif (self.actor_direction == ActorDirectionInWorld.WEST):
+                self.actor_direction = ActorDirectionInWorld.SOUTH
+            elif (self.actor_direction == ActorDirectionInWorld.SOUTH):
+                self.actor_direction = ActorDirectionInWorld.EAST
+        elif (direction == ActorDirection.RIGHT):
+            if (self.actor_direction == ActorDirectionInWorld.NORTH):
+                self.actor_direction = ActorDirectionInWorld.EAST
+            elif (self.actor_direction == ActorDirectionInWorld.EAST):
+                self.actor_direction = ActorDirectionInWorld.SOUTH
+            elif (self.actor_direction == ActorDirectionInWorld.SOUTH):
+                self.actor_direction = ActorDirectionInWorld.WEST
+
         SystemOutput.get_instance().output_turn(self.get_direction_string())
 
     def check_obstacle(self):
@@ -123,13 +145,13 @@ class Actor:
         Returns:
             bool: True if there is an obstacle in the direction the actor is facing, False otherwise.
         """
-        if self.actor_direction == ActorDirection.NORTH:
+        if self.actor_direction == ActorDirectionInWorld.NORTH:
             return len(self.world.get_obstacles(self.x, self.y - 1)) > 0
-        elif self.actor_direction == ActorDirection.EAST:
+        elif self.actor_direction == ActorDirectionInWorld.EAST:
             return len(self.world.get_obstacles(self.x + 1, self.y)) > 0
-        elif self.actor_direction == ActorDirection.SOUTH:
+        elif self.actor_direction == ActorDirectionInWorld.SOUTH:
             return len(self.world.get_obstacles(self.x, self.y + 1)) > 0
-        elif self.actor_direction == ActorDirection.WEST:
+        elif self.actor_direction == ActorDirectionInWorld.WEST:
             return len(self.world.get_obstacles(self.x - 1, self.y)) > 0
         return False
 
@@ -148,13 +170,13 @@ class Actor:
             print("Actor.py - check_world_bounds: World instance is not reachable.")
             return False
 
-        if self.actor_direction == ActorDirection.NORTH:
+        if self.actor_direction == ActorDirectionInWorld.NORTH:
             return self.y - 1 < 0
-        elif self.actor_direction == ActorDirection.EAST:
+        elif self.actor_direction == ActorDirectionInWorld.EAST:
             return self.x + 1 >= self.world.get_width()
-        elif self.actor_direction == ActorDirection.SOUTH:
+        elif self.actor_direction == ActorDirectionInWorld.SOUTH:
             return self.y + 1 >= self.world.get_height()
-        elif self.actor_direction == ActorDirection.WEST:
+        elif self.actor_direction == ActorDirectionInWorld.WEST:
             return self.x - 1 < 0
         return False
 
@@ -191,22 +213,22 @@ class Actor:
 
         The direction is determined by the `actor_direction` attribute, which is
         an instance of the `ActorDirection` enum. The possible return values are:
-        - "NORTH" if the direction is `ActorDirection.NORTH`
-        - "EAST" if the direction is `ActorDirection.EAST`
-        - "SOUTH" if the direction is `ActorDirection.SOUTH`
-        - "WEST" if the direction is `ActorDirection.WEST`
+        - "NORTH" if the direction is `ActorDirectionInWorld.NORTH`
+        - "EAST" if the direction is `ActorDirectionInWorld.EAST`
+        - "SOUTH" if the direction is `ActorDirectionInWorld.SOUTH`
+        - "WEST" if the direction is `ActorDirectionInWorld.WEST`
 
         Returns:
             str: The string representation of the actor's current direction, or
             an empty string if the direction is not recognized.
         """
-        if self.actor_direction == ActorDirection.NORTH:
+        if self.actor_direction == ActorDirectionInWorld.NORTH:
             return "NORTH"
-        elif self.actor_direction == ActorDirection.EAST:
+        elif self.actor_direction == ActorDirectionInWorld.EAST:
             return "EAST"
-        elif self.actor_direction == ActorDirection.SOUTH:
+        elif self.actor_direction == ActorDirectionInWorld.SOUTH:
             return "SOUTH"
-        elif self.actor_direction == ActorDirection.WEST:
+        elif self.actor_direction == ActorDirectionInWorld.WEST:
             return "WEST"
         return ""
 

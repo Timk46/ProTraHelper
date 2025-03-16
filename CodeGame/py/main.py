@@ -1,5 +1,5 @@
 from World import World
-from Actor import ActorType, ActorDirection
+from Actor import ActorType, ActorDirectionInWorld, ActorDirection
 from Player import Player
 from Destination import Destination
 from Obstacle import Obstacle
@@ -32,25 +32,25 @@ def get_actor_type(type_str):
 
 def get_actor_direction(direction_str):
     """
-    Converts a direction string to an ActorDirection enum value.
+    Converts a direction string to an ActorDirectionInWorld enum value.
 
     Args:
         direction_str (str): The direction as a string. Expected values are "NORTH", "EAST", "SOUTH", or "WEST".
 
     Returns:
-        ActorDirection: The corresponding ActorDirection enum value.
+        ActorDirectionInWorld: The corresponding ActorDirectionInWorld enum value.
 
     Raises:
         ValueError: If the direction_str is not one of the expected values.
     """
     if direction_str == "NORTH":
-        return ActorDirection.NORTH
+        return ActorDirectionInWorld.NORTH
     elif direction_str == "EAST":
-        return ActorDirection.EAST
+        return ActorDirectionInWorld.EAST
     elif direction_str == "SOUTH":
-        return ActorDirection.SOUTH
+        return ActorDirectionInWorld.SOUTH
     elif direction_str == "WEST":
-        return ActorDirection.WEST
+        return ActorDirectionInWorld.WEST
     else:
         raise ValueError("Unknown actor direction")
 
