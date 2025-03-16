@@ -1,5 +1,5 @@
 from World import World
-from Actor import ActorType, ActorDirectionInWorld, ActorDirection
+from Actor import ActorType, ActorDirectionInWorld
 from Player import Player
 from Destination import Destination
 from Obstacle import Obstacle

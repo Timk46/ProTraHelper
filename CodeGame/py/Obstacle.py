@@ -1,4 +1,4 @@
-from Actor import Actor, ActorDirection, ActorType
+from Actor import Actor, ActorDirectionInWorld, ActorType
 
 class Obstacle(Actor):
     def __init__(self, x, y, direction, actor_type, world):

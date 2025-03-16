@@ -1,4 +1,4 @@
-from Actor import Actor, ActorType, ActorDirection
+from Actor import Actor, ActorType
 from Player import Player
 from Obstacle import Obstacle
 from Destination import Destination
