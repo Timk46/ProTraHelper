@@ -20,26 +20,39 @@ public abstract class Actor {
     }
 
     /**
-     * The ActorDirection enum represents the four cardinal directions.
+     * The ActorDirectionInWorld enum represents the four cardinal directions.
      * It is used to specify the direction in which an actor is facing or moving.
      * 
-     * The ActorDirection enum specifies the direction the actor is facing.
+     * The ActorDirectionInWorld enum specifies the direction the actor is facing.
      * - NORTH: Facing north.
      * - EAST: Facing east.
      * - SOUTH: Facing south.
      * - WEST: Facing west.
      */
-    public enum ActorDirection {
+    public enum ActorDirectionInWorld {
         NORTH,
         EAST,
         SOUTH,
         WEST
     }
 
+    /**
+     * The ActorDirection enum represents the two possible directions an actor can turn.
+     * It is used to specify the direction in which an actor can turn.
+     * 
+     * The ActorDirection enum specifies the direction the actor can turn.
+     * - LEFT: Turning left.
+     * - RIGHT: Turning right.
+     */
+    public enum ActorDirection {
+        LEFT,
+        RIGHT
+    }
+
     protected int x;
     protected int y;
     protected ActorType actorType;
-    protected ActorDirection actorDirection;
+    protected ActorDirectionInWorld actorDirectionInWorld;
     protected World world;
     protected boolean gameError = false;
 
@@ -48,14 +61,14 @@ public abstract class Actor {
      *
      * @param x the x-coordinate of the actor
      * @param y the y-coordinate of the actor
-     * @param actorDirection the direction the actor is facing
+     * @param actorDirectionInWorld the direction the actor is facing
      * @param actorType the type of the actor
      * @param world the world in which the actor exists
      */
-    public Actor(int x, int y, ActorDirection actorDirection, ActorType actorType, World world) {
+    public Actor(int x, int y, ActorDirectionInWorld actorDirectionInWorld, ActorType actorType, World world) {
         this.x = x;
         this.y = y;
-        this.actorDirection = actorDirection;
+        this.actorDirectionInWorld = actorDirectionInWorld;
         this.actorType = actorType;
         this.world = world;
     }
@@ -91,7 +104,7 @@ public abstract class Actor {
         int newX = x;
         int newY = y;
 
-        switch (actorDirection) {
+        switch (actorDirectionInWorld) {
             case NORTH:
                 newY -= distance;
                 break;
@@ -125,7 +138,28 @@ public abstract class Actor {
             return;
         }
 
-        actorDirection = direction;
+        if (direction == ActorDirection.LEFT) {
+            if (actorDirectionInWorld == ActorDirectionInWorld.NORTH) {
+                actorDirectionInWorld = ActorDirectionInWorld.WEST;
+            } else if (actorDirectionInWorld == ActorDirectionInWorld.WEST) {
+                actorDirectionInWorld = ActorDirectionInWorld.SOUTH;
+            } else if (actorDirectionInWorld == ActorDirectionInWorld.SOUTH) {
+                actorDirectionInWorld = ActorDirectionInWorld.EAST;
+            } else if (actorDirectionInWorld == ActorDirectionInWorld.EAST) {
+                actorDirectionInWorld = ActorDirectionInWorld.NORTH;
+            }
+        } else if (direction == ActorDirection.RIGHT) {
+            if (actorDirectionInWorld == ActorDirectionInWorld.NORTH) {
+                actorDirectionInWorld = ActorDirectionInWorld.EAST;
+            } else if (actorDirectionInWorld == ActorDirectionInWorld.EAST) {
+                actorDirectionInWorld = ActorDirectionInWorld.SOUTH;
+            } else if (actorDirectionInWorld == ActorDirectionInWorld.SOUTH) {
+                actorDirectionInWorld = ActorDirectionInWorld.WEST;
+            } else if (actorDirectionInWorld == ActorDirectionInWorld.WEST) {
+                actorDirectionInWorld = ActorDirectionInWorld.NORTH;
+            }
+        }
+
         SystemOutput.getInstance().outputTurn(getDirectionString());
     }
 
@@ -135,7 +169,7 @@ public abstract class Actor {
      * @return true if there is an obstacle in the direction the actor is facing, false otherwise.
      */
     public boolean checkObstacle() {
-        switch (actorDirection) {
+        switch (actorDirectionInWorld) {
             case NORTH:
                 return world.getObstacles(x, y - 1).size() > 0;
             case EAST:
@@ -160,7 +194,7 @@ public abstract class Actor {
             return false;
         }
 
-        switch (actorDirection) {
+        switch (actorDirectionInWorld) {
             case NORTH:
                 return y - 1 < 0;
             case EAST:
@@ -195,10 +229,10 @@ public abstract class Actor {
     /**
      * Retrieves the current direction of the actor.
      *
-     * @return the direction of the actor as an {@link ActorDirection} enum.
+     * @return the direction of the actor as an {@link ActorDirectionInWorld} enum.
      */
-    public ActorDirection getDirection() {
-        return actorDirection;
+    public ActorDirectionInWorld getDirection() {
+        return actorDirectionInWorld;
     }
 
     /**
@@ -209,7 +243,7 @@ public abstract class Actor {
      *         an empty string is returned.
      */
     public String getDirectionString() {
-        switch (actorDirection) {
+        switch (actorDirectionInWorld) {
             case NORTH:
                 return "NORTH";
             case EAST:

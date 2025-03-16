@@ -6,12 +6,12 @@ public class Item extends Actor {
      *
      * @param x the x-coordinate of the item
      * @param y the y-coordinate of the item
-     * @param actorDirection the direction the item is facing
+     * @param actorDirectionInWorld the direction the item is facing
      * @param actorType the type of the actor
      * @param world the world in which the item exists
      */
-    public Item(int x, int y, ActorDirection actorDirection, ActorType actorType, World world) {
-        super(x, y, actorDirection, actorType, world);
+    public Item(int x, int y, ActorDirectionInWorld actorDirectionInWorld, ActorType actorType, World world) {
+        super(x, y, actorDirectionInWorld, actorType, world);
     }
 
     /**

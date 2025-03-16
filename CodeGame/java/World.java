@@ -75,26 +75,26 @@ public class World {
      * Adds an object of the specified type to the world at the given coordinates.
      *
      * @param actorType The type of the actor to be added (e.g., PLAYER, DESTINATION, OBSTACLE, ITEM).
-     * @param actorDirection The direction the actor is facing.
+     * @param actorDirectionInWorld The direction the actor is facing.
      * @param x The x-coordinate where the actor should be placed.
      * @param y The y-coordinate where the actor should be placed.
      */
-    public void addObject(Actor.ActorType actorType, Actor.ActorDirection actorDirection, int x, int y) {
+    public void addObject(Actor.ActorType actorType, Actor.ActorDirectionInWorld actorDirectionInWorld, int x, int y) {
         switch (actorType) {
             case PLAYER:
-                Player player = new Player(x, y, actorDirection, actorType, this);
+                Player player = new Player(x, y, actorDirectionInWorld, actorType, this);
                 worldMap.get(y).get(x).add(player);
                 break;
             case DESTINATION:
-                Destination destination = new Destination(x, y, actorDirection, actorType, this);
+                Destination destination = new Destination(x, y, actorDirectionInWorld, actorType, this);
                 worldMap.get(y).get(x).add(destination);
                 break;
             case OBSTACLE:
-                Obstacle obstacle = new Obstacle(x, y, actorDirection, actorType, this);
+                Obstacle obstacle = new Obstacle(x, y, actorDirectionInWorld, actorType, this);
                 worldMap.get(y).get(x).add(obstacle);
                 break;
             case ITEM:
-                Item item = new Item(x, y, actorDirection, actorType, this);
+                Item item = new Item(x, y, actorDirectionInWorld, actorType, this);
                 worldMap.get(y).get(x).add(item);
                 totalItems++;
                 break;

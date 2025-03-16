@@ -40,7 +40,7 @@ public class Main {
         World world = new World(worldWidth, worldHeight);
 
         for (ActorData actor : actors) {
-            world.addObject(getActorType(actor.type), getActorDirection(actor.direction), actor.x, actor.y);
+            world.addObject(getActorType(actor.type), getActorDirectionInWorld(actor.direction), actor.x, actor.y);
         }
 
         world.run();
@@ -124,22 +124,22 @@ public class Main {
     }
 
     /**
-     * Converts a string representation of a direction to the corresponding ActorDirection enum.
+     * Converts a string representation of a direction to the corresponding ActorDirectionInWorld enum.
      *
      * @param direction the string representation of the direction (e.g., "NORTH", "EAST", "SOUTH", "WEST")
-     * @return the corresponding ActorDirection enum value
+     * @return the corresponding ActorDirectionInWorld enum value
      * @throws IllegalArgumentException if the provided direction is not recognized
      */
-    private static Actor.ActorDirection getActorDirection(String direction) {
+    private static Actor.ActorDirectionInWorld getActorDirectionInWorld(String direction) {
         switch (direction) {
             case "NORTH":
-                return Actor.ActorDirection.NORTH;
+                return Actor.ActorDirectionInWorld.NORTH;
             case "EAST":
-                return Actor.ActorDirection.EAST;
+                return Actor.ActorDirectionInWorld.EAST;
             case "SOUTH":
-                return Actor.ActorDirection.SOUTH;
+                return Actor.ActorDirectionInWorld.SOUTH;
             case "WEST":
-                return Actor.ActorDirection.WEST;
+                return Actor.ActorDirectionInWorld.WEST;
             default:
                 throw new IllegalArgumentException("Unknown actor direction");
         }

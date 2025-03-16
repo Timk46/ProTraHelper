@@ -6,12 +6,12 @@ public class Destination extends Actor {
      *
      * @param x the x-coordinate of the destination
      * @param y the y-coordinate of the destination
-     * @param actorDirection the direction the actor is facing
+     * @param actorDirectionInWorld the direction the actor is facing
      * @param actorType the type of the actor
      * @param world the world in which the destination exists
      */
-    public Destination(int x, int y, ActorDirection actorDirection, ActorType actorType, World world) {
-        super(x, y, actorDirection, actorType, world);
+    public Destination(int x, int y, ActorDirectionInWorld actorDirectionInWorld, ActorType actorType, World world) {
+        super(x, y, actorDirectionInWorld, actorType, world);
     }
 
     /**

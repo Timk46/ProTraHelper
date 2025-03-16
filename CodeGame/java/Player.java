@@ -6,12 +6,12 @@ public class Player extends Actor {
      *
      * @param x the x-coordinate of the player's position
      * @param y the y-coordinate of the player's position
-     * @param actorDirection the direction the player is facing
+     * @param actorDirectionInWorld the direction the player is facing
      * @param actorType the type of actor the player is
      * @param world the world in which the player exists
      */
-    public Player(int x, int y, ActorDirection actorDirection, ActorType actorType, World world) {
-        super(x, y, actorDirection, actorType, world);
+    public Player(int x, int y, ActorDirectionInWorld actorDirectionInWorld, ActorType actorType, World world) {
+        super(x, y, actorDirectionInWorld, actorType, world);
     }
 
     /**
@@ -27,13 +27,13 @@ public class Player extends Actor {
         drive();
         drive();
         drive();
-        turn(ActorDirection.SOUTH);
+        turn(ActorDirection.RIGHT);
         drive();
         analyseItem();
         drive();
         analyseItem();
         drive();
-        turn(ActorDirection.EAST);
+        turn(ActorDirection.LEFT);
         drive();
         drive();
         drive();
@@ -58,7 +58,7 @@ public class Player extends Actor {
      * @return true if there is an obstacle in the direction the actor is facing, false otherwise.
      */
     public boolean checkObstacle() {
-        switch (actorDirection) {
+        switch (actorDirectionInWorld) {
             case NORTH:
                 return world.getObstacles(x, y - 1).size() > 0;
             case EAST:
@@ -79,7 +79,7 @@ public class Player extends Actor {
      * @return true if there is at least one obstacle in the specified direction, false otherwise.
      * @throws NullPointerException if the world instance is not reachable.
      */
-    public boolean checkObstacle(ActorDirection direction) {
+    public boolean checkObstacle(ActorDirectionInWorld direction) {
         if (world == null) {
             System.err.println("Player.java - checkObstacle: World instance is not reachable.");
             return false;
@@ -106,7 +106,7 @@ public class Player extends Actor {
      * @return {@code true} if moving in the specified direction would go out of bounds, {@code false} otherwise.
      * @throws IllegalStateException if the world instance is not reachable.
      */
-    public boolean checkWorldBounds(ActorDirection direction) {
+    public boolean checkWorldBounds(ActorDirectionInWorld direction) {
         if (world == null) {
             System.err.println("Player.java - checkWorldBounds: World instance is not reachable.");
             return false;

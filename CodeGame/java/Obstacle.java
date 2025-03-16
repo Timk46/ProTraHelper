@@ -6,13 +6,13 @@ package game;
  * 
  * @param x The x-coordinate of the obstacle.
  * @param y The y-coordinate of the obstacle.
- * @param actorDirection The direction the obstacle is facing.
+ * @param actorDirectionInWorld The direction the obstacle is facing.
  * @param actorType The type of the actor.
  * @param world The game world the obstacle belongs to.
  */
 public class Obstacle extends Actor {
-    public Obstacle(int x, int y, ActorDirection actorDirection, ActorType actorType, World world) {
-        super(x, y, actorDirection, actorType, world);
+    public Obstacle(int x, int y, ActorDirectionInWorld actorDirectionInWorld, ActorType actorType, World world) {
+        super(x, y, actorDirectionInWorld, actorType, world);
     }
 
     /**
