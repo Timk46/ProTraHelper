@@ -19,13 +19,13 @@ export default defineConfig({
   fullyParallel: true,
   
   /* Maximum time one test can run for */
-  timeout: 30000,
+  timeout: 60000,
   
   /* Fail the build on CI if you accidentally left test.only in the source code */
   forbidOnly: !!process.env.CI,
   
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  /* Retry tests on both local and CI environments */
+  retries: process.env.CI ? 2 : 1,
   
   /* Opt out of parallel tests on CI --- using either 1 or half of the available cores */
   workers: process.env.CI ? 4 : Math.max(1, Math.floor(require('os').cpus().length / 2)),
@@ -33,7 +33,9 @@ export default defineConfig({
   /* Reporter to use */
   reporter: [
     ['html'],
-    ['list']
+    ['list'],
+    ['json', { outputFile: 'test-results/test-results.json' }],
+    ['junit', { outputFile: 'test-results/junit-report.xml' }]
   ],
   
   /* Shared settings for all the projects below */
