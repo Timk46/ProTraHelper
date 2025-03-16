@@ -43,12 +43,18 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
       this.isInputDataAvailable = true;
 
       this.theme = this.inputGameData.theme;
-      this.gameField = this.transformStringToArray(this.inputGameData.gameField);
-      this.gameCellRestrictions = this.transformStringToArray(this.inputGameData.gameCellRestrictions);
 
-      this.codeGameForm.patchValue({
-        rowsAndColumns: this.gameField.length
-      });
+      if (this.inputGameData.gameField != "") {
+        this.gameField = this.transformStringToArray(this.inputGameData.gameField);
+
+        this.codeGameForm.patchValue({
+          rowsAndColumns: this.gameField.length
+        });
+      }
+
+      if (this.inputGameData.gameCellRestrictions != "") {
+        this.gameCellRestrictions = this.transformStringToArray(this.inputGameData.gameCellRestrictions);
+      }
 
       this.inputDataSet = true;
     }

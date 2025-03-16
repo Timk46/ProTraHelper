@@ -45,6 +45,7 @@ export class PlayfieldComponent {
   theme: string = ''; // part of the path to the images
   hiddenItems: String[] = [];
 
+  isPlayerVisible: boolean = true;
   playerPosition = { x: 0, y: 0 };
   playerDirection: PlayerDirection = PlayerDirection.EAST; // default direction
   startX = 0;
@@ -119,71 +120,21 @@ export class PlayfieldComponent {
   }
 
   movePlayerTo(newX: number, newY: number): void {
-    const startX = this.playerPosition.x * this.cellSize;
-    const startY = this.playerPosition.y * this.cellSize;
     const endX = newX * this.cellSize;
     const endY = newY * this.cellSize;
 
-    const steps = 50; // Number if intermediate positions
-    const interval = this.animationSpeedMaster / steps; // Time between steps in ms
-    let currentStep = 0;
-
-    // Update the position step by step
-    const moveInterval = setInterval(() => {
-      currentStep++;
-      const progress = currentStep / steps;
-
-      // Interpolated position calculation
-      const interpolatedX = startX + (endX - startX) * progress;
-      const interpolatedY = startY + (endY - startY) * progress;
-
-      // Transformation style update, rotation remains the same
-      this.playerTransform = `translate(${interpolatedX}px, ${interpolatedY}px) rotate(${this.playerDirection}deg)`;
-
-      // End animation
-      if (currentStep >= steps) {
-        clearInterval(moveInterval);
-
-        this.playerPosition = { x: newX, y: newY }; // Update the player position
-        // Ensure that the player is at the correct position
-        this.playerTransform = `translate(${endX}px, ${endY}px) rotate(${this.playerDirection}deg)`;
-      }
-    }, interval);
+    // Update the player position and transformation
+    this.playerPosition = { x: newX, y: newY };
+    this.playerTransform = `translate(${endX}px, ${endY}px) rotate(${this.playerDirection}deg)`;
   }
 
   rotatePlayerTo(direction: PlayerDirection): void {
-    const steps = 30; // number of intermediate positions
-    const interval = this.animationSpeedMaster / steps; // time between steps in ms
-    let currentStep = 0;
+    const endX = this.playerPosition.x * this.cellSize;
+    const endY = this.playerPosition.y * this.cellSize;
 
-    // Calculate the target rotation (in degrees)
-    const targetRotation = direction;
-    const startRotation = this.playerDirection;
-    let rotationDelta = (direction - startRotation + 360) % 360;
-
-    // Ensure the player takes the shortest rotation path
-    if (rotationDelta > 180) {
-      rotationDelta -= 360;
-    }
-
-    // Update the rotation step by step
-    const rotateInterval = setInterval(() => {
-      currentStep++;
-      const progress = currentStep / steps;
-      const interpolatedRotation = startRotation + rotationDelta * progress;
-
-      // Transform style update, position remains the same
-      this.playerTransform = `translate(${this.playerPosition.x * this.cellSize}px, ${this.playerPosition.y * this.cellSize}px) rotate(${interpolatedRotation}deg)`;
-
-      // End animation
-      if (currentStep >= steps) {
-        clearInterval(rotateInterval);
-
-        this.playerDirection = direction; // Update the player direction
-        // Ensure that the player is at the correct rotation
-        this.playerTransform = `translate(${this.playerPosition.x * this.cellSize}px, ${this.playerPosition.y * this.cellSize}px) rotate(${targetRotation}deg)`;
-      }
-    }, interval);
+    // Update the player direction and transformation
+    this.playerDirection = direction;
+    this.playerTransform = `translate(${endX}px, ${endY}px) rotate(${direction}deg)`;
   }
 
   hideItemImage(row: string, col: string): void {
@@ -257,15 +208,22 @@ export class PlayfieldComponent {
     this.cellRestrictionsDimState = this.gameField.map(row => row.map(() => 'off'));
   }
 
-  setCSSVariables(): void {
+setCSSVariables(): void {
+  console.log(this.gameFieldHeight, this.gameFieldWidth);
+
+  const fieldElement = this.el.nativeElement.querySelector('.field');
+  if (fieldElement) {
     // Set the CSS variables for the grid dimensions
-    this.renderer.setStyle(this.el.nativeElement.querySelector('.field'), '--rows', this.gameFieldHeight);
-    this.renderer.setStyle(this.el.nativeElement.querySelector('.field'), '--columns', this.gameFieldWidth);
-    this.renderer.setStyle(this.el.nativeElement.querySelector('.field'), '--cell-size', `${this.cellSize}px`);
+    this.renderer.setStyle(fieldElement, '--rows', this.gameFieldHeight);
+    this.renderer.setStyle(fieldElement, '--columns', this.gameFieldWidth);
+    this.renderer.setStyle(fieldElement, '--cell-size', `${this.cellSize}px`);
 
     // Set the CSS variable for the animation speed
-    this.renderer.setStyle(this.el.nativeElement.querySelector('.field'), '--animation-speed-master', this.animationSpeedMaster);
+    this.renderer.setStyle(fieldElement, '--animation-speed-master', this.animationSpeedMaster);
+  } else {
+    console.error('Element with class "field" not found');
   }
+}
 
   // used for the obstacle and destination images
   getObjectImage(row: number, col: number): string {
@@ -366,6 +324,9 @@ export class PlayfieldComponent {
   }
 
   resetGame(): void {
+    // Hide the player
+    this.isPlayerVisible = false;
+
     // reset the game field
     this.showItemImage();
     this.hideAllWaringOverlays();
@@ -376,5 +337,10 @@ export class PlayfieldComponent {
 
     // reset the game output information
     this.gameOutputInformation = 'Bereit für die Ausführung';
+
+    // Show the player after resetting the position
+    setTimeout(() => {
+      this.isPlayerVisible = true;
+    }, 0); // Adjust the timeout duration if needed
   }
 }

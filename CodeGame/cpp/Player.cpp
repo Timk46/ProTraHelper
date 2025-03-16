@@ -5,8 +5,8 @@
 #include <iostream>
 #include <string>
 
-Player::Player(int _x, int _y, ActorDirection _actorDirection, ActorType _actorType, World* _world)
-    : Actor(_x, _y, _actorDirection, _actorType, _world)
+Player::Player(int _x, int _y, ActorDirectionInWorld _actorDirectionInWorld, ActorType _actorType, World* _world)
+    : Actor(_x, _y, _actorDirectionInWorld, _actorType, _world)
 {}
 
 void Player::act()
@@ -18,13 +18,13 @@ void Player::act()
     drive();
     drive();
     drive();
-    turn(ActorDirection::SOUTH);
+    turn(ActorDirection::RIGHT);
     drive();
     analyseItem();
     drive();
     analyseItem();
     drive();
-    turn(ActorDirection::EAST);
+    turn(ActorDirection::LEFT);
     drive();
     drive();
     drive();
@@ -49,19 +49,19 @@ void Player::drive()
  */
 bool Player::checkObstacle()
 {
-    if (getDirection() == ActorDirection::NORTH) {
+    if (getDirection() == ActorDirectionInWorld::NORTH) {
         if (world->getObstacles(getX(), getY() - 1).size() > 0) {
             return true;
         }
-    } else if (getDirection() == ActorDirection::EAST) {
+    } else if (getDirection() == ActorDirectionInWorld::EAST) {
         if (world->getObstacles(getX() + 1, getY()).size() > 0) {
             return true;
         }
-    } else if (getDirection() == ActorDirection::SOUTH) {
+    } else if (getDirection() == ActorDirectionInWorld::SOUTH) {
         if (world->getObstacles(getX(), getY() + 1).size() > 0) {
             return true;
         }
-    } else if (getDirection() == ActorDirection::WEST) {
+    } else if (getDirection() == ActorDirectionInWorld::WEST) {
         if (world->getObstacles(getX() - 1, getY()).size() > 0) {
             return true;
         }
@@ -74,34 +74,34 @@ bool Player::checkObstacle()
  *
  * @param direction The direction in which to check for obstacles.
  *                  It can be one of the following values:
- *                  - ActorDirection::NORTH
- *                  - ActorDirection::EAST
- *                  - ActorDirection::SOUTH
- *                  - ActorDirection::WEST
+ *                  - ActorDirectionInWorld::NORTH
+ *                  - ActorDirectionInWorld::EAST
+ *                  - ActorDirectionInWorld::SOUTH
+ *                  - ActorDirectionInWorld::WEST
  *
  * @return true if there is at least one obstacle in the specified direction,
  *         false otherwise.
  */
-bool Player::checkObstacle(ActorDirection direction)
+bool Player::checkObstacle(ActorDirectionInWorld direction)
 {
     if (!world) {
         std::cerr << "Player.cpp - checkObstacle: World instance is not reachable." << std::endl;
         return false;
     }
 
-    if (direction == ActorDirection::NORTH) {
+    if (direction == ActorDirectionInWorld::NORTH) {
         if (world->getObstacles(getX(), getY() - 1).size() > 0) {
             return true;
         }
-    } else if (direction == ActorDirection::EAST) {
+    } else if (direction == ActorDirectionInWorld::EAST) {
         if (world->getObstacles(getX() + 1, getY()).size() > 0) {
             return true;
         }
-    } else if (direction == ActorDirection::SOUTH) {
+    } else if (direction == ActorDirectionInWorld::SOUTH) {
         if (world->getObstacles(getX(), getY() + 1).size() > 0) {
             return true;
         }
-    } else if (direction == ActorDirection::WEST) {
+    } else if (direction == ActorDirectionInWorld::WEST) {
         if (world->getObstacles(getX() - 1, getY()).size() > 0) {
             return true;
         }
@@ -113,33 +113,33 @@ bool Player::checkObstacle(ActorDirection direction)
  * @brief Checks if the player is about to move out of the world bounds in the given direction.
  * 
  * @param direction The direction in which the player intends to move. It can be one of the following:
- *                  - ActorDirection::NORTH
- *                  - ActorDirection::EAST
- *                  - ActorDirection::SOUTH
- *                  - ActorDirection::WEST
+ *                  - ActorDirectionInWorld::NORTH
+ *                  - ActorDirectionInWorld::EAST
+ *                  - ActorDirectionInWorld::SOUTH
+ *                  - ActorDirectionInWorld::WEST
  * 
  * @return true if the player would move out of the world bounds, false otherwise.
  */
-bool Player::checkWorldBounds(ActorDirection direction)
+bool Player::checkWorldBounds(ActorDirectionInWorld direction)
 {
     if (!world) {
         std::cerr << "Player.cpp - checkWorldBounds: World instance is not reachable." << std::endl;
         return false;
     }
 
-    if (direction == ActorDirection::NORTH) {
+    if (direction == ActorDirectionInWorld::NORTH) {
         if (getY() - 1 < 0) {
             return true;
         }
-    } else if (direction == ActorDirection::EAST) {
+    } else if (direction == ActorDirectionInWorld::EAST) {
         if (getX() + 1 >= world->getWidth()) {
             return true;
         }
-    } else if (direction == ActorDirection::SOUTH) {
+    } else if (direction == ActorDirectionInWorld::SOUTH) {
         if (getY() + 1 >= world->getHeight()) {
             return true;
         }
-    } else if (direction == ActorDirection::WEST) {
+    } else if (direction == ActorDirectionInWorld::WEST) {
         if (getX() - 1 < 0) {
             return true;
         }

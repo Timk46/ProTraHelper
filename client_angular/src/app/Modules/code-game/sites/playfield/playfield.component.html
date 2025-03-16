@@ -14,7 +14,7 @@
           </div>
         </div>
         <!-- Render player once and adjust its position via transform -->
-        <img *ngIf="playerPositionIsSet" [src]="getPlayerImage()" alt="playerImage"
+        <img *ngIf="playerPositionIsSet && isPlayerVisible" [src]="getPlayerImage()" alt="playerImage"
              class="playerImage"
              [style.transform]="playerTransform" />
       </div>

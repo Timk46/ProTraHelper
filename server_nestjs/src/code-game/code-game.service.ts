@@ -7,7 +7,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
-import { CppProjectExecutionResult } from '@DTOs/codeGame.dto';
+import {
+  CppProjectExecutionResult,
+  JavaProjectExecutionResult,
+  PythonProjectExecutionResult,
+} from '@DTOs/codeGame.dto';
 import { questionType } from '@DTOs/question.dto';
 
 @Injectable()
@@ -70,17 +74,24 @@ export class CodeGameService {
     mainFile: { [fileName: string]: string },
     additionalFiles: { [fileName: string]: string },
     gameFile: { [fileName: string]: string },
+    language: string,
   ) {
     additionalFiles = {
       ...additionalFiles,
       ...gameFile,
     };
-    const executionResult = await this.executeCppProject(
-      mainFile,
-      additionalFiles,
-    );
 
-    return executionResult;
+    if (language === 'cpp') {
+      return this.executeCppProject(mainFile, additionalFiles);
+    } else if (language === 'python') {
+      return this.executePythonProject(mainFile, additionalFiles);
+    } else if (language === 'java') {
+      return this.executeJavaProject(mainFile, additionalFiles);
+    } else {
+      throw new BadRequestException(
+        `Unsupported language for code game task: ${language}`,
+      );
+    }
   }
 
   async executeCppProject(
@@ -143,5 +154,108 @@ export class CodeGameService {
       base64Files[fileName] = base64Content;
     }
     return base64Files;
+  }
+
+  async executePythonProject(
+    mainFile: { [fileName: string]: string },
+    additionalFiles: { [fileName: string]: string },
+  ) {
+    const mainFileBase64 = await this.generateBase64(mainFile);
+    const additionalFilesBase64 = await this.generateBase64(additionalFiles);
+
+    console.log('JURY 1 Python Project execution');
+    console.log(
+      JSON.stringify({
+        runMethod: 'main',
+        mainFile: mainFileBase64,
+        additionalFiles: additionalFilesBase64,
+      }),
+    );
+
+    try {
+      const response = await fetch(
+        `${this.apiUrl}python-project?shouldOutputBase64=false`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            runMethod: 'main',
+            mainFile: mainFileBase64,
+            additionalFiles: additionalFilesBase64,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new HttpException(
+          `Failed to execute python code. Status: ${response.status}`,
+          HttpStatus.BAD_GATEWAY,
+        );
+      }
+
+      const responseBody: PythonProjectExecutionResult = await response.json();
+      console.log('JURY 1 Python Project execution response:', responseBody);
+
+      return responseBody;
+    } catch (error) {
+      console.error('Fetch error:', error);
+      throw new HttpException(
+        'Failed to execute Python code due to a network error.',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  async executeJavaProject(
+    mainFile: { [fileName: string]: string },
+    additionalFiles: { [fileName: string]: string },
+  ) {
+    const mainFileBase64 = await this.generateBase64(mainFile);
+    const additionalFilesBase64 = await this.generateBase64(additionalFiles);
+
+    const files = {
+      ...mainFileBase64,
+      ...additionalFilesBase64,
+    };
+
+    console.log('JURY 1 Java Project execution');
+    console.log(
+      JSON.stringify({
+        mainClassName: 'game.Main',
+        files: files,
+      }),
+    );
+
+    try {
+      const response = await fetch(
+        `${this.apiUrl}java-project?shouldOutputBase64=false`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mainClassName: 'game.Main',
+            files: files,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new HttpException(
+          `Failed to execute java code. Status: ${response.status}`,
+          HttpStatus.BAD_GATEWAY,
+        );
+      }
+
+      const responseBody: JavaProjectExecutionResult = await response.json();
+      console.log('JURY 1 Java Project execution response:', responseBody);
+
+      return responseBody;
+    } catch (error) {
+      console.error('Fetch error:', error);
+      throw new HttpException(
+        'Failed to execute Java code due to a network error.',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
   }
 }

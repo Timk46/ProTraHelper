@@ -1,26 +1,23 @@
-# CodeGame 
+# CodeGame
 
-## Setup
-Ensure you have a C++11 compatible compiler installed.
+## Overview
+CodeGame is a multi-language project that includes implementations in various programming languages such as C++, Java, and Python. The project is organized into different directories based on the language.
 
-`make`
+## Directory Structure
+- `.vscode/`: Contains Visual Studio Code configuration files.
+- `bas64/`: Contains scripts for base64 encoding.
+- `cpp/`: Contains the C++ implementation of the game.
+- `java/`: Contains the Java implementation of the game.
+- `py/`: Contains the Python implementation of the game.
 
-## Run
-`./codegame`
+## Getting Started
+Each language-specific directory contains its own `README.md` file with instructions on how to build and run the project in that language.
 
-## Cleanup
-Remove the generated files with the following command:
+### C++
+Navigate to the `cpp/` directory and follow the instructions in the `README.md` file.
 
-`make clean`
+### Java
+Navigate to the `java/` directory and follow the instructions in the `README.md` file.
 
-## Generate Base64 Files
-
-### make it excutiable
-`chmod +x convert_to_base64.sh`
-
-### run
-`./convert_to_base64.sh ./`
-
-## Debuggin
-- Run: `make`
-- At the "Run and Debuig"-Tab click "Start Debugging (F5)"
+### Python
+Navigate to the `py/` directory and follow the instructions in the `README.md` file.

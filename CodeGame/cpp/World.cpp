@@ -67,29 +67,29 @@ void World::printWorld()
  * @brief Adds an object of specified type and direction to the world map at the given coordinates.
  * 
  * @param actorType The type of the actor to be added (PLAYER, DESTINATION, OBSTACLE, ITEM).
- * @param actorDirection The direction the actor is facing.
+ * @param actorDirectionInWorld The direction the actor is facing.
  * @param x The x-coordinate (width) where the actor will be placed.
  * @param y The y-coordinate (height) where the actor will be placed.
  */
-void World::addObject(Actor::ActorType actorType, Actor::ActorDirection actorDirection, int x, int y) 
+void World::addObject(Actor::ActorType actorType, Actor::ActorDirectionInWorld actorDirectionInWorld, int x, int y) 
 {
     const int i = y; // y is the height coordinate, row in the world map
     const int j = x; // x is the width coordinate, column in the world map
 
     if (actorType == Actor::ActorType::PLAYER) {
-        Player* player = new Player(x, y, actorDirection, actorType, this);
+        Player* player = new Player(x, y, actorDirectionInWorld, actorType, this);
 
         worldMap[i][j].push_back(player);
     } else if (actorType == Actor::ActorType::DESTINATION) {
-        Destination* destination = new Destination(x, y, actorDirection, actorType, this);
+        Destination* destination = new Destination(x, y, actorDirectionInWorld, actorType, this);
 
         worldMap[i][j].push_back(destination);
     } else if (actorType == Actor::ActorType::OBSTACLE) {
-        Obstacle* obstacle = new Obstacle(x, y, actorDirection, actorType, this);
+        Obstacle* obstacle = new Obstacle(x, y, actorDirectionInWorld, actorType, this);
 
          worldMap[i][j].push_back(obstacle);
     } else if (actorType == Actor::ActorType::ITEM) {
-        Item* item = new Item(x, y, actorDirection, actorType, this);
+        Item* item = new Item(x, y, actorDirectionInWorld, actorType, this);
 
         worldMap[i][j].push_back(item);
         ++totalItems;

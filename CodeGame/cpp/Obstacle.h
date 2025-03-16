@@ -7,7 +7,7 @@
 class Obstacle: public Actor {
 
     public:
-        Obstacle(int x, int y, ActorDirection actorDirection, ActorType actorType, World* world);
+        Obstacle(int x, int y, ActorDirectionInWorld actorDirectionInWorld, ActorType actorType, World* world);
         void act() override;
 };
 
