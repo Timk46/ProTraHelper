@@ -30,7 +30,7 @@ class World {
         World(int _width, int _height);
         ~World();
         void printWorld();
-        void addObject(Actor::ActorType actorType, Actor::ActorDirection actorDirection, int x, int y);
+        void addObject(Actor::ActorType actorType, Actor::ActorDirectionInWorld actorDirectionInWorld, int x, int y);
         void moveObject(Player& player, int x, int y);
         void run();
         void determineSuccess();

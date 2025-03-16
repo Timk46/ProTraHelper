@@ -26,11 +26,11 @@ Actor::ActorType getActorType(const std::string& type) {
     throw std::invalid_argument("Unknown actor type");
 }
 
-Actor::ActorDirection getActorDirection(const std::string& direction) {
-    if (direction == "NORTH") return Actor::ActorDirection::NORTH;
-    if (direction == "EAST") return Actor::ActorDirection::EAST;
-    if (direction == "SOUTH") return Actor::ActorDirection::SOUTH;
-    if (direction == "WEST") return Actor::ActorDirection::WEST;
+Actor::ActorDirectionInWorld getActorDirectionInWorld(const std::string& direction) {
+    if (direction == "NORTH") return Actor::ActorDirectionInWorld::NORTH;
+    if (direction == "EAST") return Actor::ActorDirectionInWorld::EAST;
+    if (direction == "SOUTH") return Actor::ActorDirectionInWorld::SOUTH;
+    if (direction == "WEST") return Actor::ActorDirectionInWorld::WEST;
     throw std::invalid_argument("Unknown actor direction");
 }
 
@@ -136,7 +136,7 @@ int main() {
     for (const auto& actor : actors) {
         // std::cout << "Creating actor: Type = " << actor.type << ", Position = (" << actor.x << ", " << actor.y << "), Direction = " << actor.direction << std::endl; // for debugging
 
-        world.addObject(getActorType(actor.type), getActorDirection(actor.direction), actor.x, actor.y);
+        world.addObject(getActorType(actor.type), getActorDirectionInWorld(actor.direction), actor.x, actor.y);
     }
 
     // world.printWorld(); // for debugging

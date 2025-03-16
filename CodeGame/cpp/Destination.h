@@ -7,7 +7,7 @@
 class Destination: public Actor {
 
     public:
-        Destination(int x, int y, ActorDirection actorDirection, ActorType actorType, World* world);
+        Destination(int x, int y, ActorDirectionInWorld actorDirectionInWorld, ActorType actorType, World* world);
         void act() override;
 };
 

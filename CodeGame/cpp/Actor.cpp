@@ -9,11 +9,11 @@
  * 
  * @param x The initial x-coordinate of the actor.
  * @param y The initial y-coordinate of the actor.
- * @param actorDirection The initial direction the actor is facing.
+ * @param actorDirectionInWorld The initial direction the actor is facing.
  * @param actorType The type of the actor (player or obstacle).
  * @param world A reference to the world the actor belongs to.
  */
-Actor::Actor(int _x, int _y, ActorDirection _direction, ActorType _actorType, World* _world)
+Actor::Actor(int _x, int _y, ActorDirectionInWorld _direction, ActorType _actorType, World* _world)
     : x(_x), y(_y), actorDiraction(_direction), actorType(_actorType), world(_world)
 {
     // std::cout << "Actor is created. " << "Type: " << getActorTypeString() << "\n"; // for debugging
@@ -48,16 +48,16 @@ void Actor::move(int distance)
     int newY = y;
 
     switch (actorDiraction) {
-        case ActorDirection::NORTH:
+        case ActorDirectionInWorld::NORTH:
             newY -= distance;
             break;
-        case ActorDirection::EAST:
+        case ActorDirectionInWorld::EAST:
             newX += distance;
             break;
-        case ActorDirection::SOUTH:
+        case ActorDirectionInWorld::SOUTH:
             newY += distance;
             break;
-        case ActorDirection::WEST:
+        case ActorDirectionInWorld::WEST:
             newX -= distance;
             break;
     }
@@ -82,7 +82,27 @@ void Actor::turn(ActorDirection diraction)
         return;
     }
 
-    actorDiraction = diraction;
+    if (diraction == ActorDirection::LEFT) {
+        if (actorDiraction == ActorDirectionInWorld::NORTH) {
+            actorDiraction = ActorDirectionInWorld::WEST;
+        } else if (actorDiraction == ActorDirectionInWorld::WEST) {
+            actorDiraction = ActorDirectionInWorld::SOUTH;
+        } else if (actorDiraction == ActorDirectionInWorld::SOUTH) {
+            actorDiraction = ActorDirectionInWorld::EAST;
+        } else if (actorDiraction == ActorDirectionInWorld::EAST) {
+            actorDiraction = ActorDirectionInWorld::NORTH;
+        }
+    } else if (diraction == ActorDirection::RIGHT) {
+        if (actorDiraction == ActorDirectionInWorld::NORTH) {
+            actorDiraction = ActorDirectionInWorld::EAST;
+        } else if (actorDiraction == ActorDirectionInWorld::EAST) {
+            actorDiraction = ActorDirectionInWorld::SOUTH;
+        } else if (actorDiraction == ActorDirectionInWorld::SOUTH) {
+            actorDiraction = ActorDirectionInWorld::WEST;
+        } else if (actorDiraction == ActorDirectionInWorld::WEST) {
+            actorDiraction = ActorDirectionInWorld::NORTH;
+        }
+    }
 
     SystemOutput::getInstance().outputTrun(getDirectionString());
 }
@@ -95,19 +115,19 @@ void Actor::turn(ActorDirection diraction)
  */
 bool Actor::checkObstacle()
 {
-    if (getDirection() == ActorDirection::NORTH) {
+    if (getDirection() == ActorDirectionInWorld::NORTH) {
         if (world->getObstacles(getX(), getY() - 1).size() > 0) {
             return true;
         }
-    } else if (getDirection() == ActorDirection::EAST) {
+    } else if (getDirection() == ActorDirectionInWorld::EAST) {
         if (world->getObstacles(getX() + 1, getY()).size() > 0) {
             return true;
         }
-    } else if (getDirection() == ActorDirection::SOUTH) {
+    } else if (getDirection() == ActorDirectionInWorld::SOUTH) {
         if (world->getObstacles(getX(), getY() + 1).size() > 0) {
             return true;
         }
-    } else if (getDirection() == ActorDirection::WEST) {
+    } else if (getDirection() == ActorDirectionInWorld::WEST) {
         if (world->getObstacles(getX() - 1, getY()).size() > 0) {
             return true;
         }
@@ -127,19 +147,19 @@ bool Actor::checkWorldBounds()
         return false;
     }
 
-    if (actorDiraction == ActorDirection::NORTH) {
+    if (actorDiraction == ActorDirectionInWorld::NORTH) {
         if (getY() - 1 < 0) {
             return true;
         }
-    } else if (actorDiraction == ActorDirection::EAST) {
+    } else if (actorDiraction == ActorDirectionInWorld::EAST) {
         if (getX() + 1 >= world->getWidth()) {
             return true;
         }
-    } else if (actorDiraction == ActorDirection::SOUTH) {
+    } else if (actorDiraction == ActorDirectionInWorld::SOUTH) {
         if (getY() + 1 >= world->getHeight()) {
             return true;
         }
-    } else if (actorDiraction == ActorDirection::WEST) {
+    } else if (actorDiraction == ActorDirectionInWorld::WEST) {
         if (getX() - 1 < 0) {
             return true;
         }
@@ -174,7 +194,7 @@ int Actor::getY()
  * 
  * @return The direction the actor is facing.
  */
-Actor::ActorDirection Actor::getDirection()
+Actor::ActorDirectionInWorld Actor::getDirection()
 {
     return actorDiraction;
 }
@@ -187,13 +207,13 @@ Actor::ActorDirection Actor::getDirection()
 std::string Actor::getDirectionString() 
 {
     switch (actorDiraction) {
-        case Actor::ActorDirection::NORTH:
+        case Actor::ActorDirectionInWorld::NORTH:
             return "NORTH";
-        case Actor::ActorDirection::EAST:
+        case Actor::ActorDirectionInWorld::EAST:
             return "EAST";
-        case Actor::ActorDirection::SOUTH:
+        case Actor::ActorDirectionInWorld::SOUTH:
             return "SOUTH";
-        case Actor::ActorDirection::WEST:
+        case Actor::ActorDirectionInWorld::WEST:
             return "WEST";
     }
     return "";

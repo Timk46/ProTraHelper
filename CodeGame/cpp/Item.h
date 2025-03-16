@@ -7,7 +7,7 @@
 class Item : public Actor {
 
     public:
-        Item(int x, int y, ActorDirection actorDirection, ActorType actorType, World* world);
+        Item(int x, int y, ActorDirectionInWorld actorDirectionInWorld, ActorType actorType, World* world);
         void act() override;
 };
 

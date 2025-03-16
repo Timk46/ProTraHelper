@@ -34,23 +34,36 @@ class Actor {
         };
 
         /**
-         * @enum Actor::ActorDirection
+         * @enum Actor::ActorDirectionInWorld
          * @brief Defines the direction the actor is facing.
          * 
-         * The ActorDirection enum specifies the direction the actor is facing.
+         * The ActorDirectionInWorld enum specifies the direction the actor is facing.
          * - NORTH: Facing north.
          * - EAST: Facing east.
          * - SOUTH: Facing south.
          * - WEST: Facing west.
          */
-        enum class ActorDirection {
+        enum class ActorDirectionInWorld {
             NORTH,
             EAST,
             SOUTH,
             WEST,
         };
 
-        Actor(int x, int y, ActorDirection actorDirection, ActorType actorType, World* world);
+        /**
+         * @enum Actor::ActorDirection
+         * @brief Defines the direction the actor is facing.
+         * 
+         * The ActorDirection enum specifies the direction the actor is facing.
+         * - LEFT: Facing left.
+         * - RIGHT: Facing right.
+         */
+        enum class ActorDirection {
+            LEFT,
+            RIGHT
+        };
+
+        Actor(int x, int y, ActorDirectionInWorld actorDirectionInWorld, ActorType actorType, World* world);
         virtual ~Actor() = default; // virtual destructor, for dynamic polymorphism (casting)
 
         virtual void act() = 0; // pure virtual function, must be implemented by derived classes
@@ -59,7 +72,7 @@ class Actor {
         int getX();
         int getY();
         ActorType getType() const;
-        ActorDirection getDirection();
+        ActorDirectionInWorld getDirection();
 
         // make Player a friend class to access private members
         friend class Player; 
@@ -68,7 +81,7 @@ class Actor {
         int x;
         int y;
         ActorType actorType;
-        ActorDirection actorDiraction;
+        ActorDirectionInWorld actorDiraction;
         World* world;
 
         bool checkObstacle();
