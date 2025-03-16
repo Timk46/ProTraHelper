@@ -19,23 +19,27 @@ class Player(Actor):
         """
         Perform an action for the player.
         """
-        self.drive()
-        self.drive()
-        self.analyse_item()
-        self.drive()
-        self.drive()
-        self.drive()
-        self.drive()
-        self.turn(ActorDirection.SOUTH)
-        self.drive()
-        self.analyse_item()
-        self.drive()
-        self.analyse_item()
-        self.drive()
-        self.turn(ActorDirection.EAST)
-        self.drive()
-        self.drive()
-        self.drive()
+        drive = self.drive
+        analyse_item = self.analyse_item
+        turn = self.turn
+
+        drive()
+        drive()
+        analyse_item()
+        drive()
+        drive()
+        drive()
+        drive()
+        turn(ActorDirection.SOUTH)
+        drive()
+        analyse_item()
+        drive()
+        analyse_item()
+        drive()
+        turn(ActorDirection.EAST)
+        drive()
+        drive()
+        drive()
 
 
     def drive(self):
