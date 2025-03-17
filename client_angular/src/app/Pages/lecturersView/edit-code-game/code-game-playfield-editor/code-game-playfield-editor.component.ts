@@ -14,6 +14,7 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
 
   codeGameForm: FormGroup;
   theme: string = 'dino'; // default theme. Used without form control to avoid reset all values of the game when changing the theme
+  multiselect: string = '';
   gameField: any[][] = [];
   gameCellRestrictions: any[][] = [];
   selectedCell = { row: 0, col: 0 };
@@ -114,6 +115,14 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
 
   onClick(event: MouseEvent, row: number, col: number): void {
     this.selectedCell = { row, col };
+
+    if (this.multiselect !== '') {
+      if (this.multiselect === '#' || this.multiselect === 'O' || this.multiselect === 'I' || this.multiselect === 'D' || this.multiselect === 'P') {
+        this.setObject(this.multiselect);
+      } else if (this.multiselect === '.' || this.multiselect === 'B' || this.multiselect === 'W') {
+        this.setRestriction(this.multiselect);
+      }
+    }
   }
 
   setObject(object: string): void {
@@ -136,6 +145,10 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
   setRestriction(restriction: string): void {
     this.gameCellRestrictions[this.selectedCell.row][this.selectedCell.col] = restriction;
     this.emitData();
+  }
+
+  isMenuDisabled(): boolean {
+    return this.multiselect !== '';
   }
 
   /*
