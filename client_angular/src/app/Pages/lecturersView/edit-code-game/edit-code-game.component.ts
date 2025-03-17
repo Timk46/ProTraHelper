@@ -368,7 +368,6 @@ export class EditCodeGameComponent implements OnInit {
     console.log("added default scaffolds", codeGameScaffolds);
   }
 
-
   handleDataChangePayfieldEditor(event: any) {
     this.codeGameForm.patchValue({ game: event.gameField });
     this.codeGameForm.patchValue({ gameCellRestrictions: event.gameCellRestrictions });
