@@ -7,6 +7,8 @@ import { detailedQuestionDTO } from "@DTOs/detailedQuestion.dto";
 import { PlayfieldComponent } from "../playfield/playfield.component";
 import {CodeGameEvaluationDTO} from "@DTOs/codeGame.dto";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatDialog } from "@angular/material/dialog";
+import { HelpDialogComponent } from "../help-dialog/help-dialog.component";
 
 enum States { // TODO: check if needed
   startState = 0, // before task is loaded
@@ -57,7 +59,8 @@ export class WorkspaceComponent {
     private title: Title,
     private codeGameTaskDataService: CodeGameTaskDataService,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {
   }
 
@@ -222,5 +225,12 @@ export class WorkspaceComponent {
     this.collectedItems = 0;
     this.visitedCellsAreAllowed = false;
     this.allWhiteListCellsVisited = false;
+  }
+
+  showHelp(): void {
+    this.dialog.open(HelpDialogComponent, {
+      width: '100vh',
+      data: { language: this.selectedLanguage }
+    });
   }
 }
