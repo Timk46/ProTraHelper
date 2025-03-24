@@ -132,9 +132,25 @@ export class PlayfieldComponent {
     const endX = this.playerPosition.x * this.cellSize;
     const endY = this.playerPosition.y * this.cellSize;
 
+    /* Turn in the direction of the smallest angle to prevent the player from turning around 360 degrees */
+    let currentDirection = this.playerDirection;
+    let targetDirection = direction;
+    
+    // Calculate the difference between the current and target direction
+    let diff = targetDirection - currentDirection;
+    
+    // Normalize the difference to the range -180 to 180
+    if (diff > 180) {
+      diff -= 360;
+    } else if (diff < -180) {
+      diff += 360;
+    }
+    
+    // Update the direction based on the shortest rotation
+    this.playerDirection = currentDirection + diff;
+
     // Update the player direction and transformation
-    this.playerDirection = direction;
-    this.playerTransform = `translate(${endX}px, ${endY}px) rotate(${direction}deg)`;
+    this.playerTransform = `translate(${endX}px, ${endY}px) rotate(${this.playerDirection}deg)`;
   }
 
   hideItemImage(row: string, col: string): void {
