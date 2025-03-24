@@ -128,6 +128,8 @@ class Actor:
                 self.actor_direction = ActorDirectionInWorld.SOUTH
             elif (self.actor_direction == ActorDirectionInWorld.SOUTH):
                 self.actor_direction = ActorDirectionInWorld.EAST
+            elif (self.actor_direction == ActorDirectionInWorld.EAST):
+                self.actor_direction = ActorDirectionInWorld.NORTH
         elif (direction == ActorDirection.RIGHT):
             if (self.actor_direction == ActorDirectionInWorld.NORTH):
                 self.actor_direction = ActorDirectionInWorld.EAST
@@ -135,6 +137,8 @@ class Actor:
                 self.actor_direction = ActorDirectionInWorld.SOUTH
             elif (self.actor_direction == ActorDirectionInWorld.SOUTH):
                 self.actor_direction = ActorDirectionInWorld.WEST
+            elif (self.actor_direction == ActorDirectionInWorld.WEST):
+                self.actor_direction = ActorDirectionInWorld.NORTH
 
         SystemOutput.get_instance().output_turn(self.get_direction_string())
 
