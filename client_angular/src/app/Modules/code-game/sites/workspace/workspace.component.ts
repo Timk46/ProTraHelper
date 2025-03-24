@@ -84,6 +84,7 @@ export class WorkspaceComponent {
 
           console.log('CodeGame: Current task: ', this.currentTask); // TODO: remove
 
+          this.title.setTitle('GOALS: ' + this.currentTask?.name);
           this.codeEditorComponent?.changeLanguage(this.selectedLanguage);
 
           // trigger playfield component to load the game
@@ -95,6 +96,10 @@ export class WorkspaceComponent {
         });
       }
     });
+  }
+
+  getTitle(): string {
+    return this.title.getTitle();
   }
 
   // Event handler to get notified when the game animation has finished by the playfield component
