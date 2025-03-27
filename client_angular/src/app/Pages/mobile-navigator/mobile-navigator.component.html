@@ -1,33 +1,76 @@
 <div class="navigation-container" *ngIf="loadingDone">
-  <mat-tab-group [selectedIndex]="openLayers.length - 1" (selectedTabChange)="onTabClick($event.index)" class="tab-container">
-    <mat-tab *ngFor="let item of openLayers" [label]="item.name">
-
-      <div class="table-container">
-        <mat-table [dataSource]="item.nodes">
-          <ng-container matColumnDef="name">
-            <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
-            <mat-cell class="cell" *matCellDef="let entry; let i = index" [ngClass]="{'selected': entry.databaseId == currentNodeId, 'first-cell': i === 0}">
-              <div *ngIf="i === 0 && !item.isRoot" class="cell-container">
-                <mat-icon>reply</mat-icon>
-                <span>Zurück ({{entry.name}})</span>
-              </div>
-              <div *ngIf="i !== 0 || item.isRoot" class="cell-container">
-                <mat-icon *ngIf="entry.childIds.length > 0">folder</mat-icon>
-                <span>{{entry.name}}</span>
-              </div>
-            </mat-cell>
-          </ng-container>
-
-          <mat-row *matRowDef="let row; let i = index; columns: ['name']" (click)="onTableRowClick(row, i, item.isRoot)"></mat-row>
-        </mat-table>
-      </div>
-
-    </mat-tab>
-  </mat-tab-group>
-
-  <div class="button-container">
-    <button mat-raised-button color="primary" (click)="changeActiveNode(currentNodeId)">Anzeigen: {{userGraphData.nodeMap[currentNodeId].name}}</button>
+  <!-- Search input -->
+  <div class="search-container">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Konzepte durchsuchen</mat-label>
+      <input matInput type="text" [(ngModel)]="searchQuery" (input)="onSearchInput()">
+      <button *ngIf="searchQuery" matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()">
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
   </div>
 
+  <!-- Search results -->
+  <div class="search-results" *ngIf="searchQuery && searchResults.length > 0">
+    <div class="results-header">
+      <span>Suchergebnisse</span>
+      <button mat-icon-button (click)="clearSearch()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <mat-nav-list>
+      <a mat-list-item *ngFor="let result of searchResults" (click)="navigateToSearchResult(result)">
+        <div class="search-result-item">
+          <mat-icon *ngIf="result.childIds.length > 0">folder</mat-icon>
+          <mat-icon *ngIf="result.childIds.length === 0">description</mat-icon>
+          <span>{{ result.name }}</span>
+        </div>
+      </a>
+    </mat-nav-list>
+  </div>
+
+  <!-- Breadcrumb navigation -->
+  <div class="breadcrumb-container" *ngIf="!searchQuery">
+    <div class="breadcrumbs">
+      <a *ngFor="let item of openLayers; let i = index"
+         [ngClass]="{'active': i === openLayers.length - 1}"
+         (click)="onBreadcrumbClick(i)">
+        {{ item.name }}
+        <mat-icon *ngIf="i < openLayers.length - 1">chevron_right</mat-icon>
+      </a>
+    </div>
+  </div>
+
+  <!-- Content navigation -->
+  <div class="content-container" *ngIf="!searchQuery">
+    <div class="table-container">
+      <mat-list>
+        <mat-list-item
+          *ngFor="let entry of openLayers[openLayers.length - 1].nodes; let i = index"
+          [ngClass]="{'selected-item': entry.databaseId == currentNodeId, 'back-item': i === 0 && !openLayers[openLayers.length - 1].isRoot}"
+          (click)="onTableRowClick(entry, i, openLayers[openLayers.length - 1].isRoot)">
+
+          <div *ngIf="i === 0 && !openLayers[openLayers.length - 1].isRoot" class="list-item-content back-button">
+            <mat-icon>arrow_back</mat-icon>
+            <span>Zurück zu {{entry.name}}</span>
+          </div>
+
+          <div *ngIf="i !== 0 || openLayers[openLayers.length - 1].isRoot" class="list-item-content">
+            <div class="icon-container">
+              <mat-icon *ngIf="entry.childIds.length > 0">folder</mat-icon>
+              <mat-icon *ngIf="entry.childIds.length === 0">description</mat-icon>
+            </div>
+            <span>{{entry.name}}</span>
+            <mat-icon *ngIf="entry.childIds.length > 0" class="chevron-icon">chevron_right</mat-icon>
+          </div>
+        </mat-list-item>
+      </mat-list>
+    </div>
+  </div>
 </div>
 
+<div class="loading-container" *ngIf="!loadingDone">
+  <mat-spinner diameter="50"></mat-spinner>
+  <p>Lade Konzeptdaten...</p>
+</div>

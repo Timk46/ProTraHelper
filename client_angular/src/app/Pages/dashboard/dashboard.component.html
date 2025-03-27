@@ -1,10 +1,14 @@
-<div appDraggableHeight class="content graph mat-elevation-z8" *ngIf="(sSS.isLandscape | async)">
+<div class="navigation-preference-toggle">
+  <app-navigation-preference-toggle></app-navigation-preference-toggle>
+</div>
+
+<div appDraggableHeight class="content graph mat-elevation-z8" *ngIf="shouldShowGraph()">
   <app-graph></app-graph>
   <div class="resize-handle">
     <mat-icon aria-hidden="false" aria-label="Example drag handle icon" style="transform: scale(2); color: black;">drag_handle</mat-icon>
   </div>
 </div>
-<div class="content graph mat-elevation-z8" *ngIf="!(sSS.isLandscape | async)">
+<div class="content graph mat-elevation-z8" *ngIf="!shouldShowGraph()">
   <app-mobile-navigator></app-mobile-navigator>
 </div>
 <!-- <div *ngIf="(sSS.isHandset | async)">You are on a handset device.</div>
@@ -15,6 +19,3 @@
 <router-outlet></router-outlet>
 
 <!-- lecturers view -->
-
-
-

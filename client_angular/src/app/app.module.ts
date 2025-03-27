@@ -74,6 +74,7 @@ import { CdkAccordionItem, CdkAccordionModule } from "@angular/cdk/accordion";
 import { MatRippleModule } from "@angular/material/core";
 import { CodeGameModule } from "./Modules/code-game/code-game.module";
 import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-game/code-game-confirm-dialog.component";
+import { NavigationPreferenceToggleComponent } from './Components/navigation-preference-toggle/navigation-preference-toggle.component';
 
 @NgModule({
     declarations: [
@@ -129,7 +130,8 @@ import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-
         DynamicQuestionComponent,
         ContentListComponent,
         ContentListItemComponent,
-        CodeGameConfirmDialogComponent
+        CodeGameConfirmDialogComponent,
+        NavigationPreferenceToggleComponent
     ],
     imports: [
         ToastrModule.forRoot(),
