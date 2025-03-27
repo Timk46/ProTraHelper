@@ -1,20 +1,35 @@
 import { ConceptGraphDTO } from '@DTOs/conceptGraph.dto';
 import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
 import { debounceTime, Subject } from 'rxjs';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-mobile-navigator',
   templateUrl: './mobile-navigator.component.html',
-  styleUrls: ['./mobile-navigator.component.scss']
+  styleUrls: ['./mobile-navigator.component.scss'],
+  animations: [
+    trigger('searchAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, width: '0%' }),
+        animate('200ms ease-out', style({ opacity: 1, width: '100%' }))
+      ]),
+      transition(':leave', [
+        style({ opacity: 1, width: '100%' }),
+        animate('200ms ease-in', style({ opacity: 0, width: '0%' }))
+      ])
+    ])
+  ]
 })
-export class MobileNavigatorComponent implements OnInit {
+export class MobileNavigatorComponent implements OnInit, AfterViewChecked {
   // Search functionality
   searchQuery: string = '';
   searchResults: ConceptNodeDTO[] = [];
+  isSearchVisible: boolean = false;
   private searchSubject = new Subject<string>();
+  @ViewChild('searchInput') searchInput!: ElementRef;
 
   private graphCommunicationService: GraphCommunicationService = GraphCommunicationService.getInstance();
   loadingDone: boolean = false;
@@ -61,6 +76,29 @@ export class MobileNavigatorComponent implements OnInit {
     ).subscribe(searchTerm => {
       this.performSearch(searchTerm);
     });
+
+    // Listen for escape key to close search
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && this.isSearchVisible) {
+        this.hideSearch();
+      }
+    });
+  }
+
+  ngAfterViewChecked(): void {
+    // Focus the search input when it becomes visible
+    if (this.isSearchVisible && this.searchInput && this.searchInput.nativeElement) {
+      try {
+        setTimeout(() => {
+          if (this.searchInput && this.searchInput.nativeElement) {
+            this.searchInput.nativeElement.focus();
+          }
+        }, 0);
+      } catch (err) {
+        // Ignore focus errors - they can happen during transitions
+        console.debug('Focus error ignored:', err);
+      }
+    }
   }
 
   /**
@@ -68,6 +106,21 @@ export class MobileNavigatorComponent implements OnInit {
    */
   onSearchInput(): void {
     this.searchSubject.next(this.searchQuery);
+  }
+
+  /**
+   * Shows the search input and hides the breadcrumb
+   */
+  showSearch(): void {
+    this.isSearchVisible = true;
+  }
+
+  /**
+   * Hides the search input and shows the breadcrumb
+   */
+  hideSearch(): void {
+    this.isSearchVisible = false;
+    this.clearSearch();
   }
 
   /**
@@ -113,7 +166,12 @@ export class MobileNavigatorComponent implements OnInit {
 
     // Update UI
     this.openLayers = this.getOpenedLayers(this.currentLayer);
-    this.clearSearch();
+
+    // Hide search input and clear results
+    this.hideSearch();
+
+    // Show selected content
+    this.changeActiveNode(this.currentNodeId);
   }
 
   /**

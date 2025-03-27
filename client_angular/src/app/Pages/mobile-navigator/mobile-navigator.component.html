@@ -1,14 +1,40 @@
 <div class="navigation-container" *ngIf="loadingDone">
-  <!-- Search input -->
-  <div class="search-container">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Konzepte durchsuchen</mat-label>
-      <input matInput type="text" [(ngModel)]="searchQuery" (input)="onSearchInput()">
-      <button *ngIf="searchQuery" matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()">
-        <mat-icon>close</mat-icon>
-      </button>
-      <mat-icon matPrefix>search</mat-icon>
-    </mat-form-field>
+  <!-- Breadcrumb navigation with search icon -->
+  <div class="breadcrumb-container">
+    <div class="breadcrumbs" *ngIf="!isSearchVisible">
+      <a *ngFor="let item of openLayers; let i = index"
+         [ngClass]="{'active': i === openLayers.length - 1}"
+         (click)="onBreadcrumbClick(i)">
+        {{ item.name }}
+        <mat-icon *ngIf="i < openLayers.length - 1">chevron_right</mat-icon>
+      </a>
+    </div>
+
+    <!-- Search toggle button (visible when search is hidden) -->
+    <button
+      *ngIf="!isSearchVisible"
+      mat-icon-button
+      class="search-toggle-btn"
+      (click)="showSearch()"
+      matTooltip="Suchen">
+      <mat-icon>search</mat-icon>
+    </button>
+
+    <!-- Collapsible search input (visible when search is shown) -->
+    <div class="collapsible-search" *ngIf="isSearchVisible" [@searchAnimation]="'visible'">
+      <mat-form-field appearance="outline" class="search-field">
+        <input
+          matInput
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="onSearchInput()"
+          placeholder="Konzepte durchsuchen"
+          #searchInput>
+        <button matSuffix mat-icon-button aria-label="Clear" (click)="hideSearch()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
   </div>
 
   <!-- Search results -->
@@ -28,18 +54,6 @@
         </div>
       </a>
     </mat-nav-list>
-  </div>
-
-  <!-- Breadcrumb navigation -->
-  <div class="breadcrumb-container" *ngIf="!searchQuery">
-    <div class="breadcrumbs">
-      <a *ngFor="let item of openLayers; let i = index"
-         [ngClass]="{'active': i === openLayers.length - 1}"
-         (click)="onBreadcrumbClick(i)">
-        {{ item.name }}
-        <mat-icon *ngIf="i < openLayers.length - 1">chevron_right</mat-icon>
-      </a>
-    </div>
   </div>
 
   <!-- Content navigation -->
