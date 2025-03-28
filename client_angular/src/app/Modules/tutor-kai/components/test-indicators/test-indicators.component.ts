@@ -71,13 +71,28 @@ export class TestIndicatorsComponent implements OnChanges, OnInit {
   }
 
   /**
-   * Öffnet den Dialog mit den Testdetails
+   * Öffnet den Dialog mit den Testdetails für einen Test
    */
   openTestDetails(test: TestResult): void {
     this.dialog.open(TestDetailsDialogComponent, {
       width: '500px',
       data: test
     });
+  }
+
+  /**
+   * Öffnet den Dialog mit allen Testdetails
+   */
+  openAllTestsDetails(): void {
+    if (this.testResults && this.testResults.length > 0) {
+      this.dialog.open(TestDetailsDialogComponent, {
+        width: '600px',
+        data: {
+          allTests: this.testResults,
+          isListView: true
+        }
+      });
+    }
   }
 
   /**

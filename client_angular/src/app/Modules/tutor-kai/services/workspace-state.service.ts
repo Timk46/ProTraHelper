@@ -64,8 +64,21 @@ export class WorkspaceStateService {
 
     return this.runCodeService.executeStudentCode(taskId, inputArgs, additionalFiles).pipe(
       tap(result => {
+        // Konvertiere Backend-Testresultate zum Frontend-Format
+        if (result?.CodeSubmissionResult?.testResults) {
+          result.CodeSubmissionResult.testResults = result.CodeSubmissionResult.testResults.map(test => {
+            // Transformiere Backend-Format (test, status) zu Frontend-Format (name, passed)
+            const transformedTest: any = {
+              name: test.test || '', // Backend verwendet 'test' Eigenschaft statt 'name'
+              passed: test.status === 'PASSED',
+              exception: test.exception
+            };
+            return transformedTest;
+          });
+        }
         this.codeSubmissionResultSubject.next(result);
         this.workspaceStateSubject.next(WorkspaceState.SUBMITTED_CODE);
+        console.log(JSON.stringify(this.codeSubmissionResultSubject))
       }),
       catchError(error => {
         this.errorSubject.next(`Fehler beim Ausführen des Codes: ${error.message}`);
