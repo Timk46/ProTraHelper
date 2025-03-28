@@ -1,9 +1,3 @@
 <div class="chat-wrapper">
-    <div class="chat-header">
-        <span>Chat-Bot</span>
-        <button mat-icon-button class="close-button" (click)="onChatClose()">
-            <mat-icon>close</mat-icon>
-        </button>
-    </div>
-    <app-chat-bot-dialog [display]="displayType.Embedded" [@fadeAnimation]></app-chat-bot-dialog>
+    <app-chat-bot-dialog [display]="displayType.Embedded" (close)="onChatClose()" [@fadeAnimation]></app-chat-bot-dialog>
 </div>

@@ -1,18 +1,7 @@
 <mat-toolbar class="app-header">
-  <!-- Linke Seite: Logo und Titel -->
+  <!-- Linke Seite: Logo, Goals-Icon und Chat-Icon -->
   <div class="left-content">
     <img src="assets/img/logo_hefl2.png" alt="HEFL Logo" class="app-logo" (click)="navigateToDashboard()">
-  </div>
-
-  <!-- Mitte: Navigation Toggle Button (Mobile/Graph) -->
-  <div class="center-content">
-    <app-navigation-preference-toggle *ngIf="showNavToggle" class="nav-toggle"></app-navigation-preference-toggle>
-  </div>
-
-  <!-- Rechte Seite: Notification und User-Menü -->
-  <div class="right-content">
-    <!-- Notification Bell -->
-
     <!-- User Menü -->
     <button mat-button [matMenuTriggerFor]="userMenu" *ngIf="userIsLoggedIn" class="user-menu-button">
       <mat-icon>account_circle</mat-icon>
@@ -22,6 +11,23 @@
       <button mat-menu-item (click)="logOut(false)">Abmelden</button>
       <button mat-menu-item (click)="logOut(true)">Von allen Geräten abmelden</button>
     </mat-menu>
+
+  </div>
+
+  <!-- Mitte: Navigation Toggle Button (Mobile/Graph) -->
+  <div class="center-content">
+    <app-navigation-preference-toggle *ngIf="showNavToggle" class="nav-toggle"></app-navigation-preference-toggle>
+  </div>
+
+  <!-- Rechte Seite: Notification und User-Menü -->
+  <div class="right-content">
+    <!-- Chat-Button -->
+    <button mat-button *ngIf="userIsLoggedIn" class="chat-button" matTooltip="Chat öffnen" (click)="toggleChatBot()">
+      <mat-icon>chat</mat-icon>
+      <span>Chat</span>
+    </button>
+
+    <!-- Notification Bell -->
     <div *ngIf="userIsLoggedIn" class="notification-container">
       <app-notification-bell></app-notification-bell>
     </div>

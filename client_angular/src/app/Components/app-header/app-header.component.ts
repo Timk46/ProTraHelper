@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ConfirmationBoxComponent } from 'src/app/Pages/confirmation-box/confirmation-box.component';
@@ -11,10 +11,19 @@ import { NavigationPreferenceService } from 'src/app/Services/navigation/navigat
   styleUrls: ['./app-header.component.scss']
 })
 export class AppHeaderComponent implements OnInit {
+  @Output() chatToggle = new EventEmitter<void>();
+
   userMail: string = "";
   userRole: string = "";
   userIsLoggedIn: boolean = false;
   showNavToggle: boolean = true;
+
+  /**
+   * Toggles the chat bot visibility and emits the event to parent component
+   */
+  toggleChatBot(): void {
+    this.chatToggle.emit();
+  }
 
   /**
    * Navigiert zum Dashboard

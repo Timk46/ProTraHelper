@@ -93,7 +93,9 @@ export class AppComponent {
   }
 
   toggleChatBot(): void {
+    console.log('toggleChatBot called, current state:', this.chatActive);
     this.chatActive = !this.chatActive;
+    console.log('toggleChatBot new state:', this.chatActive);
   }
 
   disableConsoleInProduction(): void { if (environment.production)
