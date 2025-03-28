@@ -9,6 +9,12 @@ export class TerminalOutputComponent implements OnChanges {
   @Input() output: string | null = null;
   @Input() isLoading: boolean = false;
 
+  // Schriftgröße für Terminal-Output
+  fontSizePercent: number = 90; // Standardgröße (90%)
+  readonly MIN_FONT_SIZE: number = 70; // Minimale Schriftgröße (70%)
+  readonly MAX_FONT_SIZE: number = 150; // Maximale Schriftgröße (150%)
+  readonly FONT_SIZE_STEP: number = 10; // Schrittgröße der Änderung (10%)
+
   formattedOutput: string[] = [];
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -51,6 +57,24 @@ export class TerminalOutputComponent implements OnChanges {
       navigator.clipboard.writeText(this.output)
         .then(() => console.log('Output copied to clipboard'))
         .catch(err => console.error('Could not copy text: ', err));
+    }
+  }
+
+  /**
+   * Vergrößert die Schriftgröße des Terminal-Outputs
+   */
+  increaseFontSize(): void {
+    if (this.fontSizePercent < this.MAX_FONT_SIZE) {
+      this.fontSizePercent += this.FONT_SIZE_STEP;
+    }
+  }
+
+  /**
+   * Verkleinert die Schriftgröße des Terminal-Outputs
+   */
+  decreaseFontSize(): void {
+    if (this.fontSizePercent > this.MIN_FONT_SIZE) {
+      this.fontSizePercent -= this.FONT_SIZE_STEP;
     }
   }
 }

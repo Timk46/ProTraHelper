@@ -24,12 +24,20 @@
       color: #ddd;
     }
 
-    .copy-button {
-      margin-left: auto;
-      color: #aaa;
+    .header-buttons {
+      display: flex;
+      gap: 4px;
 
-      &:hover {
-        color: #fff;
+      .font-size-button, .copy-button {
+        color: #aaa;
+
+        &:hover {
+          color: #fff;
+        }
+
+        &:disabled {
+          color: #555;
+        }
       }
     }
   }
@@ -71,8 +79,14 @@
         padding: 2px 0;
         white-space: pre-wrap;
         word-break: break-all;
-        font-size: 14px;
+        // Keine feste Schriftgröße, sondern erben
+        font-size: inherit;
         line-height: 1.5;
+      }
+
+      // Stellen Sie sicher, dass auch die direkt eingefügten Inhalte die Schriftgröße erben
+      span, .error, .warning, .success {
+        font-size: inherit;
       }
 
       .empty-message {
@@ -80,6 +94,7 @@
         font-style: italic;
         padding: 10px 0;
         text-align: center;
+        font-size: inherit;
       }
 
       .error {
@@ -121,7 +136,8 @@
       padding: 8px;
 
       .terminal-content p {
-        font-size: 13px;
+        // Nicht die feste Schriftgröße verwenden, sondern erben
+        font-size: inherit;
         line-height: 1.4;
       }
     }
