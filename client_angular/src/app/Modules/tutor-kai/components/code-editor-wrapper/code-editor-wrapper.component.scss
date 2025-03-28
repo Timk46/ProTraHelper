@@ -1,0 +1,39 @@
+.code-editor-wrapper {
+  margin-bottom: 20px;
+
+  .input-args-form {
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .arg-input {
+      margin-bottom: 10px;
+
+      mat-form-field {
+        width: 100%;
+      }
+    }
+  }
+
+  .submit-controls {
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+      min-width: 150px;
+
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+}

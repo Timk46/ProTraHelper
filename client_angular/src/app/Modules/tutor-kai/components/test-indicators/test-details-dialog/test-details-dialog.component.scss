@@ -1,0 +1,84 @@
+.test-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &.passed {
+    color: #2e7d32;
+  }
+
+  &.failed {
+    color: #d32f2f;
+  }
+
+  mat-icon {
+    margin-right: 4px;
+  }
+}
+
+.test-status {
+  margin: 12px 0;
+  display: flex;
+  align-items: center;
+
+  .status-label {
+    font-weight: 500;
+    margin-right: 8px;
+  }
+
+  .status-value {
+    font-weight: 500;
+
+    &.passed {
+      color: #2e7d32;
+    }
+
+    &.failed {
+      color: #d32f2f;
+    }
+  }
+}
+
+.exception-section {
+  background-color: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  margin-top: 12px;
+  overflow: hidden;
+
+  .exception-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+
+    .error-label {
+      font-weight: 500;
+      color: #d32f2f;
+    }
+  }
+
+  .exception-preview {
+    padding: 8px 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    color: #d32f2f;
+    background-color: #ffebee;
+  }
+
+  .exception-stack {
+    padding: 12px;
+    margin: 0;
+    background-color: #ffebee;
+    color: #d32f2f;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    overflow-x: auto;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+}

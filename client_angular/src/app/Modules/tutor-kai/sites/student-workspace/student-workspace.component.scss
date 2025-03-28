@@ -1,229 +1,413 @@
-$snowstorm_1: #eceff4;
-$snowstorm_2: #e5e9f0;
-$snowstorm_3: #d8dee9;
-
-$polarNight_4: #2e3440;
-
-.feedback-message {
-  font-size: 1.2em;
-  line-height: 1.6;
-}
-
-.polarNight_4_text {
-  color: $polarNight_4;
-}
-
-.snowstorm_1 {
-  background-color: $snowstorm_1;
-}
-
-.snowstorm_2 {
-  background-color: $snowstorm_2;
-}
-
-.snowstorm_3 {
-  background-color: $snowstorm_3;
-}
-
-.snackbar {
-  background-color:$snowstorm_3;
-  color:$polarNight_4;
-}
-
-resize {
-  resize: vertical;
-  overflow: auto;
-}
-
-::ng-deep ngx-monaco-editor {
-  height: 100% !important;
-}
-
-.actions-container {
+.student-workspace {
   display: flex;
   flex-direction: column;
-  align-items: center;
-}
-
-.rating {
-  margin-bottom: 1rem;
-}
-
-.feedback-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.feedback-form mat-form-field {
-  width: 80%;
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-@keyframes glow {
-  0%, 100% {
-    box-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 15px #ffd700;
-  }
-  50% {
-    box-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700;
-  }
-}
-
-.star-button {
-  &.animate-star {
-    animation: bounce 1s infinite;
-    .mat-icon {
-      transition: all 0.3s ease;
-    }
-  }
-
-  .mat-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-    line-height: 32px;
-
-    &.gold {
-      color: gold;
-    }
-
-    &.grey {
-      color: grey;
-    }
-
-    &.glow-effect {
-      filter: drop-shadow(0 0 2px #ffd700);
-    }
-  }
-}
-
-.example-full-width {
-  width: 100%;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.noOverFlow
-{
-  min-width: 150px;
+  height: 100vh;
   overflow: hidden;
-}
-.code-editor-parent
-{
-  height: 100%;
-}
 
-.test-results {
-  display: flex;
-  align-items: center;
-  gap: 8px; /* Abstand zwischen den Elementen */
-}
-
-.test-circles {
-  display: flex;
-  align-items: center;
-  gap: 4px; /* Abstand zwischen den Kreisen */
-}
-
-.points-progress-bar {
-  width: 100%; /* Setzt die Breite der Fortschrittsleiste */
-  margin-top: 20px; /* Fügt einen Abstand nach oben hinzu */
-}
-
-
-// HEADER
-
-.mat-divider {
-  margin-top:16px;
-  margin-bottom: 16px;
-  background-color: lightgrey;
-}
-
-
-.header {
-  height: 30px; /* Reduzierte Höhe */
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 10px; /* Reduzierte Schriftgröße */
-  padding: 0 0px;
-}
-
-.left-content, .center-content, .right-content {
-  display: flex;
-  align-items: center;
-}
-
-.right-content img {
-  right: 0px;
-  height: 100%; /* Passt die Höhe des Bildes an den Header an */
-  width: auto; /* Erhält das Seitenverhältnis des Bildes */
-  max-height: 30px; /* Stellt sicher, dass das Bild den Header nicht überschreitet */
-}
-
-.center-content {
-  justify-content: center;
-  gap: 8px; /* Etwas kleinerer Abstand zwischen den Elementen */
-}
-
-.divider {
-  height: 15px; /* Reduzierte Höhe für visuelle Trennzeichen */
-  background-color: lightgrey;
-}
-
-::ng-deep markdown {
-  // Unordered lists
-  ul {
-    list-style-type: disc;
-    padding-left: 20px;
-    margin-bottom: 16px;
-  }
-
-  // Ordered lists
-  ol {
-    list-style-type: decimal;
-    padding-left: 20px;
-    margin-bottom: 16px;
-  }
-
-  // List items
-  li {
-    margin-bottom: 8px;
-  }
-
-  // Nested lists
-  ul ul, ol ul {
-    list-style-type: circle;
-  }
-
-  ul ol, ol ol {
-    list-style-type: lower-alpha;
-  }
-
-  // Task lists
-  ul.contains-task-list {
-    list-style-type: none;
-    padding-left: 0;
-  }
-
-  .task-list-item {
+  // Header immer oben
+  .header {
     display: flex;
     align-items: center;
+    padding: 10px 15px;
+    background-color: #f5f5f5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+
+    h1 {
+      margin: 0;
+      margin-left: 10px;
+      font-size: 24px;
+      font-weight: 500;
+    }
   }
 
-  .task-list-item-checkbox {
-    margin-right: 8px;
+  // Mobile Navigation (für Tablets und kleinere Geräte)
+  .mobile-navigation {
+    display: none; // standardmäßig ausgeblendet, nur für mobile sichtbar
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    padding: 5px;
+    justify-content: space-around;
+    z-index: 5;
+
+    button {
+      flex: 1;
+      padding: 8px 0;
+      font-size: 14px;
+      text-transform: uppercase;
+      border-radius: 0;
+      margin: 0 2px;
+
+      &.active {
+        background-color: #e0e0e0;
+        color: #3f51b5;
+        font-weight: 500;
+      }
+    }
+  }
+
+  // Hauptcontainer
+  .workspace-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+
+    // Obere Zeile: Aufgabe + Editor
+    .top-row {
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+
+      // Linkes Panel: Aufgabenbeschreibung
+      .task-panel {
+        display: flex;
+        flex-direction: column;
+        min-width: 250px;
+        overflow: hidden;
+        border-right: 1px solid #ddd;
+        transition: all 0.3s ease;
+
+        &.collapsed {
+          width: 50px !important;
+          min-width: 50px;
+
+          .panel-header h2, .task-description {
+            display: none;
+          }
+        }
+
+        .panel-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px;
+          background-color: #f8f9fa;
+          border-bottom: 1px solid #eee;
+
+          h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+          }
+
+          .toggle-button {
+            color: #666;
+          }
+        }
+
+        .task-description {
+          flex: 1;
+          padding: 15px;
+          overflow-y: auto;
+          background-color: #fff;
+
+          h1, h2, h3 {
+            margin-top: 0;
+          }
+
+          ul, ol {
+            padding-left: 20px;
+          }
+
+          pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+          }
+
+          code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 4px;
+          }
+        }
+      }
+
+      // Horizontaler Resize-Handle
+      .horizontal-resize-handle {
+        width: 8px;
+        cursor: ew-resize;
+        background-color: #f0f0f0;
+        border-left: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+        position: relative;
+
+        &:hover {
+          background-color: #e0e0e0;
+        }
+
+        &:active {
+          background-color: #ccc;
+        }
+
+        &::after {
+          content: '';
+          position: absolute;
+          left: 3px;
+          top: 50%;
+          transform: translateY(-50%);
+          height: 30px;
+          width: 2px;
+          background-color: #aaa;
+          border-radius: 1px;
+        }
+      }
+
+      // Rechte Seite: Code-Editor
+      .editor-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        app-code-editor-wrapper {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
+      }
+    }
+
+    // Vertikaler Resize-Handle
+    .vertical-resize-handle {
+      height: 8px;
+      background-color: #f0f0f0;
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+      cursor: ns-resize;
+      position: relative;
+
+      &:hover {
+        background-color: #e0e0e0;
+      }
+
+      &:active {
+        background-color: #ccc;
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 30px;
+        height: 2px;
+        background-color: #aaa;
+        border-radius: 1px;
+      }
+    }
+
+    // Mittlere Zeile: Test-Indikatoren + Execute-Button
+    .middle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: linear-gradient(to right, #f5f5f5, #e8eaf6);
+      border-top: 1px solid #e0e0e0;
+      border-bottom: 1px solid #e0e0e0;
+      min-height: 60px; // Feste Mindesthöhe für die Zeile
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      position: relative;
+      z-index: 5;
+
+      // Container für beide Bereiche
+      .middle-row-content {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+
+        // Bereich für Test-Indikatoren
+        .test-indicators-container {
+          flex: 2; // Nimmt mehr Platz ein
+          margin-right: 16px;
+          min-height: 40px;
+          display: flex;
+          align-items: center;
+
+          // Wenn keine Tests vorhanden sind, zeige Platzhalter
+          &.empty {
+            opacity: 0.6;
+          }
+        }
+
+        // Bereich für Ausführungs-Button
+        .execute-button-container {
+          flex: 0 0 auto;
+
+          button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: linear-gradient(45deg, #3f51b5, #536dfe);
+            color: white;
+            border-radius: 20px;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(63, 81, 181, 0.3);
+            transition: all 0.3s ease;
+            border: none;
+
+            &:hover:not(:disabled) {
+              box-shadow: 0 4px 8px rgba(63, 81, 181, 0.4);
+              transform: translateY(-1px);
+            }
+
+            &:disabled {
+              background: linear-gradient(45deg, #9e9e9e, #bdbdbd);
+              opacity: 0.7;
+            }
+
+            mat-icon {
+              font-size: 18px;
+              height: 18px;
+              width: 18px;
+            }
+          }
+        }
+      }
+
+      // Status-Indikator für den Kompilierungs-/Ausführungsstatus
+      .compile-status {
+        position: absolute;
+        right: 16px;
+        top: 0;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+
+        &.active {
+          background-color: #ff9800;
+          box-shadow: 0 0 8px rgba(255, 152, 0, 0.6);
+          animation: pulse 1.5s infinite;
+        }
+      }
+
+      @keyframes pulse {
+        0% { opacity: 0.4; }
+        50% { opacity: 1; }
+        100% { opacity: 0.4; }
+      }
+    }
+
+    // Untere Zeile: Feedback + Terminal
+    .bottom-row {
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+
+      .feedback-area {
+        min-width: 250px;
+        overflow: auto;
+        border-right: 1px solid #ddd;
+      }
+
+      .horizontal-resize-handle {
+        width: 8px;
+        cursor: ew-resize;
+        background-color: #f0f0f0;
+        border-left: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+        position: relative;
+
+        &:hover {
+          background-color: #e0e0e0;
+        }
+
+        &:active {
+          background-color: #ccc;
+        }
+
+        &::after {
+          content: '';
+          position: absolute;
+          left: 3px;
+          top: 50%;
+          transform: translateY(-50%);
+          height: 30px;
+          width: 2px;
+          background-color: #aaa;
+          border-radius: 1px;
+        }
+      }
+
+      .terminal-section {
+        flex: 1;
+        overflow: hidden;
+        background-color: #1e1e1e;
+      }
+    }
+
+    // Alte Klassen für Migration
+    .work-area {
+      display: none;
+    }
+
+    .main-resize-handle {
+      display: none;
+    }
+  }
+}
+
+// Responsives Design
+@media (max-width: 992px) {
+  .student-workspace {
+    .workspace-container {
+      .top-row .task-panel {
+        min-width: 200px;
+      }
+    }
+  }
+}
+
+// Tablet und Mobile Layout
+@media (max-width: 768px) {
+  .student-workspace {
+    // Zeige mobile Navigation
+    .mobile-navigation {
+      display: flex;
+    }
+
+    .workspace-container {
+      // Tab-basiertes Layout für mobile Ansicht
+      &[data-active-tab="task"] {
+        // Zeige nur Aufgabenbereich
+        .top-row { display: flex; height: 100% !important; }
+        .top-row .task-panel { width: 100% !important; }
+        .top-row .horizontal-resize-handle, .top-row .editor-section,
+        .middle-row, .vertical-resize-handle, .bottom-row { display: none; }
+      }
+
+      &[data-active-tab="code"] {
+        // Zeige nur Code-Editor
+        .top-row { display: flex; height: 100% !important; }
+        .top-row .editor-section { width: 100% !important; }
+        .top-row .horizontal-resize-handle, .top-row .task-panel,
+        .middle-row, .vertical-resize-handle, .bottom-row { display: none; }
+      }
+
+      &[data-active-tab="output"] {
+        // Zeige nur Terminal-Output und Test-Indikatoren
+        .top-row, .vertical-resize-handle:first-of-type { display: none; }
+        .middle-row, .bottom-row { display: flex; }
+        .bottom-row { height: calc(100% - 60px) !important; }
+        .bottom-row .terminal-section { width: 100% !important; }
+        .bottom-row .horizontal-resize-handle, .bottom-row .feedback-area { display: none; }
+      }
+
+      &[data-active-tab="feedback"] {
+        // Zeige nur Feedback-Bereich
+        .top-row, .middle-row, .vertical-resize-handle { display: none; }
+        .bottom-row { display: flex; height: 100% !important; }
+        .bottom-row .feedback-area { width: 100% !important; }
+        .bottom-row .horizontal-resize-handle, .bottom-row .terminal-section { display: none; }
+      }
+    }
   }
 }

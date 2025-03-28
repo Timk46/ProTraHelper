@@ -17,12 +17,30 @@ import { MaterialModule } from '../material.module';
 import { CodeEditorComponent } from './sites/code-editor/code-editor.component';
 import { VideoTimeStampComponent } from './sites/video-time-stamp/video-time-stamp.component';
 
+// Neue, optimierte Komponenten
+import { RatingComponent } from './components/rating/rating.component';
+import { FeedbackPanelComponent } from './components/feedback-panel/feedback-panel.component';
+import { CodeEditorWrapperComponent } from './components/code-editor-wrapper/code-editor-wrapper.component';
+import { TerminalOutputComponent } from './components/terminal-output/terminal-output.component';
+import { TestIndicatorsComponent } from './components/test-indicators/test-indicators.component';
+import { TestDetailsDialogComponent } from './components/test-indicators/test-details-dialog/test-details-dialog.component';
+
+// Services
+import { WorkspaceStateService } from './services/workspace-state.service';
+
 @NgModule({
   declarations: [
     TutorKaiComponent,
     StudentWorkspaceComponent,
     CodeEditorComponent,
-    VideoTimeStampComponent
+    VideoTimeStampComponent,
+    // Neue Komponenten
+    RatingComponent,
+    FeedbackPanelComponent,
+    CodeEditorWrapperComponent,
+    TerminalOutputComponent,
+    TestIndicatorsComponent,
+    TestDetailsDialogComponent
   ],
   imports: [
     CommonModule,
@@ -33,11 +51,20 @@ import { VideoTimeStampComponent } from './sites/video-time-stamp/video-time-sta
     FormsModule,
     MarkdownModule.forRoot(),
     ToastrModule.forRoot(),
-    MonacoEditorModule.forRoot(),
+    MonacoEditorModule.forRoot()
   ],
   exports: [
     CodeEditorComponent,
-    VideoTimeStampComponent
+    VideoTimeStampComponent,
+    // Neue Komponenten als Export hinzufügen, falls sie außerhalb des Moduls verwendet werden
+    RatingComponent,
+    FeedbackPanelComponent,
+    CodeEditorWrapperComponent,
+    TerminalOutputComponent,
+    TestIndicatorsComponent
+  ],
+  providers: [
+    WorkspaceStateService // Explizite Bereitstellung des State Services
   ],
   bootstrap: [TutorKaiComponent],
 })

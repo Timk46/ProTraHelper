@@ -1,0 +1,29 @@
+.rating-component {
+  margin: 20px 0;
+  text-align: center;
+
+  h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+
+  .star-container {
+    margin-bottom: 15px;
+
+    .star {
+      color: #ccc;
+      font-size: 28px;
+      cursor: pointer;
+      margin: 0 5px;
+      transition: color 0.2s ease-in-out;
+
+      &:hover, &.filled {
+        color: #ffc107; // Gelbe Farbe für die Sterne
+      }
+    }
+  }
+
+  button {
+    min-width: 150px;
+  }
+}

@@ -1,0 +1,32 @@
+<h2 mat-dialog-title class="test-title" [ngClass]="{'passed': data.passed, 'failed': !data.passed}">
+  <mat-icon>{{ data.passed ? 'check_circle' : 'error' }}</mat-icon>
+  <span>{{ data.name }}</span>
+</h2>
+
+<mat-dialog-content>
+  <div class="test-status">
+    <span class="status-label">Status:</span>
+    <span class="status-value" [ngClass]="{'passed': data.passed, 'failed': !data.passed}">
+      {{ data.passed ? 'Bestanden' : 'Fehlgeschlagen' }}
+    </span>
+  </div>
+
+  <div class="exception-section" *ngIf="hasException()">
+    <div class="exception-header" (click)="toggleStack()">
+      <span class="error-label">Fehler:</span>
+      <button mat-icon-button>
+        <mat-icon>{{ showStack ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</mat-icon>
+      </button>
+    </div>
+
+    <div class="exception-preview" *ngIf="!showStack">
+      {{ data.exception!.split('\n')[0] }}
+    </div>
+
+    <pre class="exception-stack" *ngIf="showStack">{{ data.exception }}</pre>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Schließen</button>
+</mat-dialog-actions>

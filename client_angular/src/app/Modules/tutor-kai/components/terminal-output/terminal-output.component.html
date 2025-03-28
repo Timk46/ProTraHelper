@@ -1,0 +1,22 @@
+<div class="terminal-container">
+  <div class="terminal-header">
+    <span class="terminal-title">Compiler Output</span>
+    <button mat-icon-button class="copy-button" (click)="copyOutput()" aria-label="Inhalt kopieren">
+      <mat-icon>content_copy</mat-icon>
+    </button>
+  </div>
+
+  <div class="terminal-body">
+    <div *ngIf="isLoading" class="loading-spinner">
+      <div class="spinner"></div>
+      <span>Ausführung läuft...</span>
+    </div>
+
+    <div *ngIf="!isLoading" class="terminal-content">
+      <p *ngFor="let line of formattedOutput" [innerHTML]="line"></p>
+      <div *ngIf="formattedOutput.length === 0" class="empty-message">
+        Keine Ausgabe vorhanden
+      </div>
+    </div>
+  </div>
+</div>

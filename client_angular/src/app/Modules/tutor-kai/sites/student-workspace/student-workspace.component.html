@@ -1,185 +1,115 @@
-<mat-toolbar class="header" style="min-height: 30px !important; height: 30px !important;" color="primary">
-  <div class="left-content">
-   <a (click)="navigateToDashboard()" mat-list-item style="cursor: pointer;">
-     <span  style="font-size:15px;">Zurück zum Dashboard</span>
-   </a>
- </div>
- <div class="center-content">
-   <span style="font-size:15px;" *ngIf="this.currentTask">{{this.currentTask.name}}</span>
- </div>
- <div class="right-content">
-   <span style="font-size:15px; margin-right: 10px;">Tutor Kai</span>
-   <img src="../../../../../assets/img/kai_logo_small.png" alt="Tutor Kai Logo">
- </div>
-</mat-toolbar>
+<div class="student-workspace">
 
-<div class="w-full px-4">
- <div class="w-full mx-auto my-4">
-   <!-- Main Grid mit 12 Spalten (jede Hälfte 6 Spalten) -->
-   <div class="grid grid-cols-1 lg:grid-cols-12 gap-2">
-     <!-- Linkes Grid: Dropdown + Aufgabenstellung-->
-     <div class="col-span-1 lg:col-span-6" style="top: 30px">
-           <div class="col-span-1 lg:col-span-6 grid lg:grid-cols-2 gap-3">
-             <mat-form-field
-               *ngIf="tasksOfSelectedWeek.length > 0"
-               appearance="fill"
-               class="mat-body w-full mb-1 light-theme"
-             >
-               <mat-select placeholder="Wähle eine Aufgabe" (selectionChange)="changeTask($event.value)">
-                 <mat-option *ngFor="let task of tasksOfSelectedWeek" [value]="task.codingQuestion!.id">{{ task.name }}</mat-option>
-               </mat-select>
-             </mat-form-field>
-           </div>
-             <mat-card>
-              <mat-card-content class="polarNight_4_text">
-                <markdown [data]="taskDescription"></markdown>
-              </mat-card-content>
-             </mat-card>
-     </div>
+  <!-- Mobile Navigation für Tab-basiertes Layout (oben statt unten) -->
+  <div class="mobile-navigation">
+    <button
+      mat-button
+      [class.active]="activeTab === 'task'"
+      (click)="setActiveTab('task')">
+      Aufgabe
+    </button>
+    <button
+      mat-button
+      [class.active]="activeTab === 'code'"
+      (click)="setActiveTab('code')">
+      Code
+    </button>
+    <button
+      mat-button
+      [class.active]="activeTab === 'output'"
+      (click)="setActiveTab('output')">
+      Ausgabe
+    </button>
+    <button
+      mat-button
+      [class.active]="activeTab === 'feedback'"
+      (click)="setActiveTab('feedback')">
+      Feedback
+    </button>
+  </div>
 
-     <!-- Rechtes Grid: Code-Editor -->
-     <div class="col-span-1 lg:col-span-6">
-       <mat-tab-group dynamicHeight animationDuration="0ms" [backgroundColor]="'primary'" [color]="'primary'">
-         <mat-tab *ngFor="let codeStructure of currentTask?.codingQuestion?.codeGerueste; let isLast = last">
-           <ng-template mat-tab-label>
-             <div class="tab-label">
-               <span>{{codeStructure.codeFileName.split('.')[0]}}</span>
-             </div>
-           </ng-template>
-             <div class="code-editor-parent">
-               <app-code-editor #codeEditorMonaco
-                   [selectedLanguage]="currentTask?.codingQuestion?.programmingLanguage"
-                   [(code)]="codeStructure.code"
-                   (codeChange)="onCodeChanged($event)">
-               </app-code-editor>
-           </div>
-         </mat-tab>
-       </mat-tab-group>
-     </div>
+  <!-- Neue Workspace-Container-Struktur -->
+  <div class="workspace-container" [attr.data-active-tab]="activeTab">
+    <!-- Obere Zeile: Aufgabe + Editor -->
+    <div class="top-row" [style.height.%]="topRowHeight">
+      <div class="task-panel" [style.width.%]="taskPanelWidth">
+        <div class="panel-header">
+          <h2>Aufgabenbeschreibung</h2>
+          <button
+            mat-icon-button
+            class="toggle-button"
+            (click)="toggleTaskPanel()"
+            aria-label="Aufgabenbeschreibung ein-/ausklappen">
+            <mat-icon>{{ isTaskPanelCollapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+          </button>
+        </div>
+        <div class="task-description" [innerHTML]="taskDescription"></div>
+      </div>
 
-     <!-- Breites Grid: Ausführen + Feedback + Console -->
-     <div class="col-span-full lg:col-span-12 flex justify-between">
-       <div class="flex-1"></div>
-       <div class="flex-1"></div>
-       <!-- Run Code Button mit verschiedenen States -->
-       <div class="flex justify-center" [ngClass]="{'with-tests': !isLoading && lastResult}">
-         <button
-           *ngIf="currentState != 0 && currentState != 3 && inputArgsForm.valid"
-           mat-raised-button color="primary" (click)="submitCode()"
-           class="md:w-auto mb-2 px-4 noOverFlow">Ausführen
-         </button>
-         <button
-           *ngIf="currentState != 0 && currentState != 3 && currentState != 4 && !inputArgsForm.valid"
-           mat-raised-button color="primary" [disabled]="true"
-           class="md:w-auto mb-2 px-4 noOverFlow">String[] args fehlt ->
-         </button>
-         <button *ngIf="currentState != 0 && currentState == 3" mat-raised-button color="primary" [disabled]="true" class="md:w-auto mb-2 px-4 noOverFlow">Warten auf das Feedback</button>
-       </div>
+      <!-- Horizontaler Resize-Handle -->
+      <!-- <div class="horizontal-resize-handle" (mousedown)="startHorizontalResize($event)"></div> -->
 
-       <!-- Anzeige der Ergebnisse der Unit-Tests -->
-       <div class="flex justify-end flex-1">
-         <div class="test-results">
-           <div class="points-display">
-             <p style="margin: 0;">Punkte: {{lastResult?.CodeSubmissionResult?.score ? lastResult.CodeSubmissionResult.score : 0}} / 100</p>
-             <mat-progress-bar mode="determinate" value="{{lastResult?.CodeSubmissionResult?.score ? lastResult.CodeSubmissionResult.score : 0}}"></mat-progress-bar>
-           </div>
-         </div>
+      <div class="editor-section" [style.width.%]="100 - taskPanelWidth">
+        <app-code-editor-wrapper
+          [currentTask]="workspaceState.getCurrentTask()"
+          (executionStarted)="onCodeExecutionStart()"
+          (codeSubmitted)="onCodeSubmitted($event)">
+        </app-code-editor-wrapper>
+      </div>
+    </div>
 
-         <div class="test-results" *ngIf="!isLoading && lastResult" style="margin-left: 10px;">
-           <div class="test-circles">
-             <svg *ngFor="let test of lastResult.CodeSubmissionResult.testResults" width="24" height="24" viewBox="0 0 24 24">
-               <circle cx="12" cy="12" r="10"
-                       [attr.fill]="test.status === 'SUCCESSFUL' ? '#4caf50' : '#f44336'"
-                       matTooltip="{{getTooltipText(test.test, test.status, test.exception)}}" matTooltipPosition="above"></circle>
-             </svg>
-           </div>
-         </div>
-     </div>
+    <!-- Vertikaler Resize-Handle zwischen Top und Middle -->
+    <div class="vertical-resize-handle" (mousedown)="startVerticalResizeTop($event)"></div>
 
-       <!-- Input Args (java) -->
-       <div class="flex justify-end flex-1">
-         <form [formGroup]="inputArgsForm"  *ngIf="argsArray.controls.length>0">
-           <div formArrayName="argsArray" class="flex flex-wrap items-center" style="margin-top: -1px; margin-right: 8px;">
-             <div class="flex items-center space-x-2"  matTooltip="Werte des Arrays (String[] args) anstelle über die Befehlszeile (z.B. java MeinProgramm arg1 arg2)" *ngFor="let arg of argsArray.controls; let i = index">
-               <label for="arg{{i}}" class="polarNight_4_text">args[{{i}}]:</label>
-               <input id="arg{{i}}" class="border border-gray-300 p-2 polarNight_4_text" type="text" [formControlName]="i" style="width: 50px; margin-right: 6px;" />
-             </div>
-         </div>
-         </form>
-         <button *ngIf="currentState != 0" mat-raised-button color="primary" (click)="downloadFiles()" class="downloadButton"  matTooltip="Programmcode herunterladen"><mat-icon>save</mat-icon></button>
-       </div>
-     </div>
+    <!-- Mittlere Zeile: Test-Indikatoren + Execute-Button -->
+    <div class="middle-row" [style.height.px]="middleRowHeight">
+      <!-- Verbesserte Struktur für die mittlere Zeile -->
+      <div class="middle-row-content">
+        <!-- Test-Indikatoren anzeigen -->
+        <div class="test-indicators-container" [class.empty]="!testResults || testResults.length === 0">
+          <app-test-indicators
+            *ngIf="testResults && testResults.length > 0"
+            [testResults]="testResults">
+          </app-test-indicators>
+          <span *ngIf="!testResults || testResults.length === 0" class="no-tests-message">
+            Führe den Code aus, um die Tests zu starten
+          </span>
+        </div>
 
-      <!-- Breites Grid: Progress Spinner -->
-     <div class="col-span-full lg:col-span-12 flex justify-center">
-       <div *ngIf="isLoading" class="flex justify-center items-center min-h-32">
-         <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
-       </div>
-     </div>
+        <!-- Execute-Button mit verbessertem Styling -->
+        <div class="execute-button-container">
+          <button
+            mat-raised-button
+            (click)="executeCode()"
+            [disabled]="isCompiling || !workspaceState.getCurrentTask()">
+            <mat-icon>play_arrow</mat-icon>
+            Code ausführen
+          </button>
+        </div>
+      </div>
 
-      <!-- Linkes Grid: KI-Feedback -->
-     <div *ngIf="!isLoading && compilerOutput" class="col-span-1 lg:col-span-6">
-       <mat-card class="KI-card">
-         <mat-card-header>
-           <mat-card-subtitle class="polarNight_4_text">Tutor Kai</mat-card-subtitle>
-         </mat-card-header>
-         <mat-card-actions *ngIf="currentState == 4" class="actions-container">
-          <div class="rating-container" style="display: flex; align-items: center; width: 100%; background-color: #f5f5f5; padding: 10px;">
-            <div class="rating-text" style="flex: 2; padding-left: 20px;">
-              <span class="polarNight_4_text" style="font-weight: bold;">Wie hilfreich war das Feedback für dich?</span><br>
-              <span class="polarNight_4_text">1 Stern = Überhaupt nicht hilfreich</span><br>
-              <span class="polarNight_4_text">5 Sterne = Sehr hilfreich</span>
-            </div>
-            <div class="rating" style="flex: 1; display: flex; justify-content: flex-start;">
-              <button mat-icon-button *ngFor="let star of [1, 2, 3, 4, 5]"
-                      (click)="sendStudentFeedback(star)"
-                      (mouseenter)="onMouseEnter(star)"
-                      (mouseleave)="onMouseLeave()"
-                      class="star-button"
-                      [ngClass]="{'animate-star': rating === 0}">
-                <mat-icon [ngClass]="{
-                  'gold': (star <= hoverState || star <= rating),
-                  'grey': !(star <= hoverState || star <= rating),
-                  'glow-effect': rating === 0
-                }">
-                  {{star <= hoverState || star <= rating ? 'star' : 'star_border'}}
-                </mat-icon>
-              </button>
-            </div>
-            <mat-divider></mat-divider>
-          </div>
-        </mat-card-actions>
-         <mat-card-content>
-           <div class="feedback-message" [innerHTML]="safeFeedbackMessage"></div>
-           <mat-divider></mat-divider>
-         </mat-card-content>
-         <mat-card-actions *ngIf="currentState == 2" class="actions-container">
-           <p style="text-align: left;">Wie sehr soll dich das Feedback unterstützen?</p>
-           <div class="feedback-buttons">
-             <button mat-raised-button color="primary" *ngFor="let level of feedbackLevelOptions" (click)="getKIFeedback(level)" class="mb-2 mr-2">
-               <mat-icon>assistant</mat-icon>
-               {{level}}
-             </button>
-           </div>
-         </mat-card-actions>
-         <mat-card-footer>
-           <mat-progress-bar *ngIf="currentState == 3" mode="indeterminate"></mat-progress-bar>
-         </mat-card-footer>
-       </mat-card>
-     </div>
+      <!-- Statusindikator für Ausführung -->
+      <div class="compile-status" [class.active]="isCompiling"></div>
+    </div>
 
-      <!-- Rechtes Grid: Console Output -->
-     <div *ngIf="!isLoading && compilerOutput" class="col-span-1 lg:col-span-6">
-       <mat-card class="CompilerCard-card">
-         <mat-card-header>
-           <mat-card-subtitle class="polarNight_4_text">Ausgabe</mat-card-subtitle>
-         </mat-card-header>
-         <mat-card-content>
-           <pre class="polarNight_4_text break-words whitespace-pre-wrap text-xs md:text-base">{{ compilerOutput }}</pre>
-           <mat-divider></mat-divider>
-         </mat-card-content>
-       </mat-card>
-     </div>
-   </div>
- </div>
+    <!-- Vertikaler Resize-Handle zwischen Middle und Bottom -->
+    <!-- Vertikaler<div class="vertical-resize-handle" (mousedown)="startVerticalResizeBottom($event)"></div>-->
+
+    <!-- Untere Zeile: Feedback + Terminal -->
+    <div class="bottom-row" [style.height.%]="bottomRowHeight">
+      <div class="feedback-area" [style.width.%]="feedbackAreaWidth">
+        <app-feedback-panel></app-feedback-panel>
+      </div>
+
+      <!-- Horizontaler Resize-Handle -->
+      <!-- <div class="horizontal-resize-handle" (mousedown)="startHorizontalResizeBottom($event)"></div>-->
+
+      <div class="terminal-section" [style.width.%]="100 - feedbackAreaWidth">
+        <app-terminal-output
+          [output]="compilerOutput"
+          [isLoading]="isCompiling">
+        </app-terminal-output>
+      </div>
+    </div>
+  </div>
 </div>
