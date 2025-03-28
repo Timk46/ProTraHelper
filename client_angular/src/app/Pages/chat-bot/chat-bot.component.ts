@@ -1,9 +1,10 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 
 enum DisplayType {
   Fixed = 'fixed-chat',
-  Collapsible = 'collapsible-chat'
+  Collapsible = 'collapsible-chat',
+  Embedded = 'embedded-chat'
 }
 
 @Component({
@@ -32,32 +33,16 @@ enum DisplayType {
   ]
 })
 export class ChatBotComponent {
-  private readonly botIconPath = '../../../assets/img/kai_logo_small_no_background.png'; // Path to the bot icon
-  private readonly chatIconPath = '../../../assets/img/chat.png'; // Path to the chat icon
+  @Output() close = new EventEmitter<void>();
 
-  public isOpen = false; // State to track if the chat bot is open or not
-  public iconSrc = this.botIconPath; // Source for the icon image
+  public isOpen = true; // Always open in the popup view
   public iconState = 'default'; // State for the rotation animation
-
   public displayType = DisplayType; // Enum for display types
 
   /**
-   * Toggles the state of the chat bot between open and closed.
-   */
-  public onChangeChatState(): void {
-    this.isOpen = !this.isOpen; // Toggle the isOpen state
-    this.iconState = this.iconState === 'default' ? 'rotated' : 'default'; // Toggle the icon rotation state
-
-    // Update the icon source based on the isOpen state
-    this.iconSrc = this.isOpen ? this.chatIconPath : this.botIconPath;
-  }
-
-  /**
-   * Handles the close event from the chat-bot-dialog component.
+   * Emits the close event to the parent component.
    */
   public onChatClose(): void {
-    if (this.isOpen) {
-      this.onChangeChatState(); // Reuse the existing method to close the chat
-    }
+    this.close.emit();
   }
 }

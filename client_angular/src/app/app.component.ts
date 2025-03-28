@@ -1,6 +1,6 @@
 import { UserService } from './Services/auth/user.service';
 import { ToolbarService } from './Services/toolbar/toolbar.service';
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { version } from '@DTOs/version';
@@ -21,6 +21,7 @@ export class AppComponent {
   userIsLoggedIn: boolean = false;
 
   editModeActive: boolean = false;
+  chatActive: boolean = false;
   constructor
     (
       private userService: UserService,
@@ -89,6 +90,10 @@ export class AppComponent {
   ngOnInit() {
     //this.toolbarService.show();
     //this.disableConsoleInProduction()
+  }
+
+  toggleChatBot(): void {
+    this.chatActive = !this.chatActive;
   }
 
   disableConsoleInProduction(): void { if (environment.production)
