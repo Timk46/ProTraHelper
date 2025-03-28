@@ -75,11 +75,21 @@
       <!-- <div class="horizontal-resize-handle" (mousedown)="startHorizontalResize($event)"></div> -->
 
       <div class="editor-section" [style.width.%]="100 - taskPanelWidth">
-        <app-code-editor-wrapper
-          [currentTask]="workspaceState.getCurrentTask()"
-          (executionStarted)="onCodeExecutionStart()"
-          (codeSubmitted)="onCodeSubmitted($event)">
-        </app-code-editor-wrapper>
+        <!-- VSCode-ähnliches Layout mit Explorer und Editor -->
+        <div class="vscode-layout">
+          <!-- File Explorer (links) -->
+          <div class="explorer-panel">
+            <app-file-explorer></app-file-explorer>
+          </div>
+          <!-- Code Editor (rechts) -->
+          <div class="editor-panel">
+            <app-code-editor-wrapper
+              [currentTask]="workspaceState.getCurrentTask()"
+              (executionStarted)="onCodeExecutionStart()"
+              (codeSubmitted)="onCodeSubmitted($event)">
+            </app-code-editor-wrapper>
+          </div>
+        </div>
       </div>
     </div>
 

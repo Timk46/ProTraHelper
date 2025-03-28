@@ -24,9 +24,12 @@ import { CodeEditorWrapperComponent } from './components/code-editor-wrapper/cod
 import { TerminalOutputComponent } from './components/terminal-output/terminal-output.component';
 import { TestIndicatorsComponent } from './components/test-indicators/test-indicators.component';
 import { TestDetailsDialogComponent } from './components/test-indicators/test-details-dialog/test-details-dialog.component';
+import { EditorTabsComponent } from './components/editor-tabs/editor-tabs.component';
+import { FileExplorerComponent } from './components/file-explorer/file-explorer.component';
 
 // Services
 import { WorkspaceStateService } from './services/workspace-state.service';
+import { FileSystemService } from './services/file-system.service';
 
 @NgModule({
   declarations: [
@@ -40,7 +43,9 @@ import { WorkspaceStateService } from './services/workspace-state.service';
     CodeEditorWrapperComponent,
     TerminalOutputComponent,
     TestIndicatorsComponent,
-    TestDetailsDialogComponent
+    TestDetailsDialogComponent,
+    EditorTabsComponent,
+    FileExplorerComponent
   ],
   imports: [
     CommonModule,
@@ -61,10 +66,13 @@ import { WorkspaceStateService } from './services/workspace-state.service';
     FeedbackPanelComponent,
     CodeEditorWrapperComponent,
     TerminalOutputComponent,
-    TestIndicatorsComponent
+    TestIndicatorsComponent,
+    EditorTabsComponent,
+    FileExplorerComponent
   ],
   providers: [
-    WorkspaceStateService // Explizite Bereitstellung des State Services
+    WorkspaceStateService, // Explizite Bereitstellung des State Services
+    FileSystemService
   ],
   bootstrap: [TutorKaiComponent],
 })

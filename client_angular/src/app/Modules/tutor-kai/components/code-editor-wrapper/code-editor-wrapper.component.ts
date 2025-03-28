@@ -1,15 +1,17 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, Validators } from '@angular/forms';
 import { QuestionDTO, CodeSubmissionResultDto } from '@DTOs/index';
 import { CodeEditorComponent } from '../../sites/code-editor/code-editor.component';
 import { WorkspaceStateService } from '../../services/workspace-state.service';
+import { FileSystemService, EditorFile } from '../../services/file-system.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-code-editor-wrapper',
   templateUrl: './code-editor-wrapper.component.html',
   styleUrls: ['./code-editor-wrapper.component.scss']
 })
-export class CodeEditorWrapperComponent implements OnInit, OnChanges {
+export class CodeEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('codeEditorMonaco') codeEditorComponent?: CodeEditorComponent;
   @Input() currentTask: QuestionDTO | null = null;
   @Output() codeSubmitted = new EventEmitter<CodeSubmissionResultDto>();
@@ -17,6 +19,8 @@ export class CodeEditorWrapperComponent implements OnInit, OnChanges {
 
   isSubmitting = false;
   language = 'python';
+  activeFile: EditorFile | null = null;
+  private destroy$ = new Subject<void>();
 
   // Form für Input-Argumente
   inputArgsForm = this.fb.group({
@@ -25,18 +29,37 @@ export class CodeEditorWrapperComponent implements OnInit, OnChanges {
 
   constructor(
     private fb: FormBuilder,
-    private workspaceState: WorkspaceStateService
+    private workspaceState: WorkspaceStateService,
+    private fileSystem: FileSystemService
   ) {}
 
   ngOnInit(): void {
     this.setupInputArgs();
+
+    // Beobachte Änderungen der aktiven Datei
+    this.fileSystem.activeFile$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(file => {
+        this.activeFile = file;
+        if (file && this.codeEditorComponent) {
+          this.codeEditorComponent.changeLanguage(file.language);
+          this.codeEditorComponent.code = file.content;
+          this.language = file.language;
+        }
+      });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['currentTask']) {
+    if (changes['currentTask'] && this.currentTask) {
       this.setupLanguage();
       this.setupInputArgs();
+      this.fileSystem.initializeFromTask(this.currentTask);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   /**
@@ -45,9 +68,6 @@ export class CodeEditorWrapperComponent implements OnInit, OnChanges {
   private setupLanguage(): void {
     if (this.currentTask?.codingQuestion?.programmingLanguage) {
       this.language = this.currentTask.codingQuestion.programmingLanguage;
-      if (this.codeEditorComponent) {
-        this.codeEditorComponent.changeLanguage(this.language);
-      }
     }
   }
 
@@ -78,26 +98,14 @@ export class CodeEditorWrapperComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Liefert den initialen Code für den Editor
-   */
-  getInitialCode(): string {
-    if (!this.currentTask?.codingQuestion?.codeGerueste?.length) {
-      return '';
-    }
-
-    // In einer komplexeren Implementierung würden wir hier mehrere Dateien verwalten
-    return this.currentTask.codingQuestion.codeGerueste[0].code;
-  }
-
-  /**
    * Führt aus, wenn sich der Code ändert
    */
   onCodeChanged(newCode: string): void {
     this.workspaceState.codeChanged();
 
-    if (this.currentTask?.codingQuestion?.codeGerueste?.length) {
-      // Update den Code im ersten codeGeruest
-      this.currentTask.codingQuestion.codeGerueste[0].code = newCode;
+    // Aktualisiere den Code in der aktiven Datei
+    if (this.activeFile) {
+      this.fileSystem.updateFileContent(this.activeFile.id, newCode);
     }
   }
 
@@ -114,12 +122,8 @@ export class CodeEditorWrapperComponent implements OnInit, OnChanges {
     // Signalisiere den Start der Ausführung
     this.executionStarted.emit();
 
-    const additionalFiles: Record<string, string> = {};
-    if (this.currentTask.codingQuestion?.codeGerueste) {
-      for (const file of this.currentTask.codingQuestion.codeGerueste) {
-        additionalFiles[file.codeFileName] = file.code;
-      }
-    }
+    // Hole alle Dateien aus dem FileSystem
+    const additionalFiles = this.fileSystem.getFilesAsRecord();
 
     this.workspaceState.executeCode(
       this.currentTask.id,
