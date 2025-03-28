@@ -21,6 +21,7 @@ export class CodeEditorWrapperComponent implements OnInit, OnChanges, OnDestroy 
   language = 'python';
   activeFile: EditorFile | null = null;
   private destroy$ = new Subject<void>();
+  private isLocalUpdate = false; // Flag für lokale Updates durch Benutzereingaben
 
   // Form für Input-Argumente
   inputArgsForm = this.fb.group({
@@ -41,7 +42,8 @@ export class CodeEditorWrapperComponent implements OnInit, OnChanges, OnDestroy 
       .pipe(takeUntil(this.destroy$))
       .subscribe(file => {
         this.activeFile = file;
-        if (file && this.codeEditorComponent) {
+        // Nur aktualisieren, wenn es kein lokaler Update ist (verhindert Fokusverlust)
+        if (file && this.codeEditorComponent && !this.isLocalUpdate) {
           this.codeEditorComponent.changeLanguage(file.language);
           this.codeEditorComponent.code = file.content;
           this.language = file.language;
@@ -103,10 +105,18 @@ export class CodeEditorWrapperComponent implements OnInit, OnChanges, OnDestroy 
   onCodeChanged(newCode: string): void {
     this.workspaceState.codeChanged();
 
+    // Markiere, dass wir gerade einen lokalen Update durchführen
+    this.isLocalUpdate = true;
+
     // Aktualisiere den Code in der aktiven Datei
     if (this.activeFile) {
       this.fileSystem.updateFileContent(this.activeFile.id, newCode);
     }
+
+    // Timeout gibt Zeit für die Verarbeitung und verhindert Race Conditions
+    setTimeout(() => {
+      this.isLocalUpdate = false;
+    }, 0);
   }
 
   /**

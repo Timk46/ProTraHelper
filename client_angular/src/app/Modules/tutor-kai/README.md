@@ -11,7 +11,9 @@ Sie ermöglicht es Studierenden, Programmieraufgaben zu lösen, Code auszuführe
 tutor-kai/
 ├── components/              # Wiederverwendbare Komponenten
 │   ├── code-editor-wrapper/ # Wrapper für den Monaco Code-Editor
+│   ├── editor-tabs/         # Tabs für geöffnete Dateien (VSCode-ähnlich)
 │   ├── feedback-panel/      # Panel für KI-Feedback-Anzeige
+│   ├── file-explorer/       # Dateisystem-Explorer (VSCode-ähnlich)
 │   ├── rating/              # Komponente für Feedback-Bewertung
 │   ├── terminal-output/     # Terminal für Compiler-Ausgabe
 │   └── test-indicators/     # Anzeige von Unit-Test-Ergebnissen
@@ -19,6 +21,7 @@ tutor-kai/
 ├── models/                  # Datenmodelle
 │   └── code-submission.model.ts # Modelle für Code-Submission und Ergebnisse
 ├── services/                # Services für die Modullogik
+│   ├── file-system.service.ts # Verwaltung von Dateien und Dateistruktur
 │   └── workspace-state.service.ts # State-Management für den Workspace
 ├── sites/                   # Hauptseiten des Moduls
 │   ├── code-editor/         # Monaco-Editor Integration
@@ -35,6 +38,7 @@ tutor-kai/
 
 Die Hauptkomponente für die Studierendensicht. Sie orchestriert alle anderen Komponenten und bietet:
 
+- VSCode-ähnliches Layout mit File Explorer und Editor-Bereich
 - Split-Panel Layout mit anpassbaren Größen
 - Aufgabenbeschreibung und Code-Editor nebeneinander
 - Terminal-Ausgabe für Compiler-Meldungen
@@ -47,8 +51,10 @@ Die Hauptkomponente für die Studierendensicht. Sie orchestriert alle anderen Ko
 Kapselt den Monaco-Editor und bietet:
 
 - Sprachspezifische Konfiguration (Python, Java, etc.)
+- Verwaltung mehrerer Dateien mit Tabs
 - Eingabefelder für Programmargumente
 - Code-Submission-Funktionalität
+- Intelligentes Fokus-Management im Editor
 
 ### TerminalOutputComponent
 
@@ -99,7 +105,33 @@ Zeigt KI-generiertes Feedback zu Studentenlösungen:
 - Formatierte Anzeige des Feedbacks
 - Rating-Möglichkeit für Studierende
 
+### EditorTabsComponent
+
+Verwaltet mehrere geöffnete Dateien als Tabs:
+
+- Anzeige von Tabs für geöffnete Dateien
+- Datei-spezifische Icons basierend auf dem Dateityp
+- Schließen-Funktion für Tabs
+
+### FileExplorerComponent
+
+Zeigt die Projektstruktur in einem Baum an:
+
+- Ordner-Hierarchie mit auf-/zuklappbaren Ordnern
+- Datei-Icons basierend auf dem Dateityp
+- Funktion zum Hinzufügen neuer Dateien
+- Öffnen von Dateien im Editor durch Klick
+
 ## Services
+
+### FileSystemService
+
+Verwaltet das virtuelle Dateisystem:
+
+- Trennung zwischen allen Dateien und geöffneten Tabs
+- Laden und Speichern von Dateien aus Aufgaben
+- Erstellen, Bearbeiten und Schließen von Dateien
+- VSCode-ähnliches Verhalten beim Tab-Management
 
 ### WorkspaceStateService
 
@@ -185,6 +217,11 @@ Beim Hinzufügen neuer Funktionen, bitte folgende Richtlinien beachten:
    - Verwende die definierten WorkspaceState-Enums für Zustandsverwaltung
    - Halte dich an den reaktiven Ansatz mit BehaviorSubjects/Observables
    - Ändere den State nur im WorkspaceStateService
+
+5. **Editor Fokus-Probleme**:
+   - Verwende das `isLocalUpdate` Flag im CodeEditorWrapper, um zirkuläre Updates zu vermeiden
+   - Bei Editor-Einbindung immer an Fokus-Management denken
+   - Trenne lokale von externen Änderungen, um Fokusverlust zu vermeiden
 
 ## Abhängigkeiten
 

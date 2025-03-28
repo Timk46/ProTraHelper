@@ -53,7 +53,7 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
    * Öffnet oder aktiviert eine Datei
    */
   openFile(fileId: string): void {
-    this.fileSystemService.setActiveFile(fileId);
+    this.fileSystemService.openFileAsTab(fileId);
   }
 
   /**

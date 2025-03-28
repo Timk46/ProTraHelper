@@ -14,11 +14,11 @@ export class EditorTabsComponent implements OnInit, OnDestroy {
   constructor(private fileSystemService: FileSystemService) {}
 
   ngOnInit(): void {
-    // Abonniere Dateiänderungen
-    this.fileSystemService.files$
+    // Abonniere offene Tabs statt aller Dateien
+    this.fileSystemService.openTabs$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(files => {
-        this.openFiles = files;
+      .subscribe(tabs => {
+        this.openFiles = tabs;
       });
   }
 
@@ -35,11 +35,11 @@ export class EditorTabsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Schließt eine Datei, wenn das X-Symbol geklickt wird
+   * Schließt einen Tab, wenn das X-Symbol geklickt wird
    */
   closeFile(event: MouseEvent, fileId: string): void {
     event.stopPropagation(); // Verhindert, dass der Tab aktiviert wird
-    this.fileSystemService.closeFile(fileId);
+    this.fileSystemService.closeTab(fileId);
   }
 
   /**

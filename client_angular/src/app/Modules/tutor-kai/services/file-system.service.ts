@@ -44,12 +44,14 @@ export class FileSystemService {
   private activeFileSubject = new BehaviorSubject<EditorFile | null>(null);
   private fileTreeSubject = new BehaviorSubject<FileSystemItem[]>([]);
   private projectRootSubject = new BehaviorSubject<string>('');
+  private openTabsSubject = new BehaviorSubject<EditorFile[]>([]);
 
   // Observables für die Komponenten
   readonly files$ = this.filesSubject.asObservable();
   readonly activeFile$ = this.activeFileSubject.asObservable();
   readonly fileTree$ = this.fileTreeSubject.asObservable();
   readonly projectRoot$ = this.projectRootSubject.asObservable();
+  readonly openTabs$ = this.openTabsSubject.asObservable();
 
   constructor() {}
 
@@ -117,6 +119,9 @@ export class FileSystemService {
 
     this.filesSubject.next(files);
     this.fileTreeSubject.next(fileSystemItems);
+
+    // Alle Dateien als Tabs öffnen (in realen VS Code würde nur die erste geöffnet)
+    this.openTabsSubject.next(files);
     this.activeFileSubject.next(files.find(f => f.isActive) || null);
   }
 
@@ -128,6 +133,7 @@ export class FileSystemService {
     this.activeFileSubject.next(null);
     this.fileTreeSubject.next([]);
     this.projectRootSubject.next('');
+    this.openTabsSubject.next([]);
   }
 
   /**
@@ -191,13 +197,33 @@ export class FileSystemService {
    */
   setActiveFile(fileId: string): void {
     const currentFiles = this.filesSubject.value;
+    const currentTabs = this.openTabsSubject.value;
 
+    // Aktualisiere Dateien
     const updatedFiles = currentFiles.map(file => ({
       ...file,
       isActive: file.id === fileId
     }));
 
+    // Aktualisiere Tabs
+    const updatedTabs = currentTabs.map(tab => ({
+      ...tab,
+      isActive: tab.id === fileId
+    }));
+
+    // Wenn die Datei nicht in den Tabs ist, öffne sie als Tab
+    if (!currentTabs.some(tab => tab.id === fileId)) {
+      const fileToOpen = currentFiles.find(file => file.id === fileId);
+      if (fileToOpen) {
+        updatedTabs.push({
+          ...fileToOpen,
+          isActive: true
+        });
+      }
+    }
+
     this.filesSubject.next(updatedFiles);
+    this.openTabsSubject.next(updatedTabs);
     this.activeFileSubject.next(updatedFiles.find(f => f.isActive) || null);
   }
 
@@ -245,28 +271,57 @@ export class FileSystemService {
   }
 
   /**
-   * Schließt eine Datei
+   * Schließt einen Tab (ohne die Datei aus dem Explorer zu entfernen)
    */
-  closeFile(fileId: string): void {
-    const currentFiles = this.filesSubject.value;
-    const fileToClose = currentFiles.find(f => f.id === fileId);
+  closeTab(fileId: string): void {
+    const currentTabs = this.openTabsSubject.value;
+    const fileToClose = currentTabs.find(f => f.id === fileId);
 
     if (!fileToClose) return;
 
-    const updatedFiles = currentFiles.filter(f => f.id !== fileId);
+    const updatedTabs = currentTabs.filter(f => f.id !== fileId);
 
-    // Wenn die zu schließende Datei die aktive ist, aktiviere eine andere
-    if (fileToClose.isActive && updatedFiles.length > 0) {
-      updatedFiles[0].isActive = true;
+    // Wenn die zu schließende Datei die aktive ist, aktiviere einen anderen Tab
+    if (fileToClose.isActive && updatedTabs.length > 0) {
+      updatedTabs[0].isActive = true;
+
+      // Aktualisiere alle Dateien, um die neue aktive Datei zu reflektieren
+      const allFiles = this.filesSubject.value;
+      const updatedAllFiles = allFiles.map(file => ({
+        ...file,
+        isActive: file.id === updatedTabs[0].id
+      }));
+
+      this.filesSubject.next(updatedAllFiles);
+      this.activeFileSubject.next(updatedTabs[0]);
+    } else if (fileToClose.isActive && updatedTabs.length === 0) {
+      // Wenn kein Tab mehr offen ist, setze activeFile auf null
+      const allFiles = this.filesSubject.value;
+      const updatedAllFiles = allFiles.map(file => ({
+        ...file,
+        isActive: false
+      }));
+
+      this.filesSubject.next(updatedAllFiles);
+      this.activeFileSubject.next(null);
     }
 
+    this.openTabsSubject.next(updatedTabs);
+  }
+
+  /**
+   * Löscht eine Datei komplett (aus dem Explorer und aus den Tabs)
+   */
+  deleteFile(fileId: string): void {
+    // Schließe den Tab
+    this.closeTab(fileId);
+
+    // Entferne die Datei aus der allgemeinen Dateiliste
+    const currentFiles = this.filesSubject.value;
+    const updatedFiles = currentFiles.filter(f => f.id !== fileId);
     this.filesSubject.next(updatedFiles);
 
-    if (fileToClose.isActive) {
-      this.activeFileSubject.next(updatedFiles.find(f => f.isActive) || null);
-    }
-
-    // Aktualisiere den Dateibaum
+    // Entferne die Datei aus dem Dateibaum
     const currentTree = this.fileTreeSubject.value;
     const updatedTree = this.removeFileFromTree(currentTree, fileId);
     this.fileTreeSubject.next(updatedTree);
@@ -288,6 +343,46 @@ export class FileSystemService {
       }
       return item;
     });
+  }
+
+  /**
+   * Öffnet eine Datei als Tab (wenn sie nicht bereits geöffnet ist)
+   */
+  openFileAsTab(fileId: string): void {
+    const allFiles = this.filesSubject.value;
+    const currentTabs = this.openTabsSubject.value;
+    const fileToOpen = allFiles.find(f => f.id === fileId);
+
+    if (!fileToOpen) return;
+
+    // Prüfe, ob die Datei bereits als Tab geöffnet ist
+    if (currentTabs.some(tab => tab.id === fileId)) {
+      // Wenn ja, aktiviere sie einfach
+      this.setActiveFile(fileId);
+      return;
+    }
+
+    // Alle Tabs deaktivieren
+    const updatedTabs = currentTabs.map(tab => ({
+      ...tab,
+      isActive: false
+    }));
+
+    // Den neuen Tab hinzufügen und aktivieren
+    updatedTabs.push({
+      ...fileToOpen,
+      isActive: true
+    });
+
+    // Aktualisiere alle Dateien
+    const updatedAllFiles = allFiles.map(file => ({
+      ...file,
+      isActive: file.id === fileId
+    }));
+
+    this.filesSubject.next(updatedAllFiles);
+    this.openTabsSubject.next(updatedTabs);
+    this.activeFileSubject.next(fileToOpen);
   }
 
   /**
