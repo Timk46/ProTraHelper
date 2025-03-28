@@ -16,6 +16,13 @@ export class AppHeaderComponent implements OnInit {
   userIsLoggedIn: boolean = false;
   showNavToggle: boolean = true;
 
+  /**
+   * Navigiert zum Dashboard
+   */
+  navigateToDashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
   constructor(
     private userService: UserService,
     private router: Router,

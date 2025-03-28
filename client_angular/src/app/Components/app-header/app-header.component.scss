@@ -26,6 +26,16 @@
   flex: 1;
 }
 
+.app-logo {
+  height: 40px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
 .app-title {
   font-size: 1.2rem;
   font-weight: 500;
