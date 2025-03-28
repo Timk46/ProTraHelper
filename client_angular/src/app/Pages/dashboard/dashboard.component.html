@@ -4,8 +4,11 @@
     <mat-icon aria-hidden="false" aria-label="Example drag handle icon" style="transform: scale(2); color: black;">drag_handle</mat-icon>
   </div>
 </div>
-<div class="content graph mat-elevation-z8" *ngIf="!shouldShowGraph()">
+<div appDraggableHeight class="content graph mat-elevation-z8" *ngIf="!shouldShowGraph()">
   <app-mobile-navigator></app-mobile-navigator>
+  <div class="resize-handle">
+    <mat-icon aria-hidden="false" aria-label="Example drag handle icon" style="transform: scale(2); color: black;">drag_handle</mat-icon>
+  </div>
 </div>
 <!-- <div *ngIf="(sSS.isHandset | async)">You are on a handset device.</div>
 <div *ngIf="(sSS.isWeb | async)">You are on a web device.</div>
