@@ -90,10 +90,20 @@
             margin: 0;
             font-size: 18px;
             font-weight: 500;
+            flex-grow: 1;
           }
 
-          .toggle-button {
-            color: #666;
+          .header-buttons {
+            display: flex;
+            gap: 4px;
+
+            .font-size-button, .toggle-button {
+              color: #666;
+
+              &:disabled {
+                color: #ccc;
+              }
+            }
           }
         }
 

@@ -24,8 +24,15 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   currentTaskId: number = 0;
   private conceptId!: number;
 
-  // Beschreibungstext
+  // Beschreibungstext und Titel
   taskDescription: string = 'Hi :)\n ich bin Kai. Ich bin hier, um dir Feedback zu deinen Lösungen zu geben.';
+  taskTitle: string = 'Aufgabe';
+
+  // Schriftgröße für die Aufgabenbeschreibung
+  fontSizePercent: number = 90; // Standardgröße (90%) - leicht reduziert
+  readonly MIN_FONT_SIZE: number = 70; // Minimale Schriftgröße (70%)
+  readonly MAX_FONT_SIZE: number = 150; // Maximale Schriftgröße (150%)
+  readonly FONT_SIZE_STEP: number = 10; // Schrittgröße der Änderung (10%)
 
   // Layout-States
   isTaskPanelCollapsed: boolean = false;
@@ -102,7 +109,10 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(task => {
         if (task) {
-          this.taskDescription = task.codingQuestion?.textHTML ?? '';
+          // Verwende text (Markdown) statt textHTML für Markdown-Rendering
+          this.taskDescription = task.codingQuestion?.text ?? '';
+          // Extrahiere den Namen als Titel aus dem Task-Objekt
+          this.taskTitle = task.name ?? 'Aufgabe';
         }
       });
   }
@@ -197,6 +207,24 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       this.taskPanelWidth = 15; // Minimale Breite, wenn eingeklappt
     } else {
       this.taskPanelWidth = 50; // Standard-Breite, wenn ausgeklappt
+    }
+  }
+
+  /**
+   * Vergrößert die Schriftgröße der Aufgabenstellung
+   */
+  increaseFontSize(): void {
+    if (this.fontSizePercent < this.MAX_FONT_SIZE) {
+      this.fontSizePercent += this.FONT_SIZE_STEP;
+    }
+  }
+
+  /**
+   * Verkleinert die Schriftgröße der Aufgabenstellung
+   */
+  decreaseFontSize(): void {
+    if (this.fontSizePercent > this.MIN_FONT_SIZE) {
+      this.fontSizePercent -= this.FONT_SIZE_STEP;
     }
   }
 

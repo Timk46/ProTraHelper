@@ -34,16 +34,41 @@
     <div class="top-row" [style.height.%]="topRowHeight">
       <div class="task-panel" [style.width.%]="taskPanelWidth">
         <div class="panel-header">
-          <h2>Aufgabenbeschreibung</h2>
-          <button
-            mat-icon-button
-            class="toggle-button"
-            (click)="toggleTaskPanel()"
-            aria-label="Aufgabenbeschreibung ein-/ausklappen">
-            <mat-icon>{{ isTaskPanelCollapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
-          </button>
+          <h2>{{ taskTitle }}</h2>
+          <div class="header-buttons">
+            <!-- Schriftgröße verkleinern -->
+            <button
+              mat-icon-button
+              class="font-size-button"
+              (click)="decreaseFontSize()"
+              aria-label="Schriftgröße verkleinern"
+              [disabled]="fontSizePercent <= MIN_FONT_SIZE">
+              <mat-icon>text_decrease</mat-icon>
+            </button>
+
+            <!-- Schriftgröße vergrößern -->
+            <button
+              mat-icon-button
+              class="font-size-button"
+              (click)="increaseFontSize()"
+              aria-label="Schriftgröße vergrößern"
+              [disabled]="fontSizePercent >= MAX_FONT_SIZE">
+              <mat-icon>text_increase</mat-icon>
+            </button>
+
+            <!-- Bestehender Toggle-Button -->
+            <button
+              mat-icon-button
+              class="toggle-button"
+              (click)="toggleTaskPanel()"
+              [attr.aria-label]="taskTitle + ' ein-/ausklappen'">
+              <mat-icon>{{ isTaskPanelCollapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+            </button>
+          </div>
         </div>
-        <div class="task-description" [innerHTML]="taskDescription"></div>
+        <div class="task-description" [style.fontSize.%]="fontSizePercent">
+          <markdown [data]="taskDescription"></markdown>
+        </div>
       </div>
 
       <!-- Horizontaler Resize-Handle -->
