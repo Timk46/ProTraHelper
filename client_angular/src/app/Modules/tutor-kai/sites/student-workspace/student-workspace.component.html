@@ -78,8 +78,10 @@
         <!-- VSCode-ähnliches Layout mit Explorer und Editor -->
         <div class="vscode-layout">
           <!-- File Explorer (links) -->
-          <div class="explorer-panel">
-            <app-file-explorer></app-file-explorer>
+          <div class="explorer-panel" [class.collapsed]="fileExplorerCollapsed">
+            <app-file-explorer #fileExplorer
+                               [class.collapsed]="fileExplorerCollapsed"
+                               (explorerCollapsedChange)="fileExplorerCollapsed = $event"></app-file-explorer>
           </div>
           <!-- Code Editor (rechts) -->
           <div class="editor-panel">

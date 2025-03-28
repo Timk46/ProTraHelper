@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { EditorFolder, FileSystemItem, FileSystemService } from '../../services/file-system.service';
 
@@ -10,6 +10,8 @@ import { EditorFolder, FileSystemItem, FileSystemService } from '../../services/
 export class FileExplorerComponent implements OnInit, OnDestroy {
   fileTree: FileSystemItem[] = [];
   projectRoot: string = '';
+  isExplorerCollapsed: boolean = true; // Standardmäßig eingeklappt
+  @Output() explorerCollapsedChange = new EventEmitter<boolean>();
   private destroy$ = new Subject<void>();
 
   constructor(private fileSystemService: FileSystemService) {}
@@ -57,14 +59,11 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Erstellt ein neues Menü zum Hinzufügen von Dateien (Stub für später)
+   * Klappt den File Explorer ein oder aus
    */
-  createNewFile(event: MouseEvent): void {
-    // In einer vollständigen Implementierung würde hier ein Dialog zum Erstellen einer neuen Datei geöffnet
-    const fileName = prompt('Dateiname:');
-    if (fileName) {
-      this.fileSystemService.addNewFile(fileName);
-    }
+  toggleExplorer(): void {
+    this.isExplorerCollapsed = !this.isExplorerCollapsed;
+    this.explorerCollapsedChange.emit(this.isExplorerCollapsed);
   }
 
   /**

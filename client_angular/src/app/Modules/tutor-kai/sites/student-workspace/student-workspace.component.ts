@@ -11,6 +11,7 @@ import { VideoTimeStampComponent } from '../video-time-stamp/video-time-stamp.co
 import { WorkspaceStateService } from "../../services/workspace-state.service";
 import { WorkspaceState, TestResult } from "../../models/code-submission.model";
 import { CodeEditorWrapperComponent } from "../../components/code-editor-wrapper/code-editor-wrapper.component";
+import { FileExplorerComponent } from "../../components/file-explorer/file-explorer.component";
 
 @Component({
   selector: 'app-student-workspace',
@@ -19,6 +20,7 @@ import { CodeEditorWrapperComponent } from "../../components/code-editor-wrapper
 })
 export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(CodeEditorWrapperComponent) codeEditorWrapper!: CodeEditorWrapperComponent;
+  @ViewChild('fileExplorer') fileExplorer!: FileExplorerComponent;
 
   // TaskID aus der Route
   currentTaskId: number = 0;
@@ -36,6 +38,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
 
   // Layout-States
   isTaskPanelCollapsed: boolean = false;
+  fileExplorerCollapsed: boolean = true; // Standardmäßig eingeklappt
   activeTab: 'task' | 'code' | 'output' | 'feedback' = 'code';
 
   // Neue Layout-Properties für das Grid-Layout
@@ -43,7 +46,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   middleRowHeight: number = 60; // 60px Höhe
   bottomRowHeight: number = 40; // 40% der Höhe
 
-  taskPanelWidth: number = 50; // 40% der Breite
+  taskPanelWidth: number = 48; // 48% der Breite - some space for file explorer of code editor
   feedbackAreaWidth: number = 50; // 50% der Breite
 
   // Alte Property für die Migration
@@ -207,6 +210,18 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       this.taskPanelWidth = 15; // Minimale Breite, wenn eingeklappt
     } else {
       this.taskPanelWidth = 50; // Standard-Breite, wenn ausgeklappt
+    }
+  }
+
+  /**
+   * Klappt den File Explorer ein oder aus
+   */
+  toggleFileExplorer(): void {
+    this.fileExplorerCollapsed = !this.fileExplorerCollapsed;
+
+    // Rufe ggf. die Toggle-Methode in der FileExplorer-Komponente auf
+    if (this.fileExplorer) {
+      this.fileExplorer.toggleExplorer();
     }
   }
 

@@ -189,6 +189,39 @@
             border-right: 1px solid #3c3c3c;
             background-color: #252526;
             overflow: hidden;
+            position: relative;
+            transition: width 0.3s ease;
+
+            &.collapsed {
+              width: 40px !important;
+              min-width: 40px;
+            }
+
+            // Toggle-Button zum Ein-/Ausklappen des Explorers
+            .toggle-explorer-button {
+              position: absolute;
+              top: 5px;
+              right: 0;
+              z-index: 10;
+              color: #969696;
+              background-color: transparent;
+              width: 20px;
+              height: 20px;
+              padding: 0;
+              line-height: 20px;
+              transition: all 0.3s ease;
+
+              &:hover {
+                color: #ffffff;
+              }
+
+              mat-icon {
+                font-size: 14px;
+                width: 14px;
+                height: 14px;
+                line-height: 14px;
+              }
+            }
           }
 
           // Editor Panel (rechts)

@@ -1,10 +1,16 @@
-<div class="file-explorer">
+<div class="file-explorer" [class.collapsed]="isExplorerCollapsed">
+  <!-- Toggle Button außerhalb der normalen Header-Struktur, damit er immer sichtbar bleibt -->
+  <button mat-icon-button
+          class="toggle-explorer-button"
+          [class.collapsed]="isExplorerCollapsed"
+          (click)="toggleExplorer()"
+          matTooltip="Explorer {{ isExplorerCollapsed ? 'ausklappen' : 'einklappen' }}">
+    <mat-icon>{{ isExplorerCollapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+  </button>
+
   <div class="explorer-header">
-    <span class="section-title">EXPLORER</span>
-    <div class="actions">
-      <button mat-icon-button class="add-button" (click)="createNewFile($event)" aria-label="Neue Datei">
-        <mat-icon>add</mat-icon>
-      </button>
+    <div class="header-content">
+      <span class="section-title">EXPLORER</span>
     </div>
   </div>
 

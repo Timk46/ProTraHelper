@@ -117,9 +117,11 @@ Verwaltet mehrere geöffnete Dateien als Tabs:
 
 Zeigt die Projektstruktur in einem Baum an:
 
+- Ist standardmäßig eingeklappt, um mehr Platz für den Editor zu bieten
+- Toggle-Button zum Ein-/Ausklappen des Explorers (oben rechts im Header)
+- Reduzierte Breite von 220px im ausgeklappten und 24px im eingeklappten Zustand
 - Ordner-Hierarchie mit auf-/zuklappbaren Ordnern
 - Datei-Icons basierend auf dem Dateityp
-- Funktion zum Hinzufügen neuer Dateien
 - Öffnen von Dateien im Editor durch Klick
 
 ## Services
@@ -130,7 +132,7 @@ Verwaltet das virtuelle Dateisystem:
 
 - Trennung zwischen allen Dateien und geöffneten Tabs
 - Laden und Speichern von Dateien aus Aufgaben
-- Erstellen, Bearbeiten und Schließen von Dateien
+- Bearbeiten und Schließen von Dateien
 - VSCode-ähnliches Verhalten beim Tab-Management
 
 ### WorkspaceStateService
@@ -183,6 +185,18 @@ Die Transformation erfolgt im `WorkspaceStateService.executeCode()`. Die Testres
 6. Die Ergebnisse werden in TerminalOutputComponent angezeigt
 7. TestIndicators zeigen die Testergebnisse an
 8. FeedbackPanel zeigt KI-generiertes Feedback
+
+## UI-Anpassungen und Verhalten
+
+- **File Explorer**: 
+  - Ist standardmäßig eingeklappt (Variable `isExplorerCollapsed` in FileExplorerComponent und StudentWorkspaceComponent)
+  - Der Button zum Ein-/Ausklappen befindet sich im rechten Bereich und bleibt auch im eingeklappten Zustand sichtbar
+  - Im eingeklappten Zustand nimmt der Explorer nur 24px Breite ein
+  - Im ausgeklappten Zustand beträgt die Breite 220px für optimale Übersicht
+
+- **Responsives Layout**:
+  - Das Layout passt sich dynamisch an, wenn der File Explorer ein- oder ausgeklappt wird
+  - Die Komponenten sind so gestaltet, dass sie auf verschiedenen Bildschirmgrößen und -orientierungen gut funktionieren
 
 ## Erweiterung und Best Practices
 

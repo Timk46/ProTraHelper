@@ -10,7 +10,7 @@ $file-icon-size: 16px;
 
 .file-explorer {
   height: 100%;
-  width: 100%;
+  width: 220px; // Reduzierte Breite im ausgeklappten Zustand
   background-color: $explorer-bg;
   color: $explorer-text;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,6 +18,78 @@ $file-icon-size: 16px;
   display: flex;
   flex-direction: column;
   user-select: none;
+  transition: width 0.3s ease-in-out;
+
+  // Neuer Stil für den Toggle-Button
+  .toggle-explorer-button {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    z-index: 100;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    padding: 0;
+    border-radius: 4px;
+    color: #ffffff;
+    background-color: rgba(45, 45, 45, 0.8);
+    transition: all 0.2s ease-in-out;
+    border: 1px solid transparent;
+
+    &:hover {
+      background-color: #4a4a4a;
+      border: 1px solid #5a5a5a;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    }
+
+    &:active {
+      background-color: #3f51b5;
+    }
+
+    &.collapsed {
+      right: 0;
+      left: auto; // Button wird an der rechten Seite positioniert
+      border-radius: 4px 0 0 4px;
+      background-color: #3f51b5;
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+
+      &:hover {
+        background-color: #536dfe;
+      }
+    }
+
+    ::ng-deep .mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+    }
+  }
+
+  &.collapsed {
+    width: 24px !important; // Exakt so breit wie der Button
+    min-width: 24px;
+    padding: 0; // Kein Padding nötig
+    margin: 0; // Kein Margin nötig
+    overflow: visible; // Erlaubt dem Button, sichtbar zu sein
+    position: relative; // Für korrekte Button-Positionierung
+
+    .project-root, .file-tree, .section-title, .folder-name, .file-name, .header-content {
+      display: none;
+    }
+
+    .explorer-header {
+      opacity: 0;
+      overflow: hidden;
+      border-bottom: none;
+    }
+
+    .toggle-explorer-button {
+      position: absolute;
+      right: 0;
+      top: 6px;
+    }
+  }
 }
 
 .explorer-header {
@@ -25,30 +97,23 @@ $file-icon-size: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px 0 8px;
+  padding: 0 8px;
   font-size: 11px;
   text-transform: uppercase;
   font-weight: 600;
   color: $explorer-inactive-text;
   letter-spacing: 0.5px;
   border-bottom: 1px solid $explorer-border;
+  position: relative;
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
 
   .actions {
-    display: flex;
-
-    .add-button {
-      font-size: 14px;
-      width: 20px;
-      height: 20px;
-      line-height: 20px;
-
-      ::ng-deep .mat-icon {
-        font-size: 14px;
-        width: 14px;
-        height: 14px;
-        line-height: 14px;
-      }
-    }
+    display: none; // Wird nicht mehr benötigt, da der Toggle-Button außerhalb platziert ist
   }
 }
 
