@@ -42,12 +42,12 @@ ERLEDIGT HINWEIS: Bei Angular Material 17 hat sich die Theming-Syntax geändert.
 
 ERLEDIGT HINWEIS: Auch in Komponenten-SCSS-Dateien müssen Änderungen vorgenommen werden, wenn sie Angular Material Theming-Variablen verwenden. Zum Beispiel müssen Variablen wie '$my-primary' und Funktionen wie 'mat-color($my-primary)' angepasst werden. In vielen Fällen ist es einfacher, direkt Hex-Farbcodes zu verwenden (z.B. '#3f51b5' anstelle von 'mat-color($my-primary)'). Auch die Import-Pfade für Paletten haben sich geändert, und einige Pfade wie '@angular/material/core/theming/palette' sind nicht mehr verfügbar.
 
-Make sure that you are using a supported version of node.js before you upgrade your application. Angular v18 supports node.js versions: v18.19.0 and newer
+ERLEDIGT Make sure that you are using a supported version of node.js before you upgrade your application. Angular v18 supports node.js versions: v18.19.0 and newer
 
-In the application's project directory, run ng update @angular/core@18 @angular/cli@18 to update your application to Angular v18.
+ERLEDIGT In the application's project directory, run ng update @angular/core@18 @angular/cli@18 to update your application to Angular v18.
 
-Run ng update @angular/material@18.
+ERLEDIGT Run ng update @angular/material@18.
 
-Update TypeScript to versions 5.4 or newer.
+ERLEDIGT Update TypeScript to versions 5.4 or newer.
 After you update
-Update TypeScript to versions 5.4 or newer.
+ERLEDIGT Update TypeScript to versions 5.4 or newer.

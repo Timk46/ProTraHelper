@@ -17,12 +17,12 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^18.2.13",
-    "@angular/cdk": "^17.3.10",
+    "@angular/cdk": "^18.2.14",
     "@angular/common": "^18.2.13",
     "@angular/compiler": "^18.2.13",
     "@angular/core": "^18.2.13",
     "@angular/forms": "^18.2.13",
-    "@angular/material": "^17.3.10",
+    "@angular/material": "^18.2.14",
     "@angular/platform-browser": "^18.2.13",
     "@angular/platform-browser-dynamic": "^18.2.13",
     "@angular/router": "^18.2.13",
@@ -45,9 +45,9 @@
     "markdown-it-footnote": "^3.0.3",
     "markdown-it-highlightjs": "^4.0.1",
     "ngx-extended-pdf-viewer": "^22.3.9",
-    "ngx-markdown": "^17.2.1",
+    "ngx-markdown": "^18.1.0",
     "ngx-mat-select-search": "^7.0.7",
-    "ngx-monaco-editor-v2": "^17.0.1",
+    "ngx-monaco-editor-v2": "^18.1.0",
     "ngx-toastr": "^15.2.2",
     "pdfjs-dist": "^3.2.146",
     "prismjs": "^1.29.0",
@@ -86,6 +86,6 @@
     "karma-jasmine-html-reporter": "~2.0.0",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
-    "typescript": "5.5.4"
+    "typescript": "5.4"
   }
 }
