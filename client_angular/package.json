@@ -45,7 +45,7 @@
     "markdown-it-footnote": "^3.0.3",
     "markdown-it-highlightjs": "^4.0.1",
     "ngx-extended-pdf-viewer": "^18.0.0-beta.6",
-    "ngx-markdown": "^16.0.0",
+    "ngx-markdown": "^17.2.1",
     "ngx-mat-select-search": "^7.0.7",
     "ngx-monaco-editor-v2": "^16.0.1",
     "ngx-toastr": "^15.2.2",
