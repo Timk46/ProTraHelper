@@ -1,15 +1,35 @@
 import { ConceptGraphDTO } from '@DTOs/conceptGraph.dto';
 import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
+import { debounceTime, Subject } from 'rxjs';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-mobile-navigator',
   templateUrl: './mobile-navigator.component.html',
-  styleUrls: ['./mobile-navigator.component.scss']
+  styleUrls: ['./mobile-navigator.component.scss'],
+  animations: [
+    trigger('searchAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, width: '0%' }),
+        animate('200ms ease-out', style({ opacity: 1, width: '100%' }))
+      ]),
+      transition(':leave', [
+        style({ opacity: 1, width: '100%' }),
+        animate('200ms ease-in', style({ opacity: 0, width: '0%' }))
+      ])
+    ])
+  ]
 })
-export class MobileNavigatorComponent {
+export class MobileNavigatorComponent implements OnInit, AfterViewChecked {
+  // Search functionality
+  searchQuery: string = '';
+  searchResults: ConceptNodeDTO[] = [];
+  isSearchVisible: boolean = false;
+  private searchSubject = new Subject<string>();
+  @ViewChild('searchInput') searchInput!: ElementRef;
 
   private graphCommunicationService: GraphCommunicationService = GraphCommunicationService.getInstance();
   loadingDone: boolean = false;
@@ -48,6 +68,122 @@ export class MobileNavigatorComponent {
     });
   }
 
+
+  ngOnInit(): void {
+    // Setup search with debounce
+    this.searchSubject.pipe(
+      debounceTime(300) // Wait for 300ms pause in events
+    ).subscribe(searchTerm => {
+      this.performSearch(searchTerm);
+    });
+
+    // Listen for escape key to close search
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && this.isSearchVisible) {
+        this.hideSearch();
+      }
+    });
+  }
+
+  ngAfterViewChecked(): void {
+    // Focus the search input when it becomes visible
+    if (this.isSearchVisible && this.searchInput && this.searchInput.nativeElement) {
+      try {
+        setTimeout(() => {
+          if (this.searchInput && this.searchInput.nativeElement) {
+            this.searchInput.nativeElement.focus();
+          }
+        }, 0);
+      } catch (err) {
+        // Ignore focus errors - they can happen during transitions
+        console.debug('Focus error ignored:', err);
+      }
+    }
+  }
+
+  /**
+   * Handles input in the search field
+   */
+  onSearchInput(): void {
+    this.searchSubject.next(this.searchQuery);
+  }
+
+  /**
+   * Shows the search input and hides the breadcrumb
+   */
+  showSearch(): void {
+    this.isSearchVisible = true;
+  }
+
+  /**
+   * Hides the search input and shows the breadcrumb
+   */
+  hideSearch(): void {
+    this.isSearchVisible = false;
+    this.clearSearch();
+  }
+
+  /**
+   * Performs the actual search and populates search results
+   */
+  private performSearch(searchTerm: string): void {
+    if (!searchTerm.trim()) {
+      this.searchResults = [];
+      return;
+    }
+
+    // Filter nodes based on the search term
+    this.searchResults = Object.values(this.userGraphData.nodeMap)
+      .filter(node =>
+        node.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      .slice(0, 10); // Limit to 10 results
+  }
+
+  /**
+   * Clears the search query and results
+   */
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.searchResults = [];
+  }
+
+  /**
+   * Navigates to a selected search result
+   */
+  navigateToSearchResult(node: ConceptNodeDTO): void {
+    // Find path to this node
+    this.currentNodeId = node.databaseId;
+
+    // If node has children, set as current layer
+    if (node.childIds.length > 0) {
+      this.currentLayer = node.databaseId;
+    } else {
+      // If it's a leaf node, set parent as current layer
+      if (node.parentIds.length > 0) {
+        this.currentLayer = node.parentIds[0];
+      }
+    }
+
+    // Update UI
+    this.openLayers = this.getOpenedLayers(this.currentLayer);
+
+    // Hide search input and clear results
+    this.hideSearch();
+
+    // Show selected content
+    this.changeActiveNode(this.currentNodeId);
+  }
+
+  /**
+   * Handles click on a breadcrumb
+   */
+  onBreadcrumbClick(index: number): void {
+    if (index !== this.openLayers.length - 1) {
+      this.currentNodeId = this.openLayers[index].id;
+      this.currentLayer = this.openLayers[index].id;
+      this.openLayers = this.getOpenedLayers(this.currentLayer);
+    }
+  }
 
   /**
    * Retrieves the opened layers for a given node ID.
@@ -96,45 +232,35 @@ export class MobileNavigatorComponent {
     return nodes;
   }
 
-  /**
-   * Handles the click event on a tab.
-   * @param index - The index of the clicked tab.
-   */
-  onTabClick(index: number): void {
-    if (index != this.openLayers.length - 1) { //check tab changed
-      this.currentNodeId = this.openLayers[index].id;
-      this.currentLayer = this.openLayers[index].id;
-      this.openLayers = this.getOpenedLayers(this.currentLayer);
-    }
-  }
 
   /**
-   * Handles the click event on a table row, depending on whether the row is clicked once or twice.
+   * Handles the click event on a table row, performs navigation and shows content.
    *
    * @param node - The ConceptNodeDTO object representing the clicked row.
    * @param rowIndex - The index of the clicked row.
    * @param isRoot - A boolean indicating whether the current layer is the root.
    */
   onTableRowClick(node: ConceptNodeDTO, rowIndex: number, isRoot: boolean): void {
-    if (node.databaseId == this.currentNodeId) { //on double click
+    // Set the current node
+    this.currentNodeId = node.databaseId;
+
+    if (node.databaseId == this.lastActiveNodeId) { // If clicking on the same node (double click behavior)
       if (node.childIds.length != 0) {
         this.currentLayer = node.databaseId;
         this.addOpenedLayer(this.currentLayer);
       }
-      if (rowIndex == 0 && !isRoot) {
-        this.currentNodeId = node.databaseId;
-        this.currentLayer = this.currentNodeId;
-      }
-    } else { //on first click
-      if (rowIndex != 0 || isRoot) {
-        this.currentNodeId = node.databaseId;
-      }
-      if (rowIndex == 0 && !isRoot) { //if back button clicked
-        this.currentNodeId = node.databaseId;
+    } else { // On first click
+      if (rowIndex == 0 && !isRoot) { // If back button clicked
         this.currentLayer = node.databaseId;
         this.openLayers.pop();
+      } else if (node.childIds.length != 0) { // If folder clicked
+        this.currentLayer = node.databaseId;
+        this.addOpenedLayer(this.currentLayer);
       }
     }
+
+    // Immediately show the content for the selected node
+    this.changeActiveNode(this.currentNodeId);
   }
 
   /**

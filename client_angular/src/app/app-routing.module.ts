@@ -7,6 +7,7 @@ import { ConceptOverviewComponent } from './Pages/conceptOverview/conceptOvervie
 import { CodeTaskComponent } from './Pages/contentView/contentElement/codeTask/codeTask.component';
 import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer/pdfViewer.component';
 import { GraphComponent } from './Pages/graph/graph.component';
+import { MobileNavigatorComponent } from './Pages/mobile-navigator/mobile-navigator.component';
 import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
 import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
 import { DiscussionViewComponent } from './Pages/discussion/discussion-view/discussion-view.component';
@@ -25,6 +26,7 @@ import { AdminGuard } from './Guards/is-admin.guard';
 import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
 import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
 import { RegisteredForSubjectGuard } from './Guards/registered-for-subject.guard';
+import { NavigationPreferenceGuard } from './Guards/navigation-preference.guard';
 import { GraphTasksComponent } from './Modules/graph-tasks/graph-tasks.component';
 import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-question.component';
 import { EditUmlComponent } from './Pages/lecturersView/edit-uml/edit-uml.component';
@@ -54,7 +56,8 @@ const routes: Routes = [
       { path: 'discussion', component: DiscussionListComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
       { path: 'codeTask', component: CodeTaskComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
       { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-      { path: 'graph', component: GraphComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'graph', component: GraphComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard, NavigationPreferenceGuard] },
+      { path: 'mobile-navigator', component: MobileNavigatorComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
       { path: 'chatbot', component: ChatBotComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
       { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
       { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },

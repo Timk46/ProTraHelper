@@ -1,0 +1,8 @@
+<button
+  mat-button
+  class="nav-toggle-button"
+  [matTooltip]="toggleTooltip"
+  (click)="toggleNavigationPreference()">
+  <mat-icon>{{ toggleIcon }}</mat-icon>
+  <span>{{ toggleLabel }}</span>
+</button>

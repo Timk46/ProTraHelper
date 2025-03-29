@@ -1,7 +1,3 @@
-<button
-    class="chat-button"
-    (click)="onChangeChatState()">
-    <mat-icon>chat</mat-icon>
-    <span class="button-text">Chat</span>
-</button>
-<app-chat-bot-dialog *ngIf="isOpen" [display]="displayType.Collapsible" [@fadeAnimation] (close)="onChatClose()"></app-chat-bot-dialog>
+<div class="chat-wrapper">
+    <app-chat-bot-dialog [display]="displayType.Embedded" (close)="onChatClose()" [@fadeAnimation]></app-chat-bot-dialog>
+</div>
