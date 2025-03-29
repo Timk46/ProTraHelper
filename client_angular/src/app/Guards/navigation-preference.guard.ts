@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { NavigationPreferenceService } from '../Services/navigation/navigation-preference.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class NavigationPreferenceGuard implements CanActivate {
+export class NavigationPreferenceGuard  {
 
   constructor(
     private navigationPreferenceService: NavigationPreferenceService,
