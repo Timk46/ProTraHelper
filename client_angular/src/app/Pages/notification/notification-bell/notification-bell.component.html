@@ -1,6 +1,13 @@
 <div class="notification-bell" #notificationBell>
-  <button mat-icon-button [matBadge]="(unreadCount$ | async)" matBadgeOverlap="true" (click)="toggleNotifications()">
-    <mat-icon>notifications</mat-icon>
+  <button mat-icon-button class="notification-button" (click)="toggleNotifications()" aria-label="Notifications">
+    <div class="bell-container">
+      <mat-icon>notifications</mat-icon>
+      <ng-container *ngIf="unreadCount$ | async as count">
+        <div *ngIf="count > 0" class="notification-count">
+          {{ count > 99 ? '99+' : count }}
+        </div>
+      </ng-container>
+    </div>
   </button>
   <div class="notifications-panel"
       *ngIf="showNotifications"
