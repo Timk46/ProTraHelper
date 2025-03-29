@@ -17,7 +17,7 @@ export class CodeEditorComponent implements AfterViewInit {
   @Input() code: string = '';
   @Output() codeChange = new EventEmitter<string>();
 
-  editorHeight: number = 600; // Default height
+  editorHeight: number = 800; // Default height
   private isDragging: boolean = false;
   private startY: number = 0;
   private startHeight: number = 0;

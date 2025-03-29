@@ -1,0 +1,104 @@
+// VSCode-inspirierte Farbpalette
+$editor-bg: #1e1e1e;
+$editor-toolbar-bg: #252526;
+$editor-border: #3c3c3c;
+$editor-text: #d4d4d4;
+$panel-bg: #252526;
+$panel-header-bg: #2d2d2d;
+$panel-border: #3c3c3c;
+
+.code-editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: $editor-bg;
+  color: $editor-text;
+  margin-bottom: 0;
+  border: 1px solid $editor-border;
+  border-radius: 2px;
+  overflow: hidden;
+
+  // Input-Args Panel mit VSCode-Styling
+  .input-args-form {
+    margin: 5px 0 0 0;
+    padding: 12px 15px;
+    background-color: $panel-bg;
+    border-top: 1px solid $panel-border;
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: $editor-text;
+      font-weight: 500;
+      border-bottom: 1px solid $panel-border;
+      padding-bottom: 8px;
+    }
+
+    .arg-input {
+      margin-bottom: 8px;
+
+      mat-form-field {
+        width: 100%;
+        // Styles für Material Eingabefelder anpassen
+        ::ng-deep {
+          .mat-form-field-wrapper {
+            padding-bottom: 0;
+          }
+
+          .mat-form-field-underline {
+            background-color: $panel-border;
+          }
+
+          .mat-form-field-ripple {
+            background-color: #0078d4;
+          }
+
+          .mat-form-field-label {
+            color: #a7a7a7;
+          }
+
+          input.mat-input-element {
+            color: $editor-text;
+          }
+        }
+      }
+    }
+  }
+
+  // Submit-Controls mit VSCode-Styling
+  .submit-controls {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 15px;
+    background-color: $panel-bg;
+    border-top: 1px solid $panel-border;
+
+    button {
+      min-width: 120px;
+      background-color: #0078d4;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 2px;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #0086f0;
+      }
+
+      &:active {
+        background-color: #006cbe;
+      }
+
+      mat-icon {
+        margin-right: 6px;
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+<div class="tabs-container">
+  <div class="editor-tabs">
+    <div *ngFor="let file of openFiles"
+         class="tab"
+         [class.active]="file.isActive"
+         [class.modified]="file.isModified"
+         (click)="activateFile(file.id)">
+      <div class="tab-content">
+        <mat-icon class="file-icon">{{getFileIcon(file)}}</mat-icon>
+        <span class="filename">{{file.name}}</span>
+        <button mat-icon-button class="close-button" (click)="closeFile($event, file.id)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

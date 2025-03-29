@@ -1,9 +1,8 @@
 .app-header {
-  position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 40px;
   z-index: 1000;
   background-color: #434c5e;
   color: white;
@@ -26,7 +25,7 @@
   flex: 1;
 
   .app-logo {
-    height: 40px;
+    height: 35px;
     cursor: pointer;
   }
 
@@ -40,7 +39,7 @@
 }
 
 .app-logo {
-  height: 40px;
+  height: 35px;
   cursor: pointer;
   transition: transform 0.2s ease;
 
