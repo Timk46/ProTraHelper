@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import * as MarkdownIt from 'markdown-it';
+import MarkdownIt from 'markdown-it';
 import markdownItFootnote from 'markdown-it-footnote';
 import hljs from 'highlight.js';
 
@@ -11,7 +11,7 @@ export class MarkdownService {
 
   constructor() {
     this.md = new MarkdownIt({
-      highlight: (str, lang) => {
+      highlight: (str: string, lang: string) => {
         if (lang && hljs.getLanguage(lang)) {
           try {
             return (

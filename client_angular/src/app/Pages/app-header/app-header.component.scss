@@ -66,6 +66,14 @@
   gap: 16px;
   flex: 1;
   justify-content: flex-end;
+
+  .chat-button {
+    color: white;
+
+    .mat-icon {
+      color: white;
+    }
+  }
 }
 
 .nav-toggle {
@@ -83,12 +91,18 @@
   align-items: center;
   gap: 8px;
   padding: 0 8px;
+  color: white;
+
+  .mat-icon {
+    color: white;
+  }
 
   .username {
     max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    color: white;
   }
 }
 
