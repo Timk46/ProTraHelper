@@ -96,7 +96,15 @@ const routes: Routes = [
   { path: 'admin', loadChildren: () => import('./Pages/admin/admin.module').then(m => m.AdminModule), canActivate: [LoggedInGuard, AdminGuard] },
 ];
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],
+  imports: [RouterModule.forRoot(routes, {
+    preloadingStrategy: PreloadAllModules,
+    paramsInheritanceStrategy: 'emptyOnly', // Default in Angular 17
+    // Add other router configuration options that are no longer part of the public API
+    scrollPositionRestoration: 'disabled', // Default value
+    anchorScrolling: 'disabled', // Default value
+    onSameUrlNavigation: 'ignore', // Default value
+    enableTracing: false // Default value
+  })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
