@@ -40,6 +40,8 @@ ERLEDIGT If you want the child routes of loadComponent routes to inherit data fr
 
 ERLEDIGT HINWEIS: Bei Angular Material 17 hat sich die Theming-Syntax geändert. Der Import-Pfad '@angular/material/theming' ist nicht mehr verfügbar. Stattdessen muss '@angular/material' verwendet werden und die Funktionen haben sich geändert. Beispiel: In SCSS-Dateien muss '@import "@angular/material/theming"' durch '@use "@angular/material" as mat;' ersetzt werden und Funktionen wie 'mat-palette' werden zu 'mat.define-palette'. Alternativ kann ein vorgefertigtes Theme verwendet werden: '@import "@angular/material/prebuilt-themes/indigo-pink.css"'.
 
+ERLEDIGT HINWEIS: Auch in Komponenten-SCSS-Dateien müssen Änderungen vorgenommen werden, wenn sie Angular Material Theming-Variablen verwenden. Zum Beispiel müssen Variablen wie '$my-primary' und Funktionen wie 'mat-color($my-primary)' angepasst werden. In vielen Fällen ist es einfacher, direkt Hex-Farbcodes zu verwenden (z.B. '#3f51b5' anstelle von 'mat-color($my-primary)'). Auch die Import-Pfade für Paletten haben sich geändert, und einige Pfade wie '@angular/material/core/theming/palette' sind nicht mehr verfügbar.
+
 Make sure that you are using a supported version of node.js before you upgrade your application. Angular v18 supports node.js versions: v18.19.0 and newer
 
 In the application's project directory, run ng update @angular/core@18 @angular/cli@18 to update your application to Angular v18.
