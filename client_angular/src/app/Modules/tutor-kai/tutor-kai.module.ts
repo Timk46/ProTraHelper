@@ -11,34 +11,28 @@ import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { ToastrModule } from 'ngx-toastr';
 import { MarkdownModule } from 'ngx-markdown';
 
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 import { MaterialModule } from '../material.module';
 import { CodeEditorComponent } from './sites/code-editor/code-editor.component';
 import { VideoTimeStampComponent } from './sites/video-time-stamp/video-time-stamp.component';
 
-@NgModule({
-  declarations: [
-    TutorKaiComponent,
-    StudentWorkspaceComponent,
-    CodeEditorComponent,
-    VideoTimeStampComponent
-  ],
-  imports: [
-    CommonModule,
-    HttpClientModule,
-    MaterialModule,
-    TutorKaiRoutingModule,
-    ReactiveFormsModule,
-    FormsModule,
-    MarkdownModule.forRoot(),
-    ToastrModule.forRoot(),
-    MonacoEditorModule.forRoot(),
-  ],
-  exports: [
-    CodeEditorComponent,
-    VideoTimeStampComponent
-  ],
-  bootstrap: [TutorKaiComponent],
-})
+@NgModule({ declarations: [
+        TutorKaiComponent,
+        StudentWorkspaceComponent,
+        CodeEditorComponent,
+        VideoTimeStampComponent
+    ],
+    exports: [
+        CodeEditorComponent,
+        VideoTimeStampComponent
+    ],
+    bootstrap: [TutorKaiComponent], imports: [CommonModule,
+        MaterialModule,
+        TutorKaiRoutingModule,
+        ReactiveFormsModule,
+        FormsModule,
+        MarkdownModule.forRoot(),
+        ToastrModule.forRoot(),
+        MonacoEditorModule.forRoot()], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class TutorKaiModule {}

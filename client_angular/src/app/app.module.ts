@@ -19,7 +19,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
-import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 import { ContentViewComponent } from './Pages/contentView/contentView.component';
 import { CreateConceptDialogComponent } from './Pages/graph/graph-dialogs/create-concept-dialog/create-concept-dialog.component';
@@ -75,8 +75,7 @@ import { MatRippleModule } from "@angular/material/core";
 import { CodeGameModule } from "./Modules/code-game/code-game.module";
 import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-game/code-game-confirm-dialog.component";
 
-@NgModule({
-    declarations: [
+@NgModule({ declarations: [
         AppComponent,
         ContentBoardComponent,
         DashboardComponent,
@@ -131,8 +130,7 @@ import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-
         ContentListItemComponent,
         CodeGameConfirmDialogComponent
     ],
-    imports: [
-        ToastrModule.forRoot(),
+    bootstrap: [AppComponent], imports: [ToastrModule.forRoot(),
         BrowserModule,
         FormsModule,
         ReactiveFormsModule,
@@ -140,7 +138,6 @@ import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-
         BrowserAnimationsModule,
         MaterialModule,
         NgxExtendedPdfViewerModule,
-        HttpClientModule,
         LecturersViewModule,
         EditorModule,
         MarkdownModule.forRoot(),
@@ -149,9 +146,7 @@ import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-
         MatExpansionModule,
         CdkAccordionModule,
         MatRippleModule,
-        CodeGameModule
-    ],
-    providers: [
+        CodeGameModule], providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
         { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
@@ -159,7 +154,6 @@ import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-
         AdminGuard,
         ConfettiService,
         Title,
-    ],
-    bootstrap: [AppComponent]
-})
+        provideHttpClient(withInterceptorsFromDi()),
+    ] })
 export class AppModule { }

@@ -1,6 +1,6 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { NotificationService } from './notification.service';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { UserService } from '../auth/user.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -9,6 +9,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { NotificationDTO } from '@DTOs/notification.dto';
 import { NotificationType } from '@DTOs/notificationType.enum';
 import { environment } from 'src/environments/environment';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -27,15 +28,17 @@ describe('NotificationService', () => {
     const webSocketServiceSpy = jasmine.createSpyObj('WebSocketService', ['connect', 'disconnect', 'on', 'onConnectionChange', 'emit']);
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [
+    imports: [],
+    providers: [
         NotificationService,
         { provide: UserService, useValue: userServiceSpy },
         { provide: MatSnackBar, useValue: snackBarSpy },
         { provide: Router, useValue: routerSpy },
-        { provide: WebSocketService, useValue: webSocketServiceSpy }
-      ]
-    });
+        { provide: WebSocketService, useValue: webSocketServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
 
     service = TestBed.inject(NotificationService);
     httpMock = TestBed.inject(HttpTestingController);
