@@ -4,65 +4,60 @@ $blue: #729CA2;
 $light_blue: #C4DCDF;
 $white: #ECF3F4;
 
-.chat-button {
+.chat-wrapper {
+    height: 100%;
     display: flex;
-    align-items: center;
-    gap: 8px;
-    position: fixed;
-    bottom: 10%;
-    right: 1%;
+    flex-direction: column;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.chat-header {
     background-color: $black;
     color: white;
-    border: none;
-    border-radius: 24px;
-    padding: 12px 24px;
-    font-size: 16px;
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    z-index: 100;
 
-    &:hover {
-        background-color: lighten($black, 5%);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        transform: translateY(-2px);
+    span {
+        flex-grow: 1;
+        text-align: center;
     }
 
-    mat-icon {
-        font-size: 20px;
-        height: 20px;
-        width: 20px;
-    }
-
-    .button-text {
-        margin-top: 1px;
-    }
-
-    // Tablet styles
-    @media (max-width: 768px) {
-        padding: 10px 20px;
-        font-size: 14px;
-        bottom: 8%;
-
-        mat-icon {
-            font-size: 18px;
-            height: 18px;
-            width: 18px;
+    .close-button {
+        color: white;
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
         }
     }
+}
 
-    // Mobile styles
-    @media (max-width: 480px) {
-        padding: 8px 16px;
-        font-size: 13px;
-        bottom: 5%;
-        right: 3%;
+::ng-deep {
+    .embedded-chat {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
 
-        mat-icon {
-            font-size: 16px;
-            height: 16px;
-            width: 16px;
+        .mat-card {
+            border-radius: 0;
+            box-shadow: none !important;
+            background-color: $white;
+            height: 100%;
+            padding: 0;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .chat-input {
+            padding: 8px;
+            background-color: #f5f5f5;
+            border-top: 1px solid #ddd;
         }
     }
 }

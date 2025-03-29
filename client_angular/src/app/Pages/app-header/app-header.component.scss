@@ -1,0 +1,109 @@
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  z-index: 1000;
+  background-color: #434c5e;
+  color: white;
+  padding: 0 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  /* Safari-specific styles */
+  @supports (-webkit-touch-callout: none) {
+    top: env(safe-area-inset-top);
+  }
+}
+
+.left-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+
+  .app-logo {
+    height: 40px;
+    cursor: pointer;
+  }
+
+  .chat-button {
+    margin-left: 12px;
+
+    .mat-icon {
+      color: white;
+    }
+  }
+}
+
+.app-logo {
+  height: 40px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.app-title {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.center-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.right-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.nav-toggle {
+  margin: 0 auto;
+}
+
+.notification-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.user-menu-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+
+  .username {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0 8px;
+  }
+
+  .username {
+    display: none;
+  }
+
+  .right-content {
+    gap: 8px;
+  }
+}
