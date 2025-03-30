@@ -2,33 +2,53 @@
   <!-- Einführung / Leerer Zustand -->
   <div *ngIf="!showFeedbackOptions() && !feedbackContent && !isGenerating" class="feedback-intro">
     <div class="feedback-card">
-      <div class="card-icon">
-        <mat-icon>lightbulb</mat-icon>
-      </div>
-      <h3>KI-Feedback für deinen Code</h3>
-      <p>Führe deinen Code aus, um persönliches Feedback von Tutor Kai zu erhalten.</p>
+      <p>Führe zunächst deinen Code aus, um Feedback von Tutor Kai zu erhalten.</p>
     </div>
   </div>
 
-  <!-- Feedback-Optionen zur Auswahl -->
+  <!-- Neue Feedback-Optionen zur Auswahl -->
   <div *ngIf="showFeedbackOptions()" class="feedback-options">
     <div class="feedback-card">
-      <h3>Feedback-Optionen</h3>
-      <p>Wähle dein gewünschtes Unterstützungslevel:</p>
-      <div class="level-selector">
+      <p>Wähle die Art des Feedbacks, das du erhalten möchtest:</p>
+      
+      <!-- Kategorie-Buttons -->
+      <div class="category-buttons">
         <button
-          *ngFor="let level of feedbackLevelOptions"
+          *ngFor="let category of feedbackCategories"
           mat-stroked-button
           color="primary"
-          [class.selected]="selectedLevel === level"
-          (click)="getKIFeedback(level)">
-          <span class="level-icon">
-            <mat-icon *ngIf="level === 'Wenig Unterstützung'">directions_walk</mat-icon>
-            <mat-icon *ngIf="level === 'Standard Unterstützung'">emoji_people</mat-icon>
-            <mat-icon *ngIf="level === 'Viel Unterstützung'">directions_run</mat-icon>
-          </span>
-          {{ level }}
+          [class.selected]="selectedCategory === category"
+          (click)="selectCategory(category)">
+          <span class="category-icon">{{ category.icon }}</span>
+          <span class="category-keyword">{{ category.keyword }}</span>
         </button>
+      </div>
+      
+      <!-- Sprechblase mit Fragen -->
+      <div
+        *ngIf="selectedCategory"
+        class="question-bubble">
+        <div class="bubble-arrow"></div>
+        <div class="bubble-content">
+          <h4>{{ selectedCategory.name }}</h4>
+          <div class="question-list">
+            <button
+              *ngFor="let question of selectedCategory.questions"
+              mat-button
+              color="primary"
+              class="question-button"
+              (click)="requestFeedbackForQuestion(question)">
+              {{ question.text }}
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Overlay zum Schließen der Sprechblase bei Klick außerhalb -->
+      <div
+        *ngIf="selectedCategory"
+        class="bubble-overlay"
+        (click)="closeQuestionBubble()">
       </div>
     </div>
   </div>
@@ -47,7 +67,10 @@
     <div *ngIf="feedbackContent" class="feedback-result">
       <div class="feedback-header">
         <h3>Feedback zu deinem Code</h3>
-        <div class="feedback-level-badge">{{ selectedLevel }}</div>
+        <div *ngIf="selectedQuestion && selectedCategory" class="feedback-type-badge">
+          <span class="category-icon">{{ selectedCategory.icon }}</span>
+          <span class="question-text">{{ selectedQuestion.text }}</span>
+        </div>
       </div>
 
       <div class="feedback-text" [innerHTML]="sanitizedFeedback"></div>

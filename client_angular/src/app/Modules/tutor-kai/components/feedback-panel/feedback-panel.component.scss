@@ -14,6 +14,7 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     margin-bottom: 16px;
     transition: all 0.3s ease;
+    position: relative; // Wichtig für die Positionierung der Sprechblase
 
     &:hover {
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
@@ -74,37 +75,106 @@
       }
     }
 
-    .level-selector {
+    // Neue Stile für die Kategorie-Buttons
+    .category-buttons {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 12px;
+      gap: 8px;
       margin-top: 16px;
-
+      position: relative; // Wichtig für die Positionierung der Sprechblase
+      
       button {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        padding: 8px 16px;
-        border-radius: 20px;
+        padding: 12px 8px;
+        border-radius: 8px;
         transition: all 0.2s ease;
-        font-weight: 500;
-
-        .level-icon {
-          display: flex;
-          align-items: center;
-          margin-right: 8px;
+        
+        .category-icon {
+          font-size: 24px;
+          margin-bottom: 4px;
         }
-
+        
+        .category-keyword {
+          font-size: 12px;
+          font-weight: 500;
+        }
+        
         &.selected {
           background-color: #3f51b5;
           color: white;
           box-shadow: 0 2px 5px rgba(63, 81, 181, 0.3);
         }
-
+        
         &:hover:not(.selected) {
           background-color: rgba(63, 81, 181, 0.1);
         }
       }
+    }
+    
+    // Stile für die Sprechblase
+    .question-bubble {
+      position: relative;
+      margin-top: 16px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 16px;
+      z-index: 10;
+      
+      // Pfeil der Sprechblase
+      .bubble-arrow {
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-bottom: 10px solid white;
+      }
+      
+      .bubble-content {
+        h4 {
+          font-size: 16px;
+          font-weight: 500;
+          margin-top: 0;
+          margin-bottom: 12px;
+          color: #3f51b5;
+        }
+        
+        .question-list {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          
+          .question-button {
+            text-align: left;
+            justify-content: flex-start;
+            padding: 8px 12px;
+            line-height: 1.3;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+            
+            &:hover {
+              background-color: rgba(63, 81, 181, 0.1);
+            }
+          }
+        }
+      }
+    }
+    
+    // Overlay zum Schließen der Sprechblase
+    .bubble-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 5;
     }
   }
 
@@ -152,6 +222,30 @@
         color: #333;
       }
 
+      // Angepasster Stil für das Feedback-Type-Badge
+      .feedback-type-badge {
+        display: flex;
+        align-items: center;
+        background-color: #e8eaf6;
+        color: #3f51b5;
+        font-size: 14px;
+        padding: 4px 12px;
+        border-radius: 16px;
+        max-width: 60%;
+        
+        .category-icon {
+          margin-right: 8px;
+        }
+        
+        .question-text {
+          font-weight: 500;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
+      // Behalte den alten Stil für das Feedback-Level-Badge bei (für Abwärtskompatibilität)
       .feedback-level-badge {
         background-color: #e8eaf6;
         color: #3f51b5;
@@ -228,20 +322,38 @@
   .feedback-panel {
     padding: 12px;
 
-    .feedback-options .level-selector {
-      flex-direction: column;
-
+    // Anpassungen für die Kategorie-Buttons auf kleinen Bildschirmen
+    .feedback-options .category-buttons {
       button {
-        width: 100%;
+        flex: 1 1 calc(33.33% - 8px); // 3 Buttons pro Zeile
+        min-width: 0;
       }
+    }
+    
+    // Anpassungen für die Fragen-Liste in der Sprechblase
+    .feedback-options .question-bubble .bubble-content .question-list {
+      max-height: 300px;
+      overflow-y: auto;
     }
 
     .feedback-result .feedback-header {
       flex-direction: column;
       align-items: flex-start;
 
-      .feedback-level-badge {
+      .feedback-type-badge, .feedback-level-badge {
         margin-top: 8px;
+        max-width: 100%;
+      }
+    }
+  }
+}
+
+@media (max-width: 400px) {
+  .feedback-panel {
+    // Anpassungen für die Kategorie-Buttons auf sehr kleinen Bildschirmen
+    .feedback-options .category-buttons {
+      button {
+        flex: 1 1 calc(50% - 8px); // 2 Buttons pro Zeile
       }
     }
   }

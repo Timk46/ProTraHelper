@@ -47,3 +47,109 @@ export interface FeedbackRating {
   comment: string;
   submissionId: string;
 }
+
+/**
+ * Neue Modelle für die erweiterten Feedback-Optionen
+ */
+
+// Interface für eine Feedback-Frage
+export interface FeedbackQuestion {
+  id: string;
+  text: string;
+  value: string; // Wert, der an den Server gesendet wird
+}
+
+// Interface für eine Feedback-Kategorie
+export interface FeedbackCategory {
+  id: string;
+  name: string;
+  icon: string;
+  keyword: string;
+  questions: FeedbackQuestion[];
+}
+
+// Konstante mit allen Feedback-Kategorien und -Fragen
+export const FEEDBACK_CATEGORIES: FeedbackCategory[] = [
+  {
+    id: 'mistakes',
+    name: 'Knowledge about Mistakes',
+    icon: '🔍',
+    keyword: 'Fehleranalyse',
+    questions: [
+      { id: 'test-failures', text: 'Welcher Test schlägt fehl?', value: 'KM_TEST_FAILURES' },
+      { id: 'compiler-errors', text: 'Welche Compiler-Fehler habe ich gemacht?', value: 'KM_COMPILER_ERRORS' },
+      { id: 'solution-errors', text: 'Was ist falsch an meiner Lösung?', value: 'KM_SOLUTION_ERRORS' },
+      { id: 'location-hint', text: 'Wo finde ich meinen Fehler?', value: 'KM_LOCATION_HINT' }
+    ]
+  },
+  {
+    id: 'how-to-proceed',
+    name: 'Knowledge on How to Proceed',
+    icon: '🧭',
+    keyword: 'Wegweiser',
+    questions: [
+      { id: 'bug-related-hints', text: 'Wie behebe ich meinen Fehler?', value: 'KH_BUG_RELATED_HINTS' },
+      { id: 'task-processing-steps', text: 'Was ist der nächste konkrete Schritt?', value: 'KH_TASK_PROCESSING_STEPS' },
+      { id: 'improvements', text: 'Wie könnte ich meine Lösung verbessern?', value: 'KH_IMPROVEMENTS' },
+      { id: 'data-hints', text: 'Welche Variablenwerte brauche ich?', value: 'KH_DATA_HINTS' }
+    ]
+  },
+  {
+    id: 'two-stage-feedback',
+    name: 'Zweistufiges Feedback',
+    icon: '🔄',
+    keyword: 'Vergleich',
+    questions: [
+      { id: 'solution-comparison', text: 'Wie gut entspricht meine Lösung der Musterlösung?', value: 'ZF_SOLUTION_COMPARISON' },
+      { id: 'typical-errors', text: 'Welchen typischen Fehlern ähnelt mein Fehler?', value: 'ZF_TYPICAL_ERRORS' },
+      { id: 'missing-parts', text: 'Was fehlt noch zu einer guten Lösung?', value: 'ZF_MISSING_PARTS' },
+      { id: 'approach-validation', text: 'Ist meine Herangehensweise grundsätzlich richtig?', value: 'ZF_APPROACH_VALIDATION' }
+    ]
+  },
+  {
+    id: 'task-constraints',
+    name: 'Knowledge on Task Constraints',
+    icon: '📋',
+    keyword: 'Anforderungen',
+    questions: [
+      { id: 'special-requirements', text: 'Welche speziellen Anforderungen hat die Aufgabe?', value: 'KTC_SPECIAL_REQUIREMENTS' },
+      { id: 'general-rules', text: 'Welche allgemeinen Regeln gelten für diese Aufgabe?', value: 'KTC_GENERAL_RULES' },
+      { id: 'language-constructs', text: 'Welche Sprachkonstrukte darf oder soll ich verwenden?', value: 'KTC_LANGUAGE_CONSTRUCTS' },
+      { id: 'methods-libraries', text: 'Welche Methoden/Bibliotheken darf ich nutzen?', value: 'KTC_METHODS_LIBRARIES' }
+    ]
+  },
+  {
+    id: 'concepts',
+    name: 'Knowledge about Concepts',
+    icon: '💡',
+    keyword: 'Konzepte',
+    questions: [
+      { id: 'concept-explanation', text: 'Kannst du mir das Konzept genauer erklären?', value: 'KC_CONCEPT_EXPLANATION' },
+      { id: 'concept-example', text: 'Hast du ein Beispiel für dieses Konzept?', value: 'KC_CONCEPT_EXAMPLE' },
+      { id: 'concept-behind-task', text: 'Welches Fachkonzept steckt hinter der Aufgabe?', value: 'KC_CONCEPT_BEHIND_TASK' },
+      { id: 'further-explanations', text: 'Wo finde ich weitere Erklärungen zu diesem Thema?', value: 'KC_FURTHER_EXPLANATIONS' }
+    ]
+  },
+  {
+    id: 'meta-cognition',
+    name: 'Knowledge on Meta-cognition',
+    icon: '🧠',
+    keyword: 'Denkstrategien',
+    questions: [
+      { id: 'structure-thinking', text: 'Wie strukturiere ich mein Denken besser?', value: 'KMC_STRUCTURE_THINKING' },
+      { id: 'understanding-strategy', text: 'Welche Strategie könnte mir helfen, die Aufgabe besser zu verstehen?', value: 'KMC_UNDERSTANDING_STRATEGY' },
+      { id: 'progress-check', text: 'Wie überprüfe ich am besten, ob ich auf dem richtigen Weg bin?', value: 'KMC_PROGRESS_CHECK' },
+      { id: 'targeted-approach', text: 'Wie kann ich gezielter an die Aufgabe herangehen?', value: 'KMC_TARGETED_APPROACH' }
+    ]
+  },
+  {
+    id: 'additional-options',
+    name: 'Zusätzliche Optionen',
+    icon: '✨',
+    keyword: 'Sonstiges',
+    questions: [
+      { id: 'small-hint', text: 'Ich brauche einen kleinen Hinweis.', value: 'AO_SMALL_HINT' },
+      { id: 'other-question', text: 'Ich habe eine andere Frage.', value: 'AO_OTHER_QUESTION' }
+    ]
+  }
+];
