@@ -113,7 +113,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       .subscribe(task => {
         if (task) {
           // Verwende text (Markdown) statt textHTML für Markdown-Rendering
-          this.taskDescription = task.codingQuestion?.text ?? '';
+          this.taskDescription = task.codingQuestion?.textHTML ?? '';
           // Extrahiere den Namen als Titel aus dem Task-Objekt
           this.taskTitle = task.name ?? 'Aufgabe';
         }
