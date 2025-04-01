@@ -388,6 +388,7 @@ export class QuestionDataService {
         } else {
           await this.qdUml.updateUmlQuestion(question.umlQuestion);
         }
+        break; // Hinzugefügtes break-Statement, um das "Durchfallen" in den CODEGAME-Fall zu verhindern
       case questionType.CODEGAME:
         if (createNewVersion || !currentQuestion.codeGameQuestion) {
           await this.qdCodeGame.createCodeGameQuestion(question.codeGameQuestion, updatedQuestion.id);
@@ -959,4 +960,3 @@ export class QuestionDataService {
   }
 
 }
-
