@@ -2,7 +2,6 @@ import { PrismaClient, contentElementType } from '@prisma/client';
 import { WorkSheet, utils } from 'xlsx';
 import { faker } from '@faker-js/faker';
 import * as fs from 'fs';
-import { seedMCQ } from './seedMCQ';
 import { seedCodeQuestions } from './seedCodeQuestions';
 import { seedAllEmbeddingsForVideo } from './seedEmbeddings';
 import { seedMCQnew } from './seedNewMCQ';
@@ -1496,7 +1495,7 @@ export const seedOFP = async () => {
           console.log('Importing Coding Tasks from Excel...');
           await seedCodeQuestions(adminUser.id);
           //await seedMCQ(adminUser.id);
-          //await seedMCQnew();
+          await seedMCQnew();
           console.log('Importing Tasks Done!');
         });
 
