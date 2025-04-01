@@ -1,26 +1,47 @@
-import { Component, OnInit, Input, Inject, EventEmitter, Output, Optional } from '@angular/core';
-import { MCOptionViewDTO, McQuestionDTO, QuestionDTO } from '@DTOs/question.dto';
+import { Component, OnInit, OnDestroy, Input, Inject, EventEmitter, Output, Optional, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { MCOptionViewDTO, McQuestionDTO, QuestionDTO, McQuestionOptionDTO } from '@DTOs/question.dto';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TaskViewData } from '@DTOs/index';
-import {  Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { Location } from '@angular/common';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+// Extended interface for our options to include correctness information
+interface MCOptionViewModel extends MCOptionViewDTO {
+  isCorrect?: boolean;
+}
+
+// Component state enum
+enum McTaskState {
+  LOADING,
+  QUESTION,
+  SUBMITTING,
+  FEEDBACK
+}
 
 @Component({
   selector: 'app-mcTask',
   templateUrl: './mcTask.component.html',
-  styleUrls: ['./mcTask.component.css']
+  styleUrls: ['./mcTask.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-
-export class McTaskComponent implements OnInit {
-
+export class McTaskComponent implements OnInit, OnDestroy {
   @Output() submitClicked = new EventEmitter<any>();
 
   @Input() conceptId!: number;
   @Input() questionId!: number;
   @Input() isSelfAssessment: boolean = false;
   @Input() taskViewData!: TaskViewData;
+
+  // Track component state
+  componentState: McTaskState = McTaskState.LOADING;
+  justAnsweredCorrectly: boolean = false;
+
+  // For handling RxJS subscriptions cleanup
+  private destroy$ = new Subject<void>();
 
   editorConfig = { //tinyMCE
     readonly: true,
@@ -32,28 +53,29 @@ export class McTaskComponent implements OnInit {
   }
 
   //init question data
-  questionData : QuestionDTO = { // dummy data
-    id : -1,
-    name : '',
-    description : '',
-    score : -1,
-    type : '',
-    text : '',
-    conceptNodeId : -1,
+  questionData: QuestionDTO = { // dummy data
+    id: -1,
+    name: '',
+    description: '',
+    score: -1,
+    type: '',
+    text: '',
+    conceptNodeId: -1,
     isApproved: false,
     originId: -1,
     level: -1,
   }
 
-  dataLoaded : boolean = false;
+  dataLoaded: boolean = false;
   conceptIdParam!: number;
   questionIdParam!: number;
+
   //the mc question data
-  mcQuestion : McQuestionDTO = {
-    id : -1,
-    questionId : -1,
-    isSC : false,
-    shuffleOptions : false,
+  mcQuestion: McQuestionDTO = {
+    id: -1,
+    questionId: -1,
+    isSC: false,
+    shuffleOptions: false,
     questionVersion: {
       id: -1,
       version: -1,
@@ -65,13 +87,13 @@ export class McTaskComponent implements OnInit {
   }
 
   //the userAnswer data
-  userAnswer : UserAnswerDataDTO = {
+  userAnswer: UserAnswerDataDTO = {
     id: -1,
     userId: -1,
     questionId: -1,
   }
 
-  feedback : userAnswerFeedbackDTO = {
+  feedback: userAnswerFeedbackDTO = {
     id: -1,
     userAnswerId: -1,
     score: -1,
@@ -80,25 +102,22 @@ export class McTaskComponent implements OnInit {
     progress: -1,
   }
 
-  //isSelfAssessment
-
   //the mc options
-  options : MCOptionViewDTO[] = [];
+  options: MCOptionViewModel[] = [];
 
   //the selected option(s)
-  selectedOptions : number[] = [];
+  selectedOptions: number[] = [];
 
-  submitDisabled : boolean = false;
-  fullscore : number = 0;
+  submitDisabled: boolean = false;
+  fullscore: number = 0;
 
-  //Get data from dialog
   constructor(
-    //public dialogRef: MatDialogRef<McTaskComponent>,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: {taskViewData: TaskViewData, conceptId: number, questionId: number},
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: { taskViewData: TaskViewData, conceptId: number, questionId: number },
     private questionDataService: QuestionDataService,
     private router: Router,
     private dialogRef: MatDialogRef<McTaskComponent>,
-    private location: Location
+    private location: Location,
+    private cdr: ChangeDetectorRef
   ) {
     if (data && data.taskViewData) {
       this.taskViewData = data.taskViewData;
@@ -106,43 +125,110 @@ export class McTaskComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.loadQuestionData();
+  }
+
+  ngOnDestroy() {
+    // Complete the subject to unsubscribe from all observables
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Loads the question data from the server
+   */
+  private loadQuestionData(): void {
     if (this.taskViewData && this.taskViewData.id) {
-      //Show the newest Version of the questions
-      this.questionDataService.getQuestionData(this.taskViewData.id).subscribe(data => {
-        this.questionData = data;
-        this.dataLoaded = true;
-
-        //Get the mc question data of the newest question version
-        console.log("id: ", this.questionData.id, "typeof", typeof this.questionData.id);
-        this.questionDataService.getMCQuestion(this.questionData.id).subscribe(data => {
-          this.mcQuestion = data;
-          console.log("mcQuestion id: ", this.mcQuestion.id);
-
-          //Get the MC-Options of the question
-          this.questionDataService.getMCOptions(this.mcQuestion.id).subscribe(data => {
-            //console.log(this.mcQuestion.id);
-            this.options = data;
-            this.options.sort(() => Math.random() - 0.5);
-          });
-        })
-      });
+      // Show the newest Version of the questions
+      this.questionDataService.getQuestionData(this.taskViewData.id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(data => {
+          this.questionData = data;
+          this.loadMcQuestionData();
+        });
     }
   }
 
+  /**
+   * Loads the MC question data after the basic question data is loaded
+   */
+  private loadMcQuestionData(): void {
+    this.questionDataService.getMCQuestion(this.questionData.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(data => {
+        this.mcQuestion = data;
+        this.loadMcOptions();
+      });
+  }
+
+  /**
+   * Loads the MC options for the question
+   */
+  private loadMcOptions(): void {
+    this.questionDataService.getMCOptions(this.mcQuestion.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(data => {
+        // Convert to our extended view model type
+        this.options = data.map(option => ({
+          ...option,
+          isCorrect: undefined  // Will be set after answer submission
+        }));
+
+        // Shuffle options if enabled in question config
+        if (this.mcQuestion.shuffleOptions) {
+          this.options.sort(() => Math.random() - 0.5);
+        }
+
+        this.dataLoaded = true;
+        this.componentState = McTaskState.QUESTION;
+        this.cdr.detectChanges();
+      });
+  }
+
+  /**
+   * Handle selection for single choice questions
+   */
+  selectSingleOption(optionId: number): void {
+    this.selectedOptions = [optionId];
+    this.onSelectionChange();
+  }
+
+  /**
+   * Handle selection/deselection for multiple choice questions
+   */
+  toggleOption(optionId: number): void {
+    const index = this.selectedOptions.indexOf(optionId);
+    if (index > -1) {
+      this.selectedOptions.splice(index, 1);
+    } else {
+      this.selectedOptions.push(optionId);
+    }
+    this.onSelectionChange();
+  }
+
+  /**
+   * Updates the selected state of options after selection changes
+   */
   onSelectionChange(): void {
     for (const option of this.options) {
-      if(this.selectedOptions.includes(option.id)) {
+      if (this.selectedOptions.includes(option.id)) {
         option.selected = true;
-      }
-      else {
+      } else {
         option.selected = false;
       }
     }
+    this.cdr.detectChanges();
   }
 
-  onSubmit() :void {
-    //Create new submit
-    //console.log('create submit for contentElementId: ' + this.taskViewData.contentElementId);
+  /**
+   * Handle form submission
+   */
+  onSubmit(): void {
+    if (this.selectedOptions.length === 0) return;
+
+    this.componentState = McTaskState.SUBMITTING;
+
+    // Create new submit
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
       contentElementId: this.taskViewData.contentElementId,
@@ -151,20 +237,65 @@ export class McTaskComponent implements OnInit {
       userMCAnswer: this.selectedOptions,
     }
 
-    this.questionDataService.createUserAnswer(userAnswerData).subscribe(data => {
-      this.feedback = data;
-      // Emit progress before setting submitDisabled
-      this.submitClicked.emit(data.progress);
-      // Set submitDisabled immediately after emitting
-      this.submitDisabled = true;
+    this.questionDataService.createUserAnswer(userAnswerData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(data => {
+        this.feedback = data;
+
+        // Check correct answers and update option models
+        this.updateOptionCorrectness();
+
+        // Emit progress
+        this.submitClicked.emit(data.progress);
+
+        // Set state
+        this.submitDisabled = true;
+        this.componentState = McTaskState.FEEDBACK;
+
+        // Determine if answered correctly for animation
+        this.justAnsweredCorrectly = this.checkCorrect();
+        if (this.justAnsweredCorrectly) {
+          setTimeout(() => {
+            this.justAnsweredCorrectly = false;
+            this.cdr.detectChanges();
+          }, 1500);
+        }
+
+        this.cdr.detectChanges();
+      });
+  }
+
+  /**
+   * After submission, update the correctness flag on each option
+   */
+  private updateOptionCorrectness(): void {
+    if (!this.mcQuestion.mcQuestionOption || this.mcQuestion.mcQuestionOption.length === 0) {
+      return;
+    }
+
+    // Get correct option ids from the question data
+    const correctOptionIds = this.mcQuestion.mcQuestionOption
+      .filter(opt => opt.option && opt.option.correct)
+      .map(opt => opt.id);
+
+    // Update our view models
+    this.options.forEach(option => {
+      option.isCorrect = correctOptionIds.includes(option.id);
     });
   }
 
-  checkCorrect() {
-    return this.questionData.score === this.feedback.score;
+  /**
+   * Check if the answer was completely correct
+   */
+  checkCorrect(): boolean {
+    const questionScore = this.questionData.score || 0;
+    return questionScore > 0 && this.feedback.score === questionScore;
   }
 
-  retry() {
+  /**
+   * Reset the question to try again
+   */
+  retry(): void {
     this.submitDisabled = false;
     this.feedback = {
       id: -1,
@@ -174,28 +305,41 @@ export class McTaskComponent implements OnInit {
       elementDone: false,
       progress: -1,
     }
+
     // Clear selected options
     this.selectedOptions = [];
+
     // Reset selected state for all options
     this.options.forEach(option => {
       option.selected = false;
+      // Keep isCorrect value for learning purposes
     });
-    // Shuffle options if needed
-    this.options.sort(() => Math.random() - 0.5);
+
+    // Reset component state
+    this.componentState = McTaskState.QUESTION;
+    this.cdr.detectChanges();
   }
 
-  getFeedbackColor() {
+  /**
+   * Get the appropriate feedback color based on score
+   */
+  getFeedbackColor(): string {
+    const questionScore = this.questionData.score || 0;
 
-    if (this.feedback.score === this.questionData.score) {
-      return '#a3be8c';
-    } else if (this.feedback.score >= this.questionData.score! * 0.5) {
-      return '#ffa500';
+    if (questionScore === 0) return '#a3be8c'; // Edge case protection
+
+    if (this.feedback.score === questionScore) {
+      return '#a3be8c'; // Nord green
+    } else if (this.feedback.score >= questionScore * 0.5) {
+      return '#ebcb8b'; // Nord yellow
     } else {
-      return '#ff0000';
+      return '#bf616a'; // Nord red
     }
-
   }
 
+  /**
+   * Close the dialog or navigate back
+   */
   onClose(): void {
     if (this.dialogRef) {
       this.dialogRef.close();
