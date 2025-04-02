@@ -131,6 +131,9 @@
 
     <div class="form-actions">
       <button mat-raised-button color="primary" type="button" class="action-button" (click)="navigateToDashboard()">Zurück zum Dashboard</button>
+      <button mat-raised-button color="primary" type="button" class="action-button" (click)="exportTask()">Export Aufgabe</button>
+      <button mat-raised-button color="primary" type="button" class="action-button" (click)="fileInput.click()" [disabled]="!isImportPossible()">Import Aufgabe</button>
+      <input #fileInput type="file" accept=".json" style="display: none" (change)="importTask($event)">
       <button mat-raised-button color="primary" type="submit" class="action-button">Änderungen speichern</button>
     </div>
 

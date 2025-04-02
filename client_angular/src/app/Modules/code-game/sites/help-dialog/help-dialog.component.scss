@@ -1,0 +1,127 @@
+.help-dialog {
+  padding: 20px;
+  max-width: 100%; // size defined in workspace.component.ts
+  height: 80vh; // set height to 80% of viewport height
+  display: flex;
+  flex-direction: column;
+
+  h2 {
+    color: #333;
+    margin-bottom: 20px;
+  }
+
+  .help-content {
+    flex: 1;
+    overflow-y: auto; // Scrollbar if needed
+    padding-right: 10px; // Space for scrollbar
+
+    h3 {
+      color: #444;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      line-height: 1.6;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    ol, ul {
+      padding-left: 20px;
+      margin-bottom: 15px;
+
+      li {
+        line-height: 1.6;
+        color: #666;
+        margin-bottom: 8px;
+      }
+    }
+
+    // Styles for the dynamically inserted content
+    ::ng-deep {
+      h3 {
+        color: #444;
+        margin-top: 20px;
+        margin-bottom: 10px;
+      }
+
+      .help-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+        max-width: 100%;
+      }
+
+      .grid-item {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease-in-out;
+        min-height: 200px; // Minimum height for consistent appearance
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        &:hover {
+          transform: translateY(-2px);
+        }
+
+        code {
+          display: block;
+          margin-bottom: 10px;
+          background-color: #e9ecef;
+          padding: 8px 12px;
+          border-radius: 4px;
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 0.9em;
+          color: #333;
+          word-break: break-word; // Prevented overflow in case of too long Code-Lines
+        }
+
+        p {
+          margin: 0 0 10px 0;
+          font-size: 0.9em;
+          color: #666;
+          flex-grow: 1; // Takes available space
+        }
+
+        .turn-gifs {
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+          margin: 10px 0;
+        }
+
+        img {
+          width: 100% !important;
+          height: auto !important;
+          max-height: 100px;
+          object-fit: contain;
+          margin: 10px 0;
+
+          &:not(.turn-gifs img) {
+            margin: 10px 0;
+          }
+        }
+      }
+
+      code {
+        background-color: #f5f5f5;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.9em;
+        color: #333;
+      }
+    }
+  }
+
+  mat-dialog-actions {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+  }
+} 

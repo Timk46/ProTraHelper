@@ -14,6 +14,7 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
 
   codeGameForm: FormGroup;
   theme: string = 'dino'; // default theme. Used without form control to avoid reset all values of the game when changing the theme
+  multiselect: string = '';
   gameField: any[][] = [];
   gameCellRestrictions: any[][] = [];
   selectedCell = { row: 0, col: 0 };
@@ -30,6 +31,7 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
       rowsAndColumns: [10]
     });
   }
+
   ngOnInit(): void {
     this.generateGameField();
     this.codeGameForm.valueChanges.subscribe(() => {
@@ -57,6 +59,24 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
       }
 
       this.inputDataSet = true;
+    }
+
+    // In case the task is allready loaded and the user starteds a import
+    if (this.inputGameData && this.inputGameData.newDataByImportOperation) {
+      console.log("Input Playfield editor by import: ", this.inputGameData);
+      this.inputDataSet = false;
+      this.isInputDataAvailable = true;
+
+      /* Overwrite old data */
+      this.theme = this.inputGameData.theme;
+      this.gameField = this.transformStringToArray(this.inputGameData.gameField);
+      this.codeGameForm.patchValue({
+        rowsAndColumns: this.gameField.length
+      });
+      this.gameCellRestrictions = this.transformStringToArray(this.inputGameData.gameCellRestrictions);
+
+      this.inputDataSet = true;
+      this.inputGameData.newDataByImportOperation = false; // Reset the flag to avoid re-importing
     }
   }
 
@@ -114,6 +134,14 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
 
   onClick(event: MouseEvent, row: number, col: number): void {
     this.selectedCell = { row, col };
+
+    if (this.multiselect !== '') {
+      if (this.multiselect === '#' || this.multiselect === 'O' || this.multiselect === 'I' || this.multiselect === 'D' || this.multiselect === 'P') {
+        this.setObject(this.multiselect);
+      } else if (this.multiselect === '.' || this.multiselect === 'B' || this.multiselect === 'W') {
+        this.setRestriction(this.multiselect);
+      }
+    }
   }
 
   setObject(object: string): void {
@@ -136,6 +164,10 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
   setRestriction(restriction: string): void {
     this.gameCellRestrictions[this.selectedCell.row][this.selectedCell.col] = restriction;
     this.emitData();
+  }
+
+  isMenuDisabled(): boolean {
+    return this.multiselect !== '';
   }
 
   /*

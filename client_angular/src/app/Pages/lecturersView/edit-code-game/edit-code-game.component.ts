@@ -29,6 +29,7 @@ export class EditCodeGameComponent implements OnInit {
   questionLoaded = false;
   showTaskPreview = false;
   markdownLanguage = 'markdown';
+  importingTask = false;
 
   // Direkte Initialisierung als leeres Objekt, das später gefüllt wird
   defaultCodeGameScaffolds: DefaultCodeGameScaffoldsDTO = {} as DefaultCodeGameScaffoldsDTO;
@@ -48,7 +49,7 @@ export class EditCodeGameComponent implements OnInit {
     // Watch for changes in the programming language and update codeGameScaffolds if empty
     this.codeGameForm.get('programmingLanguage')?.valueChanges.subscribe(language => {
       const codeGameScaffolds = this.codeGameForm.get('codeGameScaffolds') as FormArray;
-      if (this.questionLoaded && codeGameScaffolds.length === 0 && language) {
+      if (this.questionLoaded && codeGameScaffolds.length === 0 && language && !this.importingTask) {
         this.addDefaultCodeScaffolds(language);
       }
     });
@@ -141,7 +142,7 @@ export class EditCodeGameComponent implements OnInit {
               programmingLanguage: '', // default code language
               codeSolutionRestriction: false,
               fileNameToRestrict: '',
-              methodNameToRestrict: 'drive();', // default method name
+              methodNameToRestrict: '',
               frequencyOfMethodNameToRestrict: 1,
               codeGameScaffolds: [],
               gameFileName: 'game.grid.txt', // Hardcoded for every game task
@@ -173,7 +174,7 @@ export class EditCodeGameComponent implements OnInit {
         programmingLanguage: this.questionData.codeGameQuestion?.programmingLanguage || '',
         codeSolutionRestriction: this.questionData.codeGameQuestion?.codeSolutionRestriction || false,
         fileNameToRestrict: this.questionData.codeGameQuestion?.fileNameToRestrict || '',
-        methodNameToRestrict: this.questionData.codeGameQuestion?.methodNameToRestrict || 'drive();',
+        methodNameToRestrict: this.questionData.codeGameQuestion?.methodNameToRestrict || '',
         frequencyOfMethodNameToRestrict: this.questionData.codeGameQuestion?.frequencyOfMethodNameToRestrict || 1,
         game: this.questionData.codeGameQuestion?.game || '',
         gameCellRestrictions: this.questionData.codeGameQuestion?.gameCellRestrictions || '',
@@ -184,6 +185,10 @@ export class EditCodeGameComponent implements OnInit {
 
       // Data for the playfield editor
       this.exportGameDataForPlayfieldEditor = {
+        // By this the playfield editor can be setup again after the first setup 
+        // this is needed to import a task
+        newDataByImportOperation: this.importingTask, 
+
         theme: this.questionData.codeGameQuestion?.theme || '',
         gameField: this.questionData.codeGameQuestion?.game || '',
         gameCellRestrictions: this.questionData.codeGameQuestion?.gameCellRestrictions || ''
@@ -224,7 +229,7 @@ export class EditCodeGameComponent implements OnInit {
       level: ['', Validators.required],
       codeSolutionRestriction: [false],
       fileNameToRestrict: [''],
-      methodNameToRestrict: ['drive();'],
+      methodNameToRestrict: [''],
       frequencyOfMethodNameToRestrict: [1]
     });
   }
@@ -317,12 +322,18 @@ export class EditCodeGameComponent implements OnInit {
 
     // Update the language for all code editors except the first one (task description)
     this.updateCodeEditorsLanguage(newLanguage);
+
+    // Update restriction fields
+    if (newLanguage === 'cpp' || newLanguage === 'java') {
+      this.codeGameForm.patchValue({ methodNameToRestrict: 'drive();' });
+    } else { // Python
+      this.codeGameForm.patchValue({ methodNameToRestrict: 'drive()' });
+    }
   }
 
   // Helper method to update all code editors with the new language
   private updateCodeEditorsLanguage(newLanguage: string) {
     const editors = this.codeEditors.toArray();
-    const lastIndex = editors.length - 1;
 
     editors.forEach((editor, index) => {
       // Ensure the first editor (task description) always use Markdown
@@ -442,7 +453,6 @@ export class EditCodeGameComponent implements OnInit {
     console.log("added default scaffolds", codeGameScaffolds);
   }
 
-
   handleDataChangePayfieldEditor(event: any) {
     this.codeGameForm.patchValue({ game: event.gameField });
     this.codeGameForm.patchValue({ gameCellRestrictions: event.gameCellRestrictions });
@@ -513,20 +523,146 @@ export class EditCodeGameComponent implements OnInit {
         }
       };
 
+      // print question as JSON in console
+      // console.log('CodeGame: Question to update:', JSON.stringify(updatedQuestion.codeGameQuestion?.codeGameScaffolds, null, 2));
+
       this.questionDataService.updateWholeQuestion(updatedQuestion).subscribe(
         response => {
           console.log('CodeGame: Question updated successfully:', response);
-          this.snackBar.open('Question updated successfully', 'Close', { duration: 3000 });
+          this.snackBar.open('Question updated successfully', 'Schließen', { duration: 3000 });
         },
         error => {
           console.error('Error updating question:', error);
-          this.snackBar.open('Error updating question', 'Close', { duration: 3000 });
+          this.snackBar.open('Error updating question', 'Schließen', { duration: 3000 });
         }
       );
     } else {
       const missingFields = this.getMissingFields();
       const errorMessage = `Bitte füllen Sie alle erforderlichen Felder aus: ${missingFields.join(', ')}`;
-      this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+      this.snackBar.open(errorMessage, 'Schließen', { duration: 5000 });
     }
+  }
+
+  exportTask() {
+    if (!this.questionData) {
+      this.snackBar.open('Keine Daten zum Exportieren verfügbar', 'Schließen', { duration: 3000 });
+      return;
+    }
+
+    // Create a JSON object with all relevant data
+    const exportData = {
+      name: this.questionData.name,
+      text: this.questionData.text,
+      level: this.questionData.level,
+      isApproved: this.questionData.isApproved,
+      codeGameQuestion: {
+        programmingLanguage: this.questionData.codeGameQuestion?.programmingLanguage,
+        codeSolutionRestriction: this.questionData.codeGameQuestion?.codeSolutionRestriction,
+        fileNameToRestrict: this.questionData.codeGameQuestion?.fileNameToRestrict,
+        methodNameToRestrict: this.questionData.codeGameQuestion?.methodNameToRestrict,
+        frequencyOfMethodNameToRestrict: this.questionData.codeGameQuestion?.frequencyOfMethodNameToRestrict,
+        game: this.questionData.codeGameQuestion?.game,
+        gameCellRestrictions: this.questionData.codeGameQuestion?.gameCellRestrictions,
+        theme: this.questionData.codeGameQuestion?.theme,
+        codeGameScaffolds: this.questionData.codeGameQuestion?.codeGameScaffolds
+      }
+    };
+
+    // Create a Blob with the JSON data
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    
+    // Create a download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${this.questionData.name.replace(/\s+/g, '_')}_export.json`;
+    
+    // Trigger the download
+    document.body.appendChild(link);
+    link.click();
+    
+    // Cleanup
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    this.snackBar.open('Aufgabe erfolgreich exportiert', 'Schließen', { duration: 3000 });
+  }
+
+  isImportPossible() {
+    /* Import is only possible, if the CodeGameQuestion is not yet created.
+    * Otherwise the backend will not know which codeGameScaffold belongs to which question.
+    */
+
+    if (this.questionData && this.questionData.codeGameQuestion?.id === 0) {
+      // CodeGameQuestion is not created yet
+      return true;
+    }
+
+    return false;
+  } 
+
+  importTask(event: any) {
+    this.importingTask = true;
+
+    const file = event.target.files[0];
+    if (!file) {
+      this.snackBar.open('Keine Datei ausgewählt', 'Schließen', { duration: 3000 });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        this.processImportedData(importedData);
+      } catch (error) {
+        console.error('Fehler beim Parsen der JSON-Datei:', error);
+        this.snackBar.open('Fehler beim Lesen der Datei', 'Schließen', { duration: 3000 });
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  private processImportedData(importedData: any) {
+    console.log('importedData:', importedData);
+
+    console.log('Form before import:', this.codeGameForm);
+
+    if (!this.codeGameForm || !this.questionData) {
+      this.snackBar.open('Fehler beim Importieren der Aufgabe', 'Schließen', { duration: 3000 });
+      return;
+    }
+
+    /* Set data to the form */
+    this.questionData = {
+      ...this.questionData,
+      name: importedData.name,
+      text: importedData.text,
+      codeGameQuestion: {
+        id: this.questionData.codeGameQuestion!.id, // Take the existing ID
+        contentElementId: this.questionData.codeGameQuestion!.contentElementId, // Take the existing ID
+        text: importedData.text,
+        programmingLanguage: importedData.codeGameQuestion.programmingLanguage,
+        codeSolutionRestriction: importedData.codeGameQuestion.codeSolutionRestriction,
+        fileNameToRestrict: importedData.codeGameQuestion.fileNameToRestrict,
+        methodNameToRestrict: importedData.codeGameQuestion.methodNameToRestrict,
+        frequencyOfMethodNameToRestrict: importedData.codeGameQuestion.frequencyOfMethodNameToRestrict,
+        gameFileName: "game.grid.txt",
+        game: importedData.codeGameQuestion.game,
+        gameCellRestrictions: importedData.codeGameQuestion.gameCellRestrictions,
+        theme: importedData.codeGameQuestion.theme,
+        codeGameScaffolds: importedData.codeGameQuestion.codeGameScaffolds.map((scaffold: any) => ({
+          ...scaffold,
+          id: 0, // New ID will be generated by the server
+          codeGameQuestionId: 0 // New ID will be generated by the server
+        }))
+      }
+    };
+
+    // Update the form with the imported data
+    this.populateForm();
+    this.snackBar.open('Aufgabe erfolgreich importiert', 'Schließen', { duration: 3000 });
+
+    this.importingTask = false;
   }
 }
