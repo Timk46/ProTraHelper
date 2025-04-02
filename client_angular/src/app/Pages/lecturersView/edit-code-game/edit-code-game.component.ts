@@ -243,6 +243,14 @@ export class EditCodeGameComponent implements OnInit {
 
     // Update the language for all code editors except the first one (task description)
     this.updateCodeEditorsLanguage(newLanguage);
+
+    // Update restriction fields
+    if (newLanguage === 'cpp' || newLanguage === 'java') {
+      this.codeGameForm.patchValue({ methodNameToRestrict: 'drive();' });
+    }
+    if (newLanguage === 'python') {
+      this.codeGameForm.patchValue({ methodNameToRestrict: 'drive()' });
+    }
   }
 
   // Helper method to update all code editors with the new language
