@@ -68,7 +68,7 @@ export class EditCodeGameComponent implements OnInit {
               programmingLanguage: '', // default code language
               codeSolutionRestriction: false,
               fileNameToRestrict: '',
-              methodNameToRestrict: 'drive();', // default method name
+              methodNameToRestrict: '',
               frequencyOfMethodNameToRestrict: 1,
               codeGameScaffolds: [],
               gameFileName: 'game.grid.txt', // Hardcoded for every game task
@@ -100,7 +100,7 @@ export class EditCodeGameComponent implements OnInit {
         programmingLanguage: this.questionData.codeGameQuestion?.programmingLanguage || '',
         codeSolutionRestriction: this.questionData.codeGameQuestion?.codeSolutionRestriction || false,
         fileNameToRestrict: this.questionData.codeGameQuestion?.fileNameToRestrict || '',
-        methodNameToRestrict: this.questionData.codeGameQuestion?.methodNameToRestrict || 'drive();',
+        methodNameToRestrict: this.questionData.codeGameQuestion?.methodNameToRestrict || '',
         frequencyOfMethodNameToRestrict: this.questionData.codeGameQuestion?.frequencyOfMethodNameToRestrict || 1,
         game: this.questionData.codeGameQuestion?.game || '',
         gameCellRestrictions: this.questionData.codeGameQuestion?.gameCellRestrictions || '',
@@ -155,7 +155,7 @@ export class EditCodeGameComponent implements OnInit {
       level: ['', Validators.required],
       codeSolutionRestriction: [false],
       fileNameToRestrict: [''],
-      methodNameToRestrict: ['drive();'],
+      methodNameToRestrict: [''],
       frequencyOfMethodNameToRestrict: [1]
     });
   }
@@ -252,8 +252,7 @@ export class EditCodeGameComponent implements OnInit {
     // Update restriction fields
     if (newLanguage === 'cpp' || newLanguage === 'java') {
       this.codeGameForm.patchValue({ methodNameToRestrict: 'drive();' });
-    }
-    if (newLanguage === 'python') {
+    } else { // Python
       this.codeGameForm.patchValue({ methodNameToRestrict: 'drive()' });
     }
   }
@@ -261,7 +260,6 @@ export class EditCodeGameComponent implements OnInit {
   // Helper method to update all code editors with the new language
   private updateCodeEditorsLanguage(newLanguage: string) {
     const editors = this.codeEditors.toArray();
-    const lastIndex = editors.length - 1;
 
     editors.forEach((editor, index) => {
       // Ensure the first editor (task description) always use Markdown
@@ -451,20 +449,26 @@ export class EditCodeGameComponent implements OnInit {
         }
       };
 
+      // print question as JSON in console
+      // console.log('CodeGame: Question to update:', JSON.stringify(updatedQuestion.codeGameQuestion?.codeGameScaffolds, null, 2));
+
       this.questionDataService.updateWholeQuestion(updatedQuestion).subscribe(
         response => {
           console.log('CodeGame: Question updated successfully:', response);
-          this.snackBar.open('Question updated successfully', 'Close', { duration: 3000 });
+          this.snackBar.open('Question updated successfully', 'Schließen', { duration: 3000 });
         },
         error => {
           console.error('Error updating question:', error);
-          this.snackBar.open('Error updating question', 'Close', { duration: 3000 });
+          this.snackBar.open('Error updating question', 'Schließen', { duration: 3000 });
         }
       );
     } else {
       const missingFields = this.getMissingFields();
       const errorMessage = `Bitte füllen Sie alle erforderlichen Felder aus: ${missingFields.join(', ')}`;
-      this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+      this.snackBar.open(errorMessage, 'Schließen', { duration: 5000 });
+    }
+  }
+
   exportTask() {
     if (!this.questionData) {
       this.snackBar.open('Keine Daten zum Exportieren verfügbar', 'Schließen', { duration: 3000 });
