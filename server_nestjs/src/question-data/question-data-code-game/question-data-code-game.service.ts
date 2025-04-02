@@ -14,6 +14,11 @@ export class QuestionDataCodeGameService {
       data: {
         text: codeGameQuestion.text,
         programmingLanguage: codeGameQuestion.programmingLanguage,
+        codeSolutionRestriction: codeGameQuestion.codeSolutionRestriction,
+        fileNameToRestrict: codeGameQuestion.fileNameToRestrict,
+        methodNameToRestrict: codeGameQuestion.methodNameToRestrict,
+        frequencyOfMethodNameToRestrict:
+          codeGameQuestion.frequencyOfMethodNameToRestrict,
         questionId: questionId,
         codeGameScaffolds: {
           create: codeGameQuestion.codeGameScaffolds.map((cgs) => ({

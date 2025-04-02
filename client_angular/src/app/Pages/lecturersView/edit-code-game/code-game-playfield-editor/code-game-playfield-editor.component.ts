@@ -31,6 +31,7 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
       rowsAndColumns: [10]
     });
   }
+
   ngOnInit(): void {
     this.generateGameField();
     this.codeGameForm.valueChanges.subscribe(() => {
@@ -58,6 +59,24 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
       }
 
       this.inputDataSet = true;
+    }
+
+    // In case the task is allready loaded and the user starteds a import
+    if (this.inputGameData && this.inputGameData.newDataByImportOperation) {
+      console.log("Input Playfield editor by import: ", this.inputGameData);
+      this.inputDataSet = false;
+      this.isInputDataAvailable = true;
+
+      /* Overwrite old data */
+      this.theme = this.inputGameData.theme;
+      this.gameField = this.transformStringToArray(this.inputGameData.gameField);
+      this.codeGameForm.patchValue({
+        rowsAndColumns: this.gameField.length
+      });
+      this.gameCellRestrictions = this.transformStringToArray(this.inputGameData.gameCellRestrictions);
+
+      this.inputDataSet = true;
+      this.inputGameData.newDataByImportOperation = false; // Reset the flag to avoid re-importing
     }
   }
 
