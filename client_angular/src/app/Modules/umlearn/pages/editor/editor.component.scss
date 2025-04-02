@@ -1,4 +1,5 @@
-@import "../../umlearntheme.scss";
+@use "../../umlearntheme.scss" as theme;
+@use '@angular/material' as mat;
 
 .editor-container {
   width: 100%;
@@ -23,9 +24,8 @@
 }
 
 .active-edge {
-  background-color: mat-color($my-primary);
+  background-color: #3f51b5; // Hardcoded indigo color instead of using variable
   transition: background-color 0.5s;
-
 }
 .disable-interaction {
   pointer-events: none;

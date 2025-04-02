@@ -8,14 +8,23 @@ Ipad notices
   flex: 1 1 auto;
 }
 
-.app-container {
-  height:calc(100vh - 30px); /* our toolbar height: 30px */
+.main-container {
+  position: relative;
+  height: calc(100vh - 90px); /* 60px header + 30px footer */
+
+  overflow-x: hidden;
 
   /* Safari-specific styles */
   @supports (-webkit-touch-callout:none) {
     // for ipads brave and firefox we can use 100% while for chrome and safari we need to subtract the safe-area-inset values
-    height: calc(100% - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    height: calc(100% - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
+}
+
+.content-wrapper {
+  padding: 16px;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .tablet-space {
@@ -24,20 +33,10 @@ Ipad notices
   }
 }
 
-.app-sidenav {
-  width: 230px;
-}
-
-.app-sidenav-content {
-  display: flex;
-  height: 100vh;
-  align-items: center;
-  justify-content: center;
-}
 
 .mat-divider {
-  margin-top:16px;
-  margin-bottom: 16px;
+  margin-top: 6px;
+  margin-bottom: 6px;
   background-color: lightgrey;
 }
 
@@ -50,7 +49,7 @@ Ipad notices
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* justify-content: space-between; */ /* Entfernt, damit die Zentrierung funktioniert */
   font-size: 10px; /* Reduzierte Schriftgröße */
   color: #434c5e;
   padding: 0 10px;
@@ -65,15 +64,29 @@ Ipad notices
   }
 }
 
-.left-content, .center-content, .right-content {
+.left-content {
   display: flex;
   align-items: center;
   cursor: pointer;
+  flex: 1; /* Nimmt einen Teil des verfügbaren Platzes ein */
 }
 
 .center-content {
+  position: absolute; /* Absolute Positionierung */
+  left: 50%; /* Zentriert in der Mitte */
+  transform: translateX(-50%); /* Korrigiert die Verschiebung */
+  display: flex;
+  align-items: center;
   justify-content: center;
   gap: 8px; /* Etwas kleinerer Abstand zwischen den Elementen */
+}
+
+.right-content {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex: 1; /* Nimmt einen Teil des verfügbaren Platzes ein */
+  justify-content: flex-end; /* Richtet den Inhalt rechts aus */
 }
 
 .divider {
@@ -96,4 +109,24 @@ button, a {
   margin-top: 10px;
   overflow-y: auto;
   overflow-x: auto;
+}
+
+/* Chat Popup Styles */
+.chat-popup {
+  position: fixed;
+  bottom: 40px; /* Just above the footer */
+  right: 20px;
+  width: 350px;
+  height: 500px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+  overflow: hidden;
+  animation: fade-in 0.15s ease-in-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

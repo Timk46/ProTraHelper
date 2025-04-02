@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { UserService } from '../Services/auth/user.service';
 
 /**
  * This guard checks if the user is logged in and redirects to the login page if not.
  */
 @Injectable()
-export class AdminGuard implements CanActivate {
+export class AdminGuard  {
   constructor(private userService: UserService , private router: Router) {
   }
 

@@ -1,0 +1,176 @@
+// Einzelner Test Details Stile
+.test-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0;
+
+  &.passed {
+    color: #2e7d32;
+  }
+
+  &.failed {
+    color: #d32f2f;
+  }
+
+  mat-icon {
+    margin-right: 4px;
+  }
+}
+
+.full-test-name {
+  padding: 0 8px 12px 8px;
+  margin-top: -5px;
+  opacity: 0.7;
+  font-size: 13px;
+  color: #666;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+
+  &:hover {
+    white-space: normal;
+    word-break: break-all;
+  }
+}
+
+.test-status {
+  margin: 12px 0;
+  display: flex;
+  align-items: center;
+
+  .status-label {
+    font-weight: 500;
+    margin-right: 8px;
+  }
+
+  .status-value {
+    font-weight: 500;
+
+    &.passed {
+      color: #2e7d32;
+    }
+
+    &.failed {
+      color: #d32f2f;
+    }
+  }
+}
+
+.exception-section {
+  background-color: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  margin-top: 12px;
+  overflow: hidden;
+
+  .exception-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+
+    .error-label {
+      font-weight: 500;
+      color: #d32f2f;
+    }
+  }
+
+  .exception-preview {
+    padding: 8px 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    color: #d32f2f;
+    background-color: #ffebee;
+  }
+
+  .exception-stack {
+    padding: 12px;
+    margin: 0;
+    background-color: #ffebee;
+    color: #d32f2f;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    overflow-x: auto;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+}
+
+// Stile für die Tabellendarstellung aller Tests
+.test-results-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    padding: 8px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #616161;
+  }
+
+  td {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  .passed-row {
+    background-color: rgba(76, 175, 80, 0.05);
+  }
+
+  .failed-row {
+    background-color: rgba(244, 67, 54, 0.05);
+  }
+
+  .status-indicator {
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+
+    &.passed {
+      background-color: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+    }
+
+    &.failed {
+      background-color: rgba(244, 67, 54, 0.1);
+      color: #f44336;
+    }
+  }
+
+  .error-details-row {
+    background-color: #f9f9f9;
+  }
+
+  .error-details {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    padding: 8px;
+    margin: 0;
+    white-space: pre-wrap;
+    background-color: #ffebee;
+    border-left: 2px solid #f44336;
+    overflow-x: auto;
+    max-height: 200px;
+    overflow-y: auto;
+    color: #d32f2f;
+  }
+}
+
+// Responsive Design für kleinere Bildschirme
+@media (max-width: 500px) {
+  .test-results-table {
+    th:nth-child(3), td:nth-child(3) {
+      display: none; // Verberge die Details-Spalte auf kleinen Bildschirmen
+    }
+  }
+}

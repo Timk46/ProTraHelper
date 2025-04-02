@@ -1,0 +1,109 @@
+$tab-height: 32px;
+$tab-background: #252526;
+$tab-active-background: #1e1e1e;
+$tab-border-color: #252526;
+$tab-active-border-color: #00aaff;
+$tab-hover-background: #2d2d2d;
+$tab-text-color: #d4d4d4;
+$tab-inactive-text-color: #a7a7a7;
+
+.tabs-container {
+  height: $tab-height;
+  background-color: $tab-background;
+  border-bottom: 1px solid $tab-border-color;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+
+  /* Versteckt Scrollbar für Chrome, Safari und Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Versteckt Scrollbar für IE, Edge und Firefox */
+  -ms-overflow-style: none;  /* IE und Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.editor-tabs {
+  display: flex;
+  height: 100%;
+}
+
+.tab {
+  height: $tab-height;
+  display: flex;
+  align-items: center;
+  padding: 0 8px 0 10px;
+  border-right: 1px solid $tab-border-color;
+  background-color: $tab-background;
+  color: $tab-inactive-text-color;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+
+  &:hover {
+    background-color: $tab-hover-background;
+
+    .close-button {
+      opacity: 1;
+    }
+  }
+
+  &.active {
+    background-color: $tab-active-background;
+    color: $tab-text-color;
+    border-top: 2px solid $tab-active-border-color;
+
+    .close-button {
+      opacity: 1;
+    }
+  }
+
+  &.modified {
+    .filename::after {
+      content: '●';
+      margin-left: 4px;
+      font-size: 10px;
+    }
+  }
+}
+
+.tab-content {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.file-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  margin-right: 5px;
+}
+
+.filename {
+  font-size: 12px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.close-button {
+  opacity: 0;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin-left: 8px;
+  line-height: 16px;
+  transition: opacity 0.2s;
+
+  .mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+  }
+}

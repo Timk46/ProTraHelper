@@ -19,7 +19,7 @@
       </div>
 
       <!-- New input fields for Python task generation -->
-      <div class="form-field full-width subsection-container"  *ngIf="codingForm.get('programmingLanguage')?.value == 'python'">
+      <div class="form-field full-width subsection-container"  *ngIf="codingForm.get('programmingLanguage')?.value === 'python'">
         <div class="form-row" style="margin-bottom: 15px">
           <mat-form-field appearance="outline" class="form-field">
             <mat-label>Kontext (z.B. Fussball)</mat-label>
@@ -106,7 +106,7 @@
   </div>
 
      <!--Generation Button for CPP Tasks bases on Task Desc and Codeskeleton-->
-    <div *ngIf="codingForm.get('programmingLanguage')?.value == 'cpp'" style="text-align: center; margin-bottom: 15px">
+    <div *ngIf="codingForm.get('programmingLanguage')?.value === 'cpp'" style="text-align: center; margin-bottom: 15px">
       <button mat-raised-button color="primary" type="button" (click)="generateTaskCpp()" [disabled]="isGenerating">
         <mat-spinner *ngIf="isGenerating" diameter="20" style="display: inline-block; margin-right: 5px;"></mat-spinner>
         {{isGenerating ? 'Generiere Aufgabe...' : 'Aufgabe generieren'}}
@@ -179,7 +179,7 @@
       </div>
 
       <!-- Programming Language specific extra information for Unit-Tests -->
-      <div class="subsection-container" *ngIf="codingForm.get('programmingLanguage')?.value != 'cpp'" [ngSwitch]="codingForm.get('programmingLanguage')?.value">
+      <div class="subsection-container" *ngIf="codingForm.get('programmingLanguage')?.value !== 'cpp'" [ngSwitch]="codingForm.get('programmingLanguage')?.value">
         <p>Extra Informationen je nach Programmiersprache, um den Code auszuführen.</p>
         <div *ngSwitchCase="'python'" class="form-row">
           <mat-form-field appearance="outline" class="form-field">
@@ -248,4 +248,3 @@
 
   </form>
 </div>
-

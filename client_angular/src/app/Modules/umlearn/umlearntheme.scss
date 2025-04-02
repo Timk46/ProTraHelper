@@ -1,17 +1,6 @@
-@import '@angular/material/theming';
+// Use a prebuilt theme instead of creating a custom one
+@use '@angular/material' as mat;
+@include mat.core();
 
-@include mat-core();
-
-$my-primary: mat-palette($mat-blue, 500);
-$my-accent: mat-palette($mat-blue-grey, 500);
-$my-warn: mat-palette($mat-deep-orange, 500);
-
-$my-theme: mat-light-theme((
-  color: (
-    primary: $my-primary,
-    accent: $my-accent,
-    warn: $my-warn,
-  )
-));
-
-@include angular-material-theme($my-theme);
+// Use the indigo-pink prebuilt theme
+@import '@angular/material/prebuilt-themes/indigo-pink.css';

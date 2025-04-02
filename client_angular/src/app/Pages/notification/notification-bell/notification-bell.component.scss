@@ -21,27 +21,38 @@ mat-expansion-panel-header {
 }
 
 .notification-bell {
-  position: fixed;
-  margin-top: 20px;
-  margin-right: 20px;
-  top: 10px;
-  right: 10px;
-  z-index: 1000;
-  background-color: #fff;
-  border-radius: 50%;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 
   .mat-icon {
     font-size: 22px;
-    margin-top: 2px;
-    color: #818181;
+    color: white;
   }
 
+  /* Badge-Positionierung verbessern */
+  ::ng-deep .mat-badge-content {
+    right: -5px !important;
+    top: -5px !important;
+  }
+}
+
+/* Kompakteres Badge-Design */
+::ng-deep .mat-badge-medium .mat-badge-content {
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+}
+
+.notification-bell {
   .notifications-panel {
     position: absolute;
     top: 40px;
     right: 0;
+    z-index: 1001;
     width: 300px;
     max-height: 400px;
     overflow-y: auto;
@@ -49,8 +60,6 @@ mat-expansion-panel-header {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
     padding: 10px;
-
-
 
     mat-expansion-panel {
       margin-bottom: 8px;
@@ -61,7 +70,6 @@ mat-expansion-panel-header {
         margin-bottom: 0;
       }
     }
-
 
     .notification-item {
       margin-bottom: 10px;
@@ -75,18 +83,17 @@ mat-expansion-panel-header {
     }
   }
 
-    .notification-date {
-      font-size: 12px;
-      color: #666;
-      margin-right: 8px;
-    }
+  .notification-date {
+    font-size: 12px;
+    color: #666;
+    margin-right: 8px;
+  }
 
-
-    .notification-status {
-      color: #f44336;
-      font-weight: 500;
-      font-size: 12px;
-    }
+  .notification-status {
+    color: #f44336;
+    font-weight: 500;
+    font-size: 12px;
+  }
 }
 
 .buttons {

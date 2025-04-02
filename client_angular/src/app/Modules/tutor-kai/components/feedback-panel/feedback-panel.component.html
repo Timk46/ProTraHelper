@@ -1,0 +1,61 @@
+<div class="feedback-panel">
+  <!-- Einführung / Leerer Zustand -->
+  <div *ngIf="!showFeedbackOptions() && !feedbackContent && !isGenerating" class="feedback-intro">
+    <div class="feedback-card">
+      <div class="card-icon">
+        <mat-icon>lightbulb</mat-icon>
+      </div>
+      <h3>KI-Feedback für deinen Code</h3>
+      <p>Führe deinen Code aus, um persönliches Feedback von Tutor Kai zu erhalten.</p>
+    </div>
+  </div>
+
+  <!-- Feedback-Optionen zur Auswahl -->
+  <div *ngIf="showFeedbackOptions()" class="feedback-options">
+    <div class="feedback-card">
+      <h3>Feedback-Optionen</h3>
+      <p>Wähle dein gewünschtes Unterstützungslevel:</p>
+      <div class="level-selector">
+        <button
+          *ngFor="let level of feedbackLevelOptions"
+          mat-stroked-button
+          color="primary"
+          [class.selected]="selectedLevel === level"
+          (click)="getKIFeedback(level)">
+          <span class="level-icon">
+            <mat-icon *ngIf="level === 'Wenig Unterstützung'">directions_walk</mat-icon>
+            <mat-icon *ngIf="level === 'Standard Unterstützung'">emoji_people</mat-icon>
+            <mat-icon *ngIf="level === 'Viel Unterstützung'">directions_run</mat-icon>
+          </span>
+          {{ level }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback-Generierung und Anzeige -->
+  <div *ngIf="isGenerating || feedbackContent" class="feedback-content">
+    <!-- Ladeanimation -->
+    <div *ngIf="isGenerating" class="loading-container">
+      <div class="spinner-container">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+      <p class="generating-message">{{ generatingMessage }}</p>
+    </div>
+
+    <!-- Feedback-Text und Rating -->
+    <div *ngIf="feedbackContent" class="feedback-result">
+      <div class="feedback-header">
+        <h3>Feedback zu deinem Code</h3>
+        <div class="feedback-level-badge">{{ selectedLevel }}</div>
+      </div>
+
+      <div class="feedback-text" [innerHTML]="sanitizedFeedback"></div>
+
+      <div *ngIf="showRating()" class="rating-section">
+        <div class="rating-divider"></div>
+        <app-rating (ratingSubmitted)="onRatingSubmitted($event)"></app-rating>
+      </div>
+    </div>
+  </div>
+</div>

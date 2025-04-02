@@ -1,0 +1,26 @@
+<div class="code-editor-wrapper">
+  <!-- VSCode-ähnliche Tabs für Dateien -->
+  <app-editor-tabs></app-editor-tabs>
+
+  <!-- Monaco Editor für aktive Datei -->
+  <app-code-editor
+    #codeEditorMonaco
+    [selectedLanguage]="language"
+    [code]="activeFile?.content || ''"
+    (codeChange)="onCodeChanged($event)">
+  </app-code-editor>
+
+  <div *ngIf="hasInputArgs()" class="input-args-form">
+    <h3>Eingabe-Parameter</h3>
+    <form [formGroup]="inputArgsForm">
+      <div formArrayName="argsArray">
+        <div *ngFor="let arg of argsArray.controls; let i = index" class="arg-input">
+          <mat-form-field>
+            <mat-label>Parameter {{i+1}}</mat-label>
+            <input matInput [formControlName]="i" placeholder="Wert eingeben">
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
