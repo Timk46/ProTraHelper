@@ -4,8 +4,8 @@ services:
 # Postgres Database running in different compose
 
 #ANGULAR
-  hefl_aud_client:
-    container_name: goals_aud_client
+  goals_ofp_client:
+    container_name: goals_ofp_client
     build: 
       context: .
       dockerfile: ./Docker/angular
@@ -18,8 +18,8 @@ services:
     restart: always
 
 #NestJS
-  hefl_aud_server:
-    container_name: goals_aud_server
+  goals_ofp_server:
+    container_name: goals_ofp_server
     build: 
       context: .
       dockerfile: ./Docker/nest
