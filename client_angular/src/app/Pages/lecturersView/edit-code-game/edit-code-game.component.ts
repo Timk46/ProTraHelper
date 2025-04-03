@@ -12,6 +12,7 @@ import { CodeGameAddElementModalComponent } from "./code-game-add-element-modal.
 import { DefaultCodeGameScaffoldsDTO, CodeGameScaffoldDTO } from "@DTOs/codeGame.dto";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Router } from '@angular/router';
+import defaultScaffolds from './defaultCodeGameScaffolds.json';
 
 @Component({
   selector: 'app-edit-code-game',
@@ -31,8 +32,7 @@ export class EditCodeGameComponent implements OnInit {
   markdownLanguage = 'markdown';
   importingTask = false;
 
-  // Direkte Initialisierung als leeres Objekt, das später gefüllt wird
-  defaultCodeGameScaffolds: DefaultCodeGameScaffoldsDTO = {} as DefaultCodeGameScaffoldsDTO;
+  defaultCodeGameScaffolds: DefaultCodeGameScaffoldsDTO = defaultScaffolds;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -42,8 +42,6 @@ export class EditCodeGameComponent implements OnInit {
     private snackBar: MatSnackBar,
     private router: Router
   ) {
-    // Initialisiere Default-Scaffolds für verschiedene Programmiersprachen
-    this.initDefaultScaffolds();
     this.codeGameForm = this.createForm();
 
     // Watch for changes in the programming language and update codeGameScaffolds if empty
@@ -53,77 +51,6 @@ export class EditCodeGameComponent implements OnInit {
         this.addDefaultCodeScaffolds(language);
       }
     });
-  }
-
-  /**
-   * Initialisiert die Standard-Codegerüste für verschiedene Programmiersprachen
-   */
-  private initDefaultScaffolds() {
-    // Hardcodierte Default-Werte anstatt aus einer JSON-Datei zu laden
-    this.defaultCodeGameScaffolds = {
-      java: [
-        {
-          id: 0,
-          codeFileName: 'Main.java',
-          code: 'public class Main {\n\n  public static void main(String[] args) {\n    Player player = new Player();\n    player.drive();\n  }\n}',
-          visible: true,
-          mainFile: true,
-          language: 'java'
-        },
-        {
-          id: 0,
-          codeFileName: 'Player.java',
-          code: 'public class Player {\n\n  public void drive() {\n    // Code hier einfügen\n  }\n}',
-          visible: true,
-          mainFile: false,
-          language: 'java'
-        }
-      ],
-      python: [
-        {
-          id: 0,
-          codeFileName: 'main.py',
-          code: 'from player import Player\n\nplayer = Player()\nplayer.drive()',
-          visible: true,
-          mainFile: true,
-          language: 'python'
-        },
-        {
-          id: 0,
-          codeFileName: 'player.py',
-          code: 'class Player:\n\n  def drive(self):\n    # Code hier einfügen\n    pass',
-          visible: true,
-          mainFile: false,
-          language: 'python'
-        }
-      ],
-      cpp: [
-        {
-          id: 0,
-          codeFileName: 'main.cpp',
-          code: '#include "Player.h"\n\nint main() {\n  Player player;\n  player.drive();\n  return 0;\n}',
-          visible: true,
-          mainFile: true,
-          language: 'cpp'
-        },
-        {
-          id: 0,
-          codeFileName: 'Player.h',
-          code: '#ifndef PLAYER_H\n#define PLAYER_H\n\nclass Player {\npublic:\n  void drive();\n};\n\n#endif',
-          visible: true,
-          mainFile: false,
-          language: 'cpp'
-        },
-        {
-          id: 0,
-          codeFileName: 'Player.cpp',
-          code: '#include "Player.h"\n\nvoid Player::drive() {\n  // Code hier einfügen\n}',
-          visible: true,
-          mainFile: false,
-          language: 'cpp'
-        }
-      ]
-    };
   }
 
   ngOnInit() {
@@ -446,11 +373,22 @@ export class EditCodeGameComponent implements OnInit {
             codeGameQuestionId: this.questionData.codeGameQuestion.id
           };
           this.questionData.codeGameQuestion.codeGameScaffolds.push(scaffoldWithId);
+        } else {
+          console.error('CodeGame: questionData or codeGameQuestion is null');
         }
       });
     }
 
-    console.log("added default scaffolds", codeGameScaffolds);
+    // Check if scaffolds were added
+    if (language === 'java' || language === 'python') {
+      if (codeGameScaffolds.length != 8) {
+        console.error('CodeGame: Default scaffolds were not added correctly');
+      }
+    } else if (language === 'cpp') {
+      if (codeGameScaffolds.length != 15) {
+        console.error('CodeGame: Default scaffolds were not added correctly');
+      }
+    }
   }
 
   handleDataChangePayfieldEditor(event: any) {
