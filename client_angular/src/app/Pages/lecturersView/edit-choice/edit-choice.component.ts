@@ -10,7 +10,7 @@ import { MatCheckboxChange } from "@angular/material/checkbox";
 import { McqcreationService } from "src/app/Services/mcqCreation/mcqcreation.service";
 import { MatTableDataSource } from "@angular/material/table";
 import { ContentService } from "src/app/Services/content/content.service";
-import { ConceptNode } from "@DTOs/prisma.dto";
+import { ConceptNode } from "@DTOs/index";
 import { Observable, of, ReplaySubject, Subject } from "rxjs";
 import { map, startWith, takeUntil } from "rxjs/operators";
 import { Answer, McqEvaluation, McqEvaluations } from "src/app/Services/mcqCreation/mcqcreation.types";
