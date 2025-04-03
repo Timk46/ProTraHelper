@@ -43,19 +43,17 @@ Ipad notices
 
 .footer {
   z-index: 1000;
-  height: 30px; /* Reduzierte Höhe */
+  height: 30px; /* Feste Höhe wiederhergestellt */
   position: fixed;
   bottom: 0;
   width: 100%;
   display: flex;
   align-items: center;
-  /* justify-content: space-between; */ /* Entfernt, damit die Zentrierung funktioniert */
   font-size: 10px; /* Reduzierte Schriftgröße */
   color: #434c5e;
   padding: 0 10px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
+  overflow-x: auto; /* Wieder hinzugefügt für horizontales Scrollen */
+  white-space: nowrap; /* Wieder hinzugefügt, um internen Umbruch zu verhindern */
 
   /* Safari-specific styles */
   @supports (-webkit-hyphens:none) {
@@ -68,25 +66,23 @@ Ipad notices
   display: flex;
   align-items: center;
   cursor: pointer;
-  flex: 1; /* Nimmt einen Teil des verfügbaren Platzes ein */
+  flex-grow: 1; /* Hinzugefügt */
 }
 
 .center-content {
-  position: absolute; /* Absolute Positionierung */
-  left: 50%; /* Zentriert in der Mitte */
-  transform: translateX(-50%); /* Korrigiert die Verschiebung */
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: center; /* Beibehalten für interne Zentrierung */
   gap: 8px; /* Etwas kleinerer Abstand zwischen den Elementen */
+  flex-shrink: 0; /* Verhindern, dass der mittlere Teil schrumpft */
 }
 
 .right-content {
   display: flex;
   align-items: center;
   cursor: pointer;
-  flex: 1; /* Nimmt einen Teil des verfügbaren Platzes ein */
   justify-content: flex-end; /* Richtet den Inhalt rechts aus */
+  flex-grow: 1; /* Hinzugefügt */
 }
 
 .divider {
