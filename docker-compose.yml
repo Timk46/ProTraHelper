@@ -5,25 +5,30 @@ services:
 # Postgres Database running in different compose
 
 #ANGULAR
-  hefl_client:
-    container_name: goals_client
+  hefl_aud_client:
+    container_name: goals_aud_client
     build: 
       context: .
       dockerfile: ./Docker/angular
-    ports: 
-      - 4200:80
+      args:
+        # These values should be available as environment variables
+        # when running 'docker-compose build' or 'docker-compose up --build'
+        # They can be sourced from .env.prod
+        WEBSITE_URL: ${WEBSITE_URL}
+        SERVER_URL: ${SERVER_URL}
     networks:
       - nginx-network
     restart: always
 
 #NestJS
-  hefl_server:
-    container_name: goals_server
+  hefl_aud_server:
+    container_name: goals_aud_server
     build: 
       context: .
       dockerfile: ./Docker/nest
-    ports: 
-      - 3000:3000
+    env_file:
+      - .env # Contains non-sensitive vars like URLs, NODE_ENV (also used for build args)
+      - .env.auth.prod # Contains sensitive vars like DB_URL, API keys
     networks:
       - nginx-network
     restart: always
