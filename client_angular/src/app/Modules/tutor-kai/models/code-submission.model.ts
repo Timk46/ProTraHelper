@@ -88,22 +88,9 @@ export const FEEDBACK_CATEGORIES: FeedbackCategory[] = [
     icon: '🧭',
     keyword: 'Wegweiser',
     questions: [
-      { id: 'bug-related-hints', text: 'Wie behebe ich meinen Fehler?', value: 'KH_BUG_RELATED_HINTS' },
       { id: 'task-processing-steps', text: 'Was ist der nächste konkrete Schritt?', value: 'KH_TASK_PROCESSING_STEPS' },
       { id: 'improvements', text: 'Wie könnte ich meine Lösung verbessern?', value: 'KH_IMPROVEMENTS' },
       { id: 'data-hints', text: 'Welche Variablenwerte brauche ich?', value: 'KH_DATA_HINTS' }
-    ]
-  },
-  {
-    id: 'two-stage-feedback',
-    name: 'Zweistufiges Feedback',
-    icon: '🔄',
-    keyword: 'Vergleich',
-    questions: [
-      { id: 'solution-comparison', text: 'Wie gut entspricht meine Lösung der Musterlösung?', value: 'ZF_SOLUTION_COMPARISON' },
-      { id: 'typical-errors', text: 'Welchen typischen Fehlern ähnelt mein Fehler?', value: 'ZF_TYPICAL_ERRORS' },
-      { id: 'missing-parts', text: 'Was fehlt noch zu einer guten Lösung?', value: 'ZF_MISSING_PARTS' },
-      { id: 'approach-validation', text: 'Ist meine Herangehensweise grundsätzlich richtig?', value: 'ZF_APPROACH_VALIDATION' }
     ]
   },
   {
@@ -112,10 +99,8 @@ export const FEEDBACK_CATEGORIES: FeedbackCategory[] = [
     icon: '📋',
     keyword: 'Anforderungen',
     questions: [
-      { id: 'special-requirements', text: 'Welche speziellen Anforderungen hat die Aufgabe?', value: 'KTC_SPECIAL_REQUIREMENTS' },
-      { id: 'general-rules', text: 'Welche allgemeinen Regeln gelten für diese Aufgabe?', value: 'KTC_GENERAL_RULES' },
-      { id: 'language-constructs', text: 'Welche Sprachkonstrukte darf oder soll ich verwenden?', value: 'KTC_LANGUAGE_CONSTRUCTS' },
-      { id: 'methods-libraries', text: 'Welche Methoden/Bibliotheken darf ich nutzen?', value: 'KTC_METHODS_LIBRARIES' }
+      { id: 'requirements', text: 'Welche Anforderungen hat die Aufgabe?', value: 'KTCL_REQUIREMENTS' },
+      { id: 'explain', text: 'Kannst du mir die Aufgabenstellung noch einmal erklären?', value: 'KTC_EXPLAIN' },
     ]
   },
   {
@@ -126,30 +111,30 @@ export const FEEDBACK_CATEGORIES: FeedbackCategory[] = [
     questions: [
       { id: 'concept-explanation', text: 'Kannst du mir das Konzept genauer erklären?', value: 'KC_CONCEPT_EXPLANATION' },
       { id: 'concept-example', text: 'Hast du ein Beispiel für dieses Konzept?', value: 'KC_CONCEPT_EXAMPLE' },
-      { id: 'concept-behind-task', text: 'Welches Fachkonzept steckt hinter der Aufgabe?', value: 'KC_CONCEPT_BEHIND_TASK' },
-      { id: 'further-explanations', text: 'Wo finde ich weitere Erklärungen zu diesem Thema?', value: 'KC_FURTHER_EXPLANATIONS' }
     ]
   },
-  {
+  /*
+  { 
     id: 'meta-cognition',
     name: 'Knowledge on Meta-cognition',
     icon: '🧠',
     keyword: 'Denkstrategien',
     questions: [
-      { id: 'structure-thinking', text: 'Wie strukturiere ich mein Denken besser?', value: 'KMC_STRUCTURE_THINKING' },
+      // SPS = neuer Feedbacktyp nach Kiesler bei metakognitivem Wissen // Kiesler: Strategic Processing Steps (SPS) als Feedback-Typ, der Informationen über das systematische, strategische Lösen einer Aufgabe und damit vergleichbarer Aufgaben liefert, z. B. durch die Vorgabe von Arbeitsschritten, Nutzung bestimmter Kontrollstrukturen, Datentypen, etc.
+      { id: 'strategic-processing-steps', text: 'Wie würdest du eine ähnliche Aufgabe lösen?', value: 'KMC_SPS' }, // schon eher KCR Feedback?!?
+
       { id: 'understanding-strategy', text: 'Welche Strategie könnte mir helfen, die Aufgabe besser zu verstehen?', value: 'KMC_UNDERSTANDING_STRATEGY' },
-      { id: 'progress-check', text: 'Wie überprüfe ich am besten, ob ich auf dem richtigen Weg bin?', value: 'KMC_PROGRESS_CHECK' },
-      { id: 'targeted-approach', text: 'Wie kann ich gezielter an die Aufgabe herangehen?', value: 'KMC_TARGETED_APPROACH' }
     ]
   },
+  */
   {
     id: 'additional-options',
     name: 'Zusätzliche Optionen',
     icon: '✨',
     keyword: 'Sonstiges',
     questions: [
-      { id: 'small-hint', text: 'Ich brauche einen kleinen Hinweis.', value: 'AO_SMALL_HINT' },
-      { id: 'other-question', text: 'Ich habe eine andere Frage.', value: 'AO_OTHER_QUESTION' }
+      { id: 'small-hint', text: 'Ich brauche einen kleinen Hinweis.', value: 'AO_SMALL_HINT' }, // sokratisch
+      { id: 'other-question', text: 'Ich habe eine andere Frage.', value: 'AO_OTHER_QUESTION' } // immer als textfeld unten
     ]
   }
 ];

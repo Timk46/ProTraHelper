@@ -104,7 +104,7 @@ export class FeedbackPanelComponent implements OnInit, OnDestroy {
     if (task && lastResult) {
       this.workspaceState.requestFeedback(
         task.id,
-        'Feedback mit Konzept-Erklärung', // Standard-Flavor
+        this.selectedQuestion.value, // Feedback Type + Question (e.g. KC_FURTHER_EXPLANATIONS)
         question.value, // Neuer Wert für das Feedback-Level
         lastResult
       ).pipe(takeUntil(this.destroy$))

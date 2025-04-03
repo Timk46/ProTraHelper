@@ -56,7 +56,7 @@ export class RunCodeController {
   ): Promise<void> {
     res.set('Content-Type', 'text/plain');
     res.setHeader('Transfer-Encoding', 'chunked');
-
+    console.log(flavor);
     if (flavor == 'Standard Feedback') {
       const result = await this.feedbackNormalService.getKiFeedback(
         Number(questionId),

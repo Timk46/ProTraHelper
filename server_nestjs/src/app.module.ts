@@ -63,6 +63,7 @@ import { AiFeedbackService } from './graph-solution-evaluation/ai-feedback/ai-fe
 import { PointCalculationModule } from './umlearn/point-calculation/point-calculation.module';
 
 import { CodeGameModule } from './code-game/code-game.module';
+import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgraph-feedback.module';
 
 @Module({
   imports: [
@@ -99,7 +100,8 @@ import { CodeGameModule } from './code-game/code-game.module';
     GptModule,
     CompareModule,
     PointCalculationModule,
-    CodeGameModule
+    CodeGameModule,
+    LanggraphFeedbackModule
   ],
   controllers: [
     AppController,
