@@ -27,9 +27,10 @@
   },
   "dependencies": {
     "@langchain/community": "^0.2.33",
-    "@langchain/core": "^0.2.32",
-    "@langchain/langgraph": "^0.2.3",
-    "@langchain/openai": "^0.2.11",
+    "@langchain/core": "^0.3.43",
+    "@langchain/langgraph": "^0.2.62",
+    "@langchain/langgraph-supervisor": "^0.0.9",
+    "@langchain/openai": "^0.5.3",
     "@nestjs/axios": "^3.0.1",
     "@nestjs/cache-manager": "^2.3.0",
     "@nestjs/common": "^9.0.0",
@@ -64,7 +65,8 @@
     "rxjs": "^7.2.0",
     "uuid": "^9.0.1",
     "xlsx": "^0.18.5",
-    "xss": "^1.0.15"
+    "xss": "^1.0.15",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@compodoc/compodoc": "^1.1.19",
