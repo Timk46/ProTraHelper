@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { detailedQuestionDTO, QuestionDTO } from '../../../shared/dtos';
+import { detailedQuestionDTO, QuestionDTO } from '@DTOs/index'; // Use path alias
 
 @Injectable()
 export class EditCodeService {

@@ -1,6 +1,6 @@
 import { EditorElement } from "@DTOs/index";
 import { PlugOptions, availablePlugs } from "./plugs";
-import { Side, TextLabel } from "@Interfaces/index";
+import { Side, TextLabel } from "@DTOs/index"; // Changed from @Interfaces
 
 export interface lineOptions {
   lineType?: 'direct' | 'manhattan', // default: manhattan, currently only straight and manhattan is supported

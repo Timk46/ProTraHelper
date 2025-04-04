@@ -1,1 +1,0 @@
-export * from '../../server_nestjs/node_modules/@prisma/client';
