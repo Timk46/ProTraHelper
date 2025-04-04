@@ -29,7 +29,11 @@ COPY Docker/nginx.conf /etc/nginx/nginx.conf
 
 RUN rm -rf /usr/share/nginx/html/*
 
-COPY --from=build /usr/local/app/dist/client_angular /usr/share/nginx/html
+COPY --from=build /usr/local/app/dist/client_angular/browser /usr/share/nginx/html
+
+# Add these lines to fix permissions
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
 
 RUN rm -rf /usr/local/app/dist/*
 
