@@ -55,6 +55,12 @@ export class GraphService {
                 ...includeConditionUser,
                 ...includeConditionModule,
                 myParents: true,
+                // Include the Training records linked *to* this ConceptNode
+                trainedBy: {
+                    select: {
+                        awards: true // We only need the awards level
+                    }
+                },
                 myChildren: true,
                 myPrerequisites: true,
                 mySuccessors: true,
@@ -81,27 +87,39 @@ export class GraphService {
                 edgeChildIds: node.childEdges.map(edge => edge.id),
             };
             // add level field if userId is provided
+            let userLevel = 0; // Default level
             if (userId !== undefined) {
                 // if no user concept exists, set level to 0
                 if (node.userConcepts.length === 0) {
                     nodeMap[node.id].expanded = false;
-                    nodeMap[node.id].level = 0;
                 }
                 else {
                     nodeMap[node.id].expanded = node.userConcepts[0].expanded;
-                    nodeMap[node.id].level = node.userConcepts[0].level;
+                    userLevel = node.userConcepts[0].level;
                 }
+                nodeMap[node.id].level = userLevel;
             }
-            // add goal field if moduleId is provided
-            if (moduleId !== undefined) {
-                // if no module goal exists, set goal to 0
-                if (node.moduleGoals.length === 0) {
-                    nodeMap[node.id].goal = 0;
-                }
-                else {
-                    nodeMap[node.id].goal = node.moduleGoals[0].level;
-                }
+
+            // Calculate goal based on the maximum award level from linked Training records
+            let maxAwardLevel = 0;
+            if (node.trainedBy && node.trainedBy.length > 0) {
+                maxAwardLevel = Math.max(...node.trainedBy.map(t => t.awards ?? 0));
             }
+            // Use maxAwardLevel as the goal. Default to 1 if 0 to avoid division by zero issues in frontend if level > 0.
+            // If userLevel is also 0, a goal of 0 is fine.
+            nodeMap[node.id].goal = (maxAwardLevel === 0 && userLevel > 0) ? 1 : maxAwardLevel;
+
+            // // Original logic using moduleGoals (kept for reference, commented out)
+            // // add goal field if moduleId is provided
+            // if (moduleId !== undefined) {
+            //     // if no module goal exists, set goal to 0
+            //     if (node.moduleGoals.length === 0) {
+            //         nodeMap[node.id].goal = 0;
+            //     }
+            //     else {
+            //         nodeMap[node.id].goal = node.moduleGoals[0].level;
+            //     }
+            // }
         });
 
         // all edges
