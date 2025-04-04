@@ -132,14 +132,18 @@ export class LanggraphFeedbackService implements OnModuleInit {
    * @param compilerOutput Optional compiler output.
    * @param unitTestResults Optional unit test results.
    * @param attemptCount The current attempt number.
+   * @param automatedTests The automated tests defined for the task.
+   * @param codeGerueste The code skeletons/templates provided for the task.
    * @returns The generated feedback string.
    */
   async getFeedback(
     studentSolution: string,
     taskDescription: string,
     compilerOutput: string | null,
-    unitTestResults: any | null,
+    unitTestResults: any | null, // Consider specific type
     attemptCount: number,
+    automatedTests: any[], // Consider specific Prisma type
+    codeGerueste: any[], // Consider specific Prisma type
   ): Promise<string | null> {
     this.logger.log(`Getting feedback for attempt ${attemptCount}`);
 
@@ -157,6 +161,10 @@ export class LanggraphFeedbackService implements OnModuleInit {
       Task Description:
       ${taskDescription}
 
+      Provided Code Skeleton(s):
+      ${JSON.stringify(codeGerueste) || 'None'}
+
+
       My Solution:
       \`\`\`
       ${studentSolution}
@@ -164,6 +172,9 @@ export class LanggraphFeedbackService implements OnModuleInit {
 
       Compiler Output:
       ${compilerOutput || 'None'}
+
+      Automated Tests Definition:
+      ${JSON.stringify(automatedTests) || 'None'}
 
       Unit Test Results:
       ${JSON.stringify(unitTestResults) || 'None'}
@@ -179,6 +190,8 @@ export class LanggraphFeedbackService implements OnModuleInit {
       compilerOutput, // Keep for potential direct access
       unitTestResults, // Keep for potential direct access
       attemptCount, // Keep for potential direct access
+      automatedTests, // Pass through for potential direct access
+      codeGerueste, // Pass through for potential direct access
       feedbackOutput: null, // Initialize feedback output
     };
 

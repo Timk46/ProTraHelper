@@ -3,12 +3,17 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from '../crypto/crypto.service'; // Adjust path if necessary
 import { CodeSubmissionResult } from '@DTOs/tutorKaiDtos/submission.dto'; // Adjust path if necessary
 
+// Import Prisma types if needed for better type safety, e.g.:
+// import { AutomatedTest, CodeGeruest } from '@prisma/client';
+
 export interface FeedbackData {
   studentSolution: string;
   taskDescription: string;
   compilerOutput: string | null;
   unitTestResults: any | null; // Consider using a more specific type if available
   attemptCount: number;
+  automatedTests: any[]; // Use specific Prisma type like AutomatedTest[] if possible
+  codeGerueste: any[]; // Use specific Prisma type like CodeGeruest[] if possible
 }
 
 @Injectable()
@@ -45,7 +50,11 @@ export class LanggraphDataFetcherService {
       where: { id: questionId },
       include: {
         codingQuestion: {
-          select: { text: true }, // Select only the task description
+          select: {
+            text: true, // Task description
+            automatedTests: true, // Include automated tests
+            codeGerueste: true, // Include code skeletons
+          },
         },
       },
     });
@@ -72,6 +81,8 @@ export class LanggraphDataFetcherService {
       compilerOutput: codeSubmissionResult.output || null, // Use output from result
       unitTestResults: codeSubmissionResult.testResults || null, // Use testResults from result
       attemptCount: attemptCount,
+      automatedTests: question.codingQuestion.automatedTests || [],
+      codeGerueste: question.codingQuestion.codeGerueste || [],
     };
   }
 }

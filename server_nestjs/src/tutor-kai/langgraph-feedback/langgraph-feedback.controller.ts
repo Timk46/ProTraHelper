@@ -47,7 +47,10 @@ export class LanggraphFeedbackController {
         feedbackData.taskDescription,
         feedbackData.compilerOutput,
         feedbackData.unitTestResults,
-        feedbackData.attemptCount,
+        //feedbackData.attemptCount,
+        2,
+        feedbackData.automatedTests, // Pass automated tests
+        feedbackData.codeGerueste, // Pass code skeletons
       );
 
       // 3. Return the feedback
