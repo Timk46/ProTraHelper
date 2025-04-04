@@ -5,8 +5,7 @@ import { BaseMessage, HumanMessage, AIMessage } from '@langchain/core/messages';
 import { Runnable } from '@langchain/core/runnables';
 import { StateGraph, END } from '@langchain/langgraph';
 import { createSupervisor } from '@langchain/langgraph-supervisor';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+// Removed fs and path imports as they are no longer needed for prompt loading
 
 import {
   FeedbackGraphState,
@@ -24,6 +23,7 @@ import { createDomainKnowledgeTool } from './tools/domain-knowledge/domain-knowl
 import { DynamicTool } from '@langchain/core/tools';
 // Import the helper function directly
 import { createFeedbackAgent } from './agents/agent.common';
+import { buildSupervisorPrompt } from './supervisor/supervisor.prompt'; // Import the new prompt builder
 
 @Injectable()
 export class LanggraphFeedbackService implements OnModuleInit {
@@ -100,20 +100,9 @@ export class LanggraphFeedbackService implements OnModuleInit {
         agent.name === 'KC' ? kcAgentWithTool : agent // Replace the imported KC with the tool-equipped one
     );
 
-    // Load the supervisor prompt from its new location
-    const promptPath = path.join(
-      __dirname, // Be cautious with __dirname in NestJS builds, consider relative paths or asset handling
-      'supervisor',
-      'supervisor.prompt.txt',
-    );
-    let supervisorPromptTemplate: string;
-    try {
-      supervisorPromptTemplate = await fs.readFile(promptPath, 'utf-8');
-      this.logger.log(`Supervisor prompt loaded from ${promptPath}`);
-    } catch (error) {
-      this.logger.error(`Failed to load supervisor prompt from ${promptPath}`, error);
-      throw new Error(`Failed to load supervisor prompt: ${error.message}`);
-    }
+    // Build the supervisor prompt using the imported function
+    const supervisorPromptTemplate = buildSupervisorPrompt();
+    this.logger.log('Supervisor prompt built from function.');
 
     // Create the supervisor workflow
     // Note: createSupervisor expects agent functions directly, not objects with names.

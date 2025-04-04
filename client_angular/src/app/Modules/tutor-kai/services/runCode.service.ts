@@ -11,7 +11,8 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class RunCodeService {
-  private apiUrl = environment.server + '/run-code';
+  private runCodeApiUrl = environment.server + '/run-code'; // Renamed for clarity
+  private langgraphApiUrl = environment.server + '/langgraph-feedback'; // New API base URL
 
   constructor(private http: HttpClient) { }
 
@@ -33,7 +34,7 @@ export class RunCodeService {
       inputArgs: inputArgs,
       CodeFiles: additionalFiles,
     };
-    return this.http.post<CodeSubmissionResultDto>(`${this.apiUrl}/execute`, body);
+    return this.http.post<CodeSubmissionResultDto>(`${this.runCodeApiUrl}/execute`, body);
   }
 
   /**
@@ -51,47 +52,22 @@ export class RunCodeService {
     feedbackLevel: string,
     relatedCodeSubmissionResult: CodeSubmissionResultDto
   ): Observable<string> {
+const body = {
+  questionId: questionId,
+  flavor: flavor, // Keep sending for future use
+  feedbackLevel: feedbackLevel, // Keep sending for future use
+  relatedCodeSubmissionResult: relatedCodeSubmissionResult
+};
 
-    const body = {
-      questionId: questionId,
-      flavor: flavor,
-      feedbackLevel: feedbackLevel,
-      relatedCodeSubmissionResult: relatedCodeSubmissionResult
-    };
-
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
-
-    return new Observable<string>(observer => {
-      this.http.post(`${this.apiUrl}/evaluate-code`, body, {
-        headers: headers,
-        reportProgress: true,
-        observe: 'events',
-        responseType: 'text'
-      }).pipe(
-        catchError(error => { throw error; })
-      ).subscribe({
-        next: (event) => {
-          switch (event.type) {
-            case HttpEventType.Response:
-              observer.next(event.body!);
-              observer.complete();
-              break;
-            case HttpEventType.DownloadProgress:
-              const downloadEvent = event as HttpDownloadProgressEvent;
-              if (downloadEvent.partialText != undefined) {
-                const partialText = downloadEvent.partialText;
-                observer.next(partialText);
-              }
-              break;
-          }
-        },
-        error: (err: any) => {
-          observer.error(err);
-        }
-      });
-    });
+// The new endpoint returns JSON: { feedback: string | null }
+// We don't need streaming logic anymore.
+return this.http.post<{ feedback: string | null }>(`${this.langgraphApiUrl}/evaluate`, body).pipe(
+  map(response => response?.feedback ?? ''), // Extract the feedback string, default to empty string if null/undefined
+  catchError(error => {
+    console.error('Error fetching KI feedback:', error);
+    throw error; // Re-throw the error to be handled by the caller
+  })
+);
   }
 
   /**
@@ -112,6 +88,6 @@ export class RunCodeService {
       feedback: feedback,
       lastSubmissionId: lastSubmissionId
     };
-    return this.http.post<any>(`${this.apiUrl}/post-Feedback`, body);
+    return this.http.post<any>(`${this.runCodeApiUrl}/post-Feedback`, body);
   }
 }
