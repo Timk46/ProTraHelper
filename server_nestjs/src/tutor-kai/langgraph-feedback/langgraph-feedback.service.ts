@@ -1,36 +1,56 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ChatOpenAI } from '@langchain/openai';
-import { BaseMessage, HumanMessage, AIMessage } from '@langchain/core/messages'; // Added AIMessage
-import { Runnable } from '@langchain/core/runnables';
-import { StateGraph, END } from '@langchain/langgraph';
-import { createSupervisor } from '@langchain/langgraph-supervisor';
-// Removed fs and path imports as they are no longer needed for prompt loading
+import { BaseMessage, HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages';
+import { Runnable, RunnableLambda, RunnableConfig } from '@langchain/core/runnables';
+import { StateGraph, END, StateGraphArgs, Annotation } from '@langchain/langgraph'; // Import Annotation
 
-import {
-  FeedbackGraphState,
-  zodSchema,
-  State,
-} from './langgraph-feedback.state';
-// Import remaining agents
+// Import agents and tools
 import { knowledgeAboutMistakesAgent } from './agents/km/km.agent';
 import { knowledgeOnHowToProceedAgent } from './agents/kh/kh.agent';
 import { knowledgeAboutConceptsAgent } from './agents/kc/kc.agent';
 import { knowledgeAboutTaskConstraintsAgent } from './agents/ktc/ktc.agent';
-// Import tools
 import { DomainKnowledgeService } from './tools/domain-knowledge/domain-knowledge.service';
 import { createDomainKnowledgeTool } from './tools/domain-knowledge/domain-knowledge.tool';
 import { DynamicTool } from '@langchain/core/tools';
-// Import the helper function directly
 import { createFeedbackAgent } from './agents/agent.common';
-import { buildSupervisorPrompt } from './supervisor/supervisor.prompt'; // Import the new prompt builder
+import { buildSupervisorPrompt } from './supervisor/supervisor.prompt';
+
+// --- New State Definition using Annotation ---
+const AnnotatedState = Annotation.Root({
+  messages: Annotation<BaseMessage[]>, // Correct syntax
+  studentSolution: Annotation<string>,
+  taskDescription: Annotation<string>,
+  compilerOutput: Annotation<string | null>,
+  unitTestResults: Annotation<any | null>, // Consider specific type
+  attemptCount: Annotation<number>,
+  automatedTests: Annotation<any[] | undefined>, // Match Zod optional
+  codeGerueste: Annotation<any[] | undefined>, // Match Zod optional
+  feedbackOutput: Annotation<string | null>,
+  // Add the new field for routing decision
+  routingDecision: Annotation<string | typeof END | null>, // Correct syntax
+});
+// Type alias for the state object derived from Annotation
+type GraphState = typeof AnnotatedState.State;
+// --- End New State Definition ---
+
+// Define NodeFunction type using the new state type
+type NodeFunction = (state: GraphState) => Promise<Partial<GraphState>>;
+// Define RouterFunction type using the new state type
+type RouterFunction = (state: GraphState) => Promise<Partial<GraphState>>; // Router now updates state
+
+// Define valid node names for type safety (optional but good practice)
+type AgentNodeNames = "KC" | "KH" | "KM" | "KTC";
+type GraphNodeNames = "router" | AgentNodeNames;
+
 
 @Injectable()
 export class LanggraphFeedbackService implements OnModuleInit {
   private readonly logger = new Logger(LanggraphFeedbackService.name);
-  private feedbackGraph: any;
-  private domainKnowledgeService: DomainKnowledgeService; // Instance of the tool service
-  private domainKnowledgeTool: DynamicTool; // Instance of the tool
+  // Use the new GraphState type
+  private feedbackGraph: Runnable<GraphState, GraphState>;
+  private domainKnowledgeService: DomainKnowledgeService;
+  private domainKnowledgeTool: DynamicTool;
 
   constructor(private configService: ConfigService) {}
 
@@ -41,8 +61,6 @@ export class LanggraphFeedbackService implements OnModuleInit {
       this.logger.log('Langgraph Feedback Service Initialized Successfully.');
     } catch (error) {
       this.logger.error('Failed to initialize Langgraph Feedback Service:', error);
-      // Depending on the application's needs, you might want to throw the error
-      // or handle it to allow the application to start in a degraded state.
       throw error;
     }
   }
@@ -53,184 +71,247 @@ export class LanggraphFeedbackService implements OnModuleInit {
       throw new Error('OPENAI_API_KEY is not configured.');
     }
 
-    // Instantiate Tool Service and Tool
-    // TODO: Replace with proper NestJS dependency injection
-    // Ensure DomainKnowledgeService is properly initialized before creating the tool
-    this.domainKnowledgeService = new DomainKnowledgeService(this.configService);
-    await this.domainKnowledgeService.onModuleInit(); // Manually trigger init as it's not managed by NestJS DI here
-    if (!this.domainKnowledgeService['vectorStore']) { // Check if vectorStore initialized (crude check)
-        this.logger.warn('DomainKnowledgeService vector store failed to initialize. Tool may not work.');
-        // Decide how to handle this - throw error? Proceed without tool?
-    }
-    this.domainKnowledgeTool = createDomainKnowledgeTool(this.domainKnowledgeService);
-    this.logger.log('Domain Knowledge Tool created.');
 
     const model = new ChatOpenAI({
-      modelName: 'gpt-4o', // Consider making this configurable
+      modelName: 'gpt-4o',
       apiKey: openAIApiKey,
-      temperature: 0.2, // Lower temperature for more deterministic routing
+      temperature: 0.2,
     });
 
-    // Define the list of the four active feedback agents
-    const activeFeedbackAgents = [
-      knowledgeAboutMistakesAgent,
-      knowledgeOnHowToProceedAgent,
-      knowledgeAboutConceptsAgent, // This instance will be replaced by kcAgentWithTool below
-      knowledgeAboutTaskConstraintsAgent,
-    ];
+    // Get the supervisor prompt string
+    const supervisorPromptString = buildSupervisorPrompt();
+    this.logger.log('Supervisor prompt string built.');
 
-    // Re-create the KC agent instance here to bind the specific tool instance created above.
-    // This is needed because the imported 'knowledgeOfConceptAgent' is static.
-    // TODO: Refactor using NestJS providers/factories for cleaner dependency management.
-    const kcAgentPrompt = `You are the Knowledge of Concept (KC) agent.
-   Based on the student's code, the task, and the errors provided in the message history, identify the core programming concept the student seems to be misunderstanding.
-   Use the 'search_domain_knowledge' tool to fetch relevant explanations from lecture materials if needed.
-   Explain the concept clearly and concisely in the context of the task.
-   Do not provide code solutions. Focus on the conceptual explanation.
-   Respond only with the concept explanation.`; // Re-define or import KC prompt
-    const kcAgentWithTool = createFeedbackAgent( // Use the directly imported helper
-        'KC',
-        kcAgentPrompt,
-        [this.domainKnowledgeTool] // Pass the tool instance
+    // --- Start: New StateGraph Implementation ---
+
+    // Instantiate the graph using the AnnotatedState definition
+    const workflow = new StateGraph(AnnotatedState);
+
+    // --- Agent Node Wrappers ---
+    // Wrapper function adapts agent input/output and wraps in RunnableLambda
+    const wrapAgentNode = (agentRunnable: Runnable<any, any>): RunnableLambda<GraphState, Partial<GraphState>> => {
+        const nodeFunc: NodeFunction = async (state: GraphState): Promise<Partial<GraphState>> => {
+            const agentInput = { messages: state.messages };
+            try {
+                const agentOutput = await agentRunnable.invoke(agentInput);
+                // Agent output should primarily update messages
+                return { messages: agentOutput?.messages ?? [] };
+            } catch (error) {
+                this.logger.error(`Error invoking agent node: ${error}`);
+                return { messages: [new AIMessage(`Error processing feedback: ${error.message}`)] };
+            }
+        };
+        return new RunnableLambda({ func: nodeFunc });
+    };
+
+    // Wrap the agents
+    const kcNode = wrapAgentNode(knowledgeAboutConceptsAgent);
+    const khNode = wrapAgentNode(knowledgeOnHowToProceedAgent);
+    const kmNode = wrapAgentNode(knowledgeAboutMistakesAgent);
+    const ktcNode = wrapAgentNode(knowledgeAboutTaskConstraintsAgent);
+    // --- End Agent Node Wrappers ---
+
+    // Define the Router Logic function - now updates state.routingDecision
+    const routerFunction: RouterFunction = async (state: GraphState): Promise<Partial<GraphState>> => {
+        this.logger.log('Router: Deciding next agent...');
+        const { messages, studentSolution, taskDescription, compilerOutput, unitTestResults, attemptCount, automatedTests, codeGerueste } = state;
+        const lastFeedback = messages.filter(msg => msg instanceof AIMessage).pop()?.content?.toString() || 'None';
+        let formattedPrompt = supervisorPromptString
+            .replace('{taskDescription}', taskDescription || 'Not provided')
+            .replace('{codeGerueste}', JSON.stringify(codeGerueste) || 'None')
+            .replace('{studentSolution}', studentSolution || 'Not provided')
+            .replace('{compilerOutput}', compilerOutput || 'None')
+            .replace('{automatedTests}', JSON.stringify(automatedTests) || 'None')
+            .replace('{unitTestResults}', JSON.stringify(unitTestResults) || 'None')
+            .replace('{attemptCount}', attemptCount?.toString() || 'Unknown')
+            .replace('{lastFeedback}', lastFeedback);
+        const llmMessages: BaseMessage[] = [ new SystemMessage(formattedPrompt) ];
+        this.logger.log(`Router: Sending prompt to LLM (first 200 chars): ${formattedPrompt.substring(0, 200)}...`);
+
+        try {
+            const response = await model.invoke(llmMessages);
+            let decision = response.content.toString().trim();
+            if (decision.startsWith('"') && decision.endsWith('"')) {
+                decision = decision.substring(1, decision.length - 1);
+            }
+            this.logger.log(`Router: LLM decision: '${decision}'`);
+            const validAgents: AgentNodeNames[] = ['KC', 'KH', 'KM', 'KTC'];
+            if (validAgents.includes(decision as AgentNodeNames)) {
+                return { routingDecision: decision }; // Update state with decision
+            } else if (decision === END || decision === '__END__') {
+                return { routingDecision: END }; // Update state with END
+            } else {
+                // Attempt extraction from reasoning block
+                const reasoningMatch = response.content.toString().match(/<\/reasoning>\s*"?(\w+|__END__)?"?/);
+                if (reasoningMatch && reasoningMatch[1]) {
+                    const extractedDecision = reasoningMatch[1];
+                    this.logger.warn(`Router: Extracted decision '${extractedDecision}' from reasoning block.`);
+                    if (validAgents.includes(extractedDecision as AgentNodeNames)) return { routingDecision: extractedDecision };
+                    if (extractedDecision === END || extractedDecision === '__END__') return { routingDecision: END };
+                }
+                this.logger.warn(`Router: Invalid or unparseable decision '${decision}'. Defaulting to END.`);
+                return { routingDecision: END }; // Update state with END
+            }
+        } catch (error) {
+            this.logger.error(`Error invoking router LLM: ${error}`);
+            return { routingDecision: END }; // Default to END on router error
+        }
+    };
+
+    // Wrap router function in RunnableLambda
+    // No RunnableLambda wrapper needed for routerFunction as it already returns Partial<GraphState>
+
+    // Add nodes to the workflow
+    workflow.addNode('KC', kcNode);
+    workflow.addNode('KH', khNode);
+    workflow.addNode('KM', kmNode);
+    workflow.addNode('KTC', ktcNode);
+    workflow.addNode('router', routerFunction); // Add the raw router function
+
+    // Set the entry point
+    // @ts-ignore - Suppress persistent type error recognizing 'router' node
+    workflow.addEdge("__start__", "router");
+
+    // --- New Conditional Edge Logic ---
+    // Function to read the decision from state and return the target node name
+    const routeLogic = (state: GraphState): AgentNodeNames | "__end__" => { // Return literal string
+        const decision = state.routingDecision;
+        // Check against END constant but return literal string "__end__"
+        if (!decision || decision === END) {
+            return "__end__";
+        }
+        // Decision should be one of the agent node names
+        return decision as AgentNodeNames; // Assume decision is a valid agent name if not END
+    };
+
+    // Define conditional edges using the routeLogic function and an array of destinations
+    // Define conditional edges using a MAP instead of an array
+    workflow.addConditionalEdges(
+        // @ts-ignore - Suppress persistent type error recognizing 'router' node
+        'router',
+        routeLogic,
+        {
+            'KC': 'KC',
+            'KH': 'KH',
+            'KM': 'KM',
+            'KTC': 'KTC',
+            "__end__": END
+        }
     );
+    // --- End New Conditional Edge Logic ---
 
-    // Update the list passed to the supervisor, ensuring only the 4 active agents are included
-    // and the KC agent instance has the tool bound.
-    const agentsForSupervisor = activeFeedbackAgents.map(agent =>
-        agent.name === 'KC' ? kcAgentWithTool : agent // Replace the imported KC with the tool-equipped one
-    );
 
-    // Build the supervisor prompt using the imported function
-    const supervisorPromptTemplate = buildSupervisorPrompt();
-    this.logger.log('Supervisor prompt built from function.');
-
-    // Create the supervisor workflow
-    // Note: createSupervisor expects agent functions directly, not objects with names.
-    // The names are passed separately if needed or inferred. Let's adjust based on typical usage.
-    // We pass agent functions and rely on the prompt to map decisions to function calls.
-    // Rely on stateSchema for type inference, remove explicit generic
-    // Pass the array of { name, agent } objects directly
-    // Remove stateSchema, rely on inference
-    const supervisorWorkflow = createSupervisor({
-      llm: model,
-      agents: agentsForSupervisor, // Pass the final list of 4 agents
-      prompt: supervisorPromptTemplate, // Pass the loaded prompt template string
-      // entryNode: undefined, // Default entry is supervisor
-      // exitNode: END // Default exit is END when supervisor returns __END__
-    });
+    // Add edges from each agent directly to END
+    // @ts-ignore - Suppress persistent type error recognizing agent nodes
+    workflow.addEdge('KC', "__end__");
+    // @ts-ignore - Suppress persistent type error recognizing agent nodes
+    workflow.addEdge('KH', "__end__");
+    // @ts-ignore - Suppress persistent type error recognizing agent nodes
+    workflow.addEdge('KM', "__end__");
+    // @ts-ignore - Suppress persistent type error recognizing agent nodes
+    workflow.addEdge('KTC', "__end__");
 
     // Compile the graph
-    this.feedbackGraph = supervisorWorkflow.compile();
-    this.logger.log('Feedback graph compiled.');
+    this.feedbackGraph = workflow.compile();
+    this.logger.log('Feedback graph compiled using Annotation.Root state and new routing pattern.');
+
+    // --- End: New StateGraph Implementation ---
   }
 
-  /**
-   * Processes a student's submission and returns adaptive feedback.
-   * (Implementation to be added)
-   * @param studentSolution The student's code.
-   * @param taskDescription The description of the task.
-   * @param compilerOutput Optional compiler output.
-   * @param unitTestResults Optional unit test results.
-   * @param attemptCount The current attempt number.
-   * @param automatedTests The automated tests defined for the task.
-   * @param codeGerueste The code skeletons/templates provided for the task.
-   * @returns The generated feedback string.
-   */
   async getFeedback(
     studentSolution: string,
     taskDescription: string,
     compilerOutput: string | null,
-    unitTestResults: any | null, // Consider specific type
+    unitTestResults: any | null,
     attemptCount: number,
-    automatedTests: any[], // Consider specific Prisma type
-    codeGerueste: any[], // Consider specific Prisma type
+    automatedTests: any[],
+    codeGerueste: any[],
   ): Promise<string | null> {
     this.logger.log(`Getting feedback for attempt ${attemptCount}`);
 
     if (!this.feedbackGraph) {
-      this.logger.error(
-        'Feedback graph is not initialized. Cannot process request.',
-      );
+      this.logger.error('Feedback graph is not initialized. Cannot process request.');
       throw new Error('Feedback service not ready.');
     }
 
-    // Construct the initial human message containing all context for the supervisor/agents
     const contextMessageContent = `
       Analyze my solution for the following task. This is attempt number ${attemptCount}.
-
-      Task Description:
-      ${taskDescription}
-
-      Provided Code Skeleton(s):
-      ${JSON.stringify(codeGerueste) || 'None'}
-
-
+      Task Description: ${taskDescription}
+      Provided Code Skeleton(s): ${JSON.stringify(codeGerueste) || 'None'}
       My Solution:
       \`\`\`
       ${studentSolution}
       \`\`\`
-
-      Compiler Output:
-      ${compilerOutput || 'None'}
-
-      Automated Tests Definition:
-      ${JSON.stringify(automatedTests) || 'None'}
-
-      Unit Test Results:
-      ${JSON.stringify(unitTestResults) || 'None'}
+      Compiler Output: ${compilerOutput || 'None'}
+      Automated Tests Definition: ${JSON.stringify(automatedTests) || 'None'}
+      Unit Test Results: ${JSON.stringify(unitTestResults) || 'None'}
     `;
 
-    // Initialize the state for the graph invocation
-    const initialState: State = {
-      messages: [new HumanMessage(contextMessageContent)], // Pass context in the first message
-      // Other state fields are implicitly managed or not directly needed by createReactAgent structure
-      // Keep required fields from Zod schema if not covered by messages
-      studentSolution, // Keep for potential direct access if needed elsewhere
-      taskDescription, // Keep for potential direct access
-      compilerOutput, // Keep for potential direct access
-      unitTestResults, // Keep for potential direct access
-      attemptCount, // Keep for potential direct access
-      automatedTests, // Pass through for potential direct access
-      codeGerueste, // Pass through for potential direct access
-      feedbackOutput: null, // Initialize feedback output
+    // Initial state must match AnnotatedState structure
+    // Note: routingDecision starts as null (default)
+    const initialState: Partial<GraphState> = { // Use Partial as not all fields are set initially
+      messages: [new HumanMessage(contextMessageContent)],
+      studentSolution,
+      taskDescription,
+      compilerOutput,
+      unitTestResults,
+      attemptCount,
+      automatedTests: automatedTests ?? undefined,
+      codeGerueste: codeGerueste ?? undefined,
+      feedbackOutput: null,
+      // routingDecision is omitted, will use default (null)
     };
 
+
     try {
-      // Invoke the graph - the input format for createReactAgent/Supervisor
-      // typically expects just the messages array in an object.
-      // Let's adjust the invoke call based on common patterns.
-      const invokeInput = { messages: initialState.messages };
-      const finalState = await this.feedbackGraph.invoke(invokeInput);
+      const config: RunnableConfig = { recursionLimit: 50 };
+      // Invoke expects the full initial state structure, even if fields are default
+      // LangGraph handles merging the partial input with defaults.
+      const finalState = await this.feedbackGraph.invoke(initialState as GraphState, config);
 
       this.logger.log('Graph execution completed.');
 
-      // Extract the final feedback. The supervisor/agent should add an AIMessage.
-      // We look for the last AIMessage added by our agents/supervisor.
       let feedback: string | null = null;
       if (finalState && Array.isArray(finalState.messages)) {
-          // Find the last AI message in the history
+          // Find the last *AI* message added by an *agent* (not the router decision)
           for (let i = finalState.messages.length - 1; i >= 0; i--) {
               const msg = finalState.messages[i];
-              if (msg instanceof AIMessage) {
-                  // Check if content is string and not empty
-                  if (typeof msg.content === 'string' && msg.content.trim().length > 0) {
-                      feedback = msg.content.trim();
+              // Check if it's an AIMessage and not just the router's internal reasoning/decision
+              if (msg instanceof AIMessage && typeof msg.content === 'string') {
+                  const content = msg.content.trim();
+                  // Basic check to avoid returning internal router messages if they leak
+                  if (!content.startsWith('{"routingDecision":')) {
+                      feedback = content;
+                      // Strip reasoning block if present
+                      const reasoningEndIndex = feedback.indexOf('</reasoning>');
+                      if (reasoningEndIndex !== -1) {
+                          feedback = feedback.substring(reasoningEndIndex + '</reasoning>'.length).trim();
+                      }
+                      // Remove potential quotes
+                      if (feedback.startsWith('"') && feedback.endsWith('"')) {
+                          feedback = feedback.substring(1, feedback.length - 1);
+                      }
+                      // Ensure it's not just the END signal
+                      if (feedback === END || feedback === '__END__') {
+                          feedback = null; // Treat END signal as no feedback
+                      }
                       break; // Found the last relevant AI feedback
                   }
               }
           }
       }
 
+
       if (feedback) {
         this.logger.log(`Feedback generated: ${feedback.substring(0, 100)}...`);
         return feedback;
       } else {
-        this.logger.warn('No valid AI feedback message found in the final state.');
-        return null; // Or return a default "No feedback available" message
+        this.logger.warn('No valid AI feedback message found in the final state or decision was END.');
+        return null;
       }
     } catch (error) {
       this.logger.error('Error during graph invocation:', error);
-      // Consider more specific error handling or logging
+      this.logger.error('State at time of error:', JSON.stringify(initialState, null, 2));
       throw new Error(`Failed to generate feedback: ${error.message}`);
     }
   }
