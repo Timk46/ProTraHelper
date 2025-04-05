@@ -1,19 +1,46 @@
 import { ChatOpenAI } from '@langchain/openai';
-import { createFeedbackAgent } from '../agent.common'; // Import the updated helper
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/FeedbackContext.dto';
+import { BaseMessage, HumanMessage } from '@langchain/core/messages';
+import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
+import { createReactAgent } from '@langchain/langgraph/prebuilt';
+import { khSystemPrompt } from './kh.prompts'; // Import prompt from the new file
 
 /**
- * KH: Knowledge of How to Fix Agent System Prompt
- * Defines the role and instructions for the KH agent.
+ * Builds the core KH agent runnable (without input formatting).
  */
-const khSystemPrompt = `You are the Knowledge of How to Fix (KH) agent.
-Analyze the student's code, the task, any errors/test results, and potentially previous feedback provided in the message history.
-Provide a specific hint or suggest a step the student can take to fix the primary mistake identified.
-Do not give the full corrected code. Focus on guiding the student towards the solution.
-Example: "Consider how you are handling array boundaries." or "Think about the return type needed for this function."
-Respond only with the hint or guidance.`;
+export function buildKhCoreAgent(llm: ChatOpenAI): Runnable<any, any> {
+    return createReactAgent({
+        llm: llm,
+        tools: [], // KH agent doesn't use tools
+        name: 'KH',
+        prompt: khSystemPrompt,
+    });
+}
 
-// New creation function
-export function createKhAgent(llm: ChatOpenAI) { // Accept only llm
-    // Use the common helper function to create the agent, passing an empty tools array
-    return createFeedbackAgent('KH', khSystemPrompt, llm, []);
+/**
+ * Builds the complete KH agent chain, including input formatting.
+ */
+export function buildKhAgentChain(llm: ChatOpenAI): RunnableSequence {
+    const inputFormatter = new RunnableLambda({
+        func: (input: FeedbackContextDto) => {
+            const contextMessageContent = `
+Analyze my solution for the following task. This is attempt number ${input.attemptCount}.
+Task Description: ${input.taskDescription}
+Provided Code Skeleton(s): ${JSON.stringify(input.codeGerueste) || 'None'}
+My Solution:
+\`\`\`
+${input.studentSolution}
+\`\`\`
+Compiler Output: ${input.compilerOutput || 'None'}
+Automated Tests Definition: ${JSON.stringify(input.automatedTests) || 'None'}
+Unit Test Results: ${JSON.stringify(input.unitTestResults) || 'None'}
+`;
+            const initialMessages: BaseMessage[] = [new HumanMessage(contextMessageContent)];
+            return { messages: initialMessages };
+        },
+    }).withConfig({ runName: 'FormatKhAgentInput' });
+
+    const coreAgent = buildKhCoreAgent(llm);
+
+    return RunnableSequence.from([inputFormatter, coreAgent], 'KhAgentChain');
 }
