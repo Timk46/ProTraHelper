@@ -10,45 +10,24 @@
   <div *ngIf="showFeedbackOptions()" class="feedback-options">
     <div class="feedback-card">
       <p>Wähle die Art des Feedbacks, das du erhalten möchtest:</p>
-      
-      <!-- Kategorie-Buttons -->
-      <div class="category-buttons">
-        <button
-          *ngFor="let category of feedbackCategories"
-          mat-stroked-button
-          color="primary"
-          [class.selected]="selectedCategory === category"
-          (click)="selectCategory(category)">
-          <span class="category-icon">{{ category.icon }}</span>
-          <span class="category-keyword">{{ category.keyword }}</span>
+
+      <!-- New Agent Buttons -->
+      <div class="agent-buttons">
+        <button mat-stroked-button color="primary" (click)="requestSupervisorFeedback()">
+          <mat-icon>supervisor_account</mat-icon> Supervisor Feedback
         </button>
-      </div>
-      
-      <!-- Sprechblase mit Fragen -->
-      <div
-        *ngIf="selectedCategory"
-        class="question-bubble">
-        <div class="bubble-arrow"></div>
-        <div class="bubble-content">
-          <h4>{{ selectedCategory.name }}</h4>
-          <div class="question-list">
-            <button
-              *ngFor="let question of selectedCategory.questions"
-              mat-button
-              color="primary"
-              class="question-button"
-              (click)="requestFeedbackForQuestion(question)">
-              {{ question.text }}
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Overlay zum Schließen der Sprechblase bei Klick außerhalb -->
-      <div
-        *ngIf="selectedCategory"
-        class="bubble-overlay"
-        (click)="closeQuestionBubble()">
+        <button mat-stroked-button color="primary" (click)="requestKcFeedback()">
+          <mat-icon>lightbulb</mat-icon> KC Feedback (Concepts)
+        </button>
+        <button mat-stroked-button color="primary" (click)="requestKhFeedback()">
+          <mat-icon>navigation</mat-icon> KH Feedback (How-To)
+        </button>
+        <button mat-stroked-button color="primary" (click)="requestKmFeedback()">
+          <mat-icon>bug_report</mat-icon> KM Feedback (Mistakes)
+        </button>
+        <button mat-stroked-button color="primary" (click)="requestKtcFeedback()">
+          <mat-icon>assignment</mat-icon> KTC Feedback (Task)
+        </button>
       </div>
     </div>
   </div>
@@ -67,10 +46,7 @@
     <div *ngIf="feedbackContent" class="feedback-result">
       <div class="feedback-header">
         <h3>Feedback zu deinem Code</h3>
-        <div *ngIf="selectedQuestion && selectedCategory" class="feedback-type-badge">
-          <span class="category-icon">{{ selectedCategory.icon }}</span>
-          <span class="question-text">{{ selectedQuestion.text }}</span>
-        </div>
+        <!-- Removed old feedback type badge -->
       </div>
 
       <div class="feedback-text" [innerHTML]="sanitizedFeedback"></div>

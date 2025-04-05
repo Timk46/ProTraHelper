@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, Observable } from 'rxjs'; // Added Observable import
 import { WorkspaceStateService } from '../../services/workspace-state.service';
-import { FeedbackCategory, FeedbackQuestion, FEEDBACK_CATEGORIES, WorkspaceState } from '../../models/code-submission.model';
+import { WorkspaceState } from '../../models/code-submission.model'; // Removed unused imports
 import { MarkdownService } from '../../services/markdown/markdown.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 
@@ -35,10 +35,7 @@ export class FeedbackPanelComponent implements OnInit, OnDestroy {
   isGenerating = false;
   generatingMessage = 'Lass mich einen Augenblick über die Aufgabe nachdenken...';
 
-  // Neue Feedback-Kategorien und -Fragen
-  feedbackCategories = FEEDBACK_CATEGORIES;
-  selectedCategory: FeedbackCategory | null = null;
-  selectedQuestion: FeedbackQuestion | null = null;
+  // Removed properties related to old feedback categories/questions
 
   // Zustand
   currentState: WorkspaceState = WorkspaceState.START;
@@ -77,47 +74,46 @@ export class FeedbackPanelComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * Wählt eine Feedback-Kategorie aus
-   */
-  selectCategory(category: FeedbackCategory): void {
-    // Wenn die gleiche Kategorie erneut angeklickt wird, schließe die Sprechblase
-    if (this.selectedCategory === category) {
-      this.selectedCategory = null;
-    } else {
-      // Wenn eine neue Kategorie ausgewählt wird, setze sie direkt
-      this.selectedCategory = category;
-    }
-    this.selectedQuestion = null; // Zurücksetzen der ausgewählten Frage
-  }
+  // --- New Agent-Specific Feedback Request Methods ---
 
-  /**
-   * Fordert KI-Feedback für eine spezifische Frage an
-   */
-  requestFeedbackForQuestion(question: FeedbackQuestion): void {
-    this.selectedQuestion = question;
-    this.selectedCategory = null; // Schließe die Sprechblase
-    
+  private requestAgentFeedback(agentRequestFn: (taskId: number, submissionResult: any) => Observable<string>): void {
     const task = this.workspaceState.getCurrentTask();
     const lastResult = this.workspaceState.getCodeSubmissionResult();
-    
+
     if (task && lastResult) {
-      this.workspaceState.requestFeedback(
-        task.id,
-        this.selectedQuestion.value, // Feedback Type + Question (e.g. KC_FURTHER_EXPLANATIONS)
-        question.value, // Neuer Wert für das Feedback-Level
-        lastResult
-      ).pipe(takeUntil(this.destroy$))
-      .subscribe();
+      agentRequestFn.call(this.workspaceState, task.id, lastResult)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          // Optional: Add next/error handlers if needed for component-specific logic
+          error: (err: any) => console.error('Error requesting agent feedback in component:', err) // Added type for err
+        });
+    } else {
+      console.error('Cannot request feedback: Task or last submission result is missing.');
+      // Optionally show an error message to the user
     }
   }
 
-  /**
-   * Schließt die Sprechblase, wenn außerhalb geklickt wird
-   */
-  closeQuestionBubble(): void {
-    this.selectedCategory = null;
+  requestSupervisorFeedback(): void {
+    this.requestAgentFeedback(this.workspaceState.requestSupervisorFeedback);
   }
+
+  requestKcFeedback(): void {
+    this.requestAgentFeedback(this.workspaceState.requestKcFeedback);
+  }
+
+  requestKhFeedback(): void {
+    this.requestAgentFeedback(this.workspaceState.requestKhFeedback);
+  }
+
+  requestKmFeedback(): void {
+    this.requestAgentFeedback(this.workspaceState.requestKmFeedback);
+  }
+
+  requestKtcFeedback(): void {
+    this.requestAgentFeedback(this.workspaceState.requestKtcFeedback);
+  }
+
+  // Removed old methods: selectCategory, requestFeedbackForQuestion, closeQuestionBubble
 
   /**
    * Behandelt die Bewertungsabgabe
@@ -156,13 +152,5 @@ export class FeedbackPanelComponent implements OnInit, OnDestroy {
     return this.currentState === WorkspaceState.FINISHED_FEEDBACK;
   }
 
-  /**
-   * Gibt den Anzeigenamen für die ausgewählte Feedback-Frage zurück
-   */
-  getSelectedFeedbackName(): string {
-    if (this.selectedCategory && this.selectedQuestion) {
-      return `${this.selectedCategory.icon} ${this.selectedQuestion.text}`;
-    }
-    return '';
-  }
+  // Removed getSelectedFeedbackName method
 }

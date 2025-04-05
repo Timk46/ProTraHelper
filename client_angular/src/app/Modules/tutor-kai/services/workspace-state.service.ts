@@ -90,29 +90,64 @@ export class WorkspaceStateService {
     );
   }
 
+  // --- New Agent-Specific Feedback Request Methods ---
+
   /**
-   * Fordert KI-Feedback an
+   * Helper method to handle the common logic for requesting feedback from an agent.
    */
-  requestFeedback(taskId: number, flavor: string, level: string, submissionResult: CodeSubmissionResultDto): Observable<string> {
+  private requestAgentFeedback(
+    agentRequest$: Observable<string>,
+    agentName: string // For logging/error messages
+  ): Observable<string> {
     this.workspaceStateSubject.next(WorkspaceState.GENERATING_FEEDBACK);
     this.feedbackSubject.next('');
     this.errorSubject.next(null);
 
-    return this.runCodeService.getKiFeedback(taskId, flavor, level, submissionResult).pipe(
+    return agentRequest$.pipe(
       tap(feedback => {
         this.feedbackSubject.next(feedback);
         this.workspaceStateSubject.next(WorkspaceState.RECEIVING_FEEDBACK);
       }),
       catchError(error => {
-        this.errorSubject.next(`Fehler beim Generieren des Feedbacks: ${error.message}`);
-        this.workspaceStateSubject.next(WorkspaceState.SUBMITTED_CODE);
+        this.errorSubject.next(`Fehler beim Generieren des ${agentName}-Feedbacks: ${error.message}`);
+        this.workspaceStateSubject.next(WorkspaceState.SUBMITTED_CODE); // Reset state on error
         return throwError(() => error);
       }),
       finalize(() => {
-        this.workspaceStateSubject.next(WorkspaceState.FINISHED_FEEDBACK);
+        // Ensure state transitions correctly even if there's an error before finalize
+        if (this.workspaceStateSubject.value === WorkspaceState.RECEIVING_FEEDBACK) {
+          this.workspaceStateSubject.next(WorkspaceState.FINISHED_FEEDBACK);
+        }
       })
     );
   }
+
+  requestSupervisorFeedback(taskId: number, submissionResult: CodeSubmissionResultDto): Observable<string> {
+    const agentRequest$ = this.runCodeService.getSupervisorFeedback(taskId, submissionResult);
+    return this.requestAgentFeedback(agentRequest$, 'Supervisor');
+  }
+
+  requestKcFeedback(taskId: number, submissionResult: CodeSubmissionResultDto): Observable<string> {
+    const agentRequest$ = this.runCodeService.getKcFeedback(taskId, submissionResult);
+    return this.requestAgentFeedback(agentRequest$, 'KC');
+  }
+
+  requestKhFeedback(taskId: number, submissionResult: CodeSubmissionResultDto): Observable<string> {
+    const agentRequest$ = this.runCodeService.getKhFeedback(taskId, submissionResult);
+    return this.requestAgentFeedback(agentRequest$, 'KH');
+  }
+
+  requestKmFeedback(taskId: number, submissionResult: CodeSubmissionResultDto): Observable<string> {
+    const agentRequest$ = this.runCodeService.getKmFeedback(taskId, submissionResult);
+    return this.requestAgentFeedback(agentRequest$, 'KM');
+  }
+
+  requestKtcFeedback(taskId: number, submissionResult: CodeSubmissionResultDto): Observable<string> {
+    const agentRequest$ = this.runCodeService.getKtcFeedback(taskId, submissionResult);
+    return this.requestAgentFeedback(agentRequest$, 'KTC');
+  }
+
+  // Old requestFeedback method removed
 
   /**
    * Sendet eine Bewertung für das erhaltene Feedback

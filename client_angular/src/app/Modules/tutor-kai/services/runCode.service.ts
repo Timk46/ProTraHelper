@@ -1,8 +1,9 @@
 import { CodeSubmissionResultDto } from '@DTOs/index';
-import { HttpClient, HttpDownloadProgressEvent, HttpEventType, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http'; // Removed unused imports
 import { Injectable } from '@angular/core';
 import { Observable, catchError, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { FeedbackLevel, FlavorType } from '../models/code-submission.model'; // Import enums
 
 /**
  * A service for running and managing user code submissions.
@@ -37,38 +38,49 @@ export class RunCodeService {
     return this.http.post<CodeSubmissionResultDto>(`${this.runCodeApiUrl}/execute`, body);
   }
 
-  /**
-   * Gets feedback on the user-submitted code.
-   *
-   * @param code - The source code to be evaluated.
-   * @param task - The task the code is associated with.
-   * @param language - The programming language of the submitted code.
-   * @param CodeSubmissionResultDto - The result of the code execution and the ID of the last code submission (which is the submission associated with the feedback)
-   * @returns An Observable with the LLM generated Feedback string.
-   */
-  getKiFeedback(
+  // --- New Agent-Specific Feedback Methods ---
+
+  private getAgentFeedback(
+    endpoint: string,
     questionId: number,
-    flavor: string,
-    feedbackLevel: string,
     relatedCodeSubmissionResult: CodeSubmissionResultDto
   ): Observable<string> {
-const body = {
-  questionId: questionId,
-  flavor: flavor, // Keep sending for future use
-  feedbackLevel: feedbackLevel, // Keep sending for future use
-  relatedCodeSubmissionResult: relatedCodeSubmissionResult
-};
-
-// The new endpoint returns JSON: { feedback: string | null }
-// We don't need streaming logic anymore.
-return this.http.post<{ feedback: string | null }>(`${this.langgraphApiUrl}/evaluate`, body).pipe(
-  map(response => response?.feedback ?? ''), // Extract the feedback string, default to empty string if null/undefined
-  catchError(error => {
-    console.error('Error fetching KI feedback:', error);
-    throw error; // Re-throw the error to be handled by the caller
-  })
-);
+    const body = {
+      questionId: questionId,
+      flavor: FlavorType.STANDARD, // Use default flavor
+      feedbackLevel: FeedbackLevel.STANDARD, // Use default level
+      relatedCodeSubmissionResult: relatedCodeSubmissionResult
+    };
+    return this.http.post<{ feedback: string | null }>(`${this.langgraphApiUrl}/${endpoint}`, body).pipe(
+      map(response => response?.feedback ?? ''), // Extract the feedback string, default to empty string if null/undefined
+      catchError(error => {
+        console.error(`Error fetching ${endpoint} feedback:`, error);
+        throw error; // Re-throw the error to be handled by the caller
+      })
+    );
   }
+
+  getSupervisorFeedback(questionId: number, relatedCodeSubmissionResult: CodeSubmissionResultDto): Observable<string> {
+    return this.getAgentFeedback('supervisor', questionId, relatedCodeSubmissionResult);
+  }
+
+  getKcFeedback(questionId: number, relatedCodeSubmissionResult: CodeSubmissionResultDto): Observable<string> {
+    return this.getAgentFeedback('kc', questionId, relatedCodeSubmissionResult);
+  }
+
+  getKhFeedback(questionId: number, relatedCodeSubmissionResult: CodeSubmissionResultDto): Observable<string> {
+    return this.getAgentFeedback('kh', questionId, relatedCodeSubmissionResult);
+  }
+
+  getKmFeedback(questionId: number, relatedCodeSubmissionResult: CodeSubmissionResultDto): Observable<string> {
+    return this.getAgentFeedback('km', questionId, relatedCodeSubmissionResult);
+  }
+
+  getKtcFeedback(questionId: number, relatedCodeSubmissionResult: CodeSubmissionResultDto): Observable<string> {
+    return this.getAgentFeedback('ktc', questionId, relatedCodeSubmissionResult);
+  }
+
+  // Old getKiFeedback method removed
 
   /**
    * Posts user feedback (rating and comment) on the code execution.
