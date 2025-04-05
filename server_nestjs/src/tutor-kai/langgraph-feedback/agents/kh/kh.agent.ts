@@ -34,6 +34,8 @@ ${input.studentSolution}
 Compiler Output: ${input.compilerOutput || 'None'}
 Automated Tests Definition: ${JSON.stringify(input.automatedTests) || 'None'}
 Unit Test Results: ${JSON.stringify(input.unitTestResults) || 'None'}
+\`\`\`
+Generate feedback in german strictly adhering to the KH type and all constraints in your instructions.
 `;
             const initialMessages: BaseMessage[] = [new HumanMessage(contextMessageContent)];
             return { messages: initialMessages };

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from 'src/prisma/prisma.module'; // Assuming standard path
-import { CryptoService } from '../crypto/crypto.service'; // Path relative to this module
+import { CryptoService } from './helper/crypto.service'; // Path relative to this module
 // Removed duplicate imports below
 import { LanggraphFeedbackController } from './langgraph-feedback.controller';
 import { LanggraphFeedbackService } from './langgraph-feedback.service'; // Facade service

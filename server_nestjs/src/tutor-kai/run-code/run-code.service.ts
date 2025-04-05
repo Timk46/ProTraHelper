@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CryptoService } from '../crypto/crypto.service';
+import { CryptoService } from '../langgraph-feedback/helper/crypto.service';
 import { CodingQuestionInternal, detailedQuestionDTO } from '@DTOs/index';
 import {
   CodeSubmissionResult,

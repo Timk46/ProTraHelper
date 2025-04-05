@@ -20,7 +20,7 @@ import { DiscussionCreationController } from './discussion/discussion-creation/d
 import { QuestionDataModule } from './question-data/question-data.module';
 
 // BEGIN Tutor-Kai Imports
-import { CryptoService } from './tutor-kai/crypto/crypto.service';
+import { CryptoService } from './tutor-kai/langgraph-feedback/helper/crypto.service';
 import { QuestionModule } from './tutor-kai/question/question.module';
 import { RunCodeModule } from './tutor-kai/run-code/run-code.module';
 // END Tutor-Kai Imports

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CryptoService } from '../../crypto/crypto.service'; // Adjust path if necessary
+import { CryptoService } from './crypto.service'; // Adjust path if necessary
 import { CodeSubmissionResult } from '@DTOs/tutorKaiDtos/submission.dto'; // Adjust path if necessary
 import { FeedbackContextDto } from '@Interfaces/tutorKaiDtos/FeedbackContext.dto';
 
