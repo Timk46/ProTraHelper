@@ -8,12 +8,6 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/FeedbackContext.dto';
 import { CHAT_OPENAI_MODEL } from '../../langgraph.constants'; // Import token from constants file
 
-// Import Agent Providers (assuming they exist and are correctly structured)
-import { KcAgentProvider } from '../kc/kc.provider';
-import { KhAgentProvider } from '../kh/kh.provider';
-import { KmAgentProvider } from '../km/km.provider';
-import { KtcAgentProvider } from '../ktc/ktc.provider';
-
 // Import Core Agent Builders (needed if graph nodes invoke core agents directly)
 import { buildKcCoreAgent } from '../kc/kc.agent';
 import { buildKhCoreAgent } from '../kh/kh.agent';

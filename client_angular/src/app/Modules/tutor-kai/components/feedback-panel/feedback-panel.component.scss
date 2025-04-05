@@ -21,99 +21,117 @@
     }
   }
 
-  // Intro-Bereich mit Icon
+  // Intro-Bereich - kompakter Stil
   .feedback-intro {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
 
-    .card-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 32px;
-      background-color: #e8eaf6;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
-
-      mat-icon {
-        font-size: 32px;
-        color: #3f51b5;
-      }
+    .feedback-card {
+      padding: 12px 10px;
     }
 
-    h3 {
-      font-size: 22px;
-      font-weight: 500;
-      margin-bottom: 12px;
-      color: #3f51b5;
-    }
-
-    p {
-      font-size: 16px;
+    .compact-message {
+      font-size: 13px;
       color: #666;
-      line-height: 1.5;
+      line-height: 1.4;
+      margin: 0;
     }
   }
 
-  // Feedback-Optionen
+  // Kompakte Feedback-Optionen
   .feedback-options {
     .feedback-card {
       text-align: center;
+      padding: 12px 10px;
 
-      h3 {
-        font-size: 20px;
-        margin-bottom: 12px;
+      .compact-title {
+        font-size: 14px;
+        margin-bottom: 8px;
         color: #333;
-      }
-
-      p {
-        margin-bottom: 16px;
-        color: #666;
+        font-weight: 500;
       }
     }
 
-    // Neue Stile für die Kategorie-Buttons
-    .category-buttons {
+    // Kompakte Stile für die Agent-Buttons
+    .compact-agent-buttons {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 8px;
-      margin-top: 16px;
-      position: relative; // Wichtig für die Positionierung der Sprechblase
-      
-      button {
+      gap: 6px;
+
+      .compact-button {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        padding: 12px 8px;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        
-        .category-icon {
-          font-size: 24px;
-          margin-bottom: 4px;
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        height: auto;
+        min-height: 32px;
+        line-height: 1;
+        white-space: nowrap;
+        border: 1px solid #e0e0e0;
+
+        mat-icon {
+          font-size: 16px;
+          height: 16px;
+          width: 16px;
+          margin-right: 4px;
         }
-        
-        .category-keyword {
-          font-size: 12px;
+
+        span {
           font-weight: 500;
         }
-        
-        &.selected {
-          background-color: #3f51b5;
-          color: white;
-          box-shadow: 0 2px 5px rgba(63, 81, 181, 0.3);
+
+        // Farben für verschiedene Agenten
+        &.supervisor {
+          border-top: 2px solid #2196F3;
+          mat-icon {
+            color: #2196F3;
+          }
         }
-        
-        &:hover:not(.selected) {
-          background-color: rgba(63, 81, 181, 0.1);
+
+        &.concepts {
+          border-top: 2px solid #9C27B0;
+          mat-icon {
+            color: #9C27B0;
+          }
+        }
+
+        &.next-steps {
+          border-top: 2px solid #4CAF50;
+          mat-icon {
+            color: #4CAF50;
+          }
+        }
+
+        &.errors {
+          border-top: 2px solid #F44336;
+          mat-icon {
+            color: #F44336;
+          }
+        }
+
+        &.task {
+          border-top: 2px solid #FF9800;
+          mat-icon {
+            color: #FF9800;
+          }
+        }
+
+        // Gemeinsame Hover- und Fokus-Effekte
+        &:hover, &:focus {
+          background-color: #f5f5f5;
+        }
+
+        &:active {
+          transform: translateY(1px);
         }
       }
     }
-    
+
     // Stile für die Sprechblase
     .question-bubble {
       position: relative;
@@ -123,7 +141,7 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       padding: 16px;
       z-index: 10;
-      
+
       // Pfeil der Sprechblase
       .bubble-arrow {
         position: absolute;
@@ -136,7 +154,7 @@
         border-right: 10px solid transparent;
         border-bottom: 10px solid white;
       }
-      
+
       .bubble-content {
         h4 {
           font-size: 16px;
@@ -145,12 +163,12 @@
           margin-bottom: 12px;
           color: #3f51b5;
         }
-        
+
         .question-list {
           display: flex;
           flex-direction: column;
           gap: 8px;
-          
+
           .question-button {
             text-align: left;
             justify-content: flex-start;
@@ -158,7 +176,7 @@
             line-height: 1.3;
             border-radius: 8px;
             transition: background-color 0.2s ease;
-            
+
             &:hover {
               background-color: rgba(63, 81, 181, 0.1);
             }
@@ -166,7 +184,7 @@
         }
       }
     }
-    
+
     // Overlay zum Schließen der Sprechblase
     .bubble-overlay {
       position: fixed;
@@ -232,11 +250,11 @@
         padding: 4px 12px;
         border-radius: 16px;
         max-width: 60%;
-        
+
         .category-icon {
           margin-right: 8px;
         }
-        
+
         .question-text {
           font-weight: 500;
           white-space: nowrap;
@@ -320,29 +338,59 @@
 // Responsive Anpassungen
 @media (max-width: 600px) {
   .feedback-panel {
-    padding: 12px;
+    padding: 8px;
 
-    // Anpassungen für die Kategorie-Buttons auf kleinen Bildschirmen
-    .feedback-options .category-buttons {
-      button {
-        flex: 1 1 calc(33.33% - 8px); // 3 Buttons pro Zeile
-        min-width: 0;
+    .feedback-card {
+      padding: 10px 8px;
+      margin-bottom: 10px;
+    }
+
+    // Anpassungen für die kompakten Buttons
+    .feedback-options .compact-agent-buttons {
+      gap: 4px;
+
+      .compact-button {
+        padding: 4px 8px;
+        min-height: 28px;
+        font-size: 11px;
+
+        mat-icon {
+          font-size: 14px;
+          height: 14px;
+          width: 14px;
+          margin-right: 3px;
+        }
       }
     }
-    
+
     // Anpassungen für die Fragen-Liste in der Sprechblase
     .feedback-options .question-bubble .bubble-content .question-list {
-      max-height: 300px;
+      max-height: 250px;
       overflow-y: auto;
     }
 
     .feedback-result .feedback-header {
       flex-direction: column;
       align-items: flex-start;
+      padding: 10px 12px;
+
+      h3 {
+        font-size: 16px;
+      }
 
       .feedback-type-badge, .feedback-level-badge {
-        margin-top: 8px;
+        margin-top: 6px;
         max-width: 100%;
+        font-size: 12px;
+      }
+    }
+
+    .feedback-result .feedback-text {
+      padding: 12px;
+
+      pre {
+        padding: 8px;
+        margin: 12px 0;
       }
     }
   }
@@ -350,10 +398,44 @@
 
 @media (max-width: 400px) {
   .feedback-panel {
-    // Anpassungen für die Kategorie-Buttons auf sehr kleinen Bildschirmen
-    .feedback-options .category-buttons {
-      button {
-        flex: 1 1 calc(50% - 8px); // 2 Buttons pro Zeile
+    padding: 6px;
+
+    .feedback-card {
+      padding: 8px 6px;
+      border-radius: 6px;
+    }
+
+    // Kompakte Buttons noch kleiner machen
+    .feedback-options .compact-agent-buttons {
+      .compact-button {
+        padding: 3px 6px;
+        min-height: 26px;
+
+        span {
+          font-size: 10px;
+        }
+      }
+    }
+
+    .compact-title {
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    // Reduziere Textgrößen in Feedback-Anzeige
+    .feedback-result .feedback-text {
+      font-size: 13px;
+
+      h1, h2, h3 {
+        font-size: 16px;
+      }
+
+      h4, h5, h6 {
+        font-size: 14px;
+      }
+
+      code {
+        font-size: 0.85em;
       }
     }
   }

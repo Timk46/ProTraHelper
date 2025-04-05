@@ -2,31 +2,40 @@
   <!-- Einführung / Leerer Zustand -->
   <div *ngIf="!showFeedbackOptions() && !feedbackContent && !isGenerating" class="feedback-intro">
     <div class="feedback-card">
-      <p>Führe zunächst deinen Code aus, um Feedback von Tutor Kai zu erhalten.</p>
+      <p class="compact-message">Führe deinen Code aus, um Feedback zu erhalten.</p>
     </div>
   </div>
 
-  <!-- Neue Feedback-Optionen zur Auswahl -->
+  <!-- Kompakte Feedback-Optionen -->
   <div *ngIf="showFeedbackOptions()" class="feedback-options">
     <div class="feedback-card">
-      <p>Wähle die Art des Feedbacks, das du erhalten möchtest:</p>
+      <p class="compact-title">Wähle Feedback-Option:</p>
 
-      <!-- New Agent Buttons -->
-      <div class="agent-buttons">
-        <button mat-stroked-button color="primary" (click)="requestSupervisorFeedback()">
-          <mat-icon>supervisor_account</mat-icon> Supervisor Feedback
+      <!-- Compact Agent Buttons -->
+      <div class="compact-agent-buttons">
+        <button class="compact-button supervisor" mat-stroked-button (click)="requestSupervisorFeedback()" matTooltip="Die KI entscheidet die beste Option für dich">
+          <mat-icon>supervisor_account</mat-icon>
+          <span>KI wählen</span>
         </button>
-        <button mat-stroked-button color="primary" (click)="requestKcFeedback()">
-          <mat-icon>lightbulb</mat-icon> KC Feedback (Concepts)
+
+        <button class="compact-button concepts" mat-stroked-button (click)="requestKcFeedback()" matTooltip="Relevantes Hintergrundwissen erklären">
+          <mat-icon>lightbulb</mat-icon>
+          <span>Konzepte</span>
         </button>
-        <button mat-stroked-button color="primary" (click)="requestKhFeedback()">
-          <mat-icon>navigation</mat-icon> KH Feedback (How-To)
+
+        <button class="compact-button next-steps" mat-stroked-button (click)="requestKhFeedback()" matTooltip="Zeigt, wie du weitermachen kannst">
+          <mat-icon>navigation</mat-icon>
+          <span>Nächste Schritte</span>
         </button>
-        <button mat-stroked-button color="primary" (click)="requestKmFeedback()">
-          <mat-icon>bug_report</mat-icon> KM Feedback (Mistakes)
+
+        <button class="compact-button errors" mat-stroked-button (click)="requestKmFeedback()" matTooltip="Probleme in deinem Code erkennen">
+          <mat-icon>bug_report</mat-icon>
+          <span>Fehler</span>
         </button>
-        <button mat-stroked-button color="primary" (click)="requestKtcFeedback()">
-          <mat-icon>assignment</mat-icon> KTC Feedback (Task)
+
+        <button class="compact-button task" mat-stroked-button (click)="requestKtcFeedback()" matTooltip="Erklärung der Aufgabenstellung">
+          <mat-icon>assignment</mat-icon>
+          <span>Aufgabe</span>
         </button>
       </div>
     </div>
