@@ -144,20 +144,32 @@ Unit Test Results: ${JSON.stringify(input.unitTestResults) || 'None'}
     const supervisorPromptString = buildSupervisorPrompt();
     const routerFunction: RouterFunction = async (state: GraphState): Promise<Partial<GraphState>> => {
         this.logger.log('Router: Deciding next agent...');
-        const { messages, studentSolution, taskDescription, compilerOutput, unitTestResults, attemptCount, automatedTests, codeGerueste } = state;
+        const { messages } = state; // Only need messages from state now for this part
+
+        // Find the initial HumanMessage containing the context
+        const humanMessage = messages.find(msg => msg instanceof HumanMessage);
+        if (!humanMessage) {
+            this.logger.error('Router: Could not find HumanMessage in state.');
+            return { routingDecision: END }; // Cannot proceed without context
+        }
+
+        // Find the last AI message for feedback history
         const lastFeedback = messages.filter(msg => msg instanceof AIMessage).pop()?.content?.toString() || 'None';
-        let formattedPrompt = supervisorPromptString
-            .replace('{taskDescription}', taskDescription || 'Not provided')
-            .replace('{codeGerueste}', JSON.stringify(codeGerueste) || 'None')
-            .replace('{studentSolution}', studentSolution || 'Not provided')
-            .replace('{compilerOutput}', compilerOutput || 'None')
-            .replace('{automatedTests}', JSON.stringify(automatedTests) || 'None')
-            .replace('{unitTestResults}', JSON.stringify(unitTestResults) || 'None')
-            .replace('{attemptCount}', attemptCount?.toString() || 'Unknown')
-            .replace('{lastFeedback}', lastFeedback);
-        const llmMessages: BaseMessage[] = [ new SystemMessage(formattedPrompt) ];
-        this.logger.log(`Router: Sending prompt to LLM (first 200 chars): ${formattedPrompt.substring(0, 200)}...`);
+
+        // Get the base system prompt (assuming context placeholders are removed)
+        // Replace only the {lastFeedback} placeholder if it exists in the prompt
+        const systemPromptContent = supervisorPromptString.replace('{lastFeedback}', lastFeedback);
+        const systemMessage = new SystemMessage(systemPromptContent);
+
+        // Prepare messages for the LLM call
+        const llmMessages: BaseMessage[] = [ systemMessage, humanMessage ];
+
+        this.logger.log(`Router: Sending System and Human messages to LLM.`);
+        this.logger.log(`Router: System Prompt (first 200 chars): ${systemPromptContent.substring(0, 200)}...`);
+        this.logger.log(`Router: Human Message (first 200 chars): ${humanMessage.content.toString().substring(0, 200)}...`);
+
         try {
+            // Invoke the model with both System and Human messages
             const response = await this.model.invoke(llmMessages);
             let decision = response.content.toString().trim();
             if (decision.startsWith('"') && decision.endsWith('"')) {
