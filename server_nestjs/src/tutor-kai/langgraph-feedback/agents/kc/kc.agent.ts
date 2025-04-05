@@ -1,5 +1,6 @@
-// Only import createFeedbackAgent if needed elsewhere, otherwise remove
-// import { createFeedbackAgent } from '../agent.common';
+import { ChatOpenAI } from '@langchain/openai';
+import { DynamicStructuredTool } from '@langchain/core/tools';
+import { createFeedbackAgent } from '../agent.common'; // Import the updated helper
 
 /**
  * KC: Knowledge of Concept Agent System Prompt
@@ -11,5 +12,10 @@ Based on the student's code, the task, and the errors provided in the message hi
 Explain the identified concept clearly and concisely in the context of the task, incorporating information retrieved from the tool if used.
 Do not provide code solutions. Focus on the conceptual explanation. Once your get explanations from the 'search_domain_knowledge' tool, use the Snippets and always cite the source of the information (e.g. Source:Java_UML_Interfaces bei 00:14:12,000).`;
 
+// New creation function
+export function createKcAgent(llm: ChatOpenAI, tools: DynamicStructuredTool[]) { // Accept llm and tools
+    // Use the common helper function to create the agent
+    return createFeedbackAgent('KC', kcSystemPrompt, llm, tools);
+}
+
 // Agent instantiation is now handled in LanggraphFeedbackService where tools can be injected.
-// Remove the previous agent creation logic from this file.

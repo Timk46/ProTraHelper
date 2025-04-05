@@ -1,3 +1,4 @@
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/FeedbackContext.dto';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ChatOpenAI } from '@langchain/openai';
@@ -5,16 +6,17 @@ import { BaseMessage, HumanMessage, AIMessage, SystemMessage } from '@langchain/
 import { Runnable, RunnableLambda, RunnableConfig } from '@langchain/core/runnables';
 import { StateGraph, END, StateGraphArgs, Annotation } from '@langchain/langgraph'; // Import Annotation
 
-// Import agents and tools
-import { knowledgeAboutMistakesAgent } from './agents/km/km.agent';
-import { knowledgeOnHowToProceedAgent } from './agents/kh/kh.agent';
-import { kcSystemPrompt } from './agents/kc/kc.agent'; // Import only the prompt
-import { knowledgeAboutTaskConstraintsAgent } from './agents/ktc/ktc.agent';
+// Import agent creation functions and tools
+import { createKmAgent } from './agents/km/km.agent'; // Import creation function
+import { createKhAgent } from './agents/kh/kh.agent'; // Import creation function
+import { createKcAgent } from './agents/kc/kc.agent'; // Import creation function
+import { createKtcAgent } from './agents/ktc/ktc.agent'; // Import creation function
 import { DomainKnowledgeService } from './tools/domain-knowledge/domain-knowledge.service';
 import { createDomainKnowledgeTool } from './tools/domain-knowledge/domain-knowledge.tool';
 import { DynamicTool, DynamicStructuredTool } from '@langchain/core/tools'; // Import DynamicStructuredTool
-import { createFeedbackAgent } from './agents/agent.common';
+// Remove createFeedbackAgent import from common, it's used within agent files now
 import { buildSupervisorPrompt } from './supervisor/supervisor.prompt';
+// Duplicate import removed below
 
 // --- New State Definition using Annotation ---
 const AnnotatedState = Annotation.Root({
@@ -47,10 +49,9 @@ type GraphNodeNames = "router" | AgentNodeNames;
 @Injectable()
 export class LanggraphFeedbackService implements OnModuleInit {
   private readonly logger = new Logger(LanggraphFeedbackService.name);
-  // Use the new GraphState type
-  private feedbackGraph: Runnable<GraphState, GraphState>;
-  // Service will be injected
-  private domainKnowledgeTool: DynamicStructuredTool; // Update type
+  private model: ChatOpenAI; // Make model a class property
+  private feedbackGraph: Runnable<GraphState, GraphState>; // Graph runnable
+  private domainKnowledgeTool: DynamicStructuredTool; // Tool instance
 
   constructor(
     private configService: ConfigService,
@@ -79,11 +80,13 @@ export class LanggraphFeedbackService implements OnModuleInit {
     this.logger.log('Domain Knowledge Tool instantiated.');
     // --- End Tool Instantiation ---
 
-    const model = new ChatOpenAI({
+    // Instantiate the model ONCE here and assign to class property
+    this.model = new ChatOpenAI({
       modelName: 'gpt-4o',
       apiKey: openAIApiKey,
-      temperature: 0.2,
+      temperature: 0.2, // Keep temperature consistent or adjust as needed
     });
+    this.logger.log('ChatOpenAI model instantiated.');
 
     // Get the supervisor prompt string
     const supervisorPromptString = buildSupervisorPrompt();
@@ -111,17 +114,20 @@ export class LanggraphFeedbackService implements OnModuleInit {
         return new RunnableLambda({ func: nodeFunc });
     };
 
-    // Wrap the agents
-    // --- Create KC Agent Runnable with Tool ---
-    const knowledgeAboutConceptsAgentRunnable = createFeedbackAgent(
-      'KC',
-      kcSystemPrompt, // Use the imported prompt
-      [this.domainKnowledgeTool], // Pass the instantiated tool
-    );
-    const kcNode = wrapAgentNode(knowledgeAboutConceptsAgentRunnable); // Use the local runnable
-    const khNode = wrapAgentNode(knowledgeOnHowToProceedAgent);
-    const kmNode = wrapAgentNode(knowledgeAboutMistakesAgent);
-    const ktcNode = wrapAgentNode(knowledgeAboutTaskConstraintsAgent);
+    // --- Create Agent Runnables using new functions ---
+    // Pass the single model instance (this.model) and tools where needed
+    const knowledgeAboutConceptsAgentRunnable = createKcAgent(this.model, [this.domainKnowledgeTool]);
+    const knowledgeOnHowToProceedAgentRunnable = createKhAgent(this.model);
+    const knowledgeAboutMistakesAgentRunnable = createKmAgent(this.model);
+    const knowledgeAboutTaskConstraintsAgentRunnable = createKtcAgent(this.model);
+    this.logger.log('Agent runnables created using dedicated functions.');
+
+    // --- Wrap Agent Nodes ---
+    // Use the runnables created above
+    const kcNode = wrapAgentNode(knowledgeAboutConceptsAgentRunnable);
+    const khNode = wrapAgentNode(knowledgeOnHowToProceedAgentRunnable);
+    const kmNode = wrapAgentNode(knowledgeAboutMistakesAgentRunnable);
+    const ktcNode = wrapAgentNode(knowledgeAboutTaskConstraintsAgentRunnable);
     // --- End Agent Node Wrappers ---
 
     // Define the Router Logic function - now updates state.routingDecision
@@ -142,7 +148,8 @@ export class LanggraphFeedbackService implements OnModuleInit {
         this.logger.log(`Router: Sending prompt to LLM (first 200 chars): ${formattedPrompt.substring(0, 200)}...`);
 
         try {
-            const response = await model.invoke(llmMessages);
+            // Use the class model instance
+            const response = await this.model.invoke(llmMessages);
             let decision = response.content.toString().trim();
             if (decision.startsWith('"') && decision.endsWith('"')) {
                 decision = decision.substring(1, decision.length - 1);
@@ -328,4 +335,64 @@ export class LanggraphFeedbackService implements OnModuleInit {
       throw new Error(`Failed to generate feedback: ${error.message}`);
     }
   }
+
+  // --- New Method for Direct KC Agent Invocation ---
+  async getKcFeedbackDirectly(
+    contextInput: FeedbackContextDto,
+  ): Promise<BaseMessage[] | null> {
+    this.logger.log(`Getting direct KC feedback for attempt ${contextInput.attemptCount}`);
+
+    if (!this.model || !this.domainKnowledgeTool) {
+      this.logger.error('KC agent dependencies (model or tool) not initialized.');
+      throw new Error('Feedback service not ready for direct KC call.');
+    }
+
+    // Format the context into the initial message (reuse logic from getFeedback)
+    const contextMessageContent = `
+      Analyze my solution for the following task. This is attempt number ${contextInput.attemptCount}.
+      Task Description: ${contextInput.taskDescription}
+      Provided Code Skeleton(s): ${JSON.stringify(contextInput.codeGerueste) || 'None'}
+      My Solution:
+      \`\`\`
+      ${contextInput.studentSolution}
+      \`\`\`
+      Compiler Output: ${contextInput.compilerOutput || 'None'}
+      Automated Tests Definition: ${JSON.stringify(contextInput.automatedTests) || 'None'}
+      Unit Test Results: ${JSON.stringify(contextInput.unitTestResults) || 'None'}
+    `;
+    const initialMessages: BaseMessage[] = [new HumanMessage(contextMessageContent)];
+
+    try {
+      // Create the KC agent runnable instance
+      const kcAgentRunnable = createKcAgent(this.model, [this.domainKnowledgeTool]);
+
+      // Invoke the agent directly
+      const config: RunnableConfig = { recursionLimit: 10 }; // Lower recursion limit for direct call?
+      const result = await kcAgentRunnable.invoke({ messages: initialMessages }, config);
+
+      this.logger.log('Direct KC agent execution completed.');
+
+      // Extract the AI message(s) from the result
+      if (result && Array.isArray(result.messages)) {
+        const aiMessages = result.messages.filter(msg => msg instanceof AIMessage);
+        if (aiMessages.length > 0) {
+            // Return all AI messages generated by the agent
+            this.logger.log(`Direct KC feedback generated: ${aiMessages.map(m => m.content.toString().substring(0,50)).join('... ')}...`);
+            return aiMessages;
+        } else {
+            this.logger.warn('No AI message found in direct KC agent result.');
+            return null;
+        }
+      } else {
+        this.logger.warn('No messages found in direct KC agent result.');
+        return null;
+      }
+
+    } catch (error) {
+      this.logger.error('Error during direct KC agent invocation:', error);
+      this.logger.error('Input context at time of error:', JSON.stringify(contextInput, null, 2));
+      throw new Error(`Failed to generate direct KC feedback: ${error.message}`);
+    }
+  }
+  // --- End New Method ---
 }

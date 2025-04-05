@@ -1,9 +1,11 @@
-import { Controller, Post, Body, UseGuards, Req, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, InternalServerErrorException, NotFoundException, ValidationPipe } from '@nestjs/common'; // Added ValidationPipe
 import { JwtAuthGuard } from 'src/auth/common/guards/jwt-auth.guard';
 import { LanggraphFeedbackService } from './langgraph-feedback.service';
-import { LanggraphDataFetcherService, FeedbackData } from './langgraph-data-fetcher.service';
+import { LanggraphDataFetcherService} from './langgraph-data-fetcher.service';
 import { CodeSubmissionResultDto } from '@DTOs/tutorKaiDtos/submission.dto'; // Adjust path if necessary
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/FeedbackContext.dto';
 import { Request } from 'express'; // Import Request type
+import { BaseMessage } from '@langchain/core/messages'; // Import BaseMessage for return type
 
 // Define the DTO for the request body inline or import if defined elsewhere
 interface EvaluateLanggraphDto {
@@ -35,7 +37,7 @@ export class LanggraphFeedbackController {
 
     try {
       // 1. Fetch necessary data using the data fetcher service
-      const feedbackData: FeedbackData = await this.langgraphDataFetcherService.fetchFeedbackData(
+      const FeedbackContextDto: FeedbackContextDto = await this.langgraphDataFetcherService.fetchFeedbackContextDto(
         encryptedCodeSubissionId,
         questionId,
         CodeSubmissionResult,
@@ -43,14 +45,14 @@ export class LanggraphFeedbackController {
 
       // 2. Call the Langgraph feedback service with the fetched data
       const feedback = await this.langgraphFeedbackService.getFeedback(
-        feedbackData.studentSolution,
-        feedbackData.taskDescription,
-        feedbackData.compilerOutput,
-        feedbackData.unitTestResults,
-        //feedbackData.attemptCount,
+        FeedbackContextDto.studentSolution,
+        FeedbackContextDto.taskDescription,
+        FeedbackContextDto.compilerOutput,
+        FeedbackContextDto.unitTestResults,
+        //FeedbackContextDto.attemptCount,
         2,
-        feedbackData.automatedTests, // Pass automated tests
-        feedbackData.codeGerueste, // Pass code skeletons
+        FeedbackContextDto.automatedTests, // Pass automated tests
+        FeedbackContextDto.codeGerueste, // Pass code skeletons
       );
 
       // 3. Return the feedback
@@ -68,4 +70,21 @@ export class LanggraphFeedbackController {
         throw new InternalServerErrorException('Failed to generate feedback.');
     }
   }
+
+  // --- New Endpoint for Direct KC Feedback ---
+  @Post('kc-direct')
+  async getKcDirectFeedback(
+    @Body(ValidationPipe) kcInput: FeedbackContextDto, // Use the DTO and ValidationPipe
+    // @Req() req: Request, // Keep Req if user context might be needed later
+  ): Promise<{ feedbackMessages: BaseMessage[] | null }> {
+    try {
+      const feedbackMessages = await this.langgraphFeedbackService.getKcFeedbackDirectly(kcInput);
+      return { feedbackMessages };
+    } catch (error) {
+      console.error(`Error during direct KC feedback generation:`, error);
+      // Consider more specific error handling if needed
+      throw new InternalServerErrorException('Failed to generate direct KC feedback.');
+    }
+  }
+  // --- End New Endpoint ---
 }

@@ -2,19 +2,8 @@ import { Injectable, NotFoundException, InternalServerErrorException } from '@ne
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from '../crypto/crypto.service'; // Adjust path if necessary
 import { CodeSubmissionResult } from '@DTOs/tutorKaiDtos/submission.dto'; // Adjust path if necessary
+import { FeedbackContextDto } from '@Interfaces/tutorKaiDtos/FeedbackContext.dto';
 
-// Import Prisma types if needed for better type safety, e.g.:
-// import { AutomatedTest, CodeGeruest } from '@prisma/client';
-
-export interface FeedbackData {
-  studentSolution: string;
-  taskDescription: string;
-  compilerOutput: string | null;
-  unitTestResults: any | null; // Consider using a more specific type if available
-  attemptCount: number;
-  automatedTests: any[]; // Use specific Prisma type like AutomatedTest[] if possible
-  codeGerueste: any[]; // Use specific Prisma type like CodeGeruest[] if possible
-}
 
 @Injectable()
 export class LanggraphDataFetcherService {
@@ -23,11 +12,11 @@ export class LanggraphDataFetcherService {
     private cryptoService: CryptoService,
   ) {}
 
-  async fetchFeedbackData(
+  async fetchFeedbackContextDto(
     encryptedSubmissionId: string,
     questionId: number,
     codeSubmissionResult: CodeSubmissionResult,
-  ): Promise<FeedbackData> {
+  ): Promise<FeedbackContextDto> {
     let submissionId: number;
     try {
       submissionId = Number(this.cryptoService.decrypt(encryptedSubmissionId));

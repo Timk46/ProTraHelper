@@ -1,39 +1,31 @@
-import { ChatOpenAI } from '@langchain/openai';
-import { ConfigService } from '@nestjs/config';
+import { ChatOpenAI } from '@langchain/openai'; // Keep import for type
+// Remove ConfigService import if no longer needed here
+// import { ConfigService } from '@nestjs/config';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
+import { DynamicStructuredTool } from '@langchain/core/tools'; // Use DynamicStructuredTool
 
 // --- Configuration ---
-// TODO: Inject ConfigService properly in a NestJS context instead of direct instantiation
-// This setup assumes OPENAI_API_KEY is available in the environment where the service runs.
-// For a more robust NestJS integration, model and config should be managed via providers.
-const configService = new ConfigService();
-export const model = new ChatOpenAI({
-  modelName: 'gpt-4o', // Or configure via environment variable
-  apiKey: configService.get<string>('OPENAI_API_KEY'),
-  temperature: 0.7, // Adjust as needed for feedback generation
-});
+// Model instantiation is moved to the service where it can be properly managed/injected.
 
 // --- Agent Creation Helper ---
 /**
  * Creates a feedback agent using createReactAgent.
- * @param name The name of the agent (e.g., 'KR', 'KP').
+ * @param name The name of the agent (e.g., 'KC', 'KH').
  * @param systemPrompt The system prompt defining the agent's role and task.
+ * @param llm The ChatOpenAI model instance.
  * @param tools An optional array of LangChain tools the agent can use.
- * @returns A compiled LangGraph agent.
+ * @returns A compiled LangGraph agent runnable.
  */
 export function createFeedbackAgent(
   name: string,
   systemPrompt: string,
-  tools: any[] = [], // Add optional tools parameter
+  llm: ChatOpenAI, // Add llm parameter
+  tools: DynamicStructuredTool[] = [], // Use DynamicStructuredTool type
 ) {
-  // Ensure the model is initialized before creating agents
-  if (!model.apiKey) {
-    console.warn(`API key for agent ${name} is missing. Agent might not function.`);
-    // Optionally throw an error or handle differently
-  }
+  // Remove the API key check here, as the llm instance is passed in and assumed valid
   return createReactAgent({
-    llm: model,
-    tools: tools, // Pass provided tools
+    llm: llm, // Use the passed llm
+    tools: tools,
     name: name,
     prompt: systemPrompt,
   });
