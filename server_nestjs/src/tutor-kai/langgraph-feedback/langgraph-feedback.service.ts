@@ -70,24 +70,15 @@ export class LanggraphFeedbackService {
     try {
       const agentRunnable = this.kcAgentProvider.getAgentRunnable(); // Updated method call
 
-      // Manually format the input like the supervisor's format_input node
-      const input = contextInput; // Alias for clarity
-      const contextMessageContent = `
-Analyze my solution for the following task. This is attempt number ${input.attemptCount}.
-Task Description: ${input.taskDescription}
-Provided Code Skeleton(s): ${JSON.stringify(input.codeGerueste) || 'None'}
-My Solution:
-\`\`\`
-${input.studentSolution}
-\`\`\`
-Compiler Output: ${input.compilerOutput || 'None'}
-Automated Tests Definition: ${JSON.stringify(input.automatedTests) || 'None'}
-Unit Test Results: ${JSON.stringify(input.unitTestResults) || 'None'}
-`;
-      const initialMessages: BaseMessage[] = [new HumanMessage(contextMessageContent)];
-      const formattedInput = { messages: initialMessages };
+      // Input formatting is removed as the agent now accepts the DTO directly.
+      // Prepare the input object expected by the refactored KC agent runnable.
+      // We pass an empty message array as the initial history.
+      const agentInput = {
+        messages: [], // Start with empty message history for direct call
+        context: contextInput // Pass the DTO directly
+      };
 
-      const result = await agentRunnable.invoke(formattedInput); // Pass formatted input
+      const result = await agentRunnable.invoke(agentInput); // Pass direct DTO and empty messages
       // Assuming the result structure contains 'messages'
       const aiMessages = result?.messages?.filter(msg => msg instanceof AIMessage) ?? null;
       this.logger.log(`Direct KC feedback generated: ${aiMessages ? aiMessages.length + ' messages' : 'None'}`);

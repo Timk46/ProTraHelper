@@ -32,63 +32,7 @@ interface KcGraphState {
   feedbackLevel?: string; // Store the determined feedback level
 }
 
-// Helper function to extract context (adapt as needed based on actual input structure)
-// NOTE: This function makes many assumptions about the HumanMessage content
-// and the FeedbackContextDto structure. It needs careful validation.
-function parseInitialContext(messages: BaseMessage[]): { context: FeedbackContextDto | null} {
-    const humanMessage = messages.find((msg) => msg instanceof HumanMessage);
-    if (!humanMessage || typeof humanMessage.content !== 'string') {
-        console.error("KC Agent: Could not find valid HumanMessage in input.");
-        return { context: null };
-    }
-
-    try {
-        const content = humanMessage.content;
-        // Attempt to parse context details from the message content
-        const taskMatch = content.match(/Task Description: (.*?)\n/);
-        const codeMatch = content.match(/My Solution:\n\`\`\`\n([\s\S]*?)\n\`\`\`/);
-        const compilerMatch = content.match(/Compiler Output: (.*?)\n/);
-        const testsMatch = content.match(/Automated Tests Definition: (.*?)\n/);
-        const resultsMatch = content.match(/Unit Test Results: (.*?)\n/);
-        const attemptMatch = content.match(/This is attempt number (\d+)\./);
-        const skeletonMatch = content.match(/Provided Code Skeleton\(s\): (.*?)\n/);
-
-        // Reconstruct a partial DTO based on parsed info.
-        // This might be incomplete or inaccurate depending on the actual DTO.
-        const context: Partial<FeedbackContextDto> = { // Use Partial<> as we might not have all fields
-            taskDescription: taskMatch ? taskMatch[1].trim() : '',
-            studentSolution: codeMatch ? codeMatch[1].trim() : '',
-            compilerOutput: compilerMatch ? compilerMatch[1].trim() : 'None',
-            // Safely parse JSON, default to undefined/null on error
-            automatedTests: testsMatch ? tryParseJson(testsMatch[1], undefined) : undefined,
-            unitTestResults: resultsMatch ? tryParseJson(resultsMatch[1], null) : null,
-            attemptCount: attemptMatch ? parseInt(attemptMatch[1], 10) : 1,
-            codeGerueste: skeletonMatch ? tryParseJson(skeletonMatch[1], undefined) : undefined,
-            // Note: feedbackLevel is handled separately in the graph state, not part of the DTO context here.
-            // Fields from the original context that might be needed by prompts but aren't in the DTO:
-            // questionId: 0, // Example
-            // flavor: '', // Example
-            // userId: 0, // Example
-        };
-
-        // We return the partial context and the level separately
-        return { context: context as FeedbackContextDto }; // Cast back, acknowledging potential incompleteness
-    } catch (e) {
-        console.error("KC Agent: Failed to parse context from HumanMessage:", e);
-        return { context: null };
-    }
-}
-
-// Helper to safely parse JSON
-function tryParseJson(jsonString: string | null | undefined, defaultValue: any): any {
-    if (!jsonString) return defaultValue;
-    try {
-        return JSON.parse(jsonString);
-    } catch (e) {
-        console.warn("Failed to parse JSON:", jsonString, e);
-        return defaultValue;
-    }
-}
+// parseInitialContext and tryParseJson removed as context is now passed directly.
 
 
 /**
@@ -99,7 +43,7 @@ const identifyConceptsAndRequestTool = async (
   config?: RunnableConfig,
 ): Promise<Partial<KcGraphState>> => {
   console.log('--- KC Node: identifyConceptsAndRequestTool ---');
-  const { context } = parseInitialContext(state.messages); // Context here is potentially partial
+  const context = state.inputContext; // Use context directly from state
   if (!context) {
     return { messages: [...state.messages, new AIMessage("Error: Could not parse input context.")] };
   }
@@ -161,33 +105,53 @@ const processToolResults = async (
     let toolOutput: TranscriptChunk[] = [];
     try {
         let parsedContent: any;
-        // ToolMessage content might be stringified JSON or the direct object/array
+        // ToolMessage content might be stringified JSON, the direct object/array, or a plain string
         if (typeof lastMessage.content === 'string') {
-            parsedContent = JSON.parse(lastMessage.content);
+            try {
+                // Attempt to parse if it's a string
+                parsedContent = JSON.parse(lastMessage.content);
+            } catch (parseError) {
+                // If JSON parsing fails, it's likely a plain string response from the tool
+                console.warn("ToolMessage content is a string but not valid JSON. Treating as empty result.", parseError);
+                console.warn("ToolMessage string content was:", lastMessage.content);
+                // Set parsedContent to an empty array to skip processing below
+                parsedContent = [];
+            }
         } else {
-            parsedContent = lastMessage.content; // Assume it's already the object/array
+            // Assume it's already the object/array if not a string
+            parsedContent = lastMessage.content;
         }
 
-        // Validate that the parsed content is an array
+        // Validate that the parsed content is an array (could be empty array now if parsing failed)
         if (!Array.isArray(parsedContent)) {
-             throw new Error(`Parsed tool output is not an array. Type: ${typeof parsedContent}`);
+             // This case should be less likely now, but keep validation
+             console.error(`Processed tool output is not an array. Type: ${typeof parsedContent}. Content:`, parsedContent);
+             // Provide empty defaults if not an array
+             return { lectureSnippets: "[]", sourceMap: {} };
         }
 
-        // Further validation: Check if elements look like TranscriptChunk
+        // Further validation: Check if elements look like TranscriptChunk (only if array is not empty)
         if (parsedContent.length > 0) {
             const firstElement = parsedContent[0];
+            // Add null/undefined checks for safety
             if (typeof firstElement !== 'object' || firstElement === null ||
                 typeof firstElement.TranscriptChunkContent !== 'string' ||
                 typeof firstElement.metadata !== 'object' || firstElement.metadata === null ||
                 typeof firstElement.metadata.markdownLink !== 'string') {
-                 throw new Error("Parsed array elements do not match TranscriptChunk structure.");
+                 console.error("Parsed array elements do not match TranscriptChunk structure:", firstElement);
+                 // Treat as empty if structure is wrong
+                 return { lectureSnippets: "[]", sourceMap: {} };
             }
+             // If validation passes, cast and assign
+             toolOutput = parsedContent as TranscriptChunk[];
+        } else {
+            // If parsedContent is an empty array (e.g., due to parse error), toolOutput remains empty
+            toolOutput = [];
         }
-        // If validation passes, cast and assign
-        toolOutput = parsedContent as TranscriptChunk[];
 
     } catch (e) {
-        console.error("Error processing ToolMessage content:", e);
+        // Catch any unexpected errors during processing/validation
+        console.error("Unexpected error processing ToolMessage content:", e);
         console.error("ToolMessage content was:", lastMessage.content);
         // Handle error - provide empty defaults
         return { lectureSnippets: "[]", sourceMap: {} };
@@ -384,24 +348,26 @@ export function buildKcCoreAgent(llm: ChatOpenAI, tools: DynamicStructuredTool[]
 
     // Create the wrapper RunnableLambda to match supervisor expectations
     const agentRunnable = new RunnableLambda({
-        func: async (input: { messages: BaseMessage[] }, config?: RunnableConfig) => {
+        // Input now includes the context DTO directly
+        func: async (input: { messages: BaseMessage[], context: FeedbackContextDto }, config?: RunnableConfig) => {
             console.log("--- KC Agent Runnable Wrapper: Invoked ---");
-            if (!input || !Array.isArray(input.messages) || input.messages.length === 0) {
-                console.error("KC Agent Wrapper: Invalid or empty input messages:", input);
+            // Validate both messages and context in the input
+            if (!input || !input.context || !Array.isArray(input.messages)) { // Check context existence
+                console.error("KC Agent Wrapper: Invalid input format (missing messages or context):", input);
                 return { messages: [new AIMessage("Error: Invalid input format for KC agent.")] };
             }
 
-            // Attempt to parse context and feedback level from the initial message
-            const { context } = parseInitialContext(input.messages);
+            // Context is now passed directly in the input object
+            const context = input.context;
+            // Basic check if context object exists (already done in initial check, but good practice)
             if (!context) {
-                 console.error("KC Agent Wrapper: Failed to parse context from input messages.");
-                 // Return error message if context parsing fails
-                 return { messages: [new AIMessage("Error: Failed to parse context in KC agent wrapper.")] };
+                console.error("KC Agent Wrapper: Input context is missing.");
+                return { messages: [new AIMessage("Error: Input context missing for KC agent.")] };
             }
 
             const initialState: KcGraphState = {
                 messages: input.messages, // Start with the input message history
-                inputContext: context, // Store the parsed (potentially partial) context
+                inputContext: context, // Store the context passed in the input
                 // Initialize other state fields to default/empty
                 toolCalls: [],
                 lectureSnippets: "[]",

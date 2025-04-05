@@ -91,6 +91,6 @@ Example: Attempt count is 5. Student repeatedly makes the same logical error rel
 \`\`\`
 
 **Decision (Follow the Two-Step Process: Reasoning within tags, final output after tags):**
-IMPORTANT: ALWAYS USE KC FEEDBACK IF THE STUDENT ASKS FOR IT EXPLICITLY!
+IMPORTANT: ALWAYS USE THE FEEDBACK TYPE REQUESTED BY THE STUDEN (they can include it as comment in their solution)!!!
 `;
 }

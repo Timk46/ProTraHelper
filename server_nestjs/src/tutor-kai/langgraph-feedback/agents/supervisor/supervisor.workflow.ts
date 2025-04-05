@@ -111,22 +111,31 @@ Unit Test Results: ${JSON.stringify(input.unitTestResults) || 'None'}
         };
     };
 
-    // --- Agent Node Wrappers (Copied - Uses Core Agents) ---
-    const wrapAgentNode = (agentRunnable: Runnable<any, any>): RunnableLambda<GraphState, Partial<GraphState>> => {
+    // --- Generic Agent Node Wrapper (for ALL agents) ---
+    // Passes both messages and context. Agents not needing context should ignore it.
+    const wrapGenericAgentNode = (agentRunnable: Runnable<any, any>, agentName: string): RunnableLambda<GraphState, Partial<GraphState>> => {
         const nodeFunc: NodeFunction = async (state: GraphState): Promise<Partial<GraphState>> => {
-            const agentInput = { messages: state.messages }; // Input for core agent
+             if (!state.inputContext) { // Add safety check for context
+                 this.logger.error(`Error invoking ${agentName} node: inputContext is missing in state.`);
+                 return { messages: [new AIMessage(`Error processing feedback in ${agentName}: Missing input context.`)] };
+             }
+            // Prepare input including context for all agents
+            const agentInput = {
+                messages: state.messages,
+                context: state.inputContext // Pass context to all - currently only used by KC agent?
+            };
             try {
-                // Invoke the core agent runnable
                 const agentOutput = await agentRunnable.invoke(agentInput);
-                // Agent output should primarily update messages
                 return { messages: agentOutput?.messages ?? [] };
             } catch (error) {
-                this.logger.error(`Error invoking agent node: ${error}`);
-                return { messages: [new AIMessage(`Error processing feedback: ${error.message}`)] };
+                this.logger.error(`Error invoking ${agentName} node: ${error}`);
+                return { messages: [new AIMessage(`Error processing feedback in ${agentName}: ${error.message}`)] };
             }
         };
         return new RunnableLambda({ func: nodeFunc });
     };
+
+    // Specific KC Agent Node Wrapper removed - using generic wrapper now.
 
     // --- Create Core Agent Runnables (Using Builders) ---
     const knowledgeAboutConceptsAgentRunnable = buildKcCoreAgent(this.model, [this.domainKnowledgeTool]);
@@ -135,10 +144,11 @@ Unit Test Results: ${JSON.stringify(input.unitTestResults) || 'None'}
     const knowledgeAboutTaskConstraintsAgentRunnable = buildKtcCoreAgent(this.model);
 
     // --- Wrap Agent Nodes (Using Core Runnables) ---
-    const kcNode = wrapAgentNode(knowledgeAboutConceptsAgentRunnable);
-    const khNode = wrapAgentNode(knowledgeOnHowToProceedAgentRunnable);
-    const kmNode = wrapAgentNode(knowledgeAboutMistakesAgentRunnable);
-    const ktcNode = wrapAgentNode(knowledgeAboutTaskConstraintsAgentRunnable);
+    // Use the generic wrapper for ALL agents
+    const kcNode = wrapGenericAgentNode(knowledgeAboutConceptsAgentRunnable, 'KC');
+    const khNode = wrapGenericAgentNode(knowledgeOnHowToProceedAgentRunnable, 'KH');
+    const kmNode = wrapGenericAgentNode(knowledgeAboutMistakesAgentRunnable, 'KM');
+    const ktcNode = wrapGenericAgentNode(knowledgeAboutTaskConstraintsAgentRunnable, 'KTC');
 
     // --- Router Logic (Copied) ---
     const supervisorPromptString = buildSupervisorPrompt();
@@ -165,8 +175,8 @@ Unit Test Results: ${JSON.stringify(input.unitTestResults) || 'None'}
         const llmMessages: BaseMessage[] = [ systemMessage, humanMessage ];
 
         this.logger.log(`Router: Sending System and Human messages to LLM.`);
-        this.logger.log(`Router: System Prompt (first 200 chars): ${systemPromptContent.substring(0, 200)}...`);
-        this.logger.log(`Router: Human Message (first 200 chars): ${humanMessage.content.toString().substring(0, 200)}...`);
+        //this.logger.log(`Router: System Prompt (first 200 chars): ${systemPromptContent.substring(0, 200)}...`);
+        //this.logger.log(`Router: Human Message (first 200 chars): ${humanMessage.content.toString().substring(0, 200)}...`);
 
         try {
             // Invoke the model with both System and Human messages
