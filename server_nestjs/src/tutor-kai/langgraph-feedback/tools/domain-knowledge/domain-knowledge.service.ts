@@ -73,7 +73,7 @@ export class DomainKnowledgeService implements OnModuleInit {
    */
   async searchLectureContent(
     query: string,
-    k = 3,
+    k = 10,
   ): Promise<TranscriptChunk[]> {
     if (!this.vectorStore) {
       this.logger.error('Vector store is not initialized.');

@@ -5,6 +5,7 @@ import { LanggraphFeedbackController } from './langgraph-feedback.controller';
 import { LanggraphFeedbackService } from './langgraph-feedback.service';
 import { LanggraphDataFetcherService } from './langgraph-data-fetcher.service';
 import { ConfigModule } from '@nestjs/config'; // LanggraphFeedbackService needs ConfigService
+import { DomainKnowledgeService } from './tools/domain-knowledge/domain-knowledge.service'; // Import the service
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ConfigModule } from '@nestjs/config'; // LanggraphFeedbackService needs
     LanggraphFeedbackService,
     LanggraphDataFetcherService,
     CryptoService, // Provide CryptoService directly here
+    DomainKnowledgeService, // Add DomainKnowledgeService as a provider
   ],
   exports: [
     LanggraphDataFetcherService, // Export if needed by other modules

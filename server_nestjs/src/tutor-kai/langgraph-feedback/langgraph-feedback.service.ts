@@ -8,11 +8,11 @@ import { StateGraph, END, StateGraphArgs, Annotation } from '@langchain/langgrap
 // Import agents and tools
 import { knowledgeAboutMistakesAgent } from './agents/km/km.agent';
 import { knowledgeOnHowToProceedAgent } from './agents/kh/kh.agent';
-import { knowledgeAboutConceptsAgent } from './agents/kc/kc.agent';
+import { kcSystemPrompt } from './agents/kc/kc.agent'; // Import only the prompt
 import { knowledgeAboutTaskConstraintsAgent } from './agents/ktc/ktc.agent';
 import { DomainKnowledgeService } from './tools/domain-knowledge/domain-knowledge.service';
 import { createDomainKnowledgeTool } from './tools/domain-knowledge/domain-knowledge.tool';
-import { DynamicTool } from '@langchain/core/tools';
+import { DynamicTool, DynamicStructuredTool } from '@langchain/core/tools'; // Import DynamicStructuredTool
 import { createFeedbackAgent } from './agents/agent.common';
 import { buildSupervisorPrompt } from './supervisor/supervisor.prompt';
 
@@ -49,10 +49,13 @@ export class LanggraphFeedbackService implements OnModuleInit {
   private readonly logger = new Logger(LanggraphFeedbackService.name);
   // Use the new GraphState type
   private feedbackGraph: Runnable<GraphState, GraphState>;
-  private domainKnowledgeService: DomainKnowledgeService;
-  private domainKnowledgeTool: DynamicTool;
+  // Service will be injected
+  private domainKnowledgeTool: DynamicStructuredTool; // Update type
 
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    private domainKnowledgeService: DomainKnowledgeService, // Inject the service
+  ) {}
 
   async onModuleInit() {
     this.logger.log('Initializing Langgraph Feedback Service...');
@@ -71,6 +74,10 @@ export class LanggraphFeedbackService implements OnModuleInit {
       throw new Error('OPENAI_API_KEY is not configured.');
     }
 
+    // --- Instantiate Domain Knowledge Tool ---
+    this.domainKnowledgeTool = createDomainKnowledgeTool(this.domainKnowledgeService);
+    this.logger.log('Domain Knowledge Tool instantiated.');
+    // --- End Tool Instantiation ---
 
     const model = new ChatOpenAI({
       modelName: 'gpt-4o',
@@ -105,7 +112,13 @@ export class LanggraphFeedbackService implements OnModuleInit {
     };
 
     // Wrap the agents
-    const kcNode = wrapAgentNode(knowledgeAboutConceptsAgent);
+    // --- Create KC Agent Runnable with Tool ---
+    const knowledgeAboutConceptsAgentRunnable = createFeedbackAgent(
+      'KC',
+      kcSystemPrompt, // Use the imported prompt
+      [this.domainKnowledgeTool], // Pass the instantiated tool
+    );
+    const kcNode = wrapAgentNode(knowledgeAboutConceptsAgentRunnable); // Use the local runnable
     const khNode = wrapAgentNode(knowledgeOnHowToProceedAgent);
     const kmNode = wrapAgentNode(knowledgeAboutMistakesAgent);
     const ktcNode = wrapAgentNode(knowledgeAboutTaskConstraintsAgent);
