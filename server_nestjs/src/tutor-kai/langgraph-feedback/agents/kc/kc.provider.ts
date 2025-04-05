@@ -4,7 +4,7 @@ import { RunnableSequence } from '@langchain/core/runnables';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { DomainKnowledgeService } from '../../tools/domain-knowledge/domain-knowledge.service';
 import { createDomainKnowledgeTool } from '../../tools/domain-knowledge/domain-knowledge.tool';
-import { CHAT_OPENAI_MODEL } from '../../langgraph-feedback.module'; // Import provider token
+import { CHAT_OPENAI_MODEL } from '../../langgraph.constants'; // Import token from constants file
 import { buildKcAgentChain } from './kc.agent'; // Import the chain builder
 
 @Injectable()

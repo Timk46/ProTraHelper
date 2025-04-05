@@ -6,7 +6,7 @@ import { Runnable, RunnableLambda, RunnableConfig } from '@langchain/core/runnab
 import { StateGraph, END, StateGraphArgs, Annotation } from '@langchain/langgraph';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/FeedbackContext.dto';
-import { CHAT_OPENAI_MODEL } from '../../langgraph-feedback.module'; // Adjust path as needed
+import { CHAT_OPENAI_MODEL } from '../../langgraph.constants'; // Import token from constants file
 
 // Import Agent Providers (assuming they exist and are correctly structured)
 import { KcAgentProvider } from '../kc/kc.provider';

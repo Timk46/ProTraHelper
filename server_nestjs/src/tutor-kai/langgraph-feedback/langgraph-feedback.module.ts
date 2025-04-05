@@ -15,32 +15,19 @@ import { KhAgentProvider } from './agents/kh/kh.provider';
 import { KmAgentProvider } from './agents/km/km.provider';
 import { KtcAgentProvider } from './agents/ktc/ktc.provider';
 import { ChatOpenAI } from '@langchain/openai'; // Import ChatOpenAI for provider
+import { CHAT_OPENAI_MODEL } from './langgraph.constants'; // Import token from constants file
 
-// Define a constant for the provider token
-export const CHAT_OPENAI_MODEL = 'CHAT_OPENAI_MODEL';
+// Token definition moved to langgraph.constants.ts
 
 @Module({
   imports: [
     PrismaModule,
-    ConfigModule, // Import ConfigModule as LanggraphFeedbackService depends on ConfigService
+    ConfigModule, // Import ConfigModule as dependencies need ConfigService
   ],
   controllers: [LanggraphFeedbackController],
   providers: [
-    // Facade Service
-    LanggraphFeedbackService,
-    // Workflow Service
-    SupervisorWorkflowService,
-    // Agent Providers
-    KcAgentProvider,
-    KhAgentProvider,
-    KmAgentProvider,
-    KtcAgentProvider,
-    // Helper/Tool Services
-    LanggraphDataFetcherService,
-    CryptoService,
-    DomainKnowledgeService,
-    // Shared LLM Model Provider
-     {
+    // Shared LLM Model Provider (Define BEFORE services that inject it)
+    {
       provide: CHAT_OPENAI_MODEL,
       useFactory: (configService: ConfigService) => {
         const openAIApiKey = configService.get<string>('OPENAI_API_KEY');
@@ -55,6 +42,19 @@ export const CHAT_OPENAI_MODEL = 'CHAT_OPENAI_MODEL';
       },
       inject: [ConfigService], // Inject ConfigService into the factory
     },
+    // Helper/Tool Services (Define BEFORE services that inject them)
+    LanggraphDataFetcherService,
+    CryptoService,
+    DomainKnowledgeService,
+    // Agent Providers (Depend on Model and potentially Tool Services)
+    KcAgentProvider,
+    KhAgentProvider,
+    KmAgentProvider,
+    KtcAgentProvider,
+    // Workflow Service (Depends on Model and potentially Agent Providers/Tool Services)
+    SupervisorWorkflowService,
+    // Facade Service (Depends on Workflow Service and Agent Providers)
+    LanggraphFeedbackService,
   ],
   exports: [
     LanggraphFeedbackService, // Export the facade service

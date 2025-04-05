@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ChatOpenAI } from '@langchain/openai';
 import { RunnableSequence } from '@langchain/core/runnables';
-import { CHAT_OPENAI_MODEL } from '../../langgraph-feedback.module'; // Import provider token
+import { CHAT_OPENAI_MODEL } from '../../langgraph.constants'; // Import token from constants file
 import { buildKmAgentChain } from './km.agent'; // Import the chain builder
 
 @Injectable()
