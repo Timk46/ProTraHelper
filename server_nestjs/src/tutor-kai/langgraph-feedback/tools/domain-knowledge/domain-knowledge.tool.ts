@@ -16,7 +16,7 @@ const DomainKnowledgeToolSchema = z.object({
     .positive()
     .optional()
     .default(10)
-    .describe('The maximum number of relevant lecture snippets to retrieve.'),
+    .describe('The maximum number of relevant lecture snippets to retrieve. Minumum is 10, maximum is 20.'),
 });
 
 // Type for the input based on the Zod schema
@@ -49,19 +49,16 @@ export function createDomainKnowledgeTool(
           k, // k will have the default value if not provided
         );
 
+        // Return the raw results as a JSON string for the agent to process
+        // Return '[]' if no results are found, as expected by the processing node
         if (!results || results.length === 0) {
-          return `No relevant information found for query: "${query}"`;
+          // Log that no results were found for the query
+          console.log(`DomainKnowledgeTool: No relevant information found for query: "${query}"`);
+          return '[]';
         }
 
-        // Format the results for the LLM
-        const formattedResults = results
-          .map(
-            (chunk, index) =>
-              `Snippet ${index + 1} (Source: ${chunk.metadata?.markdownLink || 'Unknown'}):\n${chunk.TranscriptChunkContent}`,
-          )
-          .join('\n\n---\n\n');
-
-        return `Found relevant information for query "${query}":\n\n${formattedResults}`;
+        // Stringify the results array directly
+        return JSON.stringify(results);
       } catch (error) {
         // Log the structured input in case of error
         console.error('Error executing domain knowledge tool with input:', input, error);
@@ -71,7 +68,3 @@ export function createDomainKnowledgeTool(
     },
   });
 }
-
-// Note: This function creates the tool instance.
-// The DomainKnowledgeService instance needs to be provided (likely via dependency injection)
-// where this tool is instantiated and passed to the agents.

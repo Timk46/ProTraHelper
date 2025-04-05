@@ -7,18 +7,18 @@ import {
 export const getConceptsPrompt = ChatPromptTemplate.fromMessages([
   SystemMessagePromptTemplate.fromTemplate(
     'Du bist Lehrer für Studenten und Experte der Didaktik. ' + // role
-      'Basierend auf den Informationen zwischen BEGINCONTEXT und ENDCONTEXT, extrahierst du die drei wichtigsten Informatik-Konzepte, die der Student noch verstehen muss, damit er die Aufgabe selbstständig lösen kann. ' +
-      'Für jedes dieser Konzepte nutzt du das dir zur Verfügung stehende Tool `domainKnowledgeTool`, um weitere Informationen zu den Konzepten aus der Vorlesung zu erhalten. Formuliere deine Anfrage an das Tool so, dass du eine spezifische Frage zum Konzept stellst (z.B. "Wie funktioniert Rekursion?" oder "Was ist eine For-Schleife in C++?").',
+      'Basierend auf den Informationen zwischen BEGINCONTEXT und ENDCONTEXT, extrahierst du die zwei wichtigsten Informatik-Konzepte, die der Student noch verstehen muss, damit er die Aufgabe selbstständig lösen kann. ' +
+      'Für jedes dieser Konzepte nutzt du das dir zur Verfügung stehende Tool `search_domain_knowledge`, um weitere Informationen zu den Konzepten aus der Vorlesung zu erhalten. Formuliere deine Anfrage an das Tool so, dass du eine spezifische Frage zum Konzept stellst (z.B. "Wie funktioniert Rekursion?" oder "Was ist eine For-Schleife in C++?").',
   ),
   HumanMessagePromptTemplate.fromTemplate(
     'BEGINCONTEXT\n' +
-      '# Aufgabe die vom Studenten gelöst werden soll:\n{task}\n' +
-      '# Die Programmiersprache ist: {language}\n' +
-      '# Lösung des Studenten:\n{code}\n' +
-      '# Output des Compiler und Unit-Tests:\n{output}\n' +
+      '# Aufgabe die vom Studenten gelöst werden soll:\n{task}\n\n' +
+      '# Die Programmiersprache ist: {language}\n\n' +
+      '# Lösung des Studenten:\n{code}\n\n' +
+      '# Output des Compiler und Unit-Tests:\n{output}\n\n' +
       '# Unit Tests und deren Ergebnisse:\n ' +
       'Die Unit Tests und deren Ergebnisse liegen als JSON vor. Sie dienen nur zur internen Verwendung.\n ' +
-      '## Unit TestCases:\n{unitTests}\n' +
+      '## Unit TestCases:\n{unitTests}\n\n' +
       '## Ergebnis der Unit-Tests:\n{unitTestsResults}\n' +
       'ENDCONTEXT',
   ),
@@ -42,16 +42,16 @@ export const generateFeedbackPrompt = ChatPromptTemplate.fromMessages([
       '   - Beispiel 3: Diese Methoden sollten dann in den abgeleiteten Klassen `Pyramide` und `Kegel` implementiert werden $$1$$.\n',
   ),
   HumanMessagePromptTemplate.fromTemplate(
-    '# Aufgabe die vom Studenten gelöst werden soll:\n{task}\n' +
-      '# Die Programmiersprache ist: {language}\n' +
-      '# Lösung des Studenten:\n{code}\n' +
-      '# Output des Compiler und Unit-Tests:\n{output}\n' +
-      '# Unit Tests und deren Ergebnisse:\n ' +
+    '# Aufgabe die vom Studenten gelöst werden soll:\n{task}\n\n' +
+      '# Die Programmiersprache ist: {language}\n\n' +
+      '# Lösung des Studenten:\n{code}\n\n' +
+      '# Output des Compiler und Unit-Tests:\n{output}\n\n' +
+      '# Unit Tests und deren Ergebnisse:\n\ ' +
       'Die Unit Tests und deren Ergebnisse liegen als JSON vor. Sie dienen nur zur internen Verwendung.\n ' +
-      '## Unit TestCases:\n{unitTests}\n' +
-      '## Ergebnis der Unit-Tests:\n{unitTestsResults}\n' +
+      '## Unit TestCases:\n{unitTests}\n\n' +
+      '## Ergebnis der Unit-Tests:\n{unitTestsResults}\n\n' +
       '# Ausschnitt aus der Vorlesung:\n' +
-      '{lectureSnippet}\n' + // This is where the fetched snippets will be injected
+      '{lectureSnippet}\n\n' + // This is where the fetched snippets will be injected
       '# Wichtige Anweisung\n' +
       'Verweise immer auf die Erklärungen aus den Vorlesungsausschnitten AUSSCHLIEßLICH im Format $$Zahl$$.',
   ),
