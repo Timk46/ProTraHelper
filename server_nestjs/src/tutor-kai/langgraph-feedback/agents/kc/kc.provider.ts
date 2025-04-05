@@ -1,11 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ChatOpenAI } from '@langchain/openai';
-import { RunnableSequence } from '@langchain/core/runnables';
+import { Runnable } from '@langchain/core/runnables'; // Import Runnable instead of RunnableSequence
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { DomainKnowledgeService } from '../../tools/domain-knowledge/domain-knowledge.service';
 import { createDomainKnowledgeTool } from '../../tools/domain-knowledge/domain-knowledge.tool';
 import { CHAT_OPENAI_MODEL } from '../../langgraph.constants'; // Import token from constants file
-import { buildKcAgentChain } from './kc.agent'; // Import the chain builder
+import { buildKcCoreAgent } from './kc.agent'; // Import the core agent builder
 
 @Injectable()
 export class KcAgentProvider {
@@ -20,9 +20,9 @@ export class KcAgentProvider {
   }
 
   /**
-   * Gets a fully configured instance of the KC agent chain.
+   * Gets a fully configured instance of the KC core agent runnable.
    */
-  getAgentChain(): RunnableSequence {
-    return buildKcAgentChain(this.model, [this.domainKnowledgeTool]);
+  getAgentRunnable(): Runnable<any, any> { // Changed method name and return type
+    return buildKcCoreAgent(this.model, [this.domainKnowledgeTool]); // Call the correct builder
   }
 }
