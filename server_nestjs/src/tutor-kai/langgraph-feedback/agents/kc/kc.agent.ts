@@ -7,23 +7,19 @@ import {
   BaseMessage,
   HumanMessage,
   ToolMessage,
-  AIMessageChunk, // Import AIMessageChunk for type checking
 } from '@langchain/core/messages';
 import {
   Runnable,
   RunnableLambda,
   RunnableConfig,
 } from '@langchain/core/runnables';
-import { StateGraph, END, StateGraphArgs } from '@langchain/langgraph';
+import { StateGraph, END } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt'; // Use ToolNode for standard tool execution
 import {
   getConceptsPrompt,
   generateFeedbackPrompt,
-  individualFeedbackPromptLevel1,
-  individualFeedbackPromptLevel2,
-  individualFeedbackPromptLevel3,
-} from './kc.prompts'; // Import new prompts
-// JsonOutputToolsParser removed as we parse manually
+} from './kc.prompts';
+
 
 // --- Graph State Definition ---
 interface KcGraphState {
@@ -39,11 +35,11 @@ interface KcGraphState {
 // Helper function to extract context (adapt as needed based on actual input structure)
 // NOTE: This function makes many assumptions about the HumanMessage content
 // and the FeedbackContextDto structure. It needs careful validation.
-function parseInitialContext(messages: BaseMessage[]): { context: FeedbackContextDto | null, level: string | null } {
+function parseInitialContext(messages: BaseMessage[]): { context: FeedbackContextDto | null} {
     const humanMessage = messages.find((msg) => msg instanceof HumanMessage);
     if (!humanMessage || typeof humanMessage.content !== 'string') {
         console.error("KC Agent: Could not find valid HumanMessage in input.");
-        return { context: null, level: null };
+        return { context: null };
     }
 
     try {
@@ -56,15 +52,6 @@ function parseInitialContext(messages: BaseMessage[]): { context: FeedbackContex
         const resultsMatch = content.match(/Unit Test Results: (.*?)\n/);
         const attemptMatch = content.match(/This is attempt number (\d+)\./);
         const skeletonMatch = content.match(/Provided Code Skeleton\(s\): (.*?)\n/);
-
-        // Placeholder for feedback level extraction - HOW IS THIS DETERMINED?
-        // This is critical for selecting the correct individualFeedbackPrompt.
-        // Defaulting to Standard for now. Needs proper implementation.
-        const feedbackLevel = 'Standard Unterstützung'; // <<<--- PLACEHOLDER / NEEDS IMPLEMENTATION
-
-        // Placeholder for programming language - HOW IS THIS DETERMINED?
-        // Defaulting to C++ for now. Needs proper implementation.
-        const programmingLanguage = 'C++'; // <<<--- PLACEHOLDER / NEEDS IMPLEMENTATION
 
         // Reconstruct a partial DTO based on parsed info.
         // This might be incomplete or inaccurate depending on the actual DTO.
@@ -85,10 +72,10 @@ function parseInitialContext(messages: BaseMessage[]): { context: FeedbackContex
         };
 
         // We return the partial context and the level separately
-        return { context: context as FeedbackContextDto, level: feedbackLevel }; // Cast back, acknowledging potential incompleteness
+        return { context: context as FeedbackContextDto }; // Cast back, acknowledging potential incompleteness
     } catch (e) {
         console.error("KC Agent: Failed to parse context from HumanMessage:", e);
-        return { context: null, level: null };
+        return { context: null };
     }
 }
 
@@ -232,8 +219,6 @@ const processToolResults = async (
     });
 
     const conceptString = JSON.stringify({ Vorlesungsausschnitte: concepts });
-    console.log("Processed Snippets:", conceptString.substring(0, 200) + "..."); // Log truncated
-    console.log("Source Map:", sourceMapDict);
 
     return {
         lectureSnippets: conceptString,
@@ -259,19 +244,11 @@ const generateFeedback = async (
       return { messages: [...state.messages, new AIMessage("Error: Input context missing for final feedback generation.")] };
   }
 
-  // Select appropriate feedback level prompt
-  const individualPrompt =
-    level === 'Wenig Unterstützung'
-      ? individualFeedbackPromptLevel3
-      : level === 'Standard Unterstützung'
-      ? individualFeedbackPromptLevel2
-      : individualFeedbackPromptLevel1; // Default to Level 1
 
   // Determine programming language (using placeholder)
   const programmingLanguage = 'C++'; // <<<--- PLACEHOLDER / NEEDS IMPLEMENTATION
 
-  const promptB = await generateFeedbackPrompt.format({
-    individualFeedbackPrompt: individualPrompt,
+  const prompt = await generateFeedbackPrompt.format({
     task: context.taskDescription ?? '',
     language: programmingLanguage,
     code: context.studentSolution ?? '',
@@ -284,10 +261,8 @@ const generateFeedback = async (
   const llm = config?.configurable?.llm as ChatOpenAI;
   if (!llm) throw new Error("LLM not found in config");
 
-  // Invoke LLM with Prompt B
-  const response = await llm.invoke(promptB, config);
+  const response = await llm.invoke(prompt, config);
   const rawFeedback = response.content.toString();
-  console.log("Raw Feedback:", rawFeedback.substring(0, 200) + "..."); // Log truncated
 
   // Add raw feedback message to history for the next node
   return { messages: [...state.messages, new AIMessage(rawFeedback)] };
@@ -415,7 +390,7 @@ export function buildKcCoreAgent(llm: ChatOpenAI, tools: DynamicStructuredTool[]
             }
 
             // Attempt to parse context and feedback level from the initial message
-            const { context, level } = parseInitialContext(input.messages);
+            const { context } = parseInitialContext(input.messages);
             if (!context) {
                  console.error("KC Agent Wrapper: Failed to parse context from input messages.");
                  // Return error message if context parsing fails
@@ -425,7 +400,6 @@ export function buildKcCoreAgent(llm: ChatOpenAI, tools: DynamicStructuredTool[]
             const initialState: KcGraphState = {
                 messages: input.messages, // Start with the input message history
                 inputContext: context, // Store the parsed (potentially partial) context
-                feedbackLevel: level ?? 'Standard Unterstützung', // Use parsed level or default
                 // Initialize other state fields to default/empty
                 toolCalls: [],
                 lectureSnippets: "[]",
