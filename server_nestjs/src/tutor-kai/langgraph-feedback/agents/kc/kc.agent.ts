@@ -107,7 +107,8 @@ const identifyConceptsAndRequestTool = async (
   // Determine programming language (using placeholder for now)
   const programmingLanguage = 'C++'; // <<<--- PLACEHOLDER / NEEDS IMPLEMENTATION
 
-  const promptA = await getConceptsPrompt.format({
+  // Format the prompt directly into messages
+  const messagesA = await getConceptsPrompt.formatMessages({
     task: context.taskDescription ?? '',
     language: programmingLanguage,
     code: context.studentSolution ?? '',
@@ -125,7 +126,7 @@ const identifyConceptsAndRequestTool = async (
   });
 
   // Invoke LLM and get the AIMessage response
-  const response = await llmWithTools.invoke(promptA, config);
+  const response = await llmWithTools.invoke(messagesA, config);
 
   // Extract tool calls from the AIMessage
   // Langchain AIMessage stores tool calls in `tool_calls` property
@@ -248,7 +249,8 @@ const generateFeedback = async (
   // Determine programming language (using placeholder)
   const programmingLanguage = 'C++'; // <<<--- PLACEHOLDER / NEEDS IMPLEMENTATION
 
-  const prompt = await generateFeedbackPrompt.format({
+  // Format the prompt directly into messages
+  const messagesB = await generateFeedbackPrompt.formatMessages({
     task: context.taskDescription ?? '',
     language: programmingLanguage,
     code: context.studentSolution ?? '',
@@ -261,7 +263,7 @@ const generateFeedback = async (
   const llm = config?.configurable?.llm as ChatOpenAI;
   if (!llm) throw new Error("LLM not found in config");
 
-  const response = await llm.invoke(prompt, config);
+  const response = await llm.invoke(messagesB, config);
   const rawFeedback = response.content.toString();
 
   // Add raw feedback message to history for the next node
