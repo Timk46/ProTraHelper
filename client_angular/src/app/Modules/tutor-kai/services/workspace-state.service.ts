@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, catchError, finalize, of, tap, throwError } from 'rxjs';
 import { QuestionDTO, CodeSubmissionResultDto } from '@DTOs/index';
-import { CodeSubmissionResult, FeedbackLevel, FlavorType, WorkspaceState } from '../models/code-submission.model';
+import { CodeSubmissionResult, FeedbackLevel, FlavorType, WorkspaceState, TestResult } from '../models/code-submission.model'; // Merged TestResult import
 import { TaskDataService } from './task-data.service';
 import { RunCodeService } from './runCode.service';
 
@@ -64,19 +64,39 @@ export class WorkspaceStateService {
 
     return this.runCodeService.executeStudentCode(taskId, inputArgs, additionalFiles).pipe(
       tap(result => {
-        // Konvertiere Backend-Testresultate zum Frontend-Format
-        if (result?.CodeSubmissionResult?.testResults) {
-          result.CodeSubmissionResult.testResults = result.CodeSubmissionResult.testResults.map(test => {
-            // Transformiere Backend-Format (test, status) zu Frontend-Format (name, passed)
-            const transformedTest: any = {
-              name: test.test || '', // Backend verwendet 'test' Eigenschaft statt 'name'
-              passed: test.status === 'PASSED',
-              exception: test.exception
+        // Default to null if result or nested properties are missing
+        let finalResultForSubject: CodeSubmissionResult | null = null;
+
+        if (result?.CodeSubmissionResult) {
+            let frontendTestResults: TestResult[] = []; // Default to empty array
+
+            // Transform backend results if they exist
+            if (result.CodeSubmissionResult.testResults) {
+                const backendTestResults = result.CodeSubmissionResult.testResults as any[];
+                frontendTestResults = backendTestResults.map((test: any) => {
+                    const transformedTest: TestResult = {
+                        name: test.test || '',
+                        passed: test.status === 'SUCCESSFUL',
+                        exception: test.exception
+                    };
+                    return transformedTest;
+                });
+            }
+
+            // Create a new object conforming to the DTO structure expected by the Subject
+            finalResultForSubject = {
+                CodeSubmissionResult: {
+                    output: result.CodeSubmissionResult.output ?? '', // Provide default empty string if null
+                    score: result.CodeSubmissionResult.score,
+                    testsPassed: result.CodeSubmissionResult.testsPassed ?? false, // Provide default false if null/undefined
+                    testResults: frontendTestResults // Use the transformed results
+                },
+                encryptedCodeSubissionId: result.encryptedCodeSubissionId
             };
-            return transformedTest;
-          });
         }
-        this.codeSubmissionResultSubject.next(result);
+
+        // Emit the correctly typed frontend object (or null)
+        this.codeSubmissionResultSubject.next(finalResultForSubject as CodeSubmissionResultDto | null); // Cast to satisfy Subject type
         this.workspaceStateSubject.next(WorkspaceState.SUBMITTED_CODE);
         console.log(JSON.stringify(this.codeSubmissionResultSubject))
       }),

@@ -188,10 +188,11 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     this.isCompiling = false;
     this.compilerOutput = result.CodeSubmissionResult.output || 'Keine Ausgabe';
 
-    // Speichere Test-Ergebnisse, falls vorhanden
-    this.testResults = result.CodeSubmissionResult.testResults ?
-      (result.CodeSubmissionResult.testResults as unknown as TestResult[]) :
-      null;
+    // Hole die bereits transformierten Test-Ergebnisse vom Service
+    const latestResult = this.workspaceState.getCodeSubmissionResult();
+    // Stelle sicher, dass testResults ein Array ist oder null, falls keine Ergebnisse vorhanden sind
+    // Assert the type to the local TestResult[] as we know the service transformed it
+    this.testResults = (latestResult?.CodeSubmissionResult?.testResults as TestResult[] | undefined) ?? null;
 
     // Mobile View: Wechsle zur Output-Ansicht nach Code-Ausführung
     if (window.innerWidth <= 768) {
