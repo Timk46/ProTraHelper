@@ -23,6 +23,7 @@ import { QuestionDataModule } from './question-data/question-data.module';
 import { CryptoService } from './tutor-kai/langgraph-feedback/helper/crypto.service';
 import { QuestionModule } from './tutor-kai/question/question.module';
 import { RunCodeModule } from './tutor-kai/run-code/run-code.module';
+import { TutoringFeedbackModule } from './tutor-kai/tutoring-feedback/tutoring-feedback.module';
 // END Tutor-Kai Imports
 
 // BEGIN UMLearn Imports
@@ -101,7 +102,8 @@ import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgrap
     CompareModule,
     PointCalculationModule,
     CodeGameModule,
-    LanggraphFeedbackModule
+    LanggraphFeedbackModule,
+    TutoringFeedbackModule,
   ],
   controllers: [
     AppController,
