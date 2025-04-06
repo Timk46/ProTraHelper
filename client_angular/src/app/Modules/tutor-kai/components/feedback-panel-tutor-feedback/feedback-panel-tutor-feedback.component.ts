@@ -6,6 +6,7 @@ import { WorkspaceStateService } from '../../services/workspace-state.service';
 import { WorkspaceState } from '../../models/code-submission.model';
 import { MarkdownService } from '../../services/markdown/markdown.service';
 import { environment } from 'src/environments/environment';
+import * as Prism from 'prismjs';
 // TODO: Import FeedbackOutput and KcrOutput types/interfaces from shared DTOs
 // import { FeedbackOutput, KcrOutput } from '@DTOs/tutorKaiDtos/feedback-output.dto'; // Adjust path as needed
 // TODO: Import EvaluateRequestDto type/interface from shared DTOs
@@ -20,7 +21,7 @@ interface KcrData {
 }
 interface FeedbackOutput {
   IT?: string; // Optional internal thoughts
-  KCR?: KcrData;
+  KCR?: string;
   KM?: string;
   KTC?: string;
   KC?: string;
@@ -128,12 +129,6 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
     return this.sanitizer.bypassSecurityTrustHtml(parsed);
   }
 
-  parseKcrSteps(steps: string[]): SafeHtml {
-    if (!steps || steps.length === 0) return '';
-    const listItems = steps.map(step => `<li>${this.markdownService.parse(step)}</li>`).join(''); // Use parse instead of parseInline
-    const htmlList = `<ul>${listItems}</ul>`;
-    return this.sanitizer.bypassSecurityTrustHtml(htmlList);
-  }
 
   // --- Rating ---
   showRating(): boolean {

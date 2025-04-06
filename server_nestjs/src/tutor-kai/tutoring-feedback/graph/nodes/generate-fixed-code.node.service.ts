@@ -43,11 +43,7 @@ Do NOT simply provide the model solution. Generate only the corrected code, with
 
     if (automatedTests) {
       // Simple stringification, might need refinement based on actual structure
-      userPrompt += `\n\nAutomated Tests (the corrected code MUST pass these):\n\`\`\`\n${JSON.stringify(
-        automatedTests,
-        null,
-        2,
-      )}\n\`\`\``;
+      userPrompt += `\n\nAutomated Tests (the corrected code MUST pass these):\n\`\`\`\n${automatedTests[0].code}\n\`\`\``;
     }
 
     userPrompt += `\n\nGenerate the corrected code that passes the automated tests:`;

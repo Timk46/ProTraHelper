@@ -27,15 +27,9 @@
           </mat-expansion-panel-header>
 
           <ng-template matExpansionPanelContent>
-            <!-- Specific rendering for KCR -->
-            <ng-container *ngIf="key === 'KCR' && feedback.KCR">
-              <div class="feedback-text" [innerHTML]="parseMarkdown(feedback.KCR.explanation)"></div>
-              <h4>Steps:</h4>
-              <div class="feedback-text" [innerHTML]="parseKcrSteps(feedback.KCR.steps)"></div>
-            </ng-container>
 
             <!-- Generic rendering for other string-based feedback -->
-            <ng-container *ngIf="key !== 'KCR' && feedback[key]">
+            <ng-container *ngIf="feedback[key]">
               <div class="feedback-text" [innerHTML]="parseMarkdown(feedback[key])"></div>
             </ng-container>
           </ng-template>
