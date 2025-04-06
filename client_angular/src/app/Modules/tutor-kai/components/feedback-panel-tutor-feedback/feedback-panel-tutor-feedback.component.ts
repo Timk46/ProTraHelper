@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { trigger, state, style, animate, transition } from '@angular/animations';
 import { Subject, takeUntil, finalize, catchError, throwError, Observable } from 'rxjs';
 import { WorkspaceStateService } from '../../services/workspace-state.service';
 import { WorkspaceState } from '../../models/code-submission.model';
@@ -28,7 +29,7 @@ interface FeedbackOutput {
   KH?: string;
   [key: string]: any; // Allow other potential keys if needed, though we filter
 }
-type FeedbackKey = 'KCR' | 'KM' | 'KTC' | 'KC' | 'KH'; // Define specific keys
+type FeedbackKey = 'KCR' | 'KM' | 'KTC' | 'KC' | 'KH'; // Define specific keys for feedback types
 
 type EvaluateRequestDto = any;
 type CodeSubmissionResultDto = any;
@@ -37,11 +38,33 @@ type CodeSubmissionResultDto = any;
 @Component({
   selector: 'app-feedback-panel-tutor-feedback',
   templateUrl: './feedback-panel-tutor-feedback.component.html',
-  styleUrls: ['./feedback-panel-tutor-feedback.component.scss']
+  styleUrls: ['./feedback-panel-tutor-feedback.component.scss'],
+  animations: [
+    trigger('expandCollapse', [
+      state('false', style({
+        height: '0',
+        opacity: '0',
+        overflow: 'hidden'
+      })),
+      state('true', style({
+        height: '*',
+        opacity: '1'
+      })),
+      transition('false <=> true', animate('300ms ease-in-out'))
+    ])
+  ]
 })
 export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
   feedback: FeedbackOutput | null = null;
   isLoading = false;
+  // Track expansion state for each feedback section
+  expandedSections: Record<FeedbackKey, boolean> = {
+    KCR: false,
+    KM: false,
+    KTC: false,
+    KC: false,
+    KH: false
+  };
   error: string | null = null;
   currentState: WorkspaceState = WorkspaceState.START;
 
@@ -162,5 +185,10 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
     const orderedKeys: FeedbackKey[] = ['KCR', 'KM', 'KTC', 'KC', 'KH'];
     // Filter keys that exist and have truthy content in the feedback object
     return orderedKeys.filter(key => this.feedback && this.feedback[key]);
+  }
+
+  // Toggle a feedback section's expanded state
+  toggleSection(key: FeedbackKey): void {
+    this.expandedSections[key] = !this.expandedSections[key];
   }
 }

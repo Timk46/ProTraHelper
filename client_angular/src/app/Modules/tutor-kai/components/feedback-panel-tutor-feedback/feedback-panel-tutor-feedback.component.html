@@ -16,27 +16,64 @@
 
   <!-- Feedback Content -->
   <div *ngIf="feedback && !isLoading && !error" class="feedback-content">
-    <mat-accordion multi="true">
-      <ng-container *ngFor="let key of getFeedbackKeys()">
-        <mat-expansion-panel class="feedback-card">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <!-- Add icons later if desired -->
-              {{ feedbackTitles[key] || key }}
-            </mat-panel-title>
-          </mat-expansion-panel-header>
+    <div class="feedback-cards">
 
-          <ng-template matExpansionPanelContent>
 
-            <!-- Generic rendering for other string-based feedback -->
-            <ng-container *ngIf="feedback[key]">
-              <div class="feedback-text" [innerHTML]="parseMarkdown(feedback[key])"></div>
-            </ng-container>
-          </ng-template>
+      <!-- KM Feedback Card -->
+      <div *ngIf="feedback['KM']" class="feedback-card" [class.expanded]="expandedSections['KM']">
+        <button class="card-header" (click)="toggleSection('KM')">
+          <span class="title">{{ feedbackTitles['KM'] || 'KM' }}</span>
+          <mat-icon [class.rotated]="expandedSections['KM']">expand_more</mat-icon>
+        </button>
+        <div class="card-content" [@expandCollapse]="expandedSections['KM'] ? 'true' : 'false'">
+          <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KM'])"></div>
+        </div>
+      </div>
 
-        </mat-expansion-panel>
-      </ng-container>
-    </mat-accordion>
+      <!-- KTC Feedback Card -->
+      <div *ngIf="feedback['KTC']" class="feedback-card" [class.expanded]="expandedSections['KTC']">
+        <button class="card-header" (click)="toggleSection('KTC')">
+          <span class="title">{{ feedbackTitles['KTC'] || 'KTC' }}</span>
+          <mat-icon [class.rotated]="expandedSections['KTC']">expand_more</mat-icon>
+        </button>
+        <div class="card-content" [@expandCollapse]="expandedSections['KTC'] ? 'true' : 'false'">
+          <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KTC'])"></div>
+        </div>
+      </div>
+
+      <!-- KC Feedback Card -->
+      <div *ngIf="feedback['KC']" class="feedback-card" [class.expanded]="expandedSections['KC']">
+        <button class="card-header" (click)="toggleSection('KC')">
+          <span class="title">{{ feedbackTitles['KC'] || 'KC' }}</span>
+          <mat-icon [class.rotated]="expandedSections['KC']">expand_more</mat-icon>
+        </button>
+        <div class="card-content" [@expandCollapse]="expandedSections['KC'] ? 'true' : 'false'">
+          <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KC'])"></div>
+        </div>
+      </div>
+
+      <!-- KH Feedback Card -->
+      <div *ngIf="feedback['KH']" class="feedback-card" [class.expanded]="expandedSections['KH']">
+        <button class="card-header" (click)="toggleSection('KH')">
+          <span class="title">{{ feedbackTitles['KH'] || 'KH' }}</span>
+          <mat-icon [class.rotated]="expandedSections['KH']">expand_more</mat-icon>
+        </button>
+        <div class="card-content" [@expandCollapse]="expandedSections['KH'] ? 'true' : 'false'">
+          <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KH'])"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KCR Feedback Card -->
+    <div *ngIf="feedback['KCR']" class="feedback-card" [class.expanded]="expandedSections['KCR']">
+      <button class="card-header" (click)="toggleSection('KCR')">
+        <span class="title">{{ feedbackTitles['KCR'] || 'KCR' }}</span>
+        <mat-icon [class.rotated]="expandedSections['KCR']">expand_more</mat-icon>
+      </button>
+      <div class="card-content" [@expandCollapse]="expandedSections['KCR'] ? 'true' : 'false'">
+        <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KCR'])"></div>
+      </div>
+    </div>
 
     <!-- Rating Section -->
     <div *ngIf="showRating()" class="rating-section">
