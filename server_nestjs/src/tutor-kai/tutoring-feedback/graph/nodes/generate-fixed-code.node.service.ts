@@ -12,10 +12,8 @@ export class GenerateFixedCodeNodeService {
   constructor(private configService: ConfigService) {
     // Basic LLM initialization - replace with proper injection/configuration
     this.llm = new ChatOpenAI({
-      // TODO: Get model name (e.g., gpt-3.5-turbo) and API key from ConfigService
-      // modelName: this.configService.get<string>('OPENAI_FIX_CODE_MODEL'),
-      // openAIApiKey: this.configService.get<string>('OPENAI_API_KEY'),
-      temperature: 0.3, // Lower temperature for more deterministic code fixing
+      modelName: '03-mini',
+      temperature: 0,
     });
   }
 

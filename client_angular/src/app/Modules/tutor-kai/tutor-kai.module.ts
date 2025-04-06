@@ -18,6 +18,7 @@ import { TestDetailsDialogComponent } from './components/test-indicators/test-de
 import { EditorTabsComponent } from './components/editor-tabs/editor-tabs.component';
 import { FileExplorerComponent } from './components/file-explorer/file-explorer.component';
 
+import { FeedbackPanelTutorFeedbackComponent } from './components/feedback-panel-tutor-feedback/feedback-panel-tutor-feedback.component';
 // Modules
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
@@ -42,7 +43,8 @@ import { FileSystemService } from './services/file-system.service';
     TestIndicatorsComponent,
     TestDetailsDialogComponent,
     EditorTabsComponent,
-    FileExplorerComponent
+    FileExplorerComponent,
+    FeedbackPanelTutorFeedbackComponent,
   ],
   imports: [
     CommonModule,
@@ -63,7 +65,8 @@ import { FileSystemService } from './services/file-system.service';
     TerminalOutputComponent,
     TestIndicatorsComponent,
     EditorTabsComponent,
-    FileExplorerComponent
+    FileExplorerComponent,
+    FeedbackPanelTutorFeedbackComponent,
   ],
   providers: [
     WorkspaceStateService,

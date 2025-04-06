@@ -1,0 +1,60 @@
+<div class="feedback-panel-tutor">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading structured feedback...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <mat-icon color="warn">error_outline</mat-icon>
+    <p>Error loading feedback:</p>
+    <p class="error-message">{{ error }}</p>
+    <!-- Optional: Add a retry button -->
+    <!-- <button mat-stroked-button color="warn" (click)="fetchFeedback()">Retry</button> -->
+  </div>
+
+  <!-- Feedback Content -->
+  <div *ngIf="feedback && !isLoading && !error" class="feedback-content">
+    <mat-accordion multi="true">
+      <ng-container *ngFor="let key of getFeedbackKeys()">
+        <mat-expansion-panel class="feedback-card">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <!-- Add icons later if desired -->
+              {{ feedbackTitles[key] || key }}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <ng-template matExpansionPanelContent>
+            <!-- Specific rendering for KCR -->
+            <ng-container *ngIf="key === 'KCR' && feedback.KCR">
+              <div class="feedback-text" [innerHTML]="parseMarkdown(feedback.KCR.explanation)"></div>
+              <h4>Steps:</h4>
+              <div class="feedback-text" [innerHTML]="parseKcrSteps(feedback.KCR.steps)"></div>
+            </ng-container>
+
+            <!-- Generic rendering for other string-based feedback -->
+            <ng-container *ngIf="key !== 'KCR' && feedback[key]">
+              <div class="feedback-text" [innerHTML]="parseMarkdown(feedback[key])"></div>
+            </ng-container>
+          </ng-template>
+
+        </mat-expansion-panel>
+      </ng-container>
+    </mat-accordion>
+
+    <!-- Rating Section -->
+    <div *ngIf="showRating()" class="rating-section">
+      <div class="rating-divider"></div>
+      <app-rating (ratingSubmitted)="onRatingSubmitted($event)"></app-rating>
+    </div>
+  </div>
+
+  <!-- Initial state / No feedback yet (Optional) -->
+  <div *ngIf="!feedback && !isLoading && !error" class="initial-state">
+     <!-- Keep this empty for now, button is in parent -->
+     <!-- <p>Click "Get Structured Feedback" to load.</p> -->
+  </div>
+
+</div>

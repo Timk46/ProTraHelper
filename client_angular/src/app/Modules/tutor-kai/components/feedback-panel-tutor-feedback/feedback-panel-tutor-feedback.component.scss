@@ -1,0 +1,208 @@
+// Import common styles or variables if available
+// @import 'path/to/variables';
+
+.feedback-panel-tutor {
+  padding: 16px;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+
+  // Loading State
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    color: #555;
+
+    mat-spinner {
+      margin-bottom: 16px;
+    }
+  }
+
+  // Error State
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--mat-warn-color, #f44336); // Use Material theme variable if available
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+    }
+
+    p {
+      margin-bottom: 8px;
+    }
+
+    .error-message {
+      font-style: italic;
+      color: #777;
+      margin-bottom: 16px;
+    }
+  }
+
+  // Feedback Content Area
+  .feedback-content {
+    flex-grow: 1; // Allow content to take available space
+    display: flex;
+    flex-direction: column;
+
+    mat-accordion {
+      flex-grow: 1; // Allow accordion to take space before rating
+    }
+
+    // Style expansion panels like the original feedback cards
+    .feedback-card.mat-expansion-panel {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+      overflow: hidden; // Prevent content overflow before expansion
+
+      &:hover:not(.mat-expanded) { // Only apply hover shadow when collapsed
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      }
+
+      &.mat-expanded {
+        margin-bottom: 16px; // Ensure margin remains when expanded
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); // Keep shadow when expanded
+      }
+
+      .mat-expansion-panel-header {
+        padding: 16px 20px; // Adjust padding as needed
+        font-weight: 500;
+        height: auto; // Allow header height to adjust
+        min-height: 48px; // Ensure minimum height
+
+        .mat-panel-title {
+          font-size: 16px; // Adjust title size
+          color: #333;
+        }
+      }
+
+      .mat-expansion-panel-content {
+        .mat-expansion-panel-body {
+          padding: 0 20px 20px 20px; // Padding for the content body
+        }
+      }
+    }
+
+    // Styles for rendered markdown content (copied and adapted from feedback-panel.component.scss)
+    .feedback-text {
+      line-height: 1.6;
+      color: #444;
+
+      h1, h2, h3, h4, h5, h6 {
+        margin-top: 1.2em;
+        margin-bottom: 0.6em;
+        color: #333;
+        font-weight: 600;
+      }
+      h4 { font-size: 1.1em; } // Example size adjustment
+
+      p {
+        margin-bottom: 1em;
+      }
+
+      ul, ol {
+        margin-bottom: 1em;
+        padding-left: 24px;
+      }
+      // Ensure list items inside markdown are styled correctly
+      ul li, ol li {
+         margin-bottom: 0.5em;
+      }
+
+      pre {
+        background-color: #f5f5f5;
+        padding: 12px;
+        border-radius: 4px;
+        overflow-x: auto;
+        margin: 16px 0;
+        font-family: 'Consolas', 'Courier New', monospace;
+        border-left: 3px solid #3f51b5; // Example color
+        font-size: 0.9em;
+      }
+
+      code:not(pre code) { // Inline code
+        background-color: #f5f5f5;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 0.9em;
+      }
+
+      blockquote {
+        margin: 16px 0;
+        padding: 8px 16px;
+        border-left: 4px solid #9fa8da; // Example color
+        background-color: #f5f5f5;
+        font-style: italic;
+        color: #555;
+      }
+
+      a {
+        color: blue;
+        text-decoration: underline;
+      }
+    }
+
+    // Rating Section Styles (copied from feedback-panel.component.scss)
+    .rating-section {
+      padding: 16px 20px;
+      margin-top: auto; // Push rating to the bottom if space allows
+
+      .rating-divider {
+        height: 1px;
+        background-color: #eee;
+        margin-bottom: 16px;
+      }
+    }
+  }
+
+  // Initial State Styles (Optional)
+  .initial-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+  }
+}
+
+// Basic Responsive Adjustments (can be refined)
+@media (max-width: 600px) {
+  .feedback-panel-tutor {
+    padding: 8px;
+
+    .feedback-content {
+      .feedback-card.mat-expansion-panel {
+        margin-bottom: 10px;
+
+        .mat-expansion-panel-header {
+          padding: 12px 16px;
+        }
+        .mat-expansion-panel-content .mat-expansion-panel-body {
+          padding: 0 16px 16px 16px;
+        }
+      }
+
+      .feedback-text {
+        font-size: 0.95em; // Slightly smaller text on small screens
+        pre, code { font-size: 0.85em; }
+      }
+
+      .rating-section {
+        padding: 12px 16px;
+      }
+    }
+  }
+}

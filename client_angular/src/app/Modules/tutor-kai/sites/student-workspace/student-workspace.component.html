@@ -135,7 +135,29 @@
     <!-- Untere Zeile: Feedback + Terminal -->
     <div class="bottom-row" [style.height.%]="bottomRowHeight">
       <div class="feedback-area" [style.width.%]="feedbackAreaWidth">
-        <app-feedback-panel></app-feedback-panel>
+        <!-- Feedback View Toggle -->
+        <div class="feedback-controls">
+          <mat-slide-toggle
+            [(ngModel)]="showStructuredFeedback"
+            (change)="onFeedbackViewChange()"
+            labelPosition="before">
+            Structured View
+          </mat-slide-toggle>
+          <button
+            mat-stroked-button
+            *ngIf="showStructuredFeedback && canRequestStructuredFeedback()"
+            (click)="structuredFeedbackPanel?.fetchFeedback()"
+            class="fetch-structured-button">
+            <mat-icon>refresh</mat-icon> Get Structured Feedback
+          </button>
+        </div>
+
+        <!-- Conditional Feedback Panels -->
+        <app-feedback-panel *ngIf="!showStructuredFeedback"></app-feedback-panel>
+        <app-feedback-panel-tutor-feedback
+          *ngIf="showStructuredFeedback"
+          #structuredFeedbackPanel>
+        </app-feedback-panel-tutor-feedback>
       </div>
 
       <!-- Horizontaler Resize-Handle -->

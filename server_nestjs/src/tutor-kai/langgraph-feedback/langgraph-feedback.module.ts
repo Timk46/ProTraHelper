@@ -58,7 +58,8 @@ import { CHAT_OPENAI_MODEL } from './langgraph.constants'; // Import token from 
   ],
   exports: [
     LanggraphFeedbackService, // Export the facade service
-    // No need to export providers or workflow service unless used by other modules directly
+    LanggraphDataFetcherService, // Export the data fetcher service
+    DomainKnowledgeService, // Also export DomainKnowledgeService as it's needed by TutoringFeedbackModule
   ],
 })
 export class LanggraphFeedbackModule {}

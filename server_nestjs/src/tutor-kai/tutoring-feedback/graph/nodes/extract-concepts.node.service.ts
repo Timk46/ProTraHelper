@@ -13,10 +13,8 @@ export class ExtractConceptsNodeService {
   constructor(private configService: ConfigService) {
     // Basic LLM initialization - replace with proper injection/configuration
     this.llm = new ChatOpenAI({
-      // TODO: Get model name (e.g., gpt-4o-mini) and API key from ConfigService
-      // modelName: this.configService.get<string>('OPENAI_EXTRACT_CONCEPTS_MODEL'),
-      // openAIApiKey: this.configService.get<string>('OPENAI_API_KEY'),
-      temperature: 0.2, // Low temperature for focused concept extraction
+      modelName: 'gpt-4o',
+      temperature: 0,
     });
   }
 

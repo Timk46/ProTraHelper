@@ -12,6 +12,7 @@ import { WorkspaceStateService } from "../../services/workspace-state.service";
 import { WorkspaceState, TestResult } from "../../models/code-submission.model";
 import { CodeEditorWrapperComponent } from "../../components/code-editor-wrapper/code-editor-wrapper.component";
 import { FileExplorerComponent } from "../../components/file-explorer/file-explorer.component";
+import { FeedbackPanelTutorFeedbackComponent } from '../../components/feedback-panel-tutor-feedback/feedback-panel-tutor-feedback.component';
 
 @Component({
   selector: 'app-student-workspace',
@@ -21,6 +22,7 @@ import { FileExplorerComponent } from "../../components/file-explorer/file-explo
 export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(CodeEditorWrapperComponent) codeEditorWrapper!: CodeEditorWrapperComponent;
   @ViewChild('fileExplorer') fileExplorer!: FileExplorerComponent;
+  @ViewChild('structuredFeedbackPanel') structuredFeedbackPanel?: FeedbackPanelTutorFeedbackComponent;
 
   // TaskID aus der Route
   currentTaskId: number = 0;
@@ -57,6 +59,9 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   isCompiling: boolean = false;
   testResults: TestResult[] | null = null;
 
+
+  // Feedback Panel State
+  showStructuredFeedback: boolean = false;
   // Resize-Properties für das neue Layout
   private isHorizontalResizingTop: boolean = false;
   private isHorizontalResizingBottom: boolean = false;
@@ -493,5 +498,25 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
    */
   isState(state: WorkspaceState): boolean {
     return this.workspaceState.getCurrentState() === state;
+  }
+
+
+  /**
+   * Checks if the structured feedback can be requested (typically after code submission)
+   */
+  canRequestStructuredFeedback(): boolean {
+    return this.workspaceState.getCurrentState() === WorkspaceState.SUBMITTED_CODE;
+  }
+
+  /**
+   * Handler for when the feedback view toggle changes.
+   * Can be used for additional logic if needed in the future.
+   */
+  onFeedbackViewChange(): void {
+    // Currently no specific logic needed here as ngModel handles the state.
+    // If the structured panel should auto-fetch on toggle, add logic here:
+    // if (this.showStructuredFeedback && this.canRequestStructuredFeedback()) {
+    //   this.structuredFeedbackPanel?.fetchFeedback();
+    // }
   }
 }
