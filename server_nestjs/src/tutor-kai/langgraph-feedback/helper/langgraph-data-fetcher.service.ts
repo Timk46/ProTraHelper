@@ -43,6 +43,7 @@ export class LanggraphDataFetcherService {
             text: true, // Task description
             automatedTests: true, // Include automated tests
             codeGerueste: true, // Include code skeletons
+            modelSolutions: true, // Include model solutions
           },
         },
       },
@@ -72,6 +73,7 @@ export class LanggraphDataFetcherService {
       attemptCount: attemptCount,
       automatedTests: question.codingQuestion.automatedTests || [],
       codeGerueste: question.codingQuestion.codeGerueste || [],
+      modelSolution: question.codingQuestion.modelSolutions || [], // Include model solutions if needed
     };
   }
 }

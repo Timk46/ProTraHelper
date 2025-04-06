@@ -49,7 +49,7 @@ Your task is to generate **strictly "Knowledge about Concepts" (KC)** feedback f
 1.  Thoroughly review all provided context: the student's task, their code, any output, and the JSON structure containing lecture snippets (\`{lectureSnippet}\`).
 2.  Identify the student's primary conceptual misunderstandings or knowledge gaps revealed by their code or output.
 3.  Critically evaluate the provided \`lectureSnippets\`. For each snippet, determine if it is relevant by asking: Does this snippet directly explain the *specific* concept the student misunderstood? Does it clarify the *reason* behind the mistake identified? Does it illustrate the *principle* needed for the next step?
-4.  Plan the feedback structure: Focus on explaining the 1-2 most critical concepts the student is missing, using the relevant snippets. Maintain a supportive tone.
+4.  Plan the feedback structure: Focus on explaining the most critical concept the student is missing, using the relevant snippets.
 
 **Feedback Goal: STRICTLY Knowledge about Concepts (KC)**
 - Generate helpful, formative feedback focusing **EXCLUSIVELY** on explaining relevant concepts (KC) or clarifying conceptual misunderstandings by referencing the *relevant* lecture snippets.

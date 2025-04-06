@@ -24,17 +24,31 @@ export function buildKtcAgentChain(llm: ChatOpenAI): RunnableSequence {
     const inputFormatter = new RunnableLambda({
         func: (input: FeedbackContextDto) => {
             const contextMessageContent = `
-Analyze my solution for the following task. This is attempt number ${input.attemptCount}.
-Task Description: ${input.taskDescription}
-Provided Code Skeleton(s): ${JSON.stringify(input.codeGerueste) || 'None'}
-My Solution:
-\`\`\`
+## Attempt number
+${input.attemptCount}
+
+## Task Description
+${input.taskDescription}
+
+## Provided Code Skeleton(s)
+ ${JSON.stringify(input.codeGerueste) || 'None'}
+
+## Model Solution (there might be different correct solutions which pass the tests)
+ ${JSON.stringify(input.modelSolution) || 'None'}
+
+## Student Solution:
 ${input.studentSolution}
-\`\`\`
-Compiler Output: ${input.compilerOutput || 'None'}
-Automated Tests Definition: ${JSON.stringify(input.automatedTests) || 'None'}
-Unit Test Results: ${JSON.stringify(input.unitTestResults) || 'None'}
-\`\`\`
+
+## Compiler Output:
+${input.compilerOutput || 'None'}
+
+## Unit-Tests:
+### Unit Tests Definition (all need to pass to successfully complete the task)
+${JSON.stringify(input.automatedTests) || 'None'}
+
+### Unit Tests Results
+${JSON.stringify(input.unitTestResults) || 'None'}
+
 Generate feedback in german strictly adhering to the KTC type and all constraints in your instructions.
 `;
             const initialMessages: BaseMessage[] = [new HumanMessage(contextMessageContent)];
