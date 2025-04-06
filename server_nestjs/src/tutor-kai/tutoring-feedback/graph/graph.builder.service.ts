@@ -50,6 +50,17 @@ export class GraphBuilderService implements OnModuleInit {
       (state: TutoringFeedbackState) =>
         this.generateFinalFeedbackNode.execute(state),
     );
+    // Define the condition function to check if both parallel branches are complete
+    const checkIfReadyForFinalFeedback = (state: TutoringFeedbackState): string => {
+      this.logger.debug(`Checking readiness for final feedback. FixedCode: ${!!state.fixedCode}, Snippets/SourceMap: ${!!state.sourceMap}`);
+      if (state.fixedCode && state.sourceMap) { // Check if both fixedCode and sourceMap (proxy for snippets) are present
+        this.logger.debug('Both branches complete. Proceeding to final feedback.');
+        return 'generate_final_feedback';
+      } else {
+        this.logger.debug('Waiting for other branch to complete.');
+        return '__end__'; // End this path, wait for the other branch to trigger the condition
+      }
+    };
 
     // Try defining edges again after all nodes are added
     // @ts-ignore - Suppressing persistent type error for addEdge with node names
@@ -60,18 +71,30 @@ export class GraphBuilderService implements OnModuleInit {
     // Concept Extraction -> Fetch Lecture Snippets
     // @ts-ignore - Suppressing persistent type error for addEdge with node names
     workflow.addEdge('extract_concepts', 'fetch_lecture_snippets');
-    // Join Point: Wait for fixed code and snippets before generating final feedback
-    // LangGraph implicitly handles joins when a node has multiple incoming edges
-    // that originate from parallel branches. Both 'generate_fixed_code' and
-    // 'fetch_lecture_snippets' must complete before 'generate_final_feedback' runs.
-    // Join Point: Wait for fixed code and snippets before generating final feedback
-    // @ts-ignore - Suppressing persistent type error for addEdge with node names
-    workflow.addEdge('generate_fixed_code', 'generate_final_feedback');
-    // @ts-ignore - Suppressing persistent type error for addEdge with node names
-    workflow.addEdge('fetch_lecture_snippets', 'generate_final_feedback');
+
+    // Add conditional edges after each parallel branch finishes
+    workflow.addConditionalEdges(
+        // @ts-ignore - Suppressing persistent type error for addConditionalEdges source node
+        'generate_fixed_code',
+        checkIfReadyForFinalFeedback,
+        {
+            'generate_final_feedback': 'generate_final_feedback',
+            '__end__': '__end__',
+        }
+    );
+     workflow.addConditionalEdges(
+        // @ts-ignore - Suppressing persistent type error for addConditionalEdges source node
+        'fetch_lecture_snippets',
+        checkIfReadyForFinalFeedback,
+        {
+            'generate_final_feedback': 'generate_final_feedback',
+            '__end__': '__end__',
+        }
+    );
 
     // Final Feedback Generation -> End
     // Final Feedback Generation -> End
+    // Final Feedback Generation still goes to End
     // @ts-ignore - Suppressing persistent type error for addEdge with node names
     workflow.addEdge('generate_final_feedback', '__end__');
 
