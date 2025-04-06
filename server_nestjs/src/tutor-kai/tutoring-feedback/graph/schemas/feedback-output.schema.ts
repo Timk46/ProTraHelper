@@ -9,7 +9,7 @@ export const FeedbackOutputSchema = z.object({
   KCR: z
   .string()
   .describe(
-    'Field for Step 1 Describe Correct Approach',
+    'Knowledge about Correct Result: Field for Step 1 Describe Correct Approach',
   ),
   IT: z
     .string()

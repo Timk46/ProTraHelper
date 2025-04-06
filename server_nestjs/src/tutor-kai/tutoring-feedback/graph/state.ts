@@ -1,6 +1,6 @@
 import { Annotation } from '@langchain/langgraph';
 import { FeedbackContextDto } from '../../../../../shared/dtos/tutorKaiDtos/FeedbackContext.dto';
-import { FeedbackOutput } from '../dtos/feedback-output.schema';
+import { FeedbackOutput } from './schemas/feedback-output.schema';
 
 // Define the structure for lecture snippets if a more specific type is known, otherwise use 'any'
 // Example:

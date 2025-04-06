@@ -6,7 +6,7 @@ import { GenerateFixedCodeNodeService } from './nodes/generate-fixed-code.node.s
 import { ExtractConceptsNodeService } from './nodes/extract-concepts.node.service';
 import { FetchLectureSnippetsNodeService } from './nodes/fetch-lecture-snippets.node.service';
 import { GenerateFinalFeedbackNodeService } from './nodes/generate-final-feedback.node.service';
-import { FeedbackOutput } from '../dtos/feedback-output.schema';
+import { FeedbackOutput } from './schemas/feedback-output.schema';
 // Remove TutoringGraphNodes type - rely on inference
 
 @Injectable()

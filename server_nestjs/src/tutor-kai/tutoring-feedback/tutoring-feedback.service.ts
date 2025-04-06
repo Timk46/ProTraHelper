@@ -2,7 +2,7 @@ import { Injectable, Logger, InternalServerErrorException, NotFoundException } f
 import { GraphBuilderService } from './graph/graph.builder.service';
 import { TutoringFeedbackState } from './graph/state';
 import { FeedbackContextDto } from '../../../../shared/dtos/tutorKaiDtos/FeedbackContext.dto';
-import { FeedbackOutput } from './dtos/feedback-output.schema';
+import { FeedbackOutput } from './graph/schemas/feedback-output.schema';
 
 @Injectable()
 export class TutoringFeedbackService {

@@ -13,7 +13,7 @@ import {
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard'; // Add AuthGuard
 import { TutoringFeedbackService } from './tutoring-feedback.service';
 import { FeedbackContextDto } from '../../../../shared/dtos/tutorKaiDtos/FeedbackContext.dto';
-import { FeedbackOutput } from './dtos/feedback-output.schema';
+import { FeedbackOutput } from './graph/schemas/feedback-output.schema';
 import { LanggraphDataFetcherService } from '../langgraph-feedback/helper/langgraph-data-fetcher.service'; // Import DataFetcherService
 import { CodeSubmissionResultDto } from '@DTOs/tutorKaiDtos/submission.dto'; // Import needed DTO
 
