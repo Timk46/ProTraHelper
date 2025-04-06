@@ -314,6 +314,9 @@ export class RunCodeService {
     userId: number,
     studentCode: { [fileName: string]: string },
   ): Promise<CodeSubmissionResultDto> {
+    // Check for single compilation/syntax error result
+    transformTestsResultsAfterSyntaxError(response);
+
     const codeSubmission = await this.saveToDatabase(
       response,
       codingQuestion,
@@ -407,3 +410,24 @@ export class RunCodeService {
     return base64Files;
   }
 }
+function transformTestsResultsAfterSyntaxError(response: CodeSubmissionResult) {
+  if ( // translate to "Syntax Check"
+    response.testResults &&
+    Array.isArray(response.testResults) &&
+    response.testResults.length === 1 &&
+    (response.testResults[0].test === 'test_main (unittest.loader._FailedTest.test_main)' || response.testResults[0].test === 'MAIN_COMPILATION')) {
+    response.testResults[0].test = 'Syntax Check'; // Update 'test'
+    response.testResults[0].exception =
+      'Es wurden keine weiteren Tests durchgeführt, da das Programm noch nicht lauffähig ist. Betrachte den Compiler Output für Hinweise';
+  }
+  if ( // translate to "Syntax Check"
+    response.testResults &&
+    Array.isArray(response.testResults) &&
+    response.testResults.length === 1 &&
+    response.testResults[0].test === 'TEST_COMPILATION') {
+    response.testResults[0].test = 'Syntax Check - Test Cases'; // Update 'test'
+    response.testResults[0].exception =
+      'Die Tests konnten nicht kompiliert werden.';
+  }
+}
+
