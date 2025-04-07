@@ -1,6 +1,48 @@
 // Import Nord Light theme
 @import '../../_nord-light-theme.scss';
 
+// Common button style for Tutor Kai module
+.kai-flat-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  margin-left: 8px;
+  background-color: $nord-light-accent-frost-4;
+  color: white;
+  border-radius: 4px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background-color: darken($nord-light-accent-frost-4, 10%);
+  }
+
+  &:focus {
+    outline: none;
+    border: 1px solid lighten($nord-light-accent-frost-4, 20%);
+  }
+
+  &:disabled {
+    background-color: $nord-light-ui-dark;
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  &.loading {
+    background-color: darken($nord-light-accent-frost-4, 15%);
+  }
+
+  mat-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+
+}
+
 .feedback-controls {
   position: absolute;
   left:3px;
@@ -290,7 +332,7 @@
       background: linear-gradient(to right, $nord-light-bg-secondary, $nord-light-bg-primary);
       border-top: 1px solid $nord-light-border;
      // border-bottom: 1px solid $nord-light-border;
-      min-height: 60px; // Feste Mindesthöhe für die Zeile
+      min-height: 40px; // Feste Mindesthöhe für die Zeile
       box-shadow: 0 1px 2px rgba($nord-light-text-primary, 0.05);
       position: relative;
       z-index: 5;
@@ -315,135 +357,16 @@
             opacity: 0.6;
           }
 
-          .fetch-structured-button {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 16px;
-            background: linear-gradient(45deg, darken($nord-light-accent-aurora-3, 10%), $nord-light-accent-aurora-3);
-            color: $nord-light-text-primary; // Dark text for better contrast with yellow
-            border-radius: 20px;
-            font-weight: 500;
-            box-shadow: 0 2px 5px rgba($nord-light-accent-aurora-3, 0.3);
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-
-            &:hover {
-              box-shadow: 0 4px 8px rgba($nord-light-accent-aurora-3, 0.4);
-              transform: translateY(-1px);
-            }
-
-            &:focus {
-              outline: none;
-              box-shadow: 0 0 0 2px rgba($nord-light-accent-aurora-3, 0.5);
-            }
-
-            .stars-icon {
-              transform: rotate(180deg);
-              fill: $nord-light-text-primary;
-              margin-right: 2px;
-            }
-          }
-
-          // Custom styling for the "Tutor Kai fragen" button
-          .fetch-structured-button {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 16px;
-            background: linear-gradient(45deg, darken($nord-light-accent-aurora-3, 10%), $nord-light-accent-aurora-3);
-            color: $nord-light-text-primary; // Dark text for better contrast with yellow
-            border-radius: 20px;
-            font-weight: 500;
-            box-shadow: 0 2px 5px rgba($nord-light-accent-aurora-3, 0.3);
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-
-            &:hover {
-              box-shadow: 0 4px 8px rgba($nord-light-accent-aurora-3, 0.4);
-              transform: translateY(-1px);
-            }
-
-            &:focus {
-              outline: none;
-              box-shadow: 0 0 0 2px rgba($nord-light-accent-aurora-3, 0.5);
-            }
-
-            &:disabled {
-              background: linear-gradient(45deg, $nord-light-ui-dark, $nord-light-border);
-              opacity: 0.7;
-              cursor: not-allowed;
-            }
-
-            mat-icon {
-              font-size: 18px;
-              height: 18px;
-              width: 18px;
-              transform: rotate(180deg); // Rotating the stars icon
-            }
-          }
         }
 
         // Bereich für Ausführungs-Button
         .execute-button-container {
           flex: 0 0 auto;
 
-          button {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 16px;
-            background: linear-gradient(45deg, $nord-light-primary, $nord-light-accent-frost-4);
-            color: white;
-            border-radius: 20px;
-            font-weight: 500;
-            box-shadow: 0 2px 5px rgba($nord-light-accent-frost-4, 0.3);
-            transition: all 0.3s ease;
-            border: none;
-
-            &:hover:not(:disabled) {
-              box-shadow: 0 4px 8px rgba($nord-light-accent-frost-4, 0.4);
-              transform: translateY(-1px);
-            }
-
-            &:disabled {
-              background: linear-gradient(45deg, $nord-light-ui-dark, $nord-light-border);
-              opacity: 0.7;
-            }
-
-            mat-icon {
-              font-size: 18px;
-              height: 18px;
-              width: 18px;
-            }
-          }
+          // Execute button container (empty to remove old styles)
         }
       }
 
-      // Status-Indikator für den Kompilierungs-/Ausführungsstatus
-      .compile-status {
-        position: absolute;
-        right: 16px;
-        top: 0;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        transition: all 0.3s ease;
-
-        &.active {
-          background-color: $nord-light-warning;
-          box-shadow: 0 0 8px rgba($nord-light-warning, 0.6);
-          animation: pulse 1.5s infinite;
-        }
-      }
-
-      @keyframes pulse {
-        0% { opacity: 0.4; }
-        50% { opacity: 1; }
-        100% { opacity: 0.4; }
-      }
     }
 
     // Untere Zeile: Feedback + Terminal

@@ -116,17 +116,17 @@
           <button
           *ngIf="showStructuredFeedback && canRequestStructuredFeedback()"
           (click)="structuredFeedbackPanel?.fetchFeedback()"
-          class="fetch-structured-button">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" class="stars-icon">
-            <path d="m354-287 126-76 126 77-33-144 111-96-146-13-58-136-58 135-146 13 111 97-33 143ZM233-120l65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Zm457-560 21-89-71-59 94-8 36-84 36 84 94 8-71 59 21 89-80-47-80 47ZM480-481Z"/>
-          </svg> Tutor Kai fragen
+          class="kai-flat-button">
+            <mat-icon>stars</mat-icon>
+            Tutor Kai fragen
         </button>
         </div>
 
         <!-- Execute-Button mit verbessertem Styling -->
         <div class="execute-button-container">
           <button
-            mat-raised-button
+            class="kai-flat-button"
+            [class.loading]="isCompiling"
             (click)="executeCode()"
             [disabled]="isCompiling || !workspaceState.getCurrentTask()">
             <mat-icon>play_arrow</mat-icon>
@@ -135,8 +135,6 @@
         </div>
       </div>
 
-      <!-- Statusindikator für Ausführung -->
-      <div class="compile-status" [class.active]="isCompiling"></div>
     </div>
 
     <!-- Vertikaler Resize-Handle zwischen Middle und Bottom -->

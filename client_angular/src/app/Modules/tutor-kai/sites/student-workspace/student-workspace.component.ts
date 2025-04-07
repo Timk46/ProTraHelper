@@ -44,9 +44,9 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   activeTab: 'task' | 'code' | 'output' | 'feedback' = 'code';
 
   // Neue Layout-Properties für das Grid-Layout
-  topRowHeight: number = 40; // 40% der Höhe
-  middleRowHeight: number = 60; // 60px Höhe
-  bottomRowHeight: number = 40; // 40% der Höhe
+  topRowHeight: number = 50; // 50% der Höhe
+  middleRowHeight: number = 55; // 55px Höhe
+  bottomRowHeight: number = 50; // 50% der Höhe
 
   taskPanelWidth: number = 50; // 48% der Breite - some space for file explorer of code editor
   feedbackAreaWidth: number = 50; // 50% der Breite

@@ -70,11 +70,11 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
 
   // Use Record for type safety with FeedbackKey
   feedbackTitles: Record<FeedbackKey, string> = {
-    KCR: 'Correct Solution',
-    KM: 'Mistakes Found',
-    KTC: 'Task Constraints',
-    KC: 'Relevant Concepts',
-    KH: 'How to Proceed'
+    KCR: 'Zeige mir die korrekte Lösung.',
+    KM: 'Erkläre die Fehler.',
+    KTC: 'Erkläre die Aufgabenstellung.',
+    KC: 'Erkläre relevante Konzepte.',
+    KH: 'Erkläre, wie ich weiter machen kann.'
   };
 
   private destroy$ = new Subject<void>();
