@@ -1,0 +1,38 @@
+$tab-height: 40px;
+/**
+ * Nord Light Theme for tutor-kai module
+ * A light theme implementation of the Nord color palette
+ * Reference: https://www.nordtheme.com/docs/colors-and-palettes
+ */
+
+// Polar Night (For text, dark UI elements on light backgrounds)
+$nord-light-text-primary: #2E3440;   // nord0
+$nord-light-text-secondary: #3B4252; // nord1
+$nord-light-text-tertiary: #434C5E;  // nord2
+$nord-light-ui-dark: #4C566A;        // nord3
+
+// Snow Storm (For backgrounds, light UI elements)
+$nord-light-border: #D8DEE9;         // nord4
+$nord-light-bg-secondary: #E5E9F0;   // nord5
+$nord-light-bg-primary: #ECEFF4;     // nord6
+
+// Frost (Accents)
+$nord-light-accent-frost-1: #8FBCBB; // nord7 (Teal)
+$nord-light-accent-frost-2: #88C0D0; // nord8 (Light Blue)
+$nord-light-accent-frost-3: #81A1C1; // nord9 (Medium Blue)
+$nord-light-accent-frost-4: #5E81AC; // nord10 (Dark Blue) - Often good for primary actions
+
+// Aurora (Accents)
+$nord-light-accent-aurora-1: #BF616A; // nord11 (Red - Errors)
+$nord-light-accent-aurora-2: #D08770; // nord12 (Orange - Warnings)
+$nord-light-accent-aurora-3: #EBCB8B; // nord13 (Yellow - Highlights/Stars)
+$nord-light-accent-aurora-4: #A3BE8C; // nord14 (Green - Success/Passed)
+$nord-light-accent-aurora-5: #B48EAD; // nord15 (Purple - Secondary Accent)
+
+// Semantic alias variables (for common use cases)
+$nord-light-error: $nord-light-accent-aurora-1;
+$nord-light-warning: $nord-light-accent-aurora-2;
+$nord-light-highlight: $nord-light-accent-aurora-3;
+$nord-light-success: $nord-light-accent-aurora-4;
+$nord-light-info: $nord-light-accent-frost-3;
+$nord-light-primary: $nord-light-accent-frost-4;

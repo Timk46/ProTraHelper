@@ -10,7 +10,7 @@ Ipad notices
 
 .main-container {
   position: relative;
-  height: calc(100vh - 90px); /* 60px header + 30px footer */
+  height: calc(100vh - 60px); /* 60px header + 30px footer */
 
   overflow-x: hidden;
 
@@ -22,7 +22,7 @@ Ipad notices
 }
 
 .content-wrapper {
-  padding: 16px;
+  padding: 8px;
   height: 100%;
   overflow-y: auto;
 }

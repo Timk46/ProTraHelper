@@ -47,3 +47,5 @@ export interface FeedbackRating {
   comment: string;
   submissionId: string;
 }
+
+// Removed unused FeedbackCategory, FeedbackQuestion interfaces and FEEDBACK_CATEGORIES constant
