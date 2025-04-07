@@ -1,29 +1,36 @@
-// Nord Theme Color Variables
-$nord0: #2e3440; // Polar Night (darkest)
-$nord1: #3b4252; // Polar Night
-$nord2: #434c5e; // Polar Night
-$nord3: #4c566a; // Polar Night (lightest)
-$nord4: #d8dee9; // Snow Storm (darkest)
-$nord5: #e5e9f0; // Snow Storm
-$nord6: #eceff4; // Snow Storm (lightest)
-$nord7: #8fbcbb; // Frost (teal)
-$nord8: #88c0d0; // Frost (light blue)
-$nord9: #81a1c1; // Frost (medium blue)
-$nord10: #5e81ac; // Frost (dark blue)
-$nord11: #bf616a; // Aurora (red)
-$nord12: #d08770; // Aurora (orange)
-$nord13: #ebcb8b; // Aurora (yellow)
-$nord14: #a3be8c; // Aurora (green)
-$nord15: #b48ead; // Aurora (purple)
+@import "../../nord-light-theme";
 
 .feedback-panel-tutor {
-  padding: 16px;
   height: 100%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  color: $nord1;
+  background-color: $nord-light-bg-primary;
+  color: $nord-light-text-primary;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  .feedback-header {
+    height: $tab-height;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    background-color: $nord-light-bg-secondary;
+    border-bottom: 1px solid $nord-light-border;
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 500;
+      flex-grow: 1;
+    }
+    .ai-warning{
+      margin: 0;
+      font-size: 12px;
+      font-weight: 100;
+      max-width: 75%;
+    }
+  }
 
   // Loading State
   .loading-container {
@@ -32,7 +39,7 @@ $nord15: #b48ead; // Aurora (purple)
     align-items: center;
     justify-content: center;
     padding: 40px 0;
-    color: $nord3;
+    color: $nord-light-ui-dark;
 
     mat-spinner {
       margin-bottom: 16px;
@@ -47,7 +54,7 @@ $nord15: #b48ead; // Aurora (purple)
     justify-content: center;
     padding: 40px 20px;
     text-align: center;
-    color: var(--mat-warn-color, $nord11);
+    color: var(--mat-warn-color, $nord-light-error);
 
     mat-icon {
       font-size: 48px;
@@ -62,7 +69,7 @@ $nord15: #b48ead; // Aurora (purple)
 
     .error-message {
       font-style: italic;
-      color: $nord3;
+      color: $nord-light-ui-dark;
       margin-bottom: 16px;
     }
   }
@@ -79,18 +86,19 @@ $nord15: #b48ead; // Aurora (purple)
 
     // Custom Feedback Cards
     .feedback-card {
-      background-color: $nord6; // Snow Storm (lightest)
+      background-color: $nord-light-bg-primary;
       border-radius: 8px;
-      box-shadow: 0 2px 8px rgba($nord1, 0.1);
-      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba($nord-light-text-secondary, 0.1);
+      margin-top: 8px;
+      margin-bottom: 8px;
       transition: all 0.3s ease;
       overflow: hidden; // Prevent content overflow before expansion
-      border-left: 4px solid $nord10; // Frost (dark blue)
+      border-left: 4px solid $nord-light-accent-frost-4;
 
       &.expanded {
-        background-color: $nord6;
-        border-left-color: $nord8; // Frost (light blue) for expanded state
-        box-shadow: 0 4px 12px rgba($nord1, 0.15); // More prominent shadow when expanded
+        background-color: $nord-light-bg-primary;
+        border-left-color: $nord-light-accent-frost-2;
+        box-shadow: 0 4px 12px rgba($nord-light-text-secondary, 0.15);
       }
 
       // Card Header/Button Styling
@@ -104,17 +112,17 @@ $nord15: #b48ead; // Aurora (purple)
         border: none;
         text-align: left;
         font-weight: 500;
-        color: $nord0;
+        color: $nord-light-text-primary;
         cursor: pointer;
         transition: all 0.2s ease;
 
         &:hover {
-          background-color: rgba($nord8, 0.08); // Very light Nord Frost blue
+          background-color: rgba($nord-light-accent-frost-2, 0.08);
         }
 
         &:focus {
           outline: none;
-          background-color: rgba($nord8, 0.12); // Slightly more intense on focus
+          background-color: rgba($nord-light-accent-frost-2, 0.12);
         }
 
         .title {
@@ -123,11 +131,11 @@ $nord15: #b48ead; // Aurora (purple)
 
         mat-icon {
           transition: transform 0.3s ease;
-          color: $nord9; // Frost (medium blue)
+          color: $nord-light-accent-frost-3;
 
           &.rotated {
             transform: rotate(180deg);
-            color: $nord8; // Brighter when rotated
+            color: $nord-light-accent-frost-2;
           }
         }
       }
@@ -141,13 +149,13 @@ $nord15: #b48ead; // Aurora (purple)
     // Styles for rendered markdown content
     .feedback-text {
       line-height: 1.6;
-      color: $nord1;
+      color: $nord-light-text-secondary;
       padding-bottom: 20px;
 
       h1, h2, h3, h4, h5, h6 {
         margin-top: 1.2em;
         margin-bottom: 0.6em;
-        color: $nord0;
+        color: $nord-light-text-primary;
         font-weight: 600;
       }
 
@@ -172,46 +180,46 @@ $nord15: #b48ead; // Aurora (purple)
       }
 
       pre {
-        background-color: $nord5;
+        background-color: $nord-light-bg-secondary;
         padding: 12px;
         border-radius: 4px;
         overflow-x: auto;
         margin: 16px 0;
         font-family: 'Consolas', 'Courier New', monospace;
-        border-left: 3px solid $nord9; // Nord Frost blue
+        border-left: 3px solid $nord-light-accent-frost-3;
         font-size: 0.9em;
       }
 
       code:not(pre code) { // Inline code
-        background-color: $nord5;
+        background-color: $nord-light-bg-secondary;
         padding: 2px 4px;
         border-radius: 3px;
         font-family: 'Consolas', 'Courier New', monospace;
         font-size: 0.9em;
-        color: $nord10; // Frost (dark blue)
+        color: $nord-light-accent-frost-4;
       }
 
       blockquote {
         margin: 16px 0;
         padding: 8px 16px;
-        border-left: 4px solid $nord9; // Frost (medium blue)
-        background-color: $nord5;
+        border-left: 4px solid $nord-light-accent-frost-3;
+        background-color: $nord-light-bg-secondary;
         font-style: italic;
-        color: $nord2;
+        color: $nord-light-text-tertiary;
       }
 
       a {
-        color: $nord10; // Frost (dark blue)
+        color: $nord-light-accent-frost-4;
         text-decoration: underline;
 
         &:hover {
-          color: $nord8; // Frost (light blue)
+          color: $nord-light-accent-frost-2;
         }
       }
 
       // Special styling for potential important notes
       strong {
-        color: $nord10; // Slightly emphasized
+        color: $nord-light-accent-frost-4;
       }
 
       // Tables, if used in markdown
@@ -221,20 +229,20 @@ $nord15: #b48ead; // Aurora (purple)
         margin: 16px 0;
 
         th {
-          background-color: $nord5;
-          border: 1px solid $nord4;
+          background-color: $nord-light-bg-secondary;
+          border: 1px solid $nord-light-border;
           padding: 8px;
           text-align: left;
           font-weight: bold;
         }
 
         td {
-          border: 1px solid $nord4;
+          border: 1px solid $nord-light-border;
           padding: 8px;
         }
 
         tr:nth-child(even) {
-          background-color: rgba($nord5, 0.5);
+          background-color: rgba($nord-light-bg-secondary, 0.5);
         }
       }
     }
@@ -246,7 +254,7 @@ $nord15: #b48ead; // Aurora (purple)
 
       .rating-divider {
         height: 1px;
-        background-color: $nord4;
+        background-color: $nord-light-border;
         margin-bottom: 16px;
       }
     }
@@ -256,7 +264,7 @@ $nord15: #b48ead; // Aurora (purple)
   .initial-state {
     text-align: center;
     padding: 40px 20px;
-    color: $nord3;
+    color: $nord-light-ui-dark;
   }
 }
 

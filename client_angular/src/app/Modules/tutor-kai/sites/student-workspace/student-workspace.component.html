@@ -77,12 +77,14 @@
       <div class="editor-section" [style.width.%]="100 - taskPanelWidth">
         <!-- VSCode-ähnliches Layout mit Explorer und Editor -->
         <div class="vscode-layout">
-          <!-- File Explorer (links) -->
+
+          <!-- File Explorer (links)
           <div class="explorer-panel" [class.collapsed]="fileExplorerCollapsed">
             <app-file-explorer #fileExplorer
                                [class.collapsed]="fileExplorerCollapsed"
                                (explorerCollapsedChange)="fileExplorerCollapsed = $event"></app-file-explorer>
-          </div>
+          </div>-->
+
           <!-- Code Editor (rechts) -->
           <div class="editor-panel">
             <app-code-editor-wrapper
@@ -111,6 +113,14 @@
           <span *ngIf="!testResults || testResults.length === 0" class="no-tests-message">
             Führe den Code aus, um die Tests zu starten
           </span>
+          <button
+          *ngIf="showStructuredFeedback && canRequestStructuredFeedback()"
+          (click)="structuredFeedbackPanel?.fetchFeedback()"
+          class="fetch-structured-button">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" class="stars-icon">
+            <path d="m354-287 126-76 126 77-33-144 111-96-146-13-58-136-58 135-146 13 111 97-33 143ZM233-120l65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Zm457-560 21-89-71-59 94-8 36-84 36 84 94 8-71 59 21 89-80-47-80 47ZM480-481Z"/>
+          </svg> Tutor Kai fragen
+        </button>
         </div>
 
         <!-- Execute-Button mit verbessertem Styling -->
@@ -143,13 +153,6 @@
             labelPosition="before">
             Structured View
           </mat-slide-toggle>
-          <button
-            mat-stroked-button
-            *ngIf="showStructuredFeedback && canRequestStructuredFeedback()"
-            (click)="structuredFeedbackPanel?.fetchFeedback()"
-            class="fetch-structured-button">
-            <mat-icon>refresh</mat-icon> Get Structured Feedback
-          </button>
         </div>
 
         <!-- Conditional Feedback Panels -->

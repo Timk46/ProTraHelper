@@ -33,9 +33,9 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   taskTitle: string = 'Aufgabe';
 
   // Schriftgröße für die Aufgabenbeschreibung
-  fontSizePercent: number = 90; // Standardgröße (90%) - leicht reduziert
+  fontSizePercent: number = 100; // Standardgröße (90%) - leicht reduziert
   readonly MIN_FONT_SIZE: number = 70; // Minimale Schriftgröße (70%)
-  readonly MAX_FONT_SIZE: number = 150; // Maximale Schriftgröße (150%)
+  readonly MAX_FONT_SIZE: number = 160; // Maximale Schriftgröße (150%)
   readonly FONT_SIZE_STEP: number = 10; // Schrittgröße der Änderung (10%)
 
   // Layout-States
@@ -48,7 +48,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   middleRowHeight: number = 60; // 60px Höhe
   bottomRowHeight: number = 40; // 40% der Höhe
 
-  taskPanelWidth: number = 48; // 48% der Breite - some space for file explorer of code editor
+  taskPanelWidth: number = 50; // 48% der Breite - some space for file explorer of code editor
   feedbackAreaWidth: number = 50; // 50% der Breite
 
   // Alte Property für die Migration
@@ -61,7 +61,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
 
 
   // Feedback Panel State
-  showStructuredFeedback: boolean = false;
+  showStructuredFeedback: boolean = true;
   // Resize-Properties für das neue Layout
   private isHorizontalResizingTop: boolean = false;
   private isHorizontalResizingBottom: boolean = false;
