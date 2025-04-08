@@ -13,3 +13,9 @@ export interface ConceptNodeDTO {
     edgeChildIds: number[];
 }
 
+export interface ConceptNode {
+    id: number;
+    name: string;
+    description: string | null;
+    conceptGraphId: number | null;
+}

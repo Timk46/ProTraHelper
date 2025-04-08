@@ -1,10 +1,10 @@
 import { Component, ElementRef, EventEmitter, Input, Output, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { Plug, PlugOptions, availablePlugs, plugs } from './plugs';
-import { TextLabel, Side, highlightedLineElements } from '@Interfaces/index';
+import { TextLabel, Side, highlightedLineElements } from '@DTOs/index'; // Changed from @Interfaces
 import { EditorEdgeService } from '@UMLearnServices/editor-edge.service';
 import { EditorElement } from '@DTOs/index';
 import { lineOptions, umlLineOptions } from './line-options';
-import { ClassEdge } from '@Interfaces/index';
+import { ClassEdge } from '@DTOs/index'; // Changed from @Interfaces
 import { EdgeGrabPointComponent } from './edge-grab-point/edge-grab-point.component';
 
 @Component({

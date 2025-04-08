@@ -6,9 +6,9 @@ import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDiscon
 import { Server, Socket } from 'socket.io';
 import { NotificationService } from './notification.service';
 
-@WebSocketGateway(3001, {
+@WebSocketGateway(3100, {
   cors: {
-    origin: 'http://localhost:4200',
+    origin: '*',
     methods: ['GET', 'POST'],
     credentials: true,
     transports: ['websocket']

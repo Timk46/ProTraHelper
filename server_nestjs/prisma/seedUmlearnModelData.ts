@@ -1,4 +1,4 @@
-import { EditorElement } from '../../shared/dtos/umlearnDtos/dtos/index';
+import { EditorElement } from '@DTOs/index';
 import { PrismaClient } from '@prisma/client';
 import { connect } from 'http2';
 

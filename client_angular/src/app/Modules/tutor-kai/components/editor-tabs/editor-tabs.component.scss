@@ -1,11 +1,12 @@
-$tab-height: 32px;
-$tab-background: #252526;
-$tab-active-background: #1e1e1e;
-$tab-border-color: #252526;
-$tab-active-border-color: #00aaff;
-$tab-hover-background: #2d2d2d;
-$tab-text-color: #d4d4d4;
-$tab-inactive-text-color: #a7a7a7;
+@import '../../_nord-light-theme.scss';
+
+$tab-background: $nord-light-bg-secondary;
+$tab-active-background: $nord-light-bg-primary;
+$tab-border-color: $nord-light-border;
+$tab-active-border-color: $nord-light-accent-frost-4;
+$tab-hover-background: darken($nord-light-bg-secondary, 5%);
+$tab-text-color: $nord-light-text-primary;
+$tab-inactive-text-color: $nord-light-text-tertiary;
 
 .tabs-container {
   height: $tab-height;
@@ -14,7 +15,7 @@ $tab-inactive-text-color: #a7a7a7;
   display: flex;
   flex-direction: row;
   align-items: center;
-  overflow-x: auto;
+  overflow-x: scroll;
   overflow-y: hidden;
   white-space: nowrap;
 
@@ -67,7 +68,7 @@ $tab-inactive-text-color: #a7a7a7;
     .filename::after {
       content: '●';
       margin-left: 4px;
-      font-size: 10px;
+      font-size: 12px;
     }
   }
 }
@@ -86,7 +87,7 @@ $tab-inactive-text-color: #a7a7a7;
 }
 
 .filename {
-  font-size: 12px;
+  font-size: 14px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 

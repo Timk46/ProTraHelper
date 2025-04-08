@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ContentDTO, ContentElementDTO, contentElementType, ContentsForConceptDTO, LinkableContentElementDTO } from '@DTOs/index';
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { ContentElement } from '@DTOs/prisma.dto';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';

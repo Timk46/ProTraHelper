@@ -1,4 +1,4 @@
-import { Side } from '@Interfaces/index';
+import { Side } from '@DTOs/index'; // Changed from @Interfaces
 import { CdkDragMove } from '@angular/cdk/drag-drop';
 import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 

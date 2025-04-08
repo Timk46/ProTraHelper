@@ -1,0 +1,95 @@
+<div class="feedback-panel-tutor">
+  <div class="feedback-header">
+    <h2>Tutor Kai</h2>
+    <p class="ai-warning">Das Feedback wird mittels generativer KI generiert und ist nicht immer perfekt.</p>
+  </div>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading structured feedback...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <mat-icon color="warn">error_outline</mat-icon>
+    <p>Error loading feedback:</p>
+    <p class="error-message">{{ error }}</p>
+    <!-- Optional: Add a retry button -->
+    <!-- <button mat-stroked-button color="warn" (click)="fetchFeedback()">Retry</button> -->
+  </div>
+
+  <!-- Feedback Content -->
+  <div *ngIf="feedback && !isLoading && !error" class="feedback-content">
+    <div class="feedback-cards">
+
+
+      <!-- KM Feedback Card -->
+      <div *ngIf="feedback['KM']" class="feedback-card" [class.expanded]="expandedSections['KM']">
+        <button class="card-header" (click)="toggleSection('KM')">
+          <span class="title">{{ feedbackTitles['KM'] || 'KM' }}</span>
+          <mat-icon [class.rotated]="expandedSections['KM']">expand_more</mat-icon>
+        </button>
+        <div class="card-content" [@expandCollapse]="expandedSections['KM'] ? 'true' : 'false'">
+          <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KM'])"></div>
+        </div>
+      </div>
+
+      <!-- KTC Feedback Card -->
+      <div *ngIf="feedback['KTC']" class="feedback-card" [class.expanded]="expandedSections['KTC']">
+        <button class="card-header" (click)="toggleSection('KTC')">
+          <span class="title">{{ feedbackTitles['KTC'] || 'KTC' }}</span>
+          <mat-icon [class.rotated]="expandedSections['KTC']">expand_more</mat-icon>
+        </button>
+        <div class="card-content" [@expandCollapse]="expandedSections['KTC'] ? 'true' : 'false'">
+          <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KTC'])"></div>
+        </div>
+      </div>
+
+      <!-- KC Feedback Card -->
+      <div *ngIf="feedback['KC']" class="feedback-card" [class.expanded]="expandedSections['KC']">
+        <button class="card-header" (click)="toggleSection('KC')">
+          <span class="title">{{ feedbackTitles['KC'] || 'KC' }}</span>
+          <mat-icon [class.rotated]="expandedSections['KC']">expand_more</mat-icon>
+        </button>
+        <div class="card-content" [@expandCollapse]="expandedSections['KC'] ? 'true' : 'false'">
+          <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KC'])"></div>
+        </div>
+      </div>
+
+      <!-- KH Feedback Card -->
+      <div *ngIf="feedback['KH']" class="feedback-card" [class.expanded]="expandedSections['KH']">
+        <button class="card-header" (click)="toggleSection('KH')">
+          <span class="title">{{ feedbackTitles['KH'] || 'KH' }}</span>
+          <mat-icon [class.rotated]="expandedSections['KH']">expand_more</mat-icon>
+        </button>
+        <div class="card-content" [@expandCollapse]="expandedSections['KH'] ? 'true' : 'false'">
+          <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KH'])"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KCR Feedback Card -->
+    <div *ngIf="feedback['KCR']" class="feedback-card" [class.expanded]="expandedSections['KCR']">
+      <button class="card-header" (click)="toggleSection('KCR')">
+        <span class="title">{{ feedbackTitles['KCR'] || 'KCR' }}</span>
+        <mat-icon [class.rotated]="expandedSections['KCR']">expand_more</mat-icon>
+      </button>
+      <div class="card-content" [@expandCollapse]="expandedSections['KCR'] ? 'true' : 'false'">
+        <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KCR'])"></div>
+      </div>
+    </div>
+
+    <!-- Rating Section -->
+    <div *ngIf="showRating()" class="rating-section">
+      <div class="rating-divider"></div>
+      <app-rating (ratingSubmitted)="onRatingSubmitted($event)"></app-rating>
+    </div>
+  </div>
+
+  <!-- Initial state / No feedback yet (Optional) -->
+  <div *ngIf="!feedback && !isLoading && !error" class="initial-state">
+     <!-- Keep this empty for now, button is in parent -->
+     <!-- <p>Click "Get Structured Feedback" to load.</p> -->
+  </div>
+
+</div>

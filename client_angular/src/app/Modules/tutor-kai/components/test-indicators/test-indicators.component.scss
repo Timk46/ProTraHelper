@@ -1,20 +1,22 @@
+@import "../../_nord-light-theme.scss";
+
 .test-indicators-container {
   display: flex;
   align-items: center;
   padding: 8px 12px;
-  background-color: #f8f9fa;
+  background-color: $nord-light-bg-primary;
   border-radius: 4px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid $nord-light-border;
   min-height: 32px;
 
   &.active {
-    border-color: #3f51b5;
+    border-color: $nord-light-accent-frost-4;
   }
 
   &.empty {
-    color: #757575;
+    color: $nord-light-text-tertiary;
     justify-content: center;
-    background-color: #f5f5f5;
+    background-color: $nord-light-bg-secondary;
     font-size: 13px;
   }
 }
@@ -34,11 +36,11 @@
   cursor: pointer;
 
   &.passed {
-    background-color: #4caf50;
+    background-color: $nord-light-accent-aurora-4;
   }
 
   &.failed {
-    background-color: #f44336;
+    background-color: $nord-light-accent-aurora-1;
   }
 
   &.new-result {
@@ -54,15 +56,15 @@
   align-items: center;
 
   &.all-passed {
-    color: #4caf50;
+    color: $nord-light-accent-aurora-4;
   }
 
   &.some-failed {
-    color: #f57c00;
+    color: $nord-light-accent-aurora-2;
   }
 
   &.all-failed {
-    color: #f44336;
+    color: $nord-light-accent-aurora-1;
   }
 }
 

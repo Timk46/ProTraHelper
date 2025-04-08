@@ -2,14 +2,12 @@ import { Body, Controller, Post, Req } from '@nestjs/common';
 import { CodingQuestionGeneratorService } from './codingQuestionGeneratorPython.service';
 import { Public } from '../../public.decorator';
 import { genTaskDto } from '@DTOs/tutorKaiDtos/genTask.dto';
-import { CodingQuestionGeneratorCppService } from './codingQuestionGeneratorCPP.service';
 import { CodeGeruestDto, CodingQuestionInternal } from '@Interfaces/question.dto';
 
 @Controller('coding-question-generator')
 export class CodingQuestionGeneratorController {
     constructor(
       private readonly codingQuestionGeneratorService: CodingQuestionGeneratorService,
-      private readonly codingQuestionGeneratorCppService: CodingQuestionGeneratorCppService
     ) {}
 
     @Post('genPythonTaskWithTopic')
@@ -21,6 +19,7 @@ export class CodingQuestionGeneratorController {
         return genTask;
     }
 
+    /*
     @Post('genCppTask')
     async genCppTask(@Req() req, @Body() body: {taskDescription: string, codeGerueste: CodeGeruestDto[]}) {
         console.log("genCppTask in Controller ausgeführt ...");
@@ -29,5 +28,6 @@ export class CodingQuestionGeneratorController {
 
         return genTask;
     }
+        */
 }
 

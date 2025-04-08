@@ -12,6 +12,7 @@ import { WorkspaceStateService } from "../../services/workspace-state.service";
 import { WorkspaceState, TestResult } from "../../models/code-submission.model";
 import { CodeEditorWrapperComponent } from "../../components/code-editor-wrapper/code-editor-wrapper.component";
 import { FileExplorerComponent } from "../../components/file-explorer/file-explorer.component";
+import { FeedbackPanelTutorFeedbackComponent } from '../../components/feedback-panel-tutor-feedback/feedback-panel-tutor-feedback.component';
 
 @Component({
   selector: 'app-student-workspace',
@@ -21,6 +22,7 @@ import { FileExplorerComponent } from "../../components/file-explorer/file-explo
 export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(CodeEditorWrapperComponent) codeEditorWrapper!: CodeEditorWrapperComponent;
   @ViewChild('fileExplorer') fileExplorer!: FileExplorerComponent;
+  @ViewChild('structuredFeedbackPanel') structuredFeedbackPanel?: FeedbackPanelTutorFeedbackComponent;
 
   // TaskID aus der Route
   currentTaskId: number = 0;
@@ -31,9 +33,9 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   taskTitle: string = 'Aufgabe';
 
   // Schriftgröße für die Aufgabenbeschreibung
-  fontSizePercent: number = 90; // Standardgröße (90%) - leicht reduziert
+  fontSizePercent: number = 100; // Standardgröße (90%) - leicht reduziert
   readonly MIN_FONT_SIZE: number = 70; // Minimale Schriftgröße (70%)
-  readonly MAX_FONT_SIZE: number = 150; // Maximale Schriftgröße (150%)
+  readonly MAX_FONT_SIZE: number = 160; // Maximale Schriftgröße (150%)
   readonly FONT_SIZE_STEP: number = 10; // Schrittgröße der Änderung (10%)
 
   // Layout-States
@@ -42,11 +44,11 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   activeTab: 'task' | 'code' | 'output' | 'feedback' = 'code';
 
   // Neue Layout-Properties für das Grid-Layout
-  topRowHeight: number = 40; // 40% der Höhe
-  middleRowHeight: number = 60; // 60px Höhe
-  bottomRowHeight: number = 40; // 40% der Höhe
+  topRowHeight: number = 50; // 50% der Höhe
+  middleRowHeight: number = 55; // 55px Höhe
+  bottomRowHeight: number = 50; // 50% der Höhe
 
-  taskPanelWidth: number = 48; // 48% der Breite - some space for file explorer of code editor
+  taskPanelWidth: number = 50; // 48% der Breite - some space for file explorer of code editor
   feedbackAreaWidth: number = 50; // 50% der Breite
 
   // Alte Property für die Migration
@@ -57,6 +59,9 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   isCompiling: boolean = false;
   testResults: TestResult[] | null = null;
 
+
+  // Feedback Panel State
+  showStructuredFeedback: boolean = true;
   // Resize-Properties für das neue Layout
   private isHorizontalResizingTop: boolean = false;
   private isHorizontalResizingBottom: boolean = false;
@@ -113,7 +118,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       .subscribe(task => {
         if (task) {
           // Verwende text (Markdown) statt textHTML für Markdown-Rendering
-          this.taskDescription = task.codingQuestion?.text ?? '';
+          this.taskDescription = task.codingQuestion?.textHTML ?? '';
           // Extrahiere den Namen als Titel aus dem Task-Objekt
           this.taskTitle = task.name ?? 'Aufgabe';
         }
@@ -188,10 +193,11 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     this.isCompiling = false;
     this.compilerOutput = result.CodeSubmissionResult.output || 'Keine Ausgabe';
 
-    // Speichere Test-Ergebnisse, falls vorhanden
-    this.testResults = result.CodeSubmissionResult.testResults ?
-      (result.CodeSubmissionResult.testResults as unknown as TestResult[]) :
-      null;
+    // Hole die bereits transformierten Test-Ergebnisse vom Service
+    const latestResult = this.workspaceState.getCodeSubmissionResult();
+    // Stelle sicher, dass testResults ein Array ist oder null, falls keine Ergebnisse vorhanden sind
+    // Assert the type to the local TestResult[] as we know the service transformed it
+    this.testResults = (latestResult?.CodeSubmissionResult?.testResults as TestResult[] | undefined) ?? null;
 
     // Mobile View: Wechsle zur Output-Ansicht nach Code-Ausführung
     if (window.innerWidth <= 768) {
@@ -492,5 +498,25 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
    */
   isState(state: WorkspaceState): boolean {
     return this.workspaceState.getCurrentState() === state;
+  }
+
+
+  /**
+   * Checks if the structured feedback can be requested (typically after code submission)
+   */
+  canRequestStructuredFeedback(): boolean {
+    return this.workspaceState.getCurrentState() === WorkspaceState.SUBMITTED_CODE;
+  }
+
+  /**
+   * Handler for when the feedback view toggle changes.
+   * Can be used for additional logic if needed in the future.
+   */
+  onFeedbackViewChange(): void {
+    // Currently no specific logic needed here as ngModel handles the state.
+    // If the structured panel should auto-fetch on toggle, add logic here:
+    // if (this.showStructuredFeedback && this.canRequestStructuredFeedback()) {
+    //   this.structuredFeedbackPanel?.fetchFeedback();
+    // }
   }
 }

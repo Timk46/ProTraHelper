@@ -4,9 +4,15 @@ COPY ../server_nestjs/package.json .
 COPY ../server_nestjs/package-lock.json .
 COPY ../server_nestjs .
 COPY ../shared .
-RUN npm install
+# Correct tsconfig paths for shared DTOs within Docker build context
+RUN sed -i 's#"\.\./shared/dtos/\*"#"./dtos/\*"#g' tsconfig.json
+
+
+RUN npm ci
 RUN npx prisma generate
 #RUN npm run seed
-RUN npm run build
+# Diagnostic: Check if DTOs exist at the expected path
+RUN npm run build -- -p tsconfig.json
 EXPOSE 3000
+EXPOSE 3100
 CMD ["node", "dist/src/main"]

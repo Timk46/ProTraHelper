@@ -1,14 +1,33 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, Observable } from 'rxjs'; // Added Observable import
 import { WorkspaceStateService } from '../../services/workspace-state.service';
-import { WorkspaceState } from '../../models/code-submission.model';
+import { WorkspaceState } from '../../models/code-submission.model'; // Removed unused imports
 import { MarkdownService } from '../../services/markdown/markdown.service';
+import { trigger, state, style, animate, transition } from '@angular/animations';
 
 @Component({
   selector: 'app-feedback-panel',
   templateUrl: './feedback-panel.component.html',
-  styleUrls: ['./feedback-panel.component.scss']
+  styleUrls: ['./feedback-panel.component.scss'],
+  animations: [
+    trigger('bubbleAnimation', [
+      state('hidden', style({
+        opacity: 0,
+        transform: 'translateY(-20px)'
+      })),
+      state('visible', style({
+        opacity: 1,
+        transform: 'translateY(0)'
+      })),
+      transition('hidden => visible', [
+        animate('300ms ease-out')
+      ]),
+      transition('visible => hidden', [
+        animate('200ms ease-in')
+      ])
+    ])
+  ]
 })
 export class FeedbackPanelComponent implements OnInit, OnDestroy {
   feedbackContent = '';
@@ -16,14 +35,7 @@ export class FeedbackPanelComponent implements OnInit, OnDestroy {
   isGenerating = false;
   generatingMessage = 'Lass mich einen Augenblick über die Aufgabe nachdenken...';
 
-  // Feedback-Level-Optionen
-  feedbackLevelOptions = [
-    'Wenig Unterstützung',
-    'Standard Unterstützung',
-    'Viel Unterstützung',
-  ];
-
-  selectedLevel = 'Standard Unterstützung';
+  // Removed properties related to old feedback categories/questions
 
   // Zustand
   currentState: WorkspaceState = WorkspaceState.START;
@@ -62,25 +74,46 @@ export class FeedbackPanelComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * Fordert KI-Feedback mit dem gewählten Level an
-   */
-  getKIFeedback(level: string): void {
-    this.selectedLevel = level;
+  // --- New Agent-Specific Feedback Request Methods ---
 
+  private requestAgentFeedback(agentRequestFn: (taskId: number, submissionResult: any) => Observable<string>): void {
     const task = this.workspaceState.getCurrentTask();
     const lastResult = this.workspaceState.getCodeSubmissionResult();
 
     if (task && lastResult) {
-      this.workspaceState.requestFeedback(
-        task.id,
-        'Feedback mit Konzept-Erklärung', // Standard-Flavor
-        level,
-        lastResult
-      ).pipe(takeUntil(this.destroy$))
-      .subscribe();
+      agentRequestFn.call(this.workspaceState, task.id, lastResult)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          // Optional: Add next/error handlers if needed for component-specific logic
+          error: (err: any) => console.error('Error requesting agent feedback in component:', err) // Added type for err
+        });
+    } else {
+      console.error('Cannot request feedback: Task or last submission result is missing.');
+      // Optionally show an error message to the user
     }
   }
+
+  requestSupervisorFeedback(): void {
+    this.requestAgentFeedback(this.workspaceState.requestSupervisorFeedback);
+  }
+
+  requestKcFeedback(): void {
+    this.requestAgentFeedback(this.workspaceState.requestKcFeedback);
+  }
+
+  requestKhFeedback(): void {
+    this.requestAgentFeedback(this.workspaceState.requestKhFeedback);
+  }
+
+  requestKmFeedback(): void {
+    this.requestAgentFeedback(this.workspaceState.requestKmFeedback);
+  }
+
+  requestKtcFeedback(): void {
+    this.requestAgentFeedback(this.workspaceState.requestKtcFeedback);
+  }
+
+  // Removed old methods: selectCategory, requestFeedbackForQuestion, closeQuestionBubble
 
   /**
    * Behandelt die Bewertungsabgabe
@@ -118,4 +151,6 @@ export class FeedbackPanelComponent implements OnInit, OnDestroy {
   showRating(): boolean {
     return this.currentState === WorkspaceState.FINISHED_FEEDBACK;
   }
+
+  // Removed getSelectedFeedbackName method
 }
