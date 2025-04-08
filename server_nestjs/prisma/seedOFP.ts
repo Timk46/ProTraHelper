@@ -1,6 +1,4 @@
 import { PrismaClient, contentElementType } from '@prisma/client';
-import { WorkSheet, utils } from 'xlsx';
-import { faker } from '@faker-js/faker';
 import * as fs from 'fs';
 import { seedCodeQuestions } from './seedCodeQuestions';
 import { seedAllEmbeddingsForVideo } from './seedEmbeddings';
@@ -1344,7 +1342,7 @@ export const seedOFP = async () => {
             email: 'admin@test.de',
             firstname: 'Admin',
             lastname: 'User',
-            password: await bcrypt.hash('admin', 10), // changed on production
+            password: await bcrypt.hash('QGkd!s#4na4f', 10), // changed on production
             globalRole: 'ADMIN',
           },
         });
@@ -1360,22 +1358,6 @@ export const seedOFP = async () => {
     // seed mor users for other usecases (evaluation etc.)
     await seedUser(subjectOFP.id, moduleInformatik.id);
 
-    // More users
-    const numberOfUsers = 10;
-    const createdUsers = [];
-
-    for (let i = 0; i < numberOfUsers; i++) {
-      const user = await prisma.user.create({
-        data: {
-          email: faker.internet.email(),
-          firstname: faker.person.firstName(),
-          lastname: faker.person.lastName(),
-          password: faker.internet.password(), //passwords wont work because they are not hashed like they should. To Login with Users use hardcoded ones (see above)
-          globalRole: 'STUDENT',
-        },
-      });
-      createdUsers.push(user);
-    }
 
     // root node
     const conceptNode = await prisma.conceptNode.create({
@@ -1395,17 +1377,7 @@ export const seedOFP = async () => {
         expanded: true,
       },
     });
-    for (const user in createdUsers) {
-      await prisma.userConcept.create({
-        data: {
-          user: { connect: { id: createdUsers[user].id } },
-          concept: { connect: { id: conceptNode.id } },
-          // level: Math.floor(Math.random() * 7), // random number between 0 and 6
-          level: 10,
-          expanded: true,
-        },
-      });
-    }
+
     //create moduleConceptGoals for root
     await prisma.moduleConceptGoal.create({
       data: {

@@ -24,7 +24,7 @@ export class CodeEditorComponent implements AfterViewInit {
 
   // For Monaco Code Editor
   editorOptions = {
-    theme: 'vs-bright',
+    theme: 'vs',
     language: this.selectedLanguage,
     minimap: { enabled: false },
     automaticLayout: true,

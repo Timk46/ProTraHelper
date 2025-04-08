@@ -2,32 +2,40 @@
   <!-- Einführung / Leerer Zustand -->
   <div *ngIf="!showFeedbackOptions() && !feedbackContent && !isGenerating" class="feedback-intro">
     <div class="feedback-card">
-      <div class="card-icon">
-        <mat-icon>lightbulb</mat-icon>
-      </div>
-      <h3>KI-Feedback für deinen Code</h3>
-      <p>Führe deinen Code aus, um persönliches Feedback von Tutor Kai zu erhalten.</p>
+      <p class="compact-message">Führe deinen Code aus, um Feedback zu erhalten.</p>
     </div>
   </div>
 
-  <!-- Feedback-Optionen zur Auswahl -->
+  <!-- Kompakte Feedback-Optionen -->
   <div *ngIf="showFeedbackOptions()" class="feedback-options">
     <div class="feedback-card">
-      <h3>Feedback-Optionen</h3>
-      <p>Wähle dein gewünschtes Unterstützungslevel:</p>
-      <div class="level-selector">
-        <button
-          *ngFor="let level of feedbackLevelOptions"
-          mat-stroked-button
-          color="primary"
-          [class.selected]="selectedLevel === level"
-          (click)="getKIFeedback(level)">
-          <span class="level-icon">
-            <mat-icon *ngIf="level === 'Wenig Unterstützung'">directions_walk</mat-icon>
-            <mat-icon *ngIf="level === 'Standard Unterstützung'">emoji_people</mat-icon>
-            <mat-icon *ngIf="level === 'Viel Unterstützung'">directions_run</mat-icon>
-          </span>
-          {{ level }}
+      <p class="compact-title">Wähle Feedback-Option:</p>
+
+      <!-- Compact Agent Buttons -->
+      <div class="compact-agent-buttons">
+        <button class="compact-button supervisor" mat-stroked-button (click)="requestSupervisorFeedback()" matTooltip="Die KI entscheidet die beste Option für dich">
+          <mat-icon>supervisor_account</mat-icon>
+          <span>KI wählen</span>
+        </button>
+
+        <button class="compact-button concepts" mat-stroked-button (click)="requestKcFeedback()" matTooltip="Relevantes Hintergrundwissen erklären">
+          <mat-icon>lightbulb</mat-icon>
+          <span>Konzepte</span>
+        </button>
+
+        <button class="compact-button next-steps" mat-stroked-button (click)="requestKhFeedback()" matTooltip="Zeigt, wie du weitermachen kannst">
+          <mat-icon>navigation</mat-icon>
+          <span>Nächste Schritte</span>
+        </button>
+
+        <button class="compact-button errors" mat-stroked-button (click)="requestKmFeedback()" matTooltip="Probleme in deinem Code erkennen">
+          <mat-icon>bug_report</mat-icon>
+          <span>Fehler</span>
+        </button>
+
+        <button class="compact-button task" mat-stroked-button (click)="requestKtcFeedback()" matTooltip="Erklärung der Aufgabenstellung">
+          <mat-icon>assignment</mat-icon>
+          <span>Aufgabe</span>
         </button>
       </div>
     </div>
@@ -47,7 +55,7 @@
     <div *ngIf="feedbackContent" class="feedback-result">
       <div class="feedback-header">
         <h3>Feedback zu deinem Code</h3>
-        <div class="feedback-level-badge">{{ selectedLevel }}</div>
+        <!-- Removed old feedback type badge -->
       </div>
 
       <div class="feedback-text" [innerHTML]="sanitizedFeedback"></div>

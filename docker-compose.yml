@@ -1,29 +1,31 @@
 version: '3.1' 
 
 services: 
-
 # Postgres Database running in different compose
 
 #ANGULAR
-  hefl_client:
-    container_name: goals_client
+  goals_ofp_client:
+    container_name: goals_ofp_client
     build: 
       context: .
       dockerfile: ./Docker/angular
-    ports: 
-      - 4200:80
+      args:
+        WEBSITE_URL: ${WEBSITE_URL}
+        SERVER_URL: ${SERVER_URL}
+        WEBSOCKET_URL: ${WEBSOCKET_URL} # Add this line
     networks:
       - nginx-network
     restart: always
 
 #NestJS
-  hefl_server:
-    container_name: goals_server
+  goals_ofp_server:
+    container_name: goals_ofp_server
     build: 
       context: .
       dockerfile: ./Docker/nest
-    ports: 
-      - 3000:3000
+    env_file:
+      - .env
+      - .env.auth.prod
     networks:
       - nginx-network
     restart: always

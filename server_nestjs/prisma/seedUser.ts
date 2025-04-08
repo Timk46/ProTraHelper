@@ -31,7 +31,7 @@ export const seedUser = async (subjectInformatik_id: number, moduleInformatik_id
   };
 
   // PROBANDEN
-  await createUserAndSubject('pferd@proband.de', 'Pferd1444');
+  await createUserAndSubject('pferd@proband.de', 'Pferd1444'); // testaccount sven
   await createUserAndSubject('katze@proband.de', 'Katze7793');
   await createUserAndSubject('hund@proband.de', 'Hund7138');
   await createUserAndSubject('falke@proband.de', 'Falke5923');

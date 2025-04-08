@@ -1,27 +1,31 @@
+@import '../../_nord-light-theme.scss';
+
 .terminal-container {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 150px;
-  background-color: #1e1e1e;
-  color: #f8f8f8;
+  background-color: $nord-light-bg-primary;
+  color: $nord-light-text-primary;
   border-radius: 6px;
   overflow: hidden;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 6px rgba($nord-light-text-primary, 0.15);
 
   .terminal-header {
+    height: $tab-height;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 5px 10px;
-    background-color: #2a2a2a;
-    border-bottom: 1px solid #3a3a3a;
+    background-color: $nord-light-bg-secondary;
+    border-bottom: 1px solid $nord-light-border;
 
-    .terminal-title {
-      font-size: 14px;
+    h2 {
+      margin: 0;
+      font-size: 18px;
       font-weight: 500;
-      color: #ddd;
+      flex-grow: 1;
     }
 
     .header-buttons {
@@ -29,14 +33,14 @@
       gap: 4px;
 
       .font-size-button, .copy-button {
-        color: #aaa;
+        color: $nord-light-text-tertiary;
 
         &:hover {
-          color: #fff;
+          color: $nord-light-text-primary;
         }
 
         &:disabled {
-          color: #555;
+          color: rgba($nord-light-ui-dark, 0.5);
         }
       }
     }
@@ -47,7 +51,7 @@
     padding: 10px;
     overflow-y: auto;
     overflow-x: auto;
-    background-color: #1e1e1e;
+    background-color: $nord-light-bg-primary;
     position: relative;
 
     .loading-spinner {
@@ -60,15 +64,15 @@
       .spinner {
         width: 20px;
         height: 20px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
+        border: 2px solid $nord-light-border;
         border-radius: 50%;
-        border-top-color: #fff;
+        border-top-color: $nord-light-primary;
         animation: spin 1s linear infinite;
         margin-bottom: 10px;
       }
 
       span {
-        color: #bbb;
+        color: $nord-light-text-tertiary;
         font-size: 14px;
       }
     }
@@ -90,7 +94,7 @@
       }
 
       .empty-message {
-        color: #888;
+        color: $nord-light-ui-dark;
         font-style: italic;
         padding: 10px 0;
         text-align: center;
@@ -98,15 +102,15 @@
       }
 
       .error {
-        color: #ff6b6b;
+        color: $nord-light-error;
       }
 
       .warning {
-        color: #ffb347;
+        color: $nord-light-warning;
       }
 
       .success {
-        color: #6bff7d;
+        color: $nord-light-success;
       }
     }
   }

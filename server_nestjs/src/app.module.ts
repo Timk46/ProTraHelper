@@ -20,9 +20,10 @@ import { DiscussionCreationController } from './discussion/discussion-creation/d
 import { QuestionDataModule } from './question-data/question-data.module';
 
 // BEGIN Tutor-Kai Imports
-import { CryptoService } from './tutor-kai/crypto/crypto.service';
+import { CryptoService } from './tutor-kai/langgraph-feedback/helper/crypto.service';
 import { QuestionModule } from './tutor-kai/question/question.module';
 import { RunCodeModule } from './tutor-kai/run-code/run-code.module';
+import { TutoringFeedbackModule } from './tutor-kai/tutoring-feedback/tutoring-feedback.module';
 // END Tutor-Kai Imports
 
 // BEGIN UMLearn Imports
@@ -63,6 +64,7 @@ import { AiFeedbackService } from './graph-solution-evaluation/ai-feedback/ai-fe
 import { PointCalculationModule } from './umlearn/point-calculation/point-calculation.module';
 
 import { CodeGameModule } from './code-game/code-game.module';
+import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgraph-feedback.module';
 
 @Module({
   imports: [
@@ -99,7 +101,9 @@ import { CodeGameModule } from './code-game/code-game.module';
     GptModule,
     CompareModule,
     PointCalculationModule,
-    CodeGameModule
+    CodeGameModule,
+    LanggraphFeedbackModule,
+    TutoringFeedbackModule,
   ],
   controllers: [
     AppController,

@@ -77,12 +77,14 @@
       <div class="editor-section" [style.width.%]="100 - taskPanelWidth">
         <!-- VSCode-ähnliches Layout mit Explorer und Editor -->
         <div class="vscode-layout">
-          <!-- File Explorer (links) -->
+
+          <!-- File Explorer (links)
           <div class="explorer-panel" [class.collapsed]="fileExplorerCollapsed">
             <app-file-explorer #fileExplorer
                                [class.collapsed]="fileExplorerCollapsed"
                                (explorerCollapsedChange)="fileExplorerCollapsed = $event"></app-file-explorer>
-          </div>
+          </div>-->
+
           <!-- Code Editor (rechts) -->
           <div class="editor-panel">
             <app-code-editor-wrapper
@@ -111,12 +113,20 @@
           <span *ngIf="!testResults || testResults.length === 0" class="no-tests-message">
             Führe den Code aus, um die Tests zu starten
           </span>
+          <button
+          *ngIf="showStructuredFeedback && canRequestStructuredFeedback()"
+          (click)="structuredFeedbackPanel?.fetchFeedback()"
+          class="kai-flat-button">
+            <mat-icon>stars</mat-icon>
+            Tutor Kai fragen
+        </button>
         </div>
 
         <!-- Execute-Button mit verbessertem Styling -->
         <div class="execute-button-container">
           <button
-            mat-raised-button
+            class="kai-flat-button"
+            [class.loading]="isCompiling"
             (click)="executeCode()"
             [disabled]="isCompiling || !workspaceState.getCurrentTask()">
             <mat-icon>play_arrow</mat-icon>
@@ -125,8 +135,6 @@
         </div>
       </div>
 
-      <!-- Statusindikator für Ausführung -->
-      <div class="compile-status" [class.active]="isCompiling"></div>
     </div>
 
     <!-- Vertikaler Resize-Handle zwischen Middle und Bottom -->
@@ -135,7 +143,22 @@
     <!-- Untere Zeile: Feedback + Terminal -->
     <div class="bottom-row" [style.height.%]="bottomRowHeight">
       <div class="feedback-area" [style.width.%]="feedbackAreaWidth">
-        <app-feedback-panel></app-feedback-panel>
+        <!-- Feedback View Toggle -->
+        <div class="feedback-controls">
+          <mat-slide-toggle
+            [(ngModel)]="showStructuredFeedback"
+            (change)="onFeedbackViewChange()"
+            labelPosition="before">
+            Structured View
+          </mat-slide-toggle>
+        </div>
+
+        <!-- Conditional Feedback Panels -->
+        <app-feedback-panel *ngIf="!showStructuredFeedback"></app-feedback-panel>
+        <app-feedback-panel-tutor-feedback
+          *ngIf="showStructuredFeedback"
+          #structuredFeedbackPanel>
+        </app-feedback-panel-tutor-feedback>
       </div>
 
       <!-- Horizontaler Resize-Handle -->

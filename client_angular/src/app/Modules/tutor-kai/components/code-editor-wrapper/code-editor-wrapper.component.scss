@@ -1,37 +1,30 @@
-// VSCode-inspirierte Farbpalette
-$editor-bg: #1e1e1e;
-$editor-toolbar-bg: #252526;
-$editor-border: #3c3c3c;
-$editor-text: #d4d4d4;
-$panel-bg: #252526;
-$panel-header-bg: #2d2d2d;
-$panel-border: #3c3c3c;
+@import "../../nord-light-theme";
 
 .code-editor-wrapper {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: $editor-bg;
-  color: $editor-text;
+  background-color: $nord-light-bg-primary;
+  color: $nord-light-text-primary;
   margin-bottom: 0;
-  border: 1px solid $editor-border;
+  border: 1px solid $nord-light-border;
   border-radius: 2px;
   overflow: hidden;
 
-  // Input-Args Panel mit VSCode-Styling
+  // Input-Args Panel with Nord Light styling
   .input-args-form {
     margin: 5px 0 0 0;
     padding: 12px 15px;
-    background-color: $panel-bg;
-    border-top: 1px solid $panel-border;
+    background-color: $nord-light-bg-secondary;
+    border-top: 1px solid $nord-light-border;
 
     h3 {
       margin-top: 0;
       margin-bottom: 12px;
       font-size: 14px;
-      color: $editor-text;
+      color: $nord-light-text-primary;
       font-weight: 500;
-      border-bottom: 1px solid $panel-border;
+      border-bottom: 1px solid $nord-light-border;
       padding-bottom: 8px;
     }
 
@@ -40,44 +33,44 @@ $panel-border: #3c3c3c;
 
       mat-form-field {
         width: 100%;
-        // Styles für Material Eingabefelder anpassen
+        // Styles for Material input fields
         ::ng-deep {
           .mat-form-field-wrapper {
             padding-bottom: 0;
           }
 
           .mat-form-field-underline {
-            background-color: $panel-border;
+            background-color: $nord-light-border;
           }
 
           .mat-form-field-ripple {
-            background-color: #0078d4;
+            background-color: $nord-light-accent-frost-4;
           }
 
           .mat-form-field-label {
-            color: #a7a7a7;
+            color: $nord-light-text-secondary;
           }
 
           input.mat-input-element {
-            color: $editor-text;
+            color: $nord-light-text-primary;
           }
         }
       }
     }
   }
 
-  // Submit-Controls mit VSCode-Styling
+  // Submit-Controls with Nord Light styling
   .submit-controls {
     margin-top: 12px;
     display: flex;
     justify-content: flex-end;
     padding: 10px 15px;
-    background-color: $panel-bg;
-    border-top: 1px solid $panel-border;
+    background-color: $nord-light-bg-secondary;
+    border-top: 1px solid $nord-light-border;
 
     button {
       min-width: 120px;
-      background-color: #0078d4;
+      background-color: $nord-light-accent-frost-4;
       color: white;
       border: none;
       padding: 6px 12px;
@@ -86,11 +79,11 @@ $panel-border: #3c3c3c;
       transition: background-color 0.2s;
 
       &:hover {
-        background-color: #0086f0;
+        background-color: darken($nord-light-accent-frost-4, 5%);
       }
 
       &:active {
-        background-color: #006cbe;
+        background-color: darken($nord-light-accent-frost-4, 10%);
       }
 
       mat-icon {

@@ -847,7 +847,7 @@ export class CodingQuestionGeneratorService {
     };
 
     const result = await app.invoke(
-      {},
+      { checkCodeIteration: 0 }, // Initialize checkCodeIteration
       { recursionLimit: langGraphRecursionLimit },
     );
     //console.log("result", result);

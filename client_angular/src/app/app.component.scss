@@ -8,14 +8,23 @@ Ipad notices
   flex: 1 1 auto;
 }
 
-.app-container {
-  height:calc(100vh - 30px); /* our toolbar height: 30px */
+.main-container {
+  position: relative;
+  height: calc(100vh - 60px); /* 60px header + 30px footer */
+
+  overflow-x: hidden;
 
   /* Safari-specific styles */
   @supports (-webkit-touch-callout:none) {
     // for ipads brave and firefox we can use 100% while for chrome and safari we need to subtract the safe-area-inset values
     height: calc(100% - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
+}
+
+.content-wrapper {
+  padding: 8px;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .tablet-space {
