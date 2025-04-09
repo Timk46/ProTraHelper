@@ -1,5 +1,5 @@
 import { ChatOpenAI } from '@langchain/openai';
-import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/FeedbackContext.dto';
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
 import { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';

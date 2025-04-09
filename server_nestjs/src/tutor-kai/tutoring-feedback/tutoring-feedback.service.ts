@@ -1,7 +1,7 @@
 import { Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { GraphBuilderService } from './graph/graph.builder.service';
 import { TutoringFeedbackState } from './graph/state';
-import { FeedbackContextDto } from '../../../../shared/dtos/tutorKaiDtos/FeedbackContext.dto';
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
 import { FeedbackOutput } from './graph/schemas/feedback-output.schema';
 
 @Injectable()
