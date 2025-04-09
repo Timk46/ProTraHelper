@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, InternalServerErrorException } from '@ne
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from './crypto.service'; // Adjust path if necessary
 import { CodeSubmissionResult } from '@DTOs/tutorKaiDtos/submission.dto'; // Adjust path if necessary
-import { FeedbackContextDto } from '@Interfaces/tutorKaiDtos/FeedbackContext.dto';
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
 
 
 @Injectable()

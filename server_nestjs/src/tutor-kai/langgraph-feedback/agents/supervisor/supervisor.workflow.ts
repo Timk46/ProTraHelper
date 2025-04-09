@@ -5,7 +5,7 @@ import { BaseMessage, HumanMessage, AIMessage, SystemMessage } from '@langchain/
 import { Runnable, RunnableLambda, RunnableConfig } from '@langchain/core/runnables';
 import { StateGraph, END, StateGraphArgs, Annotation } from '@langchain/langgraph';
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/FeedbackContext.dto';
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
 import { CHAT_OPENAI_MODEL } from '../../langgraph.constants'; // Import token from constants file
 
 // Import Core Agent Builders (needed if graph nodes invoke core agents directly)

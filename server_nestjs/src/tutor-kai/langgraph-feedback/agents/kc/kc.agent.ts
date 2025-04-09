@@ -1,6 +1,6 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/FeedbackContext.dto'; // Keep this if needed for parsing input
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto'; // Keep this if needed for parsing input
 import { TranscriptChunk } from '@DTOs/index'; // Needed for processing tool output
 import {
   AIMessage,

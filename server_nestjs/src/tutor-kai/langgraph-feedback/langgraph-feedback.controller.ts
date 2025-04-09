@@ -4,7 +4,7 @@ import { LanggraphFeedbackService } from './langgraph-feedback.service'; // Faca
 // Remove DirectAgentService import
 import { LanggraphDataFetcherService } from './helper/langgraph-data-fetcher.service';
 import { CodeSubmissionResultDto } from '@DTOs/tutorKaiDtos/submission.dto';
-import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/FeedbackContext.dto';
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
 import { Request } from 'express';
 import { BaseMessage, AIMessage } from '@langchain/core/messages'; // Import AIMessage
 
