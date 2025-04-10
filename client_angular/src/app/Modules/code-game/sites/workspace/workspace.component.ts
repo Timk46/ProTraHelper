@@ -111,6 +111,17 @@ export class WorkspaceComponent {
   onCodeChanged(newCode: string): void {}
 
   submitCode(): void {
+    // reset
+    this.codeGameEvaluation = undefined;
+    this.frequencyOfMethodEvaluationResult = false;
+    this.frequencyOfMethodCallsResult = 0;
+    this.reachedDestination = false;
+    this.allItemsCollected = false;
+    this.totalItems = 0;
+    this.collectedItems = 0;
+    this.visitedCellsAreAllowed = false;
+    this.allWhiteListCellsVisited = false;
+
     this.submitButtonIsDisabled = true;
     this.isLoading = true;
     this.compilerConsoleOutputView = 'Compiling...';
@@ -132,43 +143,44 @@ export class WorkspaceComponent {
     }
 
     /* Submit Answer, run the code and get evaluation results */
-    const timeoutId = setTimeout(() => {
-      console.log("CodeGame: Timeout");
-      this.snackBar.open('Die Anfrage dauert zu lange. Bitte versuchen Sie es später erneut.', 'Schließen', { duration: 3000 });
-      this.isLoading = false;
-      this.submitButtonIsDisabled = false;
-    }, this.TIMEOUT_DURATION);
-
-    /* Submit Answer, run the code and get evaluation results */
     // Submit the code to the server to run the game
     this.codeGameTaskDataService
       .executeCodeGameTask(this.currentTask?.id, this.selectedLanguage, mainFile, additionalFiles, gameFile)
       .subscribe({
         next: (response) => {
-          clearTimeout(timeoutId);
-          console.log('CodeGame: Response: ', response);
+          if (response.success === false) {
+            if (response.message === 'Execution timed out') {
+              this.snackBar.open('Die Anfrage dauert zu lange. Bitte versuchen Sie es erneut.', 'Schließen', { duration: 3000 });
+            } else {
+              this.snackBar.open('Fehler bei der Ausführung.', 'Schließen', { duration: 3000 });
+            }
 
-          // Get evaluation results
-          this.codeGameEvaluation = response;
-          this.frequencyOfMethodEvaluationResult = response.frequencyOfMethodEvaluationResult;
-          this.frequencyOfMethodCallsResult = response.frequencyOfMethodCallsResult;
-          this.reachedDestination = response.reachedDestination;
-          this.allItemsCollected = response.allItemsCollected;
-          this.totalItems = response.totalItems;
-          this.collectedItems = response.collectedItems;
-          this.visitedCellsAreAllowed = response.visitedCellsAreAllowed;
-          this.allWhiteListCellsVisited = response.allWhiteListCellsVisited;
+            this.codeGameEvaluation = response.result; // For saving the user task try
+            this.resetGame(); // Enables to try again
+            return; // Jump to the complete block
+          }
+          
+          if (response.success === true) {
+            // Get evaluation results
+            this.codeGameEvaluation = response.result;
+            this.frequencyOfMethodEvaluationResult = response.result.frequencyOfMethodEvaluationResult;
+            this.frequencyOfMethodCallsResult = response.result.frequencyOfMethodCallsResult;
+            this.reachedDestination = response.result.reachedDestination;
+            this.allItemsCollected = response.result.allItemsCollected;
+            this.totalItems = response.result.totalItems;
+            this.collectedItems = response.result.collectedItems;
+            this.visitedCellsAreAllowed = response.result.visitedCellsAreAllowed;
+            this.allWhiteListCellsVisited = response.result.allWhiteListCellsVisited;
 
-          // Prepare and start animation of the game
-          this.splitCompilerOutputAndStartGame(response.codeGameExecutionResult.toString());
+            // Prepare and start animation of the game
+            this.splitCompilerOutputAndStartGame(response.result.codeGameExecutionResult.toString());
+          }
         },
         error: (error) => {
-          clearTimeout(timeoutId);
           console.error('Error: ', error);
           this.compilerConsoleOutputView = error.message;
         },
         complete: () => {
-          clearTimeout(timeoutId);
           this.isLoading = false;
 
           // Submit the user answer and evaulation to the server

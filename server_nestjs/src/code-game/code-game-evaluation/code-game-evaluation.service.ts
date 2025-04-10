@@ -14,6 +14,8 @@ export class CodeGameEvaluationService {
     language: string,
     submittedCode: { [fileName: string]: string },
     executionResult: CppProjectExecutionResult,
+    executionSuccess: boolean,
+    executionMessage: string,
   ) {
     let frequencyOfMethodEvaluationResult = false;
     let frequencyOfMethodCallsResult = 0;
@@ -21,6 +23,30 @@ export class CodeGameEvaluationService {
 
     if (!question) {
       // TODO: exit
+    }
+
+    /* In case of an execution error, return the error message */
+    if (!executionSuccess) {
+      // All set to default, except the submitted code
+      const evaluationResult: CodeGameEvaluationDTO = {
+        questionId,
+        language,
+        submittedCode,
+        codeGameExecutionResult: "",
+        codeSolutionRestriction: false,
+        frequencyOfMethodEvaluationResult: false,
+        frequencyOfMethodCallsResult: 0,
+        reachedDestination: false,
+        allItemsCollected: false,
+        totalItems: 0,
+        collectedItems: 0,
+        visitedCellsAreAllowed: false,
+        allWhiteListCellsVisited: false,
+        executionSuccess,
+        executionMessage,
+      };
+
+      return evaluationResult;
     }
 
     /* Check if the code fulfills the restrictions */
@@ -87,6 +113,8 @@ export class CodeGameEvaluationService {
       frequencyOfMethodCallsResult,
       ...successesFromCodeExecution,
       ...blackAndWhiteListCheckResult,
+      executionSuccess,
+      executionMessage,
     };
 
     return evaluationResult;

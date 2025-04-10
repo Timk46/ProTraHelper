@@ -27,7 +27,7 @@ export class CodeGameTaskDataService {
     mainFile: { [p: string]: string },
     additionalFiles: { [p: string]: string },
     gameFile: { [p: string]: string })
-    : Observable<CodeGameEvaluationDTO> {
+    : Observable< { success: boolean, message: string, result: CodeGameEvaluationDTO } > {
     const body = {
       questionId: questionId,
       language: language,
@@ -36,7 +36,7 @@ export class CodeGameTaskDataService {
       gameFile: gameFile,
     };
 
-    const response: Observable<CodeGameEvaluationDTO> = this.http.post<CodeGameEvaluationDTO>(`${this.apiCodeGameURL}/execute`, body);
+    const response: Observable< { success: boolean, message: string, result: CodeGameEvaluationDTO } > = this.http.post< { success: boolean, message: string, result: CodeGameEvaluationDTO } >(`${this.apiCodeGameURL}/execute`, body);
     return response;
   }
 
