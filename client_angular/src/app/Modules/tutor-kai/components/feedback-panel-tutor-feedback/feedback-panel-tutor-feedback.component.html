@@ -25,9 +25,10 @@
 
       <!-- KM Feedback Card -->
       <div *ngIf="feedback['KM']" class="feedback-card" [class.expanded]="expandedSections['KM']">
-        <button class="card-header" (click)="toggleSection('KM')">
+        <button class="card-header" (click)="toggleSection('KM')" [disabled]="expandedSections['KM']">
           <span class="title">{{ feedbackTitles['KM'] || 'KM' }}</span>
-          <mat-icon [class.rotated]="expandedSections['KM']">expand_more</mat-icon>
+          <mat-icon *ngIf="!expandedSections['KM']">visibility</mat-icon>
+          <mat-icon *ngIf="expandedSections['KM']" class="visible-icon">visibility</mat-icon>
         </button>
         <div class="card-content" [@expandCollapse]="expandedSections['KM'] ? 'true' : 'false'">
           <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KM'])"></div>
@@ -36,9 +37,10 @@
 
       <!-- KC Feedback Card -->
       <div *ngIf="feedback['KC']" class="feedback-card" [class.expanded]="expandedSections['KC']">
-        <button class="card-header" (click)="toggleSection('KC')">
+        <button class="card-header" (click)="toggleSection('KC')" [disabled]="expandedSections['KC']">
           <span class="title">{{ feedbackTitles['KC'] || 'KC' }}</span>
-          <mat-icon [class.rotated]="expandedSections['KC']">expand_more</mat-icon>
+          <mat-icon *ngIf="!expandedSections['KC']">visibility</mat-icon>
+          <mat-icon *ngIf="expandedSections['KC']" class="visible-icon">visibility</mat-icon>
         </button>
         <div class="card-content" [@expandCollapse]="expandedSections['KC'] ? 'true' : 'false'">
           <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KC'])"></div>
@@ -47,9 +49,10 @@
 
       <!-- KH Feedback Card -->
       <div *ngIf="feedback['KH']" class="feedback-card" [class.expanded]="expandedSections['KH']">
-        <button class="card-header" (click)="toggleSection('KH')">
+        <button class="card-header" (click)="toggleSection('KH')" [disabled]="expandedSections['KH']">
           <span class="title">{{ feedbackTitles['KH'] || 'KH' }}</span>
-          <mat-icon [class.rotated]="expandedSections['KH']">expand_more</mat-icon>
+          <mat-icon *ngIf="!expandedSections['KH']">visibility</mat-icon>
+          <mat-icon *ngIf="expandedSections['KH']" class="visible-icon">visibility</mat-icon>
         </button>
         <div class="card-content" [@expandCollapse]="expandedSections['KH'] ? 'true' : 'false'">
           <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KH'])"></div>
@@ -59,26 +62,25 @@
 
     <!-- SPS Feedback Card -->
     <div *ngIf="feedback['SPS']" class="feedback-card" [class.expanded]="expandedSections['SPS']">
-      <button class="card-header" (click)="toggleSection('SPS')">
+      <button class="card-header" (click)="toggleSection('SPS')" [disabled]="expandedSections['SPS']">
         <span class="title">{{ feedbackTitles['SPS'] || 'SPS' }}</span>
-        <mat-icon [class.rotated]="expandedSections['SPS']">expand_more</mat-icon>
+        <mat-icon *ngIf="!expandedSections['SPS']">visibility</mat-icon>
+        <mat-icon *ngIf="expandedSections['SPS']" class="visible-icon">visibility</mat-icon>
       </button>
       <div class="card-content" [@expandCollapse]="expandedSections['SPS'] ? 'true' : 'false'">
         <markdown [data]="feedback['SPS']"></markdown>
       </div>
     </div>
 
-    <!-- Rating Section -->
+    <!-- Rating Section
     <div *ngIf="showRating()" class="rating-section">
       <div class="rating-divider"></div>
       <app-rating (ratingSubmitted)="onRatingSubmitted($event)"></app-rating>
     </div>
-  </div>
+  </div>-->
 
-  <!-- Initial state / No feedback yet (Optional) -->
+  <!-- Initial state / No feedback yet (Optional)
   <div *ngIf="!feedback && !isLoading && !error" class="initial-state">
-     <!-- Keep this empty for now, button is in parent -->
-     <!-- <p>Click "Get Structured Feedback" to load.</p> -->
-  </div>
+  </div> -->
 
 </div>

@@ -2,11 +2,13 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { trigger, state, style, animate, transition } from '@angular/animations';
-import { Subject, takeUntil, finalize, catchError, throwError, Observable } from 'rxjs';
+import { Subject, takeUntil, finalize, catchError, throwError, Observable, filter } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
 import { WorkspaceStateService } from '../../services/workspace-state.service';
 import { WorkspaceState } from '../../models/code-submission.model';
 import { MarkdownService } from '../../services/markdown/markdown.service';
 import { environment } from 'src/environments/environment';
+import { FeedbackHintConfirmationDialogComponent } from './feedback-hint-confirmation-dialog/feedback-hint-confirmation-dialog.component';
 // TODO: Import FeedbackOutput and KcrOutput types/interfaces from shared DTOs
 // import { FeedbackOutput, KcrOutput } from '@DTOs/tutorKaiDtos/feedback-output.dto'; // Adjust path as needed
 // TODO: Import EvaluateRequestDto type/interface from shared DTOs
@@ -83,12 +85,15 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
   };
 
   private destroy$ = new Subject<void>();
+  // Set of feedback keys that require confirmation before revealing
+  private keysRequiringConfirmation: Set<FeedbackKey> = new Set(['KH', 'SPS']);
 
   constructor(
     private http: HttpClient,
     private workspaceState: WorkspaceStateService,
     private markdownService: MarkdownService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -279,12 +284,45 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
     return orderedKeys.filter(key => this.feedback && this.feedback[key]);
   }
 
-  // Toggle a feedback section's expanded state
+  // Toggle a feedback section to expand it (no collapsing)
   toggleSection(key: FeedbackKey): void {
-    // Track usage *before* toggling, only if expanding and not yet tracked
+    // Only proceed if the section is not already expanded
     if (!this.expandedSections[key]) {
-      this.trackUsage(key);
+      // Check if this section requires confirmation
+      if (this.keysRequiringConfirmation.has(key)) {
+        this.openConfirmationDialog(key);
+      } else {
+        // Standard sections are immediately expanded
+        this.trackUsage(key);
+        this.expandedSections[key] = true; // Only set to true, never back to false
+      }
     }
-    this.expandedSections[key] = !this.expandedSections[key];
+    // No collapsing logic - once expanded, sections stay open
+  }
+
+  /**
+   * Opens a confirmation dialog when a user tries to expand a section that
+   * might reveal solutions or next steps (KH or SPS)
+   */
+  private openConfirmationDialog(key: FeedbackKey): void {
+    const dialogRef = this.dialog.open(FeedbackHintConfirmationDialogComponent, {
+      width: '500px',
+      maxWidth: '95vw', // Ensure it's responsive and doesn't overflow on mobile
+      autoFocus: false,
+      disableClose: false, // Allow closing by clicking outside (optional)
+      panelClass: 'hint-confirmation-dialog-panel', // Add for additional styling options
+      position: { top: '100px' } // Position slightly below the top for better visibility
+    });
+
+    dialogRef.afterClosed().pipe(
+      takeUntil(this.destroy$),
+      filter(result => result === true) // Only proceed if confirmed
+    ).subscribe(() => {
+      // User clicked "Ja", proceed with expanding the section
+      this.trackUsage(key);
+      this.expandedSections[key] = true;
+    });
+    // If user clicked "Nein" or closed the dialog without selecting,
+    // nothing happens and the section remains collapsed
   }
 }

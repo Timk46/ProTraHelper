@@ -65,7 +65,7 @@ export class GenerateFinalFeedbackNodeService {
 # Task:
 *   Generate a structured JSON feedback object based on the provided context (task description, student solution, compiler/test results, potential fixed code, and lecture snippets).
 *   Adhere STRICTLY to the JSON output schema defined below and follow the specified steps based on your persona and using the specified tone.
-*   Format your answer with markdown and ensure it is clear and easy to read. **Never use Markdown Code Blocks** Instead use HTML-Code Blocks for code snippets (e.g. <pre><code class="language-python">def initialisiere_variable():\n    meine_variable = 100\n    return meine_variable\n</code>).
+*   Format your answer in each field with **markdown** and ensure it is clear and easy to read. **Never use Markdown Code Blocks** Instead use HTML-Code Blocks for code snippets (e.g. <pre><code class="language-python">def initialisiere_variable():\n    meine_variable = 100\n    return meine_variable\n</code>).
 
 # Processing Steps (Follow these sequentially):
 
@@ -74,7 +74,7 @@ export class GenerateFinalFeedbackNodeService {
     *   This may include:
         *   Identifying the *category* of the problem (e.g., iteration over a collection, recursive base cases/steps, input validation, searching/sorting).
         *   Suggesting standard *algorithms, design patterns, or common programming idioms* suitable for this category (e.g., "For iterating through all elements, a for-each loop is often suitable," "Recursive solutions typically need a base case and a recursive step.").
-        *   Outlining a general *sequence of steps* or a *checklist* for approaching such problems (e.g., "1. Handle edge cases. 2. Implement the main logic. 3. Test thoroughly.").
+        *   Outlining a general *sequence of steps* or a *checklist* for approaching such problems (e.g., "1. Handle edge cases. 2. Implement the main logic. 3. Test thoroughly."). Use a numbered markdown list for clarity.
         *   Mentioning relevant *data structures or control flow patterns* typically used for this problem category.
         *   Explaining *why* a particular strategy is effective or standard practice.
     *   **Crucially differentiate:** This feedback should teach a *method*, not just fix the current error (that's KH) and not just ask the student to reflect.
@@ -88,7 +88,7 @@ export class GenerateFinalFeedbackNodeService {
       * **Briefly explain why** it is wrong (max. 2 short sentences per point).
       * Reference relevant information from the task description if it helps clarify the mistake.
       * If the mistake relates to a compiler error, briefly explain the meaning of the compiler message in simple terms before explaining the underlying code issue
-    * **Never include suggestions, fixes or any diret information on how to proceed**: Keep this for the "KH" field.
+    * **Never include suggestions, fixes or any diret information on how to proceed**: Keep this for the "KH" field. Do not cite lecture snippets: Keep this for the "KC" field.
     * Example style and brevity:
       - "The loop never terminates because the stop condition is never met."
       - "Variable is not initialized – see compiler error: 'Variable might not have been initialized': This means that you're trying to use a variable that might not have a value yet"
@@ -97,9 +97,9 @@ export class GenerateFinalFeedbackNodeService {
     *   Identify the fundamental programming concepts relevant to the task and the student's errors.
     *   Explain these concepts clearly and concisely.
     *   If the concept is a programming concept, provide a small code snippet in a HTML-Code Block and explain the syntax and usage of the concept. This example must be abstract and **must not relate explicitly to the task or the student's solution**. For example, if the concept is a "for loop", provide a generic example of a for loop in the programming language used in the task.
-    *   **CRITICAL:** Examine the provided 'Relevant Lecture Snippets' JSON. If snippets relevant to the concept exist, you MUST integrate information from them into your explanation and cite the source using the EXACT placeholder format $$Number$$ (where Zahl corresponds to the 'Quelle' field number in the snippet JSON).
+    *   **CRITICAL:** Examine the provided 'Relevant Lecture Snippets' JSON. If snippets relevant to the identified concept exist, you MUST integrate information from them into your explanation and cite the source using the EXACT placeholder format $$Number$$ (where Zahl corresponds to the 'Quelle' field number in the snippet JSON).
         * Example: "Variable scope determines where a variable can be accessed. In C++, variables declared inside a function are typically local to that function $$4$$." (Assuming snippet 4 explains local scope).
-        *   If no relevant lecture snippet is available for a concept, explain it using your general knowledge but clearly state that no specific lecture material was found for this point.
+        *   If no relevant lecture snippet is available for a concept, explain it using your general knowledge.
 
 4.  **Provide Guidance on How to Proceed (Output to "KH" field):**
     *   Provide a single next step hint that guide the student towards correcting the identified mistakes (Step 2) and understanding the concepts (Step 3).

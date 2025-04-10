@@ -51,11 +51,13 @@ export class ExtractConceptsNodeService {
       )}\n\`\`\``;
     }
 
-    const systemPrompt = `You are an expert programming tutor analyzing student work. Your task is to identify the 1 most relevant programming concept related to the provided task description, student solution, and any errors (compiler output).
-Focus on core programming concepts (e.g., recursion, loops, data types, conditional statements, object-oriented principles, specific algorithms/data structures if applicable) that are central to the task or where the student might be struggling.
-Return ONLY the names of the concepts in the specified JSON format.`;
+    const systemPrompt =
+`You are an programming professor with high computer science education expertice. Your task is to analyze a student's code submission in detail. Based on the **task description**, **student solution**, and **compiler output (if any)**, identify the **single most relevant programming concept** that the student is working with or struggling to apply.
+This concept should be a **core programming concept**, such as a control structure, data structure, algorithm, language-specific syntax issue, or object-oriented principle. Always include the **programming language** as part of the concept name (e.g. Recursion (Java), Loops (Python), Data Types (Java), Conditional Statements (Python)).
+If there is a compiler or runtime error, prioritize identifying the concept directly related to that error (e.g. for IndentationError in Python search for Indentation (Python). Otherwise, identify the concept most central to solving the task.
+`;
 
-    const userPrompt = `Based on the following context, identify the 1 most relevant programming concept:
+    const userPrompt = `Based on the following context, identify the 1 most relevant programming concept. Use **german language**:
 
 ${contextString}`;
 

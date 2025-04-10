@@ -143,7 +143,7 @@
     <!-- Untere Zeile: Feedback + Terminal -->
     <div class="bottom-row" [style.height.%]="bottomRowHeight">
       <div class="feedback-area" [style.width.%]="feedbackAreaWidth">
-        <!-- Feedback View Toggle -->
+        <!-- Feedback View Toggle
         <div class="feedback-controls">
           <mat-slide-toggle
             [(ngModel)]="showStructuredFeedback"
@@ -151,7 +151,7 @@
             labelPosition="before">
             Structured View
           </mat-slide-toggle>
-        </div>
+        </div>-->
 
         <!-- Conditional Feedback Panels -->
         <app-feedback-panel *ngIf="!showStructuredFeedback"></app-feedback-panel>

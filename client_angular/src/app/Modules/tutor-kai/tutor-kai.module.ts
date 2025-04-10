@@ -19,6 +19,7 @@ import { EditorTabsComponent } from './components/editor-tabs/editor-tabs.compon
 import { FileExplorerComponent } from './components/file-explorer/file-explorer.component';
 
 import { FeedbackPanelTutorFeedbackComponent } from './components/feedback-panel-tutor-feedback/feedback-panel-tutor-feedback.component';
+import { FeedbackHintConfirmationDialogComponent } from './components/feedback-panel-tutor-feedback/feedback-hint-confirmation-dialog/feedback-hint-confirmation-dialog.component';
 // Modules
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
@@ -45,6 +46,7 @@ import { FileSystemService } from './services/file-system.service';
     EditorTabsComponent,
     FileExplorerComponent,
     FeedbackPanelTutorFeedbackComponent,
+    FeedbackHintConfirmationDialogComponent,
   ],
   imports: [
     CommonModule,

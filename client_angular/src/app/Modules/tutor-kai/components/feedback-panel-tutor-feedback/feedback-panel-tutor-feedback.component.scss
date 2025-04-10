@@ -99,6 +99,14 @@
         background-color: $nord-light-bg-primary;
         border-left-color: $nord-light-accent-frost-2;
         box-shadow: 0 4px 12px rgba($nord-light-text-secondary, 0.15);
+
+        // Add a subtle top/bottom border to better visually separate expanded cards
+        border-top: 1px solid rgba($nord-light-border, 0.7);
+        border-bottom: 1px solid rgba($nord-light-border, 0.7);
+
+        // Slightly increase spacing between expanded cards
+        margin-bottom: 16px;
+        margin-top: 16px;
       }
 
       // Card Header/Button Styling
@@ -116,25 +124,40 @@
         cursor: pointer;
         transition: all 0.2s ease;
 
-        &:hover {
+        // Styling for when button is disabled (section expanded)
+        &:disabled {
+          cursor: default;
+          opacity: 1; // Keep text fully visible
+          background-color: transparent;
+
+          .title {
+            color: $nord-light-text-primary; // Keep title visible
+          }
+        }
+
+        &:not(:disabled):hover {
           background-color: rgba($nord-light-accent-frost-2, 0.08);
         }
 
-        &:focus {
+        &:not(:disabled):focus {
           outline: none;
           background-color: rgba($nord-light-accent-frost-2, 0.12);
         }
 
         .title {
           font-size: 16px;
+          font-weight: 500;
         }
 
         mat-icon {
-          transition: transform 0.3s ease;
+          transition: all 0.3s ease;
           color: $nord-light-accent-frost-3;
+          font-size: 22px;
+          width: 22px;
+          height: 22px;
 
-          &.rotated {
-            transform: rotate(180deg);
+          // Style for the visible icon (when section is expanded)
+          &.visible-icon {
             color: $nord-light-accent-frost-2;
           }
         }
