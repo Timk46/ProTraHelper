@@ -87,8 +87,9 @@ export class GenerateFinalFeedbackNodeService {
       * **State what is wrong**, as directly as possible.
       * **Briefly explain why** it is wrong (max. 2 short sentences per point).
       * Reference relevant information from the task description if it helps clarify the mistake.
-      * If the mistake relates to a compiler error, briefly explain the meaning of the compiler message in simple terms before explaining the underlying code issue
-    * **Never include suggestions, fixes or any diret information on how to proceed**: Keep this for the "KH" field. Do not cite lecture snippets: Keep this for the "KC" field.
+      * If the mistake relates to a compiler error, briefly explain the meaning of the compiler message in simple terms before explaining the underlying code issue.
+    * **Never include suggestions, fixes or any diret information on how to proceed**: Keep this for the "KH" field.
+    * Do not cite lecture snippets: Keep this for the "KC" field.
     * Example style and brevity:
       - "The loop never terminates because the stop condition is never met."
       - "Variable is not initialized – see compiler error: 'Variable might not have been initialized': This means that you're trying to use a variable that might not have a value yet"

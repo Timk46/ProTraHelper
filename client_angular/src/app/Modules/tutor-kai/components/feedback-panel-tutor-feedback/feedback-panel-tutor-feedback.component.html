@@ -6,7 +6,7 @@
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-container">
     <mat-spinner diameter="40"></mat-spinner>
-    <p>Loading structured feedback...</p>
+    <p>Das Feedback wird generiert...</p>
   </div>
 
   <!-- Error State -->
@@ -58,18 +58,19 @@
           <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KH'])"></div>
         </div>
       </div>
-    </div>
 
-    <!-- SPS Feedback Card -->
-    <div *ngIf="feedback['SPS']" class="feedback-card" [class.expanded]="expandedSections['SPS']">
-      <button class="card-header" (click)="toggleSection('SPS')" [disabled]="expandedSections['SPS']">
-        <span class="title">{{ feedbackTitles['SPS'] || 'SPS' }}</span>
-        <mat-icon *ngIf="!expandedSections['SPS']">visibility</mat-icon>
-        <mat-icon *ngIf="expandedSections['SPS']" class="visible-icon">visibility</mat-icon>
-      </button>
-      <div class="card-content" [@expandCollapse]="expandedSections['SPS'] ? 'true' : 'false'">
-        <markdown [data]="feedback['SPS']"></markdown>
+      <!-- SPS Feedback Card -->
+      <div *ngIf="feedback['SPS']" class="feedback-card" [class.expanded]="expandedSections['SPS']">
+        <button class="card-header" (click)="toggleSection('SPS')" [disabled]="expandedSections['SPS']">
+          <span class="title">{{ feedbackTitles['SPS'] || 'SPS' }}</span>
+          <mat-icon *ngIf="!expandedSections['SPS']">visibility</mat-icon>
+          <mat-icon *ngIf="expandedSections['SPS']" class="visible-icon">visibility</mat-icon>
+        </button>
+        <div class="card-content" [@expandCollapse]="expandedSections['SPS'] ? 'true' : 'false'">
+          <markdown [data]="feedback['SPS']"></markdown>
+        </div>
       </div>
+
     </div>
 
     <!-- Rating Section
