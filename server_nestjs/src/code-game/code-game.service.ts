@@ -18,9 +18,6 @@ import { questionType } from '@DTOs/question.dto';
 export class CodeGameService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  // TODO: cleanup
-  // private readonly apiUrl =
-  'https://jury1.bshefl2.bs.informatik.uni-siegen.de/execute/';
   private readonly apiUrl: string =
     'http://jury1.bshefl2.bs.informatik.uni-siegen.de/execute/';
 

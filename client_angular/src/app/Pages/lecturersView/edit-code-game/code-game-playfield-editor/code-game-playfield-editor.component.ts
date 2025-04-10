@@ -173,7 +173,7 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
   /*
   ** -------------------------------------------------------------------
   ** Transfer data to parent component (edit-code-game.component.ts)
-   */
+  */
 
   emitData(): void {
     const data = {
