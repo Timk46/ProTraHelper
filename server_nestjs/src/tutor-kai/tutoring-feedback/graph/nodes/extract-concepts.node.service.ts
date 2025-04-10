@@ -13,7 +13,7 @@ export class ExtractConceptsNodeService {
   constructor(private configService: ConfigService) {
     // Basic LLM initialization - replace with proper injection/configuration
     this.llm = new ChatOpenAI({
-      modelName: 'gpt-4o',
+      modelName: 'gpt-4o-2024-08-06',
       temperature: 0,
     });
   }

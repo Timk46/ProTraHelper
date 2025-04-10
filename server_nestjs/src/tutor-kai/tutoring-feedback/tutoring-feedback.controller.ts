@@ -70,7 +70,7 @@ export class TutoringFeedbackController {
       );
 
       const result = await this.tutoringFeedbackService.generateFeedback(feedbackContext); // Call the service with the fetched context
-      console.log(JSON.stringify(result)); // Log the result for debugging
+      //console.log(JSON.stringify(result)); // Log the result for debugging
       // Call the service with the fetched context
       return result;
 

@@ -12,7 +12,7 @@ export class GenerateFixedCodeNodeService {
   constructor(private configService: ConfigService) {
     // Basic LLM initialization - replace with proper injection/configuration
     this.llm = new ChatOpenAI({
-      modelName: 'o3-mini',
+      modelName: 'o3-mini-2025-01-31',
     });
   }
 

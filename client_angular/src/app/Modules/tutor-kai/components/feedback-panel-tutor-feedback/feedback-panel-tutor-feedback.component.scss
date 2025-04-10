@@ -196,6 +196,15 @@
       ul, ol {
         margin-bottom: 1em;
         padding-left: 24px;
+        list-style-position: outside; // Explicitly set default position
+      }
+
+      ul {
+        list-style-type: disc; // Set default bullet style for unordered lists
+      }
+
+      ol {
+        list-style-type: decimal; // Set default number style for ordered lists
       }
 
       ul li, ol li {
