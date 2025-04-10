@@ -57,14 +57,14 @@
       </div>
     </div>
 
-    <!-- KCR Feedback Card -->
-    <div *ngIf="feedback['KCR']" class="feedback-card" [class.expanded]="expandedSections['KCR']">
-      <button class="card-header" (click)="toggleSection('KCR')">
-        <span class="title">{{ feedbackTitles['KCR'] || 'KCR' }}</span>
-        <mat-icon [class.rotated]="expandedSections['KCR']">expand_more</mat-icon>
+    <!-- SPS Feedback Card -->
+    <div *ngIf="feedback['SPS']" class="feedback-card" [class.expanded]="expandedSections['SPS']">
+      <button class="card-header" (click)="toggleSection('SPS')">
+        <span class="title">{{ feedbackTitles['SPS'] || 'SPS' }}</span>
+        <mat-icon [class.rotated]="expandedSections['SPS']">expand_more</mat-icon>
       </button>
-      <div class="card-content" [@expandCollapse]="expandedSections['KCR'] ? 'true' : 'false'">
-        <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KCR'])"></div>
+      <div class="card-content" [@expandCollapse]="expandedSections['SPS'] ? 'true' : 'false'">
+        <markdown [data]="feedback['SPS']"></markdown>
       </div>
     </div>
 

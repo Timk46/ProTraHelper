@@ -6,25 +6,25 @@ import { z } from 'zod';
  * Based on the feedback types defined by Narciss (2006) and Keuning et al. (2018).
  */
 export const FeedbackOutputSchema = z.object({
-  KCR: z
+  SPS: z
   .string()
   .describe(
-    'Knowledge about Correct Result: Field for Step 1 Describe Correct Approach',
+    'Strategic Processing Steps (SPS) ',
   ),
   KM: z
     .string()
     .describe(
-      'Knowledge about Mistakes: Information about the errors identified in the student submission (type, location, cause).',
+      'Knowledge about Mistakes (KM)',
     ),
   KC: z
     .string()
     .describe(
-      'Knowledge about Concepts: Explanation of relevant programming concepts, citing lecture snippets where applicable.',
+      'Knowledge about Concepts (KC)',
     ),
   KH: z
     .string()
     .describe(
-      'Knowledge about How to Proceed: Strategic guidance and hints on how the student can move forward or correct their solution.',
+      'Knowledge about How to Proceed (KH)',
     ),
 });
 

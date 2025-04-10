@@ -21,13 +21,13 @@ interface KcrData {
 }
 interface FeedbackOutput {
   IT?: string; // Optional internal thoughts
-  KCR?: string;
+  SPS?: string;
   KM?: string;
   KC?: string;
   KH?: string;
   [key: string]: any; // Allow other potential keys if needed, though we filter
 }
-type FeedbackKey = 'KCR' | 'KM' | 'KC' | 'KH'; // Define specific keys for feedback types
+type FeedbackKey = 'SPS' | 'KM' | 'KC' | 'KH'; // Define specific keys for feedback types
 
 type EvaluateRequestDto = any;
 type CodeSubmissionResultDto = any;
@@ -57,7 +57,7 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
   isLoading = false;
   // Track expansion state for each feedback section
   expandedSections: Record<FeedbackKey, boolean> = {
-    KCR: false,
+    SPS: false,
     KM: false,
     KC: false,
     KH: false
@@ -67,7 +67,7 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
 
   // Use Record for type safety with FeedbackKey
   feedbackTitles: Record<FeedbackKey, string> = {
-    KCR: 'Korrekte Lösung',
+    SPS: 'Strategische Vorgehensweise',
     KM: 'Probleme finden',
     KC: 'Erklärungen und Beispiele',
     KH: 'Hinweis zum nächsten Schritt'
@@ -137,7 +137,6 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
         if (this.feedback?.IT) {
           delete this.feedback.IT;
         }
-        console.log('Received feedback:', this.feedback);
       });
   }
 
@@ -162,8 +161,8 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
         // Unescape any HTML entities in the code content and trim trailing whitespace
         const cleanedContent = this.unescapeHtml(codeContent).trimRight();
 
-        // Create the Markdown code block with exactly one newline
-        return `\n\`\`\`${language}\n${cleanedContent}\n\`\`\``;
+        // Create the Markdown code block with proper format - add newlines before and after
+        return `\n\`\`\`${language}\n${cleanedContent}\n\`\`\`\n`;
       }
     );
 
@@ -173,11 +172,10 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
         // Unescape any HTML entities in the code content and trim trailing whitespace
         const cleanedContent = this.unescapeHtml(codeContent).trimRight();
 
-        // Create the Markdown code block with exactly one newline
-        return `\n\`\`\`\n${cleanedContent}\n\`\`\``;
+        // Create the Markdown code block with proper format - add newlines before and after
+        return `\n\`\`\`\n${cleanedContent}\n\`\`\`\n`;
       }
     );
-
     return result;
   }
 
@@ -230,7 +228,7 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
   getFeedbackKeys(): FeedbackKey[] {
     if (!this.feedback) return [];
     // Order matters for display
-    const orderedKeys: FeedbackKey[] = ['KCR', 'KM', 'KC', 'KH'];
+    const orderedKeys: FeedbackKey[] = ['SPS', 'KM', 'KC', 'KH'];
     // Filter keys that exist and have truthy content in the feedback object
     return orderedKeys.filter(key => this.feedback && this.feedback[key]);
   }
