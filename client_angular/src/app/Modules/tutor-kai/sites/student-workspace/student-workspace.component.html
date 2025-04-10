@@ -114,12 +114,12 @@
             Führe den Code aus, um die Tests zu starten
           </span>
           <button
-          *ngIf="showStructuredFeedback && canRequestStructuredFeedback()"
-          (click)="structuredFeedbackPanel?.fetchFeedback()"
-          class="kai-flat-button">
-            <mat-icon>stars</mat-icon>
-            Tutor Kai fragen
-        </button>
+            *ngIf="showStructuredFeedback && canRequestStructuredFeedback()"
+            (click)="structuredFeedbackPanel?.fetchFeedback()"
+            class="kai-flat-button">
+              <img src="../../../../../assets/img/tutorKai/tutor_kai_face_small_icon.webp" alt="Tutor Kai Icon" class="kai-button-icon" style="width: 22px; height: 22px; vertical-align: middle;">
+              Tutor Kai fragen
+          </button>
         </div>
 
         <!-- Execute-Button mit verbessertem Styling -->
