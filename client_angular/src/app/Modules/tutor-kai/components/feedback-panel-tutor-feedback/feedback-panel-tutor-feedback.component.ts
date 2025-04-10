@@ -7,7 +7,6 @@ import { WorkspaceStateService } from '../../services/workspace-state.service';
 import { WorkspaceState } from '../../models/code-submission.model';
 import { MarkdownService } from '../../services/markdown/markdown.service';
 import { environment } from 'src/environments/environment';
-import * as Prism from 'prismjs';
 // TODO: Import FeedbackOutput and KcrOutput types/interfaces from shared DTOs
 // import { FeedbackOutput, KcrOutput } from '@DTOs/tutorKaiDtos/feedback-output.dto'; // Adjust path as needed
 // TODO: Import EvaluateRequestDto type/interface from shared DTOs
@@ -68,10 +67,10 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
 
   // Use Record for type safety with FeedbackKey
   feedbackTitles: Record<FeedbackKey, string> = {
-    KCR: 'Korrekte Lösung.',
+    KCR: 'Korrekte Lösung',
     KM: 'Probleme finden',
-    KC: 'Konzepte und Beispiele',
-    KH: 'Nächsten Schritt preisgeben'
+    KC: 'Erklärungen und Beispiele',
+    KH: 'Hinweis zum nächsten Schritt'
   };
 
   private destroy$ = new Subject<void>();
@@ -145,8 +144,60 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
   // Adjust signature to handle potential undefined from template access
   parseMarkdown(content: string | undefined): SafeHtml {
     if (!content) return ''; // Return empty string if content is null or undefined
-    const parsed = this.markdownService.parse(content);
+
+    // Convert HTML code blocks to Markdown before parsing
+    const contentWithMarkdownCodeBlocks = this.convertHtmlCodeBlocksToMarkdown(content);
+    const parsed = this.markdownService.parse(contentWithMarkdownCodeBlocks);
     return this.sanitizer.bypassSecurityTrustHtml(parsed);
+  }
+
+  /**
+   * Converts HTML code blocks to Markdown format for proper syntax highlighting
+   * Handles both <pre><code class="language-xxx">...</code></pre> and <pre><code>...</code></pre>
+   */
+  private convertHtmlCodeBlocksToMarkdown(content: string): string {
+    // First, handle code blocks with a specified language
+    let result = content.replace(/<pre><code\s+class="language-(\w+)">([\s\S]*?)<\/code><\/pre>/g,
+      (_, language, codeContent) => {
+        // Unescape any HTML entities in the code content and trim trailing whitespace
+        const cleanedContent = this.unescapeHtml(codeContent).trimRight();
+
+        // Create the Markdown code block with exactly one newline
+        return `\n\`\`\`${language}\n${cleanedContent}\n\`\`\``;
+      }
+    );
+
+    // Then, handle code blocks without a specified language
+    result = result.replace(/<pre><code>([\s\S]*?)<\/code><\/pre>/g,
+      (_, codeContent) => {
+        // Unescape any HTML entities in the code content and trim trailing whitespace
+        const cleanedContent = this.unescapeHtml(codeContent).trimRight();
+
+        // Create the Markdown code block with exactly one newline
+        return `\n\`\`\`\n${cleanedContent}\n\`\`\``;
+      }
+    );
+
+    return result;
+  }
+
+  /**
+   * Unescapes HTML entities in the code content
+   */
+  private unescapeHtml(html: string): string {
+    const htmlEntities: Record<string, string> = {
+      '&amp;': '&',
+      '&lt;': '<',
+      '&gt;': '>',
+      '&quot;': '"',
+      '&#39;': "'",
+      '&#x2F;': '/',
+      '&nbsp;': ' '
+    };
+
+    return html.replace(/&(amp|lt|gt|quot|#39|#x2F|nbsp);/g,
+      (match) => htmlEntities[match] || match
+    );
   }
 
 
