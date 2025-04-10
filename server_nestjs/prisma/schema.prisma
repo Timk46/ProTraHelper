@@ -457,6 +457,7 @@ model CodeSubmission {
   user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   CodeSubmissionFiles CodeSubmissionFile[]
   kiFeedback          KIFeedback[]
+  generatedFeedbacks GeneratedFeedback[] // Relation to GeneratedFeedback
 }
 
 model CodeSubmissionFile {
@@ -570,6 +571,25 @@ model KIFeedback {
   flavor            String         @default("normal")
   submission        CodeSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 }
+model GeneratedFeedback {
+  id               String   @id @default(cuid())
+  spsContent       String   @db.Text
+  kmContent        String   @db.Text
+  kcContent        String   @db.Text
+  khContent        String   @db.Text
+  spsUsedAt        DateTime?
+  kmUsedAt         DateTime?
+  kcUsedAt         DateTime?
+  khUsedAt         DateTime?
+  finalPrompt      String   @db.Text
+  codeSubmissionId Int      // Foreign key to CodeSubmission
+  codeSubmission   CodeSubmission @relation(fields: [codeSubmissionId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([codeSubmissionId])
+}
+
 
 model genTaskData {
   id                Int      @id @default(autoincrement())

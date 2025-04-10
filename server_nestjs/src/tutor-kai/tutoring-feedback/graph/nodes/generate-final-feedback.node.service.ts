@@ -1,16 +1,19 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common'; // Added InternalServerErrorException
 import { ConfigService } from '@nestjs/config';
 import { ChatOpenAI } from '@langchain/openai'; // Assuming OpenAI, adjust if different
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { TutoringFeedbackState } from '../state';
-import { FeedbackOutputSchema } from '../schemas/feedback-output.schema';
-
+import { FeedbackOutputSchema, FeedbackOutput } from '../schemas/feedback-output.schema'; // Added FeedbackOutput type
+import { PrismaService } from 'src/prisma/prisma.service'; // Added PrismaService import
 @Injectable()
 export class GenerateFinalFeedbackNodeService {
   private readonly logger = new Logger(GenerateFinalFeedbackNodeService.name);
   private llm: ChatOpenAI; // We'll configure this properly later via LlmProviderService
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private prisma: PrismaService, // Injected PrismaService
+  ) {
     // Basic LLM initialization - replace with proper injection/configuration
     this.llm = new ChatOpenAI({
       modelName: 'gpt-4o',
@@ -32,6 +35,11 @@ export class GenerateFinalFeedbackNodeService {
     if (!feedbackContext) {
       this.logger.error('FeedbackContext is missing from state.');
       return { error: 'FeedbackContext is missing in GenerateFinalFeedbackNode.' };
+    }
+    // Ensure codeSubmissionId exists in the context
+    if (!feedbackContext.codeSubmissionId) {
+        this.logger.error('codeSubmissionId is missing from feedbackContext.');
+        return { error: 'codeSubmissionId is missing in GenerateFinalFeedbackNode.' };
     }
     // Fixed code and snippets might be null/empty, but we proceed anyway, letting the LLM handle missing info
     if (!fixedCode) {
@@ -123,6 +131,8 @@ ${fixedCode || 'None available.'}
 --- Relevant Lecture Snippets (JSON) ---
 ${(lectureSnippets && lectureSnippets !== '[]') ? lectureSnippets : 'None available.'}
 `;
+    // Combine prompts for storage
+    const finalPrompt = `${systemPrompt}\n\n${humanPrompt}`;
 
     // Prepare context string for the user prompt (No longer needed here as context is in system prompt)
     // let contextString = ... (Keep existing logic if needed elsewhere, but remove from here)
@@ -169,14 +179,40 @@ ${(lectureSnippets && lectureSnippets !== '[]') ? lectureSnippets : 'None availa
       }
 
 
-      return { finalFeedbackJson: processedFeedback };
-    } catch (error) {
+      // --- Persist Feedback ---
+      try {
+        const newFeedback = await this.prisma.generatedFeedback.create({
+          data: {
+            spsContent: processedFeedback.SPS,
+            kmContent: processedFeedback.KM,
+            kcContent: processedFeedback.KC,
+            khContent: processedFeedback.KH,
+            finalPrompt: finalPrompt, // Store the combined prompt
+            codeSubmissionId: feedbackContext.codeSubmissionId, // Use the ID from context
+            // Timestamps (spsUsedAt, etc.) default to null
+          },
+        });
+        this.logger.log(`Successfully saved generated feedback with ID: ${newFeedback.id}`);
+        // Return feedback JSON and the new ID
+        return { finalFeedbackJson: processedFeedback, generatedFeedbackId: newFeedback.id };
+
+      } catch (dbError) {
+        this.logger.error(
+          `Error saving generated feedback to database: ${dbError.message}`,
+          dbError.stack,
+        );
+        // Return an error state if DB saving fails, but after LLM succeeded
+        return { error: `Failed to save generated feedback: ${dbError.message}` };
+      }
+      // --- End Persist Feedback ---
+
+    } catch (llmError) {
       this.logger.error(
-        `Error generating final feedback: ${error.message}`,
-        error.stack,
+        `Error generating final feedback from LLM: ${llmError.message}`,
+        llmError.stack,
       );
       // TODO: Implement more robust error handling / retry logic
-      return { error: `Failed to generate final feedback: ${error.message}` };
+      return { error: `Failed to generate final feedback: ${llmError.message}` };
     }
   }
 }

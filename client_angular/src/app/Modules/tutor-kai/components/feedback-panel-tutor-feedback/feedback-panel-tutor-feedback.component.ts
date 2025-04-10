@@ -55,6 +55,7 @@ type CodeSubmissionResultDto = any;
 export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
   feedback: FeedbackOutput | null = null;
   isLoading = false;
+  feedbackId: string | null = null; // Added to store the feedback ID
   // Track expansion state for each feedback section
   expandedSections: Record<FeedbackKey, boolean> = {
     SPS: false,
@@ -63,6 +64,13 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
     KH: false
   };
   error: string | null = null;
+  // Track if usage has been sent for each section to prevent duplicates
+  usageTracked: Record<FeedbackKey, boolean> = {
+    SPS: false,
+    KM: false,
+    KC: false,
+    KH: false
+  };
   currentState: WorkspaceState = WorkspaceState.START;
 
   // Use Record for type safety with FeedbackKey
@@ -114,6 +122,11 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = null;
     this.feedback = null; // Clear previous feedback
+    this.feedbackId = null; // Clear previous feedback ID
+    // Reset usage tracking flags
+    this.usageTracked = { SPS: false, KM: false, KC: false, KH: false };
+    // Reset expansion state
+    this.expandedSections = { SPS: false, KM: false, KC: false, KH: false };
 
     const requestBody: EvaluateRequestDto = {
       questionId: task.id, // Assuming task has an id property
@@ -121,7 +134,8 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
       // Add flavor/feedbackLevel if needed based on final DTO
     };
 
-    this.http.post<FeedbackOutput>(environment.server + '/tutoring-feedback/structured', requestBody) // Ensure API path is correct
+    // Expect the new response structure
+    this.http.post<{ feedback: FeedbackOutput; feedbackId: string }>(environment.server + '/tutoring-feedback/structured', requestBody)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => this.isLoading = false),
@@ -132,11 +146,45 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe(response => {
-        this.feedback = response;
+        this.feedback = response.feedback; // Store the feedback object
+        this.feedbackId = response.feedbackId; // Store the feedback ID
+        console.log(`Received feedback with ID: ${this.feedbackId}`); // Added log
+
         // TODO: Remove internal thoughts if present and not needed for display
         if (this.feedback?.IT) {
           delete this.feedback.IT;
         }
+      });
+  }
+
+  // --- Usage Tracking ---
+  private trackUsage(feedbackType: FeedbackKey): void {
+    if (!this.feedbackId) {
+      console.warn('Cannot track usage: feedbackId is missing.');
+      return;
+    }
+    if (this.usageTracked[feedbackType]) {
+      // console.log(`Usage for ${feedbackType} already tracked.`);
+      return; // Already tracked, do nothing
+    }
+
+    const url = `${environment.server}/tutoring-feedback/${this.feedbackId}/usage`;
+    const body = { feedbackType };
+
+    console.log(`Tracking usage for type ${feedbackType} on feedback ${this.feedbackId}`); // Added log
+
+    this.http.patch(url, body)
+      .pipe(
+          takeUntil(this.destroy$),
+          catchError(err => {
+            console.error(`Error tracking usage for ${feedbackType} on feedback ${this.feedbackId}:`, err);
+            // Don't block UI, just log the error
+            return throwError(() => err); // Re-throw or return EMPTY/of(null) if you want to swallow
+          })
+      )
+      .subscribe(() => {
+        console.log(`Successfully tracked usage for ${feedbackType}`); // Added log
+        this.usageTracked[feedbackType] = true; // Mark as tracked only on success
       });
   }
 
@@ -235,6 +283,10 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
 
   // Toggle a feedback section's expanded state
   toggleSection(key: FeedbackKey): void {
+    // Track usage *before* toggling, only if expanding and not yet tracked
+    if (!this.expandedSections[key]) {
+      this.trackUsage(key);
+    }
     this.expandedSections[key] = !this.expandedSections[key];
   }
 }

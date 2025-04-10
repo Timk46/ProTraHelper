@@ -74,6 +74,7 @@ export class LanggraphDataFetcherService {
       automatedTests: question.codingQuestion.automatedTests || [],
       codeGerueste: question.codingQuestion.codeGerueste || [],
       modelSolution: question.codingQuestion.modelSolutions || [], // Include model solutions if needed
+      codeSubmissionId: submissionId, // Add the decrypted submission ID
     };
   }
 }
