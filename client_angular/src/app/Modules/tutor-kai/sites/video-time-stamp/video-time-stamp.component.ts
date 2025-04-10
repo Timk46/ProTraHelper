@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { WorkspaceStateService } from '../../services/workspace-state.service'; // Import WorkspaceStateService
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -18,7 +19,11 @@ export class VideoTimeStampComponent implements OnInit {
   private readonly apiUrl = `${environment.server}/event-log`;
   @ViewChild('videoPlayer') videoPlayer!: ElementRef;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { href: string }, private httpClient: HttpClient) {}
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: { href: string },
+    private httpClient: HttpClient,
+    private workspaceState: WorkspaceStateService // Inject WorkspaceStateService
+  ) {}
 
   ngOnInit(): void {
     const params = this.parseHref(this.data.href);
@@ -74,6 +79,7 @@ export class VideoTimeStampComponent implements OnInit {
    */
   logEvent(action: string, currentTime?: number): void {
     const message = currentTime !== undefined ? `${action} video: ${this.title} at ${currentTime.toFixed(2)} seconds` : `${action} video: ${this.title}`;
+    const currentFeedbackId = this.workspaceState.getCurrentFeedbackId(); // Get feedback ID
     const logData = {
       level: 'info',
       type: 'tutor-kai/videoplayer',
@@ -84,6 +90,7 @@ export class VideoTimeStampComponent implements OnInit {
         time: currentTime?.toFixed(2),
         videoUrl: this.videoUrl,
         timestamp: new Date().toISOString(),
+        feedbackId: currentFeedbackId, // Add feedback ID to data payload
       },
     };
 

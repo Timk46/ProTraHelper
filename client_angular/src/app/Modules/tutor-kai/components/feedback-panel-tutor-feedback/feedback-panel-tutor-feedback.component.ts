@@ -54,8 +54,9 @@ type CodeSubmissionResultDto = any;
 })
 export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
   feedback: FeedbackOutput | null = null;
+  // feedbackId: string | null = null; // No longer needed here, managed by WorkspaceStateService
   isLoading = false;
-  feedbackId: string | null = null; // Added to store the feedback ID
+  // feedbackId: string | null = null; // Removed duplicate, managed by WorkspaceStateService
   // Track expansion state for each feedback section
   expandedSections: Record<FeedbackKey, boolean> = {
     SPS: false,
@@ -122,8 +123,8 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = null;
     this.feedback = null; // Clear previous feedback
-    this.feedbackId = null; // Clear previous feedback ID
     // Reset usage tracking flags
+    this.workspaceState.setFeedbackId(null); // Clear feedback ID in service
     this.usageTracked = { SPS: false, KM: false, KC: false, KH: false };
     // Reset expansion state
     this.expandedSections = { SPS: false, KM: false, KC: false, KH: false };
@@ -147,20 +148,20 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
       )
       .subscribe(response => {
         this.feedback = response.feedback; // Store the feedback object
-        this.feedbackId = response.feedbackId; // Store the feedback ID
-        console.log(`Received feedback with ID: ${this.feedbackId}`); // Added log
-
-        // TODO: Remove internal thoughts if present and not needed for display
-        if (this.feedback?.IT) {
-          delete this.feedback.IT;
-        }
+        this.workspaceState.setFeedbackId(response.feedbackId); // Set feedback ID in service
       });
   }
 
   // --- Usage Tracking ---
+  // Helper to get the current feedback ID from the service
+  private getCurrentFeedbackId(): string | null {
+    return this.workspaceState.getCurrentFeedbackId();
+  }
+
   private trackUsage(feedbackType: FeedbackKey): void {
-    if (!this.feedbackId) {
-      console.warn('Cannot track usage: feedbackId is missing.');
+    const currentFeedbackId = this.getCurrentFeedbackId(); // Get ID from service
+    if (!currentFeedbackId) {
+      console.warn('Cannot track usage: feedbackId is missing from WorkspaceStateService.');
       return;
     }
     if (this.usageTracked[feedbackType]) {
@@ -168,22 +169,19 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
       return; // Already tracked, do nothing
     }
 
-    const url = `${environment.server}/tutoring-feedback/${this.feedbackId}/usage`;
+    const url = `${environment.server}/tutoring-feedback/${currentFeedbackId}/usage`; // Use ID from service
     const body = { feedbackType };
-
-    console.log(`Tracking usage for type ${feedbackType} on feedback ${this.feedbackId}`); // Added log
 
     this.http.patch(url, body)
       .pipe(
           takeUntil(this.destroy$),
           catchError(err => {
-            console.error(`Error tracking usage for ${feedbackType} on feedback ${this.feedbackId}:`, err);
+            console.error(`Error tracking usage for ${feedbackType} on feedback ${currentFeedbackId}:`, err); // Use ID from service
             // Don't block UI, just log the error
             return throwError(() => err); // Re-throw or return EMPTY/of(null) if you want to swallow
           })
       )
       .subscribe(() => {
-        console.log(`Successfully tracked usage for ${feedbackType}`); // Added log
         this.usageTracked[feedbackType] = true; // Mark as tracked only on success
       });
   }

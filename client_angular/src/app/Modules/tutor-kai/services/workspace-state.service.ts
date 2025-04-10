@@ -19,6 +19,7 @@ export class WorkspaceStateService {
   private feedbackSubject = new BehaviorSubject<string>('');
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
   private errorSubject = new BehaviorSubject<string | null>(null);
+  private currentFeedbackIdSubject = new BehaviorSubject<string | null>(null); // Added for feedback ID
 
   // Public observables
   readonly currentTask$ = this.currentTaskSubject.asObservable();
@@ -27,6 +28,7 @@ export class WorkspaceStateService {
   readonly feedback$ = this.feedbackSubject.asObservable();
   readonly isLoading$ = this.isLoadingSubject.asObservable();
   readonly error$ = this.errorSubject.asObservable();
+  readonly currentFeedbackId$ = this.currentFeedbackIdSubject.asObservable(); // Added observable for feedback ID
 
   constructor(
     private taskDataService: TaskDataService,
@@ -213,5 +215,19 @@ export class WorkspaceStateService {
    */
   getCurrentTask(): QuestionDTO | null {
     return this.currentTaskSubject.value;
+  }
+
+  /**
+   * Sets the current feedback ID.
+   */
+  setFeedbackId(id: string | null): void {
+    this.currentFeedbackIdSubject.next(id);
+  }
+
+  /**
+   * Gets the current feedback ID synchronously.
+   */
+  getCurrentFeedbackId(): string | null {
+    return this.currentFeedbackIdSubject.value;
   }
 }
