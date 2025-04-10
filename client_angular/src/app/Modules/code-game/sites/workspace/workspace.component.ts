@@ -246,7 +246,7 @@ export class WorkspaceComponent {
 
   showHelp(): void {
     this.dialog.open(HelpDialogComponent, {
-      width: '100vh',
+      width: '150vh',
       data: { language: this.selectedLanguage }
     });
   }
