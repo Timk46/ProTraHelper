@@ -59,9 +59,6 @@ export class AppHeaderComponent implements OnInit {
     });
   }
 
-  /**
-   * Navigiert zur vorherigen Route in der Browser-Historie.
-   */
   navigateToPreviousRoute(): void {
     this.location.back();
   }
