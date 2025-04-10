@@ -55,8 +55,6 @@ export class CodeGameTaskDataService {
       codeGameEvaluation: codeGameEvaluation,
     }
 
-    console.log('CodeGame: Submitting User Answer: ', body);
-
     const response: Observable<any> = this.http.post<any>(`${this.apiQuestionDataURL}/userAnswer/create`, body);
     return response;
   }
