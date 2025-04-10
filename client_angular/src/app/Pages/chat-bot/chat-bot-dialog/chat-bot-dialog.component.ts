@@ -2,7 +2,7 @@ import { AfterViewChecked, Component, ElementRef, EventEmitter, HostListener, In
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { LlmService, ChatSession, ChatBotMessage } from 'src/app/Services/ai/llm.service';
-import { VideoTimeStampComponent } from '../../../Modules/tutor-kai/sites/video-time-stamp/video-time-stamp.component';
+import { VideoTimeStampComponent } from '../video-time-stamp/video-time-stamp.component';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
