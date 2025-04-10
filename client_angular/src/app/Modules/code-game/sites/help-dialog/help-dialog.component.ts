@@ -29,9 +29,10 @@ export class HelpDialogComponent {
             <img src="${this.turnRightGifPath}" alt="turn_right-gif"/>
             <img src="${this.turnLeftGifPath}" alt="turn_left-gif"/>
           </div>
+          <p>@Input: ActorDirection::RIGHT, ActorDirection::LEFT</p>
         </div>
         <div class="grid-item">
-          <code>analyse_item()</code>
+          <code>analyseItem()</code>
           <p>Prüft ob sich an der aktuellen Position ein Item befindet, wenn ja, wird dieses aufgenommen</p>
           <img src="${this.analyseItemGifPath}" alt="analyse_item-gif"/>
         </div>
@@ -40,20 +41,32 @@ export class HelpDialogComponent {
           <p>Kann verwendet werden um Text auszugeben</p>
         </div>
         <div class="grid-item">
-          <code>check_destination()</code>
+          <code>checkDestination()</code>
           <p>Prüft ob der Spieler das Ziel erreicht hat</p>
+          <p>@Output: true/false</p>
         </div>
         <div class="grid-item">
-          <code>check_obstacle()</code>
+          <code>checkObstacle()</code>
           <p>Prüft ob sich ein Hindernis in der aktuellen Richtung befindet</p>
+          <p>@Output: true/false</p>
         </div>
         <div class="grid-item">
-          <code>check_obstacle_in_direction(direction)</code>
+          <code>checkObstacle(ActorDirectionInWorld::NORTH)</code>
+          <code>checkObstacle(ActorDirectionInWorld::EAST)</code>
+          <code>checkObstacle(ActorDirectionInWorld::SOUTH)</code>
+          <code>checkObstacle(ActorDirectionInWorld::WEST)</code>
           <p>Prüft ob sich ein Hindernis in der angegebenen Richtung befindet</p>
+          <p>@Input: ActorDirectionInWorld::NORTH, ActorDirectionInWorld::EAST, ActorDirectionInWorld::SOUTH, ActorDirectionInWorld::WEST</p>
+          <p>@Output: true/false</p>
         </div>
         <div class="grid-item">
-          <code>check_world_bounds_in_direction(direction)</code>
+          <code>checkWorldBounds(ActorDirectionInWorld::NORTH)</code>
+          <code>checkWorldBounds(ActorDirectionInWorld::EAST)</code>
+          <code>checkWorldBounds(ActorDirectionInWorld::SOUTH)</code>
+          <code>checkWorldBounds(ActorDirectionInWorld::WEST)</code>
           <p>Prüft ob der Spieler in die angegebene Richtung das Spielfeld verlässt</p>
+          <p>@Input: ActorDirectionInWorld::NORTH, ActorDirectionInWorld::EAST, ActorDirectionInWorld::SOUTH, ActorDirectionInWorld::WEST</p>
+          <p>@Output: true/false</p>
         </div>
       </div>
     `,
@@ -73,9 +86,10 @@ export class HelpDialogComponent {
             <img src="${this.turnRightGifPath}" alt="turn_right-gif"/>
             <img src="${this.turnLeftGifPath}" alt="turn_left-gif"/>
           </div>
+          <p>@Input: ActorDirection.RIGHT, ActorDirection.LEFT</p>
         </div>
         <div class="grid-item">
-          <code>analyse_item()</code>
+          <code>analyseItem()</code>
           <p>Prüft ob sich an der aktuellen Position ein Item befindet, wenn ja, wird dieses aufgenommen</p>
           <img src="${this.analyseItemGifPath}" alt="analyse_item-gif"/>
         </div>
@@ -84,20 +98,32 @@ export class HelpDialogComponent {
           <p>Kann verwendet werden um Text auszugeben</p>
         </div>
         <div class="grid-item">
-          <code>check_destination()</code>
+          <code>checkDestination()</code>
           <p>Prüft ob der Spieler das Ziel erreicht hat</p>
+          <p>@Output: true/false</p>
         </div>
         <div class="grid-item">
-          <code>check_obstacle()</code>
+          <code>checkObstacle()</code>
           <p>Prüft ob sich ein Hindernis in der aktuellen Richtung befindet</p>
+          <p>@Output: true/false</p>
         </div>
         <div class="grid-item">
-          <code>check_obstacle_in_direction(direction)</code>
+          <code>checkObstacle(ActorDirectionInWorld.NORTH)</code>
+          <code>checkObstacle(ActorDirectionInWorld.EAST)</code>
+          <code>checkObstacle(ActorDirectionInWorld.SOUTH)</code>
+          <code>checkObstacle(ActorDirectionInWorld.WEST)</code>
           <p>Prüft ob sich ein Hindernis in der angegebenen Richtung befindet</p>
+          <p>@Input: ActorDirectionInWorld.NORTH, ActorDirectionInWorld.EAST, ActorDirectionInWorld.SOUTH, ActorDirectionInWorld.WEST</p>
+          <p>@Output: true/false</p>
         </div>
         <div class="grid-item">
-          <code>check_world_bounds_in_direction(direction)</code>
+          <code>checkWorldBounds(ActorDirectionInWorld.NORTH)</code>
+          <code>checkWorldBounds(ActorDirectionInWorld.EAST)</code>
+          <code>checkWorldBounds(ActorDirectionInWorld.SOUTH)</code>
+          <code>checkWorldBounds(ActorDirectionInWorld.WEST)</code>
           <p>Prüft ob der Spieler in die angegebene Richtung das Spielfeld verlässt</p>
+          <p>@Input: ActorDirectionInWorld.NORTH, ActorDirectionInWorld.EAST, ActorDirectionInWorld.SOUTH, ActorDirectionInWorld.WEST</p>
+          <p>@Output: true/false</p>
         </div>
       </div>
     `,
@@ -117,6 +143,7 @@ export class HelpDialogComponent {
             <img src="${this.turnRightGifPath}" alt="turn_right-gif"/>
             <img src="${this.turnLeftGifPath}" alt="turn_left-gif"/>
           </div>
+          <p>@Input: ActorDirection.RIGHT, ActorDirection.LEFT</p>
         </div>
          <div class="grid-item">
           <code>analyse_item()</code>
@@ -130,18 +157,30 @@ export class HelpDialogComponent {
         <div class="grid-item">
           <code>check_destination()</code>
           <p>Prüft ob der Spieler das Ziel erreicht hat</p>
+          <p>@Output: True/False</p>
         </div>
         <div class="grid-item">
           <code>check_obstacle()</code>
           <p>Prüft ob sich ein Hindernis in der aktuellen Richtung befindet</p>
+          <p>@Output: True/False</p>
         </div>
         <div class="grid-item">
-          <code>check_obstacle_in_direction(direction)</code>
+          <code>check_obstacle_in_direction(ActorDirectionInWorld.NORTH)</code>
+          <code>check_obstacle_in_direction(ActorDirectionInWorld.EAST)</code>
+          <code>check_obstacle_in_direction(ActorDirectionInWorld.SOUTH)</code>
+          <code>check_obstacle_in_direction(ActorDirectionInWorld.WEST)</code>
           <p>Prüft ob sich ein Hindernis in der angegebenen Richtung befindet</p>
+          <p>@Input: ActorDirectionInWorld.NORTH, ActorDirectionInWorld.EAST, ActorDirectionInWorld.SOUTH, ActorDirectionInWorld.WEST</p>
+          <p>@Output: True/False</p>
         </div>
         <div class="grid-item">
-          <code>check_world_bounds_in_direction(direction)</code>
+          <code>check_world_bounds_in_direction(ActorDirectionInWorld.NORTH)</code>
+          <code>check_world_bounds_in_direction(ActorDirectionInWorld.EAST)</code>
+          <code>check_world_bounds_in_direction(ActorDirectionInWorld.SOUTH)</code>
+          <code>check_world_bounds_in_direction(ActorDirectionInWorld.WEST)</code>
           <p>Prüft ob der Spieler in die angegebene Richtung das Spielfeld verlässt</p>
+          <p>@Input: ActorDirectionInWorld.NORTH, ActorDirectionInWorld.EAST, ActorDirectionInWorld.SOUTH, ActorDirectionInWorld.WEST</p>
+          <p>@Output: True/False</p>
         </div>
       </div>
     `
