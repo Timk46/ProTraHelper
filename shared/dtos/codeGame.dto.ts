@@ -24,6 +24,8 @@ export interface CodeGameEvaluationDTO { // TODO: change to CodeGameAnswerDTO
     collectedItems: number;
     visitedCellsAreAllowed: boolean;
     allWhiteListCellsVisited: boolean;
+    executionSuccess?: boolean;
+    executionMessage?: string;
 }
 
 export interface CodeGameScaffoldDTO {

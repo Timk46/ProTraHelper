@@ -34,12 +34,30 @@ export class CodeGameController {
     @Body('additionalFiles') additionalFiles: { [fileName: string]: string },
     @Body('gameFile') gameFile: { [fileName: string]: string },
   ) {
-    const executionResult = await this.codeGameService.executeCodeGameTask(
-      mainFile,
-      additionalFiles,
-      gameFile,
-      language,
-    );
+    let executionResult = null;
+    let success = true;
+    let message = 'CodeGame executed successfully';
+
+    // Timeout, if the execution takes too long return timeout
+    executionResult = await Promise.race([
+      this.codeGameService.executeCodeGameTask(
+        mainFile,
+        additionalFiles,
+        gameFile,
+        language,
+      ),
+      new Promise((_, reject) =>
+        setTimeout(() => {
+          success = false;
+          message = 'Execution timed out';
+          reject({ success, message, result: null });
+        }, 10000),
+      ),
+    ]).catch((error) => {
+      console.error('CodeGame: Error: ', error);
+      success = false;
+      message = error.message;
+    });
 
     const submittedCode: { [fileName: string]: string } = {
       ...mainFile,
@@ -52,8 +70,14 @@ export class CodeGameController {
         language,
         submittedCode,
         executionResult,
+        success,
+        message
       );
 
-    return evaluationResult;
+    return {
+      success: success,
+      message: message,
+      result: evaluationResult,
+    };
   }
 }

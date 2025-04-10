@@ -792,8 +792,23 @@ export class QuestionDataService {
           allItemsCollected: answerData.codeGameEvaluation?.allItemsCollected,
           visitedCellsAreAllowed: answerData.codeGameEvaluation?.visitedCellsAreAllowed,
           allWhiteListCellsVisited: answerData.codeGameEvaluation?.allWhiteListCellsVisited,
+          executionSuccess: answerData.codeGameEvaluation?.executionSuccess,
+          executionMessage: answerData.codeGameEvaluation?.executionMessage,
         },
       });
+
+      if (answerData.codeGameEvaluation?.submittedCode) {
+        for (const [fileName, code] of Object.entries(answerData.codeGameEvaluation.submittedCode)) {
+          await this.prisma.codeGameScaffoldAnswer.create({
+            data: {
+              codeGameAnswerId: codeGameAnswer.id,
+              language: answerData.codeGameEvaluation.language,
+              code: code,
+              codeFileName: fileName,
+            },
+          });
+        }
+      }
 
       let countEvaluationOptions = 4;
       let userScore = 0; // max. 100

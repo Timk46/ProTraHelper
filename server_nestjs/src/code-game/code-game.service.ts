@@ -18,9 +18,6 @@ import { questionType } from '@DTOs/question.dto';
 export class CodeGameService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  // TODO: cleanup
-  // private readonly apiUrl =
-  'https://jury1.bshefl2.bs.informatik.uni-siegen.de/execute/';
   private readonly apiUrl: string =
     'http://jury1.bshefl2.bs.informatik.uni-siegen.de/execute/';
 
@@ -102,12 +99,12 @@ export class CodeGameService {
     const additionalFilesBase64 = await this.generateBase64(additionalFiles);
 
     console.log('JURY 1 CPP Project execution');
-    console.log(
-      JSON.stringify({
-        mainFile: mainFileBase64,
-        additionalFiles: additionalFilesBase64,
-      }),
-    );
+    // console.log(
+    //   JSON.stringify({
+    //     mainFile: mainFileBase64,
+    //     additionalFiles: additionalFilesBase64,
+    //   }),
+    // );
 
     try {
       const response = await fetch(`${this.apiUrl}cpp-project`, {
@@ -120,10 +117,15 @@ export class CodeGameService {
       });
 
       if (!response.ok) {
-        throw new HttpException(
+        console.log(
           `Failed to execute C++ code. Status: ${response.status}`,
-          HttpStatus.BAD_GATEWAY,
         );
+        return null;
+
+        // throw new HttpException(
+        //   `Failed to execute C++ code. Status: ${response.status}`,
+        //   HttpStatus.BAD_GATEWAY,
+        // );
       }
 
       const responseBody: CppProjectExecutionResult = await response.json();
@@ -131,11 +133,13 @@ export class CodeGameService {
 
       return responseBody;
     } catch (error) {
-      console.error('Fetch error:', error);
-      throw new HttpException(
-        'Failed to execute C++ code due to a network error.',
-        HttpStatus.SERVICE_UNAVAILABLE,
-      );
+      console.log('Fetch error:', error);
+      return null;
+
+      // throw new HttpException(
+      //   'Failed to execute C++ code due to a network error.',
+      //   HttpStatus.SERVICE_UNAVAILABLE,
+      // );
     }
   }
 
@@ -164,13 +168,13 @@ export class CodeGameService {
     const additionalFilesBase64 = await this.generateBase64(additionalFiles);
 
     console.log('JURY 1 Python Project execution');
-    console.log(
-      JSON.stringify({
-        runMethod: 'main',
-        mainFile: mainFileBase64,
-        additionalFiles: additionalFilesBase64,
-      }),
-    );
+    // console.log(
+    //   JSON.stringify({
+    //     runMethod: 'main',
+    //     mainFile: mainFileBase64,
+    //     additionalFiles: additionalFilesBase64,
+    //   }),
+    // );
 
     try {
       const response = await fetch(
@@ -187,10 +191,15 @@ export class CodeGameService {
       );
 
       if (!response.ok) {
-        throw new HttpException(
+        console.log(
           `Failed to execute python code. Status: ${response.status}`,
-          HttpStatus.BAD_GATEWAY,
         );
+        return null;
+
+        // throw new HttpException(
+        //   `Failed to execute python code. Status: ${response.status}`,
+        //   HttpStatus.BAD_GATEWAY,
+        // );
       }
 
       const responseBody: PythonProjectExecutionResult = await response.json();
@@ -198,11 +207,13 @@ export class CodeGameService {
 
       return responseBody;
     } catch (error) {
-      console.error('Fetch error:', error);
-      throw new HttpException(
-        'Failed to execute Python code due to a network error.',
-        HttpStatus.SERVICE_UNAVAILABLE,
-      );
+      console.log('Fetch error:', error);
+      return null;
+
+      // throw new HttpException(
+      //   'Failed to execute Python code due to a network error.',
+      //   HttpStatus.SERVICE_UNAVAILABLE,
+      // );
     }
   }
 
@@ -219,12 +230,12 @@ export class CodeGameService {
     };
 
     console.log('JURY 1 Java Project execution');
-    console.log(
-      JSON.stringify({
-        mainClassName: 'game.Main',
-        files: files,
-      }),
-    );
+    // console.log(
+    //   JSON.stringify({
+    //     mainClassName: 'game.Main',
+    //     files: files,
+    //   }),
+    // );
 
     try {
       const response = await fetch(
@@ -240,10 +251,15 @@ export class CodeGameService {
       );
 
       if (!response.ok) {
-        throw new HttpException(
+        console.log(
           `Failed to execute java code. Status: ${response.status}`,
-          HttpStatus.BAD_GATEWAY,
         );
+        return null;
+
+        // throw new HttpException(
+        //   `Failed to execute java code. Status: ${response.status}`,
+        //   HttpStatus.BAD_GATEWAY,
+        // );
       }
 
       const responseBody: JavaProjectExecutionResult = await response.json();
@@ -251,11 +267,13 @@ export class CodeGameService {
 
       return responseBody;
     } catch (error) {
-      console.error('Fetch error:', error);
-      throw new HttpException(
-        'Failed to execute Java code due to a network error.',
-        HttpStatus.SERVICE_UNAVAILABLE,
-      );
+      console.log('Fetch error:', error);
+      return null;
+
+      // throw new HttpException(
+      //   'Failed to execute Java code due to a network error.',
+      //   HttpStatus.SERVICE_UNAVAILABLE,
+      // );
     }
   }
 }
