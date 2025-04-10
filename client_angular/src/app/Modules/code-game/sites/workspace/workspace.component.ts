@@ -82,7 +82,7 @@ export class WorkspaceComponent {
           this.codeSolutionRestriction = this.currentTask?.codeGameQuestion!.codeSolutionRestriction || false;
           this.methodNameToRestrict = this.currentTask?.codeGameQuestion!.methodNameToRestrict || '';
 
-          console.log('CodeGame: Current task: ', this.currentTask); // TODO: remove
+          // console.log('CodeGame: Current task: ', this.currentTask); // TODO: remove
 
           this.title.setTitle('GOALS: ' + this.currentTask?.name);
           this.codeEditorComponent?.changeLanguage(this.selectedLanguage);
@@ -192,7 +192,7 @@ export class WorkspaceComponent {
               this.codeGameEvaluation ?? {} as CodeGameEvaluationDTO)
             .subscribe({
               next: (response: any) => {
-                console.log('CodeGame: Submit Response: ', response);
+                // console.log('CodeGame: Submit Response: ', response);
               },
               error: (error: any) => {
                 console.error('Error: ', error);
