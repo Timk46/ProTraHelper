@@ -34,17 +34,6 @@
         </div>
       </div>
 
-      <!-- KTC Feedback Card -->
-      <div *ngIf="feedback['KTC']" class="feedback-card" [class.expanded]="expandedSections['KTC']">
-        <button class="card-header" (click)="toggleSection('KTC')">
-          <span class="title">{{ feedbackTitles['KTC'] || 'KTC' }}</span>
-          <mat-icon [class.rotated]="expandedSections['KTC']">expand_more</mat-icon>
-        </button>
-        <div class="card-content" [@expandCollapse]="expandedSections['KTC'] ? 'true' : 'false'">
-          <div class="feedback-text" [innerHTML]="parseMarkdown(feedback['KTC'])"></div>
-        </div>
-      </div>
-
       <!-- KC Feedback Card -->
       <div *ngIf="feedback['KC']" class="feedback-card" [class.expanded]="expandedSections['KC']">
         <button class="card-header" (click)="toggleSection('KC')">

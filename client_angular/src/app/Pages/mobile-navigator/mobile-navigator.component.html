@@ -4,7 +4,7 @@
     <div class="breadcrumbs" *ngIf="!isSearchVisible">
       <a *ngFor="let item of openLayers; let i = index"
          [ngClass]="{'active': i === openLayers.length - 1}"
-         (click)="onBreadcrumbClick(i)">
+         (click)="onTabClick(i)">
         {{ item.name }}
         <mat-icon *ngIf="i < openLayers.length - 1">chevron_right</mat-icon>
       </a>
