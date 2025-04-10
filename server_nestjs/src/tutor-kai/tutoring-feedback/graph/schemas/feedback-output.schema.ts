@@ -11,20 +11,10 @@ export const FeedbackOutputSchema = z.object({
   .describe(
     'Knowledge about Correct Result: Field for Step 1 Describe Correct Approach',
   ),
-  IT: z
-    .string()
-    .describe(
-      'Internal Thoughts: Hidden chain-of-thought detailing pedagogical and didactic considerations behind the feedback.',
-    ),
   KM: z
     .string()
     .describe(
       'Knowledge about Mistakes: Information about the errors identified in the student submission (type, location, cause).',
-    ),
-  KTC: z
-    .string()
-    .describe(
-      'Knowledge about Task Constraints: Information regarding specific rules, requirements, or constraints of the programming task.',
     ),
   KC: z
     .string()

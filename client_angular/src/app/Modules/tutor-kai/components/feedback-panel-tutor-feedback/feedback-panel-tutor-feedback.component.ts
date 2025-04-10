@@ -24,12 +24,11 @@ interface FeedbackOutput {
   IT?: string; // Optional internal thoughts
   KCR?: string;
   KM?: string;
-  KTC?: string;
   KC?: string;
   KH?: string;
   [key: string]: any; // Allow other potential keys if needed, though we filter
 }
-type FeedbackKey = 'KCR' | 'KM' | 'KTC' | 'KC' | 'KH'; // Define specific keys for feedback types
+type FeedbackKey = 'KCR' | 'KM' | 'KC' | 'KH'; // Define specific keys for feedback types
 
 type EvaluateRequestDto = any;
 type CodeSubmissionResultDto = any;
@@ -61,7 +60,6 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
   expandedSections: Record<FeedbackKey, boolean> = {
     KCR: false,
     KM: false,
-    KTC: false,
     KC: false,
     KH: false
   };
@@ -70,11 +68,10 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
 
   // Use Record for type safety with FeedbackKey
   feedbackTitles: Record<FeedbackKey, string> = {
-    KCR: 'Zeige mir die korrekte Lösung.',
-    KM: 'Erkläre die Fehler.',
-    KTC: 'Erkläre die Aufgabenstellung.',
-    KC: 'Erkläre relevante Konzepte.',
-    KH: 'Erkläre, wie ich weiter machen kann.'
+    KCR: 'Korrekte Lösung.',
+    KM: 'Probleme finden',
+    KC: 'Konzepte und Beispiele',
+    KH: 'Nächsten Schritt preisgeben'
   };
 
   private destroy$ = new Subject<void>();
@@ -182,7 +179,7 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
   getFeedbackKeys(): FeedbackKey[] {
     if (!this.feedback) return [];
     // Order matters for display
-    const orderedKeys: FeedbackKey[] = ['KCR', 'KM', 'KTC', 'KC', 'KH'];
+    const orderedKeys: FeedbackKey[] = ['KCR', 'KM', 'KC', 'KH'];
     // Filter keys that exist and have truthy content in the feedback object
     return orderedKeys.filter(key => this.feedback && this.feedback[key]);
   }
