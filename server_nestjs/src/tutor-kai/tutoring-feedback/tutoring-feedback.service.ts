@@ -14,13 +14,13 @@ export class TutoringFeedbackService {
    * Generates structured feedback for a given student submission context.
    * Orchestrates the execution of the underlying LangGraph workflow.
    * @param feedbackContext The input context containing student solution, task details, etc.
-   * @returns The structured feedback JSON object.
+   * @returns An object containing the structured feedback JSON and the ID of the persisted feedback record.
    * @throws {InternalServerErrorException} If graph execution fails or returns an error state.
-   * @throws {NotFoundException} If the final feedback JSON is unexpectedly missing from the graph result.
+   * @throws {NotFoundException} If the final feedback JSON or the generatedFeedbackId is unexpectedly missing from the graph result.
    */
   async generateFeedback(
     feedbackContext: FeedbackContextDto,
-  ): Promise<FeedbackOutput> {
+  ): Promise<{ feedback: FeedbackOutput; feedbackId: string }> { // Updated return type
     this.logger.log(
       `Generating feedback for task (description length: ${feedbackContext.taskDescription?.length})`,
     );
@@ -51,18 +51,20 @@ export class TutoringFeedbackService {
 
       // Extract the final feedback
       const feedbackOutput = finalState.finalFeedbackJson;
+      const feedbackId = finalState.generatedFeedbackId; // Extract the ID
 
-      if (!feedbackOutput) {
+      if (!feedbackOutput || !feedbackId) { // Check for both feedback and ID
         this.logger.error(
-          'Final feedback JSON is missing from the graph final state.',
+          'Final feedback JSON or generatedFeedbackId is missing from the graph final state.',
+          `Feedback present: ${!!feedbackOutput}, ID present: ${!!feedbackId}`
         );
         throw new NotFoundException(
-          'Failed to generate feedback content.',
+          'Failed to retrieve generated feedback content or its ID.',
         );
       }
 
-      this.logger.log('Successfully generated and retrieved feedback JSON.');
-      return feedbackOutput;
+      this.logger.log(`Successfully generated feedback JSON and retrieved ID: ${feedbackId}`);
+      return { feedback: feedbackOutput, feedbackId: feedbackId }; // Return both
     } catch (error) {
       this.logger.error(`Error during graph invocation: ${error.message}`, error.stack);
       // Catch errors from invoke itself or errors thrown from our checks

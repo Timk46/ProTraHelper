@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config'; // Import ConfigModule
-import { LanggraphFeedbackModule } from '../langgraph-feedback/langgraph-feedback.module'; // Import the module providing DomainKnowledgeService
+import { ConfigModule } from '@nestjs/config';
+import { LanggraphFeedbackModule } from '../langgraph-feedback/langgraph-feedback.module';
+import { PrismaModule } from 'src/prisma/prisma.module'; // Import PrismaModule
 import { TutoringFeedbackService } from './tutoring-feedback.service';
 import { TutoringFeedbackController } from './tutoring-feedback.controller';
 import { GraphBuilderService } from './graph/graph.builder.service';
@@ -12,7 +13,8 @@ import { GenerateFinalFeedbackNodeService } from './graph/nodes/generate-final-f
 @Module({
   imports: [
     ConfigModule, // Needed for ConfigService injection in TutoringFeedbackService
-    LanggraphFeedbackModule, // Import to access exported providers like DomainKnowledgeService
+    LanggraphFeedbackModule,
+    PrismaModule, // Add PrismaModule to imports
   ],
   controllers: [TutoringFeedbackController],
   providers: [

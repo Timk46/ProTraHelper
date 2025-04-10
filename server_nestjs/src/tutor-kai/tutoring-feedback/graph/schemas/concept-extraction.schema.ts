@@ -8,7 +8,7 @@ export const ConceptExtractionSchema = z.object({
   concepts: z
     .array(z.string())
     .describe(
-      'An array containing the names of the 2 most relevant programming concepts related to the task or student errors.',
+      'An array containing the names of the single most relevant programming concept related to the task or student errors.',
     ),
 });
 

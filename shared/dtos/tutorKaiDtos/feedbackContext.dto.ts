@@ -10,4 +10,5 @@ export interface FeedbackContextDto {
   codeGerueste?: CodeGeruestDto[]; // Optional based on graph state definition
   modelSolution?: ModelSolutionDto[];
   // Removed learnerModel property
+  codeSubmissionId: number; // Added to link feedback back to the submission
 }

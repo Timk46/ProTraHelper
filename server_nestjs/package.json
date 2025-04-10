@@ -6,10 +6,10 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "seed": "npx prisma generate && npx prisma migrate reset && ts-node prisma/seed.ts",
-    "seedUnitTest": "npx prisma generate && npx prisma migrate reset --force --skip-generate && ts-node prisma/seed.ts",
-    "oldseed": "npx prisma generate && ts-node prisma/seed.ts",
-    "resetseed": "npx prisma generate && npx prisma db push --force-reset && ts-node prisma/seed.ts",
+    "seed": "npx prisma generate && npx prisma migrate reset && node -r tsconfig-paths/register -r ts-node/register prisma/seed.ts",
+    "seedUnitTest": "npx prisma generate && npx prisma migrate reset --force --skip-generate && node -r tsconfig-paths/register -r ts-node/register prisma/seed.ts",
+    "oldseed": "npx prisma generate && node -r tsconfig-paths/register -r ts-node/register prisma/seed.ts",
+    "resetseed": "npx prisma generate && npx prisma db push --force-reset && node -r tsconfig-paths/register -r ts-node/register prisma/seed.ts",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -23,7 +23,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seedTranscripts": "ts-node prisma/processTranscripts.ts"
+    "seedTranscripts": "node -r tsconfig-paths/register -r ts-node/register prisma/processTranscripts.ts"
   },
   "dependencies": {
     "@langchain/community": "^0.2.33",
