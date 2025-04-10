@@ -225,8 +225,6 @@ export class PlayfieldComponent {
   }
 
 setCSSVariables(): void {
-  console.log(this.gameFieldHeight, this.gameFieldWidth);
-
   const fieldElement = this.el.nativeElement.querySelector('.field');
   if (fieldElement) {
     // Set the CSS variables for the grid dimensions

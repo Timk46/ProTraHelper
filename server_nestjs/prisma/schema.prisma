@@ -519,6 +519,8 @@ model CodeGameAnswer {
   collectedItems                    Int
   visitedCellsAreAllowed            Boolean
   allWhiteListCellsVisited          Boolean
+  executionSuccess                  Boolean?
+  executionMessage                  String?
 }
 
 model CodeGameScaffoldAnswer {
