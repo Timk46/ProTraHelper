@@ -1,6 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { ConfirmationBoxComponent } from 'src/app/Pages/confirmation-box/confirmation-box.component';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { NavigationPreferenceService } from 'src/app/Services/navigation/navigation-preference.service';
@@ -36,7 +37,8 @@ export class AppHeaderComponent implements OnInit {
     private userService: UserService,
     private router: Router,
     public dialog: MatDialog,
-    private navigationPreferenceService: NavigationPreferenceService
+    private navigationPreferenceService: NavigationPreferenceService,
+    private location: Location
   ) {
     // Subscribe to the authentication observable
     this.userService.isAuthenticated$.subscribe((isAuthenticated) => {
@@ -57,6 +59,9 @@ export class AppHeaderComponent implements OnInit {
     });
   }
 
+  navigateToPreviousRoute(): void {
+    this.location.back();
+  }
 
   logOut(logOutAllUserDevices: boolean): void {
     if (logOutAllUserDevices) {
