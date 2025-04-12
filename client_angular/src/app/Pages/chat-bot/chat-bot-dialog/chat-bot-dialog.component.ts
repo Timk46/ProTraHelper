@@ -1,5 +1,6 @@
 import { AfterViewChecked, Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router'; // Import Router
 import { MatDialog } from '@angular/material/dialog';
 import { LlmService, ChatSession, ChatBotMessage } from 'src/app/Services/ai/llm.service';
 import { VideoTimeStampComponent } from '../video-time-stamp/video-time-stamp.component';
@@ -46,7 +47,8 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
     private llmService: LlmService,
     private el: ElementRef,
     private dialog: MatDialog,
-    private http: HttpClient
+    private http: HttpClient,
+    private router: Router // Inject Router
   ) {
     this.form = this.formBuilder.group({
       message: ['']
@@ -159,7 +161,9 @@ export class ChatBotDialogComponent implements OnInit, AfterViewChecked {
         content: msg.text || ''
       }));
 
-    this.llmService.getLlmAnswerDialog(context, question, this.dialogSessionId, this.currentSession?.id).subscribe({
+    const currentUrl = this.router.url; // Get current URL
+
+    this.llmService.getLlmAnswerDialog(context, question, this.dialogSessionId, currentUrl, this.currentSession?.id).subscribe({ // Pass currentUrl
       next: (response: ChatBotMessage) => {
         this.messages.pop();
         const botMessage: Message = {

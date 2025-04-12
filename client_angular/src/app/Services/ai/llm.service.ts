@@ -55,13 +55,15 @@ export class LlmService {
     context: Array<{ role: string; content: string }>,
     question: string,
     dialogSessionId: string,
+    url: string, // Added url parameter
     sessionId?: number
   ): Observable<ChatBotMessage> {
     return this.http.post<ChatBotMessage>(`${environment.server}/chat-bot/ask/basic/getDialog`, {
       context,
       question,
       dialogSessionId,
-      sessionId
+      sessionId,
+      url // Added url to payload
     });
   }
 }

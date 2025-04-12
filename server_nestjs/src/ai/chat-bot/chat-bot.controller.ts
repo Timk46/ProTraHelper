@@ -65,6 +65,7 @@ export class ChatBotController {
     @Body('dialogSessionId') dialogSessionId: string,
     @Req() req: RequestWithUser,
     @Res() res: Response,
+    @Body('url') url: string, // Added url parameter from body
     @Body('sessionId') sessionId?: number
   ): Promise<void> {
     res.set('Content-Type', 'text/plain');
@@ -72,9 +73,11 @@ export class ChatBotController {
 
     // Choose the appropriate response generation method based on the context length
     if (context.length > 3) { // 3 is the minimum and default number including the default question by the LLM
-      await this.chatBotRAGService.chatBotRagAnswerDialog(context, question, req.user.id, dialogSessionId, sessionId);
+      // TODO: Streaming is not implemented for this service method yet, but passing url for consistency
+      await this.chatBotRAGService.chatBotRagAnswerDialog(context, question, req.user.id, dialogSessionId, url, sessionId); // Pass url
     } else {
-      await this.chatBotRAGService.chatBotRagAnswer(question, req.user.id, dialogSessionId, sessionId);
+      // TODO: Streaming is not implemented for this service method yet, but passing url for consistency
+      await this.chatBotRAGService.chatBotRagAnswer(question, req.user.id, dialogSessionId, url, sessionId); // Pass url
     }
   }
 
@@ -93,13 +96,14 @@ export class ChatBotController {
     @Body('question') question: string,
     @Body('dialogSessionId') dialogSessionId: string,
     @Req() req: RequestWithUser,
+    @Body('url') url: string, // Added url parameter from body
     @Body('sessionId') sessionId?: number
   ): Promise<ChatBotMessageDTO> {
     // Choose the appropriate response generation method based on the context length
     if (context.length > 3) { // 3 is the minimum and default number including the default question by the LLM
-      return await this.chatBotRAGService.chatBotRagAnswerDialog(context, question, req.user.id, dialogSessionId, sessionId);
+      return await this.chatBotRAGService.chatBotRagAnswerDialog(context, question, req.user.id, dialogSessionId, url, sessionId); // Pass url
     } else {
-      return await this.chatBotRAGService.chatBotRagAnswer(question, req.user.id, dialogSessionId, sessionId);
+      return await this.chatBotRAGService.chatBotRagAnswer(question, req.user.id, dialogSessionId, url, sessionId); // Pass url
     }
   }
 
