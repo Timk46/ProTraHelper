@@ -1,0 +1,185 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ChatOpenAI } from '@langchain/openai';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { TutoringFeedbackState } from '../state';
+import { ConceptExtractionSchema } from '../schemas/concept-extraction.schema';
+// Adjust path based on actual location if necessary
+import { DomainKnowledgeService } from '../../../langgraph-feedback/tools/domain-knowledge/domain-knowledge.service';
+
+@Injectable()
+export class ExtractAndFetchNodeService {
+  private readonly logger = new Logger(ExtractAndFetchNodeService.name);
+  private llm: ChatOpenAI;
+
+  constructor(
+    private configService: ConfigService,
+    // Ensure DomainKnowledgeModule is imported where this service is provided (e.g., TutoringFeedbackModule)
+    private domainKnowledgeService: DomainKnowledgeService,
+  ) {
+    // Basic LLM initialization - consider a shared LlmProviderService
+    this.llm = new ChatOpenAI({
+      modelName: 'gpt-4o-2024-08-06',
+      temperature: 0,
+    });
+  }
+
+  /**
+   * Executes the node's logic: extracts concepts and fetches lecture snippets.
+   * @param state The current LangGraph state.
+   * @returns A partial state object containing concepts, snippets, sourceMap, and potential error.
+   */
+  async execute(
+    state: TutoringFeedbackState,
+  ): Promise<Partial<TutoringFeedbackState>> {
+    this.logger.log('Executing ExtractAndFetch Node');
+    const { feedbackContext } = state;
+
+    // --- Start: Concept Extraction Logic ---
+    let extractedConcepts: string[] = [];
+    let extractionError: string | undefined = undefined;
+
+    if (!feedbackContext) {
+      this.logger.error('FeedbackContext is missing from state.');
+      // Return immediately if context is missing, as nothing can be done
+      return {
+        concepts: [],
+        lectureSnippets: '[]',
+        sourceMap: {},
+        error: 'FeedbackContext is missing in ExtractAndFetchNode.',
+      };
+    }
+
+    const { studentSolution, taskDescription, compilerOutput, unitTestResults } =
+      feedbackContext;
+
+    // Prepare context string for the prompt
+    let contextString = `Task Description:\n\`\`\`\n${taskDescription}\n\`\`\`\n\nStudent Solution:\n\`\`\`\n${studentSolution}\n\`\`\``;
+    if (compilerOutput) {
+      contextString += `\n\nCompiler Output:\n\`\`\`\n${compilerOutput}\n\`\`\``;
+    }
+    if (unitTestResults) {
+      contextString += `\n\nUnit Test Results:\n\`\`\`\n${JSON.stringify(
+        unitTestResults, null, 2,
+      )}\n\`\`\``;
+    }
+
+    const systemPrompt =
+`You are a programming professor with extensive computer science expertise. Your task is to analyze a student's code submission carefully. Based on the provided context identify the **single most relevant programming concept** the student is struggling with.
+
+Follow these guidelines:
+
+1. **Prioritize Errors**: If there is a compiler or runtime error, focus specifically on the concept directly related to that error (e.g., IndentationError in Python → "Explain Indentation (Python)").
+
+2. **Central Concept Identification**: If no explicit errors exist, identify the core programming concept central to resolving the student's task, such as:
+   - Control structures
+   - Data structures
+   - Algorithms
+   - Language-specific syntax
+   - Object-oriented principles
+
+3. **Formulate a Search Query**: Clearly rephrase the identified concept into a concise, searchable query (what would the student ask for help on) suitable for semantic similarity search. Follow the pattern:
+   - "Explain [Concept] ([Programming Language])"
+   - "What is [Concept] ([Programming Language])"
+
+**Examples:**
+- "Explain Recursion (Java)"
+- "Difference between For Loops and While Loops (Python)"
+- "Explain Data Types (Java)"
+- "Explain Conditional Statements (Python)"
+
+Always explicitly include the programming language in parentheses. The query must be in **german language**.
+`;
+
+    const userPrompt =
+`# Context
+${contextString}`;
+
+    const llmWithStructure = this.llm.withStructuredOutput(
+      ConceptExtractionSchema,
+      { name: 'extract_concepts' },
+    );
+
+    try {
+      const response = await llmWithStructure.invoke([
+        new SystemMessage(systemPrompt),
+        new HumanMessage(userPrompt),
+      ]);
+      extractedConcepts = response.concepts ?? [];
+      this.logger.log(`Successfully extracted concepts: ${extractedConcepts.join(', ')}`);
+    } catch (error) {
+      this.logger.error(`Error extracting concepts: ${error.message}`, error.stack);
+      extractionError = `Failed to extract concepts: ${error.message}`;
+      // Concepts will be empty, proceed to snippet fetching which will likely return default
+    }
+    // --- End: Concept Extraction Logic ---
+
+
+    // --- Start: Fetch Snippets Logic ---
+    const defaultSnippetReturn = { lectureSnippets: '[]', sourceMap: {} };
+    let lectureSnippetsResult = defaultSnippetReturn;
+    let snippetError: string | undefined = undefined;
+
+    if (extractedConcepts.length > 0) {
+        try {
+            let sourceCounter = 0;
+            const sourceMapDict: Record<string, string> = {};
+            const allFormattedSnippets = [];
+
+            for (const concept of extractedConcepts) {
+                const rawSnippets: any[] = await this.domainKnowledgeService.searchLectureContent(concept);
+                this.logger.log(`Found ${rawSnippets?.length ?? 0} raw snippets for concept: ${concept}`);
+
+                if (rawSnippets && rawSnippets.length > 0) {
+                    for (const chunk of rawSnippets) {
+                        const content = chunk.TranscriptChunkContent ?? chunk.pageContent;
+                        const metadata = chunk.metadata;
+                        const markdownLink = metadata?.markdownLink;
+
+                        if (content && markdownLink) {
+                            sourceCounter++;
+                            allFormattedSnippets.push({
+                                Erklärung: content,
+                                Quelle: `$$${sourceCounter}$$`,
+                            });
+                            sourceMapDict[sourceCounter.toString()] = markdownLink;
+                        } else {
+                            this.logger.warn("Skipping transcript chunk due to missing content or markdownLink:", chunk);
+                        }
+                    }
+                }
+            }
+
+            const conceptsForPrompt = [{
+                Konzept: "Relevante Vorlesungsinhalte",
+                Inhalte: allFormattedSnippets,
+            }];
+            const lectureSnippetsString = JSON.stringify({ Vorlesungsausschnitte: conceptsForPrompt });
+
+            lectureSnippetsResult = {
+                lectureSnippets: lectureSnippetsString,
+                sourceMap: sourceMapDict
+            };
+            this.logger.log(`Successfully processed ${allFormattedSnippets.length} snippets.`);
+
+        } catch (error) {
+            this.logger.error(`Error fetching/processing snippets: ${error.message}`, error.stack);
+            snippetError = `Failed to fetch/process lecture snippets: ${error.message}`;
+            lectureSnippetsResult = defaultSnippetReturn; // Use default on error
+        }
+    } else {
+        this.logger.warn('No concepts extracted, skipping snippet fetch.');
+        lectureSnippetsResult = defaultSnippetReturn; // Use default if no concepts
+    }
+    // --- End: Fetch Snippets Logic ---
+
+    // Combine results and potential errors
+    const combinedError = [extractionError, snippetError].filter(Boolean).join('; ');
+
+    return {
+      concepts: extractedConcepts,
+      ...lectureSnippetsResult,
+      ...(combinedError && { error: combinedError })
+    };
+  }
+}

@@ -12,7 +12,7 @@ export class GenerateFixedCodeNodeService {
   constructor(private configService: ConfigService) {
     // Basic LLM initialization - replace with proper injection/configuration
     this.llm = new ChatOpenAI({
-      modelName: 'o3-mini-2025-01-31',
+      modelName: 'gpt-4o-2024-08-06',
     });
   }
 
@@ -36,17 +36,20 @@ export class GenerateFixedCodeNodeService {
 
     const systemPrompt = `You are an expert programming tutor. Your task is to analyze the provided student code for a given programming task and generate a corrected version.
 Focus on fixing errors and making the code functional according to the task description AND ensuring it passes the provided automated tests, while preserving the student's original logic and approach as much as possible.
-The corrected code MUST pass the automated tests.
-Do NOT simply provide the model solution. Generate only the corrected code, without any explanations, comments, or introductory phrases.`;
+The corrected code MUST pass the automated tests. Generate only the corrected code, without any explanations, comments, or introductory phrases.`;
 
-    let userPrompt = `Task Description:\n\`\`\`\n${taskDescription}\n\`\`\`\n\nStudent Solution:\n\`\`\`\n${studentSolution}\n\`\`\``;
+    let userPrompt =
+`# Task Description:
+${taskDescription}
 
-    if (automatedTests) {
-      // Simple stringification, might need refinement based on actual structure
-      userPrompt += `\n\nAutomated Tests (the corrected code MUST pass these):\n\`\`\`\n${automatedTests[0].code}\n\`\`\``;
-    }
+# Student Solution:
+${studentSolution}
 
-    userPrompt += `\n\nGenerate the corrected code that passes the automated tests:`;
+# Automated Tests (the corrected code MUST pass these)
+${automatedTests[0].code}
+
+Generate the corrected code that passes the automated tests.
+`;
 
     try {
       // TODO: Implement retry logic (e.g., using tenacity or a simple loop)

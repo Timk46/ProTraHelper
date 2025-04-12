@@ -1,13 +1,13 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { CompiledStateGraph, StateGraph } from '@langchain/langgraph'; // Keep single import
+import { CompiledStateGraph, StateGraph, START, END } from '@langchain/langgraph'; // Keep single import
 
 import { TutoringFeedbackStateAnnotation, TutoringFeedbackState } from './state';
 import { GenerateFixedCodeNodeService } from './nodes/generate-fixed-code.node.service';
-import { ExtractConceptsNodeService } from './nodes/extract-concepts.node.service';
-import { FetchLectureSnippetsNodeService } from './nodes/fetch-lecture-snippets.node.service';
+// Removed ExtractConceptsNodeService and FetchLectureSnippetsNodeService
+import { ExtractAndFetchNodeService } from './nodes/extract-and-fetch.node.service'; // Added combined node
 import { GenerateFinalFeedbackNodeService } from './nodes/generate-final-feedback.node.service';
 import { FeedbackOutput } from './schemas/feedback-output.schema';
-// Remove TutoringGraphNodes type - rely on inference
+
 
 @Injectable()
 export class GraphBuilderService implements OnModuleInit {
@@ -16,8 +16,8 @@ export class GraphBuilderService implements OnModuleInit {
 
   constructor(
     private generateFixedCodeNode: GenerateFixedCodeNodeService,
-    private extractConceptsNode: ExtractConceptsNodeService,
-    private fetchLectureSnippetsNode: FetchLectureSnippetsNodeService,
+    // Removed extractConceptsNode and fetchLectureSnippetsNode
+    private extractAndFetchNode: ExtractAndFetchNodeService, // Added combined node service
     private generateFinalFeedbackNode: GenerateFinalFeedbackNodeService,
   ) {}
 
@@ -37,66 +37,60 @@ export class GraphBuilderService implements OnModuleInit {
     workflow.addNode('generate_fixed_code', (state: TutoringFeedbackState) =>
       this.generateFixedCodeNode.execute(state),
     );
-    workflow.addNode('extract_concepts', (state: TutoringFeedbackState) =>
-      this.extractConceptsNode.execute(state),
-    );
-    workflow.addNode(
-      'fetch_lecture_snippets',
-      (state: TutoringFeedbackState) =>
-        this.fetchLectureSnippetsNode.execute(state),
+    // Removed 'extract_concepts' and 'fetch_lecture_snippets' nodes
+    workflow.addNode('extract_and_fetch_snippets', (state: TutoringFeedbackState) =>
+      this.extractAndFetchNode.execute(state),
     );
     workflow.addNode(
       'generate_final_feedback',
       (state: TutoringFeedbackState) =>
         this.generateFinalFeedbackNode.execute(state),
     );
-    // Define the condition function to check if both parallel branches are complete
-    const checkIfReadyForFinalFeedback = (state: TutoringFeedbackState): string => {
-      this.logger.debug(`Checking readiness for final feedback. FixedCode: ${!!state.fixedCode}, Snippets/SourceMap: ${!!state.sourceMap}`);
-      if (state.fixedCode && state.sourceMap) { // Check if both fixedCode and sourceMap (proxy for snippets) are present
-        this.logger.debug('Both branches complete. Proceeding to final feedback.');
+    // Simple join node - does nothing but act as a synchronization point
+    workflow.addNode('join_branches', (state: TutoringFeedbackState) => {
+      this.logger.debug('Reached join node after parallel branches.');
+      return {}; // No state update needed here
+    });
+
+    // Define the routing function to be called AFTER the join node
+    const routeAfterJoin = (state: TutoringFeedbackState): string => {
+      this.logger.debug(`Routing after join. FixedCode: ${!!state.fixedCode}, Snippets/SourceMap: ${!!state.sourceMap}`);
+      if (state.fixedCode && state.sourceMap) {
+        this.logger.debug('State complete. Proceeding to final feedback.');
         return 'generate_final_feedback';
       } else {
-        this.logger.debug('Waiting for other branch to complete.');
-        return '__end__'; // End this path, wait for the other branch to trigger the condition
+        this.logger.error('State incomplete after join! Ending graph.');
+        return END;
       }
     };
 
-    // Try defining edges again after all nodes are added
-    // @ts-ignore - Suppressing persistent type error for addEdge with node names
-    workflow.addEdge('__start__', 'generate_fixed_code');
-    // @ts-ignore - Suppressing persistent type error for addEdge with node names
-    workflow.addEdge('__start__', 'extract_concepts'); // This might still cause issues based on previous errors
-    // Concept Extraction -> Fetch Lecture Snippets
-    // Concept Extraction -> Fetch Lecture Snippets
-    // @ts-ignore - Suppressing persistent type error for addEdge with node names
-    workflow.addEdge('extract_concepts', 'fetch_lecture_snippets');
 
-    // Add conditional edges after each parallel branch finishes
+    // Define edges from start
+    // @ts-ignore - Suppressing persistent type error
+    workflow.addEdge(START, 'generate_fixed_code');
+    // @ts-ignore - Suppressing persistent type error
+    workflow.addEdge(START, 'extract_and_fetch_snippets');
+
+    // Edges from parallel branches to the join node
+    // @ts-ignore - Suppressing persistent type error
+    workflow.addEdge('generate_fixed_code', 'join_branches');
+    // @ts-ignore - Suppressing persistent type error
+    workflow.addEdge('extract_and_fetch_snippets', 'join_branches');
+
+    // Conditional edge from the join node
+
     workflow.addConditionalEdges(
-        // @ts-ignore - Suppressing persistent type error for addConditionalEdges source node
-        'generate_fixed_code',
-        checkIfReadyForFinalFeedback,
-        {
-            'generate_final_feedback': 'generate_final_feedback',
-            '__end__': '__end__',
-        }
-    );
-     workflow.addConditionalEdges(
-        // @ts-ignore - Suppressing persistent type error for addConditionalEdges source node
-        'fetch_lecture_snippets',
-        checkIfReadyForFinalFeedback,
-        {
-            'generate_final_feedback': 'generate_final_feedback',
-            '__end__': '__end__',
-        }
+      // @ts-ignore - Suppressing persistent type error for addConditionalEdges source node
+      'join_branches', // Source node for the conditional edge
+      routeAfterJoin   // Function to decide the next step
+      // No mapping needed as the function returns the target node name or END
     );
 
     // Final Feedback Generation -> End
-    // Final Feedback Generation -> End
-    // Final Feedback Generation still goes to End
-    // @ts-ignore - Suppressing persistent type error for addEdge with node names
-    workflow.addEdge('generate_final_feedback', '__end__');
+
+    // Final edge
+    // @ts-ignore - Suppressing persistent type error
+    workflow.addEdge('generate_final_feedback', END);
 
     // Compile the graph
     return workflow.compile();

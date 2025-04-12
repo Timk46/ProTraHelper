@@ -97,39 +97,41 @@ export class GenerateFinalFeedbackNodeService {
 3.  **Explain Concepts & Cite Sources (Output to "KC" field):**
     *   Identify the fundamental programming concepts relevant to the task and the student's errors.
     *   Explain these concepts clearly and concisely.
-    *   If the concept is a programming concept, provide a small code snippet in a HTML-Code Block and explain the syntax and usage of the concept. This example must be abstract and **must not relate explicitly to the task or the student's solution**. For example, if the concept is a "for loop", provide a generic example of a for loop in the programming language used in the task.
+    *   If the concept is a programming concept, provide one small code snippet in a HTML-Code Block and explain the syntax and usage of the concept. **This code snippet must be generic and must relate to a completely different use case than the task and the student's code.**. For example, if the concept is a "for loop", provide a generic example of a for loop in the programming language used in the task.
     *   **CRITICAL:** Examine the provided 'Relevant Lecture Snippets' JSON. If snippets relevant to the identified concept exist, you MUST integrate information from them into your explanation and cite the source using the EXACT placeholder format $$Number$$ (where Zahl corresponds to the 'Quelle' field number in the snippet JSON).
         * Example: "Variable scope determines where a variable can be accessed. In C++, variables declared inside a function are typically local to that function $$4$$." (Assuming snippet 4 explains local scope).
         *   If no relevant lecture snippet is available for a concept, explain it using your general knowledge.
 
 4.  **Provide Guidance on How to Proceed (Output to "KH" field):**
     *   Provide a single next step hint that guide the student towards correcting the identified mistakes (Step 2) and understanding the concepts (Step 3).
-    *   This should be a clear, actionable suggestion that the student can follow. You can include a small code snippet (1-2 lines) in HTML-Code Block format to illustrate your point, but **do not provide a complete solution**.
+    *   This should be a clear, actionable suggestion that the student can follow to get closer to the correct solution. You can include a small code snippet (1-2 lines) in HTML-Code Block format to illustrate your point, but **do not provide a complete solution**.
 
 # Final Instruction:
 Generate ONLY the structured JSON object adhering to the schema and following the processing steps outlined above based on the provided context. Stay in your role and use the specified tone and language. You answer directly to the student.
 
 `;
-    const humanPrompt = `
-    I am the student. Please help me following your custom instructions.
+    const humanPrompt =
+`I am the student. Please help me following your custom instructions.
 # Context
---- Task Description ---
+## Task Description
 ${feedbackContext.taskDescription}
 
---- Student Solution ---
+## Student Solution
 ${feedbackContext.studentSolution}
 
---- Compiler Output ---
+## Compiler Output
 ${feedbackContext.compilerOutput || 'None provided.'}
 
---- Automated Tests / Unit Test Results ---
+## Automated Tests
+### Unit Test Definitions
+${ feedbackContext.automatedTests ? feedbackContext.automatedTests[0].code : 'None provided.' }
+### Unit Test Results
+${ feedbackContext.unitTestResults ? JSON.stringify(feedbackContext.unitTestResults) : 'None provided.' }
 
-${ feedbackContext.automatedTests ? feedbackContext.automatedTests[0].code : (feedbackContext.unitTestResults ? JSON.stringify(feedbackContext.unitTestResults, null, 2) : 'None provided.') }
-
---- Corrected Code Version (Reference) ---
+## Correct Solution (Reference)
 ${fixedCode || 'None available.'}
 
---- Relevant Lecture Snippets (JSON) ---
+## Relevant Lecture Snippets (JSON) ---
 ${(lectureSnippets && lectureSnippets !== '[]') ? lectureSnippets : 'None available.'}
 `;
     // Combine prompts for storage
@@ -162,6 +164,26 @@ ${(lectureSnippets && lectureSnippets !== '[]') ? lectureSnippets : 'None availa
       if (processedFeedback.KC && sourceMap && Object.keys(sourceMap).length > 0) {
         this.logger.log('Processing citations in KC field...');
         processedFeedback.KC = processedFeedback.KC.replace(
+          /\$\$([0-9]+)\$\$/g,
+          (match, numberStr) => {
+            const link = sourceMap[numberStr];
+            if (link) {
+              // Return markdown link format
+              return `${link}`;
+            } else {
+              this.logger.warn(`No link found in sourceMap for $$${numberStr}$$`);
+              return match; // Keep original placeholder if no link found
+            }
+          },
+        );
+        this.logger.log('Citation processing complete.');
+      } else {
+         this.logger.log('No citations to process or sourceMap missing.');
+      }
+
+      if (processedFeedback.KM && sourceMap && Object.keys(sourceMap).length > 0) {
+        this.logger.log('Processing citations in KM field...');
+        processedFeedback.KM = processedFeedback.KM.replace(
           /\$\$([0-9]+)\$\$/g,
           (match, numberStr) => {
             const link = sourceMap[numberStr];

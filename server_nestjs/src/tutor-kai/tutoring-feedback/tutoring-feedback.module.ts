@@ -6,8 +6,8 @@ import { TutoringFeedbackService } from './tutoring-feedback.service';
 import { TutoringFeedbackController } from './tutoring-feedback.controller';
 import { GraphBuilderService } from './graph/graph.builder.service';
 import { GenerateFixedCodeNodeService } from './graph/nodes/generate-fixed-code.node.service';
-import { ExtractConceptsNodeService } from './graph/nodes/extract-concepts.node.service';
-import { FetchLectureSnippetsNodeService } from './graph/nodes/fetch-lecture-snippets.node.service';
+// Removed ExtractConceptsNodeService and FetchLectureSnippetsNodeService
+import { ExtractAndFetchNodeService } from './graph/nodes/extract-and-fetch.node.service'; // Added combined node
 import { GenerateFinalFeedbackNodeService } from './graph/nodes/generate-final-feedback.node.service';
 
 @Module({
@@ -21,8 +21,8 @@ import { GenerateFinalFeedbackNodeService } from './graph/nodes/generate-final-f
     TutoringFeedbackService,
     GraphBuilderService,
     GenerateFixedCodeNodeService,
-    ExtractConceptsNodeService,
-    FetchLectureSnippetsNodeService,
+    // Removed ExtractConceptsNodeService and FetchLectureSnippetsNodeService
+    ExtractAndFetchNodeService, // Added combined node service
     GenerateFinalFeedbackNodeService,
     // DomainKnowledgeService is likely provided by LanggraphFeedbackModule
   ],
