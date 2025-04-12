@@ -5,6 +5,7 @@ import { OpenAIEmbeddings } from '@langchain/openai';
 // PrismaVectorStoreArgs might not be exported; remove explicit type later
 import { PrismaVectorStore } from '@langchain/community/vectorstores/prisma';
 import { Document } from '@langchain/core/documents';
+import { CohereRerank } from '@langchain/cohere'; // Added Cohere Reranker
 import { TranscriptChunk } from '@DTOs/index'; // Assuming DTO is accessible
 
 @Injectable()
@@ -14,15 +15,13 @@ export class DomainKnowledgeService implements OnModuleInit {
   private vectorStore: PrismaVectorStore<
     TranscriptEmbedding,
     'TranscriptEmbedding',
-    any, // Prisma.TranscriptEmbeddingSelect - Use 'any' for now
-    any // Prisma.TranscriptEmbeddingWhereInput - Use 'any' for now
+    any,
+    any
   >;
+  private cohereReranker: CohereRerank; // Added Cohere Reranker instance
   private db: PrismaClient; // Direct PrismaClient instance
 
-  // TODO: Inject PrismaService instead of creating a new PrismaClient instance
-  // constructor(private prisma: PrismaService, private configService: ConfigService) {}
   constructor(private configService: ConfigService) {
-    // Temporary direct instantiation - replace with proper injection
     this.db = new PrismaClient();
   }
 
@@ -38,8 +37,6 @@ export class DomainKnowledgeService implements OnModuleInit {
     try {
       const embeddings = new OpenAIEmbeddings({ apiKey: openAIApiKey });
 
-      // Remove explicit PrismaVectorStoreArgs type annotation and explicit columns
-      // Let the .create method infer columns based on tableName and vectorColumnName
       const vectorStoreArgs = {
         prisma: Prisma, // The Prisma namespace from @prisma/client
         tableName: 'TranscriptEmbedding' as const,
@@ -63,6 +60,27 @@ export class DomainKnowledgeService implements OnModuleInit {
       this.logger.error('Failed to initialize PrismaVectorStore:', error);
       // Handle initialization error appropriately
     }
+
+    // Initialize Cohere Reranker
+    try {
+      const cohereApiKey = this.configService.get<string>('COHERE_API_KEY');
+      if (!cohereApiKey) {
+        this.logger.error(
+          'COHERE_API_KEY is not configured. Reranker will not function.',
+        );
+        // Reranker will be undefined, searchLectureContent needs to handle this
+      } else {
+        this.cohereReranker = new CohereRerank({
+          apiKey: cohereApiKey,
+          model: 'rerank-v3.5',
+          topN: 3, // Default topN for the instance, compressDocuments uses this
+        });
+        this.logger.log('CohereReranker (multilingual) initialized successfully.');
+      }
+    } catch (error) {
+      this.logger.error('Failed to initialize CohereReranker:', error);
+      // Handle initialization error appropriately
+    }
   }
 
   /**
@@ -73,7 +91,7 @@ export class DomainKnowledgeService implements OnModuleInit {
    */
   async searchLectureContent(
     query: string,
-    k = 10,
+    k = 20,
   ): Promise<TranscriptChunk[]> {
     if (!this.vectorStore) {
       this.logger.error('Vector store is not initialized.');
@@ -83,11 +101,39 @@ export class DomainKnowledgeService implements OnModuleInit {
 
     this.logger.log(`Searching lecture content for query: "${query}" (k=${k})`);
     try {
-      const results: Document[] = await this.vectorStore.similaritySearch(query, k);
-      this.logger.log(`Found ${results.length} potential results.`);
-      // The content column in TranscriptEmbedding likely stores the JSON string
-      // from the original feedback_rag.service.ts logic. We need to parse it.
-      const transcriptChunks = this.transformDocumentsToTranscriptChunks(results);
+      const initialResults: Document[] = await this.vectorStore.similaritySearch(
+        query,
+        k,
+      );
+      this.logger.log(
+        `Found ${initialResults.length} initial results from vector search.`,
+      );
+      // Clean the content of initial results before logging and reranking
+      const cleanedInitialResults = initialResults.map(doc => this.cleanDocumentContent(doc));
+
+      let finalResults: Document[];
+
+      // Rerank if the reranker is available
+      if (this.cohereReranker) {
+        // compressDocuments uses the topN defined in the constructor unless overridden
+        // Pass cleaned results to the reranker
+        finalResults = await this.cohereReranker.compressDocuments(
+          cleanedInitialResults,
+          query,
+        );
+
+      } else {
+        this.logger.warn(
+          'Cohere Reranker not available. Returning results without reranking.',
+        );
+        // Fallback: Return top 5 from initial results if reranker failed
+        // Fallback: Use top 5 from the *cleaned* initial results if reranker failed
+        finalResults = cleanedInitialResults.slice(0, 5);
+        this.logger.log(`Returning top ${finalResults.length} results without reranking.`);
+      }
+
+      // Transform the final set of documents
+      const transcriptChunks = this.transformDocumentsToTranscriptChunks(finalResults);
       return transcriptChunks;
     } catch (error) {
       this.logger.error(`Error during similarity search for query "${query}":`, error);
@@ -103,6 +149,8 @@ export class DomainKnowledgeService implements OnModuleInit {
   private transformDocumentsToTranscriptChunks(
     documents: Document[],
   ): TranscriptChunk[] {
+    // Note: Ensure the TranscriptChunk DTO in '@DTOs/index' is updated
+    // to include `relevanceScore?: number;` in its metadata interface.
     const transcriptChunks: TranscriptChunk[] = [];
     for (const doc of documents) {
       try {
@@ -117,6 +165,9 @@ export class DomainKnowledgeService implements OnModuleInit {
           typeof pageContent.metadata === 'object' &&
           pageContent.metadata !== null
         ) {
+          // Extract relevance score if available from reranker metadata
+          const relevanceScore = doc.metadata?.relevanceScore;
+
           transcriptChunks.push({
             TranscriptChunkContent: pageContent.TranscriptChunkContent,
             metadata: {
@@ -125,6 +176,7 @@ export class DomainKnowledgeService implements OnModuleInit {
               markdownLink: pageContent.metadata.markdownLink,
               uuid: pageContent.metadata.uuid,
               lectureName: pageContent.metadata.lectureName,
+              relevanceScore: relevanceScore, // Add relevance score
             },
           });
         } else {
@@ -140,5 +192,41 @@ export class DomainKnowledgeService implements OnModuleInit {
       }
     }
     return transcriptChunks;
+  }
+
+  /**
+   * Cleans the TranscriptChunkContent within a Document's pageContent JSON.
+   * Removes patterns like '\r' and '\r 68'.
+   * @param doc The original Document.
+   * @returns A new Document with cleaned pageContent, or the original if cleaning fails.
+   */
+  private cleanDocumentContent(doc: Document): Document {
+    try {
+      const pageContentObj = JSON.parse(doc.pageContent);
+
+      // Ensure the structure is as expected before cleaning
+      if (typeof pageContentObj?.TranscriptChunkContent === 'string') {
+        // Regex to remove '\r' optionally followed by spaces and digits
+        const cleanedContent = pageContentObj.TranscriptChunkContent.replace(/\r\s*\d*/g, '');
+
+        // Create a new object with the cleaned content
+        const cleanedPageContentObj = {
+          ...pageContentObj,
+          TranscriptChunkContent: cleanedContent,
+        };
+
+        // Return a new Document with the cleaned content stringified
+        return new Document({
+          pageContent: JSON.stringify(cleanedPageContentObj),
+          metadata: doc.metadata, // Preserve original metadata
+        });
+      } else {
+        this.logger.warn(`Skipping cleaning for document with unexpected pageContent structure: ${doc.pageContent}`);
+        return doc; // Return original document if structure is wrong
+      }
+    } catch (error) {
+      this.logger.error(`Error cleaning pageContent for document ID ${doc.metadata?.id ?? 'unknown'}: ${doc.pageContent}`, error);
+      return doc; // Return original document on error
+    }
   }
 }

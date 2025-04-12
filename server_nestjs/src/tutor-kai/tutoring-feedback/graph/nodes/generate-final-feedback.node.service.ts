@@ -103,7 +103,7 @@ export class GenerateFinalFeedbackNodeService {
         * If the concept is a programming concept, provide one small code snippet in an HTML **code block** and explain the syntax and usage of the concept. **This code snippet must be generic and must relate to a completely different use case than the task and the student's code.** For example, if the concept is a "for loop," provide a generic example of a for loop in the programming language used in the task.
         * **CRITICAL:** Examine the provided 'Relevant Lecture Snippets' JSON. If snippets relevant to the identified concept exist, you MUST integrate information from them into your explanation and cite the source using the EXACT placeholder format $$Number$$ (where Number  corresponds to the 'Quelle' field number in the snippet JSON).
             * Example: "Variable scope determines where a variable can be accessed. In C++, variables declared inside a function are typically local to that function $$4$$." (Assuming snippet 4 explains local scope).
-        * If no relevant lecture snippet is available for a concept, explain it using your general knowledge.
+        * You can cite multiple relevant lecture snippets. If no relevant lecture snippet is available, explain it using your general knowledge.
 
     4.  **Provide Guidance on How to Proceed (Output to "KH" field):**
         * Provide a single next step hint that **guides** the student towards correcting the identified mistakes (Step 2).

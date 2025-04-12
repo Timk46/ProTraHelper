@@ -65,7 +65,7 @@ export class ExtractAndFetchNodeService {
     }
 
     const systemPrompt =
-`You are a programming professor with extensive computer science expertise. Your task is to analyze a student's code submission carefully. Based on the provided context identify the **one or two most relevant programming concepts** the student is struggling with.
+`You are a programming professor with extensive computer science expertise. Your task is to analyze a student's code submission carefully. Based on the provided context identify the **one to four most relevant programming concepts** the student is struggling with.
 
 Follow these guidelines:
 
@@ -78,7 +78,7 @@ Follow these guidelines:
    - Language-specific syntax
    - Object-oriented principles
 
-3. **Formulate one or two Search Queries**: Clearly rephrase the identified concepts into a concise, searchable queries (what would the student ask for help on) suitable for semantic similarity search. Follow the pattern:
+3. **Formulate one to four Search Queries**: Clearly rephrase the identified concepts into a concise, searchable queries (what would the student ask for help on) suitable for semantic similarity search. Follow the pattern:
    - "Explain [Concept] ([Programming Language])"
    - "What is [Concept] ([Programming Language])"
 

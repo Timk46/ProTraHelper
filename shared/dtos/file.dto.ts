@@ -14,6 +14,7 @@ export interface TranscriptChunk {
       markdownLink: string;
       uuid: string;
       lectureName: string;
+      relevanceScore?: number; // Added optional relevance score from reranker
     };
   }
   
