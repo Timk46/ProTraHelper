@@ -65,7 +65,7 @@ export class ExtractAndFetchNodeService {
     }
 
     const systemPrompt =
-`You are a programming professor with extensive computer science expertise. Your task is to analyze a student's code submission carefully. Based on the provided context identify the **single most relevant programming concept** the student is struggling with.
+`You are a programming professor with extensive computer science expertise. Your task is to analyze a student's code submission carefully. Based on the provided context identify the **one or two most relevant programming concepts** the student is struggling with.
 
 Follow these guidelines:
 
@@ -78,7 +78,7 @@ Follow these guidelines:
    - Language-specific syntax
    - Object-oriented principles
 
-3. **Formulate a Search Query**: Clearly rephrase the identified concept into a concise, searchable query (what would the student ask for help on) suitable for semantic similarity search. Follow the pattern:
+3. **Formulate one or two Search Queries**: Clearly rephrase the identified concepts into a concise, searchable queries (what would the student ask for help on) suitable for semantic similarity search. Follow the pattern:
    - "Explain [Concept] ([Programming Language])"
    - "What is [Concept] ([Programming Language])"
 
@@ -88,7 +88,7 @@ Follow these guidelines:
 - "Explain Data Types (Java)"
 - "Explain Conditional Statements (Python)"
 
-Always explicitly include the programming language in parentheses. The query must be in **german language**.
+Always explicitly include the programming language in parentheses. The search queries must be in **german language**.
 `;
 
     const userPrompt =
@@ -119,7 +119,7 @@ ${contextString}`;
     const defaultSnippetReturn = { lectureSnippets: '[]', sourceMap: {} };
     let lectureSnippetsResult = defaultSnippetReturn;
     let snippetError: string | undefined = undefined;
-
+    console.log('extractedConcepts', extractedConcepts);
     if (extractedConcepts.length > 0) {
         try {
             let sourceCounter = 0;

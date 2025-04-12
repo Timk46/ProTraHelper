@@ -81,18 +81,28 @@ export class GenerateFinalFeedbackNodeService {
     *   You *may* include a small, *abstract* code snippet illustrating the strategy, but it must **not** solve the specific task.
 
 2.  **Identify and Explain Mistakes (Output to "KM" field):**
-    * Analyze the student’s solution and point out the mistakes **clearly and concisely**.
+    * Focus purely on identifying and explaining mistakes — as a reviewer, not a tutor. Do not guide, correct, or suggest solutions.
     * **Avoid lengthy explanations or repetition** – keep it short and focused.
     * For each mistake:
       * **State what is wrong**, as directly as possible.
-      * **Briefly explain why** it is wrong (max. 2 short sentences per point).
+      * Briefly explain why it is wrong.
       * Reference relevant information from the task description if it helps clarify the mistake.
-      * If the mistake relates to a compiler error, briefly explain the meaning of the compiler message in simple terms before explaining the underlying code issue.
-    * **Never include suggestions, fixes or any diret information on how to proceed**: Keep this for the "KH" field.
-    * Do not cite lecture snippets: Keep this for the "KC" field.
-    * Example style and brevity:
-      - "The loop never terminates because the stop condition is never met."
-      - "Variable is not initialized – see compiler error: 'Variable might not have been initialized': This means that you're trying to use a variable that might not have a value yet"
+      * If the mistake relates to a compiler error, briefly explain the meaning of the compiler message in simple terms.
+    * Do not provide (these belong in the "KH" field):
+      * Suggested fixes
+      * Code corrections
+      * Alternative approaches
+      * Hints or next steps
+    * Do not include lecture references (these belong in the "KC" field).
+    * Examples clarifying the desired output:
+        - **Good:** "The loop condition ${"`i > 10`"}  is incorrect and prevents the loop from executing."
+        - **Bad:** "The loop condition ${"`i > 10`"}  is incorrect and prevents the loop from executing. Change the condition to ${"`i < 10`"} to make the loop run." (This violates the instruction to avoid giving fixes.)
+        - **Good:** "The method doesn't return a value despite a return type being declared."
+        - **Bad:** "The method doesn't return a value despite a return type being declared. Add a ${"`return`"} statement that provides the required value." (This violates the instruction to avoid giving next steps.)
+        - **Good:** "Array index is out of bounds—see compiler error: 'ArrayIndexOutOfBoundsException'. You're accessing an array position that does not exist."
+        - **Bad:** "Array index is out of bounds—see compiler error: 'ArrayIndexOutOfBoundsException'. You're accessing an array position that does not exist. Make sure the index is within the valid array range." (This violates the instruction to avoid giving hints)
+        - **Good:** "The expression (jahr/4) is not appropriate. It returns a truthy value based on division, but does not check for divisibility by 4."
+        - **Bad:** "The expression (jahr/4) is not correct. You should use the modulo operator % to check whether jahr is divisible by 4." (It explicitly suggests a correction (use the modulo operator %), which violates the instruction to avoid giving advice, corrections, or solutions)
 
 3.  **Explain Concepts & Cite Sources (Output to "KC" field):**
     *   Identify the fundamental programming concepts relevant to the task and the student's errors.
@@ -107,8 +117,8 @@ export class GenerateFinalFeedbackNodeService {
     *   This should be a clear, actionable suggestion that the student can follow to get closer to the correct solution. You can include a small code snippet (1-2 lines) in HTML-Code Block format to illustrate your point, but **do not provide a complete solution**.
 
 # Final Instruction:
-Generate ONLY the structured JSON object adhering to the schema and following the processing steps outlined above based on the provided context. Stay in your role and use the specified tone and language. You answer directly to the student.
-
+*   The key difference between the KM and KH fields is that KM focuses on identifying mistakes, while **ONLY KH provides guidance on how to proceed**. KM is about what is wrong, while KH is about what to do next.
+*   Generate ONLY the structured JSON object adhering to the schema and following the processing steps outlined above based on the provided context. Stay in your role and use the specified tone and language. You answer directly to the student.
 `;
     const humanPrompt =
 `I am the student. Please help me following your custom instructions.
