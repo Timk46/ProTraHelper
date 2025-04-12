@@ -692,6 +692,7 @@ model ChatBotMessage {
   isBot           Boolean      @default(false)
   ratingByStudent Int?
   usedChunks      String?      @db.Text
+  contextUrl      String?      @default("") // Added field to store URL context
   user            User?        @relation(fields: [userId], references: [id])
   userId          Int?
   sessionId       Int?

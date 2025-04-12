@@ -109,7 +109,7 @@ export class RunCodeService {
     let response: CodeSubmissionResult;
     if (codingQuestion.programmingLanguage === 'java') {
       const testFilesBase64 = await this.generateBase64({
-        [codingQuestion.automatedTests[0].testClassName]: codingQuestion.automatedTests[0].code,
+        [codingQuestion.automatedTests[0].testFileName]: codingQuestion.automatedTests[0].code,
       });
       const filesBase64 = await this.generateBase64(studentCode);
       response = await this.submitCodeForExecutionJava(
@@ -161,7 +161,9 @@ export class RunCodeService {
     testFiles: { [fileName: string]: string },
     mainClassName: string,
   ): Promise<CodeSubmissionResult> {
+
     const tempClassName = 'de.goals.testing.' + mainClassName.split('.java')[0];
+
     const response = await fetch(`${this.apiUrl}java-assignment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

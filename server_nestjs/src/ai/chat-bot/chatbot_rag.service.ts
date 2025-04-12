@@ -183,6 +183,7 @@ export class ChatBotRAGService {
     question: string,
     userid: number,
     dialogSessionId: string,
+    url: string, // Added url parameter
     sessionId?: number,
   ): Promise<ChatBotMessageDTO> {
     // Perform similarity search using RAG service
@@ -303,6 +304,7 @@ export class ChatBotRAGService {
       similaritySearchResult,
       userid,
       dialogSessionId,
+      url, // Pass url
       session?.id || sessionId,
     );
 
@@ -323,6 +325,7 @@ export class ChatBotRAGService {
     question: string,
     userid: number,
     dialogSessionId: string,
+    url: string, // Added url parameter
     sessionId: number,
   ): Promise<ChatBotMessageDTO> {
     const chatHistory: string = context
@@ -336,7 +339,7 @@ export class ChatBotRAGService {
       .join('\n');
 
     // Format the dialog prompt
-    const DialogPrompt = await dialogPromptAUD.formatPromptValue({
+    const DialogPrompt = await dialogPromptOFP.formatPromptValue({
       chatHistory: chatHistory,
       question: question,
     });
@@ -363,6 +366,7 @@ export class ChatBotRAGService {
       null,
       userid,
       dialogSessionId,
+      url, // Pass url
       sessionId,
     );
     return message;
@@ -396,6 +400,7 @@ export class ChatBotRAGService {
     usedChunks: any,
     userid: number,
     dialogSessionId: string,
+    url: string, // Added url parameter
     sessionId?: number,
   ): Promise<ChatBotMessageDTO> {
     try {
@@ -408,6 +413,7 @@ export class ChatBotRAGService {
           userId: userid,
           ratingByStudent: null,
           sessionId: sessionId,
+          contextUrl: url, // Save contextUrl
         },
       });
       return createdMessage;
