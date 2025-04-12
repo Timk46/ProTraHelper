@@ -114,22 +114,31 @@ export class DomainKnowledgeService implements OnModuleInit {
       let finalResults: Document[];
 
       // Rerank if the reranker is available
+      // Rerank if the reranker is available
       if (this.cohereReranker) {
         // compressDocuments uses the topN defined in the constructor unless overridden
         // Pass cleaned results to the reranker
-        finalResults = await this.cohereReranker.compressDocuments(
+        let rerankedResults = await this.cohereReranker.compressDocuments(
           cleanedInitialResults,
           query,
         );
+
+        // Filter results based on relevance score threshold
+        const relevanceThreshold = 0.4;
+        const filteredResults = rerankedResults.filter(doc => {
+          const score = doc.metadata?.relevanceScore;
+          // Keep if score is missing or >= threshold
+          return score === undefined || score >= relevanceThreshold;
+        });
+        finalResults = filteredResults; // Use the filtered results
 
       } else {
         this.logger.warn(
           'Cohere Reranker not available. Returning results without reranking.',
         );
-        // Fallback: Return top 5 from initial results if reranker failed
         // Fallback: Use top 5 from the *cleaned* initial results if reranker failed
         finalResults = cleanedInitialResults.slice(0, 5);
-        this.logger.log(`Returning top ${finalResults.length} results without reranking.`);
+        this.logger.log(`Returning top ${finalResults.length} results without reranking (no score filtering applied).`);
       }
 
       // Transform the final set of documents
