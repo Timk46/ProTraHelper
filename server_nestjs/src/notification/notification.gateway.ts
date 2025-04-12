@@ -40,10 +40,10 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
 
     try {
       const token = client.handshake.query.token as string;
-      console.log(`Token: ${token}`);
+      //console.log(`Token: ${token}`);
       const decoded = await this.jwtService.verifyAsync(token, { secret: process.env.JWT_SECRET_KEY });
       client.data.userId = decoded.id;
-      console.log("verified with user id: ", decoded.id);
+      //console.log("verified with user id: ", decoded.id);
       if(decoded.id) {
         if(!this.connectedUsers.has(decoded.id)) {
           this.connectedUsers.set(decoded.id, new Set());
@@ -57,7 +57,7 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
       client.disconnect();
       console.log(`Client disconnected: ${client.id}, Reason: Invalid token`);
     }
-    console.log("this connceted users: ", this.connectedUsers)
+    //console.log("this connceted users: ", this.connectedUsers)
   }
 
   /**
