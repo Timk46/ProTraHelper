@@ -89,7 +89,6 @@ export class TutoringFeedbackController {
     @Param('id') feedbackId: string,
     @Body(ValidationPipe) body: TrackUsageDto,
   ): Promise<void> {
-    this.logger.log(`Tracking usage for feedback ID ${feedbackId}, type: ${body.feedbackType}`);
 
     const fieldToUpdate = `${body.feedbackType.toLowerCase()}UsedAt`; // e.g., 'spsUsedAt'
 
