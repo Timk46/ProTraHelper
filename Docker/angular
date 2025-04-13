@@ -20,7 +20,7 @@ RUN sed -i 's#"\.\./shared/dtos/\*"#"./dtos/\*"#g' tsconfig.app.json
 
 
 RUN npm i && npm cache clean --force
-RUN npm install -g @angular/cli@15.2.8
+RUN npm install -g @angular/cli@18.2.17
 RUN ng build --configuration production --base-href /
 
 FROM nginx:1.23.4

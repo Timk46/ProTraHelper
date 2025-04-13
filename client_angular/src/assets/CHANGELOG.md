@@ -1,3 +1,12 @@
+## [1.0.0]  
+- 🧩 **Neuer Aufgabentyp: CodeGame** – Bringt euren Charakter mit den richtigen Python-Befehlen ans Ziel. Achtung: Hindernisse könnten den Weg erschweren!  
+- 🧠 **Neuer Aufgabentyp: UML-Aufgaben** – Trainiert euer Verständnis für Klassendiagramme direkt in der Anwendung.  
+- 🖥️ **Neues UI für Programmier- und Single/Multiple-Choice-Aufgaben** – Moderner, übersichtlicher und intuitiver.  
+- 🔄 **Mehr Programmieraufgaben, weniger Multiple Choice** – Der Fokus liegt nun noch stärker auf Programmieren.  
+- 🛠️ **Strukturiertes Feedback bei Programmieraufgaben** – Wählt selbst, welche Art von Feedback euch am meisten hilft. Aber bedenkt, dass ihr bei der Klausur auf euch gestellt seid.
+- 📱 **Neue Ansicht für unterwegs** – Neben der Graph-Ansicht könnt ihr jetzt jederzeit in eine mobile Ansicht wechseln.  
+- 🧭 **Bessere Navigation durch zusätzlichen Header** – Profi-Tipp: Klickt oben links aufs Logo, um zur vorherigen Ansicht zurückzukehren.  
+
 ## [0.1.6]
 - ⭐ **Animierte Bewertungssterne**: Die Sterne zur Bewertung des Feedbacks und der Chatbot-Antworten sind nun animiert, um daran zu erinnern, eine Bewertung abzugeben. Ein Klick genügt – euer Feedback hilft uns enorm, diese Features weiter zu verbessern!
 - 🎥 **Erklärvideos für alle Graphaufgaben**: Ab sofort gibt es für alle Graphaufgaben Erklärvideos, die die Bedienung Schritt für Schritt erläutern.

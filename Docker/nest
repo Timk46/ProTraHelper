@@ -8,7 +8,7 @@ COPY ../shared .
 RUN sed -i 's#"\.\./shared/dtos/\*"#"./dtos/\*"#g' tsconfig.json
 
 
-RUN npm ci
+RUN npm i
 RUN npx prisma generate
 #RUN npm run seed
 # Diagnostic: Check if DTOs exist at the expected path
