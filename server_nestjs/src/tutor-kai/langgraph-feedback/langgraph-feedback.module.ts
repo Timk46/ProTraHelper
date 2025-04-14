@@ -35,7 +35,7 @@ import { CHAT_OPENAI_MODEL } from './langgraph.constants'; // Import token from 
           throw new Error('OPENAI_API_KEY is not configured for ChatOpenAI provider.');
         }
         return new ChatOpenAI({
-          modelName: 'gpt-4o', // Or fetch from config
+          modelName: 'gpt-4.1-2025-04-14', // Or fetch from config
           apiKey: openAIApiKey,
           temperature: 0.2, // Or fetch from config
         });

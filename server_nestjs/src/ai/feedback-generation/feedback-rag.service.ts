@@ -8,7 +8,7 @@ import { editorDataDTO, rawClassEdge, rawClassNode } from "@Interfaces/index";
 import { Response } from 'express';
 import { ChatPromptValue } from "langchain/dist/prompts/chat";
 
-const KImodel = 'gpt-4o-2024-05-13';
+const KImodel = 'gpt-4.1-2025-04-14';
 
 const chatStream = new ChatOpenAI({
   modelName: KImodel,

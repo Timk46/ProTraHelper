@@ -107,7 +107,7 @@ export class CodingQuestionGeneratorService {
   async genPythonTaskWithTopic(concept: string, context: string): Promise<CodingQuestionInternal> {
     console.log('genTask gestartet');
 
-    const gptModel = 'gpt-4o-2024-08-06'; //Aktuelles Modell "GPT-4o"
+    const gptModel = 'gpt-4.1-2025-04-14'; //Aktuelles Modell "GPT-4o"
     const maxIterations = 5; //Maximale Anzahl an Iterationen für die Codeüberprüfung
     const langGraphRecursionLimit = 50; //Maximale Anzahl an Rekursionen für LangGraph
     const paramTopic = concept;
