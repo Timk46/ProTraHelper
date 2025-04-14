@@ -15,14 +15,14 @@ import { PrismaService } from '@/prisma/prisma.service';
 
 // change to accessing sensitive data from .env(?)
 const llmConfig = {
-  modelName: 'gpt-4o-2024-08-06', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
+  modelName: 'gpt-4.1-2025-04-14', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
   openAIApiKey: env.OPEN_API_KEY,
   temperature: 1, // Low Temperature favours the words with higher probability = less creative
   streaming: true
 };
 
 const regenerateLLmconfig = {
-  modelName: 'gpt-4o-2024-08-06', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
+  modelName: 'gpt-4.1-2025-04-14', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
   openAIApiKey: env.OPEN_API_KEY,
   temperature: 1, // higher Temperature favours the words with lower probability = more creative
   streaming: true

@@ -13,7 +13,7 @@ const {
   SystemMessagePromptTemplate,
 } = require('langchain/prompts');
 
-const KImodel = 'gpt-4o-2024-08-06';
+const KImodel = 'gpt-4.1-2025-04-14';
 
 const llm = new ChatOpenAI({
   modelName: KImodel,

@@ -1,3 +1,8 @@
+## [1.0.1]  
+- 👁️ **Teilnahme an Eye-Tracking-Studie** – Jetzt anmelden: [**Hier klicken**](https://terminplaner6.dfn.de/b/c939cf2a4121318da30e7319fa695bd2-1183887) – Als Dankeschön gibt's 30 € Aufwandsentschädigung.
+- 🛠️ **Einzelne Aufgaben verbessert** – Dank eurem Feedback konnten wir gezielt nachbessern. Vielen Dank für eure Hinweise!  
+- 🤖 **Upgrade auf GPT-4.1** – Für das automatische Feedback und den Chatbot kommt jetzt die neue GPT-4.1-Version zum Einsatz.  
+
 ## [1.0.0]  
 - 🧩 **Neuer Aufgabentyp: CodeGame** – Bringt euren Charakter mit den richtigen Python-Befehlen ans Ziel. Achtung: Hindernisse könnten den Weg erschweren!  
 - 🧠 **Neuer Aufgabentyp: UML-Aufgaben** – Trainiert euer Verständnis für Klassendiagramme direkt in der Anwendung.  

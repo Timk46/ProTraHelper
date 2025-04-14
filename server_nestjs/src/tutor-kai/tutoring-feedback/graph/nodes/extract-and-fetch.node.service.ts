@@ -19,7 +19,7 @@ export class ExtractAndFetchNodeService {
   ) {
     // Basic LLM initialization - consider a shared LlmProviderService
     this.llm = new ChatOpenAI({
-      modelName: 'gpt-4o-2024-08-06',
+      modelName: 'gpt-4.1-2025-04-14',
       temperature: 0,
     });
   }
@@ -65,35 +65,42 @@ export class ExtractAndFetchNodeService {
     }
 
     const systemPrompt =
-`You are a programming professor with extensive computer science expertise. Your task is to analyze a student's code submission carefully. Based on the provided context identify the **one to four most relevant programming concepts** the student is struggling with.
+`
+# Role and Objective
+- You are a programming professor with extensive computer science expertise. 
+- Your task is to analyze a student's code submission carefully. 
+- Based on the provided context identify the **one to four most relevant programming concepts** the student is struggling with.
 
-Follow these guidelines:
+# Instructions
+## 1. **Prioritize Errors**
+If there is a compiler or runtime error, focus specifically on the concept directly related to that error (e.g., IndentationError in Python → "Explain Indentation (Python)").
 
-1. **Prioritize Errors**: If there is a compiler or runtime error, focus specifically on the concept directly related to that error (e.g., IndentationError in Python → "Explain Indentation (Python)").
-
-2. **Central Concept Identification**: If no explicit errors exist, identify the core programming concept central to resolving the student's task, such as:
+## 2. **Central Concept Identification**
+f no explicit errors exist, identify the core programming concept central to resolving the student's task, such as:
    - Control structures
    - Data structures
    - Algorithms
    - Language-specific syntax
    - Object-oriented principles
 
-3. **Formulate one to four Search Queries**: Clearly rephrase the identified concepts into a concise, searchable queries (what would the student ask for help on) suitable for semantic similarity search. Follow the pattern:
+## 3. **Formulate one to four Search Queries**
+Clearly rephrase the identified concepts into a concise, searchable queries (what would the student ask for help on) suitable for semantic similarity search. 
+Follow the pattern:
    - "Explain [Concept] ([Programming Language])"
    - "What is [Concept] ([Programming Language])"
 
-**Examples:**
+# Examples
 - "Explain Recursion (Java)"
 - "Difference between For Loops and While Loops (Python)"
 - "Explain Data Types (Java)"
 - "Explain Conditional Statements (Python)"
 
-Always explicitly include the programming language in parentheses. The search queries must be in **german language**.
-`;
+# Context
+${contextString}
 
-    const userPrompt =
-`# Context
-${contextString}`;
+# Final instructions
+- Always explicitly include the programming language in parentheses. The search queries must be in **german language**.
+`;
 
     const llmWithStructure = this.llm.withStructuredOutput(
       ConceptExtractionSchema,
@@ -102,8 +109,7 @@ ${contextString}`;
 
     try {
       const response = await llmWithStructure.invoke([
-        new SystemMessage(systemPrompt),
-        new HumanMessage(userPrompt),
+        new SystemMessage(systemPrompt)
       ]);
       extractedConcepts = response.concepts ?? [];
       this.logger.log(`Successfully extracted concepts: ${extractedConcepts.join(', ')}`);
