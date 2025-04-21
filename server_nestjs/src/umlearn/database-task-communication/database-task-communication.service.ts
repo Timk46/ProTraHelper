@@ -481,6 +481,36 @@ export class DatabaseTaskCommunicationService {
         ),
     );
 
+    // upsert content element as done if points are reached
+    if (reachedPoints === taskSolution.score) {
+      const contentElementId = await this.getContentElementId(taskAttemptData.taskId);
+
+      const currprogress = await this.prisma.userContentElementProgress.findFirst({
+        where: {
+          userId: studentId,
+          contentElementId: contentElementId,
+        }
+      });
+      if (currprogress) {
+        await this.prisma.userContentElementProgress.update({
+          where: {
+            id: currprogress.id,
+          },
+          data: {
+            markedAsDone: true,
+          },
+        });
+      } else {
+        await this.prisma.userContentElementProgress.create({
+          data: {
+            userId: studentId,
+            contentElementId: contentElementId,
+            markedAsDone: true,
+          },
+        });
+      }
+    }
+
     //save feedback
     const feedback = await this.prisma.feedback.create({
       data: {
@@ -506,6 +536,28 @@ export class DatabaseTaskCommunicationService {
 
     console.log('calculated: ', reachedPoints);
     return { points: reachedPoints };
+  }
+
+  /**
+   * Retrieves the ID of the content element associated with a given task.
+   *
+   * @param taskId - The unique identifier of the task for which the content element ID is to be retrieved.
+   * @returns A promise that resolves to the ID of the associated content element.
+   * @throws An error if no question is found for the given task ID.
+   */
+  async getContentElementId(taskId: number): Promise<number> {
+    const contentElement = await this.prisma.question.findUnique({
+      where: {
+        id: taskId,
+      },
+      select: {
+        contentElement: true,
+      },
+    });
+    if (!contentElement) {
+      throw new Error('Failed to find related question');
+    }
+    return contentElement.contentElement.id;
   }
 
   async generateUmlFeedback(
