@@ -48,7 +48,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
 
   // Neue Layout-Properties für das Grid-Layout
   topRowHeight: number = 50; // 50% der Höhe
-  middleRowHeight: number = 55; // 55px Höhe
+  middleRowHeight: number = 50; // 55px Höhe
   bottomRowHeight: number = 50; // 50% der Höhe
 
   taskPanelWidth: number = 50; // 48% der Breite - some space for file explorer of code editor
