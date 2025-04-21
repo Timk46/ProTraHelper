@@ -1,4 +1,6 @@
 import { Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service'; // Added PrismaService
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'; // Added for error handling
 import { GraphBuilderService } from './graph/graph.builder.service';
 import { TutoringFeedbackState } from './graph/state';
 import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
@@ -8,7 +10,10 @@ import { FeedbackOutput } from './graph/schemas/feedback-output.schema';
 export class TutoringFeedbackService {
   private readonly logger = new Logger(TutoringFeedbackService.name);
 
-  constructor(private graphBuilderService: GraphBuilderService) {}
+  constructor(
+    private graphBuilderService: GraphBuilderService,
+    private prisma: PrismaService, // Injected PrismaService
+  ) {}
 
   /**
    * Generates structured feedback for a given student submission context.
@@ -74,6 +79,67 @@ export class TutoringFeedbackService {
       throw new InternalServerErrorException(
         `An unexpected error occurred during feedback generation: ${error.message}`,
       );
+    }
+  }
+
+  // --- Privacy Consent Methods ---
+
+  /**
+   * Retrieves the privacy consent status for a given user.
+   * @param userId The ID of the user.
+   * @returns A boolean indicating whether the user has accepted the privacy policy.
+   * @throws {NotFoundException} If the user with the given ID is not found.
+   * @throws {InternalServerErrorException} For other database errors.
+   */
+  async getPrivacyConsentStatus(userId: number): Promise<boolean> {
+    this.logger.log(`Fetching privacy consent status for user ${userId}`);
+    try {
+      const user = await this.prisma.user.findUniqueOrThrow({
+        where: { id: userId },
+        select: { hasAcceptedPrivacyPolicy: true },
+      });
+      return user.hasAcceptedPrivacyPolicy;
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
+        this.logger.warn(`User ${userId} not found for privacy consent check.`);
+        throw new NotFoundException(`User with ID ${userId} not found.`);
+      }
+      this.logger.error(`Database error fetching privacy consent for user ${userId}:`, error.stack);
+      throw new InternalServerErrorException('Failed to retrieve privacy consent status.');
+    }
+  }
+
+  /**
+   * Marks the privacy policy as accepted for a given user.
+   * @param userId The ID of the user.
+   * @throws {NotFoundException} If the user with the given ID is not found.
+   * @throws {InternalServerErrorException} For other database errors.
+   */
+  async acceptPrivacyPolicy(userId: number): Promise<void> {
+    this.logger.log(`Setting privacy consent to true for user ${userId}`);
+    try {
+      const result = await this.prisma.user.updateMany({ // Use updateMany to avoid error if already true
+        where: { id: userId },
+        data: { hasAcceptedPrivacyPolicy: true },
+      });
+
+      if (result.count === 0) {
+        // Check if the user actually exists, maybe they were deleted between check and update
+        const userExists = await this.prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+        if (!userExists) {
+          this.logger.warn(`User ${userId} not found when trying to accept privacy policy.`);
+          throw new NotFoundException(`User with ID ${userId} not found.`);
+        }
+        // If user exists but count is 0, it means the value was already true. Log and proceed.
+        this.logger.log(`Privacy policy was already accepted for user ${userId}.`);
+      }
+
+    } catch (error) {
+       if (error instanceof NotFoundException) {
+         throw error; // Re-throw specific exception
+       }
+      this.logger.error(`Database error accepting privacy policy for user ${userId}:`, error.stack);
+      throw new InternalServerErrorException('Failed to update privacy consent status.');
     }
   }
 }

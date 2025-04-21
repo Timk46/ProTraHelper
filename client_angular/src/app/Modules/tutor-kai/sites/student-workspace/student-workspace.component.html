@@ -114,7 +114,7 @@
             Führe den Code aus, um die Tests zu starten
           </span>
           <button
-            *ngIf="showStructuredFeedback && canRequestStructuredFeedback()"
+            *ngIf="showStructuredFeedback && canRequestStructuredFeedback() && hasConsent"
             (click)="structuredFeedbackPanel?.fetchFeedback()"
             class="kai-flat-button">
               <img src="../../../../../assets/img/tutorKai/tutor_kai_face_small_icon.webp" alt="Tutor Kai Icon" class="kai-button-icon" style="width: 22px; height: 22px; vertical-align: middle;">
@@ -154,11 +154,40 @@
         </div>-->
 
         <!-- Conditional Feedback Panels -->
+        <!-- Conditional Feedback Panels -->
         <app-feedback-panel *ngIf="!showStructuredFeedback"></app-feedback-panel>
+
+        <!-- Tutor Kai Feedback Panel (shown only if structured feedback is enabled AND consent is given) -->
         <app-feedback-panel-tutor-feedback
-          *ngIf="showStructuredFeedback"
+          *ngIf="showStructuredFeedback && hasConsent"
           #structuredFeedbackPanel>
         </app-feedback-panel-tutor-feedback>
+
+        <!-- Privacy Consent UI (shown if structured feedback is enabled, consent is NOT given, and not currently checking) -->
+        <div *ngIf="showStructuredFeedback && !hasConsent && !isCheckingConsent" class="privacy-consent-container">
+          <div class="privacy-consent-header">
+            <mat-icon class="info-icon">info</mat-icon>
+            <h3>Datenschutzhinweis</h3>
+          </div>
+          <div class="privacy-consent-content">
+            <p>
+              Hallo, um automatisch Feedback zu bekommen, musst du noch der Datenschutzerklärung zustimmen.
+              Wir nutzen GPT 4.1 von OpenAI um dir Hinweise zu Problemen, Beispiele und Erklärungen
+              sowie Hinweise zu den nächsten Schritten zu zeigen. Die Nutzung der Feedback-Funktion ist optional und freiwillig.
+            </p>
+          </div>
+          <div class="privacy-consent-action">
+            <button mat-raised-button color="primary" (click)="openConsentDialog()" class="consent-button">
+              Datenschutzerklärung anzeigen & aktivieren
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading indicator while checking consent -->
+        <div *ngIf="isCheckingConsent" class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Checking privacy consent status...</p>
+        </div>
       </div>
 
       <!-- Horizontaler Resize-Handle -->

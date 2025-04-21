@@ -1,9 +1,11 @@
 import {
   Controller,
+  Get, // Added Get
   Post,
   Patch, // Added Patch
   Param, // Added Param
   Body,
+  Req, // Added Req
   HttpCode,
   HttpStatus,
   UseGuards,
@@ -13,6 +15,7 @@ import {
   Logger,
   BadRequestException, // Added BadRequestException
 } from '@nestjs/common';
+import { Request } from 'express'; // Added Request
 import { PrismaService } from 'src/prisma/prisma.service'; // Added PrismaService
 import { IsIn, IsString } from 'class-validator'; // Added class-validator imports
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard'; // Add AuthGuard
@@ -127,6 +130,53 @@ export class TutoringFeedbackController {
        // Handle potential Prisma errors or other issues
        this.logger.error(`Error tracking usage for feedback ID ${feedbackId}:`, error.stack);
        throw new InternalServerErrorException('Failed to track feedback usage.');
+    }
+  }
+
+  // --- Privacy Consent Endpoints ---
+
+  @Get('privacy/consent')
+  @HttpCode(HttpStatus.OK)
+  async getPrivacyConsentStatus(
+    @Req() req: Request, // Inject Request object
+  ): Promise<{ hasAccepted: boolean }> {
+    const userId = (req.user as any)?.id; // Extract userId from authenticated user
+    if (!userId) {
+      this.logger.error('User ID not found in request for privacy consent check.');
+      throw new InternalServerErrorException('User not authenticated.');
+    }
+    this.logger.log(`Checking privacy consent status for user ${userId}`);
+    try {
+      const hasAccepted = await this.tutoringFeedbackService.getPrivacyConsentStatus(userId);
+      return { hasAccepted };
+    } catch (error) {
+      this.logger.error(`Error checking privacy consent for user ${userId}:`, error.stack);
+      if (error instanceof NotFoundException) {
+        throw error; // Re-throw if user not found specifically
+      }
+      throw new InternalServerErrorException('Failed to check privacy consent status.');
+    }
+  }
+
+  @Post('privacy/consent')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async acceptPrivacyPolicy(
+    @Req() req: Request, // Inject Request object
+  ): Promise<void> {
+    const userId = (req.user as any)?.id; // Extract userId from authenticated user
+    if (!userId) {
+      this.logger.error('User ID not found in request for accepting privacy policy.');
+      throw new InternalServerErrorException('User not authenticated.');
+    }
+    this.logger.log(`Accepting privacy policy for user ${userId}`);
+    try {
+      await this.tutoringFeedbackService.acceptPrivacyPolicy(userId);
+    } catch (error) {
+      this.logger.error(`Error accepting privacy policy for user ${userId}:`, error.stack);
+      if (error instanceof NotFoundException) {
+        throw error; // Re-throw if user not found specifically
+      }
+      throw new InternalServerErrorException('Failed to accept privacy policy.');
     }
   }
 }

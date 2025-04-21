@@ -1,9 +1,10 @@
 import { Component, HostListener, OnDestroy, OnInit, Renderer2, ViewChild } from "@angular/core";
+import { HttpClient } from '@angular/common/http'; // Added HttpClient
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from "rxjs";
+import { Subject, takeUntil, catchError, finalize, throwError, filter } from "rxjs"; // Added RxJS operators
 import { CodeSubmissionResultDto } from "@DTOs/index";
 import { ConfettiService } from "src/app/Services/animations/confetti.service";
 import { ProgressService } from "src/app/Services/progress/progress.service";
@@ -13,6 +14,8 @@ import { WorkspaceState, TestResult } from "../../models/code-submission.model";
 import { CodeEditorWrapperComponent } from "../../components/code-editor-wrapper/code-editor-wrapper.component";
 import { FileExplorerComponent } from "../../components/file-explorer/file-explorer.component";
 import { FeedbackPanelTutorFeedbackComponent } from '../../components/feedback-panel-tutor-feedback/feedback-panel-tutor-feedback.component';
+import { PrivacyConsentDialogComponent } from '../../components/privacy-consent-dialog/privacy-consent-dialog.component'; // Added Consent Dialog
+import { environment } from "src/environments/environment"; // Added environment
 
 @Component({
   selector: 'app-student-workspace',
@@ -62,6 +65,9 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
 
   // Feedback Panel State
   showStructuredFeedback: boolean = true;
+  // Privacy Consent State
+  hasConsent: boolean = false;
+  isCheckingConsent: boolean = false;
   // Resize-Properties für das neue Layout
   private isHorizontalResizingTop: boolean = false;
   private isHorizontalResizingBottom: boolean = false;
@@ -100,7 +106,8 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     private title: Title,
     private router: Router,
     public workspaceState: WorkspaceStateService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private http: HttpClient // Added HttpClient
   ) {
     this.route.paramMap.subscribe(params => {
       this.conceptId = Number(params.get('concept')); // Dies könnte undefined sein, wenn 'concept' ein Query-Parameter ist
@@ -111,6 +118,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.title.setTitle('GOALS: Tutor Kai');
     this.loadCurrentTask();
+    this.checkConsentStatus(); // Check consent on init
 
     // Abonniere Änderungen am aktuellen Task
     this.workspaceState.currentTask$
@@ -519,4 +527,67 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     //   this.structuredFeedbackPanel?.fetchFeedback();
     // }
   }
+
+  // --- Privacy Consent Methods ---
+
+  /**
+   * Checks the user's privacy consent status by calling the backend.
+   */
+  private checkConsentStatus(): void {
+    this.isCheckingConsent = true;
+    this.http.get<{ hasAccepted: boolean }>(`${environment.server}/tutoring-feedback/privacy/consent`)
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(err => {
+          console.error('Error checking privacy consent status:', err);
+          this.snackBar.open('Fehler beim Prüfen des Datenschutz-Status.', 'Schließen', { duration: 5000 });
+          this.hasConsent = false; // Assume no consent on error
+          return throwError(() => err); // Re-throw or return of(null)
+        }),
+        finalize(() => {
+          this.isCheckingConsent = false;
+        })
+      )
+      .subscribe(response => {
+        this.hasConsent = response.hasAccepted;
+        console.log('Privacy consent status:', this.hasConsent);
+      });
+  }
+
+  /**
+   * Opens the privacy consent dialog. If the user agrees,
+   * it calls the backend to record the consent.
+   */
+  openConsentDialog(): void {
+    const dialogRef = this.dialog.open(PrivacyConsentDialogComponent, {
+      width: '600px',
+      maxWidth: '95vw',
+      disableClose: true, // Prevent closing by clicking outside or pressing Esc
+      autoFocus: 'button[mat-raised-button]' // Focus the primary button
+    });
+
+    dialogRef.afterClosed()
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(result => result === true) // Only proceed if the user agreed (dialog returns true)
+      )
+      .subscribe(() => {
+        // User agreed, now call the backend to record consent
+        this.http.post(`${environment.server}/tutoring-feedback/privacy/consent`, {})
+          .pipe(
+            takeUntil(this.destroy$),
+            catchError(err => {
+              console.error('Error accepting privacy policy:', err);
+              this.snackBar.open('Fehler beim Speichern der Zustimmung.', 'Schließen', { duration: 5000 });
+              // Keep hasConsent as false, user might need to try again
+              return throwError(() => err);
+            })
+          )
+          .subscribe(() => {
+            this.hasConsent = true; // Update state on successful backend call
+            this.snackBar.open('Zustimmung erfolgreich gespeichert.', 'OK', { duration: 3000 });
+          });
+      });
+  }
 }
+
