@@ -32,6 +32,13 @@ interface EvaluateRequestDto {
   feedbackLevel?: string; // Optional based on reference
   relatedCodeSubmissionResult: CodeSubmissionResultDto;
 }
+
+interface RequestWithUser extends Request {
+  user: {
+    id: number;
+  };
+}
+
 // DTO for the usage tracking request
 class TrackUsageDto {
   @IsString()
@@ -124,12 +131,12 @@ export class TutoringFeedbackController {
         this.logger.log(`Successfully tracked usage for type ${body.feedbackType} on feedback ${feedbackId}.`);
       }
     } catch (error) {
-       if (error instanceof NotFoundException) {
-         throw error;
-       }
-       // Handle potential Prisma errors or other issues
-       this.logger.error(`Error tracking usage for feedback ID ${feedbackId}:`, error.stack);
-       throw new InternalServerErrorException('Failed to track feedback usage.');
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+        // Handle potential Prisma errors or other issues
+        this.logger.error(`Error tracking usage for feedback ID ${feedbackId}:`, error.stack);
+        throw new InternalServerErrorException('Failed to track feedback usage.');
     }
   }
 
@@ -138,9 +145,9 @@ export class TutoringFeedbackController {
   @Get('privacy/consent')
   @HttpCode(HttpStatus.OK)
   async getPrivacyConsentStatus(
-    @Req() req: Request, // Inject Request object
+    @Req() req: RequestWithUser,
   ): Promise<{ hasAccepted: boolean }> {
-    const userId = (req.user as any)?.id; // Extract userId from authenticated user
+    const userId = req.user.id; // Extract userId from authenticated user
     if (!userId) {
       this.logger.error('User ID not found in request for privacy consent check.');
       throw new InternalServerErrorException('User not authenticated.');
@@ -161,9 +168,9 @@ export class TutoringFeedbackController {
   @Post('privacy/consent')
   @HttpCode(HttpStatus.NO_CONTENT)
   async acceptPrivacyPolicy(
-    @Req() req: Request, // Inject Request object
+    @Req() req: RequestWithUser,
   ): Promise<void> {
-    const userId = (req.user as any)?.id; // Extract userId from authenticated user
+    const userId = req.user.id; // Extract userId from authenticated user
     if (!userId) {
       this.logger.error('User ID not found in request for accepting privacy policy.');
       throw new InternalServerErrorException('User not authenticated.');
