@@ -417,6 +417,76 @@
       }
     }
 
+    // Privacy Consent Container
+    .privacy-consent-container {
+      display: flex;
+      flex-direction: column;
+      background-color: $nord-light-bg-secondary;
+      border: 1px solid $nord-light-border;
+      border-radius: 8px;
+      margin: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba($nord-light-text-primary, 0.05);
+
+      .privacy-consent-header {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        background-color: $nord-light-accent-frost-3;
+        color: white;
+        
+        .info-icon {
+          margin-right: 8px;
+        }
+        
+        h3 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 500;
+        }
+      }
+      
+      .privacy-consent-content {
+        padding: 16px;
+        color: $nord-light-text-primary;
+        font-size: 14px;
+        line-height: 1.5;
+        
+        p {
+          margin: 0;
+        }
+      }
+      
+      .privacy-consent-action {
+        display: flex;
+        justify-content: flex-end;
+        padding: 0 16px 16px;
+        
+        .consent-button {
+          background-color: $nord-light-accent-frost-1; // Changed to green (#8fbcbb)
+          color: $nord-light-text-primary; // Darker text for better contrast on light green
+          
+          &:hover {
+            background-color: darken($nord-light-accent-frost-1, 10%);
+          }
+        }
+      }
+    }
+
+    // Loading Container (existing styles enhanced)
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      
+      p {
+        margin-top: 16px;
+        color: $nord-light-text-secondary;
+      }
+    }
+
     // Alte Klassen für Migration
     .work-area {
       display: none;

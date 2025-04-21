@@ -34,6 +34,7 @@ model User {
   anonymousUser        anonymousUser[]
   userSubjects         UserSubject[]
   refreshTokens        RefreshToken[]
+  hasAcceptedPrivacyPolicy Boolean @default(false)
 }
 
 model RefreshToken {
