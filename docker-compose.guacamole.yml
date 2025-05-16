@@ -1,0 +1,120 @@
+# Docker Compose File Version
+# Specifies version 3 of the Docker Compose file format. This version is widely used and supports most common features.
+version: '3'
+
+# Service Definitions
+# This section defines the individual containers (services) that make up the application stack.
+services:
+
+  # PostgreSQL Database Service
+  # Defines the container responsible for running the PostgreSQL database.
+  postgres:
+    # Base Image: Specifies the Docker image to use. Here, it's the official PostgreSQL image, version 13.
+    # Using a specific version (like 13) instead of 'latest' is a best practice for reproducibility.
+    image: postgres:13
+    # Container Name: Assigns a specific, human-readable name to this container.
+    container_name: guacamole_postgres
+    # Restart Policy: Defines when the container should be restarted. 'unless-stopped' means it will restart automatically
+    # after crashes or host reboots, unless it was explicitly stopped by the user.
+    restart: unless-stopped
+    # Volumes: Defines data persistence mechanisms.
+    volumes:
+      # Mounts a named volume 'guacamole_db_data' to the standard PostgreSQL data directory inside the container.
+      # This ensures that database data persists even if the container is removed and recreated.
+      - guacamole_db_data:/var/lib/postgresql/data
+      # Mount the SQL initialization file to initialize the database schema
+      - ./guacamole_init_sql:/docker-entrypoint-initdb.d
+    # Environment Variables: Sets configuration options for the PostgreSQL container upon startup.
+    environment:
+      # POSTGRES_DB: Specifies the name of the database to be created automatically ('guacamole_db').
+      POSTGRES_DB: guacamole_db
+      # POSTGRES_USER: Specifies the username for the database owner ('guacamole_user').
+      POSTGRES_USER: guacamole_user
+      # POSTGRES_PASSWORD: Specifies the password for the database user.
+      # IMPORTANT: Replace 'YourStrongGuacamolePassword' with a strong, unique password. Consider using Docker Secrets or .env files for better security in production.
+      POSTGRES_PASSWORD: YourStrongGuacamolePassword # Hardcoded password for consistency
+    # Networks: Connects this service to a specific Docker network.
+    # All services on 'guacamole_net' can communicate with each other using their service names as hostnames.
+    networks:
+      - guacamole_net
+
+  # Guacamole Daemon Service (guacd)
+  # This service runs the core Guacamole proxy daemon, which handles communication with remote desktops (RDP, VNC, SSH, etc.).
+  guacd:
+    # Base Image: Uses the official Guacamole daemon image. Pinning the version is recommended over 'latest'.
+    image: guacamole/guacd:latest
+    # Container Name: Specific name for the guacd container.
+    container_name: guacamole_guacd
+    # Restart Policy: Ensures the daemon restarts if it crashes.
+    restart: unless-stopped
+    # Volumes: Optional named volumes for extended features.
+    volumes:
+      # Mounts 'guacamole_drive' for file transfer capabilities within Guacamole sessions. 'rw' means read-write access.
+      - guacamole_drive:/drive:rw # Optional: Für Dateitransfer
+      # Mounts 'guacamole_recordings' for storing session recordings. 'rw' means read-write access.
+      - guacamole_recordings:/recordings:rw # Optional: Für Session Recording
+    # Networks: Connects to the shared network. The 'guacamole' webapp service will connect to this service.
+    networks:
+      - guacamole_net
+    # Depends On: Specifies a dependency on 'postgres'.
+    # While guacd doesn't directly use the database, this might be intended to enforce a startup order,
+    # ensuring the DB is ready before the full stack comes online. However, it's not strictly necessary for guacd itself.
+    depends_on:
+      - postgres
+
+  # Guacamole Web Application Service
+  # This service runs the Java web application that provides the user interface for Guacamole.
+  guacamole:
+    # Base Image: Uses the official Guacamole web application image. Pinning the version is recommended.
+    image: guacamole/guacamole:latest
+    # Container Name: Specific name for the web application container.
+    container_name: guacamole_web
+    # Restart Policy: Ensures the web application restarts if it crashes.
+    restart: unless-stopped
+    # Ports: Maps a port on the host machine to a port inside the container.
+    # Maps host port 8080 to container port 8080 (the default Tomcat port used by Guacamole).
+    # Users access Guacamole via http://<host-ip>:8080.
+    ports:
+      - "8080:8080" # Guacamole Web UI Port
+    # Environment Variables: Configures the Guacamole web application.
+    environment:
+      # GUACD_HOSTNAME: Tells the webapp where to find the guacd service (using the service name 'guacd').
+      GUACD_HOSTNAME: guacd
+      # PostgreSQL connection details (using service name 'postgres')
+      POSTGRESQL_HOSTNAME: postgres
+      POSTGRESQL_DATABASE: guacamole_db
+      POSTGRESQL_USER: guacamole_user
+      POSTGRESQL_PASSWORD: YourStrongGuacamolePassword # Muss mit Postgres-Passwort übereinstimmen
+      
+      # Token-Authentifizierungskonfiguration
+      GUACAMOLE_AUTH_PROVIDER: net.sourceforge.guacamole.net.auth.token.TokenAuthenticationProvider
+      GUACAMOLE_AUTH_TOKEN_SECRET: "${PMPM_JWT_SECRET:-pmpm-secret-key}"
+      GUACAMOLE_ENABLE_ENVIRONMENT_PROPERTIES: "true"
+    # Networks: Connects to the shared network to communicate with 'guacd' and 'postgres'.
+    networks:
+      - guacamole_net
+    # Depends On: Specifies startup dependencies.
+    depends_on:
+      # Ensures 'guacd' is started before the web application, as the webapp relies on it.
+      - guacd
+      # Ensures the database is ready before starting the web application
+      - postgres
+
+# Volume Definitions
+# Defines named volumes used by the services for persistent storage. Docker manages these volumes.
+volumes:
+  # Volume for storing PostgreSQL database data persistently.
+  guacamole_db_data:
+  # Volume for Guacamole's file transfer feature.
+  guacamole_drive:
+  # Volume for storing Guacamole session recordings.
+  guacamole_recordings:
+
+# Network Definitions
+# Defines custom networks for the services.
+networks:
+  # Defines a custom bridge network named 'guacamole_net'.
+  guacamole_net:
+    # Specifies the driver for the network (bridge is the default and most common).
+    # Containers on this network can resolve each other by service name.
+    driver: bridge

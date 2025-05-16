@@ -64,6 +64,7 @@ import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-cre
 import { FillinTaskNewComponent } from './Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { DynamicBlankComponent } from './Pages/contentView/contentElement/fill-in-task-new/dynamic-blank/dynamic-blank.component';
 import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-task/graph-task.component';
+import { MultipleFreeTextTaskComponent } from './Pages/contentView/contentElement/multiple-free-text-task/multiple-free-text-task.component';
 import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
 import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
 import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-question.component';
@@ -76,6 +77,9 @@ import { CodeGameModule } from "./Modules/code-game/code-game.module";
 import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-game/code-game-confirm-dialog.component";
 import { NavigationPreferenceToggleComponent } from './Pages/app-header/navigation-preference-toggle/navigation-preference-toggle.component';
 import { AppHeaderComponent } from './Pages/app-header/app-header.component';
+
+// ProTra 2.0 Module
+import { PmpmModule } from './features/pmpm/pmpm.module';
 
 @NgModule({ declarations: [
         AppComponent,
@@ -128,6 +132,7 @@ import { AppHeaderComponent } from './Pages/app-header/app-header.component';
         DynamicBlankComponent,
         GraphTaskComponent,
         DynamicQuestionComponent,
+        MultipleFreeTextTaskComponent,
         ContentListComponent,
         ContentListItemComponent,
         CodeGameConfirmDialogComponent,
@@ -150,7 +155,8 @@ import { AppHeaderComponent } from './Pages/app-header/app-header.component';
         MatExpansionModule,
         CdkAccordionModule,
         MatRippleModule,
-        CodeGameModule], providers: [
+        CodeGameModule,
+        PmpmModule], providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
         { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },

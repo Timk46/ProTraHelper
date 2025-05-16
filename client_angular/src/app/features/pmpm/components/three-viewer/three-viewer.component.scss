@@ -1,0 +1,149 @@
+.three-viewer-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  z-index: 10;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #3498db;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 16px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.error-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.error-message mat-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  color: #f44336;
+  margin-bottom: 16px;
+}
+
+.error-message p {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.renderer-container {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  position: relative;
+}
+
+.controls-panel {
+  background-color: #f5f5f5;
+  border-top: 1px solid #ddd;
+  padding: 16px;
+}
+
+.parameters-section {
+  margin-bottom: 16px;
+}
+
+.parameters-section h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.parameter-control {
+  margin-bottom: 12px;
+}
+
+.parameter-control label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.parameter-control mat-slider {
+  width: 100%;
+}
+
+.actions-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.actions-section button {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actions-section button mat-icon {
+  margin-right: 8px;
+}
+
+/* Responsive styling */
+@media (min-width: 768px) {
+  .controls-panel {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .parameters-section {
+    flex: 1;
+    margin-right: 24px;
+    margin-bottom: 0;
+  }
+
+  .actions-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 200px;
+  }
+
+  .actions-section button {
+    width: 100%;
+  }
+}

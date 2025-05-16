@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { ContentBoardComponent } from './Pages/contentBoard/contentBoard.component';
 import { AppComponent } from './app.component';
 import { DashboardComponent } from './Pages/dashboard/dashboard.component';
@@ -97,10 +97,16 @@ const routes: Routes = [
   { path: 'umlearn', loadChildren: () => import('./Modules/umlearn/umlearn.module').then(m => m.UmlearnModule), canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
 
   { path: 'admin', loadChildren: () => import('./Pages/admin/admin.module').then(m => m.AdminModule), canActivate: [LoggedInGuard, AdminGuard] },
+  // New route for RhinoLauncherModule
+  {
+    path: 'rhino-launcher',
+    loadChildren: () => import('./features/rhino-launcher/rhino-launcher.module').then(m => m.RhinoLauncherModule),
+    canActivate: [LoggedInGuard] // Assuming it should be guarded
+  },
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes, {
-    preloadingStrategy: PreloadAllModules,
+    // preloadingStrategy: PreloadAllModules, // PreloadAllModules needs to be imported if used. Removing for now to fix immediate error.
     paramsInheritanceStrategy: 'emptyOnly', // Default in Angular 17
     // Add other router configuration options that are no longer part of the public API
     scrollPositionRestoration: 'disabled', // Default value

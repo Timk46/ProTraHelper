@@ -52,13 +52,13 @@ export class FreeTextTaskComponent {
   }
 
 
-  constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: any, private quesitonService: QuestionDataService, private location: Location) {
+  constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: any, private questionService: QuestionDataService, private location: Location) {
     this.taskViewData = data.taskViewData;
-    this.quesitonService.getFreeTextQuestion(this.taskViewData.id).subscribe(data => {
+    this.questionService.getFreeTextQuestion(this.taskViewData.id).subscribe(data => {
       this.freeTextQuestion = data;
       this.freeTextQuestion.contentElementId = this.taskViewData.contentElementId;
     });
-    this.quesitonService.getNewestUserAnswer(this.taskViewData.id).subscribe(data => {
+    this.questionService.getNewestUserAnswer(this.taskViewData.id).subscribe(data => {
       this.answerText = data.userFreetextAnswer || '';
     });
   }
@@ -76,7 +76,7 @@ export class FreeTextTaskComponent {
       userFreetextAnswer: text,
       userFreetextAnswerRaw: rawText,
     }
-    this.quesitonService.createUserAnswer(userAnswerData).subscribe(data => {
+    this.questionService.createUserAnswer(userAnswerData).subscribe(data => {
       console.log(data);
       this.feedbackText = data.feedbackText.replace(/\n/g, '<br>');
       this.isSending = false;

@@ -17,6 +17,7 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
+    "moduleResolution": "node",
     "paths": {
       "@/*": ["src/*"],
       "@storage/*": ["./storage*"],
@@ -24,8 +25,7 @@
       "@DTOs/*": ["../shared/dtos/*"],
       "@nestjs/cache-manager": ["./node_modules/@nestjs/cache-manager"],
       "cache-manager": ["./node_modules/cache-manager"]
-
     },
-  }, // Add comma here
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"] // Keep exclude
+  },
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
 }

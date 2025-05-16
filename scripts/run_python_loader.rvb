@@ -1,0 +1,61 @@
+Option Explicit
+
+Call Main()
+
+Sub Main()
+    On Error Resume Next ' Einfache Fehlerbehandlung für RVB
+
+    Dim objFSO, objFile, strTempFilePathForPythonScript, strPythonScriptPath, strCommand
+    
+    ' Pfad zur temporären Datei, die den Pfad zum eigentlichen Python-Skript enthält
+    strTempFilePathForPythonScript = CreateObject("WScript.Shell").ExpandEnvironmentStrings("%TEMP%") & "\rhino_python_script_to_run.txt"
+    
+    Rhino.Print "RVB Bootstrapper: Started."
+    Rhino.Print "RVB Bootstrapper: Expecting Python script path in: " & strTempFilePathForPythonScript
+
+    Set objFSO = CreateObject("Scripting.FileSystemObject")
+
+    If objFSO.FileExists(strTempFilePathForPythonScript) Then
+        Set objFile = objFSO.OpenTextFile(strTempFilePathForPythonScript, 1) ' 1 = ForReading
+        strPythonScriptPath = Trim(objFile.ReadAll) ' Trim, um Leerzeichen/Zeilenumbrüche zu entfernen
+        objFile.Close
+        
+        ' Temporäre Datei für den Python-Skript-Pfad löschen
+        If objFSO.FileExists(strTempFilePathForPythonScript) Then
+            objFSO.DeleteFile strTempFilePathForPythonScript, True
+            Rhino.Print "RVB Bootstrapper: Temp file for Python script path deleted: " & strTempFilePathForPythonScript
+        End If
+
+        If strPythonScriptPath = "" Then
+            Rhino.Print "RVB Bootstrapper: Python script path read from temp file is empty."
+            MsgBox "Der Pfad zum auszuführenden Python-Skript ist leer.", vbCritical, "Fehler im RVB-Skript"
+            Exit Sub
+        End If
+
+        If objFSO.FileExists(strPythonScriptPath) Then
+            Rhino.Print "RVB Bootstrapper: Python script to run found at: " & strPythonScriptPath
+            
+            ' Befehl zum Ausführen des Python-Skripts
+            ' Der Bindestrich vor RunPythonScript unterdrückt das Dialogfenster des Skript-Editors.
+            strCommand = "_-RunPythonScript " & Chr(34) & strPythonScriptPath & Chr(34)
+            
+            Rhino.Print "RVB Bootstrapper: Executing command: " & strCommand
+            Rhino.Command strCommand, 0 ' 0 bedeutet, dass das Skript nicht auf den Abschluss wartet
+            Rhino.Print "RVB Bootstrapper: Python script execution initiated."
+        Else
+            Rhino.Print "RVB Bootstrapper: Python script NOT found at path read from temp file: " & strPythonScriptPath
+            MsgBox "Das angegebene Python-Skript wurde nicht gefunden:" & vbCrLf & strPythonScriptPath, vbCritical, "Fehler im RVB-Skript"
+        End If
+    Else
+        Rhino.Print "RVB Bootstrapper: Temp file containing Python script path NOT found: " & strTempFilePathForPythonScript
+        MsgBox "Temporäre Datei, die den Pfad zum Python-Skript enthält, wurde nicht gefunden:" & vbCrLf & strTempFilePathForPythonScript, vbCritical, "Fehler im RVB-Skript"
+    End If
+
+    If Err.Number <> 0 Then
+        Rhino.Print "RVB Bootstrapper: An error occurred: " & Err.Description
+        MsgBox "Ein Fehler ist im RVB-Bootstrapper-Skript aufgetreten: " & Err.Description, vbCritical, "RVB Skript Fehler"
+        Err.Clear
+    End If
+    
+    Rhino.Print "RVB Bootstrapper: Finished."
+End Sub

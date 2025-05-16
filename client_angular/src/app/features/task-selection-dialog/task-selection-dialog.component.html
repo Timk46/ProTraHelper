@@ -1,0 +1,43 @@
+<h2 mat-dialog-title>Aufgabentyp auswählen</h2>
+<mat-dialog-content>
+  <div class="task-selection-container">
+    <mat-card class="task-option" (click)="selectTaskType('mc')">
+      <mat-card-header>
+        <mat-card-title>Multiple Choice</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Wählen Sie die richtige(n) Antwort(en) aus mehreren Optionen aus.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="task-option" (click)="selectTaskType('fill-in')">
+      <mat-card-header>
+        <mat-card-title>Lückentext</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Füllen Sie die Lücken im Text mit den richtigen Begriffen aus.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="task-option" (click)="selectTaskType('free-text')">
+      <mat-card-header>
+        <mat-card-title>Freitext</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Beantworten Sie die Frage mit einem freien Text.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="task-option" (click)="selectTaskType('multiple-free-text')">
+      <mat-card-header>
+        <mat-card-title>Freitext2</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Beantworten Sie mehrere Fragen mit freiem Text.</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Abbrechen</button>
+</mat-dialog-actions>

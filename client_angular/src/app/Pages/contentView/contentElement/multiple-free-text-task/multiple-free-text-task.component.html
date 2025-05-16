@@ -1,0 +1,59 @@
+<div class="task-container mat-elevation-z8">
+  <!-- Close button -->
+  <div class="close-button">
+    <button mat-icon-button (click)="onClose()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Fragen werden geladen...</p>
+  </div>
+
+  <!-- Main content -->
+  <mat-card class="task-card" *ngIf="!isLoading">
+    <mat-card-content>
+      <!-- Questions & Answers -->
+      <div *ngFor="let question of freeTextQuestions; let i = index" class="question-answer-pair">
+        <h3 class="question-title">{{question.title}}</h3>
+        <p class="question-text">{{question.text}}</p>
+
+        <!-- TinyMCE Editor with reduced height -->
+        <div class="editor-container">
+          <app-tinymce #textEditors [config]="editorConfig" [content]="answers[i]"></app-tinymce>
+        </div>
+
+        <!-- Individual feedback for each question -->
+        <div *ngIf="feedbackTexts[i]" class="individual-feedback">
+          <mat-divider></mat-divider>
+          <h4>Feedback:</h4>
+          <p [innerHTML]="feedbackTexts[i]"></p>
+        </div>
+
+        <!-- Divider between questions -->
+        <mat-divider *ngIf="i < freeTextQuestions.length - 1" class="question-divider"></mat-divider>
+      </div>
+    </mat-card-content>
+
+    <!-- Submit button -->
+    <mat-card-actions align="end">
+      <button [disabled]="isSending" mat-flat-button color="accent" (click)="onSubmitAll()">
+        <mat-icon *ngIf="!isSending">send</mat-icon>
+        <span *ngIf="!isSending">Alle Antworten abgeben</span>
+        <mat-spinner *ngIf="isSending" diameter="20"></mat-spinner>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Overall feedback card -->
+  <mat-card *ngIf="showOverallFeedback" class="feedback-card">
+    <mat-card-header>
+      <mat-card-title>Gesamtfeedback</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p [innerHTML]="overallFeedbackText"></p>
+    </mat-card-content>
+  </mat-card>
+</div>

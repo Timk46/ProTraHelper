@@ -34,6 +34,11 @@ import { GptModule } from './umlearn/gpt/gpt.module';
 import { CompareModule } from './umlearn/compare/compare.module';
 // END UMLearn Imports
 
+// BEGIN ProTra 2.0 Imports
+import { PmpmModule } from './pmpm/pmpm.module';
+// END ProTra 2.0 Imports
+import { GhFilesModule } from './gh-files/gh-files.module'; // Import the new module
+
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/common/guards/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
@@ -104,6 +109,9 @@ import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgrap
     CodeGameModule,
     LanggraphFeedbackModule,
     TutoringFeedbackModule,
+    // ProTra 2.0 Modules
+    PmpmModule,
+    GhFilesModule, // Add the new module to imports
   ],
   controllers: [
     AppController,

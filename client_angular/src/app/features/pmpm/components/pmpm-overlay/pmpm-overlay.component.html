@@ -1,0 +1,36 @@
+<div class="pmpm-overlay">
+  <!-- Loading spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <div class="loading-text">Verbindung wird hergestellt...</div>
+  </div>
+
+  <!-- Controls bar -->
+  <div class="controls-bar">
+    <button mat-icon-button (click)="toggleFullscreen()" title="Vollbild umschalten">
+      <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+    </button>
+    <button mat-icon-button (click)="reconnect()" title="Neu verbinden" [disabled]="!session">
+      <mat-icon>refresh</mat-icon>
+    </button>
+    <button mat-icon-button (click)="closeSession()" title="Session beenden">
+      <mat-icon>close</mat-icon>
+    </button>
+    <div class="connection-status">
+      <span class="status-indicator" [ngClass]="{'connected': isConnected, 'disconnected': !isConnected}"></span>
+      <span>{{ isConnected ? 'Verbunden' : 'Nicht verbunden' }}</span>
+    </div>
+  </div>
+
+  <!-- Main content area with iframe -->
+  <div #iframeContainer class="iframe-container">
+    <iframe *ngIf="safeUrl" [src]="safeUrl" frameborder="0" allowfullscreen></iframe>
+    <div *ngIf="!isLoading && !safeUrl" class="error-message">
+      <mat-icon>error</mat-icon>
+      <p>Es konnte keine Verbindung zu PMPM hergestellt werden.</p>
+      <button mat-raised-button color="primary" (click)="reconnect()">
+        Erneut versuchen
+      </button>
+    </div>
+  </div>
+</div>

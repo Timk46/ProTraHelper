@@ -1,0 +1,87 @@
+<div class="rhino-launcher-container">
+  <h2>Rhino Grasshopper Launcher</h2>
+
+  <!-- File Selection Section -->
+  <div class="file-selection section">
+    <h3>1. Select a Grasshopper File</h3>
+    <mat-form-field appearance="fill" class="file-dropdown">
+      <mat-label>Choose a .gh file</mat-label>
+      <mat-select (selectionChange)="selectFile($event.value)" panelClass="custom-mat-select-panel">
+        <mat-option *ngFor="let file of files" [value]="file">
+          {{ file.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <p *ngIf="selectedFile" class="selected-file-info">
+      Selected: <strong>{{ selectedFile.name }}</strong>
+      <!-- Path: {{ selectedFile.path }} -->
+    </p>
+  </div>
+
+  <!-- Launch Section -->
+  <div class="launch-section section">
+    <h3>2. Launch in Rhino</h3>
+    <p *ngIf="!isRhinoProtocolSupported && !showFallback" class="protocol-warning">
+      <mat-icon color="warn">warning</mat-icon>
+      Es scheint, dass der <code>rhinogh://</code> Protokoll-Handler nicht auf Ihrem System verfügbar ist.
+      Stellen Sie sicher, dass das DirectGHLoader-Plugin installiert ist und der Handler registriert wurde.
+    </p>
+
+    <!-- We use an <a> tag for direct protocol link invocation, which is generally more reliable -->
+    <!-- The (click) event on the <a> tag can be used for pre-flight checks or analytics if needed -->
+    <a mat-raised-button
+       color="primary"
+       [href]="rhinoUri"
+       [attr.disabled]="!selectedFile ? true : null"
+       (click)="launchRhino()"
+       class="launch-button">
+      <mat-icon>open_in_new</mat-icon>
+      Open {{ selectedFile ? selectedFile.name : 'file' }} in Rhino
+    </a>
+
+    <!-- Neuer Button für Aufgabenauswahl -->
+    <button mat-raised-button
+            color="accent"
+            (click)="openTaskSelectionDialog()"
+            class="task-button">
+      <mat-icon>assignment</mat-icon>
+      Aufgaben öffnen
+    </button>
+
+    <p *ngIf="!selectedFile" class="info-text">Please select a file to enable the launch button.</p>
+  </div>
+
+  <!-- Fallback Section - Shown if launch fails or protocol not supported -->
+  <div *ngIf="showFallback" class="fallback-section section">
+    <mat-card class="fallback-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon color="accent">info_outline</mat-icon>
+          Rhino konnte nicht direkt gestartet werden
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+          Die Datei konnte nicht automatisch in Rhino geöffnet werden. Mögliche Gründe:
+        </p>
+        <ul>
+          <li>Rhino ist nicht auf Ihrem Computer installiert.</li>
+          <li>Das DirectGHLoader-Plugin ist nicht installiert oder der <code>rhinogh://</code> Protokoll-Handler ist nicht korrekt registriert.</li>
+          <li>Ihr Browser hat die Anfrage blockiert.</li>
+        </ul>
+        <p>
+          <strong>Fallback Option:</strong>
+        </p>
+        <button mat-stroked-button color="accent" (click)="openInFallbackViewer()" [disabled]="!selectedFile">
+          <mat-icon>visibility</mat-icon>
+          Open {{ selectedFile ? selectedFile.name : 'file' }} in Web Viewer (Coming Soon)
+        </button>
+        <p class="info-text">
+          Alternatively, you can <a href="https://www.rhino3d.com/download/" target="_blank" rel="noopener noreferrer">download and install Rhino</a>,
+          then try registering the protocol handler.
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+</div>
