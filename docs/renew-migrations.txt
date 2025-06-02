@@ -2,7 +2,7 @@ If we want to delete all migrations and start over, we can do so by running the 
 
 1. Delete all migration files in the migrations directory
 2. npx prisma migrate dev --create-only
-3. in the newly created migration, add the line: CREATE EXTENSION IF NOT EXISTS vector
+3. in the newly created migration, add the line: CREATE EXTENSION IF NOT EXISTS vector;
 4. npx prisma migrate dev
 
 

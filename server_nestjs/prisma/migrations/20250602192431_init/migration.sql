@@ -24,6 +24,7 @@ CREATE TABLE "User" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "globalRole" "GlobalRole" NOT NULL DEFAULT 'STUDENT',
     "currentconceptNodeId" INTEGER,
+    "hasAcceptedPrivacyPolicy" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -457,6 +458,71 @@ CREATE TABLE "CodeSubmissionFile" (
 );
 
 -- CreateTable
+CREATE TABLE "CodeGameQuestion" (
+    "id" SERIAL NOT NULL,
+    "text" TEXT NOT NULL,
+    "programmingLanguage" TEXT NOT NULL,
+    "questionId" INTEGER NOT NULL,
+    "codeSolutionRestriction" BOOLEAN NOT NULL DEFAULT false,
+    "fileNameToRestrict" TEXT,
+    "methodNameToRestrict" TEXT,
+    "frequencyOfMethodNameToRestrict" INTEGER,
+    "gameFileName" TEXT NOT NULL,
+    "game" TEXT NOT NULL,
+    "gameCellRestrictions" TEXT,
+    "theme" TEXT DEFAULT 'dino',
+
+    CONSTRAINT "CodeGameQuestion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CodeGameScaffold" (
+    "id" SERIAL NOT NULL,
+    "codeGameQuestionId" INTEGER NOT NULL,
+    "codeFileName" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "language" TEXT,
+    "visible" BOOLEAN,
+    "mainFile" BOOLEAN,
+
+    CONSTRAINT "CodeGameScaffold_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CodeGameAnswer" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "codeGameQuestionId" INTEGER NOT NULL,
+    "userAnswerId" INTEGER NOT NULL,
+    "codeGameExecutionResult" TEXT NOT NULL,
+    "codeSolutionRestriction" BOOLEAN NOT NULL,
+    "frequencyOfMethodEvaluationResult" BOOLEAN NOT NULL,
+    "frequencyOfMethodCallsResult" INTEGER NOT NULL,
+    "reachedDestination" BOOLEAN NOT NULL,
+    "allItemsCollected" BOOLEAN NOT NULL,
+    "totalItems" INTEGER NOT NULL,
+    "collectedItems" INTEGER NOT NULL,
+    "visitedCellsAreAllowed" BOOLEAN NOT NULL,
+    "allWhiteListCellsVisited" BOOLEAN NOT NULL,
+    "executionSuccess" BOOLEAN,
+    "executionMessage" TEXT,
+
+    CONSTRAINT "CodeGameAnswer_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CodeGameScaffoldAnswer" (
+    "id" SERIAL NOT NULL,
+    "language" TEXT NOT NULL,
+    "codeFileName" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "codeGameAnswerId" INTEGER NOT NULL,
+
+    CONSTRAINT "CodeGameScaffoldAnswer_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "FillinQuestion" (
     "id" SERIAL NOT NULL,
     "content" TEXT NOT NULL,
@@ -498,6 +564,25 @@ CREATE TABLE "KIFeedback" (
     "flavor" TEXT NOT NULL DEFAULT 'normal',
 
     CONSTRAINT "KIFeedback_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "GeneratedFeedback" (
+    "id" TEXT NOT NULL,
+    "spsContent" TEXT NOT NULL,
+    "kmContent" TEXT NOT NULL,
+    "kcContent" TEXT NOT NULL,
+    "khContent" TEXT NOT NULL,
+    "spsUsedAt" TIMESTAMP(3),
+    "kmUsedAt" TIMESTAMP(3),
+    "kcUsedAt" TIMESTAMP(3),
+    "khUsedAt" TIMESTAMP(3),
+    "finalPrompt" TEXT NOT NULL,
+    "codeSubmissionId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "GeneratedFeedback_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -602,6 +687,7 @@ CREATE TABLE "ChatBotMessage" (
     "isBot" BOOLEAN NOT NULL DEFAULT false,
     "ratingByStudent" INTEGER,
     "usedChunks" TEXT,
+    "contextUrl" TEXT DEFAULT '',
     "userId" INTEGER,
     "sessionId" INTEGER,
 
@@ -761,7 +847,16 @@ CREATE UNIQUE INDEX "GraphQuestion_questionId_key" ON "GraphQuestion"("questionI
 CREATE UNIQUE INDEX "CodingQuestion_questionId_key" ON "CodingQuestion"("questionId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "CodeGameQuestion_questionId_key" ON "CodeGameQuestion"("questionId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "CodeGameAnswer_userAnswerId_key" ON "CodeGameAnswer"("userAnswerId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "FillinQuestion_questionId_key" ON "FillinQuestion"("questionId");
+
+-- CreateIndex
+CREATE INDEX "GeneratedFeedback_codeSubmissionId_idx" ON "GeneratedFeedback"("codeSubmissionId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Discussion_authorId_key" ON "Discussion"("authorId");
@@ -962,6 +1057,18 @@ ALTER TABLE "CodeSubmissionFile" ADD CONSTRAINT "CodeSubmissionFile_CodeSubmissi
 ALTER TABLE "CodeSubmissionFile" ADD CONSTRAINT "CodeSubmissionFile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "CodeGameQuestion" ADD CONSTRAINT "CodeGameQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CodeGameScaffold" ADD CONSTRAINT "CodeGameScaffold_codeGameQuestionId_fkey" FOREIGN KEY ("codeGameQuestionId") REFERENCES "CodeGameQuestion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CodeGameAnswer" ADD CONSTRAINT "CodeGameAnswer_userAnswerId_fkey" FOREIGN KEY ("userAnswerId") REFERENCES "UserAnswer"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CodeGameScaffoldAnswer" ADD CONSTRAINT "CodeGameScaffoldAnswer_codeGameAnswerId_fkey" FOREIGN KEY ("codeGameAnswerId") REFERENCES "CodeGameAnswer"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "FillinQuestion" ADD CONSTRAINT "FillinQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -969,6 +1076,9 @@ ALTER TABLE "Blank" ADD CONSTRAINT "Blank_fillinQuestionId_fkey" FOREIGN KEY ("f
 
 -- AddForeignKey
 ALTER TABLE "KIFeedback" ADD CONSTRAINT "KIFeedback_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "CodeSubmission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "GeneratedFeedback" ADD CONSTRAINT "GeneratedFeedback_codeSubmissionId_fkey" FOREIGN KEY ("codeSubmissionId") REFERENCES "CodeSubmission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "anonymousUser" ADD CONSTRAINT "anonymousUser_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
