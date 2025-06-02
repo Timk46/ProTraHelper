@@ -1,0 +1,12 @@
+If we want to delete all migrations and start over, we can do so by running the following commands:
+
+1. Delete all migration files in the migrations directory
+2. npx prisma migrate dev --create-only
+3. in the newly created migration, add the line: CREATE EXTENSION IF NOT EXISTS vector
+4. npx prisma migrate dev
+
+
+If we want to seed the database and do not need embeddings, then set in the seed.ts:
+const createEmbeddings = false;
+
+Otherwise, your seed will take about a minute longer and incur a few cents in costs.
