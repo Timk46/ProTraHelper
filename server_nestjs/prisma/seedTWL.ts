@@ -1473,7 +1473,7 @@ export const seedTWL = async () => {
           console.log('Importing Concepts Done: ' + twlData.length + ' Concepts imported!');
           //console.log('Importing Coding Tasks from Excel...');
           //await seedCodeQuestions(adminUser.id);
-          await seedMCQnew();
+          //await seedMCQnew(); // TODO
           console.log('Importing Tasks Done!');
         });
 

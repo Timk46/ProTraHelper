@@ -1,15 +1,16 @@
 import { PrismaClient } from '@prisma/client';
 import { seedOFP } from './seedOFP';
 import { seedAUD } from './seedAUD';
+import { seedTWL } from './seedTWL';
 import { seedTranscriptsToConceptNodes } from './processTranscripts';
 import { seedUmlearn } from './seedUmlearnModelData';
 const prisma = new PrismaClient();
 
 async function main() {
   //await seedAUD();
-  await seedOFP();
-  await seedTranscriptsToConceptNodes();
-  await seedUmlearn();
+  await seedTWL();
+  //await seedTranscriptsToConceptNodes(); //TODO
+  //await seedUmlearn(); //TODO
 
 }
 
