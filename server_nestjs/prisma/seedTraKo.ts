@@ -29,12 +29,12 @@ interface columns_OFP {
   description: string | null;
 }
 
-async function createTWLConcepts(twlData: columns_OFP[], moduleArchitektur: any) {
+async function createTraKoConcepts(traKoData: columns_OFP[], moduleArchitektur: any) {
   //------------------------------------------
     //Start of creating from ofpData
     //ConceptNode
     await prisma.conceptNode.createMany({
-      data: twlData
+      data: traKoData
         .filter((data) => data.conceptId)
         .map((data) => ({
           id: data.conceptId,
@@ -45,7 +45,7 @@ async function createTWLConcepts(twlData: columns_OFP[], moduleArchitektur: any)
 
     //ConceptFamily
     await prisma.conceptFamily.createMany({
-      data: twlData
+      data: traKoData
         .filter((data) => data.conceptId)
         .map((data) => ({
           childId: data.conceptId,
@@ -53,7 +53,7 @@ async function createTWLConcepts(twlData: columns_OFP[], moduleArchitektur: any)
         })),
     });
     //ConceptEdge
-    for (const data of twlData) {
+    for (const data of traKoData) {
       if (data.conceptEdge) {
         for (const edge of data.conceptEdge) {
           await prisma.conceptEdge.create({
@@ -68,7 +68,7 @@ async function createTWLConcepts(twlData: columns_OFP[], moduleArchitektur: any)
     }
     //ModuleConceptGoal
     await prisma.moduleConceptGoal.createMany({
-      data: twlData
+      data: traKoData
         .filter((data) => data.conceptId && data.moduleGoalId)
         .map((data) => ({
           moduleId: moduleArchitektur.id,
@@ -78,7 +78,7 @@ async function createTWLConcepts(twlData: columns_OFP[], moduleArchitektur: any)
     });
     //ContentNode
     await prisma.contentNode.createMany({
-      data: twlData
+      data: traKoData
         .filter((data) => data.contentId)
         .map((data) => ({
           id: data.contentId,
@@ -87,7 +87,7 @@ async function createTWLConcepts(twlData: columns_OFP[], moduleArchitektur: any)
         })),
     });
     //ContentElement
-    for (const data of twlData) {
+    for (const data of traKoData) {
       const elementList = [
         data.elementId1,
         data.elementId2,
@@ -130,7 +130,7 @@ async function createTWLConcepts(twlData: columns_OFP[], moduleArchitektur: any)
       }
     }
     //Training
-    for (const data of twlData) {
+    for (const data of traKoData) {
       if (data.trainsId && data.contentId) {
         for (const train of data.trainsId) {
           await prisma.training.create({
@@ -148,7 +148,7 @@ async function createTWLConcepts(twlData: columns_OFP[], moduleArchitektur: any)
       }
     }
     //Requirement
-    for (const data of twlData) {
+    for (const data of traKoData) {
       if (data.requiresId && data.contentId) {
         for (const requires of data.requiresId) {
           await prisma.requirement.create({
@@ -169,7 +169,7 @@ async function createTWLConcepts(twlData: columns_OFP[], moduleArchitektur: any)
     //------------------------------------------
   }
 
-// TODO: for twl
+// TODO: for traKo
 async function createFilesOFP() {
   console.log('Creating Files for OFP...');
   // createfile also creates embeddings for SRTs with the same name if the file is type VIDEO
@@ -1294,9 +1294,9 @@ async function createFilesOFP() {
   );
 }
 
-async function createFilesTWL() {
-  console.log('Creating files for TWL...');
-  // TODO: Add files for TWL
+async function createFilesTraKo() {
+  console.log('Creating files for TraKo...');
+  // TODO: Add files for TraKo
   console.log('Done.');
 }
 
@@ -1320,11 +1320,11 @@ async function createFile(
   return file;
 }
 
-export const seedTWL = async () => {
+export const seedTraKo = async () => {
     console.log('Creating everything...');
 
     // Create Files
-    createFilesTWL();
+    createFilesTraKo();
 
     const moduleArchitektur = await prisma.module.create({
       data: {
@@ -1334,7 +1334,7 @@ export const seedTWL = async () => {
       },
     });
 
-    const subjectTWL = await prisma.subject.create({
+    const subjectTraKo = await prisma.subject.create({
       data: {
         id: 1,
         name: 'Tragwerklehre 1',
@@ -1357,13 +1357,13 @@ export const seedTWL = async () => {
         await prisma.userSubject.create({
           data: {
             userId: adminUser.id,
-            subjectId: subjectTWL.id,
+            subjectId: subjectTraKo.id,
             subjectSpecificRole: 'ADMIN',
             registeredForSL: true,
           },
         });
     // seed mor users for other usecases (evaluation etc.)
-    await seedUser(subjectTWL.id, moduleArchitektur.id);
+    await seedUser(subjectTraKo.id, moduleArchitektur.id);
 
 
     // root node
@@ -1406,9 +1406,9 @@ export const seedTWL = async () => {
     // TODO: Put this in a separate function
     console.log('Importing Concepts from CSV...');
 
-    const twlData = [];
+    const traKoData = [];
 
-    const filePath = process.env.FILE_PATH + 'Kompetenzraster_TWL.csv';
+    const filePath = process.env.FILE_PATH + 'Kompetenzraster_TraKo.csv';
     if (fs.existsSync(filePath)) {
 
       //in case the topic column for the Content is empty we need to save the last topic
@@ -1449,7 +1449,7 @@ export const seedTWL = async () => {
           if(data.topic != null) {
             lastTopic = data.topic;
           }
-          twlData.push({
+          traKoData.push({
             conceptId: data.conceptId ? +data.conceptId : null,
             conceptEdge: data.conceptEdge ? data.conceptEdge.toString().split(/[,.]/).map(Number) : null,
             contentId: data.contentId ? +data.contentId : null,
@@ -1469,8 +1469,8 @@ export const seedTWL = async () => {
           });
         })
         .on('end', async () => {
-          await createTWLConcepts(twlData, moduleArchitektur);
-          console.log('Importing Concepts Done: ' + twlData.length + ' Concepts imported!');
+          await createTraKoConcepts(traKoData, moduleArchitektur);
+          console.log('Importing Concepts Done: ' + traKoData.length + ' Concepts imported!');
           //console.log('Importing Coding Tasks from Excel...');
           //await seedCodeQuestions(adminUser.id);
           //await seedMCQnew(); // TODO
