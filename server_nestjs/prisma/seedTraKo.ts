@@ -1337,8 +1337,8 @@ export const seedTraKo = async () => {
     const subjectTraKo = await prisma.subject.create({
       data: {
         id: 1,
-        name: 'Tragwerklehre 1',
-        description: 'Beschreibung für die Veranstaltung Tragwerklehre 1.',
+        name: 'Tragkonstruktion 3',
+        description: 'Beschreibung für die Veranstaltung Tragkonstruktion 3.',
         modules: { connect: { id: moduleArchitektur.id } },
       },
     });
