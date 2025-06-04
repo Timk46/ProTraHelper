@@ -40,6 +40,45 @@
         Alle Nutzer abmelden
       </button>
     </div>
+
+    <mat-card class="content-management-container">
+      <mat-card-title>Lerninhalte Management</mat-card-title>
+      <mat-card-content>
+        <div class="content-actions">
+          <button mat-raised-button color="primary" (click)="exportContent()">
+            Lerninhalte exportieren
+          </button>
+
+          <div class="import-section">
+            <input
+              hidden
+              type="file"
+              accept=".json"
+              #contentFileInput
+              (change)="onContentFileSelected($event)"
+            >
+            <button
+              mat-raised-button
+              color="accent"
+              (click)="contentFileInput.click()"
+            >
+              Datei auswählen
+            </button>
+            <span class="file-name" *ngIf="selectedContentFile">
+              {{ selectedContentFile.name }}
+            </span>
+            <button
+              mat-raised-button
+              color="accent"
+              (click)="importContent()"
+              [disabled]="!selectedContentFile"
+            >
+              Lerninhalte importieren
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 
   <div class="data-container">
