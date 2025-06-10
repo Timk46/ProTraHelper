@@ -6,6 +6,10 @@
   <p> Wir melden uns dann so schnell wie möglich bei euch zurück :)</p>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
+  <button mat-stroked-button color="primary" (click)="openHelperOnboarding()">
+    <mat-icon>rocket_launch</mat-icon>
+    Rhino Helper Dialog öffnen
+  </button>
   <button mat-button mat-dialog-close>Okay</button>
 <!-- <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Installieren</button>-->
 </mat-dialog-actions>

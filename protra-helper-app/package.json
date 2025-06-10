@@ -1,0 +1,140 @@
+{
+  "name": "protra-helper-app",
+  "version": "1.0.0",
+  "description": "Desktop Helferanwendung für die ProTra-Webanwendung zur Rhino/Grasshopper-Integration.",
+  "main": "main.js",
+  "homepage": "https://protra.hefl.de",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac", 
+    "dist:linux": "electron-builder --linux",
+    "dist:all": "electron-builder --win --mac --linux",
+    "build:installer": "electron-builder --win --x64 --publish=never",
+    "build:installer:dev": "electron-builder --win --x64 --publish=never --config.nsis.perMachine=false",
+    "build:installer:admin": "electron-builder --win --x64 --publish=never --config.nsis.perMachine=true",
+    "postinstall": "electron-builder install-app-deps",
+    "create-icons": "node create-icons.js"
+  },
+  "keywords": [
+    "ProTra",
+    "Rhino",
+    "Grasshopper",
+    "Electron",
+    "Helper",
+    "CAD",
+    "Architecture"
+  ],
+  "author": {
+    "name": "HEFL-Entwicklungsteam", 
+    "email": "support@hefl.de",
+    "url": "https://hefl.de"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hefl/protra-helper-app.git"
+  },
+  "devDependencies": {
+    "electron": "^29.1.5",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "electron-log": "^5.1.5",
+    "electron-store": "^8.2.0",
+    "express": "^4.19.2"
+  },
+  "build": {
+    "appId": "com.hefl.protra.helperapp",
+    "productName": "ProTra Helfer",
+    "artifactName": "${productName}-Setup-${version}.${ext}",
+    "copyright": "Copyright © 2025 HEFL-Entwicklungsteam",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "**/*",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,suo,xproj,cc,h}",
+      "!create-icons.js",
+      "!*.md",
+      "!.git*",
+      "!installer/"
+    ],
+    "extraResources": [
+      {
+        "from": "LICENSE",
+        "to": "LICENSE.txt"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/rhino_tray.png",
+      "publisherName": "HEFL-Entwicklungsteam",
+      "verifyUpdateCodeSignature": false,
+      "sign": null,
+      "certificateFile": null,
+      "certificatePassword": null,
+      "requestedExecutionLevel": "asInvoker",
+      "downloadAlternateFFmpeg": true
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.utilities",
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility",
+      "icon": "assets/icon.png",
+      "desktop": {
+        "Name": "ProTra Helfer",
+        "Comment": "Helferanwendung für ProTra und Rhino/Grasshopper.",
+        "StartupWMClass": "ProTra Helfer",
+        "Categories": "Utility;Development;Graphics;"
+      }
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "ProTra Helfer",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "perMachine": false,
+      "differentialPackage": false,
+      "displayLanguageSelector": false,
+      "installerLanguages": ["de-DE", "en-US"],
+      "license": "LICENSE",
+      "warningsAsErrors": false,
+      "guid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "menuCategory": "ProTra Tools",
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "uninstallDisplayName": "${productName} ${version}"
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "publish": {
+      "provider": "generic",
+      "url": "https://downloads.hefl.de/protra-helper/"
+    }
+  }
+}

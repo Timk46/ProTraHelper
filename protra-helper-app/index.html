@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ProTra Helfer</title>
+    <!-- <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';"> -->
+    <style>
+        body {
+            font: caption;
+            background-color: #f0f0f0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .container {
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ProTra Helferanwendung</h1>
+        <p>Diese Anwendung läuft im Hintergrund und stellt eine Schnittstelle für die ProTra-Webanwendung bereit.</p>
+        <p>Sie können mit der Anwendung über das Tray-Icon (oder das App-Menü unter macOS) interagieren.</p>
+        <p id="version"></p>
+    </div>
+    <script>
+      // Beispiel: Zugriff auf eine via preload.js exponierte Funktion
+      // if (window.electronAPI && typeof window.electronAPI.getAppVersion === 'function') {
+      //   window.electronAPI.getAppVersion().then(version => {
+      //     document.getElementById('version').innerText = `Version: ${version}`;
+      //   });
+      // }
+      console.log('index.html geladen. Dies ist nur ein Platzhalter-Fenster, falls es sichtbar gemacht wird.');
+    </script>
+</body>
+</html> 

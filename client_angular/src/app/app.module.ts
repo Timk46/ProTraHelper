@@ -80,6 +80,7 @@ import { AppHeaderComponent } from './Pages/app-header/app-header.component';
 
 // ProTra 2.0 Module
 import { PmpmModule } from './features/pmpm/pmpm.module';
+import { HelperAppOnboardingModule } from './features/helper-app-onboarding/helper-app-onboarding.module';
 
 @NgModule({ declarations: [
         AppComponent,
@@ -156,7 +157,8 @@ import { PmpmModule } from './features/pmpm/pmpm.module';
         CdkAccordionModule,
         MatRippleModule,
         CodeGameModule,
-        PmpmModule], providers: [
+        PmpmModule,
+        HelperAppOnboardingModule], providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
         { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },

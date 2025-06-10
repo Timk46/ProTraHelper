@@ -808,6 +808,7 @@ enum GlobalRole {
   STUDENT
   TEACHER
   ADMIN
+  ARCHSTUDENT
 }
 
 enum SubjectRole {

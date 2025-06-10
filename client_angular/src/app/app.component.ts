@@ -7,6 +7,7 @@ import { version } from '@DTOs/version';
 import { globalRole } from '@DTOs/roles.enum';
 import { environment } from 'src/environments/environment';
 import { ConfirmationBoxComponent } from "./Pages/confirmation-box/confirmation-box.component";
+import { HelperAppOnboardingComponent } from './features/helper-app-onboarding/helper-app-onboarding.component';
 
 
 @Component({
@@ -167,7 +168,17 @@ export class DatenschutzComponent {}
   templateUrl: './about/contact.html',
 })
 
-export class ContactComponent {}
+export class ContactComponent {
+  constructor(public dialog: MatDialog) {}
+
+  openHelperOnboarding() {
+    this.dialog.open(HelperAppOnboardingComponent, {
+      width: '90vw',
+      maxWidth: '800px',
+      disableClose: true
+    });
+  }
+}
 
 @Component({
   selector: 'progressInfo',

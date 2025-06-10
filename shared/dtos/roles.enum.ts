@@ -1,5 +1,6 @@
 export enum globalRole {
     ADMIN = "ADMIN",
     STUDENT = "STUDENT",
-    TEACHER = "TEACHER"
+    TEACHER = "TEACHER",
+    ARCHSTUDENT = "ARCHSTUDENT"
 }
