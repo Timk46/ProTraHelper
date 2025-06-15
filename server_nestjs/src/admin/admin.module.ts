@@ -6,10 +6,12 @@ import { UsersModule } from '@/users/users.module';
 
 import { ContentManagementController } from './content-management.controller';
 import { ContentManagementService } from './content-management.service';
+import { ModuleSettingsController } from './module-settings.controller';
+import { ModuleSettingsService } from './module-settings.service';
 
 @Module({
   imports: [PrismaModule, UsersModule],
-  controllers: [AdminController, ContentManagementController],
-  providers: [AdminService, ContentManagementService],
+  controllers: [AdminController, ContentManagementController, ModuleSettingsController],
+  providers: [AdminService, ContentManagementService, ModuleSettingsService],
 })
 export class AdminModule {}

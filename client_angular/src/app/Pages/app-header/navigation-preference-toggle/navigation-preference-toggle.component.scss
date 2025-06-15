@@ -30,3 +30,18 @@
     }
   }
 }
+
+.nav-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .settings-button {
+    color: white;
+    opacity: 0.8;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

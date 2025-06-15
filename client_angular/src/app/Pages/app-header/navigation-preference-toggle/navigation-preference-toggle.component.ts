@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { NavigationPreferenceService, NavigationType } from 'src/app/Services/navigation/navigation-preference.service';
+import { NavigationPreferenceSettingsComponent } from '../navigation-preference-settings/navigation-preference-settings.component';
+import { UserService } from 'src/app/Services/auth/user.service';
 
 @Component({
   selector: 'app-navigation-preference-toggle',
@@ -9,10 +12,13 @@ import { NavigationPreferenceService, NavigationType } from 'src/app/Services/na
 })
 export class NavigationPreferenceToggleComponent implements OnInit {
   currentPreference: NavigationType = 'graph';
+  isEditMode = false;
 
   constructor(
+    private dialog: MatDialog,
     private navigationPreferenceService: NavigationPreferenceService,
-    private router: Router
+    private router: Router,
+    private userService: UserService
   ) { }
 
   ngOnInit(): void {
@@ -21,6 +27,15 @@ export class NavigationPreferenceToggleComponent implements OnInit {
     // Subscribe to changes in the navigation preference
     this.navigationPreferenceService.preference$.subscribe(preference => {
       this.currentPreference = preference;
+    });
+
+    // Subscribe to edit mode changes
+    this.userService.hasEditModeActive$.subscribe(isEdit => {
+      this.isEditMode = isEdit;
+
+      // Reload enabled navigation types when edit mode changes
+      // Using module ID 1 as default
+      this.navigationPreferenceService.loadEnabledNavigationTypes(1).subscribe();
     });
   }
 
@@ -85,5 +100,22 @@ export class NavigationPreferenceToggleComponent implements OnInit {
       default:
         return 'account_tree'; // Material icon for graph view
     }
+  }
+
+  /**
+   * Opens the settings dialog for navigation preferences
+   */
+  openSettings(): void {
+    const dialogRef = this.dialog.open(NavigationPreferenceSettingsComponent, {
+      width: '400px',
+      data: { moduleId: 1 } // TODO: Get the current module ID
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Refresh available navigation types
+        this.navigationPreferenceService.loadEnabledNavigationTypes(1).subscribe();
+      }
+    });
   }
 }

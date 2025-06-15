@@ -34,6 +34,7 @@ model User {
   anonymousUser        anonymousUser[]
   userSubjects         UserSubject[]
   refreshTokens        RefreshToken[]
+  updatedSettings      ModuleSetting[]
   hasAcceptedPrivacyPolicy Boolean @default(false)
 }
 
@@ -54,6 +55,7 @@ model Module {
   description String
   goals       ModuleConceptGoal[]
   subjects    Subject[]           @relation("ModuleToSubject")
+  settings    ModuleSetting[]
 }
 
 model ModuleConceptGoal {
@@ -532,6 +534,19 @@ model CodeGameScaffoldAnswer {
   code                String
   codeGameAnswerId    Int
   CodeGameAnswer      CodeGameAnswer @relation(fields: [codeGameAnswerId], references: [id], onDelete: Cascade)
+}
+
+model ModuleSetting {
+  id        Int      @id @default(autoincrement())
+  key       String
+  value     String   @db.Text  // Using @db.Text for potentially large JSON strings
+  moduleId  Int
+  updatedAt DateTime @updatedAt
+  updatedBy Int
+  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  updater   User     @relation(fields: [updatedBy], references: [id])
+
+  @@unique([moduleId, key])
 }
 
 model FillinQuestion {
