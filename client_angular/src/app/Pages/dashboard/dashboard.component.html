@@ -1,11 +1,9 @@
-<div appDraggableHeight class="content graph mat-elevation-z8" *ngIf="shouldShowGraph()">
-  <app-graph></app-graph>
-  <div class="resize-handle">
-    <mat-icon aria-hidden="false" aria-label="Example drag handle icon" style="transform: scale(2); color: black;">drag_handle</mat-icon>
-  </div>
-</div>
-<div appDraggableHeight class="content graph mat-elevation-z8" *ngIf="!shouldShowGraph()">
-  <app-mobile-navigator></app-mobile-navigator>
+<div appDraggableHeight class="content graph mat-elevation-z8">
+  <ng-container [ngSwitch]="currentNavigator">
+    <app-graph *ngSwitchCase="'graph'"></app-graph>
+    <app-mobile-navigator *ngSwitchCase="'mobile'"></app-mobile-navigator>
+    <app-highlight-navigator *ngSwitchCase="'highlight'"></app-highlight-navigator>
+  </ng-container>
   <div class="resize-handle">
     <mat-icon aria-hidden="false" aria-label="Example drag handle icon" style="transform: scale(2); color: black;">drag_handle</mat-icon>
   </div>

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
-import { NavigationPreferenceService } from '../Services/navigation/navigation-preference.service';
+import { NavigationPreferenceService, NavigationType } from '../Services/navigation/navigation-preference.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,17 +16,27 @@ export class NavigationPreferenceGuard  {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): boolean {
-    // If the user is trying to access /graph route
-    if (state.url.includes('/graph')) {
-      const preference = this.navigationPreferenceService.currentPreference;
+    const preference = this.navigationPreferenceService.currentPreference;
+    const url = state.url;
 
-      // If user prefers mobile navigation, redirect to mobile-navigator
-      if (preference === 'mobile') {
-        this.router.navigate(['/dashboard/mobile-navigator']);
-        return false;
-      }
+    const currentPath = url.includes('/graph') ? 'graph' as const :
+                       url.includes('/mobile-navigator') ? 'mobile' as const :
+                       url.includes('/highlight-navigator') ? 'highlight' as const : null;
+
+    if (currentPath && currentPath !== preference) {
+      this.redirectBasedOnPreference(preference);
+      return false;
     }
 
     return true;
+  }
+
+  private redirectBasedOnPreference(preference: NavigationType): void {
+    const routes = {
+      graph: '/dashboard/graph',
+      mobile: '/dashboard/mobile-navigator',
+      highlight: '/dashboard/highlight-navigator'
+    } as const;
+    this.router.navigate([routes[preference]]);
   }
 }

@@ -59,20 +59,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Determines whether to show the graph or mobile navigator based on:
-   * 1. User preference (if explicitly set)
-   * 2. Device orientation (landscape = graph, portrait = mobile) as fallback
+   * Returns which navigator to show based on the current preference
    */
-  shouldShowGraph(): boolean {
-    // First check user preference
-    if (this.currentNavigationPreference === 'graph') {
-      return true;
-    } else if (this.currentNavigationPreference === 'mobile') {
-      return false;
-    }
-
-    // Fallback to screen orientation if no specific preference
-    return this.isLandscapeView;
+  get currentNavigator(): 'graph' | 'mobile' | 'highlight' {
+    return this.currentNavigationPreference;
   }
   ngOnDestroy() {
     // Unsubscribe from all subscriptions to avoid memory leaks

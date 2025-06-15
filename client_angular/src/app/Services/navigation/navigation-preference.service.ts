@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-export type NavigationType = 'graph' | 'mobile';
+export type NavigationType = 'graph' | 'mobile' | 'highlight';
 
 @Injectable({
   providedIn: 'root'
@@ -43,10 +43,12 @@ export class NavigationPreferenceService {
   }
 
   /**
-   * Toggles between graph and mobile navigation
+   * Toggles between navigation types in sequence: graph -> mobile -> highlight
    */
   toggleNavigationPreference(): void {
-    const newPreference: NavigationType = this.currentPreference === 'graph' ? 'mobile' : 'graph';
+    const newPreference: NavigationType =
+      this.currentPreference === 'graph' ? 'mobile' :
+      this.currentPreference === 'mobile' ? 'highlight' : 'graph';
     this.setNavigationPreference(newPreference);
   }
 }

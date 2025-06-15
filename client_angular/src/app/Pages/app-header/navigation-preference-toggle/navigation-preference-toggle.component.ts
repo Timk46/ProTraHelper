@@ -25,7 +25,7 @@ export class NavigationPreferenceToggleComponent implements OnInit {
   }
 
   /**
-   * Toggles between graph and mobile navigation
+   * Toggles between navigation types and updates the current route
    */
   toggleNavigationPreference(): void {
     this.navigationPreferenceService.toggleNavigationPreference();
@@ -34,11 +34,14 @@ export class NavigationPreferenceToggleComponent implements OnInit {
     const currentUrl = this.router.url;
 
     // Only redirect if the user is currently on one of the navigation pages
-    if (currentUrl.includes('/graph') || currentUrl.includes('/mobile-navigator')) {
-      const navigationPath = this.currentPreference === 'graph'
-        ? '/dashboard/mobile-navigator'
-        : '/dashboard/graph';
-      this.router.navigate([navigationPath]);
+    if (currentUrl.includes('/graph') || currentUrl.includes('/mobile-navigator') || currentUrl.includes('/highlight-navigator')) {
+      const newPreference = this.navigationPreferenceService.currentPreference;
+      const routes = {
+        graph: '/dashboard/graph',
+        mobile: '/dashboard/mobile-navigator',
+        highlight: '/dashboard/highlight-navigator'
+      };
+      this.router.navigate([routes[newPreference]]);
     }
   }
 
@@ -46,26 +49,41 @@ export class NavigationPreferenceToggleComponent implements OnInit {
    * Get the tooltip text based on the current preference
    */
   get toggleTooltip(): string {
-    return this.currentPreference === 'graph'
-      ? 'Wechseln zur mobilen Navigation'
-      : 'Wechseln zur Graph-Navigation';
+    switch(this.currentPreference) {
+      case 'graph':
+        return 'Wechseln zur mobilen Navigation';
+      case 'mobile':
+        return 'Wechseln zur Highlight-Navigation';
+      default:
+        return 'Wechseln zur Graph-Navigation';
+    }
   }
 
   /**
    * Get the toggle button label based on the current preference
    */
   get toggleLabel(): string {
-    return this.currentPreference === 'graph'
-      ? 'Graph-Navigation'
-      : 'Mobile Navigation';
+    switch(this.currentPreference) {
+      case 'graph':
+        return 'Graph-Navigation';
+      case 'mobile':
+        return 'Mobile Navigation';
+      default:
+        return 'Highlight Navigation';
+    }
   }
 
   /**
    * Get the toggle icon based on the current preference
    */
   get toggleIcon(): string {
-    return this.currentPreference === 'graph'
-      ? 'view_list' // Material icon for mobile view
-      : 'account_tree'; // Material icon for graph view
+    switch(this.currentPreference) {
+      case 'graph':
+        return 'view_list'; // Material icon for mobile view
+      case 'mobile':
+        return 'stars'; // Material icon for highlight view
+      default:
+        return 'account_tree'; // Material icon for graph view
+    }
   }
 }
