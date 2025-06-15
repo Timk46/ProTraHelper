@@ -1,17 +1,19 @@
 import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
-import { ContentManagementService } from '../services/content-management.service';
-import { AdminGuard } from '../../auth/guards/is-admin.guard';
+import { ContentManagementService } from './content-management.service';
+import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 
 @Controller('admin/content')
-@UseGuards(AdminGuard)
+@UseGuards(RolesGuard)
 export class ContentManagementController {
   constructor(private contentManagementService: ContentManagementService) {}
 
+  @roles('ADMIN')
   @Get('export')
   async exportContent() {
     return this.contentManagementService.exportContent();
   }
 
+  @roles('ADMIN')
   @Post('import')
   async importContent(@Body() data: any) {
     return this.contentManagementService.importContent(data);
