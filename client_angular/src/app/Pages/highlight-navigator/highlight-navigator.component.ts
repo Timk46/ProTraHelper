@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { UserService } from 'src/app/Services/auth/user.service';
 
 @Component({
   selector: 'app-highlight-navigator',
@@ -6,5 +7,11 @@ import { Component } from '@angular/core';
   styleUrl: './highlight-navigator.component.scss'
 })
 export class HighlightNavigatorComponent {
+
+  constructor(
+    private userService: UserService,
+  ){}
+
+
 
 }
