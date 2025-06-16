@@ -77,6 +77,7 @@ import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-
 import { NavigationPreferenceToggleComponent } from './Pages/app-header/navigation-preference-toggle/navigation-preference-toggle.component';
 import { AppHeaderComponent } from './Pages/app-header/app-header.component';
 import { HighlightNavigatorComponent } from './Pages/highlight-navigator/highlight-navigator.component';
+import { HighlightConceptDialogComponent } from "./Pages/highlight-navigator/highlight-concept-dialog/highlight-concept-dialog.component";
 
 @NgModule({ declarations: [
         AppComponent,
@@ -134,7 +135,8 @@ import { HighlightNavigatorComponent } from './Pages/highlight-navigator/highlig
         CodeGameConfirmDialogComponent,
         NavigationPreferenceToggleComponent,
         AppHeaderComponent,
-        HighlightNavigatorComponent
+        HighlightNavigatorComponent,
+        HighlightConceptDialogComponent,
     ],
     bootstrap: [AppComponent], imports: [ToastrModule.forRoot(),
         BrowserModule,

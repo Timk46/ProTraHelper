@@ -7,7 +7,7 @@ import { ModuleSettingsService } from './module-settings.service';
 export class ModuleSettingsController {
   constructor(private readonly moduleSettingsService: ModuleSettingsService) {}
 
-  @roles('ADMIN')
+  @roles('ANY')
   @Get(':moduleId/:key')
   async getSetting(
     @Param('moduleId') moduleId: string,

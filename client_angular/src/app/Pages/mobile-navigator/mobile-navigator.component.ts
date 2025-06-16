@@ -1,6 +1,6 @@
 import { ConceptGraphDTO } from '@DTOs/conceptGraph.dto';
 import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, Input, Output } from '@angular/core';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
 import { debounceTime, Subject } from 'rxjs';
@@ -30,7 +30,10 @@ export class MobileNavigatorComponent implements OnInit, AfterViewChecked {
   searchResults: ConceptNodeDTO[] = [];
   isSearchVisible: boolean = false;
   private searchSubject = new Subject<string>();
+
   @ViewChild('searchInput') searchInput!: ElementRef;
+  @Input() selectionMode: boolean = false; // If true, only return the concept ID on selection, no navigation
+  @Output() selectionChange: Subject<number> = new Subject<number>();
 
   private graphCommunicationService: GraphCommunicationService = GraphCommunicationService.getInstance();
   loadingDone: boolean = false;
@@ -114,19 +117,21 @@ export class MobileNavigatorComponent implements OnInit, AfterViewChecked {
 
           this.currentNodeId = initialNodeId;
 
-          // Use setTimeout to ensure the view updates before changing active node and navigating
-          setTimeout(() => {
-            this.changeActiveNode(initialNodeId).then(() => {
-              console.log(`Navigating to initial concept route: /dashboard/concept/${initialNodeId}`);
-              this.router.navigate(['/dashboard/concept', initialNodeId], { replaceUrl: true })
-                  .then(success => {
-                      if (!success) {
-                          console.error(`Navigation to /dashboard/concept/${initialNodeId} failed! Check routes.`);
-                      }
-                  })
-                  .catch(error => console.error("Error during initial navigation:", error));
-            });
-          }, 0);
+          if (!this.selectionMode){
+            // Use setTimeout to ensure the view updates before changing active node and navigating
+            setTimeout(() => {
+              this.changeActiveNode(initialNodeId).then(() => {
+                console.log(`Navigating to initial concept route: /dashboard/concept/${initialNodeId}`);
+                this.router.navigate(['/dashboard/concept', initialNodeId], { replaceUrl: true })
+                    .then(success => {
+                        if (!success) {
+                            console.error(`Navigation to /dashboard/concept/${initialNodeId} failed! Check routes.`);
+                        }
+                    })
+                    .catch(error => console.error("Error during initial navigation:", error));
+              });
+            }, 0);
+          }
 
         } else {
            console.error(`Calculated initialLayerId (${initialLayerId}) or initialNodeId (${initialNodeId}) is invalid or node does not exist in nodeMap.`);
@@ -247,9 +252,15 @@ export class MobileNavigatorComponent implements OnInit, AfterViewChecked {
 
     this.hideSearch();
 
-    this.changeActiveNode(this.currentNodeId).then(() => {
-      this.router.navigate(['/dashboard/concept', this.currentNodeId]);
-    });
+    if (this.selectionMode) {
+      // If in selection mode, emit the selected concept ID
+      this.selectionChange.next(this.currentNodeId);
+      console.log("Selection Mode: Emitted currentNodeId:", this.currentNodeId);
+    } else {
+      this.changeActiveNode(this.currentNodeId).then(() => {
+        this.router.navigate(['/dashboard/concept', this.currentNodeId]);
+      });
+    }
   }
 
   /**
@@ -382,9 +393,16 @@ export class MobileNavigatorComponent implements OnInit, AfterViewChecked {
             this.currentLayer = previousLayer.id;
             this.currentNodeId = previousLayer.id; // Select the layer node itself when going back
             console.log("Navigated Back. Current Layer:", this.currentLayer, " Current Node:", this.currentNodeId, " Open Layers:", this.openLayers.map(l=>l.id));
-            this.changeActiveNode(this.currentNodeId).then(() => {
-                this.router.navigate(['/dashboard/concept', this.currentNodeId]);
-            });
+            if (this.selectionMode) {
+              // If in selection mode, emit the selected concept ID
+              this.selectionChange.next(this.currentNodeId);
+              console.log("Selection Mode: Emitted currentNodeId:", this.currentNodeId);
+            } else {
+              this.changeActiveNode(this.currentNodeId).then(() => {
+                  this.router.navigate(['/dashboard/concept', this.currentNodeId]);
+              });
+            }
+
         } else {
             console.warn("Attempted to navigate back, but no previous layers found in openLayers array.");
             // Optional: Fallback to root if structure is inconsistent
@@ -409,16 +427,28 @@ export class MobileNavigatorComponent implements OnInit, AfterViewChecked {
         } else {
             console.log("Double click on leaf node - no navigation action.");
             // Potentially open content if not already open, but changeActiveNode handles this
-            this.changeActiveNode(node.databaseId); // Ensure content is displayed
+            if (this.selectionMode) {
+                // If in selection mode, emit the selected concept ID
+                this.selectionChange.next(node.databaseId);
+                console.log("Selection Mode: Emitted node.databaseId:", node.databaseId);
+            } else {
+              this.changeActiveNode(node.databaseId); // Ensure content is displayed
+            }
         }
     } else {
         // This is a "single click" (clicking a different node than the last active one)
         console.log("Single Click Detected on Node:", node.databaseId);
         this.currentNodeId = node.databaseId;
         // Activate the node (shows content) and update URL
-        this.changeActiveNode(this.currentNodeId).then(() => {
-            this.router.navigate(['/dashboard/concept', this.currentNodeId]);
-        });
+        if (this.selectionMode) {
+            // If in selection mode, emit the selected concept ID
+            this.selectionChange.next(this.currentNodeId);
+            console.log("Selection Mode: Emitted currentNodeId:", this.currentNodeId);
+        } else {
+          this.changeActiveNode(this.currentNodeId).then(() => {
+              this.router.navigate(['/dashboard/concept', this.currentNodeId]);
+          });
+        }
         // Do NOT automatically navigate into folders on single click here.
         // The user must "double click" (click again) to enter a folder.
     }

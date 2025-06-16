@@ -66,17 +66,4 @@ export class HighlightConceptsService {
   deleteHighlightConcept(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
-
-  /**
-   * Checks if the user has admin rights to modify highlight concepts
-   * @returns A boolean indicating if the user is an admin
-   */
-  canModifyHighlightConcepts(): boolean {
-    try {
-      const role = this.userService.getRole();
-      return role === 'ADMIN';
-    } catch (error) {
-      return false;
-    }
-  }
 }
