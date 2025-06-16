@@ -21,6 +21,7 @@ export * from "./contentLinking.dto";
 export * from "./detailedQuestion.dto";
 export * from "./fillInType.enum";
 export * from "./fillInText.dto";
+export * from "./highlight-concept.dto";
 
 //TutorKai DTOs
 export * from "./tutorKaiDtos/kiFeedback.dto";

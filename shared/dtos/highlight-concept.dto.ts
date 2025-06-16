@@ -1,4 +1,4 @@
-export class HighlightConceptDto {
+export interface HighlightConceptDto {
   id: number;
   moduleId: number;
   conceptNodeId: number;
@@ -10,7 +10,7 @@ export class HighlightConceptDto {
   conceptNode?: any; // Could be replaced with a more detailed DTO for ConceptNode
 }
 
-export class CreateHighlightConceptDto {
+export interface CreateHighlightConceptDto {
   moduleId: number;
   conceptNodeId: number;
   alias?: string;
@@ -20,7 +20,7 @@ export class CreateHighlightConceptDto {
   isUnlocked?: boolean;
 }
 
-export class UpdateHighlightConceptDto {
+export interface UpdateHighlightConceptDto {
   alias?: string;
   description?: string;
   pictureData?: string;
