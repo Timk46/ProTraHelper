@@ -48,11 +48,23 @@
   cursor: pointer;
   display: block; /* For <a> elements */
   text-decoration: none; /* Remove underline from links */
-  color: inherit; /* Inherit text color */
+  color: black; /* Inherit text color */
 
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  &.locked {
+    background-color: #f0f0f0;
+    color: inherit;
+    cursor: not-allowed;
+    opacity: 0.8;
+
+    &:hover {
+      transform: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
   }
 }
 
@@ -84,6 +96,10 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+
+  &.grayscale {
+    filter: grayscale(100%);
+  }
 }
 
 .highlight-description-overlay {

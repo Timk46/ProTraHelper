@@ -27,9 +27,10 @@
       <a
         *ngFor="let concept of highlightConcepts"
         class="highlight-tile"
+        [class.locked]="!concept.isUnlocked"
         (mouseenter)="setHoveredTile(concept.id)"
         (mouseleave)="setHoveredTile(null)"
-        (click)="navigateToConcept(concept, $event)"
+        (click)="concept.isUnlocked ? navigateToConcept(concept, $event) : $event.preventDefault()"
       >
         <!-- Title -->
         <h3 class="highlight-title">{{ concept.alias || (concept.conceptNode?.name || 'Untitled') }}</h3>
@@ -40,6 +41,7 @@
             [src]="concept.pictureData || 'https://via.placeholder.com/300'"
             [alt]="concept.alias || 'Highlight image'"
             class="highlight-image"
+            [class.grayscale]="!concept.isUnlocked"
           />
 
           <!-- Description overlay (shown on hover) -->

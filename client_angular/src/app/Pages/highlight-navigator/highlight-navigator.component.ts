@@ -272,6 +272,13 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Don't navigate if the concept is locked
+    if (!concept.isUnlocked) {
+      console.log('Not navigating because the concept is locked');
+      this.showMessage('This concept is locked and cannot be accessed yet');
+      return;
+    }
+
     if (!concept.conceptNodeId) {
       console.error('Cannot navigate: concept.conceptNodeId is undefined or null', concept);
       this.showMessage('This highlight concept is not linked to a concept node');
