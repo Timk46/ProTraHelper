@@ -24,11 +24,12 @@
       </div>
 
       <!-- Highlight tiles -->
-      <div
+      <a
         *ngFor="let concept of highlightConcepts"
         class="highlight-tile"
         (mouseenter)="setHoveredTile(concept.id)"
         (mouseleave)="setHoveredTile(null)"
+        (click)="navigateToConcept(concept, $event)"
       >
         <!-- Title -->
         <h3 class="highlight-title">{{ concept.alias || (concept.conceptNode?.name || 'Untitled') }}</h3>
@@ -71,7 +72,7 @@
             </button>
           </div>
         </div>
-      </div>
+      </a>
     </div>
   </div>
 </div>

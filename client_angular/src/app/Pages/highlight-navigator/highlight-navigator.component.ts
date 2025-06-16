@@ -1,13 +1,16 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { HighlightConceptsService } from 'src/app/Services/highlight-concepts/highlight-concepts.service';
-import { HighlightConceptDto, CreateHighlightConceptDto, UpdateHighlightConceptDto } from '@DTOs/index';
+import { HighlightConceptDto, CreateHighlightConceptDto, UpdateHighlightConceptDto, ConceptGraphDTO } from '@DTOs/index';
 import { Observable, Subscription, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { HighlightConceptDialogComponent } from './highlight-concept-dialog/highlight-concept-dialog.component';
 import { ConceptSelectionService } from 'src/app/Services/concept-selection/concept-selection.service';
+import { Router } from '@angular/router';
+import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
+import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
 
 @Component({
   selector: 'app-highlight-navigator',
@@ -22,6 +25,15 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   hoveredTileId: number | null = null;
 
+  userGraphData: ConceptGraphDTO = {
+      id: -1,
+      name: "Loading...",
+      trueRootId: -1,
+      nodeMap: {},
+      edgeMap: {},
+      currentConceptId: -1
+    };
+
   private subscriptions: Subscription = new Subscription();
 
   constructor(
@@ -29,8 +41,14 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
     private highlightConceptsService: HighlightConceptsService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private conceptSelectionService: ConceptSelectionService
-  ){}
+    private conceptSelectionService: ConceptSelectionService,
+    private router: Router,
+    private graphDataService: GraphDataService
+  ){
+    this.graphCommunicationService = GraphCommunicationService.getInstance();
+  }
+
+  private graphCommunicationService: GraphCommunicationService;
 
   ngOnInit(): void {
     // Subscribe to edit mode changes
@@ -235,4 +253,81 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
       verticalPosition: 'top'
     });
   }
+
+  /**
+   * Navigates to the concept when a highlight tile is clicked
+   * @param concept The highlight concept to navigate to
+   */
+  navigateToConcept(concept: HighlightConceptDto, event?: Event): void {
+    console.log('navigateToConcept called with concept:', concept);
+
+    if (event) {
+      // Prevent event bubbling
+      event.stopPropagation();
+    }
+
+    // Don't navigate if in edit mode and the user clicked on the edit/delete buttons
+    if (this.isEditMode && this.hoveredTileId === concept.id) {
+      console.log('Not navigating because in edit mode and hovering over the concept');
+      return;
+    }
+
+    if (!concept.conceptNodeId) {
+      console.error('Cannot navigate: concept.conceptNodeId is undefined or null', concept);
+      this.showMessage('This highlight concept is not linked to a concept node');
+      return;
+    }
+
+    const conceptNodeId = concept.conceptNodeId;
+    console.log(`Attempting to navigate to concept node ID: ${conceptNodeId}`);
+
+    // First, fetch the content for the concept to ensure it's loaded
+    this.graphDataService.fetchUserGraph(this.moduleId).subscribe({
+      next: (graph) => {
+        if (graph.nodeMap && graph.nodeMap[conceptNodeId]) {
+          const conceptNode = graph.nodeMap[conceptNodeId];
+
+          // Update the active node in the graph communication service
+          this.graphCommunicationService.changeActiveNode(conceptNode);
+
+          // Update the selected concept in the backend
+          this.graphDataService.updateSelectedConcept(conceptNodeId).subscribe({
+            next: () => {
+              console.log(`Successfully updated selected concept to ${conceptNodeId} in backend.`);
+
+              // Force a refresh by navigating to a different route first
+              // This is a workaround for Angular's router not refreshing when navigating to the same route
+              const currentUrl = this.router.url;
+              const targetUrl = `/dashboard/concept/${conceptNodeId}`;
+
+              // Only use the workaround if we're already on a concept page
+              if (currentUrl.includes('/dashboard/concept/')) {
+                // Navigate to a dummy route first (with skipLocationChange to avoid changing the URL)
+                this.router.navigateByUrl('/dashboard', { skipLocationChange: true }).then(() => {
+                  // Then navigate to the target route
+                  this.router.navigate(['/dashboard/concept', conceptNodeId]);
+                });
+              } else {
+                // If we're not on a concept page, just navigate directly
+                this.router.navigate(['/dashboard/concept', conceptNodeId]);
+              }
+            },
+            error: (err) => {
+              console.error(`Failed to update selected concept to ${conceptNodeId} in backend:`, err);
+              // Still try to navigate even if the backend update fails
+              this.router.navigate(['/dashboard/concept', conceptNodeId]);
+            }
+          });
+        } else {
+          console.error(`Concept node ${conceptNodeId} not found in graph`);
+          this.showMessage('Concept node not found. Please try again.');
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching graph data:', err);
+        this.showMessage('Error loading concept data. Please try again.');
+      }
+    });
+  }
+
 }
