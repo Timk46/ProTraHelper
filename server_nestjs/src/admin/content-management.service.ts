@@ -11,6 +11,8 @@ export class ContentManagementService {
       subjects,
       modules,
       moduleConceptGoals,
+      moduleHighlightConcepts,
+      moduleSettings,
       conceptGraphs,
       conceptNodes,
       conceptEdges,
@@ -38,6 +40,8 @@ export class ContentManagementService {
       this.prisma.subject.findMany(),
       this.prisma.module.findMany(),
       this.prisma.moduleConceptGoal.findMany(),
+      this.prisma.moduleHighlightConcepts.findMany(),
+      this.prisma.moduleSetting.findMany(),
       this.prisma.conceptGraph.findMany(),
       this.prisma.conceptNode.findMany(),
       this.prisma.conceptEdge.findMany(),
@@ -98,6 +102,8 @@ export class ContentManagementService {
         subjects,
         modules,
         moduleConceptGoals,
+        moduleHighlightConcepts,
+        moduleSettings,
         conceptGraphs,
         conceptNodes,
         conceptEdges,
@@ -197,6 +203,8 @@ export class ContentManagementService {
         prisma.contentEdge.deleteMany(),
         prisma.requirement.deleteMany(),
         prisma.training.deleteMany(),
+        prisma.moduleHighlightConcepts.deleteMany(),
+        prisma.moduleSetting.deleteMany(),
         prisma.contentNode.deleteMany(),
       ]);
 
@@ -242,6 +250,12 @@ export class ContentManagementService {
         prisma.file.createMany({ data: content.files }),
         prisma.module.createMany({ data: content.modules }),
       ]);
+      if (content.moduleHighlightConcepts && content.moduleHighlightConcepts.length > 0) {
+        await prisma.moduleHighlightConcepts.createMany({ data: content.moduleHighlightConcepts });
+      }
+      if (content.moduleSettings && content.moduleSettings.length > 0) {
+        await prisma.moduleSetting.createMany({ data: content.moduleSettings });
+      }
 
       // Second layer: concept nodes
       console.log('\n=== Phase 2/7: Concept Structure ===');
