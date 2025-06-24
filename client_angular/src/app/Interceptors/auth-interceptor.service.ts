@@ -31,6 +31,14 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
+    // Exclude Helper-App requests from all authentication processing
+    if (request.url.includes('localhost:3001') ||
+        request.url.includes('127.0.0.1:3001') ||
+        request.headers.has('Skip-Auth-Interceptor')) {
+      console.log('AuthInterceptor: Skipping Helper-App request:', request.url);
+      return next.handle(request);
+    }
+
     const accessToken = localStorage.getItem('accessToken');
     const deviceId = this.userService.getDeviceId();
 
@@ -113,7 +121,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
   /**
    * Checks the error status and handles it accordingly.
-   * 
+   *
    * @param error - The error object to be checked.
    */
   checkError(error: any) {

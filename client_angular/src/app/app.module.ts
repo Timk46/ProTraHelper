@@ -5,6 +5,7 @@ import { MaterialModule } from './Modules/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MarkdownModule } from 'ngx-markdown';
 import { MatMenuModule } from "@angular/material/menu";
+import { MatIconModule } from '@angular/material/icon';
 
 // Components
 import { ContactComponent, ImpressumComponent, DatenschutzComponent, ProgressComponent } from './app.component'
@@ -81,6 +82,7 @@ import { AppHeaderComponent } from './Pages/app-header/app-header.component';
 // ProTra 2.0 Module
 import { PmpmModule } from './features/pmpm/pmpm.module';
 import { HelperAppOnboardingModule } from './features/helper-app-onboarding/helper-app-onboarding.module';
+import { RhinoLauncherService } from './features/rhino-launcher/rhino-launcher.service';
 
 @NgModule({ declarations: [
         AppComponent,
@@ -158,7 +160,8 @@ import { HelperAppOnboardingModule } from './features/helper-app-onboarding/help
         MatRippleModule,
         CodeGameModule,
         PmpmModule,
-        HelperAppOnboardingModule], providers: [
+        HelperAppOnboardingModule,
+        MatIconModule], providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
         { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
@@ -167,5 +170,6 @@ import { HelperAppOnboardingModule } from './features/helper-app-onboarding/help
         ConfettiService,
         Title,
         provideHttpClient(withInterceptorsFromDi()),
+        RhinoLauncherService,
     ] })
 export class AppModule { }

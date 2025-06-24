@@ -3,49 +3,88 @@
 
   <!-- Helper App Status Section -->
   <div class="status-section section">
-    <h3>Status der Helferanwendung</h3>
-    <div class="status-controls">
-      <button mat-icon-button (click)="checkHelperAppStatus()" [disabled]="isLoadingStatus" matTooltip="Status der Helferanwendung erneut prüfen">
-        <mat-icon>refresh</mat-icon>
-      </button>
-      <div *ngIf="isLoadingStatus" class="status-loading">
-        <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
-        <span>Prüfe Status...</span>
+    <div class="section-header">
+      <h3>Status der Helferanwendung</h3>
+      <div class="status-controls">
+        <button mat-icon-button
+                (click)="checkHelperAppStatus()"
+                [disabled]="isLoadingStatus"
+                matTooltip="Status der Helferanwendung erneut prüfen"
+                class="refresh-button">
+          <mat-icon>refresh</mat-icon>
+        </button>
+        <div *ngIf="isLoadingStatus" class="status-loading">
+          <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
+          <span>Prüfe Status...</span>
+        </div>
       </div>
     </div>
 
-    <div *ngIf="!isLoadingStatus">
+    <div *ngIf="!isLoadingStatus" class="status-content">
+      <!-- Success Status -->
       <ng-container *ngIf="helperAppAvailable && helperAppStatus">
-        <p class="status-ok">
-          <mat-icon color="primary">check_circle</mat-icon>
-          Helferanwendung läuft (Version: {{ helperAppStatus.version }}).
-          <ng-container *ngIf="helperAppStatus.rhinoPathConfigured; else rhinoPathNotConfigured">
-            <span class="rhino-path-info">Rhino-Pfad: {{ helperAppStatus.rhinoPath }}</span>
-          </ng-container>
-          <ng-template #rhinoPathNotConfigured>
-            <span class="warning-text">
-              <mat-icon color="warn">warning</mat-icon> Rhino-Pfad nicht konfiguriert! (Bitte in Helfer-App einstellen)
-            </span>
-          </ng-template>
-        </p>
+        <div class="status-message status-ok">
+          <mat-icon class="status-icon">check_circle</mat-icon>
+          <div class="status-details">
+            <div class="status-main-text">
+              Helferanwendung läuft (Version: {{ helperAppStatus.version }})
+            </div>
+            <ng-container *ngIf="helperAppStatus.rhinoPathConfigured; else rhinoPathNotConfigured">
+              <div class="rhino-path-info">
+                <strong>Rhino-Pfad:</strong> {{ helperAppStatus.rhinoPath }}
+              </div>
+            </ng-container>
+            <ng-template #rhinoPathNotConfigured>
+              <div class="warning-section">
+                <mat-icon class="warning-icon">warning</mat-icon>
+                <span>Rhino-Pfad nicht konfiguriert! (Bitte in Helfer-App einstellen)</span>
+              </div>
+            </ng-template>
+          </div>
+        </div>
       </ng-container>
 
-      <p *ngIf="!helperAppAvailable && helperAppError" class="status-error">
-        <mat-icon color="warn">error</mat-icon> {{ helperAppError }}
-        <br><small>Stellen Sie sicher, dass die ProTra-Helferanwendung installiert und gestartet ist. Sie können sie unter <a href="[HIER_DOWNLOADLINK_EINFÜGEN]" target="_blank" rel="noopener noreferrer">diesem Link</a> herunterladen.</small>
-      </p>
-
-      <!-- Token Input - Nur anzeigen, wenn Helfer-App erreichbar oder Fehler vorhanden (um Token auch bei Fehler setzen zu können) -->
-      <div class="token-config" *ngIf="helperAppAvailable || helperAppError">
-          <mat-form-field appearance="outline" class="token-input-field">
-              <mat-label>API-Token der Helferanwendung</mat-label>
-              <input matInput [(ngModel)]="helperApiTokenInput" placeholder="Token hier einfügen" (keyup.enter)="saveApiToken()">
-              <mat-hint>Sie finden das Token im Tray-Menü der Helferanwendung. Nach der Eingabe "Enter" drücken oder "Token Speichern" klicken.</mat-hint>
-          </mat-form-field>
-          <div class="token-buttons">
-            <button mat-stroked-button color="accent" (click)="saveApiToken()" [disabled]="!helperApiTokenInput">Token Speichern</button>
-            <button mat-stroked-button (click)="clearApiToken()" *ngIf="helperApiTokenInput">Token Löschen</button>
+      <!-- Error Status -->
+      <div *ngIf="!helperAppAvailable && helperAppError" class="status-message status-error">
+        <mat-icon class="status-icon">error</mat-icon>
+        <div class="status-details">
+          <div class="status-main-text">{{ helperAppError }}</div>
+          <div class="status-help-text">
+            Stellen Sie sicher, dass die ProTra-Helferanwendung installiert und gestartet ist.
+            Sie können sie unter <a href="[HIER_DOWNLOADLINK_EINFÜGEN]" target="_blank" rel="noopener noreferrer">diesem Link</a> herunterladen.
           </div>
+        </div>
+      </div>
+
+      <!-- Token Configuration -->
+      <div class="token-config" *ngIf="helperAppAvailable || helperAppError">
+        <div class="token-header">
+          <mat-icon>vpn_key</mat-icon>
+          <span>API-Token Konfiguration</span>
+        </div>
+        <mat-form-field appearance="outline" class="token-input-field">
+          <mat-label>API-Token der Helferanwendung</mat-label>
+          <input matInput
+                 [(ngModel)]="helperApiTokenInput"
+                 placeholder="Token hier einfügen"
+                 (keyup.enter)="saveApiToken()">
+          <mat-hint>Sie finden das Token im Tray-Menü der Helferanwendung. Nach der Eingabe "Enter" drücken oder "Token Speichern" klicken.</mat-hint>
+        </mat-form-field>
+        <div class="token-buttons">
+          <button mat-stroked-button
+                  color="accent"
+                  (click)="saveApiToken()"
+                  [disabled]="!helperApiTokenInput">
+            <mat-icon>save</mat-icon>
+            Token Speichern
+          </button>
+          <button mat-stroked-button
+                  (click)="clearApiToken()"
+                  *ngIf="helperApiTokenInput">
+            <mat-icon>delete</mat-icon>
+            Token Löschen
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -69,27 +108,90 @@
   <!-- Launch Section - Nur anzeigen, wenn Helfer-App läuft und Token vorhanden ist -->
   <div class="launch-section section" *ngIf="helperAppAvailable && rhinoService.getApiToken()">
     <h3>2. Starte in Rhino</h3>
-    <button mat-raised-button
-            color="primary"
-            (click)="launchRhino()"
-            [disabled]="!selectedFile || isLaunching || !helperAppStatus?.rhinoPathConfigured"
-            class="launch-button">
-      <mat-icon>rocket_launch</mat-icon>
-      <span *ngIf="!isLaunching">Öffne {{ selectedFile ? selectedFile.name : 'Datei' }} in Rhino</span>
-      <span *ngIf="isLaunching" class="launching-indicator">
-        <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
-        <span>Starte...</span>
-      </span>
-    </button>
 
-    <button mat-raised-button
-            color="accent"
-            (click)="openTaskSelectionDialog()"
-            class="task-button">
-      <mat-icon>assignment</mat-icon>
-      Aufgaben öffnen
-    </button>
-    <p *ngIf="!selectedFile && helperAppStatus?.rhinoPathConfigured" class="info-text">Bitte wählen Sie eine Datei aus, um den Start-Button zu aktivieren.</p>
+    <div class="action-buttons">
+      <button mat-raised-button
+              color="primary"
+              (click)="launchRhino()"
+              [disabled]="!selectedFile || isLaunching || !helperAppStatus?.rhinoPathConfigured"
+              class="launch-button">
+        <mat-icon>rocket_launch</mat-icon>
+        <span *ngIf="!isLaunching" class="button-text">
+          Öffne {{ selectedFile ? selectedFile.name : 'Datei' }} in Rhino
+        </span>
+        <span *ngIf="isLaunching" class="launching-indicator">
+          <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
+          <span>Starte...</span>
+        </span>
+      </button>
+
+      <button mat-raised-button
+              color="accent"
+              (click)="openTaskSelectionDialog()"
+              class="task-button">
+        <mat-icon>assignment</mat-icon>
+        <span class="button-text">Aufgaben öffnen</span>
+      </button>
+    </div>
+
+    <div *ngIf="!selectedFile && helperAppStatus?.rhinoPathConfigured" class="info-section">
+      <mat-icon class="info-icon">info</mat-icon>
+      <span class="info-text">Bitte wählen Sie eine Datei aus, um den Start-Button zu aktivieren.</span>
+    </div>
+  </div>
+
+  <!-- Command Details Section -->
+  <div class="command-details section" *ngIf="lastLaunchResult && showCommandDetails">
+    <h3>Verwendeter Rhino-Befehl</h3>
+    <mat-expansion-panel class="command-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>code</mat-icon>
+          <span>Befehlsdetails für "{{ lastLaunchResult.fileName }}"</span>
+        </mat-panel-title>
+        <mat-panel-description>
+          <span class="timestamp">{{ lastLaunchResult.timestamp | date:'short' }}</span>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="command-content">
+        <div class="command-info">
+          <strong>Verwendeter Befehl:</strong>
+          <mat-form-field appearance="outline" class="command-field">
+            <mat-label>Rhino-Befehl</mat-label>
+            <textarea matInput
+                      [value]="lastLaunchResult.commandUsed"
+                      readonly
+                      rows="3"
+                      class="command-textarea">
+            </textarea>
+            <button mat-icon-button
+                    matSuffix
+                    (click)="copyToClipboard(lastLaunchResult.commandUsed)"
+                    matTooltip="In Zwischenablage kopieren">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
+
+        <div class="additional-info" *ngIf="lastLaunchResult.processId">
+          <div class="info-item">
+            <strong>Prozess-ID:</strong> {{ lastLaunchResult.processId }}
+          </div>
+          <div class="info-item">
+            <strong>Status:</strong>
+            <span class="success-badge">{{ lastLaunchResult.success ? 'Erfolgreich gestartet' : 'Fehler' }}</span>
+          </div>
+        </div>
+      </div>
+    </mat-expansion-panel>
+
+    <div class="command-controls">
+      <button mat-stroked-button (click)="showCommandDetails = false" color="accent">
+        <mat-icon>visibility_off</mat-icon>
+        Details ausblenden
+      </button>
+    </div>
   </div>
 
   <!-- Fallback/Info Section, wenn Helfer-App nicht erreichbar und kein Token Problem -->

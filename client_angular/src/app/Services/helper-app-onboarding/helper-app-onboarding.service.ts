@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { map, catchError, timeout } from 'rxjs/operators';
 import { UserService } from '../auth/user.service';
 import { globalRole } from '@DTOs/roles.enum';
+import { HelperAppHttpService } from '../helper-app-http.service';
 
 export interface OnboardingStep {
   id: string;
@@ -35,7 +36,8 @@ export class HelperAppOnboardingService {
 
   constructor(
     private http: HttpClient,
-    private userService: UserService
+    private userService: UserService,
+    private helperAppHttp: HelperAppHttpService
   ) {}
 
   /**
@@ -99,13 +101,12 @@ export class HelperAppOnboardingService {
   }
 
   /**
-   * Prüft den Status der Helper-App
+   * Prüft den Status der Helper-App - verwendet HelperAppHttpService für CORS-freie Kommunikation
    */
   checkHelperAppStatus(): Observable<HelperAppStatus> {
     console.log('🔍 [HelperAppOnboarding] Checking helper app status at:', this.HELPER_APP_URL);
 
-    return this.http.get<any>(`${this.HELPER_APP_URL}/status`).pipe(
-      timeout(3000), // 3 Sekunden Timeout
+    return this.helperAppHttp.get<any>(`${this.HELPER_APP_URL}/status`).pipe(
       map(response => {
         console.log('✅ [HelperAppOnboarding] Helper app response:', response);
         return {

@@ -24,6 +24,10 @@ export class RhinoLauncherComponent implements OnInit, OnDestroy {
 
   helperApiTokenInput: string = '';
 
+  // Neue Properties für Command-Info
+  lastLaunchResult: any = null;
+  showCommandDetails = false;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -136,8 +140,20 @@ export class RhinoLauncherComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (response) => {
+          // Speichere das Launch-Ergebnis für die Anzeige
+          this.lastLaunchResult = {
+            ...response,
+            fileName: this.selectedFile?.name,
+            timestamp: new Date()
+          };
+
           if (response.success) {
             this.snackBar.open(response.message || 'Rhino wird gestartet...', 'OK', { duration: 5000, panelClass: 'success-snackbar' });
+
+            // Zeige Command-Details automatisch an, wenn verfügbar
+            if (response.commandUsed) {
+              this.showCommandDetails = true;
+            }
           } else {
             this.snackBar.open(`Fehler beim Starten von Rhino: ${response.message}`, 'Schließen', { duration: 7000, panelClass: 'error-snackbar' });
           }
@@ -153,6 +169,61 @@ export class RhinoLauncherComponent implements OnInit, OnDestroy {
       width: '80%',
       maxWidth: '800px'
     });
+  }
+
+  /**
+   * Kopiert den übergebenen Text in die Zwischenablage
+   * @param text - Der zu kopierende Text
+   */
+  copyToClipboard(text: string): void {
+    if (navigator.clipboard && window.isSecureContext) {
+      // Moderne Clipboard API (HTTPS erforderlich)
+      navigator.clipboard.writeText(text).then(() => {
+        this.snackBar.open('Befehl in Zwischenablage kopiert!', 'OK', {
+          duration: 2000,
+          panelClass: 'success-snackbar'
+        });
+      }).catch(() => {
+        this.fallbackCopyToClipboard(text);
+      });
+    } else {
+      // Fallback für ältere Browser oder HTTP
+      this.fallbackCopyToClipboard(text);
+    }
+  }
+
+  /**
+   * Fallback-Methode für das Kopieren in die Zwischenablage
+   * @param text - Der zu kopierende Text
+   */
+  private fallbackCopyToClipboard(text: string): void {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+
+      if (successful) {
+        this.snackBar.open('Befehl in Zwischenablage kopiert!', 'OK', {
+          duration: 2000,
+          panelClass: 'success-snackbar'
+        });
+      } else {
+        throw new Error('Copy command failed');
+      }
+    } catch (err) {
+      this.snackBar.open('Fehler beim Kopieren in die Zwischenablage', 'Schließen', {
+        duration: 3000,
+        panelClass: 'error-snackbar'
+      });
+      console.error('Failed to copy text: ', err);
+    }
   }
 
   ngOnDestroy(): void {

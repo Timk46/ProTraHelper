@@ -14,6 +14,7 @@ class AppServer {
     this.app = express();
     this.server = null;
     this.port = process.env.PROTRA_HELPER_PORT || 3001; // Konfigurierbar via Umgebungsvariable
+    // PHASE 1: Python Script Integration - RhinoLauncher mit erweiterter Funktionalität
     this.rhinoLauncher = new RhinoLauncher(this.logger);
     this._isRunning = false;
 
@@ -24,6 +25,9 @@ class AppServer {
 
     this._configureMiddleware();
     this._configureRoutes();
+    
+    // PHASE 1: Initialisiere RhinoLauncher mit Python Script Support
+    this._initializeRhinoLauncher();
   }
 
   _createAuthMiddleware() {
@@ -52,37 +56,24 @@ class AppServer {
   }
 
   _configureMiddleware() {
-    // CORS-Konfiguration
+    // CORS-Konfiguration - MAXIMAL OFFEN FÜR ENTWICKLUNG
     const corsOptions = {
-      origin: (origin, callback) => {
-        // Im Entwicklungsmodus localhost:4200 (Angular) und ggf. andere erlauben
-        // Für Produktion sollte dies auf die spezifische Domain der ProTra-Webanwendung beschränkt werden.
-        // const allowedOrigins = ['http://localhost:4200']; // TODO: Aus Konfiguration laden oder erweitern // Alte Zeile
-        
-        // Logik mit den übergebenen allowedOrigins
-        if (process.env.NODE_ENV !== 'production') {
-            // Erlaube alle Origins im Entwicklungsmodus, wenn keine explizite Origin gesendet wird (z.B. Postman)
-            // oder wenn die Origin in der Whitelist ist.
-            if (!origin || this.allowedOrigins.includes(origin)) {
-                callback(null, true);
-            } else {
-                this.logger.warn(`CORS: Blocked origin ${origin} (Entwicklungsmodus, nicht in Whitelist: ${this.allowedOrigins.join(', ')})`);
-                callback(new Error('Not allowed by CORS'));
-            }
-        } else {
-            if (this.allowedOrigins.includes(origin)) {
-                callback(null, true);
-            } else {
-                this.logger.warn(`CORS: Blocked origin ${origin} (Produktionsmodus, nicht in Whitelist: ${this.allowedOrigins.join(', ')})`);
-                callback(new Error('Not allowed by CORS'));
-            }
-        }
-      },
-      methods: ['GET', 'POST'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Protra-Helper-Token', 'device-id'],
+      origin: '*', // Erlaubt Anfragen von JEDER Quelle
+      methods: "GET,POST,OPTIONS",
+      allowedHeaders: [
+        "Content-Type",
+        "Authorization", 
+        "X-Protra-Helper-Token",
+        "device-id",
+        "Device-ID", // Unterstützt beide Schreibweisen für bessere Kompatibilität
+        "Accept"
+      ],
+      credentials: true,
+      preflightContinue: false,
+      optionsSuccessStatus: 204
     };
     this.app.use(cors(corsOptions));
-    this.logger.info('CORS-Middleware konfiguriert.');
+    this.logger.info('CORS-Middleware konfiguriert (OFFENER MODUS FÜR ENTWICKLUNG).');
 
     // JSON Body Parser
     this.app.use(express.json({ limit: '1mb' })); // Limit für Request-Body-Größe
@@ -93,6 +84,18 @@ class AppServer {
       this.logger.info(`HTTP Request: ${req.method} ${req.originalUrl} (Origin: ${req.headers.origin || 'N/A'})`);
       next();
     });
+  }
+
+  /**
+   * PHASE 1: Initialisiert RhinoLauncher mit Python Script Support
+   */
+  async _initializeRhinoLauncher() {
+    try {
+      await this.rhinoLauncher.initialize();
+      this.logger.info('RhinoLauncher mit Python Script Integration initialisiert');
+    } catch (error) {
+      this.logger.error(`Fehler beim Initialisieren des RhinoLaunchers: ${error.message}`);
+    }
   }
 
   _configureRoutes() {
@@ -142,11 +145,38 @@ class AppServer {
         const result = await this.rhinoLauncher.launchRhinoWithGrasshopper(rhinoExecutablePath, ghFilePath);
         
         if (result.success) {
-            this.logger.info(`/launch-rhino erfolgreich für: ${ghFilePath}`);
-            return res.status(200).json({ success: true, message: result.message || 'Rhino/Grasshopper gestartet.' });
+            this.logger.info(`/launch-rhino erfolgreich für: ${ghFilePath} (${result.executionType || 'unknown'})`);
+            
+            // PHASE 1: Erweiterte Response mit Python Script Integration Details
+            const response = { 
+              success: true, 
+              message: result.message || 'Rhino/Grasshopper gestartet.',
+              commandUsed: result.commandUsed || undefined,
+              processId: result.processId || undefined,
+              fileName: result.fileName || undefined,
+              executionType: result.executionType || 'unknown' // 'python' oder 'cli'
+            };
+
+            // Python-spezifische Details hinzufügen
+            if (result.executionType === 'python') {
+              response.pythonMode = result.pythonMode || undefined;
+              response.scriptPath = result.scriptPath || undefined;
+              response.features = {
+                pythonScriptIntegration: true,
+                multiUserSupport: true,
+                advancedAutomation: true
+              };
+            }
+
+            return res.status(200).json(response);
+            
         } else {
             this.logger.error(`/launch-rhino fehlgeschlagen für ${ghFilePath}: ${result.message}`);
-            return res.status(500).json({ success: false, message: result.message || 'Fehler beim Starten von Rhino/Grasshopper.' });
+            return res.status(500).json({ 
+              success: false, 
+              message: result.message || 'Fehler beim Starten von Rhino/Grasshopper.',
+              executionType: result.executionType || 'unknown'
+            });
         }
       } catch (error) {
         this.logger.error(`/launch-rhino: Kritischer Fehler beim Versuch, Rhino zu starten: ${error.message}`, error);

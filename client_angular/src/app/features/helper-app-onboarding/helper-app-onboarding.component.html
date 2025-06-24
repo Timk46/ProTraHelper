@@ -140,18 +140,10 @@
       <!-- Skip Button -->
       <button
         *ngIf="currentStepIndex < 3"
-        mat-stroked-button
+        mat-button
+        color="primary"
         (click)="skipOnboarding()">
         Überspringen
-      </button>
-
-      <!-- Debug Info (nur in Entwicklungsmodus) -->
-      <button
-        *ngIf="false"
-        mat-icon-button
-        matTooltip="{{getDebugInfo()}}"
-        matTooltipClass="debug-tooltip">
-        <mat-icon>bug_report</mat-icon>
       </button>
     </div>
 

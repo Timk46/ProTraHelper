@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, timeout } from 'rxjs/operators';
+import { HelperAppHttpService } from '../../Services/helper-app-http.service';
 
 export interface GrasshopperFile {
   id: string;
@@ -22,6 +23,16 @@ export interface HelperAppStatus {
 export interface LaunchRhinoResponse {
   success: boolean;
   message: string;
+  commandUsed?: string; // Der verwendete Rhino-Befehl (für Debugging/Info)
+  processId?: number;   // Die Prozess-ID des gestarteten Rhino-Prozesses
+}
+
+// Interface für Command-Informationen
+export interface RhinoCommandInfo {
+  fileName: string;
+  commandTemplate: string;
+  finalCommand: string;
+  description?: string;
 }
 
 @Injectable()
@@ -29,7 +40,10 @@ export class RhinoLauncherService {
   private helperAppUrl = 'http://localhost:3001'; // Basis-URL der Helfer-App
   private apiToken: string | null = null;
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private helperAppHttp: HelperAppHttpService
+  ) {
     this.loadApiToken(); // Token beim Initialisieren des Services laden
   }
 
@@ -62,51 +76,37 @@ export class RhinoLauncherService {
     return this.http.get<GrasshopperFile[]>('http://localhost:3000/api/gh-files');
   }
 
-  // NEU: Status der Helfer-App abfragen
+  // NEU: Status der Helfer-App abfragen - verwendet HelperAppHttpService für CORS-freie Kommunikation
   getHelperAppStatus(): Observable<HelperAppStatus> {
-    return this.http.get<HelperAppStatus>(`${this.helperAppUrl}/status`).pipe(
-      timeout(3000), // Timeout nach 3 Sekunden, falls Helfer-App nicht antwortet
-      catchError((error: HttpErrorResponse) => {
-        let errorMessage = 'Helferanwendung nicht erreichbar oder antwortet nicht.';
-        if (error.error instanceof ErrorEvent) {
-          // Client-seitiger oder Netzwerkfehler
-          console.error('Client-seitiger Fehler:', error.error.message);
-        } else {
-          // Backend hat einen Fehlercode zurückgegeben
-          console.error(
-            `Helfer-App Fehlercode ${error.status}, ` +
-            `Body war: ${JSON.stringify(error.error)}`);
-          if (error.status === 0) { // Typischer Fehler, wenn Server nicht läuft
-             errorMessage = 'Helferanwendung ist nicht gestartet oder blockiert. Bitte starten Sie die ProTra-Helferanwendung.';
-          }
-        }
-        return throwError(() => new Error(errorMessage));
-      })
-    );
+    return this.helperAppHttp.get<HelperAppStatus>(`${this.helperAppUrl}/status`);
   }
 
-  // NEU oder angepasst: Rhino mit einer Datei starten über die Helfer-App
+  // NEU oder angepasst: Rhino mit einer Datei starten über die Helfer-App - verwendet HelperAppHttpService
+  /**
+   * Startet Rhino über die Helfer-App und übergibt den Pfad zu einer Grasshopper-Datei.
+   *
+   * @param ghFilePath - Der vollständige Pfad zur .gh-Datei, die geladen werden soll.
+   * @returns Ein Observable mit dem Launch-Ergebnis (LaunchRhinoResponse).
+   */
   launchRhinoWithHelper(ghFilePath: string): Observable<LaunchRhinoResponse> {
+    // Prüfe, ob ein API-Token gesetzt ist. Ohne Token kann die Helfer-App nicht angesprochen werden.
     if (!this.apiToken) {
+      // Gibt einen Fehler zurück, falls kein Token vorhanden ist.
       return throwError(() => new Error('API-Token für Helferanwendung nicht konfiguriert. Bitte im Launcher-Bereich eintragen.'));
     }
 
+    // Setze die HTTP-Header, insbesondere das API-Token für die Authentifizierung.
     const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
       'X-Protra-Helper-Token': this.apiToken
     });
 
-    return this.http.post<LaunchRhinoResponse>(
+    // Sende eine POST-Anfrage an die Helfer-App, um Rhino mit der angegebenen Datei zu starten.
+    // Der Body enthält den Dateipfad (ghFilePath) als Property.
+    // Die Antwort ist ein Observable mit dem LaunchRhinoResponse-Objekt.
+    return this.helperAppHttp.post<LaunchRhinoResponse>(
       `${this.helperAppUrl}/launch-rhino`,
       { ghFilePath }, // Der Key muss mit dem Server übereinstimmen
       { headers }
-    ).pipe(
-      catchError((error: HttpErrorResponse) => {
-        console.error('Fehler beim Starten von Rhino über Helfer-App:', error);
-        // Versuche, die Nachricht aus der Fehlerantwort des Servers zu extrahieren
-        const serverErrorMessage = error.error?.message || error.message || 'Unbekannter Fehler beim Starten von Rhino.';
-        return throwError(() => new Error(serverErrorMessage));
-      })
     );
   }
 }

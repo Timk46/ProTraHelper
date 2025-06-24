@@ -1,32 +1,218 @@
 /**
- * RhinoLauncher - Optimierte Klasse für direktes Starten von Rhino mit Grasshopper
- * Verwendet die bewährten Grasshopper-Befehle ohne Python-Skript-Umweg
+ * RhinoLauncher - Erweiterte Klasse für direktes Starten von Rhino mit Grasshopper
+ * PHASE 1: Python Script Integration - löst /runscript Probleme
  */
 const { spawn } = require('node:child_process');
 const fs = require('node:fs').promises;
 const path = require('node:path');
+const { RhinoCommandConfig } = require('./rhino-command-config');
+const PythonScriptGenerator = require('./python-script-generator');
+const RhinoCOMController = require('./rhino-com-controller');
 
 class RhinoLauncher {
   constructor(logger) {
     this.logger = logger;
     this.activeProcesses = new Map(); // Track multiple processes by file path
+    
+    // PHASE 1: Python Script Generator Integration
+    this.pythonGenerator = new PythonScriptGenerator(logger);
   }
 
   /**
-   * Erstellt den optimierten Grasshopper-Befehl basierend auf Ihrer ursprünglichen Registry-Lösung
+   * Initialisiert den RhinoLauncher und alle Komponenten
+   */
+  async initialize() {
+    try {
+      await this.pythonGenerator.initialize();
+      this.logger.info('RhinoLauncher initialized with Python Script support');
+    } catch (error) {
+      this.logger.error(`Failed to initialize RhinoLauncher: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Ermittelt die Befehlskonfiguration für eine Datei
    * @param {string} ghFilePath - Pfad zur .gh-Datei
-   * @returns {string} - Der Grasshopper-Befehl
+   * @returns {Object} - Befehlskonfiguration {type, command, mode}
+   */
+  _getCommandConfig(ghFilePath) {
+    try {
+      // Ermittle den passenden Befehl für diese Datei
+      const command = RhinoCommandConfig.getCommandForFile(ghFilePath);
+      
+      // Prüfe ob es ein COM-basierter Befehl ist (HÖCHSTE PRIORITÄT)
+      if (command.startsWith('COM:')) {
+        const mode = command.replace('COM:', '');
+        return {
+          type: 'com',
+          command: command,
+          mode: mode,
+          fileName: path.basename(ghFilePath)
+        };
+      }
+      // Prüfe ob es ein Python-basierter Befehl ist
+      else if (command.startsWith('PYTHON:')) {
+        const mode = command.replace('PYTHON:', '');
+        return {
+          type: 'python',
+          command: command,
+          mode: mode,
+          fileName: path.basename(ghFilePath)
+        };
+      } else {
+        // Legacy CLI-basierter Befehl
+        return {
+          type: 'cli',
+          command: command,
+          mode: 'legacy',
+          fileName: path.basename(ghFilePath)
+        };
+      }
+      
+    } catch (error) {
+      this.logger.error(`Fehler beim Ermitteln der Befehlskonfiguration für ${ghFilePath}: ${error.message}`);
+      // Fallback zu COM basic mode (beste Methode)
+      return {
+        type: 'com',
+        command: 'COM:basic',
+        mode: 'basic',
+        fileName: path.basename(ghFilePath)
+      };
+    }
+  }
+
+  /**
+   * Erstellt den datei-spezifischen Grasshopper-Befehl basierend auf der Konfiguration
+   * @param {string} ghFilePath - Pfad zur .gh-Datei
+   * @returns {string} - Der datei-spezifische Rhino-Befehl
    */
   _buildGrasshopperCommand(ghFilePath) {
-    // Escape Pfad für Windows-Kommandozeile
-    const escapedPath = ghFilePath.replace(/\\/g, '\\\\');
-    
-    // Optimierter Befehl basierend auf Ihrer Registry-Lösung:
-    // B D W L = Batch mode, Display, Window, Load
-    // W H = Window Hide (minimiert Grasshopper)
-    // D O = Document Open
-    // _MaxViewport = Maximiert die Rhino-Ansicht
-    return `_-Grasshopper B D W L W H D O "${escapedPath}" W H _MaxViewport _Enter`;
+    try {
+      // Legacy-Methode für CLI-basierte Befehle
+      const command = RhinoCommandConfig.getCommandForFile(ghFilePath);
+      
+      // Validiere den Befehl
+      if (!RhinoCommandConfig.validateCommand(command)) {
+        this.logger.warn(`Unsicherer Befehl erkannt für ${ghFilePath}, verwende Standard-Befehl`);
+        return RhinoCommandConfig.getCommandForFile('*'); // Fallback zum Standard
+      }
+      
+      // Escape Pfad für Windows-Kommandozeile falls nötig
+      const escapedPath = ghFilePath.includes(' ') ? `"${ghFilePath}"` : ghFilePath;
+      const finalCommand = command.replace(/\{filePath\}/g, escapedPath);
+      
+      this.logger.info(`Verwende CLI-Befehl für ${path.basename(ghFilePath)}: ${finalCommand}`);
+      return finalCommand;
+      
+    } catch (error) {
+      this.logger.error(`Fehler beim Ermitteln des Befehls für ${ghFilePath}: ${error.message}`);
+      // Fallback zum ursprünglichen Standard-Befehl
+      const escapedPath = ghFilePath.replace(/\\/g, '\\\\');
+      return `_-Grasshopper _DocumentOpen "${escapedPath}" _Enter`;
+    }
+  }
+
+  /**
+   * Startet Rhino mit Python-Script Integration
+   * @param {string} rhinoExecutablePath - Pfad zur Rhino.exe
+   * @param {string} ghFilePath - Pfad zur .gh-Datei
+   * @param {Object} commandConfig - Befehlskonfiguration
+   * @returns {Promise<Object>} - Ergebnis mit success und message
+   */
+  async _launchRhinoWithPython(rhinoExecutablePath, ghFilePath, commandConfig) {
+    try {
+      this.logger.info(`Launching Rhino with Python script integration: ${commandConfig.mode} mode`);
+      
+      // Erstelle Python-Script
+      const scriptPath = await this.pythonGenerator.createScriptFile(ghFilePath, commandConfig.mode);
+      
+      // Rhino-Argumente für Python-Script Ausführung
+      const rhinoArgs = [
+        '/nosplash',                    // Kein Splash-Screen
+        `/runscript=_RunPythonScript "${scriptPath}"` // Python-Script ausführen
+      ];
+
+      this.logger.info(`Python script created: ${scriptPath}`);
+      this.logger.info(`Starte Rhino mit Python: "${rhinoExecutablePath}" [${rhinoArgs.join(', ')}]`);
+
+      // Starte Rhino-Prozess
+      const rhinoProcess = spawn(rhinoExecutablePath, rhinoArgs, {
+        detached: true,          // Prozess läuft unabhängig
+        stdio: 'pipe',           // Capture output für Python-Script debugging
+        windowsHide: false       // Rhino-Fenster sichtbar
+      });
+
+      // Prozess von Helfer-App entkoppeln
+      rhinoProcess.unref();
+
+      // Cleanup Script nach 60 Sekunden
+      setTimeout(() => {
+        this.pythonGenerator.cleanupScript(scriptPath);
+      }, 60000);
+
+      return {
+        success: true,
+        message: `Rhino mit Python-Script gestartet (${commandConfig.mode} Modus)`,
+        processId: rhinoProcess.pid,
+        fileName: commandConfig.fileName,
+        commandUsed: `_RunPythonScript "${scriptPath}"`,
+        scriptPath: scriptPath,
+        pythonMode: commandConfig.mode,
+        executionType: 'python'
+      };
+
+    } catch (error) {
+      this.logger.error(`Fehler beim Python-basierten Rhino-Start: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Startet Rhino mit Legacy CLI-Befehlen
+   * @param {string} rhinoExecutablePath - Pfad zur Rhino.exe
+   * @param {string} ghFilePath - Pfad zur .gh-Datei
+   * @param {Object} commandConfig - Befehlskonfiguration
+   * @returns {Promise<Object>} - Ergebnis mit success und message
+   */
+  async _launchRhinoWithCLI(rhinoExecutablePath, ghFilePath, commandConfig) {
+    try {
+      this.logger.info(`Launching Rhino with legacy CLI commands`);
+      
+      // Erstelle CLI-Befehl
+      const grasshopperCommand = this._buildGrasshopperCommand(ghFilePath);
+      
+      // Rhino-Argumente
+      const rhinoArgs = [
+        '/nosplash',                    // Kein Splash-Screen
+        `/runscript=${grasshopperCommand}` // CLI-Befehl ausführen
+      ];
+
+      this.logger.info(`Starte Rhino mit CLI: "${rhinoExecutablePath}" [${rhinoArgs.join(', ')}]`);
+
+      // Starte Rhino-Prozess
+      const rhinoProcess = spawn(rhinoExecutablePath, rhinoArgs, {
+        detached: true,          // Prozess läuft unabhängig
+        stdio: 'ignore',         // Keine Pipes für CLI
+        windowsHide: false       // Rhino-Fenster sichtbar
+      });
+
+      // Prozess von Helfer-App entkoppeln
+      rhinoProcess.unref();
+
+      return {
+        success: true,
+        message: `Rhino mit CLI-Befehlen gestartet`,
+        processId: rhinoProcess.pid,
+        fileName: commandConfig.fileName,
+        commandUsed: grasshopperCommand,
+        executionType: 'cli'
+      };
+
+    } catch (error) {
+      this.logger.error(`Fehler beim CLI-basierten Rhino-Start: ${error.message}`);
+      throw error;
+    }
   }
 
   /**
@@ -61,7 +247,92 @@ class RhinoLauncher {
   }
 
   /**
+   * Startet Rhino mit COM Automation (löst /runscript Probleme)
+   * @param {string} rhinoExecutablePath - Pfad zur Rhino.exe
+   * @param {string} ghFilePath - Pfad zur .gh-Datei
+   * @param {Object} commandConfig - Befehlskonfiguration
+   * @returns {Promise<Object>} - Ergebnis mit success und message
+   */
+  async _launchRhinoWithCOM(rhinoExecutablePath, ghFilePath, commandConfig) {
+    try {
+      this.logger.info(`Launching Rhino with COM Automation: ${commandConfig.mode} mode`);
+      
+      // Phase 1: Starte Rhino OHNE /runscript (verhindert problematische Parameter)
+      const rhinoArgs = ['/nosplash'];
+      
+      this.logger.info(`Starte Rhino (clean): "${rhinoExecutablePath}" [${rhinoArgs.join(', ')}]`);
+      
+      const rhinoProcess = spawn(rhinoExecutablePath, rhinoArgs, {
+        detached: true,
+        stdio: 'ignore',
+        windowsHide: false
+      });
+      
+      rhinoProcess.unref();
+      
+      // Phase 2: Warte bis Rhino für COM bereit ist
+      const comController = new RhinoCOMController(this.logger);
+      const rhinoReady = await comController.waitForRhinoReady(30);
+      
+      if (!rhinoReady) {
+        throw new Error('Rhino not ready for COM connection after 30 seconds');
+      }
+      
+      // Phase 3: Verbinde via COM und führe Befehle aus
+      const connected = await comController.connectToRhino();
+      if (!connected) {
+        throw new Error('Failed to connect to Rhino via COM');
+      }
+      
+      // Phase 4: Lade Grasshopper-Datei via COM
+      const loadResult = await comController.loadGrasshopperFile(ghFilePath);
+      if (!loadResult.success) {
+        throw new Error(`Failed to load Grasshopper file: ${loadResult.message}`);
+      }
+      
+      // Phase 5: Führe modus-spezifische Befehle aus
+      let modeResult = { success: true, message: 'Basic mode completed' };
+      
+      if (commandConfig.mode === 'with_viewport' || commandConfig.mode === 'viewport') {
+        modeResult = await comController.executeViewportCommand('_MaxViewport');
+      } else if (commandConfig.mode === 'presentation') {
+        modeResult = await comController.activatePresentationMode();
+      } else if (commandConfig.mode === 'technical') {
+        await comController.executeViewportCommand('_MaxViewport');
+        await comController.executeViewportCommand('_SetView _Top');
+        await comController.executeViewportCommand('_SetDisplayMode _Wireframe');
+        modeResult = await comController.executeViewportCommand('_ZoomExtents');
+      }
+      
+      // Cleanup COM-Verbindung
+      await comController.cleanup();
+      
+      this.logger.info(`COM: Rhino successfully launched and configured`);
+      
+      return {
+        success: true,
+        message: `Rhino with Grasshopper launched via COM (${commandConfig.mode})`,
+        processId: rhinoProcess.pid,
+        fileName: commandConfig.fileName,
+        commandUsed: `COM: loadGrasshopperFile + ${commandConfig.mode} mode`,
+        documentName: loadResult.documentName,
+        executionType: 'com',
+        comResult: {
+          grasshopperLoaded: loadResult.success,
+          modeActivated: modeResult.success,
+          modeMessage: modeResult.message
+        }
+      };
+      
+    } catch (error) {
+      this.logger.error(`Fehler beim COM-basierten Rhino-Start: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
    * Startet Rhino mit der spezifizierten Grasshopper-Datei
+   * PHASE 2: COM Automation als Standard, Python/CLI als Fallback
    * @param {string} rhinoExecutablePath - Pfad zur Rhino.exe
    * @param {string} ghFilePath - Pfad zur .gh-Datei
    * @returns {Promise<Object>} - Ergebnis mit success und message
@@ -83,33 +354,34 @@ class RhinoLauncher {
       await this._validateGrasshopperFile(ghFilePath);
       await fs.access(rhinoExecutablePath);
 
-      // Erstelle Grasshopper-Befehl
-      const grasshopperCommand = this._buildGrasshopperCommand(ghFilePath);
+      // PHASE 1: Ermittle Befehlskonfiguration (Python vs CLI)
+      const commandConfig = this._getCommandConfig(ghFilePath);
       
-      // Rhino-Argumente
-      const rhinoArgs = [
-        '/nosplash',                    // Kein Splash-Screen
-        `/runscript=${grasshopperCommand}` // Grasshopper-Befehl ausführen
-      ];
+      this.logger.info(`Command configuration for ${commandConfig.fileName}: ${commandConfig.type} (${commandConfig.mode})`);
 
-      this.logger.info(`Starte Rhino: "${rhinoExecutablePath}" mit Argumenten: [${rhinoArgs.join(', ')}]`);
-      this.logger.info(`Grasshopper-Befehl: ${grasshopperCommand}`);
+      let result;
 
-      // Starte Rhino-Prozess
-      const rhinoProcess = spawn(rhinoExecutablePath, rhinoArgs, {
-        detached: true,          // Prozess läuft unabhängig
-        stdio: 'ignore',         // Keine Pipes (für bessere Performance)
-        windowsHide: false       // Rhino-Fenster sichtbar
-      });
-
-      // Prozess von Helfer-App entkoppeln
-      rhinoProcess.unref();
+      // PHASE 2: Wähle Ausführungsmethode basierend auf Konfiguration
+      if (commandConfig.type === 'com') {
+        // COM Automation (PRIMÄR - löst /runscript Probleme definitiv)
+        this.logger.info('Using COM Automation (primary method)...');
+        result = await this._launchRhinoWithCOM(rhinoExecutablePath, ghFilePath, commandConfig);
+      } else if (commandConfig.type === 'python') {
+        // Python Script Integration (FALLBACK)
+        this.logger.info('Using Python Script Integration...');
+        result = await this._launchRhinoWithPython(rhinoExecutablePath, ghFilePath, commandConfig);
+      } else {
+        // Legacy CLI-basierte Befehle (FALLBACK)
+        this.logger.info('Using Legacy CLI commands...');
+        result = await this._launchRhinoWithCLI(rhinoExecutablePath, ghFilePath, commandConfig);
+      }
 
       // Tracking für aktive Prozesse
       this.activeProcesses.set(processKey, {
-        pid: rhinoProcess.pid,
+        pid: result.processId,
         startTime: new Date(),
-        ghFilePath: ghFilePath
+        ghFilePath: ghFilePath,
+        commandConfig: commandConfig
       });
 
       // Cleanup nach 30 Sekunden (Prozess sollte dann gestartet sein)
@@ -118,20 +390,9 @@ class RhinoLauncher {
         this.logger.info(`Prozess-Tracking beendet für: ${ghFilePath}`);
       }, 30000);
 
-      // Event-Handler für Prozess
-      rhinoProcess.on('error', (error) => {
-        this.logger.error(`Fehler beim Starten von Rhino: ${error.message}`);
-        this.activeProcesses.delete(processKey);
-      });
+      this.logger.info(`Rhino erfolgreich gestartet (PID: ${result.processId}) für Datei: ${ghFilePath}`);
 
-      this.logger.info(`Rhino erfolgreich gestartet (PID: ${rhinoProcess.pid}) für Datei: ${ghFilePath}`);
-
-      return {
-        success: true,
-        message: `Rhino wird gestartet und öffnet ${path.basename(ghFilePath)}. Das Grasshopper-Fenster wird automatisch minimiert.`,
-        processId: rhinoProcess.pid,
-        fileName: path.basename(ghFilePath)
-      };
+      return result;
 
     } catch (error) {
       this.logger.error(`Fehler beim Starten von Rhino mit Grasshopper: ${error.message}`);
@@ -154,15 +415,22 @@ class RhinoLauncher {
       pid: process.pid,
       startTime: process.startTime,
       filePath: process.ghFilePath,
-      fileName: path.basename(process.ghFilePath)
+      fileName: path.basename(process.ghFilePath),
+      commandConfig: process.commandConfig
     }));
   }
 
   /**
-   * Cleanup-Methode zum Aufräumen von Prozess-Tracking
+   * Cleanup-Methode zum Aufräumen von Prozess-Tracking und Python-Scripts
    */
-  cleanup() {
+  async cleanup() {
     this.activeProcesses.clear();
+    
+    // PHASE 1: Cleanup aller Python-Scripts
+    if (this.pythonGenerator) {
+      await this.pythonGenerator.cleanupAllScripts();
+    }
+    
     this.logger.info('RhinoLauncher cleanup completed');
   }
 }

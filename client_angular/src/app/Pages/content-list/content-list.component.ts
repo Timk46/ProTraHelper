@@ -48,6 +48,8 @@ export class ContentListComponent {
   // emitter for refreshing
   @Output() fetchContentsForConcept = new EventEmitter<void>();
 
+  @Output() rhinoButtonClicked = new EventEmitter<void>();
+
   protected isAdmin: boolean = false;
   protected editModeActive: boolean = false;
 
