@@ -9,6 +9,7 @@ import { Color, ScaleType } from '@swimlane/ngx-charts';
 import { ConfirmationBoxComponent } from "../../confirmation-box/confirmation-box.component";
 import { MatDialog } from "@angular/material/dialog";
 import { UserService } from "../../../Services/auth/user.service";
+import { ContentManagementService } from '../../../Services/admin/content-management.service';
 
 interface UserListItem {
   id: number;
@@ -35,6 +36,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
   subjects: Subject[] = [];
   selectedSubject: number | null = null;
   selectedFile: File | null = null;
+  selectedContentFile: File | null = null;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -63,6 +65,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
     private snackBar: MatSnackBar,
     public dialog: MatDialog,
     private userService: UserService,
+    private contentManagementService: ContentManagementService,
   ) {}
 
   ngOnInit(): void {
@@ -210,5 +213,74 @@ export class UserListComponent implements OnInit, AfterViewInit {
         });
       }
     });
+  }
+
+  onContentFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file && file.type === 'application/json') {
+      this.selectedContentFile = file;
+    } else {
+      this.snackBar.open('Bitte wählen Sie eine JSON-Datei aus', 'Schließen', {
+        duration: 3000
+      });
+      event.target.value = '';
+    }
+  }
+
+  exportContent() {
+    this.contentManagementService.exportContent().subscribe({
+      next: (data) => {
+        // Create and download file
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const date = new Date().toISOString().split('T')[0];
+        link.href = url;
+        link.download = `learning-content-${date}.json`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        this.snackBar.open('Lerninhalte wurden erfolgreich exportiert', 'Schließen', {
+          duration: 3000
+        });
+      },
+      error: (error) => {
+        console.error('Export error:', error);
+        this.snackBar.open('Fehler beim Exportieren der Lerninhalte', 'Schließen', {
+          duration: 3000
+        });
+      }
+    });
+  }
+
+  importContent() {
+    if (!this.selectedContentFile) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target?.result as string);
+        this.contentManagementService.importContent(data).subscribe({
+          next: () => {
+            this.snackBar.open('Lerninhalte wurden erfolgreich importiert', 'Schließen', {
+              duration: 3000
+            });
+            this.selectedContentFile = null;
+          },
+          error: (error) => {
+            console.error('Import error:', error);
+            this.snackBar.open('Fehler beim Importieren der Lerninhalte', 'Schließen', {
+              duration: 3000
+            });
+          }
+        });
+      } catch (err) {
+        console.error('JSON parse error:', err);
+        this.snackBar.open('Ungültiges Dateiformat', 'Schließen', {
+          duration: 3000
+        });
+      }
+    };
+    reader.readAsText(this.selectedContentFile);
   }
 }

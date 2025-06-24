@@ -56,6 +56,7 @@ import { ContentLinkerService } from './content-linker/content-linker.service';
 import { ContentLinkerModule } from './content-linker/content-linker.module';
 
 import { AdminModule } from './admin/admin.module'; // Add this line
+import { HighlightConceptsModule } from './highlight-concepts/highlight-concepts.module';
 
 import { GraphSolutionEvaluationService } from './graph-solution-evaluation/graph-solution-evaluation.service';
 import { GraphSolutionEvaluationModule } from './graph-solution-evaluation/graph-solution-evaluation.module';
@@ -95,6 +96,7 @@ import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgrap
     ScheduleModule.forRoot(),
 
     AdminModule, // Add this line
+    HighlightConceptsModule,
 
     GraphSolutionEvaluationModule,
     ExampleSolutionGenerationModule,

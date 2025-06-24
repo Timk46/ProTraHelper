@@ -1,0 +1,21 @@
+<div class="settings-container mat-elevation-z2">
+  <h2>Navigationsmöglichkeiten konfigurieren</h2>
+
+  <div class="options-list">
+    <mat-checkbox
+      *ngFor="let option of navigatorOptions"
+      [(ngModel)]="option.enabled"
+      [disabled]="isLastEnabledOption(option)">
+      {{ option.label }}
+    </mat-checkbox>
+  </div>
+
+  <div class="actions">
+    <button mat-button mat-dialog-close>Abbrechen</button>
+    <button mat-raised-button color="primary"
+            (click)="onSave()"
+            [disabled]="!hasEnabledOptions()">
+      Speichern
+    </button>
+  </div>
+</div>

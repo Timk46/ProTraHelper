@@ -78,6 +78,8 @@ import { CodeGameModule } from "./Modules/code-game/code-game.module";
 import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-game/code-game-confirm-dialog.component";
 import { NavigationPreferenceToggleComponent } from './Pages/app-header/navigation-preference-toggle/navigation-preference-toggle.component';
 import { AppHeaderComponent } from './Pages/app-header/app-header.component';
+import { HighlightNavigatorComponent } from './Pages/highlight-navigator/highlight-navigator.component';
+import { HighlightConceptDialogComponent } from "./Pages/highlight-navigator/highlight-concept-dialog/highlight-concept-dialog.component";
 
 // ProTra 2.0 Module
 import { PmpmModule } from './features/pmpm/pmpm.module';
@@ -140,7 +142,9 @@ import { RhinoLauncherService } from './features/rhino-launcher/rhino-launcher.s
         ContentListItemComponent,
         CodeGameConfirmDialogComponent,
         NavigationPreferenceToggleComponent,
-        AppHeaderComponent
+        AppHeaderComponent,
+        HighlightNavigatorComponent,
+        HighlightConceptDialogComponent,
     ],
     bootstrap: [AppComponent], imports: [ToastrModule.forRoot(),
         BrowserModule,

@@ -9,32 +9,33 @@ datasource db {
 }
 
 model User {
-  id                   Int                          @id @default(autoincrement())
-  email                String                       @unique
-  firstname            String
-  lastname             String
-  password             String
-  createdAt            DateTime                     @default(now())
-  globalRole           GlobalRole                   @default(STUDENT)
-  currentconceptNodeId Int?
-  chatBotMessage       ChatBotMessage[]
-  chatSessions         ChatSession[]
-  codeSubmission       CodeSubmission[]
-  codeSubmissionFile   CodeSubmissionFile[]
-  EventLogs            EventLog[]
-  Notification         Notification[]
-  question             Question[]
-  currentConcept       ConceptNode?                 @relation(fields: [currentconceptNodeId], references: [id])
-  userAnswer           UserAnswer[]
-  conceptUser          UserConcept[]
-  UserContentProgress  UserContentElementProgress[]
-  UserContentView      UserContentView[]
-  userMCAnswer         UserMCAnswer[]
-  Vote                 Vote[]
-  anonymousUser        anonymousUser[]
-  userSubjects         UserSubject[]
-  refreshTokens        RefreshToken[]
-  hasAcceptedPrivacyPolicy Boolean @default(false)
+  id                       Int                          @id @default(autoincrement())
+  email                    String                       @unique
+  firstname                String
+  lastname                 String
+  password                 String
+  createdAt                DateTime                     @default(now())
+  globalRole               GlobalRole                   @default(STUDENT)
+  currentconceptNodeId     Int?
+  chatBotMessage           ChatBotMessage[]
+  chatSessions             ChatSession[]
+  codeSubmission           CodeSubmission[]
+  codeSubmissionFile       CodeSubmissionFile[]
+  EventLogs                EventLog[]
+  Notification             Notification[]
+  question                 Question[]
+  currentConcept           ConceptNode?                 @relation(fields: [currentconceptNodeId], references: [id])
+  userAnswer               UserAnswer[]
+  conceptUser              UserConcept[]
+  UserContentProgress      UserContentElementProgress[]
+  UserContentView          UserContentView[]
+  userMCAnswer             UserMCAnswer[]
+  Vote                     Vote[]
+  anonymousUser            anonymousUser[]
+  userSubjects             UserSubject[]
+  refreshTokens            RefreshToken[]
+  updatedSettings          ModuleSetting[]
+  hasAcceptedPrivacyPolicy Boolean                      @default(false)
 }
 
 model RefreshToken {
@@ -49,11 +50,13 @@ model RefreshToken {
 }
 
 model Module {
-  id          Int                 @id @default(autoincrement())
-  name        String              @unique
-  description String
-  goals       ModuleConceptGoal[]
-  subjects    Subject[]           @relation("ModuleToSubject")
+  id                      Int                       @id @default(autoincrement())
+  name                    String                    @unique
+  description             String
+  goals                   ModuleConceptGoal[]
+  subjects                Subject[]                 @relation("ModuleToSubject")
+  settings                ModuleSetting[]
+  ModuleHighlightConcepts ModuleHighlightConcepts[]
 }
 
 model ModuleConceptGoal {
@@ -93,24 +96,25 @@ model ConceptGraph {
 }
 
 model ConceptNode {
-  id                Int                 @id @default(autoincrement())
-  name              String
-  description       String?
-  conceptGraphId    Int?
-  transcript        String?
-  childEdges        ConceptEdge[]       @relation("conceptEdgeParent")
-  mySuccessors      ConceptEdge[]       @relation("prerequisiteConcept")
-  myPrerequisites   ConceptEdge[]       @relation("successorConcept")
-  myParents         ConceptFamily[]     @relation("childConcept")
-  myChildren        ConceptFamily[]     @relation("parentConcept")
-  conceptGraph      ConceptGraph?
-  Discussion        Discussion[]
-  moduleGoals       ModuleConceptGoal[]
-  question          Question[]
-  requiredBy        Requirement[]
-  trainedBy         Training[]
-  currentConceptFor User[]
-  userConcepts      UserConcept[]
+  id                      Int                       @id @default(autoincrement())
+  name                    String
+  description             String?
+  conceptGraphId          Int?
+  transcript              String?
+  childEdges              ConceptEdge[]             @relation("conceptEdgeParent")
+  mySuccessors            ConceptEdge[]             @relation("prerequisiteConcept")
+  myPrerequisites         ConceptEdge[]             @relation("successorConcept")
+  myParents               ConceptFamily[]           @relation("childConcept")
+  myChildren              ConceptFamily[]           @relation("parentConcept")
+  conceptGraph            ConceptGraph?
+  Discussion              Discussion[]
+  moduleGoals             ModuleConceptGoal[]
+  question                Question[]
+  requiredBy              Requirement[]
+  trainedBy               Training[]
+  currentConceptFor       User[]
+  userConcepts            UserConcept[]
+  ModuleHighlightConcepts ModuleHighlightConcepts[]
 }
 
 model ConceptFamily {
@@ -458,7 +462,7 @@ model CodeSubmission {
   user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   CodeSubmissionFiles CodeSubmissionFile[]
   kiFeedback          KIFeedback[]
-  generatedFeedbacks GeneratedFeedback[] // Relation to GeneratedFeedback
+  generatedFeedbacks  GeneratedFeedback[] // Relation to GeneratedFeedback
 }
 
 model CodeSubmissionFile {
@@ -487,13 +491,13 @@ model CodeGameQuestion {
   codeGameScaffolds               CodeGameScaffold[]
   gameFileName                    String
   game                            String
-  gameCellRestrictions            String?            // TODO: remove optional = "?"
+  gameCellRestrictions            String? // TODO: remove optional = "?"
   theme                           String?            @default("dino") // TODO: remove optional = "?"
   question                        Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 model CodeGameScaffold {
-  id                 Int            @id @default(autoincrement())
+  id                 Int              @id @default(autoincrement())
   codeGameQuestionId Int
   codeFileName       String
   code               String
@@ -504,12 +508,12 @@ model CodeGameScaffold {
 }
 
 model CodeGameAnswer {
-  id                                Int        @id @default(autoincrement())
-  createdAt                         DateTime   @default(now())
-  updatedAt                         DateTime   @updatedAt
+  id                                Int                      @id @default(autoincrement())
+  createdAt                         DateTime                 @default(now())
+  updatedAt                         DateTime                 @updatedAt
   codeGameQuestionId                Int
-  userAnswerId                      Int        @unique
-  userAnswer                        UserAnswer @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
+  userAnswerId                      Int                      @unique
+  userAnswer                        UserAnswer               @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
   codeGameScaffoldAnswers           CodeGameScaffoldAnswer[]
   codeGameExecutionResult           String
   codeSolutionRestriction           Boolean
@@ -526,12 +530,41 @@ model CodeGameAnswer {
 }
 
 model CodeGameScaffoldAnswer {
-  id                  Int        @id @default(autoincrement())
-  language            String
-  codeFileName        String
-  code                String
-  codeGameAnswerId    Int
-  CodeGameAnswer      CodeGameAnswer @relation(fields: [codeGameAnswerId], references: [id], onDelete: Cascade)
+  id               Int            @id @default(autoincrement())
+  language         String
+  codeFileName     String
+  code             String
+  codeGameAnswerId Int
+  CodeGameAnswer   CodeGameAnswer @relation(fields: [codeGameAnswerId], references: [id], onDelete: Cascade)
+}
+
+model ModuleSetting {
+  id        Int      @id @default(autoincrement())
+  key       String
+  value     String   @db.Text // Using @db.Text for potentially large JSON strings
+  moduleId  Int
+  updatedAt DateTime @updatedAt
+  updatedBy Int
+  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  updater   User     @relation(fields: [updatedBy], references: [id])
+
+  @@unique([moduleId, key])
+}
+
+model ModuleHighlightConcepts {
+  id            Int         @id @default(autoincrement())
+  moduleId      Int
+  module        Module      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  conceptNodeId Int
+  conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id], onDelete: Cascade)
+  alias         String?    // Optional alias for the concept
+  description   String?    // Optional description for the concept
+  pictureData  String?    // Stores the picture data as a base64 string or URL
+  position      Int?       // Optional position for ordering in the module
+  isUnlocked   Boolean @default(false)
+
+
+  @@unique([moduleId, conceptNodeId])
 }
 
 model FillinQuestion {
@@ -572,25 +605,25 @@ model KIFeedback {
   flavor            String         @default("normal")
   submission        CodeSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 }
+
 model GeneratedFeedback {
-  id               String   @id @default(cuid())
-  spsContent       String   @db.Text
-  kmContent        String   @db.Text
-  kcContent        String   @db.Text
-  khContent        String   @db.Text
+  id               String         @id @default(cuid())
+  spsContent       String         @db.Text
+  kmContent        String         @db.Text
+  kcContent        String         @db.Text
+  khContent        String         @db.Text
   spsUsedAt        DateTime?
   kmUsedAt         DateTime?
   kcUsedAt         DateTime?
   khUsedAt         DateTime?
-  finalPrompt      String   @db.Text
-  codeSubmissionId Int      // Foreign key to CodeSubmission
+  finalPrompt      String         @db.Text
+  codeSubmissionId Int // Foreign key to CodeSubmission
   codeSubmission   CodeSubmission @relation(fields: [codeSubmissionId], references: [id], onDelete: Cascade)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   @@index([codeSubmissionId])
 }
-
 
 model genTaskData {
   id                Int      @id @default(autoincrement())

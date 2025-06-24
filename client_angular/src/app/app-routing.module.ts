@@ -8,6 +8,7 @@ import { CodeTaskComponent } from './Pages/contentView/contentElement/codeTask/c
 import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer/pdfViewer.component';
 import { GraphComponent } from './Pages/graph/graph.component';
 import { MobileNavigatorComponent } from './Pages/mobile-navigator/mobile-navigator.component';
+import { HighlightNavigatorComponent } from './Pages/highlight-navigator/highlight-navigator.component';
 import { ChatBotComponent } from './Pages/chat-bot/chat-bot.component';
 import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
 import { DiscussionViewComponent } from './Pages/discussion/discussion-view/discussion-view.component';
@@ -57,7 +58,8 @@ const routes: Routes = [
       { path: 'codeTask', component: CodeTaskComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
       { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
       { path: 'graph', component: GraphComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard, NavigationPreferenceGuard] },
-      { path: 'mobile-navigator', component: MobileNavigatorComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      { path: 'mobile-navigator', component: MobileNavigatorComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard, NavigationPreferenceGuard] },
+      { path: 'highlight-navigator', component: HighlightNavigatorComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard, NavigationPreferenceGuard] },
       { path: 'chatbot', component: ChatBotComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
       { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
       { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },

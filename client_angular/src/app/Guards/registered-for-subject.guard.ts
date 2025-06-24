@@ -13,7 +13,7 @@ export class RegisteredForSubjectGuard  {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
 
-    if (this.userService.isRegisteredForSubject('Objektorientierte und funktionale Programmierung')) { // ToDo Make dynamic
+    if (this.userService.isRegisteredForSubject('Tragkonstruktion 3')) { // ToDo Make dynamic
       return true;
     } else {
       return this.router.createUrlTree(['/not-registered']);

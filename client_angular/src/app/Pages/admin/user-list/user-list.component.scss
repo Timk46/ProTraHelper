@@ -59,6 +59,33 @@
     }
   }
 
+  .content-management-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 20px;
+
+    mat-card-title {
+      margin-bottom: 20px;
+    }
+
+    .content-actions {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+
+      .import-section {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+
+        .file-name {
+          color: rgba(0, 0, 0, 0.87);
+        }
+      }
+    }
+  }
+
   table {
     width: 100%;
   }
