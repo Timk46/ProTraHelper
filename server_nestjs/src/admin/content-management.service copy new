@@ -35,16 +35,6 @@ export class ContentManagementService {
 
   async exportContent() {
     console.log('Starting content export...');
-
-    // Try to get uploadQuestions, but handle if it doesn't exist yet
-    let uploadQuestions = [];
-    try {
-      uploadQuestions = await this.prisma.uploadQuestion.findMany();
-    } catch (error) {
-      console.log('Note: uploadQuestion table not found, skipping...');
-      uploadQuestions = [];
-    }
-
     const [
       subjects,
       modules,
@@ -78,6 +68,7 @@ export class ContentManagementService {
       umlQuestions,
       umlEditorModels,
       umlEditorElements,
+      uploadQuestions,
       files,
     ] = await Promise.all([
       this.prisma.subject.findMany(),
@@ -140,6 +131,7 @@ export class ContentManagementService {
         }
       }),
       this.prisma.umlEditorElement.findMany(),
+      this.prisma.uploadQuestion.findMany(),
       this.prisma.file.findMany(),
     ]);
 
@@ -255,8 +247,7 @@ export class ContentManagementService {
         prisma.mCQuestionOption.deleteMany(),
         prisma.mCOption.deleteMany(),
         prisma.umlQuestion.deleteMany(),
-        // Only try to delete uploadQuestion if it exists in the schema
-        ...(content.uploadQuestions && content.uploadQuestions.length > 0 ? [prisma.uploadQuestion.deleteMany()] : []),
+        prisma.uploadQuestion.deleteMany(),
         prisma.fillinQuestion.deleteMany(),
         prisma.codeGameQuestion.deleteMany(),
         prisma.codingQuestion.deleteMany(),
@@ -376,7 +367,7 @@ export class ContentManagementService {
         content.codeGameQuestions.length,
         content.fillinQuestions.length,
         content.umlQuestions.length,
-        (content.uploadQuestions || []).length
+        content.uploadQuestions.length
       ].reduce((a, b) => a + b, 0);
 
       console.log('=== Phase 6/7: Questions Import ===');

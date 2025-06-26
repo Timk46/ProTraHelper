@@ -1,31 +1,3 @@
-/**
- * Content Management Service
- *
- * This service handles the export and import of learning content data while strictly
- * excluding all personal user data and user-specific progress information.
- *
- * PRINCIPLE: CONTENT ONLY - NO PERSONAL DATA
- *
- * EXPORTED (Learning Content):
- * - Subjects, Modules, Concept structures
- * - Questions of all types (MC, FreeText, Graph, Coding, CodeGame, Fillin, UML, Upload)
- * - Question metadata, scaffolds, solutions, tests
- * - Content elements, files, and educational materials
- * - UML editor configurations
- * - Learning structure relationships and dependencies
- *
- * NOT EXPORTED (Personal Data):
- * - User accounts, authentication, roles
- * - User progress, submissions, answers
- * - User interactions: discussions, messages, votes
- * - Notifications, chat sessions, event logs
- * - Feedback, ratings, personal assessments
- * - File uploads by individual users
- *
- * This ensures that exported content can be safely shared between environments
- * while preserving user privacy and complying with data protection requirements.
- */
-
 import { PrismaService } from '../prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 
@@ -35,16 +7,6 @@ export class ContentManagementService {
 
   async exportContent() {
     console.log('Starting content export...');
-
-    // Try to get uploadQuestions, but handle if it doesn't exist yet
-    let uploadQuestions = [];
-    try {
-      uploadQuestions = await this.prisma.uploadQuestion.findMany();
-    } catch (error) {
-      console.log('Note: uploadQuestion table not found, skipping...');
-      uploadQuestions = [];
-    }
-
     const [
       subjects,
       modules,
@@ -61,7 +23,6 @@ export class ContentManagementService {
       requirements,
       trainings,
       questions,
-      questionVersions,
       mcQuestions,
       mcOptions,
       mcQuestionOptions,
@@ -71,13 +32,9 @@ export class ContentManagementService {
       codeGerueste,
       modelSolutions,
       automatedTests,
-      codeGameQuestions,
-      codeGameScaffolds,
       fillinQuestions,
       blanks,
       umlQuestions,
-      umlEditorModels,
-      umlEditorElements,
       files,
     ] = await Promise.all([
       this.prisma.subject.findMany(),
@@ -119,7 +76,6 @@ export class ContentManagementService {
           // Exclude authorId as it will be set during import
         }
       }),
-      this.prisma.questionVersion.findMany(),
       this.prisma.mCQuestion.findMany(),
       this.prisma.mCOption.findMany(),
       this.prisma.mCQuestionOption.findMany(),
@@ -129,17 +85,9 @@ export class ContentManagementService {
       this.prisma.codeGeruest.findMany(),
       this.prisma.modelSolution.findMany(),
       this.prisma.automatedTest.findMany(),
-      this.prisma.codeGameQuestion.findMany(),
-      this.prisma.codeGameScaffold.findMany(),
       this.prisma.fillinQuestion.findMany(),
       this.prisma.blank.findMany(),
       this.prisma.umlQuestion.findMany(),
-      this.prisma.umlEditorModel.findMany({
-        include: {
-          EditorElement: true
-        }
-      }),
-      this.prisma.umlEditorElement.findMany(),
       this.prisma.file.findMany(),
     ]);
 
@@ -166,7 +114,6 @@ export class ContentManagementService {
         requirements,
         trainings,
         questions,
-        questionVersions,
         mcQuestions,
         mcOptions,
         mcQuestionOptions,
@@ -176,14 +123,9 @@ export class ContentManagementService {
         codeGerueste,
         modelSolutions,
         automatedTests,
-        codeGameQuestions,
-        codeGameScaffolds,
         fillinQuestions,
         blanks,
         umlQuestions,
-        umlEditorModels,
-        umlEditorElements,
-        uploadQuestions,
         files,
       },
     };
@@ -223,10 +165,6 @@ export class ContentManagementService {
 
       // Then clear submissions and feedback
       await Promise.all([
-        prisma.userUploadAnswer.deleteMany(),
-        prisma.userUmlQuestionAnswer.deleteMany(),
-        prisma.codeGameScaffoldAnswer.deleteMany(),
-        prisma.codeGameAnswer.deleteMany(),
         prisma.feedback.deleteMany(),
         prisma.graphAIFeedback.deleteMany(),
         prisma.codeSubmissionFile.deleteMany(),
@@ -243,27 +181,18 @@ export class ContentManagementService {
       console.log('Clearing learning content...');
       // Clear question-related data
       await Promise.all([
-        prisma.userUploadAnswer.deleteMany(),
-        prisma.userUmlQuestionAnswer.deleteMany(),
-        prisma.codeGameScaffoldAnswer.deleteMany(),
-        prisma.codeGameAnswer.deleteMany(),
         prisma.blank.deleteMany(),
         prisma.automatedTest.deleteMany(),
         prisma.modelSolution.deleteMany(),
         prisma.codeGeruest.deleteMany(),
-        prisma.codeGameScaffold.deleteMany(),
         prisma.mCQuestionOption.deleteMany(),
         prisma.mCOption.deleteMany(),
         prisma.umlQuestion.deleteMany(),
-        // Only try to delete uploadQuestion if it exists in the schema
-        ...(content.uploadQuestions && content.uploadQuestions.length > 0 ? [prisma.uploadQuestion.deleteMany()] : []),
         prisma.fillinQuestion.deleteMany(),
-        prisma.codeGameQuestion.deleteMany(),
         prisma.codingQuestion.deleteMany(),
         prisma.graphQuestion.deleteMany(),
         prisma.freeTextQuestion.deleteMany(),
         prisma.mCQuestion.deleteMany(),
-        prisma.questionVersion.deleteMany(),
         prisma.question.deleteMany(),
       ]);
 
@@ -290,8 +219,6 @@ export class ContentManagementService {
 
       // Clear files and modules but preserve subjects for user enrollments
       await Promise.all([
-        prisma.umlEditorElement.deleteMany(),
-        prisma.umlEditorModel.deleteMany(),
         prisma.module.deleteMany(),
         prisma.file.deleteMany(),
       ]);
@@ -373,10 +300,8 @@ export class ContentManagementService {
         content.freeTextQuestions.length,
         content.graphQuestions.length,
         content.codingQuestions.length,
-        content.codeGameQuestions.length,
         content.fillinQuestions.length,
-        content.umlQuestions.length,
-        (content.uploadQuestions || []).length
+        content.umlQuestions.length
       ].reduce((a, b) => a + b, 0);
 
       console.log('=== Phase 6/7: Questions Import ===');
@@ -393,23 +318,6 @@ export class ContentManagementService {
       }
 
       console.log('Using admin user with ID:', adminUser.id, 'as question author');
-
-      // Import UML editor models first (independent entities)
-      if (content.umlEditorModels && content.umlEditorModels.length > 0) {
-        console.log('Importing UML editor models...');
-        for (const model of content.umlEditorModels) {
-          const { EditorElement: editorElements, ...cleanModelData } = model;
-          await prisma.umlEditorModel.create({
-            data: cleanModelData
-          });
-        }
-      }
-
-      if (content.umlEditorElements && content.umlEditorElements.length > 0) {
-        console.log('Importing UML editor elements...');
-        await prisma.umlEditorElement.createMany({ data: content.umlEditorElements });
-      }
-
       await prisma.question.createMany({
         data: content.questions.map(q => ({
           ...q,
@@ -419,22 +327,13 @@ export class ContentManagementService {
 
       console.log('Importing question types...');
       await Promise.all([
-        content.questionVersions && content.questionVersions.length > 0
-          ? prisma.questionVersion.createMany({ data: content.questionVersions })
-          : Promise.resolve(),
         prisma.mCQuestion.createMany({ data: content.mcQuestions }),
         prisma.mCOption.createMany({ data: content.mcOptions }),
         prisma.freeTextQuestion.createMany({ data: content.freeTextQuestions }),
         prisma.graphQuestion.createMany({ data: content.graphQuestions }),
         prisma.codingQuestion.createMany({ data: content.codingQuestions }),
-        content.codeGameQuestions && content.codeGameQuestions.length > 0
-          ? prisma.codeGameQuestion.createMany({ data: content.codeGameQuestions })
-          : Promise.resolve(),
         prisma.fillinQuestion.createMany({ data: content.fillinQuestions }),
         prisma.umlQuestion.createMany({ data: content.umlQuestions }),
-        content.uploadQuestions && content.uploadQuestions.length > 0
-          ? prisma.uploadQuestion.createMany({ data: content.uploadQuestions })
-          : Promise.resolve(),
       ]);
 
       console.log('Importing question details...');
@@ -443,9 +342,6 @@ export class ContentManagementService {
         prisma.codeGeruest.createMany({ data: content.codeGerueste }),
         prisma.modelSolution.createMany({ data: content.modelSolutions }),
         prisma.automatedTest.createMany({ data: content.automatedTests }),
-        content.codeGameScaffolds && content.codeGameScaffolds.length > 0
-          ? prisma.codeGameScaffold.createMany({ data: content.codeGameScaffolds })
-          : Promise.resolve(),
         prisma.blank.createMany({ data: content.blanks }),
       ]);
 
