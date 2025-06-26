@@ -36,6 +36,7 @@ model User {
   refreshTokens            RefreshToken[]
   updatedSettings          ModuleSetting[]
   hasAcceptedPrivacyPolicy Boolean                      @default(false)
+  fileUploads              FileUpload[]
 }
 
 model RefreshToken {
@@ -57,6 +58,7 @@ model Module {
   subjects                Subject[]                 @relation("ModuleToSubject")
   settings                ModuleSetting[]
   ModuleHighlightConcepts ModuleHighlightConcepts[]
+  fileUploads             FileUpload[]
 }
 
 model ModuleConceptGoal {
@@ -223,6 +225,8 @@ model File {
   MCAnswer             MCOption?             @relation(fields: [mCAnswerId], references: [id])
   question             Question?             @relation(fields: [questionId], references: [id])
   TranscriptEmbeddings TranscriptEmbedding[]
+  fileUploads          FileUpload[]
+  UserUploadAnswer     UserUploadAnswer[]
 }
 
 model ContentView {
@@ -274,6 +278,7 @@ model Question {
   userAnswer                 UserAnswer[]
   FillinQuestion             FillinQuestion?
   UmlQuestion                UmlQuestion?
+  UploadQuestion             UploadQuestion[]
 }
 
 model QuestionVersion {
@@ -351,6 +356,7 @@ model UserAnswer {
   userMCOptionSelected  UserMCOptionSelected[]
   UserUmlQuestionAnswer UserUmlQuestionAnswer?
   codeGameAnswer        CodeGameAnswer[]
+  UserUploadAnswer      UserUploadAnswer[]
 }
 
 model UserMCOptionSelected {
@@ -558,12 +564,11 @@ model ModuleHighlightConcepts {
   module        Module      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   conceptNodeId Int
   conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id], onDelete: Cascade)
-  alias         String?    // Optional alias for the concept
-  description   String?    // Optional description for the concept
-  pictureData  String?    // Stores the picture data as a base64 string or URL
-  position      Int?       // Optional position for ordering in the module
-  isUnlocked   Boolean @default(false)
-
+  alias         String? // Optional alias for the concept
+  description   String? // Optional description for the concept
+  pictureData   String? // Stores the picture data as a base64 string or URL
+  position      Int? // Optional position for ordering in the module
+  isUnlocked    Boolean     @default(false)
 
   @@unique([moduleId, conceptNodeId])
 }
@@ -876,4 +881,42 @@ enum questionType {
   CodingQuestion
   GraphQuestion
   UMLQuestion
+}
+
+model FileUpload {
+  id        Int      @id @default(autoincrement())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  file   File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  fileId    Int
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  @@unique([userId, fileId, moduleId])
+}
+
+model UploadQuestion {
+  id         Int      @id @default(autoincrement())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId Int
+  title      String
+  text       String
+  textHTML   String?  @db.Text
+  maxSize    Int
+  fileType   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model UserUploadAnswer {
+  id           Int        @id @default(autoincrement())
+  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
+  userAnswerId Int
+  file         File       @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  fileId       Int
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
