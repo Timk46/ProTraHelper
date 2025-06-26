@@ -11,6 +11,8 @@ import { CreateContentElementDialogComponent } from '../lecturersView/create-con
 import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import { ContentListNodeEditDialogComponent } from './content-list-node-edit-dialog/content-list-node-edit-dialog.component';
+
 
 @Component({
   selector: 'app-content-list',
@@ -71,7 +73,22 @@ export class ContentListComponent {
 
   ngOnChanges() {
     if (this.contentsForActiveConceptNode.trainedBy.length > 0) {
-      this.filteredContents = this.contentsForActiveConceptNode.trainedBy;
+      // Sortiere nach position, falls vorhanden
+      this.filteredContents = [...this.contentsForActiveConceptNode.trainedBy].sort((a, b) => {
+        // Wenn beide Positionen vorhanden sind, sortiere danach
+        if (a.position != null && b.position != null) {
+          if (a.position === b.position) {
+            // Bei gleichen Positionen: nach contentNodeId als Fallback sortieren
+            return a.contentNodeId - b.contentNodeId;
+          }
+          return a.position - b.position;
+        }
+        // Wenn nur eine Position vorhanden ist, sortiere die mit Position zuerst
+        if (a.position != null) return -1;
+        if (b.position != null) return 1;
+        // Wenn keine Position vorhanden ist, sortiere nach contentNodeId
+        return a.contentNodeId - b.contentNodeId;
+      });
     }
   }
 
@@ -300,5 +317,43 @@ export class ContentListComponent {
     });
   }
 
+  /**
+   * Bereich nach oben verschieben
+   */
+  onMoveContentUp(content: ContentDTO) {
+    if (content.position == null) return;
+    this.contentLinkerService.updateContentNodePosition(content.contentNodeId, content.position - 1).subscribe(() => {
+      this.fetchContentsForConcept.emit();
+    });
+  }
+
+  /**
+   * Bereich nach unten verschieben
+   */
+  onMoveContentDown(content: ContentDTO) {
+    if (content.position == null) return;
+    this.contentLinkerService.updateContentNodePosition(content.contentNodeId, content.position + 1).subscribe(() => {
+      this.fetchContentsForConcept.emit();
+    });
+  }
+
+  /**
+   * Öffnet den Dialog zum Bearbeiten eines ContentNodes
+   */
+  onEditContentNode(content: ContentDTO) {
+    const dialogRef = this.dialog.open(ContentListNodeEditDialogComponent, {
+      width: '400px',
+      data: content
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Backend-Update hier aufrufen (muss ggf. noch implementiert werden)
+        this.contentLinkerService.updateContentNode(content.contentNodeId, result).subscribe(() => {
+          this.snackBar.open('Bereich aktualisiert', 'OK', { duration: 2000 });
+          this.fetchContentsForConcept.emit();
+        });
+      }
+    });
+  }
 
 }

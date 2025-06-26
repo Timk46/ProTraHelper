@@ -33,6 +33,8 @@ export class ContentListItemComponent {
     }
   };
 
+  @Input() contentNodeId!: number; // ContentNodeId für Positionsänderung
+
   @Output() scoreUpdated: EventEmitter<ContentElementDTO> = new EventEmitter<ContentElementDTO>();
   @Output() fetchContentsForConcept = new EventEmitter<void>();
   @Output() contentElementDeleted = new EventEmitter<number>();
@@ -315,6 +317,28 @@ export class ContentListItemComponent {
    */
   getLevels(num: number): Array<number> {
     return new Array(num);
+  }
+
+  /**
+   * Verschiebt das Item nach oben (Position verringern)
+   */
+  onMoveUp() {
+    if (!this.editModeButtonsClickable) return;
+    if (this.contentNodeId == null || this.contentElementData.positionInSpecificContentView == null) return;
+    this.contentLinkerService.updateContentNodePosition(this.contentNodeId, this.contentElementData.positionInSpecificContentView - 1).subscribe(() => {
+      this.fetchContentsForConcept.emit();
+    });
+  }
+
+  /**
+   * Verschiebt das Item nach unten (Position erhöhen)
+   */
+  onMoveDown() {
+    if (!this.editModeButtonsClickable) return;
+    if (this.contentNodeId == null || this.contentElementData.positionInSpecificContentView == null) return;
+    this.contentLinkerService.updateContentNodePosition(this.contentNodeId, this.contentElementData.positionInSpecificContentView + 1).subscribe(() => {
+      this.fetchContentsForConcept.emit();
+    });
   }
 
 }

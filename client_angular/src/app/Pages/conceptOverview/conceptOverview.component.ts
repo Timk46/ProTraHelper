@@ -65,6 +65,8 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
     private router: Router,
     private graphDataService: GraphDataService
   ) {
+    this.isAdmin = this.userService.getRole() === 'ADMIN';
+
     // subscribe to activeConceptNode changes in the graph and update the activeConceptNode and contentsForActiveConceptNode accordingly
     this.activeConceptNodeSubscription = this.graphCommunicationService.currentActiveNode.subscribe((activeConceptNode) => {
       if (activeConceptNode.databaseId > 0) { // dummy node is 0 - only update if a real node is selected
@@ -166,7 +168,9 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
    * Creates a new linked content node based on the dialog result and updates the contents for the active concept node.
    */
   onCreateContentNode() {
+    console.log('onCreateContentNode called');
     if (this.isAdmin) {
+      console.log('User is admin, opening dialog to create content node');
       const dialogRef = this.dialog.open(CreateContentNodeDialogComponent, {
         width: '400px',
       });

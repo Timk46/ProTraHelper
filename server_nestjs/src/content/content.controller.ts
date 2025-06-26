@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Param, Req, UseGuards} from '@nestjs/common';
+import { Controller, Get, Param, Req, UseGuards, Body, Patch } from '@nestjs/common';
 import { ContentService } from './content.service';
 import { ContentsForConceptDTO } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
@@ -158,5 +158,35 @@ export class ContentController {
   @Get('/conceptsFull')
   async getConcepts(): Promise<ConceptNode[]> {
     return this.contentService.getConcepts();
+  }
+
+  /**
+   * Update ContentNode Position
+   * @route POST /content/updatePosition/:contentNodeId/:newPosition
+   *
+   * @param {number} contentNodeId - Die ID des ContentNodes
+   * @param {number} newPosition - Die neue Position
+   * @returns {Promise<boolean>} - true, wenn erfolgreich
+   */
+  @roles('ADMIN')
+  @Get('/updatePosition/:contentNodeId/:newPosition')
+  async updateContentNodePosition(
+    @Param('contentNodeId') contentNodeId: number,
+    @Param('newPosition') newPosition: number,
+  ): Promise<boolean> {
+    return this.contentService.updateContentNodePosition(Number(contentNodeId), Number(newPosition));
+  }
+
+  /**
+   * Aktualisiert einen ContentNode (Name, Beschreibung, Level)
+   * @route PATCH /content/update/:contentNodeId
+   */
+  @roles('ADMIN')
+  @Patch('/update/:contentNodeId')
+  async updateContentNode(
+    @Param('contentNodeId') contentNodeId: number,
+    @Body() body: { name: string; description: string; difficulty: number }
+  ): Promise<boolean> {
+    return this.contentService.updateContentNodeData(Number(contentNodeId), body);
   }
 }

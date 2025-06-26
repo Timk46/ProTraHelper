@@ -52,5 +52,22 @@ export class ContentLinkerService {
     return this.http.get<QuestionDTO[]>(environment.server + '/content/linker/unlinkedQuestions');
   }
 
+  /**
+   * Updates the position of a content node.
+   *
+   * @param contentNodeId - The ID of the content node to update.
+   * @param newPosition - The new position for the content node.
+   * @returns An Observable that emits a boolean indicating the success of the operation.
+   */
+  updateContentNodePosition(contentNodeId: number, newPosition: number): Observable<boolean> {
+    return this.http.get<boolean>(`${environment.server}/content/updatePosition/${contentNodeId}/${newPosition}`);
+  }
+
+  /**
+   * Aktualisiert einen ContentNode (Name, Beschreibung, Level)
+   */
+  updateContentNode(contentNodeId: number, data: { name: string; description: string; difficulty: number }): Observable<boolean> {
+    return this.http.patch<boolean>(`${environment.server}/content/update/${contentNodeId}`, data);
+  }
 
 }

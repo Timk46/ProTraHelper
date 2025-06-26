@@ -77,6 +77,7 @@
         <app-content-list-item
           *ngFor="let task of getQuestions(content)"
           [contentElementData]="task"
+          [contentNodeId]="content.contentNodeId"
           (scoreUpdated)="onScoreUpdated(content, $event)"
           (fetchContentsForConcept)="fetchContentsForConcept.emit()"
           (contentElementDeleted)="onContentElementDeleted(content.contentNodeId, $event)"
@@ -85,6 +86,24 @@
 
       <!-- edit mode actions -->
       <mat-action-row *ngIf="isAdmin && editModeActive">
+        <button mat-mini-fab color="accent"
+          (click)="onMoveContentUp(content)"
+          matTooltip="Bereich nach oben verschieben"
+        >
+          <mat-icon>arrow_upward</mat-icon>
+        </button>
+        <button mat-mini-fab color="accent"
+          (click)="onMoveContentDown(content)"
+          matTooltip="Bereich nach unten verschieben"
+        >
+          <mat-icon>arrow_downward</mat-icon>
+        </button>
+        <button mat-mini-fab color="primary"
+          (click)="onEditContentNode(content)"
+          matTooltip="Bereich bearbeiten"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
         <button mat-raised-button color="primary" (click)="onAddTask(content.contentNodeId)">
           <mat-icon>add</mat-icon>
           Aufgabe hinzufügen

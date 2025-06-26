@@ -78,6 +78,7 @@ import { NavigationPreferenceToggleComponent } from './Pages/app-header/navigati
 import { AppHeaderComponent } from './Pages/app-header/app-header.component';
 import { HighlightNavigatorComponent } from './Pages/highlight-navigator/highlight-navigator.component';
 import { HighlightConceptDialogComponent } from "./Pages/highlight-navigator/highlight-concept-dialog/highlight-concept-dialog.component";
+import { ContentListNodeEditDialogComponent } from "./Pages/content-list/content-list-node-edit-dialog/content-list-node-edit-dialog.component";
 
 @NgModule({ declarations: [
         AppComponent,
@@ -132,6 +133,7 @@ import { HighlightConceptDialogComponent } from "./Pages/highlight-navigator/hig
         DynamicQuestionComponent,
         ContentListComponent,
         ContentListItemComponent,
+        ContentListNodeEditDialogComponent,
         CodeGameConfirmDialogComponent,
         NavigationPreferenceToggleComponent,
         AppHeaderComponent,
