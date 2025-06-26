@@ -510,5 +510,79 @@ export class ContentManagementService {
     }
 
     console.log('Content elements import completed');
+
+    // Reset all autoincrement sequences at the end of import
+    console.log('Resetting autoincrement sequences for all tables...');
+    await Promise.all([
+      // Base entities
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"File"', 'id'), COALESCE((SELECT MAX(id) FROM "File"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"Module"', 'id'), COALESCE((SELECT MAX(id) FROM "Module"), 1), true);`,
+      content.moduleSettings && content.moduleSettings.length > 0
+        ? this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"ModuleSetting"', 'id'), COALESCE((SELECT MAX(id) FROM "ModuleSetting"), 1), true);`
+        : Promise.resolve(),
+
+      // Concept structure
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"ConceptNode"', 'id'), COALESCE((SELECT MAX(id) FROM "ConceptNode"), 1), true);`,
+      content.moduleHighlightConcepts && content.moduleHighlightConcepts.length > 0
+        ? this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"ModuleHighlightConcepts"', 'id'), COALESCE((SELECT MAX(id) FROM "ModuleHighlightConcepts"), 1), true);`
+        : Promise.resolve(),
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"ConceptGraph"', 'id'), COALESCE((SELECT MAX(id) FROM "ConceptGraph"), 1), true);`,
+
+      // Concept relationships
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"ModuleConceptGoal"', 'id'), COALESCE((SELECT MAX(id) FROM "ModuleConceptGoal"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"ConceptEdge"', 'id'), COALESCE((SELECT MAX(id) FROM "ConceptEdge"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"ConceptFamily"', 'id'), COALESCE((SELECT MAX(id) FROM "ConceptFamily"), 1), true);`,
+
+      // Content structure
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"ContentNode"', 'id'), COALESCE((SELECT MAX(id) FROM "ContentNode"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"ContentEdge"', 'id'), COALESCE((SELECT MAX(id) FROM "ContentEdge"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"Requirement"', 'id'), COALESCE((SELECT MAX(id) FROM "Requirement"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"Training"', 'id'), COALESCE((SELECT MAX(id) FROM "Training"), 1), true);`,
+
+      // UML editor
+      content.umlEditorModels && content.umlEditorModels.length > 0
+        ? this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"UmlEditorModel"', 'id'), COALESCE((SELECT MAX(id) FROM "UmlEditorModel"), 1), true);`
+        : Promise.resolve(),
+      content.umlEditorElements && content.umlEditorElements.length > 0
+        ? this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"UmlEditorElement"', 'id'), COALESCE((SELECT MAX(id) FROM "UmlEditorElement"), 1), true);`
+        : Promise.resolve(),
+
+      // Questions
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"Question"', 'id'), COALESCE((SELECT MAX(id) FROM "Question"), 1), true);`,
+      content.questionVersions && content.questionVersions.length > 0
+        ? this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"QuestionVersion"', 'id'), COALESCE((SELECT MAX(id) FROM "QuestionVersion"), 1), true);`
+        : Promise.resolve(),
+
+      // Question types
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"MCQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "MCQuestion"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"MCOption"', 'id'), COALESCE((SELECT MAX(id) FROM "MCOption"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"FreeTextQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "FreeTextQuestion"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"GraphQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "GraphQuestion"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"CodingQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "CodingQuestion"), 1), true);`,
+      content.codeGameQuestions && content.codeGameQuestions.length > 0
+        ? this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"CodeGameQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "CodeGameQuestion"), 1), true);`
+        : Promise.resolve(),
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"FillinQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "FillinQuestion"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"UmlQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "UmlQuestion"), 1), true);`,
+      content.uploadQuestions && content.uploadQuestions.length > 0
+        ? this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"UploadQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "UploadQuestion"), 1), true);`
+        : Promise.resolve(),
+
+      // Question details
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"MCQuestionOption"', 'id'), COALESCE((SELECT MAX(id) FROM "MCQuestionOption"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"CodeGeruest"', 'id'), COALESCE((SELECT MAX(id) FROM "CodeGeruest"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"ModelSolution"', 'id'), COALESCE((SELECT MAX(id) FROM "ModelSolution"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"AutomatedTest"', 'id'), COALESCE((SELECT MAX(id) FROM "AutomatedTest"), 1), true);`,
+      content.codeGameScaffolds && content.codeGameScaffolds.length > 0
+        ? this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"CodeGameScaffold"', 'id'), COALESCE((SELECT MAX(id) FROM "CodeGameScaffold"), 1), true);`
+        : Promise.resolve(),
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"Blank"', 'id'), COALESCE((SELECT MAX(id) FROM "Blank"), 1), true);`,
+
+      // Content elements
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"ContentElement"', 'id'), COALESCE((SELECT MAX(id) FROM "ContentElement"), 1), true);`,
+      this.prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"ContentView"', 'id'), COALESCE((SELECT MAX(id) FROM "ContentView"), 1), true);`,
+    ]);
+
+    console.log('All autoincrement sequences reset successfully');
   }
 }
