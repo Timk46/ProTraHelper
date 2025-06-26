@@ -26,6 +26,7 @@ export interface detailedQuestionDTO {
   graphQuestion?: detailedGraphQuestionDTO;
   umlQuestion?: detailedUmlQuestionDTO;
   codeGameQuestion?: CodeGameQuestionDto;
+  uploadQuestion?: detailedUploadQuestionDTO;
 }
 
 export interface detailedFreetextQuestionDTO {
@@ -109,6 +110,18 @@ export interface detailedUmlQuestionDTO {
   startData?: editorDataDTO;
   dataImage?: string;
   taskSettings?: taskSettingsDTO;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface detailedUploadQuestionDTO {
+  id?: number;
+  questionId: number;
+  title?: string;
+  text?: string;
+  textHTML?: string;
+  maxSize: number;
+  fileType: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

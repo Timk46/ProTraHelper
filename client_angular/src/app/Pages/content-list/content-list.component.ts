@@ -266,6 +266,8 @@ export class ContentListComponent {
             position: result.contentElementPosition || undefined
           };
 
+          console.log("linkableContentElement: ", linkableContentElement);
+
           this.contentLinkerService.createLinkedContentElement(linkableContentElement).subscribe(
             (linkableContentElement) => {
               console.log("linked contentElement: ", linkableContentElement);

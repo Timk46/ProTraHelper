@@ -6,10 +6,12 @@ import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { FillinTaskNewComponent } from '../../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { FreeTextTaskComponent } from '../../contentView/contentElement/free-text-task/free-text-task.component';
 import { McTaskComponent } from '../../contentView/contentElement/mcTask/mcTask.component';
+import { EditUploadComponent } from '../../lecturersView/edit-upload/edit-upload.component';
 import { Router } from '@angular/router';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
@@ -53,6 +55,7 @@ export class ContentListItemComponent {
     private userService: UserService,
     private confirmService: ConfirmationService,
     private contentLinkerService: ContentLinkerService,
+    private questionDataService: QuestionDataService,
     private snackBar: MatSnackBar
   ) {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
@@ -88,6 +91,8 @@ export class ContentListItemComponent {
         return 'UML-Aufgabe';
       case questionType.CODEGAME:
         return 'Codegame';
+      case questionType.UPLOAD:
+        return 'Upload-Aufgabe';
       default:
         return 'Aufgabe';
     }
@@ -117,6 +122,8 @@ export class ContentListItemComponent {
         return 'account_tree';
       case questionType.CODEGAME:
         return 'videogame_asset';
+      case questionType.UPLOAD:
+        return 'cloud_upload';
       default:
         return 'help';
     }
@@ -238,6 +245,27 @@ export class ContentListItemComponent {
         break;
       case questionType.CODEGAME:
         this.router.navigate(['/editcodegame/', question.id]);
+        break;
+      case questionType.UPLOAD:
+        console.log("The question", this.contentElementData.question);
+        // Open upload edit dialog directly
+        const dialogRef = this.dialog.open(EditUploadComponent, {
+          width: '600px',
+          data: {
+            questionId: question.id,
+            detailedQuestion: this.contentElementData.question,
+            mode: 'edit'
+          },
+          disableClose: true
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+          if (result) {
+            console.log('Upload question updated:', result);
+            // Optionally refresh the content or show success message
+            this.snackBar.open('Upload-Aufgabe aktualisiert', 'OK', { duration: 3000 });
+          }
+        });
         break;
     }
   }

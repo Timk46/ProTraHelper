@@ -20,6 +20,7 @@
             <mat-option [value]="questionTypes.UML">UML</mat-option>
             <mat-option value="GraphQuestion">Graphen</mat-option>
             <mat-option [value]="questionTypes.CODEGAME">Programmierspiel</mat-option>
+            <mat-option [value]="questionTypes.UPLOAD">Upload-Aufgabe</mat-option>
           </mat-select>
           <mat-error *ngIf="creationForm.get('questionType')!.hasError('required')">Fragentyp ist erforderlich</mat-error>
         </mat-form-field>

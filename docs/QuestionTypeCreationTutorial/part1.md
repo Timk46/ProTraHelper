@@ -1,0 +1,182 @@
+# Tutorial: Neuen Fragetyp erstellen - Schritt 1: Backend Service Implementation
+
+Dieses Tutorial zeigt, wie man einen neuen Fragetyp in der HEFL-Plattform erstellt. Als Beispiel verwenden wir den `UploadQuestion` Typ.
+
+## Schritt 1: Backend Service und DTOs erstellen
+
+### 1.1 Prisma Schema überprüfen
+
+Zunächst muss sichergestellt werden, dass das entsprechende Model im Prisma Schema (`server_nestjs/prisma/schema.prisma`) existiert:
+
+```prisma
+model UploadQuestion {
+  id         Int      @id @default(autoincrement())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId Int
+  title      String
+  text       String
+  textHTML   String?  @db.Text
+  maxSize    Int
+  fileType   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+```
+
+### 1.2 DTOs erstellen
+
+#### 1.2.1 Basis DTO in `shared/dtos/question.dto.ts`
+
+Füge eine einfache DTO für den neuen Fragetyp hinzu:
+
+```typescript
+export interface uploadQuestionDTO {
+  questionId: number;
+  contentElementId?: number;
+  title: string;
+  text: string;
+  textHTML?: string;
+  maxSize: number;
+  fileType: string;
+  maxPoints: number;
+}
+```
+
+#### 1.2.2 Detaillierte DTO in `shared/dtos/detailedQuestion.dto.ts`
+
+1. Füge die detaillierte DTO hinzu:
+
+```typescript
+export interface detailedUploadQuestionDTO {
+  id?: number;
+  questionId: number;
+  title?: string;
+  text?: string;
+  textHTML?: string;
+  maxSize: number;
+  fileType: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+```
+
+2. Erweitere die `detailedQuestionDTO` Interface:
+
+```typescript
+export interface detailedQuestionDTO {
+  // ...existing fields...
+  uploadQuestion?: detailedUploadQuestionDTO;
+}
+```
+
+### 1.3 Service erstellen
+
+Erstelle eine neue Service-Datei: `server_nestjs/src/question-data/question-data-upload/question-data-upload.service.ts`
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@/prisma/prisma.service';
+import { detailedUploadQuestionDTO, uploadQuestionDTO } from '@DTOs/index';
+
+@Injectable()
+export class QuestionDataUploadService {
+
+  constructor(private prisma: PrismaService) {}
+
+  /**
+   * Get upload question by ID
+   * @param questionId - The question ID
+   * @param fullData - Whether to return full data
+   * @returns Promise<uploadQuestionDTO>
+   */
+  async getUploadQuestion(questionId: number, fullData = false): Promise<uploadQuestionDTO> {
+    const question = await this.prisma.question.findUnique({
+      where: { id: Number(questionId) }
+    });
+
+    const uploadQuestion = await this.prisma.uploadQuestion.findFirst({
+      where: { questionId: Number(questionId) }
+    });
+
+    if (!uploadQuestion) {
+      throw new Error('UploadQuestion not found');
+    }
+
+    return {
+      questionId: uploadQuestion.questionId,
+      title: question.name,
+      text: question.text,
+      textHTML: uploadQuestion.textHTML || undefined,
+      maxSize: uploadQuestion.maxSize,
+      fileType: uploadQuestion.fileType,
+      maxPoints: question.score,
+    };
+  }
+
+  /**
+   * Create new upload question
+   * @param uploadQuestion - Upload question data
+   * @param questionId - Associated question ID
+   * @returns Promise<detailedUploadQuestionDTO>
+   */
+  async createUploadQuestion(
+    uploadQuestion: detailedUploadQuestionDTO, 
+    questionId: number
+  ): Promise<detailedUploadQuestionDTO> {
+    const newUploadQuestion = await this.prisma.uploadQuestion.create({
+      data: {
+        title: uploadQuestion.title || '',
+        text: uploadQuestion.text || '',
+        textHTML: uploadQuestion.textHTML || undefined,
+        maxSize: uploadQuestion.maxSize,
+        fileType: uploadQuestion.fileType,
+        question: { connect: { id: questionId } },
+      },
+    });
+
+    if (!newUploadQuestion) {
+      throw new Error('UploadQuestion not created');
+    }
+    return newUploadQuestion;
+  }
+
+  /**
+   * Update existing upload question
+   * @param uploadQuestion - Updated upload question data
+   * @returns Promise<detailedUploadQuestionDTO>
+   */
+  async updateUploadQuestion(
+    uploadQuestion: detailedUploadQuestionDTO
+  ): Promise<detailedUploadQuestionDTO> {
+    const originalUploadQuestion = await this.prisma.uploadQuestion.findFirst({
+      where: { id: uploadQuestion.id }
+    });
+
+    const updatedUploadQuestion = await this.prisma.uploadQuestion.update({
+      where: { id: uploadQuestion.id },
+      data: {
+        title: uploadQuestion.title || originalUploadQuestion.title,
+        text: uploadQuestion.text || originalUploadQuestion.text,
+        textHTML: uploadQuestion.textHTML || originalUploadQuestion.textHTML,
+        maxSize: uploadQuestion.maxSize,
+        fileType: uploadQuestion.fileType,
+      },
+    });
+
+    if (!updatedUploadQuestion) {
+      throw new Error('UploadQuestion not updated');
+    }
+    return updatedUploadQuestion;
+  }
+}
+```
+
+### 1.4 Wichtige Punkte
+
+- **Error Handling**: Jede Methode wirft aussagekräftige Fehler
+- **Type Safety**: Verwendung der definierten DTOs für Typsicherheit  
+- **Prisma Integration**: Korrekte Verwendung der Prisma Client API
+- **Konsistente Patterns**: Orientierung an bestehenden Services (z.B. FreeTextQuestion)
+- **Flexible Parameter**: `fullData` Parameter für unterschiedliche Anwendungsfälle
+
+---

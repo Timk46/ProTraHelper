@@ -12,6 +12,7 @@ export interface UserAnswerDataDTO {
     userFillinTextAnswer?: UserFillinAnswer[];
     userGraphAnswer?: GraphStructureDTO[];
     codeGameEvaluation?: CodeGameEvaluationDTO;
+    userUploadFileId?: number;
     //space for more types of answers
 }
 

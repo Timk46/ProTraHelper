@@ -1,0 +1,88 @@
+<h2 mat-dialog-title style="margin-left: 15px; margin-right: 15px;">Upload-Frage bearbeiten</h2>
+
+<div mat-dialog-content class="dialog-content">
+  <form [formGroup]="uploadForm" class="upload-form">
+    <!-- Title Field -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Titel</mat-label>
+      <input matInput formControlName="title" placeholder="Titel der Upload-Aufgabe">
+      <mat-error *ngIf="uploadForm.get('title')?.hasError('required')">
+        Titel ist erforderlich
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Description/Instructions Field -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Aufgabenbeschreibung</mat-label>
+      <textarea
+        matInput
+        formControlName="text"
+        placeholder="Beschreiben Sie, was die Studierenden hochladen sollen..."
+        rows="4">
+      </textarea>
+      <mat-error *ngIf="uploadForm.get('text')?.hasError('required')">
+        Aufgabenbeschreibung ist erforderlich
+      </mat-error>
+    </mat-form-field>
+
+    <!-- File Type Selection -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Erlaubte Dateitypen</mat-label>
+      <mat-select formControlName="fileType">
+        <mat-option *ngFor="let type of fileTypes" [value]="type.value">
+          {{ type.label }}
+        </mat-option>
+      </mat-select>
+      <mat-hint>Wählen Sie die erlaubten Dateiformate für den Upload</mat-hint>
+      <mat-error *ngIf="uploadForm.get('fileType')?.hasError('required')">
+        Dateityp ist erforderlich
+      </mat-error>
+    </mat-form-field>
+
+    <!-- File Size Limit -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Maximale Dateigröße</mat-label>
+      <mat-select formControlName="maxSize">
+        <mat-option *ngFor="let size of fileSizes" [value]="size.value">
+          {{ size.label }}
+        </mat-option>
+      </mat-select>
+      <mat-hint>Maximale Größe pro hochgeladener Datei</mat-hint>
+      <mat-error *ngIf="uploadForm.get('maxSize')?.hasError('required')">
+        Maximale Dateigröße ist erforderlich
+      </mat-error>
+      <mat-error *ngIf="uploadForm.get('maxSize')?.hasError('min')">
+        Mindestens 1 MB erforderlich
+      </mat-error>
+      <mat-error *ngIf="uploadForm.get('maxSize')?.hasError('max')">
+        Maximum 100 MB erlaubt
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Additional HTML Content (optional) -->
+    <!-- <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Zusätzliche HTML-Inhalte (optional)</mat-label>
+      <textarea
+        matInput
+        formControlName="textHTML"
+        placeholder="Zusätzliche formatierte Inhalte oder Hinweise..."
+        rows="3">
+      </textarea>
+      <mat-hint>Erweiterte Formatierung möglich (HTML)</mat-hint>
+    </mat-form-field> -->
+  </form>
+</div>
+
+<div mat-dialog-actions class="dialog-actions">
+  <button mat-button (click)="onCancel()" [disabled]="isSaving">
+    Abbrechen
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSave()"
+    [disabled]="isSaving || uploadForm.invalid">
+    <span *ngIf="isSaving">Speichern...</span>
+    <span *ngIf="!isSaving">Speichern</span>
+  </button>
+</div>
