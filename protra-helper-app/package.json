@@ -1,6 +1,6 @@
 {
   "name": "protra-helper-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Desktop Helferanwendung für die ProTra-Webanwendung zur Rhino/Grasshopper-Integration.",
   "main": "main.js",
   "homepage": "https://protra.hefl.de",
@@ -84,11 +84,7 @@
       "icon": "assets/rhino_tray.png",
       "publisherName": "HEFL-Entwicklungsteam",
       "verifyUpdateCodeSignature": false,
-      "sign": null,
-      "certificateFile": null,
-      "certificatePassword": null,
-      "requestedExecutionLevel": "asInvoker",
-      "downloadAlternateFFmpeg": true
+      "requestedExecutionLevel": "asInvoker"
     },
     "mac": {
       "target": "dmg",

@@ -19,6 +19,7 @@ const COMMAND_TEMPLATES = {
   com_viewport: "COM:with_viewport",               // COM: Mit Viewport-Maximierung  
   com_presentation: "COM:presentation",            // COM: Präsentationsmodus
   com_technical: "COM:technical",                  // COM: Technische Ansicht
+  com_registry_sequence: "COM:registry_sequence",  // COM: Original Registry-Befehlssequenz mit B D W L W H D O
   
   // === PHASE 1: Python Script Integration (Fallback) ===
   
@@ -66,7 +67,7 @@ const FILE_COMMAND_MAPPING = {
   // === PHASE 2: COM Automation Tests (löst /runscript Probleme definitiv) ===
   
   // Haupttests mit COM-Integration (löst Timing-Probleme)
-  'example.gh': 'com_basic',                  // COM: Nur Datei laden
+  'example.gh': 'com_registry_sequence',      // COM: Original Registry-Befehlssequenz mit B D W L W H D O
   'example_viewport.gh': 'com_viewport',      // COM: Mit Viewport-Maximierung
   'example_presentation.gh': 'com_presentation',  // COM: Präsentationsmodus
   'example_technical.gh': 'com_technical',    // COM: Technische Ansicht

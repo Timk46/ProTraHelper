@@ -26,7 +26,7 @@
 
 .content-list-element-introduction-stars {
   display: none;
-  
+
   @media screen and (max-width: 400px) {
     display: inline
   }
@@ -36,6 +36,19 @@
   display: flex;
   flex-direction: row;
   gap: 10px;
+}
+
+.rhino-launcher-icon {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    color: #45a049 !important;
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .content-list-element-introduction {

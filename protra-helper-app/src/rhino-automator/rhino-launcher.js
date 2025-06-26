@@ -284,24 +284,33 @@ class RhinoLauncher {
         throw new Error('Failed to connect to Rhino via COM');
       }
       
-      // Phase 4: Lade Grasshopper-Datei via COM
-      const loadResult = await comController.loadGrasshopperFile(ghFilePath);
-      if (!loadResult.success) {
-        throw new Error(`Failed to load Grasshopper file: ${loadResult.message}`);
-      }
+      // Phase 4: Führe modus-spezifische Befehle aus
+      let loadResult, modeResult;
       
-      // Phase 5: Führe modus-spezifische Befehle aus
-      let modeResult = { success: true, message: 'Basic mode completed' };
-      
-      if (commandConfig.mode === 'with_viewport' || commandConfig.mode === 'viewport') {
-        modeResult = await comController.executeViewportCommand('_MaxViewport');
-      } else if (commandConfig.mode === 'presentation') {
-        modeResult = await comController.activatePresentationMode();
-      } else if (commandConfig.mode === 'technical') {
-        await comController.executeViewportCommand('_MaxViewport');
-        await comController.executeViewportCommand('_SetView _Top');
-        await comController.executeViewportCommand('_SetDisplayMode _Wireframe');
-        modeResult = await comController.executeViewportCommand('_ZoomExtents');
+      if (commandConfig.mode === 'registry_sequence') {
+        // Spezielle Registry-Sequenz mit B D W L W H D O Befehlen
+        loadResult = await comController.executeRegistrySequence(ghFilePath);
+        modeResult = loadResult; // Registry-Sequenz beinhaltet bereits alle Schritte
+      } else {
+        // Standard-Datei-Laden
+        loadResult = await comController.loadGrasshopperFile(ghFilePath);
+        if (!loadResult.success) {
+          throw new Error(`Failed to load Grasshopper file: ${loadResult.message}`);
+        }
+        
+        // Standard modus-spezifische Befehle
+        modeResult = { success: true, message: 'Basic mode completed' };
+        
+        if (commandConfig.mode === 'with_viewport' || commandConfig.mode === 'viewport') {
+          modeResult = await comController.executeViewportCommand('_MaxViewport');
+        } else if (commandConfig.mode === 'presentation') {
+          modeResult = await comController.activatePresentationMode();
+        } else if (commandConfig.mode === 'technical') {
+          await comController.executeViewportCommand('_MaxViewport');
+          await comController.executeViewportCommand('_SetView _Top');
+          await comController.executeViewportCommand('_SetDisplayMode _Wireframe');
+          modeResult = await comController.executeViewportCommand('_ZoomExtents');
+        }
       }
       
       // Cleanup COM-Verbindung

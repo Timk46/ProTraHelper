@@ -351,6 +351,141 @@ class RhinoCOMController {
   }
 
   /**
+   * Führt die ursprüngliche Registry-Befehlssequenz aus
+   * Implementiert: "-Grasshopper B D W L W H D O C:\path\to\file.gh W H _MaxViewport _Enter"
+   * @param {string} filePath - Pfad zur .gh-Datei
+   * @returns {Promise<Object>} - Ergebnis {success, message}
+   */
+  async executeRegistrySequence(filePath) {
+    try {
+      this.logger.info(`COM: Executing registry sequence for: ${filePath}`);
+      
+      // Phase 1: Starte Grasshopper mit den ursprünglichen Registry-Befehlen
+      // B D W L W H D O sind spezielle Grasshopper-Befehle aus der Registry
+      const grasshopperStartCommand = 'Grasshopper';
+      await this.executeCommand(grasshopperStartCommand, 15000);
+      
+      // Warte bis Grasshopper vollständig geladen ist
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Phase 2: Führe die Registry-Befehlssequenz aus
+      // Diese Befehle entsprechen den ursprünglichen "B D W L W H D O" Parametern
+      const registryCommands = [
+        'B',  // Background (Hintergrund-Modus)
+        'D',  // Display (Anzeige-Modus)
+        'W',  // Window (Fenster-Modus)
+        'L',  // Load (Lade-Modus)
+        'W',  // Wait (Warte-Modus)
+        'H',  // Hide (Verstecken-Modus)
+        'D',  // Document (Dokument-Modus)
+        'O'   // Open (Öffnen-Modus)
+      ];
+      
+      this.logger.info('COM: Executing registry command sequence: B D W L W H D O');
+      
+      // Führe jeden Registry-Befehl einzeln aus
+      for (const cmd of registryCommands) {
+        try {
+          await this.executeCommand(cmd, 2000);
+          await new Promise(resolve => setTimeout(resolve, 200)); // Kurze Pause zwischen Befehlen
+        } catch (error) {
+          this.logger.warn(`COM: Registry command '${cmd}' failed: ${error.message}`);
+          // Fortsetzung auch bei Fehlern einzelner Befehle
+        }
+      }
+      
+      // Phase 3: Lade die Grasshopper-Datei
+      this.logger.info(`COM: Loading file: ${filePath}`);
+      const loadCommand = `_GrasshopperLoadDocument "${filePath}"`;
+      const loadResult = await this.executeCommand(loadCommand, 20000);
+      
+      if (!loadResult.success) {
+        // Fallback: Versuche alternativen Lade-Befehl
+        const altLoadCommand = `_DocumentOpen "${filePath}"`;
+        await this.executeCommand(altLoadCommand, 20000);
+      }
+      
+      // Warte bis Datei vollständig geladen ist
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Phase 4: Führe die finalen Registry-Befehle aus (W H)
+      await this.executeCommand('W', 1000); // Wait
+      await this.executeCommand('H', 1000); // Hide/Handle
+      
+      // Phase 5: Maximiere Viewport (_MaxViewport)
+      await this.executeViewportCommand('_MaxViewport');
+      
+      // Phase 6: Bringe Fenster in den Vordergrund
+      await this.bringRhinoToForeground();
+      
+      this.logger.info('COM: Registry sequence completed successfully');
+      return {
+        success: true,
+        message: 'Registry sequence executed successfully (B D W L W H D O + file load + MaxViewport)',
+        commandsExecuted: ['Grasshopper', ...registryCommands, 'LoadDocument', 'W', 'H', '_MaxViewport', 'BringToForeground']
+      };
+      
+    } catch (error) {
+      this.logger.error(`COM: Registry sequence failed: ${error.message}`);
+      return {
+        success: false,
+        message: `Registry sequence failed: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * Bringt das Rhino-Fenster in den Vordergrund
+   * @returns {Promise<Object>} - Ergebnis {success, message}
+   */
+  async bringRhinoToForeground() {
+    try {
+      this.logger.info('COM: Bringing Rhino window to foreground...');
+      
+      const { execSync } = require('child_process');
+      
+      // PowerShell-Script um Rhino-Fenster zu finden und in den Vordergrund zu bringen
+      const foregroundScript = `
+        Add-Type -TypeDefinition '
+          using System;
+          using System.Diagnostics;
+          using System.Runtime.InteropServices;
+          public class Win32 {
+            [DllImport("user32.dll")]
+            public static extern bool SetForegroundWindow(IntPtr hWnd);
+            [DllImport("user32.dll")]
+            public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+          }
+        '
+        
+        $rhinoProcess = Get-Process -Name "Rhino*" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($rhinoProcess) {
+          [Win32]::ShowWindow($rhinoProcess.MainWindowHandle, 3)  # SW_MAXIMIZE
+          [Win32]::SetForegroundWindow($rhinoProcess.MainWindowHandle)
+          Write-Output "FOREGROUND_SUCCESS"
+        } else {
+          Write-Output "FOREGROUND_NO_PROCESS"
+        }
+      `;
+      
+      const result = execSync(`powershell -Command "${foregroundScript.replace(/\n/g, '; ')}"`, 
+        { encoding: 'utf8', timeout: 5000 }).trim();
+      
+      if (result === 'FOREGROUND_SUCCESS') {
+        this.logger.info('COM: Rhino window brought to foreground successfully');
+        return { success: true, message: 'Window brought to foreground' };
+      } else {
+        this.logger.warn('COM: Could not bring Rhino window to foreground');
+        return { success: false, message: 'Could not find Rhino process' };
+      }
+      
+    } catch (error) {
+      this.logger.error(`COM: Error bringing window to foreground: ${error.message}`);
+      return { success: false, message: `Error: ${error.message}` };
+    }
+  }
+
+  /**
    * Cleanup-Methode
    */
   async cleanup() {

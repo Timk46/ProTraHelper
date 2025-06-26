@@ -36,6 +36,14 @@
           <div class="content-list-element-header-indicators">
             <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
             <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
+            <mat-icon
+              class="rhino-launcher-icon"
+              matTooltip="Grasshopper-Datei in Rhino öffnen"
+              (click)="onRhinoButtonClick($event)"
+              [style.cursor]="'pointer'"
+              [style.color]="'#4CAF50'">
+              extension
+            </mat-icon>
           </div>
         </mat-panel-description>
       </mat-expansion-panel-header>

@@ -358,4 +358,16 @@ export class ContentListComponent {
     });
   }
 
+  /**
+   * Handles Rhino button click - emits event to parent component
+   * @param event - Mouse event to prevent propagation
+   */
+  onRhinoButtonClick(event: MouseEvent): void {
+    // Prevent event propagation to avoid expanding/collapsing the panel
+    event.stopPropagation();
+
+    // Emit event to parent component (conceptOverview) which handles the Rhino integration
+    this.rhinoButtonClicked.emit();
+  }
+
 }
