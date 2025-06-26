@@ -1,6 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS vector;
+
 -- CreateEnum
-CREATE TYPE "GlobalRole" AS ENUM ('STUDENT', 'TEACHER', 'ADMIN');
+CREATE TYPE "GlobalRole" AS ENUM ('STUDENT', 'TEACHER', 'ADMIN', 'ARCHSTUDENT');
 
 -- CreateEnum
 CREATE TYPE "SubjectRole" AS ENUM ('STUDENT', 'TEACHERASSIST', 'TEACHER');
@@ -123,6 +124,7 @@ CREATE TABLE "ContentNode" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
+    "position" INTEGER,
 
     CONSTRAINT "ContentNode_pkey" PRIMARY KEY ("id")
 );
@@ -523,6 +525,32 @@ CREATE TABLE "CodeGameScaffoldAnswer" (
 );
 
 -- CreateTable
+CREATE TABLE "ModuleSetting" (
+    "id" SERIAL NOT NULL,
+    "key" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
+    "moduleId" INTEGER NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "updatedBy" INTEGER NOT NULL,
+
+    CONSTRAINT "ModuleSetting_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ModuleHighlightConcepts" (
+    "id" SERIAL NOT NULL,
+    "moduleId" INTEGER NOT NULL,
+    "conceptNodeId" INTEGER NOT NULL,
+    "alias" TEXT,
+    "description" TEXT,
+    "pictureData" TEXT,
+    "position" INTEGER,
+    "isUnlocked" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "ModuleHighlightConcepts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "FillinQuestion" (
     "id" SERIAL NOT NULL,
     "content" TEXT NOT NULL,
@@ -805,6 +833,44 @@ CREATE TABLE "UserUmlQuestionAnswer" (
 );
 
 -- CreateTable
+CREATE TABLE "FileUpload" (
+    "id" SERIAL NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "fileId" INTEGER NOT NULL,
+    "moduleId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "FileUpload_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UploadQuestion" (
+    "id" SERIAL NOT NULL,
+    "questionId" INTEGER NOT NULL,
+    "title" TEXT NOT NULL,
+    "text" TEXT NOT NULL,
+    "textHTML" TEXT,
+    "maxSize" INTEGER NOT NULL,
+    "fileType" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "UploadQuestion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UserUploadAnswer" (
+    "id" SERIAL NOT NULL,
+    "userAnswerId" INTEGER NOT NULL,
+    "fileId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "UserUploadAnswer_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_ModuleToSubject" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
@@ -853,6 +919,12 @@ CREATE UNIQUE INDEX "CodeGameQuestion_questionId_key" ON "CodeGameQuestion"("que
 CREATE UNIQUE INDEX "CodeGameAnswer_userAnswerId_key" ON "CodeGameAnswer"("userAnswerId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ModuleSetting_moduleId_key_key" ON "ModuleSetting"("moduleId", "key");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ModuleHighlightConcepts_moduleId_conceptNodeId_key" ON "ModuleHighlightConcepts"("moduleId", "conceptNodeId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "FillinQuestion_questionId_key" ON "FillinQuestion"("questionId");
 
 -- CreateIndex
@@ -887,6 +959,9 @@ CREATE UNIQUE INDEX "UmlQuestion_questionId_key" ON "UmlQuestion"("questionId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserUmlQuestionAnswer_userAnswerId_key" ON "UserUmlQuestionAnswer"("userAnswerId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FileUpload_userId_fileId_moduleId_key" ON "FileUpload"("userId", "fileId", "moduleId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_ModuleToSubject_AB_unique" ON "_ModuleToSubject"("A", "B");
@@ -1069,6 +1144,18 @@ ALTER TABLE "CodeGameAnswer" ADD CONSTRAINT "CodeGameAnswer_userAnswerId_fkey" F
 ALTER TABLE "CodeGameScaffoldAnswer" ADD CONSTRAINT "CodeGameScaffoldAnswer_codeGameAnswerId_fkey" FOREIGN KEY ("codeGameAnswerId") REFERENCES "CodeGameAnswer"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "ModuleSetting" ADD CONSTRAINT "ModuleSetting_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ModuleSetting" ADD CONSTRAINT "ModuleSetting_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ModuleHighlightConcepts" ADD CONSTRAINT "ModuleHighlightConcepts_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ModuleHighlightConcepts" ADD CONSTRAINT "ModuleHighlightConcepts_conceptNodeId_fkey" FOREIGN KEY ("conceptNodeId") REFERENCES "ConceptNode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "FillinQuestion" ADD CONSTRAINT "FillinQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -1148,6 +1235,24 @@ ALTER TABLE "UmlQuestion" ADD CONSTRAINT "UmlQuestion_questionId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "UserUmlQuestionAnswer" ADD CONSTRAINT "UserUmlQuestionAnswer_userAnswerId_fkey" FOREIGN KEY ("userAnswerId") REFERENCES "UserAnswer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FileUpload" ADD CONSTRAINT "FileUpload_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FileUpload" ADD CONSTRAINT "FileUpload_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "File"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FileUpload" ADD CONSTRAINT "FileUpload_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UploadQuestion" ADD CONSTRAINT "UploadQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserUploadAnswer" ADD CONSTRAINT "UserUploadAnswer_userAnswerId_fkey" FOREIGN KEY ("userAnswerId") REFERENCES "UserAnswer"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserUploadAnswer" ADD CONSTRAINT "UserUploadAnswer_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "File"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ModuleToSubject" ADD CONSTRAINT "_ModuleToSubject_A_fkey" FOREIGN KEY ("A") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -323,9 +323,8 @@ export class ContentManagementService {
         prisma.file.createMany({ data: content.files }),
         prisma.module.createMany({ data: content.modules }),
       ]);
-      if (content.moduleHighlightConcepts && content.moduleHighlightConcepts.length > 0) {
-        await prisma.moduleHighlightConcepts.createMany({ data: content.moduleHighlightConcepts });
-      }
+
+      // Import module settings (don't depend on other entities)
       if (content.moduleSettings && content.moduleSettings.length > 0) {
         await prisma.moduleSetting.createMany({ data: content.moduleSettings });
       }
@@ -334,6 +333,11 @@ export class ContentManagementService {
       console.log('\n=== Phase 2/7: Concept Structure ===');
       console.log(`Concept nodes to import: ${content.conceptNodes.length}`);
       await prisma.conceptNode.createMany({ data: content.conceptNodes });
+
+      // Now import moduleHighlightConcepts after concept nodes exist
+      if (content.moduleHighlightConcepts && content.moduleHighlightConcepts.length > 0) {
+        await prisma.moduleHighlightConcepts.createMany({ data: content.moduleHighlightConcepts });
+      }
 
       // Third layer: concept graphs (depends on concept nodes for root)
       console.log('\n=== Phase 3/7: Concept Graphs ===');
