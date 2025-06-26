@@ -139,7 +139,7 @@ model ContentNode {
   id              Int               @id @default(autoincrement())
   name            String
   description     String?
-  position        Int
+  position        Int?
   prerequisites   ContentEdge[]     @relation("prerequisiteContent")
   successors      ContentEdge[]     @relation("successorContent")
   ContentView     ContentView[]

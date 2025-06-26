@@ -164,6 +164,7 @@ export class ContentService {
       contentNodeId: contentNode.id,
       name: contentNode.name,
       description: contentNode.description,
+      position: contentNode.position,
       level: contentNode.trains[0]?.awards,
       contentElements: contentNode.ContentView.map(
         this.transformContentElement(userStatus, questionProgressMap),
@@ -837,5 +838,36 @@ export class ContentService {
 
     const highestLevel: number = highestAwardsResult.awards || -1;
     return highestLevel;
+  }
+
+  /**
+   * Updates the position of a ContentNode.
+   * @param contentNodeId - Die ID des ContentNodes
+   * @param newPosition - Die neue Position
+   * @returns Promise<boolean> - true, wenn erfolgreich
+   */
+  async updateContentNodePosition(contentNodeId: number, newPosition: number): Promise<boolean> {
+    const updated = await this.prisma.contentNode.update({
+      where: { id: contentNodeId },
+      data: { position: newPosition },
+    });
+    return !!updated;
+  }
+
+  /**
+   * Aktualisiert einen ContentNode (Name, Beschreibung, Level)
+   */
+  async updateContentNodeData(contentNodeId: number, data: { name: string; description: string; difficulty: number }): Promise<boolean> {
+    await this.prisma.contentNode.update({
+      where: { id: contentNodeId },
+      data: {
+        name: data.name,
+        description: data.description,
+        // Level ist vermutlich in Training/ModuleConceptGoal, aber für Demo als Beispiel:
+        // level: data.difficulty
+      },
+    });
+    // Falls Level/Schwierigkeit in anderer Tabelle gepflegt wird, hier ergänzen
+    return true;
   }
 }

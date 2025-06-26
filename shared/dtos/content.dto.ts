@@ -7,6 +7,7 @@ export interface ContentDTO {
     contentNodeId: number;
     name: string;
     description: string;
+    position?: number;
     contentElements: ContentElementDTO[];
     level: number;
 

@@ -80,6 +80,7 @@ import { NavigationPreferenceToggleComponent } from './Pages/app-header/navigati
 import { AppHeaderComponent } from './Pages/app-header/app-header.component';
 import { HighlightNavigatorComponent } from './Pages/highlight-navigator/highlight-navigator.component';
 import { HighlightConceptDialogComponent } from "./Pages/highlight-navigator/highlight-concept-dialog/highlight-concept-dialog.component";
+import { ContentListNodeEditDialogComponent } from "./Pages/content-list/content-list-node-edit-dialog/content-list-node-edit-dialog.component";
 
 // ProTra 2.0 Module
 import { PmpmModule } from './features/pmpm/pmpm.module';
@@ -140,6 +141,7 @@ import { RhinoLauncherService } from './features/rhino-launcher/rhino-launcher.s
         MultipleFreeTextTaskComponent,
         ContentListComponent,
         ContentListItemComponent,
+        ContentListNodeEditDialogComponent,
         CodeGameConfirmDialogComponent,
         NavigationPreferenceToggleComponent,
         AppHeaderComponent,
