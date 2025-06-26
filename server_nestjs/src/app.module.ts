@@ -133,7 +133,7 @@ import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgrap
     DijkstraService,
     FloydService,
     KruskalService,
-    AiFeedbackService
+    AiFeedbackService,
   ],
 })
 
