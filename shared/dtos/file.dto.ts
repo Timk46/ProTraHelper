@@ -5,7 +5,13 @@ export interface FileDto {
     path: string;
     type: string;
   }
-  
+
+export interface FileUploadDTO {
+    file: File;
+    name: string;
+    type: string;
+}
+
 export interface TranscriptChunk {
     TranscriptChunkContent: string;
     metadata: {

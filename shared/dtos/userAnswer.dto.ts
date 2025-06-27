@@ -1,5 +1,6 @@
 import { GraphStructureDTO } from "./graphTask.dto";
 import { CodeGameEvaluationDTO } from "./codeGame.dto";
+import { FileUploadDTO } from "./file.dto";
 
 export interface UserAnswerDataDTO {
     id: number;
@@ -12,7 +13,7 @@ export interface UserAnswerDataDTO {
     userFillinTextAnswer?: UserFillinAnswer[];
     userGraphAnswer?: GraphStructureDTO[];
     codeGameEvaluation?: CodeGameEvaluationDTO;
-    userUploadFileId?: number;
+    userUploadAnswer?: UserUploadAnswer;
     //space for more types of answers
 }
 
@@ -34,4 +35,11 @@ export interface userAnswerFeedbackDTO {
 export interface UserFillinAnswer {
     position: string;
     answer: string;
+}
+
+export interface UserUploadAnswer {
+    id?: number;
+    userAnswerId?: number;
+    fileId?: number;
+    file?: FileUploadDTO;
 }

@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Inject, Output } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { TaskViewData, uploadQuestionDTO } from '@DTOs/question.dto';
+import { TaskViewData, uploadQuestionDTO, UserAnswerDTO } from '@DTOs/question.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { UserAnswerDataDTO } from '@DTOs/index';
 
 @Component({
   selector: 'app-upload-task',
@@ -105,21 +106,30 @@ export class UploadTaskComponent {
 
   uploadFile() {
     if (!this.selectedFile) return;
+    if (!this.uploadQuestion) return;
 
     this.isUploading = true;
-
-    // Simulate upload - replace with actual upload service
-    setTimeout(() => {
+    const userAnswerData: UserAnswerDataDTO = {
+      id: -1,
+      questionId: this.uploadQuestion.questionId,
+      contentElementId: this.uploadQuestion.contentElementId,
+      userId: -1,
+      userUploadAnswer: {
+        file: {
+          file: this.selectedFile,
+          name: this.selectedFile.name,
+          type: this.selectedFile.type,
+        }
+      }
+    }
+    this.questionService.createUserAnswer(userAnswerData).subscribe(data => {
+      this.snackBar.open('Datei hochgeladen', 'OK', {
+        duration: 3000,
+      });
       this.isUploading = false;
-      this.submitClicked.emit({
-        file: this.selectedFile,
-        questionId: this.uploadQuestion?.questionId
-      });
-      this.dialogRef.close({
-        uploaded: true,
-        file: this.selectedFile
-      });
-    }, 2000);
+      this.submitClicked.emit(data.progress);
+    });
+
   }
 
   // Utility methods
