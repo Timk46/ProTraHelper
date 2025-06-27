@@ -87,6 +87,7 @@ import { PmpmModule } from './features/pmpm/pmpm.module';
 import { HelperAppOnboardingModule } from './features/helper-app-onboarding/helper-app-onboarding.module';
 import { RhinoLauncherService } from './features/rhino-launcher/rhino-launcher.service';
 import { UploadTaskComponent } from "./Pages/contentView/contentElement/upload-task/upload-task.component";
+import { TeacherRoutingModule } from "./Pages/teacher/teacher-routing.module";
 
 @NgModule({ declarations: [
         AppComponent,
@@ -169,7 +170,8 @@ import { UploadTaskComponent } from "./Pages/contentView/contentElement/upload-t
         CodeGameModule,
         PmpmModule,
         HelperAppOnboardingModule,
-        MatIconModule], providers: [
+        MatIconModule,
+        TeacherRoutingModule], providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
         { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },

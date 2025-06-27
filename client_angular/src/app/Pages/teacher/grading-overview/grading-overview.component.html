@@ -1,0 +1,31 @@
+<div class="grading-overview-container">
+  <h2>Teacher Grading Overview</h2>
+
+  <div class="navigation-buttons">
+    <h3>Modular Navigation (Placeholder)</h3>
+    <button>Overview</button>
+    <button>Another Grading View</button>
+  </div>
+
+  <h3>Uploads for EntwurfUpload Questions (Module 1)</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Question ID</th>
+        <th>User ID</th>
+        <th>Upload</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of uploadOverview">
+        <td>{{ item.questionId }}</td>
+        <td>{{ item.userId }}</td>
+        <td>
+          <a *ngIf="item.uploadPath !== 'N/A'" [href]="item.uploadPath" target="_blank">View Upload</a>
+          <span *ngIf="item.uploadPath === 'N/A'" class="no-upload-text">No Upload</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
