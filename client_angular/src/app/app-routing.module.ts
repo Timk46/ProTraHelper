@@ -107,7 +107,7 @@ const routes: Routes = [
   },
   {
     path: 'teacher',
-    loadChildren: () => import('./Pages/teacher/teacher-routing.module').then(m => m.TeacherRoutingModule),
+    loadChildren: () => import('./Pages/teacher/teacher.module').then(m => m.TeacherModule),
     canActivate: [LoggedInGuard] // Assuming teachers need to be logged in
   }
 ];

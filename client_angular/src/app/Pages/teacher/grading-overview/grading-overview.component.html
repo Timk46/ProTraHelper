@@ -7,9 +7,17 @@
     <button>Another Grading View</button>
   </div>
 
-  <h3>Uploads for EntwurfUpload Questions (Module 1)</h3>
+  <h3 *ngIf="moduleId">Uploads for EntwurfUpload Questions (Module {{ moduleId }})</h3>
 
-  <table>
+  <div *ngIf="isLoading" class="loading-indicator">
+    <p>Loading...</p>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    <p>{{ error }}</p>
+  </div>
+
+  <table *ngIf="!isLoading && !error">
     <thead>
       <tr>
         <th>Question ID</th>
@@ -22,7 +30,7 @@
         <td>{{ item.questionId }}</td>
         <td>{{ item.userId }}</td>
         <td>
-          <a *ngIf="item.uploadPath !== 'N/A'" [href]="item.uploadPath" target="_blank">View Upload</a>
+          <a *ngIf="item.uploadPath !== 'N/A'" [href]="item.uploadPath" target="_blank">{{ item.uploadPath }}</a>
           <span *ngIf="item.uploadPath === 'N/A'" class="no-upload-text">No Upload</span>
         </td>
       </tr>

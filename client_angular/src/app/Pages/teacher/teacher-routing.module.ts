@@ -4,7 +4,12 @@ import { GradingOverviewComponent } from './grading-overview/grading-overview.co
 
 const routes: Routes = [
   {
-    path: 'grading-overview',
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'grading-overview/1'
+  },
+  {
+    path: 'grading-overview/:moduleId',
     component: GradingOverviewComponent
   }
 ];
