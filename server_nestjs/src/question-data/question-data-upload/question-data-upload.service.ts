@@ -33,7 +33,7 @@ export class QuestionDataUploadService {
     return {
       questionId: uploadQuestion.questionId,
       title: question.name,
-      text: question.text,
+      text: uploadQuestion.text || question.text,
       textHTML: uploadQuestion.textHTML || undefined,
       maxSize: uploadQuestion.maxSize,
       fileType: uploadQuestion.fileType,

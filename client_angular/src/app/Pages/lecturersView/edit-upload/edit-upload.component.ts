@@ -82,8 +82,9 @@ export class EditUploadComponent implements OnInit {
         this.uploadForm.patchValue({
           title: data.name
         });
-        if (data.uploadQuestion) {
-          this.setFormData(data.uploadQuestion);
+        if (this.detailedQuestion.uploadQuestion) {
+          this.detailedQuestion.uploadQuestion.maxSize = Math.floor((data.uploadQuestion?.maxSize || 10) / 1024 / 1024); // Convert bytes to MB
+          this.setFormData(this.detailedQuestion.uploadQuestion);
         }
     });
   }
@@ -106,6 +107,7 @@ export class EditUploadComponent implements OnInit {
       this.detailedQuestion.uploadQuestion = {
         ...this.detailedQuestion.uploadQuestion,
         ...this.uploadForm.value,
+        maxSize: this.uploadForm.value.maxSize * 1024 * 1024, // Convert MB to bytes
       };
 
       // update and wait for the response

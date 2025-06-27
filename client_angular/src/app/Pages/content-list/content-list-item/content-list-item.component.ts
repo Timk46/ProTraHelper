@@ -13,6 +13,7 @@ import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.
 import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { UploadTaskComponent } from '../../contentView/contentElement/upload-task/upload-task.component';
 
 @Component({
   selector: 'app-content-list-item',
@@ -156,7 +157,7 @@ export class ContentListItemComponent {
     dialogConfig.width = 'auto';
     dialogConfig.maxHeight = '95vh';
 
-    let dialogRef: MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined;
+    let dialogRef: MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent | UploadTaskComponent> | undefined;
 
     // Open the appropriate dialog based on the task type
     switch (question.type) {
@@ -184,6 +185,9 @@ export class ContentListItemComponent {
       case questionType.CODEGAME:
         // Navigate to coding question component
         this.router.navigate([this.getRouterLink('CodeGame', question.id)]);
+        break;
+      case questionType.UPLOAD:
+        dialogRef = this.dialog.open(UploadTaskComponent, {...dialogConfig, width: '70vw'});
         break;
     }
 

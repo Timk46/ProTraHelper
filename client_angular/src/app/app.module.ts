@@ -86,6 +86,7 @@ import { ContentListNodeEditDialogComponent } from "./Pages/content-list/content
 import { PmpmModule } from './features/pmpm/pmpm.module';
 import { HelperAppOnboardingModule } from './features/helper-app-onboarding/helper-app-onboarding.module';
 import { RhinoLauncherService } from './features/rhino-launcher/rhino-launcher.service';
+import { UploadTaskComponent } from "./Pages/contentView/contentElement/upload-task/upload-task.component";
 
 @NgModule({ declarations: [
         AppComponent,
@@ -147,6 +148,7 @@ import { RhinoLauncherService } from './features/rhino-launcher/rhino-launcher.s
         AppHeaderComponent,
         HighlightNavigatorComponent,
         HighlightConceptDialogComponent,
+        UploadTaskComponent
     ],
     bootstrap: [AppComponent], imports: [ToastrModule.forRoot(),
         BrowserModule,
