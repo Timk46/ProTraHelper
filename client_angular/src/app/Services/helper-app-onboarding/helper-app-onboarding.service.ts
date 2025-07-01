@@ -151,7 +151,7 @@ export class HelperAppOnboardingService {
     const backendDownloadBaseUrl = 'http://localhost:3000'; // Beispiel: Ihr NestJS-Server
 
       const downloadUrls = {
-        'windows': '/assets/downloads/ProTra Helfer-Setup-1.0.0.exe', // <-- HIER!
+        'windows': '/assets/downloads/ProTra Helfer-Setup-1.0.1.exe',
         'mac': '/assets/downloads/ProTra-Helper.dmg',
         'linux': '/assets/downloads/ProTra-Helper.AppImage'
       };

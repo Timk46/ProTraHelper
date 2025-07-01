@@ -67,7 +67,7 @@ const FILE_COMMAND_MAPPING = {
   // === PHASE 2: COM Automation Tests (löst /runscript Probleme definitiv) ===
   
   // Haupttests mit COM-Integration (löst Timing-Probleme)
-  'example.gh': 'com_registry_sequence',      // COM: Original Registry-Befehlssequenz mit B D W L W H D O
+  'example.gh': 'python_basic',      // Python: Basis-Modus mit Warten auf Grasshopper
   'example_viewport.gh': 'com_viewport',      // COM: Mit Viewport-Maximierung
   'example_presentation.gh': 'com_presentation',  // COM: Präsentationsmodus
   'example_technical.gh': 'com_technical',    // COM: Technische Ansicht

@@ -12,6 +12,10 @@ import { ContentLinkerService } from 'src/app/Services/contentLinker/content-lin
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { ContentListNodeEditDialogComponent } from './content-list-node-edit-dialog/content-list-node-edit-dialog.component';
+import { RhinoCommandDialogComponent, RhinoCommandDialogData } from '../../features/rhino-command-dialog/rhino-command-dialog.component';
+import { RhinoLauncherService } from '../../features/rhino-launcher/rhino-launcher.service';
+import { ModernRhinoApiService, CommandType } from '../../Services/modern-rhino-api.service';
+import { DirectRhinoLauncherService } from '../../Services/direct-rhino-launcher.service';
 
 
 @Component({
@@ -62,7 +66,9 @@ export class ContentListComponent {
     private userService: UserService,
     private contentLinkerService: ContentLinkerService,
     private snackBar: MatSnackBar,
-    private confirmService: ConfirmationService
+    private confirmService: ConfirmationService,
+    private rhinoService: RhinoLauncherService,
+    private modernRhinoApiService: ModernRhinoApiService
   ) {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
   }
@@ -359,15 +365,310 @@ export class ContentListComponent {
   }
 
   /**
-   * Handles Rhino button click - emits event to parent component
+   * Handles Rhino button click - starts Rhino and shows command dialog
    * @param event - Mouse event to prevent propagation
    */
   onRhinoButtonClick(event: MouseEvent): void {
     // Prevent event propagation to avoid expanding/collapsing the panel
     event.stopPropagation();
 
-    // Emit event to parent component (conceptOverview) which handles the Rhino integration
-    this.rhinoButtonClicked.emit();
+    console.log('🦏 Rhino button clicked - starting Rhino and showing command dialog');
+
+    // Hardcoded path for example.gh as requested
+    const exampleFilePath = 'C:\\Dev\\hefl\\files\\Grasshopper\\example.gh';
+    const fileName = 'example.gh';
+
+    // Start Rhino via helper app (optional - depends on availability)
+    this.startRhinoIfPossible(exampleFilePath);
+
+    // Always show the command dialog immediately
+    this.showRhinoCommandDialog(fileName, exampleFilePath);
+  }
+
+  /**
+   * Attempts to start Rhino via helper app (if available)
+   */
+  private async startRhinoIfPossible(filePath: string): Promise<void> {
+    console.log('🔍 DEBUG: startRhinoIfPossible called with filePath:', filePath);
+
+    try {
+      // Check if helper app is available
+      console.log('🔍 DEBUG: Checking helper app status...');
+      const status = await this.rhinoService.getHelperAppStatus().toPromise();
+
+      console.log('🔍 DEBUG: Helper app status received:', status);
+
+      const apiToken = this.rhinoService.getApiToken();
+      console.log('🔍 DEBUG: API Token status:', apiToken ? 'Available' : 'Missing');
+
+      console.log('🔍 DEBUG: Condition check results:', {
+        hasStatus: !!status,
+        rhinoPathConfigured: status?.rhinoPathConfigured,
+        hasApiToken: !!apiToken,
+        allConditionsMet: !!(status && status.rhinoPathConfigured && apiToken)
+      });
+
+      if (status && status.rhinoPathConfigured && apiToken) {
+        console.log('🦏 Helper app available - starting Rhino...');
+        console.log('🔍 DEBUG: Attempting to launch Rhino with helper app');
+
+        // Start Rhino via helper app
+        this.rhinoService.launchRhinoWithHelper(filePath).subscribe({
+          next: (response) => {
+            console.log('🔍 DEBUG: Launch response received:', response);
+            if (response.success) {
+              this.snackBar.open('Rhino wird gestartet...', 'OK', {
+                duration: 3000,
+                panelClass: 'success-snackbar'
+              });
+            } else {
+              console.warn('🦏 Rhino start failed:', response.message);
+              this.snackBar.open('Hinweis: Rhino konnte nicht automatisch gestartet werden. Verwenden Sie die Befehle im Dialog.', 'OK', {
+                duration: 5000,
+                panelClass: 'warn-snackbar'
+              });
+            }
+          },
+          error: (error) => {
+            console.error('🔍 DEBUG: Launch error:', error);
+            console.warn('🦏 Rhino start error:', error);
+            this.snackBar.open('Hinweis: Rhino konnte nicht automatisch gestartet werden. Verwenden Sie die Befehle im Dialog.', 'OK', {
+              duration: 5000,
+              panelClass: 'warn-snackbar'
+            });
+          }
+        });
+      } else {
+        console.log('🔍 DEBUG: Helper app conditions not met - showing dialog only');
+        console.log('🦏 Helper app not available - showing dialog only');
+
+        // Provide specific feedback about what's missing
+        let missingInfo = [];
+        if (!status) missingInfo.push('Helper-App nicht erreichbar');
+        if (status && !status.rhinoPathConfigured) missingInfo.push('Rhino-Pfad nicht konfiguriert');
+        if (!apiToken) missingInfo.push('API-Token fehlt');
+
+        const detailMessage = missingInfo.length > 0
+          ? `Hinweis: ${missingInfo.join(', ')}. Verwenden Sie die Befehle im Dialog.`
+          : 'Hinweis: Starten Sie Rhino manuell und verwenden Sie die Befehle im Dialog.';
+
+        this.snackBar.open(detailMessage, 'OK', {
+          duration: 6000,
+          panelClass: 'info-snackbar'
+        });
+      }
+    } catch (error) {
+      console.error('🔍 DEBUG: Helper app check exception:', error);
+      console.log('🦏 Helper app check failed - showing dialog only');
+      this.snackBar.open('Hinweis: Helper-App Verbindung fehlgeschlagen. Verwenden Sie die Befehle im Dialog.', 'OK', {
+        duration: 4000,
+        panelClass: 'info-snackbar'
+      });
+    }
+  }
+
+  /**
+   * New modern API method - Execute Grasshopper command via FastAPI backend
+   */
+  private async executeGrasshopperWithModernAPI(filePath: string): Promise<boolean> {
+    try {
+      console.log('🚀 Executing Grasshopper command via modern API...');
+
+      // Show loading notification
+      const loadingSnackBar = this.snackBar.open(
+        'Verbindung zur modernen Rhino API wird hergestellt...',
+        'Abbrechen',
+        {
+          duration: 0,
+          panelClass: 'info-snackbar'
+        }
+      );
+
+      // Check API health first
+      const isHealthy = await this.modernRhinoApiService.checkHealth().toPromise();
+
+      if (!isHealthy) {
+        console.warn('🚨 Modern Rhino API is not available');
+        loadingSnackBar.dismiss();
+        this.snackBar.open(
+          'Moderne API nicht verfügbar. Verwende traditionelle Methode...',
+          'OK',
+          { duration: 3000, panelClass: 'warn-snackbar' }
+        );
+        return false;
+      }
+
+      // Execute the Grasshopper command
+      const response = await this.modernRhinoApiService.executeGrasshopperCommand(filePath).toPromise();
+
+      loadingSnackBar.dismiss();
+
+      if (response && response.success) {
+        console.log('✅ Grasshopper command executed successfully:', response);
+
+        this.snackBar.open(
+          `Grasshopper-Datei erfolgreich geladen! (${response.execution_time_ms?.toFixed(0)}ms)`,
+          'OK',
+          {
+            duration: 5000,
+            panelClass: 'success-snackbar'
+          }
+        );
+
+        // Subscribe to WebSocket for real-time updates
+        this.modernRhinoApiService.getWebSocketMessages().subscribe(message => {
+          if (message.type === 'command_completed' && message.execution_id === response.execution_id) {
+            console.log('📡 Real-time update: Command completed via WebSocket');
+          }
+        });
+
+        return true;
+      } else {
+        const errorMessage = response?.message || 'Unbekannter Fehler';
+        console.error('❌ Grasshopper command failed:', errorMessage);
+        this.snackBar.open(
+          `Befehl fehlgeschlagen: ${errorMessage}`,
+          'OK',
+          {
+            duration: 5000,
+            panelClass: 'error-snackbar'
+          }
+        );
+        return false;
+      }
+
+    } catch (error) {
+      console.error('🚨 Modern API execution failed:', error);
+      this.snackBar.open(
+        'Moderne API Fehler. Verwende traditionelle Methode...',
+        'OK',
+        { duration: 3000, panelClass: 'warn-snackbar' }
+      );
+      return false;
+    }
+  }
+
+  /**
+   * Enhanced Rhino button click handler with modern API integration
+   */
+  async onRhinoButtonClickModern(event: MouseEvent): Promise<void> {
+    event.stopPropagation();
+
+    console.log('🦏 Modern Rhino button clicked - trying modern API first');
+
+    const exampleFilePath = 'C:\\Dev\\hefl\\files\\Grasshopper\\example.gh';
+    const fileName = 'example.gh';
+
+    // Try modern API first
+    const modernApiSuccess = await this.executeGrasshopperWithModernAPI(exampleFilePath);
+
+    if (!modernApiSuccess) {
+      console.log('🔄 Falling back to traditional method...');
+      // Fall back to traditional method
+      this.startRhinoIfPossible(exampleFilePath);
+      this.showRhinoCommandDialog(fileName, exampleFilePath);
+    } else {
+      // Modern API succeeded, still show command dialog for educational purposes
+      this.snackBar.open(
+        'Tipp: Der Befehl wurde automatisch ausgeführt. Dialog zeigt die Details.',
+        'OK',
+        { duration: 4000, panelClass: 'info-snackbar' }
+      );
+
+      // Show dialog with "already executed" information
+      this.showRhinoCommandDialog(fileName, exampleFilePath, true);
+    }
+  }
+
+  /**
+   * Shows the Rhino command dialog with the specified command sequence
+   */
+  private showRhinoCommandDialog(fileName: string, filePath: string, alreadyExecuted: boolean = false): void {
+    // Create the exact command sequence as requested
+    const commandSequence = `_-Grasshopper B D W L W H D O "${filePath}" W _MaxViewport _Enter`;
+
+    // Create step-by-step instructions
+    const commandSteps = [
+      {
+        step: 1,
+        command: '_-Grasshopper',
+        description: 'Startet Grasshopper im Skript-Modus (ohne GUI-Dialoge)'
+      },
+      {
+        step: 2,
+        command: 'B D W L',
+        description: 'Batch mode, Display, Window, Load - Konfiguriert Grasshopper für automatischen Betrieb'
+      },
+      {
+        step: 3,
+        command: 'W H',
+        description: 'Window Hide - Minimiert das Grasshopper-Fenster nach dem Laden'
+      },
+      {
+        step: 4,
+        command: 'D O',
+        description: 'Document Open - Bereitet das Öffnen einer Grasshopper-Datei vor'
+      },
+      {
+        step: 5,
+        command: `"${filePath}"`,
+        description: 'Pfad zur Grasshopper-Datei - Lädt die spezifische .gh-Datei'
+      },
+      {
+        step: 6,
+        command: 'W',
+        description: 'Window Hide - Versteckt das Grasshopper-Fenster'
+      },
+      {
+        step: 7,
+        command: '_MaxViewport',
+        description: 'Maximiert das Rhino-Viewport für optimale Ansicht des 3D-Modells'
+      },
+      {
+        step: 8,
+        command: '_Enter',
+        description: 'Bestätigt alle Befehle und startet die Ausführung'
+      }
+    ];
+
+    const dialogData: RhinoCommandDialogData = {
+      fileName: fileName,
+      filePath: filePath,
+      commandSequence: commandSequence,
+      commandSteps: commandSteps
+    };
+
+    console.log('🦏 Opening Rhino command dialog with data:', dialogData);
+
+    try {
+      const dialogRef = this.dialog.open(RhinoCommandDialogComponent, {
+        width: '90%',
+        maxWidth: '800px',
+        maxHeight: '90vh',
+        data: dialogData,
+        disableClose: false,
+        autoFocus: true
+      });
+
+      // Handle dialog close
+      dialogRef.afterClosed().subscribe(result => {
+        if (result && result.completed) {
+          this.snackBar.open('Rhino-Befehle erfolgreich übertragen!', 'OK', {
+            duration: 3000,
+            panelClass: 'success-snackbar'
+          });
+        }
+        console.log('🦏 Rhino command dialog closed with result:', result);
+      });
+
+      console.log('🦏 Rhino command dialog opened successfully');
+    } catch (error) {
+      console.error('🦏 Error opening Rhino command dialog:', error);
+      this.snackBar.open(`Fehler beim Öffnen des Dialogs: ${error}`, 'Schließen', {
+        duration: 5000,
+        panelClass: 'error-snackbar'
+      });
+    }
   }
 
 }

@@ -51,6 +51,40 @@
   }
 }
 
+// Modern Rhino API launcher icon styling
+.modern-rhino-launcher-icon {
+  transition: all 0.3s ease-in-out;
+  position: relative;
+
+  &:hover {
+    color: #1976D2 !important;
+    transform: scale(1.2) rotate(5deg);
+    filter: drop-shadow(0 0 8px rgba(33, 150, 243, 0.6));
+  }
+
+  &:active {
+    transform: scale(0.9) rotate(-2deg);
+  }
+
+  // Pulse animation for modern API button
+  animation: modernPulse 3s ease-in-out infinite;
+}
+
+@keyframes modernPulse {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
 .content-list-element-introduction {
   display: flex;
   flex-direction: row;

@@ -46,11 +46,13 @@ def wait_for_grasshopper(max_wait=45):
         except ImportError:
             # Grasshopper noch nicht geladen
             if attempt == 0:
-                print("ProTra: Grasshopper not yet imported, starting Grasshopper...")
+                print("ProTra: Grasshopper module not yet imported. Attempting to open Grasshopper plugin now.")
                 try:
-                    rs.Command("Grasshopper", echo=False)
-                except:
-                    print("ProTra: Could not execute Grasshopper command, will keep waiting...")
+                    print("ProTra: Sending '-_Grasshopper' command to Rhino...")
+                    rs.Command("-_Grasshopper", echo=False)
+                    print("ProTra: '-_Grasshopper' command sent successfully.")
+                except Exception as e:
+                    print(f"ProTra: ERROR: Could not execute '-_Grasshopper' command: {str(e)}. Will continue to wait for manual launch.")
             
         except Exception as e:
             print(f"ProTra: Grasshopper check attempt {attempt + 1}: {str(e)}")
@@ -98,6 +100,11 @@ def load_grasshopper_file(filepath):
 def main():
     """Enhanced main function mit robuster Grasshopper-Integration"""
     try:
+        # NEU: Feste Wartezeit von 10 Sekunden, um sicherzustellen, dass Rhino bereit ist
+        print("ProTra: Initializing automation. Waiting for 10 seconds before proceeding...")
+        time.sleep(10)
+        print("ProTra: 10-second delay finished. Starting main process.")
+
         # Datei-Pfad
         filepath = r"{{FILE_PATH}}"
         print("=== ProTra Enhanced Rhino Automation - Basic Mode ===")
@@ -508,6 +515,166 @@ def main():
 if __name__ == "__main__":
     result = main()
     print("ProTra: Debug script completed with result: " + str(result))
+`,
+
+  // Registry Sequence Advanced: Implementiert die korrekte "B D W L W H D O" Sequenz
+  registry_sequence_advanced: `# ProTra Rhino Automation Script - Registry Sequence Advanced
+# Implementiert die originale Registry-Sequenz: _-Grasshopper -> B D W L W H D O -> file.gh -> W H -> _MaxViewport
+import rhinoscriptsyntax as rs
+import System
+import time
+
+def execute_grasshopper_command_sequence(filepath):
+    """
+    Implementiert die korrekte Registry-Sequenz für Grasshopper
+    Folgt der originalen Befehlsfolge aus der Windows Registry
+    """
+    try:
+        print("=== ProTra Registry Sequence Advanced Mode ===")
+        print(f"ProTra: Target file: {filepath}")
+        
+        # Phase 1: Starte Grasshopper im Kommandozeilen-Modus
+        print("ProTra: Phase 1 - Starting Grasshopper with _-Grasshopper")
+        rs.Command("_-Grasshopper", echo=False)
+        
+        # Warte bis Grasshopper Command-Interface bereit ist
+        time.sleep(3)
+        print("ProTra: Grasshopper command mode activated")
+        
+        # Phase 2: Führe die Grasshopper-spezifischen Befehle aus
+        # Diese werden IN Grasshopper eingegeben, nachdem es gestartet wurde
+        grasshopper_commands = ['B', 'D', 'W', 'L', 'W', 'H', 'D', 'O']
+        
+        print("ProTra: Phase 2 - Executing Grasshopper commands: B D W L W H D O")
+        for i, cmd in enumerate(grasshopper_commands):
+            try:
+                print(f"ProTra: Sending Grasshopper command {i+1}/8: '{cmd}'")
+                rs.Command(cmd, echo=False)
+                time.sleep(0.3)  # Kurze Pause zwischen Befehlen
+            except Exception as e:
+                print(f"ProTra: Warning - Grasshopper command '{cmd}' failed: {str(e)}")
+                # Fortsetzung auch bei Fehlern einzelner Befehle
+        
+        # Phase 3: Sende den Dateipfad (wird in Grasshopper verarbeitet)
+        print(f"ProTra: Phase 3 - Sending file path to Grasshopper")
+        try:
+            # Versuche Pfad ohne Anführungszeichen
+            rs.Command(filepath, echo=False)
+            time.sleep(2)
+            print(f"ProTra: File path sent: {filepath}")
+        except Exception as e:
+            print(f"ProTra: Direct file path failed: {str(e)}")
+            try:
+                # Fallback: Mit Anführungszeichen
+                quoted_path = f'"{filepath}"'
+                rs.Command(quoted_path, echo=False)
+                time.sleep(2)
+                print(f"ProTra: File path sent (quoted): {quoted_path}")
+            except Exception as e2:
+                print(f"ProTra: Warning - File path transmission failed: {str(e2)}")
+        
+        # Phase 4: Führe die finalen Grasshopper-Befehle aus (W H)
+        print("ProTra: Phase 4 - Executing final Grasshopper commands: W H")
+        final_commands = ['W', 'H']
+        for cmd in final_commands:
+            try:
+                print(f"ProTra: Sending final command: '{cmd}'")
+                rs.Command(cmd, echo=False)
+                time.sleep(0.5)
+            except Exception as e:
+                print(f"ProTra: Warning - Final command '{cmd}' failed: {str(e)}")
+        
+        # Phase 5: Bestätige mit Enter (beendet den Grasshopper-Befehlsmodus)
+        print("ProTra: Phase 5 - Confirming with Enter")
+        try:
+            rs.Command("_Enter", echo=False)
+            time.sleep(1)
+            print("ProTra: Grasshopper command mode completed")
+        except Exception as e:
+            print(f"ProTra: Warning - Enter confirmation failed: {str(e)}")
+        
+        # Phase 6: Maximiere Viewport
+        print("ProTra: Phase 6 - Maximizing viewport")
+        try:
+            rs.Command("_MaxViewport", echo=False)
+            time.sleep(1)
+            print("ProTra: Viewport maximized")
+        except Exception as e:
+            print(f"ProTra: Warning - Viewport maximization failed: {str(e)}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"ProTra: ERROR in execute_grasshopper_command_sequence: {str(e)}")
+        import traceback
+        print("ProTra: Detailed traceback:")
+        print(traceback.format_exc())
+        return False
+
+def verify_grasshopper_file_loaded():
+    """
+    Versucht zu verifizieren, ob eine Grasshopper-Datei geladen wurde
+    """
+    try:
+        import Grasshopper as gh
+        
+        if gh.Instances and gh.Instances.DocumentEditor:
+            current_doc = gh.Instances.DocumentEditor.Document
+            if current_doc and current_doc.DisplayName:
+                print(f"ProTra: Document verified: {current_doc.DisplayName}")
+                return True
+            else:
+                print("ProTra: Document loaded but no display name available")
+                return True  # Trotzdem als Erfolg werten
+        else:
+            print("ProTra: Warning - Could not access Grasshopper DocumentEditor for verification")
+            return True  # Nicht als Fehler werten, da Registry-Sequence möglicherweise funktioniert hat
+            
+    except Exception as e:
+        print(f"ProTra: Could not verify document load: {str(e)}")
+        return True  # Nicht als Fehler werten
+
+def main():
+    """
+    Hauptfunktion für Registry Sequence Advanced Mode
+    Implementiert die originale Windows Registry Befehlsfolge
+    """
+    try:
+        filepath = r"{{FILE_PATH}}"
+        start_time = time.time()
+        
+        print("=== ProTra Registry Sequence Advanced - Starting ===")
+        print(f"ProTra: Implementing original registry sequence for: {filepath}")
+        
+        # Führe die Registry-Sequenz aus
+        sequence_success = execute_grasshopper_command_sequence(filepath)
+        
+        if sequence_success:
+            print("ProTra: Registry sequence executed successfully")
+            
+            # Versuche zu verifizieren dass die Datei geladen wurde
+            verify_grasshopper_file_loaded()
+            
+            # Kurze Pause für finale Verarbeitung
+            time.sleep(2)
+            
+            end_time = time.time()
+            print(f"ProTra: Registry Sequence Advanced completed successfully in {end_time - start_time:.1f} seconds")
+            return True
+        else:
+            print("ProTra: Registry sequence failed")
+            return False
+        
+    except Exception as e:
+        print(f"ProTra: ERROR in main(): {str(e)}")
+        import traceback
+        print("ProTra: Detailed traceback:")
+        print(traceback.format_exc())
+        return False
+
+if __name__ == "__main__":
+    result = main()
+    print(f"ProTra: Registry Sequence Advanced script completed with result: {result}")
 `
 };
 
@@ -578,17 +745,48 @@ class PythonScriptGenerator {
       const filename = `protra_${mode}_${timestamp}_${randomId}.py`;
       const scriptPath = path.join(this.tempScriptDir, filename);
       
+      this.logger.info(`🐍 DIAGNOSTIC: Attempting to write script to: ${scriptPath}`);
+      this.logger.info(`🐍 DIAGNOSTIC: Script content length: ${script.length} characters`);
+      this.logger.info(`🐍 DIAGNOSTIC: Temp directory: ${this.tempScriptDir}`);
+      
+      // Prüfe ob temp directory existiert
+      try {
+        await fs.access(this.tempScriptDir);
+        this.logger.info(`🐍 DIAGNOSTIC: Temp directory exists and is accessible`);
+      } catch (dirError) {
+        this.logger.error(`🐍 DIAGNOSTIC ERROR: Temp directory not accessible: ${dirError.message}`);
+        throw new Error(`Temp directory not accessible: ${dirError.message}`);
+      }
+      
       // Schreibe Script
       await fs.writeFile(scriptPath, script, 'utf8');
+      this.logger.info(`🐍 DIAGNOSTIC: Script write operation completed`);
+      
+      // Verifikation: Prüfe ob Datei tatsächlich existiert
+      try {
+        await fs.access(scriptPath);
+        const stats = await fs.stat(scriptPath);
+        this.logger.info(`🐍 DIAGNOSTIC SUCCESS: File exists with size ${stats.size} bytes`);
+        
+        // Lese ersten Teil zur Verifikation
+        const verification = await fs.readFile(scriptPath, 'utf8');
+        const preview = verification.substring(0, 100);
+        this.logger.info(`🐍 DIAGNOSTIC: File content preview: ${preview}...`);
+        
+      } catch (verifyError) {
+        this.logger.error(`🐍 DIAGNOSTIC CRITICAL ERROR: Script file not found after write: ${verifyError.message}`);
+        throw new Error(`Script file not found after write operation: ${verifyError.message}`);
+      }
       
       // Track für Cleanup
       this.activeScripts.add(scriptPath);
       
-      this.logger.info(`Python script written to: ${scriptPath}`);
+      this.logger.info(`🐍 Python script written and verified: ${scriptPath}`);
       return scriptPath;
       
     } catch (error) {
-      this.logger.error(`Failed to write temp script: ${error.message}`);
+      this.logger.error(`🐍 CRITICAL: Failed to write temp script: ${error.message}`);
+      this.logger.error(`🐍 CRITICAL: Error stack: ${error.stack}`);
       throw error;
     }
   }

@@ -8,13 +8,15 @@ import { RhinoLauncherComponent } from './rhino-launcher.component';
 import { RhinoLauncherService } from './rhino-launcher.service';
 import { HttpClientModule } from '@angular/common/http';
 import { TaskSelectionDialogComponent } from '../task-selection-dialog/task-selection-dialog.component';
+import { RhinoCommandDialogComponent } from '../rhino-command-dialog/rhino-command-dialog.component';
 import { MockQuestionDataService } from 'src/app/Services/question/mock-question-data.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 
 @NgModule({
   declarations: [
     RhinoLauncherComponent,
-    TaskSelectionDialogComponent
+    TaskSelectionDialogComponent,
+    RhinoCommandDialogComponent
   ],
   imports: [
     CommonModule,

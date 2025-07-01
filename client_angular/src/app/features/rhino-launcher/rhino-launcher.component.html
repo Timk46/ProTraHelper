@@ -132,6 +132,15 @@
         <mat-icon>assignment</mat-icon>
         <span class="button-text">Aufgaben öffnen</span>
       </button>
+
+      <!-- DEBUG: Test Button für Dialog -->
+      <button mat-stroked-button
+              color="warn"
+              (click)="testOpenDialog()"
+              class="test-button">
+        <mat-icon>bug_report</mat-icon>
+        <span class="button-text">TEST Dialog</span>
+      </button>
     </div>
 
     <div *ngIf="!selectedFile && helperAppStatus?.rhinoPathConfigured" class="info-section">

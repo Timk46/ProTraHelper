@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize, catchError, tap } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskSelectionDialogComponent } from '../task-selection-dialog/task-selection-dialog.component';
+import { RhinoCommandDialogComponent, RhinoCommandDialogData } from '../rhino-command-dialog/rhino-command-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
@@ -148,7 +149,10 @@ export class RhinoLauncherComponent implements OnInit, OnDestroy {
           };
 
           if (response.success) {
-            this.snackBar.open(response.message || 'Rhino wird gestartet...', 'OK', { duration: 5000, panelClass: 'success-snackbar' });
+            this.snackBar.open(response.message || 'Rhino wird gestartet...', 'OK', { duration: 3000, panelClass: 'success-snackbar' });
+
+            // *** NEUE FUNKTIONALITÄT: Öffne Command Dialog ***
+            this.openRhinoCommandDialog();
 
             // Zeige Command-Details automatisch an, wenn verfügbar
             if (response.commandUsed) {
@@ -168,6 +172,130 @@ export class RhinoLauncherComponent implements OnInit, OnDestroy {
     this.dialog.open(TaskSelectionDialogComponent, {
       width: '80%',
       maxWidth: '800px'
+    });
+  }
+
+  /**
+   * TEST-METHODE: Öffnet den Dialog direkt zum Testen
+   */
+  testOpenDialog(): void {
+    console.log('🔧 TEST: Opening dialog manually...');
+
+    // Erstelle Test-Daten
+    const testDialogData: RhinoCommandDialogData = {
+      fileName: 'example.gh',
+      filePath: 'C:\\Dev\\hefl\\files\\Grasshopper\\example.gh',
+      commandSequence: '_-Grasshopper B D W L W H D O "C:\\Dev\\hefl\\files\\Grasshopper\\example.gh" W H _MaxViewport _Enter',
+      commandSteps: [
+        {
+          step: 1,
+          command: '_-Grasshopper',
+          description: 'Startet Grasshopper im Skript-Modus'
+        },
+        {
+          step: 2,
+          command: 'B D W L W H D O',
+          description: 'Batch mode und Document Open'
+        }
+      ]
+    };
+
+    try {
+      const dialogRef = this.dialog.open(RhinoCommandDialogComponent, {
+        width: '90%',
+        maxWidth: '800px',
+        maxHeight: '90vh',
+        data: testDialogData,
+        disableClose: false,
+        autoFocus: true
+      });
+
+      console.log('🔧 TEST: Dialog opened successfully!', dialogRef);
+
+      dialogRef.afterClosed().subscribe(result => {
+        console.log('🔧 TEST: Dialog closed with result:', result);
+      });
+    } catch (error) {
+      console.error('🔧 TEST ERROR: Failed to open dialog:', error);
+      this.snackBar.open(`TEST ERROR: ${error}`, 'Schließen', { duration: 5000, panelClass: 'error-snackbar' });
+    }
+  }
+
+  /**
+   * Öffnet den Rhino Command Dialog mit der aktuellen Befehlssequenz
+   */
+  openRhinoCommandDialog(): void {
+    if (!this.selectedFile) {
+      this.snackBar.open('Keine Datei ausgewählt.', 'Schließen', { duration: 3000, panelClass: 'warn-snackbar' });
+      return;
+    }
+
+    // Erstelle Befehlssequenz für die ausgewählte Datei
+    const commandSequence = `_-Grasshopper B D W L W H D O "${this.selectedFile.path}" W H _MaxViewport _Enter`;
+
+    // Erstelle Schritt-für-Schritt Anleitung
+    const commandSteps = [
+      {
+        step: 1,
+        command: '_-Grasshopper',
+        description: 'Startet Grasshopper im Skript-Modus (ohne GUI-Dialoge)'
+      },
+      {
+        step: 2,
+        command: 'B D W L',
+        description: 'Batch mode, Display, Window, Load - Konfiguriert Grasshopper für automatischen Betrieb'
+      },
+      {
+        step: 3,
+        command: 'W H',
+        description: 'Window Hide - Minimiert das Grasshopper-Fenster nach dem Laden'
+      },
+      {
+        step: 4,
+        command: 'D O',
+        description: 'Document Open - Bereitet das Öffnen einer Grasshopper-Datei vor'
+      },
+      {
+        step: 5,
+        command: `"${this.selectedFile.path}"`,
+        description: 'Pfad zur Grasshopper-Datei - Lädt die spezifische .gh-Datei'
+      },
+      {
+        step: 6,
+        command: '_MaxViewport',
+        description: 'Maximiert das Rhino-Viewport für optimale Ansicht des 3D-Modells'
+      },
+      {
+        step: 7,
+        command: '_Enter',
+        description: 'Bestätigt alle Befehle und startet die Ausführung'
+      }
+    ];
+
+    const dialogData: RhinoCommandDialogData = {
+      fileName: this.selectedFile.name,
+      filePath: this.selectedFile.path,
+      commandSequence: commandSequence,
+      commandSteps: commandSteps
+    };
+
+    const dialogRef = this.dialog.open(RhinoCommandDialogComponent, {
+      width: '90%',
+      maxWidth: '800px',
+      maxHeight: '90vh',
+      data: dialogData,
+      disableClose: false,
+      autoFocus: true
+    });
+
+    // Optional: Reagiere auf Dialog-Schließung
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.completed) {
+        this.snackBar.open('Rhino-Befehle erfolgreich übertragen!', 'OK', {
+          duration: 3000,
+          panelClass: 'success-snackbar'
+        });
+      }
     });
   }
 

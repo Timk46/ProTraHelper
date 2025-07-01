@@ -36,13 +36,28 @@
           <div class="content-list-element-header-indicators">
             <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
             <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
+
+            <!-- Traditional Rhino Button (specific content) -->
             <mat-icon
+              *ngIf="content.name.toLowerCase() === 'analyse teil 1' || content.name.toLowerCase() === 'analyse teil 2'"
               class="rhino-launcher-icon"
-              matTooltip="Grasshopper-Datei in Rhino öffnen"
+              matTooltip="Grasshopper-Datei in Rhino öffnen (traditionell)"
               (click)="onRhinoButtonClick($event)"
               [style.cursor]="'pointer'"
               [style.color]="'#4CAF50'">
               extension
+            </mat-icon>
+
+            <!-- Modern Rhino API Button (example.gh for all exercise content) -->
+            <mat-icon
+              *ngIf="hasContentElementType(content, 'QUESTION')"
+              class="modern-rhino-launcher-icon"
+              matTooltip="Grasshopper example.gh mit moderner API öffnen"
+              (click)="onRhinoButtonClickModern($event)"
+              [style.cursor]="'pointer'"
+              [style.color]="'#2196F3'"
+              [style.animation]="'pulse 2s infinite'">
+              rocket_launch
             </mat-icon>
           </div>
         </mat-panel-description>

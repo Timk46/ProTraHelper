@@ -38,6 +38,7 @@ import { CompareModule } from './umlearn/compare/compare.module';
 import { PmpmModule } from './pmpm/pmpm.module';
 // END ProTra 2.0 Imports
 import { GhFilesModule } from './gh-files/gh-files.module'; // Import the new module
+import { RhinoDirectModule } from './rhino-direct/rhino-direct.module';
 
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/common/guards/jwt-auth.guard';
@@ -114,6 +115,7 @@ import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgrap
     // ProTra 2.0 Modules
     PmpmModule,
     GhFilesModule, // Add the new module to imports
+    RhinoDirectModule,
   ],
   controllers: [
     AppController,

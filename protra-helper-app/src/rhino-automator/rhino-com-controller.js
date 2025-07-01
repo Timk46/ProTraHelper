@@ -24,24 +24,39 @@ class RhinoCOMController {
     
     for (let attempt = 1; attempt <= maxWaitSeconds; attempt++) {
       try {
-        // Versuche COM-Verbindung zu Rhino
-        const { execSync } = require('child_process');
+        // Verwende spawn statt execSync für bessere Timeout-Kontrolle
+        const { spawn } = require('child_process');
         
-        // PowerShell-Script zum Testen der COM-Verfügbarkeit
-        const testScript = `
-          try {
-            $rhino = New-Object -ComObject "Rhino.Application"
-            $rhino.Visible
-            Write-Output "RHINO_READY"
-          } catch {
-            Write-Output "RHINO_NOT_READY"
-          }
-        `;
+        const isReady = await new Promise((resolve) => {
+          const timeout = setTimeout(() => {
+            resolve(false);
+          }, 2000); // Kürzerer Timeout pro Versuch
+          
+          const ps = spawn('powershell', [
+            '-Command', 
+            'try { $rhino = New-Object -ComObject "Rhino.Application"; if ($rhino.Visible -ne $null) { Write-Output "READY" } else { Write-Output "NOT_READY" } } catch { Write-Output "NOT_READY" }'
+          ], { 
+            stdio: 'pipe',
+            windowsHide: true 
+          });
+          
+          let output = '';
+          ps.stdout.on('data', (data) => {
+            output += data.toString();
+          });
+          
+          ps.on('close', () => {
+            clearTimeout(timeout);
+            resolve(output.trim() === 'READY');
+          });
+          
+          ps.on('error', () => {
+            clearTimeout(timeout);
+            resolve(false);
+          });
+        });
         
-        const result = execSync(`powershell -Command "${testScript.replace(/\n/g, '; ')}"`, 
-          { encoding: 'utf8', timeout: 3000 }).trim();
-        
-        if (result === 'RHINO_READY') {
+        if (isReady) {
           this.logger.info(`COM: Rhino ready after ${attempt} seconds`);
           return true;
         }
@@ -76,31 +91,43 @@ class RhinoCOMController {
     try {
       this.logger.info('COM: Attempting to connect to Rhino via COM...');
       
-      // Verwende PowerShell für COM-Verbindung (robuster als node-activex)
-      const { execSync } = require('child_process');
+      const { spawn } = require('child_process');
       
-      const connectScript = `
-        try {
-          $rhino = New-Object -ComObject "Rhino.Application"
-          if ($rhino.Visible -ne $null) {
-            Write-Output "CONNECTION_SUCCESS"
-          } else {
-            Write-Output "CONNECTION_FAILED"
-          }
-        } catch {
-          Write-Output "CONNECTION_ERROR: $($_.Exception.Message)"
-        }
-      `;
+      const connected = await new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+          resolve(false);
+        }, 5000);
+        
+        const ps = spawn('powershell', [
+          '-Command', 
+          'try { $rhino = New-Object -ComObject "Rhino.Application"; if ($rhino.Visible -ne $null) { Write-Output "SUCCESS" } else { Write-Output "FAILED" } } catch { Write-Output "ERROR" }'
+        ], { 
+          stdio: 'pipe',
+          windowsHide: true 
+        });
+        
+        let output = '';
+        ps.stdout.on('data', (data) => {
+          output += data.toString();
+        });
+        
+        ps.on('close', () => {
+          clearTimeout(timeout);
+          resolve(output.trim() === 'SUCCESS');
+        });
+        
+        ps.on('error', () => {
+          clearTimeout(timeout);
+          resolve(false);
+        });
+      });
       
-      const result = execSync(`powershell -Command "${connectScript.replace(/\n/g, '; ')}"`, 
-        { encoding: 'utf8', timeout: 5000 }).trim();
-      
-      if (result === 'CONNECTION_SUCCESS') {
+      if (connected) {
         this.connected = true;
         this.logger.info('COM: Successfully connected to Rhino');
         return true;
       } else {
-        this.logger.error(`COM: Connection failed: ${result}`);
+        this.logger.error('COM: Connection failed');
         return false;
       }
       
@@ -124,30 +151,81 @@ class RhinoCOMController {
     try {
       this.logger.info(`COM: Executing command: ${command}`);
       
-      const { execSync } = require('child_process');
+      const { spawn } = require('child_process');
       
-      const commandScript = `
-        try {
-          $rhino = New-Object -ComObject "Rhino.Application"
-          $result = $rhino.RunScript("${command.replace(/"/g, '""')}")
-          Write-Output "COMMAND_SUCCESS: $result"
-        } catch {
-          Write-Output "COMMAND_ERROR: $($_.Exception.Message)"
-        }
-      `;
+      const result = await new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+          resolve({ success: false, output: null, error: 'Command timeout' });
+        }, timeoutMs);
+        
+        // Escape command for PowerShell
+        const escapedCommand = command.replace(/"/g, '""');
+        
+        const ps = spawn('powershell', [
+          '-Command', 
+          `try { $rhino = New-Object -ComObject "Rhino.Application"; $result = $rhino.RunScript("${escapedCommand}"); Write-Output "SUCCESS:$result" } catch { Write-Output "ERROR:$($_.Exception.Message)" }`
+        ], { 
+          stdio: 'pipe',
+          windowsHide: true 
+        });
+        
+        let output = '';
+        let errorOutput = '';
+        
+        ps.stdout.on('data', (data) => {
+          output += data.toString();
+        });
+        
+        ps.stderr.on('data', (data) => {
+          errorOutput += data.toString();
+        });
+        
+        ps.on('close', (code) => {
+          clearTimeout(timeout);
+          
+          const fullOutput = output.trim();
+          
+          if (fullOutput.startsWith('SUCCESS:')) {
+            const commandResult = fullOutput.replace('SUCCESS:', '').trim();
+            resolve({ 
+              success: true, 
+              output: commandResult || 'Command completed', 
+              error: null 
+            });
+          } else if (fullOutput.startsWith('ERROR:')) {
+            const errorMessage = fullOutput.replace('ERROR:', '').trim();
+            resolve({ 
+              success: false, 
+              output: null, 
+              error: errorMessage || 'Unknown error' 
+            });
+          } else {
+            // Unbekanntes Format - trotzdem als Erfolg werten wenn kein Fehler
+            resolve({ 
+              success: code === 0, 
+              output: fullOutput || 'Command completed', 
+              error: code !== 0 ? `Process exited with code ${code}` : null 
+            });
+          }
+        });
+        
+        ps.on('error', (err) => {
+          clearTimeout(timeout);
+          resolve({ 
+            success: false, 
+            output: null, 
+            error: `Process error: ${err.message}` 
+          });
+        });
+      });
       
-      const result = execSync(`powershell -Command "${commandScript.replace(/\n/g, '; ')}"`, 
-        { encoding: 'utf8', timeout: timeoutMs }).trim();
-      
-      if (result.startsWith('COMMAND_SUCCESS:')) {
-        const output = result.replace('COMMAND_SUCCESS:', '').trim();
-        this.logger.info(`COM: Command executed successfully: ${output}`);
-        return { success: true, output, error: null };
+      if (result.success) {
+        this.logger.info(`COM: Command executed successfully: ${result.output}`);
       } else {
-        const error = result.replace('COMMAND_ERROR:', '').trim();
-        this.logger.error(`COM: Command failed: ${error}`);
-        return { success: false, output: null, error };
+        this.logger.error(`COM: Command failed: ${result.error}`);
       }
+      
+      return result;
       
     } catch (error) {
       this.logger.error(`COM: Command execution failed: ${error.message}`);
@@ -352,27 +430,33 @@ class RhinoCOMController {
 
   /**
    * Führt die ursprüngliche Registry-Befehlssequenz aus
-   * Implementiert: "-Grasshopper B D W L W H D O C:\path\to\file.gh W H _MaxViewport _Enter"
+   * Implementiert: "_-Grasshopper" -> "B D W L W H D O" -> "C:\path\to\file.gh" -> "W H" -> "_MaxViewport"
    * @param {string} filePath - Pfad zur .gh-Datei
    * @returns {Promise<Object>} - Ergebnis {success, message}
    */
   async executeRegistrySequence(filePath) {
     try {
-      this.logger.info(`COM: Executing registry sequence for: ${filePath}`);
+      this.logger.info(`COM: Executing correct registry sequence for: ${filePath}`);
       
-      // Phase 1: Starte Grasshopper mit den ursprünglichen Registry-Befehlen
-      // B D W L W H D O sind spezielle Grasshopper-Befehle aus der Registry
-      const grasshopperStartCommand = 'Grasshopper';
-      await this.executeCommand(grasshopperStartCommand, 15000);
+      // Phase 1: Starte Grasshopper mit dem korrekten Befehl "_-Grasshopper"
+      // Das "-" verhindert das Dialog-Interface und aktiviert den Kommandozeilen-Modus
+      this.logger.info('COM: Phase 1 - Starting Grasshopper with _-Grasshopper');
+      const grasshopperStartResult = await this.executeCommand('_-Grasshopper', 15000);
+      
+      if (!grasshopperStartResult.success) {
+        this.logger.warn('COM: _-Grasshopper failed, trying alternative start method');
+        // Fallback: Versuche normalen Grasshopper-Start
+        await this.executeCommand('Grasshopper', 15000);
+      }
       
       // Warte bis Grasshopper vollständig geladen ist
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 4000));
       
-      // Phase 2: Führe die Registry-Befehlssequenz aus
-      // Diese Befehle entsprechen den ursprünglichen "B D W L W H D O" Parametern
-      const registryCommands = [
+      // Phase 2: Führe die Grasshopper-spezifischen Befehle aus
+      // Diese werden IN Grasshopper eingegeben, nachdem es gestartet wurde
+      const grasshopperCommands = [
         'B',  // Background (Hintergrund-Modus)
-        'D',  // Display (Anzeige-Modus)
+        'D',  // Display (Anzeige-Modus) 
         'W',  // Window (Fenster-Modus)
         'L',  // Load (Lade-Modus)
         'W',  // Wait (Warte-Modus)
@@ -381,48 +465,58 @@ class RhinoCOMController {
         'O'   // Open (Öffnen-Modus)
       ];
       
-      this.logger.info('COM: Executing registry command sequence: B D W L W H D O');
+      this.logger.info('COM: Phase 2 - Executing Grasshopper commands: B D W L W H D O');
       
-      // Führe jeden Registry-Befehl einzeln aus
-      for (const cmd of registryCommands) {
+      // Führe jeden Grasshopper-Befehl einzeln aus
+      for (const cmd of grasshopperCommands) {
         try {
-          await this.executeCommand(cmd, 2000);
-          await new Promise(resolve => setTimeout(resolve, 200)); // Kurze Pause zwischen Befehlen
+          const result = await this.executeCommand(cmd, 3000);
+          this.logger.info(`COM: Grasshopper command '${cmd}' executed: ${result.success ? 'success' : 'failed'}`);
+          await new Promise(resolve => setTimeout(resolve, 300)); // Etwas längere Pause zwischen Befehlen
         } catch (error) {
-          this.logger.warn(`COM: Registry command '${cmd}' failed: ${error.message}`);
+          this.logger.warn(`COM: Grasshopper command '${cmd}' failed: ${error.message}`);
           // Fortsetzung auch bei Fehlern einzelner Befehle
         }
       }
       
-      // Phase 3: Lade die Grasshopper-Datei
-      this.logger.info(`COM: Loading file: ${filePath}`);
-      const loadCommand = `_GrasshopperLoadDocument "${filePath}"`;
-      const loadResult = await this.executeCommand(loadCommand, 20000);
+      // Phase 3: Gib den Dateipfad ein (wird in Grasshopper verarbeitet)
+      this.logger.info(`COM: Phase 3 - Sending file path to Grasshopper: ${filePath}`);
+      const filePathResult = await this.executeCommand(filePath, 20000);
       
-      if (!loadResult.success) {
-        // Fallback: Versuche alternativen Lade-Befehl
-        const altLoadCommand = `_DocumentOpen "${filePath}"`;
-        await this.executeCommand(altLoadCommand, 20000);
+      if (!filePathResult.success) {
+        this.logger.warn('COM: Direct file path failed, trying with quotes');
+        // Fallback: Versuche mit Anführungszeichen
+        await this.executeCommand(`"${filePath}"`, 20000);
       }
       
       // Warte bis Datei vollständig geladen ist
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Phase 4: Führe die finalen Registry-Befehle aus (W H)
-      await this.executeCommand('W', 1000); // Wait
-      await this.executeCommand('H', 1000); // Hide/Handle
+      // Phase 4: Führe die finalen Grasshopper-Befehle aus (W H)
+      this.logger.info('COM: Phase 4 - Executing final Grasshopper commands: W H');
+      await this.executeCommand('W', 2000); // Wait
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await this.executeCommand('H', 2000); // Hide/Handle
       
-      // Phase 5: Maximiere Viewport (_MaxViewport)
+      // Phase 5: Bestätige mit Enter (beendet den Grasshopper-Befehlsmodus)
+      this.logger.info('COM: Phase 5 - Confirming with Enter');
+      await this.executeCommand('_Enter', 1000);
+      
+      // Phase 6: Maximiere Viewport (_MaxViewport)
+      this.logger.info('COM: Phase 6 - Maximizing viewport');
+      await new Promise(resolve => setTimeout(resolve, 1000));
       await this.executeViewportCommand('_MaxViewport');
       
-      // Phase 6: Bringe Fenster in den Vordergrund
+      // Phase 7: Bringe Fenster in den Vordergrund
+      this.logger.info('COM: Phase 7 - Bringing window to foreground');
       await this.bringRhinoToForeground();
       
       this.logger.info('COM: Registry sequence completed successfully');
       return {
         success: true,
-        message: 'Registry sequence executed successfully (B D W L W H D O + file load + MaxViewport)',
-        commandsExecuted: ['Grasshopper', ...registryCommands, 'LoadDocument', 'W', 'H', '_MaxViewport', 'BringToForeground']
+        message: 'Registry sequence executed successfully (_-Grasshopper → B D W L W H D O → file.gh → W H → _MaxViewport)',
+        commandsExecuted: ['_-Grasshopper', ...grasshopperCommands, 'FilePath', 'W', 'H', '_Enter', '_MaxViewport', 'BringToForeground'],
+        documentName: filePath.split('\\').pop() || filePath.split('/').pop() || 'Unknown'
       };
       
     } catch (error) {

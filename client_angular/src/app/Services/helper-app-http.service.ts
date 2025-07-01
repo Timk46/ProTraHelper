@@ -116,41 +116,63 @@ export class HelperAppHttpService {
    * @param error - The HTTP error response
    * @returns Observable error with user-friendly message
    */
-  private handleHelperAppError(error: HttpErrorResponse): Observable<never> {
+  private handleHelperAppError(error: HttpErrorResponse | any): Observable<never> {
     let errorMessage = 'Unbekannter Fehler bei der Kommunikation mit der Helferanwendung.';
+    let errorStatus = 'unknown';
+    let errorDetails = 'undefined';
 
-    if (error.error instanceof ErrorEvent) {
-      // Client-side or network error
-      console.error('Helper App Client-seitiger Fehler:', error.error.message);
-      errorMessage = 'Netzwerkfehler bei der Verbindung zur Helferanwendung. Überprüfen Sie, ob die ProTra-Helferanwendung läuft.';
-    } else {
-      // Backend returned an error status code
-      console.error(`Helper App HTTP Fehler ${error.status}:`, error.error);
+    // Handle different error types more robustly
+    if (error instanceof HttpErrorResponse) {
+      errorStatus = error.status?.toString() || '0';
+      errorDetails = error.message || error.statusText || 'undefined';
 
-      switch (error.status) {
-        case 0:
-          errorMessage = 'Helferanwendung ist nicht erreichbar. Bitte stellen Sie sicher, dass die ProTra-Helferanwendung gestartet ist.';
-          break;
-        case 401:
-          errorMessage = 'Authentifizierung bei der Helferanwendung fehlgeschlagen. Bitte überprüfen Sie das API-Token.';
-          break;
-        case 403:
-          errorMessage = 'Zugriff auf die Helferanwendung verweigert. Das API-Token ist ungültig.';
-          break;
-        case 404:
-          errorMessage = 'Der angeforderte Dienst ist in der Helferanwendung nicht verfügbar.';
-          break;
-        case 500:
-          errorMessage = error.error?.message || 'Interner Fehler in der Helferanwendung.';
-          break;
-        case 502:
-        case 503:
-          errorMessage = 'Helferanwendung ist temporär nicht verfügbar. Bitte versuchen Sie es erneut.';
-          break;
-        default:
-          errorMessage = error.error?.message || `HTTP Fehler ${error.status}: ${error.statusText}`;
+      if (error.error instanceof ErrorEvent) {
+        // Client-side or network error
+        console.error('Helper App Client-seitiger Fehler:', error.error.message);
+        errorMessage = 'Netzwerkfehler bei der Verbindung zur Helferanwendung. Überprüfen Sie, ob die ProTra-Helferanwendung läuft.';
+      } else {
+        // Backend returned an error status code
+        console.error(`Helper App HTTP Fehler ${error.status}:`, error.error);
+
+        switch (error.status) {
+          case 0:
+            errorMessage = 'Helferanwendung ist nicht erreichbar. Bitte stellen Sie sicher, dass die ProTra-Helferanwendung gestartet ist.';
+            break;
+          case 401:
+            errorMessage = 'Authentifizierung bei der Helferanwendung fehlgeschlagen. Bitte überprüfen Sie das API-Token.';
+            break;
+          case 403:
+            errorMessage = 'Zugriff auf die Helferanwendung verweigert. Das API-Token ist ungültig.';
+            break;
+          case 404:
+            errorMessage = 'Der angeforderte Dienst ist in der Helferanwendung nicht verfügbar.';
+            break;
+          case 500:
+            errorMessage = error.error?.message || 'Interner Fehler in der Helferanwendung.';
+            break;
+          case 502:
+          case 503:
+            errorMessage = 'Helferanwendung ist temporär nicht verfügbar. Bitte versuchen Sie es erneut.';
+            break;
+          default:
+            errorMessage = error.error?.message || `HTTP Fehler ${error.status}: ${error.statusText}`;
+        }
       }
+    } else if (error?.name === 'TimeoutError') {
+      // Handle timeout errors specifically
+      errorStatus = 'timeout';
+      errorDetails = 'Request timeout';
+      errorMessage = 'Zeitüberschreitung bei der Verbindung zur Helferanwendung. Die Anwendung reagiert nicht.';
+      console.error('Helper App Timeout-Fehler:', error);
+    } else {
+      // Handle other error types
+      errorStatus = error?.status?.toString() || 'unknown';
+      errorDetails = error?.message || error?.toString() || 'undefined';
+      console.error('Helper App unbekannter Fehler:', error);
     }
+
+    // Log the error with more context for debugging
+    console.error(`Helper App HTTP Fehler ${errorStatus}: ${errorDetails}`);
 
     return throwError(() => new Error(errorMessage));
   }
