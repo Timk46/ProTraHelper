@@ -149,6 +149,7 @@ export interface AutomatedTestDto {
     GRAPH = "GraphQuestion",
     UML = "UMLQuestion",
     CODEGAME = "CodeGameQuestion",
+    UPLOAD = "UploadQuestion",
   }
 
 export interface McqGenerationDTO {
@@ -168,6 +169,17 @@ export interface freeTextQuestionDTO {
   expectationsHTML?: string;
   exampleSolution?: string;
   exampleSolutionHTML?: string;
+  maxPoints: number;
+}
+
+export interface uploadQuestionDTO {
+  questionId: number;
+  contentElementId?: number;
+  title: string;
+  text: string;
+  textHTML?: string;
+  maxSize: number;
+  fileType: string;
   maxPoints: number;
 }
 

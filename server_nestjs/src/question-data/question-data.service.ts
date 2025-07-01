@@ -13,6 +13,7 @@ import { QuestionDataGraphService } from './question-data-graph/question-data-gr
 import { GraphSolutionEvaluationService } from '@/graph-solution-evaluation/graph-solution-evaluation.service';
 import { QuestionDataUmlService } from './question-data-uml/question-data-uml.service';
 import { QuestionDataCodeGameService } from '@/question-data/question-data-code-game/question-data-code-game.service';
+import { QuestionDataUploadService } from './question-data-upload/question-data-upload.service';
 
 @Injectable()
 export class QuestionDataService {
@@ -27,7 +28,8 @@ export class QuestionDataService {
     private qdGraph: QuestionDataGraphService,
     private graphEvalService: GraphSolutionEvaluationService,
     private qdUml: QuestionDataUmlService,
-    private qdCodeGame: QuestionDataCodeGameService
+    private qdCodeGame: QuestionDataCodeGameService,
+    private qdUpload: QuestionDataUploadService
   ) {}
 
   /**
@@ -168,7 +170,16 @@ export class QuestionDataService {
           }
         });
         break;
+      case questionType.UPLOAD:
+        specificQuestionData = await this.prisma.uploadQuestion.findFirst({
+          where: {
+            questionId: Number(questionId)
+          }
+        });
+        break;
     }
+
+    console.log('specificQuestionData: ', specificQuestionData);
 
     const questionData: detailedQuestionDTO = {
       ...question,
@@ -180,6 +191,7 @@ export class QuestionDataService {
       graphQuestion: questionTypeStr === questionType.GRAPH ? specificQuestionData : undefined,
       umlQuestion: questionTypeStr === questionType.UML ? specificQuestionData : undefined,
       codeGameQuestion: questionTypeStr === questionType.CODEGAME ? specificQuestionData : undefined,
+      uploadQuestion: questionTypeStr === questionType.UPLOAD ? specificQuestionData : undefined,
     };
 
     return questionData;
@@ -235,6 +247,7 @@ export class QuestionDataService {
    */
   async createQuestion(question: QuestionDTO, authorId: number): Promise<QuestionDTO> {
       console.log("question origin Id", question.originId);
+
       let newQuestion = await this.prisma.question.create({
           data: {
               name: question.name || 'New Question',
@@ -396,6 +409,13 @@ export class QuestionDataService {
           await this.qdCodeGame.updateCodeGameQuestion(question.codeGameQuestion);
         }
         break;
+      case questionType.UPLOAD:
+        if (createNewVersion || !currentQuestion.uploadQuestion) {
+          await this.qdUpload.createUploadQuestion(question.uploadQuestion, updatedQuestion.id);
+        } else {
+          await this.qdUpload.updateUploadQuestion(question.uploadQuestion);
+        }
+        break;
     }
 
     return await this.getDetailedQuestion(updatedQuestion.id, question.type as questionType);
@@ -424,9 +444,8 @@ export class QuestionDataService {
         newQuestion.fillinQuestion ||
         newQuestion.graphQuestion ||
         newQuestion.umlQuestion ||
-        newQuestion.codeGameQuestion // ||
-        // TODO: Add more types here
-
+        newQuestion.codeGameQuestion ||
+        newQuestion.uploadQuestion
       )
     ){
       return true;
@@ -884,6 +903,67 @@ export class QuestionDataService {
         elementDone: markedAsDone,
         progress: progress * 100,
       };
+    }
+
+    // generate feedback for upload question
+    if (question.type === questionType.UPLOAD) {
+      console.log('generate feedback for upload user answer');
+
+      let feedbackText = 'Du hast keine Datei hochgeladen.';
+      let userScore = 0;
+      let markedAsDone = false;
+
+      if (answerData.userUploadFileId) {
+        // Check if the file exists in the database
+        const uploadedFile = await this.prisma.file.findUnique({
+          where: {
+            id: answerData.userUploadFileId
+          }
+        });
+
+        if (uploadedFile) {
+          // Create UserUploadAnswer entry
+          await this.prisma.userUploadAnswer.create({
+            data: {
+              userAnswerId: createdData.id,
+              fileId: answerData.userUploadFileId
+            }
+          });
+
+          userScore = question.score; // Full points if file exists
+          feedbackText = `Du hast erfolgreich die Datei "${uploadedFile.name}" hochgeladen. Du hast ${question.score} von ${question.score} Punkten erreicht. Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.`;
+
+          // Mark as done since upload was successful
+          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
+          markedAsDone = true;
+        } else {
+          feedbackText = 'Die hochgeladene Datei konnte nicht gefunden werden. Bitte versuche es erneut.';
+        }
+      }
+
+      console.log('generated Text:', feedbackText);
+      console.log('userScore: ' + userScore);
+
+      // Create feedback for user answer
+      const feedback = await this.prisma.feedback.create({
+        data: {
+          userAnswerId: createdData.id,
+          text: feedbackText,
+          score: userScore
+        }
+      });
+
+      if (!feedback) throw new Error('Could not create Feedback');
+
+      console.log('element done: ' + markedAsDone);
+      return {
+        id: feedback.id,
+        userAnswerId: feedback.userAnswerId,
+        score: feedback.score,
+        feedbackText: feedback.text,
+        elementDone: markedAsDone,
+        progress: Math.floor((feedback.score/question.score) * 100),
+      }
     }
 
     // TODO: Uml

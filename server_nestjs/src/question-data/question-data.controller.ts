@@ -1,12 +1,13 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Post, Param, Body, Req, UseGuards, ParseIntPipe} from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
-import { detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, FillinQuestionDTO, GraphQuestionDTO, userAnswerFeedbackDTO, MCOptionDTO, McQuestionDTO, MCOptionViewDTO, UserMCOptionSelectedDTO } from '@DTOs/index';
+import { detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, FillinQuestionDTO, GraphQuestionDTO, userAnswerFeedbackDTO, MCOptionDTO, McQuestionDTO, MCOptionViewDTO, UserMCOptionSelectedDTO, uploadQuestionDTO } from '@DTOs/index';
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
 import { QuestionDataFillinService } from './question-data-fillin/question-data-fillin.service';
 import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
+import { QuestionDataUploadService } from './question-data-upload/question-data-upload.service';
 
 
 @UseGuards(RolesGuard)
@@ -19,6 +20,7 @@ export class QuestionDataController {
       private qdFreetextService: QuestionDataFreetextService,
       private qdGraphService: QuestionDataGraphService,
       private qdFillinService: QuestionDataFillinService,
+      private qdUploadService: QuestionDataUploadService,
 
     ) {}
 
@@ -98,6 +100,18 @@ export class QuestionDataController {
         @Get('fillinQuestion/:fillinQuestionId')
         async getFillinQuestion(@Param('fillinQuestionId') fillinQuestionId: number): Promise<FillinQuestionDTO> {
             return this.qdFillinService.getFillinQuestion(fillinQuestionId);
+        }
+
+        /**
+         * Retrieves an upload question by its unique identifier.
+        *
+        * @param uploadQuestionId - The unique identifier of the upload question to retrieve.
+        * @returns A promise that resolves to the corresponding `uploadQuestionDTO`.
+        */
+        @roles('ANY')
+        @Get('uploadQuestion/:uploadQuestionId')
+        async getUploadQuestion(@Param('uploadQuestionId') uploadQuestionId: number): Promise<uploadQuestionDTO> {
+            return this.qdUploadService.getUploadQuestion(uploadQuestionId);
         }
 
         /**

@@ -10,6 +10,7 @@ import { FillinTaskNewComponent } from '../contentView/contentElement/fill-in-ta
 import { TaskViewData } from '@DTOs/index';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatDialogConfig } from '@angular/material/dialog';
+import { EditUploadComponent } from '../lecturersView/edit-upload/edit-upload.component';
 
 
 @Component({
@@ -129,7 +130,7 @@ export class DynamicQuestionComponent implements OnInit, OnDestroy {
     dialogConfig.width = 'auto';
     dialogConfig.maxHeight = '95vh';
 
-    let dialogRef: MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined;
+    let dialogRef: MatDialogRef<EditUploadComponent | McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined;
 
     // Open the appropriate dialog based on the task type
     switch (type) {

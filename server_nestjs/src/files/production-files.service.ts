@@ -21,7 +21,7 @@ export class ProductionFilesService {
    * @param {number} contentElementId - Optional content element ID to link the file
    * @returns {Promise<FileDto>} The metadata of the uploaded file
    */
-  async uploadFileToProduction(
+  async uploadProductionFile(
     fileBuffer: Buffer,
     fileName: string,
     fileType: string,
@@ -83,7 +83,7 @@ export class ProductionFilesService {
    * @param {number} moduleId - The module ID for additional context validation
    * @returns {Promise<StreamableFile>} The StreamableFile for downloading
    */
-  async downloadFileFromProduction(
+  async downloadProductionFile(
     uniqueIdentifier: string,
     userId: number,
     moduleId: number,

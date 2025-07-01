@@ -11,7 +11,8 @@ import {
   UserMCOptionSelectedDTO,
   questionType,
   FillinQuestionDTO,
-  GraphQuestionDTO
+  GraphQuestionDTO,
+  uploadQuestionDTO
 } from '@DTOs/index';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -20,6 +21,7 @@ import { Observable } from 'rxjs';
 import { McTaskComponent } from 'src/app/Pages/contentView/contentElement/mcTask/mcTask.component';
 import { FillinTaskNewComponent } from 'src/app/Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { FreeTextTaskComponent } from 'src/app/Pages/contentView/contentElement/free-text-task/free-text-task.component';
+import { EditUploadComponent } from 'src/app/Pages/lecturersView/edit-upload/edit-upload.component';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 
 @Injectable({
@@ -114,6 +116,15 @@ export class QuestionDataService {
   }
 
   /**
+   * Retrieves upload question data for a specific question version.
+   * @param {number} questionVersionId - The version ID of the question.
+   * @returns {Observable<uploadQuestionDTO>} An Observable that emits the uploadQuestionDTO.
+   */
+  getUploadQuestion(questionVersionId: number) : Observable<uploadQuestionDTO> {
+    return this.http.get<uploadQuestionDTO>(environment.server + `/question-data/uploadQuestion/${questionVersionId}`);
+  }
+
+  /**
    * Creates a new user answer for a question.
    * @param {UserAnswerDataDTO} data - The user answer data containing question response information.
    * @returns {Observable<userAnswerFeedbackDTO>} An Observable that emits the feedback for the submitted answer.
@@ -204,6 +215,16 @@ export class QuestionDataService {
    */
   createFreeTextQuestion(freeTextQuestion: freeTextQuestionDTO) : Observable<freeTextQuestionDTO> {
     return this.http.post<freeTextQuestionDTO>(environment.server + `/question-data/createFreeTextQuestion`, freeTextQuestion)
+  }
+
+  /**
+   * Creates a new upload question.
+   *
+   * @param {uploadQuestionDTO} uploadQuestion - The upload question data to create
+   * @returns {Observable<uploadQuestionDTO>} An Observable that emits the created uploadQuestionDTO
+   */
+  createUploadQuestion(uploadQuestion: uploadQuestionDTO) : Observable<uploadQuestionDTO> {
+    return this.http.post<uploadQuestionDTO>(environment.server + `/question-data/createUploadQuestion`, uploadQuestion)
   }
 
   /* updateFreeTextQuestion(freeTextQuestion: freeTextQuestionDTO) : Observable<freeTextQuestionDTO> {
