@@ -9,8 +9,8 @@ async function bootstrap() {
     origin: 'http://localhost:4200',
     credentials: true,
   });
-  app.use(bodyParser.json({ limit: '5mb' }));
-  app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
   // console.log = () => {}; // disable console.log in production - use nest.js logger instead, if important logs are needed
   // console.debug = () => {};

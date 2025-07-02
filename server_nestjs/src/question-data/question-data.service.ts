@@ -14,6 +14,7 @@ import { GraphSolutionEvaluationService } from '@/graph-solution-evaluation/grap
 import { QuestionDataUmlService } from './question-data-uml/question-data-uml.service';
 import { QuestionDataCodeGameService } from '@/question-data/question-data-code-game/question-data-code-game.service';
 import { QuestionDataUploadService } from './question-data-upload/question-data-upload.service';
+import { ProductionFilesService } from '@/files/production-files.service';
 
 @Injectable()
 export class QuestionDataService {
@@ -29,7 +30,8 @@ export class QuestionDataService {
     private graphEvalService: GraphSolutionEvaluationService,
     private qdUml: QuestionDataUmlService,
     private qdCodeGame: QuestionDataCodeGameService,
-    private qdUpload: QuestionDataUploadService
+    private qdUpload: QuestionDataUploadService,
+    private productionFilesService: ProductionFilesService
   ) {}
 
   /**
@@ -485,6 +487,9 @@ export class QuestionDataService {
 
     const question = await this.getQuestion(answerData.questionId);
     if (!question) throw new Error('Could not get question');
+    const detailedQuestion = await this.getDetailedQuestion(answerData.questionId, question.type);
+    if (!detailedQuestion) throw new Error('Could not get detailed question');
+
 
     //generate feedback for user answer
     if (question.type === questionType.MULTIPLECHOICE) {
@@ -908,38 +913,78 @@ export class QuestionDataService {
     // generate feedback for upload question
     if (question.type === questionType.UPLOAD) {
       console.log('generate feedback for upload user answer');
-
-      let feedbackText = 'Du hast keine Datei hochgeladen.';
       let userScore = 0;
-      let markedAsDone = false;
 
-      if (answerData.userUploadFileId) {
-        // Check if the file exists in the database
-        const uploadedFile = await this.prisma.file.findUnique({
-          where: {
-            id: answerData.userUploadFileId
-          }
-        });
+      // Check file type compatibility - handle both simple types and MIME types
+      const expectedFileType = detailedQuestion.uploadQuestion.fileType.toLowerCase();
+      const actualFileType = answerData.userUploadAnswer.file.type.toLowerCase();
 
-        if (uploadedFile) {
-          // Create UserUploadAnswer entry
-          await this.prisma.userUploadAnswer.create({
-            data: {
-              userAnswerId: createdData.id,
-              fileId: answerData.userUploadFileId
-            }
-          });
+      console.log('expectedFileType: ' + expectedFileType);
+      console.log('actualFileType: ' + actualFileType);
 
-          userScore = question.score; // Full points if file exists
-          feedbackText = `Du hast erfolgreich die Datei "${uploadedFile.name}" hochgeladen. Du hast ${question.score} von ${question.score} Punkten erreicht. Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.`;
+      // Create a mapping of simple types to MIME types
+      const mimeTypeMap: { [key: string]: string[] } = {
+        'pdf': ['application/pdf'],
+        'doc': ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        'docx': ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        'txt': ['text/plain'],
+        'jpg': ['image/jpeg'],
+        'jpeg': ['image/jpeg'],
+        'png': ['image/png'],
+        'gif': ['image/gif'],
+        'zip': ['application/zip'],
+        'rar': ['application/x-rar-compressed'],
+        'mp4': ['video/mp4'],
+        'mp3': ['audio/mpeg'],
+        'wav': ['audio/wav']
+      };
 
-          // Mark as done since upload was successful
-          await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
-          markedAsDone = true;
-        } else {
-          feedbackText = 'Die hochgeladene Datei konnte nicht gefunden werden. Bitte versuche es erneut.';
-        }
+      // Check if file type matches
+      let isValidType = false;
+
+      if (expectedFileType.includes('*')) {
+        // Handle wildcard types like "image/*"
+        const typeCategory = expectedFileType.replace('*', '');
+        isValidType = actualFileType.startsWith(typeCategory);
+      } else if (mimeTypeMap[expectedFileType]) {
+        // Check against known MIME types
+        isValidType = mimeTypeMap[expectedFileType].includes(actualFileType);
+      } else {
+        // Direct comparison (fallback)
+        isValidType = expectedFileType === actualFileType;
       }
+
+      if (!isValidType) {
+        throw new Error(`File type mismatch: expected ${expectedFileType}, got ${actualFileType}`);
+      }
+
+      const uploadedFile = await this.productionFilesService.uploadProductionFile(
+        Buffer.from(answerData.userUploadAnswer.file.file, 'base64'),
+        answerData.userUploadAnswer.file.name,
+        expectedFileType,
+      );
+
+      if (!uploadedFile) {
+        throw new Error('File upload failed');
+      }
+
+      // Create UserUploadAnswer entry
+      const uploadAnswer = await this.prisma.userUploadAnswer.create({
+        data: {
+          userAnswerId: createdData.id,
+          fileId: uploadedFile.id
+          }
+      });
+
+      if (!uploadAnswer) throw new Error('Could not create UserUploadAnswer');
+
+      userScore = question.score; // Full points if file exists
+      const feedbackText = `Du hast erfolgreich die Datei "${uploadedFile.name}" hochgeladen.`;
+
+      // Mark as done since upload was successful
+      await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
+      const markedAsDone = true;
+
 
       console.log('generated Text:', feedbackText);
       console.log('userScore: ' + userScore);
@@ -962,7 +1007,7 @@ export class QuestionDataService {
         score: feedback.score,
         feedbackText: feedback.text,
         elementDone: markedAsDone,
-        progress: Math.floor((feedback.score/question.score) * 100),
+        progress: Math.floor((feedback.score/userScore) * 100),
       }
     }
 
