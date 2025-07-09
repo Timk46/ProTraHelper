@@ -7,7 +7,7 @@ export interface FileDto {
   }
 
 export interface FileUploadDTO {
-    file: File;
+    file: string;
     name: string;
     type: string;
 }

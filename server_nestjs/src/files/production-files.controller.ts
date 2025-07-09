@@ -37,28 +37,19 @@ export class ProductionFilesController {
   @roles('ANY')
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFileToProduction(
+  async uploadProductionFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body('moduleId') moduleId: number,
     @Req() req: any,
-    @Body('questionId') questionId?: number,
-    @Body('mCAnswerId') mCAnswerId?: number,
-    @Body('contentElementId') contentElementId?: number,
   ) {
     const { buffer, mimetype } = file;
     const fileName = file.originalname;
     const fileType = mimetype.split('/')[1];
     const userId = req.user.id;
 
-    return await this.productionFilesService.uploadFileToProduction(
+    return await this.productionFilesService.uploadProductionFile(
       buffer,
       fileName,
       fileType,
-      moduleId,
-      userId,
-      questionId,
-      mCAnswerId,
-      contentElementId
     );
   }
 
@@ -75,9 +66,8 @@ export class ProductionFilesController {
    */
   @roles('ANY')
   @Get('download/:uniqueIdentifier')
-  async downloadFileFromProduction(
+  async downloadProductionFile(
     @Param('uniqueIdentifier') uniqueIdentifier: string,
-    @Body('moduleId') moduleId: number,
     @Req() req: any,
     @Res({ passthrough: true }) response: Response,
   ): Promise<StreamableFile> {
@@ -95,11 +85,7 @@ export class ProductionFilesController {
       'X-Filename': file.name,
     });
 
-    return this.productionFilesService.downloadFileFromProduction(
-      uniqueIdentifier,
-      userId,
-      moduleId
-    );
+    return this.productionFilesService.downloadProductionFile(uniqueIdentifier);
   }
 
   /**

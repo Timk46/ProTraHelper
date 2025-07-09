@@ -17,6 +17,7 @@ import { GraphSolutionEvaluationModule } from '@/graph-solution-evaluation/graph
 import { QuestionDataUmlService } from './question-data-uml/question-data-uml.service';
 import { QuestionDataCodeGameService } from './question-data-code-game/question-data-code-game.service';
 import { QuestionDataUploadService } from './question-data-upload/question-data-upload.service';
+import { FilesModule } from '@/files/files.module';
 
 @Module({
   providers: [
@@ -40,6 +41,7 @@ import { QuestionDataUploadService } from './question-data-upload/question-data-
     UserConceptModule,
     NotificationModule,
     GraphSolutionEvaluationModule,
+    FilesModule,
   ],
   exports: [QuestionDataService],
 })

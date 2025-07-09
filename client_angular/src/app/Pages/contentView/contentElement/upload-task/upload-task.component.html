@@ -78,8 +78,12 @@
     <div class="upload-progress" *ngIf="isUploading">
       <div class="progress-content">
         <mat-icon class="uploading-icon">cloud_upload</mat-icon>
-        <h4>Wird hochgeladen...</h4>
-        <mat-progress-bar mode="indeterminate" class="progress-bar"></mat-progress-bar>
+        <h4>Wird hochgeladen... {{ uploadProgress }}%</h4>
+        <mat-progress-bar 
+          mode="determinate" 
+          [value]="uploadProgress" 
+          class="progress-bar">
+        </mat-progress-bar>
         <p>{{ selectedFile?.name }}</p>
       </div>
     </div>

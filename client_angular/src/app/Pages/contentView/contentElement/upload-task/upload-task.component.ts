@@ -21,6 +21,7 @@ export class UploadTaskComponent {
   selectedFile: File | null = null;
   isDragOver = false;
   isUploading = false;
+  uploadProgress = 0;
 
 
 
@@ -104,32 +105,86 @@ export class UploadTaskComponent {
     this.isDragOver = false; // Reset drag state
   }
 
-  uploadFile() {
+  async uploadFile() {
     if (!this.selectedFile) return;
     if (!this.uploadQuestion) return;
 
     this.isUploading = true;
-    const userAnswerData: UserAnswerDataDTO = {
-      id: -1,
-      questionId: this.uploadQuestion.questionId,
-      contentElementId: this.uploadQuestion.contentElementId,
-      userId: -1,
-      userUploadAnswer: {
-        file: {
-          file: this.selectedFile,
-          name: this.selectedFile.name,
-          type: this.selectedFile.type,
+    this.uploadProgress = 0;
+    
+    try {
+      // Convert file to base64 string using a more efficient method for large files
+      const base64String = await this.fileToBase64(this.selectedFile);
+
+      const userAnswerData: UserAnswerDataDTO = {
+        id: -1,
+        questionId: this.uploadQuestion.questionId,
+        contentElementId: this.uploadQuestion.contentElementId,
+        userId: -1,
+        userUploadAnswer: {
+          file: {
+            file: base64String,
+            name: this.selectedFile.name,
+            type: this.selectedFile.type,
+          }
         }
       }
-    }
-    this.questionService.createUserAnswer(userAnswerData).subscribe(data => {
-      this.snackBar.open('Datei hochgeladen', 'OK', {
+      
+      this.uploadProgress = 90; // 90% before sending to server
+      
+      this.questionService.createUserAnswer(userAnswerData).subscribe({
+        next: (data) => {
+          console.log('Upload successful:', data);
+          this.uploadProgress = 100;
+          this.snackBar.open('Datei erfolgreich hochgeladen', 'OK', {
+            duration: 3000,
+          });
+          this.isUploading = false;
+          this.uploadProgress = 0;
+          this.submitClicked.emit();
+          this.dialogRef.close();
+        },
+        error: (error) => {
+          console.error('Upload failed:', error);
+          this.snackBar.open('Fehler beim Hochladen der Datei', 'OK', {
+            duration: 3000,
+          });
+          this.isUploading = false;
+          this.uploadProgress = 0;
+        }
+      });
+    } catch (error) {
+      console.error('Error processing file:', error);
+      this.snackBar.open('Fehler beim Verarbeiten der Datei', 'OK', {
         duration: 3000,
       });
       this.isUploading = false;
-      this.submitClicked.emit(data.progress);
-    });
+      this.uploadProgress = 0;
+    }
+  }
 
+  // Efficient base64 conversion for large files with progress tracking
+  private fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          this.uploadProgress = Math.round((event.loaded / event.total) * 50); // 50% for reading
+        }
+      };
+      
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        // Remove the data URL prefix (e.g., "data:image/png;base64,")
+        const base64Data = base64String.split(',')[1];
+        this.uploadProgress = 75; // 75% after conversion
+        resolve(base64Data);
+      };
+      
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
   }
 
   // Utility methods

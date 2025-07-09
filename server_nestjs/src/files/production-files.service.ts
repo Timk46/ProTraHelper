@@ -3,10 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 import { FileDto } from '@DTOs/index';
 import * as fs from 'fs';
+import { FilesService } from './files.service';
 
 @Injectable()
 export class ProductionFilesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private filesService: FilesService
+  ) {}
 
   /**
    * Upload a new file to the production_uploads folder.
@@ -14,22 +18,12 @@ export class ProductionFilesService {
    * @param {Buffer} fileBuffer - The file data as a Buffer
    * @param {string} fileName - The original file name
    * @param {string} fileType - The file type (e.g., 'pdf', 'mp4', 'png', 'jpg', 'gif')
-   * @param {number} moduleId - The module ID
-   * @param {number} userId - The user ID
-   * @param {number} questionId - Optional question ID to link the file
-   * @param {number} mCAnswerId - Optional MC answer ID to link the file
-   * @param {number} contentElementId - Optional content element ID to link the file
    * @returns {Promise<FileDto>} The metadata of the uploaded file
    */
   async uploadProductionFile(
     fileBuffer: Buffer,
     fileName: string,
     fileType: string,
-    moduleId: number,
-    userId: number,
-    questionId?: number,
-    mCAnswerId?: number,
-    contentElementId?: number,
   ): Promise<FileDto> {
     // Create unique file identifier
     const uniqueIdentifier = uuidv4();
@@ -51,18 +45,6 @@ export class ProductionFilesService {
         name: fileName,
         path: filePath,
         type: fileType,
-        questionId: questionId || null,
-        mCAnswerId: mCAnswerId || null,
-        contentElementId: contentElementId || null,
-      },
-    });
-
-    // Create file upload tracking entry
-    await this.prisma.fileUpload.create({
-      data: {
-        userId,
-        fileId: file.id,
-        moduleId,
       },
     });
 
@@ -85,8 +67,6 @@ export class ProductionFilesService {
    */
   async downloadProductionFile(
     uniqueIdentifier: string,
-    userId: number,
-    moduleId: number,
   ): Promise<StreamableFile> {
     // Get file metadata from database
     const file = await this.prisma.file.findUnique({
