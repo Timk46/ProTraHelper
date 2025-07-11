@@ -31,7 +31,7 @@
 
 
 
-  <div *ngIf="isAdmin" class="edit-overlay"
+  <div *ngIf="isAdmin && (isGradingContent || editModeActive)" class="edit-overlay"
     (mouseenter)="onHoverMenuMouseEnter($event)"
     (mouseleave)="rippleEnabled = true; editModeButtonsClickable = false"
   >
@@ -40,7 +40,7 @@
       <button mat-mini-fab color="primary"
         (click)="$event.stopPropagation(); onTaskGrading()"
         >
-        <mat-icon>edit</mat-icon>
+        <mat-icon>grading</mat-icon>
       </button>
     </div>
 

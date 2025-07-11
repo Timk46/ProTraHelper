@@ -61,13 +61,13 @@ export class ContentListItemComponent {
     private snackBar: MatSnackBar
   ) {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
-    this.isGradingContent = this.contentElementData.type === contentElementType.QUESTION && gradingContent.includes(this.contentElementData.question?.type as questionType);
   }
 
   ngOnInit() {
     this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
       this.editModeActive = hasEditModeActive;
     });
+    this.isGradingContent = this.contentElementData.type === contentElementType.QUESTION && gradingContent.includes(this.contentElementData.question?.type as questionType);
   }
 
   /**
