@@ -76,15 +76,46 @@ export class ProductionFilesController {
     // Get file metadata first to set proper headers
     const file = await this.productionFilesService.getProductionFile(uniqueIdentifier);
 
-    // Set response headers based on file type
+    // Map file extensions/types to proper MIME types
+    const mimeTypeMap: Record<string, string> = {
+      pdf: 'application/pdf',
+      PDF: 'application/pdf',
+      mp4: 'video/mp4',
+      MP4: 'video/mp4',
+      png: 'image/png',
+      PNG: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      JPG: 'image/jpeg',
+      JPEG: 'image/jpeg',
+      gif: 'image/gif',
+      GIF: 'image/gif',
+      txt: 'text/plain',
+      TXT: 'text/plain',
+      docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      DOCX: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      XLSX: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      csv: 'text/csv',
+      CSV: 'text/csv',
+    };
+    let mimeType = mimeTypeMap[file.type] || file.type;
+    if (!mimeType.includes('/')) {
+      mimeType = 'application/octet-stream';
+    }
+    const isPdf = mimeType === 'application/pdf';
+
+
+
     response.set({
-      'Content-Type': file.type === 'pdf' ? 'application/pdf' : `application/${file.type}`,
-      'Content-Disposition': file.type === 'pdf'
-        ? `inline; filename=${file.name}`
-        : `attachment; filename=${file.name}`,
+      'Content-Type': mimeType,
+      'Content-Disposition': isPdf ? `inline; filename="${file.name}"` : `attachment; filename="${file.name}"`,
       'X-Filename': file.name,
     });
 
+    // Logge erfolgreichen Download-Vorgang mit Nutzer und Dateiname
+    // eslint-disable-next-line no-console
+    console.log(`[Download] User ${userId} downloaded file '${file.name}' (${file.uniqueIdentifier})`);
     return this.productionFilesService.downloadProductionFile(uniqueIdentifier);
   }
 

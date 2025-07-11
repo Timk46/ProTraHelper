@@ -129,7 +129,7 @@ export class QuestionDataUploadService {
           select: {
             file: {
               select: {
-                id: true,
+                uniqueIdentifier: true,
                 name: true,
                 updatedAt: true,
               }
@@ -161,7 +161,7 @@ export class QuestionDataUploadService {
       questionTitle: answer.question.name,
       userId: answer.user.id,
       userMail: answer.user.email,
-      fileId: answer.UserUploadAnswer[0]?.file.id,
+      fileUniqueIdentifier: answer.UserUploadAnswer[0]?.file.uniqueIdentifier,
       fileName: answer.UserUploadAnswer[0]?.file.name,
       uploadDate: answer.UserUploadAnswer[0]?.file.updatedAt
     }));

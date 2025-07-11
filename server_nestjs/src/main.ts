@@ -8,6 +8,7 @@ async function bootstrap() {
   app.enableCors({
     origin: 'http://localhost:4200',
     credentials: true,
+    exposedHeaders: ['X-Filename'],
   });
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));

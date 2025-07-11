@@ -51,7 +51,7 @@ export interface UserUploadAnswerListItemDTO {
     questionTitle: string;
     userId: number;
     userMail: string;
-    fileId?: number;
+    fileUniqueIdentifier?: string;
     fileName?: string;
     uploadDate?: Date;
 }

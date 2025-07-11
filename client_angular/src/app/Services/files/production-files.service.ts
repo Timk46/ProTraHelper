@@ -7,7 +7,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class ProductionFilesService {
-  private readonly apiUrl = environment.server + '/files';
+  private readonly apiUrl = environment.server + '/production-files';
 
   constructor(private httpClient: HttpClient) {}
 

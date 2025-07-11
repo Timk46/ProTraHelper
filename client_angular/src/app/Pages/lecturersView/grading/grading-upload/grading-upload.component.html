@@ -14,15 +14,39 @@
       <th>Email</th>
       <th>Datei</th>
       <th>Datum</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let item of userAnswers">
-      <td>{{ item.conceptTitle }}</td>
-      <td>{{ item.questionTitle }}</td>
-      <td>{{ item.userMail }}</td>
-      <td>{{ item.fileName || 'n/a' }}</td>
-      <td>{{ item.uploadDate | date:'dd.MM.yyyy HH:mm' }}</td>
-    </tr>
+    <ng-container *ngFor="let key of groupKeys">
+      <tr>
+        <td>{{ groupedAnswers[key][0].conceptTitle }}</td>
+        <td>{{ groupedAnswers[key][0].questionTitle }}</td>
+        <td>{{ groupedAnswers[key][0].userMail }}</td>
+        <td>
+          <a *ngIf="groupedAnswers[key][0].fileName" href="#" (click)="downloadFile(groupedAnswers[key][0].fileUniqueIdentifier || ''); $event.preventDefault();">{{ groupedAnswers[key][0].fileName }}</a>
+          <span *ngIf="!groupedAnswers[key][0].fileName">n/a</span>
+        </td>
+        <td>{{ groupedAnswers[key][0].uploadDate | date:'dd.MM.yyyy HH:mm' }}</td>
+        <td>
+          <button mat-stroked-button color="primary" *ngIf="groupedAnswers[key].length > 1" (click)="toggleGroup(key)">
+            {{ expandedGroups[key] ? 'Weniger anzeigen' : (groupedAnswers[key].length - 1) + ' weitere' }}
+          </button>
+        </td>
+      </tr>
+      <ng-container *ngIf="expandedGroups[key]">
+        <tr class="expanded-row" *ngFor="let item of groupedAnswers[key]; let i = index" [hidden]="i === 0">
+          <td>{{ item.conceptTitle }}</td>
+          <td>{{ item.questionTitle }}</td>
+          <td>{{ item.userMail }}</td>
+          <td>
+            <a *ngIf="item.fileName" href="#" (click)="downloadFile(item.fileUniqueIdentifier || ''); $event.preventDefault();">{{ item.fileName }}</a>
+            <span *ngIf="!item.fileName">n/a</span>
+          </td>
+          <td>{{ item.uploadDate | date:'dd.MM.yyyy HH:mm' }}</td>
+          <td></td>
+        </tr>
+      </ng-container>
+    </ng-container>
   </tbody>
 </table>
