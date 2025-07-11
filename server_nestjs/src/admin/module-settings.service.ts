@@ -3,7 +3,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 
 @Injectable()
 export class ModuleSettingsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getSetting(moduleId: number, key: string) {
     return this.prisma.moduleSetting.findUnique({
@@ -31,7 +31,7 @@ export class ModuleSettingsService {
         moduleId,
         key,
         value,
-        updatedBy: userId
+        updatedBy: userId,
       },
     });
   }

@@ -1,7 +1,7 @@
-import { IGraphEdge } from "./GraphEdge.interface";
-import { IGraphNode } from "./GraphNode.interface";
+import type { IGraphEdge } from './GraphEdge.interface';
+import type { IGraphNode } from './GraphNode.interface';
 
 export interface IGraphStructure {
-    nodes: IGraphNode[];
-    edges: IGraphEdge[];
+  nodes: IGraphNode[];
+  edges: IGraphEdge[];
 }

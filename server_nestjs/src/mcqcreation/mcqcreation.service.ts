@@ -1,14 +1,14 @@
 /* eslint-disable prefer-const */
 /* eslint-disable prettier/prettier */
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import type { Cache } from 'cache-manager';
+import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import {PromptTemplate,} from "langchain/prompts";
-import { RunnableSequence } from "langchain/schema/runnable";
-import { StructuredOutputParser } from "langchain/output_parsers";
-import { z } from "zod";
-import { McqGenerationDTO, OptionDTO, McqEvaluation } from '@Interfaces/question.dto';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { PromptTemplate } from 'langchain/prompts';
+import { RunnableSequence } from 'langchain/schema/runnable';
+import { StructuredOutputParser } from 'langchain/output_parsers';
+import { z } from 'zod';
+import type { McqGenerationDTO, OptionDTO, McqEvaluation } from '@Interfaces/question.dto';
 import { env } from 'process';
 import { RagService } from '@/ai/services/rag.service';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -18,15 +18,15 @@ const llmConfig = {
   modelName: 'gpt-4.1-2025-04-14', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
   openAIApiKey: env.OPEN_API_KEY,
   temperature: 1, // Low Temperature favours the words with higher probability = less creative
-  streaming: true
+  streaming: true,
 };
 
 const regenerateLLmconfig = {
   modelName: 'gpt-4.1-2025-04-14', // other options: 'gpt-4-0314', 'gpt-3.5-turbo'
   openAIApiKey: env.OPEN_API_KEY,
   temperature: 1, // higher Temperature favours the words with lower probability = more creative
-  streaming: true
-}
+  streaming: true,
+};
 
 const questionTitlePrompt = `Du bist ein Programmierexperte und hilfst mir nur dabei eine Fragestellung für eine Multiple Choice Aufgabe zu erstellen. Nutze dabei folgendes Konzept:
 --------------
@@ -43,7 +43,7 @@ Bereits vorgeschlagene Fragen: {questions}.
 Achte zusätzlich darauf, dass du keine Antwortmöglichkeiten mit in deine Antwort reinbringst, es soll nur die Fragestellung sein. Antworte auf jeden Fall auf deutsch.
 --------------
 format instructions: {format_instructions}
-`
+`;
 
 const questionTitlePrompt2 = `Du bist ein Programmierexperte und hilfst mir nur dabei eine Fragestellung für eine Multiple Choice Aufgabe zu erstellen. Nutze dabei folgendes Konzept:
 --------------
@@ -58,7 +58,7 @@ Bereits vorgeschlagene Fragen: {questions}
 Achte zusätzlich darauf, dass du keine Antwortmöglichkeiten mit in deine Antwort reinbringst, es soll nur die Fragestellung sein. Antworte auf jeden Fall auf deutsch.
 --------------
 format instructions: {format_instructions}
-`
+`;
 
 const answersPrompt = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
 Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein m��ssen innerhalb der triple quotes ("""):
@@ -94,7 +94,7 @@ Anzahl an Antwortmöglichkeiten: {options}
 Konzept, welches als übergeordnetes Thema dienen soll: {concept}
 ---
 format instructions: {format_instructions}
-`
+`;
 
 const answersPrompt2 = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
 Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein müssen innerhalb der triple quotes ("""):
@@ -128,7 +128,7 @@ Anzahl an Antwortmöglichkeiten: {options}
 Konzept, welches als übergeordnetes Thema dienen soll: {concept}
 ---
 format instructions: {format_instructions}
-`
+`;
 
 // needs to be altered because llm needs to know what kind of expert he needs to be etc. (example: suggests network related stuff when asking about interfaces in programming languages if not specified in question field in the frontend
 const regeneratePrompt = `Du bist ein Programmierexperte und erstellst eine neue auswählbare Antwortmöglichkeit für eine bestehende Multiple Choice Frage. Folgendes Konzept ist das Oberthema zu dem die Fragestellung und die Antwortmöglichkeiten vorgeschlagen wurden:
@@ -152,7 +152,7 @@ Die bereits vorgeschlagenen Antwortmöglichkeiten dürfen sich nicht widerholen.
 bestehende Multiple Choice Frage: {question}
 ---
 format instructions: {format_instructions}
-`
+`;
 
 const regeneratePrompt2 = `Du bist ein Programmierexperte und hilfst mir dabei eine neue Antwortmöglichkeit für eine bestehende Multiple Choice Aufgabenstellung zu erstellen. Nutze dabei folgendes Konzept:
 ----------------
@@ -177,7 +177,7 @@ Schreibe jeweils dazu, ob die vorgeschlagene Antwort für die ursprüngliche Fra
 Benutze keine Aufzählungen bei Antworten, die nur ein Wort beinhalten. Bitte schreibe die Antwortmöglichkeit auf jeden Fall auf deutsch.
 ----------------
 format instructions: {format_instructions}
-`
+`;
 
 const questionAndAnswerPrompt = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
 Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein müssen innerhalb der triple quotes ("""):
@@ -216,7 +216,7 @@ Anzahl an Antwortmöglichkeiten: {options}
 Konzept, welches als übergeordnetes Thema dienen soll: {concept}
 ---
 format instructions: {format_instructions}
-`
+`;
 
 const questionAndAnswerPrompt2 = `Du bist ein Programmierexperte und erstellst Multiple Choice Questions (MCQs) und dazu passende Beschreibungen und Punktzahlen, welche von 1 bis 5 reichen können und symbolisch für den Schwierigkeitsgrad stehen.
 Hier eine Beschreibung von Eigenschaften einer MCQ, die in jeden Fall vorhanden sein müssen innerhalb der triple quotes ("""):
@@ -253,7 +253,7 @@ Anzahl an Antwortmöglichkeiten: {options}
 Konzept, welches als übergeordnetes Thema dienen soll: {concept}
 ---
 format instructions: {format_instructions}
-`
+`;
 
 const evaluationPrompt = `Du bist ein Programmierexperte und bewertest Multiple Choice Questions (MCQs). Bewerte die MCQs anhand folgender Anweisungen:
 Anweisungen zur Bewertung innerhalb der triple quotes ("""):
@@ -283,21 +283,21 @@ MCQ: {question}
 Antwortoptionen der MCQ: {answers}
 ---
 format instructions: {format_instructions}
-`
+`;
 
 @Injectable()
 export class McqCreationService {
   private readonly logger: Logger;
-  private llm: ChatOpenAI;
-  private regenLlm: ChatOpenAI;
+  private readonly llm: ChatOpenAI;
+  private readonly regenLlm: ChatOpenAI;
   private askedQuestions: { [concept: string]: McqGenerationDTO[] };
   private mcqToEvaluate: { [question: string]: string[] };
-  private mcqs: { questions: McqGenerationDTO[] };
+  private readonly mcqs: { questions: McqGenerationDTO[] };
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly ragService: RagService,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {
     this.logger = new Logger(McqCreationService.name);
     this.llm = new ChatOpenAI(llmConfig);
@@ -318,12 +318,13 @@ export class McqCreationService {
       this.askedQuestions[concept] = [];
     }
 
-    if (!(this.askedQuestions[concept].some(mcq => mcq.question === question))) {
-      const mcqOptions = options ? options.map(option => ({ answer: option.answer, correct: option.correct })) : [];
+    if (!this.askedQuestions[concept].some(mcq => mcq.question === question)) {
+      const mcqOptions = options
+        ? options.map(option => ({ answer: option.answer, correct: option.correct }))
+        : [];
       this.askedQuestions[concept].push({ question: question, answers: mcqOptions });
-      this.logger.log("askedQuestions added: ", this.askedQuestions[concept]);
+      this.logger.log('askedQuestions added: ', this.askedQuestions[concept]);
     }
-
   }
 
   /** adds a question to the askedQuestions object to prevent regenerating duplicates
@@ -336,7 +337,7 @@ export class McqCreationService {
       this.askedQuestions[concept] = [];
     }
 
-    if (!(this.askedQuestions[concept].some(mcq => mcq.question === question))) {
+    if (!this.askedQuestions[concept].some(mcq => mcq.question === question)) {
       this.askedQuestions[concept].push({ question: question, answers: [] });
     }
   }
@@ -364,16 +365,19 @@ export class McqCreationService {
    * @param options
    */
   private addOptionsToQuestion(concept: string, question: string, options: OptionDTO[]) {
-  if (concept in this.askedQuestions) {
-    const mcq = this.askedQuestions[concept].find(mcq => mcq.question === question);
+    if (concept in this.askedQuestions) {
+      const mcq = this.askedQuestions[concept].find(mcq => mcq.question === question);
 
-    if (mcq) {
-      const mcqOptions = options.map(option => ({ answer: option.answer, correct: option.correct }));
-      console.log(mcqOptions)
-      mcq.answers.push(...mcqOptions);
+      if (mcq) {
+        const mcqOptions = options.map(option => ({
+          answer: option.answer,
+          correct: option.correct,
+        }));
+        console.log(mcqOptions);
+        mcq.answers.push(...mcqOptions);
+      }
     }
   }
-}
 
   /** Called when generating a question title
    * @param concept
@@ -381,13 +385,22 @@ export class McqCreationService {
    */
   async getQuestionTitle(concept: string): Promise<McqGenerationDTO> {
     this.mcqs.questions.forEach(mcq => {
-      this.addQuestionAndOptions(concept, mcq.question, mcq.answers.map(answer => ({ answer: answer.answer, correct: answer.correct })))
+      this.addQuestionAndOptions(
+        concept,
+        mcq.question,
+        mcq.answers.map(answer => ({ answer: answer.answer, correct: answer.correct })),
+      );
     });
-    console.log("this.askedQuestions: ", this.askedQuestions[concept].map(mcq => mcq.question))
+    console.log(
+      'this.askedQuestions: ',
+      this.askedQuestions[concept].map(mcq => mcq.question),
+    );
 
-    const parser = StructuredOutputParser.fromZodSchema(z.object({
-      question: z.string().describe("Frage an den Nutzer. Ohne Antwortmöglichekiten"),
-    }));
+    const parser = StructuredOutputParser.fromZodSchema(
+      z.object({
+        question: z.string().describe('Frage an den Nutzer. Ohne Antwortmöglichekiten'),
+      }),
+    );
     const completeContext = await this.ragService.lectureSimilaritySearch(concept, 10);
     const transcript = await this.prisma.conceptNode.findFirst({
       where: {
@@ -397,22 +410,21 @@ export class McqCreationService {
         transcript: true,
       },
     });
-    if(!(transcript === null)) {
+    if (!(transcript === null)) {
       const response = await RunnableSequence.from([
-      {
-        concept: () => concept,
-        completeContext: () => completeContext,
-        questions: () => this.askedQuestions[concept].map(mcq => mcq.question),
-        transcript:  () =>  transcript,
-        format_instructions: () => parser.getFormatInstructions(),
-      },
-      PromptTemplate.fromTemplate(questionTitlePrompt),
-      this.llm,
-      parser,
-      ]).invoke({callbacks: []})
+        {
+          concept: () => concept,
+          completeContext: () => completeContext,
+          questions: () => this.askedQuestions[concept].map(mcq => mcq.question),
+          transcript: () => transcript,
+          format_instructions: () => parser.getFormatInstructions(),
+        },
+        PromptTemplate.fromTemplate(questionTitlePrompt),
+        this.llm,
+        parser,
+      ]).invoke({ callbacks: [] });
 
       this.addQuestion(concept, response.question);
-
 
       return response;
     } else {
@@ -426,7 +438,7 @@ export class McqCreationService {
         PromptTemplate.fromTemplate(questionTitlePrompt2),
         this.llm,
         parser,
-      ]).invoke({callbacks: []})
+      ]).invoke({ callbacks: [] });
       this.addQuestion(concept, response2.question);
 
       return response2;
@@ -443,30 +455,39 @@ export class McqCreationService {
     question: string,
     option: OptionDTO,
     otherOptions: OptionDTO[],
-    concept: string
+    concept: string,
   ): Promise<OptionDTO> {
     // Ensure the question exists in askedQuestions
-    if (!this.askedQuestions[concept]?.some(q => q.question === question)) {
+    if (!this.askedQuestions[concept].some(q => q.question === question)) {
       this.addQuestion(concept, question);
       // Adjusted to use otherOptions correctly
-      this.addOptionsToQuestion(concept, question, otherOptions.map(opt => ({ answer: opt.answer, correct: opt.correct })));
+      this.addOptionsToQuestion(
+        concept,
+        question,
+        otherOptions.map(opt => ({ answer: opt.answer, correct: opt.correct })),
+      );
     }
-    this.logger.log("concept: ", concept);
-    this.logger.log("Asked questions:", this.askedQuestions[concept].map(mcq => mcq.question));
+    this.logger.log('concept: ', concept);
     this.logger.log(
-      "Other options for question:",
-      this.askedQuestions[concept]?.flatMap(mcq => mcq.answers).map(ans => ans.answer) || []
+      'Asked questions:',
+      this.askedQuestions[concept].map(mcq => mcq.question),
+    );
+    this.logger.log(
+      'Other options for question:',
+      this.askedQuestions[concept].flatMap(mcq => mcq.answers).map(ans => ans.answer) || [],
     );
 
     const parser = StructuredOutputParser.fromZodSchema(
       z.object({
-        answer: z.string().describe("Antwort auf die Frage des Benutzers. Keine Aufzählungen verwenden."),
-        correct: z.boolean().describe("Gibt an, ob die Antwort korrekt ist (wahr/falsch)."),
-      })
+        answer: z
+          .string()
+          .describe('Antwort auf die Frage des Benutzers. Keine Aufzählungen verwenden.'),
+        correct: z.boolean().describe('Gibt an, ob die Antwort korrekt ist (wahr/falsch).'),
+      }),
     );
 
     let transcript = await this.cacheManager.get<string>(`transcript_${concept}`);
-    if(!transcript) {
+    if (!transcript) {
       // Retrieve context for the prompt
       const transcriptData = await this.prisma.conceptNode.findFirst({
         where: {
@@ -476,7 +497,7 @@ export class McqCreationService {
           transcript: true,
         },
       });
-      transcript = transcriptData?.transcript || "";
+      transcript = transcriptData.transcript || '';
       // Cache the transcript
       await this.cacheManager.set(`transcript_${concept}`, transcript, Number({ ttl: 3600 })); // cache for 1 hour
     } else {
@@ -484,7 +505,9 @@ export class McqCreationService {
     }
     const completeContext = await this.ragService.lectureSimilaritySearch(question, 10);
     // Convert completeContext from TranscriptChunk[] to string
-    const completeContextString = completeContext.map(chunk => chunk.TranscriptChunkContent).join(' ');
+    const completeContextString = completeContext
+      .map(chunk => chunk.TranscriptChunkContent)
+      .join(' ');
 
     // Combine otherOptions into a single string
     const optionsString = otherOptions.map(opt => opt.answer).join('\n');
@@ -536,7 +559,12 @@ export class McqCreationService {
     // Adjust the prompt to fit within token limits
     const MAX_MODEL_TOKENS = 120000;
     const MIN_TOKENS = 1000;
-    const formattedPrompt = await this.adjustPrompt(promptTemplate, promptInput, MAX_MODEL_TOKENS, MIN_TOKENS);
+    const formattedPrompt = await this.adjustPrompt(
+      promptTemplate,
+      promptInput,
+      MAX_MODEL_TOKENS,
+      MIN_TOKENS,
+    );
 
     // Log the token count
     const numTokens = await this.llm.getNumTokens(formattedPrompt);
@@ -548,18 +576,16 @@ export class McqCreationService {
     }
 
     // Prepare the runnable sequence
-    const sequence = RunnableSequence.from([
-      promptTemplate,
-      this.regenLlm,
-      parser,
-    ]);
+    const sequence = RunnableSequence.from([promptTemplate, this.regenLlm, parser]);
 
     // Invoke the sequence with promptInput
     const response = await sequence.invoke(promptInput, { callbacks: [] });
 
     // Verify that the generated answer has the desired correctness
     if (response.correct !== desiredCorrectness) {
-      this.logger.log("The generated answer did not match the desired correctness. Regenerating...");
+      this.logger.log(
+        'The generated answer did not match the desired correctness. Regenerating...',
+      );
       // Implement retry logic if necessary
     }
 
@@ -567,10 +593,10 @@ export class McqCreationService {
     this.addOption(concept, question, response.answer);
 
     this.logger.log(
-      "All answers:",
-      this.askedQuestions[concept]?.flatMap(mcq => mcq.answers).map(ans => ans.answer) || []
+      'All answers:',
+      this.askedQuestions[concept].flatMap(mcq => mcq.answers).map(ans => ans.answer) || [],
     );
-    this.logger.log("Generated response correctness:", response.correct);
+    this.logger.log('Generated response correctness:', response.correct);
 
     return { answer: response.answer, correct: response.correct };
   }
@@ -580,21 +606,31 @@ export class McqCreationService {
    * @param question
    * @returns all answers to the user's question
    */
-  async getAnswers(options: number, question: string, concept: string) :Promise<McqGenerationDTO> {
+  async getAnswers(options: number, question: string, concept: string): Promise<McqGenerationDTO> {
     //adding question to local data structure for llm to know
     this.addQuestion(concept, question);
     const parser = StructuredOutputParser.fromZodSchema(
       z.object({
         answers: z.array(
           z.object({
-            answer: z.string().describe("Antwortmöglichkeit des Nutzers. Keine Aufzählungen nutzen."),
-            correct: z.boolean().describe("Markiert die Korrektheit der Antwortmöglichkeit (wahr/falsch)"),
-          })
+            answer: z
+              .string()
+              .describe('Antwortmöglichkeit des Nutzers. Keine Aufzählungen nutzen.'),
+            correct: z
+              .boolean()
+              .describe('Markiert die Korrektheit der Antwortmöglichkeit (wahr/falsch)'),
+          }),
         ),
-        description: z.string().describe("Kurze Beschreibung der Fragestellung mit Bezug auf das Oberthema"),
-        score: z.number().describe("Punktzahl für das richtige beantworten der Frage. 1 für sehr einfach und 5 für sehr schwierig."),
-      })
-    )
+        description: z
+          .string()
+          .describe('Kurze Beschreibung der Fragestellung mit Bezug auf das Oberthema'),
+        score: z
+          .number()
+          .describe(
+            'Punktzahl für das richtige beantworten der Frage. 1 für sehr einfach und 5 für sehr schwierig.',
+          ),
+      }),
+    );
 
     const similaritySearchResults = await this.ragService.lectureSimilaritySearch(concept, 10);
     const transcriptData = await this.prisma.conceptNode.findFirst({
@@ -604,8 +640,8 @@ export class McqCreationService {
       select: {
         transcript: true,
       },
-    })
-    const transcript = transcriptData?.transcript || "";
+    });
+    const transcript = transcriptData.transcript || '';
     // Prepare the prompt template
     let promptTemplate;
     if (transcript) {
@@ -651,7 +687,11 @@ export class McqCreationService {
     ]).invoke({ callbacks: [] });
 
     // Adding the generated question and answers to prevent duplicates
-    this.addQuestionAndOptions(concept, question, response.answers.map(ans => ({ answer: ans.answer, correct: ans.correct })));
+    this.addQuestionAndOptions(
+      concept,
+      question,
+      response.answers.map(ans => ({ answer: ans.answer, correct: ans.correct })),
+    );
 
     return response;
   }
@@ -662,12 +702,16 @@ export class McqCreationService {
    * @param topic
    * @returns question and answers to the user's question
    */
-  async getQuestionAndAnswers(concept: string, options: number, topic = '(wähle selbst)'): Promise<McqGenerationDTO> {
-    this.logger.log("concept: ", concept);
-    this.logger.log("options: ", options);
-    this.logger.log("askedQuestions undefined?: ", this.askedQuestions[concept] === undefined);
+  async getQuestionAndAnswers(
+    concept: string,
+    options: number,
+    topic = '(wähle selbst)',
+  ): Promise<McqGenerationDTO> {
+    this.logger.log('concept: ', concept);
+    this.logger.log('options: ', options);
+    this.logger.log('askedQuestions undefined?: ', this.askedQuestions[concept] === undefined);
     // Log all asked questions for debugging
-    this.logger.log("All asked questions:", JSON.stringify(this.askedQuestions, null, 2));
+    this.logger.log('All asked questions:', JSON.stringify(this.askedQuestions, null, 2));
     // Fetch the ConceptNode matching the concept name
     const conceptNode = await this.prisma.conceptNode.findFirst({
       where: {
@@ -700,11 +744,11 @@ export class McqCreationService {
       },
     });
 
-    this.logger.log("mcqs: ", mcqs);
+    this.logger.log('mcqs: ', mcqs);
 
     // Process fetched questions
     mcqs.forEach(mcq => {
-      mcq.mcQuestion?.forEach(question => {
+      mcq.mcQuestion.forEach(question => {
         const answers = question.MCQuestionOption.map(opt => ({
           answer: opt.option.text,
           correct: opt.option.is_correct,
@@ -717,20 +761,31 @@ export class McqCreationService {
     // Parser for formatting the output in the desired way
     const parser = StructuredOutputParser.fromZodSchema(
       z.object({
-        question: z.string().describe("Fragestellung an den Nutzer"),
-        answers: z.array(
-          z.object({
-            answer: z.string().describe("Antwortmöglichkeit des Nutzers. Keine Aufzählungen nutzen."),
-            correct: z.boolean().describe("Markiert die Korrektheit der Antwortmöglichkeit (wahr/falsch)"),
-          })
-        ).optional().default([]),
-        description: z.string().describe("Kurze Beschreibung der Fragestellung"),
-        score: z.number().describe("Punktzahl für das richtige beantworten der Frage. 1 für sehr einfach und 5 für sehr schwierig."),
-      })
+        question: z.string().describe('Fragestellung an den Nutzer'),
+        answers: z
+          .array(
+            z.object({
+              answer: z
+                .string()
+                .describe('Antwortmöglichkeit des Nutzers. Keine Aufzählungen nutzen.'),
+              correct: z
+                .boolean()
+                .describe('Markiert die Korrektheit der Antwortmöglichkeit (wahr/falsch)'),
+            }),
+          )
+          .optional()
+          .default([]),
+        description: z.string().describe('Kurze Beschreibung der Fragestellung'),
+        score: z
+          .number()
+          .describe(
+            'Punktzahl für das richtige beantworten der Frage. 1 für sehr einfach und 5 für sehr schwierig.',
+          ),
+      }),
     );
     let transcript = await this.cacheManager.get<string>(`transcript_${concept}`);
     // Context retrieval for the question
-    if(!transcript) {
+    if (!transcript) {
       const transcriptData = await this.prisma.conceptNode.findFirst({
         where: {
           name: concept,
@@ -739,7 +794,7 @@ export class McqCreationService {
           transcript: true,
         },
       });
-      transcript = transcriptData?.transcript || "";
+      transcript = transcriptData.transcript || '';
       await this.cacheManager.set(`transcript_${concept}`, transcript, Number({ ttl: 3600 })); // cache for 1 hour
     } else {
       this.logger.log(`Retrieved transcript from cache for concept: ${concept}`);
@@ -753,9 +808,12 @@ export class McqCreationService {
     } else {
       promptTemplate = PromptTemplate.fromTemplate(questionAndAnswerPrompt2);
     }
-    this.logger.log("this.askedQuestions[concept]?.map(mcq => mcq.question): ", this.askedQuestions[concept]?.map(mcq => mcq.question));
-    let existingQuestions = this.askedQuestions[concept]?.map(mcq => mcq.question);
-    this.logger.log("existingQuestions: ", existingQuestions);
+    this.logger.log(
+      'this.askedQuestions[concept]?.map(mcq => mcq.question): ',
+      this.askedQuestions[concept].map(mcq => mcq.question),
+    );
+    let existingQuestions = this.askedQuestions[concept].map(mcq => mcq.question);
+    this.logger.log('existingQuestions: ', existingQuestions);
     // Initial prompt input
     const promptInput = {
       topic: topic,
@@ -763,14 +821,21 @@ export class McqCreationService {
       options: options,
       similaritySearchResults: similaritySearchResults,
       transcript: transcript,
-      existingQuestions: existingQuestions ? existingQuestions.map(question => question.toLowerCase()) : [],
+      existingQuestions: existingQuestions
+        ? existingQuestions.map(question => question.toLowerCase())
+        : [],
       format_instructions: parser.getFormatInstructions(),
     };
 
     // Adjust the prompt to fit within token limits
     const MAX_MODEL_TOKENS = 128000; // Model's maximum context length
-    const MIN_TOKENS = 1000;        // Minimum tokens to send to the LLM
-    const formattedPrompt = await this.adjustPrompt(promptTemplate, promptInput, MAX_MODEL_TOKENS, MIN_TOKENS);
+    const MIN_TOKENS = 1000; // Minimum tokens to send to the LLM
+    const formattedPrompt = await this.adjustPrompt(
+      promptTemplate,
+      promptInput,
+      MAX_MODEL_TOKENS,
+      MIN_TOKENS,
+    );
 
     // Calculate tokens
     const numTokens = await this.llm.getNumTokens(formattedPrompt);
@@ -781,34 +846,52 @@ export class McqCreationService {
     // Parse the LLM response
     const result = await parser.parse(response);
 
-    this.addQuestionAndOptions(concept, result.question, result.answers.map(ans => ({ answer: ans.answer, correct: ans.correct })));
-    this.logger.log("result: ", result);
+    this.addQuestionAndOptions(
+      concept,
+      result.question,
+      result.answers.map(ans => ({ answer: ans.answer, correct: ans.correct })),
+    );
+    this.logger.log('result: ', result);
     return result;
   }
 
   /**
-  * returns evaluation of given answer options and the reasoning behind its evaluation
-  * @param question
-  * @param answers
-  * @returns Promise<McqEvaluation>
-  */
-  async getEvaluation(question: string, answers: string[]) : Promise<McqEvaluation> {
-
-    this.mcqToEvaluate[question] = answers
+   * returns evaluation of given answer options and the reasoning behind its evaluation
+   * @param question
+   * @param answers
+   * @returns Promise<McqEvaluation>
+   */
+  async getEvaluation(question: string, answers: string[]): Promise<McqEvaluation> {
+    this.mcqToEvaluate[question] = answers;
 
     const parser = StructuredOutputParser.fromZodSchema(
       z.object({
-        question: z.string().describe("Die Frage an den User"),
-        evaluations: z.array(
-          z.object({
-            reasoning: z.string().describe("Eine ausführliche Erklärung dazu, warum diese Antwortmöglichkeit Mit Bezug zur Frage wahr oder falsch ist.").optional(),
-            correct: z.boolean().describe("Evaluiert, ob die gegebene Antwortmöglichkeit auf die jeweilige Frage korrekt ist (wahr/falsch)").optional(),
-
-          })
-        ).default([]),
-        commentOnQuality: z.string().describe("Die Bewertung der Gesamtfrage und der Antwortmöglichkeiten als Gut, Sehr Gut oder Exzellent. kurze Begründung für die Bewertung anhand der Anweisungen A bis D."),
-      })
-    )
+        question: z.string().describe('Die Frage an den User'),
+        evaluations: z
+          .array(
+            z.object({
+              reasoning: z
+                .string()
+                .describe(
+                  'Eine ausführliche Erklärung dazu, warum diese Antwortmöglichkeit Mit Bezug zur Frage wahr oder falsch ist.',
+                )
+                .optional(),
+              correct: z
+                .boolean()
+                .describe(
+                  'Evaluiert, ob die gegebene Antwortmöglichkeit auf die jeweilige Frage korrekt ist (wahr/falsch)',
+                )
+                .optional(),
+            }),
+          )
+          .default([]),
+        commentOnQuality: z
+          .string()
+          .describe(
+            'Die Bewertung der Gesamtfrage und der Antwortmöglichkeiten als Gut, Sehr Gut oder Exzellent. kurze Begründung für die Bewertung anhand der Anweisungen A bis D.',
+          ),
+      }),
+    );
 
     const result = await RunnableSequence.from([
       {
@@ -819,9 +902,9 @@ export class McqCreationService {
       PromptTemplate.fromTemplate(evaluationPrompt),
       this.llm,
       parser,
-    ]).invoke({callbacks: []});
+    ]).invoke({ callbacks: [] });
 
-    console.log("Evaluation result: ", result)
+    console.log('Evaluation result: ', result);
 
     return {
       question: result.question,
@@ -843,7 +926,7 @@ export class McqCreationService {
     promptTemplate: PromptTemplate,
     promptInput: any,
     maxTokens: number,
-    minTokens: number
+    minTokens: number,
   ): Promise<string> {
     let formattedPrompt = await promptTemplate.format(promptInput);
     let numTokens = await this.llm.getNumTokens(formattedPrompt);
@@ -852,13 +935,22 @@ export class McqCreationService {
     while (numTokens > maxTokens && numTokens > minTokens) {
       // Adjust the inputs contributing to the token count
       if (promptInput.similaritySearchResults) {
-        promptInput.similaritySearchResults = promptInput.similaritySearchResults.slice(0, Math.floor(promptInput.similaritySearchResults.length * 0.9));
+        promptInput.similaritySearchResults = promptInput.similaritySearchResults.slice(
+          0,
+          Math.floor(promptInput.similaritySearchResults.length * 0.9),
+        );
       }
       if (promptInput.transcript) {
-        promptInput.transcript = promptInput.transcript.slice(0, Math.floor(promptInput.transcript.length * 0.9));
+        promptInput.transcript = promptInput.transcript.slice(
+          0,
+          Math.floor(promptInput.transcript.length * 0.9),
+        );
       }
       if (promptInput.existingQuestions) {
-        promptInput.existingQuestions = promptInput.existingQuestions.slice(0, Math.floor(promptInput.existingQuestions.length * 0.9));
+        promptInput.existingQuestions = promptInput.existingQuestions.slice(
+          0,
+          Math.floor(promptInput.existingQuestions.length * 0.9),
+        );
       }
       // Reformat the prompt
       formattedPrompt = await promptTemplate.format(promptInput);

@@ -1,27 +1,24 @@
 import { Injectable } from '@angular/core';
-import { GenerateGraphService } from './generate-graph.service';
-import { GraphEdgeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
+import type { GenerateGraphService } from './generate-graph.service';
+import type { GraphEdgeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
 
 export interface GenerateKruskalConfiguration {
-  nodesCount: number,
-  edgesCount: number,
+  nodesCount: number;
+  edgesCount: number;
   edgeWeight: {
-    enabled: true,
-    min: number,
-    max: number
-  },
+    enabled: true;
+    min: number;
+    max: number;
+  };
 }
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GenerateKruskalService {
-
-  constructor(private generateGraphService: GenerateGraphService) { }
+  constructor(private readonly generateGraphService: GenerateGraphService) {}
 
   generate(configuration: GenerateKruskalConfiguration): GraphStructureDTO {
-    
     if (configuration.nodesCount < 1) {
       throw new Error('Number of nodes must be at least 1');
     }
@@ -42,24 +39,22 @@ export class GenerateKruskalService {
       nodeWeight: {
         enabled: false,
         min: 0,
-        max: 0
+        max: 0,
       },
+    };
 
-    }
+    const { nodes, edges } = this.generateGraphService.generateGraph(_configuration);
 
-    const {nodes, edges} = this.generateGraphService.generateGraph(_configuration);
-   
-    const updatedEdges: GraphEdgeDTO[] = []; 
-    
+    const updatedEdges: GraphEdgeDTO[] = [];
+
     edges.forEach(edge => {
       updatedEdges.push({
         node1Id: edge.node1.nodeId,
         node2Id: edge.node2.nodeId,
         weight: edge.weight,
-    })
+      });
     });
 
     return { nodes, edges: updatedEdges };
   }
-
 }

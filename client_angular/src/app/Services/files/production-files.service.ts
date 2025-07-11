@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import type { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
+import type { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -9,7 +10,7 @@ import { environment } from '../../../environments/environment';
 export class ProductionFilesService {
   private readonly apiUrl = environment.server + '/files';
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private readonly httpClient: HttpClient) {}
 
   /**
    * Uploads a file to the server.
@@ -21,7 +22,6 @@ export class ProductionFilesService {
     const formData = new FormData();
     formData.append('file', file, file.name);
 
-
     return this.httpClient.post(`${this.apiUrl}/upload`, formData);
   }
 
@@ -31,7 +31,7 @@ export class ProductionFilesService {
    * @param uniqueIdentifier The unique identifier for the file to be downloaded.
    * @returns An Observable containing the server response, which includes the file as a Blob.
    */
-  downloadProductionFile(uniqueIdentifier: String): Observable<HttpResponse<Blob>> {
+  downloadProductionFile(uniqueIdentifier: string): Observable<HttpResponse<Blob>> {
     return this.httpClient.get(`${this.apiUrl}/download/${uniqueIdentifier}`, {
       responseType: 'blob',
       observe: 'response',

@@ -11,7 +11,9 @@ describe('ExampleSolutionGenerationController', () => {
       providers: [ExampleSolutionGenerationService],
     }).compile();
 
-    controller = module.get<ExampleSolutionGenerationController>(ExampleSolutionGenerationController);
+    controller = module.get<ExampleSolutionGenerationController>(
+      ExampleSolutionGenerationController,
+    );
   });
 
   it('should be defined', () => {

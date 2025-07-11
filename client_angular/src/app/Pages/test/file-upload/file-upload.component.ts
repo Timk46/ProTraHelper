@@ -1,6 +1,6 @@
 // This Component is just a test component to test the file upload and download functionality.
 import { Component } from '@angular/core';
-import { FileService } from '../../../Services/files/files.service';
+import type { FileService } from '../../../Services/files/files.service';
 @Component({
   selector: 'app-file-upload',
   templateUrl: './file-upload.component.html',
@@ -10,7 +10,7 @@ export class FileUploadComponent {
   fileToUpload: File | null = null;
   uniqueIdentifier: string = '';
 
-  constructor(private fileService: FileService) {}
+  constructor(private readonly fileService: FileService) {}
 
   /**
    * Called when a file is selected via the UI.
@@ -30,7 +30,7 @@ export class FileUploadComponent {
    */
   uploadFile(): void {
     if (this.fileToUpload) {
-      this.fileService.uploadFile(this.fileToUpload).subscribe((response) => {
+      this.fileService.uploadFile(this.fileToUpload).subscribe(response => {
         //console.log(response);
         // Handle the response as needed.
       });
@@ -44,27 +44,24 @@ export class FileUploadComponent {
    */
   downloadFile(): void {
     if (this.uniqueIdentifier) {
-      this.fileService
-        .downloadFile(this.uniqueIdentifier)
-        .subscribe((response) => {
-          const blobData = response.body;
-          //console.log(JSON.stringify(response.headers));
-          if (blobData !== null) {
-            const blob = new Blob([blobData], {
-              type: 'application/octet-stream',
-            });
-            const fileName =
-              response.headers.get('X-Filename') || 'error_no_file_name.txt';
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.click();
-            window.URL.revokeObjectURL(url);
-          } else {
-            console.error('Download fehlgeschlagen: Blob-Daten sind null');
-          }
-        });
+      this.fileService.downloadFile(this.uniqueIdentifier).subscribe(response => {
+        const blobData = response.body;
+        //console.log(JSON.stringify(response.headers));
+        if (blobData !== null) {
+          const blob = new Blob([blobData], {
+            type: 'application/octet-stream',
+          });
+          const fileName = response.headers.get('X-Filename') || 'error_no_file_name.txt';
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          a.click();
+          window.URL.revokeObjectURL(url);
+        } else {
+          console.error('Download fehlgeschlagen: Blob-Daten sind null');
+        }
+      });
     }
   }
 }

@@ -1,34 +1,44 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { GraphConfigurationDTO, GraphEdgeDTO, GraphNodeDTO, GraphStructureDTO, GraphStructureSemanticDTO } from '@DTOs/graphTask.dto';
-import { GraphTaskService } from 'src/app/Modules/graph-tasks/services/graph-task.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import type { AfterViewInit, OnInit } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import type {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ValidationErrors,
+  ValidatorFn,
+} from '@angular/forms';
+import { Validators } from '@angular/forms';
+import type { GraphConfigurationDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
+import { GraphEdgeDTO, GraphStructureSemanticDTO } from '@DTOs/graphTask.dto';
+import type { GraphTaskService } from 'src/app/Modules/graph-tasks/services/graph-task.service';
+import type { ActivatedRoute, Router } from '@angular/router';
+import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { questionType } from '@DTOs/question.dto';
-import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
-import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { TinymceComponent } from '../../tinymce/tinymce.component';
-import { GenerateDijkstraService } from './generate-graph/generate-dijkstra.service';
-import { GenerateKruskalService } from './generate-graph/generate-kruskal.service';
-import { GenerateFloydService } from './generate-graph/generate-floyd.service';
-import { GenerateExampleSolutionService } from './generateExampleSolution/generate-example-solution.service';
-import { Observable } from 'rxjs';
-import { graphEdgeJSONToSemantic, graphJSONToSemantic, structuresAreEqual } from 'src/app/Modules/graph-tasks/utils';
-
+import type { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
+import type { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import type { MatSnackBar } from '@angular/material/snack-bar';
+import type { TinymceComponent } from '../../tinymce/tinymce.component';
+import type { GenerateDijkstraService } from './generate-graph/generate-dijkstra.service';
+import type { GenerateKruskalService } from './generate-graph/generate-kruskal.service';
+import type { GenerateFloydService } from './generate-graph/generate-floyd.service';
+import type { GenerateExampleSolutionService } from './generateExampleSolution/generate-example-solution.service';
+import type { Observable } from 'rxjs';
+import {
+  graphEdgeJSONToSemantic,
+  graphJSONToSemantic,
+  structuresAreEqual,
+} from 'src/app/Modules/graph-tasks/utils';
 
 interface GraphQuestionConfiguration extends GraphConfigurationDTO {
   stepsEnabled: boolean;
 }
 
-
 @Component({
   selector: 'app-edit-graph',
   templateUrl: './edit-graph.component.html',
-  styleUrls: ['./edit-graph.component.scss']
+  styleUrls: ['./edit-graph.component.scss'],
 })
-export class EditGraphComponent implements AfterViewInit {
-
+export class EditGraphComponent implements AfterViewInit, OnInit {
   // ########################################
   // Configuration for the graph question types
   dijkstraConfig: GraphQuestionConfiguration = {
@@ -37,35 +47,35 @@ export class EditGraphComponent implements AfterViewInit {
     nodeWeight: true,
     edgeWeight: true,
     edgeDirected: false,
-    stepsEnabled: true
-  }
-  
+    stepsEnabled: true,
+  };
+
   kruskalConfig: GraphQuestionConfiguration = {
     nodeSelected: false,
     nodeSelectedText: { selected: '', unselected: '' },
     nodeWeight: false,
     edgeWeight: true,
     edgeDirected: false,
-    stepsEnabled: true
-  }
-  
+    stepsEnabled: true,
+  };
+
   floydConfig: GraphQuestionConfiguration = {
     nodeSelected: true,
     nodeSelectedText: { selected: 'Aktuell', unselected: '-' },
     nodeWeight: false,
     edgeWeight: true,
     edgeDirected: true,
-    stepsEnabled: true
-  }
-  
+    stepsEnabled: true,
+  };
+
   transitiveClosureConfig: GraphQuestionConfiguration = {
     nodeSelected: false,
     nodeSelectedText: { selected: '', unselected: '' },
     nodeWeight: false,
     edgeWeight: false,
     edgeDirected: true,
-    stepsEnabled: false
-  }
+    stepsEnabled: false,
+  };
 
   getGraphQuestionConfigruation(graphQuestionType: string): GraphQuestionConfiguration {
     if (graphQuestionType === 'dijkstra') {
@@ -83,9 +93,8 @@ export class EditGraphComponent implements AfterViewInit {
     throw new Error('Invalid question type');
   }
 
-
   // ########################################
-  // Form related properties 
+  // Form related properties
   @ViewChild('question', { static: false }) questionField!: TinymceComponent;
   @ViewChild('expectations', { static: false }) expectationField!: TinymceComponent;
 
@@ -99,62 +108,62 @@ export class EditGraphComponent implements AfterViewInit {
   editorConfig = {
     readonly: false,
     plugins: 'autoresize lists table link image code codesample',
-    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
+    toolbar:
+      'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
     min_height: 300,
     max_height: 600,
     resize: false,
-  }
+  };
 
   detailedQuestionData: detailedQuestionDTO | null = null;
 
   questionDescriptionHTML: string = '';
   expectationsHTML: string = '';
 
-
   // ########################################
   // Workspace related properties
   workspaceIsActive = false;
   structureIsSet = false;
-  
+
   workspaceModePrevious: string = 'assignment';
-  workspaceModeCurrent: string = 'assignment';  
+  workspaceModeCurrent: string = 'assignment';
   public solutionStepPrevious: number = 0;
   public solutionStepCurrent: number = 0;
-  
+
   assignmentGraphStructure: GraphStructureDTO = {
-    nodes: [], edges: []
+    nodes: [],
+    edges: [],
   };
   initialUsedForExampleSolution: GraphStructureDTO = {
-    nodes: [], edges: []
+    nodes: [],
+    edges: [],
   };
 
   solutionGraphStructure: GraphStructureDTO[] = [
-  //   {
-  //   nodes: [], edges: []
-  // }
+    //   {
+    //   nodes: [], edges: []
+    // }
   ];
 
   // Store the question id from the route so that we can update the current question and not the question with id from json when importing a task
   questionId: number = -1;
   graphQuestionId: number = -1;
 
-
   // #######################################################
   // Constructor - Component lifecycle related
   constructor(
-    private fb: FormBuilder,
-    private questionDataService: QuestionDataService,
-    private graphTaskService: GraphTaskService,
-    private route: ActivatedRoute,
-    private confirmationService: ConfirmationService,
-    private snackBar: MatSnackBar,
-    private router: Router,
-    private generateFloydService: GenerateFloydService,
-    private generateDijkstraService: GenerateDijkstraService,
-    private generateKruskalService: GenerateKruskalService,
-    private generateExampleSolutionService: GenerateExampleSolutionService,
+    private readonly fb: FormBuilder,
+    private readonly questionDataService: QuestionDataService,
+    private readonly graphTaskService: GraphTaskService,
+    private readonly route: ActivatedRoute,
+    private readonly confirmationService: ConfirmationService,
+    private readonly snackBar: MatSnackBar,
+    private readonly router: Router,
+    private readonly generateFloydService: GenerateFloydService,
+    private readonly generateDijkstraService: GenerateDijkstraService,
+    private readonly generateKruskalService: GenerateKruskalService,
+    private readonly generateExampleSolutionService: GenerateExampleSolutionService,
   ) {
-
     this.graphForm = this.fb.group({
       questionTitle: ['', Validators.required],
       questionDifficulty: ['', Validators.required],
@@ -163,18 +172,15 @@ export class EditGraphComponent implements AfterViewInit {
       graphQuestionType: ['', Validators.required],
     });
 
-    this.generateGraphForm = this.fb.group(
-      {
-        graphNodeCount: [5],
-        graphEdgeCount: [7],
-        graphNodeWeightMin: [0],
-        graphNodeWeightMax: [7],
-        graphEdgeWeightMin: [0],
-        graphEdgeWeightMax: [7],
-        graphSelfEdgeCountMax: [0],
-      }
-    );
-      
+    this.generateGraphForm = this.fb.group({
+      graphNodeCount: [5],
+      graphEdgeCount: [7],
+      graphNodeWeightMin: [0],
+      graphNodeWeightMax: [7],
+      graphEdgeWeightMin: [0],
+      graphEdgeWeightMax: [7],
+      graphSelfEdgeCountMax: [0],
+    });
   }
 
   ngOnInit(): void {
@@ -182,7 +188,6 @@ export class EditGraphComponent implements AfterViewInit {
 
     // Subscribe for changes in the graph question type
     this.graphForm.get('graphQuestionType')?.valueChanges.subscribe(type => {
-
       // For each graph question type, apply required validators for generateGraphForm
       this.applyValidatorsByType(type);
 
@@ -202,17 +207,24 @@ export class EditGraphComponent implements AfterViewInit {
   private handleRouteParams() {
     this.route.params.subscribe(params => {
       this.questionId = parseInt(params['questionId']);
-      this.questionDataService.getDetailedQuestionData(this.questionId, this.thisQuestionType).subscribe(data => {
-        if (data.type === questionType.GRAPH) { // TODO: Kommentar Sven: hab hier auch die entsprechende questionType anstelle des Strings eingefügt. Bitte testen.
-          this.detailedQuestionData = data;
-          this.graphQuestionId = this.detailedQuestionData.graphQuestion?.id || -1;
-          console.log(this.detailedQuestionData);
-          this.setContent();
-        } else {
-          this.snackBar.open('ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Graphaufgabe!', 'Schließen', { duration: 10000 });
-          this.thisQuestionType = data.type as questionType;
-        }
-      });
+      this.questionDataService
+        .getDetailedQuestionData(this.questionId, this.thisQuestionType)
+        .subscribe(data => {
+          if (data.type === questionType.GRAPH) {
+            // TODO: Kommentar Sven: hab hier auch die entsprechende questionType anstelle des Strings eingefügt. Bitte testen.
+            this.detailedQuestionData = data;
+            this.graphQuestionId = this.detailedQuestionData.graphQuestion?.id || -1;
+            console.log(this.detailedQuestionData);
+            this.setContent();
+          } else {
+            this.snackBar.open(
+              'ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Graphaufgabe!',
+              'Schließen',
+              { duration: 10000 },
+            );
+            this.thisQuestionType = data.type as questionType;
+          }
+        });
     });
   }
 
@@ -228,27 +240,32 @@ export class EditGraphComponent implements AfterViewInit {
         questionScore: this.detailedQuestionData.score,
       });
       if (this.detailedQuestionData.graphQuestion) {
-
-        this.questionField.setContent(this.detailedQuestionData.graphQuestion.textHTML || this.detailedQuestionData.text);
-        this.expectationField.setContent(this.detailedQuestionData.graphQuestion.expectationsHTML || this.detailedQuestionData.graphQuestion.expectations);
+        this.questionField.setContent(
+          this.detailedQuestionData.graphQuestion.textHTML || this.detailedQuestionData.text,
+        );
+        this.expectationField.setContent(
+          this.detailedQuestionData.graphQuestion.expectationsHTML ||
+            this.detailedQuestionData.graphQuestion.expectations,
+        );
 
         // Update form controls
         this.graphForm.patchValue({
           graphQuestionType: this.detailedQuestionData.graphQuestion.type,
         });
 
-        const clonedInitialStructure: GraphStructureDTO = JSON.parse(JSON.stringify(this.detailedQuestionData.graphQuestion.initialStructure))
+        const clonedInitialStructure: GraphStructureDTO = JSON.parse(
+          JSON.stringify(this.detailedQuestionData.graphQuestion.initialStructure),
+        );
         this.assignmentGraphStructure = clonedInitialStructure;
-        
+
         // const clonedExSolGraphSteps: GraphStructureDTO[] = JSON.parse(JSON.stringify(this.detailedQuestionData.graphQuestion.exampleSolution))
         // this.solutionGraphStructure = clonedExSolGraphSteps;
-        
+
         this.structureIsSet = true;
       }
     }
   }
 
-  
   protected onOverwrite() {
     this.confirmationService.confirm({
       title: 'Frage aktualisieren',
@@ -259,18 +276,20 @@ export class EditGraphComponent implements AfterViewInit {
         this.isSaving = true;
         const submitData = this.buildDTO();
         console.log(submitData);
-        if (submitData){
+        if (submitData) {
           this.questionDataService.updateWholeQuestion(submitData).subscribe({
             next: response => {
               console.log('Question updated successfully:', response);
               this.snackBar.open('Frage erfolgreich aktualisiert', 'Schließen', { duration: 3000 });
-              this.isSaving = false
+              this.isSaving = false;
             },
             error: error => {
               console.error('Error updating question:', error);
-              this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', { duration: 3000 });
+              this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', {
+                duration: 3000,
+              });
               this.isSaving = false;
-            }
+            },
           });
         } else {
           this.isSaving = false;
@@ -278,18 +297,19 @@ export class EditGraphComponent implements AfterViewInit {
       },
       decline: () => {
         console.log('Overwrite declined');
-      }
+      },
     });
   }
 
   protected onSaveNewVersion() {
-    return // disabled for now
+    return; // disabled for now
   }
 
   protected onCancel() {
     this.confirmationService.confirm({
       title: 'Bearbeitung abbrechen',
-      message: 'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
+      message:
+        'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
       acceptLabel: 'Bearbeitung abbrechen',
       declineLabel: 'Weiter bearbeiten',
       swapColors: true,
@@ -299,15 +319,20 @@ export class EditGraphComponent implements AfterViewInit {
       },
       decline: () => {
         console.log('Cancel declined');
-      }
+      },
     });
   }
 
   // TODO: complete missing fields
   private buildDTO(): detailedQuestionDTO | null {
-    if (this.thisQuestionType === questionType.GRAPH && this.graphForm.valid && this.detailedQuestionData){
-      
-      const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+    if (
+      this.thisQuestionType === questionType.GRAPH &&
+      this.graphForm.valid &&
+      this.detailedQuestionData
+    ) {
+      const graphQuestionConfigruation = this.getGraphQuestionConfigruation(
+        this.graphForm.value.graphQuestionType,
+      );
 
       const newData: detailedQuestionDTO = {
         ...this.detailedQuestionData,
@@ -327,17 +352,17 @@ export class EditGraphComponent implements AfterViewInit {
             nodes: this.assignmentGraphStructure.nodes,
             edges: this.assignmentGraphStructure.edges,
           },
-          exampleSolution: [],//this.solutionGraphStructure,
+          exampleSolution: [], //this.solutionGraphStructure,
           stepsEnabled: graphQuestionConfigruation.stepsEnabled,
           configuration: {
             nodeWeight: graphQuestionConfigruation.nodeWeight,
             nodeSelected: graphQuestionConfigruation.nodeSelected,
             nodeSelectedText: graphQuestionConfigruation.nodeSelectedText,
             edgeWeight: graphQuestionConfigruation.edgeWeight,
-            edgeDirected:graphQuestionConfigruation.edgeDirected,
+            edgeDirected: graphQuestionConfigruation.edgeDirected,
           },
-        }
-      }
+        },
+      };
       return newData;
     }
     return null;
@@ -354,60 +379,69 @@ export class EditGraphComponent implements AfterViewInit {
     // #####
     // ## CASE 1: Example Solution ->  Load it to the service
     if (this.workspaceModeCurrent === 'solution') {
-
       // If the structure has changed
       // Generate the example solution based on the question type
-      if(!structuresAreEqual(this.assignmentGraphStructure, this.initialUsedForExampleSolution)) {
-        
-        this.generateExampleSolution().subscribe( generatedExampleSolution => {
+      if (!structuresAreEqual(this.assignmentGraphStructure, this.initialUsedForExampleSolution)) {
+        this.generateExampleSolution().subscribe(generatedExampleSolution => {
           this.solutionGraphStructure = generatedExampleSolution;
 
-          this.snackBar.open('Die Musterlösung wurde neu generiert, da die Graphstruktur geändert wurde.', 'Schließen', { duration: 3000 });  
-          
+          this.snackBar.open(
+            'Die Musterlösung wurde neu generiert, da die Graphstruktur geändert wurde.',
+            'Schließen',
+            { duration: 3000 },
+          );
+
           // Get Current Step
-          const graphContent: GraphStructureDTO = this.solutionGraphStructure[this.solutionStepCurrent];
-          
+          const graphContent: GraphStructureDTO =
+            this.solutionGraphStructure[this.solutionStepCurrent];
+
           // Get configuration
-          const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
-          
+          const graphQuestionConfigruation = this.getGraphQuestionConfigruation(
+            this.graphForm.value.graphQuestionType,
+          );
+
           // Clone the graph content and load it to the GraphService
           const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
           this.loadWorkspaceContent({
             graphContent: clonedGraphContent,
-            graphConfiguration: graphQuestionConfigruation
+            graphConfiguration: graphQuestionConfigruation,
           });
         });
-      }
-      else {
+      } else {
         // Get Current Step
-        const graphContent: GraphStructureDTO = this.solutionGraphStructure[this.solutionStepCurrent];
-          
+        const graphContent: GraphStructureDTO =
+          this.solutionGraphStructure[this.solutionStepCurrent];
+
         // Get configuration
-        const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
-        
+        const graphQuestionConfigruation = this.getGraphQuestionConfigruation(
+          this.graphForm.value.graphQuestionType,
+        );
+
         // Clone the graph content and load it to the GraphService
         const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
         this.loadWorkspaceContent({
           graphContent: clonedGraphContent,
-          graphConfiguration: graphQuestionConfigruation
+          graphConfiguration: graphQuestionConfigruation,
         });
       }
     }
 
-
     // #####
     // ## CASE 2: Initial Structure ->  Load it to the workspace
     else if (this.workspaceModeCurrent === 'assignment') {
+      // Get configuration
+      const graphQuestionConfigruation = this.getGraphQuestionConfigruation(
+        this.graphForm.value.graphQuestionType,
+      );
 
-        // Get configuration
-        const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
-
-        // Clone the graph content and load it to the GraphService
-        const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(this.assignmentGraphStructure));
-        this.loadWorkspaceContent({
-          graphContent: clonedGraphContent,
-          graphConfiguration: graphQuestionConfigruation
-        });
+      // Clone the graph content and load it to the GraphService
+      const clonedGraphContent: GraphStructureDTO = JSON.parse(
+        JSON.stringify(this.assignmentGraphStructure),
+      );
+      this.loadWorkspaceContent({
+        graphContent: clonedGraphContent,
+        graphConfiguration: graphQuestionConfigruation,
+      });
     }
 
     // Update the previous mode and previous step for the future changes
@@ -415,36 +449,32 @@ export class EditGraphComponent implements AfterViewInit {
     this.solutionStepPrevious = this.solutionStepCurrent;
   }
 
-  loadWorkspaceContent(params: Partial<{
-    graphContent: GraphStructureDTO;
-    graphConfiguration: GraphConfigurationDTO | null
-  }>) {
+  loadWorkspaceContent(
+    params: Partial<{
+      graphContent: GraphStructureDTO;
+      graphConfiguration: GraphConfigurationDTO | null;
+    }>,
+  ) {
+    let { graphContent, graphConfiguration } = params;
 
-    let {
-      graphContent,
-      graphConfiguration
-    } = params;
-    
     // Reset Graph Service to ensure the previous content is removed
     this.graphTaskService.resetGraph();
 
-    // If graph configuration is provided, set it 
+    // If graph configuration is provided, set it
     if (graphConfiguration) {
       this.graphTaskService.configureGraph(graphConfiguration);
     } else {
-      throw new Error('No Graph Configuration.')
+      throw new Error('No Graph Configuration.');
     }
 
     // Set graph data
     if (graphContent === undefined) {
-      graphContent = { nodes: [], edges: [] }
+      graphContent = { nodes: [], edges: [] };
     }
     this.graphTaskService.graphDataFromJSON(graphContent.nodes, graphContent.edges);
-
   }
 
   saveWorkspaceContent(mode: string, step: number) {
-    
     // Do not save changes for example solution mode as it is being generated and not edited
     if (mode === 'solution') {
       return;
@@ -471,35 +501,38 @@ export class EditGraphComponent implements AfterViewInit {
     this.workspaceIsActive = true;
 
     // Indicates that the structure content is not empty
-    // To reset structure content in case assignment configuration changes 
+    // To reset structure content in case assignment configuration changes
     this.structureIsSet = true;
 
     // Get configuration
-    const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
-    
+    const graphQuestionConfigruation = this.getGraphQuestionConfigruation(
+      this.graphForm.value.graphQuestionType,
+    );
+
     // Get Graph Configuration from form data
     this.graphTaskService.configureGraph(graphQuestionConfigruation);
 
     // Clone the graph structure according to the mode. It can be initial structure or example solution
     let clonedGraphContent!: GraphStructureDTO;
     if (this.workspaceModeCurrent === 'assignment') {
-      clonedGraphContent = JSON.parse(JSON.stringify(this.assignmentGraphStructure)); 
+      clonedGraphContent = JSON.parse(JSON.stringify(this.assignmentGraphStructure));
     } else if (this.workspaceModeCurrent === 'solution') {
-      clonedGraphContent = JSON.parse(JSON.stringify(this.solutionGraphStructure[this.solutionStepCurrent])); 
+      clonedGraphContent = JSON.parse(
+        JSON.stringify(this.solutionGraphStructure[this.solutionStepCurrent]),
+      );
     }
 
     // Load workspace to the service
     this.loadWorkspaceContent({
       graphContent: clonedGraphContent,
-      graphConfiguration: graphQuestionConfigruation
+      graphConfiguration: graphQuestionConfigruation,
     });
-    
   }
 
   deactivateWorkspace() {
     // Hide workspace
     this.workspaceIsActive = false;
-    
+
     // Save recent updated workspace content (only for initial structure)
     if (this.workspaceModePrevious === 'assignment') {
       this.saveWorkspaceContent(this.workspaceModePrevious, this.solutionStepCurrent);
@@ -528,13 +561,14 @@ export class EditGraphComponent implements AfterViewInit {
     this.solutionStepCurrent = 0;
     this.solutionStepPrevious = 0;
     this.assignmentGraphStructure = {
-      nodes: [], edges: []
+      nodes: [],
+      edges: [],
     };
     this.solutionGraphStructure = [];
   }
 
   addNewSolutionStep() {
-    return; // disabled for now as the solution is being generated automatically and not edited manually 
+    return; // disabled for now as the solution is being generated automatically and not edited manually
 
     // Before adding new step, the current step need to be saved
     this.saveWorkspaceContent(this.workspaceModePrevious, this.solutionStepPrevious);
@@ -546,19 +580,18 @@ export class EditGraphComponent implements AfterViewInit {
 
     if (this.solutionGraphStructure.length !== 0) {
       last = this.solutionGraphStructure[this.solutionGraphStructure.length - 1];
-    } 
-    else {
+    } else {
       const graphNodes = this.assignmentGraphStructure.nodes;
       const graphEdges = this.assignmentGraphStructure.edges;
       if (graphNodes !== undefined && graphEdges !== undefined) {
         last = {
           nodes: graphNodes,
-          edges: graphEdges
-        }
+          edges: graphEdges,
+        };
       } else {
         last = {
           nodes: [],
-          edges: []
+          edges: [],
         };
       }
     }
@@ -572,17 +605,15 @@ export class EditGraphComponent implements AfterViewInit {
     // Set the current step
     this.solutionStepCurrent = this.solutionGraphStructure.length - 1;
     this.solutionStepPrevious = this.solutionGraphStructure.length - 1;
-   
 
     // call updateWorkspace function for other needed updates required related to the step change
     this.updateWorkspace();
   }
 
   deleteCurrentSolutionStep() {
-    return; // disabled for now as the solution is being generated automatically and not edited manually 
+    return; // disabled for now as the solution is being generated automatically and not edited manually
 
     if (this.solutionGraphStructure.length > 1) {
-
       // Remove the current step
       this.solutionGraphStructure.splice(this.solutionStepCurrent, 1);
 
@@ -601,28 +632,37 @@ export class EditGraphComponent implements AfterViewInit {
       const graphContent: GraphStructureDTO = this.solutionGraphStructure[this.solutionStepCurrent];
 
       // Get configuration
-      const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+      const graphQuestionConfigruation = this.getGraphQuestionConfigruation(
+        this.graphForm.value.graphQuestionType,
+      );
 
       // To use only values and not the references
       const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(graphContent));
-      this.loadWorkspaceContent({ graphContent: clonedGraphContent, graphConfiguration: graphQuestionConfigruation });
+      this.loadWorkspaceContent({
+        graphContent: clonedGraphContent,
+        graphConfiguration: graphQuestionConfigruation,
+      });
     } else {
-        console.warn('Not enough steps to delete. Current steps:', this.solutionGraphStructure.length);
+      console.warn(
+        'Not enough steps to delete. Current steps:',
+        this.solutionGraphStructure.length,
+      );
     }
   }
 
   resetStructure() {
-
     this.confirmationService.confirm({
       title: 'Struktur zurücksetzen',
-      message: 'Sind Sie sicher, dass Sie die Struktur zurücksetzen möchten? Diese Aktion kann nicht rückgängig gemacht werden. Fortfahren?',
+      message:
+        'Sind Sie sicher, dass Sie die Struktur zurücksetzen möchten? Diese Aktion kann nicht rückgängig gemacht werden. Fortfahren?',
       acceptLabel: 'Zurücksetzen',
       declineLabel: 'Abbrechen',
-      accept: () => {   
+      accept: () => {
         // Reset the initial structure
         this.assignmentGraphStructure = {
-          nodes: [], edges: []
-        }
+          nodes: [],
+          edges: [],
+        };
 
         // Reset the solution steps
         this.solutionGraphStructure = [];
@@ -630,35 +670,34 @@ export class EditGraphComponent implements AfterViewInit {
         this.solutionStepPrevious = this.solutionStepCurrent;
 
         this.initialUsedForExampleSolution = {
-          nodes: [], edges: []
-        }
+          nodes: [],
+          edges: [],
+        };
 
         this.workspaceModeCurrent = 'assignment';
         this.workspaceModePrevious = this.workspaceModeCurrent;
 
         // Get configuration
-        const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+        const graphQuestionConfigruation = this.getGraphQuestionConfigruation(
+          this.graphForm.value.graphQuestionType,
+        );
 
         this.loadWorkspaceContent({
           graphContent: this.assignmentGraphStructure,
-          graphConfiguration: graphQuestionConfigruation
+          graphConfiguration: graphQuestionConfigruation,
         });
-
 
         // To use only values and not the references
         this.updateWorkspace();
-      }
+      },
     });
-
   }
 
   onChangeGraphQuestionType(gqType: string): void {
-
     if (this.structureIsSet) {
       this.snackBar.open('Die Graphstruktur wurde zurückgesetzt.', 'Schließen', { duration: 3000 });
       this.resetWorkspaceContent();
     }
-
   }
 
   // #######################################################
@@ -714,23 +753,31 @@ export class EditGraphComponent implements AfterViewInit {
       questionScore: questionData.score || 100,
     });
     if (questionData.graphQuestion) {
-
       this.questionField.setContent(questionData.graphQuestion.textHTML || questionData.text || '');
-      this.expectationField.setContent(questionData.graphQuestion.expectationsHTML || questionData.graphQuestion.expectations || '');
+      this.expectationField.setContent(
+        questionData.graphQuestion.expectationsHTML ||
+          questionData.graphQuestion.expectations ||
+          '',
+      );
 
-      if (questionData.graphQuestion.type === 'dijkstra' || 
-          questionData.graphQuestion.type === 'floyd' || 
-          questionData.graphQuestion.type === 'kruskal' || 
-          questionData.graphQuestion.type === 'transitive_closure') {
-
+      if (
+        questionData.graphQuestion.type === 'dijkstra' ||
+        questionData.graphQuestion.type === 'floyd' ||
+        questionData.graphQuestion.type === 'kruskal' ||
+        questionData.graphQuestion.type === 'transitive_closure'
+      ) {
         this.graphForm.patchValue({
           graphQuestionType: questionData.graphQuestion.type,
         });
-      
-        const clonedInitialStructure: GraphStructureDTO = JSON.parse(JSON.stringify(questionData.graphQuestion.initialStructure || { nodes: [], edges: [] }))
+
+        const clonedInitialStructure: GraphStructureDTO = JSON.parse(
+          JSON.stringify(questionData.graphQuestion.initialStructure || { nodes: [], edges: [] }),
+        );
         this.assignmentGraphStructure = clonedInitialStructure;
-        
-        const clonedExSolGraphSteps: GraphStructureDTO[] = JSON.parse(JSON.stringify(questionData.graphQuestion.exampleSolution || []))
+
+        const clonedExSolGraphSteps: GraphStructureDTO[] = JSON.parse(
+          JSON.stringify(questionData.graphQuestion.exampleSolution || []),
+        );
         this.solutionGraphStructure = clonedExSolGraphSteps;
 
         this.structureIsSet = true;
@@ -742,7 +789,6 @@ export class EditGraphComponent implements AfterViewInit {
     return index;
   }
 
-    
   // #######################################################
   // Generate Graph Task
 
@@ -750,17 +796,24 @@ export class EditGraphComponent implements AfterViewInit {
     let textHTML = null;
 
     if (this.assignmentGraphStructure.nodes.length === 0) {
-      this.snackBar.open('Die Graphstruktur muss zunächst erstellt werden.', 'Schließen', { duration: 3000 });
+      this.snackBar.open('Die Graphstruktur muss zunächst erstellt werden.', 'Schließen', {
+        duration: 3000,
+      });
       return;
     }
 
     if (this.graphForm.value.graphQuestionType === 'dijkstra') {
-
       // Find the start node
-      const startNode: GraphNodeDTO | undefined = this.assignmentGraphStructure.nodes.find(node => node.weight === 0 );
-      
+      const startNode: GraphNodeDTO | undefined = this.assignmentGraphStructure.nodes.find(
+        node => node.weight === 0,
+      );
+
       if (!startNode) {
-        this.snackBar.open('Die Graphstruktur muss ein Startknoten mit Gewicht 0 enthalten.', 'Schließen', { duration: 3000 });
+        this.snackBar.open(
+          'Die Graphstruktur muss ein Startknoten mit Gewicht 0 enthalten.',
+          'Schließen',
+          { duration: 3000 },
+        );
         return;
       }
 
@@ -774,11 +827,9 @@ export class EditGraphComponent implements AfterViewInit {
       Verwenden Sie den Dijkstra-Algorithmus und zeichnen Sie dabei jeden Schritt in ein eigenes Diagramm.<br> 
       Markieren Sie dabei den aktuell besuchten Knoten.
       `;
-
     }
-    
+
     if (this.graphForm.value.graphQuestionType === 'floyd') {
-      
       // Get the node values
       const nodeValues: string[] = this.assignmentGraphStructure.nodes.map(node => node.value);
 
@@ -789,9 +840,8 @@ export class EditGraphComponent implements AfterViewInit {
       Übernehmen Sie bereits hinzugefügte Kanten und aktualisierte Kantengewichte in späteren Schritten.
       `;
     }
-    
-    if (this.graphForm.value.graphQuestionType === 'kruskal') {
 
+    if (this.graphForm.value.graphQuestionType === 'kruskal') {
       // Get the node values
       const nodeValues: string[] = this.assignmentGraphStructure.nodes.map(node => node.value);
 
@@ -801,11 +851,9 @@ export class EditGraphComponent implements AfterViewInit {
       Nutzen Sie den Algorithmus von Kruskal, um den Minimalen Spannbaum B zu erzeugen.<br>
       Erstellen Sie jeden Schritt in ein eigenes Diagramm.
       `;
-      
     }
-    
-    if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
 
+    if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
       // Get the node values
       const nodeValues: string[] = this.assignmentGraphStructure.nodes.map(node => node.value);
 
@@ -815,17 +863,15 @@ export class EditGraphComponent implements AfterViewInit {
       Fügen Sie alle Kanten zu G hinzu, die zu dessen Transitive Hülle gehören.<br>
       Der Graph <strong>muss</strong> auch bereits vorhandene Kanten enthalten.
       `;
-      
     }
 
     if (textHTML) {
       this.questionDescriptionHTML = textHTML;
       this.questionField.setContent(textHTML);
-    }    
+    }
   }
 
   setDefaultsForGeneration(type: string) {
-
     if (type === 'dijkstra') {
       this.generateGraphForm.patchValue({
         graphNodeCount: 5,
@@ -835,7 +881,7 @@ export class EditGraphComponent implements AfterViewInit {
         graphEdgeWeightMin: 0,
         graphEdgeWeightMax: 7,
         graphSelfEdgeCountMax: 0,
-      })
+      });
     }
     if (type === 'kruskal') {
       this.generateGraphForm.patchValue({
@@ -846,14 +892,14 @@ export class EditGraphComponent implements AfterViewInit {
         graphEdgeWeightMin: 0,
         graphEdgeWeightMax: 7,
         graphSelfEdgeCountMax: 0,
-      })
+      });
     }
     if (type === 'transitive_closure') {
       this.generateGraphForm.patchValue({
         graphNodeCount: 5,
         graphEdgeCount: 5,
         graphSelfEdgeCountMax: 0,
-      })
+      });
     }
     if (type === 'floyd') {
       this.generateGraphForm.patchValue({
@@ -862,9 +908,8 @@ export class EditGraphComponent implements AfterViewInit {
         graphEdgeWeightMin: 0,
         graphEdgeWeightMax: 10,
         graphSelfEdgeCountMax: 0,
-      })
+      });
     }
-
   }
 
   applyValidatorsByType(type: string) {
@@ -879,17 +924,17 @@ export class EditGraphComponent implements AfterViewInit {
     // Set default validators for all question types
     this.generateGraphForm.get('graphNodeCount')?.setValidators([
       Validators.required,
-      Validators.min(1)  // Default min count
+      Validators.min(1), // Default min count
     ]);
     this.generateGraphForm.get('graphEdgeCount')?.setValidators([
       Validators.required,
-      Validators.min(0)  // Default min edges count
+      Validators.min(0), // Default min edges count
     ]);
     this.generateGraphForm.get('graphSelfEdgeCount')?.setValidators([
       Validators.required,
-      Validators.min(0)  // Default min self edges count
+      Validators.min(0), // Default min self edges count
     ]);
-    
+
     // Set validators based on type
     if (type === 'kruskal') {
       // TODO: is not working properly
@@ -900,26 +945,22 @@ export class EditGraphComponent implements AfterViewInit {
     } else if (type === 'dijkstra') {
       this.generateGraphForm.get('graphEdgeWeightMin')?.setValidators([
         Validators.required,
-        Validators.min(0)  // Only positive weights
+        Validators.min(0), // Only positive weights
       ]);
       this.generateGraphForm.get('graphEdgeWeightMax')?.setValidators([
         Validators.required,
-        Validators.min(0)  // Only positive weights
+        Validators.min(0), // Only positive weights
       ]);
     } else if (type === 'floyd') {
       // Allow negative weights for Floyd, no specific validator required
-      this.generateGraphForm.get('graphEdgeWeightMin')?.setValidators([
-        Validators.required
-      ]);
-      this.generateGraphForm.get('graphEdgeWeightMax')?.setValidators([
-        Validators.required
-      ]);
+      this.generateGraphForm.get('graphEdgeWeightMin')?.setValidators([Validators.required]);
+      this.generateGraphForm.get('graphEdgeWeightMax')?.setValidators([Validators.required]);
     }
 
     // Add form-level validator for min <= max
-      this.generateGraphForm.setValidators([
-        this.minLessThanOrEqualMaxValidator('graphNodeWeightMin', 'graphNodeWeightMax'),
-        this.minLessThanOrEqualMaxValidator('graphEdgeWeightMin', 'graphEdgeWeightMax')
+    this.generateGraphForm.setValidators([
+      this.minLessThanOrEqualMaxValidator('graphNodeWeightMin', 'graphNodeWeightMax'),
+      this.minLessThanOrEqualMaxValidator('graphEdgeWeightMin', 'graphEdgeWeightMax'),
     ]);
 
     this.generateGraphForm.updateValueAndValidity();
@@ -936,20 +977,18 @@ export class EditGraphComponent implements AfterViewInit {
 
   minLessThanOrEqualMaxValidator(minControlName: string, maxControlName: string): ValidatorFn {
     return (form: AbstractControl): ValidationErrors | null => {
-        const minControl = form.get(minControlName);
-        const maxControl = form.get(maxControlName);
+      const minControl = form.get(minControlName);
+      const maxControl = form.get(maxControlName);
 
-        if (!minControl || !maxControl) {
-            return null;  // If either control is missing, no error
-        }
+      if (!minControl || !maxControl) {
+        return null; // If either control is missing, no error
+      }
 
-        const min = minControl.value;
-        const max = maxControl.value;
+      const min = minControl.value;
+      const max = maxControl.value;
 
-        // Check if min > max
-        return (min !== null && max !== null && min > max)
-            ? { minGreaterThanMax: true }
-            : null;
+      // Check if min > max
+      return min !== null && max !== null && min > max ? { minGreaterThanMax: true } : null;
     };
   }
 
@@ -958,34 +997,48 @@ export class EditGraphComponent implements AfterViewInit {
     if (this.graphForm.value.graphQuestionType === 'kruskal') {
       return (
         this.generateGraphForm.invalid ||
-        this.generateGraphForm.value.graphEdgeCount < this.generateGraphForm.value.graphNodeCount - 1 ||
+        this.generateGraphForm.value.graphEdgeCount <
+          this.generateGraphForm.value.graphNodeCount - 1 ||
         // Ensure the number of edges are not more than the maximum possible for a indirected graph with n nodes
-        this.generateGraphForm.value.graphEdgeCount > this.generateGraphForm.value.graphNodeCount * (this.generateGraphForm.value.graphNodeCount - 1) / 2 + this.generateGraphForm.value.graphSelfEdgeCountMax
+        this.generateGraphForm.value.graphEdgeCount >
+          (this.generateGraphForm.value.graphNodeCount *
+            (this.generateGraphForm.value.graphNodeCount - 1)) /
+            2 +
+            this.generateGraphForm.value.graphSelfEdgeCountMax
       );
     }
 
     if (this.graphForm.value.graphQuestionType === 'dijkstra') {
-      return ( 
+      return (
         this.generateGraphForm.invalid ||
         // Ensure the number of edges are not more than the maximum possible for a indirected graph with n nodes
-        this.generateGraphForm.value.graphEdgeCount > this.generateGraphForm.value.graphNodeCount * (this.generateGraphForm.value.graphNodeCount - 1) / 2 + this.generateGraphForm.value.graphSelfEdgeCountMax
+        this.generateGraphForm.value.graphEdgeCount >
+          (this.generateGraphForm.value.graphNodeCount *
+            (this.generateGraphForm.value.graphNodeCount - 1)) /
+            2 +
+            this.generateGraphForm.value.graphSelfEdgeCountMax
       );
     }
 
-    if (this.graphForm.value.graphQuestionType === 'floyd' || this.graphForm.value.graphQuestionType === 'transitive_closure') {
-      return ( 
+    if (
+      this.graphForm.value.graphQuestionType === 'floyd' ||
+      this.graphForm.value.graphQuestionType === 'transitive_closure'
+    ) {
+      return (
         this.generateGraphForm.invalid ||
         // Ensure the number of edges are not more than the maximum possible for a directed graph with n nodes
-        this.generateGraphForm.value.graphEdgeCount > this.generateGraphForm.value.graphNodeCount * (this.generateGraphForm.value.graphNodeCount - 1) + this.generateGraphForm.value.graphSelfEdgeCountMax
+        this.generateGraphForm.value.graphEdgeCount >
+          this.generateGraphForm.value.graphNodeCount *
+            (this.generateGraphForm.value.graphNodeCount - 1) +
+            this.generateGraphForm.value.graphSelfEdgeCountMax
       );
     }
 
     return this.generateGraphForm.invalid;
   }
 
-  generateGraphFormVisibility(FIELD: string)  {
-    
-    if ( FIELD === 'NODES_EDGES_COUNT' ) { 
+  generateGraphFormVisibility(FIELD: string) {
+    if (FIELD === 'NODES_EDGES_COUNT') {
       return (
         this.graphForm.value.graphQuestionType === 'dijkstra' ||
         this.graphForm.value.graphQuestionType === 'floyd' ||
@@ -994,11 +1047,11 @@ export class EditGraphComponent implements AfterViewInit {
       );
     }
 
-    if ( FIELD === 'NODE_WEIGHT' ) {
+    if (FIELD === 'NODE_WEIGHT') {
       return false;
     }
 
-    if ( FIELD === 'EDGE_WEIGHT' ) {
+    if (FIELD === 'EDGE_WEIGHT') {
       return (
         this.graphForm.value.graphQuestionType === 'dijkstra' ||
         this.graphForm.value.graphQuestionType === 'floyd' ||
@@ -1006,7 +1059,7 @@ export class EditGraphComponent implements AfterViewInit {
       );
     }
 
-    if ( FIELD === 'SELF_EDGES_COUNT' ) {
+    if (FIELD === 'SELF_EDGES_COUNT') {
       return (
         this.graphForm.value.graphQuestionType === 'floyd' ||
         this.graphForm.value.graphQuestionType === 'transitive_closure'
@@ -1017,21 +1070,26 @@ export class EditGraphComponent implements AfterViewInit {
   }
 
   onGenerateClick() {
-    
     // If the structure is empty, generate it
-    if (this.assignmentGraphStructure.nodes.length === 0 && this.graphTaskService.graphToJSON().nodes.length === 0) {
+    if (
+      this.assignmentGraphStructure.nodes.length === 0 &&
+      this.graphTaskService.graphToJSON().nodes.length === 0
+    ) {
       this.onGenerate();
       return;
     }
-    
+
     // If the structure is not empty, confirm the user to overwrite it
 
     this.confirmationService.confirm({
       title: 'Struktur neu generieren',
-      message: 'Möchten Sie die Struktur wirklich neu generieren? Dabei geht die aktuelle Struktur unwiderruflich verloren. Fortfahren?',
+      message:
+        'Möchten Sie die Struktur wirklich neu generieren? Dabei geht die aktuelle Struktur unwiderruflich verloren. Fortfahren?',
       acceptLabel: 'Neu generieren',
       declineLabel: 'Abbrechen',
-      accept: () => { this.onGenerate() } 
+      accept: () => {
+        this.onGenerate();
+      },
     });
   }
 
@@ -1039,7 +1097,9 @@ export class EditGraphComponent implements AfterViewInit {
     const graphStructure = this.generateGraph();
 
     if (graphStructure === undefined) {
-      this.snackBar.open('Fehler beim Generieren der Graphstruktur.', 'Schließen', { duration: 3000 });
+      this.snackBar.open('Fehler beim Generieren der Graphstruktur.', 'Schließen', {
+        duration: 3000,
+      });
       return;
     }
 
@@ -1049,27 +1109,32 @@ export class EditGraphComponent implements AfterViewInit {
     this.assignmentGraphStructure = clonedInitialStructure;
 
     this.snackBar.open('Neue Graphstruktur wurde generiert.', 'Schließen', { duration: 3000 });
-    
+
     this.structureIsSet = true;
 
     this.generateTextFromStructure();
   }
 
   onQuickGenerateClick() {
-    
     // If the structure is empty, generate it
-    if (this.assignmentGraphStructure.nodes.length === 0 && this.graphTaskService.graphToJSON().nodes.length === 0) {
+    if (
+      this.assignmentGraphStructure.nodes.length === 0 &&
+      this.graphTaskService.graphToJSON().nodes.length === 0
+    ) {
       this.onQuickGenerate();
       return;
     }
-    
+
     // If the structure is not empty, confirm the user to overwrite it
     this.confirmationService.confirm({
       title: 'Struktur neu generieren',
-      message: 'Möchten Sie die Struktur wirklich neu generieren? Dabei geht die aktuelle Struktur unwiderruflich verloren. Fortfahren?',
+      message:
+        'Möchten Sie die Struktur wirklich neu generieren? Dabei geht die aktuelle Struktur unwiderruflich verloren. Fortfahren?',
       acceptLabel: 'Neu generieren',
       declineLabel: 'Abbrechen',
-      accept: () => { this.onQuickGenerate() } 
+      accept: () => {
+        this.onQuickGenerate();
+      },
     });
   }
 
@@ -1077,7 +1142,9 @@ export class EditGraphComponent implements AfterViewInit {
     const graphStructure = this.generateGraph();
 
     if (graphStructure === undefined) {
-      this.snackBar.open('Fehler beim Generieren der Graphstruktur.', 'Schließen', { duration: 3000 });
+      this.snackBar.open('Fehler beim Generieren der Graphstruktur.', 'Schließen', {
+        duration: 3000,
+      });
       return;
     }
 
@@ -1087,13 +1154,17 @@ export class EditGraphComponent implements AfterViewInit {
     this.assignmentGraphStructure = clonedInitialStructure;
 
     // Get configuration
-    const graphQuestionConfigruation = this.getGraphQuestionConfigruation(this.graphForm.value.graphQuestionType);
+    const graphQuestionConfigruation = this.getGraphQuestionConfigruation(
+      this.graphForm.value.graphQuestionType,
+    );
 
     // Clone the graph content and load it to the GraphService
-    const clonedGraphContent: GraphStructureDTO = JSON.parse(JSON.stringify(this.assignmentGraphStructure));
+    const clonedGraphContent: GraphStructureDTO = JSON.parse(
+      JSON.stringify(this.assignmentGraphStructure),
+    );
     this.loadWorkspaceContent({
       graphContent: clonedGraphContent,
-      graphConfiguration: graphQuestionConfigruation
+      graphConfiguration: graphQuestionConfigruation,
     });
 
     this.snackBar.open('Neue Graphstruktur wurde generiert.', 'Schließen', { duration: 3000 });
@@ -1104,10 +1175,7 @@ export class EditGraphComponent implements AfterViewInit {
   }
 
   generateGraph(): GraphStructureDTO | undefined {
-
-    
     if (this.graphForm.value.graphQuestionType === 'floyd') {
-
       const { nodes, edges } = this.generateFloydService.generate({
         nodesCount: this.generateGraphForm.value.graphNodeCount,
         edgesCount: this.generateGraphForm.value.graphEdgeCount,
@@ -1116,14 +1184,13 @@ export class EditGraphComponent implements AfterViewInit {
           enabled: true,
           min: this.generateGraphForm.value.graphEdgeWeightMin,
           max: this.generateGraphForm.value.graphEdgeWeightMax,
-        }
+        },
       });
 
-      return {nodes, edges};
+      return { nodes, edges };
     }
 
     if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
-
       const { nodes, edges } = this.generateFloydService.generate({
         nodesCount: this.generateGraphForm.value.graphNodeCount,
         edgesCount: this.generateGraphForm.value.graphEdgeCount,
@@ -1132,14 +1199,13 @@ export class EditGraphComponent implements AfterViewInit {
           enabled: false,
           min: 0,
           max: 0,
-        }
+        },
       });
 
-      return {nodes, edges};
+      return { nodes, edges };
     }
 
     if (this.graphForm.value.graphQuestionType === 'dijkstra') {
-
       const { nodes, edges } = this.generateDijkstraService.generate({
         nodesCount: this.generateGraphForm.value.graphNodeCount,
         edgesCount: this.generateGraphForm.value.graphEdgeCount,
@@ -1147,14 +1213,13 @@ export class EditGraphComponent implements AfterViewInit {
           enabled: true,
           min: this.generateGraphForm.value.graphEdgeWeightMin,
           max: this.generateGraphForm.value.graphEdgeWeightMax,
-        }
+        },
       });
 
-      return {nodes, edges};
+      return { nodes, edges };
     }
 
     if (this.graphForm.value.graphQuestionType === 'kruskal') {
-      
       const { nodes, edges } = this.generateKruskalService.generate({
         nodesCount: this.generateGraphForm.value.graphNodeCount,
         edgesCount: this.generateGraphForm.value.graphEdgeCount,
@@ -1162,14 +1227,13 @@ export class EditGraphComponent implements AfterViewInit {
           enabled: true,
           min: this.generateGraphForm.value.graphEdgeWeightMin,
           max: this.generateGraphForm.value.graphEdgeWeightMax,
-        }
+        },
       });
 
-      return {nodes, edges};
+      return { nodes, edges };
     }
 
     return undefined;
-
   }
 
   generateExampleSolution(): Observable<GraphStructureDTO[]> {
@@ -1178,16 +1242,24 @@ export class EditGraphComponent implements AfterViewInit {
 
     // Generate the example solution based on the question type
     if (this.graphForm.value.graphQuestionType === 'transitive_closure') {
-      return this.generateExampleSolutionService.generateTransitiveClosureExampleSolution(this.assignmentGraphStructure);
+      return this.generateExampleSolutionService.generateTransitiveClosureExampleSolution(
+        this.assignmentGraphStructure,
+      );
     }
     if (this.graphForm.value.graphQuestionType === 'dijkstra') {
-      return this.generateExampleSolutionService.generateDijkstraExampleSolution(this.assignmentGraphStructure);
+      return this.generateExampleSolutionService.generateDijkstraExampleSolution(
+        this.assignmentGraphStructure,
+      );
     }
     if (this.graphForm.value.graphQuestionType === 'floyd') {
-      return this.generateExampleSolutionService.generateFloydExampleSolution(this.assignmentGraphStructure);
+      return this.generateExampleSolutionService.generateFloydExampleSolution(
+        this.assignmentGraphStructure,
+      );
     }
     if (this.graphForm.value.graphQuestionType === 'kruskal') {
-      return this.generateExampleSolutionService.generateKruskalExampleSolution(this.assignmentGraphStructure);
+      return this.generateExampleSolutionService.generateKruskalExampleSolution(
+        this.assignmentGraphStructure,
+      );
     }
 
     throw new Error('No example solution generator found for the given question type');

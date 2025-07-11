@@ -4,11 +4,8 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class EventLogService {
-
-  constructor
-  (
-    private prisma: PrismaService,
-    //private logger: PinoLogger
+  constructor(
+    private readonly prisma: PrismaService, //private logger: PinoLogger
   ) {}
 
   /**
@@ -21,8 +18,8 @@ export class EventLogService {
    * @returns {Promise<void>} A promise that resolves when the log is stored and logged externally.
    */
   async log(level: string, type: string, user: number, message: string, data?: any): Promise<void> {
-
-    await this.prisma.eventLog.create({ // without await so we don't block the request
+    await this.prisma.eventLog.create({
+      // without await so we don't block the request
       data: {
         level: level,
         type: type,

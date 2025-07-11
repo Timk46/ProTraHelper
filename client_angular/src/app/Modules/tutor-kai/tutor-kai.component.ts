@@ -5,5 +5,4 @@ import { Component } from '@angular/core';
   templateUrl: './tutor-kai.component.html',
   styleUrls: ['./tutor-kai.component.scss'],
 })
-export class TutorKaiComponent {
-}
+export class TutorKaiComponent {}

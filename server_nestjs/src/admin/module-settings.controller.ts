@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 import { ModuleSettingsService } from './module-settings.service';
 
@@ -18,12 +9,9 @@ export class ModuleSettingsController {
 
   @roles('ANY')
   @Get(':moduleId/:key')
-  async getSetting(
-    @Param('moduleId', ParseIntPipe) moduleId: number,
-    @Param('key') key: string,
-  ) {
+  async getSetting(@Param('moduleId', ParseIntPipe) moduleId: number, @Param('key') key: string) {
     const setting = await this.moduleSettingsService.getSetting(moduleId, key);
-    return { value: setting?.value };
+    return { value: setting.value };
   }
 
   @roles('ADMIN')
@@ -34,12 +22,7 @@ export class ModuleSettingsController {
     @Body() data: { value: string },
     @Req() req,
   ) {
-    await this.moduleSettingsService.updateSetting(
-      moduleId,
-      key,
-      data.value,
-      req.user.id,
-    );
+    await this.moduleSettingsService.updateSetting(moduleId, key, data.value, req.user.id);
     return { message: 'Setting updated successfully' };
   }
 }

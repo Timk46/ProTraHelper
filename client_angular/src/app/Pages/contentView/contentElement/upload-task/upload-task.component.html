@@ -12,7 +12,10 @@
 
   <!-- Description Section -->
   <div class="description-section">
-    <div class="description-text" [innerHTML]="uploadQuestion.textHTML || uploadQuestion.text || 'Lädt'"></div>
+    <div
+      class="description-text"
+      [innerHTML]="uploadQuestion.textHTML || uploadQuestion.text || 'Lädt'"
+    ></div>
   </div>
 
   <!-- File Requirements Section -->
@@ -41,14 +44,15 @@
   </div>
 
   <!-- Drag & Drop Zone -->
-  <div class="drop-zone"
-       [class.drag-over]="isDragOver"
-       [class.file-selected]="selectedFile"
-       (dragover)="onDragOver($event)"
-       (dragleave)="onDragLeave($event)"
-       (drop)="onDrop($event)"
-       (click)="fileInput.click()">
-
+  <div
+    class="drop-zone"
+    [class.drag-over]="isDragOver"
+    [class.file-selected]="selectedFile"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    (click)="fileInput.click()"
+  >
     <div class="drop-content" *ngIf="!selectedFile">
       <div class="upload-animation">
         <mat-icon class="upload-cloud">cloud_upload</mat-icon>
@@ -79,10 +83,7 @@
       <div class="progress-content">
         <mat-icon class="uploading-icon">cloud_upload</mat-icon>
         <h4>Wird hochgeladen... {{ uploadProgress }}%</h4>
-        <mat-progress-bar 
-          mode="determinate" 
-          [value]="uploadProgress" 
-          class="progress-bar">
+        <mat-progress-bar mode="determinate" [value]="uploadProgress" class="progress-bar">
         </mat-progress-bar>
         <p>{{ selectedFile?.name }}</p>
       </div>
@@ -104,11 +105,13 @@
       Abbrechen
     </button>
 
-    <button mat-raised-button
-            color="primary"
-            class="upload-btn"
-            [disabled]="!selectedFile || isUploading"
-            (click)="uploadFile()">
+    <button
+      mat-raised-button
+      color="primary"
+      class="upload-btn"
+      [disabled]="!selectedFile || isUploading"
+      (click)="uploadFile()"
+    >
       <mat-icon *ngIf="!isUploading">cloud_upload</mat-icon>
       <mat-spinner *ngIf="isUploading" diameter="20"></mat-spinner>
       {{ isUploading ? 'Wird hochgeladen...' : 'Hochladen' }}
@@ -116,11 +119,13 @@
   </div>
 
   <!-- Hidden File Input -->
-  <input #fileInput
-         type="file"
-         [accept]="uploadQuestion.fileType"
-         (change)="onFileSelected($event)"
-         style="display: none;">
+  <input
+    #fileInput
+    type="file"
+    [accept]="uploadQuestion.fileType"
+    (change)="onFileSelected($event)"
+    style="display: none"
+  />
 </div>
 
 <!-- Loading State -->

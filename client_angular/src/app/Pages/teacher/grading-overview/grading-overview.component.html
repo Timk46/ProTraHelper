@@ -30,7 +30,9 @@
         <td>{{ item.questionId }}</td>
         <td>{{ item.userId }}</td>
         <td>
-          <a *ngIf="item.uploadPath !== 'N/A'" [href]="item.uploadPath" target="_blank">{{ item.uploadPath }}</a>
+          <a *ngIf="item.uploadPath !== 'N/A'" [href]="item.uploadPath" target="_blank">{{
+            item.uploadPath
+          }}</a>
           <span *ngIf="item.uploadPath === 'N/A'" class="no-upload-text">No Upload</span>
         </td>
       </tr>

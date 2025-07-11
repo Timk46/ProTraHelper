@@ -9,9 +9,7 @@
   <div *ngIf="error" class="error-message">
     <mat-icon>error</mat-icon>
     <p>{{ error }}</p>
-    <button mat-raised-button color="primary" (click)="reloadModel()">
-      Erneut versuchen
-    </button>
+    <button mat-raised-button color="primary" (click)="reloadModel()">Erneut versuchen</button>
   </div>
 
   <!-- 3D renderer container -->
@@ -23,13 +21,12 @@
       <h3>Parameter</h3>
       <div *ngFor="let param of parameters" class="parameter-control">
         <label>{{ param.name }}: {{ param.value.toFixed(1) }}</label>
-        <mat-slider
-          min="{{ param.min }}"
-          max="{{ param.max }}"
-          step="0.1">
-          <input matSliderThumb
-                [value]="param.value"
-                (valueChange)="updateParameter(param.id, $event)">
+        <mat-slider min="{{ param.min }}" max="{{ param.max }}" step="0.1">
+          <input
+            matSliderThumb
+            [value]="param.value"
+            (valueChange)="updateParameter(param.id, $event)"
+          />
         </mat-slider>
       </div>
     </div>

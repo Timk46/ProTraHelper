@@ -1,14 +1,7 @@
-import {
-  Component,
-  ElementRef,
-  Input,
-  OnInit,
-  Sanitizer,
-  SecurityContext,
-  ViewChild,
-} from '@angular/core';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { FileService } from 'src/app/Services/files/files.service';
+import type { ElementRef, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Sanitizer, SecurityContext, ViewChild } from '@angular/core';
+import type { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import type { FileService } from 'src/app/Services/files/files.service';
 import { environment } from '../../../../../environments/environment';
 
 @Component({
@@ -16,12 +9,12 @@ import { environment } from '../../../../../environments/environment';
   templateUrl: './videoViewer.component.html',
   styleUrls: ['./videoViewer.component.scss'],
 })
-export class VideoViewerComponent implements OnInit {
+export class VideoViewerComponent implements OnInit, OnDestroy {
   /**
    * A unique identifier (from FileDTO) for the video file to be displayed.
    * This is an input property and should be passed from the parent component.
    */
-  @Input() uniqueIdentifier: String = '';
+  @Input() uniqueIdentifier: string = '';
   @ViewChild('videoPlayer') videoPlayer!: ElementRef;
   /**
    * Holds the sanitized URL of the video file.
@@ -30,8 +23,8 @@ export class VideoViewerComponent implements OnInit {
   videoUrl: SafeUrl = '';
 
   constructor(
-    private sanitizer: DomSanitizer,
-    private fileService: FileService
+    private readonly sanitizer: DomSanitizer,
+    private readonly fileService: FileService,
   ) {}
 
   ngOnInit(): void {
@@ -48,13 +41,13 @@ export class VideoViewerComponent implements OnInit {
    *
    * @param uniqueIdentifier A unique string identifier for fetching the video.
    */
-  videoFromUniqueIdentifier(uniqueIdentifier: String) {
+  videoFromUniqueIdentifier(uniqueIdentifier: string) {
     const videoUrl = `${environment.server}/files/download/Video/${uniqueIdentifier}`;
     this.videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(videoUrl);
   }
 
   private stopAndResetVideo() {
-    if (this.videoPlayer && this.videoPlayer.nativeElement) {
+    if (this.videoPlayer?.nativeElement) {
       this.videoPlayer.nativeElement.pause();
       this.videoPlayer.nativeElement.src = '';
       this.videoPlayer.nativeElement.load();

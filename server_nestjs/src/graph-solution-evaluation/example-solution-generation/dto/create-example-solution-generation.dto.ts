@@ -1,5 +1,5 @@
-import { GraphStructureDTO } from "@Interfaces/graphTask.dto";
+import type { GraphStructureDTO } from '@Interfaces/graphTask.dto';
 
 export class CreateExampleSolutionGenerationDto {
-    initialStructure: GraphStructureDTO;
+  initialStructure: GraphStructureDTO;
 }

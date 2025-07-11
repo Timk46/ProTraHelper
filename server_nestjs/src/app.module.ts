@@ -43,8 +43,8 @@ import { RhinoDirectModule } from './rhino-direct/rhino-direct.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/common/guards/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
-import { RefreshTokenModule } from "./auth/refresh-token/refresh-token.module";
-import { ScheduleModule } from "@nestjs/schedule";
+import { RefreshTokenModule } from './auth/refresh-token/refresh-token.module';
+import { ScheduleModule } from '@nestjs/schedule';
 import { UsersModule } from './users/users.module';
 import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
 import { McqCreationModule } from './mcqcreation/mcqcreation.module';
@@ -119,7 +119,10 @@ import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgrap
   ],
   controllers: [
     AppController,
-    DiscussionListController, DiscussionVoteController, DiscussionViewController, DiscussionCreationController
+    DiscussionListController,
+    DiscussionVoteController,
+    DiscussionViewController,
+    DiscussionCreationController,
   ],
   providers: [
     AppService,
@@ -129,7 +132,8 @@ import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgrap
     DiscussionViewService,
     DiscussionCreationService,
     CryptoService,
-    {// Intercept and add version number to all answers. We could add this to single components instead.
+    {
+      // Intercept and add version number to all answers. We could add this to single components instead.
       provide: APP_INTERCEPTOR,
       useClass: VersionInterceptor,
     },
@@ -146,5 +150,4 @@ import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgrap
     AiFeedbackService,
   ],
 })
-
 export class AppModule {}

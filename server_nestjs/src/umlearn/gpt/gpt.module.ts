@@ -4,11 +4,9 @@ import { GptService } from './gpt.service';
 import { SimilarityCompareService } from '../compare/similarity-compare.service';
 import { PrismaModule } from '@/prisma/prisma.module';
 
-
-
 @Module({
   controllers: [GptController],
   providers: [GptService, SimilarityCompareService],
-  imports: [PrismaModule]
+  imports: [PrismaModule],
 })
 export class GptModule {}

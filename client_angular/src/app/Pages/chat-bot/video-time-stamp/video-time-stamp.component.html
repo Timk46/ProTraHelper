@@ -1,18 +1,28 @@
-<div cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle style="background-color: #2e3440;" class="outer-container">
+<div
+  cdkDrag
+  cdkDragRootElement=".cdk-overlay-pane"
+  cdkDragHandle
+  style="background-color: #2e3440"
+  class="outer-container"
+>
   <mat-icon class="drag-icon">open_with</mat-icon>
-  <h1 class="prose max-w-none text-slate-50 prose-lg" style = "margin-top: 5px; cursor: move;">{{ title }}</h1>
+  <h1 class="prose max-w-none text-slate-50 prose-lg" style="margin-top: 5px; cursor: move">
+    {{ title }}
+  </h1>
   <div class="video-container align-items-center justify-content-center">
-    <video #videoPlayer *ngIf="videoUrl"
-       [src]="videoUrl"
-       [currentTime]="startTime"
-       controls
-       width="1280"
-       height="auto"
-       (loadedmetadata)="videoLoading = false"
-       (play)="logEvent('start')"
-       (pause)="logEvent('stop')"
-       (ended)="logEvent('end')"
-       (timeupdate)="trackVideoProgress($event)">
-    </video>
+    <video
+      #videoPlayer
+      *ngIf="videoUrl"
+      [src]="videoUrl"
+      [currentTime]="startTime"
+      controls
+      width="1280"
+      height="auto"
+      (loadedmetadata)="videoLoading = false"
+      (play)="logEvent('start')"
+      (pause)="logEvent('stop')"
+      (ended)="logEvent('end')"
+      (timeupdate)="trackVideoProgress($event)"
+    ></video>
   </div>
 </div>

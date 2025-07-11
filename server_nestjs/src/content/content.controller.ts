@@ -1,18 +1,16 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Param, Req, UseGuards, Body, Patch } from '@nestjs/common';
 import { ContentService } from './content.service';
-import { ContentsForConceptDTO } from '@Interfaces/index';
-import { ContentElementStatusDTO } from '@DTOs/index';
+import type { ContentsForConceptDTO } from '@Interfaces/index';
+import type { ContentElementStatusDTO } from '@DTOs/index';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
-import { ConceptNode } from '@prisma/client';
+import type { ConceptNode } from '@prisma/client';
 import { QuestionDataService } from '@/question-data/question-data.service';
 
 @UseGuards(RolesGuard)
 @Controller('content')
 export class ContentController {
-  constructor(
-    private readonly contentService: ContentService,
-  ) {}
+  constructor(private readonly contentService: ContentService) {}
 
   /**
    * Get Content by Concept Node ID
@@ -30,10 +28,7 @@ export class ContentController {
     @Param('conceptNodeId') conceptNodeId: number,
     @Req() req,
   ): Promise<ContentsForConceptDTO> {
-    return this.contentService.getContentsByConceptNode(
-      conceptNodeId,
-      req.user.id,
-    );
+    return this.contentService.getContentsByConceptNode(conceptNodeId, req.user.id);
   }
 
   /**
@@ -109,10 +104,7 @@ export class ContentController {
     if (isNaN(contentElementId)) {
       throw new Error('Invalid contentElement id');
     }
-    return this.contentService.toggleQuestionmark(
-      Number(contentElementId),
-      req.user.id,
-    );
+    return this.contentService.toggleQuestionmark(Number(contentElementId), req.user.id);
   }
 
   /**
@@ -135,21 +127,16 @@ export class ContentController {
     if (isNaN(contentNodeId)) {
       throw new Error('Invalid contentNode id');
     }
-    return this.contentService.updateLastOpenedDate(
-      Number(contentNodeId),
-      req.user.id,
-    );
+    return this.contentService.updateLastOpenedDate(Number(contentNodeId), req.user.id);
   }
 
   @roles('ANY')
   @Get('/concepts')
   async fetchAllConceptNames(): Promise<string[]> {
     const concepts = await this.contentService.fetchAllConceptNames();
-    const formattedConcepts = concepts.map((concept) => {
+    const formattedConcepts = concepts.map(concept => {
       const formattedConcept = concept.replace(/^\d+\s/, '');
-      return (
-        formattedConcept.charAt(0).toUpperCase() + formattedConcept.slice(1)
-      );
+      return formattedConcept.charAt(0).toUpperCase() + formattedConcept.slice(1);
     });
     return formattedConcepts;
   }
@@ -174,7 +161,10 @@ export class ContentController {
     @Param('contentNodeId') contentNodeId: number,
     @Param('newPosition') newPosition: number,
   ): Promise<boolean> {
-    return this.contentService.updateContentNodePosition(Number(contentNodeId), Number(newPosition));
+    return this.contentService.updateContentNodePosition(
+      Number(contentNodeId),
+      Number(newPosition),
+    );
   }
 
   /**
@@ -185,7 +175,7 @@ export class ContentController {
   @Patch('/update/:contentNodeId')
   async updateContentNode(
     @Param('contentNodeId') contentNodeId: number,
-    @Body() body: { name: string; description: string; difficulty: number }
+    @Body() body: { name: string; description: string; difficulty: number },
   ): Promise<boolean> {
     return this.contentService.updateContentNodeData(Number(contentNodeId), body);
   }

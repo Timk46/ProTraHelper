@@ -5,7 +5,7 @@ import { NotificationDTO } from '@DTOs/notification.dto';
 
 @Controller('notifications')
 export class NotificationController {
-  constructor(private notificationService: NotificationService) {}
+  constructor(private readonly notificationService: NotificationService) {}
 
   /**
    *
@@ -48,8 +48,11 @@ export class NotificationController {
    * @returns {Promise<NotificationDTO>} the updated notification
    */
   @Put(':id')
-  async updateNotification(@Body() notification: NotificationDTO, @Param('id') id: number): Promise<NotificationDTO> {
-    console.log("updating notification with id: ", id, " and notification: ", notification)
+  async updateNotification(
+    @Body() notification: NotificationDTO,
+    @Param('id') id: number,
+  ): Promise<NotificationDTO> {
+    console.log('updating notification with id: ', id, ' and notification: ', notification);
     return await this.notificationService.updateNotification(notification, +id);
   }
 
@@ -60,9 +63,12 @@ export class NotificationController {
    * @returns {Promise<NotificationDTO>} the updated notification
    */
   @Patch(':id/read')
-  async markAsRead(@Body() notification: NotificationDTO, @Param('id') id: number): Promise<NotificationDTO> {
-    console.log("marking notification as read with id: ", id, " and notification: ", notification)
-    return await this.notificationService.markNotificationAsRead(id)
+  async markAsRead(
+    @Body() notification: NotificationDTO,
+    @Param('id') id: number,
+  ): Promise<NotificationDTO> {
+    console.log('marking notification as read with id: ', id, ' and notification: ', notification);
+    return await this.notificationService.markNotificationAsRead(id);
   }
   /**
    * Send a notification
@@ -102,7 +108,9 @@ export class NotificationController {
    */
   @Get(':userId/unread-count')
   async getUnreadCountFromServer(@Param('userId') userId: number): Promise<number> {
-    console.log("tpye of number userId send through @Param for unread count:", typeof userId)
-    return await this.notificationService.getUnreadCount(userId) ?  this.notificationService.getUnreadCount(userId) : 0;
+    console.log('tpye of number userId send through @Param for unread count:', typeof userId);
+    return (await this.notificationService.getUnreadCount(userId))
+      ? this.notificationService.getUnreadCount(userId)
+      : 0;
   }
 }

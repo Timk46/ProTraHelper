@@ -1,25 +1,23 @@
-import { Component, ElementRef, HostListener, Input } from '@angular/core';
+import type { ElementRef } from '@angular/core';
+import { Component, HostListener, Input } from '@angular/core';
 
 @Component({
   selector: 'app-tooltipp',
   templateUrl: './tooltipp.component.html',
-  styleUrls: ['./tooltipp.component.scss']
+  styleUrls: ['./tooltipp.component.scss'],
 })
 /**
  * Represents a tooltip component.
  */
 export class TooltippComponent {
-
-  @Input() isVisible: boolean = true; 
+  @Input() isVisible: boolean = true;
   @Input() tooltipContent: string | undefined;
-
-  
 
   visible = false;
   top: string = '0px';
   left: string = '0px';
 
-  constructor(private elementRef: ElementRef) { }
+  constructor(private readonly elementRef: ElementRef) {}
 
   /**
    * Event listener for mouseover event.
@@ -29,11 +27,10 @@ export class TooltippComponent {
   onMouseOver(event: MouseEvent) {
     const targetElement = event.target as HTMLElement;
     if (this.elementRef.nativeElement.contains(targetElement)) {
-      this.visible = this.isVisible; 
-      this.top = event.clientY +10+ 'px';
-      this.left = event.clientX +10+ 'px';
+      this.visible = this.isVisible;
+      this.top = event.clientY + 10 + 'px';
+      this.left = event.clientX + 10 + 'px';
     } else {
-      
       this.visible = false;
     }
   }
@@ -47,5 +44,3 @@ export class TooltippComponent {
     this.visible = false;
   }
 }
-
-

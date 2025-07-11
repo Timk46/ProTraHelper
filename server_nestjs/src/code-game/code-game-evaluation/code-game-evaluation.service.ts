@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CodeGameService } from '../code-game.service';
-import {
-  CodeGameEvaluationDTO,
-  CppProjectExecutionResult,
-} from '@DTOs/codeGame.dto';
+import type { CodeGameEvaluationDTO, CppProjectExecutionResult } from '@DTOs/codeGame.dto';
 
 @Injectable()
 export class CodeGameEvaluationService {
@@ -32,7 +29,7 @@ export class CodeGameEvaluationService {
         questionId,
         language,
         submittedCode,
-        codeGameExecutionResult: "",
+        codeGameExecutionResult: '',
         codeSolutionRestriction: false,
         frequencyOfMethodEvaluationResult: false,
         frequencyOfMethodCallsResult: 0,
@@ -82,10 +79,7 @@ export class CodeGameEvaluationService {
         };
       }
     } catch (error) {
-      console.error(
-        'CodeGame-Evaluation: Error parsing success numbers:',
-        error,
-      );
+      console.error('CodeGame-Evaluation: Error parsing success numbers:', error);
     }
 
     /* Check if the visited cells are allowed */
@@ -94,12 +88,11 @@ export class CodeGameEvaluationService {
       allWhiteListCellsVisited: false,
     };
     if (question.codeGameQuestion.gameCellRestrictions) {
-      blackAndWhiteListCheckResult =
-        await this.checkVisitedCellsAgainstBlackAndWhiteList(
-          question.codeGameQuestion.game,
-          executionResult,
-          question.codeGameQuestion.gameCellRestrictions,
-        );
+      blackAndWhiteListCheckResult = await this.checkVisitedCellsAgainstBlackAndWhiteList(
+        question.codeGameQuestion.game,
+        executionResult,
+        question.codeGameQuestion.gameCellRestrictions,
+      );
     }
 
     /* Create evaluation result */
@@ -128,10 +121,7 @@ export class CodeGameEvaluationService {
     let testPassed = false;
     let frequencyOfMethodCallsResult = 0;
 
-    const regex = new RegExp(
-      methodName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
-      'g',
-    );
+    const regex = new RegExp(methodName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
     const methodCalls = code.match(regex);
 
     if (methodCalls) {
@@ -159,9 +149,7 @@ export class CodeGameEvaluationService {
     gameCellRestrictions: string,
   ) {
     const gameArray = await this.transformStringToArray(game);
-    const gameCellRestrictionsArray = await this.transformStringToArray(
-      gameCellRestrictions,
-    );
+    const gameCellRestrictionsArray = await this.transformStringToArray(gameCellRestrictions);
 
     /* Extract starting position from the game */
     const startingPlayerPosition = { row: -1, col: -1 };
@@ -175,10 +163,7 @@ export class CodeGameEvaluationService {
       }
     }
 
-    if (
-      startingPlayerPosition.row === -1 ||
-      startingPlayerPosition.col === -1
-    ) {
+    if (startingPlayerPosition.row === -1 || startingPlayerPosition.col === -1) {
       console.error('CodeGame-Evaluation: Error extracting starting position');
       return;
     }
@@ -239,6 +224,6 @@ export class CodeGameEvaluationService {
   }
 
   async transformStringToArray(string: string): Promise<any[][]> {
-    return string.split('\n').map((row) => row.split(''));
+    return string.split('\n').map(row => row.split(''));
   }
 }

@@ -2,8 +2,16 @@
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { QuestionDTO, questionType, detailedQuestionDTO, FillinQuestionDTO, editorDataDTO, taskSettingsDTO } from '@DTOs/index';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswer } from '@DTOs/userAnswer.dto';
+import type {
+  QuestionDTO,
+  detailedQuestionDTO,
+  editorDataDTO,
+  taskSettingsDTO} from '@DTOs/index';
+import {
+  questionType,
+  FillinQuestionDTO
+} from '@DTOs/index';
+import type { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswer } from '@DTOs/userAnswer.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataCodeService } from './question-data-code/question-data-code.service';
@@ -19,19 +27,19 @@ import { ProductionFilesService } from '@/files/production-files.service';
 @Injectable()
 export class QuestionDataService {
   constructor(
-    private prisma: PrismaService,
-    private feedbackGenerationService: FeedbackGenerationService,
-    private contentService: ContentService,
-    private qdChoice: QuestionDataChoiceService,
-    private qdCode: QuestionDataCodeService,
-    private qdFillin: QuestionDataFillinService,
-    private qdFreetext: QuestionDataFreetextService,
-    private qdGraph: QuestionDataGraphService,
-    private graphEvalService: GraphSolutionEvaluationService,
-    private qdUml: QuestionDataUmlService,
-    private qdCodeGame: QuestionDataCodeGameService,
-    private qdUpload: QuestionDataUploadService,
-    private productionFilesService: ProductionFilesService
+    private readonly prisma: PrismaService,
+    private readonly feedbackGenerationService: FeedbackGenerationService,
+    private readonly contentService: ContentService,
+    private readonly qdChoice: QuestionDataChoiceService,
+    private readonly qdCode: QuestionDataCodeService,
+    private readonly qdFillin: QuestionDataFillinService,
+    private readonly qdFreetext: QuestionDataFreetextService,
+    private readonly qdGraph: QuestionDataGraphService,
+    private readonly graphEvalService: GraphSolutionEvaluationService,
+    private readonly qdUml: QuestionDataUmlService,
+    private readonly qdCodeGame: QuestionDataCodeGameService,
+    private readonly qdUpload: QuestionDataUploadService,
+    private readonly productionFilesService: ProductionFilesService,
   ) {}
 
   /**
@@ -42,11 +50,11 @@ export class QuestionDataService {
   async getQuestion(questionId: number): Promise<QuestionDTO> {
     const question = await this.prisma.question.findUnique({
       where: {
-        id: Number(questionId)
-      }
+        id: Number(questionId),
+      },
     });
 
-    if(!question) {
+    if (!question) {
       throw new Error('Question ' + questionId + ' not found');
     }
 
@@ -66,7 +74,6 @@ export class QuestionDataService {
     return questionData;
   }
 
-
   /**
    * @description Retrieves a detailed question by its ID and type. Primarily used in the lecturers view.
    * @param {number} questionId - The ID of the question to retrieve.
@@ -74,14 +81,17 @@ export class QuestionDataService {
    * @returns {Promise<detailedQuestionDTO>} A promise that resolves to a detailedQuestionDTO object representing the detailed question.
    * @throws An error if the question with the specified ID is not found.
    */
-  async getDetailedQuestion(questionId: number, questionTypeStr: string): Promise<detailedQuestionDTO> {
+  async getDetailedQuestion(
+    questionId: number,
+    questionTypeStr: string,
+  ): Promise<detailedQuestionDTO> {
     const question = await this.prisma.question.findUnique({
       where: {
-        id: Number(questionId)
+        id: Number(questionId),
       },
     });
 
-    if(!question) {
+    if (!question) {
       throw new Error('Question ' + questionId + ' not found');
     }
 
@@ -91,65 +101,66 @@ export class QuestionDataService {
       case questionType.CODE:
         specificQuestionData = await this.prisma.codingQuestion.findFirst({
           where: {
-            questionId: Number(questionId)
+            questionId: Number(questionId),
           },
           include: {
             codeGerueste: true,
             automatedTests: true,
-            modelSolutions: true
-          }
+            modelSolutions: true,
+          },
         });
         break;
       case questionType.FREETEXT:
         specificQuestionData = await this.prisma.freeTextQuestion.findFirst({
           where: {
-            questionId: Number(questionId)
-          }
+            questionId: Number(questionId),
+          },
         });
         break;
       case questionType.MULTIPLECHOICE:
       case questionType.SINGLECHOICE:
         const mcQuestion = await this.prisma.mCQuestion.findFirst({
           where: {
-            questionId: Number(questionId)
-          }
+            questionId: Number(questionId),
+          },
         });
         if (mcQuestion) {
           const mcOptions = await this.prisma.mCQuestionOption.findMany({
             where: {
-              mcQuestionId: mcQuestion.id
-            }, select: {
-              option: true
-            }
+              mcQuestionId: mcQuestion.id,
+            },
+            select: {
+              option: true,
+            },
           });
           specificQuestionData = {
             ...mcQuestion,
-            mcOptions: mcOptions.map(option => option.option)
+            mcOptions: mcOptions.map(option => option.option),
           };
         }
         break;
       case questionType.FILLIN:
         specificQuestionData = await this.prisma.fillinQuestion.findFirst({
           where: {
-            questionId: Number(questionId)
+            questionId: Number(questionId),
           },
           include: {
-            blanks: true
-          }
+            blanks: true,
+          },
         });
         break;
       case questionType.GRAPH:
         specificQuestionData = await this.prisma.graphQuestion.findFirst({
           where: {
-            questionId: Number(questionId)
-          }
+            questionId: Number(questionId),
+          },
         });
         break;
       case questionType.UML:
         const questionData = await this.prisma.umlQuestion.findFirst({
           where: {
-            questionId: Number(questionId)
-          }
+            questionId: Number(questionId),
+          },
         });
         if (!questionData) {
           specificQuestionData = undefined;
@@ -165,18 +176,18 @@ export class QuestionDataService {
       case questionType.CODEGAME:
         specificQuestionData = await this.prisma.codeGameQuestion.findFirst({
           where: {
-            questionId: Number(questionId)
+            questionId: Number(questionId),
           },
           include: {
             codeGameScaffolds: true,
-          }
+          },
         });
         break;
       case questionType.UPLOAD:
         specificQuestionData = await this.prisma.uploadQuestion.findFirst({
           where: {
-            questionId: Number(questionId)
-          }
+            questionId: Number(questionId),
+          },
         });
         break;
     }
@@ -187,18 +198,23 @@ export class QuestionDataService {
       ...question,
       type: questionTypeStr as questionType,
       codingQuestion: questionTypeStr === questionType.CODE ? specificQuestionData : undefined,
-      freetextQuestion: questionTypeStr === questionType.FREETEXT ? specificQuestionData : undefined,
-      mcQuestion: (questionTypeStr === questionType.MULTIPLECHOICE || questionTypeStr === questionType.SINGLECHOICE) ? specificQuestionData : undefined,
+      freetextQuestion:
+        questionTypeStr === questionType.FREETEXT ? specificQuestionData : undefined,
+      mcQuestion:
+        questionTypeStr === questionType.MULTIPLECHOICE ||
+        questionTypeStr === questionType.SINGLECHOICE
+          ? specificQuestionData
+          : undefined,
       fillinQuestion: questionTypeStr === questionType.FILLIN ? specificQuestionData : undefined,
       graphQuestion: questionTypeStr === questionType.GRAPH ? specificQuestionData : undefined,
       umlQuestion: questionTypeStr === questionType.UML ? specificQuestionData : undefined,
-      codeGameQuestion: questionTypeStr === questionType.CODEGAME ? specificQuestionData : undefined,
+      codeGameQuestion:
+        questionTypeStr === questionType.CODEGAME ? specificQuestionData : undefined,
       uploadQuestion: questionTypeStr === questionType.UPLOAD ? specificQuestionData : undefined,
     };
 
     return questionData;
   }
-
 
   /**
    * @description Retrieves the newest user answer for a specific question and user.
@@ -210,17 +226,17 @@ export class QuestionDataService {
     const userAnswer = await this.prisma.userAnswer.findFirst({
       where: {
         questionId: questionId,
-        userId: userId
+        userId: userId,
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
     if (!userAnswer) {
       return {
         id: -1,
         questionId: questionId,
-        userId: userId
+        userId: userId,
       };
     }
 
@@ -231,14 +247,15 @@ export class QuestionDataService {
       userFreetextAnswer: userAnswer.userFreetextAnswer || undefined,
       userFreetextAnswerRaw: undefined,
       userGraphAnswer: JSON.parse(JSON.stringify(userAnswer.userGraphAnswer)) || undefined,
-      userMCAnswer: (await this.prisma.userMCOptionSelected.findMany({
-        where: {
-          userAnswerId: userAnswer.id
-        }
-      })).map((option) => option.mcOptionId)
+      userMCAnswer: (
+        await this.prisma.userMCOptionSelected.findMany({
+          where: {
+            userAnswerId: userAnswer.id,
+          },
+        })
+      ).map(option => option.mcOptionId),
     };
   }
-
 
   /**
    * @description Creates a new question. Also works for version control.
@@ -248,41 +265,40 @@ export class QuestionDataService {
    * @throws An error if the concept node is not defined or if the question is not created.
    */
   async createQuestion(question: QuestionDTO, authorId: number): Promise<QuestionDTO> {
-      console.log("question origin Id", question.originId);
+    console.log('question origin Id', question.originId);
 
-      let newQuestion = await this.prisma.question.create({
-          data: {
-              name: question.name || 'New Question',
-              author:  {connect: {id: authorId}},
-              description: question.description || null,
-              score: question.score || 100,
-              type: question.type as questionType,
-              level: question.level,
-              mode: question.mode || 'practise',
-              text: question.text,
-              isApproved: question.isApproved || false,
-              version: question.version || 1,
-              //origin has to be set in the next step
-              conceptNode: {connect: {id: question.conceptNodeId}},
-          }
-      });
+    let newQuestion = await this.prisma.question.create({
+      data: {
+        name: question.name || 'New Question',
+        author: { connect: { id: authorId } },
+        description: question.description || null,
+        score: question.score || 100,
+        type: question.type as questionType,
+        level: question.level,
+        mode: question.mode || 'practise',
+        text: question.text,
+        isApproved: question.isApproved || false,
+        version: question.version || 1,
+        //origin has to be set in the next step
+        conceptNode: { connect: { id: question.conceptNodeId } },
+      },
+    });
 
-      newQuestion = await this.prisma.question.update({
-        where: {
-          id: newQuestion.id
-        },
-        data: {
-          originId: question.originId || newQuestion.id
-        }
-      });
+    newQuestion = await this.prisma.question.update({
+      where: {
+        id: newQuestion.id,
+      },
+      data: {
+        originId: question.originId || newQuestion.id,
+      },
+    });
 
-      if(!newQuestion) {
-          throw new Error('Question not created');
-      }
+    if (!newQuestion) {
+      throw new Error('Question not created');
+    }
 
-      return newQuestion;
+    return newQuestion;
   }
-
 
   /**
    * @description Updates a whole question.
@@ -292,14 +308,20 @@ export class QuestionDataService {
    * @returns {Promise<detailedQuestionDTO>} A promise that resolves to the updated detailed question object.
    * @throws Error if the question is not updateable.
    */
-  async updateWholeQuestion(question: detailedQuestionDTO, authorId: number, createNewVersion: boolean = false): Promise<detailedQuestionDTO> {
-    const currentQuestion = await this.getDetailedQuestion(question.id, question.type as questionType);
+  async updateWholeQuestion(
+    question: detailedQuestionDTO,
+    authorId: number,
+    createNewVersion = false,
+  ): Promise<detailedQuestionDTO> {
+    const currentQuestion = await this.getDetailedQuestion(
+      question.id,
+      question.type ,
+    );
 
     if (!this.detailedQuestionsUpdateable(currentQuestion, question)) {
       console.log('currentQuestion: ', currentQuestion);
       console.log('newQuestion: ', question);
       throw new Error('Question not updateable');
-
     }
 
     let updatedQuestion = null;
@@ -310,36 +332,44 @@ export class QuestionDataService {
           name: question.name,
           description: question.description,
           score: question.score,
-          type: question.type as questionType,
+          type: question.type ,
           level: question.level,
           mode: question.mode,
-          author: {connect: {id: authorId}},
+          author: { connect: { id: authorId } },
           text: question.text,
           isApproved: question.isApproved,
           version: currentQuestion.version + 1,
-          origin: {connect: {id: currentQuestion.originId}},
-          conceptNode: question.conceptNodeId? {connect: {id: question.conceptNodeId}}: (currentQuestion.conceptNodeId? {connect: {id: currentQuestion.conceptNodeId}}: undefined),
-        }
+          origin: { connect: { id: currentQuestion.originId } },
+          conceptNode: question.conceptNodeId
+            ? { connect: { id: question.conceptNodeId } }
+            : currentQuestion.conceptNodeId
+            ? { connect: { id: currentQuestion.conceptNodeId } }
+            : undefined,
+        },
       });
 
-    // if versions are equal, we update the question
+      // if versions are equal, we update the question
     } else if (currentQuestion.version === question.version) {
       updatedQuestion = await this.prisma.question.update({
         where: {
-          id: question.id
+          id: question.id,
         },
         data: {
           updatedAt: new Date(),
           name: question.name,
           description: question.description,
           score: question.score,
-          type: question.type as questionType,
+          type: question.type ,
           level: question.level,
           mode: question.mode,
           text: question.text,
           isApproved: question.isApproved,
-          conceptNode: question.conceptNodeId? {connect: {id: question.conceptNodeId}}: (currentQuestion.conceptNodeId? {connect: {id: currentQuestion.conceptNodeId}}: undefined),
-        }
+          conceptNode: question.conceptNodeId
+            ? { connect: { id: question.conceptNodeId } }
+            : currentQuestion.conceptNodeId
+            ? { connect: { id: currentQuestion.conceptNodeId } }
+            : undefined,
+        },
       });
     }
 
@@ -347,9 +377,9 @@ export class QuestionDataService {
     const contentNodes = await this.prisma.contentView.findMany({
       where: {
         contentElement: {
-          questionId: question.originId
-        }
-      }
+          questionId: question.originId,
+        },
+      },
     });
 
     for (const contentNode of contentNodes) {
@@ -363,7 +393,10 @@ export class QuestionDataService {
     switch (question.type) {
       case questionType.FREETEXT:
         if (createNewVersion || !currentQuestion.freetextQuestion) {
-          await this.qdFreetext.createFreeTextQuestion(question.freetextQuestion, updatedQuestion.id);
+          await this.qdFreetext.createFreeTextQuestion(
+            question.freetextQuestion,
+            updatedQuestion.id,
+          );
         } else {
           await this.qdFreetext.updateFreeTextQuestion(question.freetextQuestion);
         }
@@ -406,7 +439,10 @@ export class QuestionDataService {
         break; // Hinzugefügtes break-Statement, um das "Durchfallen" in den CODEGAME-Fall zu verhindern
       case questionType.CODEGAME:
         if (createNewVersion || !currentQuestion.codeGameQuestion) {
-          await this.qdCodeGame.createCodeGameQuestion(question.codeGameQuestion, updatedQuestion.id);
+          await this.qdCodeGame.createCodeGameQuestion(
+            question.codeGameQuestion,
+            updatedQuestion.id,
+          );
         } else {
           await this.qdCodeGame.updateCodeGameQuestion(question.codeGameQuestion);
         }
@@ -420,9 +456,8 @@ export class QuestionDataService {
         break;
     }
 
-    return await this.getDetailedQuestion(updatedQuestion.id, question.type as questionType);
+    return await this.getDetailedQuestion(updatedQuestion.id, question.type );
   }
-
 
   /**
    * @description Checks if the detailed questions can be updated based on certain conditions.
@@ -430,31 +465,32 @@ export class QuestionDataService {
    * @param {detailedQuestionDTO} newQuestion - The new detailed question data transfer object.
    * @returns {boolean} `true` if the detailed questions are updateable, `false` otherwise.
    */
-  private detailedQuestionsUpdateable(currQuestion: detailedQuestionDTO, newQuestion: detailedQuestionDTO): boolean {
+  private detailedQuestionsUpdateable(
+    currQuestion: detailedQuestionDTO,
+    newQuestion: detailedQuestionDTO,
+  ): boolean {
     if (
       currQuestion &&
       newQuestion &&
       (currQuestion.type === newQuestion.type ||
-        (currQuestion.type === questionType.MULTIPLECHOICE && newQuestion.type === questionType.SINGLECHOICE) ||
-        (currQuestion.type === questionType.SINGLECHOICE && newQuestion.type === questionType.MULTIPLECHOICE)
-      ) &&
+        (currQuestion.type === questionType.MULTIPLECHOICE &&
+          newQuestion.type === questionType.SINGLECHOICE) ||
+        (currQuestion.type === questionType.SINGLECHOICE &&
+          newQuestion.type === questionType.MULTIPLECHOICE)) &&
       currQuestion.version <= newQuestion.version &&
-      (
-        newQuestion.codingQuestion ||
+      (newQuestion.codingQuestion ||
         newQuestion.freetextQuestion ||
         newQuestion.mcQuestion ||
         newQuestion.fillinQuestion ||
         newQuestion.graphQuestion ||
         newQuestion.umlQuestion ||
         newQuestion.codeGameQuestion ||
-        newQuestion.uploadQuestion
-      )
-    ){
+        newQuestion.uploadQuestion)
+    ) {
       return true;
     }
     return false;
   }
-
 
   /**
    * @description Creates a new user answer and generates feedback for it.
@@ -462,18 +498,30 @@ export class QuestionDataService {
    * @param {UserAnswerDataDTO} answerData - The user answer data.
    * @returns {Promise<userAnswerFeedbackDTO>} A promise that resolves to the new user answer feedback.
    */
-  async createUserAnswer(userId: number, answerData: UserAnswerDataDTO) : Promise<userAnswerFeedbackDTO> {
-    console.log('create user answer: '+userId + ' ' + answerData.questionId + ' ' + answerData.contentElementId);
+  async createUserAnswer(
+    userId: number,
+    answerData: UserAnswerDataDTO,
+  ): Promise<userAnswerFeedbackDTO> {
+    console.log(
+      'create user answer: ' +
+        userId +
+        ' ' +
+        answerData.questionId +
+        ' ' +
+        answerData.contentElementId,
+    );
 
     const createdData = await this.prisma.userAnswer.create({
       data: {
-          userId: userId,
-          questionId: answerData.questionId,
-          //if answerData has a userFreetextAnswer, use it, else use null
-          userFreetextAnswer: answerData.userFreetextAnswer ?? null,
-          //if answerData has a userGraphAnswer, use it, else use null
-          userGraphAnswer: answerData.userGraphAnswer ? JSON.parse(JSON.stringify(answerData.userGraphAnswer)) : null,
-      }
+        userId: userId,
+        questionId: answerData.questionId,
+        //if answerData has a userFreetextAnswer, use it, else use null
+        userFreetextAnswer: answerData.userFreetextAnswer ?? null,
+        //if answerData has a userGraphAnswer, use it, else use null
+        userGraphAnswer: answerData.userGraphAnswer
+          ? JSON.parse(JSON.stringify(answerData.userGraphAnswer))
+          : null,
+      },
     });
 
     if (!createdData) throw new Error('Could not create userAnswer');
@@ -490,21 +538,23 @@ export class QuestionDataService {
     const detailedQuestion = await this.getDetailedQuestion(answerData.questionId, question.type);
     if (!detailedQuestion) throw new Error('Could not get detailed question');
 
-
     //generate feedback for user answer
     if (question.type === questionType.MULTIPLECHOICE) {
       console.log('generate feedback for multiple choice user answer');
       //const question = await this.getQuestion(answerData.questionId);
-      const mcOptions = await this.qdChoice.getMCCheckOptions((await this.qdChoice.getMCQuestion(answerData.questionId)).id);
+      const mcOptions = await this.qdChoice.getMCCheckOptions(
+        (
+          await this.qdChoice.getMCQuestion(answerData.questionId)
+        ).id,
+      );
       let userScore = 0;
       const scorePerOption = question.score / mcOptions.length;
 
       //generate user score
-      for(const mcOption of mcOptions) {
+      for (const mcOption of mcOptions) {
         if (mcOption.correct && answerData.userMCAnswer.includes(mcOption.id)) {
           userScore += scorePerOption;
-        }
-        else if (!mcOption.correct && !answerData.userMCAnswer.includes(mcOption.id)) {
+        } else if (!mcOption.correct && !answerData.userMCAnswer.includes(mcOption.id)) {
           userScore += scorePerOption;
         }
       }
@@ -512,16 +562,34 @@ export class QuestionDataService {
       userScore = Math.round(userScore * 100) / 100;
 
       const progress = userScore / question.score;
-      let feedbackText = "";
+      let feedbackText = '';
       let markedAsDone = false;
-      if(progress == 1) {
-        feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
+      if (progress == 1) {
+        feedbackText =
+          'Du hast ' +
+          userScore +
+          ' von ' +
+          question.score +
+          ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
         //set contentElement as done
-        console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNodeId + ' level: ' + question.level + ' userId: ' + userId)
-        await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
+        console.log(
+          'contentElementId: ' +
+            answerData.contentElementId +
+            ' conceptNode: ' +
+            question.conceptNodeId +
+            ' level: ' +
+            question.level +
+            ' userId: ' +
+            userId,
+        );
+        await this.contentService.questionContentElementDone(
+          answerData.contentElementId,
+          question.conceptNodeId,
+          question.level,
+          userId,
+        );
         markedAsDone = true;
-      }
-      else {
+      } else {
         feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
       }
 
@@ -532,8 +600,8 @@ export class QuestionDataService {
         data: {
           userAnswerId: createdData.id,
           text: feedbackText,
-          score: userScore
-        }
+          score: userScore,
+        },
       });
 
       if (!feedback) throw new Error('Could not create Feedback');
@@ -545,39 +613,60 @@ export class QuestionDataService {
         score: feedback.score,
         feedbackText: feedback.text,
         elementDone: markedAsDone,
-        progress: progress*100,
-      }
+        progress: progress * 100,
+      };
     }
 
     if (question.type === questionType.SINGLECHOICE) {
       console.log('generate feedback for single choice user answer');
       //const question = await this.getQuestion(answerData.questionId);
-      const mcOptions = await this.qdChoice.getMCCheckOptions((await this.qdChoice.getMCQuestion(answerData.questionId)).id);
+      const mcOptions = await this.qdChoice.getMCCheckOptions(
+        (
+          await this.qdChoice.getMCQuestion(answerData.questionId)
+        ).id,
+      );
       let userScore = 0;
       let progress = 0;
 
       //generate user score
-      for(const mcOption of mcOptions) {
+      for (const mcOption of mcOptions) {
         if (mcOption.correct && answerData.userMCAnswer.includes(mcOption.id)) {
           userScore += question.score;
           progress = 1;
           break;
-        }
-        else {
+        } else {
           console.log('answer not correct');
           userScore = 0;
         }
       }
 
-      let feedbackText = "";
+      let feedbackText = '';
       let markedAsDone = false;
-      if(progress == 1) {
-        feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
-        console.log('contentElementId: ' + answerData.contentElementId + ' conceptNode: ' + question.conceptNodeId + ' level: ' + question.level + ' userId: ' + userId)
-        await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
+      if (progress == 1) {
+        feedbackText =
+          'Du hast ' +
+          userScore +
+          ' von ' +
+          question.score +
+          ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
+        console.log(
+          'contentElementId: ' +
+            answerData.contentElementId +
+            ' conceptNode: ' +
+            question.conceptNodeId +
+            ' level: ' +
+            question.level +
+            ' userId: ' +
+            userId,
+        );
+        await this.contentService.questionContentElementDone(
+          answerData.contentElementId,
+          question.conceptNodeId,
+          question.level,
+          userId,
+        );
         markedAsDone = true;
-      }
-      else {
+      } else {
         feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
       }
 
@@ -586,10 +675,10 @@ export class QuestionDataService {
       //create feedback for user answer
       const feedback = await this.prisma.feedback.create({
         data: {
-            userAnswerId: createdData.id,
-            text: feedbackText,
-            score: userScore
-        }
+          userAnswerId: createdData.id,
+          text: feedbackText,
+          score: userScore,
+        },
       });
 
       if (!feedback) throw new Error('Could not create Feedback');
@@ -601,10 +690,9 @@ export class QuestionDataService {
         score: feedback.score,
         feedbackText: feedback.text,
         elementDone: markedAsDone,
-        progress: progress*100,
-      }
+        progress: progress * 100,
+      };
     }
-
 
     //generate feedback for user freetext answer
     if (question.type === questionType.FREETEXT && question.text) {
@@ -614,22 +702,30 @@ export class QuestionDataService {
       let feedbackText = 'Du hast keine Antwort eingeben.';
       let userScore = 0;
       if (answerData.userFreetextAnswerRaw && answerData.userFreetextAnswerRaw != '') {
-        await this.qdFreetext.getFreeTextQuestion(answerData.questionId, true).then(async (questionData) => {
-          await this.feedbackGenerationService.generateFreetextFeedback(questionData, answerData.userFreetextAnswerRaw).then((feedback) => {
-            feedbackText = feedback.feedbackText;
-            userScore = feedback.reachedPoints;
+        await this.qdFreetext
+          .getFreeTextQuestion(answerData.questionId, true)
+          .then(async questionData => {
+            await this.feedbackGenerationService
+              .generateFreetextFeedback(questionData, answerData.userFreetextAnswerRaw)
+              .then(feedback => {
+                feedbackText = feedback.feedbackText;
+                userScore = feedback.reachedPoints;
+              });
           });
-        });
       }
 
       const progress = userScore / question.score;
       let markedAsDone = false;
-      console.log('progress: '+progress);
+      console.log('progress: ' + progress);
 
-      if(progress == 1) {
-        await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
+      if (progress == 1) {
+        await this.contentService.questionContentElementDone(
+          answerData.contentElementId,
+          question.conceptNodeId,
+          question.level,
+          userId,
+        );
         markedAsDone = true;
-
       }
 
       console.log('generated Text:', feedbackText);
@@ -639,8 +735,8 @@ export class QuestionDataService {
         data: {
           userAnswerId: createdData.id,
           text: feedbackText,
-          score: userScore
-        }
+          score: userScore,
+        },
       });
 
       if (!feedback) throw new Error('Could not create Feedback');
@@ -651,21 +747,20 @@ export class QuestionDataService {
         score: feedback.score,
         feedbackText: feedback.text,
         elementDone: markedAsDone,
-        progress: progress*100,
-      }
-
+        progress: progress * 100,
+      };
     }
 
     // fillin
-    if(question.type === questionType.FILLIN) {
+    if (question.type === questionType.FILLIN) {
       console.log('generate feedback for fill-in-the-blank user answer');
       const fillInTask = await this.prisma.fillinQuestion.findFirst({
         where: {
           questionId: question.id,
         },
         include: {
-          blanks: true
-        }
+          blanks: true,
+        },
       });
 
       // Fetch the correct answers from the blanks table
@@ -673,25 +768,30 @@ export class QuestionDataService {
         where: {
           fillinQuestionId: fillInTask.id,
           isDistractor: false,
-          isCorrect: true
+          isCorrect: true,
         },
         orderBy: {
-          position: 'asc'
+          position: 'asc',
         },
       });
 
       const importantBlankPositions = [...new Set(correctAnswers.map(blank => blank.position))];
-      console.log("correct answers: ", correctAnswers);
+      console.log('correct answers: ', correctAnswers);
       let userScore = 0;
 
       // Compare user answers with correct answers
       const userAnswers: UserFillinAnswer[] = answerData.userFillinTextAnswer;
       const feedbackDetails = [];
-      console.log("user answers: ", userAnswers);
+      console.log('user answers: ', userAnswers);
 
       for (const blankPosition of importantBlankPositions) {
-        const userAnswer = userAnswers.find(answer => answer.position === blankPosition)?.answer?.toLowerCase().trim();
-        const correctPositionAnswers = correctAnswers.filter(blank => blank.position === blankPosition).map(blank => blank.blankContent.toLowerCase().trim());
+        const userAnswer = userAnswers
+          .find(answer => answer.position === blankPosition)
+          .answer.toLowerCase()
+          .trim();
+        const correctPositionAnswers = correctAnswers
+          .filter(blank => blank.position === blankPosition)
+          .map(blank => blank.blankContent.toLowerCase().trim());
 
         if (correctPositionAnswers.includes(userAnswer)) {
           userScore += 1;
@@ -699,16 +799,22 @@ export class QuestionDataService {
         } else {
           //feedbackDetails.push(`Blank ${blankPosition}: Incorrect`);
         }
-
       }
 
       let feedbackText = '';
       let markedAsDone = false;
-      const reachedPoints = Math.floor(userScore * (question.score / importantBlankPositions.length));
+      const reachedPoints = Math.floor(
+        userScore * (question.score / importantBlankPositions.length),
+      );
 
       if (userScore === importantBlankPositions.length) {
         feedbackText = `Herzlichen Glückwunsch! Du hast alle ${importantBlankPositions.length} Lücken richtig ausgefüllt. Du hast ${question.score} von ${question.score} Punkten erreicht. Die Aufgabe ist als abgeschlossen markiert und dein Fortschritt wurde aktualisiert.`;
-        this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
+        this.contentService.questionContentElementDone(
+          answerData.contentElementId,
+          question.conceptNodeId,
+          question.level,
+          userId,
+        );
         markedAsDone = true;
       } else {
         feedbackText = `Du hast ${userScore} von ${importantBlankPositions.length} Lücken richtig ausgefüllt. Du hast ${reachedPoints} von ${question.score} Punkten erreicht.\n\n`;
@@ -720,8 +826,8 @@ export class QuestionDataService {
         data: {
           userAnswerId: createdData.id,
           text: feedbackText,
-          score: reachedPoints
-        }
+          score: reachedPoints,
+        },
       });
 
       if (!feedback) throw new Error('Could not create Feedback');
@@ -733,11 +839,10 @@ export class QuestionDataService {
         score: feedback.score,
         feedbackText: feedback.text,
         elementDone: markedAsDone,
-        progress: Math.floor((feedback.score/question.score) * 100),
-      }
-
+        progress: Math.floor((feedback.score / question.score) * 100),
+      };
     }
-      // Create feedback for user answer
+    // Create feedback for user answer
 
     //generate feedback for user graph answer
     if (question.type === questionType.GRAPH) {
@@ -747,28 +852,36 @@ export class QuestionDataService {
       let userScore = 0;
 
       if (answerData.userGraphAnswer) {
-
-        await this.qdGraph.getGraphQuestion(answerData.questionId, true).then(async (questionData) => {
-
-          // Generate feedback based on the user answer
-          const { feedbackHTML, receivedPoints } = this.graphEvalService.evaluateSolution(questionData, answerData.userGraphAnswer);
-          feedbackText = feedbackHTML;
-          userScore = receivedPoints;
-        });
+        await this.qdGraph
+          .getGraphQuestion(answerData.questionId, true)
+          .then(async questionData => {
+            // Generate feedback based on the user answer
+            const { feedbackHTML, receivedPoints } = this.graphEvalService.evaluateSolution(
+              questionData,
+              answerData.userGraphAnswer,
+            );
+            feedbackText = feedbackHTML;
+            userScore = receivedPoints;
+          });
       }
 
       const progress = userScore / question.score;
       let markedAsDone = false;
-      console.log('progress: '+progress);
+      console.log('progress: ' + progress);
 
-      if(progress == 1) {
+      if (progress == 1) {
         // answerData for graphQuestions does not contain a contentElementId, so we need to fetch it from the database
         const contentElement = await this.prisma.contentElement.findUnique({
           where: {
-            questionId: question.originId
-          }
+            questionId: question.originId,
+          },
         });
-        await this.contentService.questionContentElementDone(contentElement.id, question.conceptNodeId, question.level, userId);
+        await this.contentService.questionContentElementDone(
+          contentElement.id,
+          question.conceptNodeId,
+          question.level,
+          userId,
+        );
         markedAsDone = true;
       }
 
@@ -780,8 +893,8 @@ export class QuestionDataService {
         data: {
           userAnswerId: createdData.id,
           text: feedbackText,
-          score: userScore
-        }
+          score: userScore,
+        },
       });
 
       if (!feedback) throw new Error('Could not create Feedback');
@@ -793,8 +906,8 @@ export class QuestionDataService {
         score: feedback.score,
         feedbackText: feedback.text,
         elementDone: markedAsDone,
-        progress: Math.floor((feedback.score/question.score) * 100),
-      }
+        progress: Math.floor((feedback.score / question.score) * 100),
+      };
     }
 
     if (question.type === questionType.CODEGAME) {
@@ -808,21 +921,24 @@ export class QuestionDataService {
           userAnswerId: createdData.id,
           codeGameExecutionResult: answerData.codeGameEvaluation.codeGameExecutionResult,
           codeSolutionRestriction: answerData.codeGameEvaluation.codeSolutionRestriction,
-          frequencyOfMethodEvaluationResult: answerData.codeGameEvaluation?.frequencyOfMethodEvaluationResult,
-          frequencyOfMethodCallsResult: answerData.codeGameEvaluation?.frequencyOfMethodCallsResult,
-          reachedDestination: answerData.codeGameEvaluation?.reachedDestination,
-          totalItems: answerData.codeGameEvaluation?.totalItems,
-          collectedItems: answerData.codeGameEvaluation?.collectedItems,
-          allItemsCollected: answerData.codeGameEvaluation?.allItemsCollected,
-          visitedCellsAreAllowed: answerData.codeGameEvaluation?.visitedCellsAreAllowed,
-          allWhiteListCellsVisited: answerData.codeGameEvaluation?.allWhiteListCellsVisited,
-          executionSuccess: answerData.codeGameEvaluation?.executionSuccess,
-          executionMessage: answerData.codeGameEvaluation?.executionMessage,
+          frequencyOfMethodEvaluationResult:
+            answerData.codeGameEvaluation.frequencyOfMethodEvaluationResult,
+          frequencyOfMethodCallsResult: answerData.codeGameEvaluation.frequencyOfMethodCallsResult,
+          reachedDestination: answerData.codeGameEvaluation.reachedDestination,
+          totalItems: answerData.codeGameEvaluation.totalItems,
+          collectedItems: answerData.codeGameEvaluation.collectedItems,
+          allItemsCollected: answerData.codeGameEvaluation.allItemsCollected,
+          visitedCellsAreAllowed: answerData.codeGameEvaluation.visitedCellsAreAllowed,
+          allWhiteListCellsVisited: answerData.codeGameEvaluation.allWhiteListCellsVisited,
+          executionSuccess: answerData.codeGameEvaluation.executionSuccess,
+          executionMessage: answerData.codeGameEvaluation.executionMessage,
         },
       });
 
-      if (answerData.codeGameEvaluation?.submittedCode) {
-        for (const [fileName, code] of Object.entries(answerData.codeGameEvaluation.submittedCode)) {
+      if (answerData.codeGameEvaluation.submittedCode) {
+        for (const [fileName, code] of Object.entries(
+          answerData.codeGameEvaluation.submittedCode,
+        )) {
           await this.prisma.codeGameScaffoldAnswer.create({
             data: {
               codeGameAnswerId: codeGameAnswer.id,
@@ -869,13 +985,13 @@ export class QuestionDataService {
         //set contentElement as done
         console.log(
           'contentElementId: ' +
-          answerData.contentElementId +
-          ' conceptNode: ' +
-          question.conceptNodeId +
-          ' level: ' +
-          question.level +
-          ' userId: ' +
-          userId,
+            answerData.contentElementId +
+            ' conceptNode: ' +
+            question.conceptNodeId +
+            ' level: ' +
+            question.level +
+            ' userId: ' +
+            userId,
         );
         await this.contentService.questionContentElementDone(
           answerData.contentElementId,
@@ -885,8 +1001,7 @@ export class QuestionDataService {
         );
         markedAsDone = true;
       } else {
-        feedbackText =
-          'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
+        feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
       }
 
       const feedback = await this.prisma.feedback.create({
@@ -924,19 +1039,22 @@ export class QuestionDataService {
 
       // Create a mapping of simple types to MIME types
       const mimeTypeMap: { [key: string]: string[] } = {
-        'pdf': ['application/pdf'],
-        'doc': ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-        'docx': ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-        'txt': ['text/plain'],
-        'jpg': ['image/jpeg'],
-        'jpeg': ['image/jpeg'],
-        'png': ['image/png'],
-        'gif': ['image/gif'],
-        'zip': ['application/zip'],
-        'rar': ['application/x-rar-compressed'],
-        'mp4': ['video/mp4'],
-        'mp3': ['audio/mpeg'],
-        'wav': ['audio/wav']
+        pdf: ['application/pdf'],
+        doc: [
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ],
+        docx: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+        txt: ['text/plain'],
+        jpg: ['image/jpeg'],
+        jpeg: ['image/jpeg'],
+        png: ['image/png'],
+        gif: ['image/gif'],
+        zip: ['application/zip'],
+        rar: ['application/x-rar-compressed'],
+        mp4: ['video/mp4'],
+        mp3: ['audio/mpeg'],
+        wav: ['audio/wav'],
       };
 
       // Check if file type matches
@@ -972,8 +1090,8 @@ export class QuestionDataService {
       const uploadAnswer = await this.prisma.userUploadAnswer.create({
         data: {
           userAnswerId: createdData.id,
-          fileId: uploadedFile.id
-          }
+          fileId: uploadedFile.id,
+        },
       });
 
       if (!uploadAnswer) throw new Error('Could not create UserUploadAnswer');
@@ -982,9 +1100,13 @@ export class QuestionDataService {
       const feedbackText = `Du hast erfolgreich die Datei "${uploadedFile.name}" hochgeladen.`;
 
       // Mark as done since upload was successful
-      await this.contentService.questionContentElementDone(answerData.contentElementId, question.conceptNodeId, question.level, userId);
+      await this.contentService.questionContentElementDone(
+        answerData.contentElementId,
+        question.conceptNodeId,
+        question.level,
+        userId,
+      );
       const markedAsDone = true;
-
 
       console.log('generated Text:', feedbackText);
       console.log('userScore: ' + userScore);
@@ -994,8 +1116,8 @@ export class QuestionDataService {
         data: {
           userAnswerId: createdData.id,
           text: feedbackText,
-          score: userScore
-        }
+          score: userScore,
+        },
       });
 
       if (!feedback) throw new Error('Could not create Feedback');
@@ -1007,8 +1129,8 @@ export class QuestionDataService {
         score: feedback.score,
         feedbackText: feedback.text,
         elementDone: markedAsDone,
-        progress: Math.floor((feedback.score/userScore) * 100),
-      }
+        progress: Math.floor((feedback.score / userScore) * 100),
+      };
     }
 
     // TODO: Uml
@@ -1043,11 +1165,11 @@ export class QuestionDataService {
           userAnswer: {
             questionId: questionId,
             userId: userId,
-          }
+          },
         },
         _max: {
-          score: true
-        }
+          score: true,
+        },
       });
 
       const maxScore = aggregatedScoreResult._max.score || 0;
@@ -1058,7 +1180,10 @@ export class QuestionDataService {
       // Ensure progress does not exceed 100%
       return Math.min(progress, 100);
     } catch (error) {
-      console.error(`Error calculating progress for question ${questionId} and user ${userId}:`, error);
+      console.error(
+        `Error calculating progress for question ${questionId} and user ${userId}:`,
+        error,
+      );
       throw new Error('Could not calculate progress');
     }
   }
@@ -1069,7 +1194,9 @@ export class QuestionDataService {
    * @returns {Promise<{ contentNodeId: number; contentElementId: number }>} A promise that resolves to an object containing contentNodeId and contentElementId.
    * @throws {NotFoundException} if the question does not exist or has no associated file.
    */
-  async getContentIdsForQuestion(questionId: number): Promise<{ contentNodeId: number; contentElementId: number }> {
+  async getContentIdsForQuestion(
+    questionId: number,
+  ): Promise<{ contentNodeId: number; contentElementId: number }> {
     const question = await this.prisma.question.findFirst({
       where: { id: questionId },
       select: {
@@ -1079,12 +1206,12 @@ export class QuestionDataService {
             id: true,
             ContentView: {
               select: {
-                contentNodeId: true
-              }
-            }
-          }
-        }
-      }
+                contentNodeId: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!question) {
@@ -1098,5 +1225,4 @@ export class QuestionDataService {
       contentElementId,
     };
   }
-
 }

@@ -1,12 +1,13 @@
-import { Component, Input, OnChanges, SimpleChanges, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { TestResult } from '../../models/code-submission.model';
+import type { OnChanges, SimpleChanges, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import type { MatDialog } from '@angular/material/dialog';
+import type { TestResult } from '../../models/code-submission.model';
 import { TestDetailsDialogComponent } from './test-details-dialog/test-details-dialog.component';
 
 @Component({
   selector: 'app-test-indicators',
   templateUrl: './test-indicators.component.html',
-  styleUrls: ['./test-indicators.component.scss']
+  styleUrls: ['./test-indicators.component.scss'],
 })
 export class TestIndicatorsComponent implements OnChanges, OnInit {
   @Input() testResults: TestResult[] | undefined;
@@ -18,7 +19,7 @@ export class TestIndicatorsComponent implements OnChanges, OnInit {
   isNewResult: boolean = false;
   lastResultsHash: string = '';
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private readonly dialog: MatDialog) {}
 
   ngOnInit(): void {
     // Initialisierung
@@ -66,7 +67,7 @@ export class TestIndicatorsComponent implements OnChanges, OnInit {
     return {
       'all-passed': this.passedTests === this.totalTests && this.totalTests > 0,
       'some-failed': this.passedTests < this.totalTests && this.passedTests > 0,
-      'all-failed': this.passedTests === 0 && this.totalTests > 0
+      'all-failed': this.passedTests === 0 && this.totalTests > 0,
     };
   }
 
@@ -76,7 +77,7 @@ export class TestIndicatorsComponent implements OnChanges, OnInit {
   openTestDetails(test: TestResult): void {
     this.dialog.open(TestDetailsDialogComponent, {
       width: '500px',
-      data: test
+      data: test,
     });
   }
 
@@ -89,8 +90,8 @@ export class TestIndicatorsComponent implements OnChanges, OnInit {
         width: '600px',
         data: {
           allTests: this.testResults,
-          isListView: true
-        }
+          isListView: true,
+        },
       });
     }
   }
@@ -119,9 +120,7 @@ export class TestIndicatorsComponent implements OnChanges, OnInit {
       return '';
     }
 
-    return this.testResults.map(test =>
-      `${test.name}:${test.passed ? 'pass' : 'fail'}`
-    ).join('|');
+    return this.testResults.map(test => `${test.name}:${test.passed ? 'pass' : 'fail'}`).join('|');
   }
 
   /**

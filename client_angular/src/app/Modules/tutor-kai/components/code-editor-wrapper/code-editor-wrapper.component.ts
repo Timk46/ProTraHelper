@@ -1,15 +1,17 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, Validators } from '@angular/forms';
-import { QuestionDTO, CodeSubmissionResultDto } from '@DTOs/index';
-import { CodeEditorComponent } from '../../sites/code-editor/code-editor.component';
-import { WorkspaceStateService } from '../../services/workspace-state.service';
-import { FileSystemService, EditorFile } from '../../services/file-system.service';
+import type { OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import type { FormArray, FormBuilder } from '@angular/forms';
+import { Validators } from '@angular/forms';
+import type { QuestionDTO, CodeSubmissionResultDto } from '@DTOs/index';
+import type { CodeEditorComponent } from '../../sites/code-editor/code-editor.component';
+import type { WorkspaceStateService } from '../../services/workspace-state.service';
+import type { FileSystemService, EditorFile } from '../../services/file-system.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-code-editor-wrapper',
   templateUrl: './code-editor-wrapper.component.html',
-  styleUrls: ['./code-editor-wrapper.component.scss']
+  styleUrls: ['./code-editor-wrapper.component.scss'],
 })
 export class CodeEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('codeEditorMonaco') codeEditorComponent?: CodeEditorComponent;
@@ -20,35 +22,33 @@ export class CodeEditorWrapperComponent implements OnInit, OnChanges, OnDestroy 
   isSubmitting = false;
   language = 'python';
   activeFile: EditorFile | null = null;
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
   private isLocalUpdate = false; // Flag für lokale Updates durch Benutzereingaben
 
   // Form für Input-Argumente
   inputArgsForm = this.fb.group({
-    argsArray: this.fb.array([])
+    argsArray: this.fb.array([]),
   });
 
   constructor(
-    private fb: FormBuilder,
-    private workspaceState: WorkspaceStateService,
-    private fileSystem: FileSystemService
+    private readonly fb: FormBuilder,
+    private readonly workspaceState: WorkspaceStateService,
+    private readonly fileSystem: FileSystemService,
   ) {}
 
   ngOnInit(): void {
     this.setupInputArgs();
 
     // Beobachte Änderungen der aktiven Datei
-    this.fileSystem.activeFile$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(file => {
-        this.activeFile = file;
-        // Nur aktualisieren, wenn es kein lokaler Update ist (verhindert Fokusverlust)
-        if (file && this.codeEditorComponent && !this.isLocalUpdate) {
-          this.codeEditorComponent.changeLanguage(file.language);
-          this.codeEditorComponent.code = file.content;
-          this.language = file.language;
-        }
-      });
+    this.fileSystem.activeFile$.pipe(takeUntil(this.destroy$)).subscribe(file => {
+      this.activeFile = file;
+      // Nur aktualisieren, wenn es kein lokaler Update ist (verhindert Fokusverlust)
+      if (file && this.codeEditorComponent && !this.isLocalUpdate) {
+        this.codeEditorComponent.changeLanguage(file.language);
+        this.codeEditorComponent.code = file.content;
+        this.language = file.language;
+      }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -135,18 +135,16 @@ export class CodeEditorWrapperComponent implements OnInit, OnChanges, OnDestroy 
     // Hole alle Dateien aus dem FileSystem
     const additionalFiles = this.fileSystem.getFilesAsRecord();
 
-    this.workspaceState.executeCode(
-      this.currentTask.id,
-      this.argsArray.value,
-      additionalFiles
-    ).subscribe({
-      next: result => {
-        this.isSubmitting = false;
-        this.codeSubmitted.emit(result);
-      },
-      error: () => {
-        this.isSubmitting = false;
-      }
-    });
+    this.workspaceState
+      .executeCode(this.currentTask.id, this.argsArray.value, additionalFiles)
+      .subscribe({
+        next: result => {
+          this.isSubmitting = false;
+          this.codeSubmitted.emit(result);
+        },
+        error: () => {
+          this.isSubmitting = false;
+        },
+      });
   }
 }

@@ -1,16 +1,17 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import type { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import type { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface RhinoCommandDialogData {
   fileName: string;
   filePath: string;
   commandSequence: string;
-  commandSteps: Array<{
+  commandSteps: {
     step: number;
     command: string;
     description: string;
-  }>;
+  }[];
 }
 
 /**
@@ -20,15 +21,14 @@ export interface RhinoCommandDialogData {
 @Component({
   selector: 'app-rhino-command-dialog',
   templateUrl: './rhino-command-dialog.component.html',
-  styleUrls: ['./rhino-command-dialog.component.scss']
+  styleUrls: ['./rhino-command-dialog.component.scss'],
 })
 export class RhinoCommandDialogComponent {
-
   constructor(
     public dialogRef: MatDialogRef<RhinoCommandDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: RhinoCommandDialogData,
-    private snackBar: MatSnackBar
-  ) { }
+    private readonly snackBar: MatSnackBar,
+  ) {}
 
   /**
    * Kopiert die komplette Befehlssequenz in die Zwischenablage
@@ -52,14 +52,17 @@ export class RhinoCommandDialogComponent {
   private copyToClipboard(text: string): void {
     if (navigator.clipboard && window.isSecureContext) {
       // Moderne Clipboard API (HTTPS erforderlich)
-      navigator.clipboard.writeText(text).then(() => {
-        this.snackBar.open('In Zwischenablage kopiert!', 'OK', {
-          duration: 2000,
-          panelClass: 'success-snackbar'
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          this.snackBar.open('In Zwischenablage kopiert!', 'OK', {
+            duration: 2000,
+            panelClass: 'success-snackbar',
+          });
+        })
+        .catch(() => {
+          this.fallbackCopyToClipboard(text);
         });
-      }).catch(() => {
-        this.fallbackCopyToClipboard(text);
-      });
     } else {
       // Fallback für ältere Browser oder HTTP
       this.fallbackCopyToClipboard(text);
@@ -86,7 +89,7 @@ export class RhinoCommandDialogComponent {
       if (successful) {
         this.snackBar.open('In Zwischenablage kopiert!', 'OK', {
           duration: 2000,
-          panelClass: 'success-snackbar'
+          panelClass: 'success-snackbar',
         });
       } else {
         throw new Error('Copy command failed');
@@ -94,7 +97,7 @@ export class RhinoCommandDialogComponent {
     } catch (err) {
       this.snackBar.open('Fehler beim Kopieren in die Zwischenablage', 'Schließen', {
         duration: 3000,
-        panelClass: 'error-snackbar'
+        panelClass: 'error-snackbar',
       });
       console.error('Failed to copy text: ', err);
     }

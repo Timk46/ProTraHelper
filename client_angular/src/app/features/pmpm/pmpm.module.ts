@@ -20,10 +20,8 @@ import { PortalModule } from '@angular/cdk/portal';
     MatButtonModule,
     MatIconModule,
     OverlayModule,
-    PortalModule
+    PortalModule,
   ],
-  providers: [
-    PmpmService
-  ]
+  providers: [PmpmService],
 })
-export class PmpmModule { }
+export class PmpmModule {}

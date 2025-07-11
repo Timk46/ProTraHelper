@@ -10,10 +10,12 @@
       <div class="model-selection">
         <h3>Verfügbare Modelle</h3>
         <div class="model-list">
-          <button mat-stroked-button
-                  *ngFor="let model of availableModels"
-                  [class.selected]="selectedModel === model.id"
-                  (click)="changeModel(model.id)">
+          <button
+            mat-stroked-button
+            *ngFor="let model of availableModels"
+            [class.selected]="selectedModel === model.id"
+            (click)="changeModel(model.id)"
+          >
             {{ model.name }}
           </button>
         </div>
@@ -32,7 +34,8 @@
         <app-three-viewer
           *ngIf="!isLoading && !error"
           [modelId]="selectedModel"
-          [modelPath]="modelPath">
+          [modelPath]="modelPath"
+        >
         </app-three-viewer>
       </div>
 

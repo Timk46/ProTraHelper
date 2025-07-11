@@ -1,20 +1,20 @@
 <div class="content mat-elevation-z8">
-  <h1 style="display: flex; justify-content: center;">Lückentext Aufgabe bearbeiten</h1>
+  <h1 style="display: flex; justify-content: center">Lückentext Aufgabe bearbeiten</h1>
 
   <div class="horizontal-align-container">
-    <div class="text-container" style="width: 30%;">
+    <div class="text-container" style="width: 30%">
       <div class="wrap-container">
-
         <h2>Optionen</h2>
 
         <form [formGroup]="fillinForm">
-          <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-form-field appearance="outline" style="width: 100%">
             <mat-label>Titel</mat-label>
-            <input matInput placeholder="Titel der Frage" formControlName="questionTitle">
-            <mat-error *ngIf="fillinForm.get('questionTitle')!.hasError('required')">Titel der Frage ist
-              erforderlich</mat-error>
+            <input matInput placeholder="Titel der Frage" formControlName="questionTitle" />
+            <mat-error *ngIf="fillinForm.get('questionTitle')!.hasError('required')"
+              >Titel der Frage ist erforderlich</mat-error
+            >
           </mat-form-field>
-          <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-form-field appearance="outline" style="width: 100%">
             <mat-label>FillinType</mat-label>
             <mat-select formControlName="fillinType">
               <mat-option [value]="fillinTypes.FillinText">Texteingabe</mat-option>
@@ -23,7 +23,7 @@
               <mat-option disabled [value]="fillinTypes.GroupingTask">GroupingTask</mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-form-field appearance="outline" style="width: 100%">
             <mat-label>Schwierigkeit</mat-label>
             <mat-select formControlName="questionDifficulty">
               <mat-option value="1">Level 1: Erinnern</mat-option>
@@ -33,8 +33,9 @@
               <mat-option value="5">Level 5: Evaluieren</mat-option>
               <mat-option value="6">Level 6: Kreieren</mat-option>
             </mat-select>
-            <mat-error *ngIf="fillinForm.get('questionDifficulty')!.hasError('required')">Schwierigkeitsgrad ist
-              erforderlich</mat-error>
+            <mat-error *ngIf="fillinForm.get('questionDifficulty')!.hasError('required')"
+              >Schwierigkeitsgrad ist erforderlich</mat-error
+            >
           </mat-form-field>
           <!-- <mat-form-field appearance="outline" style="width: 100%;">
             <mat-label>Choice-Typ</mat-label>
@@ -45,11 +46,19 @@
             <mat-error *ngIf="fillinForm.get('questionDifficulty')!.hasError('required')">Schwierigkeitsgrad ist
               erforderlich</mat-error>
           </mat-form-field> -->
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <input matInput type="number" min="0" step="1" placeholder="Punkte" formControlName="questionScore">
+          <mat-form-field appearance="outline" style="width: 100%">
+            <input
+              matInput
+              type="number"
+              min="0"
+              step="1"
+              placeholder="Punkte"
+              formControlName="questionScore"
+            />
             <mat-label>Punkte</mat-label>
-            <mat-error *ngIf="fillinForm.get('questionScore')!.hasError('required')">Punkte sind
-              erforderlich</mat-error>
+            <mat-error *ngIf="fillinForm.get('questionScore')!.hasError('required')"
+              >Punkte sind erforderlich</mat-error
+            >
           </mat-form-field>
         </form>
 
@@ -58,13 +67,18 @@
             <mat-panel-title>Erweiterte Optionen (optional)</mat-panel-title>
           </mat-expansion-panel-header>
           <div class="expansion">
-            <p>Die Auswirkungen dieser Einstellungen sind in der Übersicht nicht sichtbar und beziehen sich nur auf
-              interne Datenbankparameter</p>
+            <p>
+              Die Auswirkungen dieser Einstellungen sind in der Übersicht nicht sichtbar und
+              beziehen sich nur auf interne Datenbankparameter
+            </p>
             <form [formGroup]="fillinForm">
-              <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-form-field appearance="outline" style="width: 100%">
                 <mat-label>Beschreibung der Frage</mat-label>
-                <textarea matInput placeholder="Beschreibung der Frage"
-                  formControlName="questionDescription"></textarea>
+                <textarea
+                  matInput
+                  placeholder="Beschreibung der Frage"
+                  formControlName="questionDescription"
+                ></textarea>
                 <mat-hint>Zum Beispiel "manuell erstellt" oder "automatisch importiert"</mat-hint>
               </mat-form-field>
             </form>
@@ -73,18 +87,12 @@
       </div>
     </div>
 
-
-    <div class="text-container" style="width: 70%;">
+    <div class="text-container" style="width: 70%">
       <div class="wrap-container">
-
         <!-- --- hier fillin ---- -->
 
-
-
         <div class="container">
-          <div *ngIf="!isEditorLoaded" class="loading-indicator">
-            Loading editor...
-          </div>
+          <div *ngIf="!isEditorLoaded" class="loading-indicator">Loading editor...</div>
 
           <form [formGroup]="fillinForm">
             <!-- <app-tinymce #editor [config]="editorConfig" formControlName="fillinContent"></app-tinymce> -->
@@ -103,7 +111,8 @@
                 type="text"
                 [(ngModel)]="distractorInput"
                 (keyup)="onDistractorKeyUp($event)"
-                placeholder="Falsche Antwort hier eintragen">
+                placeholder="Falsche Antwort hier eintragen"
+              />
               <button (click)="addGlobalDistractor(distractorInput)">Add</button>
             </div>
             <ul class="distractor-list">
@@ -143,26 +152,32 @@
           </div> -->
         </div>
 
-
-
-
-
         <!-- -------------------- -->
-
       </div>
     </div>
-
   </div>
 
   <div class="button-container">
-    <mat-progress-spinner *ngIf="isSaving" diameter="20" mode="indeterminate"></mat-progress-spinner>
-    <button mat-raised-button [disabled]="isSaving" color="primary" (click)="onOverwrite()">Speichern (aktualisieren)</button>
-    <div matTooltip="Die aktuelle Version hat noch keine Single/Multiple Choice Daten."
-      [matTooltipDisabled]="!!detailedQuestionData?.mcQuestion">
-      <button mat-raised-button color="primary"
+    <mat-progress-spinner
+      *ngIf="isSaving"
+      diameter="20"
+      mode="indeterminate"
+    ></mat-progress-spinner>
+    <button mat-raised-button [disabled]="isSaving" color="primary" (click)="onOverwrite()">
+      Speichern (aktualisieren)
+    </button>
+    <div
+      matTooltip="Die aktuelle Version hat noch keine Single/Multiple Choice Daten."
+      [matTooltipDisabled]="!!detailedQuestionData?.mcQuestion"
+    >
+      <button
+        mat-raised-button
+        color="primary"
         (click)="onSaveNewVersion()"
         [disabled]="!detailedQuestionData?.mcQuestion || isSaving || true"
-        >Als neue Version speichern</button>
+      >
+        Als neue Version speichern
+      </button>
     </div>
     <button mat-raised-button color="warn" (click)="onCancel()">Abbrechen</button>
     <!-- <button (click)="logContent()">LOG CONTENT</button> -->

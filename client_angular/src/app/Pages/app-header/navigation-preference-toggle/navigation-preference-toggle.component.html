@@ -3,7 +3,8 @@
     mat-button
     class="nav-toggle-button"
     [matTooltip]="toggleTooltip"
-    (click)="toggleNavigationPreference()">
+    (click)="toggleNavigationPreference()"
+  >
     <mat-icon>{{ toggleIcon }}</mat-icon>
     <span>{{ toggleLabel }}</span>
   </button>
@@ -13,7 +14,8 @@
     mat-icon-button
     class="settings-button"
     matTooltip="Navigationsmöglichkeiten konfigurieren"
-    (click)="openSettings()">
+    (click)="openSettings()"
+  >
     <mat-icon>settings</mat-icon>
   </button>
 </div>

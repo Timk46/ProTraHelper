@@ -42,11 +42,11 @@ export interface Plug {
 }
 
 export interface PlugOptions {
-  plug: availablePlugs,
-  color?: string,
-  scale?: number,
-  outline?: number,
-  outlineColor?: string,
+  plug: availablePlugs;
+  color?: string;
+  scale?: number;
+  outline?: number;
+  outlineColor?: string;
 }
 
 export const plugs: { [key: string]: Plug } = {
@@ -76,4 +76,4 @@ export const plugs: { [key: string]: Plug } = {
     viewBox: '0 0 32 32',
     polygon: '16,16 24,10 24,22',
   },
-}
+};

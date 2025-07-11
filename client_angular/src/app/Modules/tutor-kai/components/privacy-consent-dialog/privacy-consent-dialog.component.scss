@@ -18,11 +18,11 @@ mat-dialog-content {
   color: $nord-light-text-secondary;
   font-size: 14px;
   line-height: 1.5;
-  
+
   p {
     margin-bottom: 12px;
   }
-  
+
   ul {
     padding-left: 20px; /* Indent list items */
     margin-top: 10px;
@@ -34,7 +34,7 @@ mat-dialog-content {
     margin-bottom: 12px; /* Space between list items */
     display: list-item; /* Ensure proper list item display */
     position: relative;
-    
+
     &::marker {
       color: $nord-light-accent-frost-3; /* Colored bullet points */
     }
@@ -45,16 +45,16 @@ mat-dialog-actions {
   padding-top: 16px; /* Add some space above the action buttons */
   border-top: 1px solid $nord-light-border;
   margin-top: 8px;
-  
+
   button {
     text-transform: uppercase;
     font-weight: 500;
     letter-spacing: 0.5px;
-    
+
     &.consent-button {
       background-color: $nord-light-accent-frost-1; /* Green button (#8fbcbb) */
       color: $nord-light-text-primary; /* Dark text for better contrast */
-      
+
       &:hover {
         background-color: darken($nord-light-accent-frost-1, 10%);
       }

@@ -1,31 +1,20 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from '../langgraph-feedback/helper/crypto.service';
-import { CodingQuestionInternal, detailedQuestionDTO } from '@DTOs/index';
-import {
-  CodeSubmissionResult,
-  CodeSubmissionResultDto,
-  ContentElementDTO,
-  NotificationDTO,
-  questionType
-
-} from '@Interfaces/index';
-import {
-  CodeSubmission,
-  Question,
-  CodingQuestion,
-  ContentElement,
-} from '@prisma/client';
+import type { CodingQuestionInternal, detailedQuestionDTO } from '@DTOs/index';
+import type { CodeSubmissionResult, CodeSubmissionResultDto } from '@Interfaces/index';
+import { ContentElementDTO, NotificationDTO, questionType } from '@Interfaces/index';
+import type { CodeSubmission, Question, CodingQuestion, ContentElement } from '@prisma/client';
 import { ContentService } from '@/content/content.service';
 import { NotificationService } from '@/notification/notification.service';
 
 @Injectable()
 export class RunCodeService {
   constructor(
-    private prisma: PrismaService,
+    private readonly prisma: PrismaService,
     private readonly cryptoService: CryptoService,
-    private contentService: ContentService,
-    private notificationService: NotificationService,
+    private readonly contentService: ContentService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   // API URL for code execution service.
@@ -33,11 +22,13 @@ export class RunCodeService {
 
   // Need a third way for teachers to test in student view. #TODO
 
-
   /**
    * During edit-coding to test model solution and unit-tests
    */
-  async executeCodeForTaskCreation(detailedQuestion: detailedQuestionDTO, userId: number): Promise<any> {
+  async executeCodeForTaskCreation(
+    detailedQuestion: detailedQuestionDTO,
+    userId: number,
+  ): Promise<any> {
     const codingQuestion = detailedQuestion.codingQuestion;
     if (!codingQuestion.modelSolutions || codingQuestion.modelSolutions.length === 0) {
       throw new Error('No model solutions found for this coding question.');
@@ -48,10 +39,9 @@ export class RunCodeService {
       return acc;
     }, {});
 
-    let response: CodeSubmissionResult = await this.executeCode(modelSolution, codingQuestion);
+    const response: CodeSubmissionResult = await this.executeCode(modelSolution, codingQuestion);
     return response;
   }
-
 
   /**
    * Executes student-submitted code against predefined tests with Jury1.
@@ -68,7 +58,10 @@ export class RunCodeService {
     // Retrieve the specified question and its associated coding question details from the database.
     const question = await this.findRelatedQuestion(questionId);
     // Generate Base64-encoded strings of student code and test files for submission (needed for Jury1)
-    let response: CodeSubmissionResult = await this.executeCode(studentCode, question.codingQuestion);
+    const response: CodeSubmissionResult = await this.executeCode(
+      studentCode,
+      question.codingQuestion,
+    );
     const result = await this.processExecutionResponse(
       response,
       question.codingQuestion,
@@ -95,16 +88,15 @@ export class RunCodeService {
       },
     });
     if (!question) {
-      throw new HttpException(
-        'Diese Question existiert nicht.',
-        HttpStatus.NOT_FOUND
-      );
+      throw new HttpException('Diese Question existiert nicht.', HttpStatus.NOT_FOUND);
     }
     return question;
   }
 
-  private async executeCode(studentCode: { [fileName: string]: string; }, codingQuestion: CodingQuestionInternal) {
-
+  private async executeCode(
+    studentCode: { [fileName: string]: string },
+    codingQuestion: CodingQuestionInternal,
+  ) {
     // Submit encoded files for execution and process the response.
     let response: CodeSubmissionResult;
     if (codingQuestion.programmingLanguage === 'java') {
@@ -115,7 +107,7 @@ export class RunCodeService {
       response = await this.submitCodeForExecutionJava(
         filesBase64,
         testFilesBase64,
-        codingQuestion.mainFileName
+        codingQuestion.mainFileName,
       );
     } else if (codingQuestion.programmingLanguage === 'python') {
       const testFilesBase64 = await this.generateBase64({
@@ -126,24 +118,21 @@ export class RunCodeService {
         filesBase64,
         testFilesBase64,
         codingQuestion.automatedTests[0].runMethod,
-        codingQuestion.automatedTests[0].inputArguments
+        codingQuestion.automatedTests[0].inputArguments,
       );
       console.log(filesBase64);
       console.log(testFilesBase64);
-      console.log(codingQuestion.automatedTests[0].runMethod)
-      console.log(codingQuestion.automatedTests[0].inputArguments)
+      console.log(codingQuestion.automatedTests[0].runMethod);
+      console.log(codingQuestion.automatedTests[0].inputArguments);
     } else if (codingQuestion.programmingLanguage === 'cpp') {
       const testFilesBase64 = await this.generateBase64({
         [codingQuestion.automatedTests[0].testClassName]: codingQuestion.automatedTests[0].code,
       });
-      response = await this.submitCodeForExecutionCpp(
-        studentCode,
-        testFilesBase64
-      );
+      response = await this.submitCodeForExecutionCpp(studentCode, testFilesBase64);
     } else {
       throw new HttpException(
         `Unsupported language: ${codingQuestion.programmingLanguage}`,
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
     return response;
@@ -161,7 +150,6 @@ export class RunCodeService {
     testFiles: { [fileName: string]: string },
     mainClassName: string,
   ): Promise<CodeSubmissionResult> {
-
     const tempClassName = 'de.goals.testing.' + mainClassName.split('.java')[0];
 
     const response = await fetch(`${this.apiUrl}java-assignment`, {
@@ -235,18 +223,20 @@ export class RunCodeService {
     // Konvertierung zu Base64
     const filesBase64 = await this.generateBase64(modifiedFiles);
 
-    console.log("JURY 1 CPP Anfrage");
-    console.log(JSON.stringify({
-      files: filesBase64,
-      testFile: Object.values(testFiles)[0]
-    }));
+    console.log('JURY 1 CPP Anfrage');
+    console.log(
+      JSON.stringify({
+        files: filesBase64,
+        testFile: Object.values(testFiles)[0],
+      }),
+    );
 
     const response = await fetch(`${this.apiUrl}cpp-assignment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         files: filesBase64,
-        testFile: Object.values(testFiles)[0]
+        testFile: Object.values(testFiles)[0],
       }),
     });
 
@@ -258,7 +248,7 @@ export class RunCodeService {
     }
 
     const result: CodeSubmissionResult = await response.json();
-    console.log("JURY 1 CPP Antwort");
+    console.log('JURY 1 CPP Antwort');
     console.log(JSON.stringify(result));
     return result;
   }
@@ -271,36 +261,36 @@ export class RunCodeService {
 
     const match = mainFunctionRegex.exec(content);
     if (match) {
-        const mainFunctionStart = match.index;
-        const openingBraceIndex = content.indexOf('{', mainFunctionStart);
-        if (openingBraceIndex !== -1) {
-            // Finde die schließende Klammer der main-Funktion
-            let braceCount = 1;
-            let currentIndex = openingBraceIndex + 1;
-            while (braceCount > 0 && currentIndex < content.length) {
-                if (content[currentIndex] === '{') {
-                    braceCount++;
-                } else if (content[currentIndex] === '}') {
-                    braceCount--;
-                }
-                currentIndex++;
-            }
-
-            if (braceCount === 0) {
-                const mainFunctionEnd = currentIndex; // Position nach der schließenden '}'
-
-                const beforeMain = content.substring(0, mainFunctionStart);
-                const mainFunction = content.substring(mainFunctionStart, mainFunctionEnd);
-                const afterMain = content.substring(mainFunctionEnd);
-
-                console.log("Main Methode mit Präprozessor-Direktiven umschlossen.");
-                return `${beforeMain}\n#ifndef UNIT_TEST\n${mainFunction}\n#endif // UNIT_TEST\n${afterMain}`;
-            } else {
-                console.log("Konnte die schließende Klammer der main-Funktion nicht finden.");
-            }
+      const mainFunctionStart = match.index;
+      const openingBraceIndex = content.indexOf('{', mainFunctionStart);
+      if (openingBraceIndex !== -1) {
+        // Finde die schließende Klammer der main-Funktion
+        let braceCount = 1;
+        let currentIndex = openingBraceIndex + 1;
+        while (braceCount > 0 && currentIndex < content.length) {
+          if (content[currentIndex] === '{') {
+            braceCount++;
+          } else if (content[currentIndex] === '}') {
+            braceCount--;
+          }
+          currentIndex++;
         }
+
+        if (braceCount === 0) {
+          const mainFunctionEnd = currentIndex; // Position nach der schließenden '}'
+
+          const beforeMain = content.substring(0, mainFunctionStart);
+          const mainFunction = content.substring(mainFunctionStart, mainFunctionEnd);
+          const afterMain = content.substring(mainFunctionEnd);
+
+          console.log('Main Methode mit Präprozessor-Direktiven umschlossen.');
+          return `${beforeMain}\n#ifndef UNIT_TEST\n${mainFunction}\n#endif // UNIT_TEST\n${afterMain}`;
+        } else {
+          console.log('Konnte die schließende Klammer der main-Funktion nicht finden.');
+        }
+      }
     } else {
-        console.log("Keine main-Funktion gefunden.");
+      console.log('Keine main-Funktion gefunden.');
     }
     return content;
   }
@@ -330,9 +320,7 @@ export class RunCodeService {
 
     return {
       CodeSubmissionResult: response,
-      encryptedCodeSubissionId: this.cryptoService.encrypt(
-        codeSubmission.id.toString(),
-      ),
+      encryptedCodeSubissionId: this.cryptoService.encrypt(codeSubmission.id.toString()),
     };
   }
 
@@ -348,21 +336,16 @@ export class RunCodeService {
     studentCode: { [fileName: string]: string },
   ): Promise<CodeSubmission> {
     // Create a new code submission record with the execution result.
-    const codeSubmission: CodeSubmission =
-      await this.prisma.codeSubmission.create({
-        data: {
-          code: JSON.stringify(studentCode),
-          compilerOutput: response.output
-            ? JSON.stringify(response.output)
-            : '',
-          unitTestResults: response.testResults
-            ? JSON.stringify(response.testResults)
-            : '', // TODO: Extract and store compiler error messages.
-          score: response.score ? response.score : 0,
-          user: { connect: { id: userId } },
-          codingQuestion: { connect: { id: codingQuestion.id } },
-        },
-      });
+    const codeSubmission: CodeSubmission = await this.prisma.codeSubmission.create({
+      data: {
+        code: JSON.stringify(studentCode),
+        compilerOutput: response.output ? JSON.stringify(response.output) : '',
+        unitTestResults: response.testResults ? JSON.stringify(response.testResults) : '', // TODO: Extract and store compiler error messages.
+        score: response.score ? response.score : 0,
+        user: { connect: { id: userId } },
+        codingQuestion: { connect: { id: codingQuestion.id } },
+      },
+    });
 
     // Record user answer and feedback separately.
     await this.prisma.userAnswer.create({
@@ -413,23 +396,26 @@ export class RunCodeService {
   }
 }
 function transformTestsResultsAfterSyntaxError(response: CodeSubmissionResult) {
-  if ( // translate to "Syntax Check"
+  if (
+    // translate to "Syntax Check"
     response.testResults &&
     Array.isArray(response.testResults) &&
     response.testResults.length === 1 &&
-    (response.testResults[0].test === 'test_main (unittest.loader._FailedTest.test_main)' || response.testResults[0].test === 'MAIN_COMPILATION')) {
+    (response.testResults[0].test === 'test_main (unittest.loader._FailedTest.test_main)' ||
+      response.testResults[0].test === 'MAIN_COMPILATION')
+  ) {
     response.testResults[0].test = 'Syntax Check'; // Update 'test'
     response.testResults[0].exception =
       'Es wurden keine weiteren Tests durchgeführt, da das Programm noch nicht lauffähig ist. Betrachte den Compiler Output für Hinweise';
   }
-  if ( // translate to "Syntax Check"
+  if (
+    // translate to "Syntax Check"
     response.testResults &&
     Array.isArray(response.testResults) &&
     response.testResults.length === 1 &&
-    response.testResults[0].test === 'TEST_COMPILATION') {
+    response.testResults[0].test === 'TEST_COMPILATION'
+  ) {
     response.testResults[0].test = 'Syntax Check - Test Cases'; // Update 'test'
-    response.testResults[0].exception =
-      'Die Tests konnten nicht kompiliert werden.';
+    response.testResults[0].exception = 'Die Tests konnten nicht kompiliert werden.';
   }
 }
-

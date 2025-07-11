@@ -1,15 +1,22 @@
-import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { CreateHighlightConceptDto, HighlightConceptDto, UpdateHighlightConceptDto } from '@DTOs/index';
-import { ConceptSelectionService } from 'src/app/Services/concept-selection/concept-selection.service';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Component, Inject } from '@angular/core';
+import type { FormBuilder, FormGroup } from '@angular/forms';
+import { Validators, ReactiveFormsModule } from '@angular/forms';
+import type { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import type {
+  CreateHighlightConceptDto,
+  HighlightConceptDto,
+  UpdateHighlightConceptDto,
+} from '@DTOs/index';
+import type { ConceptSelectionService } from 'src/app/Services/concept-selection/concept-selection.service';
 import { Subscription } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import type { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-highlight-concept-dialog',
   templateUrl: './highlight-concept-dialog.component.html',
-  styleUrls: ['./highlight-concept-dialog.component.scss']
+  styleUrls: ['./highlight-concept-dialog.component.scss'],
 })
 export class HighlightConceptDialogComponent implements OnInit, OnDestroy {
   form: FormGroup;
@@ -17,17 +24,18 @@ export class HighlightConceptDialogComponent implements OnInit, OnDestroy {
   selectedConceptId: number | null = null;
   title: string;
   selectedFileName: string | null = null;
-  private subscription: Subscription = new Subscription();
+  private readonly subscription: Subscription = new Subscription();
 
   constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<HighlightConceptDialogComponent>,
-    private conceptSelectionService: ConceptSelectionService,
-    private snackBar: MatSnackBar,
-    @Inject(MAT_DIALOG_DATA) public data: {
-      moduleId: number,
-      concept?: HighlightConceptDto
-    }
+    private readonly fb: FormBuilder,
+    private readonly dialogRef: MatDialogRef<HighlightConceptDialogComponent>,
+    private readonly conceptSelectionService: ConceptSelectionService,
+    private readonly snackBar: MatSnackBar,
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      moduleId: number;
+      concept?: HighlightConceptDto;
+    },
   ) {
     this.isEditMode = !!data.concept;
     this.title = this.isEditMode ? 'Edit Highlight Concept' : 'Add Highlight Concept';
@@ -37,7 +45,7 @@ export class HighlightConceptDialogComponent implements OnInit, OnDestroy {
       description: [data.concept?.description || ''],
       pictureData: [data.concept?.pictureData || 'https://via.placeholder.com/300'],
       position: [data.concept?.position || 0],
-      isUnlocked: [data.concept?.isUnlocked !== undefined ? data.concept.isUnlocked : true]
+      isUnlocked: [data.concept?.isUnlocked !== undefined ? data.concept.isUnlocked : true],
     });
 
     if (this.isEditMode && data.concept) {
@@ -52,7 +60,7 @@ export class HighlightConceptDialogComponent implements OnInit, OnDestroy {
         if (conceptId !== null) {
           this.selectedConceptId = conceptId;
         }
-      })
+      }),
     );
   }
 
@@ -60,7 +68,6 @@ export class HighlightConceptDialogComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
     this.conceptSelectionService.clearSelectedConceptId();
   }
-
 
   /**
    * Validates the form and closes the dialog with the result
@@ -83,7 +90,7 @@ export class HighlightConceptDialogComponent implements OnInit, OnDestroy {
         description: formValue.description,
         pictureData: formValue.pictureData,
         position: formValue.position,
-        isUnlocked: formValue.isUnlocked
+        isUnlocked: formValue.isUnlocked,
       };
       this.dialogRef.close(updateDto);
     } else {
@@ -94,7 +101,7 @@ export class HighlightConceptDialogComponent implements OnInit, OnDestroy {
         description: formValue.description,
         pictureData: formValue.pictureData,
         position: formValue.position,
-        isUnlocked: formValue.isUnlocked
+        isUnlocked: formValue.isUnlocked,
       };
       this.dialogRef.close(createDto);
     }
@@ -104,7 +111,6 @@ export class HighlightConceptDialogComponent implements OnInit, OnDestroy {
     this.selectedConceptId = $event;
     console.log('Selected concept ID:', this.selectedConceptId);
   }
-
 
   /**
    * Closes the dialog without saving
@@ -147,7 +153,7 @@ export class HighlightConceptDialogComponent implements OnInit, OnDestroy {
       const base64String = reader.result as string;
       // Update the form with the base64 string
       this.form.patchValue({
-        pictureData: base64String
+        pictureData: base64String,
       });
       this.showMessage('Image uploaded successfully');
     };
@@ -166,7 +172,7 @@ export class HighlightConceptDialogComponent implements OnInit, OnDestroy {
     this.snackBar.open(message, 'Close', {
       duration: 3000,
       horizontalPosition: 'right',
-      verticalPosition: 'top'
+      verticalPosition: 'top',
     });
   }
 }

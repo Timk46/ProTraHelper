@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs/internal/Observable';
+import type { HttpClient } from '@angular/common/http';
+import { HttpParams } from '@angular/common/http';
+import type { Observable } from 'rxjs/internal/Observable';
 import { environment } from 'src/environments/environment';
-import { McqGenerationDTO } from '@DTOs/question.dto';
-import { OptionDTO } from '@DTOs/question.dto';
-import { Answer, McqEvaluation, McqEvaluations } from './mcqcreation.types';
+import type { McqGenerationDTO } from '@DTOs/question.dto';
+import type { OptionDTO } from '@DTOs/question.dto';
+import type { Answer, McqEvaluations } from './mcqcreation.types';
+import { McqEvaluation } from './mcqcreation.types';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class McqcreationService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   /**
    *
@@ -25,13 +26,13 @@ export class McqcreationService {
     question: string,
     option: OptionDTO,
     otherOptions: OptionDTO[],
-    concept: string
+    concept: string,
   ): Observable<Answer> {
     const body = {
       question: question,
       option: option,
       otherOptions: otherOptions,
-      concept: concept
+      concept: concept,
     };
     return this.http.post<Answer>(environment.server + `/mcqcreation/answer`, body);
   }
@@ -48,7 +49,9 @@ export class McqcreationService {
       .set('options', options)
       .set('concept', concept);
 
-    return this.http.get<McqGenerationDTO>(environment.server + `/mcqcreation/answers`, {params: body});
+    return this.http.get<McqGenerationDTO>(environment.server + `/mcqcreation/answers`, {
+      params: body,
+    });
   }
 
   /**
@@ -57,12 +60,18 @@ export class McqcreationService {
    * @param options
    * @returns generated question and answers
    */
-  getQuestionAndAnswers(concept: string, options: number, topic: string = ''): Observable<McqGenerationDTO> {
+  getQuestionAndAnswers(
+    concept: string,
+    options: number,
+    topic: string = '',
+  ): Observable<McqGenerationDTO> {
     const body = new HttpParams()
       .set('concept', concept)
       .set('options', options)
       .set('topic', topic);
-    return this.http.get<McqGenerationDTO>(environment.server + `/mcqcreation/questionAndAnswers`, {params: body});
+    return this.http.get<McqGenerationDTO>(environment.server + `/mcqcreation/questionAndAnswers`, {
+      params: body,
+    });
   }
 
   /**
@@ -70,10 +79,11 @@ export class McqcreationService {
    * @param question
    * @returns
    */
-  getQuestionTitle(concept: string): Observable<{question: string}> {
-    const body = new HttpParams()
-      .set('concept', concept);
-    return this.http.get<{question: string}>(environment.server + `/mcqcreation/questionTitle`, {params: body});
+  getQuestionTitle(concept: string): Observable<{ question: string }> {
+    const body = new HttpParams().set('concept', concept);
+    return this.http.get<{ question: string }>(environment.server + `/mcqcreation/questionTitle`, {
+      params: body,
+    });
   }
 
   /**
@@ -83,10 +93,10 @@ export class McqcreationService {
    * @returns Observable of evaluations with reasoning for each answer
    */
   getEvaluation(question: string, answers: string[]): Observable<McqEvaluations> {
-    const body = new HttpParams()
-      .set('question', question)
-      .set('answers', answers.join(','));
-    return this.http.get<McqEvaluations>(environment.server + `/mcqcreation/evaluateOptions`, {params: body});
+    const body = new HttpParams().set('question', question).set('answers', answers.join(','));
+    return this.http.get<McqEvaluations>(environment.server + `/mcqcreation/evaluateOptions`, {
+      params: body,
+    });
   }
 
   /** NOT IMPLEMENTED
@@ -96,12 +106,20 @@ export class McqcreationService {
    * @param answers
    * @returns reevaluated question and answers
    */
-  getReevaluatedQuestionAndAnswers(question: string, options: number, concept: string, answers: string): Observable<{mcq: McqGenerationDTO, reasoning: string}> {
+  getReevaluatedQuestionAndAnswers(
+    question: string,
+    options: number,
+    concept: string,
+    answers: string,
+  ): Observable<{ mcq: McqGenerationDTO; reasoning: string }> {
     const body = new HttpParams()
       .set('question', question)
       .set('options', options)
       .set('concept', concept)
       .set('answers', answers);
-    return this.http.get<{mcq: McqGenerationDTO, reasoning: string}>(environment.server + `/mcqcreation/reevaluatedQuestionAndAnswers`, {params: body});
+    return this.http.get<{ mcq: McqGenerationDTO; reasoning: string }>(
+      environment.server + `/mcqcreation/reevaluatedQuestionAndAnswers`,
+      { params: body },
+    );
   }
 }

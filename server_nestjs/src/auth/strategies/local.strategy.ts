@@ -2,7 +2,7 @@ import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { AuthService } from '../auth.service';
-import { UserDTO } from '@DTOs/user.dto';
+import type { UserDTO } from '@DTOs/user.dto';
 
 /**
  * This class is used to define the local (password) authentication strategy
@@ -15,7 +15,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
    * Constructor
    * @param {AuthService} authService The authentication service
    */
-  constructor(private authService: AuthService) {
+  constructor(private readonly authService: AuthService) {
     super({ usernameField: 'email' });
   }
 

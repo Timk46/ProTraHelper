@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
+import type { HttpClient } from '@angular/common/http';
+import type { Observable } from 'rxjs';
+import { throwError, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 
@@ -9,12 +10,12 @@ import { environment } from '../../../../environments/environment';
  * This service interacts with the backend to perform the conversion
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ModelConverterService {
-  private apiUrl = `${environment.server}/pmpm`;
+  private readonly apiUrl = `${environment.server}/pmpm`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Converts a Rhino 3DM model to GLTF format
@@ -28,7 +29,7 @@ export class ModelConverterService {
       catchError(error => {
         console.error('Error converting model:', error);
         return throwError(() => new Error('Failed to convert 3DM model to GLTF format'));
-      })
+      }),
     );
   }
 
@@ -47,7 +48,7 @@ export class ModelConverterService {
       catchError(error => {
         console.error('Error uploading and converting model:', error);
         return throwError(() => new Error('Failed to upload and convert 3DM model'));
-      })
+      }),
     );
   }
 
@@ -74,7 +75,7 @@ export class ModelConverterService {
       catchError(() => {
         // If head request fails (e.g., 404), model doesn't exist
         return of(false);
-      })
+      }),
     );
   }
 }

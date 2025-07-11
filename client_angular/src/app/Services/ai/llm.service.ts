@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import type { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 export interface ChatSession {
@@ -21,10 +21,10 @@ export interface ChatBotMessage {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LlmService {
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Gets all chat sessions for the current user
@@ -40,7 +40,9 @@ export class LlmService {
    * @returns Observable of the answer.
    */
   getLlmAnswer(question: string): Observable<{ answer: string }> {
-    return this.http.post<{ answer: string }>(`${environment.server}/chat-bot/ask/basic`, { question });
+    return this.http.post<{ answer: string }>(`${environment.server}/chat-bot/ask/basic`, {
+      question,
+    });
   }
 
   /**
@@ -52,18 +54,18 @@ export class LlmService {
    * @returns Observable of the response.
    */
   getLlmAnswerDialog(
-    context: Array<{ role: string; content: string }>,
+    context: { role: string; content: string }[],
     question: string,
     dialogSessionId: string,
     url: string, // Added url parameter
-    sessionId?: number
+    sessionId?: number,
   ): Observable<ChatBotMessage> {
     return this.http.post<ChatBotMessage>(`${environment.server}/chat-bot/ask/basic/getDialog`, {
       context,
       question,
       dialogSessionId,
       sessionId,
-      url // Added url to payload
+      url, // Added url to payload
     });
   }
 }

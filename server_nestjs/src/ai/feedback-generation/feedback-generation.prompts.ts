@@ -1,5 +1,8 @@
-import { ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate } from 'langchain/prompts';
-
+import {
+  ChatPromptTemplate,
+  HumanMessagePromptTemplate,
+  SystemMessagePromptTemplate,
+} from 'langchain/prompts';
 
 export const feedbackGenerationPrompts = {
   byTranscriptSearch: (question: string, lecture: string) => `
@@ -34,7 +37,7 @@ export const feedbackGenerationPrompts = {
     - Am Ende nennst du in Stichpunkten die Punktzahl, die der Schüler erreicht hat und die maximale Punktzahl, die er hätte erreichen können.
     `,
 
-      /*------------
+  /*------------
     Beispiel:
     Frage: "Beschreibe in eigenen Worten, was ein primitiver Datentyp ist."
     Schülerantwort: "Primitive Datentypen sind Datentypen, die so elementar sind, dass die Art und Weise sie dazustellen in Java eingebaut ist. Dabei handelt es sich zum Beispiel um Ganzzahlen, Kommazahlen, Buchstaben und Wahrheitswerte (TRUE und FALSE)."
@@ -43,12 +46,17 @@ export const feedbackGenerationPrompts = {
     - Erreichte Punktzahl: 2
     - Maximale Punktzahl: 4"  */
 
-    /* Die Erklärung umfasst einige wichtige Aspekte primitiver Datentypen,
+  /* Die Erklärung umfasst einige wichtige Aspekte primitiver Datentypen,
       wie die Tatsache, dass sie elementar sind und direkt in einer Programmiersprache eingebaut sind. Es wird auch korrekt aufgeführt, dass zu den primitiven Datentypen Ganzzahlen, Kommazahlen, Buchstaben und Wahrheitswerte gehören. Es fehlt jedoch die Erwähnung der Speicherung und der direkten Manipulation von Werten, die für primitive Datentypen charakteristisch ist.
 
       - Erreichte Punktzahl: 3
       - Maximale Punktzahl: 4 */
-  byExpectations: (question: string, maxPoints: number, expectations: string, solution: string = undefined) => `
+  byExpectations: (
+    question: string,
+    maxPoints: number,
+    expectations: string,
+    solution: string = undefined,
+  ) => `
     Du bist ein hilfreicher Lehrer und weißt genau, wie man pädagogisch wertvolles Feedback gibt.
     ------------
     In diesem Fall sollst du ein kurzes, konstruktives Feedback für die folgende Aufgabe/Frage geben:
@@ -59,8 +67,12 @@ export const feedbackGenerationPrompts = {
     - Die Beantwortung der Frage wird anhand des folgenden Erwartungshorizonts bewertet:
     [${expectations}]
     ${solution ? `- Eine Musterlöung der Aufgabe lautet: [${solution}]` : ''}
-    - Überlege dir zunächst selbst eine Antwort auf die Frage anhand der Erwartungen ${solution ? `und der Musterlösung` : ''}.
-    - Vergleiche deine Antwort ${solution ? `und die Müsterlösung ` : ''} mit der des Schülers und vergebe Punkte nach den Regeln des Erwartungshorizontes.
+    - Überlege dir zunächst selbst eine Antwort auf die Frage anhand der Erwartungen ${
+      solution ? `und der Musterlösung` : ''
+    }.
+    - Vergleiche deine Antwort ${
+      solution ? `und die Müsterlösung ` : ''
+    } mit der des Schülers und vergebe Punkte nach den Regeln des Erwartungshorizontes.
     - Falls der Erwartungshorizont keine expliziten Regeln zur Punktevergabe enthält, überlege dir selbst, wie viele Punkte jeder Aspekt der Antwort wert ist.
     - Die maximale Punktzahl der Aufgabe beträgt ${maxPoints}, diese Punktzahl darf nicht überschritten werden.
     - Wenn deine vergebenen Punkte die maximale Punktzahl übersteigen sollte, dann vergebe die maximale Punktzahl.
@@ -76,7 +88,7 @@ export const feedbackGenerationPrompts = {
     - Alle Hinweise sollen sehr kurz sein.
     - Am Ende nennst du in Stichpunkten die Punktzahl x, die der Schüler erreicht hat und die maximale Punktzahl, die er hätte erreichen können (${maxPoints}), also: "Erreichte Punktzahl: x/${maxPoints}".
   `,
-}
+};
 
 export const umlQuestion = ChatPromptTemplate.fromMessages([
   SystemMessagePromptTemplate.fromTemplate(
@@ -123,13 +135,13 @@ export const umlQuestion = ChatPromptTemplate.fromMessages([
 
     Die Musterlösung:
     {solution}
-    `
+    `,
   ),
   HumanMessagePromptTemplate.fromTemplate(
     `
     # Antwort-JSON des Studenten:
     {attempt}
-    `
+    `,
   ),
 ]);
 
@@ -168,14 +180,14 @@ export const umlQuestionByHighlighted = ChatPromptTemplate.fromMessages([
     Hier hast du dich an gar keine der Anweisungen gehalten, denn du hast fälschlicherweise null-arrays als Fehler genannt und du hast gesagt, dass es keine Fehler gibt, obwohl du das nicht sollst.
     Richtiger wäre:
     "Alles richtig, weiter so!"
-    `
+    `,
   ),
   HumanMessagePromptTemplate.fromTemplate(
     `
     # Anteil der Punkte: {points}%
     # Antwort-JSON des Studenten:
     {highlightedData}
-    `
+    `,
   ),
 ]);
 
@@ -183,7 +195,7 @@ export const umlQuestionByLog = ChatPromptTemplate.fromMessages([
   SystemMessagePromptTemplate.fromTemplate(
     `
     Du bist ein hilfreicher, freundlicher Helfer, der sich mit UML Aufgaben auskennt und grundsätzlich keine Lösungen verrät.
-    `
+    `,
   ),
   HumanMessagePromptTemplate.fromTemplate(
     `
@@ -198,7 +210,7 @@ export const umlQuestionByLog = ChatPromptTemplate.fromMessages([
     Schau dir einfach die Aufgabenstellung an und stelle mir Sokratische Fragen du den Fehlerstellen, die du im Log gefunden hast.
     Sag mir aber zuerst, was du insgesamt von der Abgabe denkst in einem Satz.
     Erwähne nicht den Log.
-    `
+    `,
   ),
 ]);
 /* Du bist ein hilfreicher, freundlicher Helfer, der sich mit UML Aufgaben auskennt und grundsätzlich keine Lösungen verrät. */
@@ -211,33 +223,35 @@ export const umlQuestionByLog = ChatPromptTemplate.fromMessages([
     Sag mir aber zuerst, was du insgesamt von der Abgabe denkst in einem Satz.
     Erwähne nicht den Log. */
 
-
 export const exampleUmlJson = {
   nodes: [
     {
-      id: "31d81a10-2f06-11ef-b93c-23e2ce6c9ef1",
-      type: "Interface",
-      title: "Cyberauge",
-      methods: [{ name: "Sehstärke", dataType: "double", visibility: "#" }, { name: "Modellnummer", dataType: "number", visibility: "-" }],
+      id: '31d81a10-2f06-11ef-b93c-23e2ce6c9ef1',
+      type: 'Interface',
+      title: 'Cyberauge',
+      methods: [
+        { name: 'Sehstärke', dataType: 'double', visibility: '#' },
+        { name: 'Modellnummer', dataType: 'number', visibility: '-' },
+      ],
       attributes: [],
     },
     {
-      id: "456a50e0-33b4-11ef-aef7-3dd7767a9544",
-      type: "Klasse",
-      title: "Kopf",
-      methods: [{ name: "getHaare()", dataType: "number", visibility: "+" }],
-      attributes: [{ name: "Haare", dataType: "number", visibility: "+" }],
-    }
+      id: '456a50e0-33b4-11ef-aef7-3dd7767a9544',
+      type: 'Klasse',
+      title: 'Kopf',
+      methods: [{ name: 'getHaare()', dataType: 'number', visibility: '+' }],
+      attributes: [{ name: 'Haare', dataType: 'number', visibility: '+' }],
+    },
   ],
   edges: [
     {
-      id: "4dc06900-33b4-11ef-aef7-3dd7767a9544",
-      end: "456a50e0-33b4-11ef-aef7-3dd7767a9544",
-      type: "Komposition",
-      start: "31d81a10-2f06-11ef-b93c-23e2ce6c9ef1",
-      description: "eingesetzt",
-      cardinalityEnd: "1",
-      cardinalityStart: "0..2",
-    }
-  ]
-}
+      id: '4dc06900-33b4-11ef-aef7-3dd7767a9544',
+      end: '456a50e0-33b4-11ef-aef7-3dd7767a9544',
+      type: 'Komposition',
+      start: '31d81a10-2f06-11ef-b93c-23e2ce6c9ef1',
+      description: 'eingesetzt',
+      cardinalityEnd: '1',
+      cardinalityStart: '0..2',
+    },
+  ],
+};

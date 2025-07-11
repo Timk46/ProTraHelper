@@ -19,7 +19,7 @@ export class EventLogController {
     @Body('type') type: string,
     @Body('message') message: string,
     @Body('data') data: any,
-    @Req() req
+    @Req() req,
   ): Promise<void> {
     await this.eventLogService.log(level, type, req.user.id, message, data);
   }

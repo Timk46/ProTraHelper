@@ -1,11 +1,12 @@
-import { Component, OnInit, Input } from '@angular/core';
+import type { OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import type { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { ThreeViewerComponent } from '../three-viewer/three-viewer.component';
-import { ModelConverterService } from '../../services/model-converter.service';
+import type { ModelConverterService } from '../../services/model-converter.service';
 
 /**
  * Component for integrating PMPM functionality into the course system
@@ -14,15 +15,9 @@ import { ModelConverterService } from '../../services/model-converter.service';
 @Component({
   selector: 'app-course-pmpm-integration',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
-    ThreeViewerComponent
-  ],
+  imports: [CommonModule, MatButtonModule, MatCardModule, MatIconModule, ThreeViewerComponent],
   templateUrl: './course-pmpm-integration.component.html',
-  styleUrls: ['./course-pmpm-integration.component.scss']
+  styleUrls: ['./course-pmpm-integration.component.scss'],
 })
 export class CoursePmpmIntegrationComponent implements OnInit {
   @Input() courseId!: string;
@@ -33,7 +28,11 @@ export class CoursePmpmIntegrationComponent implements OnInit {
   // Predefined models for testing
   availableModels = [
     { id: 'cube', name: 'Einfacher Würfel', description: 'Ein einfaches Testobjekt' },
-    { id: 'frame', name: 'Architektonischer Rahmen', description: 'Ein Rahmenmodell mit Säulen und Trägern' }
+    {
+      id: 'frame',
+      name: 'Architektonischer Rahmen',
+      description: 'Ein Rahmenmodell mit Säulen und Trägern',
+    },
   ];
 
   selectedModel = '';
@@ -42,8 +41,8 @@ export class CoursePmpmIntegrationComponent implements OnInit {
   error: string | null = null;
 
   constructor(
-    private router: Router,
-    private modelConverterService: ModelConverterService
+    private readonly router: Router,
+    private readonly modelConverterService: ModelConverterService,
   ) {}
 
   ngOnInit(): void {
@@ -78,9 +77,12 @@ export class CoursePmpmIntegrationComponent implements OnInit {
    */
   openPmpmEditor(): void {
     this.router.navigate([
-      'courses', this.courseId,
-      'lesson', this.lessonId,
-      'pmpm', this.selectedModel
+      'courses',
+      this.courseId,
+      'lesson',
+      this.lessonId,
+      'pmpm',
+      this.selectedModel,
     ]);
   }
 
@@ -106,9 +108,12 @@ export class CoursePmpmIntegrationComponent implements OnInit {
   openPeerReview(): void {
     // This would navigate to a peer review page
     this.router.navigate([
-      'courses', this.courseId,
-      'lesson', this.lessonId,
-      'review', this.selectedModel
+      'courses',
+      this.courseId,
+      'lesson',
+      this.lessonId,
+      'review',
+      this.selectedModel,
     ]);
   }
 }

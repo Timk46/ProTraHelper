@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { EditGraphComponent } from './edit-graph.component';
 
@@ -8,9 +9,8 @@ describe('EditGraphComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ EditGraphComponent ]
-    })
-    .compileComponents();
+      declarations: [EditGraphComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(EditGraphComponent);
     component = fixture.componentInstance;

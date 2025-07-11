@@ -18,10 +18,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 @NgModule({
-  declarations: [
-    UserListComponent,
-    UserProgressComponent
-  ],
+  declarations: [UserListComponent, UserProgressComponent],
   imports: [
     CommonModule,
     AdminRoutingModule,
@@ -38,7 +35,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     MatCardModule,
     MatProgressBarModule,
     MatSnackBarModule,
-    NgxChartsModule
-  ]
+    NgxChartsModule,
+  ],
 })
-export class AdminModule { }
+export class AdminModule {}

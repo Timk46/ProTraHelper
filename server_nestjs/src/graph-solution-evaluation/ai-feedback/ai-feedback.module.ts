@@ -8,6 +8,6 @@ import { FeedbackGenerationModule } from '@/ai/feedback-generation/feedback-gene
 @Module({
   imports: [forwardRef(() => GraphSolutionEvaluationModule), FeedbackGenerationModule],
   controllers: [AiFeedbackController],
-  providers: [AiFeedbackService, PrismaService]
+  providers: [AiFeedbackService, PrismaService],
 })
 export class AiFeedbackModule {}

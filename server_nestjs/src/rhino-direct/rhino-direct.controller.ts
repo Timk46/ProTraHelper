@@ -4,20 +4,12 @@
  * Nutzt Windows-Prozess-Ausführung und Registry-Erkennung
  */
 
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Post, Get, Body, HttpException, HttpStatus } from '@nestjs/common';
+import type { DirectRhinoLaunchResponse, SystemRhinoInfo } from './rhino-direct.service';
 import {
   RhinoDirectService,
   DirectRhinoLaunchRequest,
-  DirectRhinoLaunchResponse,
   RhinoInstallation,
-  SystemRhinoInfo,
 } from './rhino-direct.service';
 
 @Controller('api/direct-rhino')
@@ -36,10 +28,7 @@ export class RhinoDirectController {
 
       // Validierung der Eingabe
       if (!request.filePath) {
-        throw new HttpException(
-          'filePath ist erforderlich',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpException('filePath ist erforderlich', HttpStatus.BAD_REQUEST);
       }
 
       // Führe Rhino-Start aus

@@ -1,13 +1,16 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { CodingQuestionDto, CodingQuestionInternal, detailedQuestionDTO, QuestionDTO } from '@DTOs/index';
+import type { CodingQuestionInternal } from '@DTOs/index';
+import { CodingQuestionDto, detailedQuestionDTO, QuestionDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class QuestionDataCodeService {
+  constructor(private readonly prisma: PrismaService) {}
 
-  constructor(private prisma: PrismaService) {}
-
-  async createCodingQuestion(codingQuestion: CodingQuestionInternal, questionId: number): Promise<CodingQuestionInternal> {
+  async createCodingQuestion(
+    codingQuestion: CodingQuestionInternal,
+    questionId: number,
+  ): Promise<CodingQuestionInternal> {
     const newCodingQuestion = await this.prisma.codingQuestion.create({
       data: {
         programmingLanguage: codingQuestion.programmingLanguage,
@@ -98,7 +101,6 @@ export class QuestionDataCodeService {
     return updatedQuestion;
   }
 
-
   /* async updateCodingQuestionOLD(question: detailedQuestionDTO): Promise<QuestionDTO> {
     const updatedQuestion = await this.prisma.question.update({
       where: { id: question.id },
@@ -163,5 +165,4 @@ export class QuestionDataCodeService {
       codingQuestion: updatedQuestion.codingQuestion,
     };
   } */
-
 }

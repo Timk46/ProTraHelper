@@ -1,12 +1,15 @@
 <!-- Create a Card for each Content Element and display PDF, Video etc. depending on type-->
 <!-- <div class="center"> -->
-<mat-card *ngFor="let contentElem of viewableElements; index as i; let l = count " class="contentView-card">
-
+<mat-card
+  *ngFor="let contentElem of viewableElements; index as i; let l = count"
+  class="contentView-card"
+>
   <!--Show Content Title, if it has any-->
   <mat-card-header *ngIf="contentElem.title">
     <mat-card-title-group>
       <mat-card-title>
-        {{contentViewData.name}} ( {{i+1}} von {{l}} ) - Zuletzt geöffnet: {{ readableDate }}
+        {{ contentViewData.name }} ( {{ i + 1 }} von {{ l }} ) - Zuletzt geöffnet:
+        {{ readableDate }}
       </mat-card-title>
       <!-- We could add an subtitle or icon to the header aswell
       <mat-card-subtitle>Extra large</mat-card-subtitle>
@@ -14,45 +17,59 @@
       -->
 
       <!-- Create Button for each Content Element to create a new Discussion -->
-      <button (click)="onCreateDiscussion(contentElem.id)" mat-stroked-button color="primary"
-        style="text-align: center;">Frage stellen</button>
+      <button
+        (click)="onCreateDiscussion(contentElem.id)"
+        mat-stroked-button
+        color="primary"
+        style="text-align: center"
+      >
+        Frage stellen
+      </button>
     </mat-card-title-group>
   </mat-card-header>
 
-
-  <mat-card-content *ngIf="contentTypes.includes(contentElem.type)" style="height: 100%; overflow: auto;">
+  <mat-card-content
+    *ngIf="contentTypes.includes(contentElem.type)"
+    style="height: 100%; overflow: auto"
+  >
     <!--********** BEGIN: Show Content depending on type **********-->
 
     <!--PDF-->
-    <div *ngIf="contentElem.type == 'PDF' && contentElem.file && !isSafari" class="contentElement-Container">
+    <div
+      *ngIf="contentElem.type === 'PDF' && contentElem.file && !isSafari"
+      class="contentElement-Container"
+    >
       <!-- Our current PDF Component cant be initialized multiple times... using an iframe instead for now -->
       <app-pdfViewer [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-pdfViewer>
     </div>
-    <div *ngIf="contentElem.type == 'PDF' && contentElem.file && isSafari" class="contentElement-Container">
+    <div
+      *ngIf="contentElem.type === 'PDF' && contentElem.file && isSafari"
+      class="contentElement-Container"
+    >
       <!-- Our current PDF Component cant be initialized multiple times... using an iframe instead for now -->
       <!-- <p class="message-code">Safari unterstützt den PDF Viewer nicht. Wir empfehlen hierfür die Nutzung eines alternativen Browsers, z.B. Google Chrome.</p> -->
       <app-pdfViewer [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-pdfViewer>
     </div>
 
     <!--VIDEO-->
-    <div *ngIf="contentElem.type == 'VIDEO' && contentElem.file " class="contentElement-Container">
+    <div *ngIf="contentElem.type === 'VIDEO' && contentElem.file" class="contentElement-Container">
       <app-videoViewer [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-videoViewer>
     </div>
 
     <!--CODE-->
-    <div *ngIf="contentElem.type == 'CODE' " class="contentElement-Container contentElement-Code">
+    <div *ngIf="contentElem.type === 'CODE'" class="contentElement-Container contentElement-Code">
       <p class="message-code">Code kann noch nicht dargestellt werden.</p>
     </div>
 
     <!-- QUESTION -->
-    <div *ngIf="contentElem.type == 'QUESTION' " class="contentElement-Container">
+    <div *ngIf="contentElem.type === 'QUESTION'" class="contentElement-Container">
       <p class="message-code">Hier werden die Aufgaben angezeigt.</p>
       <!-- <app-mcTask>  [uniqueIdentifier]=""></app-mcTask> -->
     </div>
 
     <!--Show additional Content Text, if it has any-->
     <div *ngIf="contentElem.text" class="contentElement-Container">
-      {{contentElem.text}}
+      {{ contentElem.text }}
     </div>
 
     <!-- Create Button for each Content Element to mark the Element as 'Completed'  -->
@@ -62,8 +79,8 @@
         <mat-icon class="small-icon">check</mat-icon>
         <p class="button-text"> Ich habe diesen Inhalt verstanden.</p>
       </button> -->
-      <!-- Create Button for each Content Element to mark the Element as 'Open Question'  -->
-      <!-- <button class="progress-button" (click)="onToggleQuestionmark(contentElem.id)" mat-stroked-button
+    <!-- Create Button for each Content Element to mark the Element as 'Open Question'  -->
+    <!-- <button class="progress-button" (click)="onToggleQuestionmark(contentElem.id)" mat-stroked-button
         [ngStyle]="applyQuestionmarkStyles(contentElem.id)">
         <mat-icon class="small-icon">?</mat-icon>
         <p class="button-text"> Für später markieren.</p>
@@ -73,22 +90,27 @@
     <!--********** END: Show Content depending on type **********-->
   </mat-card-content>
 
-  <mat-card-actions style="justify-content: center;">
-    <button class="progress-button" (click)="onToggleCheckmark(contentElem.id)" mat-stroked-button
-      [ngStyle]="applyCheckmarkStyles(contentElem.id)">
+  <mat-card-actions style="justify-content: center">
+    <button
+      class="progress-button"
+      (click)="onToggleCheckmark(contentElem.id)"
+      mat-stroked-button
+      [ngStyle]="applyCheckmarkStyles(contentElem.id)"
+    >
       <mat-icon class="small-icon">check</mat-icon>
-      <p class="button-text"> Ich habe diesen Inhalt verstanden.</p>
+      <p class="button-text">Ich habe diesen Inhalt verstanden.</p>
     </button>
     <!-- Create Button for each Content Element to mark the Element as 'Open Question'  -->
-    <button class="progress-button" (click)="onToggleQuestionmark(contentElem.id)" mat-stroked-button
-      [ngStyle]="applyQuestionmarkStyles(contentElem.id)">
+    <button
+      class="progress-button"
+      (click)="onToggleQuestionmark(contentElem.id)"
+      mat-stroked-button
+      [ngStyle]="applyQuestionmarkStyles(contentElem.id)"
+    >
       <mat-icon class="small-icon">?</mat-icon>
-      <p class="button-text"> Für später markieren.</p>
+      <p class="button-text">Für später markieren.</p>
     </button>
   </mat-card-actions>
-
-
-
 </mat-card>
 <!-- </div> -->
 <!--

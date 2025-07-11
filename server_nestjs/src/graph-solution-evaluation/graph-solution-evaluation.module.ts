@@ -8,7 +8,13 @@ import { FeedbackGenerationModule } from '@/ai/feedback-generation/feedback-gene
 import { AiFeedbackModule } from './ai-feedback/ai-feedback.module';
 
 @Module({
-  providers: [GraphSolutionEvaluationService, TransitiveClosureService, DijkstraService, FloydService, KruskalService],
+  providers: [
+    GraphSolutionEvaluationService,
+    TransitiveClosureService,
+    DijkstraService,
+    FloydService,
+    KruskalService,
+  ],
   imports: [FeedbackGenerationModule, AiFeedbackModule],
   exports: [GraphSolutionEvaluationService],
 })

@@ -1,15 +1,17 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
+import type { OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 import { NotificationType } from '@DTOs/notificationType.enum';
-import { UserService } from '../auth/user.service';
+import type { UserService } from '../auth/user.service';
 import { environment } from 'src/environments/environment';
-import { NotificationDTO } from '@DTOs/notification.dto';
-import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import type { NotificationDTO } from '@DTOs/notification.dto';
+import type { Router } from '@angular/router';
+import type { MatSnackBar } from '@angular/material/snack-bar';
 import { NotificationComponent } from 'src/app/Pages/notification/notification.component';
-import { HttpClient } from '@angular/common/http';
-import { WebSocketService } from '../websocket/websocket.service';
+import type { HttpClient } from '@angular/common/http';
+import type { WebSocketService } from '../websocket/websocket.service';
 
 /**
  * Service responsible for managing notifications in the frontend.
@@ -17,7 +19,7 @@ import { WebSocketService } from '../websocket/websocket.service';
  * and provides methods to interact with notifications.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NotificationService implements OnDestroy {
   private readonly NOTIFICATION_NAMESPACE = 'notifications';
@@ -27,34 +29,33 @@ export class NotificationService implements OnDestroy {
   private readonly NOTIFICATION_TYPES = {
     NEW_NOTIFICATION: 'newNotification',
     UNREAD_COUNT: 'unreadCount',
-    NOTIFICATION_READ: 'notificationRead'
+    NOTIFICATION_READ: 'notificationRead',
   };
   private readonly NOTIFICATION_ACTIONS = {
-    VIEW: 'view'
+    VIEW: 'view',
   };
   /** BehaviorSubject to store and emit notifications */
-  private notificationsSubject = new BehaviorSubject<NotificationDTO[]>([]);
+  private readonly notificationsSubject = new BehaviorSubject<NotificationDTO[]>([]);
   /** Array to store notifications */
   private notifications: NotificationDTO[] = [];
   /** ID of the current user */
   private userId: number | undefined;
   /** BehaviorSubject to store and emit the count of unread notifications */
-  private unreadCountSubject = new BehaviorSubject<number>(0);
+  private readonly unreadCountSubject = new BehaviorSubject<number>(0);
   /** BroadcastChannel for cross-tab communication */
-  private broadcastChannel: BroadcastChannel;
+  private readonly broadcastChannel: BroadcastChannel;
   /** Set to keep track of processed notifications to avoid duplicates */
-  private processedNotifications = new Set<string>();
+  private readonly processedNotifications = new Set<string>();
   /** BehaviorSubject to control closing of the notification panel */
-  private closeNotificationPanelSubject = new BehaviorSubject<boolean>(false);
+  private readonly closeNotificationPanelSubject = new BehaviorSubject<boolean>(false);
   /** Observable for closing the notification panel */
   closeNotificationPanel$ = this.closeNotificationPanelSubject.asObservable();
   /** BehaviorSubject to trigger refreshing of discussions */
-  private refreshDiscussionSubject = new BehaviorSubject<number | null>(null);
+  private readonly refreshDiscussionSubject = new BehaviorSubject<number | null>(null);
   /** Observable for refreshing discussions */
   refreshDiscussion$ = this.refreshDiscussionSubject.asObservable();
   /** Subscription for WebSocket notifications */
   private notificationSubscription?: Subscription;
-
 
   /**
    * Creates an instance of NotificationService.
@@ -65,14 +66,14 @@ export class NotificationService implements OnDestroy {
    * @param {WebSocketService} webSocketService - Service for WebSocket communications
    */
   constructor(
-    private userService: UserService,
-    private snackBar: MatSnackBar,
-    private router: Router,
-    private http: HttpClient,
-    private webSocketService: WebSocketService
+    private readonly userService: UserService,
+    private readonly snackBar: MatSnackBar,
+    private readonly router: Router,
+    private readonly http: HttpClient,
+    private readonly webSocketService: WebSocketService,
   ) {
     this.broadcastChannel = new BroadcastChannel(this.BROADCAST_CHANNEL_NAME);
-    this.userService.isAuthenticated$.subscribe((isAuthenticated) => {
+    this.userService.isAuthenticated$.subscribe(isAuthenticated => {
       if (isAuthenticated) {
         this.userId = Number(this.userService.getTokenID());
         this.startListening();
@@ -108,7 +109,7 @@ export class NotificationService implements OnDestroy {
    * 3. Notifications being read
    */
   private setupBroadcastChannel(): void {
-    this.broadcastChannel.onmessage = (event) => {
+    this.broadcastChannel.onmessage = event => {
       switch (event.data.type) {
         case this.NOTIFICATION_TYPES.NEW_NOTIFICATION:
           this.handleNewNotification(event.data.notification, false);
@@ -159,17 +160,17 @@ export class NotificationService implements OnDestroy {
           this.webSocketService.on<Partial<NotificationDTO>>(
             environment.websocketUrl,
             this.NOTIFICATION_NAMESPACE,
-            this.NOTIFICATION_RECEIVEEVENT
-          )
-        )
+            this.NOTIFICATION_RECEIVEEVENT,
+          ),
+        ),
       )
       .subscribe({
         next: (notification: Partial<NotificationDTO>) => {
           console.log('WebSocket connected and received notification:', notification);
           this.handleNewNotification(notification, true);
         },
-        error: (error) => console.error('WebSocket error:', error),
-        complete: () => console.log('WebSocket connection closed')
+        error: error => console.error('WebSocket error:', error),
+        complete: () => console.log('WebSocket connection closed'),
       });
   }
 
@@ -180,12 +181,15 @@ export class NotificationService implements OnDestroy {
     this.webSocketService.disconnect(environment.websocketUrl, this.NOTIFICATION_NAMESPACE);
   }
 
-    /**
+  /**
    * Handles a new notification by creating a unique ID and adding it to the panel if it's not already there.
    * @param {Partial<NotificationDTO>} notification - The new notification
    * @param {boolean} isBroadcast - Whether the notification is from a broadcast
    */
-  private handleNewNotification(notification: Partial<NotificationDTO>, isBroadcast: boolean): void {
+  private handleNewNotification(
+    notification: Partial<NotificationDTO>,
+    isBroadcast: boolean,
+  ): void {
     const notificationToSent = {
       id: notification.id,
       message: notification.message!,
@@ -201,7 +205,9 @@ export class NotificationService implements OnDestroy {
         this.incrementUnreadCount();
         this.broadcastChannel.postMessage({ type: 'newNotification', notificationToSent });
       }
-      this.showNotification(notificationToSent.message!, 'Anzeigen', () => this.handleNotificationClick(notificationToSent as NotificationDTO, 'view').subscribe());
+      this.showNotification(notificationToSent.message, 'Anzeigen', () =>
+        this.handleNotificationClick(notificationToSent as NotificationDTO, 'view').subscribe(),
+      );
     }
   }
 
@@ -211,7 +217,7 @@ export class NotificationService implements OnDestroy {
    * @param {T} result - The optional result to return as the observable result
    * @returns {Observable<T>} An observable of the result type
    */
-  private handleError<T>(operation = 'operation', result?: T): (error: any) => Observable<T>  {
+  private handleError<T>(operation = 'operation', result?: T): (error: any) => Observable<T> {
     return (error: any): Observable<T> => {
       console.error(`${operation} failed: ${error.message}`);
       // Optionally, we can even send a notification to the user here
@@ -229,28 +235,34 @@ export class NotificationService implements OnDestroy {
    * @param {boolean} isInitial - Whether this is the initial fetch or a subsequent one.
    * @returns {Observable<NotificationDTO[]>} An Observable of fetched notifications.
    */
-  private fetchNotifications(limit: number, offset: number, isInitial: boolean): Observable<NotificationDTO[]> {
-    return this.http.get<NotificationDTO[]>(`${environment.server}/notifications/all`, {
-      params: {
-        userId: this.userId!.toString(),
-        limit: limit.toString(),
-        offset: offset.toString(),
-      }
-    }).pipe(
-      catchError(this.handleError<NotificationDTO[]>('fetchNotifications', [])),
-      map(notifications => {
-        if (isInitial) {
-          this.notifications = notifications;
-        } else {
-          this.notifications = [...this.notifications, ...notifications];
-        }
-        this.notificationsSubject.next(this.notifications);
-        if (isInitial) {
-          this.syncUnreadCount();
-        }
-        return notifications;
+  private fetchNotifications(
+    limit: number,
+    offset: number,
+    isInitial: boolean,
+  ): Observable<NotificationDTO[]> {
+    return this.http
+      .get<NotificationDTO[]>(`${environment.server}/notifications/all`, {
+        params: {
+          userId: this.userId!.toString(),
+          limit: limit.toString(),
+          offset: offset.toString(),
+        },
       })
-    );
+      .pipe(
+        catchError(this.handleError<NotificationDTO[]>('fetchNotifications', [])),
+        map(notifications => {
+          if (isInitial) {
+            this.notifications = notifications;
+          } else {
+            this.notifications = [...this.notifications, ...notifications];
+          }
+          this.notificationsSubject.next(this.notifications);
+          if (isInitial) {
+            this.syncUnreadCount();
+          }
+          return notifications;
+        }),
+      );
   }
 
   /**
@@ -296,7 +308,10 @@ export class NotificationService implements OnDestroy {
    * @param {string} action - The action to perform ('view' or other)
    * @returns {Observable<NotificationDTO>} Observable of the updated notification
    */
-  handleNotificationClick(notification: NotificationDTO, action: string): Observable<NotificationDTO> {
+  handleNotificationClick(
+    notification: NotificationDTO,
+    action: string,
+  ): Observable<NotificationDTO> {
     if (!notification.isRead) {
       return this.markAndNavigate(notification, action);
     } else if (action === this.NOTIFICATION_ACTIONS.VIEW) {
@@ -314,16 +329,22 @@ export class NotificationService implements OnDestroy {
    * @param {string} action - The action to perform ('view' or other)
    * @returns {Observable<NotificationDTO>} Observable of the updated notification
    */
-  private markAndNavigate(notification: NotificationDTO, action: string): Observable<NotificationDTO> {
+  private markAndNavigate(
+    notification: NotificationDTO,
+    action: string,
+  ): Observable<NotificationDTO> {
     return this.markNotificationAsRead(notification).pipe(
-      map((updatedNotification) => {
+      map(updatedNotification => {
         this.updateLocalNotification(updatedNotification);
-        this.broadcastChannel.postMessage({ type: this.NOTIFICATION_TYPES.NOTIFICATION_READ, notificationId: updatedNotification.id });
+        this.broadcastChannel.postMessage({
+          type: this.NOTIFICATION_TYPES.NOTIFICATION_READ,
+          notificationId: updatedNotification.id,
+        });
         if (action === this.NOTIFICATION_ACTIONS.VIEW) {
           this.viewNotification(updatedNotification);
         }
         return updatedNotification;
-      })
+      }),
     );
   }
 
@@ -353,7 +374,7 @@ export class NotificationService implements OnDestroy {
         this.triggerDiscussionRefresh(notification.discussionId!);
         break;
       default:
-        console.log("Unknown notification type");
+        console.log('Unknown notification type');
     }
   }
 
@@ -387,7 +408,8 @@ export class NotificationService implements OnDestroy {
       environment.websocketUrl,
       this.NOTIFICATION_NAMESPACE,
       this.NOTIFICATION_SENDEVENT,
-      { userId: notification.userId, message: notification.message });
+      { userId: notification.userId, message: notification.message },
+    );
   }
 
   /**
@@ -397,15 +419,15 @@ export class NotificationService implements OnDestroy {
    * @param {() => void} action - The function to call when the action button is clicked
    */
   showNotification(message: string, actionText?: string, action?: () => void) {
-    console.log("showing notification: ", message);
+    console.log('showing notification: ', message);
     if (this.userService.isUserLoggedIn()) {
-      console.log("showing notification: ", message);
+      console.log('showing notification: ', message);
       this.snackBar.openFromComponent(NotificationComponent, {
         data: { message, actionText, action },
         duration: 5000,
         horizontalPosition: 'right',
         verticalPosition: 'top',
-        panelClass: ['notification-snackbar-container']
+        panelClass: ['notification-snackbar-container'],
       });
     }
   }
@@ -416,16 +438,23 @@ export class NotificationService implements OnDestroy {
    * @returns {Observable<NotificationDTO>} Observable of the updated notification
    */
   markNotificationAsRead(notification: NotificationDTO): Observable<NotificationDTO> {
-    console.log("marking notification as read: ", notification.id);
-    return this.http.patch<NotificationDTO>(`${environment.server}/notifications/${notification.id}/read`, { isRead: true }).pipe(
-      map((response) => {
-        this.updateNotificationReadStatus(notification.id!);
-        this.broadcastChannel.postMessage({ type: 'notificationRead', notificationId: notification.id });
-        this.syncUnreadCount();
-        return response;
-      }),
-      catchError(this.handleError<NotificationDTO>('markNotificationAsRead', notification))
-    );
+    console.log('marking notification as read: ', notification.id);
+    return this.http
+      .patch<NotificationDTO>(`${environment.server}/notifications/${notification.id}/read`, {
+        isRead: true,
+      })
+      .pipe(
+        map(response => {
+          this.updateNotificationReadStatus(notification.id!);
+          this.broadcastChannel.postMessage({
+            type: 'notificationRead',
+            notificationId: notification.id,
+          });
+          this.syncUnreadCount();
+          return response;
+        }),
+        catchError(this.handleError<NotificationDTO>('markNotificationAsRead', notification)),
+      );
   }
 
   /**
@@ -433,7 +462,8 @@ export class NotificationService implements OnDestroy {
    * @returns {Observable<number>} Observable of the unread count
    */
   getUnreadCountFromServer(): Observable<number> {
-    return this.http.get<number>(`${environment.server}/notifications/${this.userId}/unread-count`)
+    return this.http
+      .get<number>(`${environment.server}/notifications/${this.userId}/unread-count`)
       .pipe(
         map(count => {
           this.setUnreadCount(count, true);
@@ -442,7 +472,7 @@ export class NotificationService implements OnDestroy {
         catchError(error => {
           console.error('Error fetching unread notifications count:', error);
           return of(0);
-        })
+        }),
       );
   }
 
@@ -462,7 +492,7 @@ export class NotificationService implements OnDestroy {
     this.getUnreadCountFromServer().subscribe();
   }
 
-/**
+  /**
    * Decrements the unread count in local storage and notifies subscribers.
    * @param {boolean} broadcast - Whether to broadcast the change to other tabs
    */
@@ -495,5 +525,4 @@ export class NotificationService implements OnDestroy {
       // Fallback behavior or error notification
     }
   }
-
 }

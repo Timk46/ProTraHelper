@@ -1,13 +1,18 @@
 /* eslint-disable prettier/prettier */
 import { NotificationService } from '@/notification/notification.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO, NotificationType } from '@DTOs/index';
+import type {
+  AnonymousUserDTO,
+  discussionCreationDTO,
+  discussionMessageCreationDTO} from '@DTOs/index';
+import {
+  NotificationType,
+} from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import * as xss from 'xss';
 
 @Injectable()
 export class DiscussionCreationService {
-
   // cross side script prevention filter options
   xssFilterOptions = {
     whiteList: {
@@ -17,8 +22,9 @@ export class DiscussionCreationService {
   };
 
   constructor(
-    private prisma: PrismaService,
-    private readonly notificationService: NotificationService) {}
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   /** Returns the anonymous user data for a given user id and discussion id
    * If no anonymous user is found, a dummy is returned
@@ -28,37 +34,37 @@ export class DiscussionCreationService {
    * @param discussionId
    * @returns the anonymous user data or a dummy
    */
-  async getAnonymousUser(userId: number, discussionId: number) : Promise<AnonymousUserDTO> {
-      const anonymousUser = await this.prisma.anonymousUser.findFirst({
-        where: {
-          userId: Number(userId),
-          Message: {
-            some: {
-              discussionId: Number(discussionId),
-            }
-          }
+  async getAnonymousUser(userId: number, discussionId: number): Promise<AnonymousUserDTO> {
+    const anonymousUser = await this.prisma.anonymousUser.findFirst({
+      where: {
+        userId: Number(userId),
+        Message: {
+          some: {
+            discussionId: Number(discussionId),
+          },
         },
-        select: {
-          id: true,
-          userId: true,
-          anonymousName: true
-        }
-      });
+      },
+      select: {
+        id: true,
+        userId: true,
+        anonymousName: true,
+      },
+    });
 
-      if (!anonymousUser) {
-        console.log('DiscussionServie: No anonymous user found! Returning dummy.');
-        return {
-          id: -1,
-          anonymousName: 'missingNo',
-          userId: -1
-        }
-      }
-
+    if (!anonymousUser) {
+      console.log('DiscussionServie: No anonymous user found! Returning dummy.');
       return {
-        id: anonymousUser.id,
-        anonymousName: anonymousUser.anonymousName,
-        userId: anonymousUser.userId
+        id: -1,
+        anonymousName: 'missingNo',
+        userId: -1,
       };
+    }
+
+    return {
+      id: anonymousUser.id,
+      anonymousName: anonymousUser.anonymousName,
+      userId: anonymousUser.userId,
+    };
   }
 
   /** Returns the anonymous user data for a given user id and message id
@@ -68,23 +74,23 @@ export class DiscussionCreationService {
    * @param messageId
    * @returns the anonymous user data or a dummy
    */
-  async getAnonymousUserByMessageId(userId: number, messageId: number) : Promise<AnonymousUserDTO> {
+  async getAnonymousUserByMessageId(userId: number, messageId: number): Promise<AnonymousUserDTO> {
     const anonymousUser = await this.prisma.message.findFirst({
       where: {
         id: Number(messageId),
         author: {
-          userId: Number(userId)
-        }
+          userId: Number(userId),
+        },
       },
       select: {
         author: {
           select: {
             id: true,
             userId: true,
-            anonymousName: true
-          }
-        }
-      }
+            anonymousName: true,
+          },
+        },
+      },
     });
 
     if (!anonymousUser) {
@@ -92,14 +98,20 @@ export class DiscussionCreationService {
       return {
         id: -1,
         anonymousName: 'missingNo',
-        userId: -1
-      }
+        userId: -1,
+      };
     }
-    console.log(anonymousUser.author.id + ' ' + anonymousUser.author.anonymousName + ' ' + anonymousUser.author.userId);
+    console.log(
+      anonymousUser.author.id +
+        ' ' +
+        anonymousUser.author.anonymousName +
+        ' ' +
+        anonymousUser.author.userId,
+    );
     return {
       id: anonymousUser.author.id,
       anonymousName: anonymousUser.author.anonymousName,
-      userId: anonymousUser.author.userId
+      userId: anonymousUser.author.userId,
     };
   }
 
@@ -109,18 +121,62 @@ export class DiscussionCreationService {
    * @param name
    * @returns AnonymousUserDTO
    */
-  async createAnonymousUser(userId: number, name: string = '') : Promise<AnonymousUserDTO> {
-    const funnyWords: string[] = ["Narwal", "Quokka", "Axolotl", "Blobfisch", "Pangolin", "Wombat", "Kakapo", "Fuchskusu", "Gibbon", "Tapir", "Schnabeltier", "Alpaka", "Koala", "Lemming", "Marmelade", "Muffin", "Pudding", "Schokolade", "Zimtstern", "Donut", "Einhorn", "Flamingo", "Giraffe", "Hummel", "Igel", "Jaguar", "Kolibri", "Lama", "Maulwurf", "Nashorn", "Otter", "Pinguin", "Qualle", "Raubkatze", "Seestern", "Tukan", "Uhu", "Vogelspinne", "Yak", "Zebra"];
+  async createAnonymousUser(userId: number, name = ''): Promise<AnonymousUserDTO> {
+    const funnyWords: string[] = [
+      'Narwal',
+      'Quokka',
+      'Axolotl',
+      'Blobfisch',
+      'Pangolin',
+      'Wombat',
+      'Kakapo',
+      'Fuchskusu',
+      'Gibbon',
+      'Tapir',
+      'Schnabeltier',
+      'Alpaka',
+      'Koala',
+      'Lemming',
+      'Marmelade',
+      'Muffin',
+      'Pudding',
+      'Schokolade',
+      'Zimtstern',
+      'Donut',
+      'Einhorn',
+      'Flamingo',
+      'Giraffe',
+      'Hummel',
+      'Igel',
+      'Jaguar',
+      'Kolibri',
+      'Lama',
+      'Maulwurf',
+      'Nashorn',
+      'Otter',
+      'Pinguin',
+      'Qualle',
+      'Raubkatze',
+      'Seestern',
+      'Tukan',
+      'Uhu',
+      'Vogelspinne',
+      'Yak',
+      'Zebra',
+    ];
     let nameString: string = name;
     if (name === '') {
-      nameString = funnyWords[Math.floor(Math.random() * funnyWords.length)] + 's ' + funnyWords[Math.floor(Math.random() * funnyWords.length)];
+      nameString =
+        funnyWords[Math.floor(Math.random() * funnyWords.length)] +
+        's ' +
+        funnyWords[Math.floor(Math.random() * funnyWords.length)];
     }
 
     const anonymousUser = await this.prisma.anonymousUser.create({
       data: {
         userId: userId,
-        anonymousName: nameString
-      }
+        anonymousName: nameString,
+      },
     });
 
     if (!anonymousUser) {
@@ -138,7 +194,12 @@ export class DiscussionCreationService {
    * @param isSolution (optional) default is false
    * @returns message id
    */
-  async createDiscussionMessage(messageData: discussionMessageCreationDTO, userId: number, isInitiator: boolean = false, isSolution: boolean = false) : Promise<number> {
+  async createDiscussionMessage(
+    messageData: discussionMessageCreationDTO,
+    userId: number,
+    isInitiator = false,
+    isSolution = false,
+  ): Promise<number> {
     let anonymousUser = await this.getAnonymousUser(userId, messageData.discussionId);
     if (anonymousUser.id === -1) {
       anonymousUser = await this.createAnonymousUser(userId);
@@ -152,15 +213,19 @@ export class DiscussionCreationService {
         authorId: anonymousUser.id,
         discussionId: messageData.discussionId,
         isInitiator: isInitiator,
-        isSolution: isSolution
-      }
+        isSolution: isSolution,
+      },
     });
 
     if (!message) {
       throw new Error('Message not created');
     }
 
-    await this.sendCommentNotifications(messageData.discussionId, userId, anonymousUser.anonymousName);
+    await this.sendCommentNotifications(
+      messageData.discussionId,
+      userId,
+      anonymousUser.anonymousName,
+    );
 
     return message.id;
   }
@@ -171,7 +236,11 @@ export class DiscussionCreationService {
    * @param {number} commentAuthorId
    * @param {string} anonymousName
    */
-  private async sendCommentNotifications(discussionId: number, commentAuthorId: number, anonymousName: string) {
+  private async sendCommentNotifications(
+    discussionId: number,
+    commentAuthorId: number,
+    anonymousName: string,
+  ) {
     const anonymousUsers = await this.getAnonymousUsersByDiscussionId(discussionId);
     const filteredAnonymousUsers = anonymousUsers.filter(user => user.userId !== commentAuthorId);
 
@@ -194,7 +263,11 @@ export class DiscussionCreationService {
    * @param isSolved (optional) default is false
    * @returns the discussion id
    */
-  async createDiscussion(discussionData: discussionCreationDTO, userId: number, isSolved: boolean = false) : Promise<number> {
+  async createDiscussion(
+    discussionData: discussionCreationDTO,
+    userId: number,
+    isSolved = false,
+  ): Promise<number> {
     const anonymousUser = await this.createAnonymousUser(userId);
 
     const discussion = await this.prisma.discussion.create({
@@ -202,10 +275,11 @@ export class DiscussionCreationService {
         title: discussionData.title,
         conceptNodeId: discussionData.conceptNodeId,
         contentNodeId: discussionData.contentNodeId != -1 ? discussionData.contentNodeId : null,
-        contentElementId: discussionData.contentElementId != -1 ? discussionData.contentElementId : null,
+        contentElementId:
+          discussionData.contentElementId != -1 ? discussionData.contentElementId : null,
         authorId: anonymousUser.id,
-        isSolved: isSolved
-      }
+        isSolved: isSolved,
+      },
     });
 
     if (!discussion) {
@@ -213,7 +287,7 @@ export class DiscussionCreationService {
     }
 
     // xss protection
-    console.log("DISCUSSION TEXT",discussionData.text);
+    console.log('DISCUSSION TEXT', discussionData.text);
     const sanitizedText = xss.filterXSS(discussionData.text, this.xssFilterOptions);
 
     const message = await this.prisma.message.create({
@@ -222,8 +296,8 @@ export class DiscussionCreationService {
         authorId: anonymousUser.id,
         discussionId: discussion.id,
         isInitiator: true,
-        isSolution: false
-      }
+        isSolution: false,
+      },
     });
 
     if (!message) {
@@ -261,4 +335,3 @@ export class DiscussionCreationService {
     }));
   }
 }
-

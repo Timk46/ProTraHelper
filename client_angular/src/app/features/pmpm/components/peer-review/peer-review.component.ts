@@ -1,7 +1,8 @@
-import { Component, OnInit, Input } from '@angular/core';
+import type { OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import type { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,8 +12,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { ThreeViewerComponent } from '../three-viewer/three-viewer.component';
-import { ModelConverterService } from '../../services/model-converter.service';
-import { DEFAULT_REVIEW_CRITERIA, PeerReview, CriterionScore, ReviewCriterion } from '../../models/peer-review.model';
+import type { ModelConverterService } from '../../services/model-converter.service';
+import type { PeerReview, CriterionScore, ReviewCriterion } from '../../models/peer-review.model';
+import { DEFAULT_REVIEW_CRITERIA } from '../../models/peer-review.model';
 
 /**
  * Component for peer review of 3D models
@@ -32,10 +34,10 @@ import { DEFAULT_REVIEW_CRITERIA, PeerReview, CriterionScore, ReviewCriterion } 
     MatInputModule,
     MatListModule,
     MatDividerModule,
-    ThreeViewerComponent
+    ThreeViewerComponent,
   ],
   templateUrl: './peer-review.component.html',
-  styleUrls: ['./peer-review.component.scss']
+  styleUrls: ['./peer-review.component.scss'],
 })
 export class PeerReviewComponent implements OnInit {
   @Input() modelId!: string;
@@ -46,7 +48,7 @@ export class PeerReviewComponent implements OnInit {
   // Peer review data
   criteria = DEFAULT_REVIEW_CRITERIA;
   review: PeerReview = this.createEmptyReview();
-  averageScores: { criterionId: string, score: number }[] = [];
+  averageScores: { criterionId: string; score: number }[] = [];
 
   // Model data
   modelPath = '';
@@ -56,8 +58,8 @@ export class PeerReviewComponent implements OnInit {
   isSubmitted = false;
 
   constructor(
-    private route: ActivatedRoute,
-    private modelConverterService: ModelConverterService
+    private readonly route: ActivatedRoute,
+    private readonly modelConverterService: ModelConverterService,
   ) {}
 
   ngOnInit(): void {
@@ -97,10 +99,10 @@ export class PeerReviewComponent implements OnInit {
       scores: this.criteria.map(criterion => ({
         criterionId: criterion.id,
         score: 0,
-        feedback: ''
+        feedback: '',
       })),
       comments: '',
-      isComplete: false
+      isComplete: false,
     };
   }
 

@@ -1,6 +1,11 @@
-<div class="tooltip-content" [style.display]="visible ? 'block' : 'none'" [style.top]="top" [style.left]="left">
-    <mat-card class="mat-elevation-z4 grey-background" [innerHTML]="tooltipContent">
-      {{ tooltipContent }} 
-    </mat-card>
-  </div>
-  <ng-content></ng-content>
+<div
+  class="tooltip-content"
+  [style.display]="visible ? 'block' : 'none'"
+  [style.top]="top"
+  [style.left]="left"
+>
+  <mat-card class="mat-elevation-z4 grey-background" [innerHTML]="tooltipContent">
+    {{ tooltipContent }}
+  </mat-card>
+</div>
+<ng-content></ng-content>

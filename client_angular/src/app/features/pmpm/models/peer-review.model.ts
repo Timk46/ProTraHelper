@@ -96,27 +96,27 @@ export const DEFAULT_REVIEW_CRITERIA: ReviewCriterion[] = [
     name: 'Strukturelle Integrität',
     description: 'Bewerten Sie, wie gut das Modell strukturellen Belastungen standhält.',
     weight: 30,
-    maxScore: 5
+    maxScore: 5,
   },
   {
     id: 'design-concept',
     name: 'Designkonzept',
     description: 'Bewerten Sie die Originalität und Kohärenz des Entwurfskonzepts.',
     weight: 25,
-    maxScore: 5
+    maxScore: 5,
   },
   {
     id: 'technical-execution',
     name: 'Technische Ausführung',
     description: 'Bewerten Sie die technische Qualität und Detailgenauigkeit des Modells.',
     weight: 25,
-    maxScore: 5
+    maxScore: 5,
   },
   {
     id: 'parameter-usage',
     name: 'Parameternutzung',
     description: 'Bewerten Sie, wie effektiv parametrische Elemente eingesetzt wurden.',
     weight: 20,
-    maxScore: 5
-  }
+    maxScore: 5,
+  },
 ];

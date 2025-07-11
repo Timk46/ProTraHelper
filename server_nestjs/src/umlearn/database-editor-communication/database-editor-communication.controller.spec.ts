@@ -9,7 +9,9 @@ describe('DatabaseEditorCommunicationController', () => {
       controllers: [DatabaseEditorCommunicationController],
     }).compile();
 
-    controller = module.get<DatabaseEditorCommunicationController>(DatabaseEditorCommunicationController);
+    controller = module.get<DatabaseEditorCommunicationController>(
+      DatabaseEditorCommunicationController,
+    );
   });
 
   it('should be defined', () => {

@@ -1,14 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  Req,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Req } from '@nestjs/common';
 import { CodeGameService } from './code-game.service';
-import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
+import type { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
 import { CodeGameEvaluationService } from '@/code-game/code-game-evaluation/code-game-evaluation.service';
 
 @Controller('code-game')
@@ -19,9 +11,7 @@ export class CodeGameController {
   ) {}
 
   @Get(':id')
-  async findOne(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<detailedQuestionDTO> {
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<detailedQuestionDTO> {
     return await this.codeGameService.findOne(id);
   }
 
@@ -40,12 +30,7 @@ export class CodeGameController {
 
     // Timeout, if the execution takes too long return timeout
     executionResult = await Promise.race([
-      this.codeGameService.executeCodeGameTask(
-        mainFile,
-        additionalFiles,
-        gameFile,
-        language,
-      ),
+      this.codeGameService.executeCodeGameTask(mainFile, additionalFiles, gameFile, language),
       new Promise((_, reject) =>
         setTimeout(() => {
           success = false;
@@ -53,7 +38,7 @@ export class CodeGameController {
           reject({ success, message, result: null });
         }, 10000),
       ),
-    ]).catch((error) => {
+    ]).catch(error => {
       console.error('CodeGame: Error: ', error);
       success = false;
       message = error.message;
@@ -64,15 +49,14 @@ export class CodeGameController {
       ...additionalFiles,
     };
 
-    const evaluationResult =
-      await this.codeGameEvaluationService.evaluateSubmission(
-        parseInt(questionId),
-        language,
-        submittedCode,
-        executionResult,
-        success,
-        message
-      );
+    const evaluationResult = await this.codeGameEvaluationService.evaluateSubmission(
+      parseInt(questionId),
+      language,
+      submittedCode,
+      executionResult,
+      success,
+      message,
+    );
 
     return {
       success: success,

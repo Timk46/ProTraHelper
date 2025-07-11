@@ -2,21 +2,14 @@
 // content.service.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  ContentsForConceptDTO,
-  ContentElementDTO,
-  ContentDTO,
-} from '@Interfaces/index';
-import { ContentElementStatusDTO } from '@DTOs/index';
+import type { ContentsForConceptDTO, ContentElementDTO, ContentDTO } from '@Interfaces/index';
+import type { ContentElementStatusDTO } from '@DTOs/index';
 import { UserConceptService } from '@/graph/user-concept/user-concept.service';
-import { ConceptNode } from '@prisma/client';
+import type { ConceptNode } from '@prisma/client';
 
 @Injectable()
 export class ContentService {
-  constructor(
-    private prisma: PrismaService,
-    private userConceptService: UserConceptService,
-  ) {}
+  constructor(private readonly prisma: PrismaService, private readonly userConceptService: UserConceptService) {}
 
   /**
    * Retrieves contents associated with a specific concept node for a given user (eg. "Funktionale Programmierung mit Python" or "Objektorientierte Programmierung mit Java").
@@ -87,12 +80,12 @@ export class ContentService {
                   // required by or trained by our main concept node.
                   {
                     id: {
-                      in: conceptNode.requiredBy.map((r) => r.contentNode.id),
+                      in: conceptNode.requiredBy.map(r => r.contentNode.id),
                     },
                   },
                   {
                     id: {
-                      in: conceptNode.trainedBy.map((t) => t.contentNode.id),
+                      in: conceptNode.trainedBy.map(t => t.contentNode.id),
                     },
                   },
                 ],
@@ -122,12 +115,12 @@ export class ContentService {
                   OR: [
                     {
                       id: {
-                        in: conceptNode.requiredBy.map((r) => r.contentNode.id),
+                        in: conceptNode.requiredBy.map(r => r.contentNode.id),
                       },
                     },
                     {
                       id: {
-                        in: conceptNode.trainedBy.map((t) => t.contentNode.id),
+                        in: conceptNode.trainedBy.map(t => t.contentNode.id),
                       },
                     },
                   ],
@@ -149,12 +142,9 @@ export class ContentService {
 
     // Create a map of question IDs to their maximum scores
     const questionProgressMap = new Map<number, number>();
-    questionProgress.forEach((qp) => {
+    questionProgress.forEach(qp => {
       const currentMaxScore = questionProgressMap.get(qp.questionId) || 0;
-      const newMaxScore = Math.max(
-        ...qp.feedbacks.map((f) => f.score),
-        currentMaxScore,
-      );
+      const newMaxScore = Math.max(...qp.feedbacks.map(f => f.score), currentMaxScore);
       questionProgressMap.set(qp.questionId, newMaxScore);
     });
 
@@ -169,35 +159,22 @@ export class ContentService {
       contentElements: contentNode.ContentView.map(
         this.transformContentElement(userStatus, questionProgressMap),
       ),
-      contentPrerequisiteIds: contentNode.prerequisites.map(
-        (p: any) => p.prerequisiteId,
-      ),
-      contentSuccessorIds: contentNode.successors.map(
-        (s: any) => s.successorId,
-      ),
+      contentPrerequisiteIds: contentNode.prerequisites.map((p: any) => p.prerequisiteId),
+      contentSuccessorIds: contentNode.successors.map((s: any) => s.successorId),
       requiresConceptIds: contentNode.requires.map((r: any) => r.conceptNodeId),
       trainsConceptIds: contentNode.trains.map((t: any) => t.conceptNodeId),
       progress: this.calculateProgress(contentNode, userStatus),
-      levelProgress: this.calculateHighestLevelProgress(
-        contentNode,
-        userStatus,
-      ),
+      levelProgress: this.calculateHighestLevelProgress(contentNode, userStatus),
       questionMarked: contentNode.ContentView.some((cv: any) =>
         userStatus.some(
-          (status) =>
-            status.contentElementId === cv.contentElement.id &&
-            status.markedAsQuestion,
+          status => status.contentElementId === cv.contentElement.id && status.markedAsQuestion,
         ),
       ),
     });
 
     // We apply our transformation function to all the content nodes
-    const requiredBy = conceptNode.requiredBy.map((r) =>
-      transformContentNode(r.contentNode),
-    );
-    const trainedBy = conceptNode.trainedBy.map((t) =>
-      transformContentNode(t.contentNode),
-    );
+    const requiredBy = conceptNode.requiredBy.map(r => transformContentNode(r.contentNode));
+    const trainedBy = conceptNode.trainedBy.map(t => transformContentNode(t.contentNode));
 
     // Finally, we return our transformed data
     return { trainedBy, requiredBy };
@@ -236,10 +213,7 @@ export class ContentService {
    * This method creates a function that transforms a content view object into a ContentElementDTO.
    * It includes logic to calculate question progress if the content element is a question.
    */
-  private transformContentElement(
-    userStatus: any[],
-    questionProgressMap: Map<number, number>,
-  ) {
+  private transformContentElement(userStatus: any[], questionProgressMap: Map<number, number>) {
     return (contentView: any): ContentElementDTO => ({
       id: contentView.contentElement.id,
       type: contentView.contentElement.type,
@@ -256,8 +230,7 @@ export class ContentService {
             level: contentView.contentElement.question.level,
             progress: this.calculateQuestionProgress(
               contentView.contentElement.question,
-              questionProgressMap.get(contentView.contentElement.question.id) ||
-                0,
+              questionProgressMap.get(contentView.contentElement.question.id) || 0,
             ),
           }
         : null,
@@ -302,7 +275,7 @@ export class ContentService {
 
     const completedCount = questionElements.filter((cv: any) =>
       userStatus.some(
-        (status) =>
+        status =>
           cv.contentElement.type === 'QUESTION' &&
           status.contentElementId === cv.contentElement.id &&
           status.markedAsDone,
@@ -317,25 +290,17 @@ export class ContentService {
    * @param userStatus - An array of user status objects indicating which content elements have been marked as done.
    * @returns The highest level of progress achieved by the user for the given content node.
    */
-  private calculateHighestLevelProgress(
-    contentNode: any,
-    userStatus: any[],
-  ): number {
+  private calculateHighestLevelProgress(contentNode: any, userStatus: any[]): number {
     const sortedQuestionElements = contentNode.ContentView.filter(
       (cv: any) => cv.contentElement.type === 'QUESTION',
-    ).sort(
-      (a: any, b: any) =>
-        a.contentElement.question.level - b.contentElement.question.level,
-    );
+    ).sort((a: any, b: any) => a.contentElement.question.level - b.contentElement.question.level);
 
     let highestLevel = 0;
     for (let i = 0; i < sortedQuestionElements.length; i++) {
       const cv = sortedQuestionElements[i];
       if (
         !userStatus.some(
-          (status) =>
-            status.contentElementId === cv.contentElement.id &&
-            status.markedAsDone,
+          status => status.contentElementId === cv.contentElement.id && status.markedAsDone,
         )
       ) {
         break;
@@ -382,18 +347,17 @@ export class ContentService {
     contentElementId: number,
     userId: number,
   ): Promise<ContentElementStatusDTO> {
-    const contentElementStatus =
-      await this.prisma.userContentElementProgress.findFirst({
-        where: {
-          contentElementId: contentElementId,
-          userId: userId,
-        },
-        select: {
-          contentElementId: true,
-          markedAsDone: true,
-          markedAsQuestion: true,
-        },
-      });
+    const contentElementStatus = await this.prisma.userContentElementProgress.findFirst({
+      where: {
+        contentElementId: contentElementId,
+        userId: userId,
+      },
+      select: {
+        contentElementId: true,
+        markedAsDone: true,
+        markedAsQuestion: true,
+      },
+    });
 
     if (!contentElementStatus) {
       return {
@@ -497,7 +461,7 @@ export class ContentService {
         id: true,
       },
     });
-    return conceptNodes.map((concept) => concept.id as number);
+    return conceptNodes.map(concept => concept.id );
   }
 
   /**
@@ -515,17 +479,16 @@ export class ContentService {
     level: number,
   ): Promise<boolean> {
     //get checkmark status
-    let checkmarkStatus =
-      await this.prisma.userContentElementProgress.findFirst({
-        where: {
-          contentElementId: contentElementId,
-          userId: userId,
-        },
-        select: {
-          id: true,
-          markedAsDone: true,
-        },
-      });
+    let checkmarkStatus = await this.prisma.userContentElementProgress.findFirst({
+      where: {
+        contentElementId: contentElementId,
+        userId: userId,
+      },
+      select: {
+        id: true,
+        markedAsDone: true,
+      },
+    });
 
     if (!checkmarkStatus) {
       //create new entry in userContentProgress if not exists
@@ -573,22 +536,18 @@ export class ContentService {
    * @returns {Promise<boolean>} A promise that resolves to a boolean.
    *
    */
-  async toggleQuestionmark(
-    contentElementId: number,
-    userId: number,
-  ): Promise<boolean> {
+  async toggleQuestionmark(contentElementId: number, userId: number): Promise<boolean> {
     //get checkmark status
-    let questionmarkStatus =
-      await this.prisma.userContentElementProgress.findFirst({
-        where: {
-          contentElementId: contentElementId,
-          userId: userId,
-        },
-        select: {
-          id: true,
-          markedAsQuestion: true,
-        },
-      });
+    let questionmarkStatus = await this.prisma.userContentElementProgress.findFirst({
+      where: {
+        contentElementId: contentElementId,
+        userId: userId,
+      },
+      select: {
+        id: true,
+        markedAsQuestion: true,
+      },
+    });
 
     if (!questionmarkStatus) {
       //create new entry in userContentProgress if not exists
@@ -623,10 +582,7 @@ export class ContentService {
    * @returns {Promise<Date>} A promise that resolves to void.
    *
    */
-  async updateLastOpenedDate(
-    contentNodeId: number,
-    userId: number,
-  ): Promise<Date> {
+  async updateLastOpenedDate(contentNodeId: number, userId: number): Promise<Date> {
     let lastOpenedDate = await this.prisma.userContentView.findFirst({
       where: {
         contentNodeId: contentNodeId,
@@ -666,8 +622,8 @@ export class ContentService {
         name: true,
       },
     });
-    const allConcepts = concepts.map((concept) => concept.name as string);
-    Array.from(new Set(allConcepts)).find((concept) => concept === 'root')
+    const allConcepts = concepts.map(concept => concept.name );
+    Array.from(new Set(allConcepts)).find(concept => concept === 'root')
       ? allConcepts.splice(allConcepts.indexOf('root'), 1)
       : null;
     return Array.from(new Set(allConcepts));
@@ -698,14 +654,9 @@ export class ContentService {
    * @throws An error if the highest awards level cannot be found for any content or concept node.
    */
   async updateAwardsLevel(contentNodeId: number): Promise<boolean> {
-    const highestLevel: number = await this.getHighestQuestionLevel(
-      contentNodeId,
-    );
+    const highestLevel: number = await this.getHighestQuestionLevel(contentNodeId);
     if (highestLevel === -1) {
-      throw new Error(
-        'Error finding the highest awards level for contentNode ' +
-          contentNodeId,
-      );
+      throw new Error('Error finding the highest awards level for contentNode ' + contentNodeId);
     }
 
     const updatedTraining = await this.prisma.training.updateMany({
@@ -731,13 +682,10 @@ export class ContentService {
     for (const conceptNode of conceptNodes) {
       if (conceptNode.conceptNodeId !== 1) {
         //skip the root concept node
-        const highestAwards = await this.getHighestContentLevel(
-          conceptNode.conceptNodeId,
-        );
+        const highestAwards = await this.getHighestContentLevel(conceptNode.conceptNodeId);
         if (highestAwards === -1) {
           throw new Error(
-            'Error finding highest awards level for conceptNode ' +
-              conceptNode.conceptNodeId,
+            'Error finding highest awards level for conceptNode ' + conceptNode.conceptNodeId,
           );
         }
 
@@ -794,16 +742,11 @@ export class ContentService {
     });
 
     if (!highestLevelResult) {
-      console.log(
-        'No content elements found for content node ' +
-          contentNodeId +
-          '. Returning 1.',
-      );
+      console.log('No content elements found for content node ' + contentNodeId + '. Returning 1.');
       return 1;
     }
 
-    const highestLevel: number =
-      highestLevelResult.contentElement?.question?.level || -1;
+    const highestLevel: number = highestLevelResult.contentElement.question.level || -1;
     return highestLevel;
   }
 
@@ -828,11 +771,7 @@ export class ContentService {
     });
 
     if (!highestAwardsResult) {
-      console.log(
-        'No content nodes found for concept node ' +
-          conceptNodeId +
-          '. Returning 1.',
-      );
+      console.log('No content nodes found for concept node ' + conceptNodeId + '. Returning 1.');
       return 1;
     }
 
@@ -857,7 +796,10 @@ export class ContentService {
   /**
    * Aktualisiert einen ContentNode (Name, Beschreibung, Level)
    */
-  async updateContentNodeData(contentNodeId: number, data: { name: string; description: string; difficulty: number }): Promise<boolean> {
+  async updateContentNodeData(
+    contentNodeId: number,
+    data: { name: string; description: string; difficulty: number },
+  ): Promise<boolean> {
     await this.prisma.contentNode.update({
       where: { id: contentNodeId },
       data: {

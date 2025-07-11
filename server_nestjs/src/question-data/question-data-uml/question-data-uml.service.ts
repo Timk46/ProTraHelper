@@ -1,24 +1,26 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { detailedUmlQuestionDTO, editorDataDTO, taskSettingsDTO, UmlQuestionDTO } from '@DTOs/index';
+import type {
+  detailedUmlQuestionDTO,
+  editorDataDTO,
+  taskSettingsDTO,
+  UmlQuestionDTO,
+} from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class QuestionDataUmlService {
-
-  constructor(
-    private prisma: PrismaService
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getUmlQuestion(questionId: number): Promise<UmlQuestionDTO> {
     const question = await this.prisma.question.findUnique({
       where: {
-        id: Number(questionId)
-      }
+        id: Number(questionId),
+      },
     });
     const umlQuestion = await this.prisma.umlQuestion.findFirst({
       where: {
-        questionId: Number(questionId)
-      }
+        questionId: Number(questionId),
+      },
     });
     if (!umlQuestion) {
       throw new Error('FreeTextQuestion not found');
@@ -32,7 +34,10 @@ export class QuestionDataUmlService {
     };
   }
 
-  async createUmlQuestion(umlQuestion: detailedUmlQuestionDTO, questionId: number): Promise<detailedUmlQuestionDTO> {
+  async createUmlQuestion(
+    umlQuestion: detailedUmlQuestionDTO,
+    questionId: number,
+  ): Promise<detailedUmlQuestionDTO> {
     const newUmlQuestion = await this.prisma.umlQuestion.create({
       data: {
         title: umlQuestion.title,
@@ -42,7 +47,7 @@ export class QuestionDataUmlService {
         startData: JSON.parse(JSON.stringify(umlQuestion.startData)) || undefined,
         dataImage: umlQuestion.dataImage || undefined,
         taskSettings: JSON.parse(JSON.stringify(umlQuestion.taskSettings)) || undefined,
-        question: {connect: {id: questionId}},
+        question: { connect: { id: questionId } },
       },
     });
     if (!newUmlQuestion) {
@@ -59,8 +64,8 @@ export class QuestionDataUmlService {
   async updateUmlQuestion(umlQuestion: detailedUmlQuestionDTO): Promise<detailedUmlQuestionDTO> {
     const originalUmlQuestion = await this.prisma.umlQuestion.findUnique({
       where: {
-        id: umlQuestion.id
-      }
+        id: umlQuestion.id,
+      },
     });
     if (!originalUmlQuestion) {
       throw new Error('UmlQuestion not found');
@@ -71,10 +76,13 @@ export class QuestionDataUmlService {
         title: umlQuestion.title || originalUmlQuestion.title,
         text: umlQuestion.text || originalUmlQuestion.text,
         textHTML: umlQuestion.textHTML || originalUmlQuestion.textHTML,
-        editorData: JSON.parse(JSON.stringify(umlQuestion.editorData)) || originalUmlQuestion.editorData,
-        startData: JSON.parse(JSON.stringify(umlQuestion.startData)) || originalUmlQuestion.startData,
+        editorData:
+          JSON.parse(JSON.stringify(umlQuestion.editorData)) || originalUmlQuestion.editorData,
+        startData:
+          JSON.parse(JSON.stringify(umlQuestion.startData)) || originalUmlQuestion.startData,
         dataImage: umlQuestion.dataImage || originalUmlQuestion.dataImage,
-        taskSettings: JSON.parse(JSON.stringify(umlQuestion.taskSettings)) || originalUmlQuestion.taskSettings,
+        taskSettings:
+          JSON.parse(JSON.stringify(umlQuestion.taskSettings)) || originalUmlQuestion.taskSettings,
       },
     });
     if (!updatedUmlQuestion) {

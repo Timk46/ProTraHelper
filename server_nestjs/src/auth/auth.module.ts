@@ -20,13 +20,7 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
     ConfigModule.forRoot({ envFilePath: ['.env', '.env.auth'] }),
     JwtModule.register({}),
   ],
-  providers: [
-    AuthService,
-    LocalStrategy,
-    JwtStrategy,
-    JwtRefreshStrategy,
-    CasStrategy,
-  ],
+  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy, CasStrategy],
   exports: [AuthService],
   controllers: [AuthController],
 })

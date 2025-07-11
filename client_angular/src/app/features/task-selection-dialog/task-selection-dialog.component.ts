@@ -1,7 +1,7 @@
-  import { Component } from '@angular/core';
-import { MatDialogRef, MatDialog } from '@angular/material/dialog';
-import { TaskMockDataService } from 'src/app/Services/task-mock-data.service';
-import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { Component } from '@angular/core';
+import type { MatDialogRef, MatDialog } from '@angular/material/dialog';
+import type { TaskMockDataService } from 'src/app/Services/task-mock-data.service';
+import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MultipleFreeTextTaskComponent } from 'src/app/Pages/contentView/contentElement/multiple-free-text-task/multiple-free-text-task.component';
 
 /**
@@ -11,7 +11,7 @@ import { MultipleFreeTextTaskComponent } from 'src/app/Pages/contentView/content
 @Component({
   selector: 'app-task-selection-dialog',
   templateUrl: './task-selection-dialog.component.html',
-  styleUrls: ['./task-selection-dialog.component.scss']
+  styleUrls: ['./task-selection-dialog.component.scss'],
 })
 export class TaskSelectionDialogComponent {
   /**
@@ -19,10 +19,10 @@ export class TaskSelectionDialogComponent {
    */
   constructor(
     public dialogRef: MatDialogRef<TaskSelectionDialogComponent>,
-    private dialog: MatDialog,
-    private mockDataService: TaskMockDataService,
-    private questionService: QuestionDataService
-  ) { }
+    private readonly dialog: MatDialog,
+    private readonly mockDataService: TaskMockDataService,
+    private readonly questionService: QuestionDataService,
+  ) {}
 
   /**
    * Handles the selection of a task type
@@ -35,14 +35,14 @@ export class TaskSelectionDialogComponent {
     this.dialogRef.close();
 
     // Open the appropriate task dialog based on selection
-    switch(type) {
+    switch (type) {
       case 'mc':
         const mcData = this.mockDataService.getMcTaskMockData();
         // Der injizierte QuestionDataService ist eigentlich der MockQuestionDataService
         this.questionService.openDialog('MultipleChoice', {
           width: '80%',
           maxWidth: '800px',
-          data: { taskViewData: mcData }
+          data: { taskViewData: mcData },
         });
         break;
 
@@ -52,7 +52,7 @@ export class TaskSelectionDialogComponent {
         this.questionService.openDialog('FillIn', {
           width: '80%',
           maxWidth: '800px',
-          data: { taskViewData: fillInData }
+          data: { taskViewData: fillInData },
         });
         break;
 
@@ -62,7 +62,7 @@ export class TaskSelectionDialogComponent {
         this.questionService.openDialog('FreeText', {
           width: '80%',
           maxWidth: '800px',
-          data: { taskViewData: freeTextData }
+          data: { taskViewData: freeTextData },
         });
         break;
 
@@ -73,7 +73,7 @@ export class TaskSelectionDialogComponent {
           width: '90%',
           maxWidth: '1000px',
           height: '90%',
-          data: { taskViewData: multipleFreetextData }
+          data: { taskViewData: multipleFreetextData },
         });
         break;
     }

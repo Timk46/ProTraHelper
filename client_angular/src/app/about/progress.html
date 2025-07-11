@@ -1,9 +1,16 @@
 <h2 mat-dialog-title>Fortschritt</h2>
 <mat-dialog-content class="mat-typography">
-  <p><b>Hier wird der aktuelle Fortschritt für die Studienleistung angezeigt. Die benötigten Prozente hängen von Ihrem Studiengang ab.</b></p>
-  <p>Ihr aktueller Fortschritt beträgt: <b>{{userTotalProgress | number:'1.2-2'}}%</b></p>
+  <p>
+    <b
+      >Hier wird der aktuelle Fortschritt für die Studienleistung angezeigt. Die benötigten Prozente
+      hängen von Ihrem Studiengang ab.</b
+    >
+  </p>
+  <p>
+    Ihr aktueller Fortschritt beträgt: <b>{{ userTotalProgress | number: '1.2-2' }}%</b>
+  </p>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Okay</button>
-<!--  <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Install</button>-->
+  <!--  <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Install</button>-->
 </mat-dialog-actions>

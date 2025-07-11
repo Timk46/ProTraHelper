@@ -1,33 +1,34 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError } from 'rxjs';
+import type { HttpClient } from '@angular/common/http';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, throwError } from 'rxjs';
 import { catchError, tap, switchMap } from 'rxjs/operators';
-import { Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 import { io } from 'socket.io-client';
 import { environment } from '../../../../environments/environment';
-import {
+import type {
   PmpmSessionRequest,
   PmpmSession,
   PmpmSessionStatus,
   ParameterChange,
-  ParameterUpdateResult
+  ParameterUpdateResult,
 } from '../models/pmpm-session.model';
 
 /**
  * Service for interacting with PMPM sessions and WebSocket events
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PmpmService {
   private socket: Socket | null = null;
-  private apiUrl = `${environment.server}/pmpm`;
+  private readonly apiUrl = `${environment.server}/pmpm`;
 
   // Subjects to expose as Observables
-  private currentSessionSubject = new BehaviorSubject<PmpmSession | null>(null);
-  private parameterUpdateSubject = new BehaviorSubject<ParameterUpdateResult | null>(null);
-  private fileExportedSubject = new BehaviorSubject<any | null>(null);
-  private analysisCompletedSubject = new BehaviorSubject<any | null>(null);
+  private readonly currentSessionSubject = new BehaviorSubject<PmpmSession | null>(null);
+  private readonly parameterUpdateSubject = new BehaviorSubject<ParameterUpdateResult | null>(null);
+  private readonly fileExportedSubject = new BehaviorSubject<any | null>(null);
+  private readonly analysisCompletedSubject = new BehaviorSubject<any | null>(null);
 
   // Public Observables
   currentSession$ = this.currentSessionSubject.asObservable();
@@ -35,7 +36,7 @@ export class PmpmService {
   fileExported$ = this.fileExportedSubject.asObservable();
   analysisCompleted$ = this.analysisCompletedSubject.asObservable();
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Starts a new PMPM session
@@ -46,7 +47,7 @@ export class PmpmService {
   startSession(modelId: string, configuration?: string): Observable<PmpmSession> {
     const request: PmpmSessionRequest = {
       modelId,
-      configuration
+      configuration,
     };
 
     return this.http.post<PmpmSession>(`${this.apiUrl}/session`, request).pipe(
@@ -57,7 +58,7 @@ export class PmpmService {
       catchError(error => {
         console.error('Error starting PMPM session:', error);
         return throwError(() => new Error('Failed to start PMPM session'));
-      })
+      }),
     );
   }
 
@@ -71,7 +72,7 @@ export class PmpmService {
       catchError(error => {
         console.error('Error getting session status:', error);
         return throwError(() => new Error('Failed to get session status'));
-      })
+      }),
     );
   }
 
@@ -92,7 +93,7 @@ export class PmpmService {
       catchError(error => {
         console.error('Error ending session:', error);
         return throwError(() => new Error('Failed to end session'));
-      })
+      }),
     );
   }
 
@@ -123,7 +124,7 @@ export class PmpmService {
     this.socket = io(`${environment.websocketUrl}/pmpm`, {
       query: { sessionId },
       transports: ['websocket'],
-      autoConnect: true
+      autoConnect: true,
     });
 
     // Set up event listeners

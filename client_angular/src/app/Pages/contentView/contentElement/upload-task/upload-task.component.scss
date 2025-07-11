@@ -33,7 +33,11 @@ $nord15: #b48ead; // Aurora (purple)
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(94, 129, 172, 0.05) 0%, rgba(136, 192, 208, 0.03) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(94, 129, 172, 0.05) 0%,
+      rgba(136, 192, 208, 0.03) 100%
+    );
     pointer-events: none;
   }
 
@@ -526,7 +530,8 @@ $nord15: #b48ead; // Aurora (purple)
       box-shadow: none;
     }
 
-    mat-icon, mat-spinner {
+    mat-icon,
+    mat-spinner {
       margin-right: 8px;
     }
   }
@@ -555,7 +560,8 @@ $nord15: #b48ead; // Aurora (purple)
 
 // Animations
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -564,7 +570,11 @@ $nord15: #b48ead; // Aurora (purple)
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
   40% {

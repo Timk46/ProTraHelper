@@ -15,15 +15,15 @@ import {
   Logger,
   BadRequestException, // Added BadRequestException
 } from '@nestjs/common';
-import { Request } from 'express'; // Added Request
+import type { Request } from 'express'; // Added Request
 import { PrismaService } from 'src/prisma/prisma.service'; // Added PrismaService
 import { IsIn, IsString } from 'class-validator'; // Added class-validator imports
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard'; // Add AuthGuard
 import { TutoringFeedbackService } from './tutoring-feedback.service';
 import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
-import { FeedbackOutput } from './graph/schemas/feedback-output.schema';
+import type { FeedbackOutput } from './graph/schemas/feedback-output.schema';
 import { LanggraphDataFetcherService } from '../langgraph-feedback/helper/langgraph-data-fetcher.service';
-import { CodeSubmissionResultDto } from '@DTOs/tutorKaiDtos/submission.dto';
+import type { CodeSubmissionResultDto } from '@DTOs/tutorKaiDtos/submission.dto';
 
 // DTO for the evaluate request (mirrors LanggraphFeedbackController)
 interface EvaluateRequestDto {
@@ -61,7 +61,8 @@ export class TutoringFeedbackController {
   @HttpCode(HttpStatus.OK) // Explicitly set OK status for successful feedback generation
   async generateFeedback(
     @Body(ValidationPipe) body: EvaluateRequestDto, // Accept EvaluateRequestDto and use ValidationPipe
-  ): Promise<{ feedback: FeedbackOutput; feedbackId: string }> { // Updated return type
+  ): Promise<{ feedback: FeedbackOutput; feedbackId: string }> {
+    // Updated return type
     this.logger.log(`Tutoring feedback request received for question ${body.questionId}`);
     try {
       // Fetch context using DataFetcherService
@@ -70,7 +71,9 @@ export class TutoringFeedbackController {
 
       if (!encryptedCodeSubissionId || !CodeSubmissionResult) {
         this.logger.error('Missing required fields in relatedCodeSubmissionResult.');
-        throw new InternalServerErrorException('Missing required fields in relatedCodeSubmissionResult.');
+        throw new InternalServerErrorException(
+          'Missing required fields in relatedCodeSubmissionResult.',
+        );
       }
 
       const feedbackContext = await this.langgraphDataFetcherService.fetchFeedbackContextDto(
@@ -83,9 +86,11 @@ export class TutoringFeedbackController {
       //console.log(JSON.stringify(result)); // Log the result for debugging
       // Call the service with the fetched context
       return result;
-
     } catch (error) {
-      this.logger.error(`Error generating tutoring feedback for question ${body.questionId}:`, error.stack);
+      this.logger.error(
+        `Error generating tutoring feedback for question ${body.questionId}:`,
+        error.stack,
+      );
       if (error instanceof NotFoundException || error instanceof InternalServerErrorException) {
         throw error; // Re-throw known exceptions
       }
@@ -99,7 +104,6 @@ export class TutoringFeedbackController {
     @Param('id') feedbackId: string,
     @Body(ValidationPipe) body: TrackUsageDto,
   ): Promise<void> {
-
     const fieldToUpdate = `${body.feedbackType.toLowerCase()}UsedAt`; // e.g., 'spsUsedAt'
 
     try {
@@ -124,19 +128,23 @@ export class TutoringFeedbackController {
           throw new NotFoundException(`Feedback with ID ${feedbackId} not found.`);
         } else {
           // Feedback exists, but timestamp was likely already set
-          this.logger.log(`Usage for type ${body.feedbackType} on feedback ${feedbackId} was already tracked.`);
+          this.logger.log(
+            `Usage for type ${body.feedbackType} on feedback ${feedbackId} was already tracked.`,
+          );
           // Still return success (NO_CONTENT) as the state is effectively what the user requested
         }
       } else {
-        this.logger.log(`Successfully tracked usage for type ${body.feedbackType} on feedback ${feedbackId}.`);
+        this.logger.log(
+          `Successfully tracked usage for type ${body.feedbackType} on feedback ${feedbackId}.`,
+        );
       }
     } catch (error) {
-        if (error instanceof NotFoundException) {
-          throw error;
-        }
-        // Handle potential Prisma errors or other issues
-        this.logger.error(`Error tracking usage for feedback ID ${feedbackId}:`, error.stack);
-        throw new InternalServerErrorException('Failed to track feedback usage.');
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      // Handle potential Prisma errors or other issues
+      this.logger.error(`Error tracking usage for feedback ID ${feedbackId}:`, error.stack);
+      throw new InternalServerErrorException('Failed to track feedback usage.');
     }
   }
 
@@ -144,9 +152,7 @@ export class TutoringFeedbackController {
 
   @Get('privacy/consent')
   @HttpCode(HttpStatus.OK)
-  async getPrivacyConsentStatus(
-    @Req() req: RequestWithUser,
-  ): Promise<{ hasAccepted: boolean }> {
+  async getPrivacyConsentStatus(@Req() req: RequestWithUser): Promise<{ hasAccepted: boolean }> {
     const userId = req.user.id; // Extract userId from authenticated user
     if (!userId) {
       this.logger.error('User ID not found in request for privacy consent check.');
@@ -167,9 +173,7 @@ export class TutoringFeedbackController {
 
   @Post('privacy/consent')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async acceptPrivacyPolicy(
-    @Req() req: RequestWithUser,
-  ): Promise<void> {
+  async acceptPrivacyPolicy(@Req() req: RequestWithUser): Promise<void> {
     const userId = req.user.id; // Extract userId from authenticated user
     if (!userId) {
       this.logger.error('User ID not found in request for accepting privacy policy.');

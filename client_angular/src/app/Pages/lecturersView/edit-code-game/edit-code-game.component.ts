@@ -1,23 +1,26 @@
-import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
-import { ActivatedRoute } from "@angular/router";
-import { QuestionDataService } from "../../../Services/question/question-data.service";
-import { detailedQuestionDTO } from "@DTOs/detailedQuestion.dto";
-import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { MatSelectChange } from "@angular/material/select";
-import { MatDialog } from "@angular/material/dialog";
-import { CodeEditorComponent } from "../../../Modules/code-game/sites/code-editor/code-editor.component";
-import { CodeGameScaffoldDto, questionType } from "@DTOs/question.dto";
-import { CodeGameConfirmDialogComponent } from "./code-game-confirm-dialog.component";
-import { CodeGameAddElementModalComponent } from "./code-game-add-element-modal.component";
-import { DefaultCodeGameScaffoldsDTO, CodeGameScaffoldDTO } from "@DTOs/codeGame.dto";
-import { MatSnackBar } from "@angular/material/snack-bar";
-import { Router } from '@angular/router';
+import type { OnInit, QueryList } from '@angular/core';
+import { Component, ViewChildren } from '@angular/core';
+import type { ActivatedRoute } from '@angular/router';
+import type { QuestionDataService } from '../../../Services/question/question-data.service';
+import type { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
+import type { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { Validators } from '@angular/forms';
+import type { MatSelectChange } from '@angular/material/select';
+import type { MatDialog } from '@angular/material/dialog';
+import { CodeEditorComponent } from '../../../Modules/code-game/sites/code-editor/code-editor.component';
+import type { CodeGameScaffoldDto } from '@DTOs/question.dto';
+import { questionType } from '@DTOs/question.dto';
+import { CodeGameConfirmDialogComponent } from './code-game-confirm-dialog.component';
+import { CodeGameAddElementModalComponent } from './code-game-add-element-modal.component';
+import type { DefaultCodeGameScaffoldsDTO, CodeGameScaffoldDTO } from '@DTOs/codeGame.dto';
+import type { MatSnackBar } from '@angular/material/snack-bar';
+import type { Router } from '@angular/router';
 import defaultScaffolds from './defaultCodeGameScaffolds.json';
 
 @Component({
   selector: 'app-edit-code-game',
   templateUrl: './edit-code-game.component.html',
-  styleUrls: ['./edit-code-game.component.scss']
+  styleUrls: ['./edit-code-game.component.scss'],
 })
 export class EditCodeGameComponent implements OnInit {
   @ViewChildren(CodeEditorComponent) codeEditors!: QueryList<CodeEditorComponent>;
@@ -35,19 +38,24 @@ export class EditCodeGameComponent implements OnInit {
   defaultCodeGameScaffolds: DefaultCodeGameScaffoldsDTO = defaultScaffolds;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private route: ActivatedRoute,
-    private questionDataService: QuestionDataService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar,
-    private router: Router
+    private readonly formBuilder: FormBuilder,
+    private readonly route: ActivatedRoute,
+    private readonly questionDataService: QuestionDataService,
+    private readonly dialog: MatDialog,
+    private readonly snackBar: MatSnackBar,
+    private readonly router: Router,
   ) {
     this.codeGameForm = this.createForm();
 
     // Watch for changes in the programming language and update codeGameScaffolds if empty
     this.codeGameForm.get('programmingLanguage')?.valueChanges.subscribe(language => {
       const codeGameScaffolds = this.codeGameForm.get('codeGameScaffolds') as FormArray;
-      if (this.questionLoaded && codeGameScaffolds.length === 0 && language && !this.importingTask) {
+      if (
+        this.questionLoaded &&
+        codeGameScaffolds.length === 0 &&
+        language &&
+        !this.importingTask
+      ) {
         this.addDefaultCodeScaffolds(language);
       }
     });
@@ -57,32 +65,34 @@ export class EditCodeGameComponent implements OnInit {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
       if (questionId) {
-        this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
-          this.questionData = data;
-          console.log('CodeGame: Question data:', this.questionData); // TODO: remove
+        this.questionDataService
+          .getDetailedQuestionData(questionId, this.thisQuestionType)
+          .subscribe(data => {
+            this.questionData = data;
+            console.log('CodeGame: Question data:', this.questionData); // TODO: remove
 
-          if (!this.questionData.codeGameQuestion) {
-            this.questionData.codeGameQuestion = {
-              id: 0,
-              contentElementId: 0,
-              text: '',
-              programmingLanguage: '', // default code language
-              codeSolutionRestriction: false,
-              fileNameToRestrict: '',
-              methodNameToRestrict: '',
-              frequencyOfMethodNameToRestrict: 1,
-              codeGameScaffolds: [],
-              gameFileName: 'game.grid.txt', // Hardcoded for every game task
-              game: '',
-              gameCellRestrictions: '',
-              theme: 'dino' // default theme
-            };
+            if (!this.questionData.codeGameQuestion) {
+              this.questionData.codeGameQuestion = {
+                id: 0,
+                contentElementId: 0,
+                text: '',
+                programmingLanguage: '', // default code language
+                codeSolutionRestriction: false,
+                fileNameToRestrict: '',
+                methodNameToRestrict: '',
+                frequencyOfMethodNameToRestrict: 1,
+                codeGameScaffolds: [],
+                gameFileName: 'game.grid.txt', // Hardcoded for every game task
+                game: '',
+                gameCellRestrictions: '',
+                theme: 'dino', // default theme
+              };
 
-            this.questionLoaded = true;
-          }
+              this.questionLoaded = true;
+            }
 
-          this.populateForm();
-        });
+            this.populateForm();
+          });
       }
     });
   }
@@ -99,10 +109,12 @@ export class EditCodeGameComponent implements OnInit {
         name: this.questionData.name || '',
         text: this.questionData.text || '',
         programmingLanguage: this.questionData.codeGameQuestion?.programmingLanguage || '',
-        codeSolutionRestriction: this.questionData.codeGameQuestion?.codeSolutionRestriction || false,
+        codeSolutionRestriction:
+          this.questionData.codeGameQuestion?.codeSolutionRestriction || false,
         fileNameToRestrict: this.questionData.codeGameQuestion?.fileNameToRestrict || '',
         methodNameToRestrict: this.questionData.codeGameQuestion?.methodNameToRestrict || '',
-        frequencyOfMethodNameToRestrict: this.questionData.codeGameQuestion?.frequencyOfMethodNameToRestrict || 1,
+        frequencyOfMethodNameToRestrict:
+          this.questionData.codeGameQuestion?.frequencyOfMethodNameToRestrict || 1,
         game: this.questionData.codeGameQuestion?.game || '',
         gameCellRestrictions: this.questionData.codeGameQuestion?.gameCellRestrictions || '',
         theme: this.questionData.codeGameQuestion?.theme || 'dino',
@@ -112,13 +124,13 @@ export class EditCodeGameComponent implements OnInit {
 
       // Data for the playfield editor
       this.exportGameDataForPlayfieldEditor = {
-        // By this the playfield editor can be setup again after the first setup 
+        // By this the playfield editor can be setup again after the first setup
         // this is needed to import a task
-        newDataByImportOperation: this.importingTask, 
+        newDataByImportOperation: this.importingTask,
 
         theme: this.questionData.codeGameQuestion?.theme || '',
         gameField: this.questionData.codeGameQuestion?.game || '',
-        gameCellRestrictions: this.questionData.codeGameQuestion?.gameCellRestrictions || ''
+        gameCellRestrictions: this.questionData.codeGameQuestion?.gameCellRestrictions || '',
       };
 
       if (this.questionData.codeGameQuestion) {
@@ -130,16 +142,20 @@ export class EditCodeGameComponent implements OnInit {
   populateCodeGameScaffolds() {
     const codeGameScaffoldsFormArray = this.codeGameForm.get('codeGameScaffolds') as FormArray;
     codeGameScaffoldsFormArray.clear();
-    this.questionData?.codeGameQuestion!.codeGameScaffolds.forEach((codeGameScaffold: CodeGameScaffoldDto) => {
-      codeGameScaffoldsFormArray.push(this.formBuilder.group({
-        id: codeGameScaffold.id,
-        codeFileName: codeGameScaffold.codeFileName,
-        code: codeGameScaffold.code,
-        visible: codeGameScaffold.visible,
-        mainFile: codeGameScaffold.mainFile,
-        language: codeGameScaffold.language
-      }));
-    });
+    this.questionData?.codeGameQuestion!.codeGameScaffolds.forEach(
+      (codeGameScaffold: CodeGameScaffoldDto) => {
+        codeGameScaffoldsFormArray.push(
+          this.formBuilder.group({
+            id: codeGameScaffold.id,
+            codeFileName: codeGameScaffold.codeFileName,
+            code: codeGameScaffold.code,
+            visible: codeGameScaffold.visible,
+            mainFile: codeGameScaffold.mainFile,
+            language: codeGameScaffold.language,
+          }),
+        );
+      },
+    );
   }
 
   createForm(): FormGroup {
@@ -157,7 +173,7 @@ export class EditCodeGameComponent implements OnInit {
       codeSolutionRestriction: [false],
       fileNameToRestrict: [''],
       methodNameToRestrict: [''],
-      frequencyOfMethodNameToRestrict: [1]
+      frequencyOfMethodNameToRestrict: [1],
     });
   }
 
@@ -177,7 +193,7 @@ export class EditCodeGameComponent implements OnInit {
       }
     } else if (type === 'game') {
       this.codeGameForm.patchValue({ [type]: newCode });
-      if (this.questionData && this.questionData.codeGameQuestion) {
+      if (this.questionData?.codeGameQuestion) {
         this.questionData.codeGameQuestion.game = newCode;
       }
     } else {
@@ -185,7 +201,7 @@ export class EditCodeGameComponent implements OnInit {
       const control = formArray.at(index);
       if (control) {
         control.patchValue({ code: newCode });
-        if (this.questionData && this.questionData.codeGameQuestion) {
+        if (this.questionData?.codeGameQuestion) {
           const questionDataArray = this.questionData.codeGameQuestion[type];
           if (Array.isArray(questionDataArray) && questionDataArray[index]) {
             questionDataArray[index].code = newCode;
@@ -198,7 +214,7 @@ export class EditCodeGameComponent implements OnInit {
   openAddModal(type: 'codeGameScaffolds') {
     const dialogRef = this.dialog.open(CodeGameAddElementModalComponent, {
       width: '500px',
-      data: { type: type }
+      data: { type: type },
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -215,11 +231,11 @@ export class EditCodeGameComponent implements OnInit {
       ['codeFileName']: data.fileName,
       code: data.code,
       visible: true,
-      mainFile: false
+      mainFile: false,
     });
     formArray.push(newElement);
 
-    if (this.questionData && this.questionData.codeGameQuestion) {
+    if (this.questionData?.codeGameQuestion) {
       const questionDataArray = this.questionData.codeGameQuestion[type];
       if (Array.isArray(questionDataArray)) {
         let newItem;
@@ -232,9 +248,9 @@ export class EditCodeGameComponent implements OnInit {
               codeGameQuestionId: this.questionData.codeGameQuestion.id,
               language: this.codeGameForm.value.programmingLanguage,
               visible: true,
-              mainFile: false
+              mainFile: false,
             } as CodeGameScaffoldDto;
-            (questionDataArray as CodeGameScaffoldDto[]).push(newItem);
+            questionDataArray.push(newItem);
             break;
         }
       }
@@ -253,7 +269,8 @@ export class EditCodeGameComponent implements OnInit {
     // Update restriction fields
     if (newLanguage === 'cpp' || newLanguage === 'java') {
       this.codeGameForm.patchValue({ methodNameToRestrict: 'drive();' });
-    } else { // Python
+    } else {
+      // Python
       this.codeGameForm.patchValue({ methodNameToRestrict: 'drive()' });
     }
   }
@@ -281,9 +298,9 @@ export class EditCodeGameComponent implements OnInit {
     const control = formArray.at(index);
 
     if (control) {
-      control.patchValue({visible: !control.value.visible});
+      control.patchValue({ visible: !control.value.visible });
 
-      if (this.questionData && this.questionData.codeGameQuestion) {
+      if (this.questionData?.codeGameQuestion) {
         const questionDataArray = this.questionData.codeGameQuestion[type];
         if (Array.isArray(questionDataArray) && questionDataArray[index]) {
           questionDataArray[index].visible = !questionDataArray[index].visible;
@@ -307,7 +324,7 @@ export class EditCodeGameComponent implements OnInit {
       });
 
       // Update the question data
-      if (this.questionData && this.questionData.codeGameQuestion) {
+      if (this.questionData?.codeGameQuestion) {
         const questionDataArray = this.questionData.codeGameQuestion[type];
         if (Array.isArray(questionDataArray) && questionDataArray[index]) {
           questionDataArray[index].mainFile = !questionDataArray[index].mainFile;
@@ -328,8 +345,8 @@ export class EditCodeGameComponent implements OnInit {
       width: '350px',
       data: {
         title: 'Bestätigung',
-        message: `Möchten Sie wirklich "${fileName}" löschen?`
-      }
+        message: `Möchten Sie wirklich "${fileName}" löschen?`,
+      },
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -343,7 +360,7 @@ export class EditCodeGameComponent implements OnInit {
     const formArray = this.codeGameForm.get(type) as FormArray;
     formArray.removeAt(index);
 
-    if (this.questionData && this.questionData.codeGameQuestion) {
+    if (this.questionData?.codeGameQuestion) {
       const questionDataArray = this.questionData.codeGameQuestion[type];
       if (Array.isArray(questionDataArray)) {
         questionDataArray.splice(index, 1);
@@ -363,14 +380,14 @@ export class EditCodeGameComponent implements OnInit {
           code: scaffold.code,
           visible: scaffold.visible,
           mainFile: scaffold.mainFile,
-          language: scaffold.language
+          language: scaffold.language,
         });
         codeGameScaffolds.push(scaffoldGroup);
 
-        if (this.questionData && this.questionData.codeGameQuestion) {
+        if (this.questionData?.codeGameQuestion) {
           const scaffoldWithId: CodeGameScaffoldDto = {
             ...scaffold,
-            codeGameQuestionId: this.questionData.codeGameQuestion.id
+            codeGameQuestionId: this.questionData.codeGameQuestion.id,
           };
           this.questionData.codeGameQuestion.codeGameScaffolds.push(scaffoldWithId);
         } else {
@@ -402,7 +419,7 @@ export class EditCodeGameComponent implements OnInit {
       name: 'Name',
       programmingLanguage: 'Programmiersprache',
       text: 'Aufgabentext',
-      level: 'Schwierigkeitsgrad'
+      level: 'Schwierigkeitsgrad',
     };
     return displayNames[field] || field;
   }
@@ -429,7 +446,9 @@ export class EditCodeGameComponent implements OnInit {
 
   onSubmit() {
     if (this.questionData) {
-      const mainFile = this.questionData.codeGameQuestion!.codeGameScaffolds.find(scaffold => scaffold.mainFile);
+      const mainFile = this.questionData.codeGameQuestion!.codeGameScaffolds.find(
+        scaffold => scaffold.mainFile,
+      );
       if (!mainFile) {
         this.snackBar.open('Bitte wählen Sie ein MainFile aus.', 'Close', { duration: 5000 });
         return;
@@ -454,11 +473,11 @@ export class EditCodeGameComponent implements OnInit {
           methodNameToRestrict: this.codeGameForm.value.methodNameToRestrict,
           frequencyOfMethodNameToRestrict: this.codeGameForm.value.frequencyOfMethodNameToRestrict,
           codeGameScaffolds: this.questionData.codeGameQuestion!.codeGameScaffolds,
-          gameFileName: "game.grid.txt", // Hardcoded for every game task
+          gameFileName: 'game.grid.txt', // Hardcoded for every game task
           game: this.codeGameForm.value.game,
           gameCellRestrictions: this.codeGameForm.value.gameCellRestrictions,
-          theme: this.codeGameForm.value.theme
-        }
+          theme: this.codeGameForm.value.theme,
+        },
       };
 
       // print question as JSON in console
@@ -472,7 +491,7 @@ export class EditCodeGameComponent implements OnInit {
         error => {
           console.error('Error updating question:', error);
           this.snackBar.open('Error updating question', 'Schließen', { duration: 3000 });
-        }
+        },
       );
     } else {
       const missingFields = this.getMissingFields();
@@ -488,7 +507,9 @@ export class EditCodeGameComponent implements OnInit {
     }
 
     if (!this.codeGameForm.valid) {
-      this.snackBar.open('Bitte füllen Sie alle erforderlichen Felder aus', 'Schließen', { duration: 3000 });
+      this.snackBar.open('Bitte füllen Sie alle erforderlichen Felder aus', 'Schließen', {
+        duration: 3000,
+      });
       return;
     }
 
@@ -510,26 +531,26 @@ export class EditCodeGameComponent implements OnInit {
         methodNameToRestrict: this.codeGameForm.value.methodNameToRestrict,
         frequencyOfMethodNameToRestrict: this.codeGameForm.value.frequencyOfMethodNameToRestrict,
         codeGameScaffolds: this.questionData.codeGameQuestion!.codeGameScaffolds,
-        gameFileName: "game.grid.txt", // Hardcoded for every game task
+        gameFileName: 'game.grid.txt', // Hardcoded for every game task
         game: this.codeGameForm.value.game,
         gameCellRestrictions: this.codeGameForm.value.gameCellRestrictions,
-        theme: this.codeGameForm.value.theme
-      }
+        theme: this.codeGameForm.value.theme,
+      },
     };
 
     // Create a Blob with the JSON data
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    
+
     // Create a download link
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = `${this.questionData.name.replace(/\s+/g, '_')}_export.json`;
-    
+
     // Trigger the download
     document.body.appendChild(link);
     link.click();
-    
+
     // Cleanup
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
@@ -538,10 +559,10 @@ export class EditCodeGameComponent implements OnInit {
   }
 
   isImportPossible() {
-    /* 
-    * Import is only possible, if the CodeGameQuestion is not yet created.
-    * Otherwise the backend will not know which codeGameScaffold belongs to which question.
-    */
+    /*
+     * Import is only possible, if the CodeGameQuestion is not yet created.
+     * Otherwise the backend will not know which codeGameScaffold belongs to which question.
+     */
 
     if (this.questionData && this.questionData.codeGameQuestion?.id === 0) {
       // CodeGameQuestion is not created yet
@@ -549,7 +570,7 @@ export class EditCodeGameComponent implements OnInit {
     }
 
     return false;
-  } 
+  }
 
   importTask(event: any) {
     this.importingTask = true;
@@ -592,17 +613,18 @@ export class EditCodeGameComponent implements OnInit {
         codeSolutionRestriction: importedData.codeGameQuestion.codeSolutionRestriction,
         fileNameToRestrict: importedData.codeGameQuestion.fileNameToRestrict,
         methodNameToRestrict: importedData.codeGameQuestion.methodNameToRestrict,
-        frequencyOfMethodNameToRestrict: importedData.codeGameQuestion.frequencyOfMethodNameToRestrict,
-        gameFileName: "game.grid.txt",
+        frequencyOfMethodNameToRestrict:
+          importedData.codeGameQuestion.frequencyOfMethodNameToRestrict,
+        gameFileName: 'game.grid.txt',
         game: importedData.codeGameQuestion.game,
         gameCellRestrictions: importedData.codeGameQuestion.gameCellRestrictions,
         theme: importedData.codeGameQuestion.theme,
         codeGameScaffolds: importedData.codeGameQuestion.codeGameScaffolds.map((scaffold: any) => ({
           ...scaffold,
           id: 0, // New ID will be generated by the server
-          codeGameQuestionId: 0 // New ID will be generated by the server
-        }))
-      }
+          codeGameQuestionId: 0, // New ID will be generated by the server
+        })),
+      },
     };
 
     // Update the form with the imported data

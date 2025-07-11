@@ -1,15 +1,17 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { Router } from '@angular/router';
+import type { OnInit, AfterViewInit } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import type { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { AdminService, AllUsersDailyProgress } from '../services/admin.service';
-import { Color, ScaleType } from '@swimlane/ngx-charts';
-import { ConfirmationBoxComponent } from "../../confirmation-box/confirmation-box.component";
-import { MatDialog } from "@angular/material/dialog";
-import { UserService } from "../../../Services/auth/user.service";
-import { ContentManagementService } from '../../../Services/admin/content-management.service';
+import type { MatSnackBar } from '@angular/material/snack-bar';
+import type { AdminService, AllUsersDailyProgress } from '../services/admin.service';
+import type { Color } from '@swimlane/ngx-charts';
+import { ScaleType } from '@swimlane/ngx-charts';
+import { ConfirmationBoxComponent } from '../../confirmation-box/confirmation-box.component';
+import type { MatDialog } from '@angular/material/dialog';
+import type { UserService } from '../../../Services/auth/user.service';
+import type { ContentManagementService } from '../../../Services/admin/content-management.service';
 
 interface UserListItem {
   id: number;
@@ -28,11 +30,18 @@ interface Subject {
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.scss']
+  styleUrls: ['./user-list.component.scss'],
 })
 export class UserListComponent implements OnInit, AfterViewInit {
   dataSource: MatTableDataSource<UserListItem> = new MatTableDataSource<UserListItem>([]);
-  displayedColumns: string[] = ['email', 'id', 'kiFeedbackCount', 'chatBotMessageCount', 'totalProgress', 'subjects'];
+  displayedColumns: string[] = [
+    'email',
+    'id',
+    'kiFeedbackCount',
+    'chatBotMessageCount',
+    'totalProgress',
+    'subjects',
+  ];
   subjects: Subject[] = [];
   selectedSubject: number | null = null;
   selectedFile: File | null = null;
@@ -56,16 +65,16 @@ export class UserListComponent implements OnInit, AfterViewInit {
     name: 'custom',
     selectable: true,
     group: ScaleType.Ordinal,
-    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
+    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA'],
   };
 
   constructor(
-    private adminService: AdminService,
-    private router: Router,
-    private snackBar: MatSnackBar,
+    private readonly adminService: AdminService,
+    private readonly router: Router,
+    private readonly snackBar: MatSnackBar,
     public dialog: MatDialog,
-    private userService: UserService,
-    private contentManagementService: ContentManagementService,
+    private readonly userService: UserService,
+    private readonly contentManagementService: ContentManagementService,
   ) {}
 
   ngOnInit(): void {
@@ -86,7 +95,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
       },
-      (error: any) => console.error('Error loading users:', error)
+      (error: any) => console.error('Error loading users:', error),
     );
   }
 
@@ -95,7 +104,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
       (subjects: Subject[]) => {
         this.subjects = subjects;
       },
-      (error: any) => console.error('Error loading subjects:', error)
+      (error: any) => console.error('Error loading subjects:', error),
     );
   }
 
@@ -103,24 +112,26 @@ export class UserListComponent implements OnInit, AfterViewInit {
     this.adminService.getAllUsersDailyProgress().subscribe(
       (progress: AllUsersDailyProgress[]) => {
         // Process the data for the chart
-        const progressByType: { [key: string]: { name: string; series: { name: string; value: number }[] } } = {};
+        const progressByType: {
+          [key: string]: { name: string; series: { name: string; value: number }[] };
+        } = {};
 
-        progress.forEach((item) => {
+        progress.forEach(item => {
           if (!progressByType[item.type]) {
             progressByType[item.type] = {
               name: item.type,
-              series: []
+              series: [],
             };
           }
           progressByType[item.type].series.push({
             name: item.date,
-            value: item.count
+            value: item.count,
           });
         });
 
         this.allUsersDailyProgressData = Object.values(progressByType);
       },
-      (error: any) => console.error('Error loading all users daily progress:', error)
+      (error: any) => console.error('Error loading all users daily progress:', error),
     );
   }
 
@@ -142,7 +153,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
       () => {
         this.loadUsers(); // Reload the user list to reflect the changes
       },
-      (error: any) => console.error('Error toggling registeredForSL:', error)
+      (error: any) => console.error('Error toggling registeredForSL:', error),
     );
   }
 
@@ -177,7 +188,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
               horizontalPosition: 'center',
               verticalPosition: 'bottom',
             });
-          }
+          },
         );
       };
       reader.readAsText(this.selectedFile);
@@ -198,11 +209,11 @@ export class UserListComponent implements OnInit, AfterViewInit {
         decline: 'Abbrechen',
         accept: 'Abmelden',
         swapButtons: false,
-        swapColors: true
-      }
+        swapColors: true,
+      },
     });
 
-    dialog.afterClosed().subscribe((result) => {
+    dialog.afterClosed().subscribe(result => {
       if (result) {
         this.userService.logoutAllUser().then(() => {
           // Open CAS logout URL in a new tab
@@ -221,7 +232,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
       this.selectedContentFile = file;
     } else {
       this.snackBar.open('Bitte wählen Sie eine JSON-Datei aus', 'Schließen', {
-        duration: 3000
+        duration: 3000,
       });
       event.target.value = '';
     }
@@ -229,7 +240,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
 
   exportContent() {
     this.contentManagementService.exportContent().subscribe({
-      next: (data) => {
+      next: data => {
         // Create and download file
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = window.URL.createObjectURL(blob);
@@ -241,15 +252,15 @@ export class UserListComponent implements OnInit, AfterViewInit {
         window.URL.revokeObjectURL(url);
 
         this.snackBar.open('Lerninhalte wurden erfolgreich exportiert', 'Schließen', {
-          duration: 3000
+          duration: 3000,
         });
       },
-      error: (error) => {
+      error: error => {
         console.error('Export error:', error);
         this.snackBar.open('Fehler beim Exportieren der Lerninhalte', 'Schließen', {
-          duration: 3000
+          duration: 3000,
         });
-      }
+      },
     });
   }
 
@@ -257,27 +268,27 @@ export class UserListComponent implements OnInit, AfterViewInit {
     if (!this.selectedContentFile) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       try {
         const data = JSON.parse(e.target?.result as string);
         this.contentManagementService.importContent(data).subscribe({
           next: () => {
             this.snackBar.open('Lerninhalte wurden erfolgreich importiert', 'Schließen', {
-              duration: 3000
+              duration: 3000,
             });
             this.selectedContentFile = null;
           },
-          error: (error) => {
+          error: error => {
             console.error('Import error:', error);
             this.snackBar.open('Fehler beim Importieren der Lerninhalte', 'Schließen', {
-              duration: 3000
+              duration: 3000,
             });
-          }
+          },
         });
       } catch (err) {
         console.error('JSON parse error:', err);
         this.snackBar.open('Ungültiges Dateiformat', 'Schließen', {
-          duration: 3000
+          duration: 3000,
         });
       }
     };

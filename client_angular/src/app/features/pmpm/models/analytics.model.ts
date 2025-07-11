@@ -137,22 +137,22 @@ export interface LessonAnalytics {
 export const DEFAULT_ARCHITECTURE_SKILLS: { id: string; name: string }[] = [
   {
     id: 'structural-understanding',
-    name: 'Strukturelles Verständnis'
+    name: 'Strukturelles Verständnis',
   },
   {
     id: 'design-creativity',
-    name: 'Design-Kreativität'
+    name: 'Design-Kreativität',
   },
   {
     id: 'technical-precision',
-    name: 'Technische Präzision'
+    name: 'Technische Präzision',
   },
   {
     id: 'parameter-optimization',
-    name: 'Parameteroptimierung'
+    name: 'Parameteroptimierung',
   },
   {
     id: 'construction-knowledge',
-    name: 'Konstruktionswissen'
-  }
+    name: 'Konstruktionswissen',
+  },
 ];

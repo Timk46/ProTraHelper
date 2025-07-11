@@ -1,12 +1,18 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { discussionDTO, discussionFilterContentNodeDTO, discussionFilterDTO } from '@DTOs/index';
+import type {
+  discussionDTO,
+  discussionFilterContentNodeDTO,
+  discussionFilterDTO,
+} from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { DiscussionDataService } from '../discussion-data/discussion-data.service';
 
 @Injectable()
 export class DiscussionListService {
-
-  constructor(private prisma: PrismaService, private dataService: DiscussionDataService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly dataService: DiscussionDataService,
+  ) {}
 
   /**
    * This function returns all discussions for a given concept node and optional content node, author, solved status and search string
@@ -25,7 +31,7 @@ export class DiscussionListService {
    * 3. Build the discussionsDTO and return it
    *
    */
-  async getDiscussions(filterData: discussionFilterDTO) : Promise<discussionDTO[]> {
+  async getDiscussions(filterData: discussionFilterDTO): Promise<discussionDTO[]> {
     let discussions = await this.prisma.discussion.findMany({
       where: {
         conceptNode: {
@@ -35,25 +41,25 @@ export class DiscussionListService {
                 trains: {
                   some: {
                     conceptNode: {
-                      id: Number(filterData.conceptNodeId)
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                      id: Number(filterData.conceptNodeId),
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     //we have to get a list of all content nodes that are trained by the filter concept node
     const trainedByContentNodes = await this.prisma.training.findMany({
       where: {
-        conceptNodeId: Number(filterData.conceptNodeId)
+        conceptNodeId: Number(filterData.conceptNodeId),
       },
       select: {
-        contentNodeId: true
-      }
+        contentNodeId: true,
+      },
     });
 
     if (!discussions) {
@@ -61,11 +67,21 @@ export class DiscussionListService {
     }
 
     //filter only discussions that do not have a content node or that have a content node that is trained by the filter concept node
-    discussions = discussions.filter(discussion => discussion.contentNodeId == null || trainedByContentNodes.some(trainedByContentNode => trainedByContentNode.contentNodeId == discussion.contentNodeId));
+    discussions = discussions.filter(
+      discussion =>
+        discussion.contentNodeId == null ||
+        trainedByContentNodes.some(
+          trainedByContentNode => trainedByContentNode.contentNodeId == discussion.contentNodeId,
+        ),
+    );
 
     if (filterData.contentNodeId != -1) {
       //console.log('filtering for contentNodeId');
-      discussions = discussions.filter(discussion => discussion.contentNodeId === filterData.contentNodeId || discussion.contentNodeId === null);
+      discussions = discussions.filter(
+        discussion =>
+          discussion.contentNodeId === filterData.contentNodeId ||
+          discussion.contentNodeId === null,
+      );
     }
     if (filterData.onlySolved == true) {
       //console.log('filtering for onlySolved');
@@ -76,23 +92,28 @@ export class DiscussionListService {
       discussions = discussions.filter(discussion => discussion.authorId == filterData.authorId);
     }
 
-    if (filterData.searchString != "") {
+    if (filterData.searchString != '') {
       //console.log('filtering for searchString');
-      discussions = discussions.filter(discussion => discussion.title.includes(filterData.searchString));
+      discussions = discussions.filter(discussion =>
+        discussion.title.includes(filterData.searchString),
+      );
     }
 
-    let returnData: discussionDTO[] = [];
+    const returnData: discussionDTO[] = [];
 
-    for (let discussion of discussions) {
+    for (const discussion of discussions) {
       returnData.push({
         id: discussion.id,
         initMessageId: await this.dataService.getInitMessageId(discussion.id),
         title: discussion.title,
         authorName: await this.dataService.getAuthorName(discussion.authorId),
         createdAt: discussion.createdAt,
-        contentNodeName: discussion.contentNodeId == null ? 'allgemein' : (await this.dataService.getContentNodeName(discussion.contentNodeId)).name,
+        contentNodeName:
+          discussion.contentNodeId == null
+            ? 'allgemein'
+            : (await this.dataService.getContentNodeName(discussion.contentNodeId)).name,
         commentCount: await this.dataService.getDiscussionCommentCount(discussion.id),
-        isSolved: discussion.isSolved
+        isSolved: discussion.isSolved,
       });
     }
 
@@ -104,21 +125,21 @@ export class DiscussionListService {
    * @param conceptNodeId
    * @returns discussionFilterContentNodeDTO[]
    */
-  async getFilterContentNodes(conceptNodeId: number) : Promise<discussionFilterContentNodeDTO[]> {
+  async getFilterContentNodes(conceptNodeId: number): Promise<discussionFilterContentNodeDTO[]> {
     const contentNodes = await this.prisma.training.findMany({
       where: {
-        conceptNodeId: conceptNodeId
+        conceptNodeId: conceptNodeId,
       },
       select: {
         contentNode: {
           select: {
             id: true,
             name: true,
-            description: true
-          }
+            description: true,
+          },
         },
-        awards: true
-      }
+        awards: true,
+      },
     });
 
     if (!contentNodes) {
@@ -130,10 +151,8 @@ export class DiscussionListService {
         id: contentNode.contentNode.id,
         name: contentNode.contentNode.name,
         description: contentNode.contentNode.description,
-        awards: contentNode.awards
-      }
+        awards: contentNode.awards,
+      };
     });
   }
-
-
 }

@@ -1,6 +1,7 @@
-import { discussionMessageDTO } from '@DTOs/index';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import type { discussionMessageDTO } from '@DTOs/index';
+import type { OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import type { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import DOMPurify from 'dompurify';
 import Prism from 'prismjs';
 
@@ -11,20 +12,18 @@ import 'prismjs/components/prism-c';
 import 'prismjs/components/prism-cpp';
 import 'prismjs/components/prism-markup'; // For HTML
 
-
 @Component({
   selector: 'app-discussion-view-message',
   templateUrl: './discussion-view-message.component.html',
-  styleUrls: ['./discussion-view-message.component.scss']
+  styleUrls: ['./discussion-view-message.component.scss'],
 })
 export class DiscussionViewMessageComponent implements OnChanges {
-
   readableDate: string = 'dummy date';
   sanitizedContent: SafeHtml = '';
 
   @Input() userIsAuthor: boolean = false;
 
-  @Input() messageData : discussionMessageDTO = {
+  @Input() messageData: discussionMessageDTO = {
     messageId: -1,
     discussionId: -1,
     authorId: -1,
@@ -32,17 +31,17 @@ export class DiscussionViewMessageComponent implements OnChanges {
     createdAt: new Date(),
     messageText: 'dummy',
     isSolution: false,
-    isInitiator: false
+    isInitiator: false,
   };
 
-  constructor(private sanitizer: DomSanitizer) { }
+  constructor(private readonly sanitizer: DomSanitizer) {}
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['messageData'] && changes['messageData'].currentValue) {
-      let messageData = changes['messageData'].currentValue;
+    if (changes['messageData']?.currentValue) {
+      const messageData = changes['messageData'].currentValue;
       if (messageData.messageId != -1 && messageData.createdAt != null) {
         this.readableDate = this.getDateDisplay(messageData.createdAt);
-        this.sanitizedContent =  this.prepareContent(messageData.messageText);
+        this.sanitizedContent = this.prepareContent(messageData.messageText);
       }
     }
   }
@@ -60,7 +59,6 @@ export class DiscussionViewMessageComponent implements OnChanges {
     });
     return this.sanitizer.bypassSecurityTrustHtml(tempDiv.innerHTML);
   }
-
 
   /**
    * Returns the date in a human readable format, e.g. "heute" or "1. 1. 2021"

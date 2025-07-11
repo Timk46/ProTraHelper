@@ -1,9 +1,9 @@
-import { UserAnswerDataDTO, freeTextQuestionDTO } from '@DTOs/index';
-import { DialogRef } from '@angular/cdk/dialog';
+import type { UserAnswerDataDTO, freeTextQuestionDTO } from '@DTOs/index';
+import type { DialogRef } from '@angular/cdk/dialog';
 import { Component, Inject, EventEmitter, Output, Input } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { Location } from '@angular/common';
+import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import type { Location } from '@angular/common';
 interface TaskViewData {
   contentNodeId: number;
   contentElementId: number;
@@ -17,22 +17,23 @@ interface TaskViewData {
 @Component({
   selector: 'app-free-text-task',
   templateUrl: './free-text-task.component.html',
-  styleUrls: ['./free-text-task.component.scss']
+  styleUrls: ['./free-text-task.component.scss'],
 })
 export class FreeTextTaskComponent {
-
   @Output() submitClicked = new EventEmitter<any>();
   @Input() conceptId!: number;
   @Input() questionId!: number;
 
-  editorConfig = { //tinyMCE
+  editorConfig = {
+    //tinyMCE
     readonly: false,
     plugins: 'autoresize lists table link image code codesample',
-    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | link image | code codesample',
+    toolbar:
+      'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | link image | code codesample',
     min_height: 300,
     max_height: 500,
     resize: false,
-  }
+  };
 
   answerText: string = '';
   feedbackText: string = '';
@@ -40,19 +41,21 @@ export class FreeTextTaskComponent {
 
   taskViewData: TaskViewData;
 
-
-
   freeTextQuestion: freeTextQuestionDTO = {
     questionId: -1,
     contentElementId: -1,
-    title: "",
-    text: "",
-    expectations: "",
+    title: '',
+    text: '',
+    expectations: '',
     maxPoints: 0,
-  }
+  };
 
-
-  constructor(public dialogRef: DialogRef, @Inject(MAT_DIALOG_DATA) public data: any, private questionService: QuestionDataService, private location: Location) {
+  constructor(
+    public dialogRef: DialogRef,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private readonly questionService: QuestionDataService,
+    private readonly location: Location,
+  ) {
     this.taskViewData = data.taskViewData;
     this.questionService.getFreeTextQuestion(this.taskViewData.id).subscribe(data => {
       this.freeTextQuestion = data;
@@ -75,7 +78,7 @@ export class FreeTextTaskComponent {
       userId: -1,
       userFreetextAnswer: text,
       userFreetextAnswerRaw: rawText,
-    }
+    };
     this.questionService.createUserAnswer(userAnswerData).subscribe(data => {
       console.log(data);
       this.feedbackText = data.feedbackText.replace(/\n/g, '<br>');
@@ -84,9 +87,8 @@ export class FreeTextTaskComponent {
     });
   }
 
-  private replaceNewLines(text: string){
+  private replaceNewLines(text: string) {
     //replace all "\n" with "<br>"
-
   }
 
   onClose(): void {
@@ -94,7 +96,6 @@ export class FreeTextTaskComponent {
       this.dialogRef.close();
     }
     if (this.conceptId && this.questionId) {
-
       this.location.replaceState(`/dashboard/conceptOverview/${this.conceptId}`);
     } else if (this.conceptId) {
       this.location.replaceState(`/dashboard/conceptOverview`);
@@ -102,5 +103,4 @@ export class FreeTextTaskComponent {
       this.location.replaceState(`/dashboard`);
     }
   }
-
 }

@@ -1,33 +1,31 @@
-import { Component, ElementRef, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import type { ElementRef, OnInit, AfterViewInit } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { LocalModelSource, TYPES } from 'sprotty';
 import createContainer from './sprotty/di.config';
-import { Container } from 'inversify';
+import type { Container } from 'inversify';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
-import { ConceptGraphModelSource } from './sprotty/model-source';
-import { ModuleDataService } from 'src/app/Services/module/module-data.service';
-import { ModuleDTO } from '@DTOs/index';
+import type { ConceptGraphModelSource } from './sprotty/model-source';
+import type { ModuleDataService } from 'src/app/Services/module/module-data.service';
+import type { ModuleDTO } from '@DTOs/index';
 
 @Component({
   selector: 'app-graph',
   templateUrl: './graph.component.html',
-  styleUrls: ['./graph.component.css']
+  styleUrls: ['./graph.component.css'],
 })
 export class GraphComponent implements OnInit, AfterViewInit {
   @ViewChild('conceptGraph', { static: true }) graphContainer!: ElementRef<HTMLDivElement>;
   // create inversify container in di.config
-  private container!: Container;
-  private modelSource!: ConceptGraphModelSource;
+  private readonly container!: Container;
+  private readonly modelSource!: ConceptGraphModelSource;
   modules: ModuleDTO[] = [];
   private lastTouchPosition: { x: number; y: number } | null = null;
-  constructor(private moduleData: ModuleDataService) {
+  constructor(private readonly moduleData: ModuleDataService) {
     this.container = createContainer('concept-graph');
     this.modelSource = this.container.get<ConceptGraphModelSource>(TYPES.ModelSource);
-
   }
 
-  ngOnInit() {
-
-  }
+  ngOnInit() {}
 
   ngAfterViewInit() {
     this.attachEventListeners();
@@ -82,13 +80,13 @@ export class GraphComponent implements OnInit, AfterViewInit {
   }
 
   private panGraph(dx: number, dy: number): void {
-      console.log('Panning graph by:', dx, dy);
-      const svgElement = this.graphContainer.nativeElement.querySelector('svg');
-      if (!svgElement) return;
+    console.log('Panning graph by:', dx, dy);
+    const svgElement = this.graphContainer.nativeElement.querySelector('svg');
+    if (!svgElement) return;
 
-      let viewBox = svgElement.getAttribute('concept-graph')!.split(' ').map(Number);
-      viewBox[0] -= dx;
-      viewBox[1] -= dy;
-      svgElement.setAttribute('concept-graph', viewBox.join(' '));
+    const viewBox = svgElement.getAttribute('concept-graph')!.split(' ').map(Number);
+    viewBox[0] -= dx;
+    viewBox[1] -= dy;
+    svgElement.setAttribute('concept-graph', viewBox.join(' '));
   }
 }

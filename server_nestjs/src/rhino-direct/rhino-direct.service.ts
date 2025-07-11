@@ -56,9 +56,7 @@ export class RhinoDirectService {
   /**
    * Startet Rhino mit der angegebenen Grasshopper-Datei
    */
-  async launchRhino(
-    request: DirectRhinoLaunchRequest,
-  ): Promise<DirectRhinoLaunchResponse> {
+  async launchRhino(request: DirectRhinoLaunchRequest): Promise<DirectRhinoLaunchResponse> {
     console.log('🦏 Starting Rhino launch process:', request);
 
     // Validiere Dateipfad
@@ -83,9 +81,7 @@ export class RhinoDirectService {
         executionMethod = 'fallback';
         console.log('✅ Found Rhino via fallback search:', rhinoPath);
       } else {
-        throw new Error(
-          'Rhino-Installation nicht gefunden. Bitte Pfad manuell angeben.',
-        );
+        throw new Error('Rhino-Installation nicht gefunden. Bitte Pfad manuell angeben.');
       }
     }
 
@@ -112,9 +108,7 @@ export class RhinoDirectService {
       };
     } catch (error) {
       console.error('❌ Rhino process execution failed:', error);
-      throw new Error(
-        `Rhino-Prozess konnte nicht gestartet werden: ${error.message}`,
-      );
+      throw new Error(`Rhino-Prozess konnte nicht gestartet werden: ${error.message}`);
     }
   }
 
@@ -137,8 +131,7 @@ export class RhinoDirectService {
 
         if (registryInstallations.length > 0) {
           defaultPath =
-            registryInstallations.find((r) => r.isDefault)?.path ||
-            registryInstallations[0].path;
+            registryInstallations.find(r => r.isDefault).path || registryInstallations[0].path;
         }
       }
     } catch (error) {
@@ -149,7 +142,7 @@ export class RhinoDirectService {
     for (const commonPath of this.commonRhinoPaths) {
       if (fs.existsSync(commonPath)) {
         const version = this.extractVersionFromPath(commonPath);
-        const existing = installations.find((r) => r.path === commonPath);
+        const existing = installations.find(r => r.path === commonPath);
 
         if (!existing) {
           installations.push({
@@ -238,10 +231,7 @@ export class RhinoDirectService {
   /**
    * Führt Registry-Abfrage aus
    */
-  private async queryRegistry(
-    keyPath: string,
-    valueName: string,
-  ): Promise<string | null> {
+  private async queryRegistry(keyPath: string, valueName: string): Promise<string | null> {
     try {
       const command = `reg query "${keyPath}" /v "${valueName}"`;
       const { stdout } = await execAsync(command);
@@ -273,10 +263,7 @@ export class RhinoDirectService {
   /**
    * Erstellt Rhino-Befehlszeile für Grasshopper
    */
-  private buildRhinoCommand(
-    filePath: string,
-    options: DirectRhinoLaunchRequest,
-  ): string {
+  private buildRhinoCommand(filePath: string, options: DirectRhinoLaunchRequest): string {
     const commands = [];
 
     // Grasshopper-Befehlssequenz
@@ -303,10 +290,7 @@ export class RhinoDirectService {
   /**
    * Führt Rhino-Prozess aus
    */
-  private async executeRhinoProcess(
-    rhinoPath: string,
-    command: string,
-  ): Promise<number> {
+  private async executeRhinoProcess(rhinoPath: string, command: string): Promise<number> {
     return new Promise((resolve, reject) => {
       console.log('🚀 Spawning Rhino process:', { rhinoPath, command });
 
@@ -321,7 +305,7 @@ export class RhinoDirectService {
         resolve(process.pid);
       });
 
-      process.on('error', (error) => {
+      process.on('error', error => {
         console.error('❌ Rhino process spawn error:', error);
         reject(error);
       });
@@ -330,9 +314,7 @@ export class RhinoDirectService {
       setTimeout(() => {
         if (!process.pid) {
           reject(
-            new Error(
-              'Rhino-Prozess konnte nicht innerhalb von 10 Sekunden gestartet werden',
-            ),
+            new Error('Rhino-Prozess konnte nicht innerhalb von 10 Sekunden gestartet werden'),
           );
         }
       }, 10000);

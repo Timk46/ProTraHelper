@@ -1,14 +1,16 @@
-import { Component, OnInit, OnDestroy, Inject, ViewChild, ElementRef } from '@angular/core';
+import type { OnInit, OnDestroy, ElementRef } from '@angular/core';
+import { Component, Inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PortalModule } from '@angular/cdk/portal';
-import { OverlayModule, Overlay, OverlayRef } from '@angular/cdk/overlay';
+import type { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivatedRoute, Router } from '@angular/router';
-import { PmpmService } from '../../services/pmpm.service';
-import { PmpmSession } from '../../models/pmpm-session.model';
-import { Subscription } from 'rxjs';
-import { SafeResourceUrl, DomSanitizer } from '@angular/platform-browser';
+import type { ActivatedRoute, Router } from '@angular/router';
+import type { PmpmService } from '../../services/pmpm.service';
+import type { PmpmSession } from '../../models/pmpm-session.model';
+import type { Subscription } from 'rxjs';
+import type { SafeResourceUrl, DomSanitizer } from '@angular/platform-browser';
 
 /**
  * Component for displaying the PMPM application in a fullscreen overlay
@@ -18,7 +20,7 @@ import { SafeResourceUrl, DomSanitizer } from '@angular/platform-browser';
   standalone: true,
   imports: [CommonModule, PortalModule, OverlayModule, MatButtonModule, MatIconModule],
   templateUrl: './pmpm-overlay.component.html',
-  styleUrls: ['./pmpm-overlay.component.scss']
+  styleUrls: ['./pmpm-overlay.component.scss'],
 })
 export class PmpmOverlayComponent implements OnInit, OnDestroy {
   @ViewChild('iframeContainer') iframeContainer!: ElementRef;
@@ -42,15 +44,15 @@ export class PmpmOverlayComponent implements OnInit, OnDestroy {
   private overlayRef: OverlayRef | null = null;
 
   /** Subscriptions to clean up */
-  private subscriptions: Subscription[] = [];
+  private readonly subscriptions: Subscription[] = [];
 
   constructor(
-    private pmpmService: PmpmService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private overlay: Overlay,
-    private sanitizer: DomSanitizer,
-    private elementRef: ElementRef
+    private readonly pmpmService: PmpmService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly overlay: Overlay,
+    private readonly sanitizer: DomSanitizer,
+    private readonly elementRef: ElementRef,
   ) {}
 
   ngOnInit(): void {
@@ -95,7 +97,7 @@ export class PmpmOverlayComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     const sub = this.pmpmService.startSession(modelId).subscribe({
-      next: (session) => {
+      next: session => {
         this.session = session;
         this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(session.url || '');
         this.isConnected = true;
@@ -104,11 +106,11 @@ export class PmpmOverlayComponent implements OnInit, OnDestroy {
         // Listen for file export events
         this.subscribeToEvents();
       },
-      error: (error) => {
+      error: error => {
         console.error('Failed to start PMPM session:', error);
         this.isLoading = false;
         // TODO: Show error message to user
-      }
+      },
     });
 
     this.subscriptions.push(sub);
@@ -155,7 +157,8 @@ export class PmpmOverlayComponent implements OnInit, OnDestroy {
    */
   private enterFullscreen(): void {
     if (!this.overlayRef) {
-      const positionStrategy = this.overlay.position()
+      const positionStrategy = this.overlay
+        .position()
         .global()
         .top('0')
         .left('0')
@@ -166,7 +169,7 @@ export class PmpmOverlayComponent implements OnInit, OnDestroy {
         positionStrategy,
         hasBackdrop: false,
         panelClass: 'pmpm-fullscreen-overlay',
-        scrollStrategy: this.overlay.scrollStrategies.block()
+        scrollStrategy: this.overlay.scrollStrategies.block(),
       });
 
       // Move the iframe container to the overlay
@@ -202,7 +205,7 @@ export class PmpmOverlayComponent implements OnInit, OnDestroy {
       this.pmpmService.endSession().subscribe({
         complete: () => {
           this.router.navigate(['../../'], { relativeTo: this.route });
-        }
+        },
       });
     } else {
       this.router.navigate(['../../'], { relativeTo: this.route });
@@ -230,7 +233,7 @@ export class PmpmOverlayComponent implements OnInit, OnDestroy {
   /**
    * Handles beforeunload event to clean up session
    */
-  private handleBeforeUnload = (event: BeforeUnloadEvent): void => {
+  private readonly handleBeforeUnload = (event: BeforeUnloadEvent): void => {
     if (this.session) {
       // Try to end the session before unloading
       // Note: This may not complete in time before the page unloads

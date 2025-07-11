@@ -1,18 +1,18 @@
-
-import { Component, Inject, OnInit } from '@angular/core';
-import { ContentDTO, ContentElementDTO } from '@DTOs/content.dto';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
-import { ContentService } from 'src/app/Services/content/content.service';
+import type { OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
+import type { ContentDTO, ContentElementDTO } from '@DTOs/content.dto';
+import type { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import type { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import type { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
+import type { ContentService } from 'src/app/Services/content/content.service';
 
 @Component({
   selector: 'app-contentView',
   templateUrl: './contentView.component.html',
-  styleUrls: ['./contentView.component.css']
+  styleUrls: ['./contentView.component.css'],
 })
 export class ContentViewComponent implements OnInit {
-
   contentViewData: ContentDTO;
   activeConceptNodeId: number;
   contentTypes: string[];
@@ -27,53 +27,58 @@ export class ContentViewComponent implements OnInit {
 
   // Get Data from Dialog
   constructor(
-      public dialogRef: MatDialogRef<ContentViewComponent>,
-      @Inject(MAT_DIALOG_DATA) public data: any,
-      private sanitizer: DomSanitizer,
-      private discussionDialogService: DiscussionDialogService,
-      private contentService: ContentService)
-      {
-
-        this.contentViewData = data.contentViewData as ContentDTO;
-        this.activeConceptNodeId = data.conceptNodeId as number;
-        this.contentTypes = data.contentTypes;
-        this.elementCount = this.contentViewData.contentElements.length;
-        // filter contentElements by type
-        this.viewableElements = this.contentViewData.contentElements.filter(x => this.contentTypes.includes(x.type));
-        // sort contentElements by position
-        this.viewableElements = this.viewableElements.sort((a, b) => a.positionInSpecificContentView - b.positionInSpecificContentView);
-        // set default button style
-        for(let i = 0; i < this.contentViewData.contentElements.length; i++) {
-          this.applyCompletedStyle[i] = false;
-          this.applyQuestionStyle[i] = false;
-        }
-        this.pdfCount = this.getPdfCount();
-
-        // check if browser is Safari
-        // pdfViewer component is not supported in Safari therefor a warning message is displayed
-      this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    public dialogRef: MatDialogRef<ContentViewComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private readonly sanitizer: DomSanitizer,
+    private readonly discussionDialogService: DiscussionDialogService,
+    private readonly contentService: ContentService,
+  ) {
+    this.contentViewData = data.contentViewData as ContentDTO;
+    this.activeConceptNodeId = data.conceptNodeId as number;
+    this.contentTypes = data.contentTypes;
+    this.elementCount = this.contentViewData.contentElements.length;
+    // filter contentElements by type
+    this.viewableElements = this.contentViewData.contentElements.filter(x =>
+      this.contentTypes.includes(x.type),
+    );
+    // sort contentElements by position
+    this.viewableElements = this.viewableElements.sort(
+      (a, b) => a.positionInSpecificContentView - b.positionInSpecificContentView,
+    );
+    // set default button style
+    for (let i = 0; i < this.contentViewData.contentElements.length; i++) {
+      this.applyCompletedStyle[i] = false;
+      this.applyQuestionStyle[i] = false;
     }
+    this.pdfCount = this.getPdfCount();
+
+    // check if browser is Safari
+    // pdfViewer component is not supported in Safari therefor a warning message is displayed
+    this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  }
 
   // for testing -> print ContentElems as String
-  tempForTest(data: ContentElementDTO) :string {
+  tempForTest(data: ContentElementDTO): string {
     return JSON.stringify(data);
   }
 
   ngOnInit() {
     this.getLastOpenedDate();
     for (let i = 0; i < this.contentViewData.contentElements.length; i++) {
-      this.contentService.getContentElementStatus(this.contentViewData.contentElements[i].id).subscribe(status => {
-        if (status.userStatusCompleted) {
-          this.applyCompletedStyle[i] = true;
-        } else {
-          this.applyCompletedStyle[i] = false;
-        }
-        if (status.userStatusQuestion) {
-          this.applyQuestionStyle[i] = true;
-        } else {
-          this.applyQuestionStyle[i] = false;
-        }
-      });
+      this.contentService
+        .getContentElementStatus(this.contentViewData.contentElements[i].id)
+        .subscribe(status => {
+          if (status.userStatusCompleted) {
+            this.applyCompletedStyle[i] = true;
+          } else {
+            this.applyCompletedStyle[i] = false;
+          }
+          if (status.userStatusQuestion) {
+            this.applyQuestionStyle[i] = true;
+          } else {
+            this.applyQuestionStyle[i] = false;
+          }
+        });
     }
   }
 
@@ -104,7 +109,11 @@ export class ContentViewComponent implements OnInit {
    * @param {number} contentElementId - id of the content element
    */
   onCreateDiscussion(contentElementId: number) {
-    this.discussionDialogService.openDiscussionCreation(this.activeConceptNodeId, this.contentViewData.contentNodeId, contentElementId);
+    this.discussionDialogService.openDiscussionCreation(
+      this.activeConceptNodeId,
+      this.contentViewData.contentNodeId,
+      contentElementId,
+    );
     this.dialogRef.close();
   }
 
@@ -117,7 +126,13 @@ export class ContentViewComponent implements OnInit {
    */
   onToggleCheckmark(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
-    this.contentService.toggleContentElementCompletionStatus(contentElementId, this.activeConceptNodeId, this.contentViewData.level).subscribe(status => this.applyCompletedStyle[position] = status);
+    this.contentService
+      .toggleContentElementCompletionStatus(
+        contentElementId,
+        this.activeConceptNodeId,
+        this.contentViewData.level,
+      )
+      .subscribe(status => (this.applyCompletedStyle[position] = status));
   }
 
   /**
@@ -129,12 +144,14 @@ export class ContentViewComponent implements OnInit {
    */
   onToggleQuestionmark(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
-    this.contentService.toggleContentElementQuestionStatus(contentElementId).subscribe(status => this.applyQuestionStyle[position] = status);
-    if(!this.applyQuestionStyle[position]){
+    this.contentService
+      .toggleContentElementQuestionStatus(contentElementId)
+      .subscribe(status => (this.applyQuestionStyle[position] = status));
+    if (!this.applyQuestionStyle[position]) {
       this.contentViewData.questionMarked = true;
     } else {
-      for(let i = 0; i < this.applyQuestionStyle.length; i++){
-        if(this.applyQuestionStyle[i] && i !== position){
+      for (let i = 0; i < this.applyQuestionStyle.length; i++) {
+        if (this.applyQuestionStyle[i] && i !== position) {
           this.contentViewData.questionMarked = true;
           return;
         }
@@ -151,11 +168,11 @@ export class ContentViewComponent implements OnInit {
   applyCheckmarkStyles(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
 
-    let styles = {'color' : 'red', 'background-color' : 'white'};
+    let styles = { color: 'red', 'background-color': 'white' };
     if (this.applyCompletedStyle[position]) {
-      styles = {'color' : 'white', 'background-color': '#a3be8c'};
+      styles = { color: 'white', 'background-color': '#a3be8c' };
     } else {
-      styles = {'color' : 'gray', 'background-color': 'white'};
+      styles = { color: 'gray', 'background-color': 'white' };
     }
     return styles;
   }
@@ -168,11 +185,11 @@ export class ContentViewComponent implements OnInit {
   applyQuestionmarkStyles(contentElementId: number) {
     const position = this.contentViewData.contentElements.findIndex(x => x.id === contentElementId);
 
-    let styles = {'color' : 'white', 'background-color' : 'red'};
+    let styles = { color: 'white', 'background-color': 'red' };
     if (this.applyQuestionStyle[position]) {
-      styles = {'color' : 'white', 'background-color': '#b48ead'};
+      styles = { color: 'white', 'background-color': '#b48ead' };
     } else {
-      styles = {'color' : 'gray', 'background-color': 'white'};
+      styles = { color: 'gray', 'background-color': 'white' };
     }
     return styles;
   }
@@ -181,24 +198,28 @@ export class ContentViewComponent implements OnInit {
    * @description
    * Returns the date of the last time the content node was opened
    */
-  getLastOpenedDate(){
-    this.contentService.updateLastOpenedDate(this.contentViewData.contentNodeId).subscribe(status => {this.lastOpenedDate = new Date(status); this.readableDate = this.getDateDisplay(this.lastOpenedDate);});
+  getLastOpenedDate() {
+    this.contentService
+      .updateLastOpenedDate(this.contentViewData.contentNodeId)
+      .subscribe(status => {
+        this.lastOpenedDate = new Date(status);
+        this.readableDate = this.getDateDisplay(this.lastOpenedDate);
+      });
   }
   /**
    * Returns the date in a human readable format
    * @param date
    * @returns string - date in a human readable format
    */
-    getDateDisplay(date: Date): string {
-      const today = new Date();
-      const newDate = new Date(date);
-      const dbDate = new Date(date);
-      today.setHours(0, 0, 0, 0); // set time to 00:00:00.000
-      if (newDate.setHours(0, 0, 0, 0) === today.getTime()) {
-        return `Heute ${dbDate.getHours()}:${dbDate.getMinutes()< 10 ? '0' : ''}${dbDate.getMinutes()} Uhr`;
-      } else {
-        return `${newDate.getDate()}.${newDate.getMonth() + 1}.${newDate.getFullYear()}`;
-      }
+  getDateDisplay(date: Date): string {
+    const today = new Date();
+    const newDate = new Date(date);
+    const dbDate = new Date(date);
+    today.setHours(0, 0, 0, 0); // set time to 00:00:00.000
+    if (newDate.setHours(0, 0, 0, 0) === today.getTime()) {
+      return `Heute ${dbDate.getHours()}:${dbDate.getMinutes() < 10 ? '0' : ''}${dbDate.getMinutes()} Uhr`;
+    } else {
+      return `${newDate.getDate()}.${newDate.getMonth() + 1}.${newDate.getFullYear()}`;
     }
-
+  }
 }

@@ -1,11 +1,11 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-
+import type { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-image-upload-dialog',
   templateUrl: './image-upload-dialog.component.html',
-  styleUrls: ['./image-upload-dialog.component.scss']
+  styleUrls: ['./image-upload-dialog.component.scss'],
 })
 export class ImageUploadDialogComponent {
   activeTab: 'general' | 'upload' = 'upload';
@@ -83,17 +83,17 @@ export class ImageUploadDialogComponent {
    * Saves the selected image and closes the dialog
    */
   onSave(): void {
-      if (this.selectedFile && this.imagePreviewUrl) {
-        this.dialogRef.close({
-          file: this.selectedFile,
-          url: this.imagePreviewUrl,
-          altDescription: this.altDescription,
-          width: this.imageWidth,
-          height: this.imageHeight
-        });
-      } else {
-        this.dialogRef.close();
-      }
+    if (this.selectedFile && this.imagePreviewUrl) {
+      this.dialogRef.close({
+        file: this.selectedFile,
+        url: this.imagePreviewUrl,
+        altDescription: this.altDescription,
+        width: this.imageWidth,
+        height: this.imageHeight,
+      });
+    } else {
+      this.dialogRef.close();
+    }
   }
 
   /**
@@ -111,5 +111,4 @@ export class ImageUploadDialogComponent {
   canSave(): boolean {
     return this.selectedFile !== null;
   }
-
 }

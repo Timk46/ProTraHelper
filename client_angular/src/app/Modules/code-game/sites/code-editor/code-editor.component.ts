@@ -1,12 +1,12 @@
+import type { OnInit } from '@angular/core';
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-code-editor-code-game',
   templateUrl: './code-editor.component.html',
-  styleUrls: ['./code-editor.component.scss']
+  styleUrls: ['./code-editor.component.scss'],
 })
-
-export class CodeEditorComponent {
+export class CodeEditorComponent implements OnInit {
   @ViewChild('monacoEditor', { static: false }) monacoEditor!: any;
 
   @Input() selectedLanguage: string | undefined = 'c++';

@@ -1,25 +1,27 @@
+import type { OnInit } from '@angular/core';
 import { Component, HostListener, SecurityContext, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute, Router } from '@angular/router';
-import { BlankDTO, detailedFillinBlankDTO, detailedQuestionDTO, FillinQuestionType, questionType } from '@DTOs/index';
-import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
-import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { MatDialog } from '@angular/material/dialog';
+import type { FormBuilder, FormGroup } from '@angular/forms';
+import { Validators } from '@angular/forms';
+import type { MatSnackBar } from '@angular/material/snack-bar';
+import type { ActivatedRoute, Router } from '@angular/router';
+import type { BlankDTO, detailedFillinBlankDTO, detailedQuestionDTO } from '@DTOs/index';
+import { FillinQuestionType, questionType } from '@DTOs/index';
+import type { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import type { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import type { MatDialog } from '@angular/material/dialog';
 import { ImageUploadDialogComponent } from './image-upload-dialog/image-upload-dialog.component';
 import { EditBlankComponent } from './edit-blank/edit-blank.component';
 import { v4 as uuidv4 } from 'uuid';
 
-declare var tinymce: any;
+declare let tinymce: any;
 
 @Component({
   selector: 'app-edit-fillin',
   templateUrl: './edit-fillin.component.html',
-  styleUrls: ['./edit-fillin.component.scss']
+  styleUrls: ['./edit-fillin.component.scss'],
 })
-export class EditFillinComponent {
-
+export class EditFillinComponent implements OnInit {
   fillinForm: FormGroup;
   thisQuestionType = questionType.FILLIN;
   detailedQuestionData: detailedQuestionDTO | null = null;
@@ -47,8 +49,8 @@ export class EditFillinComponent {
 
   private isMarkBlankModeActive = false;
   private isEditBlanksModeActive = false;
-  private currentTaskId?: number;
-  private blankInfo = new Map<string, { id: number, word: string | null }>();
+  private readonly currentTaskId?: number;
+  private readonly blankInfo = new Map<string, { id: number; word: string | null }>();
   distractors: detailedFillinBlankDTO[] = [];
   distractorInput = '';
   isMarkDistractorModeActive = false;
@@ -57,15 +59,14 @@ export class EditFillinComponent {
   /* ----------- */
 
   constructor(
-    private fb: FormBuilder,
-    private questionDataService: QuestionDataService,
-    private route: ActivatedRoute,
-    private confirmationService: ConfirmationService,
-    private snackBar: MatSnackBar,
-    private router: Router,
-    private sanitizer: DomSanitizer,
-    private dialog: MatDialog
-
+    private readonly fb: FormBuilder,
+    private readonly questionDataService: QuestionDataService,
+    private readonly route: ActivatedRoute,
+    private readonly confirmationService: ConfirmationService,
+    private readonly snackBar: MatSnackBar,
+    private readonly router: Router,
+    private readonly sanitizer: DomSanitizer,
+    private readonly dialog: MatDialog,
   ) {
     this.fillinForm = this.fb.group({
       questionTitle: ['', Validators.required],
@@ -84,10 +85,9 @@ export class EditFillinComponent {
       this.handleRouteParams();
       //this.initializeEditor();
     }, 0);
-
   }
 
- /*  ngOnInit(): void {
+  /*  ngOnInit(): void {
     this.handleRouteParams();
     this.initializeEditorConfig();
     console.log('Initializing editor');
@@ -97,17 +97,23 @@ export class EditFillinComponent {
   private handleRouteParams() {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
-      this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
-        if (data.type === questionType.FILLIN) {
-          this.detailedQuestionData = data;
-          console.log(this.detailedQuestionData);
-          this.initializeEditor();
-          this.setContent();
-        } else {
-          this.snackBar.open('ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Lückentextaufgabe', 'Schließen', { duration: 10000 });
-          this.thisQuestionType = data.type as questionType;
-        }
-      });
+      this.questionDataService
+        .getDetailedQuestionData(questionId, this.thisQuestionType)
+        .subscribe(data => {
+          if (data.type === questionType.FILLIN) {
+            this.detailedQuestionData = data;
+            console.log(this.detailedQuestionData);
+            this.initializeEditor();
+            this.setContent();
+          } else {
+            this.snackBar.open(
+              'ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Lückentextaufgabe',
+              'Schließen',
+              { duration: 10000 },
+            );
+            this.thisQuestionType = data.type as questionType;
+          }
+        });
     });
   }
 
@@ -120,7 +126,8 @@ export class EditFillinComponent {
         questionDescription: this.detailedQuestionData.description,
         questionScore: this.detailedQuestionData.score,
       });
-      if (this.detailedQuestionData.fillinQuestion) { // fillinQuestion
+      if (this.detailedQuestionData.fillinQuestion) {
+        // fillinQuestion
         // TODO: restliche Felder fuellen
         this.fillinForm.patchValue({
           fillinType: this.detailedQuestionData.fillinQuestion.taskType,
@@ -129,20 +136,30 @@ export class EditFillinComponent {
         if (this.editorInstance) {
           this.editorInstance.setContent(this.detailedQuestionData.fillinQuestion.content);
         }
-        this.distractors = this.detailedQuestionData.fillinQuestion.blanks.filter(blank => blank.isDistractor);
+        this.distractors = this.detailedQuestionData.fillinQuestion.blanks.filter(
+          blank => blank.isDistractor,
+        );
       }
     }
   }
 
   private buildDTO(): detailedQuestionDTO | null {
-
-    console.log(this.thisQuestionType === questionType.FILLIN, this.fillinForm.valid, this.detailedQuestionData)
+    console.log(
+      this.thisQuestionType === questionType.FILLIN,
+      this.fillinForm.valid,
+      this.detailedQuestionData,
+    );
 
     const doc = new DOMParser().parseFromString(this.editorInstance.getContent(), 'text/html');
     const distractors: detailedFillinBlankDTO[] = this.distractors;
     const blanks: detailedFillinBlankDTO[] = this.processBlanks(doc);
 
-    if ( this.thisQuestionType === questionType.FILLIN && this.fillinForm.valid && this.detailedQuestionData && this.editorInstance.getContent().length > 0) {
+    if (
+      this.thisQuestionType === questionType.FILLIN &&
+      this.fillinForm.valid &&
+      this.detailedQuestionData &&
+      this.editorInstance.getContent().length > 0
+    ) {
       const newData: detailedQuestionDTO = {
         ...this.detailedQuestionData,
         name: this.fillinForm.value.questionTitle,
@@ -165,10 +182,10 @@ export class EditFillinComponent {
               isCorrect: blank.isCorrect || false,
               //isImage: blank.isImage,
               //imageUrl: blank.imageUrl
-            }
-          })
-        }
-      }
+            };
+          }),
+        },
+      };
       return newData;
     }
     return null;
@@ -184,7 +201,7 @@ export class EditFillinComponent {
         this.isSaving = true;
         const submitData = this.buildDTO();
         console.log('Submit data:', submitData);
-        if (submitData){
+        if (submitData) {
           this.questionDataService.updateWholeQuestion(submitData).subscribe({
             next: response => {
               console.log('Question updated successfully:', response);
@@ -195,9 +212,11 @@ export class EditFillinComponent {
             },
             error: error => {
               console.error('Error updating question:', error);
-              this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', { duration: 3000 });
+              this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', {
+                duration: 3000,
+              });
               this.isSaving = false;
-            }
+            },
           });
         } else {
           this.isSaving = false;
@@ -205,16 +224,17 @@ export class EditFillinComponent {
       },
       decline: () => {
         console.log('Overwrite declined');
-      }
+      },
     });
   }
 
   protected onSaveNewVersion() {
-    return // disabled for now
+    return; // disabled for now
 
     this.confirmationService.confirm({
       title: 'Neue Version erstellen',
-      message: 'Dies speichert die Frage unter einer neuen Version. Die alte Version bleibt erhalten, aber nicht mehr sichtbar. Fortfahren?',
+      message:
+        'Dies speichert die Frage unter einer neuen Version. Die alte Version bleibt erhalten, aber nicht mehr sichtbar. Fortfahren?',
       acceptLabel: 'Version erstellen',
       declineLabel: 'Abbrechen',
       accept: () => {
@@ -223,14 +243,15 @@ export class EditFillinComponent {
       },
       decline: () => {
         console.log('Save declined');
-      }
+      },
     });
   }
 
   protected onCancel() {
     this.confirmationService.confirm({
       title: 'Bearbeitung abbrechen',
-      message: 'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
+      message:
+        'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
       acceptLabel: 'Bearbeitung abbrechen',
       declineLabel: 'Weiter bearbeiten',
       swapColors: true,
@@ -241,12 +262,9 @@ export class EditFillinComponent {
       },
       decline: () => {
         console.log('Cancel declined');
-      }
+      },
     });
   }
-
-
-
 
   // ----------------- Freetext specific methods -----------------
 
@@ -257,7 +275,6 @@ export class EditFillinComponent {
       console.log('Built DTO:', this.buildDTO());
     }
   }
-
 
   private initializeEditor(): void {
     if (typeof tinymce === 'undefined') {
@@ -281,21 +298,21 @@ export class EditFillinComponent {
       statusbar: false,
       resize: false,
       branding: false,
-      ...this.editorConfig
+      ...this.editorConfig,
     });
   }
 
   /**
-     * Initializes the configuration for the TinyMCE editor.
-     * This includes setting up custom buttons, styles, and event listeners.
-     */
+   * Initializes the configuration for the TinyMCE editor.
+   * This includes setting up custom buttons, styles, and event listeners.
+   */
   private initializeEditorConfig(): void {
     this.editorConfig = {
       plugins: 'link code table lists emoticons charmap fullscreen',
       toolbar: [
         'undo redo | code | markBlank | insertImage | fullscreen',
         'fontsize | bold italic underline | forecolor backcolor | superscript subscript',
-        'alignleft aligncenter alignright | bullist numlist outdent indent | table | charmap emoticons'
+        'alignleft aligncenter alignright | bullist numlist outdent indent | table | charmap emoticons',
       ],
       images_upload_url: 'linkToImages', // update to right path(!!!!)
       table_toolbar: '',
@@ -336,14 +353,14 @@ export class EditFillinComponent {
         editor.on('keydown', (e: KeyboardEvent) => this.handleEditorKeydown(editor, e));
         this.editorInstance = editor;
       },
-      extended_valid_elements: 'span[class|style|data-word|title],div[class|contenteditable]'
+      extended_valid_elements: 'span[class|style|data-word|title],div[class|contenteditable]',
     };
   }
 
   /**
-  * Sets up custom buttons for the TinyMCE editor toolbar.
-  * @param editor - The TinyMCE editor instance
-  */
+   * Sets up custom buttons for the TinyMCE editor toolbar.
+   * @param editor - The TinyMCE editor instance
+   */
   private setupEditorButtons(editor: any): void {
     const buttons = [
       {
@@ -353,7 +370,7 @@ export class EditFillinComponent {
         onSetup: (api: any) => {
           api.setActive(this.isMarkBlankModeActive);
           return editor.on('markBlankModeChanged', (e: any) => api.setActive(e.active));
-        }
+        },
       },
       /* {
         name: 'editBlanks',
@@ -376,19 +393,18 @@ export class EditFillinComponent {
         onSetup: (api: any) => {
           api.setActive(this.isMarkDistractorModeActive);
           return editor.on('markDistractorModeChanged', (e: any) => api.setActive(e.active));
-        }
+        },
       },
       //{ name: 'addQuestionDetails', text: 'Fragendetails hinzufügen', action: () => this.openQuestionDetailsDialog() },
       //{ name: 'newTask', text: 'Neue Aufgabe erstellen', action: () => this.createNewTask(editor) },
-      { name: 'insertImage', text: 'Bild einfügen', action: () => this.openImageUploadDialog() }
-
+      { name: 'insertImage', text: 'Bild einfügen', action: () => this.openImageUploadDialog() },
     ];
 
     buttons.forEach(button => {
       editor.ui.registry.addToggleButton(button.name, {
         text: button.text,
         onAction: button.action,
-        onSetup: button.onSetup
+        onSetup: button.onSetup,
       });
     });
   }
@@ -422,7 +438,6 @@ export class EditFillinComponent {
       editor.insertContent(imageHtml);
     }
   }
-
 
   /**
    * Sets up event listeners for the TinyMCE editor.
@@ -558,8 +573,10 @@ export class EditFillinComponent {
     while (currentNode && currentNode.nodeType !== Node.ELEMENT_NODE) {
       currentNode = currentNode.parentNode;
     }
-    return currentNode?.nodeName === 'SPAN' &&
-          (currentNode as Element).classList.contains('generated-blank');
+    return (
+      currentNode?.nodeName === 'SPAN' &&
+      (currentNode as Element).classList.contains('generated-blank')
+    );
   }
 
   /**
@@ -591,7 +608,6 @@ export class EditFillinComponent {
     }
   }
 
-
   /**
    * Handles clicks when in edit blanks mode.
    * @param {any} editor - The TinyMCE editor instance
@@ -621,9 +637,14 @@ export class EditFillinComponent {
    */
   handleGeneratedContentClick(event: MouseEvent): void {
     if (this.isEditBlanksModeActive) {
-      const clickedElement = (event.target as Element).closest('.generated-blank, .editable-generated-blank, .distractor, .editable-distractor') as HTMLElement;
+      const clickedElement = (event.target as Element).closest(
+        '.generated-blank, .editable-generated-blank, .distractor, .editable-distractor',
+      ) as HTMLElement;
       if (clickedElement) {
-        if (clickedElement.classList.contains('distractor') || clickedElement.classList.contains('editable-distractor')) {
+        if (
+          clickedElement.classList.contains('distractor') ||
+          clickedElement.classList.contains('editable-distractor')
+        ) {
           this.openEditDistractorDialog(clickedElement);
         } else {
           this.openEditBlankDialog(clickedElement);
@@ -652,7 +673,7 @@ export class EditFillinComponent {
 
     const dialogRef = this.dialog.open(EditBlankComponent, {
       width: '250px',
-      data: { word: distractor.blankContent, isDistractor: true }
+      data: { word: distractor.blankContent, isDistractor: true },
     });
 
     dialogRef.afterClosed().subscribe((result: string) => {
@@ -672,10 +693,13 @@ export class EditFillinComponent {
     const isInEditor = this.editorInstance?.getBody().contains(element);
 
     if (!position) {
-      const htmlContent = this.sanitizer.sanitize(SecurityContext.HTML, this.generatedContent) || '';
+      const htmlContent =
+        this.sanitizer.sanitize(SecurityContext.HTML, this.generatedContent) || '';
       const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
       const allBlanks = doc.querySelectorAll('.generated-blank, .editable-generated-blank');
-      position = Array.from(allBlanks).findIndex(blank => blank.isEqualNode(element)).toString();
+      position = Array.from(allBlanks)
+        .findIndex(blank => blank.isEqualNode(element))
+        .toString();
     }
 
     if (!position || !this.blankInfo.has(position)) {
@@ -687,7 +711,11 @@ export class EditFillinComponent {
     const dialogRef = this.dialog.open(EditBlankComponent, {
       width: isImage ? '500px' : '250px',
       height: isImage ? '500px' : '250px',
-      data: {word: isImage ? (element as HTMLImageElement).src : word, isDistractor: false, isImage: isImage}
+      data: {
+        word: isImage ? (element as HTMLImageElement).src : word,
+        isDistractor: false,
+        isImage: isImage,
+      },
     });
 
     dialogRef.afterClosed().subscribe((result: string | File) => {
@@ -696,8 +724,13 @@ export class EditFillinComponent {
         this.updateBlank(element, result);
         this.updateGeneratedContent();
         if (isImage) {
-          this.updateBlankWithNewImage(element, position!, this.blankInfo.get(position!)!.id, result instanceof File ? URL.createObjectURL(result) : result);
-          this.updateEditorImageContent(position!, result);
+          this.updateBlankWithNewImage(
+            element,
+            position,
+            this.blankInfo.get(position)!.id,
+            result instanceof File ? URL.createObjectURL(result) : result,
+          );
+          this.updateEditorImageContent(position, result);
         }
       }
     });
@@ -707,12 +740,14 @@ export class EditFillinComponent {
     if (this.editorInstance) {
       const editor = this.editorInstance;
       const editorBody = editor.getBody();
-      const imageInEditor = editorBody.querySelector(`[data-position="${position}"]`) as HTMLImageElement;
+      const imageInEditor = editorBody.querySelector(
+        `[data-position="${position}"]`,
+      ) as HTMLImageElement;
 
       if (imageInEditor) {
         if (newImage instanceof File) {
           const reader = new FileReader();
-          reader.onload = (e) => {
+          reader.onload = e => {
             const imageData = e.target?.result as string;
             imageInEditor.src = imageData;
             editor.fire('change');
@@ -736,7 +771,6 @@ export class EditFillinComponent {
     cell.classList.toggle('table-blank', !isBlank);
     const word = cell.textContent || '';
     cell.setAttribute('data-word', isBlank ? '' : word);
-
   }
 
   /**
@@ -763,7 +797,7 @@ export class EditFillinComponent {
         this.blankInfo.delete(position);
         img.removeAttribute('data-position');
       }
-  }
+    }
 
     editor.fire('ImageBlankToggled', { img, isBlank: !isBlank, imageSource: img.src });
   }
@@ -815,7 +849,6 @@ export class EditFillinComponent {
     }
   }
 
-
   /**
    * Toggles a word as a distractor
    * @param {any} editor - The TinyMCE editor instance
@@ -833,14 +866,13 @@ export class EditFillinComponent {
           const word = wordRange.toString();
           const span = editor.dom.create('span', {
             class: 'editable-distractor',
-            'data-word': word
+            'data-word': word,
           });
           wordRange.surroundContents(span);
         }
       }
     }
   }
-
 
   /**
    * Adds a global distractor
@@ -850,9 +882,9 @@ export class EditFillinComponent {
     if (word && !this.distractors.some(d => d.blankContent === word)) {
       this.distractors.push({
         blankContent: word,
-        position: '-1',  // Use -1 to indicate it's a global distractor
+        position: '-1', // Use -1 to indicate it's a global distractor
         isDistractor: true,
-        isCorrect: false
+        isCorrect: false,
       });
       this.distractorInput = '';
     }
@@ -880,9 +912,9 @@ export class EditFillinComponent {
     if (!range.collapsed) {
       const content = range.extractContents();
       const blankSpan = editor.dom.create('span', {
-        'class': 'generated-blank',
+        class: 'generated-blank',
         'data-word': content.textContent.trim(),
-        contenteditable: 'false'
+        contenteditable: 'false',
       });
       blankSpan.appendChild(content);
       range.insertNode(blankSpan);
@@ -901,7 +933,7 @@ export class EditFillinComponent {
       editor.notificationManager.open({
         text: 'Bitte nun ein Wort, eine Tabellenzelle oder ein Bild auswählen, um eine Lücke zu markieren.',
         type: 'warning',
-        timeout: 4000
+        timeout: 4000,
       });
     }
   }
@@ -924,7 +956,7 @@ export class EditFillinComponent {
    * @param blankSpan - The span element representing the new blank
    */
   private updateBlankInfo(blankSpan: HTMLElement): void {
-    const position = uuidv4() //this.blankInfo.size.toString();
+    const position = uuidv4(); //this.blankInfo.size.toString();
     const word = blankSpan.getAttribute('data-word') || '';
     this.blankInfo.set(position, { id: -1, word });
     blankSpan.setAttribute('data-position', position);
@@ -951,7 +983,7 @@ export class EditFillinComponent {
         editor.notificationManager.open({
           text: 'Bitte nun ein Wort, eine Tabellenzelle oder ein Bild auswählen, um eine Lücke zu markieren.',
           type: 'info',
-          timeout: 3000
+          timeout: 3000,
         });
       }
     }
@@ -971,7 +1003,7 @@ export class EditFillinComponent {
     this.updateGeneratedContent();
     editor.fire('EditBlanksStateChanged', {
       active: this.isEditBlanksModeActive,
-      isExistingTask: this.isExistingTask
+      isExistingTask: this.isExistingTask,
     });
   }
 
@@ -992,8 +1024,11 @@ export class EditFillinComponent {
    * @param editor - The TinyMCE editor instance
    */
   private updateEditorMode(editor: any): void {
-    editor.getBody().style.cursor = this.isMarkBlankModeActive ? 'crosshair' :
-                                    this.isMarkDistractorModeActive ? 'cell' : 'default';
+    editor.getBody().style.cursor = this.isMarkBlankModeActive
+      ? 'crosshair'
+      : this.isMarkDistractorModeActive
+        ? 'cell'
+        : 'default';
 
     // Clean up unnecessary spans and empty paragraphs
     const body = editor.getBody();
@@ -1045,7 +1080,8 @@ export class EditFillinComponent {
     this.distractors[index].blankContent = newWord;
 
     if (this.generatedContent) {
-      const htmlContent = this.sanitizer.sanitize(SecurityContext.HTML, this.generatedContent) || '';
+      const htmlContent =
+        this.sanitizer.sanitize(SecurityContext.HTML, this.generatedContent) || '';
       const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
       const distractorElements = doc.querySelectorAll('.distractor, .editable-distractor');
 
@@ -1066,7 +1102,8 @@ export class EditFillinComponent {
    */
   private updateGeneratedContentStyles(): void {
     if (this.generatedContent) {
-      const htmlContent = this.sanitizer.sanitize(SecurityContext.HTML, this.generatedContent) || '';
+      const htmlContent =
+        this.sanitizer.sanitize(SecurityContext.HTML, this.generatedContent) || '';
       const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
       doc.querySelectorAll('.generated-blank').forEach((blank: Element) => {
         blank.classList.toggle('editable-generated-blank', this.isEditBlanksModeActive);
@@ -1083,9 +1120,12 @@ export class EditFillinComponent {
    * @param editor - The TinyMCE editor instance
    */
   private updateDistractorStyles(editor: any): void {
-    editor.getBody().querySelectorAll('.distractor').forEach((distractor: any) => {
-      distractor.classList.toggle('editable-distractor', this.isMarkDistractorModeActive);
-    });
+    editor
+      .getBody()
+      .querySelectorAll('.distractor')
+      .forEach((distractor: any) => {
+        distractor.classList.toggle('editable-distractor', this.isMarkDistractorModeActive);
+      });
   }
 
   /**
@@ -1128,13 +1168,13 @@ export class EditFillinComponent {
       console.error('Invalid blank position');
       return;
     }
-    console.log("newWord: ", newWord)
+    console.log('newWord: ', newWord);
     const { id } = this.blankInfo.get(position)!;
     const isImage = blankElement.tagName.toLowerCase() === 'img';
 
     if (isImage && newWord instanceof File) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         const imageData = e.target?.result as string;
         this.updateBlankWithNewImage(blankElement, position, id, imageData);
         this.updateGeneratedContent();
@@ -1148,7 +1188,12 @@ export class EditFillinComponent {
     }
   }
 
-  private updateBlankWithNewImage(blankElement: HTMLElement, position: string, id: number, imageData: string): void {
+  private updateBlankWithNewImage(
+    blankElement: HTMLElement,
+    position: string,
+    id: number,
+    imageData: string,
+  ): void {
     /* (blankElement as HTMLImageElement).src = imageData;
 
     const updateBlankDto: BlankDTO = {
@@ -1170,7 +1215,12 @@ export class EditFillinComponent {
     ); */
   }
 
-  private updateBlankWithNewWord(blankElement: HTMLElement, position: string, id: number, newWord: string): void {
+  private updateBlankWithNewWord(
+    blankElement: HTMLElement,
+    position: string,
+    id: number,
+    newWord: string,
+  ): void {
     /* const updateBlankDto: BlankDTO = {
       id,
       fillinQuestionId: this.currentTaskId!,
@@ -1233,7 +1283,9 @@ export class EditFillinComponent {
     const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
 
     // Process blanks
-    const blanks = Array.from(doc.querySelectorAll('.generated-blank, .editable-generated-blank, img.image-blank'));
+    const blanks = Array.from(
+      doc.querySelectorAll('.generated-blank, .editable-generated-blank, img.image-blank'),
+    );
     blanks.forEach((blank, index) => {
       const position = blank.getAttribute('data-position') || index.toString();
       if (this.blankInfo.has(position)) {
@@ -1260,9 +1312,13 @@ export class EditFillinComponent {
     });
 
     // Process existing distractors
-    const existingDistractors = Array.from(doc.querySelectorAll('.distractor, .editable-distractor'));
+    const existingDistractors = Array.from(
+      doc.querySelectorAll('.distractor, .editable-distractor'),
+    );
     existingDistractors.forEach((distractor, index) => {
-      distractor.className = this.isEditBlanksModeActive ? 'distractor editable-distractor' : 'distractor';
+      distractor.className = this.isEditBlanksModeActive
+        ? 'distractor editable-distractor'
+        : 'distractor';
       distractor.setAttribute('data-distractor-id', index.toString());
     });
 
@@ -1271,9 +1327,14 @@ export class EditFillinComponent {
     this.distractors.forEach((distractor, index) => {
       if (!existingDistractorWords.has(distractor.blankContent)) {
         const distractorElement = doc.createElement('span');
-        distractorElement.className = this.isEditBlanksModeActive ? 'distractor editable-distractor' : 'distractor';
-        distractorElement.setAttribute('data-distractor-id', (existingDistractors.length + index).toString());
-        distractorElement.setAttribute('data-word', distractor.blankContent!);
+        distractorElement.className = this.isEditBlanksModeActive
+          ? 'distractor editable-distractor'
+          : 'distractor';
+        distractorElement.setAttribute(
+          'data-distractor-id',
+          (existingDistractors.length + index).toString(),
+        );
+        distractorElement.setAttribute('data-word', distractor.blankContent);
         distractorElement.textContent = distractor.blankContent;
         doc.body.appendChild(document.createTextNode(' ')); // Add space before distractor
         doc.body.appendChild(distractorElement);
@@ -1448,7 +1509,8 @@ export class EditFillinComponent {
    */
   private getWordRange(editor: any, textNode: Text, offset: number): Range | null {
     const text = textNode.textContent || '';
-    let start = offset, end = offset;
+    let start = offset,
+      end = offset;
     while (start > 0 && !/\s/.test(text[start - 1])) start--;
     while (end < text.length && !/\s/.test(text[end])) end++;
     if (start !== end) {
@@ -1470,57 +1532,65 @@ export class EditFillinComponent {
     //let blankIndex = 0;
 
     // Remove empty paragraphs and paragraphs with only <br> tags
-    doc.querySelectorAll('p').forEach((p) => {
-      if (p.innerHTML.trim() === '' || p.innerHTML.trim() === '<br>' || p.innerHTML.trim() === '<br data-mce-bogus="1">') {
+    doc.querySelectorAll('p').forEach(p => {
+      if (
+        p.innerHTML.trim() === '' ||
+        p.innerHTML.trim() === '<br>' ||
+        p.innerHTML.trim() === '<br data-mce-bogus="1">'
+      ) {
         p.remove();
       }
     });
 
-    doc.querySelectorAll('.text-blank, td.table-blank, .generated-blank, .distractor, .image-blank').forEach((blank) => {
-      const isImage = blank.tagName.toLowerCase() === 'img';
-      const word = isImage ? (blank as HTMLImageElement).src: (blank.getAttribute('data-word') || blank.textContent || ''); //  anstatt "Image-Blank"????
-      const positionId = blank.getAttribute('data-position') || '-1';
-      const isDistractor = blank.classList.contains('distractor');
+    doc
+      .querySelectorAll('.text-blank, td.table-blank, .generated-blank, .distractor, .image-blank')
+      .forEach(blank => {
+        const isImage = blank.tagName.toLowerCase() === 'img';
+        const word = isImage
+          ? (blank as HTMLImageElement).src
+          : blank.getAttribute('data-word') || blank.textContent || ''; //  anstatt "Image-Blank"????
+        const positionId = blank.getAttribute('data-position') || '-1';
+        const isDistractor = blank.classList.contains('distractor');
 
-      // Skip empty or whitespace-only blanks
-      if (!isImage && word.trim() === '') {
-        blank.remove();
-        return;
-      }
-
-      const blankDto: detailedFillinBlankDTO = {
-        blankContent: word,
-        position: positionId,
-        isDistractor,
-        isCorrect: true,
-      };
-
-      blanks.push(blankDto);
-
-      if (!isDistractor) {
-        if (isImage) {
-          blank.classList.remove('image-blank');
-          blank.classList.add('generated-blank');
-          (blank as HTMLImageElement).setAttribute('data-word', word || '');
-        } else {
-          blank.textContent = '______';
-          blank.className = 'generated-blank';
+        // Skip empty or whitespace-only blanks
+        if (!isImage && word.trim() === '') {
+          blank.remove();
+          return;
         }
-        //blank.setAttribute('data-position', blankIndex.toString());
-        blank.setAttribute('data-word', word);
-        //blankIndex++;
-      }
-    });
+
+        const blankDto: detailedFillinBlankDTO = {
+          blankContent: word,
+          position: positionId,
+          isDistractor,
+          isCorrect: true,
+        };
+
+        blanks.push(blankDto);
+
+        if (!isDistractor) {
+          if (isImage) {
+            blank.classList.remove('image-blank');
+            blank.classList.add('generated-blank');
+            (blank as HTMLImageElement).setAttribute('data-word', word || '');
+          } else {
+            blank.textContent = '______';
+            blank.className = 'generated-blank';
+          }
+          //blank.setAttribute('data-position', blankIndex.toString());
+          blank.setAttribute('data-word', word);
+          //blankIndex++;
+        }
+      });
 
     // Remove the data-processed attribute after processing
     // Clean up any remaining empty paragraphs
-    doc.querySelectorAll('p').forEach((p) => {
+    doc.querySelectorAll('p').forEach(p => {
       if (p.innerHTML.trim() === '') {
         p.remove();
       }
     });
 
-    console.log("blanks", blanks);
+    console.log('blanks', blanks);
     return blanks;
   }
 
@@ -1596,7 +1666,6 @@ export class EditFillinComponent {
    * @param {boolean} hasTable - Indicates if the task contains a table
    */
   private saveTask(content: SafeHtml, blanks: BlankDTO[], hasTable: boolean): void {
-
     /* const stringContent = this.sanitizer.sanitize(SecurityContext.HTML, content) || '';
     const contentWithPlaceholders = this.replaceBlanksWithPlaceholders(stringContent);
     console.log('StringContent:', stringContent);
@@ -1667,7 +1736,7 @@ export class EditFillinComponent {
           ...existingBlank,
           ...blank,
           id: existingBlank.id, // Preserve the existing ID
-          isDistractor: false
+          isDistractor: false,
         });
       } else {
         mergedBlanks.set(blank.position!, { ...blank, id: -1, isDistractor: false });
@@ -1676,7 +1745,4 @@ export class EditFillinComponent {
 
     return Array.from(mergedBlanks.values());
   }
-
-
-
 }

@@ -17,8 +17,8 @@
     <mat-card-content>
       <!-- Questions & Answers -->
       <div *ngFor="let question of freeTextQuestions; let i = index" class="question-answer-pair">
-        <h3 class="question-title">{{question.title}}</h3>
-        <p class="question-text">{{question.text}}</p>
+        <h3 class="question-title">{{ question.title }}</h3>
+        <p class="question-text">{{ question.text }}</p>
 
         <!-- TinyMCE Editor with reduced height -->
         <div class="editor-container">
@@ -33,7 +33,10 @@
         </div>
 
         <!-- Divider between questions -->
-        <mat-divider *ngIf="i < freeTextQuestions.length - 1" class="question-divider"></mat-divider>
+        <mat-divider
+          *ngIf="i < freeTextQuestions.length - 1"
+          class="question-divider"
+        ></mat-divider>
       </div>
     </mat-card-content>
 

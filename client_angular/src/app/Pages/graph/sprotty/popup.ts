@@ -15,38 +15,40 @@
  ********************************************************************************/
 
 import { injectable, inject } from 'inversify';
-import {
-    TYPES, IModelFactory, IPopupModelProvider
-} from 'sprotty';
-import { PreRenderedElement, RequestPopupModelAction, SModelElement, SModelRoot } from 'sprotty-protocol';
+import type { IModelFactory, IPopupModelProvider } from 'sprotty';
+import { TYPES } from 'sprotty';
+import type {
+  PreRenderedElement,
+  RequestPopupModelAction,
+  SModelElement,
+  SModelRoot,
+} from 'sprotty-protocol';
 import { SprottyConceptNode } from './sprottyModels.interface';
 
 @injectable()
 export class PopupModelProvider implements IPopupModelProvider {
+  @inject(TYPES.IModelFactory) modelFactory: IModelFactory | undefined;
 
-    @inject(TYPES.IModelFactory) modelFactory: IModelFactory | undefined;
-
-    getPopupModel(request: RequestPopupModelAction, element?: SModelElement): SModelRoot | undefined {
-        console.log("PopupModelProvider.getPopupModel: request=", request, " element=", element)
-        if (element !== undefined && element.type.startsWith('node:')) {
-            return {
-                type: 'html',
-                id: 'popup',
-                children: [
-                    <PreRenderedElement> {
-                        type: 'pre-rendered',
-                        id: 'popup-title',
-                        code: `<div class="sprotty-popup-title"><span class="fa fa-info-circle"/> Name </div>`
-                    },
-                    <PreRenderedElement> {
-                        type: 'pre-rendered',
-                        id: 'popup-body',
-                        code: '<div class="sprotty-popup-body">Description</div>'
-                    }
-                ]
-            };
-        }
-        return undefined;
+  getPopupModel(request: RequestPopupModelAction, element?: SModelElement): SModelRoot | undefined {
+    console.log('PopupModelProvider.getPopupModel: request=', request, ' element=', element);
+    if (element !== undefined && element.type.startsWith('node:')) {
+      return {
+        type: 'html',
+        id: 'popup',
+        children: [
+          <PreRenderedElement>{
+            type: 'pre-rendered',
+            id: 'popup-title',
+            code: `<div class="sprotty-popup-title"><span class="fa fa-info-circle"/> Name </div>`,
+          },
+          <PreRenderedElement>{
+            type: 'pre-rendered',
+            id: 'popup-body',
+            code: '<div class="sprotty-popup-body">Description</div>',
+          },
+        ],
+      };
     }
-
+    return undefined;
+  }
 }

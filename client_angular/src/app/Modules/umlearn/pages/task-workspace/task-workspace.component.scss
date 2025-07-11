@@ -15,7 +15,9 @@
   flex-direction: column;
   align-items: center;
   align-content: center !important;
-  transition: background-color 0.5s ease, gap 0.5s ease;
+  transition:
+    background-color 0.5s ease,
+    gap 0.5s ease;
   justify-content: space-between;
   flex-shrink: 0;
 }
@@ -49,7 +51,9 @@
   border-radius: 15px;
   padding: 0px;
   opacity: 0;
-  transition: height 0.5s ease, opacity 0.5s ease;
+  transition:
+    height 0.5s ease,
+    opacity 0.5s ease;
 }
 
 .feedback-container.submitted {
@@ -101,7 +105,9 @@
   padding: 0 0px;
 }
 
-.left-content, .center-content, .right-content {
+.left-content,
+.center-content,
+.right-content {
   display: flex;
   align-items: center;
 }

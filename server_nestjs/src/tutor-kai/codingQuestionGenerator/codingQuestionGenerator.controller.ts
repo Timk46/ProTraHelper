@@ -2,24 +2,24 @@ import { Body, Controller, Post, Req } from '@nestjs/common';
 import { CodingQuestionGeneratorService } from './codingQuestionGeneratorPython.service';
 import { Public } from '../../public.decorator';
 import { genTaskDto } from '@DTOs/tutorKaiDtos/genTask.dto';
-import { CodeGeruestDto, CodingQuestionInternal } from '@Interfaces/question.dto';
+import type { CodingQuestionInternal } from '@Interfaces/question.dto';
+import { CodeGeruestDto } from '@Interfaces/question.dto';
 
 @Controller('coding-question-generator')
 export class CodingQuestionGeneratorController {
-    constructor(
-      private readonly codingQuestionGeneratorService: CodingQuestionGeneratorService,
-    ) {}
+  constructor(private readonly codingQuestionGeneratorService: CodingQuestionGeneratorService) {}
 
-    @Post('genPythonTaskWithTopic')
-    async genPythonTask(@Req() req, @Body() body: {concept: string, context: string}) {
-        console.log("genPythonTaskWithTopic in Controller ausgeführt ...");
-        const {concept, context} = body;
-        const genTask: CodingQuestionInternal = await this.codingQuestionGeneratorService.genPythonTaskWithTopic(concept, context);
+  @Post('genPythonTaskWithTopic')
+  async genPythonTask(@Req() req, @Body() body: { concept: string; context: string }) {
+    console.log('genPythonTaskWithTopic in Controller ausgeführt ...');
+    const { concept, context } = body;
+    const genTask: CodingQuestionInternal =
+      await this.codingQuestionGeneratorService.genPythonTaskWithTopic(concept, context);
 
-        return genTask;
-    }
+    return genTask;
+  }
 
-    /*
+  /*
     @Post('genCppTask')
     async genCppTask(@Req() req, @Body() body: {taskDescription: string, codeGerueste: CodeGeruestDto[]}) {
         console.log("genCppTask in Controller ausgeführt ...");
@@ -30,4 +30,3 @@ export class CodingQuestionGeneratorController {
     }
         */
 }
-

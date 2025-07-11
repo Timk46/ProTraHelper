@@ -1,21 +1,23 @@
-import { Component, HostListener, OnDestroy, OnInit, Renderer2, ViewChild } from "@angular/core";
-import { HttpClient } from '@angular/common/http'; // Added HttpClient
-import { MatDialog } from "@angular/material/dialog";
-import { MatSnackBar } from "@angular/material/snack-bar";
-import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil, catchError, finalize, throwError, filter } from "rxjs"; // Added RxJS operators
-import { CodeSubmissionResultDto } from "@DTOs/index";
-import { ConfettiService } from "src/app/Services/animations/confetti.service";
-import { ProgressService } from "src/app/Services/progress/progress.service";
+import type { OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import { Component, HostListener, ViewChild } from '@angular/core';
+import type { HttpClient } from '@angular/common/http'; // Added HttpClient
+import type { MatDialog } from '@angular/material/dialog';
+import type { MatSnackBar } from '@angular/material/snack-bar';
+import type { Title } from '@angular/platform-browser';
+import type { ActivatedRoute, Router } from '@angular/router';
+import { Subject, takeUntil, catchError, finalize, throwError, filter } from 'rxjs'; // Added RxJS operators
+import type { CodeSubmissionResultDto } from '@DTOs/index';
+import type { ConfettiService } from 'src/app/Services/animations/confetti.service';
+import type { ProgressService } from 'src/app/Services/progress/progress.service';
 import { VideoTimeStampComponent } from '../video-time-stamp/video-time-stamp.component';
-import { WorkspaceStateService } from "../../services/workspace-state.service";
-import { WorkspaceState, TestResult } from "../../models/code-submission.model";
-import { CodeEditorWrapperComponent } from "../../components/code-editor-wrapper/code-editor-wrapper.component";
-import { FileExplorerComponent } from "../../components/file-explorer/file-explorer.component";
-import { FeedbackPanelTutorFeedbackComponent } from '../../components/feedback-panel-tutor-feedback/feedback-panel-tutor-feedback.component';
+import type { WorkspaceStateService } from '../../services/workspace-state.service';
+import type { TestResult } from '../../models/code-submission.model';
+import { WorkspaceState } from '../../models/code-submission.model';
+import { CodeEditorWrapperComponent } from '../../components/code-editor-wrapper/code-editor-wrapper.component';
+import type { FileExplorerComponent } from '../../components/file-explorer/file-explorer.component';
+import type { FeedbackPanelTutorFeedbackComponent } from '../../components/feedback-panel-tutor-feedback/feedback-panel-tutor-feedback.component';
 import { PrivacyConsentDialogComponent } from '../../components/privacy-consent-dialog/privacy-consent-dialog.component'; // Added Consent Dialog
-import { environment } from "src/environments/environment"; // Added environment
+import { environment } from 'src/environments/environment'; // Added environment
 
 @Component({
   selector: 'app-student-workspace',
@@ -25,14 +27,16 @@ import { environment } from "src/environments/environment"; // Added environment
 export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(CodeEditorWrapperComponent) codeEditorWrapper!: CodeEditorWrapperComponent;
   @ViewChild('fileExplorer') fileExplorer!: FileExplorerComponent;
-  @ViewChild('structuredFeedbackPanel') structuredFeedbackPanel?: FeedbackPanelTutorFeedbackComponent;
+  @ViewChild('structuredFeedbackPanel')
+  structuredFeedbackPanel?: FeedbackPanelTutorFeedbackComponent;
 
   // TaskID aus der Route
   currentTaskId: number = 0;
   private conceptId!: number;
 
   // Beschreibungstext und Titel
-  taskDescription: string = 'Hi :)\n ich bin Kai. Ich bin hier, um dir Feedback zu deinen Lösungen zu geben.';
+  taskDescription: string =
+    'Hi :)\n ich bin Kai. Ich bin hier, um dir Feedback zu deinen Lösungen zu geben.';
   taskTitle: string = 'Aufgabe';
 
   // Schriftgröße für die Aufgabenbeschreibung
@@ -62,7 +66,6 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   isCompiling: boolean = false;
   testResults: TestResult[] | null = null;
 
-
   // Feedback Panel State
   showStructuredFeedback: boolean = true;
   // Privacy Consent State
@@ -84,12 +87,12 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
 
   // Alte Resize-Properties
   private isMainResizing: boolean = false;
-  private isResizing: boolean = false;
-  private startHeight: number = 0;
+  private readonly isResizing: boolean = false;
+  private readonly startHeight: number = 0;
   private startWorkAreaHeight: number = 0;
 
   // Für Unsubscribe
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
   // Event-Listener-Abräumer
   private mouseMoveListener?: () => void;
@@ -98,16 +101,16 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   private mainMouseUpListener?: () => void;
 
   constructor(
-    private progressService: ProgressService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog,
-    private route: ActivatedRoute,
-    private confettiService: ConfettiService,
-    private title: Title,
-    private router: Router,
+    private readonly progressService: ProgressService,
+    private readonly snackBar: MatSnackBar,
+    private readonly dialog: MatDialog,
+    private readonly route: ActivatedRoute,
+    private readonly confettiService: ConfettiService,
+    private readonly title: Title,
+    private readonly router: Router,
     public workspaceState: WorkspaceStateService,
-    private renderer: Renderer2,
-    private http: HttpClient // Added HttpClient
+    private readonly renderer: Renderer2,
+    private readonly http: HttpClient, // Added HttpClient
   ) {
     this.route.paramMap.subscribe(params => {
       this.conceptId = Number(params.get('concept')); // Dies könnte undefined sein, wenn 'concept' ein Query-Parameter ist
@@ -121,16 +124,14 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     this.checkConsentStatus(); // Check consent on init
 
     // Abonniere Änderungen am aktuellen Task
-    this.workspaceState.currentTask$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(task => {
-        if (task) {
-          // Verwende text (Markdown) statt textHTML für Markdown-Rendering
-          this.taskDescription = task.codingQuestion?.textHTML ?? '';
-          // Extrahiere den Namen als Titel aus dem Task-Objekt
-          this.taskTitle = task.name ?? 'Aufgabe';
-        }
-      });
+    this.workspaceState.currentTask$.pipe(takeUntil(this.destroy$)).subscribe(task => {
+      if (task) {
+        // Verwende text (Markdown) statt textHTML für Markdown-Rendering
+        this.taskDescription = task.codingQuestion?.textHTML ?? '';
+        // Extrahiere den Namen als Titel aus dem Task-Objekt
+        this.taskTitle = task.name ?? 'Aufgabe';
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -147,10 +148,10 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   private loadCurrentTask(): void {
     if (this.currentTaskId > 0) {
       this.workspaceState.loadTask(this.currentTaskId).subscribe({
-        error: (err) => {
+        error: err => {
           console.error('Error fetching task:', err);
           this.snackBar.open('Fehler beim Laden der Aufgabe.', 'Schließen', { duration: 3000 });
-        }
+        },
       });
     }
   }
@@ -205,7 +206,8 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     const latestResult = this.workspaceState.getCodeSubmissionResult();
     // Stelle sicher, dass testResults ein Array ist oder null, falls keine Ergebnisse vorhanden sind
     // Assert the type to the local TestResult[] as we know the service transformed it
-    this.testResults = (latestResult?.CodeSubmissionResult?.testResults as TestResult[] | undefined) ?? null;
+    this.testResults =
+      (latestResult?.CodeSubmissionResult?.testResults as TestResult[] | undefined) ?? null;
 
     // Mobile View: Wechsle zur Output-Ansicht nach Code-Ausführung
     if (window.innerWidth <= 768) {
@@ -268,7 +270,11 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     this.startTaskPanelWidth = this.taskPanelWidth;
 
     // Event-Listener hinzufügen
-    this.mouseMoveListener = this.renderer.listen('document', 'mousemove', this.onHorizontalResizeMove);
+    this.mouseMoveListener = this.renderer.listen(
+      'document',
+      'mousemove',
+      this.onHorizontalResizeMove,
+    );
     this.mouseUpListener = this.renderer.listen('document', 'mouseup', this.onHorizontalResizeUp);
 
     event.preventDefault();
@@ -283,7 +289,11 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     this.startFeedbackAreaWidth = this.feedbackAreaWidth;
 
     // Event-Listener hinzufügen
-    this.mouseMoveListener = this.renderer.listen('document', 'mousemove', this.onHorizontalResizeMove);
+    this.mouseMoveListener = this.renderer.listen(
+      'document',
+      'mousemove',
+      this.onHorizontalResizeMove,
+    );
     this.mouseUpListener = this.renderer.listen('document', 'mouseup', this.onHorizontalResizeUp);
 
     event.preventDefault();
@@ -298,7 +308,11 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     this.startTopRowHeight = this.topRowHeight;
 
     // Event-Listener hinzufügen
-    this.mouseMoveListener = this.renderer.listen('document', 'mousemove', this.onVerticalResizeMove);
+    this.mouseMoveListener = this.renderer.listen(
+      'document',
+      'mousemove',
+      this.onVerticalResizeMove,
+    );
     this.mouseUpListener = this.renderer.listen('document', 'mouseup', this.onVerticalResizeUp);
 
     event.preventDefault();
@@ -313,7 +327,11 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     this.startBottomRowHeight = this.bottomRowHeight;
 
     // Event-Listener hinzufügen
-    this.mouseMoveListener = this.renderer.listen('document', 'mousemove', this.onVerticalResizeMove);
+    this.mouseMoveListener = this.renderer.listen(
+      'document',
+      'mousemove',
+      this.onVerticalResizeMove,
+    );
     this.mouseUpListener = this.renderer.listen('document', 'mouseup', this.onVerticalResizeUp);
 
     event.preventDefault();
@@ -322,7 +340,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
   /**
    * Handler für horizontale Resize-Bewegung
    */
-  private onHorizontalResizeMove = (event: MouseEvent): void => {
+  private readonly onHorizontalResizeMove = (event: MouseEvent): void => {
     if (this.isHorizontalResizingTop) {
       const containerWidth = document.querySelector('.top-row')?.clientWidth || 1000;
       const delta = ((event.clientX - this.startX) / containerWidth) * 100;
@@ -336,12 +354,12 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       // Begrenze die Werte (20-80%)
       this.feedbackAreaWidth = Math.max(20, Math.min(80, this.startFeedbackAreaWidth + delta));
     }
-  }
+  };
 
   /**
    * Handler für vertikale Resize-Bewegung
    */
-  private onVerticalResizeMove = (event: MouseEvent): void => {
+  private readonly onVerticalResizeMove = (event: MouseEvent): void => {
     const containerHeight = document.querySelector('.workspace-container')?.clientHeight || 1000;
     const fixedMiddleHeightPercent = (this.middleRowHeight / containerHeight) * 100;
 
@@ -364,27 +382,27 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       // Passe die obere Höhe entsprechend an
       this.topRowHeight = 100 - newBottomHeight - fixedMiddleHeightPercent;
     }
-  }
+  };
 
   /**
    * Handler für das Ende der horizontalen Resize-Aktion
    */
-  private onHorizontalResizeUp = (): void => {
+  private readonly onHorizontalResizeUp = (): void => {
     this.isHorizontalResizingTop = false;
     this.isHorizontalResizingBottom = false;
 
     this.cleanupResizeListeners();
-  }
+  };
 
   /**
    * Handler für das Ende der vertikalen Resize-Aktion
    */
-  private onVerticalResizeUp = (): void => {
+  private readonly onVerticalResizeUp = (): void => {
     this.isVerticalResizingTop = false;
     this.isVerticalResizingBottom = false;
 
     this.cleanupResizeListeners();
-  }
+  };
 
   /**
    * Räumt die Resize-Event-Listener auf
@@ -422,7 +440,11 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     this.startWorkAreaHeight = this.workAreaHeight;
 
     // Event-Listener für den Resize-Vorgang hinzufügen
-    this.mainMouseMoveListener = this.renderer.listen('document', 'mousemove', this.onMainMouseMove);
+    this.mainMouseMoveListener = this.renderer.listen(
+      'document',
+      'mousemove',
+      this.onMainMouseMove,
+    );
     this.mainMouseUpListener = this.renderer.listen('document', 'mouseup', this.onMainMouseUp);
 
     // Verhindern der Standard-Drag-Aktionen
@@ -433,7 +455,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
    * Behandelt die Mausbewegung während des Haupt-Layout-Resizens
    * @deprecated Wird durch die neuen Resize-Methoden ersetzt
    */
-  private onMainMouseMove = (event: MouseEvent): void => {
+  private readonly onMainMouseMove = (event: MouseEvent): void => {
     if (!this.isMainResizing) return;
 
     // Berechne Höhenänderung als Prozentsatz der Container-Höhe
@@ -443,13 +465,13 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     // Begrenze die Werte auf sinnvolle Grenzen (30-85%)
     const newHeight = Math.max(30, Math.min(85, this.startWorkAreaHeight + delta));
     this.workAreaHeight = newHeight;
-  }
+  };
 
   /**
    * Beendet den Haupt-Layout-Resize-Vorgang
    * @deprecated Wird durch die neuen Resize-Methoden ersetzt
    */
-  private onMainMouseUp = (): void => {
+  private readonly onMainMouseUp = (): void => {
     this.isMainResizing = false;
 
     // Event-Listener sauber entfernen
@@ -462,7 +484,7 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       this.mainMouseUpListener();
       this.mainMouseUpListener = undefined;
     }
-  }
+  };
 
   // Der alte Resize-Handle zwischen Code-Editor und Terminal wurde entfernt
 
@@ -508,7 +530,6 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
     return this.workspaceState.getCurrentState() === state;
   }
 
-
   /**
    * Checks if the structured feedback can be requested (typically after code submission)
    */
@@ -535,18 +556,21 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
    */
   private checkConsentStatus(): void {
     this.isCheckingConsent = true;
-    this.http.get<{ hasAccepted: boolean }>(`${environment.server}/tutoring-feedback/privacy/consent`)
+    this.http
+      .get<{ hasAccepted: boolean }>(`${environment.server}/tutoring-feedback/privacy/consent`)
       .pipe(
         takeUntil(this.destroy$),
         catchError(err => {
           console.error('Error checking privacy consent status:', err);
-          this.snackBar.open('Fehler beim Prüfen des Datenschutz-Status.', 'Schließen', { duration: 5000 });
+          this.snackBar.open('Fehler beim Prüfen des Datenschutz-Status.', 'Schließen', {
+            duration: 5000,
+          });
           this.hasConsent = false; // Assume no consent on error
           return throwError(() => err); // Re-throw or return of(null)
         }),
         finalize(() => {
           this.isCheckingConsent = false;
-        })
+        }),
       )
       .subscribe(response => {
         this.hasConsent = response.hasAccepted;
@@ -563,25 +587,29 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       width: '600px',
       maxWidth: '95vw',
       disableClose: true, // Prevent closing by clicking outside or pressing Esc
-      autoFocus: 'button[mat-raised-button]' // Focus the primary button
+      autoFocus: 'button[mat-raised-button]', // Focus the primary button
     });
 
-    dialogRef.afterClosed()
+    dialogRef
+      .afterClosed()
       .pipe(
         takeUntil(this.destroy$),
-        filter(result => result === true) // Only proceed if the user agreed (dialog returns true)
+        filter(result => result === true), // Only proceed if the user agreed (dialog returns true)
       )
       .subscribe(() => {
         // User agreed, now call the backend to record consent
-        this.http.post(`${environment.server}/tutoring-feedback/privacy/consent`, {})
+        this.http
+          .post(`${environment.server}/tutoring-feedback/privacy/consent`, {})
           .pipe(
             takeUntil(this.destroy$),
             catchError(err => {
               console.error('Error accepting privacy policy:', err);
-              this.snackBar.open('Fehler beim Speichern der Zustimmung.', 'Schließen', { duration: 5000 });
+              this.snackBar.open('Fehler beim Speichern der Zustimmung.', 'Schließen', {
+                duration: 5000,
+              });
               // Keep hasConsent as false, user might need to try again
               return throwError(() => err);
-            })
+            }),
           )
           .subscribe(() => {
             this.hasConsent = true; // Update state on successful backend call
@@ -590,4 +618,3 @@ export class StudentWorkspaceComponent implements OnInit, OnDestroy {
       });
   }
 }
-

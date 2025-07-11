@@ -1,4 +1,8 @@
-<div class="test-indicators-container" *ngIf="testResults && testResults.length > 0" [class.active]="isNewResult">
+<div
+  class="test-indicators-container"
+  *ngIf="testResults && testResults.length > 0"
+  [class.active]="isNewResult"
+>
   <div class="test-indicators">
     <div
       *ngFor="let test of testResults"
@@ -7,8 +11,8 @@
       [class.failed]="!test.passed"
       [class.new-result]="isNewResult"
       [matTooltip]="test.name"
-      (click)="openTestDetails(test)">
-    </div>
+      (click)="openTestDetails(test)"
+    ></div>
   </div>
 
   <div class="test-summary" [ngClass]="getSummaryClass()" (click)="openAllTestsDetails()">

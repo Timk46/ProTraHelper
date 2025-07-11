@@ -1,14 +1,20 @@
-import { BasicMatching, GraphMatching, ClassAttribute, ClassEdge, ClassMethod, ClassNode } from "@Interfaces/index";
-import { editorDataDTO, swappableEditorElement } from "@DTOs/index";
-import { Injectable } from "@nestjs/common";
+import type {
+  BasicMatching,
+  GraphMatching,
+  ClassAttribute,
+  ClassEdge,
+  ClassMethod,
+  ClassNode,
+} from '@Interfaces/index';
+import type { editorDataDTO } from '@DTOs/index';
+import { swappableEditorElement } from '@DTOs/index';
+import { Injectable } from '@nestjs/common';
 import { JaroWinklerDistance } from 'natural';
-import { nodeWeights, edgeWeights } from "./similarity-weights.config";
-import { similarityLogEntries } from "./similarity-log.config";
-
+import { nodeWeights, edgeWeights } from './similarity-weights.config';
+import { similarityLogEntries } from './similarity-log.config';
 
 @Injectable()
 export class SimilarityCompareService {
-
   private nodeMap: Map<string, string> = null;
 
   constructor() {
@@ -29,7 +35,10 @@ export class SimilarityCompareService {
     return this.generateGraphSimilarityLog(graphMatching);
   }
 
-  private createNodeMap(attemptNodes: ClassNode[], solutionNodes: ClassNode[]): Map<string, string> {
+  private createNodeMap(
+    attemptNodes: ClassNode[],
+    solutionNodes: ClassNode[],
+  ): Map<string, string> {
     const nodeMap = new Map<string, string>();
     for (const node of attemptNodes) {
       nodeMap.set(node.id, node.title);
@@ -39,8 +48,6 @@ export class SimilarityCompareService {
     }
     return nodeMap;
   }
-
-
 
   /**
    * Finds the matching between the attempt graph and the solution graph.
@@ -54,20 +61,31 @@ export class SimilarityCompareService {
    * @param solutionGraph - The graph representing the correct solution.
    * @returns An object containing the node matchings and edge matchings.
    */
-  public findGraphMatching(attemptGraph: editorDataDTO, solutionGraph: editorDataDTO): GraphMatching {
-    const nodeMatching = this.findElementMatching(attemptGraph.nodes, solutionGraph.nodes, this.calcSingleNodeSimilarity);
+  public findGraphMatching(
+    attemptGraph: editorDataDTO,
+    solutionGraph: editorDataDTO,
+  ): GraphMatching {
+    const nodeMatching = this.findElementMatching(
+      attemptGraph.nodes,
+      solutionGraph.nodes,
+      this.calcSingleNodeSimilarity,
+    );
     const mappedAttemptEdges = attemptGraph.edges;
     // we need to map the node ids to the solution ids to ensure that the edges are correctly matched
     for (const edge of mappedAttemptEdges) {
-      edge.start = nodeMatching.find(node => node.attempt.id == edge.start).solution.id || edge.start;
+      edge.start =
+        nodeMatching.find(node => node.attempt.id == edge.start).solution.id || edge.start;
       edge.end = nodeMatching.find(node => node.attempt.id == edge.end).solution.id || edge.end;
     }
 
-    const edgeMatching = this.findElementMatching(mappedAttemptEdges, solutionGraph.edges, this.calcSingleEdgeSimilarity);
+    const edgeMatching = this.findElementMatching(
+      mappedAttemptEdges,
+      solutionGraph.edges,
+      this.calcSingleEdgeSimilarity,
+    );
 
     return { nodeMatchings: nodeMatching, edgeMatchings: edgeMatching };
   }
-
 
   /**
    * Calculates the similarity between two graphs.
@@ -85,14 +103,19 @@ export class SimilarityCompareService {
     const { nodeMatchings, edgeMatchings } = this.findGraphMatching(attemptGraph, solutionGraph);
 
     // if the matching is empty, there is nothing to compare so it has to be 100% similar
-    const nodeSimilarity = nodeMatchings.length === 0 ? 1 : nodeMatchings.reduce((acc, curr) => acc + curr.similarity, 0) / nodeMatchings.length;
-    const edgeSimilarity = edgeMatchings.length === 0 ? 1 : edgeMatchings.reduce((acc, curr) => acc + curr.similarity, 0) / edgeMatchings.length;
+    const nodeSimilarity =
+      nodeMatchings.length === 0
+        ? 1
+        : nodeMatchings.reduce((acc, curr) => acc + curr.similarity, 0) / nodeMatchings.length;
+    const edgeSimilarity =
+      edgeMatchings.length === 0
+        ? 1
+        : edgeMatchings.reduce((acc, curr) => acc + curr.similarity, 0) / edgeMatchings.length;
 
     const similarity = nodeSimilarity * nodeWeights.total + edgeSimilarity * edgeWeights.total;
     //console.log(similarity);
     return similarity;
   }
-
 
   /**
    * Generates a log string that describes the similarity between two graphs.
@@ -102,13 +125,15 @@ export class SimilarityCompareService {
    * @returns {string} A formatted string that logs the similarity information of the graphs.
    */
   public generateGraphSimilarityLog(graphMatching: GraphMatching): string {
-    return similarityLogEntries.LOG_GRAPH_INTRODUCTION + "\n"
-    + ("----------------------------------\n")
-    + (this.generateNodesSimilarityLog(graphMatching.nodeMatchings) + "\n")
-    + ("----------------------------------\n")
-    + (this.generateEdgesSimilarityLog(graphMatching.edgeMatchings));
+    return (
+      similarityLogEntries.LOG_GRAPH_INTRODUCTION +
+      '\n' +
+      '----------------------------------\n' +
+      (this.generateNodesSimilarityLog(graphMatching.nodeMatchings) + '\n') +
+      '----------------------------------\n' +
+      this.generateEdgesSimilarityLog(graphMatching.edgeMatchings)
+    );
   }
-
 
   /**
    * Generates a log string that describes the similarity between edges.
@@ -122,27 +147,29 @@ export class SimilarityCompareService {
    *                        the solution edge, and their similarity value.
    * @returns A string representing the log of edge similarities.
    */
-  private generateEdgesSimilarityLog(edgesMatching: {attempt: ClassEdge, solution: ClassEdge, similarity: number}[]): string {
-    const edgesSimilarity = edgesMatching.reduce((acc, curr) => acc + curr.similarity, 0) / edgesMatching.length;
-    let log = similarityLogEntries.LOG_EDGES_INTRODUCTION + "\n";
+  private generateEdgesSimilarityLog(
+    edgesMatching: { attempt: ClassEdge; solution: ClassEdge; similarity: number }[],
+  ): string {
+    const edgesSimilarity =
+      edgesMatching.reduce((acc, curr) => acc + curr.similarity, 0) / edgesMatching.length;
+    let log = similarityLogEntries.LOG_EDGES_INTRODUCTION + '\n';
     if (edgesSimilarity == 1) {
-      return log + similarityLogEntries.LOG_EDGES_NOTHINGFOUND + "\n";
+      return log + similarityLogEntries.LOG_EDGES_NOTHINGFOUND + '\n';
     } else {
       for (const edge of edgesMatching) {
         if (edge.similarity < 1) {
           if (edge.attempt == null) {
-            log += similarityLogEntries.CLASS_EDGE_MISSING(edge.solution.description) + "\n";
+            log += similarityLogEntries.CLASS_EDGE_MISSING(edge.solution.description) + '\n';
           } else if (edge.solution == null) {
-            log += similarityLogEntries.CLASS_EDGE_ADDED(edge.attempt.description) + "\n";
+            log += similarityLogEntries.CLASS_EDGE_ADDED(edge.attempt.description) + '\n';
           } else {
-            log += this.generateSingleEdgeSimilarityLog(edge.attempt, edge.solution) + "\n";
+            log += this.generateSingleEdgeSimilarityLog(edge.attempt, edge.solution) + '\n';
           }
         }
       }
     }
     return log;
   }
-
 
   /**
    * Calculates the similarity between two sets of class nodes.
@@ -155,10 +182,13 @@ export class SimilarityCompareService {
    * @returns The average similarity score between the attempt and solution nodes.
    */
   private calcNodesSimilarity(attemptNodes: ClassNode[], solutionNodes: ClassNode[]): number {
-    const matching = this.findElementMatching(attemptNodes, solutionNodes, this.calcSingleNodeSimilarity);
+    const matching = this.findElementMatching(
+      attemptNodes,
+      solutionNodes,
+      this.calcSingleNodeSimilarity,
+    );
     return matching.reduce((acc, curr) => acc + curr.similarity, 0) / matching.length;
   }
-
 
   /**
    * Generates a log string that describes the similarity between nodes.
@@ -172,27 +202,29 @@ export class SimilarityCompareService {
    * - If the solution node is missing, it logs that the attempt node was added.
    * - If both nodes are present, it generates a detailed similarity log for the node.
    */
-  private generateNodesSimilarityLog(nodesMatching: {attempt: ClassNode, solution: ClassNode, similarity: number}[]): string {
-    const nodesSimilarity = nodesMatching.reduce((acc, curr) => acc + curr.similarity, 0) / nodesMatching.length;
-    let log = similarityLogEntries.LOG_NODES_INTRODUCTION + "\n";
+  private generateNodesSimilarityLog(
+    nodesMatching: { attempt: ClassNode; solution: ClassNode; similarity: number }[],
+  ): string {
+    const nodesSimilarity =
+      nodesMatching.reduce((acc, curr) => acc + curr.similarity, 0) / nodesMatching.length;
+    let log = similarityLogEntries.LOG_NODES_INTRODUCTION + '\n';
     if (nodesSimilarity == 1) {
-      return log + similarityLogEntries.LOG_NODES_NOTHINGFOUND + "\n";
+      return log + similarityLogEntries.LOG_NODES_NOTHINGFOUND + '\n';
     } else {
       for (const node of nodesMatching) {
         if (node.similarity < 1) {
           if (node.attempt == null) {
-            log += similarityLogEntries.CLASS_NODE_MISSING(node.solution.title) + "\n";
+            log += similarityLogEntries.CLASS_NODE_MISSING(node.solution.title) + '\n';
           } else if (node.solution == null) {
-            log += similarityLogEntries.CLASS_NODE_ADDED(node.attempt.title) + "\n";
+            log += similarityLogEntries.CLASS_NODE_ADDED(node.attempt.title) + '\n';
           } else {
-            log += this.generateSingleNodeSimilarityLog(node.attempt, node.solution) + "\n";
+            log += this.generateSingleNodeSimilarityLog(node.attempt, node.solution) + '\n';
           }
         }
       }
     }
     return log;
   }
-
 
   /**
    * Calculates the similarity between two sets of class attributes.
@@ -201,14 +233,20 @@ export class SimilarityCompareService {
    * @param solutionAttributes - The attributes of the solution to compare against.
    * @returns A number between 0 and 1 representing the similarity, where 1 means identical and 0 means completely different.
    */
-  private calcAttributesSimilarity(attemptAttributes: ClassAttribute[], solutionAttributes: ClassAttribute[]): number{
+  private calcAttributesSimilarity(
+    attemptAttributes: ClassAttribute[],
+    solutionAttributes: ClassAttribute[],
+  ): number {
     if (attemptAttributes.length == 0 && solutionAttributes.length == 0) {
       return 1;
     }
-    const matching = this.findElementMatching(attemptAttributes, solutionAttributes, this.calcSingleAttributeSimilarity);
-    return (matching.reduce((acc, curr) => acc + curr.similarity, 0)) / matching.length;
+    const matching = this.findElementMatching(
+      attemptAttributes,
+      solutionAttributes,
+      this.calcSingleAttributeSimilarity,
+    );
+    return matching.reduce((acc, curr) => acc + curr.similarity, 0) / matching.length;
   }
-
 
   /**
    * Calculates the similarity between two sets of class methods.
@@ -218,14 +256,20 @@ export class SimilarityCompareService {
    * @returns A number representing the similarity between the two sets of methods.
    *          Returns 1 if both sets are empty.
    */
-  private calcMethodsSimilarity(attemptMethods: ClassMethod[], solutionMethods: ClassMethod[]): number {
+  private calcMethodsSimilarity(
+    attemptMethods: ClassMethod[],
+    solutionMethods: ClassMethod[],
+  ): number {
     if (attemptMethods.length == 0 && solutionMethods.length == 0) {
       return 1;
     }
-    const matching = this.findElementMatching(attemptMethods, solutionMethods, this.calcSingleMethodSimilarity);
-    return (matching.reduce((acc, curr) => acc + curr.similarity, 0)) / matching.length;
+    const matching = this.findElementMatching(
+      attemptMethods,
+      solutionMethods,
+      this.calcSingleMethodSimilarity,
+    );
+    return matching.reduce((acc, curr) => acc + curr.similarity, 0) / matching.length;
   }
-
 
   /**
    * Calculates the similarity between two class nodes.
@@ -240,10 +284,19 @@ export class SimilarityCompareService {
    * @returns {number} The similarity score between the two class nodes.
    */
   private calcSingleNodeSimilarity(attemptElement: ClassNode, solutionElement: ClassNode): number {
-    const nameSimilarity = JaroWinklerDistance(attemptElement.title || "", solutionElement.title || "");
+    const nameSimilarity = JaroWinklerDistance(
+      attemptElement.title || '',
+      solutionElement.title || '',
+    );
     const typeSimilarity = attemptElement.type == solutionElement.type ? 1 : 0;
-    const attributesSimilarity = this.calcAttributesSimilarity(attemptElement.attributes || [], solutionElement.attributes || []);
-    const methodsSimilarity = this.calcMethodsSimilarity(attemptElement.methods || [], solutionElement.methods || []);
+    const attributesSimilarity = this.calcAttributesSimilarity(
+      attemptElement.attributes || [],
+      solutionElement.attributes || [],
+    );
+    const methodsSimilarity = this.calcMethodsSimilarity(
+      attemptElement.methods || [],
+      solutionElement.methods || [],
+    );
 
     const similarity =
       nameSimilarity * nodeWeights.title +
@@ -252,7 +305,6 @@ export class SimilarityCompareService {
       methodsSimilarity * nodeWeights.methods.total;
     return similarity;
   }
-
 
   /**
    * Generates a similarity log for a single node comparison between an attempt element and a solution element.
@@ -269,49 +321,90 @@ export class SimilarityCompareService {
    *
    * If attributes or methods are not identical, detailed logs for each attribute or method are generated.
    */
-  private generateSingleNodeSimilarityLog(attemptElement: ClassNode, solutionElement: ClassNode): string {
-    const nameSimilarity = JaroWinklerDistance(attemptElement.title || "", solutionElement.title || "");
+  private generateSingleNodeSimilarityLog(
+    attemptElement: ClassNode,
+    solutionElement: ClassNode,
+  ): string {
+    const nameSimilarity = JaroWinklerDistance(
+      attemptElement.title || '',
+      solutionElement.title || '',
+    );
     const typeSimilarity = attemptElement.type == solutionElement.type ? 1 : 0;
-    const attributesSimilarity = this.calcAttributesSimilarity(attemptElement.attributes || [], solutionElement.attributes || []);
-    const methodsSimilarity = this.calcMethodsSimilarity(attemptElement.methods || [], solutionElement.methods || []);
-    let attributesSimilarityLog = "";
-    let methodsSimilarityLog = "";
+    const attributesSimilarity = this.calcAttributesSimilarity(
+      attemptElement.attributes || [],
+      solutionElement.attributes || [],
+    );
+    const methodsSimilarity = this.calcMethodsSimilarity(
+      attemptElement.methods || [],
+      solutionElement.methods || [],
+    );
+    let attributesSimilarityLog = '';
+    let methodsSimilarityLog = '';
 
     if (attributesSimilarity < 1) {
-      for (const attribute of this.findElementMatching(attemptElement.attributes || [], solutionElement.attributes || [], this.calcSingleAttributeSimilarity)) {
+      for (const attribute of this.findElementMatching(
+        attemptElement.attributes || [],
+        solutionElement.attributes || [],
+        this.calcSingleAttributeSimilarity,
+      )) {
         if (attribute.attempt == null) {
-          attributesSimilarityLog += similarityLogEntries.CLASS_NODE_ATTRIBUTE_MISSING(attribute.solution.name) + "\n";
+          attributesSimilarityLog +=
+            similarityLogEntries.CLASS_NODE_ATTRIBUTE_MISSING(attribute.solution.name) + '\n';
         } else if (attribute.solution == null) {
-          attributesSimilarityLog += similarityLogEntries.CLASS_NODE_ATTRIBUTE_ADDED(attribute.attempt.name) + "\n";
+          attributesSimilarityLog +=
+            similarityLogEntries.CLASS_NODE_ATTRIBUTE_ADDED(attribute.attempt.name) + '\n';
         } else {
-          attributesSimilarityLog += this.generateSingleAttributeSimilarityLog(attribute.attempt, attribute.solution);
+          attributesSimilarityLog += this.generateSingleAttributeSimilarityLog(
+            attribute.attempt,
+            attribute.solution,
+          );
         }
       }
     }
     if (methodsSimilarity < 1) {
-      for (const method of this.findElementMatching(attemptElement.methods || [], solutionElement.methods || [], this.calcSingleMethodSimilarity)) {
+      for (const method of this.findElementMatching(
+        attemptElement.methods || [],
+        solutionElement.methods || [],
+        this.calcSingleMethodSimilarity,
+      )) {
         if (method.attempt == null) {
-          methodsSimilarityLog += similarityLogEntries.CLASS_NODE_METHOD_MISSING(method.solution.name) + "\n";
+          methodsSimilarityLog +=
+            similarityLogEntries.CLASS_NODE_METHOD_MISSING(method.solution.name) + '\n';
         } else if (method.solution == null) {
-          methodsSimilarityLog += similarityLogEntries.CLASS_NODE_METHOD_ADDED(method.attempt.name) + "\n";
+          methodsSimilarityLog +=
+            similarityLogEntries.CLASS_NODE_METHOD_ADDED(method.attempt.name) + '\n';
         } else {
-          methodsSimilarityLog += this.generateSingleMethodSimilarityLog(method.attempt, method.solution);
+          methodsSimilarityLog += this.generateSingleMethodSimilarityLog(
+            method.attempt,
+            method.solution,
+          );
         }
       }
     }
 
-    if (nameSimilarity == 1 && typeSimilarity == 1 && attributesSimilarity == 1 && methodsSimilarity == 1) {
-      return "";
+    if (
+      nameSimilarity == 1 &&
+      typeSimilarity == 1 &&
+      attributesSimilarity == 1 &&
+      methodsSimilarity == 1
+    ) {
+      return '';
     } else {
       return (
-        similarityLogEntries.CLASS_NODE_INTRODUCTION(attemptElement.title) + "\n"
-      + ( (nameSimilarity < 1) ? similarityLogEntries.CLASS_NODE_TITLE(attemptElement.title, solutionElement.title) + "\n" : "")
-      + ( (typeSimilarity < 1) ? similarityLogEntries.CLASS_NODE_TYPE(attemptElement.type, solutionElement.type) + "\n" : "")
-      + ( (attributesSimilarity < 1) ? attributesSimilarityLog + "\n" : "")
-      + ( (methodsSimilarity < 1) ? methodsSimilarityLog + "\n" : "") );
+        similarityLogEntries.CLASS_NODE_INTRODUCTION(attemptElement.title) +
+        '\n' +
+        (nameSimilarity < 1
+          ? similarityLogEntries.CLASS_NODE_TITLE(attemptElement.title, solutionElement.title) +
+            '\n'
+          : '') +
+        (typeSimilarity < 1
+          ? similarityLogEntries.CLASS_NODE_TYPE(attemptElement.type, solutionElement.type) + '\n'
+          : '') +
+        (attributesSimilarity < 1 ? attributesSimilarityLog + '\n' : '') +
+        (methodsSimilarity < 1 ? methodsSimilarityLog + '\n' : '')
+      );
     }
   }
-
 
   /**
    * Calculates the similarity between two class attributes based on their name, data type, and visibility.
@@ -320,10 +413,17 @@ export class SimilarityCompareService {
    * @param {ClassAttribute} solutionAttribute - The attribute from the solution to compare.
    * @returns {number} The similarity score between the two attributes, ranging from 0 to 1.
    */
-  private calcSingleAttributeSimilarity(attemptAttribute: ClassAttribute, solutionAttribute: ClassAttribute): number {
+  private calcSingleAttributeSimilarity(
+    attemptAttribute: ClassAttribute,
+    solutionAttribute: ClassAttribute,
+  ): number {
     const nameSimilarity = JaroWinklerDistance(attemptAttribute.name, solutionAttribute.name);
-    const dataTypeSimilarity = JaroWinklerDistance(attemptAttribute.dataType, solutionAttribute.dataType);
-    const visibilitySimilarity = attemptAttribute.visibility == solutionAttribute.visibility ? 1 : 0;
+    const dataTypeSimilarity = JaroWinklerDistance(
+      attemptAttribute.dataType,
+      solutionAttribute.dataType,
+    );
+    const visibilitySimilarity =
+      attemptAttribute.visibility == solutionAttribute.visibility ? 1 : 0;
     const similarity =
       nameSimilarity * nodeWeights.attributes.name +
       dataTypeSimilarity * nodeWeights.attributes.dataType +
@@ -341,21 +441,45 @@ export class SimilarityCompareService {
    * @param {ClassAttribute} solutionAttribute - The attribute from the solution to be compared.
    * @returns {string} - A log entry detailing the differences between the attributes, or an empty string if they are identical.
    */
-  private generateSingleAttributeSimilarityLog(attemptAttribute: ClassAttribute, solutionAttribute: ClassAttribute): string {
+  private generateSingleAttributeSimilarityLog(
+    attemptAttribute: ClassAttribute,
+    solutionAttribute: ClassAttribute,
+  ): string {
     const nameSimilarity = JaroWinklerDistance(attemptAttribute.name, solutionAttribute.name);
-    const dataTypeSimilarity = JaroWinklerDistance(attemptAttribute.dataType, solutionAttribute.dataType);
-    const visibilitySimilarity = attemptAttribute.visibility == solutionAttribute.visibility ? 1 : 0;
+    const dataTypeSimilarity = JaroWinklerDistance(
+      attemptAttribute.dataType,
+      solutionAttribute.dataType,
+    );
+    const visibilitySimilarity =
+      attemptAttribute.visibility == solutionAttribute.visibility ? 1 : 0;
 
     if (nameSimilarity == 1 && dataTypeSimilarity == 1 && visibilitySimilarity == 1) {
-      return "";
+      return '';
     } else {
-      return similarityLogEntries.CLASS_NODE_ATTRIBUTE_INTRODUCTION(attemptAttribute.name) + "\n"
-      + ((nameSimilarity < 1) ? similarityLogEntries.CLASS_NODE_ATTRIBUTE_NAME(attemptAttribute.name, solutionAttribute.name) + "\n" : "")
-      + ((dataTypeSimilarity < 1) ? similarityLogEntries.CLASS_NODE_ATTRIBUTE_DATATYPE(attemptAttribute.dataType, solutionAttribute.dataType) + "\n" : "")
-      + ((visibilitySimilarity < 1) ? similarityLogEntries.CLASS_NODE_ATTRIBUTE_VISIBILITY(attemptAttribute.visibility, solutionAttribute.visibility) + "\n" : "");
+      return (
+        similarityLogEntries.CLASS_NODE_ATTRIBUTE_INTRODUCTION(attemptAttribute.name) +
+        '\n' +
+        (nameSimilarity < 1
+          ? similarityLogEntries.CLASS_NODE_ATTRIBUTE_NAME(
+              attemptAttribute.name,
+              solutionAttribute.name,
+            ) + '\n'
+          : '') +
+        (dataTypeSimilarity < 1
+          ? similarityLogEntries.CLASS_NODE_ATTRIBUTE_DATATYPE(
+              attemptAttribute.dataType,
+              solutionAttribute.dataType,
+            ) + '\n'
+          : '') +
+        (visibilitySimilarity < 1
+          ? similarityLogEntries.CLASS_NODE_ATTRIBUTE_VISIBILITY(
+              attemptAttribute.visibility,
+              solutionAttribute.visibility,
+            ) + '\n'
+          : '')
+      );
     }
   }
-
 
   /**
    * Calculates the similarity between two class methods based on their name, data type, and visibility.
@@ -364,7 +488,10 @@ export class SimilarityCompareService {
    * @param {ClassMethod} solutionMethod - The method from the solution to compare against.
    * @returns {number} - The similarity score between the two methods.
    */
-  private calcSingleMethodSimilarity(attemptMethod: ClassMethod, solutionMethod: ClassMethod): number {
+  private calcSingleMethodSimilarity(
+    attemptMethod: ClassMethod,
+    solutionMethod: ClassMethod,
+  ): number {
     const nameSimilarity = JaroWinklerDistance(attemptMethod.name, solutionMethod.name);
     const dataTypeSimilarity = JaroWinklerDistance(attemptMethod.dataType, solutionMethod.dataType);
     const visibilitySimilarity = attemptMethod.visibility == solutionMethod.visibility ? 1 : 0;
@@ -375,7 +502,6 @@ export class SimilarityCompareService {
 
     return similarity;
   }
-
 
   /**
    * Generates a similarity log for a single method comparison between an attempt method and a solution method.
@@ -388,21 +514,39 @@ export class SimilarityCompareService {
    * @param {ClassMethod} solutionMethod - The method from the solution to be compared.
    * @returns {string} A log entry detailing the differences between the attempt method and the solution method, or an empty string if they are identical.
    */
-  private generateSingleMethodSimilarityLog(attemptMethod: ClassMethod, solutionMethod: ClassMethod): string {
+  private generateSingleMethodSimilarityLog(
+    attemptMethod: ClassMethod,
+    solutionMethod: ClassMethod,
+  ): string {
     const nameSimilarity = JaroWinklerDistance(attemptMethod.name, solutionMethod.name);
     const dataTypeSimilarity = JaroWinklerDistance(attemptMethod.dataType, solutionMethod.dataType);
     const visibilitySimilarity = attemptMethod.visibility == solutionMethod.visibility ? 1 : 0;
 
     if (nameSimilarity == 1 && dataTypeSimilarity == 1 && visibilitySimilarity == 1) {
-      return "";
+      return '';
     } else {
-      return similarityLogEntries.CLASS_NODE_METHOD_INTRODUCTION(attemptMethod.name) + "\n"
-      + ((nameSimilarity < 1) ? similarityLogEntries.CLASS_NODE_METHOD_NAME(attemptMethod.name, solutionMethod.name) + "\n" : "")
-      + ((dataTypeSimilarity < 1) ? similarityLogEntries.CLASS_NODE_METHOD_DATATYPE(attemptMethod.dataType, solutionMethod.dataType) + "\n" : "")
-      + ((visibilitySimilarity < 1) ? similarityLogEntries.CLASS_NODE_METHOD_VISIBILITY(attemptMethod.visibility, solutionMethod.visibility) + "\n" : "");
+      return (
+        similarityLogEntries.CLASS_NODE_METHOD_INTRODUCTION(attemptMethod.name) +
+        '\n' +
+        (nameSimilarity < 1
+          ? similarityLogEntries.CLASS_NODE_METHOD_NAME(attemptMethod.name, solutionMethod.name) +
+            '\n'
+          : '') +
+        (dataTypeSimilarity < 1
+          ? similarityLogEntries.CLASS_NODE_METHOD_DATATYPE(
+              attemptMethod.dataType,
+              solutionMethod.dataType,
+            ) + '\n'
+          : '') +
+        (visibilitySimilarity < 1
+          ? similarityLogEntries.CLASS_NODE_METHOD_VISIBILITY(
+              attemptMethod.visibility,
+              solutionMethod.visibility,
+            ) + '\n'
+          : '')
+      );
     }
   }
-
 
   /**
    * Calculates the similarity between two edges in a class diagram.
@@ -430,13 +574,27 @@ export class SimilarityCompareService {
     let endSimilarity = attemptEdge.end == solutionEdge.end ? 1 : 0;
 
     // if there is no similarity and the edge type has no direction per definition in swappableEditorElement, we can try swapping the start and end
-    if (startSimilarity == 0 && endSimilarity == 0 && typeSimilarity == 1 && (attemptEdge.type in swappableEditorElement) ) {
+    if (
+      startSimilarity == 0 &&
+      endSimilarity == 0 &&
+      typeSimilarity == 1 &&
+      attemptEdge.type in swappableEditorElement
+    ) {
       startSimilarity = attemptEdge.end == solutionEdge.start ? 1 : 0;
       endSimilarity = attemptEdge.start == solutionEdge.end ? 1 : 0;
     }
-    const cardinalityStartSimilarity = JaroWinklerDistance(attemptEdge.cardinalityStart || "", solutionEdge.cardinalityStart || "");
-    const descriptionSimilarity = JaroWinklerDistance(attemptEdge.description || "", solutionEdge.description || "");
-    const cardinalityEndSimilarity = JaroWinklerDistance(attemptEdge.cardinalityEnd || "", solutionEdge.cardinalityEnd || "");
+    const cardinalityStartSimilarity = JaroWinklerDistance(
+      attemptEdge.cardinalityStart || '',
+      solutionEdge.cardinalityStart || '',
+    );
+    const descriptionSimilarity = JaroWinklerDistance(
+      attemptEdge.description || '',
+      solutionEdge.description || '',
+    );
+    const cardinalityEndSimilarity = JaroWinklerDistance(
+      attemptEdge.cardinalityEnd || '',
+      solutionEdge.cardinalityEnd || '',
+    );
 
     const similarity =
       typeSimilarity * edgeWeights.type +
@@ -447,7 +605,6 @@ export class SimilarityCompareService {
       cardinalityEndSimilarity * edgeWeights.cardinalityEnd;
     return similarity;
   }
-
 
   /**
    * Generates a similarity log for a single edge comparison between an attempt edge and a solution edge.
@@ -480,28 +637,78 @@ export class SimilarityCompareService {
     let endSimilarity = attemptEdge.end == solutionEdge.end ? 1 : 0;
 
     // if there is no similarity and the edge type has no direction per definition in swappableEditorElement, we can try swapping the start and end
-    if (startSimilarity == 0 && endSimilarity == 0 && typeSimilarity == 1 && (attemptEdge.type in swappableEditorElement) ) {
+    if (
+      startSimilarity == 0 &&
+      endSimilarity == 0 &&
+      typeSimilarity == 1 &&
+      attemptEdge.type in swappableEditorElement
+    ) {
       startSimilarity = attemptEdge.end == solutionEdge.start ? 1 : 0;
       endSimilarity = attemptEdge.start == solutionEdge.end ? 1 : 0;
     }
 
-    const cardinalityStartSimilarity = JaroWinklerDistance(attemptEdge.cardinalityStart || "", solutionEdge.cardinalityStart || "");
-    const descriptionSimilarity = JaroWinklerDistance(attemptEdge.description || "", solutionEdge.description || "");
-    const cardinalityEndSimilarity = JaroWinklerDistance(attemptEdge.cardinalityEnd || "", solutionEdge.cardinalityEnd || "");
+    const cardinalityStartSimilarity = JaroWinklerDistance(
+      attemptEdge.cardinalityStart || '',
+      solutionEdge.cardinalityStart || '',
+    );
+    const descriptionSimilarity = JaroWinklerDistance(
+      attemptEdge.description || '',
+      solutionEdge.description || '',
+    );
+    const cardinalityEndSimilarity = JaroWinklerDistance(
+      attemptEdge.cardinalityEnd || '',
+      solutionEdge.cardinalityEnd || '',
+    );
 
-    if (typeSimilarity == 1 && startSimilarity == 1 && endSimilarity == 1 && cardinalityStartSimilarity == 1 && descriptionSimilarity == 1 && cardinalityEndSimilarity == 1) {
-      return "";
+    if (
+      typeSimilarity == 1 &&
+      startSimilarity == 1 &&
+      endSimilarity == 1 &&
+      cardinalityStartSimilarity == 1 &&
+      descriptionSimilarity == 1 &&
+      cardinalityEndSimilarity == 1
+    ) {
+      return '';
     } else {
-      return similarityLogEntries.CLASS_EDGE_INTRODUCTION(attemptEdge.description) + "\n"
-      + ((typeSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_TYPE(attemptEdge.type, solutionEdge.type) + "\n" : "")
-      + ((startSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_START(this.nodeMap.get(attemptEdge.start) ?? 'nameless', this.nodeMap.get(solutionEdge.start) ?? 'nameless') + "\n" : "")
-      + ((endSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_END(this.nodeMap.get(attemptEdge.end) ?? 'nameless', this.nodeMap.get(solutionEdge.end) ?? 'nameless') + "\n" : "")
-      + ((cardinalityStartSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_CARDINALITY_START(attemptEdge.cardinalityStart, solutionEdge.cardinalityStart) + "\n" : "")
-      + ((descriptionSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_DESCRIPTION(attemptEdge.description, solutionEdge.description) + "\n" : "")
-      + ((cardinalityEndSimilarity < 1) ? similarityLogEntries.CLASS_EDGE_CARDINALITY_END(attemptEdge.cardinalityEnd, solutionEdge.cardinalityEnd) + "\n" : "");
+      return (
+        similarityLogEntries.CLASS_EDGE_INTRODUCTION(attemptEdge.description) +
+        '\n' +
+        (typeSimilarity < 1
+          ? similarityLogEntries.CLASS_EDGE_TYPE(attemptEdge.type, solutionEdge.type) + '\n'
+          : '') +
+        (startSimilarity < 1
+          ? similarityLogEntries.CLASS_EDGE_START(
+              this.nodeMap.get(attemptEdge.start) ?? 'nameless',
+              this.nodeMap.get(solutionEdge.start) ?? 'nameless',
+            ) + '\n'
+          : '') +
+        (endSimilarity < 1
+          ? similarityLogEntries.CLASS_EDGE_END(
+              this.nodeMap.get(attemptEdge.end) ?? 'nameless',
+              this.nodeMap.get(solutionEdge.end) ?? 'nameless',
+            ) + '\n'
+          : '') +
+        (cardinalityStartSimilarity < 1
+          ? similarityLogEntries.CLASS_EDGE_CARDINALITY_START(
+              attemptEdge.cardinalityStart,
+              solutionEdge.cardinalityStart,
+            ) + '\n'
+          : '') +
+        (descriptionSimilarity < 1
+          ? similarityLogEntries.CLASS_EDGE_DESCRIPTION(
+              attemptEdge.description,
+              solutionEdge.description,
+            ) + '\n'
+          : '') +
+        (cardinalityEndSimilarity < 1
+          ? similarityLogEntries.CLASS_EDGE_CARDINALITY_END(
+              attemptEdge.cardinalityEnd,
+              solutionEdge.cardinalityEnd,
+            ) + '\n'
+          : '')
+      );
     }
   }
-
 
   /**
    * Finds the best matching elements between two arrays using a provided similarity function.
@@ -514,7 +721,8 @@ export class SimilarityCompareService {
   private findElementMatching(
     attemptElement: any[],
     solutionAttempt: any[],
-    similarityFunction: (attempt: any, solution: any) => number ): BasicMatching[] {
+    similarityFunction: (attempt: any, solution: any) => number,
+  ): BasicMatching[] {
     // copy the arrays
     const tempAttempt = [...attemptElement];
     const tempSolution = [...solutionAttempt];
@@ -542,12 +750,15 @@ export class SimilarityCompareService {
           }
         }
         // we found the best match and remove it from the arrays (providing a rounded similarity)
-        matching.push({ attempt: tempAttempt[currentAttemptIndex], solution: tempSolution[bestMatchIndex], similarity: Math.round(bestMatch * 1000000) / 1000000 });
+        matching.push({
+          attempt: tempAttempt[currentAttemptIndex],
+          solution: tempSolution[bestMatchIndex],
+          similarity: Math.round(bestMatch * 1000000) / 1000000,
+        });
         tempAttempt.splice(currentAttemptIndex, 1);
         tempSolution.splice(bestMatchIndex, 1);
       }
     }
     return matching;
   }
-
 }

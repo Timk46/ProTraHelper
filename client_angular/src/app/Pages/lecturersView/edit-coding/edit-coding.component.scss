@@ -124,11 +124,13 @@ app-code-editor {
   }
 
   // Nested lists
-  ul ul, ol ul {
+  ul ul,
+  ol ul {
     list-style-type: circle;
   }
 
-  ul ol, ol ol {
+  ul ol,
+  ol ol {
     list-style-type: lower-alpha;
   }
 

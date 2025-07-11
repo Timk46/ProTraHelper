@@ -1,23 +1,13 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { DiscussionVoteService } from './discussion-vote.service';
-import {
-  discussionMessageVoteCreationDTO,
-  discussionMessageVoteDTO,
-} from '@DTOs/index';
+import type { discussionMessageVoteDTO } from '@DTOs/index';
+import { discussionMessageVoteCreationDTO } from '@DTOs/index';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 
 @UseGuards(RolesGuard)
 @Controller('discussion/vote')
 export class DiscussionVoteController {
-  constructor(private voteService: DiscussionVoteService) {}
+  constructor(private readonly voteService: DiscussionVoteService) {}
 
   /**
    * This function returns the vote data for a given message
@@ -50,9 +40,6 @@ export class DiscussionVoteController {
     if (isNaN(req.user.id)) {
       throw new Error('Invalid user id');
     }
-    return this.voteService.createOrModifyVote(
-      voteCreationData,
-      Number(req.user.id),
-    );
+    return this.voteService.createOrModifyVote(voteCreationData, Number(req.user.id));
   }
 }

@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
+import type { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import type { Observable } from 'rxjs';
+import { throwError, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import {
+import type {
   BatRhinoRequest,
   BatRhinoResponse,
   RhinoPathDetectionResponse,
-  BatRhinoSetupStatus
+  BatRhinoSetupStatus,
 } from '../../../../shared/dtos/bat-rhino.dto';
 
 /**
@@ -16,12 +17,12 @@ import {
  * Verwendet direkte HTTP-Aufrufe ohne Proxy-Konfiguration
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BatRhinoService {
   private readonly baseUrl = `${environment.server}/api/rhino`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Führt Rhino-Befehle direkt aus (ohne Download)
@@ -37,7 +38,7 @@ export class BatRhinoService {
       filePath: request.filePath,
       rhinoPath: undefined, // Let backend auto-detect
       showViewport: request.showViewport || true,
-      batchMode: request.batchMode || true
+      batchMode: request.batchMode || true,
     };
 
     console.log('🔧 BatRhinoService: Mapped request for direct execution:', directRequest);
@@ -50,7 +51,7 @@ export class BatRhinoService {
         downloadUrl: undefined, // Not provided by direct execution
         executionId: response.processId?.toString(), // Map processId to executionId
         rhinoPath: response.rhinoPath,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       })),
       tap((response: BatRhinoResponse) => {
         if (response.success) {
@@ -64,9 +65,9 @@ export class BatRhinoService {
         return of({
           success: false,
           message: `Fehler bei der direkten Rhino-Ausführung: ${error.error?.message || error.message}`,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
-      })
+      }),
     );
   }
 
@@ -76,16 +77,15 @@ export class BatRhinoService {
    * @returns Observable mit Generierungsergebnis
    */
   generateScript(request: BatRhinoRequest): Observable<BatRhinoResponse> {
-    console.log('🔧 BatRhinoService: Generating script with request:', request); 
+    console.log('🔧 BatRhinoService: Generating script with request:', request);
 
-    return this.http.post<BatRhinoResponse>(`${this.baseUrl}/generate-script`, request)
-      .pipe(
-        map(response => {
-          console.log('✅ BatRhinoService: Script generation successful:', response);
-          return response;
-        }),
-        catchError(this.handleError)
-      );
+    return this.http.post<BatRhinoResponse>(`${this.baseUrl}/generate-script`, request).pipe(
+      map(response => {
+        console.log('✅ BatRhinoService: Script generation successful:', response);
+        return response;
+      }),
+      catchError(this.handleError),
+    );
   }
 
   /**
@@ -95,14 +95,13 @@ export class BatRhinoService {
   detectRhinoPath(): Observable<RhinoPathDetectionResponse> {
     console.log('🔍 BatRhinoService: Detecting Rhino path...');
 
-    return this.http.get<RhinoPathDetectionResponse>(`${this.baseUrl}/detect-rhino-path`)
-      .pipe(
-        map(response => {
-          console.log('✅ BatRhinoService: Rhino path detection result:', response);
-          return response;
-        }),
-        catchError(this.handleError)
-      );
+    return this.http.get<RhinoPathDetectionResponse>(`${this.baseUrl}/detect-rhino-path`).pipe(
+      map(response => {
+        console.log('✅ BatRhinoService: Rhino path detection result:', response);
+        return response;
+      }),
+      catchError(this.handleError),
+    );
   }
 
   /**
@@ -112,14 +111,13 @@ export class BatRhinoService {
   getSetupStatus(): Observable<BatRhinoSetupStatus> {
     console.log('📊 BatRhinoService: Getting setup status...');
 
-    return this.http.get<BatRhinoSetupStatus>(`${this.baseUrl}/setup-status`)
-      .pipe(
-        map(response => {
-          console.log('✅ BatRhinoService: Setup status retrieved:', response);
-          return response;
-        }),
-        catchError(this.handleError)
-      );
+    return this.http.get<BatRhinoSetupStatus>(`${this.baseUrl}/setup-status`).pipe(
+      map(response => {
+        console.log('✅ BatRhinoService: Setup status retrieved:', response);
+        return response;
+      }),
+      catchError(this.handleError),
+    );
   }
 
   /**
@@ -135,7 +133,7 @@ export class BatRhinoService {
       rhinoCommand: rhinoCommand,
       showViewport: true,
       batchMode: true,
-      outputDirectory: undefined // Verwendet Server-Standard
+      outputDirectory: undefined, // Verwendet Server-Standard
     };
   }
 
@@ -144,7 +142,7 @@ export class BatRhinoService {
    * @param error - HTTP-Fehler-Response
    * @returns Observable mit Fehlermeldung
    */
-  private handleError = (error: HttpErrorResponse): Observable<never> => {
+  private readonly handleError = (error: HttpErrorResponse): Observable<never> => {
     let errorMessage = 'Ein unbekannter Fehler ist aufgetreten';
 
     if (error.error instanceof ErrorEvent) {
@@ -170,7 +168,7 @@ export class BatRhinoService {
       }
 
       // Zusätzliche Fehlerdetails aus der Server-Response
-      if (error.error && error.error.message) {
+      if (error.error?.message) {
         errorMessage += ` Details: ${error.error.message}`;
       }
     }

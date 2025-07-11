@@ -2,17 +2,17 @@ import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common
 import { ConfigService } from '@nestjs/config';
 import { ChatOpenAI } from '@langchain/openai'; // Assuming OpenAI, adjust if different
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { TutoringFeedbackState } from '../state';
+import type { TutoringFeedbackState } from '../state';
 import { FeedbackOutputSchema, FeedbackOutput } from '../schemas/feedback-output.schema'; // Added FeedbackOutput type
 import { PrismaService } from 'src/prisma/prisma.service'; // Added PrismaService import
 @Injectable()
 export class GenerateFinalFeedbackNodeService {
   private readonly logger = new Logger(GenerateFinalFeedbackNodeService.name);
-  private llm: ChatOpenAI; // We'll configure this properly later via LlmProviderService
+  private readonly llm: ChatOpenAI; // We'll configure this properly later via LlmProviderService
 
   constructor(
-    private configService: ConfigService,
-    private prisma: PrismaService, // Injected PrismaService
+    private readonly configService: ConfigService,
+    private readonly prisma: PrismaService, // Injected PrismaService
   ) {
     // Basic LLM initialization - replace with proper injection/configuration
     this.llm = new ChatOpenAI({
@@ -26,9 +26,7 @@ export class GenerateFinalFeedbackNodeService {
    * @param state The current LangGraph state.
    * @returns A partial state object containing the finalFeedbackJson.
    */
-  async execute(
-    state: TutoringFeedbackState,
-  ): Promise<Partial<TutoringFeedbackState>> {
+  async execute(state: TutoringFeedbackState): Promise<Partial<TutoringFeedbackState>> {
     this.logger.log('Executing GenerateFinalFeedback Node');
     const { feedbackContext, fixedCode, lectureSnippets, sourceMap } = state; // Add sourceMap
 
@@ -38,21 +36,22 @@ export class GenerateFinalFeedbackNodeService {
     }
     // Ensure codeSubmissionId exists in the context
     if (!feedbackContext.codeSubmissionId) {
-        this.logger.error('codeSubmissionId is missing from feedbackContext.');
-        return { error: 'codeSubmissionId is missing in GenerateFinalFeedbackNode.' };
+      this.logger.error('codeSubmissionId is missing from feedbackContext.');
+      return { error: 'codeSubmissionId is missing in GenerateFinalFeedbackNode.' };
     }
     // Fixed code and snippets might be null/empty, but we proceed anyway, letting the LLM handle missing info
     if (!fixedCode) {
-        this.logger.warn('Fixed code is missing from state. Proceeding without it.');
+      this.logger.warn('Fixed code is missing from state. Proceeding without it.');
     }
-     // lectureSnippets is now a string, check if it's the default empty array string '[]' or null/undefined
-     if (!lectureSnippets || lectureSnippets === '[]') {
-        this.logger.warn('Lecture snippets JSON string is missing or empty. Proceeding without them.');
+    // lectureSnippets is now a string, check if it's the default empty array string '[]' or null/undefined
+    if (!lectureSnippets || lectureSnippets === '[]') {
+      this.logger.warn(
+        'Lecture snippets JSON string is missing or empty. Proceeding without them.',
+      );
     }
 
     // Construct the refactored prompt
-    const systemPrompt = 
-`
+    const systemPrompt = `
 # Role and Objective
 - You are an empathetic programming professor with high computer science education **expertise**.
 - Your primary goal is to provide comprehensive, pedagogically sound, and encouraging feedback to a computer science student.
@@ -85,12 +84,12 @@ export class GenerateFinalFeedbackNodeService {
     - Do not include lecture references (these belong in the "KC" field).
     - **CRITICAL: Never provide fixes, alternative approaches, or any other information on how to proceed!**
     - Examples:
-          - **Good:** "The loop condition ${"`i > 10`"} is incorrect and prevents the loop from executing."
-          - **Bad:** "The loop condition ${"`i > 10`"} is incorrect and prevents the loop from executing. Change the condition to ${"`i < 10`"} to make the loop run." (This violates the instruction to avoid giving fixes.)
+          - **Good:** "The loop condition ${'`i > 10`'} is incorrect and prevents the loop from executing."
+          - **Bad:** "The loop condition ${'`i > 10`'} is incorrect and prevents the loop from executing. Change the condition to ${'`i < 10`'} to make the loop run." (This violates the instruction to avoid giving fixes.)
           - **Good:** "Array index is out of bounds—see compiler error: 'ArrayIndexOutOfBoundsException'. You're accessing an array position that does not exist."
           - **Bad:** "Array index is out of bounds—see compiler error: 'ArrayIndexOutOfBoundsException'. You're accessing an array position that does not exist. Make sure the index is within the valid array range." (This violates the instruction to avoid giving hints.)
-          - **Good:** "The expression ${"`(jahr/4)`"} is not appropriate. It returns a truthy value based on division but does not check for divisibility by 4."
-          - **Bad:** "The expression ${"`(jahr/4)`"} is not correct. Instead, you should use the modulo operator ${"`%`"} to check whether ${"`jahr`"} is divisible by 4." (It explicitly suggests a correction (use the modulo operator ${"`%`"}), which violates the instruction to avoid giving an alternative approach.)
+          - **Good:** "The expression ${'`(jahr/4)`'} is not appropriate. It returns a truthy value based on division but does not check for divisibility by 4."
+          - **Bad:** "The expression ${'`(jahr/4)`'} is not correct. Instead, you should use the modulo operator ${'`%`'} to check whether ${'`jahr`'} is divisible by 4." (It explicitly suggests a correction (use the modulo operator ${'`%`'}), which violates the instruction to avoid giving an alternative approach.)
 
 ## 3. **Explain Concepts & Cite Sources (Output to "KC" field)**
     - Identify the fundamental programming concepts relevant to the task and the student's errors (Step 2).
@@ -116,37 +115,38 @@ ${feedbackContext.compilerOutput || 'None provided.'}
 
 ## Automated Tests
 ### Unit Test Definitions
-${ feedbackContext.automatedTests ? feedbackContext.automatedTests[0].code : 'None provided.' }
+${feedbackContext.automatedTests ? feedbackContext.automatedTests[0].code : 'None provided.'}
 
 ### Unit Test Results
-${ feedbackContext.unitTestResults ? JSON.stringify(feedbackContext.unitTestResults) : 'None provided.' }
+${
+  feedbackContext.unitTestResults
+    ? JSON.stringify(feedbackContext.unitTestResults)
+    : 'None provided.'
+}
 
 ## Correct Solution (Reference)
 ${fixedCode || 'None available.'}
 
 ## Relevant Lecture Snippets
-${(lectureSnippets && lectureSnippets !== '[]') ? lectureSnippets : 'None available.'}
+${lectureSnippets && lectureSnippets !== '[]' ? lectureSnippets : 'None available.'}
 
 # Final Instruction
 - The key difference **between Step 2 and Step 4** is that Step 2 focuses on identifying mistakes, while **ONLY Step 4 provides guidance on how to proceed**.
 - Adhere STRICTLY to the JSON output schema defined below and follow the specified steps based on your persona and using the specified tone.
 `;
 
-    const llmWithStructure = this.llm.withStructuredOutput(
-      FeedbackOutputSchema,
-      { name: 'generate_final_feedback' },
-    );
+    const llmWithStructure = this.llm.withStructuredOutput(FeedbackOutputSchema, {
+      name: 'generate_final_feedback',
+    });
 
     try {
-      const response = await llmWithStructure.invoke([
-        new SystemMessage(systemPrompt)
-      ]);
+      const response = await llmWithStructure.invoke([new SystemMessage(systemPrompt)]);
 
       this.logger.log('Successfully generated final structured feedback.');
       this.logger.log('Successfully generated raw feedback from LLM.');
 
       // Process citations in the KC field
-      let processedFeedback = response; // Start with the raw response
+      const processedFeedback = response; // Start with the raw response
       if (processedFeedback.KC && sourceMap && Object.keys(sourceMap).length > 0) {
         this.logger.log('Processing citations in KC field...');
         processedFeedback.KC = processedFeedback.KC.replace(
@@ -164,7 +164,7 @@ ${(lectureSnippets && lectureSnippets !== '[]') ? lectureSnippets : 'None availa
         );
         this.logger.log('Citation processing complete.');
       } else {
-         this.logger.log('No citations to process or sourceMap missing.');
+        this.logger.log('No citations to process or sourceMap missing.');
       }
 
       if (processedFeedback.KM && sourceMap && Object.keys(sourceMap).length > 0) {
@@ -184,9 +184,8 @@ ${(lectureSnippets && lectureSnippets !== '[]') ? lectureSnippets : 'None availa
         );
         this.logger.log('Citation processing complete.');
       } else {
-         this.logger.log('No citations to process or sourceMap missing.');
+        this.logger.log('No citations to process or sourceMap missing.');
       }
-
 
       // --- Persist Feedback ---
       try {
@@ -204,7 +203,6 @@ ${(lectureSnippets && lectureSnippets !== '[]') ? lectureSnippets : 'None availa
         this.logger.log(`Successfully saved generated feedback with ID: ${newFeedback.id}`);
         // Return feedback JSON and the new ID
         return { finalFeedbackJson: processedFeedback, generatedFeedbackId: newFeedback.id };
-
       } catch (dbError) {
         this.logger.error(
           `Error saving generated feedback to database: ${dbError.message}`,
@@ -214,7 +212,6 @@ ${(lectureSnippets && lectureSnippets !== '[]') ? lectureSnippets : 'None availa
         return { error: `Failed to save generated feedback: ${dbError.message}` };
       }
       // --- End Persist Feedback ---
-
     } catch (llmError) {
       this.logger.error(
         `Error generating final feedback from LLM: ${llmError.message}`,

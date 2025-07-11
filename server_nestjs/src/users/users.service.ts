@@ -2,15 +2,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { globalRole } from '@DTOs/roles.enum';
-import { UserDTO, UserSubjectDTO } from '@DTOs/user.dto';
+import type { globalRole } from '@DTOs/roles.enum';
+import type { UserDTO, UserSubjectDTO } from '@DTOs/user.dto';
 
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
-  constructor(
-    private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // The Cas User will be created or updated after each login
   async createCASuser(email: string): Promise<UserDTO> {
@@ -29,9 +28,9 @@ export class UsersService {
       include: {
         userSubjects: {
           include: {
-            subject: true
-          }
-        }
+            subject: true,
+          },
+        },
       },
     });
 
@@ -47,10 +46,10 @@ export class UsersService {
       include: {
         userSubjects: {
           include: {
-            subject: true
-          }
-        }
-      }
+            subject: true,
+          },
+        },
+      },
     });
     return users.map(this.mapToUserDTO);
   }
@@ -61,10 +60,10 @@ export class UsersService {
       include: {
         userSubjects: {
           include: {
-            subject: true
-          }
-        }
-      }
+            subject: true,
+          },
+        },
+      },
     });
     return user ? this.mapToUserDTO(user) : null;
   }
@@ -75,10 +74,10 @@ export class UsersService {
       include: {
         userSubjects: {
           include: {
-            subject: true
-          }
-        }
-      }
+            subject: true,
+          },
+        },
+      },
     });
     if (user) {
       return this.mapToUserDTO(user);
@@ -96,9 +95,9 @@ export class UsersService {
       include: {
         userSubjects: {
           include: {
-            subject: true
-          }
-        }
+            subject: true,
+          },
+        },
       },
     });
     return this.mapToUserDTO(user);
@@ -122,9 +121,9 @@ export class UsersService {
       include: {
         userSubjects: {
           include: {
-            subject: true
-          }
-        }
+            subject: true,
+          },
+        },
       },
     });
 
@@ -133,7 +132,12 @@ export class UsersService {
     return this.mapToUserDTO(user);
   }
 
-  async addUserToSubject(userId: number, subjectId: number, role: string, registeredForSL: boolean): Promise<UserSubjectDTO> {
+  async addUserToSubject(
+    userId: number,
+    subjectId: number,
+    role: string,
+    registeredForSL: boolean,
+  ): Promise<UserSubjectDTO> {
     const userSubject = await this.prisma.userSubject.create({
       data: {
         userId: userId,
@@ -142,8 +146,8 @@ export class UsersService {
         registeredForSL: registeredForSL,
       },
       include: {
-        subject: true
-      }
+        subject: true,
+      },
     });
     return this.mapToUserSubjectDTO(userSubject);
   }
@@ -161,7 +165,11 @@ export class UsersService {
     return result.count;
   }
 
-  async updateUserSubjectRegistration(userId: number, subjectId: number, registeredForSL: boolean): Promise<number> {
+  async updateUserSubjectRegistration(
+    userId: number,
+    subjectId: number,
+    registeredForSL: boolean,
+  ): Promise<number> {
     const result = await this.prisma.userSubject.updateMany({
       where: {
         userId: userId,
@@ -192,7 +200,6 @@ export class UsersService {
   }
 
   async getUserTotalProgress(userId: number): Promise<number> {
-
     let maxProgress = 0;
     let userTotalProgress = 0;
     const contentElements = await this.prisma.contentElement.findMany({
@@ -214,30 +221,33 @@ export class UsersService {
     });
 
     for (const contentElement of contentElements) {
-      if(contentElement.type === 'QUESTION') {
+      if (contentElement.type === 'QUESTION') {
         maxProgress = maxProgress + contentElement.question.level;
-      }
-      else {
+      } else {
         //maxProgress = maxProgress + 0.2; // Points for PDF/VIDEO
       }
-      if(userContentElementsProgress.find((element) => element.contentElementId === contentElement.id && element.markedAsDone === true)) {
-        if(contentElement.type === 'QUESTION') {
+      if (
+        userContentElementsProgress.find(
+          element =>
+            element.contentElementId === contentElement.id && element.markedAsDone === true,
+        )
+      ) {
+        if (contentElement.type === 'QUESTION') {
           userTotalProgress = userTotalProgress + contentElement.question.level;
-        }
-        else {
+        } else {
           //userTotalProgress = userTotalProgress + 0.2; // Points for PDF/VIDEO
         }
       }
     }
 
-    const userPercentage = userTotalProgress / maxProgress * 100;
+    const userPercentage = (userTotalProgress / maxProgress) * 100;
     return userPercentage;
   }
 
   async validateUserPassword(email: string, password: string): Promise<boolean> {
     const user = await this.prisma.user.findUnique({
       where: { email: email },
-      select: { password: true }
+      select: { password: true },
     });
     if (!user) {
       this.logger.debug(`User not found for email: ${email}`);

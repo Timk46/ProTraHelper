@@ -1,11 +1,22 @@
-import { Component, OnInit, OnDestroy, Input, Inject, EventEmitter, Output, Optional, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { MCOptionViewDTO, McQuestionDTO, QuestionDTO, McQuestionOptionDTO } from '@DTOs/question.dto';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
-import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { TaskViewData } from '@DTOs/index';
-import { Router } from '@angular/router';
-import { Location } from '@angular/common';
+import type { OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  Input,
+  Inject,
+  EventEmitter,
+  Output,
+  Optional,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import type { MCOptionViewDTO, McQuestionDTO } from '@DTOs/question.dto';
+import { QuestionDTO, McQuestionOptionDTO } from '@DTOs/question.dto';
+import type { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import type { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import type { TaskViewData } from '@DTOs/index';
+import type { Router } from '@angular/router';
+import type { Location } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -30,14 +41,14 @@ enum McSliderTaskState {
   LOADING,
   QUESTIONS,
   SUBMITTING,
-  FEEDBACK
+  FEEDBACK,
 }
 
 @Component({
   selector: 'app-mc-slider-task',
   templateUrl: './mc-slider-task.component.html',
   styleUrls: ['./mc-slider-task.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class McSliderTaskComponent implements OnInit, OnDestroy {
   @Output() submitClicked = new EventEmitter<any>();
@@ -53,29 +64,31 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
   // Component state
   componentState: McSliderTaskState = McSliderTaskState.LOADING;
   currentQuestionIndex: number = 0;
-  
+
   // Questions data
   questionStates: QuestionState[] = [];
-  
+
   // Overall submission state
   allSubmitted: boolean = false;
   totalScore: number = 0;
   maxScore: number = 0;
-  
+
   // For handling RxJS subscriptions cleanup
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: { 
-      taskViewData: TaskViewData, 
-      conceptId: number, 
-      questions: any[] 
+    @Optional()
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      taskViewData: TaskViewData;
+      conceptId: number;
+      questions: any[];
     },
-    private questionDataService: QuestionDataService,
-    private router: Router,
-    private dialogRef: MatDialogRef<McSliderTaskComponent>,
-    private location: Location,
-    private cdr: ChangeDetectorRef
+    private readonly questionDataService: QuestionDataService,
+    private readonly router: Router,
+    private readonly dialogRef: MatDialogRef<McSliderTaskComponent>,
+    private readonly location: Location,
+    private readonly cdr: ChangeDetectorRef,
   ) {
     if (data) {
       this.taskViewData = data.taskViewData;
@@ -117,29 +130,31 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     }
 
     const questionData = this.questions[index];
-    
+
     // Initialize question state
     const questionState: QuestionState = {
       questionData,
       mcQuestion: this.getEmptyMcQuestion(),
       options: [],
       selectedOptions: [],
-      isSubmitted: false
+      isSubmitted: false,
     };
 
     // Load MC question data
-    this.questionDataService.getMCQuestion(questionData.id)
+    this.questionDataService
+      .getMCQuestion(questionData.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe(mcQuestionData => {
         questionState.mcQuestion = mcQuestionData;
-        
+
         // Load options
-        this.questionDataService.getMCOptions(mcQuestionData.id)
+        this.questionDataService
+          .getMCOptions(mcQuestionData.id)
           .pipe(takeUntil(this.destroy$))
           .subscribe(optionsData => {
             questionState.options = optionsData.map(option => ({
               ...option,
-              isCorrect: undefined
+              isCorrect: undefined,
             }));
 
             // Shuffle options if enabled
@@ -149,7 +164,7 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
 
             this.questionStates[index] = questionState;
             this.maxScore += questionData.score || 0;
-            
+
             // Load next question or finish loading
             this.loadQuestionAtIndex(index + 1);
           });
@@ -165,7 +180,7 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
       questionId: -1,
       isSC: false,
       shuffleOptions: false,
-      mcQuestionOption: []
+      mcQuestionOption: [],
     };
   }
 
@@ -262,21 +277,22 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
       userMCAnswer: currentState.selectedOptions,
     };
 
-    this.questionDataService.createUserAnswer(userAnswerData)
+    this.questionDataService
+      .createUserAnswer(userAnswerData)
       .pipe(takeUntil(this.destroy$))
       .subscribe(feedback => {
         currentState.feedback = feedback;
         currentState.isSubmitted = true;
-        
+
         // Update option correctness
         this.updateOptionCorrectness(currentState);
-        
+
         // Check if answer is correct
         currentState.isCorrect = this.checkQuestionCorrect(currentState);
-        
+
         // Update total score
         this.updateTotalScore();
-        
+
         this.componentState = McSliderTaskState.QUESTIONS;
         this.cdr.detectChanges();
       });
@@ -286,7 +302,10 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
    * Update option correctness after submission
    */
   private updateOptionCorrectness(questionState: QuestionState): void {
-    if (!questionState.mcQuestion.mcQuestionOption || questionState.mcQuestion.mcQuestionOption.length === 0) {
+    if (
+      !questionState.mcQuestion.mcQuestionOption ||
+      questionState.mcQuestion.mcQuestionOption.length === 0
+    ) {
       return;
     }
 
@@ -322,9 +341,9 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
    */
   submitAllQuestions(): void {
     this.componentState = McSliderTaskState.SUBMITTING;
-    
-    const unsubmittedStates = this.questionStates.filter(state => 
-      !state.isSubmitted && state.selectedOptions.length > 0
+
+    const unsubmittedStates = this.questionStates.filter(
+      state => !state.isSubmitted && state.selectedOptions.length > 0,
     );
 
     if (unsubmittedStates.length === 0) {
@@ -333,7 +352,7 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     }
 
     let submittedCount = 0;
-    
+
     unsubmittedStates.forEach(state => {
       const userAnswerData: UserAnswerDataDTO = {
         id: -1,
@@ -343,17 +362,18 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
         userMCAnswer: state.selectedOptions,
       };
 
-      this.questionDataService.createUserAnswer(userAnswerData)
+      this.questionDataService
+        .createUserAnswer(userAnswerData)
         .pipe(takeUntil(this.destroy$))
         .subscribe(feedback => {
           state.feedback = feedback;
           state.isSubmitted = true;
-          
+
           this.updateOptionCorrectness(state);
           state.isCorrect = this.checkQuestionCorrect(state);
-          
+
           submittedCount++;
-          
+
           if (submittedCount === unsubmittedStates.length) {
             this.finishSubmission();
           }
@@ -368,10 +388,10 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     this.updateTotalScore();
     this.allSubmitted = true;
     this.componentState = McSliderTaskState.FEEDBACK;
-    
+
     // Emit final progress
     this.submitClicked.emit(this.totalScore);
-    
+
     this.cdr.detectChanges();
   }
 
@@ -379,8 +399,8 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
    * Check if all questions are answered
    */
   allQuestionsAnswered(): boolean {
-    return this.questionStates.every(state => 
-      state.selectedOptions.length > 0 || state.isSubmitted
+    return this.questionStates.every(
+      state => state.selectedOptions.length > 0 || state.isSubmitted,
     );
   }
 
@@ -388,8 +408,8 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
    * Get answered questions count
    */
   getAnsweredCount(): number {
-    return this.questionStates.filter(state => 
-      state.selectedOptions.length > 0 || state.isSubmitted
+    return this.questionStates.filter(
+      state => state.selectedOptions.length > 0 || state.isSubmitted,
     ).length;
   }
 
@@ -398,9 +418,9 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
    */
   getFeedbackColor(): string {
     if (this.maxScore === 0) return '#a3be8c';
-    
+
     const percentage = this.totalScore / this.maxScore;
-    
+
     if (percentage === 1) {
       return '#a3be8c'; // Nord green
     } else if (percentage >= 0.5) {
@@ -421,12 +441,12 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     currentState.feedback = undefined;
     currentState.isSubmitted = false;
     currentState.isCorrect = undefined;
-    
+
     // Reset option states
     currentState.options.forEach(option => {
       option.selected = false;
     });
-    
+
     this.cdr.detectChanges();
   }
 

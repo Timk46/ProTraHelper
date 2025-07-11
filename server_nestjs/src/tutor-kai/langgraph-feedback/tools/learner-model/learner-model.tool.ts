@@ -1,15 +1,11 @@
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { LearnerModelToolService } from './learner-model.service';
+import type { LearnerModelToolService } from './learner-model.service';
 import { z } from 'zod';
 import { Logger } from '@nestjs/common'; // Import Logger
 
 // Define the schema for the tool's input using Zod
 const LearnerModelToolSchema = z.object({
-  userId: z
-    .number()
-    .int()
-    .positive()
-    .describe('The unique identifier for the student.'),
+  userId: z.number().int().positive().describe('The unique identifier for the student.'),
   codingQuestionId: z
     .number()
     .int()
@@ -20,7 +16,9 @@ const LearnerModelToolSchema = z.object({
     .int()
     .positive()
     .nullable() // Concept ID can be null if not applicable/available
-    .describe('The unique identifier for the primary concept associated with the coding question (if available).'),
+    .describe(
+      'The unique identifier for the primary concept associated with the coding question (if available).',
+    ),
 });
 
 // Type for the input based on the Zod schema
@@ -68,9 +66,11 @@ export function createLearnerModelTool(
         //    return resultString.substring(0, 3000) + '... [TRUNCATED]';
         // }
         return resultString;
-
       } catch (error) {
-        logger.error(`Error executing fetch_learner_model tool with input: ${JSON.stringify(input)}`, error);
+        logger.error(
+          `Error executing fetch_learner_model tool with input: ${JSON.stringify(input)}`,
+          error,
+        );
         // Return a structured error message
         return JSON.stringify({
           error: `Failed to fetch learner model data: ${error.message || 'Unknown error'}`,

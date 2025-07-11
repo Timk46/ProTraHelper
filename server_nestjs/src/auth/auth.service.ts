@@ -3,10 +3,10 @@ import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { EventLogService } from '../EventLog/event-log.service';
-import { UserDTO } from '@DTOs/user.dto';
+import type { UserDTO } from '@DTOs/user.dto';
 import { RefreshTokenService } from './refresh-token/refresh-token.service';
 import * as bcrypt from 'bcrypt';
-import { User } from "@prisma/client";
+import type { User } from '@prisma/client';
 
 /**
  * Provides authentication services
@@ -22,10 +22,10 @@ export class AuthService {
    * @param eventLogService event log service
    */
   constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService,
-    private eventLogService: EventLogService,
-    private refreshTokenService: RefreshTokenService
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly eventLogService: EventLogService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
   /**
@@ -40,12 +40,18 @@ export class AuthService {
     let user = await this.usersService.findOne(email);
     if (user) {
       //this.logger.debug(`User found for CAS login: ${JSON.stringify(user)}`);
-      this.eventLogService.log('info', 'login', user.id, 'User logged in', {email: user.email, role: user.globalRole});
-    }
-    else { // If the user doesn't exist, create a new one
+      this.eventLogService.log('info', 'login', user.id, 'User logged in', {
+        email: user.email,
+        role: user.globalRole,
+      });
+    } else {
+      // If the user doesn't exist, create a new one
       this.logger.debug(`User not found for CAS login, creating new user`);
       user = await this.usersService.createCASuser(email);
-      this.eventLogService.log('info', 'login', user.id, 'User created', {email: user.email, role: user.globalRole});
+      this.eventLogService.log('info', 'login', user.id, 'User created', {
+        email: user.email,
+        role: user.globalRole,
+      });
     }
     const tokens = await this.generateTokens(user);
     await this.refreshTokenService.createRefreshToken(user.email, deviceId, tokens.refreshToken);
@@ -68,12 +74,17 @@ export class AuthService {
       const user = await this.usersService.findOne(email);
       if (user) {
         //this.logger.debug(`User validated successfully: ${JSON.stringify(user)}`);
-        this.eventLogService.log('info', 'login', user.id, 'User ' + email + ' validated', {email: user.email, role: user.globalRole});
+        this.eventLogService.log('info', 'login', user.id, 'User ' + email + ' validated', {
+          email: user.email,
+          role: user.globalRole,
+        });
         return user;
       }
     }
     this.logger.debug(`User validation failed for: ${email}`);
-    this.eventLogService.log('warn', 'login', null, 'User ' + email + ' NOT validated', {email: email});
+    this.eventLogService.log('warn', 'login', null, 'User ' + email + ' NOT validated', {
+      email: email,
+    });
     return null;
   }
 
@@ -89,7 +100,7 @@ export class AuthService {
     const tokens = await this.generateTokens(user);
     await this.refreshTokenService.createRefreshToken(user.email, deviceId, tokens.refreshToken);
     return {
-      ...tokens
+      ...tokens,
     };
   }
 
@@ -111,10 +122,7 @@ export class AuthService {
       throw new ForbiddenException('Access Denied');
     }
 
-    const refreshTokenMatches = await bcrypt.compare(
-      refreshToken,
-      userRefreshToken.token
-    );
+    const refreshTokenMatches = await bcrypt.compare(refreshToken, userRefreshToken.token);
 
     if (!refreshTokenMatches) {
       throw new ForbiddenException('Access Denied');
@@ -123,7 +131,9 @@ export class AuthService {
     const tokens = await this.generateTokens(user);
     await this.refreshTokenService.updateRefreshToken(email, deviceId, tokens.refreshToken);
     // this.logger.debug(`Tokens refreshed for user: ${user.email}`);
-    await this.eventLogService.log('info', 'login', user.id, 'User update refresh token', { email: user.email });
+    await this.eventLogService.log('info', 'login', user.id, 'User update refresh token', {
+      email: user.email,
+    });
     return tokens;
   }
 
@@ -138,7 +148,10 @@ export class AuthService {
     // this.logger.debug(`Logging out user: ${user.email}`);
     await this.refreshTokenService.deleteRefreshToken(user.email, deviceId);
     // this.logger.debug(`User logged out: ${user.email}`);
-    await this.eventLogService.log('info', 'login', user.id, 'User logged out', { email: user.email, role: user.globalRole });
+    await this.eventLogService.log('info', 'login', user.id, 'User logged out', {
+      email: user.email,
+      role: user.globalRole,
+    });
   }
 
   /**
@@ -151,7 +164,10 @@ export class AuthService {
     // this.logger.debug(`Logging out all devices for user: ${user.email}`);
     await this.refreshTokenService.deleteAllUserRefreshTokens(user.email);
     // this.logger.debug(`User logged out of all devices: ${user.email}`);
-    await this.eventLogService.log('info', 'login', user.id, 'User logged out of all devices', { email: user.email, role: user.globalRole });
+    await this.eventLogService.log('info', 'login', user.id, 'User logged out of all devices', {
+      email: user.email,
+      role: user.globalRole,
+    });
   }
 
   /**
@@ -164,7 +180,10 @@ export class AuthService {
     // this.logger.debug(`Logging out all user`);
     await this.refreshTokenService.deleteAllRefreshTokens();
     // this.logger.debug(`All user logged out`);
-    await this.eventLogService.log('info', 'login', user.id, 'All user logged out', { email: user.email, role: user.globalRole });
+    await this.eventLogService.log('info', 'login', user.id, 'All user logged out', {
+      email: user.email,
+      role: user.globalRole,
+    });
   }
 
   /**
@@ -174,7 +193,7 @@ export class AuthService {
    * @returns { Promise<{ accessToken: string; refreshToken: string; }> } A promise that resolves to an object containing the access token and refresh token.
    * @throws { Error } If token generation fails.
    */
-  async generateTokens(user: UserDTO): Promise<{ accessToken: string; refreshToken: string; }> {
+  async generateTokens(user: UserDTO): Promise<{ accessToken: string; refreshToken: string }> {
     // this.logger.debug(`Generating tokens for user: ${user.email}`);
     const payload = {
       email: user.email,
@@ -182,12 +201,13 @@ export class AuthService {
       lastName: user.lastname,
       id: user.id,
       globalRole: user.globalRole,
-      subjects: user.userSubjects?.map(us => ({
-        subjectId: us.subjectId,
-        subjectname: us.name,
-        role: us.subjectSpecificRole,
-        registeredForSL: us.registeredForSL
-      })) || []
+      subjects:
+        user.userSubjects.map(us => ({
+          subjectId: us.subjectId,
+          subjectname: us.name,
+          role: us.subjectSpecificRole,
+          registeredForSL: us.registeredForSL,
+        })) || [],
     };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
@@ -213,7 +233,7 @@ export class AuthService {
     await this.eventLogService.log('info', 'login', user.id, 'Tokens generated', {
       email: user.email,
       role: user.globalRole,
-      accessToken: accessToken
+      accessToken: accessToken,
     });
     return {
       accessToken,

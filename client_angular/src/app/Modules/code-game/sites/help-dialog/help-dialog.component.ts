@@ -1,19 +1,20 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import type { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-help-dialog',
   templateUrl: './help-dialog.component.html',
-  styleUrls: ['./help-dialog.component.scss']
+  styleUrls: ['./help-dialog.component.scss'],
 })
 export class HelpDialogComponent {
   driveGifPath = 'assets/img/codeGame/drive.gif';
   analyseItemGifPath = 'assets/img/codeGame/analyse_item.gif';
   turnRightGifPath = 'assets/img/codeGame/turn_right.gif';
   turnLeftGifPath = 'assets/img/codeGame/turn_left.gif';
-  
+
   languageSpecificHelp: { [key: string]: string } = {
-    'cpp': `
+    cpp: `
       <h3>C++ Spezifische Hilfe</h3>
       <div class="help-grid">
         <div class="grid-item">
@@ -70,7 +71,7 @@ export class HelpDialogComponent {
         </div>
       </div>
     `,
-    'java': `
+    java: `
       <h3>Java Spezifische Hilfe</h3>
       <div class="help-grid">
         <div class="grid-item">
@@ -127,7 +128,7 @@ export class HelpDialogComponent {
         </div>
       </div>
     `,
-    'python': `
+    python: `
       <h3>Python Spezifische Hilfe</h3>
       <div class="help-grid">
         <div class="grid-item">
@@ -183,12 +184,12 @@ export class HelpDialogComponent {
           <p>@Output: True/False</p>
         </div>
       </div>
-    `
+    `,
   };
 
   constructor(
     public dialogRef: MatDialogRef<HelpDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { language: string }
+    @Inject(MAT_DIALOG_DATA) public data: { language: string },
   ) {}
 
   close(): void {
@@ -198,4 +199,4 @@ export class HelpDialogComponent {
   getLanguageSpecificHelp(): string {
     return this.languageSpecificHelp[this.data.language] || '';
   }
-} 
+}

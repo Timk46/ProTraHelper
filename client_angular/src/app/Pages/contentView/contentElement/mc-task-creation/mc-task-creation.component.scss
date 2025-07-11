@@ -1,4 +1,3 @@
-
 :host {
   display: flex;
   flex-direction: column;
@@ -41,7 +40,6 @@
 
 .options-container {
   margin-top: 10px; // Space between the form fields and options
-
 
   .option-pair {
     display: flex;
@@ -92,7 +90,7 @@ mat-divider {
 .buttonrow {
   display: flex;
   gap: 240px;
-    button {
+  button {
     font-size: 15px; // Ändern Sie die Schriftgröße
     padding: 10px 20px; // Ändern Sie das Padding
     min-width: 100px; // Ändern Sie die minimale Breite

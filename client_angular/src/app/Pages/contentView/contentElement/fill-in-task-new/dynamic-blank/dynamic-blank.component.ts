@@ -1,15 +1,16 @@
-import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import type { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import type { OnInit } from '@angular/core';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FillinQuestionType } from '@DTOs/fillInType.enum';
-import { UserFillinAnswer } from '@DTOs/userAnswer.dto';
+import type { UserFillinAnswer } from '@DTOs/userAnswer.dto';
 
 @Component({
   selector: 'app-dynamic-blank',
   templateUrl: './dynamic-blank.component.html',
-  styleUrls: ['./dynamic-blank.component.scss']
+  styleUrls: ['./dynamic-blank.component.scss'],
 })
-export class DynamicBlankComponent {
-
+export class DynamicBlankComponent implements OnInit {
   @Input() id: string | null = '';
   @Input() otherBlankIds: string[] = [];
   @Input() blankMode: string = FillinQuestionType.FillinText;
@@ -20,8 +21,7 @@ export class DynamicBlankComponent {
   protected fillinTypes = FillinQuestionType;
   protected answer: string = '';
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   /**
    * Handles the value change event.
@@ -31,14 +31,19 @@ export class DynamicBlankComponent {
    */
   onValueChange() {
     if (!this.id) return;
-    this.valueChange.emit({position: this.id.slice(4), answer: this.answer});
+    this.valueChange.emit({ position: this.id.slice(4), answer: this.answer });
   }
 
   drop(event: CdkDragDrop<string[]>) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else if (this.blankOptions.length < 1) {
-      transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
     }
     this.answer = this.blankOptions[0] || '';
     this.onValueChange();
@@ -51,6 +56,5 @@ export class DynamicBlankComponent {
     } else {
       return true;
     }
-  }
-
+  };
 }

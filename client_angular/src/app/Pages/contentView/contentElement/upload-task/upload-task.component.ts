@@ -1,18 +1,18 @@
 import { Component, EventEmitter, Inject, Output } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
-import { TaskViewData, uploadQuestionDTO, UserAnswerDTO } from '@DTOs/question.dto';
-import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import type { MatDialogRef } from '@angular/material/dialog';
+import type { TaskViewData, uploadQuestionDTO } from '@DTOs/question.dto';
+import { UserAnswerDTO } from '@DTOs/question.dto';
+import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { UserAnswerDataDTO } from '@DTOs/index';
+import type { MatSnackBar } from '@angular/material/snack-bar';
+import type { UserAnswerDataDTO } from '@DTOs/index';
 
 @Component({
   selector: 'app-upload-task',
   templateUrl: './upload-task.component.html',
-  styleUrl: './upload-task.component.scss'
+  styleUrl: './upload-task.component.scss',
 })
 export class UploadTaskComponent {
-
   @Output() submitClicked = new EventEmitter<any>();
   uploadQuestion: uploadQuestionDTO | undefined;
   taskViewData: TaskViewData;
@@ -23,14 +23,11 @@ export class UploadTaskComponent {
   isUploading = false;
   uploadProgress = 0;
 
-
-
-
   constructor(
     public dialogRef: MatDialogRef<UploadTaskComponent>,
-    private questionService: QuestionDataService,
-    private snackBar: MatSnackBar,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    private readonly questionService: QuestionDataService,
+    private readonly snackBar: MatSnackBar,
+    @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     this.taskViewData = data.taskViewData;
     this.questionService.getUploadQuestion(this.taskViewData.id).subscribe(data => {
@@ -78,19 +75,30 @@ export class UploadTaskComponent {
 
   private handleFile(file: File): boolean {
     // Check file type
-    if (this.uploadQuestion?.fileType && !file.type.includes(this.uploadQuestion.fileType.replace('*', ''))) {
-      this.snackBar.open(`Nur Dateien vom Typ ${this.uploadQuestion.fileType} sind erlaubt.`, 'OK', {
-        duration: 3000,
-      });
+    if (
+      this.uploadQuestion?.fileType &&
+      !file.type.includes(this.uploadQuestion.fileType.replace('*', ''))
+    ) {
+      this.snackBar.open(
+        `Nur Dateien vom Typ ${this.uploadQuestion.fileType} sind erlaubt.`,
+        'OK',
+        {
+          duration: 3000,
+        },
+      );
       this.selectedFile = null; // Reset selected file
       return false;
     }
 
     // Check file size
     if (this.uploadQuestion?.maxSize && file.size > this.uploadQuestion.maxSize) {
-      this.snackBar.open(`Die Datei ist zu groß. Maximale Größe: ${this.formatFileSize(this.uploadQuestion.maxSize)}`, 'OK', {
-        duration: 3000,
-      });
+      this.snackBar.open(
+        `Die Datei ist zu groß. Maximale Größe: ${this.formatFileSize(this.uploadQuestion.maxSize)}`,
+        'OK',
+        {
+          duration: 3000,
+        },
+      );
       this.selectedFile = null; // Reset selected file
       return false;
     }
@@ -111,7 +119,7 @@ export class UploadTaskComponent {
 
     this.isUploading = true;
     this.uploadProgress = 0;
-    
+
     try {
       // Convert file to base64 string using a more efficient method for large files
       const base64String = await this.fileToBase64(this.selectedFile);
@@ -126,14 +134,14 @@ export class UploadTaskComponent {
             file: base64String,
             name: this.selectedFile.name,
             type: this.selectedFile.type,
-          }
-        }
-      }
-      
+          },
+        },
+      };
+
       this.uploadProgress = 90; // 90% before sending to server
-      
+
       this.questionService.createUserAnswer(userAnswerData).subscribe({
-        next: (data) => {
+        next: data => {
           console.log('Upload successful:', data);
           this.uploadProgress = 100;
           this.snackBar.open('Datei erfolgreich hochgeladen', 'OK', {
@@ -144,14 +152,14 @@ export class UploadTaskComponent {
           this.submitClicked.emit();
           this.dialogRef.close();
         },
-        error: (error) => {
+        error: error => {
           console.error('Upload failed:', error);
           this.snackBar.open('Fehler beim Hochladen der Datei', 'OK', {
             duration: 3000,
           });
           this.isUploading = false;
           this.uploadProgress = 0;
-        }
+        },
       });
     } catch (error) {
       console.error('Error processing file:', error);
@@ -167,13 +175,13 @@ export class UploadTaskComponent {
   private fileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      
-      reader.onprogress = (event) => {
+
+      reader.onprogress = event => {
         if (event.lengthComputable) {
           this.uploadProgress = Math.round((event.loaded / event.total) * 50); // 50% for reading
         }
       };
-      
+
       reader.onload = () => {
         const base64String = reader.result as string;
         // Remove the data URL prefix (e.g., "data:image/png;base64,")
@@ -181,7 +189,7 @@ export class UploadTaskComponent {
         this.uploadProgress = 75; // 75% after conversion
         resolve(base64Data);
       };
-      
+
       reader.onerror = () => reject(reader.error);
       reader.readAsDataURL(file);
     });
@@ -213,5 +221,4 @@ export class UploadTaskComponent {
     if (fileType.includes('text')) return 'file-icon-text';
     return 'file-icon-default';
   }
-
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 
 export interface Question {
   questionId: number;
@@ -19,18 +20,17 @@ export interface UserUploadAnswer {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GradingService {
-
-  private questions: Question[] = [
+  private readonly questions: Question[] = [
     { questionId: 101, type: 'EntwurfUpload' },
     { questionId: 102, type: 'MultipleChoice' },
     { questionId: 103, type: 'EntwurfUpload' },
     { questionId: 104, type: 'Freetext' },
   ];
 
-  private userAnswers: UserAnswer[] = [
+  private readonly userAnswers: UserAnswer[] = [
     { userId: 1, questionId: 101, answer: 'upload_ref_101_user1' },
     { userId: 2, questionId: 101, answer: 'upload_ref_101_user2' },
     { userId: 1, questionId: 102, answer: 'A' },
@@ -38,13 +38,13 @@ export class GradingService {
     { userId: 1, questionId: 103, answer: 'upload_ref_103_user1' },
   ];
 
-  private userUploadAnswers: UserUploadAnswer[] = [
+  private readonly userUploadAnswers: UserUploadAnswer[] = [
     { userId: 1, questionId: 101, uploadPath: '/uploads/module1/q101_user1.pdf' },
     { userId: 2, questionId: 101, uploadPath: '/uploads/module1/q101_user2.jpg' },
     { userId: 1, questionId: 103, uploadPath: '/uploads/module1/q103_user1.zip' },
   ];
 
-  constructor() { }
+  constructor() {}
 
   getQuestions(): Observable<Question[]> {
     return of(this.questions);

@@ -1,4 +1,4 @@
-import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
+import type { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 export class GraphCommunicationService {
@@ -17,10 +17,10 @@ export class GraphCommunicationService {
     edgeChildIds: [],
   };
 
-  private ActiveNode = new BehaviorSubject<ConceptNodeDTO>(this.dummyNode);
+  private readonly ActiveNode = new BehaviorSubject<ConceptNodeDTO>(this.dummyNode);
   currentActiveNode = this.ActiveNode.asObservable();
 
-  private graphUpdateTrigger = new Subject<void>();
+  private readonly graphUpdateTrigger = new Subject<void>();
   graphUpdateNeeded = this.graphUpdateTrigger.asObservable();
 
   private constructor() {}

@@ -1,12 +1,19 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { AdminService, QuestionTypeProgress, DailyProgress, UserDetails } from '../services/admin.service';
-import { Color, ScaleType } from '@swimlane/ngx-charts';
+import type { OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import type { ActivatedRoute } from '@angular/router';
+import type {
+  AdminService,
+  QuestionTypeProgress,
+  DailyProgress,
+  UserDetails,
+} from '../services/admin.service';
+import type { Color } from '@swimlane/ngx-charts';
+import { ScaleType } from '@swimlane/ngx-charts';
 
 @Component({
   selector: 'app-user-progress',
   templateUrl: './user-progress.component.html',
-  styleUrls: ['./user-progress.component.scss']
+  styleUrls: ['./user-progress.component.scss'],
 })
 export class UserProgressComponent implements OnInit {
   userId: number = 0;
@@ -32,7 +39,7 @@ export class UserProgressComponent implements OnInit {
     name: 'custom',
     selectable: true,
     group: ScaleType.Ordinal,
-    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
+    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA'],
   };
 
   // Daily progress chart options
@@ -41,8 +48,8 @@ export class UserProgressComponent implements OnInit {
   dailyProgressYAxisLabel: string = 'Completed Tasks';
 
   constructor(
-    private route: ActivatedRoute,
-    private adminService: AdminService
+    private readonly route: ActivatedRoute,
+    private readonly adminService: AdminService,
   ) {}
 
   ngOnInit(): void {
@@ -56,7 +63,7 @@ export class UserProgressComponent implements OnInit {
       (details: UserDetails) => {
         this.userDetails = details;
       },
-      (error: any) => console.error('Error loading user details:', error)
+      (error: any) => console.error('Error loading user details:', error),
     );
   }
 
@@ -66,7 +73,7 @@ export class UserProgressComponent implements OnInit {
         this.questionTypeProgress = progress;
         this.updateQuestionTypeProgressData();
       },
-      (error: any) => console.error('Error loading question type progress:', error)
+      (error: any) => console.error('Error loading question type progress:', error),
     );
 
     this.adminService.getUserDailyProgress(this.userId).subscribe(
@@ -74,25 +81,27 @@ export class UserProgressComponent implements OnInit {
         this.dailyProgress = progress;
         this.updateDailyProgressData();
       },
-      (error: any) => console.error('Error loading daily progress:', error)
+      (error: any) => console.error('Error loading daily progress:', error),
     );
   }
 
   updateQuestionTypeProgressData(): void {
     if (this.questionTypeProgress) {
-      this.questionTypeProgressData = Object.entries(this.questionTypeProgress).map(([type, data]) => ({
-        name: type,
-        series: [
-          {
-            name: 'Completed',
-            value: data.completed || 0
-          },
-          {
-            name: 'Remaining',
-            value: (data.total || 0) - (data.completed || 0)
-          }
-        ]
-      }));
+      this.questionTypeProgressData = Object.entries(this.questionTypeProgress).map(
+        ([type, data]) => ({
+          name: type,
+          series: [
+            {
+              name: 'Completed',
+              value: data.completed || 0,
+            },
+            {
+              name: 'Remaining',
+              value: (data.total || 0) - (data.completed || 0),
+            },
+          ],
+        }),
+      );
     } else {
       this.questionTypeProgressData = [];
     }
@@ -100,13 +109,15 @@ export class UserProgressComponent implements OnInit {
 
   updateDailyProgressData(): void {
     if (this.dailyProgress) {
-      this.dailyProgressData = [{
-        name: 'Daily Progress',
-        series: this.dailyProgress.map(progress => ({
-          name: progress.date,
-          value: progress.count
-        }))
-      }];
+      this.dailyProgressData = [
+        {
+          name: 'Daily Progress',
+          series: this.dailyProgress.map(progress => ({
+            name: progress.date,
+            value: progress.count,
+          })),
+        },
+      ];
     } else {
       this.dailyProgressData = [];
     }

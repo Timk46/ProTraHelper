@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { EdgeGrabPointComponent } from './edge-grab-point.component';
 
@@ -8,9 +9,8 @@ describe('EdgeGrabPointComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ EdgeGrabPointComponent ]
-    })
-    .compileComponents();
+      declarations: [EdgeGrabPointComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(EdgeGrabPointComponent);
     component = fixture.componentInstance;

@@ -1,14 +1,19 @@
-import "reflect-metadata"
-import { NgModule} from '@angular/core';
+import 'reflect-metadata';
+import { NgModule } from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { MaterialModule } from './Modules/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MarkdownModule } from 'ngx-markdown';
-import { MatMenuModule } from "@angular/material/menu";
+import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 
 // Components
-import { ContactComponent, ImpressumComponent, DatenschutzComponent, ProgressComponent } from './app.component'
+import {
+  ContactComponent,
+  ImpressumComponent,
+  DatenschutzComponent,
+  ProgressComponent,
+} from './app.component';
 import { GraphComponent } from './Pages/graph/graph.component';
 import { ContentBoardComponent } from './Pages/contentBoard/contentBoard.component';
 import { DashboardComponent } from './Pages/dashboard/dashboard.component';
@@ -21,7 +26,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { FileUploadComponent } from './Pages/test/file-upload/file-upload.component';
 import { ContentViewComponent } from './Pages/contentView/contentView.component';
 import { CreateConceptDialogComponent } from './Pages/graph/graph-dialogs/create-concept-dialog/create-concept-dialog.component';
@@ -33,9 +38,9 @@ import { ChatSessionListComponent } from './Pages/chat-bot/chat-session-list/cha
 import { VideoTimeStampComponent } from './Pages/chat-bot/video-time-stamp/video-time-stamp.component';
 import { LoginComponent } from './Pages/login/login.component';
 import { ChangelogComponent } from './Pages/changelog/changelog.component';
-import { AuthInterceptor } from "./Interceptors/auth-interceptor.service";
-import { LoggedInGuard } from "./Guards/is-logged-in.guard";
-import { EditorModule, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
+import { AuthInterceptor } from './Interceptors/auth-interceptor.service';
+import { LoggedInGuard } from './Guards/is-logged-in.guard';
+import { EditorModule, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
 import { DiscussionListComponent } from './Pages/discussion/discussion-list/discussion-list.component';
 import { DiscussionViewComponent } from './Pages/discussion/discussion-view/discussion-view.component';
 import { DiscussionFilterComponent } from './Pages/discussion/discussion-list/discussion-filter/discussion-filter.component';
@@ -48,134 +53,140 @@ import { DiscussionCreationComponent } from './Pages/discussion/discussion-creat
 import { DiscussionPrecreationComponent } from './Pages/discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
 import { TaskEvaluationOverviewComponent } from './Pages/task-evaluation-overview/task-evaluation-overview.component';
 import { FreeTextTaskComponent } from './Pages/contentView/contentElement/free-text-task/free-text-task.component';
-import { DraggableHeightDirective } from "./Directives/draggable-height.directive";
-import { ConfettiService } from "./Services/animations/confetti.service";
-import { VersionInterceptor } from "./Interceptors/version.interceptor";
+import { DraggableHeightDirective } from './Directives/draggable-height.directive';
+import { ConfettiService } from './Services/animations/confetti.service';
+import { VersionInterceptor } from './Interceptors/version.interceptor';
 import { MobileNavigatorComponent } from './Pages/mobile-navigator/mobile-navigator.component';
-import { ToastrModule } from "ngx-toastr";
+import { ToastrModule } from 'ngx-toastr';
 import { NotificationComponent } from './Pages/notification/notification.component';
-import { NotificationBellComponent } from "./Pages/notification/notification-bell/notification-bell.component";
-import { BellDirective } from "./Pages/notification/notification-bell/belldirective.directive";
-import { AdminGuard } from "./Guards/is-admin.guard";
+import { NotificationBellComponent } from './Pages/notification/notification-bell/notification-bell.component';
+import { BellDirective } from './Pages/notification/notification-bell/belldirective.directive';
+import { AdminGuard } from './Guards/is-admin.guard';
 import { ConfirmationBoxComponent } from './Pages/confirmation-box/confirmation-box.component';
 import { ConfirmDialogComponent } from './Pages/lecturersView/edit-coding/confirm-dialog.component';
 import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module';
-import { McTaskCreationComponent } from "./Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component";
-import { MCDescriptionDialogComponent } from "./Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component";
-import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-creation/score/score.component";
+import { McTaskCreationComponent } from './Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component';
+import { MCDescriptionDialogComponent } from './Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component';
+import { MCScoreComponent } from './Pages/contentView/contentElement/mc-task-creation/score/score.component';
 import { FillinTaskNewComponent } from './Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { DynamicBlankComponent } from './Pages/contentView/contentElement/fill-in-task-new/dynamic-blank/dynamic-blank.component';
 import { GraphTaskComponent } from './Pages/contentView/contentElement/graph-task/graph-task.component';
 import { MultipleFreeTextTaskComponent } from './Pages/contentView/contentElement/multiple-free-text-task/multiple-free-text-task.component';
-import { GraphTasksModule } from "./Modules/graph-tasks/graph-tasks.module";
+import { GraphTasksModule } from './Modules/graph-tasks/graph-tasks.module';
 import { NotRegisteredComponent } from './Pages/not-registered/not-registered.component';
 import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-question.component';
 import { ContentListComponent } from './Pages/content-list/content-list.component';
 import { ContentListItemComponent } from './Pages/content-list/content-list-item/content-list-item.component';
-import { MatExpansionModule } from "@angular/material/expansion";
-import { CdkAccordionItem, CdkAccordionModule } from "@angular/cdk/accordion";
-import { MatRippleModule } from "@angular/material/core";
-import { CodeGameModule } from "./Modules/code-game/code-game.module";
-import { CodeGameConfirmDialogComponent } from "./Pages/lecturersView/edit-code-game/code-game-confirm-dialog.component";
+import { MatExpansionModule } from '@angular/material/expansion';
+import { CdkAccordionItem, CdkAccordionModule } from '@angular/cdk/accordion';
+import { MatRippleModule } from '@angular/material/core';
+import { CodeGameModule } from './Modules/code-game/code-game.module';
+import { CodeGameConfirmDialogComponent } from './Pages/lecturersView/edit-code-game/code-game-confirm-dialog.component';
 import { NavigationPreferenceToggleComponent } from './Pages/app-header/navigation-preference-toggle/navigation-preference-toggle.component';
 import { AppHeaderComponent } from './Pages/app-header/app-header.component';
 import { HighlightNavigatorComponent } from './Pages/highlight-navigator/highlight-navigator.component';
-import { HighlightConceptDialogComponent } from "./Pages/highlight-navigator/highlight-concept-dialog/highlight-concept-dialog.component";
-import { ContentListNodeEditDialogComponent } from "./Pages/content-list/content-list-node-edit-dialog/content-list-node-edit-dialog.component";
+import { HighlightConceptDialogComponent } from './Pages/highlight-navigator/highlight-concept-dialog/highlight-concept-dialog.component';
+import { ContentListNodeEditDialogComponent } from './Pages/content-list/content-list-node-edit-dialog/content-list-node-edit-dialog.component';
 
 // ProTra 2.0 Module
 import { PmpmModule } from './features/pmpm/pmpm.module';
-import { UploadTaskComponent } from "./Pages/contentView/contentElement/upload-task/upload-task.component";
+import { UploadTaskComponent } from './Pages/contentView/contentElement/upload-task/upload-task.component';
 
-@NgModule({ declarations: [
-        AppComponent,
-        ContentBoardComponent,
-        DashboardComponent,
-        ConceptOverviewComponent,
-        CodeTaskComponent,
-        PdfViewerComponent,
-        McTaskComponent,
-        McSliderTaskComponent,
-        GraphComponent,
-        FileUploadComponent,
-        ContentViewComponent,
-        CreateConceptDialogComponent,
-        VideoViewerComponent,
-        CompetenciesComponent,
-        ChatBotComponent,
-        ChatBotDialogComponent,
-        ChatSessionListComponent,
-        VideoTimeStampComponent,
-        LoginComponent,
-        ChangelogComponent,
-        DiscussionListComponent,
-        DiscussionViewComponent,
-        DiscussionFilterComponent,
-        DiscussionListItemComponent,
-        DiscussionVoteboxComponent,
-        DiscussionViewQuestionComponent,
-        DiscussionViewMessageComponent,
-        DiscussionViewCreateComponent,
-        DiscussionCreationComponent,
-        DiscussionPrecreationComponent,
-        TaskEvaluationOverviewComponent,
-        FreeTextTaskComponent,
-        DraggableHeightDirective,
-        ContactComponent,
-        ImpressumComponent,
-        DatenschutzComponent,
-        MobileNavigatorComponent,
-        ProgressComponent,
-        NotificationComponent,
-        NotificationBellComponent,
-        BellDirective,
-        ConfirmationBoxComponent,
-        ConfirmDialogComponent,
-        McTaskCreationComponent,
-        MCDescriptionDialogComponent,
-        MCScoreComponent,
-        NotRegisteredComponent,
-        FillinTaskNewComponent,
-        DynamicBlankComponent,
-        GraphTaskComponent,
-        DynamicQuestionComponent,
-        MultipleFreeTextTaskComponent,
-        ContentListComponent,
-        ContentListItemComponent,
-        ContentListNodeEditDialogComponent,
-        CodeGameConfirmDialogComponent,
-        NavigationPreferenceToggleComponent,
-        AppHeaderComponent,
-        HighlightNavigatorComponent,
-        HighlightConceptDialogComponent,
-        UploadTaskComponent
-    ],
-    bootstrap: [AppComponent], imports: [ToastrModule.forRoot(),
-        BrowserModule,
-        FormsModule,
-        ReactiveFormsModule,
-        AppRoutingModule,
-        BrowserAnimationsModule,
-        MaterialModule,
-        NgxExtendedPdfViewerModule,
-        LecturersViewModule,
-        EditorModule,
-        MarkdownModule.forRoot(),
-        GraphTasksModule,
-        MatMenuModule,
-        MatExpansionModule,
-        CdkAccordionModule,
-        MatRippleModule,
-        CodeGameModule,
-        PmpmModule,
-        MatIconModule], providers: [
-        { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-        { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
-        { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
-        LoggedInGuard,
-        AdminGuard,
-        ConfettiService,
-        Title,
-        provideHttpClient(withInterceptorsFromDi()),
-    ] })
-export class AppModule { }
+@NgModule({
+  declarations: [
+    AppComponent,
+    ContentBoardComponent,
+    DashboardComponent,
+    ConceptOverviewComponent,
+    CodeTaskComponent,
+    PdfViewerComponent,
+    McTaskComponent,
+    McSliderTaskComponent,
+    GraphComponent,
+    FileUploadComponent,
+    ContentViewComponent,
+    CreateConceptDialogComponent,
+    VideoViewerComponent,
+    CompetenciesComponent,
+    ChatBotComponent,
+    ChatBotDialogComponent,
+    ChatSessionListComponent,
+    VideoTimeStampComponent,
+    LoginComponent,
+    ChangelogComponent,
+    DiscussionListComponent,
+    DiscussionViewComponent,
+    DiscussionFilterComponent,
+    DiscussionListItemComponent,
+    DiscussionVoteboxComponent,
+    DiscussionViewQuestionComponent,
+    DiscussionViewMessageComponent,
+    DiscussionViewCreateComponent,
+    DiscussionCreationComponent,
+    DiscussionPrecreationComponent,
+    TaskEvaluationOverviewComponent,
+    FreeTextTaskComponent,
+    DraggableHeightDirective,
+    ContactComponent,
+    ImpressumComponent,
+    DatenschutzComponent,
+    MobileNavigatorComponent,
+    ProgressComponent,
+    NotificationComponent,
+    NotificationBellComponent,
+    BellDirective,
+    ConfirmationBoxComponent,
+    ConfirmDialogComponent,
+    McTaskCreationComponent,
+    MCDescriptionDialogComponent,
+    MCScoreComponent,
+    NotRegisteredComponent,
+    FillinTaskNewComponent,
+    DynamicBlankComponent,
+    GraphTaskComponent,
+    DynamicQuestionComponent,
+    MultipleFreeTextTaskComponent,
+    ContentListComponent,
+    ContentListItemComponent,
+    ContentListNodeEditDialogComponent,
+    CodeGameConfirmDialogComponent,
+    NavigationPreferenceToggleComponent,
+    AppHeaderComponent,
+    HighlightNavigatorComponent,
+    HighlightConceptDialogComponent,
+    UploadTaskComponent,
+  ],
+  bootstrap: [AppComponent],
+  imports: [
+    ToastrModule.forRoot(),
+    BrowserModule,
+    FormsModule,
+    ReactiveFormsModule,
+    AppRoutingModule,
+    BrowserAnimationsModule,
+    MaterialModule,
+    NgxExtendedPdfViewerModule,
+    LecturersViewModule,
+    EditorModule,
+    MarkdownModule.forRoot(),
+    GraphTasksModule,
+    MatMenuModule,
+    MatExpansionModule,
+    CdkAccordionModule,
+    MatRippleModule,
+    CodeGameModule,
+    PmpmModule,
+    MatIconModule,
+  ],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
+    { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
+    LoggedInGuard,
+    AdminGuard,
+    ConfettiService,
+    Title,
+    provideHttpClient(withInterceptorsFromDi()),
+  ],
+})
+export class AppModule {}

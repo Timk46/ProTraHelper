@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { CreateConceptDialogComponent } from './create-concept-dialog.component';
 
@@ -8,9 +9,8 @@ describe('CreateConceptDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CreateConceptDialogComponent ]
-    })
-    .compileComponents();
+      declarations: [CreateConceptDialogComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CreateConceptDialogComponent);
     component = fixture.componentInstance;

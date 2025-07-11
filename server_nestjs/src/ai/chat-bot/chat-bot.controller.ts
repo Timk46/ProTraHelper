@@ -1,9 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Post, Body, Req, Res, Get, HttpStatus, HttpException } from '@nestjs/common';
 import { LlmBasicPromptService } from '../services/llmBasicPrompt.service';
-import { Request, Response } from 'express';
+import type { Request} from 'express';
+import { Response } from 'express';
 import { ChatBotRAGService } from './chatbot_rag.service';
-import { ChatBotMessageDTO } from '@DTOs/index';
+import type { ChatBotMessageDTO } from '@DTOs/index';
 
 interface RequestWithUser extends Request {
   user: {
@@ -20,7 +21,7 @@ class RatingDto {
 export class ChatBotController {
   constructor(
     private readonly llmBasicPromptService: LlmBasicPromptService,
-    private readonly chatBotRAGService: ChatBotRAGService
+    private readonly chatBotRAGService: ChatBotRAGService,
   ) {}
 
   /**
@@ -45,7 +46,10 @@ export class ChatBotController {
    */
   @Post('ask/basic')
   async askBasic(@Body('question') question: string): Promise<{ answer: string }> {
-    const answer = await this.llmBasicPromptService.generateLlmAnswer("Du bist ein hilfreicher Assistent.", question);
+    const answer = await this.llmBasicPromptService.generateLlmAnswer(
+      'Du bist ein hilfreicher Assistent.',
+      question,
+    );
     return { answer: answer };
   }
 
@@ -60,24 +64,38 @@ export class ChatBotController {
    */
   @Post('ask/basic/getStreamDialog')
   async askBasicWithStreamAnswerDialog(
-    @Body('context') context: Array<{ role: string, content: string }>,
+    @Body('context') context: { role: string; content: string }[],
     @Body('question') question: string,
     @Body('dialogSessionId') dialogSessionId: string,
     @Req() req: RequestWithUser,
     @Res() res: Response,
     @Body('url') url: string, // Added url parameter from body
-    @Body('sessionId') sessionId?: number
+    @Body('sessionId') sessionId?: number,
   ): Promise<void> {
     res.set('Content-Type', 'text/plain');
     res.setHeader('Transfer-Encoding', 'chunked');
 
     // Choose the appropriate response generation method based on the context length
-    if (context.length > 3) { // 3 is the minimum and default number including the default question by the LLM
+    if (context.length > 3) {
+      // 3 is the minimum and default number including the default question by the LLM
       // TODO: Streaming is not implemented for this service method yet, but passing url for consistency
-      await this.chatBotRAGService.chatBotRagAnswerDialog(context, question, req.user.id, dialogSessionId, url, sessionId); // Pass url
+      await this.chatBotRAGService.chatBotRagAnswerDialog(
+        context,
+        question,
+        req.user.id,
+        dialogSessionId,
+        url,
+        sessionId,
+      ); // Pass url
     } else {
       // TODO: Streaming is not implemented for this service method yet, but passing url for consistency
-      await this.chatBotRAGService.chatBotRagAnswer(question, req.user.id, dialogSessionId, url, sessionId); // Pass url
+      await this.chatBotRAGService.chatBotRagAnswer(
+        question,
+        req.user.id,
+        dialogSessionId,
+        url,
+        sessionId,
+      ); // Pass url
     }
   }
 
@@ -92,18 +110,32 @@ export class ChatBotController {
    */
   @Post('ask/basic/getDialog')
   async askBasicWithAnswerDialog(
-    @Body('context') context: Array<{ role: string, content: string }>,
+    @Body('context') context: { role: string; content: string }[],
     @Body('question') question: string,
     @Body('dialogSessionId') dialogSessionId: string,
     @Req() req: RequestWithUser,
     @Body('url') url: string, // Added url parameter from body
-    @Body('sessionId') sessionId?: number
+    @Body('sessionId') sessionId?: number,
   ): Promise<ChatBotMessageDTO> {
     // Choose the appropriate response generation method based on the context length
-    if (context.length > 3) { // 3 is the minimum and default number including the default question by the LLM
-      return await this.chatBotRAGService.chatBotRagAnswerDialog(context, question, req.user.id, dialogSessionId, url, sessionId); // Pass url
+    if (context.length > 3) {
+      // 3 is the minimum and default number including the default question by the LLM
+      return await this.chatBotRAGService.chatBotRagAnswerDialog(
+        context,
+        question,
+        req.user.id,
+        dialogSessionId,
+        url,
+        sessionId,
+      ); // Pass url
     } else {
-      return await this.chatBotRAGService.chatBotRagAnswer(question, req.user.id, dialogSessionId, url, sessionId); // Pass url
+      return await this.chatBotRAGService.chatBotRagAnswer(
+        question,
+        req.user.id,
+        dialogSessionId,
+        url,
+        sessionId,
+      ); // Pass url
     }
   }
 
@@ -114,9 +146,16 @@ export class ChatBotController {
    * @returns A success message if the rating is saved successfully.
    */
   @Post('rate')
-  async rateChatbotMessage(@Body() ratingDto: RatingDto, @Req() req: RequestWithUser): Promise<{ message: string }> {
+  async rateChatbotMessage(
+    @Body() ratingDto: RatingDto,
+    @Req() req: RequestWithUser,
+  ): Promise<{ message: string }> {
     try {
-      await this.chatBotRAGService.saveOrUpdateRating(ratingDto.messageId, ratingDto.rating, req.user.id);
+      await this.chatBotRAGService.saveOrUpdateRating(
+        ratingDto.messageId,
+        ratingDto.rating,
+        req.user.id,
+      );
       return { message: 'Rating saved successfully' };
     } catch (error) {
       console.error('Error saving rating:', error);

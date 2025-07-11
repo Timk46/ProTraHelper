@@ -6,7 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { WebSocketService } from '../websocket/websocket.service';
 import { BehaviorSubject, of } from 'rxjs';
-import { NotificationDTO } from '@DTOs/notification.dto';
+import type { NotificationDTO } from '@DTOs/notification.dto';
 import { NotificationType } from '@DTOs/notificationType.enum';
 import { environment } from 'src/environments/environment';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -21,24 +21,30 @@ describe('NotificationService', () => {
 
   beforeEach(() => {
     const userServiceSpy = jasmine.createSpyObj('UserService', ['getTokenID'], {
-      isAuthenticated$: new BehaviorSubject<boolean>(true)
+      isAuthenticated$: new BehaviorSubject<boolean>(true),
     });
     const snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['openFromComponent']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    const webSocketServiceSpy = jasmine.createSpyObj('WebSocketService', ['connect', 'disconnect', 'on', 'onConnectionChange', 'emit']);
+    const webSocketServiceSpy = jasmine.createSpyObj('WebSocketService', [
+      'connect',
+      'disconnect',
+      'on',
+      'onConnectionChange',
+      'emit',
+    ]);
 
     TestBed.configureTestingModule({
-    imports: [],
-    providers: [
+      imports: [],
+      providers: [
         NotificationService,
         { provide: UserService, useValue: userServiceSpy },
         { provide: MatSnackBar, useValue: snackBarSpy },
         { provide: Router, useValue: routerSpy },
         { provide: WebSocketService, useValue: webSocketServiceSpy },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-});
+        provideHttpClientTesting(),
+      ],
+    });
 
     service = TestBed.inject(NotificationService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -62,14 +68,22 @@ describe('NotificationService', () => {
 
   it('should fetch initial notifications on creation', fakeAsync(() => {
     const mockNotifications: NotificationDTO[] = [
-      { id: 1, message: 'Test notification', timestamp: new Date(), type: NotificationType.COMMENT, isRead: false }
+      {
+        id: 1,
+        message: 'Test notification',
+        timestamp: new Date(),
+        type: NotificationType.COMMENT,
+        isRead: false,
+      },
     ];
 
     service.getNotifications().subscribe(notifications => {
       expect(notifications).toEqual(mockNotifications);
     });
 
-    const req = httpMock.expectOne(`${environment.server}/notifications/all?userId=1&limit=20&offset=0`);
+    const req = httpMock.expectOne(
+      `${environment.server}/notifications/all?userId=1&limit=20&offset=0`,
+    );
     expect(req.request.method).toBe('GET');
     req.flush(mockNotifications);
 
@@ -81,7 +95,7 @@ describe('NotificationService', () => {
       id: 1,
       message: 'New notification',
       timestamp: new Date(),
-      type: NotificationType.COMMENT
+      type: NotificationType.COMMENT,
     };
 
     webSocketServiceMock.on.and.returnValue(of(mockNotification));
@@ -102,7 +116,7 @@ describe('NotificationService', () => {
       message: 'Test notification',
       timestamp: new Date(),
       type: NotificationType.COMMENT,
-      isRead: false
+      isRead: false,
     };
 
     service.markNotificationAsRead(mockNotification).subscribe(updatedNotification => {
@@ -123,7 +137,7 @@ describe('NotificationService', () => {
       timestamp: new Date(),
       type: NotificationType.COMMENT,
       isRead: false,
-      discussionId: 123
+      discussionId: 123,
     };
 
     service.handleNotificationClick(mockNotification, 'view').subscribe();

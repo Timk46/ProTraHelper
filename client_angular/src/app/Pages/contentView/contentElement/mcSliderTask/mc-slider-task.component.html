@@ -15,7 +15,14 @@
   </div>
 
   <!-- Questions view -->
-  <div *ngIf="(componentState === McSliderTaskState.QUESTIONS || componentState === McSliderTaskState.SUBMITTING) && getCurrentQuestionState()" class="questions-container">
+  <div
+    *ngIf="
+      (componentState === McSliderTaskState.QUESTIONS ||
+        componentState === McSliderTaskState.SUBMITTING) &&
+      getCurrentQuestionState()
+    "
+    class="questions-container"
+  >
     <!-- Progress header -->
     <div class="progress-header">
       <h2 class="progress-title">Multiple Choice Quiz</h2>
@@ -54,7 +61,10 @@
       <!-- Question header -->
       <div class="content-section__header">
         <h3 class="content-section__header-title">
-          <span [innerHTML]="getCurrentQuestionState()?.questionData.text" aria-live="polite"></span>
+          <span
+            [innerHTML]="getCurrentQuestionState()?.questionData.text"
+            aria-live="polite"
+          ></span>
         </h3>
       </div>
 
@@ -74,10 +84,18 @@
           <div
             *ngFor="let option of getCurrentQuestionState()?.options; let i = index"
             class="option-item"
-            [class.option-item--selected]="getCurrentQuestionState()?.selectedOptions?.includes(option.id)"
+            [class.option-item--selected]="
+              getCurrentQuestionState()?.selectedOptions?.includes(option.id)
+            "
             [class.option-item--disabled]="getCurrentQuestionState()?.isSubmitted"
-            [class.option-item--correct]="getCurrentQuestionState()?.isSubmitted && option.isCorrect === true"
-            [class.option-item--incorrect]="getCurrentQuestionState()?.isSubmitted && option.isCorrect === false && getCurrentQuestionState()?.selectedOptions?.includes(option.id)"
+            [class.option-item--correct]="
+              getCurrentQuestionState()?.isSubmitted && option.isCorrect === true
+            "
+            [class.option-item--incorrect]="
+              getCurrentQuestionState()?.isSubmitted &&
+              option.isCorrect === false &&
+              getCurrentQuestionState()?.selectedOptions?.includes(option.id)
+            "
             (click)="!getCurrentQuestionState()?.isSubmitted && selectSingleOption(option.id)"
             [attr.aria-checked]="getCurrentQuestionState()?.selectedOptions?.includes(option.id)"
             role="radio"
@@ -87,10 +105,36 @@
           >
             <div class="option-item-content">
               <div class="item-indicator">
-                  <mat-icon class="item-icon" *ngIf="!getCurrentQuestionState()?.isSubmitted && getCurrentQuestionState()?.selectedOptions?.includes(option.id)">radio_button_checked</mat-icon>
-                <mat-icon class="item-icon" *ngIf="!getCurrentQuestionState()?.isSubmitted && !getCurrentQuestionState()?.selectedOptions?.includes(option.id)">radio_button_unchecked</mat-icon>
-                <mat-icon *ngIf="getCurrentQuestionState()?.isSubmitted && getCurrentQuestionState()?.selectedOptions?.includes(option.id)">radio_button_checked</mat-icon>
-                <mat-icon *ngIf="getCurrentQuestionState()?.isSubmitted && !getCurrentQuestionState()?.selectedOptions?.includes(option.id)">radio_button_unchecked</mat-icon>
+                <mat-icon
+                  class="item-icon"
+                  *ngIf="
+                    !getCurrentQuestionState()?.isSubmitted &&
+                    getCurrentQuestionState()?.selectedOptions?.includes(option.id)
+                  "
+                  >radio_button_checked</mat-icon
+                >
+                <mat-icon
+                  class="item-icon"
+                  *ngIf="
+                    !getCurrentQuestionState()?.isSubmitted &&
+                    !getCurrentQuestionState()?.selectedOptions?.includes(option.id)
+                  "
+                  >radio_button_unchecked</mat-icon
+                >
+                <mat-icon
+                  *ngIf="
+                    getCurrentQuestionState()?.isSubmitted &&
+                    getCurrentQuestionState()?.selectedOptions?.includes(option.id)
+                  "
+                  >radio_button_checked</mat-icon
+                >
+                <mat-icon
+                  *ngIf="
+                    getCurrentQuestionState()?.isSubmitted &&
+                    !getCurrentQuestionState()?.selectedOptions?.includes(option.id)
+                  "
+                  >radio_button_unchecked</mat-icon
+                >
               </div>
               <div class="item-text" [innerHTML]="option.text"></div>
             </div>
@@ -99,16 +143,24 @@
       </section>
 
       <!-- Multiple Choice Options -->
-      <section *ngIf="!getCurrentQuestionState()?.mcQuestion!.isSC" class="options">
+      <section *ngIf="!(getCurrentQuestionState()?.mcQuestion)!.isSC" class="options">
         <h4 class="sr-only">Wähle eine oder mehrere Antworten:</h4>
         <div class="options__container" role="group" aria-labelledby="question-title">
           <div
             *ngFor="let option of getCurrentQuestionState()?.options; let i = index"
             class="option-item"
-            [class.option-item--selected]="getCurrentQuestionState()?.selectedOptions?.includes(option.id)"
+            [class.option-item--selected]="
+              getCurrentQuestionState()?.selectedOptions?.includes(option.id)
+            "
             [class.option-item--disabled]="getCurrentQuestionState()?.isSubmitted"
-            [class.option-item--correct]="getCurrentQuestionState()?.isSubmitted && option.isCorrect === true"
-            [class.option-item--incorrect]="getCurrentQuestionState()?.isSubmitted && option.isCorrect === false && getCurrentQuestionState()?.selectedOptions?.includes(option.id)"
+            [class.option-item--correct]="
+              getCurrentQuestionState()?.isSubmitted && option.isCorrect === true
+            "
+            [class.option-item--incorrect]="
+              getCurrentQuestionState()?.isSubmitted &&
+              option.isCorrect === false &&
+              getCurrentQuestionState()?.selectedOptions?.includes(option.id)
+            "
             (click)="!getCurrentQuestionState()?.isSubmitted && toggleOption(option.id)"
             [attr.aria-checked]="getCurrentQuestionState()?.selectedOptions?.includes(option.id)"
             role="checkbox"
@@ -118,10 +170,36 @@
           >
             <div class="option-item-content">
               <div class="item-indicator">
-                <mat-icon class="item-icon" *ngIf="!getCurrentQuestionState()?.isSubmitted && getCurrentQuestionState()?.selectedOptions?.includes(option.id)">check_box</mat-icon>
-                <mat-icon class="item-icon" *ngIf="!getCurrentQuestionState()?.isSubmitted && !getCurrentQuestionState()?.selectedOptions?.includes(option.id)">check_box_outline_blank</mat-icon>
-                <mat-icon *ngIf="getCurrentQuestionState()?.isSubmitted && getCurrentQuestionState()?.selectedOptions?.includes(option.id)">check_box</mat-icon>
-                <mat-icon *ngIf="getCurrentQuestionState()?.isSubmitted && !getCurrentQuestionState()?.selectedOptions?.includes(option.id)">check_box_outline_blank</mat-icon>
+                <mat-icon
+                  class="item-icon"
+                  *ngIf="
+                    !getCurrentQuestionState()?.isSubmitted &&
+                    getCurrentQuestionState()?.selectedOptions?.includes(option.id)
+                  "
+                  >check_box</mat-icon
+                >
+                <mat-icon
+                  class="item-icon"
+                  *ngIf="
+                    !getCurrentQuestionState()?.isSubmitted &&
+                    !getCurrentQuestionState()?.selectedOptions?.includes(option.id)
+                  "
+                  >check_box_outline_blank</mat-icon
+                >
+                <mat-icon
+                  *ngIf="
+                    getCurrentQuestionState()?.isSubmitted &&
+                    getCurrentQuestionState()?.selectedOptions?.includes(option.id)
+                  "
+                  >check_box</mat-icon
+                >
+                <mat-icon
+                  *ngIf="
+                    getCurrentQuestionState()?.isSubmitted &&
+                    !getCurrentQuestionState()?.selectedOptions?.includes(option.id)
+                  "
+                  >check_box_outline_blank</mat-icon
+                >
               </div>
               <div class="item-text" [innerHTML]="option.text"></div>
             </div>
@@ -134,24 +212,53 @@
         *ngIf="getCurrentQuestionState()?.isSubmitted && getCurrentQuestionState()?.feedback"
         class="feedback-section"
         [class.feedback-section--success]="getCurrentQuestionState()?.isCorrect === true"
-        [class.feedback-section--partial]="getCurrentQuestionState()?.isCorrect === false && (getCurrentQuestionState()?.feedback?.score || 0) > 0"
+        [class.feedback-section--partial]="
+          getCurrentQuestionState()?.isCorrect === false &&
+          (getCurrentQuestionState()?.feedback?.score || 0) > 0
+        "
         [class.feedback-section--error]="(getCurrentQuestionState()?.feedback?.score || 0) === 0"
         aria-live="polite"
       >
         <div class="feedback-section__header feedback-section__header--compact">
           <div
             class="feedback-section__header-icon"
-            [class.feedback-section__header-icon--success]="getCurrentQuestionState()?.isCorrect === true"
-            [class.feedback-section__header-icon--partial]="getCurrentQuestionState()?.isCorrect === false && (getCurrentQuestionState()?.feedback?.score || 0) > 0"
-            [class.feedback-section__header-icon--error]="(getCurrentQuestionState()?.feedback?.score || 0) === 0"
+            [class.feedback-section__header-icon--success]="
+              getCurrentQuestionState()?.isCorrect === true
+            "
+            [class.feedback-section__header-icon--partial]="
+              getCurrentQuestionState()?.isCorrect === false &&
+              (getCurrentQuestionState()?.feedback?.score || 0) > 0
+            "
+            [class.feedback-section__header-icon--error]="
+              (getCurrentQuestionState()?.feedback?.score || 0) === 0
+            "
           >
-            <mat-icon *ngIf="getCurrentQuestionState()?.isCorrect === true" aria-hidden="true">sentiment_very_satisfied</mat-icon>
-            <mat-icon *ngIf="getCurrentQuestionState()?.isCorrect === false && (getCurrentQuestionState()?.feedback?.score || 0) > 0" aria-hidden="true">sentiment_satisfied</mat-icon>
-            <mat-icon *ngIf="(getCurrentQuestionState()?.feedback?.score || 0) === 0" aria-hidden="true">sentiment_dissatisfied</mat-icon>
+            <mat-icon *ngIf="getCurrentQuestionState()?.isCorrect === true" aria-hidden="true"
+              >sentiment_very_satisfied</mat-icon
+            >
+            <mat-icon
+              *ngIf="
+                getCurrentQuestionState()?.isCorrect === false &&
+                (getCurrentQuestionState()?.feedback?.score || 0) > 0
+              "
+              aria-hidden="true"
+              >sentiment_satisfied</mat-icon
+            >
+            <mat-icon
+              *ngIf="(getCurrentQuestionState()?.feedback?.score || 0) === 0"
+              aria-hidden="true"
+              >sentiment_dissatisfied</mat-icon
+            >
           </div>
           <h4 class="feedback-section__header-title">
             <span *ngIf="getCurrentQuestionState()?.isCorrect === true">Richtig!</span>
-            <span *ngIf="getCurrentQuestionState()?.isCorrect === false && (getCurrentQuestionState()?.feedback?.score || 0) > 0">Teilweise richtig!</span>
+            <span
+              *ngIf="
+                getCurrentQuestionState()?.isCorrect === false &&
+                (getCurrentQuestionState()?.feedback?.score || 0) > 0
+              "
+              >Teilweise richtig!</span
+            >
             <span *ngIf="(getCurrentQuestionState()?.feedback?.score || 0) === 0">Falsch!</span>
           </h4>
         </div>
@@ -160,18 +267,35 @@
           <div class="feedback-section__score-progress">
             <div
               class="feedback-section__score-progress-bar"
-              [class.feedback-section__score-progress-bar--success]="getCurrentQuestionState()?.isCorrect === true"
-              [class.feedback-section__score-progress-bar--partial]="getCurrentQuestionState()?.isCorrect === false && (getCurrentQuestionState()?.feedback?.score || 0) > 0"
-              [class.feedback-section__score-progress-bar--error]="(getCurrentQuestionState()?.feedback?.score || 0) === 0"
-              [style.width.%]="((getCurrentQuestionState()?.questionData.score || 0) > 0) ? ((getCurrentQuestionState()?.feedback?.score || 0) / (getCurrentQuestionState()?.questionData.score || 1)) * 100 : 0"
+              [class.feedback-section__score-progress-bar--success]="
+                getCurrentQuestionState()?.isCorrect === true
+              "
+              [class.feedback-section__score-progress-bar--partial]="
+                getCurrentQuestionState()?.isCorrect === false &&
+                (getCurrentQuestionState()?.feedback?.score || 0) > 0
+              "
+              [class.feedback-section__score-progress-bar--error]="
+                (getCurrentQuestionState()?.feedback?.score || 0) === 0
+              "
+              [style.width.%]="
+                (getCurrentQuestionState()?.questionData.score || 0) > 0
+                  ? ((getCurrentQuestionState()?.feedback?.score || 0) /
+                      (getCurrentQuestionState()?.questionData.score || 1)) *
+                    100
+                  : 0
+              "
             ></div>
           </div>
           <div class="feedback-section__score-text">
-            Punktzahl: {{ getCurrentQuestionState()?.feedback?.score || 0 }} von {{ getCurrentQuestionState()?.questionData.score || 0 }} Punkten
+            Punktzahl: {{ getCurrentQuestionState()?.feedback?.score || 0 }} von
+            {{ getCurrentQuestionState()?.questionData.score || 0 }} Punkten
           </div>
         </div>
 
-        <p *ngIf="getCurrentQuestionState()?.feedback?.feedbackText" class="feedback-section__message feedback-section__message--compact">
+        <p
+          *ngIf="getCurrentQuestionState()?.feedback?.feedbackText"
+          class="feedback-section__message feedback-section__message--compact"
+        >
           {{ getCurrentQuestionState()?.feedback?.feedbackText }}
         </p>
       </section>
@@ -205,7 +329,10 @@
         *ngIf="!getCurrentQuestionState()?.isSubmitted"
         class="mc-button mc-button--primary"
         (click)="submitCurrentQuestion()"
-        [disabled]="componentState === McSliderTaskState.SUBMITTING || (getCurrentQuestionState()?.selectedOptions?.length || 0) === 0"
+        [disabled]="
+          componentState === McSliderTaskState.SUBMITTING ||
+          (getCurrentQuestionState()?.selectedOptions?.length || 0) === 0
+        "
         aria-label="Antwort absenden"
       >
         <mat-icon aria-hidden="true">send</mat-icon>
@@ -214,7 +341,9 @@
 
       <!-- Retry current question -->
       <button
-        *ngIf="getCurrentQuestionState()?.isSubmitted && getCurrentQuestionState()?.isCorrect !== true"
+        *ngIf="
+          getCurrentQuestionState()?.isSubmitted && getCurrentQuestionState()?.isCorrect !== true
+        "
         class="mc-button mc-button--warning"
         (click)="retryCurrentQuestion()"
         aria-label="Frage erneut versuchen"
@@ -242,8 +371,12 @@
     <div class="final-feedback__header">
       <div class="final-feedback__icon">
         <mat-icon *ngIf="totalScore === maxScore" aria-hidden="true">emoji_events</mat-icon>
-        <mat-icon *ngIf="totalScore < maxScore && totalScore >= maxScore * 0.5" aria-hidden="true">sentiment_satisfied</mat-icon>
-        <mat-icon *ngIf="totalScore < maxScore * 0.5" aria-hidden="true">sentiment_dissatisfied</mat-icon>
+        <mat-icon *ngIf="totalScore < maxScore && totalScore >= maxScore * 0.5" aria-hidden="true"
+          >sentiment_satisfied</mat-icon
+        >
+        <mat-icon *ngIf="totalScore < maxScore * 0.5" aria-hidden="true"
+          >sentiment_dissatisfied</mat-icon
+        >
       </div>
       <h2 class="final-feedback__title">
         <span *ngIf="totalScore === maxScore">Perfekt!</span>

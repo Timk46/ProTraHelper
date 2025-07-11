@@ -1,5 +1,7 @@
 <div class="center-content">
-  <span style="font-size:15px; font-weight: bold; text-transform: capitalize;">{{ getTitle() }}</span>
+  <span style="font-size: 15px; font-weight: bold; text-transform: capitalize">{{
+    getTitle()
+  }}</span>
 </div>
 
 <div class="w-full px-4">
@@ -26,18 +28,27 @@
         <div class="code-editor-column">
           <mat-card>
             <mat-card-content>
-              <mat-tab-group dynamicHeight animationDuration="0ms" [backgroundColor]="'primary'" [color]="'primary'">
-                <ng-container *ngFor="let codeStructure of currentTask?.codeGameQuestion?.codeGameScaffolds">
+              <mat-tab-group
+                dynamicHeight
+                animationDuration="0ms"
+                [backgroundColor]="'primary'"
+                [color]="'primary'"
+              >
+                <ng-container
+                  *ngFor="let codeStructure of currentTask?.codeGameQuestion?.codeGameScaffolds"
+                >
                   <mat-tab *ngIf="codeStructure.visible">
                     <ng-template mat-tab-label>
                       <div class="tab-label">
-                        <span>{{codeStructure.codeFileName}}</span>
+                        <span>{{ codeStructure.codeFileName }}</span>
                       </div>
                     </ng-template>
-                    <app-code-editor-code-game #codeEditorMonaco
-                                               [selectedLanguage]="currentTask?.codeGameQuestion?.programmingLanguage"
-                                               [(code)]="codeStructure.code"
-                                               (codeChange)="onCodeChanged($event)">
+                    <app-code-editor-code-game
+                      #codeEditorMonaco
+                      [selectedLanguage]="currentTask?.codeGameQuestion?.programmingLanguage"
+                      [(code)]="codeStructure.code"
+                      (codeChange)="onCodeChanged($event)"
+                    >
                     </app-code-editor-code-game>
                   </mat-tab>
                 </ng-container>
@@ -50,33 +61,63 @@
 
     <div class="run">
       <div class="success-informations">
-        <div *ngIf="isGameAnimationFinished && codeSolutionRestriction" class="flex items-center md:w-auto">
+        <div
+          *ngIf="isGameAnimationFinished && codeSolutionRestriction"
+          class="flex items-center md:w-auto"
+        >
           <svg width="24" height="24">
-            <circle cx="12" cy="12" r="10" [attr.fill]="frequencyOfMethodEvaluationResult ? '#4caf50' : '#f44336'"></circle>
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              [attr.fill]="frequencyOfMethodEvaluationResult ? '#4caf50' : '#f44336'"
+            ></circle>
           </svg>
-          <span class="polarNight_4_text">"{{ methodNameToRestrict }}" {{ frequencyOfMethodCallsResult }}x aufgerufen</span>
+          <span class="polarNight_4_text"
+            >"{{ methodNameToRestrict }}" {{ frequencyOfMethodCallsResult }}x aufgerufen</span
+          >
         </div>
         <div *ngIf="isGameAnimationFinished" class="flex items-center md:w-auto">
           <svg width="24" height="24">
-            <circle cx="12" cy="12" r="10" [attr.fill]="reachedDestination ? '#4caf50' : '#f44336'"></circle>
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              [attr.fill]="reachedDestination ? '#4caf50' : '#f44336'"
+            ></circle>
           </svg>
           <span class="polarNight_4_text">Ziel erreicht</span>
         </div>
         <div *ngIf="isGameAnimationFinished && totalItems > 0" class="flex items-center md:w-auto">
           <svg width="24" height="24">
-            <circle cx="12" cy="12" r="10" [attr.fill]="allItemsCollected ? '#4caf50' : '#f44336'"></circle>
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              [attr.fill]="allItemsCollected ? '#4caf50' : '#f44336'"
+            ></circle>
           </svg>
           <span class="polarNight_4_text">Gegenstände: {{ collectedItems }}/{{ totalItems }}</span>
         </div>
         <div *ngIf="isGameAnimationFinished" class="flex items-center md:w-auto">
           <svg width="24" height="24">
-            <circle cx="12" cy="12" r="10" [attr.fill]="allWhiteListCellsVisited ? '#4caf50' : '#f44336'"></circle>
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              [attr.fill]="allWhiteListCellsVisited ? '#4caf50' : '#f44336'"
+            ></circle>
           </svg>
           <span class="polarNight_4_text">Vorgesehenden Weg verwendet</span>
         </div>
         <div *ngIf="isGameAnimationFinished" class="flex items-center md:w-auto">
           <svg width="24" height="24">
-            <circle cx="12" cy="12" r="10" [attr.fill]="visitedCellsAreAllowed ? '#4caf50' : '#f44336'"></circle>
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              [attr.fill]="visitedCellsAreAllowed ? '#4caf50' : '#f44336'"
+            ></circle>
           </svg>
           <span class="polarNight_4_text">Verbote Zellen nicht betreten</span>
         </div>
@@ -84,20 +125,32 @@
 
       <div class="game-actions">
         <button
-          mat-raised-button color="primary" (click)="submitCode()"
+          mat-raised-button
+          color="primary"
+          (click)="submitCode()"
           [disabled]="submitButtonIsDisabled"
-          class="md:w-auto mb-2 px-4 noOverFlow mr-5">Ausführen
+          class="md:w-auto mb-2 px-4 noOverFlow mr-5"
+        >
+          Ausführen
         </button>
 
         <button
-          mat-raised-button color="primary" (click)="resetGame()"
+          mat-raised-button
+          color="primary"
+          (click)="resetGame()"
           [disabled]="resetButtonIsDisabled"
-          class="md:w-auto mb-2 px-4 noOverFlow ml-5 mr-5">Zurücksetzen
+          class="md:w-auto mb-2 px-4 noOverFlow ml-5 mr-5"
+        >
+          Zurücksetzen
         </button>
 
         <button
-          mat-raised-button color="primary" (click)="showHelp()"
-          class="md:w-auto mb-2 px-4 noOverFlow ml-5">Hilfe
+          mat-raised-button
+          color="primary"
+          (click)="showHelp()"
+          class="md:w-auto mb-2 px-4 noOverFlow ml-5"
+        >
+          Hilfe
         </button>
       </div>
     </div>
@@ -113,7 +166,9 @@
         </mat-card-header>
 
         <mat-card-content>
-          <pre class="polarNight_4_text break-words whitespace-pre-wrap text-xs md:text-base">{{ compilerConsoleOutputView }}</pre>
+          <pre class="polarNight_4_text break-words whitespace-pre-wrap text-xs md:text-base">{{
+            compilerConsoleOutputView
+          }}</pre>
           <mat-divider></mat-divider>
         </mat-card-content>
       </mat-card>

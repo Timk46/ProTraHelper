@@ -1,6 +1,6 @@
 import { Annotation } from '@langchain/langgraph';
-import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
-import { FeedbackOutput } from './schemas/feedback-output.schema';
+import type { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
+import type { FeedbackOutput } from './schemas/feedback-output.schema';
 
 // Define the structure for lecture snippets if a more specific type is known, otherwise use 'any'
 // Example:
@@ -63,5 +63,4 @@ export const TutoringFeedbackStateAnnotation = Annotation.Root({
 });
 
 // Type alias for the state object
-export type TutoringFeedbackState =
-  typeof TutoringFeedbackStateAnnotation.State;
+export type TutoringFeedbackState = typeof TutoringFeedbackStateAnnotation.State;

@@ -4,13 +4,13 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import { spawn, ChildProcess } from 'child_process';
 import { promisify } from 'util';
-import {
-  BatScriptConfig,
+import type {
   BatScriptRequest,
   BatExecutionResult,
   RhinoPathValidationResult,
   SetupPackageInfo,
 } from '../../../shared/dtos/bat-rhino.dto';
+import { BatScriptConfig } from '../../../shared/dtos/bat-rhino.dto';
 
 /**
  * BatScriptGeneratorService
@@ -47,21 +47,15 @@ export class BatScriptGeneratorService {
    * Führt Rhino-Befehle direkt aus (ohne Download)
    * Best Practice: Generiert .bat-Skript und führt es sofort aus
    */
-  async executeRhinoDirectly(
-    request: BatScriptRequest,
-  ): Promise<BatExecutionResult> {
+  async executeRhinoDirectly(request: BatScriptRequest): Promise<BatExecutionResult> {
     try {
       // Handle both 'command' and 'rhinoCommand' fields for compatibility
       const command = request.command || request.rhinoCommand;
       if (!command) {
-        throw new Error(
-          'Kein Rhino-Befehl angegeben (command oder rhinoCommand erforderlich)',
-        );
+        throw new Error('Kein Rhino-Befehl angegeben (command oder rhinoCommand erforderlich)');
       }
 
-      this.logger.log(
-        `Executing Rhino directly with command: ${command.substring(0, 50)}...`,
-      );
+      this.logger.log(`Executing Rhino directly with command: ${command.substring(0, 50)}...`);
 
       // Ensure request has the command field for validation
       const requestWithCommand = {
@@ -70,9 +64,7 @@ export class BatScriptGeneratorService {
       };
 
       // Validiere und sanitize Eingaben
-      const validatedRequest = await this.validateAndSanitizeRequest(
-        requestWithCommand,
-      );
+      const validatedRequest = await this.validateAndSanitizeRequest(requestWithCommand);
 
       // Generiere Skript-Inhalt
       const scriptContent = this.createBatScriptContent(validatedRequest);
@@ -92,9 +84,7 @@ export class BatScriptGeneratorService {
           await fs.unlink(scriptPath);
           this.logger.log(`Temporary bat script cleaned up: ${scriptPath}`);
         } catch (error) {
-          this.logger.warn(
-            `Failed to cleanup temporary script: ${error.message}`,
-          );
+          this.logger.warn(`Failed to cleanup temporary script: ${error.message}`);
         }
       }, 10000); // 10 Sekunden Verzögerung
 
@@ -111,16 +101,13 @@ export class BatScriptGeneratorService {
       };
 
       this.logger.log(
-        `Direct Rhino execution ${
-          executionResult.success ? 'successful' : 'failed'
-        } for user: ${validatedRequest.userId}`,
+        `Direct Rhino execution ${executionResult.success ? 'successful' : 'failed'} for user: ${
+          validatedRequest.userId
+        }`,
       );
       return result;
     } catch (error) {
-      this.logger.error(
-        `Failed to execute Rhino directly: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Failed to execute Rhino directly: ${error.message}`, error.stack);
       return {
         success: false,
         scriptGenerated: false,
@@ -135,21 +122,15 @@ export class BatScriptGeneratorService {
   /**
    * Generiert ein .bat-Skript für Rhino-Befehle
    */
-  async generateBatScript(
-    request: BatScriptRequest,
-  ): Promise<BatExecutionResult> {
+  async generateBatScript(request: BatScriptRequest): Promise<BatExecutionResult> {
     try {
       // Handle both 'command' and 'rhinoCommand' fields for compatibility
       const command = request.command || request.rhinoCommand;
       if (!command) {
-        throw new Error(
-          'Kein Rhino-Befehl angegeben (command oder rhinoCommand erforderlich)',
-        );
+        throw new Error('Kein Rhino-Befehl angegeben (command oder rhinoCommand erforderlich)');
       }
 
-      this.logger.log(
-        `Generating bat script for command: ${command.substring(0, 50)}...`,
-      );
+      this.logger.log(`Generating bat script for command: ${command.substring(0, 50)}...`);
 
       // Ensure request has the command field for validation
       const requestWithCommand = {
@@ -158,18 +139,14 @@ export class BatScriptGeneratorService {
       };
 
       // Validiere und sanitize Eingaben
-      const validatedRequest = await this.validateAndSanitizeRequest(
-        requestWithCommand,
-      );
+      const validatedRequest = await this.validateAndSanitizeRequest(requestWithCommand);
 
       // Generiere Skript-Inhalt
       const scriptContent = this.createBatScriptContent(validatedRequest);
 
       // Erstelle Ausgabepfade
       const scriptPath = await this.createScriptPath(validatedRequest.userId);
-      const registryPath = await this.createRegistryPath(
-        validatedRequest.userId,
-      );
+      const registryPath = await this.createRegistryPath(validatedRequest.userId);
 
       // Schreibe .bat-Datei
       await this.writeBatScript(scriptPath, scriptContent);
@@ -194,12 +171,8 @@ export class BatScriptGeneratorService {
         batScriptPath: scriptPath,
         registryPath,
         downloadUrls: {
-          batScript: `/api/bat-rhino/download/script/${path.basename(
-            scriptPath,
-          )}`,
-          registryFile: `/api/bat-rhino/download/registry/${path.basename(
-            registryPath,
-          )}`,
+          batScript: `/api/bat-rhino/download/script/${path.basename(scriptPath)}`,
+          registryFile: `/api/bat-rhino/download/registry/${path.basename(registryPath)}`,
           setupPackage: `/api/bat-rhino/download/setup/${setupPackage.packageId}`,
         },
         timestamp: new Date(),
@@ -210,10 +183,7 @@ export class BatScriptGeneratorService {
       );
       return result;
     } catch (error) {
-      this.logger.error(
-        `Failed to generate bat script: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Failed to generate bat script: ${error.message}`, error.stack);
       return {
         success: false,
         scriptGenerated: false,
@@ -228,9 +198,7 @@ export class BatScriptGeneratorService {
   /**
    * Validiert Rhino-Pfad
    */
-  async validateRhinoPath(
-    rhinoPath: string,
-  ): Promise<RhinoPathValidationResult> {
+  async validateRhinoPath(rhinoPath: string): Promise<RhinoPathValidationResult> {
     try {
       // Prüfe ob Datei existiert
       await fs.access(rhinoPath);
@@ -289,9 +257,7 @@ export class BatScriptGeneratorService {
   /**
    * Validiert und bereinigt Request-Daten
    */
-  private async validateAndSanitizeRequest(
-    request: BatScriptRequest,
-  ): Promise<BatScriptRequest> {
+  private async validateAndSanitizeRequest(request: BatScriptRequest): Promise<BatScriptRequest> {
     // Validiere Befehl
     if (!this.isCommandSafe(request.command)) {
       throw new Error(`Unsicherer Befehl erkannt: ${request.command}`);
@@ -305,9 +271,7 @@ export class BatScriptGeneratorService {
     if (!rhinoPath) {
       rhinoPath = await this.detectRhinoPath();
       if (!rhinoPath) {
-        throw new Error(
-          'Rhino-Installation nicht gefunden. Bitte Pfad manuell angeben.',
-        );
+        throw new Error('Rhino-Installation nicht gefunden. Bitte Pfad manuell angeben.');
       }
     }
 
@@ -351,9 +315,8 @@ export class BatScriptGeneratorService {
     const mainCommand = commandParts[0];
 
     return (
-      this.defaultConfig.allowedCommands.some((allowed) =>
-        mainCommand.startsWith(allowed),
-      ) || command.includes('.gh')
+      this.defaultConfig.allowedCommands.some(allowed => mainCommand.startsWith(allowed)) ||
+      command.includes('.gh')
     ); // Erlaube .gh-Dateipfade
   }
 
@@ -501,10 +464,7 @@ exit /b 0
   /**
    * Schreibt .bat-Skript
    */
-  private async writeBatScript(
-    scriptPath: string,
-    content: string,
-  ): Promise<void> {
+  private async writeBatScript(scriptPath: string, content: string): Promise<void> {
     await fs.writeFile(scriptPath, content, { encoding: 'utf8' });
     this.logger.log(`Bat script written to: ${scriptPath}`);
   }
@@ -512,10 +472,7 @@ exit /b 0
   /**
    * Schreibt Registry-Datei
    */
-  private async writeRegistryFile(
-    registryPath: string,
-    content: string,
-  ): Promise<void> {
+  private async writeRegistryFile(registryPath: string, content: string): Promise<void> {
     await fs.writeFile(registryPath, content, { encoding: 'utf8' });
     this.logger.log(`Registry file written to: ${registryPath}`);
   }
@@ -527,7 +484,7 @@ exit /b 0
   private async executeBatScript(
     scriptPath: string,
   ): Promise<{ success: boolean; error?: string }> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       try {
         this.logger.log(`Executing bat script: ${scriptPath}`);
 
@@ -542,11 +499,11 @@ exit /b 0
         let stderr = '';
 
         // Sammle Output
-        batProcess.stdout?.on('data', (data) => {
+        batProcess.stdout.on('data', data => {
           stdout += data.toString();
         });
 
-        batProcess.stderr?.on('data', (data) => {
+        batProcess.stderr.on('data', data => {
           stderr += data.toString();
         });
 
@@ -558,7 +515,7 @@ exit /b 0
         }, 30000);
 
         // Prozess-Ende behandeln
-        batProcess.on('close', (code) => {
+        batProcess.on('close', code => {
           clearTimeout(timeout);
 
           // Behandle Exit-Codes: 0 = Erfolg, 2 = Rhino nicht gefunden, andere = Warnung aber OK
@@ -567,26 +524,19 @@ exit /b 0
             resolve({ success: true });
           } else if (code === 2) {
             // Exit-Code 2 = Rhino nicht gefunden (kritischer Fehler)
-            const errorMsg =
-              'Rhino-Installation nicht gefunden. Bitte installieren Sie Rhino 8.';
-            this.logger.error(
-              `Bat script execution failed: ${scriptPath}, Error: ${errorMsg}`,
-            );
+            const errorMsg = 'Rhino-Installation nicht gefunden. Bitte installieren Sie Rhino 8.';
+            this.logger.error(`Bat script execution failed: ${scriptPath}, Error: ${errorMsg}`);
             resolve({ success: false, error: errorMsg });
           } else {
             // Andere Exit-Codes (z.B. 1) = Rhino wurde gestartet aber mit Warnung beendet
-            this.logger.warn(
-              `Bat script completed with warning code ${code}: ${scriptPath}`,
-            );
-            this.logger.log(
-              `Treating exit code ${code} as success - Rhino was likely started`,
-            );
+            this.logger.warn(`Bat script completed with warning code ${code}: ${scriptPath}`);
+            this.logger.log(`Treating exit code ${code} as success - Rhino was likely started`);
             resolve({ success: true });
           }
         });
 
         // Fehlerbehandlung
-        batProcess.on('error', (error) => {
+        batProcess.on('error', error => {
           clearTimeout(timeout);
           this.logger.error(`Failed to start bat script: ${scriptPath}`, error);
           resolve({ success: false, error: error.message });
@@ -595,9 +545,7 @@ exit /b 0
         // Prozess sofort detachen (nicht auf Ende warten)
         batProcess.unref();
       } catch (error) {
-        this.logger.error(
-          `Exception during bat script execution: ${error.message}`,
-        );
+        this.logger.error(`Exception during bat script execution: ${error.message}`);
         resolve({ success: false, error: error.message });
       }
     });
@@ -612,19 +560,12 @@ exit /b 0
     userId: string,
   ): Promise<SetupPackageInfo> {
     const packageId = crypto.randomUUID();
-    const packageDir = path.join(
-      this.defaultConfig.workingDirectory,
-      'SetupPackages',
-      packageId,
-    );
+    const packageDir = path.join(this.defaultConfig.workingDirectory, 'SetupPackages', packageId);
 
     await fs.mkdir(packageDir, { recursive: true });
 
     // Kopiere Dateien ins Paket
-    const packageScriptPath = path.join(
-      packageDir,
-      'protra_rhino_launcher.bat',
-    );
+    const packageScriptPath = path.join(packageDir, 'protra_rhino_launcher.bat');
     const packageRegistryPath = path.join(packageDir, 'install_protocol.reg');
 
     await fs.copyFile(scriptPath, packageScriptPath);
@@ -649,10 +590,7 @@ Datum: ${new Date().toLocaleString('de-DE')}
 
     // Berechne Checksumme (vereinfacht)
     const checksumData = await fs.readFile(packageScriptPath);
-    const checksum = crypto
-      .createHash('sha256')
-      .update(new Uint8Array(checksumData))
-      .digest('hex');
+    const checksum = crypto.createHash('sha256').update(new Uint8Array(checksumData)).digest('hex');
 
     return {
       packageId,

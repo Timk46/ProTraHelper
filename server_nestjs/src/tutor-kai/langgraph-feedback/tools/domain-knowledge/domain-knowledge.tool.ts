@@ -1,5 +1,5 @@
 import { DynamicStructuredTool } from '@langchain/core/tools'; // Changed import
-import { DomainKnowledgeService } from './domain-knowledge.service';
+import type { DomainKnowledgeService } from './domain-knowledge.service';
 import { z } from 'zod';
 // Removed Injectable import as it's not used directly in this file
 
@@ -16,7 +16,9 @@ const DomainKnowledgeToolSchema = z.object({
     .positive()
     .optional()
     .default(10)
-    .describe('The maximum number of relevant lecture snippets to retrieve. Minumum is 10, maximum is 20.'),
+    .describe(
+      'The maximum number of relevant lecture snippets to retrieve. Minumum is 10, maximum is 20.',
+    ),
 });
 
 // Type for the input based on the Zod schema
@@ -31,8 +33,10 @@ type DomainKnowledgeToolInput = z.infer<typeof DomainKnowledgeToolSchema>;
  */
 export function createDomainKnowledgeTool(
   domainKnowledgeService: DomainKnowledgeService,
-): DynamicStructuredTool { // Changed return type
-  return new DynamicStructuredTool({ // Changed instantiation
+): DynamicStructuredTool {
+  // Changed return type
+  return new DynamicStructuredTool({
+    // Changed instantiation
     name: 'search_domain_knowledge',
     description: `Searches the lecture transcripts and materials for relevant information based on a query (e.g., a concept, keyword, or question). Returns snippets of relevant text content. Use this to answer questions about programming concepts, syntax, or topics covered in the course.`, // Simplified description
     schema: DomainKnowledgeToolSchema, // Provide schema directly

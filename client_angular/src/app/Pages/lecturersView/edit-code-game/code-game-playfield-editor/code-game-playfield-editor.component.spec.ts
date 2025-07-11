@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { CodeGamePlayfieldEditorComponent } from './code-game-playfield-editor.component';
 
@@ -8,9 +9,8 @@ describe('CodeGamePlayfieldEditorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CodeGamePlayfieldEditorComponent ]
-    })
-    .compileComponents();
+      declarations: [CodeGamePlayfieldEditorComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CodeGamePlayfieldEditorComponent);
     component = fixture.componentInstance;

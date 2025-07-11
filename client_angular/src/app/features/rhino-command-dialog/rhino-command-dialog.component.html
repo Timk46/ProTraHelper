@@ -7,16 +7,15 @@
 
   <!-- Dialog Content -->
   <mat-dialog-content class="dialog-content">
-
     <!-- Anleitung -->
     <div class="instruction-section">
       <mat-icon class="instruction-icon">info</mat-icon>
       <div class="instruction-text">
         <h3>Anleitung:</h3>
         <p>
-          1. Rhino ist gestartet und bereit für Befehle<br>
-          2. Kopieren Sie die Befehlssequenz in die Zwischenablage<br>
-          3. Fügen Sie sie in die Rhino-Befehlszeile ein (Strg+V)<br>
+          1. Rhino ist gestartet und bereit für Befehle<br />
+          2. Kopieren Sie die Befehlssequenz in die Zwischenablage<br />
+          3. Fügen Sie sie in die Rhino-Befehlszeile ein (Strg+V)<br />
           4. Drücken Sie Enter zur Ausführung
         </p>
       </div>
@@ -35,7 +34,8 @@
           mat-icon-button
           class="copy-button"
           (click)="copyFullCommand()"
-          matTooltip="Kompletten Befehl kopieren">
+          matTooltip="Kompletten Befehl kopieren"
+        >
           <mat-icon>content_copy</mat-icon>
         </button>
       </div>
@@ -51,8 +51,8 @@
       <mat-accordion class="steps-accordion">
         <mat-expansion-panel
           *ngFor="let step of data.commandSteps; trackBy: trackByStep"
-          class="step-panel">
-
+          class="step-panel"
+        >
           <mat-expansion-panel-header>
             <mat-panel-title>
               <span class="step-number">{{ step.step }}</span>
@@ -66,7 +66,8 @@
               mat-stroked-button
               color="primary"
               (click)="copyStepCommand(step.command)"
-              class="copy-step-button">
+              class="copy-step-button"
+            >
               <mat-icon>content_copy</mat-icon>
               Diesen Schritt kopieren
             </button>
@@ -93,33 +94,21 @@
         </div>
       </div>
     </div>
-
   </mat-dialog-content>
 
   <!-- Dialog Actions -->
   <mat-dialog-actions class="dialog-actions">
-    <button
-      mat-button
-      (click)="onCancel()"
-      class="cancel-button">
+    <button mat-button (click)="onCancel()" class="cancel-button">
       <mat-icon>close</mat-icon>
       Schließen
     </button>
 
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="copyFullCommand()"
-      class="copy-main-button">
+    <button mat-raised-button color="primary" (click)="copyFullCommand()" class="copy-main-button">
       <mat-icon>content_copy</mat-icon>
       Befehl kopieren
     </button>
 
-    <button
-      mat-raised-button
-      color="accent"
-      (click)="onComplete()"
-      class="complete-button">
+    <button mat-raised-button color="accent" (click)="onComplete()" class="complete-button">
       <mat-icon>check</mat-icon>
       Fertig
     </button>

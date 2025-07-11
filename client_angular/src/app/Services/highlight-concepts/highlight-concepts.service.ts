@@ -1,22 +1,24 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import type { HttpClient } from '@angular/common/http';
+import type { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { UserService } from '../auth/user.service';
-import { HighlightConceptDto, CreateHighlightConceptDto, UpdateHighlightConceptDto } from '@DTOs/index';
-
-
+import type { UserService } from '../auth/user.service';
+import type {
+  HighlightConceptDto,
+  CreateHighlightConceptDto,
+  UpdateHighlightConceptDto,
+} from '@DTOs/index';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class HighlightConceptsService {
   private readonly apiUrl = `${environment.server}/highlight-concepts`;
 
   constructor(
-    private http: HttpClient,
-    private userService: UserService
-  ) { }
+    private readonly http: HttpClient,
+    private readonly userService: UserService,
+  ) {}
 
   /**
    * Gets all highlight concepts for a specific module
@@ -53,7 +55,10 @@ export class HighlightConceptsService {
    * @param data The data to update
    * @returns An Observable of the updated HighlightConcept
    */
-  updateHighlightConcept(id: number, data: UpdateHighlightConceptDto): Observable<HighlightConceptDto> {
+  updateHighlightConcept(
+    id: number,
+    data: UpdateHighlightConceptDto,
+  ): Observable<HighlightConceptDto> {
     return this.http.put<HighlightConceptDto>(`${this.apiUrl}/${id}`, data);
   }
 

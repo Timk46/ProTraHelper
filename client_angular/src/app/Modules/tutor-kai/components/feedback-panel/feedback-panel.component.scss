@@ -1,4 +1,4 @@
-@import "../../nord-light-theme";
+@import '../../nord-light-theme';
 
 .feedback-panel {
   height: 100%;
@@ -124,7 +124,8 @@
         }
 
         // Gemeinsame Hover- und Fokus-Effekte
-        &:hover, &:focus {
+        &:hover,
+        &:focus {
           background-color: $nord-light-bg-secondary;
         }
 
@@ -282,7 +283,12 @@
       overflow-y: auto;
       line-height: 1.6;
 
-      h1, h2, h3, h4, h5, h6 {
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
         margin-top: 1.2em;
         margin-bottom: 0.6em;
         color: $nord-light-text-primary;
@@ -293,7 +299,8 @@
         color: $nord-light-text-secondary;
       }
 
-      ul, ol {
+      ul,
+      ol {
         margin-bottom: 1em;
         padding-left: 24px;
       }
@@ -380,7 +387,8 @@
         font-size: 16px;
       }
 
-      .feedback-type-badge, .feedback-level-badge {
+      .feedback-type-badge,
+      .feedback-level-badge {
         margin-top: 6px;
         max-width: 100%;
         font-size: 12px;
@@ -428,12 +436,16 @@
     .feedback-result .feedback-text {
       font-size: 13px;
 
-      h1, h2, h3 {
+      h1,
+      h2,
+      h3 {
         font-size: 16px;
         color: $nord-light-text-primary;
       }
 
-      h4, h5, h6 {
+      h4,
+      h5,
+      h6 {
         font-size: 14px;
         color: $nord-light-text-primary;
       }

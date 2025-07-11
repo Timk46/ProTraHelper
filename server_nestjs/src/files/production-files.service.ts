@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
-import { FileDto } from '@DTOs/index';
+import type { FileDto } from '@DTOs/index';
 import * as fs from 'fs';
 import { FilesService } from './files.service';
 
@@ -9,7 +9,7 @@ import { FilesService } from './files.service';
 export class ProductionFilesService {
   constructor(
     private readonly prisma: PrismaService,
-    private filesService: FilesService
+    private readonly filesService: FilesService,
   ) {}
 
   /**
@@ -65,9 +65,7 @@ export class ProductionFilesService {
    * @param {number} moduleId - The module ID for additional context validation
    * @returns {Promise<StreamableFile>} The StreamableFile for downloading
    */
-  async downloadProductionFile(
-    uniqueIdentifier: string,
-  ): Promise<StreamableFile> {
+  async downloadProductionFile(uniqueIdentifier: string): Promise<StreamableFile> {
     // Get file metadata from database
     const file = await this.prisma.file.findUnique({
       where: { uniqueIdentifier },

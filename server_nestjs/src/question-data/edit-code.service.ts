@@ -4,7 +4,7 @@ import { detailedQuestionDTO, QuestionDTO } from '@DTOs/index'; // Use path alia
 
 @Injectable()
 export class EditCodeService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /* async updateCodingQuestion(question: detailedQuestionDTO): Promise<QuestionDTO> {
     const updatedQuestion = await this.prisma.question.update({

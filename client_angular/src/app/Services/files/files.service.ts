@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import type { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
+import type { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -9,7 +10,7 @@ import { environment } from '../../../environments/environment';
 export class FileService {
   private readonly apiUrl = environment.server + '/files';
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private readonly httpClient: HttpClient) {}
 
   /**
    * Uploads a given file to the server.
@@ -30,20 +31,20 @@ export class FileService {
    * @param uniqueIdentifier The unique identifier for the file to be downloaded.
    * @returns An Observable containing the server response, which includes the file as a Blob.
    */
-  downloadFile(uniqueIdentifier: String): Observable<HttpResponse<Blob>> {
+  downloadFile(uniqueIdentifier: string): Observable<HttpResponse<Blob>> {
     return this.httpClient.get(`${this.apiUrl}/download/${uniqueIdentifier}`, {
       responseType: 'blob',
       observe: 'response',
     });
   }
 
-   /**
+  /**
    * Downloads a file based on a name (first file with that name <- not unique)
    *
    * @param name The unique identifier for the file to be downloaded.
    * @returns An Observable containing the server response, which includes the file as a Blob.
    */
-   downloadFileByName(name: String): Observable<HttpResponse<Blob>> {
+  downloadFileByName(name: string): Observable<HttpResponse<Blob>> {
     return this.httpClient.get(`${this.apiUrl}/download/byName/${name}`, {
       responseType: 'blob',
       observe: 'response',

@@ -3,30 +3,23 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { genTaskDto } from '@DTOs/tutorKaiDtos/genTask.dto';
 import { ChatOpenAI } from '@langchain/openai';
-import {
-  HumanMessage,
-  BaseMessage,
-  SystemMessage,
-} from '@langchain/core/messages';
-import {
-  MessagesAnnotation,
-  END,
-  START,
-  StateGraph,
-  Annotation,
-} from '@langchain/langgraph';
-import {
-  ChatPromptTemplate,
-  MessagesPlaceholder,
-} from '@langchain/core/prompts';
+import type { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { MessagesAnnotation, END, START, StateGraph, Annotation } from '@langchain/langgraph';
+import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import axios from 'axios';
 import { contentElementType } from '@prisma/client';
-import { AutomatedTestDto, CodeGeruestDto, CodingQuestionInternal, ModelSolutionDto } from '@Interfaces/index';
+import type {
+  AutomatedTestDto,
+  CodeGeruestDto,
+  CodingQuestionInternal,
+  ModelSolutionDto,
+} from '@Interfaces/index';
 @Injectable()
 export class CodingQuestionGeneratorService {
   constructor(
-    private configService: ConfigService,
-    private prisma: PrismaService,
+    private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
   ) {}
 
   encodeBased64(text: string): string {
@@ -56,16 +49,12 @@ export class CodingQuestionGeneratorService {
     const unitTestThree = data.unitTest.length > 2 ? data.unitTest[2] : null;
 
     const errorOne = data.checkCodeError[0];
-    const errorTwo =
-      data.checkCodeError.length > 1 ? data.checkCodeError[1] : null;
-    const errorThree =
-      data.checkCodeError.length > 2 ? data.checkCodeError[2] : null;
+    const errorTwo = data.checkCodeError.length > 1 ? data.checkCodeError[1] : null;
+    const errorThree = data.checkCodeError.length > 2 ? data.checkCodeError[2] : null;
 
     const juryResponseOne = data.juryResponses[0];
-    const juryResponseTwo =
-      data.juryResponses.length > 1 ? data.juryResponses[1] : null;
-    const juryResponseThree =
-      data.juryResponses.length > 2 ? data.juryResponses[2] : null;
+    const juryResponseTwo = data.juryResponses.length > 1 ? data.juryResponses[1] : null;
+    const juryResponseThree = data.juryResponses.length > 2 ? data.juryResponses[2] : null;
 
     const dbEntry = await this.prisma.genTaskData.create({
       data: {
@@ -112,8 +101,7 @@ export class CodingQuestionGeneratorService {
     const langGraphRecursionLimit = 50; //Maximale Anzahl an Rekursionen für LangGraph
     const paramTopic = concept;
     const paramContext = context;
-    const jury1url =
-      'http://jury1.bshefl2.bs.informatik.uni-siegen.de/execute/python-assignment';
+    const jury1url = 'http://jury1.bshefl2.bs.informatik.uni-siegen.de/execute/python-assignment';
 
     const model = new ChatOpenAI({
       temperature: 0,
@@ -202,9 +190,7 @@ export class CodingQuestionGeneratorService {
 
       model.temperature = 0.2;
       const response = await prompt
-        .pipe(
-          new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }),
-        )
+        .pipe(new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }))
         .invoke({ messages });
       model.temperature = 0;
 
@@ -244,9 +230,7 @@ export class CodingQuestionGeneratorService {
       }
 
       const response = await prompt
-        .pipe(
-          new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }),
-        )
+        .pipe(new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }))
         .invoke({ messages });
 
       return {
@@ -259,7 +243,7 @@ export class CodingQuestionGeneratorService {
     const genCodeFramework = async (state: typeof TaskGenState.State) => {
       const { messages } = state;
 
-      let prompt = ChatPromptTemplate.fromMessages([
+      const prompt = ChatPromptTemplate.fromMessages([
         new SystemMessage('Du bist ein Python Experte'),
         new HumanMessage(`Erstelle ein Codegerüst für die nachfolgende Programmieraufgabe. Gib das Codegerüst als "String" wieder, ohne Markierungen mit "'''Python" oder ähnlichem. Das Codegerüst soll nur aus der Methodendefinition bestehen.
             Orientiere dich an dem folgenden Beispiel:
@@ -269,9 +253,7 @@ export class CodingQuestionGeneratorService {
       ]);
 
       const response = await prompt
-        .pipe(
-          new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }),
-        )
+        .pipe(new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }))
         .invoke({ messages });
 
       return {
@@ -385,9 +367,7 @@ export class CodingQuestionGeneratorService {
           new HumanMessage(`Erstelle einen Unit-Test für die Programmieraufgabe inklusive aller benötigten Imports zu der nachfolgenden Musterlösung. Generiere nur den Unit-Test ohne zusätzlichen Text. Der Unit-Test soll direkt ausführbar sein.
                 Du hast bereits einmal versucht diesen Unit-Test zu erstellen, es gab aber einen Fehler. Generiere hier nur den korrigierten Unit-Test. \n
                 \n
-                Die Musterlösung lautet: ${
-                  state.solution[state.solution.length - 1]
-                } \n
+                Die Musterlösung lautet: ${state.solution[state.solution.length - 1]} \n
                 Die aufgetauchte Fehlermeldung: ${
                   state.checkCodeError[state.checkCodeError.length - 1]
                 } \n
@@ -498,9 +478,7 @@ export class CodingQuestionGeneratorService {
       }
 
       const response = await prompt
-        .pipe(
-          new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }),
-        )
+        .pipe(new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }))
         .invoke({ messages });
 
       return {
@@ -526,9 +504,7 @@ export class CodingQuestionGeneratorService {
       ]);
 
       const response = await prompt
-        .pipe(
-          new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }),
-        )
+        .pipe(new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }))
         .invoke({ messages });
 
       const expectation = this.extractFinalStep(response.content.toString());
@@ -543,7 +519,7 @@ export class CodingQuestionGeneratorService {
     const checkCode = async (state: typeof TaskGenState.State) => {
       const solution = state.solution[state.solution.length - 1];
       const unitTest = state.unitTest[state.unitTest.length - 1];
-      let reflection = '';
+      const reflection = '';
       let errorMessages = '';
 
       console.log('--- CheckCode ---');
@@ -568,10 +544,7 @@ export class CodingQuestionGeneratorService {
         for (let i = 0; i < testResults.length; i++) {
           if (testResults[i].status === 'FAILED') {
             //Es gab einen Fehler in einem Testcase
-            if (
-              testResults[i].test === 'MAIN_COMPILATION' &&
-              testResults[i].status === 'FAILED'
-            ) {
+            if (testResults[i].test === 'MAIN_COMPILATION' && testResults[i].status === 'FAILED') {
               errorMessages += `Kompilierungsfehler: ${output} \n`;
             } else {
               const testCase = testResults[i].test;
@@ -607,15 +580,9 @@ export class CodingQuestionGeneratorService {
     };
 
     const _CheckCodePassed = (state): string => {
-      console.log(
-        '_CheckCodePassed - state.checkCodeErrorHappen = ',
-        state.checkCodeErrorHappend,
-      );
+      console.log('_CheckCodePassed - state.checkCodeErrorHappen = ', state.checkCodeErrorHappend);
 
-      if (
-        state.checkCodeErrorHappend === true &&
-        state.checkCodeIteration < maxIterations
-      ) {
+      if (state.checkCodeErrorHappend === true && state.checkCodeIteration < maxIterations) {
         console.log(
           '----------------------- SOLUTION ERROR => Retry! -----------------------',
           state.checkCodeIteration,
@@ -709,9 +676,7 @@ export class CodingQuestionGeneratorService {
       ]);
 
       const response = await prompt
-        .pipe(
-          new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }),
-        )
+        .pipe(new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }))
         .invoke({ messages });
 
       console.log('genRunMethodArgs - response: ', response.content);
@@ -737,14 +702,10 @@ export class CodingQuestionGeneratorService {
         runMethod: jsonData.runMethod,
         input: jsonData.input,
         mainFile: {
-          'main.py': this.encodeBased64(
-            state.solution[state.solution.length - 1],
-          ),
+          'main.py': this.encodeBased64(state.solution[state.solution.length - 1]),
         },
         testFiles: {
-          'test_main.py': this.encodeBased64(
-            state.unitTest[state.unitTest.length - 1],
-          ),
+          'test_main.py': this.encodeBased64(state.unitTest[state.unitTest.length - 1]),
         },
       });
 
@@ -807,9 +768,7 @@ export class CodingQuestionGeneratorService {
       ]);
 
       const response = await prompt
-        .pipe(
-          new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }),
-        )
+        .pipe(new ChatOpenAI({ temperature: 0, streaming: true, model: gptModel }))
         .invoke({ messages });
 
       return {
@@ -873,7 +832,7 @@ export class CodingQuestionGeneratorService {
 
     //Erstelle einen Eintrag in der Datenbank, in welchem alle Daten als JSON-Objekt gespeichert werden
 
-    var jsonData = {
+    const jsonData = {
       topic: paramTopic,
       context: paramContext,
       task: result.task,
@@ -894,42 +853,42 @@ export class CodingQuestionGeneratorService {
     console.log('Datenbank Eintrag erstellt - ID der Aufgabe: ', dbEntry.id);
 
     const codeGeruest: CodeGeruestDto = {
-      id : -1, // temp - real value will be set by database
-      codingQuestionId : -1, // temp - real value will be set by database
-      code : result.codeFramework,
-      codeFileName: "main.py",
-      language : "python",
+      id: -1, // temp - real value will be set by database
+      codingQuestionId: -1, // temp - real value will be set by database
+      code: result.codeFramework,
+      codeFileName: 'main.py',
+      language: 'python',
     };
 
     const modelSolution: ModelSolutionDto = {
-      id : -1, // temp - real value will be set by database
-      codingQuestionId : -1, // temp - real value will be set by database
-      code : result.solution[result.solution.length - 1],
-      codeFileName: "main.py",
-      language : "python",
+      id: -1, // temp - real value will be set by database
+      codingQuestionId: -1, // temp - real value will be set by database
+      code: result.solution[result.solution.length - 1],
+      codeFileName: 'main.py',
+      language: 'python',
     };
 
     const automatedTest: AutomatedTestDto = {
-      id : -1, // temp - real value will be set by database
-      code : result.unitTest[result.unitTest.length - 1],
-      testFileName: "test_main.py",
-      language : "python",
-      questionId : -1, // temp - real value will be set by database
-      runMethod : result.runMethod,
-      inputArguments : result.runMethodInput,
+      id: -1, // temp - real value will be set by database
+      code: result.unitTest[result.unitTest.length - 1],
+      testFileName: 'test_main.py',
+      language: 'python',
+      questionId: -1, // temp - real value will be set by database
+      runMethod: result.runMethod,
+      inputArguments: result.runMethodInput,
     };
 
     const genereatedCodingQuestion: CodingQuestionInternal = {
-      id : -1, // temp - real value will be set by database
-      count_InputArgs : 0, // none for python tasks
-      programmingLanguage : "python",
-      mainFileName : "main.py", // currently only one single python file
-      text : result.task,
-      textHTML : result.task,
-      codeGerueste : [codeGeruest],
-      expectations : result.expectation,
-      automatedTests : [automatedTest],
-      modelSolutions : [modelSolution]
+      id: -1, // temp - real value will be set by database
+      count_InputArgs: 0, // none for python tasks
+      programmingLanguage: 'python',
+      mainFileName: 'main.py', // currently only one single python file
+      text: result.task,
+      textHTML: result.task,
+      codeGerueste: [codeGeruest],
+      expectations: result.expectation,
+      automatedTests: [automatedTest],
+      modelSolutions: [modelSolution],
     };
 
     return genereatedCodingQuestion;

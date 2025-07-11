@@ -1,13 +1,12 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
-import { LinkableContentElementDTO, LinkableContentNodeDTO, QuestionDTO } from '@Interfaces/index';
+import type { QuestionDTO } from '@Interfaces/index';
+import { LinkableContentElementDTO, LinkableContentNodeDTO } from '@Interfaces/index';
 import { ContentLinkerService } from './content-linker.service';
 
 @UseGuards(RolesGuard)
 @Controller('content/linker')
-
 export class ContentLinkerController {
-
   constructor(private readonly contentLinkerService: ContentLinkerService) {}
 
   @roles('ADMIN')
@@ -56,7 +55,6 @@ export class ContentLinkerController {
     return this.contentLinkerService.unlinkContentElement(Number(contentElementId));
   }
 
-
   @roles('ADMIN')
   @Get('unlinkedQuestions')
   /**
@@ -67,6 +65,4 @@ export class ContentLinkerController {
   async getUnlinkedQuestions(): Promise<QuestionDTO[]> {
     return this.contentLinkerService.getUnlinkedQuestions();
   }
-
-
 }

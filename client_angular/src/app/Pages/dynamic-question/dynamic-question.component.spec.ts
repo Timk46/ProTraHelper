@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { DynamicQuestionComponent } from './dynamic-question.component';
 
@@ -8,9 +9,8 @@ describe('DynamicQuestionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DynamicQuestionComponent ]
-    })
-    .compileComponents();
+      declarations: [DynamicQuestionComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DynamicQuestionComponent);
     component = fixture.componentInstance;

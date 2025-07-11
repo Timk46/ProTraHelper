@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { McTaskCreationComponent } from './mc-task-creation.component';
 
@@ -8,9 +9,8 @@ describe('McTaskCreationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ McTaskCreationComponent ]
-    })
-    .compileComponents();
+      declarations: [McTaskCreationComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(McTaskCreationComponent);
     component = fixture.componentInstance;

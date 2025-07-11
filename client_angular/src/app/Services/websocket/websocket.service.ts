@@ -1,7 +1,9 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { io, Socket, ManagerOptions, SocketOptions } from 'socket.io-client';
+import type { OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
+import type { Socket, ManagerOptions, SocketOptions } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { Observable, Subject, BehaviorSubject, timer } from 'rxjs';
-import { UserService } from '../auth/user.service';
+import type { UserService } from '../auth/user.service';
 import { takeUntil, retry, switchMap } from 'rxjs/operators';
 
 interface SocketConnection {
@@ -12,15 +14,15 @@ interface SocketConnection {
  * Service for managing WebSocket connections.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WebSocketService implements OnDestroy {
   /** A map of WebSocket connections, indexed by the full URL of the connection.
    * The value is an object containing the socket instance and a BehaviorSubject for the connection status.*/
-  private sockets: Map<string, SocketConnection> = new Map();
-  private destroyed$ = new Subject<void>();
+  private readonly sockets: Map<string, SocketConnection> = new Map();
+  private readonly destroyed$ = new Subject<void>();
 
-  constructor(private userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
   /**
    * Initiates a WebSocket connection.
@@ -28,14 +30,18 @@ export class WebSocketService implements OnDestroy {
    * @param {string} namespace - The namespace for the WebSocket connection.
    * @param {ManagerOptions & SocketOptions} options - Additional options for the connection.
    */
-  connect(url: string, namespace: string, options: Partial<ManagerOptions & SocketOptions> = {}): void {
+  connect(
+    url: string,
+    namespace: string,
+    options: Partial<ManagerOptions & SocketOptions> = {},
+  ): void {
     const fullUrl = `${url}/${namespace}`;
     if (!this.sockets.has(fullUrl)) {
       const socket = io(fullUrl, {
         query: { token: this.userService.getAccessToken() },
         withCredentials: true, // Required for cross-origin requests
         transports: ['websocket'],
-        ...options // example usage of options: { autoConnect: false, reconnectionAttempts: 5, timeout: 10000, .. }
+        ...options, // example usage of options: { autoConnect: false, reconnectionAttempts: 5, timeout: 10000, .. }
       });
 
       const connectionSubject = new BehaviorSubject<boolean>(false);
@@ -82,7 +88,7 @@ export class WebSocketService implements OnDestroy {
    * @returns {Observable<T>} An Observable that emits the data received for the event.
    */
   on<T>(url: string, namespace: string, eventName: string): Observable<T> {
-    return new Observable<T>((observer) => {
+    return new Observable<T>(observer => {
       const socket = this.getSocket(url, namespace);
       if (!socket) {
         observer.error(new Error(`No socket connection for ${url}/${namespace}`));
@@ -154,7 +160,7 @@ export class WebSocketService implements OnDestroy {
           return new Observable<boolean>();
         }),
         retry(),
-        takeUntil(timer(60000)) // Stop trying after 1 minute
+        takeUntil(timer(60000)), // Stop trying after 1 minute
       )
       .subscribe();
   }
@@ -175,7 +181,7 @@ export class WebSocketService implements OnDestroy {
   ngOnDestroy(): void {
     this.destroyed$.next();
     this.destroyed$.complete();
-    this.sockets.forEach((connection) => {
+    this.sockets.forEach(connection => {
       connection.socket.disconnect();
       connection.connectionSubject.complete();
     });

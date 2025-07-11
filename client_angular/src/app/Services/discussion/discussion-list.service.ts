@@ -1,15 +1,18 @@
-import { discussionDTO, discussionFilterContentNodeDTO, discussionFilterDTO } from '@DTOs/index';
-import { HttpClient } from '@angular/common/http';
+import type {
+  discussionDTO,
+  discussionFilterContentNodeDTO,
+  discussionFilterDTO,
+} from '@DTOs/index';
+import type { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/internal/Observable';
+import type { Observable } from 'rxjs/internal/Observable';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DiscussionListService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Returns a list of discussions with the given filter data
@@ -26,8 +29,8 @@ export class DiscussionListService {
    * @returns discussionFilterContentNodeDTO[]
    */
   getFilterContentNodes(conceptNodeId: number): Observable<discussionFilterContentNodeDTO[]> {
-    return this.http.get<discussionFilterContentNodeDTO[]>(environment.server + `/discussion/list/filterContentNodes/${conceptNodeId}`);
+    return this.http.get<discussionFilterContentNodeDTO[]>(
+      environment.server + `/discussion/list/filterContentNodes/${conceptNodeId}`,
+    );
   }
-
-
 }

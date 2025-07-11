@@ -1,4 +1,5 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import type { ElementRef, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,9 +7,9 @@ import { MatSliderModule } from '@angular/material/slider';
 import { FormsModule } from '@angular/forms';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { ParameterChange, ParameterUpdateResult } from '../../models/pmpm-session.model';
-import { PmpmService } from '../../services/pmpm.service';
-import { Subscription } from 'rxjs';
+import type { ParameterChange, ParameterUpdateResult } from '../../models/pmpm-session.model';
+import type { PmpmService } from '../../services/pmpm.service';
+import type { Subscription } from 'rxjs';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 /**
@@ -20,9 +21,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule, MatSliderModule, FormsModule],
   templateUrl: './three-viewer.component.html',
-  styleUrls: ['./three-viewer.component.scss']
+  styleUrls: ['./three-viewer.component.scss'],
 })
-export class ThreeViewerComponent implements OnInit, OnDestroy {
+export class ThreeViewerComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('rendererContainer') rendererContainer!: ElementRef;
 
   /** The ID of the model to load */
@@ -52,18 +53,18 @@ export class ThreeViewerComponent implements OnInit, OnDestroy {
     { id: 'height', name: 'Höhe', value: 5, min: 1, max: 10 },
     { id: 'width', name: 'Breite', value: 3, min: 1, max: 5 },
     { id: 'depth', name: 'Tiefe', value: 4, min: 1, max: 8 },
-    { id: 'density', name: 'Dichte', value: 2, min: 0.1, max: 5 }
+    { id: 'density', name: 'Dichte', value: 2, min: 0.1, max: 5 },
   ];
 
   /** Subscriptions for cleanup */
-  private subscriptions: Subscription[] = [];
+  private readonly subscriptions: Subscription[] = [];
 
   /** Flags and state */
   isLoading = true;
   isAnalysisMode = false;
   error: string | null = null;
 
-  constructor(private pmpmService: PmpmService) {}
+  constructor(private readonly pmpmService: PmpmService) {}
 
   ngOnInit(): void {
     // Listen for parameter update results from the server
@@ -72,7 +73,7 @@ export class ThreeViewerComponent implements OnInit, OnDestroy {
         if (update) {
           this.applyParameterUpdate(update);
         }
-      })
+      }),
     );
   }
 
@@ -232,11 +233,11 @@ export class ThreeViewerComponent implements OnInit, OnDestroy {
     const loader = new GLTFLoader();
     loader.load(
       modelPathToLoad,
-      (gltf: { scene: THREE.Group<THREE.Object3DEventMap> | null; }) => {
+      (gltf: { scene: THREE.Group<THREE.Object3DEventMap> | null }) => {
         this.model = gltf.scene;
 
         // Set up model
-        this.model!.traverse((child) => {
+        this.model!.traverse(child => {
           if (child instanceof THREE.Mesh) {
             child.castShadow = true;
             child.receiveShadow = true;
@@ -256,7 +257,7 @@ export class ThreeViewerComponent implements OnInit, OnDestroy {
         console.error('Error loading model:', err);
         this.error = 'Fehler beim Laden des 3D-Modells.';
         this.isLoading = false;
-      }
+      },
     );
   }
 
@@ -333,7 +334,7 @@ export class ThreeViewerComponent implements OnInit, OnDestroy {
     // Send change to server
     const change: ParameterChange = {
       parameterId,
-      value
+      value,
     };
 
     this.pmpmService.sendParameterChange(change);
@@ -417,7 +418,7 @@ export class ThreeViewerComponent implements OnInit, OnDestroy {
 
     // Color the model based on stress
     if (this.model) {
-      this.model.traverse((child) => {
+      this.model.traverse(child => {
         if (child instanceof THREE.Mesh) {
           const material = child.material as THREE.MeshStandardMaterial;
           material.color.copy(color);
@@ -435,7 +436,7 @@ export class ThreeViewerComponent implements OnInit, OnDestroy {
     const normalizedDeformation = deformation / 10;
 
     if (this.model) {
-      this.model.traverse((child) => {
+      this.model.traverse(child => {
         if (child instanceof THREE.Mesh && child.geometry.type === 'BufferGeometry') {
           const geometry = child.geometry;
           const positionAttribute = geometry.getAttribute('position');
@@ -447,7 +448,8 @@ export class ThreeViewerComponent implements OnInit, OnDestroy {
           const positions = positionAttribute.array;
           for (let i = 0; i < positions.length; i += 3) {
             const y = positions[i + 1];
-            positions[i + 1] = y * (1 + Math.sin(positions[i] + positions[i + 2]) * normalizedDeformation * 0.1);
+            positions[i + 1] =
+              y * (1 + Math.sin(positions[i] + positions[i + 2]) * normalizedDeformation * 0.1);
           }
 
           positionAttribute.needsUpdate = true;
@@ -480,7 +482,7 @@ export class ThreeViewerComponent implements OnInit, OnDestroy {
 
       // Reset model colors
       if (this.model) {
-        this.model.traverse((child) => {
+        this.model.traverse(child => {
           if (child instanceof THREE.Mesh) {
             const material = child.material as THREE.MeshStandardMaterial;
             material.color.set(0xcccccc);
@@ -495,12 +497,13 @@ export class ThreeViewerComponent implements OnInit, OnDestroy {
    */
   resetParameters(): void {
     this.parameters.forEach(param => {
-      const defaultValue = {
-        height: 5,
-        width: 3,
-        depth: 4,
-        density: 2
-      }[param.id] || param.value;
+      const defaultValue =
+        {
+          height: 5,
+          width: 3,
+          depth: 4,
+          density: 2,
+        }[param.id] || param.value;
 
       this.updateParameter(param.id, defaultValue);
     });

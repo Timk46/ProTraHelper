@@ -5,7 +5,7 @@
   overflow: hidden;
 
   transition: transform 0.2s;
-  border: 2px solid #3F51B5;
+  border: 2px solid #3f51b5;
   background-color: whitesmoke;
 
   @media screen and (max-width: 580px) {
@@ -55,11 +55,11 @@
 
 .list-item-title {
   overflow: hidden;
-   text-overflow: ellipsis;
-   display: -webkit-box;
-   -webkit-line-clamp: 2; /* number of lines to show */
-           line-clamp: 2;
-   -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* number of lines to show */
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .list-item-avatar {
@@ -88,4 +88,3 @@
     transform-origin: bottom right;
   }
 }
-

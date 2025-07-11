@@ -1,6 +1,6 @@
 <div class="container" *ngIf="!isLoading">
   <div class="header" *ngIf="fillInTask">
-    <h2>{{fillInTask.question.name}}</h2>
+    <h2>{{ fillInTask.question.name }}</h2>
   </div>
 
   <div class="question-container" *ngIf="fillInTask">
@@ -13,110 +13,170 @@
         <ng-container [ngSwitch]="part.type">
           <div *ngSwitchCase="'sentence'" class="sentence">
             <ng-container *ngFor="let sentencePart of part.content">
-              <span *ngIf="sentencePart.type === 'text'" class="sentence-part">{{sentencePart.content}}</span>
+              <span *ngIf="sentencePart.type === 'text'" class="sentence-part">{{
+                sentencePart.content
+              }}</span>
               <ng-container *ngIf="sentencePart.type === 'blank'">
                 <!-- Drag and Drop Version -->
-                <div *ngIf="fillInTask.taskType === fillinTaskTypes.FillinDrag"
-                    class="blank-box"
-                    cdkDropList
-                    [id]="sentencePart.id"
-                    [cdkDropListData]="[sentencePart]"
-                    [cdkDropListConnectedTo]="allContainers"
-                    (cdkDropListDropped)="onDrop($event)">
-                  <div *ngIf="sentencePart.content" class="word-box" cdkDrag [cdkDragData]="sentencePart">
+                <div
+                  *ngIf="fillInTask.taskType === fillinTaskTypes.FillinDrag"
+                  class="blank-box"
+                  cdkDropList
+                  [id]="sentencePart.id"
+                  [cdkDropListData]="[sentencePart]"
+                  [cdkDropListConnectedTo]="allContainers"
+                  (cdkDropListDropped)="onDrop($event)"
+                >
+                  <div
+                    *ngIf="sentencePart.content"
+                    class="word-box"
+                    cdkDrag
+                    [cdkDragData]="sentencePart"
+                  >
                     <ng-container *ngIf="!isImageContent(sentencePart.content); else imageContent">
-                      {{sentencePart.content}}
+                      {{ sentencePart.content }}
                     </ng-container>
                     <ng-template #imageContent>
-                      <img [src]="sentencePart.content" alt="Dropped image" class="dropped-image">
+                      <img [src]="sentencePart.content" alt="Dropped image" class="dropped-image" />
                     </ng-template>
                   </div>
                 </div>
                 <!-- Dropdown Version -->
-                <mat-form-field appearance="outline" *ngIf="fillInTask.taskType === fillinTaskTypes.FillinDropdown">
+                <mat-form-field
+                  appearance="outline"
+                  *ngIf="fillInTask.taskType === fillinTaskTypes.FillinDropdown"
+                >
                   <mat-select [formControlName]="sentencePart.id">
                     <mat-option *ngFor="let option of options" [value]="option.blankContent">
                       <ng-container *ngIf="!isImageOption(option)">
                         {{ option.blankContent }}
                       </ng-container>
-                      <img *ngIf="isImageOption(option)" [src]="option.blankContent" alt="Image option" class="image-option">
+                      <img
+                        *ngIf="isImageOption(option)"
+                        [src]="option.blankContent"
+                        alt="Image option"
+                        class="image-option"
+                      />
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
                 <!-- Manual Input Version -->
-                <mat-form-field appearance="outline" *ngIf="fillInTask.taskType === fillinTaskTypes.FillinText" >
-                  <input matInput [formControlName]="sentencePart.id" placeholder="Antwort eingeben">
+                <mat-form-field
+                  appearance="outline"
+                  *ngIf="fillInTask.taskType === fillinTaskTypes.FillinText"
+                >
+                  <input
+                    matInput
+                    [formControlName]="sentencePart.id"
+                    placeholder="Antwort eingeben"
+                  />
                 </mat-form-field>
               </ng-container>
             </ng-container>
           </div>
-        <div *ngSwitchCase="'table'" class="table-container">
-          <table>
-            <tr *ngFor="let row of part.content.rows; let rowIndex = index">
-              <td *ngFor="let cell of row.cells; let cellIndex = index"
-                  [ngClass]="{'table-blank-cell': cell.isBlank}"
-                  [attr.data-cell-id]="cell.id">
-                <ng-container *ngIf="cell.isBlank; else regularCell">
-                  <div cdkDropList
+          <div *ngSwitchCase="'table'" class="table-container">
+            <table>
+              <tr *ngFor="let row of part.content.rows; let rowIndex = index">
+                <td
+                  *ngFor="let cell of row.cells; let cellIndex = index"
+                  [ngClass]="{ 'table-blank-cell': cell.isBlank }"
+                  [attr.data-cell-id]="cell.id"
+                >
+                  <ng-container *ngIf="cell.isBlank; else regularCell">
+                    <div
+                      cdkDropList
                       [id]="cell.id"
                       [cdkDropListData]="[cell]"
                       [cdkDropListConnectedTo]="allContainers"
                       (cdkDropListDropped)="onDrop($event)"
-                      class="table-blank-container">
-                    <div *ngIf="cell.content" class="word-box in-table-cell" cdkDrag [cdkDragData]="cell">
-                      <img *ngIf="cell.isImage" [src]="cell.content" alt="Blank image">
-                      <span *ngIf="!cell.isImage">{{cell.content}}</span>
+                      class="table-blank-container"
+                    >
+                      <div
+                        *ngIf="cell.content"
+                        class="word-box in-table-cell"
+                        cdkDrag
+                        [cdkDragData]="cell"
+                      >
+                        <img *ngIf="cell.isImage" [src]="cell.content" alt="Blank image" />
+                        <span *ngIf="!cell.isImage">{{ cell.content }}</span>
+                      </div>
                     </div>
-                  </div>
-                </ng-container>
-                <ng-template #regularCell>
-                  <img *ngIf="cell.isImage" [src]="cell.content" alt="Table image">
-                  <span *ngIf="!cell.isImage">{{cell.content}}</span>
-                </ng-template>
-              </td>
-            </tr>
-          </table>
-        </div>
+                  </ng-container>
+                  <ng-template #regularCell>
+                    <img *ngIf="cell.isImage" [src]="cell.content" alt="Table image" />
+                    <span *ngIf="!cell.isImage">{{ cell.content }}</span>
+                  </ng-template>
+                </td>
+              </tr>
+            </table>
+          </div>
         </ng-container>
       </ng-container>
     </div>
 
     <div class="options-container" *ngIf="fillInTask.taskType === 'FillInDrag'">
       <h3>Auswahloptionen</h3>
-      <div id="options"
-          class="options-list"
-          cdkDropList
-          [cdkDropListData]="options"
-          [cdkDropListConnectedTo]="allContainers"
-          (cdkDropListDropped)="onDrop($event)">
-          <div class="word-box" *ngFor="let option of options" cdkDrag [cdkDragData]="option">
-            <ng-container *ngIf="!isImageOption(option)">
-              {{ option.blankContent }}
-            </ng-container>
-            <img *ngIf="isImageOption(option)" [src]="option.blankContent" alt="Image option" class="image-option">
-          </div>
+      <div
+        id="options"
+        class="options-list"
+        cdkDropList
+        [cdkDropListData]="options"
+        [cdkDropListConnectedTo]="allContainers"
+        (cdkDropListDropped)="onDrop($event)"
+      >
+        <div class="word-box" *ngFor="let option of options" cdkDrag [cdkDragData]="option">
+          <ng-container *ngIf="!isImageOption(option)">
+            {{ option.blankContent }}
+          </ng-container>
+          <img
+            *ngIf="isImageOption(option)"
+            [src]="option.blankContent"
+            alt="Image option"
+            class="image-option"
+          />
+        </div>
       </div>
     </div>
 
+    <div class="submit">
+      <button
+        *ngIf="!submitDisabled && !isSending"
+        mat-raised-button
+        color="primary"
+        (click)="submitTask()"
+      >
+        {{ isSending ? 'Senden...' : 'Antworten' }}
+      </button>
+      <button
+        *ngIf="submitDisabled && !isCorrect"
+        mat-raised-button
+        color="accent"
+        (click)="retry()"
+      >
+        Erneut versuchen
+      </button>
+      <button
+        *ngIf="submitDisabled && isCorrect"
+        mat-flat-button
+        color="accent"
+        (click)="onClose()"
+      >
+        Schließen
+      </button>
+    </div>
 
-  <div class="submit">
-    <button *ngIf="!submitDisabled && !isSending" mat-raised-button color="primary" (click)="submitTask()">
-      {{ isSending ? 'Senden...' : 'Antworten' }}
-    </button>
-    <button *ngIf="submitDisabled && !isCorrect" mat-raised-button color="accent" (click)="retry()">
-      Erneut versuchen
-    </button>
-    <button *ngIf="submitDisabled && isCorrect"  mat-flat-button color="accent" (click)="onClose()">
-      Schließen
-    </button>
-  </div>
+    <div
+      class="feedback-container"
+      *ngIf="submitDisabled"
+      [ngStyle]="{ 'background-color': feedbackColor }"
+    >
+      <h3>Feedback</h3>
+      <p [innerHTML]="feedbackText.feedbackText"></p>
+    </div>
 
-  <div class="feedback-container" *ngIf="submitDisabled" [ngStyle]="{'background-color': feedbackColor}">
-    <h3>Feedback</h3>
-    <p [innerHTML]="feedbackText.feedbackText"></p>
-  </div>
-
-<div class="loading" *ngIf="isLoading">
-  <mat-spinner></mat-spinner>
-  <p>Lade Aufgabe...</p>
+    <div class="loading" *ngIf="isLoading">
+      <mat-spinner></mat-spinner>
+      <p>Lade Aufgabe...</p>
+    </div>
+  </form>
 </div>

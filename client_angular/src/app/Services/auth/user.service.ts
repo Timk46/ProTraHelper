@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import jwt_decode from 'jwt-decode';
 import { globalRole } from '@DTOs/roles.enum';
 import { environment } from 'src/environments/environment';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import type { MatSnackBar } from '@angular/material/snack-bar';
+import type { Router } from '@angular/router';
+import type { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { v4 as uuid } from 'uuid';
-import { catchError, finalize, tap } from "rxjs/operators";
+import { catchError, finalize, tap } from 'rxjs/operators';
 
 interface SubjectInfo {
   subjectId: number;
@@ -25,13 +26,11 @@ export class UserService {
   isAuthenticated$: Observable<boolean>;
   hasEditModeActive$: Observable<boolean>;
 
-  constructor
-  (
-    private router: Router,
-    private snackBar: MatSnackBar,
-    private http: HttpClient,
-  )
-  {
+  constructor(
+    private readonly router: Router,
+    private readonly snackBar: MatSnackBar,
+    private readonly http: HttpClient,
+  ) {
     this.isAuthenticated$ = new BehaviorSubject<boolean>(false);
     this.hasEditModeActive$ = new BehaviorSubject<boolean>(false);
   }
@@ -55,7 +54,7 @@ export class UserService {
           const refreshToken = response.refreshToken;
           localStorage.setItem('accessToken', accessToken);
           localStorage.setItem('refreshToken', refreshToken);
-          this.openSnackBar("Hallo " + username);
+          this.openSnackBar('Hallo ' + username);
           this.router.navigate(['/dashboard']);
           resolve(true);
         },
@@ -68,9 +67,9 @@ export class UserService {
           } else {
             console.error('Server-side error:', error.error);
           }
-          this.openSnackBar("Der Login ist fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.");
+          this.openSnackBar('Der Login ist fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.');
           resolve(false);
-        }
+        },
       });
     });
   }
@@ -82,34 +81,38 @@ export class UserService {
    * @returns { Promise<boolean> } - A promise that resolves to true if the logout was successful, otherwise false.
    */
   logout(logoutFromAllDevices: boolean): Promise<boolean> {
-    const url = logoutFromAllDevices ? environment.server + '/auth/logoutAllUserDevices' : environment.server + '/auth/logout';
+    const url = logoutFromAllDevices
+      ? environment.server + '/auth/logoutAllUserDevices'
+      : environment.server + '/auth/logout';
 
-    return new Promise<boolean>(async (resolve) => {
-      this.http.get(url).pipe(
-        finalize(() => {
-          this.removeTokens();
-          this.router.navigate(['/login']);
-        })
-      ).subscribe({
-        next: (response: any) => {
-          if (response.message === "Logout successful") {
-            this.openSnackBar("Erfolgreich abgemeldet.");
-            resolve(true);
-          } else if (response.message === "Logout from all devices successful") {
-            this.openSnackBar("Erfolgreich von allen Geräten abgemeldet.");
-            resolve(true);
-          } else {
-            this.openSnackBar("Fehler bei der Abmeldung.");
+    return new Promise<boolean>(async resolve => {
+      this.http
+        .get(url)
+        .pipe(
+          finalize(() => {
+            this.removeTokens();
+            this.router.navigate(['/login']);
+          }),
+        )
+        .subscribe({
+          next: (response: any) => {
+            if (response.message === 'Logout successful') {
+              this.openSnackBar('Erfolgreich abgemeldet.');
+              resolve(true);
+            } else if (response.message === 'Logout from all devices successful') {
+              this.openSnackBar('Erfolgreich von allen Geräten abgemeldet.');
+              resolve(true);
+            } else {
+              this.openSnackBar('Fehler bei der Abmeldung.');
+              resolve(false);
+            }
+          },
+          error: (error: any) => {
+            this.openSnackBar('Fehler bei der Abmeldung.');
             resolve(false);
-          }
-        },
-        error: (error: any) => {
-          this.openSnackBar("Fehler bei der Abmeldung.");
-          resolve(false);
-        },
-        complete: () => {
-        },
-      });
+          },
+          complete: () => {},
+        });
     });
   }
 
@@ -120,29 +123,31 @@ export class UserService {
    * successfully logged out, or `false` if there was an error.
    */
   logoutAllUser(): Promise<boolean> {
-    return new Promise<boolean>(async (resolve) => {
-      this.http.get(environment.server + '/auth/logoutAllUser').pipe(
-        finalize(() => {
-          this.removeTokens();
-          this.router.navigate(['/login']);
-        })
-      ).subscribe({
-        next: (response: any) => {
-          if (response.message === "All user logout out successful") {
-            this.openSnackBar("Alle Nutzer erfolgreich abgemeldet.");
-            resolve(true);
-          } else {
-            this.openSnackBar("Fehler bei der Abmeldung aller Nutzer.");
+    return new Promise<boolean>(async resolve => {
+      this.http
+        .get(environment.server + '/auth/logoutAllUser')
+        .pipe(
+          finalize(() => {
+            this.removeTokens();
+            this.router.navigate(['/login']);
+          }),
+        )
+        .subscribe({
+          next: (response: any) => {
+            if (response.message === 'All user logout out successful') {
+              this.openSnackBar('Alle Nutzer erfolgreich abgemeldet.');
+              resolve(true);
+            } else {
+              this.openSnackBar('Fehler bei der Abmeldung aller Nutzer.');
+              resolve(false);
+            }
+          },
+          error: (error: any) => {
+            this.openSnackBar('Fehler bei der Abmeldung aller Nutzer.');
             resolve(false);
-          }
-        },
-        error: (error: any) => {
-          this.openSnackBar("Fehler bei der Abmeldung aller Nutzer.");
-          resolve(false);
-        },
-        complete: () => {
-        },
-      });
+          },
+          complete: () => {},
+        });
     });
   }
 
@@ -153,7 +158,7 @@ export class UserService {
    */
   isRegisteredForSubject(subjectName: string): boolean {
     const decodedToken = this.decodeAccessToken();
-    if (decodedToken && decodedToken.subjects) {
+    if (decodedToken?.subjects) {
       const subject = decodedToken.subjects.find((s: SubjectInfo) => s.subjectname === subjectName);
       return subject ? subject.registeredForSL : false;
     }
@@ -167,9 +172,7 @@ export class UserService {
    * @returns A boolean value representing whether the user is logged in
    */
   isUserLoggedIn(): boolean {
-    const isAuthenticated = Boolean(
-      localStorage.getItem('accessToken')
-    );
+    const isAuthenticated = Boolean(localStorage.getItem('accessToken'));
     (this.isAuthenticated$ as BehaviorSubject<boolean>).next(isAuthenticated);
     return isAuthenticated;
   }
@@ -183,7 +186,7 @@ export class UserService {
   setTokens(accessToken: string, refreshToken: string): void {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
-    (this.isAuthenticated$ as BehaviorSubject<boolean>).next(true);// Update authentication status
+    (this.isAuthenticated$ as BehaviorSubject<boolean>).next(true); // Update authentication status
   }
 
   /**
@@ -195,11 +198,15 @@ export class UserService {
     const refreshToken = 'refreshToken';
     const deviceId = this.DEVICE_ID_KEY;
 
-    if (localStorage.getItem(accessToken) && localStorage.getItem(refreshToken) && localStorage.getItem(deviceId)) {
+    if (
+      localStorage.getItem(accessToken) &&
+      localStorage.getItem(refreshToken) &&
+      localStorage.getItem(deviceId)
+    ) {
       localStorage.removeItem(accessToken);
       localStorage.removeItem(refreshToken);
       localStorage.removeItem(deviceId);
-      (this.isAuthenticated$ as BehaviorSubject<boolean>).next(false);// Update authentication status
+      (this.isAuthenticated$ as BehaviorSubject<boolean>).next(false); // Update authentication status
     }
   }
 
@@ -238,11 +245,12 @@ export class UserService {
    * @returns { Observable<any> } - An observable that emits the server's response or an error.
    */
   refreshTokens(refreshToken: string): Observable<any> {
-    return this.http.get(environment.server + '/auth/refresh', {
-      headers: {
-        'Authorization': `Bearer ${refreshToken}`,
-      },
-    })
+    return this.http
+      .get(environment.server + '/auth/refresh', {
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+        },
+      })
       .pipe(
         tap((response: any) => {
           // Update the access token in local storage or cookie
@@ -253,9 +261,9 @@ export class UserService {
         }),
         catchError((error: any) => {
           this.openSnackBar('Sitzung abgelaufen. Bitte erneut anmelden');
-          this.removeTokens()
+          this.removeTokens();
           return error;
-        })
+        }),
       );
   }
 
@@ -320,7 +328,7 @@ export class UserService {
    * This function gets the role from the decoded access token.
    * @returns { globalRole } The role of the user.
    */
-  getRole(): globalRole  {
+  getRole(): globalRole {
     const decodedToken = this.decodeAccessToken();
     return decodedToken.globalRole;
   }
@@ -336,19 +344,19 @@ export class UserService {
 
   enableEditMode(): void {
     if (this.getRole() === globalRole.ADMIN) {
-    (this.hasEditModeActive$ as BehaviorSubject<boolean>).next(true);
+      (this.hasEditModeActive$ as BehaviorSubject<boolean>).next(true);
     }
   }
   disableEditMode(): void {
     (this.hasEditModeActive$ as BehaviorSubject<boolean>).next(false);
   }
-   /**
+  /**
    * Open a MatSnackBar with the provided message and icon.
    *
    * @param message - The message to display
    * @param icon - The icon to display
    */
-   private openSnackBar(message: string): void {
+  private openSnackBar(message: string): void {
     this.snackBar.open(message, '', {
       duration: 3000, // Time duration in milliseconds to display the snackbar
       panelClass: ['snackbar'],

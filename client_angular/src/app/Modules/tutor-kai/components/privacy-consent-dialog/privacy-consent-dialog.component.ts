@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import type { MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 
@@ -8,13 +8,10 @@ import { MatDialogModule } from '@angular/material/dialog';
   templateUrl: './privacy-consent-dialog.component.html',
   styleUrls: ['./privacy-consent-dialog.component.scss'],
   standalone: true, // Assuming standalone components are used, adjust if not
-  imports: [MatDialogModule, MatButtonModule] // Import necessary Angular Material modules
+  imports: [MatDialogModule, MatButtonModule], // Import necessary Angular Material modules
 })
 export class PrivacyConsentDialogComponent {
-
-  constructor(
-    public dialogRef: MatDialogRef<PrivacyConsentDialogComponent>
-  ) {}
+  constructor(public dialogRef: MatDialogRef<PrivacyConsentDialogComponent>) {}
 
   /**
    * Called when the user clicks the "Ich stimme zu" button.

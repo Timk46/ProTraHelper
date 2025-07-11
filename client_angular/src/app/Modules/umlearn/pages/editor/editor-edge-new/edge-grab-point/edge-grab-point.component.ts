@@ -1,23 +1,28 @@
 import { Side } from '@DTOs/index'; // Changed from @Interfaces
-import { CdkDragMove } from '@angular/cdk/drag-drop';
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import type { CdkDragMove } from '@angular/cdk/drag-drop';
+import type { SimpleChanges, OnChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-edge-grab-point',
   templateUrl: './edge-grab-point.component.html',
-  styleUrls: ['./edge-grab-point.component.scss']
+  styleUrls: ['./edge-grab-point.component.scss'],
 })
-export class EdgeGrabPointComponent {
-
+export class EdgeGrabPointComponent implements OnChanges {
   @Input() targetElem: HTMLElement | string | undefined = undefined;
   @Input() targetSide: Side | undefined = undefined;
   @Input() sideOffset: number | undefined;
   @Input() visible: boolean = true;
 
-  @Output() onPointDrag = new EventEmitter<{side: Side, offset: number}>();
+  @Output() onPointDrag = new EventEmitter<{ side: Side; offset: number }>();
 
-  targetElemProps: { x: number, y: number, width: number, height: number } = { x: 0, y: 0, width: 0, height: 0 };
-  position: { x: number, y: number } = { x: 0, y: 0 };
+  targetElemProps: { x: number; y: number; width: number; height: number } = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  };
+  position: { x: number; y: number } = { x: 0, y: 0 };
   radius: number = 0;
   isDragging: boolean = false;
   opacity: number = 0;
@@ -29,7 +34,7 @@ export class EdgeGrabPointComponent {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['targetElem'] || changes['targetSide'] || changes['sideOffset']) {
       if (typeof this.targetElem === 'string') {
-        this.targetElem = document.getElementById(this.targetElem as string) || undefined;
+        this.targetElem = document.getElementById(this.targetElem) || undefined;
       }
       if (this.targetElem && this.targetSide) {
         this.updateTargetPosition();
@@ -42,8 +47,8 @@ export class EdgeGrabPointComponent {
    * Sets the visibility of the edge grab point.
    * @param visibility - The visibility flag.
    */
-  setVisible(visibility: boolean){
-    if (!this.isDragging){
+  setVisible(visibility: boolean) {
+    if (!this.isDragging) {
       this.opacity = visibility ? 0.5 : 0;
     }
   }
@@ -51,19 +56,19 @@ export class EdgeGrabPointComponent {
   /**
    * Handles the click event on the edge grab point.
    */
-  onClick(){
+  onClick() {
     if (this.isDragging) {
       this.isDragging = false;
       this.opacity = 0;
       return;
     }
-    this.onPointDrag.emit({side: Side.NONE, offset: 0});
+    this.onPointDrag.emit({ side: Side.NONE, offset: 0 });
   }
 
   /**
    * Handles the drag ended event on the edge grab point.
    */
-  onDragEnded(){
+  onDragEnded() {
     setTimeout(() => {
       this.isDragging = false;
       this.opacity = 0;
@@ -73,9 +78,9 @@ export class EdgeGrabPointComponent {
   /**
    * Updates the edge grab point.
    */
-  update(){
+  update() {
     this.updateTargetPosition();
-    if (this.targetElem && this.targetSide){
+    if (this.targetElem && this.targetSide) {
       this.updatePosition(this.targetSide, this.sideOffset || 0);
     }
   }
@@ -83,7 +88,7 @@ export class EdgeGrabPointComponent {
   /**
    * Updates the position of the target element.
    */
-  private updateTargetPosition(){
+  private updateTargetPosition() {
     if (typeof this.targetElem === 'string') return;
 
     this.targetElemProps.x = this.targetElem?.offsetLeft || 0;
@@ -91,8 +96,12 @@ export class EdgeGrabPointComponent {
     this.targetElemProps.width = this.targetElem?.offsetWidth || 0;
     this.targetElemProps.height = this.targetElem?.offsetHeight || 0;
     //if it has a transform, add it to the position
-    this.targetElemProps.x += this.targetElem!.style.transform ? parseInt(this.targetElem!.style.transform.split('(')[1].split('px')[0]) : 0;
-    this.targetElemProps.y += this.targetElem!.style.transform ? parseInt(this.targetElem!.style.transform.split(',')[1].split('px')[0]) : 0;
+    this.targetElemProps.x += this.targetElem!.style.transform
+      ? parseInt(this.targetElem!.style.transform.split('(')[1].split('px')[0])
+      : 0;
+    this.targetElemProps.y += this.targetElem!.style.transform
+      ? parseInt(this.targetElem!.style.transform.split(',')[1].split('px')[0])
+      : 0;
   }
 
   /**
@@ -103,20 +112,24 @@ export class EdgeGrabPointComponent {
   private updatePosition(side: Side, sideOffset: number) {
     switch (side) {
       case Side.TOP:
-        this.position.x = this.targetElemProps.x + this.targetElemProps.width / 2 + sideOffset - this.radius;
-        this.position.y = this.targetElemProps.y - this.radius*2;
+        this.position.x =
+          this.targetElemProps.x + this.targetElemProps.width / 2 + sideOffset - this.radius;
+        this.position.y = this.targetElemProps.y - this.radius * 2;
         break;
       case Side.BOTTOM:
-        this.position.x = this.targetElemProps.x + this.targetElemProps.width / 2 + sideOffset - this.radius;
-        this.position.y = this.targetElemProps.y + this.targetElemProps.height - this.radius*2;
+        this.position.x =
+          this.targetElemProps.x + this.targetElemProps.width / 2 + sideOffset - this.radius;
+        this.position.y = this.targetElemProps.y + this.targetElemProps.height - this.radius * 2;
         break;
       case Side.LEFT:
         this.position.x = this.targetElemProps.x - this.radius;
-        this.position.y = this.targetElemProps.y + this.targetElemProps.height / 2 + sideOffset - this.radius*2;
+        this.position.y =
+          this.targetElemProps.y + this.targetElemProps.height / 2 + sideOffset - this.radius * 2;
         break;
       case Side.RIGHT:
         this.position.x = this.targetElemProps.x + this.targetElemProps.width - this.radius;
-        this.position.y = this.targetElemProps.y + this.targetElemProps.height / 2 + sideOffset - this.radius*2;
+        this.position.y =
+          this.targetElemProps.y + this.targetElemProps.height / 2 + sideOffset - this.radius * 2;
         break;
     }
   }
@@ -127,8 +140,9 @@ export class EdgeGrabPointComponent {
    * @param draggable - The draggable element.
    * @returns The calculated offset.
    */
-  calculateOffset(event: CdkDragMove, draggable: HTMLElement): {side: Side, offset: number} {
-    if (!this.targetElem || typeof this.targetElem == 'string') return {side: this.targetSide || Side.NONE, offset: 0};
+  calculateOffset(event: CdkDragMove, draggable: HTMLElement): { side: Side; offset: number } {
+    if (!this.targetElem || typeof this.targetElem == 'string')
+      return { side: this.targetSide || Side.NONE, offset: 0 };
 
     const targetElemProps = this.targetElem.getBoundingClientRect();
     const mousePosition = event.pointerPosition;
@@ -148,17 +162,24 @@ export class EdgeGrabPointComponent {
     // new x and y position of draggable, based on closest side of targetElem, so that the draggable is always on the side of the targetElem
     let newOffset;
     if (closestSide == Side.TOP || closestSide == Side.BOTTOM) {
-      newOffset = ((mousePosition.x > targetElemProps.left + targetElemProps.width / 2) ? Math.min(mousePosition.x, targetElemProps.left + targetElemProps.width) : Math.max(mousePosition.x, targetElemProps.left)) - (targetElemProps.left + targetElemProps.width / 2);
+      newOffset =
+        (mousePosition.x > targetElemProps.left + targetElemProps.width / 2
+          ? Math.min(mousePosition.x, targetElemProps.left + targetElemProps.width)
+          : Math.max(mousePosition.x, targetElemProps.left)) -
+        (targetElemProps.left + targetElemProps.width / 2);
     } else {
-      newOffset = ((mousePosition.y > targetElemProps.top + targetElemProps.height / 2) ? Math.min(mousePosition.y, targetElemProps.top + targetElemProps.height) : Math.max(mousePosition.y, targetElemProps.top)) - (targetElemProps.top + targetElemProps.height / 2);
+      newOffset =
+        (mousePosition.y > targetElemProps.top + targetElemProps.height / 2
+          ? Math.min(mousePosition.y, targetElemProps.top + targetElemProps.height)
+          : Math.max(mousePosition.y, targetElemProps.top)) -
+        (targetElemProps.top + targetElemProps.height / 2);
     }
 
     draggable.style.transform = 'none';
 
     //this.updatePosition(closestSide, newOffset);
-    this.onPointDrag.emit({side: closestSide, offset: newOffset});
+    this.onPointDrag.emit({ side: closestSide, offset: newOffset });
 
-    return {side: closestSide, offset: newOffset};
+    return { side: closestSide, offset: newOffset };
   }
-
 }

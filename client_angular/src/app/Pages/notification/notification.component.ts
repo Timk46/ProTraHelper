@@ -1,7 +1,9 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
-import { NotificationDTO } from '@DTOs//notification.dto';
-import { NotificationService } from 'src/app/Services/notification/notification.service';
+import type { OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
+import type { MatSnackBarRef } from '@angular/material/snack-bar';
+import { MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
+import type { NotificationDTO } from '@DTOs//notification.dto';
+import type { NotificationService } from 'src/app/Services/notification/notification.service';
 
 /**
  * Component that represents an individual notification.
@@ -10,7 +12,7 @@ import { NotificationService } from 'src/app/Services/notification/notification.
 @Component({
   selector: 'app-notification',
   templateUrl: './notification.component.html',
-  styleUrls: ['./notification.component.scss']
+  styleUrls: ['./notification.component.scss'],
 })
 export class NotificationComponent implements OnInit {
   /** Array to store notifications */
@@ -24,8 +26,8 @@ export class NotificationComponent implements OnInit {
    */
   constructor(
     @Inject(MAT_SNACK_BAR_DATA) public data: any,
-    private snackBarRef: MatSnackBarRef<NotificationComponent>,
-    private notificationService: NotificationService
+    private readonly snackBarRef: MatSnackBarRef<NotificationComponent>,
+    private readonly notificationService: NotificationService,
   ) {}
 
   /**
@@ -33,7 +35,7 @@ export class NotificationComponent implements OnInit {
    * It subscribes to the notifications observable to update the notifications array.
    */
   ngOnInit(): void {
-    this.notificationService.getNotifications().subscribe((notifications) => {
+    this.notificationService.getNotifications().subscribe(notifications => {
       this.notifications = notifications;
     });
   }

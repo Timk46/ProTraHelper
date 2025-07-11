@@ -4,12 +4,7 @@ import { GradingOverviewComponent } from './grading-overview/grading-overview.co
 import { TeacherRoutingModule } from './teacher-routing.module';
 
 @NgModule({
-  declarations: [
-    GradingOverviewComponent
-  ],
-  imports: [
-    CommonModule,
-    TeacherRoutingModule
-  ]
+  declarations: [GradingOverviewComponent],
+  imports: [CommonModule, TeacherRoutingModule],
 })
-export class TeacherModule { }
+export class TeacherModule {}

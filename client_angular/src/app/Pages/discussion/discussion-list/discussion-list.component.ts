@@ -1,18 +1,18 @@
-import { discussionDTO } from '@DTOs/discussion.dto';
-import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { discussionFilterDTO } from '@DTOs/discussionFilter.dto';
-import { DiscussionListService } from 'src/app/Services/discussion/discussion-list.service';
-import { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
-import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+import type { discussionDTO } from '@DTOs/discussion.dto';
+import type { OnChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import type { MatDialog } from '@angular/material/dialog';
+import type { discussionFilterDTO } from '@DTOs/discussionFilter.dto';
+import type { DiscussionListService } from 'src/app/Services/discussion/discussion-list.service';
+import type { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
+import type { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 
 @Component({
   selector: 'app-discussion-list',
   templateUrl: './discussion-list.component.html',
-  styleUrls: ['./discussion-list.component.scss']
+  styleUrls: ['./discussion-list.component.scss'],
 })
 export class DiscussionListComponent implements OnChanges {
-
   @Input() activeConceptNodeId: number = -1;
   @Output() createDiscussion = new EventEmitter();
 
@@ -23,28 +23,26 @@ export class DiscussionListComponent implements OnChanges {
     contentNodeId: -1,
     authorId: -1,
     onlySolved: false,
-    searchString: ""
-  }
+    searchString: '',
+  };
 
   constructor(
-    private discussionListService: DiscussionListService,
-    public dialog : MatDialog,
-    private discussionDialogService: DiscussionDialogService,
-    public sSS: ScreenSizeService
-  ) { }
+    private readonly discussionListService: DiscussionListService,
+    public dialog: MatDialog,
+    private readonly discussionDialogService: DiscussionDialogService,
+    public sSS: ScreenSizeService,
+  ) {}
 
   //mache listDiscussions, wenn activeConceptNodeId sich ändert
   ngOnChanges() {
     if (this.activeConceptNodeId > 0) {
-      this.listDiscussions(
-        {
-          conceptNodeId: this.activeConceptNodeId,
-          contentNodeId: -1,
-          authorId: -1,
-          onlySolved: false,
-          searchString: ""
-        }
-      )
+      this.listDiscussions({
+        conceptNodeId: this.activeConceptNodeId,
+        contentNodeId: -1,
+        authorId: -1,
+        onlySolved: false,
+        searchString: '',
+      });
     }
   }
 
@@ -54,8 +52,8 @@ export class DiscussionListComponent implements OnChanges {
    */
   listDiscussions(filterData: discussionFilterDTO, force: boolean = false) {
     //console.log("do i want to list? Different?: " + this.isDifferent(filterData) + " conceptNodeId: " + filterData.conceptNodeId)
-    if ( (filterData.conceptNodeId >0 && this.isDifferent(filterData)) || force) {
-      this.filterData = {...filterData}; //prevents mutation
+    if ((filterData.conceptNodeId > 0 && this.isDifferent(filterData)) || force) {
+      this.filterData = { ...filterData }; //prevents mutation
       this.discussionListService.getDiscussions(filterData).subscribe(discussions => {
         this.visibleDiscussions = discussions;
       });
@@ -68,19 +66,21 @@ export class DiscussionListComponent implements OnChanges {
    */
   onQuestionClick(discussionId: number) {
     const url = '/discussion-view/' + discussionId;
-    window.open(url, "_blank");
+    window.open(url, '_blank');
   }
 
   /**
    * Emits the createDiscussion event
    */
-  onNewDiscussion(){
-    this.discussionDialogService.openContentSelection(this.activeConceptNodeId).then((result: number) => {
-      //console.log("Want to refresh? result: " + result);
-      if (!isNaN(result)) {
-        this.listDiscussions(this.filterData, true);
-      }
-    });
+  onNewDiscussion() {
+    this.discussionDialogService
+      .openContentSelection(this.activeConceptNodeId)
+      .then((result: number) => {
+        //console.log("Want to refresh? result: " + result);
+        if (!isNaN(result)) {
+          this.listDiscussions(this.filterData, true);
+        }
+      });
   }
 
   /**
@@ -90,10 +90,12 @@ export class DiscussionListComponent implements OnChanges {
    */
   isDifferent(filterData: discussionFilterDTO): boolean {
     //console.log("checking differences...");
-    return filterData.conceptNodeId != this.filterData.conceptNodeId ||
-    filterData.contentNodeId != this.filterData.contentNodeId ||
-    filterData.authorId != this.filterData.authorId ||
-    filterData.onlySolved != this.filterData.onlySolved ||
-    filterData.searchString != this.filterData.searchString;
+    return (
+      filterData.conceptNodeId != this.filterData.conceptNodeId ||
+      filterData.contentNodeId != this.filterData.contentNodeId ||
+      filterData.authorId != this.filterData.authorId ||
+      filterData.onlySolved != this.filterData.onlySolved ||
+      filterData.searchString != this.filterData.searchString
+    );
   }
 }

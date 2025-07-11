@@ -1,7 +1,9 @@
-import { ChatOpenAI } from '@langchain/openai';
-import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
-import { BaseMessage, HumanMessage } from '@langchain/core/messages';
-import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
+import type { ChatOpenAI } from '@langchain/openai';
+import type { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
+import type { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage } from '@langchain/core/messages';
+import type { Runnable } from '@langchain/core/runnables';
+import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { khSystemPrompt } from './kh.prompts'; // Import prompt from the new file
 
@@ -9,21 +11,21 @@ import { khSystemPrompt } from './kh.prompts'; // Import prompt from the new fil
  * Builds the core KH agent runnable (without input formatting).
  */
 export function buildKhCoreAgent(llm: ChatOpenAI): Runnable<any, any> {
-    return createReactAgent({
-        llm: llm,
-        tools: [], // KH agent doesn't use tools
-        name: 'KH',
-        prompt: khSystemPrompt,
-    });
+  return createReactAgent({
+    llm: llm,
+    tools: [], // KH agent doesn't use tools
+    name: 'KH',
+    prompt: khSystemPrompt,
+  });
 }
 
 /**
  * Builds the complete KH agent chain, including input formatting.
  */
 export function buildKhAgentChain(llm: ChatOpenAI): RunnableSequence {
-    const inputFormatter = new RunnableLambda({
-        func: (input: FeedbackContextDto) => {
-            const contextMessageContent = `
+  const inputFormatter = new RunnableLambda({
+    func: (input: FeedbackContextDto) => {
+      const contextMessageContent = `
 ## Attempt number
 ${input.attemptCount}
 
@@ -51,12 +53,12 @@ ${JSON.stringify(input.unitTestResults) || 'None'}
 
 Generate feedback in german strictly adhering to the KH type and all constraints in your instructions.
 `;
-            const initialMessages: BaseMessage[] = [new HumanMessage(contextMessageContent)];
-            return { messages: initialMessages };
-        },
-    }).withConfig({ runName: 'FormatKhAgentInput' });
+      const initialMessages: BaseMessage[] = [new HumanMessage(contextMessageContent)];
+      return { messages: initialMessages };
+    },
+  }).withConfig({ runName: 'FormatKhAgentInput' });
 
-    const coreAgent = buildKhCoreAgent(llm);
+  const coreAgent = buildKhCoreAgent(llm);
 
-    return RunnableSequence.from([inputFormatter, coreAgent], 'KhAgentChain');
+  return RunnableSequence.from([inputFormatter, coreAgent], 'KhAgentChain');
 }

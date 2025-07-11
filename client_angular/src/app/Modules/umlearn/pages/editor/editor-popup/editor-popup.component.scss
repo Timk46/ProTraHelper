@@ -87,10 +87,10 @@
 }
 
 .class-name-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-  }
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
 
 .divider-container {
   display: flex;
@@ -130,12 +130,12 @@
 }
 
 .add-button:hover {
-  background-color: #2196F3;
+  background-color: #2196f3;
   color: #ffffff;
 }
 
 .trash-button:hover {
-  background-color: #FF5722;
+  background-color: #ff5722;
   color: #ffffff;
 }
 
@@ -162,6 +162,7 @@
   max-width: 80px;
 }
 
-mat-header-cell, mat-cell {
+mat-header-cell,
+mat-cell {
   justify-content: center;
 }

@@ -24,12 +24,12 @@ export type CodeSubmissionResultDto = CodeSubmissionResult;
 export enum FeedbackLevel {
   LOW = 'Wenig Unterstützung',
   STANDARD = 'Standard Unterstützung',
-  HIGH = 'Viel Unterstützung'
+  HIGH = 'Viel Unterstützung',
 }
 
 export enum FlavorType {
   STANDARD = 'Standard Feedback',
-  CONCEPT = 'Feedback mit Konzept-Erklärung'
+  CONCEPT = 'Feedback mit Konzept-Erklärung',
 }
 
 export enum WorkspaceState {
@@ -39,7 +39,7 @@ export enum WorkspaceState {
   GENERATING_FEEDBACK = 'generatingFeedback',
   RECEIVING_FEEDBACK = 'receivingFeedback',
   FINISHED_FEEDBACK = 'finishedFeedback',
-  FEEDBACK_RATED = 'feedbackRated'
+  FEEDBACK_RATED = 'feedbackRated',
 }
 
 export interface FeedbackRating {

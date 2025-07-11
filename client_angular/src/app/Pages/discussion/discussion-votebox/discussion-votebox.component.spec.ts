@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { DiscussionVoteboxComponent } from './discussion-votebox.component';
 
@@ -8,9 +9,8 @@ describe('DiscussionVoteboxComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DiscussionVoteboxComponent ]
-    })
-    .compileComponents();
+      declarations: [DiscussionVoteboxComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DiscussionVoteboxComponent);
     component = fixture.componentInstance;

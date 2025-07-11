@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { roles, RolesGuard } from '../auth/common/guards/roles.guard';
 import { HighlightConceptsService } from './highlight-concepts.service';
 import { CreateHighlightConceptDto, UpdateHighlightConceptDto } from '@DTOs/index';
@@ -30,7 +40,7 @@ export class HighlightConceptsController {
   @Put(':id')
   async updateHighlightConcept(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateDto: UpdateHighlightConceptDto
+    @Body() updateDto: UpdateHighlightConceptDto,
   ) {
     return this.highlightConceptsService.updateHighlightConcept(id, updateDto);
   }

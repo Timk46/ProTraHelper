@@ -1,4 +1,4 @@
-import {
+import type {
   McQuestionDTO,
   QuestionDTO,
   MCOptionDTO,
@@ -9,34 +9,36 @@ import {
   UserAnswerDataDTO,
   userAnswerFeedbackDTO,
   UserMCOptionSelectedDTO,
-  questionType,
   FillinQuestionDTO,
   GraphQuestionDTO,
-  uploadQuestionDTO
+  uploadQuestionDTO,
 } from '@DTOs/index';
-import { HttpClient } from '@angular/common/http';
+import { questionType } from '@DTOs/index';
+import type { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { McTaskComponent } from 'src/app/Pages/contentView/contentElement/mcTask/mcTask.component';
 import { FillinTaskNewComponent } from 'src/app/Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { FreeTextTaskComponent } from 'src/app/Pages/contentView/contentElement/free-text-task/free-text-task.component';
 import { EditUploadComponent } from 'src/app/Pages/lecturersView/edit-upload/edit-upload.component';
-import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import type { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class QuestionDataService {
-
-  constructor(private http: HttpClient, private dialog: MatDialog) { }
+  constructor(
+    private readonly http: HttpClient,
+    private readonly dialog: MatDialog,
+  ) {}
 
   /**
    *
    * @param {number} questionId - The ID of the question to retrieve data for
    * @returns {Observable<QuestionDTO>} An Observable that emits the question data
    */
-  getQuestionData(questionId: number) : Observable<QuestionDTO> {
+  getQuestionData(questionId: number): Observable<QuestionDTO> {
     return this.http.get<QuestionDTO>(environment.server + `/question-data/${questionId}`);
   }
 
@@ -46,18 +48,25 @@ export class QuestionDataService {
    * @param {questionType} questionType - The type of the question.
    * @returns {Observable<detailedQuestionDTO>} An Observable that emits a detailedQuestionDTO object.
    */
-  getDetailedQuestionData(questionId: number, questionType: questionType) : Observable<detailedQuestionDTO> {
-    return this.http.post<detailedQuestionDTO>(environment.server + `/question-data/detailed`, { questionId, questionType });
+  getDetailedQuestionData(
+    questionId: number,
+    questionType: questionType,
+  ): Observable<detailedQuestionDTO> {
+    return this.http.post<detailedQuestionDTO>(environment.server + `/question-data/detailed`, {
+      questionId,
+      questionType,
+    });
   }
-
 
   /**
    * Retrieves the newest version of a question.
    * @param {number} questionId - The ID of the question to get the newest version for.
    * @returns {Observable<QuestionDTO>} An Observable that emits the newest QuestionDTO.
    */
-  getNewestQuestionVersion(questionId: number) : Observable<QuestionDTO> {
-    return this.http.get<QuestionDTO>(environment.server + `/question-data/newestQuestionVersion/${questionId}`);
+  getNewestQuestionVersion(questionId: number): Observable<QuestionDTO> {
+    return this.http.get<QuestionDTO>(
+      environment.server + `/question-data/newestQuestionVersion/${questionId}`,
+    );
   }
 
   /**
@@ -66,8 +75,10 @@ export class QuestionDataService {
    * @param {number} userId - The ID of the user, defaults to -1 for current user.
    * @returns {Observable<UserAnswerDataDTO>} An Observable that emits the UserAnswerDataDTO.
    */
-  getNewestUserAnswer(questionId: number, userId: number = -1) : Observable<UserAnswerDataDTO> {
-    return this.http.get<UserAnswerDataDTO>(environment.server + `/question-data/newestUserAnswer/${questionId}/${userId}`);
+  getNewestUserAnswer(questionId: number, userId: number = -1): Observable<UserAnswerDataDTO> {
+    return this.http.get<UserAnswerDataDTO>(
+      environment.server + `/question-data/newestUserAnswer/${questionId}/${userId}`,
+    );
   }
 
   /**
@@ -75,8 +86,10 @@ export class QuestionDataService {
    * @param {number} questionVersionId - The version ID of the question.
    * @returns {Observable<McQuestionDTO>} An Observable that emits the McQuestionDTO.
    */
-  getMCQuestion(questionVersionId: number) : Observable<McQuestionDTO> {
-    return this.http.get<McQuestionDTO>(environment.server + `/question-data/mcQuestion/${questionVersionId}`);
+  getMCQuestion(questionVersionId: number): Observable<McQuestionDTO> {
+    return this.http.get<McQuestionDTO>(
+      environment.server + `/question-data/mcQuestion/${questionVersionId}`,
+    );
   }
 
   /**
@@ -84,8 +97,10 @@ export class QuestionDataService {
    * @param {number} questionId - The ID of the question to get options for.
    * @returns {Observable<MCOptionViewDTO[]>} An Observable that emits an array of MCOptionViewDTO.
    */
-  getMCOptions(questionId: number) : Observable<MCOptionViewDTO[]> {
-    return this.http.get<MCOptionViewDTO[]>(environment.server + `/question-data/mcOptions/${questionId}`);
+  getMCOptions(questionId: number): Observable<MCOptionViewDTO[]> {
+    return this.http.get<MCOptionViewDTO[]>(
+      environment.server + `/question-data/mcOptions/${questionId}`,
+    );
   }
 
   /**
@@ -93,8 +108,10 @@ export class QuestionDataService {
    * @param {number} questionVersionId - The version ID of the question.
    * @returns {Observable<freeTextQuestionDTO>} An Observable that emits the freeTextQuestionDTO.
    */
-  getFreeTextQuestion(questionVersionId: number) : Observable<freeTextQuestionDTO> {
-    return this.http.get<freeTextQuestionDTO>(environment.server + `/question-data/freeTextQuestion/${questionVersionId}`);
+  getFreeTextQuestion(questionVersionId: number): Observable<freeTextQuestionDTO> {
+    return this.http.get<freeTextQuestionDTO>(
+      environment.server + `/question-data/freeTextQuestion/${questionVersionId}`,
+    );
   }
 
   /**
@@ -102,8 +119,10 @@ export class QuestionDataService {
    * @param {number} questionId - The ID of the fill-in question.
    * @returns {Observable<FillinQuestionDTO>} An Observable that emits the FillinQuestionDTO.
    */
-  getFillinTask(questionId: number) : Observable<FillinQuestionDTO> {
-    return this.http.get<FillinQuestionDTO>(environment.server + `/question-data/fillinQuestion/${questionId}`);
+  getFillinTask(questionId: number): Observable<FillinQuestionDTO> {
+    return this.http.get<FillinQuestionDTO>(
+      environment.server + `/question-data/fillinQuestion/${questionId}`,
+    );
   }
 
   /**
@@ -111,8 +130,10 @@ export class QuestionDataService {
    * @param {number} questionVersionId - The version ID of the question.
    * @returns {Observable<GraphQuestionDTO>} An Observable that emits the GraphQuestionDTO.
    */
-  getGraphQuestion(questionVersionId: number) : Observable<GraphQuestionDTO> {
-    return this.http.get<GraphQuestionDTO>(environment.server + `/question-data/graphQuestion/${questionVersionId}`);
+  getGraphQuestion(questionVersionId: number): Observable<GraphQuestionDTO> {
+    return this.http.get<GraphQuestionDTO>(
+      environment.server + `/question-data/graphQuestion/${questionVersionId}`,
+    );
   }
 
   /**
@@ -120,8 +141,10 @@ export class QuestionDataService {
    * @param {number} questionVersionId - The version ID of the question.
    * @returns {Observable<uploadQuestionDTO>} An Observable that emits the uploadQuestionDTO.
    */
-  getUploadQuestion(questionVersionId: number) : Observable<uploadQuestionDTO> {
-    return this.http.get<uploadQuestionDTO>(environment.server + `/question-data/uploadQuestion/${questionVersionId}`);
+  getUploadQuestion(questionVersionId: number): Observable<uploadQuestionDTO> {
+    return this.http.get<uploadQuestionDTO>(
+      environment.server + `/question-data/uploadQuestion/${questionVersionId}`,
+    );
   }
 
   /**
@@ -129,10 +152,12 @@ export class QuestionDataService {
    * @param {UserAnswerDataDTO} data - The user answer data containing question response information.
    * @returns {Observable<userAnswerFeedbackDTO>} An Observable that emits the feedback for the submitted answer.
    */
-  createUserAnswer(data: UserAnswerDataDTO) : Observable<userAnswerFeedbackDTO> {
-    return this.http.post<userAnswerFeedbackDTO>(environment.server + `/question-data/userAnswer/create`, data);
+  createUserAnswer(data: UserAnswerDataDTO): Observable<userAnswerFeedbackDTO> {
+    return this.http.post<userAnswerFeedbackDTO>(
+      environment.server + `/question-data/userAnswer/create`,
+      data,
+    );
   }
-
 
   /**
    * Gets the progress of a question for the currently authenticated user.
@@ -140,7 +165,9 @@ export class QuestionDataService {
    * @returns {Observable<{ progress: number }>} An Observable with the progress in percent.
    */
   getQuestionProgress(questionId: number): Observable<{ progress: number }> {
-    return this.http.get<{ progress: number }>(environment.server + `/question-data/progress/${questionId}`);
+    return this.http.get<{ progress: number }>(
+      environment.server + `/question-data/progress/${questionId}`,
+    );
   }
 
   /**
@@ -149,8 +176,12 @@ export class QuestionDataService {
    * @param {number} questionId - The ID of the question.
    * @returns {Observable<{contentNodeId: number, contentElementId: number}>} An Observable that emits a ContentIdsDTO object.
    */
-  getContentIds(questionId: number): Observable<{contentNodeId: number, contentElementId: number}> {
-    return this.http.get<{contentNodeId: number, contentElementId: number}>(environment.server + `/question-data/contentIds/${questionId}`);
+  getContentIds(
+    questionId: number,
+  ): Observable<{ contentNodeId: number; contentElementId: number }> {
+    return this.http.get<{ contentNodeId: number; contentElementId: number }>(
+      environment.server + `/question-data/contentIds/${questionId}`,
+    );
   }
 
   /**
@@ -161,8 +192,14 @@ export class QuestionDataService {
    * @param {number} mcOptionId - The ID of the selected multiple choice option
    * @returns {Observable<UserMCOptionSelectedDTO>} An Observable that emits the created UserMCOptionSelectedDTO
    */
-  createUserMCOptionSelected(userAnswerId: number, mcOptionId: number) : Observable<UserMCOptionSelectedDTO> {
-    return this.http.post<UserMCOptionSelectedDTO>(environment.server + `/question-data/userMCOptionSelected/create`, {userAnswerId, mcOptionId});
+  createUserMCOptionSelected(
+    userAnswerId: number,
+    mcOptionId: number,
+  ): Observable<UserMCOptionSelectedDTO> {
+    return this.http.post<UserMCOptionSelectedDTO>(
+      environment.server + `/question-data/userMCOptionSelected/create`,
+      { userAnswerId, mcOptionId },
+    );
   }
 
   /**
@@ -171,8 +208,11 @@ export class QuestionDataService {
    * @param {QuestionDTO} question - The question data to create
    * @returns {Observable<QuestionDTO>} An Observable that emits the created QuestionDTO
    */
-  createQuestion(question: QuestionDTO) : Observable<QuestionDTO> {
-    return this.http.post<QuestionDTO>(environment.server + `/question-data/createQuestion`, question)
+  createQuestion(question: QuestionDTO): Observable<QuestionDTO> {
+    return this.http.post<QuestionDTO>(
+      environment.server + `/question-data/createQuestion`,
+      question,
+    );
   }
 
   /**
@@ -181,8 +221,11 @@ export class QuestionDataService {
    * @param {QuestionDTO} question - The question data to update
    * @returns {Observable<QuestionDTO>} An Observable that emits the updated QuestionDTO
    */
-  updateQuestion(question: QuestionDTO) : Observable<QuestionDTO> {
-    return this.http.put<QuestionDTO>(environment.server + `/question-data/updateQuestion`, question)
+  updateQuestion(question: QuestionDTO): Observable<QuestionDTO> {
+    return this.http.put<QuestionDTO>(
+      environment.server + `/question-data/updateQuestion`,
+      question,
+    );
   }
 
   /**
@@ -192,8 +235,11 @@ export class QuestionDataService {
    * @param {detailedQuestionDTO} question - The detailed question data containing all components to update
    * @returns {Observable<detailedQuestionDTO>} An Observable that emits the updated detailedQuestionDTO
    */
-  updateWholeQuestion(question: detailedQuestionDTO) : Observable<detailedQuestionDTO> {
-    return this.http.post<detailedQuestionDTO>(environment.server + `/question-data/updateWholeQuestion`, question)
+  updateWholeQuestion(question: detailedQuestionDTO): Observable<detailedQuestionDTO> {
+    return this.http.post<detailedQuestionDTO>(
+      environment.server + `/question-data/updateWholeQuestion`,
+      question,
+    );
   }
 
   /**
@@ -203,8 +249,11 @@ export class QuestionDataService {
    * @param {detailedQuestionDTO} question - The detailed question data for the new version
    * @returns {Observable<detailedQuestionDTO>} An Observable that emits the newly created question version as detailedQuestionDTO
    */
-  versionUpdateWholeQuestion(question: detailedQuestionDTO) : Observable<detailedQuestionDTO> {
-    return this.http.post<detailedQuestionDTO>(environment.server + `/question-data/versionUpdateWholeQuestion`, question)
+  versionUpdateWholeQuestion(question: detailedQuestionDTO): Observable<detailedQuestionDTO> {
+    return this.http.post<detailedQuestionDTO>(
+      environment.server + `/question-data/versionUpdateWholeQuestion`,
+      question,
+    );
   }
 
   /**
@@ -213,8 +262,11 @@ export class QuestionDataService {
    * @param {freeTextQuestionDTO} freeTextQuestion - The free text question data to create
    * @returns {Observable<freeTextQuestionDTO>} An Observable that emits the created freeTextQuestionDTO
    */
-  createFreeTextQuestion(freeTextQuestion: freeTextQuestionDTO) : Observable<freeTextQuestionDTO> {
-    return this.http.post<freeTextQuestionDTO>(environment.server + `/question-data/createFreeTextQuestion`, freeTextQuestion)
+  createFreeTextQuestion(freeTextQuestion: freeTextQuestionDTO): Observable<freeTextQuestionDTO> {
+    return this.http.post<freeTextQuestionDTO>(
+      environment.server + `/question-data/createFreeTextQuestion`,
+      freeTextQuestion,
+    );
   }
 
   /**
@@ -223,8 +275,11 @@ export class QuestionDataService {
    * @param {uploadQuestionDTO} uploadQuestion - The upload question data to create
    * @returns {Observable<uploadQuestionDTO>} An Observable that emits the created uploadQuestionDTO
    */
-  createUploadQuestion(uploadQuestion: uploadQuestionDTO) : Observable<uploadQuestionDTO> {
-    return this.http.post<uploadQuestionDTO>(environment.server + `/question-data/createUploadQuestion`, uploadQuestion)
+  createUploadQuestion(uploadQuestion: uploadQuestionDTO): Observable<uploadQuestionDTO> {
+    return this.http.post<uploadQuestionDTO>(
+      environment.server + `/question-data/createUploadQuestion`,
+      uploadQuestion,
+    );
   }
 
   /* updateFreeTextQuestion(freeTextQuestion: freeTextQuestionDTO) : Observable<freeTextQuestionDTO> {
@@ -235,7 +290,6 @@ export class QuestionDataService {
     return this.http.put<detailedQuestionDTO>(environment.server + `/question-data/updateCodingQuestion`, question)
   } */
 
-
   /**
    * Creates a new multiple choice question.
    * This method sends a POST request to create a new MC question in the database.
@@ -243,8 +297,11 @@ export class QuestionDataService {
    * @param {McQuestionDTO} mcQuestion - The multiple choice question data to create
    * @returns {Observable<McQuestionDTO>} An Observable that emits the created McQuestionDTO
    */
-  createMcQuestion(mcQuestion: McQuestionDTO) : Observable<McQuestionDTO> {
-    return this.http.post<McQuestionDTO>(environment.server + `/question-data/createMcQuestion`, mcQuestion)
+  createMcQuestion(mcQuestion: McQuestionDTO): Observable<McQuestionDTO> {
+    return this.http.post<McQuestionDTO>(
+      environment.server + `/question-data/createMcQuestion`,
+      mcQuestion,
+    );
   }
 
   /**
@@ -254,8 +311,11 @@ export class QuestionDataService {
    * @param {MCOptionDTO[]} mcOptions - Array of multiple choice option data to create
    * @returns {Observable<MCOptionDTO[]>} An Observable that emits an array of created MCOptionDTO objects
    */
-  createOptions(mcOptions: MCOptionDTO[]) : Observable<MCOptionDTO[]> {
-    return this.http.post<MCOptionDTO[]>(environment.server + `/question-data/createOptions`, mcOptions)
+  createOptions(mcOptions: MCOptionDTO[]): Observable<MCOptionDTO[]> {
+    return this.http.post<MCOptionDTO[]>(
+      environment.server + `/question-data/createOptions`,
+      mcOptions,
+    );
   }
 
   /**
@@ -265,8 +325,11 @@ export class QuestionDataService {
    * @param {McQuestionOptionDTO} mcQuestionOption - The data linking a question to an option
    * @returns {Observable<McQuestionOptionDTO>} An Observable that emits the created McQuestionOptionDTO
    */
-  createMcQuestionOption(mcQuestionOption: McQuestionOptionDTO) : Observable<McQuestionOptionDTO> {
-    return this.http.post<McQuestionOptionDTO>(environment.server + `/question-data/createMcQuestionOption`, mcQuestionOption)
+  createMcQuestionOption(mcQuestionOption: McQuestionOptionDTO): Observable<McQuestionOptionDTO> {
+    return this.http.post<McQuestionOptionDTO>(
+      environment.server + `/question-data/createMcQuestionOption`,
+      mcQuestionOption,
+    );
   }
 
   /**
@@ -275,7 +338,10 @@ export class QuestionDataService {
    * @param {MatDialogConfig} config - The configuration for the dialog.
    * @returns {MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined} The dialog reference or undefined if no dialog is defined.
    */
-  openDialog(taskType: string, config: MatDialogConfig): MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined {
+  openDialog(
+    taskType: string,
+    config: MatDialogConfig,
+  ): MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined {
     switch (taskType) {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
@@ -289,5 +355,4 @@ export class QuestionDataService {
         return undefined;
     }
   }
-
 }

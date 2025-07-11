@@ -1,13 +1,28 @@
 <div class="content-list-container">
-
   <!-- Search and Sort section -->
-  <div style="display: flex;">
+  <div style="display: flex">
     <div class="search-bar">
       <!-- <h3>Suchen</h3> -->
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" style="background-color: white;">
+      <mat-form-field
+        appearance="outline"
+        subscriptSizing="dynamic"
+        style="background-color: white"
+      >
         <mat-icon matPrefix>search</mat-icon>
-        <input matInput type="text"  [(ngModel)]="searchTerm" (keyup)="applyFilter()" placeholder="Suche nach Inhalten" />
-        <button *ngIf="searchTerm" matSuffix mat-icon-button aria-label="Clear" (click)="searchTerm=''; applyFilter()">
+        <input
+          matInput
+          type="text"
+          [(ngModel)]="searchTerm"
+          (keyup)="applyFilter()"
+          placeholder="Suche nach Inhalten"
+        />
+        <button
+          *ngIf="searchTerm"
+          matSuffix
+          mat-icon-button
+          aria-label="Clear"
+          (click)="searchTerm = ''; applyFilter()"
+        >
           <mat-icon>close</mat-icon>
         </button>
       </mat-form-field>
@@ -22,21 +37,31 @@
       class="content-list-item"
     >
       <mat-expansion-panel-header>
-        <mat-panel-title style="flex-grow: 3;">
-          {{ content.name}}
+        <mat-panel-title style="flex-grow: 3">
+          {{ content.name }}
         </mat-panel-title>
         <mat-panel-description class="content-list-element-header-description">
           <!-- stars to show difficulty and progress -->
           <div class="content-list-element-header-stars">
             <mat-icon *ngFor="let reached of getLevels(content.levelProgress || 0)">star</mat-icon>
-            <mat-icon *ngFor="let level of getLevels(content.level-(content.levelProgress || 0))">star_border</mat-icon>
+            <mat-icon *ngFor="let level of getLevels(content.level - (content.levelProgress || 0))"
+              >star_border</mat-icon
+            >
           </div>
 
           <!-- more indicators -->
           <div class="content-list-element-header-indicators">
-            <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
-            <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
-
+            <mat-icon
+              *ngIf="hasContentElementType(content, 'QUESTION')"
+              matTooltip="Enthält Übungsaufgaben."
+              >rate_review</mat-icon
+            >
+            <mat-icon
+              class="node-question"
+              *ngIf="content.questionMarked"
+              matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert."
+              >help</mat-icon
+            >
 
             <!-- Direct Bat-Rhino Button (executes Rhino directly via .bat script) -->
             <mat-icon
@@ -47,7 +72,8 @@
               [style.cursor]="'pointer'"
               [style.color]="'#E91E63'"
               [style.margin-left]="'4px'"
-              [style.font-weight]="'bold'">
+              [style.font-weight]="'bold'"
+            >
               flash_on
             </mat-icon>
           </div>
@@ -58,7 +84,9 @@
         <!-- stars to show difficulty and progress - only in mobile view -->
         <div class="content-list-element-introduction-stars">
           <mat-icon *ngFor="let reached of getLevels(content.levelProgress || 0)">star</mat-icon>
-          <mat-icon *ngFor="let level of getLevels(content.level-(content.levelProgress || 0))">star_border</mat-icon>
+          <mat-icon *ngFor="let level of getLevels(content.level - (content.levelProgress || 0))"
+            >star_border</mat-icon
+          >
         </div>
 
         <!-- description -->
@@ -86,7 +114,7 @@
           </button>
         </div>
       </div>
-      <h2 style="margin-top: 10px;">Aufgaben</h2>
+      <h2 style="margin-top: 10px">Aufgaben</h2>
       <div class="content-list-element-items">
         <app-content-list-item
           *ngFor="let task of getQuestions(content)"
@@ -101,19 +129,25 @@
 
       <!-- edit mode actions -->
       <mat-action-row *ngIf="isAdmin && editModeActive">
-        <button mat-mini-fab color="accent"
+        <button
+          mat-mini-fab
+          color="accent"
           (click)="onMoveContentUp(content)"
           matTooltip="Bereich nach oben verschieben"
         >
           <mat-icon>arrow_upward</mat-icon>
         </button>
-        <button mat-mini-fab color="accent"
+        <button
+          mat-mini-fab
+          color="accent"
           (click)="onMoveContentDown(content)"
           matTooltip="Bereich nach unten verschieben"
         >
           <mat-icon>arrow_downward</mat-icon>
         </button>
-        <button mat-mini-fab color="primary"
+        <button
+          mat-mini-fab
+          color="primary"
           (click)="onEditContentNode(content)"
           matTooltip="Bereich bearbeiten"
         >
@@ -124,12 +158,16 @@
           Aufgabe hinzufügen
         </button>
         <!-- TODO: enable button after deletion implementation -->
-        <button mat-raised-button disabled color="warn" (click)="onDeleteContentNode(content.contentNodeId)">
+        <button
+          mat-raised-button
+          disabled
+          color="warn"
+          (click)="onDeleteContentNode(content.contentNodeId)"
+        >
           <mat-icon>delete</mat-icon>
           Diesen Bereich löschen
         </button>
       </mat-action-row>
-
     </mat-expansion-panel>
   </mat-accordion>
 </div>

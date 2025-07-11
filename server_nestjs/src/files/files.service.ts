@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
-import { FileDto } from '@DTOs/index';
+import type { FileDto } from '@DTOs/index';
 import * as fs from 'fs';
 
 @Injectable()
@@ -15,11 +15,7 @@ export class FilesService {
    * @param {string} fileType - The file type (e.g., 'pdf', 'mp4', 'png', 'jpg', 'gif')
    * @returns {Promise<FileDto>} The metadata of the uploaded file
    */
-  async uploadFile(
-    fileBuffer: Buffer,
-    fileName: string,
-    fileType: string,
-  ): Promise<FileDto> {
+  async uploadFile(fileBuffer: Buffer, fileName: string, fileType: string): Promise<FileDto> {
     const uniqueIdentifier = uuidv4();
     const filePath = `${uniqueIdentifier}.${fileType}`;
 
@@ -93,7 +89,7 @@ export class FilesService {
    */
   async downloadFileByName(uniqueIdentifier: string): Promise<StreamableFile> {
     const file: FileDto = await this.getFileByName(uniqueIdentifier);
-    console.log("downloadFileByName A");
+    console.log('downloadFileByName A');
     console.log(JSON.stringify(file));
     const filePath = process.env.FILE_PATH + file.path;
 
@@ -102,7 +98,7 @@ export class FilesService {
     }
 
     const fileStream = fs.createReadStream(filePath);
-    console.log("downloadFileByName B");
+    console.log('downloadFileByName B');
     console.log(JSON.stringify(filePath));
     return new StreamableFile(fileStream);
   }

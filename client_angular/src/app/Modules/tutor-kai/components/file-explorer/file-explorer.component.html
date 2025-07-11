@@ -1,10 +1,12 @@
 <div class="file-explorer" [class.collapsed]="isExplorerCollapsed">
   <!-- Toggle Button außerhalb der normalen Header-Struktur, damit er immer sichtbar bleibt -->
-  <button mat-icon-button
-          class="toggle-explorer-button"
-          [class.collapsed]="isExplorerCollapsed"
-          (click)="toggleExplorer()"
-          matTooltip="Explorer {{ isExplorerCollapsed ? 'ausklappen' : 'einklappen' }}">
+  <button
+    mat-icon-button
+    class="toggle-explorer-button"
+    [class.collapsed]="isExplorerCollapsed"
+    (click)="toggleExplorer()"
+    matTooltip="Explorer {{ isExplorerCollapsed ? 'ausklappen' : 'einklappen' }}"
+  >
     <mat-icon>{{ isExplorerCollapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
   </button>
 
@@ -38,8 +40,14 @@
       <span class="folder-name">{{ item.name }}</span>
     </div>
     <div class="folder-content" *ngIf="item.isExpanded">
-      <div class="folder-items" *ngFor="let childItem of item.children" [style.padding-left.px]="16">
-        <ng-container *ngTemplateOutlet="fileSystemItem; context: { $implicit: childItem }"></ng-container>
+      <div
+        class="folder-items"
+        *ngFor="let childItem of item.children"
+        [style.padding-left.px]="16"
+      >
+        <ng-container
+          *ngTemplateOutlet="fileSystemItem; context: { $implicit: childItem }"
+        ></ng-container>
       </div>
     </div>
   </div>

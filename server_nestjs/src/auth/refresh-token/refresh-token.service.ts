@@ -97,9 +97,7 @@ export class RefreshTokenService {
     });
 
     if (!existingRefreshToken) {
-      throw new Error(
-        `Refresh token not found for email ${email} and device ID ${deviceId}`,
-      );
+      throw new Error(`Refresh token not found for email ${email} and device ID ${deviceId}`);
     }
 
     const hashedRefreshToken = await bcrypt.hash(token, 10);
@@ -134,9 +132,7 @@ export class RefreshTokenService {
     });
 
     if (!existingRefreshToken) {
-      throw new Error(
-        `Refresh token not found for email ${email} and device ID ${deviceId}`,
-      );
+      throw new Error(`Refresh token not found for email ${email} and device ID ${deviceId}`);
     }
 
     return this.prisma.refreshToken.delete({
@@ -193,8 +189,7 @@ export class RefreshTokenService {
   async purgeExpiredRefreshTokens() {
     const expirationThreshold = new Date();
     expirationThreshold.setMinutes(
-      expirationThreshold.getMinutes() -
-        parseInt(process.env.JWT_REFRESH_EXPIRATION_TIME),
+      expirationThreshold.getMinutes() - parseInt(process.env.JWT_REFRESH_EXPIRATION_TIME),
     );
 
     this.logger.log(
@@ -210,7 +205,7 @@ export class RefreshTokenService {
     });
 
     if (expiredTokens.length > 0) {
-      const tokenIds = expiredTokens.map((token) => token.id);
+      const tokenIds = expiredTokens.map(token => token.id);
 
       await this.prisma.refreshToken.deleteMany({
         where: {

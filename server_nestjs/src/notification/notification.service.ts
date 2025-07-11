@@ -1,19 +1,19 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
-import { NotificationDTO, NotificationType } from '@Interfaces/index';
+import type { NotificationDTO, NotificationType } from '@Interfaces/index';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Subject } from 'rxjs';
-import { Prisma } from '@prisma/client';
-import { Notification } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
+import type { Notification } from '@prisma/client';
 @Injectable()
 export class NotificationService {
-  private notificationSubject = new Subject<NotificationDTO>();
+  private readonly notificationSubject = new Subject<NotificationDTO>();
   notification$ = this.notificationSubject.asObservable();
 
   constructor(private readonly prisma: PrismaService) {}
 
   // Select fields for notifications
-  private notificationSelect: Prisma.NotificationSelect = {
+  private readonly notificationSelect: Prisma.NotificationSelect = {
     id: true,
     userId: true,
     message: true,
@@ -59,7 +59,7 @@ export class NotificationService {
       const newNotifications = await this.prisma.notification.findMany({
         where: {
           userId: { in: notifications.map(n => n.userId) },
-          timestamp: { gte: new Date(Date.now() - 1000) }
+          timestamp: { gte: new Date(Date.now() - 1000) },
         },
         orderBy: { timestamp: 'desc' },
         take: notifications.length,
@@ -83,14 +83,18 @@ export class NotificationService {
    * @param {number} page
    * @param {number} pageSize
    */
-  async notifyAllUsers(notification: Omit<NotificationDTO, 'userId'>, page = 1, pageSize = 100): Promise<void> {
+  async notifyAllUsers(
+    notification: Omit<NotificationDTO, 'userId'>,
+    page = 1,
+    pageSize = 100,
+  ): Promise<void> {
     const skip = (page - 1) * pageSize;
 
     try {
       const users = await this.prisma.user.findMany({
         select: { id: true },
         take: pageSize,
-        skip: skip
+        skip: skip,
       });
 
       if (users.length > 0) {
@@ -146,14 +150,15 @@ export class NotificationService {
    * @param {number} offset
    * @returns {Promise<NotificationDTO[]>} all notifications
    */
-  async getAllNotifications(userId: number, limit: number, offset: number): Promise<NotificationDTO[]> {
+  async getAllNotifications(
+    userId: number,
+    limit: number,
+    offset: number,
+  ): Promise<NotificationDTO[]> {
     try {
       const notifications = await this.prisma.notification.findMany({
         where: { userId: Number(userId) },
-        orderBy: [
-          { isRead: 'asc' },
-          { timestamp: 'desc' }
-        ],
+        orderBy: [{ isRead: 'asc' }, { timestamp: 'desc' }],
         take: Number(limit),
         skip: Number(offset),
         select: this.notificationSelect,
@@ -182,7 +187,7 @@ export class NotificationService {
           timestamp: notification.timestamp,
           isRead: notification.isRead,
           readTimestamp: notification.readTimestamp,
-          type: notification.type
+          type: notification.type,
         },
         select: this.notificationSelect,
       });
@@ -219,7 +224,11 @@ export class NotificationService {
    * @param {number} pageSize
    * @returns {Promise<{ notifications: NotificationDTO[], totalCount: number }>} all unread notifications
    */
-  async getUnreadNotifications(userId: number, page = 1, pageSize = 10): Promise<{ notifications: NotificationDTO[], totalCount: number }> {
+  async getUnreadNotifications(
+    userId: number,
+    page = 1,
+    pageSize = 10,
+  ): Promise<{ notifications: NotificationDTO[]; totalCount: number }> {
     const skip = (page - 1) * pageSize;
 
     try {
@@ -231,12 +240,12 @@ export class NotificationService {
           take: pageSize,
           select: this.notificationSelect,
         }),
-        this.prisma.notification.count({ where: { userId: userId, isRead: false } })
+        this.prisma.notification.count({ where: { userId: userId, isRead: false } }),
       ]);
 
       return {
         notifications: notifications.map(this.toNotificationDTO),
-        totalCount: totalCount
+        totalCount: totalCount,
       };
     } catch (error) {
       console.error('Error fetching unread notifications:', error);
@@ -281,13 +290,13 @@ export class NotificationService {
           where: { userId: userId, isRead: false },
           data: {
             isRead: true,
-            readTimestamp: currentTime
-          }
+            readTimestamp: currentTime,
+          },
         }),
         this.prisma.notification.findMany({
           where: { userId: userId, isRead: true, readTimestamp: currentTime },
           select: this.notificationSelect,
-        })
+        }),
       ]);
 
       return updatedNotifications.map(this.toNotificationDTO);
@@ -324,7 +333,7 @@ export class NotificationService {
   private toNotificationDTO(prismaNotification: Notification): NotificationDTO {
     return {
       ...prismaNotification,
-      type: prismaNotification.type as NotificationType
+      type: prismaNotification.type as NotificationType,
     };
   }
 }

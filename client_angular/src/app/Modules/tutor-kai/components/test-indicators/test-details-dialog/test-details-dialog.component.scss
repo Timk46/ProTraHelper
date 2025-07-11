@@ -172,7 +172,8 @@
 // Responsive Design für kleinere Bildschirme
 @media (max-width: 500px) {
   .test-results-table {
-    th:nth-child(3), td:nth-child(3) {
+    th:nth-child(3),
+    td:nth-child(3) {
       display: none; // Verberge die Details-Spalte auf kleinen Bildschirmen
     }
   }

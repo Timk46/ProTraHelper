@@ -1,20 +1,19 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { IGraphEdge } from '../models/GraphEdge.interface';
-import { SizeDTO, PositionDTO } from '@DTOs/graphTask.dto';
+import type { ElementRef, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import type { IGraphEdge } from '../models/GraphEdge.interface';
+import type { SizeDTO, PositionDTO } from '@DTOs/graphTask.dto';
 import { calculateLineCenter } from '../utils';
 
 @Component({
   selector: 'app-edge-toolset-graph',
   templateUrl: './edge-toolset-graph.component.html',
-  styleUrls: ['./edge-toolset-graph.component.scss']
+  styleUrls: ['./edge-toolset-graph.component.scss'],
 })
 export class EdgeToolsetGraphComponent implements OnInit {
-  
   // #############################
   // References for HTML Elements
   @ViewChild('edgeToolset') component!: ElementRef<HTMLInputElement>;
   @ViewChild('edgeWeightValueInput') edgeWeightValueInput!: ElementRef<HTMLInputElement>;
-
 
   // #############################
   // Inputs from parent component
@@ -22,13 +21,12 @@ export class EdgeToolsetGraphComponent implements OnInit {
   @Input() index!: number;
   @Input() reverseEdgeState!: 0 | 1 | 2;
 
-
   // #############################
   // Outputs for parent component
   @Output() removeEdge: EventEmitter<number> = new EventEmitter<number>();
   @Output() changeEdgeDirection: EventEmitter<number> = new EventEmitter<number>();
-  @Output() changeEdgeWeight: EventEmitter<{ edgeIndex: number, newWeight: number }> = new EventEmitter<{ edgeIndex: number, newWeight: number }>();
-  
+  @Output() changeEdgeWeight: EventEmitter<{ edgeIndex: number; newWeight: number }> =
+    new EventEmitter<{ edgeIndex: number; newWeight: number }>();
 
   // #############################
   // Class properties
@@ -36,7 +34,6 @@ export class EdgeToolsetGraphComponent implements OnInit {
   displayEdgeToolbar: boolean;
   editEdgeWeight: boolean;
   componentSize!: SizeDTO;
-  
 
   // #############################
   // Constructor
@@ -45,8 +42,7 @@ export class EdgeToolsetGraphComponent implements OnInit {
     this.displayEdgeToolbar = false;
     this.editEdgeWeight = false;
   }
-  
-  
+
   // #############################
   // Lifecycle hook methods
   ngOnInit(): void {
@@ -54,13 +50,14 @@ export class EdgeToolsetGraphComponent implements OnInit {
     if (this.edge.weight.enabled) {
       this.componentSize = {
         width: 50,
-        height: 30
-      }
-    } else { // weight is disabled
+        height: 30,
+      };
+    } else {
+      // weight is disabled
       this.componentSize = {
         width: 25,
-        height: 25
-      }
+        height: 25,
+      };
     }
   }
 
@@ -73,7 +70,9 @@ export class EdgeToolsetGraphComponent implements OnInit {
   onChangeDirection(event: MouseEvent) {
     try {
       this.changeEdgeDirection.emit(this.index);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   onFieldHover(event: any) {
@@ -92,7 +91,7 @@ export class EdgeToolsetGraphComponent implements OnInit {
 
       this.edgeWeightValueInput.nativeElement.value = '';
 
-      // Ensure that the input element is mounted 
+      // Ensure that the input element is mounted
       setTimeout(() => {
         this.edgeWeightValueInput.nativeElement.focus();
       }, 0);
@@ -106,24 +105,29 @@ export class EdgeToolsetGraphComponent implements OnInit {
 
     this.changeEdgeWeight.emit({
       edgeIndex: this.index,
-      newWeight: intValue
-    })
+      newWeight: intValue,
+    });
   }
 
-    
   // #############################
   // Utility functions
 
   calculateComponentPosition(): PositionDTO {
     let position: PositionDTO;
-    if (this.edge.node1 === this.edge.node2) { // edges which connect a node with itself
-      return { 
-        x: this.edge.node1.position.x - 20 - (this.componentSize.width / 2), 
-        y: this.edge.node1.position.y - 20 - (this.componentSize.height / 2)
-      }; 
-    } else { // edges which connect two different nodes
-      return calculateLineCenter(this.edge.node1.center, this.edge.node2.center, this.componentSize, this.reverseEdgeState);
+    if (this.edge.node1 === this.edge.node2) {
+      // edges which connect a node with itself
+      return {
+        x: this.edge.node1.position.x - 20 - this.componentSize.width / 2,
+        y: this.edge.node1.position.y - 20 - this.componentSize.height / 2,
+      };
+    } else {
+      // edges which connect two different nodes
+      return calculateLineCenter(
+        this.edge.node1.center,
+        this.edge.node2.center,
+        this.componentSize,
+        this.reverseEdgeState,
+      );
     }
   }
-
 }

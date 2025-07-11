@@ -1,8 +1,10 @@
-import { AfterViewInit, Component, EventEmitter, Inject, Input, OnInit, Output, QueryList, ViewChildren } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { UserAnswerDataDTO, freeTextQuestionDTO, userAnswerFeedbackDTO } from '@DTOs/index';
-import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { Location } from '@angular/common';
+import type { AfterViewInit, OnInit, QueryList } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, Output, ViewChildren } from '@angular/core';
+import type { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import type { UserAnswerDataDTO, freeTextQuestionDTO, userAnswerFeedbackDTO } from '@DTOs/index';
+import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import type { Location } from '@angular/common';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -22,7 +24,7 @@ interface TaskViewData {
 @Component({
   selector: 'app-multiple-free-text-task',
   templateUrl: './multiple-free-text-task.component.html',
-  styleUrls: ['./multiple-free-text-task.component.scss']
+  styleUrls: ['./multiple-free-text-task.component.scss'],
 })
 export class MultipleFreeTextTaskComponent implements OnInit, AfterViewInit {
   @ViewChildren('textEditors') textEditors!: QueryList<any>;
@@ -34,7 +36,8 @@ export class MultipleFreeTextTaskComponent implements OnInit, AfterViewInit {
   editorConfig = {
     readonly: false,
     plugins: 'autoresize lists table link image code codesample',
-    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | link image | code codesample',
+    toolbar:
+      'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | link image | code codesample',
     min_height: 150, // Reduzierte Höhe im Vergleich zum Original
     max_height: 250, // Reduzierte Höhe im Vergleich zum Original
     resize: false,
@@ -55,8 +58,8 @@ export class MultipleFreeTextTaskComponent implements OnInit, AfterViewInit {
   constructor(
     public dialogRef: MatDialogRef<MultipleFreeTextTaskComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private questionService: QuestionDataService,
-    private location: Location
+    private readonly questionService: QuestionDataService,
+    private readonly location: Location,
   ) {
     this.taskViewData = data.taskViewData;
   }
@@ -78,24 +81,27 @@ export class MultipleFreeTextTaskComponent implements OnInit, AfterViewInit {
     this.isLoading = true;
 
     // Simuliere das Laden von 4 Fragen mit der gleichen ID
-    const questionPromises = Array(4).fill(0).map((_, i) => {
-      return this.questionService.getFreeTextQuestion(this.taskViewData.id).pipe(
-        catchError(err => {
-          console.error(`Error loading question ${i+1}:`, err);
-          return of(this.createDummyQuestion(i+1));
-        })
-      );
-    });
+    const questionPromises = Array(4)
+      .fill(0)
+      .map((_, i) => {
+        return this.questionService.getFreeTextQuestion(this.taskViewData.id).pipe(
+          catchError(err => {
+            console.error(`Error loading question ${i + 1}:`, err);
+            return of(this.createDummyQuestion(i + 1));
+          }),
+        );
+      });
 
     forkJoin(questionPromises).subscribe(questions => {
       this.freeTextQuestions = questions;
 
       // Für jede Frage prüfen, ob es bereits eine Antwort gibt
       questions.forEach((_, index) => {
-        this.questionService.getNewestUserAnswer(this.taskViewData.id)
+        this.questionService
+          .getNewestUserAnswer(this.taskViewData.id)
           .pipe(catchError(() => of(null)))
           .subscribe(answer => {
-            if (answer && answer.userFreetextAnswer) {
+            if (answer?.userFreetextAnswer) {
               this.answers[index] = answer.userFreetextAnswer;
             }
           });
@@ -135,7 +141,7 @@ export class MultipleFreeTextTaskComponent implements OnInit, AfterViewInit {
     const editorContents = this.textEditors.map(editor => {
       return {
         content: editor.getContent(),
-        rawContent: editor.getRawContent()
+        rawContent: editor.getRawContent(),
       };
     });
 
@@ -152,18 +158,18 @@ export class MultipleFreeTextTaskComponent implements OnInit, AfterViewInit {
 
       return this.questionService.createUserAnswer(userAnswerData).pipe(
         catchError(err => {
-          console.error(`Error submitting answer ${index+1}:`, err);
+          console.error(`Error submitting answer ${index + 1}:`, err);
           // Erstelle eine Mock-Antwort im Fehlerfall
           const mockFeedback: userAnswerFeedbackDTO = {
             id: -1,
             userAnswerId: -1,
             score: 5,
-            feedbackText: `Feedback für Antwort ${index+1}: Gut gemacht!`,
+            feedbackText: `Feedback für Antwort ${index + 1}: Gut gemacht!`,
             elementDone: true,
-            progress: 100
+            progress: 100,
           };
           return of(mockFeedback);
-        })
+        }),
       );
     });
 
@@ -179,7 +185,8 @@ export class MultipleFreeTextTaskComponent implements OnInit, AfterViewInit {
       this.showOverallFeedback = true;
 
       // Emittiere den Fortschritt (Durchschnitt aller Feedback-Fortschritte)
-      const avgProgress = feedbacks.reduce((acc, curr) => acc + curr.progress, 0) / feedbacks.length;
+      const avgProgress =
+        feedbacks.reduce((acc, curr) => acc + curr.progress, 0) / feedbacks.length;
       this.submitClicked.emit(avgProgress);
 
       this.isSending = false;

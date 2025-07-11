@@ -5,6 +5,6 @@ import { PrismaService } from '@/prisma/prisma.service';
 
 @Module({
   controllers: [DatabaseEditorCommunicationController],
-  providers: [DatabaseEditorCommunicationService, PrismaService]
+  providers: [DatabaseEditorCommunicationService, PrismaService],
 })
 export class DatabaseEditorCommunicationModule {}

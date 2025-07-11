@@ -1,34 +1,35 @@
-import { discussionCreationDTO, discussionNodeNamesDTO } from '@DTOs/discussionCreation.dto';
+import type { discussionCreationDTO, discussionNodeNamesDTO } from '@DTOs/discussionCreation.dto';
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
+import type { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import type { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
 
 @Component({
   selector: 'app-discussion-creation',
   templateUrl: './discussion-creation.component.html',
-  styleUrls: ['./discussion-creation.component.scss']
+  styleUrls: ['./discussion-creation.component.scss'],
 })
 export class DiscussionCreationComponent {
-
   //@Input() userId: number = 1;
   editorConfig = {
     readonly: false,
     plugins: 'autoresize lists table link image code codesample',
-    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
+    toolbar:
+      'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
     min_height: 300,
     max_height: 500,
     resize: false,
-  }
+  };
 
   discussionNodeNames: discussionNodeNamesDTO = {
-    conceptNodeName: "dummy",
-    contentNodeName: "dummy",
-    contentElementName: "dummy"
+    conceptNodeName: 'dummy',
+    contentNodeName: 'dummy',
+    contentElementName: 'dummy',
   };
 
   discussionData: discussionCreationDTO = {
-    title: "dummy",
-    text: "dummy",
+    title: 'dummy',
+    text: 'dummy',
     conceptNodeId: -1,
     contentNodeId: -1,
     contentElementId: -1,
@@ -37,13 +38,19 @@ export class DiscussionCreationComponent {
   constructor(
     public dialogRef: MatDialogRef<DiscussionCreationComponent>,
     @Inject(MAT_DIALOG_DATA) public reqDiscussionData: discussionCreationDTO,
-    private creationService: DiscussionCreationService,
-    ) {
-      this.discussionData = reqDiscussionData;
-      this.creationService.getNodeNames(reqDiscussionData.conceptNodeId, reqDiscussionData.contentNodeId, reqDiscussionData.contentElementId).subscribe(data => {
+    private readonly creationService: DiscussionCreationService,
+  ) {
+    this.discussionData = reqDiscussionData;
+    this.creationService
+      .getNodeNames(
+        reqDiscussionData.conceptNodeId,
+        reqDiscussionData.contentNodeId,
+        reqDiscussionData.contentElementId,
+      )
+      .subscribe(data => {
         this.discussionNodeNames = data;
       });
-    }
+  }
 
   /**
    * Submits the discussion creation form, awaiting the creation of the discussion and closing the dialog
@@ -52,7 +59,7 @@ export class DiscussionCreationComponent {
    */
   onSubmit(title: string, text: string) {
     //console.log("Submit: " + title + text);
-    if (title != "" && text != "") {
+    if (title != '' && text != '') {
       this.discussionData.title = title;
       this.discussionData.text = text;
 

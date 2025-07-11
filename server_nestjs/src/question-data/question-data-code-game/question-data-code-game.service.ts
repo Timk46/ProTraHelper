@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { CodeGameQuestionDto } from '@DTOs/question.dto';
+import type { CodeGameQuestionDto } from '@DTOs/question.dto';
 
 @Injectable()
 export class QuestionDataCodeGameService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async createCodeGameQuestion(
     codeGameQuestion: CodeGameQuestionDto,
@@ -17,11 +17,10 @@ export class QuestionDataCodeGameService {
         codeSolutionRestriction: codeGameQuestion.codeSolutionRestriction,
         fileNameToRestrict: codeGameQuestion.fileNameToRestrict,
         methodNameToRestrict: codeGameQuestion.methodNameToRestrict,
-        frequencyOfMethodNameToRestrict:
-          codeGameQuestion.frequencyOfMethodNameToRestrict,
+        frequencyOfMethodNameToRestrict: codeGameQuestion.frequencyOfMethodNameToRestrict,
         questionId: questionId,
         codeGameScaffolds: {
-          create: codeGameQuestion.codeGameScaffolds.map((cgs) => ({
+          create: codeGameQuestion.codeGameScaffolds.map(cgs => ({
             codeFileName: cgs.codeFileName,
             code: cgs.code,
             language: cgs.language,
@@ -53,10 +52,9 @@ export class QuestionDataCodeGameService {
         codeSolutionRestriction: codeGameQuestion.codeSolutionRestriction,
         fileNameToRestrict: codeGameQuestion.fileNameToRestrict,
         methodNameToRestrict: codeGameQuestion.methodNameToRestrict,
-        frequencyOfMethodNameToRestrict:
-          codeGameQuestion.frequencyOfMethodNameToRestrict,
+        frequencyOfMethodNameToRestrict: codeGameQuestion.frequencyOfMethodNameToRestrict,
         codeGameScaffolds: {
-          update: codeGameQuestion.codeGameScaffolds.map((cgs) => ({
+          update: codeGameQuestion.codeGameScaffolds.map(cgs => ({
             where: { id: cgs.id },
             data: {
               codeFileName: cgs.codeFileName,

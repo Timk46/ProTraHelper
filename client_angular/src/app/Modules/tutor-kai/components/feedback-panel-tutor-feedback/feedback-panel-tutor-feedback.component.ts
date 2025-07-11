@@ -1,12 +1,13 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
+import type { HttpClient } from '@angular/common/http';
+import type { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { Subject, takeUntil, finalize, catchError, throwError, Observable, filter } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
-import { WorkspaceStateService } from '../../services/workspace-state.service';
+import type { MatDialog } from '@angular/material/dialog';
+import type { WorkspaceStateService } from '../../services/workspace-state.service';
 import { WorkspaceState } from '../../models/code-submission.model';
-import { MarkdownService } from '../../services/markdown/markdown.service';
+import type { MarkdownService } from '../../services/markdown/markdown.service';
 import { environment } from 'src/environments/environment';
 import { FeedbackHintConfirmationDialogComponent } from './feedback-hint-confirmation-dialog/feedback-hint-confirmation-dialog.component';
 // TODO: Import FeedbackOutput and KcrOutput types/interfaces from shared DTOs
@@ -34,25 +35,30 @@ type FeedbackKey = 'SPS' | 'KM' | 'KC' | 'KH'; // Define specific keys for feedb
 type EvaluateRequestDto = any;
 type CodeSubmissionResultDto = any;
 
-
 @Component({
   selector: 'app-feedback-panel-tutor-feedback',
   templateUrl: './feedback-panel-tutor-feedback.component.html',
   styleUrls: ['./feedback-panel-tutor-feedback.component.scss'],
   animations: [
     trigger('expandCollapse', [
-      state('false', style({
-        height: '0',
-        opacity: '0',
-        overflow: 'hidden'
-      })),
-      state('true', style({
-        height: '*',
-        opacity: '1'
-      })),
-      transition('false <=> true', animate('300ms ease-in-out'))
-    ])
-  ]
+      state(
+        'false',
+        style({
+          height: '0',
+          opacity: '0',
+          overflow: 'hidden',
+        }),
+      ),
+      state(
+        'true',
+        style({
+          height: '*',
+          opacity: '1',
+        }),
+      ),
+      transition('false <=> true', animate('300ms ease-in-out')),
+    ]),
+  ],
 })
 export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
   feedback: FeedbackOutput | null = null;
@@ -64,7 +70,7 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
     SPS: false,
     KM: false,
     KC: false,
-    KH: false
+    KH: false,
   };
   error: string | null = null;
   // Track if usage has been sent for each section to prevent duplicates
@@ -72,7 +78,7 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
     SPS: false,
     KM: false,
     KC: false,
-    KH: false
+    KH: false,
   };
   currentState: WorkspaceState = WorkspaceState.START;
 
@@ -81,33 +87,31 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
     SPS: 'Strategische Vorgehensweise',
     KM: 'Probleme finden',
     KC: 'Erklärungen und Beispiele',
-    KH: 'Hinweis zum nächsten Schritt'
+    KH: 'Hinweis zum nächsten Schritt',
   };
 
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
   // Set of feedback keys that require confirmation before revealing
-  private keysRequiringConfirmation: Set<FeedbackKey> = new Set(['KH', 'SPS']);
+  private readonly keysRequiringConfirmation: Set<FeedbackKey> = new Set(['KH', 'SPS']);
 
   constructor(
-    private http: HttpClient,
-    private workspaceState: WorkspaceStateService,
-    private markdownService: MarkdownService,
-    private sanitizer: DomSanitizer,
-    private dialog: MatDialog
+    private readonly http: HttpClient,
+    private readonly workspaceState: WorkspaceStateService,
+    private readonly markdownService: MarkdownService,
+    private readonly sanitizer: DomSanitizer,
+    private readonly dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
     // Subscribe to workspace state
-    this.workspaceState.workspaceState$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(state => {
-        this.currentState = state;
-        // Optionally reset feedback when state changes, e.g., back to START
-        // if (state === WorkspaceState.START) {
-        //   this.feedback = null;
-        //   this.error = null;
-        // }
-      });
+    this.workspaceState.workspaceState$.pipe(takeUntil(this.destroy$)).subscribe(state => {
+      this.currentState = state;
+      // Optionally reset feedback when state changes, e.g., back to START
+      // if (state === WorkspaceState.START) {
+      //   this.feedback = null;
+      //   this.error = null;
+      // }
+    });
   }
 
   ngOnDestroy(): void {
@@ -136,20 +140,24 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
 
     const requestBody: EvaluateRequestDto = {
       questionId: task.id, // Assuming task has an id property
-      relatedCodeSubmissionResult: lastResult
+      relatedCodeSubmissionResult: lastResult,
       // Add flavor/feedbackLevel if needed based on final DTO
     };
 
     // Expect the new response structure
-    this.http.post<{ feedback: FeedbackOutput; feedbackId: string }>(environment.server + '/tutoring-feedback/structured', requestBody)
+    this.http
+      .post<{ feedback: FeedbackOutput; feedbackId: string }>(
+        environment.server + '/tutoring-feedback/structured',
+        requestBody,
+      )
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.isLoading = false),
+        finalize(() => (this.isLoading = false)),
         catchError(err => {
           console.error('Error fetching tutoring feedback:', err);
           this.error = `Failed to load feedback. ${err.error?.message || err.message || 'Unknown error'}`;
           return throwError(() => err); // Re-throw the error
-        })
+        }),
       )
       .subscribe(response => {
         this.feedback = response.feedback; // Store the feedback object
@@ -177,14 +185,18 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
     const url = `${environment.server}/tutoring-feedback/${currentFeedbackId}/usage`; // Use ID from service
     const body = { feedbackType };
 
-    this.http.patch(url, body)
+    this.http
+      .patch(url, body)
       .pipe(
-          takeUntil(this.destroy$),
-          catchError(err => {
-            console.error(`Error tracking usage for ${feedbackType} on feedback ${currentFeedbackId}:`, err); // Use ID from service
-            // Don't block UI, just log the error
-            return throwError(() => err); // Re-throw or return EMPTY/of(null) if you want to swallow
-          })
+        takeUntil(this.destroy$),
+        catchError(err => {
+          console.error(
+            `Error tracking usage for ${feedbackType} on feedback ${currentFeedbackId}:`,
+            err,
+          ); // Use ID from service
+          // Don't block UI, just log the error
+          return throwError(() => err); // Re-throw or return EMPTY/of(null) if you want to swallow
+        }),
       )
       .subscribe(() => {
         this.usageTracked[feedbackType] = true; // Mark as tracked only on success
@@ -207,26 +219,25 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
    */
   private convertHtmlCodeBlocksToMarkdown(content: string): string {
     // First, handle code blocks with a specified language
-    let result = content.replace(/<pre><code\s+class="language-(\w+)">([\s\S]*?)<\/code><\/pre>/g,
+    let result = content.replace(
+      /<pre><code\s+class="language-(\w+)">([\s\S]*?)<\/code><\/pre>/g,
       (_, language, codeContent) => {
         // Unescape any HTML entities in the code content and trim trailing whitespace
         const cleanedContent = this.unescapeHtml(codeContent).trimRight();
 
         // Create the Markdown code block with proper format - add newlines before and after
         return `\n\`\`\`${language}\n${cleanedContent}\n\`\`\`\n`;
-      }
+      },
     );
 
     // Then, handle code blocks without a specified language
-    result = result.replace(/<pre><code>([\s\S]*?)<\/code><\/pre>/g,
-      (_, codeContent) => {
-        // Unescape any HTML entities in the code content and trim trailing whitespace
-        const cleanedContent = this.unescapeHtml(codeContent).trimRight();
+    result = result.replace(/<pre><code>([\s\S]*?)<\/code><\/pre>/g, (_, codeContent) => {
+      // Unescape any HTML entities in the code content and trim trailing whitespace
+      const cleanedContent = this.unescapeHtml(codeContent).trimRight();
 
-        // Create the Markdown code block with proper format - add newlines before and after
-        return `\n\`\`\`\n${cleanedContent}\n\`\`\`\n`;
-      }
-    );
+      // Create the Markdown code block with proper format - add newlines before and after
+      return `\n\`\`\`\n${cleanedContent}\n\`\`\`\n`;
+    });
     return result;
   }
 
@@ -241,35 +252,37 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
       '&quot;': '"',
       '&#39;': "'",
       '&#x2F;': '/',
-      '&nbsp;': ' '
+      '&nbsp;': ' ',
     };
 
-    return html.replace(/&(amp|lt|gt|quot|#39|#x2F|nbsp);/g,
-      (match) => htmlEntities[match] || match
-    );
+    return html.replace(/&(amp|lt|gt|quot|#39|#x2F|nbsp);/g, match => htmlEntities[match] || match);
   }
-
 
   // --- Rating ---
   showRating(): boolean {
     // Adapted from FeedbackPanelComponent
     // Ensure the second part evaluates strictly to boolean
-    return this.currentState === WorkspaceState.FINISHED_FEEDBACK || (!!this.feedback && !this.isLoading && !this.error);
+    return (
+      this.currentState === WorkspaceState.FINISHED_FEEDBACK ||
+      (!!this.feedback && !this.isLoading && !this.error)
+    );
   }
 
   onRatingSubmitted(rating: number): void {
     // Adapted from FeedbackPanelComponent
     const result = this.workspaceState.getCodeSubmissionResult();
     if (result) {
-      this.workspaceState.submitRating(
-        rating,
-        '', // Empty comment for now
-        result.encryptedCodeSubissionId
-      ).pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => console.log('Rating submitted successfully'),
-        error: (err) => console.error('Error submitting rating:', err)
-      });
+      this.workspaceState
+        .submitRating(
+          rating,
+          '', // Empty comment for now
+          result.encryptedCodeSubissionId,
+        )
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => console.log('Rating submitted successfully'),
+          error: err => console.error('Error submitting rating:', err),
+        });
     } else {
       console.error('Cannot submit rating: Code submission result is missing.');
     }
@@ -281,7 +294,7 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
     // Order matters for display
     const orderedKeys: FeedbackKey[] = ['SPS', 'KM', 'KC', 'KH'];
     // Filter keys that exist and have truthy content in the feedback object
-    return orderedKeys.filter(key => this.feedback && this.feedback[key]);
+    return orderedKeys.filter(key => this.feedback?.[key]);
   }
 
   // Toggle a feedback section to expand it (no collapsing)
@@ -311,17 +324,20 @@ export class FeedbackPanelTutorFeedbackComponent implements OnInit, OnDestroy {
       autoFocus: false,
       disableClose: false, // Allow closing by clicking outside (optional)
       panelClass: 'hint-confirmation-dialog-panel', // Add for additional styling options
-      position: { top: '100px' } // Position slightly below the top for better visibility
+      position: { top: '100px' }, // Position slightly below the top for better visibility
     });
 
-    dialogRef.afterClosed().pipe(
-      takeUntil(this.destroy$),
-      filter(result => result === true) // Only proceed if confirmed
-    ).subscribe(() => {
-      // User clicked "Ja", proceed with expanding the section
-      this.trackUsage(key);
-      this.expandedSections[key] = true;
-    });
+    dialogRef
+      .afterClosed()
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(result => result === true), // Only proceed if confirmed
+      )
+      .subscribe(() => {
+        // User clicked "Ja", proceed with expanding the section
+        this.trackUsage(key);
+        this.expandedSections[key] = true;
+      });
     // If user clicked "Nein" or closed the dialog without selecting,
     // nothing happens and the section remains collapsed
   }

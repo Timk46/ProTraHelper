@@ -1,11 +1,15 @@
-import { Directive, ElementRef, Renderer2, OnInit } from '@angular/core';
+import type { ElementRef, Renderer2, OnInit } from '@angular/core';
+import { Directive } from '@angular/core';
 @Directive({
-  selector: '[appDraggableHeight]' // Defines the selector to be used in templates for applying this directive.
+  selector: '[appDraggableHeight]', // Defines the selector to be used in templates for applying this directive.
 })
 export class DraggableHeightDirective implements OnInit {
   private resizeHandle!: HTMLElement; // Handle for the element used to drag and resize.
 
-  constructor(private el: ElementRef, private renderer: Renderer2) {
+  constructor(
+    private readonly el: ElementRef,
+    private readonly renderer: Renderer2,
+  ) {
     // ElementRef is used to access the host element.
     // Renderer2 is used for rendering purposes which is a more secure way to manipulate the DOM.
   }
@@ -28,7 +32,7 @@ export class DraggableHeightDirective implements OnInit {
 
     const mouseMove = (moveEvent: MouseEvent) => {
       moveEvent.preventDefault(); // Prevent default action during move.
-      let newHeight = startHeight + (moveEvent.clientY - startY); // Calculate new height based on mouse movement.
+      const newHeight = startHeight + (moveEvent.clientY - startY); // Calculate new height based on mouse movement.
       const vh = window.innerHeight * 0.01; // Calculate value of 1vh based on current window height.
       let newHeightVh = newHeight / vh; // Convert new height to vh units.
 

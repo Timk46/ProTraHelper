@@ -1,11 +1,22 @@
-import { Component, OnInit, OnDestroy, Input, Inject, EventEmitter, Output, Optional, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { MCOptionViewDTO, McQuestionDTO, QuestionDTO, McQuestionOptionDTO } from '@DTOs/question.dto';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
-import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { TaskViewData } from '@DTOs/index';
-import { Router } from '@angular/router';
-import { Location } from '@angular/common';
+import type { OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  Input,
+  Inject,
+  EventEmitter,
+  Output,
+  Optional,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import type { MCOptionViewDTO, McQuestionDTO, QuestionDTO } from '@DTOs/question.dto';
+import { McQuestionOptionDTO } from '@DTOs/question.dto';
+import type { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import type { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import type { TaskViewData } from '@DTOs/index';
+import type { Router } from '@angular/router';
+import type { Location } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -19,14 +30,14 @@ enum McTaskState {
   LOADING,
   QUESTION,
   SUBMITTING,
-  FEEDBACK
+  FEEDBACK,
 }
 
 @Component({
   selector: 'app-mcTask',
   templateUrl: './mcTask.component.html',
   styleUrls: ['./mcTask.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class McTaskComponent implements OnInit, OnDestroy {
   @Output() submitClicked = new EventEmitter<any>();
@@ -41,19 +52,21 @@ export class McTaskComponent implements OnInit, OnDestroy {
   justAnsweredCorrectly: boolean = false;
 
   // For handling RxJS subscriptions cleanup
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
-  editorConfig = { //tinyMCE
+  editorConfig = {
+    //tinyMCE
     readonly: true,
     plugins: 'lists table link image code codesample',
     toolbar: false,
     min_height: 100,
     max_height: 500,
     resize: false,
-  }
+  };
 
   //init question data
-  questionData: QuestionDTO = { // dummy data
+  questionData: QuestionDTO = {
+    // dummy data
     id: -1,
     name: '',
     description: '',
@@ -64,7 +77,7 @@ export class McTaskComponent implements OnInit, OnDestroy {
     isApproved: false,
     originId: -1,
     level: -1,
-  }
+  };
 
   dataLoaded: boolean = false;
   conceptIdParam!: number;
@@ -81,17 +94,17 @@ export class McTaskComponent implements OnInit, OnDestroy {
       version: -1,
       isApproved: false,
       questionId: -1,
-      successor: null
+      successor: null,
     },
-    mcQuestionOption: []
-  }
+    mcQuestionOption: [],
+  };
 
   //the userAnswer data
   userAnswer: UserAnswerDataDTO = {
     id: -1,
     userId: -1,
     questionId: -1,
-  }
+  };
 
   feedback: userAnswerFeedbackDTO = {
     id: -1,
@@ -100,7 +113,7 @@ export class McTaskComponent implements OnInit, OnDestroy {
     feedbackText: '',
     elementDone: false,
     progress: -1,
-  }
+  };
 
   //the mc options
   options: MCOptionViewModel[] = [];
@@ -112,12 +125,14 @@ export class McTaskComponent implements OnInit, OnDestroy {
   fullscore: number = 0;
 
   constructor(
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: { taskViewData: TaskViewData, conceptId: number, questionId: number },
-    private questionDataService: QuestionDataService,
-    private router: Router,
-    private dialogRef: MatDialogRef<McTaskComponent>,
-    private location: Location,
-    private cdr: ChangeDetectorRef
+    @Optional()
+    @Inject(MAT_DIALOG_DATA)
+    public data: { taskViewData: TaskViewData; conceptId: number; questionId: number },
+    private readonly questionDataService: QuestionDataService,
+    private readonly router: Router,
+    private readonly dialogRef: MatDialogRef<McTaskComponent>,
+    private readonly location: Location,
+    private readonly cdr: ChangeDetectorRef,
   ) {
     if (data && data.taskViewData) {
       this.taskViewData = data.taskViewData;
@@ -140,7 +155,8 @@ export class McTaskComponent implements OnInit, OnDestroy {
   private loadQuestionData(): void {
     if (this.taskViewData && this.taskViewData.id) {
       // Show the newest Version of the questions
-      this.questionDataService.getQuestionData(this.taskViewData.id)
+      this.questionDataService
+        .getQuestionData(this.taskViewData.id)
         .pipe(takeUntil(this.destroy$))
         .subscribe(data => {
           this.questionData = data;
@@ -153,7 +169,8 @@ export class McTaskComponent implements OnInit, OnDestroy {
    * Loads the MC question data after the basic question data is loaded
    */
   private loadMcQuestionData(): void {
-    this.questionDataService.getMCQuestion(this.questionData.id)
+    this.questionDataService
+      .getMCQuestion(this.questionData.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => {
         this.mcQuestion = data;
@@ -165,13 +182,14 @@ export class McTaskComponent implements OnInit, OnDestroy {
    * Loads the MC options for the question
    */
   private loadMcOptions(): void {
-    this.questionDataService.getMCOptions(this.mcQuestion.id)
+    this.questionDataService
+      .getMCOptions(this.mcQuestion.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => {
         // Convert to our extended view model type
         this.options = data.map(option => ({
           ...option,
-          isCorrect: undefined  // Will be set after answer submission
+          isCorrect: undefined, // Will be set after answer submission
         }));
 
         // Shuffle options if enabled in question config
@@ -235,9 +253,10 @@ export class McTaskComponent implements OnInit, OnDestroy {
       userId: -1,
       questionId: this.questionData.id,
       userMCAnswer: this.selectedOptions,
-    }
+    };
 
-    this.questionDataService.createUserAnswer(userAnswerData)
+    this.questionDataService
+      .createUserAnswer(userAnswerData)
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => {
         this.feedback = data;
@@ -304,7 +323,7 @@ export class McTaskComponent implements OnInit, OnDestroy {
       feedbackText: '',
       elementDone: false,
       progress: -1,
-    }
+    };
 
     // Clear selected options
     this.selectedOptions = [];

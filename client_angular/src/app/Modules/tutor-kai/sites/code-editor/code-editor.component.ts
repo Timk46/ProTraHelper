@@ -1,4 +1,5 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from "@angular/core";
+import type { AfterViewInit, ChangeDetectorRef, ElementRef, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 
 /**
  * A component that wraps the ngx-monaco-editor and provides additional functionality.
@@ -8,8 +9,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, 
   templateUrl: './code-editor.component.html',
   styleUrls: ['./code-editor.component.scss'],
 })
-
-export class CodeEditorComponent implements AfterViewInit {
+export class CodeEditorComponent implements AfterViewInit, OnInit {
   @ViewChild('resizeHandle', { static: false }) resizeHandle!: ElementRef;
   @ViewChild('monacoEditor', { static: false }) monacoEditor!: any;
 
@@ -30,7 +30,7 @@ export class CodeEditorComponent implements AfterViewInit {
     automaticLayout: true,
   };
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(private readonly cdr: ChangeDetectorRef) {}
 
   ngAfterViewInit() {
     this.setupResizeListener();
@@ -61,24 +61,24 @@ export class CodeEditorComponent implements AfterViewInit {
   /**
    * Handles the resizing of the editor.
    */
-  private resize = (e: MouseEvent) => {
+  private readonly resize = (e: MouseEvent) => {
     if (!this.isDragging) return;
     const deltaY = e.clientY - this.startY;
     this.editorHeight = Math.max(200, Math.min(800, this.startHeight + deltaY));
     this.cdr.detectChanges(); // Trigger change detection
-    if (this.monacoEditor && this.monacoEditor.editor) {
+    if (this.monacoEditor?.editor) {
       this.monacoEditor.editor.layout();
     }
-  }
+  };
 
   /**
    * Stops the resizing operation.
    */
-  private stopResize = () => {
+  private readonly stopResize = () => {
     this.isDragging = false;
     document.removeEventListener('mousemove', this.resize);
     document.removeEventListener('mouseup', this.stopResize);
-  }
+  };
 
   /**
    * Change the language of the editor.

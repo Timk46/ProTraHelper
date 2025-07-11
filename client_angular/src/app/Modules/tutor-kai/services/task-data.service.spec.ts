@@ -6,7 +6,7 @@ import { TaskDataService } from './task-data.service';
 describe('Service: TaskData', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [TaskDataService]
+      providers: [TaskDataService],
     });
   });
 

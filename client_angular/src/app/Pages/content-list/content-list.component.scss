@@ -9,7 +9,7 @@
   flex-direction: row;
 }
 
-.content-list{
+.content-list {
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -28,7 +28,7 @@
   display: none;
 
   @media screen and (max-width: 400px) {
-    display: inline
+    display: inline;
   }
 }
 
@@ -57,7 +57,7 @@
   position: relative;
 
   &:hover {
-    color: #1976D2 !important;
+    color: #1976d2 !important;
     transform: scale(1.2) rotate(5deg);
     filter: drop-shadow(0 0 8px rgba(33, 150, 243, 0.6));
   }

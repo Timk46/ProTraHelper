@@ -5,15 +5,18 @@
     </mat-card-header>
     <mat-card-content>
       <div class="user-info">
-        <p><strong>Name:</strong> {{userDetails.firstname}} {{userDetails.lastname}}</p>
-        <p><strong>Email:</strong> {{userDetails.email}}</p>
-        <p><strong>Role:</strong> {{userDetails.globalRole}}</p>
-        <p><strong>Created At:</strong> {{userDetails.createdAt | date:'medium'}}</p>
+        <p><strong>Name:</strong> {{ userDetails.firstname }} {{ userDetails.lastname }}</p>
+        <p><strong>Email:</strong> {{ userDetails.email }}</p>
+        <p><strong>Role:</strong> {{ userDetails.globalRole }}</p>
+        <p><strong>Created At:</strong> {{ userDetails.createdAt | date: 'medium' }}</p>
       </div>
       <div class="total-progress">
         <h3>Total Progress</h3>
-        <mat-progress-bar mode="determinate" [value]="userDetails.totalProgress * 100"></mat-progress-bar>
-        <p>{{userDetails.totalProgress | percent:'1.0-2'}}</p>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="userDetails.totalProgress * 100"
+        ></mat-progress-bar>
+        <p>{{ userDetails.totalProgress | percent: '1.0-2' }}</p>
       </div>
     </mat-card-content>
   </mat-card>
@@ -31,7 +34,8 @@
       [showXAxisLabel]="showXAxisLabel"
       [showYAxisLabel]="showYAxisLabel"
       [xAxisLabel]="xAxisLabel"
-      [yAxisLabel]="yAxisLabel">
+      [yAxisLabel]="yAxisLabel"
+    >
     </ngx-charts-bar-vertical-stacked>
   </div>
 
@@ -49,7 +53,8 @@
       [showYAxisLabel]="showYAxisLabel"
       [xAxisLabel]="dailyProgressXAxisLabel"
       [yAxisLabel]="dailyProgressYAxisLabel"
-      [autoScale]="true">
+      [autoScale]="true"
+    >
     </ngx-charts-line-chart>
   </div>
 </div>

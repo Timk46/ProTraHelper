@@ -1,26 +1,33 @@
-import { Component, ViewChild } from "@angular/core";
-import { TinymceComponent } from "../../tinymce/tinymce.component";
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
-import { detailedChoiceOptionDTO, detailedQuestionDTO, questionType } from "@DTOs/index";
-import { QuestionDataService } from "src/app/Services/question/question-data.service";
-import { ActivatedRoute, Router } from "@angular/router";
-import { ConfirmationService } from "src/app/Services/confirmation/confirmation.service";
-import { MatSnackBar } from "@angular/material/snack-bar";
-import { MatCheckboxChange } from "@angular/material/checkbox";
-import { McqcreationService } from "src/app/Services/mcqCreation/mcqcreation.service";
-import { MatTableDataSource } from "@angular/material/table";
-import { ContentService } from "src/app/Services/content/content.service";
-import { ConceptNode } from "@DTOs/index";
-import { Observable, of, ReplaySubject, Subject } from "rxjs";
-import { map, startWith, takeUntil } from "rxjs/operators";
-import { Answer, McqEvaluation, McqEvaluations } from "src/app/Services/mcqCreation/mcqcreation.types";
+import type { OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import type { TinymceComponent } from '../../tinymce/tinymce.component';
+import type { AbstractControl, FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
+import type { detailedQuestionDTO } from '@DTOs/index';
+import { detailedChoiceOptionDTO, questionType } from '@DTOs/index';
+import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import type { ActivatedRoute, Router } from '@angular/router';
+import type { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import type { MatSnackBar } from '@angular/material/snack-bar';
+import { MatCheckboxChange } from '@angular/material/checkbox';
+import type { McqcreationService } from 'src/app/Services/mcqCreation/mcqcreation.service';
+import { MatTableDataSource } from '@angular/material/table';
+import type { ContentService } from 'src/app/Services/content/content.service';
+import type { ConceptNode } from '@DTOs/index';
+import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { map, startWith, takeUntil } from 'rxjs/operators';
+import type {
+  Answer,
+  McqEvaluation,
+  McqEvaluations,
+} from 'src/app/Services/mcqCreation/mcqcreation.types';
 
 @Component({
   selector: 'app-edit-choice',
   templateUrl: './edit-choice.component.html',
-  styleUrls: ['./edit-choice.component.scss']
+  styleUrls: ['./edit-choice.component.scss'],
 })
-export class EditChoiceComponent {
+export class EditChoiceComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('question') questionField!: TinymceComponent;
 
   choiceForm: FormGroup;
@@ -43,27 +50,28 @@ export class EditChoiceComponent {
   editorConfig = {
     readonly: false,
     plugins: 'autoresize lists table link image code codesample',
-    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
+    toolbar:
+      'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
     min_height: 300,
     max_height: 600,
     resize: false,
-  }
+  };
   detailedQuestionData: detailedQuestionDTO | null = null;
 
   displayedColumns: string[] = ['option', 'correct', 'action'];
   additionalInfoColumns: string[] = ['info', 'action'];
 
-  private _onDestroy = new Subject<void>();
+  private readonly _onDestroy = new Subject<void>();
 
   constructor(
-    private fb: FormBuilder,
-    private questionDataService: QuestionDataService,
-    private route: ActivatedRoute,
-    private confirmationService: ConfirmationService,
-    private snackBar: MatSnackBar,
-    private mcqService: McqcreationService,
-    private contentService: ContentService,
-    private router: Router
+    private readonly fb: FormBuilder,
+    private readonly questionDataService: QuestionDataService,
+    private readonly route: ActivatedRoute,
+    private readonly confirmationService: ConfirmationService,
+    private readonly snackBar: MatSnackBar,
+    private readonly mcqService: McqcreationService,
+    private readonly contentService: ContentService,
+    private readonly router: Router,
   ) {
     this.dataSource = new MatTableDataSource<any>([]);
     this.additionalInfoDataSource = new MatTableDataSource<any>([]);
@@ -79,7 +87,7 @@ export class EditChoiceComponent {
     });
 
     this.additionalInfoForm = this.fb.group({
-      additionalInfoData: this.fb.array([])
+      additionalInfoData: this.fb.array([]),
     });
 
     this.generationForm = this.fb.group({
@@ -91,11 +99,9 @@ export class EditChoiceComponent {
 
   ngOnInit(): void {
     this.filteredConcepts.next(this.concepts.slice());
-    this.conceptFilterControl.valueChanges
-      .pipe(takeUntil(this._onDestroy))
-      .subscribe(() => {
-        this.filterConcepts();
-      });
+    this.conceptFilterControl.valueChanges.pipe(takeUntil(this._onDestroy)).subscribe(() => {
+      this.filterConcepts();
+    });
   }
 
   ngAfterViewInit(): void {
@@ -118,7 +124,9 @@ export class EditChoiceComponent {
   }
 
   get correctOptionsCount(): number {
-    return this.optionsData.value.filter((option: { id: number, text: string, is_correct: boolean }) => option.is_correct).length;
+    return this.optionsData.value.filter(
+      (option: { id: number; text: string; is_correct: boolean }) => option.is_correct,
+    ).length;
   }
 
   onSelectClick(): void {
@@ -137,7 +145,7 @@ export class EditChoiceComponent {
       search = search.toLowerCase();
     }
     this.filteredConcepts.next(
-      this.concepts.filter(concept => concept.name.toLowerCase().indexOf(search!) > -1)
+      this.concepts.filter(concept => concept.name.toLowerCase().indexOf(search) > -1),
     );
   }
 
@@ -145,7 +153,7 @@ export class EditChoiceComponent {
     const optionGroup = this.fb.group({
       id: [id],
       text: [text, Validators.required],
-      is_correct: [isCorrect]
+      is_correct: [isCorrect],
     });
     this.optionsData.push(optionGroup);
     this.updateTableData();
@@ -159,7 +167,7 @@ export class EditChoiceComponent {
   addAdditionalInfo(text: string = '', correct: boolean = false): void {
     const infoGroup = this.fb.group({
       text: [text, Validators.required],
-      correct: [{value: correct, disabled: true}]
+      correct: [{ value: correct, disabled: true }],
     });
     this.additionalInfoData.push(infoGroup);
     this.updateAdditionalInfoTableData();
@@ -179,34 +187,36 @@ export class EditChoiceComponent {
 
     const currentOption = {
       answer: this.optionsData.at(index).get('text')!.value || '',
-      correct: this.optionsData.at(index).get('is_correct')!.value || false
+      correct: this.optionsData.at(index).get('is_correct')!.value || false,
     };
 
     const otherOptions = this.optionsData.value
       .filter((_: any, i: number) => i !== index)
       .map((option: { id: number; text: string; is_correct: boolean }) => ({
         answer: option.text,
-        correct: option.is_correct
+        correct: option.is_correct,
       }));
 
-    this.mcqService.getAnswer(
-      this.questionField.getRawContent(),
-      currentOption,
-      otherOptions,
-      this.getConceptById(Number(this.generationForm.value.generationConcept))
-    ).subscribe({
-      next: (answer: Answer) => {
-        this.optionsData.at(index).get('id')!.setValue("-1");
-        this.optionsData.at(index).get('text')!.setValue(answer.answer);
-        this.optionsData.at(index).get('is_correct')!.setValue(answer.correct);
-        this.isGenerating[index] = false;
-      },
-      error: (error) => {
-        console.error('Error generating option:', error);
-        this.isGenerating[index] = false;
-        this.snackBar.open('Fehler beim Generieren der Option', 'Schließen', { duration: 3000 });
-      }
-    });
+    this.mcqService
+      .getAnswer(
+        this.questionField.getRawContent(),
+        currentOption,
+        otherOptions,
+        this.getConceptById(Number(this.generationForm.value.generationConcept)),
+      )
+      .subscribe({
+        next: (answer: Answer) => {
+          this.optionsData.at(index).get('id')!.setValue('-1');
+          this.optionsData.at(index).get('text')!.setValue(answer.answer);
+          this.optionsData.at(index).get('is_correct')!.setValue(answer.correct);
+          this.isGenerating[index] = false;
+        },
+        error: error => {
+          console.error('Error generating option:', error);
+          this.isGenerating[index] = false;
+          this.snackBar.open('Fehler beim Generieren der Option', 'Schließen', { duration: 3000 });
+        },
+      });
   }
 
   generateQuestion(): void {
@@ -216,28 +226,30 @@ export class EditChoiceComponent {
     }
 
     this.isQuestionGenerating = true;
-    this.mcqService.getQuestionAndAnswers(
-      this.getConceptById(Number(this.generationForm.value.generationConcept)),
-      this.generationForm.value.generationOptionCount,
-    ).subscribe({
-      next: (data) => {
-        console.log('Generated question:', data);
-        this.questionField.setContent(data.question || '');
-        this.optionsData.clear();
-        if (data.answers) {
-          data.answers.forEach((answer: Answer) => {
-            this.addOption(-1, answer.answer, answer.correct);
-          });
-        }
-      },
-      error: (error) => {
-        console.error('Error generating question:', error);
-        this.snackBar.open('Fehler beim Generieren der Frage', 'Schließen', { duration: 3000 });
-      },
-      complete: () => {
-        this.resetLoadingIndicators();
-      }
-    });
+    this.mcqService
+      .getQuestionAndAnswers(
+        this.getConceptById(Number(this.generationForm.value.generationConcept)),
+        this.generationForm.value.generationOptionCount,
+      )
+      .subscribe({
+        next: data => {
+          console.log('Generated question:', data);
+          this.questionField.setContent(data.question || '');
+          this.optionsData.clear();
+          if (data.answers) {
+            data.answers.forEach((answer: Answer) => {
+              this.addOption(-1, answer.answer, answer.correct);
+            });
+          }
+        },
+        error: error => {
+          console.error('Error generating question:', error);
+          this.snackBar.open('Fehler beim Generieren der Frage', 'Schließen', { duration: 3000 });
+        },
+        complete: () => {
+          this.resetLoadingIndicators();
+        },
+      });
   }
 
   private resetLoadingIndicators(): void {
@@ -262,7 +274,9 @@ export class EditChoiceComponent {
 
       this.snackBar.open('Bewertungen wurden übernommen', 'Schließen', { duration: 3000 });
     } else {
-      this.snackBar.open('Anzahl der Optionen und Begründungen stimmt nicht überein', 'Schließen', { duration: 3000 });
+      this.snackBar.open('Anzahl der Optionen und Begründungen stimmt nicht überein', 'Schließen', {
+        duration: 3000,
+      });
     }
   }
 
@@ -281,10 +295,7 @@ export class EditChoiceComponent {
           if (evalData.evaluations) {
             evalData.evaluations.forEach((evaluation: McqEvaluation, index: number) => {
               if (evaluation.reasoning) {
-                this.addAdditionalInfo(
-                  `${evaluation.reasoning}`,
-                  evaluation.correct || false
-                );
+                this.addAdditionalInfo(`${evaluation.reasoning}`, evaluation.correct || false);
               }
             });
           }
@@ -294,10 +305,14 @@ export class EditChoiceComponent {
           console.error('Error evaluating answers:', error);
           this.snackBar.open('Fehler beim Bewerten der Antworten', 'Schließen', { duration: 3000 });
           this.isEvaluating = false;
-        }
+        },
       });
     } else {
-      this.snackBar.open('Bitte geben Sie eine Frage und mindestens eine Antwortoption ein', 'Schließen', { duration: 3000 });
+      this.snackBar.open(
+        'Bitte geben Sie eine Frage und mindestens eine Antwortoption ein',
+        'Schließen',
+        { duration: 3000 },
+      );
     }
   }
 
@@ -319,14 +334,16 @@ export class EditChoiceComponent {
             },
             error: error => {
               console.error('Error updating question:', error);
-              this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', { duration: 3000 });
+              this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', {
+                duration: 3000,
+              });
               this.isSaving = false;
-            }
+            },
           });
         } else {
           this.isSaving = false;
         }
-      }
+      },
     });
   }
 
@@ -337,18 +354,24 @@ export class EditChoiceComponent {
   onCancel(): void {
     this.confirmationService.confirm({
       title: 'Bearbeitung abbrechen',
-      message: 'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
+      message:
+        'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
       acceptLabel: 'Bearbeitung abbrechen',
       declineLabel: 'Weiter bearbeiten',
       swapColors: true,
       accept: () => {
         this.router.navigate(['dashboard']);
-      }
+      },
     });
   }
 
   private buildDTO(): detailedQuestionDTO | null {
-    if ((this.thisQuestionType === questionType.SINGLECHOICE || this.thisQuestionType === questionType.MULTIPLECHOICE) && this.choiceForm.valid && this.detailedQuestionData) {
+    if (
+      (this.thisQuestionType === questionType.SINGLECHOICE ||
+        this.thisQuestionType === questionType.MULTIPLECHOICE) &&
+      this.choiceForm.valid &&
+      this.detailedQuestionData
+    ) {
       return {
         ...this.detailedQuestionData,
         name: this.choiceForm.value.questionTitle,
@@ -364,13 +387,18 @@ export class EditChoiceComponent {
           textHTML: this.questionField.getContent(),
           shuffleoptions: false,
           isSC: this.choiceForm.value.questionType === questionType.SINGLECHOICE,
-          mcOptions: this.optionsData.value.map((option: { id: number, text: string, is_correct: boolean }) => ({
-            id: option.id,
-            text: option.text,
-            is_correct: option.is_correct
-          })),
-          additionalInfo: this.additionalInfoData.value.map((info: { text: string, correct: boolean }) => info.text) || []
-        }
+          mcOptions: this.optionsData.value.map(
+            (option: { id: number; text: string; is_correct: boolean }) => ({
+              id: option.id,
+              text: option.text,
+              is_correct: option.is_correct,
+            }),
+          ),
+          additionalInfo:
+            this.additionalInfoData.value.map(
+              (info: { text: string; correct: boolean }) => info.text,
+            ) || [],
+        },
       };
     }
     return null;
@@ -379,20 +407,33 @@ export class EditChoiceComponent {
   private handleRouteParams(): void {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
-      this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
-        this.thisQuestionType = data.type as questionType;
-        if (data.type === questionType.SINGLECHOICE || data.type === questionType.MULTIPLECHOICE) {
-          this.detailedQuestionData = data;
-          this.setContent();
-        } else {
-          this.snackBar.open('ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Multiple/Single Choice Aufgabe!', 'Schließen', { duration: 10000 });
-        }
-      });
+      this.questionDataService
+        .getDetailedQuestionData(questionId, this.thisQuestionType)
+        .subscribe(data => {
+          this.thisQuestionType = data.type;
+          if (
+            data.type === questionType.SINGLECHOICE ||
+            data.type === questionType.MULTIPLECHOICE
+          ) {
+            this.detailedQuestionData = data;
+            this.setContent();
+          } else {
+            this.snackBar.open(
+              'ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Multiple/Single Choice Aufgabe!',
+              'Schließen',
+              { duration: 10000 },
+            );
+          }
+        });
     });
   }
 
   private setContent(): void {
-    if ((this.thisQuestionType === questionType.SINGLECHOICE || this.thisQuestionType === questionType.MULTIPLECHOICE) && this.detailedQuestionData) {
+    if (
+      (this.thisQuestionType === questionType.SINGLECHOICE ||
+        this.thisQuestionType === questionType.MULTIPLECHOICE) &&
+      this.detailedQuestionData
+    ) {
       this.choiceForm.patchValue({
         questionTitle: this.detailedQuestionData.name,
         questionDifficulty: this.detailedQuestionData.level.toString(),
@@ -405,11 +446,13 @@ export class EditChoiceComponent {
       this.generationForm.patchValue({
         generationConcept: this.detailedQuestionData.conceptNodeId || '',
         generationTopic: '',
-        generationOptionCount: this.detailedQuestionData.mcQuestion?.mcOptions.length || 4
+        generationOptionCount: this.detailedQuestionData.mcQuestion?.mcOptions.length || 4,
       });
 
       if (this.detailedQuestionData.mcQuestion) {
-        this.questionField.setContent(this.detailedQuestionData.mcQuestion.textHTML || this.detailedQuestionData.text);
+        this.questionField.setContent(
+          this.detailedQuestionData.mcQuestion.textHTML || this.detailedQuestionData.text,
+        );
 
         this.optionsData.clear();
         this.detailedQuestionData.mcQuestion.mcOptions.forEach(option => {

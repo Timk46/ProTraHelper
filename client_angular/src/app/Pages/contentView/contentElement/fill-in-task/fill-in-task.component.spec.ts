@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { FillinTaskComponent } from './fill-in-task.component';
-
 
 describe('FillinTaskComponent', () => {
   let component: FillinTaskComponent;
@@ -8,9 +8,8 @@ describe('FillinTaskComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ FillinTaskComponent ]
-    })
-    .compileComponents();
+      declarations: [FillinTaskComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(FillinTaskComponent);
     component = fixture.componentInstance;

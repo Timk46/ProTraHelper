@@ -4,7 +4,7 @@ export const pointDefinitions = {
     name: 1,
     type: 1,
     attribute: 1,
-    method: 1
+    method: 1,
   },
   edge: {
     found: 1,
@@ -14,6 +14,6 @@ export const pointDefinitions = {
     cardinalityStart: 1,
     //targetText: 1,
     cardinalityEnd: 1,
-    description: 1
-  }
-}
+    description: 1,
+  },
+};

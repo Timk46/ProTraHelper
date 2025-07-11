@@ -1,10 +1,8 @@
+import type { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from '@nestjs/websockets';
 import {
   WebSocketGateway,
   WebSocketServer,
   SubscribeMessage,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  OnGatewayInit,
   WsResponse,
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
@@ -16,9 +14,7 @@ import { Server, Socket } from 'socket.io';
   },
   namespace: 'pmpm',
 })
-export class PmpmEventsGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+export class PmpmEventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(PmpmEventsGateway.name);
   private readonly clientBySession = new Map<string, string>();
 
@@ -88,9 +84,7 @@ export class PmpmEventsGateway
   // Client-side message handling for parameter changes
   @SubscribeMessage('parameter.change')
   handleParameterChange(client: Socket, payload: any): void {
-    this.logger.log(
-      `Received parameter.change from ${client.id}: ${JSON.stringify(payload)}`,
-    );
+    this.logger.log(`Received parameter.change from ${client.id}: ${JSON.stringify(payload)}`);
 
     // In a real implementation, this would trigger a calculation or update
     // For now, we just log it and echo back a response after a short delay

@@ -2,9 +2,11 @@
   <!-- Breadcrumb navigation with search icon -->
   <div class="breadcrumb-container">
     <div class="breadcrumbs" *ngIf="!isSearchVisible">
-      <a *ngFor="let item of openLayers; let i = index"
-         [ngClass]="{'active': i === openLayers.length - 1}"
-         (click)="onTabClick(i)">
+      <a
+        *ngFor="let item of openLayers; let i = index"
+        [ngClass]="{ active: i === openLayers.length - 1 }"
+        (click)="onTabClick(i)"
+      >
         {{ item.name }}
         <mat-icon *ngIf="i < openLayers.length - 1">chevron_right</mat-icon>
       </a>
@@ -16,7 +18,8 @@
       mat-icon-button
       class="search-toggle-btn"
       (click)="showSearch()"
-      matTooltip="Suchen">
+      matTooltip="Suchen"
+    >
       <mat-icon>search</mat-icon>
     </button>
 
@@ -29,7 +32,8 @@
           [(ngModel)]="searchQuery"
           (input)="onSearchInput()"
           placeholder="Konzepte durchsuchen"
-          #searchInput>
+          #searchInput
+        />
         <button matSuffix mat-icon-button aria-label="Clear" (click)="hideSearch()">
           <mat-icon>close</mat-icon>
         </button>
@@ -46,7 +50,11 @@
       </button>
     </div>
     <mat-nav-list>
-      <a mat-list-item *ngFor="let result of searchResults" (click)="navigateToSearchResult(result)">
+      <a
+        mat-list-item
+        *ngFor="let result of searchResults"
+        (click)="navigateToSearchResult(result)"
+      >
         <div class="search-result-item">
           <mat-icon *ngIf="result.childIds.length > 0">folder</mat-icon>
           <mat-icon *ngIf="result.childIds.length === 0">description</mat-icon>
@@ -62,21 +70,32 @@
       <mat-list>
         <mat-list-item
           *ngFor="let entry of openLayers[openLayers.length - 1].nodes; let i = index"
-          [ngClass]="{'selected-item': entry.databaseId == currentNodeId, 'back-item': i === 0 && !openLayers[openLayers.length - 1].isRoot}"
-          (click)="onTableRowClick(entry, i, openLayers[openLayers.length - 1].isRoot)">
-
-          <div *ngIf="i === 0 && !openLayers[openLayers.length - 1].isRoot" class="list-item-content back-button">
+          [ngClass]="{
+            'selected-item': entry.databaseId == currentNodeId,
+            'back-item': i === 0 && !openLayers[openLayers.length - 1].isRoot,
+          }"
+          (click)="onTableRowClick(entry, i, openLayers[openLayers.length - 1].isRoot)"
+        >
+          <div
+            *ngIf="i === 0 && !openLayers[openLayers.length - 1].isRoot"
+            class="list-item-content back-button"
+          >
             <mat-icon>arrow_back</mat-icon>
-            <span>Zurück zu {{entry.name}}</span>
+            <span>Zurück zu {{ entry.name }}</span>
           </div>
 
-          <div *ngIf="i !== 0 || openLayers[openLayers.length - 1].isRoot" class="list-item-content">
+          <div
+            *ngIf="i !== 0 || openLayers[openLayers.length - 1].isRoot"
+            class="list-item-content"
+          >
             <div class="icon-container">
               <mat-icon *ngIf="entry.childIds.length > 0">folder</mat-icon>
               <mat-icon *ngIf="entry.childIds.length === 0">description</mat-icon>
             </div>
-            <span>{{entry.name}}</span>
-            <mat-icon *ngIf="entry.childIds.length > 0" class="chevron-icon">chevron_right</mat-icon>
+            <span>{{ entry.name }}</span>
+            <mat-icon *ngIf="entry.childIds.length > 0" class="chevron-icon"
+              >chevron_right</mat-icon
+            >
           </div>
         </mat-list-item>
       </mat-list>

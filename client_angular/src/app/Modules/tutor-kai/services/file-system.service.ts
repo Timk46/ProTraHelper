@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { QuestionDTO } from '@DTOs/index';
+import type { QuestionDTO } from '@DTOs/index';
 
 /**
  * Schnittstelle für eine Datei im Dateisystem
@@ -36,15 +36,15 @@ export type FileSystemItem = EditorFile | EditorFolder;
  * Service zur Verwaltung des virtuellen Dateisystems für den Code-Editor
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FileSystemService {
   // Subjects für die reaktive Verarbeitung
-  private filesSubject = new BehaviorSubject<EditorFile[]>([]);
-  private activeFileSubject = new BehaviorSubject<EditorFile | null>(null);
-  private fileTreeSubject = new BehaviorSubject<FileSystemItem[]>([]);
-  private projectRootSubject = new BehaviorSubject<string>('');
-  private openTabsSubject = new BehaviorSubject<EditorFile[]>([]);
+  private readonly filesSubject = new BehaviorSubject<EditorFile[]>([]);
+  private readonly activeFileSubject = new BehaviorSubject<EditorFile | null>(null);
+  private readonly fileTreeSubject = new BehaviorSubject<FileSystemItem[]>([]);
+  private readonly projectRootSubject = new BehaviorSubject<string>('');
+  private readonly openTabsSubject = new BehaviorSubject<EditorFile[]>([]);
 
   // Observables für die Komponenten
   readonly files$ = this.filesSubject.asObservable();
@@ -59,7 +59,7 @@ export class FileSystemService {
    * Initialisiert das Dateisystem mit Dateien aus einer Aufgabe
    */
   initializeFromTask(task: QuestionDTO | null): void {
-    if (!task || !task.codingQuestion || !task.codingQuestion.codeGerueste) {
+    if (!task?.codingQuestion?.codeGerueste) {
       this.reset();
       return;
     }
@@ -76,7 +76,7 @@ export class FileSystemService {
       name: 'src',
       path: `${projectName}/src`,
       isExpanded: true,
-      children: []
+      children: [],
     };
 
     fileSystemItems.push(mainFolder);
@@ -91,7 +91,7 @@ export class FileSystemService {
         language: language,
         content: fileData.code,
         isActive: index === 0, // Erste Datei ist aktiv
-        isModified: false
+        isModified: false,
       };
 
       files.push(file);
@@ -110,7 +110,7 @@ export class FileSystemService {
         language: language,
         content: '',
         isActive: true,
-        isModified: false
+        isModified: false,
       };
 
       files.push(defaultFile);
@@ -156,7 +156,7 @@ export class FileSystemService {
       this.activeFileSubject.next({
         ...activeFile,
         content,
-        isModified: true
+        isModified: true,
       });
     }
 
@@ -174,14 +174,14 @@ export class FileSystemService {
           // Es ist ein Ordner
           return {
             ...item,
-            children: updateItemInTree(item.children)
+            children: updateItemInTree(item.children),
           };
         } else if (item.id === fileId) {
           // Es ist die gesuchte Datei
           return {
             ...item,
             content,
-            isModified: true
+            isModified: true,
           };
         }
         return item;
@@ -202,13 +202,13 @@ export class FileSystemService {
     // Aktualisiere Dateien
     const updatedFiles = currentFiles.map(file => ({
       ...file,
-      isActive: file.id === fileId
+      isActive: file.id === fileId,
     }));
 
     // Aktualisiere Tabs
     const updatedTabs = currentTabs.map(tab => ({
       ...tab,
-      isActive: tab.id === fileId
+      isActive: tab.id === fileId,
     }));
 
     // Wenn die Datei nicht in den Tabs ist, öffne sie als Tab
@@ -217,7 +217,7 @@ export class FileSystemService {
       if (fileToOpen) {
         updatedTabs.push({
           ...fileToOpen,
-          isActive: true
+          isActive: true,
         });
       }
     }
@@ -242,7 +242,7 @@ export class FileSystemService {
       language,
       content,
       isActive: false,
-      isModified: true
+      isModified: true,
     };
 
     const updatedFiles = [...currentFiles, newFile];
@@ -263,7 +263,7 @@ export class FileSystemService {
         // Füge die Datei zum src-Ordner hinzu
         return {
           ...item,
-          children: [...item.children, newFile]
+          children: [...item.children, newFile],
         };
       }
       return item;
@@ -289,7 +289,7 @@ export class FileSystemService {
       const allFiles = this.filesSubject.value;
       const updatedAllFiles = allFiles.map(file => ({
         ...file,
-        isActive: file.id === updatedTabs[0].id
+        isActive: file.id === updatedTabs[0].id,
       }));
 
       this.filesSubject.next(updatedAllFiles);
@@ -299,7 +299,7 @@ export class FileSystemService {
       const allFiles = this.filesSubject.value;
       const updatedAllFiles = allFiles.map(file => ({
         ...file,
-        isActive: false
+        isActive: false,
       }));
 
       this.filesSubject.next(updatedAllFiles);
@@ -335,10 +335,11 @@ export class FileSystemService {
       if ('children' in item) {
         return {
           ...item,
-          children: item.children.filter(child =>
-            // Wenn es eine Datei ist, behalte sie nur, wenn die ID nicht übereinstimmt
-            !('content' in child) || child.id !== fileId
-          )
+          children: item.children.filter(
+            child =>
+              // Wenn es eine Datei ist, behalte sie nur, wenn die ID nicht übereinstimmt
+              !('content' in child) || child.id !== fileId,
+          ),
         };
       }
       return item;
@@ -365,19 +366,19 @@ export class FileSystemService {
     // Alle Tabs deaktivieren
     const updatedTabs = currentTabs.map(tab => ({
       ...tab,
-      isActive: false
+      isActive: false,
     }));
 
     // Den neuen Tab hinzufügen und aktivieren
     updatedTabs.push({
       ...fileToOpen,
-      isActive: true
+      isActive: true,
     });
 
     // Aktualisiere alle Dateien
     const updatedAllFiles = allFiles.map(file => ({
       ...file,
-      isActive: file.id === fileId
+      isActive: file.id === fileId,
     }));
 
     this.filesSubject.next(updatedAllFiles);

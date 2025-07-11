@@ -1,12 +1,12 @@
 import { Body, Controller, Get, Post, Param, Req, UseGuards } from '@nestjs/common';
 import { DatabaseTaskCommunicationService } from './database-task-communication.service';
-import { taskDataDTO, taskAttemptDataDTO, taskWorkspaceDataDTO } from '@DTOs/index';
+import type { taskDataDTO, taskWorkspaceDataDTO } from '@DTOs/index';
+import { taskAttemptDataDTO } from '@DTOs/index';
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 
 @UseGuards(RolesGuard)
 @Controller('database-task-communication')
 export class DatabaseTaskCommunicationController {
-
   constructor(private readonly tasksService: DatabaseTaskCommunicationService) {}
 
   /**
@@ -17,7 +17,7 @@ export class DatabaseTaskCommunicationController {
    */
   @roles('TEACHER', 'ADMIN')
   @Get('getTaskImage/:taskId')
-  async getTaskImage(@Param('taskId') taskId: number): Promise<{imageB64: string}> {
+  async getTaskImage(@Param('taskId') taskId: number): Promise<{ imageB64: string }> {
     if (isNaN(taskId)) {
       throw new Error('Invalid taskId');
     }
@@ -33,7 +33,10 @@ export class DatabaseTaskCommunicationController {
    */
   @roles('ANY')
   @Get('taskAttempt/:taskId')
-  async getTaskAttemptData(@Param('taskId')taskId: number, @Req() req): Promise<taskAttemptDataDTO> {
+  async getTaskAttemptData(
+    @Param('taskId') taskId: number,
+    @Req() req,
+  ): Promise<taskAttemptDataDTO> {
     if (isNaN(taskId)) {
       throw new Error('Invalid taskId');
     }
@@ -49,14 +52,20 @@ export class DatabaseTaskCommunicationController {
    */
   @roles('ANY')
   @Post('taskAttempt')
-  setTaskAttemptData(@Body() taskAttemptData: taskAttemptDataDTO, @Req() req): Promise<taskAttemptDataDTO> {
+  setTaskAttemptData(
+    @Body() taskAttemptData: taskAttemptDataDTO,
+    @Req() req,
+  ): Promise<taskAttemptDataDTO> {
     return this.tasksService.setTaskAttemptData(taskAttemptData, req.user.id);
   }
 
   @roles('ANY')
   @Get('generateUmlFeedback/:taskId')
-  generateUmlFeedback(@Req() req, @Param('taskId') taskAttempt: number): Promise<{response: string}> {
-    console.log("###### generation for taskId:", taskAttempt);
+  generateUmlFeedback(
+    @Req() req,
+    @Param('taskId') taskAttempt: number,
+  ): Promise<{ response: string }> {
+    console.log('###### generation for taskId:', taskAttempt);
     if (isNaN(Number(taskAttempt))) {
       throw new Error('Invalid taskId');
     }
@@ -71,7 +80,10 @@ export class DatabaseTaskCommunicationController {
    */
   @roles('ANY')
   @Post('commitAttempt')
-  commitAttemptGetPoints(@Body() taskAttemptData: taskAttemptDataDTO, @Req() req): Promise<{points: number}> {
+  commitAttemptGetPoints(
+    @Body() taskAttemptData: taskAttemptDataDTO,
+    @Req() req,
+  ): Promise<{ points: number }> {
     return this.tasksService.commitAttemptGetPoints(taskAttemptData, req.user.id);
   }
 
@@ -84,15 +96,15 @@ export class DatabaseTaskCommunicationController {
    */
   @roles('TEACHER', 'ADMIN')
   @Get('taskWorkspace/:taskId')
-  async getTaskData(@Param('taskId') taskId : number): Promise<taskDataDTO> {
+  async getTaskData(@Param('taskId') taskId: number): Promise<taskDataDTO> {
     if (isNaN(taskId)) {
       throw new Error('Invalid taskId');
     }
     console.log('DatabaseTaskCommunicationController: getTaskData()');
-  return this.tasksService.getTaskData(Number(taskId));
+    return this.tasksService.getTaskData(Number(taskId));
   }
 
-    /**
+  /**
    * Retrieves the workspace data for a specific task.
    * This data has no solution and is used for the student view.
    *
@@ -102,12 +114,11 @@ export class DatabaseTaskCommunicationController {
    */
   @roles('ANY')
   @Get('taskWorkspaceData/:taskId')
-  async getTaskWorkspaceData(@Param('taskId') taskId : number): Promise<taskWorkspaceDataDTO> {
+  async getTaskWorkspaceData(@Param('taskId') taskId: number): Promise<taskWorkspaceDataDTO> {
     if (isNaN(taskId)) {
       throw new Error('Invalid taskId');
     }
     console.log('DatabaseTaskCommunicationController: getTaskWorkspaceData()');
-  return this.tasksService.getTaskWorkspaceData(Number(taskId));
+    return this.tasksService.getTaskWorkspaceData(Number(taskId));
   }
-
 }

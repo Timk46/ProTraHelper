@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
-import { User, contentElementType } from '@prisma/client';
-import { UserDTO } from '@DTOs/user.dto';
+import type { User } from '@prisma/client';
+import { contentElementType } from '@prisma/client';
+import type { UserDTO } from '@DTOs/user.dto';
 
 /**
  * Service responsible for administrative operations such as managing users and subjects.
@@ -14,8 +15,8 @@ export class AdminService {
    * @param usersService The Users service to handle user-related operations.
    */
   constructor(
-    private prisma: PrismaService,
-    private usersService: UsersService
+    private readonly prisma: PrismaService,
+    private readonly usersService: UsersService,
   ) {}
 
   /**
@@ -30,8 +31,8 @@ export class AdminService {
         email: true,
         codeSubmission: {
           select: {
-            kiFeedback: { select: { id: true } }
-          }
+            kiFeedback: { select: { id: true } },
+          },
         },
         chatBotMessage: { select: { id: true } },
         userSubjects: {
@@ -43,20 +44,25 @@ export class AdminService {
       },
     });
 
-    const usersWithProgress = await Promise.all(users.map(async (user) => {
-      const totalProgress = await this.usersService.getUserTotalProgress(user.id) / 100;
-      return {
-        ...user,
-        kiFeedbackCount: user.codeSubmission.reduce((total, submission) => total + submission.kiFeedback.length, 0),
-        chatBotMessageCount: user.chatBotMessage.length,
-        totalProgress,
-        subjects: user.userSubjects.map(us => ({
-          id: us.subject.id,
-          name: us.subject.name,
-          registeredForSL: us.registeredForSL,
-        })),
-      };
-    }));
+    const usersWithProgress = await Promise.all(
+      users.map(async user => {
+        const totalProgress = (await this.usersService.getUserTotalProgress(user.id)) / 100;
+        return {
+          ...user,
+          kiFeedbackCount: user.codeSubmission.reduce(
+            (total, submission) => total + submission.kiFeedback.length,
+            0,
+          ),
+          chatBotMessageCount: user.chatBotMessage.length,
+          totalProgress,
+          subjects: user.userSubjects.map(us => ({
+            id: us.subject.id,
+            name: us.subject.name,
+            registeredForSL: us.registeredForSL,
+          })),
+        };
+      }),
+    );
 
     return usersWithProgress;
   }
@@ -166,7 +172,7 @@ export class AdminService {
     }
 
     return {
-      message: `Processed ${processedUsers} users for subject ${subjectId}. Created ${createdUsers} new users.`
+      message: `Processed ${processedUsers} users for subject ${subjectId}. Created ${createdUsers} new users.`,
     };
   }
 
@@ -219,8 +225,8 @@ export class AdminService {
       return acc;
     }, {});
 
-    userProgress.forEach((progress) => {
-      const questionType = progress.contentElement.question?.type;
+    userProgress.forEach(progress => {
+      const questionType = progress.contentElement.question.type;
       if (questionType && progressByType[questionType]) {
         progressByType[questionType].completed += 1;
       }
@@ -296,7 +302,7 @@ export class AdminService {
 
     const dailyProgress = userProgress.reduce((acc, progress) => {
       const date = progress.updatedAt.toISOString().split('T')[0];
-      const questionType = progress.contentElement.question?.type || 'Unknown';
+      const questionType = progress.contentElement.question.type || 'Unknown';
 
       if (!acc[date]) {
         acc[date] = {};
@@ -311,7 +317,7 @@ export class AdminService {
         date,
         type,
         count,
-      }))
+      })),
     );
   }
 

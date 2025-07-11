@@ -7,7 +7,8 @@
     #codeEditorMonaco
     [selectedLanguage]="language"
     [code]="activeFile?.content || ''"
-    (codeChange)="onCodeChanged($event)">
+    (codeChange)="onCodeChanged($event)"
+  >
   </app-code-editor>
 
   <!--

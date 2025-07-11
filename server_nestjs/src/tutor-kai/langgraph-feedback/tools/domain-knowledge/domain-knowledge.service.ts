@@ -1,27 +1,24 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Prisma, PrismaClient, TranscriptEmbedding } from '@prisma/client';
+import type { TranscriptEmbedding } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { OpenAIEmbeddings } from '@langchain/openai';
 // PrismaVectorStoreArgs might not be exported; remove explicit type later
 import { PrismaVectorStore } from '@langchain/community/vectorstores/prisma';
 import { Document } from '@langchain/core/documents';
 import { CohereRerank } from '@langchain/cohere'; // Added Cohere Reranker
-import { TranscriptChunk } from '@DTOs/index'; // Assuming DTO is accessible
+import type { TranscriptChunk } from '@DTOs/index'; // Assuming DTO is accessible
 
 @Injectable()
 export class DomainKnowledgeService implements OnModuleInit {
   private readonly logger = new Logger(DomainKnowledgeService.name);
   // Provide required generic arguments: Model, ModelName, SelectType, FilterType
-  private vectorStore: PrismaVectorStore<
-    TranscriptEmbedding,
-    'TranscriptEmbedding',
-    any,
-    any
-  >;
+  private vectorStore: PrismaVectorStore<TranscriptEmbedding, 'TranscriptEmbedding', any, any>;
   private cohereReranker: CohereRerank; // Added Cohere Reranker instance
-  private db: PrismaClient; // Direct PrismaClient instance
+  private readonly db: PrismaClient; // Direct PrismaClient instance
 
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     this.db = new PrismaClient();
   }
 
@@ -51,9 +48,10 @@ export class DomainKnowledgeService implements OnModuleInit {
       };
 
       // Simplify generic for withModel - it primarily needs the model type
-      this.vectorStore = PrismaVectorStore.withModel<TranscriptEmbedding>(
-        this.db,
-      ).create(embeddings, vectorStoreArgs);
+      this.vectorStore = PrismaVectorStore.withModel<TranscriptEmbedding>(this.db).create(
+        embeddings,
+        vectorStoreArgs,
+      );
 
       this.logger.log('PrismaVectorStore initialized successfully.');
     } catch (error) {
@@ -65,9 +63,7 @@ export class DomainKnowledgeService implements OnModuleInit {
     try {
       const cohereApiKey = this.configService.get<string>('COHERE_API_KEY');
       if (!cohereApiKey) {
-        this.logger.error(
-          'COHERE_API_KEY is not configured. Reranker will not function.',
-        );
+        this.logger.error('COHERE_API_KEY is not configured. Reranker will not function.');
         // Reranker will be undefined, searchLectureContent needs to handle this
       } else {
         this.cohereReranker = new CohereRerank({
@@ -89,10 +85,7 @@ export class DomainKnowledgeService implements OnModuleInit {
    * @param k The number of results to return (default: 3).
    * @returns An array of relevant transcript chunks.
    */
-  async searchLectureContent(
-    query: string,
-    k = 20,
-  ): Promise<TranscriptChunk[]> {
+  async searchLectureContent(query: string, k = 20): Promise<TranscriptChunk[]> {
     if (!this.vectorStore) {
       this.logger.error('Vector store is not initialized.');
       // Consider throwing an error or returning an empty array
@@ -101,13 +94,8 @@ export class DomainKnowledgeService implements OnModuleInit {
 
     this.logger.log(`Searching lecture content for query: "${query}" (k=${k})`);
     try {
-      const initialResults: Document[] = await this.vectorStore.similaritySearch(
-        query,
-        k,
-      );
-      this.logger.log(
-        `Found ${initialResults.length} initial results from vector search.`,
-      );
+      const initialResults: Document[] = await this.vectorStore.similaritySearch(query, k);
+      this.logger.log(`Found ${initialResults.length} initial results from vector search.`);
       // Clean the content of initial results before logging and reranking
       const cleanedInitialResults = initialResults.map(doc => this.cleanDocumentContent(doc));
 
@@ -118,7 +106,7 @@ export class DomainKnowledgeService implements OnModuleInit {
       if (this.cohereReranker) {
         // compressDocuments uses the topN defined in the constructor unless overridden
         // Pass cleaned results to the reranker
-        let rerankedResults = await this.cohereReranker.compressDocuments(
+        const rerankedResults = await this.cohereReranker.compressDocuments(
           cleanedInitialResults,
           query,
         );
@@ -126,19 +114,18 @@ export class DomainKnowledgeService implements OnModuleInit {
         // Filter results based on relevance score threshold
         const relevanceThreshold = 0.4;
         const filteredResults = rerankedResults.filter(doc => {
-          const score = doc.metadata?.relevanceScore;
+          const score = doc.metadata.relevanceScore;
           // Keep if score is missing or >= threshold
           return score === undefined || score >= relevanceThreshold;
         });
         finalResults = filteredResults; // Use the filtered results
-
       } else {
-        this.logger.warn(
-          'Cohere Reranker not available. Returning results without reranking.',
-        );
+        this.logger.warn('Cohere Reranker not available. Returning results without reranking.');
         // Fallback: Use top 5 from the *cleaned* initial results if reranker failed
         finalResults = cleanedInitialResults.slice(0, 5);
-        this.logger.log(`Returning top ${finalResults.length} results without reranking (no score filtering applied).`);
+        this.logger.log(
+          `Returning top ${finalResults.length} results without reranking (no score filtering applied).`,
+        );
       }
 
       // Transform the final set of documents
@@ -155,9 +142,7 @@ export class DomainKnowledgeService implements OnModuleInit {
    * Assumes the document's pageContent is a JSON stringified TranscriptChunk structure.
    * Adapted from feedback_rag.service.ts.
    */
-  private transformDocumentsToTranscriptChunks(
-    documents: Document[],
-  ): TranscriptChunk[] {
+  private transformDocumentsToTranscriptChunks(documents: Document[]): TranscriptChunk[] {
     // Note: Ensure the TranscriptChunk DTO in '@DTOs/index' is updated
     // to include `relevanceScore?: number;` in its metadata interface.
     const transcriptChunks: TranscriptChunk[] = [];
@@ -175,7 +160,7 @@ export class DomainKnowledgeService implements OnModuleInit {
           pageContent.metadata !== null
         ) {
           // Extract relevance score if available from reranker metadata
-          const relevanceScore = doc.metadata?.relevanceScore;
+          const relevanceScore = doc.metadata.relevanceScore;
 
           transcriptChunks.push({
             TranscriptChunkContent: pageContent.TranscriptChunkContent,
@@ -195,7 +180,9 @@ export class DomainKnowledgeService implements OnModuleInit {
         }
       } catch (error) {
         this.logger.error(
-          `Error parsing pageContent for document ID ${doc.metadata?.id ?? 'unknown'}: ${doc.pageContent}`,
+          `Error parsing pageContent for document ID ${doc.metadata.id ?? 'unknown'}: ${
+            doc.pageContent
+          }`,
           error,
         );
       }
@@ -230,11 +217,18 @@ export class DomainKnowledgeService implements OnModuleInit {
           metadata: doc.metadata, // Preserve original metadata
         });
       } else {
-        this.logger.warn(`Skipping cleaning for document with unexpected pageContent structure: ${doc.pageContent}`);
+        this.logger.warn(
+          `Skipping cleaning for document with unexpected pageContent structure: ${doc.pageContent}`,
+        );
         return doc; // Return original document if structure is wrong
       }
     } catch (error) {
-      this.logger.error(`Error cleaning pageContent for document ID ${doc.metadata?.id ?? 'unknown'}: ${doc.pageContent}`, error);
+      this.logger.error(
+        `Error cleaning pageContent for document ID ${doc.metadata.id ?? 'unknown'}: ${
+          doc.pageContent
+        }`,
+        error,
+      );
       return doc; // Return original document on error
     }
   }

@@ -1,7 +1,8 @@
-import { discussionDTO } from '@DTOs/discussion.dto';
-import { discussionMessageDTO } from '@DTOs/discussionMessage.dto';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import type { discussionDTO } from '@DTOs/discussion.dto';
+import type { discussionMessageDTO } from '@DTOs/discussionMessage.dto';
+import type { OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import type { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import DOMPurify from 'dompurify';
 import Prism from 'prismjs';
 
@@ -15,16 +16,15 @@ import 'prismjs/components/prism-markup'; // For HTML
 @Component({
   selector: 'app-discussion-view-question',
   templateUrl: './discussion-view-question.component.html',
-  styleUrls: ['./discussion-view-question.component.scss']
+  styleUrls: ['./discussion-view-question.component.scss'],
 })
-export class DiscussionViewQuestionComponent implements OnChanges{
-
+export class DiscussionViewQuestionComponent implements OnChanges {
   readableDate: string = 'dummy date';
   sanitizedContent: SafeHtml = '';
 
   @Input() conceptNodeName: string = 'dummy concept';
 
-  @Input() messageData : discussionMessageDTO = {
+  @Input() messageData: discussionMessageDTO = {
     messageId: -1,
     discussionId: -1,
     authorId: -1,
@@ -32,38 +32,43 @@ export class DiscussionViewQuestionComponent implements OnChanges{
     createdAt: new Date(),
     messageText: 'dummy',
     isSolution: false,
-    isInitiator: false
+    isInitiator: false,
   };
 
-  @Input() discussionData : discussionDTO = {
+  @Input() discussionData: discussionDTO = {
     id: -1,
     initMessageId: -1,
-    title: "dummy title",
-    authorName: "dummy author",
+    title: 'dummy title',
+    authorName: 'dummy author',
     createdAt: new Date(),
-    contentNodeName: "dummy content node",
+    contentNodeName: 'dummy content node',
     commentCount: 0,
     isSolved: false,
   };
 
-  constructor(private sanitizer: DomSanitizer) { }
+  constructor(private readonly sanitizer: DomSanitizer) {}
 
- /*  ngOnChanges() {
+  /*  ngOnChanges() {
     if (this.discussionData.id != -1 && this.discussionData.createdAt != null && this.readableDate == 'dummy date'){
       this.readableDate = this.getDateDisplay(this.discussionData.createdAt);
     }
   } */
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['discussionData'] && changes['discussionData'].currentValue.id != -1 && changes['discussionData'].currentValue.createdAt != null && this.readableDate == 'dummy date'){
+    if (
+      changes['discussionData'] &&
+      changes['discussionData'].currentValue.id != -1 &&
+      changes['discussionData'].currentValue.createdAt != null &&
+      this.readableDate == 'dummy date'
+    ) {
       this.readableDate = this.getDateDisplay(changes['discussionData'].currentValue.createdAt);
     }
 
-    if (changes['messageData'] && changes['messageData'].currentValue) {
-      let messageData = changes['messageData'].currentValue;
+    if (changes['messageData']?.currentValue) {
+      const messageData = changes['messageData'].currentValue;
       if (messageData.messageId != -1 && messageData.createdAt != null) {
         this.readableDate = this.getDateDisplay(messageData.createdAt);
-        this.sanitizedContent =  this.prepareContent(messageData.messageText);
+        this.sanitizedContent = this.prepareContent(messageData.messageText);
       }
     }
   }
@@ -106,5 +111,4 @@ export class DiscussionViewQuestionComponent implements OnChanges{
       return null;
     }
   } */
-
 }

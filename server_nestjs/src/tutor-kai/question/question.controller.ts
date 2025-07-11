@@ -1,13 +1,6 @@
-import {
-  Controller,
-  Get,
-  Delete,
-  Param,
-  NotFoundException,
-  ParseIntPipe
-} from '@nestjs/common';
+import { Controller, Get, Delete, Param, NotFoundException, ParseIntPipe } from '@nestjs/common';
 import { QuestionService } from './question.service';
-import { CodingQuestionDto, QuestionDTO } from '@DTOs/index';
+import type { CodingQuestionDto, QuestionDTO } from '@DTOs/index';
 
 @Controller('questions')
 export class QuestionController {
@@ -55,9 +48,7 @@ export class QuestionController {
    * @returns {Promise<CodingQuestionDto>} A single coding question data transfer object.
    */
   @Get('codingQuestion/:id')
-  async findCodingQuestionById(
-    @Param('id') id: number,
-  ): Promise<CodingQuestionDto> {
+  async findCodingQuestionById(@Param('id') id: number): Promise<CodingQuestionDto> {
     return await this.questionService.findCodingQuestionDtoById(id);
   }
 

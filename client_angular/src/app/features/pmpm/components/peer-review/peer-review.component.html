@@ -2,7 +2,9 @@
   <mat-card>
     <mat-card-header>
       <mat-card-title>Peer-Review durchführen</mat-card-title>
-      <mat-card-subtitle>Bewerten Sie das 3D-Modell anhand der definierten Kriterien</mat-card-subtitle>
+      <mat-card-subtitle
+        >Bewerten Sie das 3D-Modell anhand der definierten Kriterien</mat-card-subtitle
+      >
     </mat-card-header>
 
     <mat-card-content>
@@ -25,7 +27,8 @@
           <app-three-viewer
             *ngIf="!isLoading && !error && modelPath"
             [modelId]="modelId"
-            [modelPath]="modelPath">
+            [modelPath]="modelPath"
+          >
           </app-three-viewer>
         </div>
       </div>
@@ -33,7 +36,10 @@
       <!-- Review form section -->
       <div class="review-form-section" *ngIf="!isSubmitted">
         <h3>Bewertungskriterien</h3>
-        <p class="helper-text">Bewerten Sie das Modell für jedes Kriterium auf einer Skala von 0 bis 5 und geben Sie optional Feedback.</p>
+        <p class="helper-text">
+          Bewerten Sie das Modell für jedes Kriterium auf einer Skala von 0 bis 5 und geben Sie
+          optional Feedback.
+        </p>
 
         <!-- Display error message -->
         <div *ngIf="error" class="error-banner">
@@ -53,15 +59,16 @@
 
             <!-- Score slider -->
             <div class="score-slider">
-              <label>Bewertung: {{ getScore(criterion.id)?.score || 0 }} / {{ criterion.maxScore }}</label>
-              <mat-slider
-                min="0"
-                [max]="criterion.maxScore"
-                step="1">
+              <label
+                >Bewertung: {{ getScore(criterion.id)?.score || 0 }} /
+                {{ criterion.maxScore }}</label
+              >
+              <mat-slider min="0" [max]="criterion.maxScore" step="1">
                 <input
                   matSliderThumb
                   [value]="getScore(criterion.id)?.score || 0"
-                  (valueChange)="updateScore(criterion.id, $event)">
+                  (valueChange)="updateScore(criterion.id, $event)"
+                />
               </mat-slider>
             </div>
 
@@ -72,7 +79,8 @@
                 matInput
                 rows="2"
                 [value]="getScore(criterion.id)?.feedback || ''"
-                (input)="updateFeedback(criterion.id, $any($event.target).value)"></textarea>
+                (input)="updateFeedback(criterion.id, $any($event.target).value)"
+              ></textarea>
             </mat-form-field>
 
             <mat-divider *ngIf="criteria.indexOf(criterion) < criteria.length - 1"></mat-divider>
@@ -83,18 +91,24 @@
         <h3>Allgemeine Kommentare</h3>
         <mat-form-field class="full-width">
           <mat-label>Geben Sie hier allgemeine Kommentare ein</mat-label>
-          <textarea
-            matInput
-            rows="4"
-            [(ngModel)]="review.comments"></textarea>
+          <textarea matInput rows="4" [(ngModel)]="review.comments"></textarea>
         </mat-form-field>
 
         <!-- Total score -->
         <div class="total-score">
           <h3>Gesamtbewertung</h3>
           <div class="score-display">
-            <div class="score-circle" [style.background]="calculateTotalScore() >= 70 ? '#4caf50' : (calculateTotalScore() >= 40 ? '#ff9800' : '#f44336')">
-              {{ calculateTotalScore() | number:'1.0-0' }}%
+            <div
+              class="score-circle"
+              [style.background]="
+                calculateTotalScore() >= 70
+                  ? '#4caf50'
+                  : calculateTotalScore() >= 40
+                    ? '#ff9800'
+                    : '#f44336'
+              "
+            >
+              {{ calculateTotalScore() | number: '1.0-0' }}%
             </div>
             <p>{{ isReviewComplete() ? 'Bewertung vollständig' : 'Bewertung unvollständig' }}</p>
           </div>
@@ -105,8 +119,14 @@
       <div *ngIf="isSubmitted" class="review-submitted">
         <mat-icon class="success-icon">check_circle</mat-icon>
         <h3>Bewertung erfolgreich übermittelt!</h3>
-        <p>Vielen Dank für Ihre Peer-Review. Ihre Bewertung wurde gespeichert und wird nun im System verarbeitet.</p>
-        <p class="score-summary">Die von Ihnen vergebene Gesamtbewertung: <strong>{{ calculateTotalScore() | number:'1.0-0' }}%</strong></p>
+        <p>
+          Vielen Dank für Ihre Peer-Review. Ihre Bewertung wurde gespeichert und wird nun im System
+          verarbeitet.
+        </p>
+        <p class="score-summary">
+          Die von Ihnen vergebene Gesamtbewertung:
+          <strong>{{ calculateTotalScore() | number: '1.0-0' }}%</strong>
+        </p>
       </div>
     </mat-card-content>
 
@@ -115,15 +135,13 @@
         mat-raised-button
         color="primary"
         [disabled]="isSaving || !isReviewComplete()"
-        (click)="submitReview()">
+        (click)="submitReview()"
+      >
         <mat-icon>send</mat-icon>
         Bewertung abschicken
       </button>
 
-      <button
-        mat-raised-button
-        [disabled]="isSaving"
-        (click)="saveDraft()">
+      <button mat-raised-button [disabled]="isSaving" (click)="saveDraft()">
         <mat-icon>save</mat-icon>
         Als Entwurf speichern
       </button>

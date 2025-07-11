@@ -1,25 +1,29 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { NavigationPreferenceService, NavigationType } from 'src/app/Services/navigation/navigation-preference.service';
+import type { OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import type { Router } from '@angular/router';
+import type { MatDialog } from '@angular/material/dialog';
+import type {
+  NavigationPreferenceService,
+  NavigationType,
+} from 'src/app/Services/navigation/navigation-preference.service';
 import { NavigationPreferenceSettingsComponent } from '../navigation-preference-settings/navigation-preference-settings.component';
-import { UserService } from 'src/app/Services/auth/user.service';
+import type { UserService } from 'src/app/Services/auth/user.service';
 
 @Component({
   selector: 'app-navigation-preference-toggle',
   templateUrl: './navigation-preference-toggle.component.html',
-  styleUrls: ['./navigation-preference-toggle.component.scss']
+  styleUrls: ['./navigation-preference-toggle.component.scss'],
 })
 export class NavigationPreferenceToggleComponent implements OnInit {
   currentPreference: NavigationType = 'graph';
   isEditMode = false;
 
   constructor(
-    private dialog: MatDialog,
-    private navigationPreferenceService: NavigationPreferenceService,
-    private router: Router,
-    private userService: UserService
-  ) { }
+    private readonly dialog: MatDialog,
+    private readonly navigationPreferenceService: NavigationPreferenceService,
+    private readonly router: Router,
+    private readonly userService: UserService,
+  ) {}
 
   ngOnInit(): void {
     this.currentPreference = this.navigationPreferenceService.currentPreference;
@@ -49,12 +53,16 @@ export class NavigationPreferenceToggleComponent implements OnInit {
     const currentUrl = this.router.url;
 
     // Only redirect if the user is currently on one of the navigation pages
-    if (currentUrl.includes('/graph') || currentUrl.includes('/mobile-navigator') || currentUrl.includes('/highlight-navigator')) {
+    if (
+      currentUrl.includes('/graph') ||
+      currentUrl.includes('/mobile-navigator') ||
+      currentUrl.includes('/highlight-navigator')
+    ) {
       const newPreference = this.navigationPreferenceService.currentPreference;
       const routes = {
         graph: '/dashboard/graph',
         mobile: '/dashboard/mobile-navigator',
-        highlight: '/dashboard/highlight-navigator'
+        highlight: '/dashboard/highlight-navigator',
       };
       this.router.navigate([routes[newPreference]]);
     }
@@ -64,7 +72,7 @@ export class NavigationPreferenceToggleComponent implements OnInit {
    * Get the tooltip text based on the current preference
    */
   get toggleTooltip(): string {
-    switch(this.currentPreference) {
+    switch (this.currentPreference) {
       case 'graph':
         return 'Wechseln zur mobilen Navigation';
       case 'mobile':
@@ -78,7 +86,7 @@ export class NavigationPreferenceToggleComponent implements OnInit {
    * Get the toggle button label based on the current preference
    */
   get toggleLabel(): string {
-    switch(this.currentPreference) {
+    switch (this.currentPreference) {
       case 'graph':
         return 'Graph-Navigation';
       case 'mobile':
@@ -92,7 +100,7 @@ export class NavigationPreferenceToggleComponent implements OnInit {
    * Get the toggle icon based on the current preference
    */
   get toggleIcon(): string {
-    switch(this.currentPreference) {
+    switch (this.currentPreference) {
       case 'graph':
         return 'view_list'; // Material icon for mobile view
       case 'mobile':
@@ -108,7 +116,7 @@ export class NavigationPreferenceToggleComponent implements OnInit {
   openSettings(): void {
     const dialogRef = this.dialog.open(NavigationPreferenceSettingsComponent, {
       width: '400px',
-      data: { moduleId: 1 } // TODO: Get the current module ID
+      data: { moduleId: 1 }, // TODO: Get the current module ID
     });
 
     dialogRef.afterClosed().subscribe(result => {

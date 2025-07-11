@@ -1,15 +1,13 @@
 import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import type { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-feedback-hint-confirmation-dialog',
   templateUrl: './feedback-hint-confirmation-dialog.component.html',
-  styleUrls: ['./feedback-hint-confirmation-dialog.component.scss']
+  styleUrls: ['./feedback-hint-confirmation-dialog.component.scss'],
 })
 export class FeedbackHintConfirmationDialogComponent {
-  constructor(
-    public dialogRef: MatDialogRef<FeedbackHintConfirmationDialogComponent>
-  ) {}
+  constructor(public dialogRef: MatDialogRef<FeedbackHintConfirmationDialogComponent>) {}
 
   /**
    * Close the dialog when the user cancels (chooses "Nein")

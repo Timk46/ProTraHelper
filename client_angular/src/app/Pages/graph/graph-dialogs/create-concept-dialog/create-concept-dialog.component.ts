@@ -1,46 +1,44 @@
-import { Component, Inject} from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { inject } from 'inversify';
-import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import type { MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { IActionDispatcher, TYPES } from 'sprotty';
-import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
+import type { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 
 @Component({
   selector: 'app-create-concept-dialog',
   templateUrl: './create-concept-dialog.component.html',
-  styleUrls: ['./create-concept-dialog.component.scss']
+  styleUrls: ['./create-concept-dialog.component.scss'],
 })
 export class CreateConceptDialogComponent {
-
-  name: string = "";
-  description: string = "";
+  name: string = '';
+  description: string = '';
   currentModuleId: number = 1;
-  levels: number[] = [1,2,3,4,5,6];
+  levels: number[] = [1, 2, 3, 4, 5, 6];
   moduleGoal: number = 0;
 
-    constructor(
-      public dialogRef: MatDialogRef<CreateConceptDialogComponent>,
-      @Inject(MAT_DIALOG_DATA) public data: any,
-      private graphService: GraphDataService
-      ) {
+  constructor(
+    public dialogRef: MatDialogRef<CreateConceptDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private readonly graphService: GraphDataService,
+  ) {}
 
-      }
+  onDialogOpen(): void {
+    //console.log("in onDialogOpen")
+  }
+  onNoClick(): void {
+    this.dialogRef.close('cancel');
+  }
 
+  createConcept(): void {
+    //console.log("trying to create concept: ", this.name, this.description)
+    this.graphService.createConcept(this.data.parentId, this.name, this.description, [
+      { moduleId: this.currentModuleId, goal: this.moduleGoal },
+    ]);
+    this.dialogRef.close('success');
+  }
 
-    onDialogOpen(): void {
-      //console.log("in onDialogOpen")
-    }
-    onNoClick(): void {
-      this.dialogRef.close('cancel');
-    }
-
-    createConcept(): void {
-      //console.log("trying to create concept: ", this.name, this.description)
-      this.graphService.createConcept(this.data.parentId, this.name, this.description, [{ moduleId: this.currentModuleId, goal: this.moduleGoal }]);
-      this.dialogRef.close('success');
-    }
-
-    cancelCreateConcept(): void {
-      this.dialogRef.close('cancel');
-    }
-
+  cancelCreateConcept(): void {
+    this.dialogRef.close('cancel');
+  }
 }

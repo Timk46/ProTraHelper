@@ -22,7 +22,10 @@ export class AiFeedbackController {
    * @returns The updated AI feedback entry.
    */
   @Patch(':id')
-  rateFeedback(@Param('id') id: string, @Body() updateAiFeedbackDto: { rating: 1 | 2 | 3 | 4 | 5 }) {
+  rateFeedback(
+    @Param('id') id: string,
+    @Body() updateAiFeedbackDto: { rating: 1 | 2 | 3 | 4 | 5 },
+  ) {
     return this.aiFeedbackService.rateFeedback(+id, updateAiFeedbackDto);
   }
 }
