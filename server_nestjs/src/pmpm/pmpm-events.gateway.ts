@@ -88,7 +88,9 @@ export class PmpmEventsGateway
   // Client-side message handling for parameter changes
   @SubscribeMessage('parameter.change')
   handleParameterChange(client: Socket, payload: any): void {
-    this.logger.log(`Received parameter.change from ${client.id}: ${JSON.stringify(payload)}`);
+    this.logger.log(
+      `Received parameter.change from ${client.id}: ${JSON.stringify(payload)}`,
+    );
 
     // In a real implementation, this would trigger a calculation or update
     // For now, we just log it and echo back a response after a short delay
@@ -99,7 +101,7 @@ export class PmpmEventsGateway
         results: {
           stressValue: Math.random() * 100,
           deformation: Math.random() * 10,
-        }
+        },
       });
     }, 200); // Simulate a short calculation time
   }

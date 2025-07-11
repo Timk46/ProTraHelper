@@ -143,6 +143,7 @@ export interface AutomatedTestDto {
   export enum questionType {
     SINGLECHOICE = "SC",
     MULTIPLECHOICE = "MC",
+    MCSLIDER = "MCSlider",
     FREETEXT = "FreeText",
     CODE = "CodingQuestion",
     FILLIN = "Fillin",

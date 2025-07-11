@@ -32,8 +32,12 @@ export class GhFilesService {
   async getGrasshopperFiles(): Promise<GrasshopperFileInfo[]> {
     try {
       const entries = await readdir(this.ghFilesDir, { withFileTypes: true });
-      this.logger.log(`Found ${entries.length} entries in directory ${this.ghFilesDir}`);
-      entries.forEach(entry => this.logger.log(`Entry: ${entry.name}, isFile: ${entry.isFile()}`));
+      this.logger.log(
+        `Found ${entries.length} entries in directory ${this.ghFilesDir}`,
+      );
+      entries.forEach((entry) =>
+        this.logger.log(`Entry: ${entry.name}, isFile: ${entry.isFile()}`),
+      );
 
       const files: GrasshopperFileInfo[] = entries
         .filter((entry) => entry.isFile() && entry.name.endsWith('.gh'))
@@ -43,8 +47,8 @@ export class GhFilesService {
             id: fileEntry.name,
             name: fileEntry.name,
             path: filePath, // This path MUST be accessible by the Rhino instance on the user's machine if opening local server files.
-                           // If files are served via HTTP for Rhino to download, this would be a URL.
-                           // Based on the initial request, it seems we're aiming for local paths.
+            // If files are served via HTTP for Rhino to download, this would be a URL.
+            // Based on the initial request, it seems we're aiming for local paths.
           };
         });
       this.logger.log(`Found ${files.length} Grasshopper files.`);

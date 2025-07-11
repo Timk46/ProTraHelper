@@ -6,6 +6,7 @@ import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { FillinTaskNewComponent } from '../../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { FreeTextTaskComponent } from '../../contentView/contentElement/free-text-task/free-text-task.component';
 import { McTaskComponent } from '../../contentView/contentElement/mcTask/mcTask.component';
+import { McSliderTaskComponent } from '../../contentView/contentElement/mcSliderTask/mc-slider-task.component';
 import { EditUploadComponent } from '../../lecturersView/edit-upload/edit-upload.component';
 import { Router } from '@angular/router';
 import { UserService } from 'src/app/Services/auth/user.service';
@@ -37,6 +38,7 @@ export class ContentListItemComponent {
   };
 
   @Input() contentNodeId!: number; // ContentNodeId für Positionsänderung
+  @Input() allContentElements: ContentElementDTO[] = []; // Alle ContentElements für MCSlider-Gruppierung
 
   @Output() scoreUpdated: EventEmitter<ContentElementDTO> = new EventEmitter<ContentElementDTO>();
   @Output() fetchContentsForConcept = new EventEmitter<void>();
@@ -80,6 +82,8 @@ export class ContentListItemComponent {
         return 'Multiple Choice';
       case questionType.SINGLECHOICE:
         return 'Single Choice';
+      case questionType.MCSLIDER:
+        return 'MC Slider Quiz';
       case questionType.FREETEXT:
         return 'Freitext';
       case questionType.FILLIN:
@@ -111,6 +115,8 @@ export class ContentListItemComponent {
         return 'list';
       case questionType.SINGLECHOICE:
         return 'radio_button_checked';
+      case questionType.MCSLIDER:
+        return 'view_carousel';
       case questionType.FREETEXT:
         return 'text_fields';
       case questionType.FILLIN:
@@ -157,13 +163,22 @@ export class ContentListItemComponent {
     dialogConfig.width = 'auto';
     dialogConfig.maxHeight = '95vh';
 
-    let dialogRef: MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent | UploadTaskComponent> | undefined;
+    let dialogRef: MatDialogRef<McTaskComponent | McSliderTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent | UploadTaskComponent> | undefined;
 
     // Open the appropriate dialog based on the task type
     switch (question.type) {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
         dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
+        break;
+      case questionType.MCSLIDER:
+        // Check if there are multiple MCSlider questions in the same content
+        const allMCSliderQuestions = this.getAllMCSliderQuestions();
+        dialogConfig.data = {
+          ...dialogConfig.data,
+          questions: allMCSliderQuestions.length > 1 ? allMCSliderQuestions : [question],
+        };
+        dialogRef = this.dialog.open(McSliderTaskComponent, dialogConfig);
         break;
       case questionType.FREETEXT:
         dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
@@ -371,6 +386,16 @@ export class ContentListItemComponent {
     this.contentLinkerService.updateContentNodePosition(this.contentNodeId, this.contentElementData.positionInSpecificContentView + 1).subscribe(() => {
       this.fetchContentsForConcept.emit();
     });
+  }
+
+  /**
+   * Holt alle MCSlider-Fragen aus der aktuellen Inhaltsliste
+   */
+  private getAllMCSliderQuestions(): any[] {
+    return this.allContentElements
+      .filter(element => element.question?.type === questionType.MCSLIDER)
+      .map(element => element.question)
+      .filter(question => question != null);
   }
 
 }

@@ -874,6 +874,7 @@ enum userConceptEventType {
 }
 
 enum questionType {
+  MCSlider
   SC
   MC
   FreeText

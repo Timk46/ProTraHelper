@@ -7,7 +7,7 @@ import {
   Param,
   Logger,
   HttpException,
-  HttpStatus
+  HttpStatus,
 } from '@nestjs/common';
 import { PmpmService } from './pmpm.service';
 import { JwtAuthGuard } from '@/auth/common/guards/jwt-auth.guard';
@@ -27,14 +27,19 @@ export class PmpmController {
   @Post('session')
   async createSession(@Body() createSessionDto: CreatePmpmSessionDto) {
     try {
-      this.logger.log(`Creating PMPM session for model: ${createSessionDto.modelId}`);
+      this.logger.log(
+        `Creating PMPM session for model: ${createSessionDto.modelId}`,
+      );
       const session = await this.pmpmService.createSession(createSessionDto);
       return session;
     } catch (error) {
-      this.logger.error(`Failed to create PMPM session: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create PMPM session: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
         'Failed to create PMPM session',
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -48,10 +53,13 @@ export class PmpmController {
     try {
       return await this.pmpmService.getSessionStatus(sessionId);
     } catch (error) {
-      this.logger.error(`Failed to get session status: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to get session status: ${error.message}`,
+        error.stack,
+      );
       throw new HttpException(
         'Failed to get session status',
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

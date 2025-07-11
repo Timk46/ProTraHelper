@@ -1,4 +1,9 @@
-import { Injectable, Logger, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  UnauthorizedException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
 import { CreatePmpmSessionDto } from './dto/create-pmpm-session.dto';
@@ -26,7 +31,9 @@ export class PmpmService {
   /**
    * Creates a new session for PMPM in Guacamole
    */
-  async createSession(createSessionDto: CreatePmpmSessionDto): Promise<PmpmSessionResponseDto> {
+  async createSession(
+    createSessionDto: CreatePmpmSessionDto,
+  ): Promise<PmpmSessionResponseDto> {
     const sessionId = uuidv4();
 
     // Store session data
@@ -34,14 +41,14 @@ export class PmpmService {
       connectionId: this.guacamoleConnectionId,
       modelId: createSessionDto.modelId,
       createdAt: new Date(),
-      status: 'active'
+      status: 'active',
     });
 
     // Generate a token for the session
     const payload = {
       sub: sessionId,
       modelId: createSessionDto.modelId,
-      type: 'pmpm-session'
+      type: 'pmpm-session',
     };
 
     const token = this.jwtService.sign(payload);
@@ -50,10 +57,12 @@ export class PmpmService {
       sessionId,
       connectionId: this.guacamoleConnectionId,
       token,
-      url: `${this.guacamoleBaseUrl}/#/client/c/${this.guacamoleConnectionId}?token=${token}`
+      url: `${this.guacamoleBaseUrl}/#/client/c/${this.guacamoleConnectionId}?token=${token}`,
     };
 
-    this.logger.log(`Created PMPM session ${sessionId} for model ${createSessionDto.modelId}`);
+    this.logger.log(
+      `Created PMPM session ${sessionId} for model ${createSessionDto.modelId}`,
+    );
 
     return response;
   }
@@ -72,7 +81,7 @@ export class PmpmService {
       sessionId,
       status: session.status,
       modelId: session.modelId,
-      createdAt: session.createdAt
+      createdAt: session.createdAt,
     };
   }
 

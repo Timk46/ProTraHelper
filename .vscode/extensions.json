@@ -1,3 +1,9 @@
 {
-  "recommendations": ["stagewise.stagewise-vscode-extension"]
+  "recommendations": [
+    "stagewise.stagewise-vscode-extension",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "angular.ng-template",
+    "ms-vscode.vscode-typescript-next"
+  ]
 } 

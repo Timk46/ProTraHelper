@@ -4,38 +4,23 @@
  * Nutzt Windows-Prozess-Ausführung und Registry-Erkennung
  */
 
-import { Controller, Post, Get, Body, HttpException, HttpStatus } from '@nestjs/common';
-import { RhinoDirectService } from './rhino-direct.service';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  RhinoDirectService,
+  DirectRhinoLaunchRequest,
+  DirectRhinoLaunchResponse,
+  RhinoInstallation,
+  SystemRhinoInfo,
+} from './rhino-direct.service';
 
-export interface DirectRhinoLaunchRequest {
-  filePath: string;
-  rhinoPath?: string;
-  showViewport?: boolean;
-  batchMode?: boolean;
-}
-
-export interface DirectRhinoLaunchResponse {
-  success: boolean;
-  message: string;
-  processId?: number;
-  commandUsed?: string;
-  rhinoPath?: string;
-  executionMethod: 'direct' | 'registry' | 'fallback';
-}
-
-export interface RhinoInstallation {
-  version: string;
-  path: string;
-  isDefault: boolean;
-}
-
-export interface SystemRhinoInfo {
-  installations: RhinoInstallation[];
-  defaultPath?: string;
-  registryAvailable: boolean;
-}
-
-@Controller('api/rhino')
+@Controller('api/direct-rhino')
 export class RhinoDirectController {
   constructor(private readonly rhinoDirectService: RhinoDirectService) {}
 
@@ -43,13 +28,18 @@ export class RhinoDirectController {
    * Startet Rhino direkt über Windows-Prozess
    */
   @Post('launch-direct')
-  async launchRhinoDirect(@Body() request: DirectRhinoLaunchRequest): Promise<DirectRhinoLaunchResponse> {
+  async launchRhinoDirect(
+    @Body() request: DirectRhinoLaunchRequest,
+  ): Promise<DirectRhinoLaunchResponse> {
     try {
       console.log('🚀 Direct Rhino launch request received:', request);
 
       // Validierung der Eingabe
       if (!request.filePath) {
-        throw new HttpException('filePath ist erforderlich', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          'filePath ist erforderlich',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // Führe Rhino-Start aus
@@ -57,7 +47,6 @@ export class RhinoDirectController {
 
       console.log('✅ Direct Rhino launch result:', result);
       return result;
-
     } catch (error) {
       console.error('❌ Direct Rhino launch failed:', error);
 
@@ -67,7 +56,7 @@ export class RhinoDirectController {
 
       throw new HttpException(
         `Rhino-Start fehlgeschlagen: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -84,13 +73,12 @@ export class RhinoDirectController {
 
       console.log('✅ System Rhino info retrieved:', info);
       return info;
-
     } catch (error) {
       console.error('❌ System Rhino info failed:', error);
 
       throw new HttpException(
         `System-Info Abfrage fehlgeschlagen: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -99,7 +87,10 @@ export class RhinoDirectController {
    * Testet Rhino-Verfügbarkeit
    */
   @Get('test-availability')
-  async testRhinoAvailability(): Promise<{ available: boolean; message?: string }> {
+  async testRhinoAvailability(): Promise<{
+    available: boolean;
+    message?: string;
+  }> {
     try {
       console.log('🧪 Rhino availability test request received');
 
@@ -107,18 +98,17 @@ export class RhinoDirectController {
 
       const result = {
         available,
-        message: available ? 'Rhino ist verfügbar' : 'Rhino nicht gefunden'
+        message: available ? 'Rhino ist verfügbar' : 'Rhino nicht gefunden',
       };
 
       console.log('✅ Rhino availability test result:', result);
       return result;
-
     } catch (error) {
       console.error('❌ Rhino availability test failed:', error);
 
       return {
         available: false,
-        message: `Test fehlgeschlagen: ${error.message}`
+        message: `Test fehlgeschlagen: ${error.message}`,
       };
     }
   }

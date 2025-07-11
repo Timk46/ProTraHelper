@@ -27,7 +27,7 @@
 
   <div [ngStyle]="{'display': activeTab === 'content' ? 'block' : 'none'}" class="tab-content-container">
     <app-content-list class="tab-content" [contentsForActiveConceptNode]="contentsForActiveConceptNode"
-      [activeConceptNodeId]="activeConceptNode.databaseId" (fetchContentsForConcept)="onFetchContentsForConcept()" (rhinoButtonClicked)="openRhinoLauncher()">
+      [activeConceptNodeId]="activeConceptNode.databaseId" (fetchContentsForConcept)="onFetchContentsForConcept()">
       <div class="action-buttons-top">
         <button mat-stroked-button color="primary" >
             <mat-icon>picture_as_pdf</mat-icon>

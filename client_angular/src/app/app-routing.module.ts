@@ -99,12 +99,6 @@ const routes: Routes = [
   { path: 'umlearn', loadChildren: () => import('./Modules/umlearn/umlearn.module').then(m => m.UmlearnModule), canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
 
   { path: 'admin', loadChildren: () => import('./Pages/admin/admin.module').then(m => m.AdminModule), canActivate: [LoggedInGuard, AdminGuard] },
-  // New route for RhinoLauncherModule
-  {
-    path: 'rhino-launcher',
-    loadChildren: () => import('./features/rhino-launcher/rhino-launcher.module').then(m => m.RhinoLauncherModule),
-    canActivate: [LoggedInGuard] // Assuming it should be guarded
-  },
   {
     path: 'teacher',
     loadChildren: () => import('./Pages/teacher/teacher.module').then(m => m.TeacherModule),

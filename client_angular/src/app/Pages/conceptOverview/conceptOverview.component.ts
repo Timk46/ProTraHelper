@@ -13,7 +13,6 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { RhinoLauncherService, HelperAppStatus } from 'src/app/features/rhino-launcher/rhino-launcher.service';
 
 @Component({
   selector: 'app-conceptOverview',
@@ -66,7 +65,6 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
     private questionService: QuestionDataService,
     private router: Router,
     private graphDataService: GraphDataService,
-    private rhinoLauncherService: RhinoLauncherService,
     private snackBar: MatSnackBar
   ) {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
@@ -214,56 +212,6 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
         (contentsForConcept) =>
           (this.contentsForActiveConceptNode = contentsForConcept)
       );
-  }
-
-  /**
-   * Öffnet die Rhino-Launcher-Seite, um eine spezifische Datei zu starten.
-   */
-  openRhinoLauncher(): void {
-    const fileNameToLaunch = 'example.gh'; // Name der zu startenden Datei
-
-    this.rhinoLauncherService.getGrasshopperFiles().subscribe({
-      next: (files) => {
-        const fileToLaunch = files.find(f => f.name === fileNameToLaunch);
-
-        if (!fileToLaunch) {
-          this.snackBar.open(`Die Datei '${fileNameToLaunch}' wurde nicht gefunden.`, 'Schließen', { duration: 5000 });
-          return;
-        }
-
-        this.rhinoLauncherService.getHelperAppStatus().subscribe({
-          next: (status: HelperAppStatus) => {
-            if (status.status !== 'running') {
-              this.snackBar.open('Helfer-App läuft nicht. Bitte starten Sie sie.', 'Schließen', { duration: 5000 });
-              return;
-            }
-            if (!status.rhinoPathConfigured) {
-              this.snackBar.open('Rhino-Pfad in der Helfer-App nicht konfiguriert.', 'Schließen', { duration: 5000 });
-              return;
-            }
-
-            this.rhinoLauncherService.launchRhinoWithHelper(fileToLaunch.path).subscribe({
-              next: (response) => {
-                if (response.success) {
-                  this.snackBar.open(response.message || `Rhino wird mit ${fileToLaunch.name} gestartet...`, 'OK', { duration: 5000 });
-                } else {
-                  this.snackBar.open(`Fehler beim Starten von Rhino: ${response.message}`, 'Schließen', { duration: 7000 });
-                }
-              },
-              error: (err) => {
-                this.snackBar.open(`Fehler beim Starten von Rhino: ${err.message}`, 'Schließen', { duration: 7000 });
-              }
-            });
-          },
-          error: (err) => {
-            this.snackBar.open(`Fehler beim Prüfen des Helfer-App Status: ${err.message}`, 'Schließen', { duration: 7000 });
-          }
-        });
-      },
-      error: (err) => {
-        this.snackBar.open(`Fehler beim Laden der Grasshopper-Dateien: ${err.message}`, 'Schließen', { duration: 7000 });
-      }
-    });
   }
 
   // unsubscribe to prevent memory leaks after component is destroyed

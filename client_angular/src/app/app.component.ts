@@ -1,13 +1,11 @@
 import { UserService } from './Services/auth/user.service';
 import { ToolbarService } from './Services/toolbar/toolbar.service';
-import { Component, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { version } from '@DTOs/version';
-import { globalRole } from '@DTOs/roles.enum';
 import { environment } from 'src/environments/environment';
 import { ConfirmationBoxComponent } from "./Pages/confirmation-box/confirmation-box.component";
-import { HelperAppOnboardingComponent } from './features/helper-app-onboarding/helper-app-onboarding.component';
 
 
 @Component({
@@ -171,13 +169,6 @@ export class DatenschutzComponent {}
 export class ContactComponent {
   constructor(public dialog: MatDialog) {}
 
-  openHelperOnboarding() {
-    this.dialog.open(HelperAppOnboardingComponent, {
-      width: '90vw',
-      maxWidth: '800px',
-      disableClose: true
-    });
-  }
 }
 
 @Component({

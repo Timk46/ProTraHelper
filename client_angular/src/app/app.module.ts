@@ -16,6 +16,7 @@ import { ConceptOverviewComponent } from './Pages/conceptOverview/conceptOvervie
 import { CodeTaskComponent } from './Pages/contentView/contentElement/codeTask/codeTask.component';
 import { PdfViewerComponent } from './Pages/contentView/contentElement/pdfViewer/pdfViewer.component';
 import { McTaskComponent } from './Pages/contentView/contentElement/mcTask/mcTask.component';
+import { McSliderTaskComponent } from './Pages/contentView/contentElement/mcSliderTask/mc-slider-task.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -84,8 +85,6 @@ import { ContentListNodeEditDialogComponent } from "./Pages/content-list/content
 
 // ProTra 2.0 Module
 import { PmpmModule } from './features/pmpm/pmpm.module';
-import { HelperAppOnboardingModule } from './features/helper-app-onboarding/helper-app-onboarding.module';
-import { RhinoLauncherService } from './features/rhino-launcher/rhino-launcher.service';
 import { UploadTaskComponent } from "./Pages/contentView/contentElement/upload-task/upload-task.component";
 
 @NgModule({ declarations: [
@@ -96,6 +95,7 @@ import { UploadTaskComponent } from "./Pages/contentView/contentElement/upload-t
         CodeTaskComponent,
         PdfViewerComponent,
         McTaskComponent,
+        McSliderTaskComponent,
         GraphComponent,
         FileUploadComponent,
         ContentViewComponent,
@@ -168,7 +168,6 @@ import { UploadTaskComponent } from "./Pages/contentView/contentElement/upload-t
         MatRippleModule,
         CodeGameModule,
         PmpmModule,
-        HelperAppOnboardingModule,
         MatIconModule], providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: VersionInterceptor, multi: true },
@@ -178,6 +177,5 @@ import { UploadTaskComponent } from "./Pages/contentView/contentElement/upload-t
         ConfettiService,
         Title,
         provideHttpClient(withInterceptorsFromDi()),
-        RhinoLauncherService,
     ] })
 export class AppModule { }

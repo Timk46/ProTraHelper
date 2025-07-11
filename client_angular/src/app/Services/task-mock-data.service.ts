@@ -14,7 +14,7 @@ export interface TaskViewData {
 }
 
 /**
- * Service providing mock data for different task types
+ * Service providing mock data for different task types 
  * This service provides sample data for MC, fill-in and free text tasks
  */
 @Injectable({
