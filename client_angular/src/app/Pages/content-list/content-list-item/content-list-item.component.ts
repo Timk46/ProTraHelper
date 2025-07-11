@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
-import { ContentDTO, ContentElementDTO, contentElementType, questionType, taskViewDTO } from '@DTOs/index';
+import { ContentDTO, ContentElementDTO, contentElementType, gradingContent, questionType, taskViewDTO } from '@DTOs/index';
 import { takeUntil } from 'rxjs';
 import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { FillinTaskNewComponent } from '../../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
@@ -45,6 +45,7 @@ export class ContentListItemComponent {
   protected rippleEnabled: boolean = true;
 
   protected isAdmin: boolean = false;
+  protected isGradingContent: boolean = false;
   protected editModeActive: boolean = false;
   protected editModeButtonsClickable: boolean = false;
 
@@ -60,6 +61,7 @@ export class ContentListItemComponent {
     private snackBar: MatSnackBar
   ) {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
+    this.isGradingContent = this.contentElementData.type === contentElementType.QUESTION && gradingContent.includes(this.contentElementData.question?.type as questionType);
   }
 
   ngOnInit() {
@@ -214,6 +216,14 @@ export class ContentListItemComponent {
           }
         });
     }
+  }
+
+  onTaskGrading(){
+    if (!this.contentElementData.question || !this.editModeButtonsClickable) return;
+    const question: taskViewDTO = this.contentElementData.question;
+    console.log("onTaskGrading", question);
+    // Navigate to grading overview
+    this.router.navigate(['/grading/', question.id]);
   }
 
   /**

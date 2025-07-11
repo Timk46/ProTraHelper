@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { GradingService, Question, UserAnswer, UserUploadAnswer } from './services/grading.service';
+import { GradingService, Question, UserAnswer, UserUploadAnswer } from '../services/grading.service';
 import { forkJoin } from 'rxjs';
 
 @Component({

@@ -152,6 +152,10 @@ export interface AutomatedTestDto {
     UPLOAD = "UploadQuestion",
   }
 
+export const gradingContent: readonly questionType[] = [
+  questionType.UPLOAD,
+];
+
 export interface McqGenerationDTO {
   question?: string;
   answers?: {answer?: string; correct?: boolean}[];

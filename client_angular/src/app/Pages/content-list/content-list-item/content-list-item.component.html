@@ -29,21 +29,34 @@
     </div>
   </div>
 
-  <div *ngIf="isAdmin && editModeActive" class="edit-overlay"
-      (mouseenter)="onHoverMenuMouseEnter($event)"
-      (mouseleave)="rippleEnabled = true; editModeButtonsClickable = false"
+
+
+  <div *ngIf="isAdmin" class="edit-overlay"
+    (mouseenter)="onHoverMenuMouseEnter($event)"
+    (mouseleave)="rippleEnabled = true; editModeButtonsClickable = false"
   >
+    <!-- admin / teacher actions -->
+    <div *ngIf="isGradingContent">
+      <button mat-mini-fab color="primary"
+        (click)="$event.stopPropagation(); onTaskGrading()"
+        >
+        <mat-icon>edit</mat-icon>
+      </button>
+    </div>
+
     <!-- edit mode actions -->
-    <button mat-mini-fab color="primary"
-      (click)="$event.stopPropagation(); onTaskEdit()"
+    <div *ngIf="editModeActive">
+      <button mat-mini-fab color="primary"
+        (click)="$event.stopPropagation(); onTaskEdit()"
+        >
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-mini-fab color="warn"
+        (click)="$event.stopPropagation(); onTaskDelete()"
       >
-      <mat-icon>edit</mat-icon>
-    </button>
-    <button mat-mini-fab color="warn"
-      (click)="$event.stopPropagation(); onTaskDelete()"
-    >
-      <mat-icon>delete</mat-icon>
-    </button>
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
   </div>
 
   <mat-card-footer>
