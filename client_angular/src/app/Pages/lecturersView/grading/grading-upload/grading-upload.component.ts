@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges } from '@angular/core';
 import { GradingService } from '../services/grading.service';
 import { UserUploadAnswerListItemDTO } from '@DTOs/userAnswer.dto';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -8,7 +8,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   templateUrl: './grading-upload.component.html',
   styleUrls: ['./grading-upload.component.scss']
 })
-export class GradingUploadComponent implements OnInit {
+export class GradingUploadComponent implements OnInit, OnChanges {
+  // Sortier- und Anzeige-Logik
+  sortColumn: string = 'latestUploadDate';
+  sortDirection: 'asc' | 'desc' = 'desc';
+  sortedGroupKeys: string[] = [];
+
   @Input() questionId!: number;
   isLoading = true;
   error: string | null = null;
@@ -29,6 +34,65 @@ export class GradingUploadComponent implements OnInit {
     }
   }
 
+  ngOnChanges(): void {
+    this.updateSortedGroupKeys();
+  }
+
+  sortBy(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = column === 'latestUploadDate' ? 'desc' : 'asc';
+    }
+    this.updateSortedGroupKeys();
+  }
+
+  updateSortedGroupKeys(): void {
+    if (!this.groupKeys || !this.groupedAnswers) {
+      this.sortedGroupKeys = [];
+      return;
+    }
+    this.sortedGroupKeys = [...this.groupKeys].sort((a, b) => {
+      const groupA = this.groupedAnswers[a];
+      const groupB = this.groupedAnswers[b];
+      if (!groupA || !groupB) return 0;
+      let valA: any;
+      let valB: any;
+      switch (this.sortColumn) {
+        case 'conceptTitle':
+          valA = groupA[0]?.conceptTitle?.toLocaleLowerCase() || '';
+          valB = groupB[0]?.conceptTitle?.toLocaleLowerCase() || '';
+          break;
+        case 'questionTitle':
+          valA = groupA[0]?.questionTitle?.toLocaleLowerCase() || '';
+          valB = groupB[0]?.questionTitle?.toLocaleLowerCase() || '';
+          break;
+        case 'userMail':
+          valA = groupA[0]?.userMail?.toLocaleLowerCase() || '';
+          valB = groupB[0]?.userMail?.toLocaleLowerCase() || '';
+          break;
+        case 'fileName':
+          valA = groupA[0]?.fileName?.toLocaleLowerCase() || '';
+          valB = groupB[0]?.fileName?.toLocaleLowerCase() || '';
+          break;
+        case 'latestUploadDate':
+        default:
+          valA = this.getLatestUploadDate(a)?.getTime() || 0;
+          valB = this.getLatestUploadDate(b)?.getTime() || 0;
+      }
+      if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  getLatestUploadDate(key: string): Date | null {
+    const group = this.groupedAnswers[key];
+    if (!group || group.length === 0) return null;
+    return group[0].uploadDate ? new Date(group[0].uploadDate) : null;
+  }
+
   getUserAnswers(questionId: number): void {
     this.isLoading = true;
     this.error = null;
@@ -38,9 +102,9 @@ export class GradingUploadComponent implements OnInit {
         this.groupedAnswers = {};
         this.groupKeys = [];
         this.expandedGroups = {};
-        // Group by conceptTitle + questionTitle
+        // Group by conceptTitle + questionTitle + userMail
         for (const answer of data) {
-          const key = `${answer.conceptTitle}|||${answer.questionTitle}`;
+          const key = `${answer.conceptTitle}|||${answer.questionTitle}|||${answer.userMail}`;
           if (!this.groupedAnswers[key]) {
             this.groupedAnswers[key] = [];
           }
@@ -55,6 +119,7 @@ export class GradingUploadComponent implements OnInit {
           });
         }
         this.groupKeys = Object.keys(this.groupedAnswers);
+        this.updateSortedGroupKeys();
         this.isLoading = false;
       },
       error: (err) => {
@@ -71,9 +136,7 @@ export class GradingUploadComponent implements OnInit {
   downloadFile(fileUniqueIdentifier: string): void {
     this.gradingService.downloadFile(fileUniqueIdentifier).subscribe({
       next: ({ blob, filename }) => {
-        // Fallback: falls filename leer ist, nimm die UUID
         let safeFilename = filename && filename.trim() ? filename.trim() : fileUniqueIdentifier;
-        // Browser-sichere Zeichen entfernen
         safeFilename = safeFilename.replace(/[\\/:*?"<>|]/g, '_');
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
