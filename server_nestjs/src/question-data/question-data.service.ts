@@ -3,7 +3,7 @@ import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-gen
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { QuestionDTO, questionType, detailedQuestionDTO, FillinQuestionDTO, editorDataDTO, taskSettingsDTO } from '@DTOs/index';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswer } from '@DTOs/userAnswer.dto';
+import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswerDTO } from '@DTOs/userAnswer.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataCodeService } from './question-data-code/question-data-code.service';
@@ -238,7 +238,6 @@ export class QuestionDataService {
       })).map((option) => option.mcOptionId)
     };
   }
-
 
   /**
    * @description Creates a new question. Also works for version control.
@@ -685,7 +684,7 @@ export class QuestionDataService {
       let userScore = 0;
 
       // Compare user answers with correct answers
-      const userAnswers: UserFillinAnswer[] = answerData.userFillinTextAnswer;
+      const userAnswers: UserFillinAnswerDTO[] = answerData.userFillinTextAnswer;
       const feedbackDetails = [];
       console.log("user answers: ", userAnswers);
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { detailedUploadQuestionDTO, uploadQuestionDTO } from '@DTOs/index';
+import { detailedUploadQuestionDTO, uploadQuestionDTO, UserUploadAnswerListItemDTO } from '@DTOs/index';
 
 @Injectable()
 export class QuestionDataUploadService {
@@ -100,5 +100,70 @@ export class QuestionDataUploadService {
       throw new Error('UploadQuestion not updated');
     }
     return updatedUploadQuestion;
+  }
+
+  /**
+   * Retrieves all user upload answers for a specific question.
+   *
+   * Queries the database for all user answers associated with the given `questionId`,
+   * including related user information, uploaded file details, and question/concept metadata.
+   * The results are ordered by creation date in descending order.
+   *
+   * @param questionId - The ID of the question for which to fetch user upload answers.
+   * @returns A promise that resolves to an array of `UserUploadAnswerListItemDTO` objects,
+   *          each containing user, file, question, and concept details.
+   */
+  async getAllUserUploadAnswers(questionId: number): Promise<UserUploadAnswerListItemDTO[]> {
+    const userUploadAnswers = await this.prisma.userAnswer.findMany({
+      where: {
+        questionId: Number(questionId)
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+          }
+        },
+        UserUploadAnswer: {
+          select: {
+            file: {
+              select: {
+                id: true,
+                name: true,
+                updatedAt: true,
+              }
+            }
+          }
+        },
+        question: {
+          select: {
+            id: true,
+            name: true,
+            conceptNode: {
+              select: {
+                id: true,
+                name: true,
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return userUploadAnswers.map(answer => ({
+      conceptId: answer.question.conceptNode.id,
+      conceptTitle: answer.question.conceptNode.name,
+      questionId: answer.question.id,
+      questionTitle: answer.question.name,
+      userId: answer.user.id,
+      userMail: answer.user.email,
+      fileId: answer.UserUploadAnswer[0]?.file.id,
+      fileName: answer.UserUploadAnswer[0]?.file.name,
+      uploadDate: answer.UserUploadAnswer[0]?.file.updatedAt
+    }));
   }
 }

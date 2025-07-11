@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { taskViewDTO } from '@DTOs/content.dto';
 import { FillinQuestionDTO } from '@DTOs/fillInText.dto';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswer } from '@DTOs/userAnswer.dto';
+import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswerDTO } from '@DTOs/userAnswer.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { DynamicBlankComponent } from './dynamic-blank/dynamic-blank.component';
 import { Subject, takeUntil } from 'rxjs';
@@ -29,7 +29,7 @@ export class FillinTaskNewComponent {
   protected isSending: boolean = false;
   protected isCorrect: boolean = false;
   protected submitDisabled: boolean = false;
-  protected gapValues: UserFillinAnswer[] = [];
+  protected gapValues: UserFillinAnswerDTO[] = [];
   protected gapIds: string[] = [];
   protected possibleAnswers: string[] = [];
   protected feedbackText: userAnswerFeedbackDTO | undefined;
@@ -108,7 +108,7 @@ export class FillinTaskNewComponent {
 
       this.gapValues.push({ position: element.getAttribute('id')!.slice(4), answer: '' }); // remove 'gap_' from id and add to gapValues
 
-      componentRef.instance.valueChange.subscribe((value: UserFillinAnswer) => {
+      componentRef.instance.valueChange.subscribe((value: UserFillinAnswerDTO) => {
         const existingIndex = this.gapValues.findIndex(v => v.position === value.position);
         if (existingIndex !== -1) {
           // Replace the existing value

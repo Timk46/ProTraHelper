@@ -1,1 +1,28 @@
-<p>grading-upload works!</p>
+<div *ngIf="isLoading" class="loading-indicator">
+  <p>Loading...</p>
+</div>
+
+<div *ngIf="error" class="error-message">
+  <p>{{ error }}</p>
+</div>
+
+<table *ngIf="!isLoading && !error">
+  <thead>
+    <tr>
+      <th>Thema</th>
+      <th>Frage</th>
+      <th>Email</th>
+      <th>Datei</th>
+      <th>Datum</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let item of userAnswers">
+      <td>{{ item.conceptTitle }}</td>
+      <td>{{ item.questionTitle }}</td>
+      <td>{{ item.userMail }}</td>
+      <td>{{ item.fileName || 'n/a' }}</td>
+      <td>{{ item.uploadDate | date:'dd.MM.yyyy HH:mm' }}</td>
+    </tr>
+  </tbody>
+</table>

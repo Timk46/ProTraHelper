@@ -10,10 +10,10 @@ export interface UserAnswerDataDTO {
     userFreetextAnswer?: string;
     userFreetextAnswerRaw?: string;
     userMCAnswer?: number[];
-    userFillinTextAnswer?: UserFillinAnswer[];
+    userFillinTextAnswer?: UserFillinAnswerDTO[];
     userGraphAnswer?: GraphStructureDTO[];
     codeGameEvaluation?: CodeGameEvaluationDTO;
-    userUploadAnswer?: UserUploadAnswer;
+    userUploadAnswer?: UserUploadAnswerDTO;
     //space for more types of answers
 }
 
@@ -32,14 +32,26 @@ export interface userAnswerFeedbackDTO {
     progress: number;
 }
 
-export interface UserFillinAnswer {
+export interface UserFillinAnswerDTO {
     position: string;
     answer: string;
 }
 
-export interface UserUploadAnswer {
+export interface UserUploadAnswerDTO {
     id?: number;
     userAnswerId?: number;
     fileId?: number;
     file?: FileUploadDTO;
+}
+
+export interface UserUploadAnswerListItemDTO {
+    conceptId: number;
+    conceptTitle: string;
+    questionId: number;
+    questionTitle: string;
+    userId: number;
+    userMail: string;
+    fileId?: number;
+    fileName?: string;
+    uploadDate?: Date;
 }

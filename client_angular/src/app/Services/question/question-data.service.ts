@@ -12,7 +12,8 @@ import {
   questionType,
   FillinQuestionDTO,
   GraphQuestionDTO,
-  uploadQuestionDTO
+  uploadQuestionDTO,
+  UserUploadAnswerListItemDTO
 } from '@DTOs/index';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -68,6 +69,16 @@ export class QuestionDataService {
    */
   getNewestUserAnswer(questionId: number, userId: number = -1) : Observable<UserAnswerDataDTO> {
     return this.http.get<UserAnswerDataDTO>(environment.server + `/question-data/newestUserAnswer/${questionId}/${userId}`);
+  }
+
+  /**
+   * Retrieves the newest user answers for a specific question and type.
+   * @param {number} questionId - The ID of the question to get answers for.
+   * @param {questionType} [questionType] - The type of the question (optional).
+   * @returns {Observable<UserAnswerDataDTO[]>} An Observable that emits an array of UserAnswerDataDTO.
+   */
+  getAllUserUploadAnswers(questionId: number, questionType?: questionType) : Observable<UserUploadAnswerListItemDTO[]> {
+    return this.http.get<UserUploadAnswerListItemDTO[]>(environment.server + `/question-data/allUserUploadAnswers/${questionId}`);
   }
 
   /**

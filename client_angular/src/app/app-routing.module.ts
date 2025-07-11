@@ -106,8 +106,8 @@ const routes: Routes = [
     canActivate: [LoggedInGuard] // Assuming it should be guarded
   },
   {
-    path: 'teacher',
-    loadChildren: () => import('./Pages/teacher/teacher.module').then(m => m.TeacherModule),
+    path: 'grading',
+    loadChildren: () => import('./Pages/lecturersView/grading/grading.module').then(m => m.GradingModule),
     canActivate: [LoggedInGuard] // Assuming teachers need to be logged in
   }
 ];

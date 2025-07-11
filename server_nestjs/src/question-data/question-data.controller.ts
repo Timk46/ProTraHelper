@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Post, Param, Body, Req, UseGuards, ParseIntPipe} from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
-import { detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, FillinQuestionDTO, GraphQuestionDTO, userAnswerFeedbackDTO, MCOptionDTO, McQuestionDTO, MCOptionViewDTO, UserMCOptionSelectedDTO, uploadQuestionDTO } from '@DTOs/index';
+import { detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, FillinQuestionDTO, GraphQuestionDTO, userAnswerFeedbackDTO, MCOptionDTO, McQuestionDTO, MCOptionViewDTO, UserMCOptionSelectedDTO, uploadQuestionDTO, questionType, UserUploadAnswerListItemDTO } from '@DTOs/index';
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
@@ -122,7 +122,7 @@ export class QuestionDataController {
          * @returns {Promise<UserAnswerDTO>} The newest user answer.
          * @throws Error if questionId or userId is invalid.
          */
-        @roles('ANY')
+        @roles('ADMIN', 'TEACHER')
         @Get('/newestUserAnswer/:questionId/:userId')
         async getNewestUserAnswer(@Param('questionId') questionId: number, @Param('userId') userId: number, @Req() req: any): Promise<UserAnswerDataDTO> {
             if (isNaN(questionId) || isNaN(userId)) {
@@ -133,6 +133,17 @@ export class QuestionDataController {
             } else {
                 return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
             }
+        }
+
+        @roles('ADMIN', 'TEACHER')
+        @Get('/allUserUploadAnswers/:questionId')
+        async getAllUserUploadAnswers(
+            @Param('questionId', ParseIntPipe) questionId: number,
+            @Req() req: any
+        ): Promise<UserUploadAnswerListItemDTO[]> {
+          const temp = await this.qdUploadService.getAllUserUploadAnswers(questionId);
+          console.log('User Upload Answers:', temp);
+          return temp;
         }
 
         /**

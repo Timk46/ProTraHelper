@@ -1,7 +1,7 @@
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FillinQuestionType } from '@DTOs/fillInType.enum';
-import { UserFillinAnswer } from '@DTOs/userAnswer.dto';
+import { UserFillinAnswerDTO } from '@DTOs/userAnswer.dto';
 
 @Component({
   selector: 'app-dynamic-blank',
@@ -15,7 +15,7 @@ export class DynamicBlankComponent {
   @Input() blankMode: string = FillinQuestionType.FillinText;
   @Input() blankOptions: string[] = [];
 
-  @Output() valueChange = new EventEmitter<UserFillinAnswer>();
+  @Output() valueChange = new EventEmitter<UserFillinAnswerDTO>();
 
   protected fillinTypes = FillinQuestionType;
   protected answer: string = '';

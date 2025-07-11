@@ -4,12 +4,7 @@ import { GradingOverviewComponent } from './grading-overview/grading-overview.co
 
 const routes: Routes = [
   {
-    path: '',
-    pathMatch: 'full',
-    redirectTo: 'grading-overview/1'
-  },
-  {
-    path: 'grading-overview/:moduleId',
+    path: ':questionId',
     component: GradingOverviewComponent
   }
 ];
@@ -18,4 +13,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class TeacherRoutingModule { }
+export class GradingRoutingModule { }
