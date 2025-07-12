@@ -1,11 +1,9 @@
-import type { OnInit } from '@angular/core';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import type { ActivatedRoute, Router } from '@angular/router';
-import type { UserService } from '../../Services/auth/user.service';
-import type { FormBuilder, FormGroup } from '@angular/forms';
-import { Validators } from '@angular/forms';
-import type { Title } from '@angular/platform-browser';
+import { ActivatedRoute, Router } from '@angular/router';
+import { UserService } from '../../Services/auth/user.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Title } from '@angular/platform-browser';
 
 /**
  * The LoginComponent handles the login process.

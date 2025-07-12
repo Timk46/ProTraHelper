@@ -1,6 +1,5 @@
-import type { OnInit } from '@angular/core';
-import { Component } from '@angular/core';
-import type { HttpClient } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 
 /**

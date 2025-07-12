@@ -1,8 +1,7 @@
-import type { OnInit } from '@angular/core';
-import { Component, Input } from '@angular/core';
-import type { discussionMessageVoteCreationDTO, discussionMessageVoteDTO } from '@DTOs/index';
-import type { DiscussionViewService } from 'src/app/Services/discussion/discussion-view.service';
-import type { DiscussionVoteService } from 'src/app/Services/discussion/discussion-vote.service';
+import { Component, Input, OnInit } from '@angular/core';
+import { discussionMessageVoteCreationDTO, discussionMessageVoteDTO } from '@DTOs/index';
+import { DiscussionViewService } from 'src/app/Services/discussion/discussion-view.service';
+import { DiscussionVoteService } from 'src/app/Services/discussion/discussion-vote.service';
 
 @Component({
   selector: 'app-discussion-votebox',

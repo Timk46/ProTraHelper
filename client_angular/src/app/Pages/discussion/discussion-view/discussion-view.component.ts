@@ -1,13 +1,12 @@
-import type { discussionMessageDTO, discussionDTO } from '@DTOs/index';
-import type { OnDestroy, OnInit } from '@angular/core';
-import { Component, Input } from '@angular/core';
-import type { ActivatedRoute } from '@angular/router';
-import type { DiscussionViewService } from 'src/app/Services/discussion/discussion-view.service';
-import type { UserService } from 'src/app/Services/auth/user.service';
-import type { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
-import type { Title } from '@angular/platform-browser';
-import type { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
-import type { NotificationService } from 'src/app/Services/notification/notification.service';
+import { discussionMessageDTO, discussionDTO } from '@DTOs/index';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { DiscussionViewService } from 'src/app/Services/discussion/discussion-view.service';
+import { UserService } from 'src/app/Services/auth/user.service';
+import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
+import { Title } from '@angular/platform-browser';
+import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+import { NotificationService } from 'src/app/Services/notification/notification.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 

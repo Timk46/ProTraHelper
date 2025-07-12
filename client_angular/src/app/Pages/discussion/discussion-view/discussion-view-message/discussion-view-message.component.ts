@@ -1,7 +1,6 @@
 import type { discussionMessageDTO } from '@DTOs/index';
-import type { OnChanges, SimpleChanges } from '@angular/core';
-import { Component, Input } from '@angular/core';
-import type { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import DOMPurify from 'dompurify';
 import Prism from 'prismjs';
 

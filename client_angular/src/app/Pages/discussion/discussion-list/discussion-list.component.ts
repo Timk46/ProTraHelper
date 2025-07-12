@@ -1,11 +1,10 @@
-import type { discussionDTO } from '@DTOs/discussion.dto';
-import type { OnChanges } from '@angular/core';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import type { MatDialog } from '@angular/material/dialog';
-import type { discussionFilterDTO } from '@DTOs/discussionFilter.dto';
-import type { DiscussionListService } from 'src/app/Services/discussion/discussion-list.service';
-import type { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
-import type { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+import { discussionDTO } from '@DTOs/discussion.dto';
+import { Component, EventEmitter, Input, Output, OnChanges } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { discussionFilterDTO } from '@DTOs/discussionFilter.dto';
+import { DiscussionListService } from 'src/app/Services/discussion/discussion-list.service';
+import { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
+import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 
 @Component({
   selector: 'app-discussion-list',

@@ -1,9 +1,9 @@
 import type { UserAnswerDataDTO, freeTextQuestionDTO } from '@DTOs/index';
-import type { DialogRef } from '@angular/cdk/dialog';
+import { DialogRef } from '@angular/cdk/dialog';
 import { Component, Inject, EventEmitter, Output, Input } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import type { Location } from '@angular/common';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { Location } from '@angular/common';
 interface TaskViewData {
   contentNodeId: number;
   contentElementId: number;

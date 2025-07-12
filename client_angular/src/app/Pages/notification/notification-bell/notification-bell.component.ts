@@ -1,10 +1,9 @@
-import type { ElementRef, OnInit, QueryList, OnDestroy } from '@angular/core';
-import { Component, ViewChild, ViewChildren } from '@angular/core';
-import type { NotificationService } from 'src/app/Services/notification/notification.service';
+import { Component, ViewChild, ViewChildren, ElementRef, OnInit, QueryList, OnDestroy } from '@angular/core';
+import { NotificationService } from 'src/app/Services/notification/notification.service';
 import type { NotificationDTO } from '@DTOs/notification.dto';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { NotificationType } from '@DTOs/notificationType.enum';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Subject, merge } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 

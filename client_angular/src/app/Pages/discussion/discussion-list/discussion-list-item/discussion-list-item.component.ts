@@ -1,7 +1,6 @@
-import type { discussionDTO } from '@DTOs/index';
-import type { OnChanges } from '@angular/core';
-import { Component, Input } from '@angular/core';
-import type { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+import { discussionDTO } from '@DTOs/index';
+import { Component, Input, OnChanges } from '@angular/core';
+import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 
 @Component({
   selector: 'app-discussion-list-item',

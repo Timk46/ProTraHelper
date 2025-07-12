@@ -1,10 +1,9 @@
-import type { OnChanges } from '@angular/core';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import type {
+import { Component, EventEmitter, Input, Output, OnChanges } from '@angular/core';
+import {
   discussionFilterContentNodeDTO,
   discussionFilterDTO,
 } from '@DTOs/discussionFilter.dto';
-import type { DiscussionListService } from 'src/app/Services/discussion/discussion-list.service';
+import { DiscussionListService } from 'src/app/Services/discussion/discussion-list.service';
 
 @Component({
   selector: 'app-discussion-filter',

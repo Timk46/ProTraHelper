@@ -1,6 +1,5 @@
-import type { HttpClient } from '@angular/common/http';
-import type { ElementRef, OnInit, OnDestroy } from '@angular/core';
-import { Component, Inject, ViewChild } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, Inject, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { environment } from 'src/environments/environment';
 @Component({

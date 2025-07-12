@@ -1,8 +1,7 @@
 import type { discussionCreationDTO, discussionNodeNamesDTO } from '@DTOs/discussionCreation.dto';
 import { Component, Inject } from '@angular/core';
-import type { MatDialogRef } from '@angular/material/dialog';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';
 
 @Component({
   selector: 'app-discussion-creation',

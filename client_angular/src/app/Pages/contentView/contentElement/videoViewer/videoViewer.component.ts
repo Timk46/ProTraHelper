@@ -1,7 +1,6 @@
-import type { ElementRef, OnInit, OnDestroy } from '@angular/core';
-import { Component, Input, Sanitizer, SecurityContext, ViewChild } from '@angular/core';
-import type { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import type { FileService } from 'src/app/Services/files/files.service';
+import { Component, Input, Sanitizer, SecurityContext, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { FileService } from 'src/app/Services/files/files.service';
 import { environment } from '../../../../../environments/environment';
 
 @Component({

@@ -1,11 +1,10 @@
-import type { AfterViewChecked, ElementRef, OnInit } from '@angular/core';
-import { Component, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
-import type { FormBuilder, FormGroup } from '@angular/forms';
-import type { Router } from '@angular/router'; // Import Router
-import type { MatDialog } from '@angular/material/dialog';
-import type { LlmService, ChatSession, ChatBotMessage } from 'src/app/Services/ai/llm.service';
+import { Component, EventEmitter, HostListener, Input, Output, ViewChild, AfterViewChecked, ElementRef, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router'; // Import Router
+import { MatDialog } from '@angular/material/dialog';
+import { LlmService, ChatSession, ChatBotMessage } from 'src/app/Services/ai/llm.service';
 import { VideoTimeStampComponent } from '../video-time-stamp/video-time-stamp.component';
-import type { HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
 enum MessageType {

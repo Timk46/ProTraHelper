@@ -1,9 +1,9 @@
 import { Component, Inject } from '@angular/core';
 import { inject } from 'inversify';
-import type { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { IActionDispatcher, TYPES } from 'sprotty';
-import type { GraphDataService } from 'src/app/Services/graph/graph-data.service';
+import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 
 @Component({
   selector: 'app-create-concept-dialog',
