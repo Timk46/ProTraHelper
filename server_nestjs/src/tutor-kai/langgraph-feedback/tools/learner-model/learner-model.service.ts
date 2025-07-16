@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust path if needed based on actual structure
-import type { LearnerModelDto } from '@Interfaces/tutorKaiDtos/LearnerModel.dto';
-import type { KIFeedback, CodeSubmission } from '@prisma/client';
+import { LearnerModelDto } from '@Interfaces/tutorKaiDtos/LearnerModel.dto';
+import { KIFeedback, CodeSubmission } from '@prisma/client';
 import { ChatOpenAI } from '@langchain/openai';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { PromptTemplate } from '@langchain/core/prompts';

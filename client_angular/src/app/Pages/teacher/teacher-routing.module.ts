@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import type { Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { GradingOverviewComponent } from './grading-overview/grading-overview.component';
 

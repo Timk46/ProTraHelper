@@ -31,7 +31,7 @@ import {
 } from 'sprotty';
 import { ConceptNodeView, CustomExpandButtonView, LeafConceptView, MiniConceptView } from './views';
 import { ConceptGraphModelSource } from './model-source';
-import type { LayoutOptions } from 'elkjs';
+import { LayoutOptions } from 'elkjs';
 import ElkConstructor from 'elkjs';
 import {
   DefaultLayoutConfigurator,
@@ -40,7 +40,7 @@ import {
   ILayoutConfigurator,
   elkLayoutModule,
 } from 'sprotty-elk/lib/inversify';
-import type { SGraph as SGraphP, SModelIndex, SNode as SNodeP } from 'sprotty-protocol';
+import { SGraph as SGraphP, SModelIndex, SNode as SNodeP } from 'sprotty-protocol';
 import { Point } from 'sprotty-protocol';
 import { CustomMouseListener } from './mouse-interactions';
 import { CustomActionHandler } from './customActionHandler';
@@ -54,7 +54,7 @@ export default (containerId: string) => {
       algorithms: ['layered'],
     });
 
-  const myModule = new ContainerModule((bind, unbind, isBound, rebind) => {
+  const myModule = new ContainerModule((bind: any, unbind: any, isBound: any, rebind: any) => {
     bind(TYPES.ModelSource).to(ConceptGraphModelSource).inSingletonScope();
     rebind(TYPES.ILogger).to(ConsoleLogger).inSingletonScope();
     rebind(TYPES.LogLevel).toConstantValue(LogLevel.error);

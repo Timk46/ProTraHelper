@@ -1,5 +1,5 @@
 import { BellDirective } from './belldirective.directive';
-import type { Renderer2 } from '@angular/core';
+import { Renderer2 } from '@angular/core';
 import { ElementRef } from '@angular/core';
 
 describe('BellDirective', () => {

@@ -1,6 +1,5 @@
-import type { ElementRef, Renderer2, OnInit, OnChanges } from '@angular/core';
-import { Component, ViewChild, Output, EventEmitter, Input } from '@angular/core';
-import type { FormBuilder, FormGroup } from '@angular/forms';
+import { ElementRef, Renderer2, OnInit, OnChanges, Component, ViewChild, Output, EventEmitter, Input } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatMenuTrigger } from '@angular/material/menu';
 
 @Component({

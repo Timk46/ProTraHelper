@@ -1,12 +1,12 @@
-import type { HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import type { ContentsForConceptDTO, ContentElementStatusDTO } from '@DTOs/index';
+import { ContentsForConceptDTO, ContentElementStatusDTO } from '@DTOs/index';
 import { ConceptNodeDTO } from '@DTOs/index';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { catchError, tap, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import type { ConceptNode } from '@DTOs/conceptNode.dto';
+import { ConceptNode } from '@DTOs/conceptNode.dto';
 
 @Injectable({
   providedIn: 'root',

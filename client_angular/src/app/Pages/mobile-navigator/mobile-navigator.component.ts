@@ -1,5 +1,5 @@
-import type { ConceptGraphDTO } from '@DTOs/conceptGraph.dto';
-import type { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
+import { ConceptGraphDTO } from '@DTOs/conceptGraph.dto';
+import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
 import { Component, ViewChild, Input, Output, OnInit, ElementRef, AfterViewChecked } from '@angular/core';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';

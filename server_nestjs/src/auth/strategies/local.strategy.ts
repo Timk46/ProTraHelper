@@ -2,7 +2,7 @@ import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { AuthService } from '../auth.service';
-import type { UserDTO } from '@DTOs/user.dto';
+import { UserDTO } from '@DTOs/user.dto';
 
 /**
  * This class is used to define the local (password) authentication strategy

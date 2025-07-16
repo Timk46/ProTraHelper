@@ -1,9 +1,9 @@
-import type { OnInit, ElementRef, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { OnInit, ElementRef, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { Component, ViewChild, EventEmitter, Output, Inject, Input } from '@angular/core';
-import type { CdkDragDrop } from '@angular/cdk/drag-drop';
-import type { DialogRef } from '@angular/cdk/dialog';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import type {
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { DialogRef } from '@angular/cdk/dialog';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import {
   QuestionDTO,
   BlankDTO,
   userAnswerFeedbackDTO,
@@ -12,14 +12,14 @@ import type {
   UserFillinAnswer,
 } from '@DTOs/index';
 import { FillinQuestionType } from '@DTOs/index';
-import type { UserService } from 'src/app/Services/auth/user.service';
-import type { SafeUrl } from '@angular/platform-browser';
+import { UserService } from 'src/app/Services/auth/user.service';
+import { SafeUrl } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { FormControl } from '@angular/forms';
-import type { Location } from '@angular/common';
+import { Location } from '@angular/common';
 
 interface ContentPart {
   type: 'sentence' | 'table';

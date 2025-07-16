@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import type { HttpClient } from '@angular/common/http';
-import type { Observable } from 'rxjs';
-import type { BlankDTO, FillinQuestionDTO } from '@DTOs/fillInText.dto';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { BlankDTO, FillinQuestionDTO } from '@DTOs/fillInText.dto';
 import { environment } from 'src/environments/environment';
 
 @Injectable({

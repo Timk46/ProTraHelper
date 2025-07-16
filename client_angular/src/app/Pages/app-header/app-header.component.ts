@@ -1,11 +1,10 @@
-import type { OnInit } from '@angular/core';
-import { Component, EventEmitter, Output } from '@angular/core';
-import type { MatDialog } from '@angular/material/dialog';
-import type { Router } from '@angular/router';
-import type { Location } from '@angular/common';
+import { OnInit, Component, EventEmitter, Output } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { ConfirmationBoxComponent } from 'src/app/Pages/confirmation-box/confirmation-box.component';
-import type { UserService } from 'src/app/Services/auth/user.service';
-import type { NavigationPreferenceService } from 'src/app/Services/navigation/navigation-preference.service';
+import { UserService } from 'src/app/Services/auth/user.service';
+import { NavigationPreferenceService } from 'src/app/Services/navigation/navigation-preference.service';
 
 @Component({
   selector: 'app-header',

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { DiscussionVoteService } from './discussion-vote.service';
-import type { discussionMessageVoteDTO } from '@DTOs/index';
+import { discussionMessageVoteDTO } from '@DTOs/index';
 import { discussionMessageVoteCreationDTO } from '@DTOs/index';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 

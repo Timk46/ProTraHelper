@@ -1,19 +1,17 @@
-import type { OnInit, OnDestroy, ComponentRef } from '@angular/core';
-import { Component, ViewChild, ViewContainerRef } from '@angular/core';
-import type { ActivatedRoute, Router } from '@angular/router';
-import type { Observable } from 'rxjs';
+import { OnInit, OnDestroy, ComponentRef, Component, ViewChild, ViewContainerRef } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import { finalize, forkJoin, Subject, takeUntil } from 'rxjs';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import type { QuestionDTO } from '@DTOs/index';
-import { questionType } from '@DTOs/index';
-import type { MatSnackBar } from '@angular/material/snack-bar';
-import type { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
-import type { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
-import type { FillinTaskNewComponent } from '../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
-import type { TaskViewData } from '@DTOs/index';
-import type { MatDialogRef } from '@angular/material/dialog';
-import { MatDialogConfig } from '@angular/material/dialog';
-import type { EditUploadComponent } from '../lecturersView/edit-upload/edit-upload.component';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { QuestionDTO, questionType } from '@DTOs/index';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { McTaskComponent } from '../contentView/contentElement/mcTask/mcTask.component';
+import { McSliderTaskComponent } from '../contentView/contentElement/mcSliderTask/mc-slider-task.component';
+import { FreeTextTaskComponent } from '../contentView/contentElement/free-text-task/free-text-task.component';
+import { FillinTaskNewComponent } from '../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
+import { TaskViewData } from '@DTOs/index';
+import { MatDialogRef, MatDialogConfig } from '@angular/material/dialog';
+import { EditUploadComponent } from '../lecturersView/edit-upload/edit-upload.component';
 
 @Component({
   selector: 'app-dynamic-question',
@@ -137,7 +135,7 @@ export class DynamicQuestionComponent implements OnInit, OnDestroy {
 
     let dialogRef:
       | MatDialogRef<
-          EditUploadComponent | McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent
+          EditUploadComponent | McTaskComponent | McSliderTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent
         >
       | undefined;
 

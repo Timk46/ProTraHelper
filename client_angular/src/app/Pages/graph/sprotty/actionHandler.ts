@@ -1,12 +1,12 @@
 // client_angular/src/app/Pages/graph/sprotty/actionHandlerInitializer.ts
 
 import { inject, injectable } from 'inversify';
-import type { ActionHandlerRegistry } from 'sprotty';
+import { ActionHandlerRegistry } from 'sprotty';
 import { TYPES } from 'sprotty';
-import type { TouchEventActionHandler } from './touchEventActionHandler';
+import { TouchEventActionHandler } from './touchEventActionHandler';
 import { CustomAction, TouchEventAction } from './actions';
 import { TYPESS } from './symbols';
-import type { CustomActionHandler } from './customActionHandler';
+import { CustomActionHandler } from './customActionHandler';
 
 @injectable()
 export class ActionHandlerInitializer {

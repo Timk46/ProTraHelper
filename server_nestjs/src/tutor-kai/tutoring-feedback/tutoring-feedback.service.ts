@@ -7,9 +7,9 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service'; // Added PrismaService
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'; // Added for error handling
 import { GraphBuilderService } from './graph/graph.builder.service';
-import type { TutoringFeedbackState } from './graph/state';
-import type { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
-import type { FeedbackOutput } from './graph/schemas/feedback-output.schema';
+import { TutoringFeedbackState } from './graph/state';
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
+import { FeedbackOutput } from './graph/schemas/feedback-output.schema';
 
 @Injectable()
 export class TutoringFeedbackService {

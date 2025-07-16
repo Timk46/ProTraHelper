@@ -1,4 +1,4 @@
-import type {
+import {
   taskCreationPopupDTO,
   taskInformationDTO,
   tasksInformationDTO,
@@ -14,8 +14,8 @@ import type {
 } from '@DTOs/index';
 import { jaroWinklerDTO } from '@DTOs/index';
 import { Injectable } from '@angular/core';
-import type { HttpClient } from '@angular/common/http';
-import type { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({

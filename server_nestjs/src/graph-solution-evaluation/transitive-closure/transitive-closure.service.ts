@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import type { GraphStructureDTO, GraphStructureSemanticDTO } from '@DTOs/graphTask.dto';
+import { GraphStructureDTO, GraphStructureSemanticDTO } from '@DTOs/graphTask.dto';
 import {
   getExtraEdges,
   graphJSONToSemantic,
   graphsContainSameNodes,
   graphsIdentical,
 } from '../utils/graph-utils';
-import type { GraphEdgeSemanticDTO } from '@DTOs/graphTask.dto';
+import { GraphEdgeSemanticDTO } from '@DTOs/graphTask.dto';
 
 @Injectable()
 export class TransitiveClosureService {

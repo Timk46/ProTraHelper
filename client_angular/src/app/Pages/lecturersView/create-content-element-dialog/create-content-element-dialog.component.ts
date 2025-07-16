@@ -1,14 +1,11 @@
-import type { OnInit } from '@angular/core';
-import { Component, Inject } from '@angular/core';
-import type { FormBuilder, FormGroup } from '@angular/forms';
-import { FormControl, Validators } from '@angular/forms';
-import type { MatDialogRef } from '@angular/material/dialog';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { OnInit, Component, Inject } from '@angular/core';
+import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { trigger, state, style, animate, transition } from '@angular/animations';
-import type { QuestionDTO } from '@DTOs/question.dto';
+import { QuestionDTO } from '@DTOs/question.dto';
 import { questionType } from '@DTOs/question.dto';
 import { ReplaySubject, Subject, takeUntil } from 'rxjs';
-import type { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
+import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
 
 @Component({
   selector: 'app-create-content-element-dialog',

@@ -1,12 +1,12 @@
-import type { discussionFilterContentNodeDTO } from '@DTOs/index';
+import { discussionFilterContentNodeDTO } from '@DTOs/index';
 import { ContentDTO, discussionCreationDTO } from '@DTOs/index';
 import { Injectable } from '@angular/core';
-import type { MatDialog } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { DiscussionCreationComponent } from 'src/app/Pages/discussion/discussion-creation/discussion-creation.component';
 import { DiscussionPrecreationComponent } from 'src/app/Pages/discussion/discussion-creation/discussion-precreation/discussion-precreation.component';
-import type { DiscussionListService } from './discussion-list.service';
+import { DiscussionListService } from './discussion-list.service';
 import { Observable, firstValueFrom } from 'rxjs';
-import type { ScreenSizeService } from '../mobile/screen-size.service';
+import { ScreenSizeService } from '../mobile/screen-size.service';
 
 @Injectable({
   providedIn: 'root',

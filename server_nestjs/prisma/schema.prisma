@@ -37,6 +37,9 @@ model User {
   updatedSettings          ModuleSetting[]
   hasAcceptedPrivacyPolicy Boolean                      @default(false)
   fileUploads              FileUpload[]
+  // Peer Review Extensions
+  createdReviewSessions    PeerReviewSession[]
+  peerReviews              PeerReview[]
 }
 
 model RefreshToken {
@@ -59,6 +62,8 @@ model Module {
   settings                ModuleSetting[]
   ModuleHighlightConcepts ModuleHighlightConcepts[]
   fileUploads             FileUpload[]
+  // Peer Review Extensions
+  peerReviewSessions      PeerReviewSession[]
 }
 
 model ModuleConceptGoal {
@@ -262,6 +267,14 @@ model Question {
   version                    Int                @default(1)
   originId                   Int?
   conceptNodeId              Int?
+  
+  // Rhino Integration Fields
+  rhinoEnabled               Boolean            @default(false)
+  rhinoGrasshopperFile       String?
+  rhinoSettings              Json?
+  rhinoAutoLaunch            Boolean            @default(false)
+  rhinoAutoFocus             Boolean            @default(true)
+  
   codingQuestion             CodingQuestion?
   codeGameQuestion           CodeGameQuestion?
   contentElement             ContentElement?
@@ -269,6 +282,7 @@ model Question {
   GraphQuestion              GraphQuestion?
   FreeTextQuestion           FreeTextQuestion[]
   mcQuestion                 MCQuestion[]
+  mCSliderQuestion           MCSliderQuestion?
   author                     User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
   conceptNode                ConceptNode?       @relation(fields: [conceptNodeId], references: [id])
   origin                     Question?          @relation("VersionControl", fields: [originId], references: [id], onDelete: Cascade)
@@ -670,6 +684,8 @@ model anonymousUser {
   Discussion    Discussion?
   Message       Message[]
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Peer Review Extensions
+  peerReview    PeerReview?
 }
 
 model Discussion {
@@ -682,10 +698,13 @@ model Discussion {
   contentElementId Int?
   authorId         Int             @unique
   isSolved         Boolean         @default(false)
+  // Peer Review Extensions
+  peerSubmissionId String?
   author           anonymousUser   @relation(fields: [authorId], references: [id])
   conceptNode      ConceptNode     @relation(fields: [conceptNodeId], references: [id])
   contentElement   ContentElement? @relation(fields: [contentElementId], references: [id])
   contentNode      ContentNode?    @relation(fields: [contentNodeId], references: [id])
+  peerSubmission   PeerSubmission? @relation(fields: [peerSubmissionId], references: [id])
   messages         Message[]
   Notification     Notification[]
 }
@@ -843,6 +862,84 @@ model UserUmlQuestionAnswer {
 
 //***************************** End Umlearn Tables
 
+//***************************** Begin Peer Review Tables
+
+model PeerReviewSession {
+  id                String         @id @default(cuid())
+  title             String
+  description       String?        @db.Text
+  moduleId          Int
+  createdById       Int
+  submissionDeadline DateTime
+  reviewDeadline    DateTime
+  discussionDeadline DateTime
+  status            PeerReviewStatus @default(CREATED)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  // Relations
+  module            Module         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  creator           User           @relation(fields: [createdById], references: [id])
+  submissions       PeerSubmission[]
+  reviews           PeerReview[]
+  
+  @@index([moduleId, status])
+}
+
+model PeerSubmission {
+  id               String         @id @default(cuid())
+  sessionId        String
+  fileUploadId     Int            @unique
+  title            String
+  description      String?        @db.Text
+  submittedAt      DateTime       @default(now())
+  
+  // Relations
+  session          PeerReviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  fileUpload       FileUpload     @relation(fields: [fileUploadId], references: [id], onDelete: Cascade)
+  reviews          PeerReview[]
+  discussions      Discussion[]
+  
+  @@index([sessionId, submittedAt])
+}
+
+model PeerReview {
+  id               String         @id @default(cuid())
+  sessionId        String
+  submissionId     String
+  reviewerId       Int
+  anonymousReviewerId Int         @unique
+  rating           Int?           // 1-5 stars
+  comment          String?        @db.Text
+  isComplete       Boolean        @default(false)
+  completedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  
+  // Relations
+  session          PeerReviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  submission       PeerSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  reviewer         User           @relation(fields: [reviewerId], references: [id])
+  anonymousReviewer anonymousUser @relation(fields: [anonymousReviewerId], references: [id])
+  
+  @@index([sessionId, reviewerId])
+  @@index([submissionId])
+  @@unique([sessionId, submissionId, reviewerId])
+}
+
+//***************************** End Peer Review Tables
+
+enum PeerReviewStatus {
+  CREATED
+  SUBMISSION_OPEN
+  SUBMISSION_CLOSED
+  REVIEW_OPEN
+  REVIEW_CLOSED
+  DISCUSSION_OPEN
+  DISCUSSION_CLOSED
+  COMPLETED
+}
+
 enum GlobalRole {
   STUDENT
   TEACHER
@@ -894,7 +991,9 @@ model FileUpload {
   moduleId  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  
+  // Peer Review Extensions
+  peerSubmission PeerSubmission?
 
   @@unique([userId, fileId, moduleId])
 }
@@ -920,4 +1019,16 @@ model UserUploadAnswer {
   fileId       Int
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+}
+
+model MCSliderQuestion {
+  id                Int         @id @default(autoincrement())
+  questionId        Int         @unique
+  items             Json        @default("[]")
+  config            Json        @default("{}")
+  rhinoIntegration  Json?
+  
+  question          Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 }

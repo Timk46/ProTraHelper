@@ -14,10 +14,10 @@ import { LocalAuthGuard } from './common/guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { CasAuthGuard } from './common/guards/cas-auth.guard';
 import { Public } from '@/public.decorator';
-import type { UserDTO } from '@DTOs/user.dto';
+import { UserDTO } from '@DTOs/user.dto';
 import { JwtAuthGuard } from '@/auth/common/guards/jwt-auth.guard';
 import { JwtRefreshAuthGuard } from '@/auth/common/guards/jwt-refresh-auth.guard';
-import type { User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { roles } from '@/auth/common/guards/roles.guard';
 
 /**

@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
-import type {
+import {
   HttpInterceptor,
   HttpRequest,
   HttpHandler,
   HttpEvent,
   HttpErrorResponse,
 } from '@angular/common/http';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { switchMap, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import type { Router } from '@angular/router';
-import type { MatSnackBar } from '@angular/material/snack-bar';
-import type { UserService } from '../Services/auth/user.service';
+import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { UserService } from '../Services/auth/user.service';
 
 /**
  * The AuthInterceptor class intercepts Http requests and

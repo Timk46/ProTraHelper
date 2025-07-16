@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import type { CodeGameQuestionDto } from '@DTOs/question.dto';
+import { CodeGameQuestionDto } from '@DTOs/question.dto';
 
 @Injectable()
 export class QuestionDataCodeGameService {

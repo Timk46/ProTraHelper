@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import type { Action } from 'sprotty-protocol';
+import { Action } from 'sprotty-protocol';
 import { CustomAction } from './actions';
 
 @injectable()

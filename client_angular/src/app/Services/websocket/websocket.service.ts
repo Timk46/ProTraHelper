@@ -1,9 +1,9 @@
-import type { OnDestroy } from '@angular/core';
+import { OnDestroy } from '@angular/core';
 import { Injectable } from '@angular/core';
-import type { Socket, ManagerOptions, SocketOptions } from 'socket.io-client';
+import { Socket, ManagerOptions, SocketOptions } from 'socket.io-client';
 import { io } from 'socket.io-client';
 import { Observable, Subject, BehaviorSubject, timer } from 'rxjs';
-import type { UserService } from '../auth/user.service';
+import { UserService } from '../auth/user.service';
 import { takeUntil, retry, switchMap } from 'rxjs/operators';
 
 interface SocketConnection {

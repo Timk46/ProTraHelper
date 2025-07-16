@@ -1,8 +1,6 @@
 import { Component, Inject } from '@angular/core';
-import type { MatDialogRef } from '@angular/material/dialog';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { FormBuilder, FormGroup } from '@angular/forms';
-import { Validators } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-add-element-modal',

@@ -1,4 +1,4 @@
-import type {
+import {
   editorModelDTO,
   editorElementDTO,
   editorDataDTO,
@@ -7,15 +7,15 @@ import type {
   ClassEdge,
 } from '@DTOs/index';
 import { EditorElementType, EditorModel } from '@DTOs/index';
-import type { OnDestroy } from '@angular/core';
+import { OnDestroy } from '@angular/core';
 import { Component } from '@angular/core';
-import type { MatDialog } from '@angular/material/dialog';
-import type { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { TaskDescriptionPopupComponent } from './task-description-popup/task-description-popup.component';
-import type { Subscription } from 'rxjs/internal/Subscription';
-import type { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';
-import type { DatabaseTaskCommunicationService } from '@UMLearnServices/database-task-communication.service';
-import type { NotificationService } from '@UMLearnServices/notification.service';
+import { Subscription } from 'rxjs/internal/Subscription';
+import { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';
+import { DatabaseTaskCommunicationService } from '@UMLearnServices/database-task-communication.service';
+import { NotificationService } from '@UMLearnServices/notification.service';
 
 @Component({
   selector: 'app-task-creation',

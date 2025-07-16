@@ -1,22 +1,20 @@
-import type { OnInit, AfterViewInit, OnDestroy } from '@angular/core';
-import { Component, ViewChild } from '@angular/core';
-import type { TinymceComponent } from '../../tinymce/tinymce.component';
-import type { AbstractControl, FormArray, FormBuilder, FormGroup } from '@angular/forms';
-import { FormControl, Validators } from '@angular/forms';
-import type { detailedQuestionDTO } from '@DTOs/index';
+import { OnInit, AfterViewInit, OnDestroy, Component, ViewChild } from '@angular/core';
+import { TinymceComponent } from '../../tinymce/tinymce.component';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
+import { detailedQuestionDTO } from '@DTOs/index';
 import { detailedChoiceOptionDTO, questionType } from '@DTOs/index';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import type { ActivatedRoute, Router } from '@angular/router';
-import type { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
-import type { MatSnackBar } from '@angular/material/snack-bar';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCheckboxChange } from '@angular/material/checkbox';
-import type { McqcreationService } from 'src/app/Services/mcqCreation/mcqcreation.service';
+import { McqcreationService } from 'src/app/Services/mcqCreation/mcqcreation.service';
 import { MatTableDataSource } from '@angular/material/table';
-import type { ContentService } from 'src/app/Services/content/content.service';
-import type { ConceptNode } from '@DTOs/index';
+import { ContentService } from 'src/app/Services/content/content.service';
+import { ConceptNode } from '@DTOs/index';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { map, startWith, takeUntil } from 'rxjs/operators';
-import type {
+import {
   Answer,
   McqEvaluation,
   McqEvaluations,

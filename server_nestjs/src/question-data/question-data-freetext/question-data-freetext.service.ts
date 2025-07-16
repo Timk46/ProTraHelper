@@ -1,7 +1,7 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { QuestionDataService } from '../question-data.service';
-import type { detailedFreetextQuestionDTO, freeTextQuestionDTO } from '@DTOs/index';
+import { detailedFreetextQuestionDTO, freeTextQuestionDTO } from '@DTOs/index';
 
 @Injectable()
 export class QuestionDataFreetextService {

@@ -1,4 +1,4 @@
-import type { UserAnswerDataDTO, freeTextQuestionDTO } from '@DTOs/index';
+import { UserAnswerDataDTO, freeTextQuestionDTO } from '@DTOs/index';
 import { DialogRef } from '@angular/cdk/dialog';
 import { Component, Inject, EventEmitter, Output, Input } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';

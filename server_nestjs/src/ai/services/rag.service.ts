@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PrismaVectorStore } from '@langchain/community/vectorstores/prisma';
-import type { TranscriptChunk } from '@DTOs/index';
-import type { TranscriptEmbedding } from '@prisma/client';
+import { TranscriptChunk } from '@DTOs/index';
+import { TranscriptEmbedding } from '@prisma/client';
 import { Prisma, PrismaClient } from '@prisma/client';
 // Notes:
 // Currently this is only providing similarity search on lecture transcripts and the pgvectorstore.

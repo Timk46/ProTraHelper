@@ -1,7 +1,7 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import type { detailedGraphQuestionDTO } from '@Interfaces/detailedQuestion.dto';
+import { detailedGraphQuestionDTO } from '@Interfaces/detailedQuestion.dto';
 import { GraphStructureDTO } from '@Interfaces/graphTask.dto';
-import type { GraphQuestionDTO } from '@Interfaces/question.dto';
+import { GraphQuestionDTO } from '@Interfaces/question.dto';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

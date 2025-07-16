@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { NotificationService } from '@/notification/notification.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import type {
+import {
   AnonymousUserDTO,
   discussionCreationDTO,
   discussionMessageCreationDTO} from '@DTOs/index';

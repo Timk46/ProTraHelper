@@ -1,6 +1,8 @@
 import 'reflect-metadata';
 import { NgModule } from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { MaterialModule } from './Modules/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MarkdownModule } from 'ngx-markdown';
@@ -89,7 +91,6 @@ import { HighlightConceptDialogComponent } from './Pages/highlight-navigator/hig
 import { ContentListNodeEditDialogComponent } from './Pages/content-list/content-list-node-edit-dialog/content-list-node-edit-dialog.component';
 
 // ProTra 2.0 Module
-import { PmpmModule } from './features/pmpm/pmpm.module';
 import { UploadTaskComponent } from './Pages/contentView/contentElement/upload-task/upload-task.component';
 
 @NgModule({
@@ -158,8 +159,9 @@ import { UploadTaskComponent } from './Pages/contentView/contentElement/upload-t
   ],
   bootstrap: [AppComponent],
   imports: [
-    ToastrModule.forRoot(),
     BrowserModule,
+    CommonModule,
+    RouterModule,
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
@@ -175,8 +177,8 @@ import { UploadTaskComponent } from './Pages/contentView/contentElement/upload-t
     CdkAccordionModule,
     MatRippleModule,
     CodeGameModule,
-    PmpmModule,
     MatIconModule,
+    ToastrModule.forRoot(),
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

@@ -1,13 +1,12 @@
-import type { OnInit } from '@angular/core';
-import { Component } from '@angular/core';
-import type { Router } from '@angular/router';
-import type { MatDialog } from '@angular/material/dialog';
-import type {
+import { OnInit, Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import {
   NavigationPreferenceService,
   NavigationType,
 } from 'src/app/Services/navigation/navigation-preference.service';
 import { NavigationPreferenceSettingsComponent } from '../navigation-preference-settings/navigation-preference-settings.component';
-import type { UserService } from 'src/app/Services/auth/user.service';
+import { UserService } from 'src/app/Services/auth/user.service';
 
 @Component({
   selector: 'app-navigation-preference-toggle',

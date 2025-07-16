@@ -1,21 +1,21 @@
-import type { OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import { OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { Component, HostListener, ViewChild } from '@angular/core';
-import type { HttpClient } from '@angular/common/http'; // Added HttpClient
-import type { MatDialog } from '@angular/material/dialog';
-import type { MatSnackBar } from '@angular/material/snack-bar';
-import type { Title } from '@angular/platform-browser';
-import type { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http'; // Added HttpClient
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, finalize, throwError, filter } from 'rxjs'; // Added RxJS operators
-import type { CodeSubmissionResultDto } from '@DTOs/index';
-import type { ConfettiService } from 'src/app/Services/animations/confetti.service';
-import type { ProgressService } from 'src/app/Services/progress/progress.service';
+import { CodeSubmissionResultDto } from '@DTOs/index';
+import { ConfettiService } from 'src/app/Services/animations/confetti.service';
+import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { VideoTimeStampComponent } from '../video-time-stamp/video-time-stamp.component';
-import type { WorkspaceStateService } from '../../services/workspace-state.service';
-import type { TestResult } from '../../models/code-submission.model';
+import { WorkspaceStateService } from '../../services/workspace-state.service';
+import { TestResult } from '../../models/code-submission.model';
 import { WorkspaceState } from '../../models/code-submission.model';
 import { CodeEditorWrapperComponent } from '../../components/code-editor-wrapper/code-editor-wrapper.component';
-import type { FileExplorerComponent } from '../../components/file-explorer/file-explorer.component';
-import type { FeedbackPanelTutorFeedbackComponent } from '../../components/feedback-panel-tutor-feedback/feedback-panel-tutor-feedback.component';
+import { FileExplorerComponent } from '../../components/file-explorer/file-explorer.component';
+import { FeedbackPanelTutorFeedbackComponent } from '../../components/feedback-panel-tutor-feedback/feedback-panel-tutor-feedback.component';
 import { PrivacyConsentDialogComponent } from '../../components/privacy-consent-dialog/privacy-consent-dialog.component'; // Added Consent Dialog
 import { environment } from 'src/environments/environment'; // Added environment
 

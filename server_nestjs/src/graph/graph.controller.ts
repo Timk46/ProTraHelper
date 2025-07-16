@@ -1,4 +1,4 @@
-import type { ConceptGraphDTO } from '@DTOs/index';
+import { ConceptGraphDTO } from '@DTOs/index';
 import {
   Body,
   Controller,

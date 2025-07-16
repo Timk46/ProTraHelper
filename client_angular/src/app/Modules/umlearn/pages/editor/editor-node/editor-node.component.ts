@@ -1,6 +1,6 @@
 import { EditorElement } from '@DTOs/index';
-import type { ClassNode } from '@DTOs/index';
-import type { ElementRef, SimpleChanges, OnChanges } from '@angular/core';
+import { ClassNode } from '@DTOs/index';
+import { ElementRef, SimpleChanges, OnChanges } from '@angular/core';
 import { Component, Input } from '@angular/core';
 import { NotificationService } from '@UMLearnServices/notification.service';
 

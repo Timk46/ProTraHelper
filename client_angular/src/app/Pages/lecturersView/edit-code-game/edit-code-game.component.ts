@@ -1,20 +1,18 @@
-import type { OnInit, QueryList } from '@angular/core';
-import { Component, ViewChildren } from '@angular/core';
-import type { ActivatedRoute } from '@angular/router';
-import type { QuestionDataService } from '../../../Services/question/question-data.service';
-import type { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
-import type { FormArray, FormBuilder, FormGroup } from '@angular/forms';
-import { Validators } from '@angular/forms';
-import type { MatSelectChange } from '@angular/material/select';
-import type { MatDialog } from '@angular/material/dialog';
+import { OnInit, QueryList, Component, ViewChildren } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { QuestionDataService } from '../../../Services/question/question-data.service';
+import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatSelectChange } from '@angular/material/select';
+import { MatDialog } from '@angular/material/dialog';
 import { CodeEditorComponent } from '../../../Modules/code-game/sites/code-editor/code-editor.component';
-import type { CodeGameScaffoldDto } from '@DTOs/question.dto';
+import { CodeGameScaffoldDto } from '@DTOs/question.dto';
 import { questionType } from '@DTOs/question.dto';
 import { CodeGameConfirmDialogComponent } from './code-game-confirm-dialog.component';
 import { CodeGameAddElementModalComponent } from './code-game-add-element-modal.component';
-import type { DefaultCodeGameScaffoldsDTO, CodeGameScaffoldDTO } from '@DTOs/codeGame.dto';
-import type { MatSnackBar } from '@angular/material/snack-bar';
-import type { Router } from '@angular/router';
+import { DefaultCodeGameScaffoldsDTO, CodeGameScaffoldDTO } from '@DTOs/codeGame.dto';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import defaultScaffolds from './defaultCodeGameScaffolds.json';
 
 @Component({

@@ -2,7 +2,28 @@
   "permissions": {
     "allow": [
       "Bash(npm run build:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(npm start)",
+      "Bash(npx ng build:*)",
+      "Bash(npm run lint)",
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)",
+      "Bash(grep:*)",
+      "Bash(-exec npx tsc --noEmit {})",
+      "Bash(npm install:*)",
+      "Bash(npm ls:*)",
+      "Bash(npx ng:*)",
+      "Bash(rm:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm info:*)",
+      "Bash(npm view:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(npm run:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
-import type { FileDto } from '@DTOs/index';
+import { FileDto } from '@DTOs/index';
 import * as fs from 'fs';
 import { FilesService } from './files.service';
 

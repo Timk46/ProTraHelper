@@ -1,10 +1,9 @@
-import type { AfterViewInit, OnInit, QueryList } from '@angular/core';
-import { Component, EventEmitter, Inject, Input, Output, ViewChildren } from '@angular/core';
-import type { MatDialogRef } from '@angular/material/dialog';
+import { AfterViewInit, OnInit, QueryList, Component, EventEmitter, Inject, Input, Output, ViewChildren } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { UserAnswerDataDTO, freeTextQuestionDTO, userAnswerFeedbackDTO } from '@DTOs/index';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import type { Location } from '@angular/common';
+import { UserAnswerDataDTO, freeTextQuestionDTO, userAnswerFeedbackDTO } from '@DTOs/index';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { Location } from '@angular/common';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 

@@ -1,10 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Post, Body, Req, Res, Get, HttpStatus, HttpException } from '@nestjs/common';
 import { LlmBasicPromptService } from '../services/llmBasicPrompt.service';
-import type { Request} from 'express';
+import { Request} from 'express';
 import { Response } from 'express';
 import { ChatBotRAGService } from './chatbot_rag.service';
-import type { ChatBotMessageDTO } from '@DTOs/index';
+import { ChatBotMessageDTO } from '@DTOs/index';
 
 interface RequestWithUser extends Request {
   user: {

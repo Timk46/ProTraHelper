@@ -1,4 +1,4 @@
-import type { ElementRef, OnDestroy } from '@angular/core';
+import { ElementRef, OnDestroy } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
 
 @Component({

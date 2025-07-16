@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Req } from '@nestjs/common';
 import { CodeGameService } from './code-game.service';
-import type { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
+import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
 import { CodeGameEvaluationService } from '@/code-game/code-game-evaluation/code-game-evaluation.service';
 
 @Controller('code-game')

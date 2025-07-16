@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
-import type { ConceptNodeDTO, ConceptEdgeDTO, ConceptGraphDTO } from '@Interfaces/index';
+import { ConceptNodeDTO, ConceptEdgeDTO, ConceptGraphDTO } from '@Interfaces/index';
 
 /**
  * This service handles the concept graph

@@ -1,4 +1,4 @@
-import type { AfterViewInit, ChangeDetectorRef, ElementRef, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, ElementRef, OnInit } from '@angular/core';
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 
 /**

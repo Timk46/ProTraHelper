@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import type { GenerateGraphService } from './generate-graph.service';
-import type { GraphEdgeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
+import { GenerateGraphService } from './generate-graph.service';
+import { GraphEdgeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
 
 export interface GenerateFloydConfiguration {
   nodesCount: number;

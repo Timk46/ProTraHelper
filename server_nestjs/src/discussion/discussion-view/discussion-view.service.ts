@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { PrismaService } from '@/prisma/prisma.service';
-import type { discussionDTO, discussionMessageDTO, nodeNameDTO} from '@DTOs/index';
+import { discussionDTO, discussionMessageDTO, nodeNameDTO} from '@DTOs/index';
 import { NotificationType } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { DiscussionDataService } from '../discussion-data/discussion-data.service';

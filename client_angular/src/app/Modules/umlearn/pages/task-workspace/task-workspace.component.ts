@@ -1,13 +1,13 @@
-import type { OnDestroy } from '@angular/core';
+import { OnDestroy } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
-import type { MatDialog } from '@angular/material/dialog';
-import type { ActivatedRoute, Router } from '@angular/router';
-import type { editorDataDTO, taskAttemptDataDTO, taskWorkspaceDataDTO } from '@DTOs/index';
+import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute, Router } from '@angular/router';
+import { editorDataDTO, taskAttemptDataDTO, taskWorkspaceDataDTO } from '@DTOs/index';
 import { EditorModel } from '@DTOs/index';
-import type { DatabaseTaskCommunicationService } from '@UMLearnServices/database-task-communication.service';
-import type { NotificationService } from '@UMLearnServices/notification.service';
+import { DatabaseTaskCommunicationService } from '@UMLearnServices/database-task-communication.service';
+import { NotificationService } from '@UMLearnServices/notification.service';
 import { TaskDescriptionPopupComponent } from '../task-creation/task-description-popup/task-description-popup.component';
-import type { Subscription } from 'rxjs/internal/Subscription';
+import { Subscription } from 'rxjs/internal/Subscription';
 
 @Component({
   selector: 'app-task-workspace',

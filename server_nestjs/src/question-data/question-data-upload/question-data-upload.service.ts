@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import type { detailedUploadQuestionDTO, uploadQuestionDTO } from '@DTOs/index';
+import { detailedUploadQuestionDTO, uploadQuestionDTO } from '@DTOs/index';
 
 @Injectable()
 export class QuestionDataUploadService {

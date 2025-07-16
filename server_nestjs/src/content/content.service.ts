@@ -2,10 +2,10 @@
 // content.service.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import type { ContentsForConceptDTO, ContentElementDTO, ContentDTO } from '@Interfaces/index';
-import type { ContentElementStatusDTO } from '@DTOs/index';
+import { ContentsForConceptDTO, ContentElementDTO, ContentDTO } from '@Interfaces/index';
+import { ContentElementStatusDTO } from '@DTOs/index';
 import { UserConceptService } from '@/graph/user-concept/user-concept.service';
-import type { ConceptNode } from '@prisma/client';
+import { ConceptNode } from '@prisma/client';
 
 @Injectable()
 export class ContentService {

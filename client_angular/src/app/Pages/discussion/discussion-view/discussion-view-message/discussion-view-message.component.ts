@@ -1,4 +1,4 @@
-import type { discussionMessageDTO } from '@DTOs/index';
+import { discussionMessageDTO } from '@DTOs/index';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import DOMPurify from 'dompurify';

@@ -1,4 +1,4 @@
-import type { Action } from 'sprotty-protocol';
+import { Action } from 'sprotty-protocol';
 import { SprottyConceptNode } from './sprottyModels.interface';
 
 // these actions are handled in the model-source.

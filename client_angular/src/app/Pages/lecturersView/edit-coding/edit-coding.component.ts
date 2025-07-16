@@ -1,24 +1,22 @@
-import type { OnInit, QueryList } from '@angular/core';
-import { Component, ViewChildren } from '@angular/core';
-import type { FormBuilder, FormGroup, FormArray } from '@angular/forms';
-import { Validators } from '@angular/forms';
-import type { MatSnackBar } from '@angular/material/snack-bar';
-import type { MatDialog } from '@angular/material/dialog';
-import type { QuestionDataService } from '../../../Services/question/question-data.service';
-import type { EditCodeService } from './edit-coding.service';
-import type { CodingQuestionInternal } from '@DTOs/question.dto';
+import { OnInit, QueryList, Component, ViewChildren } from '@angular/core';
+import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { QuestionDataService } from '../../../Services/question/question-data.service';
+import { EditCodeService } from './edit-coding.service';
+import { CodingQuestionInternal } from '@DTOs/question.dto';
 import { questionType } from '@DTOs/question.dto';
-import type {
+import {
   detailedQuestionDTO,
   CodeGeruestDto,
   ModelSolutionDto,
   AutomatedTestDto,
   CodeSubmissionResultDto,
 } from '@DTOs/index';
-import type { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { AddElementModalComponent } from './add-element-modal.component';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
-import type { MatSelectChange } from '@angular/material/select';
+import { MatSelectChange } from '@angular/material/select';
 import { CodeEditorComponent } from '../../../Modules/tutor-kai/sites/code-editor/code-editor.component';
 
 @Component({

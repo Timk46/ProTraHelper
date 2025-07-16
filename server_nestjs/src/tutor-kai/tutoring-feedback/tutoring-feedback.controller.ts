@@ -15,15 +15,15 @@ import {
   Logger,
   BadRequestException, // Added BadRequestException
 } from '@nestjs/common';
-import type { Request } from 'express'; // Added Request
+import { Request } from 'express'; // Added Request
 import { PrismaService } from 'src/prisma/prisma.service'; // Added PrismaService
 import { IsIn, IsString } from 'class-validator'; // Added class-validator imports
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard'; // Add AuthGuard
 import { TutoringFeedbackService } from './tutoring-feedback.service';
 import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
-import type { FeedbackOutput } from './graph/schemas/feedback-output.schema';
+import { FeedbackOutput } from './graph/schemas/feedback-output.schema';
 import { LanggraphDataFetcherService } from '../langgraph-feedback/helper/langgraph-data-fetcher.service';
-import type { CodeSubmissionResultDto } from '@DTOs/tutorKaiDtos/submission.dto';
+import { CodeSubmissionResultDto } from '@DTOs/tutorKaiDtos/submission.dto';
 
 // DTO for the evaluate request (mirrors LanggraphFeedbackController)
 interface EvaluateRequestDto {

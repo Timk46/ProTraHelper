@@ -8,7 +8,7 @@ import { PromptTemplate } from 'langchain/prompts';
 import { RunnableSequence } from 'langchain/schema/runnable';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import { z } from 'zod';
-import type { McqGenerationDTO, OptionDTO, McqEvaluation } from '@Interfaces/question.dto';
+import { McqGenerationDTO, OptionDTO, McqEvaluation } from '@Interfaces/question.dto';
 import { env } from 'process';
 import { RagService } from '@/ai/services/rag.service';
 import { PrismaService } from '@/prisma/prisma.service';

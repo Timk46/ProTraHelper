@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { GraphSolutionEvaluationService } from '../graph-solution-evaluation.service';
-import type { GraphStructureDTO, GraphStructureSemanticDTO } from '@Interfaces/graphTask.dto';
+import { GraphStructureDTO, GraphStructureSemanticDTO } from '@Interfaces/graphTask.dto';
 import { graphFeedbackGenerationPrompts } from '../utils/graph-feedback-generation.prompts';
 import { graphJSONToSemantic } from '../utils/graph-utils';
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';

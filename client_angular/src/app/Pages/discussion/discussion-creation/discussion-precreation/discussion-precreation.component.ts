@@ -1,4 +1,4 @@
-import type { discussionFilterContentNodeDTO } from '@DTOs/index';
+import { discussionFilterContentNodeDTO } from '@DTOs/index';
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 

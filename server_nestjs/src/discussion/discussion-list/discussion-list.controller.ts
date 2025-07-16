@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards, Query } from '@nestjs/common';
 import { DiscussionListService } from './discussion-list.service';
-import type { discussionDTO, discussionFilterContentNodeDTO } from '@DTOs/index';
+import { discussionDTO, discussionFilterContentNodeDTO } from '@DTOs/index';
 import { discussionFilterDTO } from '@DTOs/index';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 
@@ -22,8 +22,8 @@ export class DiscussionListController {
    * @returns the discussions
    */
   @roles('ANY')
-  @Post()
-  async getDiscussions(@Body() filterData: discussionFilterDTO): Promise<discussionDTO[]> {
+  @Get()
+  async getDiscussions(@Query() filterData: discussionFilterDTO): Promise<discussionDTO[]> {
     debug && console.log('DiscussionListController: getDiscussions');
     return this.listService.getDiscussions(filterData);
   }

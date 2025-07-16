@@ -1,10 +1,7 @@
-import type { OnInit } from '@angular/core';
-import { Component, Inject, Input } from '@angular/core';
-import type { MatDialogRef } from '@angular/material/dialog';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { FormBuilder, FormGroup } from '@angular/forms';
-import { Validators } from '@angular/forms';
-import type { ContentDTO } from '@DTOs/index';
+import { OnInit, Component, Inject, Input } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ContentDTO } from '@DTOs/index';
 
 @Component({
   selector: 'app-content-list-node-edit-dialog',

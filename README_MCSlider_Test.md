@@ -1,134 +1,217 @@
-# MCSlider Test Setup
+# MCSlider Komponente Test-Dokumentation
 
-## Übersicht
+## Überblick
+Diese Dokumentation beschreibt die Testeinrichtung und -durchführung für die MCSlider-Komponente in HEFL.
 
-Dieses Setup erstellt Testdaten für die neue MCSlider-Komponente. Die Komponente zeigt mehrere Multiple-Choice-Fragen in einem Slider-Interface an.
+## Testdaten-Setup
 
-## Automatisches Setup
-
+### Automatische Einrichtung
 ```bash
-# Führen Sie das Setup-Skript aus
-./setup_mcslider_test.sh
+# MCSlider Testdaten erstellen
+cd server_nestjs
+npx ts-node prisma/seed/seedMCSlider.ts
 ```
 
-## Manuelles Setup
+### Manuelle Einrichtung
+1. Navigiere zu `server_nestjs/prisma/seed/`
+2. Führe das Seed-Script aus: `npx ts-node seedMCSlider.ts`
+3. Prüfe die Konsolen-Ausgabe auf Erfolg
 
-Falls Sie die Datenbank manuell konfigurieren möchten:
+## Erstellte Testdaten
 
-```bash
-# Führen Sie die SQL-Datei direkt aus
-psql "your_database_url" -f create_mcslider_test_data.sql
+### ConceptNode
+- **Name**: "MCSlider Tests"
+- **Beschreibung**: Konzept für MCSlider-Komponenten Tests
+- **ID**: Automatisch generiert
+
+### ContentNode
+- **Name**: "MCSlider Test Bereich"
+- **Beschreibung**: Testbereich für MCSlider-Komponente
+- **Position**: 1
+
+### Testfragen
+
+#### 1. Geografie Hauptstädte (Mehrfachauswahl)
+- **Typ**: MCSlider
+- **Punktzahl**: 3
+- **Optionen**: 5 (3 richtig, 2 falsch)
+- **Richtige Antworten**: 
+  - Berlin - Deutschland
+  - Paris - Frankreich
+  - Rom - Italien
+
+#### 2. Mathematik Grundlagen (Mehrfachauswahl)
+- **Typ**: MCSlider
+- **Punktzahl**: 2
+- **Optionen**: 4 (3 richtig, 1 falsch)
+- **Richtige Antworten**: 
+  - 2 + 2 = 4
+  - 5 * 3 = 15
+  - 7 - 3 = 4
+
+#### 3. Naturwissenschaften (Mehrfachauswahl)
+- **Typ**: MCSlider
+- **Punktzahl**: 4
+- **Optionen**: 5 (3 richtig, 2 falsch)
+- **Richtige Antworten**: 
+  - Wasser gefriert bei 0°C
+  - Licht breitet sich mit ca. 300.000 km/s aus
+  - Ein Jahr hat 365 Tage
+
+#### 4. Einfachauswahl Test (Einfachauswahl)
+- **Typ**: MCSlider
+- **Punktzahl**: 1
+- **Optionen**: 4 (1 richtig, 3 falsch)
+- **Richtige Antwort**: Berlin
+
+## Test-Durchführung
+
+### 1. Frontend-Test
+1. Starte den Angular-Entwicklungsserver: `npm start`
+2. Navigiere zu `/dashboard/content-list`
+3. Suche nach "MCSlider Test Bereich"
+4. Klicke auf MCSlider-Fragen (erkennbar am Carousel-Icon)
+
+### 2. Funktionstest
+
+#### Navigation
+- [ ] Vorherige/Nächste Frage Buttons funktionieren
+- [ ] Fortschritts-Dots sind klickbar
+- [ ] Tastatur-Navigation funktioniert
+
+#### Fragen-Anzeige
+- [ ] Fragentext wird korrekt dargestellt
+- [ ] Optionen werden angezeigt
+- [ ] Single/Multiple Choice wird korrekt unterschieden
+- [ ] Punktzahl wird angezeigt
+
+#### Antwort-Auswahl
+- [ ] Optionen können ausgewählt werden
+- [ ] Mehrfachauswahl funktioniert bei MC-Fragen
+- [ ] Einfachauswahl funktioniert bei SC-Fragen
+- [ ] Optionen können deselektiert werden
+
+#### Antwort-Submission
+- [ ] Einzelne Frage kann abgeschickt werden
+- [ ] Alle Fragen können auf einmal abgeschickt werden
+- [ ] Feedback wird korrekt angezeigt
+- [ ] Punktzahl wird richtig berechnet
+
+#### Feedback-System
+- [ ] Korrekte Antworten werden grün markiert
+- [ ] Falsche Antworten werden rot markiert
+- [ ] Fortschrittsbalken funktioniert
+- [ ] Gesamt-Feedback wird angezeigt
+
+### 3. Fehlerbehebung
+
+#### Häufige Probleme
+
+**Problem**: MCSlider-Fragen werden nicht angezeigt
+**Lösung**: 
+1. Prüfe, ob Testdaten erfolgreich erstellt wurden
+2. Kontrolliere die Konsole auf Fehler
+3. Überprüfe, ob QuestionDataService korrekt implementiert ist
+
+**Problem**: Dialog öffnet sich nicht
+**Lösung**: 
+1. Prüfe content-list-item.component.ts Implementierung
+2. Kontrolliere MCSlider-Typ-Erkennung
+3. Überprüfe Dialog-Service-Integration
+
+**Problem**: Optionen werden nicht geladen
+**Lösung**: 
+1. Prüfe MCQuestion/MCOption-Tabellen in der Datenbank
+2. Kontrolliere API-Endpoints
+3. Überprüfe Service-Implementierung
+
+## Datenbank-Verifizierung
+
+### Prüfung der erstellten Daten
+```sql
+-- Prüfe ConceptNode
+SELECT * FROM "ConceptNode" WHERE name = 'MCSlider Tests';
+
+-- Prüfe ContentNode
+SELECT * FROM "ContentNode" WHERE name = 'MCSlider Test Bereich';
+
+-- Prüfe Questions
+SELECT * FROM "Question" WHERE type = 'MCSlider';
+
+-- Prüfe MCQuestions
+SELECT q.text, mcq.* FROM "Question" q
+JOIN "MCQuestion" mcq ON q.id = mcq."questionId"
+WHERE q.type = 'MCSlider';
+
+-- Prüfe MCOptions
+SELECT q.text as question_text, opt.text as option_text, opt.is_correct
+FROM "Question" q
+JOIN "MCQuestion" mcq ON q.id = mcq."questionId"
+JOIN "MCQuestionOption" mqo ON mcq.id = mqo."mcQuestionId"
+JOIN "MCOption" opt ON mqo."mcOptionId" = opt.id
+WHERE q.type = 'MCSlider';
 ```
 
-## Erstelle Testdaten
+## Cleanup
 
-Das Skript erstellt:
+### Testdaten entfernen
+Das Seed-Script führt automatisch ein Cleanup durch, bevor neue Daten erstellt werden.
 
-1. **Einen Content-Node**: "MCSlider Test Bereich"
-2. **Drei Test-Fragen**:
-   - **Geographie**: "Was ist die Hauptstadt von Deutschland?"
-   - **Mathematik**: "Was ist 2 + 2?"
-   - **Naturwissenschaft**: "Welches Element hat das Symbol 'O'?"
-3. **Multiple-Choice-Optionen** für jede Frage
-4. **Content-Verknüpfungen** um die Fragen anzuzeigen
+### Manuelles Cleanup
+```sql
+-- Achtung: Nur ausführen wenn du sicher bist!
+-- Entfernt alle MCSlider-Testdaten
 
-## Testen der Komponente
+-- Finde ContentNode ID
+SELECT id FROM "ContentNode" WHERE name = 'MCSlider Test Bereich';
 
-Nach dem Setup:
+-- Entferne in dieser Reihenfolge:
+-- 1. ContentViews
+-- 2. ContentElements
+-- 3. MCQuestionOptions
+-- 4. MCOptions
+-- 5. MCQuestions
+-- 6. Questions
+-- 7. Training
+-- 8. ContentNode
+-- 9. ConceptNode
+```
 
-1. **Starten Sie den Angular-Entwicklungsserver**:
-   ```bash
-   cd client_angular
-   npm start
-   ```
+## Erwartete Ergebnisse
 
-2. **Navigieren Sie zu einer Content-Liste**
+### Erfolgreiche Tests
+- MCSlider-Komponente lädt ohne Fehler
+- Alle 4 Testfragen sind verfügbar
+- Navigation funktioniert flüssig
+- Antwort-Submission funktioniert
+- Feedback ist korrekt und vollständig
 
-3. **Suchen Sie nach "MCSlider Test Bereich"**
-
-4. **Klicken Sie auf eine MCSlider-Frage** (erkennbar am Karussell-Symbol)
-
-5. **Die MCSlider-Komponente öffnet sich** mit:
-   - ✅ Slider-Navigation mit Pfeiltasten
-   - ✅ Progress-Dots zur direkten Navigation
-   - ✅ Einzelfrage-Submission
-   - ✅ Gesamtbereich-Submission
-   - ✅ Visuelles Feedback (richtig/falsch)
-   - ✅ Responsive Design
-
-## Funktionen der MCSlider-Komponente
-
-### Navigation
-- **Pfeiltasten**: Links/Rechts navigieren
-- **Progress-Dots**: Direkter Sprung zu einer Frage
-- **Keyboard-Navigation**: Vollständig zugänglich
-
-### Submission
-- **Einzelfrage**: Jede Frage kann einzeln beantwortet werden
-- **Batch-Submission**: Alle Fragen auf einmal absenden
-- **Retry-Funktion**: Falsche Antworten erneut versuchen
-
-### Feedback
-- **Sofortiges Feedback**: Nach jeder Submission
-- **Farbcodierung**: Grün (richtig), Rot (falsch), Gelb (teilweise)
-- **Endergebnis**: Gesamtpunktzahl und Einzelergebnisse
-
-### Responsive Design
-- **Mobile-First**: Touch-freundliche Bedienung
-- **Breakpoints**: Optimiert für alle Bildschirmgrößen
-- **Accessibility**: WCAG-konform
+### Performance-Benchmarks
+- Ladezeit: < 2 Sekunden
+- Navigationszeit zwischen Fragen: < 100ms
+- Submission-Zeit: < 1 Sekunde
+- Feedback-Anzeige: < 500ms
 
 ## Troubleshooting
 
-### Datenbank-Verbindung
-Wenn die Verbindung zur Datenbank fehlschlägt:
+### Entwickler-Tools
+1. **Browser-Konsole**: Prüfe auf JavaScript-Fehler
+2. **Netzwerk-Tab**: Kontrolliere API-Calls
+3. **Angular DevTools**: Prüfe Komponenten-Zustand
 
-```bash
-# Überprüfen Sie die Umgebungsvariable
-echo $DATABASE_URL
-
-# Oder setzen Sie sie manuell
-export DATABASE_URL="postgresql://username:password@localhost:5432/database_name"
+### Logging
+```typescript
+// Aktiviere detailliertes Logging in der Komponente
+console.log('MCSlider State:', this.componentState);
+console.log('Questions:', this.questionStates);
+console.log('Current Question:', this.getCurrentQuestionState());
 ```
 
-### Fehlende Abhängigkeiten
-Falls TypeScript-Fehler auftreten:
-
-```bash
-# Kompilierung überprüfen
-cd client_angular
-npx tsc --noEmit
-
-# Abhängigkeiten installieren
-npm install
-```
-
-### Komponente erscheint nicht
-1. Überprüfen Sie, ob die Testdaten erstellt wurden:
-   ```sql
-   SELECT * FROM "Question" WHERE type = 'MCSlider';
-   ```
-
-2. Stellen Sie sicher, dass die Angular-Anwendung neu gestartet wurde
-
-3. Überprüfen Sie die Browser-Konsole auf Fehler
-
-## Aufräumen
-
-Um die Testdaten zu entfernen:
-
-```sql
--- Testdaten entfernen
-DELETE FROM "ContentView" WHERE "contentNodeId" IN (SELECT id FROM "ContentNode" WHERE name = 'MCSlider Test Bereich');
-DELETE FROM "ContentElement" WHERE title LIKE 'MCSlider Test Frage%';
-DELETE FROM "MCQuestionOption" WHERE "mcQuestionId" IN (SELECT id FROM "MCQuestion" WHERE "questionId" IN (SELECT id FROM "Question" WHERE type = 'MCSlider'));
-DELETE FROM "MCQuestion" WHERE "questionId" IN (SELECT id FROM "Question" WHERE type = 'MCSlider');
-DELETE FROM "MCOption" WHERE text IN ('Berlin', 'München', 'Hamburg', 'Frankfurt', '4', '3', '5', '2', 'Sauerstoff', 'Kohlenstoff', 'Wasserstoff', 'Stickstoff');
-DELETE FROM "Question" WHERE type = 'MCSlider';
-DELETE FROM "Training" WHERE "contentNodeId" IN (SELECT id FROM "ContentNode" WHERE name = 'MCSlider Test Bereich');
-DELETE FROM "ContentNode" WHERE name = 'MCSlider Test Bereich';
-```
+### Häufige Fehlerquellen
+1. **Fehlende DTOs**: Prüfe Import-Pfade
+2. **Service-Fehler**: Kontrolliere QuestionDataService
+3. **Dialog-Probleme**: Prüfe Material-Dialog-Konfiguration
+4. **Routing-Fehler**: Kontrolliere Navigation-Logik
 
 ## Kontakt
-
-Bei Fragen oder Problemen wenden Sie sich an das Entwicklungsteam.
+Bei Problemen oder Fragen zur MCSlider-Komponente, kontaktiere das Entwicklungsteam oder erstelle ein Issue im Repository.

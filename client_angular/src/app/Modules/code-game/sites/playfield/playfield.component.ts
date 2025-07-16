@@ -1,4 +1,4 @@
-import type { ElementRef, Renderer2 } from '@angular/core';
+import { ElementRef, Renderer2 } from '@angular/core';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { animate, style, transition, trigger, state, keyframes } from '@angular/animations';
 

@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import type { Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { ContentBoardComponent } from './Pages/contentBoard/contentBoard.component';
 import { AppComponent } from './app.component';
@@ -227,6 +227,11 @@ const routes: Routes = [
     path: 'teacher',
     loadChildren: () => import('./Pages/teacher/teacher.module').then(m => m.TeacherModule),
     canActivate: [LoggedInGuard], // Assuming teachers need to be logged in
+  },
+  {
+    path: 'peer-review',
+    loadChildren: () => import('./Modules/peer-review/peer-review.module').then(m => m.PeerReviewModule),
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
   },
 ];
 @NgModule({

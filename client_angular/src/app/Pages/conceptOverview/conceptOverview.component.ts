@@ -1,27 +1,27 @@
-import type { OnDestroy, OnInit } from '@angular/core';
+import { OnDestroy, OnInit } from '@angular/core';
 import { Component } from '@angular/core';
-import type { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs';
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
-import type {
+import {
   ConceptNodeDTO,
   ContentsForConceptDTO,
   LinkableContentNodeDTO,
   QuestionDTO,
 } from '@DTOs/index';
-import type { ContentService } from 'src/app/Services/content/content.service';
-import type { BreakpointObserver } from '@angular/cdk/layout';
+import { ContentService } from 'src/app/Services/content/content.service';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { Breakpoints } from '@angular/cdk/layout';
-import type { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
-import type { UserService } from 'src/app/Services/auth/user.service';
-import type { MatDialog } from '@angular/material/dialog';
+import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+import { UserService } from 'src/app/Services/auth/user.service';
+import { MatDialog } from '@angular/material/dialog';
 import { CreateContentNodeDialogComponent } from '../lecturersView/create-content-node-dialog/create-content-node-dialog.component';
-import type { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
-import type { ActivatedRoute, Router } from '@angular/router';
+import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NavigationEnd } from '@angular/router';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import type { GraphDataService } from 'src/app/Services/graph/graph-data.service';
-import type { MatSnackBar } from '@angular/material/snack-bar';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-conceptOverview',

@@ -1,9 +1,9 @@
-import type { editorDataDTO } from '@DTOs/index';
+import { editorDataDTO } from '@DTOs/index';
 import { swappableEditorElement } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { detailedDiff } from 'deep-object-diff';
-import type { ClassNode, ClassAttribute, ClassMethod, NodeMatch } from '@DTOs/index';
-import type { ClassEdge, EdgeMatch } from '@DTOs/index';
+import { ClassNode, ClassAttribute, ClassMethod, NodeMatch } from '@DTOs/index';
+import { ClassEdge, EdgeMatch } from '@DTOs/index';
 import * as _ from 'lodash';
 import { JaroWinklerDistance } from 'natural';
 import { PointCalculationService } from '../point-calculation/point-calculation.service';

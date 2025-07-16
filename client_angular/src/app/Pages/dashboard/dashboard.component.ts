@@ -1,14 +1,14 @@
-import type { OnDestroy, OnInit } from '@angular/core';
+import { OnDestroy, OnInit } from '@angular/core';
 import { Component } from '@angular/core';
-import type { Title } from '@angular/platform-browser';
-import type { Subscription } from 'rxjs';
-import type { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
-import type {
+import { Title } from '@angular/platform-browser';
+import { Subscription } from 'rxjs';
+import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+import {
   NavigationPreferenceService,
   NavigationType,
 } from 'src/app/Services/navigation/navigation-preference.service';
-import type { NotificationService } from 'src/app/Services/notification/notification.service';
-import type { ToolbarService } from 'src/app/Services/toolbar/toolbar.service';
+import { NotificationService } from 'src/app/Services/notification/notification.service';
+import { ToolbarService } from 'src/app/Services/toolbar/toolbar.service';
 
 @Component({
   selector: 'app-dashboard',

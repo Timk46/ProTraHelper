@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { GraphStructureDTO, GraphStructureSemanticDTO } from '@DTOs/graphTask.dto';
+import { GraphStructureDTO, GraphStructureSemanticDTO } from '@DTOs/graphTask.dto';
 import {
   getEdgesWithDifferentWeights,
   getExtraEdges,

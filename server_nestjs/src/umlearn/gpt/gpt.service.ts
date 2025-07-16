@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import type { BaseMessage } from '@langchain/core/messages';
+import { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ChatOpenAI } from '@langchain/openai';
 import { TUTOR_INSTRUCTIONS } from './system-message_sven';
 import * as SimilarityLogPrompts from './system-message_similog';
-import type { editorDataDTO } from '@DTOs/index';
+import { editorDataDTO } from '@DTOs/index';
 import { SimilarityCompareService } from '../compare/similarity-compare.service';
 
 @Injectable()

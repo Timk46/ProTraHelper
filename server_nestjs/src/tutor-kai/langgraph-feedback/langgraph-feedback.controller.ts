@@ -13,10 +13,10 @@ import { JwtAuthGuard } from 'src/auth/common/guards/jwt-auth.guard';
 import { LanggraphFeedbackService } from './langgraph-feedback.service'; // Facade service
 // Remove DirectAgentService import
 import { LanggraphDataFetcherService } from './helper/langgraph-data-fetcher.service';
-import type { CodeSubmissionResultDto } from '@DTOs/tutorKaiDtos/submission.dto';
-import type { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
+import { CodeSubmissionResultDto } from '@DTOs/tutorKaiDtos/submission.dto';
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
 import { Request } from 'express';
-import type { BaseMessage } from '@langchain/core/messages';
+import { BaseMessage } from '@langchain/core/messages';
 import { AIMessage } from '@langchain/core/messages'; // Import AIMessage
 
 // DTO for the combined evaluate request

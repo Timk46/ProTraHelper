@@ -1,14 +1,14 @@
-import type { OnModuleInit } from '@nestjs/common';
+import { OnModuleInit } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { TranscriptEmbedding } from '@prisma/client';
+import { TranscriptEmbedding } from '@prisma/client';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { OpenAIEmbeddings } from '@langchain/openai';
 // PrismaVectorStoreArgs might not be exported; remove explicit type later
 import { PrismaVectorStore } from '@langchain/community/vectorstores/prisma';
 import { Document } from '@langchain/core/documents';
 import { CohereRerank } from '@langchain/cohere'; // Added Cohere Reranker
-import type { TranscriptChunk } from '@DTOs/index'; // Assuming DTO is accessible
+import { TranscriptChunk } from '@DTOs/index'; // Assuming DTO is accessible
 
 @Injectable()
 export class DomainKnowledgeService implements OnModuleInit {

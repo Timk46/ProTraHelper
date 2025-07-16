@@ -1,7 +1,7 @@
-import type { OnChanges, SimpleChanges, OnInit } from '@angular/core';
+import { OnChanges, SimpleChanges, OnInit } from '@angular/core';
 import { Component, Input } from '@angular/core';
-import type { MatDialog } from '@angular/material/dialog';
-import type { TestResult } from '../../models/code-submission.model';
+import { MatDialog } from '@angular/material/dialog';
+import { TestResult } from '../../models/code-submission.model';
 import { TestDetailsDialogComponent } from './test-details-dialog/test-details-dialog.component';
 
 @Component({

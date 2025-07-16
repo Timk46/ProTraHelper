@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Post, Param, Body, Req, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
-import type {
+import {
   freeTextQuestionDTO,
   FillinQuestionDTO,
   GraphQuestionDTO,

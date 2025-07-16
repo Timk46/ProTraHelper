@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
 import { DiscussionViewService } from './discussion-view.service';
-import type { discussionMessageDTO, nodeNameDTO } from '@DTOs/index';
+import { discussionMessageDTO, nodeNameDTO } from '@DTOs/index';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 
 const debug = true; // set this to false to disable console logs

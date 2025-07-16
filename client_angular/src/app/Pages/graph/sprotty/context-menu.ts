@@ -15,7 +15,7 @@
  ********************************************************************************/
 
 import { inject, injectable } from 'inversify';
-import type {
+import {
   Anchor,
   IActionDispatcher,
   IContextMenuItemProvider,
@@ -25,7 +25,7 @@ import type {
   ViewerOptions,
 } from 'sprotty';
 import { EMPTY_ROOT, LabeledAction, RequestExportSvgAction, SNodeImpl, TYPES } from 'sprotty';
-import type { Point, SelectionResult } from 'sprotty-protocol';
+import { Point, SelectionResult } from 'sprotty-protocol';
 import {
   CenterAction,
   GetSelectionAction,

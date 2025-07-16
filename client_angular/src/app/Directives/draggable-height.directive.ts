@@ -1,4 +1,4 @@
-import type { ElementRef, Renderer2, OnInit } from '@angular/core';
+import { ElementRef, Renderer2, OnInit } from '@angular/core';
 import { Directive } from '@angular/core';
 @Directive({
   selector: '[appDraggableHeight]', // Defines the selector to be used in templates for applying this directive.

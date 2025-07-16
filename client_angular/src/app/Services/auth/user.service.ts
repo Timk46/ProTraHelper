@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import jwt_decode from 'jwt-decode';
 import { globalRole } from '@DTOs/roles.enum';
 import { environment } from 'src/environments/environment';
-import type { MatSnackBar } from '@angular/material/snack-bar';
-import type { Router } from '@angular/router';
-import type { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { v4 as uuid } from 'uuid';
 import { catchError, finalize, tap } from 'rxjs/operators';
 

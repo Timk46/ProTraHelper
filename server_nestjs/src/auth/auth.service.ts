@@ -3,10 +3,10 @@ import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { EventLogService } from '../EventLog/event-log.service';
-import type { UserDTO } from '@DTOs/user.dto';
+import { UserDTO } from '@DTOs/user.dto';
 import { RefreshTokenService } from './refresh-token/refresh-token.service';
 import * as bcrypt from 'bcrypt';
-import type { User } from '@prisma/client';
+import { User } from '@prisma/client';
 
 /**
  * Provides authentication services

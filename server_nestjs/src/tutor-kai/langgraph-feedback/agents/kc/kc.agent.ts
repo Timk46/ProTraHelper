@@ -1,10 +1,10 @@
-import type { ChatOpenAI } from '@langchain/openai';
-import type { DynamicStructuredTool } from '@langchain/core/tools';
-import type { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto'; // Keep this if needed for parsing input
-import type { TranscriptChunk } from '@DTOs/index'; // Needed for processing tool output
-import type { BaseMessage } from '@langchain/core/messages';
+import { ChatOpenAI } from '@langchain/openai';
+import { DynamicStructuredTool } from '@langchain/core/tools';
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto'; // Keep this if needed for parsing input
+import { TranscriptChunk } from '@DTOs/index'; // Needed for processing tool output
+import { BaseMessage } from '@langchain/core/messages';
 import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
-import type { Runnable, RunnableConfig } from '@langchain/core/runnables';
+import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { RunnableLambda } from '@langchain/core/runnables';
 import { StateGraph, END } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt'; // Use ToolNode for standard tool execution

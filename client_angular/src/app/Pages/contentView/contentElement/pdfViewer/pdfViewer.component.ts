@@ -13,7 +13,7 @@
   };
 }*/
 
-import type { OnInit, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { OnInit, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import {
   Component,
   Input,
@@ -21,7 +21,7 @@ import {
   ViewChild,
   SecurityContext,
 } from '@angular/core';
-import type { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { environment } from '../../../../../environments/environment';
 import * as pdfjsLib from 'pdfjs-dist';
 

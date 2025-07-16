@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import type { Router } from '@angular/router';
-import type { UserService } from '../Services/auth/user.service';
+import { Router } from '@angular/router';
+import { UserService } from '../Services/auth/user.service';
 
 /**
  * This guard checks if the user is logged in and redirects to the login page if not.

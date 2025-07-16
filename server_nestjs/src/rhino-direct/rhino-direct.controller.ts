@@ -5,16 +5,25 @@
  */
 
 import { Controller, Post, Get, Body, HttpException, HttpStatus } from '@nestjs/common';
-import type { DirectRhinoLaunchResponse, SystemRhinoInfo } from './rhino-direct.service';
+import { DirectRhinoLaunchResponse, SystemRhinoInfo } from './rhino-direct.service';
 import {
   RhinoDirectService,
   DirectRhinoLaunchRequest,
   RhinoInstallation,
 } from './rhino-direct.service';
+import {
+  RhinoWindowManagerService,
+  RhinoFocusRequest,
+  RhinoFocusResponse,
+  WindowInfo,
+} from './rhino-window-manager.service';
 
-@Controller('api/direct-rhino')
+@Controller('api/rhino')
 export class RhinoDirectController {
-  constructor(private readonly rhinoDirectService: RhinoDirectService) {}
+  constructor(
+    private readonly rhinoDirectService: RhinoDirectService,
+    private readonly rhinoWindowManagerService: RhinoWindowManagerService,
+  ) {}
 
   /**
    * Startet Rhino direkt über Windows-Prozess
@@ -98,6 +107,114 @@ export class RhinoDirectController {
       return {
         available: false,
         message: `Test fehlgeschlagen: ${error.message}`,
+      };
+    }
+  }
+
+  /**
+   * Fokussiert ein Rhino-Fenster
+   */
+  @Post('focus-window')
+  async focusRhinoWindow(@Body() request: RhinoFocusRequest): Promise<RhinoFocusResponse> {
+    try {
+      console.log('🎯 Focus Rhino window request received:', request);
+
+      const result = await this.rhinoWindowManagerService.focusRhinoWindow(request);
+
+      console.log('✅ Focus Rhino window result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Focus Rhino window failed:', error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        success: false,
+        message: `Fehler beim Fokussieren: ${errorMessage}`,
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
+  /**
+   * Ermittelt Rhino-Fenster-Informationen
+   */
+  @Get('window-info')
+  async getRhinoWindowInfo(): Promise<WindowInfo[]> {
+    try {
+      console.log('🔍 Get Rhino window info request received');
+
+      const windows = await this.rhinoWindowManagerService.findRhinoWindows();
+
+      console.log('✅ Rhino window info retrieved:', windows);
+      return windows;
+    } catch (error) {
+      console.error('❌ Get Rhino window info failed:', error);
+
+      throw new HttpException(
+        `Fenster-Info Abfrage fehlgeschlagen: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Prüft den Status von Rhino-Fenstern
+   */
+  @Get('window-status')
+  async checkRhinoWindowStatus(): Promise<{
+    isActive: boolean;
+    windowInfo?: WindowInfo;
+    totalWindows: number;
+  }> {
+    try {
+      console.log('🔍 Check Rhino window status request received');
+
+      const status = await this.rhinoWindowManagerService.checkRhinoWindowStatus();
+
+      console.log('✅ Rhino window status retrieved:', status);
+      return status;
+    } catch (error) {
+      console.error('❌ Check Rhino window status failed:', error);
+
+      throw new HttpException(
+        `Fenster-Status Abfrage fehlgeschlagen: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Testet die Windows API-Verfügbarkeit
+   */
+  @Get('test-windows-api')
+  async testWindowsApiAvailability(): Promise<{
+    available: boolean;
+    message: string;
+    features: {
+      powershell: boolean;
+      windowsApi: boolean;
+      rhinoDetection: boolean;
+    };
+  }> {
+    try {
+      console.log('🧪 Test Windows API availability request received');
+
+      const result = await this.rhinoWindowManagerService.testWindowsApiAvailability();
+
+      console.log('✅ Windows API availability test result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Windows API availability test failed:', error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        available: false,
+        message: `Test fehlgeschlagen: ${errorMessage}`,
+        features: {
+          powershell: false,
+          windowsApi: false,
+          rhinoDetection: false,
+        },
       };
     }
   }

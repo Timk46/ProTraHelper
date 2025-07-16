@@ -1,10 +1,10 @@
-import type { OnDestroy } from '@angular/core';
+import { OnDestroy } from '@angular/core';
 import { Component, Inject } from '@angular/core';
-import type { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { TinymceComponent } from '../../tinymce/tinymce.component';
-import type { NotificationService } from '@UMLearnServices/notification.service';
-import type { Subscription } from 'rxjs/internal/Subscription';
+import { TinymceComponent } from '../../tinymce/tinymce.component';
+import { NotificationService } from '@UMLearnServices/notification.service';
+import { Subscription } from 'rxjs/internal/Subscription';
 
 @Component({
   selector: 'app-task-description-popup',

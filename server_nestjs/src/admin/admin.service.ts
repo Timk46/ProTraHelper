@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
-import type { User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { contentElementType } from '@prisma/client';
-import type { UserDTO } from '@DTOs/user.dto';
+import { UserDTO } from '@DTOs/user.dto';
 
 /**
  * Service responsible for administrative operations such as managing users and subjects.

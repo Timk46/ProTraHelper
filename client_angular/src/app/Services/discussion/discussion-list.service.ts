@@ -1,11 +1,7 @@
-import type {
-  discussionDTO,
-  discussionFilterContentNodeDTO,
-  discussionFilterDTO,
-} from '@DTOs/index';
-import type { HttpClient } from '@angular/common/http';
+import { discussionDTO, discussionFilterContentNodeDTO, discussionFilterDTO } from '@DTOs/index';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import type { Observable } from 'rxjs/internal/Observable';
+import { Observable } from 'rxjs/internal/Observable';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -20,7 +16,9 @@ export class DiscussionListService {
    * @returns discussionDTO[]
    */
   getDiscussions(filterData: discussionFilterDTO): Observable<discussionDTO[]> {
-    return this.http.post<discussionDTO[]>(environment.server + `/discussion/list/`, filterData);
+    return this.http.get<discussionDTO[]>(environment.server + `/discussion/list/`, {
+      params: { ...filterData } as any,
+    });
   }
 
   /**

@@ -1,6 +1,6 @@
-import type { ElementRef, OnDestroy, AfterViewInit } from '@angular/core';
+import { ElementRef, OnDestroy, AfterViewInit } from '@angular/core';
 import { Component, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
-import type { ClassEdge, ClassNode, Side, editorDataDTO, editorElementDTO } from '@DTOs/index';
+import { ClassEdge, ClassNode, Side, editorDataDTO, editorElementDTO } from '@DTOs/index';
 import {
   EditorElement,
   EditorElementType,
@@ -8,17 +8,17 @@ import {
   dataType,
   visibilityType,
 } from '@DTOs/index';
-import type { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
-import type { EditorEdgeService } from '@UMLearnServices/editor-edge.service';
-import type { CdkDrag, CdkDragDrop, CdkDragMove, CdkDragStart } from '@angular/cdk/drag-drop';
+import { EditorEdgeService } from '@UMLearnServices/editor-edge.service';
+import { CdkDrag, CdkDragDrop, CdkDragMove, CdkDragStart } from '@angular/cdk/drag-drop';
 import { moveItemInArray } from '@angular/cdk/drag-drop';
-import type { NotificationService } from '@UMLearnServices/notification.service';
+import { NotificationService } from '@UMLearnServices/notification.service';
 import { v1 as uuidv1 } from 'uuid';
 import { EditorPopupComponent } from './editor-popup/editor-popup.component';
-import type { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import * as htmlToImage from 'html-to-image';
-import type { Subscription } from 'rxjs/internal/Subscription';
+import { Subscription } from 'rxjs/internal/Subscription';
 
 @Component({
   selector: 'app-editor',

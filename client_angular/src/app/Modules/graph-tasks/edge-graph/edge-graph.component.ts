@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import type { IGraphEdge } from '../models/GraphEdge.interface';
+import { IGraphEdge } from '../models/GraphEdge.interface';
 import {
   calculateArrowPoints,
   calculateEdgeStart,

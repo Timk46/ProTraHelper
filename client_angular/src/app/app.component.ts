@@ -1,9 +1,9 @@
-import type { UserService } from './Services/auth/user.service';
-import type { ToolbarService } from './Services/toolbar/toolbar.service';
-import type { OnInit } from '@angular/core';
+import { UserService } from './Services/auth/user.service';
+import { ToolbarService } from './Services/toolbar/toolbar.service';
+import { OnInit } from '@angular/core';
 import { Component } from '@angular/core';
-import type { MatDialog } from '@angular/material/dialog';
-import type { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { version } from '@DTOs/version';
 import { environment } from 'src/environments/environment';
 import { ConfirmationBoxComponent } from './Pages/confirmation-box/confirmation-box.component';

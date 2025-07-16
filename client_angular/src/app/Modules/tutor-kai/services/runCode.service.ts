@@ -1,7 +1,7 @@
-import type { CodeSubmissionResultDto } from '@DTOs/index';
-import type { HttpClient } from '@angular/common/http'; // Removed unused imports
+import { CodeSubmissionResultDto } from '@DTOs/index';
+import { HttpClient } from '@angular/common/http'; // Removed unused imports
 import { Injectable } from '@angular/core';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { catchError, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { FeedbackLevel, FlavorType } from '../models/code-submission.model'; // Import enums

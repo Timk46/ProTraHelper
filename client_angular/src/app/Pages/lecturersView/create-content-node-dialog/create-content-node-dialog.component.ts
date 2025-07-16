@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import type { MatDialogRef } from '@angular/material/dialog';
-import type { FormBuilder, FormGroup } from '@angular/forms';
-import { Validators } from '@angular/forms';
+import { MatDialogRef } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-create-content-node-dialog',

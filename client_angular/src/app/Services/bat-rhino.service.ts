@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import type { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import type { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { throwError, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import type {
+import {
   BatRhinoRequest,
   BatRhinoResponse,
   RhinoPathDetectionResponse,

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import type { Response } from 'express';
+import { Response } from 'express';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { RagService } from './rag.service';
 import {

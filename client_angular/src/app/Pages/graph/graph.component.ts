@@ -1,12 +1,12 @@
-import type { ElementRef, OnInit, AfterViewInit } from '@angular/core';
+import { ElementRef, OnInit, AfterViewInit } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
 import { LocalModelSource, TYPES } from 'sprotty';
 import createContainer from './sprotty/di.config';
-import type { Container } from 'inversify';
+import { Container } from 'inversify';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
-import type { ConceptGraphModelSource } from './sprotty/model-source';
-import type { ModuleDataService } from 'src/app/Services/module/module-data.service';
-import type { ModuleDTO } from '@DTOs/index';
+import { ConceptGraphModelSource } from './sprotty/model-source';
+import { ModuleDataService } from 'src/app/Services/module/module-data.service';
+import { ModuleDTO } from '@DTOs/index';
 
 @Component({
   selector: 'app-graph',

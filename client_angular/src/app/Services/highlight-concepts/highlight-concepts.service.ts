@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import type { HttpClient } from '@angular/common/http';
-import type { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import type { UserService } from '../auth/user.service';
-import type {
+import { UserService } from '../auth/user.service';
+import {
   HighlightConceptDto,
   CreateHighlightConceptDto,
   UpdateHighlightConceptDto,

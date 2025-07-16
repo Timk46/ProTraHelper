@@ -25,6 +25,39 @@ body {
   max-height: 95vh;
   overflow: auto;
 }
+
+// MCSlider dialog panel styling
+.mcslider-dialog-panel {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+    overflow: hidden !important;
+    height: 85vh !important;
+    max-height: 85vh !important;
+    width: 90vw !important;
+    max-width: 900px !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .mat-mdc-dialog-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-height: none !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 0 !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+  }
+}
+
 .notification-snackbar-container {
   background-color: transparent !important;
   box-shadow: none !important;

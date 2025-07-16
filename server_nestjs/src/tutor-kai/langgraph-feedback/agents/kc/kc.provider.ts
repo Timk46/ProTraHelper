@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ChatOpenAI } from '@langchain/openai';
-import type { Runnable } from '@langchain/core/runnables'; // Import Runnable instead of RunnableSequence
-import type { DynamicStructuredTool } from '@langchain/core/tools';
+import { Runnable } from '@langchain/core/runnables'; // Import Runnable instead of RunnableSequence
+import { DynamicStructuredTool } from '@langchain/core/tools';
 import { DomainKnowledgeService } from '../../tools/domain-knowledge/domain-knowledge.service';
 import { createDomainKnowledgeTool } from '../../tools/domain-knowledge/domain-knowledge.tool';
 import { CHAT_OPENAI_MODEL } from '../../langgraph.constants'; // Import token from constants file

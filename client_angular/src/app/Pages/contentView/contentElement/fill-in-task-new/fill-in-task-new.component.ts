@@ -1,22 +1,20 @@
-import type { ViewContainerRef, OnInit } from '@angular/core';
-import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
-import type { MatDialogRef } from '@angular/material/dialog';
+import { ViewContainerRef, OnInit, Component, EventEmitter, Inject, Input, Output } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import type { taskViewDTO } from '@DTOs/content.dto';
-import type { FillinQuestionDTO } from '@DTOs/fillInText.dto';
-import type {
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { taskViewDTO } from '@DTOs/content.dto';
+import { FillinQuestionDTO } from '@DTOs/fillInText.dto';
+import {
   UserAnswerDataDTO,
   userAnswerFeedbackDTO,
   UserFillinAnswer,
 } from '@DTOs/userAnswer.dto';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { DynamicBlankComponent } from './dynamic-blank/dynamic-blank.component';
 import { Subject, takeUntil } from 'rxjs';
 import { FillinQuestionType } from '@DTOs/fillInType.enum';
-import type { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import type { Location } from '@angular/common';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { Location } from '@angular/common';
 @Component({
   selector: 'app-fill-in-task-new',
   templateUrl: './fill-in-task-new.component.html',

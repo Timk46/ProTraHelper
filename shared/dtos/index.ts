@@ -11,10 +11,10 @@ export * from "./discussion.dto";
 export * from "./discussionMessage.dto";
 export * from "./discussionMessageVote.dto";
 export * from "./chatBot.dto";
-export * from "./discussionCreation.dto"
-export * from "./discussionFilter.dto"
-export * from "./module.dto"
-export * from "./contentElementStatus.dto"
+export * from "./discussionCreation.dto";
+export * from "./discussionFilter.dto";
+export * from "./module.dto";
+export * from "./contentElementStatus.dto";
 export * from "./notification.dto";
 export * from "./notificationType.enum";
 export * from "./contentLinking.dto";
@@ -22,16 +22,25 @@ export * from "./detailedQuestion.dto";
 export * from "./fillInType.enum";
 export * from "./fillInText.dto";
 export * from "./highlight-concept.dto";
+export * from "./peer-review.dto";
+export * from "./peer-review-session.dto";
+export * from "./peer-submission.dto";
 
 //TutorKai DTOs
 export * from "./tutorKaiDtos/kiFeedback.dto";
 export * from "./tutorKaiDtos/submission.dto";
 export * from "./tutorKaiDtos/genTask.dto";
-export * from "./user.dto"; // ToDo: Merge with hefl
-export * from "./file.dto"; // ToDo: Merge with hefl
 export * from "./userAnswer.dto";
 export * from "./feedbackGeneration.dto";
 
 //UMLearn DTOs
 export * from "./umlearnDtos/dtos/index";
 export * from "./umlearnDtos/interfaces/index";
+
+//Peer Review DTOs
+
+//Rhino Window Management DTOs
+export * from "./rhino-window.dto";
+
+//MCSlider DTOs
+export * from "./mcslider.dto";

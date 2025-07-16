@@ -1,6 +1,5 @@
-import type { ElementRef, OnChanges, Renderer2, SimpleChanges } from '@angular/core';
-import { Directive, Input } from '@angular/core';
-import type { NotificationDTO } from '@DTOs/notification.dto';
+import { ElementRef, OnChanges, Renderer2, SimpleChanges, Directive, Input } from '@angular/core';
+import { NotificationDTO } from '@DTOs/notification.dto';
 import { NotificationType } from '@DTOs/notificationType.enum';
 
 /**

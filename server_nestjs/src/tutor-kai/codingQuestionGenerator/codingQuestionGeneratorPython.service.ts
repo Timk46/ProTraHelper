@@ -3,13 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { genTaskDto } from '@DTOs/tutorKaiDtos/genTask.dto';
 import { ChatOpenAI } from '@langchain/openai';
-import type { BaseMessage } from '@langchain/core/messages';
+import { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { MessagesAnnotation, END, START, StateGraph, Annotation } from '@langchain/langgraph';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import axios from 'axios';
 import { contentElementType } from '@prisma/client';
-import type {
+import {
   AutomatedTestDto,
   CodeGeruestDto,
   CodingQuestionInternal,

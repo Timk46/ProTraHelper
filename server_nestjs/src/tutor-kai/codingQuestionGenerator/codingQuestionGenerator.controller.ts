@@ -2,7 +2,7 @@ import { Body, Controller, Post, Req } from '@nestjs/common';
 import { CodingQuestionGeneratorService } from './codingQuestionGeneratorPython.service';
 import { Public } from '../../public.decorator';
 import { genTaskDto } from '@DTOs/tutorKaiDtos/genTask.dto';
-import type { CodingQuestionInternal } from '@Interfaces/question.dto';
+import { CodingQuestionInternal } from '@Interfaces/question.dto';
 import { CodeGeruestDto } from '@Interfaces/question.dto';
 
 @Controller('coding-question-generator')

@@ -1,7 +1,7 @@
 // client_angular/src/app/Pages/graph/sprotty/touchEventActionHandler.ts
 
 import { injectable } from 'inversify';
-import type { Action } from 'sprotty-protocol';
+import { Action } from 'sprotty-protocol';
 import { TouchEventAction } from './actions';
 
 @injectable()

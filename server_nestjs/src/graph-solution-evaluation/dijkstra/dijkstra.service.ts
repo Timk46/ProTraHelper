@@ -6,7 +6,7 @@ import {
   graphsContainSameEdges,
   graphsContainSameNodes,
 } from '../utils/graph-utils';
-import type {
+import {
   GraphStructureDTO,
   GraphStructureSemanticDTO,
   GraphNodeSemanticDTO,

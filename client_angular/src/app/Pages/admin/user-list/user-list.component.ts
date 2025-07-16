@@ -1,17 +1,17 @@
-import type { OnInit, AfterViewInit } from '@angular/core';
+import { OnInit, AfterViewInit } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
-import type { Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
-import type { MatSnackBar } from '@angular/material/snack-bar';
-import type { AdminService, AllUsersDailyProgress } from '../services/admin.service';
-import type { Color } from '@swimlane/ngx-charts';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AdminService, AllUsersDailyProgress } from '../services/admin.service';
+import { Color } from '@swimlane/ngx-charts';
 import { ScaleType } from '@swimlane/ngx-charts';
 import { ConfirmationBoxComponent } from '../../confirmation-box/confirmation-box.component';
-import type { MatDialog } from '@angular/material/dialog';
-import type { UserService } from '../../../Services/auth/user.service';
-import type { ContentManagementService } from '../../../Services/admin/content-management.service';
+import { MatDialog } from '@angular/material/dialog';
+import { UserService } from '../../../Services/auth/user.service';
+import { ContentManagementService } from '../../../Services/admin/content-management.service';
 
 interface UserListItem {
   id: number;

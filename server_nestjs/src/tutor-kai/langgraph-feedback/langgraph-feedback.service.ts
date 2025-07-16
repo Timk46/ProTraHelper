@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { BaseMessage } from '@langchain/core/messages';
+import { BaseMessage } from '@langchain/core/messages';
 import { AIMessage, HumanMessage } from '@langchain/core/messages'; // Added HumanMessage
-import type { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
 
 // Import Providers
 import { KcAgentProvider } from './agents/kc/kc.provider';

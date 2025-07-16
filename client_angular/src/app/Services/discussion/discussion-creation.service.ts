@@ -1,12 +1,12 @@
-import type {
+import {
   AnonymousUserDTO,
   discussionCreationDTO,
   discussionMessageCreationDTO,
   discussionNodeNamesDTO,
 } from '@DTOs/index';
-import type { HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import type { Observable } from 'rxjs/internal/Observable';
+import { Observable } from 'rxjs/internal/Observable';
 import { environment } from 'src/environments/environment';
 
 @Injectable({

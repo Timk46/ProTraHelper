@@ -1,6 +1,6 @@
-import type { AfterViewInit, OnInit } from '@angular/core';
+import { AfterViewInit, OnInit } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
-import type {
+import {
   AbstractControl,
   FormBuilder,
   FormGroup,
@@ -8,21 +8,21 @@ import type {
   ValidatorFn,
 } from '@angular/forms';
 import { Validators } from '@angular/forms';
-import type { GraphConfigurationDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
+import { GraphConfigurationDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
 import { GraphEdgeDTO, GraphStructureSemanticDTO } from '@DTOs/graphTask.dto';
-import type { GraphTaskService } from 'src/app/Modules/graph-tasks/services/graph-task.service';
-import type { ActivatedRoute, Router } from '@angular/router';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { GraphTaskService } from 'src/app/Modules/graph-tasks/services/graph-task.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { questionType } from '@DTOs/question.dto';
-import type { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
-import type { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
-import type { MatSnackBar } from '@angular/material/snack-bar';
-import type { TinymceComponent } from '../../tinymce/tinymce.component';
-import type { GenerateDijkstraService } from './generate-graph/generate-dijkstra.service';
-import type { GenerateKruskalService } from './generate-graph/generate-kruskal.service';
-import type { GenerateFloydService } from './generate-graph/generate-floyd.service';
-import type { GenerateExampleSolutionService } from './generateExampleSolution/generate-example-solution.service';
-import type { Observable } from 'rxjs';
+import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
+import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { TinymceComponent } from '../../tinymce/tinymce.component';
+import { GenerateDijkstraService } from './generate-graph/generate-dijkstra.service';
+import { GenerateKruskalService } from './generate-graph/generate-kruskal.service';
+import { GenerateFloydService } from './generate-graph/generate-floyd.service';
+import { GenerateExampleSolutionService } from './generateExampleSolution/generate-example-solution.service';
+import { Observable } from 'rxjs';
 import {
   graphEdgeJSONToSemantic,
   graphJSONToSemantic,

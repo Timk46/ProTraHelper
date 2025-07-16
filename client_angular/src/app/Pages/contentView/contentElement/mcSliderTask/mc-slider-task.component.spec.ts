@@ -1,4 +1,4 @@
-import type { ComponentFixture } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
 import { TestBed } from '@angular/core/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,8 +9,8 @@ import { of } from 'rxjs';
 
 import { McSliderTaskComponent } from './mc-slider-task.component';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import type { QuestionDTO, McQuestionDTO } from '@DTOs/question.dto';
-import type { TaskViewData } from '@DTOs/index';
+import { QuestionDTO, McQuestionDTO } from '@DTOs/question.dto';
+import { TaskViewData } from '@DTOs/index';
 
 describe('McSliderTaskComponent', () => {
   let component: McSliderTaskComponent;

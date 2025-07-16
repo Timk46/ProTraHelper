@@ -1,6 +1,6 @@
 import { Controller, Get, Delete, Param, NotFoundException, ParseIntPipe } from '@nestjs/common';
 import { QuestionService } from './question.service';
-import type { CodingQuestionDto, QuestionDTO } from '@DTOs/index';
+import { CodingQuestionDto, QuestionDTO } from '@DTOs/index';
 
 @Controller('questions')
 export class QuestionController {

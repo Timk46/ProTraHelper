@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CodeGameService } from '../code-game.service';
-import type { CodeGameEvaluationDTO, CppProjectExecutionResult } from '@DTOs/codeGame.dto';
+import { CodeGameEvaluationDTO, CppProjectExecutionResult } from '@DTOs/codeGame.dto';
 
 @Injectable()
 export class CodeGameEvaluationService {

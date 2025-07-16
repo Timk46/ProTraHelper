@@ -1,6 +1,5 @@
-import type { OnInit, OnChanges } from '@angular/core';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import type {
+import { OnInit, OnChanges, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
   ContentDTO,
   ContentElementDTO,
   ContentsForConceptDTO,
@@ -8,19 +7,18 @@ import type {
 } from '@DTOs/index';
 import { contentElementType } from '@DTOs/index';
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import type { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
-import type { ProgressService } from 'src/app/Services/progress/progress.service';
-import type { MatDialog } from '@angular/material/dialog';
-import { MatDialogConfig } from '@angular/material/dialog';
+import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
+import { ProgressService } from 'src/app/Services/progress/progress.service';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import { ContentViewComponent } from '../contentView/contentView.component';
-import type { UserService } from 'src/app/Services/auth/user.service';
+import { UserService } from 'src/app/Services/auth/user.service';
 import { CreateContentElementDialogComponent } from '../lecturersView/create-content-element-dialog/create-content-element-dialog.component';
-import type { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
-import type { MatSnackBar } from '@angular/material/snack-bar';
-import type { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { ContentListNodeEditDialogComponent } from './content-list-node-edit-dialog/content-list-node-edit-dialog.component';
-import type { BatRhinoService } from '../../Services/bat-rhino.service';
+import { BatRhinoService } from '../../Services/bat-rhino.service';
 
 @Component({
   selector: 'app-content-list',

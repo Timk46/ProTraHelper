@@ -1,6 +1,6 @@
 // This Component is just a test component to test the file upload and download functionality.
 import { Component } from '@angular/core';
-import type { FileService } from '../../../Services/files/files.service';
+import { FileService } from '../../../Services/files/files.service';
 @Component({
   selector: 'app-file-upload',
   templateUrl: './file-upload.component.html',

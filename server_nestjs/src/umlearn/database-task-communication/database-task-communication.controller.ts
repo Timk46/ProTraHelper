@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Param, Req, UseGuards } from '@nestjs/common';
 import { DatabaseTaskCommunicationService } from './database-task-communication.service';
-import type { taskDataDTO, taskWorkspaceDataDTO } from '@DTOs/index';
+import { taskDataDTO, taskWorkspaceDataDTO } from '@DTOs/index';
 import { taskAttemptDataDTO } from '@DTOs/index';
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 

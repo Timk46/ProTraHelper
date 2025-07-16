@@ -1,7 +1,7 @@
-import type { IGraphStructure } from '../models/GraphStructure.interface';
-import type { IGraphEdge } from '../models/GraphEdge.interface';
-import type { IGraphNode } from '../models/GraphNode.interface';
-import type {
+import { IGraphStructure } from '../models/GraphStructure.interface';
+import { IGraphEdge } from '../models/GraphEdge.interface';
+import { IGraphNode } from '../models/GraphNode.interface';
+import {
   PositionDTO,
   SizeDTO,
   GraphNodeSemanticDTO,

@@ -1,7 +1,7 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import type { User } from '@prisma/client';
+import { User } from '@prisma/client';
 
 /**
  * This class provides a passport strategy for JWT authentication

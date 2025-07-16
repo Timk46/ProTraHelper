@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import type { HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { HttpParams } from '@angular/common/http';
-import type { Observable } from 'rxjs/internal/Observable';
+import { Observable } from 'rxjs/internal/Observable';
 import { environment } from 'src/environments/environment';
-import type { McqGenerationDTO } from '@DTOs/question.dto';
-import type { OptionDTO } from '@DTOs/question.dto';
-import type { Answer, McqEvaluations } from './mcqcreation.types';
+import { McqGenerationDTO } from '@DTOs/question.dto';
+import { OptionDTO } from '@DTOs/question.dto';
+import { Answer, McqEvaluations } from './mcqcreation.types';
 import { McqEvaluation } from './mcqcreation.types';
 
 @Injectable({

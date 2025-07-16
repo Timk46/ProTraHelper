@@ -1,6 +1,6 @@
 import { Side } from '@DTOs/index'; // Changed from @Interfaces
-import type { CdkDragMove } from '@angular/cdk/drag-drop';
-import type { SimpleChanges, OnChanges } from '@angular/core';
+import { CdkDragMove } from '@angular/cdk/drag-drop';
+import { SimpleChanges, OnChanges } from '@angular/core';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({

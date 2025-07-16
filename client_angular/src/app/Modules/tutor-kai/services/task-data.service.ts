@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import type { HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
-import type { Observable } from 'rxjs';
-import type { QuestionDTO } from '@DTOs/index';
+import { Observable } from 'rxjs';
+import { QuestionDTO } from '@DTOs/index';
 import { environment } from 'src/environments/environment';
 
 /**

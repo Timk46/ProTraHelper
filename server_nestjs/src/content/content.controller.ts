@@ -1,10 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Param, Req, UseGuards, Body, Patch } from '@nestjs/common';
 import { ContentService } from './content.service';
-import type { ContentsForConceptDTO } from '@Interfaces/index';
-import type { ContentElementStatusDTO } from '@DTOs/index';
+import { ContentsForConceptDTO } from '@Interfaces/index';
+import { ContentElementStatusDTO } from '@DTOs/index';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
-import type { ConceptNode } from '@prisma/client';
+import { ConceptNode } from '@prisma/client';
 import { QuestionDataService } from '@/question-data/question-data.service';
 
 @UseGuards(RolesGuard)

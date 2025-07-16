@@ -1,11 +1,9 @@
 import { Component, EventEmitter, Inject, Output } from '@angular/core';
-import type { MatDialogRef } from '@angular/material/dialog';
-import type { TaskViewData, uploadQuestionDTO } from '@DTOs/question.dto';
-import { UserAnswerDTO } from '@DTOs/question.dto';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { MatSnackBar } from '@angular/material/snack-bar';
-import type { UserAnswerDataDTO } from '@DTOs/index';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { TaskViewData, uploadQuestionDTO, UserAnswerDTO } from '@DTOs/question.dto';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { UserAnswerDataDTO } from '@DTOs/index';
 
 @Component({
   selector: 'app-upload-task',

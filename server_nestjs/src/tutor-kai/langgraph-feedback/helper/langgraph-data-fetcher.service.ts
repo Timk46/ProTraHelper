@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from './crypto.service'; // Adjust path if necessary
-import type { CodeSubmissionResult } from '@DTOs/tutorKaiDtos/submission.dto'; // Adjust path if necessary
-import type { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
+import { CodeSubmissionResult } from '@DTOs/tutorKaiDtos/submission.dto'; // Adjust path if necessary
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
 
 @Injectable()
 export class LanggraphDataFetcherService {

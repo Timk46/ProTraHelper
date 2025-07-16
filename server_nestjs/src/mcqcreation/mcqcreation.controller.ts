@@ -2,8 +2,8 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { McqCreationService } from './mcqcreation.service';
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
-import type { McqGenerationDTO } from '@DTOs/question.dto';
-import type { OptionDTO } from '@DTOs/question.dto';
+import { McqGenerationDTO } from '@DTOs/question.dto';
+import { OptionDTO } from '@DTOs/question.dto';
 interface Answer {
   answer?: string;
   isCorrect?: boolean;

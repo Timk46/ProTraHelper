@@ -1,8 +1,8 @@
-import type { OnModuleInit } from '@nestjs/common';
+import { OnModuleInit } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { CompiledStateGraph, StateGraph, START, END } from '@langchain/langgraph'; // Keep single import
 
-import type { TutoringFeedbackState } from './state';
+import { TutoringFeedbackState } from './state';
 import { TutoringFeedbackStateAnnotation } from './state';
 import { GenerateFixedCodeNodeService } from './nodes/generate-fixed-code.node.service';
 // Removed ExtractConceptsNodeService and FetchLectureSnippetsNodeService

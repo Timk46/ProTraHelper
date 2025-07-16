@@ -1,4 +1,4 @@
-import type { SimpleChanges, OnChanges, OnDestroy } from '@angular/core';
+import { SimpleChanges, OnChanges, OnDestroy } from '@angular/core';
 import { Component, Input } from '@angular/core';
 
 declare let tinymce: any;

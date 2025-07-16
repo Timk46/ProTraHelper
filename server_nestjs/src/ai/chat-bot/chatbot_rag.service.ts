@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { RagService } from '../services/rag.service';
-import type { TranscriptChunk } from '@Interfaces/index';
+import { TranscriptChunk } from '@Interfaces/index';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ChatOpenAI } from '@langchain/openai';
-import type { ChatBotMessageDTO } from '@DTOs/index';
+import { ChatBotMessageDTO } from '@DTOs/index';
 import { UnauthorizedException } from '@nestjs/common';
 
 const {

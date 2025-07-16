@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
-import type { ModuleSettingsService } from '../module-settings/module-settings.service';
+import { ModuleSettingsService } from '../module-settings/module-settings.service';
 import { catchError, map } from 'rxjs/operators';
 
 export type NavigationType = 'graph' | 'mobile' | 'highlight';

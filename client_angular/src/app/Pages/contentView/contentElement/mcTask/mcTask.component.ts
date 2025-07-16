@@ -1,4 +1,4 @@
-import type { OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import {
   Component,
   Input,
@@ -8,15 +8,15 @@ import {
   Optional,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import type { MCOptionViewDTO, McQuestionDTO, QuestionDTO } from '@DTOs/question.dto';
+import { MCOptionViewDTO, McQuestionDTO, QuestionDTO } from '@DTOs/question.dto';
 import { McQuestionOptionDTO } from '@DTOs/question.dto';
-import type { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import type { MatDialogRef } from '@angular/material/dialog';
+import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { TaskViewData } from '@DTOs/index';
-import type { Router } from '@angular/router';
-import type { Location } from '@angular/common';
+import { TaskViewData } from '@DTOs/index';
+import { Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 

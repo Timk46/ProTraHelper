@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { TransitiveClosureService } from './transitive-closure/transitive-closure.service';
 import { DijkstraService } from './dijkstra/dijkstra.service';
-import type { GraphQuestionDTO } from '@DTOs/question.dto';
-import type { GraphStructureDTO } from '@Interfaces/graphTask.dto';
+import { GraphQuestionDTO } from '@DTOs/question.dto';
+import { GraphStructureDTO } from '@Interfaces/graphTask.dto';
 import { FloydService } from './floyd/floyd.service';
 import { KruskalService } from './kruskal/kruskal.service';
 

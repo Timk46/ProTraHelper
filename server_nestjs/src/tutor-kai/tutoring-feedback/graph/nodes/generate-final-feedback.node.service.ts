@@ -2,7 +2,7 @@ import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common
 import { ConfigService } from '@nestjs/config';
 import { ChatOpenAI } from '@langchain/openai'; // Assuming OpenAI, adjust if different
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import type { TutoringFeedbackState } from '../state';
+import { TutoringFeedbackState } from '../state';
 import { FeedbackOutputSchema, FeedbackOutput } from '../schemas/feedback-output.schema'; // Added FeedbackOutput type
 import { PrismaService } from 'src/prisma/prisma.service'; // Added PrismaService import
 @Injectable()

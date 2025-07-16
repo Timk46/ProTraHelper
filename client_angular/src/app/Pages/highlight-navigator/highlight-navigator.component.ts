@@ -1,17 +1,16 @@
-import type { OnDestroy, OnInit } from '@angular/core';
-import { Component, Input } from '@angular/core';
-import type { UserService } from 'src/app/Services/auth/user.service';
-import type { HighlightConceptsService } from 'src/app/Services/highlight-concepts/highlight-concepts.service';
-import type { HighlightConceptDto, UpdateHighlightConceptDto, ConceptGraphDTO } from '@DTOs/index';
+import { OnDestroy, OnInit, Component, Input } from '@angular/core';
+import { UserService } from 'src/app/Services/auth/user.service';
+import { HighlightConceptsService } from 'src/app/Services/highlight-concepts/highlight-concepts.service';
+import { HighlightConceptDto, UpdateHighlightConceptDto, ConceptGraphDTO } from '@DTOs/index';
 import { CreateHighlightConceptDto } from '@DTOs/index';
 import { Observable, Subscription, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
-import type { MatSnackBar } from '@angular/material/snack-bar';
-import type { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { HighlightConceptDialogComponent } from './highlight-concept-dialog/highlight-concept-dialog.component';
-import type { ConceptSelectionService } from 'src/app/Services/concept-selection/concept-selection.service';
-import type { Router } from '@angular/router';
-import type { GraphDataService } from 'src/app/Services/graph/graph-data.service';
+import { ConceptSelectionService } from 'src/app/Services/concept-selection/concept-selection.service';
+import { Router } from '@angular/router';
+import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
 
 @Component({

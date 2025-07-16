@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import type { CodingQuestionInternal } from '@DTOs/index';
+import { CodingQuestionInternal } from '@DTOs/index';
 import { CodingQuestionDto, detailedQuestionDTO, QuestionDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 

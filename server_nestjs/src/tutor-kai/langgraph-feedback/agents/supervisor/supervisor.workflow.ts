@@ -1,14 +1,14 @@
-import type { OnModuleInit } from '@nestjs/common';
+import { OnModuleInit } from '@nestjs/common';
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ChatOpenAI } from '@langchain/openai';
-import type { BaseMessage } from '@langchain/core/messages';
+import { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages';
-import type { Runnable, RunnableConfig } from '@langchain/core/runnables';
+import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { RunnableLambda } from '@langchain/core/runnables';
 import { StateGraph, END, StateGraphArgs, Annotation } from '@langchain/langgraph';
-import type { DynamicStructuredTool } from '@langchain/core/tools';
-import type { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
+import { DynamicStructuredTool } from '@langchain/core/tools';
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
 import { CHAT_OPENAI_MODEL } from '../../langgraph.constants'; // Import token from constants file
 
 // Import Core Agent Builders (needed if graph nodes invoke core agents directly)

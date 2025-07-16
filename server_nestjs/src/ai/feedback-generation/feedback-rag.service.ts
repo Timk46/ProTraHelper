@@ -4,9 +4,9 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { Client } from 'langsmith';
 import * as fGPrompts from './feedback-generation.prompts';
 import { REQUEST } from '@nestjs/core';
-import type { editorDataDTO, rawClassEdge, rawClassNode } from '@Interfaces/index';
-import type { Response } from 'express';
-import type { ChatPromptValue } from 'langchain/dist/prompts/chat';
+import { editorDataDTO, rawClassEdge, rawClassNode } from '@Interfaces/index';
+import { Response } from 'express';
+import { ChatPromptValue } from 'langchain/dist/prompts/chat';
 
 const KImodel = 'gpt-4.1-2025-04-14';
 

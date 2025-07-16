@@ -1,7 +1,7 @@
-import type { OnInit, OnDestroy } from '@angular/core';
+import { OnInit, OnDestroy } from '@angular/core';
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import type { NotificationService } from '@UMLearnServices/notification.service';
-import type { INotification } from './notification.models';
+import { NotificationService } from '@UMLearnServices/notification.service';
+import { INotification } from './notification.models';
 import { Subscription } from 'rxjs';
 import { trigger, transition, animate, style } from '@angular/animations';
 

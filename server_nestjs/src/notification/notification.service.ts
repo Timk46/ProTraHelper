@@ -1,10 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
-import type { NotificationDTO, NotificationType } from '@Interfaces/index';
+import { NotificationDTO, NotificationType } from '@Interfaces/index';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Subject } from 'rxjs';
-import type { Prisma } from '@prisma/client';
-import type { Notification } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { Notification } from '@prisma/client';
 @Injectable()
 export class NotificationService {
   private readonly notificationSubject = new Subject<NotificationDTO>();

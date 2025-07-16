@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ChatOpenAI } from '@langchain/openai';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import type { TutoringFeedbackState } from '../state';
+import { TutoringFeedbackState } from '../state';
 import { ConceptExtractionSchema } from '../schemas/concept-extraction.schema';
 // Adjust path based on actual location if necessary
 import { DomainKnowledgeService } from '../../../langgraph-feedback/tools/domain-knowledge/domain-knowledge.service';

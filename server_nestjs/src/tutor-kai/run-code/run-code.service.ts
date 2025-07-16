@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from '../langgraph-feedback/helper/crypto.service';
-import type { CodingQuestionInternal, detailedQuestionDTO } from '@DTOs/index';
-import type { CodeSubmissionResult, CodeSubmissionResultDto } from '@Interfaces/index';
+import { CodingQuestionInternal, detailedQuestionDTO } from '@DTOs/index';
+import { CodeSubmissionResult, CodeSubmissionResultDto } from '@Interfaces/index';
 import { ContentElementDTO, NotificationDTO, questionType } from '@Interfaces/index';
-import type { CodeSubmission, Question, CodingQuestion, ContentElement } from '@prisma/client';
+import { CodeSubmission, Question, CodingQuestion, ContentElement } from '@prisma/client';
 import { ContentService } from '@/content/content.service';
 import { NotificationService } from '@/notification/notification.service';
 

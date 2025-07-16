@@ -1,9 +1,7 @@
-import type { OnInit } from '@angular/core';
-import { Component, ViewChild } from '@angular/core';
-import type { AbstractControl } from '@angular/forms';
-import { FormGroup, Validators, FormArray, FormControl } from '@angular/forms';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import type {
+import { OnInit, Component, ViewChild } from '@angular/core';
+import { AbstractControl, FormGroup, Validators, FormArray, FormControl } from '@angular/forms';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import {
   McQuestionDTO,
   QuestionDTO,
   QuestionVersionDTO,
@@ -11,18 +9,18 @@ import type {
   McqGenerationDTO,
   OptionDTO,
 } from '@DTOs/question.dto';
-import type { MatDialog } from '@angular/material/dialog';
-import type { Observable } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { Observable } from 'rxjs';
 import { of, switchMap, startWith, map, max } from 'rxjs';
-import type { McQuestionOptionDTO } from '@DTOs/question.dto';
-import type { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { McQuestionOptionDTO } from '@DTOs/question.dto';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MCScoreComponent } from './score/score.component';
-import type { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MCDescriptionDialogComponent } from './description-dialog/description-dialog.component';
-import type { McqcreationService } from 'src/app/Services/mcqCreation/mcqcreation.service';
-import type { MatCheckboxChange } from '@angular/material/checkbox';
-import type { ContentService } from 'src/app/Services/content/content.service';
-import type {
+import { McqcreationService } from 'src/app/Services/mcqCreation/mcqcreation.service';
+import { MatCheckboxChange } from '@angular/material/checkbox';
+import { ContentService } from 'src/app/Services/content/content.service';
+import {
   Answer,
   McqEvaluation,
   McqEvaluations,

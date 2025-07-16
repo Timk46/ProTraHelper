@@ -1,9 +1,9 @@
-import type { ElementRef, AfterViewInit, OnInit } from '@angular/core';
+import { ElementRef, AfterViewInit, OnInit } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
-import type { TinymceComponent } from '../../tinymce/tinymce.component';
-import type { FormBuilder, FormGroup } from '@angular/forms';
+import { TinymceComponent } from '../../tinymce/tinymce.component';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { FormControl, Validators } from '@angular/forms';
-import type {
+import {
   ClassEdge,
   ClassNode,
   detailedQuestionDTO,
@@ -13,14 +13,14 @@ import type {
   taskSettingsDTO,
 } from '@DTOs/index';
 import { EditorElementType, EditorModel, questionType } from '@DTOs/index';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import type { ActivatedRoute, Router } from '@angular/router';
-import type { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
-import type { MatSnackBar } from '@angular/material/snack-bar';
-import type { MatDialog } from '@angular/material/dialog';
-import type { EditorComponent } from 'src/app/Modules/umlearn/pages/editor/editor.component';
-import type { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';
-import type { MatCheckboxChange } from '@angular/material/checkbox';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { EditorComponent } from 'src/app/Modules/umlearn/pages/editor/editor.component';
+import { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-edit-uml',

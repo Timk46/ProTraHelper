@@ -1,4 +1,4 @@
-import type { editorElementDTO, editorModelDTO } from '@DTOs/index';
+import { editorElementDTO, editorModelDTO } from '@DTOs/index';
 import { EditorModel } from '@DTOs/index';
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { DatabaseEditorCommunicationService } from './database-editor-communication.service';

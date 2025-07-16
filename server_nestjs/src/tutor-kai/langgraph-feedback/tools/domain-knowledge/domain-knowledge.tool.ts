@@ -1,5 +1,5 @@
 import { DynamicStructuredTool } from '@langchain/core/tools'; // Changed import
-import type { DomainKnowledgeService } from './domain-knowledge.service';
+import { DomainKnowledgeService } from './domain-knowledge.service';
 import { z } from 'zod';
 // Removed Injectable import as it's not used directly in this file
 

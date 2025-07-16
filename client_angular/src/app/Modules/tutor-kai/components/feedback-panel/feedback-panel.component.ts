@@ -1,11 +1,11 @@
-import type { OnDestroy, OnInit } from '@angular/core';
+import { OnDestroy, OnInit } from '@angular/core';
 import { Component } from '@angular/core';
-import type { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import type { Observable } from 'rxjs';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Observable } from 'rxjs';
 import { Subject, takeUntil } from 'rxjs'; // Added Observable import
-import type { WorkspaceStateService } from '../../services/workspace-state.service';
+import { WorkspaceStateService } from '../../services/workspace-state.service';
 import { WorkspaceState } from '../../models/code-submission.model'; // Removed unused imports
-import type { MarkdownService } from '../../services/markdown/markdown.service';
+import { MarkdownService } from '../../services/markdown/markdown.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 
 @Component({

@@ -1,22 +1,20 @@
-import type { OnInit } from '@angular/core';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import type { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatDialogConfig } from '@angular/material/dialog';
-import type { ContentElementDTO, taskViewDTO } from '@DTOs/index';
+import { OnInit, Component, Input, Output, EventEmitter } from '@angular/core';
+import { MatDialog, MatDialogRef, MatDialogConfig } from '@angular/material/dialog';
+import { ContentElementDTO, taskViewDTO } from '@DTOs/index';
 import { ContentDTO, contentElementType, questionType } from '@DTOs/index';
 import { takeUntil } from 'rxjs';
-import type { ProgressService } from 'src/app/Services/progress/progress.service';
+import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { FillinTaskNewComponent } from '../../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { FreeTextTaskComponent } from '../../contentView/contentElement/free-text-task/free-text-task.component';
 import { McTaskComponent } from '../../contentView/contentElement/mcTask/mcTask.component';
 import { McSliderTaskComponent } from '../../contentView/contentElement/mcSliderTask/mc-slider-task.component';
 import { EditUploadComponent } from '../../lecturersView/edit-upload/edit-upload.component';
-import type { Router } from '@angular/router';
-import type { UserService } from 'src/app/Services/auth/user.service';
-import type { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
-import type { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import type { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { UserService } from 'src/app/Services/auth/user.service';
+import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { UploadTaskComponent } from '../../contentView/contentElement/upload-task/upload-task.component';
 
 @Component({
@@ -187,6 +185,12 @@ export class ContentListItemComponent implements OnInit {
           ...dialogConfig.data,
           questions: allMCSliderQuestions.length > 1 ? allMCSliderQuestions : [question],
         };
+        // Configure optimized dialog for MCSlider with minimal whitespace
+        dialogConfig.width = '90vw';
+        dialogConfig.maxWidth = '900px';
+        dialogConfig.height = '85vh';
+        dialogConfig.maxHeight = '85vh';
+        dialogConfig.panelClass = 'mcslider-dialog-panel';
         dialogRef = this.dialog.open(McSliderTaskComponent, dialogConfig);
         break;
       case questionType.FREETEXT:
@@ -253,6 +257,7 @@ export class ContentListItemComponent implements OnInit {
     switch (question.type) {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
+      case questionType.MCSLIDER:
         this.router.navigate(['/editchoice/', question.id]);
         break;
       case questionType.FREETEXT:

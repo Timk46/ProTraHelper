@@ -2,218 +2,269 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log('🚀 Starting MCSlider test data seeding...');
+export async function seedMCSlider() {
+  console.log('🎯 Seeding MCSlider test data...');
 
   try {
-    // Create a test user if not exists
-    const testUser = await prisma.user.upsert({
-      where: { email: 'mcslider.test@example.com' },
-      update: {},
-      create: {
-        email: 'mcslider.test@example.com',
-        firstname: 'MCSlider',
-        lastname: 'Tester',
-        password: '$2b$10$YourHashedPasswordHere', // This should be a properly hashed password
-        globalRole: 'STUDENT',
-      },
+    // Clean up existing MCSlider test data
+    await cleanupMCSliderTestData();
+
+    // Get existing user (use first available user)
+    const testUser = await prisma.user.findFirst({
+      where: { globalRole: 'ARCHSTUDENT', email: 'hund@proband.de' },
     });
 
-    console.log('✅ Test user created/found:', testUser.email);
+    if (!testUser) {
+      throw new Error('No users found in database. Please run basic seeding first.');
+    }
 
-    // Create a test module if not exists
-    const testModule = await prisma.module.upsert({
-      where: { name: 'MCSlider Test Module' },
-      update: {},
-      create: {
-        name: 'MCSlider Test Module',
-        description: 'Module for testing MCSlider functionality',
-      },
-    });
+    // Get existing ConceptNode (use first available)
+    const existingConcept = await prisma.conceptNode.findFirst();
 
-    console.log('✅ Test module created/found:', testModule.name);
+    if (!existingConcept) {
+      throw new Error('No ConceptNodes found in database. Please run basic seeding first.');
+    }
 
-    // Create a content node
-    const contentNode = await prisma.contentNode.create({
-      data: {
-        name: 'MCSlider Test Bereich',
-        description: 'Testbereich für MCSlider-Komponente',
-        position: 1,
-      },
-    });
+    // Get existing ContentNode (use first available)
+    const existingContentNode = await prisma.contentNode.findFirst();
 
-    console.log('✅ Content node created:', contentNode.name);
+    if (!existingContentNode) {
+      throw new Error('No ContentNodes found in database. Please run basic seeding first.');
+    }
 
-    // Create MCSlider questions
-    const questions = [
+    // Test Questions Data
+    const testQuestions = [
       {
-        name: 'MCSlider Test Frage 1',
-        text: 'Was ist die Hauptstadt von Deutschland?',
-        description: 'Erste Frage im MCSlider-Test',
-        correctAnswer: 'Berlin',
-      },
-      {
-        name: 'MCSlider Test Frage 2',
-        text: 'Was ist 2 + 2?',
-        description: 'Zweite Frage im MCSlider-Test',
-        correctAnswer: '4',
+        name: 'MCSlider: Geografie Hauptstädte',
+        text: 'Welche Hauptstädte gehören zu welchen Ländern?',
+        score: 3,
+        type: 'MCSlider',
+        isSC: false,
+        options: [
+          { text: 'Berlin - Deutschland', correct: true },
+          { text: 'Paris - Frankreich', correct: true },
+          { text: 'Madrid - Italien', correct: false },
+          { text: 'Rom - Italien', correct: true },
+          { text: 'London - Spanien', correct: false },
+        ],
       },
       {
-        name: 'MCSlider Test Frage 3',
-        text: 'Welches Element hat das Symbol "O"?',
-        description: 'Dritte Frage im MCSlider-Test',
-        correctAnswer: 'Sauerstoff',
+        name: 'MCSlider: Mathematik Grundlagen',
+        text: 'Welche Aussagen über Grundrechenarten sind korrekt?',
+        score: 2,
+        type: 'MCSlider',
+        isSC: false,
+        options: [
+          { text: '2 + 2 = 4', correct: true },
+          { text: '5 * 3 = 15', correct: true },
+          { text: '10 / 2 = 4', correct: false },
+          { text: '7 - 3 = 4', correct: true },
+        ],
+      },
+      {
+        name: 'MCSlider: Naturwissenschaften',
+        text: 'Welche Aussagen über Naturphänomene sind richtig?',
+        score: 4,
+        type: 'MCSlider',
+        isSC: false,
+        options: [
+          { text: 'Wasser gefriert bei 0°C', correct: true },
+          { text: 'Die Sonne ist ein Planet', correct: false },
+          { text: 'Licht breitet sich mit ca. 300.000 km/s aus', correct: true },
+          { text: 'Ein Jahr hat 365 Tage', correct: true },
+          { text: 'Gold ist magnetisch', correct: false },
+        ],
+      },
+      {
+        name: 'MCSlider: Einfachauswahl Test',
+        text: 'Was ist die Hauptstadt von Deutschland? (Einfachauswahl)',
+        score: 1,
+        type: 'MCSlider',
+        isSC: true,
+        options: [
+          { text: 'München', correct: false },
+          { text: 'Berlin', correct: true },
+          { text: 'Hamburg', correct: false },
+          { text: 'Köln', correct: false },
+        ],
       },
     ];
 
-    for (const [index, questionData] of questions.entries()) {
-      // Create the question
+    // Create questions and their options
+    for (const questionData of testQuestions) {
+      // Create the main question
       const question = await prisma.question.create({
         data: {
           name: questionData.name,
-          description: questionData.description,
-          score: 10,
-          type: 'MCSlider',
+          text: questionData.text,
+          score: questionData.score,
+          type: questionData.type,
+          authorId: testUser.id,
+          conceptNodeId: existingConcept.id,
+          isApproved: true,
           level: 1,
           mode: 'practise',
-          text: questionData.text,
-          isApproved: true,
-          version: 1,
-          author: {
-            connect: { id: testUser.id },
-          },
         },
       });
 
-      // Create MCQuestion
+      // Create MCQuestion entry
       const mcQuestion = await prisma.mCQuestion.create({
         data: {
-          question: {
-            connect: { id: question.id },
-          },
+          questionId: question.id,
           textHTML: `<p>${questionData.text}</p>`,
+          isSC: questionData.isSC,
           shuffleoptions: true,
-          isSC: true,
         },
       });
 
-      // Create MCOption (correct answer)
-      const mcOption = await prisma.mCOption.create({
-        data: {
-          text: questionData.correctAnswer,
-          is_correct: true,
-        },
-      });
+      // Create options
+      for (const optionData of questionData.options) {
+        const mcOption = await prisma.mCOption.create({
+          data: {
+            text: optionData.text,
+            is_correct: optionData.correct,
+          },
+        });
 
-      // Connect MCOption to MCQuestion
-      await prisma.mCQuestionOption.create({
-        data: {
-          mcQuestionId: mcQuestion.id,
-          mcOptionId: mcOption.id,
-        },
-      });
+        // Link option to question
+        await prisma.mCQuestionOption.create({
+          data: {
+            mcQuestionId: mcQuestion.id,
+            mcOptionId: mcOption.id,
+          },
+        });
+      }
 
-      // Create content element for the question
+      // Create ContentElement for the question
       const contentElement = await prisma.contentElement.create({
         data: {
           type: 'QUESTION',
-          title: `MCSlider Element ${index + 1}`,
+          title: questionData.name,
           text: questionData.text,
-          question: {
-            connect: { id: question.id },
-          },
+          questionId: question.id,
         },
       });
 
-      // Create content view to link content element to content node
+      // Create ContentView to link ContentElement to ContentNode
       await prisma.contentView.create({
         data: {
-          contentNode: {
-            connect: { id: contentNode.id },
-          },
+          contentNodeId: existingContentNode.id,
+          contentElementId: contentElement.id,
+          position: testQuestions.indexOf(questionData) + 1,
+        },
+      });
+    }
+
+    console.log('✅ MCSlider test data seeded successfully!');
+    console.log(`📊 Created:`);
+    console.log(`   - Used existing ConceptNode: "${existingConcept.name}"`);
+    console.log(`   - Used existing ContentNode: "${existingContentNode.name}"`);
+    console.log(`   - ${testQuestions.length} Questions with MCSlider type`);
+    console.log(
+      `   - ${testQuestions.reduce((sum, q) => sum + q.options.length, 0)} Answer options`,
+    );
+    console.log(`   - ${testQuestions.length} ContentElements`);
+    console.log(`   - ${testQuestions.length} ContentViews`);
+
+    return {
+      conceptNode: existingConcept,
+      contentNode: existingContentNode,
+      questionsCount: testQuestions.length,
+    };
+  } catch (error) {
+    console.error('❌ Error seeding MCSlider test data:', error);
+    throw error;
+  }
+}
+
+async function cleanupMCSliderTestData() {
+  console.log('🧹 Cleaning up existing MCSlider test data...');
+
+  try {
+    // Find MCSlider questions by name pattern (more reliable than text content)
+    const mcSliderQuestions = await prisma.question.findMany({
+      where: {
+        type: 'MCSlider',
+        name: {
+          startsWith: 'MCSlider:',
+        },
+      },
+    });
+
+    console.log(`Found ${mcSliderQuestions.length} existing MCSlider questions to clean up`);
+
+    for (const question of mcSliderQuestions) {
+      // Delete related data in correct order
+
+      // 1. Delete ContentViews first
+      await prisma.contentView.deleteMany({
+        where: {
           contentElement: {
-            connect: { id: contentElement.id },
+            questionId: question.id,
           },
-          position: index + 1,
         },
       });
 
-      console.log(`✅ Created MCSlider question ${index + 1}: ${questionData.name}`);
+      // 2. Delete ContentElements
+      await prisma.contentElement.deleteMany({
+        where: { questionId: question.id },
+      });
+
+      // 3. Delete MCQuestionOptions and MCOptions
+      const mcQuestion = await prisma.mCQuestion.findFirst({
+        where: { questionId: question.id },
+      });
+
+      if (mcQuestion) {
+        const mcQuestionOptions = await prisma.mCQuestionOption.findMany({
+          where: { mcQuestionId: mcQuestion.id },
+        });
+
+        // Delete MCOptions
+        for (const mqo of mcQuestionOptions) {
+          await prisma.mCOption.deleteMany({
+            where: { id: mqo.mcOptionId },
+          });
+        }
+
+        // Delete MCQuestionOptions
+        await prisma.mCQuestionOption.deleteMany({
+          where: { mcQuestionId: mcQuestion.id },
+        });
+
+        // Delete MCQuestion
+        await prisma.mCQuestion.deleteMany({
+          where: { id: mcQuestion.id },
+        });
+      }
+
+      // 4. Delete Question
+      await prisma.question.deleteMany({
+        where: { id: question.id },
+      });
     }
 
-    // Create a concept node and training relationship
-    const conceptNode = await prisma.conceptNode.create({
-      data: {
-        name: 'MCSlider Test Concept',
-        description: 'Test concept for MCSlider questions',
-      },
-    });
-
-    await prisma.training.create({
-      data: {
-        contentNode: {
-          connect: { id: contentNode.id },
-        },
-        conceptNode: {
-          connect: { id: conceptNode.id },
-        },
-        awards: 10,
-      },
-    });
-
-    console.log('✅ Created concept node and training relationship');
-
-    // Verify the data
-    const contentViews = await prisma.contentView.findMany({
-      where: { contentNodeId: contentNode.id },
-      include: {
-        contentElement: {
-          include: {
-            question: {
-              include: {
-                mcQuestion: {
-                  include: {
-                    MCQuestionOption: {
-                      include: {
-                        option: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    console.log('\n📊 Verification - Created content views:', contentViews.length);
-    contentViews.forEach((cv, index) => {
-      const q = cv.contentElement.question;
-      if (q && q.mcQuestion.length > 0) {
-        const mcq = q.mcQuestion[0];
-        const option = mcq.MCQuestionOption[0]?.option;
-        console.log(`   ${index + 1}. ${q.text} -> Answer: ${option?.text}`);
-      }
-    });
-
-    console.log('\n✅ MCSlider test data seeded successfully!');
-    console.log('\n🧪 To test the component:');
-    console.log('1. Start the Angular development server: npm start');
-    console.log('2. Navigate to a content list page');
-    console.log('3. Look for "MCSlider Test Bereich" content');
-    console.log('4. Click on any MCSlider question to test the component');
-
+    console.log('✅ Cleanup completed successfully');
   } catch (error) {
-    console.error('❌ Error seeding data:', error);
-    throw error;
+    console.error('❌ Error during cleanup:', error);
+    // Don't throw here, just log - we want to continue with seeding
+  }
+}
+
+// Helper function to run only MCSlider seeding
+export async function runMCSliderSeed() {
+  try {
+    await seedMCSlider();
+    console.log('🎉 MCSlider seeding completed successfully!');
+  } catch (error) {
+    console.error('💥 MCSlider seeding failed:', error);
+    process.exit(1);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  });
+// Run if called directly
+if (require.main === module) {
+  runMCSliderSeed();
+}

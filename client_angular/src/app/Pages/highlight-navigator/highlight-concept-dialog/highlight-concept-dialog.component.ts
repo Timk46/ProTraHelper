@@ -1,17 +1,15 @@
-import type { OnInit, OnDestroy } from '@angular/core';
-import { Component, Inject } from '@angular/core';
-import type { FormBuilder, FormGroup } from '@angular/forms';
-import { Validators, ReactiveFormsModule } from '@angular/forms';
-import type { MatDialogRef } from '@angular/material/dialog';
+import { OnInit, OnDestroy, Component, Inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type {
+import {
   CreateHighlightConceptDto,
   HighlightConceptDto,
   UpdateHighlightConceptDto,
 } from '@DTOs/index';
-import type { ConceptSelectionService } from 'src/app/Services/concept-selection/concept-selection.service';
+import { ConceptSelectionService } from 'src/app/Services/concept-selection/concept-selection.service';
 import { Subscription } from 'rxjs';
-import type { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-highlight-concept-dialog',

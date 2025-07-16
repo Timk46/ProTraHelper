@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import { spawn, ChildProcess } from 'child_process';
 import { promisify } from 'util';
-import type {
+import {
   BatScriptRequest,
   BatExecutionResult,
   RhinoPathValidationResult,

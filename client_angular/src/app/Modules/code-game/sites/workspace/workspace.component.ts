@@ -1,14 +1,14 @@
-import type { OnInit } from '@angular/core';
+import { OnInit } from '@angular/core';
 import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
-import type { CodeEditorComponent } from '../code-editor/code-editor.component';
-import type { Title } from '@angular/platform-browser';
-import type { ActivatedRoute } from '@angular/router';
-import type { CodeGameTaskDataService } from '../../services/code-game-task-data.service';
-import type { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
-import type { PlayfieldComponent } from '../playfield/playfield.component';
-import type { CodeGameEvaluationDTO } from '@DTOs/codeGame.dto';
-import type { MatSnackBar } from '@angular/material/snack-bar';
-import type { MatDialog } from '@angular/material/dialog';
+import { CodeEditorComponent } from '../code-editor/code-editor.component';
+import { Title } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
+import { CodeGameTaskDataService } from '../../services/code-game-task-data.service';
+import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
+import { PlayfieldComponent } from '../playfield/playfield.component';
+import { CodeGameEvaluationDTO } from '@DTOs/codeGame.dto';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { HelpDialogComponent } from '../help-dialog/help-dialog.component';
 
 enum States {

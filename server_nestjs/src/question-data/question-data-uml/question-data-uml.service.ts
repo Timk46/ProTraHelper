@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import type {
+import {
   detailedUmlQuestionDTO,
   editorDataDTO,
   taskSettingsDTO,

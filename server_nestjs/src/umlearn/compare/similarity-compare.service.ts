@@ -1,4 +1,4 @@
-import type {
+import {
   BasicMatching,
   GraphMatching,
   ClassAttribute,
@@ -6,7 +6,7 @@ import type {
   ClassMethod,
   ClassNode,
 } from '@Interfaces/index';
-import type { editorDataDTO } from '@DTOs/index';
+import { editorDataDTO } from '@DTOs/index';
 import { swappableEditorElement } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { JaroWinklerDistance } from 'natural';

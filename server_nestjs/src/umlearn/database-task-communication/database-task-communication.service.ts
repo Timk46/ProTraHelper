@@ -1,4 +1,4 @@
-import type {
+import {
   taskDataDTO,
   taskSettingsDTO,
   taskAttemptDataDTO,
@@ -8,7 +8,7 @@ import type {
 import { EditorModel } from '@DTOs/index';
 import { PrismaService } from '@/prisma/prisma.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { CompareService } from '../compare/compare.service';
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { FeedbackRAGService } from '@/ai/feedback-generation/feedback-rag.service';

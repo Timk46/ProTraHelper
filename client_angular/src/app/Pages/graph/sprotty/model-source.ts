@@ -1,10 +1,10 @@
 import { injectable } from 'inversify';
-import type { ActionHandlerRegistry } from 'sprotty';
+import { ActionHandlerRegistry } from 'sprotty';
 import { LocalModelSource } from 'sprotty';
-import type { ConceptGraphDTO, ConceptNodeDTO } from '@DTOs/index';
-import type { SprottyConceptEdge, SprottyConceptNode } from './sprottyModels.interface';
+import { ConceptGraphDTO, ConceptNodeDTO } from '@DTOs/index';
+import { SprottyConceptEdge, SprottyConceptNode } from './sprottyModels.interface';
 //import { SModelIndex } from 'sprotty-protocol/lib/utils/model-utils';
-import type {
+import {
   Action,
   SEdge,
   SGraph,
@@ -22,7 +22,7 @@ import {
 } from 'sprotty-protocol';
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
-import type { OnDestroy } from '@angular/core';
+import { OnDestroy } from '@angular/core';
 import { inject as injectAngular } from '@angular/core';
 import {
   AwardLevelAction,
@@ -33,7 +33,7 @@ import {
 } from './actions';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateConceptDialogComponent } from '../graph-dialogs/create-concept-dialog/create-concept-dialog.component';
-import type { Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 
 @injectable()

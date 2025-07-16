@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import type { QuestionDTO } from '@DTOs/index';
+import { QuestionDTO } from '@DTOs/index';
 
 /**
  * Schnittstelle für eine Datei im Dateisystem

@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import type { discussionMessageVoteCreationDTO, discussionMessageVoteDTO } from '@DTOs/index';
+import { discussionMessageVoteCreationDTO, discussionMessageVoteDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

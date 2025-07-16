@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import type { MatDialog } from '@angular/material/dialog';
-import type { Observable } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import { ConfirmationBoxComponent } from 'src/app/Pages/confirmation-box/confirmation-box.component';
 

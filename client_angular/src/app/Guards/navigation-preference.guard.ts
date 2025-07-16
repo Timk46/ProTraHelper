@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import type { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
-import type {
+import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import {
   NavigationPreferenceService,
   NavigationType,
 } from '../Services/navigation/navigation-preference.service';

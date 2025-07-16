@@ -1,13 +1,13 @@
-import type { OnInit } from '@angular/core';
+import { OnInit } from '@angular/core';
 import { Component } from '@angular/core';
-import type { ActivatedRoute } from '@angular/router';
-import type {
+import { ActivatedRoute } from '@angular/router';
+import {
   AdminService,
   QuestionTypeProgress,
   DailyProgress,
   UserDetails,
 } from '../services/admin.service';
-import type { Color } from '@swimlane/ngx-charts';
+import { Color } from '@swimlane/ngx-charts';
 import { ScaleType } from '@swimlane/ngx-charts';
 
 @Component({

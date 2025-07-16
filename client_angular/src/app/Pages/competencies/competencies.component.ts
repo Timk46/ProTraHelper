@@ -1,6 +1,6 @@
-import type { OnInit } from '@angular/core';
+import { OnInit } from '@angular/core';
 import { Component, Input } from '@angular/core';
-import type { ContentsForConceptDTO } from '@DTOs/content.dto';
+import { ContentsForConceptDTO } from '@DTOs/content.dto';
 import { ContentDTO } from '@DTOs/content.dto';
 
 @Component({

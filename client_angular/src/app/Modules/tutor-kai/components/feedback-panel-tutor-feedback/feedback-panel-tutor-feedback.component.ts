@@ -1,13 +1,13 @@
-import type { OnInit, OnDestroy } from '@angular/core';
+import { OnInit, OnDestroy } from '@angular/core';
 import { Component } from '@angular/core';
-import type { HttpClient } from '@angular/common/http';
-import type { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { Subject, takeUntil, finalize, catchError, throwError, Observable, filter } from 'rxjs';
-import type { MatDialog } from '@angular/material/dialog';
-import type { WorkspaceStateService } from '../../services/workspace-state.service';
+import { MatDialog } from '@angular/material/dialog';
+import { WorkspaceStateService } from '../../services/workspace-state.service';
 import { WorkspaceState } from '../../models/code-submission.model';
-import type { MarkdownService } from '../../services/markdown/markdown.service';
+import { MarkdownService } from '../../services/markdown/markdown.service';
 import { environment } from 'src/environments/environment';
 import { FeedbackHintConfirmationDialogComponent } from './feedback-hint-confirmation-dialog/feedback-hint-confirmation-dialog.component';
 // TODO: Import FeedbackOutput and KcrOutput types/interfaces from shared DTOs

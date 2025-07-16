@@ -1,7 +1,7 @@
 // src/common/interceptors/version.interceptor.ts
-import type { NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { version } from '@DTOs/version';
 import { map } from 'rxjs/operators';
 

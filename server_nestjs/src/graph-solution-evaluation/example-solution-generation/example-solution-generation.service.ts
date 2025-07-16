@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { TransitiveClosureService } from '../transitive-closure/transitive-closure.service';
 import { graphJSONToSemantic } from '../utils/graph-utils';
-import type {
+import {
   GraphEdgeSemanticDTO,
   GraphStructureDTO,
   GraphStructureSemanticDTO,

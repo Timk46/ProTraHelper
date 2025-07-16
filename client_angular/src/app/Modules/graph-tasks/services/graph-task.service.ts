@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import type { IGraphNode } from '../models/GraphNode.interface';
-import type { IGraphEdge } from '../models/GraphEdge.interface';
-import type { IGraphNewEdge } from '../models/GraphNewEdge.interface';
-import type {
+import { IGraphNode } from '../models/GraphNode.interface';
+import { IGraphEdge } from '../models/GraphEdge.interface';
+import { IGraphNewEdge } from '../models/GraphNewEdge.interface';
+import {
   GraphConfigurationDTO,
   GraphNodeDTO,
   GraphEdgeDTO,

@@ -1,11 +1,11 @@
-import type { CdkDragEnd, CdkDragMove, CdkDragStart } from '@angular/cdk/drag-drop';
-import type { ElementRef, OnDestroy, OnInit } from '@angular/core';
+import { CdkDragEnd, CdkDragMove, CdkDragStart } from '@angular/cdk/drag-drop';
+import { ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { Component, Input, ViewChild } from '@angular/core';
-import type { PositionDTO, GraphConfigurationDTO } from '@DTOs/graphTask.dto';
-import type { IGraphNode } from '../models/GraphNode.interface';
-import type { GraphTaskService } from '../services/graph-task.service';
-import type { IGraphNewEdge } from '../models/GraphNewEdge.interface';
-import type { Subscription } from 'rxjs';
+import { PositionDTO, GraphConfigurationDTO } from '@DTOs/graphTask.dto';
+import { IGraphNode } from '../models/GraphNode.interface';
+import { GraphTaskService } from '../services/graph-task.service';
+import { IGraphNewEdge } from '../models/GraphNewEdge.interface';
+import { Subscription } from 'rxjs';
 import { calculateShapeCenter } from '../utils';
 
 @Component({

@@ -1,8 +1,8 @@
-import type { discussionDTO, discussionMessageDTO, nodeNameDTO } from '@DTOs/index';
-import type { HttpClient } from '@angular/common/http';
+import { discussionDTO, discussionMessageDTO, nodeNameDTO } from '@DTOs/index';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Subject, tap } from 'rxjs';
-import type { Observable } from 'rxjs/internal/Observable';
+import { Observable } from 'rxjs/internal/Observable';
 import { environment } from 'src/environments/environment';
 
 @Injectable({

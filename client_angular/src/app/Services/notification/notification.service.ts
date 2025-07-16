@@ -1,17 +1,17 @@
-import type { OnDestroy } from '@angular/core';
+import { OnDestroy } from '@angular/core';
 import { Injectable } from '@angular/core';
-import type { Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 import { NotificationType } from '@DTOs/notificationType.enum';
-import type { UserService } from '../auth/user.service';
+import { UserService } from '../auth/user.service';
 import { environment } from 'src/environments/environment';
-import type { NotificationDTO } from '@DTOs/notification.dto';
-import type { Router } from '@angular/router';
-import type { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationDTO } from '@DTOs/notification.dto';
+import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { NotificationComponent } from 'src/app/Pages/notification/notification.component';
-import type { HttpClient } from '@angular/common/http';
-import type { WebSocketService } from '../websocket/websocket.service';
+import { HttpClient } from '@angular/common/http';
+import { WebSocketService } from '../websocket/websocket.service';
 
 /**
  * Service responsible for managing notifications in the frontend.

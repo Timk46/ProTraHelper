@@ -1,4 +1,4 @@
-import type { OnInit, OnDestroy, SimpleChanges, OnChanges, AfterViewInit } from '@angular/core';
+import { OnInit, OnDestroy, SimpleChanges, OnChanges, AfterViewInit } from '@angular/core';
 import { Component, Input } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { v4 as uuidv4 } from 'uuid';

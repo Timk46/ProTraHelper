@@ -1,7 +1,7 @@
-import type { Expandable } from 'sprotty';
-import type { SNode } from 'sprotty-protocol';
+import { Expandable } from 'sprotty';
+import { SNode } from 'sprotty-protocol';
 
-import type { SEdge } from 'sprotty-protocol';
+import { SEdge } from 'sprotty-protocol';
 
 // interface for concept nodes
 // needed for sprotty

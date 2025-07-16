@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Req } from '@nestjs/common';
 import { RunCodeService } from './run-code.service';
-import type { CodeSubmissionResultDto } from '@DTOs/index';
+import { CodeSubmissionResultDto } from '@DTOs/index';
 import { detailedQuestionDTO } from '@DTOs/index';
 
 @Controller('run-code')

@@ -1,4 +1,4 @@
-import type { StreamableFile } from '@nestjs/common';
+import { StreamableFile } from '@nestjs/common';
 import {
   Controller,
   Get,

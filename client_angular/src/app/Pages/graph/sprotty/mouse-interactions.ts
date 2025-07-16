@@ -1,4 +1,4 @@
-import type {
+import {
   ContextMenuProviderRegistry,
   IActionDispatcher,
   IContextMenuServiceProvider,
@@ -15,11 +15,11 @@ import {
   isSelectable,
   isSelected,
 } from 'sprotty';
-import type { Action, SModelElement } from 'sprotty-protocol';
+import { Action, SModelElement } from 'sprotty-protocol';
 import { CollapseExpandAction, Point, SelectAction } from 'sprotty-protocol';
 import { injectable, inject } from 'inversify';
 import { expand } from 'rxjs';
-import type { SprottyConceptNode } from './sprottyModels.interface';
+import { SprottyConceptNode } from './sprottyModels.interface';
 import ElkConstructor from 'elkjs';
 //import { NodeCreator } from "./di.config";
 

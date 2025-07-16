@@ -1,4 +1,4 @@
-import type { OnChanges, SimpleChanges } from '@angular/core';
+import { OnChanges, SimpleChanges } from '@angular/core';
 import { Component, Input } from '@angular/core';
 
 @Component({

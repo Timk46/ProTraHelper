@@ -1,4 +1,4 @@
-import type { ClassEdge, ClassNode, editorDataDTO } from '@Interfaces/index';
+import { ClassEdge, ClassNode, editorDataDTO } from '@Interfaces/index';
 import { Injectable } from '@nestjs/common';
 import { pointDefinitions } from './point-calculation.settings';
 

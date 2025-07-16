@@ -1,4 +1,4 @@
-import type { ElementRef } from '@angular/core';
+import { ElementRef } from '@angular/core';
 import { Component, HostListener, Input } from '@angular/core';
 
 @Component({

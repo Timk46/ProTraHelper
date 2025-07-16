@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import type { BreakpointObserver } from '@angular/cdk/layout';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { BreakpointState, Breakpoints } from '@angular/cdk/layout';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Injectable({

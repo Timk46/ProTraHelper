@@ -1,8 +1,8 @@
-import type { ChatOpenAI } from '@langchain/openai';
-import type { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
-import type { BaseMessage } from '@langchain/core/messages';
+import { ChatOpenAI } from '@langchain/openai';
+import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
+import { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
-import type { Runnable } from '@langchain/core/runnables';
+import { Runnable } from '@langchain/core/runnables';
 import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { kmSystemPrompt } from './km.prompts'; // Import prompt from the new file

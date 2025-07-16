@@ -35,10 +35,11 @@ import { CompareModule } from './umlearn/compare/compare.module';
 // END UMLearn Imports
 
 // BEGIN ProTra 2.0 Imports
-import { PmpmModule } from './pmpm/pmpm.module';
 // END ProTra 2.0 Imports
 import { GhFilesModule } from './gh-files/gh-files.module'; // Import the new module
 import { RhinoDirectModule } from './rhino-direct/rhino-direct.module';
+import { MCSliderModule } from './mcslider/mcslider.module';
+import { RhinoIntegrationModule } from './rhino-integration/rhino-integration.module';
 
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/common/guards/jwt-auth.guard';
@@ -72,6 +73,7 @@ import { PointCalculationModule } from './umlearn/point-calculation/point-calcul
 
 import { CodeGameModule } from './code-game/code-game.module';
 import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgraph-feedback.module';
+import { PeerReviewModule } from './peer-review/peer-review.module';
 
 @Module({
   imports: [
@@ -113,9 +115,11 @@ import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgrap
     LanggraphFeedbackModule,
     TutoringFeedbackModule,
     // ProTra 2.0 Modules
-    PmpmModule,
     GhFilesModule, // Add the new module to imports
     RhinoDirectModule,
+    MCSliderModule,
+    RhinoIntegrationModule,
+    PeerReviewModule,
   ],
   controllers: [
     AppController,

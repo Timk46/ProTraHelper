@@ -1,11 +1,11 @@
-import type { OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import type { FormArray, FormBuilder } from '@angular/forms';
+import { FormArray, FormBuilder } from '@angular/forms';
 import { Validators } from '@angular/forms';
-import type { QuestionDTO, CodeSubmissionResultDto } from '@DTOs/index';
-import type { CodeEditorComponent } from '../../sites/code-editor/code-editor.component';
-import type { WorkspaceStateService } from '../../services/workspace-state.service';
-import type { FileSystemService, EditorFile } from '../../services/file-system.service';
+import { QuestionDTO, CodeSubmissionResultDto } from '@DTOs/index';
+import { CodeEditorComponent } from '../../sites/code-editor/code-editor.component';
+import { WorkspaceStateService } from '../../services/workspace-state.service';
+import { FileSystemService, EditorFile } from '../../services/file-system.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({

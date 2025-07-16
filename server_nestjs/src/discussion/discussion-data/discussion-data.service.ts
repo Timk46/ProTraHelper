@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { PrismaService } from '@/prisma/prisma.service';
-import type { discussionNodeNamesDTO, nodeNameDTO } from '@DTOs/index';
+import { discussionNodeNamesDTO, nodeNameDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 

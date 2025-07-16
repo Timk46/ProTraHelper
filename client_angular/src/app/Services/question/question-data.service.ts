@@ -1,4 +1,4 @@
-import type {
+import {
   McQuestionDTO,
   QuestionDTO,
   MCOptionDTO,
@@ -14,15 +14,16 @@ import type {
   uploadQuestionDTO,
 } from '@DTOs/index';
 import { questionType } from '@DTOs/index';
-import type { HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { McTaskComponent } from 'src/app/Pages/contentView/contentElement/mcTask/mcTask.component';
+import { McSliderTaskComponent } from 'src/app/Pages/contentView/contentElement/mcSliderTask/mc-slider-task.component';
 import { FillinTaskNewComponent } from 'src/app/Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { FreeTextTaskComponent } from 'src/app/Pages/contentView/contentElement/free-text-task/free-text-task.component';
 import { EditUploadComponent } from 'src/app/Pages/lecturersView/edit-upload/edit-upload.component';
-import type { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 
 @Injectable({
   providedIn: 'root',
@@ -336,16 +337,18 @@ export class QuestionDataService {
    * Opens a dialog for a specific task type.
    * @param {string} taskType - The type of the task.
    * @param {MatDialogConfig} config - The configuration for the dialog.
-   * @returns {MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined} The dialog reference or undefined if no dialog is defined.
+   * @returns {MatDialogRef<McTaskComponent | McSliderTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined} The dialog reference or undefined if no dialog is defined.
    */
   openDialog(
     taskType: string,
     config: MatDialogConfig,
-  ): MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined {
+  ): MatDialogRef<McTaskComponent | McSliderTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined {
     switch (taskType) {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
         return this.dialog.open(McTaskComponent, config);
+      case questionType.MCSLIDER:
+        return this.dialog.open(McSliderTaskComponent, config);
       case questionType.FREETEXT:
         return this.dialog.open(FreeTextTaskComponent, config);
       case questionType.FILLIN:

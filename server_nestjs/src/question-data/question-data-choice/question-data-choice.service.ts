@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { PrismaService } from '@/prisma/prisma.service';
-import type {
+import {
   detailedChoiceOptionDTO,
   detailedChoiceQuestionDTO,
   MCOptionDTO,

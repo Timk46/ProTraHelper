@@ -1,6 +1,6 @@
-import type { AfterViewInit, ElementRef, OnDestroy, OnInit, QueryList } from '@angular/core';
+import { AfterViewInit, ElementRef, OnDestroy, OnInit, QueryList } from '@angular/core';
 import { Component, Input, ViewChild, ViewChildren } from '@angular/core';
-import type { GraphTaskService } from '../services/graph-task.service';
+import { GraphTaskService } from '../services/graph-task.service';
 import {
   CdkDrag,
   CdkDragEnd,
@@ -9,13 +9,13 @@ import {
   DragDropModule,
 } from '@angular/cdk/drag-drop';
 import { NodeGraphComponent } from '../node-graph/node-graph.component';
-import type { IGraphNode } from '../models/GraphNode.interface';
-import type { IGraphEdge } from '../models/GraphEdge.interface';
-import type { IGraphNewEdge } from '../models/GraphNewEdge.interface';
-import type { Router } from '@angular/router';
-import type { Subscription } from 'rxjs';
+import { IGraphNode } from '../models/GraphNode.interface';
+import { IGraphEdge } from '../models/GraphEdge.interface';
+import { IGraphNewEdge } from '../models/GraphNewEdge.interface';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { readFile } from '../utils';
-import type {
+import {
   SizeDTO,
   PositionDTO,
   RectangleDTO,

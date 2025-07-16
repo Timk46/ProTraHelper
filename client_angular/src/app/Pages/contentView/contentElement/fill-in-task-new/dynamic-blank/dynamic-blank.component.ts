@@ -1,9 +1,9 @@
-import type { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import type { OnInit } from '@angular/core';
+import { OnInit } from '@angular/core';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FillinQuestionType } from '@DTOs/fillInType.enum';
-import type { UserFillinAnswer } from '@DTOs/userAnswer.dto';
+import { UserFillinAnswer } from '@DTOs/userAnswer.dto';
 
 @Component({
   selector: 'app-dynamic-blank',

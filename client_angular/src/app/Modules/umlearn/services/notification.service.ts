@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { INotification } from '../pages/notification/notification.models';
+import { INotification } from '../pages/notification/notification.models';
 import { NotificationType } from '../pages/notification/notification.models';
-import type { MatDialog } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationComponent } from '../pages/confirmation/confirmation.component';
 
 @Injectable({

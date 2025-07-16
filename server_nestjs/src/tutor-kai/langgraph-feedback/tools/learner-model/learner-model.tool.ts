@@ -1,5 +1,5 @@
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import type { LearnerModelToolService } from './learner-model.service';
+import { LearnerModelToolService } from './learner-model.service';
 import { z } from 'zod';
 import { Logger } from '@nestjs/common'; // Import Logger
 

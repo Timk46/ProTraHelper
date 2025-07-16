@@ -1,7 +1,6 @@
-import type { OnInit } from '@angular/core';
-import { Component } from '@angular/core';
-import type { ActivatedRoute } from '@angular/router';
-import type { GradingService } from './services/grading.service';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { GradingService } from './services/grading.service';
 import { Question, UserAnswer, UserUploadAnswer } from './services/grading.service';
 import { forkJoin } from 'rxjs';
 

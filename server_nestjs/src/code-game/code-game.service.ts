@@ -6,8 +6,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import type { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
-import type {
+import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
+import {
   CppProjectExecutionResult,
   JavaProjectExecutionResult,
   PythonProjectExecutionResult,

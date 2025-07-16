@@ -1,15 +1,15 @@
-import type { ElementRef, Renderer2, SimpleChanges, OnChanges, AfterViewInit } from '@angular/core';
+import { ElementRef, Renderer2, SimpleChanges, OnChanges, AfterViewInit } from '@angular/core';
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import type { Plug, PlugOptions } from './plugs';
+import { Plug, PlugOptions } from './plugs';
 import { availablePlugs, plugs } from './plugs';
-import type { TextLabel, highlightedLineElements } from '@DTOs/index';
+import { TextLabel, highlightedLineElements } from '@DTOs/index';
 import { Side } from '@DTOs/index'; // Changed from @Interfaces
-import type { EditorEdgeService } from '@UMLearnServices/editor-edge.service';
+import { EditorEdgeService } from '@UMLearnServices/editor-edge.service';
 import { EditorElement } from '@DTOs/index';
-import type { lineOptions } from './line-options';
+import { lineOptions } from './line-options';
 import { umlLineOptions } from './line-options';
-import type { ClassEdge } from '@DTOs/index'; // Changed from @Interfaces
-import type { EdgeGrabPointComponent } from './edge-grab-point/edge-grab-point.component';
+import { ClassEdge } from '@DTOs/index'; // Changed from @Interfaces
+import { EdgeGrabPointComponent } from './edge-grab-point/edge-grab-point.component';
 
 @Component({
   selector: 'app-editor-edge-new',
@@ -920,8 +920,8 @@ export class EditorEdgeNewComponent implements OnChanges, AfterViewInit {
       return { startSide: this.options.startDirection, endSide: this.options.endDirection };
     }
 
-    let startSide = undefined;
-    let endSide = undefined;
+    let startSide: Side | undefined = undefined;
+    let endSide: Side | undefined = undefined;
     let startSides: Side[] = [];
     let endSides: Side[] = [];
 
@@ -989,7 +989,10 @@ export class EditorEdgeNewComponent implements OnChanges, AfterViewInit {
       });
     });
 
-    return { startSide: startSide, endSide: endSide };
+    return { 
+      startSide: startSide ?? Side.NONE, 
+      endSide: endSide ?? Side.NONE 
+    };
   }
 
   /**

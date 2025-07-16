@@ -1,4 +1,4 @@
-import type { OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import {
   Component,
   Input,
@@ -8,17 +8,18 @@ import {
   Optional,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import type { MCOptionViewDTO, McQuestionDTO } from '@DTOs/question.dto';
+import { MCOptionViewDTO, McQuestionDTO } from '@DTOs/question.dto';
 import { QuestionDTO, McQuestionOptionDTO } from '@DTOs/question.dto';
-import type { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import type { MatDialogRef } from '@angular/material/dialog';
+import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { TaskViewData } from '@DTOs/index';
-import type { Router } from '@angular/router';
-import type { Location } from '@angular/common';
+import { TaskViewData } from '@DTOs/index';
+import { Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, finalize } from 'rxjs/operators';
+import { McSliderRhinoIntegrationService, RhinoIntegrationEvent } from 'src/app/Services/mcslider-rhino-integration.service';
 
 // Extended interface for our options to include correctness information
 interface MCOptionViewModel extends MCOptionViewDTO {
@@ -73,6 +74,11 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
   totalScore: number = 0;
   maxScore: number = 0;
 
+  // Rhino integration state
+  isRhinoSwitching: boolean = false;
+  rhinoSwitchAttempts: number = 0;
+  maxRhinoSwitchAttempts: number = 3;
+
   // For handling RxJS subscriptions cleanup
   private readonly destroy$ = new Subject<void>();
 
@@ -89,6 +95,7 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     private readonly dialogRef: MatDialogRef<McSliderTaskComponent>,
     private readonly location: Location,
     private readonly cdr: ChangeDetectorRef,
+    private readonly rhinoIntegrationService: McSliderRhinoIntegrationService,
   ) {
     if (data) {
       this.taskViewData = data.taskViewData;
@@ -295,6 +302,22 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
 
         this.componentState = McSliderTaskState.QUESTIONS;
         this.cdr.detectChanges();
+
+        // Rhino-Integration: Fokussiere Rhino nach Fragen-Einreichung
+        this.rhinoIntegrationService.handleQuestionSubmission({
+          questionIndex: this.currentQuestionIndex,
+          totalQuestions: this.questionStates.length,
+          score: feedback.score,
+          maxScore: currentState.questionData.score,
+          isCorrect: currentState.isCorrect,
+        }).pipe(takeUntil(this.destroy$)).subscribe({
+          next: (result) => {
+            console.log('🎯 Rhino focus after question submission:', result);
+          },
+          error: (error) => {
+            console.warn('⚠️ Rhino focus failed after question submission:', error);
+          }
+        });
       });
   }
 
@@ -393,6 +416,20 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     this.submitClicked.emit(this.totalScore);
 
     this.cdr.detectChanges();
+
+    // Rhino-Integration: Fokussiere Rhino nach Abschluss aller Fragen
+    this.rhinoIntegrationService.handleAllQuestionsCompleted({
+      totalQuestions: this.questionStates.length,
+      score: this.totalScore,
+      maxScore: this.maxScore,
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (result) => {
+        console.log('🎯 Rhino focus after all questions completed:', result);
+      },
+      error: (error) => {
+        console.warn('⚠️ Rhino focus failed after all questions completed:', error);
+      }
+    });
   }
 
   /**
@@ -451,9 +488,89 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Switch to Rhino manually via button
+   */
+  switchToRhino(): void {
+    if (this.isRhinoSwitching || !this.isRhinoAvailable()) {
+      return;
+    }
+
+    this.isRhinoSwitching = true;
+    this.rhinoSwitchAttempts++;
+
+    this.rhinoIntegrationService.handleManualRhinoSwitch({
+      source: 'manual_button',
+      questionIndex: this.currentQuestionIndex,
+      totalQuestions: this.questionStates.length,
+      score: this.totalScore,
+      maxScore: this.maxScore,
+      attempt: this.rhinoSwitchAttempts
+    }).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.isRhinoSwitching = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
+      next: (result) => {
+        if (result.success) {
+          console.log('✅ Manual Rhino switch successful:', result);
+          this.rhinoSwitchAttempts = 0; // Reset on success
+        } else {
+          console.warn('⚠️ Manual Rhino switch failed:', result.message);
+          this.handleRhinoSwitchError(result.message);
+        }
+      },
+      error: (error) => {
+        console.error('❌ Manual Rhino switch error:', error);
+        this.handleRhinoSwitchError(error.message);
+      }
+    });
+  }
+
+  /**
+   * Check if Rhino is available
+   */
+  isRhinoAvailable(): boolean {
+    return this.rhinoIntegrationService.isIntegrationAvailable();
+  }
+
+  /**
+   * Handle Rhino switch error
+   */
+  private handleRhinoSwitchError(message: string): void {
+    if (this.rhinoSwitchAttempts < this.maxRhinoSwitchAttempts) {
+      // Retry after a short delay
+      setTimeout(() => {
+        console.log(`🔄 Retrying Rhino switch (attempt ${this.rhinoSwitchAttempts + 1}/${this.maxRhinoSwitchAttempts})`);
+        this.switchToRhino();
+      }, 1000);
+    } else {
+      // Max attempts reached
+      console.error('❌ Max Rhino switch attempts reached');
+      this.rhinoSwitchAttempts = 0;
+      // Could show user notification here if needed
+    }
+  }
+
+  /**
    * Close dialog or navigate back
    */
   onClose(): void {
+    // Rhino-Integration: Fokussiere Rhino beim Schließen der Komponente
+    this.rhinoIntegrationService.handleComponentClose({
+      totalQuestions: this.questionStates.length,
+      score: this.totalScore,
+      maxScore: this.maxScore,
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (result) => {
+        console.log('🎯 Rhino focus on component close:', result);
+      },
+      error: (error) => {
+        console.warn('⚠️ Rhino focus failed on component close:', error);
+      }
+    });
+
     if (this.dialogRef) {
       this.dialogRef.close();
     }

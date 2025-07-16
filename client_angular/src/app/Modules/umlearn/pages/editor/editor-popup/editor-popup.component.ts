@@ -1,4 +1,4 @@
-import type {
+import {
   ClassAttribute,
   ClassEdge,
   ClassMethod,
@@ -7,14 +7,14 @@ import type {
 } from '@DTOs/index';
 import { dataType, EditorElement, visibilityType } from '@DTOs/index';
 
-import type { OnInit } from '@angular/core';
+import { OnInit } from '@angular/core';
 import { Component, Inject, ViewChild } from '@angular/core';
-import type { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';
-import type { NotificationService } from '@UMLearnServices/notification.service';
+import { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';
+import { NotificationService } from '@UMLearnServices/notification.service';
 import { MatTableDataSource } from '@angular/material/table';
-import type { EditorEdgeNewComponent } from '../editor-edge-new/editor-edge-new.component';
+import { EditorEdgeNewComponent } from '../editor-edge-new/editor-edge-new.component';
 import { timer } from 'rxjs';
 
 @Component({

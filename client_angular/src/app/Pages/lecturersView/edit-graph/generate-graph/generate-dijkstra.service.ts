@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import type { GraphEdgeDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
-import type { GenerateGraphService } from './generate-graph.service';
+import { GraphEdgeDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
+import { GenerateGraphService } from './generate-graph.service';
 
 export interface GenerateDijkstraConfiguration {
   nodesCount: number;

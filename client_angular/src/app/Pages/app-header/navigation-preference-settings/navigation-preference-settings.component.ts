@@ -1,12 +1,12 @@
-import type { OnInit } from '@angular/core';
+import { OnInit } from '@angular/core';
 import { Component, Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import type { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import type { NavigationType } from 'src/app/Services/navigation/navigation-preference.service';
-import type { ModuleSettingsService } from 'src/app/Services/module-settings/module-settings.service';
+import { NavigationType } from 'src/app/Services/navigation/navigation-preference.service';
+import { ModuleSettingsService } from 'src/app/Services/module-settings/module-settings.service';
 import { CommonModule } from '@angular/common';
 
 interface NavigatorSetting {

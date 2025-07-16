@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import type {
+import {
   FillinQuestionDTO,
   MCOptionViewDTO,
   McQuestionDTO,
@@ -11,7 +11,7 @@ import type {
   userAnswerFeedbackDTO,
 } from '@DTOs/index';
 import { FillinQuestionType } from '@DTOs/index';
-import type { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { McTaskComponent } from 'src/app/Pages/contentView/contentElement/mcTask/mcTask.component';
 import { FillinTaskNewComponent } from 'src/app/Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { FreeTextTaskComponent } from 'src/app/Pages/contentView/contentElement/free-text-task/free-text-task.component';

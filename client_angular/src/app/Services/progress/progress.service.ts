@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { GraphCommunicationService } from '../graph/graphCommunication.service';
 import { timer, from, Observable } from 'rxjs';
 import { concatMap, catchError } from 'rxjs/operators';
-import type { ContentDTO, ContentElementDTO } from '@DTOs/content.dto';
+import { ContentDTO, ContentElementDTO } from '@DTOs/content.dto';
 import { contentElementType } from '@DTOs/contentElementType.enum';
 
 @Injectable({

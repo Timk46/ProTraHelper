@@ -15,9 +15,9 @@
  ********************************************************************************/
 
 import { injectable, inject } from 'inversify';
-import type { IModelFactory, IPopupModelProvider } from 'sprotty';
+import { IModelFactory, IPopupModelProvider } from 'sprotty';
 import { TYPES } from 'sprotty';
-import type {
+import {
   PreRenderedElement,
   RequestPopupModelAction,
   SModelElement,

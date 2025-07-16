@@ -1,7 +1,7 @@
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { QuestionDataService } from '@/question-data/question-data.service';
-import type { LinkableContentElementDTO, LinkableContentNodeDTO, QuestionDTO } from '@DTOs/index';
+import { LinkableContentElementDTO, LinkableContentNodeDTO, QuestionDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

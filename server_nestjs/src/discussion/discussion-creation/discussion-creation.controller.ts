@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { DiscussionCreationService } from './discussion-creation.service';
-import type {
+import {
   AnonymousUserDTO,
   discussionNodeNamesDTO} from '@DTOs/index';
 import {

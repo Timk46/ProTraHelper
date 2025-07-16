@@ -1,9 +1,9 @@
-import type { CanActivate, ExecutionContext } from '@nestjs/common';
+import { CanActivate, ExecutionContext } from '@nestjs/common';
 import { Injectable, SetMetadata } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Reflector } from '@nestjs/core';
-import type { User } from '@prisma/client';
-import type { globalRole } from '@DTOs/roles.enum';
+import { User } from '@prisma/client';
+import { globalRole } from '@DTOs/roles.enum';
 
 export const roles = (...roles: string[]) => SetMetadata('roles', roles);
 

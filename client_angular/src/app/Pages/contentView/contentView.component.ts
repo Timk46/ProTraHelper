@@ -1,11 +1,11 @@
-import type { OnInit } from '@angular/core';
+import { OnInit } from '@angular/core';
 import { Component, Inject } from '@angular/core';
-import type { ContentDTO, ContentElementDTO } from '@DTOs/content.dto';
-import type { MatDialogRef } from '@angular/material/dialog';
+import { ContentDTO, ContentElementDTO } from '@DTOs/content.dto';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import type { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
-import type { ContentService } from 'src/app/Services/content/content.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
+import { ContentService } from 'src/app/Services/content/content.service';
 
 @Component({
   selector: 'app-contentView',

@@ -1,7 +1,7 @@
-import type { OnInit } from '@angular/core';
+import { OnInit } from '@angular/core';
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { TestResult } from '../../../models/code-submission.model';
+import { TestResult } from '../../../models/code-submission.model';
 
 // Dialog-Daten können entweder ein einzelnes TestResult oder ein Objekt mit allTests sein
 export interface TestDetailsDialogData {

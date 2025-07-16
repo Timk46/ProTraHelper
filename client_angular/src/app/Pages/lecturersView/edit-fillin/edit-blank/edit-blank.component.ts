@@ -1,10 +1,7 @@
-import type { OnInit } from '@angular/core';
-import { Component, Inject } from '@angular/core';
-import type { MatDialogRef } from '@angular/material/dialog';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { FormBuilder, FormGroup } from '@angular/forms';
-import { Validators } from '@angular/forms';
-import type { SafeUrl, DomSanitizer } from '@angular/platform-browser';
+import { OnInit, Component, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { SafeUrl, DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-edit-blank',

@@ -1,8 +1,8 @@
-import type { HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import type { ConceptGraphDTO } from '@DTOs/index';
-import type { Observable } from 'rxjs';
+import { ConceptGraphDTO } from '@DTOs/index';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({

@@ -1,5 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import type { detailedFillinQuestionDTO, FillinQuestionDTO } from '@DTOs/index';
+import { detailedFillinQuestionDTO, FillinQuestionDTO } from '@DTOs/index';
 import { detailedFillinBlankDTO } from '@DTOs/index';
 import { Injectable, NotFoundException } from '@nestjs/common';
 

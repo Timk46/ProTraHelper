@@ -1,7 +1,7 @@
-import type { OnDestroy, OnInit } from '@angular/core';
+import { OnDestroy, OnInit } from '@angular/core';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
-import type {
+import {
   EditorFolder,
   FileSystemItem,
   FileSystemService,

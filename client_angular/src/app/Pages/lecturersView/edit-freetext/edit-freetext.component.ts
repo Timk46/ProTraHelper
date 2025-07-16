@@ -1,14 +1,14 @@
-import type { OnInit, AfterViewInit } from '@angular/core';
+import { OnInit, AfterViewInit } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
-import type { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { Validators } from '@angular/forms';
-import type { ActivatedRoute, Router } from '@angular/router';
-import type { detailedQuestionDTO } from '@DTOs/index';
+import { ActivatedRoute, Router } from '@angular/router';
+import { detailedQuestionDTO } from '@DTOs/index';
 import { detailedFreetextQuestionDTO, questionType } from '@DTOs/index';
-import type { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import type { TinymceComponent } from '../../tinymce/tinymce.component';
-import type { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
-import type { MatSnackBar } from '@angular/material/snack-bar';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { TinymceComponent } from '../../tinymce/tinymce.component';
+import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-edit-freetext',

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import type { ChatSession } from 'src/app/Services/ai/llm.service';
+import { ChatSession } from 'src/app/Services/ai/llm.service';
 
 @Component({
   selector: 'app-chat-session-list',

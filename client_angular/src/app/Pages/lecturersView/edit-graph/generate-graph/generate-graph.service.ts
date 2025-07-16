@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import type { GraphNodeDTO } from '@DTOs/graphTask.dto';
+import { GraphNodeDTO } from '@DTOs/graphTask.dto';
 
 export interface GenerateGraphConfiguration {
   nodesCount: number;

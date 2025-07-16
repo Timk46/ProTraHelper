@@ -1,4 +1,4 @@
-import type { IGraphNode } from './GraphNode.interface';
+import { IGraphNode } from './GraphNode.interface';
 
 export interface IGraphNewEdge {
   started: boolean;

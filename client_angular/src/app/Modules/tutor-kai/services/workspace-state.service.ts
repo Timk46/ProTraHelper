@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import type { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { BehaviorSubject, Subject, catchError, finalize, of, tap, throwError } from 'rxjs';
-import type { QuestionDTO, CodeSubmissionResultDto } from '@DTOs/index';
-import type { CodeSubmissionResult, TestResult } from '../models/code-submission.model';
+import { QuestionDTO, CodeSubmissionResultDto } from '@DTOs/index';
+import { CodeSubmissionResult, TestResult } from '../models/code-submission.model';
 import { FeedbackLevel, FlavorType, WorkspaceState } from '../models/code-submission.model'; // Merged TestResult import
-import type { TaskDataService } from './task-data.service';
-import type { RunCodeService } from './runCode.service';
+import { TaskDataService } from './task-data.service';
+import { RunCodeService } from './runCode.service';
 
 /**
  * Service to manage the state of the student workspace

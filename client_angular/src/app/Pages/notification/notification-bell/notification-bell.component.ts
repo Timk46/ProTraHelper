@@ -1,6 +1,6 @@
 import { Component, ViewChild, ViewChildren, ElementRef, OnInit, QueryList, OnDestroy } from '@angular/core';
 import { NotificationService } from 'src/app/Services/notification/notification.service';
-import type { NotificationDTO } from '@DTOs/notification.dto';
+import { NotificationDTO } from '@DTOs/notification.dto';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { NotificationType } from '@DTOs/notificationType.enum';
 import { Observable } from 'rxjs';
