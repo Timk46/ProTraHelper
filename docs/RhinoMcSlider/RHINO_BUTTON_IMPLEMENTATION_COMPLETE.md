@@ -28,7 +28,7 @@ handleManualRhinoSwitch(context: Partial<RhinoIntegrationContext>): Observable<R
   return this.focusRhinoWithDelay(fullContext, 0, 'bei manuellem Switch');
 }
 ```
-
+ 
 ### 2. UI-Komponente (`mc-slider-task.component.html`)
 
 **Button-Platzierung:**

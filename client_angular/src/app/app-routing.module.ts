@@ -227,12 +227,7 @@ const routes: Routes = [
     path: 'teacher',
     loadChildren: () => import('./Pages/teacher/teacher.module').then(m => m.TeacherModule),
     canActivate: [LoggedInGuard], // Assuming teachers need to be logged in
-  },
-  {
-    path: 'peer-review',
-    loadChildren: () => import('./Modules/peer-review/peer-review.module').then(m => m.PeerReviewModule),
-    canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
-  },
+  }
 ];
 @NgModule({
   imports: [

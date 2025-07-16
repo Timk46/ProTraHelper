@@ -73,7 +73,7 @@ import { PointCalculationModule } from './umlearn/point-calculation/point-calcul
 
 import { CodeGameModule } from './code-game/code-game.module';
 import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgraph-feedback.module';
-import { PeerReviewModule } from './peer-review/peer-review.module';
+
 
 @Module({
   imports: [
@@ -118,8 +118,7 @@ import { PeerReviewModule } from './peer-review/peer-review.module';
     GhFilesModule, // Add the new module to imports
     RhinoDirectModule,
     MCSliderModule,
-    RhinoIntegrationModule,
-    PeerReviewModule,
+    RhinoIntegrationModule
   ],
   controllers: [
     AppController,
