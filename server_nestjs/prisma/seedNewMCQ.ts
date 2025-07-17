@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { contentElementType, PrismaClient } from '@prisma/client';
 import * as xlsx from 'xlsx';
-import { McqGenerationDTO, questionType } from '@DTOs/question.dto';
+import type { McqGenerationDTO, questionType } from '@DTOs/question.dto';
 
 const prisma = new PrismaClient();
 interface Option {
@@ -9,7 +9,6 @@ interface Option {
   correct: boolean;
 }
 interface MCQuestion {
-
   score: number;
   type: string; //MC
   author: number; //init = 1
@@ -18,7 +17,6 @@ interface MCQuestion {
   concept: number;
   isApproved: boolean;
   version: number; //init = 1
-
 }
 export const seedMCQnew = async () => {
   // Excel-Datei einlesen
@@ -36,7 +34,7 @@ export const seedMCQnew = async () => {
       .filter(letter => mcq[`Antwort ${letter}`] !== undefined)
       .map(letter => ({
         text: mcq[`Antwort ${letter}`],
-        correct: mcq[`Korrekt markiert ${letter}`]
+        correct: mcq[`Korrekt markiert ${letter}`],
       }));
     let approved = true; //for testing only!
     if (mcq['Approved'] == '1') {
@@ -101,15 +99,15 @@ export const seedMCQnew = async () => {
       where: {
         conceptNodeId: createdQuestion.conceptNodeId,
         awards: createdQuestion.level,
-      }
+      },
     });
     if (training) {
       const contentNode = await prisma.contentNode.findFirst({
-        where: { id: training.contentNodeId }
+        where: { id: training.contentNodeId },
       });
       //ermittle die höchste Position in der content view und setze die Position des neuen content elements auf +1
       const contentViews = await prisma.contentView.findMany({
-        where: { contentNodeId: contentNode.id }
+        where: { contentNodeId: contentNode.id },
       });
       let maxPosition = 0;
       for (const contentView of contentViews) {
@@ -124,8 +122,7 @@ export const seedMCQnew = async () => {
           position: maxPosition + 1,
         },
       });
-    }
-    else {
+    } else {
       //erzeuge eine neue content node mit dem award level und verbinde sie mit dem content element
       /*const contentNode = await prisma.contentNode.create({
           data: {
@@ -176,10 +173,8 @@ export const seedMCQnew = async () => {
       });
     }
   }
-}
-async function main() {
-
-}
+};
+async function main() {}
 
 main()
   .catch(e => {
@@ -189,4 +184,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-

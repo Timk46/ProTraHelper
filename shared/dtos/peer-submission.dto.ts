@@ -1,13 +1,12 @@
-import { IsString, IsOptional, IsInt } from "class-validator";
 import { PeerReviewDTO } from "./peer-review.dto";
 
-export class PeerSubmissionDTO {
-  id!: string;
-  sessionId!: string;
-  fileUploadId!: number;
-  title!: string;
+export interface PeerSubmissionDTO {
+  id: string;
+  sessionId: string;
+  fileUploadId: number;
+  title: string;
   description?: string;
-  submittedAt!: Date;
+  submittedAt: Date;
 
   // Populated relationships
   session?: {
@@ -46,28 +45,15 @@ export class PeerSubmissionDTO {
   userHasReviewed?: boolean;
 }
 
-export class CreatePeerSubmissionDTO {
-  @IsString()
-  sessionId!: string;
-
-  @IsInt()
-  fileUploadId!: number;
-
-  @IsString()
-  title!: string;
-
-  @IsOptional()
-  @IsString()
+export interface CreatePeerSubmissionDTO {
+  sessionId: string;
+  fileUploadId: number;
+  title: string;
   description?: string;
 }
 
-export class UpdatePeerSubmissionDTO {
-  @IsOptional()
-  @IsString()
+export interface UpdatePeerSubmissionDTO {
   title?: string;
-
-  @IsOptional()
-  @IsString()
   description?: string;
 }
 

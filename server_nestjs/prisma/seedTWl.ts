@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { PrismaClient, contentElementType } from '@prisma/client';
 import * as fs from 'fs';
 import { seedCodeQuestions } from './seedCodeQuestions';
@@ -30,147 +29,147 @@ interface columns_OFP {
   description: string | null;
 }
 
-async function createTraKoConcepts(traKoData: columns_OFP[], moduleArchitektur: any) {
+async function createTWLConcepts(twlData: columns_OFP[], moduleArchitektur: any) {
   //------------------------------------------
-    //Start of creating from ofpData
-    //ConceptNode
-    await prisma.conceptNode.createMany({
-      data: traKoData
-        .filter((data) => data.conceptId)
-        .map((data) => ({
-          id: data.conceptId,
-          name: data.topic,
-          description: data.description,
-        })),
-    });
+  //Start of creating from ofpData
+  //ConceptNode
+  await prisma.conceptNode.createMany({
+    data: twlData
+      .filter(data => data.conceptId)
+      .map(data => ({
+        id: data.conceptId,
+        name: data.topic,
+        description: data.description,
+      })),
+  });
 
-    //ConceptFamily
-    await prisma.conceptFamily.createMany({
-      data: traKoData
-        .filter((data) => data.conceptId)
-        .map((data) => ({
-          childId: data.conceptId,
-          parentId: data.parentId ? data.parentId : 1,
-        })),
-    });
-    //ConceptEdge
-    for (const data of traKoData) {
-      if (data.conceptEdge) {
-        for (const edge of data.conceptEdge) {
-          await prisma.conceptEdge.create({
+  //ConceptFamily
+  await prisma.conceptFamily.createMany({
+    data: twlData
+      .filter(data => data.conceptId)
+      .map(data => ({
+        childId: data.conceptId,
+        parentId: data.parentId ? data.parentId : 1,
+      })),
+  });
+  //ConceptEdge
+  for (const data of twlData) {
+    if (data.conceptEdge) {
+      for (const edge of data.conceptEdge) {
+        await prisma.conceptEdge.create({
+          data: {
+            prerequisiteId: edge,
+            successorId: data.conceptId,
+            parentId: data.parentId ? data.parentId : 1,
+          },
+        });
+      }
+    }
+  }
+  //ModuleConceptGoal
+  await prisma.moduleConceptGoal.createMany({
+    data: twlData
+      .filter(data => data.conceptId && data.moduleGoalId)
+      .map(data => ({
+        moduleId: moduleArchitektur.id,
+        conceptNodeId: data.conceptId,
+        level: data.moduleGoalId,
+      })),
+  });
+  //ContentNode
+  await prisma.contentNode.createMany({
+    data: twlData
+      .filter(data => data.contentId)
+      .map(data => ({
+        id: data.contentId,
+        name: data.contentNodeTitle,
+        description: data.description,
+      })),
+  });
+  //ContentElement
+  for (const data of twlData) {
+    const elementList = [
+      data.elementId1,
+      data.elementId2,
+      data.elementId3,
+      data.elementId4,
+      data.elementId5,
+    ];
+    for (const elemId in elementList) {
+      // console.log('data', elemId.valueOf);
+      if (elementList[+elemId] && data.contentId) {
+        const file = await prisma.file.findUnique({
+          where: { uniqueIdentifier: elementList[+elemId] },
+        });
+        if (file && file.type !== 'CODE') {
+          const TempContentElement = await prisma.contentElement.create({
             data: {
-              prerequisiteId: edge,
-              successorId: data.conceptId,
-              parentId: data.parentId ? data.parentId : 1,
+              type: contentElementType[file.type],
+              title: file.name,
             },
           });
-        }
-      }
-    }
-    //ModuleConceptGoal
-    await prisma.moduleConceptGoal.createMany({
-      data: traKoData
-        .filter((data) => data.conceptId && data.moduleGoalId)
-        .map((data) => ({
-          moduleId: moduleArchitektur.id,
-          conceptNodeId: data.conceptId,
-          level: data.moduleGoalId,
-        })),
-    });
-    //ContentNode
-    await prisma.contentNode.createMany({
-      data: traKoData
-        .filter((data) => data.contentId)
-        .map((data) => ({
-          id: data.contentId,
-          name: data.contentNodeTitle,
-          description: data.description,
-        })),
-    });
-    //ContentElement
-    for (const data of traKoData) {
-      const elementList = [
-        data.elementId1,
-        data.elementId2,
-        data.elementId3,
-        data.elementId4,
-        data.elementId5,
-      ];
-      for (const elemId in elementList) {
-        // console.log('data', elemId.valueOf);
-        if (elementList[+elemId] && data.contentId) {
-          const file = await prisma.file.findUnique({
-            where: { uniqueIdentifier: elementList[+elemId] },
+          await prisma.file.update({
+            where: { uniqueIdentifier: file.uniqueIdentifier },
+            data: {
+              contentElement: { connect: { id: TempContentElement.id } },
+            },
           });
-          if (file && file.type !== 'CODE') {
-            const TempContentElement = await prisma.contentElement.create({
-              data: {
-                type: contentElementType[file.type],
-                title: file.name,
-              },
-            });
-            await prisma.file.update({
-              where: { uniqueIdentifier: file.uniqueIdentifier },
-              data: {
-                contentElement: { connect: { id: TempContentElement.id } },
-              },
-            });
-            await prisma.contentView.create({
-              data: {
-                contentNode: {
-                  connect: { id: data.contentId },
-                },
-                contentElement: {
-                  connect: { id: TempContentElement.id },
-                },
-                position: +elemId,
-              },
-            });
-          }
-        }
-      }
-    }
-    //Training
-    for (const data of traKoData) {
-      if (data.trainsId && data.contentId) {
-        for (const train of data.trainsId) {
-          await prisma.training.create({
+          await prisma.contentView.create({
             data: {
               contentNode: {
                 connect: { id: data.contentId },
               },
-              conceptNode: {
-                connect: { id: +train },
+              contentElement: {
+                connect: { id: TempContentElement.id },
               },
-              awards: data.level,
+              position: +elemId,
             },
           });
         }
       }
     }
-    //Requirement
-    for (const data of traKoData) {
-      if (data.requiresId && data.contentId) {
-        for (const requires of data.requiresId) {
-          await prisma.requirement.create({
-            data: {
-              contentNode: {
-                connect: { id: data.contentId },
-              },
-              conceptNode: {
-                connect: { id: +requires },
-              },
+  }
+  //Training
+  for (const data of twlData) {
+    if (data.trainsId && data.contentId) {
+      for (const train of data.trainsId) {
+        await prisma.training.create({
+          data: {
+            contentNode: {
+              connect: { id: data.contentId },
             },
-          });
-        }
+            conceptNode: {
+              connect: { id: +train },
+            },
+            awards: data.level,
+          },
+        });
       }
     }
-
-    //End of creating from ofpData
-    //------------------------------------------
+  }
+  //Requirement
+  for (const data of twlData) {
+    if (data.requiresId && data.contentId) {
+      for (const requires of data.requiresId) {
+        await prisma.requirement.create({
+          data: {
+            contentNode: {
+              connect: { id: data.contentId },
+            },
+            conceptNode: {
+              connect: { id: +requires },
+            },
+          },
+        });
+      }
+    }
   }
 
-// TODO: for traKo
+  //End of creating from ofpData
+  //------------------------------------------
+}
+
+// TODO: for twl
 async function createFilesOFP() {
   console.log('Creating Files for OFP...');
   // createfile also creates embeddings for SRTs with the same name if the file is type VIDEO
@@ -1005,18 +1004,8 @@ async function createFilesOFP() {
     'OFP/Java_Methoden_Rekursion.mp4',
     'VIDEO',
   );
-  createFile(
-    'Java_UML.pdf',
-    '67eea819-ab11-42ab-8c06-3bb5ad6aab13',
-    'OFP/Java_UML.pdf',
-    'PDF',
-  );
-  createFile(
-    'Java_UML.mp4',
-    '3371631e-d626-4bfd-83a3-e3a4b8a9c3ce',
-    'OFP/Java_UML.mp4',
-    'VIDEO',
-  );
+  createFile('Java_UML.pdf', '67eea819-ab11-42ab-8c06-3bb5ad6aab13', 'OFP/Java_UML.pdf', 'PDF');
+  createFile('Java_UML.mp4', '3371631e-d626-4bfd-83a3-e3a4b8a9c3ce', 'OFP/Java_UML.mp4', 'VIDEO');
   createFile(
     'Java_UML_Beispiel_Twitter.pdf',
     'b681b280-c818-4970-a531-2aafcf5b49c8',
@@ -1295,18 +1284,13 @@ async function createFilesOFP() {
   );
 }
 
-async function createFilesTraKo() {
-  console.log('Creating files for TraKo...');
-  // TODO: Add files for TraKo
+async function createFilesTWL() {
+  console.log('Creating files for TWL...');
+  // TODO: Add files for TWL
   console.log('Done.');
 }
 
-async function createFile(
-  name: string,
-  uniqueIdentifier: string,
-  path: string,
-  type: string,
-) {
+async function createFile(name: string, uniqueIdentifier: string, path: string, type: string) {
   const file = await prisma.file.create({
     data: {
       name,
@@ -1321,188 +1305,181 @@ async function createFile(
   return file;
 }
 
-export const seedTraKo = async () => {
-    console.log('Creating everything...');
+export const seedTWL = async () => {
+  console.log('Creating everything...');
 
-    // Create Files
-    createFilesTraKo();
+  // Create Files
+  createFilesTWL();
 
-    const moduleArchitektur = await prisma.module.create({
-      data: {
-        id: 1,
-        name: 'Bachelor Architektur',
-        description: 'Beschreibung für den Studiengang Architektur.',
-      },
-    });
+  const moduleArchitektur = await prisma.module.create({
+    data: {
+      id: 1,
+      name: 'Bachelor Architektur',
+      description: 'Beschreibung für den Studiengang Architektur.',
+    },
+  });
 
-    const subjectTraKo = await prisma.subject.create({
-      data: {
-        id: 1,
-        name: 'Tragkonstruktion 3',
-        description: 'Beschreibung für die Veranstaltung Tragkonstruktion 3.',
-        modules: { connect: { id: moduleArchitektur.id } },
-      },
-    });
+  const subjectTWL = await prisma.subject.create({
+    data: {
+      id: 1,
+      name: 'Tragwerklehre 1',
+      description: 'Beschreibung für die Veranstaltung Tragwerklehre 1.',
+      modules: { connect: { id: moduleArchitektur.id } },
+    },
+  });
 
-    // Admin
-    const adminUser = await prisma.user.create({
-          data: {
-            email: 'admin@admin.de',
-            firstname: 'Admin',
-            lastname: 'User',
-            password: await bcrypt.hash('AdminSAdmin!4411', 10), // changed on production
-            globalRole: 'ADMIN',
-          },
+  // Admin
+  const adminUser = await prisma.user.create({
+    data: {
+      email: 'admin@admin.de',
+      firstname: 'Admin',
+      lastname: 'User',
+      password: await bcrypt.hash('AdminSAdmin!4411', 10), // changed on production
+      globalRole: 'ADMIN',
+    },
+  });
+
+  await prisma.userSubject.create({
+    data: {
+      userId: adminUser.id,
+      subjectId: subjectTWL.id,
+      subjectSpecificRole: 'ADMIN',
+      registeredForSL: true,
+    },
+  });
+  // seed mor users for other usecases (evaluation etc.)
+  await seedUser(subjectTWL.id, moduleArchitektur.id);
+
+  // root node
+  const conceptNode = await prisma.conceptNode.create({
+    data: {
+      id: 1,
+      name: 'root',
+      description: 'root description',
+    },
+  });
+
+  await prisma.userConcept.create({
+    data: {
+      user: { connect: { id: adminUser.id } },
+      concept: { connect: { id: conceptNode.id } },
+      // level: Math.floor(Math.random() * 7), // random number between 0 and 6
+      level: 10,
+      expanded: true,
+    },
+  });
+
+  //create moduleConceptGoals for root
+  await prisma.moduleConceptGoal.create({
+    data: {
+      moduleId: moduleArchitektur.id,
+      conceptNodeId: conceptNode.id,
+      // level: Math.floor(Math.random() * 7), // random number between 0 and 6
+      level: 10,
+    },
+  });
+
+  // ConceptGraph
+  const conceptGraph = await prisma.conceptGraph.create({
+    data: {
+      name: 'Concept Graph 1',
+      root: { connect: { id: conceptNode.id } },
+    },
+  });
+
+  // TODO: Put this in a separate function
+  console.log('Importing Concepts from CSV...');
+
+  const twlData = [];
+
+  const filePath = process.env.FILE_PATH + 'Kompetenzraster_TraKo.csv';
+  if (fs.existsSync(filePath)) {
+    //in case the topic column for the Content is empty we need to save the last topic
+    let lastTopic = 'No topic found!';
+
+    const fs = require('fs');
+    const fastCsv = require('fast-csv');
+
+    const options = {
+      delimiter: ',',
+      headers: [
+        'conceptId',
+        'conceptEdge',
+        'contentId',
+        'requiresId',
+        'trainsId',
+        'topic',
+        'parentId',
+        'moduleGoalId',
+        'level',
+        'elementId1',
+        'elementId2',
+        'elementId3',
+        'elementId4',
+        'elementId5',
+        'contentNodeTitle',
+        'description',
+      ],
+      skipRows: 1,
+      trim: true,
+    };
+
+    const readableStream = fs.createReadStream(filePath);
+
+    fastCsv
+      .parseStream(readableStream, options)
+      .on('data', data => {
+        // console.log(data);
+        if (data.topic != null) {
+          lastTopic = data.topic;
+        }
+        twlData.push({
+          conceptId: data.conceptId ? +data.conceptId : null,
+          conceptEdge: data.conceptEdge
+            ? data.conceptEdge.toString().split(/[,.]/).map(Number)
+            : null,
+          contentId: data.contentId ? +data.contentId : null,
+          requiresId: data.requiresId ? data.requiresId.toString().split(/[,.]/).map(Number) : null,
+          trainsId: data.trainsId ? data.trainsId.toString().split(/[,.]/).map(Number) : null,
+          topic: lastTopic,
+          parentId: data.parentId ? +data.parentId : null,
+          moduleGoalId: data.moduleGoalId ? +data.moduleGoalId : null,
+          level: data.level ? +data.level : null,
+          elementId1: data.elementId1 ? data.elementId1 : null,
+          elementId2: data.elementId2 ? data.elementId2 : null,
+          elementId3: data.elementId3 ? data.elementId3 : null,
+          elementId4: data.elementId4 ? data.elementId4 : null,
+          elementId5: data.elementId5 ? data.elementId5 : null,
+          contentNodeTitle: data.contentNodeTitle ? data.contentNodeTitle : lastTopic,
+          description: data.description ? data.description : null,
         });
+      })
+      .on('end', async () => {
+        await createTWLConcepts(twlData, moduleArchitektur);
+        console.log('Importing Concepts Done: ' + twlData.length + ' Concepts imported!');
+        //console.log('Importing Coding Tasks from Excel...');
+        //await seedCodeQuestions(adminUser.id);
+        //await seedMCQnew(); // TODO
+        console.log('Importing Tasks Done!');
+      });
+  } else {
+    console.log('To import ContentNodes please save "Kompetenzraster.csv" in the storage folder!');
+  }
 
-        await prisma.userSubject.create({
-          data: {
-            userId: adminUser.id,
-            subjectId: subjectTraKo.id,
-            subjectSpecificRole: 'ADMIN',
-            registeredForSL: true,
-          },
-        });
-    // seed mor users for other usecases (evaluation etc.)
-    await seedUser(subjectTraKo.id, moduleArchitektur.id);
+  console.log('Creating rest from Seed.ts...');
 
+  // update user to have a current concept node
+  await prisma.user.updateMany({
+    data: {
+      currentconceptNodeId: conceptNode.id,
+    },
+  });
+};
 
-    // root node
-    const conceptNode = await prisma.conceptNode.create({
-      data: {
-        id: 1,
-        name: 'root',
-        description: 'root description',
-      },
-    });
-
-    await prisma.userConcept.create({
-      data: {
-        user: { connect: { id: adminUser.id } },
-        concept: { connect: { id: conceptNode.id } },
-        // level: Math.floor(Math.random() * 7), // random number between 0 and 6
-        level: 10,
-        expanded: true,
-      },
-    });
-
-    //create moduleConceptGoals for root
-    await prisma.moduleConceptGoal.create({
-      data: {
-        moduleId: moduleArchitektur.id,
-        conceptNodeId: conceptNode.id,
-        // level: Math.floor(Math.random() * 7), // random number between 0 and 6
-        level: 10,
-      },
-    });
-
-    // ConceptGraph
-    const conceptGraph = await prisma.conceptGraph.create({
-      data: {
-        name: 'Concept Graph 1',
-        root: { connect: { id: conceptNode.id } },
-      },
-    });
-
-    // TODO: Put this in a separate function
-    console.log('Importing Concepts from CSV...');
-
-    const traKoData = [];
-
-    const filePath = process.env.FILE_PATH + 'Kompetenzraster_TraKo.csv';
-    if (fs.existsSync(filePath)) {
-
-      //in case the topic column for the Content is empty we need to save the last topic
-      let lastTopic = 'No topic found!';
-
-      const fs = require('fs');
-      const fastCsv = require('fast-csv');
-
-      const options = {
-        delimiter: ',',
-        headers: [
-          'conceptId',
-          'conceptEdge',
-          'contentId',
-          'requiresId',
-          'trainsId',
-          'topic',
-          'parentId',
-          'moduleGoalId',
-          'level',
-          'elementId1',
-          'elementId2',
-          'elementId3',
-          'elementId4',
-          'elementId5',
-          'contentNodeTitle',
-          'description',
-        ],
-        skipRows: 1,
-        trim: true,
-      };
-
-      const readableStream = fs.createReadStream(filePath);
-
-      fastCsv.parseStream(readableStream, options)
-        .on('data', (data) => {
-          // console.log(data);
-          if(data.topic != null) {
-            lastTopic = data.topic;
-          }
-          traKoData.push({
-            conceptId: data.conceptId ? +data.conceptId : null,
-            conceptEdge: data.conceptEdge ? data.conceptEdge.toString().split(/[,.]/).map(Number) : null,
-            contentId: data.contentId ? +data.contentId : null,
-            requiresId: data.requiresId ? data.requiresId.toString().split(/[,.]/).map(Number) : null,
-            trainsId: data.trainsId ? data.trainsId.toString().split(/[,.]/).map(Number) : null,
-            topic: lastTopic,
-            parentId: data.parentId ? +data.parentId : null,
-            moduleGoalId: data.moduleGoalId ? +data.moduleGoalId : null,
-            level: data.level ? +data.level : null,
-            elementId1: data.elementId1 ? data.elementId1 : null,
-            elementId2: data.elementId2 ? data.elementId2 : null,
-            elementId3: data.elementId3 ? data.elementId3 : null,
-            elementId4: data.elementId4 ? data.elementId4 : null,
-            elementId5: data.elementId5 ? data.elementId5 : null,
-            contentNodeTitle: data.contentNodeTitle ? data.contentNodeTitle : lastTopic,
-            description: data.description ? data.description : null,
-          });
-        })
-        .on('end', async () => {
-          await createTraKoConcepts(traKoData, moduleArchitektur);
-          console.log('Importing Concepts Done: ' + traKoData.length + ' Concepts imported!');
-          //console.log('Importing Coding Tasks from Excel...');
-          //await seedCodeQuestions(adminUser.id);
-          //await seedMCQnew(); // TODO
-          console.log('Importing Tasks Done!');
-        });
-
-
-
-    } else {
-      console.log(
-        'To import ContentNodes please save "Kompetenzraster.csv" in the storage folder!',
-      );
-    }
-
-    console.log('Creating rest from Seed.ts...');
-
-    // update user to have a current concept node
-    await prisma.user.updateMany({
-      data: {
-        currentconceptNodeId: conceptNode.id,
-      },
-    });
-}
-
-
-async function main() {
-
-}
+async function main() {}
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error(e);
     process.exit(1);
   })

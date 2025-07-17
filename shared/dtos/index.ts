@@ -44,3 +44,13 @@ export * from "./rhino-window.dto";
 
 //MCSlider DTOs
 export * from "./mcslider.dto";
+
+//Evaluation & Discussion Forum DTOs
+export * from "./evaluation-submission.dto";
+export * from "./evaluation-category.dto";
+export * from "./evaluation-comment.dto";
+export * from "./evaluation-vote.dto";
+export * from "./evaluation-rating.dto";
+export * from "./comment-stats.dto";
+export * from "./anonymous-evaluation-user.dto";
+export * from "./phase-switch.dto";

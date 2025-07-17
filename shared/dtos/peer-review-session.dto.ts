@@ -1,11 +1,3 @@
-import {
-  IsString,
-  IsOptional,
-  IsDateString,
-  IsEnum,
-  IsInt,
-} from "class-validator";
-import { Transform, Type } from "class-transformer";
 import { PeerSubmissionDTO } from "./peer-submission.dto";
 
 export enum PeerReviewStatus {
@@ -19,18 +11,18 @@ export enum PeerReviewStatus {
   COMPLETED = "COMPLETED",
 }
 
-export class PeerReviewSessionDTO {
-  id!: string;
-  title!: string;
+export interface PeerReviewSessionDTO {
+  id: string;
+  title: string;
   description?: string;
-  moduleId!: number;
-  createdById!: number;
-  submissionDeadline!: Date;
-  reviewDeadline!: Date;
-  discussionDeadline!: Date;
-  status!: PeerReviewStatus;
-  createdAt!: Date;
-  updatedAt!: Date;
+  moduleId: number;
+  createdById: number;
+  submissionDeadline: Date;
+  reviewDeadline: Date;
+  discussionDeadline: Date;
+  status: PeerReviewStatus;
+  createdAt: Date;
+  updatedAt: Date;
 
   // Populated relationships
   module?: {
@@ -52,61 +44,20 @@ export class PeerReviewSessionDTO {
   totalReviewCount?: number;
 }
 
-export class CreatePeerReviewSessionDTO {
-  @IsString()
-  title!: string;
-
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsInt()
-  moduleId!: number;
-
-  @IsDateString()
-  submissionDeadline!: Date;
-
-  @IsDateString()
-  reviewDeadline!: Date;
-
-  @IsDateString()
-  discussionDeadline!: Date;
-}
-
-export class UpdatePeerReviewSessionDTO {
-  @IsOptional()
-  @IsString()
-  title?: string;
-
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsOptional()
-  @IsDateString()
-  submissionDeadline?: Date;
-
-  @IsOptional()
-  @IsDateString()
-  reviewDeadline?: Date;
-
-  @IsOptional()
-  @IsDateString()
-  discussionDeadline?: Date;
-
-  @IsOptional()
-  @IsEnum(PeerReviewStatus)
-  status?: PeerReviewStatus;
-}
-
-// Import for PeerSubmissionDTO - will be defined in separate file
-/*
-export interface PeerSubmissionDTO {
-  id: string;
-  sessionId: string;
-  fileUploadId: number;
+export interface CreatePeerReviewSessionDTO {
   title: string;
   description?: string;
-  submittedAt: Date;
+  moduleId: number;
+  submissionDeadline: Date;
+  reviewDeadline: Date;
+  discussionDeadline: Date;
 }
-*/
+
+export interface UpdatePeerReviewSessionDTO {
+  title?: string;
+  description?: string;
+  submissionDeadline?: Date;
+  reviewDeadline?: Date;
+  discussionDeadline?: Date;
+  status?: PeerReviewStatus;
+}

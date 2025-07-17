@@ -26,5 +26,9 @@
       "Bash(npm run:*)"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "puppeteer"
+  ],
+  "enableAllProjectMcpServers": true
 }

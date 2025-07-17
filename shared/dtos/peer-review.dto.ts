@@ -1,26 +1,18 @@
-import {
-  IsString,
-  IsOptional,
-  IsInt,
-  IsBoolean,
-  Min,
-  Max,
-} from "class-validator";
 import { PeerReviewSessionDTO } from "./peer-review-session.dto";
 import { PeerSubmissionDTO } from "./peer-submission.dto";
 
-export class PeerReviewDTO {
-  id!: string;
-  sessionId!: string;
-  submissionId!: string;
-  reviewerId!: number;
-  anonymousReviewerId!: number;
+export interface PeerReviewDTO {
+  id: string;
+  sessionId: string;
+  submissionId: string;
+  reviewerId: number;
+  anonymousReviewerId: number;
   rating?: number; // 1-5 stars
   comment?: string;
-  isComplete!: boolean;
+  isComplete: boolean;
   completedAt?: Date;
-  createdAt!: Date;
-  updatedAt!: Date;
+  createdAt: Date;
+  updatedAt: Date;
 
   // Populated relationships
   session?: {
@@ -57,90 +49,66 @@ export class PeerReviewDTO {
   canEdit?: boolean;
 }
 
-export class CreatePeerReviewDTO {
-  @IsString()
-  sessionId!: string;
-
-  @IsString()
-  submissionId!: string;
-
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(5)
+export interface CreatePeerReviewDTO {
+  sessionId: string;
+  submissionId: string;
   rating?: number;
-
-  @IsOptional()
-  @IsString()
   comment?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  isComplete?: boolean = false;
-}
-
-export class UpdatePeerReviewDTO {
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(5)
-  rating?: number;
-
-  @IsOptional()
-  @IsString()
-  comment?: string;
-
-  @IsOptional()
-  @IsBoolean()
   isComplete?: boolean;
 }
 
-export class PeerReviewStatsDTO {
-  sessionId!: string;
-
-  // Submission statistics
-  totalSubmissions!: number;
-  submissionRate!: number;
-
-  // Review statistics
-  totalReviews!: number;
-  completedReviews!: number;
-  reviewCompletionRate!: number;
-  averageReviewsPerSubmission!: number;
-
-  // Rating statistics
-  averageRating!: number;
-  ratingDistribution!: { [rating: number]: number };
-
-  // User statistics
-  totalParticipants!: number;
-  activeReviewers!: number;
-
-  // Timeline statistics
-  submissionTimeline!: { date: Date; count: number }[];
-  reviewTimeline!: { date: Date; count: number }[];
-
-  // Discussion statistics
-  totalDiscussions!: number;
-  averageMessagesPerDiscussion!: number;
-  activeDiscussions!: number;
+export interface UpdatePeerReviewDTO {
+  rating?: number;
+  comment?: string;
+  isComplete?: boolean;
 }
 
-export class PeerReviewDashboardDTO {
+export interface PeerReviewStatsDTO {
+  sessionId: string;
+
+  // Submission statistics
+  totalSubmissions: number;
+  submissionRate: number;
+
+  // Review statistics
+  totalReviews: number;
+  completedReviews: number;
+  reviewCompletionRate: number;
+  averageReviewsPerSubmission: number;
+
+  // Rating statistics
+  averageRating: number;
+  ratingDistribution: { [rating: number]: number };
+
+  // User statistics
+  totalParticipants: number;
+  activeReviewers: number;
+
+  // Timeline statistics
+  submissionTimeline: { date: Date; count: number }[];
+  reviewTimeline: { date: Date; count: number }[];
+
+  // Discussion statistics
+  totalDiscussions: number;
+  averageMessagesPerDiscussion: number;
+  activeDiscussions: number;
+}
+
+export interface PeerReviewDashboardDTO {
   // Current user's sessions
-  activeSessions!: PeerReviewSessionDTO[];
+  activeSessions: PeerReviewSessionDTO[];
 
   // Current user's submissions
-  mySubmissions!: PeerSubmissionDTO[];
+  mySubmissions: PeerSubmissionDTO[];
 
   // Reviews assigned to current user
-  assignedReviews!: PeerReviewDTO[];
+  assignedReviews: PeerReviewDTO[];
 
   // Reviews completed by current user
-  completedReviews!: PeerReviewDTO[];
+  completedReviews: PeerReviewDTO[];
 
   // Quick stats
-  stats!: {
+  stats: {
     totalReviewsCompleted: number;
     totalReviewsAssigned: number;
     averageRatingReceived?: number;
