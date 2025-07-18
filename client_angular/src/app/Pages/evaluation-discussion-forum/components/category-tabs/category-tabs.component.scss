@@ -1,0 +1,436 @@
+// =============================================================================
+// CATEGORY TABS COMPONENT - DUMB COMPONENT STYLES
+// =============================================================================
+
+.category-tabs-container {
+  width: 100%;
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  position: relative;
+}
+
+// =============================================================================
+// MATERIAL TAB GROUP STYLING
+// =============================================================================
+
+.category-tab-group {
+  .mat-mdc-tab-header {
+    border-bottom: none;
+    
+    .mat-mdc-tab-label-container {
+      background-color: #fafafa;
+      padding: 0 16px;
+    }
+    
+    .mat-mdc-tab-labels {
+      justify-content: flex-start;
+    }
+  }
+  
+  .mat-mdc-tab-body-wrapper {
+    display: none; // Content is handled by parent component
+  }
+}
+
+// =============================================================================
+// TAB LABEL CONTENT
+// =============================================================================
+
+.tab-label-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  position: relative;
+  min-height: 48px;
+  
+  .tab-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+  
+  .tab-title {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+    
+    @media (max-width: 768px) {
+      max-width: 120px;
+      font-size: 12px;
+    }
+  }
+}
+
+// =============================================================================
+// ACTIVITY BADGE
+// =============================================================================
+
+.tab-badge-container {
+  position: relative;
+  
+  .activity-badge {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    
+    ::ng-deep .mat-badge-content {
+      background-color: #ff9800;
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      min-width: 16px;
+      height: 16px;
+      line-height: 16px;
+    }
+  }
+}
+
+// =============================================================================
+// AVAILABILITY INDICATOR
+// =============================================================================
+
+.availability-indicator {
+  margin-left: auto;
+  
+  .availability-chip {
+    font-size: 11px;
+    height: 24px;
+    border-radius: 12px;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    
+    .availability-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+    
+    .availability-text {
+      font-size: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    
+    // Color variants
+    &.availability-success {
+      background-color: #e8f5e8;
+      color: #2e7d32;
+      border-color: #4caf50;
+      
+      .availability-icon {
+        color: #4caf50;
+      }
+    }
+    
+    &.availability-warn {
+      background-color: #ffebee;
+      color: #d32f2f;
+      border-color: #f44336;
+      
+      .availability-icon {
+        color: #f44336;
+      }
+    }
+    
+    &.availability-accent {
+      background-color: #fff3e0;
+      color: #ef6c00;
+      border-color: #ff9800;
+      
+      .availability-icon {
+        color: #ff9800;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// TAB STATES
+// =============================================================================
+
+.mat-mdc-tab:not(.mat-mdc-tab-disabled) {
+  .mat-mdc-tab-label {
+    &:hover {
+      background-color: #f5f5f5;
+      
+      .availability-chip {
+        transform: scale(1.05);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+    }
+    
+    &.mdc-tab--active {
+      background-color: #e3f2fd;
+      color: #1976d2;
+      border-bottom: 3px solid #1976d2;
+      
+      .tab-title {
+        color: #1976d2;
+        font-weight: 600;
+      }
+      
+      .tab-icon {
+        color: #1976d2 !important;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// MOBILE CATEGORY SELECTOR
+// =============================================================================
+
+.mobile-category-selector {
+  display: none;
+  padding: 16px;
+  background-color: #fff;
+  
+  .mobile-category-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: #666;
+    font-size: 14px;
+    font-weight: 500;
+    
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+  
+  .mobile-category-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 8px;
+  }
+  
+  .mobile-category-button {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    
+    &:hover {
+      background-color: #f5f5f5;
+      border-color: #1976d2;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    &.active {
+      background-color: #e3f2fd;
+      border-color: #1976d2;
+      color: #1976d2;
+      
+      .category-name {
+        font-weight: 600;
+        color: #1976d2;
+      }
+    }
+    
+    .mobile-button-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+      
+      .category-name {
+        flex: 1;
+        text-align: left;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      
+      .availability-text-mobile {
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 8px;
+        
+        &.availability-success {
+          background-color: #e8f5e8;
+          color: #2e7d32;
+        }
+        
+        &.availability-warn {
+          background-color: #ffebee;
+          color: #d32f2f;
+        }
+        
+        &.availability-accent {
+          background-color: #fff3e0;
+          color: #ef6c00;
+        }
+      }
+    }
+  }
+}
+
+// =============================================================================
+// LOADING STATE
+// =============================================================================
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  color: #666;
+  font-size: 14px;
+  
+  .loading-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    opacity: 0.7;
+  }
+}
+
+// =============================================================================
+// RESPONSIVE DESIGN
+// =============================================================================
+
+@media (max-width: 1024px) {
+  .tab-label-content {
+    gap: 6px;
+    padding: 6px 8px;
+    
+    .tab-title {
+      max-width: 100px;
+    }
+    
+    .availability-chip {
+      .availability-text {
+        font-size: 9px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .category-tab-group {
+    display: none;
+  }
+  
+  .mobile-category-selector {
+    display: block;
+  }
+  
+  .mobile-category-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-category-selector {
+    padding: 12px;
+    
+    .mobile-category-button {
+      padding: 10px 12px;
+      
+      .mobile-button-content {
+        gap: 8px;
+        
+        .category-name {
+          font-size: 13px;
+        }
+        
+        .availability-text-mobile {
+          font-size: 11px;
+          padding: 3px 6px;
+        }
+      }
+    }
+  }
+}
+
+// =============================================================================
+// ACCESSIBILITY IMPROVEMENTS
+// =============================================================================
+
+// Focus indicators
+.mat-mdc-tab-label:focus,
+.mobile-category-button:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .availability-chip {
+    border-width: 2px !important;
+    
+    &.availability-success {
+      background-color: #ffffff;
+      border-color: #2e7d32 !important;
+    }
+    
+    &.availability-warn {
+      background-color: #ffffff;
+      border-color: #d32f2f !important;
+    }
+    
+    &.availability-accent {
+      background-color: #ffffff;
+      border-color: #ef6c00 !important;
+    }
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .availability-chip,
+  .mobile-category-button {
+    transition: none !important;
+  }
+  
+  .mobile-category-button:hover {
+    transform: none !important;
+  }
+}
+
+// =============================================================================
+// PRINT STYLES
+// =============================================================================
+
+@media print {
+  .mobile-category-selector {
+    display: none !important;
+  }
+  
+  .availability-indicator {
+    display: none !important;
+  }
+  
+  .category-tab-group {
+    .mat-mdc-tab-label.mdc-tab--active {
+      background-color: #f0f0f0 !important;
+      color: #000 !important;
+    }
+  }
+}

@@ -1,0 +1,654 @@
+// =============================================================================
+// DISCUSSION THREAD COMPONENT - DUMB COMPONENT STYLES
+// =============================================================================
+
+.discussion-thread-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #fafafa;
+  overflow: hidden;
+}
+
+// =============================================================================
+// DISCUSSION CONTROLS
+// =============================================================================
+
+.discussion-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  
+  .controls-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    .discussion-icon {
+      color: #1976d2;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+    
+    .discussion-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+  }
+  
+  .controls-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    .sort-label {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+    
+    button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+      
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+      
+      &:hover {
+        background-color: #f5f5f5;
+      }
+      
+      &.active {
+        background-color: #e3f2fd;
+        color: #1976d2;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// DISCUSSION CONTENT
+// =============================================================================
+
+.discussion-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+// =============================================================================
+// VIRTUAL SCROLLING
+// =============================================================================
+
+.discussion-viewport {
+  height: 100%;
+  background-color: #fafafa;
+  
+  .virtual-item {
+    padding: 8px 0;
+    
+    &:first-child {
+      padding-top: 16px;
+    }
+    
+    &:last-child {
+      padding-bottom: 16px;
+    }
+  }
+}
+
+// =============================================================================
+// DISCUSSION HEADER
+// =============================================================================
+
+.discussion-header-item {
+  padding: 0 24px 16px 24px;
+  
+  .discussion-header-card {
+    border-left: 4px solid #1976d2;
+    background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+    
+    mat-card-header {
+      padding: 16px 20px;
+      
+      .header-icon {
+        background-color: #1976d2;
+        color: white;
+        
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+      
+      mat-card-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1976d2;
+        margin: 0;
+      }
+      
+      mat-card-subtitle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 4px;
+        font-size: 13px;
+        color: #666;
+        
+        .comment-count {
+          font-weight: 500;
+        }
+        
+        .separator {
+          color: #ccc;
+        }
+        
+        .available-comments {
+          font-weight: 500;
+          color: #4caf50;
+        }
+      }
+    }
+  }
+}
+
+// =============================================================================
+// COMMENT ITEM CONTAINER
+// =============================================================================
+
+.comment-item-container {
+  padding: 0 24px;
+  transition: margin-left 0.2s ease;
+  
+  // Threading visual indicators
+  &[style*="margin-left"] {
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, #e0e0e0 0%, transparent 100%);
+    }
+  }
+}
+
+// =============================================================================
+// COMMENT INPUT CONTAINER
+// =============================================================================
+
+.comment-input-container {
+  padding: 16px 24px;
+  background-color: #fff;
+  border-top: 1px solid #f0f0f0;
+  margin: 8px 0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+// =============================================================================
+// EMPTY STATES
+// =============================================================================
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  
+  .empty-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 24px;
+    opacity: 0.5;
+  }
+  
+  h3 {
+    margin: 0 0 16px 0;
+    font-size: 20px;
+    font-weight: 500;
+    color: #424242;
+  }
+  
+  p {
+    margin: 0 0 24px 0;
+    font-size: 16px;
+    color: #666;
+    line-height: 1.5;
+    max-width: 400px;
+  }
+  
+  .empty-state-comment-input {
+    width: 100%;
+    max-width: 500px;
+    margin-top: 24px;
+  }
+  
+  &.no-discussions {
+    .empty-icon {
+      color: #1976d2;
+    }
+  }
+  
+  &.no-comments {
+    .empty-icon {
+      color: #4caf50;
+    }
+  }
+}
+
+// =============================================================================
+// READ-ONLY MODE
+// =============================================================================
+
+.read-only-message {
+  padding: 16px 24px;
+  
+  .read-only-card {
+    border-left: 4px solid #ff9800;
+    background-color: #fff3e0;
+    
+    .read-only-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px;
+      
+      .read-only-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: #ff9800;
+        flex-shrink: 0;
+      }
+      
+      .read-only-text {
+        flex: 1;
+        
+        h4 {
+          margin: 0 0 8px 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #e65100;
+        }
+        
+        p {
+          margin: 0;
+          font-size: 14px;
+          color: #ef6c00;
+          line-height: 1.4;
+        }
+      }
+    }
+  }
+}
+
+// =============================================================================
+// LOADING OVERLAY
+// =============================================================================
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+  
+  .loading-card {
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    .loading-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px;
+      
+      .loading-text {
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// MOBILE ACTIONS
+// =============================================================================
+
+.mobile-actions {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  
+  .add-comment-fab {
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+    
+    &:hover {
+      box-shadow: 0 6px 16px rgba(25, 118, 210, 0.4);
+    }
+  }
+  
+  .mobile-comment-input {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+    
+    .mobile-input-card {
+      margin: 0;
+      border-radius: 16px 16px 0 0;
+      
+      mat-card-header {
+        background-color: #f8f9fa;
+        padding: 16px 20px;
+        
+        mat-card-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 16px;
+          font-weight: 600;
+          margin: 0;
+          
+          mat-icon {
+            color: #1976d2;
+          }
+        }
+        
+        .close-button {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          color: #666;
+        }
+      }
+      
+      mat-card-content {
+        padding: 20px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// RESPONSIVE DESIGN
+// =============================================================================
+
+@media (max-width: 1024px) {
+  .discussion-controls {
+    padding: 12px 16px;
+    
+    .controls-left {
+      .discussion-title {
+        font-size: 16px;
+      }
+    }
+    
+    .sort-controls {
+      .sort-label {
+        display: none;
+      }
+      
+      button {
+        padding: 6px 10px;
+        font-size: 12px;
+        
+        mat-icon {
+          font-size: 14px;
+          width: 14px;
+          height: 14px;
+        }
+      }
+    }
+  }
+  
+  .discussion-header-item,
+  .comment-item-container,
+  .comment-input-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .discussion-controls {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+    
+    .controls-right {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  .mobile-actions {
+    display: block;
+  }
+  
+  .discussion-header-item,
+  .comment-item-container,
+  .comment-input-container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  
+  .comment-item-container {
+    &[style*="margin-left"] {
+      margin-left: 12px !important;
+      
+      &::before {
+        left: -6px;
+      }
+    }
+  }
+  
+  .empty-state {
+    padding: 40px 16px;
+    
+    .empty-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+    }
+    
+    h3 {
+      font-size: 18px;
+    }
+    
+    p {
+      font-size: 14px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .discussion-controls {
+    padding: 8px 12px;
+    
+    .controls-left {
+      .discussion-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+      
+      .discussion-title {
+        font-size: 14px;
+      }
+    }
+    
+    .sort-controls {
+      gap: 4px;
+      
+      button {
+        padding: 4px 8px;
+        font-size: 11px;
+        
+        span {
+          display: none;
+        }
+      }
+    }
+  }
+  
+  .discussion-header-item {
+    padding: 0 8px 12px 8px;
+    
+    .discussion-header-card {
+      mat-card-header {
+        padding: 12px 16px;
+        
+        mat-card-title {
+          font-size: 14px;
+        }
+        
+        mat-card-subtitle {
+          font-size: 11px;
+        }
+      }
+    }
+  }
+  
+  .comment-item-container,
+  .comment-input-container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+
+// =============================================================================
+// ACCESSIBILITY IMPROVEMENTS
+// =============================================================================
+
+// Focus indicators
+button:focus,
+.add-comment-fab:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .discussion-header-card {
+    border-left-width: 6px !important;
+  }
+  
+  .read-only-card {
+    border-left-width: 6px !important;
+  }
+  
+  .comment-item-container::before {
+    background-color: #000 !important;
+    width: 3px !important;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .comment-item-container,
+  .sort-controls button,
+  .add-comment-fab {
+    transition: none !important;
+  }
+  
+  .mobile-comment-input {
+    animation: none !important;
+  }
+}
+
+// =============================================================================
+// PRINT STYLES
+// =============================================================================
+
+@media print {
+  .discussion-controls,
+  .mobile-actions,
+  .loading-overlay {
+    display: none !important;
+  }
+  
+  .discussion-thread-container {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  
+  .discussion-viewport {
+    height: auto !important;
+  }
+  
+  .discussion-header-card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+}
+
+// =============================================================================
+// CUSTOM SCROLLBAR
+// =============================================================================
+
+.discussion-viewport {
+  // Custom scrollbar for better UX
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: #c1c1c1;
+    border-radius: 4px;
+    
+    &:hover {
+      background-color: #a8a8a8;
+    }
+  }
+}

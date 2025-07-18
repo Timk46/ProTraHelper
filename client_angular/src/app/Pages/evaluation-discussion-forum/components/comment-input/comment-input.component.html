@@ -1,0 +1,144 @@
+<!-- Comment Input Form -->
+<mat-card class="comment-input-card" [class.focused]="isFocused" [class.disabled]="disabled">
+  
+  <mat-card-content class="comment-input-content">
+    
+    <!-- Comment Form -->
+    <form [formGroup]="commentForm" (ngSubmit)="onSubmit()" class="comment-form">
+      
+      <!-- Text Input Field -->
+      <mat-form-field class="comment-field" appearance="outline">
+        
+        <mat-label>{{ placeholder }}</mat-label>
+        
+        <!-- Textarea -->
+        <textarea 
+          #textareaElement
+          matInput
+          formControlName="content"
+          [placeholder]="getPlaceholderText()"
+          [rows]="rows"
+          [maxlength]="maxLength"
+          [disabled]="disabled"
+          class="comment-textarea"
+          (focus)="onTextareaFocus()"
+          (blur)="onTextareaBlur()"
+          (keydown)="onKeyDown($event)"
+          (paste)="onPaste($event)"
+          (input)="autoResize()"
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="3"
+          cdkAutosizeMaxRows="8">
+        </textarea>
+        
+        <!-- Character Counter -->
+        <mat-hint *ngIf="showCharacterCount" 
+                  class="character-counter"
+                  [ngClass]="getCharacterCountClass()">
+          {{ getCharacterCountText() }}
+          <span *ngIf="getRemainingCharacters() < 100" class="remaining-hint">
+            ({{ getRemainingCharacters() }} verbleibend)
+          </span>
+        </mat-hint>
+        
+        <!-- Error Messages -->
+        <mat-error *ngIf="hasErrors()">
+          {{ getErrorMessage() }}
+        </mat-error>
+        
+      </mat-form-field>
+      
+    </form>
+    
+  </mat-card-content>
+  
+  <!-- Action Buttons -->
+  <mat-card-actions *ngIf="showSubmitButton" class="comment-actions">
+    
+    <!-- Action Buttons Container -->
+    <div class="action-buttons">
+      
+      <!-- Keyboard Hint -->
+      <div class="keyboard-hint" *ngIf="isFocused && !disabled">
+        <mat-icon class="hint-icon">keyboard</mat-icon>
+        <span class="hint-text">Strg+Enter zum Senden</span>
+      </div>
+      
+      <!-- Submit Button -->
+      <button 
+        mat-raised-button
+        color="primary"
+        type="button"
+        class="submit-button"
+        [disabled]="!isFormValid() || isSubmitting || disabled"
+        [matTooltip]="getSubmitTooltip()"
+        (click)="onSubmit()">
+        
+        <!-- Loading Spinner -->
+        <mat-spinner *ngIf="isSubmitting" 
+                     diameter="16" 
+                     strokeWidth="2" 
+                     class="button-spinner">
+        </mat-spinner>
+        
+        <!-- Submit Icon -->
+        <mat-icon *ngIf="!isSubmitting" class="submit-icon">send</mat-icon>
+        
+        <!-- Button Text -->
+        <span class="button-text">
+          {{ isSubmitting ? 'Wird gesendet...' : submitButtonText }}
+        </span>
+        
+      </button>
+      
+    </div>
+    
+  </mat-card-actions>
+  
+  <!-- Status Bar -->
+  <div class="status-bar" *ngIf="isFocused && !disabled">
+    
+    <!-- Form Status Indicators -->
+    <div class="status-indicators">
+      
+      <!-- Content Length Indicator -->
+      <div class="length-indicator" [ngClass]="getCharacterCountClass()">
+        <mat-icon class="status-icon">
+          {{ currentLength > 0 ? 'edit' : 'create' }}
+        </mat-icon>
+        <span class="status-text">
+          {{ currentLength === 0 ? 'Kommentar eingeben' : currentLength + ' Zeichen' }}
+        </span>
+      </div>
+      
+      <!-- Validation Status -->
+      <div class="validation-indicator" *ngIf="currentLength > 0">
+        <mat-icon class="status-icon" 
+                  [ngClass]="{ 'valid': isFormValid(), 'invalid': !isFormValid() }">
+          {{ isFormValid() ? 'check_circle' : 'error' }}
+        </mat-icon>
+        <span class="status-text">
+          {{ isFormValid() ? 'Bereit zum Senden' : 'Eingabe prüfen' }}
+        </span>
+      </div>
+      
+    </div>
+    
+    <!-- Tips -->
+    <div class="input-tips" *ngIf="currentLength === 0">
+      <span class="tip-text">
+        💡 Teilen Sie Ihre Gedanken zu dieser Bewertung
+      </span>
+    </div>
+    
+  </div>
+  
+  <!-- Disabled State Overlay -->
+  <div class="disabled-overlay" *ngIf="disabled">
+    <div class="disabled-content">
+      <mat-icon class="disabled-icon">block</mat-icon>
+      <span class="disabled-text">Kommentare sind momentan nicht verfügbar</span>
+    </div>
+  </div>
+  
+</mat-card>
