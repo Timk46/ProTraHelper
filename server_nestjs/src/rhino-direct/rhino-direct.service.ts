@@ -284,6 +284,7 @@ export class RhinoDirectService {
     commands.push('_Enter');
 
     const commandString = commands.join(' ');
+    console.log('🔧 Built Rhino command:', commandString, 'was successful');
     return `-runscript="${commandString}"`;
   }
 

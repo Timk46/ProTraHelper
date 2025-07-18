@@ -1,4 +1,4 @@
-import { userDTO } from './user.dto';
+import { UserDTO } from './user.dto';
 import { EvaluationCommentDTO, VoteType } from './evaluation-comment.dto';
 
 export interface EvaluationVoteDTO {
@@ -10,7 +10,7 @@ export interface EvaluationVoteDTO {
   
   // Relations
   comment?: EvaluationCommentDTO;
-  user?: userDTO;
+  user?: UserDTO;
 }
 
 export interface VoteResultDTO {

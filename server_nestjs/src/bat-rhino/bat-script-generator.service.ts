@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import { spawn, ChildProcess } from 'child_process';
 import { promisify } from 'util';
-import {
+import type {
   BatScriptRequest,
   BatExecutionResult,
   RhinoPathValidationResult,
@@ -390,7 +390,7 @@ echo Starte Rhino...
 echo.
 
 REM Starte Rhino mit Befehlen direkt über Kommandozeile
-"%RHINO_PATH%" /nosplash /runscript="-Grasshopper B D W L W H D O C:\\Dev\\hefl\\files\\Grasshopper\\example.gh W H _MaxViewport _Enter"
+"%RHINO_PATH%" /nosplash /runscript="-Grasshopper B D W L W H D O C:\\Dev\\hefl\\files\\Grasshopper\\example.gh W  _MaxViewport _Enter"
 
 REM Prüfe Exit-Code
 IF %ERRORLEVEL% NEQ 0 (

@@ -1,4 +1,4 @@
-import { userDTO } from './user.dto';
+import { UserDTO } from './user.dto';
 import { EvaluationSubmissionDTO } from './evaluation-submission.dto';
 import { EvaluationCommentDTO } from './evaluation-comment.dto';
 
@@ -11,7 +11,7 @@ export interface AnonymousEvaluationUserDTO {
   createdAt: Date;
   
   // Relations
-  user?: userDTO;
+  user?: UserDTO;
   submission?: EvaluationSubmissionDTO;
   comments?: EvaluationCommentDTO[];
 }

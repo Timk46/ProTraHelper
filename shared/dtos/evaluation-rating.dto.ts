@@ -1,4 +1,4 @@
-import { userDTO } from './user.dto';
+import { UserDTO } from './user.dto';
 import { EvaluationSubmissionDTO } from './evaluation-submission.dto';
 import { EvaluationCategoryDTO } from './evaluation-category.dto';
 
@@ -13,7 +13,7 @@ export interface EvaluationRatingDTO {
   
   // Relations
   submission?: EvaluationSubmissionDTO;
-  user?: userDTO;
+  user?: UserDTO;
   category?: EvaluationCategoryDTO;
 }
 

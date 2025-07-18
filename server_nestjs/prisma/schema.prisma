@@ -37,6 +37,11 @@ model User {
   updatedSettings          ModuleSetting[]
   hasAcceptedPrivacyPolicy Boolean                      @default(false)
   fileUploads              FileUpload[]
+  
+  // EVALUATION SYSTEM RELATIONS
+  evaluationSessionsCreated EvaluationSession[]
+  evaluationSubmissions     EvaluationSubmission[]
+  evaluationRatings         EvaluationRating[]
 }
 
 model RefreshToken {
@@ -59,6 +64,9 @@ model Module {
   settings                ModuleSetting[]
   ModuleHighlightConcepts ModuleHighlightConcepts[]
   fileUploads             FileUpload[]
+  
+  // EVALUATION SYSTEM RELATIONS
+  evaluationSessions      EvaluationSession[]
 }
 
 model ModuleConceptGoal {
@@ -227,6 +235,9 @@ model File {
   TranscriptEmbeddings TranscriptEmbedding[]
   fileUploads          FileUpload[]
   UserUploadAnswer     UserUploadAnswer[]
+  
+  // EVALUATION SYSTEM RELATIONS
+  evaluationSubmissions EvaluationSubmission[]
 }
 
 model ContentView {
@@ -690,12 +701,21 @@ model Discussion {
   contentElementId Int?
   authorId         Int             @unique
   isSolved         Boolean         @default(false)
+  
+  // EVALUATION SYSTEM EXTENSIONS
+  evaluationSubmissionId String?
+  evaluationCategoryId   Int?
+  
   author           anonymousUser   @relation(fields: [authorId], references: [id])
   conceptNode      ConceptNode     @relation(fields: [conceptNodeId], references: [id])
   contentElement   ContentElement? @relation(fields: [contentElementId], references: [id])
   contentNode      ContentNode?    @relation(fields: [contentNodeId], references: [id])
   messages         Message[]
   Notification     Notification[]
+  
+  // EVALUATION SYSTEM RELATIONS
+  evaluationSubmission EvaluationSubmission? @relation("EvaluationDiscussions", fields: [evaluationSubmissionId], references: [id])
+  evaluationCategory   EvaluationCategory?   @relation("CategoryDiscussions", fields: [evaluationCategoryId], references: [id])
 }
 
 model Message {
@@ -938,4 +958,110 @@ enum questionType {
   GraphQuestion
   UMLQuestion
   MCSlider
+}
+
+// ==========================================
+// EVALUATION SYSTEM ENUMS
+// ==========================================
+
+enum EvaluationStatus {
+  DRAFT
+  SUBMITTED
+  IN_REVIEW
+  DISCUSSION
+  COMPLETED
+}
+
+enum EvaluationPhase {
+  DISCUSSION
+  EVALUATION
+}
+
+// ==========================================
+// EVALUATION SYSTEM MODELS
+// ==========================================
+
+model EvaluationSession {
+  id            Int                    @id @default(autoincrement())
+  title         String
+  description   String?
+  startDate     DateTime
+  endDate       DateTime
+  moduleId      Int
+  createdById   Int
+  isActive      Boolean                @default(true)
+  isAnonymous   Boolean                @default(true)
+  phase         EvaluationPhase        @default(DISCUSSION)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  
+  // Relations
+  module        Module                 @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  createdBy     User                   @relation(fields: [createdById], references: [id])
+  submissions   EvaluationSubmission[]
+  categories    EvaluationCategory[]
+  
+  @@map("evaluation_sessions")
+}
+
+model EvaluationSubmission {
+  id          String                     @id @default(cuid())
+  title       String
+  description String?
+  authorId    Int
+  pdfFileId   Int
+  sessionId   Int
+  status      EvaluationStatus           @default(DRAFT)
+  submittedAt DateTime
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+  
+  // Relations
+  author      User                       @relation(fields: [authorId], references: [id])
+  pdfFile     File                       @relation(fields: [pdfFileId], references: [id])
+  session     EvaluationSession          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  discussions Discussion[]               @relation("EvaluationDiscussions")
+  ratings     EvaluationRating[]
+  
+  @@map("evaluation_submissions")
+}
+
+model EvaluationCategory {
+  id          Int                @id @default(autoincrement())
+  sessionId   Int
+  name        String
+  displayName String
+  description String?
+  icon        String?
+  color       String?
+  order       Int                @default(0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  
+  // Relations
+  session     EvaluationSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  discussions Discussion[]       @relation("CategoryDiscussions")
+  ratings     EvaluationRating[]
+  
+  @@unique([sessionId, name])
+  @@map("evaluation_categories")
+}
+
+model EvaluationRating {
+  id           Int                @id @default(autoincrement())
+  submissionId String
+  categoryId   Int
+  userId       Int
+  rating       Int                @db.SmallInt // 0-10 rating
+  comment      String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  
+  // Relations
+  submission   EvaluationSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  category     EvaluationCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user         User               @relation(fields: [userId], references: [id])
+  
+  @@unique([submissionId, categoryId, userId])
+  @@map("evaluation_ratings")
 }

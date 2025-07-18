@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Body, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { BatScriptGeneratorService } from './bat-script-generator.service';
-import {
+import type {
   BatExecutionResult,
   RhinoPathValidationResult,
 } from '../../../shared/dtos/bat-rhino.dto';
@@ -11,7 +11,7 @@ import { BatScriptRequest } from '../../../shared/dtos/bat-rhino.dto';
  * REST API Controller für .bat-Skript-basierte Rhino-Integration
  * Bietet Endpunkte für direkte Rhino-Ausführung und Skript-Generierung
  */
-@Controller('api/rhino')
+@Controller('api/rhinobat')
 export class BatRhinoController {
   private readonly logger = new Logger(BatRhinoController.name);
 

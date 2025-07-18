@@ -20,7 +20,7 @@ import {
   providedIn: 'root',
 })
 export class BatRhinoService {
-  private readonly baseUrl = `${environment.server}/api/rhino`;
+  private readonly baseUrl = `${environment.server}/api/rhinobat`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -64,7 +64,9 @@ export class BatRhinoService {
         console.error('🚨 BatRhinoService: Direct execution error:', error);
         return of({
           success: false,
-          message: `Fehler bei der direkten Rhino-Ausführung: ${error.error?.message || error.message}`,
+          message: `Fehler bei der direkten Rhino-Ausführung: ${
+            error.error?.message || error.message
+          }`,
           timestamp: new Date().toISOString(),
         });
       }),
@@ -126,7 +128,7 @@ export class BatRhinoService {
    * @returns Vorkonfigurierte BatRhinoRequest
    */
   createGrasshopperRequest(filePath: string): BatRhinoRequest {
-    const rhinoCommand = `_-Grasshopper B D W L W H D O "${filePath}" W H _MaxViewport _Enter`;
+    const rhinoCommand = `_-Grasshopper B D W L W H D O "${filePath}" W _MaxViewport _Enter`;
 
     return {
       filePath: filePath,

@@ -1,6 +1,6 @@
-import { userDTO } from './user.dto';
-import { fileDTO } from './file.dto';
-import { moduleDTO } from './module.dto';
+import { UserDTO } from './user.dto';
+import { FileDto } from './file.dto';
+import { ModuleDTO } from './module.dto';
 
 export enum EvaluationStatus {
   DRAFT = 'DRAFT',
@@ -28,9 +28,9 @@ export interface EvaluationSubmissionDTO {
   updatedAt: Date;
   
   // Relations
-  author?: userDTO;
-  pdfFile?: fileDTO;
-  module?: moduleDTO;
+  author?: UserDTO;
+  pdfFile?: FileDto;
+  module?: ModuleDTO;
   
   // PDF Metadata
   pdfMetadata?: {

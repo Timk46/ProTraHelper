@@ -18,7 +18,7 @@ import {
   WindowInfo,
 } from './rhino-window-manager.service';
 
-@Controller('api/rhino')
+@Controller('api/rhinodirect')
 export class RhinoDirectController {
   constructor(
     private readonly rhinoDirectService: RhinoDirectService,
