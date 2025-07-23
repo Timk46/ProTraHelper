@@ -32,6 +32,7 @@ import { GraphTasksComponent } from './Modules/graph-tasks/graph-tasks.component
 import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-question.component';
 import { EditUmlComponent } from './Pages/lecturersView/edit-uml/edit-uml.component';
 import { EditCodeGameComponent } from "./Pages/lecturersView/edit-code-game/edit-code-game.component";
+import { LecturersViewComponent } from './Pages/lecturersView/lecturers-view.component';
 
 
 const routes: Routes = [
@@ -80,6 +81,7 @@ const routes: Routes = [
   { path: 'mcqcreation', component: McTaskCreationComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard]},
 
   // lecturers view
+  { path: 'lecturer', loadChildren: () => import('./Pages/lecturersView/lecturers-view.module').then(m => m.LecturersViewModule), canActivate: [LoggedInGuard, AdminGuard] },
   { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [LoggedInGuard, AdminGuard]},
   { path: 'editcoding/:questionId', component: EditCodingComponent, canActivate: [LoggedInGuard, AdminGuard]},
   { path: 'editfillin/:questionId', component: EditFillinComponent, canActivate: [LoggedInGuard, AdminGuard]},

@@ -136,7 +136,7 @@ export class QuestionDataController {
         }
 
         @roles('ADMIN', 'TEACHER')
-        @Get('/allUserUploadAnswers/:questionId')
+        @Get('/allUserUploadAnswers/:questionId?')
         async getAllUserUploadAnswers(
             @Param('questionId', ParseIntPipe) questionId: number,
             @Req() req: any

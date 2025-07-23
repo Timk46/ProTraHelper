@@ -1,0 +1,19 @@
+<div class="lecturer-header">
+  <button type="button" mat-icon-button (click)="drawer.toggle()" class="sidebar-toggle">
+    <mat-icon>{{ drawer.opened ? 'chevron_left' : 'menu' }}</mat-icon>
+  </button>
+  <div class="title">
+    <h2>Lecturers View</h2>
+    <p>Dies ist der Dozentenbereich</p>
+  </div>
+</div>
+<mat-drawer-container class="lecturers-view-container" autosize>
+  <mat-drawer #drawer class="side-panel" mode="side">
+    <a routerLink="overview" routerLinkActive="active">Abgaben</a>
+    <a routerLink="profile" routerLinkActive="active">Profil</a>
+    <a routerLink="courses" routerLinkActive="active">Kurse</a>
+  </mat-drawer>
+  <div class="main-content">
+    <router-outlet></router-outlet>
+  </div>
+</mat-drawer-container>

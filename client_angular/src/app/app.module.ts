@@ -35,6 +35,7 @@ import { ChangelogComponent } from './Pages/changelog/changelog.component';
 import { AuthInterceptor } from "./Interceptors/auth-interceptor.service";
 import { LoggedInGuard } from "./Guards/is-logged-in.guard";
 import { EditorModule, TINYMCE_SCRIPT_SRC } from "@tinymce/tinymce-angular";
+import { TinymceModule } from './Pages/tinymce/tinymce.module';
 import { DiscussionListComponent } from './Pages/discussion/discussion-list/discussion-list.component';
 import { DiscussionViewComponent } from './Pages/discussion/discussion-view/discussion-view.component';
 import { DiscussionFilterComponent } from './Pages/discussion/discussion-list/discussion-filter/discussion-filter.component';
@@ -58,7 +59,6 @@ import { BellDirective } from "./Pages/notification/notification-bell/belldirect
 import { AdminGuard } from "./Guards/is-admin.guard";
 import { ConfirmationBoxComponent } from './Pages/confirmation-box/confirmation-box.component';
 import { ConfirmDialogComponent } from './Pages/lecturersView/edit-coding/confirm-dialog.component';
-import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module';
 import { McTaskCreationComponent } from "./Pages/contentView/contentElement/mc-task-creation/mc-task-creation.component";
 import { MCDescriptionDialogComponent } from "./Pages/contentView/contentElement/mc-task-creation/description-dialog/description-dialog.component";
 import { MCScoreComponent } from "./Pages/contentView/contentElement/mc-task-creation/score/score.component";
@@ -148,9 +148,11 @@ import { UploadTaskComponent } from "./Pages/contentView/contentElement/upload-t
         AppHeaderComponent,
         HighlightNavigatorComponent,
         HighlightConceptDialogComponent,
-        UploadTaskComponent
+        UploadTaskComponent,
     ],
-    bootstrap: [AppComponent], imports: [ToastrModule.forRoot(),
+    bootstrap: [AppComponent],
+    imports: [
+        ToastrModule.forRoot(),
         BrowserModule,
         FormsModule,
         ReactiveFormsModule,
@@ -158,8 +160,8 @@ import { UploadTaskComponent } from "./Pages/contentView/contentElement/upload-t
         BrowserAnimationsModule,
         MaterialModule,
         NgxExtendedPdfViewerModule,
-        LecturersViewModule,
         EditorModule,
+        TinymceModule,
         MarkdownModule.forRoot(),
         GraphTasksModule,
         MatMenuModule,

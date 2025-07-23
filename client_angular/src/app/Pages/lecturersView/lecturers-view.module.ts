@@ -13,7 +13,7 @@ import { EditCodingComponent } from './edit-coding/edit-coding.component';
 import { EditChoiceComponent } from './edit-choice/edit-choice.component';
 import { EditGraphComponent } from './edit-graph/edit-graph.component';
 import { AddElementModalComponent } from './edit-coding/add-element-modal.component';
-import { TinymceComponent } from '../tinymce/tinymce.component';
+
 import { ScoreComponent } from './edit-choice/score/score.component';
 import { DescriptionDialogComponent } from './edit-choice/description-dialog/description-dialog.component';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
@@ -29,10 +29,14 @@ import { EditCodeGameComponent } from './edit-code-game/edit-code-game.component
 import { CodeGameAddElementModalComponent } from "./edit-code-game/code-game-add-element-modal.component";
 import { CodeGameModule } from "../../Modules/code-game/code-game.module";
 import { CodeGamePlayfieldEditorComponent } from './edit-code-game/code-game-playfield-editor/code-game-playfield-editor.component';
-import { MatMenuModule } from "@angular/material/menu";
+import { MatMenuModule } from '@angular/material/menu';
+import { TinymceModule } from '../tinymce/tinymce.module';
+import { LecturersViewComponent } from './lecturers-view.component';
+import { LecturersViewRoutingModule } from './lecturers-view-routing.module';
 
 @NgModule({
   declarations: [
+    LecturersViewComponent,
     CreateContentNodeDialogComponent,
     CreateContentElementDialogComponent,
     EditFreetextComponent,
@@ -45,7 +49,7 @@ import { MatMenuModule } from "@angular/material/menu";
     EditCodingComponent,
     EditGraphComponent,
     AddElementModalComponent,
-    TinymceComponent,
+    
     EditUmlComponent,
     EditCodeGameComponent,
     CodeGameAddElementModalComponent,
@@ -66,7 +70,10 @@ import { MatMenuModule } from "@angular/material/menu";
     MatButtonToggleModule,
     UmlearnModule,
     CodeGameModule,
-    MatMenuModule
+    MatMenuModule,
+    
+    TinymceModule,
+    LecturersViewRoutingModule
   ],
   exports: [
     CreateContentNodeDialogComponent,
@@ -76,7 +83,7 @@ import { MatMenuModule } from "@angular/material/menu";
     EditFillinComponent,
     EditCodingComponent,
     EditGraphComponent,
-    TinymceComponent
+    
   ]
 })
 export class LecturersViewModule { }

@@ -6,6 +6,10 @@ const routes: Routes = [
   {
     path: ':questionId',
     component: GradingOverviewComponent
+  },
+  {
+    path: '',
+    component: GradingOverviewComponent
   }
 ];
 
