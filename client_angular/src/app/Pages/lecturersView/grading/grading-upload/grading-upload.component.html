@@ -1,8 +1,11 @@
 <div class="grading-upload-container">
   <div class="rounded-box">
-    <h1>Abgabenübersicht</h1>
+    <h2>Abgabenübersicht</h2>
     <p class="description">
-      Hier sehen Sie alle hochgeladenen Abgaben, gruppiert nach Aufgabe und Nutzer. Sie können die Tabelle nach den Spalten sortieren, z.B. nach dem jüngsten Upload-Datum pro Gruppe. Beim Klick auf den Dateinamen wird die Datei heruntergeladen.
+      Hier sehen Sie alle hochgeladenen Abgaben<span *ngIf="question"> zur gewählten Aufgabe</span>, gruppiert nach Aufgabe und Nutzer. Sie können die Tabelle nach den Spalten sortieren, z.B. nach dem jüngsten Upload-Datum pro Gruppe. Beim Klick auf den Dateinamen wird die Datei heruntergeladen.
+    </p>
+    <p *ngIf="question">
+      Ausgewählte Aufgabe: <strong>{{ question.name }} (ID: {{ question.id }})</strong>
     </p>
   </div>
 

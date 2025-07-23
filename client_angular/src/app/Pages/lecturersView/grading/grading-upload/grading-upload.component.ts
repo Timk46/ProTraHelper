@@ -2,6 +2,9 @@ import { Component, Input, OnInit, OnChanges } from '@angular/core';
 import { GradingService } from '../services/grading.service';
 import { UserUploadAnswerListItemDTO } from '@DTOs/userAnswer.dto';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ActivatedRoute } from '@angular/router';
+import { QuestionDataService } from 'src/app/Services/question/question-data.service';
+import { QuestionDTO } from '@DTOs/index';
 
 @Component({
   selector: 'app-grading-upload',
@@ -14,28 +17,52 @@ export class GradingUploadComponent implements OnInit, OnChanges {
   sortDirection: 'asc' | 'desc' = 'desc';
   sortedGroupKeys: string[] = [];
 
-  @Input() questionId!: number;
+  @Input() questionId: number | undefined;
   isLoading = true;
   error: string | null = null;
 
+  question: QuestionDTO | null = null; 
   userAnswers: UserUploadAnswerListItemDTO[] = [];
   groupedAnswers: { [key: string]: UserUploadAnswerListItemDTO[] } = {};
   groupKeys: string[] = [];
   expandedGroups: { [key: string]: boolean } = {};
 
   constructor(
+    private route: ActivatedRoute,
+    private questionDataService: QuestionDataService,
     private gradingService: GradingService,
     private snackBar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
-    if (this.questionId) {
-      this.getUserAnswers(this.questionId);
-    }
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('questionId');
+      if (id) {
+        this.questionId = +id;
+        this.fetchQuestionData(+id);
+      }
+    });
+    this.getUserAnswers(this.questionId || -1);
   }
 
+  
   ngOnChanges(): void {
     this.updateSortedGroupKeys();
+  }
+  
+  fetchQuestionData(questionId: number): void {
+    this.isLoading = true;
+    this.error = null;
+    this.questionDataService.getQuestionData(questionId).subscribe({
+      next: (data) => {
+        this.question = data;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to load question data.';
+        this.isLoading = false;
+      }
+    });
   }
 
   sortBy(column: string): void {

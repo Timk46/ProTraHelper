@@ -141,6 +141,7 @@ export class QuestionDataController {
             @Param('questionId', ParseIntPipe) questionId: number,
             @Req() req: any
         ): Promise<UserUploadAnswerListItemDTO[]> {
+          console.log('Fetching all user upload answers for questionId:', questionId);
           const temp = await this.qdUploadService.getAllUserUploadAnswers(questionId);
           console.log('User Upload Answers:', temp);
           return temp;

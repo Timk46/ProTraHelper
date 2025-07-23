@@ -1,15 +1,15 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { GradingOverviewComponent } from './grading-overview/grading-overview.component';
+import { GradingUploadComponent } from './grading-upload/grading-upload.component';
 
 const routes: Routes = [
   {
     path: ':questionId',
-    component: GradingOverviewComponent
+    component: GradingUploadComponent
   },
   {
     path: '',
-    component: GradingOverviewComponent
+    component: GradingUploadComponent
   }
 ];
 

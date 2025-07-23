@@ -109,15 +109,16 @@ export class QuestionDataUploadService {
    * including related user information, uploaded file details, and question/concept metadata.
    * The results are ordered by creation date in descending order.
    *
-   * @param questionId - The ID of the question for which to fetch user upload answers.
+   * @param questionId - The ID of the question for which to fetch user upload answers. For all questions, pass -1.
    * @returns A promise that resolves to an array of `UserUploadAnswerListItemDTO` objects,
    *          each containing user, file, question, and concept details.
    */
   async getAllUserUploadAnswers(questionId: number): Promise<UserUploadAnswerListItemDTO[]> {
+    const whereClause = Number(questionId) !== -1
+      ? { questionId: Number(questionId), UserUploadAnswer: { some: {} } }
+      : { UserUploadAnswer: { some: {} } };
     const userUploadAnswers = await this.prisma.userAnswer.findMany({
-      where: {
-        questionId: Number(questionId)
-      },
+      where: whereClause,
       include: {
         user: {
           select: {

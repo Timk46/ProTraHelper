@@ -3,13 +3,13 @@
     <mat-icon>{{ drawer.opened ? 'chevron_left' : 'menu' }}</mat-icon>
   </button>
   <div class="title">
-    <h2>Lecturers View</h2>
-    <p>Dies ist der Dozentenbereich</p>
+    <h2>Dozentenbereich</h2>
+    <p>Verwaltung zum laufenden Studiengang</p>
   </div>
 </div>
 <mat-drawer-container class="lecturers-view-container" autosize>
-  <mat-drawer #drawer class="side-panel" mode="side">
-    <a routerLink="overview" routerLinkActive="active">Abgaben</a>
+  <mat-drawer #drawer [opened]="true" class="side-panel" mode="side">
+    <a routerLink="uploads" routerLinkActive="active">Abgaben</a>
     <a routerLink="profile" routerLinkActive="active">Profil</a>
     <a routerLink="courses" routerLinkActive="active">Kurse</a>
   </mat-drawer>

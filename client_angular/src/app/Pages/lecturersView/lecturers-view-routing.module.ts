@@ -8,7 +8,7 @@ const routes: Routes = [
     component: LecturersViewComponent,
     children: [
       {
-        path: 'overview',
+        path: 'uploads',
         loadChildren: () => import('./grading/grading.module').then(m => m.GradingModule)
       }
     ]
