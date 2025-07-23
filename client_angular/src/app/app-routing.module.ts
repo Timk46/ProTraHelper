@@ -107,11 +107,6 @@ const routes: Routes = [
     loadChildren: () => import('./features/rhino-launcher/rhino-launcher.module').then(m => m.RhinoLauncherModule),
     canActivate: [LoggedInGuard] // Assuming it should be guarded
   },
-  {
-    path: 'grading',
-    loadChildren: () => import('./Pages/lecturersView/grading/grading.module').then(m => m.GradingModule),
-    canActivate: [LoggedInGuard] // Assuming teachers need to be logged in
-  }
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes, {

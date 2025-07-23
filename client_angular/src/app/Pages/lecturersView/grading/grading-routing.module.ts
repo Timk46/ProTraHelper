@@ -4,11 +4,11 @@ import { GradingUploadComponent } from './grading-upload/grading-upload.componen
 
 const routes: Routes = [
   {
-    path: ':questionId',
+    path: 'uploads/:questionId',
     component: GradingUploadComponent
   },
   {
-    path: '',
+    path: 'uploads',
     component: GradingUploadComponent
   }
 ];

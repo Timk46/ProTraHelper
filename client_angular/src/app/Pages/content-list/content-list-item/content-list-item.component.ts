@@ -223,7 +223,7 @@ export class ContentListItemComponent {
     const question: taskViewDTO = this.contentElementData.question;
     console.log("onTaskGrading", question);
     // Navigate to grading overview
-    this.router.navigate(['/lecturer/uploads/', question.id]);
+    this.router.navigate(['/lecturer/grading/uploads', question.id]);
   }
 
   /**
