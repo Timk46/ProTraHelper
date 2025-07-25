@@ -64,7 +64,7 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ getLatestUploadDate(key) | date:'dd.MM.yyyy HH:mm' }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button mat-stroked-button color="primary" *ngIf="groupedAnswers[key].length > 1" (click)="toggleGroup(key)">
-                  {{ expandedGroups[key] ? 'Weniger anzeigen' : (groupedAnswers[key].length - 1) + ' weitere' }}
+                  {{ expandedGroups[key] ? '▲' : '+' + (groupedAnswers[key].length - 1) + ' ▼' }}
                 </button>
               </td>
             </tr>
