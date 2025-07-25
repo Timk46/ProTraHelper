@@ -34,6 +34,9 @@ import { TinymceModule } from '../tinymce/tinymce.module';
 import { LecturersViewComponent } from './lecturers-view.component';
 import { LecturersViewRoutingModule } from './lecturers-view-routing.module';
 
+import { GradingService } from './services/grading.service';
+import { SubjectManagementService } from './services/subject-management.service';
+
 @NgModule({
   declarations: [
     LecturersViewComponent,
@@ -84,6 +87,10 @@ import { LecturersViewRoutingModule } from './lecturers-view-routing.module';
     EditCodingComponent,
     EditGraphComponent,
     
+  ],
+  providers: [
+    GradingService,
+    SubjectManagementService,
   ]
 })
 export class LecturersViewModule { }

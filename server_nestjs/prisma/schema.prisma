@@ -37,6 +37,7 @@ model User {
   updatedSettings          ModuleSetting[]
   hasAcceptedPrivacyPolicy Boolean                      @default(false)
   fileUploads              FileUpload[]
+  UserGroupMembership      UserGroupMembership[]
 }
 
 model RefreshToken {
@@ -885,15 +886,14 @@ enum questionType {
 
 model FileUpload {
   id        Int      @id @default(autoincrement())
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  file   File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
   fileId    Int
-  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   moduleId  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
 
   @@unique([userId, fileId, moduleId])
 }
@@ -919,4 +919,25 @@ model UserUploadAnswer {
   fileId       Int
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+}
+
+model UserGroup {
+  id                  Int                   @id @default(autoincrement())
+  name                String
+  maxSize             Int
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  UserGroupMembership UserGroupMembership[]
+}
+
+model UserGroupMembership {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  groupId      Int
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group        UserGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
 }

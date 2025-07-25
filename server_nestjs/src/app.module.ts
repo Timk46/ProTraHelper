@@ -71,6 +71,8 @@ import { PointCalculationModule } from './umlearn/point-calculation/point-calcul
 
 import { CodeGameModule } from './code-game/code-game.module';
 import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgraph-feedback.module';
+import { UserGroupService } from './lecturers-view/user-group/user-group.service';
+import { UserGroupController } from './lecturers-view/user-group/user-group.controller';
 
 @Module({
   imports: [
@@ -117,7 +119,7 @@ import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgrap
   ],
   controllers: [
     AppController,
-    DiscussionListController, DiscussionVoteController, DiscussionViewController, DiscussionCreationController
+    DiscussionListController, DiscussionVoteController, DiscussionViewController, DiscussionCreationController, UserGroupController
   ],
   providers: [
     AppService,
@@ -142,6 +144,7 @@ import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgrap
     FloydService,
     KruskalService,
     AiFeedbackService,
+    UserGroupService,
   ],
 })
 

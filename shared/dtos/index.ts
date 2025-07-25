@@ -7,6 +7,7 @@ export * from "./contentElementType.enum";
 export * from "./roles.enum";
 export * from "./question.dto";
 export * from "./user.dto";
+export * from "./userGroup.dto";
 export * from "./discussion.dto";
 export * from "./discussionMessage.dto";
 export * from "./discussionMessageVote.dto";

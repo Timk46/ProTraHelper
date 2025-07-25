@@ -7,9 +7,7 @@ import { UserUploadAnswerListItemDTO} from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { ProductionFilesService } from 'src/app/Services/files/production-files.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class GradingService {
 
   constructor(

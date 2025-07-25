@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, OnChanges } from '@angular/core';
-import { GradingService } from '../services/grading.service';
+import { GradingService } from '../../services/grading.service';
 import { UserUploadAnswerListItemDTO } from '@DTOs/userAnswer.dto';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
