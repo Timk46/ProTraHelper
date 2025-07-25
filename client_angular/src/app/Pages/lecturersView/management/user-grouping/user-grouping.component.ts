@@ -30,27 +30,17 @@ export class UserGroupingComponent implements OnInit {
   private nextGroupId = 1;
 
   constructor(
-    private subjectManagementService: SubjectManagementService,
-    private renderer: Renderer2,
-    @Inject(DOCUMENT) private document: Document
+    private subjectManagementService: SubjectManagementService
   ) { }
 
   ngOnInit(): void {
     this.loadData();
-    this.loadFontAwesome();
   }
 
   get isAutoGroupingDisabled(): boolean {
     const allUsersInGroups = this.groups.flatMap(g => g.members);
     const allAvailableUsers = [...this.unassignedUsers, ...allUsersInGroups];
     return !this.autoGroupSize || allAvailableUsers.length === 0;
-  }
-
-  private loadFontAwesome(): void {
-    const link = this.renderer.createElement('link');
-    this.renderer.setAttribute(link, 'rel', 'stylesheet');
-    this.renderer.setAttribute(link, 'href', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
-    this.renderer.appendChild(this.document.head, link);
   }
 
   loadData(): void {
