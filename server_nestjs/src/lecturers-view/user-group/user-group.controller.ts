@@ -4,6 +4,7 @@ import { UserGroupService } from './user-group.service';
 import { CreateUserGroupDto } from './dto/userGroup.dto';
 import { UserGroup, UserGroupMembership } from '@prisma/client';
 import { CreateUserGroupMembershipDto } from './dto/userGroupMembership.dto';
+import { UserDTO } from '@Interfaces/user.dto';
 
 @UseGuards(RolesGuard)
 @Controller('user-group')
@@ -21,6 +22,12 @@ export class UserGroupController {
   @roles('LECTURER', 'ADMIN')
   async getAllUserGroups(): Promise<UserGroup[]> {
     return this.userGroupService.getAllUserGroups();
+  }
+
+  @Get('users')
+  @roles('LECTURER', 'ADMIN')
+  async getAllUsers(): Promise<UserDTO[]> {
+    return this.userGroupService.getAllUsers();
   }
 
   @Get(':id')

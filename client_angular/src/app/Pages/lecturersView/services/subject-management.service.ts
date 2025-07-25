@@ -6,7 +6,8 @@ import {
   UserGroupDTO, 
   CreateUserGroupDTO, 
   UserGroupMembershipDTO, 
-  CreateUserGroupMembershipDTO 
+  CreateUserGroupMembershipDTO, 
+  UserDTO
 } from "@DTOs/index";
 
 @Injectable()
@@ -30,6 +31,10 @@ export class SubjectManagementService {
 
   deleteUserGroup(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  getAllUsers(): Observable<UserDTO[]> {
+    return this.http.get<UserDTO[]>(`${this.baseUrl}/users`);
   }
 
   // UserGroupMembership methods

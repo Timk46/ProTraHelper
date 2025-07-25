@@ -3,6 +3,7 @@ import { UserDTO } from "./user.dto";
 export interface UserGroupDTO {
     id: number;
     name: string;
+    maxSize: number;
     createdAt: Date;
     updatedAt: Date;
     UserGroupMembership?: UserGroupMembershipDTO[];
@@ -10,6 +11,7 @@ export interface UserGroupDTO {
 
 export interface CreateUserGroupDTO {
     name: string;
+    maxSize: number;
 }
 
 export interface UserGroupMembershipDTO {

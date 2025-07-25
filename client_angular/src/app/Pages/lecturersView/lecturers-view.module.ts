@@ -30,6 +30,14 @@ import { CodeGameAddElementModalComponent } from "./edit-code-game/code-game-add
 import { CodeGameModule } from "../../Modules/code-game/code-game.module";
 import { CodeGamePlayfieldEditorComponent } from './edit-code-game/code-game-playfield-editor/code-game-playfield-editor.component';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { CdkDropList, DragDropModule } from '@angular/cdk/drag-drop';
 import { TinymceModule } from '../tinymce/tinymce.module';
 import { LecturersViewComponent } from './lecturers-view.component';
 import { LecturersViewRoutingModule } from './lecturers-view-routing.module';
@@ -74,7 +82,14 @@ import { SubjectManagementService } from './services/subject-management.service'
     UmlearnModule,
     CodeGameModule,
     MatMenuModule,
-    
+    MatDialogModule,
+    MatTabsModule,
+    MatExpansionModule,
+    MatCheckboxModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    DragDropModule,
     TinymceModule,
     LecturersViewRoutingModule
   ],

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gruppenaufteilungs-Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Basic styling for a clean look */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        .dragging {
+            opacity: 0.5;
+        }
+        
+        /* Simplified drag-over effect to match the new style */
+        .drag-over {
+            border-color: #2563eb !important; /* A solid blue */
+            background-color: #eff6ff !important; /* A light blue */
+        }
+        
+        .user-item {
+            transition: background-color 0.2s ease;
+        }
+        
+        .group-card {
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-7xl mx-auto p-6">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Gruppenaufteilung</h1>
+            <p class="text-gray-600 mt-1">Ziehen Sie User per Drag & Drop in die gewünschten Gruppen oder nutzen Sie die automatische Aufteilung.</p>
+        </div>
+
+        <div class="bg-white p-4 mb-6 border border-gray-200 rounded-lg shadow-sm">
+            <div class="flex flex-wrap gap-4 items-center justify-between">
+                <button onclick="createGroup()" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-plus"></i>
+                    Neue Gruppe
+                </button>
+
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <label for="maxGroupSize" class="text-gray-700 text-sm font-medium">Max. Gruppengröße:</label>
+                        <input type="number" id="maxGroupSize" min="2" max="20" value="4" class="w-16 px-2 py-1 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    </div>
+                    <button onclick="autoCreateGroups()" id="autoGroupBtn" class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <i class="fas fa-bolt"></i>
+                        Auto-Gruppierung
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-1">
+                <div id="userListContainer" class="bg-white border border-gray-200 rounded-lg shadow-sm min-h-[500px]" ondrop="dropOnUserList(event)" ondragover="allowDrop(event)">
+                    <div class="p-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-users text-gray-500"></i>
+                            Verfügbare User (<span id="userCount">0</span>)
+                        </h2>
+                    </div>
+                    <div id="userList" class="p-4 space-y-2">
+                        </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2">
+                <div id="groupsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2 bg-white border border-dashed border-gray-300 rounded-lg p-12 text-center">
+                        <p class="text-gray-500">Noch keine Gruppen erstellt</p>
+                        <p class="text-gray-400 mt-2 text-sm">Klicken Sie auf "Neue Gruppe" oder nutzen Sie die Auto-Gruppierung</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initial data
+        let users = [
+            { id: 1, name: 'Anna Schmidt' },
+            { id: 2, name: 'Max Müller' },
+            { id: 3, name: 'Lisa Weber' },
+            { id: 4, name: 'Tom Fischer' },
+            { id: 5, name: 'Sarah Wagner' },
+            { id: 6, name: 'Felix Becker' },
+            { id: 7, name: 'Laura Schulz' },
+            { id: 8, name: 'David Meyer' },
+            { id: 9, name: 'Emma Klein' },
+            { id: 10, name: 'Lukas Wolf' },
+            { id: 11, name: 'Sophie Braun' },
+            { id: 12, name: 'Jonas Zimmermann' }
+        ];
+
+        let groups = [];
+        let nextGroupId = 1;
+        let draggedUser = null;
+
+        // Initialize
+        renderUsers();
+        renderGroups(); // Render initial empty state
+        updateAutoGroupButton();
+
+        // Render functions
+        function renderUsers() {
+            const userList = document.getElementById('userList');
+            const userCount = document.getElementById('userCount');
+            
+            userCount.textContent = users.length;
+            
+            if (users.length === 0) {
+                userList.innerHTML = '<p class="text-gray-500 text-center py-8">Alle User sind in Gruppen eingeteilt.</p>';
+            } else {
+                userList.innerHTML = users.map(user => `
+                    <div class="user-item bg-gray-50 border border-gray-200 rounded-md px-4 py-3 cursor-move hover:bg-gray-100 hover:border-gray-300"
+                         draggable="true" 
+                         ondragstart="dragStart(event, ${user.id}, null)"
+                         data-user-id="${user.id}">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-user text-gray-400"></i>
+                            <span class="text-gray-800 font-medium">${user.name}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderGroups() {
+            const container = document.getElementById('groupsContainer');
+            const maxSize = parseInt(document.getElementById('maxGroupSize').value);
+            
+            if (groups.length === 0) {
+                container.innerHTML = `
+                    <div class="md:col-span-2 bg-white border border-dashed border-gray-300 rounded-lg p-12 text-center">
+                        <p class="text-gray-500">Noch keine Gruppen erstellt</p>
+                        <p class="text-gray-400 mt-2 text-sm">Klicken Sie auf "Neue Gruppe" oder nutzen Sie die Auto-Gruppierung</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = groups.map(group => {
+                    const isFull = group.members.length >= maxSize;
+                    const fillPercentage = (group.members.length / maxSize) * 100;
+                    
+                    return `
+                        <div class="group-card bg-white border-2 border-gray-200 rounded-lg shadow-sm"
+                             ondragover="allowDrop(event)"
+                             ondragenter="dragEnter(event)"
+                             ondragleave="dragLeave(event)"
+                             ondrop="dropOnGroup(event, ${group.id})"
+                             data-group-id="${group.id}">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h3 class="text-base font-semibold text-gray-800">${group.name}</h3>
+                                    <button onclick="deleteGroup(${group.id})" class="text-gray-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-red-100">
+                                        <i class="fas fa-trash-alt fa-sm"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-gray-600">Mitglieder</span>
+                                        <span class="font-medium ${isFull ? 'text-green-600' : 'text-blue-600'}">
+                                            ${group.members.length}/${maxSize}
+                                        </span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                                        <div class="h-full transition-all duration-300 ${isFull ? 'bg-green-500' : 'bg-blue-500'}"
+                                             style="width: ${Math.min(fillPercentage, 100)}%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-2 min-h-[100px] bg-gray-50/50 p-2 rounded-md border">
+                                    ${group.members.length === 0 
+                                        ? '<p class="text-gray-400 text-center py-8 text-xs">User hier ablegen</p>'
+                                        : group.members.map(member => `
+                                            <div class="user-item bg-white border border-gray-200 rounded px-3 py-2 cursor-move hover:bg-gray-100"
+                                                 draggable="true"
+                                                 ondragstart="dragStart(event, ${member.id}, ${group.id})"
+                                                 data-user-id="${member.id}">
+                                                <div class="flex items-center gap-2">
+                                                    <i class="fas fa-user text-xs text-gray-400"></i>
+                                                    <span class="text-gray-700 text-sm">${member.name}</span>
+                                                </div>
+                                            </div>
+                                        `).join('')
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Group management
+        function createGroup() {
+            const newGroup = {
+                id: nextGroupId,
+                name: `Gruppe ${nextGroupId}`,
+                members: []
+            };
+            groups.push(newGroup);
+            nextGroupId++;
+            renderGroups();
+        }
+
+        function deleteGroup(groupId) {
+            const group = groups.find(g => g.id === groupId);
+            if (group && group.members.length > 0) {
+                users.push(...group.members);
+                // Sort users by name after re-adding them
+                users.sort((a, b) => a.name.localeCompare(b.name));
+                renderUsers();
+            }
+            groups = groups.filter(g => g.id !== groupId);
+            renderGroups();
+            updateAutoGroupButton();
+        }
+
+        function autoCreateGroups() {
+            const maxSize = parseInt(document.getElementById('maxGroupSize').value);
+            if (isNaN(maxSize) || maxSize < 1) {
+                alert("Bitte eine gültige maximale Gruppengröße angeben.");
+                return;
+            }
+            
+            // Collect all users
+            const allUsers = [...users];
+            groups.forEach(group => {
+                allUsers.push(...group.members);
+            });
+            
+            if (allUsers.length === 0) return;
+
+            // Calculate optimal number of groups
+            const numGroups = Math.ceil(allUsers.length / maxSize);
+            
+            // Create new groups
+            groups = [];
+            nextGroupId = 1; // Reset group numbering for clarity
+            for (let i = 0; i < numGroups; i++) {
+                groups.push({
+                    id: nextGroupId + i,
+                    name: `Gruppe ${nextGroupId + i}`,
+                    members: []
+                });
+            }
+             nextGroupId += numGroups;
+            
+            // Distribute users evenly
+            const shuffledUsers = allUsers.sort(() => Math.random() - 0.5);
+            shuffledUsers.forEach((user, index) => {
+                const groupIndex = index % numGroups;
+                groups[groupIndex].members.push(user);
+            });
+            
+            users = [];
+            
+            renderUsers();
+            renderGroups();
+            updateAutoGroupButton();
+        }
+
+        // Drag and Drop
+        function dragStart(event, userId, fromGroupId) {
+            draggedUser = { userId, fromGroupId };
+            event.target.classList.add('dragging');
+            event.dataTransfer.effectAllowed = 'move';
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+        }
+
+        function dragEnter(event) {
+            const groupCard = event.currentTarget.closest('.group-card');
+            if(groupCard) {
+               groupCard.classList.add('drag-over');
+            }
+        }
+
+        function dragLeave(event) {
+            const groupCard = event.currentTarget.closest('.group-card');
+             if(groupCard) {
+                groupCard.classList.remove('drag-over');
+            }
+        }
+
+        function dropOnGroup(event, targetGroupId) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+            
+            if (!draggedUser) return;
+            
+            const { userId, fromGroupId } = draggedUser;
+            let user;
+            
+            // Remove user from original location
+            if (fromGroupId === null) {
+                user = users.find(u => u.id === userId);
+                users = users.filter(u => u.id !== userId);
+            } else {
+                const fromGroup = groups.find(g => g.id === fromGroupId);
+                if (!fromGroup) return; // Safety check
+                user = fromGroup.members.find(u => u.id === userId);
+                fromGroup.members = fromGroup.members.filter(u => u.id !== userId);
+            }
+            
+            // Add user to target group
+            const targetGroup = groups.find(g => g.id === targetGroupId);
+             if (!targetGroup || !user) return; // Safety check
+
+            targetGroup.members.push(user);
+             targetGroup.members.sort((a, b) => a.name.localeCompare(b.name));
+            
+            // Clean up
+            document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+            draggedUser = null;
+            
+            renderUsers();
+            renderGroups();
+            updateAutoGroupButton();
+        }
+
+        function dropOnUserList(event) {
+            event.preventDefault();
+            
+            if (!draggedUser || draggedUser.fromGroupId === null) return;
+            
+            const { userId, fromGroupId } = draggedUser;
+            const fromGroup = groups.find(g => g.id === fromGroupId);
+             if (!fromGroup) return;
+            const user = fromGroup.members.find(u => u.id === userId);
+            
+            fromGroup.members = fromGroup.members.filter(u => u.id !== userId);
+            users.push(user);
+             users.sort((a, b) => a.name.localeCompare(b.name));
+            
+            document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+            draggedUser = null;
+            
+            renderUsers();
+            renderGroups();
+            updateAutoGroupButton();
+        }
+
+        function updateAutoGroupButton() {
+            const btn = document.getElementById('autoGroupBtn');
+            const hasUsers = users.length > 0 || groups.some(g => g.members.length > 0);
+            btn.disabled = !hasUsers;
+            if (!hasUsers) {
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    </script>
+</body>
+</html>

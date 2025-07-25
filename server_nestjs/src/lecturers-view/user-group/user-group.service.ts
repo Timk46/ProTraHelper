@@ -3,6 +3,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { UserGroup, UserGroupMembership } from '@prisma/client';
 import { CreateUserGroupDto } from './dto/userGroup.dto';
 import { CreateUserGroupMembershipDto } from './dto/userGroupMembership.dto';
+import { UserDTO, UserSubjectDTO } from '@DTOs/user.dto';
 
 @Injectable()
 export class UserGroupService {
@@ -15,6 +16,7 @@ export class UserGroupService {
       return await this.prisma.userGroup.create({
         data: {
           name: createUserGroupDto.name,
+          maxSize: createUserGroupDto.maxSize,
         },
       });
     } catch (error) {
@@ -81,6 +83,41 @@ export class UserGroupService {
       }
       throw error;
     }
+  }
+
+  async getAllUsers(): Promise<UserDTO[]> {
+    const users = await this.prisma.user.findMany({
+      include: {
+        userSubjects: {
+          include: {
+            subject: true
+          }
+        }
+      }
+    });
+    return users.map(user => this.mapToUserDTO(user));
+  }
+
+  private mapToUserDTO(user: any): UserDTO {
+    return {
+      id: user.id,
+      email: user.email,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      globalRole: user.globalRole,
+      userSubjects: user.userSubjects ? user.userSubjects.map(userSubject => this.mapToUserSubjectDTO(userSubject)) : [],
+    };
+  }
+
+  private mapToUserSubjectDTO(userSubject: any): UserSubjectDTO {
+    return {
+      id: userSubject.id,
+      name: userSubject.subject.name,
+      userId: userSubject.userId,
+      subjectId: userSubject.subjectId,
+      subjectSpecificRole: userSubject.subjectSpecificRole,
+      registeredForSL: userSubject.registeredForSL,
+    };
   }
 
   // UserGroupMembership methods
