@@ -1,5 +1,6 @@
-import { Component, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
-import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropList } from '@angular/cdk/drag-drop';
+import { Component, OnInit, Renderer2, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { SubjectManagementService } from '../../services/subject-management.service';
 import { UserGroupDTO, CreateUserGroupDTO, CreateUserGroupMembershipDTO } from '@DTOs/index';
 import { UserDTO } from '@DTOs/user.dto';
@@ -7,6 +8,7 @@ import { UserDTO } from '@DTOs/user.dto';
 // Client-side interface to handle UI logic easily
 interface ClientUserGroup extends UserGroupDTO {
   members: UserDTO[];
+  isDragOver?: boolean;
 }
 
 @Component({
@@ -16,9 +18,6 @@ interface ClientUserGroup extends UserGroupDTO {
 })
 export class UserGroupingComponent implements OnInit {
 
-  @ViewChild('unassignedList') unassignedDropList!: CdkDropList;
-  @ViewChildren('groupList') groupDropLists!: QueryList<CdkDropList>;
-
   allUsers: UserDTO[] = [];
   unassignedUsers: UserDTO[] = [];
   groups: ClientUserGroup[] = [];
@@ -27,27 +26,36 @@ export class UserGroupingComponent implements OnInit {
   private originalUnassignedUsers: UserDTO[] = [];
   private originalGroups: ClientUserGroup[] = [];
 
-  autoGroupSize = 1;
+  autoGroupSize = 4;
+  private nextGroupId = 1;
 
   constructor(
-    private subjectManagementService: SubjectManagementService
+    private subjectManagementService: SubjectManagementService,
+    private renderer: Renderer2,
+    @Inject(DOCUMENT) private document: Document
   ) { }
 
   ngOnInit(): void {
     this.loadData();
+    this.loadFontAwesome();
   }
 
-  getConnectedListsForGroup(currentGroupList: CdkDropList): CdkDropList[] {
-    if (!this.unassignedDropList || !this.groupDropLists) {
-      return [];
-    }
-    const otherGroupLists = this.groupDropLists.filter(list => list !== currentGroupList);
-    return [this.unassignedDropList, ...otherGroupLists];
+  get isAutoGroupingDisabled(): boolean {
+    const allUsersInGroups = this.groups.flatMap(g => g.members);
+    const allAvailableUsers = [...this.unassignedUsers, ...allUsersInGroups];
+    return !this.autoGroupSize || allAvailableUsers.length === 0;
+  }
+
+  private loadFontAwesome(): void {
+    const link = this.renderer.createElement('link');
+    this.renderer.setAttribute(link, 'rel', 'stylesheet');
+    this.renderer.setAttribute(link, 'href', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+    this.renderer.appendChild(this.document.head, link);
   }
 
   loadData(): void {
     this.subjectManagementService.getAllUsers().subscribe(users => {
-      this.allUsers = users;
+      this.allUsers = users.sort((a, b) => (a.firstname || '').localeCompare(b.firstname || ''));
       this.subjectManagementService.getUserGroups().subscribe(groups => {
         const allGroupedUserIds = new Set<number>();
 
@@ -57,11 +65,15 @@ export class UserGroupingComponent implements OnInit {
             const user = this.allUsers.find(u => u.id === membership.userId);
             return user ? { ...user, userGroupMembershipId: membership.id } : undefined;
           }).filter(u => u !== undefined) as UserDTO[] || [];
+          members.sort((a, b) => (a.firstname || '').localeCompare(b.firstname || ''));
           return {
             ...groupDto,
             members,
+            isDragOver: false
           };
         });
+
+        this.nextGroupId = this.groups.length > 0 ? Math.max(...this.groups.map(g => g.id)) + 1 : 1;
 
         this.unassignedUsers = this.allUsers.filter(user => !allGroupedUserIds.has(user.id));
 
@@ -82,24 +94,21 @@ export class UserGroupingComponent implements OnInit {
         event.previousIndex,
         event.currentIndex
       );
+      event.container.data.sort((a, b) => (a.firstname || '').localeCompare(b.firstname || ''));
     }
   }
 
-  openCreateGroupDialog(): void {
-    // Replace with a real dialog (e.g., using MatDialog)
-    const groupName = prompt('Enter group name:');
-    const maxSize = prompt('Enter max size:', '10');
-    if (groupName && maxSize) {
-      const newGroup: ClientUserGroup = {
-        id: Date.now(), // Temporary ID for client-side handling
-        name: groupName,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        members: [],
-        maxSize: parseInt(maxSize, 10)
-      };
-      this.groups.push(newGroup);
-    }
+  createGroup(): void {
+    const newGroup: ClientUserGroup = {
+      id: this.nextGroupId, // Temporary ID for client-side handling
+      name: `Gruppe ${this.nextGroupId}`,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      members: [],
+      maxSize: this.autoGroupSize
+    };
+    this.groups.push(newGroup);
+    this.nextGroupId++;
   }
 
   deleteGroup(groupId: number): void {
@@ -108,85 +117,91 @@ export class UserGroupingComponent implements OnInit {
       const deletedGroup = this.groups.splice(groupIndex, 1)[0];
       // Move members back to unassigned list
       this.unassignedUsers.push(...deletedGroup.members);
+      this.unassignedUsers.sort((a, b) => (a.firstname || '').localeCompare(b.firstname || ''));
     }
   }
 
   autoAssignGroups(): void {
-    if (!this.autoGroupSize || this.unassignedUsers.length === 0) {
+    if (!this.autoGroupSize || this.autoGroupSize < 1) {
+      alert("Bitte eine gültige maximale Gruppengröße angeben.");
       return;
     }
 
-    const usersToAssign = [...this.unassignedUsers];
-    const groupCount = Math.ceil(usersToAssign.length / this.autoGroupSize);
+    // Collect all users from unassigned and existing groups
+    const allUsers = [...this.unassignedUsers];
+    this.groups.forEach(group => {
+      allUsers.push(...group.members);
+    });
+    allUsers.sort(() => Math.random() - 0.5); // Shuffle users
 
-    for (let i = 0; i < groupCount; i++) {
-      const newGroup: ClientUserGroup = {
-        id: Date.now() + i, // Temporary ID
-        name: `Gruppe ${this.groups.length + i + 1}`,
+    if (allUsers.length === 0) return;
+
+    // Calculate optimal number of groups
+    const numGroups = Math.ceil(allUsers.length / this.autoGroupSize);
+
+    // Create new groups
+    this.groups = [];
+    this.nextGroupId = 1;
+    for (let i = 0; i < numGroups; i++) {
+      this.groups.push({
+        id: this.nextGroupId + i,
+        name: `Gruppe ${this.nextGroupId + i}`,
+        members: [],
         maxSize: this.autoGroupSize,
         createdAt: new Date(),
         updatedAt: new Date(),
-        members: []
-      };
-      this.groups.push(newGroup);
+      });
     }
+    this.nextGroupId += numGroups;
 
-    // Distribute users
-    let currentGroupIndex = this.groups.length - groupCount;
-    while(usersToAssign.length > 0) {
-        const user = usersToAssign.shift();
-        if(user) {
-            const targetGroup = this.groups[currentGroupIndex];
-            if(targetGroup.members.length < targetGroup.maxSize) {
-                targetGroup.members.push(user);
-            } else {
-                usersToAssign.unshift(user); // Put it back if group is full
-            }
-            currentGroupIndex++;
-            if(currentGroupIndex >= this.groups.length) {
-                currentGroupIndex = this.groups.length - groupCount;
-            }
-        }
-    }
+    // Distribute users evenly
+    allUsers.forEach((user, index) => {
+      const groupIndex = index % numGroups;
+      this.groups[groupIndex].members.push(user);
+    });
+
+    // Sort members within each new group
+    this.groups.forEach(group => group.members.sort((a, b) => (a.firstname || '').localeCompare(b.firstname || '')));
+
     this.unassignedUsers = [];
   }
 
   hasChanges(): boolean {
-    return JSON.stringify(this.unassignedUsers) !== JSON.stringify(this.originalUnassignedUsers) ||
-           JSON.stringify(this.groups) !== JSON.stringify(this.originalGroups);
+    const currentUnassigned = JSON.stringify(this.unassignedUsers.map(u => u.id).sort());
+    const originalUnassigned = JSON.stringify(this.originalUnassignedUsers.map(u => u.id).sort());
+
+    const currentGroups = JSON.stringify(this.groups.map(g => ({ id: g.id, members: g.members.map(m => m.id).sort() })).sort((a,b) => a.id - b.id));
+    const originalGroups = JSON.stringify(this.originalGroups.map(g => ({ id: g.id, members: g.members.map(m => m.id).sort() })).sort((a,b) => a.id - b.id));
+
+    return currentUnassigned !== originalUnassigned || currentGroups !== originalGroups;
   }
 
   discardChanges(): void {
-    this.unassignedUsers = JSON.parse(JSON.stringify(this.originalUnassignedUsers));
-    this.groups = JSON.parse(JSON.stringify(this.originalGroups));
+    this.loadData(); // Just reload the initial state from the server
   }
 
   saveChanges(): void {
     const originalGroupIds = new Set(this.originalGroups.map(g => g.id));
     const currentGroupIds = new Set(this.groups.map(g => g.id));
 
-    // 1. Delete groups
+    // 1. Delete groups that are no longer present
     for (const originalGroup of this.originalGroups) {
       if (!currentGroupIds.has(originalGroup.id)) {
         this.subjectManagementService.deleteUserGroup(originalGroup.id).subscribe();
       }
     }
 
-    // 2. Create groups
+    // 2. Create or update groups
     for (const group of this.groups) {
       if (!originalGroupIds.has(group.id)) {
+        // Create new group
         const createDto: CreateUserGroupDTO = { name: group.name, maxSize: group.maxSize };
         this.subjectManagementService.createUserGroup(createDto).subscribe(newGroup => {
-          // Update the temporary ID with the real one from the backend
-          const tempGroup = this.groups.find(g => g.id === group.id);
-          if (tempGroup) {
-            tempGroup.id = newGroup.id;
-          }
-          // Now handle memberships for this new group
+          group.id = newGroup.id; // Update temporary ID
           this.updateMemberships(newGroup.id, [], group.members);
         });
       } else {
-        // 3. Update memberships for existing groups
+        // Update existing group
         const originalGroup = this.originalGroups.find(g => g.id === group.id);
         if (originalGroup) {
           this.updateMemberships(group.id, originalGroup.members, group.members);
@@ -194,8 +209,8 @@ export class UserGroupingComponent implements OnInit {
       }
     }
 
-    // After all operations, reload data to be in sync with the server
-    this.loadData();
+    // Use a timeout to ensure all backend operations have a chance to complete before reloading
+    setTimeout(() => this.loadData(), 1000);
   }
 
   private updateMemberships(groupId: number, originalMembers: UserDTO[], currentMembers: UserDTO[]) {
@@ -213,6 +228,9 @@ export class UserGroupingComponent implements OnInit {
     // Remove old members
     for (const member of originalMembers) {
       if (!currentMemberIds.has(member.id)) {
+        // We need the membership ID to delete it, which we don't have here.
+        // The backend should probably handle deletion by userId and groupId.
+        // Assuming the service has a method for this.
         this.subjectManagementService.deleteUserGroupMembership(member.id, groupId).subscribe();
       }
     }
