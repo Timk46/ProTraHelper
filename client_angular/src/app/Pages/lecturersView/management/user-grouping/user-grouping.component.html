@@ -1,22 +1,22 @@
-<div class="max-w-7xl mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
+<div class="container">
   <!-- Header -->
-  <div class="mb-6">
-    <h1 class="text-2xl font-bold text-gray-800">Gruppenaufteilung</h1>
-    <p class="text-gray-600 mt-1">Ziehen Sie User per Drag & Drop in die gewünschten Gruppen oder nutzen Sie die automatische Aufteilung.</p>
+  <div class="header-section">
+    <h2>Gruppenaufteilung</h2>
+    <p class="description">Ziehen Sie User per Drag & Drop in die gewünschten Gruppen oder nutzen Sie die automatische Aufteilung.</p>
   </div>
 
   <!-- Action Bar -->
-  <div class="bg-white p-4 mb-6 border border-gray-200 rounded-lg shadow-sm">
-    <div class="flex flex-wrap gap-4 items-center justify-between">
+  <div class="action-bar">
+    <div class="action-bar-content">
       <button mat-flat-button color="primary" (click)="createGroup()">
         <mat-icon>add</mat-icon>
         Neue Gruppe
       </button>
 
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2">
-          <label for="maxGroupSize" class="text-gray-700 text-sm font-medium">Max. Gruppengröße:</label>
-          <input type="number" id="maxGroupSize" [(ngModel)]="autoGroupSize" min="2" max="20" class="w-16 px-2 py-1 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-1 focus:ring-blue-500">
+      <div class="controls-section">
+        <div class="group-size-control">
+          <label for="maxGroupSize" class="group-size-label">Max. Gruppengröße:</label>
+          <input type="number" id="maxGroupSize" [(ngModel)]="autoGroupSize" min="2" max="20" class="group-size-input">
         </div>
         <button mat-flat-button color="accent" (click)="autoAssignGroups()" [disabled]="isAutoGroupingDisabled">
           <mat-icon>bolt</mat-icon>
@@ -27,24 +27,24 @@
   </div>
 
   <!-- Main Content -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" cdkDropListGroup>
+  <div class="main-grid" cdkDropListGroup>
     <!-- Available Users Column -->
-    <div class="lg:col-span-1">
-      <div class="bg-white border border-gray-200 rounded-lg shadow-sm min-h-[500px]">
-        <div class="p-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+    <div class="users-column">
+      <div class="users-card">
+        <div class="users-header">
+          <h2 class="users-title">
             <mat-icon>people</mat-icon>
             Verfügbare User ({{ unassignedUsers.length }})
           </h2>
         </div>
-        <div cdkDropList #unassignedList="cdkDropList" [cdkDropListData]="unassignedUsers" (cdkDropListDropped)="drop($event)" class="p-4 space-y-2 user-list-container">
-          <div *ngIf="unassignedUsers.length === 0" class="text-gray-500 text-center py-8">
+        <div cdkDropList #unassignedList="cdkDropList" [cdkDropListData]="unassignedUsers" (cdkDropListDropped)="drop($event)" class="users-list user-list-container">
+          <div *ngIf="unassignedUsers.length === 0" class="empty-users">
             Alle User sind in Gruppen eingeteilt.
           </div>
-          <div *ngFor="let user of unassignedUsers" cdkDrag [cdkDragData]="user" class="user-item bg-gray-50 border border-gray-200 rounded-md px-4 py-3 cursor-move hover:bg-gray-100 hover:border-gray-300">
-            <div class="flex items-center gap-3">
+          <div *ngFor="let user of unassignedUsers" cdkDrag [cdkDragData]="user" class="user-item">
+            <div class="user-content">
               <mat-icon>person</mat-icon>
-              <span class="text-gray-800 font-medium">{{ user.firstname }} {{ user.lastname }} ({{ user.email }})</span>
+              <span class="user-name">{{ user.firstname }} {{ user.lastname }} ({{ user.email }})</span>
             </div>
           </div>
         </div>
@@ -52,44 +52,44 @@
     </div>
 
     <!-- Groups Column -->
-    <div class="lg:col-span-2">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="groups-column">
+      <div class="groups-grid">
         <!-- Empty State -->
-        <div *ngIf="groups.length === 0" class="md:col-span-2 bg-white border border-dashed border-gray-300 rounded-lg p-12 text-center">
-          <p class="text-gray-500">Noch keine Gruppen erstellt</p>
-          <p class="text-gray-400 mt-2 text-sm">Klicken Sie auf "Neue Gruppe" oder nutzen Sie die Auto-Gruppierung</p>
+        <div *ngIf="groups.length === 0" class="empty-groups">
+          <p class="empty-groups-text">Noch keine Gruppen erstellt</p>
+          <p class="empty-groups-subtext">Klicken Sie auf "Neue Gruppe" oder nutzen Sie die Auto-Gruppierung</p>
         </div>
 
         <!-- Group Cards -->
-        <div *ngFor="let group of groups" cdkDropList [cdkDropListData]="group.members" (cdkDropListDropped)="drop($event)" class="group-card bg-white border-2 border-gray-200 rounded-lg shadow-sm" [class.drag-over]="group.isDragOver" (dragleave)="group.isDragOver = false" (dragover)="group.isDragOver = true">
-          <div class="p-4">
-            <div class="flex justify-between items-start mb-3">
-              <h3 class="text-base font-semibold text-gray-800">{{ group.name }}</h3>
+        <div *ngFor="let group of groups" cdkDropList [cdkDropListData]="group.members" (cdkDropListDropped)="drop($event)" class="group-card" [class.drag-over]="group.isDragOver" (dragleave)="group.isDragOver = false" (dragover)="group.isDragOver = true">
+          <div class="group-content">
+            <div class="group-header">
+              <h3 class="group-title">{{ group.name }}</h3>
               <button mat-icon-button color="warn" (click)="deleteGroup(group.id)">
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
 
-            <div class="mb-4">
-              <div class="flex justify-between text-xs mb-1">
-                <span class="text-gray-600">Mitglieder</span>
-                <span class="font-medium" [ngClass]="{'text-green-600': group.members.length >= group.maxSize, 'text-blue-600': group.members.length < group.maxSize}">
+            <div class="group-stats">
+              <div class="stats-header">
+                <span class="stats-label">Mitglieder</span>
+                <span class="stats-count" [ngClass]="{'full-group': group.members.length >= group.maxSize, 'partial-group': group.members.length < group.maxSize}">
                   {{ group.members.length }}/{{ group.maxSize }}
                 </span>
               </div>
-              <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                <div class="h-full transition-all duration-300" [ngClass]="{'bg-green-500': group.members.length >= group.maxSize, 'bg-blue-500': group.members.length < group.maxSize}" [style.width.%]="(group.members.length / group.maxSize) * 100"></div>
+              <div class="progress-bar">
+                <div class="progress-fill" [ngClass]="{'full-progress': group.members.length >= group.maxSize, 'partial-progress': group.members.length < group.maxSize}" [style.width.%]="(group.members.length / group.maxSize) * 100"></div>
               </div>
             </div>
 
-            <div class="space-y-2 min-h-[100px] bg-gray-50/50 p-2 rounded-md border user-list-container">
-              <div *ngIf="group.members.length === 0" class="text-gray-400 text-center py-8 text-xs">
+            <div class="group-members user-list-container">
+              <div *ngIf="group.members.length === 0" class="empty-group">
                 User hier ablegen
               </div>
-              <div *ngFor="let member of group.members" cdkDrag [cdkDragData]="member" class="user-item bg-white border border-gray-200 rounded px-3 py-2 cursor-move hover:bg-gray-100">
-                <div class="flex items-center gap-2">
+              <div *ngFor="let member of group.members" cdkDrag [cdkDragData]="member" class="group-member">
+                <div class="member-content">
                   <mat-icon>person</mat-icon>
-                  <span class="text-gray-700 text-sm">{{ member.firstname }} {{ member.lastname }} ({{ member.email }})</span>
+                  <span class="member-name">{{ member.firstname }} {{ member.lastname }} ({{ member.email }})</span>
                 </div>
               </div>
             </div>
@@ -100,7 +100,7 @@
   </div>
 
   <!-- Floating Action Buttons -->
-  <div *ngIf="hasChanges()" class="fixed bottom-6 right-6 flex flex-col gap-3">
+  <div *ngIf="hasChanges()" class="floating-actions">
     <button mat-fab color="primary" (click)="saveChanges()">
       <mat-icon>save</mat-icon>
     </button>

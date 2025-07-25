@@ -1,86 +1,86 @@
-<div class="max-w-7xl mx-auto p-6 bg-gray-100 rounded-lg shadow-md">
+<div class="container">
   <!-- Header -->
-  <div class="mb-6">
-    <h1 class="text-2xl font-bold text-gray-800">Abgabenübersicht</h1>
-    <p class="text-gray-600 mt-1">
+  <div class="header-section">
+    <h2>Abgabenübersicht</h2>
+    <p class="description">
       Hier sehen Sie alle hochgeladenen Abgaben<span *ngIf="question"> zur gewählten Aufgabe</span>, gruppiert nach Aufgabe und Nutzer. Sie können die Tabelle nach den Spalten sortieren, z.B. nach dem jüngsten Upload-Datum pro Gruppe. Beim Klick auf den Dateinamen wird die Datei heruntergeladen.
     </p>
-    <p *ngIf="question" class="text-gray-800 font-semibold mt-2">
+    <p *ngIf="question" class="selected-question">
       Ausgewählte Aufgabe: {{ question.name }} (ID: {{ question.id }})
     </p>
   </div>
 
   <!-- Main Content -->
-  <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
-    <div *ngIf="isLoading" class="p-6 text-center">
+  <div class="main-content">
+    <div *ngIf="isLoading" class="loading-section">
       <p>Loading...</p>
     </div>
 
-    <div *ngIf="error" class="p-6 text-center text-red-600">
+    <div *ngIf="error" class="error-section">
       <p>{{ error }}</p>
     </div>
 
-    <div *ngIf="!isLoading && !error" class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+    <div *ngIf="!isLoading && !error" class="table-container">
+      <table class="data-table">
+        <thead class="table-header">
           <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" (click)="sortBy('conceptTitle')">
+            <th class="table-cell header-cell sortable" (click)="sortBy('conceptTitle')">
               Thema
               <span *ngIf="sortColumn === 'conceptTitle'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" (click)="sortBy('questionTitle')">
+            <th class="table-cell header-cell sortable" (click)="sortBy('questionTitle')">
               Frage
               <span *ngIf="sortColumn === 'questionTitle'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" (click)="sortBy('userMail')">
+            <th class="table-cell header-cell sortable" (click)="sortBy('userMail')">
               Email
               <span *ngIf="sortColumn === 'userMail'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" (click)="sortBy('fileName')">
+            <th class="table-cell header-cell sortable" (click)="sortBy('fileName')">
               Datei
               <span *ngIf="sortColumn === 'fileName'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" (click)="sortBy('latestUploadDate')">
+            <th class="table-cell header-cell sortable" (click)="sortBy('latestUploadDate')">
               Datum (jüngster Upload)
               <span *ngIf="sortColumn === 'latestUploadDate'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
-            <th scope="col" class="relative px-6 py-3">
+            <th class="table-cell header-cell actions-cell">
               <span class="sr-only">Actions</span>
             </th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="table-body">
           <ng-container *ngFor="let key of sortedGroupKeys">
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ groupedAnswers[key][0].conceptTitle }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ groupedAnswers[key][0].questionTitle }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ groupedAnswers[key][0].userMail }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <a *ngIf="groupedAnswers[key][0].fileName" href="#" (click)="downloadFile(groupedAnswers[key][0].fileUniqueIdentifier || ''); $event.preventDefault();" class="text-blue-600 hover:text-blue-800">
+            <tr class="table-row">
+              <td class="table-cell main-cell">{{ groupedAnswers[key][0].conceptTitle }}</td>
+              <td class="table-cell">{{ groupedAnswers[key][0].questionTitle }}</td>
+              <td class="table-cell">{{ groupedAnswers[key][0].userMail }}</td>
+              <td class="table-cell">
+                <a *ngIf="groupedAnswers[key][0].fileName" href="#" (click)="downloadFile(groupedAnswers[key][0].fileUniqueIdentifier || ''); $event.preventDefault();" class="file-link">
                   {{ groupedAnswers[key][0].fileName }}
                 </a>
-                <span *ngIf="!groupedAnswers[key][0].fileName">n/a</span>
+                <span *ngIf="!groupedAnswers[key][0].fileName" class="no-file">n/a</span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ getLatestUploadDate(key) | date:'dd.MM.yyyy HH:mm' }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button mat-stroked-button color="primary" *ngIf="groupedAnswers[key].length > 1" (click)="toggleGroup(key)">
+              <td class="table-cell">{{ getLatestUploadDate(key) | date:'dd.MM.yyyy HH:mm' }}</td>
+              <td class="table-cell actions-cell">
+                <button mat-stroked-button color="primary" *ngIf="groupedAnswers[key].length > 1" (click)="toggleGroup(key)" class="expand-button">
                   {{ expandedGroups[key] ? '▲' : '+' + (groupedAnswers[key].length - 1) + ' ▼' }}
                 </button>
               </td>
             </tr>
             <ng-container *ngIf="expandedGroups[key]">
-              <tr class="bg-gray-50 hover:bg-gray-100" *ngFor="let item of groupedAnswers[key]; let i = index" [hidden]="i === 0">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ item.conceptTitle }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.questionTitle }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.userMail }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <a *ngIf="item.fileName" href="#" (click)="downloadFile(item.fileUniqueIdentifier || ''); $event.preventDefault();" class="text-blue-600 hover:text-blue-800">
+              <tr class="table-row expanded-row" *ngFor="let item of groupedAnswers[key]; let i = index" [hidden]="i === 0">
+                <td class="table-cell main-cell">{{ item.conceptTitle }}</td>
+                <td class="table-cell">{{ item.questionTitle }}</td>
+                <td class="table-cell">{{ item.userMail }}</td>
+                <td class="table-cell">
+                  <a *ngIf="item.fileName" href="#" (click)="downloadFile(item.fileUniqueIdentifier || ''); $event.preventDefault();" class="file-link">
                     {{ item.fileName }}
                   </a>
-                  <span *ngIf="!item.fileName">n/a</span>
+                  <span *ngIf="!item.fileName" class="no-file">n/a</span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.uploadDate | date:'dd.MM.yyyy HH:mm' }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"></td>
+                <td class="table-cell">{{ item.uploadDate | date:'dd.MM.yyyy HH:mm' }}</td>
+                <td class="table-cell actions-cell"></td>
               </tr>
             </ng-container>
           </ng-container>
