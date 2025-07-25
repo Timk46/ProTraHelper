@@ -44,6 +44,9 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     [NotificationType.COMMENT]: 'Kommentar',
     [NotificationType.SOLUTION]: 'Lösung',
     [NotificationType.INFO]: 'Information',
+    [NotificationType.EVALUATION_COMMENT]: 'Bewertungskommentar',
+    [NotificationType.EVALUATION_RATING]: 'Bewertung',
+    [NotificationType.PHASE_SWITCH]: 'Phasenwechsel',
   } as const;
 
   /** Formatter for displaying timestamps with date and time */

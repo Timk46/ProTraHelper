@@ -44,9 +44,8 @@ npm run compodoc        # Generate documentation (port 8002)
 
 ```bash
 npm run seed            # Reset database and seed with test data
-npm run seedProTra      # Seed ProTra-specific data
-npm run resetseed       # Force reset and seed
-npx prisma migrate dev  # Run pending migrations
+npm run seedProTra      # Seed ProTra-specific dat
+npx prisma migrate deploy  # Run pending migrations
 npx prisma studio       # Open Prisma Studio GUI
 ```
 
@@ -217,7 +216,7 @@ A new system for launching Rhino with Grasshopper files:
 ### Working with Prisma
 
 1. Modify schema in `prisma/schema.prisma`
-2. Generate migration: `npx prisma migrate dev --name description`
+2. Generate migration: `npx prisma migrate deploy --name description`
 3. Update client: `npx prisma generate`
 4. Seed data if needed in `prisma/seed/`
 
@@ -239,14 +238,6 @@ Essential environment variables needed:
 - `COHERE_API_KEY`: For AI features
 - `LANGCHAIN_API_KEY`: For tracing
 - `JUDGE0_URL`: Code execution service
-
-Of course. Here is the detailed English translation of the best practices and conventions for the `client_angular` frontend.
-
----
-
-Absolutely. Here is a detailed description of the best practices and conventions for the `client_angular` frontend, based on the existing structure. This can serve as a guide for developers and as context for a language model.
-
----
 
 ### **Best Practices and Conventions for the Angular Frontend (`client_angular`)**
 
@@ -294,7 +285,7 @@ The frontend's architecture follows the principle of a clear separation of respo
 
 ```typescript
 // in a service
-import { UserDTO } from '@dtos'; // use path alias @dtos
+import { UserDTO } from '@DTOs/index'; // use path alias @dtos
 import { Observable } from 'rxjs';
 
 // ...
@@ -400,15 +391,45 @@ Controllers are the traffic and security control of the API.
 **Example:**
 
 ```typescript
-import { CreateUserDTO } from "@dtos"; // use path alias @dtos
+import { CreateUserDTO } from "@DTOs/index";
 
+/**
+ * Controller für die Behandlung von benutzerbezogenen HTTP-Anfragen
+ *
+ * @description Dieser Controller verwaltet alle HTTP-Endpunkte für Benutzeroperationen.
+ * Er folgt dem Prinzip dünner Controller, indem er nur die HTTP-Schicht behandelt
+ * und die gesamte Geschäftslogik an den UsersService delegiert.
+ *
+ * @Controller users
+ */
 @Controller("users")
 export class UsersController {
+  /**
+   * Erstellt eine Instanz des UsersController
+   *
+   * @description Injiziert den UsersService über Dependency Injection
+   *
+   * @param {UsersService} usersService - Der injizierte UsersService für Geschäftslogik
+   * @memberof UsersController
+   */
   constructor(private readonly usersService: UsersService) {}
 
+  /**
+   * Erstellt einen neuen Benutzer
+   *
+   * @description Dieser Endpunkt empfängt Benutzerdaten über den Request Body,
+   * validiert sie automatisch über das ValidationPipe und delegiert die
+   * Erstellung an den UsersService. Der Controller enthält keine Geschäftslogik.
+   *
+   * @method POST
+   * @route POST /users
+   *
+   * @param {CreateUserDTO} createUserDto - Die validierten Benutzerdaten
+   * @returns {Promise<User>} Promise mit dem erstellten Benutzer
+   */
   @Post()
-  async createUser(@Body() createUserDto: CreateUserDTO) {
-    // No logic here, only delegation!
+  async createUser(@Body() createUserDto: CreateUserDTO): Promise<User> {
+    // Keine Logik hier, nur Delegation!
     return this.usersService.create(createUserDto);
   }
 }
@@ -556,7 +577,7 @@ export class UserDTO {
 }
 
 // in angular.service.ts
-import { UserDTO } from '@dtos'; // Use path aliases!
+import { UserDTO } from '@DTOs/index'; // Use path aliases!
 ...
 getUser(id: number): Observable<UserDTO> {
   return this.http.get<UserDTO>(`/api/users/${id}`);
@@ -668,7 +689,7 @@ This protocol outlines a four-phase, structured methodology for tackling complex
     - During this phase, you are in a **read-only** mode. Your primary goal is to absorb information, not to generate solutions or write code.
 
 2.  **Strategic Use of Sub-Agents for Focused Investigation:**
-    - For complex or multifaceted problems, you must delegate specific investigatory tasks to specialized sub-agents. This maintains the integrity of your primary operational context and allows for parallelized, efficient information gathering.
+    - For complex or multifaceted problems, you must delegate specific investigatory tasks to specialized sub-agents. This maintains the integrity of your primary operational context and allows for parallelized, efficient information gathering. Always use them for reading and analyzing files.
     - **Example Delegations:**
       - "Sub-agent, investigate the official documentation for the `matplotlib` library and report back on the best methods for creating time-series plots with logarithmic axes."
       - "Sub-agent, verify the authentication method required by the third-party API endpoint defined in `external_comms.py`."

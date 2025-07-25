@@ -18,19 +18,37 @@ export enum EvaluationPhase {
 export interface EvaluationSubmissionDTO {
   id: string;
   title: string;
+  description?: string;
   authorId: number;
   pdfFileId: number;
-  moduleId: number;
+  sessionId: number;
   status: EvaluationStatus;
   phase: EvaluationPhase;
   submittedAt: Date;
   createdAt: Date;
   updatedAt: Date;
+ 
   
   // Relations
   author?: UserDTO;
   pdfFile?: FileDto;
-  module?: ModuleDTO;
+  session?: {
+    id: number;
+    title: string;
+    description?: string;
+    startDate: Date;
+    endDate: Date;
+    moduleId: number;
+    phase: EvaluationPhase;
+    isActive: boolean;
+    isAnonymous: boolean;
+  };
+  discussions?: any[];
+  ratings?: any[];
+  _count?: {
+    discussions?: number;
+    ratings?: number;
+  };
   
   // PDF Metadata
   pdfMetadata?: {

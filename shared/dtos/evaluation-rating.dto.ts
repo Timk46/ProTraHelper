@@ -6,7 +6,7 @@ export interface EvaluationRatingDTO {
   id: string;
   submissionId: string;
   userId: number;
-  categoryId: string;
+  categoryId: number;
   score: number; // 0-10 points
   createdAt: Date;
   updatedAt: Date;
@@ -17,19 +17,12 @@ export interface EvaluationRatingDTO {
   category?: EvaluationCategoryDTO;
 }
 
-export interface CreateRatingDTO {
-  submissionId: string;
-  categoryId: string;
-  score: number;
-}
-
-export interface UpdateRatingDTO {
-  score: number;
-}
+// CreateRatingDTO and UpdateRatingDTO are now defined in evaluation-rating-create.dto.ts
+// to avoid duplicate exports
 
 export interface RatingStatsDTO {
   submissionId: string;
-  categoryId: string;
+  categoryId: number;
   
   // Statistics
   averageScore: number;
@@ -50,7 +43,7 @@ export interface RatingSubmissionResultDTO {
   
   // Category ratings
   categoryRatings: {
-    categoryId: string;
+    categoryId: number;
     categoryName: string;
     userRating?: number;
     averageRating: number;

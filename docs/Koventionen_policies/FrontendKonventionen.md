@@ -46,7 +46,7 @@ Die Architektur des Frontends folgt dem Prinzip der klaren Trennung von Verantwo
 
 ```typescript
 // in einem Service
-import { UserDTO } from '@dtos'; // Pfadaliase @dtos verwenden
+import { UserDTO } from '@DTOs/index'; // Pfadaliase @dtos verwenden
 import { Observable } from 'rxjs';
 
 // ...

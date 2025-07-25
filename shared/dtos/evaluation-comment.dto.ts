@@ -16,36 +16,45 @@ export interface AuthorDTO {
 
 export interface EvaluationCommentDTO {
   id: string;
-  discussionId: string;
-  categoryId: string;
-  author: AuthorDTO;
+  submissionId: string;
+  categoryId: number | null;
+  authorId: number;
   content: string;
+  parentId?: string;
   createdAt: Date;
   updatedAt: Date;
   
+  // Display info
+  author: AuthorDTO;
+  category?: EvaluationCategoryDTO;
+  
   // Voting data
-  upvotes: number;
-  downvotes: number;
-  userVote?: VoteType;
+  votes: Array<{
+    id: string;
+    commentId: string;
+    userId: number;
+    voteType: VoteType;
+    createdAt: Date;
+  }>;
+  voteStats: {
+    upVotes: number;
+    downVotes: number;
+    totalVotes: number;
+    score: number;
+  };
   
   // Threading
-  parentId?: string;
-  replies?: EvaluationCommentDTO[];
+  replies: EvaluationCommentDTO[];
   replyCount: number;
-  
-  // Metadata
-  isEdited?: boolean;
-  editedAt?: Date;
   
   // Relations
   submission?: EvaluationSubmissionDTO;
-  category?: EvaluationCategoryDTO;
 }
 
 export interface EvaluationDiscussionDTO {
   id: string;
   submissionId: string;
-  categoryId: string;
+  categoryId: number;
   comments: EvaluationCommentDTO[];
   createdAt: Date;
   
@@ -61,7 +70,7 @@ export interface EvaluationDiscussionDTO {
 
 export interface CreateCommentDTO {
   submissionId: string;
-  categoryId: string;
+  categoryId?: number;
   content: string;
   parentId?: string;
   anonymousUserId?: string;

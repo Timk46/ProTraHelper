@@ -6,15 +6,19 @@ import { seedTranscriptsToConceptNodes } from './processTranscripts';
 import { seedUmlearn } from './seedUmlearnModelData';
 import { seedMCSlider } from './seed/seedMCSlider';
 import { seedTWL } from './seedTWl';
+import seedEvaluationCompleteFix from './seed/seedEvaluationCompleteFix';
+import { seedEvaluationDemo } from './seed/seedEvaluationDemo';
 const prisma = new PrismaClient();
 
 async function main() {
   //await seedAUD();
   //await seedOFP();
-  await seedTraKo();
+  //await seedTraKo();
   //await seedTranscriptsToConceptNodes();
   //await seedUmlearn();
-
+  //await seedMCSlider();
+  await seedEvaluationCompleteFix();
+  //await seedEvaluationDemo();
 }
 
 main()

@@ -31,9 +31,13 @@ export class NavigationPreferenceSettingsComponent implements OnInit {
     private readonly dialogRef: MatDialogRef<NavigationPreferenceSettingsComponent>,
     private readonly moduleSettings: ModuleSettingsService,
     @Inject(MAT_DIALOG_DATA) private readonly data: { moduleId: number },
-  ) {}
+  ) {
+    console.log('data', this.data);
+  }
 
   ngOnInit(): void {
+    console.log('callling NavigationPreferenceSettingsComponent');
+    console.log('moduleId', this.data.moduleId);
     this.moduleSettings
       .getSetting<NavigatorSetting>(this.data.moduleId, 'enabled_navigators')
       .subscribe(setting => {

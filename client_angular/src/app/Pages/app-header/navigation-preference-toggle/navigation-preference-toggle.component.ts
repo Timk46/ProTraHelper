@@ -115,7 +115,7 @@ export class NavigationPreferenceToggleComponent implements OnInit {
   openSettings(): void {
     const dialogRef = this.dialog.open(NavigationPreferenceSettingsComponent, {
       width: '400px',
-      data: { moduleId: 1 }, // TODO: Get the current module ID
+      data: { moduleId: 3 }, // TODO: Get the current module ID
     });
 
     dialogRef.afterClosed().subscribe(result => {

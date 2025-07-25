@@ -46,11 +46,22 @@ export * from "./rhino-window.dto";
 export * from "./mcslider.dto";
 
 //Evaluation & Discussion Forum DTOs
+export * from "./evaluation-session.dto";
 export * from "./evaluation-submission.dto";
+export * from "./evaluation-submission-create.dto";
 export * from "./evaluation-category.dto";
 export * from "./evaluation-comment.dto";
+export * from "./evaluation-comment-create.dto";
 export * from "./evaluation-vote.dto";
 export * from "./evaluation-rating.dto";
+export * from "./evaluation-rating-create.dto";
 export * from "./comment-stats.dto";
 export * from "./anonymous-evaluation-user.dto";
 export * from "./phase-switch.dto";
+export * from "./phase-switch-schedule.dto";
+
+// Additional types and enums from evaluation DTOs
+export { EvaluationDiscussionDTO, VoteType } from "./evaluation-comment.dto";
+export { EvaluationPhase } from "./evaluation-submission.dto";
+export { RatingStatsDTO } from "./evaluation-rating.dto";
+export { PhaseSwitchResponseDTO } from "./phase-switch.dto";

@@ -326,6 +326,100 @@ export class NotificationService {
   }
 
   /**
+   * Notify about evaluation comment
+   * @param {string} submissionId
+   * @param {number} commenterId
+   */
+  async notifyEvaluationComment(submissionId: string, commenterId: number): Promise<void> {
+    try {
+      const submission = await this.prisma.evaluationSubmission.findUnique({
+        where: { id: submissionId },
+        include: {
+          author: { select: { id: true, firstname: true, lastname: true } },
+        },
+      });
+
+      if (submission && submission.authorId !== commenterId) {
+        await this.notifyUser({
+          userId: submission.authorId,
+          message: `New evaluation comment on your submission "${submission.title}"`,
+          type: NotificationType.EVALUATION_COMMENT,
+          timestamp: new Date(),
+          isRead: false,
+        });
+      }
+    } catch (error) {
+      console.error('Error notifying evaluation comment:', error);
+    }
+  }
+
+  /**
+   * Notify about evaluation rating
+   * @param {string} submissionId
+   * @param {number} raterId
+   */
+  async notifyEvaluationRating(submissionId: string, raterId: number): Promise<void> {
+    try {
+      const submission = await this.prisma.evaluationSubmission.findUnique({
+        where: { id: submissionId },
+        include: {
+          author: { select: { id: true, firstname: true, lastname: true } },
+        },
+      });
+
+      if (submission && submission.authorId !== raterId) {
+        await this.notifyUser({
+          userId: submission.authorId,
+          message: `New evaluation rating on your submission "${submission.title}"`,
+          type: NotificationType.EVALUATION_RATING,
+          timestamp: new Date(),
+          isRead: false,
+        });
+      }
+    } catch (error) {
+      console.error('Error notifying evaluation rating:', error);
+    }
+  }
+
+  /**
+   * Notify about phase switch
+   * @param {number} sessionId
+   * @param {string} newPhase
+   */
+  async notifyPhaseSwitch(sessionId: number, newPhase: string): Promise<void> {
+    try {
+      const session = await this.prisma.evaluationSession.findUnique({
+        where: { id: sessionId },
+        include: {
+          module: { select: { name: true } },
+          submissions: {
+            include: {
+              author: { select: { id: true, firstname: true, lastname: true } },
+            },
+          },
+        },
+      });
+
+      if (session) {
+        const userIds = session.submissions.map(s => s.authorId);
+        const uniqueUserIds = [...new Set(userIds)];
+
+        const notifications = uniqueUserIds.map(userId => ({
+          userId,
+          message: `Evaluation session "${session.title}" in ${session.module.name} has switched to ${newPhase} phase`,
+          type: NotificationType.PHASE_SWITCH,
+          timestamp: new Date(),
+          isRead: false,
+        }));
+
+        await this.notifyUsers(notifications);
+      }
+    } catch (error) {
+      console.error('Error notifying phase switch:', error);
+    }
+  }
+
+  /**
    * Convert a Prisma notification to a NotificationDTO
    * @param {Notification} prismaNotification
    * @returns {NotificationDTO} the notification as DTO

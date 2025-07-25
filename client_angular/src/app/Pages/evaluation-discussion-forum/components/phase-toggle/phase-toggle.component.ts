@@ -11,7 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 
 // DTOs
-import { PhaseSwitchDTO } from '@dtos';
+import { PhaseSwitchScheduleDTO, EvaluationPhase } from '@DTOs/index';
 
 @Component({
   selector: 'app-phase-toggle',
@@ -31,13 +31,19 @@ import { PhaseSwitchDTO } from '@dtos';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PhaseToggleComponent {
-  
+
+  // =============================================================================
+  // TEMPLATE UTILITIES
+  // =============================================================================
+
+  protected readonly Math = Math;
+
   // =============================================================================
   // INPUTS - CONFIGURATION FROM PARENT
   // =============================================================================
-  
+
   @Input() currentPhase: 'discussion' | 'evaluation' = 'discussion';
-  @Input() phaseSwitch: PhaseSwitchDTO | null = null;
+  @Input() phaseSwitch: PhaseSwitchScheduleDTO | null = null;
   @Input() disabled: boolean = false;
   @Input() showLabels: boolean = true;
   @Input() showDescription: boolean = true;
@@ -48,13 +54,13 @@ export class PhaseToggleComponent {
   // =============================================================================
   // OUTPUTS - EVENTS TO PARENT
   // =============================================================================
-  
+
   @Output() phaseChanged = new EventEmitter<'discussion' | 'evaluation'>();
 
   // =============================================================================
   // EVENT HANDLERS
   // =============================================================================
-  
+
   onPhaseToggle(newPhase: 'discussion' | 'evaluation'): void {
     if (!this.disabled && newPhase !== this.currentPhase) {
       this.phaseChanged.emit(newPhase);
@@ -64,31 +70,43 @@ export class PhaseToggleComponent {
   // =============================================================================
   // TEMPLATE HELPER METHODS
   // =============================================================================
-  
+
   /**
    * Gets the phase display information
    */
-  getPhaseInfo(phase: 'discussion' | 'evaluation'): {
+  getPhaseInfo(phase: EvaluationPhase | 'discussion' | 'evaluation'): {
     title: string;
     description: string;
     icon: string;
     color: string;
   } {
     const phaseInfo = {
-      discussion: {
+      [EvaluationPhase.DISCUSSION]: {
         title: 'Diskussion',
         description: 'Kommentare und Diskussionen zu Bewertungen',
         icon: 'forum',
         color: 'primary'
       },
-      evaluation: {
+      [EvaluationPhase.EVALUATION]: {
+        title: 'Bewertung',
+        description: 'Bewertungen zu verschiedenen Kategorien abgeben',
+        icon: 'star_rate',
+        color: 'accent'
+      },
+      'discussion': {
+        title: 'Diskussion',
+        description: 'Kommentare und Diskussionen zu Bewertungen',
+        icon: 'forum',
+        color: 'primary'
+      },
+      'evaluation': {
         title: 'Bewertung',
         description: 'Bewertungen zu verschiedenen Kategorien abgeben',
         icon: 'star_rate',
         color: 'accent'
       }
     };
-    
+
     return phaseInfo[phase];
   }
 
@@ -99,13 +117,13 @@ export class PhaseToggleComponent {
     if (this.disabled) {
       return 'Phasenwechsel ist momentan nicht möglich';
     }
-    
+
     const info = this.getPhaseInfo(phase);
-    
+
     if (phase === this.currentPhase) {
       return `Aktuelle Phase: ${info.title}`;
     }
-    
+
     return `Zu ${info.title} wechseln: ${info.description}`;
   }
 
@@ -128,7 +146,7 @@ export class PhaseToggleComponent {
    */
   getPhaseBadgeText(phase: 'discussion' | 'evaluation'): string {
     const count = this.getPhaseBadgeCount(phase);
-    
+
     if (phase === 'discussion') {
       return count === 1 ? '1 Kommentar' : `${count} Kommentare`;
     } else {
@@ -143,17 +161,17 @@ export class PhaseToggleComponent {
     if (this.phaseSwitch) {
       const currentTime = new Date();
       const switchTime = new Date(this.phaseSwitch.switchTime);
-      
+
       if (currentTime < switchTime) {
         const timeDiff = switchTime.getTime() - currentTime.getTime();
         const hoursLeft = Math.ceil(timeDiff / (1000 * 60 * 60));
-        
+
         return `Automatischer Wechsel in ${hoursLeft} Stunden`;
       } else {
         return 'Phase kann gewechselt werden';
       }
     }
-    
+
     return '';
   }
 
@@ -168,33 +186,33 @@ export class PhaseToggleComponent {
    * Gets the automatic switch information
    */
   getAutomaticSwitchInfo(): {
-    targetPhase: 'discussion' | 'evaluation';
+    targetPhase: EvaluationPhase;
     timeRemaining: string;
     isActive: boolean;
   } | null {
     if (!this.phaseSwitch) {
       return null;
     }
-    
+
     const currentTime = new Date();
     const switchTime = new Date(this.phaseSwitch.switchTime);
     const isActive = currentTime < switchTime;
-    
+
     if (!isActive) {
       return null;
     }
-    
+
     const timeDiff = switchTime.getTime() - currentTime.getTime();
     const hours = Math.floor(timeDiff / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     let timeRemaining = '';
     if (hours > 0) {
       timeRemaining = `${hours}h ${minutes}m`;
     } else {
       timeRemaining = `${minutes}m`;
     }
-    
+
     return {
       targetPhase: this.phaseSwitch.targetPhase,
       timeRemaining,
@@ -207,19 +225,19 @@ export class PhaseToggleComponent {
    */
   getContainerClass(): string {
     const classes = [`phase-toggle-${this.currentPhase}`];
-    
+
     if (this.compactMode) {
       classes.push('compact');
     }
-    
+
     if (this.disabled) {
       classes.push('disabled');
     }
-    
+
     if (this.hasAutomaticSwitch()) {
       classes.push('has-automatic-switch');
     }
-    
+
     return classes.join(' ');
   }
 
@@ -228,15 +246,15 @@ export class PhaseToggleComponent {
    */
   getPhaseButtonClass(phase: 'discussion' | 'evaluation'): string {
     const classes = [`phase-button-${phase}`];
-    
+
     if (phase === this.currentPhase) {
       classes.push('active');
     }
-    
+
     if (this.hasPhaseContent(phase)) {
       classes.push('has-content');
     }
-    
+
     return classes.join(' ');
   }
 
@@ -245,18 +263,18 @@ export class PhaseToggleComponent {
    */
   getAutomaticSwitchProgress(): number {
     const switchInfo = this.getAutomaticSwitchInfo();
-    
+
     if (!switchInfo || !this.phaseSwitch) {
       return 0;
     }
-    
+
     const currentTime = new Date();
     const startTime = new Date(this.phaseSwitch.createdAt);
     const endTime = new Date(this.phaseSwitch.switchTime);
-    
+
     const totalDuration = endTime.getTime() - startTime.getTime();
     const elapsedTime = currentTime.getTime() - startTime.getTime();
-    
+
     return Math.min(100, Math.max(0, (elapsedTime / totalDuration) * 100));
   }
 
@@ -274,8 +292,8 @@ export class PhaseToggleComponent {
     if (!this.phaseSwitch) {
       return 'swap_horiz';
     }
-    
-    if (this.phaseSwitch.targetPhase === 'evaluation') {
+
+    if (this.phaseSwitch.targetPhase === EvaluationPhase.EVALUATION) {
       return 'trending_up';
     } else {
       return 'trending_down';
@@ -287,7 +305,7 @@ export class PhaseToggleComponent {
    */
   getUrgencyLevel(): 'low' | 'medium' | 'high' {
     const progress = this.getAutomaticSwitchProgress();
-    
+
     if (progress >= 80) {
       return 'high';
     } else if (progress >= 50) {
@@ -327,13 +345,13 @@ export class PhaseToggleComponent {
     if (this.disabled) {
       return 'Phasenwechsel deaktiviert';
     }
-    
+
     const switchInfo = this.getAutomaticSwitchInfo();
     if (switchInfo) {
       const targetInfo = this.getPhaseInfo(switchInfo.targetPhase);
       return `Automatischer Wechsel zu ${targetInfo.title} in ${this.formatTimeRemaining(switchInfo.timeRemaining)}`;
     }
-    
+
     return this.getCurrentPhaseStatus() || 'Manueller Phasenwechsel möglich';
   }
 
@@ -344,9 +362,9 @@ export class PhaseToggleComponent {
     if (this.disabled) {
       return 'error';
     }
-    
+
     const urgency = this.getUrgencyLevel();
-    
+
     switch (urgency) {
       case 'high':
         return 'error';

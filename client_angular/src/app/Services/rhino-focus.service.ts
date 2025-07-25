@@ -15,7 +15,7 @@ import {
   RhinoFocusResponseDTO,
   RhinoWindowStatusDTO,
   WindowsApiAvailabilityDTO,
-} from '@DTOs/rhino-window.dto';
+} from '@DTOs/index';
 
 /**
  * Konfiguration für Rhino Focus Service
@@ -43,7 +43,7 @@ const DEFAULT_CONFIG: RhinoFocusConfig = {
   providedIn: 'root',
 })
 export class RhinoFocusService {
-  private readonly baseUrl = `${environment.server}/api/rhino`;
+  private readonly baseUrl = `${environment.server}/api/rhinodirect`;
   private config: RhinoFocusConfig = { ...DEFAULT_CONFIG };
   private isAvailable: boolean | null = null;
 
@@ -79,21 +79,19 @@ export class RhinoFocusService {
       return of(false);
     }
 
-    return this.http
-      .get<WindowsApiAvailabilityDTO>(`${this.baseUrl}/test-windows-api`)
-      .pipe(
-        timeout(this.config.timeoutMs),
-        map(response => {
-          this.isAvailable = response.available;
-          console.log('🧪 Rhino API availability:', response);
-          return response.available;
-        }),
-        catchError(error => {
-          console.warn('⚠️ Rhino API availability check failed:', error);
-          this.isAvailable = false;
-          return of(false);
-        }),
-      );
+    return this.http.get<WindowsApiAvailabilityDTO>(`${this.baseUrl}/test-windows-api`).pipe(
+      timeout(this.config.timeoutMs),
+      map(response => {
+        this.isAvailable = response.available;
+        console.log('🧪 Rhino API availability:', response);
+        return response.available;
+      }),
+      catchError(error => {
+        console.warn('⚠️ Rhino API availability check failed:', error);
+        this.isAvailable = false;
+        return of(false);
+      }),
+    );
   }
 
   /**
@@ -120,17 +118,15 @@ export class RhinoFocusService {
 
     console.log('🎯 Focusing Rhino window:', focusRequest);
 
-    return this.http
-      .post<RhinoFocusResponseDTO>(`${this.baseUrl}/focus-window`, focusRequest)
-      .pipe(
-        timeout(this.config.timeoutMs),
-        retry(this.config.retryAttempts),
-        map((response: RhinoFocusResponseDTO) => {
-          console.log('✅ Rhino focus result:', response);
-          return response;
-        }),
-        catchError(error => this.handleError<RhinoFocusResponseDTO>('focusRhinoWindow', error)),
-      );
+    return this.http.post<RhinoFocusResponseDTO>(`${this.baseUrl}/focus-window`, focusRequest).pipe(
+      timeout(this.config.timeoutMs),
+      retry(this.config.retryAttempts),
+      map((response: RhinoFocusResponseDTO) => {
+        console.log('✅ Rhino focus result:', response);
+        return response;
+      }),
+      catchError(error => this.handleError<RhinoFocusResponseDTO>('focusRhinoWindow', error)),
+    );
   }
 
   /**

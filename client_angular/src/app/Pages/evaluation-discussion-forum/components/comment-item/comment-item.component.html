@@ -1,167 +1,56 @@
-<!-- Comment Item Card -->
-<mat-card class="comment-card" [ngClass]="getDepthClass()">
-  
-  <!-- Comment Header -->
-  <mat-card-header class="comment-header">
-    
-    <!-- Author Information -->
-    <div class="author-section">
-      
-      <!-- Author Chip -->
-      <mat-chip 
-        class="author-chip"
-        [style.background-color]="getAuthorColorCode()"
-        [style.color]="'white'"
-        [matTooltip]="getAuthorTooltip()">
-        
-        <mat-icon *ngIf="isCurrentUser()" matChipRemove>person</mat-icon>
-        <span class="author-name">{{ getAuthorDisplayName() }}</span>
-        
-      </mat-chip>
-      
-      <!-- User Vote Indicator -->
-      <mat-chip 
-        *ngIf="hasUserVoted()"
-        class="vote-indicator-chip"
-        [style.background-color]="getUserVoteColor()">
-        <mat-icon>{{ getUserVoteIcon() }}</mat-icon>
-      </mat-chip>
-      
-    </div>
-    
-    <!-- Comment Metadata -->
-    <div class="comment-metadata">
-      
-      <!-- Timestamp -->
-      <span class="comment-time" 
-            [matTooltip]="comment.createdAt | date:'medium':'de-DE'">
-        {{ formattedTime }}
-      </span>
-      
-      <!-- Reply Count -->
-      <span *ngIf="hasReplies()" 
-            class="reply-count"
-            [matTooltip]="'Antworten auf diesen Kommentar'">
-        <mat-icon>reply</mat-icon>
-        {{ getReplyCountText() }}
-      </span>
-      
-    </div>
-    
-  </mat-card-header>
-  
-  <!-- Comment Content -->
-  <mat-card-content class="comment-content">
-    
-    <!-- Comment Text -->
-    <div class="comment-text" 
+<!-- Chat Bubble Comment -->
+<div class="chat-bubble" [ngClass]="isCurrentUser() ? 'own-message' : 'other-message'">
+
+  <!-- Message Header -->
+  <div class="message-header">
+    <!-- Author Name (left) -->
+    <span class="author-name">{{ getAuthorDisplayName() }}</span>
+
+    <!-- Timestamp (right) -->
+    <span class="message-time"
+          [matTooltip]="comment.createdAt | date:'medium':'de-DE'">
+      {{ formattedTime }}
+    </span>
+  </div>
+
+  <!-- Message Content -->
+  <div class="message-content">
+    <div class="message-text"
          [innerHTML]="formatContent(sanitizeContent(getDisplayContent()))">
     </div>
-    
-    <!-- Expand/Collapse Button -->
-    <button *ngIf="shouldShowToggleButton()"
-            mat-button
-            class="toggle-content-button"
-            (click)="onToggleContent()">
-      <mat-icon>{{ isContentExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
-      {{ getToggleButtonText() }}
+  </div>
+
+  <!-- Voting Actions (only for other users' messages) -->
+  <div *ngIf="!isCurrentUser() && canVote" class="vote-actions">
+
+    <!-- Plus Vote Button -->
+    <button class="vote-btn plus"
+            [ngClass]="getUserVote() === 'UP' ? 'voted' : ''"
+            [disabled]="isVoting"
+            [matTooltip]="'Positiv bewerten'"
+            (click)="onVote('UP')">
+      <span>+</span>
     </button>
-    
-  </mat-card-content>
-  
-  <!-- Comment Actions -->
-  <mat-card-actions class="comment-actions">
-    
-    <!-- Vote Box Section -->
-    <div class="vote-section">
-      
-      <!-- Vote Box Component -->
-      <app-vote-box
-        [upvotes]="comment.upvotes"
-        [downvotes]="comment.downvotes"
-        [userVote]="comment.userVote"
-        [canVote]="canVote"
-        [isVoting]="isVoting"
-        [compactMode]="depth > 1"
-        (voted)="onVote($event)">
-      </app-vote-box>
-      
-      <!-- Vote Score Display -->
-      <div class="vote-score" 
-           [ngClass]="getVoteScoreClass()"
-           [matTooltip]="getVoteScoreTooltip()">
-        
-        <mat-icon class="score-icon">
-          {{ getVoteScore() > 0 ? 'trending_up' : getVoteScore() < 0 ? 'trending_down' : 'trending_flat' }}
-        </mat-icon>
-        
-        <span class="score-value">
-          {{ getVoteScore() >= 0 ? '+' : '' }}{{ getVoteScore() }}
-        </span>
-        
-      </div>
-      
-    </div>
-    
-    <!-- Comment Actions Buttons -->
-    <div class="action-buttons">
-      
-      <!-- Reply Button -->
-      <button mat-button 
-              class="reply-button"
-              [disabled]="!canVote || isReadOnly"
-              (click)="onReply()"
-              matTooltip="Auf diesen Kommentar antworten">
-        <mat-icon>reply</mat-icon>
-        Antworten
-      </button>
-      
-      <!-- More Actions Menu -->
-      <button mat-icon-button 
-              class="more-actions-button"
-              [matMenuTriggerFor]="moreActionsMenu"
-              matTooltip="Weitere Aktionen">
-        <mat-icon>more_vert</mat-icon>
-      </button>
-      
-      <!-- More Actions Menu -->
-      <mat-menu #moreActionsMenu="matMenu">
-        
-        <button mat-menu-item 
-                [disabled]="!isCurrentUser()"
-                matTooltip="Nur eigene Kommentare können bearbeitet werden">
-          <mat-icon>edit</mat-icon>
-          Bearbeiten
-        </button>
-        
-        <button mat-menu-item 
-                [disabled]="!isCurrentUser()"
-                matTooltip="Nur eigene Kommentare können gelöscht werden">
-          <mat-icon>delete</mat-icon>
-          Löschen
-        </button>
-        
-        <mat-divider></mat-divider>
-        
-        <button mat-menu-item>
-          <mat-icon>flag</mat-icon>
-          Melden
-        </button>
-        
-        <button mat-menu-item>
-          <mat-icon>share</mat-icon>
-          Link kopieren
-        </button>
-        
-      </mat-menu>
-      
-    </div>
-    
-  </mat-card-actions>
-  
+
+    <!-- Minus Vote Button -->
+    <button class="vote-btn minus"
+            [ngClass]="getUserVote() === 'DOWN' ? 'voted' : ''"
+            [disabled]="isVoting"
+            [matTooltip]="'Negativ bewerten'"
+            (click)="onVote('DOWN')">
+      <span>-</span>
+    </button>
+
+    <!-- Vote Counts -->
+    <span class="vote-count">
+      {{ comment.voteStats!.upVotes || 0 }} 👍 {{ comment.voteStats!.downVotes || 0 }} 👎
+    </span>
+
+  </div>
+
   <!-- Voting Loading Overlay -->
   <div *ngIf="isVoting" class="voting-overlay">
-    <mat-spinner diameter="24" strokeWidth="3"></mat-spinner>
+    <mat-spinner diameter="20" strokeWidth="2"></mat-spinner>
   </div>
-  
-</mat-card>
+
+</div>

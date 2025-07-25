@@ -13,7 +13,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 
 // DTOs
-import { EvaluationRatingDTO } from '@dtos';
+import { EvaluationRatingDTO } from '@DTOs/index';
 
 @Component({
   selector: 'app-rating-slider',
@@ -35,12 +35,12 @@ import { EvaluationRatingDTO } from '@dtos';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RatingSliderComponent implements OnInit, OnChanges {
-  
+
   // =============================================================================
   // INPUTS - CONFIGURATION FROM PARENT
   // =============================================================================
-  
-  @Input() categoryId: string = '';
+
+  @Input() categoryId: number = 1;
   @Input() categoryName: string = '';
   @Input() currentRating: EvaluationRatingDTO | null = null;
   @Input() minValue: number = 1;
@@ -55,14 +55,14 @@ export class RatingSliderComponent implements OnInit, OnChanges {
   // =============================================================================
   // OUTPUTS - EVENTS TO PARENT
   // =============================================================================
-  
-  @Output() ratingChanged = new EventEmitter<{ categoryId: string; rating: number }>();
-  @Output() ratingSubmitted = new EventEmitter<{ categoryId: string; rating: number }>();
+
+  @Output() ratingChanged = new EventEmitter<{ categoryId: number; score: number }>();
+  @Output() ratingSubmitted = new EventEmitter<{ categoryId: number; score: number }>();
 
   // =============================================================================
   // COMPONENT STATE
   // =============================================================================
-  
+
   ratingForm: FormGroup;
   currentValue: number = 5;
   isModified: boolean = false;
@@ -70,7 +70,7 @@ export class RatingSliderComponent implements OnInit, OnChanges {
   // =============================================================================
   // CONSTRUCTOR
   // =============================================================================
-  
+
   constructor(private formBuilder: FormBuilder) {
     this.ratingForm = this.createForm();
   }
@@ -78,7 +78,7 @@ export class RatingSliderComponent implements OnInit, OnChanges {
   // =============================================================================
   // LIFECYCLE METHODS
   // =============================================================================
-  
+
   ngOnInit(): void {
     this.initializeRating();
     this.setupValueChanges();
@@ -93,7 +93,7 @@ export class RatingSliderComponent implements OnInit, OnChanges {
   // =============================================================================
   // FORM SETUP
   // =============================================================================
-  
+
   private createForm(): FormGroup {
     return this.formBuilder.group({
       rating: [this.currentValue]
@@ -102,11 +102,11 @@ export class RatingSliderComponent implements OnInit, OnChanges {
 
   private initializeRating(): void {
     if (this.currentRating) {
-      this.currentValue = this.currentRating.rating;
+      this.currentValue = this.currentRating.score;
     } else {
       this.currentValue = Math.floor((this.minValue + this.maxValue) / 2);
     }
-    
+
     this.ratingForm.get('rating')?.setValue(this.currentValue);
     this.isModified = false;
   }
@@ -115,12 +115,12 @@ export class RatingSliderComponent implements OnInit, OnChanges {
     this.ratingForm.get('rating')?.valueChanges.subscribe(value => {
       if (value !== null && value !== undefined) {
         this.currentValue = value;
-        const originalRating = this.currentRating?.rating || Math.floor((this.minValue + this.maxValue) / 2);
+        const originalRating = this.currentRating?.score || Math.floor((this.minValue + this.maxValue) / 2);
         this.isModified = value !== originalRating;
-        
+
         this.ratingChanged.emit({
           categoryId: this.categoryId,
-          rating: value
+          score: value
         });
       }
     });
@@ -129,8 +129,14 @@ export class RatingSliderComponent implements OnInit, OnChanges {
   // =============================================================================
   // EVENT HANDLERS
   // =============================================================================
-  
-  onSliderChange(value: number): void {
+
+  /**
+   * Handles slider change events
+   * @param event - The input event from the slider
+   */
+  onSliderChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const value = Number(target.value);
     this.ratingForm.get('rating')?.setValue(value);
   }
 
@@ -138,7 +144,7 @@ export class RatingSliderComponent implements OnInit, OnChanges {
     if (!this.disabled && this.isModified) {
       this.ratingSubmitted.emit({
         categoryId: this.categoryId,
-        rating: this.currentValue
+        score: this.currentValue
       });
       this.isModified = false;
     }
@@ -156,14 +162,14 @@ export class RatingSliderComponent implements OnInit, OnChanges {
   // =============================================================================
   // TEMPLATE HELPER METHODS
   // =============================================================================
-  
+
   /**
    * Gets the rating description based on current value
    */
   getRatingDescription(): string {
     const descriptions: { [key: number]: string } = {
       1: 'Sehr schlecht',
-      2: 'Schlecht', 
+      2: 'Schlecht',
       3: 'Mangelhaft',
       4: 'Ausreichend',
       5: 'Befriedigend',
@@ -173,7 +179,7 @@ export class RatingSliderComponent implements OnInit, OnChanges {
       9: 'Sehr gut',
       10: 'Ausgezeichnet'
     };
-    
+
     return descriptions[this.currentValue] || 'Unbewertet';
   }
 
@@ -231,11 +237,11 @@ export class RatingSliderComponent implements OnInit, OnChanges {
     if (this.disabled) {
       return 'Bewertungen sind momentan nicht möglich';
     }
-    
+
     if (!this.isModified) {
       return 'Keine Änderungen vorgenommen';
     }
-    
+
     return `${this.categoryName} mit ${this.currentValue}/10 bewerten`;
   }
 
@@ -249,7 +255,7 @@ export class RatingSliderComponent implements OnInit, OnChanges {
   /**
    * Gets the slider color based on rating
    */
-  getSliderColor(): string {
+  getSliderColor(): 'primary' | 'accent' | 'warn' | undefined {
     if (this.currentValue <= 3) {
       return 'warn';
     } else if (this.currentValue <= 7) {
@@ -278,11 +284,11 @@ export class RatingSliderComponent implements OnInit, OnChanges {
     if (!this.currentRating) {
       return 'unrated';
     }
-    
+
     if (this.isModified) {
       return 'modified';
     }
-    
+
     return 'rated';
   }
 
@@ -346,17 +352,17 @@ export class RatingSliderComponent implements OnInit, OnChanges {
    */
   getContainerClass(): string {
     const classes = [`rating-slider-${this.getCategoryStatus()}`];
-    
+
     if (this.isCompact()) {
       classes.push('compact');
     }
-    
+
     if (this.disabled) {
       classes.push('disabled');
     }
-    
+
     classes.push(this.getRatingColorClass());
-    
+
     return classes.join(' ');
   }
 

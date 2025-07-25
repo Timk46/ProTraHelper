@@ -1,14 +1,14 @@
 <!-- Discussion Thread Container -->
 <div class="discussion-thread-container">
-  
+
   <!-- Discussion Controls -->
   <div class="discussion-controls" *ngIf="hasDiscussions() && hasAnyComments()">
-    
+
     <div class="controls-left">
       <mat-icon class="discussion-icon">forum</mat-icon>
       <span class="discussion-title">Diskussion</span>
     </div>
-    
+
     <div class="controls-right">
       <!-- Sort Options -->
       <div class="sort-controls">
@@ -29,103 +29,72 @@
         </button>
       </div>
     </div>
-    
+
   </div>
-  
+
   <!-- Main Discussion Content -->
   <div class="discussion-content">
-    
-    <!-- Virtual Scrolling Container -->
-    <cdk-virtual-scroll-viewport 
-      *ngIf="hasDiscussions()" 
-      class="discussion-viewport"
-      [itemSize]="itemSize"
-      [minBufferPx]="minBufferPx"
-      [maxBufferPx]="maxBufferPx">
+
+    <!-- Discussion Messages Area -->
+    <div class="discussion-messages-area">
+
+      <!-- DEBUG: Direct rendering without Virtual Scrolling -->
+      <div *ngIf="hasDiscussions()" class="discussion-viewport-debug">
+        <p><strong>DEBUG: flattenedComments.length = {{ flattenedComments.length }}</strong></p>
+        
+        <!-- Flattened Comment Items WITHOUT Virtual Scrolling -->
+        <div *ngFor="let item of flattenedComments; trackBy: trackByFlattenedComment"
+             class="virtual-item"
+             [ngSwitch]="item.type">
+
+          <!-- Discussion Header -->
+          <div *ngSwitchCase="'discussion-header'"
+               class="discussion-header-item">
+            <p><strong>DISCUSSION HEADER: {{ item.discussion?.id }}</strong></p>
+          </div>
+
+          <!-- Individual Comment -->
+          <div *ngSwitchCase="'comment'"
+               class="comment-item-container"
+               [style.margin-left.px]="getCommentIndentation(item.depth)">
+            
+            <p><strong>COMMENT WRAPPER: {{ item.comment?.id }}</strong></p>
+            <app-comment-item
+              [comment]="item.comment!"
+              [anonymousUser]="anonymousUser"
+              [canVote]="canVote && !isReadOnly"
+              [isVoting]="isCommentBeingVoted(item.comment!.id)"
+              [depth]="item.depth"
+              (voted)="onCommentVoted($event)">
+            </app-comment-item>
+
+          </div>
+
+        </div>
       
-      <!-- Flattened Comment Items with Virtual Scrolling -->
-      <div *cdkVirtualFor="let item of flattenedComments; trackBy: trackByFlattenedComment"
-           class="virtual-item"
-           [ngSwitch]="item.type">
-        
-        <!-- Discussion Header -->
-        <div *ngSwitchCase="'discussion-header'" 
-             class="discussion-header-item">
-          
-          <mat-card class="discussion-header-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar class="header-icon">forum</mat-icon>
-              <mat-card-title>{{ getDiscussionHeaderText(item.discussion!) }}</mat-card-title>
-              <mat-card-subtitle>
-                <span class="comment-count">{{ getTotalCommentCount(item.discussion!) }} Kommentare</span>
-                <span class="separator">•</span>
-                <span class="available-comments">{{ getAvailableCommentsText(item.discussion!) }}</span>
-              </mat-card-subtitle>
-            </mat-card-header>
-          </mat-card>
-          
-        </div>
-        
-        <!-- Individual Comment -->
-        <div *ngSwitchCase="'comment'" 
-             class="comment-item-container"
-             [style.margin-left.px]="getCommentIndentation(item.depth)">
-          
-          <app-comment-item
-            [comment]="item.comment!"
-            [anonymousUser]="anonymousUser"
-            [canVote]="canVote && !isReadOnly"
-            [isVoting]="isCommentBeingVoted(item.comment!.id)"
-            [depth]="item.depth"
-            (voted)="onCommentVoted($event)">
-          </app-comment-item>
-          
-        </div>
-        
-        <!-- Comment Input -->
-        <div *ngSwitchCase="'comment-input'" 
-             class="comment-input-container">
-          
-          <app-comment-input
-            [placeholder]="'Schreiben Sie einen Kommentar...'"
-            [maxLength]="1000"
-            [disabled]="isSubmittingComment || !canComment || isReadOnly"
-            [isSubmitting]="isSubmittingComment"
-            (commentSubmitted)="onCommentSubmitted($event)">
-          </app-comment-input>
-          
-        </div>
-        
       </div>
-      
-    </cdk-virtual-scroll-viewport>
-    
+
+    </div>
+
+    <!-- Input field removed - handled by action-area -->
+
     <!-- No Discussions State -->
     <div class="empty-state no-discussions" *ngIf="!hasDiscussions()">
       <mat-icon class="empty-icon">forum</mat-icon>
       <h3>{{ getNoDiscussionsMessage() }}</h3>
       <p>Diskussionen werden automatisch erstellt, wenn eine Kategorie ausgewählt wird.</p>
     </div>
-    
+
     <!-- No Comments State -->
     <div class="empty-state no-comments" *ngIf="hasDiscussions() && !hasAnyComments()">
       <mat-icon class="empty-icon">chat_bubble_outline</mat-icon>
       <h3>{{ getNoCommentsMessage() }}</h3>
       <p>Teilen Sie Ihre Gedanken zu dieser Bewertung mit.</p>
-      
-      <!-- Comment Input for Empty State -->
-      <div class="empty-state-comment-input" *ngIf="canComment && !isReadOnly">
-        <app-comment-input
-          [placeholder]="'Schreiben Sie den ersten Kommentar...'"
-          [maxLength]="1000"
-          [disabled]="isSubmittingComment"
-          [isSubmitting]="isSubmittingComment"
-          (commentSubmitted)="onCommentSubmitted($event)">
-        </app-comment-input>
-      </div>
-      
+
+      <!-- Comment input removed - handled by action-area -->
+
     </div>
-    
+
     <!-- Read-Only Mode Message -->
     <div class="read-only-message" *ngIf="isReadOnly && hasDiscussions()">
       <mat-card class="read-only-card">
@@ -140,7 +109,7 @@
         </mat-card-content>
       </mat-card>
     </div>
-    
+
     <!-- Loading State for Comment Submission -->
     <div class="loading-overlay" *ngIf="isSubmittingComment">
       <mat-card class="loading-card">
@@ -152,51 +121,9 @@
         </mat-card-content>
       </mat-card>
     </div>
-    
+
   </div>
-  
-  <!-- Bottom Actions (Mobile) -->
-  <div class="mobile-actions" *ngIf="hasDiscussions() && canComment && !isReadOnly">
-    
-    <button mat-fab 
-            color="primary"
-            class="add-comment-fab"
-            [disabled]="isSubmittingComment"
-            matTooltip="Kommentar hinzufügen"
-            (click)="showCommentInput = !showCommentInput">
-      <mat-icon>add_comment</mat-icon>
-    </button>
-    
-    <!-- Mobile Comment Input -->
-    <div class="mobile-comment-input" 
-         *ngIf="showCommentInput">
-      
-      <mat-card class="mobile-input-card">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>add_comment</mat-icon>
-            Neuer Kommentar
-          </mat-card-title>
-          <button mat-icon-button 
-                  (click)="showCommentInput = false"
-                  class="close-button">
-            <mat-icon>close</mat-icon>
-          </button>
-        </mat-card-header>
-        
-        <mat-card-content>
-          <app-comment-input
-            [placeholder]="'Schreiben Sie Ihren Kommentar...'"
-            [maxLength]="1000"
-            [disabled]="isSubmittingComment"
-            [isSubmitting]="isSubmittingComment"
-            (commentSubmitted)="onCommentSubmitted($event)">
-          </app-comment-input>
-        </mat-card-content>
-      </mat-card>
-      
-    </div>
-    
-  </div>
-  
+
+  <!-- Mobile actions removed - input handled by action-area -->
+
 </div>

@@ -63,10 +63,11 @@
                   [min]="minZoom"
                   [max]="maxZoom"
                   [step]="zoomStep"
-                  [value]="zoomLevel"
                   [disabled]="isLoading"
-                  (valueChange)="onZoomSliderChange($event)"
                   matTooltip="Zoom: {{ getZoomPercentage() }}">
+        <input matSliderThumb 
+               [value]="zoomLevel"
+               (input)="onZoomSliderChange($event)">
       </mat-slider>
       
       <!-- Zoom In Button -->
@@ -136,9 +137,31 @@
       </button>
     </div>
     
-    <!-- PDF Content (Mock Display) -->
-    <div class="pdf-content" 
-         *ngIf="hasValidPdf() && !isLoading && !hasError"
+    <!-- Real PDF Content (iframe) -->
+    <div class="pdf-content real-pdf" 
+         *ngIf="hasRealPdf() && !isLoading && !hasError">
+      
+      <iframe 
+        [src]="getRealPdfUrl()"
+        class="pdf-iframe"
+        [style.transform]="'scale(' + (zoomLevel / 100) + ')'"
+        frameborder="0">
+        <p>Your browser does not support PDFs. 
+           <a [href]="getRealPdfUrl()" target="_blank">Download the PDF</a>.
+        </p>
+      </iframe>
+      
+      <!-- Page Indicator for Real PDF -->
+      <div class="page-indicator">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>PDF-Dokument geladen</span>
+      </div>
+      
+    </div>
+
+    <!-- Mock PDF Content (fallback) -->
+    <div class="pdf-content mock-pdf" 
+         *ngIf="!hasRealPdf() && hasValidPdf() && !isLoading && !hasError"
          [style.transform]="'scale(' + (zoomLevel / 100) + ')'">
       
       <!-- Page Content -->
@@ -151,7 +174,7 @@
       <!-- Page Indicator -->
       <div class="page-indicator">
         <mat-icon>description</mat-icon>
-        <span>{{ getPageInfo() }}</span>
+        <span>{{ getPageInfo() }} (Demo)</span>
       </div>
       
     </div>

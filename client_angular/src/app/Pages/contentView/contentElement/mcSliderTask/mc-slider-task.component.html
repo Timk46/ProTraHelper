@@ -21,7 +21,7 @@
       (click)="switchToRhino()"
       [disabled]="isRhinoSwitching"
       aria-label="Zu Rhino wechseln"
-      matTooltip="Rhino 8 fokussieren"
+      [matTooltip]="getRhinoButtonTooltip()"
       [class.rhino-switch-button--loading]="isRhinoSwitching"
       [class.rhino-switch-button--available]="isRhinoAvailable()"
       [class.rhino-switch-button--unavailable]="!isRhinoAvailable()">

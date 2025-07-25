@@ -42,6 +42,7 @@ model User {
   evaluationSessionsCreated EvaluationSession[]
   evaluationSubmissions     EvaluationSubmission[]
   evaluationRatings         EvaluationRating[]
+  evaluationComments        EvaluationComment[]
 }
 
 model RefreshToken {
@@ -1012,6 +1013,7 @@ model EvaluationSubmission {
   pdfFileId   Int
   sessionId   Int
   status      EvaluationStatus           @default(DRAFT)
+  phase       EvaluationPhase            @default(DISCUSSION)
   submittedAt DateTime
   createdAt   DateTime                   @default(now())
   updatedAt   DateTime                   @updatedAt
@@ -1022,6 +1024,7 @@ model EvaluationSubmission {
   session     EvaluationSession          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   discussions Discussion[]               @relation("EvaluationDiscussions")
   ratings     EvaluationRating[]
+  comments    EvaluationComment[]
   
   @@map("evaluation_submissions")
 }
@@ -1042,6 +1045,7 @@ model EvaluationCategory {
   session     EvaluationSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   discussions Discussion[]       @relation("CategoryDiscussions")
   ratings     EvaluationRating[]
+  comments    EvaluationComment[]
   
   @@unique([sessionId, name])
   @@map("evaluation_categories")
@@ -1064,4 +1068,32 @@ model EvaluationRating {
   
   @@unique([submissionId, categoryId, userId])
   @@map("evaluation_ratings")
+}
+
+model EvaluationComment {
+  id           String              @id @default(cuid())
+  submissionId String
+  categoryId   Int
+  userId       Int
+  content      String              @db.Text
+  
+  // Simplified voting system - store counts directly
+  upvotes      Int                @default(0)
+  downvotes    Int                @default(0)
+  
+  // Vote tracking as JSON to avoid complex schema
+  voteDetails  Json?              // {userVotes: {userId: "UP"|"DOWN"}}
+  
+  // Anonymous display name for this comment
+  anonymousDisplayName String?
+  
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  
+  // Relations
+  submission   EvaluationSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  category     EvaluationCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user         User                 @relation(fields: [userId], references: [id])
+  
+  @@map("evaluation_comments")
 }

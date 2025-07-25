@@ -12,7 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
 // DTOs
-import { EvaluationSubmissionDTO } from '@dtos';
+import { EvaluationSubmissionDTO } from '@DTOs/index';
 
 @Component({
   selector: 'app-pdf-viewer-panel',
@@ -33,35 +33,35 @@ import { EvaluationSubmissionDTO } from '@dtos';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PdfViewerPanelComponent implements OnInit {
-  
+
   // =============================================================================
   // INPUTS - DATA FROM PARENT (SMART COMPONENT)
   // =============================================================================
-  
+
   @Input() submission: EvaluationSubmissionDTO | null = null;
   @Input() pdfUrl: string | null = null;
 
   // =============================================================================
-  // OUTPUTS - EVENTS TO PARENT (SMART COMPONENT)  
+  // OUTPUTS - EVENTS TO PARENT (SMART COMPONENT)
   // =============================================================================
-  
+
   @Output() pageChanged = new EventEmitter<number>();
   @Output() downloadRequested = new EventEmitter<void>();
 
   // =============================================================================
   // COMPONENT STATE
   // =============================================================================
-  
+
   currentPage: number = 1;
   totalPages: number = 1;
   zoomLevel: number = 100;
   isLoading: boolean = false;
   hasError: boolean = false;
   errorMessage: string = '';
-  
+
   // Mock PDF data for demonstration
   mockPdfPages: string[] = [];
-  
+
   // Zoom settings
   readonly minZoom = 50;
   readonly maxZoom = 200;
@@ -70,22 +70,34 @@ export class PdfViewerPanelComponent implements OnInit {
   // =============================================================================
   // LIFECYCLE METHODS
   // =============================================================================
-  
+
   ngOnInit(): void {
-    this.initializeMockPdfData();
-    this.loadPdf();
+    console.log('🔎 PDF Viewer initialized with:', {
+      submission: this.submission?.title,
+      pdfUrl: this.pdfUrl,
+      hasSubmission: !!this.submission
+    });
+    
+    if (this.pdfUrl) {
+      this.loadRealPdf();
+    } else if (this.submission) {
+      this.initializeMockPdfData();
+      this.loadPdf();
+    } else {
+      this.showNoDocumentState();
+    }
   }
 
   // =============================================================================
   // PDF MANAGEMENT METHODS
   // =============================================================================
-  
+
   private initializeMockPdfData(): void {
     // Create mock PDF page content based on submission data
     if (this.submission) {
       const pageCount = this.submission.pdfMetadata?.pageCount || 4;
       this.totalPages = pageCount;
-      
+
       // Generate mock page content
       for (let i = 1; i <= pageCount; i++) {
         this.mockPdfPages.push(this.generateMockPageContent(i));
@@ -94,7 +106,7 @@ export class PdfViewerPanelComponent implements OnInit {
       this.totalPages = 4;
       this.mockPdfPages = [
         this.generateMockPageContent(1),
-        this.generateMockPageContent(2), 
+        this.generateMockPageContent(2),
         this.generateMockPageContent(3),
         this.generateMockPageContent(4)
       ];
@@ -103,7 +115,7 @@ export class PdfViewerPanelComponent implements OnInit {
 
   private generateMockPageContent(pageNumber: number): string {
     const title = this.submission?.title || 'Architektur-Entwurf';
-    
+
     switch (pageNumber) {
       case 1:
         return `
@@ -191,7 +203,7 @@ export class PdfViewerPanelComponent implements OnInit {
   private loadPdf(): void {
     this.isLoading = true;
     this.hasError = false;
-    
+
     // Simulate PDF loading
     setTimeout(() => {
       if (this.pdfUrl || this.submission) {
@@ -207,7 +219,7 @@ export class PdfViewerPanelComponent implements OnInit {
   // =============================================================================
   // NAVIGATION METHODS
   // =============================================================================
-  
+
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
@@ -230,7 +242,7 @@ export class PdfViewerPanelComponent implements OnInit {
   // =============================================================================
   // ZOOM METHODS
   // =============================================================================
-  
+
   setZoom(zoomLevel: number): void {
     this.zoomLevel = Math.max(this.minZoom, Math.min(this.maxZoom, zoomLevel));
   }
@@ -250,10 +262,10 @@ export class PdfViewerPanelComponent implements OnInit {
   // =============================================================================
   // DOWNLOAD METHODS
   // =============================================================================
-  
+
   downloadPdf(): void {
     this.downloadRequested.emit();
-    
+
     // Mock download functionality
     if (this.pdfUrl) {
       // In a real implementation, this would trigger an actual download
@@ -282,7 +294,7 @@ export class PdfViewerPanelComponent implements OnInit {
   // =============================================================================
   // TEMPLATE HELPER METHODS
   // =============================================================================
-  
+
   getCurrentPageContent(): string {
     return this.mockPdfPages[this.currentPage - 1] || '';
   }
@@ -318,7 +330,7 @@ export class PdfViewerPanelComponent implements OnInit {
   // =============================================================================
   // EVENT HANDLERS
   // =============================================================================
-  
+
   onPageInputChange(event: any): void {
     const page = parseInt(event.target.value, 10);
     if (!isNaN(page)) {
@@ -327,10 +339,45 @@ export class PdfViewerPanelComponent implements OnInit {
   }
 
   onZoomSliderChange(event: any): void {
-    this.setZoom(event.value);
+    // Handle both the new MDC slider event format and legacy format
+    const value = event.value !== undefined ? event.value : event.target.value;
+    this.setZoom(Number(value));
   }
 
   onRetryLoad(): void {
     this.loadPdf();
+  }
+
+  // =============================================================================
+  // NEW REAL PDF METHODS
+  // =============================================================================
+
+  private loadRealPdf(): void {
+    console.log('📄 Loading real PDF from URL:', this.pdfUrl);
+    this.isLoading = true;
+    this.hasError = false;
+    
+    // For real PDF viewing, we'll use an iframe approach
+    // In a production environment, you'd use PDF.js or similar
+    setTimeout(() => {
+      this.isLoading = false;
+      this.totalPages = 1; // Unknown page count for iframe
+      this.currentPage = 1;
+    }, 1000);
+  }
+
+  private showNoDocumentState(): void {
+    console.log('📭 No document to display');
+    this.hasError = true;
+    this.errorMessage = 'Kein PDF-Dokument verfügbar';
+    this.isLoading = false;
+  }
+
+  getRealPdfUrl(): string {
+    return this.pdfUrl || '';
+  }
+
+  hasRealPdf(): boolean {
+    return !!this.pdfUrl;
   }
 }

@@ -1,119 +1,35 @@
-<!-- Vote Box Container -->
-<div class="vote-box-container" [ngClass]="getContainerClass() + ' ' + getPopularityClass()">
+<!-- Vote Box Container (Matching HTML Template) -->
+<div class="message-actions" [ngClass]="getContainerClass()">
   
-  <!-- Upvote Button -->
-  <button mat-icon-button
-          class="vote-button upvote-button"
+  <!-- Plus/Upvote Button -->
+  <button class="vote-btn plus"
           [ngClass]="getUpvoteButtonClass()"
-          [color]="getUpvoteButtonColor()"
           [disabled]="isDisabled()"
           [matTooltip]="getUpvoteTooltip()"
           [attr.aria-label]="getUpvoteAriaLabel()"
-          (click)="onUpvote()"
-          matRipple>
-    
-    <mat-icon [style.font-size]="getIconSize()" 
-              [style.width]="getIconSize()" 
-              [style.height]="getIconSize()">
-      {{ getUpvoteIcon() }}
-    </mat-icon>
-    
+          (click)="onUpvote()">
+    <span>+</span>
   </button>
   
-  <!-- Vote Counts (Horizontal Layout) -->
-  <div *ngIf="showCounts && orientation === 'horizontal'" 
-       class="vote-counts horizontal-counts">
-    
-    <!-- Upvote Count -->
-    <span class="upvote-count" 
-          [style.font-size]="getCountFontSize()"
-          [matTooltip]="upvotes + ' positive Bewertungen'">
-      {{ formatVoteCount(upvotes) }}
-    </span>
-    
-    <!-- Vote Separator -->
-    <span class="vote-separator">•</span>
-    
-    <!-- Downvote Count -->
-    <span class="downvote-count" 
-          [style.font-size]="getCountFontSize()"
-          [matTooltip]="downvotes + ' negative Bewertungen'">
-      {{ formatVoteCount(downvotes) }}
-    </span>
-    
-  </div>
-  
-  <!-- Upvote Count (Vertical Layout) -->
-  <div *ngIf="showCounts && orientation === 'vertical'" 
-       class="vote-count upvote-count vertical-count">
-    <span [style.font-size]="getCountFontSize()"
-          [matTooltip]="upvotes + ' positive Bewertungen'">
-      {{ formatVoteCount(upvotes) }}
-    </span>
-  </div>
-  
-  <!-- Net Score Display (Alternative) -->
-  <div *ngIf="!showCounts && orientation === 'horizontal'" 
-       class="net-score">
-    <span class="score-value" 
-          [style.font-size]="getCountFontSize()"
-          [matTooltip]="'Netto-Bewertung: ' + getNetScore() + ' (' + upvotes + ' positiv, ' + downvotes + ' negativ)'">
-      {{ getNetScore() >= 0 ? '+' : '' }}{{ getNetScore() }}
-    </span>
-  </div>
-  
-  <!-- Downvote Button -->
-  <button mat-icon-button
-          class="vote-button downvote-button"
+  <!-- Minus/Downvote Button -->
+  <button class="vote-btn minus"
           [ngClass]="getDownvoteButtonClass()"
-          [color]="getDownvoteButtonColor()"
           [disabled]="isDisabled()"
           [matTooltip]="getDownvoteTooltip()"
           [attr.aria-label]="getDownvoteAriaLabel()"
-          (click)="onDownvote()"
-          matRipple>
-    
-    <mat-icon [style.font-size]="getIconSize()" 
-              [style.width]="getIconSize()" 
-              [style.height]="getIconSize()">
-      {{ getDownvoteIcon() }}
-    </mat-icon>
-    
+          (click)="onDownvote()">
+    <span>-</span>
   </button>
   
-  <!-- Downvote Count (Vertical Layout) -->
-  <div *ngIf="showCounts && orientation === 'vertical'" 
-       class="vote-count downvote-count vertical-count">
-    <span [style.font-size]="getCountFontSize()"
-          [matTooltip]="downvotes + ' negative Bewertungen'">
-      {{ formatVoteCount(downvotes) }}
-    </span>
-  </div>
+  <!-- Vote Count Display (HTML Template Style) -->
+  <span class="vote-count" 
+        [matTooltip]="'Gesamtbewertungen: ' + getTotalVotes() + ' (' + upvotes + ' positiv, ' + downvotes + ' negativ)'">
+    {{ formatVoteCount(upvotes) }} 👍 {{ formatVoteCount(downvotes) }} 👎
+  </span>
   
   <!-- Voting Loading Indicator -->
   <div *ngIf="isVoting" class="voting-loading">
-    <mat-spinner [diameter]="compactMode ? 16 : 20" 
-                 [strokeWidth]="2">
-    </mat-spinner>
-  </div>
-  
-  <!-- Vote Status Indicator -->
-  <div *ngIf="hasVotes() && !isVoting" 
-       class="vote-status-indicator"
-       [matTooltip]="'Gesamtbewertungen: ' + getTotalVotes() + ' (' + Math.round(getVoteRatio() * 100) + '% positiv)'">
-    
-    <!-- Popular Content Indicator -->
-    <mat-icon *ngIf="getPopularityClass() === 'very-popular'" 
-              class="popularity-icon very-popular-icon">
-      trending_up
-    </mat-icon>
-    
-    <!-- Unpopular Content Indicator -->
-    <mat-icon *ngIf="getPopularityClass() === 'unpopular'" 
-              class="popularity-icon unpopular-icon">
-      trending_down
-    </mat-icon>
-    
+    <mat-spinner [diameter]="16" [strokeWidth]="2"></mat-spinner>
   </div>
   
 </div>

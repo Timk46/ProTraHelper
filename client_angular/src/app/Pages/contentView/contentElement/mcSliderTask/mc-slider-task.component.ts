@@ -18,11 +18,13 @@ import { TaskViewData } from '@DTOs/index';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { Subject } from 'rxjs';
-import { takeUntil, finalize } from 'rxjs/operators';
-import { McSliderRhinoIntegrationService, RhinoIntegrationEvent } from 'src/app/Services/mcslider-rhino-integration.service';
+import { takeUntil } from 'rxjs/operators';
+import { RhinoFocusService } from 'src/app/Services/rhino-focus.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 // Extended interface for our options to include correctness information
 interface MCOptionViewModel extends MCOptionViewDTO {
+  id: number;
   isCorrect?: boolean;
 }
 
@@ -76,8 +78,6 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
 
   // Rhino integration state
   isRhinoSwitching: boolean = false;
-  rhinoSwitchAttempts: number = 0;
-  maxRhinoSwitchAttempts: number = 3;
 
   // For handling RxJS subscriptions cleanup
   private readonly destroy$ = new Subject<void>();
@@ -95,7 +95,8 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     private readonly dialogRef: MatDialogRef<McSliderTaskComponent>,
     private readonly location: Location,
     private readonly cdr: ChangeDetectorRef,
-    private readonly rhinoIntegrationService: McSliderRhinoIntegrationService,
+    private readonly rhinoFocusService: RhinoFocusService,
+    private readonly snackBar: MatSnackBar,
   ) {
     if (data) {
       this.taskViewData = data.taskViewData;
@@ -152,14 +153,14 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
       .getMCQuestion(questionData.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe(mcQuestionData => {
-        questionState.mcQuestion = mcQuestionData;
+        questionState.mcQuestion = mcQuestionData as McQuestionDTO;
 
         // Load options
         this.questionDataService
-          .getMCOptions(mcQuestionData.id)
+          .getMCOptions((mcQuestionData as McQuestionDTO).id)
           .pipe(takeUntil(this.destroy$))
           .subscribe(optionsData => {
-            questionState.options = optionsData.map(option => ({
+            questionState.options = (optionsData as MCOptionViewDTO[]).map((option: MCOptionViewDTO) => ({
               ...option,
               isCorrect: undefined,
             }));
@@ -288,7 +289,7 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
       .createUserAnswer(userAnswerData)
       .pipe(takeUntil(this.destroy$))
       .subscribe(feedback => {
-        currentState.feedback = feedback;
+        currentState.feedback = feedback as userAnswerFeedbackDTO;
         currentState.isSubmitted = true;
 
         // Update option correctness
@@ -303,21 +304,8 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
         this.componentState = McSliderTaskState.QUESTIONS;
         this.cdr.detectChanges();
 
-        // Rhino-Integration: Fokussiere Rhino nach Fragen-Einreichung
-        this.rhinoIntegrationService.handleQuestionSubmission({
-          questionIndex: this.currentQuestionIndex,
-          totalQuestions: this.questionStates.length,
-          score: feedback.score,
-          maxScore: currentState.questionData.score,
-          isCorrect: currentState.isCorrect,
-        }).pipe(takeUntil(this.destroy$)).subscribe({
-          next: (result) => {
-            console.log('🎯 Rhino focus after question submission:', result);
-          },
-          error: (error) => {
-            console.warn('⚠️ Rhino focus failed after question submission:', error);
-          }
-        });
+        // Automatic Rhino integration removed - users can manually focus Rhino using the button
+        console.log('Question submitted successfully. Use the Rhino button to manually focus if needed.');
       });
   }
 
@@ -389,7 +377,7 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
         .createUserAnswer(userAnswerData)
         .pipe(takeUntil(this.destroy$))
         .subscribe(feedback => {
-          state.feedback = feedback;
+          state.feedback = feedback as userAnswerFeedbackDTO;
           state.isSubmitted = true;
 
           this.updateOptionCorrectness(state);
@@ -417,19 +405,8 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
 
     this.cdr.detectChanges();
 
-    // Rhino-Integration: Fokussiere Rhino nach Abschluss aller Fragen
-    this.rhinoIntegrationService.handleAllQuestionsCompleted({
-      totalQuestions: this.questionStates.length,
-      score: this.totalScore,
-      maxScore: this.maxScore,
-    }).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (result) => {
-        console.log('🎯 Rhino focus after all questions completed:', result);
-      },
-      error: (error) => {
-        console.warn('⚠️ Rhino focus failed after all questions completed:', error);
-      }
-    });
+    // Automatic Rhino integration removed - users can manually focus Rhino using the button
+    console.log('All questions completed successfully. Use the Rhino button to manually focus if needed.');
   }
 
   /**
@@ -488,88 +465,79 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Switch to Rhino manually via button
+   * Switch to Rhino manually via button - Simplified direct approach
    */
-  switchToRhino(): void {
-    if (this.isRhinoSwitching || !this.isRhinoAvailable()) {
+  async switchToRhino(): Promise<void> {
+    if (this.isRhinoSwitching) {
       return;
     }
 
     this.isRhinoSwitching = true;
-    this.rhinoSwitchAttempts++;
-
-    this.rhinoIntegrationService.handleManualRhinoSwitch({
-      source: 'manual_button',
-      questionIndex: this.currentQuestionIndex,
-      totalQuestions: this.questionStates.length,
-      score: this.totalScore,
-      maxScore: this.maxScore,
-      attempt: this.rhinoSwitchAttempts
-    }).pipe(
-      takeUntil(this.destroy$),
-      finalize(() => {
-        this.isRhinoSwitching = false;
-        this.cdr.detectChanges();
-      })
-    ).subscribe({
-      next: (result) => {
-        if (result.success) {
-          console.log('✅ Manual Rhino switch successful:', result);
-          this.rhinoSwitchAttempts = 0; // Reset on success
-        } else {
-          console.warn('⚠️ Manual Rhino switch failed:', result.message);
-          this.handleRhinoSwitchError(result.message);
-        }
-      },
-      error: (error) => {
-        console.error('❌ Manual Rhino switch error:', error);
-        this.handleRhinoSwitchError(error.message);
+    
+    try {
+      console.log('🎯 Focusing Rhino window directly...');
+      
+      const result = await this.rhinoFocusService.focusRhinoWindow().toPromise();
+      
+      if (result && result.success) {
+        console.log('✅ Rhino window focused successfully');
+        this.snackBar.open('Rhino erfolgreich fokussiert', 'OK', {
+          duration: 2000,
+          panelClass: 'success-snackbar'
+        });
+      } else {
+        console.warn('⚠️ Rhino focus failed:', result?.message || 'Unknown error');
+        this.snackBar.open(
+          `Rhino konnte nicht fokussiert werden: ${result?.message || 'Rhino möglicherweise nicht gestartet'}`,
+          'OK',
+          {
+            duration: 4000,
+            panelClass: 'warning-snackbar'
+          }
+        );
       }
-    });
+    } catch (error) {
+      console.error('❌ Rhino focus error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
+      this.snackBar.open(
+        `Fehler beim Fokussieren von Rhino: ${errorMessage}`,
+        'OK',
+        {
+          duration: 4000,
+          panelClass: 'error-snackbar'
+        }
+      );
+    } finally {
+      this.isRhinoSwitching = false;
+      this.cdr.detectChanges();
+    }
   }
 
   /**
-   * Check if Rhino is available
+   * Check if Rhino is available - Simplified check
    */
   isRhinoAvailable(): boolean {
-    return this.rhinoIntegrationService.isIntegrationAvailable();
+    // For manual button clicks, we always allow the attempt
+    // The actual availability will be checked during the focus operation
+    return true;
   }
 
   /**
-   * Handle Rhino switch error
+   * Get Rhino button tooltip text
    */
-  private handleRhinoSwitchError(message: string): void {
-    if (this.rhinoSwitchAttempts < this.maxRhinoSwitchAttempts) {
-      // Retry after a short delay
-      setTimeout(() => {
-        console.log(`🔄 Retrying Rhino switch (attempt ${this.rhinoSwitchAttempts + 1}/${this.maxRhinoSwitchAttempts})`);
-        this.switchToRhino();
-      }, 1000);
-    } else {
-      // Max attempts reached
-      console.error('❌ Max Rhino switch attempts reached');
-      this.rhinoSwitchAttempts = 0;
-      // Could show user notification here if needed
+  getRhinoButtonTooltip(): string {
+    if (this.isRhinoSwitching) {
+      return 'Rhino wird fokussiert...';
     }
+    return 'Rhino-Fenster fokussieren';
   }
 
   /**
    * Close dialog or navigate back
    */
   onClose(): void {
-    // Rhino-Integration: Fokussiere Rhino beim Schließen der Komponente
-    this.rhinoIntegrationService.handleComponentClose({
-      totalQuestions: this.questionStates.length,
-      score: this.totalScore,
-      maxScore: this.maxScore,
-    }).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (result) => {
-        console.log('🎯 Rhino focus on component close:', result);
-      },
-      error: (error) => {
-        console.warn('⚠️ Rhino focus failed on component close:', error);
-      }
-    });
+    // Automatic Rhino integration removed - users can manually focus Rhino using the button
+    console.log('Component closing. Use the Rhino button to manually focus if needed.');
 
     if (this.dialogRef) {
       this.dialogRef.close();

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -31,7 +31,7 @@ import { MatCardModule } from '@angular/material/card';
   styleUrl: './comment-input.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CommentInputComponent implements OnInit, OnDestroy {
+export class CommentInputComponent implements OnInit, OnDestroy, OnChanges {
   
   // =============================================================================
   // INPUTS - CONFIGURATION FROM PARENT
@@ -47,7 +47,7 @@ export class CommentInputComponent implements OnInit, OnDestroy {
   @Input() showSubmitButton: boolean = true;
   @Input() allowEmpty: boolean = false;
   @Input() rows: number = 3;
-  @Input() submitButtonText: string = 'Kommentar senden';
+  @Input() submitButtonText: string = 'Senden';
 
   // =============================================================================
   // OUTPUTS - EVENTS TO PARENT
@@ -87,9 +87,16 @@ export class CommentInputComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.setupFormValidation();
     this.setupValueChanges();
+    this.updateFormControlState();
     
     if (this.autofocus) {
       setTimeout(() => this.focusTextarea(), 100);
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['disabled'] && this.commentForm) {
+      this.updateFormControlState();
     }
   }
 
@@ -120,7 +127,7 @@ export class CommentInputComponent implements OnInit, OnDestroy {
         this.allowEmpty ? null : Validators.required,
         Validators.minLength(this.minLength),
         Validators.maxLength(this.maxLength)
-      ].filter(v => v !== null);
+      ].filter(v => v !== null) as any[];
       
       contentControl.setValidators(validators);
       contentControl.updateValueAndValidity();
@@ -359,6 +366,20 @@ export class CommentInputComponent implements OnInit, OnDestroy {
 
   private isDeletionKey(event: KeyboardEvent): boolean {
     return event.key === 'Backspace' || event.key === 'Delete';
+  }
+
+  /**
+   * Updates the form control enabled/disabled state based on the disabled input
+   */
+  private updateFormControlState(): void {
+    const contentControl = this.commentForm.get('content');
+    if (contentControl) {
+      if (this.disabled) {
+        contentControl.disable();
+      } else {
+        contentControl.enable();
+      }
+    }
   }
 
   /**

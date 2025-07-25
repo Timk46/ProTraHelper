@@ -34,7 +34,7 @@ Controller sind die Verkehrs- und Sicherheitskontrolle der API.
 **Beispiel:**
 
 ```typescript
-import { CreateUserDTO } from '@dtos'; // Pfadaliase @dtos verwenden
+import { CreateUserDTO } from '@DTOs/index'; // Pfadaliase @dtos verwenden
 
 @Controller('users')
 export class UsersController {

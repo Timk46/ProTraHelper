@@ -1,200 +1,198 @@
-<!-- Main Container with ViewModel -->
-<div class="evaluation-forum-container" *ngIf="viewModel$ | async as vm">
-  
+<div class="evaluation-forum-wrapper" *ngIf="viewModel$ | async as vm">
+  <!-- Demo Mode Banner -->
+  <div class="demo-mode-banner" *ngIf="isMockMode()">
+    <mat-icon>preview</mat-icon>
+    <div class="banner-content">
+      <span class="banner-title">Demo-Modus</span>
+      <small class="banner-subtitle">Interaktive Beispieldaten zur Demonstration - Alle Aktionen werden nur lokal gespeichert</small>
+    </div>
+  </div>
+
   <!-- Loading Overlay -->
   <div class="loading-overlay" *ngIf="vm.loading">
     <mat-spinner diameter="40"></mat-spinner>
-    <p>Lade Evaluierungsforum...</p>
+    <p>Lade Bewertungsdaten...</p>
   </div>
 
-  <!-- Top Toolbar -->
-  <mat-toolbar class="forum-toolbar" color="primary">
-    <div class="toolbar-content">
-      <div class="submission-info">
-        <mat-icon>description</mat-icon>
-        <span class="submission-title">{{ vm.submission?.title || 'Bewertungsforum' }}</span>
-        <span class="submission-author" *ngIf="vm.submission?.author">
-          von {{ vm.submission.author.firstname }} {{ vm.submission.author.lastname }}
+  <!-- Error State -->
+  <div class="error-state" *ngIf="vm.error">
+    <mat-icon>error_outline</mat-icon>
+    <h2>Fehler beim Laden</h2>
+    <p>{{ vm.error }}</p>
+    <button mat-raised-button color="primary" (click)="onRefresh()">Erneut versuchen</button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="evaluation-forum-container" *ngIf="!vm.loading && !vm.error">
+    <!-- Header Section -->
+    <header class="forum-header">
+      <h1>Bewertung: {{ vm.submission?.title || 'Entwurf "Stabile Rahmenkonstruktion"' }}</h1>
+      <div class="header-info">
+        <span class="author-info">
+          Verfasser: {{ vm.submission?.author?.firstname || 'Student A' }}
+          {{ vm.submission?.author?.lastname || '(anonymisiert)' }}
+        </span>
+        <span class="phase-badge" [class.evaluation]="vm.isEvaluationPhase">
+          {{ vm.isEvaluationPhase ? 'Bewertungsphase' : 'Diskussionsphase' }}
         </span>
       </div>
-      
-      <div class="toolbar-actions">
-        <!-- Phase Toggle -->
-        <app-phase-toggle
-          *ngIf="vm.currentPhase"
-          [currentPhase]="vm.currentPhase"
-          [canSwitch]="true"
-          (phaseChanged)="onPhaseToggled($event)">
-        </app-phase-toggle>
-        
-        <!-- Refresh Button -->
-        <button mat-icon-button 
-                (click)="onRefresh()" 
-                matTooltip="Aktualisieren">
-          <mat-icon>refresh</mat-icon>
-        </button>
+    </header>
+
+    <!-- Category Tabs - Full Width -->
+    <div class="category-tabs-wrapper">
+      <app-category-tabs
+        [categories]="vm.categories"
+        [activeCategory]="vm.activeCategory"
+        [commentStats]="vm.commentStats"
+        (categorySelected)="onCategorySelected($event)"
+      >
+      </app-category-tabs>
+    </div>
+
+    <!-- Main Grid Layout (50/50) -->
+    <div class="main-content-grid">
+      <!-- Left Column: PDF Viewer -->
+      <div class="pdf-column">
+        <div class="panel card">
+          <div class="panel-header">
+            <h3>Abgabe Dokument</h3>
+            <a
+              [href]="vm.submission?.pdfMetadata?.downloadUrl"
+              target="_blank"
+              class="download-btn"
+              matTooltip="PDF herunterladen"
+            >
+              <mat-icon>download</mat-icon>
+              <span>PDF Herunterladen</span>
+            </a>
+          </div>
+          <div class="pdf-viewer-container">
+            <app-pdf-viewer-panel
+              [submission]="vm.submission"
+              [pdfUrl]="vm.submission?.pdfMetadata?.downloadUrl || null"
+            >
+            </app-pdf-viewer-panel>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Discussion -->
+      <div class="discussion-column">
+        <div class="panel card">
+          <div class="panel-header">
+            <h3>Diskussion: {{ vm.activeCategoryInfo?.displayName }}</h3>
+            <div class="points-info" *ngIf="vm.isDiscussionPhase">
+              <div class="point-counter plus">
+                <span>+</span>
+                <span>{{ vm.availableUpvotes }}/3 verfügbar</span>
+              </div>
+              <div class="point-counter minus">
+                <span>-</span>
+                <span>{{ vm.availableDownvotes }}/3 verfügbar</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Discussion Content Area -->
+          <div class="discussion-content">
+            <!-- Discussion Phase -->
+            <div class="discussion-phase-content" *ngIf="vm.isDiscussionPhase">
+              <!-- Discussion Messages Area -->
+              <div class="discussion-messages">
+                <app-discussion-thread
+                  [discussions]="vm.discussions"
+                  [anonymousUser]="vm.anonymousUser"
+                  [canComment]="vm.canComment"
+                  [canVote]="vm.canVote"
+                  [isReadOnly]="!vm.canComment"
+                  [isSubmittingComment]="vm.isSubmittingComment"
+                  [trackByFn]="trackByDiscussion"
+                  (commentSubmitted)="onCommentSubmitted($event)"
+                  (commentVoted)="onCommentVoted($event)"
+                >
+                </app-discussion-thread>
+              </div>
+
+              <!-- Action Area for Message Input (HTML Template Style) -->
+              <div class="action-area" *ngIf="vm.canComment">
+                <div class="message-input">
+                  <input
+                    type="text"
+                    class="message-input-field"
+                    [(ngModel)]="currentMessageText"
+                    [placeholder]="'Antworten Sie auf die Diskussion...'"
+                    [disabled]="vm.isSubmittingComment"
+                    (keydown.enter)="onMessageSubmit()"
+                    maxlength="1000"
+                  />
+                  <button
+                    class="send-btn"
+                    [disabled]="!currentMessageText.trim() || vm.isSubmittingComment"
+                    (click)="onMessageSubmit()"
+                  >
+                    <span *ngIf="!vm.isSubmittingComment">Senden</span>
+                    <mat-spinner *ngIf="vm.isSubmittingComment" diameter="16"></mat-spinner>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Evaluation Phase -->
+            <div class="evaluation-phase-content" *ngIf="vm.isEvaluationPhase">
+              <!-- Discussion History (Read-only) -->
+              <div class="discussion-messages">
+                <app-discussion-thread
+                  [discussions]="vm.discussions"
+                  [anonymousUser]="vm.anonymousUser"
+                  [canComment]="false"
+                  [canVote]="false"
+                  [isReadOnly]="true"
+                  [isSubmittingComment]="false"
+                  [trackByFn]="trackByDiscussion"
+                >
+                </app-discussion-thread>
+              </div>
+
+              <!-- Rating Section at Bottom -->
+              <div class="action-area">
+                <div class="rating-section">
+                  <h4>Ihre Endbewertung für "{{ vm.activeCategoryInfo?.displayName }}"</h4>
+                  <app-rating-slider
+                    [categoryId]="vm.activeCategoryInfo?.id || 0"
+                    [categoryName]="vm.activeCategoryInfo?.displayName || ''"
+                    [currentRating]="getCurrentRating(vm.activeCategoryInfo?.id || 0) | async"
+                    [disabled]="!vm.canRate"
+                    (ratingSubmitted)="onRatingSubmitted($event)"
+                  >
+                  </app-rating-slider>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </mat-toolbar>
 
-  <!-- Main Layout with Sidenav -->
-  <mat-sidenav-container class="forum-sidenav-container">
-    
-    <!-- PDF Viewer Sidenav -->
-    <mat-sidenav 
-      mode="side" 
-      opened="true" 
-      position="start"
-      class="pdf-sidenav"
-      [fixedInViewport]="true">
-      
-      <div class="pdf-panel-header">
-        <mat-icon>picture_as_pdf</mat-icon>
-        <span>PDF Viewer</span>
-      </div>
-      
-      <app-pdf-viewer-panel
-        [submission]="vm.submission"
-        [pdfUrl]="vm.submission?.pdfMetadata?.downloadUrl">
-      </app-pdf-viewer-panel>
-      
-    </mat-sidenav>
+    <!-- Development Phase Toggle (Bottom Right) -->
+    <button
+      class="dev-phase-toggle"
+      mat-fab
+      color="warn"
+      (click)="togglePhase()"
+      matTooltip="Entwickler: Phase wechseln"
+    >
+      <mat-icon>{{ vm.isEvaluationPhase ? 'forum' : 'star' }}</mat-icon>
+    </button>
+  </div>
 
-    <!-- Main Content Area -->
-    <mat-sidenav-content class="forum-content">
-      
-      <!-- Category Tabs Section -->
-      <div class="category-section" *ngIf="vm.categories.length > 0">
-        <app-category-tabs
-          [categories]="vm.categories"
-          [activeCategory]="vm.activeCategory"
-          [commentStats]="vm.commentStats"
-          (categorySelected)="onCategorySelected($event)">
-        </app-category-tabs>
-      </div>
-
-      <!-- Discussion Content -->
-      <div class="discussion-content" *ngIf="vm.activeCategoryInfo">
-        
-        <!-- Phase Indicator Card -->
-        <mat-card class="phase-indicator-card">
-          <mat-card-header>
-            <mat-icon mat-card-avatar 
-                      [class.discussion-phase]="vm.isDiscussionPhase"
-                      [class.evaluation-phase]="vm.isEvaluationPhase">
-              {{ vm.isDiscussionPhase ? 'forum' : 'star' }}
-            </mat-icon>
-            <mat-card-title>
-              {{ vm.isDiscussionPhase ? 'Diskussionsphase' : 'Bewertungsphase' }}
-            </mat-card-title>
-            <mat-card-subtitle>
-              Kategorie: {{ vm.activeCategoryInfo.displayName }}
-            </mat-card-subtitle>
-          </mat-card-header>
-          
-          <mat-card-content>
-            <div class="phase-description">
-              <p *ngIf="vm.isDiscussionPhase">
-                <mat-icon class="inline-icon">info</mat-icon>
-                In der Diskussionsphase können Sie Kommentare verfassen und abstimmen.
-              </p>
-              <p *ngIf="vm.isEvaluationPhase">
-                <mat-icon class="inline-icon">info</mat-icon>
-                In der Bewertungsphase können Sie Punkte vergeben und Bewertungen einsehen.
-              </p>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- Discussion Phase Content -->
-        <div class="discussion-phase-content" *ngIf="vm.isDiscussionPhase">
-          
-          <!-- Discussion Thread -->
-          <app-discussion-thread
-            [discussions]="vm.discussions"
-            [anonymousUser]="vm.anonymousUser"
-            [canComment]="vm.canComment"
-            [trackByFn]="trackByDiscussion"
-            (commentSubmitted)="onCommentSubmitted($event)"
-            (commentVoted)="onCommentVoted($event)">
-          </app-discussion-thread>
-
-        </div>
-
-        <!-- Evaluation Phase Content -->
-        <div class="evaluation-phase-content" *ngIf="vm.isEvaluationPhase">
-          
-          <!-- Rating Section -->
-          <mat-card class="rating-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar>star</mat-icon>
-              <mat-card-title>Bewertung abgeben</mat-card-title>
-              <mat-card-subtitle>
-                Bewerten Sie die Kategorie "{{ vm.activeCategoryInfo.displayName }}"
-              </mat-card-subtitle>
-            </mat-card-header>
-            
-            <mat-card-content>
-              <app-rating-slider
-                [categoryId]="vm.activeCategoryInfo.id"
-                [ratingStats]="getRatingStats(vm.activeCategoryInfo.id) | async"
-                [canRate]="vm.canRate"
-                (ratingSubmitted)="onRatingSubmitted($event)">
-              </app-rating-slider>
-            </mat-card-content>
-          </mat-card>
-
-          <!-- Discussion History (Read-only in Evaluation Phase) -->
-          <mat-card class="discussion-history-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar>history</mat-icon>
-              <mat-card-title>Diskussionsverlauf</mat-card-title>
-              <mat-card-subtitle>Vergangene Kommentare (nur Ansicht)</mat-card-subtitle>
-            </mat-card-header>
-            
-            <mat-card-content>
-              <app-discussion-thread
-                [discussions]="vm.discussions"
-                [anonymousUser]="vm.anonymousUser"
-                [canComment]="false"
-                [canVote]="false"
-                [isReadOnly]="true"
-                [trackByFn]="trackByDiscussion">
-              </app-discussion-thread>
-            </mat-card-content>
-          </mat-card>
-
-        </div>
-
-      </div>
-
-      <!-- Empty State -->
-      <div class="empty-state" *ngIf="!vm.submission">
-        <mat-icon class="empty-icon">description</mat-icon>
-        <h2>Kein Dokument ausgewählt</h2>
-        <p>Wählen Sie ein Dokument aus, um das Bewertungsforum zu starten.</p>
-      </div>
-
-      <!-- Error State -->
-      <div class="error-state" *ngIf="vm.error">
-        <mat-icon class="error-icon">error</mat-icon>
-        <h2>Fehler aufgetreten</h2>
-        <p>{{ vm.error }}</p>
-        <button mat-raised-button color="primary" (click)="onRefresh()">
-          <mat-icon>refresh</mat-icon>
-          Erneut versuchen
-        </button>
-      </div>
-
-    </mat-sidenav-content>
-
-  </mat-sidenav-container>
-
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!vm.loading && !vm.error && !vm.submission">
+    <mat-icon class="empty-icon">description</mat-icon>
+    <h2>Kein Dokument ausgewählt</h2>
+    <p>Um das Bewertungsforum zu verwenden, benötigen Sie eine gültige Abgabe-ID.</p>
+    <button mat-raised-button color="primary" (click)="onNavigateToDashboard()">
+      <mat-icon>dashboard</mat-icon>
+      Zum Dashboard
+    </button>
+  </div>
 </div>
-
-<!-- Progress Bar for Loading States -->
-<mat-progress-bar 
-  mode="indeterminate" 
-  *ngIf="loading$ | async"
-  class="loading-progress-bar">
-</mat-progress-bar>

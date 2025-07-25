@@ -7,12 +7,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // DTOs
 import {
   EvaluationCategoryDTO,
   CommentStatsDTO
-} from '@dtos';
+} from '@DTOs/index';
 
 @Component({
   selector: 'app-category-tabs',
@@ -23,33 +24,38 @@ import {
     MatIconModule,
     MatBadgeModule,
     MatChipsModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './category-tabs.component.html',
   styleUrl: './category-tabs.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CategoryTabsComponent {
-  
+
   // =============================================================================
   // INPUTS - DATA FROM PARENT (SMART COMPONENT)
   // =============================================================================
-  
+
   @Input() categories: EvaluationCategoryDTO[] = [];
-  @Input() activeCategory: string = '';
+  @Input() activeCategory: number = 1;
   @Input() commentStats: CommentStatsDTO | null = null;
 
   // =============================================================================
   // OUTPUTS - EVENTS TO PARENT (SMART COMPONENT)
   // =============================================================================
-  
-  @Output() categorySelected = new EventEmitter<string>();
+
+  @Output() categorySelected = new EventEmitter<number>();
 
   // =============================================================================
   // EVENT HANDLERS
   // =============================================================================
-  
-  onTabChanged(categoryId: string): void {
+
+  /**
+   * Handles tab change events
+   * @param categoryId - The ID of the selected category
+   */
+  onTabChanged(categoryId: number): void {
     if (categoryId !== this.activeCategory) {
       this.categorySelected.emit(categoryId);
     }
@@ -65,7 +71,7 @@ export class CategoryTabsComponent {
   // =============================================================================
   // TAB MANAGEMENT METHODS
   // =============================================================================
-  
+
   /**
    * Gets the currently selected tab index
    */
@@ -77,13 +83,15 @@ export class CategoryTabsComponent {
   // =============================================================================
   // TEMPLATE HELPER METHODS
   // =============================================================================
-  
+
   /**
    * Gets comment statistics for a specific category
+   * @param categoryId - The ID of the category to get stats for
+   * @returns Object containing category statistics
    */
-  getCategoryStats(categoryId: string): { 
-    availableComments: number; 
-    usedComments: number; 
+  getCategoryStats(categoryId: number): {
+    availableComments: number;
+    usedComments: number;
     isLimitReached: boolean;
     indicatorColor: 'success' | 'warn' | 'accent';
     availabilityText: string;
@@ -100,8 +108,8 @@ export class CategoryTabsComponent {
       };
     }
 
-    const categoryStats = this.commentStats.categories.find(cat => cat.categoryId === categoryId);
-    
+    const categoryStats = this.commentStats.categories.find((cat: any) => cat.categoryId === categoryId);
+
     if (!categoryStats) {
       return {
         availableComments: 3,
@@ -115,7 +123,7 @@ export class CategoryTabsComponent {
 
     const available = categoryStats.availableComments - categoryStats.usedComments;
     const isLimitReached = available <= 0;
-    
+
     return {
       availableComments: categoryStats.availableComments,
       usedComments: categoryStats.usedComments,
@@ -128,16 +136,20 @@ export class CategoryTabsComponent {
 
   /**
    * Gets the availability prefix (+ or -) for display
+   * @param categoryId - The ID of the category
+   * @returns String prefix indicating availability status
    */
-  getAvailabilityPrefix(categoryId: string): string {
+  getAvailabilityPrefix(categoryId: number): string {
     const stats = this.getCategoryStats(categoryId);
     return stats.isLimitReached ? '-' : '+';
   }
 
   /**
    * Gets the availability text with proper formatting
+   * @param categoryId - The ID of the category
+   * @returns Formatted availability text
    */
-  getAvailabilityDisplay(categoryId: string): string {
+  getAvailabilityDisplay(categoryId: number): string {
     const stats = this.getCategoryStats(categoryId);
     const prefix = this.getAvailabilityPrefix(categoryId);
     return `${prefix} ${stats.availabilityText}`;
@@ -145,16 +157,20 @@ export class CategoryTabsComponent {
 
   /**
    * Gets the CSS class for availability styling
+   * @param categoryId - The ID of the category
+   * @returns CSS class name for styling
    */
-  getAvailabilityClass(categoryId: string): string {
+  getAvailabilityClass(categoryId: number): string {
     const stats = this.getCategoryStats(categoryId);
     return `availability-${stats.indicatorColor}`;
   }
 
   /**
    * Checks if a category is the active one
+   * @param categoryId - The ID of the category to check
+   * @returns True if the category is active, false otherwise
    */
-  isActiveCategory(categoryId: string): boolean {
+  isActiveCategory(categoryId: number): boolean {
     return this.activeCategory === categoryId;
   }
 
@@ -168,16 +184,20 @@ export class CategoryTabsComponent {
 
   /**
    * Gets the total used comments for the badge display
+   * @param categoryId - The ID of the category
+   * @returns Number of used comments
    */
-  getTotalUsedComments(categoryId: string): number {
+  getTotalUsedComments(categoryId: number): number {
     const stats = this.getCategoryStats(categoryId);
     return stats.usedComments;
   }
 
   /**
    * Checks if the category has any activity
+   * @param categoryId - The ID of the category
+   * @returns True if the category has activity, false otherwise
    */
-  hasActivity(categoryId: string): boolean {
+  hasActivity(categoryId: number): boolean {
     const stats = this.getCategoryStats(categoryId);
     return stats.usedComments > 0;
   }
@@ -185,8 +205,14 @@ export class CategoryTabsComponent {
   // =============================================================================
   // TRACK BY FUNCTIONS FOR PERFORMANCE
   // =============================================================================
-  
+
+  /**
+   * Track by function for performance optimization
+   * @param index - The index of the item
+   * @param category - The category object
+   * @returns Unique identifier for the category
+   */
   trackByCategory(index: number, category: EvaluationCategoryDTO): string {
-    return category.id;
+    return category.id.toString();
   }
 }

@@ -9,6 +9,8 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   overflow: visible;
+  max-width: 600px;
+  margin: 0 auto;
   
   &.focused {
     box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
@@ -282,6 +284,8 @@
 @media (max-width: 768px) {
   .comment-input-card {
     border-radius: 8px;
+    max-width: 90%;
+    margin: 0 auto;
     
     &.focused {
       transform: none;
@@ -364,6 +368,11 @@
 }
 
 @media (max-width: 480px) {
+  .comment-input-card {
+    max-width: 95%;
+    margin: 0 auto;
+  }
+  
   .comment-input-content {
     padding: 12px 16px 8px 16px;
   }

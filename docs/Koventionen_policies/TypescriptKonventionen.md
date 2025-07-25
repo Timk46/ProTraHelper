@@ -7,6 +7,7 @@ Absolut. Hier ist ein umfassender Leitfaden als Markdown-Datei, der die Best Pra
 Dieses Dokument dient als Leitfaden für die effektive Nutzung von TypeScript im Kontext von Angular-Frontends und Nest.js-Backends. Das Ziel ist die Erstellung von robustem, wartbarem und typsicherem Code, der die Stärken beider Frameworks optimal nutzt.
 
 ## Inhaltsverzeichnis
+
 1. [Kernphilosophie: Statische Typisierung als Grundpfeiler](#1-kernphilosophie-statische-typisierung-als-grundpfeiler)
 2. [Typdefinitionen: `interface` vs. `type` vs. `class`](#2-typdefinitionen-interface-vs-type-vs-class)
 3. [Der API-Vertrag: `shared/dtos`](#3-der-api-vertrag-shareddtos)
@@ -28,6 +29,7 @@ TypeScript verliert seinen größten Vorteil, wenn die Typsicherheit untergraben
 `any` deaktiviert die Typprüfung für eine Variable und führt TypeScript ad absurdum. Es ist ein "Escape Hatch", der nur in absoluten Ausnahmefällen (z.B. bei der Migration von JavaScript-Code) temporär akzeptabel ist.
 
 **Alternativen zu `any`:**
+
 - **`unknown`:** Die typsichere Alternative. `unknown` zwingt dich, den Typ zu überprüfen (z.B. mit `typeof`, `instanceof` oder Type Guards), bevor du auf die Variable zugreifen kannst.
 - **Generics:** Erlauben das Schreiben von flexiblen, aber dennoch typsicheren Funktionen und Klassen.
 
@@ -39,7 +41,7 @@ function processData(data: any): string {
 
 // GUT
 function processData(data: unknown): string {
-  if (typeof data === 'object' && data && 'name' in data) {
+  if (typeof data === "object" && data && "name" in data) {
     return (data as { name: string }).name; // Typprüfung vor Zugriff
   }
   throw new Error("Invalid data structure");
@@ -50,13 +52,14 @@ function processData(data: unknown): string {
 
 Die Wahl des richtigen Werkzeugs zur Definition von Datenstrukturen ist entscheidend.
 
-| Schlüsselwort | Verwendung | Begründung |
-| :--- | :--- | :--- |
-| **`interface`** | Definition von Objektstrukturen (`object shapes`), insbesondere für öffentliche APIs. | Kann durch `extends` erweitert und durch "Declaration Merging" kombiniert werden. Dies macht sie ideal für erweiterbare Bibliotheken und klare Objektverträge. |
-| **`type`** | Definition von komplexen Typen, Union-Typen (`|`), Intersection-Typen (`&`) oder Aliase für Primitive. | Flexibler für nicht-objektbasierte Typen. Nicht erweiterbar nach der Definition. |
-| **`class`** | Definition von Strukturen, die Instanzen, Methoden, Logik und Laufzeitinformationen benötigen. | Notwendig für Dependency Injection in Angular/Nest.js. **Zwingend für Nest.js DTOs**, da Decorators zur Validierung nur auf Klassen angewendet werden können. |
+| Schlüsselwort   | Verwendung                                                                                     | Begründung                                                                                                                                                     |
+| :-------------- | :--------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **`interface`** | Definition von Objektstrukturen (`object shapes`), insbesondere für öffentliche APIs.          | Kann durch `extends` erweitert und durch "Declaration Merging" kombiniert werden. Dies macht sie ideal für erweiterbare Bibliotheken und klare Objektverträge. |
+| **`type`**      | Definition von komplexen Typen, Union-Typen (`                                                 | `), Intersection-Typen (`&`) oder Aliase für Primitive.                                                                                                        | Flexibler für nicht-objektbasierte Typen. Nicht erweiterbar nach der Definition. |
+| **`class`**     | Definition von Strukturen, die Instanzen, Methoden, Logik und Laufzeitinformationen benötigen. | Notwendig für Dependency Injection in Angular/Nest.js. **Zwingend für Nest.js DTOs**, da Decorators zur Validierung nur auf Klassen angewendet werden können.  |
 
 **Faustregel:**
+
 - Nutze `interface` für die Form von Objekten.
 - Nutze `type` für alles andere (Unions, Tuples, etc.).
 - Nutze `class` wenn du eine Instanz mit Logik (`new MyClass()`) oder Decorator-Metadaten (Nest.js DTOs) benötigst.
@@ -82,7 +85,7 @@ export class UserDTO {
 }
 
 // in angular.service.ts
-import { UserDTO } from '@dtos'; // Pfadaliase verwenden!
+import { UserDTO } from '@DTOs/index'; // Pfadaliase verwenden!
 ...
 getUser(id: number): Observable<UserDTO> {
   return this.http.get<UserDTO>(`/api/users/${id}`);
@@ -105,24 +108,24 @@ getUser(id: number): Observable<UserDTO> {
 
 ```typescript
 // in shared/dtos/index.ts
-export * from './user.dto';
-export * from './content.dto';
+export * from "./user.dto";
+export * from "./content.dto";
 
 // in einem anderen File
-import { UserDTO, ContentDTO } from '@dtos';
+import { UserDTO, ContentDTO } from "@DTOs/index";
 ```
 
 ### 6. Namenskonventionen
 
 Konsistenz ist der Schlüssel zur Lesbarkeit.
 
-| Artefakt | Konvention | Beispiel |
-| :--- | :--- | :--- |
-| Klassen, Interfaces, Types, Enums | `UpperCamelCase` | `ContentService`, `UserDTO`, `NotificationType` |
-| Variablen, Funktionen | `camelCase` | `currentUser`, `fetchContent()` |
-| Private Member | `camelCase` (mit `private` Keyword) | `private userCount: number` |
-| Observables | `camelCase$` | `users$`, `contentNode$` |
-| Dateien | `feature.type.ts` | `user.service.ts`, `content-list.component.html` |
+| Artefakt                          | Konvention                          | Beispiel                                         |
+| :-------------------------------- | :---------------------------------- | :----------------------------------------------- |
+| Klassen, Interfaces, Types, Enums | `UpperCamelCase`                    | `ContentService`, `UserDTO`, `NotificationType`  |
+| Variablen, Funktionen             | `camelCase`                         | `currentUser`, `fetchContent()`                  |
+| Private Member                    | `camelCase` (mit `private` Keyword) | `private userCount: number`                      |
+| Observables                       | `camelCase$`                        | `users$`, `contentNode$`                         |
+| Dateien                           | `feature.type.ts`                   | `user.service.ts`, `content-list.component.html` |
 
 ### 7. Strikte Compiler-Optionen (`tsconfig.json`)
 
@@ -131,13 +134,13 @@ Die `tsconfig.json` ist das Fundament der Typsicherheit. Die folgenden Optionen 
 ```json
 {
   "compilerOptions": {
-    "strict": true,                   // Aktiviert alle strikten Typprüfungsoptionen
-    "noImplicitAny": true,            // Löst Fehler bei implizitem 'any' aus
-    "strictNullChecks": true,         // Unterscheidet zwischen 'string' und 'string | null'
+    "strict": true, // Aktiviert alle strikten Typprüfungsoptionen
+    "noImplicitAny": true, // Löst Fehler bei implizitem 'any' aus
+    "strictNullChecks": true, // Unterscheidet zwischen 'string' und 'string | null'
     "forceConsistentCasingInFileNames": true, // Verhindert Fehler auf case-sensitiven Systemen
-    "noUnusedLocals": true,           // Meldet ungenutzte lokale Variablen
-    "noUnusedParameters": true,       // Meldet ungenutzte Parameter
-    "noImplicitReturns": true         // Stellt sicher, dass alle Codepfade einen Wert zurückgeben
+    "noUnusedLocals": true, // Meldet ungenutzte lokale Variablen
+    "noUnusedParameters": true, // Meldet ungenutzte Parameter
+    "noImplicitReturns": true // Stellt sicher, dass alle Codepfade einen Wert zurückgeben
   }
 }
 ```
@@ -157,7 +160,7 @@ export class ApiService {
 }
 
 // Verwendung
-apiService.get<UserDTO[]>('users').subscribe(users => {
+apiService.get<UserDTO[]>("users").subscribe((users) => {
   // `users` ist hier korrekt als `UserDTO[]` typisiert
 });
 ```

@@ -1,5 +1,5 @@
 export interface EvaluationCategoryDTO {
-  id: string;
+  id: number;
   name: string;
   displayName: string;
   description: string;
@@ -14,7 +14,7 @@ export interface EvaluationCategoryDTO {
 // Predefined categories based on screenshots
 export const EVALUATION_CATEGORIES = {
   VOLLSTAENDIGKEIT: {
-    id: 'vollstaendigkeit',
+    id: 1,
     name: 'vollstaendigkeit',
     displayName: 'Vollständigkeit',
     description: 'Bewertung der Vollständigkeit der Lösung',
@@ -23,7 +23,7 @@ export const EVALUATION_CATEGORIES = {
     color: '#4CAF50'
   },
   GRAFISCHE_DARSTELLUNG: {
-    id: 'grafische_darstellung',
+    id: 2,
     name: 'grafische_darstellung', 
     displayName: 'Grafische Darstellungsqualität',
     description: 'Bewertung der grafischen Darstellungsqualität',
@@ -32,7 +32,7 @@ export const EVALUATION_CATEGORIES = {
     color: '#2196F3'
   },
   VERGLEICHBARKEIT: {
-    id: 'vergleichbarkeit',
+    id: 3,
     name: 'vergleichbarkeit',
     displayName: 'Vergleichbarkeit',
     description: 'Bewertung der Vergleichbarkeit der Lösung',
@@ -41,7 +41,7 @@ export const EVALUATION_CATEGORIES = {
     color: '#FF9800'
   },
   KOMPLEXITAET: {
-    id: 'komplexitaet',
+    id: 4,
     name: 'komplexitaet',
     displayName: 'Komplexität',
     description: 'Bewertung der Komplexität der Lösung',

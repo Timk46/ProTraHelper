@@ -1,5 +1,5 @@
 export interface CategoryStatsDTO {
-  categoryId: string;
+  categoryId: number;
   categoryName: string;
   availableComments: number;
   usedComments: number;
@@ -40,7 +40,7 @@ export interface CommentLimitDTO {
   id: string;
   submissionId: string;
   userId: number;
-  categoryId: string;
+  categoryId: number;
   availableCount: number;
   usedCount: number;
   resetAt?: Date;
@@ -48,7 +48,7 @@ export interface CommentLimitDTO {
 }
 
 export interface CommentLimitUpdateDTO {
-  categoryId: string;
+  categoryId: number;
   usedCount: number;
   lastUsedAt: Date;
 }
@@ -62,7 +62,7 @@ export interface CommentStatsDisplayDTO extends CommentStatsDTO {
   
   // Formatted strings for display
   formattedStats: {
-    categoryId: string;
+    categoryId: number;
     displayText: string;
     badgeColor: string;
     tooltipText: string;

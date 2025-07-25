@@ -10,6 +10,7 @@ export class ModuleSettingsController {
   @roles('ANY')
   @Get(':moduleId/:key')
   async getSetting(@Param('moduleId', ParseIntPipe) moduleId: number, @Param('key') key: string) {
+    console.log('getSetting', moduleId, key);
     const setting = await this.moduleSettingsService.getSetting(moduleId, key);
     return { value: setting.value };
   }

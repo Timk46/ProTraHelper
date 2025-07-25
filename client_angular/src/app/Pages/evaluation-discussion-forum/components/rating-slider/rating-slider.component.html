@@ -71,7 +71,7 @@
         <input 
           matSliderThumb
           formControlName="rating"
-          (valueChange)="onSliderChange($event)"
+          (input)="onSliderChange($event)"
           [attr.aria-label]="getSliderAriaLabel()">
         
       </mat-slider>

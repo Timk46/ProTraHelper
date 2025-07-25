@@ -340,7 +340,7 @@ export * from './rhino-window.dto';
 ### Frontend Integration
 ```typescript
 // Angular Service with Type Safety
-import { UserDTO, ContentDTO } from '@dtos';
+import { UserDTO, ContentDTO } from '@DTOs/index';
 
 @Injectable()
 export class ContentService {

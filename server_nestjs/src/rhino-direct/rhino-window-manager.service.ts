@@ -79,7 +79,7 @@ export class RhinoWindowManagerService {
         }
       `;
 
-      const { stdout } = await execAsync(`powershell -Command "${powershellScript}"`);
+      const { stdout } = await execAsync(`powershell -Command "${powershellScript.replace(/"/g, '\\"').replace(/\$/g, '\\$')}"`);
 
       if (!stdout.trim()) {
         this.logger.warn('⚠️ No Rhino windows found');

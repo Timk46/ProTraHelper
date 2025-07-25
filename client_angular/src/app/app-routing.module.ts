@@ -33,12 +33,23 @@ import { GraphTasksComponent } from './Modules/graph-tasks/graph-tasks.component
 import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-question.component';
 import { EditUmlComponent } from './Pages/lecturersView/edit-uml/edit-uml.component';
 import { EditCodeGameComponent } from './Pages/lecturersView/edit-code-game/edit-code-game.component';
+import { EvaluationDiscussionForumComponent } from './Pages/evaluation-discussion-forum/evaluation-discussion-forum/evaluation-discussion-forum.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'app', component: AppComponent },
   { path: 'not-registered', component: NotRegisteredComponent, canActivate: [LoggedInGuard] },
+  {
+    path: 'forum',
+    component: EvaluationDiscussionForumComponent,
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+  },
+  {
+    path: 'forum/:submissionId',
+    component: EvaluationDiscussionForumComponent,
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+  },
   {
     path: 'dashboard',
     component: DashboardComponent,
@@ -227,7 +238,7 @@ const routes: Routes = [
     path: 'teacher',
     loadChildren: () => import('./Pages/teacher/teacher.module').then(m => m.TeacherModule),
     canActivate: [LoggedInGuard], // Assuming teachers need to be logged in
-  }
+  },
 ];
 @NgModule({
   imports: [

@@ -1,24 +1,16 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 
-// Angular Material Imports
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
+// Angular Material Imports (reduced set for chat bubbles)
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatMenuModule } from '@angular/material/menu';
 
 // DTOs
 import {
   EvaluationCommentDTO,
   AnonymousEvaluationUserDTO,
   VoteType
-} from '@dtos';
-
-// Child Components
-import { VoteBoxComponent } from '../vote-box/vote-box.component';
+} from '@DTOs/index';
 
 @Component({
   selector: 'app-comment-item',
@@ -26,25 +18,19 @@ import { VoteBoxComponent } from '../vote-box/vote-box.component';
   imports: [
     CommonModule,
     DatePipe,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
     MatTooltipModule,
-    MatProgressSpinnerModule,
-    MatMenuModule,
-    VoteBoxComponent
+    MatProgressSpinnerModule
   ],
   templateUrl: './comment-item.component.html',
   styleUrl: './comment-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CommentItemComponent implements OnInit {
-  
+
   // =============================================================================
   // INPUTS - DATA FROM PARENT COMPONENT
   // =============================================================================
-  
+
   @Input() comment!: EvaluationCommentDTO;
   @Input() anonymousUser: AnonymousEvaluationUserDTO | null = null;
   @Input() canVote: boolean = true;
@@ -55,14 +41,14 @@ export class CommentItemComponent implements OnInit {
   // =============================================================================
   // OUTPUTS - EVENTS TO PARENT COMPONENT
   // =============================================================================
-  
+
   @Output() voted = new EventEmitter<{ commentId: string; voteType: VoteType }>();
   @Output() replyRequested = new EventEmitter<string>();
 
   // =============================================================================
   // COMPONENT STATE
   // =============================================================================
-  
+
   formattedTime: string = '';
   isContentExpanded: boolean = false;
   readonly maxContentLength = 300;
@@ -70,7 +56,7 @@ export class CommentItemComponent implements OnInit {
   // =============================================================================
   // LIFECYCLE METHODS
   // =============================================================================
-  
+
   ngOnInit(): void {
     this.formatCommentTime();
   }
@@ -78,18 +64,18 @@ export class CommentItemComponent implements OnInit {
   // =============================================================================
   // TIME FORMATTING
   // =============================================================================
-  
+
   private formatCommentTime(): void {
     const now = new Date();
     const commentDate = new Date(this.comment.createdAt);
     const diffMs = now.getTime() - commentDate.getTime();
-    
+
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const diffWeeks = Math.floor(diffDays / 7);
     const diffMonths = Math.floor(diffDays / 30);
-    
+
     if (diffMinutes < 1) {
       this.formattedTime = 'gerade eben';
     } else if (diffMinutes < 60) {
@@ -115,12 +101,12 @@ export class CommentItemComponent implements OnInit {
   // =============================================================================
   // EVENT HANDLERS
   // =============================================================================
-  
+
   onVote(voteType: VoteType): void {
     if (!this.canVote || this.isVoting) {
       return;
     }
-    
+
     this.voted.emit({
       commentId: this.comment.id,
       voteType: voteType
@@ -138,7 +124,7 @@ export class CommentItemComponent implements OnInit {
   // =============================================================================
   // TEMPLATE HELPER METHODS
   // =============================================================================
-  
+
   /**
    * Gets the display name for the comment author
    */
@@ -199,7 +185,7 @@ export class CommentItemComponent implements OnInit {
    * Gets the vote score (net votes)
    */
   getVoteScore(): number {
-    return this.comment.upvotes - this.comment.downvotes;
+    return this.comment.voteStats.upVotes - this.comment.voteStats.downVotes;
   }
 
   /**
@@ -226,8 +212,8 @@ export class CommentItemComponent implements OnInit {
    * Gets tooltip text for the vote score
    */
   getVoteScoreTooltip(): string {
-    const upvotes = this.comment.upvotes;
-    const downvotes = this.comment.downvotes;
+    const upvotes = this.comment.voteStats.upVotes;
+    const downvotes = this.comment.voteStats.downVotes;
     return `${upvotes} positive, ${downvotes} negative Bewertungen`;
   }
 
@@ -266,10 +252,28 @@ export class CommentItemComponent implements OnInit {
   }
 
   /**
+   * Gets the user vote from the votes array
+   * @returns VoteType The user's vote type or null if no vote exists
+   */
+  getUserVote(): VoteType {
+    if (!this.anonymousUser) return null;
+
+    const userVote = this.comment.votes.find((vote: any) =>
+      vote.userId === this.anonymousUser!.id
+    );
+
+    return userVote ? userVote.voteType : null;
+  }
+
+  /**
    * Gets the user vote icon
+   * @returns string The icon name for the user's vote
    */
   getUserVoteIcon(): string {
-    switch (this.comment.userVote) {
+    const userVote = this.getUserVote();
+    if (!userVote) return '';
+
+    switch (userVote) {
       case 'UP': return 'thumb_up';
       case 'DOWN': return 'thumb_down';
       default: return '';
@@ -278,9 +282,13 @@ export class CommentItemComponent implements OnInit {
 
   /**
    * Gets the user vote color
+   * @returns string The color code for the user's vote
    */
   getUserVoteColor(): string {
-    switch (this.comment.userVote) {
+    const userVote = this.getUserVote();
+    if (!userVote) return '#666';
+
+    switch (userVote) {
       case 'UP': return '#4caf50';
       case 'DOWN': return '#f44336';
       default: return '#666';
@@ -289,15 +297,17 @@ export class CommentItemComponent implements OnInit {
 
   /**
    * Checks if user has voted
+   * @returns boolean True if the user has voted, false otherwise
    */
   hasUserVoted(): boolean {
-    return this.comment.userVote !== null;
+    const userVote = this.getUserVote();
+    return userVote !== null;
   }
 
   // =============================================================================
   // UTILITY METHODS
   // =============================================================================
-  
+
   /**
    * Sanitizes HTML content for safe display
    */

@@ -76,6 +76,7 @@ export class NavigationPreferenceService {
    * @param moduleId The ID of the module
    */
   loadEnabledNavigationTypes(moduleId: number): Observable<NavigationType[]> {
+    console.log('loadEnabledNavigationTypes', moduleId);
     return this.moduleSettings.getSetting<NavigatorSetting>(moduleId, 'enabled_navigators').pipe(
       map(setting => {
         if (setting?.enabled && setting.enabled.length > 0) {

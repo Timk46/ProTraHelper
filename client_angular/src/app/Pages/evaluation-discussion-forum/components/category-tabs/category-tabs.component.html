@@ -1,109 +1,19 @@
 <!-- Category Tabs Container -->
 <div class="category-tabs-container">
-  
-  <!-- Material Tabs -->
-  <mat-tab-group 
-    class="category-tab-group"
-    [selectedIndex]="getSelectedTabIndex()"
-    (selectedTabChange)="onTabSelectionChange($event)"
-    animationDuration="300ms">
-    
-    <!-- Tab for each category -->
-    <mat-tab 
+  <!-- Tab buttons matching the design -->
+  <div class="criteria-tabs">
+    <button 
       *ngFor="let category of categories; trackBy: trackByCategory"
-      [label]="category.displayName"
-      class="category-tab">
-      
-      <!-- Custom Tab Label Template -->
-      <ng-template mat-tab-label>
-        <div class="tab-label-content" 
-             [matTooltip]="getCategoryTooltip(category)"
-             matTooltipPosition="below"
-             matTooltipShowDelay="500">
-          
-          <!-- Tab Icon -->
-          <mat-icon class="tab-icon" 
-                    [style.color]="category.color">
-            {{ category.icon }}
-          </mat-icon>
-          
-          <!-- Tab Title -->
-          <span class="tab-title">{{ category.displayName }}</span>
-          
-          <!-- Activity Badge -->
-          <div class="tab-badge-container" *ngIf="hasActivity(category.id)">
-            <span class="activity-badge"
-                  [matBadge]="getTotalUsedComments(category.id)"
-                  matBadgePosition="above after"
-                  matBadgeSize="small"
-                  [matBadgeColor]="hasActivity(category.id) ? 'accent' : 'primary'">
-            </span>
-          </div>
-          
-          <!-- Availability Indicator -->
-          <div class="availability-indicator">
-            <mat-chip class="availability-chip"
-                      [class]="getAvailabilityClass(category.id)"
-                      [selected]="false"
-                      [disabled]="false">
-              
-              <mat-icon class="availability-icon">
-                {{ getCategoryStats(category.id).availabilityIcon }}
-              </mat-icon>
-              
-              <span class="availability-text">
-                {{ getAvailabilityDisplay(category.id) }}
-              </span>
-              
-            </mat-chip>
-          </div>
-          
-        </div>
-      </ng-template>
-      
-      <!-- Tab Content (empty since content is handled by parent) -->
-      <div class="tab-content-placeholder">
-        <!-- Content wird von Parent Component gehandhabt -->
-      </div>
-      
-    </mat-tab>
-    
-  </mat-tab-group>
-  
-  <!-- Mobile Category Selector (for small screens) -->
-  <div class="mobile-category-selector" *ngIf="categories.length > 0">
-    
-    <div class="mobile-category-header">
-      <mat-icon>category</mat-icon>
-      <span>Kategorie auswählen</span>
-    </div>
-    
-    <div class="mobile-category-list">
-      <button 
-        *ngFor="let category of categories; trackBy: trackByCategory"
-        class="mobile-category-button"
-        [class.active]="isActiveCategory(category.id)"
-        (click)="onTabChanged(category.id)"
-        [matTooltip]="getCategoryTooltip(category)">
-        
-        <div class="mobile-button-content">
-          <mat-icon [style.color]="category.color">{{ category.icon }}</mat-icon>
-          <span class="category-name">{{ category.displayName }}</span>
-          <span class="availability-text-mobile" 
-                [class]="getAvailabilityClass(category.id)">
-            {{ getAvailabilityDisplay(category.id) }}
-          </span>
-        </div>
-        
-      </button>
-    </div>
-    
+      class="criteria-tab"
+      [class.active]="isActiveCategory(category.id)"
+      (click)="onTabChanged(category.id)">
+      {{ category.displayName }}
+    </button>
   </div>
-  
 </div>
 
 <!-- Loading State -->
 <div class="loading-state" *ngIf="categories.length === 0">
-  <mat-icon class="loading-icon">category</mat-icon>
+  <mat-spinner diameter="20"></mat-spinner>
   <span>Lade Kategorien...</span>
 </div>

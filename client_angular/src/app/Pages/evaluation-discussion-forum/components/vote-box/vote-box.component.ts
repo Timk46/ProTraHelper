@@ -9,7 +9,7 @@ import { MatRippleModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // DTOs
-import { VoteType } from '@dtos';
+import { VoteType } from '@DTOs/index';
 
 @Component({
   selector: 'app-vote-box',
@@ -27,11 +27,17 @@ import { VoteType } from '@dtos';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VoteBoxComponent {
-  
+
+  // =============================================================================
+  // TEMPLATE UTILITIES
+  // =============================================================================
+
+  protected readonly Math = Math;
+
   // =============================================================================
   // INPUTS - DATA FROM PARENT COMPONENT
   // =============================================================================
-  
+
   @Input() upvotes: number = 0;
   @Input() downvotes: number = 0;
   @Input() userVote: VoteType | null = null;
@@ -44,18 +50,18 @@ export class VoteBoxComponent {
   // =============================================================================
   // OUTPUTS - EVENTS TO PARENT COMPONENT
   // =============================================================================
-  
+
   @Output() voted = new EventEmitter<VoteType>();
 
   // =============================================================================
   // EVENT HANDLERS
   // =============================================================================
-  
+
   onUpvote(): void {
     if (!this.canVote || this.isVoting) {
       return;
     }
-    
+
     // Toggle upvote: if already upvoted, remove vote; otherwise upvote
     const newVote: VoteType = this.userVote === 'UP' ? null : 'UP';
     this.voted.emit(newVote);
@@ -65,7 +71,7 @@ export class VoteBoxComponent {
     if (!this.canVote || this.isVoting) {
       return;
     }
-    
+
     // Toggle downvote: if already downvoted, remove vote; otherwise downvote
     const newVote: VoteType = this.userVote === 'DOWN' ? null : 'DOWN';
     this.voted.emit(newVote);
@@ -74,25 +80,25 @@ export class VoteBoxComponent {
   // =============================================================================
   // TEMPLATE HELPER METHODS
   // =============================================================================
-  
+
   /**
-   * Gets the upvote button state class
+   * Gets the upvote button state class (HTML Template Style)
    */
   getUpvoteButtonClass(): string {
     if (this.userVote === 'UP') {
-      return 'voted upvoted';
+      return 'voted';
     }
-    return 'not-voted';
+    return '';
   }
 
   /**
-   * Gets the downvote button state class
+   * Gets the downvote button state class (HTML Template Style)
    */
   getDownvoteButtonClass(): string {
     if (this.userVote === 'DOWN') {
-      return 'voted downvoted';
+      return 'voted';
     }
-    return 'not-voted';
+    return '';
   }
 
   /**
@@ -225,19 +231,15 @@ export class VoteBoxComponent {
   }
 
   /**
-   * Gets the container class based on orientation and compact mode
+   * Gets the container class (simplified for HTML template style)
    */
   getContainerClass(): string {
-    const classes = [`vote-box-${this.orientation}`];
-    
-    if (this.compactMode) {
-      classes.push('compact');
-    }
-    
+    const classes: string[] = [];
+
     if (this.isVoting) {
       classes.push('voting');
     }
-    
+
     return classes.join(' ');
   }
 
@@ -257,11 +259,11 @@ export class VoteBoxComponent {
   getPopularityClass(): string {
     const ratio = this.getVoteRatio();
     const total = this.getTotalVotes();
-    
+
     if (total < 3) {
       return ''; // Not enough votes to determine popularity
     }
-    
+
     if (ratio >= 0.8) {
       return 'very-popular';
     } else if (ratio >= 0.6) {
@@ -271,7 +273,7 @@ export class VoteBoxComponent {
     } else if (ratio <= 0.4) {
       return 'somewhat-unpopular';
     }
-    
+
     return 'neutral';
   }
 }
