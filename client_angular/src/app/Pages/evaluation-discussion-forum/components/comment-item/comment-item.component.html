@@ -25,18 +25,24 @@
 
     <!-- Plus Vote Button -->
     <button class="vote-btn plus"
-            [ngClass]="getUserVote() === 'UP' ? 'voted' : ''"
-            [disabled]="isVoting"
-            [matTooltip]="'Positiv bewerten'"
+            [ngClass]="{
+              'voted': getUserVote() === 'UP',
+              'disabled-limit': !canVoteUp && getUserVote() !== 'UP'
+            }"
+            [disabled]="isVoting || (!canVoteUp && getUserVote() !== 'UP')"
+            [matTooltip]="getUpvoteTooltip()"
             (click)="onVote('UP')">
       <span>+</span>
     </button>
 
     <!-- Minus Vote Button -->
     <button class="vote-btn minus"
-            [ngClass]="getUserVote() === 'DOWN' ? 'voted' : ''"
-            [disabled]="isVoting"
-            [matTooltip]="'Negativ bewerten'"
+            [ngClass]="{
+              'voted': getUserVote() === 'DOWN',
+              'disabled-limit': !canVoteDown && getUserVote() !== 'DOWN'
+            }"
+            [disabled]="isVoting || (!canVoteDown && getUserVote() !== 'DOWN')"
+            [matTooltip]="getDownvoteTooltip()"
             (click)="onVote('DOWN')">
       <span>-</span>
     </button>

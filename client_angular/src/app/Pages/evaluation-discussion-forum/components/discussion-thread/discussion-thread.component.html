@@ -40,8 +40,7 @@
 
       <!-- DEBUG: Direct rendering without Virtual Scrolling -->
       <div *ngIf="hasDiscussions()" class="discussion-viewport-debug">
-        <p><strong>DEBUG: flattenedComments.length = {{ flattenedComments.length }}</strong></p>
-        
+
         <!-- Flattened Comment Items WITHOUT Virtual Scrolling -->
         <div *ngFor="let item of flattenedComments; trackBy: trackByFlattenedComment"
              class="virtual-item"
@@ -57,12 +56,15 @@
           <div *ngSwitchCase="'comment'"
                class="comment-item-container"
                [style.margin-left.px]="getCommentIndentation(item.depth)">
-            
-            <p><strong>COMMENT WRAPPER: {{ item.comment?.id }}</strong></p>
+
             <app-comment-item
               [comment]="item.comment!"
               [anonymousUser]="anonymousUser"
               [canVote]="canVote && !isReadOnly"
+              [canVoteUp]="availableUpvotes > 0"
+              [canVoteDown]="availableDownvotes > 0"
+              [availableUpvotes]="availableUpvotes"
+              [availableDownvotes]="availableDownvotes"
               [isVoting]="isCommentBeingVoted(item.comment!.id)"
               [depth]="item.depth"
               (voted)="onCommentVoted($event)">
@@ -71,7 +73,7 @@
           </div>
 
         </div>
-      
+
       </div>
 
     </div>

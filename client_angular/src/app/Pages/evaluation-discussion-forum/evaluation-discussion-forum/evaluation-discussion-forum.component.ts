@@ -48,6 +48,7 @@ import { CategoryTabsComponent } from '../components/category-tabs/category-tabs
 import { PdfViewerPanelComponent } from '../components/pdf-viewer-panel/pdf-viewer-panel.component';
 import { DiscussionThreadComponent } from '../components/discussion-thread/discussion-thread.component';
 import { PhaseToggleComponent } from '../components/phase-toggle/phase-toggle.component';
+import { ErrorFallbackComponent } from '../components/error-fallback/error-fallback.component';
 import { RatingSliderComponent } from '../components/rating-slider/rating-slider.component';
 
 // =============================================================================
@@ -84,6 +85,7 @@ import { RatingSliderComponent } from '../components/rating-slider/rating-slider
     DiscussionThreadComponent,
     PhaseToggleComponent,
     RatingSliderComponent,
+    ErrorFallbackComponent,
   ],
   templateUrl: './evaluation-discussion-forum.component.html',
   styleUrl: './evaluation-discussion-forum.component.scss',

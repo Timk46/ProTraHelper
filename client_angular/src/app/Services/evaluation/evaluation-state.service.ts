@@ -1,6 +1,15 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, combineLatest, forkJoin, of } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay, switchMap, catchError, finalize } from 'rxjs/operators';
+import {
+  map,
+  distinctUntilChanged,
+  shareReplay,
+  switchMap,
+  catchError,
+  finalize,
+  take,
+  tap,
+} from 'rxjs/operators';
 
 import {
   EvaluationSubmissionDTO,
@@ -14,21 +23,20 @@ import {
   EvaluationPhase,
   VoteUpdateData,
   EvaluationRatingDTO,
-  RatingStatsDTO
+  RatingStatsDTO,
 } from '@DTOs/index';
 
 import { EvaluationDiscussionService } from './evaluation-discussion.service';
 import { EvaluationMockDataService } from './evaluation-mock-data.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EvaluationStateService {
-
   // Core state subjects
   private submissionSubject = new BehaviorSubject<EvaluationSubmissionDTO | null>(null);
   private categoriesSubject = new BehaviorSubject<EvaluationCategoryDTO[]>([]);
-  private activeCategorySubject = new BehaviorSubject<number>(1);
+  private activeCategorySubject = new BehaviorSubject<number | null>(null);
   private commentStatsSubject = new BehaviorSubject<CommentStatsDTO | null>(null);
   private anonymousUserSubject = new BehaviorSubject<AnonymousEvaluationUserDTO | null>(null);
 
@@ -42,21 +50,37 @@ export class EvaluationStateService {
   // UI state
   private loadingSubject = new BehaviorSubject<boolean>(false);
   private errorSubject = new BehaviorSubject<string | null>(null);
-  
+
   // Race condition prevention
   private commentCreationInProgress = new Set<string>(); // Track ongoing comment creations by category
   private categoryLoadingStates = new Map<number, boolean>(); // Track loading state per category
 
   // Vote limits tracking (per category)
-  private voteLimitsSubject = new BehaviorSubject<Map<number, {plusVotes: number, minusVotes: number}>>(new Map());
+  private voteLimitsSubject = new BehaviorSubject<
+    Map<number, { plusVotes: number; minusVotes: number }>
+  >(new Map());
 
   // Mock mode state
   private isMockModeActive = false;
 
   constructor(
     private evaluationService: EvaluationDiscussionService,
-    private mockDataService: EvaluationMockDataService
-  ) {}
+    private mockDataService: EvaluationMockDataService,
+  ) {
+    // Warte auf das Laden der Kategorien und setze die erste verfügbare als aktiv
+    this.categories$.subscribe(categories => {
+      if (categories.length > 0 && this.activeCategorySubject.value === null) {
+        // Setze die erste Kategorie als Standard-aktive Kategorie
+        const firstCategory = categories[0];
+        console.log(
+          '🎯 Automatische Auswahl der ersten Kategorie:',
+          firstCategory.id,
+          firstCategory.displayName,
+        );
+        this.activeCategorySubject.next(firstCategory.id);
+      }
+    });
+  }
 
   // =============================================================================
   // MOCK MODE MANAGEMENT
@@ -73,26 +97,26 @@ export class EvaluationStateService {
     // Load mock submission
     this.mockDataService.getMockSubmission().subscribe(submission => {
       this.submissionSubject.next(submission);
-      
+
       // Load related mock data
       const categories = this.mockDataService.getMockCategories();
       this.categoriesSubject.next(categories);
       this.initializeVoteLimits(categories);
-      
+
       // Load mock comment stats
       this.mockDataService.getMockCommentStats().subscribe(stats => {
         this.commentStatsSubject.next(stats);
       });
-      
+
       // Load mock anonymous user
       const anonymousUser = this.mockDataService.getMockAnonymousUser();
       this.anonymousUserSubject.next(anonymousUser);
-      
+
       // Load mock vote limits
       this.mockDataService.getMockVoteLimits().subscribe(limits => {
         this.voteLimitsSubject.next(limits);
       });
-      
+
       this.setLoading(false);
     });
   }
@@ -121,7 +145,17 @@ export class EvaluationStateService {
    * @returns Observable<number> The active category ID
    */
   get activeCategory$(): Observable<number> {
-    return this.activeCategorySubject.asObservable();
+    return this.activeCategorySubject.asObservable().pipe(
+      map(categoryId => {
+        // Fallback: Falls keine Kategorie gesetzt ist, nutze die erste verfügbare
+        if (categoryId === null) {
+          const categories = this.categoriesSubject.value;
+          return categories.length > 0 ? categories[0].id : 5; // 5 als letzter Fallback
+        }
+        return categoryId;
+      }),
+      distinctUntilChanged(),
+    );
   }
 
   get commentStats$(): Observable<CommentStatsDTO | null> {
@@ -140,7 +174,7 @@ export class EvaluationStateService {
     return this.errorSubject.asObservable();
   }
 
-  get voteLimits$(): Observable<Map<number, {plusVotes: number, minusVotes: number}>> {
+  get voteLimits$(): Observable<Map<number, { plusVotes: number; minusVotes: number }>> {
     return this.voteLimitsSubject.asObservable();
   }
 
@@ -154,26 +188,35 @@ export class EvaluationStateService {
     this.clearError();
 
     this.evaluationService.getSubmission(submissionId).subscribe({
-      next: (submission) => {
+      next: submission => {
         console.log('✅ Submission loaded:', submission);
         this.submissionSubject.next(submission);
-        
+
         // Prepare parallel operations array
         const parallelOps: Observable<any>[] = [
           this.evaluationService.getCommentStats(submissionId).pipe(
             catchError(error => {
               console.warn('⚠️ CommentStats loading failed:', error);
               return of(null); // Continue with null if stats fail
-            })
+            }),
           ),
           this.evaluationService.getOrCreateAnonymousUser(submissionId).pipe(
+            tap(anonymousUser => {
+              console.log('🎭 Anonymous user loaded:', {
+                submissionId,
+                anonymousUser,
+                id: anonymousUser?.id,
+                idType: typeof anonymousUser?.id,
+                displayName: anonymousUser?.displayName
+              });
+            }),
             catchError(error => {
-              console.warn('⚠️ AnonymousUser loading failed:', error);
+              console.error('⚠️ AnonymousUser loading failed:', error);
               return of(null); // Continue with null if user fails
-            })
-          )
+            }),
+          ),
         ];
-        
+
         // Add categories loading if sessionId is available
         if (submission.sessionId) {
           console.log('📡 Adding categories loading for sessionId:', submission.sessionId);
@@ -182,19 +225,19 @@ export class EvaluationStateService {
               catchError(error => {
                 console.warn('⚠️ Categories loading failed:', error);
                 return of([]); // Continue with empty array if categories fail
-              })
-            )
+              }),
+            ),
           );
         }
-        
+
         // Wait for ALL parallel operations to complete
         console.log('🔄 Starting parallel operations. Count:', parallelOps.length);
         forkJoin(parallelOps).subscribe({
-          next: (results) => {
+          next: results => {
             console.log('✅ All parallel operations completed:', results);
-            
+
             const [commentStats, anonymousUser, categories] = results;
-            
+
             // Update states with results
             if (commentStats) {
               this.commentStatsSubject.next(commentStats);
@@ -207,23 +250,23 @@ export class EvaluationStateService {
               this.categoriesSubject.next(categories);
               this.initializeVoteLimits(categories);
             }
-            
+
             // ONLY NOW set loading to false - after ALL operations are complete
             console.log('🎉 All data loaded successfully. Setting loading to false.');
             this.setLoading(false);
           },
-          error: (error) => {
+          error: error => {
             console.error('❌ Parallel operations failed:', error);
             this.setError('Fehler beim Laden der Zusatzdaten');
             this.setLoading(false);
-          }
+          },
         });
       },
-      error: (error) => {
+      error: error => {
         console.error('❌ Submission loading failed:', error);
         this.setError('Fehler beim Laden der Abgabe');
         this.setLoading(false);
-      }
+      },
     });
   }
 
@@ -236,16 +279,16 @@ export class EvaluationStateService {
       this.setError('SessionId erforderlich zum Laden der Kategorien');
       return;
     }
-    
+
     this.evaluationService.getCategories(sessionId).subscribe({
-      next: (categories) => {
+      next: categories => {
         this.categoriesSubject.next(categories);
         // Initialize vote limits for all categories
         this.initializeVoteLimits(categories);
       },
-      error: (error) => {
+      error: error => {
         this.setError('Fehler beim Laden der Kategorien');
-      }
+      },
     });
   }
 
@@ -261,14 +304,9 @@ export class EvaluationStateService {
   }
 
   get activeCategoryInfo$(): Observable<EvaluationCategoryDTO | null> {
-    return combineLatest([
-      this.categories$,
-      this.activeCategory$
-    ]).pipe(
-      map(([categories, activeId]) =>
-        categories.find(cat => cat.id === activeId) || null
-      ),
-      distinctUntilChanged()
+    return combineLatest([this.categories$, this.activeCategory$]).pipe(
+      map(([categories, activeId]) => categories.find(cat => cat.id === activeId) || null),
+      distinctUntilChanged(),
     );
   }
 
@@ -282,23 +320,30 @@ export class EvaluationStateService {
    * @param categoryId - The category ID
    * @returns Observable<EvaluationDiscussionDTO[]> The discussions for the category
    */
-  getDiscussionsForCategory(submissionId: string, categoryId: number): Observable<EvaluationDiscussionDTO[]> {
-    console.log('📂 getDiscussionsForCategory called:', { submissionId, categoryId, mockMode: this.isMockModeActive });
-    
+  getDiscussionsForCategory(
+    submissionId: string,
+    categoryId: number,
+  ): Observable<EvaluationDiscussionDTO[]> {
+    console.log('📂 getDiscussionsForCategory called:', {
+      submissionId,
+      categoryId,
+      mockMode: this.isMockModeActive,
+    });
+
     if (this.isMockModeActive) {
       // Mock mode - return mock discussions
       return this.mockDataService.getMockDiscussions(categoryId);
     }
-    
+
     // Real mode - ensure cache exists before loading
     const subject = this.ensureDiscussionCache(categoryId);
-    
+
     // Load discussions if cache is empty
     if (subject.value.length === 0) {
       console.log('📡 Loading discussions for category:', categoryId);
       this.loadDiscussionsForCategory(submissionId, categoryId);
     }
-    
+
     return subject.asObservable();
   }
 
@@ -320,18 +365,26 @@ export class EvaluationStateService {
     this.categoryLoadingStates.set(categoryId, true);
 
     this.evaluationService.getDiscussionsByCategory(submissionId, categoryId.toString()).subscribe({
-      next: (discussions) => {
-        console.log('✅ Discussions loaded for category', categoryId, ':', discussions.length, 'discussions');
+      next: discussions => {
+        console.log(
+          '✅ Discussions loaded for category',
+          categoryId,
+          ':',
+          discussions.length,
+          'discussions',
+        );
         const subject = this.discussionCache.get(cacheKey);
         if (subject) {
           subject.next(discussions);
         }
         this.clearError(); // Clear any previous errors
       },
-      error: (error) => {
+      error: error => {
         console.error('❌ Failed to load discussions for category', categoryId, ':', error);
-        this.setError(`Fehler beim Laden der Diskussionen für Kategorie ${categoryId}. Bitte aktualisieren Sie die Seite.`);
-        
+        this.setError(
+          `Fehler beim Laden der Diskussionen für Kategorie ${categoryId}. Bitte aktualisieren Sie die Seite.`,
+        );
+
         // Provide fallback empty state instead of leaving cache in undefined state
         const subject = this.discussionCache.get(cacheKey);
         if (subject && subject.value.length === 0) {
@@ -343,21 +396,18 @@ export class EvaluationStateService {
         // Always clean up loading state
         this.categoryLoadingStates.set(categoryId, false);
         console.log('🧹 Category loading completed for', categoryId);
-      }
+      },
     });
   }
 
   get activeDiscussions$(): Observable<EvaluationDiscussionDTO[]> {
-    return combineLatest([
-      this.submission$,
-      this.activeCategory$
-    ]).pipe(
+    return combineLatest([this.submission$, this.activeCategory$]).pipe(
       map(([submission, categoryId]) => {
         if (!submission) return [];
         return this.getDiscussionsForCategory(submission.id, categoryId);
       }),
       switchMap(discussions$ => discussions$),
-      shareReplay(1)
+      shareReplay(1),
     );
   }
 
@@ -387,7 +437,11 @@ export class EvaluationStateService {
    * @param content - The comment content
    * @returns Observable<EvaluationCommentDTO> The created comment
    */
-  addComment(submissionId: string, categoryId: number, content: string): Observable<EvaluationCommentDTO> {
+  addComment(
+    submissionId: string,
+    categoryId: number,
+    content: string,
+  ): Observable<EvaluationCommentDTO> {
     const anonymousUser = this.anonymousUserSubject.value;
 
     // Phase 1.2: Validate anonymous user exists
@@ -406,14 +460,14 @@ export class EvaluationStateService {
     const createCommentDto: CreateEvaluationCommentDTO = {
       submissionId,
       categoryId: categoryId,
-      content
+      content,
     };
 
     console.log('✅ Anonymous user validated:', anonymousUser.displayName);
-    
+
     // Mark operation as in progress
     this.commentCreationInProgress.add(operationKey);
-    
+
     return this.evaluationService.createComment(createCommentDto).pipe(
       map(comment => {
         // Update local cache
@@ -430,7 +484,7 @@ export class EvaluationStateService {
         // Always clean up the progress tracking
         this.commentCreationInProgress.delete(operationKey);
         console.log('🧹 Comment creation operation completed for category', categoryId);
-      })
+      }),
     );
   }
 
@@ -440,19 +494,31 @@ export class EvaluationStateService {
    * @param categoryId - The category ID
    * @param comment - The comment that was added
    */
-  private handleCommentAdded(submissionId: string, categoryId: number, comment: EvaluationCommentDTO): void {
-    console.log('➕ handleCommentAdded called:', { submissionId, categoryId, commentId: comment.id });
-    
+  private handleCommentAdded(
+    submissionId: string,
+    categoryId: number,
+    comment: EvaluationCommentDTO,
+  ): void {
+    console.log('➕ handleCommentAdded called:', {
+      submissionId,
+      categoryId,
+      commentId: comment.id,
+    });
+
     try {
       // Validate input parameters
       if (!submissionId || !categoryId || !comment) {
-        console.error('❌ Invalid parameters for handleCommentAdded:', { submissionId, categoryId, comment });
+        console.error('❌ Invalid parameters for handleCommentAdded:', {
+          submissionId,
+          categoryId,
+          comment,
+        });
         return;
       }
 
       // Use robust cache method to ensure cache exists
       const subject = this.ensureDiscussionCache(categoryId);
-      
+
       const currentDiscussions = subject.value || []; // Fallback to empty array
       const updatedDiscussions = [...currentDiscussions];
 
@@ -468,7 +534,7 @@ export class EvaluationStateService {
           createdAt: new Date(),
           totalComments: 0,
           availableComments: 3,
-          usedComments: 0
+          usedComments: 0,
         };
         updatedDiscussions.push(discussion);
       }
@@ -478,14 +544,16 @@ export class EvaluationStateService {
         console.warn('⚠️ Discussion.comments was invalid, initializing as empty array');
         discussion.comments = [];
       }
-      
+
       discussion.comments = [comment, ...discussion.comments];
       discussion.totalComments = discussion.comments.length;
       discussion.usedComments = discussion.comments.length;
 
-      console.log('✅ Discussion updated with new comment. Total comments:', discussion.totalComments);
+      console.log(
+        '✅ Discussion updated with new comment. Total comments:',
+        discussion.totalComments,
+      );
       subject.next(updatedDiscussions);
-      
     } catch (error) {
       console.error('❌ Error in handleCommentAdded:', error);
       this.setError('Fehler beim Aktualisieren der Kommentare. Bitte laden Sie die Seite neu.');
@@ -503,10 +571,10 @@ export class EvaluationStateService {
           upvotes: result.upvotes,
           downvotes: result.downvotes,
           userVote: result.userVote,
-          netVotes: result.netVotes
+          netVotes: result.netVotes,
         });
         return result;
-      })
+      }),
     );
   }
 
@@ -525,11 +593,11 @@ export class EvaluationStateService {
               ...comment,
               upvotes: voteData.upvotes,
               downvotes: voteData.downvotes,
-              userVote: voteData.userVote
+              userVote: voteData.userVote,
             };
           }
           return comment;
-        })
+        }),
       }));
 
       if (updated) {
@@ -558,7 +626,7 @@ export class EvaluationStateService {
         averageScore: 0,
         totalRatings: 0,
         scoreDistribution: [],
-        userHasRated: false
+        userHasRated: false,
       });
       this.ratingStatsCache.set(cacheKey, subject);
 
@@ -578,15 +646,15 @@ export class EvaluationStateService {
     const cacheKey = categoryId;
 
     this.evaluationService.getRatingStats(submissionId, categoryId.toString()).subscribe({
-      next: (stats) => {
+      next: stats => {
         const subject = this.ratingStatsCache.get(cacheKey);
         if (subject) {
           subject.next(stats);
         }
       },
-      error: (error) => {
+      error: error => {
         this.setError('Fehler beim Laden der Bewertungsstatistiken');
-      }
+      },
     });
   }
 
@@ -597,11 +665,15 @@ export class EvaluationStateService {
    * @param score - The rating score
    * @returns Observable<EvaluationRatingDTO> The created rating
    */
-  submitRating(submissionId: string, categoryId: number, score: number): Observable<EvaluationRatingDTO> {
+  submitRating(
+    submissionId: string,
+    categoryId: number,
+    score: number,
+  ): Observable<EvaluationRatingDTO> {
     const createRatingDto: CreateEvaluationRatingDTO = {
       submissionId,
       categoryId: categoryId,
-      score
+      score,
     };
 
     return this.evaluationService.createRating(createRatingDto).pipe(
@@ -609,7 +681,7 @@ export class EvaluationStateService {
         // Update local cache
         this.refreshRatingStats(submissionId, categoryId);
         return rating;
-      })
+      }),
     );
   }
 
@@ -632,7 +704,7 @@ export class EvaluationStateService {
       map(ratings => {
         const rating = ratings.find(r => r.categoryId === categoryId);
         return rating || null;
-      })
+      }),
     );
   }
 
@@ -643,14 +715,14 @@ export class EvaluationStateService {
   get currentPhase$(): Observable<EvaluationPhase | null> {
     return this.submission$.pipe(
       map(submission => submission?.phase || null),
-      distinctUntilChanged()
+      distinctUntilChanged(),
     );
   }
 
   switchPhase(submissionId: string, targetPhase: EvaluationPhase): Observable<any> {
     const request = {
       submissionId,
-      targetPhase
+      targetPhase,
     };
 
     return this.evaluationService.switchPhase(request).pipe(
@@ -660,22 +732,26 @@ export class EvaluationStateService {
         if (currentSubmission) {
           this.submissionSubject.next({
             ...currentSubmission,
-            phase: targetPhase
+            phase: targetPhase,
           });
         }
         return response;
-      })
+      }),
     );
   }
 
   /**
    * Alternative phase switching using submission-based endpoint (more efficient)
    */
-  switchPhaseBySubmission(submissionId: string, targetPhase: EvaluationPhase, reason?: string): Observable<any> {
+  switchPhaseBySubmission(
+    submissionId: string,
+    targetPhase: EvaluationPhase,
+    reason?: string,
+  ): Observable<any> {
     const request = {
       submissionId,
       targetPhase,
-      reason
+      reason,
     };
 
     return this.evaluationService.switchPhaseBySubmission(request).pipe(
@@ -685,11 +761,11 @@ export class EvaluationStateService {
         if (currentSubmission) {
           this.submissionSubject.next({
             ...currentSubmission,
-            phase: targetPhase
+            phase: targetPhase,
           });
         }
         return response;
-      })
+      }),
     );
   }
 
@@ -699,12 +775,12 @@ export class EvaluationStateService {
 
   private loadCommentStats(submissionId: string): void {
     this.evaluationService.getCommentStats(submissionId).subscribe({
-      next: (stats) => {
+      next: stats => {
         this.commentStatsSubject.next(stats);
       },
-      error: (error) => {
+      error: error => {
         this.setError('Fehler beim Laden der Kommentarstatistiken');
-      }
+      },
     });
   }
 
@@ -713,15 +789,12 @@ export class EvaluationStateService {
   }
 
   get commentStatsForActiveCategory$(): Observable<any> {
-    return combineLatest([
-      this.commentStats$,
-      this.activeCategory$
-    ]).pipe(
+    return combineLatest([this.commentStats$, this.activeCategory$]).pipe(
       map(([stats, categoryId]) => {
         if (!stats) return null;
         return stats.categories.find((cat: any) => cat.categoryId === categoryId) || null;
       }),
-      distinctUntilChanged()
+      distinctUntilChanged(),
     );
   }
 
@@ -731,12 +804,12 @@ export class EvaluationStateService {
 
   private loadAnonymousUser(submissionId: string): void {
     this.evaluationService.getOrCreateAnonymousUser(submissionId).subscribe({
-      next: (user) => {
+      next: user => {
         this.anonymousUserSubject.next(user);
       },
-      error: (error) => {
+      error: error => {
         this.setError('Fehler beim Laden des anonymen Benutzers');
-      }
+      },
     });
   }
 
@@ -771,7 +844,6 @@ export class EvaluationStateService {
     // Categories will be loaded automatically when submission loads
   }
 
-
   // =============================================================================
   // REAL-TIME UPDATES
   // =============================================================================
@@ -802,7 +874,7 @@ export class EvaluationStateService {
    * Initialize vote limits for all categories (3 plus and 3 minus votes per category)
    */
   initializeVoteLimits(categories: EvaluationCategoryDTO[]): void {
-    const limits = new Map<number, {plusVotes: number, minusVotes: number}>();
+    const limits = new Map<number, { plusVotes: number; minusVotes: number }>();
     categories.forEach(category => {
       limits.set(category.id, { plusVotes: 3, minusVotes: 3 });
     });
@@ -815,16 +887,16 @@ export class EvaluationStateService {
   canVote(categoryId: number, voteType: 'UP' | 'DOWN'): boolean {
     const currentLimits = this.voteLimitsSubject.value;
     const categoryLimits = currentLimits.get(categoryId);
-    
+
     if (!categoryLimits) return false;
-    
+
     return voteType === 'UP' ? categoryLimits.plusVotes > 0 : categoryLimits.minusVotes > 0;
   }
 
   /**
    * Get available votes for a specific category
    */
-  getAvailableVotes(categoryId: number): {plusVotes: number, minusVotes: number} | null {
+  getAvailableVotes(categoryId: number): { plusVotes: number; minusVotes: number } | null {
     const currentLimits = this.voteLimitsSubject.value;
     return currentLimits.get(categoryId) || null;
   }
@@ -832,44 +904,85 @@ export class EvaluationStateService {
   /**
    * Update vote limits after a vote is cast
    */
-  private updateVoteLimits(categoryId: number, voteType: 'UP' | 'DOWN', isAddingVote: boolean): void {
+  private updateVoteLimits(
+    categoryId: number,
+    voteType: 'UP' | 'DOWN',
+    isAddingVote: boolean,
+  ): void {
     const currentLimits = new Map(this.voteLimitsSubject.value);
     const categoryLimits = currentLimits.get(categoryId);
-    
+
     if (!categoryLimits) return;
-    
+
     const change = isAddingVote ? -1 : 1;
-    
+
     if (voteType === 'UP') {
       categoryLimits.plusVotes += change;
     } else {
       categoryLimits.minusVotes += change;
     }
-    
+
     // Ensure limits don't go below 0 or above 3
     categoryLimits.plusVotes = Math.max(0, Math.min(3, categoryLimits.plusVotes));
     categoryLimits.minusVotes = Math.max(0, Math.min(3, categoryLimits.minusVotes));
-    
+
     currentLimits.set(categoryId, categoryLimits);
     this.voteLimitsSubject.next(currentLimits);
   }
 
   /**
+   * Synchronizes mock vote limits with state service limits
+   * Called after each mock vote to keep the display in sync
+   */
+  private synchronizeMockVoteLimits(): void {
+    if (this.isMockModeActive) {
+      this.mockDataService.getMockVoteLimits().pipe(
+        take(1)
+      ).subscribe(mockLimits => {
+        console.log('🔄 Synchronizing mock vote limits with state service:', mockLimits);
+        this.voteLimitsSubject.next(mockLimits);
+      });
+    }
+  }
+
+  /**
    * Enhanced vote method that updates limits
    */
-  voteCommentWithLimits(commentId: string, voteType: 'UP' | 'DOWN' | null, categoryId: number): Observable<any> {
+  voteCommentWithLimits(
+    commentId: string,
+    voteType: 'UP' | 'DOWN' | null,
+    categoryId: number,
+  ): Observable<any> {
     if (this.isMockModeActive) {
-      // Mock mode - use mock data service
+      // Mock mode - graceful handling without throwing errors
       if (voteType !== null && !this.canVote(categoryId, voteType)) {
-        throw new Error(`Keine weiteren ${voteType === 'UP' ? 'positiven' : 'negativen'} Bewertungen für diese Kategorie verfügbar`);
+        console.warn(`⚠️ No more ${voteType.toLowerCase()} votes available for category ${categoryId}`);
+        // Return empty observable to gracefully handle limit reached
+        return of(null);
       }
-      
-      return this.mockDataService.voteMockComment(commentId, voteType, categoryId);
+
+      return this.mockDataService.voteMockComment(commentId, voteType, categoryId).pipe(
+        tap(result => {
+          if (result) {
+            // Synchronize mock vote limits with state service
+            this.synchronizeMockVoteLimits();
+
+            // Update comment display
+            this.handleVoteUpdate(commentId, {
+              upvotes: result.upvotes,
+              downvotes: result.downvotes,
+              userVote: result.userVote,
+              netVotes: result.netVotes,
+            });
+          }
+        })
+      );
     }
 
-    // Real mode - check if vote is allowed
+    // Real mode - graceful handling without throwing errors
     if (voteType !== null && !this.canVote(categoryId, voteType)) {
-      throw new Error(`No more ${voteType.toLowerCase()} votes available for this category`);
+      console.warn(`⚠️ No more ${voteType.toLowerCase()} votes available for category ${categoryId}`);
+      return of(null);
     }
 
     return this.evaluationService.voteComment(commentId, voteType).pipe(
@@ -881,16 +994,16 @@ export class EvaluationStateService {
           // Vote was removed - need to determine which type was removed
           // This would need to be tracked separately or returned from backend
         }
-        
+
         this.handleVoteUpdate(commentId, {
           upvotes: result.upvotes,
           downvotes: result.downvotes,
           userVote: result.userVote,
-          netVotes: result.netVotes
+          netVotes: result.netVotes,
         });
-        
+
         return result;
-      })
+      }),
     );
   }
 }

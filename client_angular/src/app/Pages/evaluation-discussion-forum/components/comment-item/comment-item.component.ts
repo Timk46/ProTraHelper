@@ -1,4 +1,11 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+  OnInit,
+} from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 
 // Angular Material Imports (reduced set for chat bubbles)
@@ -6,27 +13,19 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // DTOs
-import {
-  EvaluationCommentDTO,
-  AnonymousEvaluationUserDTO,
-  VoteType
-} from '@DTOs/index';
+import { EvaluationCommentDTO, AnonymousEvaluationUserDTO, VoteType } from '@DTOs/index';
+
+// Utils
 
 @Component({
   selector: 'app-comment-item',
   standalone: true,
-  imports: [
-    CommonModule,
-    DatePipe,
-    MatTooltipModule,
-    MatProgressSpinnerModule
-  ],
+  imports: [CommonModule, DatePipe, MatTooltipModule, MatProgressSpinnerModule],
   templateUrl: './comment-item.component.html',
   styleUrl: './comment-item.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CommentItemComponent implements OnInit {
-
   // =============================================================================
   // INPUTS - DATA FROM PARENT COMPONENT
   // =============================================================================
@@ -34,6 +33,10 @@ export class CommentItemComponent implements OnInit {
   @Input() comment!: EvaluationCommentDTO;
   @Input() anonymousUser: AnonymousEvaluationUserDTO | null = null;
   @Input() canVote: boolean = true;
+  @Input() canVoteUp: boolean = true;
+  @Input() canVoteDown: boolean = true;
+  @Input() availableUpvotes: number = 3;
+  @Input() availableDownvotes: number = 3;
   @Input() isVoting: boolean = false;
   @Input() depth: number = 0;
   @Input() isReadOnly: boolean = false;
@@ -59,6 +62,14 @@ export class CommentItemComponent implements OnInit {
 
   ngOnInit(): void {
     this.formatCommentTime();
+    console.log('💬 Comment item initialized:', {
+      commentId: this.comment.id,
+      authorId: this.comment.author.id,
+      authorType: this.comment.author.type,
+      authorDisplayName: this.comment.author.displayName,
+      anonymousUserId: this.anonymousUser?.id,
+      isCurrentUser: this.isCurrentUser(),
+    });
   }
 
   // =============================================================================
@@ -93,7 +104,7 @@ export class CommentItemComponent implements OnInit {
       this.formattedTime = commentDate.toLocaleDateString('de-DE', {
         day: '2-digit',
         month: '2-digit',
-        year: 'numeric'
+        year: 'numeric',
       });
     }
   }
@@ -109,7 +120,7 @@ export class CommentItemComponent implements OnInit {
 
     this.voted.emit({
       commentId: this.comment.id,
-      voteType: voteType
+      voteType: voteType,
     });
   }
 
@@ -149,12 +160,49 @@ export class CommentItemComponent implements OnInit {
 
   /**
    * Checks if the comment author is the current user
+   * Includes graceful error handling for missing anonymous user data
    */
   isCurrentUser(): boolean {
-    if (this.anonymousUser && this.comment.author.type === 'anonymous') {
-      return this.comment.author.id === this.anonymousUser.id.toString();
+    // Graceful handling of missing data
+    if (!this.anonymousUser || !this.comment?.author || this.comment.author.type !== 'anonymous') {
+      return false;
     }
-    return false;
+
+    try {
+      // Robust type conversion for both IDs
+      const commentAuthorId = this.comment.author.id;
+      const anonymousUserId = this.anonymousUser.id;
+
+      // Handle null/undefined values gracefully
+      if (commentAuthorId == null || anonymousUserId == null) {
+        console.warn('🔍 isCurrentUser() Missing ID values:', {
+          commentAuthorId,
+          anonymousUserId,
+        });
+        return false;
+      }
+
+      // Try multiple comparison strategies to handle potential type inconsistencies
+      const numericComparison = Number(commentAuthorId) === Number(anonymousUserId);
+      const stringComparison = String(commentAuthorId) === String(anonymousUserId);
+
+      // Debug logging for development mode only
+      const isMatch = numericComparison || stringComparison;
+      console.log('🔍 isCurrentUser() Debug:', {
+        commentAuthorId,
+        commentAuthorIdType: typeof commentAuthorId,
+        anonymousUserId,
+        anonymousUserIdType: typeof anonymousUserId,
+        numericComparison,
+        stringComparison,
+        finalResult: isMatch,
+      });
+
+      return isMatch;
+    } catch (error) {
+      console.error('❌ Error in isCurrentUser():', error);
+      return false; // Fail safe - assume not current user on error
+    }
   }
 
   /**
@@ -258,8 +306,10 @@ export class CommentItemComponent implements OnInit {
   getUserVote(): VoteType {
     if (!this.anonymousUser) return null;
 
-    const userVote = this.comment.votes.find((vote: any) =>
-      vote.userId === this.anonymousUser!.id
+    // Fix: vote.userId is number, anonymousUser.id is number
+    // Ensure both are compared as numbers
+    const userVote = this.comment.votes.find(
+      (vote: any) => vote.userId === Number(this.anonymousUser!.id),
     );
 
     return userVote ? userVote.voteType : null;
@@ -274,9 +324,12 @@ export class CommentItemComponent implements OnInit {
     if (!userVote) return '';
 
     switch (userVote) {
-      case 'UP': return 'thumb_up';
-      case 'DOWN': return 'thumb_down';
-      default: return '';
+      case 'UP':
+        return 'thumb_up';
+      case 'DOWN':
+        return 'thumb_down';
+      default:
+        return '';
     }
   }
 
@@ -289,9 +342,12 @@ export class CommentItemComponent implements OnInit {
     if (!userVote) return '#666';
 
     switch (userVote) {
-      case 'UP': return '#4caf50';
-      case 'DOWN': return '#f44336';
-      default: return '#666';
+      case 'UP':
+        return '#4caf50';
+      case 'DOWN':
+        return '#f44336';
+      default:
+        return '#666';
     }
   }
 
@@ -307,6 +363,26 @@ export class CommentItemComponent implements OnInit {
   // =============================================================================
   // UTILITY METHODS
   // =============================================================================
+
+  /**
+   * Gets tooltip text for upvote button
+   * @returns string The tooltip text
+   */
+  getUpvoteTooltip(): string {
+    if (this.getUserVote() === 'UP') return 'Positive Bewertung entfernen';
+    if (!this.canVoteUp) return 'Keine positiven Bewertungen mehr verfügbar';
+    return 'Positiv bewerten';
+  }
+
+  /**
+   * Gets tooltip text for downvote button
+   * @returns string The tooltip text
+   */
+  getDownvoteTooltip(): string {
+    if (this.getUserVote() === 'DOWN') return 'Negative Bewertung entfernen';
+    if (!this.canVoteDown) return 'Keine negativen Bewertungen mehr verfügbar';
+    return 'Negativ bewerten';
+  }
 
   /**
    * Sanitizes HTML content for safe display

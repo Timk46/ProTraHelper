@@ -1,4 +1,17 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, ViewChild, AfterViewInit, DoCheck } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  ChangeDetectorRef,
+  ViewChild,
+  AfterViewInit,
+  DoCheck,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -15,7 +28,7 @@ import { ScrollingModule, CdkVirtualScrollViewport } from '@angular/cdk/scrollin
 import {
   EvaluationDiscussionDTO,
   EvaluationCommentDTO,
-  AnonymousEvaluationUserDTO
+  AnonymousEvaluationUserDTO,
 } from '@DTOs/index';
 
 // Child Components
@@ -36,14 +49,13 @@ import { CommentInputComponent } from '../comment-input/comment-input.component'
     MatTooltipModule,
     ScrollingModule,
     CommentItemComponent,
-    CommentInputComponent
+    CommentInputComponent,
   ],
   templateUrl: './discussion-thread.component.html',
   styleUrl: './discussion-thread.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewInit, DoCheck {
-
   @ViewChild(CdkVirtualScrollViewport) viewport!: CdkVirtualScrollViewport;
 
   constructor(private cdr: ChangeDetectorRef) {}
@@ -56,6 +68,8 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
   @Input() anonymousUser: AnonymousEvaluationUserDTO | null = null;
   @Input() canComment: boolean = true;
   @Input() canVote: boolean = true;
+  @Input() availableUpvotes: number = 0;
+  @Input() availableDownvotes: number = 0;
   @Input() isReadOnly: boolean = false;
   @Input() isSubmittingComment: boolean = false;
   @Input() trackByFn: ((index: number, item: EvaluationDiscussionDTO) => string) | null = null;
@@ -65,7 +79,10 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
   // =============================================================================
 
   @Output() commentSubmitted = new EventEmitter<string>();
-  @Output() commentVoted = new EventEmitter<{ commentId: string; voteType: 'UP' | 'DOWN' | null }>();
+  @Output() commentVoted = new EventEmitter<{
+    commentId: string;
+    voteType: 'UP' | 'DOWN' | null;
+  }>();
 
   // =============================================================================
   // COMPONENT STATE
@@ -74,13 +91,13 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
   // Flattened comment list for virtual scrolling
   flattenedComments: FlattenedComment[] = [];
 
-  // Loading states  
+  // Loading states
   isVotingComment: Map<string, boolean> = new Map();
 
   // UI state
   showCommentInput: boolean = true;
   sortOrder: 'newest' | 'oldest' | 'mostVoted' = 'newest';
-  
+
   // Chat input state
   currentInputText: string = '';
 
@@ -111,7 +128,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
       console.log('🔧 ngOnChanges triggered - processing flattened comments');
       this.processFlattenedComments();
       this.cdr.markForCheck();
-      
+
       // Auto-scroll to bottom when new messages are added
       if (changes['discussions'] && !changes['discussions'].firstChange) {
         setTimeout(() => this.scrollToBottom(), 100);
@@ -123,23 +140,25 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     // OnPush Change Detection fix: Force reprocessing when data changes
     // This ensures flattenedComments is updated even if Angular doesn't detect reference changes
     const currentDiscussionsLength = this.discussions?.length || 0;
-    const currentCommentsCount = this.discussions?.reduce((total, d) => {
-      // Defensive programming: handle undefined comments array
-      const comments = d.comments || [];
-      return total + comments.length;
-    }, 0) || 0;
-    
-    if (currentDiscussionsLength !== this.lastDiscussionsLength || 
-        currentCommentsCount !== this.lastCommentsCount) {
-      
+    const currentCommentsCount =
+      this.discussions?.reduce((total, d) => {
+        // Defensive programming: handle undefined comments array
+        const comments = d.comments || [];
+        return total + comments.length;
+      }, 0) || 0;
+
+    if (
+      currentDiscussionsLength !== this.lastDiscussionsLength ||
+      currentCommentsCount !== this.lastCommentsCount
+    ) {
       console.log('🔧 ngDoCheck: Data changed, reprocessing flattened comments', {
         discussions: currentDiscussionsLength,
-        comments: currentCommentsCount
+        comments: currentCommentsCount,
       });
-      
+
       this.lastDiscussionsLength = currentDiscussionsLength;
       this.lastCommentsCount = currentCommentsCount;
-      
+
       this.processFlattenedComments();
       this.cdr.markForCheck();
     }
@@ -159,13 +178,13 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
       // Defensive programming: ensure comments array exists
       const comments = discussion.comments || [];
       console.log('🔧 Processing discussion:', discussion.id, 'with', comments.length, 'comments');
-      
+
       // Add discussion header
       this.flattenedComments.push({
         type: 'discussion-header',
         discussion,
         depth: 0,
-        comment: null
+        comment: null,
       });
 
       // Sort and flatten comments (with defensive check)
@@ -175,7 +194,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
 
       // Note: Comment input is now fixed at the bottom, not part of virtual scrolling
     });
-
+    console.log('🔧 flattenedComments:', this.flattenedComments);
     console.log('🔧 Final flattenedComments count:', this.flattenedComments.length);
   }
 
@@ -190,16 +209,19 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
 
     switch (this.sortOrder) {
       case 'newest':
-        return commentsCopy.sort((a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        return commentsCopy.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
       case 'oldest':
-        return commentsCopy.sort((a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        return commentsCopy.sort(
+          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         );
       case 'mostVoted':
-        return commentsCopy.sort((a, b) =>
-          (b.voteStats.upVotes - b.voteStats.downVotes) - (a.voteStats.upVotes - a.voteStats.downVotes)
+        return commentsCopy.sort(
+          (a, b) =>
+            b.voteStats.upVotes -
+            b.voteStats.downVotes -
+            (a.voteStats.upVotes - a.voteStats.downVotes),
         );
       default:
         return commentsCopy;
@@ -208,7 +230,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
 
   private flattenCommentsRecursive(
     comments: EvaluationCommentDTO[],
-    depth: number
+    depth: number,
   ): FlattenedComment[] {
     const flattened: FlattenedComment[] = [];
 
@@ -218,12 +240,12 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
         type: 'comment',
         discussion: null,
         depth,
-        comment
+        comment,
       });
       console.log('🔧 Added comment to flattened:', {
         type: 'comment',
         commentId: comment.id,
-        content: comment.content?.substring(0, 50) + '...'
+        content: comment.content?.substring(0, 50) + '...',
       });
 
       // Add replies if they exist
@@ -280,7 +302,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     if (text && !this.isSubmittingComment) {
       this.onCommentSubmitted(text);
       this.currentInputText = '';
-      
+
       // Auto-scroll to bottom after comment submission
       setTimeout(() => this.scrollToBottom(), 200);
     }
@@ -326,10 +348,11 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
       1: 'Vollständigkeit',
       2: 'Grafische Darstellungsqualität',
       3: 'Vergleichbarkeit',
-      4: 'Komplexität'
+      4: 'Komplexität',
     };
 
-    const categoryName = categoryNames[discussion.categoryId] || `Kategorie ${discussion.categoryId}`;
+    const categoryName =
+      categoryNames[discussion.categoryId] || `Kategorie ${discussion.categoryId}`;
     return `Diskussion: ${categoryName}`;
   }
 

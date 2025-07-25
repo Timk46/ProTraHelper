@@ -30,6 +30,7 @@
       "@DTOs/index": ["../shared/dtos/index.ts"],
       "@UMLearnServices/*": ["./src/app/Modules/umlearn/services/*"]
     },
+    "types": ["node"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

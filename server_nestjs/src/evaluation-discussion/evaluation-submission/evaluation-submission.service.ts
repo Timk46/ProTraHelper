@@ -460,23 +460,40 @@ export class EvaluationSubmissionService {
   }
 
   async getAnonymousUser(submissionId: string, userId: number) {
+    // Debug logging only in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🔍 getAnonymousUser called:', { submissionId, userId });
+    }
+    
+    // For evaluation system, anonymous users are per-user, not per-submission
+    // Find existing anonymous user for this userId
     let anonymousUser = await this.prisma.anonymousUser.findFirst({
       where: {
         userId,
-        // We need to find anonymous users related to this submission
-        // This will be implemented once we have the proper relation
       },
     });
 
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🔍 Found existing anonymous user:', anonymousUser);
+    }
+
     if (!anonymousUser) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🆕 Creating new anonymous user for userId:', userId);
+      }
       anonymousUser = await this.createAnonymousUser(submissionId, userId);
     }
 
-    return {
+    const result = {
       id: anonymousUser.id,
       displayName: anonymousUser.anonymousName,
       colorCode: this.generateColorCode(anonymousUser.id),
     };
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🎯 Returning anonymous user:', result);
+    }
+    return result;
   }
 
   /**
@@ -719,9 +736,10 @@ export class EvaluationSubmissionService {
   }
 
   private async createAnonymousUser(submissionId: string, userId: number) {
+    // Generate consistent anonymous name based on userId for deterministic results  
     const anonymousNames = [
       'Teilnehmer',
-      'Bewerter',
+      'Bewerter', 
       'Diskutant',
       'Reviewer',
       'Kommentator',
@@ -732,15 +750,45 @@ export class EvaluationSubmissionService {
       'Gutachter',
     ];
 
-    const randomName = anonymousNames[Math.floor(Math.random() * anonymousNames.length)];
-    const suffix = Math.floor(Math.random() * 1000);
+    // Use userId for deterministic name selection (not random)
+    const nameIndex = userId % anonymousNames.length;
+    const selectedName = anonymousNames[nameIndex];
+    
+    // Generate deterministic suffix based on userId
+    const suffix = (userId * 7) % 100; // Simple deterministic hash
+    
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🆕 Creating anonymous user:', { userId, selectedName, suffix });
+    }
 
-    return await this.prisma.anonymousUser.create({
-      data: {
-        userId,
-        anonymousName: `${randomName} ${suffix}`,
-      },
-    });
+    // Use try-catch to handle race conditions when creating concurrent anonymous users
+    try {
+      return await this.prisma.anonymousUser.create({
+        data: {
+          userId,
+          anonymousName: `${selectedName} ${suffix}`,
+        },
+      });
+    } catch (error) {
+      // If creation fails (likely due to concurrent creation), try to find existing user
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('⚠️ Anonymous user creation failed, trying to find existing:', { userId, error: error.message });
+      }
+      
+      const existingUser = await this.prisma.anonymousUser.findFirst({
+        where: { userId },
+      });
+      
+      if (existingUser) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('✅ Found existing anonymous user:', existingUser);
+        }
+        return existingUser;
+      }
+      
+      // If still no user found, re-throw the original error
+      throw error;
+    }
   }
 
   private generateColorCode(userId: number): string {

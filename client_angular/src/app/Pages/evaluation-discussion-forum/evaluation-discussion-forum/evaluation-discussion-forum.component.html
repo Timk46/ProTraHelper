@@ -95,8 +95,17 @@
 
           <!-- Discussion Content Area -->
           <div class="discussion-content">
+            
+            <!-- Error Fallback for Missing Anonymous User -->
+            <app-error-fallback 
+              *ngIf="vm.isDiscussionPhase && !vm.anonymousUser && !vm.loading"
+              [title]="'Anonymer Benutzer konnte nicht geladen werden'"
+              [message]="'Die Diskussion kann ohne anonyme Benutzerdaten nicht angezeigt werden. Bitte laden Sie die Seite neu.'"
+              [showRetry]="true">
+            </app-error-fallback>
+            
             <!-- Discussion Phase -->
-            <div class="discussion-phase-content" *ngIf="vm.isDiscussionPhase">
+            <div class="discussion-phase-content" *ngIf="vm.isDiscussionPhase && vm.anonymousUser">
               <!-- Discussion Messages Area -->
               <div class="discussion-messages">
                 <app-discussion-thread
@@ -104,6 +113,8 @@
                   [anonymousUser]="vm.anonymousUser"
                   [canComment]="vm.canComment"
                   [canVote]="vm.canVote"
+                  [availableUpvotes]="vm.availableUpvotes"
+                  [availableDownvotes]="vm.availableDownvotes"
                   [isReadOnly]="!vm.canComment"
                   [isSubmittingComment]="vm.isSubmittingComment"
                   [trackByFn]="trackByDiscussion"
@@ -146,6 +157,8 @@
                   [anonymousUser]="vm.anonymousUser"
                   [canComment]="false"
                   [canVote]="false"
+                  [availableUpvotes]="0"
+                  [availableDownvotes]="0"
                   [isReadOnly]="true"
                   [isSubmittingComment]="false"
                   [trackByFn]="trackByDiscussion"

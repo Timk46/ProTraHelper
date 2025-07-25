@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -8,7 +9,6 @@ import type {
   EvaluationCommentDTO,
   VoteType,
 } from '@DTOs/index';
-import { NotificationType } from '@DTOs/index';
 import { EvaluationCacheService } from '../shared/evaluation-cache.service';
 import { EvaluationUtilsService } from '../shared/evaluation-utils.service';
 import type { Prisma } from '@prisma/client';
@@ -80,7 +80,7 @@ export class EvaluationCommentService {
     return this.cacheService.getOrSet(
       cacheKey,
       async () => {
-        const whereClause: any = { submissionId };
+        const whereClause: Prisma.EvaluationCommentWhereInput = { submissionId };
         if (categoryId) {
           whereClause.categoryId = categoryId;
         }
@@ -168,8 +168,10 @@ export class EvaluationCommentService {
     userId: number,
   ): Promise<EvaluationCommentDTO> {
     // Generate anonymous display name
+    console.log('createDto', createDto);
+    console.log('userId', userId);
     const anonymousDisplayName = await this.generateAnonymousName(createDto.submissionId, userId);
-
+    console.log('anonymousDisplayName', anonymousDisplayName);
     const comment = await this.prisma.evaluationComment.create({
       data: {
         submissionId: createDto.submissionId,
@@ -235,6 +237,7 @@ export class EvaluationCommentService {
       throw new ForbiddenException('You can only edit your own comments');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const updatedComment = await this.prisma.evaluationComment.update({
       where: { id },
       data: {
@@ -318,8 +321,12 @@ export class EvaluationCommentService {
       throw new NotFoundException(`Comment with ID ${commentId} not found`);
     }
 
+    // Defensive programming: Ensure voteDetails and userVotes exist
     const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
-    const previousVote = voteDetails.userVotes[userId.toString()];
+
+    // Ensure userVotes object exists before accessing
+    const userVotes = voteDetails.userVotes || {};
+    const previousVote = userVotes[userId.toString()];
 
     let newUpvotes = comment.upvotes;
     let newDownvotes = comment.downvotes;
@@ -327,7 +334,7 @@ export class EvaluationCommentService {
     if (voteType === null) {
       // Remove vote
       if (previousVote) {
-        delete voteDetails.userVotes[userId.toString()];
+        delete userVotes[userId.toString()];
         if (previousVote === 'UP') {
           newUpvotes--;
         } else {
@@ -338,7 +345,7 @@ export class EvaluationCommentService {
       // Add or change vote
       if (previousVote === voteType) {
         // Same vote - remove it
-        delete voteDetails.userVotes[userId.toString()];
+        delete userVotes[userId.toString()];
         if (voteType === 'UP') {
           newUpvotes--;
         } else {
@@ -356,7 +363,7 @@ export class EvaluationCommentService {
         }
 
         // Add new vote
-        voteDetails.userVotes[userId.toString()] = voteType;
+        userVotes[userId.toString()] = voteType;
         if (voteType === 'UP') {
           newUpvotes++;
         } else {
@@ -365,23 +372,46 @@ export class EvaluationCommentService {
       }
     }
 
+    // Update voteDetails with the modified userVotes
+    const updatedVoteDetails = { userVotes };
+
     const updatedComment = await this.prisma.evaluationComment.update({
       where: { id: commentId },
       data: {
         upvotes: newUpvotes,
         downvotes: newDownvotes,
-        voteDetails: voteDetails as unknown as Prisma.JsonValue,
+        voteDetails: updatedVoteDetails as unknown as Prisma.JsonValue,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            displayName: true,
+            description: true,
+            icon: true,
+            color: true,
+            order: true,
+          },
+        },
       },
     });
 
-    // Invalidate cache for this comment
+    // Invalidate cache for this submission
     this.cacheService.invalidateByPattern(`comments:.*`);
 
     return {
       commentId: commentId,
       upvotes: newUpvotes,
       downvotes: newDownvotes,
-      userVote: voteDetails.userVotes[userId.toString()] || null,
+      userVote: userVotes[userId.toString()] || null,
       netVotes: newUpvotes - newDownvotes,
     };
   }
@@ -444,7 +474,7 @@ export class EvaluationCommentService {
       },
     });
     console.log('existingComment', existingComment);
-    if (existingComment.anonymousDisplayName) {
+    if (existingComment) {
       return existingComment.anonymousDisplayName;
     }
 

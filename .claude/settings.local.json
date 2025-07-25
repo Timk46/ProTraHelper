@@ -38,7 +38,8 @@
       "Bash(timeout 30 npm start)",
       "Bash(powershell:*)",
       "Bash(node:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npx prisma db execute:*)"
     ],
     "deny": []
   },

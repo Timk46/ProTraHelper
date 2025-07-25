@@ -199,7 +199,7 @@ export async function seedEvaluationComplete() {
         categoryId: createdCategories[0].id, // Vollständigkeit
         content: 'Die Zeichnung scheint alle geforderten Bauteile zu enthalten. Mir ist aber nicht klar, ob die Bemaßung vollständig ist.',
         userId: testStudent2.id,
-        voteDetails: {},
+        voteDetails: { userVotes: {} },
         upvotes: 1,
         downvotes: 0,
         anonymousDisplayName: 'Student B',
@@ -209,7 +209,7 @@ export async function seedEvaluationComplete() {
         categoryId: createdCategories[1].id, // Grafische Darstellungsqualität
         content: 'Guter Punkt. Die Hauptkomponenten sind da, aber es fehlen einige Detailansichten, die im Lastenheft gefordert waren.',
         userId: testLecturer.id,
-        voteDetails: {},
+        voteDetails: { userVotes: {} },
         upvotes: 2,
         downvotes: 0,
         anonymousDisplayName: 'Dozent',
@@ -219,7 +219,7 @@ export async function seedEvaluationComplete() {
         categoryId: createdCategories[2].id, // Vergleichbarkeit
         content: 'Stimmt, Anhang B.2 wurde nicht berücksichtigt. Das macht die Abgabe unvollständig.',
         userId: testStudent.id,
-        voteDetails: {},
+        voteDetails: { userVotes: {} },
         upvotes: 1,
         downvotes: 1,
         anonymousDisplayName: 'Student C',

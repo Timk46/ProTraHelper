@@ -72,7 +72,7 @@ export class EvaluationDiscussionService {
       map(comments => {
         // Backend returns comments directly, but frontend expects discussion containers
         console.log('🔄 Transforming', comments.length, 'comments to discussion format');
-        
+
         if (comments.length === 0) {
           return [];
         }
@@ -96,6 +96,7 @@ export class EvaluationDiscussionService {
   }
 
   createComment(comment: CreateEvaluationCommentDTO): Observable<EvaluationCommentDTO> {
+    console.log('createComment in frontend:', comment);
     return this.http.post<EvaluationCommentDTO>(`${this.apiUrls.comments}`, comment).pipe(
       tap(newComment => {
         // Update local state for real-time updates
