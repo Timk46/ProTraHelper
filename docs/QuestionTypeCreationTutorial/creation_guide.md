@@ -74,15 +74,19 @@ Dies ist der wichtigste Schritt für die Funktionalität und variiert je nach Ko
 
 ## Phase 2: Frontend-Implementierung
 
-### Schritt 2.1: Edit-Dialog für Dozenten erstellen
+### Schritt 2.1: Edit-Oberfläche für Dozenten erstellen
 
-Dozenten benötigen eine Oberfläche, um die spezifischen Eigenschaften deines Fragetyps zu erstellen und zu bearbeiten.
+Dozenten benötigen eine Oberfläche, um die spezifischen Eigenschaften deines Fragetyps zu erstellen und zu bearbeiten. In den meisten Fällen ist hierfür eine eigene Seite notwendig, da die Konfiguration komplex sein kann.
 
 -   **Wo:** `client_angular/src/app/pages/lecturersView/`
 -   **Was:**
-    1.  Erstelle eine neue Komponente für den Edit-Dialog (z.B. `edit-mynewtype/edit-mynewtype.component.ts`).
-    2.  Diese Komponente sollte ein `FormGroup` enthalten, um die spezifischen Felder deines Fragetyps zu verwalten.
-    3.  Beim Speichern sollte die Komponente den `QuestionDataService` aufrufen, um die Änderungen via `updateWholeQuestion` zu persistieren.
+    1.  **Standardfall (Eigene Seite):** Erstelle eine neue Komponente, die als vollwertige Seite dient (z.B. `edit-mynewtype/edit-mynewtype.component.ts`). Dies ist der empfohlene Ansatz für Fragetypen mit mehreren Konfigurationsoptionen (siehe `edit-choice` als Beispiel).
+        -   Binde die neue Seite in das Angular-Routing ein.
+        -   Die Komponente lädt die Daten über den `QuestionDataService` und speichert sie über `updateWholeQuestion`.
+
+    2.  **Ausnahmefall (Dialog):** Wenn der Fragetyp nur sehr wenige, einfache Einstellungen benötigt (wie bei der `UploadQuestion`), kann anstelle einer ganzen Seite ein Dialog ausreichen.
+        -   Erstelle eine Komponente, die als Dialog fungiert.
+        -   Diese wird nicht über das Routing, sondern direkt über den `MatDialog`-Service aus der `content-list-item.component.ts` geöffnet.
 
 ### Schritt 2.2: Task-Komponente für Studierende erstellen
 
