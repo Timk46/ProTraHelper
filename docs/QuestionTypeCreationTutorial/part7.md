@@ -1,220 +1,131 @@
-# Part 7: Upload Task Component - Nord Theme Styling
+# Part 7: Student Upload Interface (`UploadTaskComponent`)
 
 ## Übersicht
-Das Upload-Task Component implementiert eine moderne Datei-Upload-Funktionalität mit Nord Theme Design. Es bietet Drag & Drop, Dateivorschau und animierte Benutzerinteraktionen.
 
-## Nord Theme Variablen
-Das Component nutzt das vollständige Nord Color Palette:
+Die `UploadTaskComponent` ist die Schnittstelle für Studierende, um Dateien für eine Upload-Aufgabe einzureichen. Sie bietet eine moderne Benutzeroberfläche mit Drag & Drop, Dateivorschau, Validierung und einer Fortschrittsanzeige für den Upload.
 
-```scss
-// Polar Night (Dunkle Farben)
-$nord0: #2e3440; // Haupttext
-$nord3: #4c566a; // Sekundärtext
+## Komponentenlogik (`upload-task.component.ts`)
 
-// Snow Storm (Helle Farben)
-$nord4: #d8dee9; // Rahmen
-$nord6: #eceff4; // Hintergrund
+Die Logik der Komponente umfasst die folgenden Hauptfunktionen:
 
-// Frost (Blaue Akzente)
-$nord8: #88c0d0; // Primäre Akzente
-$nord10: #5e81ac; // Icons
+- **Datenabruf:** Lädt die Details der Upload-Aufgabe beim Initialisieren.
+- **Datei-Handling:** Beinhaltet Methoden für Drag & Drop (`onDragOver`, `onDragLeave`, `onDrop`) und die manuelle Dateiauswahl (`onFileSelected`).
+- **Validierung:** Überprüft, ob die ausgewählte Datei den Anforderungen an Dateityp und -größe entspricht.
+- **Upload-Prozess:** Konvertiert die Datei in einen Base64-String und sendet sie über den `QuestionDataService` an das Backend. Zeigt den Fortschritt des Uploads an.
+- **Feedback:** Gibt dem Benutzer über Snackbars Feedback zum Erfolg oder Misserfolg des Uploads.
 
-// Aurora (Farbige Akzente)
-$nord11: #bf616a; // Rot (Löschen)
-$nord14: #a3be8c; // Grün (Erfolg)
-```
+```typescript
+// ... (Auszug aus upload-task.component.ts)
+export class UploadTaskComponent {
+  // ... (Properties für File-Handling, Upload-Status etc.)
 
-## Hauptkomponenten-Struktur
-
-### Container mit Gradient-Overlay
-```scss
-.upload-container {
-  padding: 44px;
-  background: $nord6;
-  position: relative;
-
-  &::before {
-    background: linear-gradient(135deg, 
-      rgba(94, 129, 172, 0.05) 0%, 
-      rgba(136, 192, 208, 0.03) 100%);
-  }
-}
-```
-
-### Header mit Icon und Titel
-```scss
-.upload-icon {
-  color: $nord10;
-  background: rgba(94, 129, 172, 0.1);
-  border-radius: 15px;
-  backdrop-filter: blur(10px);
-  width: 56px;
-  height: 56px;
-}
-
-.upload-title {
-  color: $nord0;
-  font-size: 24px;
-  font-weight: 600;
-}
-```
-
-## Drag & Drop Zone
-
-### Basis-Styling
-```scss
-.drop-zone {
-  background: white;
-  border: 2px dashed $nord8;
-  border-radius: 15px;
-  padding: 48px 24px;
-  min-height: 200px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    border-color: $nord10;
-    background: $nord6;
-    transform: translateY(-2px);
+  constructor(
+    public dialogRef: MatDialogRef<UploadTaskComponent>,
+    private questionService: QuestionDataService,
+    private snackBar: MatSnackBar,
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) {
+    // ...
+    this.questionService.getUploadQuestion(this.taskViewData.id).subscribe(data => {
+      this.uploadQuestion = data;
+      // ...
+    });
   }
 
-  &.drag-over {
-    border-color: $nord10;
-    background: rgba(94, 129, 172, 0.05);
-    transform: scale(1.02);
+  private handleFile(file: File): boolean {
+    // Validierung von Dateityp und -größe
+    // ...
+    this.selectedFile = file;
+    return true;
   }
+
+  async uploadFile() {
+    if (!this.selectedFile || !this.uploadQuestion) return;
+
+    this.isUploading = true;
+    // ... (Base64-Konvertierung und Fortschrittsanzeige)
+
+    const userAnswerData: UserAnswerDataDTO = {
+      // ... (Vorbereitung der Antwort-DTO)
+    };
+
+    this.questionService.createUserAnswer(userAnswerData).subscribe({
+      next: (data) => {
+        // ... (Erfolgs-Handling)
+      },
+      error: (error) => {
+        // ... (Fehlerbehandlung)
+      }
+    });
+  }
+
+  // ... (Hilfsmethoden für Dateigröße, Icons etc.)
 }
 ```
 
-### Upload-Animation
-```scss
-.upload-cloud {
-  font-size: 48px;
-  color: $nord8;
-  animation: float 3s ease-in-out infinite;
-}
+## Template (`upload-task.component.html`)
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
+Das Template ist in mehrere Bereiche unterteilt:
+
+- **Header:** Zeigt den Titel der Aufgabe an.
+- **Beschreibung:** Zeigt die Aufgabenstellung an.
+- **Anforderungen:** Listet die erlaubten Dateitypen, die maximale Dateigröße und die erreichbaren Punkte auf.
+- **Drag & Drop Zone:** Der Hauptinteraktionsbereich für den Datei-Upload. Zeigt je nach Zustand entweder die Upload-Aufforderung, eine Vorschau der ausgewählten Datei oder den Upload-Fortschritt an.
+- **Aktions-Buttons:** Buttons zum Abbrechen oder Starten des Uploads.
+
+```html
+<!-- (Auszug aus upload-task.component.html) -->
+<div class="upload-container" *ngIf="uploadQuestion">
+  <!-- Header -->
+  <div class="upload-header">
+    <h2 class="upload-title">{{ uploadQuestion.title }}</h2>
+  </div>
+
+  <!-- Beschreibung -->
+  <div class="description-section">
+    <div class="description-text" [innerHTML]="uploadQuestion.textHTML || uploadQuestion.text"></div>
+  </div>
+
+  <!-- Anforderungen -->
+  <div class="requirements-section">
+    <!-- ... (Anforderungs-Karten) ... -->
+  </div>
+
+  <!-- Drag & Drop Zone -->
+  <div class="drop-zone" [class.drag-over]="isDragOver">
+    <!-- Vorschau der ausgewählten Datei -->
+    <div class="file-info" *ngIf="selectedFile && !isUploading">
+      <!-- ... (Details zur Datei) ... -->
+    </div>
+
+    <!-- Upload-Fortschritt -->
+    <div class="upload-progress" *ngIf="isUploading">
+      <!-- ... (Fortschrittsanzeige) ... -->
+    </div>
+  </div>
+
+  <!-- Aktions-Buttons -->
+  <div class="action-buttons">
+    <button mat-button (click)="dialogRef.close()">Abbrechen</button>
+    <button mat-raised-button color="primary" (click)="uploadFile()" [disabled]="!selectedFile || isUploading">
+      Hochladen
+    </button>
+  </div>
+</div>
 ```
 
-## Requirements Section
+## Styling (`upload-task.component.scss`)
 
-### Grid Layout
-```scss
-.requirements-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-}
+Das Styling verwendet das Nord Theme und setzt auf ein klares, modernes Design mit folgenden Merkmalen:
 
-.requirement-card {
-  background: white;
-  padding: 16px;
-  border-radius: 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-}
-```
+- **Farbpalette:** Nutzt die Nord-Theme-Farben für Hintergründe, Texte und Akzente.
+- **Visuelles Feedback:** Ändert das Aussehen der Drag & Drop Zone, wenn eine Datei darüber gezogen wird (`drag-over`).
+- **Animationen:** Verwendet subtile Animationen für Hover-Effekte und eine animierte Fortschrittsanzeige.
+- **Responsivität:** Passt sich an verschiedene Bildschirmgrößen an.
 
-## Datei-Preview
+---
 
-### Icon-Styling nach Dateityp
-```scss
-.file-icon {
-  &.file-icon-image {
-    color: $nord12;
-    background: rgba(208, 135, 112, 0.1);
-  }
+**Status:** ✅ Alle Teile des Tutorials wurden überprüft und aktualisiert.
+**Tutorial abgeschlossen!**
 
-  &.file-icon-pdf {
-    color: $nord11;
-    background: rgba(191, 97, 106, 0.1);
-  }
-
-  &.file-icon-video {
-    color: $nord15;
-    background: rgba(180, 142, 173, 0.1);
-  }
-}
-```
-
-## Action Buttons
-
-### Upload Button mit Gradient
-```scss
-.upload-btn {
-  background: linear-gradient(45deg, $nord14, darken($nord14, 10%));
-  color: white;
-  border-radius: 15px;
-  box-shadow: 0 2px 8px rgba(163, 190, 140, 0.3);
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(163, 190, 140, 0.4);
-  }
-}
-```
-
-## Animationen
-
-### Loading-Spinner
-```scss
-.uploading-icon {
-  animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-```
-
-### Bounce-Dots
-```scss
-.upload-dots .dot {
-  animation: bounce 1.5s infinite;
-  
-  &:nth-child(2) { animation-delay: 0.3s; }
-  &:nth-child(3) { animation-delay: 0.6s; }
-}
-```
-
-## Responsive Design
-
-```scss
-@media (max-width: 768px) {
-  .upload-container {
-    padding: 16px;
-  }
-
-  .requirements-section {
-    grid-template-columns: 1fr;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-  }
-}
-```
-
-## Design-Prinzipien
-
-1. **Konsistente Farben**: Ausschließliche Verwendung der Nord Theme Palette
-2. **Sanfte Übergänge**: 0.3s ease transitions für alle Hover-Effekte
-3. **Abgerundete Ecken**: 15px border-radius für moderne Optik
-4. **Schatten-Hierarchie**: Verschiedene box-shadow Stärken für Tiefe
-5. **Responsive Grid**: Auto-fit Layout für verschiedene Bildschirmgrößen
-
-## Besondere Features
-
-- **Backdrop Blur**: Moderne Glasmorphism-Effekte
-- **Gradient Overlays**: Subtile Hintergrund-Gradienten
-- **Animation States**: Verschiedene Zustände (hover, drag-over, loading)
-- **Dateityp-Icons**: Farbkodierte Icons basierend auf Dateierweiterung
-- **Progress Indicators**: Animierte Upload-Fortschrittsanzeige
+---
