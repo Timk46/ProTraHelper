@@ -18,6 +18,7 @@ import { QuestionDataUmlService } from './question-data-uml/question-data-uml.se
 import { QuestionDataCodeGameService } from './question-data-code-game/question-data-code-game.service';
 import { QuestionDataUploadService } from './question-data-upload/question-data-upload.service';
 import { FilesModule } from '@/files/files.module';
+import { QuestionDataGroupReviewGateService } from './question-data-groupreviewgate/question-data-groupreviewgate.service';
 
 @Module({
   providers: [
@@ -32,6 +33,7 @@ import { FilesModule } from '@/files/files.module';
     QuestionDataUmlService,
     QuestionDataCodeGameService,
     QuestionDataUploadService,
+    QuestionDataGroupReviewGateService,
   ],
   controllers: [QuestionDataController],
   imports: [

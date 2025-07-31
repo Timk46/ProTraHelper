@@ -27,6 +27,8 @@ export interface detailedQuestionDTO {
   umlQuestion?: detailedUmlQuestionDTO;
   codeGameQuestion?: CodeGameQuestionDto;
   uploadQuestion?: detailedUploadQuestionDTO;
+  groupReviewGate?: detailedGroupReviewGateDTO;
+  groupReviewStatuses?: GroupReviewStatusDTO[];
 }
 
 export interface detailedFreetextQuestionDTO {
@@ -124,4 +126,18 @@ export interface detailedUploadQuestionDTO {
   fileType: string;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface detailedGroupReviewGateDTO {
+  id?: number;
+  questionId: number;
+  linkedQuestionId: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface GroupReviewStatusDTO {
+  submissionIdentifier: string;
+  reviewPhase: string;
+  userStatus: string;
 }

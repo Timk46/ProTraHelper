@@ -42,6 +42,23 @@ export class QuestionDataUploadService {
   }
 
   /**
+   * Retrieves all upload questions for the course.
+   *
+   * @returns A promise that resolves to an array of upload questions.
+   */
+  async getAllUploadQuestions(): Promise<uploadQuestionDTO[]> {
+    const uploadQuestions = await this.prisma.uploadQuestion.findMany();
+    return uploadQuestions.map((uq) => ({
+      questionId: uq.questionId,
+      title: uq.title,
+      text: uq.text,
+      textHTML: uq.textHTML,
+      maxSize: uq.maxSize,
+      fileType: uq.fileType,
+    }));
+  }
+
+  /**
    * Creates a new upload question.
    *
    * @param uploadQuestion - The detailed information of the upload question to be created.

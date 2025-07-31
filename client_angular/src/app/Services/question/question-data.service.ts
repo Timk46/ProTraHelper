@@ -135,6 +135,10 @@ export class QuestionDataService {
     return this.http.get<uploadQuestionDTO>(environment.server + `/question-data/uploadQuestion/${questionVersionId}`);
   }
 
+  getAllUploadQuestions() : Observable<uploadQuestionDTO[]> {
+    return this.http.get<uploadQuestionDTO[]>(environment.server + `/question-data/uploadQuestion/all`);
+  }
+
   /**
    * Creates a new user answer for a question.
    * @param {UserAnswerDataDTO} data - The user answer data containing question response information.

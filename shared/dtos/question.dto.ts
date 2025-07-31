@@ -150,6 +150,7 @@ export interface AutomatedTestDto {
     UML = "UMLQuestion",
     CODEGAME = "CodeGameQuestion",
     UPLOAD = "UploadQuestion",
+    GROUP_REVIEW_GATE = "GroupReviewGate",
   }
 
 export const gradingContent: readonly questionType[] = [
@@ -184,7 +185,7 @@ export interface uploadQuestionDTO {
   textHTML?: string;
   maxSize: number;
   fileType: string;
-  maxPoints: number;
+  maxPoints?: number;
 }
 
   export interface GraphQuestionDTO {

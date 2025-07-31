@@ -96,6 +96,8 @@ export class ContentListItemComponent {
         return 'Codegame';
       case questionType.UPLOAD:
         return 'Upload-Aufgabe';
+      case questionType.GROUP_REVIEW_GATE:
+        return 'Abgabenbewertung';
       default:
         return 'Aufgabe';
     }
@@ -127,6 +129,8 @@ export class ContentListItemComponent {
         return 'videogame_asset';
       case questionType.UPLOAD:
         return 'cloud_upload';
+      case questionType.GROUP_REVIEW_GATE:
+        return 'group_work';
       default:
         return 'help';
     }
@@ -280,6 +284,9 @@ export class ContentListItemComponent {
             this.snackBar.open('Upload-Aufgabe aktualisiert', 'OK', { duration: 3000 });
           }
         });
+        break;
+      case questionType.GROUP_REVIEW_GATE:
+        this.router.navigate(['/editgroupreviewgate/', question.id]);
         break;
     }
   }

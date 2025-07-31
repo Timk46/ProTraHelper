@@ -31,8 +31,7 @@ export class QuestionDataController {
          */
         @roles('ANY')
         @Get(':questionId')
-        async getQuestion(@Param('questionId') questionId: number) {
-            console.log(typeof questionId);
+        async getQuestion(@Param('questionId', ParseIntPipe) questionId: number) {
             return this.questionDataService.getQuestion(questionId);
         }
 
@@ -43,8 +42,8 @@ export class QuestionDataController {
          */
         @roles('ADMIN')
         @Post('detailed')
-        async getDetailedQuestion(@Body() data: { questionId: number, questionType: string }): Promise<detailedQuestionDTO> {
-          return this.questionDataService.getDetailedQuestion(data.questionId, data.questionType);
+        async getDetailedQuestion(@Body() data: { questionId: number, questionType: string }, @Req() req: any): Promise<detailedQuestionDTO> {
+          return this.questionDataService.getDetailedQuestion(data.questionId, data.questionType, req.user.id);
         }
 
         /**
@@ -103,6 +102,16 @@ export class QuestionDataController {
         }
 
         /**
+         * @description Retrieves all upload questions.
+         * @returns {Promise<uploadQuestionDTO[]>} A promise that resolves to an array of uploadQuestionDTO.
+         */
+        @roles('ADMIN', 'TEACHER')
+        @Get('uploadQuestion/all')
+        async getAllUploadQuestions(): Promise<uploadQuestionDTO[]> {
+            return this.qdUploadService.getAllUploadQuestions();
+        }
+
+        /**
          * Retrieves an upload question by its unique identifier.
         *
         * @param uploadQuestionId - The unique identifier of the upload question to retrieve.
@@ -111,7 +120,7 @@ export class QuestionDataController {
         @roles('ANY')
         @Get('uploadQuestion/:uploadQuestionId')
         async getUploadQuestion(@Param('uploadQuestionId') uploadQuestionId: number): Promise<uploadQuestionDTO> {
-            return this.qdUploadService.getUploadQuestion(uploadQuestionId);
+          return this.qdUploadService.getUploadQuestion(uploadQuestionId);
         }
 
         /**
