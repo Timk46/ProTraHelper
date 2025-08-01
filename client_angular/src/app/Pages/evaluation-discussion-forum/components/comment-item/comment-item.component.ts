@@ -4,7 +4,10 @@ import {
   Output,
   EventEmitter,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   OnInit,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 
@@ -25,7 +28,7 @@ import { EvaluationCommentDTO, AnonymousEvaluationUserDTO, VoteType } from '@DTO
   styleUrl: './comment-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CommentItemComponent implements OnInit {
+export class CommentItemComponent implements OnInit, OnChanges {
   // =============================================================================
   // INPUTS - DATA FROM PARENT COMPONENT
   // =============================================================================
@@ -56,19 +59,127 @@ export class CommentItemComponent implements OnInit {
   isContentExpanded: boolean = false;
   readonly maxContentLength = 300;
 
+  // 🚀 PHASE 2.3: Cached computed properties for better template performance
+  private _cachedUserVote: VoteType | null = null;
+  private _cachedIsCurrentUser: boolean = false;
+  private _cachedAuthorDisplayName: string = '';
+  private _cachedDisplayContent: string = '';
+  private _cachedFormattedContent: string = '';
+  private _cachedUpvoteTooltip: string = '';
+  private _cachedDownvoteTooltip: string = '';
+  
+  // Public getters for templates (avoid function calls)
+  get cachedUserVote(): VoteType | null { return this._cachedUserVote; }
+  get cachedIsCurrentUser(): boolean { return this._cachedIsCurrentUser; }
+  get cachedAuthorDisplayName(): string { return this._cachedAuthorDisplayName; }
+  get cachedFormattedContent(): string { return this._cachedFormattedContent; }
+  get cachedUpvoteTooltip(): string { return this._cachedUpvoteTooltip; }
+  get cachedDownvoteTooltip(): string { return this._cachedDownvoteTooltip; }
+
+  // =============================================================================
+  // CONSTRUCTOR
+  // =============================================================================
+
+  constructor(private cdr: ChangeDetectorRef) {}
+
   // =============================================================================
   // LIFECYCLE METHODS
   // =============================================================================
 
   ngOnInit(): void {
     this.formatCommentTime();
+    // 🚀 PHASE 2.3: Initialize cached values for performance
+    this.updateCachedValues();
+    
     console.log('💬 Comment item initialized:', {
       commentId: this.comment.id,
       authorId: this.comment.author.id,
       authorType: this.comment.author.type,
       authorDisplayName: this.comment.author.displayName,
       anonymousUserId: this.anonymousUser?.id,
-      isCurrentUser: this.isCurrentUser(),
+      isCurrentUser: this._cachedIsCurrentUser, // Use cached value
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // 🚀 PHASE 2.3: Update cached values when inputs change
+    if (changes['comment'] || changes['anonymousUser'] || changes['canVoteUp'] || changes['canVoteDown']) {
+      this.updateCachedValues();
+    }
+    
+    // 🚀 PHASE 1.3: Aggressive change detection for immediate UI updates
+    if (changes['comment'] || changes['isVoting'] || changes['canVoteUp'] || changes['canVoteDown'] || changes['availableUpvotes'] || changes['availableDownvotes']) {
+      console.log('🔄 Vote-related inputs changed, triggering change detection:', {
+        commentId: this.comment?.id,
+        hasCommentChanged: !!changes['comment'],
+        hasVotingStateChanged: !!changes['isVoting'],
+        hasVoteLimitsChanged: !!(changes['canVoteUp'] || changes['canVoteDown']),
+        hasVoteCountsChanged: !!(changes['availableUpvotes'] || changes['availableDownvotes']),
+        newVotingState: changes['isVoting']?.currentValue,
+        previousVotingState: changes['isVoting']?.previousValue,
+      });
+      
+      // 🚀 PHASE 1.3: Use detectChanges() for immediate update when voting state changes
+      if (changes['isVoting'] && changes['isVoting'].currentValue !== changes['isVoting'].previousValue) {
+        console.log('⚡ Voting state changed - forcing immediate detection');
+        this.cdr.detectChanges();
+      } else {
+        // Trigger change detection for OnPush strategy
+        this.cdr.markForCheck();
+      }
+    }
+    
+    // 🚀 PHASE 1.3: Also trigger on comment vote stats changes
+    if (changes['comment'] && changes['comment'].currentValue && changes['comment'].previousValue) {
+      const currentVoteStats = changes['comment'].currentValue.voteStats;
+      const previousVoteStats = changes['comment'].previousValue.voteStats;
+      
+      if (currentVoteStats && previousVoteStats && 
+          (currentVoteStats.upVotes !== previousVoteStats.upVotes || 
+           currentVoteStats.downVotes !== previousVoteStats.downVotes)) {
+        console.log('📊 Vote stats changed - forcing immediate update:', {
+          commentId: this.comment.id,
+          previousUpVotes: previousVoteStats.upVotes,
+          currentUpVotes: currentVoteStats.upVotes,
+          previousDownVotes: previousVoteStats.downVotes,
+          currentDownVotes: currentVoteStats.downVotes,
+        });
+        this.cdr.detectChanges();
+      }
+    }
+  }
+
+  // =============================================================================
+  // CACHED VALUE MANAGEMENT - 🚀 PHASE 2.3
+  // =============================================================================
+
+  /**
+   * Updates all cached values to avoid repeated function calls in templates
+   * Called on ngOnInit and when relevant inputs change
+   */
+  private updateCachedValues(): void {
+    // Cache user vote (called multiple times in template)
+    this._cachedUserVote = this.getUserVote();
+    
+    // Cache current user status (called multiple times)
+    this._cachedIsCurrentUser = this.isCurrentUser();
+    
+    // Cache author display name
+    this._cachedAuthorDisplayName = this.getAuthorDisplayName();
+    
+    // Cache display content and formatted content (complex chain)
+    this._cachedDisplayContent = this.getDisplayContent();
+    this._cachedFormattedContent = this.formatContent(this.sanitizeContent(this._cachedDisplayContent));
+    
+    // Cache tooltips (computed based on state)
+    this._cachedUpvoteTooltip = this.getUpvoteTooltip();
+    this._cachedDownvoteTooltip = this.getDownvoteTooltip();
+    
+    console.log('🚀 Cached values updated for performance:', {
+      commentId: this.comment?.id,
+      userVote: this._cachedUserVote,
+      isCurrentUser: this._cachedIsCurrentUser,
+      authorDisplayName: this._cachedAuthorDisplayName,
     });
   }
 
@@ -163,46 +274,15 @@ export class CommentItemComponent implements OnInit {
    * Includes graceful error handling for missing anonymous user data
    */
   isCurrentUser(): boolean {
-    // Graceful handling of missing data
-    if (!this.anonymousUser || !this.comment?.author || this.comment.author.type !== 'anonymous') {
+    if (!this.anonymousUser || !this.comment?.author) {
       return false;
     }
 
-    try {
-      // Robust type conversion for both IDs
-      const commentAuthorId = this.comment.author.id;
-      const anonymousUserId = this.anonymousUser.id;
+    // Simple numeric comparison - convert both to numbers for consistency
+    const commentAuthorId = Number(this.comment.author.id);
+    const anonymousUserId = Number(this.anonymousUser.id);
 
-      // Handle null/undefined values gracefully
-      if (commentAuthorId == null || anonymousUserId == null) {
-        console.warn('🔍 isCurrentUser() Missing ID values:', {
-          commentAuthorId,
-          anonymousUserId,
-        });
-        return false;
-      }
-
-      // Try multiple comparison strategies to handle potential type inconsistencies
-      const numericComparison = Number(commentAuthorId) === Number(anonymousUserId);
-      const stringComparison = String(commentAuthorId) === String(anonymousUserId);
-
-      // Debug logging for development mode only
-      const isMatch = numericComparison || stringComparison;
-      console.log('🔍 isCurrentUser() Debug:', {
-        commentAuthorId,
-        commentAuthorIdType: typeof commentAuthorId,
-        anonymousUserId,
-        anonymousUserIdType: typeof anonymousUserId,
-        numericComparison,
-        stringComparison,
-        finalResult: isMatch,
-      });
-
-      return isMatch;
-    } catch (error) {
-      console.error('❌ Error in isCurrentUser():', error);
-      return false; // Fail safe - assume not current user on error
-    }
+    return commentAuthorId === anonymousUserId;
   }
 
   /**
@@ -369,8 +449,15 @@ export class CommentItemComponent implements OnInit {
    * @returns string The tooltip text
    */
   getUpvoteTooltip(): string {
-    if (this.getUserVote() === 'UP') return 'Positive Bewertung entfernen';
-    if (!this.canVoteUp) return 'Keine positiven Bewertungen mehr verfügbar';
+    if (this.isCurrentUser()) {
+      return 'Sie können nicht für Ihren eigenen Kommentar stimmen.';
+    }
+    if (this.getUserVote() === 'UP') {
+      return 'Positive Bewertung entfernen';
+    }
+    if (!this.canVoteUp) {
+      return 'Keine positiven Bewertungen mehr verfügbar';
+    }
     return 'Positiv bewerten';
   }
 
@@ -379,8 +466,15 @@ export class CommentItemComponent implements OnInit {
    * @returns string The tooltip text
    */
   getDownvoteTooltip(): string {
-    if (this.getUserVote() === 'DOWN') return 'Negative Bewertung entfernen';
-    if (!this.canVoteDown) return 'Keine negativen Bewertungen mehr verfügbar';
+    if (this.isCurrentUser()) {
+      return 'Sie können nicht für Ihren eigenen Kommentar stimmen.';
+    }
+    if (this.getUserVote() === 'DOWN') {
+      return 'Negative Bewertung entfernen';
+    }
+    if (!this.canVoteDown) {
+      return 'Keine negativen Bewertungen mehr verfügbar';
+    }
     return 'Negativ bewerten';
   }
 

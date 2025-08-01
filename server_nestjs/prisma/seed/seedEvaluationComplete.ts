@@ -45,7 +45,70 @@ export async function seedEvaluationComplete() {
       },
     });
 
-    console.log('✅ Test users created/verified');
+    const testStudent3 = await prisma.user.upsert({
+      where: { email: 'student3.test@uni-siegen.de' },
+      update: {},
+      create: {
+        email: 'student3.test@uni-siegen.de',
+        firstname: 'Lisa',
+        lastname: 'Mueller',
+        password: await bcrypt.hash('password123', 10),
+        globalRole: GlobalRole.STUDENT,
+      },
+    });
+
+    const testStudent4 = await prisma.user.upsert({
+      where: { email: 'student4.test@uni-siegen.de' },
+      update: {},
+      create: {
+        email: 'student4.test@uni-siegen.de',
+        firstname: 'Tom',
+        lastname: 'Weber',
+        password: await bcrypt.hash('password123', 10),
+        globalRole: GlobalRole.STUDENT,
+      },
+    });
+
+    console.log('✅ Test users created/verified (now includes 5 students + 1 lecturer for comprehensive voting tests)');
+
+    // 1.5. Create dedicated anonymous users for seed comments (non-colliding IDs)
+    const seedAnonymousUser1 = await prisma.user.upsert({
+      where: { email: 'seed.anonymous1@seed.local' },
+      update: {},
+      create: {
+        email: 'seed.anonymous1@seed.local',
+        firstname: 'Seed',
+        lastname: 'Anonymous1',
+        password: await bcrypt.hash('seed-only-user', 10),
+        globalRole: GlobalRole.STUDENT,
+      },
+    });
+
+    const seedAnonymousUser2 = await prisma.user.upsert({
+      where: { email: 'seed.anonymous2@seed.local' },
+      update: {},
+      create: {
+        email: 'seed.anonymous2@seed.local',
+        firstname: 'Seed',
+        lastname: 'Anonymous2', 
+        password: await bcrypt.hash('seed-only-user', 10),
+        globalRole: GlobalRole.TEACHER,
+      },
+    });
+
+    const seedAnonymousUser3 = await prisma.user.upsert({
+      where: { email: 'seed.anonymous3@seed.local' },
+      update: {},
+      create: {
+        email: 'seed.anonymous3@seed.local',
+        firstname: 'Seed',
+        lastname: 'Anonymous3',
+        password: await bcrypt.hash('seed-only-user', 10),
+        globalRole: GlobalRole.STUDENT,
+      },
+    });
+
+    console.log('✅ Dedicated seed anonymous users created/verified');
 
     // 2. Create test module
     const testModule = await prisma.module.upsert({
@@ -192,37 +255,57 @@ export async function seedEvaluationComplete() {
 
     console.log('✅ Evaluation submissions created - anonymous display handled in comments');
 
-    // 8. Create realistic evaluation comments
+    // 8. Create 5 evaluation comments (one per student) distributed across different categories
     const commentsData = [
       {
         submissionId: submission1.id,
         categoryId: createdCategories[0].id, // Vollständigkeit
-        content: 'Die Zeichnung scheint alle geforderten Bauteile zu enthalten. Mir ist aber nicht klar, ob die Bemaßung vollständig ist.',
+        content: 'Ich vermisse die Angaben zu den Lastannahmen. Ohne diese ist schwer zu beurteilen, ob die Dimensionierung stimmt.',
         userId: testStudent2.id,
         voteDetails: { userVotes: {} },
-        upvotes: 1,
+        upvotes: 3,
         downvotes: 0,
-        anonymousDisplayName: 'Student B',
+        anonymousDisplayName: 'Student Anna',
       },
       {
         submissionId: submission1.id,
         categoryId: createdCategories[1].id, // Grafische Darstellungsqualität
-        content: 'Guter Punkt. Die Hauptkomponenten sind da, aber es fehlen einige Detailansichten, die im Lastenheft gefordert waren.',
+        content: 'Die Linienführung ist sehr sauber und professionell. Alle Maße sind gut lesbar.',
+        userId: testStudent.id,
+        voteDetails: { userVotes: {} },
+        upvotes: 2,
+        downvotes: 0,
+        anonymousDisplayName: 'Student Max',
+      },
+      {
+        submissionId: submission1.id,
+        categoryId: createdCategories[1].id, // Grafische Darstellungsqualität
+        content: 'Die Schnittdarstellung ist etwas unübersichtlich. Eine Explosionszeichnung wäre hilfreicher gewesen.',
+        userId: testStudent3.id,
+        voteDetails: { userVotes: {} },
+        upvotes: 1,
+        downvotes: 1,
+        anonymousDisplayName: 'Student Lisa',
+      },
+      {
+        submissionId: submission1.id,
+        categoryId: createdCategories[2].id, // Vergleichbarkeit
+        content: 'Der Maßstab ist konsistent, aber die Legende könnte ausführlicher sein für bessere Vergleichbarkeit.',
+        userId: testStudent4.id,
+        voteDetails: { userVotes: {} },
+        upvotes: 1,
+        downvotes: 0,
+        anonymousDisplayName: 'Student Tom',
+      },
+      {
+        submissionId: submission1.id,
+        categoryId: createdCategories[3].id, // Komplexität
+        content: 'Die Lösung ist angemessen komplex für die Aufgabenstellung. Nicht zu einfach, aber auch nicht übertrieben.',
         userId: testLecturer.id,
         voteDetails: { userVotes: {} },
         upvotes: 2,
         downvotes: 0,
         anonymousDisplayName: 'Dozent',
-      },
-      {
-        submissionId: submission1.id,
-        categoryId: createdCategories[2].id, // Vergleichbarkeit
-        content: 'Stimmt, Anhang B.2 wurde nicht berücksichtigt. Das macht die Abgabe unvollständig.',
-        userId: testStudent.id,
-        voteDetails: { userVotes: {} },
-        upvotes: 1,
-        downvotes: 1,
-        anonymousDisplayName: 'Student C',
       },
     ];
 
@@ -232,7 +315,7 @@ export async function seedEvaluationComplete() {
       });
     }
 
-    console.log('✅ Evaluation comments created');
+    console.log('✅ Evaluation comments created (5 comments - one per student across different categories)');
 
     // 9. Create evaluation ratings
     const ratingsData = [
@@ -278,12 +361,17 @@ export async function seedEvaluationComplete() {
     console.log(`🎯 Submission ID 1: ${submission1.id}`);
     console.log(`🎯 Submission ID 2: ${submission2.id}`);
     console.log(`📚 Session ID: ${evaluationSession.id}`);
-    console.log(`👤 Test Student ID: ${testStudent.id}`);
-    console.log(`👨‍🏫 Test Lecturer ID: ${testLecturer.id}`);
+    console.log(`👤 Test Student 1 ID: ${testStudent.id} (Max Mustermann)`);
+    console.log(`👤 Test Student 2 ID: ${testStudent2.id} (Anna Schmidt)`);
+    console.log(`👤 Test Student 3 ID: ${testStudent3.id} (Lisa Mueller)`);
+    console.log(`👤 Test Student 4 ID: ${testStudent4.id} (Tom Weber)`);
+    console.log(`👨‍🏫 Test Lecturer ID: ${testLecturer.id} (Prof. Dr. Lehmann)`);
+    console.log(`🎭 Seed Anonymous User IDs: ${seedAnonymousUser1.id}, ${seedAnonymousUser2.id}, ${seedAnonymousUser3.id}`);
     console.log('\n🌐 Frontend Test URLs:');
     console.log(`http://localhost:4200/evaluation-forum/${submission1.id}`);
     console.log(`http://localhost:4200/evaluation-forum/${submission2.id}`);
     console.log('\n🔧 Use these submission IDs to test the evaluation forum!');
+    console.log('\n✅ Seed comments now use dedicated anonymous users - no collision with real user logins!');
 
     console.log('\n✅ Comprehensive evaluation system seeding completed successfully!');
 

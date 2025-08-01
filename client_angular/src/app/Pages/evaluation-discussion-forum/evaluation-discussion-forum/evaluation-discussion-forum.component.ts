@@ -158,6 +158,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   // Loading state management
   private isSubmittingComment$ = new BehaviorSubject<boolean>(false);
+  isVotingComment: Map<string, boolean> = new Map();
 
   // Event handling with debouncing
   private commentSubmissionQueue$ = new Subject<string>();
@@ -172,7 +173,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private evaluationService: EvaluationDiscussionService,
     private stateService: EvaluationStateService,
     private mockDataService: EvaluationMockDataService,
     private snackBar: MatSnackBar,
@@ -470,10 +470,21 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   onCommentVoted(data: { commentId: string; voteType: 'UP' | 'DOWN' | null }): void {
     console.log('🗳️ Vote action triggered:', data);
 
+    // Prevent voting if already in progress for this comment
+    if (this.isVotingComment.get(data.commentId)) {
+      return;
+    }
+
+    // Set loading state for this specific comment
+    this.isVotingComment.set(data.commentId, true);
+    this.cdr.markForCheck(); // Manually trigger change detection
+
     this.activeCategory$.pipe(take(1)).subscribe(categoryId => {
       if (!categoryId) {
         console.error('❌ No active category for voting');
         this.showSnackBar('Fehler: Keine aktive Kategorie', 'Schließen', 3000, true);
+        this.isVotingComment.delete(data.commentId); // Reset loading state
+        this.cdr.markForCheck();
         return;
       }
 
@@ -493,17 +504,17 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
                   ? 'negativ bewertet'
                   : 'Bewertung entfernt';
 
-            // Use robust SnackBar method
             this.showSnackBar(`Kommentar ${action}`, 'OK', 2000, false);
-
-            // Trigger change detection
-            this.cdr.markForCheck();
           },
           error: error => {
             console.error('❌ Vote failed:', error);
             const message = error.message || 'Fehler beim Bewerten des Kommentars';
-            // Use robust SnackBar method for error
             this.showSnackBar(message, 'Schließen', 5000, true);
+          },
+          complete: () => {
+            // Always reset loading state on completion
+            this.isVotingComment.delete(data.commentId);
+            this.cdr.markForCheck();
           },
         });
     });
@@ -981,7 +992,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   private createMockAnonymousUser(): AnonymousEvaluationUserDTO {
     return {
-      id: 1,
+      id: 999,
       userId: 999,
       submissionId: 'demo-submission-001',
       displayName: 'Sie (Demo-Modus)',

@@ -4,7 +4,10 @@
     <mat-icon>preview</mat-icon>
     <div class="banner-content">
       <span class="banner-title">Demo-Modus</span>
-      <small class="banner-subtitle">Interaktive Beispieldaten zur Demonstration - Alle Aktionen werden nur lokal gespeichert</small>
+      <small class="banner-subtitle"
+        >Interaktive Beispieldaten zur Demonstration - Alle Aktionen werden nur lokal
+        gespeichert</small
+      >
     </div>
   </div>
 
@@ -95,15 +98,17 @@
 
           <!-- Discussion Content Area -->
           <div class="discussion-content">
-            
             <!-- Error Fallback for Missing Anonymous User -->
-            <app-error-fallback 
+            <app-error-fallback
               *ngIf="vm.isDiscussionPhase && !vm.anonymousUser && !vm.loading"
               [title]="'Anonymer Benutzer konnte nicht geladen werden'"
-              [message]="'Die Diskussion kann ohne anonyme Benutzerdaten nicht angezeigt werden. Bitte laden Sie die Seite neu.'"
-              [showRetry]="true">
+              [message]="
+                'Die Diskussion kann ohne anonyme Benutzerdaten nicht angezeigt werden. Bitte laden Sie die Seite neu.'
+              "
+              [showRetry]="true"
+            >
             </app-error-fallback>
-            
+
             <!-- Discussion Phase -->
             <div class="discussion-phase-content" *ngIf="vm.isDiscussionPhase && vm.anonymousUser">
               <!-- Discussion Messages Area -->
@@ -117,6 +122,7 @@
                   [availableDownvotes]="vm.availableDownvotes"
                   [isReadOnly]="!vm.canComment"
                   [isSubmittingComment]="vm.isSubmittingComment"
+                  [isVotingComment]="isVotingComment"
                   [trackByFn]="trackByDiscussion"
                   (commentSubmitted)="onCommentSubmitted($event)"
                   (commentVoted)="onCommentVoted($event)"

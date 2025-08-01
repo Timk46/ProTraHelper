@@ -100,6 +100,8 @@ export class RhinoFocusService {
    * @returns Observable mit Fokussierungs-Ergebnis
    */
   focusRhinoWindow(request: RhinoFocusRequestDTO = {}): Observable<RhinoFocusResponseDTO> {
+    console.log('is config enabled', this.config.enabled);
+    console.log('is available', this.isAvailable);
     if (!this.config.enabled || this.isAvailable === false) {
       console.log('🚫 Rhino focus disabled or unavailable');
       return of({

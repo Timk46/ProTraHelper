@@ -1,31 +1,26 @@
 // =============================================================================
-// CHAT BUBBLE COMMENT DESIGN - MATCHING SCREENSHOT
+// COMMENT BLOCK DESIGN - MATCHING CHATRICHTIG.PNG SCREENSHOT
 // =============================================================================
 
-.chat-bubble {
-  margin-bottom: 12px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  max-width: 85%;
+.comment-block {
+  margin-bottom: 16px;
+  padding: 16px;
+  background-color: #f8f9fa; // Light gray background for all comments
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
   position: relative;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   
-  // Default styling for other users' messages (left-aligned, light gray)
-  &.other-message {
+  // Default styling for other users' comments (gray blocks as shown in screenshot)
+  &.other-comment {
     background-color: #f8f9fa;
-    margin-left: 0;
-    margin-right: auto;
-    border: 1px solid #e9ecef;
-    border-left: 4px solid #6c757d; // Gray left border for other users
+    border-left: 3px solid #6c757d;
   }
   
-  // Styling for current user's messages (right-aligned, light blue)
-  &.own-message {
-    background-color: #e3f2fd;
-    margin-left: auto;
-    margin-right: 0;
-    border: 1px solid #bbdefb;
-    border-left: 4px solid #1976d2; // Blue left border for current user
+  // Styling for current user's comments (slightly different but still block style)
+  &.own-comment {
+    background-color: #e8f4fd;
+    border-left: 3px solid #1976d2;
     
     .author-name {
       color: #1565c0;
@@ -42,7 +37,7 @@
   }
   
   &:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   }
 }
 
@@ -215,10 +210,9 @@
 // =============================================================================
 
 @media (max-width: 768px) {
-  .chat-bubble {
-    max-width: 90%;
-    padding: 10px 14px;
-    margin-bottom: 10px;
+  .comment-block {
+    padding: 12px 14px;
+    margin-bottom: 12px;
     
     .message-header {
       .author-name {
@@ -251,9 +245,8 @@
 }
 
 @media (max-width: 480px) {
-  .chat-bubble {
-    max-width: 95%;
-    padding: 8px 12px;
+  .comment-block {
+    padding: 10px 12px;
     
     .vote-actions {
       gap: 4px;
@@ -282,14 +275,14 @@
 
 // High contrast mode support
 @media (prefers-contrast: high) {
-  .chat-bubble {
+  .comment-block {
     border: 2px solid #000 !important;
     
-    &.other-message {
+    &.other-comment {
       background-color: #fff !important;
     }
     
-    &.own-message {
+    &.own-comment {
       background-color: #f0f8ff !important;
     }
   }
@@ -302,7 +295,7 @@
 // Reduced motion support
 @media (prefers-reduced-motion: reduce) {
   .vote-btn,
-  .chat-bubble {
+  .comment-block {
     transition: none !important;
   }
   
@@ -321,7 +314,7 @@
     display: none !important;
   }
   
-  .chat-bubble {
+  .comment-block {
     box-shadow: none !important;
     border: 1px solid #ccc !important;
     margin-bottom: 8px !important;

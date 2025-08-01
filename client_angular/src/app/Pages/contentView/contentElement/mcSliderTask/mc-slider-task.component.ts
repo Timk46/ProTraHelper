@@ -17,7 +17,7 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TaskViewData } from '@DTOs/index';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { RhinoFocusService } from 'src/app/Services/rhino-focus.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -465,7 +465,39 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Switch to Rhino manually via button - Simplified direct approach
+   * Wechselt manuell zu Rhino über Button-Klick mit vereinfachtem direkten Ansatz
+   *
+   * Diese Methode ermöglicht es dem Benutzer, das Rhino-Fenster manuell zu fokussieren.
+   * Sie verwendet einen vereinfachten Ansatz ohne automatische Auslösung und bietet
+   * umfassendes Feedback über den Erfolg oder Misserfolg der Operation.
+   *
+   * @description
+   * Die Methode implementiert einen Schutz gegen mehrfache gleichzeitige Ausführungen
+   * durch das `isRhinoSwitching` Flag. Sie nutzt `firstValueFrom()` um das Observable
+   * des RhinoFocusService in ein Promise zu konvertieren, was eine saubere async/await
+   * Syntax ermöglicht und gleichzeitig die erste Emission des Observables abwartet.
+   *
+   * @async
+   * @returns {Promise<void>} Ein Promise, das aufgelöst wird, wenn die Rhino-Fokussierung
+   *                          abgeschlossen ist (erfolgreich oder fehlgeschlagen)
+   *
+   * @throws {Error} Wirft einen Fehler, wenn die Rhino-Fokussierung fehlschlägt
+   *
+   * @example
+   * ```typescript
+   * // Wird typischerweise über Button-Klick aufgerufen
+   * await this.switchToRhino();
+   * ```
+   *
+   * @see {@link RhinoFocusService.focusRhinoWindow} - Der zugrundeliegende Service
+   *
+   * @note
+   * `firstValueFrom()` wird hier verwendet, um ein Observable in ein Promise zu konvertieren.
+   * Dies ist notwendig, da der RhinoFocusService ein Observable zurückgibt, wir aber
+   * eine async/await Syntax für bessere Lesbarkeit und Fehlerbehandlung verwenden möchten.
+   * `firstValueFrom()` wartet auf die erste Emission des Observables und löst das Promise
+   * mit diesem Wert auf. Falls das Observable einen Fehler emittiert, wird das Promise
+   * entsprechend abgelehnt.
    */
   async switchToRhino(): Promise<void> {
     if (this.isRhinoSwitching) {
@@ -473,12 +505,12 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     }
 
     this.isRhinoSwitching = true;
-    
+
     try {
       console.log('🎯 Focusing Rhino window directly...');
-      
-      const result = await this.rhinoFocusService.focusRhinoWindow().toPromise();
-      
+
+      const result = await firstValueFrom(this.rhinoFocusService.focusRhinoWindow());
+
       if (result && result.success) {
         console.log('✅ Rhino window focused successfully');
         this.snackBar.open('Rhino erfolgreich fokussiert', 'OK', {

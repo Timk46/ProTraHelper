@@ -74,7 +74,7 @@ export class EvaluationMockDataService {
 
   getMockAnonymousUser(): AnonymousEvaluationUserDTO {
     return {
-      id: 1,
+      id: "999", // String ID für Konsistenz mit Backend
       userId: 999,
       submissionId: "demo-submission-001",
       displayName: "Sie (Demo-Modus)",
@@ -287,6 +287,12 @@ export class EvaluationMockDataService {
       commentId: commentId,
       upvotes: upvotes,
       downvotes: downvotes,
+      voteStats: {
+        upVotes: upvotes,
+        downVotes: downvotes,
+        totalVotes: upvotes + downvotes,
+        score: upvotes - downvotes,
+      },
       userVote: userVote,
       netVotes: upvotes - downvotes
     });
@@ -698,11 +704,13 @@ export class EvaluationMockDataService {
   }
 
   private createMockVoteLimits(): Map<number, {plusVotes: number, minusVotes: number}> {
+    // Set all categories to full vote limits for comprehensive voting tests
+    // Each user gets 3 upvotes + 3 downvotes per category
     return new Map([
-      [1, { plusVotes: 2, minusVotes: 3 }], // Vollständigkeit
-      [2, { plusVotes: 3, minusVotes: 2 }], // Grafische Darstellung
-      [3, { plusVotes: 1, minusVotes: 3 }], // Vergleichbarkeit
-      [4, { plusVotes: 3, minusVotes: 1 }]  // Komplexität
+      [1, { plusVotes: 3, minusVotes: 3 }], // Vollständigkeit - full limits for testing
+      [2, { plusVotes: 3, minusVotes: 3 }], // Grafische Darstellung - full limits for testing
+      [3, { plusVotes: 3, minusVotes: 3 }], // Vergleichbarkeit - full limits for testing
+      [4, { plusVotes: 3, minusVotes: 3 }]  // Komplexität - full limits for testing
     ]);
   }
 

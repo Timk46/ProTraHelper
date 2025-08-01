@@ -1,21 +1,14 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+/* eslint-disable @typescript-eslint/require-await */
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/common/guards/roles.guard';
 import { roles } from '../../auth/common/guards/roles.guard';
 import { EvaluationCommentService } from './evaluation-comment.service';
 import type { EvaluationCommentDTO } from '@DTOs/index';
 import { CreateEvaluationCommentDTO, UpdateEvaluationCommentDTO } from '@DTOs/index';
+
+import { GetUser } from '../../auth/common/decorators/get-user.decorator';
+import { User } from '@prisma/client';
 
 @Controller('evaluation-comments')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -44,9 +37,9 @@ export class EvaluationCommentController {
   @roles('ANY')
   async create(
     @Body() createDto: CreateEvaluationCommentDTO,
-    @Req() req: any,
+    @GetUser() user: User,
   ): Promise<EvaluationCommentDTO> {
-    return this.evaluationCommentService.create(createDto, req.user.id);
+    return this.evaluationCommentService.create(createDto, user.id);
   }
 
   @Put(':id')
@@ -54,20 +47,20 @@ export class EvaluationCommentController {
   async update(
     @Param('id') id: string,
     @Body() updateDto: UpdateEvaluationCommentDTO,
-    @Req() req: any,
+    @GetUser() user: User,
   ): Promise<EvaluationCommentDTO> {
-    return this.evaluationCommentService.update(id, updateDto, req.user.id);
+    return this.evaluationCommentService.update(id, updateDto, user.id);
   }
 
   @Delete(':id')
   @roles('ANY')
-  async remove(@Param('id') id: string, @Req() req: any): Promise<void> {
-    return this.evaluationCommentService.remove(id, req.user.id);
+  async remove(@Param('id') id: string, @GetUser() user: User): Promise<void> {
+    return this.evaluationCommentService.remove(id, user.id);
   }
 
   @Get(':id/replies')
   @roles('ANY')
-  async getReplies(@Param('id') id: string): Promise<EvaluationCommentDTO[]> {
+  async getReplies(): Promise<EvaluationCommentDTO[]> {
     // Replies not implemented in simplified model
     return [];
   }
@@ -77,14 +70,14 @@ export class EvaluationCommentController {
   async vote(
     @Param('id') id: string,
     @Body() body: { voteType: 'UP' | 'DOWN' | null },
-    @Req() req: any,
+    @GetUser() user: User,
   ) {
-    return this.evaluationCommentService.vote(id, body.voteType, req.user.id);
+    return this.evaluationCommentService.vote(id, body.voteType, user.id);
   }
 
   @Get(':id/votes')
   @roles('ANY')
-  async getVotes(@Param('id') id: string, @Req() req: any) {
-    return this.evaluationCommentService.getVotes(id, req.user.id);
+  async getVotes(@Param('id') id: string, @GetUser() user: User) {
+    return this.evaluationCommentService.getVotes(id, user.id);
   }
 }

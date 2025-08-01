@@ -24,6 +24,7 @@ import {
   VoteUpdateData,
   EvaluationRatingDTO,
   RatingStatsDTO,
+  VoteResultDTO,
 } from '@DTOs/index';
 
 import { EvaluationDiscussionService } from './evaluation-discussion.service';
@@ -46,6 +47,8 @@ export class EvaluationStateService {
   // Rating state
   private ratingsSubject = new BehaviorSubject<EvaluationRatingDTO[]>([]);
   private ratingStatsCache = new Map<number, BehaviorSubject<RatingStatsDTO>>();
+
+  private commentIdToCategoryIdMap = new Map<string, number>();
 
   // UI state
   private loadingSubject = new BehaviorSubject<boolean>(false);
@@ -207,7 +210,7 @@ export class EvaluationStateService {
                 anonymousUser,
                 id: anonymousUser?.id,
                 idType: typeof anonymousUser?.id,
-                displayName: anonymousUser?.displayName
+                displayName: anonymousUser?.displayName,
               });
             }),
             catchError(error => {
@@ -377,6 +380,12 @@ export class EvaluationStateService {
         if (subject) {
           subject.next(discussions);
         }
+        // Populate comment-id to category-id map for quick lookups
+        discussions.forEach(discussion => {
+          discussion.comments.forEach(comment => {
+            this.commentIdToCategoryIdMap.set(comment.id, categoryId);
+          });
+        });
         this.clearError(); // Clear any previous errors
       },
       error: error => {
@@ -549,6 +558,9 @@ export class EvaluationStateService {
       discussion.totalComments = discussion.comments.length;
       discussion.usedComments = discussion.comments.length;
 
+      // Add new comment to the lookup map
+      this.commentIdToCategoryIdMap.set(comment.id, categoryId);
+
       console.log(
         '✅ Discussion updated with new comment. Total comments:',
         discussion.totalComments,
@@ -564,12 +576,12 @@ export class EvaluationStateService {
   // VOTING MANAGEMENT
   // =============================================================================
 
-  voteComment(commentId: string, voteType: 'UP' | 'DOWN' | null): Observable<any> {
+  voteComment(commentId: string, voteType: 'UP' | 'DOWN' | null): Observable<VoteResultDTO> {
     return this.evaluationService.voteComment(commentId, voteType).pipe(
       map(result => {
+        // Backend now returns result.voteStats structure
         this.handleVoteUpdate(commentId, {
-          upvotes: result.upvotes,
-          downvotes: result.downvotes,
+          voteStats: result.voteStats,
           userVote: result.userVote,
           netVotes: result.netVotes,
         });
@@ -579,31 +591,56 @@ export class EvaluationStateService {
   }
 
   private handleVoteUpdate(commentId: string, voteData: VoteUpdateData): void {
-    // Update all cached discussions
-    this.discussionCache.forEach((subject, key) => {
-      const discussions = subject.value;
-      let updated = false;
+    const categoryId = this.commentIdToCategoryIdMap.get(commentId);
+    if (categoryId === undefined) {
+      console.warn(
+        `Could not find category for commentId ${commentId}. Vote update may not be reflected in UI.`,
+      );
+      return;
+    }
 
-      const updatedDiscussions = discussions.map(discussion => ({
-        ...discussion,
-        comments: discussion.comments.map((comment: any) => {
-          if (comment.id === commentId) {
-            updated = true;
-            return {
-              ...comment,
-              upvotes: voteData.upvotes,
-              downvotes: voteData.downvotes,
-              userVote: voteData.userVote,
-            };
+    const subject = this.discussionCache.get(categoryId);
+    if (!subject) {
+      return;
+    }
+
+    const anonymousUser = this.anonymousUserSubject.value;
+    if (!anonymousUser) {
+      console.warn('Cannot update vote, anonymous user not available');
+      return;
+    }
+
+    const discussions = subject.value;
+    const updatedDiscussions = discussions.map(discussion => ({
+      ...discussion,
+      comments: discussion.comments.map((comment: EvaluationCommentDTO) => {
+        if (comment.id === commentId) {
+          // Manually update the votes array for immediate UI feedback
+          const otherVotes = comment.votes.filter(vote => vote.userId !== anonymousUser.id);
+
+          const newVotes = [...otherVotes];
+          if (voteData.userVote) {
+            // 'UP' or 'DOWN'
+            newVotes.push({
+              id: `temp-vote-${Date.now()}`, // Temporary ID for client-side rendering
+              userId: anonymousUser.id,
+              commentId: comment.id,
+              voteType: voteData.userVote,
+              createdAt: new Date(),
+            });
           }
-          return comment;
-        }),
-      }));
 
-      if (updated) {
-        subject.next(updatedDiscussions);
-      }
-    });
+          return {
+            ...comment,
+            voteStats: voteData.voteStats,
+            votes: newVotes, // Update the votes array
+          };
+        }
+        return comment;
+      }),
+    }));
+
+    subject.next(updatedDiscussions);
   }
 
   // =============================================================================
@@ -836,6 +873,7 @@ export class EvaluationStateService {
   clearCache(): void {
     this.discussionCache.clear();
     this.ratingStatsCache.clear();
+    this.commentIdToCategoryIdMap.clear();
   }
 
   refreshAll(submissionId: string): void {
@@ -936,12 +974,13 @@ export class EvaluationStateService {
    */
   private synchronizeMockVoteLimits(): void {
     if (this.isMockModeActive) {
-      this.mockDataService.getMockVoteLimits().pipe(
-        take(1)
-      ).subscribe(mockLimits => {
-        console.log('🔄 Synchronizing mock vote limits with state service:', mockLimits);
-        this.voteLimitsSubject.next(mockLimits);
-      });
+      this.mockDataService
+        .getMockVoteLimits()
+        .pipe(take(1))
+        .subscribe(mockLimits => {
+          console.log('🔄 Synchronizing mock vote limits with state service:', mockLimits);
+          this.voteLimitsSubject.next(mockLimits);
+        });
     }
   }
 
@@ -956,7 +995,9 @@ export class EvaluationStateService {
     if (this.isMockModeActive) {
       // Mock mode - graceful handling without throwing errors
       if (voteType !== null && !this.canVote(categoryId, voteType)) {
-        console.warn(`⚠️ No more ${voteType.toLowerCase()} votes available for category ${categoryId}`);
+        console.warn(
+          `⚠️ No more ${voteType.toLowerCase()} votes available for category ${categoryId}`,
+        );
         // Return empty observable to gracefully handle limit reached
         return of(null);
       }
@@ -967,21 +1008,22 @@ export class EvaluationStateService {
             // Synchronize mock vote limits with state service
             this.synchronizeMockVoteLimits();
 
-            // Update comment display
+            // Update comment display - Mock service now returns result.voteStats
             this.handleVoteUpdate(commentId, {
-              upvotes: result.upvotes,
-              downvotes: result.downvotes,
+              voteStats: result.voteStats,
               userVote: result.userVote,
               netVotes: result.netVotes,
             });
           }
-        })
+        }),
       );
     }
 
     // Real mode - graceful handling without throwing errors
     if (voteType !== null && !this.canVote(categoryId, voteType)) {
-      console.warn(`⚠️ No more ${voteType.toLowerCase()} votes available for category ${categoryId}`);
+      console.warn(
+        `⚠️ No more ${voteType.toLowerCase()} votes available for category ${categoryId}`,
+      );
       return of(null);
     }
 
@@ -995,9 +1037,9 @@ export class EvaluationStateService {
           // This would need to be tracked separately or returned from backend
         }
 
+        // Backend now returns result.voteStats structure
         this.handleVoteUpdate(commentId, {
-          upvotes: result.upvotes,
-          downvotes: result.downvotes,
+          voteStats: result.voteStats,
           userVote: result.userVote,
           netVotes: result.netVotes,
         });

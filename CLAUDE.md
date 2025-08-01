@@ -239,6 +239,7 @@ Essential environment variables needed:
 - `LANGCHAIN_API_KEY`: For tracing
 - `JUDGE0_URL`: Code execution service
 
+
 ### **Best Practices and Conventions for the Angular Frontend (`client_angular`)**
 
 This document describes the architecture, conventions, and best practices for the development of the `client_angular` project. Adherence to these guidelines is crucial to ensure the code quality, maintainability, and scalability of the application.

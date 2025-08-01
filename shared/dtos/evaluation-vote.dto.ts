@@ -22,8 +22,12 @@ export interface VoteResultDTO {
 }
 
 export interface VoteUpdateData {
-  upvotes: number;
-  downvotes: number;
+  voteStats: {
+    upVotes: number;
+    downVotes: number;
+    totalVotes: number;
+    score: number;
+  };
   userVote?: VoteType;
   netVotes: number;
 }

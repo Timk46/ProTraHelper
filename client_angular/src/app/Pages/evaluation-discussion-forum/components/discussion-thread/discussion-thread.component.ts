@@ -91,8 +91,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
   // Flattened comment list for virtual scrolling
   flattenedComments: FlattenedComment[] = [];
 
-  // Loading states
-  isVotingComment: Map<string, boolean> = new Map();
+  @Input() isVotingComment: Map<string, boolean> = new Map();
 
   // UI state
   showCommentInput: boolean = true;
@@ -133,34 +132,6 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
       if (changes['discussions'] && !changes['discussions'].firstChange) {
         setTimeout(() => this.scrollToBottom(), 100);
       }
-    }
-  }
-
-  ngDoCheck(): void {
-    // OnPush Change Detection fix: Force reprocessing when data changes
-    // This ensures flattenedComments is updated even if Angular doesn't detect reference changes
-    const currentDiscussionsLength = this.discussions?.length || 0;
-    const currentCommentsCount =
-      this.discussions?.reduce((total, d) => {
-        // Defensive programming: handle undefined comments array
-        const comments = d.comments || [];
-        return total + comments.length;
-      }, 0) || 0;
-
-    if (
-      currentDiscussionsLength !== this.lastDiscussionsLength ||
-      currentCommentsCount !== this.lastCommentsCount
-    ) {
-      console.log('🔧 ngDoCheck: Data changed, reprocessing flattened comments', {
-        discussions: currentDiscussionsLength,
-        comments: currentCommentsCount,
-      });
-
-      this.lastDiscussionsLength = currentDiscussionsLength;
-      this.lastCommentsCount = currentCommentsCount;
-
-      this.processFlattenedComments();
-      this.cdr.markForCheck();
     }
   }
 
@@ -275,17 +246,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     if (!this.canVote || this.isVotingComment.get(data.commentId)) {
       return;
     }
-
-    // Set loading state for this specific comment
-    this.isVotingComment.set(data.commentId, true);
-
-    // Emit the vote event
     this.commentVoted.emit(data);
-
-    // Reset loading state after a delay
-    setTimeout(() => {
-      this.isVotingComment.delete(data.commentId);
-    }, 1000);
   }
 
   onSortOrderChanged(newOrder: 'newest' | 'oldest' | 'mostVoted'): void {

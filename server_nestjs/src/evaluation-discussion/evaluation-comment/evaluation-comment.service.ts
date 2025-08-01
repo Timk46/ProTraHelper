@@ -407,10 +407,15 @@ export class EvaluationCommentService {
     // Invalidate cache for this submission
     this.cacheService.invalidateByPattern(`comments:.*`);
 
+    // Return format consistent with comment DTO voteStats structure
     return {
       commentId: commentId,
-      upvotes: newUpvotes,
-      downvotes: newDownvotes,
+      voteStats: {
+        upVotes: newUpvotes,
+        downVotes: newDownvotes,
+        totalVotes: newUpvotes + newDownvotes,
+        score: newUpvotes - newDownvotes,
+      },
       userVote: userVotes[userId.toString()] || null,
       netVotes: newUpvotes - newDownvotes,
     };
@@ -441,10 +446,15 @@ export class EvaluationCommentService {
     const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
     const userVote = voteDetails.userVotes[userId.toString()] || null;
 
+    // Return format consistent with comment DTO voteStats structure
     return {
       commentId: commentId,
-      upvotes: comment.upvotes,
-      downvotes: comment.downvotes,
+      voteStats: {
+        upVotes: comment.upvotes,
+        downVotes: comment.downvotes,
+        totalVotes: comment.upvotes + comment.downvotes,
+        score: comment.upvotes - comment.downvotes,
+      },
       userVote: userVote,
       netVotes: comment.upvotes - comment.downvotes,
     };
