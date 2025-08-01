@@ -13,7 +13,8 @@ import {
   FillinQuestionDTO,
   GraphQuestionDTO,
   uploadQuestionDTO,
-  UserUploadAnswerListItemDTO
+  UserUploadAnswerListItemDTO,
+  GroupReviewStatusDTO
 } from '@DTOs/index';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -137,6 +138,10 @@ export class QuestionDataService {
 
   getAllUploadQuestions() : Observable<uploadQuestionDTO[]> {
     return this.http.get<uploadQuestionDTO[]>(environment.server + `/question-data/uploadQuestion/all`);
+  }
+
+  getGroupReviewStatuses(questionId: number) : Observable<GroupReviewStatusDTO[]> {
+    return this.http.get<GroupReviewStatusDTO[]>(environment.server + `/question-data/groupReviewStatuses/${questionId}`);
   }
 
   /**

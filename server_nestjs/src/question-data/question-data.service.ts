@@ -182,6 +182,13 @@ export class QuestionDataService {
           }
         });
         break;
+      case questionType.GROUP_REVIEW_GATE:
+        specificQuestionData = await this.prisma.groupReviewGate.findFirst({
+          where: {
+            questionId: Number(questionId)
+          }
+        });
+        break;
     }
 
     console.log('specificQuestionData: ', specificQuestionData);
@@ -438,6 +445,7 @@ export class QuestionDataService {
         }
         break;
       case questionType.GROUP_REVIEW_GATE:
+        console.log('groupReviewGate: ', question.groupReviewGate);
         if (createNewVersion || !currentQuestion.groupReviewGate) {
           await this.qdGroupReviewGate.create(updatedQuestion.id, question.groupReviewGate);
         } else {

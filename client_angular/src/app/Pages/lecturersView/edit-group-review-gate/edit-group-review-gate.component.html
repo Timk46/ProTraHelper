@@ -1,5 +1,6 @@
 <div class="content mat-elevation-z8">
   <h1 style="display: flex; justify-content: center;">Bewertungsübersicht bearbeiten</h1>
+  <p>Die Bewertungsübersicht dient dazu, den Studierenden die für sie zu bewertenden und zu diskutierenden Abgaben von anderen Studierenden der selben eingeteilten Gruppe anonymisiert anzuzeigen. Dafür ist es wichtig, die entsprechende Upload-Aufgabe hier anzugeben. Die Gruppeneinteilung kann in der Lehrendenansicht vorgenommen werden.</p>
 
   <div class="horizontal-align-container">
     <div class="text-container" style="width: 30%;">
@@ -31,6 +32,15 @@
             <mat-error *ngIf="grgForm.get('questionScore')!.hasError('required')">Punkte sind
               erforderlich</mat-error>
           </mat-form-field>
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Verknüpfte Upload-Aufgabe</mat-label>
+            <mat-select formControlName="linkedQuestionId">
+              <mat-option *ngFor="let uq of allUploadQuestions" [value]="uq.questionId">
+                {{ uq.title }} ({{ uq.questionId }})
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="grgForm.get('linkedQuestionId')!.hasError('required')">Verknüpfte Upload-Aufgabe ist erforderlich</mat-error>
+          </mat-form-field>
         </form>
 
         <mat-expansion-panel>
@@ -59,19 +69,6 @@
           <app-tinymce #question [config]="editorConfig"></app-tinymce>
         </div>
 
-        <form [formGroup]="grgForm">
-          <mat-form-field appearance="fill" class="full-width">
-            <mat-label>Verknüpfte Upload-Aufgabe</mat-label>
-            <mat-select formControlName="linkedQuestionId">
-              <mat-option [value]="0">-- Bitte wählen --</mat-option>
-              <mat-option *ngFor="let uq of allUploadQuestions" [value]="uq.questionId">
-                {{ uq.title }}
-              </mat-option>
-            </mat-select>
-            <mat-error *ngIf="grgForm.get('linkedQuestionId')!.hasError('required')">Verknüpfte Upload-Aufgabe ist erforderlich</mat-error>
-          </mat-form-field>
-        </form>
-
       </div>
     </div>
 
@@ -80,7 +77,7 @@
   <div class="button-container">
     <mat-progress-spinner *ngIf="isSaving" diameter="20" mode="indeterminate"></mat-progress-spinner>
     <button mat-raised-button [disabled]="isSaving" color="primary" (click)="onOverwrite()">Speichern (aktualisieren)</button>
-    <div matTooltip="Die aktuelle Version hat noch keine Freitextdaten." [matTooltipDisabled]="!!detailedQuestionData?.freetextQuestion">
+    <div matTooltip="Die aktuelle Version hat noch keine Daten." [matTooltipDisabled]="!!detailedQuestionData?.freetextQuestion">
       <button mat-raised-button color="primary"
         (click)="onSaveNewVersion()"
         [disabled]="!detailedQuestionData?.freetextQuestion || isSaving || true"

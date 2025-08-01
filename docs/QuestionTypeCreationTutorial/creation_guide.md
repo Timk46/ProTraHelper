@@ -134,3 +134,7 @@ Dozenten müssen den neuen Fragetyp beim Erstellen eines neuen Inhaltselements a
 -   [ ] `src/app/pages/contentView/contentElement/mynewtype-task/` (neue Komponente)
 -   [ ] `src/app/pages/content-list/content-list-item/content-list-item.component.ts`
 -   [ ] `src/app/pages/lecturersView/create-content-element-dialog/create-content-element-dialog.component.html`
+
+
+Verbesserungsbedarf:
+server_nestjs\src\question-data\question-data.service.ts hier in getDetailedQuestion einen case für den neuen Fragetyp hinzufügen, um die spezifischen Daten zu laden.

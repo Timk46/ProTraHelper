@@ -1,13 +1,14 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Post, Param, Body, Req, UseGuards, ParseIntPipe} from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
-import { detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, FillinQuestionDTO, GraphQuestionDTO, userAnswerFeedbackDTO, MCOptionDTO, McQuestionDTO, MCOptionViewDTO, UserMCOptionSelectedDTO, uploadQuestionDTO, questionType, UserUploadAnswerListItemDTO } from '@DTOs/index';
+import { detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, FillinQuestionDTO, GraphQuestionDTO, userAnswerFeedbackDTO, MCOptionDTO, McQuestionDTO, MCOptionViewDTO, UserMCOptionSelectedDTO, uploadQuestionDTO, questionType, UserUploadAnswerListItemDTO, GroupReviewStatusDTO } from '@DTOs/index';
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
 import { QuestionDataFillinService } from './question-data-fillin/question-data-fillin.service';
 import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
 import { QuestionDataUploadService } from './question-data-upload/question-data-upload.service';
+import { QuestionDataGroupReviewGateService } from './question-data-groupreviewgate/question-data-groupreviewgate.service';
 
 
 @UseGuards(RolesGuard)
@@ -21,6 +22,7 @@ export class QuestionDataController {
       private qdGraphService: QuestionDataGraphService,
       private qdFillinService: QuestionDataFillinService,
       private qdUploadService: QuestionDataUploadService,
+      private qdGroupReviewGateService: QuestionDataGroupReviewGateService
 
     ) {}
 
@@ -121,6 +123,20 @@ export class QuestionDataController {
         @Get('uploadQuestion/:uploadQuestionId')
         async getUploadQuestion(@Param('uploadQuestionId') uploadQuestionId: number): Promise<uploadQuestionDTO> {
           return this.qdUploadService.getUploadQuestion(uploadQuestionId);
+        }
+
+        /**
+         * Retrieves the review statuses for a specific question group for the current user.
+        *
+        * @param questionId - The ID of the question to get review statuses for.
+        * @param req - The request object containing the authenticated user information.
+        * @returns A promise that resolves to an array of group review status DTOs.
+        */
+        @roles('ANY')
+        @Get('groupReviewStatuses/:questionId')
+        async getGroupReviewStatuses(@Param('questionId', ParseIntPipe) questionId: number, @Req() req: any): Promise<GroupReviewStatusDTO[]> {
+          const userId = req.user.id;
+          return this.qdGroupReviewGateService.getStatuses(questionId, userId);
         }
 
         /**

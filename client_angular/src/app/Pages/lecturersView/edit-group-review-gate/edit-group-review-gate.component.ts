@@ -46,7 +46,7 @@ export class EditGroupReviewGateComponent {
       questionDifficulty: ['', Validators.required],
       questionDescription: [''],
       questionScore: ['', Validators.required],
-      linkedQuestionId: [0, Validators.required]
+      linkedQuestionId: ['', Validators.required]
     });
     this.questionDataService.getAllUploadQuestions().subscribe((questions: uploadQuestionDTO[]) => {
       this.allUploadQuestions = questions;
@@ -90,6 +90,9 @@ export class EditGroupReviewGateComponent {
         questionScore: this.detailedQuestionData.score,
         linkedQuestionId: this.detailedQuestionData.groupReviewGate?.linkedQuestionId || 0
       });
+      if (this.detailedQuestionData.groupReviewGate) {
+        this.questionField.setContent(this.detailedQuestionData.groupReviewGate.textHTML || this.detailedQuestionData.text);
+      }
     }
 
   }
@@ -104,6 +107,7 @@ export class EditGroupReviewGateComponent {
       accept: () => {
         this.isSaving = true;
         const submitData = this.buildDTO();
+        console.log('Submit Data:', submitData);
         if (submitData){
           this.questionDataService.updateWholeQuestion(submitData).subscribe({
             next: response => {
@@ -173,7 +177,8 @@ export class EditGroupReviewGateComponent {
         text: this.questionField.getRawContent(),
         groupReviewGate: {
           questionId: this.detailedQuestionData.id,
-          linkedQuestionId: parseInt(this.grgForm.value.linkedQuestionId)
+          linkedQuestionId: parseInt(this.grgForm.value.linkedQuestionId),
+          textHTML: this.questionField.getContent(),
         }
       }
       return newData;

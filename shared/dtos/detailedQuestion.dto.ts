@@ -132,6 +132,7 @@ export interface detailedGroupReviewGateDTO {
   id?: number;
   questionId: number;
   linkedQuestionId: number;
+  textHTML?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

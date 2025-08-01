@@ -14,6 +14,7 @@ import { ContentLinkerService } from 'src/app/Services/contentLinker/content-lin
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UploadTaskComponent } from '../../contentView/contentElement/upload-task/upload-task.component';
+import { GroupReviewGateDialogComponent } from '../../contentView/contentElement/group-review-gate-dialog/group-review-gate-dialog.component';
 
 @Component({
   selector: 'app-content-list-item',
@@ -163,7 +164,13 @@ export class ContentListItemComponent {
     dialogConfig.width = 'auto';
     dialogConfig.maxHeight = '95vh';
 
-    let dialogRef: MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent | UploadTaskComponent> | undefined;
+    let dialogRef: MatDialogRef<
+      McTaskComponent
+      | FreeTextTaskComponent
+      | FillinTaskNewComponent
+      | UploadTaskComponent
+      | GroupReviewGateDialogComponent
+    > | undefined;
 
     // Open the appropriate dialog based on the task type
     switch (question.type) {
@@ -194,6 +201,10 @@ export class ContentListItemComponent {
         break;
       case questionType.UPLOAD:
         dialogRef = this.dialog.open(UploadTaskComponent, {...dialogConfig, width: '70vw'});
+        break;
+      case questionType.GROUP_REVIEW_GATE:
+        console.log("Opening Group Review Gate Dialog with data:", question);
+        dialogRef = this.dialog.open(GroupReviewGateDialogComponent, {...dialogConfig, width: '70vw'});
         break;
     }
 

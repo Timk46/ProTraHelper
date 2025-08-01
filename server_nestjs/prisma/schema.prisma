@@ -948,6 +948,7 @@ model GroupReviewGate {
   question         Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId       Int      @unique
   linkedQuestionId Int
+  textHTML         String?  @db.Text
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
