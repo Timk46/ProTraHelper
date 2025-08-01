@@ -6,6 +6,13 @@ import { detailedGroupReviewGateDTO, GroupReviewStatusDTO } from '@DTOs/detailed
 export class QuestionDataGroupReviewGateService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * Creates a new GroupReviewGate entry in the database.
+   *
+   * @param questionId - The ID of the question to associate with the group review gate.
+   * @param dto - The data transfer object containing details for the group review gate, including linked question ID and HTML text.
+   * @returns A promise that resolves to the created GroupReviewGate record.
+   */
   async create(questionId: number, dto: detailedGroupReviewGateDTO) {
     return this.prisma.groupReviewGate.create({
       data: {
@@ -16,6 +23,13 @@ export class QuestionDataGroupReviewGateService {
     });
   }
 
+  /**
+   * Updates a GroupReviewGate entity with the specified ID using the provided detailedGroupReviewGateDTO.
+   *
+   * @param id - The unique identifier of the GroupReviewGate to update.
+   * @param dto - The data transfer object containing updated fields for the GroupReviewGate.
+   * @returns A promise that resolves to the updated GroupReviewGate entity.
+   */
   async update(id: number, dto: detailedGroupReviewGateDTO) {
     return this.prisma.groupReviewGate.update({
       where: { id },
@@ -26,6 +40,15 @@ export class QuestionDataGroupReviewGateService {
     });
   }
 
+  /**
+   * Retrieves the latest group review statuses for all other members in the same group as the specified user,
+   * for the linked question associated with the given question ID.
+   *
+   * @param questionId - The ID of the question for which to fetch group review statuses.
+   * @param userId - The ID of the current user (whose group members' statuses are to be fetched).
+   * @returns A promise that resolves to an array of `GroupReviewStatusDTO` objects, each representing the latest status of a group member.
+   * @throws Error if the group review gate for the given question ID is not found.
+   */
   async getStatuses(questionId: number, userId: number): Promise<GroupReviewStatusDTO[]> {
     // Check if the group review gate exists for the given questionId
     const groupReviewGate = await this.prisma.groupReviewGate.findUnique({
