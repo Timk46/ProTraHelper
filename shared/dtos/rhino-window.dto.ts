@@ -53,3 +53,62 @@ export interface WindowsApiAvailabilityDTO {
     rhinoDetection: boolean;
   };
 }
+
+/**
+ * Native Focus DTOs for direct Windows API implementation
+ */
+
+export interface NativeFocusAttemptDTO {
+  method: string;
+  success: boolean;
+  errorCode?: number;
+  durationMs: number;
+  timestamp: string;
+}
+
+export interface NativeFocusProcessInfoDTO {
+  processId: number;
+  threadId: number;
+}
+
+export interface NativeFocusResponseDTO {
+  success: boolean;
+  message: string;
+  details: {
+    methodsAttempted: string[];
+    attemptsLog: NativeFocusAttemptDTO[];
+    lastError?: number;
+    windowValid: boolean;
+    currentForeground?: string;
+    performanceMs: number;
+    processInfo?: NativeFocusProcessInfoDTO;
+  };
+  windowHandle: string;
+  timestamp: string;
+}
+
+export interface NativeFocusConfigDTO {
+  maxAttempts: number;
+  attemptDelayMs: number;
+  restoreIfMinimized: boolean;
+  bringToFront: boolean;
+  operationTimeoutMs: number;
+  verboseLogging: boolean;
+}
+
+export interface NativeFocusRequestDTO {
+  windowHandle: string | number;
+  config?: Partial<NativeFocusConfigDTO>;
+}
+
+/**
+ * Combined response that can handle both PowerShell and Native implementations
+ */
+export interface UnifiedRhinoFocusResponseDTO {
+  success: boolean;
+  message: string;
+  implementation: 'powershell' | 'native' | 'error' | 'none';
+  windowInfo?: RhinoWindowInfoDTO;
+  nativeDetails?: NativeFocusResponseDTO['details'];
+  timestamp: string;
+}

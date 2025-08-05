@@ -1,18 +1,18 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RhinoIntegrationService } from '../rhino-integration/rhino-integration.service';
-import { 
-  CreateMCSliderQuestionDTO, 
-  MCSliderQuestionResponseDTO, 
-  MCSliderSubmissionDTO, 
+import {
+  CreateMCSliderQuestionDTO,
+  MCSliderQuestionResponseDTO,
+  MCSliderSubmissionDTO,
   MCSliderItemDTO,
   MCSliderConfigDTO,
   MCSliderRhinoConfigDTO,
-  MCSliderItemResponseDTO,
   MCSliderSubmissionResultDTO,
   UpdateMCSliderQuestionDTO,
-  RhinoExecutionResultDTO
+  RhinoExecutionResultDTO,
 } from '@DTOs/mcslider.dto';
+import { MCSliderItemResponseDTO } from '@DTOs/mcslider.dto';
 
 @Injectable()
 export class MCSliderService {
@@ -20,7 +20,7 @@ export class MCSliderService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly rhinoIntegrationService: RhinoIntegrationService
+    private readonly rhinoIntegrationService: RhinoIntegrationService,
   ) {}
 
   /**
@@ -28,7 +28,7 @@ export class MCSliderService {
    */
   async createMCSliderQuestion(
     userId: number,
-    createDto: CreateMCSliderQuestionDTO
+    createDto: CreateMCSliderQuestionDTO,
   ): Promise<MCSliderQuestionResponseDTO> {
     this.logger.log(`Creating MCSlider question: ${createDto.title}`);
 
@@ -39,16 +39,18 @@ export class MCSliderService {
         name: createDto.title,
         text: createDto.text,
         score: createDto.maxPoints,
-        rhinoEnabled: !!createDto.rhinoIntegration?.enabled,
-        rhinoGrasshopperFile: createDto.rhinoIntegration?.grasshopperFile,
-        rhinoAutoLaunch: createDto.rhinoIntegration?.autoLaunch ?? false,
-        rhinoAutoFocus: createDto.rhinoIntegration?.autoFocus ?? true,
-        rhinoSettings: createDto.rhinoIntegration ? {
-          focusDelayMs: createDto.rhinoIntegration.focusDelayMs ?? 1000,
-          showViewport: true,
-          batchMode: false
-        } : null
-      }
+        rhinoEnabled: !!createDto.rhinoIntegration.enabled,
+        rhinoGrasshopperFile: createDto.rhinoIntegration.grasshopperFile,
+        rhinoAutoLaunch: createDto.rhinoIntegration.autoLaunch ?? false,
+        rhinoAutoFocus: createDto.rhinoIntegration.autoFocus ?? true,
+        rhinoSettings: createDto.rhinoIntegration
+          ? {
+              focusDelayMs: createDto.rhinoIntegration.focusDelayMs ?? 1000,
+              showViewport: true,
+              batchMode: false,
+            }
+          : null,
+      },
     });
 
     // Create MCSlider-specific data
@@ -57,8 +59,8 @@ export class MCSliderService {
         questionId: question.id,
         items: createDto.items as any,
         config: createDto.config as any,
-        rhinoIntegration: createDto.rhinoIntegration as any
-      }
+        rhinoIntegration: createDto.rhinoIntegration as any,
+      },
     });
 
     this.logger.log(`✅ Created MCSlider question with ID: ${question.id}`);
@@ -72,8 +74,8 @@ export class MCSliderService {
     const question = await this.prisma.question.findUnique({
       where: { id: questionId },
       include: {
-        mCSliderQuestion: true
-      }
+        mCSliderQuestion: true,
+      },
     });
 
     if (!question || !question.mCSliderQuestion) {
@@ -89,7 +91,7 @@ export class MCSliderService {
       config: question.mCSliderQuestion.config as any as MCSliderConfigDTO,
       rhinoIntegration: question.mCSliderQuestion.rhinoIntegration as any as MCSliderRhinoConfigDTO,
       createdAt: question.createdAt,
-      updatedAt: question.updatedAt
+      updatedAt: question.updatedAt,
     };
   }
 
@@ -98,11 +100,11 @@ export class MCSliderService {
    */
   async updateMCSliderQuestion(
     questionId: number,
-    updateDto: UpdateMCSliderQuestionDTO
+    updateDto: UpdateMCSliderQuestionDTO,
   ): Promise<MCSliderQuestionResponseDTO> {
     const existingQuestion = await this.prisma.question.findUnique({
       where: { id: questionId },
-      include: { mCSliderQuestion: true }
+      include: { mCSliderQuestion: true },
     });
 
     if (!existingQuestion || !existingQuestion.mCSliderQuestion) {
@@ -125,10 +127,10 @@ export class MCSliderService {
             rhinoSettings: {
               focusDelayMs: updateDto.rhinoIntegration.focusDelayMs ?? 1000,
               showViewport: true,
-              batchMode: false
-            }
-          })
-        }
+              batchMode: false,
+            },
+          }),
+        },
       });
     }
 
@@ -139,8 +141,10 @@ export class MCSliderService {
         data: {
           ...(updateDto.items && { items: updateDto.items as any }),
           ...(updateDto.config && { config: updateDto.config as any }),
-          ...(updateDto.rhinoIntegration && { rhinoIntegration: updateDto.rhinoIntegration as any })
-        }
+          ...(updateDto.rhinoIntegration && {
+            rhinoIntegration: updateDto.rhinoIntegration as any,
+          }),
+        },
       });
     }
 
@@ -154,7 +158,7 @@ export class MCSliderService {
   async deleteMCSliderQuestion(questionId: number): Promise<void> {
     const question = await this.prisma.question.findUnique({
       where: { id: questionId },
-      include: { mCSliderQuestion: true }
+      include: { mCSliderQuestion: true },
     });
 
     if (!question || !question.mCSliderQuestion) {
@@ -163,7 +167,7 @@ export class MCSliderService {
 
     // Delete the main question (cascade will handle MCSliderQuestion)
     await this.prisma.question.delete({
-      where: { id: questionId }
+      where: { id: questionId },
     });
 
     this.logger.log(`🗑️ Deleted MCSlider question ${questionId}`);
@@ -174,16 +178,16 @@ export class MCSliderService {
    */
   async executeRhinoForMCSlider(questionId: number): Promise<RhinoExecutionResultDTO> {
     const question = await this.getMCSliderQuestion(questionId);
-    
-    if (!question.rhinoIntegration?.enabled) {
+
+    if (!question.rhinoIntegration.enabled) {
       throw new BadRequestException('Rhino integration not enabled for this question');
     }
 
     this.logger.log(`🦏 Executing Rhino for MCSlider question ${questionId}`);
-    
+
     return await this.rhinoIntegrationService.executeRhinoForQuestion(
       questionId,
-      'batch' // Default for MCSlider
+      'batch', // Default for MCSlider
     );
   }
 
@@ -192,12 +196,14 @@ export class MCSliderService {
    */
   async submitMCSliderAnswer(
     userId: number,
-    submissionDto: MCSliderSubmissionDTO
+    submissionDto: MCSliderSubmissionDTO,
   ): Promise<MCSliderSubmissionResultDTO> {
     const question = await this.getMCSliderQuestion(submissionDto.questionId);
-    
-    this.logger.log(`📊 Processing MCSlider submission for question ${submissionDto.questionId} by user ${userId}`);
-    
+
+    this.logger.log(
+      `📊 Processing MCSlider submission for question ${submissionDto.questionId} by user ${userId}`,
+    );
+
     // Evaluate responses
     const responses = submissionDto.responses.map((response, index) => {
       const item = question.items[index];
@@ -207,14 +213,14 @@ export class MCSliderService {
 
       const isCorrect = Math.abs(response.userValue - item.correctValue) <= (item.tolerance || 0);
       const partialCredit = this.calculatePartialCredit(response.userValue, item);
-      
+
       return {
         itemIndex: index,
         userValue: response.userValue,
         correctValue: item.correctValue,
         isCorrect,
         partialCredit,
-        feedback: this.generateFeedback(response.userValue, item, isCorrect)
+        feedback: this.generateFeedback(response.userValue, item, isCorrect),
       };
     });
 
@@ -230,19 +236,18 @@ export class MCSliderService {
           responses,
           totalScore,
           percentage,
-          timestamp: submissionDto.timestamp
-        })
-      }
+          timestamp: submissionDto.timestamp,
+        }),
+      },
     });
 
     // Optional: Auto-focus Rhino after submission
-    if (question.rhinoIntegration?.autoFocus) {
-      this.rhinoIntegrationService.executeRhinoForQuestion(
-        submissionDto.questionId,
-        'batch'
-      ).catch(error => {
-        this.logger.warn(`Failed to auto-focus Rhino: ${error.message}`);
-      });
+    if (question.rhinoIntegration.autoFocus) {
+      this.rhinoIntegrationService
+        .executeRhinoForQuestion(submissionDto.questionId, 'batch')
+        .catch(error => {
+          this.logger.warn(`Failed to auto-focus Rhino: ${error.message}`);
+        });
     }
 
     const result = {
@@ -251,10 +256,14 @@ export class MCSliderService {
       totalScore,
       maxScore: question.maxPoints,
       percentage,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
-    this.logger.log(`✅ MCSlider submission completed: ${percentage.toFixed(1)}% (${totalScore}/${question.maxPoints})`);
+    this.logger.log(
+      `✅ MCSlider submission completed: ${percentage.toFixed(1)}% (${totalScore}/${
+        question.maxPoints
+      })`,
+    );
     return result;
   }
 
@@ -262,23 +271,28 @@ export class MCSliderService {
    * Gets all MCSlider questions (with pagination)
    */
   async getAllMCSliderQuestions(
-    page: number = 1,
-    limit: number = 20,
-    userId?: number
-  ): Promise<{ questions: MCSliderQuestionResponseDTO[]; total: number; page: number; limit: number }> {
+    page = 1,
+    limit = 20,
+    userId?: number,
+  ): Promise<{
+    questions: MCSliderQuestionResponseDTO[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
     const skip = (page - 1) * limit;
-    
+
     const where = userId ? { authorId: userId, type: 'MCSLIDER' } : { type: 'MCSLIDER' };
-    
+
     const [questions, total] = await Promise.all([
       this.prisma.question.findMany({
         where,
         include: { mCSliderQuestion: true },
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.question.count({ where })
+      this.prisma.question.count({ where }),
     ]);
 
     const formattedQuestions = questions.map(question => ({
@@ -286,11 +300,12 @@ export class MCSliderService {
       title: question.name || '',
       text: question.text,
       maxPoints: question.score || 0,
-      items: question.mCSliderQuestion?.items as any as MCSliderItemDTO[] || [],
-      config: question.mCSliderQuestion?.config as any as MCSliderConfigDTO || {} as MCSliderConfigDTO,
-      rhinoIntegration: question.mCSliderQuestion?.rhinoIntegration as any as MCSliderRhinoConfigDTO,
+      items: (question.mCSliderQuestion.items as any as MCSliderItemDTO[]) || [],
+      config:
+        (question.mCSliderQuestion.config as any as MCSliderConfigDTO) || ({} as MCSliderConfigDTO),
+      rhinoIntegration: question.mCSliderQuestion.rhinoIntegration as any as MCSliderRhinoConfigDTO,
       createdAt: question.createdAt,
-      updatedAt: question.updatedAt
+      updatedAt: question.updatedAt,
     }));
 
     return { questions: formattedQuestions, total, page, limit };
@@ -302,11 +317,11 @@ export class MCSliderService {
   private calculatePartialCredit(userValue: number, item: MCSliderItemDTO): number {
     const diff = Math.abs(userValue - item.correctValue);
     const tolerance = item.tolerance || 0;
-    
+
     if (diff <= tolerance) {
       return 1.0; // Full credit
     }
-    
+
     // Linear penalty based on distance from correct value
     const range = item.maxValue - item.minValue;
     const penalty = Math.min(diff / range, 1.0);
@@ -320,16 +335,18 @@ export class MCSliderService {
     if (isCorrect) {
       return 'Correct! Well done.';
     }
-    
+
     const diff = Math.abs(userValue - item.correctValue);
     const tolerance = item.tolerance || 0;
-    
+
     if (diff <= tolerance * 2) {
       return 'Close! You were very near the correct answer.';
     } else if (diff <= tolerance * 5) {
-      return 'Not quite right, but you\'re on the right track.';
+      return "Not quite right, but you're on the right track.";
     } else {
-      return `The correct answer is ${item.correctValue}${item.unit || ''}. Try to think about this more carefully.`;
+      return `The correct answer is ${item.correctValue}${
+        item.unit || ''
+      }. Try to think about this more carefully.`;
     }
   }
 }

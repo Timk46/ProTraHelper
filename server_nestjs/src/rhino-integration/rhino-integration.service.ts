@@ -16,11 +16,11 @@ export class RhinoIntegrationService {
     grasshopperBasePath: path.join(process.cwd(), 'files', 'Grasshopper'),
     defaultFile: 'example.gh',
     questionTypeMapping: {
-      'MCSLIDER': 'Rahmen.gh',
-      'GRAPH': 'Test.gh',
-      'UML': 'example.gh',
-      'CODE': 'example.gh'
-    }
+      MCSLIDER: 'Rahmen.gh',
+      GRAPH: 'Test.gh',
+      UML: 'example.gh',
+      CODE: 'example.gh',
+    },
   };
 
   // Simple caching mechanism
@@ -30,7 +30,7 @@ export class RhinoIntegrationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly rhinoDirectService: RhinoDirectService,
-    private readonly batScriptService: BatScriptGeneratorService
+    private readonly batScriptService: BatScriptGeneratorService,
   ) {}
 
   /**
@@ -50,8 +50,8 @@ export class RhinoIntegrationService {
       select: {
         type: true,
         rhinoGrasshopperFile: true,
-        rhinoEnabled: true
-      }
+        rhinoEnabled: true,
+      },
     });
 
     if (!question || !question.rhinoEnabled) {
@@ -87,10 +87,12 @@ export class RhinoIntegrationService {
     // Cache the result
     this.cache.set(cacheKey, {
       data: resolvedPath,
-      expiry: Date.now() + this.CACHE_DURATION
+      expiry: Date.now() + this.CACHE_DURATION,
     });
 
-    this.logger.log(`🦏 Resolved grasshopper file for question ${questionId}: ${path.basename(resolvedPath)}`);
+    this.logger.log(
+      `🦏 Resolved grasshopper file for question ${questionId}: ${path.basename(resolvedPath)}`,
+    );
     return resolvedPath;
   }
 
@@ -99,7 +101,7 @@ export class RhinoIntegrationService {
    */
   async executeRhinoForQuestion(
     questionId: number,
-    executionMode: 'direct' | 'batch' = 'batch'
+    executionMode: 'direct' | 'batch' = 'batch',
   ): Promise<RhinoExecutionResultDTO> {
     const startTime = Date.now();
 
@@ -113,8 +115,8 @@ export class RhinoIntegrationService {
         select: {
           rhinoSettings: true,
           rhinoAutoLaunch: true,
-          rhinoAutoFocus: true
-        }
+          rhinoAutoFocus: true,
+        },
       });
 
       const rhinoSettings = question?.rhinoSettings as any;
@@ -126,7 +128,7 @@ export class RhinoIntegrationService {
         result = await this.rhinoDirectService.launchRhino({
           filePath,
           showViewport: rhinoSettings?.showViewport ?? true,
-          batchMode: rhinoSettings?.batchMode ?? false
+          batchMode: rhinoSettings?.batchMode ?? false,
         });
       } else {
         // Use batch script execution
@@ -134,22 +136,23 @@ export class RhinoIntegrationService {
           filePath,
           rhinoCommand: this.buildGrasshopperCommand(filePath, rhinoSettings),
           showViewport: rhinoSettings?.showViewport ?? true,
-          batchMode: rhinoSettings?.batchMode ?? false
+          batchMode: rhinoSettings?.batchMode ?? false,
         });
       }
 
       const executionTime = Date.now() - startTime;
 
-      this.logger.log(`🦏 Rhino execution completed for question ${questionId} in ${executionTime}ms`);
+      this.logger.log(
+        `🦏 Rhino execution completed for question ${questionId} in ${executionTime}ms`,
+      );
 
       return {
         success: result.success,
         message: result.message,
         rhinoPath: result.rhinoPath,
         processId: result.processId,
-        executionTime
+        executionTime,
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
       this.logger.error(`🦏 Rhino execution failed for question ${questionId}: ${error.message}`);
@@ -157,7 +160,7 @@ export class RhinoIntegrationService {
       return {
         success: false,
         message: `Rhino execution failed: ${error.message}`,
-        executionTime
+        executionTime,
       };
     }
   }

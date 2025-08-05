@@ -19,6 +19,13 @@ export interface VoteResultDTO {
   downvotes: number;
   userVote: VoteType;
   netVotes: number; // upvotes - downvotes
+  // Added voteStats to match frontend expectations
+  voteStats: {
+    upVotes: number;
+    downVotes: number;
+    totalVotes: number;
+    score: number;
+  };
 }
 
 export interface VoteUpdateData {

@@ -20,11 +20,7 @@ import { EvaluationCacheService } from './shared/evaluation-cache.service';
 import { EvaluationUtilsService } from './shared/evaluation-utils.service';
 
 @Module({
-  imports: [
-    PrismaModule,
-    NotificationModule,
-    FilesModule,
-  ],
+  imports: [PrismaModule, NotificationModule, FilesModule],
   controllers: [
     EvaluationSessionController,
     EvaluationSubmissionController,

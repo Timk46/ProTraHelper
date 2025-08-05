@@ -3,7 +3,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../../notification/notification.service';
-import type {
+import {
   CreateEvaluationCommentDTO,
   UpdateEvaluationCommentDTO,
   EvaluationCommentDTO,
@@ -11,7 +11,7 @@ import type {
 } from '@DTOs/index';
 import { EvaluationCacheService } from '../shared/evaluation-cache.service';
 import { EvaluationUtilsService } from '../shared/evaluation-utils.service';
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 // =============================================================================
 // INTERNAL TYPES
@@ -48,6 +48,29 @@ type PrismaCommentWithDetails = Prisma.EvaluationCommentGetPayload<{
         order: true;
       };
     };
+    replies: {
+      include: {
+        user: {
+          select: {
+            id: true;
+            firstname: true;
+            lastname: true;
+          };
+        };
+        category: {
+          select: {
+            id: true;
+            name: true;
+            displayName: true;
+            description: true;
+            icon: true;
+            color: true;
+            order: true;
+          };
+        };
+        replies: true; // Include nested replies (recursive)
+      };
+    };
   };
 }>;
 
@@ -74,7 +97,7 @@ export class EvaluationCommentService {
     const cacheKey = this.utilsService.generateCacheKey(
       'comments',
       submissionId,
-      categoryId.toString() || 'all',
+      categoryId?.toString() || 'all',
     );
 
     return this.cacheService.getOrSet(
@@ -85,8 +108,13 @@ export class EvaluationCommentService {
           whereClause.categoryId = categoryId;
         }
 
+        // Temporarily disable parentId filtering to restore existing comments visibility
+        // This allows both existing comments (without parentId) and new top-level comments
+        // TODO: Re-enable proper parentId filtering after data migration
+        const extendedWhereClause = { ...whereClause };
+
         const comments = await this.prisma.evaluationComment.findMany({
-          where: whereClause,
+          where: extendedWhereClause,
           include: {
             user: {
               select: {
@@ -106,8 +134,55 @@ export class EvaluationCommentService {
                 order: true,
               },
             },
+            replies: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    firstname: true,
+                    lastname: true,
+                  },
+                },
+                category: {
+                  select: {
+                    id: true,
+                    name: true,
+                    displayName: true,
+                    description: true,
+                    icon: true,
+                    color: true,
+                    order: true,
+                  },
+                },
+                replies: {
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        firstname: true,
+                        lastname: true,
+                      },
+                    },
+                    category: {
+                      select: {
+                        id: true,
+                        name: true,
+                        displayName: true,
+                        description: true,
+                        icon: true,
+                        color: true,
+                        order: true,
+                      },
+                    },
+                    replies: true, // Support deeper nesting
+                  },
+                  orderBy: { createdAt: 'asc' }, // Replies chronological order
+                },
+              },
+              orderBy: { createdAt: 'asc' }, // Replies chronological order
+            },
           },
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: 'desc' }, // Top-level comments newest first
         });
 
         return comments.map(comment => this.mapCommentToDTO(comment));
@@ -145,6 +220,30 @@ export class EvaluationCommentService {
             order: true,
           },
         },
+        replies: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstname: true,
+                lastname: true,
+              },
+            },
+            category: {
+              select: {
+                id: true,
+                name: true,
+                displayName: true,
+                description: true,
+                icon: true,
+                color: true,
+                order: true,
+              },
+            },
+            replies: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
       },
     });
 
@@ -167,6 +266,11 @@ export class EvaluationCommentService {
     createDto: CreateEvaluationCommentDTO,
     userId: number,
   ): Promise<EvaluationCommentDTO> {
+    // Validate reply if parentId is provided
+    if (createDto.parentId) {
+      await this.validateReply(createDto.parentId, createDto.submissionId);
+    }
+
     // Generate anonymous display name
     console.log('createDto', createDto);
     console.log('userId', userId);
@@ -178,6 +282,7 @@ export class EvaluationCommentService {
         categoryId: createDto.categoryId,
         userId: userId,
         content: createDto.content,
+        parentId: createDto.parentId || null, // Handle reply functionality
         anonymousDisplayName,
         voteDetails: { userVotes: {} } as Prisma.JsonObject, // Initialize empty vote tracking
       },
@@ -199,6 +304,30 @@ export class EvaluationCommentService {
             color: true,
             order: true,
           },
+        },
+        replies: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstname: true,
+                lastname: true,
+              },
+            },
+            category: {
+              select: {
+                id: true,
+                name: true,
+                displayName: true,
+                description: true,
+                icon: true,
+                color: true,
+                order: true,
+              },
+            },
+            replies: true,
+          },
+          orderBy: { createdAt: 'asc' },
         },
       },
     });
@@ -262,6 +391,30 @@ export class EvaluationCommentService {
             color: true,
             order: true,
           },
+        },
+        replies: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstname: true,
+                lastname: true,
+              },
+            },
+            category: {
+              select: {
+                id: true,
+                name: true,
+                displayName: true,
+                description: true,
+                icon: true,
+                color: true,
+                order: true,
+              },
+            },
+            replies: true, // Nested replies
+          },
+          orderBy: { createdAt: 'asc' }, // Replies chronologically
         },
       },
     });
@@ -407,9 +560,11 @@ export class EvaluationCommentService {
     // Invalidate cache for this submission
     this.cacheService.invalidateByPattern(`comments:.*`);
 
-    // Return format consistent with comment DTO voteStats structure
+    // Return format consistent with VoteResultDTO structure
     return {
       commentId: commentId,
+      upvotes: newUpvotes,
+      downvotes: newDownvotes,
       voteStats: {
         upVotes: newUpvotes,
         downVotes: newDownvotes,
@@ -419,6 +574,38 @@ export class EvaluationCommentService {
       userVote: userVotes[userId.toString()] || null,
       netVotes: newUpvotes - newDownvotes,
     };
+  }
+
+  /**
+   * Gets the current user's vote status for a specific comment
+   * @param commentId - The comment ID
+   * @param userId - The user ID
+   * @returns The user's vote type or null if no vote exists
+   */
+  async getUserVoteForComment(commentId: string, userId: number): Promise<'UP' | 'DOWN' | null> {
+    const comment = await this.prisma.evaluationComment.findUnique({
+      where: { id: commentId },
+      select: {
+        voteDetails: true,
+      },
+    });
+
+    if (!comment) {
+      throw new NotFoundException(`Comment with ID ${commentId} not found`);
+    }
+
+    // Check voteDetails for user's vote
+    const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
+    const userVotes = voteDetails.userVotes || {};
+
+    console.log('🔍 getUserVoteForComment:', {
+      commentId,
+      userId,
+      userVote: userVotes[userId.toString()],
+      allUserVotes: Object.keys(userVotes),
+    });
+
+    return userVotes[userId.toString()] || null;
   }
 
   /**
@@ -502,6 +689,7 @@ export class EvaluationCommentService {
 
   /**
    * Mappt einen Prisma-Kommentar mit allen Details auf ein EvaluationCommentDTO.
+   * Unterstützt jetzt hierarchische Replies.
    *
    * @param comment - Der Prisma-Kommentar-Objekt.
    * @returns Das entsprechende EvaluationCommentDTO.
@@ -510,13 +698,16 @@ export class EvaluationCommentService {
     const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
     const userVotes = voteDetails.userVotes || {};
 
+    // Recursively map replies
+    const mappedReplies = comment.replies?.map(reply => this.mapCommentToDTO(reply as any)) || [];
+
     return {
       id: comment.id,
       submissionId: comment.submissionId,
       categoryId: comment.categoryId,
       authorId: comment.userId,
       content: comment.content,
-      parentId: null, // Simple comment system without replies for now
+      parentId: comment.parentId || null, // Use actual parentId from database
       createdAt: comment.createdAt,
       updatedAt: comment.updatedAt,
       author: {
@@ -543,8 +734,8 @@ export class EvaluationCommentService {
         voteType: voteType,
         createdAt: comment.createdAt,
       })),
-      replies: [],
-      replyCount: 0,
+      replies: mappedReplies, // Use recursively mapped replies
+      replyCount: this.calculateReplyCount(comment.replies || []), // Calculate total reply count
       voteStats: {
         upVotes: comment.upvotes,
         downVotes: comment.downvotes,
@@ -552,5 +743,85 @@ export class EvaluationCommentService {
         score: comment.upvotes - comment.downvotes,
       },
     };
+  }
+
+  /**
+   * Berechnet die Gesamtzahl der Replies rekursiv (inkl. Replies von Replies).
+   *
+   * @param replies - Array der direkten Replies.
+   * @returns Die Gesamtzahl aller Replies.
+   */
+  private calculateReplyCount(replies: any[]): number {
+    if (!replies || replies.length === 0) {
+      return 0;
+    }
+
+    return replies.reduce((count, reply) => {
+      return count + 1 + this.calculateReplyCount(reply.replies || []);
+    }, 0);
+  }
+
+  /**
+   * Validiert eine Reply-Anfrage.
+   * Stellt sicher, dass der Parent-Comment existiert, zur gleichen Submission gehört
+   * und die maximale Tiefe nicht überschritten wird.
+   *
+   * @param parentId - Die ID des Parent-Comments.
+   * @param submissionId - Die ID der Submission.
+   * @throws {NotFoundException} Wenn der Parent-Comment nicht existiert.
+   * @throws {ForbiddenException} Wenn der Parent-Comment zu einer anderen Submission gehört oder maximale Tiefe überschritten wird.
+   */
+  private async validateReply(parentId: string, submissionId: string): Promise<void> {
+    const parentComment = await this.prisma.evaluationComment.findUnique({
+      where: { id: parentId },
+      select: {
+        id: true,
+        submissionId: true,
+        parentId: true,
+      },
+    });
+
+    if (!parentComment) {
+      throw new NotFoundException(`Parent comment with ID ${parentId} not found`);
+    }
+
+    if (parentComment.submissionId !== submissionId) {
+      throw new ForbiddenException('Parent comment must belong to the same submission');
+    }
+
+    // Calculate depth by traversing up the parent chain
+    const depth = await this.calculateCommentDepth(parentId);
+    const MAX_REPLY_DEPTH = 5; // Allow up to 5 levels of nesting
+
+    if (depth >= MAX_REPLY_DEPTH) {
+      throw new ForbiddenException(`Maximum reply depth of ${MAX_REPLY_DEPTH} exceeded`);
+    }
+  }
+
+  /**
+   * Berechnet die Tiefe eines Comments in der Reply-Hierarchie.
+   *
+   * @param commentId - Die ID des Comments.
+   * @returns Die Tiefe (0 = Top-Level-Comment, 1 = erste Reply-Ebene, etc.).
+   */
+  private async calculateCommentDepth(commentId: string): Promise<number> {
+    let depth = 0;
+    let currentCommentId = commentId;
+
+    while (currentCommentId) {
+      const comment = await this.prisma.evaluationComment.findUnique({
+        where: { id: currentCommentId },
+        select: { parentId: true },
+      });
+
+      if (!comment || !comment.parentId) {
+        break;
+      }
+
+      depth++;
+      currentCommentId = comment.parentId;
+    }
+
+    return depth;
   }
 }

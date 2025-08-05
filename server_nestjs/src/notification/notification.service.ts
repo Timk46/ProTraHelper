@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
-import { NotificationDTO, NotificationType } from '@Interfaces/index';
+import { NotificationDTO} from '@Interfaces/index';
+import { NotificationType } from '@Interfaces/index';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Subject } from 'rxjs';
 import { Prisma } from '@prisma/client';

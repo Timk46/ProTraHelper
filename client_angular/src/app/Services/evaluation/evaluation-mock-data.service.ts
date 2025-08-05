@@ -74,7 +74,7 @@ export class EvaluationMockDataService {
 
   getMockAnonymousUser(): AnonymousEvaluationUserDTO {
     return {
-      id: "999", // String ID für Konsistenz mit Backend
+      id: 999, // Changed from string to number to match DTO
       userId: 999,
       submissionId: "demo-submission-001",
       displayName: "Sie (Demo-Modus)",

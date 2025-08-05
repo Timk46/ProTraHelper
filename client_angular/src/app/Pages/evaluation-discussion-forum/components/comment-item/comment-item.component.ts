@@ -8,12 +8,21 @@ import {
   OnInit,
   OnChanges,
   SimpleChanges,
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { BehaviorSubject, takeUntil, Subject, filter, retry, catchError, of, timer } from 'rxjs';
 
 // Angular Material Imports (reduced set for chat bubbles)
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+
+// Services
+import { EvaluationStateService } from '../../../../Services/evaluation/evaluation-state.service';
 
 // DTOs
 import { EvaluationCommentDTO, AnonymousEvaluationUserDTO, VoteType } from '@DTOs/index';
@@ -23,12 +32,21 @@ import { EvaluationCommentDTO, AnonymousEvaluationUserDTO, VoteType } from '@DTO
 @Component({
   selector: 'app-comment-item',
   standalone: true,
-  imports: [CommonModule, DatePipe, MatTooltipModule, MatProgressSpinnerModule],
+  imports: [
+    CommonModule, 
+    DatePipe, 
+    FormsModule,
+    MatTooltipModule, 
+    MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule
+  ],
   templateUrl: './comment-item.component.html',
   styleUrl: './comment-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CommentItemComponent implements OnInit, OnChanges {
+export class CommentItemComponent implements OnInit, OnChanges, OnDestroy {
   // =============================================================================
   // INPUTS - DATA FROM PARENT COMPONENT
   // =============================================================================
@@ -68,6 +86,20 @@ export class CommentItemComponent implements OnInit, OnChanges {
   private _cachedUpvoteTooltip: string = '';
   private _cachedDownvoteTooltip: string = '';
   
+  // 🚀 PHASE 3: Vote status cache and loading state
+  private _userVoteLoadingState = new BehaviorSubject<boolean>(false);
+  private _userVoteStatusCache = new BehaviorSubject<VoteType | null>(null);
+  private destroy$ = new Subject<void>();
+  
+  // Reply state
+  showReplyInput: boolean = false;
+  replyText: string = '';
+  isSubmittingReply: boolean = false;
+  
+  // 🚀 PHASE 2: Public observables for reactive programming with template
+  userVoteStatus$ = this._userVoteStatusCache.asObservable();
+  userVoteLoading$ = this._userVoteLoadingState.asObservable();
+  
   // Public getters for templates (avoid function calls)
   get cachedUserVote(): VoteType | null { return this._cachedUserVote; }
   get cachedIsCurrentUser(): boolean { return this._cachedIsCurrentUser; }
@@ -80,7 +112,10 @@ export class CommentItemComponent implements OnInit, OnChanges {
   // CONSTRUCTOR
   // =============================================================================
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private evaluationStateService: EvaluationStateService,
+  ) {}
 
   // =============================================================================
   // LIFECYCLE METHODS
@@ -90,6 +125,16 @@ export class CommentItemComponent implements OnInit, OnChanges {
     this.formatCommentTime();
     // 🚀 PHASE 2.3: Initialize cached values for performance
     this.updateCachedValues();
+    
+    // 🚀 PHASE 4: Initialize vote status with unified state management
+    const initialVoteStatus = this.getUserVoteFromLocal();
+    this.setVoteStatus(initialVoteStatus, 'initialization');
+    
+    // 🚀 PHASE 3: Initialize async vote status loading
+    this.loadUserVoteStatus();
+    
+    // 🚀 PHASE 4: Listen to vote completion events for cache synchronization
+    this.setupVoteEventListeners();
     
     console.log('💬 Comment item initialized:', {
       commentId: this.comment.id,
@@ -101,10 +146,21 @@ export class CommentItemComponent implements OnInit, OnChanges {
     });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
-    // 🚀 PHASE 2.3: Update cached values when inputs change
+    // 🚀 PHASE 2.3 + PHASE 3: Update cached values when inputs change
     if (changes['comment'] || changes['anonymousUser'] || changes['canVoteUp'] || changes['canVoteDown']) {
       this.updateCachedValues();
+      
+      // 🚀 PHASE 3: Reload vote status if comment or anonymousUser changed
+      if (changes['comment'] && !changes['comment'].firstChange) {
+        console.log('🔄 Comment changed, reloading vote status');
+        this.loadUserVoteStatus();
+      }
     }
     
     // 🚀 PHASE 1.3: Aggressive change detection for immediate UI updates
@@ -119,13 +175,13 @@ export class CommentItemComponent implements OnInit, OnChanges {
         previousVotingState: changes['isVoting']?.previousValue,
       });
       
-      // 🚀 PHASE 1.3: Use detectChanges() for immediate update when voting state changes
+      // 🚀 PHASE 1: Use detectChanges() for immediate update when voting state changes
       if (changes['isVoting'] && changes['isVoting'].currentValue !== changes['isVoting'].previousValue) {
         console.log('⚡ Voting state changed - forcing immediate detection');
         this.cdr.detectChanges();
       } else {
-        // Trigger change detection for OnPush strategy
-        this.cdr.markForCheck();
+        // 🚀 PHASE 1: Use detectChanges() for consistent immediate UI updates
+        this.cdr.detectChanges();
       }
     }
     
@@ -150,17 +206,15 @@ export class CommentItemComponent implements OnInit, OnChanges {
   }
 
   // =============================================================================
-  // CACHED VALUE MANAGEMENT - 🚀 PHASE 2.3
+  // CACHED VALUE MANAGEMENT - 🚀 PHASE 2.3 + PHASE 3
   // =============================================================================
 
   /**
    * Updates all cached values to avoid repeated function calls in templates
    * Called on ngOnInit and when relevant inputs change
+   * 🚀 PHASE 4: Removed vote caching - now handled by Observable
    */
   private updateCachedValues(): void {
-    // Cache user vote (called multiple times in template)
-    this._cachedUserVote = this.getUserVote();
-    
     // Cache current user status (called multiple times)
     this._cachedIsCurrentUser = this.isCurrentUser();
     
@@ -171,16 +225,150 @@ export class CommentItemComponent implements OnInit, OnChanges {
     this._cachedDisplayContent = this.getDisplayContent();
     this._cachedFormattedContent = this.formatContent(this.sanitizeContent(this._cachedDisplayContent));
     
-    // Cache tooltips (computed based on state)
-    this._cachedUpvoteTooltip = this.getUpvoteTooltip();
-    this._cachedDownvoteTooltip = this.getDownvoteTooltip();
+    // Cache tooltips (computed based on current Observable value)
+    this.updateCachedTooltips();
     
     console.log('🚀 Cached values updated for performance:', {
       commentId: this.comment?.id,
-      userVote: this._cachedUserVote,
       isCurrentUser: this._cachedIsCurrentUser,
       authorDisplayName: this._cachedAuthorDisplayName,
     });
+  }
+
+  /**
+   * 🚀 PHASE 4: Load user vote status with fallback system - unified state management
+   * First try local comment.votes array, then API call if needed
+   */
+  private loadUserVoteStatus(): void {
+    // First attempt: Try to get vote from local data
+    const localVote = this.getUserVoteFromLocal();
+    
+    if (localVote !== null) {
+      // Found vote in local data
+      console.log('✅ User vote found in local data:', {
+        commentId: this.comment.id,
+        localVote,
+      });
+      this.setVoteStatus(localVote, 'local-data');
+      return;
+    }
+
+    // Second attempt: Load from API if not found locally
+    console.log('🔄 Loading user vote status from API for comment:', this.comment.id);
+    this._userVoteLoadingState.next(true);
+
+    this.evaluationStateService
+      .getUserVoteStatus(this.comment.id)
+      .pipe(
+        // 🚀 PHASE 5: Add retry mechanism with exponential backoff
+        retry({ count: 2, delay: (error, retryCount) => timer(Math.pow(2, retryCount) * 1000) }),
+        // 🚀 PHASE 5: Handle errors gracefully with enhanced logging
+        catchError((error: any) => {
+          console.error('❌ Failed to load user vote status after retries:', {
+            commentId: this.comment.id,
+            error: error,
+            errorMessage: error?.message,
+            errorStatus: error?.status,
+            errorUrl: error?.url,
+            errorDetails: error?.error
+          });
+          this._userVoteLoadingState.next(false);
+          // Return null to indicate no vote status available
+          return of(null);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (voteType: VoteType | null) => {
+          console.log('✅ User vote status loaded from API:', {
+            commentId: this.comment.id,
+            voteType,
+          });
+          
+          this._userVoteLoadingState.next(false);
+          this.setVoteStatus(voteType, 'api-fallback');
+        },
+      });
+  }
+
+  /**
+   * 🚀 PHASE 3: Gets user vote from local comment.votes array (fallback system)
+   * This is the local fallback before API call
+   */
+  private getUserVoteFromLocal(): VoteType | null {
+    if (!this.anonymousUser) return null;
+
+    // Fix: vote.userId is number, anonymousUser.id is number
+    // Ensure both are compared as numbers
+    const userVote = this.comment.votes.find(
+      (vote: any) => vote.userId === Number(this.anonymousUser!.id),
+    );
+
+    return userVote ? userVote.voteType : null;
+  }
+
+  /**
+   * 🚀 PHASE 4: Unified method for updating vote status - single source of truth
+   * @param voteStatus The new vote status to set
+   * @param source Optional source description for logging
+   */
+  private setVoteStatus(voteStatus: VoteType | null, source: string = 'unknown'): void {
+    console.log('🔄 Setting vote status:', {
+      commentId: this.comment.id,
+      voteStatus,
+      source,
+    });
+
+    // Update the Observable (primary source of truth)
+    this._userVoteStatusCache.next(voteStatus);
+    
+    // Update cached value for backward compatibility
+    this._cachedUserVote = voteStatus;
+    
+    // Update tooltips based on new vote status
+    this.updateCachedTooltips();
+    
+    // Force immediate UI update
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Updates cached tooltips when vote status changes
+   */
+  private updateCachedTooltips(): void {
+    this._cachedUpvoteTooltip = this.getUpvoteTooltip();
+    this._cachedDownvoteTooltip = this.getDownvoteTooltip();
+  }
+
+  /**
+   * 🚀 PHASE 4: Setup vote event listeners for cache synchronization
+   */
+  private setupVoteEventListeners(): void {
+    // Listen to vote completion events
+    this.evaluationStateService.voteCompletion$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((event: any) => event !== null && event.commentId === this.comment.id),
+      )
+      .subscribe((event: any) => {
+        if (event) {
+          console.log('🔄 Received vote completion event:', event);
+          this.onVoteCompleted(event.voteResult);
+        }
+      });
+
+    // Listen to vote error events
+    this.evaluationStateService.voteError$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((event: any) => event !== null && event.commentId === this.comment.id),
+      )
+      .subscribe((event: any) => {
+        if (event) {
+          console.log('❌ Received vote error event:', event);
+          this.onVoteError();
+        }
+      });
   }
 
   // =============================================================================
@@ -229,14 +417,113 @@ export class CommentItemComponent implements OnInit, OnChanges {
       return;
     }
 
+    // 🚀 PHASE 4: Optimistic UI update with unified state management
+    const currentVote = this._cachedUserVote;
+    const newVote = currentVote === voteType ? null : voteType; // Toggle logic
+    
+    console.log('🗳️ Vote initiated:', {
+      commentId: this.comment.id,
+      currentVote,
+      voteType,
+      newVote,
+    });
+
+    // Optimistic update for immediate UI feedback using unified method
+    this.setVoteStatus(newVote, 'optimistic-update');
+
     this.voted.emit({
       commentId: this.comment.id,
       voteType: voteType,
     });
   }
 
+  /**
+   * 🚀 PHASE 4: Called when vote operation completes successfully
+   * Synchronizes the local cache with the actual result using unified state management
+   */
+  onVoteCompleted(voteResult: VoteType | null): void {
+    console.log('✅ Vote completed, updating cache:', {
+      commentId: this.comment.id,
+      voteResult,
+    });
+
+    // Use unified method for consistent state management
+    this.setVoteStatus(voteResult, 'vote-completed');
+  }
+
+  /**
+   * 🚀 PHASE 5: Called when vote operation fails - enhanced error handling
+   * Reverts optimistic updates and provides user feedback
+   */
+  onVoteError(): void {
+    console.log('❌ Vote failed, reverting optimistic update');
+    
+    // Reload vote status from local data first (faster fallback)
+    const localVote = this.getUserVoteFromLocal();
+    if (localVote !== null) {
+      this.setVoteStatus(localVote, 'error-revert-local');
+    } else {
+      // If no local data, reload from API to get correct state
+      this.loadUserVoteStatus();
+    }
+  }
+
   onReply(): void {
+    // Show inline reply input
+    this.showReplyInput = true;
+    this.replyText = '';
+    
+    // Also emit the legacy event for parent components
     this.replyRequested.emit(this.comment.id);
+    
+    // Trigger change detection
+    this.cdr.detectChanges();
+  }
+
+  onSubmitReply(): void {
+    if (!this.replyText.trim() || this.isSubmittingReply) {
+      return;
+    }
+
+    // Validate categoryId exists
+    if (!this.comment.categoryId) {
+      console.error('❌ Cannot create reply: categoryId is null');
+      alert('Fehler: Kategorie-ID fehlt. Bitte laden Sie die Seite neu.');
+      return;
+    }
+
+    this.isSubmittingReply = true;
+
+    // Use the state service to add reply
+    this.evaluationStateService.addReply(
+      this.comment.submissionId,
+      this.comment.categoryId,
+      this.comment.id,
+      this.replyText.trim()
+    ).subscribe({
+      next: (reply) => {
+        console.log('✅ Reply created successfully:', reply);
+        this.onCancelReply(); // Clear the form
+        
+        // Note: The parent component should reload discussions to show the new reply
+        // This is handled by the state service cache invalidation
+      },
+      error: (error) => {
+        console.error('❌ Failed to create reply:', error);
+        this.isSubmittingReply = false;
+        this.cdr.detectChanges();
+        
+        // Could show a toast notification here
+        alert('Fehler beim Erstellen der Antwort. Bitte versuchen Sie es erneut.');
+      }
+    });
+  }
+
+  onCancelReply(): void {
+    this.showReplyInput = false;
+    this.replyText = '';
+    this.isSubmittingReply = false;
+    this.cdr.detectChanges();
   }
 
   onToggleContent(): void {
@@ -380,19 +667,12 @@ export class CommentItemComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Gets the user vote from the votes array
+   * 🚀 PHASE 3: Gets the user vote - now uses cached value for performance
    * @returns VoteType The user's vote type or null if no vote exists
    */
-  getUserVote(): VoteType {
-    if (!this.anonymousUser) return null;
-
-    // Fix: vote.userId is number, anonymousUser.id is number
-    // Ensure both are compared as numbers
-    const userVote = this.comment.votes.find(
-      (vote: any) => vote.userId === Number(this.anonymousUser!.id),
-    );
-
-    return userVote ? userVote.voteType : null;
+  getUserVote(): VoteType | null {
+    // Return cached value for immediate access
+    return this._cachedUserVote;
   }
 
   /**

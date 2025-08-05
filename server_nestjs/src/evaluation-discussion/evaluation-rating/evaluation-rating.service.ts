@@ -1,7 +1,16 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../../notification/notification.service';
-import { CreateEvaluationRatingDTO, UpdateEvaluationRatingDTO, EvaluationRatingDTO } from '@DTOs/index';
+import {
+  CreateEvaluationRatingDTO,
+  UpdateEvaluationRatingDTO,
+  EvaluationRatingDTO,
+} from '@DTOs/index';
 import { EvaluationCacheService } from '../shared/evaluation-cache.service';
 import { EvaluationUtilsService } from '../shared/evaluation-utils.service';
 
@@ -99,7 +108,11 @@ export class EvaluationRatingService {
     return this.mapToDTO(rating);
   }
 
-  async update(id: number, updateDto: UpdateEvaluationRatingDTO, userId: number): Promise<EvaluationRatingDTO> {
+  async update(
+    id: number,
+    updateDto: UpdateEvaluationRatingDTO,
+    userId: number,
+  ): Promise<EvaluationRatingDTO> {
     const existing = await this.prisma.evaluationRating.findUnique({
       where: { id },
       select: { userId: true },
@@ -156,41 +169,42 @@ export class EvaluationRatingService {
 
   async getSubmissionRatings(submissionId: string): Promise<EvaluationRatingDTO[]> {
     const cacheKey = this.utilsService.generateCacheKey('ratings', submissionId, 'all');
-    
-    return this.cacheService.getOrSet(cacheKey, async () => {
-      const ratings = await this.prisma.evaluationRating.findMany({
-        where: { submissionId },
-        include: {
-          submission: {
-            select: {
-              id: true,
-              title: true,
-              author: {
-                select: {
-                  id: true,
-                  firstname: true,
-                  lastname: true,
+
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const ratings = await this.prisma.evaluationRating.findMany({
+          where: { submissionId },
+          include: {
+            submission: {
+              select: {
+                id: true,
+                title: true,
+                author: {
+                  select: {
+                    id: true,
+                    firstname: true,
+                    lastname: true,
+                  },
                 },
               },
             },
-          },
-          category: true,
-          user: {
-            select: {
-              id: true,
-              firstname: true,
-              lastname: true,
+            category: true,
+            user: {
+              select: {
+                id: true,
+                firstname: true,
+                lastname: true,
+              },
             },
           },
-        },
-        orderBy: [
-          { category: { order: 'asc' } },
-          { createdAt: 'desc' },
-        ],
-      });
+          orderBy: [{ category: { order: 'asc' } }, { createdAt: 'desc' }],
+        });
 
-      return ratings.map(this.mapToDTO);
-    }, 300000); // 5 minutes cache
+        return ratings.map(this.mapToDTO);
+      },
+      300000,
+    ); // 5 minutes cache
   }
 
   async getCategoryRatings(categoryId: number): Promise<EvaluationRatingDTO[]> {
@@ -227,46 +241,52 @@ export class EvaluationRatingService {
 
   async getRatingSummary(submissionId: string) {
     const cacheKey = this.utilsService.generateCacheKey('ratings', submissionId, 'summary');
-    
-    return this.cacheService.getOrSet(cacheKey, async () => {
-      const ratings = await this.prisma.evaluationRating.findMany({
-        where: { submissionId },
-        include: {
-          category: true,
-        },
-      });
 
-      const summary = ratings.reduce((acc, rating) => {
-        const categoryId = rating.categoryId;
-        const categoryName = rating.category.name;
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const ratings = await this.prisma.evaluationRating.findMany({
+          where: { submissionId },
+          include: {
+            category: true,
+          },
+        });
 
-        if (!acc[categoryId]) {
-          acc[categoryId] = {
-            categoryId,
-            categoryName,
-            displayName: rating.category.displayName,
-            ratings: [],
-          };
-        }
+        const summary = ratings.reduce((acc, rating) => {
+          const categoryId = rating.categoryId;
+          const categoryName = rating.category.name;
 
-        acc[categoryId].ratings.push({ score: rating.rating });
+          if (!acc[categoryId]) {
+            acc[categoryId] = {
+              categoryId,
+              categoryName,
+              displayName: rating.category.displayName,
+              ratings: [],
+            };
+          }
 
-        return acc;
-      }, {});
+          acc[categoryId].ratings.push({ score: rating.rating });
 
-      // Calculate averages and distributions using utility service
-      Object.values(summary).forEach((cat: any) => {
-        cat.average = this.utilsService.calculateAverageRating(cat.ratings);
-        cat.distribution = this.utilsService.calculateScoreDistribution(cat.ratings);
-        cat.count = cat.ratings.length;
-      });
+          return acc;
+        }, {});
 
-      return {
-        totalRatings: ratings.length,
-        categorySummary: summary,
-        overallAverage: this.utilsService.calculateAverageRating(ratings.map(r => ({ score: r.rating }))),
-      };
-    }, 300000); // 5 minutes cache
+        // Calculate averages and distributions using utility service
+        Object.values(summary).forEach((cat: any) => {
+          cat.average = this.utilsService.calculateAverageRating(cat.ratings);
+          cat.distribution = this.utilsService.calculateScoreDistribution(cat.ratings);
+          cat.count = cat.ratings.length;
+        });
+
+        return {
+          totalRatings: ratings.length,
+          categorySummary: summary,
+          overallAverage: this.utilsService.calculateAverageRating(
+            ratings.map(r => ({ score: r.rating })),
+          ),
+        };
+      },
+      300000,
+    ); // 5 minutes cache
   }
 
   async getUserRatings(submissionId: string, userId: number) {
@@ -295,47 +315,56 @@ export class EvaluationRatingService {
   }
 
   async getCategoryStats(submissionId: string, categoryId: number) {
-    const cacheKey = this.utilsService.generateCacheKey('ratings', submissionId, 'category', categoryId.toString());
-    
-    return this.cacheService.getOrSet(cacheKey, async () => {
-      const ratings = await this.prisma.evaluationRating.findMany({
-        where: {
-          submissionId,
-          categoryId,
-        },
-        include: {
-          category: true,
-        },
-      });
+    const cacheKey = this.utilsService.generateCacheKey(
+      'ratings',
+      submissionId,
+      'category',
+      categoryId.toString(),
+    );
 
-      if (ratings.length === 0) {
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const ratings = await this.prisma.evaluationRating.findMany({
+          where: {
+            submissionId,
+            categoryId,
+          },
+          include: {
+            category: true,
+          },
+        });
+
+        if (ratings.length === 0) {
+          return {
+            categoryId,
+            categoryName: '',
+            count: 0,
+            average: 0,
+            distribution: Array(11).fill(0),
+          };
+        }
+
+        const ratingScores = ratings.map(r => ({ score: r.rating }));
+        const distribution = this.utilsService.calculateScoreDistribution(ratingScores);
+        const average = this.utilsService.calculateAverageRating(ratingScores);
+
         return {
           categoryId,
-          categoryName: '',
-          count: 0,
-          average: 0,
-          distribution: Array(11).fill(0),
+          categoryName: ratings[0].category.name,
+          displayName: ratings[0].category.displayName,
+          count: ratings.length,
+          average,
+          distribution,
+          ratings: ratings.map(rating => ({
+            score: rating.rating,
+            comment: rating.comment,
+            createdAt: rating.createdAt,
+          })),
         };
-      }
-
-      const ratingScores = ratings.map(r => ({ score: r.rating }));
-      const distribution = this.utilsService.calculateScoreDistribution(ratingScores);
-      const average = this.utilsService.calculateAverageRating(ratingScores);
-
-      return {
-        categoryId,
-        categoryName: ratings[0].category.name,
-        displayName: ratings[0].category.displayName,
-        count: ratings.length,
-        average,
-        distribution,
-        ratings: ratings.map(rating => ({
-          score: rating.rating,
-          comment: rating.comment,
-          createdAt: rating.createdAt,
-        })),
-      };
-    }, 300000); // 5 minutes cache
+      },
+      300000,
+    ); // 5 minutes cache
   }
 
   private validateRatingScore(score: number): void {
@@ -355,15 +384,17 @@ export class EvaluationRatingService {
       updatedAt: rating.updatedAt,
       submission: rating.submission,
       user: rating.user,
-      category: rating.category ? {
-        id: rating.category.id.toString(),
-        name: rating.category.name,
-        displayName: rating.category.displayName,
-        description: rating.category.description,
-        icon: rating.category.icon,
-        color: rating.category.color,
-        order: rating.category.order,
-      } : null,
+      category: rating.category
+        ? {
+            id: rating.category.id.toString(),
+            name: rating.category.name,
+            displayName: rating.category.displayName,
+            description: rating.category.description,
+            icon: rating.category.icon,
+            color: rating.category.color,
+            order: rating.category.order,
+          }
+        : null,
     };
   }
 }

@@ -11,12 +11,10 @@ import {
   DirectRhinoLaunchRequest,
   RhinoInstallation,
 } from './rhino-direct.service';
-import {
-  RhinoWindowManagerService,
-  RhinoFocusRequest,
-  RhinoFocusResponse,
-  WindowInfo,
-} from './rhino-window-manager.service';
+import { RhinoFocusResponse, WindowInfo } from './rhino-window-manager.service';
+import { RhinoWindowManagerService, RhinoFocusRequest } from './rhino-window-manager.service';
+import { UnifiedRhinoFocusResponseDTO } from '@DTOs/rhino-window.dto';
+import { NativeFocusRequestDTO } from '@DTOs/rhino-window.dto';
 
 @Controller('api/rhinodirect')
 export class RhinoDirectController {
@@ -180,6 +178,181 @@ export class RhinoDirectController {
         `Fenster-Status Abfrage fehlgeschlagen: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+
+  /**
+   * Fokussiert ein Rhino-Fenster mit unified approach (native + PowerShell fallback)
+   */
+  @Post('focus-window-unified')
+  async focusRhinoWindowUnified(
+    @Body() request: RhinoFocusRequest,
+  ): Promise<UnifiedRhinoFocusResponseDTO> {
+    try {
+      console.log('🎯 Unified Rhino window focus request received:', request);
+
+      const result = await this.rhinoWindowManagerService.focusRhinoWindowUnified(request);
+
+      console.log('✅ Unified Rhino window focus result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Unified Rhino window focus failed:', error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        success: false,
+        message: `Unified focus error: ${errorMessage}`,
+        implementation: 'error',
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
+  /**
+   * Fokussiert ein Rhino-Fenster nur mit der nativen Implementierung
+   */
+  @Post('focus-window-native')
+  async focusRhinoWindowNative(
+    @Body() request: NativeFocusRequestDTO,
+  ): Promise<UnifiedRhinoFocusResponseDTO> {
+    try {
+      console.log('🚀 Native Rhino window focus request received:', request);
+
+      const result = await this.rhinoWindowManagerService.focusRhinoWindowNative(
+        request.windowHandle,
+      );
+
+      console.log('✅ Native Rhino window focus result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Native Rhino window focus failed:', error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        success: false,
+        message: `Native focus error: ${errorMessage}`,
+        implementation: 'error',
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
+  /**
+   * Aktiviert/Deaktiviert die native Implementierung als Standard
+   */
+  @Post('set-native-default')
+  async setNativeAsDefault(@Body() request: { enabled: boolean }): Promise<{
+    success: boolean;
+    message: string;
+    nativeEnabled: boolean;
+    nativeAvailable: boolean;
+  }> {
+    try {
+      console.log('⚙️ Set native as default request received:', request);
+
+      this.rhinoWindowManagerService.setUseNativeByDefault(request.enabled);
+      const isAvailable = this.rhinoWindowManagerService.isNativeImplementationReady();
+
+      const result = {
+        success: true,
+        message: `Native implementation ${request.enabled ? 'enabled' : 'disabled'} as default`,
+        nativeEnabled: request.enabled,
+        nativeAvailable: isAvailable,
+      };
+
+      console.log('✅ Set native as default result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Set native as default failed:', error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        success: false,
+        message: `Configuration error: ${errorMessage}`,
+        nativeEnabled: false,
+        nativeAvailable: false,
+      };
+    }
+  }
+
+  /**
+   * Prüft den Status der nativen Implementierung
+   */
+  @Get('native-status')
+  async getNativeImplementationStatus(): Promise<{
+    available: boolean;
+    enabled: boolean;
+    message: string;
+    details?: {
+      koffiLoaded: boolean;
+      winApiInitialized: boolean;
+    };
+  }> {
+    try {
+      console.log('📊 Native implementation status request received');
+
+      const isAvailable = this.rhinoWindowManagerService.isNativeImplementationReady();
+
+      const result = {
+        available: isAvailable,
+        enabled: true, // This would need to be tracked in the service
+        message: isAvailable
+          ? 'Native implementation ready'
+          : 'Native implementation not available',
+        details: {
+          koffiLoaded: isAvailable,
+          winApiInitialized: isAvailable,
+        },
+      };
+
+      console.log('✅ Native implementation status result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Native implementation status failed:', error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        available: false,
+        enabled: false,
+        message: `Status check failed: ${errorMessage}`,
+      };
+    }
+  }
+
+  /**
+   * Debug-Endpunkt für Live-Diagnostik der Rhino-Erkennung
+   */
+  @Get('debug-rhino-detection')
+  async debugRhinoDetection(): Promise<any> {
+    try {
+      console.log('🔧 Debug Rhino detection request received');
+
+      const debugResult = await this.rhinoWindowManagerService.debugRhinoDetection();
+
+      console.log('✅ Debug Rhino detection completed:', debugResult.summary);
+      return debugResult;
+    } catch (error) {
+      console.error('❌ Debug Rhino detection failed:', error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        timestamp: new Date().toISOString(),
+        methods: {
+          native: { available: false, result: [], performanceMs: 0, error: errorMessage },
+          base64PowerShell: { available: false, result: [], performanceMs: 0, error: errorMessage },
+          simplifiedPowerShell: {
+            available: false,
+            result: [],
+            performanceMs: 0,
+            error: errorMessage,
+          },
+        },
+        summary: {
+          totalWindowsFound: 0,
+          recommendedMethod: 'none',
+          issueDiagnosis: [`Debug process failed: ${errorMessage}`],
+        },
+      };
     }
   }
 

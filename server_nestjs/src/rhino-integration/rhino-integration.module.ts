@@ -9,6 +9,6 @@ import { BatRhinoModule } from '../bat-rhino/bat-rhino.module';
   imports: [RhinoDirectModule, BatRhinoModule],
   controllers: [RhinoIntegrationController],
   providers: [RhinoIntegrationService, PrismaService],
-  exports: [RhinoIntegrationService]
+  exports: [RhinoIntegrationService],
 })
 export class RhinoIntegrationModule {}

@@ -29,9 +29,7 @@
       "Bash(ng generate component:*)",
       "Bash(ng generate service:*)",
       "Bash(ng generate:*)",
-      "Bash(npx prisma migrate:*)",
       "Bash(npx prisma generate:*)",
-      "Bash(npx prisma studio:*)",
       "Bash(npx @nestjs/cli generate module:*)",
       "Bash(nest generate:*)",
       "Bash(mkdir:*)",
@@ -40,7 +38,12 @@
       "Bash(powershell:*)",
       "Bash(node:*)",
       "Bash(curl:*)",
-      "Bash(npx prisma db execute:*)"
+      "Bash(npx prisma db execute:*)",
+      "Bash(cmd /c:*)",
+      "mcp__puppeteer__puppeteer_connect_active_tab",
+      "mcp__puppeteer__puppeteer_navigate",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "mcp__puppeteer__puppeteer_evaluate"
     ],
     "deny": []
   },

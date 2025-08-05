@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { contentElementType, PrismaClient } from '@prisma/client';
 import * as xlsx from 'xlsx';
-import type { McqGenerationDTO, questionType } from '@DTOs/question.dto';
+import { McqGenerationDTO, questionType } from '@DTOs/question.dto';
 
 const prisma = new PrismaClient();
 interface Option {

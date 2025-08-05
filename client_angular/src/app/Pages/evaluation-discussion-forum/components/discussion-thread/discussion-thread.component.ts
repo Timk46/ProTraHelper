@@ -55,7 +55,7 @@ import { CommentInputComponent } from '../comment-input/comment-input.component'
   styleUrl: './discussion-thread.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewInit, DoCheck {
+export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewInit {
   @ViewChild(CdkVirtualScrollViewport) viewport!: CdkVirtualScrollViewport;
 
   constructor(private cdr: ChangeDetectorRef) {}
@@ -82,6 +82,10 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
   @Output() commentVoted = new EventEmitter<{
     commentId: string;
     voteType: 'UP' | 'DOWN' | null;
+  }>();
+  @Output() replyRequested = new EventEmitter<{
+    parentCommentId: string;
+    parentComment: EvaluationCommentDTO;
   }>();
 
   // =============================================================================
@@ -247,6 +251,23 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
       return;
     }
     this.commentVoted.emit(data);
+  }
+
+  onReplyRequested(commentId: string): void {
+    // Find the comment in the flattened list
+    const commentItem = this.flattenedComments.find(item => 
+      item.type === 'comment' && item.comment?.id === commentId
+    );
+    
+    if (commentItem?.comment) {
+      console.log('🔄 Reply requested for comment:', commentId);
+      this.replyRequested.emit({
+        parentCommentId: commentId,
+        parentComment: commentItem.comment
+      });
+    } else {
+      console.warn('⚠️ Could not find comment for reply:', commentId);
+    }
   }
 
   onSortOrderChanged(newOrder: 'newest' | 'oldest' | 'mostVoted'): void {

@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/common/guards/roles.guard';
 import { roles } from '../../auth/common/guards/roles.guard';
 import { EvaluationCommentService } from './evaluation-comment.service';
-import type { EvaluationCommentDTO } from '@DTOs/index';
+import { EvaluationCommentDTO, UserVoteResponseDTO } from '@DTOs/index';
 import { CreateEvaluationCommentDTO, UpdateEvaluationCommentDTO } from '@DTOs/index';
 
 import { GetUser } from '../../auth/common/decorators/get-user.decorator';
@@ -60,9 +60,10 @@ export class EvaluationCommentController {
 
   @Get(':id/replies')
   @roles('ANY')
-  async getReplies(): Promise<EvaluationCommentDTO[]> {
-    // Replies not implemented in simplified model
-    return [];
+  async getReplies(@Param('id') parentId: string): Promise<EvaluationCommentDTO[]> {
+    // Get the parent comment with all its replies
+    const parentComment = await this.evaluationCommentService.findOne(parentId);
+    return parentComment.replies;
   }
 
   @Post(':id/vote')
@@ -79,5 +80,12 @@ export class EvaluationCommentController {
   @roles('ANY')
   async getVotes(@Param('id') id: string, @GetUser() user: User) {
     return this.evaluationCommentService.getVotes(id, user.id);
+  }
+
+  @Get(':id/user-vote')
+  @roles('ANY')
+  async getUserVote(@Param('id') id: string, @GetUser() user: User): Promise<UserVoteResponseDTO> {
+    const voteType = await this.evaluationCommentService.getUserVoteForComment(id, user.id);
+    return { voteType };
   }
 }

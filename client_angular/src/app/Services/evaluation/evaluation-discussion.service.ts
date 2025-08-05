@@ -18,7 +18,8 @@ import {
   EvaluationRatingDTO,
   RatingStatsDTO,
   PhaseSwitchRequestDTO,
-  PhaseSwitchResponseDTO
+  PhaseSwitchResponseDTO,
+  UserVoteResponseDTO
 } from '@DTOs/index';
 
 @Injectable({
@@ -111,6 +112,18 @@ export class EvaluationDiscussionService {
    */
   voteComment(commentId: string, voteType: VoteType): Observable<VoteResultDTO> {
     return this.http.post<VoteResultDTO>(`${this.apiUrls.comments}/${commentId}/vote`, { voteType });
+  }
+
+  /**
+   * Gets the current user's vote status for a specific comment
+   * @param commentId - The comment ID
+   * @returns Observable<VoteType | null> - The user's vote or null
+   */
+  getUserVoteForComment(commentId: string): Observable<VoteType | null> {
+    return this.http.get<UserVoteResponseDTO>(`${this.apiUrls.comments}/${commentId}/user-vote`)
+      .pipe(
+        map(response => response.voteType)
+      );
   }
 
   /**

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest, forkJoin, of } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, forkJoin, of, timer, retry } from 'rxjs';
 import {
   map,
   distinctUntilChanged,
@@ -25,6 +25,7 @@ import {
   EvaluationRatingDTO,
   RatingStatsDTO,
   VoteResultDTO,
+  VoteType,
 } from '@DTOs/index';
 
 import { EvaluationDiscussionService } from './evaluation-discussion.service';
@@ -444,12 +445,14 @@ export class EvaluationStateService {
    * @param submissionId - The submission ID
    * @param categoryId - The category ID
    * @param content - The comment content
+   * @param parentId - Optional parent comment ID for replies
    * @returns Observable<EvaluationCommentDTO> The created comment
    */
   addComment(
     submissionId: string,
     categoryId: number,
     content: string,
+    parentId?: string,
   ): Observable<EvaluationCommentDTO> {
     const anonymousUser = this.anonymousUserSubject.value;
 
@@ -470,6 +473,7 @@ export class EvaluationStateService {
       submissionId,
       categoryId: categoryId,
       content,
+      parentId, // Include parentId for reply functionality
     };
 
     console.log('✅ Anonymous user validated:', anonymousUser.displayName);
@@ -495,6 +499,23 @@ export class EvaluationStateService {
         console.log('🧹 Comment creation operation completed for category', categoryId);
       }),
     );
+  }
+
+  /**
+   * Adds a reply to an existing comment
+   * @param submissionId - The submission ID
+   * @param categoryId - The category ID
+   * @param parentCommentId - The parent comment ID
+   * @param content - The reply content
+   * @returns Observable<EvaluationCommentDTO> The created reply
+   */
+  addReply(
+    submissionId: string,
+    categoryId: number,
+    parentCommentId: string,
+    content: string,
+  ): Observable<EvaluationCommentDTO> {
+    return this.addComment(submissionId, categoryId, content, parentCommentId);
   }
 
   /**
@@ -573,8 +594,280 @@ export class EvaluationStateService {
   }
 
   // =============================================================================
+  // VOTE STATUS MANAGEMENT - ARCHITECTURE REFACTOR
+  // =============================================================================
+
+  // Comment-specific vote status cache
+  private commentVoteStatusCache = new Map<string, BehaviorSubject<VoteType | null>>();
+  private commentVoteLoadingCache = new Map<string, BehaviorSubject<boolean>>();
+
+  // =============================================================================
+  // VOTING MANAGEMENT & CACHE SYNCHRONIZATION - 🚀 PHASE 4
+  // =============================================================================
+
+  // 🚀 PHASE 4: Vote completion notifications for cache synchronization
+  private voteCompletionSubject = new BehaviorSubject<{commentId: string, voteResult: VoteType | null} | null>(null);
+  voteCompletion$ = this.voteCompletionSubject.asObservable();
+
+  private voteErrorSubject = new BehaviorSubject<{commentId: string} | null>(null);
+  voteError$ = this.voteErrorSubject.asObservable();
+
+  // =============================================================================
+  // VOTE STATUS MANAGEMENT - CENTRALIZED BUSINESS LOGIC
+  // =============================================================================
+
+  /**
+   * Gets the complete vote state for a comment including status and loading state
+   * This centralizes all vote management business logic previously in components
+   * 
+   * @param commentId - The comment ID
+   * @returns Observable with vote status and loading state
+   * @memberof EvaluationStateService
+   */
+  getCommentVoteState$(commentId: string): Observable<{
+    voteStatus: VoteType | null;
+    isLoading: boolean;
+  }> {
+    // Ensure cache subjects exist
+    this.ensureCommentVoteCache(commentId);
+    
+    const voteStatus$ = this.commentVoteStatusCache.get(commentId)!.asObservable();
+    const isLoading$ = this.commentVoteLoadingCache.get(commentId)!.asObservable();
+
+    return combineLatest([voteStatus$, isLoading$]).pipe(
+      map(([voteStatus, isLoading]) => ({ voteStatus, isLoading }))
+    );
+  }
+
+  /**
+   * Loads user vote status for a comment with fallback system
+   * First tries local comment data, then API call if needed
+   * 
+   * @param commentId - The comment ID
+   * @memberof EvaluationStateService
+   */
+  loadUserVoteStatusForComment(commentId: string): void {
+    // Ensure cache exists
+    this.ensureCommentVoteCache(commentId);
+    
+    const voteStatusSubject = this.commentVoteStatusCache.get(commentId)!;
+    const loadingSubject = this.commentVoteLoadingCache.get(commentId)!;
+
+    // First attempt: Try to get vote from local comment data
+    const localVote = this.getUserVoteFromLocalComment(commentId);
+    
+    if (localVote !== null) {
+      console.log('✅ User vote found in local data:', {
+        commentId,
+        localVote,
+      });
+      voteStatusSubject.next(localVote);
+      return;
+    }
+
+    // Second attempt: Load from API if not found locally
+    console.log('🔄 Loading user vote status from API for comment:', commentId);
+    loadingSubject.next(true);
+
+    this.getUserVoteStatus(commentId).pipe(
+      retry(2),
+      catchError((error: any) => {
+        console.error('❌ Failed to load user vote status after retries:', {
+          commentId,
+          error: error,
+          errorMessage: error?.message,
+          errorStatus: error?.status,
+          errorUrl: error?.url,
+          errorDetails: error?.error
+        });
+        loadingSubject.next(false);
+        return of(null);
+      }),
+      take(1)
+    ).subscribe((voteType: VoteType | null) => {
+      console.log('✅ User vote status loaded from API:', {
+        commentId,
+        voteType,
+      });
+      
+      loadingSubject.next(false);
+      voteStatusSubject.next(voteType);
+    });
+  }
+
+  /**
+   * Performs optimistic voting with proper state management
+   * 
+   * @param commentId - The comment ID
+   * @param voteType - The vote type ('UP' or 'DOWN')
+   * @param categoryId - The category ID for vote limits
+   * @returns Observable<VoteResultDTO> - Vote result
+   * @memberof EvaluationStateService
+   */
+  performOptimisticVote(
+    commentId: string, 
+    voteType: VoteType, 
+    categoryId: number
+  ): Observable<VoteResultDTO> {
+    // Ensure cache exists
+    this.ensureCommentVoteCache(commentId);
+    
+    const voteStatusSubject = this.commentVoteStatusCache.get(commentId)!;
+    const currentVote = voteStatusSubject.value;
+    const newVote = currentVote === voteType ? null : voteType; // Toggle logic
+    
+    console.log('🗳️ Vote initiated:', {
+      commentId,
+      currentVote,
+      voteType,
+      newVote,
+    });
+
+    // Optimistic update for immediate UI feedback
+    voteStatusSubject.next(newVote);
+
+    // Perform actual vote
+    return this.voteCommentWithLimits(commentId, voteType, categoryId).pipe(
+      tap(result => {
+        if (result) {
+          // Vote succeeded - emit completion event
+          this.voteCompletionSubject.next({
+            commentId,
+            voteResult: result.userVote,
+          });
+          // Update final vote status
+          voteStatusSubject.next(result.userVote);
+        }
+      }),
+      catchError(error => {
+        // Vote failed - revert optimistic update
+        console.log('❌ Vote failed, reverting optimistic update');
+        
+        // Reload vote status from local data first (faster fallback)
+        const localVote = this.getUserVoteFromLocalComment(commentId);
+        if (localVote !== null) {
+          voteStatusSubject.next(localVote);
+        } else {
+          // If no local data, reload from API
+          this.loadUserVoteStatusForComment(commentId);
+        }
+        
+        // Emit error event
+        this.voteErrorSubject.next({ commentId });
+        throw error;
+      })
+    );
+  }
+
+  /**
+   * Ensures vote cache subjects exist for a comment
+   * 
+   * @param commentId - The comment ID
+   * @memberof EvaluationStateService
+   */
+  private ensureCommentVoteCache(commentId: string): void {
+    if (!this.commentVoteStatusCache.has(commentId)) {
+      this.commentVoteStatusCache.set(commentId, new BehaviorSubject<VoteType | null>(null));
+    }
+    if (!this.commentVoteLoadingCache.has(commentId)) {
+      this.commentVoteLoadingCache.set(commentId, new BehaviorSubject<boolean>(false));
+    }
+  }
+
+  /**
+   * Gets user vote from local comment data (fallback system)
+   * This is the local fallback before API call
+   * 
+   * @param commentId - The comment ID
+   * @returns VoteType | null - The user's vote or null
+   * @memberof EvaluationStateService
+   */
+  private getUserVoteFromLocalComment(commentId: string): VoteType | null {
+    const anonymousUser = this.anonymousUserSubject.value;
+    if (!anonymousUser) {
+      return null;
+    }
+
+    // Search through all discussion caches to find the comment
+    for (const [categoryId, cacheSubject] of this.discussionCache.entries()) {
+      const discussions = cacheSubject.value;
+      for (const discussion of discussions) {
+        const comment = discussion.comments.find(c => c.id === commentId);
+        if (comment) {
+          const userVote = comment.votes.find(vote => vote.userId === anonymousUser.id);
+          return userVote ? userVote.voteType : null;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  // =============================================================================
   // VOTING MANAGEMENT
   // =============================================================================
+
+  /**
+   * Gets the current user's vote status for a specific comment
+   * @param commentId - The comment ID
+   * @returns Observable<VoteType> - The user's vote or null
+   */
+  getUserVoteStatus(commentId: string): Observable<VoteType | null> {
+    if (this.isMockModeActive) {
+      // Mock mode: Check local mock data
+      return this.getMockUserVoteStatus(commentId);
+    }
+
+    // Real mode: Call backend API
+    return this.evaluationService.getUserVoteForComment(commentId).pipe(
+      tap(voteType => {
+        console.log('🔍 User vote status loaded from API:', {
+          commentId,
+          voteType,
+        });
+      }),
+      catchError(error => {
+        console.error('❌ Failed to load user vote status:', error);
+        return of(null); // Return null if failed
+      }),
+    );
+  }
+
+  /**
+   * Gets user vote status from mock data
+   * @param commentId - The comment ID
+   * @returns Observable<VoteType> - The user's vote or null
+   */
+  private getMockUserVoteStatus(commentId: string): Observable<VoteType | null> {
+    const anonymousUser = this.anonymousUserSubject.value;
+    if (!anonymousUser) {
+      return of(null);
+    }
+
+    // Find the comment in mock data and check votes
+    const category1$ = this.discussionCache.get(1)?.asObservable() || of([]);
+    const category2$ = this.discussionCache.get(2)?.asObservable() || of([]);
+    const category3$ = this.discussionCache.get(3)?.asObservable() || of([]);
+    const category4$ = this.discussionCache.get(4)?.asObservable() || of([]);
+    
+    return combineLatest([
+      category1$,
+      category2$,
+      category3$,
+      category4$,
+    ]).pipe(
+      map(([disc1, disc2, disc3, disc4]) => {
+        const allComments = [...disc1, ...disc2, ...disc3, ...disc4]
+          .flatMap(discussion => discussion.comments);
+        
+        const comment = allComments.find(c => c.id === commentId);
+        if (!comment) return null;
+
+        const userVote = comment.votes.find(vote => vote.userId === anonymousUser.id);
+        return userVote ? userVote.voteType : null;
+      }),
+    );
+  }
 
   voteComment(commentId: string, voteType: 'UP' | 'DOWN' | null): Observable<VoteResultDTO> {
     return this.evaluationService.voteComment(commentId, voteType).pipe(
@@ -585,7 +878,19 @@ export class EvaluationStateService {
           userVote: result.userVote,
           netVotes: result.netVotes,
         });
+        
+        // 🚀 PHASE 4: Emit vote completion for cache synchronization
+        this.voteCompletionSubject.next({
+          commentId,
+          voteResult: result.userVote,
+        });
+        
         return result;
+      }),
+      catchError(error => {
+        // 🚀 PHASE 4: Emit vote error for cache synchronization
+        this.voteErrorSubject.next({ commentId });
+        throw error;
       }),
     );
   }
@@ -1014,7 +1319,18 @@ export class EvaluationStateService {
               userVote: result.userVote,
               netVotes: result.netVotes,
             });
+
+            // 🚀 PHASE 4: Emit vote completion for cache synchronization
+            this.voteCompletionSubject.next({
+              commentId,
+              voteResult: result.userVote,
+            });
           }
+        }),
+        catchError(error => {
+          // 🚀 PHASE 4: Emit vote error for cache synchronization
+          this.voteErrorSubject.next({ commentId });
+          throw error;
         }),
       );
     }
@@ -1044,7 +1360,18 @@ export class EvaluationStateService {
           netVotes: result.netVotes,
         });
 
+        // 🚀 PHASE 4: Emit vote completion for cache synchronization
+        this.voteCompletionSubject.next({
+          commentId,
+          voteResult: result.userVote,
+        });
+
         return result;
+      }),
+      catchError(error => {
+        // 🚀 PHASE 4: Emit vote error for cache synchronization
+        this.voteErrorSubject.next({ commentId });
+        throw error;
       }),
     );
   }

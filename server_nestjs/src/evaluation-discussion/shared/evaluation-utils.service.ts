@@ -2,11 +2,10 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class EvaluationUtilsService {
-  
   /**
    * Calculate vote statistics for comments
    */
-  calculateVoteStats(votes: Array<{ isUpvote: boolean; userId: number }>): {
+  calculateVoteStats(votes: { isUpvote: boolean; userId: number }[]): {
     upVotes: number;
     downVotes: number;
     totalVotes: number;
@@ -29,9 +28,12 @@ export class EvaluationUtilsService {
    * Calculate vote statistics for multiple comments at once
    */
   calculateBatchVoteStats(
-    commentVotes: Array<{ messageId: number; votes: Array<{ isUpvote: boolean; userId: number }> }>
+    commentVotes: { messageId: number; votes: { isUpvote: boolean; userId: number }[] }[],
   ): Record<number, { upVotes: number; downVotes: number; totalVotes: number; score: number }> {
-    const result: Record<number, { upVotes: number; downVotes: number; totalVotes: number; score: number }> = {};
+    const result: Record<
+      number,
+      { upVotes: number; downVotes: number; totalVotes: number; score: number }
+    > = {};
 
     for (const { messageId, votes } of commentVotes) {
       result[messageId] = this.calculateVoteStats(votes);
@@ -45,8 +47,16 @@ export class EvaluationUtilsService {
    */
   generateAnonymousDisplayName(): string {
     const anonymousNames = [
-      'Teilnehmer', 'Bewerter', 'Diskutant', 'Reviewer', 'Kommentator',
-      'Analyst', 'Kritiker', 'Prüfer', 'Evaluator', 'Gutachter'
+      'Teilnehmer',
+      'Bewerter',
+      'Diskutant',
+      'Reviewer',
+      'Kommentator',
+      'Analyst',
+      'Kritiker',
+      'Prüfer',
+      'Evaluator',
+      'Gutachter',
     ];
 
     const randomName = anonymousNames[Math.floor(Math.random() * anonymousNames.length)];
@@ -60,8 +70,16 @@ export class EvaluationUtilsService {
    */
   generateColorCode(userId: number): string {
     const colors = [
-      '#2196F3', '#4CAF50', '#FF9800', '#9C27B0', '#F44336',
-      '#3F51B5', '#009688', '#FF5722', '#607D8B', '#795548'
+      '#2196F3',
+      '#4CAF50',
+      '#FF9800',
+      '#9C27B0',
+      '#F44336',
+      '#3F51B5',
+      '#009688',
+      '#FF5722',
+      '#607D8B',
+      '#795548',
     ];
 
     // Use user ID to generate consistent color
@@ -72,7 +90,7 @@ export class EvaluationUtilsService {
   /**
    * Calculate rating score distribution
    */
-  calculateScoreDistribution(ratings: Array<{ score: number }>): Array<{ score: number; count: number }> {
+  calculateScoreDistribution(ratings: { score: number }[]): { score: number; count: number }[] {
     const distribution: Record<number, number> = {};
 
     // Initialize distribution for scores 0-10
@@ -97,7 +115,7 @@ export class EvaluationUtilsService {
   /**
    * Calculate average rating
    */
-  calculateAverageRating(ratings: Array<{ score: number }>): number {
+  calculateAverageRating(ratings: { score: number }[]): number {
     if (ratings.length === 0) return 0;
 
     const total = ratings.reduce((sum, rating) => sum + rating.score, 0);
@@ -111,7 +129,7 @@ export class EvaluationUtilsService {
     // Check if it's a valid UUID or numeric ID
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const numericRegex = /^\d+$/;
-    
+
     return uuidRegex.test(id) || numericRegex.test(id);
   }
 
@@ -133,7 +151,7 @@ export class EvaluationUtilsService {
   /**
    * Calculate comment reply tree depth
    */
-  calculateReplyDepth(comments: Array<{ id: string; parentId?: string }>): Record<string, number> {
+  calculateReplyDepth(comments: { id: string; parentId?: string }[]): Record<string, number> {
     const depths: Record<string, number> = {};
     const visited = new Set<string>();
 
@@ -166,7 +184,7 @@ export class EvaluationUtilsService {
    */
   canPerformAction(
     action: 'comment' | 'rate' | 'vote',
-    currentPhase: 'DISCUSSION' | 'EVALUATION'
+    currentPhase: 'DISCUSSION' | 'EVALUATION',
   ): boolean {
     switch (action) {
       case 'comment':

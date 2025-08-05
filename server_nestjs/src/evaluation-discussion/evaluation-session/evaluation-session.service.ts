@@ -1,7 +1,12 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../../notification/notification.service';
-import { CreateEvaluationSessionDTO, UpdateEvaluationSessionDTO, EvaluationSessionDTO, EvaluationCategoryDTO } from '@DTOs/index';
+import {
+  CreateEvaluationSessionDTO,
+  UpdateEvaluationSessionDTO,
+  EvaluationSessionDTO,
+  EvaluationCategoryDTO,
+} from '@DTOs/index';
 import { EvaluationPhase } from '@prisma/client';
 
 @Injectable()
@@ -95,7 +100,10 @@ export class EvaluationSessionService {
     return this.mapToDTO(session);
   }
 
-  async create(createDto: CreateEvaluationSessionDTO, userId: number): Promise<EvaluationSessionDTO> {
+  async create(
+    createDto: CreateEvaluationSessionDTO,
+    userId: number,
+  ): Promise<EvaluationSessionDTO> {
     const session = await this.prisma.evaluationSession.create({
       data: {
         title: createDto.title,
@@ -199,11 +207,11 @@ export class EvaluationSessionService {
 
   /**
    * Get all categories for a specific evaluation session
-   * 
+   *
    * @description Retrieves all evaluation categories associated with a session,
    * ordered by their display order. Categories are used to organize discussions
    * and ratings into thematic groups.
-   * 
+   *
    * @param sessionId - The ID of the evaluation session
    * @returns Promise resolving to an array of evaluation categories
    * @throws NotFoundException if the session does not exist

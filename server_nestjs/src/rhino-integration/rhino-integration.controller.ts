@@ -6,12 +6,12 @@ import {
   UseGuards,
   ParseIntPipe,
   HttpStatus,
-  HttpCode
+  HttpCode,
 } from '@nestjs/common';
 // Swagger-Import entfernt
 import { JwtAuthGuard } from '../auth/common/guards/jwt-auth.guard';
 import { RhinoIntegrationService } from './rhino-integration.service';
-import type { RhinoExecutionResultDTO } from '@DTOs/mcslider.dto';
+import { RhinoExecutionResultDTO } from '@DTOs/mcslider.dto';
 
 // Swagger-Dekoratoren entfernt
 @Controller('rhino')
@@ -21,7 +21,7 @@ export class RhinoIntegrationController {
 
   @Post('execute/:questionId')
   async executeForQuestion(
-    @Param('questionId', ParseIntPipe) questionId: number
+    @Param('questionId', ParseIntPipe) questionId: number,
   ): Promise<RhinoExecutionResultDTO> {
     return this.rhinoIntegrationService.executeRhinoForQuestion(questionId);
   }

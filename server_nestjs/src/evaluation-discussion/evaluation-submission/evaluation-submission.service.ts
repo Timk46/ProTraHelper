@@ -2,15 +2,16 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../../notification/notification.service';
 import { FilesService } from '../../files/files.service';
-import type {
+import {
   CreateEvaluationSubmissionDTO,
   UpdateEvaluationSubmissionDTO,
   EvaluationSubmissionDTO,
   CommentStatsDTO,
   CategoryStatsDTO,
   EvaluationSessionDTO,
+  EvaluationPhase,
 } from '@DTOs/index';
-import { EvaluationPhase, EvaluationStatus } from '@DTOs/index';
+import { EvaluationStatus } from '@DTOs/index';
 import { globalRole } from '@DTOs/index';
 import { createReadStream } from 'fs';
 import { join } from 'path';
@@ -23,7 +24,11 @@ export class EvaluationSubmissionService {
     private readonly filesService: FilesService,
   ) {}
 
-  async findAll(sessionId?: number, page?: number, limit?: number): Promise<EvaluationSubmissionDTO[]> {
+  async findAll(
+    sessionId?: number,
+    page?: number,
+    limit?: number,
+  ): Promise<EvaluationSubmissionDTO[]> {
     const skip = page && limit ? (page - 1) * limit : undefined;
     const take = limit || undefined;
 
@@ -96,10 +101,10 @@ export class EvaluationSubmissionService {
 
   async findAllPaginated(
     sessionId?: number,
-    page: number = 1,
-    limit: number = 20,
-    orderBy: string = 'createdAt',
-    orderDirection: 'asc' | 'desc' = 'desc'
+    page = 1,
+    limit = 20,
+    orderBy = 'createdAt',
+    orderDirection: 'asc' | 'desc' = 'desc',
   ): Promise<{
     submissions: EvaluationSubmissionDTO[];
     total: number;
@@ -187,16 +192,11 @@ export class EvaluationSubmissionService {
             },
           },
         },
+        // Removed discussions.messages include - using EvaluationComment system now
         discussions: {
           include: {
             author: true,
-            messages: {
-              include: {
-                author: true,
-                votes: true,
-              },
-              orderBy: { createdAt: 'asc' },
-            },
+            evaluationCategory: true,
           },
         },
         ratings: {
@@ -387,13 +387,6 @@ export class EvaluationSubmissionService {
       },
       include: {
         author: true,
-        messages: {
-          include: {
-            author: true,
-            votes: true,
-          },
-          orderBy: { createdAt: 'asc' },
-        },
         evaluationCategory: true,
       },
       orderBy: { createdAt: 'desc' },
@@ -415,11 +408,7 @@ export class EvaluationSubmissionService {
         discussions: {
           select: {
             evaluationCategoryId: true,
-            _count: {
-              select: {
-                messages: true,
-              },
-            },
+            id: true,
           },
         },
         ratings: {
@@ -443,7 +432,7 @@ export class EvaluationSubmissionService {
         if (!acc[categoryId]) {
           acc[categoryId] = 0;
         }
-        acc[categoryId] += discussion._count.messages;
+        acc[categoryId] += 1; // Count discussions instead of messages
         return acc;
       }, {}),
       ratingsByCategory: stats.ratings.reduce((acc, rating) => {
@@ -464,7 +453,7 @@ export class EvaluationSubmissionService {
     if (process.env.NODE_ENV !== 'production') {
       console.log('🔍 getAnonymousUser called:', { submissionId, userId });
     }
-    
+
     // For evaluation system, anonymous users are per-user, not per-submission
     // Find existing anonymous user for this userId
     let anonymousUser = await this.prisma.anonymousUser.findFirst({
@@ -547,12 +536,13 @@ export class EvaluationSubmissionService {
     });
 
     const discussionCountsMap = new Map(
-      discussionCounts.map(count => [count.evaluationCategoryId, count._count.id])
+      discussionCounts.map(count => [count.evaluationCategoryId, count._count.id]),
     );
 
     // Default limits per category (could be configurable)
     const DEFAULT_COMMENTS_PER_CATEGORY = 3;
-    const DEFAULT_TOTAL_COMMENTS = submission.session.categories.length * DEFAULT_COMMENTS_PER_CATEGORY;
+    const DEFAULT_TOTAL_COMMENTS =
+      submission.session.categories.length * DEFAULT_COMMENTS_PER_CATEGORY;
 
     let totalAvailable = 0;
     let totalUsed = 0;
@@ -594,9 +584,12 @@ export class EvaluationSubmissionService {
     });
 
     const overallProgress = totalAvailable > 0 ? (totalUsed / totalAvailable) * 100 : 0;
-    const averageUsage = categories.length > 0
-      ? categories.reduce((sum, cat) => sum + (cat.usedComments / cat.availableComments), 0) / categories.length * 100
-      : 0;
+    const averageUsage =
+      categories.length > 0
+        ? (categories.reduce((sum, cat) => sum + cat.usedComments / cat.availableComments, 0) /
+            categories.length) *
+          100
+        : 0;
 
     return {
       submissionId,
@@ -628,7 +621,10 @@ export class EvaluationSubmissionService {
    * @throws NotFoundException if the submission does not exist
    * @throws ForbiddenException if user lacks permission
    */
-  async switchPhase(submissionId: string, phase: 'DISCUSSION' | 'EVALUATION'): Promise<EvaluationSessionDTO> {
+  async switchPhase(
+    submissionId: string,
+    phase: 'DISCUSSION' | 'EVALUATION',
+  ): Promise<EvaluationSessionDTO> {
     // First get the submission to find the associated session
     const submission = await this.prisma.evaluationSubmission.findUnique({
       where: { id: submissionId },
@@ -717,18 +713,22 @@ export class EvaluationSubmissionService {
       createdAt: updatedSession.createdAt,
       updatedAt: updatedSession.updatedAt,
       module: updatedSession.module,
-      createdBy: updatedSession.createdBy ? {
-        ...updatedSession.createdBy,
-        globalRole: updatedSession.createdBy.globalRole as globalRole, // Cast Prisma enum to DTO enum
-      } : undefined,
-      submissions: updatedSession.submissions?.map(sub => ({
+      createdBy: updatedSession.createdBy
+        ? {
+            ...updatedSession.createdBy,
+            globalRole: updatedSession.createdBy.globalRole as globalRole, // Cast Prisma enum to DTO enum
+          }
+        : undefined,
+      submissions: updatedSession.submissions.map(sub => ({
         ...sub,
         phase: updatedSession.phase as EvaluationPhase, // Use session phase for submissions
         status: sub.status as EvaluationStatus, // Cast Prisma enum to DTO enum
-        author: sub.author ? {
-          ...sub.author,
-          globalRole: sub.author.globalRole as globalRole, // Cast Prisma enum to DTO enum
-        } : undefined,
+        author: sub.author
+          ? {
+              ...sub.author,
+              globalRole: sub.author.globalRole as globalRole, // Cast Prisma enum to DTO enum
+            }
+          : undefined,
       })),
       categories: updatedSession.categories,
       _count: updatedSession._count,
@@ -736,10 +736,10 @@ export class EvaluationSubmissionService {
   }
 
   private async createAnonymousUser(submissionId: string, userId: number) {
-    // Generate consistent anonymous name based on userId for deterministic results  
+    // Generate consistent anonymous name based on userId for deterministic results
     const anonymousNames = [
       'Teilnehmer',
-      'Bewerter', 
+      'Bewerter',
       'Diskutant',
       'Reviewer',
       'Kommentator',
@@ -753,10 +753,10 @@ export class EvaluationSubmissionService {
     // Use userId for deterministic name selection (not random)
     const nameIndex = userId % anonymousNames.length;
     const selectedName = anonymousNames[nameIndex];
-    
+
     // Generate deterministic suffix based on userId
     const suffix = (userId * 7) % 100; // Simple deterministic hash
-    
+
     if (process.env.NODE_ENV !== 'production') {
       console.log('🆕 Creating anonymous user:', { userId, selectedName, suffix });
     }
@@ -772,20 +772,23 @@ export class EvaluationSubmissionService {
     } catch (error) {
       // If creation fails (likely due to concurrent creation), try to find existing user
       if (process.env.NODE_ENV !== 'production') {
-        console.log('⚠️ Anonymous user creation failed, trying to find existing:', { userId, error: error.message });
+        console.log('⚠️ Anonymous user creation failed, trying to find existing:', {
+          userId,
+          error: error.message,
+        });
       }
-      
+
       const existingUser = await this.prisma.anonymousUser.findFirst({
         where: { userId },
       });
-      
+
       if (existingUser) {
         if (process.env.NODE_ENV !== 'production') {
           console.log('✅ Found existing anonymous user:', existingUser);
         }
         return existingUser;
       }
-      
+
       // If still no user found, re-throw the original error
       throw error;
     }
@@ -837,7 +840,7 @@ export class EvaluationSubmissionService {
       pdfMetadata: submission.pdfFile
         ? {
             pageCount: 0, // Default value since we don't store this in the File model
-            fileSize: 0,  // Default value since we don't store this in the File model
+            fileSize: 0, // Default value since we don't store this in the File model
             downloadUrl: `/api/evaluation-submissions/${submission.id}/pdf`,
           }
         : undefined,

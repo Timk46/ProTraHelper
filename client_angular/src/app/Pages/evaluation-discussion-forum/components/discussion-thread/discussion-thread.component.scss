@@ -180,19 +180,63 @@
 .comment-item-container {
   padding: 4px 16px;
   transition: margin-left 0.2s ease;
+  position: relative;
 
-  // Threading visual indicators
+  // Enhanced threading visual indicators for replies
   &[style*="margin-left"] {
-    position: relative;
-
+    // Reply threading line
     &::before {
       content: '';
       position: absolute;
-      left: -8px;
+      left: -12px;
       top: 0;
-      bottom: 0;
+      bottom: 50%;
       width: 2px;
-      background: linear-gradient(to bottom, #e0e0e0 0%, transparent 100%);
+      background: linear-gradient(to bottom, #1976d2 0%, #64b5f6 100%);
+      border-radius: 1px;
+    }
+
+    // Reply connection corner
+    &::after {
+      content: '';
+      position: absolute;
+      left: -12px;
+      top: 50%;
+      width: 20px;
+      height: 2px;
+      background: #1976d2;
+      border-radius: 1px;
+    }
+
+    // Visual depth indicators
+    &[style*="margin-left: 40px"] {
+      &::before { background: linear-gradient(to bottom, #2e7d32 0%, #81c784 100%); }
+      &::after { background: #2e7d32; }
+    }
+
+    &[style*="margin-left: 80px"] {
+      &::before { background: linear-gradient(to bottom, #f57c00 0%, #ffb74d 100%); }
+      &::after { background: #f57c00; }
+    }
+
+    &[style*="margin-left: 120px"] {
+      &::before { background: linear-gradient(to bottom, #7b1fa2 0%, #ba68c8 100%); }
+      &::after { background: #7b1fa2; }
+    }
+
+    &[style*="margin-left: 160px"] {
+      &::before { background: linear-gradient(to bottom, #d32f2f 0%, #e57373 100%); }
+      &::after { background: #d32f2f; }
+    }
+  }
+
+  // Hover effect for better interactivity
+  &:hover {
+    &[style*="margin-left"] {
+      &::before, &::after {
+        opacity: 0.8;
+        transform: scale(1.1);
+      }
     }
   }
 }
@@ -467,6 +511,30 @@
   .comment-input-container {
     padding-left: 16px;
     padding-right: 16px;
+  }
+
+  // Mobile-optimized threading visualization
+  .comment-item-container {
+    &[style*="margin-left"] {
+      // Reduce indentation on mobile
+      &[style*="margin-left: 20px"] { margin-left: 12px !important; }
+      &[style*="margin-left: 40px"] { margin-left: 20px !important; }
+      &[style*="margin-left: 60px"] { margin-left: 28px !important; }
+      &[style*="margin-left: 80px"] { margin-left: 36px !important; }
+      &[style*="margin-left: 100px"] { margin-left: 44px !important; }
+
+      // Adjust threading indicators for mobile
+      &::before {
+        left: -8px;
+        width: 1px;
+      }
+
+      &::after {
+        left: -8px;
+        width: 12px;
+        height: 1px;
+      }
+    }
   }
 }
 

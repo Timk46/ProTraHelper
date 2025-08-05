@@ -16,7 +16,7 @@ import {
 // Swagger-Import entfernt
 import { JwtAuthGuard } from '../auth/common/guards/jwt-auth.guard';
 import { MCSliderService } from './mcslider.service';
-import type {
+import {
   MCSliderQuestionResponseDTO,
   MCSliderSubmissionResultDTO,
   RhinoExecutionResultDTO,

@@ -1077,6 +1077,9 @@ model EvaluationComment {
   userId       Int
   content      String              @db.Text
   
+  // Reply functionality - hierarchical comments
+  parentId     String?
+  
   // Simplified voting system - store counts directly
   upvotes      Int                @default(0)
   downvotes    Int                @default(0)
@@ -1094,6 +1097,10 @@ model EvaluationComment {
   submission   EvaluationSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   category     EvaluationCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   user         User                 @relation(fields: [userId], references: [id])
+  
+  // Self-referential relations for reply hierarchy
+  parent       EvaluationComment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      EvaluationComment[]  @relation("CommentReplies")
   
   @@map("evaluation_comments")
 }

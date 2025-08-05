@@ -8,7 +8,7 @@ interface CacheItem<T> {
 
 @Injectable()
 export class EvaluationCacheService {
-  private cache = new Map<string, CacheItem<any>>();
+  private readonly cache = new Map<string, CacheItem<any>>();
   private readonly DEFAULT_TTL = 300000; // 5 minutes in milliseconds
 
   /**
@@ -59,7 +59,7 @@ export class EvaluationCacheService {
   async getOrSet<T>(
     key: string,
     factory: () => Promise<T>,
-    ttl: number = this.DEFAULT_TTL
+    ttl: number = this.DEFAULT_TTL,
   ): Promise<T> {
     const cached = this.get<T>(key);
     if (cached !== null) {
@@ -93,7 +93,7 @@ export class EvaluationCacheService {
   } {
     const size = this.cache.size;
     const memoryUsage = JSON.stringify(Array.from(this.cache.entries())).length;
-    
+
     return {
       size,
       hitRate: 0, // Would need to track hits/misses for actual calculation

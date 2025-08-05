@@ -8,6 +8,6 @@ import { RhinoIntegrationModule } from '../rhino-integration/rhino-integration.m
   imports: [RhinoIntegrationModule],
   controllers: [MCSliderController],
   providers: [MCSliderService, PrismaService],
-  exports: [MCSliderService]
+  exports: [MCSliderService],
 })
 export class MCSliderModule {}

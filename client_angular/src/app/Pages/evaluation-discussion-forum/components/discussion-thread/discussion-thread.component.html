@@ -67,7 +67,9 @@
               [availableDownvotes]="availableDownvotes"
               [isVoting]="isCommentBeingVoted(item.comment!.id)"
               [depth]="item.depth"
-              (voted)="onCommentVoted($event)">
+              [isReadOnly]="isReadOnly"
+              (voted)="onCommentVoted($event)"
+              (replyRequested)="onReplyRequested($event)">
             </app-comment-item>
 
           </div>

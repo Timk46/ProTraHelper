@@ -45,6 +45,89 @@ Review **every** Pull Request or code change against this checklist. Give approv
 - [ ] **Frontend Observables**: End with `$` suffix (e.g., `users$`, `contentList$`)
 - [ ] **Files**: Follow patterns (`.component.ts`, `.service.ts`, `.dto.ts`)
 
+### **🔷 TYPESCRIPT EXCELLENCE**
+- [ ] **Type Definitions**: Correct usage of `interface` vs `type` vs `class`
+  - **If WRONG → BLOCK CHANGE**: Interfaces for object shapes, types for unions/intersections, classes only for instances/decorators
+  ```typescript
+  // ✅ CORRECT
+  interface UserData { id: number; name: string; }  // Object shape
+  type Status = 'pending' | 'approved' | 'rejected'; // Union type
+  class UserDTO { @IsNotEmpty() name: string; }     // For decorators
+  
+  // ❌ BLOCK - Wrong usage
+  type UserData = { id: number; name: string; };    // Should be interface
+  interface Status extends 'pending' {}             // Should be type
+  ```
+- [ ] **unknown vs any**: Is `unknown` used instead of `any` where possible?
+  - **If `any` without justification → BLOCK CHANGE**: Use `unknown` and type guards
+  ```typescript
+  // ✅ CORRECT
+  function processData(data: unknown) {
+    if (typeof data === 'object' && data && 'name' in data) {
+      return (data as { name: string }).name;
+    }
+  }
+  
+  // ❌ BLOCK - Unnecessary any
+  function processData(data: any) { return data.name; }
+  ```
+- [ ] **Explicit Return Types**: All functions have explicit return types?
+  - **If implicit return type → BLOCK CHANGE**: Functions must specify return types
+  ```typescript
+  // ✅ CORRECT
+  async function getUser(id: number): Promise<UserDTO> { ... }
+  
+  // ❌ BLOCK - Missing return type
+  async function getUser(id: number) { ... }
+  ```
+- [ ] **Generics Usage**: Reusable code uses generics instead of any?
+  - **If generic could replace any → BLOCK CHANGE**: Use generics for type safety
+  ```typescript
+  // ✅ CORRECT
+  function processResponse<T>(data: T): Observable<T> { ... }
+  
+  // ❌ BLOCK - Should use generic
+  function processResponse(data: any): Observable<any> { ... }
+  ```
+- [ ] **Strict Mode Compliance**: Code compiles with strict TypeScript settings?
+  - **If strict mode violations → BLOCK CHANGE**: Must compile with strict: true
+
+### **📁 CODE ORGANIZATION**
+- [ ] **Path Aliases**: Imports use configured aliases instead of relative paths?
+  - **If using ../../../ → BLOCK CHANGE**: Use @DTOs, @services, @components aliases
+  ```typescript
+  // ✅ CORRECT
+  import { UserDTO } from '@DTOs/index';
+  import { AuthService } from '@services/auth.service';
+  
+  // ❌ BLOCK - Relative paths
+  import { UserDTO } from '../../../shared/dtos/user.dto';
+  ```
+- [ ] **Barrel Files**: Modules export through index.ts files?
+  - **If missing index.ts → WARNING**: Create barrel files for cleaner imports
+- [ ] **Module Structure**: Features properly encapsulated in modules?
+  - **If cross-cutting concerns mixed → BLOCK CHANGE**: Maintain clear module boundaries
+- [ ] **Circular Dependencies**: No circular imports between modules?
+  - **If circular dependency → BLOCK CHANGE**: Refactor to eliminate cycles
+
+### **⚙️ TYPESCRIPT CONFIGURATION**
+- [ ] **tsconfig.json**: Strict mode enabled with proper options?
+  ```json
+  // ✅ REQUIRED SETTINGS
+  {
+    "compilerOptions": {
+      "strict": true,
+      "noImplicitAny": true,
+      "strictNullChecks": true,
+      "noImplicitReturns": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true
+    }
+  }
+  ```
+- [ ] **Path Mappings**: Aliases properly configured in tsconfig paths?
+- [ ] **Target/Module**: Appropriate settings for Angular/NestJS versions?
+
 ### **🔒 Security Validation**
 - [ ] **No Hardcoded Secrets**: No API keys, passwords, or tokens in code
 - [ ] **Input Sanitization**: User inputs properly validated and sanitized
@@ -79,9 +162,114 @@ Review **every** Pull Request or code change against this checklist. Give approv
 - [ ] **UI Consistency**: Follows established Material Design patterns?
 
 ### **⚡ PERFORMANCE CONSIDERATIONS**
-- [ ] **Change Detection**: Performance-critical components use `OnPush` strategy?
+- [ ] **Change Detection Strategy**: Performance-critical components use `OnPush` strategy?
+  - **If heavy computation without OnPush → BLOCK CHANGE**: Components with complex calculations must use OnPush
+  ```typescript
+  // ✅ CORRECT
+  @Component({
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    // ... component config
+  })
+  export class HeavyComponent { ... }
+  
+  // ❌ BLOCK - Missing OnPush for performance-critical component
+  @Component({ ... })
+  export class HeavyComponent { /* complex calculations */ }
+  ```
 - [ ] **TrackBy Functions**: `*ngFor` loops include `trackBy` functions for large lists?
+  - **If large list without trackBy → BLOCK CHANGE**: Lists with >20 items need trackBy
+  ```typescript
+  // ✅ CORRECT
+  trackByUserId(index: number, user: UserDTO): number {
+    return user.id;
+  }
+  
+  // In template: *ngFor="let user of users; trackBy: trackByUserId"
+  
+  // ❌ BLOCK - Missing trackBy for large list
+  // *ngFor="let user of users" // 100+ users without trackBy
+  ```
 - [ ] **Bundle Optimization**: No unnecessary imports that bloat bundle size?
+- [ ] **Lazy Loading**: Feature modules properly lazy loaded?
+  - **If large feature not lazy loaded → WARNING**: Consider lazy loading for better performance
+
+### **🔄 ADVANCED RXJS & STATE MANAGEMENT**
+- [ ] **Memory Management**: Manual subscriptions use proper cleanup patterns?
+  - **If manual subscription without cleanup → BLOCK CHANGE**: Memory leak prevention mandatory
+  ```typescript
+  // ✅ CORRECT - takeUntil pattern
+  private destroy$ = new Subject<void>();
+  
+  ngOnInit() {
+    this.service.getData()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(data => { ... });
+  }
+  
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+  
+  // ❌ BLOCK - Memory leak potential
+  ngOnInit() {
+    this.service.getData().subscribe(data => { ... }); // No cleanup
+  }
+  ```
+- [ ] **State Management**: BehaviorSubjects used correctly for shared state?
+  - **If global state without BehaviorSubject → WARNING**: Consider proper state management
+  ```typescript
+  // ✅ CORRECT
+  private currentUserSubject = new BehaviorSubject<UserDTO | null>(null);
+  public currentUser$ = this.currentUserSubject.asObservable();
+  
+  setCurrentUser(user: UserDTO | null): void {
+    this.currentUserSubject.next(user);
+  }
+  
+  // ❌ PATTERN VIOLATION - Regular Subject loses current value
+  private currentUserSubject = new Subject<UserDTO>();
+  ```
+- [ ] **Async Pipe Preference**: Templates use `async` pipe over manual subscriptions?
+  - **If manual subscription in component → WARNING**: Prefer async pipe for automatic cleanup
+  ```html
+  <!-- ✅ CORRECT -->
+  <div *ngIf="user$ | async as user">Hello, {{ user.firstname }}</div>
+  
+  <!-- ❌ NOT PREFERRED - Manual subscription -->
+  <div *ngIf="user">Hello, {{ user.firstname }}</div>
+  ```
+
+### **📝 FORMS & INPUT HANDLING**
+- [ ] **Reactive Forms**: Complex forms use Reactive Forms pattern?
+  - **If template-driven for complex form → BLOCK CHANGE**: Use FormBuilder for forms with >3 fields
+  ```typescript
+  // ✅ CORRECT
+  userForm = this.fb.group({
+    firstname: ['', [Validators.required, Validators.minLength(2)]],
+    lastname: ['', [Validators.required]],
+    email: ['', [Validators.required, Validators.email]]
+  });
+  
+  // ❌ BLOCK - Template-driven for complex form
+  // <form #userForm="ngForm"> with multiple ngModel bindings
+  ```
+- [ ] **Form Validation**: Proper validation messages and error handling?
+- [ ] **Type Safety**: FormControls typed with proper interfaces?
+  ```typescript
+  // ✅ CORRECT
+  interface UserFormData {
+    firstname: string;
+    lastname: string;
+    email: string;
+  }
+  
+  userForm: FormGroup<{
+    firstname: FormControl<string>;
+    lastname: FormControl<string>;
+    email: FormControl<string>;
+  }>;
+  ```
 
 ## ✅ BACKEND-SPECIFIC CHECKS (NestJS)
 
@@ -107,10 +295,139 @@ Review **every** Pull Request or code change against this checklist. Give approv
 - [ ] **Role-Based Access**: Sensitive operations use `@Roles()` decorator?
 - [ ] **Input Validation**: DTOs with `class-validator` decorators for request bodies?
 
+### **🏗️ ADVANCED NESTJS PATTERNS**
+- [ ] **Custom Decorators**: Repetitive patterns extracted to custom decorators?
+  - **If repetitive validation/extraction → WARNING**: Consider custom decorators for cleaner code
+  ```typescript
+  // ✅ CORRECT - Custom decorator
+  @CreateUserDecorator()
+  export const User = createParamDecorator(
+    (data: unknown, ctx: ExecutionContext): UserDTO => {
+      const request = ctx.switchToHttp().getRequest();
+      return request.user;
+    }
+  );
+  
+  // Usage: method(@User() user: UserDTO)
+  
+  // ❌ REPETITIVE PATTERN - Extract to decorator
+  @Get('profile')
+  getProfile(@Req() request: Request) {
+    const user = request.user; // Repeated across controllers
+  }
+  ```
+- [ ] **Dependency Injection Scope**: Services properly scoped (Singleton/Request/Transient)?
+  - **If wrong scope → BLOCK CHANGE**: Database connections should be Singleton, user-specific services Request-scoped
+  ```typescript
+  // ✅ CORRECT
+  @Injectable({ scope: Scope.REQUEST })
+  export class UserContextService { ... } // User-specific data
+  
+  @Injectable() // Default Singleton
+  export class DatabaseService { ... } // Shared connection
+  
+  // ❌ BLOCK - Wrong scope
+  @Injectable({ scope: Scope.TRANSIENT })
+  export class DatabaseService { ... } // Creates new connection each time
+  ```
+- [ ] **Module Boundaries**: Clear separation between feature modules?
+  - **If cross-cutting concerns mixed → BLOCK CHANGE**: Maintain proper module encapsulation
+
+### **⚙️ CONFIGURATION & ENVIRONMENT**
+- [ ] **ConfigModule Usage**: Environment variables accessed via ConfigService?
+  - **If process.env.* direct access → BLOCK CHANGE**: Use ConfigService for type safety
+  ```typescript
+  // ✅ CORRECT
+  @Injectable()
+  export class AuthService {
+    constructor(private configService: ConfigService) {}
+    
+    getJwtSecret(): string {
+      return this.configService.get<string>('JWT_ACCESS_SECRET');
+    }
+  }
+  
+  // ❌ BLOCK - Direct process.env access
+  const jwtSecret = process.env.JWT_ACCESS_SECRET; // No validation
+  ```
+- [ ] **Configuration Validation**: Environment variables validated at startup?
+  ```typescript
+  // ✅ CORRECT - Validation schema
+  export const configValidationSchema = Joi.object({
+    JWT_ACCESS_SECRET: Joi.string().required(),
+    DATABASE_URL: Joi.string().required(),
+    NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
+  });
+  ```
+- [ ] **Secrets Management**: No hardcoded secrets in configuration?
+
+### **🔧 ADVANCED VALIDATION & TRANSFORMATION**
+- [ ] **DTO Validation**: Comprehensive class-validator decorators on DTOs?
+  - **If missing validation → BLOCK CHANGE**: All input DTOs must have validation
+  ```typescript
+  // ✅ CORRECT
+  export class CreateUserDTO {
+    @IsString()
+    @IsNotEmpty()
+    @MinLength(2)
+    firstname: string;
+    
+    @IsEmail()
+    email: string;
+    
+    @IsOptional()
+    @IsInt()
+    @Min(18)
+    age?: number;
+  }
+  
+  // ❌ BLOCK - Missing validation
+  export class CreateUserDTO {
+    firstname: string; // No validation
+    email: string;     // No email validation
+  }
+  ```
+- [ ] **Global Validation Pipe**: ValidationPipe configured globally?
+- [ ] **Transform Options**: Proper whitelist and forbidNonWhitelisted options?
+  ```typescript
+  // ✅ CORRECT in main.ts
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+  }));
+  ```
+
 ### **📊 ERROR HANDLING & LOGGING**
+- [ ] **Exception Filters**: Custom exception filters for specific error types?
+  - **If generic error handling → WARNING**: Consider custom filters for better error responses
+  ```typescript
+  // ✅ GOOD PATTERN
+  @Catch(PrismaClientKnownRequestError)
+  export class PrismaExceptionFilter implements ExceptionFilter {
+    catch(exception: PrismaClientKnownRequestError, host: ArgumentsHost) {
+      const response = host.switchToHttp().getResponse();
+      
+      switch (exception.code) {
+        case 'P2002':
+          response.status(409).json({
+            statusCode: 409,
+            message: 'Resource already exists',
+          });
+          break;
+        default:
+          response.status(500).json({
+            statusCode: 500,
+            message: 'Database error',
+          });
+      }
+    }
+  }
+  ```
 - [ ] **HTTP Exceptions**: Proper use of NestJS exception classes?
 - [ ] **Error Context**: Errors include relevant context information?
 - [ ] **Logging Implementation**: Appropriate logging for debugging?
+- [ ] **Structured Logging**: Consistent log format across the application?
 
 ## 🎯 HEFL-SPECIFIC VALIDATIONS
 
@@ -174,6 +491,7 @@ Before approving ANY code change:
 - [ ] Architecture patterns followed
 - [ ] Security requirements met
 - [ ] Database migrations present (if needed)
+- [ ] TypeScript strict mode compliance verified
 
 ### ✅ **Quality Standards Met**  
 - [ ] Code follows naming conventions
@@ -181,12 +499,25 @@ Before approving ANY code change:
 - [ ] Performance implications considered
 - [ ] Memory leaks prevented
 - [ ] Testing strategy adequate
+- [ ] Path aliases used consistently
+- [ ] Proper type definitions (interface/type/class)
+
+### ✅ **Framework-Specific Standards**
+- [ ] **Angular**: OnPush strategy for performance-critical components
+- [ ] **Angular**: Proper RxJS memory management with takeUntil
+- [ ] **Angular**: BehaviorSubjects for state management
+- [ ] **Angular**: Reactive Forms for complex forms
+- [ ] **NestJS**: ConfigService for environment variables
+- [ ] **NestJS**: Comprehensive DTO validation
+- [ ] **NestJS**: Proper dependency injection scoping
+- [ ] **NestJS**: Custom decorators for repetitive patterns
 
 ### ✅ **Integration Verified**
 - [ ] API contracts maintained
 - [ ] HEFL-specific patterns followed
 - [ ] Breaking changes documented
 - [ ] Backward compatibility considered
+- [ ] Module boundaries respected
 
 ## 🎯 SUCCESS METRICS
 
