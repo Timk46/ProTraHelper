@@ -48,6 +48,12 @@ export class CommentInputComponent implements OnInit, OnDestroy, OnChanges {
   @Input() allowEmpty: boolean = false;
   @Input() rows: number = 3;
   @Input() submitButtonText: string = 'Senden';
+  
+  // 🚀 PHASE 4: Reply mode support
+  @Input() parentCommentId: string | null = null;
+  @Input() depth: number = 0;
+  @Input() isReplyMode: boolean = false;
+  @Input() showCancelButton: boolean = false;
 
   // =============================================================================
   // OUTPUTS - EVENTS TO PARENT
@@ -56,6 +62,9 @@ export class CommentInputComponent implements OnInit, OnDestroy, OnChanges {
   @Output() commentSubmitted = new EventEmitter<string>();
   @Output() textChanged = new EventEmitter<string>();
   @Output() focusChanged = new EventEmitter<boolean>();
+  
+  // 🚀 PHASE 4: Reply mode events
+  @Output() cancelled = new EventEmitter<void>();
 
   // =============================================================================
   // COMPONENT STATE
@@ -89,6 +98,13 @@ export class CommentInputComponent implements OnInit, OnDestroy, OnChanges {
     this.setupValueChanges();
     this.updateFormControlState();
     
+    // 🚀 PHASE 4: Auto-detect reply mode and enable cancel button
+    if (this.parentCommentId) {
+      this.isReplyMode = true;
+      this.showCancelButton = true;
+      this.autofocus = true; // Auto-focus reply inputs
+    }
+    
     if (this.autofocus) {
       setTimeout(() => this.focusTextarea(), 100);
     }
@@ -97,6 +113,14 @@ export class CommentInputComponent implements OnInit, OnDestroy, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['disabled'] && this.commentForm) {
       this.updateFormControlState();
+    }
+    
+    // 🚀 PHASE 4: Update reply mode when parentCommentId changes
+    if (changes['parentCommentId']) {
+      this.isReplyMode = !!this.parentCommentId;
+      if (this.isReplyMode) {
+        this.showCancelButton = true;
+      }
     }
   }
 
@@ -160,6 +184,12 @@ export class CommentInputComponent implements OnInit, OnDestroy, OnChanges {
       }
     }
   }
+  
+  // 🚀 PHASE 4: Cancel reply input
+  onCancel(): void {
+    this.clearContent();
+    this.cancelled.emit();
+  }
 
   onTextareaFocus(): void {
     this.isFocused = true;
@@ -176,6 +206,14 @@ export class CommentInputComponent implements OnInit, OnDestroy, OnChanges {
     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
       event.preventDefault();
       this.onSubmit();
+      return;
+    }
+    
+    // 🚀 PHASE 4: Cancel on Escape key in reply mode
+    if (event.key === 'Escape' && this.isReplyMode) {
+      event.preventDefault();
+      this.onCancel();
+      return;
     }
     
     // Prevent typing when at max length (except for deletion/navigation keys)
@@ -331,14 +369,51 @@ export class CommentInputComponent implements OnInit, OnDestroy, OnChanges {
     }
     
     if (this.isSubmitting) {
-      return 'Kommentar wird gesendet...';
+      return this.isReplyMode ? 'Antwort wird gesendet...' : 'Kommentar wird gesendet...';
     }
     
     if (!this.isFormValid()) {
-      return 'Bitte geben Sie einen gültigen Kommentar ein';
+      return this.isReplyMode ? 'Bitte geben Sie eine gültige Antwort ein' : 'Bitte geben Sie einen gültigen Kommentar ein';
     }
     
-    return 'Kommentar senden (Strg+Enter)';
+    return this.isReplyMode ? 'Antwort senden (Strg+Enter)' : 'Kommentar senden (Strg+Enter)';
+  }
+  
+  // 🚀 PHASE 4: Reply mode specific helpers
+  
+  /**
+   * Gets the submit button text based on mode
+   */
+  getSubmitButtonText(): string {
+    if (this.isReplyMode) {
+      return this.isSubmitting ? 'Antworten...' : 'Antworten';
+    }
+    return this.isSubmitting ? 'Senden...' : this.submitButtonText;
+  }
+  
+  /**
+   * Gets the cancel button tooltip
+   */
+  getCancelTooltip(): string {
+    return 'Antwort abbrechen (Escape)';
+  }
+  
+  /**
+   * Checks if component is in reply mode
+   */
+  isInReplyMode(): boolean {
+    return this.isReplyMode || !!this.parentCommentId;
+  }
+  
+  /**
+   * Gets depth-based styling class
+   */
+  getDepthClass(): string {
+    if (this.depth <= 0) return 'depth-0';
+    if (this.depth === 1) return 'depth-1';
+    if (this.depth === 2) return 'depth-2';
+    if (this.depth === 3) return 'depth-3';
+    return 'depth-max';
   }
 
   /**

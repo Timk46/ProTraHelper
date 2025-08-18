@@ -1,5 +1,7 @@
 <!-- Discussion Thread Container -->
-<div class="discussion-thread-container">
+<div class="discussion-thread-container" 
+     appPerformanceProfiling="discussion-thread"
+     [profilingOptions]="{trackMemory: true, trackDOMChanges: true, trackVisibility: true, sampleRate: 0.5}">
 
   <!-- Discussion Controls -->
   <div class="discussion-controls" *ngIf="hasDiscussions() && hasAnyComments()">
@@ -72,6 +74,23 @@
               (replyRequested)="onReplyRequested($event)">
             </app-comment-item>
 
+          </div>
+
+          <!-- 🚀 PHASE 3: Reply Input Case -->
+          <div *ngSwitchCase="'comment-input'" 
+               class="reply-input-item-container"
+               [style.margin-left.px]="getCommentIndentation(item.depth)">
+            
+            <app-comment-input
+              [parentCommentId]="item.parentCommentId!"
+              [depth]="item.depth"
+              [isSubmitting]="isSubmittingComment"
+              [placeholder]="'Antwort schreiben...'"
+              [maxLength]="500"
+              (commentSubmitted)="onReplyInputSubmitted({commentId: item.parentCommentId!, content: $event})"
+              (cancelled)="onReplyInputCancelled(item.parentCommentId!)">
+            </app-comment-input>
+            
           </div>
 
         </div>

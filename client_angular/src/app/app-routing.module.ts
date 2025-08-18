@@ -34,6 +34,7 @@ import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-quest
 import { EditUmlComponent } from './Pages/lecturersView/edit-uml/edit-uml.component';
 import { EditCodeGameComponent } from './Pages/lecturersView/edit-code-game/edit-code-game.component';
 import { EvaluationDiscussionForumComponent } from './Pages/evaluation-discussion-forum/evaluation-discussion-forum/evaluation-discussion-forum.component';
+import { evaluationAccessGuard } from './Pages/evaluation-discussion-forum/guards/evaluation-access.guard';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -43,12 +44,20 @@ const routes: Routes = [
   {
     path: 'forum',
     component: EvaluationDiscussionForumComponent,
-    canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard, evaluationAccessGuard],
+    data: { 
+      title: 'Evaluation Discussion Forum',
+      description: 'Peer evaluation and discussion platform'
+    }
   },
   {
     path: 'forum/:submissionId',
     component: EvaluationDiscussionForumComponent,
-    canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard, evaluationAccessGuard],
+    data: { 
+      title: 'Evaluation Discussion',
+      description: 'Discussion forum for specific submission evaluation'
+    }
   },
   {
     path: 'dashboard',

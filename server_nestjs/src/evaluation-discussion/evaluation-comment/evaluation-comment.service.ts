@@ -3,7 +3,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../../notification/notification.service';
-import {
+import type {
   CreateEvaluationCommentDTO,
   UpdateEvaluationCommentDTO,
   EvaluationCommentDTO,
@@ -11,7 +11,7 @@ import {
 } from '@DTOs/index';
 import { EvaluationCacheService } from '../shared/evaluation-cache.service';
 import { EvaluationUtilsService } from '../shared/evaluation-utils.service';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 // =============================================================================
 // INTERNAL TYPES
@@ -68,7 +68,29 @@ type PrismaCommentWithDetails = Prisma.EvaluationCommentGetPayload<{
             order: true;
           };
         };
-        replies: true; // Include nested replies (recursive)
+        replies: {
+          include: {
+            user: {
+              select: {
+                id: true;
+                firstname: true;
+                lastname: true;
+              };
+            };
+            category: {
+              select: {
+                id: true;
+                name: true;
+                displayName: true;
+                description: true;
+                icon: true;
+                color: true;
+                order: true;
+              };
+            };
+            replies: true; // Include nested replies (recursive)
+          };
+        };
       };
     };
   };
@@ -84,37 +106,69 @@ export class EvaluationCommentService {
   ) {}
 
   /**
-   * Findet alle Kommentare für eine Abgabe basierend auf der Abgabe-ID.
+   * Findet alle Kommentare für eine Abgabe basierend auf der Abgabe-ID mit Pagination.
    *
    * @param submissionId - Die ID der Abgabe.
    * @param categoryId - Optional: Die ID der Kategorie, nach der gefiltert werden soll.
-   * @returns Ein Promise, das ein Array von Kommentar-DTOs auflöst.
+   * @param options - Pagination and filtering options
+   * @returns Ein Promise, das paginated Kommentar-DTOs auflöst.
    */
-  async findBySubmission(
+  async findBySubmissionPaginated(
     submissionId: string,
-    categoryId?: number,
-  ): Promise<EvaluationCommentDTO[]> {
+    categoryId: string,
+    options: {
+      page?: number;
+      pageSize?: number;
+      sortOrder?: 'asc' | 'desc';
+      onlyTopLevel?: boolean;
+    } = {},
+  ): Promise<{
+    comments: EvaluationCommentDTO[];
+    pagination: {
+      page: number;
+      pageSize: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  }> {
+    const { page = 1, pageSize = 20, sortOrder = 'desc', onlyTopLevel = false } = options;
+    const skip = (page - 1) * pageSize;
+
+    const whereClause: Prisma.EvaluationCommentWhereInput = { submissionId };
+    if (categoryId) {
+      whereClause.categoryId = Number(categoryId);
+    }
+    if (onlyTopLevel) {
+      whereClause.parentId = null;
+    }
+
+    // Get total count for pagination
+    const total = await this.prisma.evaluationComment.count({
+      where: whereClause,
+    });
+
+    const totalPages = Math.ceil(total / pageSize);
+
     const cacheKey = this.utilsService.generateCacheKey(
-      'comments',
+      'comments-paginated',
       submissionId,
-      categoryId?.toString() || 'all',
+      categoryId.toString(),
+      page.toString(),
+      pageSize.toString(),
+      sortOrder,
+      onlyTopLevel.toString(),
     );
 
-    return this.cacheService.getOrSet(
+    const result = await this.cacheService.getOrSet(
       cacheKey,
       async () => {
-        const whereClause: Prisma.EvaluationCommentWhereInput = { submissionId };
-        if (categoryId) {
-          whereClause.categoryId = categoryId;
-        }
-
-        // Temporarily disable parentId filtering to restore existing comments visibility
-        // This allows both existing comments (without parentId) and new top-level comments
-        // TODO: Re-enable proper parentId filtering after data migration
-        const extendedWhereClause = { ...whereClause };
-
         const comments = await this.prisma.evaluationComment.findMany({
-          where: extendedWhereClause,
+          where: whereClause,
+          relationLoadStrategy: 'join',
+          skip,
+          take: pageSize,
           include: {
             user: {
               select: {
@@ -135,6 +189,7 @@ export class EvaluationCommentService {
               },
             },
             replies: {
+              take: 5, // Limit replies in paginated view
               include: {
                 user: {
                   select: {
@@ -155,6 +210,131 @@ export class EvaluationCommentService {
                   },
                 },
                 replies: {
+                  take: 3,
+                  include: {
+                    user: {
+                      select: {
+                        id: true,
+                        firstname: true,
+                        lastname: true,
+                      },
+                    },
+                    category: {
+                      select: {
+                        id: true,
+                        name: true,
+                        displayName: true,
+                        description: true,
+                        icon: true,
+                        color: true,
+                        order: true,
+                      },
+                    },
+                    replies: true,
+                  },
+                  orderBy: { createdAt: 'asc' },
+                },
+              },
+              orderBy: { createdAt: 'asc' },
+            },
+          },
+          orderBy: { createdAt: sortOrder },
+        });
+
+        return {
+          comments: comments.map(comment => this.mapCommentToDTO(comment)),
+          pagination: {
+            page,
+            pageSize,
+            total,
+            totalPages,
+            hasNext: page < totalPages,
+            hasPrev: page > 1,
+          },
+        };
+      },
+      180000, // 3 minutes cache for paginated results
+    );
+
+    return result;
+  }
+
+  /**
+   * Findet alle Kommentare für eine Abgabe basierend auf der Abgabe-ID.
+   *
+   * @param submissionId - Die ID der Abgabe.
+   * @param categoryId - Optional: Die ID der Kategorie, nach der gefiltert werden soll.
+   * @returns Ein Promise, das ein Array von Kommentar-DTOs auflöst.
+   */
+  async findBySubmission(
+    submissionId: string,
+    categoryId: string,
+  ): Promise<EvaluationCommentDTO[]> {
+    const cacheKey = this.utilsService.generateCacheKey(
+      'comments',
+      submissionId,
+      categoryId.toString(),
+    );
+    console.log('🔍 findBySubmission service  cachekey:', cacheKey);
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        const whereClause: Prisma.EvaluationCommentWhereInput = { submissionId };
+        if (categoryId) {
+          whereClause.categoryId = Number(categoryId);
+        }
+
+        // Temporarily disable parentId filtering to restore existing comments visibility
+        // This allows both existing comments (without parentId) and new top-level comments
+        // TODO: Re-enable proper parentId filtering after data migration
+        const extendedWhereClause = { ...whereClause };
+
+        const comments = await this.prisma.evaluationComment.findMany({
+          where: extendedWhereClause,
+          relationLoadStrategy: 'join', // More efficient for deep relations
+          take: 50, // Limit initial load for performance
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstname: true,
+                lastname: true,
+              },
+            },
+            category: {
+              select: {
+                id: true,
+                name: true,
+                displayName: true,
+                description: true,
+                icon: true,
+                color: true,
+                order: true,
+              },
+            },
+            replies: {
+              take: 20, // Limit replies per comment
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    firstname: true,
+                    lastname: true,
+                  },
+                },
+                category: {
+                  select: {
+                    id: true,
+                    name: true,
+                    displayName: true,
+                    description: true,
+                    icon: true,
+                    color: true,
+                    order: true,
+                  },
+                },
+                replies: {
+                  take: 10, // Limit nested replies
                   include: {
                     user: {
                       select: {
@@ -577,6 +757,150 @@ export class EvaluationCommentService {
   }
 
   /**
+   * Process multiple votes in a batch operation for better performance
+   * @param votes - Array of vote operations
+   * @param userId - The user ID
+   * @returns Array of vote results
+   */
+  async batchVote(
+    votes: Array<{ commentId: string; voteType: 'UP' | 'DOWN' | null }>,
+    userId: number,
+  ) {
+    const results = [];
+    
+    // Use transaction for atomic batch operations
+    await this.prisma.$transaction(async (tx) => {
+      for (const voteOperation of votes) {
+        const result = await this.processVoteInTransaction(
+          tx,
+          voteOperation.commentId,
+          voteOperation.voteType,
+          userId,
+        );
+        results.push(result);
+      }
+    });
+
+    // Invalidate all related cache entries
+    this.cacheService.invalidateByPattern(`comments:.*`);
+
+    return results;
+  }
+
+  /**
+   * Process a single vote within a transaction context
+   */
+  private async processVoteInTransaction(
+    tx: any,
+    commentId: string,
+    voteType: 'UP' | 'DOWN' | null,
+    userId: number,
+  ) {
+    const comment = await tx.evaluationComment.findUnique({
+      where: { id: commentId },
+    });
+
+    if (!comment) {
+      throw new NotFoundException(`Comment with ID ${commentId} not found`);
+    }
+
+    // Process vote logic (same as single vote)
+    const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
+    const userVotes = voteDetails.userVotes || {};
+    const previousVote = userVotes[userId.toString()];
+
+    let newUpvotes = comment.upvotes;
+    let newDownvotes = comment.downvotes;
+
+    // Vote processing logic (extracted for reuse)
+    ({ newUpvotes, newDownvotes } = this.calculateVoteChanges(
+      voteType,
+      previousVote,
+      newUpvotes,
+      newDownvotes,
+      userVotes,
+      userId,
+    ));
+
+    const updatedVoteDetails = { userVotes };
+
+    const updatedComment = await tx.evaluationComment.update({
+      where: { id: commentId },
+      data: {
+        upvotes: newUpvotes,
+        downvotes: newDownvotes,
+        voteDetails: updatedVoteDetails as unknown as Prisma.JsonValue,
+      },
+    });
+
+    return {
+      commentId,
+      upvotes: newUpvotes,
+      downvotes: newDownvotes,
+      userVote: userVotes[userId.toString()] || null,
+      netVotes: newUpvotes - newDownvotes,
+    };
+  }
+
+  /**
+   * Extract vote calculation logic for reuse
+   */
+  private calculateVoteChanges(
+    voteType: 'UP' | 'DOWN' | null,
+    previousVote: string | undefined,
+    upvotes: number,
+    downvotes: number,
+    userVotes: { [userId: string]: VoteType },
+    userId: number,
+  ): { newUpvotes: number; newDownvotes: number } {
+    let newUpvotes = upvotes;
+    let newDownvotes = downvotes;
+
+    if (voteType === null) {
+      // Remove vote
+      if (previousVote) {
+        delete userVotes[userId.toString()];
+        if (previousVote === 'UP') {
+          newUpvotes--;
+        } else {
+          newDownvotes--;
+        }
+      }
+    } else {
+      // Add or change vote
+      if (previousVote === voteType) {
+        // Same vote - remove it
+        delete userVotes[userId.toString()];
+        if (voteType === 'UP') {
+          newUpvotes--;
+        } else {
+          newDownvotes--;
+        }
+      } else {
+        // New vote or change vote
+        if (previousVote) {
+          // Remove previous vote first
+          if (previousVote === 'UP') {
+            newUpvotes--;
+          } else {
+            newDownvotes--;
+          }
+        }
+
+        // Add new vote
+        userVotes[userId.toString()] = voteType;
+        if (voteType === 'UP') {
+          newUpvotes++;
+        } else {
+          newDownvotes++;
+        }
+      }
+    }
+
+    return { newUpvotes, newDownvotes };
+  }
+
+  /**
    * Gets the current user's vote status for a specific comment
    * @param commentId - The comment ID
    * @param userId - The user ID
@@ -694,12 +1018,12 @@ export class EvaluationCommentService {
    * @param comment - Der Prisma-Kommentar-Objekt.
    * @returns Das entsprechende EvaluationCommentDTO.
    */
-  private mapCommentToDTO(comment: PrismaCommentWithDetails): EvaluationCommentDTO {
+  private mapCommentToDTO(comment: any): EvaluationCommentDTO {
     const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
     const userVotes = voteDetails.userVotes || {};
 
-    // Recursively map replies
-    const mappedReplies = comment.replies?.map(reply => this.mapCommentToDTO(reply as any)) || [];
+    // Recursively map replies, handling cases where replies might not have full relations
+    const mappedReplies = comment.replies?.map((reply: any) => this.mapCommentToDTO(reply)) || [];
 
     return {
       id: comment.id,
@@ -711,10 +1035,10 @@ export class EvaluationCommentService {
       createdAt: comment.createdAt,
       updatedAt: comment.updatedAt,
       author: {
-        id: comment.user.id.toString(),
+        id: comment.user?.id?.toString() || comment.userId?.toString(),
         type: 'anonymous',
         displayName: comment.anonymousDisplayName || 'Anonymous User',
-        colorCode: this.utilsService.generateColorCode(comment.user.id),
+        colorCode: this.utilsService.generateColorCode(comment.user?.id || comment.userId),
       },
       category: comment.category
         ? {

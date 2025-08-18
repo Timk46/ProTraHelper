@@ -26,6 +26,16 @@ Folge diesen Schritten strikt, um einen robusten Plan zu erstellen.
   - Definiere jede Eigenschaft mit ihrem TypeScript-Typ (`string`, `number`, `boolean`, `Array<OtherDTO>`).
   - Füge für Backend-DTOs, die in Request-Bodies verwendet werden, direkt die `class-validator`-Decorators hinzu (`@IsString()`, `@IsNotEmpty()`, etc.).
 
+### Schritt 2.5: Sicherheit und Berechtigungen planen
+
+- **Berechtigungsmatrix:** Welche Benutzerrollen dürfen welche Aktionen ausführen?
+  - Beispiel: Nur eingeloggte Benutzer dürfen abstimmen, nur Autoren und Admins dürfen Beiträge löschen.
+- **Guard-Strategie:** Plane explizit, welche Guards verwendet werden:
+  - `JwtAuthGuard` für authentifizierte Endpunkte
+  - `RolesGuard` für rollenbasierte Zugriffe
+  - Custom Guards für spezielle Geschäftslogik (z.B. "nur eigene Inhalte bearbeiten")
+- **Datenvalidierung:** Stelle sicher, dass alle Benutzereingaben validiert werden.
+
 ### Schritt 3: Backend-Plan (Nest.js & Prisma)
 
 Basierend auf dem DTO-Vertrag, plane nun die serverseitigen Aufgaben.
@@ -51,6 +61,12 @@ Basierend auf dem DTO-Vertrag, plane nun die serverseitigen Aufgaben.
     - Beschreibe die Geschäftslogik, die im Service implementiert werden muss.
     - Beispiel: "Der `DiscussionVoteService` muss prüfen, ob der Benutzer bereits für diesen Beitrag abgestimmt hat. Falls ja, wird die alte Stimme entfernt. Anschließend wird die neue Stimme in der Datenbank gespeichert und die Gesamtstimmenzahl des Beitrags aktualisiert."
 
+4.  **Real-time Features (Socket.io):**
+    - Werden Echtzeit-Updates benötigt? (z.B. Live-Abstimmungsergebnisse, neue Kommentare)
+    - Welche Events müssen emittiert werden und an wen?
+    - Beispiel: `voteUpdated`-Event an alle Benutzer in der Diskussion senden
+    - Gateway-Klasse und Event-Handler definieren
+
 ### Schritt 4: Frontend-Plan (Angular)
 
 Plane nun die clientseitigen Aufgaben, die auf dem Backend-Plan aufbauen.
@@ -69,6 +85,23 @@ Plane nun die clientseitigen Aufgaben, die auf dem Backend-Plan aufbauen.
 3.  **Komponenten-Logik und Datenfluss:**
     - **Smart Components:** Beschreibe, wie sie die neuen Service-Methoden aufrufen und den Zustand verwalten (z.B. über `BehaviorSubject`).
     - **Dumb Components:** Definiere ihre `@Input()`-Properties (welche Daten erhalten sie?) und ihre `@Output()`-Events (auf welche Benutzerinteraktionen reagieren sie?).
+
+4.  **Real-time Integration:**
+    - Muss das Frontend auf Socket.io-Events reagieren?
+    - Welche Components müssen live Updates erhalten?
+    - Socket-Service-Methoden für Event-Handling definieren
+
+### Schritt 5: Testing-Strategie
+
+- **Backend-Tests:**
+  - Unit Tests für Service-Logik (Geschäftsregeln, Edge Cases)
+  - Integration Tests für Controller-Endpunkte
+  - E2E Tests für kritische User Flows
+- **Frontend-Tests:**
+  - Unit Tests für Component-Logik und Services
+  - Integration Tests für Component-Interaktionen
+  - E2E Tests mit Playwright für User Stories
+- **Test-Daten:** Welche Mock-Daten oder Test-Fixtures werden benötigt?
 
 ## 3. Das Ausgabeformat: Ein klarer Arbeitsauftrag
 
@@ -105,7 +138,10 @@ Präsentiere deinen finalen Plan in einer klaren, strukturierten Markdown-Datei.
   - Methode `castVote(@Param('postId') postId: number, @Body() createVoteDto: CreateVoteDTO)`.
   - Geschützt mit `JwtAuthGuard`.
 - [ ] **Service (`discussion-vote.service.ts`):**
-  - Implementiere die Logik zur Verarbeitung der Abstimmung (alte Stimme löschen, neue erstellen, Score des Posts aktualisieren).
+  - Implementiere die Logik zur Verarbeitung der Abstimmung (alte Stimme löschen, neue erstellen, Score des Posts aktualisiert).
+- [ ] **Real-time Gateway (`discussion.gateway.ts`):**
+  - Event `voteUpdated` emittieren mit neuer Punktzahl.
+  - An alle Clients in der entsprechenden Diskussion senden.
 
 ---
 
@@ -120,3 +156,18 @@ Präsentiere deinen finalen Plan in einer klaren, strukturierten Markdown-Datei.
 - [ ] **`discussion-post.component.ts` anpassen:**
   - Die neue `vote-control`-Komponente einbinden.
   - Den `voteCasted`-Event verarbeiten und die `discussion-api.service.ts` aufrufen.
+- [ ] **Socket-Integration:**
+  - `voteUpdated`-Events abonnieren und Score in Echtzeit aktualisieren.
+
+---
+
+### 4. Testing-Plan
+
+- [ ] **Backend-Tests:**
+  - Unit Tests für `DiscussionVoteService` (Logik, Edge Cases).
+  - Integration Tests für Vote-Controller.
+- [ ] **Frontend-Tests:**
+  - Unit Tests für `vote-control.component.ts`.
+  - E2E Tests für Abstimmungsflow mit Playwright.
+- [ ] **Test-Daten:**
+  - Mock-Posts und -Users für Tests erstellen.

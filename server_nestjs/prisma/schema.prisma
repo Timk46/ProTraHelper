@@ -37,7 +37,7 @@ model User {
   updatedSettings          ModuleSetting[]
   hasAcceptedPrivacyPolicy Boolean                      @default(false)
   fileUploads              FileUpload[]
-  
+
   // EVALUATION SYSTEM RELATIONS
   evaluationSessionsCreated EvaluationSession[]
   evaluationSubmissions     EvaluationSubmission[]
@@ -65,7 +65,7 @@ model Module {
   settings                ModuleSetting[]
   ModuleHighlightConcepts ModuleHighlightConcepts[]
   fileUploads             FileUpload[]
-  
+
   // EVALUATION SYSTEM RELATIONS
   evaluationSessions      EvaluationSession[]
 }
@@ -236,7 +236,7 @@ model File {
   TranscriptEmbeddings TranscriptEmbedding[]
   fileUploads          FileUpload[]
   UserUploadAnswer     UserUploadAnswer[]
-  
+
   // EVALUATION SYSTEM RELATIONS
   evaluationSubmissions EvaluationSubmission[]
 }
@@ -702,18 +702,18 @@ model Discussion {
   contentElementId Int?
   authorId         Int             @unique
   isSolved         Boolean         @default(false)
-  
+
   // EVALUATION SYSTEM EXTENSIONS
   evaluationSubmissionId String?
   evaluationCategoryId   Int?
-  
+
   author           anonymousUser   @relation(fields: [authorId], references: [id])
   conceptNode      ConceptNode     @relation(fields: [conceptNodeId], references: [id])
   contentElement   ContentElement? @relation(fields: [contentElementId], references: [id])
   contentNode      ContentNode?    @relation(fields: [contentNodeId], references: [id])
   messages         Message[]
   Notification     Notification[]
-  
+
   // EVALUATION SYSTEM RELATIONS
   evaluationSubmission EvaluationSubmission? @relation("EvaluationDiscussions", fields: [evaluationSubmissionId], references: [id])
   evaluationCategory   EvaluationCategory?   @relation("CategoryDiscussions", fields: [evaluationCategoryId], references: [id])
@@ -872,6 +872,7 @@ model UserUmlQuestionAnswer {
 
 //***************************** End Umlearn Tables
 
+
 model MCSliderQuestion {
   id                Int         @id @default(autoincrement())
   questionId        Int         @unique
@@ -995,13 +996,13 @@ model EvaluationSession {
   phase         EvaluationPhase        @default(DISCUSSION)
   createdAt     DateTime               @default(now())
   updatedAt     DateTime               @updatedAt
-  
+
   // Relations
   module        Module                 @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   createdBy     User                   @relation(fields: [createdById], references: [id])
   submissions   EvaluationSubmission[]
   categories    EvaluationCategory[]
-  
+
   @@map("evaluation_sessions")
 }
 
@@ -1017,7 +1018,7 @@ model EvaluationSubmission {
   submittedAt DateTime
   createdAt   DateTime                   @default(now())
   updatedAt   DateTime                   @updatedAt
-  
+
   // Relations
   author      User                       @relation(fields: [authorId], references: [id])
   pdfFile     File                       @relation(fields: [pdfFileId], references: [id])
@@ -1025,7 +1026,7 @@ model EvaluationSubmission {
   discussions Discussion[]               @relation("EvaluationDiscussions")
   ratings     EvaluationRating[]
   comments    EvaluationComment[]
-  
+
   @@map("evaluation_submissions")
 }
 
@@ -1040,13 +1041,13 @@ model EvaluationCategory {
   order       Int                @default(0)
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
-  
+
   // Relations
   session     EvaluationSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   discussions Discussion[]       @relation("CategoryDiscussions")
   ratings     EvaluationRating[]
   comments    EvaluationComment[]
-  
+
   @@unique([sessionId, name])
   @@map("evaluation_categories")
 }
@@ -1060,12 +1061,12 @@ model EvaluationRating {
   comment      String?
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
-  
+
   // Relations
   submission   EvaluationSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   category     EvaluationCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   user         User               @relation(fields: [userId], references: [id])
-  
+
   @@unique([submissionId, categoryId, userId])
   @@map("evaluation_ratings")
 }
@@ -1076,31 +1077,31 @@ model EvaluationComment {
   categoryId   Int
   userId       Int
   content      String              @db.Text
-  
+
   // Reply functionality - hierarchical comments
   parentId     String?
-  
+
   // Simplified voting system - store counts directly
   upvotes      Int                @default(0)
   downvotes    Int                @default(0)
-  
+
   // Vote tracking as JSON to avoid complex schema
   voteDetails  Json?              // {userVotes: {userId: "UP"|"DOWN"}}
-  
+
   // Anonymous display name for this comment
   anonymousDisplayName String?
-  
+
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
-  
+
   // Relations
   submission   EvaluationSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   category     EvaluationCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   user         User                 @relation(fields: [userId], references: [id])
-  
+
   // Self-referential relations for reply hierarchy
   parent       EvaluationComment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies      EvaluationComment[]  @relation("CommentReplies")
-  
+
   @@map("evaluation_comments")
 }

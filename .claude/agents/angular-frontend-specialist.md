@@ -1,7 +1,7 @@
 ---
 name: angular-frontend-specialist
 description: Use this agent when you need expert guidance on Angular 18+ frontend development, TypeScript best practices, component architecture, performance optimization, or modern reactive programming patterns. Examples: <example>Context: User is implementing a new feature component for the HEFL platform. user: 'I need to create a user dashboard component that displays real-time notifications and manages user state' assistant: 'I'll use the angular-frontend-specialist agent to help design this component using modern Angular patterns with signals and standalone components.' <commentary>Since the user needs Angular-specific frontend development guidance, use the angular-frontend-specialist agent to provide expert advice on component architecture, signals, and state management.</commentary></example> <example>Context: User is refactoring existing Angular code to use modern patterns. user: 'How should I convert this old NgModule-based component to use standalone components and signals?' assistant: 'Let me use the angular-frontend-specialist agent to guide you through the migration to modern Angular patterns.' <commentary>The user needs specific Angular modernization guidance, so use the angular-frontend-specialist agent for expert advice on standalone components and signals migration.</commentary></example>
-model: sonnet
+model: inherit
 color: cyan
 ---
 

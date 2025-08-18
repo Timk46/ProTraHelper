@@ -19,12 +19,10 @@ export class EvaluationCommentController {
   @roles('ANY')
   async findBySubmission(
     @Query('submissionId') submissionId: string,
-    @Query('categoryId') categoryId?: string,
+    @Query('categoryId') categoryId: string,
   ): Promise<EvaluationCommentDTO[]> {
-    return this.evaluationCommentService.findBySubmission(
-      submissionId,
-      categoryId ? Number(categoryId) : undefined,
-    );
+    console.log('🔍 findBySubmission controller call', submissionId, categoryId);
+    return this.evaluationCommentService.findBySubmission(submissionId, categoryId);
   }
 
   @Get(':id')

@@ -8,7 +8,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subject, combineLatest, BehaviorSubject, of } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+import { Observable, Subject, combineLatest, BehaviorSubject, of, interval } from 'rxjs';
 import { takeUntil, map, filter, switchMap, take, startWith, debounceTime } from 'rxjs/operators';
 
 // Angular Material Imports
@@ -42,10 +43,16 @@ import {
 import { EvaluationDiscussionService } from '../../../Services/evaluation/evaluation-discussion.service';
 import { EvaluationStateService } from '../../../Services/evaluation/evaluation-state.service';
 import { EvaluationMockDataService } from '../../../Services/evaluation/evaluation-mock-data.service';
+import { EvaluationGlobalStateService } from '../services/evaluation-global-state.service';
+import { EvaluationNavigationService } from '../services/evaluation-navigation.service';
+import { EvaluationPerformanceService } from '../services/evaluation-performance.service';
+import { BundleAnalyzerService } from '../services/bundle-analyzer.service';
+import { MemoryLeakDetectorService } from '../services/memory-leak-detector.service';
 
 // Child Components
 import { CategoryTabsComponent } from '../components/category-tabs/category-tabs.component';
 import { PdfViewerPanelComponent } from '../components/pdf-viewer-panel/pdf-viewer-panel.component';
+import { PerformanceDashboardComponent } from '../components/performance-dashboard/performance-dashboard.component';
 import { DiscussionThreadComponent } from '../components/discussion-thread/discussion-thread.component';
 import { PhaseToggleComponent } from '../components/phase-toggle/phase-toggle.component';
 import { ErrorFallbackComponent } from '../components/error-fallback/error-fallback.component';
@@ -86,17 +93,73 @@ import { RatingSliderComponent } from '../components/rating-slider/rating-slider
     PhaseToggleComponent,
     RatingSliderComponent,
     ErrorFallbackComponent,
+    PerformanceDashboardComponent,
   ],
   templateUrl: './evaluation-discussion-forum.component.html',
   styleUrl: './evaluation-discussion-forum.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
+  
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private snackBar: MatSnackBar,
+    private stateService: EvaluationStateService,
+    private discussionService: EvaluationDiscussionService,
+    private mockDataService: EvaluationMockDataService,
+    private globalStateService: EvaluationGlobalStateService,
+    private navigationService: EvaluationNavigationService,
+    private performanceService: EvaluationPerformanceService,
+    private bundleAnalyzer: BundleAnalyzerService,
+    private memoryLeakDetector: MemoryLeakDetectorService
+  ) {
+    console.log('🏗️ EvaluationDiscussionForumComponent constructor called');
+  }
   // =============================================================================
   // TEMPLATE UTILITIES
   // =============================================================================
 
   protected readonly EvaluationPhase = EvaluationPhase;
+
+  // =============================================================================
+  // COMPONENT STATE - ENHANCED WITH GLOBAL STATE MANAGEMENT
+  // =============================================================================
+
+  private destroy$ = new Subject<void>();
+  
+  // 🚀 PHASE 5: Integration observables for comprehensive state management
+  public applicationState$ = this.globalStateService.applicationState$;
+  
+  // 🚀 PHASE 6: Performance monitoring state
+  public showPerformanceDashboard = false; // Can be toggled for development/debugging
+  public navigationContext$ = this.navigationService.navigationContext$;
+  public systemStatus$ = this.globalStateService.systemStatus$;
+  public userContext$ = this.globalStateService.userContext$;
+  
+  // Enhanced error handling with global state integration
+  public hasGlobalError$ = this.globalStateService.systemStatus$.pipe(
+    map(status => status.errorCount > 0)
+  );
+  
+  // Combined loading state from multiple sources
+  public isGlobalLoading$ = combineLatest([
+    this.stateService.loading$,
+    this.globalStateService.uiState$
+  ]).pipe(
+    map(([serviceLoading, uiState]) => serviceLoading || uiState.isLoading)
+  );
+  
+  // Enhanced permission system
+  public userPermissions$ = this.userContext$.pipe(
+    map(context => context.permissions)
+  );
+  
+  // Deep linking support
+  public currentSubmissionId$ = this.navigationService.submissionId$;
+  public currentCategoryId$ = this.navigationService.categoryId$;
+  public highlightedCommentId$ = this.navigationService.commentId$;
 
   // =============================================================================
   // COMPONENT STATE - REACTIVE STREAMS
@@ -148,58 +211,17 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   // COMPONENT LIFECYCLE
   // =============================================================================
 
-  private destroy$ = new Subject<void>();
+  // Legacy state - keeping for compatibility during migration
   private submissionId: string | null = null;
-
-  // Mock data for testing
   currentCategoryIndex = 0;
-
-  // Mock data observables - REMOVED: Using real services now
-
-  // Loading state management
   private isSubmittingComment$ = new BehaviorSubject<boolean>(false);
   isVotingComment: Map<string, boolean> = new Map();
-
-  // Event handling with debouncing
   private commentSubmissionQueue$ = new Subject<string>();
   private lastSubmittedContent: string | null = null;
-
-  // Message input state (for action area)
   currentMessageText: string = '';
-
-  // SnackBar reference management
   private currentSnackBarRef: any = null;
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private stateService: EvaluationStateService,
-    private mockDataService: EvaluationMockDataService,
-    private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef,
-  ) {
-    // FIXED: Using real services instead of mock data
-    this.initializeObservableStreams();
-  }
-
-  ngOnInit(): void {
-    this.handleRouteParams();
-    this.handleErrorNotifications();
-    this.loadInitialData();
-    this.setupEventHandling();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  // =============================================================================
-  // INITIALIZATION
-  // =============================================================================
-
-  // REMOVED: initializeMockStreams() - using real services now
-
+  // 🚀 PHASE 5: Enhanced initialization with comprehensive setup
   private initializeObservableStreams(): void {
     // Core state streams from service with initial values to ensure viewModel$ always emits
     this.submission$ = this.stateService.submission$;
@@ -215,11 +237,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
     // Derived streams
     this.isDiscussionPhase$ = this.currentPhase$.pipe(
-      map(phase => phase === EvaluationPhase.DISCUSSION),
+      map(phase => phase === EvaluationPhase.DISCUSSION)
     );
 
     this.isEvaluationPhase$ = this.currentPhase$.pipe(
-      map(phase => phase === EvaluationPhase.EVALUATION),
+      map(phase => phase === EvaluationPhase.EVALUATION)
     );
 
     this.canComment$ = this.isDiscussionPhase$;
@@ -286,9 +308,329 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
             availableUpvotes: categoryLimits?.plusVotes || 3,
             availableDownvotes: categoryLimits?.minusVotes || 3,
           };
-        },
-      ),
+        }
+      )
     );
+  }
+
+  ngOnInit(): void {
+    console.log('🎆 EvaluationDiscussionForumComponent initialized');
+    
+    // 🚀 PHASE 5: Enhanced initialization with global state management
+    this.initializeGlobalStateManagement();
+    this.handleRouteParams();
+    this.handleErrorNotifications();
+    this.loadInitialData();
+    this.setupEventHandling();
+    this.setupDeepLinkingSupport();
+    this.setupPerformanceMonitoring();
+  }
+
+  ngOnDestroy(): void {
+    console.log('🧹 EvaluationDiscussionForumComponent cleanup');
+    
+    this.destroy$.next();
+    this.destroy$.complete();
+    
+    // 🚀 PHASE 5: Enhanced cleanup with global state management
+    this.cleanup();
+  }
+  
+  private cleanup(): void {
+    // 🚀 PHASE 6: Enhanced cleanup with performance monitoring
+    console.log('🧹 Starting enhanced cleanup with performance monitoring...');
+    
+    // Stop performance monitoring
+    this.performanceService.stopComponentProfiling('evaluation-discussion-forum');
+    
+    // Unregister from memory leak detection
+    this.memoryLeakDetector.unregisterComponent('evaluation-discussion-forum');
+    
+    // Close any open notifications
+    if (this.currentSnackBarRef) {
+      this.currentSnackBarRef.dismiss();
+    }
+    
+    // Clear any pending actions in global state
+    this.globalStateService.setGlobalLoading(false);
+    
+    // Update last activity
+    this.globalStateService.updateLastActivity();
+    
+    console.log('✅ Enhanced cleanup completed');
+  }
+
+  // =============================================================================
+  // INITIALIZATION
+  // =============================================================================
+
+  // REMOVED: initializeMockStreams() - using real services now
+
+  // 🚀 PHASE 5: Initialize global state management integration
+  private initializeGlobalStateManagement(): void {
+    console.log('🌐 Initializing global state management');
+    
+    // Initialize observables
+    this.initializeObservableStreams();
+    
+    // Set up user permissions based on current evaluation state
+    this.setupUserPermissions();
+    
+    // Initialize performance tracking
+    this.setupPerformanceTracking();
+    
+    // Setup connectivity monitoring
+    this.setupConnectivityMonitoring();
+  }
+  
+  private setupUserPermissions(): void {
+    // Update global permissions based on evaluation state
+    combineLatest([
+      this.currentPhase$,
+      this.anonymousUser$,
+      this.submission$
+    ]).pipe(
+      takeUntil(this.destroy$),
+      filter(([phase, user, submission]) => !!phase && !!user && !!submission)
+    ).subscribe(([phase, user, submission]) => {
+      const permissions = {
+        canComment: phase === EvaluationPhase.DISCUSSION,
+        canVote: phase === EvaluationPhase.DISCUSSION,
+        canModerate: false, // Could be based on user role
+        canSwitchPhase: false, // Could be based on user role
+        canExport: true
+      };
+      
+      this.globalStateService.updateUserPermissions(permissions);
+    });
+  }
+  
+  private setupPerformanceTracking(): void {
+    // Track component initialization time
+    const startTime = performance.now();
+    
+    // Track when all critical data is loaded
+    this.viewModel$.pipe(
+      filter(vm => !!vm.submission && !!vm.anonymousUser),
+      take(1)
+    ).subscribe(() => {
+      const loadTime = performance.now() - startTime;
+      this.globalStateService.updatePerformanceMetrics(loadTime, true);
+      console.log(`⏱️ Component initialization completed in ${loadTime.toFixed(2)}ms`);
+    });
+  }
+  
+  private setupConnectivityMonitoring(): void {
+    // Monitor network status and update global state
+    this.systemStatus$.pipe(
+      takeUntil(this.destroy$),
+      map(status => status.isOnline),
+      distinctUntilChanged()
+    ).subscribe(isOnline => {
+      if (!isOnline) {
+        this.showErrorMessage('Verbindung unterbrochen. Arbeite im Offline-Modus.');
+      }
+    });
+  }
+  
+  // 🚀 PHASE 5: Enhanced deep linking support
+  private setupDeepLinkingSupport(): void {
+    console.log('🔗 Setting up deep linking support');
+    
+    // Handle highlighted comment from URL
+    this.highlightedCommentId$.pipe(
+      takeUntil(this.destroy$),
+      filter(commentId => !!commentId),
+      debounceTime(500) // Wait for UI to stabilize
+    ).subscribe(commentId => {
+      this.scrollToComment(commentId!);
+    });
+    
+    // Handle category selection from URL
+    this.currentCategoryId$.pipe(
+      takeUntil(this.destroy$),
+      filter(categoryId => !!categoryId)
+    ).subscribe(categoryId => {
+      this.stateService.setActiveCategory(categoryId!);
+    });
+    
+    // Update page metadata based on navigation context
+    this.navigationContext$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(context => {
+      this.updatePageMetadata(context);
+    });
+  }
+  
+  private setupPerformanceMonitoring(): void {
+    // 🚀 PHASE 6: Enhanced Performance Monitoring & Optimization
+    console.log('🎯 Setting up comprehensive performance monitoring...');
+    
+    // Register component for memory leak detection
+    this.memoryLeakDetector.registerComponent(
+      'evaluation-discussion-forum',
+      this,
+      {
+        trackSubscriptions: true,
+        trackMemory: true,
+        warningThreshold: 100 * 1024 * 1024 // 100MB threshold
+      }
+    );
+
+    // Start component profiling
+    this.performanceService.startComponentProfiling('evaluation-discussion-forum', {
+      trackMemory: true,
+      trackChangeDetection: true,
+      sampleRate: 1.0 // Profile all render cycles for main component
+    });
+
+    // Analyze bundle structure
+    this.bundleAnalyzer.analyzeBundleStructure();
+    
+    // Monitor component performance and report to global state
+    const startTime = performance.now();
+    
+    // Track render performance with enhanced metrics
+    this.viewModel$.pipe(
+      takeUntil(this.destroy$),
+      debounceTime(100)
+    ).subscribe(() => {
+      const renderTime = performance.now() - startTime;
+      
+      // Mark performance events
+      this.performanceService.markRenderEnd('evaluation-discussion-forum');
+      
+      // Log slow renders with more context
+      if (renderTime > 100) {
+        console.warn(`⚠️ Slow render detected: ${renderTime.toFixed(2)}ms in evaluation forum`);
+        
+        // Report to performance service
+        this.performanceService.updatePerformanceMetrics(renderTime, true);
+      }
+    });
+
+    // Monitor critical performance metrics
+    this.performanceService.performanceMetrics$.pipe(
+      takeUntil(this.destroy$),
+      filter(metrics => metrics.componentMetrics.has('evaluation-discussion-forum'))
+    ).subscribe(metrics => {
+      const componentMetrics = metrics.componentMetrics.get('evaluation-discussion-forum');
+      if (componentMetrics && componentMetrics.averageRenderTime > 50) {
+        console.warn(`📊 Component performance alert: Average render time ${componentMetrics.averageRenderTime.toFixed(2)}ms`);
+      }
+    });
+
+    // Monitor memory leaks
+    this.memoryLeakDetector.leakDetectionReport$.pipe(
+      takeUntil(this.destroy$),
+      filter(report => report.detectedLeaks.length > 0)
+    ).subscribe(report => {
+      const criticalLeaks = report.detectedLeaks.filter(leak => 
+        leak.severity === 'critical' && leak.componentName === 'evaluation-discussion-forum'
+      );
+      
+      if (criticalLeaks.length > 0) {
+        console.error('🚨 Critical memory leaks detected in evaluation forum:', criticalLeaks);
+        
+        // Show user notification for critical issues
+        this.snackBar.open(
+          'Leistungsproblem erkannt - Seite wird optimiert',
+          'OK',
+          { duration: 5000, panelClass: ['warning-snackbar'] }
+        );
+      }
+    });
+
+    // Log performance report periodically
+    interval(30000).pipe( // Every 30 seconds
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.performanceService.logPerformanceReport();
+      this.bundleAnalyzer.logBundleReport();
+    });
+    
+    console.log('✅ Performance monitoring setup completed');
+  }
+  
+  // =============================================================================
+  // 🚀 PHASE 6: PERFORMANCE MONITORING CONTROLS
+  // =============================================================================
+  
+  /**
+   * Toggles the performance dashboard visibility
+   */
+  togglePerformanceDashboard(): void {
+    this.showPerformanceDashboard = !this.showPerformanceDashboard;
+    console.log(`📊 Performance dashboard ${this.showPerformanceDashboard ? 'shown' : 'hidden'}`);
+    
+    if (this.showPerformanceDashboard) {
+      // Force a performance scan when dashboard is opened
+      this.performanceService.analyzeBundlePerformance();
+      this.bundleAnalyzer.analyzeBundleStructure();
+      this.memoryLeakDetector.forceScan();
+    }
+    
+    this.cdr.markForCheck();
+  }
+  
+  /**
+   * Checks if performance dashboard should be available
+   * (e.g., in development mode or for admin users)
+   */
+  isPerformanceDashboardAvailable(): boolean {
+    return !environment.production || this.isDevelopmentMode();
+  }
+  
+  /**
+   * Determines if we're in development mode
+   */
+  private isDevelopmentMode(): boolean {
+    return (
+      (typeof window !== 'undefined' && window.location.hostname === 'localhost') ||
+      (typeof window !== 'undefined' && window.location.hostname.includes('dev'))
+    );
+  }
+  
+  private updatePageMetadata(context: any): void {
+    if (context.submissionId) {
+      this.navigationService.updateMetaTags({
+        title: `Evaluation Discussion - ${context.submissionId}`,
+        description: 'Peer evaluation and discussion forum for submission review',
+        ogTitle: 'HEFL Evaluation Forum',
+        ogDescription: 'Participate in peer evaluation discussions',
+        ogUrl: this.navigationService.generateShareableUrl()
+      });
+    } else {
+      this.navigationService.updateMetaTags({
+        title: 'Evaluation Discussion Forum',
+        description: 'Browse and participate in evaluation discussions',
+        ogTitle: 'HEFL Evaluation Forum',
+        ogDescription: 'Collaborative peer evaluation platform'
+      });
+    }
+  }
+  
+  private scrollToComment(commentId: string): void {
+    console.log('🎯 Scrolling to comment:', commentId);
+    
+    // Use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      const element = document.getElementById(`comment-${commentId}`);
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+        
+        // Add highlight effect
+        element.classList.add('highlighted');
+        setTimeout(() => {
+          element.classList.remove('highlighted');
+        }, 3000);
+      } else {
+        console.warn('⚠️ Comment element not found:', commentId);
+      }
+    });
   }
 
   private handleRouteParams(): void {
@@ -374,6 +716,68 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   onCommentSubmitted(content: string): void {
     // Queue the comment for debounced processing
     this.commentSubmissionQueue$.next(content.trim());
+  }
+
+  /**
+   * Handles reply submission from discussion-thread component
+   * @param data - Contains parentCommentId and content
+   */
+  onReplySubmitted(data: { parentCommentId: string; content: string }): void {
+    if (!this.submissionId) {
+      console.error('❌ Cannot submit reply: Missing submissionId');
+      return;
+    }
+
+    console.log('📝 Reply submitted:', {
+      parentCommentId: data.parentCommentId,
+      content: data.content.substring(0, 50) + '...',
+      submissionId: this.submissionId,
+    });
+
+    // Set loading state
+    this.isSubmittingComment$.next(true);
+
+    // Get current active category and submit reply
+    this.activeCategory$
+      .pipe(
+        take(1),
+        switchMap(activeCategory => {
+          if (!activeCategory) {
+            throw new Error('Keine aktive Kategorie verfügbar');
+          }
+
+          console.log('📝 Submitting reply to category:', activeCategory);
+          
+          return this.stateService.addReply(
+            this.submissionId!,
+            activeCategory,
+            data.parentCommentId,
+            data.content.trim()
+          );
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: reply => {
+          console.log('✅ Reply created successfully:', reply);
+          this.showSnackBar('Antwort wurde erfolgreich erstellt', 'OK', 2000, false);
+          
+          // Reset loading state
+          this.isSubmittingComment$.next(false);
+          this.cdr.markForCheck();
+        },
+        error: error => {
+          console.error('❌ Failed to create reply:', error);
+          
+          // Reset loading state
+          this.isSubmittingComment$.next(false);
+          this.cdr.markForCheck();
+          
+          // Show error message
+          const message = error.message || 'Fehler beim Erstellen der Antwort';
+          this.showSnackBar(message, 'Schließen', 5000, true);
+        }
+      });
   }
 
   /**
@@ -623,6 +1027,175 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   trackByComment(index: number, comment: EvaluationCommentDTO): string {
     return comment.id;
+  }
+
+  // =============================================================================
+  // 🚀 PHASE 5: ENHANCED ERROR HANDLING WITH GLOBAL STATE
+  // =============================================================================
+
+  /**
+   * Enhanced error message display using global state notifications
+   * 
+   * @param message - Error message to display
+   * @param action - Optional action button text
+   */
+  private showErrorMessage(message: string, action?: string): void {
+    // Add to global state notifications
+    this.globalStateService.addNotification({
+      type: 'error',
+      title: 'Fehler',
+      message,
+      autoClose: true,
+      duration: 5000
+    });
+    
+    // Also show snackbar for immediate feedback
+    this.showSnackBar(message, action || 'Schließen', 5000, true);
+    
+    // Update system error count
+    this.globalStateService.incrementPendingActions();
+  }
+  
+  /**
+   * Enhanced success message display using global state notifications
+   * 
+   * @param message - Success message to display
+   * @param action - Optional action button text
+   */
+  private showSuccessMessage(message: string, action?: string): void {
+    // Add to global state notifications
+    this.globalStateService.addNotification({
+      type: 'success',
+      title: 'Erfolg',
+      message,
+      autoClose: true,
+      duration: 3000
+    });
+    
+    // Also show snackbar for immediate feedback
+    this.showSnackBar(message, action || 'OK', 3000, false);
+  }
+  
+  /**
+   * Enhanced warning message display using global state notifications
+   * 
+   * @param message - Warning message to display
+   * @param action - Optional action button text
+   */
+  private showWarningMessage(message: string, action?: string): void {
+    // Add to global state notifications
+    this.globalStateService.addNotification({
+      type: 'warning',
+      title: 'Warnung',
+      message,
+      autoClose: true,
+      duration: 4000
+    });
+    
+    // Also show snackbar for immediate feedback
+    this.showSnackBar(message, action || 'OK', 4000, false);
+  }
+  
+  /**
+   * Enhanced info message display using global state notifications
+   * 
+   * @param message - Info message to display
+   * @param action - Optional action button text
+   */
+  private showInfoMessage(message: string, action?: string): void {
+    // Add to global state notifications
+    this.globalStateService.addNotification({
+      type: 'info',
+      title: 'Information',
+      message,
+      autoClose: true,
+      duration: 3000
+    });
+    
+    // Also show snackbar for immediate feedback
+    this.showSnackBar(message, action || 'OK', 3000, false);
+  }
+
+  // =============================================================================
+  // 🚀 PHASE 5: ENHANCED NAVIGATION METHODS
+  // =============================================================================
+
+  /**
+   * Navigates to a specific submission with state management
+   * 
+   * @param submissionId - The submission ID to navigate to
+   * @param categoryId - Optional category to select
+   */
+  navigateToSubmission(submissionId: string, categoryId?: number): void {
+    console.log('🧩 Navigating to submission:', { submissionId, categoryId });
+    
+    this.navigationService.navigateToSubmission(submissionId, categoryId)
+      .then(success => {
+        if (success) {
+          this.showInfoMessage(`Zu Abgabe ${submissionId} navigiert`);
+        } else {
+          this.showErrorMessage('Navigation fehlgeschlagen');
+        }
+      })
+      .catch(error => {
+        console.error('❌ Navigation error:', error);
+        this.showErrorMessage('Fehler bei der Navigation');
+      });
+  }
+  
+  /**
+   * Shares the current evaluation URL
+   */
+  shareCurrentEvaluation(): void {
+    const shareUrl = this.navigationService.generateShareableUrl(true);
+    
+    if (navigator.share) {
+      // Use native share API if available
+      navigator.share({
+        title: 'HEFL Evaluation Discussion',
+        text: 'Schauen Sie sich diese Bewertungsdiskussion an',
+        url: shareUrl
+      }).then(() => {
+        this.showSuccessMessage('Link erfolgreich geteilt');
+      }).catch(error => {
+        console.error('Share failed:', error);
+        this.copyToClipboard(shareUrl);
+      });
+    } else {
+      // Fallback to clipboard
+      this.copyToClipboard(shareUrl);
+    }
+  }
+  
+  /**
+   * Copies text to clipboard with user feedback
+   * 
+   * @param text - Text to copy
+   */
+  private copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        this.showSuccessMessage('Link in Zwischenablage kopiert');
+      })
+      .catch(error => {
+        console.error('Clipboard copy failed:', error);
+        this.showErrorMessage('Kopieren in Zwischenablage fehlgeschlagen');
+      });
+  }
+  
+  /**
+   * Exports current evaluation data
+   */
+  exportEvaluationData(): void {
+    this.userPermissions$.pipe(take(1)).subscribe(permissions => {
+      if (!permissions.canExport) {
+        this.showWarningMessage('Sie haben keine Berechtigung zum Exportieren');
+        return;
+      }
+      
+      // Implement export functionality
+      this.showInfoMessage('Export-Funktionalität wird implementiert...');
+    });
   }
 
   // =============================================================================

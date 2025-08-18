@@ -154,7 +154,7 @@ export class EvaluationStateService {
         // Fallback: Falls keine Kategorie gesetzt ist, nutze die erste verfügbare
         if (categoryId === null) {
           const categories = this.categoriesSubject.value;
-          return categories.length > 0 ? categories[0].id : 5; // 5 als letzter Fallback
+          return categories.length > 0 ? categories[0].id : 1; // 1 als letzter Fallback
         }
         return categoryId;
       }),
@@ -358,7 +358,11 @@ export class EvaluationStateService {
    */
   private loadDiscussionsForCategory(submissionId: string, categoryId: number): void {
     const cacheKey = categoryId;
-
+    console.log('🔍 loadDiscussionsForCategory called:', {
+      submissionId,
+      categoryId,
+      cacheKey,
+    });
     // Phase 3.2: Prevent concurrent loading of the same category
     if (this.categoryLoadingStates.get(categoryId)) {
       console.log('⚠️ Category', categoryId, 'already loading, skipping duplicate request');
@@ -533,6 +537,8 @@ export class EvaluationStateService {
       submissionId,
       categoryId,
       commentId: comment.id,
+      parentId: comment.parentId,
+      isReply: !!comment.parentId,
     });
 
     try {
@@ -569,28 +575,125 @@ export class EvaluationStateService {
         updatedDiscussions.push(discussion);
       }
 
-      // Add comment to beginning (newest first) - with defensive programming
+      // Handle replies vs top-level comments differently
       if (!discussion.comments || !Array.isArray(discussion.comments)) {
         console.warn('⚠️ Discussion.comments was invalid, initializing as empty array');
         discussion.comments = [];
       }
 
-      discussion.comments = [comment, ...discussion.comments];
-      discussion.totalComments = discussion.comments.length;
-      discussion.usedComments = discussion.comments.length;
+      if (comment.parentId) {
+        // This is a reply - find the parent comment and add to its replies array
+        const success = this.addReplyToParent(discussion.comments, comment);
+        if (success) {
+          console.log('✅ Reply added to parent comment:', {
+            replyId: comment.id,
+            parentId: comment.parentId,
+          });
+        } else {
+          console.warn('⚠️ Could not find parent comment, adding as top-level:', {
+            replyId: comment.id,
+            parentId: comment.parentId,
+          });
+          // Fallback: add as top-level comment if parent not found
+          discussion.comments = [comment, ...discussion.comments];
+        }
+      } else {
+        // This is a top-level comment - add to beginning (newest first)
+        discussion.comments = [comment, ...discussion.comments];
+        console.log('✅ Top-level comment added to cache:', {
+          commentId: comment.id,
+        });
+      }
+
+      // Recalculate total comments (including all replies)
+      discussion.totalComments = this.calculateTotalComments(discussion.comments);
+      discussion.usedComments = discussion.totalComments;
 
       // Add new comment to the lookup map
       this.commentIdToCategoryIdMap.set(comment.id, categoryId);
 
-      console.log(
-        '✅ Discussion updated with new comment. Total comments:',
-        discussion.totalComments,
-      );
+      console.log('✅ Comment processing complete:', {
+        discussionId: discussion.id,
+        commentId: comment.id,
+        isReply: !!comment.parentId,
+        totalComments: discussion.totalComments,
+      });
+
       subject.next(updatedDiscussions);
     } catch (error) {
       console.error('❌ Error in handleCommentAdded:', error);
       this.setError('Fehler beim Aktualisieren der Kommentare. Bitte laden Sie die Seite neu.');
     }
+  }
+
+  /**
+   * Recursively finds a parent comment and adds the reply to its replies array
+   * @param comments - Array of comments to search through
+   * @param reply - The reply to add
+   * @returns true if parent was found and reply was added, false otherwise
+   */
+  private addReplyToParent(comments: EvaluationCommentDTO[], reply: EvaluationCommentDTO): boolean {
+    for (const comment of comments) {
+      if (comment.id === reply.parentId) {
+        // Found the parent - add reply to its replies array
+        comment.replies = comment.replies || [];
+        comment.replies.push(reply);
+
+        // Update reply count
+        comment.replyCount = (comment.replyCount || 0) + 1;
+
+        console.log('🔗 Reply linked to parent:', {
+          parentId: comment.id,
+          replyId: reply.id,
+          newReplyCount: comment.replyCount,
+        });
+
+        return true;
+      }
+
+      // Recursively search in replies
+      if (comment.replies && comment.replies.length > 0) {
+        if (this.addReplyToParent(comment.replies, reply)) {
+          // Update reply count for nested replies
+          comment.replyCount = this.calculateReplyCount(comment.replies);
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Calculates total comments including all nested replies
+   * @param comments - Array of top-level comments
+   * @returns Total count of all comments and replies
+   */
+  private calculateTotalComments(comments: EvaluationCommentDTO[]): number {
+    let total = comments.length;
+
+    for (const comment of comments) {
+      if (comment.replies && comment.replies.length > 0) {
+        total += this.calculateTotalComments(comment.replies);
+      }
+    }
+
+    return total;
+  }
+
+  /**
+   * Calculates reply count for a comment recursively
+   * @param replies - Array of replies
+   * @returns Total count of all replies (including nested)
+   */
+  private calculateReplyCount(replies: EvaluationCommentDTO[]): number {
+    if (!replies || replies.length === 0) {
+      return 0;
+    }
+
+    return replies.reduce((count, reply) => {
+      return count + 1 + this.calculateReplyCount(reply.replies || []);
+    }, 0);
   }
 
   // =============================================================================
@@ -619,7 +722,7 @@ export class EvaluationStateService {
   /**
    * Gets the complete vote state for a comment including status and loading state
    * This centralizes all vote management business logic previously in components
-   * 
+   *
    * @param commentId - The comment ID
    * @returns Observable with vote status and loading state
    * @memberof EvaluationStateService
@@ -630,7 +733,7 @@ export class EvaluationStateService {
   }> {
     // Ensure cache subjects exist
     this.ensureCommentVoteCache(commentId);
-    
+
     const voteStatus$ = this.commentVoteStatusCache.get(commentId)!.asObservable();
     const isLoading$ = this.commentVoteLoadingCache.get(commentId)!.asObservable();
 
@@ -642,20 +745,20 @@ export class EvaluationStateService {
   /**
    * Loads user vote status for a comment with fallback system
    * First tries local comment data, then API call if needed
-   * 
+   *
    * @param commentId - The comment ID
    * @memberof EvaluationStateService
    */
   loadUserVoteStatusForComment(commentId: string): void {
     // Ensure cache exists
     this.ensureCommentVoteCache(commentId);
-    
+
     const voteStatusSubject = this.commentVoteStatusCache.get(commentId)!;
     const loadingSubject = this.commentVoteLoadingCache.get(commentId)!;
 
     // First attempt: Try to get vote from local comment data
     const localVote = this.getUserVoteFromLocalComment(commentId);
-    
+
     if (localVote !== null) {
       console.log('✅ User vote found in local data:', {
         commentId,
@@ -689,7 +792,7 @@ export class EvaluationStateService {
         commentId,
         voteType,
       });
-      
+
       loadingSubject.next(false);
       voteStatusSubject.next(voteType);
     });
@@ -697,7 +800,7 @@ export class EvaluationStateService {
 
   /**
    * Performs optimistic voting with proper state management
-   * 
+   *
    * @param commentId - The comment ID
    * @param voteType - The vote type ('UP' or 'DOWN')
    * @param categoryId - The category ID for vote limits
@@ -705,17 +808,17 @@ export class EvaluationStateService {
    * @memberof EvaluationStateService
    */
   performOptimisticVote(
-    commentId: string, 
-    voteType: VoteType, 
+    commentId: string,
+    voteType: VoteType,
     categoryId: number
   ): Observable<VoteResultDTO> {
     // Ensure cache exists
     this.ensureCommentVoteCache(commentId);
-    
+
     const voteStatusSubject = this.commentVoteStatusCache.get(commentId)!;
     const currentVote = voteStatusSubject.value;
     const newVote = currentVote === voteType ? null : voteType; // Toggle logic
-    
+
     console.log('🗳️ Vote initiated:', {
       commentId,
       currentVote,
@@ -742,7 +845,7 @@ export class EvaluationStateService {
       catchError(error => {
         // Vote failed - revert optimistic update
         console.log('❌ Vote failed, reverting optimistic update');
-        
+
         // Reload vote status from local data first (faster fallback)
         const localVote = this.getUserVoteFromLocalComment(commentId);
         if (localVote !== null) {
@@ -751,7 +854,7 @@ export class EvaluationStateService {
           // If no local data, reload from API
           this.loadUserVoteStatusForComment(commentId);
         }
-        
+
         // Emit error event
         this.voteErrorSubject.next({ commentId });
         throw error;
@@ -761,7 +864,7 @@ export class EvaluationStateService {
 
   /**
    * Ensures vote cache subjects exist for a comment
-   * 
+   *
    * @param commentId - The comment ID
    * @memberof EvaluationStateService
    */
@@ -777,7 +880,7 @@ export class EvaluationStateService {
   /**
    * Gets user vote from local comment data (fallback system)
    * This is the local fallback before API call
-   * 
+   *
    * @param commentId - The comment ID
    * @returns VoteType | null - The user's vote or null
    * @memberof EvaluationStateService
@@ -849,7 +952,7 @@ export class EvaluationStateService {
     const category2$ = this.discussionCache.get(2)?.asObservable() || of([]);
     const category3$ = this.discussionCache.get(3)?.asObservable() || of([]);
     const category4$ = this.discussionCache.get(4)?.asObservable() || of([]);
-    
+
     return combineLatest([
       category1$,
       category2$,
@@ -859,7 +962,7 @@ export class EvaluationStateService {
       map(([disc1, disc2, disc3, disc4]) => {
         const allComments = [...disc1, ...disc2, ...disc3, ...disc4]
           .flatMap(discussion => discussion.comments);
-        
+
         const comment = allComments.find(c => c.id === commentId);
         if (!comment) return null;
 
@@ -878,13 +981,13 @@ export class EvaluationStateService {
           userVote: result.userVote,
           netVotes: result.netVotes,
         });
-        
+
         // 🚀 PHASE 4: Emit vote completion for cache synchronization
         this.voteCompletionSubject.next({
           commentId,
           voteResult: result.userVote,
         });
-        
+
         return result;
       }),
       catchError(error => {

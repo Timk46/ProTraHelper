@@ -10,6 +10,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { Response as ExpressResponse } from 'express';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { LocalAuthGuard } from './common/guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { CasAuthGuard } from './common/guards/cas-auth.guard';
@@ -23,6 +24,7 @@ import { roles } from '@/auth/common/guards/roles.guard';
 /**
  * This class is used to define the auth routes of the application
  */
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -35,6 +37,9 @@ export class AuthController {
    * @throws { UnauthorizedException } If the user email is not provided.
    * @returns { Promise<void> } A promise that resolves when the redirection is complete.
    */
+  @ApiOperation({ summary: 'CAS Login', description: 'Handles the CAS authentication process' })
+  @ApiResponse({ status: 302, description: 'Redirects to frontend with authentication tokens' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - User email not provided' })
   @Public()
   @UseGuards(CasAuthGuard)
   @Get('cas')

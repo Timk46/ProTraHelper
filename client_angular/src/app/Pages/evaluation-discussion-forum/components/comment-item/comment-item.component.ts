@@ -9,8 +9,13 @@ import {
   OnChanges,
   SimpleChanges,
   OnDestroy,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  Inject,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, takeUntil, Subject, filter, retry, catchError, of, timer } from 'rxjs';
 
 // Angular Material Imports (reduced set for chat bubbles)
@@ -23,6 +28,7 @@ import { FormsModule } from '@angular/forms';
 
 // Services
 import { EvaluationStateService } from '../../../../Services/evaluation/evaluation-state.service';
+import { CommentPanelStateService } from '../../../../Services/evaluation/comment-panel-state.service';
 
 // DTOs
 import { EvaluationCommentDTO, AnonymousEvaluationUserDTO, VoteType } from '@DTOs/index';
@@ -46,7 +52,7 @@ import { EvaluationCommentDTO, AnonymousEvaluationUserDTO, VoteType } from '@DTO
   styleUrl: './comment-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CommentItemComponent implements OnInit, OnChanges, OnDestroy {
+export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   // =============================================================================
   // INPUTS - DATA FROM PARENT COMPONENT
   // =============================================================================
@@ -61,6 +67,10 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy {
   @Input() isVoting: boolean = false;
   @Input() depth: number = 0;
   @Input() isReadOnly: boolean = false;
+
+  // =============================================================================
+  // VIEW REFERENCES - 🚀 PHASE 5: Cleaned up - inline reply removed
+  // =============================================================================
 
   // =============================================================================
   // OUTPUTS - EVENTS TO PARENT COMPONENT
@@ -91,10 +101,10 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy {
   private _userVoteStatusCache = new BehaviorSubject<VoteType | null>(null);
   private destroy$ = new Subject<void>();
   
-  // Reply state
-  showReplyInput: boolean = false;
-  replyText: string = '';
-  isSubmittingReply: boolean = false;
+  // 🚀 PHASE 5: Reply state removed - now handled by separate reply-input items
+  
+  // Panel state
+  isPanelExpanded: boolean = false;
   
   // 🚀 PHASE 2: Public observables for reactive programming with template
   userVoteStatus$ = this._userVoteStatusCache.asObservable();
@@ -115,6 +125,8 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy {
   constructor(
     private cdr: ChangeDetectorRef,
     private evaluationStateService: EvaluationStateService,
+    private commentPanelStateService: CommentPanelStateService,
+    @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
   // =============================================================================
@@ -136,6 +148,9 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy {
     // 🚀 PHASE 4: Listen to vote completion events for cache synchronization
     this.setupVoteEventListeners();
     
+    // Initialize panel state
+    this.initializePanelState();
+    
     console.log('💬 Comment item initialized:', {
       commentId: this.comment.id,
       authorId: this.comment.author.id,
@@ -143,7 +158,12 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy {
       authorDisplayName: this.comment.author.displayName,
       anonymousUserId: this.anonymousUser?.id,
       isCurrentUser: this._cachedIsCurrentUser, // Use cached value
+      isPanelExpanded: this.isPanelExpanded,
     });
+  }
+
+  ngAfterViewInit(): void {
+    // ViewChild references are now available
   }
 
   ngOnDestroy(): void {
@@ -372,6 +392,51 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   // =============================================================================
+  // PANEL STATE MANAGEMENT
+  // =============================================================================
+
+  /**
+   * Initializes the panel expansion state from the service
+   */
+  private initializePanelState(): void {
+    // Subscribe to panel state changes for this comment
+    this.commentPanelStateService.getPanelState(this.comment.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isExpanded => {
+        this.isPanelExpanded = isExpanded;
+        this.cdr.detectChanges();
+      });
+
+    // Set initial state (default to collapsed for comments with replies)
+    this.isPanelExpanded = this.commentPanelStateService.isPanelExpanded(this.comment.id);
+  }
+
+  // 🚀 PHASE 5: Old reply textarea helper methods removed - handled by separate reply-input component
+
+  /**
+   * Toggles the panel expansion state
+   */
+  onTogglePanel(): void {
+    if (!this.hasReplies()) {
+      return; // Don't toggle if no replies
+    }
+
+    // 🚀 PHASE 4: Trigger haptic feedback for mobile devices
+    this.triggerHapticFeedback('light');
+
+    const newState = this.commentPanelStateService.togglePanelState(this.comment.id);
+    
+    console.log('🔄 Panel toggled:', {
+      commentId: this.comment.id,
+      newState,
+      replyCount: this.comment.replyCount,
+    });
+
+    // The panel state will be updated via the subscription in initializePanelState
+    // No need to manually update isPanelExpanded here
+  }
+
+  // =============================================================================
   // TIME FORMATTING
   // =============================================================================
 
@@ -416,6 +481,9 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.canVote || this.isVoting) {
       return;
     }
+
+    // 🚀 PHASE 4: Trigger haptic feedback for mobile devices
+    this.triggerHapticFeedback('light');
 
     // 🚀 PHASE 4: Optimistic UI update with unified state management
     const currentVote = this._cachedUserVote;
@@ -469,62 +537,20 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onReply(): void {
-    // Show inline reply input
-    this.showReplyInput = true;
-    this.replyText = '';
+    // 🚀 PHASE 4: Trigger haptic feedback for mobile devices
+    this.triggerHapticFeedback('medium');
     
-    // Also emit the legacy event for parent components
+    // 🚀 PHASE 5: Simplified - only emit event, reply input handled by parent
     this.replyRequested.emit(this.comment.id);
     
-    // Trigger change detection
-    this.cdr.detectChanges();
-  }
-
-  onSubmitReply(): void {
-    if (!this.replyText.trim() || this.isSubmittingReply) {
-      return;
-    }
-
-    // Validate categoryId exists
-    if (!this.comment.categoryId) {
-      console.error('❌ Cannot create reply: categoryId is null');
-      alert('Fehler: Kategorie-ID fehlt. Bitte laden Sie die Seite neu.');
-      return;
-    }
-
-    this.isSubmittingReply = true;
-
-    // Use the state service to add reply
-    this.evaluationStateService.addReply(
-      this.comment.submissionId,
-      this.comment.categoryId,
-      this.comment.id,
-      this.replyText.trim()
-    ).subscribe({
-      next: (reply) => {
-        console.log('✅ Reply created successfully:', reply);
-        this.onCancelReply(); // Clear the form
-        
-        // Note: The parent component should reload discussions to show the new reply
-        // This is handled by the state service cache invalidation
-      },
-      error: (error) => {
-        console.error('❌ Failed to create reply:', error);
-        this.isSubmittingReply = false;
-        this.cdr.detectChanges();
-        
-        // Could show a toast notification here
-        alert('Fehler beim Erstellen der Antwort. Bitte versuchen Sie es erneut.');
-      }
+    console.log('🎯 Reply requested:', {
+      commentId: this.comment.id,
     });
   }
 
-  onCancelReply(): void {
-    this.showReplyInput = false;
-    this.replyText = '';
-    this.isSubmittingReply = false;
-    this.cdr.detectChanges();
-  }
+  // 🚀 PHASE 5: Old reply submission methods removed - handled by separate reply-input component
+
+  // 🚀 PHASE 5: Old reply keyboard handler removed - handled by separate reply-input component
 
   onToggleContent(): void {
     this.isContentExpanded = !this.isContentExpanded;
@@ -769,5 +795,105 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+  }
+
+  // =============================================================================
+  // 🚀 PHASE 4: HAPTIC FEEDBACK SUPPORT FOR MOBILE DEVICES
+  // =============================================================================
+
+  /**
+   * Triggers haptic feedback on supported mobile devices
+   * @param intensity - The intensity of the haptic feedback ('light', 'medium', 'heavy')
+   */
+  private triggerHapticFeedback(intensity: 'light' | 'medium' | 'heavy' = 'light'): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return; // Don't trigger on server
+    }
+
+    // Check if the device supports haptic feedback
+    if ('vibrate' in navigator) {
+      let pattern: number | number[];
+      
+      switch (intensity) {
+        case 'light':
+          pattern = 50; // Short vibration
+          break;
+        case 'medium':
+          pattern = [100, 50, 100]; // Medium pattern
+          break;
+        case 'heavy':
+          pattern = [200, 100, 200]; // Heavy pattern
+          break;
+        default:
+          pattern = 50;
+      }
+      
+      navigator.vibrate(pattern);
+    }
+
+    // Check for modern iOS haptic feedback (iOS 10+)
+    if ('hapticFeedback' in window && typeof (window as any).hapticFeedback !== 'undefined') {
+      const hapticType = intensity === 'light' ? 'impactLight' : 
+                        intensity === 'medium' ? 'impactMedium' : 'impactHeavy';
+      (window as any).hapticFeedback(hapticType);
+    }
+
+    // Fallback: Add CSS animation class for visual feedback
+    this.addHapticFeedbackAnimation();
+  }
+
+  /**
+   * Adds a visual haptic feedback animation class temporarily
+   */
+  private addHapticFeedbackAnimation(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    const element = document.querySelector(`[data-comment-id="${this.comment.id}"]`);
+    if (element) {
+      element.classList.add('haptic-feedback');
+      
+      // Remove the class after animation completes
+      setTimeout(() => {
+        element.classList.remove('haptic-feedback');
+      }, 300);
+    }
+  }
+
+  /**
+   * Triggers a success animation after a vote is successfully processed
+   */
+  private triggerVoteSuccessAnimation(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    const element = document.querySelector(`[data-comment-id="${this.comment.id}"] .vote-btn.voted`);
+    if (element) {
+      element.classList.add('vote-success');
+      
+      // Remove the class after animation completes
+      setTimeout(() => {
+        element.classList.remove('vote-success');
+      }, 400);
+    }
+  }
+
+  /**
+   * Enhanced vote completion handler with success animation
+   */
+  onVoteCompleted(voteResult: VoteType | null): void {
+    console.log('✅ Vote completed, updating cache:', {
+      commentId: this.comment.id,
+      voteResult,
+    });
+
+    // Use unified method for consistent state management
+    this.setVoteStatus(voteResult, 'vote-completed');
+    
+    // 🚀 PHASE 4: Trigger success animation and haptic feedback
+    this.triggerVoteSuccessAnimation();
+    this.triggerHapticFeedback('medium');
   }
 }

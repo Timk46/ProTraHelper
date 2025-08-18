@@ -1,7 +1,20 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { map, tap, switchMap } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, BehaviorSubject, timer, throwError, of } from 'rxjs';
+import { 
+  map, 
+  tap, 
+  switchMap, 
+  retry, 
+  retryWhen, 
+  delay, 
+  take, 
+  mergeMap,
+  catchError,
+  debounceTime,
+  throttleTime,
+  distinctUntilChanged
+} from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 // Import all evaluation DTOs
 import {
@@ -37,8 +50,145 @@ export class EvaluationDiscussionService {
   private commentsSubject = new BehaviorSubject<EvaluationCommentDTO[]>([]);
   private ratingsSubject = new BehaviorSubject<EvaluationRatingDTO[]>([]);
 
+  // Performance optimization subjects
+  private pendingRequests = new Map<string, Observable<any>>();
+  
+  // Configuration for retry logic
+  private readonly MAX_RETRY_ATTEMPTS = 3;
+  private readonly RETRY_DELAYS = [1000, 2000, 5000]; // Exponential backoff
+  private readonly DEBOUNCE_TIME = 300; // ms
+  private readonly THROTTLE_TIME = 1000; // ms
+
   constructor(private http: HttpClient) {
     // Using real backend APIs - no mock data initialization needed
+  }
+
+  // =============================================================================
+  // PERFORMANCE & RETRY HELPERS
+  // =============================================================================
+
+  /**
+   * Enhanced HTTP request with exponential backoff retry logic
+   * @param request - The HTTP request observable
+   * @param options - Retry options
+   * @returns Observable with retry logic applied
+   */
+  private withRetry<T>(
+    request: Observable<T>,
+    options: {
+      maxAttempts?: number;
+      shouldRetry?: (error: HttpErrorResponse) => boolean;
+      requestKey?: string;
+    } = {}
+  ): Observable<T> {
+    const { 
+      maxAttempts = this.MAX_RETRY_ATTEMPTS, 
+      shouldRetry = this.defaultShouldRetry,
+      requestKey
+    } = options;
+
+    // Deduplication: Return existing request if already pending
+    if (requestKey && this.pendingRequests.has(requestKey)) {
+      console.log('🔄 Returning existing request for key:', requestKey);
+      return this.pendingRequests.get(requestKey)!;
+    }
+
+    const requestWithRetry = request.pipe(
+      retryWhen(errors => 
+        errors.pipe(
+          mergeMap((error: HttpErrorResponse, attempt) => {
+            const shouldRetryError = shouldRetry(error);
+            const isLastAttempt = attempt >= maxAttempts - 1;
+
+            console.log(`🔄 Request attempt ${attempt + 1}/${maxAttempts}:`, {
+              status: error.status,
+              shouldRetry: shouldRetryError,
+              isLastAttempt
+            });
+
+            if (!shouldRetryError || isLastAttempt) {
+              return throwError(() => error);
+            }
+
+            const delayTime = this.RETRY_DELAYS[attempt] || 5000;
+            console.log(`⏰ Retrying in ${delayTime}ms...`);
+            return timer(delayTime);
+          })
+        )
+      ),
+      tap(() => {
+        // Clean up pending request on success
+        if (requestKey) {
+          this.pendingRequests.delete(requestKey);
+        }
+      }),
+      catchError(error => {
+        // Clean up pending request on final error
+        if (requestKey) {
+          this.pendingRequests.delete(requestKey);
+        }
+        return throwError(() => error);
+      })
+    );
+
+    // Cache pending request
+    if (requestKey) {
+      this.pendingRequests.set(requestKey, requestWithRetry);
+    }
+
+    return requestWithRetry;
+  }
+
+  /**
+   * Determines if an HTTP error should trigger a retry
+   * @param error - The HTTP error response
+   * @returns true if request should be retried
+   */
+  private defaultShouldRetry(error: HttpErrorResponse): boolean {
+    // Retry on network errors or 5xx server errors
+    return !error.status || // Network error
+           error.status === 0 || // Network error
+           (error.status >= 500 && error.status < 600) || // Server errors
+           error.status === 429; // Rate limiting
+  }
+
+  /**
+   * Creates a debounced version of an HTTP request
+   * @param requestFactory - Function that creates the HTTP request
+   * @param debounceTime - Debounce time in milliseconds
+   * @returns Debounced observable
+   */
+  private withDebounce<T>(
+    requestFactory: () => Observable<T>,
+    debounceTime: number = this.DEBOUNCE_TIME
+  ): Observable<T> {
+    return timer(debounceTime).pipe(
+      switchMap(() => requestFactory())
+    );
+  }
+
+  /**
+   * Enhanced vote request with optimistic updates and batch support
+   * @param votes - Array of vote operations
+   * @returns Observable with batch voting results
+   */
+  batchVoteComments(votes: Array<{ commentId: string; voteType: VoteType }>): Observable<VoteResultDTO[]> {
+    console.log('🗳️ Batch voting on comments:', votes.length, 'votes');
+    
+    const batchRequest = this.http.post<VoteResultDTO[]>(`${this.apiUrls.comments}/batch-vote`, { votes });
+    
+    return this.withRetry(batchRequest, {
+      requestKey: `batch-vote-${votes.map(v => v.commentId).join('-')}`,
+      shouldRetry: (error) => {
+        // Don't retry on validation errors (4xx)
+        return error.status >= 500 || !error.status;
+      }
+    }).pipe(
+      throttleTime(this.THROTTLE_TIME, undefined, { leading: true, trailing: true }),
+      tap(results => {
+        console.log('✅ Batch vote completed:', results.length, 'results');
+      })
+    );
   }
 
   // =============================================================================
@@ -46,7 +196,17 @@ export class EvaluationDiscussionService {
   // =============================================================================
 
   getSubmission(submissionId: string): Observable<EvaluationSubmissionDTO> {
-    return this.http.get<EvaluationSubmissionDTO>(`${this.apiUrls.submissions}/${submissionId}`);
+    const request = this.http.get<EvaluationSubmissionDTO>(`${this.apiUrls.submissions}/${submissionId}`);
+    
+    return this.withRetry(request, {
+      requestKey: `submission-${submissionId}`,
+      maxAttempts: 3
+    }).pipe(
+      distinctUntilChanged(),
+      tap(submission => {
+        console.log('✅ Submission loaded with retry support:', submission.id);
+      })
+    );
   }
 
   /**
@@ -54,18 +214,30 @@ export class EvaluationDiscussionService {
    * Requires sessionId - gets it from current submission
    */
   getCategories(sessionId?: number): Observable<EvaluationCategoryDTO[]> {
-    if (sessionId) {
-      return this.http.get<EvaluationCategoryDTO[]>(`${this.apiUrls.sessions}/${sessionId}/categories`);
+    if (!sessionId) {
+      throw new Error('SessionId required for categories endpoint');
     }
 
-    // If no sessionId provided, throw error - calling code should provide it
-    throw new Error('SessionId required for categories endpoint');
+    const request = this.http.get<EvaluationCategoryDTO[]>(`${this.apiUrls.sessions}/${sessionId}/categories`);
+    
+    return this.withRetry(request, {
+      requestKey: `categories-${sessionId}`,
+      maxAttempts: 2
+    }).pipe(
+      distinctUntilChanged((prev, curr) => 
+        JSON.stringify(prev) === JSON.stringify(curr)
+      ),
+      tap(categories => {
+        console.log('✅ Categories loaded with retry support:', categories.length);
+      })
+    );
   }
 
   getDiscussionsByCategory(
     submissionId: string,
     categoryId: string
   ): Observable<EvaluationDiscussionDTO[]> {
+    console.log('🔍 getDiscussionsByCategory service call', submissionId, categoryId);
     // Phase 2.1: Transform EvaluationCommentDTO[] response to EvaluationDiscussionDTO[]
     return this.http.get<EvaluationCommentDTO[]>(
       `${this.apiUrls.comments}?submissionId=${submissionId}&categoryId=${categoryId}`
@@ -107,11 +279,29 @@ export class EvaluationDiscussionService {
   }
 
   /**
-   * Votes on a comment
+   * Votes on a comment with enhanced retry logic and performance optimization
    * Corrected parameter name to match backend expectation
    */
   voteComment(commentId: string, voteType: VoteType): Observable<VoteResultDTO> {
-    return this.http.post<VoteResultDTO>(`${this.apiUrls.comments}/${commentId}/vote`, { voteType });
+    const request = this.http.post<VoteResultDTO>(`${this.apiUrls.comments}/${commentId}/vote`, { voteType });
+    
+    return this.withRetry(request, {
+      requestKey: `vote-${commentId}-${voteType}-${Date.now()}`, // Include timestamp to prevent caching votes
+      maxAttempts: 2,
+      shouldRetry: (error) => {
+        // Don't retry client errors (4xx) except 429
+        return error.status >= 500 || error.status === 429 || !error.status;
+      }
+    }).pipe(
+      throttleTime(500, undefined, { leading: true, trailing: false }), // Prevent spam voting
+      tap(result => {
+        console.log('✅ Vote completed with retry support:', {
+          commentId,
+          voteType,
+          result: result.userVote
+        });
+      })
+    );
   }
 
   /**

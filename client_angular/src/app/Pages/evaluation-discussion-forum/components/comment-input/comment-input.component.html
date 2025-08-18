@@ -52,7 +52,7 @@
   </mat-card-content>
   
   <!-- Action Buttons -->
-  <mat-card-actions *ngIf="showSubmitButton" class="comment-actions">
+  <mat-card-actions *ngIf="showSubmitButton" class="comment-actions" [ngClass]="{ 'reply-mode': isInReplyMode() }">
     
     <!-- Action Buttons Container -->
     <div class="action-buttons">
@@ -60,8 +60,25 @@
       <!-- Keyboard Hint -->
       <div class="keyboard-hint" *ngIf="isFocused && !disabled">
         <mat-icon class="hint-icon">keyboard</mat-icon>
-        <span class="hint-text">Strg+Enter zum Senden</span>
+        <span class="hint-text">
+          {{ isInReplyMode() ? 'Strg+Enter zum Antworten, Escape zum Abbrechen' : 'Strg+Enter zum Senden' }}
+        </span>
       </div>
+      
+      <!-- 🚀 PHASE 4: Cancel Button for Reply Mode -->
+      <button 
+        *ngIf="showCancelButton && isInReplyMode()"
+        mat-button
+        type="button"
+        class="cancel-button"
+        [disabled]="isSubmitting"
+        [matTooltip]="getCancelTooltip()"
+        (click)="onCancel()">
+        
+        <mat-icon class="cancel-icon">close</mat-icon>
+        <span class="button-text">Abbrechen</span>
+        
+      </button>
       
       <!-- Submit Button -->
       <button 
@@ -81,11 +98,13 @@
         </mat-spinner>
         
         <!-- Submit Icon -->
-        <mat-icon *ngIf="!isSubmitting" class="submit-icon">send</mat-icon>
+        <mat-icon *ngIf="!isSubmitting" class="submit-icon">
+          {{ isInReplyMode() ? 'reply' : 'send' }}
+        </mat-icon>
         
         <!-- Button Text -->
         <span class="button-text">
-          {{ isSubmitting ? 'Wird gesendet...' : submitButtonText }}
+          {{ getSubmitButtonText() }}
         </span>
         
       </button>
