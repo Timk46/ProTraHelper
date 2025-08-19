@@ -8,12 +8,14 @@ import { seedMCSlider } from './seed/seedMCSlider';
 import { seedTWL } from './seedTWl';
 import seedEvaluationCompleteFix from './seed/seedEvaluationCompleteFix';
 import { seedEvaluationDemo } from './seed/seedEvaluationDemo';
+import seedTraKoCombined from './seed/seedTraKoCombined';
 const prisma = new PrismaClient();
 
 async function main() {
   //await seedAUD();
   //await seedOFP();
-  await seedTraKo();
+  //await seedTraKo();
+  await seedTraKoCombined();
   //await seedTranscriptsToConceptNodes();
   //await seedUmlearn();
   //await seedMCSlider();
