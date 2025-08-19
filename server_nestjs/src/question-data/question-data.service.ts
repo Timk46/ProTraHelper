@@ -2,18 +2,14 @@
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
+import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswerDTO } from '@DTOs/index';
 import {
   QuestionDTO,
+  questionType,
   detailedQuestionDTO,
   editorDataDTO,
-  taskSettingsDTO} from '@DTOs/index';
-import {
-  questionType,
-  FillinQuestionDTO
+  taskSettingsDTO,
 } from '@DTOs/index';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswer } from '@DTOs/userAnswer.dto';
-import { QuestionDTO, questionType, detailedQuestionDTO, editorDataDTO, taskSettingsDTO } from '@DTOs/index';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswerDTO } from '@DTOs/userAnswer.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataCodeService } from './question-data-code/question-data-code.service';
@@ -26,7 +22,6 @@ import { QuestionDataCodeGameService } from '@/question-data/question-data-code-
 import { QuestionDataUploadService } from './question-data-upload/question-data-upload.service';
 import { ProductionFilesService } from '@/files/production-files.service';
 import { QuestionDataGroupReviewGateService } from './question-data-groupreviewgate/question-data-groupreviewgate.service';
-
 
 @Injectable()
 export class QuestionDataService {
@@ -86,7 +81,11 @@ export class QuestionDataService {
    * @returns {Promise<detailedQuestionDTO>} A promise that resolves to a detailedQuestionDTO object representing the detailed question.
    * @throws An error if the question with the specified ID is not found.
    */
-  async getDetailedQuestion(questionId: number, questionTypeStr: string, userId: number): Promise<detailedQuestionDTO> {
+  async getDetailedQuestion(
+    questionId: number,
+    questionTypeStr: string,
+    userId: number,
+  ): Promise<detailedQuestionDTO> {
     const question = await this.prisma.question.findUnique({
       where: {
         id: Number(questionId),
@@ -195,15 +194,15 @@ export class QuestionDataService {
       case questionType.GROUP_REVIEW_GATE:
         specificQuestionData = await this.prisma.groupReviewGate.findFirst({
           where: {
-            questionId: Number(questionId)
-          }
+            questionId: Number(questionId),
+          },
         });
         break;
       case questionType.GROUP_REVIEW_GATE:
         specificQuestionData = await this.prisma.groupReviewGate.findFirst({
           where: {
-            questionId: Number(questionId)
-          }
+            questionId: Number(questionId),
+          },
         });
         break;
     }
@@ -227,13 +226,14 @@ export class QuestionDataService {
       codeGameQuestion:
         questionTypeStr === questionType.CODEGAME ? specificQuestionData : undefined,
       uploadQuestion: questionTypeStr === questionType.UPLOAD ? specificQuestionData : undefined,
-      groupReviewGate: questionTypeStr === questionType.GROUP_REVIEW_GATE ? specificQuestionData : undefined,
+      groupReviewGate:
+        questionTypeStr === questionType.GROUP_REVIEW_GATE ? specificQuestionData : undefined,
     };
 
     if (questionTypeStr === questionType.GROUP_REVIEW_GATE) {
       const userGroup = await this.prisma.userGroupMembership.findFirst({
         where: { userId: userId },
-        include: { group: { include: { UserGroupMembership: { include: { user: true } } } } }
+        include: { group: { include: { UserGroupMembership: { include: { user: true } } } } },
       });
 
       if (userGroup) {
@@ -341,8 +341,16 @@ export class QuestionDataService {
    * @returns {Promise<detailedQuestionDTO>} A promise that resolves to the updated detailed question object.
    * @throws Error if the question is not updateable.
    */
-  async updateWholeQuestion(question: detailedQuestionDTO, authorId: number, createNewVersion: boolean = false): Promise<detailedQuestionDTO> {
-    const currentQuestion = await this.getDetailedQuestion(question.id, question.type as questionType, authorId);
+  async updateWholeQuestion(
+    question: detailedQuestionDTO,
+    authorId: number,
+    createNewVersion: boolean = false,
+  ): Promise<detailedQuestionDTO> {
+    const currentQuestion = await this.getDetailedQuestion(
+      question.id,
+      question.type as questionType,
+      authorId,
+    );
 
     if (!this.detailedQuestionsUpdateable(currentQuestion, question)) {
       console.log('currentQuestion: ', currentQuestion);
@@ -358,7 +366,7 @@ export class QuestionDataService {
           name: question.name,
           description: question.description,
           score: question.score,
-          type: question.type ,
+          type: question.type,
           level: question.level,
           mode: question.mode,
           author: { connect: { id: authorId } },
@@ -385,7 +393,7 @@ export class QuestionDataService {
           name: question.name,
           description: question.description,
           score: question.score,
-          type: question.type ,
+          type: question.type,
           level: question.level,
           mode: question.mode,
           text: question.text,
@@ -485,12 +493,19 @@ export class QuestionDataService {
         if (createNewVersion || !currentQuestion.groupReviewGate) {
           await this.qdGroupReviewGate.create(updatedQuestion.id, question.groupReviewGate);
         } else {
-          await this.qdGroupReviewGate.update(currentQuestion.groupReviewGate.id, question.groupReviewGate);
+          await this.qdGroupReviewGate.update(
+            currentQuestion.groupReviewGate.id,
+            question.groupReviewGate,
+          );
         }
         break;
     }
 
-    return await this.getDetailedQuestion(updatedQuestion.id, question.type as questionType, authorId);
+    return await this.getDetailedQuestion(
+      updatedQuestion.id,
+      question.type as questionType,
+      authorId,
+    );
   }
 
   /**
@@ -520,9 +535,8 @@ export class QuestionDataService {
         newQuestion.umlQuestion ||
         newQuestion.codeGameQuestion ||
         newQuestion.uploadQuestion ||
-        newQuestion.groupReviewGate
-      )
-    ){
+        newQuestion.groupReviewGate)
+    ) {
       return true;
     }
     return false;
@@ -571,7 +585,11 @@ export class QuestionDataService {
 
     const question = await this.getQuestion(answerData.questionId);
     if (!question) throw new Error('Could not get question');
-    const detailedQuestion = await this.getDetailedQuestion(answerData.questionId, question.type, userId);
+    const detailedQuestion = await this.getDetailedQuestion(
+      answerData.questionId,
+      question.type,
+      userId,
+    );
     if (!detailedQuestion) throw new Error('Could not get detailed question');
 
     //generate feedback for user answer

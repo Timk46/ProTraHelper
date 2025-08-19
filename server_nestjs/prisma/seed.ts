@@ -13,11 +13,11 @@ const prisma = new PrismaClient();
 async function main() {
   //await seedAUD();
   //await seedOFP();
-  //await seedTraKo();
+  await seedTraKo();
   //await seedTranscriptsToConceptNodes();
   //await seedUmlearn();
   //await seedMCSlider();
-  await seedEvaluationCompleteFix();
+  //await seedEvaluationCompleteFix();
   //await seedEvaluationDemo();
 }
 
