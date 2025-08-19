@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Inject, Output } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { TaskViewData, uploadQuestionDTO, UserAnswerDTO } from '@DTOs/question.dto';
+import { TaskViewData, uploadQuestionDTO } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserAnswerDataDTO } from '@DTOs/index';

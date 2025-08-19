@@ -2,8 +2,12 @@ import { Component, OnInit, Renderer2, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { SubjectManagementService } from '../../services/subject-management.service';
-import { UserGroupDTO, CreateUserGroupDTO, CreateUserGroupMembershipDTO } from '@DTOs/index';
-import { UserDTO } from '@DTOs/user.dto';
+import {
+  UserGroupDTO,
+  CreateUserGroupDTO,
+  CreateUserGroupMembershipDTO,
+  UserDTO,
+} from '@DTOs/index';
 
 // Client-side interface to handle UI logic easily
 interface ClientUserGroup extends UserGroupDTO {
@@ -14,10 +18,9 @@ interface ClientUserGroup extends UserGroupDTO {
 @Component({
   selector: 'app-user-grouping',
   templateUrl: './user-grouping.component.html',
-  styleUrls: ['./user-grouping.component.scss']
+  styleUrls: ['./user-grouping.component.scss'],
 })
 export class UserGroupingComponent implements OnInit {
-
   allUsers: UserDTO[] = [];
   unassignedUsers: UserDTO[] = [];
   groups: ClientUserGroup[] = [];
@@ -29,9 +32,7 @@ export class UserGroupingComponent implements OnInit {
   autoGroupSize = 4;
   private nextGroupId = 1;
 
-  constructor(
-    private subjectManagementService: SubjectManagementService
-  ) { }
+  constructor(private subjectManagementService: SubjectManagementService) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -50,16 +51,17 @@ export class UserGroupingComponent implements OnInit {
         const allGroupedUserIds = new Set<number>();
 
         this.groups = groups.map(groupDto => {
-          const members = groupDto.UserGroupMembership?.map(membership => {
-            allGroupedUserIds.add(membership.userId);
-            const user = this.allUsers.find(u => u.id === membership.userId);
-            return user ? { ...user, userGroupMembershipId: membership.id } : undefined;
-          }).filter(u => u !== undefined) as UserDTO[] || [];
+          const members =
+            (groupDto.UserGroupMembership?.map(membership => {
+              allGroupedUserIds.add(membership.userId);
+              const user = this.allUsers.find(u => u.id === membership.userId);
+              return user ? { ...user, userGroupMembershipId: membership.id } : undefined;
+            }).filter(u => u !== undefined) as UserDTO[]) || [];
           members.sort((a, b) => (a.firstname || '').localeCompare(b.firstname || ''));
           return {
             ...groupDto,
             members,
-            isDragOver: false
+            isDragOver: false,
           };
         });
 
@@ -82,7 +84,7 @@ export class UserGroupingComponent implements OnInit {
         event.previousContainer.data,
         event.container.data,
         event.previousIndex,
-        event.currentIndex
+        event.currentIndex,
       );
       event.container.data.sort((a, b) => (a.firstname || '').localeCompare(b.firstname || ''));
     }
@@ -95,7 +97,7 @@ export class UserGroupingComponent implements OnInit {
       createdAt: new Date(),
       updatedAt: new Date(),
       members: [],
-      maxSize: this.autoGroupSize
+      maxSize: this.autoGroupSize,
     };
     this.groups.push(newGroup);
     this.nextGroupId++;
@@ -113,7 +115,7 @@ export class UserGroupingComponent implements OnInit {
 
   autoAssignGroups(): void {
     if (!this.autoGroupSize || this.autoGroupSize < 1) {
-      alert("Bitte eine gültige maximale Gruppengröße angeben.");
+      alert('Bitte eine gültige maximale Gruppengröße angeben.');
       return;
     }
 
@@ -151,7 +153,9 @@ export class UserGroupingComponent implements OnInit {
     });
 
     // Sort members within each new group
-    this.groups.forEach(group => group.members.sort((a, b) => (a.firstname || '').localeCompare(b.firstname || '')));
+    this.groups.forEach(group =>
+      group.members.sort((a, b) => (a.firstname || '').localeCompare(b.firstname || '')),
+    );
 
     this.unassignedUsers = [];
   }
@@ -160,8 +164,16 @@ export class UserGroupingComponent implements OnInit {
     const currentUnassigned = JSON.stringify(this.unassignedUsers.map(u => u.id).sort());
     const originalUnassigned = JSON.stringify(this.originalUnassignedUsers.map(u => u.id).sort());
 
-    const currentGroups = JSON.stringify(this.groups.map(g => ({ id: g.id, members: g.members.map(m => m.id).sort() })).sort((a,b) => a.id - b.id));
-    const originalGroups = JSON.stringify(this.originalGroups.map(g => ({ id: g.id, members: g.members.map(m => m.id).sort() })).sort((a,b) => a.id - b.id));
+    const currentGroups = JSON.stringify(
+      this.groups
+        .map(g => ({ id: g.id, members: g.members.map(m => m.id).sort() }))
+        .sort((a, b) => a.id - b.id),
+    );
+    const originalGroups = JSON.stringify(
+      this.originalGroups
+        .map(g => ({ id: g.id, members: g.members.map(m => m.id).sort() }))
+        .sort((a, b) => a.id - b.id),
+    );
 
     return currentUnassigned !== originalUnassigned || currentGroups !== originalGroups;
   }
@@ -203,7 +215,11 @@ export class UserGroupingComponent implements OnInit {
     setTimeout(() => this.loadData(), 1000);
   }
 
-  private updateMemberships(groupId: number, originalMembers: UserDTO[], currentMembers: UserDTO[]) {
+  private updateMemberships(
+    groupId: number,
+    originalMembers: UserDTO[],
+    currentMembers: UserDTO[],
+  ) {
     const originalMemberIds = new Set(originalMembers.map(m => m.id));
     const currentMemberIds = new Set(currentMembers.map(m => m.id));
 

@@ -1,6 +1,12 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
-import { ContentDTO, ContentElementDTO, contentElementType, gradingContent, questionType, taskViewDTO } from '@DTOs/index';
+import {
+  ContentElementDTO,
+  contentElementType,
+  gradingContent,
+  questionType,
+  taskViewDTO,
+} from '@DTOs/index';
 import { takeUntil } from 'rxjs';
 import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { FillinTaskNewComponent } from '../../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
@@ -68,7 +74,9 @@ export class ContentListItemComponent implements OnInit {
     this.userService.hasEditModeActive$.subscribe(hasEditModeActive => {
       this.editModeActive = hasEditModeActive;
     });
-    this.isGradingContent = this.contentElementData.type === contentElementType.QUESTION && gradingContent.includes(this.contentElementData.question?.type as questionType);
+    this.isGradingContent =
+      this.contentElementData.type === contentElementType.QUESTION &&
+      gradingContent.includes(this.contentElementData.question?.type as questionType);
   }
 
   /**
@@ -168,13 +176,16 @@ export class ContentListItemComponent implements OnInit {
     dialogConfig.width = 'auto';
     dialogConfig.maxHeight = '95vh';
 
-    let dialogRef: MatDialogRef<
-      McTaskComponent
-      | FreeTextTaskComponent
-      | FillinTaskNewComponent
-      | UploadTaskComponent
-      | GroupReviewGateDialogComponent
-    > | undefined;
+    let dialogRef:
+      | MatDialogRef<
+          | McTaskComponent
+          | FreeTextTaskComponent
+          | FillinTaskNewComponent
+          | UploadTaskComponent
+          | GroupReviewGateDialogComponent
+          | McSliderTaskComponent
+        >
+      | undefined;
 
     // Open the appropriate dialog based on the task type
     switch (question.type) {
@@ -219,11 +230,14 @@ export class ContentListItemComponent implements OnInit {
         this.router.navigate([this.getRouterLink('CodeGame', question.id)]);
         break;
       case questionType.UPLOAD:
-        dialogRef = this.dialog.open(UploadTaskComponent, {...dialogConfig, width: '70vw'});
+        dialogRef = this.dialog.open(UploadTaskComponent, { ...dialogConfig, width: '70vw' });
         break;
       case questionType.GROUP_REVIEW_GATE:
-        console.log("Opening Group Review Gate Dialog with data:", question);
-        dialogRef = this.dialog.open(GroupReviewGateDialogComponent, {...dialogConfig, width: '70vw'});
+        console.log('Opening Group Review Gate Dialog with data:', question);
+        dialogRef = this.dialog.open(GroupReviewGateDialogComponent, {
+          ...dialogConfig,
+          width: '70vw',
+        });
         break;
     }
 
@@ -252,10 +266,10 @@ export class ContentListItemComponent implements OnInit {
     }
   }
 
-  onTaskGrading(){
+  onTaskGrading() {
     if (!this.contentElementData.question || !this.editModeButtonsClickable) return;
     const question: taskViewDTO = this.contentElementData.question;
-    console.log("onTaskGrading", question);
+    console.log('onTaskGrading', question);
     // Navigate to grading overview
     this.router.navigate(['/lecturer/grading/uploads', question.id]);
   }

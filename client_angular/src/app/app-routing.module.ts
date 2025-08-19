@@ -34,10 +34,8 @@ import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-quest
 import { EditUmlComponent } from './Pages/lecturersView/edit-uml/edit-uml.component';
 import { EditCodeGameComponent } from './Pages/lecturersView/edit-code-game/edit-code-game.component';
 import { EvaluationDiscussionForumComponent } from './Pages/evaluation-discussion-forum/evaluation-discussion-forum/evaluation-discussion-forum.component';
-import { evaluationAccessGuard } from './Pages/evaluation-discussion-forum/guards/evaluation-access.guard';import { EditGroupReviewGateComponent } from './Pages/lecturersView/edit-group-review-gate/edit-group-review-gate.component';
-
-
-
+import { evaluationAccessGuard } from './Pages/evaluation-discussion-forum/guards/evaluation-access.guard';
+import { EditGroupReviewGateComponent } from './Pages/lecturersView/edit-group-review-gate/edit-group-review-gate.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -50,8 +48,8 @@ const routes: Routes = [
     canActivate: [LoggedInGuard, RegisteredForSubjectGuard, evaluationAccessGuard],
     data: {
       title: 'Evaluation Discussion Forum',
-      description: 'Peer evaluation and discussion platform'
-    }
+      description: 'Peer evaluation and discussion platform',
+    },
   },
   {
     path: 'forum/:submissionId',
@@ -59,8 +57,8 @@ const routes: Routes = [
     canActivate: [LoggedInGuard, RegisteredForSubjectGuard, evaluationAccessGuard],
     data: {
       title: 'Evaluation Discussion',
-      description: 'Discussion forum for specific submission evaluation'
-    }
+      description: 'Discussion forum for specific submission evaluation',
+    },
   },
   {
     path: 'dashboard',
@@ -187,7 +185,12 @@ const routes: Routes = [
   },
 
   // lecturers view
-  { path: 'lecturer', loadChildren: () => import('./Pages/lecturersView/lecturers-view.module').then(m => m.LecturersViewModule), canActivate: [LoggedInGuard, AdminGuard] },
+  {
+    path: 'lecturer',
+    loadChildren: () =>
+      import('./Pages/lecturersView/lecturers-view.module').then(m => m.LecturersViewModule),
+    canActivate: [LoggedInGuard, AdminGuard],
+  },
   {
     path: 'editchoice/:questionId',
     component: EditChoiceComponent,
@@ -223,7 +226,11 @@ const routes: Routes = [
     component: EditCodeGameComponent,
     canActivate: [LoggedInGuard, AdminGuard],
   },
-  { path: 'editgroupreviewgate/:questionId', component: EditGroupReviewGateComponent, canActivate: [LoggedInGuard, AdminGuard]},
+  {
+    path: 'editgroupreviewgate/:questionId',
+    component: EditGroupReviewGateComponent,
+    canActivate: [LoggedInGuard, AdminGuard],
+  },
 
   // just for testing
   { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
@@ -247,11 +254,6 @@ const routes: Routes = [
     path: 'admin',
     loadChildren: () => import('./Pages/admin/admin.module').then(m => m.AdminModule),
     canActivate: [LoggedInGuard, AdminGuard],
-  },
-  {
-    path: 'teacher',
-    loadChildren: () => import('./Pages/teacher/teacher.module').then(m => m.TeacherModule),
-    canActivate: [LoggedInGuard], // Assuming teachers need to be logged in
   },
 ];
 @NgModule({

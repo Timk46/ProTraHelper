@@ -92,7 +92,8 @@ import { ContentListNodeEditDialogComponent } from './Pages/content-list/content
 
 // ProTra 2.0 Module
 import { UploadTaskComponent } from './Pages/contentView/contentElement/upload-task/upload-task.component';
-import { GroupReviewGateDialogComponent } from "./Pages/contentView/contentElement/group-review-gate-dialog/group-review-gate-dialog.component";
+import { GroupReviewGateDialogComponent } from './Pages/contentView/contentElement/group-review-gate-dialog/group-review-gate-dialog.component';
+import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module';
 
 @NgModule({
   declarations: [
@@ -161,16 +162,15 @@ import { GroupReviewGateDialogComponent } from "./Pages/contentView/contentEleme
   bootstrap: [AppComponent],
   imports: [
     BrowserModule,
-    CommonModule,
-    RouterModule,
     FormsModule,
+    CommonModule,
     ReactiveFormsModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     MaterialModule,
     NgxExtendedPdfViewerModule,
-    LecturersViewModule,
     EditorModule,
+    TinymceModule,
     MarkdownModule.forRoot(),
     GraphTasksModule,
     MatMenuModule,
@@ -178,6 +178,9 @@ import { GroupReviewGateDialogComponent } from "./Pages/contentView/contentEleme
     CdkAccordionModule,
     MatRippleModule,
     CodeGameModule,
+    RouterModule,
+    LecturersViewModule,
+    MatMenuModule,
     MatIconModule,
     ToastrModule.forRoot(),
   ],

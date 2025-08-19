@@ -1,21 +1,28 @@
-import { ViewContainerRef, OnInit, Component, EventEmitter, Inject, Input, Output } from '@angular/core';
+import {
+  ViewContainerRef,
+  OnInit,
+  Component,
+  EventEmitter,
+  Inject,
+  Input,
+  Output,
+} from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { taskViewDTO } from '@DTOs/content.dto';
-import { FillinQuestionDTO } from '@DTOs/fillInText.dto';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswerDTO } from '@DTOs/userAnswer.dto';
-import {
-  UserAnswerDataDTO,
-  userAnswerFeedbackDTO,
-  UserFillinAnswer,
-} from '@DTOs/userAnswer.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { DynamicBlankComponent } from './dynamic-blank/dynamic-blank.component';
 import { Subject, takeUntil } from 'rxjs';
-import { FillinQuestionType } from '@DTOs/fillInType.enum';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Location } from '@angular/common';
+import {
+  FillinQuestionType,
+  FillinQuestionDTO,
+  UserFillinAnswerDTO,
+  userAnswerFeedbackDTO,
+  taskViewDTO,
+  UserAnswerDataDTO,
+} from '@DTOs/index';
 @Component({
   selector: 'app-fill-in-task-new',
   templateUrl: './fill-in-task-new.component.html',

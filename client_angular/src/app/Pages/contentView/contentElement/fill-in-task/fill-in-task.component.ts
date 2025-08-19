@@ -9,7 +9,7 @@ import {
   userAnswerFeedbackDTO,
   UserAnswerDataDTO,
   FillinQuestionDTO,
-  UserFillinAnswer,
+  UserFillinAnswerDTO,
 } from '@DTOs/index';
 import { FillinQuestionType } from '@DTOs/index';
 import { UserService } from 'src/app/Services/auth/user.service';
