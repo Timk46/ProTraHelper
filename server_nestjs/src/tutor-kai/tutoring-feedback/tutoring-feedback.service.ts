@@ -1,4 +1,9 @@
-import { Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Added PrismaService
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'; // Added for error handling
 import { GraphBuilderService } from './graph/graph.builder.service';
@@ -11,8 +16,8 @@ export class TutoringFeedbackService {
   private readonly logger = new Logger(TutoringFeedbackService.name);
 
   constructor(
-    private graphBuilderService: GraphBuilderService,
-    private prisma: PrismaService, // Injected PrismaService
+    private readonly graphBuilderService: GraphBuilderService,
+    private readonly prisma: PrismaService, // Injected PrismaService
   ) {}
 
   /**
@@ -25,9 +30,10 @@ export class TutoringFeedbackService {
    */
   async generateFeedback(
     feedbackContext: FeedbackContextDto,
-  ): Promise<{ feedback: FeedbackOutput; feedbackId: string }> { // Updated return type
+  ): Promise<{ feedback: FeedbackOutput; feedbackId: string }> {
+    // Updated return type
     this.logger.log(
-      `Generating feedback for task (description length: ${feedbackContext.taskDescription?.length})`,
+      `Generating feedback for task (description length: ${feedbackContext.taskDescription.length})`,
     );
 
     const compiledGraph = this.graphBuilderService.getCompiledGraph();
@@ -40,8 +46,8 @@ export class TutoringFeedbackService {
     try {
       // Invoke the graph workflow
       const finalState = await compiledGraph.invoke(initialState, {
-         // Add config if needed, e.g., recursion limit
-         // recursionLimit: 10,
+        // Add config if needed, e.g., recursion limit
+        // recursionLimit: 10,
       });
 
       this.logger.log('Graph execution completed.');
@@ -58,14 +64,13 @@ export class TutoringFeedbackService {
       const feedbackOutput = finalState.finalFeedbackJson;
       const feedbackId = finalState.generatedFeedbackId; // Extract the ID
 
-      if (!feedbackOutput || !feedbackId) { // Check for both feedback and ID
+      if (!feedbackOutput || !feedbackId) {
+        // Check for both feedback and ID
         this.logger.error(
           'Final feedback JSON or generatedFeedbackId is missing from the graph final state.',
-          `Feedback present: ${!!feedbackOutput}, ID present: ${!!feedbackId}`
+          `Feedback present: ${!!feedbackOutput}, ID present: ${!!feedbackId}`,
         );
-        throw new NotFoundException(
-          'Failed to retrieve generated feedback content or its ID.',
-        );
+        throw new NotFoundException('Failed to retrieve generated feedback content or its ID.');
       }
 
       this.logger.log(`Successfully generated feedback JSON and retrieved ID: ${feedbackId}`);
@@ -73,9 +78,9 @@ export class TutoringFeedbackService {
     } catch (error) {
       this.logger.error(`Error during graph invocation: ${error.message}`, error.stack);
       // Catch errors from invoke itself or errors thrown from our checks
-       if (error instanceof InternalServerErrorException || error instanceof NotFoundException) {
-         throw error; // Re-throw specific HTTP exceptions
-       }
+      if (error instanceof InternalServerErrorException || error instanceof NotFoundException) {
+        throw error; // Re-throw specific HTTP exceptions
+      }
       throw new InternalServerErrorException(
         `An unexpected error occurred during feedback generation: ${error.message}`,
       );
@@ -118,14 +123,18 @@ export class TutoringFeedbackService {
   async acceptPrivacyPolicy(userId: number): Promise<void> {
     this.logger.log(`Setting privacy consent to true for user ${userId}`);
     try {
-      const result = await this.prisma.user.updateMany({ // Use updateMany to avoid error if already true
+      const result = await this.prisma.user.updateMany({
+        // Use updateMany to avoid error if already true
         where: { id: userId },
         data: { hasAcceptedPrivacyPolicy: true },
       });
 
       if (result.count === 0) {
         // Check if the user actually exists, maybe they were deleted between check and update
-        const userExists = await this.prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+        const userExists = await this.prisma.user.findUnique({
+          where: { id: userId },
+          select: { id: true },
+        });
         if (!userExists) {
           this.logger.warn(`User ${userId} not found when trying to accept privacy policy.`);
           throw new NotFoundException(`User with ID ${userId} not found.`);
@@ -133,11 +142,10 @@ export class TutoringFeedbackService {
         // If user exists but count is 0, it means the value was already true. Log and proceed.
         this.logger.log(`Privacy policy was already accepted for user ${userId}.`);
       }
-
     } catch (error) {
-       if (error instanceof NotFoundException) {
-         throw error; // Re-throw specific exception
-       }
+      if (error instanceof NotFoundException) {
+        throw error; // Re-throw specific exception
+      }
       this.logger.error(`Database error accepting privacy policy for user ${userId}:`, error.stack);
       throw new InternalServerErrorException('Failed to update privacy consent status.');
     }

@@ -1,11 +1,18 @@
-import { Component, OnInit, ViewChildren, QueryList } from '@angular/core';
+import { OnInit, QueryList, Component, ViewChildren } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { QuestionDataService } from '../../../Services/question/question-data.service';
 import { EditCodeService } from './edit-coding.service';
-import { CodingQuestionInternal, questionType } from '@DTOs/question.dto';
-import { detailedQuestionDTO, CodeGeruestDto, ModelSolutionDto, AutomatedTestDto, CodeSubmissionResultDto } from '@DTOs/index';
+import { CodingQuestionInternal } from '@DTOs/question.dto';
+import { questionType } from '@DTOs/question.dto';
+import {
+  detailedQuestionDTO,
+  CodeGeruestDto,
+  ModelSolutionDto,
+  AutomatedTestDto,
+  CodeSubmissionResultDto,
+} from '@DTOs/index';
 import { ActivatedRoute } from '@angular/router';
 import { AddElementModalComponent } from './add-element-modal.component';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
@@ -15,7 +22,7 @@ import { CodeEditorComponent } from '../../../Modules/tutor-kai/sites/code-edito
 @Component({
   selector: 'app-edit-coding',
   templateUrl: './edit-coding.component.html',
-  styleUrls: ['./edit-coding.component.scss']
+  styleUrls: ['./edit-coding.component.scss'],
 })
 export class EditCodingComponent implements OnInit {
   @ViewChildren(CodeEditorComponent) codeEditors!: QueryList<CodeEditorComponent>;
@@ -30,12 +37,12 @@ export class EditCodingComponent implements OnInit {
   isGenerating = false; // Loading state variable
 
   constructor(
-    private fb: FormBuilder,
-    private questionDataService: QuestionDataService,
-    private editCodeService: EditCodeService,
-    private snackBar: MatSnackBar,
-    private route: ActivatedRoute,
-    private dialog: MatDialog
+    private readonly fb: FormBuilder,
+    private readonly questionDataService: QuestionDataService,
+    private readonly editCodeService: EditCodeService,
+    private readonly snackBar: MatSnackBar,
+    private readonly route: ActivatedRoute,
+    private readonly dialog: MatDialog,
   ) {
     this.codingForm = this.createForm();
   }
@@ -44,27 +51,29 @@ export class EditCodingComponent implements OnInit {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
       if (questionId) {
-        this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
-          this.questionData = data;
-          console.log('Question data:', this.questionData);
+        this.questionDataService
+          .getDetailedQuestionData(questionId, this.thisQuestionType)
+          .subscribe(data => {
+            this.questionData = data;
+            console.log('Question data:', this.questionData);
 
-          if (!this.questionData.codingQuestion) {
-            this.questionData.codingQuestion = {
-              id: 0,
-              programmingLanguage: '',
-              codeGerueste: [],
-              modelSolutions: [],
-              automatedTests: [],
-              expectations: '',
-              mainFileName: '',
-              count_InputArgs: 0,
-              text: '',
-              textHTML: ''
-            };
-          }
+            if (!this.questionData.codingQuestion) {
+              this.questionData.codingQuestion = {
+                id: 0,
+                programmingLanguage: '',
+                codeGerueste: [],
+                modelSolutions: [],
+                automatedTests: [],
+                expectations: '',
+                mainFileName: '',
+                count_InputArgs: 0,
+                text: '',
+                textHTML: '',
+              };
+            }
 
-          this.populateForm();
-        });
+            this.populateForm();
+          });
       }
     });
   }
@@ -80,11 +89,11 @@ export class EditCodingComponent implements OnInit {
       expectations: ['', Validators.required],
       mainFileName: [''], // needed for python-tasks
       runMethod: [''], // needed for python-tasks
-      inputArguments: [''],  // needed for python-tasks
+      inputArguments: [''], // needed for python-tasks
       isApproved: [false],
       level: ['', Validators.required],
       context: [''], // new field for python task generation
-      concept: [''] // new field for python task generation
+      concept: [''], // new field for python task generation
     });
   }
 
@@ -101,7 +110,7 @@ export class EditCodingComponent implements OnInit {
         isApproved: this.questionData.isApproved || false,
         level: this.questionData.level || '',
         context: '', // Initialize with empty string
-        concept: '' // Initialize with empty string
+        concept: '', // Initialize with empty string
       });
 
       if (this.questionData.codingQuestion) {
@@ -116,11 +125,13 @@ export class EditCodingComponent implements OnInit {
     const codeGeruesteFormArray = this.codingForm.get('codeGerueste') as FormArray;
     codeGeruesteFormArray.clear();
     this.questionData?.codingQuestion!.codeGerueste.forEach((codeGeruest: CodeGeruestDto) => {
-      codeGeruesteFormArray.push(this.fb.group({
-        id: codeGeruest.id,
-        codeFileName: codeGeruest.codeFileName,
-        code: codeGeruest.code
-      }));
+      codeGeruesteFormArray.push(
+        this.fb.group({
+          id: codeGeruest.id,
+          codeFileName: codeGeruest.codeFileName,
+          code: codeGeruest.code,
+        }),
+      );
     });
   }
 
@@ -128,11 +139,13 @@ export class EditCodingComponent implements OnInit {
     const modelSolutionsFormArray = this.codingForm.get('modelSolutions') as FormArray;
     modelSolutionsFormArray.clear();
     this.questionData?.codingQuestion!.modelSolutions?.forEach((solution: ModelSolutionDto) => {
-      modelSolutionsFormArray.push(this.fb.group({
-        id: solution.id,
-        codeFileName: solution.codeFileName,
-        code: solution.code
-      }));
+      modelSolutionsFormArray.push(
+        this.fb.group({
+          id: solution.id,
+          codeFileName: solution.codeFileName,
+          code: solution.code,
+        }),
+      );
     });
   }
 
@@ -140,11 +153,13 @@ export class EditCodingComponent implements OnInit {
     const automatedTestsFormArray = this.codingForm.get('automatedTests') as FormArray;
     automatedTestsFormArray.clear();
     this.questionData?.codingQuestion!.automatedTests.forEach((test: AutomatedTestDto) => {
-      automatedTestsFormArray.push(this.fb.group({
-        id: test.id,
-        testFileName: test.testFileName,
-        code: test.code
-      }));
+      automatedTestsFormArray.push(
+        this.fb.group({
+          id: test.id,
+          testFileName: test.testFileName,
+          code: test.code,
+        }),
+      );
     });
   }
 
@@ -160,7 +175,11 @@ export class EditCodingComponent implements OnInit {
     return (this.codingForm.get('automatedTests') as FormArray).controls;
   }
 
-  onCodeChange(newCode: string, index: number, type: 'codeGerueste' | 'automatedTests' | 'modelSolutions' | 'text' | 'expectations') {
+  onCodeChange(
+    newCode: string,
+    index: number,
+    type: 'codeGerueste' | 'automatedTests' | 'modelSolutions' | 'text' | 'expectations',
+  ) {
     if (type === 'text' || type === 'expectations') {
       this.codingForm.patchValue({ [type]: newCode });
       if (this.questionData) {
@@ -175,7 +194,7 @@ export class EditCodingComponent implements OnInit {
       const control = formArray.at(index);
       if (control) {
         control.patchValue({ code: newCode });
-        if (this.questionData && this.questionData.codingQuestion) {
+        if (this.questionData?.codingQuestion) {
           const questionDataArray = this.questionData.codingQuestion[type];
           if (Array.isArray(questionDataArray) && questionDataArray[index]) {
             questionDataArray[index].code = newCode;
@@ -188,7 +207,7 @@ export class EditCodingComponent implements OnInit {
   openAddModal(type: 'codeGerueste' | 'modelSolutions' | 'automatedTests') {
     const dialogRef = this.dialog.open(AddElementModalComponent, {
       width: '500px',
-      data: { type: type }
+      data: { type: type },
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -203,11 +222,11 @@ export class EditCodingComponent implements OnInit {
     const newElement = this.fb.group({
       id: 0,
       [type === 'automatedTests' ? 'testFileName' : 'codeFileName']: data.fileName,
-      code: data.code
+      code: data.code,
     });
     formArray.push(newElement);
 
-    if (this.questionData && this.questionData.codingQuestion) {
+    if (this.questionData?.codingQuestion) {
       const questionDataArray = this.questionData.codingQuestion[type];
       if (Array.isArray(questionDataArray)) {
         let newItem;
@@ -218,7 +237,7 @@ export class EditCodingComponent implements OnInit {
               codeFileName: data.fileName,
               code: data.code,
               codingQuestionId: this.questionData.codingQuestion.id,
-              language: this.questionData.codingQuestion.programmingLanguage
+              language: this.questionData.codingQuestion.programmingLanguage,
             } as CodeGeruestDto;
             (questionDataArray as CodeGeruestDto[]).push(newItem);
             break;
@@ -228,7 +247,7 @@ export class EditCodingComponent implements OnInit {
               codeFileName: data.fileName,
               code: data.code,
               codingQuestionId: this.questionData.codingQuestion.id,
-              language: this.questionData.codingQuestion.programmingLanguage
+              language: this.questionData.codingQuestion.programmingLanguage,
             } as ModelSolutionDto;
             (questionDataArray as ModelSolutionDto[]).push(newItem);
             break;
@@ -239,7 +258,7 @@ export class EditCodingComponent implements OnInit {
               code: data.code,
               codingQuestionId: this.questionData.codingQuestion.id,
               language: this.questionData.codingQuestion.programmingLanguage,
-              questionId: this.questionData.id
+              questionId: this.questionData.id,
             } as AutomatedTestDto;
             (questionDataArray as AutomatedTestDto[]).push(newItem);
             break;
@@ -248,13 +267,17 @@ export class EditCodingComponent implements OnInit {
     }
   }
 
-  confirmDelete(type: 'codeGerueste' | 'modelSolutions' | 'automatedTests', index: number, fileName: string) {
+  confirmDelete(
+    type: 'codeGerueste' | 'modelSolutions' | 'automatedTests',
+    index: number,
+    fileName: string,
+  ) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
         title: 'Bestätigung',
-        message: `Möchten Sie wirklich "${fileName}" löschen?`
-      }
+        message: `Möchten Sie wirklich "${fileName}" löschen?`,
+      },
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -268,7 +291,7 @@ export class EditCodingComponent implements OnInit {
     const formArray = this.codingForm.get(type) as FormArray;
     formArray.removeAt(index);
 
-    if (this.questionData && this.questionData.codingQuestion) {
+    if (this.questionData?.codingQuestion) {
       const questionDataArray = this.questionData.codingQuestion[type];
       if (Array.isArray(questionDataArray)) {
         questionDataArray.splice(index, 1);
@@ -296,11 +319,11 @@ export class EditCodingComponent implements OnInit {
           automatedTests: this.codingForm.value.automatedTests.map((test: any) => ({
             ...test,
             runMethod: this.codingForm.value.runMethod,
-            inputArguments: this.codingForm.value.inputArguments
+            inputArguments: this.codingForm.value.inputArguments,
           })),
           expectations: this.codingForm.value.expectations,
           mainFileName: this.codingForm.value.mainFileName,
-        }
+        },
       };
 
       this.questionDataService.updateWholeQuestion(updatedQuestion).subscribe(
@@ -311,7 +334,7 @@ export class EditCodingComponent implements OnInit {
         error => {
           console.error('Error updating question:', error);
           this.snackBar.open('Error updating question', 'Close', { duration: 3000 });
-        }
+        },
       );
     } else {
       const missingFields = this.getMissingFields();
@@ -353,18 +376,20 @@ export class EditCodingComponent implements OnInit {
       programmingLanguage: 'Programmiersprache',
       text: 'Aufgabentext',
       expectations: 'Erwartungshorizont',
-      level: 'Schwierigkeitsgrad'
+      level: 'Schwierigkeitsgrad',
     };
     return displayNames[field] || field;
   }
 
   testCode() {
     if (!this.isProgrammingLanguageSelected()) {
-      this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', { duration: 5000 });
+      this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', {
+        duration: 5000,
+      });
       return;
     }
 
-    if (this.codingForm.valid && this.questionData && this.questionData.codingQuestion) {
+    if (this.codingForm.valid && this.questionData?.codingQuestion) {
       const questionToTest: detailedQuestionDTO = {
         ...this.questionData,
         name: this.codingForm.value.name,
@@ -380,11 +405,11 @@ export class EditCodingComponent implements OnInit {
           automatedTests: this.codingForm.value.automatedTests.map((test: any) => ({
             ...test,
             runMethod: this.codingForm.value.runMethod,
-            inputArguments: this.codingForm.value.inputArguments
+            inputArguments: this.codingForm.value.inputArguments,
           })),
           expectations: this.codingForm.value.expectations,
           mainFileName: this.codingForm.value.mainFileName,
-        }
+        },
       };
 
       this.editCodeService.executeForTaskCreation(questionToTest).subscribe(
@@ -396,7 +421,7 @@ export class EditCodingComponent implements OnInit {
         error => {
           console.error('Error testing code:', error);
           this.snackBar.open('Error testing code', 'Close', { duration: 3000 });
-        }
+        },
       );
     } else {
       const missingFields = this.getMissingFields();
@@ -407,7 +432,9 @@ export class EditCodingComponent implements OnInit {
 
   generateTaskCpp() {
     if (!this.isProgrammingLanguageSelected()) {
-      this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', { duration: 5000 });
+      this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', {
+        duration: 5000,
+      });
       return;
     }
 
@@ -427,16 +454,22 @@ export class EditCodingComponent implements OnInit {
           console.error('Error generating task:', error);
           this.snackBar.open('Error generating task', 'Close', { duration: 3000 });
           this.isGenerating = false; // Set loading state to false
-        }
+        },
       );
     } else {
-      this.snackBar.open('Please fill in the question text and add at least one code scaffold', 'Close', { duration: 3000 });
+      this.snackBar.open(
+        'Please fill in the question text and add at least one code scaffold',
+        'Close',
+        { duration: 3000 },
+      );
     }
   }
 
   generateTaskPython() {
     if (!this.isProgrammingLanguageSelected()) {
-      this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', { duration: 5000 });
+      this.snackBar.open('Bitte wählen Sie zuerst eine Programmiersprache aus.', 'Close', {
+        duration: 5000,
+      });
       return;
     }
 
@@ -460,12 +493,12 @@ export class EditCodingComponent implements OnInit {
         console.error('Error generating task:', error);
         this.snackBar.open('Error generating task', 'Close', { duration: 3000 });
         this.isGenerating = false; // Set loading state to false
-      }
+      },
     );
   }
 
   exportTask() {
-    if (this.questionData && this.questionData.codingQuestion) {
+    if (this.questionData?.codingQuestion) {
       const exportQuestion: detailedQuestionDTO = {
         ...this.questionData,
         name: this.codingForm.value.name,
@@ -481,11 +514,11 @@ export class EditCodingComponent implements OnInit {
           automatedTests: this.codingForm.value.automatedTests.map((test: any) => ({
             ...test,
             runMethod: this.codingForm.value.runMethod,
-            inputArguments: this.codingForm.value.inputArguments
+            inputArguments: this.codingForm.value.inputArguments,
           })),
           expectations: this.codingForm.value.expectations,
           mainFileName: this.codingForm.value.mainFileName,
-        }
+        },
       };
       const jsonString = JSON.stringify(exportQuestion, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
@@ -508,11 +541,12 @@ export class EditCodingComponent implements OnInit {
           const tempId = this.questionData?.id || 0;
           this.questionData = importedData;
           this.questionData.id = tempId; // Keep the original ID of the edited question. We cant override with the id of the imported question because its might not fit to database (trying to save id 11 if there is already on)
-          if (this.questionData && this.questionData.codingQuestion) {
+          if (this.questionData?.codingQuestion) {
             this.codingForm.patchValue({
               runMethod: this.questionData.codingQuestion.automatedTests[0]?.runMethod || '',
-              inputArguments: this.questionData.codingQuestion.automatedTests[0]?.inputArguments || '',
-              mainFileName: this.questionData.codingQuestion.mainFileName || ''
+              inputArguments:
+                this.questionData.codingQuestion.automatedTests[0]?.inputArguments || '',
+              mainFileName: this.questionData.codingQuestion.mainFileName || '',
             });
           }
           this.populateForm();
@@ -574,11 +608,12 @@ export class EditCodingComponent implements OnInit {
       count_InputArgs: genTask.count_InputArgs,
       // Get runMethod and inputArguments from the first automated test if available
       runMethod: genTask.automatedTests[0]?.runMethod || '',
-      inputArguments: genTask.automatedTests[0]?.inputArguments || ''
+      inputArguments: genTask.automatedTests[0]?.inputArguments || '',
     });
 
-    if (genTask.programmingLanguage === "python") {this.codingForm.patchValue({text: genTask.text});} // Update task description for c++ only (python task description is already set)
-
+    if (genTask.programmingLanguage === 'python') {
+      this.codingForm.patchValue({ text: genTask.text });
+    } // Update task description for c++ only (python task description is already set)
 
     (this.codingForm.get('codeGerueste') as FormArray).clear();
     (this.codingForm.get('modelSolutions') as FormArray).clear();
@@ -587,14 +622,14 @@ export class EditCodingComponent implements OnInit {
     genTask.codeGerueste?.forEach(codeGeruest => {
       this.addElement('codeGerueste', {
         fileName: codeGeruest.codeFileName,
-        code: codeGeruest.code
+        code: codeGeruest.code,
       });
     });
 
     genTask.modelSolutions?.forEach(solution => {
       this.addElement('modelSolutions', {
         fileName: solution.codeFileName,
-        code: solution.code
+        code: solution.code,
       });
     });
 
@@ -602,7 +637,7 @@ export class EditCodingComponent implements OnInit {
       console.log(test);
       this.addElement('automatedTests', {
         fileName: test.testFileName ? test.testFileName : 'testFile',
-        code: test.code // Pass the code directly
+        code: test.code, // Pass the code directly
       });
     });
 

@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { UploadTaskComponent } from './upload-task.component';
 
@@ -8,9 +9,8 @@ describe('UploadTaskComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UploadTaskComponent]
-    })
-    .compileComponents();
+      imports: [UploadTaskComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(UploadTaskComponent);
     component = fixture.componentInstance;

@@ -1,5 +1,6 @@
-import { Component, ElementRef, EventEmitter, Output, Renderer2 } from '@angular/core';
-import { animate, style, transition, trigger, state, keyframes } from "@angular/animations";
+import { ElementRef, Renderer2 } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
+import { animate, style, transition, trigger, state, keyframes } from '@angular/animations';
 
 enum PlayerDirection {
   NORTH = 270,
@@ -14,25 +15,27 @@ enum PlayerDirection {
   styleUrls: ['./playfield.component.scss'],
   animations: [
     trigger('movePlayer', [
-      transition('* => *', [
-        animate('{{animationSpeedMaster}}ms linear', style({
-          transform: 'translate({{endX}}px, {{endY}}px)'
-        })),
-      ], { params: { endX: 0, endY: 0 } }),
+      transition(
+        '* => *',
+        [
+          animate(
+            '{{animationSpeedMaster}}ms linear',
+            style({
+              transform: 'translate({{endX}}px, {{endY}}px)',
+            }),
+          ),
+        ],
+        { params: { endX: 0, endY: 0 } },
+      ),
     ]),
     trigger('dimChase', [
       state('off', style({ opacity: 0.3 })),
       state('on', style({ opacity: 1 })),
-      transition('off => on', [
-        animate('0.3s ease-in-out')
-      ]),
-      transition('on => off', [
-        animate('1.5s ease-in-out')
-      ]),
+      transition('off => on', [animate('0.3s ease-in-out')]),
+      transition('on => off', [animate('1.5s ease-in-out')]),
     ]),
-  ]
+  ],
 })
-
 export class PlayfieldComponent {
   gameField: string[][] = [];
   inputGameFile = '';
@@ -43,7 +46,7 @@ export class PlayfieldComponent {
   gameFieldHeight: number = 0;
   cellSize: number = 60;
   theme: string = ''; // part of the path to the images
-  hiddenItems: String[] = [];
+  hiddenItems: string[] = [];
 
   isPlayerVisible: boolean = true;
   playerPosition = { x: 0, y: 0 };
@@ -53,7 +56,7 @@ export class PlayfieldComponent {
   endX = 0;
   endY = 0;
   playerTransform: string = '';
-  playerInitialPosition: { x: number, y: number } = { x: 0, y: 0 };
+  playerInitialPosition: { x: number; y: number } = { x: 0, y: 0 };
   playerPositionIsSet = false; // true, if the player position is set
 
   gameOutputInformation: string = 'Bereit für die Ausführung';
@@ -65,8 +68,10 @@ export class PlayfieldComponent {
 
   isSysWarning: boolean = false;
 
-
-  constructor(private renderer: Renderer2, private el: ElementRef) {}
+  constructor(
+    private readonly renderer: Renderer2,
+    private readonly el: ElementRef,
+  ) {}
 
   initGameField(_game: string, _theme: string, _gameCellRestrictions: string): void {
     this.inputGameFile = _game;
@@ -85,12 +90,12 @@ export class PlayfieldComponent {
 
   initPlayer(): void {
     if (this.gameFieldHeight === 0 || this.gameFieldWidth === 0) {
-      console.error("Game field dimensions are not set.");
+      console.error('Game field dimensions are not set.');
       return;
     }
 
     if (this.gameField.length === 0) {
-      console.error("Game field is empty.");
+      console.error('Game field is empty.');
       return;
     }
 
@@ -105,14 +110,14 @@ export class PlayfieldComponent {
           this.playerInitialPosition = { x: col, y: row };
           this.playerPosition = { x: col, y: row };
           this.playerTransform = `translate(${this.startX}px, ${this.startY}px)`;
-          this.playerPositionIsSet = true
+          this.playerPositionIsSet = true;
 
           return; // Exit the loop once the player is found
         }
       }
     }
 
-    console.error("Player not found in the game field.");
+    console.error('Player not found in the game field.');
   }
 
   transformStringToArray(string: string): any[][] {
@@ -133,19 +138,19 @@ export class PlayfieldComponent {
     const endY = this.playerPosition.y * this.cellSize;
 
     /* Turn in the direction of the smallest angle to prevent the player from turning around 360 degrees */
-    let currentDirection = this.playerDirection;
-    let targetDirection = direction;
-    
+    const currentDirection = this.playerDirection;
+    const targetDirection = direction;
+
     // Calculate the difference between the current and target direction
     let diff = targetDirection - currentDirection;
-    
+
     // Normalize the difference to the range -180 to 180
     if (diff > 180) {
       diff -= 360;
     } else if (diff < -180) {
       diff += 360;
     }
-    
+
     // Update the direction based on the shortest rotation
     this.playerDirection = currentDirection + diff;
 
@@ -163,7 +168,11 @@ export class PlayfieldComponent {
 
   showItemImage(): void {
     for (let i = 0; i < this.hiddenItems.length; i++) {
-      this.renderer.setStyle(this.el.nativeElement.querySelector(this.hiddenItems[i]), 'display', 'block');
+      this.renderer.setStyle(
+        this.el.nativeElement.querySelector(this.hiddenItems[i]),
+        'display',
+        'block',
+      );
     }
 
     this.hiddenItems = [];
@@ -179,7 +188,9 @@ export class PlayfieldComponent {
 
   checkCellRestrictionAndShowWarning(col: number, row: number): void {
     if (this.gameCellRestrictions[row][col] === 'B') {
-      const overlay = this.el.nativeElement.querySelector(`.row:nth-child(${row + 1}) .cell:nth-child(${col + 1}) .overlay`);
+      const overlay = this.el.nativeElement.querySelector(
+        `.row:nth-child(${row + 1}) .cell:nth-child(${col + 1}) .overlay`,
+      );
       if (overlay) {
         setTimeout(() => {
           this.renderer.setStyle(overlay, 'display', 'block');
@@ -213,7 +224,6 @@ export class PlayfieldComponent {
     this.cellRestrictionsDimChaseIntervals = [];
   }
 
-
   fillGameField(): void {
     // Generate a 2D array from the input string.
     // Each new line is a new row, and each character is a new column.
@@ -224,20 +234,20 @@ export class PlayfieldComponent {
     this.cellRestrictionsDimState = this.gameField.map(row => row.map(() => 'off'));
   }
 
-setCSSVariables(): void {
-  const fieldElement = this.el.nativeElement.querySelector('.field');
-  if (fieldElement) {
-    // Set the CSS variables for the grid dimensions
-    this.renderer.setStyle(fieldElement, '--rows', this.gameFieldHeight);
-    this.renderer.setStyle(fieldElement, '--columns', this.gameFieldWidth);
-    this.renderer.setStyle(fieldElement, '--cell-size', `${this.cellSize}px`);
+  setCSSVariables(): void {
+    const fieldElement = this.el.nativeElement.querySelector('.field');
+    if (fieldElement) {
+      // Set the CSS variables for the grid dimensions
+      this.renderer.setStyle(fieldElement, '--rows', this.gameFieldHeight);
+      this.renderer.setStyle(fieldElement, '--columns', this.gameFieldWidth);
+      this.renderer.setStyle(fieldElement, '--cell-size', `${this.cellSize}px`);
 
-    // Set the CSS variable for the animation speed
-    this.renderer.setStyle(fieldElement, '--animation-speed-master', this.animationSpeedMaster);
-  } else {
-    console.error('Element with class "field" not found');
+      // Set the CSS variable for the animation speed
+      this.renderer.setStyle(fieldElement, '--animation-speed-master', this.animationSpeedMaster);
+    } else {
+      console.error('Element with class "field" not found');
+    }
   }
-}
 
   // used for the obstacle and destination images
   getObjectImage(row: number, col: number): string {
@@ -288,52 +298,46 @@ setCSSVariables(): void {
     }, totalDuration);
   }
 
-  actPlayer(command: String): void {
+  actPlayer(command: string): void {
     const action = command.split(':')[0];
     const move = command.split(':')[1];
 
-    if (action == "#SYS-Move") {
-      this.gameOutputInformation = ""; // clear the information
+    if (action == '#SYS-Move') {
+      this.gameOutputInformation = ''; // clear the information
 
       const coordinates = move.split('/');
       this.movePlayerTo(parseInt(coordinates[0]), parseInt(coordinates[1]));
       this.checkCellRestrictionAndShowWarning(parseInt(coordinates[0]), parseInt(coordinates[1]));
-
-    } else if (action == "#SYS-Turn") {
-      this.gameOutputInformation = ""; // clear the information
+    } else if (action == '#SYS-Turn') {
+      this.gameOutputInformation = ''; // clear the information
 
       switch (move) {
-        case "NORTH":
+        case 'NORTH':
           this.rotatePlayerTo(PlayerDirection.NORTH);
           break;
-        case "EAST":
+        case 'EAST':
           this.rotatePlayerTo(PlayerDirection.EAST);
           break;
-        case "SOUTH":
+        case 'SOUTH':
           this.rotatePlayerTo(PlayerDirection.SOUTH);
           break;
-        case "WEST":
+        case 'WEST':
           this.rotatePlayerTo(PlayerDirection.WEST);
           break;
         default:
-          console.error("Unknown direction: ", move);
+          console.error('Unknown direction: ', move);
       }
-
-    } else if (action == "#SYS-RemoveItem") {
+    } else if (action == '#SYS-RemoveItem') {
       const coordinates = move.split('/');
       this.hideItemImage(coordinates[1], coordinates[0]);
-
-    } else if (action == "#SYS-Info") {
+    } else if (action == '#SYS-Info') {
       this.gameOutputInformation = move;
-
-    } else if (action == "#SYS-Warning") {
+    } else if (action == '#SYS-Warning') {
       this.setSysWarning(true);
-
-    } else if (action == "#SYS-Success") {
+    } else if (action == '#SYS-Success') {
       // Informations are valuated in the backend
-
     } else {
-      console.error("Unknown action: ", action);
+      console.error('Unknown action: ', action);
     }
   }
 

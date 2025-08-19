@@ -63,5 +63,4 @@ export const TutoringFeedbackStateAnnotation = Annotation.Root({
 });
 
 // Type alias for the state object
-export type TutoringFeedbackState =
-  typeof TutoringFeedbackStateAnnotation.State;
+export type TutoringFeedbackState = typeof TutoringFeedbackStateAnnotation.State;

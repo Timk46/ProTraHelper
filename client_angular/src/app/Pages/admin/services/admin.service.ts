@@ -46,12 +46,12 @@ export interface UserDetails {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AdminService {
-  private apiUrl = environment.server + '/admin';
+  private readonly apiUrl = environment.server + '/admin';
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   getAllUsers(): Observable<UserListItem[]> {
     return this.http.get<UserListItem[]>(`${this.apiUrl}/users`);
@@ -62,7 +62,9 @@ export class AdminService {
   }
 
   getUserProgressByQuestionType(userId: number): Observable<QuestionTypeProgress> {
-    return this.http.get<QuestionTypeProgress>(`${this.apiUrl}/users/${userId}/progress-by-question-type`);
+    return this.http.get<QuestionTypeProgress>(
+      `${this.apiUrl}/users/${userId}/progress-by-question-type`,
+    );
   }
 
   getUserDailyProgress(userId: number): Observable<DailyProgress[]> {
@@ -78,7 +80,9 @@ export class AdminService {
   }
 
   toggleRegisteredForSL(userId: number, subjectId: number, value: boolean): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/users/${userId}/subjects/${subjectId}`, { registeredForSL: value });
+    return this.http.patch(`${this.apiUrl}/users/${userId}/subjects/${subjectId}`, {
+      registeredForSL: value,
+    });
   }
 
   getSubjects(): Observable<Subject[]> {

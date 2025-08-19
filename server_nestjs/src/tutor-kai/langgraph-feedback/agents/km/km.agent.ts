@@ -1,7 +1,9 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
-import { BaseMessage, HumanMessage } from '@langchain/core/messages';
-import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
+import { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage } from '@langchain/core/messages';
+import { Runnable } from '@langchain/core/runnables';
+import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { kmSystemPrompt } from './km.prompts'; // Import prompt from the new file
 
@@ -9,21 +11,21 @@ import { kmSystemPrompt } from './km.prompts'; // Import prompt from the new fil
  * Builds the core KM agent runnable (without input formatting).
  */
 export function buildKmCoreAgent(llm: ChatOpenAI): Runnable<any, any> {
-    return createReactAgent({
-        llm: llm,
-        tools: [], // KM agent doesn't use tools
-        name: 'KM',
-        prompt: kmSystemPrompt,
-    });
+  return createReactAgent({
+    llm: llm,
+    tools: [], // KM agent doesn't use tools
+    name: 'KM',
+    prompt: kmSystemPrompt,
+  });
 }
 
 /**
  * Builds the complete KM agent chain, including input formatting.
  */
 export function buildKmAgentChain(llm: ChatOpenAI): RunnableSequence {
-    const inputFormatter = new RunnableLambda({
-        func: (input: FeedbackContextDto) => {
-            const contextMessageContent = `
+  const inputFormatter = new RunnableLambda({
+    func: (input: FeedbackContextDto) => {
+      const contextMessageContent = `
 ## Attempt number
 ${input.attemptCount}
 
@@ -51,12 +53,12 @@ ${JSON.stringify(input.unitTestResults) || 'None'}
 
 Generate feedback in german based *only* on the mistakes identified in your analysis, strictly adhering to the KM type and all constraints in your instructions.
 `;
-            const initialMessages: BaseMessage[] = [new HumanMessage(contextMessageContent)];
-            return { messages: initialMessages };
-        },
-    }).withConfig({ runName: 'FormatKmAgentInput' });
+      const initialMessages: BaseMessage[] = [new HumanMessage(contextMessageContent)];
+      return { messages: initialMessages };
+    },
+  }).withConfig({ runName: 'FormatKmAgentInput' });
 
-    const coreAgent = buildKmCoreAgent(llm);
+  const coreAgent = buildKmCoreAgent(llm);
 
-    return RunnableSequence.from([inputFormatter, coreAgent], 'KmAgentChain');
+  return RunnableSequence.from([inputFormatter, coreAgent], 'KmAgentChain');
 }

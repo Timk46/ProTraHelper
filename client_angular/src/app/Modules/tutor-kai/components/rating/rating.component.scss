@@ -1,4 +1,4 @@
-@import "../../_nord-light-theme.scss";
+@import '../../_nord-light-theme.scss';
 
 .rating-component {
   margin: 20px 0;
@@ -19,7 +19,8 @@
       margin: 0 5px;
       transition: color 0.2s ease-in-out;
 
-      &:hover, &.filled {
+      &:hover,
+      &.filled {
         color: $nord-light-accent-aurora-3; // Was: #ffc107 - Now using Nord Light yellow for stars
       }
     }

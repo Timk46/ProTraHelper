@@ -1,12 +1,12 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { OnInit, Component, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SafeUrl, DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-edit-blank',
   templateUrl: './edit-blank.component.html',
-  styleUrls: ['./edit-blank.component.scss']
+  styleUrls: ['./edit-blank.component.scss'],
 })
 export class EditBlankComponent implements OnInit {
   form!: FormGroup;
@@ -15,9 +15,9 @@ export class EditBlankComponent implements OnInit {
 
   constructor(
     public dialogRef: MatDialogRef<EditBlankComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { word: string, isDistractor: boolean, isImage: boolean },
-    private fb: FormBuilder,
-    private sanitizer: DomSanitizer
+    @Inject(MAT_DIALOG_DATA) public data: { word: string; isDistractor: boolean; isImage: boolean },
+    private readonly fb: FormBuilder,
+    private readonly sanitizer: DomSanitizer,
   ) {
     this.isImage = data.isImage;
   }
@@ -25,7 +25,7 @@ export class EditBlankComponent implements OnInit {
   ngOnInit() {
     this.form = this.fb.group({
       word: [this.data.word, Validators.required],
-      file: [null]
+      file: [null],
     });
 
     if (this.isImage) {
@@ -35,7 +35,11 @@ export class EditBlankComponent implements OnInit {
 
   setPreviewImage(imageSource: string) {
     // Check if the imageSource is a valid URL or base64 string
-    if (imageSource.startsWith('data:image') || imageSource.startsWith('http') || imageSource.startsWith('blob:')) {
+    if (
+      imageSource.startsWith('data:image') ||
+      imageSource.startsWith('http') ||
+      imageSource.startsWith('blob:')
+    ) {
       this.previewImage = this.sanitizer.bypassSecurityTrustUrl(imageSource);
     } else {
       console.error('Invalid image source:', imageSource);
@@ -47,7 +51,7 @@ export class EditBlankComponent implements OnInit {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         const result = e.target?.result as string;
         this.setPreviewImage(result);
       };

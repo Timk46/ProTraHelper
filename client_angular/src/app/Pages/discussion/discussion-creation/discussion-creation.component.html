@@ -1,37 +1,45 @@
 <!-- <div class="main-container"> -->
-  <div class="content">
-    <h1>Neuen Beitrag erstellen</h1>
-    <!-- begin white card -->
+<div class="content">
+  <h1>Neuen Beitrag erstellen</h1>
+  <!-- begin white card -->
 
-    <div class="vbox">
+  <div class="vbox">
+    <p style="margin-bottom: 0px">Dieser Beitrag wird erstellt unter:</p>
+    <p>
+      <strong
+        >{{ discussionNodeNames.conceptNodeName }}
+        <span *ngIf="discussionData.contentNodeId != -1"
+          >: {{ discussionNodeNames.contentNodeName }}</span
+        >
+        <span *ngIf="discussionData.contentElementId != -1"
+          >: {{ discussionNodeNames.contentElementName }}</span
+        >
+      </strong>
+    </p>
 
-      <p style="margin-bottom: 0px;">Dieser Beitrag wird erstellt unter:</p>
-      <p><strong>{{discussionNodeNames.conceptNodeName}}
-        <span *ngIf="discussionData.contentNodeId != -1">: {{discussionNodeNames.contentNodeName}}</span>
-        <span *ngIf="discussionData.contentElementId != -1">: {{discussionNodeNames.contentElementName}}</span>
-      </strong></p>
+    <!-- Title -->
 
-      <!-- Title -->
+    <!-- <h3>Titel</h3> -->
+    <mat-form-field appearance="outline">
+      <mat-label>Titel des Beitrags</mat-label>
+      <input matInput #title maxlength="64" placeholder="Titel..." />
+      <mat-hint align="end">{{ title.value.length }} / 64</mat-hint>
+    </mat-form-field>
 
-      <!-- <h3>Titel</h3> -->
-      <mat-form-field appearance="outline">
-        <mat-label>Titel des Beitrags</mat-label>
-        <input matInput #title maxlength="64" placeholder="Titel...">
-        <mat-hint align="end">{{title.value.length}} / 64</mat-hint>
-      </mat-form-field>
-
-      <!-- Text -->
-      <!-- <h3>Beschreibung</h3> -->
-      <app-tinymce #editor [config]="editorConfig" [content]="''"></app-tinymce>
-
-    </div>
-    <!-- button not available if not logged in -->
-
-    <div class="hbox" style="margin-top: 16px;">
-      <button mat-raised-button style="width: fit-content; margin-bottom: 8px" (click)="onSubmit(title.value, editor.getContent())">Erstellen</button>
-    </div>
-
+    <!-- Text -->
+    <!-- <h3>Beschreibung</h3> -->
+    <app-tinymce #editor [config]="editorConfig" [content]="''"></app-tinymce>
   </div>
+  <!-- button not available if not logged in -->
+
+  <div class="hbox" style="margin-top: 16px">
+    <button
+      mat-raised-button
+      style="width: fit-content; margin-bottom: 8px"
+      (click)="onSubmit(title.value, editor.getContent())"
+    >
+      Erstellen
+    </button>
+  </div>
+</div>
 <!-- </div> -->
-
-

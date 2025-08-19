@@ -7,10 +7,7 @@ import { Injectable } from '@nestjs/common';
  * JwtRefreshStrategy is a custom Passport strategy for handling JWT refresh tokens.
  */
 @Injectable()
-export class JwtRefreshStrategy extends PassportStrategy(
-  Strategy,
-  'jwt-refresh',
-) {
+export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   /**
    * Constructor
    */

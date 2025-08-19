@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { INotification, NotificationType } from '../pages/notification/notification.models';
+import { Observable } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { INotification } from '../pages/notification/notification.models';
+import { NotificationType } from '../pages/notification/notification.models';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationComponent } from '../pages/confirmation/confirmation.component';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NotificationService {
-
   /*
     USEFUL INFORMATION:
     If we want to show a notification in a component, we need to inject the NotificationService in its constructor.
@@ -17,10 +18,14 @@ export class NotificationService {
     This shows a success notification for 1 second, then it disappears. The default duration is 3 seconds so this parameter is optional.
   */
 
-  constructor(private dialog: MatDialog) { }
+  constructor(private readonly dialog: MatDialog) {}
 
-  private notification$: Subject<INotification> = new BehaviorSubject<INotification>({message: '', type: NotificationType.Info, duration: 0});
-  private defaultDuration: number = 3000;
+  private readonly notification$: Subject<INotification> = new BehaviorSubject<INotification>({
+    message: '',
+    type: NotificationType.Info,
+    duration: 0,
+  });
+  private readonly defaultDuration: number = 3000;
 
   /**
    * Shows a success notification
@@ -62,7 +67,12 @@ export class NotificationService {
    * Shows a confirmation dialog
    * @param message
    */
-  confirm(title: string = "Achtung!", message: string = "Sind Sie sicher, dass Sie diese Aktion durchführen möchten?",  decline: string = "Abbrechen", accept: string = "Bestätigen"): Observable<boolean> {
+  confirm(
+    title: string = 'Achtung!',
+    message: string = 'Sind Sie sicher, dass Sie diese Aktion durchführen möchten?',
+    decline: string = 'Abbrechen',
+    accept: string = 'Bestätigen',
+  ): Observable<boolean> {
     const resultSubject = new Subject<boolean>();
     const dialogRef = this.dialog.open(ConfirmationComponent, {
       data: { title, message, decline, accept },
@@ -79,23 +89,20 @@ export class NotificationService {
     return resultSubject.asObservable();
   }
 
-
-
   /**
    * Shows a notification by passing the message, type and duration
    * @param message
    * @param type
    * @param duration
    */
-  private notify(message: string, type: NotificationType, duration: number){
-    this.notification$.next({message, type, duration} as INotification);
+  private notify(message: string, type: NotificationType, duration: number) {
+    this.notification$.next({ message, type, duration } as INotification);
   }
 
   /**
    * Returns the notification as an observable
    */
-  get notification(){
+  get notification() {
     return this.notification$.asObservable();
   }
 }
-

@@ -1,35 +1,36 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
-import { EditorFolder, FileSystemItem, FileSystemService } from '../../services/file-system.service';
+import {
+  EditorFolder,
+  FileSystemItem,
+  FileSystemService,
+} from '../../services/file-system.service';
 
 @Component({
   selector: 'app-file-explorer',
   templateUrl: './file-explorer.component.html',
-  styleUrls: ['./file-explorer.component.scss']
+  styleUrls: ['./file-explorer.component.scss'],
 })
 export class FileExplorerComponent implements OnInit, OnDestroy {
   fileTree: FileSystemItem[] = [];
   projectRoot: string = '';
   isExplorerCollapsed: boolean = true; // Standardmäßig eingeklappt
   @Output() explorerCollapsedChange = new EventEmitter<boolean>();
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
-  constructor(private fileSystemService: FileSystemService) {}
+  constructor(private readonly fileSystemService: FileSystemService) {}
 
   ngOnInit(): void {
     // Abonniere Dateibaum-Änderungen
-    this.fileSystemService.fileTree$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(tree => {
-        this.fileTree = tree;
-      });
+    this.fileSystemService.fileTree$.pipe(takeUntil(this.destroy$)).subscribe(tree => {
+      this.fileTree = tree;
+    });
 
     // Abonniere Projekt-Root-Änderungen
-    this.fileSystemService.projectRoot$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(root => {
-        this.projectRoot = root;
-      });
+    this.fileSystemService.projectRoot$.pipe(takeUntil(this.destroy$)).subscribe(root => {
+      this.projectRoot = root;
+    });
   }
 
   ngOnDestroy(): void {

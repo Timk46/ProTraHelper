@@ -6,9 +6,11 @@ import { UserService } from '../Services/auth/user.service';
  * This guard checks if the user is logged in and redirects to the login page if not.
  */
 @Injectable()
-export class LoggedInGuard  {
-  constructor(private userService: UserService , private router: Router) {
-  }
+export class LoggedInGuard {
+  constructor(
+    private readonly userService: UserService,
+    private readonly router: Router,
+  ) {}
 
   /**
    * Checks if the user is logged in and redirects to the login page if not.

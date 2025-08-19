@@ -3,7 +3,7 @@ import { REQUEST } from '@nestjs/core';
 import { RagService } from '../services/rag.service';
 import { TranscriptChunk } from '@Interfaces/index';
 import { PrismaService } from '../../prisma/prisma.service';
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatOpenAI } from '@langchain/openai';
 import { ChatBotMessageDTO } from '@DTOs/index';
 import { UnauthorizedException } from '@nestjs/common';
 
@@ -26,11 +26,9 @@ const llm = new ChatOpenAI({
 const titleGenerationPrompt = ChatPromptTemplate.fromPromptMessages([
   SystemMessagePromptTemplate.fromTemplate(
     'Generiere einen kurzen, prägnanten Titel (maximal 30 Zeichen) für diese Chat-Konversation. ' +
-    'Der Titel soll das Hauptthema der Unterhaltung widerspiegeln.'
+      'Der Titel soll das Hauptthema der Unterhaltung widerspiegeln.',
   ),
-  HumanMessagePromptTemplate.fromTemplate(
-    'Frage: {question}\nAntwort: {answer}'
-  ),
+  HumanMessagePromptTemplate.fromTemplate('Frage: {question}\nAntwort: {answer}'),
 ]);
 
 const finalRAGPromptAUD = ChatPromptTemplate.fromPromptMessages([
@@ -90,10 +88,7 @@ const dialogPromptAUD = ChatPromptTemplate.fromPromptMessages([
       '1. Wenn die Frage keinen Bezug zur Informatik oder Algorithmen und Datenstrukturen hat, antworte: "Das ist eine interessante Frage, aber leider nicht Teil des Vorlesungsstoffs."',
   ),
   HumanMessagePromptTemplate.fromTemplate(
-    '# Chatverlauf\n' +
-      '{chatHistory}\n' +
-      '# Frage des Studenten:\n' +
-      '{question}\n',
+    '# Chatverlauf\n' + '{chatHistory}\n' + '# Frage des Studenten:\n' + '{question}\n',
   ),
 ]);
 
@@ -105,10 +100,7 @@ const dialogPromptOFP = ChatPromptTemplate.fromPromptMessages([
       '1. Wenn die Frage keinen Bezug zur Informatik oder Objektorientierte und funktionale Programmierung hat, antworte: "Das ist eine interessante Frage, aber leider nicht Teil des Vorlesungsstoffs."',
   ),
   HumanMessagePromptTemplate.fromTemplate(
-    '# Chatverlauf\n' +
-      '{chatHistory}\n' +
-      '# Frage des Studenten:\n' +
-      '{question}\n',
+    '# Chatverlauf\n' + '{chatHistory}\n' + '# Frage des Studenten:\n' + '{question}\n',
   ),
 ]);
 
@@ -116,8 +108,8 @@ const dialogPromptOFP = ChatPromptTemplate.fromPromptMessages([
 export class ChatBotRAGService {
   constructor(
     @Inject(REQUEST) private readonly request: Request,
-    private ragService: RagService,
-    private prisma: PrismaService,
+    private readonly ragService: RagService,
+    private readonly prisma: PrismaService,
   ) {}
 
   /**
@@ -132,7 +124,7 @@ export class ChatBotRAGService {
       // Generate title using GPT-4
       const titlePrompt = await titleGenerationPrompt.formatPromptValue({
         question: question,
-        answer: answer
+        answer: answer,
       });
 
       const titleResponse = await llm.generatePrompt([titlePrompt]);
@@ -142,8 +134,8 @@ export class ChatBotRAGService {
       const session = await this.prisma.chatSession.create({
         data: {
           title: sessionTitle,
-          userId: userId
-        }
+          userId: userId,
+        },
       });
 
       return session;
@@ -163,10 +155,10 @@ export class ChatBotRAGService {
       where: { userId },
       include: {
         messages: {
-          orderBy: { createdAt: 'asc' }
-        }
+          orderBy: { createdAt: 'asc' },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -187,15 +179,12 @@ export class ChatBotRAGService {
     sessionId?: number,
   ): Promise<ChatBotMessageDTO> {
     // Perform similarity search using RAG service
-    const tempsimilaritySearchResult =
-      await this.ragService.lectureSimilaritySearch(question, 4);
-    const similaritySearchResult = this.transformSearchResult(
-      tempsimilaritySearchResult,
-    );
+    const tempsimilaritySearchResult = await this.ragService.lectureSimilaritySearch(question, 4);
+    const similaritySearchResult = this.transformSearchResult(tempsimilaritySearchResult);
     let answer = '';
 
-    let sourceCounter: number = 0;
-    let sourceMapDict = {};
+    let sourceCounter = 0;
+    const sourceMapDict = {};
 
     for (const item of similaritySearchResult) {
       sourceCounter++;
@@ -212,84 +201,81 @@ export class ChatBotRAGService {
     let ongoingBuffer = ''; // Buffer to capture potential reference across tokens
 
     let openAiAnswerWithMarkdownLinks = '';
-    const openAiResponse = await llm.generatePrompt(
-      [ragFormattedPrompt],
-      undefined,
-      [
-        {
-          ignoreAgent: true,
-          ignoreChain: true,
-          handleLLMNewToken(token: string) {
-            // Handle each token of the response to replace references with actual markdown links
-            for (let i = 0; i < token.length; i++) {
-              const char = token[i];
+    const openAiResponse = await llm.generatePrompt([ragFormattedPrompt], undefined, [
+      {
+        ignoreAgent: true,
+        ignoreChain: true,
+        handleLLMNewToken(token: string) {
+          // Handle each token of the response to replace references with actual markdown links
+          for (let i = 0; i < token.length; i++) {
+            const char = token[i];
 
-              // Start buffering if we encounter the first $
-              if (char === '$') {
-                ongoingBuffer += char;
-              } else if (ongoingBuffer) {
-                ongoingBuffer += char;
+            // Start buffering if we encounter the first $
+            if (char === '$') {
+              ongoingBuffer += char;
+            } else if (ongoingBuffer) {
+              ongoingBuffer += char;
 
-                // Check if the buffer now contains a complete reference ending with "$$"
-                if (ongoingBuffer.match(/\$\$\d+\$\$/)) {
-                  const match = ongoingBuffer.match(/\$\$(\d+)\$\$/);
+              // Check if the buffer now contains a complete reference ending with "$$"
+              if (ongoingBuffer.match(/\$\$\d+\$\$/)) {
+                const match = ongoingBuffer.match(/\$\$(\d+)\$\$/);
 
-                  if (match) {
-                    const sourceCounter = match[1];
-                    const markdownLink = sourceMapDict[sourceCounter];
-                    if (markdownLink) {
-                      const replacedText = ongoingBuffer.replace(
-                        `$$${sourceCounter}$$`,
-                        markdownLink,
-                      );
-                      answer += replacedText;
-                      openAiAnswerWithMarkdownLinks += replacedText;
-                    } else {
-                      answer += ongoingBuffer;
-                      openAiAnswerWithMarkdownLinks += ongoingBuffer;
-                    }
+                if (match) {
+                  const sourceCounter = match[1];
+                  const markdownLink = sourceMapDict[sourceCounter];
+                  if (markdownLink) {
+                    const replacedText = ongoingBuffer.replace(
+                      `$$${sourceCounter}$$`,
+                      markdownLink,
+                    );
+                    answer += replacedText;
+                    openAiAnswerWithMarkdownLinks += replacedText;
                   } else {
                     answer += ongoingBuffer;
                     openAiAnswerWithMarkdownLinks += ongoingBuffer;
                   }
-
-                  ongoingBuffer = ''; // Clear the buffer after processing
+                } else {
+                  answer += ongoingBuffer;
+                  openAiAnswerWithMarkdownLinks += ongoingBuffer;
                 }
-              } else {
-                // If not buffering, directly write the character to the response stream
-                answer += char;
-                openAiAnswerWithMarkdownLinks += char;
-              }
-            }
 
-            // Handle the case where ongoingBuffer contains the beginning of a reference
-            if (ongoingBuffer && !ongoingBuffer.match(/\$\$\d+\$\$/)) {
-              // Do not flush; wait for more tokens to complete the reference
-            } else if (ongoingBuffer.match(/\$\$\d+\$\$/)) {
-              // If buffer is complete but wasn't processed yet, process now
-              const match = ongoingBuffer.match(/\$\$(\d+)\$\$/);
-              if (match) {
-                const sourceCounter = match[1];
-                const markdownLink = "(Quelle: " +
-                  sourceMapDict[sourceCounter]
-                    .replace(/^\^\[/, '') // TEMP FIX TO REPLACE FOOTNOTE LINK WITH NORMAL MARKDOWN LINK
-                    .replace(/\]$/, '') +
-                  ")";
-                const replacedText = markdownLink
-                  ? ongoingBuffer.replace(`$$${sourceCounter}$$`, markdownLink)
-                  : ongoingBuffer;
-                answer += replacedText;
-                openAiAnswerWithMarkdownLinks += replacedText;
-              } else {
-                answer += ongoingBuffer;
-                openAiAnswerWithMarkdownLinks += ongoingBuffer;
+                ongoingBuffer = ''; // Clear the buffer after processing
               }
-              ongoingBuffer = ''; // Clear the buffer
+            } else {
+              // If not buffering, directly write the character to the response stream
+              answer += char;
+              openAiAnswerWithMarkdownLinks += char;
             }
-          },
+          }
+
+          // Handle the case where ongoingBuffer contains the beginning of a reference
+          if (ongoingBuffer && !ongoingBuffer.match(/\$\$\d+\$\$/)) {
+            // Do not flush; wait for more tokens to complete the reference
+          } else if (ongoingBuffer.match(/\$\$\d+\$\$/)) {
+            // If buffer is complete but wasn't processed yet, process now
+            const match = ongoingBuffer.match(/\$\$(\d+)\$\$/);
+            if (match) {
+              const sourceCounter = match[1];
+              const markdownLink =
+                '(Quelle: ' +
+                sourceMapDict[sourceCounter]
+                  .replace(/^\^\[/, '') // TEMP FIX TO REPLACE FOOTNOTE LINK WITH NORMAL MARKDOWN LINK
+                  .replace(/\]$/, '') +
+                ')';
+              const replacedText = markdownLink
+                ? ongoingBuffer.replace(`$$${sourceCounter}$$`, markdownLink)
+                : ongoingBuffer;
+              answer += replacedText;
+              openAiAnswerWithMarkdownLinks += replacedText;
+            } else {
+              answer += ongoingBuffer;
+              openAiAnswerWithMarkdownLinks += ongoingBuffer;
+            }
+            ongoingBuffer = ''; // Clear the buffer
+          }
         },
-      ],
-    );
+      },
+    ]);
 
     let session;
     if (!sessionId) {
@@ -330,12 +316,7 @@ export class ChatBotRAGService {
   ): Promise<ChatBotMessageDTO> {
     const chatHistory: string = context
       .slice(0, -2)
-      .map(
-        (msg) =>
-          `## ${msg.role === 'user' ? 'HumanMessage' : 'AIMessage'}\n${
-            msg.content
-          }`,
-      )
+      .map(msg => `## ${msg.role === 'user' ? 'HumanMessage' : 'AIMessage'}\n${msg.content}`)
       .join('\n');
 
     // Format the dialog prompt
@@ -345,19 +326,15 @@ export class ChatBotRAGService {
     });
 
     // Generate response using the dialog model
-    const openAiResponse = await llm.generatePrompt(
-      [DialogPrompt],
-      undefined,
-      [
-        {
-          ignoreAgent: true,
-          ignoreChain: true,
-          handleLLMNewToken(token: string) {
-            //resStream.write(token);
-          },
+    const openAiResponse = await llm.generatePrompt([DialogPrompt], undefined, [
+      {
+        ignoreAgent: true,
+        ignoreChain: true,
+        handleLLMNewToken(token: string) {
+          //resStream.write(token);
         },
-      ],
-    );
+      },
+    ]);
 
     // Save the chatbot's response with session
     const message = await this.saveChatBotMessage(
@@ -378,7 +355,7 @@ export class ChatBotRAGService {
    * @returns The transformed search result.
    */
   transformSearchResult(jsonArray: TranscriptChunk[]): any[] {
-    return jsonArray.map((item) => ({
+    return jsonArray.map(item => ({
       Erklärung: item.TranscriptChunkContent,
       Quelle: item.metadata.markdownLink,
     }));
@@ -434,7 +411,7 @@ export class ChatBotRAGService {
       // First check if the message belongs to the user
       const message = await this.prisma.chatBotMessage.findUnique({
         where: { id: messageId },
-        include: { session: true }
+        include: { session: true },
       });
 
       if (!message) {
@@ -442,7 +419,7 @@ export class ChatBotRAGService {
       }
 
       // Check if the message belongs to the user's session
-      if (message.session?.userId !== userId) {
+      if (message.session.userId !== userId) {
         throw new UnauthorizedException('You can only rate your own messages');
       }
 

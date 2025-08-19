@@ -7,19 +7,23 @@ import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 @UseGuards(RolesGuard)
 @Controller('gpt')
 export class GptController {
+  constructor(private readonly gptService: GptService) {}
 
-    constructor(private gptService: GptService) {}
-
-    /**
-     * Retrieves GPT feedback.
-     * @param body - The request body containing the solution and attempt data.
-     * @returns A Promise that resolves to the result of the feedback request.
-     */
-    @roles('TEACHER, ADMIN')
-    @Post('getGptFeedback')
-    async getGptFeedback(@Body() body: {solution: editorDataDTO, attempt: editorDataDTO, taskDescription: string}) {
-        //return await this.gptService.sendFeedbackRequest(body.solution, body.attempt, body.taskDescription);
-        return await this.gptService.sendFeedbackRequestByLog(body.solution, body.attempt, body.taskDescription);
-    }
-
+  /**
+   * Retrieves GPT feedback.
+   * @param body - The request body containing the solution and attempt data.
+   * @returns A Promise that resolves to the result of the feedback request.
+   */
+  @roles('TEACHER, ADMIN')
+  @Post('getGptFeedback')
+  async getGptFeedback(
+    @Body() body: { solution: editorDataDTO; attempt: editorDataDTO; taskDescription: string },
+  ) {
+    //return await this.gptService.sendFeedbackRequest(body.solution, body.attempt, body.taskDescription);
+    return await this.gptService.sendFeedbackRequestByLog(
+      body.solution,
+      body.attempt,
+      body.taskDescription,
+    );
+  }
 }

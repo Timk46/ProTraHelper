@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BaseMessage, AIMessage, HumanMessage } from '@langchain/core/messages'; // Added HumanMessage
+import { BaseMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage } from '@langchain/core/messages'; // Added HumanMessage
 import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
 
 // Import Providers
@@ -40,20 +41,22 @@ export class LanggraphFeedbackService {
       let feedback: string | null = null;
       if (finalState && Array.isArray(finalState.messages)) {
         for (let i = finalState.messages.length - 1; i >= 0; i--) {
-            const msg = finalState.messages[i];
-            if (msg instanceof AIMessage && typeof msg.content === 'string') {
-                const content = msg.content.trim();
-                if (!content.startsWith('{"routingDecision":')) { // Avoid internal router messages
-                    feedback = content;
-                    // Optional: Strip reasoning, quotes etc. (add logic if needed)
-                    break;
-                }
+          const msg = finalState.messages[i];
+          if (msg instanceof AIMessage && typeof msg.content === 'string') {
+            const content = msg.content.trim();
+            if (!content.startsWith('{"routingDecision":')) {
+              // Avoid internal router messages
+              feedback = content;
+              // Optional: Strip reasoning, quotes etc. (add logic if needed)
+              break;
             }
+          }
         }
       }
-      this.logger.log(`Supervisor feedback generated: ${feedback ? feedback.substring(0, 100) + '...' : 'None'}`);
+      this.logger.log(
+        `Supervisor feedback generated: ${feedback ? feedback.substring(0, 100) + '...' : 'None'}`,
+      );
       return feedback;
-
     } catch (error) {
       this.logger.error('Error getting supervisor feedback:', error);
       throw error; // Re-throw or handle appropriately
@@ -75,13 +78,15 @@ export class LanggraphFeedbackService {
       // We pass an empty message array as the initial history.
       const agentInput = {
         messages: [], // Start with empty message history for direct call
-        context: contextInput // Pass the DTO directly
+        context: contextInput, // Pass the DTO directly
       };
 
       const result = await agentRunnable.invoke(agentInput); // Pass direct DTO and empty messages
       // Assuming the result structure contains 'messages'
       const aiMessages = result?.messages?.filter(msg => msg instanceof AIMessage) ?? null;
-      this.logger.log(`Direct KC feedback generated: ${aiMessages ? aiMessages.length + ' messages' : 'None'}`);
+      this.logger.log(
+        `Direct KC feedback generated: ${aiMessages ? aiMessages.length + ' messages' : 'None'}`,
+      );
       return aiMessages;
     } catch (error) {
       this.logger.error('Error getting direct KC feedback:', error);
@@ -96,11 +101,13 @@ export class LanggraphFeedbackService {
    */
   async getKhFeedback(contextInput: FeedbackContextDto): Promise<BaseMessage[] | null> {
     this.logger.log(`Getting direct KH feedback for attempt ${contextInput.attemptCount}`);
-     try {
+    try {
       const agentChain = this.khAgentProvider.getAgentChain();
       const result = await agentChain.invoke(contextInput);
       const aiMessages = result?.messages?.filter(msg => msg instanceof AIMessage) ?? null;
-      this.logger.log(`Direct KH feedback generated: ${aiMessages ? aiMessages.length + ' messages' : 'None'}`);
+      this.logger.log(
+        `Direct KH feedback generated: ${aiMessages ? aiMessages.length + ' messages' : 'None'}`,
+      );
       return aiMessages;
     } catch (error) {
       this.logger.error('Error getting direct KH feedback:', error);
@@ -115,11 +122,13 @@ export class LanggraphFeedbackService {
    */
   async getKmFeedback(contextInput: FeedbackContextDto): Promise<BaseMessage[] | null> {
     this.logger.log(`Getting direct KM feedback for attempt ${contextInput.attemptCount}`);
-     try {
+    try {
       const agentChain = this.kmAgentProvider.getAgentChain();
       const result = await agentChain.invoke(contextInput);
       const aiMessages = result?.messages?.filter(msg => msg instanceof AIMessage) ?? null;
-      this.logger.log(`Direct KM feedback generated: ${aiMessages ? aiMessages.length + ' messages' : 'None'}`);
+      this.logger.log(
+        `Direct KM feedback generated: ${aiMessages ? aiMessages.length + ' messages' : 'None'}`,
+      );
       return aiMessages;
     } catch (error) {
       this.logger.error('Error getting direct KM feedback:', error);
@@ -127,23 +136,24 @@ export class LanggraphFeedbackService {
     }
   }
 
-    /**
+  /**
    * Gets feedback directly from the KTC agent.
    * @param contextInput The feedback context.
    * @returns An array of AI messages from the agent or null.
    */
   async getKtcFeedback(contextInput: FeedbackContextDto): Promise<BaseMessage[] | null> {
     this.logger.log(`Getting direct KTC feedback for attempt ${contextInput.attemptCount}`);
-     try {
+    try {
       const agentChain = this.ktcAgentProvider.getAgentChain();
       const result = await agentChain.invoke(contextInput);
       const aiMessages = result?.messages?.filter(msg => msg instanceof AIMessage) ?? null;
-      this.logger.log(`Direct KTC feedback generated: ${aiMessages ? aiMessages.length + ' messages' : 'None'}`);
+      this.logger.log(
+        `Direct KTC feedback generated: ${aiMessages ? aiMessages.length + ' messages' : 'None'}`,
+      );
       return aiMessages;
     } catch (error) {
       this.logger.error('Error getting direct KTC feedback:', error);
       throw error;
     }
   }
-
 }

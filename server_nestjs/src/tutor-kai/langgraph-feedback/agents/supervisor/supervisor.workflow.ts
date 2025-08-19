@@ -1,8 +1,11 @@
-import { Injectable, Inject, Logger, OnModuleInit } from '@nestjs/common';
+import { OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ChatOpenAI } from '@langchain/openai';
-import { BaseMessage, HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages';
-import { Runnable, RunnableLambda, RunnableConfig } from '@langchain/core/runnables';
+import { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages';
+import { Runnable, RunnableConfig } from '@langchain/core/runnables';
+import { RunnableLambda } from '@langchain/core/runnables';
 import { StateGraph, END, StateGraphArgs, Annotation } from '@langchain/langgraph';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
@@ -38,10 +41,9 @@ const AnnotatedState = Annotation.Root({
 type GraphState = typeof AnnotatedState.State;
 type NodeFunction = (state: GraphState) => Promise<Partial<GraphState>>;
 type RouterFunction = (state: GraphState) => Promise<Partial<GraphState>>;
-type AgentNodeNames = "KC" | "KH" | "KM" | "KTC";
-type GraphNodeNames = "router" | "format_input" | AgentNodeNames;
+type AgentNodeNames = 'KC' | 'KH' | 'KM' | 'KTC';
+type GraphNodeNames = 'router' | 'format_input' | AgentNodeNames;
 // --- End Graph State Definition ---
-
 
 @Injectable()
 export class SupervisorWorkflowService implements OnModuleInit {
@@ -53,12 +55,7 @@ export class SupervisorWorkflowService implements OnModuleInit {
     @Inject(CHAT_OPENAI_MODEL) private readonly model: ChatOpenAI,
     private readonly configService: ConfigService, // Needed for API key? Or just model?
     // Inject Agent Providers (if invoking full chains) - OR - Tool Services (if invoking core agents)
-    private readonly domainKnowledgeService: DomainKnowledgeService, // Needed for tool creation
-    // Inject providers if needed, though maybe not if core builders are used directly?
-    // private readonly kcAgentProvider: KcAgentProvider,
-    // private readonly khAgentProvider: KhAgentProvider,
-    // private readonly kmAgentProvider: KmAgentProvider,
-    // private readonly ktcAgentProvider: KtcAgentProvider,
+    private readonly domainKnowledgeService: DomainKnowledgeService, // Needed for tool creation // Inject providers if needed, though maybe not if core builders are used directly? // private readonly kcAgentProvider: KcAgentProvider, // private readonly khAgentProvider: KhAgentProvider, // private readonly kmAgentProvider: KmAgentProvider, // private readonly ktcAgentProvider: KtcAgentProvider,
   ) {}
 
   async onModuleInit() {
@@ -81,12 +78,14 @@ export class SupervisorWorkflowService implements OnModuleInit {
     const workflow = new StateGraph(AnnotatedState);
 
     // --- Node: Format Initial Input (Copied) ---
-    const formatInitialInputNode: NodeFunction = async (state: GraphState): Promise<Partial<GraphState>> => {
-        if (!state.inputContext) {
-            throw new Error("Input context is missing in graph state.");
-        }
-        const input = state.inputContext;
-        const contextMessageContent = `
+    const formatInitialInputNode: NodeFunction = async (
+      state: GraphState,
+    ): Promise<Partial<GraphState>> => {
+      if (!state.inputContext) {
+        throw new Error('Input context is missing in graph state.');
+      }
+      const input = state.inputContext;
+      const contextMessageContent = `
 ## Attempt number
 ${input.attemptCount}
 
@@ -112,47 +111,61 @@ ${JSON.stringify(input.automatedTests) || 'None'}
 ### Unit Tests Results
 ${JSON.stringify(input.unitTestResults) || 'None'}
 `;
-        const initialMessages: BaseMessage[] = [new HumanMessage(contextMessageContent)];
-        return {
-            messages: initialMessages,
-            studentSolution: input.studentSolution,
-            taskDescription: input.taskDescription,
-            compilerOutput: input.compilerOutput,
-            unitTestResults: input.unitTestResults,
-            attemptCount: input.attemptCount,
-            automatedTests: input.automatedTests,
-            codeGerueste: input.codeGerueste,
-        };
+      const initialMessages: BaseMessage[] = [new HumanMessage(contextMessageContent)];
+      return {
+        messages: initialMessages,
+        studentSolution: input.studentSolution,
+        taskDescription: input.taskDescription,
+        compilerOutput: input.compilerOutput,
+        unitTestResults: input.unitTestResults,
+        attemptCount: input.attemptCount,
+        automatedTests: input.automatedTests,
+        codeGerueste: input.codeGerueste,
+      };
     };
 
     // --- Generic Agent Node Wrapper (for ALL agents) ---
     // Passes both messages and context. Agents not needing context should ignore it.
-    const wrapGenericAgentNode = (agentRunnable: Runnable<any, any>, agentName: string): RunnableLambda<GraphState, Partial<GraphState>> => {
-        const nodeFunc: NodeFunction = async (state: GraphState): Promise<Partial<GraphState>> => {
-             if (!state.inputContext) { // Add safety check for context
-                 this.logger.error(`Error invoking ${agentName} node: inputContext is missing in state.`);
-                 return { messages: [new AIMessage(`Error processing feedback in ${agentName}: Missing input context.`)] };
-             }
-            // Prepare input including context for all agents
-            const agentInput = {
-                messages: state.messages,
-                context: state.inputContext // Pass context to all - currently only used by KC agent?
-            };
-            try {
-                const agentOutput = await agentRunnable.invoke(agentInput);
-                return { messages: agentOutput?.messages ?? [] };
-            } catch (error) {
-                this.logger.error(`Error invoking ${agentName} node: ${error}`);
-                return { messages: [new AIMessage(`Error processing feedback in ${agentName}: ${error.message}`)] };
-            }
+    const wrapGenericAgentNode = (
+      agentRunnable: Runnable<any, any>,
+      agentName: string,
+    ): RunnableLambda<GraphState, Partial<GraphState>> => {
+      const nodeFunc: NodeFunction = async (state: GraphState): Promise<Partial<GraphState>> => {
+        if (!state.inputContext) {
+          // Add safety check for context
+          this.logger.error(`Error invoking ${agentName} node: inputContext is missing in state.`);
+          return {
+            messages: [
+              new AIMessage(`Error processing feedback in ${agentName}: Missing input context.`),
+            ],
+          };
+        }
+        // Prepare input including context for all agents
+        const agentInput = {
+          messages: state.messages,
+          context: state.inputContext, // Pass context to all - currently only used by KC agent?
         };
-        return new RunnableLambda({ func: nodeFunc });
+        try {
+          const agentOutput = await agentRunnable.invoke(agentInput);
+          return { messages: agentOutput?.messages ?? [] };
+        } catch (error) {
+          this.logger.error(`Error invoking ${agentName} node: ${error}`);
+          return {
+            messages: [
+              new AIMessage(`Error processing feedback in ${agentName}: ${error.message}`),
+            ],
+          };
+        }
+      };
+      return new RunnableLambda({ func: nodeFunc });
     };
 
     // Specific KC Agent Node Wrapper removed - using generic wrapper now.
 
     // --- Create Core Agent Runnables (Using Builders) ---
-    const knowledgeAboutConceptsAgentRunnable = buildKcCoreAgent(this.model, [this.domainKnowledgeTool]);
+    const knowledgeAboutConceptsAgentRunnable = buildKcCoreAgent(this.model, [
+      this.domainKnowledgeTool,
+    ]);
     const knowledgeOnHowToProceedAgentRunnable = buildKhCoreAgent(this.model);
     const knowledgeAboutMistakesAgentRunnable = buildKmCoreAgent(this.model);
     const knowledgeAboutTaskConstraintsAgentRunnable = buildKtcCoreAgent(this.model);
@@ -166,60 +179,74 @@ ${JSON.stringify(input.unitTestResults) || 'None'}
 
     // --- Router Logic (Copied) ---
     const supervisorPromptString = buildSupervisorPrompt();
-    const routerFunction: RouterFunction = async (state: GraphState): Promise<Partial<GraphState>> => {
-        this.logger.log('Router: Deciding next agent...');
-        const { messages } = state; // Only need messages from state now for this part
+    const routerFunction: RouterFunction = async (
+      state: GraphState,
+    ): Promise<Partial<GraphState>> => {
+      this.logger.log('Router: Deciding next agent...');
+      const { messages } = state; // Only need messages from state now for this part
 
-        // Find the initial HumanMessage containing the context
-        const humanMessage = messages.find(msg => msg instanceof HumanMessage);
-        if (!humanMessage) {
-            this.logger.error('Router: Could not find HumanMessage in state.');
-            return { routingDecision: END }; // Cannot proceed without context
+      // Find the initial HumanMessage containing the context
+      const humanMessage = messages.find(msg => msg instanceof HumanMessage);
+      if (!humanMessage) {
+        this.logger.error('Router: Could not find HumanMessage in state.');
+        return { routingDecision: END }; // Cannot proceed without context
+      }
+
+      // Find the last AI message for feedback history
+      const lastFeedback =
+        messages
+          .filter(msg => msg instanceof AIMessage)
+          .pop()
+          .content.toString() || 'None';
+
+      // Get the base system prompt (assuming context placeholders are removed)
+      // Replace only the {lastFeedback} placeholder if it exists in the prompt
+      const systemPromptContent = supervisorPromptString.replace('{lastFeedback}', lastFeedback);
+      const systemMessage = new SystemMessage(systemPromptContent);
+
+      // Prepare messages for the LLM call
+      const llmMessages: BaseMessage[] = [systemMessage, humanMessage];
+
+      this.logger.log(`Router: Sending System and Human messages to LLM.`);
+      //this.logger.log(`Router: System Prompt (first 200 chars): ${systemPromptContent.substring(0, 200)}...`);
+      //this.logger.log(`Router: Human Message (first 200 chars): ${humanMessage.content.toString().substring(0, 200)}...`);
+
+      try {
+        // Invoke the model with both System and Human messages
+        const response = await this.model.invoke(llmMessages);
+        let decision = response.content.toString().trim();
+        if (decision.startsWith('"') && decision.endsWith('"')) {
+          decision = decision.substring(1, decision.length - 1);
         }
-
-        // Find the last AI message for feedback history
-        const lastFeedback = messages.filter(msg => msg instanceof AIMessage).pop()?.content?.toString() || 'None';
-
-        // Get the base system prompt (assuming context placeholders are removed)
-        // Replace only the {lastFeedback} placeholder if it exists in the prompt
-        const systemPromptContent = supervisorPromptString.replace('{lastFeedback}', lastFeedback);
-        const systemMessage = new SystemMessage(systemPromptContent);
-
-        // Prepare messages for the LLM call
-        const llmMessages: BaseMessage[] = [ systemMessage, humanMessage ];
-
-        this.logger.log(`Router: Sending System and Human messages to LLM.`);
-        //this.logger.log(`Router: System Prompt (first 200 chars): ${systemPromptContent.substring(0, 200)}...`);
-        //this.logger.log(`Router: Human Message (first 200 chars): ${humanMessage.content.toString().substring(0, 200)}...`);
-
-        try {
-            // Invoke the model with both System and Human messages
-            const response = await this.model.invoke(llmMessages);
-            let decision = response.content.toString().trim();
-            if (decision.startsWith('"') && decision.endsWith('"')) {
-                decision = decision.substring(1, decision.length - 1);
-            }
-            this.logger.log(`Router: LLM decision: '${decision}'`);
-            const validAgents: AgentNodeNames[] = ['KC', 'KH', 'KM', 'KTC'];
-            if (validAgents.includes(decision as AgentNodeNames)) {
-                return { routingDecision: decision };
-            } else if (decision === END || decision === '__END__') {
-                return { routingDecision: END };
-            } else {
-                const reasoningMatch = response.content.toString().match(/<\/reasoning>\s*"?(\w+|__END__)?"?/);
-                if (reasoningMatch && reasoningMatch[1]) {
-                    const extractedDecision = reasoningMatch[1];
-                    this.logger.warn(`Router: Extracted decision '${extractedDecision}' from reasoning block.`);
-                    if (validAgents.includes(extractedDecision as AgentNodeNames)) return { routingDecision: extractedDecision };
-                    if (extractedDecision === END || extractedDecision === '__END__') return { routingDecision: END };
-                }
-                this.logger.warn(`Router: Invalid or unparseable decision '${decision}'. Defaulting to END.`);
-                return { routingDecision: END };
-            }
-        } catch (error) {
-            this.logger.error(`Error invoking router LLM: ${error}`);
-            return { routingDecision: END };
+        this.logger.log(`Router: LLM decision: '${decision}'`);
+        const validAgents: AgentNodeNames[] = ['KC', 'KH', 'KM', 'KTC'];
+        if (validAgents.includes(decision as AgentNodeNames)) {
+          return { routingDecision: decision };
+        } else if (decision === END || decision === '__END__') {
+          return { routingDecision: END };
+        } else {
+          const reasoningMatch = response.content
+            .toString()
+            .match(/<\/reasoning>\s*"?(\w+|__END__)?"?/);
+          if (reasoningMatch && reasoningMatch[1]) {
+            const extractedDecision = reasoningMatch[1];
+            this.logger.warn(
+              `Router: Extracted decision '${extractedDecision}' from reasoning block.`,
+            );
+            if (validAgents.includes(extractedDecision as AgentNodeNames))
+              return { routingDecision: extractedDecision };
+            if (extractedDecision === END || extractedDecision === '__END__')
+              return { routingDecision: END };
+          }
+          this.logger.warn(
+            `Router: Invalid or unparseable decision '${decision}'. Defaulting to END.`,
+          );
+          return { routingDecision: END };
         }
+      } catch (error) {
+        this.logger.error(`Error invoking router LLM: ${error}`);
+        return { routingDecision: END };
+      }
     };
 
     // --- Add Nodes and Edges (Copied) ---
@@ -231,29 +258,33 @@ ${JSON.stringify(input.unitTestResults) || 'None'}
     workflow.addNode('router', routerFunction);
 
     // @ts-ignore
-    workflow.addEdge("__start__", "format_input");
+    workflow.addEdge('__start__', 'format_input');
     // @ts-ignore
-    workflow.addEdge("format_input", "router");
+    workflow.addEdge('format_input', 'router');
 
-    const routeLogic = (state: GraphState): AgentNodeNames | "__end__" => {
-        const decision = state.routingDecision;
-        if (!decision || decision === END) return "__end__";
-        return decision as AgentNodeNames;
+    const routeLogic = (state: GraphState): AgentNodeNames | '__end__' => {
+      const decision = state.routingDecision;
+      if (!decision || decision === END) return '__end__';
+      return decision as AgentNodeNames;
     };
 
     // @ts-ignore
     workflow.addConditionalEdges('router', routeLogic, {
-        'KC': 'KC', 'KH': 'KH', 'KM': 'KM', 'KTC': 'KTC', "__end__": END
+      KC: 'KC',
+      KH: 'KH',
+      KM: 'KM',
+      KTC: 'KTC',
+      __end__: END,
     });
 
     // @ts-ignore
-    workflow.addEdge('KC', "__end__");
+    workflow.addEdge('KC', '__end__');
     // @ts-ignore
-    workflow.addEdge('KH', "__end__");
+    workflow.addEdge('KH', '__end__');
     // @ts-ignore
-    workflow.addEdge('KM', "__end__");
+    workflow.addEdge('KM', '__end__');
     // @ts-ignore
-    workflow.addEdge('KTC', "__end__");
+    workflow.addEdge('KTC', '__end__');
 
     // --- Compile Graph ---
     this.supervisorGraph = workflow.compile();
@@ -266,7 +297,8 @@ ${JSON.stringify(input.unitTestResults) || 'None'}
    * @param contextInput The feedback context DTO.
    * @returns The final state of the graph. // TODO: Define a clearer return type (e.g., just the feedback message)
    */
-  async invokeWorkflow(contextInput: FeedbackContextDto): Promise<GraphState> { // Returning full state for now
+  async invokeWorkflow(contextInput: FeedbackContextDto): Promise<GraphState> {
+    // Returning full state for now
     this.logger.log(`Invoking supervisor workflow for attempt ${contextInput.attemptCount}`);
     if (!this.supervisorGraph) {
       this.logger.error('Supervisor graph is not initialized.');
@@ -274,17 +306,17 @@ ${JSON.stringify(input.unitTestResults) || 'None'}
     }
 
     const initialState: Partial<GraphState> = {
-        inputContext: contextInput,
-        messages: [],
-        studentSolution: '',
-        taskDescription: '',
-        compilerOutput: null,
-        unitTestResults: null,
-        attemptCount: contextInput.attemptCount,
-        automatedTests: undefined,
-        codeGerueste: undefined,
-        feedbackOutput: null,
-        routingDecision: null,
+      inputContext: contextInput,
+      messages: [],
+      studentSolution: '',
+      taskDescription: '',
+      compilerOutput: null,
+      unitTestResults: null,
+      attemptCount: contextInput.attemptCount,
+      automatedTests: undefined,
+      codeGerueste: undefined,
+      feedbackOutput: null,
+      routingDecision: null,
     };
 
     try {

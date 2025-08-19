@@ -77,7 +77,12 @@ $file-icon-size: 16px;
     overflow: visible; // Erlaubt dem Button, sichtbar zu sein
     position: relative; // Für korrekte Button-Positionierung
 
-    .project-root, .file-tree, .section-title, .folder-name, .file-name, .header-content {
+    .project-root,
+    .file-tree,
+    .section-title,
+    .folder-name,
+    .file-name,
+    .header-content {
       display: none;
     }
 

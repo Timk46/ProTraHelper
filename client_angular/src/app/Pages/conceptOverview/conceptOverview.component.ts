@@ -1,19 +1,27 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { filter, map, Observable, Subscription } from 'rxjs';
+import { OnDestroy, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { Observable, Subscription } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
-import { ConceptNodeDTO, ContentsForConceptDTO, LinkableContentNodeDTO, QuestionDTO } from '@DTOs/index';
+import {
+  ConceptNodeDTO,
+  ContentsForConceptDTO,
+  LinkableContentNodeDTO,
+  QuestionDTO,
+} from '@DTOs/index';
 import { ContentService } from 'src/app/Services/content/content.service';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { Breakpoints } from '@angular/cdk/layout';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateContentNodeDialogComponent } from '../lecturersView/create-content-node-dialog/create-content-node-dialog.component';
 import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NavigationEnd } from '@angular/router';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { RhinoLauncherService, HelperAppStatus } from 'src/app/features/rhino-launcher/rhino-launcher.service';
 
 @Component({
   selector: 'app-conceptOverview',
@@ -21,14 +29,14 @@ import { RhinoLauncherService, HelperAppStatus } from 'src/app/features/rhino-la
   styleUrls: ['./conceptOverview.component.css'],
 })
 export class ConceptOverviewComponent implements OnInit, OnDestroy {
-  private graphCommunicationService: GraphCommunicationService =
-  GraphCommunicationService.getInstance();
+  private readonly graphCommunicationService: GraphCommunicationService =
+    GraphCommunicationService.getInstance();
   isQuestionRoute = false;
-  private activeConceptNodeSubscription: Subscription;
+  private readonly activeConceptNodeSubscription: Subscription;
   activeTab: string = 'content';
   isHandset$: Observable<boolean> = this.bps
     .observe(Breakpoints.Handset)
-    .pipe(map((result) => result.matches));
+    .pipe(map(result => result.matches));
 
   // for lecturers view
   protected isAdmin: boolean = false;
@@ -56,35 +64,36 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
   };
 
   constructor(
-    private contentService: ContentService,
-    private bps: BreakpointObserver,
+    private readonly contentService: ContentService,
+    private readonly bps: BreakpointObserver,
     public sSS: ScreenSizeService,
-    private userService: UserService,
-    private dialog: MatDialog,
-    private contentLinkerSerivce: ContentLinkerService,
-    private route: ActivatedRoute,
-    private questionService: QuestionDataService,
-    private router: Router,
-    private graphDataService: GraphDataService,
-    private rhinoLauncherService: RhinoLauncherService,
-    private snackBar: MatSnackBar
+    private readonly userService: UserService,
+    private readonly dialog: MatDialog,
+    private readonly contentLinkerSerivce: ContentLinkerService,
+    private readonly route: ActivatedRoute,
+    private readonly questionService: QuestionDataService,
+    private readonly router: Router,
+    private readonly graphDataService: GraphDataService,
+    private readonly snackBar: MatSnackBar,
   ) {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
 
     // subscribe to activeConceptNode changes in the graph and update the activeConceptNode and contentsForActiveConceptNode accordingly
-    this.activeConceptNodeSubscription = this.graphCommunicationService.currentActiveNode.subscribe((activeConceptNode) => {
-      if (activeConceptNode.databaseId > 0) { // dummy node is 0 - only update if a real node is selected
-        this.activeConceptNode = activeConceptNode;
-        this.contentService.fetchContentsForConcept(this.activeConceptNode.databaseId).subscribe(contentsForConcept => {
-          this.contentsForActiveConceptNode = contentsForConcept;
-          console.log('contentsForActiveConceptNode', this.contentsForActiveConceptNode);
-        });
+    this.activeConceptNodeSubscription = this.graphCommunicationService.currentActiveNode.subscribe(
+      activeConceptNode => {
+        if (activeConceptNode.databaseId > 0) {
+          // dummy node is 0 - only update if a real node is selected
+          this.activeConceptNode = activeConceptNode;
+          this.contentService
+            .fetchContentsForConcept(this.activeConceptNode.databaseId)
+            .subscribe(contentsForConcept => {
+              this.contentsForActiveConceptNode = contentsForConcept;
+              console.log('contentsForActiveConceptNode', this.contentsForActiveConceptNode);
+            });
         }
-      }
-      );
-      this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
+      },
+    );
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(() => {
       this.isQuestionRoute = this.router.url.includes('/question/');
     });
   }
@@ -93,7 +102,7 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
     //this.isAdmin = this.userService.isAdmin();
 
     // Prüfen auf 'id' Parameter in der Route
-    this.route.paramMap.subscribe((params) => {
+    this.route.paramMap.subscribe(params => {
       const conceptId = params.get('conceptId');
       const questionId = params.get('questionId');
 
@@ -110,8 +119,8 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
     });
     this.bps
       .observe([Breakpoints.Handset, Breakpoints.Tablet, Breakpoints.Web])
-      .subscribe((result) => {});
-    this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
+      .subscribe(result => {});
+    this.userService.hasEditModeActive$.subscribe(hasEditModeActive => {
       this.editModeActive = hasEditModeActive;
     });
   }
@@ -132,29 +141,22 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
    * @param questionType
    */
   navigateToQuestion(conceptId: number, questionId: number): void {
-
-    this.router.navigate([
-      '/dashboard/concept',
-      conceptId,
-      'question',
-      questionId,
-    ]);
+    this.router.navigate(['/dashboard/concept', conceptId, 'question', questionId]);
   }
 
   loadConceptNode(conceptNodeId: number) {
     // First, fetch contents for the concept
-    this.contentService
-      .fetchContentsForConcept(conceptNodeId)
-      .subscribe((contentsForConcept) => {
-        this.contentsForActiveConceptNode = contentsForConcept;
-      });
+    this.contentService.fetchContentsForConcept(conceptNodeId).subscribe(contentsForConcept => {
+      this.contentsForActiveConceptNode = contentsForConcept;
+    });
 
     // When navigating directly to a concept URL, we need to fetch concept node data
     // and update the activeConceptNode instead of showing dummy values
     if (this.activeConceptNode.databaseId === -1 || this.activeConceptNode.name === 'dummys') {
       // We'll use GraphDataService to fetch the concept graph and extract the node
-      this.graphDataService.fetchUserGraph(1) // Using module ID 1 as default; adjust if needed
-        .subscribe((graph) => {
+      this.graphDataService
+        .fetchUserGraph(1) // Using module ID 1 as default; adjust if needed
+        .subscribe(graph => {
           // Check if the concept node exists in the graph
           if (graph.nodeMap[conceptNodeId]) {
             const conceptNode = graph.nodeMap[conceptNodeId];
@@ -179,24 +181,22 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
         width: '400px',
       });
 
-      dialogRef.afterClosed().subscribe((result) => {
+      dialogRef.afterClosed().subscribe(result => {
         if (result) {
           const linkableContentNode: LinkableContentNodeDTO = {
             conceptNodeId: this.activeConceptNode.databaseId,
             name: result.name,
-            description:
-              result.description !== '' ? result.description : undefined,
+            description: result.description !== '' ? result.description : undefined,
             awardsLevel: result.difficulty,
           };
           this.contentLinkerSerivce
             .createLinkedContentNode(linkableContentNode)
-            .subscribe((newContentNode) => {
+            .subscribe(newContentNode => {
               // update the contents for the active concept node
               this.contentService
                 .fetchContentsForConcept(this.activeConceptNode.databaseId)
                 .subscribe(
-                  (contentsForConcept) =>
-                    (this.contentsForActiveConceptNode = contentsForConcept)
+                  contentsForConcept => (this.contentsForActiveConceptNode = contentsForConcept),
                 );
             });
         }
@@ -210,60 +210,7 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
   onFetchContentsForConcept() {
     this.contentService
       .fetchContentsForConcept(this.activeConceptNode.databaseId)
-      .subscribe(
-        (contentsForConcept) =>
-          (this.contentsForActiveConceptNode = contentsForConcept)
-      );
-  }
-
-  /**
-   * Öffnet die Rhino-Launcher-Seite, um eine spezifische Datei zu starten.
-   */
-  openRhinoLauncher(): void {
-    const fileNameToLaunch = 'example.gh'; // Name der zu startenden Datei
-
-    this.rhinoLauncherService.getGrasshopperFiles().subscribe({
-      next: (files) => {
-        const fileToLaunch = files.find(f => f.name === fileNameToLaunch);
-
-        if (!fileToLaunch) {
-          this.snackBar.open(`Die Datei '${fileNameToLaunch}' wurde nicht gefunden.`, 'Schließen', { duration: 5000 });
-          return;
-        }
-
-        this.rhinoLauncherService.getHelperAppStatus().subscribe({
-          next: (status: HelperAppStatus) => {
-            if (status.status !== 'running') {
-              this.snackBar.open('Helfer-App läuft nicht. Bitte starten Sie sie.', 'Schließen', { duration: 5000 });
-              return;
-            }
-            if (!status.rhinoPathConfigured) {
-              this.snackBar.open('Rhino-Pfad in der Helfer-App nicht konfiguriert.', 'Schließen', { duration: 5000 });
-              return;
-            }
-
-            this.rhinoLauncherService.launchRhinoWithHelper(fileToLaunch.path).subscribe({
-              next: (response) => {
-                if (response.success) {
-                  this.snackBar.open(response.message || `Rhino wird mit ${fileToLaunch.name} gestartet...`, 'OK', { duration: 5000 });
-                } else {
-                  this.snackBar.open(`Fehler beim Starten von Rhino: ${response.message}`, 'Schließen', { duration: 7000 });
-                }
-              },
-              error: (err) => {
-                this.snackBar.open(`Fehler beim Starten von Rhino: ${err.message}`, 'Schließen', { duration: 7000 });
-              }
-            });
-          },
-          error: (err) => {
-            this.snackBar.open(`Fehler beim Prüfen des Helfer-App Status: ${err.message}`, 'Schließen', { duration: 7000 });
-          }
-        });
-      },
-      error: (err) => {
-        this.snackBar.open(`Fehler beim Laden der Grasshopper-Dateien: ${err.message}`, 'Schließen', { duration: 7000 });
-      }
-    });
+      .subscribe(contentsForConcept => (this.contentsForActiveConceptNode = contentsForConcept));
   }
 
   // unsubscribe to prevent memory leaks after component is destroyed

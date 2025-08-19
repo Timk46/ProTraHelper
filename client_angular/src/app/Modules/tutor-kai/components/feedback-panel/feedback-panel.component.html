@@ -13,27 +13,52 @@
 
       <!-- Compact Agent Buttons -->
       <div class="compact-agent-buttons">
-        <button class="compact-button supervisor" mat-stroked-button (click)="requestSupervisorFeedback()" matTooltip="Die KI entscheidet die beste Option für dich">
+        <button
+          class="compact-button supervisor"
+          mat-stroked-button
+          (click)="requestSupervisorFeedback()"
+          matTooltip="Die KI entscheidet die beste Option für dich"
+        >
           <mat-icon>supervisor_account</mat-icon>
           <span>KI wählen</span>
         </button>
 
-        <button class="compact-button concepts" mat-stroked-button (click)="requestKcFeedback()" matTooltip="Relevantes Hintergrundwissen erklären">
+        <button
+          class="compact-button concepts"
+          mat-stroked-button
+          (click)="requestKcFeedback()"
+          matTooltip="Relevantes Hintergrundwissen erklären"
+        >
           <mat-icon>lightbulb</mat-icon>
           <span>Konzepte</span>
         </button>
 
-        <button class="compact-button next-steps" mat-stroked-button (click)="requestKhFeedback()" matTooltip="Zeigt, wie du weitermachen kannst">
+        <button
+          class="compact-button next-steps"
+          mat-stroked-button
+          (click)="requestKhFeedback()"
+          matTooltip="Zeigt, wie du weitermachen kannst"
+        >
           <mat-icon>navigation</mat-icon>
           <span>Nächste Schritte</span>
         </button>
 
-        <button class="compact-button errors" mat-stroked-button (click)="requestKmFeedback()" matTooltip="Probleme in deinem Code erkennen">
+        <button
+          class="compact-button errors"
+          mat-stroked-button
+          (click)="requestKmFeedback()"
+          matTooltip="Probleme in deinem Code erkennen"
+        >
           <mat-icon>bug_report</mat-icon>
           <span>Fehler</span>
         </button>
 
-        <button class="compact-button task" mat-stroked-button (click)="requestKtcFeedback()" matTooltip="Erklärung der Aufgabenstellung">
+        <button
+          class="compact-button task"
+          mat-stroked-button
+          (click)="requestKtcFeedback()"
+          matTooltip="Erklärung der Aufgabenstellung"
+        >
           <mat-icon>assignment</mat-icon>
           <span>Aufgabe</span>
         </button>

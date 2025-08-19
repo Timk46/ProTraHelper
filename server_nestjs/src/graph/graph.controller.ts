@@ -1,63 +1,75 @@
 import { ConceptGraphDTO } from '@DTOs/index';
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { GraphService } from './graph.service';
 import { roles, RolesGuard } from '../auth/common/guards/roles.guard';
 
 @UseGuards(RolesGuard)
 @Controller('graph')
 export class GraphController {
+  constructor(private readonly graphService: GraphService) {}
 
-    constructor(private graphService: GraphService) {}
+  /**
+   * This function returns a concept graph without data about a course or a user
+   * @returns the concept graph
+   */
+  @roles('ANY')
+  @Get()
+  async getConceptGraph(): Promise<ConceptGraphDTO> {
+    const graph: ConceptGraphDTO = await this.graphService.getConceptGraph();
+    return graph;
+  }
 
-    /**
-     * This function returns a concept graph without data about a course or a user
-     * @returns the concept graph
-     */
-    @roles("ANY")
-    @Get()
-    async getConceptGraph(): Promise<ConceptGraphDTO>{
-        const graph: ConceptGraphDTO = await this.graphService.getConceptGraph();
-        return graph;
-    }
+  /**
+   * This function returns a concept graph with data about a user (the level)
+   * @param userId the user id
+   * @returns the concept graph
+   */
+  @roles('ANY')
+  @Get('module/:moduleId')
+  async getUserConceptGraph(
+    @Req() req,
+    @Param('moduleId', ParseIntPipe) moduleId: number,
+  ): Promise<ConceptGraphDTO> {
+    const userId = req.user.id;
+    const graph: ConceptGraphDTO = await this.graphService.getConceptGraph(userId, moduleId);
+    return graph;
+  }
 
-    /**
-     * This function returns a concept graph with data about a user (the level)
-     * @param userId the user id
-     * @returns the concept graph
-     */
-    @roles("ANY")
-    @Get('module/:moduleId')
-    async getUserConceptGraph(@Req() req,
-    @Param('moduleId', ParseIntPipe) moduleId: number
-    ): Promise<ConceptGraphDTO>{
-        const userId = req.user.id;
-        const graph: ConceptGraphDTO = await this.graphService.getConceptGraph(userId, moduleId);
-        return graph;
-    }
+  /**
+   * This function returns a concept graph of a module with data about a user (the level)
+   * @param userId the user id
+   * @param moduleId the module id
+   * @returns the concept graph
+   */
+  @roles('ANY')
+  @Get(':moduleId')
+  async getModuleUserConceptGraph(
+    @Req() req,
+    @Param('moduleId', ParseIntPipe) moduleId: number,
+  ): Promise<ConceptGraphDTO> {
+    const userId = req.user.id;
+    const graph: ConceptGraphDTO = await this.graphService.getConceptGraph(userId, moduleId);
+    return graph;
+  }
 
-    /**
-     * This function returns a concept graph of a module with data about a user (the level)
-     * @param userId the user id
-     * @param moduleId the module id
-     * @returns the concept graph
-     */
-    @roles("ANY")
-    @Get(':moduleId')
-    async getModuleUserConceptGraph( @Req() req,
-    @Param('moduleId', ParseIntPipe) moduleId: number):
-    Promise<ConceptGraphDTO>{
-        const userId = req.user.id;
-        const graph: ConceptGraphDTO = await this.graphService.getConceptGraph(userId, moduleId);
-        return graph;
-    }
-
-    /**
-     * This function creates a new concept node
-     * @param parentId the parent id
-     * @param name the name of the concept
-     * @returns the new concept
-     */
-    // todo: add body for description and moduleGoals
+  /**
+   * This function creates a new concept node
+   * @param parentId the parent id
+   * @param name the name of the concept
+   * @returns the new concept
+   */
+  // todo: add body for description and moduleGoals
 
   // Aus sicherheitsgründen lieber vollständig auskommentiert, obwohl die Rolle korrekt gesetzt ist!
 

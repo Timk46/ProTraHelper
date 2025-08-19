@@ -9,7 +9,7 @@ import { buildKcCoreAgent } from './kc.agent'; // Import the core agent builder
 
 @Injectable()
 export class KcAgentProvider {
-  private domainKnowledgeTool: DynamicStructuredTool;
+  private readonly domainKnowledgeTool: DynamicStructuredTool;
 
   constructor(
     @Inject(CHAT_OPENAI_MODEL) private readonly model: ChatOpenAI,
@@ -22,7 +22,8 @@ export class KcAgentProvider {
   /**
    * Gets a fully configured instance of the KC core agent runnable.
    */
-  getAgentRunnable(): Runnable<any, any> { // Changed method name and return type
+  getAgentRunnable(): Runnable<any, any> {
+    // Changed method name and return type
     return buildKcCoreAgent(this.model, [this.domainKnowledgeTool]); // Call the correct builder
   }
 }

@@ -10,12 +10,12 @@ import { DomainKnowledgeService } from '../../../langgraph-feedback/tools/domain
 @Injectable()
 export class ExtractAndFetchNodeService {
   private readonly logger = new Logger(ExtractAndFetchNodeService.name);
-  private llm: ChatOpenAI;
+  private readonly llm: ChatOpenAI;
 
   constructor(
-    private configService: ConfigService,
+    private readonly configService: ConfigService,
     // Ensure DomainKnowledgeModule is imported where this service is provided (e.g., TutoringFeedbackModule)
-    private domainKnowledgeService: DomainKnowledgeService,
+    private readonly domainKnowledgeService: DomainKnowledgeService,
   ) {
     // Basic LLM initialization - consider a shared LlmProviderService
     this.llm = new ChatOpenAI({
@@ -29,9 +29,7 @@ export class ExtractAndFetchNodeService {
    * @param state The current LangGraph state.
    * @returns A partial state object containing concepts, snippets, sourceMap, and potential error.
    */
-  async execute(
-    state: TutoringFeedbackState,
-  ): Promise<Partial<TutoringFeedbackState>> {
+  async execute(state: TutoringFeedbackState): Promise<Partial<TutoringFeedbackState>> {
     this.logger.log('Executing ExtractAndFetch Node');
     const { feedbackContext } = state;
 
@@ -50,8 +48,7 @@ export class ExtractAndFetchNodeService {
       };
     }
 
-    const { studentSolution, taskDescription, compilerOutput, unitTestResults } =
-      feedbackContext;
+    const { studentSolution, taskDescription, compilerOutput, unitTestResults } = feedbackContext;
 
     // Prepare context string for the prompt
     let contextString = `Task Description:\n\`\`\`\n${taskDescription}\n\`\`\`\n\nStudent Solution:\n\`\`\`\n${studentSolution}\n\`\`\``;
@@ -60,12 +57,13 @@ export class ExtractAndFetchNodeService {
     }
     if (unitTestResults) {
       contextString += `\n\nUnit Test Results:\n\`\`\`\n${JSON.stringify(
-        unitTestResults, null, 2,
+        unitTestResults,
+        null,
+        2,
       )}\n\`\`\``;
     }
 
-    const systemPrompt =
-`
+    const systemPrompt = `
 # Role and Objective
 - You are a programming professor with extensive computer science expertise. 
 - Your task is to analyze a student's code submission carefully. 
@@ -102,15 +100,12 @@ ${contextString}
 - Always explicitly include the programming language in parentheses. The search queries must be in **german language**.
 `;
 
-    const llmWithStructure = this.llm.withStructuredOutput(
-      ConceptExtractionSchema,
-      { name: 'extract_concepts' },
-    );
+    const llmWithStructure = this.llm.withStructuredOutput(ConceptExtractionSchema, {
+      name: 'extract_concepts',
+    });
 
     try {
-      const response = await llmWithStructure.invoke([
-        new SystemMessage(systemPrompt)
-      ]);
+      const response = await llmWithStructure.invoke([new SystemMessage(systemPrompt)]);
       extractedConcepts = response.concepts ?? [];
       this.logger.log(`Successfully extracted concepts: ${extractedConcepts.join(', ')}`);
     } catch (error) {
@@ -120,7 +115,6 @@ ${contextString}
     }
     // --- End: Concept Extraction Logic ---
 
-
     // --- Start: Fetch Snippets Logic ---
     const defaultSnippetReturn = { lectureSnippets: '', sourceMap: {} }; // Default to empty string
     let lectureSnippetsResult = defaultSnippetReturn;
@@ -128,74 +122,83 @@ ${contextString}
     // console.log('extractedConcepts', extractedConcepts); // Keep or remove logging as needed
 
     if (extractedConcepts.length > 0) {
-        try {
-            let sourceCounter = 0;
-            const sourceMapDict: Record<string, string> = {};
-            const groupedSnippets: { query: string; snippets: { content: string; sourceId: string }[] }[] = [];
-            let totalSnippetsProcessed = 0;
+      try {
+        let sourceCounter = 0;
+        const sourceMapDict: Record<string, string> = {};
+        const groupedSnippets: {
+          query: string;
+          snippets: { content: string; sourceId: string }[];
+        }[] = [];
+        let totalSnippetsProcessed = 0;
 
-            for (const concept of extractedConcepts) {
-                const rawSnippets: any[] = await this.domainKnowledgeService.searchLectureContent(concept);
-                this.logger.log(`Found ${rawSnippets?.length ?? 0} raw snippets for concept: ${concept}`);
+        for (const concept of extractedConcepts) {
+          const rawSnippets: any[] = await this.domainKnowledgeService.searchLectureContent(
+            concept,
+          );
+          this.logger.log(`Found ${rawSnippets.length ?? 0} raw snippets for concept: ${concept}`);
 
-                const currentQuerySnippets: { content: string; sourceId: string }[] = [];
+          const currentQuerySnippets: { content: string; sourceId: string }[] = [];
 
-                if (rawSnippets && rawSnippets.length > 0) {
-                    for (const chunk of rawSnippets) {
-                        const content = chunk.TranscriptChunkContent ?? chunk.pageContent;
-                        const metadata = chunk.metadata;
-                        const markdownLink = metadata?.markdownLink;
+          if (rawSnippets && rawSnippets.length > 0) {
+            for (const chunk of rawSnippets) {
+              const content = chunk.TranscriptChunkContent ?? chunk.pageContent;
+              const metadata = chunk.metadata;
+              const markdownLink = metadata?.markdownLink;
 
-                        if (content && markdownLink) {
-                            sourceCounter++;
-                            const sourceId = `$$${sourceCounter}$$`;
-                            currentQuerySnippets.push({
-                                content: content,
-                                sourceId: sourceId,
-                            });
-                            sourceMapDict[sourceCounter.toString()] = markdownLink;
-                            totalSnippetsProcessed++;
-                        } else {
-                            this.logger.warn("Skipping transcript chunk due to missing content or markdownLink:", chunk);
-                        }
-                    }
-                }
-                // Add the group even if no snippets were found for this concept,
-                // so the query numbering remains consistent if needed later.
-                // Or filter out empty groups if preferred. Let's add it for now.
-                groupedSnippets.push({ query: concept, snippets: currentQuerySnippets });
+              if (content && markdownLink) {
+                sourceCounter++;
+                const sourceId = `$$${sourceCounter}$$`;
+                currentQuerySnippets.push({
+                  content: content,
+                  sourceId: sourceId,
+                });
+                sourceMapDict[sourceCounter.toString()] = markdownLink;
+                totalSnippetsProcessed++;
+              } else {
+                this.logger.warn(
+                  'Skipping transcript chunk due to missing content or markdownLink:',
+                  chunk,
+                );
+              }
             }
-
-            // Generate Markdown string
-            let markdownOutput = '';
-            groupedSnippets.forEach((group, index) => {
-                // Only add header if there are snippets for this query
-                if (group.snippets.length > 0) {
-                    markdownOutput += `### ${group.query}\n\n`; // Use the actual query string
-                    group.snippets.forEach(snippet => {
-                        markdownOutput += `#### Source (${snippet.sourceId})\n${snippet.content}\n\n`;
-                    });
-                    markdownOutput += '\n'; // Add space between queries
-                }
-            });
-
-             // Remove trailing newline if it exists
-            markdownOutput = markdownOutput.trimEnd();
-
-            lectureSnippetsResult = {
-                lectureSnippets: markdownOutput,
-                sourceMap: sourceMapDict
-            };
-            this.logger.log(`Successfully processed ${totalSnippetsProcessed} snippets into Markdown format.`);
-
-        } catch (error) {
-            this.logger.error(`Error fetching/processing snippets: ${error.message}`, error.stack);
-            snippetError = `Failed to fetch/process lecture snippets: ${error.message}`;
-            lectureSnippetsResult = defaultSnippetReturn; // Use default on error
+          }
+          // Add the group even if no snippets were found for this concept,
+          // so the query numbering remains consistent if needed later.
+          // Or filter out empty groups if preferred. Let's add it for now.
+          groupedSnippets.push({ query: concept, snippets: currentQuerySnippets });
         }
+
+        // Generate Markdown string
+        let markdownOutput = '';
+        groupedSnippets.forEach((group, index) => {
+          // Only add header if there are snippets for this query
+          if (group.snippets.length > 0) {
+            markdownOutput += `### ${group.query}\n\n`; // Use the actual query string
+            group.snippets.forEach(snippet => {
+              markdownOutput += `#### Source (${snippet.sourceId})\n${snippet.content}\n\n`;
+            });
+            markdownOutput += '\n'; // Add space between queries
+          }
+        });
+
+        // Remove trailing newline if it exists
+        markdownOutput = markdownOutput.trimEnd();
+
+        lectureSnippetsResult = {
+          lectureSnippets: markdownOutput,
+          sourceMap: sourceMapDict,
+        };
+        this.logger.log(
+          `Successfully processed ${totalSnippetsProcessed} snippets into Markdown format.`,
+        );
+      } catch (error) {
+        this.logger.error(`Error fetching/processing snippets: ${error.message}`, error.stack);
+        snippetError = `Failed to fetch/process lecture snippets: ${error.message}`;
+        lectureSnippetsResult = defaultSnippetReturn; // Use default on error
+      }
     } else {
-        this.logger.warn('No concepts extracted, skipping snippet fetch.');
-        lectureSnippetsResult = defaultSnippetReturn; // Use default if no concepts
+      this.logger.warn('No concepts extracted, skipping snippet fetch.');
+      lectureSnippetsResult = defaultSnippetReturn; // Use default if no concepts
     }
     // --- End: Fetch Snippets Logic ---
 
@@ -205,7 +208,7 @@ ${contextString}
     return {
       concepts: extractedConcepts,
       ...lectureSnippetsResult,
-      ...(combinedError && { error: combinedError })
+      ...(combinedError && { error: combinedError }),
     };
   }
 }

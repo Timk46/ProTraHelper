@@ -1,9 +1,15 @@
-import { Component, EventEmitter, Inject, Input, Output, ViewContainerRef } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ViewContainerRef, OnInit, Component, EventEmitter, Inject, Input, Output } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { taskViewDTO } from '@DTOs/content.dto';
 import { FillinQuestionDTO } from '@DTOs/fillInText.dto';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswerDTO } from '@DTOs/userAnswer.dto';
+import {
+  UserAnswerDataDTO,
+  userAnswerFeedbackDTO,
+  UserFillinAnswer,
+} from '@DTOs/userAnswer.dto';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { DynamicBlankComponent } from './dynamic-blank/dynamic-blank.component';
 import { Subject, takeUntil } from 'rxjs';
@@ -13,13 +19,13 @@ import { Location } from '@angular/common';
 @Component({
   selector: 'app-fill-in-task-new',
   templateUrl: './fill-in-task-new.component.html',
-  styleUrls: ['./fill-in-task-new.component.scss']
+  styleUrls: ['./fill-in-task-new.component.scss'],
 })
-export class FillinTaskNewComponent {
+export class FillinTaskNewComponent implements OnInit {
   @Output() submitClicked = new EventEmitter<any>();
   @Input() conceptId!: number;
   @Input() questionId!: number;
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
   protected fillinTypes = FillinQuestionType;
   protected processedContent: SafeHtml | undefined;
   protected taskViewData: taskViewDTO;
@@ -37,18 +43,18 @@ export class FillinTaskNewComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private sanitizer: DomSanitizer,
-    private questionDataService: QuestionDataService,
-    private viewContainerRef: ViewContainerRef,
-    private location: Location,
-    private dialogRef: MatDialogRef<FillinTaskNewComponent>
+    private readonly sanitizer: DomSanitizer,
+    private readonly questionDataService: QuestionDataService,
+    private readonly viewContainerRef: ViewContainerRef,
+    private readonly location: Location,
+    private readonly dialogRef: MatDialogRef<FillinTaskNewComponent>,
   ) {
     this.taskViewData = data.taskViewData;
     this.contentElementId = data.taskViewData.contentElementId || -1;
   }
 
   ngOnInit() {
-    this.questionDataService.getFillinTask(this.taskViewData.id).subscribe((data) => {
+    this.questionDataService.getFillinTask(this.taskViewData.id).subscribe(data => {
       this.fillinQuestionData = data;
       this.processContent();
       this.isLoading = false;
@@ -66,11 +72,15 @@ export class FillinTaskNewComponent {
     const parser = new DOMParser();
     const doc = parser.parseFromString(this.fillinQuestionData.content, 'text/html');
     const gaps = doc.querySelectorAll('.generated-blank');
-    this.gapIds = Array.from(gaps).map(gap => "gap_" + gap.getAttribute('data-position') || '');
+    this.gapIds = Array.from(gaps).map(gap => 'gap_' + gap.getAttribute('data-position') || '');
     if (this.fillinQuestionData.taskType === FillinQuestionType.FillinDropdown) {
-      this.possibleAnswers = Array.from(new Set(this.fillinQuestionData.blanks.map(blank => blank.blankContent || '<missingStr>')));
+      this.possibleAnswers = Array.from(
+        new Set(this.fillinQuestionData.blanks.map(blank => blank.blankContent || '<missingStr>')),
+      );
     } else {
-      this.possibleAnswers = this.fillinQuestionData.blanks.map(blank => blank.blankContent || '<missingStr>');
+      this.possibleAnswers = this.fillinQuestionData.blanks.map(
+        blank => blank.blankContent || '<missingStr>',
+      );
     }
 
     gaps.forEach((gap, index) => {
@@ -92,18 +102,19 @@ export class FillinTaskNewComponent {
    * Updates the gap values based on user input and maintains the state of each gap element.
    */
   replaceGapPlaceholders() {
-    const gapElements = this.viewContainerRef.element.nativeElement.querySelectorAll('app-dynamic-blank');
+    const gapElements =
+      this.viewContainerRef.element.nativeElement.querySelectorAll('app-dynamic-blank');
 
     gapElements.forEach((element: HTMLElement) => {
-      if (element.getAttribute('id') === null || !this.fillinQuestionData || !this.fillinQuestionData.taskType) return;
+      if (element.getAttribute('id') === null || !this.fillinQuestionData?.taskType) return;
 
       const componentRef = this.viewContainerRef.createComponent(DynamicBlankComponent);
       componentRef.instance.id = element.getAttribute('id');
-      componentRef.instance.blankMode = this.fillinQuestionData.taskType || FillinQuestionType.FillinText;
+      componentRef.instance.blankMode =
+        this.fillinQuestionData.taskType || FillinQuestionType.FillinText;
       componentRef.instance.otherBlankIds = this.gapIds;
-      if (this.fillinQuestionData.taskType === FillinQuestionType.FillinDropdown
-      ) {
-        componentRef.instance.blankOptions = [...this.possibleAnswers]
+      if (this.fillinQuestionData.taskType === FillinQuestionType.FillinDropdown) {
+        componentRef.instance.blankOptions = [...this.possibleAnswers];
       }
 
       this.gapValues.push({ position: element.getAttribute('id')!.slice(4), answer: '' }); // remove 'gap_' from id and add to gapValues
@@ -129,22 +140,24 @@ export class FillinTaskNewComponent {
     if (!this.feedbackText || !this.fillinQuestionData) return;
     const score = this.feedbackText.score;
     const totalScore = this.fillinQuestionData.question.score!;
-    this.feedbackColor = score === totalScore ? '#a3be8c' :
-                         score >= totalScore * 0.5 ? '#ffa500' : '#ff0000';
+    this.feedbackColor =
+      score === totalScore ? '#a3be8c' : score >= totalScore * 0.5 ? '#ffa500' : '#ff0000';
   }
 
   drop(event: CdkDragDrop<string[]>) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.previousContainer.data, event.previousIndex, event.currentIndex);
     } else {
-      transferArrayItem(event.previousContainer.data,
-                        event.container.data,
-                        event.previousIndex,
-                        event.currentIndex);
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
     }
   }
 
-  onLog(){
+  onLog() {
     console.log(this.gapValues);
   }
 
@@ -165,10 +178,11 @@ export class FillinTaskNewComponent {
       userFillinTextAnswer: this.gapValues,
     };
 
-    this.questionDataService.createUserAnswer(userAnswerData)
+    this.questionDataService
+      .createUserAnswer(userAnswerData)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => {
+        next: data => {
           this.feedbackText = data;
           this.submitClicked.emit(data.progress);
           this.taskViewData.progress = Math.max(this.taskViewData.progress, data.progress);
@@ -180,21 +194,17 @@ export class FillinTaskNewComponent {
             this.submitDisabled = false;
           }, 500);
         },
-        error: (error) => {
+        error: error => {
           console.error('Error submitting answer:', error);
           this.isSending = false;
           setTimeout(() => {
             this.submitDisabled = false;
           }, 500);
-
-        }
+        },
       });
-
   }
 
-  onRetry() {
-
-  }
+  onRetry() {}
 
   onClose() {
     if (this.dialogRef) {
@@ -208,5 +218,4 @@ export class FillinTaskNewComponent {
       this.location.replaceState(`/dashboard`);
     }
   }
-
 }

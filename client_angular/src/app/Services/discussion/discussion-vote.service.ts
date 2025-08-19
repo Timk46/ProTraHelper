@@ -5,19 +5,20 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DiscussionVoteService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * This function returns the vote data for a given message
    * @param messageId
    * @returns the vote data
    */
-  getVoteData(messageId: number) : Observable<discussionMessageVoteDTO> {
-    return this.http.get<discussionMessageVoteDTO>(environment.server + `/discussion/vote/${messageId}`)
+  getVoteData(messageId: number): Observable<discussionMessageVoteDTO> {
+    return this.http.get<discussionMessageVoteDTO>(
+      environment.server + `/discussion/vote/${messageId}`,
+    );
   }
 
   /**
@@ -25,9 +26,12 @@ export class DiscussionVoteService {
    * @param voteCreationData
    * @returns discussionMessageVoteCreationDTO
    */
-  createOrModifyVote(voteCreationData: discussionMessageVoteCreationDTO) : Observable<discussionMessageVoteCreationDTO>{
-    return this.http.post<discussionMessageVoteCreationDTO>(environment.server + '/discussion/vote/create', voteCreationData);
+  createOrModifyVote(
+    voteCreationData: discussionMessageVoteCreationDTO,
+  ): Observable<discussionMessageVoteCreationDTO> {
+    return this.http.post<discussionMessageVoteCreationDTO>(
+      environment.server + '/discussion/vote/create',
+      voteCreationData,
+    );
   }
-
-
 }

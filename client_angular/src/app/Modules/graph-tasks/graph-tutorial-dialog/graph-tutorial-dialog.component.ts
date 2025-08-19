@@ -1,4 +1,5 @@
-import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { ElementRef, OnDestroy } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-graph-tutorial-dialog',
@@ -6,7 +7,6 @@ import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
   styleUrls: ['./graph-tutorial-dialog.component.scss'],
 })
 export class GraphTutorialDialogComponent implements OnDestroy {
-
   @ViewChild('videoPlayer') videoPlayer!: ElementRef;
 
   videosFolder = '../../../assets//videos';
@@ -31,7 +31,7 @@ export class GraphTutorialDialogComponent implements OnDestroy {
       title: 'Kruskal',
       videoUrl: `${this.videosFolder}/goals_kruskal_tutorial.mp4`,
     },
-  ]
+  ];
 
   currentTutorial = 0;
 
@@ -41,12 +41,10 @@ export class GraphTutorialDialogComponent implements OnDestroy {
   }
 
   private stopAndResetVideo() {
-    if (this.videoPlayer && this.videoPlayer.nativeElement) {
+    if (this.videoPlayer?.nativeElement) {
       this.videoPlayer.nativeElement.pause();
       this.videoPlayer.nativeElement.src = '';
       this.videoPlayer.nativeElement.load();
     }
   }
 }
-
-

@@ -4,16 +4,16 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ContentManagementService {
-  private apiUrl = `${environment.server}/admin/content`;
+  private readonly apiUrl = `${environment.server}/admin/content`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   exportContent(): Observable<any> {
     return this.http.get(`${this.apiUrl}/export`, {
-      responseType: 'json'
+      responseType: 'json',
     });
   }
 

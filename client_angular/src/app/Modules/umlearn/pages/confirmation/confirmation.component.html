@@ -1,10 +1,12 @@
-<div style="border: 2px solid rgb(255, 87, 34);">
-  <h1 mat-dialog-title>{{data.title}}</h1>
+<div style="border: 2px solid rgb(255, 87, 34)">
+  <h1 mat-dialog-title>{{ data.title }}</h1>
   <div mat-dialog-content>
-    <p>{{data.message}}</p>
+    <p>{{ data.message }}</p>
   </div>
   <div mat-dialog-actions align="start">
-    <button mat-flat-button color="accent" mat-dialog-close>{{data.decline}}</button>
-    <button mat-flat-button color="warn" tabindex="-1" [mat-dialog-close]="true">{{data.accept}}</button>
+    <button mat-flat-button color="accent" mat-dialog-close>{{ data.decline }}</button>
+    <button mat-flat-button color="warn" tabindex="-1" [mat-dialog-close]="true">
+      {{ data.accept }}
+    </button>
   </div>
 </div>

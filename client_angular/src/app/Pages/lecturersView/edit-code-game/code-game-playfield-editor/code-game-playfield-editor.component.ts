@@ -1,13 +1,13 @@
-import { Component, ElementRef, Renderer2, OnInit, ViewChild, Output, EventEmitter, Input } from '@angular/core';
+import { ElementRef, Renderer2, OnInit, OnChanges, Component, ViewChild, Output, EventEmitter, Input } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
   selector: 'app-code-game-playfield-editor',
   templateUrl: './code-game-playfield-editor.component.html',
-  styleUrls: ['./code-game-playfield-editor.component.scss']
+  styleUrls: ['./code-game-playfield-editor.component.scss'],
 })
-export class CodeGamePlayfieldEditorComponent implements OnInit {
+export class CodeGamePlayfieldEditorComponent implements OnInit, OnChanges {
   @ViewChild(MatMenuTrigger) menuTrigger!: MatMenuTrigger;
   @Input() inputGameData: any;
   @Output() dataChange = new EventEmitter<any>(); // TODO: change name
@@ -23,12 +23,12 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
   inputDataSet = false;
 
   constructor(
-    private fb: FormBuilder,
-    private renderer: Renderer2,
-    private el: ElementRef
+    private readonly fb: FormBuilder,
+    private readonly renderer: Renderer2,
+    private readonly el: ElementRef,
   ) {
     this.codeGameForm = this.fb.group({
-      rowsAndColumns: [10]
+      rowsAndColumns: [10],
     });
   }
 
@@ -41,29 +41,31 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
 
   ngOnChanges(): void {
     if (this.inputGameData && !this.inputDataSet) {
-      console.log("Input Playfield editor: ", this.inputGameData);
+      console.log('Input Playfield editor: ', this.inputGameData);
       this.isInputDataAvailable = true;
 
       this.theme = this.inputGameData.theme;
 
-      if (this.inputGameData.gameField != "") {
+      if (this.inputGameData.gameField != '') {
         this.gameField = this.transformStringToArray(this.inputGameData.gameField);
 
         this.codeGameForm.patchValue({
-          rowsAndColumns: this.gameField.length
+          rowsAndColumns: this.gameField.length,
         });
       }
 
-      if (this.inputGameData.gameCellRestrictions != "") {
-        this.gameCellRestrictions = this.transformStringToArray(this.inputGameData.gameCellRestrictions);
+      if (this.inputGameData.gameCellRestrictions != '') {
+        this.gameCellRestrictions = this.transformStringToArray(
+          this.inputGameData.gameCellRestrictions,
+        );
       }
 
       this.inputDataSet = true;
     }
 
     // In case the task is allready loaded and the user starteds a import
-    if (this.inputGameData && this.inputGameData.newDataByImportOperation) {
-      console.log("Input Playfield editor by import: ", this.inputGameData);
+    if (this.inputGameData?.newDataByImportOperation) {
+      console.log('Input Playfield editor by import: ', this.inputGameData);
       this.inputDataSet = false;
       this.isInputDataAvailable = true;
 
@@ -71,9 +73,11 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
       this.theme = this.inputGameData.theme;
       this.gameField = this.transformStringToArray(this.inputGameData.gameField);
       this.codeGameForm.patchValue({
-        rowsAndColumns: this.gameField.length
+        rowsAndColumns: this.gameField.length,
       });
-      this.gameCellRestrictions = this.transformStringToArray(this.inputGameData.gameCellRestrictions);
+      this.gameCellRestrictions = this.transformStringToArray(
+        this.inputGameData.gameCellRestrictions,
+      );
 
       this.inputDataSet = true;
       this.inputGameData.newDataByImportOperation = false; // Reset the flag to avoid re-importing
@@ -81,15 +85,15 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
   }
 
   generateGameField(): void {
-    console.log("Generate game field");
-    if ((this.isInputDataAvailable && !this.inputDataSet)) {
-      console.log("Playfield allready generated");
+    console.log('Generate game field');
+    if (this.isInputDataAvailable && !this.inputDataSet) {
+      console.log('Playfield allready generated');
       return;
     }
 
     const size = this.codeGameForm.get('rowsAndColumns')?.value || 10;
-    this.gameField = Array.from({ length: size }, () => Array(size).fill("#"));
-    this.gameCellRestrictions = Array.from({ length: size }, () => Array(size).fill("."));
+    this.gameField = Array.from({ length: size }, () => Array(size).fill('#'));
+    this.gameCellRestrictions = Array.from({ length: size }, () => Array(size).fill('.'));
 
     this.setCSSVariables();
   }
@@ -136,7 +140,13 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
     this.selectedCell = { row, col };
 
     if (this.multiselect !== '') {
-      if (this.multiselect === '#' || this.multiselect === 'O' || this.multiselect === 'I' || this.multiselect === 'D' || this.multiselect === 'P') {
+      if (
+        this.multiselect === '#' ||
+        this.multiselect === 'O' ||
+        this.multiselect === 'I' ||
+        this.multiselect === 'D' ||
+        this.multiselect === 'P'
+      ) {
         this.setObject(this.multiselect);
       } else if (this.multiselect === '.' || this.multiselect === 'B' || this.multiselect === 'W') {
         this.setRestriction(this.multiselect);
@@ -154,11 +164,11 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
   }
 
   removePlayer(): void {
-    this.gameField = this.gameField.map(row => row.map(cell => cell === 'P' ? '#' : cell));
+    this.gameField = this.gameField.map(row => row.map(cell => (cell === 'P' ? '#' : cell)));
   }
 
   removeDestination(): void {
-    this.gameField = this.gameField.map(row => row.map(cell => cell === 'D' ? '#' : cell));
+    this.gameField = this.gameField.map(row => row.map(cell => (cell === 'D' ? '#' : cell)));
   }
 
   setRestriction(restriction: string): void {
@@ -171,15 +181,15 @@ export class CodeGamePlayfieldEditorComponent implements OnInit {
   }
 
   /*
-  ** -------------------------------------------------------------------
-  ** Transfer data to parent component (edit-code-game.component.ts)
-  */
+   ** -------------------------------------------------------------------
+   ** Transfer data to parent component (edit-code-game.component.ts)
+   */
 
   emitData(): void {
     const data = {
       theme: this.theme,
       gameField: this.transformArrayToString(this.gameField),
-      gameCellRestrictions: this.transformArrayToString(this.gameCellRestrictions)
+      gameCellRestrictions: this.transformArrayToString(this.gameCellRestrictions),
     };
 
     this.dataChange.emit(data);

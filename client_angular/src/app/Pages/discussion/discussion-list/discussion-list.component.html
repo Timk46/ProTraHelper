@@ -5,21 +5,34 @@
   ></app-discussion-filter>
 
   <div class="list-container mat-elevation-z8">
-    <div style="display: flex; flex-direction: row; justify-content: space-between; margin-bottom: 10px;">
+    <div
+      style="
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      "
+    >
       <h1>Beiträge</h1>
-      <button mat-raised-button (click)="onNewDiscussion()">Neu<span *ngIf="(sSS.isLandscape | async)">en Beitrag erstellen</span>   </button>
+      <button mat-raised-button (click)="onNewDiscussion()">
+        Neu<span *ngIf="sSS.isLandscape | async">en Beitrag erstellen</span>
+      </button>
     </div>
 
     <div>
       <div *ngIf="visibleDiscussions && visibleDiscussions.length > 0">
-        <app-discussion-list-item *ngFor="let question of visibleDiscussions"
+        <app-discussion-list-item
+          *ngFor="let question of visibleDiscussions"
           [questionData]="question"
-          (click)="onQuestionClick(question.id)"></app-discussion-list-item>
+          (click)="onQuestionClick(question.id)"
+        ></app-discussion-list-item>
       </div>
-      <p *ngIf="visibleDiscussions.length == 0">Zu diesem Thema/Filter wurden keine Beiträge gefunden. Erstelle den Ersten oder ändere das Thema bzw. den Filter!</p>
+      <p *ngIf="visibleDiscussions.length == 0">
+        Zu diesem Thema/Filter wurden keine Beiträge gefunden. Erstelle den Ersten oder ändere das
+        Thema bzw. den Filter!
+      </p>
     </div>
   </div>
 </div>
-
 
 <!-- TODO: Wechsel zwischen alle und meine Beitraege -->

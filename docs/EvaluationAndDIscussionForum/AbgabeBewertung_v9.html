@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peer-Review Bewertung</title>
+    <style>
+        /* General Body and Font Styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f7fa;
+            line-height: 1.6;
+            color: #34495e;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        /* Card Style for Panels */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        /* Header Section */
+        .header h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .header-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .status-badge {
+            background: #e67e22;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+        .status-badge.evaluation {
+            background: #27ae60;
+        }
+        
+        /* DEV-ONLY BUTTON */
+        #dev-phase-toggle {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Criteria Navigation Tabs */
+        .criteria-tabs {
+            display: flex;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .criteria-tab {
+            flex: 1;
+            padding: 16px 20px;
+            background: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+            border-right: 1px solid #dcdcdc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .criteria-tab:last-child { border-right: none; }
+        .criteria-tab.active {
+            background: #3498db;
+            color: white;
+        }
+        .criteria-tab:hover:not(.active) { background: #d5dbdb; }
+        .criteria-tab.locked {
+            background-color: #e0e0e0;
+            color: #95a5a6;
+        }
+
+        /* Main Content Grid */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .submission-panel, .discussion-panel {
+            height: 650px; /* Fixed height for better layout */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Submission Panel Header with Download Button */
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+        .submission-header h3 {
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #ecf0f1;
+            color: #34495e;
+            padding: 6px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+        .download-btn:hover {
+            background-color: #d5dbdb;
+        }
+
+        /* PDF Viewer Iframe */
+        #pdf-viewer {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fdfdfd;
+        }
+
+
+        /* Discussion Panel */
+        .discussion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #ecf0f1;
+            flex-shrink: 0;
+        }
+        .discussion-header h3 {
+             color: #2c3e50;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        .points-info {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        .point-counter { display: flex; align-items: center; gap: 4px; }
+        .point-counter.plus { color: #27ae60; }
+        .point-counter.minus { color: #e74c3c; }
+
+        /* Chat Messages */
+        .discussion-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin: 20px 0;
+            padding-right: 10px;
+        }
+        .message {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid #bdc3c7;
+        }
+        .message.own {
+            background: #e3f2fd;
+            border-left-color: #3498db;
+        }
+        .message-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .message-author { font-weight: 600; color: #2c3e50; font-size: 13px; }
+        .message-time { color: #7f8c8d; font-size: 11px; }
+        .message-content { margin-bottom: 8px; }
+        .message-actions { display: flex; gap: 8px; align-items: center; }
+        .vote-btn {
+            background: none;
+            border: 1px solid #bdc3c7;
+            border-radius: 20px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .vote-btn:hover:not(:disabled) { transform: translateY(-1px); }
+        .vote-btn.plus { border-color: #27ae60; color: #27ae60; }
+        .vote-btn.plus:hover:not(.voted):not(:disabled) { background: #e8f8ef; }
+        .vote-btn.minus { border-color: #e74c3c; color: #e74c3c; }
+        .vote-btn.minus:hover:not(.voted):not(:disabled) { background: #fdedec; }
+        .vote-btn.voted.plus { background: #27ae60; color: white; }
+        .vote-btn.voted.minus { background: #e74c3c; color: white; }
+        .vote-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .vote-count { font-size: 11px; color: #7f8c8d; min-width: 50px; }
+
+        /* Action Area at the bottom of discussion panel */
+        #action-area {
+            padding-top: 16px;
+            border-top: 2px solid #ecf0f1;
+            flex-shrink: 0;
+        }
+        .message-input { display: flex; gap: 12px; }
+        .message-input textarea {
+            flex: 1;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: none;
+            height: 42px;
+        }
+        .message-input textarea:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); }
+        .send-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        .send-btn:hover { background: #2980b9; }
+
+        /* Final Evaluation Content (now inside action-area) */
+        .final-evaluation-content h4 {
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .rating-slider input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #ecf0f1;
+            outline: none;
+            -webkit-appearance: none;
+            margin: 10px 0;
+        }
+        .rating-slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+        }
+        .rating-slider input[type="range"]:hover:not(:disabled)::-webkit-slider-thumb { transform: scale(1.1); }
+        .rating-slider input[type="range"]:disabled::-webkit-slider-thumb {
+            background: #bdc3c7;
+            transform: scale(1);
+            cursor: not-allowed;
+        }
+        .rating-labels { display: flex; justify-content: space-between; font-size: 12px; color: #7f8c8d; }
+        .rating-value { text-align: center; font-size: 16px; font-weight: 600; color: #3498db; margin-top: 5px; }
+        .submit-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+        }
+        .submit-btn:hover:not(:disabled) { background: #219a52; }
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .main-content { grid-template-columns: 1fr; }
+            .submission-panel, .discussion-panel { height: auto; max-height: 500px; }
+        }
+        @media (max-width: 600px) {
+            .criteria-tabs-wrapper {
+                 margin-bottom: 0;
+            }
+            .criteria-tabs {
+                flex-direction: column;
+                border-radius: 12px;
+            }
+            .criteria-tab { border-right: none; border-bottom: 1px solid #dcdcdc; }
+            .header-info { flex-direction: column; align-items: flex-start; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- DEV-ONLY BUTTON TO TOGGLE PHASES -->
+        <button id="dev-phase-toggle" onclick="togglePhase()">Zu Phase 2 wechseln</button>
+
+        <div class="header card">
+            <h1>Bewertung: Entwurf "Stabile Rahmenkonstruktion"</h1>
+            <div class="header-info">
+                <span>Verfasser: Student A (anonymisiert)</span>
+                <span class="status-badge" id="status-badge">Diskussionsphase</span>
+            </div>
+        </div>
+        
+        <div class="card criteria-tabs-wrapper" style="padding: 0; margin-bottom: 20px;">
+             <div class="criteria-tabs">
+                <!-- Criteria tabs will be generated by JS -->
+            </div>
+        </div>
+
+
+        <div class="main-content">
+            <div class="submission-panel card">
+                <div class="submission-header">
+                    <h3>Abgabe Dokument</h3>
+                    <a id="pdf-download-link" href="#" target="_blank" class="download-btn" title="Das PDF in einem neuen Tab öffnen oder herunterladen">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>PDF Herunterladen</span>
+                    </a>
+                </div>
+                <iframe id="pdf-viewer" title="PDF-Ansicht der Abgabe"></iframe>
+            </div>
+
+            <div class="discussion-panel card">
+                <div class="discussion-header">
+                    <h3 id="discussion-title"></h3>
+                    <div class="points-info">
+                        <div class="point-counter plus">
+                            <span>+</span>
+                            <span id="plus-points-counter"></span>
+                        </div>
+                        <div class="point-counter minus">
+                            <span>-</span>
+                            <span id="minus-points-counter"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="discussion-messages" id="discussion-messages">
+                    <!-- Messages will be generated by JS -->
+                </div>
+                <div id="action-area">
+                    <!-- Message Input or Evaluation Slider will be rendered here by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & STATE MANAGEMENT ---
+        const submissionPDF = "https://www.princexml.com/samples/catalogue/PrinceCatalogue.pdf";
+
+        const criteriaData = [
+            { 
+                name: "Vollständigkeit", 
+                availablePlusPoints: 2, availableMinusPoints: 3, rating: 5, isLocked: false,
+                votes: { 'msg2': 'plus' },
+                messages: [
+                    { id: 'msg1', author: 'Sie', time: 'vor 25 Min', own: true, content: '<strong>Meine Bewertung:</strong> Die Zeichnung scheint alle geforderten Bauteile zu enthalten. Mir ist aber nicht klar, ob die Bemaßung vollständig ist.' }, 
+                    { id: 'msg2', author: 'Student B', time: 'vor 18 Min', own: false, content: 'Guter Punkt. Die Hauptkomponenten sind da, aber es fehlen einige Detailansichten, die im Lastenheft gefordert waren.', voteDisplay: { plus: 2, minus: 0 } }, 
+                    { id: 'msg3', author: 'Student C', time: 'vor 12 Min', own: false, content: 'Stimmt, Anhang B.2 wurde nicht berücksichtigt. Das macht die Abgabe unvollständig.', voteDisplay: { plus: 1, minus: 1 } }
+                ] 
+            },
+            { 
+                name: "Grafische Darstellungsqualität", 
+                availablePlusPoints: 3, availableMinusPoints: 3, rating: 7, isLocked: false, votes: {}, 
+                messages: [
+                    { id: 'msg4', author: 'Sie', time: 'vor 15 Min', own: true, content: '<strong>Meine Bewertung:</strong> Die CAD-Zeichnung ist sauber und gut strukturiert. Die Linienstärken sind gut gewählt.' },
+                    { id: 'msg8', author: 'Student B', time: 'vor 10 Min', own: false, content: 'Ich finde die Auflösung der exportierten Bilder etwas gering. In der PDF-Ansicht ist es teilweise unscharf.', voteDisplay: { plus: 0, minus: 1 } }
+                ] 
+            },
+            { 
+                name: "Vergleichbarkeit", 
+                availablePlusPoints: 3, availableMinusPoints: 2, rating: 8, isLocked: false,
+                votes: { 'msg6': 'minus' },
+                messages: [
+                    { id: 'msg5', author: 'Sie', time: 'vor 8 Min', own: true, content: '<strong>Meine Bewertung:</strong> Die gewählte Darstellung ist Standard und lässt sich gut mit den Beispielen aus der Vorlesung vergleichen.' }, 
+                    { id: 'msg6', author: 'Student D', time: 'vor 5 Min', own: false, content: 'Ich finde es schwierig, die Maße direkt mit der Musterlösung zu vergleichen, da ein anderer Maßstab gewählt wurde.', voteDisplay: { plus: 1, minus: 2 } }
+                ] 
+            },
+            { 
+                name: "Komplexität", 
+                availablePlusPoints: 3, availableMinusPoints: 3, rating: 6, isLocked: false, votes: {}, 
+                messages: [
+                    { id: 'msg7', author: 'Sie', time: 'vor 2 Min', own: true, content: '<strong>Meine Bewertung:</strong> Die Konstruktion zeigt eine hohe Komplexität und berücksichtigt viele Randbedingungen. Gut gemacht.' }
+                ] 
+            }
+        ];
+
+        let currentCriteriaIndex = 0;
+        let isEvaluationPhase = false;
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            // Set the static PDF source and download link once
+            document.getElementById('pdf-viewer').src = submissionPDF;
+            document.getElementById('pdf-download-link').href = submissionPDF;
+            
+            updateCriteriaTabs();
+            switchCriteria(0);
+        };
+        
+        function updateCriteriaTabs() {
+            const tabsContainer = document.querySelector('.criteria-tabs');
+            tabsContainer.innerHTML = '';
+            criteriaData.forEach((criteria, index) => {
+                const tab = document.createElement('button');
+                tab.className = 'criteria-tab';
+                tab.classList.toggle('active', index === currentCriteriaIndex);
+                tab.classList.toggle('locked', criteria.isLocked);
+                
+                let content = `<span>${criteria.name}</span>`;
+                if (criteria.isLocked) {
+                    content += `<span>✅</span>`;
+                }
+                tab.innerHTML = content;
+                tab.onclick = () => switchCriteria(index);
+                tabsContainer.appendChild(tab);
+            });
+        }
+
+        // --- UI UPDATE & RENDER FUNCTIONS ---
+
+        function switchCriteria(index) {
+            currentCriteriaIndex = index;
+            const criteria = criteriaData[index];
+
+            updateCriteriaTabs();
+            
+            // The title in the discussion panel now changes
+            document.getElementById('discussion-title').textContent = `Diskussion: ${criteria.name}`;
+            
+            renderMessages();
+            updatePointCounters();
+            renderActionArea();
+        }
+
+        function renderMessages() {
+            const criteria = criteriaData[currentCriteriaIndex];
+            const messagesContainer = document.getElementById('discussion-messages');
+            messagesContainer.innerHTML = '';
+            criteria.messages.forEach(msg => {
+                const messageEl = document.createElement('div');
+                messageEl.className = `message ${msg.own ? 'own' : ''}`;
+                messageEl.dataset.messageId = msg.id;
+
+                let actionsHtml = '';
+                if (!msg.own) {
+                    const plusVoted = criteria.votes[msg.id] === 'plus' ? 'voted' : '';
+                    const minusVoted = criteria.votes[msg.id] === 'minus' ? 'voted' : '';
+                    const voteCountText = `${msg.voteDisplay.plus} 👍 ${msg.voteDisplay.minus}  `;
+                    actionsHtml = `
+                        <button class="vote-btn plus ${plusVoted}" onclick="vote('${msg.id}', 'plus')" ${criteria.isLocked ? 'disabled' : ''}><span>+</span></button>
+                        <button class="vote-btn minus ${minusVoted}" onclick="vote('${msg.id}', 'minus')" ${criteria.isLocked ? 'disabled' : ''}><span>-</span></button>
+                        <span class="vote-count">${voteCountText}</span>`;
+                }
+                messageEl.innerHTML = `
+                    <div class="message-header"><span class="message-author">${msg.author}</span><span class="message-time">${msg.time}</span></div>
+                    <div class="message-content">${msg.content}</div>
+                    <div class="message-actions">${actionsHtml}</div>`;
+                messagesContainer.appendChild(messageEl);
+            });
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function renderActionArea() {
+            const actionArea = document.getElementById('action-area');
+            actionArea.innerHTML = '';
+            const criteria = criteriaData[currentCriteriaIndex];
+            
+            if (isEvaluationPhase) {
+                const evaluationEl = document.createElement('div');
+                evaluationEl.className = 'final-evaluation-content';
+                evaluationEl.innerHTML = `
+                    <h4>Ihre Endbewertung für "${criteria.name}"</h4>
+                    <div class="rating-slider">
+                        <input type="range" id="ratingSlider" min="0" max="10" value="${criteria.rating}" ${criteria.isLocked ? 'disabled' : ''}>
+                        <div class="rating-labels"><span>Ungenügend (0)</span><span>Exzellent (10)</span></div>
+                        <div class="rating-value" id="rating-value">${criteria.rating} / 10 Punkte</div>
+                    </div>
+                    <button id="submit-evaluation-btn" class="submit-btn" ${criteria.isLocked ? 'disabled' : ''}>
+                        ${criteria.isLocked ? 'Bewertung abgeschlossen' : 'Bewertung abschließen'}
+                    </button>`;
+                actionArea.appendChild(evaluationEl);
+                if (!criteria.isLocked) {
+                    document.getElementById('ratingSlider').addEventListener('input', handleSliderChange);
+                    document.getElementById('submit-evaluation-btn').addEventListener('click', lockCurrentCriterion);
+                }
+            } else {
+                const messageInputEl = document.createElement('div');
+                messageInputEl.className = 'message-input';
+                messageInputEl.innerHTML = `
+                    <textarea placeholder="Antworten Sie auf die Diskussion..." id="messageInput"></textarea>
+                    <button class="send-btn">Senden</button>`;
+                actionArea.appendChild(messageInputEl);
+                actionArea.querySelector('.send-btn').onclick = sendMessage;
+                actionArea.querySelector('#messageInput').addEventListener('keypress', handleMessageInputKey);
+            }
+        }
+
+        function updatePointCounters() {
+            const criteria = criteriaData[currentCriteriaIndex];
+            document.getElementById('plus-points-counter').textContent = `${criteria.availablePlusPoints}/3 verfügbar`;
+            document.getElementById('minus-points-counter').textContent = `${criteria.availableMinusPoints}/3 verfügbar`;
+        }
+
+        // --- ACTIONS & EVENT HANDLERS ---
+        
+        function lockCurrentCriterion() {
+            criteriaData[currentCriteriaIndex].isLocked = true;
+            // Force a full re-render of the current view
+            switchCriteria(currentCriteriaIndex);
+        }
+
+        function togglePhase() {
+            isEvaluationPhase = !isEvaluationPhase;
+            const statusBadge = document.getElementById('status-badge');
+            const toggleBtn = document.getElementById('dev-phase-toggle');
+
+            if (isEvaluationPhase) {
+                statusBadge.textContent = 'Bewertungsphase';
+                statusBadge.classList.add('evaluation');
+                toggleBtn.textContent = 'Zu Phase 1 wechseln';
+            } else {
+                statusBadge.textContent = 'Diskussionsphase';
+                statusBadge.classList.remove('evaluation');
+                toggleBtn.textContent = 'Zu Phase 2 wechseln';
+            }
+            renderActionArea();
+        }
+
+        function findMessageById(messageId) {
+            return criteriaData[currentCriteriaIndex].messages.find(m => m.id === messageId);
+        }
+
+        function vote(messageId, voteType) {
+            const criteria = criteriaData[currentCriteriaIndex];
+            if (criteria.isLocked) return; // Prevent voting if locked
+
+            const currentVote = criteria.votes[messageId];
+            const message = findMessageById(messageId);
+            if (!message) return;
+
+            if (currentVote === voteType) { // Retract vote
+                if (voteType === 'plus') {
+                    criteria.availablePlusPoints++;
+                    message.voteDisplay.plus--;
+                } else {
+                    criteria.availableMinusPoints++;
+                    message.voteDisplay.minus--;
+                }
+                criteria.votes[messageId] = null;
+            } else { // Cast new or change vote
+                if (currentVote) { // First, refund the old vote's point and count
+                    if (currentVote === 'plus') {
+                        criteria.availablePlusPoints++;
+                        message.voteDisplay.plus--;
+                    } else {
+                        criteria.availableMinusPoints++;
+                        message.voteDisplay.minus--;
+                    }
+                }
+                // Then, apply the new vote
+                if (voteType === 'plus' && criteria.availablePlusPoints > 0) {
+                    criteria.availablePlusPoints--;
+                    message.voteDisplay.plus++;
+                    criteria.votes[messageId] = 'plus';
+                } else if (voteType === 'minus' && criteria.availableMinusPoints > 0) {
+                    criteria.availableMinusPoints--;
+                    message.voteDisplay.minus++;
+                    criteria.votes[messageId] = 'minus';
+                }
+            }
+            renderMessages();
+            updatePointCounters();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            if(!input) return;
+            const messageText = input.value.trim();
+            
+            if (messageText) {
+                const criteria = criteriaData[currentCriteriaIndex];
+                criteria.messages.push({
+                    id: 'msg' + Date.now(),
+                    author: 'Sie',
+                    time: 'gerade eben',
+                    own: true,
+                    content: messageText,
+                    voteDisplay: { plus: 0, minus: 0 } // New messages need this
+                });
+                renderMessages();
+                input.value = '';
+            }
+        }
+        
+        function handleSliderChange(e) {
+            const rating = e.target.value;
+            criteriaData[currentCriteriaIndex].rating = rating;
+            document.getElementById('rating-value').textContent = `${rating} / 10 Punkte`;
+        }
+
+        function handleMessageInputKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
+ 

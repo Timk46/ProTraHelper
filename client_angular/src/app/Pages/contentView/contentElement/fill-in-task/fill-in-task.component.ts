@@ -1,20 +1,29 @@
-import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef, OnDestroy, EventEmitter, Output, Inject, Input } from '@angular/core';
+import { OnInit, ElementRef, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, ViewChild, EventEmitter, Output, Inject, Input } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { DialogRef } from '@angular/cdk/dialog';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { QuestionDTO, BlankDTO, userAnswerFeedbackDTO, UserAnswerDataDTO, FillinQuestionDTO, FillinQuestionType, UserFillinAnswerDTO } from '@DTOs/index';
+import {
+  QuestionDTO,
+  BlankDTO,
+  userAnswerFeedbackDTO,
+  UserAnswerDataDTO,
+  FillinQuestionDTO,
+  UserFillinAnswer,
+} from '@DTOs/index';
+import { FillinQuestionType } from '@DTOs/index';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { SafeUrl } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { Location } from '@angular/common';
 
 interface ContentPart {
   type: 'sentence' | 'table';
   content: SentencePart[] | TableData | any;
-
 }
 
 interface SentencePart {
@@ -55,7 +64,7 @@ interface TaskViewData {
 @Component({
   selector: 'app-fill-in-task',
   templateUrl: './fill-in-task.component.html',
-  styleUrls: ['./fill-in-task.component.scss']
+  styleUrls: ['./fill-in-task.component.scss'],
 })
 export class FillinTaskComponent implements OnInit, OnDestroy {
   @ViewChild('tableContainer') tableContainer!: ElementRef;
@@ -83,21 +92,21 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
     progress: -1,
   };
 
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
   isCorrect = false;
   taskForm!: FormGroup;
 
   constructor(
-    private dialogRef: DialogRef,
-    private questionDataService: QuestionDataService,
+    private readonly dialogRef: DialogRef,
+    private readonly questionDataService: QuestionDataService,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private userService: UserService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private location: Location
+    private readonly userService: UserService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly location: Location,
   ) {
     this.taskViewData = data.taskViewData;
-    this.taskForm = this.fb.group({})
+    this.taskForm = this.fb.group({});
   }
 
   ngOnInit(): void {
@@ -111,10 +120,11 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
 
   private loadTask(): void {
     this.isLoading = true;
-    this.questionDataService.getFillinTask(this.taskViewData.id!)
+    this.questionDataService
+      .getFillinTask(this.taskViewData.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (task) => {
+        next: task => {
           console.log('task', task);
           this.fillInTask = task;
           this.questionData = task.question;
@@ -125,18 +135,17 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.cdr.detectChanges();
         },
-        error: (error) => {
+        error: error => {
           console.error('Error loading task:', error);
           this.isLoading = false;
-        }
+        },
       });
-      setTimeout(() => {
-        this.logContentStructure();
-        console.log("content parts", this.contentParts);
-      }, 1000);
+    setTimeout(() => {
+      this.logContentStructure();
+      console.log('content parts', this.contentParts);
+    }, 1000);
 
-      console.log("sentenceParts", this.contentParts);
-
+    console.log('sentenceParts', this.contentParts);
   }
 
   private initializeForm(): void {
@@ -165,7 +174,9 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
       console.log(`Part ${index + 1}: ${part.type}`);
       if (part.type === 'sentence') {
         (part.content as SentencePart[]).forEach((sentencePart, sentenceIndex) => {
-          console.log(`  Sentence part ${sentenceIndex + 1}: ${sentencePart.type} - ${sentencePart.content}`);
+          console.log(
+            `  Sentence part ${sentenceIndex + 1}: ${sentencePart.type} - ${sentencePart.content}`,
+          );
         });
       } else if (part.type === 'table') {
         console.log(`  Table with ${(part.content as TableData).rows.length} rows`);
@@ -190,20 +201,24 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
         if (element.tagName === 'SPAN' && element.classList.contains('generated-blank')) {
           parts.push({
             type: 'sentence',
-            content: [{
-              type: 'blank',
-              content: null,
-              id: `blank-${element.getAttribute('data-position')}`
-            }]
+            content: [
+              {
+                type: 'blank',
+                content: null,
+                id: `blank-${element.getAttribute('data-position')}`,
+              },
+            ],
           });
         } else if (element.tagName === 'IMG' && element.classList.contains('generated-blank')) {
           parts.push({
             type: 'sentence',
-            content: [{
-              type: 'image',
-              content: element.getAttribute('src') || '',
-              id: `blank-${element.getAttribute('data-position')}`
-            }]
+            content: [
+              {
+                type: 'image',
+                content: element.getAttribute('src') || '',
+                id: `blank-${element.getAttribute('data-position')}`,
+              },
+            ],
           });
         } else {
           element.childNodes.forEach(processTextAndSpans);
@@ -212,7 +227,7 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
     };
 
     // Process the content
-    doc.body.childNodes.forEach((node) => {
+    doc.body.childNodes.forEach(node => {
       if (node.nodeType === Node.ELEMENT_NODE) {
         const element = node as Element;
         if (element.tagName === 'TABLE') {
@@ -220,16 +235,18 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
           parts.push({ type: 'table', content: this.processTable(element as HTMLTableElement) });
 
           // Extract image blanks from the table
-          element.querySelectorAll('td.image-blank img, td img.generated-blank').forEach((img, index) => {
-            const src = img.getAttribute('src') || '';
-            imageOptions.push({
-              id: Number(`image-blank-${index}`),
-              blankContent: src,
-              imageUrl: src,
-              position: index.toString(),
-              isImage: true // Add this line
+          element
+            .querySelectorAll('td.image-blank img, td img.generated-blank')
+            .forEach((img, index) => {
+              const src = img.getAttribute('src') || '';
+              imageOptions.push({
+                id: Number(`image-blank-${index}`),
+                blankContent: src,
+                imageUrl: src,
+                position: index.toString(),
+                isImage: true, // Add this line
+              });
             });
-          });
         } else {
           processTextAndSpans(element);
         }
@@ -250,11 +267,12 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
       rows: Array.from(tableElement.querySelectorAll('tr')).map((row, rowIndex) => ({
         cells: Array.from(row.querySelectorAll('td')).map((cell, colIndex) => {
           console.log('Cell:', cell);
-          const isBlank = cell.classList.contains('generated-blank') ||
-                          cell.classList.contains('image-blank') ||
-                          cell.querySelector('img[class*="generated-blank"]') !== null;
-          const isImage = cell.classList.contains('image-blank') ||
-                          cell.querySelector('img') !== null;
+          const isBlank =
+            cell.classList.contains('generated-blank') ||
+            cell.classList.contains('image-blank') ||
+            cell.querySelector('img[class*="generated-blank"]') !== null;
+          const isImage =
+            cell.classList.contains('image-blank') || cell.querySelector('img') !== null;
           let content = '';
           let id: string | undefined;
 
@@ -272,10 +290,10 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
             content: content,
             isBlank: isBlank,
             isImage: isImage,
-            id: id
+            id: id,
           };
-        })
-      }))
+        }),
+      })),
     };
   }
 
@@ -284,7 +302,12 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
   }
 
   isImageContent(content: string): boolean {
-     return !!content && (content.startsWith('data:image') || content.startsWith('http') || content.startsWith('https'));
+    return (
+      !!content &&
+      (content.startsWith('data:image') ||
+        content.startsWith('http') ||
+        content.startsWith('https'))
+    );
   }
 
   private updateAllContainers(): void {
@@ -375,20 +398,23 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
     for (const part of this.contentParts) {
       if (part.type === 'sentence') {
         const sentencePart = (part.content as SentencePart[]).find(p => p.id === blankId);
-        if (sentencePart && sentencePart.content) {
+        if (sentencePart?.content) {
           return {
             blankContent: sentencePart.content as string,
             isImage: sentencePart.isImage || false,
-            imageUrl: sentencePart.isImage ? (sentencePart.content as string) || undefined : undefined };
+            imageUrl: sentencePart.isImage
+              ? (sentencePart.content as string) || undefined
+              : undefined,
+          };
         }
-        } else if (part.type === 'table') {
+      } else if (part.type === 'table') {
         for (const row of (part.content as TableData).rows) {
           const cell = row.cells.find((c: any) => c.id === blankId);
-          if (cell && cell.content) {
+          if (cell?.content) {
             return {
               blankContent: cell.content,
               isImage: cell.isImage,
-              imageUrl: cell.isImage ? cell.content : undefined
+              imageUrl: cell.isImage ? cell.content : undefined,
             };
           }
         }
@@ -433,10 +459,11 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
       userFillinTextAnswer: filledBlanks,
     };
 
-    this.questionDataService.createUserAnswer(userAnswerData)
+    this.questionDataService
+      .createUserAnswer(userAnswerData)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => {
+        next: data => {
           this.feedbackText = data;
           this.isSending = false;
           this.submitClicked.emit(data.progress);
@@ -447,14 +474,14 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
           this.updateFeedbackColor();
           this.cdr.detectChanges();
         },
-        error: (error) => {
+        error: error => {
           console.error('Error submitting answer:', error);
           this.isSending = false;
-        }
+        },
       });
-      setTimeout(() => {
-        this.submitDisabled = true;
-      }, 500);
+    setTimeout(() => {
+      this.submitDisabled = true;
+    }, 500);
   }
 
   private gatherFilledBlanks(): UserFillinAnswerDTO[] {
@@ -464,7 +491,7 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
       if (value) {
         filledBlanks.push({
           position: key.slice(6), // Remove 'blank-' prefix
-          answer: value.toString()
+          answer: value.toString(),
         });
       }
     });
@@ -475,12 +502,12 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
   private updateFeedbackColor(): void {
     const score = this.feedbackText.score;
     const totalScore = this.questionData.score!;
-    this.feedbackColor = score === totalScore ? '#a3be8c' :
-                         score >= totalScore * 0.5 ? '#ffa500' : '#ff0000';
+    this.feedbackColor =
+      score === totalScore ? '#a3be8c' : score >= totalScore * 0.5 ? '#ffa500' : '#ff0000';
   }
 
   private updateIsCorrect(): void {
-      this.isCorrect = this.questionData.score === this.feedbackText.score;
+    this.isCorrect = this.questionData.score === this.feedbackText.score;
   }
 
   retry(): void {
@@ -489,7 +516,12 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
     this.options = this.shuffleOptions([...this.fillInTask.blanks]);
     this.updateAllContainers();
     this.feedbackText = {
-      id: -1, userAnswerId: -1, score: -1, feedbackText: '', elementDone: false, progress: -1,
+      id: -1,
+      userAnswerId: -1,
+      score: -1,
+      feedbackText: '',
+      elementDone: false,
+      progress: -1,
     };
     this.feedbackColor = '';
     this.cdr.detectChanges();
@@ -550,9 +582,4 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
         return 'drag';
     }
   }
-
-
-
 }
-
-

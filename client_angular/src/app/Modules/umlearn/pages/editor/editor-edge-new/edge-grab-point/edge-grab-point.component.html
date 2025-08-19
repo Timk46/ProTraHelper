@@ -1,13 +1,31 @@
-<div #dragElem class="grabPoint" cdkDrag
+<div
+  #dragElem
+  class="grabPoint"
+  cdkDrag
   (cdkDragStarted)="isDragging = true; opacity = 1"
   (cdkDragMoved)="calculateOffset($event, dragElem)"
   (cdkDragEnded)="onDragEnded()"
-  (click)="onClick()" [style.top.px]="position.y - 10"
-  [style.left.px]="position.x - 10" [style.opacity]="opacity"
+  (click)="onClick()"
+  [style.top.px]="position.y - 10"
+  [style.left.px]="position.x - 10"
+  [style.opacity]="opacity"
   matTooltip="Klicken und ziehen zum Verschieben. Klicken zum Zurücksetzen."
   matTooltipShowDelay="500"
-  [matTooltipDisabled]="isDragging">
-  <svg class="svgElem" width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-    <circle class="svgCircle" cx="10" cy="10" r="10" [style.fill]="sideOffset && sideOffset != 0 ? 'red' : 'grey'"/>
+  [matTooltipDisabled]="isDragging"
+>
+  <svg
+    class="svgElem"
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      class="svgCircle"
+      cx="10"
+      cy="10"
+      r="10"
+      [style.fill]="sideOffset && sideOffset != 0 ? 'red' : 'grey'"
+    />
   </svg>
 </div>

@@ -7,8 +7,7 @@ import { buildKmAgentChain } from './km.agent'; // Import the chain builder
 @Injectable()
 export class KmAgentProvider {
   constructor(
-    @Inject(CHAT_OPENAI_MODEL) private readonly model: ChatOpenAI,
-    // No tool services needed for KM agent
+    @Inject(CHAT_OPENAI_MODEL) private readonly model: ChatOpenAI, // No tool services needed for KM agent
   ) {}
 
   /**

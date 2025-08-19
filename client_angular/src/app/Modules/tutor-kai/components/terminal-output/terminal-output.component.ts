@@ -1,9 +1,10 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-terminal-output',
   templateUrl: './terminal-output.component.html',
-  styleUrls: ['./terminal-output.component.scss']
+  styleUrls: ['./terminal-output.component.scss'],
 })
 export class TerminalOutputComponent implements OnChanges {
   @Input() output: string | null = null;
@@ -54,7 +55,8 @@ export class TerminalOutputComponent implements OnChanges {
    */
   copyOutput(): void {
     if (this.output) {
-      navigator.clipboard.writeText(this.output)
+      navigator.clipboard
+        .writeText(this.output)
         .then(() => console.log('Output copied to clipboard'))
         .catch(err => console.error('Could not copy text: ', err));
     }

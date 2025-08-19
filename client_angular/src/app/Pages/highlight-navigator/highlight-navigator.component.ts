@@ -1,7 +1,8 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { OnDestroy, OnInit, Component, Input } from '@angular/core';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { HighlightConceptsService } from 'src/app/Services/highlight-concepts/highlight-concepts.service';
-import { HighlightConceptDto, CreateHighlightConceptDto, UpdateHighlightConceptDto, ConceptGraphDTO } from '@DTOs/index';
+import { HighlightConceptDto, UpdateHighlightConceptDto, ConceptGraphDTO } from '@DTOs/index';
+import { CreateHighlightConceptDto } from '@DTOs/index';
 import { Observable, Subscription, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -15,7 +16,7 @@ import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunica
 @Component({
   selector: 'app-highlight-navigator',
   templateUrl: './highlight-navigator.component.html',
-  styleUrl: './highlight-navigator.component.scss'
+  styleUrl: './highlight-navigator.component.scss',
 })
 export class HighlightNavigatorComponent implements OnInit, OnDestroy {
   @Input() moduleId: number = 1; // Default to 1, should be provided by parent component
@@ -26,29 +27,29 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
   hoveredTileId: number | null = null;
 
   userGraphData: ConceptGraphDTO = {
-      id: -1,
-      name: "Loading...",
-      trueRootId: -1,
-      nodeMap: {},
-      edgeMap: {},
-      currentConceptId: -1
-    };
+    id: -1,
+    name: 'Loading...',
+    trueRootId: -1,
+    nodeMap: {},
+    edgeMap: {},
+    currentConceptId: -1,
+  };
 
-  private subscriptions: Subscription = new Subscription();
+  private readonly subscriptions: Subscription = new Subscription();
 
   constructor(
-    private userService: UserService,
-    private highlightConceptsService: HighlightConceptsService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog,
-    private conceptSelectionService: ConceptSelectionService,
-    private router: Router,
-    private graphDataService: GraphDataService
-  ){
+    private readonly userService: UserService,
+    private readonly highlightConceptsService: HighlightConceptsService,
+    private readonly snackBar: MatSnackBar,
+    private readonly dialog: MatDialog,
+    private readonly conceptSelectionService: ConceptSelectionService,
+    private readonly router: Router,
+    private readonly graphDataService: GraphDataService,
+  ) {
     this.graphCommunicationService = GraphCommunicationService.getInstance();
   }
 
-  private graphCommunicationService: GraphCommunicationService;
+  private readonly graphCommunicationService: GraphCommunicationService;
 
   ngOnInit(): void {
     // Subscribe to edit mode changes
@@ -56,7 +57,7 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
       this.subscriptions.add(
         this.userService.hasEditModeActive$.subscribe(isActive => {
           this.isEditMode = isActive;
-        })
+        }),
       );
     }
 
@@ -74,7 +75,8 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
   loadHighlightConcepts(): void {
     this.isLoading = true;
     this.subscriptions.add(
-      this.highlightConceptsService.getHighlightConcepts(this.moduleId)
+      this.highlightConceptsService
+        .getHighlightConcepts(this.moduleId)
         .pipe(
           catchError(error => {
             this.showMessage('Error loading highlight concepts');
@@ -83,13 +85,13 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
           }),
           finalize(() => {
             this.isLoading = false;
-          })
+          }),
         )
         .subscribe(concepts => {
           this.highlightConcepts = concepts;
           // Sort concepts by position
           this.sortHighlightConcepts();
-        })
+        }),
     );
   }
 
@@ -131,7 +133,8 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    this.highlightConceptsService.deleteHighlightConcept(id)
+    this.highlightConceptsService
+      .deleteHighlightConcept(id)
       .pipe(
         catchError(error => {
           this.showMessage('Error deleting highlight concept');
@@ -140,7 +143,7 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
         }),
         finalize(() => {
           this.isLoading = false;
-        })
+        }),
       )
       .subscribe(() => {
         this.highlightConcepts = this.highlightConcepts.filter(concept => concept.id !== id);
@@ -162,14 +165,15 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(HighlightConceptDialogComponent, {
       width: '800px',
       data: {
-        moduleId: this.moduleId
-      }
+        moduleId: this.moduleId,
+      },
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.isLoading = true;
-        this.highlightConceptsService.createHighlightConcept(result)
+        this.highlightConceptsService
+          .createHighlightConcept(result)
           .pipe(
             catchError(error => {
               this.showMessage('Error creating highlight concept');
@@ -178,7 +182,7 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
             }),
             finalize(() => {
               this.isLoading = false;
-            })
+            }),
           )
           .subscribe(concept => {
             if (concept) {
@@ -209,14 +213,15 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
       width: '800px',
       data: {
         moduleId: this.moduleId,
-        concept: concept
-      }
+        concept: concept,
+      },
     });
 
     dialogRef.afterClosed().subscribe((result: UpdateHighlightConceptDto) => {
       if (result) {
         this.isLoading = true;
-        this.highlightConceptsService.updateHighlightConcept(concept.id, result)
+        this.highlightConceptsService
+          .updateHighlightConcept(concept.id, result)
           .pipe(
             catchError(error => {
               this.showMessage('Error updating highlight concept');
@@ -225,7 +230,7 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
             }),
             finalize(() => {
               this.isLoading = false;
-            })
+            }),
           )
           .subscribe(updatedConcept => {
             if (updatedConcept) {
@@ -250,7 +255,7 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
     this.snackBar.open(message, 'Close', {
       duration: 3000,
       horizontalPosition: 'right',
-      verticalPosition: 'top'
+      verticalPosition: 'top',
     });
   }
 
@@ -290,7 +295,7 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
 
     // First, fetch the content for the concept to ensure it's loaded
     this.graphDataService.fetchUserGraph(this.moduleId).subscribe({
-      next: (graph) => {
+      next: graph => {
         if (graph.nodeMap && graph.nodeMap[conceptNodeId]) {
           const conceptNode = graph.nodeMap[conceptNodeId];
 
@@ -319,22 +324,24 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
                 this.router.navigate(['/dashboard/concept', conceptNodeId]);
               }
             },
-            error: (err) => {
-              console.error(`Failed to update selected concept to ${conceptNodeId} in backend:`, err);
+            error: err => {
+              console.error(
+                `Failed to update selected concept to ${conceptNodeId} in backend:`,
+                err,
+              );
               // Still try to navigate even if the backend update fails
               this.router.navigate(['/dashboard/concept', conceptNodeId]);
-            }
+            },
           });
         } else {
           console.error(`Concept node ${conceptNodeId} not found in graph`);
           this.showMessage('Concept node not found. Please try again.');
         }
       },
-      error: (err) => {
+      error: err => {
         console.error('Error fetching graph data:', err);
         this.showMessage('Error loading concept data. Please try again.');
-      }
+      },
     });
   }
-
 }

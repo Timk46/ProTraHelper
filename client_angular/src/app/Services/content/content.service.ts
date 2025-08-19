@@ -1,31 +1,33 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ContentsForConceptDTO, ContentElementStatusDTO, ConceptNodeDTO } from '@DTOs/index';
-import { catchError, Observable, tap, Subject } from 'rxjs';
+import { ContentsForConceptDTO, ContentElementStatusDTO } from '@DTOs/index';
+import { ConceptNodeDTO } from '@DTOs/index';
+import { Observable } from 'rxjs';
+import { catchError, tap, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { ConceptNode } from "@DTOs/conceptNode.dto";
+import { ConceptNode } from '@DTOs/conceptNode.dto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ContentService {
-
-  public toggleCheckmarkStatus: Subject<{contentElementId: number, isCompleted: boolean}> = new Subject<{contentElementId: number, isCompleted: boolean}>();
-  public toggleQuestionmarkStatus: Subject<{contentElementId: number, hasQuestion: boolean}> = new Subject<{contentElementId: number, hasQuestion: boolean}>();
+  public toggleCheckmarkStatus: Subject<{ contentElementId: number; isCompleted: boolean }> =
+    new Subject<{ contentElementId: number; isCompleted: boolean }>();
+  public toggleQuestionmarkStatus: Subject<{ contentElementId: number; hasQuestion: boolean }> =
+    new Subject<{ contentElementId: number; hasQuestion: boolean }>();
   // public lastOpenedDate: Subject<Date> = new Subject<Date>();
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Fetches all content for a specific conceptNode.
    * @param conceptId The id of a concept node.
    * @returns ContentsForConceptDTO - an object with two arrays of ContentDTO objects. One for the requiredBy and one for trainedBy relations.
    */
-  fetchContentsForConcept(
-    conceptId: number
-  ): Observable<ContentsForConceptDTO> {
+  fetchContentsForConcept(conceptId: number): Observable<ContentsForConceptDTO> {
     return this.http.get<ContentsForConceptDTO>(
-      environment.server + `/content/byConceptNode/${conceptId}`
+      environment.server + `/content/byConceptNode/${conceptId}`,
     );
   }
 
@@ -34,11 +36,11 @@ export class ContentService {
    * @returns All conceptNames in the database.
    */
   fetchAllConceptNames(): Observable<string[]> {
-    return this.http.get<string[]>(environment.server + `/content/concepts`)
+    return this.http.get<string[]>(environment.server + `/content/concepts`);
   }
 
   getConcepts(): Observable<ConceptNode[]> {
-    return this.http.get<ConceptNode[]>(environment.server + `/content/conceptsFull`)
+    return this.http.get<ConceptNode[]>(environment.server + `/content/conceptsFull`);
   }
 
   /**
@@ -46,11 +48,9 @@ export class ContentService {
    * @param contentElementId The id of a content element.
    * @returns ContentElementStatusDTO - the status of the content element.
    */
-  getContentElementStatus(
-    contentElementId: number
-  ): Observable<ContentElementStatusDTO> {
+  getContentElementStatus(contentElementId: number): Observable<ContentElementStatusDTO> {
     return this.http.get<ContentElementStatusDTO>(
-      environment.server + `/content/status/${contentElementId}`
+      environment.server + `/content/status/${contentElementId}`,
     );
   }
 
@@ -62,17 +62,28 @@ export class ContentService {
   toggleContentElementCompletionStatus(
     contentElementId: number,
     conceptNodeId: number,
-    level: number
+    level: number,
   ): Observable<boolean> {
-    console.log("toggleContentElementCompletionStatus: "+contentElementId+" "+conceptNodeId+" "+level);
+    console.log(
+      'toggleContentElementCompletionStatus: ' +
+        contentElementId +
+        ' ' +
+        conceptNodeId +
+        ' ' +
+        level,
+    );
     return this.http
       .get<boolean>(
-        environment.server + `/content/toggleCheckmark/${contentElementId}/${conceptNodeId}/${level}`
+        environment.server +
+          `/content/toggleCheckmark/${contentElementId}/${conceptNodeId}/${level}`,
       )
       .pipe(
         tap((status: boolean) => {
-          this.toggleCheckmarkStatus.next({contentElementId: contentElementId, isCompleted: status});
-        })
+          this.toggleCheckmarkStatus.next({
+            contentElementId: contentElementId,
+            isCompleted: status,
+          });
+        }),
       );
   }
 
@@ -81,17 +92,16 @@ export class ContentService {
    * @param contentElementId The id of a content element.
    * @returns ContentElementStatusDTO - the status of the content element.
    */
-  toggleContentElementQuestionStatus(
-    contentElementId: number
-  ): Observable<boolean> {
+  toggleContentElementQuestionStatus(contentElementId: number): Observable<boolean> {
     return this.http
-      .get<boolean>(
-        environment.server + `/content/toggleQuestionmark/${contentElementId}`
-      )
+      .get<boolean>(environment.server + `/content/toggleQuestionmark/${contentElementId}`)
       .pipe(
         tap((status: boolean) => {
-          this.toggleQuestionmarkStatus.next({contentElementId: contentElementId, hasQuestion: status});
-        })
+          this.toggleQuestionmarkStatus.next({
+            contentElementId: contentElementId,
+            hasQuestion: status,
+          });
+        }),
       );
   }
 
@@ -102,8 +112,6 @@ export class ContentService {
    */
   updateLastOpenedDate(contentNodeId: number): Observable<Date> {
     //console.log('ContentService: updateLastOpenedDate');
-    return this.http.get<Date>(
-      environment.server + `/content/lastOpenedDate/${contentNodeId}`
-    );
+    return this.http.get<Date>(environment.server + `/content/lastOpenedDate/${contentNodeId}`);
   }
 }

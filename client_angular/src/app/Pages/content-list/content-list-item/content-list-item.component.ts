@@ -6,6 +6,7 @@ import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { FillinTaskNewComponent } from '../../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { FreeTextTaskComponent } from '../../contentView/contentElement/free-text-task/free-text-task.component';
 import { McTaskComponent } from '../../contentView/contentElement/mcTask/mcTask.component';
+import { McSliderTaskComponent } from '../../contentView/contentElement/mcSliderTask/mc-slider-task.component';
 import { EditUploadComponent } from '../../lecturersView/edit-upload/edit-upload.component';
 import { Router } from '@angular/router';
 import { UserService } from 'src/app/Services/auth/user.service';
@@ -19,12 +20,11 @@ import { GroupReviewGateDialogComponent } from '../../contentView/contentElement
 @Component({
   selector: 'app-content-list-item',
   templateUrl: './content-list-item.component.html',
-  styleUrls: ['./content-list-item.component.scss']
+  styleUrls: ['./content-list-item.component.scss'],
 })
-export class ContentListItemComponent {
-
+export class ContentListItemComponent implements OnInit {
   @Input() contentElementData: ContentElementDTO = {
-    id : -1,
+    id: -1,
     type: contentElementType.TEXT,
     positionInSpecificContentView: -1,
     question: {
@@ -34,10 +34,11 @@ export class ContentListItemComponent {
       progress: -1,
       name: '',
       description: '',
-    }
+    },
   };
 
   @Input() contentNodeId!: number; // ContentNodeId für Positionsänderung
+  @Input() allContentElements: ContentElementDTO[] = []; // Alle ContentElements für MCSlider-Gruppierung
 
   @Output() scoreUpdated: EventEmitter<ContentElementDTO> = new EventEmitter<ContentElementDTO>();
   @Output() fetchContentsForConcept = new EventEmitter<void>();
@@ -50,22 +51,21 @@ export class ContentListItemComponent {
   protected editModeActive: boolean = false;
   protected editModeButtonsClickable: boolean = false;
 
-
   constructor(
-    private progressService: ProgressService,
-    private dialog: MatDialog,
-    private router: Router,
-    private userService: UserService,
-    private confirmService: ConfirmationService,
-    private contentLinkerService: ContentLinkerService,
-    private questionDataService: QuestionDataService,
-    private snackBar: MatSnackBar
+    private readonly progressService: ProgressService,
+    private readonly dialog: MatDialog,
+    private readonly router: Router,
+    private readonly userService: UserService,
+    private readonly confirmService: ConfirmationService,
+    private readonly contentLinkerService: ContentLinkerService,
+    private readonly questionDataService: QuestionDataService,
+    private readonly snackBar: MatSnackBar,
   ) {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
   }
 
   ngOnInit() {
-    this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
+    this.userService.hasEditModeActive$.subscribe(hasEditModeActive => {
       this.editModeActive = hasEditModeActive;
     });
     this.isGradingContent = this.contentElementData.type === contentElementType.QUESTION && gradingContent.includes(this.contentElementData.question?.type as questionType);
@@ -83,6 +83,8 @@ export class ContentListItemComponent {
         return 'Multiple Choice';
       case questionType.SINGLECHOICE:
         return 'Single Choice';
+      case questionType.MCSLIDER:
+        return 'MC Slider Quiz';
       case questionType.FREETEXT:
         return 'Freitext';
       case questionType.FILLIN:
@@ -116,6 +118,8 @@ export class ContentListItemComponent {
         return 'list';
       case questionType.SINGLECHOICE:
         return 'radio_button_checked';
+      case questionType.MCSLIDER:
+        return 'view_carousel';
       case questionType.FREETEXT:
         return 'text_fields';
       case questionType.FILLIN:
@@ -150,7 +154,7 @@ export class ContentListItemComponent {
    * @returns {void}
    */
   onTaskClick() {
-    console.log("Task clicked");
+    console.log('Task clicked');
     if (!this.contentElementData.question) return;
     const question: taskViewDTO = this.contentElementData.question;
     // Create dialog configuration
@@ -178,6 +182,21 @@ export class ContentListItemComponent {
       case questionType.MULTIPLECHOICE:
         dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
         break;
+      case questionType.MCSLIDER:
+        // Check if there are multiple MCSlider questions in the same content
+        const allMCSliderQuestions = this.getAllMCSliderQuestions();
+        dialogConfig.data = {
+          ...dialogConfig.data,
+          questions: allMCSliderQuestions.length > 1 ? allMCSliderQuestions : [question],
+        };
+        // Configure optimized dialog for MCSlider with minimal whitespace
+        dialogConfig.width = '90vw';
+        dialogConfig.maxWidth = '900px';
+        dialogConfig.height = '85vh';
+        dialogConfig.maxHeight = '85vh';
+        dialogConfig.panelClass = 'mcslider-dialog-panel';
+        dialogRef = this.dialog.open(McSliderTaskComponent, dialogConfig);
+        break;
       case questionType.FREETEXT:
         dialogRef = this.dialog.open(FreeTextTaskComponent, dialogConfig);
         break;
@@ -190,10 +209,10 @@ export class ContentListItemComponent {
         this.router.navigate([`/graphtask/${question.id}`]);
         return;
       case questionType.FILLIN:
-        dialogRef = this.dialog.open(FillinTaskNewComponent, {...dialogConfig, width: '50vw'});
+        dialogRef = this.dialog.open(FillinTaskNewComponent, { ...dialogConfig, width: '50vw' });
         break;
       case questionType.UML:
-        this.router.navigate([this.getRouterLink("UML", question.id)]);
+        this.router.navigate([this.getRouterLink('UML', question.id)]);
         break;
       case questionType.CODEGAME:
         // Navigate to coding question component
@@ -216,7 +235,7 @@ export class ContentListItemComponent {
       dialogRef.componentInstance.submitClicked
         .pipe(takeUntil(dialogRef.afterClosed()))
         .subscribe((score: number) => {
-          console.log("current score:", question.progress, "submitted score:", score);
+          console.log('current score:', question.progress, 'submitted score:', score);
 
           // update the score if higher
           if (score > question.progress) {
@@ -225,7 +244,7 @@ export class ContentListItemComponent {
             this.scoreUpdated.emit(this.contentElementData);
 
             if (score === 100) {
-              console.log("Aufgabe wurde zum ersten Mal erfolgreich gelöst.");
+              console.log('Aufgabe wurde zum ersten Mal erfolgreich gelöst.');
               this.progressService.answerSubmitted();
             }
           }
@@ -254,13 +273,14 @@ export class ContentListItemComponent {
     switch (question.type) {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
+      case questionType.MCSLIDER:
         this.router.navigate(['/editchoice/', question.id]);
         break;
       case questionType.FREETEXT:
         this.router.navigate(['/editfreetext/', question.id]);
         break;
       case questionType.FILLIN:
-        console.log("FILLIN");
+        console.log('FILLIN');
         this.router.navigate(['/editfillin/', question.id]);
         break;
       case questionType.CODE:
@@ -276,16 +296,16 @@ export class ContentListItemComponent {
         this.router.navigate(['/editcodegame/', question.id]);
         break;
       case questionType.UPLOAD:
-        console.log("The question", this.contentElementData.question);
+        console.log('The question', this.contentElementData.question);
         // Open upload edit dialog directly
         const dialogRef = this.dialog.open(EditUploadComponent, {
           width: '600px',
           data: {
             questionId: question.id,
             detailedQuestion: this.contentElementData.question,
-            mode: 'edit'
+            mode: 'edit',
           },
-          disableClose: true
+          disableClose: true,
         });
 
         dialogRef.afterClosed().subscribe(result => {
@@ -310,28 +330,28 @@ export class ContentListItemComponent {
   onTaskDelete() {
     if (!this.contentElementData.question || !this.editModeButtonsClickable) return;
     this.confirmService.confirm({
-      title: "Verknüpfung aufheben?",
-      message: "Die Verknüpfung zur Frage wird aufgehoben. Die Frage bleibt bestehen. Fortfahren?",
-      acceptLabel: "Aufheben",
-      declineLabel: "Abbrechen",
+      title: 'Verknüpfung aufheben?',
+      message: 'Die Verknüpfung zur Frage wird aufgehoben. Die Frage bleibt bestehen. Fortfahren?',
+      acceptLabel: 'Aufheben',
+      declineLabel: 'Abbrechen',
       swapButtons: true,
       swapColors: true,
       accept: () => {
-        console.log("deleting");
-        this.contentLinkerService.unlinkContentElement(this.contentElementData.id).subscribe(
-          (success) => {
-            console.log("unlink success: ", success);
-            this.snackBar.open("Verknüpfung aufgehoben", "OK", { duration: 3000 });
+        console.log('deleting');
+        this.contentLinkerService
+          .unlinkContentElement(this.contentElementData.id)
+          .subscribe(success => {
+            console.log('unlink success: ', success);
+            this.snackBar.open('Verknüpfung aufgehoben', 'OK', { duration: 3000 });
             this.progressService.questionLinkDeleted();
             this.contentElementDeleted.emit(this.contentElementData.id);
-          }
-        );
-      }, decline: () => {
-        console.log("aborted");
-      }
+          });
+      },
+      decline: () => {
+        console.log('aborted');
+      },
     });
   }
-
 
   /**
    * Event handler for mouse enter event on the hover menu.
@@ -345,7 +365,6 @@ export class ContentListItemComponent {
       this.editModeButtonsClickable = true;
     }, 200);
   }
-
 
   /**
    * Generates a router link based on the provided question type and index.
@@ -368,14 +387,13 @@ export class ContentListItemComponent {
     }
   }
 
-
   /**
    * Generates an array with a specified number of elements.
    *
    * @param num - The number of elements in the array.
    * @returns An array with the specified number of elements.
    */
-  getLevels(num: number): Array<number> {
+  getLevels(num: number): number[] {
     return new Array(num);
   }
 
@@ -384,10 +402,16 @@ export class ContentListItemComponent {
    */
   onMoveUp() {
     if (!this.editModeButtonsClickable) return;
-    if (this.contentNodeId == null || this.contentElementData.positionInSpecificContentView == null) return;
-    this.contentLinkerService.updateContentNodePosition(this.contentNodeId, this.contentElementData.positionInSpecificContentView - 1).subscribe(() => {
-      this.fetchContentsForConcept.emit();
-    });
+    if (this.contentNodeId == null || this.contentElementData.positionInSpecificContentView == null)
+      return;
+    this.contentLinkerService
+      .updateContentNodePosition(
+        this.contentNodeId,
+        this.contentElementData.positionInSpecificContentView - 1,
+      )
+      .subscribe(() => {
+        this.fetchContentsForConcept.emit();
+      });
   }
 
   /**
@@ -395,10 +419,25 @@ export class ContentListItemComponent {
    */
   onMoveDown() {
     if (!this.editModeButtonsClickable) return;
-    if (this.contentNodeId == null || this.contentElementData.positionInSpecificContentView == null) return;
-    this.contentLinkerService.updateContentNodePosition(this.contentNodeId, this.contentElementData.positionInSpecificContentView + 1).subscribe(() => {
-      this.fetchContentsForConcept.emit();
-    });
+    if (this.contentNodeId == null || this.contentElementData.positionInSpecificContentView == null)
+      return;
+    this.contentLinkerService
+      .updateContentNodePosition(
+        this.contentNodeId,
+        this.contentElementData.positionInSpecificContentView + 1,
+      )
+      .subscribe(() => {
+        this.fetchContentsForConcept.emit();
+      });
   }
 
+  /**
+   * Holt alle MCSlider-Fragen aus der aktuellen Inhaltsliste
+   */
+  private getAllMCSliderQuestions(): any[] {
+    return this.allContentElements
+      .filter(element => element.question?.type === questionType.MCSLIDER)
+      .map(element => element.question)
+      .filter(question => question != null);
+  }
 }

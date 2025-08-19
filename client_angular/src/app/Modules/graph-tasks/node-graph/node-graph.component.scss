@@ -1,189 +1,193 @@
 .node-div {
-    position: absolute; 
-    width: 100px;
-    height: 100px;
-    border: solid 1px #ccc;
-    border-radius: 20%;
-    color: rgba(0, 0, 0, 0.87);
-    cursor: move;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    background: #fff;
-    transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
-    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2),
-                0 2px 2px 0 rgba(0, 0, 0, 0.14),
-                0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border: solid 1px #ccc;
+  border-radius: 20%;
+  color: rgba(0, 0, 0, 0.87);
+  cursor: move;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: #fff;
+  transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
+  box-shadow:
+    0 3px 1px -2px rgba(0, 0, 0, 0.2),
+    0 2px 2px 0 rgba(0, 0, 0, 0.14),
+    0 1px 5px 0 rgba(0, 0, 0, 0.12);
 }
 
 .node-div:hover {
-    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+  box-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2),
     0 8px 10px 1px rgba(0, 0, 0, 0.14),
     0 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
 .node-properties {
-    width: 100%;
-    height: 100%;
-    border-radius: 20%;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 20%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.node-value, .node-weight, .node-selected {
-    width: 100%;
-    z-index: 1;
+.node-value,
+.node-weight,
+.node-selected {
+  width: 100%;
+  z-index: 1;
 }
 
-.node-weight.display, .node-selected.display {
-    padding: .5em 0;
-    border-top: .1em solid #919191;
+.node-weight.display,
+.node-selected.display {
+  padding: 0.5em 0;
+  border-top: 0.1em solid #919191;
 }
 
-.node-properties input {    
-    width: 100%;
+.node-properties input {
+  width: 100%;
 }
 
 .container {
-    position: absolute;
-    width: 170%;
-    height: 170%;
-    border-radius: 50%;
-    border: dotted #ccc 2px;
+  position: absolute;
+  width: 170%;
+  height: 170%;
+  border-radius: 50%;
+  border: dotted #ccc 2px;
 }
 
 .container-item {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    background-color: white;
-    padding: 6px;
-    border-radius: 50%;
-    border: solid silver 1px;
-    opacity: 0.4;
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-color: white;
+  padding: 6px;
+  border-radius: 50%;
+  border: solid silver 1px;
+  opacity: 0.4;
 }
 
 .container-item:hover {
-    opacity: 1;
-    transform: scale(1.2, 1.2);  
-    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+  opacity: 1;
+  transform: scale(1.2, 1.2);
+  box-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2),
     0 8px 10px 1px rgba(0, 0, 0, 0.14),
     0 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
 .delete {
-    top: 50%;
-    transform: translate(-50%, -50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .delete:hover {
-    transform: translate(-50%, -50%) scale(1.2, 1.2);
+  transform: translate(-50%, -50%) scale(1.2, 1.2);
 }
 
 .edit-value {
-    top: 50%;
-    left: 100%;
-    transform: translate(-50%, -50%);
+  top: 50%;
+  left: 100%;
+  transform: translate(-50%, -50%);
 }
 
 .edit-value:hover {
-    transform: translate(-50%, -50%) scale(1.2, 1.2);
+  transform: translate(-50%, -50%) scale(1.2, 1.2);
 }
 
 .edit-weight {
-    top: 25%;
-    left: 95%;
-    transform: translate(-50%, -50%);
+  top: 25%;
+  left: 95%;
+  transform: translate(-50%, -50%);
 }
 
 .edit-weight:hover {
-    transform: translate(-50%, -50%) scale(1.2, 1.2);
+  transform: translate(-50%, -50%) scale(1.2, 1.2);
 }
 
 .set-weight-infinity {
-    top: 25%;
-    left: 5%;
-    transform: translate(-50%, -50%);
+  top: 25%;
+  left: 5%;
+  transform: translate(-50%, -50%);
 }
 
 .set-weight-infinity:hover {
-    transform: translate(-50%, -50%) scale(1.2, 1.2);
+  transform: translate(-50%, -50%) scale(1.2, 1.2);
 }
 
 .edit-selected {
-    top: 75%;
-    left: 95%;
-    transform: translate(-50%, -50%);
+  top: 75%;
+  left: 95%;
+  transform: translate(-50%, -50%);
 }
 
 .edit-selected:hover {
-    transform: translate(-50%, -50%) scale(1.2, 1.2);
+  transform: translate(-50%, -50%) scale(1.2, 1.2);
 }
-
-
 
 /* For directed edges */
 .new-node-incoming {
-    top: 0;
-    left: 50%;
-    transform: translate(-110%, -50%);
+  top: 0;
+  left: 50%;
+  transform: translate(-110%, -50%);
 }
 
 .new-node-incoming:hover {
-    transform: translate(-110%, -50%) scale(1.2, 1.2);
+  transform: translate(-110%, -50%) scale(1.2, 1.2);
 }
 
 .new-node-outgoing {
-    top: 0;
-    left: 50%;
-    transform: translate(10%, -50%);
+  top: 0;
+  left: 50%;
+  transform: translate(10%, -50%);
 }
 
 .new-node-outgoing:hover {
-    transform: translate(10%, -50%) scale(1.2, 1.2);
+  transform: translate(10%, -50%) scale(1.2, 1.2);
 }
 
 .new-edge-incoming {
-    top: 100%;
-    left: 50%;
-    transform: translate(-110%, -50%);
+  top: 100%;
+  left: 50%;
+  transform: translate(-110%, -50%);
 }
 
 .new-edge-incoming:hover {
-    transform: translate(-110%, -50%) scale(1.2, 1.2);
+  transform: translate(-110%, -50%) scale(1.2, 1.2);
 }
 
 .new-edge-outgoing {
-    top: 100%;
-    left: 50%;
-    transform: translate(10%, -50%);
+  top: 100%;
+  left: 50%;
+  transform: translate(10%, -50%);
 }
 
 .new-edge-outgoing:hover {
-    transform: translate(10%, -50%) scale(1.2, 1.2);
+  transform: translate(10%, -50%) scale(1.2, 1.2);
 }
 
 /* For undirected edges */
 .new-node {
-    top: 0;
-    left: 50%;
-    transform: translate(-50%, -50%);
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .new-node:hover {
-    transform: translate(-50%, -50%) scale(1.2, 1.2);
+  transform: translate(-50%, -50%) scale(1.2, 1.2);
 }
 
 .new-edge {
-    top: 100%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .new-edge:hover {
-    transform: translate(-50%, -50%) scale(1.2, 1.2);
+  transform: translate(-50%, -50%) scale(1.2, 1.2);
 }

@@ -1,7 +1,16 @@
-import { ClassAttribute, ClassEdge, ClassMethod, ClassNode, dataType, EditorElement, EditorElementType, visibilityType } from '@DTOs/index';
+import {
+  ClassAttribute,
+  ClassEdge,
+  ClassMethod,
+  ClassNode,
+  EditorElementType,
+} from '@DTOs/index';
+import { dataType, EditorElement, visibilityType } from '@DTOs/index';
 
+import { OnInit } from '@angular/core';
 import { Component, Inject, ViewChild } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';
 import { NotificationService } from '@UMLearnServices/notification.service';
 import { MatTableDataSource } from '@angular/material/table';
@@ -11,9 +20,9 @@ import { timer } from 'rxjs';
 @Component({
   selector: 'app-editor-popup',
   templateUrl: './editor-popup.component.html',
-  styleUrls: ['./editor-popup.component.scss']
+  styleUrls: ['./editor-popup.component.scss'],
 })
-export class EditorPopupComponent {
+export class EditorPopupComponent implements OnInit {
   elementType: string;
   elementData: ClassNode | ClassEdge;
   nodeData?: ClassNode;
@@ -33,7 +42,7 @@ export class EditorPopupComponent {
 
   // second table data
   methods?: ClassMethod[] = [
-    { name: '', dataType: dataType.empty , visibility: visibilityType.empty},
+    { name: '', dataType: dataType.empty, visibility: visibilityType.empty },
   ];
   methodsDataSource: MatTableDataSource<ClassMethod>;
 
@@ -56,36 +65,37 @@ export class EditorPopupComponent {
 
   constructor(
     public dialogRef: MatDialogRef<EditorPopupComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: {elementData: ClassNode | ClassEdge, elementType: EditorElementType, switchPosition: boolean, additionalDataTypes: string[]},
-    private notification: NotificationService,
-    private ecs: EditorCommunicationService,
-    )
-    {
-      this.attributesDataSource = new MatTableDataSource(this.attributes || []);
-      this.methodsDataSource = new MatTableDataSource(this.methods || []);
-      this.dataTypes = [
-        ...Object.values(dataType) as string[],
-        ...this.data.additionalDataTypes,
-      ];
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      elementData: ClassNode | ClassEdge;
+      elementType: EditorElementType;
+      switchPosition: boolean;
+      additionalDataTypes: string[];
+    },
+    private readonly notification: NotificationService,
+    private readonly ecs: EditorCommunicationService,
+  ) {
+    this.attributesDataSource = new MatTableDataSource(this.attributes || []);
+    this.methodsDataSource = new MatTableDataSource(this.methods || []);
+    this.dataTypes = [...(Object.values(dataType) as string[]), ...this.data.additionalDataTypes];
 
+    this.elementType = data.elementType;
+    this.elementData = { ...data.elementData };
 
-      this.elementType = data.elementType;
-      this.elementData = {...data.elementData};
-
-      if ('attributes' in this.elementData) {
-        this.attributes = this.elementData.attributes;
-        this.attributesDataSource = new MatTableDataSource(this.attributes);
-      }
-
-      if ('methods' in this.elementData) {
-        this.methods = this.elementData.methods;
-        this.methodsDataSource = new MatTableDataSource(this.methods);
-      }
-
-      if ('switchPosition' in this.data) {
-        this.switchPosition = this.data.switchPosition as boolean;
-      }
+    if ('attributes' in this.elementData) {
+      this.attributes = this.elementData.attributes;
+      this.attributesDataSource = new MatTableDataSource(this.attributes);
     }
+
+    if ('methods' in this.elementData) {
+      this.methods = this.elementData.methods;
+      this.methodsDataSource = new MatTableDataSource(this.methods);
+    }
+
+    if ('switchPosition' in this.data) {
+      this.switchPosition = this.data.switchPosition;
+    }
+  }
 
   ngOnInit(): void {
     if (this.elementType === 'node') {
@@ -108,16 +118,19 @@ export class EditorPopupComponent {
    * @returns the
    */
   isClassEdge(): ClassEdge | undefined {
-    return ('start' in this.elementData && 'end' in this.elementData) ? this.elementData as ClassEdge : undefined;
+    return 'start' in this.elementData && 'end' in this.elementData ? this.elementData : undefined;
   }
-
 
   /**
    * Adds a new attribute row to the list of attributes.
    */
   addAttributeRow(): void {
     if (this.attributes) {
-      this.attributes.push({ name: '', dataType: dataType.empty, visibility: visibilityType.empty });
+      this.attributes.push({
+        name: '',
+        dataType: dataType.empty,
+        visibility: visibilityType.empty,
+      });
       this.attributesDataSource.data = [...this.attributes];
     }
   }
@@ -127,7 +140,7 @@ export class EditorPopupComponent {
    */
   addMethodRow(): void {
     if (this.methods) {
-      this.methods.push({ name: '', dataType: dataType.empty , visibility: visibilityType.empty });
+      this.methods.push({ name: '', dataType: dataType.empty, visibility: visibilityType.empty });
       this.methodsDataSource.data = [...this.methods];
     }
   }
@@ -154,7 +167,6 @@ export class EditorPopupComponent {
     this.dialogRef.close();
   }
 
-
   /**
    * Closes the dialog and sends the changed data to the editor component.
    */
@@ -164,7 +176,7 @@ export class EditorPopupComponent {
       (this.elementData as ClassNode).attributes = [];
     }
     const result = {
-      command: "update",
+      command: 'update',
       changedData: this.elementData,
     };
     this.dialogRef.close(result);
@@ -175,7 +187,7 @@ export class EditorPopupComponent {
    */
   onDelete() {
     const result = {
-      command: "delete",
+      command: 'delete',
       changedData: this.elementData,
     };
     this.dialogRef.close(result);
@@ -250,7 +262,7 @@ export class EditorPopupComponent {
       this.edgeData.start = this.edgeData.end;
       this.edgeData.end = temp;
 
-      this.switchPosition == true ? this.switchPosition = false : this.switchPosition = true;
+      this.switchPosition == true ? (this.switchPosition = false) : (this.switchPosition = true);
       setTimeout(() => {
         this.previewLine.refresh();
       }, 0);

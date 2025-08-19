@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { environment } from 'src/environments/environment';
 @Component({
@@ -7,17 +7,20 @@ import { environment } from 'src/environments/environment';
   templateUrl: './video-time-stamp.component.html',
   styleUrls: ['./video-time-stamp.component.scss'],
 })
-export class VideoTimeStampComponent implements OnInit {
+export class VideoTimeStampComponent implements OnInit, OnDestroy {
   videoUrl: string = '';
   videoLoading: boolean = false;
   startTime: number = 0;
   title: string = '';
   private lastLoggedTime: number = 0;
-  private logIntervalSeconds: number = 5;
+  private readonly logIntervalSeconds: number = 5;
   private readonly apiUrl = `${environment.server}/event-log`;
   @ViewChild('videoPlayer') videoPlayer!: ElementRef;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { href: string }, private httpClient: HttpClient) {}
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: { href: string },
+    private readonly httpClient: HttpClient,
+  ) {}
 
   ngOnInit(): void {
     const params = this.parseHref(this.data.href);
@@ -40,11 +43,14 @@ export class VideoTimeStampComponent implements OnInit {
    */
   private parseHref(href: string): Record<string, string> {
     const query = href.split('?')[1];
-    return query.split('&').reduce((params, param) => {
-      const [key, value] = param.split('=');
-      params[key] = decodeURIComponent(value);
-      return params;
-    }, {} as Record<string, string>);
+    return query.split('&').reduce(
+      (params, param) => {
+        const [key, value] = param.split('=');
+        params[key] = decodeURIComponent(value);
+        return params;
+      },
+      {} as Record<string, string>,
+    );
   }
 
   /**
@@ -72,7 +78,10 @@ export class VideoTimeStampComponent implements OnInit {
    * @param currentTime The current playback time in seconds (optional).
    */
   logEvent(action: string, currentTime?: number): void {
-    const message = currentTime !== undefined ? `${action} video: ${this.title} at ${currentTime.toFixed(2)} seconds` : `${action} video: ${this.title}`;
+    const message =
+      currentTime !== undefined
+        ? `${action} video: ${this.title} at ${currentTime.toFixed(2)} seconds`
+        : `${action} video: ${this.title}`;
     const logData = {
       level: 'info',
       type: 'chatbot/videoplayer',
@@ -87,7 +96,7 @@ export class VideoTimeStampComponent implements OnInit {
     };
 
     this.httpClient.post(this.apiUrl, logData).subscribe({
-      error: (error) => console.error('Error logging video event:', error),
+      error: error => console.error('Error logging video event:', error),
     });
   }
 
@@ -106,17 +115,17 @@ export class VideoTimeStampComponent implements OnInit {
     }
   }
 
-    // preventing Premature close conncetion error by closing the modal while video is loading
-    ngOnDestroy() {
-      this.stopAndResetVideo();
-    }
+  // preventing Premature close conncetion error by closing the modal while video is loading
+  ngOnDestroy() {
+    this.stopAndResetVideo();
+  }
 
-    private stopAndResetVideo() {
-      if (this.videoPlayer && this.videoPlayer.nativeElement) {
-        this.videoPlayer.nativeElement.pause();
-        this.videoPlayer.nativeElement.src = '';
-        this.videoPlayer.nativeElement.load();
-      }
-      this.videoUrl = "";
+  private stopAndResetVideo() {
+    if (this.videoPlayer?.nativeElement) {
+      this.videoPlayer.nativeElement.pause();
+      this.videoPlayer.nativeElement.src = '';
+      this.videoPlayer.nativeElement.load();
     }
+    this.videoUrl = '';
+  }
 }

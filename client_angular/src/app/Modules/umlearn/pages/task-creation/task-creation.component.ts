@@ -1,37 +1,48 @@
-import { EditorElementType, editorModelDTO, editorElementDTO, EditorModel, editorDataDTO, taskDataDTO, ClassNode, ClassEdge } from '@DTOs/index';
-import { Component, OnDestroy } from '@angular/core';
+import {
+  editorModelDTO,
+  editorElementDTO,
+  editorDataDTO,
+  taskDataDTO,
+  ClassNode,
+  ClassEdge,
+} from '@DTOs/index';
+import { EditorElementType, EditorModel } from '@DTOs/index';
+import { OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Router} from '@angular/router';
+import { Router } from '@angular/router';
 import { TaskDescriptionPopupComponent } from './task-description-popup/task-description-popup.component';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';
 import { DatabaseTaskCommunicationService } from '@UMLearnServices/database-task-communication.service';
 import { NotificationService } from '@UMLearnServices/notification.service';
 
-
 @Component({
   selector: 'app-task-creation',
   templateUrl: './task-creation.component.html',
-  styleUrls: ['./task-creation.component.scss']
+  styleUrls: ['./task-creation.component.scss'],
 })
-
-
 export class TaskCreationComponent implements OnDestroy {
-  private subscriptions: Subscription[] = []; // Array to store subscriptions to unsubscribe later
+  private readonly subscriptions: Subscription[] = []; // Array to store subscriptions to unsubscribe later
 
-  taskTitle: string ="";
-  taskDescription: string="";
+  taskTitle: string = '';
+  taskDescription: string = '';
   maxPoints: number = 0;
   calculatedMaxPoints: number = 0;
-  selectedModel: editorModelDTO = {model: EditorModel.CLASSDIAGRAM, title: 'dummy', description: 'dummy', id: 1};
-  editorData : editorDataDTO = {
+  selectedModel: editorModelDTO = {
+    model: EditorModel.CLASSDIAGRAM,
+    title: 'dummy',
+    description: 'dummy',
+    id: 1,
+  };
+  editorData: editorDataDTO = {
     nodes: [],
     edges: [],
   };
   nodes: editorElementDTO[] = [];
-  selectedNodes:editorElementDTO[] = [];
+  selectedNodes: editorElementDTO[] = [];
   edges: editorElementDTO[] = [];
-  selectedEdges:editorElementDTO[] = [];
+  selectedEdges: editorElementDTO[] = [];
 
   checkboxStatesNode: { [key: string]: boolean } = {};
   checkboxStatesEdge: { [key: string]: boolean } = {};
@@ -39,7 +50,7 @@ export class TaskCreationComponent implements OnDestroy {
   checkboxStatesEdgeSelfCheck: { [key: string]: boolean } = {};
 
   activeConnectionModeChange = false;
-  counter:number = 0;
+  counter: number = 0;
   taskData: taskDataDTO = {
     id: 3,
     title: 'Updated Task Title',
@@ -95,7 +106,7 @@ export class TaskCreationComponent implements OnDestroy {
       </tr>
   </table>
 `;
-CheckBoxTooltipp: string = `
+  CheckBoxTooltipp: string = `
 Liste erlaubter Elemente
 <ul>
     <li>Checkboxen der Liste checken automatisch, sobald ein entsprechndes Element im Editor eingefügt wird.</li>
@@ -107,19 +118,20 @@ Liste erlaubter Elemente
 `;
 
   constructor(
-    private router:Router,
-    private ecs:EditorCommunicationService,
-    private dtcs: DatabaseTaskCommunicationService,
+    private readonly router: Router,
+    private readonly ecs: EditorCommunicationService,
+    private readonly dtcs: DatabaseTaskCommunicationService,
     public dialog: MatDialog,
-    private notification: NotificationService,
-    )
-    {
-      const navigation = this.router.getCurrentNavigation();
-      if (navigation && navigation.extras && navigation.extras.state) {
-        const getTaskDataSubscription = this.dtcs.getTaskData(navigation.extras.state['id']).subscribe((data: taskDataDTO) => {
+    private readonly notification: NotificationService,
+  ) {
+    const navigation = this.router.getCurrentNavigation();
+    if (navigation?.extras?.state) {
+      const getTaskDataSubscription = this.dtcs
+        .getTaskData(navigation.extras.state['id'])
+        .subscribe((data: taskDataDTO) => {
           this.taskData = data;
           this.editorData = this.taskData.editorData;
-          this.selectedModel.model = data.taskSettings.editorModel as EditorModel;
+          this.selectedModel.model = data.taskSettings.editorModel;
           this.taskTitle = this.taskData.title;
           this.taskDescription = this.taskData.description;
           this.maxPoints = this.taskData.maxPoints;
@@ -127,30 +139,36 @@ Liste erlaubter Elemente
             this.isManualInput = true;
           }
           if (this.selectedModel && this.selectedModel.model) {
-            const getEditorElementsSubscription = this.ecs.getEditorElements(this.selectedModel.model).subscribe(elements => {
-              this.nodes = elements.filter(element => element.elementType === EditorElementType.NODE);
-              this.edges = elements.filter(element => element.elementType === EditorElementType.EDGE);
-              this.initializeSelectedElements();
-            });
+            const getEditorElementsSubscription = this.ecs
+              .getEditorElements(this.selectedModel.model)
+              .subscribe(elements => {
+                this.nodes = elements.filter(
+                  element => element.elementType === EditorElementType.NODE,
+                );
+                this.edges = elements.filter(
+                  element => element.elementType === EditorElementType.EDGE,
+                );
+                this.initializeSelectedElements();
+              });
             this.subscriptions.push(getEditorElementsSubscription);
           }
         });
-        this.subscriptions.push(getTaskDataSubscription);
-      }
+      this.subscriptions.push(getTaskDataSubscription);
     }
+  }
 
   /**
    * Initializes the selected elements based on the task settings.
    */
   initializeSelectedElements(): void {
-    for (let node of this.nodes) {
+    for (const node of this.nodes) {
       if (this.taskData.taskSettings.allowedNodeTypes.some(element => element.id === node.id)) {
         this.onCheckboxChange(node.id, true, true);
       } else {
         this.onCheckboxChange(node.id, false, true);
       }
     }
-    for (let edge of this.edges) {
+    for (const edge of this.edges) {
       if (this.taskData.taskSettings.allowedEdgeTypes.some(element => element.id === edge.id)) {
         this.onCheckboxChange(edge.id, true, false);
       } else {
@@ -165,7 +183,7 @@ Liste erlaubter Elemente
    */
   onNodeSelected(node: editorElementDTO) {
     if (!this.selectedNodes.some(selectedNode => selectedNode.id === node.id)) {
-      this.onCheckboxChange(node.id, true, true)
+      this.onCheckboxChange(node.id, true, true);
     }
     this.calculateMaxPoints();
   }
@@ -176,7 +194,7 @@ Liste erlaubter Elemente
    */
   onEdgeSelected(edge: editorElementDTO) {
     if (!this.selectedEdges.some(selectedEdge => selectedEdge.id === edge.id)) {
-      this.onCheckboxChange(edge.id, true, false)
+      this.onCheckboxChange(edge.id, true, false);
     }
     this.calculateMaxPoints();
   }
@@ -185,11 +203,15 @@ Liste erlaubter Elemente
    * The notification informs the user that the element type is already included in the task
    * and prompts them to remove all elements of this type from the editor before removing it from the allowed list.
    */
-  CountErrorsCheckbox(): void{
+  CountErrorsCheckbox(): void {
     this.counter += 1;
-    if(this.counter == 3){
-      this.notification.confirm('Dieser Elementtyp ist bereits in der Aufgabe enthalten',
-      'Entfernen Sie bitte erst alle Elemente diesen Typs aus dem Editor, um es von der Liste erlaubter Elemente zu entfernen', 'OK', '');
+    if (this.counter == 3) {
+      this.notification.confirm(
+        'Dieser Elementtyp ist bereits in der Aufgabe enthalten',
+        'Entfernen Sie bitte erst alle Elemente diesen Typs aus dem Editor, um es von der Liste erlaubter Elemente zu entfernen',
+        'OK',
+        '',
+      );
       this.counter = 0;
     }
   }
@@ -199,14 +221,14 @@ Liste erlaubter Elemente
    * @param node - The editor element DTO representing the clicked node.
    * @param event - The click event object.
    */
-  onClickCheckboxNode(node:editorElementDTO,event: Event) {
+  onClickCheckboxNode(node: editorElementDTO, event: Event) {
     if (this.editorData.nodes.some(_node => _node.type === node.element)) {
       event.preventDefault();
-      this.notification.error("Dieser Knoten ist bereits im Editor vorhanden");
+      this.notification.error('Dieser Knoten ist bereits im Editor vorhanden');
       this.CountErrorsCheckbox();
-    }else{
-    this.onCheckboxChange(node.id, !this.checkboxStatesNode[node.id], true);
-    this.checkboxStatesNodeSelfCheck[node.id] = !this.checkboxStatesNodeSelfCheck[node.id];
+    } else {
+      this.onCheckboxChange(node.id, !this.checkboxStatesNode[node.id], true);
+      this.checkboxStatesNodeSelfCheck[node.id] = !this.checkboxStatesNodeSelfCheck[node.id];
     }
   }
   /**
@@ -215,14 +237,14 @@ Liste erlaubter Elemente
    * @param edge - The editor element DTO representing the edge.
    * @param event - The click event object.
    */
-  onClickCheckboxEdge(edge:editorElementDTO,event: Event) {
+  onClickCheckboxEdge(edge: editorElementDTO, event: Event) {
     if (this.editorData.edges.some(_edge => _edge.type === edge.element)) {
       event.preventDefault();
-      this.notification.error("Diese Kante ist bereits im Editor vorhanden");
+      this.notification.error('Diese Kante ist bereits im Editor vorhanden');
       this.CountErrorsCheckbox();
-    }else{
-    this.onCheckboxChange(edge.id, !this.checkboxStatesEdge[edge.id], false);
-    this.checkboxStatesEdgeSelfCheck[edge.id] = !this.checkboxStatesEdgeSelfCheck[edge.id];
+    } else {
+      this.onCheckboxChange(edge.id, !this.checkboxStatesEdge[edge.id], false);
+      this.checkboxStatesEdgeSelfCheck[edge.id] = !this.checkboxStatesEdgeSelfCheck[edge.id];
     }
   }
   /**
@@ -230,8 +252,8 @@ Liste erlaubter Elemente
    * @param node The node that was removed.
    */
   onNodeRemoved(node: ClassNode) {
-    if(this.editorData.nodes.filter(_node => _node.type === node.type).length === 1){
-      let matchingNode = this.selectedNodes.find(_node => _node.element === node.type);
+    if (this.editorData.nodes.filter(_node => _node.type === node.type).length === 1) {
+      const matchingNode = this.selectedNodes.find(_node => _node.element === node.type);
       if (matchingNode && !this.checkboxStatesNodeSelfCheck[matchingNode.id]) {
         this.onCheckboxChange(matchingNode.id, false, true);
       }
@@ -242,8 +264,8 @@ Liste erlaubter Elemente
    * @param {ClassEdge} edge - The edge to be removed.
    */
   onEdgeRemoved(edge: ClassEdge) {
-    if(this.editorData.edges.filter(_edge => _edge.type === edge.type).length === 1){
-      let matchingEdge = this.selectedEdges.find(_Edge => _Edge.element === edge.type);
+    if (this.editorData.edges.filter(_edge => _edge.type === edge.type).length === 1) {
+      const matchingEdge = this.selectedEdges.find(_Edge => _Edge.element === edge.type);
       if (matchingEdge && !this.checkboxStatesEdgeSelfCheck[matchingEdge.id]) {
         this.onCheckboxChange(matchingEdge.id, false, false);
       }
@@ -265,7 +287,7 @@ Liste erlaubter Elemente
           this.selectedNodes.push(node);
         }
       } else {
-          this.selectedNodes = this.selectedNodes.filter(node => node.id !== id);
+        this.selectedNodes = this.selectedNodes.filter(node => node.id !== id);
       }
     } else {
       this.checkboxStatesEdge[id] = isChecked;
@@ -285,11 +307,18 @@ Liste erlaubter Elemente
    * Displays a confirmation dialog and navigates to the task overview page if confirmed.
    */
   onCancel(): void {
-    const confirmSubscription = this.notification.confirm('Taskerstellung abbrechen?', 'Alle Änderungen gehen verloren.', 'Nein', 'Ja, abbrechen').subscribe((confirmed) => {
-      if (confirmed) {
-        this.router.navigate(['/task-overview']);
-      }
-    });
+    const confirmSubscription = this.notification
+      .confirm(
+        'Taskerstellung abbrechen?',
+        'Alle Änderungen gehen verloren.',
+        'Nein',
+        'Ja, abbrechen',
+      )
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.router.navigate(['/task-overview']);
+        }
+      });
     this.subscriptions.push(confirmSubscription);
   }
 
@@ -300,7 +329,7 @@ Liste erlaubter Elemente
    * @param {Promise<string>} imageB64 - The promise that resolves to the base64 image data.
    */
   onAccept(data: editorDataDTO, imageB64: Promise<string>) {
-    const newTaskData: taskDataDTO = {...this.taskData};
+    const newTaskData: taskDataDTO = { ...this.taskData };
     newTaskData.title = this.taskTitle;
     newTaskData.description = this.taskDescription;
     newTaskData.maxPoints = this.maxPoints;
@@ -317,13 +346,15 @@ Liste erlaubter Elemente
     });
     imageB64.then(image => {
       if (image.length > 0) {
-        this.dtcs.setTaskImage({taskId: this.taskData.id, imageB64: image}).subscribe((taskId: number) => {
-          if (taskId && taskId == this.taskData.id) {
-            this.notification.success('Task-Vorschau erfolgreich gespeichert');
-          } else {
-            this.notification.error('Fehler beim Speichern der Task-Vorschau');
-          }
-        });
+        this.dtcs
+          .setTaskImage({ taskId: this.taskData.id, imageB64: image })
+          .subscribe((taskId: number) => {
+            if (taskId && taskId == this.taskData.id) {
+              this.notification.success('Task-Vorschau erfolgreich gespeichert');
+            } else {
+              this.notification.error('Fehler beim Speichern der Task-Vorschau');
+            }
+          });
       } else {
         this.notification.error('Fehler beim Speichern der Task-Vorschau');
       }
@@ -339,12 +370,12 @@ Liste erlaubter Elemente
       height: '80%',
       data: {
         description: this.taskDescription,
-        taskTitle: this.taskTitle
-      }
+        taskTitle: this.taskTitle,
+      },
     });
 
     const dialogSubscription = dialog.afterClosed().subscribe(result => {
-      if(result){
+      if (result) {
         this.taskDescription = result;
       }
     });
@@ -370,13 +401,31 @@ Liste erlaubter Elemente
     if (!this.isManualInput) {
       let edgePoints = 0;
       let nodePoints = 0;
-      for (let edge of this.editorData.edges) {
+      for (const edge of this.editorData.edges) {
         edgePoints += 1; // Count the edge itself as a point
-        edgePoints += ['cardinalityEnd', 'cardinalityStart', 'description', 'type'].reduce((total, attr) => total + (Array.isArray((edge as any)[attr]) ? (edge as any)[attr].length : ((edge as any)[attr] ? 1 : 0)), 0);
+        edgePoints += ['cardinalityEnd', 'cardinalityStart', 'description', 'type'].reduce(
+          (total, attr) =>
+            total +
+            (Array.isArray((edge as any)[attr])
+              ? (edge as any)[attr].length
+              : (edge as any)[attr]
+                ? 1
+                : 0),
+          0,
+        );
       }
-      for (let node of this.editorData.nodes) {
+      for (const node of this.editorData.nodes) {
         nodePoints += 1; // Count the node itself as a point
-        nodePoints += ['type', 'methods', 'attributes', 'title'].reduce((total, attr) => total + (Array.isArray((node as any)[attr]) ? (node as any)[attr].length : ((node as any)[attr] ? 1 : 0)), 0);
+        nodePoints += ['type', 'methods', 'attributes', 'title'].reduce(
+          (total, attr) =>
+            total +
+            (Array.isArray((node as any)[attr])
+              ? (node as any)[attr].length
+              : (node as any)[attr]
+                ? 1
+                : 0),
+          0,
+        );
       }
       this.maxPoints = edgePoints + nodePoints;
     }
@@ -385,27 +434,43 @@ Liste erlaubter Elemente
    * Handles the confirmation of deleting a task.
    */
   onDelete() {
-    const checkForTaskAttemptsSubscription = this.dtcs.checkForTaskAttempts(this.taskData.id).subscribe(result => {
-      if (result) {
-        const confirmSubscription1 = this.notification.confirm("Es existieren bereits Abgaben zur Aufgabe!", "Alle Abgaben werden auch gelöscht!", "Abbrechen", "Aufgabe löschen").subscribe(result => {
-          if (result) {
-            this.deleteTask();
-          } else {
-            this.notification.info("Aufgabe wurde nicht gelöscht");
-          }
-        });
-        this.subscriptions.push(confirmSubscription1);
-      } else {
-        const confirmSubscription2 = this.notification.confirm("Aufgabe wirklich löschen?", "Achtung: Inhalte können nicht wiederhergestellt werden!", "Abbrechen", "Aufgabe löschen").subscribe(result => {
-          if (result) {
-            this.deleteTask();
-          } else {
-            this.notification.success("Aufgabe wurde nicht gelöscht");
-          }
-        });
-        this.subscriptions.push(confirmSubscription2);
-      }
-    });
+    const checkForTaskAttemptsSubscription = this.dtcs
+      .checkForTaskAttempts(this.taskData.id)
+      .subscribe(result => {
+        if (result) {
+          const confirmSubscription1 = this.notification
+            .confirm(
+              'Es existieren bereits Abgaben zur Aufgabe!',
+              'Alle Abgaben werden auch gelöscht!',
+              'Abbrechen',
+              'Aufgabe löschen',
+            )
+            .subscribe(result => {
+              if (result) {
+                this.deleteTask();
+              } else {
+                this.notification.info('Aufgabe wurde nicht gelöscht');
+              }
+            });
+          this.subscriptions.push(confirmSubscription1);
+        } else {
+          const confirmSubscription2 = this.notification
+            .confirm(
+              'Aufgabe wirklich löschen?',
+              'Achtung: Inhalte können nicht wiederhergestellt werden!',
+              'Abbrechen',
+              'Aufgabe löschen',
+            )
+            .subscribe(result => {
+              if (result) {
+                this.deleteTask();
+              } else {
+                this.notification.success('Aufgabe wurde nicht gelöscht');
+              }
+            });
+          this.subscriptions.push(confirmSubscription2);
+        }
+      });
     this.subscriptions.push(checkForTaskAttemptsSubscription);
   }
 
@@ -419,21 +484,20 @@ Liste erlaubter Elemente
       },
       (error: any) => {
         console.error('Error deleting task:', error);
-      }
+      },
     );
     this.subscriptions.push(deleteTaskSubscription);
   }
 
- /**
- * Called when the component is about to be destroyed.
- * Unsubscribes from all subscriptions to prevent memory leaks.
- *
- * @memberof CourseEditComponent
- * @public
- * @returns {void}
- */
+  /**
+   * Called when the component is about to be destroyed.
+   * Unsubscribes from all subscriptions to prevent memory leaks.
+   *
+   * @memberof CourseEditComponent
+   * @public
+   * @returns {void}
+   */
   ngOnDestroy() {
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
-
- }
+}

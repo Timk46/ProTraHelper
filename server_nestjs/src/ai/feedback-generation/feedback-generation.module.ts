@@ -8,7 +8,13 @@ import { FeedbackRAGService } from './feedback-rag.service';
 
 @Module({
   controllers: [FeedbackGenerationController],
-  providers: [FeedbackGenerationService, RagService, LlmBasicPromptService, PrismaClient, FeedbackRAGService],
-  exports: [FeedbackGenerationService, FeedbackRAGService]
+  providers: [
+    FeedbackGenerationService,
+    RagService,
+    LlmBasicPromptService,
+    PrismaClient,
+    FeedbackRAGService,
+  ],
+  exports: [FeedbackGenerationService, FeedbackRAGService],
 })
 export class FeedbackGenerationModule {}

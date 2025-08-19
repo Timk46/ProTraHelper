@@ -33,7 +33,9 @@
         (click)="concept.isUnlocked ? navigateToConcept(concept, $event) : $event.preventDefault()"
       >
         <!-- Title -->
-        <h3 class="highlight-title">{{ concept.alias || (concept.conceptNode?.name || 'Untitled') }}</h3>
+        <h3 class="highlight-title">
+          {{ concept.alias || concept.conceptNode?.name || 'Untitled' }}
+        </h3>
 
         <!-- Image container -->
         <div class="highlight-image-container">
@@ -46,7 +48,9 @@
 
           <!-- Description overlay (shown on hover) -->
           <div class="highlight-description-overlay" [class.visible]="hoveredTileId === concept.id">
-            <p class="highlight-description">{{ concept.description || 'No description available' }}</p>
+            <p class="highlight-description">
+              {{ concept.description || 'No description available' }}
+            </p>
           </div>
 
           <!-- Action buttons (only in edit mode, shown on hover) -->

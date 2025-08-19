@@ -1,7 +1,8 @@
 import { CodeSubmissionResultDto } from '@DTOs/index';
 import { HttpClient } from '@angular/common/http'; // Removed unused imports
 import { Injectable } from '@angular/core';
-import { Observable, catchError, map } from 'rxjs';
+import { Observable } from 'rxjs';
+import { catchError, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { FeedbackLevel, FlavorType } from '../models/code-submission.model'; // Import enums
 
@@ -12,10 +13,10 @@ import { FeedbackLevel, FlavorType } from '../models/code-submission.model'; // 
   providedIn: 'root',
 })
 export class RunCodeService {
-  private runCodeApiUrl = environment.server + '/run-code'; // Renamed for clarity
-  private langgraphApiUrl = environment.server + '/langgraph-feedback'; // New API base URL
+  private readonly runCodeApiUrl = environment.server + '/run-code'; // Renamed for clarity
+  private readonly langgraphApiUrl = environment.server + '/langgraph-feedback'; // New API base URL
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Executes multiple files of user-submitted code on the server.
@@ -28,7 +29,7 @@ export class RunCodeService {
   executeStudentCode(
     taskId: number,
     inputArgs: string[],
-    additionalFiles: { [fileName: string]: string }
+    additionalFiles: { [fileName: string]: string },
   ): Observable<CodeSubmissionResultDto> {
     const body = {
       taskId: taskId,
@@ -43,40 +44,57 @@ export class RunCodeService {
   private getAgentFeedback(
     endpoint: string,
     questionId: number,
-    relatedCodeSubmissionResult: CodeSubmissionResultDto
+    relatedCodeSubmissionResult: CodeSubmissionResultDto,
   ): Observable<string> {
     const body = {
       questionId: questionId,
       flavor: FlavorType.STANDARD, // Use default flavor
       feedbackLevel: FeedbackLevel.STANDARD, // Use default level
-      relatedCodeSubmissionResult: relatedCodeSubmissionResult
+      relatedCodeSubmissionResult: relatedCodeSubmissionResult,
     };
-    return this.http.post<{ feedback: string | null }>(`${this.langgraphApiUrl}/${endpoint}`, body).pipe(
-      map(response => response?.feedback ?? ''), // Extract the feedback string, default to empty string if null/undefined
-      catchError(error => {
-        console.error(`Error fetching ${endpoint} feedback:`, error);
-        throw error; // Re-throw the error to be handled by the caller
-      })
-    );
+    return this.http
+      .post<{ feedback: string | null }>(`${this.langgraphApiUrl}/${endpoint}`, body)
+      .pipe(
+        map(response => response?.feedback ?? ''), // Extract the feedback string, default to empty string if null/undefined
+        catchError(error => {
+          console.error(`Error fetching ${endpoint} feedback:`, error);
+          throw error; // Re-throw the error to be handled by the caller
+        }),
+      );
   }
 
-  getSupervisorFeedback(questionId: number, relatedCodeSubmissionResult: CodeSubmissionResultDto): Observable<string> {
+  getSupervisorFeedback(
+    questionId: number,
+    relatedCodeSubmissionResult: CodeSubmissionResultDto,
+  ): Observable<string> {
     return this.getAgentFeedback('supervisor', questionId, relatedCodeSubmissionResult);
   }
 
-  getKcFeedback(questionId: number, relatedCodeSubmissionResult: CodeSubmissionResultDto): Observable<string> {
+  getKcFeedback(
+    questionId: number,
+    relatedCodeSubmissionResult: CodeSubmissionResultDto,
+  ): Observable<string> {
     return this.getAgentFeedback('kc', questionId, relatedCodeSubmissionResult);
   }
 
-  getKhFeedback(questionId: number, relatedCodeSubmissionResult: CodeSubmissionResultDto): Observable<string> {
+  getKhFeedback(
+    questionId: number,
+    relatedCodeSubmissionResult: CodeSubmissionResultDto,
+  ): Observable<string> {
     return this.getAgentFeedback('kh', questionId, relatedCodeSubmissionResult);
   }
 
-  getKmFeedback(questionId: number, relatedCodeSubmissionResult: CodeSubmissionResultDto): Observable<string> {
+  getKmFeedback(
+    questionId: number,
+    relatedCodeSubmissionResult: CodeSubmissionResultDto,
+  ): Observable<string> {
     return this.getAgentFeedback('km', questionId, relatedCodeSubmissionResult);
   }
 
-  getKtcFeedback(questionId: number, relatedCodeSubmissionResult: CodeSubmissionResultDto): Observable<string> {
+  getKtcFeedback(
+    questionId: number,
+    relatedCodeSubmissionResult: CodeSubmissionResultDto,
+  ): Observable<string> {
     return this.getAgentFeedback('ktc', questionId, relatedCodeSubmissionResult);
   }
 
@@ -90,15 +108,11 @@ export class RunCodeService {
    * @param lastSubmissionId - The ID of the last code submission (which is the submission associated with the feedback).
    * @returns An Observable with the server's response.
    */
-  postFeedback(
-    rating: number,
-    feedback: string,
-    lastSubmissionId: string,
-  ): Observable<any> {
+  postFeedback(rating: number, feedback: string, lastSubmissionId: string): Observable<any> {
     const body = {
       rating: rating,
       feedback: feedback,
-      lastSubmissionId: lastSubmissionId
+      lastSubmissionId: lastSubmissionId,
     };
     return this.http.post<any>(`${this.runCodeApiUrl}/post-Feedback`, body);
   }

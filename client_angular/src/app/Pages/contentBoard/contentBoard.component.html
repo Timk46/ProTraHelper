@@ -1,41 +1,119 @@
 <div class="content-container" class="mat-elevation-z8">
   <mat-accordion multi="true">
-    <mat-expansion-panel [hideToggle]="!hasContentElementType(content, 'QUESTION')" *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index">
-    <!-- <mat-expansion-panel [disabled]="!hasContentElementType(content, 'QUESTION')" [hideToggle]="!hasContentElementType(content, 'QUESTION')" *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index"></mat-expansion-panel> -->
-      <mat-expansion-panel-header fxLayout = "row">
-        <mat-panel-title  class="panel-title">
+    <mat-expansion-panel
+      [hideToggle]="!hasContentElementType(content, 'QUESTION')"
+      *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index"
+    >
+      <!-- <mat-expansion-panel [disabled]="!hasContentElementType(content, 'QUESTION')" [hideToggle]="!hasContentElementType(content, 'QUESTION')" *ngFor="let content of contentsForActiveConceptNode.trainedBy; let i = index"></mat-expansion-panel> -->
+      <mat-expansion-panel-header fxLayout="row">
+        <mat-panel-title class="panel-title">
           {{ content.name }}
-          <div *ngIf="content.progress==100">
-            <mat-icon class="level-icon" *ngFor="let level of getLevels(content.level)">star</mat-icon>
+          <div *ngIf="content.progress == 100">
+            <mat-icon class="level-icon" *ngFor="let level of getLevels(content.level)"
+              >star</mat-icon
+            >
           </div>
-          <div *ngIf="content.progress<100" class="level-icon-container">
-            <mat-icon class="level-icon" *ngFor="let level of getLevels(content.level)">star_border</mat-icon>
+          <div *ngIf="content.progress < 100" class="level-icon-container">
+            <mat-icon class="level-icon" *ngFor="let level of getLevels(content.level)"
+              >star_border</mat-icon
+            >
           </div>
-          <mat-icon *ngIf="hasContentElementType(content, 'QUESTION')" matTooltip="Enthält Übungsaufgaben.">rate_review</mat-icon>
-          <mat-icon class="node-question" *ngIf="content.questionMarked" matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert.">help</mat-icon>
+          <mat-icon
+            *ngIf="hasContentElementType(content, 'QUESTION')"
+            matTooltip="Enthält Übungsaufgaben."
+            >rate_review</mat-icon
+          >
+          <mat-icon
+            class="node-question"
+            *ngIf="content.questionMarked"
+            matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert."
+            >help</mat-icon
+          >
         </mat-panel-title>
-        <p *ngIf="!(sSS.isHandset | async) && !editModeActive" class="level-progress" matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." style="margin-top: 10px;">Level-Fortschritt: </p>
-        <mat-progress-bar *ngIf="!(sSS.isHandset | async) && !editModeActive"  matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." class="node-progress" mode="determinate" [value]="content.progress"></mat-progress-bar>
-        <button *ngIf="!(sSS.isHandset | async)" class="content-view" [style.visibility]="hasContentElementType(content, 'PDF') ? 'visible' : 'hidden'" matTooltip="Zeigt alle PDF (z.B. Vorlesungsfolien) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['PDF'], $event)">PDF</button>
-        <button *ngIf="!(sSS.isHandset | async)" class="content-view" [style.visibility]="hasContentElementType(content, 'VIDEO') ? 'visible' : 'hidden'" matTooltip="Zeigt alle Videos (z.B. Vorlesungsaufzeichungen) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['VIDEO'], $event)">Video</button>
+        <p
+          *ngIf="!(sSS.isHandset | async) && !editModeActive"
+          class="level-progress"
+          matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet."
+          style="margin-top: 10px"
+        >
+          Level-Fortschritt:
+        </p>
+        <mat-progress-bar
+          *ngIf="!(sSS.isHandset | async) && !editModeActive"
+          matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet."
+          class="node-progress"
+          mode="determinate"
+          [value]="content.progress"
+        ></mat-progress-bar>
+        <button
+          *ngIf="!(sSS.isHandset | async)"
+          class="content-view"
+          [style.visibility]="hasContentElementType(content, 'PDF') ? 'visible' : 'hidden'"
+          matTooltip="Zeigt alle PDF (z.B. Vorlesungsfolien) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden."
+          mat-raised-button
+          color="primary"
+          (click)="onContentClick(content, ['PDF'], $event)"
+        >
+          PDF
+        </button>
+        <button
+          *ngIf="!(sSS.isHandset | async)"
+          class="content-view"
+          [style.visibility]="hasContentElementType(content, 'VIDEO') ? 'visible' : 'hidden'"
+          matTooltip="Zeigt alle Videos (z.B. Vorlesungsaufzeichungen) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden."
+          mat-raised-button
+          color="primary"
+          (click)="onContentClick(content, ['VIDEO'], $event)"
+        >
+          Video
+        </button>
       </mat-expansion-panel-header>
 
-      <div class="mobile-button" *ngIf="(sSS.isHandset | async)">
-        <button class="content-view" [style.visibility]="hasContentElementType(content, 'PDF') ? 'visible' : 'hidden'" matTooltip="Zeigt alle PDF (z.B. Vorlesungsfolien) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['PDF'], $event)">PDF</button>
-        <button class="content-view" [style.visibility]="hasContentElementType(content, 'VIDEO') ? 'visible' : 'hidden'" matTooltip="Zeigt alle Videos (z.B. Vorlesungsaufzeichungen) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden." mat-raised-button color="primary" (click)="onContentClick(content, ['VIDEO'], $event)">Video</button>
+      <div class="mobile-button" *ngIf="sSS.isHandset | async">
+        <button
+          class="content-view"
+          [style.visibility]="hasContentElementType(content, 'PDF') ? 'visible' : 'hidden'"
+          matTooltip="Zeigt alle PDF (z.B. Vorlesungsfolien) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden."
+          mat-raised-button
+          color="primary"
+          (click)="onContentClick(content, ['PDF'], $event)"
+        >
+          PDF
+        </button>
+        <button
+          class="content-view"
+          [style.visibility]="hasContentElementType(content, 'VIDEO') ? 'visible' : 'hidden'"
+          matTooltip="Zeigt alle Videos (z.B. Vorlesungsaufzeichungen) zum Thema an. Über diese Ansicht können einzelne Elemente als erledigt markiert und der Fortschritt erhöht werden."
+          mat-raised-button
+          color="primary"
+          (click)="onContentClick(content, ['VIDEO'], $event)"
+        >
+          Video
+        </button>
       </div>
       <div *ngIf="!editModeActive">
-        <mat-divider *ngIf="(sSS.isHandset | async)"></mat-divider>
-        <div *ngIf="(sSS.isHandset | async)">
-          <p matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." style="margin-top: 10px;">Level-Fortschritt: </p>
-          <mat-progress-bar style="margin-bottom: 15px" matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet." mode="determinate" [value]="content.progress">asdasd</mat-progress-bar>
+        <mat-divider *ngIf="sSS.isHandset | async"></mat-divider>
+        <div *ngIf="sSS.isHandset | async">
+          <p
+            matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet."
+            style="margin-top: 10px"
+          >
+            Level-Fortschritt:
+          </p>
+          <mat-progress-bar
+            style="margin-bottom: 15px"
+            matTooltip="Der Fortschritt wird durch die abschlossenen Teilinhalte berechnet."
+            mode="determinate"
+            [value]="content.progress"
+            >asdasd</mat-progress-bar
+          >
         </div>
-        <mat-divider *ngIf="(sSS.isHandset | async)"></mat-divider>
+        <mat-divider *ngIf="sSS.isHandset | async"></mat-divider>
       </div>
       <mat-panel-description>
         <p class="description">
           {{ content.description }}
-          </p>
+        </p>
       </mat-panel-description>
       <!-- table with the content node details and elements -->
       <div class="content-container" *ngIf="hasContentElementType(content, 'QUESTION')">
@@ -45,20 +123,20 @@
           <table mat-table [dataSource]="getFilteredData(content.contentNodeId)" mat-sort>
             <!-- Position Column -->
             <ng-container matColumnDef="id">
-              <th mat-header-cell *matHeaderCellDef> ID </th>
-              <td mat-cell *matCellDef="let element"> {{ element.id }} </td>
+              <th mat-header-cell *matHeaderCellDef>ID</th>
+              <td mat-cell *matCellDef="let element">{{ element.id }}</td>
             </ng-container>
 
             <!-- Name Column -->
             <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef> Name </th>
-              <td mat-cell *matCellDef="let element"> {{ element.name }} </td>
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let element">{{ element.name }}</td>
             </ng-container>
 
             <!-- Type Column -->
             <ng-container matColumnDef="type">
-              <th mat-header-cell *matHeaderCellDef> Fragentyp </th>
-              <td mat-cell *matCellDef="let element"> {{ genBetterElementNames(element.type) }} </td>
+              <th mat-header-cell *matHeaderCellDef>Fragentyp</th>
+              <td mat-cell *matCellDef="let element">{{ genBetterElementNames(element.type) }}</td>
             </ng-container>
 
             <!-- Attempts Column -> not used anymore
@@ -77,40 +155,71 @@
 
             <!-- Progress Column -->
             <ng-container matColumnDef="progress">
-              <th mat-header-cell *matHeaderCellDef> Fortschritt </th>
+              <th mat-header-cell *matHeaderCellDef>Fortschritt</th>
               <td mat-cell *matCellDef="let row">
-                <mat-progress-spinner [value]="row.progress" [mode]="'determinate'" [diameter]="30"></mat-progress-spinner>
+                <mat-progress-spinner
+                  [value]="row.progress"
+                  [mode]="'determinate'"
+                  [diameter]="30"
+                ></mat-progress-spinner>
               </td>
             </ng-container>
 
             <!-- Symbol Column -->
             <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef> Aktion </th>
+              <th mat-header-cell *matHeaderCellDef>Aktion</th>
               <td mat-cell *matCellDef="let element">
-                <div style="display: flex; flex-direction: row; gap: 10px;" >
-                  <button mat-raised-button color="primary" (click)="onTaskClick(element, content)" class="button">Öffnen</button>
-                  <button *ngIf="isAdmin && editModeActive" mat-icon-button color="primary" (click)="onTaskEdit(element)" class="button">
+                <div style="display: flex; flex-direction: row; gap: 10px">
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    (click)="onTaskClick(element, content)"
+                    class="button"
+                  >
+                    Öffnen
+                  </button>
+                  <button
+                    *ngIf="isAdmin && editModeActive"
+                    mat-icon-button
+                    color="primary"
+                    (click)="onTaskEdit(element)"
+                    class="button"
+                  >
                     <mat-icon>edit</mat-icon>
                   </button>
-                  <button *ngIf="isAdmin && editModeActive" mat-icon-button color="warn" (click)="onTaskDelete(element)" class="button" style="margin-left: 20px;">
+                  <button
+                    *ngIf="isAdmin && editModeActive"
+                    mat-icon-button
+                    color="warn"
+                    (click)="onTaskDelete(element)"
+                    class="button"
+                    style="margin-left: 20px"
+                  >
                     <mat-icon>delete</mat-icon>
                   </button>
                 </div>
-
               </td>
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
           </table>
         </div>
       </div>
 
       <mat-action-row *ngIf="isAdmin && editModeActive">
-        <button mat-raised-button color="primary" (click)="onNewTask(content.contentNodeId)">Frage hinzufügen</button>
-        <button mat-raised-button color="warn" (click)="onContentNodeDelete(content.contentNodeId)" disabled>ContentNode Löschen</button>
+        <button mat-raised-button color="primary" (click)="onNewTask(content.contentNodeId)">
+          Frage hinzufügen
+        </button>
+        <button
+          mat-raised-button
+          color="warn"
+          (click)="onContentNodeDelete(content.contentNodeId)"
+          disabled
+        >
+          ContentNode Löschen
+        </button>
       </mat-action-row>
     </mat-expansion-panel>
   </mat-accordion>
 </div>
-

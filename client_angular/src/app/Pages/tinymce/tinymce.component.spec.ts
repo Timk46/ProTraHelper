@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { TinymceComponent } from './tinymce.component';
 
@@ -8,9 +9,8 @@ describe('TinymceComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TinymceComponent ]
-    })
-    .compileComponents();
+      declarations: [TinymceComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TinymceComponent);
     component = fixture.componentInstance;

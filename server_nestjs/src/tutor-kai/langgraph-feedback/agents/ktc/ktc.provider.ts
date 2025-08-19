@@ -7,8 +7,7 @@ import { buildKtcAgentChain } from './ktc.agent'; // Import the chain builder
 @Injectable()
 export class KtcAgentProvider {
   constructor(
-    @Inject(CHAT_OPENAI_MODEL) private readonly model: ChatOpenAI,
-    // No tool services needed for KTC agent
+    @Inject(CHAT_OPENAI_MODEL) private readonly model: ChatOpenAI, // No tool services needed for KTC agent
   ) {}
 
   /**

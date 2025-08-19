@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DatabaseTaskCommunicationService } from './database-task-communication.service';
 
-
 describe('DatabaseTaskCommunicationService', () => {
   let service: DatabaseTaskCommunicationService;
 

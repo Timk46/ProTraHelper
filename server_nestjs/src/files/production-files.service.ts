@@ -9,7 +9,7 @@ import { FilesService } from './files.service';
 export class ProductionFilesService {
   constructor(
     private readonly prisma: PrismaService,
-    private filesService: FilesService
+    private readonly filesService: FilesService,
   ) {}
 
   /**
@@ -65,9 +65,7 @@ export class ProductionFilesService {
    * @param {number} moduleId - The module ID for additional context validation
    * @returns {Promise<StreamableFile>} The StreamableFile for downloading
    */
-  async downloadProductionFile(
-    uniqueIdentifier: string,
-  ): Promise<StreamableFile> {
+  async downloadProductionFile(uniqueIdentifier: string): Promise<StreamableFile> {
     // Get file metadata from database
     const file = await this.prisma.file.findUnique({
       where: { uniqueIdentifier },

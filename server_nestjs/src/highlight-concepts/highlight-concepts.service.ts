@@ -3,20 +3,20 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class HighlightConceptsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getHighlightConcepts(moduleId: number) {
     return this.prisma.moduleHighlightConcepts.findMany({
       where: { moduleId },
       include: { conceptNode: true },
-      orderBy: { position: 'asc' }
+      orderBy: { position: 'asc' },
     });
   }
 
   async getHighlightConcept(id: number) {
     return this.prisma.moduleHighlightConcepts.findUnique({
       where: { id },
-      include: { conceptNode: true }
+      include: { conceptNode: true },
     });
   }
 
@@ -31,7 +31,7 @@ export class HighlightConceptsService {
   }) {
     return this.prisma.moduleHighlightConcepts.create({
       data,
-      include: { conceptNode: true }
+      include: { conceptNode: true },
     });
   }
 
@@ -43,18 +43,18 @@ export class HighlightConceptsService {
       pictureData?: string;
       position?: number;
       isUnlocked?: boolean;
-    }
+    },
   ) {
     return this.prisma.moduleHighlightConcepts.update({
       where: { id },
       data,
-      include: { conceptNode: true }
+      include: { conceptNode: true },
     });
   }
 
   async deleteHighlightConcept(id: number) {
     return this.prisma.moduleHighlightConcepts.delete({
-      where: { id }
+      where: { id },
     });
   }
 }

@@ -4,28 +4,27 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class DiscussionVoteService {
-
-  constructor(private prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   /** Returns the vote data for a given message
    * @param messageId
    * @returns the vote data
    */
-  async getVoteData(messageId: number, userId: number) : Promise<discussionMessageVoteDTO> {
+  async getVoteData(messageId: number, userId: number): Promise<discussionMessageVoteDTO> {
     const votesForMessage = await this.prisma.vote.findMany({
       where: {
         messageId: messageId,
         userId: {
-          not: userId
-        }
-      }
+          not: userId,
+        },
+      },
     });
 
     const userVote = await this.prisma.vote.findFirst({
       where: {
         messageId: messageId,
-        userId: userId
-      }
+        userId: userId,
+      },
     });
 
     if (!votesForMessage && !userVote) {
@@ -39,8 +38,8 @@ export class DiscussionVoteService {
     const voteData: discussionMessageVoteDTO = {
       messageId: messageId,
       votes: totalVotes,
-      userVoteStatus: userVote ? (userVote.isUpvote ? 1 : -1) : 0
-    }
+      userVoteStatus: userVote ? (userVote.isUpvote ? 1 : -1) : 0,
+    };
     return voteData;
   }
 
@@ -49,13 +48,16 @@ export class DiscussionVoteService {
    * @param voteCreationData
    * @returns a creation status if successful
    */
-  async createOrModifyVote(voteCreationData: discussionMessageVoteCreationDTO, userId: number) : Promise<discussionMessageVoteCreationDTO> {
+  async createOrModifyVote(
+    voteCreationData: discussionMessageVoteCreationDTO,
+    userId: number,
+  ): Promise<discussionMessageVoteCreationDTO> {
     //console.log('DiscussionService: createOrModifyVote, voteCreationData:');
     const vote = await this.prisma.vote.findFirst({
       where: {
         messageId: voteCreationData.messageId,
-        userId: userId
-      }
+        userId: userId,
+      },
     });
 
     if (!vote) {
@@ -65,8 +67,8 @@ export class DiscussionVoteService {
           data: {
             messageId: voteCreationData.messageId,
             userId: userId,
-            isUpvote: voteCreationData.voteStatus == 1 ? true : false
-          }
+            isUpvote: voteCreationData.voteStatus == 1 ? true : false,
+          },
         });
 
         if (!newVote) {
@@ -81,23 +83,21 @@ export class DiscussionVoteService {
         //console.log('DiscussionService: createOrModifyVote, vote status 0, deleting vote');
         await this.prisma.vote.delete({
           where: {
-            id: vote.id
-          }
+            id: vote.id,
+          },
         });
       } else {
         //console.log('DiscussionService: createOrModifyVote, vote status != 0, modifying vote');
         await this.prisma.vote.update({
           where: {
-            id: vote.id
+            id: vote.id,
           },
           data: {
-            isUpvote: voteCreationData.voteStatus == 1 ? true : false
-          }
+            isUpvote: voteCreationData.voteStatus == 1 ? true : false,
+          },
         });
       }
     }
     return voteCreationData;
   }
-
-
 }

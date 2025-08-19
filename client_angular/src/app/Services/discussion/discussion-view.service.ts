@@ -6,21 +6,25 @@ import { Observable } from 'rxjs/internal/Observable';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DiscussionViewService {
+  public toggleStatus: Subject<{ messageId: number; isSolution: boolean }> = new Subject<{
+    messageId: number;
+    isSolution: boolean;
+  }>();
 
-  public toggleStatus: Subject<{messageId: number, isSolution: boolean}> = new Subject<{messageId: number, isSolution: boolean}>();
-
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   /** Returns the name of the concept node for a given discussion
    *
    * @param discussionId
    * @returns the name of the concept node
    */
-  getConceptNodeName(discussionId: number) : Observable<nodeNameDTO> {
-    return this.http.get<nodeNameDTO>(environment.server + `/discussion/view/conceptNodeName/${discussionId}`)
+  getConceptNodeName(discussionId: number): Observable<nodeNameDTO> {
+    return this.http.get<nodeNameDTO>(
+      environment.server + `/discussion/view/conceptNodeName/${discussionId}`,
+    );
   }
 
   /**
@@ -28,8 +32,8 @@ export class DiscussionViewService {
    * @param discussionId
    * @returns the discussion
    */
-  getDiscussion(discussionId: number) : Observable<discussionDTO> {
-    return this.http.get<discussionDTO>(environment.server + `/discussion/view/${discussionId}`)
+  getDiscussion(discussionId: number): Observable<discussionDTO> {
+    return this.http.get<discussionDTO>(environment.server + `/discussion/view/${discussionId}`);
   }
 
   /**
@@ -37,8 +41,10 @@ export class DiscussionViewService {
    * @param discussionId
    * @returns the messages
    */
-  getMessages(discussionId: number) : Observable<discussionMessageDTO[]> {
-    return this.http.get<discussionMessageDTO[]>(environment.server + `/discussion/view/messages/${discussionId}`)
+  getMessages(discussionId: number): Observable<discussionMessageDTO[]> {
+    return this.http.get<discussionMessageDTO[]>(
+      environment.server + `/discussion/view/messages/${discussionId}`,
+    );
   }
 
   /**
@@ -46,15 +52,14 @@ export class DiscussionViewService {
    * @param messageId
    * @returns the new solution status as boolean
    */
-  toggleSolution(messageId: number) : Observable<boolean> {
+  toggleSolution(messageId: number): Observable<boolean> {
     //console.log('DiscussionViewService: toggleSolution')
-    return this.http.get<boolean>(environment.server + `/discussion/view/messages/toggleSolution/${messageId}`)
+    return this.http
+      .get<boolean>(environment.server + `/discussion/view/messages/toggleSolution/${messageId}`)
       .pipe(
         tap((toggleStatus: boolean) => {
-          this.toggleStatus.next({messageId: messageId, isSolution: toggleStatus});
-        })
+          this.toggleStatus.next({ messageId: messageId, isSolution: toggleStatus });
+        }),
       );
   }
-
-
 }

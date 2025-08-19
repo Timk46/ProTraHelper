@@ -3,10 +3,9 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-task-evaluation-overview',
   templateUrl: './task-evaluation-overview.component.html',
-  styleUrls: ['./task-evaluation-overview.component.scss']
+  styleUrls: ['./task-evaluation-overview.component.scss'],
 })
 export class TaskEvaluationOverviewComponent {
-  
   /*
   the panels for all evaluation overviews
   each panel is the summary of all progress bars as in the tab "Aufgaben" for a single concept
@@ -39,7 +38,7 @@ export class TaskEvaluationOverviewComponent {
 
   filterPanels() {
     this.filteredPanels = this.panels.filter(panel =>
-      panel.title.toLowerCase().includes(this.searchTerm.toLowerCase())
+      panel.title.toLowerCase().includes(this.searchTerm.toLowerCase()),
     );
   }
 }

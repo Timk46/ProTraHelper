@@ -1,16 +1,18 @@
+import { OnInit } from '@angular/core';
 import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
-import { CodeEditorComponent } from "../code-editor/code-editor.component";
-import { Title } from "@angular/platform-browser";
-import { ActivatedRoute } from "@angular/router";
-import { CodeGameTaskDataService } from "../../services/code-game-task-data.service";
-import { detailedQuestionDTO } from "@DTOs/detailedQuestion.dto";
-import { PlayfieldComponent } from "../playfield/playfield.component";
-import {CodeGameEvaluationDTO} from "@DTOs/codeGame.dto";
-import { MatSnackBar } from "@angular/material/snack-bar";
-import { MatDialog } from "@angular/material/dialog";
-import { HelpDialogComponent } from "../help-dialog/help-dialog.component";
+import { CodeEditorComponent } from '../code-editor/code-editor.component';
+import { Title } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
+import { CodeGameTaskDataService } from '../../services/code-game-task-data.service';
+import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
+import { PlayfieldComponent } from '../playfield/playfield.component';
+import { CodeGameEvaluationDTO } from '@DTOs/codeGame.dto';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { HelpDialogComponent } from '../help-dialog/help-dialog.component';
 
-enum States { // TODO: check if needed
+enum States {
+  // TODO: check if needed
   startState = 0, // before task is loaded
   editingCode = 1, // task is loaded
 }
@@ -18,9 +20,9 @@ enum States { // TODO: check if needed
 @Component({
   selector: 'app-workspace',
   templateUrl: './workspace.component.html',
-  styleUrls: ['./workspace.component.scss']
+  styleUrls: ['./workspace.component.scss'],
 })
-export class WorkspaceComponent {
+export class WorkspaceComponent implements OnInit {
   @ViewChild('codeEditorMonaco') codeEditorComponent?: CodeEditorComponent;
   @ViewChild('playfield') playfieldComponent?: PlayfieldComponent;
   @Output() gameLoaded = new EventEmitter<void>();
@@ -56,13 +58,12 @@ export class WorkspaceComponent {
   allWhiteListCellsVisited: boolean = false;
 
   constructor(
-    private title: Title,
-    private codeGameTaskDataService: CodeGameTaskDataService,
-    private route: ActivatedRoute,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog
-  ) {
-  }
+    private readonly title: Title,
+    private readonly codeGameTaskDataService: CodeGameTaskDataService,
+    private readonly route: ActivatedRoute,
+    private readonly snackBar: MatSnackBar,
+    private readonly dialog: MatDialog,
+  ) {}
 
   ngOnInit(): void {
     this.getCurrentTaskFromRoute();
@@ -70,17 +71,19 @@ export class WorkspaceComponent {
   }
 
   getCurrentTaskFromRoute(): void {
-    this.route.params.subscribe((params) => {
+    this.route.params.subscribe(params => {
       const taskId = params['taskId'];
       if (taskId) {
         this.currentTaskId = parseInt(taskId, 10);
-        this.codeGameTaskDataService.getCodeGameTask(this.currentTaskId).subscribe((task) => {
+        this.codeGameTaskDataService.getCodeGameTask(this.currentTaskId).subscribe(task => {
           this.currentTask = task;
           this.taskDescription = this.currentTask?.codeGameQuestion!.text;
           this.selectedLanguage = this.currentTask?.codeGameQuestion!.programmingLanguage;
           this.currentState = States.editingCode;
-          this.codeSolutionRestriction = this.currentTask?.codeGameQuestion!.codeSolutionRestriction || false;
-          this.methodNameToRestrict = this.currentTask?.codeGameQuestion!.methodNameToRestrict || '';
+          this.codeSolutionRestriction =
+            this.currentTask?.codeGameQuestion!.codeSolutionRestriction || false;
+          this.methodNameToRestrict =
+            this.currentTask?.codeGameQuestion!.methodNameToRestrict || '';
 
           // console.log('CodeGame: Current task: ', this.currentTask); // TODO: remove
 
@@ -91,7 +94,7 @@ export class WorkspaceComponent {
           this.playfieldComponent?.initGameField(
             this.currentTask?.codeGameQuestion!.game,
             this.currentTask?.codeGameQuestion!.theme,
-            this.currentTask?.codeGameQuestion!.gameCellRestrictions
+            this.currentTask?.codeGameQuestion!.gameCellRestrictions,
           );
         });
       }
@@ -139,18 +142,29 @@ export class WorkspaceComponent {
         }
       }
 
-      gameFile[this.currentTask.codeGameQuestion!.gameFileName] = this.currentTask.codeGameQuestion!.game;
+      gameFile[this.currentTask.codeGameQuestion!.gameFileName] =
+        this.currentTask.codeGameQuestion!.game;
     }
 
     /* Submit Answer, run the code and get evaluation results */
     // Submit the code to the server to run the game
     this.codeGameTaskDataService
-      .executeCodeGameTask(this.currentTask?.id, this.selectedLanguage, mainFile, additionalFiles, gameFile)
+      .executeCodeGameTask(
+        this.currentTask?.id,
+        this.selectedLanguage,
+        mainFile,
+        additionalFiles,
+        gameFile,
+      )
       .subscribe({
-        next: (response) => {
+        next: response => {
           if (response.success === false) {
             if (response.message === 'Execution timed out') {
-              this.snackBar.open('Die Anfrage dauert zu lange. Bitte versuchen Sie es erneut.', 'Schließen', { duration: 3000 });
+              this.snackBar.open(
+                'Die Anfrage dauert zu lange. Bitte versuchen Sie es erneut.',
+                'Schließen',
+                { duration: 3000 },
+              );
             } else {
               this.snackBar.open('Fehler bei der Ausführung.', 'Schließen', { duration: 3000 });
             }
@@ -159,11 +173,12 @@ export class WorkspaceComponent {
             this.resetGame(); // Enables to try again
             return; // Jump to the complete block
           }
-          
+
           if (response.success === true) {
             // Get evaluation results
             this.codeGameEvaluation = response.result;
-            this.frequencyOfMethodEvaluationResult = response.result.frequencyOfMethodEvaluationResult;
+            this.frequencyOfMethodEvaluationResult =
+              response.result.frequencyOfMethodEvaluationResult;
             this.frequencyOfMethodCallsResult = response.result.frequencyOfMethodCallsResult;
             this.reachedDestination = response.result.reachedDestination;
             this.allItemsCollected = response.result.allItemsCollected;
@@ -173,10 +188,12 @@ export class WorkspaceComponent {
             this.allWhiteListCellsVisited = response.result.allWhiteListCellsVisited;
 
             // Prepare and start animation of the game
-            this.splitCompilerOutputAndStartGame(response.result.codeGameExecutionResult.toString());
+            this.splitCompilerOutputAndStartGame(
+              response.result.codeGameExecutionResult.toString(),
+            );
           }
         },
-        error: (error) => {
+        error: error => {
           console.error('Error: ', error);
           this.compilerConsoleOutputView = error.message;
         },
@@ -189,16 +206,17 @@ export class WorkspaceComponent {
               this.currentTaskId,
               this.currentTask?.codeGameQuestion?.contentElementId ?? -1,
               this.selectedLanguage,
-              this.codeGameEvaluation ?? {} as CodeGameEvaluationDTO)
+              this.codeGameEvaluation ?? ({} as CodeGameEvaluationDTO),
+            )
             .subscribe({
               next: (response: any) => {
                 // console.log('CodeGame: Submit Response: ', response);
               },
               error: (error: any) => {
                 console.error('Error: ', error);
-              }
+              },
             });
-        }
+        },
       });
   }
 
@@ -206,7 +224,7 @@ export class WorkspaceComponent {
     // split the output vor the game view and the compiler output
     // lines staring with # needed for the game view
     const lines = compilerOutput.split('\n');
-    let gameOutput: string[] = [];
+    const gameOutput: string[] = [];
     let remainingOutput = '';
 
     lines.forEach(line => {
@@ -247,7 +265,7 @@ export class WorkspaceComponent {
   showHelp(): void {
     this.dialog.open(HelpDialogComponent, {
       width: '150vh',
-      data: { language: this.selectedLanguage }
+      data: { language: this.selectedLanguage },
     });
   }
 }

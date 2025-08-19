@@ -16,14 +16,17 @@
 
   <!-- Question header -->
   <div *ngIf="dataLoaded" class="content-section__header" [class.celebrate]="justAnsweredCorrectly">
-     <h2 class="content-section__header-title">
+    <h2 class="content-section__header-title">
       <span [innerHTML]="questionData.text" aria-live="polite"></span>
     </h2>
   </div>
-   <!-- Score information -->
+  <!-- Score information -->
   <div *ngIf="dataLoaded" class="content-section__score">
-     <mat-icon class="score-icon" aria-hidden="true">grade</mat-icon>
-    <span>{{ mcQuestion.isSC ? 'Einfachauswahl' : 'Mehrfachauswahl' }} - Maximale Punktzahl: {{questionData.score || 0}}</span>
+    <mat-icon class="score-icon" aria-hidden="true">grade</mat-icon>
+    <span
+      >{{ mcQuestion.isSC ? 'Einfachauswahl' : 'Mehrfachauswahl' }} - Maximale Punktzahl:
+      {{ questionData.score || 0 }}</span
+    >
   </div>
 
   <!-- Single Choice Options -->
@@ -43,11 +46,23 @@
         [attr.aria-label]="'Option ' + (i + 1)"
       >
         <div class="option-item-content">
-           <div class="item-indicator">
-            <mat-icon class="item-icon" *ngIf="!submitDisabled && selectedOptions.includes(option.id)">radio_button_checked</mat-icon>
-            <mat-icon class="item-icon" *ngIf="!submitDisabled && !selectedOptions.includes(option.id)">radio_button_unchecked</mat-icon>
-            <mat-icon *ngIf="submitDisabled && selectedOptions.includes(option.id)">radio_button_checked</mat-icon>
-            <mat-icon *ngIf="submitDisabled && !selectedOptions.includes(option.id)">radio_button_unchecked</mat-icon>
+          <div class="item-indicator">
+            <mat-icon
+              class="item-icon"
+              *ngIf="!submitDisabled && selectedOptions.includes(option.id)"
+              >radio_button_checked</mat-icon
+            >
+            <mat-icon
+              class="item-icon"
+              *ngIf="!submitDisabled && !selectedOptions.includes(option.id)"
+              >radio_button_unchecked</mat-icon
+            >
+            <mat-icon *ngIf="submitDisabled && selectedOptions.includes(option.id)"
+              >radio_button_checked</mat-icon
+            >
+            <mat-icon *ngIf="submitDisabled && !selectedOptions.includes(option.id)"
+              >radio_button_unchecked</mat-icon
+            >
           </div>
           <div class="item-text" [innerHTML]="option.text"></div>
         </div>
@@ -57,7 +72,7 @@
 
   <!-- Multiple Choice Options -->
   <section *ngIf="dataLoaded && !mcQuestion.isSC" class="options">
-     <h3 class="sr-only">Wähle eine oder mehrere Antworten:</h3>
+    <h3 class="sr-only">Wähle eine oder mehrere Antworten:</h3>
     <div class="options__container" role="group" aria-labelledby="question-title">
       <div
         *ngFor="let option of options; let i = index"
@@ -72,11 +87,23 @@
         [attr.aria-label]="'Option ' + (i + 1)"
       >
         <div class="option-item-content">
-           <div class="item-indicator">
-            <mat-icon class="item-icon" *ngIf="!submitDisabled && selectedOptions.includes(option.id)">check_box</mat-icon>
-            <mat-icon class="item-icon" *ngIf="!submitDisabled && !selectedOptions.includes(option.id)">check_box_outline_blank</mat-icon>
-            <mat-icon *ngIf="submitDisabled && selectedOptions.includes(option.id)">check_box</mat-icon>
-            <mat-icon *ngIf="submitDisabled && !selectedOptions.includes(option.id)">check_box_outline_blank</mat-icon>
+          <div class="item-indicator">
+            <mat-icon
+              class="item-icon"
+              *ngIf="!submitDisabled && selectedOptions.includes(option.id)"
+              >check_box</mat-icon
+            >
+            <mat-icon
+              class="item-icon"
+              *ngIf="!submitDisabled && !selectedOptions.includes(option.id)"
+              >check_box_outline_blank</mat-icon
+            >
+            <mat-icon *ngIf="submitDisabled && selectedOptions.includes(option.id)"
+              >check_box</mat-icon
+            >
+            <mat-icon *ngIf="submitDisabled && !selectedOptions.includes(option.id)"
+              >check_box_outline_blank</mat-icon
+            >
           </div>
           <div class="item-text" [innerHTML]="option.text"></div>
         </div>
@@ -86,7 +113,7 @@
 
   <!-- Action buttons -->
   <div *ngIf="dataLoaded" class="content-section__footer">
-     <!-- Submit button -->
+    <!-- Submit button -->
     <button
       *ngIf="!submitDisabled"
       class="mc-button mc-button--primary"
@@ -124,15 +151,12 @@
   <!-- Feedback panel -->
   <section
     *ngIf="submitDisabled"
-
     class="feedback-section"
-
     [class.feedback-section--success]="checkCorrect()"
     [class.feedback-section--partial]="!checkCorrect() && feedback.score > 0"
     [class.feedback-section--error]="feedback.score === 0"
     aria-live="polite"
-
-    >
+  >
     <div class="feedback-section__header feedback-section__header--compact">
       <div
         class="feedback-section__header-icon"
@@ -141,7 +165,9 @@
         [class.feedback-section__header-icon--error]="feedback.score === 0"
       >
         <mat-icon *ngIf="checkCorrect()" aria-hidden="true">sentiment_very_satisfied</mat-icon>
-        <mat-icon *ngIf="!checkCorrect() && feedback.score > 0" aria-hidden="true">sentiment_satisfied</mat-icon>
+        <mat-icon *ngIf="!checkCorrect() && feedback.score > 0" aria-hidden="true"
+          >sentiment_satisfied</mat-icon
+        >
         <mat-icon *ngIf="feedback.score === 0" aria-hidden="true">sentiment_dissatisfied</mat-icon>
       </div>
       <h3 class="feedback-section__header-title">
@@ -154,21 +180,29 @@
     <div class="feedback-section__score feedback-section__score--compact">
       <div class="feedback-section__score-progress">
         <div
-
           class="feedback-section__score-progress-bar"
           [class.feedback-section__score-progress-bar--success]="checkCorrect()"
-          [class.feedback-section__score-progress-bar--partial]="!checkCorrect() && feedback.score > 0"
+          [class.feedback-section__score-progress-bar--partial]="
+            !checkCorrect() && feedback.score > 0
+          "
           [class.feedback-section__score-progress-bar--error]="feedback.score === 0"
-          [style.width.%]="(questionData.score && questionData.score > 0) ? (feedback.score / questionData.score) * 100 : 0"
+          [style.width.%]="
+            questionData.score && questionData.score > 0
+              ? (feedback.score / questionData.score) * 100
+              : 0
+          "
         ></div>
       </div>
       <div class="feedback-section__score-text">
-        Punktzahl: {{feedback.score}} von {{questionData.score || 0}} Punkten
+        Punktzahl: {{ feedback.score }} von {{ questionData.score || 0 }} Punkten
       </div>
     </div>
 
-    <p *ngIf="feedback.feedbackText" class="feedback-section__message feedback-section__message--compact">
-      {{feedback.feedbackText}}
+    <p
+      *ngIf="feedback.feedbackText"
+      class="feedback-section__message feedback-section__message--compact"
+    >
+      {{ feedback.feedbackText }}
     </p>
   </section>
 </div>

@@ -1,4 +1,3 @@
-
 import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Response } from 'express';
@@ -8,13 +7,13 @@ import {
   ChatPromptTemplate,
   SystemMessagePromptTemplate,
   HumanMessagePromptTemplate,
-} from "langchain/prompts";
+} from 'langchain/prompts';
 
 const llm = new ChatOpenAI({
   modelName: 'gpt-4.1-2025-04-14', // other options: 'gpt-4-1106-preview', 'gpt-4-0314', 'gpt-3.5-turbo'
   openAIApiKey: process.env.OPENAI_API_KEY,
   temperature: 0, // Low Temperature favours the words with higher probability = less creative
-  streaming: true
+  streaming: true,
 });
 
 // Notes:
@@ -26,7 +25,7 @@ const llm = new ChatOpenAI({
 export class LlmBasicPromptService {
   constructor(
     @Inject(REQUEST) private readonly request: Request,
-    private ragService: RagService,
+    private readonly ragService: RagService,
   ) {}
 
   /**
@@ -35,13 +34,15 @@ export class LlmBasicPromptService {
    * @param prompt The user message to include in the prompt.
    * @returns A Promise String that resolves to the generated LLM answer.
    */
-  async generateLlmAnswer( systemMessage: string, prompt: string ): Promise<string> {
+  async generateLlmAnswer(systemMessage: string, prompt: string): Promise<string> {
     const systemMessagePrompt = SystemMessagePromptTemplate.fromTemplate(systemMessage);
     const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate(prompt);
-    const chatPrompt = ChatPromptTemplate.fromMessages<{
-    }>([systemMessagePrompt, humanMessagePrompt]);
+    const chatPrompt = ChatPromptTemplate.fromMessages<{}>([
+      systemMessagePrompt,
+      humanMessagePrompt,
+    ]);
 
-    const formattedChatPrompt = await chatPrompt.formatPromptValue({})
+    const formattedChatPrompt = await chatPrompt.formatPromptValue({});
     const openAiResponse = await llm.generatePrompt([formattedChatPrompt]);
     return openAiResponse.generations[0][0].text;
   }
@@ -54,28 +55,28 @@ export class LlmBasicPromptService {
    * @param res - The response object (@Res() res: Response) from the controller.
    * @returns A Promise that resolves when the streaming is complete.
    */
-  async streamLlmAnswer( systemMessage: string, prompt: string, res: Response,): Promise<void> {
+  async streamLlmAnswer(systemMessage: string, prompt: string, res: Response): Promise<void> {
     // Note: // we dont really need the templates here, but they become useful once the prompt gets more complex (e.g. few shot prompts: https://js.langchain.com/docs/modules/model_io/prompts/prompt_templates/few_shot)
     const systemMessagePrompt = SystemMessagePromptTemplate.fromTemplate(systemMessage);
     const humanMessagePrompt = HumanMessagePromptTemplate.fromTemplate(prompt);
-    const chatPrompt = ChatPromptTemplate.fromMessages<{ // Because we use TypeScript, we can add typing to prompts created with .fromMessages by passing a type parameter like this
+    const chatPrompt = ChatPromptTemplate.fromMessages<{
+      // Because we use TypeScript, we can add typing to prompts created with .fromMessages by passing a type parameter like this
       // placeholder: string;
       // ...
     }>([systemMessagePrompt, humanMessagePrompt]);
 
-    const formattedChatPrompt = await chatPrompt.formatPromptValue({}) // Insert Parameter to Placeholders in Prompts. Currently we dont have any.
+    const formattedChatPrompt = await chatPrompt.formatPromptValue({}); // Insert Parameter to Placeholders in Prompts. Currently we dont have any.
 
     const openAiResponse = await llm.generatePrompt([formattedChatPrompt], undefined, [
-      { // Request Callbacks for streaming (see here: https://js.langchain.com/docs/modules/callbacks/)
+      {
+        // Request Callbacks for streaming (see here: https://js.langchain.com/docs/modules/callbacks/)
         ignoreAgent: true,
         ignoreChain: true,
         handleLLMNewToken(token: string) {
           res.write(token);
         },
       },
-    ],
-    );
+    ]);
     res.end();
   }
 }
-

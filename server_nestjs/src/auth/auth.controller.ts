@@ -10,6 +10,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { Response as ExpressResponse } from 'express';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { LocalAuthGuard } from './common/guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { CasAuthGuard } from './common/guards/cas-auth.guard';
@@ -23,9 +24,10 @@ import { roles } from '@/auth/common/guards/roles.guard';
 /**
  * This class is used to define the auth routes of the application
  */
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   /**
    * Handles the CAS login process.
@@ -35,6 +37,9 @@ export class AuthController {
    * @throws { UnauthorizedException } If the user email is not provided.
    * @returns { Promise<void> } A promise that resolves when the redirection is complete.
    */
+  @ApiOperation({ summary: 'CAS Login', description: 'Handles the CAS authentication process' })
+  @ApiResponse({ status: 302, description: 'Redirects to frontend with authentication tokens' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - User email not provided' })
   @Public()
   @UseGuards(CasAuthGuard)
   @Get('cas')
@@ -45,10 +50,7 @@ export class AuthController {
     if (!req.user || !req.user.email) {
       throw new UnauthorizedException('User email not provided');
     }
-    const tokens = await this.authService.loginCAS(
-      req.user.email,
-      req.user.currentDeviceId,
-    );
+    const tokens = await this.authService.loginCAS(req.user.email, req.user.currentDeviceId);
 
     // Redirect to the website with tokens as URL parameters - not super secure, but cant send in body because its not a request by the client
     res.redirect(
@@ -65,10 +67,7 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(
-    @Request() req: { user: UserDTO },
-    @Headers('device-id') deviceId: string,
-  ) {
+  async login(@Request() req: { user: UserDTO }, @Headers('device-id') deviceId: string) {
     // The LocalAuthGuard has already validated the user, so we can directly login
     return this.authService.login(req.user, deviceId);
   }
@@ -83,10 +82,7 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard)
   @Get('logout')
-  async logout(
-    @Request() req: { user: User },
-    @Headers('device-id') deviceId: string,
-  ) {
+  async logout(@Request() req: { user: User }, @Headers('device-id') deviceId: string) {
     try {
       await this.authService.logout(req.user, deviceId);
       return { message: 'Logout successful' };
@@ -146,19 +142,12 @@ export class AuthController {
   @Public()
   @UseGuards(JwtRefreshAuthGuard)
   @Get('refresh')
-  async refresh(
-    @Request() req: { user: User },
-    @Headers('device-id') deviceId: string,
-  ) {
+  async refresh(@Request() req: { user: User }, @Headers('device-id') deviceId: string) {
     try {
       const email = req.user['email'];
       const refreshToken = req.user['refreshToken'];
 
-      return await this.authService.refreshTokens(
-        email,
-        deviceId,
-        refreshToken,
-      );
+      return await this.authService.refreshTokens(email, deviceId, refreshToken);
     } catch (error) {
       throw new BadRequestException(error.message);
     }

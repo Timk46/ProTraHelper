@@ -1,6 +1,6 @@
 <!-- Einzelner Test Details Ansicht -->
 <ng-container *ngIf="!isListView">
-  <h2 mat-dialog-title class="test-title" [ngClass]="{'passed': data.passed, 'failed': !data.passed}">
+  <h2 mat-dialog-title class="test-title" [ngClass]="{ passed: data.passed, failed: !data.passed }">
     <mat-icon>{{ data.passed ? 'check_circle' : 'error' }}</mat-icon>
     <span>{{ getShortTestName(data.name || '') }}</span>
   </h2>
@@ -13,7 +13,7 @@
   <mat-dialog-content>
     <div class="test-status">
       <span class="status-label">Status:</span>
-      <span class="status-value" [ngClass]="{'passed': data.passed, 'failed': !data.passed}">
+      <span class="status-value" [ngClass]="{ passed: data.passed, failed: !data.passed }">
         {{ data.passed ? 'Bestanden' : 'Fehlgeschlagen' }}
       </span>
     </div>
@@ -49,26 +49,34 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let test of allTests; let i = index"
-            [ngClass]="{'passed-row': test.passed, 'failed-row': !test.passed}">
+        <tr
+          *ngFor="let test of allTests; let i = index"
+          [ngClass]="{ 'passed-row': test.passed, 'failed-row': !test.passed }"
+        >
           <td [title]="test.name">{{ getShortTestName(test.name) }}</td>
           <td>
-            <span class="status-indicator"
-                  [ngClass]="{'passed': test.passed, 'failed': !test.passed}">
+            <span
+              class="status-indicator"
+              [ngClass]="{ passed: test.passed, failed: !test.passed }"
+            >
               {{ test.passed ? 'Bestanden' : 'Fehlgeschlagen' }}
             </span>
           </td>
           <td>
-            <button *ngIf="!test.passed && test.exception"
-                    mat-icon-button
-                    (click)="toggleExceptionDetails(i)">
+            <button
+              *ngIf="!test.passed && test.exception"
+              mat-icon-button
+              (click)="toggleExceptionDetails(i)"
+            >
               <mat-icon>{{ isExceptionShown(i) ? 'expand_less' : 'expand_more' }}</mat-icon>
             </button>
           </td>
         </tr>
-        <tr *ngFor="let test of allTests; let i = index"
-            [hidden]="test.passed || !test.exception || !isExceptionShown(i)"
-            class="error-details-row">
+        <tr
+          *ngFor="let test of allTests; let i = index"
+          [hidden]="test.passed || !test.exception || !isExceptionShown(i)"
+          class="error-details-row"
+        >
           <td colspan="3">
             <pre class="error-details">{{ test.exception }}</pre>
           </td>

@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { EdgeToolsetGraphComponent } from './edge-toolset-graph.component';
 
@@ -8,10 +9,9 @@ describe('EdgeToolsetGraphComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EdgeToolsetGraphComponent]
-    })
-    .compileComponents();
-    
+      imports: [EdgeToolsetGraphComponent],
+    }).compileComponents();
+
     fixture = TestBed.createComponent(EdgeToolsetGraphComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

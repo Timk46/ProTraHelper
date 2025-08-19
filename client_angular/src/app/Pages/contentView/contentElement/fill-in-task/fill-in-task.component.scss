@@ -51,7 +51,6 @@
   align-items: center;
   margin-bottom: 15px;
   font-size: 16px;
-
 }
 
 .sentence-part {
@@ -242,7 +241,9 @@
   padding: 12px 24px;
   font-size: 16px;
   width: 100%;
-  transition: background-color 0.3s, transform 0.1s;
+  transition:
+    background-color 0.3s,
+    transform 0.1s;
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -314,20 +315,22 @@
     max-height: 50px; // Adjust this value as needed
     object-fit: contain;
   }
-    &.in-table-cell {
+  &.in-table-cell {
     margin: 0;
   }
 }
 
 // Adjust images to fit perfectly within word-box
-.word-box img, .blank-box img {
+.word-box img,
+.blank-box img {
   max-width: 90%; // Reduce slightly to accommodate padding and borders
   max-height: 50px;
   object-fit: contain;
 }
 
 // Ensure that text within word-boxes doesn't exceed boundaries
-.word-box span, .blank-box span {
+.word-box span,
+.blank-box span {
   font-size: 14px;
   text-align: center;
   width: 100%;
@@ -340,9 +343,10 @@
 .cdk-drag-preview {
   box-sizing: border-box;
   border-radius: 4px;
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-              0 8px 10px 1px rgba(0, 0, 0, 0.14),
-              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0 3px 14px 2px rgba(0, 0, 0, 0.12);
   z-index: 1000;
 }
 
@@ -365,12 +369,15 @@
 .blank-box.cdk-drop-list-dragged-over {
   border-color: #3498db; // Blue dashed border
   background-color: rgba(52, 152, 219, 0.1); // Light blue background
-  transition: border-color 0.3s, background-color 0.3s;
+  transition:
+    border-color 0.3s,
+    background-color 0.3s;
 }
 // Ensure blanks have the same dimensions as options
-.table-blank-container, .blank-box {
-  width: 100px;   // Match the width of .word-box
-  height: 50px;   // Match the height of .word-box
+.table-blank-container,
+.blank-box {
+  width: 100px; // Match the width of .word-box
+  height: 50px; // Match the height of .word-box
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -382,7 +389,7 @@
 
 // Adjust word-box within table cells to prevent overflow
 .table-blank-container .word-box.in-table-cell {
-  width: 100px;  // Ensure it matches .word-box
+  width: 100px; // Ensure it matches .word-box
   height: 50px;
   margin: 0;
 }

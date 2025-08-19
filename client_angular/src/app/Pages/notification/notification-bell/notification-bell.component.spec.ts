@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { NotificationBellComponent } from './notification-bell.component';
 
@@ -8,9 +9,8 @@ describe('NotificationBellComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NotificationBellComponent ]
-    })
-    .compileComponents();
+      declarations: [NotificationBellComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(NotificationBellComponent);
     component = fixture.componentInstance;

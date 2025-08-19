@@ -1,22 +1,28 @@
 import {
-  taskCreationPopupDTO, taskInformationDTO, tasksInformationDTO, taskAttemptDTO,
-  taskAttemptDataDTO, taskFeedbackDTO, taskFeedbackDataDTO, studentTaskStatusDTO,
-  tasksOverviewDTO, jaroWinklerDTO, taskDataDTO, taskWorkspaceDataDTO,
-  editorDataDTO
+  taskCreationPopupDTO,
+  taskInformationDTO,
+  tasksInformationDTO,
+  taskAttemptDTO,
+  taskAttemptDataDTO,
+  taskFeedbackDTO,
+  taskFeedbackDataDTO,
+  studentTaskStatusDTO,
+  tasksOverviewDTO,
+  taskDataDTO,
+  taskWorkspaceDataDTO,
+  editorDataDTO,
 } from '@DTOs/index';
+import { jaroWinklerDTO } from '@DTOs/index';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class DatabaseTaskCommunicationService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Finds a synonym for an attempt based on a solution.
@@ -24,8 +30,10 @@ export class DatabaseTaskCommunicationService {
    * @param attempt - The attempt string.
    * @returns An Observable that emits the new attempt string.
    */
-  synonym(solution:string, attempt:string): Observable<{newAttempt: string}> {
-    return this.http.get<{newAttempt: string}>(environment.server + `/database-task-communication/synonym/${solution}/${attempt}`);
+  synonym(solution: string, attempt: string): Observable<{ newAttempt: string }> {
+    return this.http.get<{ newAttempt: string }>(
+      environment.server + `/database-task-communication/synonym/${solution}/${attempt}`,
+    );
   }
 
   /**
@@ -33,7 +41,9 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits the tasks overview data as a tasksOverviewDTO object.
    */
   getTasksOverview(): Observable<tasksOverviewDTO> {
-    return this.http.get<tasksOverviewDTO>(environment.server + '/database-task-communication/taskOverviewData');
+    return this.http.get<tasksOverviewDTO>(
+      environment.server + '/database-task-communication/taskOverviewData',
+    );
   }
 
   /**
@@ -41,7 +51,9 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits the tasks information as a tasksInformationDTO object.
    */
   getTasks(): Observable<tasksInformationDTO> {
-    return this.http.get<tasksInformationDTO>(environment.server + '/database-task-communication/taskOverview');
+    return this.http.get<tasksInformationDTO>(
+      environment.server + '/database-task-communication/taskOverview',
+    );
   }
 
   /**
@@ -50,7 +62,10 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits the created task data as a taskCreationPopupDTO object.
    */
   createTask(taskCreationData: taskCreationPopupDTO): Observable<taskCreationPopupDTO> {
-    return this.http.post<taskCreationPopupDTO>(environment.server + '/database-task-communication/taskCreation', taskCreationData);
+    return this.http.post<taskCreationPopupDTO>(
+      environment.server + '/database-task-communication/taskCreation',
+      taskCreationData,
+    );
   }
 
   /**
@@ -58,8 +73,11 @@ export class DatabaseTaskCommunicationService {
    * @param taskData - The data to be set for the task.
    * @returns An Observable that emits the updated task data as a taskDataDTO object.
    */
-  setTaskData(taskData: taskDataDTO){
-    return this.http.post<taskDataDTO>(environment.server + '/database-task-communication/setTaskData', taskData);
+  setTaskData(taskData: taskDataDTO) {
+    return this.http.post<taskDataDTO>(
+      environment.server + '/database-task-communication/setTaskData',
+      taskData,
+    );
   }
 
   /**
@@ -67,8 +85,11 @@ export class DatabaseTaskCommunicationService {
    * @param data - The data containing the task ID and the image in base64 format.
    * @returns An Observable that emits the task ID.
    */
-  setTaskImage(data: {taskId: number, imageB64: string}): Observable<number> {
-    return this.http.post<number>(environment.server + '/database-task-communication/setTaskImage', data);
+  setTaskImage(data: { taskId: number; imageB64: string }): Observable<number> {
+    return this.http.post<number>(
+      environment.server + '/database-task-communication/setTaskImage',
+      data,
+    );
   }
 
   /**
@@ -76,8 +97,10 @@ export class DatabaseTaskCommunicationService {
    * @param taskId - The ID of the task.
    * @returns An Observable that emits the image in base64 format.
    */
-  getTaskImage(taskId: number): Observable<{imageB64: string}> {
-    return this.http.get<{imageB64: string}>(environment.server + `/database-task-communication/getTaskImage/${taskId}`);
+  getTaskImage(taskId: number): Observable<{ imageB64: string }> {
+    return this.http.get<{ imageB64: string }>(
+      environment.server + `/database-task-communication/getTaskImage/${taskId}`,
+    );
   }
 
   /**
@@ -86,7 +109,9 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits the deleted task information as a taskInformationDTO object.
    */
   deleteTask(taskId: number): Observable<taskInformationDTO> {
-    return this.http.delete<taskInformationDTO>(environment.server + '/database-task-communication/taskDeletion/' + taskId);
+    return this.http.delete<taskInformationDTO>(
+      environment.server + '/database-task-communication/taskDeletion/' + taskId,
+    );
   }
 
   /**
@@ -95,7 +120,9 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits the task settings data as a taskSettingsDTO object.
    */
   getTaskData(taskId: number): Observable<taskDataDTO> {
-    return this.http.get<taskDataDTO>(environment.server + `/database-task-communication/taskWorkspace/${taskId}`);
+    return this.http.get<taskDataDTO>(
+      environment.server + `/database-task-communication/taskWorkspace/${taskId}`,
+    );
   }
 
   /**
@@ -104,7 +131,9 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits the task workspace data as a taskWorkspaceDataDTO object.
    */
   getTaskWorkspaceData(taskId: number): Observable<taskWorkspaceDataDTO> {
-    return this.http.get<taskDataDTO>(environment.server + `/database-task-communication/taskWorkspaceData/${taskId}`);
+    return this.http.get<taskDataDTO>(
+      environment.server + `/database-task-communication/taskWorkspaceData/${taskId}`,
+    );
   }
 
   /**
@@ -113,16 +142,25 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits the task feedback data as a taskFeedbackDataDTO object.
    */
   getTaskFeedbackData(taskAttemptId: number): Observable<taskFeedbackDataDTO> {
-    return this.http.get<taskFeedbackDataDTO>(environment.server + `/database-task-communication/taskFeedback/${taskAttemptId}`);
+    return this.http.get<taskFeedbackDataDTO>(
+      environment.server + `/database-task-communication/taskFeedback/${taskAttemptId}`,
+    );
   }
 
-  commitAttemptGetPoints(taskAttemptData: taskAttemptDataDTO): Observable<{points: number, highlightData: editorDataDTO}> {
-    return this.http.post<{points: number, highlightData: editorDataDTO}>(environment.server + '/database-task-communication/commitAttempt', taskAttemptData);
+  commitAttemptGetPoints(
+    taskAttemptData: taskAttemptDataDTO,
+  ): Observable<{ points: number; highlightData: editorDataDTO }> {
+    return this.http.post<{ points: number; highlightData: editorDataDTO }>(
+      environment.server + '/database-task-communication/commitAttempt',
+      taskAttemptData,
+    );
   }
 
-  generateUmlFeedback(taskId: number): Observable<{response: string}> {
-    console.log("generateUmlFeedback", taskId);
-    return this.http.get<{response: string}>(environment.server + '/database-task-communication/generateUmlFeedback/' + taskId);
+  generateUmlFeedback(taskId: number): Observable<{ response: string }> {
+    console.log('generateUmlFeedback', taskId);
+    return this.http.get<{ response: string }>(
+      environment.server + '/database-task-communication/generateUmlFeedback/' + taskId,
+    );
   }
 
   /* generateUmlFeedbackByHighlighted(taskId: number): Observable<{response: string}> {
@@ -135,7 +173,10 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits the updated task attempt data.
    */
   setTaskAttemptData(taskAttemptData: taskAttemptDataDTO): Observable<taskAttemptDataDTO> {
-    return this.http.post<taskAttemptDataDTO>(environment.server + '/database-task-communication/taskAttempt', taskAttemptData);
+    return this.http.post<taskAttemptDataDTO>(
+      environment.server + '/database-task-communication/taskAttempt',
+      taskAttemptData,
+    );
   }
 
   /**
@@ -145,7 +186,9 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits the task attempt data as a taskAttemptDataDTO object.
    */
   getTaskAttemptData(taskId: number): Observable<taskAttemptDataDTO> {
-    return this.http.get<taskAttemptDataDTO>(environment.server + `/database-task-communication/taskAttempt/${taskId}`);
+    return this.http.get<taskAttemptDataDTO>(
+      environment.server + `/database-task-communication/taskAttempt/${taskId}`,
+    );
   }
 
   /**
@@ -155,8 +198,15 @@ export class DatabaseTaskCommunicationService {
    * @param studentId - The ID of the student.
    * @returns An Observable that emits the task attempt data as a taskAttemptDataDTO object.
    */
-  getTaskAttemptDataByStudent(courseId: number, taskId: number, studentId: number): Observable<taskAttemptDataDTO> {
-    return this.http.get<taskAttemptDataDTO>(environment.server + `/database-task-communication/taskAttempt/${courseId}/${taskId}/${studentId}`);
+  getTaskAttemptDataByStudent(
+    courseId: number,
+    taskId: number,
+    studentId: number,
+  ): Observable<taskAttemptDataDTO> {
+    return this.http.get<taskAttemptDataDTO>(
+      environment.server +
+        `/database-task-communication/taskAttempt/${courseId}/${taskId}/${studentId}`,
+    );
   }
 
   /**
@@ -165,7 +215,10 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits the created feedback data as a taskFeedbackDTO object.
    */
   createFeedback(taskFeedbackData: taskFeedbackDTO): Observable<taskFeedbackDTO> {
-    return this.http.post<taskFeedbackDTO>(environment.server + '/database-task-communication/taskFeedback', taskFeedbackData);
+    return this.http.post<taskFeedbackDTO>(
+      environment.server + '/database-task-communication/taskFeedback',
+      taskFeedbackData,
+    );
   }
 
   /**
@@ -175,8 +228,15 @@ export class DatabaseTaskCommunicationService {
    * @param studentId - The ID of the student.
    * @returns An Observable that emits the task feedback data as a taskFeedbackDataDTO object.
    */
-  getTaskFeedbackDataByStudent(courseId: number, taskId: number, studentId: number): Observable<taskFeedbackDataDTO> {
-    return this.http.get<taskFeedbackDataDTO>(environment.server + `/database-task-communication/taskFeedback/${courseId}/${taskId}/${studentId}`);
+  getTaskFeedbackDataByStudent(
+    courseId: number,
+    taskId: number,
+    studentId: number,
+  ): Observable<taskFeedbackDataDTO> {
+    return this.http.get<taskFeedbackDataDTO>(
+      environment.server +
+        `/database-task-communication/taskFeedback/${courseId}/${taskId}/${studentId}`,
+    );
   }
 
   /**
@@ -186,7 +246,9 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits an array of taskAttemptDTO objects.
    */
   showOpenAttempts(courseId: number, taskId: number): Observable<taskAttemptDTO[]> {
-    return this.http.get<taskAttemptDTO[]>(environment.server + `/database-task-communication/coursePageLecturer/${courseId}/${taskId}`);
+    return this.http.get<taskAttemptDTO[]>(
+      environment.server + `/database-task-communication/coursePageLecturer/${courseId}/${taskId}`,
+    );
   }
 
   /**
@@ -195,7 +257,9 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits an array of taskFeedbackDataDTO objects.
    */
   getTaskFeedbackDataByCourse(courseId: number): Observable<taskFeedbackDataDTO[]> {
-    return this.http.get<taskFeedbackDataDTO[]>(environment.server + `/database-task-communication/coursePageLecturer/${courseId}`);
+    return this.http.get<taskFeedbackDataDTO[]>(
+      environment.server + `/database-task-communication/coursePageLecturer/${courseId}`,
+    );
   }
 
   /**
@@ -206,7 +270,10 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits a boolean value indicating whether the task attempt exists or not.
    */
   hasTaskAttempt(courseId: number, taskId: number, studentId: number): Observable<boolean> {
-    return this.http.get<boolean>(environment.server + `/database-task-communication/taskAttempt/${courseId}/${taskId}/${studentId}`);
+    return this.http.get<boolean>(
+      environment.server +
+        `/database-task-communication/taskAttempt/${courseId}/${taskId}/${studentId}`,
+    );
   }
 
   /**
@@ -217,7 +284,10 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits a boolean value indicating whether the feedback exists or not.
    */
   hasFeedback(courseId: number, taskId: number, studentId: number): Observable<boolean> {
-    return this.http.get<boolean>(environment.server + `/database-task-communication/taskFeedback/${courseId}/${taskId}/${studentId}`);
+    return this.http.get<boolean>(
+      environment.server +
+        `/database-task-communication/taskFeedback/${courseId}/${taskId}/${studentId}`,
+    );
   }
 
   /**
@@ -227,7 +297,10 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits an array of studentTaskStatusDTO objects.
    */
   getStudentTaskStatus(courseId: number, taskId: number): Observable<studentTaskStatusDTO[]> {
-    return this.http.get<studentTaskStatusDTO[]>(environment.server + `/database-task-communication/coursePageLecturer/studentTaskStatus/${courseId}/${taskId}`);
+    return this.http.get<studentTaskStatusDTO[]>(
+      environment.server +
+        `/database-task-communication/coursePageLecturer/studentTaskStatus/${courseId}/${taskId}`,
+    );
   }
 
   /**
@@ -237,7 +310,9 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits an array of studentTaskStatusDTO objects.
    */
   checkForTaskAttempts(taskId: number): Observable<boolean> {
-    return this.http.get<boolean>(environment.server + `/database-task-communication/checkForTaskAttempts/${taskId}`);
+    return this.http.get<boolean>(
+      environment.server + `/database-task-communication/checkForTaskAttempts/${taskId}`,
+    );
   }
 
   /**
@@ -247,7 +322,10 @@ export class DatabaseTaskCommunicationService {
    * @returns An Observable that emits a boolean value indicating whether there are any task attempts.
    */
   checkForTaskAttemptsForCourse(courseId: number, taskId: number): Observable<boolean> {
-    return this.http.get<boolean>(environment.server + `/database-task-communication/checkForTaskAttemptsForTask/${courseId}/${taskId}`);
+    return this.http.get<boolean>(
+      environment.server +
+        `/database-task-communication/checkForTaskAttemptsForTask/${courseId}/${taskId}`,
+    );
   }
 
   /**
@@ -256,8 +334,13 @@ export class DatabaseTaskCommunicationService {
    * @param studentId - The ID of the student.
    * @returns An Observable that emits a boolean indicating whether there are any task attempts.
    */
-  checkForTaskAttemptsForCourseAndStudent(courseId: number, studentId: number): Observable<boolean> {
-    return this.http.get<boolean>(environment.server + `/database-task-communication/checkForTaskAttemptsForCourseAndStudent/${courseId}/${studentId}`);
+  checkForTaskAttemptsForCourseAndStudent(
+    courseId: number,
+    studentId: number,
+  ): Observable<boolean> {
+    return this.http.get<boolean>(
+      environment.server +
+        `/database-task-communication/checkForTaskAttemptsForCourseAndStudent/${courseId}/${studentId}`,
+    );
   }
-
 }

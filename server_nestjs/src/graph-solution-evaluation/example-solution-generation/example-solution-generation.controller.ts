@@ -6,30 +6,47 @@ import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 @UseGuards(RolesGuard)
 @Controller('graph-example-solution-generation')
 export class ExampleSolutionGenerationController {
-  constructor(private readonly exampleSolutionGenerationService: ExampleSolutionGenerationService) {}
+  constructor(
+    private readonly exampleSolutionGenerationService: ExampleSolutionGenerationService,
+  ) {}
 
   @roles('ADMIN')
   @Post('/dijkstra')
-  generateDijkstraExampleSolution(@Body() createExampleSolutionGenerationDto: CreateExampleSolutionGenerationDto) {
-    return this.exampleSolutionGenerationService.generateDijkstraExampleSolution(createExampleSolutionGenerationDto.initialStructure);
+  generateDijkstraExampleSolution(
+    @Body() createExampleSolutionGenerationDto: CreateExampleSolutionGenerationDto,
+  ) {
+    return this.exampleSolutionGenerationService.generateDijkstraExampleSolution(
+      createExampleSolutionGenerationDto.initialStructure,
+    );
   }
 
   @roles('ADMIN')
   @Post('/kruskal')
-  generateKruskalExampleSolution(@Body() createExampleSolutionGenerationDto: CreateExampleSolutionGenerationDto) {
-    return this.exampleSolutionGenerationService.generateKruskalExampleSolution(createExampleSolutionGenerationDto.initialStructure);
+  generateKruskalExampleSolution(
+    @Body() createExampleSolutionGenerationDto: CreateExampleSolutionGenerationDto,
+  ) {
+    return this.exampleSolutionGenerationService.generateKruskalExampleSolution(
+      createExampleSolutionGenerationDto.initialStructure,
+    );
   }
 
   @roles('ADMIN')
   @Post('/floyd')
-  generateFloydExampleSolution(@Body() createExampleSolutionGenerationDto: CreateExampleSolutionGenerationDto) {
-    return this.exampleSolutionGenerationService.generateFloydExampleSolution(createExampleSolutionGenerationDto.initialStructure);
+  generateFloydExampleSolution(
+    @Body() createExampleSolutionGenerationDto: CreateExampleSolutionGenerationDto,
+  ) {
+    return this.exampleSolutionGenerationService.generateFloydExampleSolution(
+      createExampleSolutionGenerationDto.initialStructure,
+    );
   }
 
   @roles('ADMIN')
   @Post('/transitive-closure')
-  generateTransitiveClosureExampleSolution(@Body() createExampleSolutionGenerationDto: CreateExampleSolutionGenerationDto) {
-    return this.exampleSolutionGenerationService.generateTransitiveClosureExampleSolution(createExampleSolutionGenerationDto.initialStructure);
+  generateTransitiveClosureExampleSolution(
+    @Body() createExampleSolutionGenerationDto: CreateExampleSolutionGenerationDto,
+  ) {
+    return this.exampleSolutionGenerationService.generateTransitiveClosureExampleSolution(
+      createExampleSolutionGenerationDto.initialStructure,
+    );
   }
-
 }

@@ -9,7 +9,9 @@ describe('DatabaseTaskCommunicationController', () => {
       controllers: [DatabaseTaskCommunicationController],
     }).compile();
 
-    controller = module.get<DatabaseTaskCommunicationController>(DatabaseTaskCommunicationController);
+    controller = module.get<DatabaseTaskCommunicationController>(
+      DatabaseTaskCommunicationController,
+    );
   });
 
   it('should be defined', () => {

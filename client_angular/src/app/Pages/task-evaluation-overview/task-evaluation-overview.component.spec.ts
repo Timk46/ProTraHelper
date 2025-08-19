@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { TaskEvaluationOverviewComponent } from './task-evaluation-overview.component';
 
@@ -8,9 +9,8 @@ describe('TaskEvaluationOverviewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TaskEvaluationOverviewComponent ]
-    })
-    .compileComponents();
+      declarations: [TaskEvaluationOverviewComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TaskEvaluationOverviewComponent);
     component = fixture.componentInstance;

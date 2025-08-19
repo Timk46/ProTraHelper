@@ -6,11 +6,10 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GraphDataService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Fetches the graph for a specific user
@@ -19,10 +18,8 @@ export class GraphDataService {
    * @returns The graph for the user
    */
   fetchUserGraph(moduleId: number): Observable<ConceptGraphDTO> {
-    return this.http.get<ConceptGraphDTO>(environment.server + `/graph/${moduleId}`)
+    return this.http.get<ConceptGraphDTO>(environment.server + `/graph/${moduleId}`);
   }
-
-
 
   /**
    * Creates a new concept node and returns it
@@ -30,11 +27,21 @@ export class GraphDataService {
    * @param conceptName The name of the new concept
    * @returns The new concept node
    */
-  createConcept(parentId: string, conceptName: string, description?: string, moduleGoals?: { moduleId: number, goal: number }[]) {
+  createConcept(
+    parentId: string,
+    conceptName: string,
+    description?: string,
+    moduleGoals?: { moduleId: number; goal: number }[],
+  ) {
     //console.log("in graph-data.service. Trying to create concept: ", parentId, conceptName)
-    const x = this.http.post(environment.server + `/graph/concept/${parentId}/${conceptName}`, { description: description, moduleGoals: moduleGoals }).subscribe()
+    const x = this.http
+      .post(environment.server + `/graph/concept/${parentId}/${conceptName}`, {
+        description: description,
+        moduleGoals: moduleGoals,
+      })
+      .subscribe();
     //console.log("x: ", x)
-    return x
+    return x;
   }
 
   /**
@@ -45,7 +52,7 @@ export class GraphDataService {
    */
   deleteConcept(conceptId: number) {
     //console.log("trying to delete node with id: ", conceptId)
-    return this.http.delete(environment.server + `/graph/concept/${conceptId}`)
+    return this.http.delete(environment.server + `/graph/concept/${conceptId}`);
   }
 
   /**
@@ -57,30 +64,39 @@ export class GraphDataService {
    */
   createEdge(parentId: number, prerequisiteId: number, successorId: number) {
     //console.log("in createEdge: ", parentId, prerequisiteId, successorId)
-    return this.http.post(environment.server + `/graph/edge`, {parentId: parentId, prerequisiteId: prerequisiteId, successorId: successorId})
+    return this.http.post(environment.server + `/graph/edge`, {
+      parentId: parentId,
+      prerequisiteId: prerequisiteId,
+      successorId: successorId,
+    });
   }
 
   deleteEdge(edgeId: number) {
     //console.log("in deleteEdge: ", edgeId)
-    return this.http.delete(environment.server + `/graph/edge/${edgeId}`)
+    return this.http.delete(environment.server + `/graph/edge/${edgeId}`);
   }
 
   moveConceptNode(conceptId: number, parentId: number) {
     //console.log("in moveConcept: ", conceptId, parentId)
-    return this.http.put(environment.server + `/graph/concept/${conceptId}/newParent/${parentId}`, {})
+    return this.http.put(
+      environment.server + `/graph/concept/${conceptId}/newParent/${parentId}`,
+      {},
+    );
   }
 
   updateUserLevel(conceptId: number, level: number) {
     //console.log("in updateUserLevel: ", level)
-    return this.http.put(environment.server + `/user-concept/${conceptId}/level/${level}`, {})
+    return this.http.put(environment.server + `/user-concept/${conceptId}/level/${level}`, {});
   }
 
   updateSelectedConcept(conceptId: number) {
-    return this.http.put(environment.server + `/user-concept/concept/${conceptId}/selected`, {})
+    return this.http.put(environment.server + `/user-concept/concept/${conceptId}/selected`, {});
   }
 
   updateConceptExpansionState(conceptId: number, expanded: boolean) {
-    return this.http.put(environment.server + `/user-concept/${conceptId}/expanded/${expanded}`, {})
+    return this.http.put(
+      environment.server + `/user-concept/${conceptId}/expanded/${expanded}`,
+      {},
+    );
   }
-
 }

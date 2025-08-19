@@ -1,25 +1,24 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { OnDestroy, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { EditorFile, FileSystemService } from '../../services/file-system.service';
 
 @Component({
   selector: 'app-editor-tabs',
   templateUrl: './editor-tabs.component.html',
-  styleUrls: ['./editor-tabs.component.scss']
+  styleUrls: ['./editor-tabs.component.scss'],
 })
 export class EditorTabsComponent implements OnInit, OnDestroy {
   openFiles: EditorFile[] = [];
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
-  constructor(private fileSystemService: FileSystemService) {}
+  constructor(private readonly fileSystemService: FileSystemService) {}
 
   ngOnInit(): void {
     // Abonniere offene Tabs statt aller Dateien
-    this.fileSystemService.openTabs$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(tabs => {
-        this.openFiles = tabs;
-      });
+    this.fileSystemService.openTabs$.pipe(takeUntil(this.destroy$)).subscribe(tabs => {
+      this.openFiles = tabs;
+    });
   }
 
   ngOnDestroy(): void {

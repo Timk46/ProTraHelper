@@ -6,12 +6,10 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ContentLinkerService {
-
-
   constructor(
-    private prisma: PrismaService,
-    private questionDataService: QuestionDataService,
-    private contentService: ContentService,
+    private readonly prisma: PrismaService,
+    private readonly questionDataService: QuestionDataService,
+    private readonly contentService: ContentService,
   ) {}
 
   /**
@@ -21,7 +19,9 @@ export class ContentLinkerService {
    * @returns A promise that resolves to the created linkable content node.
    * @throws An error if there was an issue creating the linkable content node or the associated training.
    */
-  async createLinkedContentNode(contentNode: LinkableContentNodeDTO): Promise<LinkableContentNodeDTO> {
+  async createLinkedContentNode(
+    contentNode: LinkableContentNodeDTO,
+  ): Promise<LinkableContentNodeDTO> {
     // first create the content node
     const dbContentNode = await this.prisma.contentNode.create({
       data: {
@@ -36,8 +36,8 @@ export class ContentLinkerService {
     // then create the training to link the content node to the concept node
     const dbTraining = await this.prisma.training.create({
       data: {
-        conceptNode: {connect: {id: contentNode.conceptNodeId}},
-        contentNode: {connect: {id: dbContentNode.id}},
+        conceptNode: { connect: { id: contentNode.conceptNodeId } },
+        contentNode: { connect: { id: dbContentNode.id } },
         awards: contentNode.awardsLevel,
       },
     });
@@ -60,7 +60,6 @@ export class ContentLinkerService {
     };
   }
 
-
   /**
    * Creates a linked ContentElement linked with a question based on the provided data.
    * The question can be provided as a new question object or as an existing question ID.
@@ -71,7 +70,10 @@ export class ContentLinkerService {
    * @returns A promise that resolves to the created question.
    * @throws An error if any of the required data is missing or if there is an error creating the linked question.
    */
-  async createLinkedContentElement(linkData: LinkableContentElementDTO, authorId: number): Promise<LinkableContentElementDTO> {
+  async createLinkedContentElement(
+    linkData: LinkableContentElementDTO,
+    authorId: number,
+  ): Promise<LinkableContentElementDTO> {
     if (!linkData.contentNodeId) {
       throw new Error('No content node id provided');
     }
@@ -82,7 +84,7 @@ export class ContentLinkerService {
     // look into contentView table, get the rows with the same contentNode id and get the max position
     const maxPosition = await this.prisma.contentView.findFirst({
       where: {
-        contentNode: {id: linkData.contentNodeId},
+        contentNode: { id: linkData.contentNodeId },
       },
       select: {
         position: true,
@@ -92,12 +94,9 @@ export class ContentLinkerService {
       },
     });
 
-
-    const question: QuestionDTO = linkData.question? (
-      await this.questionDataService.createQuestion(linkData.question, authorId)
-    ) : (
-      await this.questionDataService.getQuestion(linkData.questionId)
-    );
+    const question: QuestionDTO = linkData.question
+      ? await this.questionDataService.createQuestion(linkData.question, authorId)
+      : await this.questionDataService.getQuestion(linkData.questionId);
 
     //look in contentElement if the question is already linked
     const contentElement = await this.prisma.contentElement.findFirst({
@@ -106,7 +105,7 @@ export class ContentLinkerService {
       },
     });
     if (contentElement) {
-      throw new Error('Question ' + question.id +  ' is already linked to a content node');
+      throw new Error('Question ' + question.id + ' is already linked to a content node');
     }
 
     console.log('#### question', question);
@@ -114,21 +113,21 @@ export class ContentLinkerService {
     // create a content view and a content element with a question and link them all together based on our schema
     const dbContentView = await this.prisma.contentView.create({
       data: {
-        contentNode: {connect: {id: linkData.contentNodeId}},
+        contentNode: { connect: { id: linkData.contentNodeId } },
         contentElement: {
           create: {
             type: 'QUESTION',
             title: linkData.contentElementTitle || question.name,
             text: linkData.contentElementText || null,
-            question: {connect: {id: question.id }},
+            question: { connect: { id: question.id } },
           },
         },
-        position: (maxPosition?.position || 0) + 1, // for now, inside the view, we just add the contentElement (-> the question) to the end
+        position: (maxPosition.position || 0) + 1, // for now, inside the view, we just add the contentElement (-> the question) to the end
       },
       select: {
         contentElement: true,
         position: true,
-      }
+      },
     });
 
     //since we may have a higher award level, update them
@@ -154,11 +153,12 @@ export class ContentLinkerService {
     // get the corresponding content views
     const contentViews = await this.prisma.contentView.findMany({
       where: {
-        contentElement: {id: contentElementId},
+        contentElement: { id: contentElementId },
       },
     });
 
-    const contentElement = await this.prisma.contentElement.delete({ // this will also delete the corresponding contentView
+    const contentElement = await this.prisma.contentElement.delete({
+      // this will also delete the corresponding contentView
       where: {
         id: contentElementId,
       },
@@ -176,7 +176,6 @@ export class ContentLinkerService {
     return true;
   }
 
-
   async getUnlinkedQuestions(): Promise<QuestionDTO[]> {
     const linkedQuestions = await this.prisma.contentElement.findMany({
       where: {
@@ -190,7 +189,7 @@ export class ContentLinkerService {
       },
     });
 
-    const linkedQuestionIds = linkedQuestions.map((linkedQuestion) => linkedQuestion.questionId);
+    const linkedQuestionIds = linkedQuestions.map(linkedQuestion => linkedQuestion.questionId);
 
     const unlinkedQuestions = await this.prisma.question.findMany({
       where: {
@@ -202,6 +201,4 @@ export class ContentLinkerService {
 
     return unlinkedQuestions;
   }
-
-
 }

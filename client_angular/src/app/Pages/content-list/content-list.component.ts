@@ -1,5 +1,11 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ContentDTO, ContentElementDTO, contentElementType, ContentsForConceptDTO, LinkableContentElementDTO } from '@DTOs/index';
+import { OnInit, OnChanges, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ContentDTO,
+  ContentElementDTO,
+  ContentsForConceptDTO,
+  LinkableContentElementDTO,
+} from '@DTOs/index';
+import { contentElementType } from '@DTOs/index';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 import { ProgressService } from 'src/app/Services/progress/progress.service';
@@ -12,7 +18,7 @@ import { ContentLinkerService } from 'src/app/Services/contentLinker/content-lin
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { ContentListNodeEditDialogComponent } from './content-list-node-edit-dialog/content-list-node-edit-dialog.component';
-
+import { BatRhinoService } from '../../Services/bat-rhino.service';
 
 @Component({
   selector: 'app-content-list',
@@ -20,21 +26,26 @@ import { ContentListNodeEditDialogComponent } from './content-list-node-edit-dia
   styleUrls: ['./content-list.component.scss'],
   animations: [
     trigger('contentExpand', [
-      state('collapsed', style({
-        height: '0',
-        opacity: 0,
-        overflow: 'hidden'
-      })),
-      state('expanded', style({
-        height: '*',
-        opacity: 1
-      })),
-      transition('collapsed <=> expanded', animate('200ms ease-out'))
-    ])
-  ]
+      state(
+        'collapsed',
+        style({
+          height: '0',
+          opacity: 0,
+          overflow: 'hidden',
+        }),
+      ),
+      state(
+        'expanded',
+        style({
+          height: '*',
+          opacity: 1,
+        }),
+      ),
+      transition('collapsed <=> expanded', animate('200ms ease-out')),
+    ]),
+  ],
 })
-export class ContentListComponent {
-
+export class ContentListComponent implements OnInit, OnChanges {
   @Input() activeConceptNodeId: any;
   @Input() contentsForActiveConceptNode: ContentsForConceptDTO = {
     trainedBy: [],
@@ -56,19 +67,20 @@ export class ContentListComponent {
   protected editModeActive: boolean = false;
 
   constructor(
-    private dialog: MatDialog,
-    private sSS: ScreenSizeService,
-    private progressService: ProgressService,
-    private userService: UserService,
-    private contentLinkerService: ContentLinkerService,
-    private snackBar: MatSnackBar,
-    private confirmService: ConfirmationService
+    private readonly dialog: MatDialog,
+    private readonly sSS: ScreenSizeService,
+    private readonly progressService: ProgressService,
+    private readonly userService: UserService,
+    private readonly contentLinkerService: ContentLinkerService,
+    private readonly snackBar: MatSnackBar,
+    private readonly confirmService: ConfirmationService,
+    private readonly batRhinoService: BatRhinoService,
   ) {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
   }
 
   ngOnInit() {
-    this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
+    this.userService.hasEditModeActive$.subscribe(hasEditModeActive => {
       this.editModeActive = hasEditModeActive;
     });
   }
@@ -100,10 +112,9 @@ export class ContentListComponent {
    * @param num - The number of elements in the array.
    * @returns An array with the specified number of elements.
    */
-  getLevels(num: number): Array<number> {
+  getLevels(num: number): number[] {
     return new Array(num);
   }
-
 
   /**
    * Checks if the given content has at least one content element of the specified type.
@@ -113,7 +124,7 @@ export class ContentListComponent {
    * @returns `true` if the content has at least one element of the specified type, otherwise `false`.
    */
   hasContentElementType(content: ContentDTO, type: string): boolean {
-    return content.contentElements.some((element) => element.type === type);
+    return content.contentElements.some(element => element.type === type);
   }
 
   /**
@@ -123,7 +134,7 @@ export class ContentListComponent {
    * @returns {ContentElement[]} An array of content elements that are of type QUESTION.
    */
   getQuestions(content: ContentDTO): ContentElementDTO[] {
-    return content.contentElements.filter((element) => element.type === contentElementType.QUESTION);
+    return content.contentElements.filter(element => element.type === contentElementType.QUESTION);
   }
 
   /**
@@ -134,7 +145,10 @@ export class ContentListComponent {
    * @returns An array of content elements that are either of type PDF or VIDEO.
    */
   getAttachments(content: ContentDTO): ContentElementDTO[] {
-    return content.contentElements.filter((element) => element.type === contentElementType.PDF || element.type === contentElementType.VIDEO);
+    return content.contentElements.filter(
+      element =>
+        element.type === contentElementType.PDF || element.type === contentElementType.VIDEO,
+    );
   }
 
   /**
@@ -169,11 +183,12 @@ export class ContentListComponent {
 
     // Handle dialog close event
     // We use this to update the data source and refresh graph is progress is 100%
-    if (type[0] != "VIDEO" && type[0] != "PDF") { // Dont update progress for video and pdf
+    if (type[0] != 'VIDEO' && type[0] != 'PDF') {
+      // Dont update progress for video and pdf
       dialogRef.afterClosed().subscribe(() => {
         // Find the updated content in contentsForActiveConceptNode
         const updatedContent = this.contentsForActiveConceptNode.trainedBy.find(
-          c => c.contentNodeId === content.contentNodeId
+          c => c.contentNodeId === content.contentNodeId,
         );
 
         // If the content is fully completed (100% progress), trigger a graph update
@@ -187,13 +202,17 @@ export class ContentListComponent {
   // TODO: update total score without reloading
   onScoreUpdated(contentNode: ContentDTO, elementData: ContentElementDTO) {
     //console.log("Score updated:", elementData.question?.progress);
-    const foundContent = this.contentsForActiveConceptNode.trainedBy.find(content => content.contentNodeId === contentNode.contentNodeId);
+    const foundContent = this.contentsForActiveConceptNode.trainedBy.find(
+      content => content.contentNodeId === contentNode.contentNodeId,
+    );
     if (foundContent) {
-      const foundElement = foundContent.contentElements.find(element => element.id === elementData.id);
-      if (foundElement && foundElement.question && elementData.question) {
+      const foundElement = foundContent.contentElements.find(
+        element => element.id === elementData.id,
+      );
+      if (foundElement?.question && elementData.question) {
         foundElement.question.progress = elementData.question.progress;
         foundContent.progress = this.progressService.calculateProgress(foundContent);
-        if(elementData.question.progress == 100) {
+        if (elementData.question.progress == 100) {
           foundContent.levelProgress = this.progressService.calculateLevelProgress(foundContent);
         }
       }
@@ -232,50 +251,52 @@ export class ContentListComponent {
    * @param contentNodeId - The ID of the content node.
    */
   onAddTask(contentNodeId: number) {
-    console.log("onNewTask");
-    if (this.isAdmin){
+    console.log('onNewTask');
+    if (this.isAdmin) {
       const dialogRef = this.dialog.open(CreateContentElementDialogComponent, {
         width: '50vw',
-        height: '80vh'
+        height: '80vh',
       });
 
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
           console.log('Dialog result:', result);
           if (this.activeConceptNodeId == undefined) {
-            console.error("activeConceptNodeId is undefined");
+            console.error('activeConceptNodeId is undefined');
             return;
           }
           const linkableContentElement: LinkableContentElementDTO = {
             contentNodeId: contentNodeId,
 
             questionId: Number(result.questionId) || undefined,
-            question: Number(result.questionId) ? undefined : {
-              id: -1, // -1 for temporary id
-              text: "",
-              isApproved: false, //TODO: implement approval
-              name: result.questionTitle || "New question",
-              type: result.questionType,
-              conceptNodeId: this.activeConceptNodeId,
-              description: result.questionDescription || "Manuell per GUI erstellte Frage",
-              level: Number(result.questionDifficulty),
-              score: Number(result.questionScore) || 100,
-            },
+            question: Number(result.questionId)
+              ? undefined
+              : {
+                  id: -1, // -1 for temporary id
+                  text: '',
+                  isApproved: false, //TODO: implement approval
+                  name: result.questionTitle || 'New question',
+                  type: result.questionType,
+                  conceptNodeId: this.activeConceptNodeId,
+                  description: result.questionDescription || 'Manuell per GUI erstellte Frage',
+                  level: Number(result.questionDifficulty),
+                  score: Number(result.questionScore) || 100,
+                },
             contentElementTitle: result.contentElementTitle || undefined,
             contentElementText: result.contentElementDescription || undefined,
-            position: result.contentElementPosition || undefined
+            position: result.contentElementPosition || undefined,
           };
 
-          console.log("linkableContentElement: ", linkableContentElement);
+          console.log('linkableContentElement: ', linkableContentElement);
 
-          this.contentLinkerService.createLinkedContentElement(linkableContentElement).subscribe(
-            (linkableContentElement) => {
-              console.log("linked contentElement: ", linkableContentElement);
-              this.snackBar.open("Frage erstellt", "OK", { duration: 3000 });
+          this.contentLinkerService
+            .createLinkedContentElement(linkableContentElement)
+            .subscribe(linkableContentElement => {
+              console.log('linked contentElement: ', linkableContentElement);
+              this.snackBar.open('Frage erstellt', 'OK', { duration: 3000 });
               this.progressService.questionCreated();
               this.fetchContentsForConcept.emit(); // TODO: make this dynamic
-            }
-          );
+            });
         }
       });
     }
@@ -294,7 +315,9 @@ export class ContentListComponent {
   onContentElementDeleted(contentNodeId: number, contentElementId: number) {
     this.contentsForActiveConceptNode.trainedBy.forEach(content => {
       if (content.contentNodeId === contentNodeId) {
-        content.contentElements = content.contentElements.filter(element => element.id !== contentElementId);
+        content.contentElements = content.contentElements.filter(
+          element => element.id !== contentElementId,
+        );
       }
     });
     this.applyFilter();
@@ -302,22 +325,23 @@ export class ContentListComponent {
 
   // TODO: implement
   onDeleteContentNode(contentNodeId: number) {
-    console.log("onContentNodeDelete", contentNodeId);
+    console.log('onContentNodeDelete', contentNodeId);
     this.confirmService.confirm({
-      title: "Bereich löschen?",
-      message: "Dieser Bereich wird gelöscht und alle darin entahltenen Verknüpfungen werden aufgehoben. Die darin verknüpften Inhalte bleiben bestehen. Fortfahren?",
-      acceptLabel: "Löschen",
-      declineLabel: "Abbrechen",
+      title: 'Bereich löschen?',
+      message:
+        'Dieser Bereich wird gelöscht und alle darin entahltenen Verknüpfungen werden aufgehoben. Die darin verknüpften Inhalte bleiben bestehen. Fortfahren?',
+      acceptLabel: 'Löschen',
+      declineLabel: 'Abbrechen',
       swapButtons: true,
       swapColors: true,
       accept: () => {
-        console.log("deleting");
+        console.log('deleting');
 
         // TODO: implement
-
-      }, decline: () => {
-        console.log("aborted");
-      }
+      },
+      decline: () => {
+        console.log('aborted');
+      },
     });
   }
 
@@ -326,9 +350,11 @@ export class ContentListComponent {
    */
   onMoveContentUp(content: ContentDTO) {
     if (content.position == null) return;
-    this.contentLinkerService.updateContentNodePosition(content.contentNodeId, content.position - 1).subscribe(() => {
-      this.fetchContentsForConcept.emit();
-    });
+    this.contentLinkerService
+      .updateContentNodePosition(content.contentNodeId, content.position - 1)
+      .subscribe(() => {
+        this.fetchContentsForConcept.emit();
+      });
   }
 
   /**
@@ -336,9 +362,11 @@ export class ContentListComponent {
    */
   onMoveContentDown(content: ContentDTO) {
     if (content.position == null) return;
-    this.contentLinkerService.updateContentNodePosition(content.contentNodeId, content.position + 1).subscribe(() => {
-      this.fetchContentsForConcept.emit();
-    });
+    this.contentLinkerService
+      .updateContentNodePosition(content.contentNodeId, content.position + 1)
+      .subscribe(() => {
+        this.fetchContentsForConcept.emit();
+      });
   }
 
   /**
@@ -347,7 +375,7 @@ export class ContentListComponent {
   onEditContentNode(content: ContentDTO) {
     const dialogRef = this.dialog.open(ContentListNodeEditDialogComponent, {
       width: '400px',
-      data: content
+      data: content,
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -361,15 +389,102 @@ export class ContentListComponent {
   }
 
   /**
-   * Handles Rhino button click - emits event to parent component
+   * Handles Direct Bat-Rhino button click - executes Rhino directly via .bat script
+   * Best Practice: Ein-Klick-Lösung für sofortige Rhino-Ausführung
    * @param event - Mouse event to prevent propagation
    */
-  onRhinoButtonClick(event: MouseEvent): void {
-    // Prevent event propagation to avoid expanding/collapsing the panel
+  async onRhinoBatDirectButtonClick(event: MouseEvent): Promise<void> {
     event.stopPropagation();
 
-    // Emit event to parent component (conceptOverview) which handles the Rhino integration
-    this.rhinoButtonClicked.emit();
-  }
+    console.log('⚡ Direct Bat-Rhino button clicked - executing Rhino directly');
 
+    const exampleFilePath = 'C:\\Dev\\hefl\\files\\Grasshopper\\example.gh';
+    const fileName = 'example.gh';
+
+    try {
+      // Show loading notification
+      const loadingSnackBar = this.snackBar.open('⚡ Führe Rhino direkt aus...', 'Abbrechen', {
+        duration: 0,
+        panelClass: 'info-snackbar',
+      });
+
+      // Create request using the service helper method
+      const request = this.batRhinoService.createGrasshopperRequest(exampleFilePath);
+
+      console.log('⚡ Sending direct execution request:', request);
+
+      // Execute Rhino directly
+      const response = await this.batRhinoService.executeDirectly(request).toPromise();
+
+      loadingSnackBar.dismiss();
+
+      if (response?.success) {
+        console.log('✅ Direct Rhino execution successful:', response);
+
+        // Show success message
+        this.snackBar.open(
+          `🚀 Rhino wurde erfolgreich gestartet! Grasshopper-Datei: ${fileName}`,
+          'OK',
+          {
+            duration: 8000,
+            panelClass: 'success-snackbar',
+          },
+        );
+
+        // Show additional info about what happened
+        this.snackBar.open(
+          `💡 Rhino läuft jetzt mit der Grasshopper-Datei. Prüfen Sie das Rhino-Fenster.`,
+          'OK',
+          {
+            duration: 6000,
+            panelClass: 'info-snackbar',
+          },
+        );
+      } else {
+        const errorMessage =
+          response?.message || 'Unbekannter Fehler bei der direkten Rhino-Ausführung';
+        console.error('❌ Direct Rhino execution failed:', errorMessage);
+
+        this.snackBar.open(`❌ Direkte Rhino-Ausführung fehlgeschlagen: ${errorMessage}`, 'OK', {
+          duration: 8000,
+          panelClass: 'error-snackbar',
+        });
+
+        // Show fallback suggestion
+        this.snackBar.open(
+          '💡 Tipp: Versuchen Sie es mit dem .bat-Skript-Generator oder den anderen Rhino-Buttons.',
+          'OK',
+          {
+            duration: 6000,
+            panelClass: 'info-snackbar',
+          },
+        );
+      }
+    } catch (error) {
+      console.error('🚨 Direct Rhino execution error:', error);
+
+      // Dismiss loading if still showing
+      this.snackBar.dismiss();
+
+      let errorMessage = 'Unbekannter Fehler';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      this.snackBar.open(`🚨 Fehler bei der direkten Rhino-Ausführung: ${errorMessage}`, 'OK', {
+        duration: 8000,
+        panelClass: 'error-snackbar',
+      });
+
+      // Show fallback suggestion
+      this.snackBar.open(
+        '💡 Tipp: Stellen Sie sicher, dass Rhino installiert ist und der Server läuft.',
+        'OK',
+        {
+          duration: 6000,
+          panelClass: 'info-snackbar',
+        },
+      );
+    }
+  }
 }

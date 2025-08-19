@@ -36,7 +36,7 @@ export class UserService {
    * if either of them exists.
    */
   removeTokens(): void {
-  const accessToken = 'accessToken';
+    const accessToken = 'accessToken';
     const refreshToken = 'refreshToken';
 
     if (localStorage.getItem(accessToken)) {

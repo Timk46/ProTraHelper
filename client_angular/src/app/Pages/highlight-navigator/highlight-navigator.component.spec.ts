@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { HighlightNavigatorComponent } from './highlight-navigator.component';
 
@@ -8,9 +9,8 @@ describe('HighlightNavigatorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HighlightNavigatorComponent]
-    })
-    .compileComponents();
+      imports: [HighlightNavigatorComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(HighlightNavigatorComponent);
     component = fixture.componentInstance;

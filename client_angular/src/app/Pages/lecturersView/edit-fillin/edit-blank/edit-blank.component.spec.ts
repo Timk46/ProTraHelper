@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { EditBlankComponent } from './edit-blank.component';
 
@@ -8,9 +9,8 @@ describe('EditBlankComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ EditBlankComponent ]
-    })
-    .compileComponents();
+      declarations: [EditBlankComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(EditBlankComponent);
     component = fixture.componentInstance;

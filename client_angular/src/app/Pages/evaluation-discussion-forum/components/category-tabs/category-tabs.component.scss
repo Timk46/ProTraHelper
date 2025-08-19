@@ -1,0 +1,121 @@
+// =============================================================================
+// CATEGORY TABS COMPONENT - SIMPLE TAB DESIGN
+// =============================================================================
+
+.category-tabs-container {
+  width: 100%;
+}
+
+// Tab buttons container
+.criteria-tabs {
+  display: flex;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+}
+
+// Individual tab button
+.criteria-tab {
+  flex: 1;
+  padding: 16px 20px;
+  background: #ecf0f1;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #7f8c8d;
+  transition: all 0.3s ease;
+  border-right: 1px solid #dcdcdc;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  &:last-child {
+    border-right: none;
+  }
+
+  &.active {
+    background: #3498db;
+    color: white;
+  }
+
+  &:hover:not(.active) {
+    background: #d5dbdb;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #3498db;
+    outline-offset: -2px;
+  }
+}
+
+// Loading state
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  color: #666;
+  font-size: 14px;
+  background: white;
+  border-radius: 12px;
+}
+
+// =============================================================================
+// RESPONSIVE DESIGN
+// =============================================================================
+
+@media (max-width: 768px) {
+  .criteria-tabs {
+    flex-direction: column;
+  }
+
+  .criteria-tab {
+    border-right: none;
+    border-bottom: 1px solid #dcdcdc;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .criteria-tab {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+}
+
+// =============================================================================
+// ACCESSIBILITY
+// =============================================================================
+
+@media (prefers-contrast: high) {
+  .criteria-tab {
+    border: 1px solid #000;
+
+    &.active {
+      background: #000;
+      color: #fff;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .criteria-tab {
+    transition: none;
+  }
+}
+
+// =============================================================================
+// PRINT STYLES
+// =============================================================================
+
+@media print {
+  .criteria-tab {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #ddd !important;
+  }
+}

@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, catchError, finalize, of, tap, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
+import { BehaviorSubject, Subject, catchError, finalize, of, tap, throwError } from 'rxjs';
 import { QuestionDTO, CodeSubmissionResultDto } from '@DTOs/index';
-import { CodeSubmissionResult, FeedbackLevel, FlavorType, WorkspaceState, TestResult } from '../models/code-submission.model'; // Merged TestResult import
+import { CodeSubmissionResult, TestResult } from '../models/code-submission.model';
+import { FeedbackLevel, FlavorType, WorkspaceState } from '../models/code-submission.model'; // Merged TestResult import
 import { TaskDataService } from './task-data.service';
 import { RunCodeService } from './runCode.service';
 
@@ -9,17 +11,20 @@ import { RunCodeService } from './runCode.service';
  * Service to manage the state of the student workspace
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WorkspaceStateService {
   // State subjects
-  private currentTaskSubject = new BehaviorSubject<QuestionDTO | null>(null);
-  private workspaceStateSubject = new BehaviorSubject<WorkspaceState>(WorkspaceState.START);
-  private codeSubmissionResultSubject = new BehaviorSubject<CodeSubmissionResultDto | null>(null);
-  private feedbackSubject = new BehaviorSubject<string>('');
-  private isLoadingSubject = new BehaviorSubject<boolean>(false);
-  private errorSubject = new BehaviorSubject<string | null>(null);
-  private currentFeedbackIdSubject = new BehaviorSubject<string | null>(null); // Added for feedback ID
+  private readonly currentTaskSubject = new BehaviorSubject<QuestionDTO | null>(null);
+  private readonly workspaceStateSubject = new BehaviorSubject<WorkspaceState>(
+    WorkspaceState.START,
+  );
+  private readonly codeSubmissionResultSubject =
+    new BehaviorSubject<CodeSubmissionResultDto | null>(null);
+  private readonly feedbackSubject = new BehaviorSubject<string>('');
+  private readonly isLoadingSubject = new BehaviorSubject<boolean>(false);
+  private readonly errorSubject = new BehaviorSubject<string | null>(null);
+  private readonly currentFeedbackIdSubject = new BehaviorSubject<string | null>(null); // Added for feedback ID
 
   // Public observables
   readonly currentTask$ = this.currentTaskSubject.asObservable();
@@ -31,8 +36,8 @@ export class WorkspaceStateService {
   readonly currentFeedbackId$ = this.currentFeedbackIdSubject.asObservable(); // Added observable for feedback ID
 
   constructor(
-    private taskDataService: TaskDataService,
-    private runCodeService: RunCodeService
+    private readonly taskDataService: TaskDataService,
+    private readonly runCodeService: RunCodeService,
   ) {}
 
   /**
@@ -53,14 +58,18 @@ export class WorkspaceStateService {
       }),
       finalize(() => {
         this.isLoadingSubject.next(false);
-      })
+      }),
     );
   }
 
   /**
    * Führt den Code aus und gibt das Ergebnis zurück
    */
-  executeCode(taskId: number, inputArgs: any[], additionalFiles: Record<string, string>): Observable<CodeSubmissionResultDto> {
+  executeCode(
+    taskId: number,
+    inputArgs: any[],
+    additionalFiles: Record<string, string>,
+  ): Observable<CodeSubmissionResultDto> {
     this.isLoadingSubject.next(true);
     this.errorSubject.next(null);
 
@@ -70,37 +79,39 @@ export class WorkspaceStateService {
         let finalResultForSubject: CodeSubmissionResult | null = null;
 
         if (result?.CodeSubmissionResult) {
-            let frontendTestResults: TestResult[] = []; // Default to empty array
+          let frontendTestResults: TestResult[] = []; // Default to empty array
 
-            // Transform backend results if they exist
-            if (result.CodeSubmissionResult.testResults) {
-                const backendTestResults = result.CodeSubmissionResult.testResults as any[];
-                frontendTestResults = backendTestResults.map((test: any) => {
-                    const transformedTest: TestResult = {
-                        name: test.test || '',
-                        passed: test.status === 'SUCCESSFUL',
-                        exception: test.exception
-                    };
-                    return transformedTest;
-                });
-            }
+          // Transform backend results if they exist
+          if (result.CodeSubmissionResult.testResults) {
+            const backendTestResults = result.CodeSubmissionResult.testResults as any[];
+            frontendTestResults = backendTestResults.map((test: any) => {
+              const transformedTest: TestResult = {
+                name: test.test || '',
+                passed: test.status === 'SUCCESSFUL',
+                exception: test.exception,
+              };
+              return transformedTest;
+            });
+          }
 
-            // Create a new object conforming to the DTO structure expected by the Subject
-            finalResultForSubject = {
-                CodeSubmissionResult: {
-                    output: result.CodeSubmissionResult.output ?? '', // Provide default empty string if null
-                    score: result.CodeSubmissionResult.score,
-                    testsPassed: result.CodeSubmissionResult.testsPassed ?? false, // Provide default false if null/undefined
-                    testResults: frontendTestResults // Use the transformed results
-                },
-                encryptedCodeSubissionId: result.encryptedCodeSubissionId
-            };
+          // Create a new object conforming to the DTO structure expected by the Subject
+          finalResultForSubject = {
+            CodeSubmissionResult: {
+              output: result.CodeSubmissionResult.output ?? '', // Provide default empty string if null
+              score: result.CodeSubmissionResult.score,
+              testsPassed: result.CodeSubmissionResult.testsPassed ?? false, // Provide default false if null/undefined
+              testResults: frontendTestResults, // Use the transformed results
+            },
+            encryptedCodeSubissionId: result.encryptedCodeSubissionId,
+          };
         }
 
         // Emit the correctly typed frontend object (or null)
-        this.codeSubmissionResultSubject.next(finalResultForSubject as CodeSubmissionResultDto | null); // Cast to satisfy Subject type
+        this.codeSubmissionResultSubject.next(
+          finalResultForSubject as CodeSubmissionResultDto | null,
+        ); // Cast to satisfy Subject type
         this.workspaceStateSubject.next(WorkspaceState.SUBMITTED_CODE);
-        console.log(JSON.stringify(this.codeSubmissionResultSubject))
+        console.log(JSON.stringify(this.codeSubmissionResultSubject));
       }),
       catchError(error => {
         this.errorSubject.next(`Fehler beim Ausführen des Codes: ${error.message}`);
@@ -108,7 +119,7 @@ export class WorkspaceStateService {
       }),
       finalize(() => {
         this.isLoadingSubject.next(false);
-      })
+      }),
     );
   }
 
@@ -119,7 +130,7 @@ export class WorkspaceStateService {
    */
   private requestAgentFeedback(
     agentRequest$: Observable<string>,
-    agentName: string // For logging/error messages
+    agentName: string, // For logging/error messages
   ): Observable<string> {
     this.workspaceStateSubject.next(WorkspaceState.GENERATING_FEEDBACK);
     this.feedbackSubject.next('');
@@ -131,7 +142,9 @@ export class WorkspaceStateService {
         this.workspaceStateSubject.next(WorkspaceState.RECEIVING_FEEDBACK);
       }),
       catchError(error => {
-        this.errorSubject.next(`Fehler beim Generieren des ${agentName}-Feedbacks: ${error.message}`);
+        this.errorSubject.next(
+          `Fehler beim Generieren des ${agentName}-Feedbacks: ${error.message}`,
+        );
         this.workspaceStateSubject.next(WorkspaceState.SUBMITTED_CODE); // Reset state on error
         return throwError(() => error);
       }),
@@ -140,11 +153,14 @@ export class WorkspaceStateService {
         if (this.workspaceStateSubject.value === WorkspaceState.RECEIVING_FEEDBACK) {
           this.workspaceStateSubject.next(WorkspaceState.FINISHED_FEEDBACK);
         }
-      })
+      }),
     );
   }
 
-  requestSupervisorFeedback(taskId: number, submissionResult: CodeSubmissionResultDto): Observable<string> {
+  requestSupervisorFeedback(
+    taskId: number,
+    submissionResult: CodeSubmissionResultDto,
+  ): Observable<string> {
     const agentRequest$ = this.runCodeService.getSupervisorFeedback(taskId, submissionResult);
     return this.requestAgentFeedback(agentRequest$, 'Supervisor');
   }
@@ -164,7 +180,10 @@ export class WorkspaceStateService {
     return this.requestAgentFeedback(agentRequest$, 'KM');
   }
 
-  requestKtcFeedback(taskId: number, submissionResult: CodeSubmissionResultDto): Observable<string> {
+  requestKtcFeedback(
+    taskId: number,
+    submissionResult: CodeSubmissionResultDto,
+  ): Observable<string> {
     const agentRequest$ = this.runCodeService.getKtcFeedback(taskId, submissionResult);
     return this.requestAgentFeedback(agentRequest$, 'KTC');
   }
@@ -182,7 +201,7 @@ export class WorkspaceStateService {
       catchError(error => {
         this.errorSubject.next(`Fehler beim Senden des Feedbacks: ${error.message}`);
         return throwError(() => error);
-      })
+      }),
     );
   }
 
@@ -190,8 +209,10 @@ export class WorkspaceStateService {
    * Setzt den Zustand auf Code-Bearbeitung zurück, wenn der Code geändert wird
    */
   codeChanged(): void {
-    if (this.workspaceStateSubject.value !== WorkspaceState.GENERATING_FEEDBACK &&
-        this.workspaceStateSubject.value !== WorkspaceState.RECEIVING_FEEDBACK) {
+    if (
+      this.workspaceStateSubject.value !== WorkspaceState.GENERATING_FEEDBACK &&
+      this.workspaceStateSubject.value !== WorkspaceState.RECEIVING_FEEDBACK
+    ) {
       this.workspaceStateSubject.next(WorkspaceState.EDITING_CODE);
     }
   }

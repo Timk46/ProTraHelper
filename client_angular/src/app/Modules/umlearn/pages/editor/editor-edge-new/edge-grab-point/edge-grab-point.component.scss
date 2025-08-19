@@ -1,22 +1,22 @@
-.grabPoint{
+.grabPoint {
   position: absolute;
   z-index: 1000;
 }
 
-.grabPoint:hover{
+.grabPoint:hover {
   opacity: 1 !important;
 }
 
-.grabPoint:hover .svgCircle{
+.grabPoint:hover .svgCircle {
   cursor: move;
 }
 
-.visibleArea{
+.visibleArea {
   position: absolute;
   z-index: 999;
   opacity: 0.5;
 }
 
-.visibleArea:hover .grabPoint{
+.visibleArea:hover .grabPoint {
   opacity: 1;
 }

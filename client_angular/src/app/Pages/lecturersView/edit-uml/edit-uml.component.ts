@@ -1,7 +1,18 @@
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { ElementRef, AfterViewInit, OnInit } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ClassEdge, ClassNode, detailedQuestionDTO, editorDataDTO, editorElementDTO, EditorElement, EditorElementType, EditorModel, questionType, taskSettingsDTO } from '@DTOs/index';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
+import {
+  ClassEdge,
+  ClassNode,
+  detailedQuestionDTO,
+  editorDataDTO,
+  editorElementDTO,
+  EditorElement,
+  taskSettingsDTO,
+} from '@DTOs/index';
+import { EditorElementType, EditorModel, questionType } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
@@ -14,10 +25,9 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 @Component({
   selector: 'app-edit-uml',
   templateUrl: './edit-uml.component.html',
-  styleUrls: ['./edit-uml.component.scss']
+  styleUrls: ['./edit-uml.component.scss'],
 })
-export class EditUmlComponent implements AfterViewInit {
-
+export class EditUmlComponent implements AfterViewInit, OnInit {
   @ViewChild('question') questionField!: TinymceComponent;
   @ViewChild('umleditor') umlEditor!: EditorComponent;
 
@@ -39,13 +49,13 @@ export class EditUmlComponent implements AfterViewInit {
   protected detailedQuestionData: detailedQuestionDTO | null = null;
   protected currentEditorData: editorDataDTO = {
     nodes: [],
-    edges: []
-  }
+    edges: [],
+  };
   protected taskSettings: taskSettingsDTO = {
     allowedEdgeTypes: [],
     allowedNodeTypes: [],
-    editorModel: EditorModel.CLASSDIAGRAM
-  }
+    editorModel: EditorModel.CLASSDIAGRAM,
+  };
   protected possibleEdgeTypes: editorElementDTO[] = [];
   protected possibleNodeTypes: editorElementDTO[] = [];
   protected optionalNodeTypes: Set<EditorElement> = new Set();
@@ -54,21 +64,22 @@ export class EditUmlComponent implements AfterViewInit {
   protected editorConfig = {
     readonly: false,
     plugins: 'autoresize lists table link image code codesample',
-    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
+    toolbar:
+      'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
     min_height: 300,
     max_height: 600,
     resize: false,
-  }
+  };
 
   constructor(
-    private fb: FormBuilder,
-    private questionDataService: QuestionDataService,
-    private route: ActivatedRoute,
-    private confirmationService: ConfirmationService,
-    private snackBar: MatSnackBar,
-    private router: Router,
-    private dialog: MatDialog,
-    private editorCommunicationService: EditorCommunicationService
+    private readonly fb: FormBuilder,
+    private readonly questionDataService: QuestionDataService,
+    private readonly route: ActivatedRoute,
+    private readonly confirmationService: ConfirmationService,
+    private readonly snackBar: MatSnackBar,
+    private readonly router: Router,
+    private readonly dialog: MatDialog,
+    private readonly editorCommunicationService: EditorCommunicationService,
   ) {
     this.umlForm = this.fb.group({
       questionTitle: ['', Validators.required],
@@ -166,36 +177,58 @@ export class EditUmlComponent implements AfterViewInit {
   private handleRouteParams() {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
-      this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe((data: detailedQuestionDTO) => {
-        if (data.type === questionType.UML) {
-          this.detailedQuestionData = {
-            ...data,
-            umlQuestion: {
-              ...data.umlQuestion,
-              taskSettings: data.umlQuestion?.taskSettings || { allowedEdgeTypes: [], allowedNodeTypes: [], editorModel: EditorModel.CLASSDIAGRAM },
-              editorData: data.umlQuestion?.editorData || { nodes: [], edges: [] },
-              startData: data.umlQuestion?.startData || { nodes: [], edges: [] }
-            }
-          };
+      this.questionDataService
+        .getDetailedQuestionData(questionId, this.thisQuestionType)
+        .subscribe((data: detailedQuestionDTO) => {
+          if (data.type === questionType.UML) {
+            this.detailedQuestionData = {
+              ...data,
+              umlQuestion: {
+                ...data.umlQuestion,
+                taskSettings: data.umlQuestion?.taskSettings || {
+                  allowedEdgeTypes: [],
+                  allowedNodeTypes: [],
+                  editorModel: EditorModel.CLASSDIAGRAM,
+                },
+                editorData: data.umlQuestion?.editorData || { nodes: [], edges: [] },
+                startData: data.umlQuestion?.startData || { nodes: [], edges: [] },
+              },
+            };
 
-          this.optionalNodeTypes = new Set(this.detailedQuestionData.umlQuestion!.taskSettings!.allowedNodeTypes.filter(node => {
-            return !this.detailedQuestionData!.umlQuestion!.editorData!.nodes.some(n => n.type === node.element)
-          }).map(node => node.element));
+            this.optionalNodeTypes = new Set(
+              this.detailedQuestionData
+                .umlQuestion!.taskSettings!.allowedNodeTypes.filter(node => {
+                  return !this.detailedQuestionData!.umlQuestion!.editorData!.nodes.some(
+                    n => n.type === node.element,
+                  );
+                })
+                .map(node => node.element),
+            );
 
-          this.optionalEdgeTypes = new Set(this.detailedQuestionData.umlQuestion!.taskSettings!.allowedEdgeTypes.filter(edge => {
-            return !this.detailedQuestionData!.umlQuestion!.editorData!.edges.some(e => e.type === edge.element)
-          }).map(edge => edge.element));
+            this.optionalEdgeTypes = new Set(
+              this.detailedQuestionData
+                .umlQuestion!.taskSettings!.allowedEdgeTypes.filter(edge => {
+                  return !this.detailedQuestionData!.umlQuestion!.editorData!.edges.some(
+                    e => e.type === edge.element,
+                  );
+                })
+                .map(edge => edge.element),
+            );
 
-          this.updateAllowedEdges();
-          this.updateAllowedNodes();
-          this.taskSettings = this.detailedQuestionData.umlQuestion!.taskSettings!;
+            this.updateAllowedEdges();
+            this.updateAllowedNodes();
+            this.taskSettings = this.detailedQuestionData.umlQuestion!.taskSettings!;
 
-          this.setContent();
-        } else {
-          this.snackBar.open('ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine UML-Aufgabe!', 'Schließen', { duration: 10000 });
-          this.thisQuestionType = data.type as questionType;
-        }
-      });
+            this.setContent();
+          } else {
+            this.snackBar.open(
+              'ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine UML-Aufgabe!',
+              'Schließen',
+              { duration: 10000 },
+            );
+            this.thisQuestionType = data.type as questionType;
+          }
+        });
     });
   }
 
@@ -213,7 +246,9 @@ export class EditUmlComponent implements AfterViewInit {
         questionScore: this.detailedQuestionData.score,
       });
       if (this.detailedQuestionData.umlQuestion) {
-        this.questionField.setContent(this.detailedQuestionData.umlQuestion.textHTML || this.detailedQuestionData.text);
+        this.questionField.setContent(
+          this.detailedQuestionData.umlQuestion.textHTML || this.detailedQuestionData.text,
+        );
         if (this.detailedQuestionData.umlQuestion.editorData) {
           this.currentEditorData = this.detailedQuestionData?.umlQuestion?.editorData;
         }
@@ -244,13 +279,15 @@ export class EditUmlComponent implements AfterViewInit {
             next: response => {
               console.log('Question updated successfully:', response);
               this.snackBar.open('Frage erfolgreich aktualisiert', 'Schließen', { duration: 3000 });
-              this.isSaving = false
+              this.isSaving = false;
             },
             error: error => {
               console.error('Error updating question:', error);
-              this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', { duration: 3000 });
+              this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', {
+                duration: 3000,
+              });
               this.isSaving = false;
-            }
+            },
           });
         } else {
           this.isSaving = false;
@@ -258,16 +295,17 @@ export class EditUmlComponent implements AfterViewInit {
       },
       decline: () => {
         console.log('Overwrite declined');
-      }
+      },
     });
   }
 
   protected onSaveNewVersion() {
-    return // disabled for now
+    return; // disabled for now
 
     this.confirmationService.confirm({
       title: 'Neue Version erstellen',
-      message: 'Dies speichert die Frage unter einer neuen Version. Die alte Version bleibt erhalten, aber nicht mehr sichtbar. Fortfahren?',
+      message:
+        'Dies speichert die Frage unter einer neuen Version. Die alte Version bleibt erhalten, aber nicht mehr sichtbar. Fortfahren?',
       acceptLabel: 'Version erstellen',
       declineLabel: 'Abbrechen',
       accept: () => {
@@ -276,7 +314,7 @@ export class EditUmlComponent implements AfterViewInit {
       },
       decline: () => {
         console.log('Save declined');
-      }
+      },
     });
   }
 
@@ -290,7 +328,8 @@ export class EditUmlComponent implements AfterViewInit {
   protected onCancel() {
     this.confirmationService.confirm({
       title: 'Bearbeitung abbrechen',
-      message: 'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
+      message:
+        'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
       acceptLabel: 'Bearbeitung abbrechen',
       declineLabel: 'Weiter bearbeiten',
       swapColors: true,
@@ -300,7 +339,7 @@ export class EditUmlComponent implements AfterViewInit {
       },
       decline: () => {
         console.log('Cancel declined');
-      }
+      },
     });
   }
 
@@ -317,7 +356,11 @@ export class EditUmlComponent implements AfterViewInit {
    * 5. Returns null if the conditions are not met.
    */
   private buildDTO(): detailedQuestionDTO | null {
-    if (this.thisQuestionType === questionType.UML && this.umlForm.valid && this.detailedQuestionData) {
+    if (
+      this.thisQuestionType === questionType.UML &&
+      this.umlForm.valid &&
+      this.detailedQuestionData
+    ) {
       const newData: detailedQuestionDTO = {
         ...this.detailedQuestionData,
         name: this.umlForm.value.questionTitle,
@@ -329,12 +372,22 @@ export class EditUmlComponent implements AfterViewInit {
           id: this.detailedQuestionData.umlQuestion?.id || undefined,
           questionId: this.detailedQuestionData.id,
           textHTML: this.questionField.getContent(),
-          editorData: this.selectedEditor.value === 'solution' ? this.umlEditor.getSaveData() : this.detailedQuestionData.umlQuestion?.editorData,
-          startData: this.selectedEditor.value === 'prefab' ? this.umlEditor.getSaveData() : this.detailedQuestionData.umlQuestion?.startData,
+          editorData:
+            this.selectedEditor.value === 'solution'
+              ? this.umlEditor.getSaveData()
+              : this.detailedQuestionData.umlQuestion?.editorData,
+          startData:
+            this.selectedEditor.value === 'prefab'
+              ? this.umlEditor.getSaveData()
+              : this.detailedQuestionData.umlQuestion?.startData,
           //dataImage: null,
-          taskSettings: this.detailedQuestionData.umlQuestion?.taskSettings || { allowedEdgeTypes: [], allowedNodeTypes: [], editorModel: EditorModel.CLASSDIAGRAM },
-        }
-      }
+          taskSettings: this.detailedQuestionData.umlQuestion?.taskSettings || {
+            allowedEdgeTypes: [],
+            allowedNodeTypes: [],
+            editorModel: EditorModel.CLASSDIAGRAM,
+          },
+        },
+      };
       return newData;
     }
     return null;
@@ -352,7 +405,7 @@ export class EditUmlComponent implements AfterViewInit {
    *                the type of change and updates the editor accordingly.
    */
   onEditorChange(event: any) {
-    if (event && this.detailedQuestionData && this.detailedQuestionData.umlQuestion) {
+    if (event && this.detailedQuestionData?.umlQuestion) {
       switch (event) {
         case 'prefab':
           this.selectedEditorAddText = 'Elemente zur Vorlage hinzufügen';
@@ -382,9 +435,10 @@ export class EditUmlComponent implements AfterViewInit {
    * @returns A boolean indicating whether the specified node type is used.
    */
   protected isNodeTypeUsed(type: EditorElement, settingsOnly: boolean = false): boolean {
-    return this.detailedQuestionData?.umlQuestion?.editorData?.nodes.some(node =>
-      node.type === type) || // Direct match
-      (!settingsOnly && this.optionalNodeTypes.has(type)); // Or optionally selected
+    return (
+      this.detailedQuestionData?.umlQuestion?.editorData?.nodes.some(node => node.type === type) || // Direct match
+      (!settingsOnly && this.optionalNodeTypes.has(type))
+    ); // Or optionally selected
   }
 
   /**
@@ -395,9 +449,10 @@ export class EditUmlComponent implements AfterViewInit {
    * @returns `true` if the edge type is used, `false` otherwise.
    */
   protected isEdgeTypeUsed(type: EditorElement, settingsOnly: boolean = false): boolean {
-    return this.detailedQuestionData?.umlQuestion?.editorData?.edges.some(edge =>
-      edge.type === type) || // Direct match
-      (!settingsOnly && this.optionalEdgeTypes.has(type)); // Or optionally selected
+    return (
+      this.detailedQuestionData?.umlQuestion?.editorData?.edges.some(edge => edge.type === type) || // Direct match
+      (!settingsOnly && this.optionalEdgeTypes.has(type))
+    ); // Or optionally selected
   }
 
   /**
@@ -467,12 +522,22 @@ export class EditUmlComponent implements AfterViewInit {
    *
    * If any of these checks fail, the method returns early without making any changes.
    */
-  private updateAllowedNodes(){
-    if (!(this.detailedQuestionData && this.detailedQuestionData.umlQuestion && this.detailedQuestionData.umlQuestion.editorData && this.detailedQuestionData.umlQuestion.taskSettings)) return;
-    this.detailedQuestionData.umlQuestion.taskSettings.allowedNodeTypes = this.possibleNodeTypes.filter(node =>
-      this.detailedQuestionData!.umlQuestion!.editorData!.nodes.some(n => n.type === node.element) || // If already used
-      this.optionalNodeTypes.has(node.element) // Or optionally selected
-    );
+  private updateAllowedNodes() {
+    if (
+      !(
+        this.detailedQuestionData?.umlQuestion?.editorData &&
+        this.detailedQuestionData.umlQuestion.taskSettings
+      )
+    )
+      return;
+    this.detailedQuestionData.umlQuestion.taskSettings.allowedNodeTypes =
+      this.possibleNodeTypes.filter(
+        node =>
+          this.detailedQuestionData!.umlQuestion!.editorData!.nodes.some(
+            n => n.type === node.element,
+          ) || // If already used
+          this.optionalNodeTypes.has(node.element), // Or optionally selected
+      );
   }
 
   /**
@@ -484,12 +549,22 @@ export class EditUmlComponent implements AfterViewInit {
    *
    * If any of these checks fail, the method returns early without making any changes.
    */
-  private updateAllowedEdges(){
-    if (!(this.detailedQuestionData && this.detailedQuestionData.umlQuestion && this.detailedQuestionData.umlQuestion.editorData && this.detailedQuestionData.umlQuestion.taskSettings)) return;
-    this.detailedQuestionData.umlQuestion.taskSettings.allowedEdgeTypes = this.possibleEdgeTypes.filter(edge =>
-      this.detailedQuestionData!.umlQuestion!.editorData!.edges.some(e => e.type === edge.element) || // If already used
-      this.optionalEdgeTypes.has(edge.element) // Or optionally selected
-    );
+  private updateAllowedEdges() {
+    if (
+      !(
+        this.detailedQuestionData?.umlQuestion?.editorData &&
+        this.detailedQuestionData.umlQuestion.taskSettings
+      )
+    )
+      return;
+    this.detailedQuestionData.umlQuestion.taskSettings.allowedEdgeTypes =
+      this.possibleEdgeTypes.filter(
+        edge =>
+          this.detailedQuestionData!.umlQuestion!.editorData!.edges.some(
+            e => e.type === edge.element,
+          ) || // If already used
+          this.optionalEdgeTypes.has(edge.element), // Or optionally selected
+      );
   }
 
   /**
@@ -502,15 +577,18 @@ export class EditUmlComponent implements AfterViewInit {
    * @method copyFromSolution
    * @returns {void}
    */
-  protected copyFromSolution(){
+  protected copyFromSolution() {
     this.confirmationService.confirm({
       title: 'Lösung kopieren',
-      message: 'Möchten Sie die Lösung als Vorlage verwenden? Alle bisherigen Änderungen an der Vorlage gehen verloren.',
+      message:
+        'Möchten Sie die Lösung als Vorlage verwenden? Alle bisherigen Änderungen an der Vorlage gehen verloren.',
       acceptLabel: 'Verwenden',
       declineLabel: 'Abbrechen',
       accept: () => {
-        if (this.detailedQuestionData && this.detailedQuestionData.umlQuestion && this.detailedQuestionData.umlQuestion.editorData) {
-          this.detailedQuestionData.umlQuestion.startData = JSON.parse(JSON.stringify(this.detailedQuestionData.umlQuestion.editorData));
+        if (this.detailedQuestionData?.umlQuestion?.editorData) {
+          this.detailedQuestionData.umlQuestion.startData = JSON.parse(
+            JSON.stringify(this.detailedQuestionData.umlQuestion.editorData),
+          );
           if (this.detailedQuestionData.umlQuestion.startData) {
             this.currentEditorData = this.detailedQuestionData.umlQuestion.startData;
           }
@@ -518,7 +596,7 @@ export class EditUmlComponent implements AfterViewInit {
       },
       decline: () => {
         console.log('Copy declined');
-      }
+      },
     });
   }
 
@@ -529,15 +607,18 @@ export class EditUmlComponent implements AfterViewInit {
    *
    * @protected
    */
-  protected copyFromPrefab(){
+  protected copyFromPrefab() {
     this.confirmationService.confirm({
       title: 'Vorlage kopieren',
-      message: 'Möchten Sie die Vorlage als Lösung verwenden? Alle bisherigen Änderungen an der Lösung gehen verloren.',
+      message:
+        'Möchten Sie die Vorlage als Lösung verwenden? Alle bisherigen Änderungen an der Lösung gehen verloren.',
       acceptLabel: 'Verwenden',
       declineLabel: 'Abbrechen',
       accept: () => {
-        if (this.detailedQuestionData && this.detailedQuestionData.umlQuestion && this.detailedQuestionData.umlQuestion.startData) {
-          this.detailedQuestionData.umlQuestion.editorData = JSON.parse(JSON.stringify(this.detailedQuestionData.umlQuestion.startData));
+        if (this.detailedQuestionData?.umlQuestion?.startData) {
+          this.detailedQuestionData.umlQuestion.editorData = JSON.parse(
+            JSON.stringify(this.detailedQuestionData.umlQuestion.startData),
+          );
           if (this.detailedQuestionData.umlQuestion.editorData) {
             this.currentEditorData = this.detailedQuestionData.umlQuestion.editorData;
           }
@@ -545,7 +626,7 @@ export class EditUmlComponent implements AfterViewInit {
       },
       decline: () => {
         console.log('Copy declined');
-      }
+      },
     });
   }
 }

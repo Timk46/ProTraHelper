@@ -8,11 +8,7 @@ export class CryptoService {
   private readonly iv = crypto.randomBytes(16);
 
   encrypt(text: string): string {
-    const cipher = crypto.createCipheriv(
-      this.algorithm,
-      this.secretKey,
-      this.iv,
-    );
+    const cipher = crypto.createCipheriv(this.algorithm, this.secretKey, this.iv);
 
     const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
 

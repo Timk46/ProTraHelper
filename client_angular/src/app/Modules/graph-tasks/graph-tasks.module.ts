@@ -21,18 +21,18 @@ import { GraphTutorialDialogComponent } from './graph-tutorial-dialog/graph-tuto
     EdgeGraphComponent,
     EdgeToolsetGraphComponent,
     AssignmentContainerComponent,
-    GraphTutorialDialogComponent
+    GraphTutorialDialogComponent,
   ],
   imports: [
     CommonModule,
-    CdkDrag, FormsModule, DragDropModule, MatButtonToggleModule, MatProgressSpinnerModule,
-    MaterialModule
+    CdkDrag,
+    FormsModule,
+    DragDropModule,
+    MatButtonToggleModule,
+    MatProgressSpinnerModule,
+    MaterialModule,
   ],
-  exports: [
-    GraphTasksComponent,
-    GraphStructureComponent
-  ],
+  exports: [GraphTasksComponent, GraphStructureComponent],
   bootstrap: [GraphTasksComponent],
 })
-
-export class GraphTasksModule { }
+export class GraphTasksModule {}

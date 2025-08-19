@@ -1,4 +1,5 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TestResult } from '../../../models/code-submission.model';
 
@@ -14,7 +15,7 @@ export interface TestDetailsDialogData {
 @Component({
   selector: 'app-test-details-dialog',
   templateUrl: './test-details-dialog.component.html',
-  styleUrls: ['./test-details-dialog.component.scss']
+  styleUrls: ['./test-details-dialog.component.scss'],
 })
 export class TestDetailsDialogComponent implements OnInit {
   // Für Einzeltest-Ansicht

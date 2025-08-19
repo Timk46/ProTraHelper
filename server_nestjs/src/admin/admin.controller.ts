@@ -10,7 +10,7 @@ import { JwtAuthGuard } from '../auth/common/guards/jwt-auth.guard';
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
   ) {}
 
   @roles('ADMIN')

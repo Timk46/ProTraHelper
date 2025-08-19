@@ -1,4 +1,5 @@
-import { ContentDTO, discussionCreationDTO, discussionFilterContentNodeDTO } from '@DTOs/index';
+import { discussionFilterContentNodeDTO } from '@DTOs/index';
+import { ContentDTO, discussionCreationDTO } from '@DTOs/index';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DiscussionCreationComponent } from 'src/app/Pages/discussion/discussion-creation/discussion-creation.component';
@@ -8,11 +9,14 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { ScreenSizeService } from '../mobile/screen-size.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DiscussionDialogService {
-
-  constructor(public sSS: ScreenSizeService , private dialog: MatDialog, private listService: DiscussionListService) { }
+  constructor(
+    public sSS: ScreenSizeService,
+    private readonly dialog: MatDialog,
+    private readonly listService: DiscussionListService,
+  ) {}
 
   /**
    * Opens the discussion creation dialog. The dialog is used to choose a content node for the discussion.
@@ -27,7 +31,7 @@ export class DiscussionDialogService {
         const landsub = this.sSS.isLandscape.subscribe(isLandscape => {
           const dialogRef = this.dialog.open(DiscussionPrecreationComponent, {
             width: isLandscape ? '40vw' : '80%',
-            data: contentNodes
+            data: contentNodes,
           });
 
           dialogRef.afterClosed().subscribe((result: discussionFilterContentNodeDTO) => {
@@ -38,7 +42,7 @@ export class DiscussionDialogService {
                 resolve(result);
               });
             } else {
-              reject("No result"); // Reject the promise with an error message
+              reject('No result'); // Reject the promise with an error message
             }
           });
         });
@@ -51,7 +55,11 @@ export class DiscussionDialogService {
    * Opens the discussion creation dialog. Here the user can create a discussion for the given concept and content node
    * @param discussionData
    */
-  async openDiscussionCreation(conceptNodeId: number, contentNodeId: number, contentElementId: number): Promise<number> {
+  async openDiscussionCreation(
+    conceptNodeId: number,
+    contentNodeId: number,
+    contentElementId: number,
+  ): Promise<number> {
     const isLandscape = await firstValueFrom(this.sSS.isLandscape);
     return new Promise<number>((resolve, reject) => {
       const dialogRef = this.dialog.open(DiscussionCreationComponent, {
@@ -59,24 +67,24 @@ export class DiscussionDialogService {
         panelClass: 'discussionDialog',
         data: {
           id: -1,
-          title: "",
+          title: '',
           conceptNodeId: conceptNodeId,
           contentNodeId: contentNodeId,
           contentElementId: contentElementId,
           authorId: -1,
-          isSolved: false
-        }
+          isSolved: false,
+        },
       });
 
       dialogRef.afterClosed().subscribe((result: number) => {
         if (result && result != -1) {
           //console.log("created discussion id: " + result);
           const url = `/discussion-view/${result}`;
-          window.open(url, "_blank");
+          window.open(url, '_blank');
           resolve(result);
         } else {
           //console.log("no discussion created");
-          reject("No discussion created");
+          reject('No discussion created');
         }
       });
     });

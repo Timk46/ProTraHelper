@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { CreateContentNodeDialogComponent } from './create-content-node-dialog.component';
 
@@ -8,9 +9,8 @@ describe('CreateContentNodeDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CreateContentNodeDialogComponent ]
-    })
-    .compileComponents();
+      declarations: [CreateContentNodeDialogComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CreateContentNodeDialogComponent);
     component = fixture.componentInstance;

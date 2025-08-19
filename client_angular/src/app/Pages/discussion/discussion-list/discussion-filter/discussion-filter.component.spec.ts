@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { DiscussionFilterComponent } from './discussion-filter.component';
 
@@ -8,9 +9,8 @@ describe('DiscussionFilterComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DiscussionFilterComponent ]
-    })
-    .compileComponents();
+      declarations: [DiscussionFilterComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DiscussionFilterComponent);
     component = fixture.componentInstance;

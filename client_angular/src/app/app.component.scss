@@ -15,7 +15,7 @@ Ipad notices
   overflow-x: hidden;
 
   /* Safari-specific styles */
-  @supports (-webkit-touch-callout:none) {
+  @supports (-webkit-touch-callout: none) {
     // for ipads brave and firefox we can use 100% while for chrome and safari we need to subtract the safe-area-inset values
     height: calc(100% - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
@@ -28,7 +28,7 @@ Ipad notices
 }
 
 .tablet-space {
-  @supports (-webkit-touch-callout:none) {
+  @supports (-webkit-touch-callout: none) {
     height: 30px; //footer-height
   }
 }
@@ -45,11 +45,10 @@ Ipad notices
 }
 
 .mat-divider {
-  margin-top:16px;
+  margin-top: 16px;
   margin-bottom: 16px;
   background-color: lightgrey;
 }
-
 
 .footer {
   z-index: 1000;
@@ -68,13 +67,15 @@ Ipad notices
   white-space: nowrap;
 
   /* Safari-specific styles */
-  @supports (-webkit-hyphens:none) {
+  @supports (-webkit-hyphens: none) {
     // important only for ipads safari
     bottom: env(safe-area-inset-bottom);
   }
 }
 
-.left-content, .center-content, .right-content {
+.left-content,
+.center-content,
+.right-content {
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -90,7 +91,8 @@ Ipad notices
   background-color: lightgrey;
 }
 
-button, a {
+button,
+a {
   line-height: 1; /* Reduziert den Zeilenabstand, um die Elemente kompakter zu machen */
   padding: 0 5px; /* Reduziertes Padding für Buttons und Links */
 }

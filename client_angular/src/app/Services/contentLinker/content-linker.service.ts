@@ -5,12 +5,10 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ContentLinkerService {
-
-  constructor(private http: HttpClient) { }
-
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Creates a linked content node.
@@ -19,7 +17,10 @@ export class ContentLinkerService {
    * @returns An observable of the created linkable content node DTO.
    */
   createLinkedContentNode(contentNode: LinkableContentNodeDTO): Observable<LinkableContentNodeDTO> {
-    return this.http.post<LinkableContentNodeDTO>(environment.server + '/content/linker/createLinkedContentNode', contentNode);
+    return this.http.post<LinkableContentNodeDTO>(
+      environment.server + '/content/linker/createLinkedContentNode',
+      contentNode,
+    );
   }
 
   /**
@@ -28,8 +29,13 @@ export class ContentLinkerService {
    * @param linkableQuestion - The linkable question to create.
    * @returns An observable of type `QuestionDTO` representing the created question.
    */
-  createLinkedContentElement(linkableContentElement: LinkableContentElementDTO): Observable<LinkableContentElementDTO> {
-    return this.http.post<LinkableContentElementDTO>(environment.server + '/content/linker/createLinkedContentElement', linkableContentElement);
+  createLinkedContentElement(
+    linkableContentElement: LinkableContentElementDTO,
+  ): Observable<LinkableContentElementDTO> {
+    return this.http.post<LinkableContentElementDTO>(
+      environment.server + '/content/linker/createLinkedContentElement',
+      linkableContentElement,
+    );
   }
 
   /**
@@ -39,9 +45,10 @@ export class ContentLinkerService {
    * @returns An Observable that emits a boolean indicating the success of the operation.
    */
   unlinkContentElement(contentElementId: number): Observable<boolean> {
-    return this.http.get<boolean>(environment.server + '/content/linker/unlinkContentElement/' + contentElementId);
+    return this.http.get<boolean>(
+      environment.server + '/content/linker/unlinkContentElement/' + contentElementId,
+    );
   }
-
 
   /**
    * Fetches a list of unlinked questions from the server.
@@ -60,14 +67,18 @@ export class ContentLinkerService {
    * @returns An Observable that emits a boolean indicating the success of the operation.
    */
   updateContentNodePosition(contentNodeId: number, newPosition: number): Observable<boolean> {
-    return this.http.get<boolean>(`${environment.server}/content/updatePosition/${contentNodeId}/${newPosition}`);
+    return this.http.get<boolean>(
+      `${environment.server}/content/updatePosition/${contentNodeId}/${newPosition}`,
+    );
   }
 
   /**
    * Aktualisiert einen ContentNode (Name, Beschreibung, Level)
    */
-  updateContentNode(contentNodeId: number, data: { name: string; description: string; difficulty: number }): Observable<boolean> {
+  updateContentNode(
+    contentNodeId: number,
+    data: { name: string; description: string; difficulty: number },
+  ): Observable<boolean> {
     return this.http.patch<boolean>(`${environment.server}/content/update/${contentNodeId}`, data);
   }
-
 }

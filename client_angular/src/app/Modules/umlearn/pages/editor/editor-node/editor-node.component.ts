@@ -1,23 +1,22 @@
 import { EditorElement } from '@DTOs/index';
 import { ClassNode } from '@DTOs/index';
-import { Component, ElementRef, Input, SimpleChanges } from '@angular/core';
+import { ElementRef, SimpleChanges, OnChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { NotificationService } from '@UMLearnServices/notification.service';
-
 
 @Component({
   selector: 'app-editor-node',
   templateUrl: './editor-node.component.html',
-  styleUrls: ['./editor-node.component.scss']
+  styleUrls: ['./editor-node.component.scss'],
 })
-export class EditorNodeComponent {
-
+export class EditorNodeComponent implements OnChanges {
   @Input() model!: string;
   @Input() backgroundColor: string | undefined;
-  @Input() elementData : ClassNode = {
-    identification: "",
+  @Input() elementData: ClassNode = {
+    identification: '',
     type: EditorElement.CD_CLASS,
-    id: "",
-    position: {x: 0, y: 0},
+    id: '',
+    position: { x: 0, y: 0 },
     width: 0,
     height: 0,
   };
@@ -32,9 +31,9 @@ export class EditorNodeComponent {
   addedMethods: any[] = [];
   deletedMethods: any[] = [];
 
-  constructor(public el: ElementRef) { }
+  constructor(public el: ElementRef) {}
 
-  ngOnChanges(changes: SimpleChanges){
+  ngOnChanges(changes: SimpleChanges) {
     if (this.elementData.highlighted) {
       if (this.elementData.highlighted.updated) {
         if (this.elementData.highlighted.updated.title) {
@@ -66,14 +65,12 @@ export class EditorNodeComponent {
         }
       }
 
-      if(this.elementData.highlighted.code == "missing") {
-        this.backgroundColor = "#A9A9A9";
+      if (this.elementData.highlighted.code == 'missing') {
+        this.backgroundColor = '#A9A9A9';
       }
-      if(this.elementData.highlighted.code == "not_found") {
-        this.backgroundColor = "#FFFFE0";
+      if (this.elementData.highlighted.code == 'not_found') {
+        this.backgroundColor = '#FFFFE0';
       }
     }
   }
 }
-
-

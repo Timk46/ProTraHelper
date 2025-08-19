@@ -1,7 +1,10 @@
+import { OnInit, AfterViewInit } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { detailedFreetextQuestionDTO, detailedQuestionDTO, questionType } from '@DTOs/index';
+import { detailedQuestionDTO } from '@DTOs/index';
+import { detailedFreetextQuestionDTO, questionType } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
@@ -10,10 +13,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 @Component({
   selector: 'app-edit-freetext',
   templateUrl: './edit-freetext.component.html',
-  styleUrls: ['./edit-freetext.component.scss']
+  styleUrls: ['./edit-freetext.component.scss'],
 })
-export class EditFreetextComponent {
-
+export class EditFreetextComponent implements OnInit, AfterViewInit {
   @ViewChild('question') questionField!: TinymceComponent;
   @ViewChild('expectations') expectationField!: TinymceComponent;
   @ViewChild('solution') solutionField!: TinymceComponent;
@@ -27,22 +29,22 @@ export class EditFreetextComponent {
   editorConfig = {
     readonly: false,
     plugins: 'autoresize lists table link image code codesample',
-    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
+    toolbar:
+      'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
     min_height: 300,
     max_height: 600,
     resize: false,
-  }
+  };
 
   detailedQuestionData: detailedQuestionDTO | null = null;
 
   constructor(
-    private fb: FormBuilder,
-    private questionDataService: QuestionDataService,
-    private route: ActivatedRoute,
-    private confirmationService: ConfirmationService,
-    private snackBar: MatSnackBar,
-    private router: Router
-
+    private readonly fb: FormBuilder,
+    private readonly questionDataService: QuestionDataService,
+    private readonly route: ActivatedRoute,
+    private readonly confirmationService: ConfirmationService,
+    private readonly snackBar: MatSnackBar,
+    private readonly router: Router,
   ) {
     this.freeTextForm = this.fb.group({
       questionTitle: ['', Validators.required],
@@ -62,21 +64,26 @@ export class EditFreetextComponent {
     }, 0);
   }
 
-
-
   private handleRouteParams() {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
-      this.questionDataService.getDetailedQuestionData(questionId, this.thisQuestionType).subscribe(data => {
-        if (data.type === questionType.FREETEXT) { // Kommentar Sven: hab hier auch die entsprechende questionType anstelle des Strings eingefügt. Bitte testen.
-          this.detailedQuestionData = data;
-          console.log(this.detailedQuestionData);
-          this.setContent();
-        } else {
-          this.snackBar.open('ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Freitextaufgabe!', 'Schließen', { duration: 10000 });
-          this.thisQuestionType = data.type as questionType;
-        }
-      });
+      this.questionDataService
+        .getDetailedQuestionData(questionId, this.thisQuestionType)
+        .subscribe(data => {
+          if (data.type === questionType.FREETEXT) {
+            // Kommentar Sven: hab hier auch die entsprechende questionType anstelle des Strings eingefügt. Bitte testen.
+            this.detailedQuestionData = data;
+            console.log(this.detailedQuestionData);
+            this.setContent();
+          } else {
+            this.snackBar.open(
+              'ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Freitextaufgabe!',
+              'Schließen',
+              { duration: 10000 },
+            );
+            this.thisQuestionType = data.type as questionType;
+          }
+        });
     });
   }
 
@@ -89,14 +96,21 @@ export class EditFreetextComponent {
         questionScore: this.detailedQuestionData.score,
       });
       if (this.detailedQuestionData.freetextQuestion) {
-        this.questionField.setContent(this.detailedQuestionData.freetextQuestion.textHTML || this.detailedQuestionData.text);
-        this.expectationField.setContent(this.detailedQuestionData.freetextQuestion.expectationsHTML || this.detailedQuestionData.freetextQuestion.expectations);
-        this.solutionField.setContent(this.detailedQuestionData.freetextQuestion.exampleSolutionHTML || this.detailedQuestionData.freetextQuestion.exampleSolution || '');
+        this.questionField.setContent(
+          this.detailedQuestionData.freetextQuestion.textHTML || this.detailedQuestionData.text,
+        );
+        this.expectationField.setContent(
+          this.detailedQuestionData.freetextQuestion.expectationsHTML ||
+            this.detailedQuestionData.freetextQuestion.expectations,
+        );
+        this.solutionField.setContent(
+          this.detailedQuestionData.freetextQuestion.exampleSolutionHTML ||
+            this.detailedQuestionData.freetextQuestion.exampleSolution ||
+            '',
+        );
       }
     }
-
   }
-
 
   protected onOverwrite() {
     this.confirmationService.confirm({
@@ -107,18 +121,20 @@ export class EditFreetextComponent {
       accept: () => {
         this.isSaving = true;
         const submitData = this.buildDTO();
-        if (submitData){
+        if (submitData) {
           this.questionDataService.updateWholeQuestion(submitData).subscribe({
             next: response => {
               console.log('Question updated successfully:', response);
               this.snackBar.open('Frage erfolgreich aktualisiert', 'Schließen', { duration: 3000 });
-              this.isSaving = false
+              this.isSaving = false;
             },
             error: error => {
               console.error('Error updating question:', error);
-              this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', { duration: 3000 });
+              this.snackBar.open('Fehler beim Aktualisieren der Frage', 'Schließen', {
+                duration: 3000,
+              });
               this.isSaving = false;
-            }
+            },
           });
         } else {
           this.isSaving = false;
@@ -126,16 +142,17 @@ export class EditFreetextComponent {
       },
       decline: () => {
         console.log('Overwrite declined');
-      }
+      },
     });
   }
 
   protected onSaveNewVersion() {
-    return // disabled for now
+    return; // disabled for now
 
     this.confirmationService.confirm({
       title: 'Neue Version erstellen',
-      message: 'Dies speichert die Frage unter einer neuen Version. Die alte Version bleibt erhalten, aber nicht mehr sichtbar. Fortfahren?',
+      message:
+        'Dies speichert die Frage unter einer neuen Version. Die alte Version bleibt erhalten, aber nicht mehr sichtbar. Fortfahren?',
       acceptLabel: 'Version erstellen',
       declineLabel: 'Abbrechen',
       accept: () => {
@@ -144,14 +161,15 @@ export class EditFreetextComponent {
       },
       decline: () => {
         console.log('Save declined');
-      }
+      },
     });
   }
 
   protected onCancel() {
     this.confirmationService.confirm({
       title: 'Bearbeitung abbrechen',
-      message: 'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
+      message:
+        'Dies schließt die Bearbeitung der Frage. Alle ungespeicherten Daten gehen verloren. Fortfahren?',
       acceptLabel: 'Bearbeitung abbrechen',
       declineLabel: 'Weiter bearbeiten',
       swapColors: true,
@@ -161,12 +179,16 @@ export class EditFreetextComponent {
       },
       decline: () => {
         console.log('Cancel declined');
-      }
+      },
     });
   }
 
   private buildDTO(): detailedQuestionDTO | null {
-    if (this.thisQuestionType === questionType.FREETEXT && this.freeTextForm.valid && this.detailedQuestionData){
+    if (
+      this.thisQuestionType === questionType.FREETEXT &&
+      this.freeTextForm.valid &&
+      this.detailedQuestionData
+    ) {
       const newData: detailedQuestionDTO = {
         ...this.detailedQuestionData,
         name: this.freeTextForm.value.questionTitle,
@@ -182,8 +204,8 @@ export class EditFreetextComponent {
           expectationsHTML: this.expectationField.getContent(),
           exampleSolution: this.solutionField.getRawContent(),
           exampleSolutionHTML: this.solutionField.getContent(),
-        }
-      }
+        },
+      };
       return newData;
     }
     return null;

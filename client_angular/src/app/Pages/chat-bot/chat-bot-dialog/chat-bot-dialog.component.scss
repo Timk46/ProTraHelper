@@ -137,7 +137,7 @@
     border-bottom-left-radius: 4px;
 
     &::after {
-      content: "...";
+      content: '...';
       animation: loading 1s infinite;
     }
   }
@@ -184,7 +184,8 @@
   }
 
   @keyframes bounce {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0);
     }
     50% {
@@ -193,7 +194,9 @@
   }
 
   button {
-    transition: transform 0.3s ease, color 0.3s ease;
+    transition:
+      transform 0.3s ease,
+      color 0.3s ease;
 
     &:hover {
       transform: scale(1.1);
@@ -264,9 +267,15 @@
 }
 
 @keyframes loading {
-  0% { content: "."; }
-  33% { content: ".."; }
-  66% { content: "..."; }
+  0% {
+    content: '.';
+  }
+  33% {
+    content: '..';
+  }
+  66% {
+    content: '...';
+  }
 }
 
 @keyframes rateAnimation {

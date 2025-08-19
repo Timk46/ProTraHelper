@@ -1,23 +1,29 @@
-import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO, discussionNodeNamesDTO } from '@DTOs/index';
+import {
+  AnonymousUserDTO,
+  discussionCreationDTO,
+  discussionMessageCreationDTO,
+  discussionNodeNamesDTO,
+} from '@DTOs/index';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/internal/Observable';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DiscussionCreationService {
-
-  constructor(private http:HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Returns the anonymous user for the logged in user by discussion id
    * @param discussionId
    * @returns Observable<AnonymousUserDTO>
    */
-  getAnonymousUser(discussionId: number) : Observable<AnonymousUserDTO>{
-    return this.http.get<AnonymousUserDTO>(environment.server + `/discussion/creation/anonymousUser/${discussionId}`);
+  getAnonymousUser(discussionId: number): Observable<AnonymousUserDTO> {
+    return this.http.get<AnonymousUserDTO>(
+      environment.server + `/discussion/creation/anonymousUser/${discussionId}`,
+    );
   }
 
   /**
@@ -25,8 +31,13 @@ export class DiscussionCreationService {
    * @param message
    * @returns Observable<discussionMessageCreationDTO>
    */
-  createDiscussionMessage(message: discussionMessageCreationDTO): Observable<discussionMessageCreationDTO> {
-    return this.http.post<discussionMessageCreationDTO>(environment.server + '/discussion/creation/messages/create', message);
+  createDiscussionMessage(
+    message: discussionMessageCreationDTO,
+  ): Observable<discussionMessageCreationDTO> {
+    return this.http.post<discussionMessageCreationDTO>(
+      environment.server + '/discussion/creation/messages/create',
+      message,
+    );
   }
 
   /**
@@ -45,7 +56,14 @@ export class DiscussionCreationService {
    * @param contentElementId
    * @returns
    */
-  getNodeNames(conceptNodeId: number, contentNodeId: number, contentElementId: number) : Observable<discussionNodeNamesDTO> {
-    return this.http.get<discussionNodeNamesDTO>(environment.server + `/discussion/creation/nodeNames/${conceptNodeId}/${contentNodeId}/${contentElementId}`)
+  getNodeNames(
+    conceptNodeId: number,
+    contentNodeId: number,
+    contentElementId: number,
+  ): Observable<discussionNodeNamesDTO> {
+    return this.http.get<discussionNodeNamesDTO>(
+      environment.server +
+        `/discussion/creation/nodeNames/${conceptNodeId}/${contentNodeId}/${contentElementId}`,
+    );
   }
 }

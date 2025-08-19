@@ -7,6 +7,6 @@ import { SimilarityCompareService } from './similarity-compare.service';
 @Module({
   providers: [CompareService, SimilarityCompareService, PointCalculationService],
   controllers: [CompareController],
-  exports: [CompareService, SimilarityCompareService]
+  exports: [CompareService, SimilarityCompareService],
 })
 export class CompareModule {}

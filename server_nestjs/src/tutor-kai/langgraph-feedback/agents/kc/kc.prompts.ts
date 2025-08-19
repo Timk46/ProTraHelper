@@ -1,9 +1,13 @@
-import { ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate } from '@langchain/core/prompts';
+import {
+  ChatPromptTemplate,
+  SystemMessagePromptTemplate,
+  HumanMessagePromptTemplate,
+} from '@langchain/core/prompts';
 
 // Revised getConceptsPrompt (Draft 2)
 export const getConceptsPrompt = ChatPromptTemplate.fromMessages([
   SystemMessagePromptTemplate.fromTemplate(
-`You are an expert Computer Science Professor with strong pedagogical knowledge, specializing in identifying conceptual hurdles for novice programmers.
+    `You are an expert Computer Science Professor with strong pedagogical knowledge, specializing in identifying conceptual hurdles for novice programmers.
 
 Your task is to analyze the provided student context (task description, code, output) and identify the one or two most critical computer science concepts the student needs to understand better to solve the programming task. Then, you must formulate specific questions about these concepts to query the \`search_domain_knowledge\` tool for relevant lecture materials.
 
@@ -21,27 +25,26 @@ Your task is to analyze the provided student context (task description, code, ou
 - Formulate concise, targeted queries for the tool (vector query). Avoid overly broad questions.
 - Focus ONLY on generating tool calls. **Do not generate any other output**.
 
-Based on your analysis of the context below, identify the key concept and **generate only the appropriate tool call**.`
+Based on your analysis of the context below, identify the key concept and **generate only the appropriate tool call**.`,
   ),
   HumanMessagePromptTemplate.fromTemplate(
     'BEGINCONTEXT\n' +
-    '# Task for the student:\n{task}\n\n' +
-    '# Programming Language:\n{language}\n\n' +
-    "# Student's Solution:\n{code}\n\n" +
-    '# Compiler and Unit Test Output:\n{output}\n\n' +
-    '# Unit Tests and Results:\n ' +
-    'The unit tests and their results are provided in JSON format for internal use only.\n ' +
-    '## Unit Test Cases:\n{unitTests}\n\n' +
-    '## Unit Test Results:\n{unitTestsResults}\n' +
-    'ENDCONTEXT'
+      '# Task for the student:\n{task}\n\n' +
+      '# Programming Language:\n{language}\n\n' +
+      "# Student's Solution:\n{code}\n\n" +
+      '# Compiler and Unit Test Output:\n{output}\n\n' +
+      '# Unit Tests and Results:\n ' +
+      'The unit tests and their results are provided in JSON format for internal use only.\n ' +
+      '## Unit Test Cases:\n{unitTests}\n\n' +
+      '## Unit Test Results:\n{unitTestsResults}\n' +
+      'ENDCONTEXT',
   ),
 ]);
 
 // Revised generateFeedbackPrompt (Draft 6 - Strictly KC, Persona Update)
 export const generateFeedbackPrompt = ChatPromptTemplate.fromMessages([
   SystemMessagePromptTemplate.fromTemplate(
-
-`You are an expert Computer Science Professor with strong pedagogical and didactical knowledge, specializing in computer science education. Your expertise lies in explaining core programming concepts clearly and effectively to introductory students, leveraging lecture materials.
+    `You are an expert Computer Science Professor with strong pedagogical and didactical knowledge, specializing in computer science education. Your expertise lies in explaining core programming concepts clearly and effectively to introductory students, leveraging lecture materials.
 
 Your task is to generate **strictly "Knowledge about Concepts" (KC)** feedback for the student based on their submitted code, the task description, compiler/test output, and relevant snippets from lecture materials provided.
 
@@ -70,20 +73,20 @@ Your task is to generate **strictly "Knowledge about Concepts" (KC)** feedback f
 - **Be brief and precise.**
 - Use clear, simple german language suitable for a novice programmer. Explain necessary jargon briefly.
 
-Generate the feedback based on your analysis and the provided context, strictly adhering to these KC goals and constraints.`
+Generate the feedback based on your analysis and the provided context, strictly adhering to these KC goals and constraints.`,
   ),
   HumanMessagePromptTemplate.fromTemplate(
     '# Task for the student:\n{task}\n\n' +
-    '# Programming Language:\n{language}\n\n' +
-    "# Student's Solution:\n{code}\n\n" +
-    '# Compiler and Unit Test Output:\n{output}\n\n' +
-    '# Unit Tests and Results:\n ' +
-    'The unit tests and their results are provided in JSON format for internal use only.\n ' +
-    '## Unit Test Cases:\n{unitTests}\n\n' +
-    '## Unit Test Results:\n{unitTestsResults}\n\n' +
-    '# Lecture Snippets:\n' +
-    '{lectureSnippet}\n\n' + // This is where the fetched snippets will be injected
-    '# Important Instruction\n' +
-    'Generate feedback focused **exclusively on explaining relevant concepts (KC)** for the student. Remember to cite explanations from the lecture snippets ONLY when they are directly relevant and necessary for the conceptual explanation, using the format \\\`$$Number$$\\\`.'
+      '# Programming Language:\n{language}\n\n' +
+      "# Student's Solution:\n{code}\n\n" +
+      '# Compiler and Unit Test Output:\n{output}\n\n' +
+      '# Unit Tests and Results:\n ' +
+      'The unit tests and their results are provided in JSON format for internal use only.\n ' +
+      '## Unit Test Cases:\n{unitTests}\n\n' +
+      '## Unit Test Results:\n{unitTestsResults}\n\n' +
+      '# Lecture Snippets:\n' +
+      '{lectureSnippet}\n\n' + // This is where the fetched snippets will be injected
+      '# Important Instruction\n' +
+      'Generate feedback focused **exclusively on explaining relevant concepts (KC)** for the student. Remember to cite explanations from the lecture snippets ONLY when they are directly relevant and necessary for the conceptual explanation, using the format \\`$$Number$$\\`.',
   ),
 ]);

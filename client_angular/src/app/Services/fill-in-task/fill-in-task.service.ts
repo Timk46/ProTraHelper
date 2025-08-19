@@ -5,12 +5,12 @@ import { BlankDTO, FillinQuestionDTO } from '@DTOs/fillInText.dto';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FillInTaskService {
-  private apiUrl = environment.server; // Replace with your actual API URL
+  private readonly apiUrl = environment.server; // Replace with your actual API URL
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Get all fill-in tasks
@@ -28,9 +28,9 @@ export class FillInTaskService {
   createFillInTask(createTaskDto: FillinQuestionDTO): Observable<FillinQuestionDTO> {
     createTaskDto.blanks = createTaskDto.blanks.map(blank => ({
       ...blank,
-      isDistractor: blank.isDistractor || false
+      isDistractor: blank.isDistractor || false,
     }));
-    console.log("sending data from frontend service: ", createTaskDto)
+    console.log('sending data from frontend service: ', createTaskDto);
     return this.http.post<FillinQuestionDTO>(`${this.apiUrl}/fill-in-tasks/task`, createTaskDto);
   }
 
@@ -40,7 +40,10 @@ export class FillInTaskService {
    * @returns {Observable<any>} The updated blank
    */
   updateBlank(updateBlankDto: BlankDTO): Observable<BlankDTO> {
-    return this.http.put<BlankDTO>(`${this.apiUrl}/fill-in-tasks/blank/${updateBlankDto.id}`, updateBlankDto);
+    return this.http.put<BlankDTO>(
+      `${this.apiUrl}/fill-in-tasks/blank/${updateBlankDto.id}`,
+      updateBlankDto,
+    );
   }
 
   /**
@@ -49,8 +52,10 @@ export class FillInTaskService {
    * @returns {Observable<FillinQuestionDTO>} The updated task
    */
   updateFillInTask(updateTaskDto: FillinQuestionDTO): Observable<FillinQuestionDTO> {
-    return this.http.put<FillinQuestionDTO>(`${this.apiUrl}/fill-in-tasks/${updateTaskDto.id}`, updateTaskDto);
-
+    return this.http.put<FillinQuestionDTO>(
+      `${this.apiUrl}/fill-in-tasks/${updateTaskDto.id}`,
+      updateTaskDto,
+    );
   }
 
   /**

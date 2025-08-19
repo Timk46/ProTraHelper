@@ -16,15 +16,15 @@ import { Title } from '@angular/platform-browser';
 })
 export class LoginComponent implements OnInit {
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private userService: UserService,
-    private formBuilder: FormBuilder,
-    private title: Title
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly userService: UserService,
+    private readonly formBuilder: FormBuilder,
+    private readonly title: Title,
   ) {
     this.loginForm = this.formBuilder.group({
       username: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
+      password: ['', Validators.required],
     });
   }
 
@@ -40,7 +40,7 @@ export class LoginComponent implements OnInit {
    * If both tokens are present, it then navigates to the '/dashboard' page.
    */
   ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
+    this.route.queryParams.subscribe(params => {
       const accessToken = params['accessToken'];
       const refreshToken = params['refreshToken'];
 
@@ -73,7 +73,7 @@ export class LoginComponent implements OnInit {
         return 'Safari';
       default:
         return 'other';
-      }
+    }
   }
 
   /**
@@ -86,12 +86,12 @@ export class LoginComponent implements OnInit {
     window.location.href = `${environment.server}/auth/cas/?device-id=${deviceId}`;
   }
 
-  loginWithPassword(){
+  loginWithPassword() {
     if (this.loginForm.invalid) {
       Object.values(this.loginForm.controls).forEach(control => {
         control.markAsTouched();
       });
-      console.error("Form is invalid");
+      console.error('Form is invalid');
       return;
     }
 

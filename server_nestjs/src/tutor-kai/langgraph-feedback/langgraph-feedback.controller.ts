@@ -1,4 +1,14 @@
-import { Controller, Post, Body, UseGuards, Req, InternalServerErrorException, NotFoundException, ValidationPipe, Logger } from '@nestjs/common'; // Added Logger, ValidationPipe
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  InternalServerErrorException,
+  NotFoundException,
+  ValidationPipe,
+  Logger,
+} from '@nestjs/common'; // Added Logger, ValidationPipe
 import { JwtAuthGuard } from 'src/auth/common/guards/jwt-auth.guard';
 import { LanggraphFeedbackService } from './langgraph-feedback.service'; // Facade service
 // Remove DirectAgentService import
@@ -6,7 +16,8 @@ import { LanggraphDataFetcherService } from './helper/langgraph-data-fetcher.ser
 import { CodeSubmissionResultDto } from '@DTOs/tutorKaiDtos/submission.dto';
 import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
 import { Request } from 'express';
-import { BaseMessage, AIMessage } from '@langchain/core/messages'; // Import AIMessage
+import { BaseMessage } from '@langchain/core/messages';
+import { AIMessage } from '@langchain/core/messages'; // Import AIMessage
 
 // DTO for the combined evaluate request
 interface EvaluateRequestDto {
@@ -32,7 +43,9 @@ export class LanggraphFeedbackController {
     const { questionId, relatedCodeSubmissionResult } = body;
     const { encryptedCodeSubissionId, CodeSubmissionResult } = relatedCodeSubmissionResult;
     if (!encryptedCodeSubissionId || !CodeSubmissionResult) {
-      throw new InternalServerErrorException('Missing required fields in relatedCodeSubmissionResult.');
+      throw new InternalServerErrorException(
+        'Missing required fields in relatedCodeSubmissionResult.',
+      );
     }
     return this.langgraphDataFetcherService.fetchFeedbackContextDto(
       encryptedCodeSubissionId,
@@ -45,7 +58,7 @@ export class LanggraphFeedbackController {
   private extractFeedbackContent(messages: BaseMessage[] | null): string | null {
     if (!messages) return null;
     const aiMsg = messages.find(msg => msg instanceof AIMessage);
-    return aiMsg?.content?.toString() ?? null;
+    return aiMsg.content.toString() ?? null;
   }
 
   // --- Supervisor Endpoint ---
@@ -69,8 +82,9 @@ export class LanggraphFeedbackController {
   @Post('kc')
   async getKcFeedback(
     @Body(ValidationPipe) body: EvaluateRequestDto,
-  ): Promise<{ feedback: string | null }> { // Return string feedback for consistency?
-     this.logger.log(`KC direct endpoint called for question ${body.questionId}`);
+  ): Promise<{ feedback: string | null }> {
+    // Return string feedback for consistency?
+    this.logger.log(`KC direct endpoint called for question ${body.questionId}`);
     try {
       const feedbackContext = await this.fetchContext(body);
       const feedbackMessages = await this.langgraphFeedbackService.getKcFeedback(feedbackContext);
@@ -87,8 +101,8 @@ export class LanggraphFeedbackController {
   async getKhFeedback(
     @Body(ValidationPipe) body: EvaluateRequestDto,
   ): Promise<{ feedback: string | null }> {
-     this.logger.log(`KH direct endpoint called for question ${body.questionId}`);
-     try {
+    this.logger.log(`KH direct endpoint called for question ${body.questionId}`);
+    try {
       const feedbackContext = await this.fetchContext(body);
       const feedbackMessages = await this.langgraphFeedbackService.getKhFeedback(feedbackContext);
       return { feedback: this.extractFeedbackContent(feedbackMessages) };
@@ -104,8 +118,8 @@ export class LanggraphFeedbackController {
   async getKmFeedback(
     @Body(ValidationPipe) body: EvaluateRequestDto,
   ): Promise<{ feedback: string | null }> {
-     this.logger.log(`KM direct endpoint called for question ${body.questionId}`);
-     try {
+    this.logger.log(`KM direct endpoint called for question ${body.questionId}`);
+    try {
       const feedbackContext = await this.fetchContext(body);
       const feedbackMessages = await this.langgraphFeedbackService.getKmFeedback(feedbackContext);
       return { feedback: this.extractFeedbackContent(feedbackMessages) };
@@ -121,8 +135,8 @@ export class LanggraphFeedbackController {
   async getKtcFeedback(
     @Body(ValidationPipe) body: EvaluateRequestDto,
   ): Promise<{ feedback: string | null }> {
-     this.logger.log(`KTC direct endpoint called for question ${body.questionId}`);
-     try {
+    this.logger.log(`KTC direct endpoint called for question ${body.questionId}`);
+    try {
       const feedbackContext = await this.fetchContext(body);
       const feedbackMessages = await this.langgraphFeedbackService.getKtcFeedback(feedbackContext);
       return { feedback: this.extractFeedbackContent(feedbackMessages) };

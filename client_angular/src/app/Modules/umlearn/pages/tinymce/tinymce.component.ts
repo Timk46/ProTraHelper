@@ -1,23 +1,23 @@
-import { Component, Input, SimpleChanges } from '@angular/core';
+import { SimpleChanges, OnChanges, OnDestroy } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
-declare var tinymce: any;
+declare let tinymce: any;
 
 @Component({
   selector: 'app-tinymce',
   templateUrl: './tinymce.component.html',
-  styleUrls: ['./tinymce.component.scss']
+  styleUrls: ['./tinymce.component.scss'],
 })
-export class TinymceComponent {
-
-  @Input() content: string = "";
+export class TinymceComponent implements OnChanges, OnDestroy {
+  @Input() content: string = '';
   @Input() tinymceConfig: any = {};
   @Input() isMarkOnly: boolean = false;
 
   isReadonly: boolean = false;
 
-  constructor(){}
+  constructor() {}
 
-  ngOnChanges( changes: SimpleChanges): void {
+  ngOnChanges(changes: SimpleChanges): void {
     if (changes['tinymceConfig'] && changes['content']) {
       const content = this.content;
       // do not change this here, change it over the content input
@@ -35,7 +35,6 @@ export class TinymceComponent {
         min_height: 300,
         max_height: 500,
         resize: false, */
-
       };
 
       this.tinymceConfig = Object.assign(defaultConfig, this.tinymceConfig);
@@ -46,14 +45,22 @@ export class TinymceComponent {
             editor.setContent(content == undefined ? '' : content);
           });
           editor.on('keydown', (e: any) => {
-            if (this.isMarkOnly && (e.key !== 'ArrowLeft') && (e.key !== 'ArrowRight') && (e.key !== 'ArrowUp') && (e.key !== 'ArrowDown') && (e.key !== 'Shift')) { //!e.ctrlKey && !e.altKey && !e.metaKey
+            if (
+              this.isMarkOnly &&
+              e.key !== 'ArrowLeft' &&
+              e.key !== 'ArrowRight' &&
+              e.key !== 'ArrowUp' &&
+              e.key !== 'ArrowDown' &&
+              e.key !== 'Shift'
+            ) {
+              //!e.ctrlKey && !e.altKey && !e.metaKey
               // prevent arrow keys from moving the cursor
               e.preventDefault();
               return false;
             }
             return true;
           });
-        }
+        },
       });
     }
   }
@@ -61,11 +68,11 @@ export class TinymceComponent {
   /**
    * Change the view of the editor
    */
-  changeView(){
+  changeView() {
     if (this.isReadonly) {
-      tinymce.get("tinymce").mode.set("readonly");
+      tinymce.get('tinymce').mode.set('readonly');
     } else {
-      tinymce.get("tinymce").mode.set("design");
+      tinymce.get('tinymce').mode.set('design');
     }
   }
 
@@ -74,7 +81,7 @@ export class TinymceComponent {
    * @returns the content of the editor
    */
   getContent(): string {
-    return tinymce.get("tinymce").getContent();
+    return tinymce.get('tinymce').getContent();
   }
 
   /**
@@ -82,14 +89,14 @@ export class TinymceComponent {
    * @param content the content to set
    */
   setContent(content: string): void {
-    tinymce.get("tinymce").setContent(content);
+    tinymce.get('tinymce').setContent(content);
   }
 
   /**
    * Destroys the editor
    */
   destroy(): void {
-    tinymce.get("tinymce").destroy();
+    tinymce.get('tinymce').destroy();
   }
 
   /**
@@ -97,7 +104,6 @@ export class TinymceComponent {
    * destroys the TinyMCE instance.
    */
   ngOnDestroy(): void {
-    tinymce.get("tinymce").destroy();
+    tinymce.get('tinymce').destroy();
   }
-
 }

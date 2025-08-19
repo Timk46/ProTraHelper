@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { ImageUploadDialogComponent } from './image-upload-dialog.component';
 
@@ -8,9 +9,8 @@ describe('ImageUploadDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ImageUploadDialogComponent ]
-    })
-    .compileComponents();
+      declarations: [ImageUploadDialogComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ImageUploadDialogComponent);
     component = fixture.componentInstance;

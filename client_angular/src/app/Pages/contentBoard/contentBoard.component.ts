@@ -1,8 +1,11 @@
 import { ProgressService } from 'src/app/Services/progress/progress.service';
-import { ContentDTO, ContentsForConceptDTO, LinkableContentElementDTO, questionType } from '@DTOs/index';
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { ContentDTO, ContentsForConceptDTO, LinkableContentElementDTO } from '@DTOs/index';
+import { questionType } from '@DTOs/index';
+import { OnChanges, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogConfig } from '@angular/material/dialog';
 import { ContentViewComponent } from '../contentView/contentView.component';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
@@ -29,8 +32,7 @@ import { MatAccordion } from '@angular/material/expansion';
   templateUrl: './contentBoard.component.html',
   styleUrls: ['./contentBoard.component.css'],
 })
-export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
-
+export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   /**
    * Event emitter that triggers a refresh of the contents for the current concept
    * Used to notify parent components when content needs to be reloaded
@@ -57,13 +59,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Columns to be displayed in the table
    */
-  displayedColumns: string[] = [
-    'id',
-    'name',
-    'type',
-    'progress',
-    'actions'
-  ];
+  displayedColumns: string[] = ['id', 'name', 'type', 'progress', 'actions'];
 
   /**
    * Data source for the MatTable
@@ -73,21 +69,21 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Subject to manage subscriptions and trigger their unsubscription on component destruction
    */
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
   // for lecturers view
   protected isAdmin: boolean = false;
   protected editModeActive: boolean = false;
 
   constructor(
-    private router: Router,
+    private readonly router: Router,
     public dialog: MatDialog,
     public sSS: ScreenSizeService,
-    private progressService: ProgressService,
-    private userService: UserService,
-    private contentLinkerService: ContentLinkerService,
-    private confirmService: ConfirmationService,
-    private snackBar: MatSnackBar,
+    private readonly progressService: ProgressService,
+    private readonly userService: UserService,
+    private readonly contentLinkerService: ContentLinkerService,
+    private readonly confirmService: ConfirmationService,
+    private readonly snackBar: MatSnackBar,
   ) {
     // Initialize the data source for the table
     this.dataSource = new MatTableDataSource<TaskViewData>();
@@ -98,23 +94,21 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit() {
-
-
     // Subscribe to screen size changes for responsive design
-    this.userService.hasEditModeActive$.subscribe((hasEditModeActive) => {
+    this.userService.hasEditModeActive$.subscribe(hasEditModeActive => {
       this.editModeActive = hasEditModeActive;
       if (hasEditModeActive) {
-        this.updateDisplayedColumns(['id', 'name', 'type','progress', 'actions']);
+        this.updateDisplayedColumns(['id', 'name', 'type', 'progress', 'actions']);
       } else {
-        this.sSS.isHandset.pipe(takeUntil(this.destroy$)).subscribe((isHandset) => {
+        this.sSS.isHandset.pipe(takeUntil(this.destroy$)).subscribe(isHandset => {
           if (isHandset) {
             this.updateDisplayedColumns(['name', 'type', 'progress', 'actions']);
           }
         });
 
-        this.sSS.isTablet.pipe(takeUntil(this.destroy$)).subscribe((isTablet) => {
+        this.sSS.isTablet.pipe(takeUntil(this.destroy$)).subscribe(isTablet => {
           if (isTablet) {
-            this.updateDisplayedColumns(['id','name','type', 'progress', 'actions']);
+            this.updateDisplayedColumns(['id', 'name', 'type', 'progress', 'actions']);
           }
         });
       }
@@ -191,11 +185,12 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
 
     // Handle dialog close event
     // We use this to update the data source and refresh graph is progress is 100%
-    if (type[0] != "VIDEO" && type[0] != "PDF") { // Dont update progress for video and pdf
+    if (type[0] != 'VIDEO' && type[0] != 'PDF') {
+      // Dont update progress for video and pdf
       dialogRef.afterClosed().subscribe(() => {
         // Find the updated content in contentsForActiveConceptNode
         const updatedContent = this.contentsForActiveConceptNode.trainedBy.find(
-          c => c.contentNodeId === content.contentNodeId
+          c => c.contentNodeId === content.contentNodeId,
         );
 
         // If the content is fully completed (100% progress), trigger a graph update
@@ -218,7 +213,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     dialogConfig.data = {
       taskViewData: selectedTask,
       conceptId: this.activeConceptNodeId,
-      questionId: selectedTask.id
+      questionId: selectedTask.id,
     };
     dialogConfig.width = 'auto';
     dialogConfig.maxHeight = '95vh';
@@ -226,12 +221,13 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
     const taskId = selectedTask.id;
 
     if (conceptId === undefined || taskId === undefined) {
-      console.error("Concept ID or Task ID is undefined");
+      console.error('Concept ID or Task ID is undefined');
       this.snackBar.open('Ungültige Konzept-ID oder Task-ID.', 'Schließen', { duration: 3000 });
       return;
     }
-    let dialogRef: MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined;
-
+    let dialogRef:
+      | MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent>
+      | undefined;
 
     switch (selectedTask.type) {
       case questionType.SINGLECHOICE:
@@ -248,20 +244,18 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         break;
       case questionType.GRAPH:
         // Navigate to graph question component
-        await this.router.navigate([`/graphtask/${taskId}`],
-          {
-            queryParams: {
-              concept: conceptId,
-              questionId: taskId
-            }
-          }
-        );
+        await this.router.navigate([`/graphtask/${taskId}`], {
+          queryParams: {
+            concept: conceptId,
+            questionId: taskId,
+          },
+        });
         return;
       case questionType.FILLIN:
-        dialogRef = this.dialog.open(FillinTaskNewComponent, {...dialogConfig, width: '50vw'});
+        dialogRef = this.dialog.open(FillinTaskNewComponent, { ...dialogConfig, width: '50vw' });
         break;
       case questionType.UML:
-        this.router.navigate([this.getRouterLink("UML", selectedTask.id)]);
+        this.router.navigate([this.getRouterLink('UML', selectedTask.id)]);
         break;
       case questionType.CODEGAME:
         // Navigate to coding game component
@@ -277,32 +271,48 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
       dialogRef.componentInstance.submitClicked
         .pipe(takeUntil(dialogRef.afterClosed()))
         .subscribe((score: number) => {
-          console.log("current score:", selectedTask.progress, "submitted score:", score);
+          console.log('current score:', selectedTask.progress, 'submitted score:', score);
 
           // update the score if higher
           if (score > selectedTask.progress!) {
             // the tasks score is taken from dataSource
             selectedTask.progress = score;
             //while the contentNodes score is taken from the contentsForActiveConceptNode data
-            selectedContentNode.contentElements.find(element => element.id === selectedTask.contentElementId)!.question!.progress = score;
+            selectedContentNode.contentElements.find(
+              element => element.id === selectedTask.contentElementId,
+            )!.question!.progress = score;
 
-            console.log("new score set:", selectedTask.progress, "contentNode score:", selectedContentNode.progress);
+            console.log(
+              'new score set:',
+              selectedTask.progress,
+              'contentNode score:',
+              selectedContentNode.progress,
+            );
 
             if (score === 100) {
-
-              const questionElements = selectedContentNode.contentElements.filter(element => element.type === "QUESTION");
+              const questionElements = selectedContentNode.contentElements.filter(
+                element => element.type === 'QUESTION',
+              );
               const elementCount = questionElements.length;
-              const completedElements = questionElements.filter(element =>
-                element.question?.progress === 100 ||
-                (element.id === selectedTask.contentElementId && score === 100)
+              const completedElements = questionElements.filter(
+                element =>
+                  element.question?.progress === 100 ||
+                  (element.id === selectedTask.contentElementId && score === 100),
               ).length;
 
               // Calculate progress based on completed elements
               selectedContentNode.progress = Math.floor((completedElements / elementCount) * 100);
-              console.log("Progress calc triggered. Progress:", selectedContentNode.progress, "ElementCount:", elementCount, "CompletedElements:", completedElements);
+              console.log(
+                'Progress calc triggered. Progress:',
+                selectedContentNode.progress,
+                'ElementCount:',
+                elementCount,
+                'CompletedElements:',
+                completedElements,
+              );
 
               if (selectedContentNode.progress === 100) {
-                console.log("Aufgabe wurde zum ersten Mal erfolgreich gelöst.");
+                console.log('Aufgabe wurde zum ersten Mal erfolgreich gelöst.');
                 this.progressService.answerSubmitted();
               }
             }
@@ -317,48 +327,50 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    * @param {number} contentNodeId - The ID of the content node.
    */
   onNewTask(contentNodeId: number) {
-    console.log("onNewTask");
-    if (this.isAdmin){
+    console.log('onNewTask');
+    if (this.isAdmin) {
       const dialogRef = this.dialog.open(CreateContentElementDialogComponent, {
         width: '50vw',
-        height: '80vh'
+        height: '80vh',
       });
 
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
           console.log('Dialog result:', result);
           if (this.activeConceptNodeId == undefined) {
-            console.error("activeConceptNodeId is undefined");
+            console.error('activeConceptNodeId is undefined');
             return;
           }
           const linkableContentElement: LinkableContentElementDTO = {
             contentNodeId: contentNodeId,
 
             questionId: Number(result.questionId) || undefined,
-            question: Number(result.questionId) ? undefined : {
-              id: -1, // -1 for temporary id
-              text: "",
-              isApproved: false, //TODO: implement approval
-              name: result.questionTitle || "New question",
-              type: result.questionType,
-              conceptNodeId: this.activeConceptNodeId,
-              description: result.questionDescription || "Manuell per GUI erstellte Frage",
-              level: Number(result.questionDifficulty),
-              score: Number(result.questionScore) || 100,
-            },
+            question: Number(result.questionId)
+              ? undefined
+              : {
+                  id: -1, // -1 for temporary id
+                  text: '',
+                  isApproved: false, //TODO: implement approval
+                  name: result.questionTitle || 'New question',
+                  type: result.questionType,
+                  conceptNodeId: this.activeConceptNodeId,
+                  description: result.questionDescription || 'Manuell per GUI erstellte Frage',
+                  level: Number(result.questionDifficulty),
+                  score: Number(result.questionScore) || 100,
+                },
             contentElementTitle: result.contentElementTitle || undefined,
             contentElementText: result.contentElementDescription || undefined,
-            position: result.contentElementPosition || undefined
+            position: result.contentElementPosition || undefined,
           };
 
-          this.contentLinkerService.createLinkedContentElement(linkableContentElement).subscribe(
-            (linkableContentElement) => {
-              console.log("linked contentElement: ", linkableContentElement);
-              this.snackBar.open("Frage erstellt", "OK", { duration: 3000 });
+          this.contentLinkerService
+            .createLinkedContentElement(linkableContentElement)
+            .subscribe(linkableContentElement => {
+              console.log('linked contentElement: ', linkableContentElement);
+              this.snackBar.open('Frage erstellt', 'OK', { duration: 3000 });
               this.progressService.questionCreated();
               this.fetchContentsForConcept.emit();
-            }
-          );
+            });
         }
       });
     }
@@ -370,7 +382,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    * @param {TaskViewData} taskViewData - The data object containing task information to be approved
    */
   onTaskApprove(taskViewData: TaskViewData) {
-    console.log("onTaskApprove: ", taskViewData);
+    console.log('onTaskApprove: ', taskViewData);
   }
 
   /**
@@ -380,7 +392,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    * @param {TaskViewData} taskViewData - The data object containing task information to be edited
    */
   onTaskEdit(taskViewData: TaskViewData) {
-    console.log("onTaskEdit: ", taskViewData);
+    console.log('onTaskEdit: ', taskViewData);
     switch (taskViewData.type) {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:
@@ -390,7 +402,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
         this.router.navigate(['/editfreetext/', taskViewData.id]);
         break;
       case questionType.FILLIN:
-        console.log("FILLIN");
+        console.log('FILLIN');
         this.router.navigate(['/editfillin/', taskViewData.id]);
         break;
       case questionType.CODE:
@@ -416,33 +428,34 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    * @param {TaskViewData} element - The element containing the content element ID to be unlinked
    */
   onTaskDelete(element: TaskViewData) {
-    console.log("onDeleteClick: ", element);
+    console.log('onDeleteClick: ', element);
     this.confirmService.confirm({
-      title: "Verknüpfung löschen",
-      message: "Die Verknüpfung zur Frage wird gelöscht. Die Frage bleibt bestehen. Fortfahren?",
-      acceptLabel: "Löschen",
-      declineLabel: "Abbrechen",
+      title: 'Verknüpfung löschen',
+      message: 'Die Verknüpfung zur Frage wird gelöscht. Die Frage bleibt bestehen. Fortfahren?',
+      acceptLabel: 'Löschen',
+      declineLabel: 'Abbrechen',
       swapButtons: true,
       swapColors: true,
       accept: () => {
-        console.log("deleting");
-        this.contentLinkerService.unlinkContentElement(element.contentElementId).subscribe(
-          (success) => {
-            console.log("unlink success: ", success);
-            this.snackBar.open("Verknüpfung gelöscht", "OK", { duration: 3000 });
+        console.log('deleting');
+        this.contentLinkerService
+          .unlinkContentElement(element.contentElementId)
+          .subscribe(success => {
+            console.log('unlink success: ', success);
+            this.snackBar.open('Verknüpfung gelöscht', 'OK', { duration: 3000 });
             this.progressService.questionLinkDeleted();
             this.fetchContentsForConcept.emit();
-          }
-        );
-      }, decline: () => {
-        console.log("aborted");
-      }
+          });
+      },
+      decline: () => {
+        console.log('aborted');
+      },
     });
   }
 
   //TODO
   onContentNodeDelete(contentNodeId: number) {
-    console.log("onContentNodeDelete", contentNodeId);
+    console.log('onContentNodeDelete', contentNodeId);
   }
 
   /**
@@ -452,8 +465,8 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
   private updateDataSource() {
     const data: TaskViewData[] = [];
     // Iterate through all content and their elements
-    for (let content of this.contentsForActiveConceptNode.trainedBy) {
-      for (let contentElement of content.contentElements) {
+    for (const content of this.contentsForActiveConceptNode.trainedBy) {
+      for (const contentElement of content.contentElements) {
         // Only include elements with questions
         if (contentElement.question == null) {
           continue;
@@ -463,9 +476,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
           contentNodeId: content.contentNodeId,
           contentElementId: contentElement.id,
           id: contentElement.question.id,
-          name: contentElement.question.name
-            ? contentElement.question.name
-            : content.name,
+          name: contentElement.question.name ? contentElement.question.name : content.name,
           type: contentElement.question.type,
           progress: contentElement.question.progress,
           description: contentElement.question.description,
@@ -503,7 +514,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    * @returns {boolean} True if the content has an element of the specified type, false otherwise
    */
   hasContentElementType(content: ContentDTO, type: string): boolean {
-    return content.contentElements.some((element) => element.type === type);
+    return content.contentElements.some(element => element.type === type);
   }
 
   /**
@@ -513,9 +524,7 @@ export class ContentBoardComponent implements OnInit, OnChanges, OnDestroy {
    * @returns {TaskViewData[]} An array of TaskViewData objects for the specified content node
    */
   getFilteredData(contentNodeId: number): TaskViewData[] {
-    return this.dataSource.data.filter(
-      (element) => element.contentNodeId === contentNodeId
-    );
+    return this.dataSource.data.filter(element => element.contentNodeId === contentNodeId);
   }
 
   /**

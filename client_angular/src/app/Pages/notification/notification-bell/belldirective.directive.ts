@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, OnChanges, Renderer2, SimpleChanges } from '@angular/core';
+import { ElementRef, OnChanges, Renderer2, SimpleChanges, Directive, Input } from '@angular/core';
 import { NotificationDTO } from '@DTOs/notification.dto';
 import { NotificationType } from '@DTOs/notificationType.enum';
 
@@ -7,7 +7,7 @@ import { NotificationType } from '@DTOs/notificationType.enum';
  * This directive dynamically changes the appearance of a notification based on its read status and type.
  */
 @Directive({
-  selector: '[appNotificationStyle]'
+  selector: '[appNotificationStyle]',
 })
 export class BellDirective implements OnChanges {
   /**
@@ -20,7 +20,10 @@ export class BellDirective implements OnChanges {
    * @param {ElementRef} element - Reference to the host element.
    * @param {Renderer2} renderer - Renderer2 for DOM manipulation.
    */
-  constructor(private element: ElementRef, private renderer: Renderer2) {}
+  constructor(
+    private readonly element: ElementRef,
+    private readonly renderer: Renderer2,
+  ) {}
 
   /**
    * Lifecycle hook that is called when any data-bound property of a directive changes.
@@ -28,7 +31,7 @@ export class BellDirective implements OnChanges {
    * @param {SimpleChanges} changes - SimpleChanges object containing current and previous property values.
    */
   ngOnChanges(changes: SimpleChanges) {
-    if(changes['notification']) {
+    if (changes['notification']) {
       this.applyStylesAndText();
     }
   }

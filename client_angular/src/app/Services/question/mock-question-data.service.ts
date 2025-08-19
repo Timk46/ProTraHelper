@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import {
   FillinQuestionDTO,
-  FillinQuestionType,
   MCOptionViewDTO,
   McQuestionDTO,
   QuestionDTO,
   UserAnswerDataDTO,
   freeTextQuestionDTO,
-  userAnswerFeedbackDTO
+  userAnswerFeedbackDTO,
 } from '@DTOs/index';
+import { FillinQuestionType } from '@DTOs/index';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { McTaskComponent } from 'src/app/Pages/contentView/contentElement/mcTask/mcTask.component';
 import { FillinTaskNewComponent } from 'src/app/Pages/contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
@@ -21,13 +22,12 @@ import { FreeTextTaskComponent } from 'src/app/Pages/contentView/contentElement/
  */
 @Injectable()
 export class MockQuestionDataService {
-
-  constructor(private dialog: MatDialog) {}
+  constructor(private readonly dialog: MatDialog) {}
 
   /**
    * Returns mock question data
    */
-  getQuestionData(questionId: number) : Observable<QuestionDTO> {
+  getQuestionData(questionId: number): Observable<QuestionDTO> {
     return of({
       id: questionId,
       name: 'Beispiel Multiple-Choice Frage',
@@ -45,7 +45,7 @@ export class MockQuestionDataService {
   /**
    * Returns mock MC question data
    */
-  getMCQuestion(questionVersionId: number) : Observable<McQuestionDTO> {
+  getMCQuestion(questionVersionId: number): Observable<McQuestionDTO> {
     return of({
       id: questionVersionId,
       questionId: questionVersionId,
@@ -56,20 +56,32 @@ export class MockQuestionDataService {
         version: 1,
         isApproved: true,
         questionId: questionVersionId,
-        successor: null
+        successor: null,
       },
       mcQuestionOption: [
-        { id: 1, mcQuestionId: questionVersionId, option: { id: 1, text: 'Diese Aussage ist richtig.', correct: true } },
-        { id: 2, mcQuestionId: questionVersionId, option: { id: 2, text: 'Diese Aussage ist falsch.', correct: false } },
-        { id: 3, mcQuestionId: questionVersionId, option: { id: 3, text: 'Auch diese Aussage ist richtig.', correct: true } },
-      ]
+        {
+          id: 1,
+          mcQuestionId: questionVersionId,
+          option: { id: 1, text: 'Diese Aussage ist richtig.', correct: true },
+        },
+        {
+          id: 2,
+          mcQuestionId: questionVersionId,
+          option: { id: 2, text: 'Diese Aussage ist falsch.', correct: false },
+        },
+        {
+          id: 3,
+          mcQuestionId: questionVersionId,
+          option: { id: 3, text: 'Auch diese Aussage ist richtig.', correct: true },
+        },
+      ],
     });
   }
 
   /**
    * Returns mock MC options
    */
-  getMCOptions(questionId: number) : Observable<MCOptionViewDTO[]> {
+  getMCOptions(questionId: number): Observable<MCOptionViewDTO[]> {
     return of([
       { id: 1, text: 'Diese Aussage ist richtig.', selected: false },
       { id: 2, text: 'Diese Aussage ist falsch.', selected: false },
@@ -80,7 +92,7 @@ export class MockQuestionDataService {
   /**
    * Returns mock free text question data
    */
-  getFreeTextQuestion(questionVersionId: number) : Observable<freeTextQuestionDTO> {
+  getFreeTextQuestion(questionVersionId: number): Observable<freeTextQuestionDTO> {
     return of({
       questionId: questionVersionId,
       contentElementId: 1,
@@ -94,20 +106,20 @@ export class MockQuestionDataService {
   /**
    * Returns mock user answer data
    */
-  getNewestUserAnswer(questionId: number, userId: number = -1) : Observable<UserAnswerDataDTO> {
+  getNewestUserAnswer(questionId: number, userId: number = -1): Observable<UserAnswerDataDTO> {
     return of({
       id: 1,
       questionId: questionId,
       contentElementId: 1,
       userId: userId,
-      userFreetextAnswer: 'Dies ist eine Beispielantwort für die Freitext-Aufgabe.'
+      userFreetextAnswer: 'Dies ist eine Beispielantwort für die Freitext-Aufgabe.',
     });
   }
 
   /**
    * Returns mock fill-in task data
    */
-  getFillinTask(questionId: number) : Observable<FillinQuestionDTO> {
+  getFillinTask(questionId: number): Observable<FillinQuestionDTO> {
     return of({
       id: questionId,
       taskType: FillinQuestionType.FillinDrag,
@@ -130,14 +142,14 @@ export class MockQuestionDataService {
         { id: 3, position: '3', blankContent: 'TypeScript' },
         { id: 4, position: '0', blankContent: 'JavaScript' },
         { id: 5, position: '0', blankContent: 'Komponenten' },
-      ]
+      ],
     });
   }
 
   /**
    * Mock user answer creation that returns success feedback
    */
-  createUserAnswer(data: UserAnswerDataDTO) : Observable<userAnswerFeedbackDTO> {
+  createUserAnswer(data: UserAnswerDataDTO): Observable<userAnswerFeedbackDTO> {
     return of({
       id: 1,
       userAnswerId: 1,
@@ -151,12 +163,13 @@ export class MockQuestionDataService {
   /**
    * Opens a dialog for a task using the mock service
    */
-  openDialog(taskType: string, config: MatDialogConfig): MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined {
+  openDialog(
+    taskType: string,
+    config: MatDialogConfig,
+  ): MatDialogRef<McTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined {
     const modifiedConfig = {
       ...config,
-      providers: [
-        { provide: QuestionDataService, useClass: MockQuestionDataService }
-      ]
+      providers: [{ provide: QuestionDataService, useClass: MockQuestionDataService }],
     };
 
     switch (taskType) {

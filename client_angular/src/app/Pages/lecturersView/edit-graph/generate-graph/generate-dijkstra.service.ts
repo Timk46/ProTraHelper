@@ -3,24 +3,22 @@ import { GraphEdgeDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.d
 import { GenerateGraphService } from './generate-graph.service';
 
 export interface GenerateDijkstraConfiguration {
-  nodesCount: number,
-  edgesCount: number,
+  nodesCount: number;
+  edgesCount: number;
   edgeWeight: {
-    enabled: true,
-    min: number,
-    max: number
-  },
+    enabled: true;
+    min: number;
+    max: number;
+  };
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GenerateDijkstraService {
-
-  constructor(private generateGraphService: GenerateGraphService) { }
+  constructor(private readonly generateGraphService: GenerateGraphService) {}
 
   generate(configuration: GenerateDijkstraConfiguration): GraphStructureDTO {
-
     if (configuration.nodesCount < 1) {
       throw new Error('Number of nodes must be at least 1');
     }
@@ -37,22 +35,26 @@ export class GenerateDijkstraService {
       ...configuration,
       maxSelfEdges: 0,
       edgeDirected: false,
-      nodeWeight: { // disabled, as it won't be generated randomly
+      nodeWeight: {
+        // disabled, as it won't be generated randomly
         enabled: false,
         min: 0,
-        max: 0
-      }, 
+        max: 0,
+      },
       nodeSelected: true, // It is enabled and the attribute selected will be set to false automatically for all nodes
-    }
+    };
 
-    const {nodes, edges} = this.generateGraphService.generateGraph(_configuration);
-    
+    const { nodes, edges } = this.generateGraphService.generateGraph(_configuration);
+
     // Randomly select a starting node for Dijkstra's algorithm
-    const startNodeIndex = this.generateGraphService.getRandomNumber(0, configuration.nodesCount - 1);
+    const startNodeIndex = this.generateGraphService.getRandomNumber(
+      0,
+      configuration.nodesCount - 1,
+    );
     const startNode = nodes[startNodeIndex];
-    
+
     // TODO: Find a proper solution for this
-    // For now, prevent the start node having an edge with weight 0 
+    // For now, prevent the start node having an edge with weight 0
     // as it causes multiple nodes to have the weight 0
     // but for now we distinguish the start node by setting its weight to 0
     edges.forEach(edge => {
@@ -67,22 +69,21 @@ export class GenerateDijkstraService {
     // Calculate initial state for Dijkstra's algorithm
     const updatedNodes = this.calculateInitialStateWithWeights(startNode, nodes, edges);
 
-    const updatedEdges: GraphEdgeDTO[] = []; 
-    
+    const updatedEdges: GraphEdgeDTO[] = [];
+
     edges.forEach(edge => {
       updatedEdges.push({
         node1Id: edge.node1.nodeId,
         node2Id: edge.node2.nodeId,
-        weight: edge.weight
-    })
+        weight: edge.weight,
+      });
     });
 
     return { nodes: updatedNodes, edges: updatedEdges };
   }
 
-
-   // Function to calculate initial state for Dijkstra's algorithm
-   calculateInitialStateWithWeights(startNode: GraphNodeDTO, nodes: GraphNodeDTO[], edges: any[]) {
+  // Function to calculate initial state for Dijkstra's algorithm
+  calculateInitialStateWithWeights(startNode: GraphNodeDTO, nodes: GraphNodeDTO[], edges: any[]) {
     // Step 1: Initialize all node weights to Infinity except the start node
     nodes.forEach(node => {
       node.weight = Number.MAX_SAFE_INTEGER; // Initially set to a large number (Infinity)
@@ -96,11 +97,9 @@ export class GenerateDijkstraService {
       if (edge.node2 === startNode) {
         edge.node1.weight = edge.weight;
       }
-    })
-    
+    });
+
     // Return updated nodes with calculated weights for shortest paths
     return nodes;
   }
-
-
 }

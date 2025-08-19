@@ -4,8 +4,7 @@ import { detailedUploadQuestionDTO, uploadQuestionDTO, UserUploadAnswerListItemD
 
 @Injectable()
 export class QuestionDataUploadService {
-
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * get the upload question, including full data if requested
@@ -16,14 +15,14 @@ export class QuestionDataUploadService {
   async getUploadQuestion(questionId: number, fullData = false): Promise<uploadQuestionDTO> {
     const question = await this.prisma.question.findUnique({
       where: {
-        id: Number(questionId)
-      }
+        id: Number(questionId),
+      },
     });
 
     const uploadQuestion = await this.prisma.uploadQuestion.findFirst({
       where: {
-        questionId: Number(questionId)
-      }
+        questionId: Number(questionId),
+      },
     });
 
     if (!uploadQuestion) {
@@ -66,7 +65,10 @@ export class QuestionDataUploadService {
    * @returns A promise that resolves to the created upload question.
    * @throws An error if the upload question is not created.
    */
-  async createUploadQuestion(uploadQuestion: detailedUploadQuestionDTO, questionId: number): Promise<detailedUploadQuestionDTO> {
+  async createUploadQuestion(
+    uploadQuestion: detailedUploadQuestionDTO,
+    questionId: number,
+  ): Promise<detailedUploadQuestionDTO> {
     const newUploadQuestion = await this.prisma.uploadQuestion.create({
       data: {
         title: uploadQuestion.title || '',
@@ -74,11 +76,11 @@ export class QuestionDataUploadService {
         textHTML: uploadQuestion.textHTML || undefined,
         maxSize: uploadQuestion.maxSize,
         fileType: uploadQuestion.fileType,
-        question: {connect: {id: questionId}},
+        question: { connect: { id: questionId } },
       },
     });
 
-    if(!newUploadQuestion) {
+    if (!newUploadQuestion) {
       throw new Error('UploadQuestion not created');
     }
     return newUploadQuestion;
@@ -91,18 +93,20 @@ export class QuestionDataUploadService {
    * @returns A promise that resolves to the updated detailed upload question DTO.
    * @throws An error if the upload question is not updated.
    */
-  async updateUploadQuestion(uploadQuestion: detailedUploadQuestionDTO): Promise<detailedUploadQuestionDTO> {
+  async updateUploadQuestion(
+    uploadQuestion: detailedUploadQuestionDTO,
+  ): Promise<detailedUploadQuestionDTO> {
     const originalUploadQuestion = await this.prisma.uploadQuestion.findFirst({
       where: {
-        id: uploadQuestion.id
-      }
+        id: uploadQuestion.id,
+      },
     });
 
     console.log(uploadQuestion);
 
     const updatedUploadQuestion = await this.prisma.uploadQuestion.update({
       where: {
-        id: uploadQuestion.id
+        id: uploadQuestion.id,
       },
       data: {
         title: uploadQuestion.title || originalUploadQuestion.title,
@@ -113,7 +117,7 @@ export class QuestionDataUploadService {
       },
     });
 
-    if(!updatedUploadQuestion) {
+    if (!updatedUploadQuestion) {
       throw new Error('UploadQuestion not updated');
     }
     return updatedUploadQuestion;

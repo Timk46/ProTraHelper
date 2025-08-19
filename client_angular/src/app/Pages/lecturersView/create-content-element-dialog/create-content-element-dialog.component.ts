@@ -1,8 +1,9 @@
-import { Component, Inject } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { OnInit, Component, Inject } from '@angular/core';
+import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { trigger, state, style, animate, transition } from '@angular/animations';
-import { QuestionDTO, questionType } from '@DTOs/question.dto';
+import { QuestionDTO } from '@DTOs/question.dto';
+import { questionType } from '@DTOs/question.dto';
 import { ReplaySubject, Subject, takeUntil } from 'rxjs';
 import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
 
@@ -11,7 +12,7 @@ import { ContentLinkerService } from 'src/app/Services/contentLinker/content-lin
   templateUrl: './create-content-element-dialog.component.html',
   styleUrls: ['./create-content-element-dialog.component.scss'],
 })
-export class CreateContentElementDialogComponent {
+export class CreateContentElementDialogComponent implements OnInit {
   creationForm: FormGroup;
   connectionForm: FormGroup;
   questionTypes = questionType;
@@ -21,13 +22,13 @@ export class CreateContentElementDialogComponent {
   unlinkedQuestions: QuestionDTO[] = [];
   filteredQuestions: ReplaySubject<QuestionDTO[]> = new ReplaySubject<QuestionDTO[]>(1);
   questionFilterControl = new FormControl('');
-  private _onDestroy = new Subject<void>();
+  private readonly _onDestroy = new Subject<void>();
 
   constructor(
     public dialogRef: MatDialogRef<CreateContentElementDialogComponent>,
-    private fb: FormBuilder,
-    private contentLinkerService: ContentLinkerService,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    private readonly fb: FormBuilder,
+    private readonly contentLinkerService: ContentLinkerService,
+    @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     this.creationForm = this.fb.group({
       questionTitle: ['', Validators.required],
@@ -48,16 +49,14 @@ export class CreateContentElementDialogComponent {
   }
 
   ngOnInit() {
-    this.contentLinkerService.getUnlinkedQuestions().subscribe((questions) => {
+    this.contentLinkerService.getUnlinkedQuestions().subscribe(questions => {
       this.unlinkedQuestions = questions;
       this.filteredQuestions.next(this.unlinkedQuestions.slice());
     });
 
-    this.questionFilterControl.valueChanges
-      .pipe(takeUntil(this._onDestroy))
-      .subscribe(() => {
-        this.filterQuestions();
-      });
+    this.questionFilterControl.valueChanges.pipe(takeUntil(this._onDestroy)).subscribe(() => {
+      this.filterQuestions();
+    });
   }
 
   onSelectClick() {
@@ -76,7 +75,7 @@ export class CreateContentElementDialogComponent {
       search = search.toLowerCase();
     }
     this.filteredQuestions.next(
-      this.unlinkedQuestions.filter(question => question.name!.toLowerCase().indexOf(search!) > -1)
+      this.unlinkedQuestions.filter(question => question.name!.toLowerCase().indexOf(search) > -1),
     );
   }
 

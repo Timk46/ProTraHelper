@@ -1,19 +1,20 @@
 <div class="content mat-elevation-z8">
-  <h1 style="display: flex; justify-content: center;">Freitextaufgabe bearbeiten</h1>
+  <h1 style="display: flex; justify-content: center">Freitextaufgabe bearbeiten</h1>
 
   <div class="horizontal-align-container">
-    <div class="text-container" style="width: 30%;">
+    <div class="text-container" style="width: 30%">
       <div class="wrap-container">
-
         <h2>Optionen</h2>
 
         <form [formGroup]="freeTextForm">
-          <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-form-field appearance="outline" style="width: 100%">
             <mat-label>Titel</mat-label>
-            <input matInput placeholder="Titel der Frage" formControlName="questionTitle">
-            <mat-error *ngIf="freeTextForm.get('questionTitle')!.hasError('required')">Titel der Frage ist erforderlich</mat-error>
+            <input matInput placeholder="Titel der Frage" formControlName="questionTitle" />
+            <mat-error *ngIf="freeTextForm.get('questionTitle')!.hasError('required')"
+              >Titel der Frage ist erforderlich</mat-error
+            >
           </mat-form-field>
-          <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-form-field appearance="outline" style="width: 100%">
             <mat-label>Schwierigkeit</mat-label>
             <mat-select formControlName="questionDifficulty">
               <mat-option value="1">Level 1: Erinnern</mat-option>
@@ -23,13 +24,23 @@
               <mat-option value="5">Level 5: Evaluieren</mat-option>
               <mat-option value="6">Level 6: Kreieren</mat-option>
             </mat-select>
-            <mat-error *ngIf="freeTextForm.get('questionDifficulty')!.hasError('required')">Schwierigkeitsgrad ist erforderlich</mat-error>
+            <mat-error *ngIf="freeTextForm.get('questionDifficulty')!.hasError('required')"
+              >Schwierigkeitsgrad ist erforderlich</mat-error
+            >
           </mat-form-field>
-          <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-form-field appearance="outline" style="width: 100%">
             <mat-label>Punkte</mat-label>
-            <input matInput type="number" min="0" step="1" placeholder="Punkte" formControlName="questionScore">
-            <mat-error *ngIf="freeTextForm.get('questionScore')!.hasError('required')">Punkte sind
-              erforderlich</mat-error>
+            <input
+              matInput
+              type="number"
+              min="0"
+              step="1"
+              placeholder="Punkte"
+              formControlName="questionScore"
+            />
+            <mat-error *ngIf="freeTextForm.get('questionScore')!.hasError('required')"
+              >Punkte sind erforderlich</mat-error
+            >
           </mat-form-field>
         </form>
 
@@ -38,11 +49,18 @@
             <mat-panel-title>Erweiterte Optionen (optional)</mat-panel-title>
           </mat-expansion-panel-header>
           <div class="expansion">
-            <p>Die Auswirkungen dieser Einstellungen sind in der Übersicht nicht sichtbar und beziehen sich nur auf interne Datenbankparameter</p>
+            <p>
+              Die Auswirkungen dieser Einstellungen sind in der Übersicht nicht sichtbar und
+              beziehen sich nur auf interne Datenbankparameter
+            </p>
             <form [formGroup]="freeTextForm">
-              <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-form-field appearance="outline" style="width: 100%">
                 <mat-label>Beschreibung der Frage</mat-label>
-                <textarea matInput placeholder="Beschreibung der Frage" formControlName="questionDescription"></textarea>
+                <textarea
+                  matInput
+                  placeholder="Beschreibung der Frage"
+                  formControlName="questionDescription"
+                ></textarea>
                 <mat-hint>Zum Beispiel "manuell erstellt" oder "automatisch importiert"</mat-hint>
               </mat-form-field>
             </form>
@@ -51,36 +69,47 @@
       </div>
     </div>
 
-    <div class="text-container" style="width: 70%;">
+    <div class="text-container" style="width: 70%">
       <div class="wrap-container">
-
-        <div style="width: 100%;">
+        <div style="width: 100%">
           <h2>Aufgabentext</h2>
           <app-tinymce #question [config]="editorConfig"></app-tinymce>
         </div>
 
-        <div style="width: 100%;">
+        <div style="width: 100%">
           <h2>Erwartungshorizont</h2>
           <app-tinymce #expectations [config]="editorConfig"></app-tinymce>
         </div>
 
-        <div style="width: 100%;">
+        <div style="width: 100%">
           <h2>Musterlösung</h2>
           <app-tinymce #solution [config]="editorConfig"></app-tinymce>
         </div>
       </div>
     </div>
-
   </div>
 
   <div class="button-container">
-    <mat-progress-spinner *ngIf="isSaving" diameter="20" mode="indeterminate"></mat-progress-spinner>
-    <button mat-raised-button [disabled]="isSaving" color="primary" (click)="onOverwrite()">Speichern (aktualisieren)</button>
-    <div matTooltip="Die aktuelle Version hat noch keine Freitextdaten." [matTooltipDisabled]="!!detailedQuestionData?.freetextQuestion">
-      <button mat-raised-button color="primary"
+    <mat-progress-spinner
+      *ngIf="isSaving"
+      diameter="20"
+      mode="indeterminate"
+    ></mat-progress-spinner>
+    <button mat-raised-button [disabled]="isSaving" color="primary" (click)="onOverwrite()">
+      Speichern (aktualisieren)
+    </button>
+    <div
+      matTooltip="Die aktuelle Version hat noch keine Freitextdaten."
+      [matTooltipDisabled]="!!detailedQuestionData?.freetextQuestion"
+    >
+      <button
+        mat-raised-button
+        color="primary"
         (click)="onSaveNewVersion()"
         [disabled]="!detailedQuestionData?.freetextQuestion || isSaving || true"
-        >Als neue Version speichern</button>
+      >
+        Als neue Version speichern
+      </button>
     </div>
     <button mat-raised-button color="warn" (click)="onCancel()">Abbrechen</button>
   </div>

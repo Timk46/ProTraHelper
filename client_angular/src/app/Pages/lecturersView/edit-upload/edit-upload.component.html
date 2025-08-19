@@ -1,11 +1,11 @@
-<h2 mat-dialog-title style="margin-left: 15px; margin-right: 15px;">Upload-Frage bearbeiten</h2>
+<h2 mat-dialog-title style="margin-left: 15px; margin-right: 15px">Upload-Frage bearbeiten</h2>
 
 <div mat-dialog-content class="dialog-content">
   <form [formGroup]="uploadForm" class="upload-form">
     <!-- Title Field -->
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Titel</mat-label>
-      <input matInput formControlName="title" placeholder="Titel der Upload-Aufgabe">
+      <input matInput formControlName="title" placeholder="Titel der Upload-Aufgabe" />
       <mat-error *ngIf="uploadForm.get('title')?.hasError('required')">
         Titel ist erforderlich
       </mat-error>
@@ -18,7 +18,8 @@
         matInput
         formControlName="text"
         placeholder="Beschreiben Sie, was die Studierenden hochladen sollen..."
-        rows="4">
+        rows="4"
+      >
       </textarea>
       <mat-error *ngIf="uploadForm.get('text')?.hasError('required')">
         Aufgabenbeschreibung ist erforderlich
@@ -74,14 +75,13 @@
 </div>
 
 <div mat-dialog-actions class="dialog-actions">
-  <button mat-button (click)="onCancel()" [disabled]="isSaving">
-    Abbrechen
-  </button>
+  <button mat-button (click)="onCancel()" [disabled]="isSaving">Abbrechen</button>
   <button
     mat-raised-button
     color="primary"
     (click)="onSave()"
-    [disabled]="isSaving || uploadForm.invalid">
+    [disabled]="isSaving || uploadForm.invalid"
+  >
     <span *ngIf="isSaving">Speichern...</span>
     <span *ngIf="!isSaving">Speichern</span>
   </button>

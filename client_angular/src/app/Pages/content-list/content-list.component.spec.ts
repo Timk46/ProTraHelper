@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { ContentListComponent } from './content-list.component';
 
@@ -8,9 +9,8 @@ describe('ContentListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ContentListComponent ]
-    })
-    .compileComponents();
+      declarations: [ContentListComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ContentListComponent);
     component = fixture.componentInstance;

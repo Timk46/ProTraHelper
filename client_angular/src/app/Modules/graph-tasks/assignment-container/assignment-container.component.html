@@ -1,174 +1,250 @@
 <div class="form-container" *ngIf="questionData && graphQuestionData; else noQuestion">
+  <div class="assignment box">
+    <button
+      class="navigation-button"
+      (click)="navigateToDashboard()"
+      aria-label="Zurück zum Dashboard"
+    >
+      Zurück zum Dashboard
+    </button>
+    <h2>{{ questionData.name }}</h2>
+    <p>
+      {{ questionData.text }}
+    </p>
+  </div>
+  <div class="evaluation box">
+    <h2>Feedback</h2>
+    <mat-button-toggle-group
+      class="feedback-type-toggle-group"
+      name="feedback-type"
+      aria-label="Feedback Type"
+      [(ngModel)]="feedbackTypeCurrent"
+      (ngModelChange)="onFeedbackTypeChange()"
+    >
+      <mat-button-toggle
+        class="feedback-type-toggle-item"
+        value="algoFeedback"
+        [disabled]="feedbackDisabled"
+        >Algo-Check</mat-button-toggle
+      >
+      <mat-button-toggle
+        class="feedback-type-toggle-item"
+        value="llmFeedback"
+        [disabled]="feedbackDisabled"
+        >KI-Feedback</mat-button-toggle
+      >
+    </mat-button-toggle-group>
 
-    <div class="assignment box">
-        <button class="navigation-button" (click)="navigateToDashboard()" aria-label="Zurück zum Dashboard">
-            Zurück zum Dashboard
+    <hr style="margin-top: 1em" />
+
+    <div
+      *ngIf="feedbackTypeCurrent === 'llmFeedback' && feedbackState === 'LLM'"
+      style="
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+        align-items: center;
+        background-color: #ddd;
+        border-radius: 0.5em;
+        padding: 0.5em 0;
+      "
+    >
+      <div
+        style="
+          flex: 1;
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          font-size: 0.9em;
+        "
+      >
+        <p style="margin: 0">Wie hilfreich war das Feedback?</p>
+      </div>
+      <div class="rating" style="margin: 0; flex: 1; display: flex; justify-content: flex-start">
+        <button
+          mat-icon-button
+          *ngFor="let star of [1, 2, 3, 4, 5]"
+          (click)="sendStudentFeedback(star)"
+          (mouseenter)="onMouseEnter(star)"
+          (mouseleave)="onMouseLeave()"
+          class="star-button"
+          [ngClass]="{ 'animate-star': rating === 0 }"
+        >
+          <mat-icon
+            [ngClass]="{
+              gold: star <= hoverState || star <= rating,
+              grey: !(star <= hoverState || star <= rating),
+              'glow-effect': rating === 0,
+            }"
+          >
+            {{ star <= hoverState || star <= rating ? 'star' : 'star_border' }}
+          </mat-icon>
         </button>
-        <h2>{{ questionData.name }}</h2>
-        <p>
-            {{ questionData.text }}
-        </p>
+      </div>
     </div>
-    <div class="evaluation box">
-        <h2>Feedback</h2>
-        <mat-button-toggle-group
-            class="feedback-type-toggle-group"
-            name="feedback-type"
-            aria-label="Feedback Type"
-            [(ngModel)]="feedbackTypeCurrent"
-            (ngModelChange)="onFeedbackTypeChange()"
-        >
-            <mat-button-toggle class="feedback-type-toggle-item" value="algoFeedback" [disabled]="feedbackDisabled">Algo-Check</mat-button-toggle>
-            <mat-button-toggle class="feedback-type-toggle-item" value="llmFeedback" [disabled]="feedbackDisabled">KI-Feedback</mat-button-toggle>
-        </mat-button-toggle-group>
 
-
-        <hr style="margin-top: 1em;">
-
-        <div
-            *ngIf="feedbackTypeCurrent === 'llmFeedback' && feedbackState === 'LLM'"
-            style="display: flex; flex-direction: column; justify-content: start; align-items: center; background-color: #ddd; border-radius: .5em; padding: .5em 0;"
-        >
-            <div
-                style="flex: 1; display: flex; justify-content: flex-start; align-items: center; font-size: .9em;"
-            >
-                <p style="margin: 0;">Wie hilfreich war das Feedback?</p>
-            </div>
-            <div
-                class="rating" style="margin: 0; flex: 1; display: flex; justify-content: flex-start;"
-            >
-                <button mat-icon-button *ngFor="let star of [1, 2, 3, 4, 5]"
-                    (click)="sendStudentFeedback(star)"
-                    (mouseenter)="onMouseEnter(star)"
-                    (mouseleave)="onMouseLeave()"
-                    class="star-button"
-                    [ngClass]="{'animate-star': rating === 0}"
-                >
-                    <mat-icon [ngClass]="{
-                        'gold': (star <= hoverState || star <= rating),
-                        'grey': !(star <= hoverState || star <= rating),
-                        'glow-effect': rating === 0
-                    }">
-                        {{star <= hoverState || star <= rating ? 'star' : 'star_border'}}
-                    </mat-icon>
-                </button>
-            </div>
-        </div>
-
-        <p *ngIf="!isSending" [innerHTML]="feedbackTypeCurrent === 'algoFeedback' ? algoFeedback : llmFeedback"></p>
-        <div
-            *ngIf="isSending"
-            class="spinner-contaier"
-            style="display: flex; justify-content: center; align-items: center; height: 60%;"
-        >
-            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
-        </div>
+    <p
+      *ngIf="!isSending"
+      [innerHTML]="feedbackTypeCurrent === 'algoFeedback' ? algoFeedback : llmFeedback"
+    ></p>
+    <div
+      *ngIf="isSending"
+      class="spinner-contaier"
+      style="display: flex; justify-content: center; align-items: center; height: 60%"
+    >
+      <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
     </div>
-    <div class="solution box">
-        <app-graph-structure [toolbarEnabled]="false"/>
-    </div>
+  </div>
+  <div class="solution box">
+    <app-graph-structure [toolbarEnabled]="false" />
+  </div>
 
-    <div class="controls box">
+  <div class="controls box">
+    <button class="image-button question" type="button" (click)="openTutorialDialog()">
+      <!-- Tutorial Video -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        fill="currentColor"
+        class="bi bi-question-circle-fill"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247m2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"
+        />
+      </svg>
+    </button>
 
-        <button
-            class="image-button question"
-            type="button"
-            (click)="openTutorialDialog()"
-        >
-        <!-- Tutorial Video -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
-            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247m2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
-        </svg>
-        </button>
+    <mat-button-toggle-group
+      class="workspace-toggle-group"
+      name="mode"
+      aria-label="mode"
+      [(ngModel)]="workspaceModeCurrent"
+      (ngModelChange)="updateWorkspace()"
+    >
+      <mat-button-toggle class="workspace-toggle-item" value="assignment" [disabled]="isSending"
+        >Aufgabe</mat-button-toggle
+      >
+      <mat-button-toggle class="workspace-toggle-item" value="solution" [disabled]="isSending"
+        >Lösung</mat-button-toggle
+      >
+    </mat-button-toggle-group>
 
+    <mat-button-toggle-group
+      class="solution-step-toggle-group"
+      *ngIf="graphQuestionData.stepsEnabled && workspaceModeCurrent === 'solution'"
+      name="solution-step"
+      aria-label="solution-step"
+      [(ngModel)]="solutionStepCurrent"
+      (ngModelChange)="updateWorkspace()"
+    >
+      <mat-button-toggle
+        class="solution-step-toggle-item"
+        *ngFor="let step of solutionGraph; let i = index; trackBy: trackByIndex"
+        [value]="i"
+        [disabled]="isSending"
+      >
+        {{ solutionStepCurrent === i ? 'Schritt' : '' }} {{ i + 1 }}
+      </mat-button-toggle>
+    </mat-button-toggle-group>
 
-        <mat-button-toggle-group
-            class="workspace-toggle-group"
-            name="mode"
-            aria-label="mode"
-            [(ngModel)]="workspaceModeCurrent"
-            (ngModelChange)="updateWorkspace()"
-        >
-            <mat-button-toggle class="workspace-toggle-item" value="assignment" [disabled]="isSending">Aufgabe</mat-button-toggle>
-            <mat-button-toggle class="workspace-toggle-item" value="solution" [disabled]="isSending">Lösung</mat-button-toggle>
-        </mat-button-toggle-group>
+    <button
+      *ngIf="!isSending && graphQuestionData.stepsEnabled && workspaceModeCurrent === 'solution'"
+      class="image-button primary"
+      type="button"
+      (click)="addNewSolutionStep()"
+    >
+      <!-- Neuen Schritt -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        fill="currentColor"
+        class="bi bi-plus-lg"
+        viewBox="0 0 16 16"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"
+        />
+      </svg>
+    </button>
 
-        <mat-button-toggle-group
-            class="solution-step-toggle-group"
-            *ngIf="graphQuestionData.stepsEnabled && workspaceModeCurrent === 'solution'"
-            name="solution-step"
-            aria-label="solution-step"
-            [(ngModel)]="solutionStepCurrent"
-            (ngModelChange)="updateWorkspace()"
-        >
-                <mat-button-toggle
-                    class="solution-step-toggle-item"
-                    *ngFor="let step of solutionGraph; let i = index; trackBy:trackByIndex"
-                    [value]="i"
-                    [disabled]="isSending"
-                >
-                    {{ solutionStepCurrent === i ? 'Schritt' : '' }} {{ i + 1 }}
-                </mat-button-toggle>
+    <button
+      *ngIf="
+        !isSending &&
+        graphQuestionData.stepsEnabled &&
+        workspaceModeCurrent === 'solution' &&
+        solutionGraph.length > 1
+      "
+      class="image-button warn"
+      type="button"
+      (click)="deleteCurrentSolutionStep()"
+    >
+      <!-- Schritt löschen -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        fill="currentColor"
+        class="bi bi-trash"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"
+        />
+        <path
+          d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"
+        />
+      </svg>
+    </button>
 
-        </mat-button-toggle-group>
-
-        <button
-            *ngIf="!isSending && graphQuestionData.stepsEnabled && workspaceModeCurrent === 'solution'"
-            class="image-button primary"
-            type="button"
-            (click)="addNewSolutionStep()"
-        >
-            <!-- Neuen Schritt -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
-            </svg>
-        </button>
-
-        <button
-            *ngIf="!isSending && graphQuestionData.stepsEnabled && workspaceModeCurrent === 'solution' && solutionGraph.length > 1"
-            class="image-button warn"
-            type="button"
-            (click)="deleteCurrentSolutionStep()"
-        >
-            <!-- Schritt löschen -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-                </svg>
-        </button>
-
-        <button
-            *ngIf="!isSending && workspaceModeCurrent === 'solution'"
-            class="warn"
-            type="button"
-            (click)="resetSolution()"
-        >
-            Zurücksetzen
-        <!-- Die Lösung zurücksetzen -->
-            <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
+    <button
+      *ngIf="!isSending && workspaceModeCurrent === 'solution'"
+      class="warn"
+      type="button"
+      (click)="resetSolution()"
+    >
+      Zurücksetzen
+      <!-- Die Lösung zurücksetzen -->
+      <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/>
                 <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466"/>
             </svg> -->
-        </button>
+    </button>
 
-        <button
-            class="primary"
-            *ngIf="!isSending && workspaceModeCurrent === 'solution'"
-            type="button"
-            [disabled]="isSending"
-            (click)="onSubmitButtonClick()"
-        >
-            Abgeben
-        </button>
-        <mat-progress-spinner *ngIf="isSending" diameter="20" mode="indeterminate"></mat-progress-spinner>
-    </div>
+    <button
+      class="primary"
+      *ngIf="!isSending && workspaceModeCurrent === 'solution'"
+      type="button"
+      [disabled]="isSending"
+      (click)="onSubmitButtonClick()"
+    >
+      Abgeben
+    </button>
+    <mat-progress-spinner
+      *ngIf="isSending"
+      diameter="20"
+      mode="indeterminate"
+    ></mat-progress-spinner>
+  </div>
 </div>
 
 <ng-template #noQuestion>
-    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; background-color: rgb(248, 242, 233);">
-        <h2>Keine Aufgabe vorhanden</h2>
-        <button (click)="navigateToDashboard()" aria-label="Zurück zum Dashboard">
-            <h3>Zurück zum Dashboard</h3>
-        </button>
-    </div>
+  <div
+    style="
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      background-color: rgb(248, 242, 233);
+    "
+  >
+    <h2>Keine Aufgabe vorhanden</h2>
+    <button (click)="navigateToDashboard()" aria-label="Zurück zum Dashboard">
+      <h3>Zurück zum Dashboard</h3>
+    </button>
+  </div>
 </ng-template>

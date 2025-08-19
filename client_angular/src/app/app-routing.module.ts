@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { ContentBoardComponent } from './Pages/contentBoard/contentBoard.component';
 import { AppComponent } from './app.component';
 import { DashboardComponent } from './Pages/dashboard/dashboard.component';
@@ -31,8 +32,9 @@ import { NavigationPreferenceGuard } from './Guards/navigation-preference.guard'
 import { GraphTasksComponent } from './Modules/graph-tasks/graph-tasks.component';
 import { DynamicQuestionComponent } from './Pages/dynamic-question/dynamic-question.component';
 import { EditUmlComponent } from './Pages/lecturersView/edit-uml/edit-uml.component';
-import { EditCodeGameComponent } from "./Pages/lecturersView/edit-code-game/edit-code-game.component";
-import { EditGroupReviewGateComponent } from './Pages/lecturersView/edit-group-review-gate/edit-group-review-gate.component';
+import { EditCodeGameComponent } from './Pages/lecturersView/edit-code-game/edit-code-game.component';
+import { EvaluationDiscussionForumComponent } from './Pages/evaluation-discussion-forum/evaluation-discussion-forum/evaluation-discussion-forum.component';
+import { evaluationAccessGuard } from './Pages/evaluation-discussion-forum/guards/evaluation-access.guard';import { EditGroupReviewGateComponent } from './Pages/lecturersView/edit-group-review-gate/edit-group-review-gate.component';
 
 
 
@@ -43,84 +45,227 @@ const routes: Routes = [
   { path: 'app', component: AppComponent },
   { path: 'not-registered', component: NotRegisteredComponent, canActivate: [LoggedInGuard] },
   {
+    path: 'forum',
+    component: EvaluationDiscussionForumComponent,
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard, evaluationAccessGuard],
+    data: {
+      title: 'Evaluation Discussion Forum',
+      description: 'Peer evaluation and discussion platform'
+    }
+  },
+  {
+    path: 'forum/:submissionId',
+    component: EvaluationDiscussionForumComponent,
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard, evaluationAccessGuard],
+    data: {
+      title: 'Evaluation Discussion',
+      description: 'Discussion forum for specific submission evaluation'
+    }
+  },
+  {
     path: 'dashboard',
     component: DashboardComponent,
     canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
     children: [
-      { path: 'contentBoard', component: ContentBoardComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-      { path: 'concept', component: ConceptOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      {
+        path: 'contentBoard',
+        component: ContentBoardComponent,
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+      },
+      {
+        path: 'concept',
+        component: ConceptOverviewComponent,
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+      },
       {
         path: 'concept/:conceptId',
         component: ConceptOverviewComponent,
         children: [
-          { path: 'question/:questionId', component: DynamicQuestionComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] }
+          {
+            path: 'question/:questionId',
+            component: DynamicQuestionComponent,
+            canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+          },
         ],
-        canActivate: [LoggedInGuard, RegisteredForSubjectGuard]
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
       },
-      { path: 'discussion', component: DiscussionListComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-      { path: 'codeTask', component: CodeTaskComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-      { path: 'pdfViewer/:uniqueIdentifier', component: PdfViewerComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-      { path: 'graph', component: GraphComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard, NavigationPreferenceGuard] },
-      { path: 'mobile-navigator', component: MobileNavigatorComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard, NavigationPreferenceGuard] },
-      { path: 'highlight-navigator', component: HighlightNavigatorComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard, NavigationPreferenceGuard] },
-      { path: 'chatbot', component: ChatBotComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-      { path: 'video', component: VideoTimeStampComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-      { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-      { path: 'mcqcreation', component: McTaskCreationComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+      {
+        path: 'discussion',
+        component: DiscussionListComponent,
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+      },
+      {
+        path: 'codeTask',
+        component: CodeTaskComponent,
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+      },
+      {
+        path: 'pdfViewer/:uniqueIdentifier',
+        component: PdfViewerComponent,
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+      },
+      {
+        path: 'graph',
+        component: GraphComponent,
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard, NavigationPreferenceGuard],
+      },
+      {
+        path: 'mobile-navigator',
+        component: MobileNavigatorComponent,
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard, NavigationPreferenceGuard],
+      },
+      {
+        path: 'highlight-navigator',
+        component: HighlightNavigatorComponent,
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard, NavigationPreferenceGuard],
+      },
+      {
+        path: 'chatbot',
+        component: ChatBotComponent,
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+      },
+      {
+        path: 'video',
+        component: VideoTimeStampComponent,
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+      },
+      {
+        path: 'task-evaluation-overview',
+        component: TaskEvaluationOverviewComponent,
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+      },
+      {
+        path: 'mcqcreation',
+        component: McTaskCreationComponent,
+        canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+      },
       // lecturers view
-      { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [LoggedInGuard, AdminGuard] },
-      { path: 'editcoding/:questionId', component: EditCodingComponent, canActivate: [LoggedInGuard, AdminGuard] },
-      { path: 'editfillin/:questionId', component: EditFillinComponent, canActivate: [LoggedInGuard, AdminGuard] },
-      { path: 'editfreetext/:questionId', component: EditFreetextComponent, canActivate: [LoggedInGuard, AdminGuard] },
-      { path: 'editgraph/:questionId', component: EditGraphComponent, canActivate: [LoggedInGuard, AdminGuard] },
+      {
+        path: 'editchoice/:questionId',
+        component: EditChoiceComponent,
+        canActivate: [LoggedInGuard, AdminGuard],
+      },
+      {
+        path: 'editcoding/:questionId',
+        component: EditCodingComponent,
+        canActivate: [LoggedInGuard, AdminGuard],
+      },
+      {
+        path: 'editfillin/:questionId',
+        component: EditFillinComponent,
+        canActivate: [LoggedInGuard, AdminGuard],
+      },
+      {
+        path: 'editfreetext/:questionId',
+        component: EditFreetextComponent,
+        canActivate: [LoggedInGuard, AdminGuard],
+      },
+      {
+        path: 'editgraph/:questionId',
+        component: EditGraphComponent,
+        canActivate: [LoggedInGuard, AdminGuard],
+      },
       // just for testing
       { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
-    ]
+    ],
   },
-  { path: 'discussion-view/:discussionId', component: DiscussionViewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  { path: 'task-evaluation-overview', component: TaskEvaluationOverviewComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
+  {
+    path: 'discussion-view/:discussionId',
+    component: DiscussionViewComponent,
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+  },
+  {
+    path: 'task-evaluation-overview',
+    component: TaskEvaluationOverviewComponent,
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+  },
 
-  { path: 'mcqcreation', component: McTaskCreationComponent, canActivate: [LoggedInGuard, RegisteredForSubjectGuard]},
+  {
+    path: 'mcqcreation',
+    component: McTaskCreationComponent,
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+  },
 
   // lecturers view
   { path: 'lecturer', loadChildren: () => import('./Pages/lecturersView/lecturers-view.module').then(m => m.LecturersViewModule), canActivate: [LoggedInGuard, AdminGuard] },
-  { path: 'editchoice/:questionId', component: EditChoiceComponent, canActivate: [LoggedInGuard, AdminGuard]},
-  { path: 'editcoding/:questionId', component: EditCodingComponent, canActivate: [LoggedInGuard, AdminGuard]},
-  { path: 'editfillin/:questionId', component: EditFillinComponent, canActivate: [LoggedInGuard, AdminGuard]},
-  { path: 'editfreetext/:questionId', component: EditFreetextComponent, canActivate: [LoggedInGuard, AdminGuard]},
-  { path: 'editgraph/:questionId', component: EditGraphComponent, canActivate: [LoggedInGuard, AdminGuard]},
-  { path: 'edituml/:questionId', component: EditUmlComponent, canActivate: [LoggedInGuard, AdminGuard]},
-  { path: 'editcodegame/:questionId', component: EditCodeGameComponent, canActivate: [LoggedInGuard, AdminGuard]},
+  {
+    path: 'editchoice/:questionId',
+    component: EditChoiceComponent,
+    canActivate: [LoggedInGuard, AdminGuard],
+  },
+  {
+    path: 'editcoding/:questionId',
+    component: EditCodingComponent,
+    canActivate: [LoggedInGuard, AdminGuard],
+  },
+  {
+    path: 'editfillin/:questionId',
+    component: EditFillinComponent,
+    canActivate: [LoggedInGuard, AdminGuard],
+  },
+  {
+    path: 'editfreetext/:questionId',
+    component: EditFreetextComponent,
+    canActivate: [LoggedInGuard, AdminGuard],
+  },
+  {
+    path: 'editgraph/:questionId',
+    component: EditGraphComponent,
+    canActivate: [LoggedInGuard, AdminGuard],
+  },
+  {
+    path: 'edituml/:questionId',
+    component: EditUmlComponent,
+    canActivate: [LoggedInGuard, AdminGuard],
+  },
+  {
+    path: 'editcodegame/:questionId',
+    component: EditCodeGameComponent,
+    canActivate: [LoggedInGuard, AdminGuard],
+  },
   { path: 'editgroupreviewgate/:questionId', component: EditGroupReviewGateComponent, canActivate: [LoggedInGuard, AdminGuard]},
 
   // just for testing
   { path: 'file-upload', component: FileUploadComponent, canActivate: [LoggedInGuard] },
 
-  { path: 'graphtask/:questionId', component: GraphTasksComponent, canActivate: [LoggedInGuard]},
+  { path: 'graphtask/:questionId', component: GraphTasksComponent, canActivate: [LoggedInGuard] },
 
   // Tutor-Kai as lazy loaded module (https://medium.com/@jaydeepvpatil225/feature-module-with-lazy-loading-in-angular-15-53bb8e15d193) Maybe we can use the same for UML Tasks?
-  { path: 'tutor-kai', loadChildren: () => import('./Modules/tutor-kai/tutor-kai.module').then(m => m.TutorKaiModule), canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-  // UMLearn as lazy loaded module
-  { path: 'umlearn', loadChildren: () => import('./Modules/umlearn/umlearn.module').then(m => m.UmlearnModule), canActivate: [LoggedInGuard, RegisteredForSubjectGuard] },
-
-  { path: 'admin', loadChildren: () => import('./Pages/admin/admin.module').then(m => m.AdminModule), canActivate: [LoggedInGuard, AdminGuard] },
-  // New route for RhinoLauncherModule
   {
-    path: 'rhino-launcher',
-    loadChildren: () => import('./features/rhino-launcher/rhino-launcher.module').then(m => m.RhinoLauncherModule),
-    canActivate: [LoggedInGuard] // Assuming it should be guarded
+    path: 'tutor-kai',
+    loadChildren: () => import('./Modules/tutor-kai/tutor-kai.module').then(m => m.TutorKaiModule),
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+  },
+  // UMLearn as lazy loaded module
+  {
+    path: 'umlearn',
+    loadChildren: () => import('./Modules/umlearn/umlearn.module').then(m => m.UmlearnModule),
+    canActivate: [LoggedInGuard, RegisteredForSubjectGuard],
+  },
+
+  {
+    path: 'admin',
+    loadChildren: () => import('./Pages/admin/admin.module').then(m => m.AdminModule),
+    canActivate: [LoggedInGuard, AdminGuard],
+  },
+  {
+    path: 'teacher',
+    loadChildren: () => import('./Pages/teacher/teacher.module').then(m => m.TeacherModule),
+    canActivate: [LoggedInGuard], // Assuming teachers need to be logged in
   },
 ];
 @NgModule({
-  imports: [RouterModule.forRoot(routes, {
-    // preloadingStrategy: PreloadAllModules, // PreloadAllModules needs to be imported if used. Removing for now to fix immediate error.
-    paramsInheritanceStrategy: 'emptyOnly', // Default in Angular 17
-    // Add other router configuration options that are no longer part of the public API
-    scrollPositionRestoration: 'disabled', // Default value
-    anchorScrolling: 'disabled', // Default value
-    onSameUrlNavigation: 'ignore', // Default value
-    enableTracing: false // Default value
-  })],
-  exports: [RouterModule]
+  imports: [
+    RouterModule.forRoot(routes, {
+      // preloadingStrategy: PreloadAllModules, // PreloadAllModules needs to be imported if used. Removing for now to fix immediate error.
+      paramsInheritanceStrategy: 'emptyOnly', // Default in Angular 17
+      // Add other router configuration options that are no longer part of the public API
+      scrollPositionRestoration: 'disabled', // Default value
+      anchorScrolling: 'disabled', // Default value
+      onSameUrlNavigation: 'ignore', // Default value
+      enableTracing: false, // Default value
+    }),
+  ],
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

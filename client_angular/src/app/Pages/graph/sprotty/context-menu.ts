@@ -16,91 +16,124 @@
 
 import { inject, injectable } from 'inversify';
 import {
-    Anchor, EMPTY_ROOT, IActionDispatcher,
-    IContextMenuItemProvider, IContextMenuService, LabeledAction, MenuItem,
-    RequestExportSvgAction, SModelRootImpl, SNodeImpl, TYPES, ViewerOptions
+  Anchor,
+  IActionDispatcher,
+  IContextMenuItemProvider,
+  IContextMenuService,
+  MenuItem,
+  SModelRootImpl,
+  ViewerOptions,
 } from 'sprotty';
-import { CenterAction, GetSelectionAction, DeleteElementAction, FitToScreenAction, Point, SetPopupModelAction, SelectionResult, CreateElementAction } from 'sprotty-protocol';
+import { EMPTY_ROOT, LabeledAction, RequestExportSvgAction, SNodeImpl, TYPES } from 'sprotty';
+import { Point, SelectionResult } from 'sprotty-protocol';
+import {
+  CenterAction,
+  GetSelectionAction,
+  DeleteElementAction,
+  FitToScreenAction,
+  SetPopupModelAction,
+  CreateElementAction,
+} from 'sprotty-protocol';
 
-import { SprottyConceptNode } from './sprottyModels.interface'
-import { AwardLevelAction, CreateConceptAction, CreateEdgeAction, DeleteConceptAction, MoveNodeAction } from './actions';
+import { SprottyConceptNode } from './sprottyModels.interface';
+import {
+  AwardLevelAction,
+  CreateConceptAction,
+  CreateEdgeAction,
+  DeleteConceptAction,
+  MoveNodeAction,
+} from './actions';
 @injectable()
 export class ClassContextMenuService implements IContextMenuService {
+  @inject(TYPES.IActionDispatcher) readonly actionDispatcher!: IActionDispatcher;
+  @inject(TYPES.ViewerOptions) protected viewerOptions!: ViewerOptions;
 
-    @inject(TYPES.IActionDispatcher) readonly actionDispatcher!: IActionDispatcher;
-    @inject(TYPES.ViewerOptions) protected viewerOptions!: ViewerOptions;
+  show(items: MenuItem[], anchor: Anchor, onHide?: () => void): void {
+    this.actionDispatcher.dispatch(SetPopupModelAction.create(EMPTY_ROOT));
+    const container = document.getElementById(this.viewerOptions.baseDiv);
+    let menuNode: HTMLDivElement;
+    const hideMenu = () => {
+      container?.removeChild(menuNode);
+      if (onHide) {
+        onHide();
+      }
+    };
+    menuNode = this.createMenu(items, hideMenu);
+    menuNode.style.top = anchor.y - 100 + 'px';
+    menuNode.style.left = anchor.x - 100 + 'px';
+    menuNode.autofocus = true;
+    console.log(anchor);
 
-    show(items: MenuItem[], anchor: Anchor, onHide?: (() => void) | undefined): void {
-        this.actionDispatcher.dispatch(SetPopupModelAction.create(EMPTY_ROOT))
-        const container = document.getElementById(this.viewerOptions.baseDiv);
-        let menuNode: HTMLDivElement;
-        const hideMenu = () => {
-            container?.removeChild(menuNode);
-            if (onHide) {
-                onHide()
-            }
+    container?.appendChild(menuNode);
+    menuNode.onmouseleave = (e: MouseEvent) => hideMenu();
+  }
+
+  protected createMenu(items: MenuItem[], closeCallback: () => void): HTMLDivElement {
+    const menuNode = document.createElement('div');
+    menuNode.id = 'class-context-menu';
+    menuNode.classList.add('class-context-menu');
+    items.forEach((item, index) => {
+      const menuItem = document.createElement('div');
+      menuItem.id = 'class-context-menu-item-' + index;
+      menuItem.classList.add('class-context-menu-item');
+      const itemEnabled = item.isEnabled ? item.isEnabled() : true;
+      if (!itemEnabled) menuItem.classList.add('disabled-action');
+      menuItem.textContent = item.label;
+      menuItem.onclick = (e: MouseEvent) => {
+        closeCallback();
+        if (itemEnabled && item.actions.length > 0) {
+          this.actionDispatcher.dispatchAll(item.actions);
         }
-        menuNode = this.createMenu(items, hideMenu);
-        menuNode.style.top = (anchor.y-100 ) + 'px'
-        menuNode.style.left = (anchor.x-100 ) + 'px'
-        menuNode.autofocus = true;
-        console.log(anchor)
-
-
-        container?.appendChild(menuNode);
-        menuNode.onmouseleave = (e: MouseEvent) => hideMenu();
-    }
-
-    protected createMenu(items: MenuItem[], closeCallback: () => void): HTMLDivElement {
-        const menuNode = document.createElement('div');
-        menuNode.id = 'class-context-menu';
-        menuNode.classList.add('class-context-menu');
-        items.forEach((item, index) => {
-            const menuItem = document.createElement('div');
-            menuItem.id = 'class-context-menu-item-' + index;
-            menuItem.classList.add('class-context-menu-item');
-            const itemEnabled = item.isEnabled ? item.isEnabled() : true;
-            if (!itemEnabled)
-                menuItem.classList.add('disabled-action');
-            menuItem.textContent = item.label;
-            menuItem.onclick = (e: MouseEvent) => {
-                closeCallback();
-                if (itemEnabled && item.actions.length > 0) {
-                    this.actionDispatcher.dispatchAll(item.actions);
-                }
-            }
-            menuNode.appendChild(menuItem);
-        });
-        return menuNode;
-    }
+      };
+      menuNode.appendChild(menuItem);
+    });
+    return menuNode;
+  }
 }
 
 @injectable()
 export class ClassContextMenuItemProvider implements IContextMenuItemProvider {
+  @inject(TYPES.IActionDispatcher) readonly actionDispatcher!: IActionDispatcher;
 
-    @inject(TYPES.IActionDispatcher) readonly actionDispatcher!: IActionDispatcher;
-    
+  async getItems(
+    root: Readonly<SModelRootImpl>,
+    lastMousePosition?: Point,
+  ): Promise<LabeledAction[]> {
+    const selectionResult = await this.actionDispatcher.request<SelectionResult>(
+      GetSelectionAction.create(),
+    );
+    const selectedElement = selectionResult.selectedElementsIDs[0];
+    return [
+      new LabeledAction('Fit Diagram to Screen', [
+        FitToScreenAction.create(root.children.map(child => child.id)),
+      ]),
+      new LabeledAction('Center Selection', [
+        CenterAction.create(selectionResult.selectedElementsIDs),
+      ]),
+      new LabeledAction('', []),
+      new LabeledAction('Export SVG', [RequestExportSvgAction.create()]),
+      new LabeledAction('', []),
 
-    async getItems(root: Readonly<SModelRootImpl>, lastMousePosition?: Point | undefined): Promise<LabeledAction[]> {
-        const selectionResult = await this.actionDispatcher.request<SelectionResult>(GetSelectionAction.create())
-        const selectedElement = selectionResult.selectedElementsIDs[0]
-        return [
-            new LabeledAction('Fit Diagram to Screen', [FitToScreenAction.create(root.children.map(child => child.id))]),
-            new LabeledAction('Center Selection', [CenterAction.create(selectionResult.selectedElementsIDs)]),
-            new LabeledAction('', []),
-            new LabeledAction('Export SVG', [RequestExportSvgAction.create()]),
-            new LabeledAction('', []),
-
-
-            // custom options for admins
-            new LabeledAction('', []),
-            new LabeledAction('Add Concept here', [CreateConceptAction.create({parentId: selectedElement})]),
-            new LabeledAction('Delete this Concept or Edge', [DeleteConceptAction.create({conceptId: selectedElement})]),
-            new LabeledAction('Add prerequisite', [CreateEdgeAction.create({conceptId: selectedElement, connectionType: 'prerequisite'})]),
-            new LabeledAction('Add successor', [CreateEdgeAction.create({conceptId: selectedElement, connectionType: 'successor'})]),
-            new LabeledAction('Move to new Parent', [MoveNodeAction.create({conceptId: selectedElement})]),
-            new LabeledAction('debug: Award 1 Level', [AwardLevelAction.create({conceptId: selectedElement})]),
-        ];
-    }
-
+      // custom options for admins
+      new LabeledAction('', []),
+      new LabeledAction('Add Concept here', [
+        CreateConceptAction.create({ parentId: selectedElement }),
+      ]),
+      new LabeledAction('Delete this Concept or Edge', [
+        DeleteConceptAction.create({ conceptId: selectedElement }),
+      ]),
+      new LabeledAction('Add prerequisite', [
+        CreateEdgeAction.create({ conceptId: selectedElement, connectionType: 'prerequisite' }),
+      ]),
+      new LabeledAction('Add successor', [
+        CreateEdgeAction.create({ conceptId: selectedElement, connectionType: 'successor' }),
+      ]),
+      new LabeledAction('Move to new Parent', [
+        MoveNodeAction.create({ conceptId: selectedElement }),
+      ]),
+      new LabeledAction('debug: Award 1 Level', [
+        AwardLevelAction.create({ conceptId: selectedElement }),
+      ]),
+    ];
+  }
 }

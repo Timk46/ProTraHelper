@@ -1,4 +1,3 @@
-
 // NOTE: pdfjs-dist is throwing "Promise.withResolvers is not a function" in some scenarios.
 // This is a workaround. Only keep it if your environment really needs it.
 
@@ -14,17 +13,13 @@
   };
 }*/
 
-
+import { OnInit, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import {
   Component,
   Input,
-  OnInit,
   ChangeDetectionStrategy,
   ViewChild,
-  ElementRef,
-  AfterViewInit,
   SecurityContext,
-  ChangeDetectorRef,
 } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { environment } from '../../../../../environments/environment';
@@ -37,7 +32,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.vers
   selector: 'app-pdfViewer',
   templateUrl: './pdfViewer.component.html',
   styleUrls: ['./pdfViewer.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PdfViewerComponent implements OnInit, AfterViewInit {
   @Input() uniqueIdentifier: string = '';
@@ -53,7 +48,7 @@ export class PdfViewerComponent implements OnInit, AfterViewInit {
 
   constructor(
     private readonly sanitizer: DomSanitizer,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -86,16 +81,16 @@ export class PdfViewerComponent implements OnInit, AfterViewInit {
 
     const loadingTask = pdfjsLib.getDocument(pdfUrl);
     loadingTask.promise
-      .then(async (pdf) => {
+      .then(async pdf => {
         const totalPages = pdf.numPages;
-        const renderPromises: Array<Promise<void>> = [];
+        const renderPromises: Promise<void>[] = [];
 
         for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
           // Push each page render promise to the array
           renderPromises.push(
-            pdf.getPage(pageNum).then((page) =>
-              this.renderPage(page, container, pageNum, totalPages)
-            )
+            pdf
+              .getPage(pageNum)
+              .then(page => this.renderPage(page, container, pageNum, totalPages)),
           );
         }
 
@@ -103,7 +98,7 @@ export class PdfViewerComponent implements OnInit, AfterViewInit {
         this.isLoading = false;
         this.cdr.markForCheck();
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error loading PDF:', error);
         this.isLoading = false;
         this.cdr.markForCheck();
@@ -117,7 +112,7 @@ export class PdfViewerComponent implements OnInit, AfterViewInit {
     page: pdfjsLib.PDFPageProxy,
     container: HTMLElement,
     pageNum: number,
-    totalPages: number
+    totalPages: number,
   ): Promise<void> {
     const viewport = page.getViewport({ scale: 1.5 });
     const canvas = document.createElement('canvas');
@@ -158,6 +153,5 @@ export class PdfViewerComponent implements OnInit, AfterViewInit {
     const pdfUrl = `${environment.server}/files/download/${uniqueIdentifier}`;
     this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(pdfUrl);
     this.cdr.markForCheck();
-
   }
 }

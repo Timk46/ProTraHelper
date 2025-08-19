@@ -1,10 +1,10 @@
 .arrow-down::before {
-  content: "\25BC";
+  content: '\25BC';
   margin-left: 5px;
 }
 
 .arrow-up::before {
-  content: "\25B2";
+  content: '\25B2';
   margin-left: 5px;
 }
 
@@ -12,7 +12,9 @@
   opacity: 0;
   max-height: 0;
   overflow: hidden;
-  transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out;
+  transition:
+    opacity 0.5s ease-in-out,
+    max-height 0.5s ease-in-out;
 }
 
 .fade-in-out.active {
@@ -27,7 +29,7 @@
 
 .content {
   height: 20h;
-  padding:16px;
+  padding: 16px;
 
   contain: content;
   overflow-y: hidden;

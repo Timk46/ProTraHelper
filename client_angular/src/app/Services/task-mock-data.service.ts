@@ -18,10 +18,10 @@ export interface TaskViewData {
  * This service provides sample data for MC, fill-in and free text tasks
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TaskMockDataService {
-  constructor() { }
+  constructor() {}
 
   /**
    * Returns mock data for a Multiple Choice task
@@ -34,7 +34,7 @@ export class TaskMockDataService {
       name: 'Multiple Choice Beispielaufgabe',
       type: 'mcTask',
       progress: 0,
-      description: 'Eine Beispielaufgabe vom Typ Multiple Choice'
+      description: 'Eine Beispielaufgabe vom Typ Multiple Choice',
     };
   }
 
@@ -49,7 +49,7 @@ export class TaskMockDataService {
       name: 'Lückentext Beispielaufgabe',
       type: 'fillInTask',
       progress: 0,
-      description: 'Eine Beispielaufgabe vom Typ Lückentext'
+      description: 'Eine Beispielaufgabe vom Typ Lückentext',
     };
   }
 
@@ -64,7 +64,7 @@ export class TaskMockDataService {
       name: 'Freitext Beispielaufgabe',
       type: 'freeTextTask',
       progress: 0,
-      description: 'Eine Beispielaufgabe vom Typ Freitext'
+      description: 'Eine Beispielaufgabe vom Typ Freitext',
     };
   }
 }

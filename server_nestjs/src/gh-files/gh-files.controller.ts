@@ -1,5 +1,6 @@
 import { Controller, Get, Logger } from '@nestjs/common';
-import { GhFilesService, GrasshopperFileInfo } from './gh-files.service';
+import { GrasshopperFileInfo } from './gh-files.service';
+import { GhFilesService } from './gh-files.service';
 import { Public } from '@/public.decorator'; // Import the Public decorator
 
 @Controller('api/gh-files') // Base path for all routes in this controller

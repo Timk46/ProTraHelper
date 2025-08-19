@@ -18,8 +18,7 @@ import { questionType } from '@DTOs/question.dto';
 export class CodeGameService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  private readonly apiUrl: string =
-    'http://jury1.bshefl2.bs.informatik.uni-siegen.de/execute/';
+  private readonly apiUrl: string = 'http://jury1.bshefl2.bs.informatik.uni-siegen.de/execute/';
 
   async findOne(id: number): Promise<detailedQuestionDTO> {
     const question = await this.prismaService.question.findUnique({
@@ -41,9 +40,7 @@ export class CodeGameService {
 
     if (!question.codeGameQuestion) {
       console.log(`ERROR: Question with ID ${id} is not a coding question`);
-      throw new BadRequestException(
-        `Question with ID ${id} is not a coding question`,
-      );
+      throw new BadRequestException(`Question with ID ${id} is not a coding question`);
     }
 
     /* contentElementId passed in codeGameQuestion */
@@ -85,9 +82,7 @@ export class CodeGameService {
     } else if (language === 'java') {
       return this.executeJavaProject(mainFile, additionalFiles);
     } else {
-      throw new BadRequestException(
-        `Unsupported language for code game task: ${language}`,
-      );
+      throw new BadRequestException(`Unsupported language for code game task: ${language}`);
     }
   }
 
@@ -117,9 +112,7 @@ export class CodeGameService {
       });
 
       if (!response.ok) {
-        console.log(
-          `Failed to execute C++ code. Status: ${response.status}`,
-        );
+        console.log(`Failed to execute C++ code. Status: ${response.status}`);
         return null;
 
         // throw new HttpException(
@@ -177,23 +170,18 @@ export class CodeGameService {
     // );
 
     try {
-      const response = await fetch(
-        `${this.apiUrl}python-project?shouldOutputBase64=false`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            runMethod: 'main',
-            mainFile: mainFileBase64,
-            additionalFiles: additionalFilesBase64,
-          }),
-        },
-      );
+      const response = await fetch(`${this.apiUrl}python-project?shouldOutputBase64=false`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          runMethod: 'main',
+          mainFile: mainFileBase64,
+          additionalFiles: additionalFilesBase64,
+        }),
+      });
 
       if (!response.ok) {
-        console.log(
-          `Failed to execute python code. Status: ${response.status}`,
-        );
+        console.log(`Failed to execute python code. Status: ${response.status}`);
         return null;
 
         // throw new HttpException(
@@ -238,22 +226,17 @@ export class CodeGameService {
     // );
 
     try {
-      const response = await fetch(
-        `${this.apiUrl}java-project?shouldOutputBase64=false`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            mainClassName: 'game.Main',
-            files: files,
-          }),
-        },
-      );
+      const response = await fetch(`${this.apiUrl}java-project?shouldOutputBase64=false`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mainClassName: 'game.Main',
+          files: files,
+        }),
+      });
 
       if (!response.ok) {
-        console.log(
-          `Failed to execute java code. Status: ${response.status}`,
-        );
+        console.log(`Failed to execute java code. Status: ${response.status}`);
         return null;
 
         // throw new HttpException(

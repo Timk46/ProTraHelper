@@ -1,6 +1,8 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { NavigationType } from 'src/app/Services/navigation/navigation-preference.service';
@@ -16,28 +18,28 @@ interface NavigatorSetting {
   templateUrl: './navigation-preference-settings.component.html',
   styleUrls: ['./navigation-preference-settings.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatButtonModule,
-    MatCheckboxModule
-  ]
+  imports: [CommonModule, FormsModule, MatButtonModule, MatCheckboxModule],
 })
 export class NavigationPreferenceSettingsComponent implements OnInit {
   navigatorOptions: { type: NavigationType; label: string; enabled: boolean }[] = [
     { type: 'graph', label: 'Graph-Navigation', enabled: true },
     { type: 'mobile', label: 'Mobile Navigation', enabled: true },
-    { type: 'highlight', label: 'Highlight Navigation', enabled: true }
+    { type: 'highlight', label: 'Highlight Navigation', enabled: true },
   ];
 
   constructor(
-    private dialogRef: MatDialogRef<NavigationPreferenceSettingsComponent>,
-    private moduleSettings: ModuleSettingsService,
-    @Inject(MAT_DIALOG_DATA) private data: { moduleId: number }
-  ) {}
+    private readonly dialogRef: MatDialogRef<NavigationPreferenceSettingsComponent>,
+    private readonly moduleSettings: ModuleSettingsService,
+    @Inject(MAT_DIALOG_DATA) private readonly data: { moduleId: number },
+  ) {
+    console.log('data', this.data);
+  }
 
   ngOnInit(): void {
-    this.moduleSettings.getSetting<NavigatorSetting>(this.data.moduleId, 'enabled_navigators')
+    console.log('callling NavigationPreferenceSettingsComponent');
+    console.log('moduleId', this.data.moduleId);
+    this.moduleSettings
+      .getSetting<NavigatorSetting>(this.data.moduleId, 'enabled_navigators')
       .subscribe(setting => {
         if (setting?.enabled) {
           this.navigatorOptions.forEach(opt => {
@@ -57,15 +59,14 @@ export class NavigationPreferenceSettingsComponent implements OnInit {
 
   onSave(): void {
     if (this.navigatorOptions.some(opt => opt.enabled)) {
-      const enabledTypes = this.navigatorOptions
-        .filter(opt => opt.enabled)
-        .map(opt => opt.type);
+      const enabledTypes = this.navigatorOptions.filter(opt => opt.enabled).map(opt => opt.type);
 
       const setting: NavigatorSetting = {
-        enabled: enabledTypes
+        enabled: enabledTypes,
       };
 
-      this.moduleSettings.updateSetting(this.data.moduleId, 'enabled_navigators', setting)
+      this.moduleSettings
+        .updateSetting(this.data.moduleId, 'enabled_navigators', setting)
         .subscribe(() => {
           this.dialogRef.close(setting);
         });

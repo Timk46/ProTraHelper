@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(npm start)",
+      "Bash(npx ng build:*)",
+      "Bash(npm run lint)",
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)",
+      "Bash(grep:*)",
+      "Bash(-exec npx tsc --noEmit {})",
+      "Bash(npm install:*)",
+      "Bash(npm ls:*)",
+      "Bash(npx ng:*)",
+      "Bash(rm:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm info:*)",
+      "Bash(npm view:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(npm run:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(npm run:*)",
+      "Bash(ng generate module:*)",
+      "Bash(ng generate component:*)",
+      "Bash(ng generate service:*)",
+      "Bash(ng generate:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(npx @nestjs/cli generate module:*)",
+      "Bash(nest generate:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(timeout 30 npm start)",
+      "Bash(powershell:*)",
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(npx prisma db execute:*)",
+      "Bash(cmd /c:*)",
+      "mcp__puppeteer__puppeteer_connect_active_tab",
+      "mcp__puppeteer__puppeteer_navigate",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "mcp__puppeteer__puppeteer_evaluate"
+    ],
+    "deny": [],
+    "additionalDirectories": [
+      "C:\\c\\Dev\\hefl"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "browser-tools",
+    "puppeteer"
+  ]
+}

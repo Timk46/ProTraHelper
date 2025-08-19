@@ -6,14 +6,15 @@ import { ContentDTO, ContentElementDTO } from '@DTOs/content.dto';
 import { contentElementType } from '@DTOs/contentElementType.enum';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProgressService {
   /**
    * Instance of GraphCommunicationService (Singleton) for graph-related communications.
    * @private
    */
-  private graphCommunicationService: GraphCommunicationService = GraphCommunicationService.getInstance();
+  private readonly graphCommunicationService: GraphCommunicationService =
+    GraphCommunicationService.getInstance();
 
   constructor() {}
 
@@ -24,17 +25,19 @@ export class ProgressService {
    */
   answerSubmitted(): void {
     // Use timer to create a small delay for backend processing
-    timer(500).pipe(
-      concatMap(() => {
-        console.log("Triggering graph update after backend processing (500ms delay)");
-        this.graphCommunicationService.triggerGraphUpdate();
-        return from(Promise.resolve()); // Convert to Observable for proper chaining
-      }),
-      catchError(error => {
-        console.error('Error updating graph after answer submission:', error);
-        return from(Promise.resolve()); // Continue the chain even if there's an error
-      })
-    ).subscribe();
+    timer(500)
+      .pipe(
+        concatMap(() => {
+          console.log('Triggering graph update after backend processing (500ms delay)');
+          this.graphCommunicationService.triggerGraphUpdate();
+          return from(Promise.resolve()); // Convert to Observable for proper chaining
+        }),
+        catchError(error => {
+          console.error('Error updating graph after answer submission:', error);
+          return from(Promise.resolve()); // Continue the chain even if there's an error
+        }),
+      )
+      .subscribe();
   }
 
   /**
@@ -58,13 +61,15 @@ export class ProgressService {
    * @returns {number} - The average progress of the question elements within the content node.
    */
   calculateProgress(contentNode: ContentDTO): number {
-    const questionElements: ContentElementDTO[] = contentNode.contentElements.filter(element => element.type === contentElementType.QUESTION);
-    const progress = questionElements.reduce((acc, element) => {
-      return acc + (element.question?.progress || 0);
-    }, 0)/questionElements.length;
+    const questionElements: ContentElementDTO[] = contentNode.contentElements.filter(
+      (element: ContentElementDTO) => element.type === contentElementType.QUESTION,
+    );
+    const progress =
+      questionElements.reduce((acc, element) => {
+        return acc + (element.question?.progress || 0);
+      }, 0) / questionElements.length;
     return progress;
   }
-
 
   /**
    * Calculates the highest level of progress for a given content node.
@@ -79,8 +84,8 @@ export class ProgressService {
    */
   calculateLevelProgress(contentNode: ContentDTO): number {
     const sortedQuestionElements: ContentElementDTO[] = contentNode.contentElements
-    .filter(element => ((element.type === contentElementType.QUESTION) && element.question && element.question.level))
-    .sort((a, b) => a.question!.level - b.question!.level);
+      .filter((element: ContentElementDTO) => element.type === contentElementType.QUESTION && element.question?.level)
+      .sort((a: ContentElementDTO, b: ContentElementDTO) => a.question!.level - b.question!.level);
 
     let highestLevel = 0;
     for (let i = 0; i < sortedQuestionElements.length; i++) {
@@ -91,7 +96,7 @@ export class ProgressService {
         // only change highestLevel if last element or next element has different (higher) level
         if (
           i == sortedQuestionElements.length - 1 ||
-          sortedQuestionElements[i+1].question!.level != cv.question!.level
+          sortedQuestionElements[i + 1].question!.level != cv.question!.level
         ) {
           highestLevel = cv.question!.level;
         }

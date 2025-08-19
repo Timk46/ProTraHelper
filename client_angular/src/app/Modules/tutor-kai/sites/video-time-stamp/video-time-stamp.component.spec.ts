@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { VideoTimeStampComponent } from './video-time-stamp.component';
 
@@ -8,9 +9,8 @@ describe('VideoTimeStampComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ VideoTimeStampComponent ]
-    })
-    .compileComponents();
+      declarations: [VideoTimeStampComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(VideoTimeStampComponent);
     component = fixture.componentInstance;

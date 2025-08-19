@@ -7,6 +7,6 @@ import { UserConceptModule } from './user-concept/user-concept.module';
 @Module({
   providers: [GraphService],
   imports: [PrismaModule, UserConceptModule],
-  controllers: [GraphController]
+  controllers: [GraphController],
 })
 export class GraphModule {}

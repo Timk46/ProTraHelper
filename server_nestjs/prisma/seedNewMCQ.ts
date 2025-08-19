@@ -9,7 +9,6 @@ interface Option {
   correct: boolean;
 }
 interface MCQuestion {
-
   score: number;
   type: string; //MC
   author: number; //init = 1
@@ -18,15 +17,42 @@ interface MCQuestion {
   concept: number;
   isApproved: boolean;
   version: number; //init = 1
-
 }
 export const seedMCQnew = async () => {
   // Excel-Datei einlesen
   const filepath = process.env.FILE_PATH + 'TWL_MCQs.xlsx';
+  console.log('filepath', filepath);
+
+  // Check if Excel file exists
+  const fs = require('fs');
+  if (!fs.existsSync(filepath)) {
+    console.warn(`MCQ Excel file not found at: ${filepath}`);
+    console.warn(
+      'Skipping MCQ seeding. Place TWL_MCQs.xlsx in the FILE_PATH directory to enable MCQ import.',
+    );
+    return;
+  }
+
+  console.log('📚 Reading MCQ Excel file...');
   const workbook = xlsx.readFile(filepath);
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
   const data: McqGenerationDTO[] = xlsx.utils.sheet_to_json(sheet);
+  
+  console.log(`Found ${data.length} rows in Excel file`);
+  console.log('Sample row data:', data[0]); // Debug erste Zeile
+  
+  // Get available ConceptNodes from database
+  const availableConceptNodes = await prisma.conceptNode.findMany({
+    select: { id: true, name: true }
+  });
+  
+  console.log(`Available ConceptNodes in database: ${availableConceptNodes.length}`);
+  console.log('Available ConceptNode IDs:', availableConceptNodes.map(c => c.id).slice(0, 10)); // First 10 IDs
+  
+  // Use root ConceptNode as fallback
+  const fallbackConceptNodeId = 1; // Root ConceptNode should always exist
+  
   const questions: MCQuestion[] = [];
   // Daten transformieren
   const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -36,8 +62,14 @@ export const seedMCQnew = async () => {
       .filter(letter => mcq[`Antwort ${letter}`] !== undefined)
       .map(letter => ({
         text: mcq[`Antwort ${letter}`],
-        correct: mcq[`Korrekt markiert ${letter}`]
+        correct: mcq[`Korrekt markiert ${letter}`],
       }));
+    // Skip rows without question text
+    if (!mcq['Frage'] || mcq['Frage'].trim() === '') {
+      console.log('Skipping empty question row');
+      continue;
+    }
+
     let approved = true; //for testing only!
     if (mcq['Approved'] == '1') {
       approved = true;
@@ -52,19 +84,46 @@ export const seedMCQnew = async () => {
     } else {
       score = 1;
     }
+
+    // Handle ConceptNodeId - use fallback if invalid/missing
+    let conceptNodeId = mcq['ConceptNodeId'];
+    
+    // If ConceptNodeId is invalid, use fallback
+    if (!conceptNodeId || isNaN(Number(conceptNodeId))) {
+      console.log(`Using fallback ConceptNodeId for question: "${mcq['Frage']?.substring(0, 50)}..."`);
+      conceptNodeId = fallbackConceptNodeId;
+    } else {
+      conceptNodeId = Number(conceptNodeId);
+      
+      // Check if this ConceptNodeId exists in our database
+      const conceptExists = availableConceptNodes.find(c => c.id === conceptNodeId);
+      if (!conceptExists) {
+        console.log(`ConceptNodeId ${conceptNodeId} not found, using fallback for: "${mcq['Frage']?.substring(0, 50)}..."`);
+        conceptNodeId = fallbackConceptNodeId;
+      }
+    }
+
     const question: MCQuestion = {
       score: score,
       type: type,
       author: 1,
       text: mcq['Frage'],
-      concept: mcq['ConceptNodeId'],
+      concept: conceptNodeId,
       isApproved: Boolean(approved),
       options: options,
       version: 1,
     };
     questions.push(question);
   }
+  console.log(`\n🔨 Processing ${questions.length} MCQs for database insertion...`);
+  
   for (const mcq of questions) {
+    // At this point, all MCQs should have valid concept IDs due to fallback logic above
+    if (!mcq.concept || isNaN(mcq.concept)) {
+      console.warn(`Unexpected: Skipping MCQ "${mcq.text}" - Missing ConceptNodeId: ${mcq.concept}`);
+      continue;
+    }
+
     //create the question
     //console.log('create mc question...');
     const createdQuestion = await prisma.question.create({
@@ -101,15 +160,15 @@ export const seedMCQnew = async () => {
       where: {
         conceptNodeId: createdQuestion.conceptNodeId,
         awards: createdQuestion.level,
-      }
+      },
     });
     if (training) {
       const contentNode = await prisma.contentNode.findFirst({
-        where: { id: training.contentNodeId }
+        where: { id: training.contentNodeId },
       });
       //ermittle die höchste Position in der content view und setze die Position des neuen content elements auf +1
       const contentViews = await prisma.contentView.findMany({
-        where: { contentNodeId: contentNode.id }
+        where: { contentNodeId: contentNode.id },
       });
       let maxPosition = 0;
       for (const contentView of contentViews) {
@@ -124,8 +183,7 @@ export const seedMCQnew = async () => {
           position: maxPosition + 1,
         },
       });
-    }
-    else {
+    } else {
       //erzeuge eine neue content node mit dem award level und verbinde sie mit dem content element
       /*const contentNode = await prisma.contentNode.create({
           data: {
@@ -176,10 +234,8 @@ export const seedMCQnew = async () => {
       });
     }
   }
-}
-async function main() {
-
-}
+};
+async function main() {}
 
 main()
   .catch(e => {
@@ -189,4 +245,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-

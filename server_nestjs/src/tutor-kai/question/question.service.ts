@@ -13,7 +13,6 @@ import {
  */
 @Injectable()
 export class QuestionService {
-
   constructor(private readonly prismaService: PrismaService) {}
 
   /**
@@ -26,7 +25,7 @@ export class QuestionService {
       where: { id },
       include: {
         codeGerueste: true,
-        automatedTests: true
+        automatedTests: true,
       },
     });
     if (!codingQuestion) {
@@ -35,11 +34,11 @@ export class QuestionService {
     return this.mapCodingQuestionToInternal(codingQuestion);
   }
 
-   /**
+  /**
    * @description Retrieve a codingQuestion (only DTO without Tests) from the database by its id.
    * @returns {Promise<CodingQuestionDto>} An array of question data transfer objects.
    */
-   async findCodingQuestionDtoById(id: number): Promise<CodingQuestionDto> {
+  async findCodingQuestionDtoById(id: number): Promise<CodingQuestionDto> {
     const codingQuestion = await this.prismaService.codingQuestion.findUnique({
       where: { id },
       include: {
@@ -62,12 +61,12 @@ export class QuestionService {
         codingQuestion: {
           include: {
             codeGerueste: true,
-            automatedTests: true
+            automatedTests: true,
           },
         },
       },
     });
-    return questions.map((question) : QuestionDTO => this.mapQuestionToDto(question));
+    return questions.map((question): QuestionDTO => this.mapQuestionToDto(question));
   }
 
   /**
@@ -83,7 +82,7 @@ export class QuestionService {
         codingQuestion: {
           include: {
             codeGerueste: true,
-            automatedTests: true
+            automatedTests: true,
           },
         },
       },
@@ -122,7 +121,7 @@ export class QuestionService {
       text: codingQuestion.text,
       textHTML: codingQuestion.textHTML,
       programmingLanguage: codingQuestion.programmingLanguage,
-      codeGerueste: codingQuestion.codeGerueste.map((codeGeruest) => {
+      codeGerueste: codingQuestion.codeGerueste.map(codeGeruest => {
         const codeGeruestDto: CodeGeruestDto = {
           id: codeGeruest.id,
           codingQuestionId: codeGeruest.codingQuestionId,
@@ -144,7 +143,7 @@ export class QuestionService {
       text: codingQuestion.text,
       programmingLanguage: codingQuestion.programmingLanguage,
       textHTML: codingQuestion.textHTML,
-      codeGerueste: codingQuestion.codeGerueste.map((codeGeruest) => {
+      codeGerueste: codingQuestion.codeGerueste.map(codeGeruest => {
         const codeGeruestDto: CodeGeruestDto = {
           id: codeGeruest.id,
           codingQuestionId: codeGeruest.codingQuestionId,
@@ -154,14 +153,13 @@ export class QuestionService {
         };
         return codeGeruestDto;
       }),
-      automatedTests: codingQuestion.automatedTests.map((automatedTest) => {
+      automatedTests: codingQuestion.automatedTests.map(automatedTest => {
         const automatedTestDto: AutomatedTestDto = {
           id: automatedTest.id,
           code: automatedTest.code,
           testFileName: automatedTest.testFileName,
           language: automatedTest.language,
           questionId: automatedTest.questionId,
-
         };
         return automatedTestDto;
       }),
@@ -176,7 +174,6 @@ export class QuestionService {
    * @returns {QuestionDto} The mapped question data transfer object.
    */
   private mapQuestionToDto(question): QuestionDTO {
-
     const questionDto: QuestionDTO = {
       id: question.id,
       name: question.name,

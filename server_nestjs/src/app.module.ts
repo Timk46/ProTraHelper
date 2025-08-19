@@ -35,15 +35,19 @@ import { CompareModule } from './umlearn/compare/compare.module';
 // END UMLearn Imports
 
 // BEGIN ProTra 2.0 Imports
-import { PmpmModule } from './pmpm/pmpm.module';
 // END ProTra 2.0 Imports
 import { GhFilesModule } from './gh-files/gh-files.module'; // Import the new module
+import { RhinoDirectModule } from './rhino-direct/rhino-direct.module';
+import { BatRhinoModule } from './bat-rhino/bat-rhino.module';
+import { RhinoUnifiedModule } from './rhino-unified/rhino-unified.module';
+import { MCSliderModule } from './mcslider/mcslider.module';
+import { RhinoIntegrationModule } from './rhino-integration/rhino-integration.module';
 
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/common/guards/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
-import { RefreshTokenModule } from "./auth/refresh-token/refresh-token.module";
-import { ScheduleModule } from "@nestjs/schedule";
+import { RefreshTokenModule } from './auth/refresh-token/refresh-token.module';
+import { ScheduleModule } from '@nestjs/schedule';
 import { UsersModule } from './users/users.module';
 import { FeedbackGenerationModule } from './ai/feedback-generation/feedback-generation.module';
 import { McqCreationModule } from './mcqcreation/mcqcreation.module';
@@ -73,6 +77,8 @@ import { CodeGameModule } from './code-game/code-game.module';
 import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgraph-feedback.module';
 import { UserGroupService } from './lecturers-view/user-group/user-group.service';
 import { UserGroupController } from './lecturers-view/user-group/user-group.controller';
+import { EvaluationDiscussionModule } from './evaluation-discussion/evaluation-discussion.module';
+
 
 @Module({
   imports: [
@@ -114,8 +120,15 @@ import { UserGroupController } from './lecturers-view/user-group/user-group.cont
     LanggraphFeedbackModule,
     TutoringFeedbackModule,
     // ProTra 2.0 Modules
-    PmpmModule,
     GhFilesModule, // Add the new module to imports
+    RhinoDirectModule,
+    BatRhinoModule,
+    RhinoUnifiedModule,
+    MCSliderModule,
+    RhinoIntegrationModule,
+
+    // Evaluation System
+    EvaluationDiscussionModule
   ],
   controllers: [
     AppController,
@@ -129,7 +142,8 @@ import { UserGroupController } from './lecturers-view/user-group/user-group.cont
     DiscussionViewService,
     DiscussionCreationService,
     CryptoService,
-    {// Intercept and add version number to all answers. We could add this to single components instead.
+    {
+      // Intercept and add version number to all answers. We could add this to single components instead.
       provide: APP_INTERCEPTOR,
       useClass: VersionInterceptor,
     },
@@ -147,5 +161,4 @@ import { UserGroupController } from './lecturers-view/user-group/user-group.cont
     UserGroupService,
   ],
 })
-
 export class AppModule {}

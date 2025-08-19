@@ -1,7 +1,9 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
-import { BaseMessage, HumanMessage } from '@langchain/core/messages';
-import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
+import { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage } from '@langchain/core/messages';
+import { Runnable } from '@langchain/core/runnables';
+import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { ktcSystemPrompt } from './ktc.prompts'; // Import prompt from the new file
 
@@ -9,21 +11,21 @@ import { ktcSystemPrompt } from './ktc.prompts'; // Import prompt from the new f
  * Builds the core KTC agent runnable (without input formatting).
  */
 export function buildKtcCoreAgent(llm: ChatOpenAI): Runnable<any, any> {
-    return createReactAgent({
-        llm: llm,
-        tools: [], // KTC agent doesn't use tools
-        name: 'KTC',
-        prompt: ktcSystemPrompt,
-    });
+  return createReactAgent({
+    llm: llm,
+    tools: [], // KTC agent doesn't use tools
+    name: 'KTC',
+    prompt: ktcSystemPrompt,
+  });
 }
 
 /**
  * Builds the complete KTC agent chain, including input formatting.
  */
 export function buildKtcAgentChain(llm: ChatOpenAI): RunnableSequence {
-    const inputFormatter = new RunnableLambda({
-        func: (input: FeedbackContextDto) => {
-            const contextMessageContent = `
+  const inputFormatter = new RunnableLambda({
+    func: (input: FeedbackContextDto) => {
+      const contextMessageContent = `
 ## Attempt number
 ${input.attemptCount}
 
@@ -51,12 +53,12 @@ ${JSON.stringify(input.unitTestResults) || 'None'}
 
 Generate feedback in german strictly adhering to the KTC type and all constraints in your instructions.
 `;
-            const initialMessages: BaseMessage[] = [new HumanMessage(contextMessageContent)];
-            return { messages: initialMessages };
-        },
-    }).withConfig({ runName: 'FormatKtcAgentInput' });
+      const initialMessages: BaseMessage[] = [new HumanMessage(contextMessageContent)];
+      return { messages: initialMessages };
+    },
+  }).withConfig({ runName: 'FormatKtcAgentInput' });
 
-    const coreAgent = buildKtcCoreAgent(llm);
+  const coreAgent = buildKtcCoreAgent(llm);
 
-    return RunnableSequence.from([inputFormatter, coreAgent], 'KtcAgentChain');
+  return RunnableSequence.from([inputFormatter, coreAgent], 'KtcAgentChain');
 }

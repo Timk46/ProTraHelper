@@ -19,8 +19,6 @@ import { TaskCreationComponent } from './pages/task-creation/task-creation.compo
 import { TooltippComponent } from './pages/tooltip/tooltipp.component';
 import { EditorCommunicationService } from '@UMLearnServices/editor-communication.service';
 
-
-
 @NgModule({
   declarations: [
     EditorComponent,
@@ -34,21 +32,10 @@ import { EditorCommunicationService } from '@UMLearnServices/editor-communicatio
     TaskWorkspaceComponent,
     TaskDescriptionPopupComponent,
     TaskCreationComponent,
-    TooltippComponent
+    TooltippComponent,
   ],
-  imports: [
-    CommonModule,
-    MaterialModule,
-    FormsModule,
-    UmlearnRoutingModule
-  ],
-  providers: [
-    { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' },
-    EditorModule
-  ],
-  exports: [
-    TaskCreationComponent,
-    EditorComponent
-  ]
+  imports: [CommonModule, MaterialModule, FormsModule, UmlearnRoutingModule],
+  providers: [{ provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }, EditorModule],
+  exports: [TaskCreationComponent, EditorComponent],
 })
-export class UmlearnModule { }
+export class UmlearnModule {}

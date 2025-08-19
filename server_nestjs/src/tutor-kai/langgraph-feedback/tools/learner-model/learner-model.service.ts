@@ -2,22 +2,21 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust path if needed based on actual structure
 import { LearnerModelDto } from '@Interfaces/tutorKaiDtos/LearnerModel.dto';
 import { KIFeedback, CodeSubmission } from '@prisma/client';
-import { ChatOpenAI } from "@langchain/openai";
-import { StringOutputParser } from "@langchain/core/output_parsers";
-import { PromptTemplate } from "@langchain/core/prompts";
+import { ChatOpenAI } from '@langchain/openai';
+import { StringOutputParser } from '@langchain/core/output_parsers';
+import { PromptTemplate } from '@langchain/core/prompts';
 
 @Injectable()
-export class LearnerModelToolService { // Renamed class
+export class LearnerModelToolService {
+  // Renamed class
   private readonly logger = new Logger(LearnerModelToolService.name);
 
   // Instantiate ChatOpenAI - assumes OPENAI_API_KEY is in environment variables
-  private chatModel = new ChatOpenAI({
+  private readonly chatModel = new ChatOpenAI({
     temperature: 0.2,
   });
 
-  constructor(
-    private prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // Renamed method to be more descriptive for tool usage
   async getLearnerModelData(
@@ -26,7 +25,9 @@ export class LearnerModelToolService { // Renamed class
     // currentSubmissionTimestamp: Date, // Timestamp might not be needed if tool is called before submission processing
     conceptNodeId: number | null,
   ): Promise<LearnerModelDto> {
-    this.logger.log(`Fetching learner model data for tool: user ${userId}, question ${codingQuestionId}, concept ${conceptNodeId}`);
+    this.logger.log(
+      `Fetching learner model data for tool: user ${userId}, question ${codingQuestionId}, concept ${conceptNodeId}`,
+    );
 
     // Fetch task history first, as it might be needed for time calculations if we add them back
     // Note: If the tool is called *before* the current submission is saved, we fetch *all* history for the task.
@@ -38,22 +39,19 @@ export class LearnerModelToolService { // Renamed class
       // conceptPromise and prerequisitePromise depend on conceptNodeId
     ];
 
-    const conceptPromise = conceptNodeId !== null
-      ? this.getConceptPerformance(userId, conceptNodeId)
-      : Promise.resolve(null);
-    const prerequisitePromise = conceptNodeId !== null
-      ? this.getPrerequisitePerformance(userId, conceptNodeId)
-      : Promise.resolve([]);
+    const conceptPromise =
+      conceptNodeId !== null
+        ? this.getConceptPerformance(userId, conceptNodeId)
+        : Promise.resolve(null);
+    const prerequisitePromise =
+      conceptNodeId !== null
+        ? this.getPrerequisitePerformance(userId, conceptNodeId)
+        : Promise.resolve([]);
 
     promises.push(conceptPromise, prerequisitePromise);
 
     // We already have taskHistory, so only await the others
-    const [
-      overallPerformance,
-      conceptData,
-      prerequisiteData,
-    ] = await Promise.all(promises);
-
+    const [overallPerformance, conceptData, prerequisiteData] = await Promise.all(promises);
 
     // --- Calculate Recent Activity ---
     // This might need adjustment depending on when the tool is called relative to submission saving
@@ -76,7 +74,7 @@ export class LearnerModelToolService { // Renamed class
       performanceOnPrerequisites: prerequisiteData,
       overallCodingPerformance: overallPerformance,
       recentActivity: {
-        lastSubmissionDate: lastOverallSubmission?.createdAt ?? null,
+        lastSubmissionDate: lastOverallSubmission.createdAt ?? null,
         timeSinceLastAttemptSeconds: timeSinceLastAttemptSeconds, // Using placeholder
       },
       taskHistorySummary: taskHistorySummary,
@@ -86,7 +84,9 @@ export class LearnerModelToolService { // Renamed class
     return learnerModel;
   }
 
-  private async getOverallCodingPerformance(userId: number): Promise<{ totalSubmissions: number; overallAvgScore: number | null }> {
+  private async getOverallCodingPerformance(
+    userId: number,
+  ): Promise<{ totalSubmissions: number; overallAvgScore: number | null }> {
     const submissions = await this.prisma.codeSubmission.findMany({
       where: { userId: userId, score: { not: null } },
       select: { score: true },
@@ -103,7 +103,10 @@ export class LearnerModelToolService { // Renamed class
   }
 
   // Modified: Doesn't need currentSubmissionTimestamp if fetching all history for the tool
-  private async getTaskHistory(userId: number, codingQuestionId: number): Promise<(CodeSubmission & { kiFeedback: KIFeedback[] })[]> {
+  private async getTaskHistory(
+    userId: number,
+    codingQuestionId: number,
+  ): Promise<(CodeSubmission & { kiFeedback: KIFeedback[] })[]> {
     return this.prisma.codeSubmission.findMany({
       where: {
         userId: userId,
@@ -119,39 +122,57 @@ export class LearnerModelToolService { // Renamed class
     });
   }
 
-  private async generateTaskSummary(taskHistory: (CodeSubmission & { kiFeedback: KIFeedback[] })[]): Promise<string | null> {
+  private async generateTaskSummary(
+    taskHistory: (CodeSubmission & { kiFeedback: KIFeedback[] })[],
+  ): Promise<string | null> {
     if (taskHistory.length === 0) {
       return null;
     }
 
-    this.logger.log(`Generating task summary for ${taskHistory.length} past attempts using Langchain`);
+    this.logger.log(
+      `Generating task summary for ${taskHistory.length} past attempts using Langchain`,
+    );
 
-    const formattedHistory = taskHistory.map((attempt, index) => {
+    const formattedHistory = taskHistory
+      .map((attempt, index) => {
         let errorSummary = attempt.compilerOutput ? `Compiler: ${attempt.compilerOutput}` : '';
         if (attempt.unitTestResults) {
-            try {
-                const tests = typeof attempt.unitTestResults === 'string' ? JSON.parse(attempt.unitTestResults) : attempt.unitTestResults;
-                const resultsArray = Array.isArray(tests) ? tests : [];
-                const failedTests = resultsArray.filter(t => t?.status === 'failed').map(t => t?.name || 'Unnamed test');
-                if (failedTests.length > 0) {
-                    errorSummary += (errorSummary ? '; ' : '') + `Failed tests: ${failedTests.join(', ')}`;
-                } else if (!errorSummary && resultsArray.length > 0) {
-                     errorSummary = 'Tests passed or no results.';
-                } else if (!errorSummary) {
-                    errorSummary = 'No test results found.';
-                }
-            } catch (e) {
-                this.logger.warn(`Could not parse test results for submission ${attempt.id}: ${e.message}`);
-                errorSummary += (errorSummary ? '; ' : '') + 'Could not parse test results.';
+          try {
+            const tests =
+              typeof attempt.unitTestResults === 'string'
+                ? JSON.parse(attempt.unitTestResults)
+                : attempt.unitTestResults;
+            const resultsArray = Array.isArray(tests) ? tests : [];
+            const failedTests = resultsArray
+              .filter(t => t?.status === 'failed')
+              .map(t => t?.name || 'Unnamed test');
+            if (failedTests.length > 0) {
+              errorSummary +=
+                (errorSummary ? '; ' : '') + `Failed tests: ${failedTests.join(', ')}`;
+            } else if (!errorSummary && resultsArray.length > 0) {
+              errorSummary = 'Tests passed or no results.';
+            } else if (!errorSummary) {
+              errorSummary = 'No test results found.';
             }
+          } catch (e) {
+            this.logger.warn(
+              `Could not parse test results for submission ${attempt.id}: ${e.message}`,
+            );
+            errorSummary += (errorSummary ? '; ' : '') + 'Could not parse test results.';
+          }
         }
         if (!errorSummary) errorSummary = 'No explicit errors recorded.';
-        const feedbackGiven = attempt.kiFeedback.map(f => f.flavor || 'unknown').join(', ') || 'None';
-        const truncatedErrorSummary = errorSummary.length > 250 ? errorSummary.substring(0, 250) + '...' : errorSummary;
+        const feedbackGiven =
+          attempt.kiFeedback.map(f => f.flavor || 'unknown').join(', ') || 'None';
+        const truncatedErrorSummary =
+          errorSummary.length > 250 ? errorSummary.substring(0, 250) + '...' : errorSummary;
 
         // Corrected template literal for the return string
-        return `Attempt ${index + 1} (${attempt.createdAt.toISOString()}):\n        Score: ${attempt.score ?? 'N/A'}\n        Errors/Output Summary: ${truncatedErrorSummary}\n        Feedback Given: ${feedbackGiven}`;
-    }).join('\n\n');
+        return `Attempt ${index + 1} (${attempt.createdAt.toISOString()}):\n        Score: ${
+          attempt.score ?? 'N/A'
+        }\n        Errors/Output Summary: ${truncatedErrorSummary}\n        Feedback Given: ${feedbackGiven}`;
+      })
+      .join('\n\n');
 
     // Corrected template literal definition
     const template = `You are an assistant summarizing a student's history on a specific programming task.
@@ -172,32 +193,39 @@ Concise Summary:`;
     const chain = prompt.pipe(this.chatModel).pipe(new StringOutputParser());
 
     try {
-        const summary = await chain.invoke({ history: formattedHistory });
-        this.logger.log(`Generated summary: ${summary}`); // Corrected template literal
-        return summary.trim();
+      const summary = await chain.invoke({ history: formattedHistory });
+      this.logger.log(`Generated summary: ${summary}`); // Corrected template literal
+      return summary.trim();
     } catch (error) {
-        this.logger.error('Error generating task summary with Langchain:', error);
-        return `(Error generating summary: ${error.message})`; // Corrected template literal
+      this.logger.error('Error generating task summary with Langchain:', error);
+      return `(Error generating summary: ${error.message})`; // Corrected template literal
     }
   }
 
   // Stubbed method implementation - Ensure these are defined in the class
-  private async getConceptPerformance(userId: number, conceptId: number): Promise<LearnerModelDto['performanceOnCurrentConcept']> {
+  private async getConceptPerformance(
+    userId: number,
+    conceptId: number,
+  ): Promise<LearnerModelDto['performanceOnCurrentConcept']> {
     this.logger.log(`Fetching performance for concept ${conceptId} for user ${userId} (STUBBED)`); // Corrected template literal
     // Placeholder logic
     return {
-        attempts: 0,
-        avgScore: null,
-        commonErrorTypes: [],
-        lastFeedbackTypes: [],
+      attempts: 0,
+      avgScore: null,
+      commonErrorTypes: [],
+      lastFeedbackTypes: [],
     };
   }
 
   // Stubbed method implementation - Ensure these are defined in the class
-  private async getPrerequisitePerformance(userId: number, conceptId: number): Promise<LearnerModelDto['performanceOnPrerequisites']> {
-     this.logger.log(`Fetching prerequisite performance for concept ${conceptId} for user ${userId} (STUBBED)`); // Corrected template literal
+  private async getPrerequisitePerformance(
+    userId: number,
+    conceptId: number,
+  ): Promise<LearnerModelDto['performanceOnPrerequisites']> {
+    this.logger.log(
+      `Fetching prerequisite performance for concept ${conceptId} for user ${userId} (STUBBED)`,
+    ); // Corrected template literal
     // Placeholder logic
     return [];
   }
-
 } // End of LearnerModelToolService class

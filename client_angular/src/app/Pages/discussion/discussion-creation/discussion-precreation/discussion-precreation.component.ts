@@ -1,17 +1,19 @@
 import { discussionFilterContentNodeDTO } from '@DTOs/index';
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-discussion-precreation',
   templateUrl: './discussion-precreation.component.html',
-  styleUrls: ['./discussion-precreation.component.scss']
+  styleUrls: ['./discussion-precreation.component.scss'],
 })
 export class DiscussionPrecreationComponent {
-
   contentNodes: discussionFilterContentNodeDTO[];
 
-  constructor(public dialogRef: MatDialogRef<DiscussionPrecreationComponent>, @Inject(MAT_DIALOG_DATA) public data: discussionFilterContentNodeDTO[]) {
+  constructor(
+    public dialogRef: MatDialogRef<DiscussionPrecreationComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: discussionFilterContentNodeDTO[],
+  ) {
     this.contentNodes = data;
   }
 
@@ -26,12 +28,12 @@ export class DiscussionPrecreationComponent {
   /**
    * Closes the dialog and passes a common content node to the parent component
    */
-  onAllSelect(){
+  onAllSelect() {
     //console.log("Alle");
     this.dialogRef.close({
       id: -1,
-      name: "Alle",
-      description: "",
+      name: 'Alle',
+      description: '',
     });
   }
 
@@ -41,6 +43,4 @@ export class DiscussionPrecreationComponent {
   onCancel() {
     this.dialogRef.close();
   }
-
-
 }

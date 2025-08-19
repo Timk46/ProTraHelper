@@ -7,9 +7,9 @@ import { TutoringFeedbackState } from '../state';
 @Injectable()
 export class GenerateFixedCodeNodeService {
   private readonly logger = new Logger(GenerateFixedCodeNodeService.name);
-  private llm: ChatOpenAI; // We'll configure this properly later via LlmProviderService
+  private readonly llm: ChatOpenAI; // We'll configure this properly later via LlmProviderService
 
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     // Basic LLM initialization - replace with proper injection/configuration
     this.llm = new ChatOpenAI({
       modelName: 'gpt-4.1-2025-04-14',
@@ -22,9 +22,7 @@ export class GenerateFixedCodeNodeService {
    * @param state The current LangGraph state.
    * @returns A partial state object containing the generated fixedCode.
    */
-  async execute(
-    state: TutoringFeedbackState,
-  ): Promise<Partial<TutoringFeedbackState>> {
+  async execute(state: TutoringFeedbackState): Promise<Partial<TutoringFeedbackState>> {
     this.logger.log('Executing GenerateFixedCode Node');
     const { feedbackContext } = state;
 
@@ -35,8 +33,7 @@ export class GenerateFixedCodeNodeService {
 
     const { studentSolution, taskDescription, automatedTests } = feedbackContext; // Extract automatedTests
 
-    const systemPrompt = 
-`
+    const systemPrompt = `
 # Role and Objective
 You are an expert programming tutor AI. Your primary objective is to analyze the provided student code against a task description and automated tests, then generate a corrected version of the code.
 
@@ -65,20 +62,22 @@ ${studentSolution}
 
 ## Automated Tests (the corrected code MUST pass these)
 ### Unit Test Definitions
-${ feedbackContext.automatedTests ? feedbackContext.automatedTests[0].code : 'None provided.' }
+${feedbackContext.automatedTests ? feedbackContext.automatedTests[0].code : 'None provided.'}
 
 ### Unit Test Results (for Student Solution)
-${ feedbackContext.unitTestResults ? JSON.stringify(feedbackContext.unitTestResults) : 'None provided.' }
+${
+  feedbackContext.unitTestResults
+    ? JSON.stringify(feedbackContext.unitTestResults)
+    : 'None provided.'
+}
 
 # Final instructions
 Generate the corrected code that passes the automated tests.
-`   
+`;
 
     try {
       // TODO: Implement retry logic (e.g., using tenacity or a simple loop)
-      const response = await this.llm.invoke([
-        new SystemMessage(systemPrompt)
-      ]);
+      const response = await this.llm.invoke([new SystemMessage(systemPrompt)]);
 
       const fixedCode = response.content.toString().trim();
       this.logger.log('Successfully generated fixed code.');

@@ -1,9 +1,19 @@
 <mat-toolbar class="app-header">
   <!-- Linke Seite: Logo, Goals-Icon und Chat-Icon -->
   <div class="left-content">
-    <img src="assets/img/logo_hefl2.png" alt="HEFL Logo" class="app-logo" (click)="navigateToPreviousRoute()">
+    <img
+      src="assets/img/logo_hefl2.png"
+      alt="HEFL Logo"
+      class="app-logo"
+      (click)="navigateToPreviousRoute()"
+    />
     <!-- User Menü -->
-    <button mat-button [matMenuTriggerFor]="userMenu" *ngIf="userIsLoggedIn" class="user-menu-button">
+    <button
+      mat-button
+      [matMenuTriggerFor]="userMenu"
+      *ngIf="userIsLoggedIn"
+      class="user-menu-button"
+    >
       <mat-icon>account_circle</mat-icon>
       <span class="username">{{ userMail }}</span>
     </button>
@@ -11,18 +21,26 @@
       <button mat-menu-item (click)="logOut(false)">Abmelden</button>
       <button mat-menu-item (click)="logOut(true)">Von allen Geräten abmelden</button>
     </mat-menu>
-
   </div>
 
   <!-- Mitte: Navigation Toggle Button (Mobile/Graph) -->
   <div class="center-content">
-    <app-navigation-preference-toggle *ngIf="showNavToggle" class="nav-toggle"></app-navigation-preference-toggle>
+    <app-navigation-preference-toggle
+      *ngIf="showNavToggle"
+      class="nav-toggle"
+    ></app-navigation-preference-toggle>
   </div>
 
   <!-- Rechte Seite: Notification und User-Menü -->
   <div class="right-content">
     <!-- Chat-Button -->
-    <button mat-button *ngIf="userIsLoggedIn" class="chat-button" matTooltip="Chat öffnen" (click)="toggleChatBot()">
+    <button
+      mat-button
+      *ngIf="userIsLoggedIn"
+      class="chat-button"
+      matTooltip="Chat öffnen"
+      (click)="toggleChatBot()"
+    >
       <mat-icon>chat</mat-icon>
       <span>KaiGPT</span>
     </button>

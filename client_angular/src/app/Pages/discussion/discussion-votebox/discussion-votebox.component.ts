@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { discussionMessageVoteCreationDTO, discussionMessageVoteDTO } from '@DTOs/index';
 import { DiscussionViewService } from 'src/app/Services/discussion/discussion-view.service';
 import { DiscussionVoteService } from 'src/app/Services/discussion/discussion-vote.service';
@@ -6,31 +6,36 @@ import { DiscussionVoteService } from 'src/app/Services/discussion/discussion-vo
 @Component({
   selector: 'app-discussion-votebox',
   templateUrl: './discussion-votebox.component.html',
-  styleUrls: ['./discussion-votebox.component.scss']
+  styleUrls: ['./discussion-votebox.component.scss'],
 })
-export class DiscussionVoteboxComponent {
+export class DiscussionVoteboxComponent implements OnInit {
   @Input() messageId: number = -1; // to be changed on init
-  @Input() isSolution : boolean = false;
-  @Input() canMarkAsSolution : boolean = false;
+  @Input() isSolution: boolean = false;
+  @Input() canMarkAsSolution: boolean = false;
   //@Input() userId: number = 1; //HAS TO BE CHANGED
 
-  userVoteStatus : number = 0; /* 0 = nicht gevotet, 1 = upvote, -1 = downvote */
+  userVoteStatus: number = 0; /* 0 = nicht gevotet, 1 = upvote, -1 = downvote */
 
-  timeoutID : any;
+  timeoutID: any;
 
   voteData: discussionMessageVoteDTO = {
     messageId: -1,
     votes: 0,
-    userVoteStatus: 0
-  }
+    userVoteStatus: 0,
+  };
 
-  constructor(private discussionVoteService: DiscussionVoteService, private discussionViewService: DiscussionViewService) { }
+  constructor(
+    private readonly discussionVoteService: DiscussionVoteService,
+    private readonly discussionViewService: DiscussionViewService,
+  ) {}
 
   /**
    * Gets the vote data for the message
    */
   ngOnInit(): void {
-    this.discussionVoteService.getVoteData(this.messageId).subscribe(voteData => this.voteData = voteData);
+    this.discussionVoteService
+      .getVoteData(this.messageId)
+      .subscribe(voteData => (this.voteData = voteData));
   }
 
   /**
@@ -63,7 +68,9 @@ export class DiscussionVoteboxComponent {
 
   onMarkAsSolution(event: Event) {
     event.stopPropagation();
-    this.discussionViewService.toggleSolution(this.messageId).subscribe(isSolution => this.isSolution = isSolution);
+    this.discussionViewService
+      .toggleSolution(this.messageId)
+      .subscribe(isSolution => (this.isSolution = isSolution));
   }
 
   /**
@@ -78,10 +85,9 @@ export class DiscussionVoteboxComponent {
     this.timeoutID = setTimeout(() => {
       const voteCreationData: discussionMessageVoteCreationDTO = {
         messageId: this.messageId,
-        voteStatus: this.voteData.userVoteStatus
-      }
+        voteStatus: this.voteData.userVoteStatus,
+      };
       this.discussionVoteService.createOrModifyVote(voteCreationData).subscribe();
     }, 1000);
   }
-
 }

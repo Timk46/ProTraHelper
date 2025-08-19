@@ -1,20 +1,18 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ContentsForConceptDTO, ContentDTO } from '@DTOs/content.dto';
+import { OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { ContentsForConceptDTO } from '@DTOs/content.dto';
+import { ContentDTO } from '@DTOs/content.dto';
 
 @Component({
   selector: 'app-competencies',
   templateUrl: './competencies.component.html',
-  styleUrls: ['./competencies.component.scss']
+  styleUrls: ['./competencies.component.scss'],
 })
 export class CompetenciesComponent implements OnInit {
-
   @Input() contentsForActiveConceptNode: ContentsForConceptDTO = {
     trainedBy: [],
     requiredBy: [],
   };
 
-  ngOnInit() {
-  }
-
-
+  ngOnInit() {}
 }

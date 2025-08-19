@@ -6,11 +6,7 @@ import { QuestionDataModule } from '@/question-data/question-data.module';
 import { ContentModule } from '@/content/content.module';
 
 @Module({
-  imports: [
-    PrismaModule,
-    QuestionDataModule,
-    ContentModule,
-  ],
+  imports: [PrismaModule, QuestionDataModule, ContentModule],
   controllers: [ContentLinkerController],
   providers: [ContentLinkerService],
 })

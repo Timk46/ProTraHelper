@@ -1,4 +1,5 @@
-import { swappableEditorElement, editorDataDTO } from '@DTOs/index';
+import { editorDataDTO } from '@DTOs/index';
+import { swappableEditorElement } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { detailedDiff } from 'deep-object-diff';
 import { ClassNode, ClassAttribute, ClassMethod, NodeMatch } from '@DTOs/index';
@@ -8,34 +9,39 @@ import { JaroWinklerDistance } from 'natural';
 import { PointCalculationService } from '../point-calculation/point-calculation.service';
 import { pointDefinitions } from '../point-calculation/point-calculation.settings';
 
-
 @Injectable()
 export class CompareService {
-
-
-  constructor(private pointCalculator: PointCalculationService) { }
+  constructor(private readonly pointCalculator: PointCalculationService) {}
 
   /**
- * Compares the solution and the attempt and returns the attempt with highlights.
- * @param {editorDataDTO} solution - The solution data to compare.
- * @param {editorDataDTO} attempt - The attempt data to compare.
- * @returns {editorDataDTO} The highlighted differences between the solution and attempt data.
- */
+   * Compares the solution and the attempt and returns the attempt with highlights.
+   * @param {editorDataDTO} solution - The solution data to compare.
+   * @param {editorDataDTO} attempt - The attempt data to compare.
+   * @returns {editorDataDTO} The highlighted differences between the solution and attempt data.
+   */
   async compare(solution: editorDataDTO, attempt: editorDataDTO): Promise<editorDataDTO> {
-
     // matchNodes returns an object containing the final matches and the nodes with no matches
     const { finalMatches, noMatches } = this.matchNodes(solution.nodes, attempt.nodes);
     // matchEdges returns an array of edge matches between solution and attempt
     const edgeMatches = this.matchEdges(solution.edges, attempt.edges, finalMatches);
 
-    const highlightedNodes = this.highlightNodes(finalMatches, noMatches, solution.nodes, attempt.nodes);
-    const highlightedEdges = this.highlightEdges(finalMatches, edgeMatches, solution.edges, attempt.edges);
+    const highlightedNodes = this.highlightNodes(
+      finalMatches,
+      noMatches,
+      solution.nodes,
+      attempt.nodes,
+    );
+    const highlightedEdges = this.highlightEdges(
+      finalMatches,
+      edgeMatches,
+      solution.edges,
+      attempt.edges,
+    );
 
     return {
       nodes: highlightedNodes,
-      edges: highlightedEdges
+      edges: highlightedEdges,
     };
-
   }
 
   /**
@@ -46,29 +52,36 @@ export class CompareService {
    * @param maxPoints The maximum points that can be achieved.
    * @returns The reached points calculated based on the comparison.
    */
-  async compareAndCalculate(solution: editorDataDTO, attempt: editorDataDTO, maxPoints: number): Promise<{points: number, highlightData: editorDataDTO}> {
+  async compareAndCalculate(
+    solution: editorDataDTO,
+    attempt: editorDataDTO,
+    maxPoints: number,
+  ): Promise<{ points: number; highlightData: editorDataDTO }> {
     //console.log("datatatat: ", attempt);
     if (attempt.nodes.length == 0) {
       //return 0;
-      return {points: 0, highlightData: {nodes: [], edges: []}};
+      return { points: 0, highlightData: { nodes: [], edges: [] } };
     }
-    if (solution.nodes.length == 0){
+    if (solution.nodes.length == 0) {
       //for later: what to do when a task is given, but no solution?
       //return 0;
-      return {points: 0, highlightData: {nodes: [], edges: []}};
+      return { points: 0, highlightData: { nodes: [], edges: [] } };
     }
 
     const highlightedData = await this.compare(solution, attempt);
 
-
-    const reachedPoints = await this.pointCalculator.calculatePoints(highlightedData, solution, maxPoints);
+    const reachedPoints = await this.pointCalculator.calculatePoints(
+      highlightedData,
+      solution,
+      maxPoints,
+    );
 
     /* console.log("##### solution: #####", solution);
     console.log("##### attempt: #####", attempt);
     console.log("##### highlightedData: #####", highlightedData);
     console.log("##### mistakes: #####", (nodesMistakes + edgesMistakes), " / ", maxPoints); */
     //return reachedPoints;
-    return {points: reachedPoints, highlightData: highlightedData};
+    return { points: reachedPoints, highlightData: highlightedData };
   }
 
   /**
@@ -80,7 +93,12 @@ export class CompareService {
    * @param attemptNodes - The attempt nodes.
    * @returns An array of class nodes with highlights.
    */
-  highlightNodes(finalMatches: NodeMatch[], noMatches: ClassNode[], solutionNodes: ClassNode[], attemptNodes: ClassNode[]): ClassNode[] {
+  highlightNodes(
+    finalMatches: NodeMatch[],
+    noMatches: ClassNode[],
+    solutionNodes: ClassNode[],
+    attemptNodes: ClassNode[],
+  ): ClassNode[] {
     const result: ClassNode[] = [];
 
     // For each match in finalMatches, find the corresponding node in solutionNodes and attemptNodes
@@ -91,18 +109,18 @@ export class CompareService {
       if (solutionNode && attemptNode) {
         // compareNodes returns the attemptNode with highlights
         result.push(this.compareNodes(solutionNode, attemptNode));
-    };
-  });
+      }
+    });
 
-  // Add the nodes from noMatches to the result array
-  noMatches.forEach(noMatch => {
-    result.push(noMatch);
-  });
+    // Add the nodes from noMatches to the result array
+    noMatches.forEach(noMatch => {
+      result.push(noMatch);
+    });
 
-  // Update the position of the missing nodes
-  this.updateMissingNodesPosition(result);
+    // Update the position of the missing nodes
+    this.updateMissingNodesPosition(result);
 
-  return result;
+    return result;
   }
 
   /**
@@ -114,7 +132,12 @@ export class CompareService {
    * @param attemptEdges - The attempt edges.
    * @returns An array of class edges with highlights.
    */
-  highlightEdges(finalMatches: NodeMatch[], edgeMatches: EdgeMatch[], solutionEdges: ClassEdge[], attemptEdges: ClassEdge[]): ClassEdge[] {
+  highlightEdges(
+    finalMatches: NodeMatch[],
+    edgeMatches: EdgeMatch[],
+    solutionEdges: ClassEdge[],
+    attemptEdges: ClassEdge[],
+  ): ClassEdge[] {
     const result: ClassEdge[] = [];
 
     // For each match in edgeMatches compare the solutionEdge and attemptEdge and add the attemptEdge with highlights to result
@@ -132,8 +155,8 @@ export class CompareService {
         result.push({
           ...attemptEdge,
           highlighted: {
-            code: "not_found",
-          }
+            code: 'not_found',
+          },
         });
       }
     });
@@ -143,34 +166,36 @@ export class CompareService {
       if (!edgeMatches.some(match => match.solutionEdge.id === solutionEdge.id)) {
         // if the start or end node of the edge is in finalMatches, then replace the id with the id of the corresponding node in attemptNodes
         if (finalMatches.some(match => match.solutionNode.id === solutionEdge.start)) {
-          solutionEdge.start = finalMatches.find(match => match.solutionNode.id === solutionEdge.start)?.attemptNode.id!;
+          solutionEdge.start = finalMatches.find(
+            match => match.solutionNode.id === solutionEdge.start,
+          ).attemptNode.id;
         }
         result.push({
           ...solutionEdge,
           highlighted: {
-            code: "missing",
-          }
+            code: 'missing',
+          },
         });
       }
     });
     return result;
   }
 
-/**
- * Performs typo detection on the given solutionNode and attemptNode.
- * If the distance between the titles of the nodes is greater than or equal to 0.85,
- * the title of the attemptNode is updated to match the title of the solutionNode.
- * For each method in the attemptNode, the method name is updated to match the method name
- * in the solutionNode if the Jaro-Winkler distance between them is greater than 0.8.
- * Similarly, for each attribute in the attemptNode, the attribute name is updated to match
- * the attribute name in the solutionNode if the Jaro-Winkler distance between them is greater than 0.8.
- * Returns the updated attemptNode.
- *
- * @param solutionNode - The solution node to compare against.
- * @param attemptNode - The attempt node to perform typo detection on.
- * @returns The updated attemptNode with corrected titles, method names, and attribute names.
- */
-typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
+  /**
+   * Performs typo detection on the given solutionNode and attemptNode.
+   * If the distance between the titles of the nodes is greater than or equal to 0.85,
+   * the title of the attemptNode is updated to match the title of the solutionNode.
+   * For each method in the attemptNode, the method name is updated to match the method name
+   * in the solutionNode if the Jaro-Winkler distance between them is greater than 0.8.
+   * Similarly, for each attribute in the attemptNode, the attribute name is updated to match
+   * the attribute name in the solutionNode if the Jaro-Winkler distance between them is greater than 0.8.
+   * Returns the updated attemptNode.
+   *
+   * @param solutionNode - The solution node to compare against.
+   * @param attemptNode - The attempt node to perform typo detection on.
+   * @returns The updated attemptNode with corrected titles, method names, and attribute names.
+   */
+  typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
     // For the title
     var distance = JaroWinklerDistance(solutionNode.title, attemptNode.title, undefined);
     if (distance >= 0.85) {
@@ -180,10 +205,14 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
     // For the methods
     for (let k = 0; k < attemptNode.methods.length; k++) {
       var maxDistance = 0.0;
-      var maxString = "";
+      var maxString = '';
       for (let l = 0; l < solutionNode.methods.length; l++) {
         if (solutionNode.methods[l] && attemptNode.methods[k]) {
-          var distance = JaroWinklerDistance(solutionNode.methods[l].name, attemptNode.methods[k].name, undefined);
+          var distance = JaroWinklerDistance(
+            solutionNode.methods[l].name,
+            attemptNode.methods[k].name,
+            undefined,
+          );
           if (distance > maxDistance) {
             maxDistance = distance;
             maxString = solutionNode.methods[l].name;
@@ -194,16 +223,20 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
         attemptNode.methods[k].name = maxString;
       }
       var maxDistance = 0.0;
-      var maxString = "";
+      var maxString = '';
     }
 
     // For the attributes
     for (let k = 0; k < attemptNode.attributes.length; k++) {
       var maxDistance = 0.0;
-      var maxString = "";
+      var maxString = '';
       for (let l = 0; l < solutionNode.attributes.length; l++) {
         if (solutionNode.attributes[l] && attemptNode.attributes[k]) {
-          var distance = JaroWinklerDistance(solutionNode.attributes[l].name, attemptNode.attributes[k].name, undefined);
+          var distance = JaroWinklerDistance(
+            solutionNode.attributes[l].name,
+            attemptNode.attributes[k].name,
+            undefined,
+          );
           if (distance > maxDistance) {
             maxDistance = distance;
             maxString = solutionNode.attributes[l].name;
@@ -214,7 +247,7 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
         attemptNode.attributes[k].name = maxString;
       }
       var maxDistance = 0.0;
-      var maxString = "";
+      var maxString = '';
     }
     return attemptNode;
   }
@@ -227,7 +260,10 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
    * @param attemptNodes - An array of ClassNode objects representing the attempt nodes.
    * @returns An object with finalMatches and noMatches arrays.
    */
-  matchNodes(solutionNodes: ClassNode[], attemptNodes: ClassNode[]): { finalMatches: NodeMatch[], noMatches: ClassNode[] } {
+  matchNodes(
+    solutionNodes: ClassNode[],
+    attemptNodes: ClassNode[],
+  ): { finalMatches: NodeMatch[]; noMatches: ClassNode[] } {
     let allMatches: NodeMatch[] = [];
     const attemptNodesCopy: ClassNode[] = _.cloneDeep(attemptNodes);
     const solutionNodesCopy: ClassNode[] = _.cloneDeep(solutionNodes);
@@ -236,27 +272,31 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
 
     // Loop over all nodes of the solution
     for (let j = 0; j < solutionNodesCopy.length; j++) {
-      var solutionNode = solutionNodesCopy[j];
+      let solutionNode = solutionNodesCopy[j];
 
       // Array for matches for this solutionNode
-      var matchesForSolutionNode: NodeMatch[] = [];
+      const matchesForSolutionNode: NodeMatch[] = [];
 
       // Loop over all nodes of the attempt
       for (let i = 0; i < attemptNodesCopy.length; i++) {
-        var attemptNode = _.cloneDeep(attemptNodesCopy[i]);
+        let attemptNode = _.cloneDeep(attemptNodesCopy[i]);
 
-       // prepareWordsForMatching converts all attribute and method names to lowercase and replaces umlauts
+        // prepareWordsForMatching converts all attribute and method names to lowercase and replaces umlauts
         attemptNode = this.prepareWordsForMatching(attemptNode);
         solutionNode = this.prepareWordsForMatching(solutionNode);
 
         attemptNode = this.typoDetection(solutionNode, attemptNode);
 
-
         // Align attributes and methods
         [solutionNode, attemptNode] = this.alignAttributesAndMethods(solutionNode, attemptNode);
 
         // Diff between solutionNode and attemptNode
-        const detailedDifferences = this.customDetailedDiff(solutionNode, attemptNode, ['id', 'width', 'height', 'position']);
+        const detailedDifferences = this.customDetailedDiff(solutionNode, attemptNode, [
+          'id',
+          'width',
+          'height',
+          'position',
+        ]);
 
         // Calculate percentage match
         const percentageMatch = this.calculatePercentageMatch(detailedDifferences, attemptNode);
@@ -273,7 +313,9 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
       }
 
       // Check if there is a match with solutionNodeTitle === attemptNodeTitle
-      const sameTitleMatch = matchesForSolutionNode.find(match => match.solutionNode.title === match.attemptNode.title);
+      const sameTitleMatch = matchesForSolutionNode.find(
+        match => match.solutionNode.title === match.attemptNode.title,
+      );
 
       // if there is a sameTitleMatch, then add it to finalMatches
       if (sameTitleMatch) {
@@ -296,24 +338,28 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
       }
 
       // Check if there are entries with the same percentageMatch for this solutionNodeID
-      const sameCountMatches = allMatches.filter(match => match.percentageMatch === bestMatch.percentageMatch && match.solutionNode.id === bestMatch.solutionNode.id);
+      const sameCountMatches = allMatches.filter(
+        match =>
+          match.percentageMatch === bestMatch.percentageMatch &&
+          match.solutionNode.id === bestMatch.solutionNode.id,
+      );
 
       if (sameCountMatches.length > 0) {
         // Check if one of the entries has solutionNodeTitle === attemptNodeTitle
-        const sameTitleMatch = sameCountMatches.find(match => match.solutionNode.title === bestMatch.attemptNode.title);
+        const sameTitleMatch = sameCountMatches.find(
+          match => match.solutionNode.title === bestMatch.attemptNode.title,
+        );
 
         if (!sameTitleMatch) {
           // If no matching title was found, add bestMatch to finalMatches
           finalMatches.push(bestMatch);
-        }
-        else {
+        } else {
           // Add sameTitleMatch to finalMatches if a matching title was found
           finalMatches.push(sameTitleMatch);
           // Remove sameTitleMatch from allMatches
           allMatches = allMatches.filter(match => match !== sameTitleMatch);
         }
-      }
-      else {
+      } else {
         // Add the best match to finalMatches if there are no entries with the same differenceCount
         finalMatches.push(bestMatch);
       }
@@ -330,8 +376,8 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
         noMatches.push({
           ...node,
           highlighted: {
-            code: "missing"
-          }
+            code: 'missing',
+          },
         });
       }
     });
@@ -342,13 +388,13 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
         noMatches.push({
           ...node,
           highlighted: {
-            code: "not_found"
-          }
+            code: 'not_found',
+          },
         });
       }
     });
 
-    return {finalMatches, noMatches};
+    return { finalMatches, noMatches };
   }
 
   /**
@@ -359,46 +405,61 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
    * @param finalMatches - The array of final node matches.
    * @returns An array of matched edges between solution and attempt nodes.
    */
-  matchEdges(solutionEdges: ClassEdge[], attemptEdges: ClassEdge[], finalMatches: NodeMatch[]): EdgeMatch[] {
-    let edgeMatches: EdgeMatch[] = [];
+  matchEdges(
+    solutionEdges: ClassEdge[],
+    attemptEdges: ClassEdge[],
+    finalMatches: NodeMatch[],
+  ): EdgeMatch[] {
+    const edgeMatches: EdgeMatch[] = [];
 
-    for (let attemptEdge of attemptEdges) {
-        // find match in finalMatches for start and end node
-        let startMatch = finalMatches.find(match => match.attemptNode.id === attemptEdge.start);
-        let endMatch = finalMatches.find(match => match.attemptNode.id === attemptEdge.end);
+    for (const attemptEdge of attemptEdges) {
+      // find match in finalMatches for start and end node
+      const startMatch = finalMatches.find(match => match.attemptNode.id === attemptEdge.start);
+      const endMatch = finalMatches.find(match => match.attemptNode.id === attemptEdge.end);
 
-        // if both start and end node have a match in finalMatches
-        if (startMatch && endMatch) {
-          // then search for corresponding edge in solutionEdges with startMatch.solutionNode.id and endMatch.solutionNode.id
-          let solutionEdge = solutionEdges.find(edge => edge.start === startMatch?.solutionNode.id && edge.end === endMatch?.solutionNode.id && edge.type === attemptEdge.type);
-          // alternatively search for edges in the wrong direction, but only allow directionless edge types - NEEDS TESTING
-          let swappedEdge = solutionEdges.find(edge => edge.start === endMatch?.solutionNode.id && edge.end === startMatch?.solutionNode.id && edge.type === attemptEdge.type && swappableEditorElement.includes(attemptEdge.type));
+      // if both start and end node have a match in finalMatches
+      if (startMatch && endMatch) {
+        // then search for corresponding edge in solutionEdges with startMatch.solutionNode.id and endMatch.solutionNode.id
+        const solutionEdge = solutionEdges.find(
+          edge =>
+            edge.start === startMatch.solutionNode.id &&
+            edge.end === endMatch.solutionNode.id &&
+            edge.type === attemptEdge.type,
+        );
+        // alternatively search for edges in the wrong direction, but only allow directionless edge types - NEEDS TESTING
+        const swappedEdge = solutionEdges.find(
+          edge =>
+            edge.start === endMatch.solutionNode.id &&
+            edge.end === startMatch.solutionNode.id &&
+            edge.type === attemptEdge.type &&
+            swappableEditorElement.includes(attemptEdge.type),
+        );
 
-          if (solutionEdge) {
-            // Create match object
-            const match: EdgeMatch = {
-              solutionEdge: solutionEdge,
-              attemptEdge: attemptEdge,
-            };
-            // Add match to edgeMatches
-            edgeMatches.push(match);
-          } else if (swappedEdge) {
-            console.log("Swapped edge found");
-            // Create match object, but with swapped start and end
-            const match: EdgeMatch = {
-              solutionEdge: swappedEdge,
-              attemptEdge: {
-                ...attemptEdge,
-                start: attemptEdge.end,
-                end: attemptEdge.start,
-                cardinalityStart: attemptEdge.cardinalityEnd,
-                cardinalityEnd: attemptEdge.cardinalityStart,
-              },
-            };
-            // Add match to edgeMatches
-            edgeMatches.push(match);
-          }
+        if (solutionEdge) {
+          // Create match object
+          const match: EdgeMatch = {
+            solutionEdge: solutionEdge,
+            attemptEdge: attemptEdge,
+          };
+          // Add match to edgeMatches
+          edgeMatches.push(match);
+        } else if (swappedEdge) {
+          console.log('Swapped edge found');
+          // Create match object, but with swapped start and end
+          const match: EdgeMatch = {
+            solutionEdge: swappedEdge,
+            attemptEdge: {
+              ...attemptEdge,
+              start: attemptEdge.end,
+              end: attemptEdge.start,
+              cardinalityStart: attemptEdge.cardinalityEnd,
+              cardinalityEnd: attemptEdge.cardinalityStart,
+            },
+          };
+          // Add match to edgeMatches
+          edgeMatches.push(match);
         }
+      }
     }
     return edgeMatches;
   }
@@ -415,7 +476,6 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
     return newObj;
   }
 
-
   /**
    * Compares two objects and returns a detailed difference between them,
    * ignoring specified properties.
@@ -425,7 +485,11 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
    * @param propertiesToIgnore - An array of property names to ignore during the comparison.
    * @returns An object representing the detailed difference between the two objects.
    */
-  customDetailedDiff(obj1: ClassNode | ClassEdge, obj2: ClassNode | ClassEdge, propertiesToIgnore: string[]): object {
+  customDetailedDiff(
+    obj1: ClassNode | ClassEdge,
+    obj2: ClassNode | ClassEdge,
+    propertiesToIgnore: string[],
+  ): object {
     const obj1WithoutIgnoredProperties = this.ignoreProperties(obj1, propertiesToIgnore);
     const obj2WithoutIgnoredProperties = this.ignoreProperties(obj2, propertiesToIgnore);
     return detailedDiff(obj1WithoutIgnoredProperties, obj2WithoutIgnoredProperties);
@@ -498,62 +562,68 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
    * @param attemptNode - The attempt node.
    * @returns An array containing the updated solution node and attempt node.
    */
-  alignAttributesAndMethods(solutionNode: ClassNode, attemptNode: ClassNode): [ClassNode, ClassNode] {
-      // Create new lists for attributes and methods
-      let newSolutionAttributes: ClassAttribute[] = [];
-      let newAttemptAttributes: ClassAttribute[] = [];
-      let newSolutionMethods: ClassMethod[] = [];
-      let newAttemptMethods: ClassMethod[] = [];
+  alignAttributesAndMethods(
+    solutionNode: ClassNode,
+    attemptNode: ClassNode,
+  ): [ClassNode, ClassNode] {
+    // Create new lists for attributes and methods
+    const newSolutionAttributes: ClassAttribute[] = [];
+    const newAttemptAttributes: ClassAttribute[] = [];
+    const newSolutionMethods: ClassMethod[] = [];
+    const newAttemptMethods: ClassMethod[] = [];
 
-      // Add attributes that are in both lists
-      solutionNode.attributes?.forEach((attr: ClassAttribute) => {
-        if (attemptNode.attributes?.some((a: ClassAttribute) => a.name === attr.name)) {
-          newSolutionAttributes.push(attr);
-          newAttemptAttributes.push(attemptNode.attributes?.find((a: ClassAttribute) => a.name === attr.name)!);
-        }
-      });
+    // Add attributes that are in both lists
+    solutionNode.attributes.forEach((attr: ClassAttribute) => {
+      if (attemptNode.attributes.some((a: ClassAttribute) => a.name === attr.name)) {
+        newSolutionAttributes.push(attr);
+        newAttemptAttributes.push(
+          attemptNode.attributes.find((a: ClassAttribute) => a.name === attr.name)!,
+        );
+      }
+    });
 
-      // Add methods that are in both lists
-      solutionNode.methods?.forEach((method: ClassMethod) => {
-        if (attemptNode.methods?.some((m: ClassMethod) => m.name === method.name)) {
-          newSolutionMethods.push(method);
-          newAttemptMethods.push(attemptNode.methods?.find((m: ClassMethod) => m.name === method.name)!);
-        }
-      });
+    // Add methods that are in both lists
+    solutionNode.methods.forEach((method: ClassMethod) => {
+      if (attemptNode.methods.some((m: ClassMethod) => m.name === method.name)) {
+        newSolutionMethods.push(method);
+        newAttemptMethods.push(
+          attemptNode.methods.find((m: ClassMethod) => m.name === method.name)!,
+        );
+      }
+    });
 
-      // Add attributes and methods that are only in solutionNode
-      solutionNode.attributes?.forEach((attr: ClassAttribute) => {
-        if (!newSolutionAttributes.some((a: ClassAttribute) => a.name === attr.name)) {
-          newSolutionAttributes.push(attr);
-        }
-      });
-      solutionNode.methods?.forEach((method: ClassMethod) => {
-        if (!newSolutionMethods.some((m: ClassMethod) => m.name === method.name)) {
-          newSolutionMethods.push(method);
-        }
-      });
+    // Add attributes and methods that are only in solutionNode
+    solutionNode.attributes.forEach((attr: ClassAttribute) => {
+      if (!newSolutionAttributes.some((a: ClassAttribute) => a.name === attr.name)) {
+        newSolutionAttributes.push(attr);
+      }
+    });
+    solutionNode.methods.forEach((method: ClassMethod) => {
+      if (!newSolutionMethods.some((m: ClassMethod) => m.name === method.name)) {
+        newSolutionMethods.push(method);
+      }
+    });
 
-      // Add attributes and methods that are only in attemptNode
-      attemptNode.attributes?.forEach((attr: ClassAttribute) => {
-        if (!newAttemptAttributes.some((a: ClassAttribute) => a.name === attr.name)) {
-          newAttemptAttributes.push(attr);
-        }
-      });
-      attemptNode.methods?.forEach((method: ClassMethod) => {
-        if (!newAttemptMethods.some((m: ClassMethod) => m.name === method.name)) {
-          newAttemptMethods.push(method);
-        }
-      });
+    // Add attributes and methods that are only in attemptNode
+    attemptNode.attributes.forEach((attr: ClassAttribute) => {
+      if (!newAttemptAttributes.some((a: ClassAttribute) => a.name === attr.name)) {
+        newAttemptAttributes.push(attr);
+      }
+    });
+    attemptNode.methods.forEach((method: ClassMethod) => {
+      if (!newAttemptMethods.some((m: ClassMethod) => m.name === method.name)) {
+        newAttemptMethods.push(method);
+      }
+    });
 
-      // Replace the old lists with the new ones
-      solutionNode.attributes = newSolutionAttributes;
-      attemptNode.attributes = newAttemptAttributes;
-      solutionNode.methods = newSolutionMethods;
-      attemptNode.methods = newAttemptMethods;
+    // Replace the old lists with the new ones
+    solutionNode.attributes = newSolutionAttributes;
+    attemptNode.attributes = newAttemptAttributes;
+    solutionNode.methods = newSolutionMethods;
+    attemptNode.methods = newAttemptMethods;
 
-      return [solutionNode, attemptNode];
+    return [solutionNode, attemptNode];
   }
-
 
   /**
    * Converts the attribute and method names of a Node object to lowercase and replaces umlauts.
@@ -563,21 +633,35 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
    */
   prepareWordsForMatching(node: ClassNode): ClassNode {
     // Lowercase title and replace umlauts
-    node.title = (node.title ?? '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss');
+    node.title = (node.title ?? '')
+      .toLowerCase()
+      .replace(/ä/g, 'ae')
+      .replace(/ö/g, 'oe')
+      .replace(/ü/g, 'ue')
+      .replace(/ß/g, 'ss');
 
     // Lowercase all attribute names and replace umlauts
-    node.attributes?.forEach((attr: ClassAttribute) => {
-      attr.name = attr.name.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss');
+    node.attributes.forEach((attr: ClassAttribute) => {
+      attr.name = attr.name
+        .toLowerCase()
+        .replace(/ä/g, 'ae')
+        .replace(/ö/g, 'oe')
+        .replace(/ü/g, 'ue')
+        .replace(/ß/g, 'ss');
     });
 
     // Lowercase all method names and replace umlauts
-    node.methods?.forEach((method: ClassMethod) => {
-      method.name = method.name.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss');
+    node.methods.forEach((method: ClassMethod) => {
+      method.name = method.name
+        .toLowerCase()
+        .replace(/ä/g, 'ae')
+        .replace(/ö/g, 'oe')
+        .replace(/ü/g, 'ue')
+        .replace(/ß/g, 'ss');
     });
 
     return node;
   }
-
 
   /**
    * Creates a custom detailed difference between two ClassNodes.
@@ -586,7 +670,13 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
    * @returns {any} - The custom detailed difference between the two ClassNodes.
    */
   makeCustomDetailedDiff(solutionNode: ClassNode, attemptNode: ClassNode) {
-    return this.customDetailedDiff(solutionNode, attemptNode, ['id', 'width', 'height', 'position', 'identification']);
+    return this.customDetailedDiff(solutionNode, attemptNode, [
+      'id',
+      'width',
+      'height',
+      'position',
+      'identification',
+    ]);
   }
 
   /**
@@ -596,15 +686,15 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
    * @returns The modified ClassNode object with highlighted changes.
    */
   compareNodes(solution: ClassNode, attempt: ClassNode): ClassNode {
-        // clone the attempt node
+    // clone the attempt node
     const resultWithoutTypoCorrection: ClassNode = _.cloneDeep(attempt);
-    var result = this.typoDetection(solution, attempt);
+    const result = this.typoDetection(solution, attempt);
 
     // define the node points
     //const nodePoints: {attributePoints: number, methodPoints: number} = this.pointCalculator.defineNodePoints(solution);
     const nodePoints = {
-      attributes: (pointDefinitions.node.attribute * solution.attributes.length),
-      methods: (pointDefinitions.node.method * solution.methods.length)
+      attributes: pointDefinitions.node.attribute * solution.attributes.length,
+      methods: pointDefinitions.node.method * solution.methods.length,
     };
 
     // initialize the highlighted object
@@ -613,60 +703,81 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
       maxPoints: nodePoints,
       added: {},
       deleted: {},
-      updated: {} };
+      updated: {},
+    };
 
     // compare title and type and add them to the updated object if they are different
     if (result.type.localeCompare(solution.type, undefined, { sensitivity: 'base' }) !== 0) {
-      result.highlighted.updated!.type = result.type;
+      result.highlighted.updated.type = result.type;
     }
-    if (result.title && solution.title && result.title.localeCompare(solution.title, undefined, { sensitivity: 'base' }) !== 0) {
-      result.highlighted.updated!.title = result.title;
+    if (
+      result.title &&
+      solution.title &&
+      result.title.localeCompare(solution.title, undefined, { sensitivity: 'base' }) !== 0
+    ) {
+      result.highlighted.updated.title = result.title;
     }
 
     // initialize the arrays with null
-    result.highlighted!.added!.attributes = new Array(result.attributes?.length).fill(null);
-    result.highlighted!.updated!.attributes = new Array(result.attributes?.length).fill(null);
-    result.highlighted!.added!.methods = new Array(result.methods?.length).fill(null);
-    result.highlighted!.updated!.methods = new Array(result.methods?.length).fill(null);
+    result.highlighted.added.attributes = new Array(result.attributes.length).fill(null);
+    result.highlighted.updated.attributes = new Array(result.attributes.length).fill(null);
+    result.highlighted.added.methods = new Array(result.methods.length).fill(null);
+    result.highlighted.updated.methods = new Array(result.methods.length).fill(null);
 
     // compare attributes and add them to updated object if they are different or to added object if they are not in the solution
-    result.attributes?.forEach((attr, index) => {
-      const match = solution.attributes?.find(sAttr => sAttr.name.localeCompare(attr.name, undefined, { sensitivity: 'base' }) === 0);
-      console.log("##### match: ", match, "##### attr: ", attr);
+    result.attributes.forEach((attr, index) => {
+      const match = solution.attributes.find(
+        sAttr => sAttr.name.localeCompare(attr.name, undefined, { sensitivity: 'base' }) === 0,
+      );
+      console.log('##### match: ', match, '##### attr: ', attr);
       if (!match) {
-        result.highlighted!.added!.attributes = result.highlighted!.added!.attributes || []; // Initialize the array if it's undefined
-        result.highlighted!.added!.attributes[index] = attr;
+        result.highlighted.added.attributes = result.highlighted.added.attributes || []; // Initialize the array if it's undefined
+        result.highlighted.added.attributes[index] = attr;
       } else if (match.dataType !== attr.dataType || match.visibility !== attr.visibility) {
-        result.highlighted!.updated!.attributes = result.highlighted!.updated!.attributes || []; // Initialize the array if it's undefined
-        result.highlighted!.updated!.attributes[index] = attr;
+        result.highlighted.updated.attributes = result.highlighted.updated.attributes || []; // Initialize the array if it's undefined
+        result.highlighted.updated.attributes[index] = attr;
       }
     });
 
     // compare attributes and add them to deleted object if they are not in the attempt
-    solution.attributes?.forEach((attr) => {
-      const match = result.attributes?.find(rAttr => rAttr.name.localeCompare(attr.name, undefined, { sensitivity: 'base' }) === 0);
+    solution.attributes.forEach(attr => {
+      const match = result.attributes.find(
+        rAttr => rAttr.name.localeCompare(attr.name, undefined, { sensitivity: 'base' }) === 0,
+      );
       if (!match) {
-        result.highlighted!.deleted!.attributes = [...(result.highlighted!.deleted!.attributes || []), attr];
+        result.highlighted.deleted.attributes = [
+          ...(result.highlighted.deleted.attributes || []),
+          attr,
+        ];
       }
     });
 
     // compare methods and add them to updated object if they are different or to added object if they are not in the solution
-    result.methods?.forEach((method, index) => {
-      const match = solution.methods?.find(sMethod => sMethod.name.localeCompare(method.name, undefined, { sensitivity: 'base' }) === 0);
+    result.methods.forEach((method, index) => {
+      const match = solution.methods.find(
+        sMethod =>
+          sMethod.name.localeCompare(method.name, undefined, { sensitivity: 'base' }) === 0,
+      );
       if (!match) {
-        result.highlighted!.added!.methods = result.highlighted!.added!.methods || []; // Initialize the array if it's undefined
-        result.highlighted!.added!.methods[index] = method;
+        result.highlighted.added.methods = result.highlighted.added.methods || []; // Initialize the array if it's undefined
+        result.highlighted.added.methods[index] = method;
       } else if (match.dataType !== method.dataType || match.visibility !== method.visibility) {
-        result.highlighted!.updated!.methods = result.highlighted!.updated!.methods || []; // Initialize the array if it's undefined
-        result.highlighted!.updated!.methods[index] = method;
+        result.highlighted.updated.methods = result.highlighted.updated.methods || []; // Initialize the array if it's undefined
+        result.highlighted.updated.methods[index] = method;
       }
     });
 
     // compare methods and add them to deleted object if they are not in the attempt
-    solution.methods?.forEach((method) => {
-      const match = result.methods?.find(rMethod => rMethod.name.localeCompare(method.name, undefined, { sensitivity: 'base' }) === 0);
+    solution.methods.forEach(method => {
+      const match = result.methods.find(
+        rMethod =>
+          rMethod.name.localeCompare(method.name, undefined, { sensitivity: 'base' }) === 0,
+      );
       if (!match) {
-        result.highlighted!.deleted!.methods = [...(result.highlighted!.deleted!.methods || []), method];
+        result.highlighted.deleted.methods = [
+          ...(result.highlighted.deleted.methods || []),
+          method,
+        ];
       }
     });
 
@@ -685,53 +796,77 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
     const result: ClassEdge = _.cloneDeep(attempt);
 
     // define the edge points
-    const edgePoints = pointDefinitions.edge.type
-      + (solution.cardinalityStart? pointDefinitions.edge.cardinalityStart : 0)
-      + (solution.cardinalityEnd? pointDefinitions.edge.cardinalityEnd : 0)
-      + (solution.description? pointDefinitions.edge.description : 0);
+    const edgePoints =
+      pointDefinitions.edge.type +
+      (solution.cardinalityStart ? pointDefinitions.edge.cardinalityStart : 0) +
+      (solution.cardinalityEnd ? pointDefinitions.edge.cardinalityEnd : 0) +
+      (solution.description ? pointDefinitions.edge.description : 0);
 
     // initialize the highlighted object
-    result.highlighted = { code: 'found', maxPoints: edgePoints, added: {}, deleted: {}, updated: {} };
+    result.highlighted = {
+      code: 'found',
+      maxPoints: edgePoints,
+      added: {},
+      deleted: {},
+      updated: {},
+    };
 
     // compare type and add it to the updated object if it is different
     if (result.type.localeCompare(solution.type, undefined, { sensitivity: 'base' }) !== 0) {
-      result.highlighted.updated!.type = result.type;
+      result.highlighted.updated.type = result.type;
     }
     // compare cardinalityStart and add it to the updated object if it is different
-    if (result.cardinalityStart && solution.cardinalityStart && result.cardinalityStart.localeCompare(solution.cardinalityStart, undefined, { sensitivity: 'base' }) !== 0) {
-      result.highlighted.updated!.cardinalityStart = result.cardinalityStart;
+    if (
+      result.cardinalityStart &&
+      solution.cardinalityStart &&
+      result.cardinalityStart.localeCompare(solution.cardinalityStart, undefined, {
+        sensitivity: 'base',
+      }) !== 0
+    ) {
+      result.highlighted.updated.cardinalityStart = result.cardinalityStart;
     }
     // compare cardinalityEnd and add it to the updated object if it is different
-    if (result.cardinalityEnd && solution.cardinalityEnd && result.cardinalityEnd.localeCompare(solution.cardinalityEnd, undefined, { sensitivity: 'base' }) !== 0) {
-      result.highlighted.updated!.cardinalityEnd = result.cardinalityEnd;
+    if (
+      result.cardinalityEnd &&
+      solution.cardinalityEnd &&
+      result.cardinalityEnd.localeCompare(solution.cardinalityEnd, undefined, {
+        sensitivity: 'base',
+      }) !== 0
+    ) {
+      result.highlighted.updated.cardinalityEnd = result.cardinalityEnd;
     }
     // compare description and add it to the updated object if it is different
-    if (result.description && solution.description && result.description.localeCompare(solution.description, undefined, { sensitivity: 'base' }) !== 0) {
-      result.highlighted.updated!.description = result.description;
+    if (
+      result.description &&
+      solution.description &&
+      result.description.localeCompare(solution.description, undefined, { sensitivity: 'base' }) !==
+        0
+    ) {
+      result.highlighted.updated.description = result.description;
     }
     // compare cardinalityStart and if it is not in the solution add it to the added object
     if (result.cardinalityStart && !solution.cardinalityStart) {
-      result.highlighted.added!.cardinalityStart = result.cardinalityStart;
+      result.highlighted.added.cardinalityStart = result.cardinalityStart;
     }
     // compare cardinalityEnd and if it is not in the solution add it to the added object
     if (result.cardinalityEnd && !solution.cardinalityEnd) {
-      result.highlighted.added!.cardinalityEnd = result.cardinalityEnd;
+      result.highlighted.added.cardinalityEnd = result.cardinalityEnd;
     }
     // compare description and if it is not in the solution add it to the added object
     if (result.description && !solution.description) {
-      result.highlighted.added!.description = result.description;
+      result.highlighted.added.description = result.description;
     }
     // compare cardinalityStart and if it is not in the attempt add it to the deleted object
     if (solution.cardinalityStart && !result.cardinalityStart) {
-      result.highlighted.deleted!.cardinalityStart = solution.cardinalityStart;
+      result.highlighted.deleted.cardinalityStart = solution.cardinalityStart;
     }
     // compare cardinalityEnd and if it is not in the attempt add it to the deleted object
     if (solution.cardinalityEnd && !result.cardinalityEnd) {
-      result.highlighted.deleted!.cardinalityEnd = solution.cardinalityEnd;
+      result.highlighted.deleted.cardinalityEnd = solution.cardinalityEnd;
     }
     // compare description and if it is not in the attempt add it to the deleted object
     if (solution.description && !result.description) {
-      result.highlighted.deleted!.description = solution.description;
+      result.highlighted.deleted.description = solution.description;
     }
     return result;
   }
@@ -741,15 +876,16 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
    *
    * @param highlightedNodes - An array of ClassNode objects representing the highlighted nodes.
    */
-  updateMissingNodesPosition(highlightedNodes: ClassNode[]){
-
+  updateMissingNodesPosition(highlightedNodes: ClassNode[]) {
     // get all nodes that are missing in the attempt
-    const missingNodes = highlightedNodes.filter(node => node.highlighted?.code === 'missing');
+    const missingNodes = highlightedNodes.filter(node => node.highlighted.code === 'missing');
     // get all other nodes
-    const otherNodes = highlightedNodes.filter(node => node.highlighted?.code !== 'missing');
+    const otherNodes = highlightedNodes.filter(node => node.highlighted.code !== 'missing');
 
     // check which node from otherNodes has the highest y position
-    const mostBottomNode = otherNodes.reduce((prev, current) => (prev.position.y > current.position.y) ? prev : current);
+    const mostBottomNode = otherNodes.reduce((prev, current) =>
+      prev.position.y > current.position.y ? prev : current,
+    );
 
     // place the first missingNode 400px below the mostBottomNode at x position 0
     if (missingNodes.length > 0) {
@@ -758,11 +894,9 @@ typoDetection(solutionNode: ClassNode, attemptNode: ClassNode): ClassNode {
 
       // place every other missingNode at the same y postion as the previous missingNode and with + 300px x position
       for (let i = 1; i < missingNodes.length; i++) {
-        missingNodes[i].position.x = missingNodes[i-1].position.x + 300;
-        missingNodes[i].position.y = missingNodes[i-1].position.y;
+        missingNodes[i].position.x = missingNodes[i - 1].position.x + 300;
+        missingNodes[i].position.y = missingNodes[i - 1].position.y;
       }
     }
   }
-
 }
-

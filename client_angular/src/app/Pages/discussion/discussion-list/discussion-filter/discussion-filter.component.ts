@@ -1,32 +1,35 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
-import { discussionFilterContentNodeDTO, discussionFilterDTO } from '@DTOs/discussionFilter.dto';
+import { Component, EventEmitter, Input, Output, OnChanges } from '@angular/core';
+import {
+  discussionFilterContentNodeDTO,
+  discussionFilterDTO,
+} from '@DTOs/discussionFilter.dto';
 import { DiscussionListService } from 'src/app/Services/discussion/discussion-list.service';
 
 @Component({
   selector: 'app-discussion-filter',
   templateUrl: './discussion-filter.component.html',
-  styleUrls: ['./discussion-filter.component.scss']
+  styleUrls: ['./discussion-filter.component.scss'],
 })
 export class DiscussionFilterComponent implements OnChanges {
-
-  allSelected : Boolean = true;
-  filterSelection : Boolean = false;
-  filterTitle : String = 'Filter auswählen';
-  filterSelected : String = 'Python';
+  allSelected: boolean = true;
+  filterSelection: boolean = false;
+  filterTitle: string = 'Filter auswählen';
+  filterSelected: string = 'Python';
 
   contentNodes: discussionFilterContentNodeDTO[] = [];
 
   @Input() activeConceptNodeId: number = -1;
   @Output() changeFilter = new EventEmitter<discussionFilterDTO>();
 
-
-  constructor(private discussionListService: DiscussionListService) {}
+  constructor(private readonly discussionListService: DiscussionListService) {}
 
   ngOnChanges() {
     if (this.activeConceptNodeId > -1) {
-      this.discussionListService.getFilterContentNodes(this.activeConceptNodeId).subscribe(contentNodes => {
-        this.contentNodes = contentNodes;
-      });
+      this.discussionListService
+        .getFilterContentNodes(this.activeConceptNodeId)
+        .subscribe(contentNodes => {
+          this.contentNodes = contentNodes;
+        });
     }
   }
 
@@ -42,7 +45,7 @@ export class DiscussionFilterComponent implements OnChanges {
       contentNodeId: -1,
       authorId: -1,
       onlySolved: false,
-      searchString: ""
+      searchString: '',
     });
   }
 
@@ -58,7 +61,7 @@ export class DiscussionFilterComponent implements OnChanges {
    * if a filter is selected, the filter title is changed and the filter data is emitted
    * @param filterData
    */
-  onFilterSelected(contentId: number, searchInput: string, solvedChecked: boolean){
+  onFilterSelected(contentId: number, searchInput: string, solvedChecked: boolean) {
     this.filterSelection = false;
     this.allSelected = false;
     this.filterTitle = 'Filter eingestellt';

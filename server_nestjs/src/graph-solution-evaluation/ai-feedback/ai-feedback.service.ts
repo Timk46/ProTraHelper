@@ -8,11 +8,10 @@ import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-gen
 
 @Injectable()
 export class AiFeedbackService {
-
   constructor(
     private readonly prismaService: PrismaService,
     private readonly graphSolutionEvaluationService: GraphSolutionEvaluationService,
-    private readonly feedbackGenerationService: FeedbackGenerationService
+    private readonly feedbackGenerationService: FeedbackGenerationService,
   ) {}
 
   /**
@@ -23,22 +22,21 @@ export class AiFeedbackService {
    * @throws Error if the user answer, question, or graph question is not found.
    */
   async create(createAiFeedbackDto: { userAnswerId: number }) {
-
     // ##############################
     // Get the user graph answer and graph question
     console.log(createAiFeedbackDto.userAnswerId);
     const userAnswer = await this.prismaService.userAnswer.findUnique({
       where: {
-        id: createAiFeedbackDto.userAnswerId
+        id: createAiFeedbackDto.userAnswerId,
       },
       include: {
         question: {
           include: {
-            GraphQuestion: true
-          }
-        }
-      }
-    })
+            GraphQuestion: true,
+          },
+        },
+      },
+    });
 
     if (!userAnswer) {
       throw new Error('User Answer not found');
@@ -52,25 +50,30 @@ export class AiFeedbackService {
       throw new Error('Graph question not found');
     }
 
-    console.log(JSON.stringify(userAnswer,null,'\t'));
+    console.log(JSON.stringify(userAnswer, null, '\t'));
 
     // ##############################
     // Format data appropriately for the algorithmic evaluation and ai feedback generation
     const graphQuestion = {
-        questionId: userAnswer.question.id,
-        title: userAnswer.question.name,
-        textHTML: userAnswer.question.GraphQuestion.textHTML || undefined,
-        expectations: userAnswer.question.GraphQuestion.expectations,
-        expectationsHTML: (userAnswer.question.GraphQuestion.expectationsHTML || undefined),
-        type: userAnswer.question.GraphQuestion.type || undefined,
-        exampleSolution: JSON.parse(JSON.stringify(userAnswer.question.GraphQuestion.exampleSolution)) || undefined,
-        initialStructure: JSON.parse(JSON.stringify(userAnswer.question.GraphQuestion.initialStructure)) || undefined,
-        stepsEnabled: userAnswer.question.GraphQuestion.stepsEnabled || undefined,
-        configuration: JSON.parse(JSON.stringify(userAnswer.question.GraphQuestion.configuration)) || undefined,
-        maxPoints: userAnswer.question.score,
-    }
+      questionId: userAnswer.question.id,
+      title: userAnswer.question.name,
+      textHTML: userAnswer.question.GraphQuestion.textHTML || undefined,
+      expectations: userAnswer.question.GraphQuestion.expectations,
+      expectationsHTML: userAnswer.question.GraphQuestion.expectationsHTML || undefined,
+      type: userAnswer.question.GraphQuestion.type || undefined,
+      exampleSolution:
+        JSON.parse(JSON.stringify(userAnswer.question.GraphQuestion.exampleSolution)) || undefined,
+      initialStructure:
+        JSON.parse(JSON.stringify(userAnswer.question.GraphQuestion.initialStructure)) || undefined,
+      stepsEnabled: userAnswer.question.GraphQuestion.stepsEnabled || undefined,
+      configuration:
+        JSON.parse(JSON.stringify(userAnswer.question.GraphQuestion.configuration)) || undefined,
+      maxPoints: userAnswer.question.score,
+    };
 
-    const studentSolution: GraphStructureDTO[] = JSON.parse(JSON.stringify(userAnswer.userGraphAnswer));
+    const studentSolution: GraphStructureDTO[] = JSON.parse(
+      JSON.stringify(userAnswer.userGraphAnswer),
+    );
 
     const initialStructureSemantic = graphJSONToSemantic(graphQuestion.initialStructure);
 
@@ -79,11 +82,10 @@ export class AiFeedbackService {
       studentSolutionSemantic.push(graphJSONToSemantic(studentSolutionStep));
     }
 
-
     // ##############################
     // Evaluate and generate algorithmic feedback
-    const { feedback, expectedSolutionSemantic } = this.graphSolutionEvaluationService.evaluateSolution(graphQuestion, studentSolution);
-
+    const { feedback, expectedSolutionSemantic } =
+      this.graphSolutionEvaluationService.evaluateSolution(graphQuestion, studentSolution);
 
     // ##############################
     // Generate ai feedback
@@ -95,11 +97,13 @@ export class AiFeedbackService {
       JSON.stringify(expectedSolutionSemantic),
       JSON.stringify(studentSolutionSemantic),
       feedback,
-      graphQuestion.maxPoints
+      graphQuestion.maxPoints,
     );
 
     const systemMessagePrompt = graphSystemMessage.replace(/[{]/g, '{{').replace(/[}]/g, '}}');
-    const humanMessagePrompt = JSON.stringify(studentSolutionSemantic).replace(/[{]/g, '{{').replace(/[}]/g, '}}');
+    const humanMessagePrompt = JSON.stringify(studentSolutionSemantic)
+      .replace(/[{]/g, '{{')
+      .replace(/[}]/g, '}}');
 
     const generatedFeedback = await this.feedbackGenerationService.generateGraphFeedback(
       systemMessagePrompt,
@@ -111,17 +115,17 @@ export class AiFeedbackService {
       data: {
         prompt: JSON.stringify({
           systemMessagePrompt,
-          humanMessagePrompt
+          humanMessagePrompt,
         }),
         response: generatedFeedback,
         userAnswerId: createAiFeedbackDto.userAnswerId,
-      }
+      },
     });
 
     // Return ai feedback
     return {
       feedbackId: feedbackPrisma.id,
-      feedback: generatedFeedback
+      feedback: generatedFeedback,
     };
   }
 
@@ -135,13 +139,13 @@ export class AiFeedbackService {
   async rateFeedback(id: number, updateAiFeedbackDto: { rating: 1 | 2 | 3 | 4 | 5 }) {
     const updatedFeedback = await this.prismaService.graphAIFeedback.update({
       data: {
-        ratingByStudent: updateAiFeedbackDto.rating
+        ratingByStudent: updateAiFeedbackDto.rating,
       },
       where: {
-        id
-      }
+        id,
+      },
     });
 
-      return updatedFeedback;
-    }
+    return updatedFeedback;
   }
+}

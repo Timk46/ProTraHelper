@@ -1,16 +1,46 @@
-<div style="border: 2px solid rgb(255, 87, 34);">
-  <h1 mat-dialog-title>{{data.title}}</h1>
+<div style="border: 2px solid rgb(255, 87, 34)">
+  <h1 mat-dialog-title>{{ data.title }}</h1>
   <div mat-dialog-content>
-    <p>{{data.message}}</p>
+    <p>{{ data.message }}</p>
   </div>
   <div mat-dialog-actions align="end">
     <div *ngIf="!data.swapButtons; else swap">
-      <button #accept mat-flat-button [color]="!data.swapColors ? 'primary' : 'warn'" tabindex="-1" [mat-dialog-close]="true">{{data.accept}}</button>
-      <button #decline mat-flat-button [color]="!data.swapColors ? 'warn' : 'primary'" mat-dialog-close>{{data.decline}}</button>
+      <button
+        #accept
+        mat-flat-button
+        [color]="!data.swapColors ? 'primary' : 'warn'"
+        tabindex="-1"
+        [mat-dialog-close]="true"
+      >
+        {{ data.accept }}
+      </button>
+      <button
+        #decline
+        mat-flat-button
+        [color]="!data.swapColors ? 'warn' : 'primary'"
+        mat-dialog-close
+      >
+        {{ data.decline }}
+      </button>
     </div>
     <ng-template #swap>
-      <button #decline mat-flat-button [color]="!data.swapColors ? 'warn' : 'primary'" mat-dialog-close>{{data.decline}}</button>
-      <button #accept mat-flat-button [color]="!data.swapColors ? 'primary' : 'warn'" tabindex="-1" [mat-dialog-close]="true">{{data.accept}}</button>
+      <button
+        #decline
+        mat-flat-button
+        [color]="!data.swapColors ? 'warn' : 'primary'"
+        mat-dialog-close
+      >
+        {{ data.decline }}
+      </button>
+      <button
+        #accept
+        mat-flat-button
+        [color]="!data.swapColors ? 'primary' : 'warn'"
+        tabindex="-1"
+        [mat-dialog-close]="true"
+      >
+        {{ data.accept }}
+      </button>
     </ng-template>
   </div>
 </div>

@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { EditorComponent } from './pages/editor/editor.component';
 import { TaskWorkspaceComponent } from './pages/task-workspace/task-workspace.component';
 // Fügen Sie weitere Komponentenimporte hier ein
@@ -11,6 +12,6 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class UmlearnRoutingModule { }
+export class UmlearnRoutingModule {}

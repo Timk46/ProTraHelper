@@ -1,15 +1,16 @@
-import { Component, OnInit, OnDestroy, Input, SimpleChanges, OnChanges, AfterViewInit } from '@angular/core';
+import { OnInit, OnDestroy, SimpleChanges, OnChanges, AfterViewInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { v4 as uuidv4 } from 'uuid';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, debounceTime } from 'rxjs/operators';
 
-declare var tinymce: any;
+declare let tinymce: any;
 
 @Component({
   selector: 'app-tinymce',
   templateUrl: './tinymce.component.html',
-  styleUrls: ['./tinymce.component.scss']
+  styleUrls: ['./tinymce.component.scss'],
 })
 export class TinymceComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
   readonly DEFAULT_CONFIG: any = {
@@ -27,24 +28,19 @@ export class TinymceComponent implements OnInit, OnDestroy, OnChanges, AfterView
   uuid: string = '';
   isReadonly: boolean = false;
   editorInstance: any;
-  private contentSubject = new BehaviorSubject<string>('');
-  private destroy$ = new Subject<void>();
+  private readonly contentSubject = new BehaviorSubject<string>('');
+  private readonly destroy$ = new Subject<void>();
 
   constructor() {}
 
   ngOnInit(): void {
-    this.uuid = "editor-" + uuidv4(); // Fügen Sie einen Bindestrich hinzu, um sicherzustellen, dass es kein reiner Zahlen-Selektor ist
+    this.uuid = 'editor-' + uuidv4(); // Fügen Sie einen Bindestrich hinzu, um sicherzustellen, dass es kein reiner Zahlen-Selektor ist
 
-    this.contentSubject
-      .pipe(
-        takeUntil(this.destroy$),
-        debounceTime(300)
-      )
-      .subscribe(content => {
-        if (this.editorInstance) {
-          this.editorInstance.setContent(content);
-        }
-      });
+    this.contentSubject.pipe(takeUntil(this.destroy$), debounceTime(300)).subscribe(content => {
+      if (this.editorInstance) {
+        this.editorInstance.setContent(content);
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -86,16 +82,16 @@ export class TinymceComponent implements OnInit, OnDestroy, OnChanges, AfterView
             editor.setContent(this.content);
           }
         });
-      }
+      },
     });
   }
 
   changeView() {
-    if (this.editorInstance && this.editorInstance.mode) {
+    if (this.editorInstance?.mode) {
       if (this.isReadonly) {
-        this.editorInstance.mode.set("readonly");
+        this.editorInstance.mode.set('readonly');
       } else {
-        this.editorInstance.mode.set("design");
+        this.editorInstance.mode.set('design');
       }
     }
   }
@@ -115,7 +111,7 @@ export class TinymceComponent implements OnInit, OnDestroy, OnChanges, AfterView
 
   getRawContent(): string {
     if (this.editorInstance) {
-      return this.editorInstance.getContent({format: 'text'});
+      return this.editorInstance.getContent({ format: 'text' });
     }
     return '';
   }

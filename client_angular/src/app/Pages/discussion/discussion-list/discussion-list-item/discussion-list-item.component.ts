@@ -5,27 +5,30 @@ import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 @Component({
   selector: 'app-discussion-list-item',
   templateUrl: './discussion-list-item.component.html',
-  styleUrls: ['./discussion-list-item.component.scss']
+  styleUrls: ['./discussion-list-item.component.scss'],
 })
 export class DiscussionListItemComponent implements OnChanges {
-
   readableDate: string = 'dummy date';
 
-  @Input() questionData : discussionDTO = {
+  @Input() questionData: discussionDTO = {
     id: -1,
     initMessageId: -1,
-    title: "dummy question",
-    authorName: "dummy author",
+    title: 'dummy question',
+    authorName: 'dummy author',
     createdAt: new Date(),
-    contentNodeName: "dummy content node",
+    contentNodeName: 'dummy content node',
     commentCount: 0,
-    isSolved: false
+    isSolved: false,
   };
 
-  constructor(public sSS: ScreenSizeService) { }
+  constructor(public sSS: ScreenSizeService) {}
 
   ngOnChanges() {
-    if (this.questionData.id != -1 && this.questionData.createdAt != null && this.readableDate == 'dummy date'){
+    if (
+      this.questionData.id != -1 &&
+      this.questionData.createdAt != null &&
+      this.readableDate == 'dummy date'
+    ) {
       this.readableDate = this.getDateDisplay(this.questionData.createdAt);
     }
   }
@@ -46,5 +49,4 @@ export class DiscussionListItemComponent implements OnChanges {
       return `${newDate.getDate()}.${newDate.getMonth() + 1}.${newDate.getFullYear()}`;
     }
   }
-
 }

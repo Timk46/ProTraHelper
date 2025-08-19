@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { OnInit, Component, EventEmitter, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
@@ -9,13 +9,13 @@ import { NavigationPreferenceService } from 'src/app/Services/navigation/navigat
 @Component({
   selector: 'app-header',
   templateUrl: './app-header.component.html',
-  styleUrls: ['./app-header.component.scss']
+  styleUrls: ['./app-header.component.scss'],
 })
 export class AppHeaderComponent implements OnInit {
   @Output() chatToggle = new EventEmitter<void>();
 
-  userMail: string = "";
-  userRole: string = "";
+  userMail: string = '';
+  userRole: string = '';
   userIsLoggedIn: boolean = false;
   showNavToggle: boolean = true;
 
@@ -34,14 +34,14 @@ export class AppHeaderComponent implements OnInit {
   }
 
   constructor(
-    private userService: UserService,
-    private router: Router,
+    private readonly userService: UserService,
+    private readonly router: Router,
     public dialog: MatDialog,
-    private navigationPreferenceService: NavigationPreferenceService,
-    private location: Location
+    private readonly navigationPreferenceService: NavigationPreferenceService,
+    private readonly location: Location,
   ) {
     // Subscribe to the authentication observable
-    this.userService.isAuthenticated$.subscribe((isAuthenticated) => {
+    this.userService.isAuthenticated$.subscribe(isAuthenticated => {
       this.userIsLoggedIn = isAuthenticated;
       if (isAuthenticated) {
         this.userMail = userService.getEmail();
@@ -72,11 +72,11 @@ export class AppHeaderComponent implements OnInit {
           decline: 'Abbrechen',
           accept: 'Abmelden',
           swapButtons: false,
-          swapColors: true
-        }
+          swapColors: true,
+        },
       });
 
-      dialog.afterClosed().subscribe((result) => {
+      dialog.afterClosed().subscribe(result => {
         if (result) {
           this.userService.logout(true).then(() => {
             this.userIsLoggedIn = false;

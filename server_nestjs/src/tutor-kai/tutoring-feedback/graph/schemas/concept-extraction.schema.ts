@@ -5,11 +5,7 @@ import { z } from 'zod';
  * Expects an array containing the names of the extracted programming concepts.
  */
 export const ConceptExtractionSchema = z.object({
-  concepts: z
-    .array(z.string())
-    .describe(
-      'An array containing the search queries',
-    ),
+  concepts: z.array(z.string()).describe('An array containing the search queries'),
 });
 
 // Type alias for easier usage

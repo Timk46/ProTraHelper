@@ -7,7 +7,7 @@ import hljs from 'highlight.js';
   providedIn: 'root',
 })
 export class MarkdownService {
-  private md: MarkdownIt;
+  private readonly md: MarkdownIt;
 
   constructor() {
     this.md = new MarkdownIt({
@@ -23,9 +23,7 @@ export class MarkdownService {
             );
           } catch (__) {}
         }
-        return (
-          '<pre class="hljs"><code>' + this.escapeHtml(str) + '</code></pre>'
-        );
+        return '<pre class="hljs"><code>' + this.escapeHtml(str) + '</code></pre>';
       },
       breaks: true,
       html: true,
@@ -89,7 +87,7 @@ export class MarkdownService {
   }
 
   private escapeHtml(str: string): string {
-    return str.replace(/[&<>"']/g, (tag) => {
+    return str.replace(/[&<>"']/g, tag => {
       const charsToReplace: { [key: string]: string } = {
         '&': '&amp;',
         '<': '<',

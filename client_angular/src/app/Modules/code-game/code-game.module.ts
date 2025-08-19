@@ -8,17 +8,12 @@ import { WorkspaceComponent } from './sites/workspace/workspace.component';
 import { HelpDialogComponent } from './sites/help-dialog/help-dialog.component';
 
 import { MaterialModule } from '../material.module';
-import { MonacoEditorModule } from "ngx-monaco-editor-v2";
-import { FormsModule } from "@angular/forms";
-import { MarkdownModule} from "ngx-markdown";
+import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
+import { FormsModule } from '@angular/forms';
+import { MarkdownModule } from 'ngx-markdown';
 
 @NgModule({
-  declarations: [
-    PlayfieldComponent,
-    CodeEditorComponent,
-    WorkspaceComponent,
-    HelpDialogComponent
-  ],
+  declarations: [PlayfieldComponent, CodeEditorComponent, WorkspaceComponent, HelpDialogComponent],
   imports: [
     CommonModule,
     CodeGameRoutingModule,
@@ -28,8 +23,6 @@ import { MarkdownModule} from "ngx-markdown";
     MarkdownModule,
     NgOptimizedImage,
   ],
-  exports: [
-    CodeEditorComponent
-  ],
+  exports: [CodeEditorComponent],
 })
-export class CodeGameModule { }
+export class CodeGameModule {}

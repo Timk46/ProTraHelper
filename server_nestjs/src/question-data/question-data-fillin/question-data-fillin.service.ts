@@ -1,11 +1,11 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { detailedFillinBlankDTO, detailedFillinQuestionDTO, FillinQuestionDTO } from '@DTOs/index';
+import { detailedFillinQuestionDTO, FillinQuestionDTO } from '@DTOs/index';
+import { detailedFillinBlankDTO } from '@DTOs/index';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class QuestionDataFillinService {
-
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Get the fill-in-the-blank task for a specific question.
@@ -16,12 +16,12 @@ export class QuestionDataFillinService {
     console.log('getFillInTaskId', questionId);
     const task = await this.prisma.fillinQuestion.findUnique({
       where: {
-        questionId: Number(questionId)
+        questionId: Number(questionId),
       },
       include: {
         blanks: true,
-        question: true
-      }
+        question: true,
+      },
     });
 
     if (!task) {
@@ -29,11 +29,11 @@ export class QuestionDataFillinService {
     }
 
     console.log('task', JSON.stringify(task));
-    console.log("tasktype: " + task.taskType);
+    console.log('tasktype: ' + task.taskType);
     return {
       id: task.id,
       content: task.content,
-      taskType: task.taskType ,
+      taskType: task.taskType,
       table: task.table,
       createdAt: task.createdAt,
       updatedAt: task.updatedAt,
@@ -41,7 +41,7 @@ export class QuestionDataFillinService {
         id: blank.id,
         blankContent: blank.blankContent,
         position: blank.position.toString(),
-        fillinQuestionId: blank.fillinQuestionId
+        fillinQuestionId: blank.fillinQuestionId,
       })),
       question: {
         id: task.question.id,
@@ -53,8 +53,8 @@ export class QuestionDataFillinService {
         level: task.question.level,
         isApproved: task.question.isApproved,
         originId: task.question.originId,
-        conceptNodeId: task.question.conceptNodeId
-      }
+        conceptNodeId: task.question.conceptNodeId,
+      },
     };
   }
 
@@ -66,13 +66,16 @@ export class QuestionDataFillinService {
    * @returns A promise that resolves to the created detailed fill-in-the-blank question DTO.
    * @throws An error if the fill-in-the-blank question could not be created.
    */
-  async createFillinQuestion(questionData: detailedFillinQuestionDTO, questionId: number): Promise<detailedFillinQuestionDTO> {
+  async createFillinQuestion(
+    questionData: detailedFillinQuestionDTO,
+    questionId: number,
+  ): Promise<detailedFillinQuestionDTO> {
     const newFillinQuestion = await this.prisma.fillinQuestion.create({
       data: {
         content: questionData.content,
         taskType: questionData.taskType,
         table: questionData.table || false,
-        question: {connect: {id: questionId}},
+        question: { connect: { id: questionId } },
         blanks: {
           create: questionData.blanks.map(blank => ({
             blankContent: blank.blankContent,
@@ -87,17 +90,19 @@ export class QuestionDataFillinService {
       },
     });
 
-    if(!newFillinQuestion) {
+    if (!newFillinQuestion) {
       throw new Error('FreeTextQuestion not created');
     }
 
     return newFillinQuestion;
   }
 
-  async updateFillinQuestion(questionData: detailedFillinQuestionDTO): Promise<detailedFillinQuestionDTO> {
+  async updateFillinQuestion(
+    questionData: detailedFillinQuestionDTO,
+  ): Promise<detailedFillinQuestionDTO> {
     // Delete blanks that are not in the new data
     const currentBlanks = await this.prisma.blank.findMany({
-      where: { fillinQuestionId: questionData.id }
+      where: { fillinQuestionId: questionData.id },
     });
     const newBlankIds = questionData.blanks.map(blank => blank.id);
     const blankIdsToDelete = currentBlanks
@@ -105,12 +110,12 @@ export class QuestionDataFillinService {
       .map(blank => blank.id);
 
     await this.prisma.blank.deleteMany({
-      where: { id: { in: blankIdsToDelete } }
+      where: { id: { in: blankIdsToDelete } },
     });
 
     // Update the fill-in question
     const updatedFillinQuestion = await this.prisma.fillinQuestion.update({
-      where: {id: questionData.id},
+      where: { id: questionData.id },
       data: {
         updatedAt: new Date(),
         content: questionData.content,
@@ -127,7 +132,7 @@ export class QuestionDataFillinService {
                 position: blank.position,
                 isDistractor: blank.isDistractor,
                 isCorrect: blank.isCorrect,
-              }
+              },
             })),
           createMany: {
             data: questionData.blanks
@@ -137,16 +142,16 @@ export class QuestionDataFillinService {
                 position: blank.position,
                 isDistractor: blank.isDistractor,
                 isCorrect: blank.isCorrect,
-              }))
-          }
-        }
+              })),
+          },
+        },
       },
       include: {
         blanks: true,
       },
     });
 
-    if(!updatedFillinQuestion) {
+    if (!updatedFillinQuestion) {
       throw new Error('FreeTextQuestion not updated');
     }
 

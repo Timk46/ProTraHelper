@@ -11,6 +11,6 @@ import { FeedbackGenerationModule } from '@/ai/feedback-generation/feedback-gene
 @Module({
   imports: [CompareModule, FeedbackGenerationModule],
   providers: [DatabaseTaskCommunicationService, PrismaService],
-  controllers: [DatabaseTaskCommunicationController]
+  controllers: [DatabaseTaskCommunicationController],
 })
 export class DatabaseTaskCommunicationModule {}

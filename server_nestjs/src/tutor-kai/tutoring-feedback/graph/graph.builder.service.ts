@@ -1,13 +1,14 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CompiledStateGraph, StateGraph, START, END } from '@langchain/langgraph'; // Keep single import
 
-import { TutoringFeedbackStateAnnotation, TutoringFeedbackState } from './state';
+import { TutoringFeedbackState } from './state';
+import { TutoringFeedbackStateAnnotation } from './state';
 import { GenerateFixedCodeNodeService } from './nodes/generate-fixed-code.node.service';
 // Removed ExtractConceptsNodeService and FetchLectureSnippetsNodeService
 import { ExtractAndFetchNodeService } from './nodes/extract-and-fetch.node.service'; // Added combined node
 import { GenerateFinalFeedbackNodeService } from './nodes/generate-final-feedback.node.service';
 import { FeedbackOutput } from './schemas/feedback-output.schema';
-
 
 @Injectable()
 export class GraphBuilderService implements OnModuleInit {
@@ -15,10 +16,10 @@ export class GraphBuilderService implements OnModuleInit {
   private compiledGraph; // Let TypeScript infer the type
 
   constructor(
-    private generateFixedCodeNode: GenerateFixedCodeNodeService,
+    private readonly generateFixedCodeNode: GenerateFixedCodeNodeService,
     // Removed extractConceptsNode and fetchLectureSnippetsNode
-    private extractAndFetchNode: ExtractAndFetchNodeService, // Added combined node service
-    private generateFinalFeedbackNode: GenerateFinalFeedbackNodeService,
+    private readonly extractAndFetchNode: ExtractAndFetchNodeService, // Added combined node service
+    private readonly generateFinalFeedbackNode: GenerateFinalFeedbackNodeService,
   ) {}
 
   onModuleInit() {
@@ -30,7 +31,8 @@ export class GraphBuilderService implements OnModuleInit {
   /**
    * Builds and compiles the LangGraph for the tutoring feedback workflow.
    */
-  private buildGraph() { // Let TypeScript infer the return type
+  private buildGraph() {
+    // Let TypeScript infer the return type
     const workflow = new StateGraph(TutoringFeedbackStateAnnotation);
 
     // Add nodes using arrow functions to call service methods
@@ -41,10 +43,8 @@ export class GraphBuilderService implements OnModuleInit {
     workflow.addNode('extract_and_fetch_snippets', (state: TutoringFeedbackState) =>
       this.extractAndFetchNode.execute(state),
     );
-    workflow.addNode(
-      'generate_final_feedback',
-      (state: TutoringFeedbackState) =>
-        this.generateFinalFeedbackNode.execute(state),
+    workflow.addNode('generate_final_feedback', (state: TutoringFeedbackState) =>
+      this.generateFinalFeedbackNode.execute(state),
     );
     // Simple join node - does nothing but act as a synchronization point
     workflow.addNode('join_branches', (state: TutoringFeedbackState) => {
@@ -54,7 +54,9 @@ export class GraphBuilderService implements OnModuleInit {
 
     // Define the routing function to be called AFTER the join node
     const routeAfterJoin = (state: TutoringFeedbackState): string => {
-      this.logger.debug(`Routing after join. FixedCode: ${!!state.fixedCode}, Snippets/SourceMap: ${!!state.sourceMap}`);
+      this.logger.debug(
+        `Routing after join. FixedCode: ${!!state.fixedCode}, Snippets/SourceMap: ${!!state.sourceMap}`,
+      );
       if (state.fixedCode && state.sourceMap) {
         this.logger.debug('State complete. Proceeding to final feedback.');
         return 'generate_final_feedback';
@@ -63,7 +65,6 @@ export class GraphBuilderService implements OnModuleInit {
         return END;
       }
     };
-
 
     // Define edges from start
     // @ts-ignore - Suppressing persistent type error
@@ -82,7 +83,7 @@ export class GraphBuilderService implements OnModuleInit {
     workflow.addConditionalEdges(
       // @ts-ignore - Suppressing persistent type error for addConditionalEdges source node
       'join_branches', // Source node for the conditional edge
-      routeAfterJoin   // Function to decide the next step
+      routeAfterJoin, // Function to decide the next step
       // No mapping needed as the function returns the target node name or END
     );
 
@@ -99,7 +100,8 @@ export class GraphBuilderService implements OnModuleInit {
   /**
    * Returns the compiled LangGraph instance.
    */
-  getCompiledGraph() { // Let TypeScript infer the return type
+  getCompiledGraph() {
+    // Let TypeScript infer the return type
     if (!this.compiledGraph) {
       this.logger.error('Graph accessed before compilation finished!');
       // In a real app, might throw an error or wait for compilation

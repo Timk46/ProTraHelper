@@ -1,12 +1,12 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { LangChainTracer } from "langchain/callbacks";
-import { ChatOpenAI } from "langchain/chat_models/openai";
+import { Inject, Injectable } from '@nestjs/common';
+import { LangChainTracer } from 'langchain/callbacks';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { Client } from 'langsmith';
 import * as fGPrompts from './feedback-generation.prompts';
-import { REQUEST } from "@nestjs/core";
-import { editorDataDTO, rawClassEdge, rawClassNode } from "@Interfaces/index";
+import { REQUEST } from '@nestjs/core';
+import { editorDataDTO, rawClassEdge, rawClassNode } from '@Interfaces/index';
 import { Response } from 'express';
-import { ChatPromptValue } from "langchain/dist/prompts/chat";
+import { ChatPromptValue } from 'langchain/dist/prompts/chat';
 
 const KImodel = 'gpt-4.1-2025-04-14';
 
@@ -26,7 +26,6 @@ const tracer = new LangChainTracer({
   client,
 });
 
-
 @Injectable()
 export class FeedbackRAGService {
   constructor(@Inject(REQUEST) private readonly request: Request) {}
@@ -39,7 +38,12 @@ export class FeedbackRAGService {
    * @param resStream - Optional response stream for token streaming.
    * @returns A promise that resolves to an object containing the generated response.
    */
-  async generateUmlFeedback(question: String, solution: editorDataDTO, attempt: editorDataDTO, resStream: Response = undefined): Promise<{response: string}> {
+  async generateUmlFeedback(
+    question: string,
+    solution: editorDataDTO,
+    attempt: editorDataDTO,
+    resStream: Response = undefined,
+  ): Promise<{ response: string }> {
     //console.log("attempt solution", await this.filterUmlData(solution), await this.filterUmlData(attempt));
     const ragFormattedPrompt = await fGPrompts.umlQuestion.formatPromptValue({
       example: JSON.stringify(fGPrompts.exampleUmlJson),
@@ -51,8 +55,16 @@ export class FeedbackRAGService {
     return this.generateByChatPromptValue(ragFormattedPrompt, resStream);
   }
 
-  async generateUmlFeedbackByHighlighted(question: String, highlightedData: editorDataDTO, points: number, resStream: Response = undefined): Promise<{response: string}> {
-    console.log("highlighted data", JSON.stringify(await this.filterUmlData(highlightedData, true)));
+  async generateUmlFeedbackByHighlighted(
+    question: string,
+    highlightedData: editorDataDTO,
+    points: number,
+    resStream: Response = undefined,
+  ): Promise<{ response: string }> {
+    console.log(
+      'highlighted data',
+      JSON.stringify(await this.filterUmlData(highlightedData, true)),
+    );
     const ragFormattedPrompt = await fGPrompts.umlQuestionByHighlighted.formatPromptValue({
       //example: JSON.stringify(fGPrompts.exampleUmlJson),
       question: question,
@@ -63,7 +75,11 @@ export class FeedbackRAGService {
     return this.generateByChatPromptValue(ragFormattedPrompt, resStream);
   }
 
-  async generateUmlFeedbackByLog(question: String, log: string, resStream: Response = undefined): Promise<{response: string}> {
+  async generateUmlFeedbackByLog(
+    question: string,
+    log: string,
+    resStream: Response = undefined,
+  ): Promise<{ response: string }> {
     const ragFormattedPrompt = await fGPrompts.umlQuestionByLog.formatPromptValue({
       question: question,
       log: log,
@@ -72,28 +88,27 @@ export class FeedbackRAGService {
     return this.generateByChatPromptValue(ragFormattedPrompt, resStream);
   }
 
-  private async generateByChatPromptValue(promptValue: ChatPromptValue, ragStream: Response = undefined): Promise<{response: string}> {
+  private async generateByChatPromptValue(
+    promptValue: ChatPromptValue,
+    ragStream: Response = undefined,
+  ): Promise<{ response: string }> {
     let responseString = '';
-    const openAiResponse = await chatStream.generatePrompt(
-      [promptValue],
-      undefined,
-      [
-        {
-          ignoreAgent: true,
-          ignoreChain: true,
-          handleLLMNewToken(token: string) {
-            ragStream ? ragStream.write(token) : responseString += token; //for token streaming
-          },
+    const openAiResponse = await chatStream.generatePrompt([promptValue], undefined, [
+      {
+        ignoreAgent: true,
+        ignoreChain: true,
+        handleLLMNewToken(token: string) {
+          ragStream ? ragStream.write(token) : (responseString += token); //for token streaming
         },
-        tracer,
-      ],
-    );
+      },
+      tracer,
+    ]);
     console.log(openAiResponse);
 
     if (ragStream) {
       ragStream.end();
     }
-    return {response: responseString};
+    return { response: responseString };
   }
 
   /**
@@ -102,7 +117,10 @@ export class FeedbackRAGService {
    * @param data - The editor data containing nodes and edges.
    * @returns An object containing the filtered nodes and edges.
    */
-  async filterUmlData(data: editorDataDTO, enableHighlights: boolean = false): Promise<{nodes: rawClassNode[], edges: rawClassEdge[]}> {
+  async filterUmlData(
+    data: editorDataDTO,
+    enableHighlights = false,
+  ): Promise<{ nodes: rawClassNode[]; edges: rawClassEdge[] }> {
     const filteredNodes: rawClassNode[] = [];
     const filteredEdges: rawClassEdge[] = [];
 
@@ -127,13 +145,11 @@ export class FeedbackRAGService {
         cardinalityStart: edge.cardinalityStart,
         description: edge.description,
         cardinalityEnd: edge.cardinalityEnd,
-        highlighted: enableHighlights ? edge.highlighted : undefined
+        highlighted: enableHighlights ? edge.highlighted : undefined,
       };
       filteredEdges.push(filteredEdge);
     }
 
-    return {edges: filteredEdges, nodes: filteredNodes};
+    return { edges: filteredEdges, nodes: filteredNodes };
   }
-
-
 }

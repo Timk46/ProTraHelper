@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { NodeGraphComponent } from './node-graph.component';
 
@@ -8,10 +9,9 @@ describe('NodeGraphComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NodeGraphComponent]
-    })
-    .compileComponents();
-    
+      imports: [NodeGraphComponent],
+    }).compileComponents();
+
     fixture = TestBed.createComponent(NodeGraphComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -5,20 +5,19 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 @Component({
   selector: 'app-create-content-node-dialog',
   templateUrl: './create-content-node-dialog.component.html',
-  styleUrls: ['./create-content-node-dialog.component.scss']
+  styleUrls: ['./create-content-node-dialog.component.scss'],
 })
-
 export class CreateContentNodeDialogComponent {
   form: FormGroup;
 
   constructor(
-    private dialogRef: MatDialogRef<CreateContentNodeDialogComponent>,
-    private fb: FormBuilder
+    private readonly dialogRef: MatDialogRef<CreateContentNodeDialogComponent>,
+    private readonly fb: FormBuilder,
   ) {
     this.form = this.fb.group({
       name: ['', Validators.required],
       description: [''],
-      difficulty: ['', Validators.required]
+      difficulty: ['', Validators.required],
     });
   }
 

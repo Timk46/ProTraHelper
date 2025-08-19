@@ -5,11 +5,10 @@ import { Observable } from 'rxjs/internal/Observable';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DiscussionListService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   /**
    * Returns a list of discussions with the given filter data
@@ -17,7 +16,9 @@ export class DiscussionListService {
    * @returns discussionDTO[]
    */
   getDiscussions(filterData: discussionFilterDTO): Observable<discussionDTO[]> {
-    return this.http.post<discussionDTO[]>(environment.server + `/discussion/list/`, filterData);
+    return this.http.get<discussionDTO[]>(environment.server + `/discussion/list/`, {
+      params: { ...filterData } as any,
+    });
   }
 
   /**
@@ -26,8 +27,8 @@ export class DiscussionListService {
    * @returns discussionFilterContentNodeDTO[]
    */
   getFilterContentNodes(conceptNodeId: number): Observable<discussionFilterContentNodeDTO[]> {
-    return this.http.get<discussionFilterContentNodeDTO[]>(environment.server + `/discussion/list/filterContentNodes/${conceptNodeId}`);
+    return this.http.get<discussionFilterContentNodeDTO[]>(
+      environment.server + `/discussion/list/filterContentNodes/${conceptNodeId}`,
+    );
   }
-
-
 }

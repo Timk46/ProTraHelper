@@ -9,8 +9,8 @@
   <mat-toolbar class="footer">
     <!-- Linke Seite: Version -->
     <div class="left-content">
-      <button style="font-size:15px;cursor: pointer;">Version: {{version}}</button>
-        <!--
+      <button style="font-size: 15px; cursor: pointer">Version: {{ version }}</button>
+      <!--
         <mat-divider vertical="true" class="divider"></mat-divider>
         <button mat-button style="font-size:15px;">User: {{userMail? userMail : "nicht eingeloggt"}} </button>
         -->
@@ -25,22 +25,46 @@
       <button mat-button (click)="openDatenschutz()">Datenschutz</button>
     </div>
 
-      <!-- Rechte Seite: Fortschritt und Admin -->
-      <div class="right-content">
-        <mat-slide-toggle *ngIf="userRole === 'ADMIN'" (change)="onToggleEditorMode()" [checked]="editModeActive" color="primary" style="margin-right: 10px;">
-          Edit Mode
-        </mat-slide-toggle>
-        <mat-divider vertical="true" class="divider" *ngIf="userIsLoggedIn && userRole === 'ADMIN'"></mat-divider>
+    <!-- Rechte Seite: Fortschritt und Admin -->
+    <div class="right-content">
+      <mat-slide-toggle
+        *ngIf="userRole === 'ADMIN'"
+        (change)="onToggleEditorMode()"
+        [checked]="editModeActive"
+        color="primary"
+        style="margin-right: 10px"
+      >
+        Edit Mode
+      </mat-slide-toggle>
+      <mat-divider
+        vertical="true"
+        class="divider"
+        *ngIf="userIsLoggedIn && userRole === 'ADMIN'"
+      ></mat-divider>
 
-        <button mat-button *ngIf="userIsLoggedIn" style="font-size:15px; font-weight:bolder;" (click)="showProgress()">
-          <mat-icon>trending_up</mat-icon> Fortschritt
-        </button>
-        <mat-divider vertical="true" class="divider" *ngIf="userIsLoggedIn && userRole === 'ADMIN'"></mat-divider>
+      <button
+        mat-button
+        *ngIf="userIsLoggedIn"
+        style="font-size: 15px; font-weight: bolder"
+        (click)="showProgress()"
+      >
+        <mat-icon>trending_up</mat-icon> Fortschritt
+      </button>
+      <mat-divider
+        vertical="true"
+        class="divider"
+        *ngIf="userIsLoggedIn && userRole === 'ADMIN'"
+      ></mat-divider>
 
-        <button mat-button *ngIf="userRole === 'ADMIN'" routerLink="/admin" style="font-size:15px; font-weight:bolder;">
-          <mat-icon>admin_panel_settings</mat-icon> Admin
-        </button>
-      </div>
+      <button
+        mat-button
+        *ngIf="userRole === 'ADMIN'"
+        routerLink="/admin"
+        style="font-size: 15px; font-weight: bolder"
+      >
+        <mat-icon>admin_panel_settings</mat-icon> Admin
+      </button>
+    </div>
   </mat-toolbar>
 
   <!-- Chat-Popup nur einblenden, wenn es aktiv ist -->
@@ -49,5 +73,4 @@
   </div>
 
   <div class="tablet-space"></div>
-
 </div>

@@ -1,126 +1,138 @@
-import { GraphStructureDTO, GraphStructureSemanticDTO, GraphEdgeDTO, GraphEdgeSemanticDTO, GraphNodeDTO, GraphNodeSemanticDTO } from "@DTOs/graphTask.dto";
+import {
+  GraphStructureDTO,
+  GraphStructureSemanticDTO,
+  GraphEdgeDTO,
+  GraphEdgeSemanticDTO,
+  GraphNodeDTO,
+  GraphNodeSemanticDTO,
+} from '@DTOs/graphTask.dto';
 
 /**
  * Checks if two graphs are identical by comparing their nodes and edges.
  *
- * This function compares two graphs, `graph1` and `graph2`, to determine if they are identical. 
- * It checks if both graphs have the same number of nodes and edges. Then, it verifies that every 
- * node in `graph1` exists in `graph2` and vice versa, and that every edge in `graph1` exists in 
+ * This function compares two graphs, `graph1` and `graph2`, to determine if they are identical.
+ * It checks if both graphs have the same number of nodes and edges. Then, it verifies that every
+ * node in `graph1` exists in `graph2` and vice versa, and that every edge in `graph1` exists in
  * `graph2` and vice versa.
  *
  * @param {GraphStructureSemanticDTO} graph1 - The first graph to compare.
  * @param {GraphStructureSemanticDTO} graph2 - The second graph to compare.
  * @returns {boolean} - Returns `true` if the graphs are identical (same nodes and edges), otherwise `false`.
  */
-export function graphsIdentical(graph1: GraphStructureSemanticDTO, graph2: GraphStructureSemanticDTO): boolean {
+export function graphsIdentical(
+  graph1: GraphStructureSemanticDTO,
+  graph2: GraphStructureSemanticDTO,
+): boolean {
+  // Check if the number of nodes and edges are the same
+  if (graph1.nodes.length !== graph2.nodes.length || graph1.edges.length !== graph2.edges.length) {
+    return false;
+  }
 
-    // Check if the number of nodes and edges are the same
-    if (graph1.nodes.length !== graph2.nodes.length || graph1.edges.length !== graph2.edges.length) {
+  // Check if all nodes in graph1 are in graph2
+  for (const node1 of graph1.nodes) {
+    const matchingNode = graph2.nodes.find(node2 => nodesHaveSameValue(node1, node2));
+    if (!matchingNode) {
       return false;
     }
-
-    // Check if all nodes in graph1 are in graph2
-    for (const node1 of graph1.nodes) {
-      const matchingNode = graph2.nodes.find(node2 => nodesHaveSameValue(node1, node2));
-      if (!matchingNode) {
-        return false;
-      }
+  }
+  // Check if all nodes in graph2 are in graph1
+  for (const node2 of graph2.nodes) {
+    const matchingNode = graph1.nodes.find(node1 => nodesHaveSameValue(node2, node1));
+    if (!matchingNode) {
+      return false;
     }
-    // Check if all nodes in graph2 are in graph1
-    for (const node2 of graph2.nodes) {
-      const matchingNode = graph1.nodes.find(node1 => nodesHaveSameValue(node2, node1));
-      if (!matchingNode) {
-        return false;
-      }
-    }
+  }
 
-    // Check if all edges in graph1 are in graph2
-    for (const edge1 of graph1.edges) {
-      const matchingEdge = graph2.edges.find(edge2 => edgesConnectNodesWithSameValues(edge1, edge2));
-      if (!matchingEdge) {
-        return false;
-      }
+  // Check if all edges in graph1 are in graph2
+  for (const edge1 of graph1.edges) {
+    const matchingEdge = graph2.edges.find(edge2 => edgesConnectNodesWithSameValues(edge1, edge2));
+    if (!matchingEdge) {
+      return false;
     }
+  }
 
-    // Check if all edges in graph2 are in graph1
-    for (const edge2 of graph2.edges) {
-      const matchingEdge = graph1.edges.find(edge1 => edgesConnectNodesWithSameValues(edge2, edge1));
-      if (!matchingEdge) {
-        return false;
-      }
+  // Check if all edges in graph2 are in graph1
+  for (const edge2 of graph2.edges) {
+    const matchingEdge = graph1.edges.find(edge1 => edgesConnectNodesWithSameValues(edge2, edge1));
+    if (!matchingEdge) {
+      return false;
     }
+  }
 
-    return true;
+  return true;
 }
-
-
 
 /**
  * Checks if two graphs contain the same set of nodes, regardless of their order.
  *
- * This function determines if `graph1` and `graph2` contain the same nodes by 
- * comparing the sorted list of node values from both graphs. It first extracts 
- * the node values from each graph, sorts them, and then compares the sorted lists. 
- * If the lengths differ or any value does not match, the graphs do not contain 
+ * This function determines if `graph1` and `graph2` contain the same nodes by
+ * comparing the sorted list of node values from both graphs. It first extracts
+ * the node values from each graph, sorts them, and then compares the sorted lists.
+ * If the lengths differ or any value does not match, the graphs do not contain
  * the same nodes.
  *
  * @param {GraphStructureSemanticDTO} graph1 - The first graph to compare.
  * @param {GraphStructureSemanticDTO} graph2 - The second graph to compare.
  * @returns {boolean} - Returns `true` if both graphs contain the same set of nodes, otherwise `false`.
  */
-export function graphsContainSameNodes(graph1: GraphStructureSemanticDTO, graph2: GraphStructureSemanticDTO): boolean {
-    
-    function extractAndSortNodeValues(graph: GraphStructureSemanticDTO) {
-      return graph.nodes.map(node => node.value).sort();
+export function graphsContainSameNodes(
+  graph1: GraphStructureSemanticDTO,
+  graph2: GraphStructureSemanticDTO,
+): boolean {
+  function extractAndSortNodeValues(graph: GraphStructureSemanticDTO) {
+    return graph.nodes.map(node => node.value).sort();
+  }
+
+  const graph1Values = extractAndSortNodeValues(graph1);
+  const graph2Values = extractAndSortNodeValues(graph2);
+
+  if (graph1Values.length !== graph2Values.length) {
+    return false;
+  }
+
+  for (let i = 0; i < graph1Values.length; i++) {
+    if (graph1Values[i] !== graph2Values[i]) {
+      return false;
     }
+  }
 
-    const graph1Values = extractAndSortNodeValues(graph1);
-    const graph2Values = extractAndSortNodeValues(graph2);
-
-    if (graph1Values.length !== graph2Values.length) {
-        return false;
-    }
-
-    for (let i = 0; i < graph1Values.length; i++) {
-        if (graph1Values[i] !== graph2Values[i]) {
-            return false;
-        }
-    }
-
-    return true;
+  return true;
 }
 
 /**
  * Identifies edges in the first graph that are not present in the second graph.
  *
- * This function compares two lists of edges, `edgesGraph1` and `edgesGraph2`, and 
+ * This function compares two lists of edges, `edgesGraph1` and `edgesGraph2`, and
  * returns a list of edges that are present in `edgesGraph1` but not in `edgesGraph2`.
- * It iterates through each edge in `edgesGraph1` and checks if there is a matching 
- * edge in `edgesGraph2` using the `compareEdges` method. If no matching edge is found, 
+ * It iterates through each edge in `edgesGraph1` and checks if there is a matching
+ * edge in `edgesGraph2` using the `compareEdges` method. If no matching edge is found,
  * the edge is considered an "extra" edge and added to the result list.
  *
  * @param {GraphEdgeSemanticDTO[]} edgesGraph1 - The list of edges from the first graph.
  * @param {GraphEdgeSemanticDTO[]} edgesGraph2 - The list of edges from the second graph.
  * @returns {GraphEdgeSemanticDTO[]} - Returns an array of edges that are present in `edgesGraph1` but not in `edgesGraph2`.
  */
-export function getExtraEdges(edgesGraph1: GraphEdgeSemanticDTO[], edgesGraph2: GraphEdgeSemanticDTO[]): GraphEdgeSemanticDTO[] {
-    const extraEdges: GraphEdgeSemanticDTO[] = [];
+export function getExtraEdges(
+  edgesGraph1: GraphEdgeSemanticDTO[],
+  edgesGraph2: GraphEdgeSemanticDTO[],
+): GraphEdgeSemanticDTO[] {
+  const extraEdges: GraphEdgeSemanticDTO[] = [];
 
-    for (const edge1 of edgesGraph1) {
-      const matchingEdge = edgesGraph2.find(edge2 => edgesConnectNodesWithSameValues(edge1, edge2));
-      if (!matchingEdge) {
-        extraEdges.push(edge1);
-      }
+  for (const edge1 of edgesGraph1) {
+    const matchingEdge = edgesGraph2.find(edge2 => edgesConnectNodesWithSameValues(edge1, edge2));
+    if (!matchingEdge) {
+      extraEdges.push(edge1);
     }
-  
-    return extraEdges;
+  }
+
+  return extraEdges;
 }
 
 /**
  * Checks if two graph nodes have the same value.
  *
- * This function compares two graph nodes, `node1` and `node2`, and returns `true` 
- * if they have the same `value` property. The comparison does not consider other 
+ * This function compares two graph nodes, `node1` and `node2`, and returns `true`
+ * if they have the same `value` property. The comparison does not consider other
  * properties such as `selected` or `weight`.
  *
  * @param {GraphNodeSemanticDTO} node1 - The first graph node to compare.
@@ -128,8 +140,8 @@ export function getExtraEdges(edgesGraph1: GraphEdgeSemanticDTO[], edgesGraph2: 
  * @returns {boolean} - Returns `true` if both nodes have the same value, otherwise `false`.
  */
 export function nodesHaveSameValue(node1: GraphNodeSemanticDTO, node2: GraphNodeSemanticDTO) {
-    return node1.value === node2.value;
-};
+  return node1.value === node2.value;
+}
 
 /**
  * Checks if two directed edges connect nodes with the same values.
@@ -142,38 +154,43 @@ export function nodesHaveSameValue(node1: GraphNodeSemanticDTO, node2: GraphNode
  * @param {GraphEdgeSemanticDTO} edge2 - The second edge to compare.
  * @returns {boolean} - Returns `true` if both edges connect nodes with the same values, otherwise `false`.
  */
-export function edgesConnectNodesWithSameValues(edge1: GraphEdgeSemanticDTO, edge2: GraphEdgeSemanticDTO) {
-    return (
-      edge1.node1Value === edge2.node1Value &&
-      edge1.node2Value === edge2.node2Value
-    );
-};
-
+export function edgesConnectNodesWithSameValues(
+  edge1: GraphEdgeSemanticDTO,
+  edge2: GraphEdgeSemanticDTO,
+) {
+  return edge1.node1Value === edge2.node1Value && edge1.node2Value === edge2.node2Value;
+}
 
 /**
  * Checks if the graphs contain only edges which connect the same nodes.
  * It is not considered whether other edge attributes are different.
  * This function is for graphs with undirected edges.
- * @param graph1 
- * @param graph2 
+ * @param graph1
+ * @param graph2
  */
-export function graphsContainSameEdges(graph1: GraphStructureSemanticDTO, graph2: GraphStructureSemanticDTO) {
-
+export function graphsContainSameEdges(
+  graph1: GraphStructureSemanticDTO,
+  graph2: GraphStructureSemanticDTO,
+) {
   function extractAndSortEdges(graph: GraphStructureSemanticDTO) {
-    return graph.edges.map( edge => {
-      // Ensure the smaller value is always node1Value and the larger value is node2Value 
-      // Reuqired to treat edges as undirected
-      const [node1Value, node2Value] = edge.node1Value.localeCompare(edge.node2Value) < 0 ?
-        [edge.node1Value, edge.node2Value] : [edge.node2Value, edge.node1Value];
+    return graph.edges
+      .map(edge => {
+        // Ensure the smaller value is always node1Value and the larger value is node2Value
+        // Reuqired to treat edges as undirected
+        const [node1Value, node2Value] =
+          edge.node1Value.localeCompare(edge.node2Value) < 0
+            ? [edge.node1Value, edge.node2Value]
+            : [edge.node2Value, edge.node1Value];
         return { node1Value, node2Value };
 
-      // Sort the edges first by node1Value and then by node2Value
-      }).sort((a, b) => {
+        // Sort the edges first by node1Value and then by node2Value
+      })
+      .sort((a, b) => {
         if (a.node1Value === b.node1Value) {
           return a.node2Value.localeCompare(b.node2Value);
         }
         return a.node1Value.localeCompare(b.node1Value);
-    });
+      });
   }
 
   // Extract and sort edges for both graphs
@@ -187,8 +204,10 @@ export function graphsContainSameEdges(graph1: GraphStructureSemanticDTO, graph2
 
   // Check if all edges are the same in both graphs
   for (let i = 0; i < graph1Edges.length; i++) {
-    if (graph1Edges[i].node1Value !== graph2Edges[i].node1Value ||
-      graph1Edges[i].node2Value !== graph2Edges[i].node2Value) {
+    if (
+      graph1Edges[i].node1Value !== graph2Edges[i].node1Value ||
+      graph1Edges[i].node2Value !== graph2Edges[i].node2Value
+    ) {
       return false;
     }
   }
@@ -196,7 +215,6 @@ export function graphsContainSameEdges(graph1: GraphStructureSemanticDTO, graph2
   // If all checks pass, return true
   return true;
 }
-
 
 /**
  * Returns the list of nodes with selected attribute set to true
@@ -213,7 +231,10 @@ export function getSelectedNodes(nodes: GraphNodeSemanticDTO[]): GraphNodeSemant
  * @param nodesGraph2 Reference nodes
  * @returns {GraphNodeSemanticDTO[]} Extra selected nodes
  */
-export function getExtraSelectedNodes(nodesGraph1: GraphNodeSemanticDTO[], nodesGraph2: GraphNodeSemanticDTO[]): GraphNodeSemanticDTO[] {
+export function getExtraSelectedNodes(
+  nodesGraph1: GraphNodeSemanticDTO[],
+  nodesGraph2: GraphNodeSemanticDTO[],
+): GraphNodeSemanticDTO[] {
   const extraSelectedNodes = [];
 
   for (const node1 of nodesGraph1) {
@@ -228,14 +249,16 @@ export function getExtraSelectedNodes(nodesGraph1: GraphNodeSemanticDTO[], nodes
   return extraSelectedNodes;
 }
 
-
 /**
  * Returns the list of node value for the nodes with different weights between two node lists
  * @param nodesGraph1 Array of nodes from the first graph
  * @param nodesGraph2 Array of nodes from the second graph
  * @returns {Array<string>} Node values for the nodes with different weights
  */
-export function getNodesWithDifferentWeights(nodesGraph1: GraphNodeSemanticDTO[], nodesGraph2: GraphNodeSemanticDTO[]): string[] {
+export function getNodesWithDifferentWeights(
+  nodesGraph1: GraphNodeSemanticDTO[],
+  nodesGraph2: GraphNodeSemanticDTO[],
+): string[] {
   const nodesWithDifferentWeights: string[] = [];
 
   for (const node1 of nodesGraph1) {
@@ -248,29 +271,31 @@ export function getNodesWithDifferentWeights(nodesGraph1: GraphNodeSemanticDTO[]
   return nodesWithDifferentWeights;
 }
 
-
 /**
  * Returns the list of edge value for the edges with different weights between two edge lists
  * @param edgesGraph1 Array of edges from the first graph
  * @param edgesGraph2 Array of edges from the second graph
  * @returns {Array<string>} Edge values for the edges with different weights as string like: 'A -> B'
  */
-export function getEdgesWithDifferentWeights(edgesGraph1: GraphEdgeSemanticDTO[], edgesGraph2: GraphEdgeSemanticDTO[]): string[] {
+export function getEdgesWithDifferentWeights(
+  edgesGraph1: GraphEdgeSemanticDTO[],
+  edgesGraph2: GraphEdgeSemanticDTO[],
+): string[] {
   const edgesWithDifferentWeights: string[] = [];
-  
+
   for (const edge1 of edgesGraph1) {
-    const matchingEdge = edgesGraph2.find(edge2 => edge1.node1Value === edge2.node1Value && edge1.node2Value === edge2.node2Value);
-      if (matchingEdge && edge1.weight !== matchingEdge.weight) {
-        edgesWithDifferentWeights.push(`${edge1.node1Value} -> ${edge1.node2Value}`);
-      }
+    const matchingEdge = edgesGraph2.find(
+      edge2 => edge1.node1Value === edge2.node1Value && edge1.node2Value === edge2.node2Value,
+    );
+    if (matchingEdge && edge1.weight !== matchingEdge.weight) {
+      edgesWithDifferentWeights.push(`${edge1.node1Value} -> ${edge1.node2Value}`);
+    }
   }
   return edgesWithDifferentWeights;
 }
 
-
 // #####
 // Convert GraphJSON to GraphSemantic
-
 
 /**
  * Converts graph data from IGraphDataJSON type to IGraphDataSemantic format.
@@ -283,25 +308,25 @@ export function getEdgesWithDifferentWeights(edgesGraph1: GraphEdgeSemanticDTO[]
  * @returns {GraphStructureSemanticDTO} - The graph data as IGraphDataSemantic, containing nodes and edges.
  */
 export function graphJSONToSemantic(graphData: GraphStructureDTO): GraphStructureSemanticDTO {
-    const nodesSemantic: GraphNodeSemanticDTO[] = [];
-    const edgesSemantic: GraphEdgeSemanticDTO[] = [];
-  
-    graphData.nodes.forEach( node => {
-      const nodeSemantic: GraphNodeSemanticDTO = graphNodeJSONToSemantic(node);
-      nodesSemantic.push(nodeSemantic);
-    });
-  
-    graphData.edges.forEach( edge => {
-      const edgeSemantic: GraphEdgeSemanticDTO = graphEdgeJSONToSemantic(edge, graphData.nodes);
-      edgesSemantic.push(edgeSemantic);
-    });
-  
-    return {
-      nodes: nodesSemantic,
-      edges: edgesSemantic
-    };
+  const nodesSemantic: GraphNodeSemanticDTO[] = [];
+  const edgesSemantic: GraphEdgeSemanticDTO[] = [];
+
+  graphData.nodes.forEach(node => {
+    const nodeSemantic: GraphNodeSemanticDTO = graphNodeJSONToSemantic(node);
+    nodesSemantic.push(nodeSemantic);
+  });
+
+  graphData.edges.forEach(edge => {
+    const edgeSemantic: GraphEdgeSemanticDTO = graphEdgeJSONToSemantic(edge, graphData.nodes);
+    edgesSemantic.push(edgeSemantic);
+  });
+
+  return {
+    nodes: nodesSemantic,
+    edges: edgesSemantic,
+  };
 }
- 
+
 /**
  * Converts a graph node from IGraphNodeJSON type to IGraphNodeSemantic type.
  *
@@ -309,18 +334,18 @@ export function graphJSONToSemantic(graphData: GraphStructureDTO): GraphStructur
  * @returns {GraphNodeSemanticDTO} - The graph node as IGraphNodeSemantic, with relevant properties copied over.
  */
 export function graphNodeJSONToSemantic(node: GraphNodeDTO): GraphNodeSemanticDTO {
-    const nodeSemantic: GraphNodeSemanticDTO = {
-      value: node.value,
-    };
-  
-    if (node.weight !== null) {
-      nodeSemantic.weight = node.weight;
-    }
-    if (node.selected !== null) {
-      nodeSemantic.selected = node.selected;
-    }
-  
-    return nodeSemantic;
+  const nodeSemantic: GraphNodeSemanticDTO = {
+    value: node.value,
+  };
+
+  if (node.weight !== null) {
+    nodeSemantic.weight = node.weight;
+  }
+  if (node.selected !== null) {
+    nodeSemantic.selected = node.selected;
+  }
+
+  return nodeSemantic;
 }
 
 /**
@@ -334,49 +359,56 @@ export function graphNodeJSONToSemantic(node: GraphNodeDTO): GraphNodeSemanticDT
  * @param {GraphNodeDTO[]} nodesList - The list of nodes as IGraphNodeJSON, used to lookup node values by their IDs.
  * @returns {GraphEdgeSemanticDTO} - The graph edge as IGraphEdgeSemantic, with node values and weight copied over.
  */
-export function graphEdgeJSONToSemantic(edge: GraphEdgeDTO, nodesList: GraphNodeDTO[]): GraphEdgeSemanticDTO {
-    let node1Value: string = 'no-value'
-    let node2Value: string = 'no-value'
-    nodesList.forEach(node => {
-      if (node.nodeId === edge.node1Id) {
-        node1Value = node.value;
-      }
-      if (node.nodeId === edge.node2Id) {
-        node2Value = node.value;
-      }
-    });
-  
-    const edgeSemantic: GraphEdgeSemanticDTO = {
-      node1Value: node1Value,
-      node2Value: node2Value,
-    };
-  
-    if (edge.weight !== null) {
-      edgeSemantic.weight = edge.weight;
+export function graphEdgeJSONToSemantic(
+  edge: GraphEdgeDTO,
+  nodesList: GraphNodeDTO[],
+): GraphEdgeSemanticDTO {
+  let node1Value = 'no-value';
+  let node2Value = 'no-value';
+  nodesList.forEach(node => {
+    if (node.nodeId === edge.node1Id) {
+      node1Value = node.value;
     }
-  
-    return edgeSemantic;
-}
+    if (node.nodeId === edge.node2Id) {
+      node2Value = node.value;
+    }
+  });
 
+  const edgeSemantic: GraphEdgeSemanticDTO = {
+    node1Value: node1Value,
+    node2Value: node2Value,
+  };
+
+  if (edge.weight !== null) {
+    edgeSemantic.weight = edge.weight;
+  }
+
+  return edgeSemantic;
+}
 
 /**
  * Identifies edges in the first graph that are not present in the second graph.
  *
- * This function compares two lists of edges, `edgesGraph1` and `edgesGraph2`, and 
+ * This function compares two lists of edges, `edgesGraph1` and `edgesGraph2`, and
  * returns a list of edges that are present in `edgesGraph1` but not in `edgesGraph2`.
- * It iterates through each edge in `edgesGraph1` and checks if there is a matching 
- * edge in `edgesGraph2` using the `compareEdges` method. If no matching edge is found, 
+ * It iterates through each edge in `edgesGraph1` and checks if there is a matching
+ * edge in `edgesGraph2` using the `compareEdges` method. If no matching edge is found,
  * the edge is considered an "extra" edge and added to the result list.
  *
  * @param {GraphEdgeSemanticDTO[]} edgesGraph1 - The list of edges from the first graph.
  * @param {GraphEdgeSemanticDTO[]} edgesGraph2 - The list of edges from the second graph.
  * @returns {GraphEdgeSemanticDTO[]} - Returns an array of edges that are present in `edgesGraph1` but not in `edgesGraph2`.
  */
-export function getExtraEdgesUndirectedGraph(edgesGraph1: GraphEdgeSemanticDTO[], edgesGraph2: GraphEdgeSemanticDTO[]): GraphEdgeSemanticDTO[] {
+export function getExtraEdgesUndirectedGraph(
+  edgesGraph1: GraphEdgeSemanticDTO[],
+  edgesGraph2: GraphEdgeSemanticDTO[],
+): GraphEdgeSemanticDTO[] {
   const extraEdges: GraphEdgeSemanticDTO[] = [];
 
   for (const edge1 of edgesGraph1) {
-    const matchingEdge = edgesGraph2.find(edge2 => undirectedEdgesConnectNodesWithSameValues(edge1, edge2));
+    const matchingEdge = edgesGraph2.find(edge2 =>
+      undirectedEdgesConnectNodesWithSameValues(edge1, edge2),
+    );
     if (!matchingEdge) {
       extraEdges.push(edge1);
     }
@@ -384,9 +416,6 @@ export function getExtraEdgesUndirectedGraph(edgesGraph1: GraphEdgeSemanticDTO[]
 
   return extraEdges;
 }
-
-
-
 
 /**
  * Checks if two undirected edges connect nodes with the same values.
@@ -399,16 +428,12 @@ export function getExtraEdgesUndirectedGraph(edgesGraph1: GraphEdgeSemanticDTO[]
  * @param {GraphEdgeSemanticDTO} edge2 - The second edge to compare.
  * @returns {boolean} - Returns `true` if both edges connect nodes with the same values, otherwise `false`.
  */
-export function undirectedEdgesConnectNodesWithSameValues(edge1: GraphEdgeSemanticDTO, edge2: GraphEdgeSemanticDTO) {
+export function undirectedEdgesConnectNodesWithSameValues(
+  edge1: GraphEdgeSemanticDTO,
+  edge2: GraphEdgeSemanticDTO,
+) {
   return (
-    (
-    edge1.node1Value === edge2.node1Value &&
-    edge1.node2Value === edge2.node2Value
-    )
-    ||
-    (
-      edge1.node1Value === edge2.node2Value &&
-      edge1.node2Value === edge2.node1Value
-    )
+    (edge1.node1Value === edge2.node1Value && edge1.node2Value === edge2.node2Value) ||
+    (edge1.node1Value === edge2.node2Value && edge1.node2Value === edge2.node1Value)
   );
-};
+}

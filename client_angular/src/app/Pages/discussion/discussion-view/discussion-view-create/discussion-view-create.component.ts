@@ -6,33 +6,32 @@ import { DiscussionCreationService } from 'src/app/Services/discussion/discussio
 @Component({
   selector: 'app-discussion-view-create',
   templateUrl: './discussion-view-create.component.html',
-  styleUrls: ['./discussion-view-create.component.scss']
+  styleUrls: ['./discussion-view-create.component.scss'],
 })
 export class DiscussionViewCreateComponent {
+  expanded: boolean = false;
+  expanderTitle: string = 'Dem Beitrag antworten';
 
-  expanded: Boolean = false
-  expanderTitle: String = 'Dem Beitrag antworten'
-
-  editorConfig = { // for later
+  editorConfig = {
+    // for later
     plugins: 'autoresize lists table link image code codesample',
-    toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
+    toolbar:
+      'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
     min_height: 300,
-  }
+  };
 
   anonymousUser: AnonymousUserDTO = {
     id: -1,
     userId: -1,
-    anonymousName: 'dummy'
-  }
+    anonymousName: 'dummy',
+  };
 
   //@Input() userId: number = -1;
   @Input() discussionId: number = -1;
 
   @Output() refreshMessages = new EventEmitter<void>();
 
-
-
-  constructor(private creationService: DiscussionCreationService) { }
+  constructor(private readonly creationService: DiscussionCreationService) {}
 
   /** Handles the submission of the comment
    * No empty comments are allowed.
@@ -48,12 +47,14 @@ export class DiscussionViewCreateComponent {
     if (text && text != '') {
       // check if the discussion id is present
       if (this.discussionId != -1) {
-        this.creationService.createDiscussionMessage({text: text, discussionId: this.discussionId}).subscribe(messageId => {
-          this.expanded = false;
-          // refresh the messages by telling the parent 'discussion-page' component to do so
-          this.refreshMessages.emit();
-          editor.setContent('');
-        });
+        this.creationService
+          .createDiscussionMessage({ text: text, discussionId: this.discussionId })
+          .subscribe(messageId => {
+            this.expanded = false;
+            // refresh the messages by telling the parent 'discussion-page' component to do so
+            this.refreshMessages.emit();
+            editor.setContent('');
+          });
       } else {
         console.log('Error. No discussion id');
       }

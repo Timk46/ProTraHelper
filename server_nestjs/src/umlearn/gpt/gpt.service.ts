@@ -1,21 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { HumanMessage, SystemMessage, BaseMessage, } from '@langchain/core/messages';
-import { ChatOpenAI } from "@langchain/openai";
+import { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { ChatOpenAI } from '@langchain/openai';
 import { TUTOR_INSTRUCTIONS } from './system-message_sven';
 import * as SimilarityLogPrompts from './system-message_similog';
 import { editorDataDTO } from '@DTOs/index';
 import { SimilarityCompareService } from '../compare/similarity-compare.service';
 
-
 @Injectable()
 export class GptService {
   private readonly chat: ChatOpenAI;
 
-  constructor(private scService: SimilarityCompareService) {
+  constructor(private readonly scService: SimilarityCompareService) {
     this.chat = new ChatOpenAI({
       temperature: 0,
       openAIApiKey: process.env.OPENAI_API_KEY,
-      modelName: 'gpt-4.1-2025-04-14'
+      modelName: 'gpt-4.1-2025-04-14',
     });
   }
 
@@ -25,7 +25,11 @@ export class GptService {
    * @param attempt - The user's attempt at solving the problem.
    * @returns A promise that resolves to an object containing the GPT feedback.
    */
-  async sendFeedbackRequest(solution: editorDataDTO, attempt: editorDataDTO, taskDescription: string): Promise<{gptFeedback: string}>  {
+  async sendFeedbackRequest(
+    solution: editorDataDTO,
+    attempt: editorDataDTO,
+    taskDescription: string,
+  ): Promise<{ gptFeedback: string }> {
     // Transform the UML diagrams to a more LLM-friendly format
     const transformToMermaid = (diagram: any) => {
       let mermaidCode = '```mermaid\nclassDiagram\n';
@@ -35,9 +39,9 @@ export class GptService {
         const className = node.title;
 
         // Define class type (class, interface, abstract)
-        if (node.type === "Interface") {
+        if (node.type === 'Interface') {
           mermaidCode += `  class ${className} {\n    <<interface>>\n`;
-        } else if (node.type === "Abstrakte Klasse") {
+        } else if (node.type === 'Abstrakte Klasse') {
           mermaidCode += `  class ${className} {\n    <<abstract>>\n`;
         } else {
           mermaidCode += `  class ${className} {\n`;
@@ -46,8 +50,8 @@ export class GptService {
         // Add attributes
         if (node.attributes) {
           for (const attr of node.attributes) {
-            const visibility = attr.visibility === "private" ? "-" :
-                             attr.visibility === "protected" ? "#" : "+";
+            const visibility =
+              attr.visibility === 'private' ? '-' : attr.visibility === 'protected' ? '#' : '+';
             mermaidCode += `    ${visibility}${attr.name} ${attr.dataType}\n`;
           }
         }
@@ -55,8 +59,8 @@ export class GptService {
         // Add methods
         if (node.methods) {
           for (const method of node.methods) {
-            const visibility = method.visibility === "private" ? "-" :
-                             method.visibility === "protected" ? "#" : "+";
+            const visibility =
+              method.visibility === 'private' ? '-' : method.visibility === 'protected' ? '#' : '+';
             mermaidCode += `    ${visibility}${method.name}() ${method.returnType}\n`;
           }
         }
@@ -71,33 +75,33 @@ export class GptService {
         if (!sourceClass || !targetClass) continue;
 
         let relationSymbol = '';
-        switch(edge.type) {
-          case "Assoziation":
-            relationSymbol = "-->";
+        switch (edge.type) {
+          case 'Assoziation':
+            relationSymbol = '-->';
             break;
-          case "Gerichtete Assoziation":
-            relationSymbol = "-->";
+          case 'Gerichtete Assoziation':
+            relationSymbol = '-->';
             break;
-          case "Bidirektionale Assoziation":
-            relationSymbol = "<-->";
+          case 'Bidirektionale Assoziation':
+            relationSymbol = '<-->';
             break;
-          case "Aggregation":
-            relationSymbol = "o--";
+          case 'Aggregation':
+            relationSymbol = 'o--';
             break;
-          case "Komposition":
-            relationSymbol = "*--";
+          case 'Komposition':
+            relationSymbol = '*--';
             break;
-          case "Generalisierung":
-            relationSymbol = "--|>";
+          case 'Generalisierung':
+            relationSymbol = '--|>';
             break;
-          case "Implementierung":
-            relationSymbol = "..|>";
+          case 'Implementierung':
+            relationSymbol = '..|>';
             break;
-          case "Abhängigkeit":
-            relationSymbol = "..>";
+          case 'Abhängigkeit':
+            relationSymbol = '..>';
             break;
           default:
-            relationSymbol = "-->";
+            relationSymbol = '-->';
         }
 
         let relationship = `${sourceClass} ${relationSymbol} ${targetClass}`;
@@ -116,15 +120,20 @@ export class GptService {
 
     const requestPack: BaseMessage[] = [];
     requestPack.push(new SystemMessage(TUTOR_INSTRUCTIONS));
-    requestPack.push(new HumanMessage(
-      '# Aufgabenstellung: \n\n'
-      + taskDescription + '\n\n'
-      + '# Musterlösung (Mermaid UML format): \n\n'
-      + transformToMermaid(solution) + '\n\n'
-      + '# Abgabe des Schülers (Mermaid UML format): \n\n' + transformToMermaid(attempt)
-    ));
+    requestPack.push(
+      new HumanMessage(
+        '# Aufgabenstellung: \n\n' +
+          taskDescription +
+          '\n\n' +
+          '# Musterlösung (Mermaid UML format): \n\n' +
+          transformToMermaid(solution) +
+          '\n\n' +
+          '# Abgabe des Schülers (Mermaid UML format): \n\n' +
+          transformToMermaid(attempt),
+      ),
+    );
 
-    return {gptFeedback: await this.getLLMResponse(requestPack)};
+    return { gptFeedback: await this.getLLMResponse(requestPack) };
   }
 
   /**
@@ -137,13 +146,19 @@ export class GptService {
    * @param solution - The correct solution data in the form of an editorDataDTO.
    * @returns A promise that resolves to an object containing the GPT feedback as a string.
    */
-  async sendFeedbackRequestByLog(solution: editorDataDTO, attempt: editorDataDTO, taskDescription: string): Promise<{gptFeedback: string}> {
+  async sendFeedbackRequestByLog(
+    solution: editorDataDTO,
+    attempt: editorDataDTO,
+    taskDescription: string,
+  ): Promise<{ gptFeedback: string }> {
     const comparisonLog = this.scService.compare(attempt, solution);
     const requestPack: BaseMessage[] = [];
     requestPack.push(new SystemMessage(SimilarityLogPrompts.TUTOR_INSTRUCTIONS));
-    requestPack.push(new HumanMessage(SimilarityLogPrompts.HUMAN_MESSAGE(taskDescription, comparisonLog)));
+    requestPack.push(
+      new HumanMessage(SimilarityLogPrompts.HUMAN_MESSAGE(taskDescription, comparisonLog)),
+    );
 
-    return {gptFeedback: (await this.getLLMResponse(requestPack))};
+    return { gptFeedback: await this.getLLMResponse(requestPack) };
   }
 
   /**
@@ -168,5 +183,4 @@ export class GptService {
     }
     return messageText;
   }
-
 }

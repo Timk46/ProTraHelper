@@ -1,20 +1,20 @@
 .task-progress-card {
-    margin: 4px;
-    display: flex;
+  margin: 4px;
+  display: flex;
 }
 
 .passed {
-    background-color: rgb(0, 255, 0, 0.3);
+  background-color: rgb(0, 255, 0, 0.3);
 }
 
 .floating {
-    background-color: rgb(255, 255, 0, 0.3);
+  background-color: rgb(255, 255, 0, 0.3);
 }
 
 .failed {
-    background-color: rgb(255, 0, 0, 0.3);
+  background-color: rgb(255, 0, 0, 0.3);
 }
 
 .show-details {
-    margin: 4px;
+  margin: 4px;
 }

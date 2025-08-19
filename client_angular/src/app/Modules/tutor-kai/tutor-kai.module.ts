@@ -56,7 +56,7 @@ import { FileSystemService } from './services/file-system.service';
     MaterialModule,
     MarkdownModule.forRoot(),
     ToastrModule.forRoot(),
-    MonacoEditorModule.forRoot()
+    MonacoEditorModule.forRoot(),
   ],
   exports: [
     CodeEditorComponent,
@@ -70,9 +70,6 @@ import { FileSystemService } from './services/file-system.service';
     FileExplorerComponent,
     FeedbackPanelTutorFeedbackComponent,
   ],
-  providers: [
-    WorkspaceStateService,
-    FileSystemService
-  ]
+  providers: [WorkspaceStateService, FileSystemService],
 })
 export class TutorKaiModule {}

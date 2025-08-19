@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ConceptSelectionService {
-  private selectedConceptIdSubject = new BehaviorSubject<number | null>(null);
+  private readonly selectedConceptIdSubject = new BehaviorSubject<number | null>(null);
   selectedConceptId$: Observable<number | null> = this.selectedConceptIdSubject.asObservable();
 
-  constructor() { }
+  constructor() {}
 
   /**
    * Sets the selected concept ID

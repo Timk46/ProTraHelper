@@ -1,0 +1,646 @@
+// =============================================================================
+// EVALUATION DISCUSSION FORUM - COMPONENT STYLES
+// =============================================================================
+
+// Variables
+$header-height: 120px;
+$tab-height: 56px;
+$background-color: #f5f7fa;
+$card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+$border-color: #e0e0e0;
+$text-primary: #2c3e50;
+$text-secondary: #7f8c8d;
+$primary-color: #3498db;
+$success-color: #27ae60;
+$error-color: #e74c3c;
+$warning-color: #e67e22;
+
+// =============================================================================
+// DEMO MODE BANNER
+// =============================================================================
+
+.demo-mode-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    opacity: 0.9;
+  }
+  
+  .banner-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .banner-title {
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.2;
+  }
+  
+  .banner-subtitle {
+    font-size: 13px;
+    opacity: 0.85;
+    line-height: 1.3;
+  }
+  
+  // Animation
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Main wrapper
+.evaluation-forum-wrapper {
+  width: 100%;
+  height: 100vh;
+  background-color: $background-color;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+// Container
+.evaluation-forum-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: min(20px, 2vw);
+  flex: 1;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: min(20px, 2vw);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+// =============================================================================
+// HEADER SECTION
+// =============================================================================
+
+.forum-header {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: $card-shadow;
+  margin-bottom: 20px;
+
+  h1 {
+    color: $text-primary;
+    font-size: 24px;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+  }
+
+  .header-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    color: $text-secondary;
+    font-size: 14px;
+
+    .author-info {
+      color: $text-secondary;
+    }
+
+    .phase-badge {
+      background: $warning-color;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      transition: background-color 0.3s ease;
+
+      &.evaluation {
+        background: $success-color;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// CATEGORY TABS
+// =============================================================================
+
+.category-tabs-wrapper {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: $card-shadow;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+// =============================================================================
+// MAIN GRID LAYOUT
+// =============================================================================
+
+.main-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: min(20px, 2vw);
+  min-height: 0;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+
+  .pdf-column,
+  .discussion-column {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0; /* Allow shrinking below content size */
+    overflow: hidden;
+  }
+
+  .panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: $card-shadow;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    min-width: 0; /* Allow shrinking below content size */
+    overflow: hidden;
+    
+    // Special handling for discussion panel
+    &.card {
+      .discussion-column & {
+        height: 650px; /* Fixed height like in HTML template */
+        max-height: 650px;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// PANEL HEADER
+// =============================================================================
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid $border-color;
+  flex-shrink: 0;
+
+  h3 {
+    color: $text-primary;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ecf0f1;
+    color: $text-primary;
+    padding: 6px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      background-color: #d5dbdb;
+    }
+  }
+}
+
+// =============================================================================
+// PDF VIEWER
+// =============================================================================
+
+.pdf-viewer-container {
+  flex: 1;
+  overflow: hidden;
+  padding: 16px;
+  background: #fdfdfd;
+}
+
+// =============================================================================
+// DISCUSSION PANEL
+// =============================================================================
+
+.points-info {
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  color: $text-secondary;
+
+  .point-counter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &.plus {
+      color: $success-color;
+    }
+
+    &.minus {
+      color: $error-color;
+    }
+  }
+}
+
+.discussion-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #bdc3c7;
+    border-radius: 3px;
+
+    &:hover {
+      background: #95a5a6;
+    }
+  }
+}
+
+// Discussion phase specific styling (like HTML template)
+.discussion-phase-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  
+  // Discussion messages area should grow to fill available space
+  .discussion-messages-area {
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+}
+
+// =============================================================================
+// ACTION AREA STYLING (MATCHING HTML TEMPLATE)
+// =============================================================================
+
+// Action Area at the bottom of discussion panel (HTML Template Style)
+.action-area {
+  padding-top: 16px;
+  border-top: 2px solid #ecf0f1;
+  flex-shrink: 0;
+}
+
+// Message Input (HTML Template Style)
+.message-input { 
+  display: flex; 
+  gap: 12px;
+  
+  .message-input-field {
+    flex: 1;
+    border: 1px solid #bdc3c7;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: none;
+    height: 42px;
+    box-sizing: border-box;
+    outline: none;
+    transition: all 0.3s ease;
+    
+    &:focus { 
+      border-color: #3498db; 
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); 
+    }
+    
+    &:disabled {
+      background-color: #f5f5f5;
+      color: #ccc;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.send-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s ease;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  
+  &:hover:not(:disabled) { 
+    background: #2980b9; 
+  }
+  
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+}
+
+// =============================================================================
+// EVALUATION PHASE
+// =============================================================================
+
+.evaluation-phase-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .discussion-messages {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 16px;
+  }
+
+  .action-area {
+    padding: 16px 0 0;
+    border-top: 2px solid #ecf0f1;
+    flex-shrink: 0;
+
+    .rating-section {
+      h4 {
+        font-size: 14px;
+        color: $text-primary;
+        font-weight: 600;
+        margin: 0 0 16px 0;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// DEVELOPMENT PHASE TOGGLE
+// =============================================================================
+
+.dev-phase-toggle {
+  position: fixed !important;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+// =============================================================================
+// LOADING & ERROR STATES
+// =============================================================================
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+
+  p {
+    margin-top: 16px;
+    color: $text-secondary;
+    font-weight: 500;
+  }
+}
+
+.error-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: $card-shadow;
+  margin: 40px auto;
+  max-width: 500px;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 24px;
+  }
+
+  h2 {
+    margin: 0 0 16px 0;
+    color: $text-primary;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0 0 24px 0;
+    color: $text-secondary;
+    line-height: 1.5;
+  }
+}
+
+.error-state mat-icon {
+  color: $error-color;
+}
+
+.empty-state mat-icon {
+  color: #bbb;
+}
+
+// =============================================================================
+// RESPONSIVE DESIGN
+// =============================================================================
+
+@media (max-width: 1024px) {
+  .main-content-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+
+    .pdf-column,
+    .discussion-column {
+      min-height: 0;
+    }
+  }
+
+  .evaluation-forum-container {
+    padding: min(15px, 1.5vw);
+  }
+}
+
+@media (max-width: 768px) {
+  .evaluation-forum-container {
+    padding: 10px;
+  }
+
+  .forum-header {
+    padding: 16px;
+
+    h1 {
+      font-size: 20px;
+    }
+
+    .header-info {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  }
+
+  .main-content-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+
+    .panel {
+      border-radius: 8px;
+    }
+  }
+
+  .panel-header {
+    padding: 12px 16px;
+
+    h3 {
+      font-size: 16px;
+    }
+  }
+
+  .discussion-content {
+    padding: 12px;
+  }
+}
+
+// =============================================================================
+// ACCESSIBILITY
+// =============================================================================
+
+// Focus indicators
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid $primary-color;
+  outline-offset: 2px;
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .panel {
+    border: 2px solid $text-primary;
+  }
+
+  .phase-badge {
+    border: 1px solid white;
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// =============================================================================
+// PRINT STYLES
+// =============================================================================
+
+@media print {
+  .dev-phase-toggle,
+  .download-btn,
+  .loading-overlay {
+    display: none !important;
+  }
+
+  .main-content-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .panel {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+}
+
+// =============================================================================
+// SNACKBAR STYLES
+// =============================================================================
+
+::ng-deep .error-snackbar {
+  background-color: $error-color !important;
+  color: white !important;
+  
+  .mat-mdc-snack-bar-action {
+    color: #ffeb3b !important;
+    font-weight: bold !important;
+    
+    &:hover {
+      background-color: rgba(255, 235, 59, 0.1) !important;
+    }
+  }
+  
+  .mdc-snackbar__surface {
+    border-left: 4px solid #c62828;
+  }
+}
+
+::ng-deep .success-snackbar {
+  background-color: $success-color !important;
+  color: white !important;
+  
+  .mat-mdc-snack-bar-action {
+    color: #e8f5e8 !important;
+    font-weight: bold !important;
+    
+    &:hover {
+      background-color: rgba(232, 245, 232, 0.1) !important;
+    }
+  }
+  
+  .mdc-snackbar__surface {
+    border-left: 4px solid #1b5e20;
+  }
+}

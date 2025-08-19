@@ -2,52 +2,91 @@
   <div class="section-1">
     <div *ngIf="elementData.type === editorElementEnum.CD_CLASS">
       <div class="small-text">
-        <span [ngStyle]="{'background-color': elementData.highlighted?.updated?.type ? 'hsl(60, 100%, 90%)' : 'none'}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <span
+          [ngStyle]="{
+            'background-color': elementData.highlighted?.updated?.type
+              ? 'hsl(60, 100%, 90%)'
+              : 'none',
+          }"
+          >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span
+        >
       </div>
     </div>
     <div *ngIf="elementData.type === editorElementEnum.CD_ABSTRACT_CLASS">
       <div class="small-text">
-        <span [ngStyle]="{'background-color': updatedType ? 'hsl(60, 100%, 90%)' : 'none'}">&lt;&lt;Abstract&gt;&gt;</span>
+        <span [ngStyle]="{ 'background-color': updatedType ? 'hsl(60, 100%, 90%)' : 'none' }"
+          >&lt;&lt;Abstract&gt;&gt;</span
+        >
       </div>
     </div>
     <div *ngIf="elementData.type === editorElementEnum.CD_INTERFACE">
       <div class="small-text">
-        <span [ngStyle]="{'background-color': updatedType ? 'hsl(60, 100%, 90%)' : 'none'}">&lt;&lt;Interface&gt;&gt;</span>
+        <span [ngStyle]="{ 'background-color': updatedType ? 'hsl(60, 100%, 90%)' : 'none' }"
+          >&lt;&lt;Interface&gt;&gt;</span
+        >
       </div>
     </div>
-    <b [ngStyle]="{'background-color': updatedTitle ? 'yellow' : 'none'}">{{elementData.title}}</b>
+    <b [ngStyle]="{ 'background-color': updatedTitle ? 'yellow' : 'none' }">{{
+      elementData.title
+    }}</b>
   </div>
-  <hr [hidden]="elementData.type === editorElementEnum.CD_INTERFACE">
+  <hr [hidden]="elementData.type === editorElementEnum.CD_INTERFACE" />
   <div *ngIf="elementData.type !== editorElementEnum.CD_INTERFACE" class="section-2">
     <!-- attributes -->
     <div *ngFor="let attribute of elementData.attributes; let i = index">
-      <span [ngStyle]="{'background-color': (updatedAttributes[i]?.dataType || addedAttributes[i]) ? 'yellow' : 'none'}">
-          {{attribute.visibility}}
+      <span
+        [ngStyle]="{
+          'background-color':
+            updatedAttributes[i]?.dataType || addedAttributes[i] ? 'yellow' : 'none',
+        }"
+      >
+        {{ attribute.visibility }}
       </span>
-      <span [ngStyle]="{'background-color': (updatedAttributes[i]?.name || addedAttributes[i]) ? 'yellow' : 'none'}">
-          {{attribute.name}}:
+      <span
+        [ngStyle]="{
+          'background-color': updatedAttributes[i]?.name || addedAttributes[i] ? 'yellow' : 'none',
+        }"
+      >
+        {{ attribute.name }}:
       </span>
-      <span [ngStyle]="{'background-color': (updatedAttributes[i]?.dataType || addedAttributes[i]) ? 'yellow' : 'none'}">
-          {{attribute.dataType}}
+      <span
+        [ngStyle]="{
+          'background-color':
+            updatedAttributes[i]?.dataType || addedAttributes[i] ? 'yellow' : 'none',
+        }"
+      >
+        {{ attribute.dataType }}
       </span>
     </div>
     <!-- deletedAttributes -->
     <div class="del-error" *ngFor="let attribute of deletedAttributes">
-        {{ attribute.visibility }} {{ attribute.name }}: {{ attribute.dataType }}
+      {{ attribute.visibility }} {{ attribute.name }}: {{ attribute.dataType }}
     </div>
   </div>
-  <hr>
+  <hr />
   <div class="section-3">
     <!-- methods -->
     <div *ngFor="let method of elementData.methods; let i = index">
-      <span [ngStyle]="{'background-color': (updatedMethods[i]?.dataType || addedMethods[i]) ? 'yellow' : 'none'}">
-        {{method.visibility}}
+      <span
+        [ngStyle]="{
+          'background-color': updatedMethods[i]?.dataType || addedMethods[i] ? 'yellow' : 'none',
+        }"
+      >
+        {{ method.visibility }}
       </span>
-      <span [ngStyle]="{'background-color': (updatedMethods[i]?.name || addedMethods[i]) ? 'yellow' : 'none'}">
-        {{method.name}}:
+      <span
+        [ngStyle]="{
+          'background-color': updatedMethods[i]?.name || addedMethods[i] ? 'yellow' : 'none',
+        }"
+      >
+        {{ method.name }}:
       </span>
-      <span [ngStyle]="{'background-color': (updatedMethods[i]?.dataType || addedMethods[i]) ? 'yellow' : 'none'}">
-        {{method.dataType}}
+      <span
+        [ngStyle]="{
+          'background-color': updatedMethods[i]?.dataType || addedMethods[i] ? 'yellow' : 'none',
+        }"
+      >
+        {{ method.dataType }}
       </span>
     </div>
     <!-- deletedMethoden -->

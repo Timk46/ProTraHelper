@@ -1,9 +1,10 @@
-import { Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren, OnDestroy } from '@angular/core';
+import { Component, ViewChild, ViewChildren, ElementRef, OnInit, QueryList, OnDestroy } from '@angular/core';
 import { NotificationService } from 'src/app/Services/notification/notification.service';
 import { NotificationDTO } from '@DTOs/notification.dto';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { NotificationType } from '@DTOs/notificationType.enum';
-import { Observable, Subject, merge } from 'rxjs';
+import { Observable } from 'rxjs';
+import { Subject, merge } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
 /**
@@ -14,7 +15,7 @@ import { map, takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'app-notification-bell',
   templateUrl: './notification-bell.component.html',
-  styleUrls: ['./notification-bell.component.scss']
+  styleUrls: ['./notification-bell.component.scss'],
 })
 export class NotificationBellComponent implements OnInit, OnDestroy {
   /** Stores all notifications */
@@ -36,13 +37,16 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   private offset = 0;
 
   /** Subject used for unsubscribing from observables */
-  private unsubscribe$ = new Subject<void>();
+  private readonly unsubscribe$ = new Subject<void>();
 
   /** Titles for different types of notifications */
   private readonly notificationTitles: Record<NotificationType, string> = {
     [NotificationType.COMMENT]: 'Kommentar',
     [NotificationType.SOLUTION]: 'Lösung',
-    [NotificationType.INFO]: 'Information'
+    [NotificationType.INFO]: 'Information',
+    [NotificationType.EVALUATION_COMMENT]: 'Bewertungskommentar',
+    [NotificationType.EVALUATION_RATING]: 'Bewertung',
+    [NotificationType.PHASE_SWITCH]: 'Phasenwechsel',
   } as const;
 
   /** Formatter for displaying timestamps with date and time */
@@ -51,14 +55,14 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   });
 
   /** Formatter for displaying timestamps with date only */
   private readonly dateOnlyFormatter = new Intl.DateTimeFormat('de-DE', {
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit'
+    day: '2-digit',
   });
 
   /** Reference to all MatExpansionPanel elements in the template */
@@ -71,7 +75,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
    * Creates an instance of NotificationBellComponent.
    * @param {NotificationService} notificationService Service for handling notification-related operations
    */
-  constructor(private notificationService: NotificationService) {
+  constructor(private readonly notificationService: NotificationService) {
     this.unreadCount$ = this.notificationService.getUnreadCount();
   }
 
@@ -97,24 +101,32 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
    * Initializes notifications by fetching initial data and setting up streams.
    */
   private initializeNotifications(): void {
-    const initialNotifications$ = this.notificationService.fetchMoreNotifications(this.INITIAL_LIMIT, 0);
+    const initialNotifications$ = this.notificationService.fetchMoreNotifications(
+      this.INITIAL_LIMIT,
+      0,
+    );
     const updatedNotifications$ = this.notificationService.getNotifications();
 
     merge(initialNotifications$, updatedNotifications$)
       .pipe(
         takeUntil(this.unsubscribe$),
-        map(notifications => notifications.map(notification => ({
-          ...notification,
-          formattedTimestamp: this.safeFormatTimeStamp(notification.timestamp, true),
-          formattedTimestampTitle: this.safeFormatTimeStampTitle(notification.timestamp),
-          title: this.getNotificationTitle(notification.type || NotificationType.INFO)
-        })))
+        map(notifications =>
+          notifications.map(notification => ({
+            ...notification,
+            formattedTimestamp: this.safeFormatTimeStamp(notification.timestamp, true),
+            formattedTimestampTitle: this.safeFormatTimeStampTitle(notification.timestamp),
+            title: this.getNotificationTitle(notification.type || NotificationType.INFO),
+          })),
+        ),
       )
       .subscribe(notifications => {
         this.allNotifications = notifications;
       });
 
-    this.notificationService.getUnreadCountFromServer().pipe(takeUntil(this.unsubscribe$)).subscribe();
+    this.notificationService
+      .getUnreadCountFromServer()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe();
   }
 
   /**
@@ -152,7 +164,8 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
    */
   loadMoreNotifications(): void {
     this.offset += this.LOAD_MORE_LIMIT;
-    this.notificationService.fetchMoreNotifications(this.LOAD_MORE_LIMIT, this.offset)
+    this.notificationService
+      .fetchMoreNotifications(this.LOAD_MORE_LIMIT, this.offset)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(newNotifications => {
         // Append new notifications to the existing list
@@ -179,7 +192,8 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
    * @param {string} action The action to perform ('view' or 'mark as read')
    */
   onClick(notification: NotificationDTO, panel: MatExpansionPanel, action: string): void {
-    this.notificationService.handleNotificationClick(notification, action)
+    this.notificationService
+      .handleNotificationClick(notification, action)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(() => panel.close());
   }

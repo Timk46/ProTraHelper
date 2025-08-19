@@ -4,7 +4,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
 enum DisplayType {
   Fixed = 'fixed-chat',
   Collapsible = 'collapsible-chat',
-  Embedded = 'embedded-chat'
+  Embedded = 'embedded-chat',
 }
 
 @Component({
@@ -23,14 +23,14 @@ enum DisplayType {
     trigger('fadeAnimation', [
       transition(':enter', [
         style({ opacity: 0 }),
-        animate('150ms ease-in-out', style({ opacity: 1 }))
+        animate('150ms ease-in-out', style({ opacity: 1 })),
       ]),
       transition(':leave', [
         style({ opacity: 1 }),
-        animate('150ms ease-in-out', style({ opacity: 0 }))
-      ])
+        animate('150ms ease-in-out', style({ opacity: 0 })),
+      ]),
     ]),
-  ]
+  ],
 })
 export class ChatBotComponent {
   @Output() close = new EventEmitter<void>();

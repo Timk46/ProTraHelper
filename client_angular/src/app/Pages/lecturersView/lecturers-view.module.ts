@@ -26,8 +26,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { EditUmlComponent } from './edit-uml/edit-uml.component';
 import { UmlearnModule } from 'src/app/Modules/umlearn/umlearn.module';
 import { EditCodeGameComponent } from './edit-code-game/edit-code-game.component';
-import { CodeGameAddElementModalComponent } from "./edit-code-game/code-game-add-element-modal.component";
-import { CodeGameModule } from "../../Modules/code-game/code-game.module";
+import { CodeGameAddElementModalComponent } from './edit-code-game/code-game-add-element-modal.component';
+import { CodeGameModule } from '../../Modules/code-game/code-game.module';
 import { CodeGamePlayfieldEditorComponent } from './edit-code-game/code-game-playfield-editor/code-game-playfield-editor.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -111,4 +111,4 @@ import { EditGroupReviewGateComponent } from './edit-group-review-gate/edit-grou
     SubjectManagementService,
   ]
 })
-export class LecturersViewModule { }
+export class LecturersViewModule {}

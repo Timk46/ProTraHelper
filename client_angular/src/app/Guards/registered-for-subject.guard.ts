@@ -4,16 +4,20 @@ import { Observable } from 'rxjs';
 import { UserService } from '../Services/auth/user.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-export class RegisteredForSubjectGuard  {
-  constructor(private userService: UserService, private router: Router) {}
+export class RegisteredForSubjectGuard {
+  constructor(
+    private readonly userService: UserService,
+    private readonly router: Router,
+  ) {}
 
   canActivate(
     route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-
-    if (this.userService.isRegisteredForSubject('Tragkonstruktion 3')) { // ToDo Make dynamic
+    state: RouterStateSnapshot,
+  ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+    if (this.userService.isRegisteredForSubject('Tragkonstruktion 3')) {
+      // ToDo Make dynamic
       return true;
     } else {
       return this.router.createUrlTree(['/not-registered']);

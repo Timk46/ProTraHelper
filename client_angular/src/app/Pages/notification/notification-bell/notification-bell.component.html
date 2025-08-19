@@ -1,5 +1,10 @@
 <div class="notification-bell" #notificationBell>
-  <button mat-icon-button class="notification-button" (click)="toggleNotifications()" aria-label="Notifications">
+  <button
+    mat-icon-button
+    class="notification-button"
+    (click)="toggleNotifications()"
+    aria-label="Notifications"
+  >
     <div class="bell-container">
       <mat-icon>notifications</mat-icon>
       <ng-container *ngIf="unreadCount$ | async as count">
@@ -9,14 +14,14 @@
       </ng-container>
     </div>
   </button>
-  <div class="notifications-panel"
-      *ngIf="showNotifications"
-      (scroll)="onScroll($event)">
+  <div class="notifications-panel" *ngIf="showNotifications" (scroll)="onScroll($event)">
     <mat-accordion>
-      <mat-expansion-panel *ngFor="let notification of allNotifications"
-                            #panel
-                            appNotificationStyle
-                            [notification]="notification">
+      <mat-expansion-panel
+        *ngFor="let notification of allNotifications"
+        #panel
+        appNotificationStyle
+        [notification]="notification"
+      >
         <mat-expansion-panel-header>
           <mat-panel-title>
             <span class="notification-date">{{ notification.formattedTimestampTitle }}</span>
@@ -30,8 +35,17 @@
         <mat-divider class="divider"></mat-divider>
         <p>{{ notification.formattedTimestamp }}</p>
         <div class="buttons">
-          <button mat-raised-button color="primary" (click)="onClick(notification, panel, 'view')">Anzeigen</button>
-          <button mat-raised-button color="accent" (click)="onClick(notification, panel, 'read')" [disabled]="notification.isRead">als gelesen markieren</button>
+          <button mat-raised-button color="primary" (click)="onClick(notification, panel, 'view')">
+            Anzeigen
+          </button>
+          <button
+            mat-raised-button
+            color="accent"
+            (click)="onClick(notification, panel, 'read')"
+            [disabled]="notification.isRead"
+          >
+            als gelesen markieren
+          </button>
         </div>
       </mat-expansion-panel>
     </mat-accordion>

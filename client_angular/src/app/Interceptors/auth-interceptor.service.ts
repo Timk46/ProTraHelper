@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
-import { Observable, switchMap, throwError } from 'rxjs';
+import {
+  HttpInterceptor,
+  HttpRequest,
+  HttpHandler,
+  HttpEvent,
+  HttpErrorResponse,
+} from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { switchMap, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -12,13 +19,11 @@ import { UserService } from '../Services/auth/user.service';
  */
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-
   constructor(
-    private router: Router,
-    private snackBar: MatSnackBar,
-    private userService: UserService
+    private readonly router: Router,
+    private readonly snackBar: MatSnackBar,
+    private readonly userService: UserService,
   ) {}
-
 
   /**
    * Intercepts HTTP requests to add authentication headers and handle errors.
@@ -27,14 +32,13 @@ export class AuthInterceptor implements HttpInterceptor {
    * @param next - The next interceptor in the chain.
    * @returns An observable of the HTTP event.
    */
-  intercept(
-    request: HttpRequest<any>,
-    next: HttpHandler
-  ): Observable<HttpEvent<any>> {
+  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // Exclude Helper-App requests from all authentication processing
-    if (request.url.includes('localhost:3001') ||
-        request.url.includes('127.0.0.1:3001') ||
-        request.headers.has('Skip-Auth-Interceptor')) {
+    if (
+      request.url.includes('localhost:3001') ||
+      request.url.includes('127.0.0.1:3001') ||
+      request.headers.has('Skip-Auth-Interceptor')
+    ) {
       console.log('AuthInterceptor: Skipping Helper-App request:', request.url);
       return next.handle(request);
     }
@@ -95,10 +99,9 @@ export class AuthInterceptor implements HttpInterceptor {
                 setHeaders: {
                   Authorization: `Bearer ${this.userService.getAccessToken()}`,
                   'Device-ID': deviceId,
-                }
+                },
               });
               return next.handle(request);
-
             }),
             catchError((error: any) => {
               // Refresh token is invalid or expired
@@ -107,15 +110,14 @@ export class AuthInterceptor implements HttpInterceptor {
 
               this.router.navigate(['/login']);
               return throwError(() => new Error('Unauthorized'));
-            })
+            }),
           );
-
         } else {
           return throwError(() => err);
         }
 
         return throwError(err);
-      })
+      }),
     );
   }
 
@@ -130,19 +132,14 @@ export class AuthInterceptor implements HttpInterceptor {
     } else if (error.status === 429) {
       this.openSnackBar(
         'Too many requests in a short time. Please try again in a minute.',
-        'Warning'
+        'Warning',
       );
-    }
-    else if (error.status === 403) {
-      this.openSnackBar(
-        'Authorization failed.',
-        'Warning'
-      );
-    }
-    else {
+    } else if (error.status === 403) {
+      this.openSnackBar('Authorization failed.', 'Warning');
+    } else {
       this.openSnackBar(
         `An error occurred. Please check the console.\n${error.statusText}`,
-        'Warning'
+        'Warning',
       );
     }
   }

@@ -7,8 +7,7 @@ import { buildKhAgentChain } from './kh.agent'; // Import the chain builder
 @Injectable()
 export class KhAgentProvider {
   constructor(
-    @Inject(CHAT_OPENAI_MODEL) private readonly model: ChatOpenAI,
-    // No tool services needed for KH agent
+    @Inject(CHAT_OPENAI_MODEL) private readonly model: ChatOpenAI, // No tool services needed for KH agent
   ) {}
 
   /**

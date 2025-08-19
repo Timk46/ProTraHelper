@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { PrismaClient, contentElementType } from '@prisma/client';
 import * as fs from 'fs';
 import { seedCodeQuestions } from './seedCodeQuestions';

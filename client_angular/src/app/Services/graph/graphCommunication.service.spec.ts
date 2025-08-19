@@ -6,7 +6,7 @@ import { GraphCommunicationService } from './graphCommunication.service';
 describe('Service: ChangeActiveNode', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [GraphCommunicationService]
+      providers: [GraphCommunicationService],
     });
   });
 

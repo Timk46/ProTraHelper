@@ -6,8 +6,8 @@ import { ConfigModule } from '@nestjs/config'; // Import ConfigModule if you pla
 @Module({
   imports: [
     ConfigModule, // Add ConfigModule here if GhFilesService uses ConfigService
-                  // If ConfigService is globally available, this might not be strictly necessary here
-                  // but it's good practice to import dependencies explicitly.
+    // If ConfigService is globally available, this might not be strictly necessary here
+    // but it's good practice to import dependencies explicitly.
   ],
   controllers: [GhFilesController],
   providers: [GhFilesService],

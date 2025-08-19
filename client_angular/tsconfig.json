@@ -27,9 +27,10 @@
     ],
     "paths": {
       // "@Interfaces/*" alias removed as per user request
-      "@DTOs/*": ["../shared/dtos/*"],
+      "@DTOs/index": ["../shared/dtos/index.ts"],
       "@UMLearnServices/*": ["./src/app/Modules/umlearn/services/*"]
     },
+    "types": ["node"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

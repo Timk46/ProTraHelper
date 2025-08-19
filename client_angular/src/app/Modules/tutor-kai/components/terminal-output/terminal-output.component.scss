@@ -32,7 +32,8 @@
       display: flex;
       gap: 4px;
 
-      .font-size-button, .copy-button {
+      .font-size-button,
+      .copy-button {
         color: $nord-light-text-tertiary;
 
         &:hover {
@@ -89,7 +90,10 @@
       }
 
       // Stellen Sie sicher, dass auch die direkt eingefügten Inhalte die Schriftgröße erben
-      span, .error, .warning, .success {
+      span,
+      .error,
+      .warning,
+      .success {
         font-size: inherit;
       }
 

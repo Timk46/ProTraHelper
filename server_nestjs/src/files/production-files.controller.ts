@@ -1,15 +1,15 @@
+import { StreamableFile } from '@nestjs/common';
 import {
   Controller,
   Get,
   Param,
   Post,
   Res,
-  StreamableFile,
   UploadedFile,
   UseInterceptors,
   Body,
   Req,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductionFilesService } from './production-files.service';
@@ -37,20 +37,13 @@ export class ProductionFilesController {
   @roles('ANY')
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadProductionFile(
-    @UploadedFile() file: Express.Multer.File,
-    @Req() req: any,
-  ) {
+  async uploadProductionFile(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
     const { buffer, mimetype } = file;
     const fileName = file.originalname;
     const fileType = mimetype.split('/')[1];
     const userId = req.user.id;
 
-    return await this.productionFilesService.uploadProductionFile(
-      buffer,
-      fileName,
-      fileType,
-    );
+    return await this.productionFilesService.uploadProductionFile(buffer, fileName, fileType);
   }
 
   /**

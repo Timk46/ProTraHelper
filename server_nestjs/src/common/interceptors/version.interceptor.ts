@@ -1,5 +1,6 @@
 // src/common/interceptors/version.interceptor.ts
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { version } from '@DTOs/version';
 import { map } from 'rxjs/operators';
@@ -15,7 +16,7 @@ export class VersionInterceptor implements NestInterceptor {
           response.set('X-App-Version', version);
         }
         return data;
-      })
+      }),
     );
   }
 }

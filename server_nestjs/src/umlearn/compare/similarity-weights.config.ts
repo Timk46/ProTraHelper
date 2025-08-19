@@ -13,7 +13,7 @@ export const nodeWeights = {
     name: 0.6,
     dataType: 0.25,
     visibility: 0.15,
-  }
+  },
 };
 
 export const edgeWeights = {
@@ -24,5 +24,4 @@ export const edgeWeights = {
   cardinalityStart: 0.1,
   description: 0.3,
   cardinalityEnd: 0.1,
-}
-
+};

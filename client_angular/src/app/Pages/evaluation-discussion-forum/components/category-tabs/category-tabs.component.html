@@ -1,0 +1,19 @@
+<!-- Category Tabs Container -->
+<div class="category-tabs-container">
+  <!-- Tab buttons matching the design -->
+  <div class="criteria-tabs">
+    <button 
+      *ngFor="let category of categories; trackBy: trackByCategory"
+      class="criteria-tab"
+      [class.active]="isActiveCategory(category.id)"
+      (click)="onTabChanged(category.id)">
+      {{ category.displayName }}
+    </button>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-state" *ngIf="categories.length === 0">
+  <mat-spinner diameter="20"></mat-spinner>
+  <span>Lade Kategorien...</span>
+</div>

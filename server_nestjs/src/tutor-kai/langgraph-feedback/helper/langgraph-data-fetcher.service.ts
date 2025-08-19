@@ -4,12 +4,11 @@ import { CryptoService } from './crypto.service'; // Adjust path if necessary
 import { CodeSubmissionResult } from '@DTOs/tutorKaiDtos/submission.dto'; // Adjust path if necessary
 import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
 
-
 @Injectable()
 export class LanggraphDataFetcherService {
   constructor(
-    private prisma: PrismaService,
-    private cryptoService: CryptoService,
+    private readonly prisma: PrismaService,
+    private readonly cryptoService: CryptoService,
   ) {}
 
   async fetchFeedbackContextDto(
@@ -51,7 +50,9 @@ export class LanggraphDataFetcherService {
 
     // Check if question and the nested codingQuestion exist
     if (!question || !question.codingQuestion) {
-      throw new NotFoundException(`Question or associated CodingQuestion with ID ${questionId} not found.`);
+      throw new NotFoundException(
+        `Question or associated CodingQuestion with ID ${questionId} not found.`,
+      );
     }
 
     // Calculate attempt count

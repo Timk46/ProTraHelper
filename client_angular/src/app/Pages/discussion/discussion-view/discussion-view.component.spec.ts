@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { DiscussionViewComponent } from './discussion-view.component';
 
@@ -8,9 +9,8 @@ describe('DiscussionViewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DiscussionViewComponent ]
-    })
-    .compileComponents();
+      declarations: [DiscussionViewComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DiscussionViewComponent);
     component = fixture.componentInstance;

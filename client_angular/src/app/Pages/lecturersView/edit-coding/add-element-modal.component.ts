@@ -10,7 +10,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
       <form [formGroup]="form">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>File Name</mat-label>
-          <input matInput formControlName="fileName" required>
+          <input matInput formControlName="fileName" required />
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Code</mat-label>
@@ -20,26 +20,30 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button (click)="onCancel()">Cancel</button>
-      <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="onSubmit()">Add</button>
+      <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="onSubmit()">
+        Add
+      </button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .full-width {
-      width: 100%;
-    }
-  `]
+  styles: [
+    `
+      .full-width {
+        width: 100%;
+      }
+    `,
+  ],
 })
 export class AddElementModalComponent {
   form: FormGroup;
 
   constructor(
-    private fb: FormBuilder,
+    private readonly fb: FormBuilder,
     public dialogRef: MatDialogRef<AddElementModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { type: string }
+    @Inject(MAT_DIALOG_DATA) public data: { type: string },
   ) {
     this.form = this.fb.group({
       fileName: ['', Validators.required],
-      code: ['', Validators.required]
+      code: ['', Validators.required],
     });
   }
 

@@ -5,16 +5,22 @@
   [matRippleDisabled]="!rippleEnabled"
   [ngClass]="{
     'item-completed': contentElementData.question?.progress === 100,
-    'edit-mode': isAdmin && editModeActive
-    }"
-  >
-
+    'edit-mode': isAdmin && editModeActive,
+  }"
+>
   <mat-card-header>
-    <div mat-card-avatar class="list-item-avatar" matTooltip="CEID: {{contentElementData.id}}" [matTooltipShowDelay]="5000">
+    <div
+      mat-card-avatar
+      class="list-item-avatar"
+      matTooltip="CEID: {{ contentElementData.id }}"
+      [matTooltipShowDelay]="5000"
+    >
       <mat-icon [fontIcon]="getQuestionTypeIcon(contentElementData.question?.type)"></mat-icon>
     </div>
-    <mat-card-title class="list-item-title">{{contentElementData.question?.name}}</mat-card-title>
-    <mat-card-subtitle>{{ getQuestionTypeReadable(contentElementData.question?.type)}}</mat-card-subtitle>
+    <mat-card-title class="list-item-title">{{ contentElementData.question?.name }}</mat-card-title>
+    <mat-card-subtitle>{{
+      getQuestionTypeReadable(contentElementData.question?.type)
+    }}</mat-card-subtitle>
   </mat-card-header>
 
   <!-- Space for a more specific task description -->
@@ -25,7 +31,9 @@
   <!-- level stars -->
   <div class="list-item-stars">
     <div class="stars">
-      <mat-icon *ngFor="let star of getLevels(contentElementData.question?.level || 0)">{{(contentElementData.question?.progress || 0) < 100 ? 'star_border' : 'star'}}</mat-icon>
+      <mat-icon *ngFor="let star of getLevels(contentElementData.question?.level || 0)">{{
+        (contentElementData.question?.progress || 0) < 100 ? 'star_border' : 'star'
+      }}</mat-icon>
     </div>
   </div>
 
@@ -64,9 +72,8 @@
       *ngIf="contentElementData.question && contentElementData.question.progress > 0"
       class="list-item-progress-bar"
       mode="determinate"
-      [ngClass]="{'completed': contentElementData.question.progress === 100}"
+      [ngClass]="{ completed: contentElementData.question.progress === 100 }"
       [value]="contentElementData.question.progress"
     ></mat-progress-bar>
   </mat-card-footer>
-
 </mat-card>

@@ -1,37 +1,40 @@
 /* eslint-disable prettier/prettier */
 import { PrismaService } from '@/prisma/prisma.service';
-import { discussionDTO, discussionMessageDTO, nodeNameDTO, NotificationType } from '@DTOs/index';
+import { discussionDTO, discussionMessageDTO, nodeNameDTO} from '@DTOs/index';
+import { NotificationType } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { DiscussionDataService } from '../discussion-data/discussion-data.service';
 import { NotificationService } from '@/notification/notification.service';
 
 @Injectable()
 export class DiscussionViewService {
-
-  constructor(private prisma: PrismaService, private discussionDataService: DiscussionDataService, private notificationService: NotificationService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly discussionDataService: DiscussionDataService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   /** This function returns the name of the concept node for a given concept node id
    *
    * @param conceptNodeId
    * @returns the stringyfied JSON name of the concept node
    */
-  async getConceptNodeName(discussionId: number) : Promise<nodeNameDTO> {
+  async getConceptNodeName(discussionId: number): Promise<nodeNameDTO> {
     const conceptNodeData = await this.prisma.discussion.findUnique({
       where: { id: Number(discussionId) },
       include: {
         conceptNode: {
-          select: { name: true }
-        }
-      }
+          select: { name: true },
+        },
+      },
     });
 
     if (!conceptNodeData) {
       throw new Error('Concept node name not found');
     }
 
-
     const conceptNodeName = {
-      name: conceptNodeData ? conceptNodeData.conceptNode.name : ""
+      name: conceptNodeData ? conceptNodeData.conceptNode.name : '',
     };
 
     return conceptNodeName;
@@ -43,24 +46,23 @@ export class DiscussionViewService {
    * @param discussionId
    * @returns the discussion
    */
-  async getDiscussion(discussionId: number) : Promise<discussionDTO> {
+  async getDiscussion(discussionId: number): Promise<discussionDTO> {
     const discussion = await this.prisma.discussion.findFirst({
       where: {
-         id: discussionId,
+        id: discussionId,
       },
       select: {
         id: true,
         title: true,
         author: {
           select: {
-            anonymousName: true
-          }
+            anonymousName: true,
+          },
         },
         contentNodeId: true,
         createdAt: true,
-        isSolved: true
+        isSolved: true,
       },
-
     });
     if (!discussion) {
       throw new Error('Discussion not found');
@@ -69,11 +71,11 @@ export class DiscussionViewService {
     const initMessageId = await this.prisma.message.findFirst({
       where: {
         discussionId: discussionId,
-        isInitiator: true
+        isInitiator: true,
       },
       select: {
-        id: true
-      }
+        id: true,
+      },
     });
     if (!initMessageId) {
       throw new Error('Init message not found');
@@ -85,7 +87,10 @@ export class DiscussionViewService {
       title: discussion.title,
       authorName: discussion.author.anonymousName,
       createdAt: discussion.createdAt,
-      contentNodeName: discussion.contentNodeId == null ? 'allgemein' : (await this.discussionDataService.getContentNodeName(discussion.contentNodeId)).name,
+      contentNodeName:
+        discussion.contentNodeId == null
+          ? 'allgemein'
+          : (await this.discussionDataService.getContentNodeName(discussion.contentNodeId)).name,
       commentCount: await this.getDiscussionCommentCount(discussionId),
       isSolved: discussion.isSolved,
     };
@@ -98,14 +103,14 @@ export class DiscussionViewService {
    * @param discussionId
    * @returns the number of comments
    */
-  async getDiscussionCommentCount(discussionId: number) : Promise<number> {
+  async getDiscussionCommentCount(discussionId: number): Promise<number> {
     const commentCount = await this.prisma.message.count({
       where: {
         discussionId: discussionId,
         AND: {
           isInitiator: false,
-        }
-      }
+        },
+      },
     });
 
     return commentCount;
@@ -118,41 +123,39 @@ export class DiscussionViewService {
    * @param discussionId
    * @returns the messages
    */
-  async getDiscussionMessages(discussionId: number) : Promise<discussionMessageDTO[]> {
+  async getDiscussionMessages(discussionId: number): Promise<discussionMessageDTO[]> {
     const messages = await this.prisma.message.findMany({
       where: {
-        discussionId: Number(discussionId)
+        discussionId: Number(discussionId),
       },
       select: {
         id: true,
         author: {
           select: {
             id: true,
-            anonymousName: true
-          }
+            anonymousName: true,
+          },
         },
         createdAt: true,
         text: true,
         isSolution: true,
-        isInitiator: true
-      }
-
+        isInitiator: true,
+      },
     });
 
     if (!messages) {
       throw new Error('Messages not found');
     }
 
-
-
-
-    let messageData: discussionMessageDTO[] = [];
-    for (let message of messages) {
-      const totalVotes = (await this.prisma.vote.findMany({
-        where: {
-          messageId: message.id,
-        }
-      })).reduce((sum, vote) => sum + (vote.isUpvote ? 1 : -1), 0);
+    const messageData: discussionMessageDTO[] = [];
+    for (const message of messages) {
+      const totalVotes = (
+        await this.prisma.vote.findMany({
+          where: {
+            messageId: message.id,
+          },
+        })
+      ).reduce((sum, vote) => sum + (vote.isUpvote ? 1 : -1), 0);
       console.log(totalVotes);
 
       messageData.push({
@@ -164,7 +167,7 @@ export class DiscussionViewService {
         messageText: message.text,
         isSolution: message.isSolution,
         isInitiator: message.isInitiator,
-        voteCount: totalVotes || 0
+        voteCount: totalVotes || 0,
       });
     }
     return messageData;
@@ -175,7 +178,7 @@ export class DiscussionViewService {
    * @param messageId
    * @returns the new solution status as boolean
    */
-  async toggleSolution(messageId: number, userId: number) : Promise<boolean> {
+  async toggleSolution(messageId: number, userId: number): Promise<boolean> {
     //get message solution status
     const message = await this.prisma.message.findUnique({
       where: {
@@ -187,8 +190,8 @@ export class DiscussionViewService {
         author: {
           select: {
             userId: true, // need that for notiying the author of the message
-            anonymousName: true
-          }
+            anonymousName: true,
+          },
         },
         discussion: {
           select: {
@@ -196,12 +199,12 @@ export class DiscussionViewService {
             author: {
               select: {
                 userId: true,
-                anonymousName: true
-              }
-            }
-          }
-        }
-      }
+                anonymousName: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!message) {
@@ -214,50 +217,48 @@ export class DiscussionViewService {
     }
     const newSolutionStatus = !message.isSolution;
     //set all messages in discussion to not solution except toggle message and init message
-    await this.prisma.$transaction([ // $transaction to ensure atomicity of the operations (less roundtrips and less error-prone)
+    await this.prisma.$transaction([
+      // $transaction to ensure atomicity of the operations (less roundtrips and less error-prone)
       // Set all messages in discussion to not solution except toggle message and init message
       this.prisma.message.updateMany({
         where: {
           discussionId: message.discussion.id,
           NOT: {
             id: messageId,
-            isInitiator: true
-          }
+            isInitiator: true,
+          },
         },
         data: {
-          isSolution: false
-        }
+          isSolution: false,
+        },
       }),
 
       // Toggle message solution status and init message solution status
       this.prisma.message.updateMany({
         where: {
           discussionId: message.discussion.id,
-          OR: [
-            { id: messageId },
-            { isInitiator: true }
-          ]
+          OR: [{ id: messageId }, { isInitiator: true }],
         },
         data: {
-          isSolution: !message.isSolution
-        }
+          isSolution: !message.isSolution,
+        },
       }),
 
       // Set discussion solution status
       this.prisma.discussion.update({
         where: {
-          id: message.discussion.id
+          id: message.discussion.id,
         },
         data: {
-          isSolved: !message.isSolution
-        }
-      })
+          isSolved: !message.isSolution,
+        },
+      }),
     ]);
 
     // sending notification to author of the whole discussion
 
-    if(newSolutionStatus) {
-        const notification = {
+    if (newSolutionStatus) {
+      const notification = {
         userId: message.author.userId,
         message: `Dein Kommentar wurde von ${message.discussion.author.anonymousName} als Lösung in einem Beitrag markiert.`,
         type: NotificationType.SOLUTION,
@@ -270,6 +271,4 @@ export class DiscussionViewService {
 
     return !message.isSolution;
   }
-
-
 }

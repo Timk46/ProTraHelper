@@ -5,7 +5,7 @@ import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 @Controller('admin/content')
 @UseGuards(RolesGuard)
 export class ContentManagementController {
-  constructor(private contentManagementService: ContentManagementService) {}
+  constructor(private readonly contentManagementService: ContentManagementService) {}
 
   @roles('ADMIN')
   @Get('export')

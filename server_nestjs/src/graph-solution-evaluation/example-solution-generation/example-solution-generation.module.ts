@@ -11,7 +11,13 @@ import { FeedbackGenerationModule } from '@/ai/feedback-generation/feedback-gene
 
 @Module({
   controllers: [ExampleSolutionGenerationController],
-  providers: [ExampleSolutionGenerationService, TransitiveClosureService, FloydService, DijkstraService, KruskalService],
+  providers: [
+    ExampleSolutionGenerationService,
+    TransitiveClosureService,
+    FloydService,
+    DijkstraService,
+    KruskalService,
+  ],
   imports: [PrismaModule, GraphSolutionEvaluationModule, FeedbackGenerationModule],
 })
 export class ExampleSolutionGenerationModule {}
