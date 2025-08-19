@@ -11,8 +11,6 @@ import {
   questionType,
   FillinQuestionDTO
 } from '@DTOs/index';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswer } from '@DTOs/userAnswer.dto';
-import { QuestionDTO, questionType, detailedQuestionDTO, editorDataDTO, taskSettingsDTO } from '@DTOs/index';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswerDTO } from '@DTOs/userAnswer.dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';

@@ -2,18 +2,12 @@ import { ViewContainerRef, OnInit, Component, EventEmitter, Inject, Input, Outpu
 import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { taskViewDTO } from '@DTOs/content.dto';
-import { FillinQuestionDTO } from '@DTOs/fillInText.dto';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswerDTO } from '@DTOs/userAnswer.dto';
-import {
-  UserAnswerDataDTO,
-  userAnswerFeedbackDTO,
-  UserFillinAnswer,
-} from '@DTOs/userAnswer.dto';
+import { taskViewDTO } from "@DTOs/index"
+import { FillinQuestionDTO, UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswerDTO } from "@DTOs/index"
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { DynamicBlankComponent } from './dynamic-blank/dynamic-blank.component';
 import { Subject, takeUntil } from 'rxjs';
-import { FillinQuestionType } from '@DTOs/fillInType.enum';
+import { FillinQuestionType } from "@DTOs/index"
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Location } from '@angular/common';
 @Component({

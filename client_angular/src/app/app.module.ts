@@ -44,6 +44,7 @@ import { AuthInterceptor } from './Interceptors/auth-interceptor.service';
 import { LoggedInGuard } from './Guards/is-logged-in.guard';
 import { EditorModule, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
 import { TinymceModule } from './Pages/tinymce/tinymce.module';
+import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module';
 import { DiscussionListComponent } from './Pages/discussion/discussion-list/discussion-list.component';
 import { DiscussionViewComponent } from './Pages/discussion/discussion-view/discussion-view.component';
 import { DiscussionFilterComponent } from './Pages/discussion/discussion-list/discussion-filter/discussion-filter.component';
@@ -92,7 +93,7 @@ import { ContentListNodeEditDialogComponent } from './Pages/content-list/content
 
 // ProTra 2.0 Module
 import { UploadTaskComponent } from './Pages/contentView/contentElement/upload-task/upload-task.component';
-import { GroupReviewGateDialogComponent } from "./Pages/contentView/contentElement/group-review-gate-dialog/group-review-gate-dialog.component";
+import { GroupReviewGateDialogComponent } from './Pages/contentView/contentElement/group-review-gate-dialog/group-review-gate-dialog.component';
 
 @NgModule({
   declarations: [
@@ -157,6 +158,7 @@ import { GroupReviewGateDialogComponent } from "./Pages/contentView/contentEleme
     HighlightNavigatorComponent,
     HighlightConceptDialogComponent,
     UploadTaskComponent,
+    GroupReviewGateDialogComponent,
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -180,6 +182,7 @@ import { GroupReviewGateDialogComponent } from "./Pages/contentView/contentEleme
     CodeGameModule,
     MatIconModule,
     ToastrModule.forRoot(),
+    TinymceModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

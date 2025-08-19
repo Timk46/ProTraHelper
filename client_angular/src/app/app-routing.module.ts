@@ -247,12 +247,7 @@ const routes: Routes = [
     path: 'admin',
     loadChildren: () => import('./Pages/admin/admin.module').then(m => m.AdminModule),
     canActivate: [LoggedInGuard, AdminGuard],
-  },
-  {
-    path: 'teacher',
-    loadChildren: () => import('./Pages/teacher/teacher.module').then(m => m.TeacherModule),
-    canActivate: [LoggedInGuard], // Assuming teachers need to be logged in
-  },
+  }
 ];
 @NgModule({
   imports: [
