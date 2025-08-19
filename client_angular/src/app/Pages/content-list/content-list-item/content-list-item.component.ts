@@ -22,6 +22,7 @@ import { QuestionDataService } from 'src/app/Services/question/question-data.ser
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UploadTaskComponent } from '../../contentView/contentElement/upload-task/upload-task.component';
 import { GroupReviewGateDialogComponent } from '../../contentView/contentElement/group-review-gate-dialog/group-review-gate-dialog.component';
+import { OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-content-list-item',

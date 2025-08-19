@@ -44,6 +44,7 @@ import { AuthInterceptor } from './Interceptors/auth-interceptor.service';
 import { LoggedInGuard } from './Guards/is-logged-in.guard';
 import { EditorModule, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
 import { TinymceModule } from './Pages/tinymce/tinymce.module';
+import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module';
 import { DiscussionListComponent } from './Pages/discussion/discussion-list/discussion-list.component';
 import { DiscussionViewComponent } from './Pages/discussion/discussion-view/discussion-view.component';
 import { DiscussionFilterComponent } from './Pages/discussion/discussion-list/discussion-filter/discussion-filter.component';
@@ -158,6 +159,7 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
     HighlightNavigatorComponent,
     HighlightConceptDialogComponent,
     UploadTaskComponent,
+    GroupReviewGateDialogComponent,
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -183,6 +185,7 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
     MatMenuModule,
     MatIconModule,
     ToastrModule.forRoot(),
+    TinymceModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
