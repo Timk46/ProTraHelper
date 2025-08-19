@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Language Guidelines
+
+- **Code & Documentation**: All code, comments, commit messages, and technical documentation must be written in **English**
+- **Terminal Communication**: Claude Code should communicate with users in **German** during terminal interactions
+- **JSDoc Comments**: All code documentation must be in English for consistency and international collaboration
+
 ## Project Overview
 
 HEFL (Hybrid E-Learning Framework) is a sophisticated full-stack e-learning platform with:
@@ -118,12 +124,54 @@ docker-compose -f Docker/docker-compose.yml up -d  # Start dev database
 - Run tests: `npm test` (both directories)
 - Ensure no TypeScript errors
 
+### Effective Communication with Claude Code
+For complex tasks, use structured prompts to ensure clarity and efficiency:
+
+**Quick Template:**
+```
+**Aufgabe:** [Clear task description]
+**Kontext:** [Relevant files/modules - use @ prefixes like @client_angular/src/app/Pages/]  
+**Anforderungen:**
+- [Specific requirement 1]
+- [Specific requirement 2]
+
+**Schritte:**
+1. [Implementation step 1]
+2. [Implementation step 2]
+
+**Erwartung:** [Expected outcome/deliverable]
+```
+
+**Advanced XML Structure (for complex features):**
+```xml
+<task>
+  <objective>Clear goal description</objective>
+  <context>Relevant directories and files</context>
+  <requirements>
+    <item>Specific requirement 1</item>
+    <item>Specific requirement 2</item>
+  </requirements>
+  <implementation-phases>
+    <phase>UI/Frontend changes</phase>
+    <phase>Backend/API changes</phase>
+    <phase>Testing and validation</phase>
+  </implementation-phases>
+</task>
+```
+
+**Key Principles:**
+- **Reference specific files**: Use precise paths like `@client_angular/src/app/Services/`
+- **Categorize information**: Separate context, requirements, and implementation steps
+- **Be explicit about expectations**: Define what success looks like
+- **Mention agent usage**: Specify when specialized agents should be used
+
 ### Code Standards
 - Follow existing patterns in neighboring files
 - Use Prisma for all database operations
 - DTOs must be defined in `shared/dtos/`
 - Use dependency injection in NestJS
 - Follow Angular style guide
+- **All code, variable names, function names, and comments must be written in English**
 
 ### Documentation Requirements
 - **All code must be documented with Compodoc-style JSDoc comments in English**

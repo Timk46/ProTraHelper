@@ -26,6 +26,7 @@ import {
   RatingStatsDTO,
   VoteResultDTO,
   VoteType,
+  CategoryRatingStatus,
 } from '@DTOs/index';
 
 import { EvaluationDiscussionService } from './evaluation-discussion.service';
@@ -48,6 +49,10 @@ export class EvaluationStateService {
   // Rating state
   private ratingsSubject = new BehaviorSubject<EvaluationRatingDTO[]>([]);
   private ratingStatsCache = new Map<number, BehaviorSubject<RatingStatsDTO>>();
+  
+  // Category-specific rating status management
+  private categoryRatingStatusSubject = new BehaviorSubject<Map<number, CategoryRatingStatus>>(new Map());
+  private ratingStatusLoadingSubject = new BehaviorSubject<boolean>(false);
 
   private commentIdToCategoryIdMap = new Map<string, number>();
 
@@ -170,6 +175,51 @@ export class EvaluationStateService {
     return this.anonymousUserSubject.asObservable();
   }
 
+  /**
+   * Observable for category-specific rating status
+   * Returns a Map where the key is categoryId and value is CategoryRatingStatus
+   */
+  get categoryRatingStatus$(): Observable<Map<number, CategoryRatingStatus>> {
+    return this.categoryRatingStatusSubject.asObservable();
+  }
+
+  /**
+   * Observable for rating status loading state
+   */
+  get ratingStatusLoading$(): Observable<boolean> {
+    return this.ratingStatusLoadingSubject.asObservable();
+  }
+
+  /**
+   * Gets rating status for a specific category
+   */
+  getCategoryRatingStatus$(categoryId: number): Observable<CategoryRatingStatus | null> {
+    return this.categoryRatingStatus$.pipe(
+      map(statusMap => statusMap.get(categoryId) || null),
+      distinctUntilChanged()
+    );
+  }
+
+  /**
+   * Checks if a specific category has been rated by the user
+   */
+  isCategoryRated$(categoryId: number): Observable<boolean> {
+    return this.getCategoryRatingStatus$(categoryId).pipe(
+      map(status => status?.hasRated || false),
+      distinctUntilChanged()
+    );
+  }
+
+  /**
+   * Checks if user can access discussion for a specific category
+   */
+  canAccessCategoryDiscussion$(categoryId: number): Observable<boolean> {
+    return this.getCategoryRatingStatus$(categoryId).pipe(
+      map(status => status?.canAccessDiscussion || false),
+      distinctUntilChanged()
+    );
+  }
+
   get loading$(): Observable<boolean> {
     return this.loadingSubject.asObservable();
   }
@@ -233,6 +283,28 @@ export class EvaluationStateService {
             ),
           );
         }
+
+        // Add rating status loading
+        console.log('📊 Adding rating status loading for submissionId:', submissionId);
+        parallelOps.push(
+          this.evaluationService.getUserRatingStatus(submissionId).pipe(
+            tap(statuses => {
+              console.log('✅ Rating statuses loaded during submission init:', statuses);
+              // Convert array to Map for efficient lookups
+              const statusMap = new Map<number, CategoryRatingStatus>();
+              statuses.forEach(status => {
+                statusMap.set(status.categoryId, status);
+              });
+              this.categoryRatingStatusSubject.next(statusMap);
+            }),
+            catchError(error => {
+              console.warn('⚠️ Rating status loading failed:', error);
+              // Reset to empty map if loading fails
+              this.categoryRatingStatusSubject.next(new Map());
+              return of([]); // Continue with empty array if rating status fails
+            }),
+          ),
+        );
 
         // Wait for ALL parallel operations to complete
         console.log('🔄 Starting parallel operations. Count:', parallelOps.length);
@@ -438,6 +510,86 @@ export class EvaluationStateService {
       this.discussionCache.set(cacheKey, subject);
     }
     return this.discussionCache.get(cacheKey)!;
+  }
+
+  // =============================================================================
+  // RATING STATUS MANAGEMENT
+  // =============================================================================
+
+  /**
+   * Loads rating status for all categories of a submission
+   * @param submissionId - The submission ID to load rating status for
+   */
+  loadCategoryRatingStatus(submissionId: string): void {
+    console.log('🎯 Loading category rating status for submission:', submissionId);
+    
+    this.ratingStatusLoadingSubject.next(true);
+    
+    this.evaluationService.getUserRatingStatus(submissionId).pipe(
+      take(1),
+      tap(statuses => {
+        console.log('✅ Received rating statuses:', statuses);
+        
+        // Convert array to Map for efficient lookups
+        const statusMap = new Map<number, CategoryRatingStatus>();
+        statuses.forEach(status => {
+          statusMap.set(status.categoryId, status);
+        });
+        
+        this.categoryRatingStatusSubject.next(statusMap);
+      }),
+      catchError(error => {
+        console.error('❌ Error loading rating status:', error);
+        this.setError('Fehler beim Laden des Bewertungsstatus');
+        return of([]);
+      }),
+      finalize(() => {
+        this.ratingStatusLoadingSubject.next(false);
+      })
+    ).subscribe();
+  }
+
+  /**
+   * Updates rating status for a specific category after user submits a rating
+   * @param submissionId - The submission ID
+   * @param categoryId - The category ID that was rated
+   * @param rating - The rating value submitted
+   */
+  updateCategoryRatingStatus(submissionId: string, categoryId: number, rating: number): void {
+    console.log('📝 Updating rating status:', { submissionId, categoryId, rating });
+    
+    const currentStatusMap = this.categoryRatingStatusSubject.value;
+    const existingStatus = currentStatusMap.get(categoryId);
+    
+    // Create updated status
+    const updatedStatus: CategoryRatingStatus = {
+      categoryId,
+      categoryName: existingStatus?.categoryName || `Category ${categoryId}`,
+      displayName: existingStatus?.displayName || `Kategorie ${categoryId}`,
+      hasRated: true,
+      rating,
+      ratedAt: new Date(),
+      lastUpdatedAt: new Date(),
+      canAccessDiscussion: true,
+      isRequired: true,
+    };
+    
+    // Update the map
+    const newStatusMap = new Map(currentStatusMap);
+    newStatusMap.set(categoryId, updatedStatus);
+    
+    this.categoryRatingStatusSubject.next(newStatusMap);
+    
+    console.log('✅ Rating status updated locally');
+  }
+
+  /**
+   * Refreshes rating status from the server
+   * @param submissionId - The submission ID to refresh
+   */
+  refreshRatingStatus(submissionId: string): void {
+    console.log('🔄 Refreshing rating status from server');
+    this.loadCategoryRatingStatus(submissionId);
   }
 
   // =============================================================================

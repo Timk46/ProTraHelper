@@ -203,7 +203,7 @@ export class PerformanceInterceptor implements HttpInterceptor {
         return new Blob([bodyString]).size;
       } catch (error) {
         // Fallback estimation
-        return this.estimateSizeByType(response.url, response.body);
+        return this.estimateSizeByType(response.url || 'unknown', response.body);
       }
     }
 

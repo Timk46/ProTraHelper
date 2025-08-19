@@ -467,7 +467,7 @@ export class EvaluationNavigationService {
     } else {
       element = document.createElement('meta');
       if (name.startsWith('og:')) {
-        element.property = name;
+        (element as any).property = name;
       } else {
         element.name = name;
       }
@@ -486,9 +486,10 @@ export class EvaluationNavigationService {
   private initializeRouterListener(): void {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: NavigationEnd) => {
-      this.updateNavigationContext(event.url);
-      this.globalState.updateNavigationState(event.url);
+    ).subscribe((event) => {
+      const navigationEvent = event as NavigationEnd;
+      this.updateNavigationContext(navigationEvent.url);
+      this.globalState.updateNavigationState(navigationEvent.url);
     });
   }
 

@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { Observable, Subject, combineLatest, BehaviorSubject, of, interval } from 'rxjs';
-import { takeUntil, map, filter, switchMap, take, startWith, debounceTime } from 'rxjs/operators';
+import { takeUntil, map, filter, switchMap, take, startWith, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 // Angular Material Imports
 import { MatCardModule } from '@angular/material/card';
@@ -57,6 +57,7 @@ import { DiscussionThreadComponent } from '../components/discussion-thread/discu
 import { PhaseToggleComponent } from '../components/phase-toggle/phase-toggle.component';
 import { ErrorFallbackComponent } from '../components/error-fallback/error-fallback.component';
 import { RatingSliderComponent } from '../components/rating-slider/rating-slider.component';
+import { RatingGateComponent } from '../components/rating-gate/rating-gate.component';
 
 // =============================================================================
 // MOCK DATA FOR DEVELOPMENT - ALL REMOVED
@@ -92,6 +93,7 @@ import { RatingSliderComponent } from '../components/rating-slider/rating-slider
     DiscussionThreadComponent,
     PhaseToggleComponent,
     RatingSliderComponent,
+    RatingGateComponent,
     ErrorFallbackComponent,
     PerformanceDashboardComponent,
   ],
@@ -182,6 +184,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   // Derived state streams
   isDiscussionPhase$!: Observable<boolean>;
   isEvaluationPhase$!: Observable<boolean>;
+  hasRatedCurrentCategory$!: Observable<boolean>;
   canComment$!: Observable<boolean>;
   canRate$!: Observable<boolean>;
 
@@ -220,6 +223,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   private lastSubmittedContent: string | null = null;
   currentMessageText: string = '';
   private currentSnackBarRef: any = null;
+  
+  // Rating gate access control - replaced with reactive state from stateService
 
   // 🚀 PHASE 5: Enhanced initialization with comprehensive setup
   private initializeObservableStreams(): void {
@@ -242,6 +247,15 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
     this.isEvaluationPhase$ = this.currentPhase$.pipe(
       map(phase => phase === EvaluationPhase.EVALUATION)
+    );
+
+    // Rating status stream for current category - replaces hasRatedCurrentCategory
+    this.hasRatedCurrentCategory$ = this.activeCategory$.pipe(
+      switchMap(categoryId => 
+        categoryId ? this.stateService.isCategoryRated$(categoryId) : of(false)
+      ),
+      distinctUntilChanged(),
+      startWith(false)
     );
 
     this.canComment$ = this.isDiscussionPhase$;
@@ -695,6 +709,17 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       .subscribe(content => {
         this.processCommentSubmission(content);
       });
+
+    // Setup rating status checking when active category changes
+    this.activeCategory$
+      .pipe(
+        filter(categoryId => categoryId > 0), // Only check valid category IDs
+        takeUntil(this.destroy$)
+      )
+      .subscribe(categoryId => {
+        console.log('🔄 Active category changed to:', categoryId, '- rating status tracked reactively');
+        // Rating status is now handled automatically by hasRatedCurrentCategory$ observable
+      });
   }
 
   // =============================================================================
@@ -709,9 +734,12 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     // FIXED: Using real state service instead of mock
     this.stateService.setActiveCategory(categoryId);
 
+    // Rating status is now tracked automatically through hasRatedCurrentCategory$ observable
     // Trigger change detection to update UI
     this.cdr.markForCheck();
   }
+
+  // Method removed - rating status is now handled reactively through stateService
 
   onCommentSubmitted(content: string): void {
     // Queue the comment for debounced processing
@@ -936,6 +964,10 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: rating => {
+          // Update rating status in state service for reactive updates
+          this.stateService.updateCategoryRatingStatus(this.submissionId!, data.categoryId, data.score);
+          this.cdr.markForCheck();
+          
           this.snackBar.open('Bewertung wurde erfolgreich abgegeben', 'Schließen', {
             duration: 3000,
             horizontalPosition: 'center',
@@ -950,6 +982,35 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           });
         },
       });
+  }
+
+  /**
+   * Handles discussion access granted events from rating gate
+   * 
+   * @description Called when the rating gate component grants access to discussion
+   * after a user successfully rates a category. Updates UI state and shows success message.
+   * 
+   * @param {any} data - Event data containing categoryId
+   * @memberof EvaluationDiscussionForumComponent
+   */
+  onDiscussionAccessGranted(data: { categoryId: number }): void {
+    console.log('🔓 Discussion access granted for category:', data.categoryId);
+    
+    // State is now automatically updated through reactive observables
+    
+    // Show success message
+    this.showSuccessMessage(
+      `Diskussion für diese Kategorie wurde freigeschaltet`
+    );
+    
+    // Trigger change detection
+    this.cdr.markForCheck();
+    
+    // Refresh comment stats to reflect new rating
+    if (this.submissionId) {
+      // Trigger a reload of comment stats (load initial data again)
+      this.stateService.refreshAll(this.submissionId);
+    }
   }
 
   onPhaseToggled(targetPhase: 'discussion' | 'evaluation'): void {

@@ -109,30 +109,34 @@
             >
             </app-error-fallback>
 
-            <!-- Discussion Phase -->
+            <!-- Discussion Phase with Rating Gate -->
             <div class="discussion-phase-content" *ngIf="vm.isDiscussionPhase && vm.anonymousUser">
-              <!-- Discussion Messages Area -->
-              <div class="discussion-messages">
-                <app-discussion-thread
-                  [discussions]="vm.discussions"
-                  [anonymousUser]="vm.anonymousUser"
-                  [canComment]="vm.canComment"
-                  [canVote]="vm.canVote"
-                  [availableUpvotes]="vm.availableUpvotes"
-                  [availableDownvotes]="vm.availableDownvotes"
-                  [isReadOnly]="!vm.canComment"
-                  [isSubmittingComment]="vm.isSubmittingComment"
-                  [isVotingComment]="isVotingComment"
-                  [trackByFn]="trackByDiscussion"
-                  (commentSubmitted)="onCommentSubmitted($event)"
-                  (commentVoted)="onCommentVoted($event)"
-                  (replySubmitted)="onReplySubmitted($event)"
-                >
-                </app-discussion-thread>
-              </div>
+              
+              <!-- Rating Gate Component (Controls access to discussion) -->
+              <app-rating-gate
+                *ngIf="vm.activeCategoryInfo"
+                [submissionId]="vm.submission?.id || ''"
+                [currentCategory]="vm.activeCategoryInfo"
+                [discussions]="vm.discussions"
+                [anonymousUser]="vm.anonymousUser"
+                [canComment]="vm.canComment"
+                [canVote]="vm.canVote"
+                [availableUpvotes]="vm.availableUpvotes"
+                [availableDownvotes]="vm.availableDownvotes"
+                [isReadOnly]="!vm.canComment"
+                [isSubmittingComment]="vm.isSubmittingComment"
+                [isVotingComment]="isVotingComment"
+                [trackByDiscussion]="trackByDiscussion"
+                (ratingSubmitted)="onRatingSubmitted($event)"
+                (commentSubmitted)="onCommentSubmitted($event)"
+                (commentVoted)="onCommentVoted($event)"
+                (replySubmitted)="onReplySubmitted($event)"
+                (accessGranted)="onDiscussionAccessGranted($event)"
+              >
+              </app-rating-gate>
 
-              <!-- Action Area for Message Input (HTML Template Style) -->
-              <div class="action-area" *ngIf="vm.canComment">
+              <!-- Message Input Area (only shown when discussion is accessible) -->
+              <div class="action-area" *ngIf="vm.canComment && (hasRatedCurrentCategory$ | async)">
                 <div class="message-input">
                   <input
                     type="text"
@@ -153,6 +157,7 @@
                   </button>
                 </div>
               </div>
+              
             </div>
 
             <!-- Evaluation Phase -->

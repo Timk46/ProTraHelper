@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { takeUntil } from 'rxjs/operators';
 
 // Angular Material Imports
 import { MatSliderModule } from '@angular/material/slider';
@@ -14,6 +15,9 @@ import { MatChipsModule } from '@angular/material/chips';
 
 // DTOs
 import { EvaluationRatingDTO } from '@DTOs/index';
+
+// Base Component
+import { BaseComponent } from '../../../../shared/base.component';
 
 @Component({
   selector: 'app-rating-slider',
@@ -34,7 +38,7 @@ import { EvaluationRatingDTO } from '@DTOs/index';
   styleUrl: './rating-slider.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RatingSliderComponent implements OnInit, OnChanges {
+export class RatingSliderComponent extends BaseComponent implements OnInit, OnChanges, AfterViewInit, OnDestroy {
 
   // =============================================================================
   // INPUTS - CONFIGURATION FROM PARENT
@@ -60,8 +64,10 @@ export class RatingSliderComponent implements OnInit, OnChanges {
   @Output() ratingSubmitted = new EventEmitter<{ categoryId: number; score: number }>();
 
   // =============================================================================
-  // COMPONENT STATE
+  // COMPONENT STATE & VIEW CHILDREN
   // =============================================================================
+
+  @ViewChild('ratingSlider', { static: false }) ratingSlider!: ElementRef;
 
   ratingForm: FormGroup;
   currentValue: number = 5;
@@ -71,7 +77,11 @@ export class RatingSliderComponent implements OnInit, OnChanges {
   // CONSTRUCTOR
   // =============================================================================
 
-  constructor(private formBuilder: FormBuilder) {
+  constructor(
+    private formBuilder: FormBuilder,
+    private cdr: ChangeDetectorRef
+  ) {
+    super(); // Call BaseComponent constructor
     this.ratingForm = this.createForm();
   }
 
@@ -88,6 +98,11 @@ export class RatingSliderComponent implements OnInit, OnChanges {
     if (changes['currentRating'] && !changes['currentRating'].firstChange) {
       this.initializeRating();
     }
+  }
+
+  ngAfterViewInit(): void {
+    // Ensure the slider is properly initialized after view is ready
+    this.cdr.detectChanges();
   }
 
   // =============================================================================
@@ -111,19 +126,34 @@ export class RatingSliderComponent implements OnInit, OnChanges {
     this.isModified = false;
   }
 
+  /**
+   * Sets up reactive form value change subscriptions with proper memory leak prevention
+   * 
+   * @description Uses takeUntil pattern to automatically unsubscribe when component
+   * is destroyed, preventing memory leaks in production environment
+   * 
+   * @private
+   * @memberof RatingSliderComponent
+   */
   private setupValueChanges(): void {
-    this.ratingForm.get('rating')?.valueChanges.subscribe(value => {
-      if (value !== null && value !== undefined) {
-        this.currentValue = value;
-        const originalRating = this.currentRating?.score || Math.floor((this.minValue + this.maxValue) / 2);
-        this.isModified = value !== originalRating;
+    this.ratingForm.get('rating')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(value => {
+        if (value !== null && value !== undefined) {
+          this.currentValue = value;
+          const originalRating = this.currentRating?.score || Math.floor((this.minValue + this.maxValue) / 2);
+          this.isModified = value !== originalRating;
 
-        this.ratingChanged.emit({
-          categoryId: this.categoryId,
-          score: value
-        });
-      }
-    });
+          // Emit rating change event
+          this.ratingChanged.emit({
+            categoryId: this.categoryId,
+            score: value
+          });
+
+          // Trigger change detection to ensure UI updates
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   // =============================================================================
@@ -155,8 +185,37 @@ export class RatingSliderComponent implements OnInit, OnChanges {
   }
 
   onQuickRating(value: number): void {
-    this.ratingForm.get('rating')?.setValue(value);
-    this.onSubmitRating();
+    console.log('🎯 Quick rating selected:', value);
+    
+    // Use setValue with emitEvent: true to trigger all the reactive form mechanics
+    // This ensures the Material Slider receives the change properly
+    this.ratingForm.get('rating')?.setValue(value, { 
+      emitEvent: true,
+      onlySelf: false 
+    });
+    
+    // Force change detection to ensure immediate UI update
+    this.cdr.detectChanges();
+    
+    // Additional fallback: directly update the slider if needed
+    setTimeout(() => {
+      if (this.ratingSlider?.nativeElement) {
+        const sliderInput = this.ratingSlider.nativeElement.querySelector('input[matSliderThumb]');
+        if (sliderInput && sliderInput.value !== value.toString()) {
+          sliderInput.value = value.toString();
+          // Dispatch change event to make sure Material components update
+          sliderInput.dispatchEvent(new Event('input', { bubbles: true }));
+          sliderInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+      this.cdr.detectChanges();
+    }, 10);
+    
+    console.log('📊 Quick rating completed:', { 
+      selectedValue: value, 
+      formValue: this.ratingForm.get('rating')?.value, 
+      currentValue: this.currentValue 
+    });
   }
 
   // =============================================================================

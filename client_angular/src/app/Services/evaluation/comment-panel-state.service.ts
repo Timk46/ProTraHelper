@@ -139,6 +139,14 @@ export class CommentPanelStateService {
     return this.getExpandedPanelCount() > 0;
   }
 
+  /**
+   * Gets the current panel states as a Map
+   * @returns Current Map of panel states for immediate synchronous access
+   */
+  getCurrentPanelStates(): Map<string, boolean> {
+    return new Map(this.panelStates.value);
+  }
+
   // =============================================================================
   // PRIVATE METHODS - LOCAL STORAGE PERSISTENCE
   // =============================================================================

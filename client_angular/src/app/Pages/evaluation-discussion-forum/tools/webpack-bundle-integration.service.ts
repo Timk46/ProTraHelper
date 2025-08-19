@@ -190,7 +190,7 @@ export class WebpackBundleIntegrationService {
         name: this.extractChunkName(resource.name),
         fileName: resource.name,
         size: resource.size,
-        type: resource.type,
+        type: this.mapResourceTypeToChunkType(resource.type),
         loadTime: resource.loadTime,
         isLazyLoaded: this.isLazyLoadedChunk(resource.name),
         modules: [], // Simplified - would need webpack stats for actual module info
@@ -548,6 +548,29 @@ export class WebpackBundleIntegrationService {
         .filter(r => r.priority === 'critical' || r.priority === 'high')
         .slice(0, 3)
     };
+  }
+
+  /**
+   * Maps resource type to valid ChunkInfo type
+   * 
+   * @param resourceType - Resource type from performance API
+   * @returns Valid chunk type
+   */
+  private mapResourceTypeToChunkType(resourceType: string): 'main' | 'vendor' | 'lazy' | 'polyfills' {
+    if (resourceType === 'main' || resourceType === 'vendor' || resourceType === 'lazy' || resourceType === 'polyfills') {
+      return resourceType as 'main' | 'vendor' | 'lazy' | 'polyfills';
+    }
+    
+    // Fallback mapping based on resource type
+    switch (resourceType.toLowerCase()) {
+      case 'script':
+      case 'document':
+        return 'main';
+      case 'polyfill':
+        return 'polyfills';
+      default:
+        return 'main';
+    }
   }
 }
 

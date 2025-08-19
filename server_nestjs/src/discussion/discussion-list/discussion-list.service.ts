@@ -1,9 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import {
-  discussionDTO,
-  discussionFilterContentNodeDTO,
-  discussionFilterDTO,
-} from '@DTOs/index';
+import { discussionDTO, discussionFilterContentNodeDTO, discussionFilterDTO } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import { DiscussionDataService } from '../discussion-data/discussion-data.service';
 

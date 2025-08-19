@@ -91,6 +91,37 @@ export class EvaluationPerformanceService {
   }
 
   /**
+   * Updates performance metrics for external components
+   * 
+   * @description Public wrapper method for updating performance metrics
+   * from external components. This method delegates to the appropriate
+   * internal metric updating methods based on the type of metric.
+   * 
+   * @param {number} metricValue - The metric value to record
+   * @param {boolean} isRenderTime - Whether this is a render time metric
+   * @memberof EvaluationPerformanceService
+   */
+  updatePerformanceMetrics(metricValue: number, isRenderTime: boolean = false): void {
+    if (isRenderTime) {
+      // Find the most recently started component profiling to update
+      const activeProfilings = Array.from(this.componentProfilingMap.entries())
+        .filter(([_, profiling]) => profiling.isActive);
+      
+      if (activeProfilings.length > 0) {
+        const [componentName, profiling] = activeProfilings[0];
+        profiling.renderTimes.push(metricValue);
+        profiling.averageRenderTime = profiling.renderTimes.reduce((a: number, b: number) => a + b, 0) / profiling.renderTimes.length;
+        profiling.maxRenderTime = Math.max(profiling.maxRenderTime, metricValue);
+        
+        this.updateComponentMetrics(componentName, profiling);
+      }
+    } else {
+      // Generic metric update - record as network request
+      this.recordNetworkRequest('generic-metric', metricValue, true);
+    }
+  }
+
+  /**
    * Observable for memory metrics only
    */
   get memoryMetrics$(): Observable<MemoryMetrics> {
@@ -143,14 +174,14 @@ export class EvaluationPerformanceService {
       totalRenderTime: 0,
       averageRenderTime: 0,
       maxRenderTime: 0,
+      renderTimes: [],
       changeDetectionCycles: 0,
       memorySnapshot: this.getCurrentMemoryUsage(),
       isActive: true,
       options: {
-        trackMemory: true,
-        trackChangeDetection: true,
-        sampleRate: 1.0,
-        ...options
+        trackMemory: options.trackMemory ?? true,
+        trackChangeDetection: options.trackChangeDetection ?? true,
+        sampleRate: options.sampleRate ?? 1.0
       }
     };
 
@@ -209,7 +240,7 @@ export class EvaluationPerformanceService {
    */
   markRenderStart(componentName: string): void {
     const profiling = this.componentProfilingMap.get(componentName);
-    if (profiling && Math.random() <= profiling.options.sampleRate) {
+    if (profiling && Math.random() <= (profiling.options.sampleRate ?? 1.0)) {
       profiling.currentRenderStart = performance.now();
     }
 
@@ -786,6 +817,7 @@ export interface ComponentProfiling {
   totalRenderTime: number;
   averageRenderTime: number;
   maxRenderTime: number;
+  renderTimes: number[];
   changeDetectionCycles: number;
   memorySnapshot: number;
   memoryDelta?: number;
@@ -795,9 +827,9 @@ export interface ComponentProfiling {
 }
 
 export interface ProfilingOptions {
-  trackMemory: boolean;
-  trackChangeDetection: boolean;
-  sampleRate: number;
+  trackMemory?: boolean;
+  trackChangeDetection?: boolean;
+  sampleRate?: number;
 }
 
 export interface NetworkMetrics {

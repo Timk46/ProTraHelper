@@ -57,6 +57,24 @@ export interface RatingSubmissionResultDTO {
   canFinalize: boolean;
 }
 
+// Category rating status for access control
+export interface CategoryRatingStatus {
+  categoryId: number;
+  categoryName: string;
+  displayName: string;
+  hasRated: boolean;
+  rating: number | null;
+  ratedAt: Date | null;
+  lastUpdatedAt: Date | null;
+  canAccessDiscussion: boolean;
+  isRequired: boolean;
+}
+
+// Response for checking if user has rated a category
+export interface HasRatedResponse {
+  hasRated: boolean;
+}
+
 // Rating slider configuration
 export interface RatingSliderConfig {
   min: number;

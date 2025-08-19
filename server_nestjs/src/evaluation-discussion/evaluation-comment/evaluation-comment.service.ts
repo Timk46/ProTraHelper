@@ -762,14 +762,11 @@ export class EvaluationCommentService {
    * @param userId - The user ID
    * @returns Array of vote results
    */
-  async batchVote(
-    votes: Array<{ commentId: string; voteType: 'UP' | 'DOWN' | null }>,
-    userId: number,
-  ) {
+  async batchVote(votes: { commentId: string; voteType: 'UP' | 'DOWN' | null }[], userId: number) {
     const results = [];
-    
+
     // Use transaction for atomic batch operations
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async tx => {
       for (const voteOperation of votes) {
         const result = await this.processVoteInTransaction(
           tx,

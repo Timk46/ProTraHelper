@@ -540,7 +540,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
         commentCount: d.comments?.length || 0,
         commentsHash: d.comments?.map(c => `${c.id}-${c.voteStats.upVotes}-${c.voteStats.downVotes}`).join(',') || ''
       })),
-      panelStates: Array.from(this.commentPanelStateService.panelStates$.value.entries()),
+      panelStates: Array.from(this.commentPanelStateService.getCurrentPanelStates().entries()),
       replyStates: Array.from(this.activeReplyInputs.entries())
     };
 

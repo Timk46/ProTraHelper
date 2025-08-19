@@ -505,19 +505,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     });
   }
 
-  /**
-   * 🚀 PHASE 4: Called when vote operation completes successfully
-   * Synchronizes the local cache with the actual result using unified state management
-   */
-  onVoteCompleted(voteResult: VoteType | null): void {
-    console.log('✅ Vote completed, updating cache:', {
-      commentId: this.comment.id,
-      voteResult,
-    });
-
-    // Use unified method for consistent state management
-    this.setVoteStatus(voteResult, 'vote-completed');
-  }
 
   /**
    * 🚀 PHASE 5: Called when vote operation fails - enhanced error handling

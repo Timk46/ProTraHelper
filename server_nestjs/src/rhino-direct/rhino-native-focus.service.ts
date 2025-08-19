@@ -18,7 +18,7 @@ import {
 export class RhinoNativeFocusService {
   private readonly logger = new Logger(RhinoNativeFocusService.name);
   private config: NativeFocusConfig;
-  private isInitialized: boolean;
+  private readonly isInitialized: boolean;
   private user32: any;
   private kernel32: any;
 

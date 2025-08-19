@@ -1,9 +1,6 @@
 import { Controller, Post, Get, Body, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { BatScriptGeneratorService } from './bat-script-generator.service';
-import {
-  BatExecutionResult,
-  RhinoPathValidationResult,
-} from '../../../shared/dtos/bat-rhino.dto';
+import { BatExecutionResult, RhinoPathValidationResult } from '../../../shared/dtos/bat-rhino.dto';
 import { BatScriptRequest } from '../../../shared/dtos/bat-rhino.dto';
 
 /**

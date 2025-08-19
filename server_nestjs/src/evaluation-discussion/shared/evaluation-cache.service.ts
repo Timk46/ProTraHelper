@@ -179,7 +179,7 @@ export class EvaluationCacheService {
     factory: (key: string) => Promise<T>,
     ttl: number = this.DEFAULT_TTL,
   ): Promise<void> {
-    const promises = keys.map(async (key) => {
+    const promises = keys.map(async key => {
       try {
         const data = await factory(key);
         this.set(key, data, ttl);

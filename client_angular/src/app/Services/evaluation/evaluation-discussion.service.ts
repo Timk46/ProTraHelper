@@ -30,6 +30,8 @@ import {
   AnonymousEvaluationUserDTO,
   EvaluationRatingDTO,
   RatingStatsDTO,
+  CategoryRatingStatus,
+  HasRatedResponse,
   PhaseSwitchRequestDTO,
   PhaseSwitchResponseDTO,
   UserVoteResponseDTO
@@ -362,6 +364,71 @@ export class EvaluationDiscussionService {
     return this.http.get<RatingStatsDTO>(`${this.apiUrls.ratings}/submission/${submissionId}/category/${categoryId}/stats`);
   }
 
+  /**
+   * Checks if the current user has rated a specific category
+   * 
+   * @description This method is used to determine if the user has access
+   * to the discussion area for a specific category. Users must rate a category
+   * before they can access its discussion.
+   * 
+   * @param {string} submissionId - The submission ID to check
+   * @param {number} categoryId - The category ID to check
+   * @returns {Observable<{hasRated: boolean}>} Observable indicating if user has rated the category
+   * @memberof EvaluationDiscussionService
+   */
+  hasUserRatedCategory(submissionId: string, categoryId: number): Observable<HasRatedResponse> {
+    return this.http.get<HasRatedResponse>(
+      `${this.apiUrls.ratings}/submission/${submissionId}/category/${categoryId}/user`
+    ).pipe(
+      retry(2),
+      catchError(this.handleError<HasRatedResponse>('hasUserRatedCategory'))
+    );
+  }
+
+  /**
+   * Gets the rating status for all categories for the current user and submission
+   * 
+   * @description This method returns the complete rating status overview,
+   * indicating which categories the user has rated and which discussions they can access.
+   * This is essential for the rating gate functionality.
+   * 
+   * @param {string} submissionId - The submission ID to check
+   * @returns {Observable<CategoryRatingStatus[]>} Observable containing rating status for all categories
+   * @memberof EvaluationDiscussionService
+   */
+  getUserRatingStatus(submissionId: string): Observable<CategoryRatingStatus[]> {
+    return this.http.get<CategoryRatingStatus[]>(
+      `${this.apiUrls.ratings}/submission/${submissionId}/user/status`
+    ).pipe(
+      retry(2),
+      catchError(this.handleError<CategoryRatingStatus[]>('getUserRatingStatus'))
+    );
+  }
+
+  /**
+   * Gets the current user's rating for a specific category
+   * 
+   * @description This method retrieves the user's existing rating for a category,
+   * useful for pre-populating rating sliders and showing rating history.
+   * 
+   * @param {string} submissionId - The submission ID
+   * @param {number} categoryId - The category ID
+   * @returns {Observable<number | null>} Observable containing the user's rating or null if not rated
+   * @memberof EvaluationDiscussionService
+   */
+  getUserCategoryRating(submissionId: string, categoryId: number): Observable<number | null> {
+    return this.getUserRatingStatus(submissionId).pipe(
+      map(statuses => {
+        const categoryStatus = statuses.find(s => s.categoryId === categoryId);
+        return categoryStatus?.rating || null;
+      }),
+      catchError(error => {
+        console.error('Failed to get user category rating:', error);
+        return of(null);
+      })
+    );
+  }
+
   // =============================================================================
   // PHASE MANAGEMENT
   // =============================================================================
@@ -411,6 +478,25 @@ export class EvaluationDiscussionService {
   // =============================================================================
   // PRIVATE HELPER METHODS
   // =============================================================================
+
+  /**
+   * Generic error handler for HTTP operations
+   * 
+   * @description Returns an error handler function that logs the operation
+   * and returns a safe fallback value
+   * 
+   * @param {string} operation - Name of the operation that failed
+   * @returns {Function} Error handler function
+   * @memberof EvaluationDiscussionService
+   */
+  private handleError<T>(operation = 'operation'): (error: any) => Observable<T> {
+    return (error: any): Observable<T> => {
+      console.error(`${operation} failed:`, error);
+      
+      // Let the app keep running by returning a safe fallback
+      return throwError(() => new Error(`${operation} failed: ${error.message || error}`));
+    };
+  }
 
   // All mock methods removed - using real backend APIs
 }

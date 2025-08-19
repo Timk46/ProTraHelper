@@ -45,7 +45,10 @@
       "mcp__puppeteer__puppeteer_screenshot",
       "mcp__puppeteer__puppeteer_evaluate"
     ],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": [
+      "C:\\c\\Dev\\hefl"
+    ]
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
