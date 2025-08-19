@@ -771,7 +771,13 @@ export class EvaluationStateService {
         totalComments: discussion.totalComments,
       });
 
+      // Force immediate update of discussion cache
       subject.next(updatedDiscussions);
+      
+      // Force change detection by manually updating the observable
+      setTimeout(() => {
+        subject.next([...updatedDiscussions]);
+      }, 50);
     } catch (error) {
       console.error('❌ Error in handleCommentAdded:', error);
       this.setError('Fehler beim Aktualisieren der Kommentare. Bitte laden Sie die Seite neu.');
@@ -1440,6 +1446,24 @@ export class EvaluationStateService {
     this.loadSubmission(submissionId);
     this.clearCache();
     // Categories will be loaded automatically when submission loads
+  }
+
+  /**
+   * Refreshes discussions for all categories
+   * @param submissionId - The submission ID to refresh discussions for
+   */
+  refreshDiscussions(submissionId: string): void {
+    console.log('🔄 Refreshing discussions for submission:', submissionId);
+    
+    // Get current active category and refresh its discussions
+    const currentActiveCategory = this.activeCategorySubject.value;
+    if (currentActiveCategory && currentActiveCategory > 0) {
+      // loadDiscussionsForCategory returns void and handles subscription internally
+      this.loadDiscussionsForCategory(submissionId, currentActiveCategory);
+      console.log('✅ Discussions refresh initiated for category:', currentActiveCategory);
+    } else {
+      console.log('⚠️ No active category to refresh discussions for');
+    }
   }
 
   // =============================================================================

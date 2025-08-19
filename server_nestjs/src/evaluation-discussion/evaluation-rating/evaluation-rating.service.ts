@@ -14,13 +14,16 @@ import {
   EvaluationCategoryDTO,
   UserDTO,
   EvaluationSubmissionDTO,
-} from '@DTOs/index';
+  EvaluationStatus,
+  EvaluationPhase,
+} from '../../../../shared/dtos/index';
+import { globalRole } from '../../../../shared/dtos/roles.enum';
 import { EvaluationCacheService } from '../shared/evaluation-cache.service';
 import { EvaluationUtilsService } from '../shared/evaluation-utils.service';
 
 /**
  * Interface for Prisma rating with all relations
- * 
+ *
  * @description Provides strict typing for Prisma query results
  * to eliminate any usage and improve type safety
  */
@@ -60,7 +63,7 @@ interface PrismaRatingWithRelations {
 
 /**
  * Interface for category summary calculations
- * 
+ *
  * @description Strict typing for rating summary operations
  * to ensure type safety across aggregation functions
  */
@@ -68,15 +71,15 @@ interface CategorySummary {
   categoryId: number;
   categoryName: string;
   displayName: string;
-  ratings: Array<{ score: number }>;
+  ratings: { score: number }[];
   average?: number;
-  distribution?: number[];
+  distribution?: { score: number; count: number }[];
   count?: number;
 }
 
 /**
  * Interface for summary accumulator
- * 
+ *
  * @description Type-safe accumulator for rating summary calculations
  */
 interface SummaryAccumulator {
@@ -344,7 +347,9 @@ export class EvaluationRatingService {
         // Calculate averages and distributions using utility service
         Object.values(summary).forEach((categoryData: CategorySummary) => {
           categoryData.average = this.utilsService.calculateAverageRating(categoryData.ratings);
-          categoryData.distribution = this.utilsService.calculateScoreDistribution(categoryData.ratings);
+          categoryData.distribution = this.utilsService.calculateScoreDistribution(
+            categoryData.ratings,
+          );
           categoryData.count = categoryData.ratings.length;
         });
 
@@ -402,10 +407,8 @@ export class EvaluationRatingService {
     categoryId: number,
     userId: number,
   ): Promise<boolean> {
-    // For demo submissions, always return false (unrated) initially
-    if (this.isDemoSubmission(submissionId)) {
-      return false;
-    }
+    // FIXED: Demo submissions should also check for actual stored ratings
+    // Removed the short-circuit that always returned false for demos
 
     const rating = await this.prisma.evaluationRating.findUnique({
       where: {
@@ -475,17 +478,20 @@ export class EvaluationRatingService {
     const ratingsMap = new Map(userRatings.map(rating => [rating.categoryId, rating]));
 
     // Build status for each category
-    return submission.session.categories.map(category => ({
-      categoryId: category.id,
-      categoryName: category.name,
-      displayName: category.displayName,
-      hasRated: ratingsMap.has(category.id),
-      rating: ratingsMap.get(category.id).rating || null,
-      ratedAt: ratingsMap.get(category.id).createdAt || null,
-      lastUpdatedAt: ratingsMap.get(category.id).updatedAt || null,
-      canAccessDiscussion: ratingsMap.has(category.id), // User can access discussion if they've rated
-      isRequired: true, // All categories require rating for discussion access
-    }));
+    return submission.session.categories.map(category => {
+      const categoryRating = ratingsMap.get(category.id);
+      return {
+        categoryId: category.id,
+        categoryName: category.name,
+        displayName: category.displayName,
+        hasRated: ratingsMap.has(category.id),
+        rating: categoryRating?.rating || null,
+        ratedAt: categoryRating?.createdAt || null,
+        lastUpdatedAt: categoryRating?.updatedAt || null,
+        canAccessDiscussion: ratingsMap.has(category.id), // User can access discussion if they've rated
+        isRequired: true, // All categories require rating for discussion access
+      };
+    });
   }
 
   async getCategoryStats(submissionId: string, categoryId: number) {
@@ -560,10 +566,10 @@ export class EvaluationRatingService {
   }
 
   /**
-   * Provides demo rating status for demo submissions
+   * Provides demo rating status for demo submissions with proper persistence
    *
-   * @description Creates a mock rating status response for demo submissions
-   * that may not exist in the database, enabling frontend testing and demos
+   * @description Creates rating status for demo submissions by checking actual
+   * stored ratings in the database, enabling proper testing with persistence
    *
    * @param {string} submissionId - The demo submission ID
    * @param {number} userId - The user ID to check
@@ -583,19 +589,38 @@ export class EvaluationRatingService {
       { id: 5, name: 'documentation', displayName: 'Dokumentation' },
     ];
 
-    // Check if user has any ratings for this demo submission (from memory/cache)
-    // For simplicity, we'll assume no ratings exist for demo submissions
-    return demoCategories.map(category => ({
-      categoryId: category.id,
-      categoryName: category.name,
-      displayName: category.displayName,
-      hasRated: false, // Demo submissions start unrated
-      rating: null,
-      ratedAt: null,
-      lastUpdatedAt: null,
-      canAccessDiscussion: false, // Must rate first
-      isRequired: true, // All categories require rating
-    }));
+    // FIXED: Check for actual stored ratings for demo submissions
+    // Demo submissions should persist ratings like regular submissions
+    const userRatings = await this.prisma.evaluationRating.findMany({
+      where: {
+        submissionId,
+        userId,
+      },
+      select: {
+        categoryId: true,
+        rating: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    // Create a map for quick lookup of stored ratings
+    const ratingsMap = new Map(userRatings.map(rating => [rating.categoryId, rating]));
+
+    return demoCategories.map(category => {
+      const storedRating = ratingsMap.get(category.id);
+      return {
+        categoryId: category.id,
+        categoryName: category.name,
+        displayName: category.displayName,
+        hasRated: ratingsMap.has(category.id), // Check if rating exists in DB
+        rating: storedRating?.rating || null,
+        ratedAt: storedRating?.createdAt || null,
+        lastUpdatedAt: storedRating?.updatedAt || null,
+        canAccessDiscussion: ratingsMap.has(category.id), // Can access if rated
+        isRequired: true, // All categories require rating
+      };
+    });
   }
 
   private validateRatingScore(score: number): void {
@@ -606,10 +631,10 @@ export class EvaluationRatingService {
 
   /**
    * Maps Prisma rating object to DTO with strict type safety
-   * 
+   *
    * @description Converts Prisma rating with relations to a typed DTO
    * eliminating any usage and ensuring type consistency
-   * 
+   *
    * @param {PrismaRatingWithRelations} rating - The Prisma rating object with relations
    * @returns {EvaluationRatingDTO} Typed DTO object
    * @memberof EvaluationRatingService
@@ -623,19 +648,45 @@ export class EvaluationRatingService {
       score: rating.rating,
       createdAt: rating.createdAt,
       updatedAt: rating.updatedAt,
-      submission: rating.submission || null,
-      user: rating.user || null,
+      // Map partial submission data to full DTO structure with required defaults
+      submission: rating.submission ? {
+        id: rating.submission.id,
+        title: rating.submission.title,
+        authorId: rating.submission.author.id,
+        pdfFileId: 0, // Default value - not available in this context
+        sessionId: 0, // Default value - not available in this context
+        status: EvaluationStatus.SUBMITTED, // Default status
+        phase: EvaluationPhase.DISCUSSION, // Default phase
+        submittedAt: new Date(), // Default date
+        createdAt: new Date(), // Default date
+        updatedAt: new Date(), // Default date
+        author: {
+          id: rating.submission.author.id,
+          firstname: rating.submission.author.firstname,
+          lastname: rating.submission.author.lastname,
+          email: '', // Default value - not available in this context
+          globalRole: globalRole.STUDENT, // Default role
+        }
+      } : null,
+      // Map partial user data to full DTO structure with required defaults
+      user: rating.user ? {
+        id: rating.user.id,
+        firstname: rating.user.firstname,
+        lastname: rating.user.lastname,
+        email: '', // Default value - not available in this context
+        globalRole: globalRole.STUDENT, // Default role
+      } : null,
       category: rating.category
         ? {
-            id: rating.category.id.toString(),
+            id: rating.category.id,
             name: rating.category.name,
             displayName: rating.category.displayName,
-            description: rating.category.description || null,
-            icon: rating.category.icon || null,
-            color: rating.category.color || null,
+            description: rating.category.description ?? '',
+            icon: rating.category.icon ?? '',
+            color: rating.category.color ?? undefined,
             order: rating.category.order,
           }
-        : null,
+        : undefined,
     };
   }
 }

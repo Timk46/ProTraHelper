@@ -17,7 +17,10 @@ import {
   WindowsApiAvailabilityDTO,
   UnifiedRhinoFocusResponseDTO,
   NativeFocusRequestDTO,
-} from '@DTOs/index';
+  EnsureRhinoActiveRequestDTO,
+  EnsureRhinoActiveResponseDTO,
+  RhinoAvailabilityStatusDTO,
+} from '../../../../shared/dtos/index';
 
 /**
  * Konfiguration für Rhino Focus Service
@@ -50,6 +53,7 @@ const DEFAULT_CONFIG: RhinoFocusConfig = {
 })
 export class RhinoFocusService {
   private readonly baseUrl = `${environment.server}/api/rhinodirect`;
+  private readonly unifiedBaseUrl = `${environment.server}/api/rhinounified`;
   private config: RhinoFocusConfig = { ...DEFAULT_CONFIG };
   private isAvailable: boolean | null = null;
 
@@ -328,29 +332,23 @@ export class RhinoFocusService {
    */
   focusFirstAvailableWindow(): Observable<RhinoFocusResponseDTO> {
     return this.getRhinoWindowInfo().pipe(
-      map(windows => {
+      switchMap(windows => {
+        // Handle no windows found case
         if (windows.length === 0) {
-          return {
+          return of({
             success: false,
             message: 'Keine Rhino-Fenster gefunden',
             timestamp: new Date().toISOString(),
-          };
+          });
         }
 
-        // Fokussiere das erste Fenster
+        // Focus the first window - return Observable directly
         const firstWindow = windows[0];
         return this.focusRhinoWindow({
           processId: firstWindow.processId,
           bringToFront: true,
           restoreIfMinimized: true,
         });
-      }),
-      // Flatten the nested Observable
-      switchMap(result => {
-        if (typeof result === 'object' && 'success' in result) {
-          return of(result);
-        }
-        return result as Observable<RhinoFocusResponseDTO>;
       }),
     );
   }
@@ -495,6 +493,218 @@ export class RhinoFocusService {
     // Benutzerfreundliche Fehlermeldung
     const userMessage = this.getUserFriendlyErrorMessage(error);
     return throwError(() => new Error(userMessage));
+  }
+
+  /**
+   * Ensures Rhino is active - intelligently focuses existing window or launches new instance
+   * This is the main method for unified Rhino management
+   * @param request - Configuration for the ensure operation
+   * @returns Observable with ensure operation result
+   */
+  ensureRhinoActive(request: EnsureRhinoActiveRequestDTO = {}): Observable<EnsureRhinoActiveResponseDTO> {
+    console.log('🎯 Ensuring Rhino is active:', request);
+
+    if (!this.config.enabled) {
+      console.log('🚫 Rhino service disabled');
+      return of({
+        success: false,
+        message: 'Rhino-Service ist deaktiviert',
+        action: 'failed',
+        timestamp: new Date().toISOString(),
+        performanceMs: 0,
+        warnings: ['Service deaktiviert']
+      });
+    }
+
+    return this.http.post<EnsureRhinoActiveResponseDTO>(`${this.unifiedBaseUrl}/ensure-active`, request).pipe(
+      timeout(this.config.timeoutMs),
+      retry(this.config.retryAttempts),
+      map((response: EnsureRhinoActiveResponseDTO) => {
+        console.log('✅ Ensure Rhino active result:', response);
+        return response;
+      }),
+      catchError(error => this.handleError<EnsureRhinoActiveResponseDTO>('ensureRhinoActive', error, {
+        success: false,
+        message: 'Fehler bei der Rhino-Aktivierung',
+        action: 'failed',
+        timestamp: new Date().toISOString(),
+        performanceMs: 0,
+        warnings: [this.getUserFriendlyErrorMessage(error)]
+      })),
+    );
+  }
+
+  /**
+   * Checks Rhino availability status
+   * @returns Observable with availability status
+   */
+  checkRhinoAvailabilityStatus(): Observable<RhinoAvailabilityStatusDTO> {
+    console.log('🔍 Checking Rhino availability status');
+
+    if (!this.config.enabled) {
+      return of({
+        isRunning: false,
+        isInstalled: false,
+        windowCount: 0,
+        installations: [],
+        nativeFocusAvailable: false,
+        powershellFocusAvailable: false,
+        recommendedAction: 'unknown',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    return this.http.get<RhinoAvailabilityStatusDTO>(`${this.unifiedBaseUrl}/availability`).pipe(
+      timeout(this.config.timeoutMs),
+      retry(this.config.retryAttempts),
+      map((status: RhinoAvailabilityStatusDTO) => {
+        console.log('✅ Rhino availability status:', status);
+        return status;
+      }),
+      catchError(error => {
+        console.error('❌ Availability check failed:', error);
+        return of({
+          isRunning: false,
+          isInstalled: false,
+          windowCount: 0,
+          installations: [],
+          nativeFocusAvailable: false,
+          powershellFocusAvailable: false,
+          recommendedAction: 'unknown' as const,
+          timestamp: new Date().toISOString()
+        });
+      }),
+    );
+  }
+
+  /**
+   * Focus existing Rhino window only (without launching)
+   * @param focusMethod - Method to use for focusing
+   * @returns Observable with focus result
+   */
+  focusOnlyRhino(focusMethod: 'native' | 'powershell' | 'unified' = 'unified'): Observable<EnsureRhinoActiveResponseDTO> {
+    console.log('🎯 Focus-only Rhino:', { focusMethod });
+
+    if (!this.config.enabled) {
+      return of({
+        success: false,
+        message: 'Rhino-Service ist deaktiviert',
+        action: 'failed',
+        timestamp: new Date().toISOString(),
+        performanceMs: 0
+      });
+    }
+
+    const request = { focusMethod };
+
+    return this.http.post<EnsureRhinoActiveResponseDTO>(`${this.unifiedBaseUrl}/focus-only`, request).pipe(
+      timeout(this.config.timeoutMs),
+      retry(this.config.retryAttempts),
+      map((response: EnsureRhinoActiveResponseDTO) => {
+        console.log('✅ Focus-only result:', response);
+        return response;
+      }),
+      catchError(error => this.handleError<EnsureRhinoActiveResponseDTO>('focusOnlyRhino', error, {
+        success: false,
+        message: 'Fehler beim Fokussieren von Rhino',
+        action: 'failed',
+        timestamp: new Date().toISOString(),
+        performanceMs: 0,
+        warnings: [this.getUserFriendlyErrorMessage(error)]
+      })),
+    );
+  }
+
+  /**
+   * Launch new Rhino instance (always launches, doesn't focus existing)
+   * @param grasshopperFilePath - Optional Grasshopper file to open
+   * @param userId - User ID for tracking
+   * @returns Observable with launch result
+   */
+  launchOnlyRhino(grasshopperFilePath?: string, userId?: string): Observable<EnsureRhinoActiveResponseDTO> {
+    console.log('🚀 Launch-only Rhino:', { grasshopperFilePath, userId });
+
+    if (!this.config.enabled) {
+      return of({
+        success: false,
+        message: 'Rhino-Service ist deaktiviert',
+        action: 'failed',
+        timestamp: new Date().toISOString(),
+        performanceMs: 0
+      });
+    }
+
+    const request = { grasshopperFilePath, userId: userId || 'web-user' };
+
+    return this.http.post<EnsureRhinoActiveResponseDTO>(`${this.unifiedBaseUrl}/launch-only`, request).pipe(
+      timeout(this.config.timeoutMs * 2), // Double timeout for launch operations
+      retry(this.config.retryAttempts),
+      map((response: EnsureRhinoActiveResponseDTO) => {
+        console.log('✅ Launch-only result:', response);
+        return response;
+      }),
+      catchError(error => this.handleError<EnsureRhinoActiveResponseDTO>('launchOnlyRhino', error, {
+        success: false,
+        message: 'Fehler beim Starten von Rhino',
+        action: 'failed',
+        timestamp: new Date().toISOString(),
+        performanceMs: 0,
+        warnings: [this.getUserFriendlyErrorMessage(error)]
+      })),
+    );
+  }
+
+  /**
+   * Gets comprehensive system status for debugging
+   * @returns Observable with detailed system status
+   */
+  getSystemStatus(): Observable<any> {
+    console.log('🔧 Getting system status');
+
+    return this.http.get(`${this.unifiedBaseUrl}/system-status`).pipe(
+      timeout(this.config.timeoutMs),
+      map((status: any) => {
+        console.log('✅ System status:', status);
+        return status;
+      }),
+      catchError(error => {
+        console.error('❌ System status failed:', error);
+        return of({
+          error: this.getUserFriendlyErrorMessage(error),
+          timestamp: new Date().toISOString()
+        });
+      }),
+    );
+  }
+
+  /**
+   * Enhanced version of the original focusRhinoWindow that uses unified approach
+   * Maintains backwards compatibility while providing improved functionality
+   * @param request - Focus request parameters
+   * @returns Observable with focus result
+   */
+  focusRhinoWindowEnhanced(request: RhinoFocusRequestDTO = {}): Observable<RhinoFocusResponseDTO> {
+    console.log('🎯 Enhanced Rhino focus (with fallback to launch):', request);
+
+    // Convert old request format to new format
+    const unifiedRequest: EnsureRhinoActiveRequestDTO = {
+      focusMethod: 'unified',
+      bringToFront: request.bringToFront !== false,
+      restoreIfMinimized: request.restoreIfMinimized !== false
+    };
+
+    return this.ensureRhinoActive(unifiedRequest).pipe(
+      map((unifiedResponse: EnsureRhinoActiveResponseDTO) => {
+        // Convert back to old response format for backwards compatibility
+        const legacyResponse: RhinoFocusResponseDTO = {
+          success: unifiedResponse.success,
+          message: unifiedResponse.message,
+          windowInfo: unifiedResponse.windowInfo,
+          timestamp: unifiedResponse.timestamp,
+        };
+        return legacyResponse;
+      })
+    );
   }
 
   /**

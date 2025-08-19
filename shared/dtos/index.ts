@@ -41,6 +41,8 @@ export * from "./umlearnDtos/interfaces/index";
 
 //Rhino Window Management DTOs
 export * from "./rhino-window.dto";
+export * from "./rhino-unified.dto";
+export * from "./bat-rhino.dto";
 
 //MCSlider DTOs
 export * from "./mcslider.dto";

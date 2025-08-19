@@ -22,7 +22,7 @@ import {
   finalize
 } from 'rxjs/operators';
 import { RhinoFocusService } from './rhino-focus.service';
-import { RhinoFocusRequestDTO, RhinoFocusResponseDTO } from '@DTOs/rhino-window.dto';
+import { RhinoFocusRequestDTO, RhinoFocusResponseDTO } from '../../../../shared/dtos/rhino-window.dto';
 import { environment } from 'src/environments/environment';
 
 /**

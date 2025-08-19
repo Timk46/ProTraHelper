@@ -49,7 +49,7 @@ export class EvaluationRatingController {
 
   @Get('submission/:submissionId/summary')
   @roles('ANY')
-  async getRatingSummary(@Param('submissionId') submissionId: string) {
+  async getRatingSummary(@Param('submissionId') submissionId: string): Promise<any> {
     return this.evaluationRatingService.getRatingSummary(submissionId);
   }
 
@@ -58,7 +58,7 @@ export class EvaluationRatingController {
   async getUserRatings(
     @Param('submissionId') submissionId: string,
     @Param('userId') userId: string,
-  ) {
+  ): Promise<any> {
     return this.evaluationRatingService.getUserRatings(submissionId, Number(userId));
   }
 
@@ -67,7 +67,7 @@ export class EvaluationRatingController {
   async getCategoryStats(
     @Param('submissionId') submissionId: string,
     @Param('categoryId') categoryId: string,
-  ) {
+  ): Promise<any> {
     return this.evaluationRatingService.getCategoryStats(submissionId, Number(categoryId));
   }
 

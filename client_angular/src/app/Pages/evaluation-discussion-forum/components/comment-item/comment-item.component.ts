@@ -134,6 +134,14 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   // =============================================================================
 
   ngOnInit(): void {
+    console.log('🔧 CommentItem initialized:', {
+      commentId: this.comment?.id,
+      author: this.comment?.author?.displayName,
+      content: this.comment?.content?.substring(0, 50) + '...',
+      depth: this.depth,
+      timestamp: new Date().toISOString()
+    });
+    
     this.formatCommentTime();
     // 🚀 PHASE 2.3: Initialize cached values for performance
     this.updateCachedValues();

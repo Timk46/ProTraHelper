@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { takeUntil } from 'rxjs/operators';
@@ -38,7 +38,7 @@ import { BaseComponent } from '../../../../shared/base.component';
   styleUrl: './rating-slider.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RatingSliderComponent extends BaseComponent implements OnInit, OnChanges, AfterViewInit, OnDestroy {
+export class RatingSliderComponent extends BaseComponent implements OnInit, OnChanges, AfterViewInit {
 
   // =============================================================================
   // INPUTS - CONFIGURATION FROM PARENT
@@ -72,6 +72,7 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
   ratingForm: FormGroup;
   currentValue: number = 5;
   isModified: boolean = false;
+  hasUserInteracted: boolean = false; // Tracks if user has manually changed the value
 
   // =============================================================================
   // CONSTRUCTOR
@@ -81,7 +82,7 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
     private formBuilder: FormBuilder,
     private cdr: ChangeDetectorRef
   ) {
-    super(); // Call BaseComponent constructor
+    super(); // Call BaseComponent constructor first
     this.ratingForm = this.createForm();
   }
 
@@ -124,6 +125,7 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
 
     this.ratingForm.get('rating')?.setValue(this.currentValue);
     this.isModified = false;
+    this.hasUserInteracted = false; // Reset user interaction flag
   }
 
   /**
@@ -141,8 +143,14 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
       .subscribe(value => {
         if (value !== null && value !== undefined) {
           this.currentValue = value;
-          const originalRating = this.currentRating?.score || Math.floor((this.minValue + this.maxValue) / 2);
-          this.isModified = value !== originalRating;
+          
+          // For new ratings (no existing rating), always allow submission
+          if (!this.currentRating) {
+            this.isModified = true; // Always allow submission for new ratings
+          } else {
+            // For existing ratings, check if value differs from original
+            this.isModified = value !== this.currentRating.score;
+          }
 
           // Emit rating change event
           this.ratingChanged.emit({
@@ -167,6 +175,7 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
   onSliderChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     const value = Number(target.value);
+    this.hasUserInteracted = true; // Mark that user has manually interacted
     this.ratingForm.get('rating')?.setValue(value);
   }
 
@@ -184,32 +193,30 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
     this.initializeRating();
   }
 
+  /**
+   * Handles quick rating button clicks
+   * 
+   * @description Updates the rating slider and form value when user clicks
+   * on a quick rating button. Uses a simplified approach that relies on
+   * Angular's reactive forms to sync the UI properly.
+   * 
+   * @param {number} value - The rating value to set (1-10)
+   * @memberof RatingSliderComponent
+   */
   onQuickRating(value: number): void {
     console.log('🎯 Quick rating selected:', value);
     
-    // Use setValue with emitEvent: true to trigger all the reactive form mechanics
-    // This ensures the Material Slider receives the change properly
-    this.ratingForm.get('rating')?.setValue(value, { 
-      emitEvent: true,
-      onlySelf: false 
-    });
+    // Mark that user has interacted manually
+    this.hasUserInteracted = true;
     
-    // Force change detection to ensure immediate UI update
+    // Set form control value - this should trigger UI updates automatically
+    this.ratingForm.get('rating')?.setValue(value);
+    
+    // Update current value directly to ensure immediate UI reflection
+    this.currentValue = value;
+    
+    // Force change detection for OnPush components
     this.cdr.detectChanges();
-    
-    // Additional fallback: directly update the slider if needed
-    setTimeout(() => {
-      if (this.ratingSlider?.nativeElement) {
-        const sliderInput = this.ratingSlider.nativeElement.querySelector('input[matSliderThumb]');
-        if (sliderInput && sliderInput.value !== value.toString()) {
-          sliderInput.value = value.toString();
-          // Dispatch change event to make sure Material components update
-          sliderInput.dispatchEvent(new Event('input', { bubbles: true }));
-          sliderInput.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      }
-      this.cdr.detectChanges();
-    }, 10);
     
     console.log('📊 Quick rating completed:', { 
       selectedValue: value, 

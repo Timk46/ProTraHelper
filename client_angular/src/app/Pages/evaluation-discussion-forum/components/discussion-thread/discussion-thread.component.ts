@@ -199,9 +199,16 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['discussions'] || changes['sortOrder']) {
-      console.log('🔧 ngOnChanges triggered - processing flattened comments');
+      console.log('🔧 ngOnChanges triggered - processing flattened comments', {
+        discussionsCount: this.discussions?.length || 0,
+        sortOrder: this.sortOrder,
+        isFirstChange: changes['discussions']?.firstChange
+      });
       this.performanceService.markRenderStart('discussion-thread');
       
+      // Force reprocessing by clearing cache
+      this.lastProcessedDiscussionsHash = '';
+      this.memoizedComments.clear(); // Clear memoization cache for fresh processing
       this.processFlattenedComments();
       this.cdr.markForCheck();
 
@@ -209,6 +216,11 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
       if (changes['discussions'] && !changes['discussions'].firstChange) {
         setTimeout(() => this.scrollToBottom(), 100);
       }
+      
+      // Force change detection for nested components
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 150);
       
       this.performanceService.markRenderEnd('discussion-thread');
     }

@@ -62,7 +62,7 @@ export class ProgressService {
    */
   calculateProgress(contentNode: ContentDTO): number {
     const questionElements: ContentElementDTO[] = contentNode.contentElements.filter(
-      element => element.type === contentElementType.QUESTION,
+      (element: ContentElementDTO) => element.type === contentElementType.QUESTION,
     );
     const progress =
       questionElements.reduce((acc, element) => {
@@ -84,8 +84,8 @@ export class ProgressService {
    */
   calculateLevelProgress(contentNode: ContentDTO): number {
     const sortedQuestionElements: ContentElementDTO[] = contentNode.contentElements
-      .filter(element => element.type === contentElementType.QUESTION && element.question?.level)
-      .sort((a, b) => a.question!.level - b.question!.level);
+      .filter((element: ContentElementDTO) => element.type === contentElementType.QUESTION && element.question?.level)
+      .sort((a: ContentElementDTO, b: ContentElementDTO) => a.question!.level - b.question!.level);
 
     let highestLevel = 0;
     for (let i = 0; i < sortedQuestionElements.length; i++) {

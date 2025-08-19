@@ -504,6 +504,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     // Monitor component performance and report to global state
     const startTime = performance.now();
     
+    // Mark performance start for proper measurement
+    this.performanceService.markRenderStart('evaluation-discussion-forum');
+    
     // Track render performance with enhanced metrics
     this.viewModel$.pipe(
       takeUntil(this.destroy$),
@@ -846,17 +849,21 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
               this.stateService['commentStatsSubject'].next(stats);
             });
 
-            // CRITICAL: Force change detection for OnPush components
-            setTimeout(() => {
-              this.cdr.detectChanges();
-            }, 100);
-
             this.showSnackBar('Kommentar wurde erfolgreich hinzugefügt', 'OK', 3000, false);
             this.cdr.markForCheck();
 
             // Reset states
             this.isSubmittingComment$.next(false);
             this.lastSubmittedContent = null;
+
+            // CRITICAL: Force change detection for OnPush components - multiple cycles
+            setTimeout(() => {
+              this.cdr.detectChanges();
+            }, 50);
+            
+            setTimeout(() => {
+              this.cdr.detectChanges();
+            }, 200);
           },
           error: error => {
             console.error('❌ Mock comment submission failed:', error);
@@ -882,11 +889,22 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           next: comment => {
             console.log('✅ Comment added successfully:', comment);
             this.showSnackBar('Kommentar wurde erfolgreich hinzugefügt', 'OK', 3000, false);
+            
+            // Force refresh of discussions to ensure UI updates
+            if (this.submissionId) {
+              this.stateService.refreshDiscussions(this.submissionId);
+            }
+            
             this.cdr.markForCheck();
 
             // Reset states
             this.isSubmittingComment$.next(false);
             this.lastSubmittedContent = null;
+            
+            // Additional change detection cycle to ensure child components update
+            setTimeout(() => {
+              this.cdr.detectChanges();
+            }, 100);
           },
           error: error => {
             console.error('❌ Comment submission failed:', error);

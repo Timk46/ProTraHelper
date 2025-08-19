@@ -399,7 +399,10 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
     ]).pipe(
       map(([activeCategory, categoryStatusMap, isLoading, error]) => {
         // Get rating status for current category from centralized state
-        const ratingStatus = this.currentCategory ? categoryStatusMap.get(this.currentCategory.id) : null;
+        // Convert undefined to null for type safety
+        const ratingStatus = this.currentCategory 
+          ? (categoryStatusMap.get(this.currentCategory.id) ?? null) 
+          : null;
         
         return {
           hasRated: ratingStatus?.hasRated || false,

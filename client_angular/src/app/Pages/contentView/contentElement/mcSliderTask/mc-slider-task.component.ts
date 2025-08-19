@@ -465,23 +465,22 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Wechselt manuell zu Rhino über Button-Klick mit vereinfachtem direkten Ansatz
+   * Wechselt manuell zu Rhino über Button-Klick mit intelligenter Lösung
    *
-   * Diese Methode ermöglicht es dem Benutzer, das Rhino-Fenster manuell zu fokussieren.
-   * Sie verwendet einen vereinfachten Ansatz ohne automatische Auslösung und bietet
-   * umfassendes Feedback über den Erfolg oder Misserfolg der Operation.
+   * Diese Methode ermöglicht es dem Benutzer, Rhino intelligent zu aktivieren.
+   * Sie prüft automatisch ob Rhino läuft und fokussiert es, oder startet es neu falls nötig.
+   * Bietet umfassendes Feedback über den Erfolg oder Misserfolg der Operation.
    *
    * @description
    * Die Methode implementiert einen Schutz gegen mehrfache gleichzeitige Ausführungen
-   * durch das `isRhinoSwitching` Flag. Sie nutzt `firstValueFrom()` um das Observable
-   * des RhinoFocusService in ein Promise zu konvertieren, was eine saubere async/await
-   * Syntax ermöglicht und gleichzeitig die erste Emission des Observables abwartet.
+   * durch das `isRhinoSwitching` Flag. Sie nutzt den neuen unified approach, der
+   * automatisch entscheidet ob Rhino fokussiert oder gestartet werden soll.
    *
    * @async
-   * @returns {Promise<void>} Ein Promise, das aufgelöst wird, wenn die Rhino-Fokussierung
+   * @returns {Promise<void>} Ein Promise, das aufgelöst wird, wenn die Rhino-Aktivierung
    *                          abgeschlossen ist (erfolgreich oder fehlgeschlagen)
    *
-   * @throws {Error} Wirft einen Fehler, wenn die Rhino-Fokussierung fehlschlägt
+   * @throws {Error} Wirft einen Fehler, wenn die Rhino-Aktivierung fehlschlägt
    *
    * @example
    * ```typescript
@@ -489,15 +488,12 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
    * await this.switchToRhino();
    * ```
    *
-   * @see {@link RhinoFocusService.focusRhinoWindow} - Der zugrundeliegende Service
+   * @see {@link RhinoFocusService.ensureRhinoActive} - Der zugrundeliegende unified Service
    *
    * @note
    * `firstValueFrom()` wird hier verwendet, um ein Observable in ein Promise zu konvertieren.
-   * Dies ist notwendig, da der RhinoFocusService ein Observable zurückgibt, wir aber
-   * eine async/await Syntax für bessere Lesbarkeit und Fehlerbehandlung verwenden möchten.
-   * `firstValueFrom()` wartet auf die erste Emission des Observables und löst das Promise
-   * mit diesem Wert auf. Falls das Observable einen Fehler emittiert, wird das Promise
-   * entsprechend abgelehnt.
+   * Der neue unified approach entscheidet automatisch ob Rhino fokussiert oder gestartet
+   * werden soll, basierend auf dem aktuellen Status der Anwendung.
    */
   async switchToRhino(): Promise<void> {
     if (this.isRhinoSwitching) {
@@ -507,35 +503,104 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     this.isRhinoSwitching = true;
 
     try {
-      console.log('🎯 Focusing Rhino window directly...');
+      console.log('🎯 Ensuring Rhino is active...');
 
-      const result = await firstValueFrom(this.rhinoFocusService.focusRhinoWindow());
+      // Use the new unified approach with optional Grasshopper file
+      const request = {
+        grasshopperFilePath: 'C:\\Dev\\hefl\\files\\Grasshopper\\example.gh',
+        userId: 'mcslider-user',
+        focusMethod: 'unified' as const,
+        bringToFront: true,
+        restoreIfMinimized: true
+      };
+
+      const result = await firstValueFrom(this.rhinoFocusService.ensureRhinoActive(request));
 
       if (result && result.success) {
-        console.log('✅ Rhino window focused successfully');
-        this.snackBar.open('Rhino erfolgreich fokussiert', 'OK', {
-          duration: 2000,
+        // Provide different messages based on what action was taken
+        let message = '';
+        let icon = '';
+        
+        switch (result.action) {
+          case 'focused':
+            message = 'Rhino erfolgreich fokussiert';
+            icon = '🎯';
+            break;
+          case 'launched':
+            message = 'Rhino erfolgreich gestartet und Grasshopper-Datei geöffnet';
+            icon = '🚀';
+            break;
+          case 'already_active':
+            message = 'Rhino war bereits aktiv';
+            icon = '✅';
+            break;
+          default:
+            message = 'Rhino erfolgreich aktiviert';
+            icon = '✅';
+        }
+
+        console.log(`${icon} ${message}`, result);
+        this.snackBar.open(`${icon} ${message}`, 'OK', {
+          duration: 3000,
           panelClass: 'success-snackbar'
         });
+
+        // Show additional info if there are warnings
+        if (result.warnings && result.warnings.length > 0) {
+          setTimeout(() => {
+            this.snackBar.open(
+              `Hinweise: ${result.warnings!.join(', ')}`,
+              'OK',
+              {
+                duration: 3000,
+                panelClass: 'warning-snackbar'
+              }
+            );
+          }, 3500);
+        }
+
       } else {
-        console.warn('⚠️ Rhino focus failed:', result?.message || 'Unknown error');
+        console.warn('⚠️ Rhino activation failed:', result?.message || 'Unknown error');
+        
+        let userMessage = '';
+        switch (result?.action) {
+          case 'failed':
+            userMessage = result.message || 'Rhino konnte nicht aktiviert werden';
+            break;
+          default:
+            userMessage = 'Rhino konnte nicht aktiviert werden. Prüfen Sie ob Rhino installiert ist.';
+        }
+
         this.snackBar.open(
-          `Rhino konnte nicht fokussiert werden: ${result?.message || 'Rhino möglicherweise nicht gestartet'}`,
-          'OK',
+          `❌ ${userMessage}`,
+          'Details',
           {
-            duration: 4000,
-            panelClass: 'warning-snackbar'
+            duration: 5000,
+            panelClass: 'error-snackbar'
           }
-        );
+        ).onAction().subscribe(() => {
+          // Show detailed error information
+          console.log('Detailed error info:', result);
+          if (result?.warnings && result.warnings.length > 0) {
+            this.snackBar.open(
+              `Details: ${result.warnings.join('; ')}`,
+              'OK',
+              {
+                duration: 8000,
+                panelClass: 'warning-snackbar'
+              }
+            );
+          }
+        });
       }
     } catch (error) {
-      console.error('❌ Rhino focus error:', error);
+      console.error('❌ Rhino activation error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
       this.snackBar.open(
-        `Fehler beim Fokussieren von Rhino: ${errorMessage}`,
+        `❌ Fehler bei der Rhino-Aktivierung: ${errorMessage}`,
         'OK',
         {
-          duration: 4000,
+          duration: 5000,
           panelClass: 'error-snackbar'
         }
       );
@@ -555,13 +620,13 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get Rhino button tooltip text
+   * Get Rhino button tooltip text with intelligent status
    */
   getRhinoButtonTooltip(): string {
     if (this.isRhinoSwitching) {
-      return 'Rhino wird fokussiert...';
+      return 'Rhino wird aktiviert...';
     }
-    return 'Rhino-Fenster fokussieren';
+    return 'Rhino aktivieren (fokussiert oder startet automatisch)';
   }
 
   /**
