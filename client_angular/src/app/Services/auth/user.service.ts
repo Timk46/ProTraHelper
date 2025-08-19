@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import jwt_decode from 'jwt-decode';
-import { globalRole } from '@DTOs/roles.enum';
+import { globalRole } from '@DTOs/index';
 import { environment } from 'src/environments/environment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';

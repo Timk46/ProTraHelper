@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { detailedQuestionDTO, GroupReviewStatusDTO } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 
@@ -16,10 +17,9 @@ interface TaskViewData {
 @Component({
   selector: 'app-group-review-gate-dialog',
   templateUrl: './group-review-gate-dialog.component.html',
-  styleUrls: ['./group-review-gate-dialog.component.scss']
+  styleUrls: ['./group-review-gate-dialog.component.scss'],
 })
 export class GroupReviewGateDialogComponent implements OnInit {
-
   @Output() submitClicked = new EventEmitter<any>();
 
   taskViewData: TaskViewData;
@@ -28,8 +28,9 @@ export class GroupReviewGateDialogComponent implements OnInit {
 
   constructor(
     private questionDataService: QuestionDataService,
+    private router: Router,
     public dialogRef: MatDialogRef<GroupReviewGateDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     this.taskViewData = data.taskViewData;
     console.log('Dialog data:', this.taskViewData);
@@ -45,21 +46,20 @@ export class GroupReviewGateDialogComponent implements OnInit {
         this.statuses = statuses;
         console.log('Fetched group review statuses:', this.statuses);
       },
-      error: (error) => {
+      error: error => {
         console.error('Error fetching group review statuses:', error);
-      }
+      },
     });
   }
-
 
   onGoToReview(status: GroupReviewStatusDTO): void {
     // TODO: Implement navigation to the actual review page
     console.log('Navigate to review for:', status.submissionIdentifier);
+    this.router.navigate(['/forum']);
     this.dialogRef.close();
   }
 
   onClose(): void {
     this.dialogRef.close();
   }
-
 }
